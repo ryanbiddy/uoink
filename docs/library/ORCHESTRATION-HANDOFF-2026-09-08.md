@@ -96,7 +96,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | 4 | Owner ff67b84 and process 747fb6b accepted; combined tree09 sealed at 9a46b38 | All 50 previously failing Phase 4 cases now pass in the complete run. Original 233-case focused results and Gemini scope review remain intact | No mirror rerun needed. Preserve tree08 failure and unresolved exact historical cause; continue runtime security |
 | 5 | Part A repaired; SDK union 267 passed in each root and corrected complete-tree case passes | BA-4/unary-clock failures close; dashboard 24,576-byte target remains missed | Preserve performance limit; Part B deferred |
 | 6 | Package-08 production publication and cited-range review complete at `49e2b31` | Exact export after 2.1001697 s protocol delay; first actual client export succeeds after separate 1.9874018 s delay | No speaker or player-seek credit; speakers blocked, no new fetch |
-| Security | NLTK wheel at 52d9f7d, binding at 07084fe; graph f22456c and security scope 14aa0df reviewed; cache guard b96dbd0 accepted | Cache guard: 144 passed plus 13 subtests in each independent root; all 117 proof payloads match Git and disk. Candidate advisory count remains one entry / one group; graph still fails five caps. Default VAD remains open; Gemini cache review integrated at 9d25eda. B2 empty-buffer derivative passes ten synthetic cases independently but is unapplied | Finish exact loader/compatibility and distribution proposals. Static checkpoint inventory run01 refused on unsupported ZIP header; no model execution. No runtime or installed clearance |
+| Security | NLTK wheel at 52d9f7d, binding at 07084fe; graph f22456c and security scope 14aa0df reviewed; cache guard b96dbd0 accepted | Cache guard: 144 passed plus 13 subtests in each independent root; all 117 proof payloads match Git and disk. Candidate advisory count remains one entry / one group; graph still fails five caps. Default VAD remains open; Gemini cache review integrated at 9d25eda. B2 empty-buffer derivative passes ten synthetic cases independently but is unapplied | Finish exact loader/compatibility and distribution proposals. Static inventory and fixed-loader proposal archived at 01163e1; runs03/04 completed after retained refusals. Symbolic adapter review is next; no model execution. No runtime or installed clearance |
 | Signing | Gemini review and repaired path integrated at 0b3629d | 48 focused passes; 77 proof payloads match Git. Real Inno direct callback refuses missing certificate and keeps a durable error. No successful signing credit | Full combined candidate tree after runtime work settles; actual certificate/service choice remains Ryan's |
 | Integration | Complete tree09 at source 56d9d4c sealed in 9a46b38; historical receipt failure remains | 2,796 passed / 1 failed / 3 skipped across 2,800 cases, plus 13 passed subtests. Exact union and exits verified; 174 passive captures, no observer errors; 62 payloads match Git and disk | Continue tokenizer/VAD and dependency proposals. No blind rerun; package08 and website/marketing remain held |
 | Desktop incident | Isolation failed in package-07 attempt; corrected at `e10ba3a` | Ordinary Uoink and filesystem connectors launched; earlier live-index/5179 effects unknown. Owned job cleaned | No further override launch; only guarded Uoink dashboard observed for package 08 |
@@ -194,6 +194,12 @@ is complete but is not this goal's completion. Current queue:
    and independent runs; B1 remains six pass / four fail on that protocol.
    Windows casing alone is not a Path inequality; reject the resolve-first
    suggestion because it discards alias evidence. B2 is not built or installed.
+   Static VAD evidence and fixed-loader preparation are archived at 01163e1.
+   Read ASTRA-VAD-STATIC-PREPARATION-VERDICT-2026-09-13.md. Inventory80,
+   tail29 and proposal42 payloads match Git and disk; the original38 seal is
+   preserved inside the last archive. Finish exact symbolic-adapter review
+   before any targeted static trace. Configuration, provenance, conversion
+   and runtime acceptance remain unresolved; do not fill unknown defaults.
    Prepare an exact derivative and protocol before Ryan's
    frozen-test/model decision; do not replace the current lock with this graph.
 3. NLTK is prepared at 4aec8ff. Read ASTRA-NLTK-PATHSEC-VERDICT-2026-09-12.md
@@ -3922,3 +3928,25 @@ Keep B2 under the exact derivative/distribution review. The full tree at
 56d9d4c remains 2,796 passed / one failed / three skipped plus 13 passed
 subtests. Runtime security, historical AT6 disposition, real signing and
 verified separate-client isolation still prevent market approval.
+
+### 2026-09-13 — Static VAD inventory and fixed-loader proposal archived
+
+Commit 01163e1 preserves the completed metadata inventory, tail appendix and
+source-bound loader proposal. All 80, 29 and 42 outer payloads match Git and
+disk, including immutable original seals. The four reads bound the same
+17,719,103-byte artifact. Runs01/02 remain refusals; reviewed runs03/04
+completed. Only data.pkl received payload CRC and instruction parsing; no
+referenced object or tensor was constructed, and no storage member decoded.
+
+The PyanNet literals support a hypothesis only. Numeric configuration, final
+metadata associations, tensor schema and trusted provenance remain open.
+The fixed-loader draft refuses until those inputs and runtime protocol are
+qualified. A pure symbolic tracer has a reviewed 57-pass synthetic attempt;
+its exact artifact adapter is being prepared and independently reviewed.
+
+The first Git proof-verifier invocation stopped on a `file` versus `path`
+manifest-key mismatch, exit one, before comparison. The unchanged original
+manifests then passed a separately named schema-aware verifier that retains
+membership, containment, length/hash and Git-byte checks. This is a transport
+instrument correction, not a changed product result or model acceptance.
+No production source changed; the complete-tree result remains unchanged.
