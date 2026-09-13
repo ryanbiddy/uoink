@@ -96,9 +96,9 @@ establish safe installation isolation, and verify/correct resulting findings.
 | 4 | Owner ff67b84 and process 747fb6b accepted; combined tree09 sealed at 9a46b38 | All 50 previously failing Phase 4 cases now pass in the complete run. Original 233-case focused results and Gemini scope review remain intact | No mirror rerun needed. Preserve tree08 failure and unresolved exact historical cause; continue runtime security |
 | 5 | Part A repaired; SDK union 267 passed in each root and corrected complete-tree case passes | BA-4/unary-clock failures close; dashboard 24,576-byte target remains missed | Preserve performance limit; Part B deferred |
 | 6 | Package-08 production publication and cited-range review complete at `49e2b31` | Exact export after 2.1001697 s protocol delay; first actual client export succeeds after separate 1.9874018 s delay | No speaker or player-seek credit; speakers blocked, no new fetch |
-| Security | NLTK wheel at 52d9f7d, binding at 07084fe; graph f22456c and security scope 14aa0df reviewed; cache guard b96dbd0 accepted | Cache guard: 144 passed plus 13 subtests in each independent root; all 117 proof payloads match Git and disk. Candidate advisory count remains one entry / one group; graph still fails five caps. Default VAD remains open; Gemini cache review integrated at 9d25eda. B2 derivative preparation at f0181f8 passes ten synthetic cases independently; actual B2 builds at 576cd07/d9f2208 reproduce identically under Python 3.14/3.13, remain uninstalled; optional Hub keyword repair qualified at 25b0a63, remains an inert proposal | Finish combined B3 derivative and exact loader/compatibility proposals. Static inventory and fixed-loader proposal archived at 01163e1; runs03/04 completed after retained refusals. Symbolic run01 refused a reference cycle (4a3644a); cycle diagnostic ccb44ce retains refusal; selected projection at ba8d2c8 provides 54 symbolic tensor descriptors while strict refusal remains. Fixed factory/schema mapped and independently reviewed at de07dfe: 54 declarations, 23 storages; bridge unapproved. No model execution. No runtime or installed clearance |
+| Security | NLTK wheel at 52d9f7d, binding at 07084fe; graph f22456c and security scope 14aa0df reviewed; cache guard b96dbd0 accepted | Cache guard: 144 passed plus 13 subtests in each independent root; all 117 proof payloads match Git and disk. Candidate advisory count remains one entry / one group; graph still fails five caps. Default VAD remains open; Gemini cache review integrated at 9d25eda. B2 derivative preparation at f0181f8 passes ten synthetic cases independently; actual B2 builds at 576cd07/d9f2208 reproduce identically under Python 3.14/3.13, remain uninstalled; optional Hub keyword repair qualified at 25b0a63, remains an inert proposal | B3 packaging qualifies at 7be52ef with 68/68 in both roots and identical actual builds. Finish exact loader/conversion and compatibility proposals. Static inventory and fixed-loader proposal archived at 01163e1; runs03/04 completed after retained refusals. Symbolic run01 refused a reference cycle (4a3644a); cycle diagnostic ccb44ce retains refusal; selected projection at ba8d2c8 provides 54 symbolic tensor descriptors while strict refusal remains. Fixed factory/schema mapped and independently reviewed at de07dfe: 54 declarations, 23 storages; bridge unapproved. No model execution. No runtime or installed clearance |
 | Signing | Gemini review and repaired path integrated at 0b3629d | 48 focused passes; 77 proof payloads match Git. Real Inno direct callback refuses missing certificate and keeps a durable error. No successful signing credit | Full combined candidate tree after runtime work settles; actual certificate/service choice remains Ryan's |
-| Integration | Complete tree09 at source 56d9d4c sealed in 9a46b38; historical receipt failure remains | 2,796 passed / 1 failed / 3 skipped across 2,800 cases, plus 13 passed subtests. Exact union and exits verified; 174 passive captures, no observer errors; 62 payloads match Git and disk | Continue tokenizer/VAD and dependency proposals. No blind rerun; package08 and website/marketing remain held. Notes refreshed at 4a3644a |
+| Integration | Complete tree09 at source 56d9d4c sealed in 9a46b38; historical receipt failure remains | 2,796 passed / 1 failed / 3 skipped across 2,800 cases, plus 13 passed subtests. Exact union and exits verified; 174 passive captures, no observer errors; 62 payloads match Git and disk | Continue tokenizer/VAD and dependency proposals. No blind rerun; package08 and website/marketing remain held. Notes refreshed at 7be52ef |
 | Desktop incident | Isolation failed in package-07 attempt; corrected at `e10ba3a` | Ordinary Uoink and filesystem connectors launched; earlier live-index/5179 effects unknown. Owned job cleaned | No further override launch; only guarded Uoink dashboard observed for package 08 |
 
 Receipts and artifacts: `docs/library/proof/` (stage archives, S20 matrix, S21 incl. run at7, S22, AW,
@@ -213,6 +213,14 @@ is complete but is not this goal's completion. Current queue:
    attempts and the insufficient compile-filename repair. Prepare combined
    B3 as localassets2 with both source fixes, independent review and synthetic
    packaging checks before another actual build. Do not mutate B2 seals.
+   B3 is now packaged and independently reviewed at 7be52ef. Its 148 proof
+   payloads match Git and disk; read proof/companion-b3-reproduction-2026-09-13/
+   VERDICT.md. Worker and root each passed 68 cases; actual Python 3.14/3.13
+   builds each exit0 with valid guards and identical 1,388,022-byte output,
+   SHA256 97bdde2d33fe71660b4cf8a318853e2e1b647ad900918e7e24397990162f29e4.
+   B3 remains uninstalled. Do not rebuild without a new change or concern.
+   Continue fixed VAD conversion/provenance and retained Pipeline contracts;
+   no migration, frozen-test, native-model or release acceptance follows.
    Windows casing alone is not a Path inequality; reject the resolve-first
    suggestion because it discards alias evidence. B2 is built but not installed.
    Static VAD evidence and fixed-loader preparation are archived at 01163e1.
@@ -4148,3 +4156,25 @@ artifact, import/native compatibility and numerical/installed behavior remain
 open. A stdlib converter with synthetic fixtures and a separate primary-text
 provenance review are next. Production source and the complete-tree result are
 unchanged; website and marketing work remain paused.
+### 2026-09-13 - Combined companion reproduced and notes refreshed
+
+The B3 wheel combines the qualified B2 tokenizer guard with the one-line Hub
+keyword repair. Both independent synthetic runs passed 68/68. Astra reviewed
+and externally pinned preparation seal36141cdd, ran py314-01 once, observed
+its output identity, then ran py313-01 once with that exact identity. Both
+builds yielded 1,388,022 bytes, SHA256
+97bdde2d33fe71660b4cf8a318853e2e1b647ad900918e7e24397990162f29e4.
+Child, launcher and actual outer exits are zero. All16 members/RECORD, fixed
+ZIP metadata, unchanged license and opaque asset bytes passed checks. The
+second run used the already verified private34 no-site runtime, unchanged
+before/after, and a different epoch. No original embedded interpreter launched.
+
+Integration7be52ef preserves all148 proof payloads against Git and disk, seal
+a5aa66011e8bf73f8dcc7d82d2c88f1303c42bff699c0762c87afc5a1726f1f2.
+Original combined95/preparation32 seals and first pending-reproduction field
+remain unchanged; the separate second receipt supplies byte-equality evidence.
+The source-only reviewer did not reopen a wheel or runtime. No model parser,
+package import or installation occurred. The release notes now distinguish B3
+packaging and the reviewed VAD factory from pending runtime acceptance. Product
+source and complete-tree counts remain unchanged. Next work is concrete VAD
+conversion/provenance and Pipeline compatibility, with website/marketing held.
