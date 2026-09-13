@@ -1,0 +1,21 @@
+{
+  "scope": "Verification performed before outer manifest; final exact-set check prints outside proof",
+  "original_manifest_sha256": "581fa57387fa06cf38822000aa8f2fb5d5e7da8a3a6307200283c365faa75bd0",
+  "original_payloads_verified": 20,
+  "original_complete_files": 21,
+  "root_files": 7,
+  "both_source_hashes_verified": true,
+  "author_passed": 37,
+  "root_passed": 37,
+  "failed": 0,
+  "author_native_exit": 0,
+  "root_native_exit": 0,
+  "root_tool_observed_outer_exit": 0,
+  "stderr_empty_both": true,
+  "unexpected_audit_events": 0,
+  "all_reported_facts_except_elapsed_match": true,
+  "source_changed": false,
+  "test_rerun": false,
+  "actual_storage_read": false,
+  "real_profile_approved": false
+}

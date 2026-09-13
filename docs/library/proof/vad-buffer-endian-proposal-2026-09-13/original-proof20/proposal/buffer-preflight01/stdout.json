@@ -1,0 +1,172 @@
+{
+  "scope": "Generated analytic constants only; no actual storage or model access",
+  "input_sha256": {
+    "buffer_basis.py": "bfbb83800d127f031008c31fa669b093dca3d945ae2543db1b834f93c1d51373",
+    "qualify_basis.py": "fe0e3e5559ecc237bf6d7af4b8f38a4d68d557daa574e4470058c2f2b2fa7aa3"
+  },
+  "startup_binding_asserted": true,
+  "passed": 37,
+  "failed": 0,
+  "qualification_exit": 0,
+  "elapsed_seconds": 0.004261,
+  "cases": [
+    {
+      "case": "all_250_generated_words_little",
+      "passed": true
+    },
+    {
+      "case": "all_250_generated_words_big",
+      "passed": true
+    },
+    {
+      "case": "centered_hamming_formula",
+      "passed": true
+    },
+    {
+      "case": "n_division_rounded_first",
+      "passed": true
+    },
+    {
+      "case": "n_scalar_and_division_rounded",
+      "passed": true
+    },
+    {
+      "case": "n_double_intermediate",
+      "passed": true
+    },
+    {
+      "case": "window_inclusive_ulp_-8",
+      "passed": true
+    },
+    {
+      "case": "window_inclusive_ulp_8",
+      "passed": true
+    },
+    {
+      "case": "window_outside_ulp_-9",
+      "passed": true
+    },
+    {
+      "case": "window_outside_ulp_9",
+      "passed": true
+    },
+    {
+      "case": "window_positive_inf",
+      "passed": true
+    },
+    {
+      "case": "window_negative_inf",
+      "passed": true
+    },
+    {
+      "case": "window_quiet_nan",
+      "passed": true
+    },
+    {
+      "case": "window_sign_flip",
+      "passed": true
+    },
+    {
+      "case": "time_vector_inclusive_ulp_-8",
+      "passed": true
+    },
+    {
+      "case": "time_vector_inclusive_ulp_8",
+      "passed": true
+    },
+    {
+      "case": "time_vector_outside_ulp_-9",
+      "passed": true
+    },
+    {
+      "case": "time_vector_outside_ulp_9",
+      "passed": true
+    },
+    {
+      "case": "time_vector_positive_inf",
+      "passed": true
+    },
+    {
+      "case": "time_vector_negative_inf",
+      "passed": true
+    },
+    {
+      "case": "time_vector_quiet_nan",
+      "passed": true
+    },
+    {
+      "case": "time_vector_sign_flip",
+      "passed": true
+    },
+    {
+      "case": "opposite_orientations_disagree",
+      "passed": true
+    },
+    {
+      "case": "window_order_changed",
+      "passed": true
+    },
+    {
+      "case": "time_order_changed",
+      "passed": true
+    },
+    {
+      "case": "all_zero_buffers",
+      "passed": true
+    },
+    {
+      "case": "missing_window",
+      "passed": true
+    },
+    {
+      "case": "mutable_window",
+      "passed": true
+    },
+    {
+      "case": "view_time_vector",
+      "passed": true
+    },
+    {
+      "case": "window_short",
+      "passed": true
+    },
+    {
+      "case": "window_long",
+      "passed": true
+    },
+    {
+      "case": "time_short",
+      "passed": true
+    },
+    {
+      "case": "time_long",
+      "passed": true
+    },
+    {
+      "case": "direct_helper_both_refuses_no_full_fixture_claim",
+      "passed": true
+    },
+    {
+      "case": "direct_helper_neither_refuses",
+      "passed": true
+    },
+    {
+      "case": "direct_helper_nonboolean_refuses",
+      "passed": true
+    },
+    {
+      "case": "static_scope_fixed_limits_no_io_or_target_execution",
+      "passed": true
+    }
+  ],
+  "synthetic_operation_order_maximum_ulp": {
+    "centered_hamming_vs_direct": 0,
+    "n_division_rounded_vs_ideal": 1,
+    "n_division_and_scalar_rounded_vs_ideal": 2,
+    "n_double_intermediate_vs_ideal": 0
+  },
+  "historical_backend_bound_proven": false,
+  "real_profile_approved": false,
+  "actual_storage_read": false,
+  "unexpected_audit_events": []
+}

@@ -1,0 +1,5 @@
+{
+  "tool_observed_outer_exit": 0,
+  "source": "Completed exec_command returned exit_code0",
+  "native_receipt": "exit.json"
+}
