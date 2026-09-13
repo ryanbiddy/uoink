@@ -96,7 +96,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | 4 | Owner ff67b84 and process 747fb6b accepted; combined tree09 sealed at 9a46b38 | All 50 previously failing Phase 4 cases now pass in the complete run. Original 233-case focused results and Gemini scope review remain intact | No mirror rerun needed. Preserve tree08 failure and unresolved exact historical cause; continue runtime security |
 | 5 | Part A repaired; SDK union 267 passed in each root and corrected complete-tree case passes | BA-4/unary-clock failures close; dashboard 24,576-byte target remains missed | Preserve performance limit; Part B deferred |
 | 6 | Package-08 production publication and cited-range review complete at `49e2b31` | Exact export after 2.1001697 s protocol delay; first actual client export succeeds after separate 1.9874018 s delay | No speaker or player-seek credit; speakers blocked, no new fetch |
-| Security | NLTK wheel at 52d9f7d, binding at 07084fe; graph f22456c and security scope 14aa0df reviewed; cache guard b96dbd0 accepted | Cache guard: 144 passed plus 13 subtests in each independent root; all 117 proof payloads match Git and disk. Candidate advisory count remains one entry / one group; graph still fails five caps. Default VAD remains open; Gemini cache review integrated at 9d25eda. B2 derivative preparation at f0181f8 passes ten synthetic cases independently; actual B2 builds at 576cd07/d9f2208 reproduce identically under Python 3.14/3.13, remain uninstalled | Finish combined B3 derivative and exact loader/compatibility proposals. Static inventory and fixed-loader proposal archived at 01163e1; runs03/04 completed after retained refusals. Symbolic run01 refused a reference cycle (4a3644a); cycle diagnostic ccb44ce retains refusal; selected projection at ba8d2c8 provides 54 symbolic tensor descriptors while strict refusal remains. No model execution. No runtime or installed clearance |
+| Security | NLTK wheel at 52d9f7d, binding at 07084fe; graph f22456c and security scope 14aa0df reviewed; cache guard b96dbd0 accepted | Cache guard: 144 passed plus 13 subtests in each independent root; all 117 proof payloads match Git and disk. Candidate advisory count remains one entry / one group; graph still fails five caps. Default VAD remains open; Gemini cache review integrated at 9d25eda. B2 derivative preparation at f0181f8 passes ten synthetic cases independently; actual B2 builds at 576cd07/d9f2208 reproduce identically under Python 3.14/3.13, remain uninstalled; optional Hub keyword repair qualified at 25b0a63, remains an inert proposal | Finish combined B3 derivative and exact loader/compatibility proposals. Static inventory and fixed-loader proposal archived at 01163e1; runs03/04 completed after retained refusals. Symbolic run01 refused a reference cycle (4a3644a); cycle diagnostic ccb44ce retains refusal; selected projection at ba8d2c8 provides 54 symbolic tensor descriptors while strict refusal remains. No model execution. No runtime or installed clearance |
 | Signing | Gemini review and repaired path integrated at 0b3629d | 48 focused passes; 77 proof payloads match Git. Real Inno direct callback refuses missing certificate and keeps a durable error. No successful signing credit | Full combined candidate tree after runtime work settles; actual certificate/service choice remains Ryan's |
 | Integration | Complete tree09 at source 56d9d4c sealed in 9a46b38; historical receipt failure remains | 2,796 passed / 1 failed / 3 skipped across 2,800 cases, plus 13 passed subtests. Exact union and exits verified; 174 passive captures, no observer errors; 62 payloads match Git and disk | Continue tokenizer/VAD and dependency proposals. No blind rerun; package08 and website/marketing remain held. Notes refreshed at 4a3644a |
 | Desktop incident | Isolation failed in package-07 attempt; corrected at `e10ba3a` | Ordinary Uoink and filesystem connectors launched; earlier live-index/5179 effects unknown. Owned job cleaned | No further override launch; only guarded Uoink dashboard observed for package 08 |
@@ -206,9 +206,11 @@ is complete but is not this goal's completion. Current queue:
    All 46 reproduction proof payloads match Git and disk. Read the independent
    verdict under proof/companion-b2-reproduction-2026-09-13. Original embedded
    interpreters were not launched or modified. No runtime acceptance.
-   A separate optional Hub-keyword repair passes eight synthetic contracts in
-   author and root runs; baseline is four pass/four TypeError errors with a
-   valid guard. Preserve all earlier invalid-guard attempts. Prepare combined
+   Optional Hub-keyword repair is preserved at 25b0a63 in 122 verified proof
+   payloads. Read proof/companion-hub-keyword-2026-09-13/README.md. It passes
+   eight synthetic contracts in author and root runs; baseline is four pass/
+   four TypeError errors with a valid guard. Preserve all earlier invalid-guard
+   attempts and the insufficient compile-filename repair. Prepare combined
    B3 as localassets2 with both source fixes, independent review and synthetic
    packaging checks before another actual build. Do not mutate B2 seals.
    Windows casing alone is not a Path inequality; reject the resolve-first
@@ -4100,3 +4102,20 @@ All earlier invalid attempts and the insufficient filename repair remain
 preserved. A combined localassets2 proposal will add this one-line fix while
 keeping B2's exact artifacts and measurements unchanged. No source-tree or
 installed acceptance changed; website and marketing remain paused.
+
+### 2026-09-13 - Optional Hub argument repair independently qualified
+
+Commit 25b0a63 preserves 122 payloads with exact Git/disk equality, including
+the original 97-payload review and all earlier invalid-guard attempts. Root's
+unchanged eight contracts repeat the corrected baseline at four pass/four
+TypeError errors, child exit one, and the one-line patch at eight passes,
+child exit zero. Both guards are valid and inputs unchanged. The root wrapper
+returns zero for the declared before/after comparison; the baseline remains
+failed. B2's reproducible wheel is unchanged and uninstalled.
+
+The combined B3 source/recipe proposal is being prepared as localassets2 with
+both repairs and independent review. The safe VAD JSON is being mapped to
+exact recorded configuration and tensor descriptors. No additional checkpoint
+read, package build, model execution, installation or product test occurred.
+Production source and full-tree counts remain unchanged; market approval is
+still held, with website and marketing paused.
