@@ -109,7 +109,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | Orchestration council | Gemini review integrated at cf5614d | All three groups accepted for their limited scope, with Astra's cleanup/exit/ownership corrections. Eight source/contract files match both checkouts and original seals; all 27 new proof payloads match Git/disk | Continue concrete runtime implementations. This review grants no native, installed or market acceptance |
 | Component council | Gemini98b5e1a3 integrated at 488a7fd | CPU/factory, lifecycle and owned WhisperX accepted for tested scope, with Astra's three wording corrections. Seventeen current bindings checked; all 99 proof payloads match Git/disk | Qualify the connected Windows worker and final dependency set. No runtime, installed or market acceptance |
 | Windows namespace | Native positive at 668b08a; handshake at e98f4c2; timeout repair at 0d93186; child adoption at 428707d | Exact109 repair passes67 cases in each root and native timeout02 returns valid0. Original timeout01 remains FAIL. Child adoption positive/refusal return valid0 with actual child exits0/2; all82 adoption proof payloads match Git/disk | Qualify the adapter-to-session repair, then council review. Durable recovery and real runtime remain open |
-| Local wheel graph and notices | Exact NLTK metadata at e5b1ddd; prior graph at 4827288; cached wheels at 95a7f29; source notices at d887f8a | Five-record checker passes68 cases in each root; fresh144-pin/287-edge metadata graph passes with unchanged inputs. Both cached wheels pass byte/RECORD checks. Missing notice texts now retained; all58 notice proof payloads match Git/disk | Seal fresh graph; integrate actual notice staging/installer entries and preserve proxy-tools metadata conflict. Native compatibility and release security remain open |
+| Local wheel graph and notices | Fresh graph at 616f670; prior graph at 4827288; cached wheels at 95a7f29; source notices at d887f8a | Five-record checker passes68 cases in each root; fresh144-pin/287-edge metadata graph passes with unchanged inputs. All24 graph and58 notice proof payloads match Git/disk | Council review; qualify actual notice staging/installer repair and preserve proxy-tools metadata conflict. Native compatibility and release security remain open |
 | Integration | Reliability consent/readiness/settings repair integrated at e8d058f after tree09 | Each root passes 53 focused cases plus 13 subtests; all guards and exact membership valid. Tree09 at 56d9d4c remains 2,796 passed / 1 failed / 3 skipped across 2,800 cases, plus 13 subtests; it predates this repair | Continue VAD/plain-state and ASR manifest proposals, then a new committed complete tree when source settles. Package08 and website/marketing remain held. No current-source package or installation credit |
 | Desktop incident | Isolation failed in package-07 attempt; corrected at `e10ba3a` | Ordinary Uoink and filesystem connectors launched; earlier live-index/5179 effects unknown. Owned job cleaned | No further override launch; only guarded Uoink dashboard observed for package 08 |
 
@@ -336,8 +336,11 @@ The five-record checker now passes all68 cases in each independent root
 All367 inputs are identical. Fresh complete144 graph e8f43c returns valid0/PASS,
 144pins/287edges with all gap lists empty and313 captures/47 inputs unchanged.
 Five local records retain null URL, public=false, artifact_verified=false;
-ANTLR/proxy Requires-Python remains null. Seal this fresh result separately.
-The earlier full graph remains FAIL in its unchanged historical receipt.
+ANTLR/proxy Requires-Python remains null. Fresh result is integrated at616f670;
+read ASTRA-FIVE-WHEEL-GRAPH-VERDICT-2026-09-13.md. Documentary seal/verifier6b3ee1
+returns0; all22 main and2 integrator payloads match Git/disk. The new archive
+requires the existing4827288 archive for415 referenced objects. The earlier
+full graph remains FAIL in its unchanged historical receipt.
 
 The authorized backup push of 01e22fb is waiting at Git's account selector;
 exec session 35629 remains pending. The local backup ref was fast-forwarded,
@@ -5107,3 +5110,21 @@ notices and their attribution explanation, and to retain the conflict during
 regeneration. Final installed contents and candidate wheel identities still
 need verification. This notice evidence changes no production source and
 grants no market, runtime, or overall license clearance.
+
+### 2026-09-13 - Complete metadata graph accepted; adapter connection passes
+
+Commit616f670 accepts the exact five-record checker68/0 in each independent
+root and complete144-pin/287-edge metadata PASS. Documentary seal6b3ee1 returns0
+without rerunning tests; all24 graph proof payloads match Git/disk. The archive
+stores63 new text objects and references415 unchanged objects in4827288.
+Null public URLs, false artifact/public claims and absent Requires-Python values
+remain intact. This does not qualify native dependencies or clear advisories.
+
+The final adapter2b6cbbad now passes its six new connected cases in both roots:
+authorc59cdb and independent672a23, both valid native/outer0 with no skips,
+heavy imports or guard denials. Original58 assertions/results remain historical
+for the old interface. Before execution root replaced the copied old virtualenv
+selection with C:\Python314\python.exe in a fresh preparation; original17-file
+preparation is retained and no failed run is invented for that correction.
+The adapter evidence is next to integrate. Notice packaging qualification and
+a generated OperationFacade worker connection continue; website/marketing held.
