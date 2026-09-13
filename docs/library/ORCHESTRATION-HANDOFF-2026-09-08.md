@@ -109,6 +109,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | Orchestration council | Gemini review integrated at cf5614d | All three groups accepted for their limited scope, with Astra's cleanup/exit/ownership corrections. Eight source/contract files match both checkouts and original seals; all 27 new proof payloads match Git/disk | Continue concrete runtime implementations. This review grants no native, installed or market acceptance |
 | Component council | Gemini98b5e1a3 integrated at 488a7fd | CPU/factory, lifecycle and owned WhisperX accepted for tested scope, with Astra's three wording corrections. Seventeen current bindings checked; all 99 proof payloads match Git/disk | Qualify the connected Windows worker and final dependency set. No runtime, installed or market acceptance |
 | Windows namespace | Protocol and pipe contracts integrated at 9c40271 | Author and Astra each pass the same 54 generated-memory cases; all 65 proof payloads match Git/disk and preserve 87 logical files | Complete the generated-only real Windows child observation. No native model or release acceptance |
+| Local NLTK graph input | Exact metadata receipt integrated at e5b1ddd | Reader/native/outer exits zero; 3,245 metadata bytes bound to the exact accepted wheel. All 23 proof payloads match Git/disk | Qualify the explicit third local-artifact record and run the retained 144-pin graph; no runtime or security clearance |
 | Integration | Reliability consent/readiness/settings repair integrated at e8d058f after tree09 | Each root passes 53 focused cases plus 13 subtests; all guards and exact membership valid. Tree09 at 56d9d4c remains 2,796 passed / 1 failed / 3 skipped across 2,800 cases, plus 13 subtests; it predates this repair | Continue VAD/plain-state and ASR manifest proposals, then a new committed complete tree when source settles. Package08 and website/marketing remain held. No current-source package or installation credit |
 | Desktop incident | Isolation failed in package-07 attempt; corrected at `e10ba3a` | Ordinary Uoink and filesystem connectors launched; earlier live-index/5179 effects unknown. Owned job cleaned | No further override launch; only guarded Uoink dashboard observed for package 08 |
 
@@ -265,13 +266,17 @@ Read ASTRA-WINDOWS-NAMESPACE-VERDICT-2026-09-13.md. Author and Astra each pass
 the same 54 cases; both actual outer exits are zero, guards valid and nine
 inputs unchanged. All 65 proof payloads match Git/disk. Next qualify the
 connected generated-only Windows child, inherited pipe,
-child-held file guard and actual process/job shutdown. No model is involved.
+child-held file guard and actual process/job shutdown. Native01 failed during
+ctypes structure setup before worker creation: actual84f5c9/native/outer exit1,
+unchanged inputs, stderr495 bytes. Preserve it. Review the fixed stdlib layout
+loader repair and new native02 brief before a fresh run. No model is involved.
 Candidate03 graph qualification01 remains FAIL: 51 passed / 11 failed,
 25 guard denials for generated package@version JSON metadata probes. No valid
 subset credit. The narrow guard repair and fresh qualification02 were admitted
-after root source review; the worker reports 62/0 and valid guards. The separately
-admitted exact NLTK metadata reader reports PASS. Verify both raw records, then
-qualify the literal third local-wheel record. Neither the current 144-pin graph nor native
+after root source review; root verified62/0, valid guards, exact membership and
+362 unchanged inputs. NLTK metadata read01 is accepted at e5b1ddd; read
+ASTRA-NLTK-METADATA-VERDICT-2026-09-13.md. All23 proof payloads match Git/disk.
+Qualify the literal third local-wheel record. Neither the current 144-pin graph nor native
 models have run. Preserve all failures and keep model authority closed.
 
 The authorized backup push of 01e22fb is waiting at Git's account selector;
@@ -4858,3 +4863,30 @@ final source/launcher review. Worker reports62/0 and metadata PASS; raw review
 and integration are next. The failed51/11 qualification01 stays failed. The
 144-pin graph and real model gates remain open. Production remains e8d058f;
 website and marketing stay paused until council and Astra accept the release.
+
+### 2026-09-13 - Exact NLTK metadata accepted; first native worker setup fails
+
+Integratione5b1ddd preserves the exact NLTK metadata receipt. Actual0940dd,
+reader and both exits are0. Metadata3245 bytes/SHA58ba0717917015b5fd7a2416d52d2ab7952eacfddcbe22797cbb566fba864234
+matches the exact Version-only transformation. Whole-wheel identity and stored
+512-member layout were checked; only METADATA/RECORD contents were interpreted.
+Other individual member digests were not recomputed in this invocation. A graph
+using this retained text must still say artifact_verified_in_this_invocation=false.
+All23 proof payloads/117071 bytes match Git/disk in c17a5e; seal
+ee428799befd7b04c68f5de81a7eab287d1102bc86fb6e5993d22d8661e6df08.
+Root also verified all62 ordered graph02 cases, raw native/outer exits, guard
+and current362+11 input hashes in10b613. The prior51/11 remains failed.
+
+Native01 actual84f5c9 returned1 in0.6232523 seconds. Immediate native1 and outer1
+are retained; inputs remain unchanged, stderr495 bytes and no child result.
+The traceback stops at the first ctypes Structure declaration under an import
+denial, before dummy worker creation. Source inspection supports the missing
+lazy ctypes._layout import as the cause; the raw trace did not capture the import
+name. A reviewed source-bound loader for that exact installed stdlib file and
+explicit warnings preload are being prepared in native02. No automatic retry,
+generic ctypes allowance, model import or installed-runtime credit is granted.
+One wrong historical draft filename lookup failed harmlessly; root then read
+the complete current launcher. All native01 evidence remains unchanged.
+
+Production remains e8d058f. Website and marketing stay paused. The native,
+complete-graph, model, current-source tree/package and release gates remain open.

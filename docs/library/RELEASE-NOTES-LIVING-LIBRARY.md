@@ -85,6 +85,13 @@ Astra accepts its limited source verdicts with three wording corrections;
 all 99 evidence payloads match Git and disk. This is component agreement,
 not approval of the unfinished runtime, installation or market release.
 
+Windows protocol and pipe contracts are accepted at `9c40271`: 54 simulated
+cases pass independently in each root. The first actual Windows worker test
+stopped during ctypes startup before child creation; its failed result is
+retained and a narrow setup repair is in progress. Exact local NLTK metadata
+is accepted at `e5b1ddd` for the next dependency review. Neither result clears
+the complete runtime, current installer or release.
+
 The repaired metadata checker rejects the earlier upgrade proposal: five
 WhisperX conflicts, two missing dependencies and three wheel failures, including
 a yanked Transformers release. That result does not establish that a different
