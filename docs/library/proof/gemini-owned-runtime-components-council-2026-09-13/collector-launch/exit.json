@@ -1,0 +1,55 @@
+{
+  "actual_native_exit": 0,
+  "finished_utc": "2026-09-13T19:58:11.0116754+00:00",
+  "inputs_unchanged": true,
+  "input_checks": [
+    {
+      "path": "collect.py",
+      "expected_sha256": "118d8303ac16822f9e06618ada3578bb58d8a765fdc6392a16c4fc92a6565086",
+      "actual_sha256": "118d8303ac16822f9e06618ada3578bb58d8a765fdc6392a16c4fc92a6565086"
+    },
+    {
+      "path": "before-collector.py",
+      "expected_sha256": "e7e2d71fa4ef76963dc7ce746dfc28863aa86aabcdece4c2dbcf8deb8081c16a",
+      "actual_sha256": "e7e2d71fa4ef76963dc7ce746dfc28863aa86aabcdece4c2dbcf8deb8081c16a"
+    },
+    {
+      "path": "BRIEF.md",
+      "expected_sha256": "fce2834adf9ad9a097b0ef18a4c02f29208c8db42475c6500c10dd9ba988d6d0",
+      "actual_sha256": "fce2834adf9ad9a097b0ef18a4c02f29208c8db42475c6500c10dd9ba988d6d0"
+    },
+    {
+      "path": "run_collect01.ps1",
+      "expected_sha256": "d95f8ad74e7fdb326659f4adb39ffb23de73807c1de94feebbcbf6f48d0c6f68",
+      "actual_sha256": "d95f8ad74e7fdb326659f4adb39ffb23de73807c1de94feebbcbf6f48d0c6f68"
+    },
+    {
+      "path": "PREEXECUTION-REPAIR02.md",
+      "expected_sha256": "2034c3ce60077f7db9fcc859a6d3f18946e1c904013091726a9417c483e211e1",
+      "actual_sha256": "2034c3ce60077f7db9fcc859a6d3f18946e1c904013091726a9417c483e211e1"
+    },
+    {
+      "path": "PREEXECUTION-REPAIR02.diff.txt",
+      "expected_sha256": "ede8a6afa0c4905876b24a4b4a957df98eed72f865d520a4a18e374782477b1d",
+      "actual_sha256": "ede8a6afa0c4905876b24a4b4a957df98eed72f865d520a4a18e374782477b1d"
+    },
+    {
+      "path": "before-review02/collect.py",
+      "expected_sha256": "d2fb308452130bd1cde6588e27a287c97358e3e5fe455f4946045dc25b92dad2",
+      "actual_sha256": "d2fb308452130bd1cde6588e27a287c97358e3e5fe455f4946045dc25b92dad2"
+    },
+    {
+      "path": "before-review02/run_collect01.ps1",
+      "expected_sha256": "8c0a60d96db86b4e6de967acc0c6de287b296b7eb5e069432a76ed548fde52f1",
+      "actual_sha256": "8c0a60d96db86b4e6de967acc0c6de287b296b7eb5e069432a76ed548fde52f1"
+    },
+    {
+      "path": "before-review02/PINS.json",
+      "expected_sha256": "7de5d12a730e8b9cbb78cb2a9d1e7481aaf14e99789d4905499f90e0e2179c3f",
+      "actual_sha256": "7de5d12a730e8b9cbb78cb2a9d1e7481aaf14e99789d4905499f90e0e2179c3f"
+    }
+  ],
+  "stdout_sha256": "109ca1b42e8611ad9f881e8d7f2848c279dfca74d7d1f79f53eb3d5c9dc47fa1",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderr_bytes": 0
+}

@@ -1,0 +1,7 @@
+{
+  "path": "E:\\AI\\projects\\agent-control-room\\src\\core\\worktrees.ts",
+  "sha256": "3750717b853f4444c879911380de4e9a4530660f39810bc0d3bc3b76e9a08a1b",
+  "read_only_current_source_observation": true,
+  "frozen_dispatch_source_identity_claim": false,
+  "finding": "assertGoalInputsCommitted adds visited references before outside-root/absent-path skips and returns that set; the event counter is not twelve file receipts."
+}

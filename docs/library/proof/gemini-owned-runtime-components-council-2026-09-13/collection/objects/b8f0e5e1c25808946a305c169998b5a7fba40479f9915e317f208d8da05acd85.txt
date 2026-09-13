@@ -1,0 +1,1 @@
+warning: in the working copy of 'docs/library/GEMINI-OWNED-RUNTIME-COMPONENTS-COUNCIL-REVIEW-2026-09-13.md', LF will be replaced by CRLF the next time Git touches it

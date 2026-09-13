@@ -1,0 +1,60 @@
+--- before/collect.py
++++ after/collect.py
+@@ -108,7 +108,9 @@
+     OUT.mkdir()
+     save('.gitattributes', b'* -text\n')
+     started = utc()
+-    for name in ('collect.py', 'before-collector.py', 'BRIEF.md', 'run_collect01.ps1'):
++    for name in ('collect.py', 'before-collector.py', 'BRIEF.md', 'run_collect01.ps1',
++                 'PINS.json', 'PREEXECUTION-REPAIR02.md', 'PREEXECUTION-REPAIR02.diff.txt', 'before-review02/collect.py',
++                 'before-review02/run_collect01.ps1', 'before-review02/PINS.json'):
+         save('preparation/'+name, read(PREP/name))
+     for name, expected in ACTUALS:
+         raw = read(ROOT/'_scratch'/name)
+@@ -171,17 +173,28 @@
+         seal_info = None
+         if path.startswith(PROOF):
+             folder, member = path[len(PROOF):].split('/', 1)
+-            sealpath = PROOF+folder+'/SHA256.json'
++            manifest_name = 'SHA256-MANIFEST.json' if folder == 'asr-lifecycle-contracts-2026-09-13' else 'SHA256.json'
++            sealpath = PROOF+folder+'/'+manifest_name
+             if sealpath not in seals:
+                 sr, sw = read(ROOT/sealpath), read(WORKER/sealpath)
+                 sb = git(['show', BASE+':'+sealpath]).stdout
+                 assert sr == sw == sb
+                 seal = json.loads(sr)
+-                assert len(seal['files']) == seal['payload_count']
+-                assert len({r['path'] for r in seal['files']}) == len(seal['files'])
+-                seals[sealpath] = {'raw':sr, 'parsed':seal, 'object':obj(sr)}
++                if folder == 'whisperx-owned-contracts-2026-09-13':
++                    assert type(seal) is list
++                    seal_rows = seal
++                elif folder == 'asr-lifecycle-contracts-2026-09-13':
++                    seal_rows = seal['files']
++                    assert len(seal_rows) == seal['count']
++                    assert sum(r['bytes'] for r in seal_rows) == seal['bytes']
++                else:
++                    assert folder in ('vad-owned-cpu-tensor-port-2026-09-13', 'vad-owned-factory-port-2026-09-13')
++                    seal_rows = seal['files']
++                    assert len(seal_rows) == seal['payload_count']
++                assert len({r['path'] for r in seal_rows}) == len(seal_rows)
++                seals[sealpath] = {'raw':sr, 'rows':seal_rows, 'object':obj(sr)}
+             seal = seals[sealpath]
+-            matches = [r for r in seal['parsed']['files'] if r['path']==member]
++            matches = [r for r in seal['rows'] if r['path']==member]
+             assert len(matches) == 1
+             assert matches[0]['sha256'] == sha(worker_raw) and matches[0]['bytes'] == len(worker_raw)
+             seal_info = {'seal_path':sealpath, 'seal_object':seal['object'], 'row':matches[0]}
+--- before/run_collect01.ps1
++++ after/run_collect01.ps1
+@@ -25,6 +25,10 @@
+     $PSNativeCommandUseErrorActionPreference = $false
+     & 'C:\Python314\python.exe' -I -S -B $sourcePath --collect 1> (Join-Path $launchRoot 'stdout.json') 2> (Join-Path $launchRoot 'stderr.log')
+     $nativeExit = $global:LASTEXITCODE
++    $nativeText = if ($null -eq $nativeExit) { "null`n" } else { [string]$nativeExit + "`n" }
++    $nativeBytes = [System.Text.UTF8Encoding]::new($false).GetBytes($nativeText)
++    $nativeFile = [System.IO.FileStream]::new((Join-Path $launchRoot 'native-exit.raw.txt'), [System.IO.FileMode]::CreateNew, [System.IO.FileAccess]::Write, [System.IO.FileShare]::Read)
++    try { $nativeFile.Write($nativeBytes, 0, $nativeBytes.Length); $nativeFile.Flush($true) } finally { $nativeFile.Dispose() }
+     $finished = [DateTimeOffset]::UtcNow.ToString('o')
+     $after = @($pins.files | ForEach-Object { [ordered]@{ path = $_.path; expected_sha256 = $_.sha256; actual_sha256 = (Get-FileHash -LiteralPath (Join-Path $proposal $_.path) -Algorithm SHA256).Hash.ToLowerInvariant() } })
+     $unchanged = @($after | Where-Object { $_.expected_sha256 -cne $_.actual_sha256 }).Count -eq 0

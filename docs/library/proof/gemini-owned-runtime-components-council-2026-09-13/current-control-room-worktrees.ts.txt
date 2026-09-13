@@ -1,0 +1,149 @@
+import { existsSync, mkdirSync, readFileSync, statSync } from "node:fs";
+import { relative, resolve } from "node:path";
+import { runStreamingProcess } from "./process.js";
+import type { AgentName, Project } from "../types.js";
+
+function safeSegment(value: string): string {
+  return value.toLowerCase().replace(/[^a-z0-9._-]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 48) || "project";
+}
+
+async function git(args: string[], cwd: string): Promise<string> {
+  const result = await runStreamingProcess({ command: "git", args, cwd });
+  if (result.exitCode !== 0) {
+    throw new Error(result.stderr || result.stdout || `git ${args.join(" ")} failed`);
+  }
+  return result.stdout.trim();
+}
+
+const TEXT_INPUT_EXTENSIONS = new Set([
+  ".css", ".html", ".js", ".json", ".jsx", ".md", ".mjs", ".py", ".ts", ".tsx", ".txt",
+]);
+
+function normalizeReference(value: string): string | null {
+  const normalized = value.trim().replace(/^\.([\\/])/, "").replace(/[\\/]+$/, "");
+  if (!normalized || normalized.includes("://") || normalized.includes("*") || normalized.includes("?")) return null;
+  if (/^[A-Za-z]:[\\/]/.test(normalized) || normalized.startsWith("/") || normalized.startsWith("\\")) return null;
+  return normalized.replaceAll("\\", "/");
+}
+
+export function extractRepositoryReferences(value: string): string[] {
+  const references = new Set<string>();
+  const add = (candidate: string) => {
+    const normalized = normalizeReference(candidate);
+    if (normalized) references.add(normalized);
+  };
+
+  for (const match of value.matchAll(/`([^`\r\n]+)`/g)) add(match[1]);
+  for (const match of value.matchAll(/(?:^|[\s("'])((?:[A-Za-z0-9._-]+[\\/])*[A-Za-z0-9._-]+\.(?:css|html?|jsx?|json|md|mjs|py|tsx?|txt))(?:$|[\s),;:"'])/gim)) {
+    add(match[1]);
+  }
+  return [...references];
+}
+
+function isTextInput(path: string): boolean {
+  const dot = path.lastIndexOf(".");
+  return dot >= 0 && TEXT_INPUT_EXTENSIONS.has(path.slice(dot).toLowerCase());
+}
+
+export interface FrozenWorkspaceBase {
+  commit: string;
+  references: string[];
+}
+
+export async function assertGoalInputsCommitted(
+  projectRoot: string,
+  goal: string,
+  baseCommit?: string,
+): Promise<string[]> {
+  const root = resolve(projectRoot);
+  const commit = baseCommit ?? await git(["rev-parse", "--verify", "HEAD^{commit}"], root);
+  const directReferences = extractRepositoryReferences(goal);
+  const queue = directReferences.map((reference) => ({
+    reference,
+    expand: /(?:^|\/)(?:readme|[^/]*brief[^/]*)\.[^.]+$/i.test(reference),
+  }));
+  const visited = new Set<string>();
+  const unavailable: string[] = [];
+
+  while (queue.length > 0) {
+    const { reference, expand } = queue.shift()!;
+    if (visited.has(reference)) continue;
+    visited.add(reference);
+
+    const absolute = resolve(root, reference);
+    const withinRoot = relative(root, absolute);
+    if (withinRoot.startsWith("..") || withinRoot.includes(":")) continue;
+    if (!existsSync(absolute)) continue;
+
+    const status = await git(["status", "--porcelain", "--", reference], root);
+    const committed = await git(["ls-tree", "-r", "--name-only", commit, "--", reference], root);
+    const changedFromBase = await git(["diff", "--name-only", commit, "--", reference], root);
+    if (status || !committed || changedFromBase) unavailable.push(reference);
+
+    if (expand && statSync(absolute).isFile() && isTextInput(reference) && statSync(absolute).size <= 1_000_000) {
+      for (const nested of extractRepositoryReferences(readFileSync(absolute, "utf8"))) {
+        if (!visited.has(nested)) queue.push({ reference: nested, expand: false });
+      }
+    }
+  }
+
+  if (unavailable.length > 0) {
+    throw new Error([
+      `Refusing to start isolated worktrees because required goal inputs are absent or differ from frozen Git base ${commit}:`,
+      ...[...new Set(unavailable)].sort().map((path) => `- ${path}`),
+      "Commit a shared checkpoint for these inputs, then rerun. Unrelated working-tree changes may remain.",
+    ].join("\n"));
+  }
+  return [...visited].sort();
+}
+
+export async function freezeWorkspaceBase(projectRoot: string, goal: string): Promise<FrozenWorkspaceBase> {
+  const commit = await git(["rev-parse", "--verify", "HEAD^{commit}"], projectRoot);
+  const references = await assertGoalInputsCommitted(projectRoot, goal, commit);
+  return { commit, references };
+}
+
+export interface PreparedWorkspace {
+  path: string;
+  branch: string | null;
+  warning: string | null;
+}
+
+export async function prepareWorkspace(input: {
+  project: Project;
+  runId: string;
+  agent: AgentName;
+  worktreesRoot: string;
+  isolated: boolean;
+  goal?: string;
+  baseCommit?: string;
+}): Promise<PreparedWorkspace> {
+  if (!input.isolated) {
+    return { path: input.project.rootPath, branch: null, warning: null };
+  }
+
+  const baseCommit = input.baseCommit ?? await git(["rev-parse", "--verify", "HEAD^{commit}"], input.project.rootPath);
+  if (input.goal) await assertGoalInputsCommitted(input.project.rootPath, input.goal, baseCommit);
+  const status = await git(["status", "--porcelain"], input.project.rootPath);
+  const projectSegment = safeSegment(input.project.name);
+  const runSegment = safeSegment(input.runId.slice(0, 12));
+  const targetRoot = resolve(input.worktreesRoot);
+  const target = resolve(targetRoot, projectSegment, runSegment, input.agent);
+  const targetRelative = relative(targetRoot, target);
+
+  if (targetRelative.startsWith("..") || targetRelative.includes(":") || targetRelative === "") {
+    throw new Error(`Refusing to create a worktree outside ${targetRoot}`);
+  }
+
+  mkdirSync(resolve(target, ".."), { recursive: true });
+  const branch = `control-room/${runSegment}-${input.agent}`;
+  await git(["worktree", "add", "-b", branch, target, baseCommit], input.project.rootPath);
+
+  return {
+    path: target,
+    branch,
+    warning: status
+      ? `The source project has uncommitted changes; the worktree starts from frozen base ${baseCommit} and does not include them.`
+      : null,
+  };
+}

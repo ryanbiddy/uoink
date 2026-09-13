@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "git",
+    "-c",
+    "core.quotePath=false",
+    "show",
+    "59f3aeb84fdf2c545fcd90ffbc569f784a9818db:docs/library/proof/vad-owned-factory-port-2026-09-13/SOURCE-TREE.json"
+  ],
+  "cwd": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\98b5e1a3-c10\\gemini",
+  "started_utc": "2026-09-13T19:58:09.630648+00:00",
+  "finished_utc": "2026-09-13T19:58:09.651835+00:00",
+  "actual_exit": 0,
+  "stdout": "objects/d5bbefed1ee91040775f04707cf576c5a1fba6285b050a51d584c45992681b06.txt",
+  "stderr": "objects/e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855.txt"
+}

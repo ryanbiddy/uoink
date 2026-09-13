@@ -1,0 +1,475 @@
+{
+  "original_preflight_membership": false,
+  "count": 17,
+  "kinds": {
+    "code": 8,
+    "contract": 2,
+    "source_tree": 1,
+    "verdict": 5,
+    "brief": 1
+  },
+  "bindings": [
+    {
+      "path": "docs/library/proof/vad-owned-cpu-tensor-port-2026-09-13/objects/ac9eb28194723ffaf2d98bb2cd691a7b27b0a1638694fdfd8cb198c3084e8964.txt",
+      "kind": "code",
+      "comparison": "exact raw bytes",
+      "worker": {
+        "sha256": "ac9eb28194723ffaf2d98bb2cd691a7b27b0a1638694fdfd8cb198c3084e8964",
+        "bytes": 11768,
+        "object": "objects/ac9eb28194723ffaf2d98bb2cd691a7b27b0a1638694fdfd8cb198c3084e8964.txt"
+      },
+      "checkout": {
+        "sha256": "ac9eb28194723ffaf2d98bb2cd691a7b27b0a1638694fdfd8cb198c3084e8964",
+        "bytes": 11768,
+        "object": "objects/ac9eb28194723ffaf2d98bb2cd691a7b27b0a1638694fdfd8cb198c3084e8964.txt"
+      },
+      "frozen_git": {
+        "commit": "59f3aeb84fdf2c545fcd90ffbc569f784a9818db",
+        "sha256": "ac9eb28194723ffaf2d98bb2cd691a7b27b0a1638694fdfd8cb198c3084e8964",
+        "bytes": 11768,
+        "object": "objects/ac9eb28194723ffaf2d98bb2cd691a7b27b0a1638694fdfd8cb198c3084e8964.txt"
+      },
+      "proof_row": {
+        "seal_path": "docs/library/proof/vad-owned-cpu-tensor-port-2026-09-13/SHA256.json",
+        "seal_object": "objects/d14fcad26ad6b74967541f2403e05a88c49ebdddf713bee32fe32f0b7d3efc6e.txt",
+        "row": {
+          "path": "objects/ac9eb28194723ffaf2d98bb2cd691a7b27b0a1638694fdfd8cb198c3084e8964.txt",
+          "bytes": 11768,
+          "sha256": "ac9eb28194723ffaf2d98bb2cd691a7b27b0a1638694fdfd8cb198c3084e8964"
+        }
+      }
+    },
+    {
+      "path": "docs/library/proof/vad-owned-factory-port-2026-09-13/objects/2569853c7634b795e3d2cf717129ec3dbc4e11d96ddb347098dcc4fbc532f0d4.txt",
+      "kind": "code",
+      "comparison": "exact raw bytes",
+      "worker": {
+        "sha256": "2569853c7634b795e3d2cf717129ec3dbc4e11d96ddb347098dcc4fbc532f0d4",
+        "bytes": 15463,
+        "object": "objects/2569853c7634b795e3d2cf717129ec3dbc4e11d96ddb347098dcc4fbc532f0d4.txt"
+      },
+      "checkout": {
+        "sha256": "2569853c7634b795e3d2cf717129ec3dbc4e11d96ddb347098dcc4fbc532f0d4",
+        "bytes": 15463,
+        "object": "objects/2569853c7634b795e3d2cf717129ec3dbc4e11d96ddb347098dcc4fbc532f0d4.txt"
+      },
+      "frozen_git": {
+        "commit": "59f3aeb84fdf2c545fcd90ffbc569f784a9818db",
+        "sha256": "2569853c7634b795e3d2cf717129ec3dbc4e11d96ddb347098dcc4fbc532f0d4",
+        "bytes": 15463,
+        "object": "objects/2569853c7634b795e3d2cf717129ec3dbc4e11d96ddb347098dcc4fbc532f0d4.txt"
+      },
+      "proof_row": {
+        "seal_path": "docs/library/proof/vad-owned-factory-port-2026-09-13/SHA256.json",
+        "seal_object": "objects/e59a778e0acb1da9c22ab5eeb1442f050a4cb119aeded70cc460d6146b4b15c8.txt",
+        "row": {
+          "path": "objects/2569853c7634b795e3d2cf717129ec3dbc4e11d96ddb347098dcc4fbc532f0d4.txt",
+          "bytes": 15463,
+          "sha256": "2569853c7634b795e3d2cf717129ec3dbc4e11d96ddb347098dcc4fbc532f0d4"
+        }
+      }
+    },
+    {
+      "path": "docs/library/proof/vad-owned-factory-port-2026-09-13/objects/48567add0f0ac2ac9140e9aa86b06f077454c98e2f0773100da5ba070f7b3deb.txt",
+      "kind": "code",
+      "comparison": "exact raw bytes",
+      "worker": {
+        "sha256": "48567add0f0ac2ac9140e9aa86b06f077454c98e2f0773100da5ba070f7b3deb",
+        "bytes": 8732,
+        "object": "objects/48567add0f0ac2ac9140e9aa86b06f077454c98e2f0773100da5ba070f7b3deb.txt"
+      },
+      "checkout": {
+        "sha256": "48567add0f0ac2ac9140e9aa86b06f077454c98e2f0773100da5ba070f7b3deb",
+        "bytes": 8732,
+        "object": "objects/48567add0f0ac2ac9140e9aa86b06f077454c98e2f0773100da5ba070f7b3deb.txt"
+      },
+      "frozen_git": {
+        "commit": "59f3aeb84fdf2c545fcd90ffbc569f784a9818db",
+        "sha256": "48567add0f0ac2ac9140e9aa86b06f077454c98e2f0773100da5ba070f7b3deb",
+        "bytes": 8732,
+        "object": "objects/48567add0f0ac2ac9140e9aa86b06f077454c98e2f0773100da5ba070f7b3deb.txt"
+      },
+      "proof_row": {
+        "seal_path": "docs/library/proof/vad-owned-factory-port-2026-09-13/SHA256.json",
+        "seal_object": "objects/e59a778e0acb1da9c22ab5eeb1442f050a4cb119aeded70cc460d6146b4b15c8.txt",
+        "row": {
+          "path": "objects/48567add0f0ac2ac9140e9aa86b06f077454c98e2f0773100da5ba070f7b3deb.txt",
+          "bytes": 8732,
+          "sha256": "48567add0f0ac2ac9140e9aa86b06f077454c98e2f0773100da5ba070f7b3deb"
+        }
+      }
+    },
+    {
+      "path": "docs/library/proof/asr-lifecycle-contracts-2026-09-13/author02/snapshot_lifecycle.py",
+      "kind": "code",
+      "comparison": "exact raw bytes",
+      "worker": {
+        "sha256": "a80514aac6b1e75b9b872052852fa993a23cd5273b6bed4ffb4eef7404cb69dd",
+        "bytes": 22138,
+        "object": "objects/a80514aac6b1e75b9b872052852fa993a23cd5273b6bed4ffb4eef7404cb69dd.txt"
+      },
+      "checkout": {
+        "sha256": "a80514aac6b1e75b9b872052852fa993a23cd5273b6bed4ffb4eef7404cb69dd",
+        "bytes": 22138,
+        "object": "objects/a80514aac6b1e75b9b872052852fa993a23cd5273b6bed4ffb4eef7404cb69dd.txt"
+      },
+      "frozen_git": {
+        "commit": "59f3aeb84fdf2c545fcd90ffbc569f784a9818db",
+        "sha256": "a80514aac6b1e75b9b872052852fa993a23cd5273b6bed4ffb4eef7404cb69dd",
+        "bytes": 22138,
+        "object": "objects/a80514aac6b1e75b9b872052852fa993a23cd5273b6bed4ffb4eef7404cb69dd.txt"
+      },
+      "proof_row": {
+        "seal_path": "docs/library/proof/asr-lifecycle-contracts-2026-09-13/SHA256-MANIFEST.json",
+        "seal_object": "objects/74129bbd376def3ae9451ef98025748c527539e94490d551dd01fa7c3761ffcf.txt",
+        "row": {
+          "path": "author02/snapshot_lifecycle.py",
+          "bytes": 22138,
+          "sha256": "a80514aac6b1e75b9b872052852fa993a23cd5273b6bed4ffb4eef7404cb69dd"
+        }
+      }
+    },
+    {
+      "path": "docs/library/proof/whisperx-owned-contracts-2026-09-13/derivative/after/whisperx/_uoink_owned.py",
+      "kind": "code",
+      "comparison": "exact raw bytes",
+      "worker": {
+        "sha256": "7672f614d81cf0be5e7bd408f8f856af328fe34e6ca7ee707c9d0db838e56d1f",
+        "bytes": 2109,
+        "object": "objects/7672f614d81cf0be5e7bd408f8f856af328fe34e6ca7ee707c9d0db838e56d1f.txt"
+      },
+      "checkout": {
+        "sha256": "7672f614d81cf0be5e7bd408f8f856af328fe34e6ca7ee707c9d0db838e56d1f",
+        "bytes": 2109,
+        "object": "objects/7672f614d81cf0be5e7bd408f8f856af328fe34e6ca7ee707c9d0db838e56d1f.txt"
+      },
+      "frozen_git": {
+        "commit": "59f3aeb84fdf2c545fcd90ffbc569f784a9818db",
+        "sha256": "7672f614d81cf0be5e7bd408f8f856af328fe34e6ca7ee707c9d0db838e56d1f",
+        "bytes": 2109,
+        "object": "objects/7672f614d81cf0be5e7bd408f8f856af328fe34e6ca7ee707c9d0db838e56d1f.txt"
+      },
+      "proof_row": {
+        "seal_path": "docs/library/proof/whisperx-owned-contracts-2026-09-13/SHA256.json",
+        "seal_object": "objects/144d6b9a05b58a82ce7fbb4f129e2e90ff82e00f2748b7e81f92566abd2ff4bd.txt",
+        "row": {
+          "path": "derivative/after/whisperx/_uoink_owned.py",
+          "bytes": 2109,
+          "sha256": "7672f614d81cf0be5e7bd408f8f856af328fe34e6ca7ee707c9d0db838e56d1f"
+        }
+      }
+    },
+    {
+      "path": "docs/library/proof/whisperx-owned-contracts-2026-09-13/derivative/after/whisperx/asr.py",
+      "kind": "code",
+      "comparison": "exact raw bytes",
+      "worker": {
+        "sha256": "723bfba5775cb4a610368e1ad706fc55131bc9a2e8ea2f1e1a2b55cd6e8b5d42",
+        "bytes": 17608,
+        "object": "objects/723bfba5775cb4a610368e1ad706fc55131bc9a2e8ea2f1e1a2b55cd6e8b5d42.txt"
+      },
+      "checkout": {
+        "sha256": "723bfba5775cb4a610368e1ad706fc55131bc9a2e8ea2f1e1a2b55cd6e8b5d42",
+        "bytes": 17608,
+        "object": "objects/723bfba5775cb4a610368e1ad706fc55131bc9a2e8ea2f1e1a2b55cd6e8b5d42.txt"
+      },
+      "frozen_git": {
+        "commit": "59f3aeb84fdf2c545fcd90ffbc569f784a9818db",
+        "sha256": "723bfba5775cb4a610368e1ad706fc55131bc9a2e8ea2f1e1a2b55cd6e8b5d42",
+        "bytes": 17608,
+        "object": "objects/723bfba5775cb4a610368e1ad706fc55131bc9a2e8ea2f1e1a2b55cd6e8b5d42.txt"
+      },
+      "proof_row": {
+        "seal_path": "docs/library/proof/whisperx-owned-contracts-2026-09-13/SHA256.json",
+        "seal_object": "objects/144d6b9a05b58a82ce7fbb4f129e2e90ff82e00f2748b7e81f92566abd2ff4bd.txt",
+        "row": {
+          "path": "derivative/after/whisperx/asr.py",
+          "bytes": 17608,
+          "sha256": "723bfba5775cb4a610368e1ad706fc55131bc9a2e8ea2f1e1a2b55cd6e8b5d42"
+        }
+      }
+    },
+    {
+      "path": "docs/library/proof/whisperx-owned-contracts-2026-09-13/derivative/after/whisperx/vads/pyannote.py",
+      "kind": "code",
+      "comparison": "exact raw bytes",
+      "worker": {
+        "sha256": "aeec3ec09d1ed7e11f827353c4f9087de665b1cd3dabf3ff47bb5917c679c6f2",
+        "bytes": 8854,
+        "object": "objects/aeec3ec09d1ed7e11f827353c4f9087de665b1cd3dabf3ff47bb5917c679c6f2.txt"
+      },
+      "checkout": {
+        "sha256": "aeec3ec09d1ed7e11f827353c4f9087de665b1cd3dabf3ff47bb5917c679c6f2",
+        "bytes": 8854,
+        "object": "objects/aeec3ec09d1ed7e11f827353c4f9087de665b1cd3dabf3ff47bb5917c679c6f2.txt"
+      },
+      "frozen_git": {
+        "commit": "59f3aeb84fdf2c545fcd90ffbc569f784a9818db",
+        "sha256": "aeec3ec09d1ed7e11f827353c4f9087de665b1cd3dabf3ff47bb5917c679c6f2",
+        "bytes": 8854,
+        "object": "objects/aeec3ec09d1ed7e11f827353c4f9087de665b1cd3dabf3ff47bb5917c679c6f2.txt"
+      },
+      "proof_row": {
+        "seal_path": "docs/library/proof/whisperx-owned-contracts-2026-09-13/SHA256.json",
+        "seal_object": "objects/144d6b9a05b58a82ce7fbb4f129e2e90ff82e00f2748b7e81f92566abd2ff4bd.txt",
+        "row": {
+          "path": "derivative/after/whisperx/vads/pyannote.py",
+          "bytes": 8854,
+          "sha256": "aeec3ec09d1ed7e11f827353c4f9087de665b1cd3dabf3ff47bb5917c679c6f2"
+        }
+      }
+    },
+    {
+      "path": "docs/library/proof/whisperx-owned-contracts-2026-09-13/derivative/after/whisperx/audio.py",
+      "kind": "code",
+      "comparison": "exact raw bytes",
+      "worker": {
+        "sha256": "c7b696df836e415e7c732c03edae496c4317cb741eaac7357e8c9c7bdcf38152",
+        "bytes": 3976,
+        "object": "objects/c7b696df836e415e7c732c03edae496c4317cb741eaac7357e8c9c7bdcf38152.txt"
+      },
+      "checkout": {
+        "sha256": "c7b696df836e415e7c732c03edae496c4317cb741eaac7357e8c9c7bdcf38152",
+        "bytes": 3976,
+        "object": "objects/c7b696df836e415e7c732c03edae496c4317cb741eaac7357e8c9c7bdcf38152.txt"
+      },
+      "frozen_git": {
+        "commit": "59f3aeb84fdf2c545fcd90ffbc569f784a9818db",
+        "sha256": "c7b696df836e415e7c732c03edae496c4317cb741eaac7357e8c9c7bdcf38152",
+        "bytes": 3976,
+        "object": "objects/c7b696df836e415e7c732c03edae496c4317cb741eaac7357e8c9c7bdcf38152.txt"
+      },
+      "proof_row": {
+        "seal_path": "docs/library/proof/whisperx-owned-contracts-2026-09-13/SHA256.json",
+        "seal_object": "objects/144d6b9a05b58a82ce7fbb4f129e2e90ff82e00f2748b7e81f92566abd2ff4bd.txt",
+        "row": {
+          "path": "derivative/after/whisperx/audio.py",
+          "bytes": 3976,
+          "sha256": "c7b696df836e415e7c732c03edae496c4317cb741eaac7357e8c9c7bdcf38152"
+        }
+      }
+    },
+    {
+      "path": "docs/library/proof/vad-owned-factory-port-2026-09-13/objects/4b0e29011821dd610a653d6c3692768c6451e61ca986f28b8d8e9bd54d974932.txt",
+      "kind": "contract",
+      "comparison": "exact raw bytes",
+      "worker": {
+        "sha256": "4b0e29011821dd610a653d6c3692768c6451e61ca986f28b8d8e9bd54d974932",
+        "bytes": 5777,
+        "object": "objects/4b0e29011821dd610a653d6c3692768c6451e61ca986f28b8d8e9bd54d974932.txt"
+      },
+      "checkout": {
+        "sha256": "4b0e29011821dd610a653d6c3692768c6451e61ca986f28b8d8e9bd54d974932",
+        "bytes": 5777,
+        "object": "objects/4b0e29011821dd610a653d6c3692768c6451e61ca986f28b8d8e9bd54d974932.txt"
+      },
+      "frozen_git": {
+        "commit": "59f3aeb84fdf2c545fcd90ffbc569f784a9818db",
+        "sha256": "4b0e29011821dd610a653d6c3692768c6451e61ca986f28b8d8e9bd54d974932",
+        "bytes": 5777,
+        "object": "objects/4b0e29011821dd610a653d6c3692768c6451e61ca986f28b8d8e9bd54d974932.txt"
+      },
+      "proof_row": {
+        "seal_path": "docs/library/proof/vad-owned-factory-port-2026-09-13/SHA256.json",
+        "seal_object": "objects/e59a778e0acb1da9c22ab5eeb1442f050a4cb119aeded70cc460d6146b4b15c8.txt",
+        "row": {
+          "path": "objects/4b0e29011821dd610a653d6c3692768c6451e61ca986f28b8d8e9bd54d974932.txt",
+          "bytes": 5777,
+          "sha256": "4b0e29011821dd610a653d6c3692768c6451e61ca986f28b8d8e9bd54d974932"
+        }
+      }
+    },
+    {
+      "path": "docs/library/proof/vad-owned-factory-port-2026-09-13/objects/50783d05baf8027334fc28b1972fc4d35ec205941c115b79bdf4f8edb8b4babb.txt",
+      "kind": "contract",
+      "comparison": "exact raw bytes",
+      "worker": {
+        "sha256": "50783d05baf8027334fc28b1972fc4d35ec205941c115b79bdf4f8edb8b4babb",
+        "bytes": 4419,
+        "object": "objects/50783d05baf8027334fc28b1972fc4d35ec205941c115b79bdf4f8edb8b4babb.txt"
+      },
+      "checkout": {
+        "sha256": "50783d05baf8027334fc28b1972fc4d35ec205941c115b79bdf4f8edb8b4babb",
+        "bytes": 4419,
+        "object": "objects/50783d05baf8027334fc28b1972fc4d35ec205941c115b79bdf4f8edb8b4babb.txt"
+      },
+      "frozen_git": {
+        "commit": "59f3aeb84fdf2c545fcd90ffbc569f784a9818db",
+        "sha256": "50783d05baf8027334fc28b1972fc4d35ec205941c115b79bdf4f8edb8b4babb",
+        "bytes": 4419,
+        "object": "objects/50783d05baf8027334fc28b1972fc4d35ec205941c115b79bdf4f8edb8b4babb.txt"
+      },
+      "proof_row": {
+        "seal_path": "docs/library/proof/vad-owned-factory-port-2026-09-13/SHA256.json",
+        "seal_object": "objects/e59a778e0acb1da9c22ab5eeb1442f050a4cb119aeded70cc460d6146b4b15c8.txt",
+        "row": {
+          "path": "objects/50783d05baf8027334fc28b1972fc4d35ec205941c115b79bdf4f8edb8b4babb.txt",
+          "bytes": 4419,
+          "sha256": "50783d05baf8027334fc28b1972fc4d35ec205941c115b79bdf4f8edb8b4babb"
+        }
+      }
+    },
+    {
+      "path": "docs/library/proof/vad-owned-factory-port-2026-09-13/SOURCE-TREE.json",
+      "kind": "source_tree",
+      "comparison": "exact raw bytes",
+      "worker": {
+        "sha256": "d5bbefed1ee91040775f04707cf576c5a1fba6285b050a51d584c45992681b06",
+        "bytes": 52063,
+        "object": "objects/d5bbefed1ee91040775f04707cf576c5a1fba6285b050a51d584c45992681b06.txt"
+      },
+      "checkout": {
+        "sha256": "d5bbefed1ee91040775f04707cf576c5a1fba6285b050a51d584c45992681b06",
+        "bytes": 52063,
+        "object": "objects/d5bbefed1ee91040775f04707cf576c5a1fba6285b050a51d584c45992681b06.txt"
+      },
+      "frozen_git": {
+        "commit": "59f3aeb84fdf2c545fcd90ffbc569f784a9818db",
+        "sha256": "d5bbefed1ee91040775f04707cf576c5a1fba6285b050a51d584c45992681b06",
+        "bytes": 52063,
+        "object": "objects/d5bbefed1ee91040775f04707cf576c5a1fba6285b050a51d584c45992681b06.txt"
+      },
+      "proof_row": {
+        "seal_path": "docs/library/proof/vad-owned-factory-port-2026-09-13/SHA256.json",
+        "seal_object": "objects/e59a778e0acb1da9c22ab5eeb1442f050a4cb119aeded70cc460d6146b4b15c8.txt",
+        "row": {
+          "path": "SOURCE-TREE.json",
+          "bytes": 52063,
+          "sha256": "d5bbefed1ee91040775f04707cf576c5a1fba6285b050a51d584c45992681b06"
+        }
+      }
+    },
+    {
+      "path": "docs/library/ASTRA-VAD-CPU-PORT-VERDICT-2026-09-13.md",
+      "kind": "verdict",
+      "comparison": "CRLF-to-LF only",
+      "worker": {
+        "sha256": "ae92ffa3d7e1028e1d4bf311f7931c97d824762011e5839152a258d12be35138",
+        "bytes": 3481,
+        "object": "objects/ae92ffa3d7e1028e1d4bf311f7931c97d824762011e5839152a258d12be35138.txt"
+      },
+      "checkout": {
+        "sha256": "087fc1b11112e49c1d2d7151050cca26985af0facc6b10f45b8ac9d4263b2a40",
+        "bytes": 3428,
+        "object": "objects/087fc1b11112e49c1d2d7151050cca26985af0facc6b10f45b8ac9d4263b2a40.txt"
+      },
+      "frozen_git": {
+        "commit": "59f3aeb84fdf2c545fcd90ffbc569f784a9818db",
+        "sha256": "087fc1b11112e49c1d2d7151050cca26985af0facc6b10f45b8ac9d4263b2a40",
+        "bytes": 3428,
+        "object": "objects/087fc1b11112e49c1d2d7151050cca26985af0facc6b10f45b8ac9d4263b2a40.txt"
+      },
+      "proof_row": null
+    },
+    {
+      "path": "docs/library/ASTRA-VAD-FACTORY-PORT-VERDICT-2026-09-13.md",
+      "kind": "verdict",
+      "comparison": "CRLF-to-LF only",
+      "worker": {
+        "sha256": "aeb032106167133da6ae89c457fdc430a4d5c4aaef352ebc1cb8fd20f76c4b7c",
+        "bytes": 3277,
+        "object": "objects/aeb032106167133da6ae89c457fdc430a4d5c4aaef352ebc1cb8fd20f76c4b7c.txt"
+      },
+      "checkout": {
+        "sha256": "7e6fa3860d4a5b3f9a4e84996094a076987850c52d61bfc3613c37a5fae2db36",
+        "bytes": 3228,
+        "object": "objects/7e6fa3860d4a5b3f9a4e84996094a076987850c52d61bfc3613c37a5fae2db36.txt"
+      },
+      "frozen_git": {
+        "commit": "59f3aeb84fdf2c545fcd90ffbc569f784a9818db",
+        "sha256": "7e6fa3860d4a5b3f9a4e84996094a076987850c52d61bfc3613c37a5fae2db36",
+        "bytes": 3228,
+        "object": "objects/7e6fa3860d4a5b3f9a4e84996094a076987850c52d61bfc3613c37a5fae2db36.txt"
+      },
+      "proof_row": null
+    },
+    {
+      "path": "docs/library/ASTRA-ASR-LIFECYCLE-CONTRACT-VERDICT-2026-09-13.md",
+      "kind": "verdict",
+      "comparison": "CRLF-to-LF only",
+      "worker": {
+        "sha256": "41b3973a85b62874842c84f9953dd642c554d11bad35a62781a51d83a3d158b9",
+        "bytes": 2508,
+        "object": "objects/41b3973a85b62874842c84f9953dd642c554d11bad35a62781a51d83a3d158b9.txt"
+      },
+      "checkout": {
+        "sha256": "080b99a884ed0e89da0425466e891bca9095e6311c4cba04722364a06497e846",
+        "bytes": 2469,
+        "object": "objects/080b99a884ed0e89da0425466e891bca9095e6311c4cba04722364a06497e846.txt"
+      },
+      "frozen_git": {
+        "commit": "59f3aeb84fdf2c545fcd90ffbc569f784a9818db",
+        "sha256": "080b99a884ed0e89da0425466e891bca9095e6311c4cba04722364a06497e846",
+        "bytes": 2469,
+        "object": "objects/080b99a884ed0e89da0425466e891bca9095e6311c4cba04722364a06497e846.txt"
+      },
+      "proof_row": null
+    },
+    {
+      "path": "docs/library/ASTRA-OWNED-WHISPERX-CONTRACT-VERDICT-2026-09-13.md",
+      "kind": "verdict",
+      "comparison": "CRLF-to-LF only",
+      "worker": {
+        "sha256": "bd7b39e810879f7e13b633f12a964ee03ebd5ccd8c52642b6f6e3f11cfdc4c8c",
+        "bytes": 2401,
+        "object": "objects/bd7b39e810879f7e13b633f12a964ee03ebd5ccd8c52642b6f6e3f11cfdc4c8c.txt"
+      },
+      "checkout": {
+        "sha256": "eb458487dcd0496992c5832fdc77fab111ae0a93351eb84b09f0401924389412",
+        "bytes": 2365,
+        "object": "objects/eb458487dcd0496992c5832fdc77fab111ae0a93351eb84b09f0401924389412.txt"
+      },
+      "frozen_git": {
+        "commit": "59f3aeb84fdf2c545fcd90ffbc569f784a9818db",
+        "sha256": "eb458487dcd0496992c5832fdc77fab111ae0a93351eb84b09f0401924389412",
+        "bytes": 2365,
+        "object": "objects/eb458487dcd0496992c5832fdc77fab111ae0a93351eb84b09f0401924389412.txt"
+      },
+      "proof_row": null
+    },
+    {
+      "path": "docs/library/ASTRA-OWNED-WHISPERX-BUILD-VERDICT-2026-09-13.md",
+      "kind": "verdict",
+      "comparison": "CRLF-to-LF only",
+      "worker": {
+        "sha256": "4a9a76f6cd0282a5c4529c542759ca09cb756dd78595f5ca68324ed3468ce4c4",
+        "bytes": 2368,
+        "object": "objects/4a9a76f6cd0282a5c4529c542759ca09cb756dd78595f5ca68324ed3468ce4c4.txt"
+      },
+      "checkout": {
+        "sha256": "9558f96b4a920bc3ac9a82e9a5ea2c5c723571df84c409f908a26a3fbd6db872",
+        "bytes": 2332,
+        "object": "objects/9558f96b4a920bc3ac9a82e9a5ea2c5c723571df84c409f908a26a3fbd6db872.txt"
+      },
+      "frozen_git": {
+        "commit": "59f3aeb84fdf2c545fcd90ffbc569f784a9818db",
+        "sha256": "9558f96b4a920bc3ac9a82e9a5ea2c5c723571df84c409f908a26a3fbd6db872",
+        "bytes": 2332,
+        "object": "objects/9558f96b4a920bc3ac9a82e9a5ea2c5c723571df84c409f908a26a3fbd6db872.txt"
+      },
+      "proof_row": null
+    },
+    {
+      "path": "docs/library/GEMINI-OWNED-RUNTIME-COMPONENTS-COUNCIL-BRIEF-2026-09-13.md",
+      "kind": "brief",
+      "comparison": "CRLF-to-LF only",
+      "worker": {
+        "sha256": "55c58d1c3afffde595fcf2835882ca702ce6717d4a7b797032e933347b6afe13",
+        "bytes": 4920,
+        "object": "objects/55c58d1c3afffde595fcf2835882ca702ce6717d4a7b797032e933347b6afe13.txt"
+      },
+      "checkout": {
+        "sha256": "d0df426ab9b18a11c5dcae4d1a6266eb59d3036cdba377507f28c6b4303258fc",
+        "bytes": 4850,
+        "object": "objects/d0df426ab9b18a11c5dcae4d1a6266eb59d3036cdba377507f28c6b4303258fc.txt"
+      },
+      "frozen_git": {
+        "commit": "59f3aeb84fdf2c545fcd90ffbc569f784a9818db",
+        "sha256": "d0df426ab9b18a11c5dcae4d1a6266eb59d3036cdba377507f28c6b4303258fc",
+        "bytes": 4850,
+        "object": "objects/d0df426ab9b18a11c5dcae4d1a6266eb59d3036cdba377507f28c6b4303258fc.txt"
+      },
+      "proof_row": null
+    }
+  ]
+}

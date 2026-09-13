@@ -1,0 +1,17 @@
+{
+  "argv": [
+    "git",
+    "-c",
+    "core.quotePath=false",
+    "diff",
+    "--name-only",
+    "-z",
+    "--no-ext-diff"
+  ],
+  "cwd": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\98b5e1a3-c10\\gemini",
+  "started_utc": "2026-09-13T19:58:09.868614+00:00",
+  "finished_utc": "2026-09-13T19:58:09.978636+00:00",
+  "actual_exit": 0,
+  "stdout": "objects/8caad18ee6dd44403e48aeb8f3a35697bfb21ff4bba12247176a5964709e6d4b.txt",
+  "stderr": "objects/e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855.txt"
+}

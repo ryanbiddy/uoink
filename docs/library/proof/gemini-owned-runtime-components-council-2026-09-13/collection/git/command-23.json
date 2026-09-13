@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "git",
+    "-c",
+    "core.quotePath=false",
+    "show",
+    "59f3aeb84fdf2c545fcd90ffbc569f784a9818db:docs/library/ASTRA-OWNED-WHISPERX-CONTRACT-VERDICT-2026-09-13.md"
+  ],
+  "cwd": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\98b5e1a3-c10\\gemini",
+  "started_utc": "2026-09-13T19:58:09.745670+00:00",
+  "finished_utc": "2026-09-13T19:58:09.768120+00:00",
+  "actual_exit": 0,
+  "stdout": "objects/eb458487dcd0496992c5832fdc77fab111ae0a93351eb84b09f0401924389412.txt",
+  "stderr": "objects/e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855.txt"
+}

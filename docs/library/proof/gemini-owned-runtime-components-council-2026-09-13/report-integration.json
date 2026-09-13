@@ -1,0 +1,9 @@
+{
+  "git_apply_actual_tool": "e2f730",
+  "actual_exit": 0,
+  "application": "three-way requested, direct fallback for new file",
+  "worker_report_sha256": "9a8bc8e6103e86ebd13eba9cc1c9472c83b2a01f07f1c4192346ed5c7aeeadaf",
+  "applied_checkout_sha256": "8a2bd696df202eef105500109d4365039fdc1bddd1224151cafa6f80cade158c",
+  "only_crlf_lf_transport": true,
+  "checkout_restored_to_exact_worker_bytes": true
+}

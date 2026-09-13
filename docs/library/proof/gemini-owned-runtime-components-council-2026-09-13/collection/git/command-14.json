@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "git",
+    "-c",
+    "core.quotePath=false",
+    "show",
+    "59f3aeb84fdf2c545fcd90ffbc569f784a9818db:docs/library/proof/whisperx-owned-contracts-2026-09-13/derivative/after/whisperx/asr.py"
+  ],
+  "cwd": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\98b5e1a3-c10\\gemini",
+  "started_utc": "2026-09-13T19:58:09.472997+00:00",
+  "finished_utc": "2026-09-13T19:58:09.497271+00:00",
+  "actual_exit": 0,
+  "stdout": "objects/723bfba5775cb4a610368e1ad706fc55131bc9a2e8ea2f1e1a2b55cd6e8b5d42.txt",
+  "stderr": "objects/e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855.txt"
+}

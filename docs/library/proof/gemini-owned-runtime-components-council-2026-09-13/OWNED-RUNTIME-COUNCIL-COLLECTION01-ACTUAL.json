@@ -1,0 +1,7 @@
+{
+  "chunk_id": "fc8b56",
+  "wall_time_seconds": 2.6281222,
+  "exit_code": 0,
+  "original_token_count": 140,
+  "output": "{\"status\": \"collected_and_full_file_set_verified\", \"output\": \"E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\_scratch\\\\gemini-owned-runtime-components-council-receipts01\", \"payload_count\": 86, \"physical_file_count\": 87, \"seal_sha256\": \"b9070b4fc426f9bef5c0bdc5f559acba92bef14565f9d92ef416677b6464d3ce\", \"current_review_bindings\": 17, \"original_preflight_counter\": 12, \"events\": 364, \"report_sha256\": \"9a8bc8e6103e86ebd13eba9cc1c9472c83b2a01f07f1c4192346ed5c7aeeadaf\", \"patch_sha256\": \"cd2ff42f631e3e085605bb5bd1a86b444f039df33d564f3a9832648b7f6c7637\"}\r\n\r\n"
+}
