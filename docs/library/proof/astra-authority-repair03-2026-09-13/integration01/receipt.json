@@ -1,0 +1,19 @@
+{
+  "checkout_before": "099a72408f63e6cdb227322e137da428f6c3a1d7",
+  "worker_base": "4b8dc95912ae74fcdcc0dccf5f9d862d08207fb2",
+  "worker_source_sha256": "67432bf13905b8c28c2048ce51bbebd74490d463f8b1a4e08fdd3ce4e53a0a23",
+  "patch_sha256": "2f7ce0c350b34a54fc9dca94b3becb2d3f8fedba7a77b49b8bf6ac80d0d65b97",
+  "paths": [
+    "library_mirror.py",
+    "tests/test_library_mirror_process_authority.py",
+    "tests/test_mirror_process_identity_boundaries.py",
+    "tests/test_mirror_process_handle_lifetime.py",
+    "tests/test_mirror_authority_review02.py",
+    "tests/test_mirror_stable_handle_discovery.py",
+    "tests/_mirror_stable_native_fixture.py"
+  ],
+  "worker_passed": 233,
+  "existing_test_changes": false,
+  "normalized_source_test_equality": true,
+  "checkout_tests_run": false
+}

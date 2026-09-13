@@ -1,0 +1,12 @@
+diff --git a/_scratch/astra-authority-repair03/baseline/test_mirror_process_handle_lifetime.py b/tests/test_mirror_process_handle_lifetime.py
+index 6e60c05..61ea781 100644
+--- a/_scratch/astra-authority-repair03/baseline/test_mirror_process_handle_lifetime.py
++++ b/tests/test_mirror_process_handle_lifetime.py
+@@ -13,6 +13,7 @@ from types import SimpleNamespace
+ import pytest
+ 
+ import library_mirror as mirror
++from _mirror_stable_native_fixture import stable_native_authority
+ 
+ 
+ class FailClosedKernel:

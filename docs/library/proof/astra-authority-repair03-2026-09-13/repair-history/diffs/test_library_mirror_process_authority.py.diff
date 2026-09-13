@@ -1,0 +1,12 @@
+diff --git a/_scratch/astra-authority-repair03/baseline/test_library_mirror_process_authority.py b/tests/test_library_mirror_process_authority.py
+index ebeb9a7..5834cc2 100644
+--- a/_scratch/astra-authority-repair03/baseline/test_library_mirror_process_authority.py
++++ b/tests/test_library_mirror_process_authority.py
+@@ -13,6 +13,7 @@ from unittest.mock import MagicMock
+ import pytest
+ 
+ import library_mirror as mirror
++from _mirror_stable_native_fixture import stable_native_authority
+ 
+ 
+ class EffectRecorder:

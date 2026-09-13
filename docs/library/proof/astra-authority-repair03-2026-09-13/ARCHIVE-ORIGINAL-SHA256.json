@@ -1,0 +1,555 @@
+{
+  "algorithm": "sha256",
+  "files": {
+    "historical-references/a5-SHA256.json": {
+      "bytes": 9424,
+      "sha256": "e95ce31779ed9820b874f1bc91e81ee1c7a384684775091a28a427d5d2703b06",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\docs\\library\\proof\\astra-authority-a5-review-2026-09-13\\SHA256.json"
+    },
+    "instruments/integrate_authority_repair03.py": {
+      "bytes": 2622,
+      "sha256": "19368c17e141dcd477a797977e339283fdae94e3492299d619d1383df9c80420",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\integrate_authority_repair03.py"
+    },
+    "instruments/integrator_verify.py": {
+      "bytes": 4420,
+      "sha256": "280cfdad5ebc56a1748ce53cf9c6850335b7046ab1b9998f7cdd9a196c44e7e2",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\integrator_verify.py"
+    },
+    "instruments/run_process_authority_repair03_verification.ps1": {
+      "bytes": 1990,
+      "sha256": "11e1bddff379cf5ccfb8adb9bdce8fdcf1de67a96cbed930ada162cfac4cc23e",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\run_process_authority_repair03_verification.ps1"
+    },
+    "instruments/seal-draft-history.md": {
+      "bytes": 1656,
+      "sha256": "4d2ef4eef76b1977d720174ecf6e90afc8fe8eac6dcf2777ebf7352ffd72b934",
+      "source": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a5e7ba0d-26f\\grok\\_scratch\\SEAL-AUTHORITY-REPAIR03-DRAFT-HISTORY-2026-09-13.md"
+    },
+    "instruments/seal-draft01-unexecuted.py": {
+      "bytes": 13652,
+      "sha256": "0f8908e22ac8ed4658527dd640262710ae82544235f369f251379a06badb2d99",
+      "source": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a5e7ba0d-26f\\grok\\_scratch\\seal_astra_authority_repair03.draft01-unexecuted.py"
+    },
+    "instruments/seal-draft02-unexecuted.py": {
+      "bytes": 14940,
+      "sha256": "e47ba6dca9c5798622feec4b235f43262f31b761dfa186912d7a69cf2caf581c",
+      "source": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a5e7ba0d-26f\\grok\\_scratch\\seal_astra_authority_repair03.draft02-unexecuted.py"
+    },
+    "instruments/seal-draft03-unexecuted.py": {
+      "bytes": 15773,
+      "sha256": "1ce6928875a54ed7ce06baaf10a46f91246faa80f4c0767c67df318b6bff4dc5",
+      "source": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a5e7ba0d-26f\\grok\\_scratch\\seal_astra_authority_repair03.draft03-unexecuted.py"
+    },
+    "instruments/seal_astra_authority_repair03.py": {
+      "bytes": 16557,
+      "sha256": "3720174963d0250810efeff4c58addbdf88b60a1d3c85444b701d5315d763a01",
+      "source": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a5e7ba0d-26f\\grok\\_scratch\\seal_astra_authority_repair03.py"
+    },
+    "integration01/apply.log": {
+      "bytes": 578,
+      "sha256": "1b0deffaeef0f9f9cbc85e9b422d4ad21b977aaeab3e44c59e2604113e8c92f6",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\authority-repair03-integration01\\apply.log"
+    },
+    "integration01/check.log": {
+      "bytes": 274,
+      "sha256": "e7f0f2c80b349d255e9960d94acf75796d54a8f9cb6a1e90d601d9cdb6c496cc",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\authority-repair03-integration01\\check.log"
+    },
+    "integration01/receipt.json": {
+      "bytes": 809,
+      "sha256": "b776bd9b3559704a2ebb2a49d625b47d6b30f237985d0a9a818ee456d952ee74",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\authority-repair03-integration01\\receipt.json"
+    },
+    "integration01/worker.patch": {
+      "bytes": 96130,
+      "sha256": "2f7ce0c350b34a54fc9dca94b3becb2d3f8fedba7a77b49b8bf6ac80d0d65b97",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\authority-repair03-integration01\\worker.patch"
+    },
+    "path-budget-evidence/original-a0-ledger.json": {
+      "bytes": 1532,
+      "sha256": "93f4b0d1d74fbddc3fe47b8effdebfd596511449999602eee94899770a4e31d6",
+      "source": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a5e7ba0d-26f\\grok\\_scratch\\astra-authority-repair03-worker-phase4-01-0\\a0\\d\\reach\\mirror\\ledger.json"
+    },
+    "path-budget-evidence/original-a0-manifest.json": {
+      "bytes": 383,
+      "sha256": "0ce7d9c385d1a7f8ee801ae5989c5308ca5dc95723cec2e6cef50c90e05f8975",
+      "source": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a5e7ba0d-26f\\grok\\_scratch\\astra-authority-repair03-worker-phase4-01-0\\a0\\v\\Uoink\\.uoink-mirror\\manifest.json"
+    },
+    "repair-history/attempt01-reason.md": {
+      "bytes": 1315,
+      "sha256": "02d1318a50e84adceef38488330dc3dff106d535b413a78ed7b2654d3ebc1eb6",
+      "source": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a5e7ba0d-26f\\grok\\_scratch\\astra-authority-repair03\\attempt01-reason.md"
+    },
+    "repair-history/attempt01/_mirror_stable_native_fixture.py": {
+      "bytes": 2893,
+      "sha256": "a86c63b0a33f31c064aa6c6881b73301d218b88b1fb9699d7304428eec77d005",
+      "source": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a5e7ba0d-26f\\grok\\_scratch\\astra-authority-repair03\\attempt01\\_mirror_stable_native_fixture.py"
+    },
+    "repair-history/attempt01/library_mirror.py": {
+      "bytes": 224453,
+      "sha256": "738217f0ca20a34bf3e917125aaf5e99db5ab4a561fc8183089eec15ce1ecf82",
+      "source": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a5e7ba0d-26f\\grok\\_scratch\\astra-authority-repair03\\attempt01\\library_mirror.py"
+    },
+    "repair-history/attempt01/test_library_mirror_process_authority.py": {
+      "bytes": 16917,
+      "sha256": "f8f0f98dabddee85ccedd9d5a739c60e9388bc7e565d34be523b1638aad16831",
+      "source": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a5e7ba0d-26f\\grok\\_scratch\\astra-authority-repair03\\attempt01\\test_library_mirror_process_authority.py"
+    },
+    "repair-history/attempt01/test_mirror_authority_review02.py": {
+      "bytes": 10615,
+      "sha256": "6f2b9f94ae2063ea7c5cfc65dd87ada79aa04f65cff68a1175b1ec9862b8fdef",
+      "source": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a5e7ba0d-26f\\grok\\_scratch\\astra-authority-repair03\\attempt01\\test_mirror_authority_review02.py"
+    },
+    "repair-history/attempt01/test_mirror_process_handle_lifetime.py": {
+      "bytes": 11003,
+      "sha256": "5696a99fb6c541d29bb9f4f420f9c6d41f5a4fa4ec498e9088ae84bbd335db4c",
+      "source": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a5e7ba0d-26f\\grok\\_scratch\\astra-authority-repair03\\attempt01\\test_mirror_process_handle_lifetime.py"
+    },
+    "repair-history/attempt01/test_mirror_process_identity_boundaries.py": {
+      "bytes": 4274,
+      "sha256": "0cfead50d616e2c4b94efa22a2dc4e618d3b30d97537b514148244b0805fc597",
+      "source": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a5e7ba0d-26f\\grok\\_scratch\\astra-authority-repair03\\attempt01\\test_mirror_process_identity_boundaries.py"
+    },
+    "repair-history/attempt01/test_mirror_stable_handle_discovery.py": {
+      "bytes": 6926,
+      "sha256": "47fa23c21f3986f4b79285dcbb42b7b1f4d657bb73d90d271f6dabc978435029",
+      "source": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a5e7ba0d-26f\\grok\\_scratch\\astra-authority-repair03\\attempt01\\test_mirror_stable_handle_discovery.py"
+    },
+    "repair-history/attempt02-reason.md": {
+      "bytes": 912,
+      "sha256": "b9dcd34caf84cb0576727ce328c6e61a3bb74f45ef3796fd405ced2ddb5ba2cb",
+      "source": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a5e7ba0d-26f\\grok\\_scratch\\astra-authority-repair03\\attempt02-reason.md"
+    },
+    "repair-history/attempt02/_mirror_stable_native_fixture.py": {
+      "bytes": 2893,
+      "sha256": "a86c63b0a33f31c064aa6c6881b73301d218b88b1fb9699d7304428eec77d005",
+      "source": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a5e7ba0d-26f\\grok\\_scratch\\astra-authority-repair03\\attempt02\\_mirror_stable_native_fixture.py"
+    },
+    "repair-history/attempt02/library_mirror.py": {
+      "bytes": 224695,
+      "sha256": "8a6b50a2b92e45713f573323650d64d379dd876db17b4c036568dbcba4d62665",
+      "source": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a5e7ba0d-26f\\grok\\_scratch\\astra-authority-repair03\\attempt02\\library_mirror.py"
+    },
+    "repair-history/attempt02/test_mirror_stable_handle_discovery.py": {
+      "bytes": 7855,
+      "sha256": "d39b2d329f72fbfc7e54d4dcfbc39f261c7280e22258d0a4fb6ea405fc796757",
+      "source": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a5e7ba0d-26f\\grok\\_scratch\\astra-authority-repair03\\attempt02\\test_mirror_stable_handle_discovery.py"
+    },
+    "repair-history/attempt03-reason.md": {
+      "bytes": 865,
+      "sha256": "0a8e4019c8a1afce0d1810b5db991bf14ddfb304b38a652cedca127acd489b2d",
+      "source": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a5e7ba0d-26f\\grok\\_scratch\\astra-authority-repair03\\attempt03-reason.md"
+    },
+    "repair-history/attempt03/_mirror_stable_native_fixture.py": {
+      "bytes": 2893,
+      "sha256": "a86c63b0a33f31c064aa6c6881b73301d218b88b1fb9699d7304428eec77d005",
+      "source": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a5e7ba0d-26f\\grok\\_scratch\\astra-authority-repair03\\attempt03\\_mirror_stable_native_fixture.py"
+    },
+    "repair-history/attempt03/library_mirror.py": {
+      "bytes": 225120,
+      "sha256": "67432bf13905b8c28c2048ce51bbebd74490d463f8b1a4e08fdd3ce4e53a0a23",
+      "source": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a5e7ba0d-26f\\grok\\_scratch\\astra-authority-repair03\\attempt03\\library_mirror.py"
+    },
+    "repair-history/attempt03/test_mirror_stable_handle_discovery.py": {
+      "bytes": 8675,
+      "sha256": "7b3c613a432b3d002b6efb22f0b44fd296b538f53ed56959bdf44fdd3f82f645",
+      "source": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a5e7ba0d-26f\\grok\\_scratch\\astra-authority-repair03\\attempt03\\test_mirror_stable_handle_discovery.py"
+    },
+    "repair-history/audit_review_inputs.py": {
+      "bytes": 2956,
+      "sha256": "c670fa2ce31f1e89787c393b10907e5d1ce446970371cc3caa949078269ac8f9",
+      "source": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a5e7ba0d-26f\\grok\\_scratch\\astra-authority-repair03\\audit_review_inputs.py"
+    },
+    "repair-history/baseline/library_mirror.py": {
+      "bytes": 218955,
+      "sha256": "1f8088426c766ab3c93e81df41e6a9b25edec4cee94e40f3a3b4c639660bbc16",
+      "source": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a5e7ba0d-26f\\grok\\_scratch\\astra-authority-repair03\\baseline\\library_mirror.py"
+    },
+    "repair-history/baseline/test_library_mirror_process_authority.py": {
+      "bytes": 16851,
+      "sha256": "74221830187d566a9bede12ff01dfaf61ed674e9bfb6581a7ab4bac2550bf602",
+      "source": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a5e7ba0d-26f\\grok\\_scratch\\astra-authority-repair03\\baseline\\test_library_mirror_process_authority.py"
+    },
+    "repair-history/baseline/test_mirror_authority_review02.py": {
+      "bytes": 10549,
+      "sha256": "29171f6046cdc270573613810304656350dfc35e1fe2f4047cb675c7114b7045",
+      "source": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a5e7ba0d-26f\\grok\\_scratch\\astra-authority-repair03\\baseline\\test_mirror_authority_review02.py"
+    },
+    "repair-history/baseline/test_mirror_process_handle_lifetime.py": {
+      "bytes": 10937,
+      "sha256": "1fec835cf12cded6bb0f78564b2085354863ad2c6e821c0c28419cb009b74379",
+      "source": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a5e7ba0d-26f\\grok\\_scratch\\astra-authority-repair03\\baseline\\test_mirror_process_handle_lifetime.py"
+    },
+    "repair-history/baseline/test_mirror_process_identity_boundaries.py": {
+      "bytes": 4208,
+      "sha256": "b621d87273d75ee2fee84c8c73f78f98dd3809f6e19e1161ec8bfcc1cb8679c3",
+      "source": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a5e7ba0d-26f\\grok\\_scratch\\astra-authority-repair03\\baseline\\test_mirror_process_identity_boundaries.py"
+    },
+    "repair-history/before-final-review-repair/library_mirror.py": {
+      "bytes": 224453,
+      "sha256": "738217f0ca20a34bf3e917125aaf5e99db5ab4a561fc8183089eec15ce1ecf82",
+      "source": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a5e7ba0d-26f\\grok\\_scratch\\astra-authority-repair03\\before-final-review-repair\\library_mirror.py"
+    },
+    "repair-history/before-final-review-repair/test_mirror_stable_handle_discovery.py": {
+      "bytes": 6926,
+      "sha256": "47fa23c21f3986f4b79285dcbb42b7b1f4d657bb73d90d271f6dabc978435029",
+      "source": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a5e7ba0d-26f\\grok\\_scratch\\astra-authority-repair03\\before-final-review-repair\\test_mirror_stable_handle_discovery.py"
+    },
+    "repair-history/before-parent-review-repair/library_mirror.py": {
+      "bytes": 224695,
+      "sha256": "8a6b50a2b92e45713f573323650d64d379dd876db17b4c036568dbcba4d62665",
+      "source": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a5e7ba0d-26f\\grok\\_scratch\\astra-authority-repair03\\before-parent-review-repair\\library_mirror.py"
+    },
+    "repair-history/before-parent-review-repair/test_mirror_stable_handle_discovery.py": {
+      "bytes": 7855,
+      "sha256": "d39b2d329f72fbfc7e54d4dcfbc39f261c7280e22258d0a4fb6ea405fc796757",
+      "source": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a5e7ba0d-26f\\grok\\_scratch\\astra-authority-repair03\\before-parent-review-repair\\test_mirror_stable_handle_discovery.py"
+    },
+    "repair-history/diffs/attempt01-to-attempt02-source.diff": {
+      "bytes": 3500,
+      "sha256": "aedac522ab84f7c59f3fc7945b4018c0cce4eb551f2d8ba73412d42ed3ce38b1",
+      "source": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a5e7ba0d-26f\\grok\\_scratch\\astra-authority-repair03\\diffs\\attempt01-to-attempt02-source.diff"
+    },
+    "repair-history/diffs/attempt02-to-attempt03-source.diff": {
+      "bytes": 2349,
+      "sha256": "4a2079dc559d579e3f4d8abdb4778eaa2057079bb8efec325720d0a5ed029ad4",
+      "source": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a5e7ba0d-26f\\grok\\_scratch\\astra-authority-repair03\\diffs\\attempt02-to-attempt03-source.diff"
+    },
+    "repair-history/diffs/library_mirror.py.diff": {
+      "bytes": 22312,
+      "sha256": "92129142ec69d935e3a8be76a96cd2284313c39ecd8b74915b97f9bd711efc60",
+      "source": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a5e7ba0d-26f\\grok\\_scratch\\astra-authority-repair03\\diffs\\library_mirror.py.diff"
+    },
+    "repair-history/diffs/test_library_mirror_process_authority.py.diff": {
+      "bytes": 517,
+      "sha256": "8e580e6fbf4e5b6f48ef91a161b821d83c8df37fd8eab1ab0f7e443129d11309",
+      "source": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a5e7ba0d-26f\\grok\\_scratch\\astra-authority-repair03\\diffs\\test_library_mirror_process_authority.py.diff"
+    },
+    "repair-history/diffs/test_mirror_authority_review02.py.diff": {
+      "bytes": 482,
+      "sha256": "74dca005d04d95812ed33686b6a8c9351f0701ff26f3baa6ef03eafc7dba1f1e",
+      "source": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a5e7ba0d-26f\\grok\\_scratch\\astra-authority-repair03\\diffs\\test_mirror_authority_review02.py.diff"
+    },
+    "repair-history/diffs/test_mirror_process_handle_lifetime.py.diff": {
+      "bytes": 509,
+      "sha256": "aa223b368a076791a2c6b4ab748518abcf2fd9c3d4911b030d7067030cf9b26b",
+      "source": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a5e7ba0d-26f\\grok\\_scratch\\astra-authority-repair03\\diffs\\test_mirror_process_handle_lifetime.py.diff"
+    },
+    "repair-history/diffs/test_mirror_process_identity_boundaries.py.diff": {
+      "bytes": 509,
+      "sha256": "6b22ed3516165840d56d0e4b880bec3e6557b5e22bcc1696a832efa5d5197e5e",
+      "source": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a5e7ba0d-26f\\grok\\_scratch\\astra-authority-repair03\\diffs\\test_mirror_process_identity_boundaries.py.diff"
+    },
+    "repair-history/review-input-audit.json": {
+      "bytes": 2611,
+      "sha256": "c57a0d04d855f2e7d3a71cfcf7e4c4360d93218b0d2f425c1d4f0d7ad1a367ae",
+      "source": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a5e7ba0d-26f\\grok\\_scratch\\astra-authority-repair03\\review-input-audit.json"
+    },
+    "repair-history/static-audit-attempt01-rejection.md": {
+      "bytes": 616,
+      "sha256": "2832778afba693c6d7bdd8df3828ac82dc8a5719e1715569b87de81f23d8a5a9",
+      "source": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a5e7ba0d-26f\\grok\\_scratch\\astra-authority-repair03\\static-audit-attempt01-rejection.md"
+    },
+    "repair-history/static-audit-attempt02.log": {
+      "bytes": 2611,
+      "sha256": "c57a0d04d855f2e7d3a71cfcf7e4c4360d93218b0d2f425c1d4f0d7ad1a367ae",
+      "source": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a5e7ba0d-26f\\grok\\_scratch\\astra-authority-repair03\\static-audit-attempt02.log"
+    },
+    "reviews/historical-a5-held-review.md": {
+      "bytes": 1942,
+      "sha256": "725a5073e7debbc4cd5e647bb151326722c82f74b1e785f803cf4b7d5f1c47b3",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\docs\\library\\ASTRA-AUTHORITY-A5-REVIEW-2026-09-13.md"
+    },
+    "reviews/integrator-qualification.md": {
+      "bytes": 1695,
+      "sha256": "1a07d8c880aa8e0f661abec5fe080cb2775c589bf5a4087ffe1e83e978404166",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\AUTHORITY-REPAIR03-INTEGRATOR-QUALIFICATION-2026-09-13.md"
+    },
+    "reviews/path-budget-repair.md": {
+      "bytes": 1629,
+      "sha256": "c5486fbc151ee851cb649f9f0c425cbe519d9ae3e13b6b36d4672d9a8b777435",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\AUTHORITY-REPAIR03-PATH-QUALIFICATION-REPAIR-2026-09-13.md"
+    },
+    "reviews/repair03-brief.md": {
+      "bytes": 2430,
+      "sha256": "3d2eb312380f8e85ba08c095b6f3252833f07c1986f651100d4973e4b40f28cd",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\docs\\library\\MIRROR-AUTHORITY-ASTRA-REPAIR03-BRIEF-2026-09-13.md"
+    },
+    "reviews/repair03-worker-report.md": {
+      "bytes": 4982,
+      "sha256": "140b429881366be3bb49feb6b58a1c307297d25b10dd4e7ae833c2d6fffa4ad7",
+      "source": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a5e7ba0d-26f\\grok\\docs\\library\\MIRROR-AUTHORITY-ASTRA-REPAIR03-2026-09-13.md"
+    },
+    "runs/a3c01/guard/ig_paths.py": {
+      "bytes": 106,
+      "sha256": "226f4e0dd35385e5edcbfc351b062c9b7680c16ddf0630573338f7b8a5fdbed6",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\a3c01\\guard\\ig_paths.py"
+    },
+    "runs/a3c01/guard/sitecustomize.py": {
+      "bytes": 1216,
+      "sha256": "2bd3820ac4a345039c6550308c32a7731e93494dee5933166a0a1da54620017f",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\a3c01\\guard\\sitecustomize.py"
+    },
+    "runs/a3c01/results.json": {
+      "bytes": 2631,
+      "sha256": "f8f15bd75d3a0f15aea730d631373e05e590a57f47efe15541e57bcfd770f858",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\a3c01\\results.json"
+    },
+    "runs/a3c01/tests.log": {
+      "bytes": 357,
+      "sha256": "82e4c8c6c691bf974f6b8df6bf8268de77b53ba9fa46edd9c468234642d2d85e",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\a3c01\\tests.log"
+    },
+    "runs/a3c01/tests.xml": {
+      "bytes": 34148,
+      "sha256": "bb1d405c757c5367bf29a491a7c5aac2599fca8db17ddbb6ddf5dea12484554d",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\a3c01\\tests.xml"
+    },
+    "runs/a3w02/guard/ig_paths.py": {
+      "bytes": 106,
+      "sha256": "226f4e0dd35385e5edcbfc351b062c9b7680c16ddf0630573338f7b8a5fdbed6",
+      "source": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a5e7ba0d-26f\\grok\\_scratch\\a3w02\\guard\\ig_paths.py"
+    },
+    "runs/a3w02/guard/sitecustomize.py": {
+      "bytes": 1216,
+      "sha256": "2bd3820ac4a345039c6550308c32a7731e93494dee5933166a0a1da54620017f",
+      "source": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a5e7ba0d-26f\\grok\\_scratch\\a3w02\\guard\\sitecustomize.py"
+    },
+    "runs/a3w02/results.json": {
+      "bytes": 2772,
+      "sha256": "d8b107507770c7a7c438fac006aa0a310f35a58f90b210c24711fccfbbd176f5",
+      "source": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a5e7ba0d-26f\\grok\\_scratch\\a3w02\\results.json"
+    },
+    "runs/a3w02/tests.log": {
+      "bytes": 357,
+      "sha256": "b888219a413273bc68d30253c5c37a0d8269b0078c16032d3c1c4fd2f16adf62",
+      "source": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a5e7ba0d-26f\\grok\\_scratch\\a3w02\\tests.log"
+    },
+    "runs/a3w02/tests.xml": {
+      "bytes": 34148,
+      "sha256": "66e3e5573037bde6066e3d89cb5850f996691a199bfe11f0f39ed2bcb43fed83",
+      "source": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a5e7ba0d-26f\\grok\\_scratch\\a3w02\\tests.xml"
+    },
+    "runs/astra-authority-a5-repair01/guard/ig_paths.py": {
+      "bytes": 106,
+      "sha256": "226f4e0dd35385e5edcbfc351b062c9b7680c16ddf0630573338f7b8a5fdbed6",
+      "source": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a5e7ba0d-26f\\grok\\_scratch\\astra-authority-a5-repair01\\guard\\ig_paths.py"
+    },
+    "runs/astra-authority-a5-repair01/guard/sitecustomize.py": {
+      "bytes": 1216,
+      "sha256": "2bd3820ac4a345039c6550308c32a7731e93494dee5933166a0a1da54620017f",
+      "source": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a5e7ba0d-26f\\grok\\_scratch\\astra-authority-a5-repair01\\guard\\sitecustomize.py"
+    },
+    "runs/astra-authority-a5-repair01/results.json": {
+      "bytes": 1072,
+      "sha256": "58bc0802fe60b7879f65dc19cddfc42cca7ed452b70d6ec02225ef3fba4bca34",
+      "source": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a5e7ba0d-26f\\grok\\_scratch\\astra-authority-a5-repair01\\results.json"
+    },
+    "runs/astra-authority-a5-repair01/tests.log": {
+      "bytes": 101,
+      "sha256": "37445f640832d5287162c67b1de5db2096378613a255da3f0c3fa38cdb6ad243",
+      "source": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a5e7ba0d-26f\\grok\\_scratch\\astra-authority-a5-repair01\\tests.log"
+    },
+    "runs/astra-authority-a5-repair01/tests.xml": {
+      "bytes": 5875,
+      "sha256": "f67fe370cea2d337fe7b52c149a379334d97d8e5a916d7a8e69a1c7b1fc50c0d",
+      "source": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a5e7ba0d-26f\\grok\\_scratch\\astra-authority-a5-repair01\\tests.xml"
+    },
+    "runs/astra-authority-repair03-01/guard/ig_paths.py": {
+      "bytes": 106,
+      "sha256": "226f4e0dd35385e5edcbfc351b062c9b7680c16ddf0630573338f7b8a5fdbed6",
+      "source": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a5e7ba0d-26f\\grok\\_scratch\\astra-authority-repair03-01\\guard\\ig_paths.py"
+    },
+    "runs/astra-authority-repair03-01/guard/sitecustomize.py": {
+      "bytes": 1216,
+      "sha256": "2bd3820ac4a345039c6550308c32a7731e93494dee5933166a0a1da54620017f",
+      "source": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a5e7ba0d-26f\\grok\\_scratch\\astra-authority-repair03-01\\guard\\sitecustomize.py"
+    },
+    "runs/astra-authority-repair03-01/results.json": {
+      "bytes": 1127,
+      "sha256": "4fc31112a5a9f73eec2a02fd69ad4782d7add189b246548ffdf9e22bd18443bd",
+      "source": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a5e7ba0d-26f\\grok\\_scratch\\astra-authority-repair03-01\\results.json"
+    },
+    "runs/astra-authority-repair03-01/tests.log": {
+      "bytes": 101,
+      "sha256": "f31400b1078d254c77390cb54553fa7fe5e654b4854ad7934e2579c2a360f917",
+      "source": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a5e7ba0d-26f\\grok\\_scratch\\astra-authority-repair03-01\\tests.log"
+    },
+    "runs/astra-authority-repair03-01/tests.xml": {
+      "bytes": 6623,
+      "sha256": "eb64403cde3a0d994994f5cac428d4b22a3b8d7b0b3a694bb020b908dc531610",
+      "source": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a5e7ba0d-26f\\grok\\_scratch\\astra-authority-repair03-01\\tests.xml"
+    },
+    "runs/astra-authority-repair03-02/guard/ig_paths.py": {
+      "bytes": 106,
+      "sha256": "226f4e0dd35385e5edcbfc351b062c9b7680c16ddf0630573338f7b8a5fdbed6",
+      "source": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a5e7ba0d-26f\\grok\\_scratch\\astra-authority-repair03-02\\guard\\ig_paths.py"
+    },
+    "runs/astra-authority-repair03-02/guard/sitecustomize.py": {
+      "bytes": 1216,
+      "sha256": "2bd3820ac4a345039c6550308c32a7731e93494dee5933166a0a1da54620017f",
+      "source": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a5e7ba0d-26f\\grok\\_scratch\\astra-authority-repair03-02\\guard\\sitecustomize.py"
+    },
+    "runs/astra-authority-repair03-02/results.json": {
+      "bytes": 1127,
+      "sha256": "378d8129cc5b4281188f79fef49d52c3dc2dac50a72937173bb2b3e88ca9fb3c",
+      "source": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a5e7ba0d-26f\\grok\\_scratch\\astra-authority-repair03-02\\results.json"
+    },
+    "runs/astra-authority-repair03-02/tests.log": {
+      "bytes": 101,
+      "sha256": "45603098d6370543fd0892acc8ae3bb796de0fefef4d4b35aa95653e68b1152a",
+      "source": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a5e7ba0d-26f\\grok\\_scratch\\astra-authority-repair03-02\\tests.log"
+    },
+    "runs/astra-authority-repair03-02/tests.xml": {
+      "bytes": 6914,
+      "sha256": "ede575df11f18b8dc68271c40d518e39ad1f057931c065a92b0f4d3e00f6de27",
+      "source": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a5e7ba0d-26f\\grok\\_scratch\\astra-authority-repair03-02\\tests.xml"
+    },
+    "runs/astra-authority-repair03-03/guard/ig_paths.py": {
+      "bytes": 106,
+      "sha256": "226f4e0dd35385e5edcbfc351b062c9b7680c16ddf0630573338f7b8a5fdbed6",
+      "source": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a5e7ba0d-26f\\grok\\_scratch\\astra-authority-repair03-03\\guard\\ig_paths.py"
+    },
+    "runs/astra-authority-repair03-03/guard/sitecustomize.py": {
+      "bytes": 1216,
+      "sha256": "2bd3820ac4a345039c6550308c32a7731e93494dee5933166a0a1da54620017f",
+      "source": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a5e7ba0d-26f\\grok\\_scratch\\astra-authority-repair03-03\\guard\\sitecustomize.py"
+    },
+    "runs/astra-authority-repair03-03/results.json": {
+      "bytes": 1127,
+      "sha256": "5bdae2da62c094d346fd8204212626df3d4e5be2afcb0f92c2c974958325b17b",
+      "source": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a5e7ba0d-26f\\grok\\_scratch\\astra-authority-repair03-03\\results.json"
+    },
+    "runs/astra-authority-repair03-03/tests.log": {
+      "bytes": 101,
+      "sha256": "56355d9a3fce26b2611af89f059ce0713c159df6c82b38633b02388950bc56aa",
+      "source": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a5e7ba0d-26f\\grok\\_scratch\\astra-authority-repair03-03\\tests.log"
+    },
+    "runs/astra-authority-repair03-03/tests.xml": {
+      "bytes": 7359,
+      "sha256": "6a6a5d88f0f8a29964cc405db465f371acfffdb6574bf43657bff8c99c5a6da3",
+      "source": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a5e7ba0d-26f\\grok\\_scratch\\astra-authority-repair03-03\\tests.xml"
+    },
+    "runs/astra-authority-repair03-independent01/guard/ig_paths.py": {
+      "bytes": 106,
+      "sha256": "226f4e0dd35385e5edcbfc351b062c9b7680c16ddf0630573338f7b8a5fdbed6",
+      "source": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a5e7ba0d-26f\\grok\\_scratch\\astra-authority-repair03-independent01\\guard\\ig_paths.py"
+    },
+    "runs/astra-authority-repair03-independent01/guard/sitecustomize.py": {
+      "bytes": 1216,
+      "sha256": "2bd3820ac4a345039c6550308c32a7731e93494dee5933166a0a1da54620017f",
+      "source": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a5e7ba0d-26f\\grok\\_scratch\\astra-authority-repair03-independent01\\guard\\sitecustomize.py"
+    },
+    "runs/astra-authority-repair03-independent01/results.json": {
+      "bytes": 1160,
+      "sha256": "d83e5fb284e5379cfcd503487128611794f635944855da2f446a52e1cca42f9f",
+      "source": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a5e7ba0d-26f\\grok\\_scratch\\astra-authority-repair03-independent01\\results.json"
+    },
+    "runs/astra-authority-repair03-independent01/tests.log": {
+      "bytes": 101,
+      "sha256": "53038a3a7f2efbbcb4e944be01fbda8cc0dc5cee7f86e4cd312b7982ec6d9e58",
+      "source": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a5e7ba0d-26f\\grok\\_scratch\\astra-authority-repair03-independent01\\tests.log"
+    },
+    "runs/astra-authority-repair03-independent01/tests.xml": {
+      "bytes": 7359,
+      "sha256": "39b2820c5b3d81eb4dcbf396b32340292e38e51b2736fa93b2e383cb2220cac4",
+      "source": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a5e7ba0d-26f\\grok\\_scratch\\astra-authority-repair03-independent01\\tests.xml"
+    },
+    "runs/astra-authority-repair03-worker-phase4-01/guard/ig_paths.py": {
+      "bytes": 106,
+      "sha256": "226f4e0dd35385e5edcbfc351b062c9b7680c16ddf0630573338f7b8a5fdbed6",
+      "source": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a5e7ba0d-26f\\grok\\_scratch\\astra-authority-repair03-worker-phase4-01\\guard\\ig_paths.py"
+    },
+    "runs/astra-authority-repair03-worker-phase4-01/guard/sitecustomize.py": {
+      "bytes": 1216,
+      "sha256": "2bd3820ac4a345039c6550308c32a7731e93494dee5933166a0a1da54620017f",
+      "source": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a5e7ba0d-26f\\grok\\_scratch\\astra-authority-repair03-worker-phase4-01\\guard\\sitecustomize.py"
+    },
+    "runs/astra-authority-repair03-worker-phase4-01/results.json": {
+      "bytes": 2880,
+      "sha256": "961d1e148576b5f7827c32a61532e10d502ed15772836cb862e58bb15c2bfcb6",
+      "source": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a5e7ba0d-26f\\grok\\_scratch\\astra-authority-repair03-worker-phase4-01\\results.json"
+    },
+    "runs/astra-authority-repair03-worker-phase4-01/tests.log": {
+      "bytes": 79316,
+      "sha256": "bcd34b3d96f7f1cafa7a76c02272635253c812e3140a8f5a2be34a0e5a042534",
+      "source": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a5e7ba0d-26f\\grok\\_scratch\\astra-authority-repair03-worker-phase4-01\\tests.log"
+    },
+    "runs/astra-authority-repair03-worker-phase4-01/tests.xml": {
+      "bytes": 155608,
+      "sha256": "469520a4a7899067b051f84e1f3d0c18e93c6faae5b0d5bd49b4f5f23fd5f914",
+      "source": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a5e7ba0d-26f\\grok\\_scratch\\astra-authority-repair03-worker-phase4-01\\tests.xml"
+    },
+    "source-checkout/library_mirror.py": {
+      "bytes": 225428,
+      "sha256": "fd6db91a0a188eee16383e8a12b7fcb4bedf6edbba90b3840aa11e4087fab135",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\library_mirror.py"
+    },
+    "source-checkout/tests/_mirror_stable_native_fixture.py": {
+      "bytes": 2968,
+      "sha256": "46a5e1f51dd833a68ee73271a71df8b144db367ace5f40f540f29bbb2985af5a",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\tests\\_mirror_stable_native_fixture.py"
+    },
+    "source-checkout/tests/test_library_mirror_process_authority.py": {
+      "bytes": 17272,
+      "sha256": "025f2a0a2f8dae000ca31aad61271c8e9f26514d633fb4a3a6bdd6675fb0c171",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\tests\\test_library_mirror_process_authority.py"
+    },
+    "source-checkout/tests/test_mirror_authority_review02.py": {
+      "bytes": 10906,
+      "sha256": "0573c080bb58f354a4706eb8f4e56bf5269e94ba122e3aa546fec76b9caaa5c6",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\tests\\test_mirror_authority_review02.py"
+    },
+    "source-checkout/tests/test_mirror_process_handle_lifetime.py": {
+      "bytes": 11300,
+      "sha256": "348964b410512a0a141a2411d7f0b638ef34588b53c3413c301b736fd38947e6",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\tests\\test_mirror_process_handle_lifetime.py"
+    },
+    "source-checkout/tests/test_mirror_process_identity_boundaries.py": {
+      "bytes": 4375,
+      "sha256": "597bef0d569091f9d921f83c62335460e25b5636f484533dd13aa50dfc589682",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\tests\\test_mirror_process_identity_boundaries.py"
+    },
+    "source-checkout/tests/test_mirror_stable_handle_discovery.py": {
+      "bytes": 8940,
+      "sha256": "4023387526d615107073c5e1c51c7ea5b04a3e48104d6ad08d305cac88a33a9f",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\tests\\test_mirror_stable_handle_discovery.py"
+    },
+    "source/library_mirror.py": {
+      "bytes": 225120,
+      "sha256": "67432bf13905b8c28c2048ce51bbebd74490d463f8b1a4e08fdd3ce4e53a0a23",
+      "source": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a5e7ba0d-26f\\grok\\library_mirror.py"
+    },
+    "source/tests/_mirror_stable_native_fixture.py": {
+      "bytes": 2893,
+      "sha256": "a86c63b0a33f31c064aa6c6881b73301d218b88b1fb9699d7304428eec77d005",
+      "source": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a5e7ba0d-26f\\grok\\tests\\_mirror_stable_native_fixture.py"
+    },
+    "source/tests/test_library_mirror_process_authority.py": {
+      "bytes": 16917,
+      "sha256": "f8f0f98dabddee85ccedd9d5a739c60e9388bc7e565d34be523b1638aad16831",
+      "source": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a5e7ba0d-26f\\grok\\tests\\test_library_mirror_process_authority.py"
+    },
+    "source/tests/test_mirror_authority_review02.py": {
+      "bytes": 10615,
+      "sha256": "6f2b9f94ae2063ea7c5cfc65dd87ada79aa04f65cff68a1175b1ec9862b8fdef",
+      "source": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a5e7ba0d-26f\\grok\\tests\\test_mirror_authority_review02.py"
+    },
+    "source/tests/test_mirror_process_handle_lifetime.py": {
+      "bytes": 11003,
+      "sha256": "5696a99fb6c541d29bb9f4f420f9c6d41f5a4fa4ec498e9088ae84bbd335db4c",
+      "source": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a5e7ba0d-26f\\grok\\tests\\test_mirror_process_handle_lifetime.py"
+    },
+    "source/tests/test_mirror_process_identity_boundaries.py": {
+      "bytes": 4274,
+      "sha256": "0cfead50d616e2c4b94efa22a2dc4e618d3b30d97537b514148244b0805fc597",
+      "source": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a5e7ba0d-26f\\grok\\tests\\test_mirror_process_identity_boundaries.py"
+    },
+    "source/tests/test_mirror_stable_handle_discovery.py": {
+      "bytes": 8675,
+      "sha256": "7b3c613a432b3d002b6efb22f0b44fd296b538f53ed56959bdf44fdd3f82f645",
+      "source": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\a5e7ba0d-26f\\grok\\tests\\test_mirror_stable_handle_discovery.py"
+    }
+  }
+}

@@ -565,19 +565,149 @@ def _is_console_host(exe: str) -> bool:
     return name in ("conhost.exe", "openconsole.exe")
 
 
+def _creation_identity_equal(actual, expected) -> bool:
+    """Exact process-creation identity. One millisecond is a different process."""
+    if actual is None or expected is None:
+        return False
+    try:
+        return int(actual) == int(expected)
+    except (TypeError, ValueError):
+        return False
+
+
+def _creation_differs(actual, expected, tolerance_ms: int = 0) -> bool:
+    if actual is None or expected is None:
+        return True
+    try:
+        return abs(int(actual) - int(expected)) > int(tolerance_ms)
+    except (TypeError, ValueError):
+        return True
+
+
+def _child_born_on_or_after_parent(child_created, parent_created) -> bool:
+    """A child older than its parent is not that parent's child."""
+    if child_created is None or parent_created is None:
+        return False
+    try:
+        return int(child_created) >= int(parent_created)
+    except (TypeError, ValueError):
+        return False
+
+
+def _handle_creation_matches(handle, created_ms: int | None) -> bool:
+    if handle is None or created_ms is None:
+        return False
+    return _creation_identity_equal(_windows_process_created_ms(handle), created_ms)
+
+
+def _creation_from_popen(proc) -> int | None:
+    """Prefer the retained PROCESS_INFORMATION handle. A later PID query is not that handle."""
+    if proc is None:
+        return None
+    handle = getattr(proc, "_handle", None)
+    if handle is not None and os.name == "nt":
+        created = _windows_process_created_ms(handle)
+        if created is not None:
+            return created
+    pid = getattr(proc, "pid", None)
+    return _process_created_ms(pid if isinstance(pid, int) else None)
+
+
+def _recorded_identity_is_alive(pid: int | None, created_ms: int | None) -> bool:
+    """Alive as the recorded identity. Unknown and missing identity are not authority."""
+    if created_ms is None or not isinstance(pid, int) or pid <= 0:
+        return False
+    return _pid_is_alive(pid, created_ms)
+
+
+def _verified_toolhelp_children(
+    parent_pid: int | None, parent_created: int | None,
+    parent_handle, parent_native_created: int | None,
+) -> Any:
+    """Children of one recorded parent identity.
+
+    A Toolhelp PID plus a later timestamp query does not prove the snapshot
+    still describes that process. Revalidate parent identity after the snapshot
+    and after the child query, then require the PID to still be that parent's
+    child with the same creation identity.
+    """
+    if (parent_created is None or parent_native_created is None
+            or not isinstance(parent_pid, int) or parent_pid <= 0):
+        return []
+    if _native_handle_liveness(parent_handle, parent_created) != "alive":
+        return []
+    snapshot = _windows_process_children(parent_pid)
+    for child in snapshot:
+        child_pid = int(child.get("pid") or 0)
+        if child_pid <= 0:
+            continue
+        exe = str(child.get("exe") or "")
+        if _is_console_host(exe):
+            continue
+        handle = _open_ownership_handle(child_pid)
+        if not handle:
+            continue
+        transferred = False
+        try:
+            native_created = _windows_process_created_100ns(handle)
+            if native_created is None or native_created < parent_native_created:
+                continue
+            child_created = (native_created - _FILETIME_EPOCH_OFFSET_100NS) // 10_000
+            if _native_handle_liveness(handle, child_created) != "alive":
+                continue
+            if _native_handle_liveness(parent_handle, parent_created) != "alive":
+                continue
+            # Both original process objects stay pinned while this snapshot is
+            # taken. Neither PID can become another process between proof and
+            # publication, even if creation times share one millisecond.
+            again = _windows_process_children(parent_pid)
+            if child_pid not in {int(row.get("pid") or 0) for row in again}:
+                continue
+            if _native_handle_liveness(parent_handle, parent_created) != "alive":
+                continue
+            transferred = True
+            yield child_pid, exe, child_created, native_created, handle
+        finally:
+            if not transferred:
+                _win_close_handle(handle)
+
+
+def _open_ownership_handle(pid: int):
+    return _kernel32().OpenProcess(
+        _PROCESS_TERMINATE | _PROCESS_QUERY_LIMITED_INFORMATION | 0x0100,
+        False, int(pid),
+    )
+
+
+def _popen_native_handle(proc):
+    return getattr(proc, "_handle", None)
+
+
+def _native_handle_liveness(handle, created_ms: int | None) -> str:
+    if handle is None:
+        return "unknown"
+    from ctypes import wintypes
+    code = wintypes.DWORD()
+    if not _kernel32().GetExitCodeProcess(handle, ctypes.byref(code)):
+        return "unknown"
+    if int(code.value) != _STILL_ACTIVE:
+        return "dead"
+    if created_ms is not None and not _handle_creation_matches(handle, created_ms):
+        return "unknown"
+    return "alive"
+
+
 def _win_terminate_pid(pid: int | None, created_ms: int | None = None) -> bool:
     """Terminate only the recorded process identity. Recycled PIDs are skipped."""
-    if os.name != "nt" or not isinstance(pid, int) or pid <= 0:
+    if os.name != "nt" or not isinstance(pid, int) or pid <= 0 or created_ms is None:
         return False
     k32 = _kernel32()
     handle = k32.OpenProcess(_PROCESS_TERMINATE | _PROCESS_QUERY_LIMITED_INFORMATION, False, int(pid))
     if not handle:
         return ctypes.get_last_error() in (87, 0)
     try:
-        if created_ms is not None:
-            actual = _windows_process_created_ms(handle)
-            if actual is not None and abs(actual - int(created_ms)) > _PROCESS_START_TOLERANCE_MS:
-                return False
+        if not _handle_creation_matches(handle, created_ms):
+            return False
         from ctypes import wintypes
         code = wintypes.DWORD()
         if k32.GetExitCodeProcess(handle, ctypes.byref(code)) and int(code.value) != _STILL_ACTIVE:
@@ -587,8 +717,8 @@ def _win_terminate_pid(pid: int | None, created_ms: int | None = None) -> bool:
         k32.CloseHandle(handle)
 
 
-def _win_assign_pid(job, pid: int | None) -> bool:
-    if job is None or os.name != "nt" or not isinstance(pid, int) or pid <= 0:
+def _win_assign_pid(job, pid: int | None, created_ms: int | None = None) -> bool:
+    if job is None or os.name != "nt" or not isinstance(pid, int) or pid <= 0 or created_ms is None:
         return False
     k32 = _kernel32()
     handle = k32.OpenProcess(
@@ -598,12 +728,28 @@ def _win_assign_pid(job, pid: int | None) -> bool:
     if not handle:
         return False
     try:
+        if not _handle_creation_matches(handle, created_ms):
+            return False
         return bool(k32.AssignProcessToJobObject(job, handle))
     finally:
         k32.CloseHandle(handle)
 
 
-def _windows_process_created_ms(handle) -> int | None:
+def _win_terminate_retained_handle(handle, created_ms: int | None) -> bool:
+    """Mutate a caller-owned handle. Does not close it."""
+    if os.name != "nt" or handle is None or created_ms is None:
+        return False
+    if not _handle_creation_matches(handle, created_ms):
+        return False
+    k32 = _kernel32()
+    from ctypes import wintypes
+    code = wintypes.DWORD()
+    if k32.GetExitCodeProcess(handle, ctypes.byref(code)) and int(code.value) != _STILL_ACTIVE:
+        return True
+    return bool(k32.TerminateProcess(handle, 1))
+
+
+def _windows_process_created_100ns(handle) -> int | None:
     from ctypes import wintypes
     creation, exit_, kernel, user = (wintypes.FILETIME() for _ in range(4))
     if not _kernel32().GetProcessTimes(
@@ -611,8 +757,12 @@ def _windows_process_created_ms(handle) -> int | None:
         ctypes.byref(kernel), ctypes.byref(user),
     ):
         return None
-    value = (int(creation.dwHighDateTime) << 32) | int(creation.dwLowDateTime)
-    return (value - _FILETIME_EPOCH_OFFSET_100NS) // 10_000
+    return (int(creation.dwHighDateTime) << 32) | int(creation.dwLowDateTime)
+
+
+def _windows_process_created_ms(handle) -> int | None:
+    value = _windows_process_created_100ns(handle)
+    return None if value is None else (value - _FILETIME_EPOCH_OFFSET_100NS) // 10_000
 
 
 def _posix_process_created_ms(pid: int) -> int | None:
@@ -643,8 +793,15 @@ def _process_created_ms(pid: int | None) -> int | None:
     return _posix_process_created_ms(int(pid))
 
 
-def _process_liveness(pid: int | None, created_ms: int | None = None) -> str:
-    """``alive``, ``dead`` or ``unknown``. PID reuse with a mismatched start time is dead."""
+def _process_liveness(
+    pid: int | None, created_ms: int | None = None, *, tolerance_ms: int = 0,
+) -> str:
+    """``alive``, ``dead`` or ``unknown``. PID reuse with a mismatched start time is dead.
+
+    Owned-process identity is exact (``tolerance_ms=0``). Legacy dest-lease
+    wire formats may pass the historical start-time window; that path does
+    not authorize kill, job assignment, or child adoption.
+    """
     if not isinstance(pid, int) or pid <= 0:
         return "dead"
     if os.name == "nt":
@@ -662,7 +819,9 @@ def _process_liveness(pid: int | None, created_ms: int | None = None) -> str:
                 return "dead"
             if created_ms is not None:
                 actual = _windows_process_created_ms(handle)
-                if actual is not None and abs(actual - int(created_ms)) > _PROCESS_START_TOLERANCE_MS:
+                if actual is None:
+                    return "unknown"
+                if _creation_differs(actual, created_ms, tolerance_ms):
                     return "dead"
             return "alive"
         finally:
@@ -675,7 +834,9 @@ def _process_liveness(pid: int | None, created_ms: int | None = None) -> str:
         return "unknown"
     if created_ms is not None:
         actual = _posix_process_created_ms(int(pid))
-        if actual is not None and abs(actual - int(created_ms)) > _PROCESS_START_TOLERANCE_MS:
+        if actual is None:
+            return "unknown"
+        if _creation_differs(actual, created_ms, tolerance_ms):
             return "dead"
     return "alive"
 
@@ -788,6 +949,8 @@ def _session_launch_open(session) -> bool:
     """True while launch may still create or register a child."""
     if session is None:
         return False
+    if getattr(session, "_discovery_users", 0):
+        return True
     if getattr(session, "_popen_in_progress", False):
         return True
     return bool(getattr(session, "_launching", False) and session.proc is None)
@@ -933,6 +1096,7 @@ def _lease_holder_status(lease: dict) -> str:
     created = lease.get("created_ms")
     return _process_liveness(
         lease.get("pid"), created if isinstance(created, int) else None,
+        tolerance_ms=_PROCESS_START_TOLERANCE_MS,
     )
 
 
@@ -1403,6 +1567,74 @@ def _win_close_handle(handle) -> None:
         pass
 
 
+class _CountedNativeHandle:
+    """CloseHandle only after every user drops the handle."""
+
+    def __init__(self, *, owns_close: bool = True) -> None:
+        self._guard = threading.Lock()
+        self.handle = None
+        self._users = 0
+        self._close_requested = False
+        self.owns_close = bool(owns_close)
+        self.owner = None
+        self.native_created = None
+        self.created_ms = None
+
+    def set_handle(self, handle, *, owner=None) -> None:
+        with self._guard:
+            if self.handle is not None or self._users:
+                raise RuntimeError("native handle already published")
+            self.handle = handle
+            self.owner = owner
+            self._users = 0
+            self._close_requested = False
+
+    def acquire(self):
+        with self._guard:
+            if self._close_requested or self.handle is None:
+                return None
+            self._users += 1
+            return self.handle
+
+    def release(self) -> None:
+        close_now = None
+        owner_to_drop = None
+        with self._guard:
+            if self._users > 0:
+                self._users -= 1
+            if self._users == 0 and self._close_requested:
+                close_now = self.handle
+                self.handle = None
+                owner_to_drop = self.owner
+                self.owner = None
+                self._close_requested = False
+        if close_now is not None and self.owns_close:
+            _win_close_handle(close_now)
+        # Releasing the last owner reference may run Popen.__del__.
+        # Keep that destruction outside the handle bookkeeping guard.
+        del owner_to_drop
+
+    def request_close(self) -> None:
+        close_now = None
+        owner_to_drop = None
+        with self._guard:
+            self._close_requested = True
+            if self._users == 0:
+                close_now = self.handle
+                self.handle = None
+                owner_to_drop = self.owner
+                self.owner = None
+                self._close_requested = False
+        if close_now is not None and self.owns_close:
+            _win_close_handle(close_now)
+        del owner_to_drop
+
+    @property
+    def in_use(self) -> bool:
+        with self._guard:
+            return self._users > 0
+
+
 def _win_terminate_job(job) -> None:
     if job is None or os.name != "nt":
         return
@@ -1435,6 +1667,10 @@ class _VaultIoSession:
         self._exclusion_owner: _DestExclusionOwner | None = None
         self._owned_exe: dict[int, str] = {}
         self._owned_created: dict[int, int | None] = {}
+        self._dead_identities: set[tuple[int, int | None]] = set()
+        self._job_lifetime = _CountedNativeHandle()
+        self._owned_handles: dict[int, _CountedNativeHandle] = {}
+        self._discovery_users = 0
         self._launch_t0 = 0.0
         self._launching = False
         self._popen_in_progress = False
@@ -1458,30 +1694,103 @@ class _VaultIoSession:
             pids.append(pid)
             if exe:
                 self._owned_exe[pid] = exe
-            if pid not in self._owned_created:
-                self._owned_created[pid] = created if created is not None else _process_created_ms(pid)
+            if pid not in self._owned_created and created is not None:
+                # Recorded identity only. A later raw PID query is not authority.
+                self._owned_created[pid] = created
 
         add(self.pid, created=self.created_ms)
         add(self.writer_pid, created=self.writer_created_ms)
-        if os.name == "nt" and self.pid:
-            for child in _windows_process_children(self.pid):
-                exe = str(child.get("exe") or "")
-                if _is_console_host(exe):
-                    continue
-                add(int(child["pid"]), exe)
-            writer = self.writer_pid
-            if writer and writer != self.pid:
-                for child in _windows_process_children(writer):
-                    exe = str(child.get("exe") or "")
-                    if _is_console_host(exe):
-                        continue
-                    add(int(child["pid"]), exe)
+        for pid, created in list(self._owned_created.items()):
+            add(pid, exe=self._owned_exe.get(pid, ""), created=created)
+
+        if os.name == "nt":
+            self._discover_owned_children()
+            for pid, created in list(self._owned_created.items()):
+                add(pid, exe=self._owned_exe.get(pid, ""), created=created)
         return pids
+
+    def _discover_owned_children(self) -> None:
+        with self._state_lock:
+            if self._dead:
+                return
+            owner = self._exclusion_owner
+            if owner is not None:
+                owner.reserve()
+            self._discovery_users += 1
+            parents = [(self.pid, self.created_ms, self.proc)]
+            if self.writer_pid and self.writer_pid != self.pid:
+                parents.append((self.writer_pid, self.writer_created_ms, None))
+        try:
+            for pid, created, proc_owner in parents:
+                if not pid or created is None:
+                    continue
+                if proc_owner is not None:
+                    try:
+                        if proc_owner.poll() is not None:
+                            continue
+                    except Exception:
+                        continue
+                with self._state_lock:
+                    retained = self._owned_handles.get(pid)
+                if retained is None and proc_owner is not None:
+                    handle = _popen_native_handle(proc_owner)
+                    if handle is not None:
+                        retained = self._retain_owned_handle(
+                            pid, handle, created, owns_close=False, owner=proc_owner,
+                        )
+                if retained is None:
+                    continue
+                used = retained.acquire()
+                if used is None:
+                    continue
+                try:
+                    native_created = retained.native_created
+                    if native_created is None:
+                        native_created = _windows_process_created_100ns(used)
+                    for child_pid, exe, child_ms, child_native, child_handle in _verified_toolhelp_children(
+                        pid, created, used, native_created,
+                    ):
+                        child = None
+                        published = False
+                        try:
+                            child = _CountedNativeHandle()
+                            child.set_handle(child_handle)
+                            child.created_ms = child_ms
+                            child.native_created = child_native
+                            with self._state_lock:
+                                existing = self._owned_handles.get(child_pid)
+                                if existing is None:
+                                    # Cancellation may have arrived after proof.
+                                    # Publish so deferred cleanup owns this child.
+                                    self._owned_handles[child_pid] = child
+                                    self._owned_created[child_pid] = child_ms
+                                    self._owned_exe[child_pid] = exe
+                                    published = True
+                        finally:
+                            if not published:
+                                if child is not None:
+                                    child.request_close()
+                                else:
+                                    _win_close_handle(child_handle)
+                finally:
+                    retained.release()
+        finally:
+            with self._state_lock:
+                self._discovery_users -= 1
+                cleanup = self._dead and self._discovery_users == 0
+            try:
+                if cleanup:
+                    self.terminate()
+            finally:
+                if owner is not None:
+                    owner.drop_exclusive()
+                    owner.release_if_unneeded()
 
     def physical_liveness(self) -> str:
         """``alive``, ``unknown`` or ``dead``. Unknown is unresolved ownership."""
         states: list[str] = []
         proc = self.proc
+        launcher_proven_dead = False
         if proc is not None:
             try:
                 poll = proc.poll()
@@ -1490,19 +1799,58 @@ class _VaultIoSession:
             else:
                 if poll is None:
                     return "alive"
+                launcher_proven_dead = True
+                states.append("dead")
+                if self.pid:
+                    self._dead_identities.add((self.pid, self.created_ms))
+
         writer = self.writer_pid
         if writer:
-            states.append(_process_liveness(writer, self.writer_created_ms))
-        if self.pid:
-            states.append(_process_liveness(self.pid, self.created_ms))
+            writer_identity = (writer, self.writer_created_ms)
+            if launcher_proven_dead and self._writer_is_canonical_launcher():
+                # Popen handle death is this writer's death. A failed later
+                # timestamp query cannot resurrect the same launcher identity.
+                states.append("dead")
+                self._dead_identities.add(writer_identity)
+                if self.pid:
+                    self._dead_identities.add((self.pid, self.created_ms))
+            elif writer_identity in self._dead_identities:
+                states.append("dead")
+            else:
+                st = _process_liveness(writer, self.writer_created_ms)
+                if st == "dead":
+                    self._dead_identities.add(writer_identity)
+                states.append(st)
+
+        if self.pid and not launcher_proven_dead:
+            launcher_identity = (self.pid, self.created_ms)
+            if launcher_identity in self._dead_identities:
+                states.append("dead")
+            else:
+                st = _process_liveness(self.pid, self.created_ms)
+                if st == "dead":
+                    self._dead_identities.add(launcher_identity)
+                states.append(st)
+
         for pid, created in list(self._owned_created.items()):
             if pid in (self.pid, self.writer_pid):
                 continue
-            states.append(_process_liveness(pid, created))
+            child_identity = (pid, created)
+            if child_identity in self._dead_identities:
+                states.append("dead")
+            else:
+                st = _process_liveness(pid, created)
+                if st == "dead":
+                    self._dead_identities.add(child_identity)
+                states.append(st)
+
         if "alive" in states:
             return "alive"
         if "unknown" in states:
             return "unknown"
+        with self._state_lock:
+            if self._discovery_users:
+                return "unknown"
         return "dead"
 
     def physically_alive(self) -> bool:
@@ -1612,10 +1960,10 @@ class _VaultIoSession:
                     self._launching = False
                     refuse_before_popen = True
                 else:
-                    self.job = job
+                    self._publish_job(job)
                     refuse_before_popen = False
             if refuse_before_popen:
-                _win_close_handle(job)
+                self._close_session_job(job)
                 self._abandon_unstarted()
                 raise OSError("vault io worker cancelled")
         env = os.environ.copy()
@@ -1643,9 +1991,7 @@ class _VaultIoSession:
                 self._popen_in_progress = True
                 refuse_before_popen = False
         if refuse_before_popen:
-            held = self.job
-            self.job = None
-            _win_close_handle(held)
+            self._close_session_job()
             self._abandon_unstarted()
             raise OSError("vault io worker cancelled")
         try:
@@ -1655,18 +2001,21 @@ class _VaultIoSession:
             )
         except Exception as exc:
             with self._state_lock:
-                held = self.job
-                self.job = None
                 self._popen_in_progress = False
                 self._launching = False
-            _win_close_handle(held)
+            self._close_session_job()
             self._abandon_unstarted()
             raise OSError("vault io worker failed to start") from exc
         with self._state_lock:
             self.proc = proc
-        self.created_ms = _process_created_ms(self.pid)
+        self.created_ms = _creation_from_popen(proc)
         if self.pid:
             self._owned_created[self.pid] = self.created_ms
+            popen_handle = _popen_native_handle(proc)
+            if popen_handle is not None:
+                self._retain_owned_handle(
+                    self.pid, popen_handle, self.created_ms, owns_close=False, owner=proc,
+                )
         # Launch owns the job through process registration and assignment.
         # Cancellation records intent but cannot close a handle still in use.
         try:
@@ -1703,17 +2052,24 @@ class _VaultIoSession:
                 self._abandon_unstarted()
             raise OSError("vault io worker failed to start")
         writer = _optional_int(ready.get("pid"))
-        self.writer_pid = writer if writer else self.pid
-        self.writer_created_ms = _process_created_ms(self.writer_pid)
+        if not self._record_writer_identity(writer if writer else self.pid):
+            confirmed = self.terminate()
+            if confirmed:
+                self._abandon_unstarted()
+            raise OSError("vault io worker identity could not be verified")
         self._adopt_owned_tree()
         if os.name == "nt":
             for pid in self.owned_pids():
                 if pid != self.pid:
-                    # This local handle operation is short. Popen and pipe
-                    # reads remain outside the state lock.
-                    with self._state_lock:
-                        if not self._dead and self.job is not None:
-                            _win_assign_pid(self.job, pid)
+                    # Do not hold the cancellation state lock across assignment.
+                    created = self._created_for_pid(pid)
+                    job_handle = self._acquire_job_handle()
+                    try:
+                        if job_handle is not None:
+                            self._assign_owned_handle(job_handle, pid, created)
+                    finally:
+                        if job_handle is not None:
+                            self._release_job_handle()
         self._launching = False
         if self._dead:
             confirmed = self.terminate()
@@ -1734,12 +2090,21 @@ class _VaultIoSession:
     def _adopt_owned_tree(self) -> None:
         self.owned_pids()
         if self.writer_pid is None and os.name == "nt" and self.pid:
-            for child in _windows_process_children(self.pid):
-                exe = str(child.get("exe") or "").lower()
-                if "python" in exe and not _is_console_host(exe):
-                    self.writer_pid = int(child["pid"])
-                    self.writer_created_ms = _process_created_ms(self.writer_pid)
-                    break
+            parent_exited = False
+            if self.proc is not None:
+                try:
+                    parent_exited = self.proc.poll() is not None
+                except Exception:
+                    parent_exited = True
+            if parent_exited:
+                return
+            for child_pid, child_created in list(self._owned_created.items()):
+                if child_pid == self.pid or child_pid not in self._owned_handles:
+                    continue
+                exe = self._owned_exe.get(child_pid, "")
+                if "python" in exe.lower() and not _is_console_host(exe):
+                    if self._record_writer_identity(child_pid):
+                        break
 
     def claim_lease(self, op_id: int | None = None) -> None:
         """Dest lease I/O. Bind session/token/operation before the isolated put."""
@@ -1778,10 +2143,39 @@ class _VaultIoSession:
         if not result.get("ok"):
             raise OSError(result.get("error") or "bind failed")
         writer = _optional_int(result.get("pid"))
-        if writer:
-            self.writer_pid = writer
-            if self.writer_created_ms is None:
-                self.writer_created_ms = _process_created_ms(writer)
+        if writer and not self._record_writer_identity(writer):
+            raise OSError("vault io worker identity could not be verified")
+
+    def _record_writer_identity(self, writer: int | None) -> bool:
+        """A response PID identifies a writer only within the proved owned tree."""
+        if not isinstance(writer, int) or writer <= 0:
+            return False
+        with self._state_lock:
+            if self._dead:
+                return False
+            if writer == self.pid:
+                self.writer_pid = writer
+                self.writer_created_ms = self.created_ms
+                return True
+        # Discover before publishing writer_pid: otherwise owned_pids would add
+        # an unverified response PID to the ownership table itself.
+        self.owned_pids()
+        with self._state_lock:
+            retained = self._owned_handles.get(writer)
+        used = retained.acquire() if retained is not None else None
+        if used is None:
+            return False
+        try:
+            if _native_handle_liveness(used, retained.created_ms) != "alive":
+                return False
+            with self._state_lock:
+                if self._dead:
+                    return False
+                self.writer_pid = writer
+                self.writer_created_ms = retained.created_ms
+            return True
+        finally:
+            retained.release()
 
     def local_put(
         self, path: str, data: bytes, *, op_id: int | None = None,
@@ -1938,10 +2332,95 @@ class _VaultIoSession:
         if not isinstance(pid, int) or pid <= 0:
             return None
         if pid == self.writer_pid:
+            if self._writer_is_canonical_launcher() and self.created_ms is not None:
+                return self.created_ms
             return self.writer_created_ms
         if pid == self.pid:
             return self.created_ms
         return self._owned_created.get(pid)
+
+    def _writer_is_canonical_launcher(self) -> bool:
+        """True when the writer is the Popen launcher, not a later same-PID epoch."""
+        if self.writer_pid is None or self.pid is None:
+            return False
+        if int(self.writer_pid) != int(self.pid):
+            return False
+        if self.writer_created_ms is None:
+            return True
+        if self.created_ms is None:
+            return False
+        return int(self.writer_created_ms) == int(self.created_ms)
+
+    def _publish_job(self, job) -> None:
+        self.job = job
+        self._job_lifetime.set_handle(job)
+
+    def _acquire_job_handle(self):
+        with self._state_lock:
+            if self._dead:
+                return None
+            return self._job_lifetime.acquire()
+
+    def _release_job_handle(self) -> None:
+        self._job_lifetime.release()
+        self.job = self._job_lifetime.handle
+
+    def _close_session_job(self, handle=None) -> None:
+        published = self._job_lifetime.handle
+        if handle is None or handle is published:
+            self._job_lifetime.request_close()
+            self.job = self._job_lifetime.handle
+            return
+        if not self._job_lifetime.in_use:
+            _win_close_handle(handle)
+            if self.job is handle:
+                self.job = None
+
+    def _retain_owned_handle(
+        self, pid: int, handle, created_ms: int | None, *, owns_close: bool = True,
+        owner=None,
+    ) -> _CountedNativeHandle | None:
+        """Hold a process handle so identity stays stable while another thread uses it."""
+        if not isinstance(pid, int) or pid <= 0 or handle is None:
+            return
+        retained = _CountedNativeHandle(owns_close=owns_close)
+        retained.set_handle(handle, owner=owner)
+        retained.created_ms = created_ms
+        retained.native_created = _windows_process_created_100ns(handle)
+        with self._state_lock:
+            existing = self._owned_handles.get(pid)
+            if existing is None:
+                self._owned_handles[pid] = retained
+                if created_ms is not None:
+                    self._owned_created[pid] = created_ms
+        if existing is not None:
+            retained.request_close()
+            return existing
+        return retained
+
+    def _assign_owned_handle(self, job, pid: int, created_ms: int | None) -> bool:
+        with self._state_lock:
+            retained = self._owned_handles.get(pid)
+        used = retained.acquire() if retained is not None else None
+        if used is None:
+            return False
+        try:
+            if not _handle_creation_matches(used, created_ms):
+                return False
+            return bool(_kernel32().AssignProcessToJobObject(job, used))
+        finally:
+            retained.release()
+
+    def _terminate_owned_handle(self, pid: int) -> bool:
+        with self._state_lock:
+            retained = self._owned_handles.get(pid)
+        used = retained.acquire() if retained is not None else None
+        if used is None:
+            return False
+        try:
+            return _win_terminate_retained_handle(used, retained.created_ms)
+        finally:
+            retained.release()
 
     def _release_held_exclusion(self) -> None:
         owner = self._exclusion_owner
@@ -1961,6 +2440,9 @@ class _VaultIoSession:
         started = time.monotonic()
         with self._state_lock:
             self._dead = True
+            if self._discovery_users:
+                self.cancel_return_s = time.monotonic() - started
+                return False
         # One terminator owns job closure. Another cancellation must not
         # wait for it or close the same native handle a second time.
         if not self._termination_lock.acquire(blocking=False):
@@ -1976,7 +2458,6 @@ class _VaultIoSession:
         with self._state_lock:
             self._dead = True
             proc = self.proc
-            job = self.job
             if self._popen_in_progress:
                 # Admission cancelled. Do not claim physical death, close a job
                 # launch still uses, or drop retain/owner while Popen can follow.
@@ -1986,58 +2467,65 @@ class _VaultIoSession:
                 # A prepared-only session can no longer enter Popen: launch
                 # rechecks _dead under this same lock before that transition.
                 self._launching = False
-        owned = self.owned_pids()
-        if job is not None:
-            _win_terminate_job(job)
-        if os.name == "nt":
-            for pid in owned:
-                if self.owns_pid(pid):
-                    _win_terminate_pid(pid, self._created_for_pid(pid))
-        if os.name != "nt" and proc is not None and proc.pid:
-            try:
-                os.killpg(int(proc.pid), getattr(signal, "SIGKILL", signal.SIGTERM))
-            except (OSError, ProcessLookupError, PermissionError, AttributeError):
+            job = self._job_lifetime.acquire()
+            job_held = job is not None
+        try:
+            owned = self.owned_pids()
+            if job is not None:
+                _win_terminate_job(job)
+            if os.name == "nt":
+                for pid in owned:
+                    if self.owns_pid(pid):
+                        self._terminate_owned_handle(pid)
+            if os.name != "nt" and proc is not None and proc.pid:
+                try:
+                    os.killpg(int(proc.pid), getattr(signal, "SIGKILL", signal.SIGTERM))
+                except (OSError, ProcessLookupError, PermissionError, AttributeError):
+                    try:
+                        proc.kill()
+                    except OSError:
+                        pass
+            elif proc is not None and proc.poll() is None:
                 try:
                     proc.kill()
                 except OSError:
                     pass
-        elif proc is not None and proc.poll() is None:
-            try:
-                proc.kill()
-            except OSError:
-                pass
-        confirmed = not self.physically_alive()
-        if proc is not None and not confirmed:
-            try:
-                proc.wait(timeout=_WORKER_TERMINATE_S)
-            except subprocess.TimeoutExpired:
-                pass
-            if os.name == "nt":
-                for pid in self.owned_pids():
-                    if self.owns_pid(pid):
-                        _win_terminate_pid(pid, self._created_for_pid(pid))
             confirmed = not self.physically_alive()
-        if not confirmed and job is not None:
-            _win_close_handle(job)
-            self.job = None
-            job = None
-            if proc is not None and proc.poll() is None:
+            if proc is not None and not confirmed:
                 try:
-                    proc.wait(timeout=min(0.5, _WORKER_TERMINATE_S))
+                    proc.wait(timeout=_WORKER_TERMINATE_S)
                 except subprocess.TimeoutExpired:
                     pass
+                if os.name == "nt":
+                    for pid in self.owned_pids():
+                        if self.owns_pid(pid):
+                            self._terminate_owned_handle(pid)
                 confirmed = not self.physically_alive()
-        if confirmed:
-            self._launching = False
-            self._close_streams()
-            _win_close_handle(job)
-            self.proc = None
-            self.job = None
-            _drop_retained_session(self)
-            self._release_held_exclusion()
-            _unbind_dead_session_from_this_thread(self, proven_dead=True)
-        self.termination_s = time.monotonic() - t0
-        return confirmed
+            if not confirmed and job is not None:
+                self._close_session_job()
+                if proc is not None and proc.poll() is None:
+                    try:
+                        proc.wait(timeout=min(0.5, _WORKER_TERMINATE_S))
+                    except subprocess.TimeoutExpired:
+                        pass
+                    confirmed = not self.physically_alive()
+            if confirmed:
+                self._launching = False
+                self._close_streams()
+                self._close_session_job()
+                for retained in list(self._owned_handles.values()):
+                    retained.request_close()
+                self._owned_handles.clear()
+                self.proc = None
+                _drop_retained_session(self)
+                self._release_held_exclusion()
+                _unbind_dead_session_from_this_thread(self, proven_dead=True)
+            return confirmed
+        finally:
+            if job_held:
+                self._job_lifetime.release()
+                self.job = self._job_lifetime.handle
+            self.termination_s = time.monotonic() - t0
 
     def shutdown(self) -> bool:
         t0 = time.monotonic()

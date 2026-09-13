@@ -1,0 +1,502 @@
+diff --git a/_scratch/astra-authority-repair03/baseline/library_mirror.py b/library_mirror.py
+index 08a899d..cac85ac 100644
+--- a/_scratch/astra-authority-repair03/baseline/library_mirror.py
++++ b/library_mirror.py
+@@ -622,7 +622,8 @@ def _recorded_identity_is_alive(pid: int | None, created_ms: int | None) -> bool
+ 
+ def _verified_toolhelp_children(
+     parent_pid: int | None, parent_created: int | None,
+-) -> list[tuple[int, str, int]]:
++    parent_handle, parent_native_created: int | None,
++) -> Any:
+     """Children of one recorded parent identity.
+ 
+     A Toolhelp PID plus a later timestamp query does not prove the snapshot
+@@ -630,14 +631,12 @@ def _verified_toolhelp_children(
+     and after the child query, then require the PID to still be that parent's
+     child with the same creation identity.
+     """
+-    if parent_created is None or not isinstance(parent_pid, int) or parent_pid <= 0:
++    if (parent_created is None or parent_native_created is None
++            or not isinstance(parent_pid, int) or parent_pid <= 0):
+         return []
+-    if not _recorded_identity_is_alive(parent_pid, parent_created):
++    if _native_handle_liveness(parent_handle, parent_created) != "alive":
+         return []
+     snapshot = _windows_process_children(parent_pid)
+-    if not _recorded_identity_is_alive(parent_pid, parent_created):
+-        return []
+-    verified: list[tuple[int, str, int]] = []
+     for child in snapshot:
+         child_pid = int(child.get("pid") or 0)
+         if child_pid <= 0:
+@@ -645,21 +644,57 @@ def _verified_toolhelp_children(
+         exe = str(child.get("exe") or "")
+         if _is_console_host(exe):
+             continue
+-        child_created = _process_created_ms(child_pid)
+-        if not _child_born_on_or_after_parent(child_created, parent_created):
+-            continue
+-        if not _recorded_identity_is_alive(parent_pid, parent_created):
+-            continue
+-        again = _windows_process_children(parent_pid)
+-        if child_pid not in {int(row.get("pid") or 0) for row in again}:
+-            continue
+-        child_created_again = _process_created_ms(child_pid)
+-        if not _creation_identity_equal(child_created_again, child_created):
+-            continue
+-        if not _recorded_identity_is_alive(parent_pid, parent_created):
++        handle = _open_ownership_handle(child_pid)
++        if not handle:
+             continue
+-        verified.append((child_pid, exe, int(child_created)))
+-    return verified
++        transferred = False
++        try:
++            native_created = _windows_process_created_100ns(handle)
++            if native_created is None or native_created < parent_native_created:
++                continue
++            child_created = (native_created - _FILETIME_EPOCH_OFFSET_100NS) // 10_000
++            if _native_handle_liveness(handle, child_created) != "alive":
++                continue
++            if _native_handle_liveness(parent_handle, parent_created) != "alive":
++                continue
++            # Both original process objects stay pinned while this snapshot is
++            # taken. Neither PID can become another process between proof and
++            # publication, even if creation times share one millisecond.
++            again = _windows_process_children(parent_pid)
++            if child_pid not in {int(row.get("pid") or 0) for row in again}:
++                continue
++            if _native_handle_liveness(parent_handle, parent_created) != "alive":
++                continue
++            transferred = True
++            yield child_pid, exe, child_created, native_created, handle
++        finally:
++            if not transferred:
++                _win_close_handle(handle)
++
++
++def _open_ownership_handle(pid: int):
++    return _kernel32().OpenProcess(
++        _PROCESS_TERMINATE | _PROCESS_QUERY_LIMITED_INFORMATION | 0x0100,
++        False, int(pid),
++    )
++
++
++def _popen_native_handle(proc):
++    return getattr(proc, "_handle", None)
++
++
++def _native_handle_liveness(handle, created_ms: int | None) -> str:
++    if handle is None:
++        return "unknown"
++    from ctypes import wintypes
++    code = wintypes.DWORD()
++    if not _kernel32().GetExitCodeProcess(handle, ctypes.byref(code)):
++        return "unknown"
++    if int(code.value) != _STILL_ACTIVE:
++        return "dead"
++    if created_ms is not None and not _handle_creation_matches(handle, created_ms):
++        return "unknown"
++    return "alive"
+ 
+ 
+ def _win_terminate_pid(pid: int | None, created_ms: int | None = None) -> bool:
+@@ -714,7 +749,7 @@ def _win_terminate_retained_handle(handle, created_ms: int | None) -> bool:
+     return bool(k32.TerminateProcess(handle, 1))
+ 
+ 
+-def _windows_process_created_ms(handle) -> int | None:
++def _windows_process_created_100ns(handle) -> int | None:
+     from ctypes import wintypes
+     creation, exit_, kernel, user = (wintypes.FILETIME() for _ in range(4))
+     if not _kernel32().GetProcessTimes(
+@@ -722,8 +757,12 @@ def _windows_process_created_ms(handle) -> int | None:
+         ctypes.byref(kernel), ctypes.byref(user),
+     ):
+         return None
+-    value = (int(creation.dwHighDateTime) << 32) | int(creation.dwLowDateTime)
+-    return (value - _FILETIME_EPOCH_OFFSET_100NS) // 10_000
++    return (int(creation.dwHighDateTime) << 32) | int(creation.dwLowDateTime)
++
++
++def _windows_process_created_ms(handle) -> int | None:
++    value = _windows_process_created_100ns(handle)
++    return None if value is None else (value - _FILETIME_EPOCH_OFFSET_100NS) // 10_000
+ 
+ 
+ def _posix_process_created_ms(pid: int) -> int | None:
+@@ -910,6 +949,8 @@ def _session_launch_open(session) -> bool:
+     """True while launch may still create or register a child."""
+     if session is None:
+         return False
++    if getattr(session, "_discovery_users", 0):
++        return True
+     if getattr(session, "_popen_in_progress", False):
+         return True
+     return bool(getattr(session, "_launching", False) and session.proc is None)
+@@ -1535,10 +1576,16 @@ class _CountedNativeHandle:
+         self._users = 0
+         self._close_requested = False
+         self.owns_close = bool(owns_close)
++        self.owner = None
++        self.native_created = None
++        self.created_ms = None
+ 
+-    def set_handle(self, handle) -> None:
++    def set_handle(self, handle, *, owner=None) -> None:
+         with self._guard:
++            if self.handle is not None or self._users:
++                raise RuntimeError("native handle already published")
+             self.handle = handle
++            self.owner = owner
+             self._users = 0
+             self._close_requested = False
+ 
+@@ -1551,26 +1598,36 @@ class _CountedNativeHandle:
+ 
+     def release(self) -> None:
+         close_now = None
++        owner_to_drop = None
+         with self._guard:
+             if self._users > 0:
+                 self._users -= 1
+             if self._users == 0 and self._close_requested:
+                 close_now = self.handle
+                 self.handle = None
++                owner_to_drop = self.owner
++                self.owner = None
+                 self._close_requested = False
+         if close_now is not None and self.owns_close:
+             _win_close_handle(close_now)
++        # Releasing the last owner reference may run Popen.__del__.
++        # Keep that destruction outside the handle bookkeeping guard.
++        del owner_to_drop
+ 
+     def request_close(self) -> None:
+         close_now = None
++        owner_to_drop = None
+         with self._guard:
+             self._close_requested = True
+             if self._users == 0:
+                 close_now = self.handle
+                 self.handle = None
++                owner_to_drop = self.owner
++                self.owner = None
+                 self._close_requested = False
+         if close_now is not None and self.owns_close:
+             _win_close_handle(close_now)
++        del owner_to_drop
+ 
+     @property
+     def in_use(self) -> bool:
+@@ -1613,6 +1670,7 @@ class _VaultIoSession:
+         self._dead_identities: set[tuple[int, int | None]] = set()
+         self._job_lifetime = _CountedNativeHandle()
+         self._owned_handles: dict[int, _CountedNativeHandle] = {}
++        self._discovery_users = 0
+         self._launch_t0 = 0.0
+         self._launching = False
+         self._popen_in_progress = False
+@@ -1645,32 +1703,89 @@ class _VaultIoSession:
+         for pid, created in list(self._owned_created.items()):
+             add(pid, exe=self._owned_exe.get(pid, ""), created=created)
+ 
+-        if os.name == "nt" and self.pid:
+-            parent_exited = False
+-            if self.proc is not None:
+-                try:
+-                    parent_exited = self.proc.poll() is not None
+-                except Exception:
+-                    parent_exited = True
+-            if not parent_exited:
+-                for child_pid, exe, child_created in _verified_toolhelp_children(
+-                    self.pid, self.created_ms,
+-                ):
+-                    if child_pid in seen or child_pid in self._owned_created:
+-                        continue
+-                    self._owned_created[child_pid] = child_created
+-                    add(child_pid, exe=exe, created=child_created)
+-            writer = self.writer_pid
+-            if writer and writer != self.pid:
+-                for child_pid, exe, child_created in _verified_toolhelp_children(
+-                    writer, self.writer_created_ms,
+-                ):
+-                    if child_pid in seen or child_pid in self._owned_created:
+-                        continue
+-                    self._owned_created[child_pid] = child_created
+-                    add(child_pid, exe=exe, created=child_created)
++        if os.name == "nt":
++            self._discover_owned_children()
++            for pid, created in list(self._owned_created.items()):
++                add(pid, exe=self._owned_exe.get(pid, ""), created=created)
+         return pids
+ 
++    def _discover_owned_children(self) -> None:
++        with self._state_lock:
++            if self._dead:
++                return
++            owner = self._exclusion_owner
++            if owner is not None:
++                owner.reserve()
++            self._discovery_users += 1
++            parents = [(self.pid, self.created_ms, self.proc)]
++            if self.writer_pid and self.writer_pid != self.pid:
++                parents.append((self.writer_pid, self.writer_created_ms, None))
++        try:
++            for pid, created, proc_owner in parents:
++                if not pid or created is None:
++                    continue
++                if proc_owner is not None:
++                    try:
++                        if proc_owner.poll() is not None:
++                            continue
++                    except Exception:
++                        continue
++                with self._state_lock:
++                    retained = self._owned_handles.get(pid)
++                if retained is None and proc_owner is not None:
++                    handle = _popen_native_handle(proc_owner)
++                    if handle is not None:
++                        retained = self._retain_owned_handle(
++                            pid, handle, created, owns_close=False, owner=proc_owner,
++                        )
++                if retained is None:
++                    continue
++                used = retained.acquire()
++                if used is None:
++                    continue
++                try:
++                    native_created = retained.native_created
++                    if native_created is None:
++                        native_created = _windows_process_created_100ns(used)
++                    for child_pid, exe, child_ms, child_native, child_handle in _verified_toolhelp_children(
++                        pid, created, used, native_created,
++                    ):
++                        child = None
++                        published = False
++                        try:
++                            child = _CountedNativeHandle()
++                            child.set_handle(child_handle)
++                            child.created_ms = child_ms
++                            child.native_created = child_native
++                            with self._state_lock:
++                                existing = self._owned_handles.get(child_pid)
++                                if existing is None:
++                                    # Cancellation may have arrived after proof.
++                                    # Publish so deferred cleanup owns this child.
++                                    self._owned_handles[child_pid] = child
++                                    self._owned_created[child_pid] = child_ms
++                                    self._owned_exe[child_pid] = exe
++                                    published = True
++                        finally:
++                            if not published:
++                                if child is not None:
++                                    child.request_close()
++                                else:
++                                    _win_close_handle(child_handle)
++                finally:
++                    retained.release()
++        finally:
++            with self._state_lock:
++                self._discovery_users -= 1
++                cleanup = self._dead and self._discovery_users == 0
++            try:
++                if cleanup:
++                    self.terminate()
++            finally:
++                if owner is not None:
++                    owner.drop_exclusive()
++                    owner.release_if_unneeded()
++
+     def physical_liveness(self) -> str:
+         """``alive``, ``unknown`` or ``dead``. Unknown is unresolved ownership."""
+         states: list[str] = []
+@@ -1733,6 +1848,9 @@ class _VaultIoSession:
+             return "alive"
+         if "unknown" in states:
+             return "unknown"
++        with self._state_lock:
++            if self._discovery_users:
++                return "unknown"
+         return "dead"
+ 
+     def physically_alive(self) -> bool:
+@@ -1893,10 +2011,10 @@ class _VaultIoSession:
+         self.created_ms = _creation_from_popen(proc)
+         if self.pid:
+             self._owned_created[self.pid] = self.created_ms
+-            popen_handle = getattr(proc, "_handle", None)
++            popen_handle = _popen_native_handle(proc)
+             if popen_handle is not None:
+                 self._retain_owned_handle(
+-                    self.pid, popen_handle, self.created_ms, owns_close=False,
++                    self.pid, popen_handle, self.created_ms, owns_close=False, owner=proc,
+                 )
+         # Launch owns the job through process registration and assignment.
+         # Cancellation records intent but cannot close a handle still in use.
+@@ -1948,7 +2066,7 @@ class _VaultIoSession:
+                     job_handle = self._acquire_job_handle()
+                     try:
+                         if job_handle is not None:
+-                            _win_assign_pid(job_handle, pid, created)
++                            self._assign_owned_handle(job_handle, pid, created)
+                     finally:
+                         if job_handle is not None:
+                             self._release_job_handle()
+@@ -1980,15 +2098,13 @@ class _VaultIoSession:
+                     parent_exited = True
+             if parent_exited:
+                 return
+-            for child_pid, exe, child_created in _verified_toolhelp_children(
+-                self.pid, self.created_ms,
+-            ):
++            for child_pid, child_created in list(self._owned_created.items()):
++                if child_pid == self.pid or child_pid not in self._owned_handles:
++                    continue
++                exe = self._owned_exe.get(child_pid, "")
+                 if "python" in exe.lower() and not _is_console_host(exe):
+-                    self.writer_pid = child_pid
+-                    self.writer_created_ms = child_created
+-                    self._owned_created[child_pid] = child_created
+-                    self._owned_exe[child_pid] = exe
+-                    break
++                    if self._record_writer_identity(child_pid):
++                        break
+ 
+     def claim_lease(self, op_id: int | None = None) -> None:
+         """Dest lease I/O. Bind session/token/operation before the isolated put."""
+@@ -2034,19 +2150,32 @@ class _VaultIoSession:
+         """A response PID identifies a writer only within the proved owned tree."""
+         if not isinstance(writer, int) or writer <= 0:
+             return False
+-        if writer == self.pid:
+-            self.writer_pid = writer
+-            self.writer_created_ms = self.created_ms
+-            return True
++        with self._state_lock:
++            if self._dead:
++                return False
++            if writer == self.pid:
++                self.writer_pid = writer
++                self.writer_created_ms = self.created_ms
++                return True
+         # Discover before publishing writer_pid: otherwise owned_pids would add
+         # an unverified response PID to the ownership table itself.
+         self.owned_pids()
+-        created = self._owned_created.get(writer)
+-        if created is None:
++        with self._state_lock:
++            retained = self._owned_handles.get(writer)
++        used = retained.acquire() if retained is not None else None
++        if used is None:
+             return False
+-        self.writer_pid = writer
+-        self.writer_created_ms = created
+-        return True
++        try:
++            if _native_handle_liveness(used, retained.created_ms) != "alive":
++                return False
++            with self._state_lock:
++                if self._dead:
++                    return False
++                self.writer_pid = writer
++                self.writer_created_ms = retained.created_ms
++            return True
++        finally:
++            retained.release()
+ 
+     def local_put(
+         self, path: str, data: bytes, *, op_id: int | None = None,
+@@ -2249,15 +2378,49 @@ class _VaultIoSession:
+ 
+     def _retain_owned_handle(
+         self, pid: int, handle, created_ms: int | None, *, owns_close: bool = True,
+-    ) -> None:
++        owner=None,
++    ) -> _CountedNativeHandle | None:
+         """Hold a process handle so identity stays stable while another thread uses it."""
+         if not isinstance(pid, int) or pid <= 0 or handle is None:
+             return
+         retained = _CountedNativeHandle(owns_close=owns_close)
+-        retained.set_handle(handle)
+-        self._owned_handles[pid] = retained
+-        if created_ms is not None:
+-            self._owned_created[pid] = created_ms
++        retained.set_handle(handle, owner=owner)
++        retained.created_ms = created_ms
++        retained.native_created = _windows_process_created_100ns(handle)
++        with self._state_lock:
++            existing = self._owned_handles.get(pid)
++            if existing is None:
++                self._owned_handles[pid] = retained
++                if created_ms is not None:
++                    self._owned_created[pid] = created_ms
++        if existing is not None:
++            retained.request_close()
++            return existing
++        return retained
++
++    def _assign_owned_handle(self, job, pid: int, created_ms: int | None) -> bool:
++        with self._state_lock:
++            retained = self._owned_handles.get(pid)
++        used = retained.acquire() if retained is not None else None
++        if used is None:
++            return False
++        try:
++            if not _handle_creation_matches(used, created_ms):
++                return False
++            return bool(_kernel32().AssignProcessToJobObject(job, used))
++        finally:
++            retained.release()
++
++    def _terminate_owned_handle(self, pid: int) -> bool:
++        with self._state_lock:
++            retained = self._owned_handles.get(pid)
++        used = retained.acquire() if retained is not None else None
++        if used is None:
++            return False
++        try:
++            return _win_terminate_retained_handle(used, retained.created_ms)
++        finally:
++            retained.release()
+ 
+     def _release_held_exclusion(self) -> None:
+         owner = self._exclusion_owner
+@@ -2277,6 +2440,9 @@ class _VaultIoSession:
+         started = time.monotonic()
+         with self._state_lock:
+             self._dead = True
++            if self._discovery_users:
++                self.cancel_return_s = time.monotonic() - started
++                return False
+         # One terminator owns job closure. Another cancellation must not
+         # wait for it or close the same native handle a second time.
+         if not self._termination_lock.acquire(blocking=False):
+@@ -2310,16 +2476,7 @@ class _VaultIoSession:
+             if os.name == "nt":
+                 for pid in owned:
+                     if self.owns_pid(pid):
+-                        retained = self._owned_handles.get(pid)
+-                        used = retained.acquire() if retained is not None else None
+-                        try:
+-                            if used is not None:
+-                                _win_terminate_retained_handle(used, self._created_for_pid(pid))
+-                            else:
+-                                _win_terminate_pid(pid, self._created_for_pid(pid))
+-                        finally:
+-                            if used is not None:
+-                                retained.release()
++                        self._terminate_owned_handle(pid)
+             if os.name != "nt" and proc is not None and proc.pid:
+                 try:
+                     os.killpg(int(proc.pid), getattr(signal, "SIGKILL", signal.SIGTERM))
+@@ -2342,7 +2499,7 @@ class _VaultIoSession:
+                 if os.name == "nt":
+                     for pid in self.owned_pids():
+                         if self.owns_pid(pid):
+-                            _win_terminate_pid(pid, self._created_for_pid(pid))
++                            self._terminate_owned_handle(pid)
+                 confirmed = not self.physically_alive()
+             if not confirmed and job is not None:
+                 self._close_session_job()

@@ -1,0 +1,12 @@
+diff --git a/_scratch/astra-authority-repair03/baseline/test_mirror_authority_review02.py b/tests/test_mirror_authority_review02.py
+index 4fcd5ab..22bcc9f 100644
+--- a/_scratch/astra-authority-repair03/baseline/test_mirror_authority_review02.py
++++ b/tests/test_mirror_authority_review02.py
+@@ -13,6 +13,7 @@ from types import SimpleNamespace
+ import pytest
+ 
+ import library_mirror as mirror
++from _mirror_stable_native_fixture import stable_native_authority
+ 
+ 
+ LAUNCHER = 71001

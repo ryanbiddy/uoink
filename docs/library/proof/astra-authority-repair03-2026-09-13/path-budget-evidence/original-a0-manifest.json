@@ -1,0 +1,15 @@
+{
+  "contract_version": "phase4-v1-2026-09-08",
+  "ownership": {
+    "Library.md": {
+      "file_hash": "6493d0017bc19e13709cfb86aea72176705ada079a06a69e3279d9c4b1a487c7",
+      "generation": 3,
+      "identity": "Library.md",
+      "key": "index:Library.md",
+      "kind": "index",
+      "tombstone": false
+    }
+  },
+  "render_version": "reach-markdown-v1",
+  "schema_version": 1
+}

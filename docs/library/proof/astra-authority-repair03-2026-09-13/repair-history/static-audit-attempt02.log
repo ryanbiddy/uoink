@@ -1,0 +1,33 @@
+{
+  "static_audit_only": true,
+  "checks": {
+    "test_library_mirror_process_authority.py: entire AST unchanged except inert fixture import": true,
+    "test_mirror_process_identity_boundaries.py: entire AST unchanged except inert fixture import": true,
+    "test_mirror_process_handle_lifetime.py: entire AST unchanged except inert fixture import": true,
+    "test_mirror_authority_review02.py: entire AST unchanged except inert fixture import": true,
+    "accepted exclusion owner class unchanged": true,
+    "accepted prepare method unchanged": true,
+    "attempt01: test_child_older_within_same_millisecond_is_refused unchanged": true,
+    "attempt01: test_foreign_replacement_before_child_open_fails_final_relationship unchanged": true,
+    "attempt01: test_pinned_child_cannot_be_replaced_before_relationship_or_mutation unchanged": true,
+    "attempt01: test_borrowed_handle_keeps_owner_until_last_user_finishes unchanged": true,
+    "attempt01: test_cancellation_during_discovery_defers_cleanup_without_losing_child unchanged": true,
+    "attempt02: test_child_older_within_same_millisecond_is_refused unchanged": true,
+    "attempt02: test_foreign_replacement_before_child_open_fails_final_relationship unchanged": true,
+    "attempt02: test_pinned_child_cannot_be_replaced_before_relationship_or_mutation unchanged": true,
+    "attempt02: test_borrowed_handle_keeps_owner_until_last_user_finishes unchanged": true,
+    "attempt02: test_repeated_discovery_keeps_original_child_handle_open unchanged": true,
+    "attempt02: test_parent_without_original_handle_cannot_adopt_from_raw_pid unchanged": true,
+    "attempt02: test_cancellation_during_discovery_defers_cleanup_without_losing_child unchanged": true
+  },
+  "all_checks_passed": true,
+  "sha256": {
+    "library_mirror.py": "67432bf13905b8c28c2048ce51bbebd74490d463f8b1a4e08fdd3ce4e53a0a23",
+    "tests/test_library_mirror_process_authority.py": "f8f0f98dabddee85ccedd9d5a739c60e9388bc7e565d34be523b1638aad16831",
+    "tests/test_mirror_process_identity_boundaries.py": "0cfead50d616e2c4b94efa22a2dc4e618d3b30d97537b514148244b0805fc597",
+    "tests/test_mirror_process_handle_lifetime.py": "5696a99fb6c541d29bb9f4f420f9c6d41f5a4fa4ec498e9088ae84bbd335db4c",
+    "tests/test_mirror_authority_review02.py": "6f2b9f94ae2063ea7c5cfc65dd87ada79aa04f65cff68a1175b1ec9862b8fdef",
+    "tests/_mirror_stable_native_fixture.py": "a86c63b0a33f31c064aa6c6881b73301d218b88b1fb9699d7304428eec77d005",
+    "tests/test_mirror_stable_handle_discovery.py": "7b3c613a432b3d002b6efb22f0b44fd296b538f53ed56959bdf44fdd3f82f645"
+  }
+}
