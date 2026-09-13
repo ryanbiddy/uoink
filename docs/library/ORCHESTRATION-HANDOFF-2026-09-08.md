@@ -93,12 +93,12 @@ establish safe installation isolation, and verify/correct resulting findings.
 | 0–1 | Unicode search repair integrated at `41c0d1d`; package-08 installed checks reviewed at `49e2b31` | 137 focused passes in both roots and complete tree; original assertions/markers unchanged | Preserve foundation exceptions and positive Recall limit |
 | 2 | Option 3 authorized by Ryan; Stage 4 P2-7 remains FAIL (39/46, 6/11) | Keep 0.90 for autonomous filing and apply false; proposals are reviewable suggestions | No quality-rule decision pending |
 | 3 | Package-08 C22 and browser review complete at `49e2b31` | Setup/reinstall exit 0; C22 11 pass / 0 fail / 3 raw manual placeholders; four browser images match consent/charge/recovery state | Original AT6 exit disposition remains Ryan's |
-| 4 | Owner repair ff67b84 and process repair 747fb6b accepted; final Gemini review retained at 1e90e08 | 233 Phase 4 passes in each root; exact case sets match. Gemini found no actionable defect in the three reviewed authority boundaries. Astra's wording corrections and 11 review payloads are verified | Cache guard b96dbd0 is integrated. Qualify subtest-aware receipts, then committed tree09. Tree08 cause remains unproved |
+| 4 | Owner ff67b84 and process 747fb6b accepted; combined tree09 sealed at 9a46b38 | All 50 previously failing Phase 4 cases now pass in the complete run. Original 233-case focused results and Gemini scope review remain intact | No mirror rerun needed. Preserve tree08 failure and unresolved exact historical cause; continue runtime security |
 | 5 | Part A repaired; SDK union 267 passed in each root and corrected complete-tree case passes | BA-4/unary-clock failures close; dashboard 24,576-byte target remains missed | Preserve performance limit; Part B deferred |
 | 6 | Package-08 production publication and cited-range review complete at `49e2b31` | Exact export after 2.1001697 s protocol delay; first actual client export succeeds after separate 1.9874018 s delay | No speaker or player-seek credit; speakers blocked, no new fetch |
 | Security | NLTK wheel at 52d9f7d, binding at 07084fe; graph f22456c and security scope 14aa0df reviewed; cache guard b96dbd0 accepted | Cache guard: 144 passed plus 13 subtests in each independent root; all 117 proof payloads match Git and disk. Candidate advisory count remains one entry / one group; graph still fails five caps. Default VAD and companion tokenizer loader remain open | Finish exact loader/compatibility proposal. Static checkpoint inventory run01 refused on unsupported ZIP header; no model execution. No runtime or installed clearance |
 | Signing | Gemini review and repaired path integrated at 0b3629d | 48 focused passes; 77 proof payloads match Git. Real Inno direct callback refuses missing certificate and keeps a durable error. No successful signing credit | Full combined candidate tree after runtime work settles; actual certificate/service choice remains Ryan's |
-| Integration | Tree08 at 9dd0cfb remains failed; process repair 747fb6b and cache guard b96dbd0 qualify in both roots; subtest receipts accepted at b376c8d | Tree08: 2,675 passed / 51 failed / 3 skipped across all 2,729 cases. Receipt checks: 116 passed in each independent run; 309 proof payloads match Git and disk | Run committed combined tree09 under its updated brief. Package08 held; website/marketing paused |
+| Integration | Complete tree09 at source 56d9d4c sealed in 9a46b38; historical receipt failure remains | 2,796 passed / 1 failed / 3 skipped across 2,800 cases, plus 13 passed subtests. Exact union and exits verified; 174 passive captures, no observer errors; 62 payloads match Git and disk | Continue tokenizer/VAD and dependency proposals. No blind rerun; package08 and website/marketing remain held |
 | Desktop incident | Isolation failed in package-07 attempt; corrected at `e10ba3a` | Ordinary Uoink and filesystem connectors launched; earlier live-index/5179 effects unknown. Owned job cleaned | No further override launch; only guarded Uoink dashboard observed for package 08 |
 
 Receipts and artifacts: `docs/library/proof/` (stage archives, S20 matrix, S21 incl. run at7, S22, AW,
@@ -259,7 +259,13 @@ is complete but is not this goal's completion. Current queue:
    subtests and raw/final failures stay separate. Intentional failures and the
    incomplete instrument I/O attempt remain preserved. Run tree09 under
    MIRROR-COMBINED-TREE09-BRIEF-2026-09-13.md with separate collection/main/media
-   heavy-import guard receipts. No complete tree09 has run at this entry.
+   heavy-import guard receipts. Tree09 is now complete and sealed at 9a46b38;
+   read ASTRA-COMBINED-TREE09-VERDICT-2026-09-13.md. Source 56d9d4c yields
+   2,796 passed / one historical AT6 failure / three skipped across 2,800 cases,
+   plus 13 passed subtests. All 50 formerly failing Phase 4 cases now pass.
+   The 62-payload proof matches disk and Git; 174 passive captures are complete
+   with no observer errors. No production test needs another run absent a new
+   source change or documented new concern. Retain tree08 and historical AT6.
    Rebind the unused package09 instruments to that new qualified source before
    following PACKAGE-09-INTEGRATION-BRIEF-2026-09-12.md. Package08 remains held;
    no new installed NLTK or signing credit exists.
@@ -3865,3 +3871,28 @@ diagnostics: the first directory entry declares version 0, stored compression,
 disk 0 and flags 2056. Both inspections observed the same size and hash. A narrow
 metadata-reader compatibility proposal is being prepared against those exact
 bytes; no deserialization, architecture or model-quality claim follows.
+
+### 2026-09-13 — Combined source qualifies with one historical receipt failure
+
+Commit 9a46b38 seals complete tree09 at source 56d9d4c: 2,796 passed, one failed,
+three skipped and 13 passed subtests. Main ran in 1,505.07 s and the separate
+media pair in 4.12 s; aggregate wall time including collection was 1,521.10 s.
+All 2,800 collected cases are accounted for, with only S21 excluded. All 50
+previously failing Phase 4 cases now pass. Keep the overall FAIL for the missing
+historical AT6 child-exit record. Original assertions/fixtures/markers are intact.
+
+The sealer exited zero; all 62 payloads match Git and disk. The durable observer
+records aggregate child exit one and the summary hash. The passive observer has
+174 captures and zero errors. Import guards validate for collection, main and
+media, with one, two and one denied import attempts respectively. Their scope
+remains the pytest process, not its children. No new installer or model ran.
+
+Gemini asset council run 131e52c7-b6e7-4b69-bc74-1283f77391fa completed source
+review at the same base. Integration is next. Its empty supplied-tokenizer-buffer
+finding is being repaired in a fresh B2 proposal; its Windows drive-case premise
+is disproved by native Path equality observations. The unapplied tokenizer race
+is the already-recorded runtime gap. Preserve the raw report and Astra's verdict.
+Static VAD inventories completed under exact-hash, nonexecuting readers; their
+proof and the fixed-loader proposal are awaiting documentary integration. The
+next bounded preparation is a symbolic metadata trace; no model conversion,
+load, inference or frozen dependency-test change has been authorized.
