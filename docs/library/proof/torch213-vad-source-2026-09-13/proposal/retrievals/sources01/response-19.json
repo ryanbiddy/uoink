@@ -1,0 +1,18 @@
+{
+  "advertised_bytes": 26593,
+  "body_bytes": 26593,
+  "body_complete": true,
+  "body_file": "body-19.txt",
+  "body_sha256": "59dad5f51cb700bbe3a323a4169e77489470c25582838594f98e8e55f8156f7d",
+  "content_encoding": "identity",
+  "content_type": "text/plain",
+  "finished_utc": "2026-09-13T16:48:31.366616+00:00",
+  "http_status": 200,
+  "kind": "source",
+  "limit": 65536,
+  "ordinal": 19,
+  "started_utc": "2026-09-13T16:48:31.115942+00:00",
+  "status": "text_collected",
+  "truncated": false,
+  "url": "https://raw.githubusercontent.com/pytorch/pytorch/cf30153c4c131c8164ee7798e5022d810682e2cb/torch/nn/init.py"
+}

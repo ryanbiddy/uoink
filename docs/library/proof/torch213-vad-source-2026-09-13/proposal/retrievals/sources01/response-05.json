@@ -1,0 +1,18 @@
+{
+  "advertised_bytes": 3185,
+  "body_bytes": 3185,
+  "body_complete": true,
+  "body_file": "body-05.txt",
+  "body_sha256": "ca4f65fca5ac7d5233501c7d706afe39db5699bfa923c6617113809b76bf150c",
+  "content_encoding": "identity",
+  "content_type": "text/plain",
+  "finished_utc": "2026-09-13T16:48:27.946534+00:00",
+  "http_status": 200,
+  "kind": "source",
+  "limit": 16384,
+  "ordinal": 5,
+  "started_utc": "2026-09-13T16:48:27.730294+00:00",
+  "status": "text_collected",
+  "truncated": false,
+  "url": "https://raw.githubusercontent.com/pytorch/pytorch/cf30153c4c131c8164ee7798e5022d810682e2cb/torch/__future__.py"
+}

@@ -1,0 +1,7 @@
+{
+  "only_crlf_lf_difference": true,
+  "worker_sha256": "d43314e848c9cf0b6301c0c07bdfb96f92df7c678ae5705dccf636cc53751e79",
+  "checkout_sha256": "ec2b77f6a863e83e3897106667ae2fb7d47de03526eeef740e679d912ab3c815",
+  "applies_to_brief_only": true,
+  "reviewed_source_bytes_must_match_exactly": true
+}

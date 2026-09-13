@@ -1,0 +1,7 @@
+{
+  "scope": "Read-only Git textual comparison, not a product test",
+  "rnn_exit": 1,
+  "init_exit": 1,
+  "exit_one_means_text_differences": true,
+  "source_executed": false
+}

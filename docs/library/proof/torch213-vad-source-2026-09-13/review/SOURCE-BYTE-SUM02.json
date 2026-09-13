@@ -1,0 +1,11 @@
+{
+  "scope": "Documentary sum of unchanged retained response records",
+  "original_binding_sha256": "2bcb4256aafaf7de29eb2252d7a10ff0a85358e90db659de5d0d3aa5a6308ba6",
+  "original_source_bytes_was_null": true,
+  "source_files": 19,
+  "source_bytes": 1044471.0,
+  "api_files": 2,
+  "api_bytes": 6257.0,
+  "total_body_bytes": 1050728.0,
+  "all_individual_body_hashes_and_lengths_match": true
+}

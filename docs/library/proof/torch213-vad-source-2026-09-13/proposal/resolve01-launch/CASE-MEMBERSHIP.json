@@ -1,0 +1,97 @@
+{
+  "scope": "Receipt-derived case membership; no rerun",
+  "receipt": "collector-preflight01/stdout.json",
+  "receipt_sha256": "8708cbde80a61540d14b5362a385b9267171e49c6a2d08eedf0dfc9b8687731e",
+  "ordered_case_names": [
+    "fixed_scope_and_caps",
+    "url_scope_exact",
+    "request_headers_utc_sha_and_inert_body",
+    "redirect_status_refused",
+    "changed_response_url",
+    "encoded_response",
+    "successful_html",
+    "invalid_content_length",
+    "oversized_content_length",
+    "short_body",
+    "invalid_utf8",
+    "nul_source",
+    "lfs_pointer",
+    "http_error_body_is_failure_evidence",
+    "oversized_body_retains_only_bounded_prefix",
+    "interrupted_read_preserves_partial_error",
+    "total_byte_cap",
+    "request_cap_before_open",
+    "deadline_before_open",
+    "local_json_receipt_cap",
+    "duplicate_api_key",
+    "malformed_api_json",
+    "api_root_array",
+    "api_body_cap",
+    "lightweight_tag_chain",
+    "annotated_tag_chain",
+    "wrong_ref_name",
+    "unsupported_ref_type",
+    "invalid_ref_id",
+    "wrong_annotated_tag_name",
+    "tag_cycle_refused",
+    "tag_depth_refused",
+    "commit_identity_refused",
+    "absent_admission_before_tls_and_paths",
+    "changed_reviewed_commit",
+    "changed_reviewed_ref_object",
+    "complete_fake_source_stage_exact_19_urls",
+    "post_serialization_deadline_retains_refusal",
+    "collector_audit_predicates_direct_inert_calls",
+    "redirect_handler_never_follows"
+  ],
+  "unique_cases": 40,
+  "passed": 40,
+  "failed": 0,
+  "qualification_exit": 0,
+  "native_exit": 0,
+  "outer_exit": 0,
+  "startup_binding": true,
+  "inputs": [
+    {
+      "name": "collect_torch_text.py",
+      "sha256": "6971aa91d430f0b43f3a3215d2dfe8a0c467b234ead827d311b1323b348fdc93",
+      "original_and_copy_match": true
+    },
+    {
+      "name": "qualify_collector.py",
+      "sha256": "1186f6d1fb0bad848fcb5e662791350db7a1fa6c7e65e280b7806ece537b222e",
+      "original_and_copy_match": true
+    },
+    {
+      "name": "BRIEF.md",
+      "sha256": "370d2bdd75281731b11f60662b8f865bbb5637c40f428277ce4fd437c371d508",
+      "original_and_copy_match": true
+    },
+    {
+      "name": "PLAN.md",
+      "sha256": "1e8793aec89ff050b3f38f2cd32b7281aadab5f60731de212cce4d82ff016285",
+      "original_and_copy_match": true
+    },
+    {
+      "name": "SYNTHETIC-PREFLIGHT01-PROTOCOL.md",
+      "sha256": "ae4eefe8d8fc0d678b52ea057d8abe028fe047cab68f1e4a59cfbcbc64aeed61",
+      "original_and_copy_match": true
+    },
+    {
+      "name": "PRE-REVIEW-REFINEMENTS.md",
+      "sha256": "0e97f460ecc88be11bd7b1eebed4f6385762487b0e88855c7faabd19ebd4a374",
+      "original_and_copy_match": true
+    },
+    {
+      "name": "UTC-REPORTING-REFINEMENT.md",
+      "sha256": "49e3e7b997b31e707938648a02139155af25885026ea8abd86dd19be5200de0b",
+      "original_and_copy_match": true
+    },
+    {
+      "name": "run_preflight01.ps1",
+      "sha256": "4b3ed1d664b1b3a4a6c5611397ccfdbf7a78e707766728e19379c116b10bb8a5",
+      "original_and_copy_match": true
+    }
+  ],
+  "stderr_bytes": 0
+}

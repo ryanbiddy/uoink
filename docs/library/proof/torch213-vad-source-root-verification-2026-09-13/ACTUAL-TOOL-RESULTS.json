@@ -1,0 +1,23 @@
+{
+  "scope": "Transcribed actual root tool results; raw tool records remain in the task history",
+  "source_proof_sha256": "290a815003a3593d0685e5570c61feccf6884edada9dae80f5cc0887665b3a74",
+  "attempt01": {
+    "chunk_id": "02a385",
+    "wall_time_seconds": 0.2182696,
+    "actual_outer_exit": 1,
+    "failure": "AssertionError at line 93: expected 48 timestamp receipt JSON files but selected all 51 JSON files",
+    "destination_created": false
+  },
+  "attempt02": {
+    "chunk_id": "e79585",
+    "wall_time_seconds": 0.6773129,
+    "actual_outer_exit": 0,
+    "payloads": 199,
+    "original_copies_verified": 197,
+    "ordered_passing_cases_each_run": 40,
+    "http_body_pairs_verified": 23,
+    "utc_strings_verified": 119,
+    "copied_files": 200
+  },
+  "no_tests_or_network_rerun": true
+}

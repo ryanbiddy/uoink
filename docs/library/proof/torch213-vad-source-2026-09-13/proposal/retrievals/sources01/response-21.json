@@ -1,0 +1,18 @@
+{
+  "advertised_bytes": 16964,
+  "body_bytes": 16964,
+  "body_complete": true,
+  "body_file": "body-21.txt",
+  "body_sha256": "ddc32c2cc2dfa5e2320f8c8e75b7d048c7661c58e1c9f7304914a22744e2177f",
+  "content_encoding": "identity",
+  "content_type": "text/plain",
+  "finished_utc": "2026-09-13T16:48:31.828359+00:00",
+  "http_status": 200,
+  "kind": "source",
+  "limit": 32768,
+  "ordinal": 21,
+  "started_utc": "2026-09-13T16:48:31.605280+00:00",
+  "status": "text_collected",
+  "truncated": false,
+  "url": "https://raw.githubusercontent.com/pytorch/pytorch/cf30153c4c131c8164ee7798e5022d810682e2cb/torch/autograd/grad_mode.py"
+}

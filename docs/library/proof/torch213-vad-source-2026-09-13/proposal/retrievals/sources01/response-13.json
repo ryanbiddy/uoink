@@ -1,0 +1,18 @@
+{
+  "advertised_bytes": 41172,
+  "body_bytes": 41172,
+  "body_complete": true,
+  "body_file": "body-13.txt",
+  "body_sha256": "b59a648fe5d87ea98f953840a75542e0cd1ef89bf98127c9f00b8ed5051f1e07",
+  "content_encoding": "identity",
+  "content_type": "text/plain",
+  "finished_utc": "2026-09-13T16:48:29.949432+00:00",
+  "http_status": 200,
+  "kind": "source",
+  "limit": 65536,
+  "ordinal": 13,
+  "started_utc": "2026-09-13T16:48:29.712607+00:00",
+  "status": "text_collected",
+  "truncated": false,
+  "url": "https://raw.githubusercontent.com/pytorch/pytorch/cf30153c4c131c8164ee7798e5022d810682e2cb/torch/nn/modules/batchnorm.py"
+}

@@ -1,0 +1,89 @@
+{
+  "scope": "Retained committed Python and documentary text only; no source import or asset access",
+  "commit": "de07dfe5ee69da349d967aa45164ed6004b07aa5",
+  "target_torch": "2.13.0",
+  "target_tag": "v2.13.0",
+  "target_commit": null,
+  "network_requests": 0,
+  "bindings": [
+    {
+      "key": "LOCK",
+      "path": "docs\\library\\proof\\vad-selected-metadata-map-2026-09-13\\retained-fixed-loader\\source\\requirements-installer-lock.txt",
+      "bytes": 3718,
+      "sha256": "333e420059309d113e66a12c8b2c19ea14cb2feb8f812780a76a5fa30c94d20a",
+      "matches_original_binding": true
+    },
+    {
+      "key": "MODEL",
+      "path": "docs\\library\\proof\\vad-selected-metadata-map-2026-09-13\\retained-fixed-loader\\source\\pyannote\\audio\\core\\model.py",
+      "bytes": 22879,
+      "sha256": "baef26b0d3bcb0027b179f9d472cc5795f77073fa8e5210bdd2ce53a267275e3",
+      "matches_original_binding": true
+    },
+    {
+      "key": "TASK",
+      "path": "docs\\library\\proof\\vad-selected-metadata-map-2026-09-13\\retained-fixed-loader\\source\\pyannote\\audio\\core\\task.py",
+      "bytes": 32399,
+      "sha256": "e2b0cc845a1234fe2f211ba2a0084c3e9be43fbdb82e41e6ca775f4746bbe444",
+      "matches_original_binding": true
+    },
+    {
+      "key": "PYANNET",
+      "path": "docs\\library\\proof\\vad-selected-metadata-map-2026-09-13\\retained-fixed-loader\\source\\pyannote\\audio\\models\\segmentation\\PyanNet.py",
+      "bytes": 7992,
+      "sha256": "3ceebc8c00e83d96747a706212102e7e99c44732ff1fc769e241e8de47d3d6af",
+      "matches_original_binding": true
+    },
+    {
+      "key": "SINCNET",
+      "path": "docs\\library\\proof\\vad-selected-metadata-map-2026-09-13\\retained-fixed-loader\\source\\pyannote\\audio\\models\\blocks\\sincnet.py",
+      "bytes": 5702,
+      "sha256": "3f151a2482c3f8c266b1efd9bdcab297238c52b4792a7265261f2da063e5dade",
+      "matches_original_binding": true
+    },
+    {
+      "key": "INFERENCE",
+      "path": "docs\\library\\proof\\vad-selected-metadata-map-2026-09-13\\retained-fixed-loader\\source\\pyannote\\audio\\core\\inference.py",
+      "bytes": 25120,
+      "sha256": "c29f525c93a1a5c6bd0a9475ae4fb8c73ce9b48cf9735301302eb99886ad7d41",
+      "matches_original_binding": true
+    },
+    {
+      "key": "SINC_FB",
+      "path": "docs\\library\\proof\\vad-selected-metadata-map-2026-09-13\\retained-fixed-loader\\source\\asteroid_filterbanks\\param_sinc_fb.py",
+      "bytes": 5191,
+      "sha256": "2df0d1e6f109985c00efcc60970ebceff6a9665c3e65ebae73ea4848e48d8eae",
+      "matches_original_binding": true
+    },
+    {
+      "key": "FACTORY",
+      "path": "docs\\library\\proof\\vad-selected-metadata-map-2026-09-13\\proposal\\fixed-factory.proposal.txt",
+      "bytes": 7589,
+      "sha256": "69136c1f7d5cd7bf283e3634dff730c9fd951a314a80b0fa134208f3d1c1820b"
+    },
+    {
+      "key": "TORCH_INIT_28",
+      "path": "docs\\library\\proof\\vad-selected-metadata-map-2026-09-13\\proposal\\additional-source\\torch-init.py",
+      "bytes": 105826,
+      "sha256": "6d6c92d0b1091fc8f437cfe8228e9c9ad088dc0faf8446b1df8738f61c0834f2"
+    },
+    {
+      "key": "TORCH_RNN_28",
+      "path": "docs\\library\\proof\\vad-selected-metadata-map-2026-09-13\\proposal\\additional-source\\torch-rnn.py",
+      "bytes": 76334,
+      "sha256": "4ca97c3133494a7b21bb07fdf90ec04b27d764a4803f02f9f139fb61614b5ecb"
+    },
+    {
+      "key": "TORCH_UTILS_28",
+      "path": "docs\\library\\proof\\vad-selected-metadata-map-2026-09-13\\proposal\\additional-source\\torch-utils.py",
+      "bytes": 41529,
+      "sha256": "a74c433f12e3f0867e4b9911d3fb071205198ee946f78ef7dbcfa438bdadd6cb"
+    },
+    {
+      "key": "ORIGINAL_BINDINGS",
+      "path": "docs\\library\\proof\\vad-selected-metadata-map-2026-09-13\\context\\fixed-loader-source-bindings.json",
+      "bytes": 13661,
+      "sha256": "8dbd83213bceac5012bc342e001826902ce3a88fd420fa64f8f8d9a65366fa9c"
+    }
+  ]
+}

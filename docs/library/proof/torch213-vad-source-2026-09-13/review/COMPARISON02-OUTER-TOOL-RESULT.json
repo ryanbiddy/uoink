@@ -1,0 +1,7 @@
+{
+  "chunk_id": "4682fd",
+  "wall_time_seconds": 0.1880711,
+  "exit_code": 0,
+  "original_token_count": 71,
+  "output": "{\r\n  \"reporting_exit\": 0,\r\n  \"exact_cases\": 40,\r\n  \"input_checks\": 16,\r\n  \"source_bytes\": 1044471.0,\r\n  \"comparison_sha256\": \"39b7e5632aee1edbe7ae4d4f42251b6aa1e8c29200be8284f557988c8e9c9708\",\r\n  \"sum_sha256\": \"ac8f3d0e19a2163aa5159c8f57857a8fbddfb539ca555d91ef557eb33444be49\"\r\n}\r\n"
+}

@@ -1,0 +1,253 @@
+{
+  "scope": "Receipt-only selected metadata mapping and inert factory proposal; no model or conversion execution",
+  "created_utc": "2026-09-13T14:43:39.9547126Z",
+  "payload_count": 48,
+  "records": [
+    {
+      "path": ".gitattributes",
+      "bytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+    },
+    {
+      "path": "context/fixed-loader-source-bindings.json",
+      "bytes": 13661,
+      "sha256": "8dbd83213bceac5012bc342e001826902ce3a88fd420fa64f8f8d9a65366fa9c"
+    },
+    {
+      "path": "context/original-fixed-loader38-SHA256.json",
+      "bytes": 6601,
+      "sha256": "129773fb33e4ec94a4e217373064d6d55de68d1db71f299a2372a91be1a76403"
+    },
+    {
+      "path": "context/original-projection214-SHA256.json",
+      "bytes": 45593,
+      "sha256": "7a3484f2b52d607c65748cb03eb13363418ff2c157e76648c1e7c1cef68d66ed"
+    },
+    {
+      "path": "context/symbolic-projection01.json",
+      "bytes": 190182,
+      "sha256": "60b0078f3367bf80b8ed526d681850c47b0caae09f4fbd8da3de0883f927247d"
+    },
+    {
+      "path": "INDEPENDENT-REVIEW.md",
+      "bytes": 4283,
+      "sha256": "95a6de46637ebc88ac67baca4708f2bd6f5ea2ae9cc4d21a036f76a1de35e320"
+    },
+    {
+      "path": "proposal/additional-source/torch-init.py",
+      "bytes": 105826,
+      "sha256": "6d6c92d0b1091fc8f437cfe8228e9c9ad088dc0faf8446b1df8738f61c0834f2"
+    },
+    {
+      "path": "proposal/additional-source/torch-rnn.py",
+      "bytes": 76334,
+      "sha256": "4ca97c3133494a7b21bb07fdf90ec04b27d764a4803f02f9f139fb61614b5ecb"
+    },
+    {
+      "path": "proposal/additional-source/torch-utils.py",
+      "bytes": 41529,
+      "sha256": "a74c433f12e3f0867e4b9911d3fb071205198ee946f78ef7dbcfa438bdadd6cb"
+    },
+    {
+      "path": "proposal/BRIEF.md",
+      "bytes": 2138,
+      "sha256": "a0976ad178305463b8370c8ca245d8d5ce1c5f61147a1cc9ded828137c304773"
+    },
+    {
+      "path": "proposal/drafts/fixed-factory-before-string-key-refinement.txt",
+      "bytes": 7477,
+      "sha256": "c2f60b9c2409cabb5203a14030d46f4332417bb114a1bed2c367cb69d4f7ee74"
+    },
+    {
+      "path": "proposal/drafts/manifest-before-string-key-refinement.json",
+      "bytes": 39960,
+      "sha256": "5c8cf91da7b9798979fe612a4299512a9c24c1f334355dc911027dff7118ab47"
+    },
+    {
+      "path": "proposal/EVIDENCE-REPORT.md",
+      "bytes": 16402,
+      "sha256": "a836f6ab24246e10b263ece7296763bfd4b5dfa50b5f0f6a88161d51b7761a82"
+    },
+    {
+      "path": "proposal/FINAL-REPORT-REFINEMENTS.md",
+      "bytes": 1071,
+      "sha256": "6d8eb37723bf809872fbdab69270f349f4d801719dc0ea697ef766430f4b9bf9"
+    },
+    {
+      "path": "proposal/fixed-factory.proposal.txt",
+      "bytes": 7589,
+      "sha256": "69136c1f7d5cd7bf283e3634dff730c9fd951a314a80b0fa134208f3d1c1820b"
+    },
+    {
+      "path": "proposal/INTEGRATOR-NOTE.md",
+      "bytes": 1684,
+      "sha256": "a43208d2406304ef01ba8ab4dd531daf2e10be5963512e012dc20f929f6cfd15"
+    },
+    {
+      "path": "proposal/manifest.proposal.json",
+      "bytes": 39960,
+      "sha256": "5c8cf91da7b9798979fe612a4299512a9c24c1f334355dc911027dff7118ab47"
+    },
+    {
+      "path": "proposal/manifest.proposal02.json",
+      "bytes": 40097,
+      "sha256": "7198c7f63558feaac2f80814e61e77d91fd45316615b6aa6cad4d498742bed37"
+    },
+    {
+      "path": "proposal/map_receipt.py",
+      "bytes": 12955,
+      "sha256": "9fef99356f9051dcbf6809f5da3b1ada5046aa7227b01784b65e7897ba6e6bf0"
+    },
+    {
+      "path": "proposal/map-run01.json",
+      "bytes": 440,
+      "sha256": "63962ee79e316b2974bec827128f274e05d6cdfc412c72a67fcaf7138c8fa17a"
+    },
+    {
+      "path": "proposal/map01-launch.json",
+      "bytes": 276,
+      "sha256": "6069bd725b4032846c0ce721ead07d6fc755542fe4cead859c0ba0295a3140a0"
+    },
+    {
+      "path": "proposal/map01-stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "proposal/map01-stdout.log",
+      "bytes": 417,
+      "sha256": "f70c941aa6e3dcc2b1fb6f7c7cfad950ee1ccbb701051cc72e19d2c02ba755d3"
+    },
+    {
+      "path": "proposal/mapping.json",
+      "bytes": 186186,
+      "sha256": "b6ef4d932556a24e46661e5600e50b386f3243a3aeeb19fa0dad592e439fd5ca"
+    },
+    {
+      "path": "proposal/PRESEAL-REFINEMENTS.md",
+      "bytes": 1017,
+      "sha256": "89a2f4c21f9ee47678310f2ac383460281b0809ab24359dae63ba2eb6247aed8"
+    },
+    {
+      "path": "proposal/run_map01.ps1",
+      "bytes": 1359,
+      "sha256": "57c883b6fd3d0ce9e5c59fe89ef1079faf6a7c73bea6490f56943c3937c048c0"
+    },
+    {
+      "path": "proposal/seal_map01.ps1",
+      "bytes": 5483,
+      "sha256": "9feed5d5d65145b6351b5ccae238cfe6c83e861e183fa2b2ff0d65f854fb6ab9"
+    },
+    {
+      "path": "proposal/source-extra-check01.json",
+      "bytes": 578,
+      "sha256": "e3ff0ed829c0f4056398c5ff2978ff1e435e8eb6dfce9009fcc7df56e609d5da"
+    },
+    {
+      "path": "proposal/SUPPLEMENT-SCOPE.md",
+      "bytes": 1283,
+      "sha256": "7a40536690c64144fe491fc8ae2bbf7e9ad07446f64e6125b9f797a87d3f7fc3"
+    },
+    {
+      "path": "proposal/supplement01.json",
+      "bytes": 23613,
+      "sha256": "aebde1776b44adda8c52e4cdc7d50204ef31ff20f231c842d746eb745d872999"
+    },
+    {
+      "path": "proposal/supplement01.ps1",
+      "bytes": 4752,
+      "sha256": "e65c486491ec144832d96e5b102cfa2cb5a3bfeef930bad3914df5727fbc268d"
+    },
+    {
+      "path": "proposal/tensor-table.md",
+      "bytes": 5287,
+      "sha256": "aa7f8073cf5491e6508ad1b91805577f303458c77fda19daaea2a43068976f00"
+    },
+    {
+      "path": "proposal/tensor-table02.md",
+      "bytes": 6411,
+      "sha256": "884277d8eeaf16f900c45e32fb5a347512bda70caa72698e3c29bfc38d3cccbb"
+    },
+    {
+      "path": "proposal/update_manifest02.ps1",
+      "bytes": 1207,
+      "sha256": "4bef0a946b4ec70f4f4c6d3ec9edb22060bf4716f9143f63edf673d16f5735cb"
+    },
+    {
+      "path": "proposal/write_manifest01.ps1",
+      "bytes": 7501,
+      "sha256": "77663e5fae2e0f3a87897f26ca680d908ce3499f42df53400dba045eceaa1836"
+    },
+    {
+      "path": "proposal/write_table02.ps1",
+      "bytes": 2152,
+      "sha256": "6141a7f4b9f95806a4fdf611a7d9859e8a983659f1fe972189afd8f6db209e27"
+    },
+    {
+      "path": "retained-fixed-loader/source/asteroid_filterbanks/param_sinc_fb.py",
+      "bytes": 5191,
+      "sha256": "2df0d1e6f109985c00efcc60970ebceff6a9665c3e65ebae73ea4848e48d8eae"
+    },
+    {
+      "path": "retained-fixed-loader/source/pyannote/audio/core/inference.py",
+      "bytes": 25120,
+      "sha256": "c29f525c93a1a5c6bd0a9475ae4fb8c73ce9b48cf9735301302eb99886ad7d41"
+    },
+    {
+      "path": "retained-fixed-loader/source/pyannote/audio/core/model.py",
+      "bytes": 22879,
+      "sha256": "baef26b0d3bcb0027b179f9d472cc5795f77073fa8e5210bdd2ce53a267275e3"
+    },
+    {
+      "path": "retained-fixed-loader/source/pyannote/audio/core/task.py",
+      "bytes": 32399,
+      "sha256": "e2b0cc845a1234fe2f211ba2a0084c3e9be43fbdb82e41e6ca775f4746bbe444"
+    },
+    {
+      "path": "retained-fixed-loader/source/pyannote/audio/models/blocks/sincnet.py",
+      "bytes": 5702,
+      "sha256": "3f151a2482c3f8c266b1efd9bdcab297238c52b4792a7265261f2da063e5dade"
+    },
+    {
+      "path": "retained-fixed-loader/source/pyannote/audio/models/segmentation/PyanNet.py",
+      "bytes": 7992,
+      "sha256": "3ceebc8c00e83d96747a706212102e7e99c44732ff1fc769e241e8de47d3d6af"
+    },
+    {
+      "path": "retained-fixed-loader/source/pyannote/audio/pipelines/utils/getter.py",
+      "bytes": 9339,
+      "sha256": "42bc13a1ba61a7a297e311c0f881f2e5abb8cff6dad219ed7ea654752480eab5"
+    },
+    {
+      "path": "retained-fixed-loader/source/pyannote/audio/pipelines/voice_activity_detection.py",
+      "bytes": 7801,
+      "sha256": "24f4234c84f934f400f3a23da15d36104c1c04eb0453f6af9ca4ff2c3bd51fbb"
+    },
+    {
+      "path": "retained-fixed-loader/source/pyannote/audio/utils/params.py",
+      "bytes": 266,
+      "sha256": "e33654afd8fba201d7bed24d579573a74044e3154ac5b3bb14269fcdcde53e43"
+    },
+    {
+      "path": "retained-fixed-loader/source/requirements-installer-lock.txt",
+      "bytes": 3718,
+      "sha256": "333e420059309d113e66a12c8b2c19ea14cb2feb8f812780a76a5fa30c94d20a"
+    },
+    {
+      "path": "retained-fixed-loader/source/whisperx/asr.py",
+      "bytes": 17620,
+      "sha256": "f25d2dfd0cfcbcb6cd2850ba213bf715f92d4369401274e534557448876da565"
+    },
+    {
+      "path": "retained-fixed-loader/source/whisperx/vads/pyannote.py",
+      "bytes": 9880,
+      "sha256": "65575744a07c2366847b33c14ba56a1e5e07234a4f6d7008d2e271f134413003"
+    }
+  ],
+  "original_checkpoint_read": false,
+  "original_refusal_preserved": true,
+  "original_projection214_unchanged": true,
+  "original_fixed_loader38_unchanged": true,
+  "factory_approved": false,
+  "release_approved": false
+}

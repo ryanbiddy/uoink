@@ -1,0 +1,770 @@
+{
+  "scope": "Regex string extraction from unchanged raw JSON; no date parsing",
+  "all_observed_timestamps_explicit_utc": true,
+  "records": [
+    {
+      "timestamps": [
+        {
+          "field": "finished_utc",
+          "literal": "2026-09-13T16:43:38.023840+00:00"
+        },
+        {
+          "field": "finished_utc",
+          "literal": "2026-09-13T16:43:37.787735+00:00"
+        },
+        {
+          "field": "started_utc",
+          "literal": "2026-09-13T16:43:37.567387+00:00"
+        },
+        {
+          "field": "finished_utc",
+          "literal": "2026-09-13T16:43:38.023026+00:00"
+        },
+        {
+          "field": "started_utc",
+          "literal": "2026-09-13T16:43:37.788018+00:00"
+        },
+        {
+          "field": "started_utc",
+          "literal": "2026-09-13T16:43:37.567031+00:00"
+        }
+      ],
+      "sha256": "d10ebf095e330aae8ad818644ddd5638228c2a9d1db57021c50967b2bd52daa4",
+      "file": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\torch213-vad-source-proposal01\\retrievals\\resolve01\\receipt.json"
+    },
+    {
+      "timestamps": [
+        {
+          "field": "started_utc",
+          "literal": "2026-09-13T16:43:37.567387+00:00"
+        }
+      ],
+      "sha256": "91c53c9eb14d3f18a618786cd949c079d539c84e69795f2b1dfe00c5de2c9eae",
+      "file": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\torch213-vad-source-proposal01\\retrievals\\resolve01\\request-01.json"
+    },
+    {
+      "timestamps": [
+        {
+          "field": "started_utc",
+          "literal": "2026-09-13T16:43:37.788018+00:00"
+        }
+      ],
+      "sha256": "38206ef8574b2162a3756c3a753832e02ea71268d25858ba6eab2b8dca678db4",
+      "file": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\torch213-vad-source-proposal01\\retrievals\\resolve01\\request-02.json"
+    },
+    {
+      "timestamps": [
+        {
+          "field": "finished_utc",
+          "literal": "2026-09-13T16:43:37.787735+00:00"
+        },
+        {
+          "field": "started_utc",
+          "literal": "2026-09-13T16:43:37.567387+00:00"
+        }
+      ],
+      "sha256": "1783a03a2b69777edd957758962dbe5f851f81801bc1232e10dbe47108dfa453",
+      "file": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\torch213-vad-source-proposal01\\retrievals\\resolve01\\response-01.json"
+    },
+    {
+      "timestamps": [
+        {
+          "field": "finished_utc",
+          "literal": "2026-09-13T16:43:38.023026+00:00"
+        },
+        {
+          "field": "started_utc",
+          "literal": "2026-09-13T16:43:37.788018+00:00"
+        }
+      ],
+      "sha256": "1ddb8dbd1af2d0de2b6d8daa7d64b860d56b2f237d97e335458b38de2831d6ab",
+      "file": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\torch213-vad-source-proposal01\\retrievals\\resolve01\\response-02.json"
+    },
+    {
+      "timestamps": [
+        {
+          "field": "finished_utc",
+          "literal": "2026-09-13T16:48:31.828553+00:00"
+        },
+        {
+          "field": "finished_utc",
+          "literal": "2026-09-13T16:48:26.930654+00:00"
+        },
+        {
+          "field": "started_utc",
+          "literal": "2026-09-13T16:48:26.715395+00:00"
+        },
+        {
+          "field": "finished_utc",
+          "literal": "2026-09-13T16:48:27.138973+00:00"
+        },
+        {
+          "field": "started_utc",
+          "literal": "2026-09-13T16:48:26.930883+00:00"
+        },
+        {
+          "field": "finished_utc",
+          "literal": "2026-09-13T16:48:27.364497+00:00"
+        },
+        {
+          "field": "started_utc",
+          "literal": "2026-09-13T16:48:27.140013+00:00"
+        },
+        {
+          "field": "finished_utc",
+          "literal": "2026-09-13T16:48:27.729980+00:00"
+        },
+        {
+          "field": "started_utc",
+          "literal": "2026-09-13T16:48:27.364710+00:00"
+        },
+        {
+          "field": "finished_utc",
+          "literal": "2026-09-13T16:48:27.946534+00:00"
+        },
+        {
+          "field": "started_utc",
+          "literal": "2026-09-13T16:48:27.730294+00:00"
+        },
+        {
+          "field": "finished_utc",
+          "literal": "2026-09-13T16:48:28.228095+00:00"
+        },
+        {
+          "field": "started_utc",
+          "literal": "2026-09-13T16:48:27.946787+00:00"
+        },
+        {
+          "field": "finished_utc",
+          "literal": "2026-09-13T16:48:28.446428+00:00"
+        },
+        {
+          "field": "started_utc",
+          "literal": "2026-09-13T16:48:28.228403+00:00"
+        },
+        {
+          "field": "finished_utc",
+          "literal": "2026-09-13T16:48:28.647678+00:00"
+        },
+        {
+          "field": "started_utc",
+          "literal": "2026-09-13T16:48:28.446632+00:00"
+        },
+        {
+          "field": "finished_utc",
+          "literal": "2026-09-13T16:48:29.037413+00:00"
+        },
+        {
+          "field": "started_utc",
+          "literal": "2026-09-13T16:48:28.647888+00:00"
+        },
+        {
+          "field": "finished_utc",
+          "literal": "2026-09-13T16:48:29.279831+00:00"
+        },
+        {
+          "field": "started_utc",
+          "literal": "2026-09-13T16:48:29.037629+00:00"
+        },
+        {
+          "field": "finished_utc",
+          "literal": "2026-09-13T16:48:29.500293+00:00"
+        },
+        {
+          "field": "started_utc",
+          "literal": "2026-09-13T16:48:29.280051+00:00"
+        },
+        {
+          "field": "finished_utc",
+          "literal": "2026-09-13T16:48:29.712282+00:00"
+        },
+        {
+          "field": "started_utc",
+          "literal": "2026-09-13T16:48:29.500752+00:00"
+        },
+        {
+          "field": "finished_utc",
+          "literal": "2026-09-13T16:48:29.949432+00:00"
+        },
+        {
+          "field": "started_utc",
+          "literal": "2026-09-13T16:48:29.712607+00:00"
+        },
+        {
+          "field": "finished_utc",
+          "literal": "2026-09-13T16:48:30.151561+00:00"
+        },
+        {
+          "field": "started_utc",
+          "literal": "2026-09-13T16:48:29.949665+00:00"
+        },
+        {
+          "field": "finished_utc",
+          "literal": "2026-09-13T16:48:30.428926+00:00"
+        },
+        {
+          "field": "started_utc",
+          "literal": "2026-09-13T16:48:30.151885+00:00"
+        },
+        {
+          "field": "finished_utc",
+          "literal": "2026-09-13T16:48:30.670011+00:00"
+        },
+        {
+          "field": "started_utc",
+          "literal": "2026-09-13T16:48:30.429137+00:00"
+        },
+        {
+          "field": "finished_utc",
+          "literal": "2026-09-13T16:48:30.901045+00:00"
+        },
+        {
+          "field": "started_utc",
+          "literal": "2026-09-13T16:48:30.670238+00:00"
+        },
+        {
+          "field": "finished_utc",
+          "literal": "2026-09-13T16:48:31.115731+00:00"
+        },
+        {
+          "field": "started_utc",
+          "literal": "2026-09-13T16:48:30.901348+00:00"
+        },
+        {
+          "field": "finished_utc",
+          "literal": "2026-09-13T16:48:31.366616+00:00"
+        },
+        {
+          "field": "started_utc",
+          "literal": "2026-09-13T16:48:31.115942+00:00"
+        },
+        {
+          "field": "finished_utc",
+          "literal": "2026-09-13T16:48:31.604969+00:00"
+        },
+        {
+          "field": "started_utc",
+          "literal": "2026-09-13T16:48:31.366832+00:00"
+        },
+        {
+          "field": "finished_utc",
+          "literal": "2026-09-13T16:48:31.828359+00:00"
+        },
+        {
+          "field": "started_utc",
+          "literal": "2026-09-13T16:48:31.605280+00:00"
+        },
+        {
+          "field": "started_utc",
+          "literal": "2026-09-13T16:48:26.715068+00:00"
+        }
+      ],
+      "sha256": "4e55849a06e2d6796963a027047037c51e488c55a0d20d7fd1566158a0aea90b",
+      "file": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\torch213-vad-source-proposal01\\retrievals\\sources01\\receipt.json"
+    },
+    {
+      "timestamps": [
+        {
+          "field": "started_utc",
+          "literal": "2026-09-13T16:48:26.715395+00:00"
+        }
+      ],
+      "sha256": "0e83785bfd95b8ce3706167b2d7c4e354a01efa637e71f1150352cd7bb8b0bbc",
+      "file": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\torch213-vad-source-proposal01\\retrievals\\sources01\\request-01.json"
+    },
+    {
+      "timestamps": [
+        {
+          "field": "started_utc",
+          "literal": "2026-09-13T16:48:26.930883+00:00"
+        }
+      ],
+      "sha256": "01f8b2de860f602afe3df1c4a205414e83dc3658953a4f67bc531c3209e100ef",
+      "file": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\torch213-vad-source-proposal01\\retrievals\\sources01\\request-02.json"
+    },
+    {
+      "timestamps": [
+        {
+          "field": "started_utc",
+          "literal": "2026-09-13T16:48:27.140013+00:00"
+        }
+      ],
+      "sha256": "daa02778d668a78bc503411a6cc9c0873b87a80f01e884bfbfd0d574673392c4",
+      "file": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\torch213-vad-source-proposal01\\retrievals\\sources01\\request-03.json"
+    },
+    {
+      "timestamps": [
+        {
+          "field": "started_utc",
+          "literal": "2026-09-13T16:48:27.364710+00:00"
+        }
+      ],
+      "sha256": "efba168e7a9a4ea66944f9770ff6a7512a26efa664a36d5e7b17a9f10eb2903c",
+      "file": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\torch213-vad-source-proposal01\\retrievals\\sources01\\request-04.json"
+    },
+    {
+      "timestamps": [
+        {
+          "field": "started_utc",
+          "literal": "2026-09-13T16:48:27.730294+00:00"
+        }
+      ],
+      "sha256": "2044b00a449137b429344bffcf0206b84d3ba20b288189c897c29eb2ec4b65b1",
+      "file": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\torch213-vad-source-proposal01\\retrievals\\sources01\\request-05.json"
+    },
+    {
+      "timestamps": [
+        {
+          "field": "started_utc",
+          "literal": "2026-09-13T16:48:27.946787+00:00"
+        }
+      ],
+      "sha256": "64c976a5093e221632acf9787f3fce75971a4daa7982d542de3f3f6bb0f0be00",
+      "file": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\torch213-vad-source-proposal01\\retrievals\\sources01\\request-06.json"
+    },
+    {
+      "timestamps": [
+        {
+          "field": "started_utc",
+          "literal": "2026-09-13T16:48:28.228403+00:00"
+        }
+      ],
+      "sha256": "5a3325ffa430565ebc75fa59447d540d4838d6fca53b659bd0e7092041746de6",
+      "file": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\torch213-vad-source-proposal01\\retrievals\\sources01\\request-07.json"
+    },
+    {
+      "timestamps": [
+        {
+          "field": "started_utc",
+          "literal": "2026-09-13T16:48:28.446632+00:00"
+        }
+      ],
+      "sha256": "da1e448cb7f1a8f4f59246d05772483351ce28921df8b8a1695e138b4723f7db",
+      "file": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\torch213-vad-source-proposal01\\retrievals\\sources01\\request-08.json"
+    },
+    {
+      "timestamps": [
+        {
+          "field": "started_utc",
+          "literal": "2026-09-13T16:48:28.647888+00:00"
+        }
+      ],
+      "sha256": "ceaaec4459ace12666d4454657d34f10e8f4db937ab262abef8de4e1d9b7fd5c",
+      "file": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\torch213-vad-source-proposal01\\retrievals\\sources01\\request-09.json"
+    },
+    {
+      "timestamps": [
+        {
+          "field": "started_utc",
+          "literal": "2026-09-13T16:48:29.037629+00:00"
+        }
+      ],
+      "sha256": "a420b546f4876d6f584573677965cf8d3a24bc7dea411760f65c046815761689",
+      "file": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\torch213-vad-source-proposal01\\retrievals\\sources01\\request-10.json"
+    },
+    {
+      "timestamps": [
+        {
+          "field": "started_utc",
+          "literal": "2026-09-13T16:48:29.280051+00:00"
+        }
+      ],
+      "sha256": "3bc576c0725c2716cc92b8aa72af431679e57160ae84652a10474795dbde8ab4",
+      "file": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\torch213-vad-source-proposal01\\retrievals\\sources01\\request-11.json"
+    },
+    {
+      "timestamps": [
+        {
+          "field": "started_utc",
+          "literal": "2026-09-13T16:48:29.500752+00:00"
+        }
+      ],
+      "sha256": "e4c5b180dba923609d2b79c9842255a30467fe1cb07af6f430560a2ea04e1547",
+      "file": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\torch213-vad-source-proposal01\\retrievals\\sources01\\request-12.json"
+    },
+    {
+      "timestamps": [
+        {
+          "field": "started_utc",
+          "literal": "2026-09-13T16:48:29.712607+00:00"
+        }
+      ],
+      "sha256": "f752794b93b6dc9c26c2b9f029462798278073758d4174f12193656e6536d3b6",
+      "file": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\torch213-vad-source-proposal01\\retrievals\\sources01\\request-13.json"
+    },
+    {
+      "timestamps": [
+        {
+          "field": "started_utc",
+          "literal": "2026-09-13T16:48:29.949665+00:00"
+        }
+      ],
+      "sha256": "2d3c6b09095c4b5d9d9af9014b0263496867b0a999cf90ec73d4f3346e7d237f",
+      "file": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\torch213-vad-source-proposal01\\retrievals\\sources01\\request-14.json"
+    },
+    {
+      "timestamps": [
+        {
+          "field": "started_utc",
+          "literal": "2026-09-13T16:48:30.151885+00:00"
+        }
+      ],
+      "sha256": "af2fe00e904ee0e57c95997ad4fc6c162b491545335c480553c0f165773c47de",
+      "file": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\torch213-vad-source-proposal01\\retrievals\\sources01\\request-15.json"
+    },
+    {
+      "timestamps": [
+        {
+          "field": "started_utc",
+          "literal": "2026-09-13T16:48:30.429137+00:00"
+        }
+      ],
+      "sha256": "66020fd8cde291c32abc3f2b03489dfad003ef70125c3d9f139b2fc8ce41f701",
+      "file": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\torch213-vad-source-proposal01\\retrievals\\sources01\\request-16.json"
+    },
+    {
+      "timestamps": [
+        {
+          "field": "started_utc",
+          "literal": "2026-09-13T16:48:30.670238+00:00"
+        }
+      ],
+      "sha256": "e7ac368779ea25f41225443b354e2ea762d23dccb2f24a026b3d976ee9807b79",
+      "file": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\torch213-vad-source-proposal01\\retrievals\\sources01\\request-17.json"
+    },
+    {
+      "timestamps": [
+        {
+          "field": "started_utc",
+          "literal": "2026-09-13T16:48:30.901348+00:00"
+        }
+      ],
+      "sha256": "b7432e2559065bacb21a38527b7be60579f16ac1a215cb4e4c48f3de4f1f627b",
+      "file": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\torch213-vad-source-proposal01\\retrievals\\sources01\\request-18.json"
+    },
+    {
+      "timestamps": [
+        {
+          "field": "started_utc",
+          "literal": "2026-09-13T16:48:31.115942+00:00"
+        }
+      ],
+      "sha256": "8f73a9fd43381cc49d4763ca9da2af8430dcf018316fd61cfa3c790cc1855f82",
+      "file": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\torch213-vad-source-proposal01\\retrievals\\sources01\\request-19.json"
+    },
+    {
+      "timestamps": [
+        {
+          "field": "started_utc",
+          "literal": "2026-09-13T16:48:31.366832+00:00"
+        }
+      ],
+      "sha256": "1a827f446976e4e4cf540c0592611484440cf04899b2942666fe5776be436231",
+      "file": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\torch213-vad-source-proposal01\\retrievals\\sources01\\request-20.json"
+    },
+    {
+      "timestamps": [
+        {
+          "field": "started_utc",
+          "literal": "2026-09-13T16:48:31.605280+00:00"
+        }
+      ],
+      "sha256": "106dfe6be6fca71e4da551fa4ce00a2d088601de486e6e6dcfe96330b215c0f9",
+      "file": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\torch213-vad-source-proposal01\\retrievals\\sources01\\request-21.json"
+    },
+    {
+      "timestamps": [
+        {
+          "field": "finished_utc",
+          "literal": "2026-09-13T16:48:26.930654+00:00"
+        },
+        {
+          "field": "started_utc",
+          "literal": "2026-09-13T16:48:26.715395+00:00"
+        }
+      ],
+      "sha256": "7e202e2db37122027dfe8e679f459f460f50a2dcb02d409d53a47085cff48bfb",
+      "file": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\torch213-vad-source-proposal01\\retrievals\\sources01\\response-01.json"
+    },
+    {
+      "timestamps": [
+        {
+          "field": "finished_utc",
+          "literal": "2026-09-13T16:48:27.138973+00:00"
+        },
+        {
+          "field": "started_utc",
+          "literal": "2026-09-13T16:48:26.930883+00:00"
+        }
+      ],
+      "sha256": "e4b85a1ad9bb3821a74c12d6d30dabb0ccb0ad3c96bc51a4423e5389998bfeaf",
+      "file": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\torch213-vad-source-proposal01\\retrievals\\sources01\\response-02.json"
+    },
+    {
+      "timestamps": [
+        {
+          "field": "finished_utc",
+          "literal": "2026-09-13T16:48:27.364497+00:00"
+        },
+        {
+          "field": "started_utc",
+          "literal": "2026-09-13T16:48:27.140013+00:00"
+        }
+      ],
+      "sha256": "b28bd87ea74514384ef8b86e62896f226184f5d32e2753220dc7772cb38a30db",
+      "file": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\torch213-vad-source-proposal01\\retrievals\\sources01\\response-03.json"
+    },
+    {
+      "timestamps": [
+        {
+          "field": "finished_utc",
+          "literal": "2026-09-13T16:48:27.729980+00:00"
+        },
+        {
+          "field": "started_utc",
+          "literal": "2026-09-13T16:48:27.364710+00:00"
+        }
+      ],
+      "sha256": "0624feef1b401a587bbc8f994845736885aba76072f9292ec84106a004c7a53c",
+      "file": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\torch213-vad-source-proposal01\\retrievals\\sources01\\response-04.json"
+    },
+    {
+      "timestamps": [
+        {
+          "field": "finished_utc",
+          "literal": "2026-09-13T16:48:27.946534+00:00"
+        },
+        {
+          "field": "started_utc",
+          "literal": "2026-09-13T16:48:27.730294+00:00"
+        }
+      ],
+      "sha256": "5de9e1212c466e08c85d47713c1d5ad4c5adae4efe9903eb1da022bf73e30f38",
+      "file": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\torch213-vad-source-proposal01\\retrievals\\sources01\\response-05.json"
+    },
+    {
+      "timestamps": [
+        {
+          "field": "finished_utc",
+          "literal": "2026-09-13T16:48:28.228095+00:00"
+        },
+        {
+          "field": "started_utc",
+          "literal": "2026-09-13T16:48:27.946787+00:00"
+        }
+      ],
+      "sha256": "971c6d1d611c6d2c154e797111278c022a7c324ce2aeeb236f57b42477343d22",
+      "file": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\torch213-vad-source-proposal01\\retrievals\\sources01\\response-06.json"
+    },
+    {
+      "timestamps": [
+        {
+          "field": "finished_utc",
+          "literal": "2026-09-13T16:48:28.446428+00:00"
+        },
+        {
+          "field": "started_utc",
+          "literal": "2026-09-13T16:48:28.228403+00:00"
+        }
+      ],
+      "sha256": "c5020628b9d5d5d32a2f330ee6609525632b1783814b505c8b8e05de76f775d1",
+      "file": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\torch213-vad-source-proposal01\\retrievals\\sources01\\response-07.json"
+    },
+    {
+      "timestamps": [
+        {
+          "field": "finished_utc",
+          "literal": "2026-09-13T16:48:28.647678+00:00"
+        },
+        {
+          "field": "started_utc",
+          "literal": "2026-09-13T16:48:28.446632+00:00"
+        }
+      ],
+      "sha256": "84334ed8ce03c362c3839af25997e719055af0475051d37fd0ac2599e100d715",
+      "file": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\torch213-vad-source-proposal01\\retrievals\\sources01\\response-08.json"
+    },
+    {
+      "timestamps": [
+        {
+          "field": "finished_utc",
+          "literal": "2026-09-13T16:48:29.037413+00:00"
+        },
+        {
+          "field": "started_utc",
+          "literal": "2026-09-13T16:48:28.647888+00:00"
+        }
+      ],
+      "sha256": "0a688b61986ba499231ffdd52c510175515dba785979bcfef6e6fe7ffe36825b",
+      "file": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\torch213-vad-source-proposal01\\retrievals\\sources01\\response-09.json"
+    },
+    {
+      "timestamps": [
+        {
+          "field": "finished_utc",
+          "literal": "2026-09-13T16:48:29.279831+00:00"
+        },
+        {
+          "field": "started_utc",
+          "literal": "2026-09-13T16:48:29.037629+00:00"
+        }
+      ],
+      "sha256": "2273ccd7a9f8f9a5566436b8bb56bf60914e6beb923b168abb53d9a1e8ce74e7",
+      "file": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\torch213-vad-source-proposal01\\retrievals\\sources01\\response-10.json"
+    },
+    {
+      "timestamps": [
+        {
+          "field": "finished_utc",
+          "literal": "2026-09-13T16:48:29.500293+00:00"
+        },
+        {
+          "field": "started_utc",
+          "literal": "2026-09-13T16:48:29.280051+00:00"
+        }
+      ],
+      "sha256": "e18b28f7a8efe4c3f28985b59f355c4ce894e2c9b469aef59180f1f5694f794c",
+      "file": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\torch213-vad-source-proposal01\\retrievals\\sources01\\response-11.json"
+    },
+    {
+      "timestamps": [
+        {
+          "field": "finished_utc",
+          "literal": "2026-09-13T16:48:29.712282+00:00"
+        },
+        {
+          "field": "started_utc",
+          "literal": "2026-09-13T16:48:29.500752+00:00"
+        }
+      ],
+      "sha256": "423614ebf90b2ef82c3fa40845c16717ecf35c676e6dd2436c57ff51fa943d24",
+      "file": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\torch213-vad-source-proposal01\\retrievals\\sources01\\response-12.json"
+    },
+    {
+      "timestamps": [
+        {
+          "field": "finished_utc",
+          "literal": "2026-09-13T16:48:29.949432+00:00"
+        },
+        {
+          "field": "started_utc",
+          "literal": "2026-09-13T16:48:29.712607+00:00"
+        }
+      ],
+      "sha256": "028bb9727ccd672015ba95e4e23dab7ab9c5dcd4e27835c8ec9240db7d9d8548",
+      "file": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\torch213-vad-source-proposal01\\retrievals\\sources01\\response-13.json"
+    },
+    {
+      "timestamps": [
+        {
+          "field": "finished_utc",
+          "literal": "2026-09-13T16:48:30.151561+00:00"
+        },
+        {
+          "field": "started_utc",
+          "literal": "2026-09-13T16:48:29.949665+00:00"
+        }
+      ],
+      "sha256": "1b9364f43826c7dfb2e62b7bc9707e84bbe157185982f7f2f43246af0f219200",
+      "file": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\torch213-vad-source-proposal01\\retrievals\\sources01\\response-14.json"
+    },
+    {
+      "timestamps": [
+        {
+          "field": "finished_utc",
+          "literal": "2026-09-13T16:48:30.428926+00:00"
+        },
+        {
+          "field": "started_utc",
+          "literal": "2026-09-13T16:48:30.151885+00:00"
+        }
+      ],
+      "sha256": "6b79e8885c3b83a03a3e89760e61032e1a9c7e7f57d54710102700e5de9c724c",
+      "file": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\torch213-vad-source-proposal01\\retrievals\\sources01\\response-15.json"
+    },
+    {
+      "timestamps": [
+        {
+          "field": "finished_utc",
+          "literal": "2026-09-13T16:48:30.670011+00:00"
+        },
+        {
+          "field": "started_utc",
+          "literal": "2026-09-13T16:48:30.429137+00:00"
+        }
+      ],
+      "sha256": "cbf8bc283bbc5e03850638c62aea801bbb289a31dcf9e901a61517d53e13f131",
+      "file": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\torch213-vad-source-proposal01\\retrievals\\sources01\\response-16.json"
+    },
+    {
+      "timestamps": [
+        {
+          "field": "finished_utc",
+          "literal": "2026-09-13T16:48:30.901045+00:00"
+        },
+        {
+          "field": "started_utc",
+          "literal": "2026-09-13T16:48:30.670238+00:00"
+        }
+      ],
+      "sha256": "e24dfbf98be7c358a4d524a177bffb0b4cf1f9f738cebc3642fa6cd3696855ca",
+      "file": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\torch213-vad-source-proposal01\\retrievals\\sources01\\response-17.json"
+    },
+    {
+      "timestamps": [
+        {
+          "field": "finished_utc",
+          "literal": "2026-09-13T16:48:31.115731+00:00"
+        },
+        {
+          "field": "started_utc",
+          "literal": "2026-09-13T16:48:30.901348+00:00"
+        }
+      ],
+      "sha256": "bd1a4e63477e94915f0504b4b6a8a0607717d88a349df9b7e2948b4dc4284001",
+      "file": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\torch213-vad-source-proposal01\\retrievals\\sources01\\response-18.json"
+    },
+    {
+      "timestamps": [
+        {
+          "field": "finished_utc",
+          "literal": "2026-09-13T16:48:31.366616+00:00"
+        },
+        {
+          "field": "started_utc",
+          "literal": "2026-09-13T16:48:31.115942+00:00"
+        }
+      ],
+      "sha256": "f9fb9e6e569b853917d7c7f0247a8bd4befe5738f32ca5998c629a4142009bd1",
+      "file": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\torch213-vad-source-proposal01\\retrievals\\sources01\\response-19.json"
+    },
+    {
+      "timestamps": [
+        {
+          "field": "finished_utc",
+          "literal": "2026-09-13T16:48:31.604969+00:00"
+        },
+        {
+          "field": "started_utc",
+          "literal": "2026-09-13T16:48:31.366832+00:00"
+        }
+      ],
+      "sha256": "911af94a705e722c2fb8208f346421a4d0df6f03fab0c516eeb03f9d460b4893",
+      "file": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\torch213-vad-source-proposal01\\retrievals\\sources01\\response-20.json"
+    },
+    {
+      "timestamps": [
+        {
+          "field": "finished_utc",
+          "literal": "2026-09-13T16:48:31.828359+00:00"
+        },
+        {
+          "field": "started_utc",
+          "literal": "2026-09-13T16:48:31.605280+00:00"
+        }
+      ],
+      "sha256": "566995b12d158ef9f2e889facd1061a4c7ae55359ef431e1860e5c86d9974420",
+      "file": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\torch213-vad-source-proposal01\\retrievals\\sources01\\response-21.json"
+    }
+  ]
+}

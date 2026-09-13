@@ -1,0 +1,58 @@
+{
+  "label": "resolve01",
+  "started_utc": "2026-09-13T16:43:37.4664150Z",
+  "source_sha256": "6971aa91d430f0b43f3a3215d2dfe8a0c467b234ead827d311b1323b348fdc93",
+  "inputs": [
+    {
+      "name": "collect_torch_text.py",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\torch213-vad-source-proposal01\\collect_torch_text.py",
+      "sha256": "6971aa91d430f0b43f3a3215d2dfe8a0c467b234ead827d311b1323b348fdc93"
+    },
+    {
+      "name": "run_resolve01.ps1",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\torch213-vad-source-proposal01\\run_resolve01.ps1",
+      "sha256": "9cd24e18cec0d68d8c00a70cff847f1f5fada853370fc0254719cfc61e5a5736"
+    },
+    {
+      "name": "RESOLVE01-PROTOCOL.md",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\torch213-vad-source-proposal01\\RESOLVE01-PROTOCOL.md",
+      "sha256": "2aff1f2b4d7e57c99645709065d4cfa023c4ad97d85bd2bb9ede128796a6c58f"
+    },
+    {
+      "name": "BRIEF.md",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\torch213-vad-source-proposal01\\BRIEF.md",
+      "sha256": "370d2bdd75281731b11f60662b8f865bbb5637c40f428277ce4fd437c371d508"
+    },
+    {
+      "name": "PLAN.md",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\torch213-vad-source-proposal01\\PLAN.md",
+      "sha256": "1e8793aec89ff050b3f38f2cd32b7281aadab5f60731de212cce4d82ff016285"
+    },
+    {
+      "name": "FINAL-REPORT.md",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\torch213-vad-source-proposal01\\FINAL-REPORT.md",
+      "sha256": "68ddff33360379899b63353016ea8b86b3ddf7ed1a09ccf1a6e95cfed6755511"
+    },
+    {
+      "name": "CASE-MEMBERSHIP.json",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\torch213-vad-source-proposal01\\CASE-MEMBERSHIP.json",
+      "sha256": "f9bfa102aa61150d45129b37fc70ae41befb65eb38db48e24cfa5b45614c906c"
+    }
+  ],
+  "startup_binding_set": true,
+  "environment_scrub": "provider credentials, proxies, certificate overrides and SSL key log; no values retained",
+  "arguments": [
+    "-I",
+    "-S",
+    "-B",
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\torch213-vad-source-proposal01\\collect_torch_text.py",
+    "--mode",
+    "resolve",
+    "--label",
+    "resolve01",
+    "--admission",
+    "reviewed-torch213-vad-public-text-only"
+  ],
+  "scope": "official GitHub tag/commit API text only; at most four requests",
+  "source_stage_authorized": false
+}

@@ -1,0 +1,6 @@
+{
+  "actual_outer_exit": 1,
+  "chunk_id": "5991d7",
+  "failure": "Brief bytes differed between checkout and worktree before source verification or Git intent-to-add",
+  "qualification_run": false
+}
