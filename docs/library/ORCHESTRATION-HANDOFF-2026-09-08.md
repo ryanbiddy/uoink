@@ -86,7 +86,7 @@ establish safe installation isolation, and verify/correct resulting findings.
   Always `PYTHONDONTWRITEBYTECODE=1`, `PYTHONPATH=<checkout>`; Phase 3 needs
   `PHASE3_REQUIRE_IMPLEMENTATION=1`; unset `ANTHROPIC_API_KEY`.
 
-## State at handoff (updated 2026-09-12; release fixes continue after package 08)
+## State at handoff (updated 2026-09-13; release fixes continue after package 08)
 
 | Phase | State | Astra's latest ruling | Next |
 |---|---|---|---|
@@ -100,6 +100,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | Runtime source review | Gemini loader council and Torch source comparison integrated at a2e6e7c | Gemini found no new actionable defect within the three components' synthetic scope; Astra accepts with timestamp, path and native-open corrections. Torch collector passed 40 cases in each root; 23 admitted HTTP body pairs verified. All 38 council, 199 source and seven root-verification payloads match Git/disk | Repair dormant D1 and ASR qualification exit-recording gaps, qualify fake-port orchestration, implement tensor bridge and real runtime ports. No native, installed or release clearance |
 | Signing | Gemini review and repaired path integrated at 0b3629d | 48 focused passes; 77 proof payloads match Git. Real Inno direct callback refuses missing certificate and keeps a durable error. No successful signing credit | Full combined candidate tree after runtime work settles; actual certificate/service choice remains Ryan's |
 | Dormant D1 runner | Repaired wrapper and source review integrated at f0602f8 | Author and Astra each 12 passed / 0 failed plus four separate controls; 102 sealed payloads match Git/disk, with 460 source files and 370 archived case members verified | Actual static inspection remains disabled for the separate D1 decision. No model, conversion, installed or release credit |
+| State bridge | Synthetic orchestration integrated at 2b9068a | Author and Astra each 61 passed / 0 failed / 0 skipped, exact cases and valid guards. All 59 proof payloads match Git/disk and map 83 logical files | Implement the concrete CPU tensor services and qualify them separately. Real entry point remains closed; no native or release credit |
 | Integration | Reliability consent/readiness/settings repair integrated at e8d058f after tree09 | Each root passes 53 focused cases plus 13 subtests; all guards and exact membership valid. Tree09 at 56d9d4c remains 2,796 passed / 1 failed / 3 skipped across 2,800 cases, plus 13 subtests; it predates this repair | Continue VAD/plain-state and ASR manifest proposals, then a new committed complete tree when source settles. Package08 and website/marketing remain held. No current-source package or installation credit |
 | Desktop incident | Isolation failed in package-07 attempt; corrected at `e10ba3a` | Ordinary Uoink and filesystem connectors launched; earlier live-index/5179 effects unknown. Owned job cleaned | No further override launch; only guarded Uoink dashboard observed for package 08 |
 
@@ -203,11 +204,13 @@ original-wrapper controls recorded separately. All 102 proof payloads match
 Git/disk. Actual D1 gates remain None. The ASR instrument's first check failed:
 native_exit was null after local LASTEXITCODE shadowing. Four fresh inert scope
 observations confirm explicit global capture on PowerShell 7.6.5; the original
-failed receipt remains unchanged. Finish the reviewed two-wrapper/four-guard
-repair subset, then admit the unchanged 58 ASR cases only if it qualifies.
-The tensor bridge's author run passes 61 generated/fake-port cases; independent
-repeat and integration follow. Native construction, the real ASR lifecycle and
-the owned WhisperX derivative remain implementation work.
+failed receipt remains unchanged. The repaired two-wrapper/four-guard subset
+met its expectations; the unchanged 58 ASR cases then pass independently in
+author and Astra roots. Integrate their complete proof next.
+The tensor bridge is qualified at 2b9068a: 61 generated/fake-port cases pass in
+both roots, with 59 proof payloads matching Git/disk. Read
+ASTRA-VAD-STATE-BRIDGE-VERDICT-2026-09-13.md. Native tensor services, the real ASR
+lifecycle and the owned WhisperX derivative remain implementation work.
 
 1. Signing review e922b3bf and local repairs are integrated at 0b3629d. Read
    ASTRA-SIGNING-REVIEW-02-2026-09-12.md before the retained Gemini report.
@@ -4510,3 +4513,21 @@ behavior run. Preserve those failures and the scoped repair reasons.
 The bridge author has 61 passing synthetic cases, zero failures/skips, valid
 guards and all exits zero. Independent repeat follows; no native port ran.
 Production remains e8d058f. Website and marketing remain paused.
+
+### 2026-09-13 - State bridge independently qualified; ASR orchestration passes
+
+Bridge source b3ff126f is qualified for its generated/fake-port scope at 2b9068a.
+Author and Astra each pass the same 61 cases, zero failures/skips, in 3.874631
+and 3.958711 seconds. All guards and source/copy identities remain intact;
+all exits are zero. The 59-payload proof preserves 83 logical files through
+53 content objects, including pre-execution drafts and both raw runs. All
+payloads match Git and disk. Its real entry point still refuses; concrete
+Torch allocation, copying, strict load and native cleanup are unfinished.
+
+The ASR capture repair passed its two expected wrapper outcomes and four
+guard checks. The unchanged 58-case adapter qualification then passes in
+both roots (0.004348 and 0.004171 s), all exits zero, 11 final traps intact,
+no denials/imports, and matching ordered cases. Its separate combined proof
+is being prepared; no native runtime ran. Keep the original null exit failed.
+No production change follows; source remains e8d058f. Website and marketing
+remain paused pending council and integrator approval of the finished product.
