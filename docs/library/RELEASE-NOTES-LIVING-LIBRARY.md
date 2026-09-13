@@ -79,8 +79,11 @@ The concrete VAD factory and model registry at `803df4b` pass 59 simulated
 cases independently in both roots. Registration now precedes the owned VAD
 guard, failed construction revokes its authority, and an expired reference
 cannot authorize a repeated release. The [factory verdict](ASTRA-VAD-FACTORY-PORT-VERDICT-2026-09-13.md)
-records the remaining native and worker requirements. The next Gemini review
-covers these components, the lifecycle and owned WhisperX source.
+records the remaining native and worker requirements. Gemini's review of these
+components, the lifecycle and owned WhisperX is integrated at `488a7fd`.
+Astra accepts its limited source verdicts with three wording corrections;
+all 99 evidence payloads match Git and disk. This is component agreement,
+not approval of the unfinished runtime, installation or market release.
 
 The repaired metadata checker rejects the earlier upgrade proposal: five
 WhisperX conflicts, two missing dependencies and three wheel failures, including

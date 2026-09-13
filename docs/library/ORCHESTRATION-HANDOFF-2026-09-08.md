@@ -102,11 +102,12 @@ establish safe installation isolation, and verify/correct resulting findings.
 | Dormant D1 runner | Repaired wrapper and source review integrated at f0602f8 | Author and Astra each 12 passed / 0 failed plus four separate controls; 102 sealed payloads match Git/disk, with 460 source files and 370 archived case members verified | Actual static inspection remains disabled for the separate D1 decision. No model, conversion, installed or release credit |
 | State bridge | Synthetic orchestration integrated at 2b9068a | Author and Astra each 61 passed / 0 failed / 0 skipped, exact cases and valid guards. All 59 proof payloads match Git/disk and map 83 logical files | CPU port now qualified with fake APIs at 3801cee; implement the concrete factory service and qualify native independence separately. Real entry points remain closed |
 | CPU tensor port | Concrete method bodies qualified with fake storage at 3801cee | Author and Astra each 60 passed / 0 failed / 0 skipped, exact ordered cases and ten valid final guards. All 45 proof payloads match Git/disk and map 67 logical files | Implement factory ownership and actual runtime services. Native allocation, float conversion, storage/view behavior and cleanup remain untested; no market clearance |
-| VAD factory registry | Concrete factory and worker-local model registration integrated at 803df4b | Author and Astra each 59 passed / 0 failed / 0 skipped; all ten guards valid and 65 proof payloads match Git/disk, preserving 119 logical files | Gemini98b5e1a3 is reviewing CPU/factory, lifecycle and owned WhisperX; actual runtime bootstrap, native semantics and numerical behavior remain open |
+| VAD factory registry | Concrete factory and worker-local model registration integrated at 803df4b | Author and Astra each 59 passed / 0 failed / 0 skipped; all ten guards valid and 65 proof payloads match Git/disk, preserving 119 logical files | Gemini component review accepted at 488a7fd for tested scope; actual runtime bootstrap, native semantics and numerical behavior remain open |
 | Owned WhisperX | Source/contracts at 1935012; actual text wheel at 93f4996 | Author and Astra each 50 inert cases pass. Actual wheel is 134,793 bytes/22 members; build and independent byte verification exits zero. All 217 contract and 38 packaging proof payloads match Git/disk. Original failures remain preserved | Recompute captured compatibility graph with the exact built derivatives; real runtime remains closed |
 | ASR lifecycle | State/facade contracts integrated at 1935012 | Author and Astra each 46 passed / 0 failed / 0 skipped; all 98 proof payloads match Git/disk. Original zero-case winreg startup failure, diagnostic and repair preserved | Implement complete Windows loader namespace protection, trusted worker bootstrap/IPC and crash recovery; no kernel/model clearance |
 | ASR orchestration | Fake-port adapter qualified at a3e02f4 | Author and Astra each 58 passed / 0 failed with exact cases and 11 final traps intact. All 260 proof payloads match Git/disk; original null exit remains failed | Implement Windows snapshot lifetime and the owned operation worker. No real model, package or installed clearance |
 | Orchestration council | Gemini review integrated at cf5614d | All three groups accepted for their limited scope, with Astra's cleanup/exit/ownership corrections. Eight source/contract files match both checkouts and original seals; all 27 new proof payloads match Git/disk | Continue concrete runtime implementations. This review grants no native, installed or market acceptance |
+| Component council | Gemini98b5e1a3 integrated at 488a7fd | CPU/factory, lifecycle and owned WhisperX accepted for tested scope, with Astra's three wording corrections. Seventeen current bindings checked; all 99 proof payloads match Git/disk | Qualify the connected Windows worker and final dependency set. No runtime, installed or market acceptance |
 | Integration | Reliability consent/readiness/settings repair integrated at e8d058f after tree09 | Each root passes 53 focused cases plus 13 subtests; all guards and exact membership valid. Tree09 at 56d9d4c remains 2,796 passed / 1 failed / 3 skipped across 2,800 cases, plus 13 subtests; it predates this repair | Continue VAD/plain-state and ASR manifest proposals, then a new committed complete tree when source settles. Package08 and website/marketing remain held. No current-source package or installation credit |
 | Desktop incident | Isolation failed in package-07 attempt; corrected at `e10ba3a` | Ordinary Uoink and filesystem connectors launched; earlier live-index/5179 effects unknown. Owned job cleaned | No further override launch; only guarded Uoink dashboard observed for package 08 |
 
@@ -251,13 +252,24 @@ integrated at 803df4b after author/root each pass the same 59 cases. Read
 ASTRA-VAD-FACTORY-PORT-VERDICT-2026-09-13.md; all 65 proof payloads match
 Git/disk and map 119 original logical files. The context-cleanup, registration
 and expired-retirement repairs precede both runs. Gemini98b5e1a3-c100-4cf6-b147-1b73555538ce
-is running the three-group GEMINI-OWNED-RUNTIME-COMPONENTS-COUNCIL-BRIEF-2026-09-13.md
-from frozen59f3aeb; controller exec66449. It is text review only, with no new
-execution suite. Collect the actual report/events/controller outcome when it
-finishes, review independently and integrate via diff/three-way apply. Continue
-the candidate03 graph adaptation and
-connected Windows worker source while council reviews; preserve all original
-failures and keep native authority closed.
+completed its three-group review from frozen59f3aeb and is integrated at
+488a7fd. Read ASTRA-OWNED-RUNTIME-COMPONENTS-COUNCIL-VERDICT-2026-09-13.md
+before the raw report. All 99 proof payloads match Git/disk. No new execution
+suite was named or run for that review. Its verified-inputs=12 event is a
+reference counter without membership; seventeen current bindings were checked
+separately and must not be called the original preflight manifest.
+
+Next integrate the Windows namespace/protocol fake-API evidence: author and
+Astra each pass the same 54 cases; both actual outer exits are zero, guards
+valid, nine inputs unchanged. The prepared combined proof awaits root review.
+Then qualify the connected generated-only Windows child, inherited pipe,
+child-held file guard and actual process/job shutdown. No model is involved.
+Candidate03 graph qualification01 remains FAIL: 51 passed / 11 failed,
+25 guard denials for generated package@version JSON metadata probes. No valid
+subset credit. Preserve the first run; review the narrow guard repair and
+fresh qualification02 before invocation. The exact local NLTK METADATA reader
+is prepared for separate review. Neither the current 144-pin graph nor native
+models have run. Preserve all failures and keep model authority closed.
 
 The authorized backup push of 01e22fb is waiting at Git's account selector;
 exec session 35629 remains pending. The local backup ref was fast-forwarded,
@@ -4783,3 +4795,38 @@ variables were removed from the child environment without printing values.
 The brief permits only a report and text inspection, no new execution suite.
 Continue Windows worker and metadata-graph implementation while it runs; review
 and preserve the actual report, source identities and events before acceptance.
+
+### 2026-09-13 - Component council accepted; Windows protocol passes twice
+
+Gemini98b5e1a3 completed, controller fa4418 exit0. Integration488a7fd retains
+its complete report, 364 events and seventeen separate current input bindings.
+Astra accepts the three tested source scopes with corrections to view offsets,
+exception/quarantine wording and conditional runtime guards. Collectionfc8b56
+and three-way applicatione2f730 both exited0; all99 proof payloads match Git
+and disk in root verificationa8dd31. No tests reran for the text-only council.
+
+Correct the preceding dispatch entry's twelve verified inputs wording: the
+event retained only a counter and no membership. Current Control Room source
+adds references to visited before skipping missing/outside-root paths. The
+seventeen inputs now checked are not reconstructed preflight membership. The
+observed Control Room source is archived separately without claiming it is
+the frozen dispatch implementation. Also use each proof's actual schema:
+lifecycle has SHA256-MANIFEST.json/count/files, WhisperX has a row array, and
+CPU/factory have payload_count/files. These collector draft errors were fixed
+before collection. Two routine wrong-path text lookups failed without tests,
+artifact reads or source changes.
+
+Author Windows nsp01:54/0/0 in0.017906299995956942s, actual0a8066 exit0.
+Astra independent nsp01:54/0/0 in0.01751979999244213s, actual91ffc7 exit0.
+Both have12 metadata/25 registry traps, no denials/heavy imports, empty stderr
+and nine unchanged source/copy inputs. Their proof is prepared, not integrated
+yet. The separate real Windows test will use generated data and demonstrate
+child-held protection after the parent's original read handle is closed.
+
+Candidate03 qualification01 failed51/11/0/0, actualc7c121 exit1, with25 test
+guard denials on generated package@version JSON probes. Root verified this
+cause; no subset is accepted. A documented probe-only guard repair and fresh
+qualification02 are prepared. Local NLTK METADATA extraction is a separate
+bounded step; neither it nor the current144-pin graph has run. Git backup
+session35629 still waits at account selection (df4678, no output), with no
+duplicate push. Production remains e8d058f; release/web/marketing stay held.
