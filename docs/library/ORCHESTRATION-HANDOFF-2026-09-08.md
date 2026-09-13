@@ -100,7 +100,8 @@ establish safe installation isolation, and verify/correct resulting findings.
 | Runtime source review | Gemini loader council and Torch source comparison integrated at a2e6e7c | Gemini found no new actionable defect within the three components' synthetic scope; Astra accepts with timestamp, path and native-open corrections. Torch collector passed 40 cases in each root; 23 admitted HTTP body pairs verified. All 38 council, 199 source and seven root-verification payloads match Git/disk | Repair dormant D1 and ASR qualification exit-recording gaps, qualify fake-port orchestration, implement tensor bridge and real runtime ports. No native, installed or release clearance |
 | Signing | Gemini review and repaired path integrated at 0b3629d | 48 focused passes; 77 proof payloads match Git. Real Inno direct callback refuses missing certificate and keeps a durable error. No successful signing credit | Full combined candidate tree after runtime work settles; actual certificate/service choice remains Ryan's |
 | Dormant D1 runner | Repaired wrapper and source review integrated at f0602f8 | Author and Astra each 12 passed / 0 failed plus four separate controls; 102 sealed payloads match Git/disk, with 460 source files and 370 archived case members verified | Actual static inspection remains disabled for the separate D1 decision. No model, conversion, installed or release credit |
-| State bridge | Synthetic orchestration integrated at 2b9068a | Author and Astra each 61 passed / 0 failed / 0 skipped, exact cases and valid guards. All 59 proof payloads match Git/disk and map 83 logical files | Implement the concrete CPU tensor services and qualify them separately. Real entry point remains closed; no native or release credit |
+| State bridge | Synthetic orchestration integrated at 2b9068a | Author and Astra each 61 passed / 0 failed / 0 skipped, exact cases and valid guards. All 59 proof payloads match Git/disk and map 83 logical files | CPU port now qualified with fake APIs at 3801cee; implement the concrete factory service and qualify native independence separately. Real entry points remain closed |
+| CPU tensor port | Concrete method bodies qualified with fake storage at 3801cee | Author and Astra each 60 passed / 0 failed / 0 skipped, exact ordered cases and ten valid final guards. All 45 proof payloads match Git/disk and map 67 logical files | Implement factory ownership and actual runtime services. Native allocation, float conversion, storage/view behavior and cleanup remain untested; no market clearance |
 | ASR orchestration | Fake-port adapter qualified at a3e02f4 | Author and Astra each 58 passed / 0 failed with exact cases and 11 final traps intact. All 260 proof payloads match Git/disk; original null exit remains failed | Implement Windows snapshot lifetime and the owned operation worker. No real model, package or installed clearance |
 | Orchestration council | Gemini review integrated at cf5614d | All three groups accepted for their limited scope, with Astra's cleanup/exit/ownership corrections. Eight source/contract files match both checkouts and original seals; all 27 new proof payloads match Git/disk | Continue concrete runtime implementations. This review grants no native, installed or market acceptance |
 | Integration | Reliability consent/readiness/settings repair integrated at e8d058f after tree09 | Each root passes 53 focused cases plus 13 subtests; all guards and exact membership valid. Tree09 at 56d9d4c remains 2,796 passed / 1 failed / 3 skipped across 2,800 cases, plus 13 subtests; it predates this repair | Continue VAD/plain-state and ASR manifest proposals, then a new committed complete tree when source settles. Package08 and website/marketing remain held. No current-source package or installation credit |
@@ -221,6 +222,17 @@ All 27 proof payloads match Git/disk. No tests reran for this source review.
 Continue concrete CPU tensor services, Windows lifecycle/worker and the owned
 WhisperX source/whitelist builder proposals. Their new source needs independent
 qualification; none inherits runtime or market acceptance from this council.
+The concrete CPU tensor port is now qualified with fake APIs at 3801cee; read
+ASTRA-VAD-CPU-PORT-VERDICT-2026-09-13.md. Both roots pass the same 60 cases,
+with ten valid guards and 45 sealed payloads matching Git/disk. Continue the
+concrete factory service, lifecycle/worker and owned WhisperX qualification.
+The Windows source's cancellation, output-budget and interruption repairs are
+under review; a later result-publication race was also repaired before testing.
+No real Torch/model code has run. D1 still awaits Ryan's separate answer.
+
+The authorized backup push of 01e22fb is waiting at Git's account selector;
+exec session 35629 remains pending. The local backup ref was fast-forwarded,
+but no successful remote result is recorded. Do not issue a duplicate push.
 
 1. Signing review e922b3bf and local repairs are integrated at 0b3629d. Read
    ASTRA-SIGNING-REVIEW-02-2026-09-12.md before the retained Gemini report.
@@ -4580,3 +4592,29 @@ cancellation-exception, output-bound and interruption-handling gaps; repairs
 and their tests are being prepared. These are product implementation work,
 not Ryan blockers. D1 remains the separate pending decision. Production is
 unchanged at e8d058f; website and marketing remain paused.
+
+### 2026-09-13 - Concrete CPU tensor port qualified with fake storage
+
+Integration 3801cee preserves the new concrete port and its 60 fixed cases.
+Author and independent Astra runs each pass 60/0/0 in 0.2979664000158664 and
+0.3032889000023715 seconds. Actual child/outer exits are zero, all ten final
+guards hold and stderr/audit denials are empty. Ordered raw case records match.
+The 13 source pins, five executed copies, admissions and generated control
+have checked identities. No source or assertion changed between these runs.
+
+The 45-payload proof maps 67 logical files to 39 content objects. All match
+Git/disk, with seal d14fcad26ad6b74967541f2403e05a88c49ebdddf713bee32fe32f0b7d3efc6e.
+The documentary builder's unused-copy-recipe schema assumption was corrected
+before execution to match the actual root receipt; both versions and the reason
+are preserved. No test reran for that documentary repair. Read the Astra CPU
+port verdict for original-storage retention, cleanup and native limits.
+
+Root review also identified a lifecycle result-publication race after the
+worker call returned. The proposal now commits passive output under the same
+lock as revocation; its added callback cases and stronger qualification guard
+are not yet run. The WhisperX builder's metadata agreement and qualification
+guards are being refined before admission, preserving original assertions.
+Concrete factory, Windows kernel/worker and real runtime work remain open.
+The D1 decision and Git account selection are pending user inputs. Backup
+session 35629 targets only cc/living-library at 01e22fb and has no success
+receipt yet. Website and marketing stay paused; production remains e8d058f.

@@ -55,8 +55,8 @@ Gemini's follow-up source council is integrated at `cf5614d`; Astra accepts
 its three limited-scope verdicts with documented corrections. It adds no native
 execution, package, installation or market-readiness result.
 
-The concrete CPU tensor port now passes 60 simulated cases in each independent
-run, with all ten final guards intact. Its proof and
+The concrete CPU tensor port at `3801cee` passes 60 simulated cases in each
+independent run, with all ten final guards intact. Its proof and
 [Astra verdict](ASTRA-VAD-CPU-PORT-VERDICT-2026-09-13.md) preserve exact source
 and outcomes. Native Torch behavior and factory independence remain untested;
 the real entry point stays closed. The Windows worker and owned WhisperX
