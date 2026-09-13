@@ -1,0 +1,10 @@
+{
+  "native_exit": 0,
+  "executable": "C:\\Python314\\python.exe",
+  "flags": [
+    "-I",
+    "-S",
+    "-B"
+  ],
+  "elapsed_seconds": 0.5180892
+}

@@ -1,0 +1,17 @@
+# One focused notice qualification
+
+2026-09-13. This proposal has not been executed. Root reviews the pinned source and creates ROOT-ADMISSION.json binding SOURCE-INPUTS.json, label notice01, source_tests_and_inert_blocks_approved true and full_build_or_models_approved false. The fixed launcher refuses existing output paths and checks every pinned file, all 23 originals/copies and the admission before and after the attempt.
+
+Run once, after admission, with the observed host:
+
+    C:\Users\hello\.cache\codex-runtimes\codex-primary-runtime\dependencies\native\powershell\pwsh.exe -NoLogo -NoProfile -NonInteractive -File E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\two-wheel-notice-qualification-proposal01\run_notice01.ps1
+
+The launcher invokes C:\Python314\python.exe -I -S -B notice_bootstrap.py. It installs the copied integrator audit policy and unchanged heavy-import guard before pytest. The only added import roots are the exact copied overlay and the existing C:\Users\hello\AppData\Roaming\Python\Python314\site-packages pytest support directory. No site initialization or package installation occurs. This is a scoped source-test guard, not a hermetic package environment or complete OS sandbox. The existing pytest installation is a qualification dependency, not a proposed shipped dependency. Output is captured and color disabled.
+
+Expected Python membership is 20 cases: all 13 assertions/tests in the three unchanged named files plus seven added parameterized generator cases. The observer records the full actual collection, setup/call/teardown reports and session exit; JUnit and the heavy guard are retained. validate_results.py checks these saved ordinary-test receipts and actual direct pytest.main/native exits. It does not reinterpret a failed or partial run as passed. There is no invented -m pytest subprocess record.
+
+Only if Python and receipt validation pass, a second fresh PowerShell process parses and runs the two exact hash-bound changed build blocks. Six generation cases use only a fixed function stand-in with exact arguments: success, pip-licenses failure followed by fallback generation, generator exit 2 followed by cleanup 0, cleanup exit 2, generator exception, and absent SOURCE_DATE_EPOCH. They check call order, failure propagation and restoration of epoch/native preference. Four staging cases copy the exact four text files or refuse a missing/mutated license or changed version lock, retaining source bytes. The stand-in executes no native program. These controls do not measure pip behavior or an embedded runtime inventory.
+
+The wrapper captures each actual native exit immediately, writes it with CreateNew plus Flush(true), then checks receipts. It forces PSNativeCommandUseErrorActionPreference false immediately before native calls and reads global:LASTEXITCODE without a local shadow/reset. Failure stops the sequence; raw streams and after-input checks remain. Root/tool output must be saved as the actual returned object separately. No rerun, source/test repair or new label without a documented cause and root review.
+
+No full build, StageSourceOnly build, embedded Python, ISCC, installation, cached wheel, model, live index or network is touched. Four source fixture copies and an empty temporary .wav created by the unchanged reliability test are the only test media; no audio decoder runs. Passing this scope supports the notice patch only. It gives no legal clearance, dependency/native runtime, installed or market acceptance.

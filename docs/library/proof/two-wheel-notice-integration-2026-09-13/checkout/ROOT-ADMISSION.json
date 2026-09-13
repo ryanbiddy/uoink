@@ -1,0 +1,9 @@
+{
+  "label": "notice01",
+  "source_inputs_sha256": "88e277a9e58f98c639fea115d2a59fe0bc8f739b5ff1adb984b77ebdf8605f24",
+  "source_tests_and_inert_blocks_approved": true,
+  "full_build_or_models_approved": false,
+  "reviewer": "Astra integrator",
+  "review_date": "2026-09-13",
+  "scope": "Run the fixed 20 source tests and 10 inert block controls against the actual integration checkout files after the documented EOL integration repair. The four harness diffs have been read; assertions, guards and case membership remain unchanged. No site startup, package installation, full build, model or network execution. Stop after any failure."
+}

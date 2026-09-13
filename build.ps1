@@ -435,30 +435,47 @@ if ($LASTEXITCODE -ne 0) { throw 'pip install (yt-dlp + Pillow + MCP + keyring +
 
 # C-02: regenerate THIRD-PARTY-NOTICES.md from the bundle we just built, so
 # the shipped notices match the shipped dependency tree exactly. pip-licenses
-# reads the embeddable Python's installed metadata. Best-effort: a missing
-# pip-licenses (offline dev build) warns but doesn't fail the build; the
-# committed file is the fallback.
+# reads the embeddable Python's installed metadata. The generator's
+# importlib.metadata fallback works without pip-licenses; generation failure
+# is fatal so an old index cannot stand in for this build's inventory.
 Write-Step 'Generating THIRD-PARTY-NOTICES.md'
-& $embedPython -m pip install --no-warn-script-location --no-compile --no-cache-dir `
-    --no-build-isolation `
-    --constraint $InstallerLock "pip-licenses==5.0.0" 2>$null
-if ($LASTEXITCODE -eq 0) {
+$noticePriorNativePreference = $PSNativeCommandUseErrorActionPreference
+try {
+    $PSNativeCommandUseErrorActionPreference = $false
+    & $embedPython -m pip install --no-warn-script-location --no-compile --no-cache-dir `
+        --no-build-isolation `
+        --constraint $InstallerLock "pip-licenses==5.0.0" 2>$null
+    $noticeToolInstallExit = $global:LASTEXITCODE
+    if ($noticeToolInstallExit -ne 0) {
+        Write-Warning 'pip-licenses unavailable; generator will use importlib.metadata if needed.'
+    }
     $noticesPath = Join-Path $RepoRoot 'THIRD-PARTY-NOTICES.md'
     # Stamp the notices from the same source-bound epoch used to normalize
     # installer input mtimes, so regenerating from unchanged source produces an
     # identical file instead of dirtying the tree on every build.
     $priorSourceDateEpoch = $env:SOURCE_DATE_EPOCH
-    $env:SOURCE_DATE_EPOCH = [string][DateTimeOffset]::new(
-        (Get-PackageTimestampUtc), [TimeSpan]::Zero).ToUnixTimeSeconds()
-    & $embedPython (Join-Path $RepoRoot 'scripts\gen_third_party_notices.py') $noticesPath
-    $env:SOURCE_DATE_EPOCH = $priorSourceDateEpoch
-    if ($LASTEXITCODE -ne 0) { Write-Warning 'THIRD-PARTY-NOTICES generation failed; committed file kept.' }
+    $noticeGenerationExit = $null
+    try {
+        $env:SOURCE_DATE_EPOCH = [string][DateTimeOffset]::new(
+            (Get-PackageTimestampUtc), [TimeSpan]::Zero).ToUnixTimeSeconds()
+        & $embedPython (Join-Path $RepoRoot 'scripts\gen_third_party_notices.py') $noticesPath
+        $noticeGenerationExit = $global:LASTEXITCODE
+    } finally {
+        $env:SOURCE_DATE_EPOCH = $priorSourceDateEpoch
+    }
     # pip-licenses is a build-time tool, not a runtime dep -- strip it back out.
     # Remove the tool and its tool-only dependencies. tomli is not required by
     # the runtime graph on Python 3.13; wcwidth arrives only through prettytable.
     & $embedPython -m pip uninstall -y pip-licenses prettytable tomli wcwidth 2>$null
-} else {
-    Write-Warning 'pip-licenses unavailable; THIRD-PARTY-NOTICES.md not regenerated.'
+    $noticeCleanupExit = $global:LASTEXITCODE
+    if ($noticeGenerationExit -isnot [int] -or $noticeGenerationExit -ne 0) {
+        throw "THIRD-PARTY-NOTICES generation failed (exit $noticeGenerationExit); refusing stale attribution"
+    }
+    if ($noticeCleanupExit -isnot [int] -or $noticeCleanupExit -ne 0) {
+        throw "Notice build-tool cleanup failed (exit $noticeCleanupExit)"
+    }
+} finally {
+    $PSNativeCommandUseErrorActionPreference = $noticePriorNativePreference
 }
 
 # 2d-bis. Regenerate installer\uoink.ico from assets\logo-mark-color.png. Uses
@@ -548,6 +565,38 @@ try {
 
 # 2g. Server source + helpers + icon
 Write-Host '    copying server source + templates...'
+}
+
+# Ship the attribution index and exact supplemental upstream texts.
+# Confirm-Hash deletes a mismatched cache file, so do not use it on source notices.
+$noticeRoot = Join-Path $RepoRoot 'third-party-notices'
+$noticePins = @{
+    'antlr4-python3-runtime-4.9.3-LICENSE.txt' = 'b1b379fcaf3219593a4c433feb1b35c780bed23fafaae440b1ae2771a9521e3a'
+    'proxy-tools-0.1.0-UPSTREAM-LICENSE.txt' = 'a428fb8a2e762af3eb0a6edbbb88e9b42ccfee80fd9b423958bcacf9b9abbfe4'
+}
+$noticeLock = @(Get-Content -LiteralPath $InstallerLock | ForEach-Object { $_.Trim() })
+foreach ($noticePin in @('antlr4-python3-runtime==4.9.3', 'proxy_tools==0.1.0')) {
+    if (@($noticeLock | Where-Object { $_ -ceq $noticePin }).Count -ne 1) {
+        throw "Supplemental notice version requires review: $noticePin"
+    }
+}
+foreach ($noticeName in $noticePins.Keys) {
+    if ((Get-FileHash -LiteralPath (Join-Path $noticeRoot $noticeName) -Algorithm SHA256).Hash.ToLowerInvariant() -cne $noticePins[$noticeName]) {
+        throw "Upstream notice bytes differ: $noticeName"
+    }
+}
+New-Item -ItemType Directory -Force -Path (Join-Path $StagingDir 'third-party-notices') | Out-Null
+foreach ($noticeRelative in @('THIRD-PARTY-NOTICES.md', 'third-party-notices\README.md',
+        'third-party-notices\antlr4-python3-runtime-4.9.3-LICENSE.txt',
+        'third-party-notices\proxy-tools-0.1.0-UPSTREAM-LICENSE.txt')) {
+    $noticeSource = Join-Path $RepoRoot $noticeRelative
+    $noticeTarget = Join-Path $StagingDir $noticeRelative
+    $noticeHash = (Get-FileHash -LiteralPath $noticeSource -Algorithm SHA256).Hash
+    Copy-Item -LiteralPath $noticeSource -Destination $noticeTarget -Force
+    if ((Get-FileHash -LiteralPath $noticeSource -Algorithm SHA256).Hash -cne $noticeHash -or
+        (Get-FileHash -LiteralPath $noticeTarget -Algorithm SHA256).Hash -cne $noticeHash) {
+        throw "Staged notice bytes differ: $noticeRelative"
+    }
 }
 
 Copy-Item (Join-Path $RepoRoot 'server.py')      $StagingDir -Force

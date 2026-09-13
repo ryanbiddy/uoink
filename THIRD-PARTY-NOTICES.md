@@ -95,7 +95,7 @@ does not infer missing metadata or replace the packaged license files.
 | primePy | 1.3 | MIT License | https://github.com/janaindrajit/primePy |
 | propcache | 0.5.2 | Apache Software License | https://github.com/aio-libs/propcache |
 | protobuf | 7.35.1 | 3-Clause BSD License | https://developers.google.com/protocol-buffers/ |
-| proxy_tools | 0.1.0 | MIT License | http://github.com/jtushman/proxy_tools |
+| proxy_tools | 0.1.0 | MIT License (metadata; see upstream conflict below) | http://github.com/jtushman/proxy_tools |
 | pyannote-audio | 4.0.7 | UNKNOWN | UNKNOWN |
 | pyannote-core | 6.0.1 | UNKNOWN | UNKNOWN |
 | pyannote-database | 6.1.1 | UNKNOWN | UNKNOWN |
@@ -154,6 +154,22 @@ does not infer missing metadata or replace the packaged license files.
 | whisperx | 3.8.6 | BSD-2-Clause | https://github.com/m-bain/whisperx |
 | yarl | 1.24.5 | Apache-2.0 | https://github.com/aio-libs/yarl |
 | yt-dlp | 2026.7.4 | Unlicense | https://github.com/yt-dlp/yt-dlp |
+
+## Supplemental upstream notices
+
+The two cached wheels below omit license-text members. Their exact upstream
+texts, source bindings and recorded metadata conflict are listed in
+[the supplemental notice index](third-party-notices/README.md).
+
+- antlr4-python3-runtime 4.9.3: [full upstream license](third-party-notices/antlr4-python3-runtime-4.9.3-LICENSE.txt).
+  The reviewed Python source header identifies the BSD 3-clause notice. The file
+  also retains an MIT section scoped to two JavaScript files; their presence in
+  that notice does not establish that they ship in this Python wheel.
+- proxy-tools 0.1.0: [full upstream license](third-party-notices/proxy-tools-0.1.0-UPSTREAM-LICENSE.txt).
+  Wheel/PyPI metadata and historical setup.py say MIT; the matching source
+  header and repository license say BSD. Both declarations are retained here.
+  The upstream text is unchanged, including its placeholder and trailing text.
+  This notice does not resolve that conflict or grant legal clearance.
 
 ## ffmpeg (bundled binary, not a Python package)
 

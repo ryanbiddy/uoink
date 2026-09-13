@@ -1,0 +1,221 @@
+{
+  "schema": "uoink.notice-qualification-inputs.v1",
+  "files": [
+    {
+      "path": "before-harness-null-review/HARNESS-NULL-REVIEW.initial.md",
+      "bytes": 747,
+      "sha256": "ab6e347b91bdb603db65a9c901f534ceea10a41ddd8a2d904322e5e1edff3025"
+    },
+    {
+      "path": "before-harness-null-review/run_build_blocks.ps1",
+      "bytes": 13027,
+      "sha256": "4267d8a44fb2ff7381cbdfee0bfc3d661e737575bbae04d2dcb7c14e29e45733"
+    },
+    {
+      "path": "before-startup-review/BRIEF.md",
+      "bytes": 2591,
+      "sha256": "9bbfcfd86b32e03d448444a1930ebf0079faba0fac37174dd6d45d8cfccc9a25"
+    },
+    {
+      "path": "before-startup-review/validate_results.py",
+      "bytes": 1660,
+      "sha256": "93d37386d4650456fc69b319e9547164f39cd52705f92d627573e9c5cdfc46fe"
+    },
+    {
+      "path": "BLOCK-BINDINGS.json",
+      "bytes": 648,
+      "sha256": "dbcf9392bf6c5b4ae1ed023ceda943551cdfe126e5c8fbecab3ee9b4f3d7d499"
+    },
+    {
+      "path": "BRIEF.md",
+      "bytes": 2735,
+      "sha256": "9fd9c1e834e3f965f84f1e5c52426d579b648f2329e0038835aef72f743930d6"
+    },
+    {
+      "path": "COPY-BINDINGS.json",
+      "bytes": 6737,
+      "sha256": "c34d58da21764e8962e2b79f2af895d39107623fa7ebef3b74588a45c5d81751"
+    },
+    {
+      "path": "EXPECTED-PYTEST-MEMBERSHIP.json",
+      "bytes": 1961,
+      "sha256": "d5b597e2c7f412ae3a219bac8c29dacb715f2e99282fd55338db22c6242a1c49"
+    },
+    {
+      "path": "generation.block.ps1",
+      "bytes": 2497,
+      "sha256": "931196fea0b6418aa773acff5de0976adb477d5d5961ca0a21ff12d93cd49d54"
+    },
+    {
+      "path": "HARNESS-NULL-REVIEW.md",
+      "bytes": 985,
+      "sha256": "05b3e459b329c148117c3ecd317dc3cb4374092d0c83b4efb95e949aaf6b24e5"
+    },
+    {
+      "path": "notice_bootstrap.py",
+      "bytes": 4273,
+      "sha256": "94e50ce0d1d3a7f5dcd1b3c073d9c45a86a02df2d6a4943f2d9a95b9fdc11595"
+    },
+    {
+      "path": "overlay/_scratch/agw_heavy_import_guard.py",
+      "bytes": 1401,
+      "sha256": "4a97b84d24edea4bca28958183ffc9dd442be0522f1b0a7b230e441630a879d9"
+    },
+    {
+      "path": "overlay/_scratch/integrator_verify.py",
+      "bytes": 4420,
+      "sha256": "280cfdad5ebc56a1748ce53cf9c6850335b7046ab1b9998f7cdd9a196c44e7e2"
+    },
+    {
+      "path": "overlay/_scratch/partition_exit_contract.py",
+      "bytes": 17187,
+      "sha256": "6d835ee91985616f135984ff81032173c1917ca1dc71449db973e694f142f171"
+    },
+    {
+      "path": "overlay/_scratch/partition_receipt_plugin.py",
+      "bytes": 1972,
+      "sha256": "e9eb059fd73488f561a60d8d14f63692b2e2c5d2885322ae39507c608b098f94"
+    },
+    {
+      "path": "overlay/build.ps1",
+      "bytes": 49362,
+      "sha256": "88cf746727876ad2fa0b822b210738b886fb0fac966d4d882f9d049ee360a368"
+    },
+    {
+      "path": "overlay/docs/build-installer.md",
+      "bytes": 21452,
+      "sha256": "4a3fed7973357be48e865a4933e1f30e540bb3e90c8ef2315dbe998d86f15dcd"
+    },
+    {
+      "path": "overlay/docs/security.md",
+      "bytes": 23318,
+      "sha256": "588a4a84dccb07a9db12bd5179128c0450b82dbf15b3010de67032ee9d20fc81"
+    },
+    {
+      "path": "overlay/installer/uoink.iss",
+      "bytes": 71150,
+      "sha256": "26bbb58c67fe6ff3c32fca270366ec7c731f5182457d9c3faae36cf66d02f373"
+    },
+    {
+      "path": "overlay/pytest.ini",
+      "bytes": 9,
+      "sha256": "8250d20f42b419af40706490ead78aabab9feba93eab09a3f626e3de5256e1f4"
+    },
+    {
+      "path": "overlay/requirements-installer-lock.txt",
+      "bytes": 3718,
+      "sha256": "333e420059309d113e66a12c8b2c19ea14cb2feb8f812780a76a5fa30c94d20a"
+    },
+    {
+      "path": "overlay/requirements.txt",
+      "bytes": 881,
+      "sha256": "db64e96192bd374f516943c822ac6d0c9020945196b98abfcf2ef76e65a375ef"
+    },
+    {
+      "path": "overlay/scripts/gen_third_party_notices.py",
+      "bytes": 8580,
+      "sha256": "72e3bae5aab2e4ac8915852bb15690a5e78502361a5472df6d0ca34a948a1d19"
+    },
+    {
+      "path": "overlay/scripts/verify_installer_lock.py",
+      "bytes": 3054,
+      "sha256": "d1f04ee7f82cda15a1903cbb1049edde921e18bce0a6eb110b22ba0130505bda"
+    },
+    {
+      "path": "overlay/tests/conftest.py",
+      "bytes": 115,
+      "sha256": "a07d5b9e167a5e437cf6c573a2c8788447f0d95d921960aa6cd4b0225d529204"
+    },
+    {
+      "path": "overlay/tests/test_c02_reliability_faster_whisper.py",
+      "bytes": 6289,
+      "sha256": "c0af159e45879fe68ab3333d94dfc05320052942d01ef2a6924cbb873033ed97"
+    },
+    {
+      "path": "overlay/tests/test_installer_dependency_lock.py",
+      "bytes": 5202,
+      "sha256": "644899578ae396e7bcdcc4a931912d1a4f749f46931f161abe11b66539b7643b"
+    },
+    {
+      "path": "overlay/tests/test_notice_integration.py",
+      "bytes": 5000,
+      "sha256": "0ba6b8c53f991d5373eaf86a54aff10bc3840d7855b187b02719ecdc31a28a3c"
+    },
+    {
+      "path": "overlay/tests/test_runtime_setuptools_notices.py",
+      "bytes": 2601,
+      "sha256": "03a7ab6fc172323c446e9b12ddf88321c529cf2a871589b82f6ce70c081120b5"
+    },
+    {
+      "path": "overlay/THIRD-PARTY-NOTICES.md",
+      "bytes": 14455,
+      "sha256": "77cb55003529e9340b547b0d99c92213ed61e0de38feb4d69068394e719a5a68"
+    },
+    {
+      "path": "overlay/third-party-notices/.gitattributes",
+      "bytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+    },
+    {
+      "path": "overlay/third-party-notices/antlr4-python3-runtime-4.9.3-LICENSE.txt",
+      "bytes": 2699,
+      "sha256": "b1b379fcaf3219593a4c433feb1b35c780bed23fafaae440b1ae2771a9521e3a"
+    },
+    {
+      "path": "overlay/third-party-notices/proxy-tools-0.1.0-UPSTREAM-LICENSE.txt",
+      "bytes": 1436,
+      "sha256": "a428fb8a2e762af3eb0a6edbbb88e9b42ccfee80fd9b423958bcacf9b9abbfe4"
+    },
+    {
+      "path": "overlay/third-party-notices/README.md",
+      "bytes": 3037,
+      "sha256": "bb450b669ef1e518920ca2da192bd6b783aed9507f6f2879f74e41675f8ae3df"
+    },
+    {
+      "path": "overlay/uoink_reliability.py",
+      "bytes": 17162,
+      "sha256": "81a6d68fcd5c4fa9b66b752f9f7ebcaff2d76ccb1026f889a055525a5c1acad6"
+    },
+    {
+      "path": "prepare_inputs.ps1",
+      "bytes": 3902,
+      "sha256": "726f6613a7bd97737b470e278d0fe592571ccce0560bf3f47456ccf99d741803"
+    },
+    {
+      "path": "PROTOCOL.md",
+      "bytes": 3504,
+      "sha256": "b458301f26bdab00d33d0f928bc1e493d76ff2bb81c2effcb4c835d1cc12b717"
+    },
+    {
+      "path": "run_build_blocks.ps1",
+      "bytes": 13042,
+      "sha256": "288101d7d03b2c0903d4766dbe4af3a798181fc4b10db9835ca1d508b96e5802"
+    },
+    {
+      "path": "run_notice01.ps1",
+      "bytes": 7652,
+      "sha256": "105fbfaceda7a46c854fdbaadf71e4bdb1db5d65bfa6860acfcc784648705219"
+    },
+    {
+      "path": "staging.block.ps1",
+      "bytes": 1902,
+      "sha256": "c2412f7937cfeff5c41b77e50d6148eecd02e4a9b7cfea43aa8bb4f59bbfb5d2"
+    },
+    {
+      "path": "STARTUP-REVIEW.md",
+      "bytes": 1554,
+      "sha256": "32d0bd0cd2f663036e5b88a8ebb5b61fdf1c1997d2ebf9442cb2bfb3c4edf5f5"
+    },
+    {
+      "path": "test_notice_integration.py",
+      "bytes": 5000,
+      "sha256": "0ba6b8c53f991d5373eaf86a54aff10bc3840d7855b187b02719ecdc31a28a3c"
+    },
+    {
+      "path": "validate_results.py",
+      "bytes": 3286,
+      "sha256": "049152a722fc1d18aa2dbbd6804e93ca53e403fee5662c351dc762d0f9ab1d01"
+    }
+  ],
+  "count": 43
+}

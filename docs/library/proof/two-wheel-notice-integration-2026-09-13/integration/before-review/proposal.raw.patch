@@ -1,0 +1,281 @@
+diff --git a/before/THIRD-PARTY-NOTICES.md b/after/THIRD-PARTY-NOTICES.md
+index b6ba0dd..ed31d80 100644
+--- a/before/THIRD-PARTY-NOTICES.md
++++ b/after/THIRD-PARTY-NOTICES.md
+@@ -95,7 +95,7 @@ does not infer missing metadata or replace the packaged license files.
+ | primePy | 1.3 | MIT License | https://github.com/janaindrajit/primePy |
+ | propcache | 0.5.2 | Apache Software License | https://github.com/aio-libs/propcache |
+ | protobuf | 7.35.1 | 3-Clause BSD License | https://developers.google.com/protocol-buffers/ |
+-| proxy_tools | 0.1.0 | MIT License | http://github.com/jtushman/proxy_tools |
++| proxy_tools | 0.1.0 | MIT License (metadata; see upstream conflict below) | http://github.com/jtushman/proxy_tools |
+ | pyannote-audio | 4.0.7 | UNKNOWN | UNKNOWN |
+ | pyannote-core | 6.0.1 | UNKNOWN | UNKNOWN |
+ | pyannote-database | 6.1.1 | UNKNOWN | UNKNOWN |
+@@ -155,6 +155,22 @@ does not infer missing metadata or replace the packaged license files.
+ | yarl | 1.24.5 | Apache-2.0 | https://github.com/aio-libs/yarl |
+ | yt-dlp | 2026.7.4 | Unlicense | https://github.com/yt-dlp/yt-dlp |
+ 
++## Supplemental upstream notices
++
++The two cached wheels below omit license-text members. Their exact upstream
++texts, source bindings and recorded metadata conflict are listed in
++[the supplemental notice index](third-party-notices/README.md).
++
++- antlr4-python3-runtime 4.9.3: [full upstream license](third-party-notices/antlr4-python3-runtime-4.9.3-LICENSE.txt).
++  The reviewed Python source header identifies the BSD 3-clause notice. The file
++  also retains an MIT section scoped to two JavaScript files; their presence in
++  that notice does not establish that they ship in this Python wheel.
++- proxy-tools 0.1.0: [full upstream license](third-party-notices/proxy-tools-0.1.0-UPSTREAM-LICENSE.txt).
++  Wheel/PyPI metadata and historical setup.py say MIT; the matching source
++  header and repository license say BSD. Both declarations are retained here.
++  The upstream text is unchanged, including its placeholder and trailing text.
++  This notice does not resolve that conflict or grant legal clearance.
++
+ ## ffmpeg (bundled binary, not a Python package)
+ 
+ - **Component:** ffmpeg / ffprobe, BtbN `win64-lgpl` build (see build.ps1
+diff --git a/before/build.ps1 b/after/build.ps1
+index 843d2f6..8bc2565 100644
+--- a/before/build.ps1
++++ b/after/build.ps1
+@@ -550,6 +550,38 @@ try {
+ Write-Host '    copying server source + templates...'
+ }
+ 
++# Ship the attribution index and exact supplemental upstream texts.
++# Confirm-Hash deletes a mismatched cache file, so do not use it on source notices.
++$noticeRoot = Join-Path $RepoRoot 'third-party-notices'
++$noticePins = @{
++    'antlr4-python3-runtime-4.9.3-LICENSE.txt' = 'b1b379fcaf3219593a4c433feb1b35c780bed23fafaae440b1ae2771a9521e3a'
++    'proxy-tools-0.1.0-UPSTREAM-LICENSE.txt' = 'a428fb8a2e762af3eb0a6edbbb88e9b42ccfee80fd9b423958bcacf9b9abbfe4'
++}
++$noticeLock = @(Get-Content -LiteralPath $InstallerLock | ForEach-Object { $_.Trim() })
++foreach ($noticePin in @('antlr4-python3-runtime==4.9.3', 'proxy_tools==0.1.0')) {
++    if (@($noticeLock | Where-Object { $_ -ceq $noticePin }).Count -ne 1) {
++        throw "Supplemental notice version requires review: $noticePin"
++    }
++}
++foreach ($noticeName in $noticePins.Keys) {
++    if ((Get-FileHash -LiteralPath (Join-Path $noticeRoot $noticeName) -Algorithm SHA256).Hash.ToLowerInvariant() -cne $noticePins[$noticeName]) {
++        throw "Upstream notice bytes differ: $noticeName"
++    }
++}
++New-Item -ItemType Directory -Force -Path (Join-Path $StagingDir 'third-party-notices') | Out-Null
++foreach ($noticeRelative in @('THIRD-PARTY-NOTICES.md', 'third-party-notices\README.md',
++        'third-party-notices\antlr4-python3-runtime-4.9.3-LICENSE.txt',
++        'third-party-notices\proxy-tools-0.1.0-UPSTREAM-LICENSE.txt')) {
++    $noticeSource = Join-Path $RepoRoot $noticeRelative
++    $noticeTarget = Join-Path $StagingDir $noticeRelative
++    $noticeHash = (Get-FileHash -LiteralPath $noticeSource -Algorithm SHA256).Hash
++    Copy-Item -LiteralPath $noticeSource -Destination $noticeTarget -Force
++    if ((Get-FileHash -LiteralPath $noticeSource -Algorithm SHA256).Hash -cne $noticeHash -or
++        (Get-FileHash -LiteralPath $noticeTarget -Algorithm SHA256).Hash -cne $noticeHash) {
++        throw "Staged notice bytes differ: $noticeRelative"
++    }
++}
++
+ Copy-Item (Join-Path $RepoRoot 'server.py')      $StagingDir -Force
+ # System-tray module (Tier 1 v2.1.1). Imported by server.py at boot on
+ # installed builds; optional at runtime (degrades if pystray is unavailable).
+diff --git a/before/installer/uoink.iss b/after/installer/uoink.iss
+index 292b905..93a3b11 100644
+--- a/before/installer/uoink.iss
++++ b/after/installer/uoink.iss
+@@ -96,6 +96,12 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
+ Name: "desktopicon"; Description: "Create a desktop shortcut"; GroupDescription: "Additional shortcuts:"
+ 
+ [Files]
++; Attribution index and exact supplemental notices (staged with hash checks).
++Source: "staging\THIRD-PARTY-NOTICES.md"; DestDir: "{app}"; Flags: ignoreversion
++Source: "staging\third-party-notices\README.md"; DestDir: "{app}\third-party-notices"; Flags: ignoreversion
++Source: "staging\third-party-notices\antlr4-python3-runtime-4.9.3-LICENSE.txt"; DestDir: "{app}\third-party-notices"; Flags: ignoreversion
++Source: "staging\third-party-notices\proxy-tools-0.1.0-UPSTREAM-LICENSE.txt"; DestDir: "{app}\third-party-notices"; Flags: ignoreversion
++
+ ; Python embeddable distribution (already includes pythonw.exe + python.exe
+ ; + the stdlib zip). After staging, Lib\site-packages contains yt_dlp,
+ ; WhisperX, and their runtime dependencies.
+diff --git a/before/scripts/gen_third_party_notices.py b/after/scripts/gen_third_party_notices.py
+index e4bbc6c..9a0afcf 100644
+--- a/before/scripts/gen_third_party_notices.py
++++ b/after/scripts/gen_third_party_notices.py
+@@ -42,6 +42,34 @@ FFMPEG_BLOCK = """\
+ """
+ 
+ 
++SUPPLEMENTAL_NOTICE_BLOCK = """\
++## Supplemental upstream notices
++
++The two cached wheels below omit license-text members. Their exact upstream
++texts, source bindings and recorded metadata conflict are listed in
++[the supplemental notice index](third-party-notices/README.md).
++
++- antlr4-python3-runtime 4.9.3: [full upstream license](third-party-notices/antlr4-python3-runtime-4.9.3-LICENSE.txt).
++  The reviewed Python source header identifies the BSD 3-clause notice. The file
++  also retains an MIT section scoped to two JavaScript files; their presence in
++  that notice does not establish that they ship in this Python wheel.
++- proxy-tools 0.1.0: [full upstream license](third-party-notices/proxy-tools-0.1.0-UPSTREAM-LICENSE.txt).
++  Wheel/PyPI metadata and historical setup.py say MIT; the matching source
++  header and repository license say BSD. Both declarations are retained here.
++  The upstream text is unchanged, including its placeholder and trailing text.
++  This notice does not resolve that conflict or grant legal clearance.
++"""
++
++
++def _supplemental_notices(rows: list[dict]) -> str:
++    versions = {re.sub(r"[-_.]+", "-", row.get("Name", "")).lower():
++                row.get("Version", "") for row in rows}
++    for name, version in (("antlr4-python3-runtime", "4.9.3"), ("proxy-tools", "0.1.0")):
++        if versions.get(name) != version:
++            raise RuntimeError(f"Supplemental notice requires review: {name}=={versions.get(name)}")
++    return SUPPLEMENTAL_NOTICE_BLOCK
++
++
+ def _from_pip_licenses() -> list[dict] | None:
+     try:
+         out = subprocess.check_output(
+@@ -131,6 +159,7 @@ def main() -> int:
+         rows = _from_importlib()
+         source = "importlib.metadata (pip-licenses unavailable)"
+     rows = _dedupe(_runtime_rows(rows))
++    supplemental = _supplemental_notices(rows)
+ 
+     stamp = _stamp_date()
+     lines = [
+@@ -148,6 +177,8 @@ def main() -> int:
+         name = row.get("Name", "")
+         version = row.get("Version", "")
+         lic = (row.get("License") or "UNKNOWN").replace("|", "/")
++        if re.sub(r"[-_.]+", "-", name).lower() == "proxy-tools" and version == "0.1.0":
++            lic += " (metadata; see upstream conflict below)"
+         url = row.get("URL") or row.get("Home-page") or ""
+         lines.append(f"| {name} | {version} | {lic} | {url} |")
+     if any(row.get("Name", "").lower() == "nltk" and
+@@ -157,7 +188,7 @@ def main() -> int:
+                   "source and build provenance are in vendor/nltk-pathsec in the source "
+                   "repository. This modification does not qualify model loading or "
+                   "clear unrelated dependency advisories."]
+-    lines += ["", FFMPEG_BLOCK, ""]
++    lines += ["", supplemental, "", FFMPEG_BLOCK, ""]
+     output.write_text("\n".join(lines), encoding="utf-8")
+     print(f"wrote {output} ({len(rows)} python packages, source: {source})")
+     return 0
+diff --git a/after/third-party-notices/.gitattributes b/after/third-party-notices/.gitattributes
+new file mode 100644
+index 0000000..fa1385d
+--- /dev/null
++++ b/after/third-party-notices/.gitattributes
+@@ -0,0 +1 @@
++* -text
+diff --git a/after/third-party-notices/README.md b/after/third-party-notices/README.md
+new file mode 100644
+index 0000000..9c717c1
+--- /dev/null
++++ b/after/third-party-notices/README.md
+@@ -0,0 +1,18 @@
++# Supplemental upstream notices
++
++These two cached Python wheels contain no license-text member. The files beside this index preserve the exact upstream text identified through retained wheel-member hashes and official source records. They supplement the metadata inventory in [THIRD-PARTY-NOTICES.md](../THIRD-PARTY-NOTICES.md). No wheel metadata is changed.
++
++**ANTLR Python runtime 4.9.3.** [Complete upstream license](antlr4-python3-runtime-4.9.3-LICENSE.txt), copyright 2012–2017 The ANTLR Project. The official `4.9.3` tag resolves to commit `e4c1a74c66bd5290364ea2b36c97cd724b247357`. Its Python setup declares 4.9.3, and `Recognizer.py` matches the retained wheel member. That source header identifies the BSD 3-clause license. The full upstream file also contains an MIT section explicitly scoped to `codepointat.js` and `fromcodepoint.js`; this is not a claim that those JavaScript files ship in the Python wheel.
++
++- Cached wheel: `antlr4_python3_runtime-4.9.3-py3-none-any.whl`, 144,613 bytes, SHA-256 `d50ab331bff062b5e7f74e19fb16a2e891a47e893d805bcdbff8e6e6beb09c37`.
++- Notice: 2,699 bytes, SHA-256 `b1b379fcaf3219593a4c433feb1b35c780bed23fafaae440b1ae2771a9521e3a`.
++- Sources: [versioned license](https://github.com/antlr/antlr4/blob/e4c1a74c66bd5290364ea2b36c97cd724b247357/LICENSE.txt), [matching Python source header](https://github.com/antlr/antlr4/blob/e4c1a74c66bd5290364ea2b36c97cd724b247357/runtime/Python3/src/antlr4/Recognizer.py).
++
++**Proxy-tools 0.1.0: metadata conflict retained.** [Complete upstream license](proxy-tools-0.1.0-UPSTREAM-LICENSE.txt), copyright 2013 Armin Ronacher and 2014 Jonathan Tushman. The wheel/PyPI metadata and historical `setup.py` declare MIT. The matching source header and repository license instead say BSD. This index reports both declarations; it does not choose an SPDX identifier or resolve the conflict. The license file is unchanged, including its literal `<COPYRIGHT HOLDER>` placeholder and malformed trailing sentence.
++
++- Cached wheel: `proxy_tools-0.1.0-py3-none-any.whl`, 2,943 bytes, SHA-256 `a049f8570f5ce89b723ba282b90291ac3aa1fdcbd7d7100426ff659447400c68`.
++- Notice: 1,436 bytes, SHA-256 `a428fb8a2e762af3eb0a6edbbb88e9b42ccfee80fd9b423958bcacf9b9abbfe4`.
++- Official pre-upload commit `f82ae43524fd6d9917b0e9490c7d0394dff8d155` declares 0.1.0; the package module matches the retained wheel member. The captured official tag list was empty. This does not establish an exact release commit or publisher-signed artifact.
++- Sources: [historical license](https://github.com/jtushman/proxy_tools/blob/f82ae43524fd6d9917b0e9490c7d0394dff8d155/LICENSE.txt), [matching source header](https://github.com/jtushman/proxy_tools/blob/f82ae43524fd6d9917b0e9490c7d0394dff8d155/proxy_tools/__init__.py), [conflicting setup metadata](https://github.com/jtushman/proxy_tools/blob/f82ae43524fd6d9917b0e9490c7d0394dff8d155/setup.py).
++
++These notices do not establish legal clearance, authenticate every package member, or qualify package installation, script execution or model behavior.
+diff --git a/after/third-party-notices/antlr4-python3-runtime-4.9.3-LICENSE.txt b/after/third-party-notices/antlr4-python3-runtime-4.9.3-LICENSE.txt
+new file mode 100644
+index 0000000..2042d1b
+--- /dev/null
++++ b/after/third-party-notices/antlr4-python3-runtime-4.9.3-LICENSE.txt
+@@ -0,0 +1,52 @@
++[The "BSD 3-clause license"]
++Copyright (c) 2012-2017 The ANTLR Project. All rights reserved.
++
++Redistribution and use in source and binary forms, with or without
++modification, are permitted provided that the following conditions
++are met:
++
++ 1. Redistributions of source code must retain the above copyright
++    notice, this list of conditions and the following disclaimer.
++ 2. Redistributions in binary form must reproduce the above copyright
++    notice, this list of conditions and the following disclaimer in the
++    documentation and/or other materials provided with the distribution.
++ 3. Neither the name of the copyright holder nor the names of its contributors
++    may be used to endorse or promote products derived from this software
++    without specific prior written permission.
++
++THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
++IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
++OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
++IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
++INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
++NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
++DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
++THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
++(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
++THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
++
++=====
++
++MIT License for codepointat.js from https://git.io/codepointat
++MIT License for fromcodepoint.js from https://git.io/vDW1m
++
++Copyright Mathias Bynens <https://mathiasbynens.be/>
++
++Permission is hereby granted, free of charge, to any person obtaining
++a copy of this software and associated documentation files (the
++"Software"), to deal in the Software without restriction, including
++without limitation the rights to use, copy, modify, merge, publish,
++distribute, sublicense, and/or sell copies of the Software, and to
++permit persons to whom the Software is furnished to do so, subject to
++the following conditions:
++
++The above copyright notice and this permission notice shall be
++included in all copies or substantial portions of the Software.
++
++THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
++EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
++MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
++NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
++LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
++OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
++WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+diff --git a/after/third-party-notices/proxy-tools-0.1.0-UPSTREAM-LICENSE.txt b/after/third-party-notices/proxy-tools-0.1.0-UPSTREAM-LICENSE.txt
+new file mode 100644
+index 0000000..078411c
+--- /dev/null
++++ b/after/third-party-notices/proxy-tools-0.1.0-UPSTREAM-LICENSE.txt
+@@ -0,0 +1,24 @@
++The BSD License (BSD)
++
++Copyright (c) 2013 Armin Ronacher
++Copyright (c) 2014 Jonathan Tushman
++
++Redistribution and use in source and binary forms, with or without
++modification, are permitted provided that the following conditions are met:
++
++  * Redistributions of source code must retain the above copyright
++    notice, this list of conditions and the following disclaimer.
++  * Redistributions in binary form must reproduce the above copyright
++    notice, this list of conditions and the following disclaimer in the
++    documentation and/or other materials provided with the distribution.
++
++THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
++AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
++IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
++ARE DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
++DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
++(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
++LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
++ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
++(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
++THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+\ No newline at end of file

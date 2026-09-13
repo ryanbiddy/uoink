@@ -1,0 +1,9 @@
+# Pre-execution notice-generation repair
+
+Root's source review identified a remaining stale-attribution path in the first proposal: the new exact-version refusal could be swallowed by build.ps1's existing warning, allowing an older committed index to reach a normal installer build. The unexecuted proposed build file, patch and earlier scope/verification wording are preserved under `before-review/`. No measurement failed and no candidate code has run.
+
+The revised proposal always invokes the generator during a normal build, even if pip-licenses installation fails. The generator already has an importlib.metadata fallback. Capture the generator's native exit immediately, before pip cleanup changes LASTEXITCODE. Restore SOURCE_DATE_EPOCH in a finally block; temporarily disable PowerShell's native-error promotion so a nonzero generator exit reaches the explicit capture and fatal check, then restore that preference too. Failure of generation or cleanup stops the build. No old index is credited as a newly observed inventory.
+
+There is no ReuseStaging parameter or separate current reuse wrapper identified in the inspected source. `StageSourceOnly` requires a new contained source directory, copies source, and returns before staged Python/inventory checks or ISCC. Its copied index is a source snapshot, not regenerated installed-inventory evidence. Normal build.ps1 still installs the embedded graph and calls verify_installer_lock.py after tool trimming; that check compares package names and versions, not artifact bytes. The retained build_library_candidate09.ps1 wrapper also requires its exact clean candidate branch/HEAD and records build.ps1's hash. None of these checks authenticates the two cached wheel hashes on its own.
+
+This is a narrow normal-build notice-generation change. The proposal does not execute or authorize a build, alter frozen tests, change wheel metadata, resolve the proxy-tools license conflict, or qualify model/runtime behavior.

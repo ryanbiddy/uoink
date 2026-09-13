@@ -42,6 +42,34 @@ FFMPEG_BLOCK = """\
 """
 
 
+SUPPLEMENTAL_NOTICE_BLOCK = """\
+## Supplemental upstream notices
+
+The two cached wheels below omit license-text members. Their exact upstream
+texts, source bindings and recorded metadata conflict are listed in
+[the supplemental notice index](third-party-notices/README.md).
+
+- antlr4-python3-runtime 4.9.3: [full upstream license](third-party-notices/antlr4-python3-runtime-4.9.3-LICENSE.txt).
+  The reviewed Python source header identifies the BSD 3-clause notice. The file
+  also retains an MIT section scoped to two JavaScript files; their presence in
+  that notice does not establish that they ship in this Python wheel.
+- proxy-tools 0.1.0: [full upstream license](third-party-notices/proxy-tools-0.1.0-UPSTREAM-LICENSE.txt).
+  Wheel/PyPI metadata and historical setup.py say MIT; the matching source
+  header and repository license say BSD. Both declarations are retained here.
+  The upstream text is unchanged, including its placeholder and trailing text.
+  This notice does not resolve that conflict or grant legal clearance.
+"""
+
+
+def _supplemental_notices(rows: list[dict]) -> str:
+    versions = {re.sub(r"[-_.]+", "-", row.get("Name", "")).lower():
+                row.get("Version", "") for row in rows}
+    for name, version in (("antlr4-python3-runtime", "4.9.3"), ("proxy-tools", "0.1.0")):
+        if versions.get(name) != version:
+            raise RuntimeError(f"Supplemental notice requires review: {name}=={versions.get(name)}")
+    return SUPPLEMENTAL_NOTICE_BLOCK
+
+
 def _from_pip_licenses() -> list[dict] | None:
     try:
         out = subprocess.check_output(
@@ -131,6 +159,7 @@ def main() -> int:
         rows = _from_importlib()
         source = "importlib.metadata (pip-licenses unavailable)"
     rows = _dedupe(_runtime_rows(rows))
+    supplemental = _supplemental_notices(rows)
 
     stamp = _stamp_date()
     lines = [
@@ -148,6 +177,8 @@ def main() -> int:
         name = row.get("Name", "")
         version = row.get("Version", "")
         lic = (row.get("License") or "UNKNOWN").replace("|", "/")
+        if re.sub(r"[-_.]+", "-", name).lower() == "proxy-tools" and version == "0.1.0":
+            lic += " (metadata; see upstream conflict below)"
         url = row.get("URL") or row.get("Home-page") or ""
         lines.append(f"| {name} | {version} | {lic} | {url} |")
     if any(row.get("Name", "").lower() == "nltk" and
@@ -157,7 +188,7 @@ def main() -> int:
                   "source and build provenance are in vendor/nltk-pathsec in the source "
                   "repository. This modification does not qualify model loading or "
                   "clear unrelated dependency advisories."]
-    lines += ["", FFMPEG_BLOCK, ""]
+    lines += ["", supplemental, "", FFMPEG_BLOCK, ""]
     output.write_text("\n".join(lines), encoding="utf-8")
     print(f"wrote {output} ({len(rows)} python packages, source: {source})")
     return 0

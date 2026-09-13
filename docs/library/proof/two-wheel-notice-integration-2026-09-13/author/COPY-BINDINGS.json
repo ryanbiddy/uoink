@@ -1,0 +1,140 @@
+[
+  {
+    "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\two-wheel-notice-integration-proposal01\\after\\build.ps1",
+    "path": "overlay/build.ps1",
+    "bytes": 49362,
+    "sha256": "88cf746727876ad2fa0b822b210738b886fb0fac966d4d882f9d049ee360a368"
+  },
+  {
+    "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\two-wheel-notice-integration-proposal01\\after\\THIRD-PARTY-NOTICES.md",
+    "path": "overlay/THIRD-PARTY-NOTICES.md",
+    "bytes": 14455,
+    "sha256": "77cb55003529e9340b547b0d99c92213ed61e0de38feb4d69068394e719a5a68"
+  },
+  {
+    "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\two-wheel-notice-integration-proposal01\\after\\installer\\uoink.iss",
+    "path": "overlay/installer/uoink.iss",
+    "bytes": 71150,
+    "sha256": "26bbb58c67fe6ff3c32fca270366ec7c731f5182457d9c3faae36cf66d02f373"
+  },
+  {
+    "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\two-wheel-notice-integration-proposal01\\after\\scripts\\gen_third_party_notices.py",
+    "path": "overlay/scripts/gen_third_party_notices.py",
+    "bytes": 8580,
+    "sha256": "72e3bae5aab2e4ac8915852bb15690a5e78502361a5472df6d0ca34a948a1d19"
+  },
+  {
+    "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\two-wheel-notice-integration-proposal01\\after\\third-party-notices\\.gitattributes",
+    "path": "overlay/third-party-notices/.gitattributes",
+    "bytes": 8,
+    "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+  },
+  {
+    "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\two-wheel-notice-integration-proposal01\\after\\third-party-notices\\antlr4-python3-runtime-4.9.3-LICENSE.txt",
+    "path": "overlay/third-party-notices/antlr4-python3-runtime-4.9.3-LICENSE.txt",
+    "bytes": 2699,
+    "sha256": "b1b379fcaf3219593a4c433feb1b35c780bed23fafaae440b1ae2771a9521e3a"
+  },
+  {
+    "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\two-wheel-notice-integration-proposal01\\after\\third-party-notices\\proxy-tools-0.1.0-UPSTREAM-LICENSE.txt",
+    "path": "overlay/third-party-notices/proxy-tools-0.1.0-UPSTREAM-LICENSE.txt",
+    "bytes": 1436,
+    "sha256": "a428fb8a2e762af3eb0a6edbbb88e9b42ccfee80fd9b423958bcacf9b9abbfe4"
+  },
+  {
+    "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\two-wheel-notice-integration-proposal01\\after\\third-party-notices\\README.md",
+    "path": "overlay/third-party-notices/README.md",
+    "bytes": 3037,
+    "sha256": "bb450b669ef1e518920ca2da192bd6b783aed9507f6f2879f74e41675f8ae3df"
+  },
+  {
+    "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\tests\\test_runtime_setuptools_notices.py",
+    "path": "overlay/tests/test_runtime_setuptools_notices.py",
+    "bytes": 2601,
+    "sha256": "03a7ab6fc172323c446e9b12ddf88321c529cf2a871589b82f6ce70c081120b5"
+  },
+  {
+    "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\tests\\test_installer_dependency_lock.py",
+    "path": "overlay/tests/test_installer_dependency_lock.py",
+    "bytes": 5202,
+    "sha256": "644899578ae396e7bcdcc4a931912d1a4f749f46931f161abe11b66539b7643b"
+  },
+  {
+    "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\tests\\test_c02_reliability_faster_whisper.py",
+    "path": "overlay/tests/test_c02_reliability_faster_whisper.py",
+    "bytes": 6289,
+    "sha256": "c0af159e45879fe68ab3333d94dfc05320052942d01ef2a6924cbb873033ed97"
+  },
+  {
+    "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\tests\\conftest.py",
+    "path": "overlay/tests/conftest.py",
+    "bytes": 115,
+    "sha256": "a07d5b9e167a5e437cf6c573a2c8788447f0d95d921960aa6cd4b0225d529204"
+  },
+  {
+    "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\requirements-installer-lock.txt",
+    "path": "overlay/requirements-installer-lock.txt",
+    "bytes": 3718,
+    "sha256": "333e420059309d113e66a12c8b2c19ea14cb2feb8f812780a76a5fa30c94d20a"
+  },
+  {
+    "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\requirements.txt",
+    "path": "overlay/requirements.txt",
+    "bytes": 881,
+    "sha256": "db64e96192bd374f516943c822ac6d0c9020945196b98abfcf2ef76e65a375ef"
+  },
+  {
+    "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\uoink_reliability.py",
+    "path": "overlay/uoink_reliability.py",
+    "bytes": 17162,
+    "sha256": "81a6d68fcd5c4fa9b66b752f9f7ebcaff2d76ccb1026f889a055525a5c1acad6"
+  },
+  {
+    "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\scripts\\verify_installer_lock.py",
+    "path": "overlay/scripts/verify_installer_lock.py",
+    "bytes": 3054,
+    "sha256": "d1f04ee7f82cda15a1903cbb1049edde921e18bce0a6eb110b22ba0130505bda"
+  },
+  {
+    "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\docs\\build-installer.md",
+    "path": "overlay/docs/build-installer.md",
+    "bytes": 21452,
+    "sha256": "4a3fed7973357be48e865a4933e1f30e540bb3e90c8ef2315dbe998d86f15dcd"
+  },
+  {
+    "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\docs\\security.md",
+    "path": "overlay/docs/security.md",
+    "bytes": 23318,
+    "sha256": "588a4a84dccb07a9db12bd5179128c0450b82dbf15b3010de67032ee9d20fc81"
+  },
+  {
+    "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\integrator_verify.py",
+    "path": "overlay/_scratch/integrator_verify.py",
+    "bytes": 4420,
+    "sha256": "280cfdad5ebc56a1748ce53cf9c6850335b7046ab1b9998f7cdd9a196c44e7e2"
+  },
+  {
+    "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\agw_heavy_import_guard.py",
+    "path": "overlay/_scratch/agw_heavy_import_guard.py",
+    "bytes": 1401,
+    "sha256": "4a97b84d24edea4bca28958183ffc9dd442be0522f1b0a7b230e441630a879d9"
+  },
+  {
+    "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition_receipt_plugin.py",
+    "path": "overlay/_scratch/partition_receipt_plugin.py",
+    "bytes": 1972,
+    "sha256": "e9eb059fd73488f561a60d8d14f63692b2e2c5d2885322ae39507c608b098f94"
+  },
+  {
+    "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\partition_exit_contract.py",
+    "path": "overlay/_scratch/partition_exit_contract.py",
+    "bytes": 17187,
+    "sha256": "6d835ee91985616f135984ff81032173c1917ca1dc71449db973e694f142f171"
+  },
+  {
+    "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\two-wheel-notice-qualification-proposal01\\test_notice_integration.py",
+    "path": "overlay/tests/test_notice_integration.py",
+    "bytes": 5000,
+    "sha256": "0ba6b8c53f991d5373eaf86a54aff10bc3840d7855b187b02719ecdc31a28a3c"
+  }
+]

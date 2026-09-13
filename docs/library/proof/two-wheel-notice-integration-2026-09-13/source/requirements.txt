@@ -1,0 +1,20 @@
+mcp==1.28.1
+keyring==25.7.0
+Pillow==12.3.0
+pystray==0.19.5
+pywebview==5.4
+pythonnet==3.0.5
+# C-02 (license compliance): reliability detection runs on faster-whisper's
+# MIT word-probabilities. The prior AGPL word-confidence library (which
+# pulled openai-whisper + dtw-python and made the "MIT" product claim false)
+# is dropped. whisperx already depends on faster-whisper, so this pin just
+# makes the direct use explicit.
+faster-whisper==1.2.1
+whisperx==3.8.6
+# v3.2 Universal Site Uoinking. Lazy-imported by page_extractor.py; the
+# helper falls back to a stdlib HTML-to-markdown path when crawl4ai
+# isn't importable (broken bundle, missing playwright runtime, etc.).
+# Bundling into the embeddable Python is gated on a clean-install test
+# of the playwright transitive dep -- not in build.ps1 yet (see the
+# v3.2 universal-site PR body).
+crawl4ai==0.4.247

@@ -1,0 +1,23 @@
+{
+  "source": "overlay/build.ps1",
+  "source_sha256": "88cf746727876ad2fa0b822b210738b886fb0fac966d4d882f9d049ee360a368",
+  "blocks": [
+    {
+      "name": "generation",
+      "path": "generation.block.ps1",
+      "start": 21512,
+      "characters": 2497,
+      "bytes": 2497,
+      "sha256": "931196fea0b6418aa773acff5de0976adb477d5d5961ca0a21ff12d93cd49d54"
+    },
+    {
+      "name": "staging",
+      "path": "staging.block.ps1",
+      "start": 28477,
+      "characters": 1902,
+      "bytes": 1902,
+      "sha256": "c2412f7937cfeff5c41b77e50d6148eecd02e4a9b7cfea43aa8bb4f59bbfb5d2"
+    }
+  ],
+  "candidate_execution": 0
+}
