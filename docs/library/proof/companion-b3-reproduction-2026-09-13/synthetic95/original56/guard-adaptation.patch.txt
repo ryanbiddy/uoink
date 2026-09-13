@@ -1,0 +1,21 @@
+--- B2/run-synthetic.py
++++ B3/run-synthetic.py
+@@ -15,7 +15,7 @@
+ parser = argparse.ArgumentParser()
+ parser.add_argument("label")
+ label = parser.parse_args().label
+-if label not in {"bw01", "bw02", "bw03"}:
++if label not in {"b3w01"}:
+     raise ValueError("Unbriefed label")
+ run = out / "runs" / label
+ run.mkdir(parents=True, exist_ok=False)
+@@ -42,7 +42,8 @@
+     if event in {"open", "sqlite3.connect"} and isinstance(args[0], (str, bytes, os.PathLike)):
+         path = os.fsdecode(args[0]).replace("\\", "/").lower()
+         if ("c:/users/hello/appdata/local/uoink/index.db" in path or "/installer/staging/" in path
+-                or "/_scratch/python313-graph-01/" in path or path.endswith(".onnx")):
++                or "/_scratch/python313-graph-01/" in path or "/_scratch/b2-real-wheel-" in path
++                or "/_scratch/b2-stdlib313-" in path or path.endswith(".onnx")):
+             violations.append(event + ":forbidden-artifact")
+             raise PermissionError("Actual artifact/live-index access forbidden")
+ sys.addaudithook(audit)

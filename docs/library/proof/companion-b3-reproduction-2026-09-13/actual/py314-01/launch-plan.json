@@ -1,0 +1,19 @@
+{
+  "command": [
+    "C:\\Python314\\python.exe",
+    "-I",
+    "-S",
+    "-B",
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\b3-real-wheel-preparation01\\build-guarded314.py",
+    "py314-01",
+    "--execute-reviewed-build"
+  ],
+  "cwd": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\b3-real-wheel-preparation01",
+  "manifest_sha256": "36141cdd7a2bec9014985bbe860eacc60d4c265e68a6591e3c3659dbd195678a",
+  "source_date_epoch": "1",
+  "scrubbed_variable_names": [],
+  "runtime_plan_sha256": null,
+  "comparison_sha256": null,
+  "comparison_size": null,
+  "started_utc": "2026-09-13T14:47:59.424442+00:00"
+}

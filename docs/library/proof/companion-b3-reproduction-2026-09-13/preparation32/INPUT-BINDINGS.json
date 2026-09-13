@@ -1,0 +1,105 @@
+{
+  "created_utc": "2026-09-13T14:40:37.081888+00:00",
+  "bindings": [
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-b3-builder01\\SHA256.json",
+      "target": "prior-seals/B3-56-SHA256.json",
+      "bytes": 9409,
+      "sha256": "07e4ac3373142058da95b97568b9a8542b8c42942f8e8f877f00fabc7f97c142"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-b3-builder01\\build_faster_whisper_localassets_wheel.py",
+      "target": "inputs/build_faster_whisper_localassets_wheel.py",
+      "bytes": 16660,
+      "sha256": "f25530a3ee58169c049e63c2e6bfff444061f2c04c9a87ec2af43c8850b81892"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-b3-builder01\\recipe\\B2.py.txt",
+      "target": "inputs/recipe/B2.py.txt",
+      "bytes": 82612,
+      "sha256": "bf452635becacf6bba46825be6d6eea533da472ce966ee47f5ce7bccfc3bf06d"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-b3-builder01\\recipe\\NOTICE.txt",
+      "target": "inputs/recipe/NOTICE.txt",
+      "bytes": 945,
+      "sha256": "9696cab401e9798323f8a5cd90874760ce23a53be9860c26b4391446db7be0b1"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-b3-builder01\\recipe\\patch.txt",
+      "target": "inputs/recipe/patch.txt",
+      "bytes": 1657,
+      "sha256": "43b62bbcc5c4bd6bb13a584a166c5deb867561383905fadc671fa5fe44b7733e"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-b3-builder01\\recipe\\member-manifest.json",
+      "target": "inputs/recipe/member-manifest.json",
+      "bytes": 5750,
+      "sha256": "a331424f8d4323878cc4732bbd8b3b4ed2927cf90c7ba9455205984db2e77241"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-b3-builder01\\recipe\\utils.py.txt",
+      "target": "inputs/recipe/utils.py.txt",
+      "bytes": 4897,
+      "sha256": "ecec29ad34688e2d559218685672c3c2f1086f524d78bcfd53e633a5739d5b19"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\b2-real-wheel-preparation01\\build-guarded.py",
+      "target": "prior-protocols/build-guarded314.py.txt",
+      "bytes": 8481,
+      "sha256": "3becaed597aa15f3b2fc5d5cc816aaf172d89cfa4165aed92d18e47fb56ccc73"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\b2-python313-reproduction-preparation01\\build-guarded313.py",
+      "target": "prior-protocols/build-guarded313.py.txt",
+      "bytes": 11183,
+      "sha256": "616295bae49ab05844a57e88ad1b47cc5b612cb9094e275c1aabcedd991a788a"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\b2-python313-reproduction-preparation01\\copy-and-launch.py",
+      "target": "prior-protocols/copy-and-launch.py.txt",
+      "bytes": 9411,
+      "sha256": "6fcf3a4476b3b4517b227bf213a875c88831aa5a03e7435704362b8bca36ed26"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\b2-python313-reproduction-preparation01\\runtime-copy-plan.json",
+      "target": "runtime-copy-plan.json",
+      "bytes": 6508,
+      "sha256": "8b676299c1e60414231ffefcf62bd00705c6f24d633a9aa23e91a1829b618b0b"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\b2-real-wheel-preparation01\\SHA256.json",
+      "target": "prior-seals/B2-first-preparation21-SHA256.json",
+      "bytes": 3469,
+      "sha256": "ebab6c9180c7c8f230e55b619d1cc469d7043f1a43e197a3a8abd126f7eb7484"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\b2-python313-reproduction-preparation01\\SHA256.json",
+      "target": "prior-seals/B2-private313-preparation28-SHA256.json",
+      "bytes": 4627,
+      "sha256": "0b1cb98b296f34965d8bcebe8a67755bb5315df1a3663b479e282da630346f4c"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\b2-real-wheel-py313-01\\build-result.json",
+      "target": "runtime-history/b2-real-wheel-py313-01--build-result.json",
+      "bytes": 2255,
+      "sha256": "9bae1281c3b1278e1bbf10884c22940b707056ec16a3bf6c0d01775c9817eb73"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\b2-real-wheel-py313-01\\launch-result.json",
+      "target": "runtime-history/b2-real-wheel-py313-01--launch-result.json",
+      "bytes": 169,
+      "sha256": "37fb729a538974abbec78adddd9f3e42121d8e4a42c19a8aee814a2303f7d4ee"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\b2-stdlib313-copy01\\copy-result.json",
+      "target": "runtime-history/b2-stdlib313-copy01--copy-result.json",
+      "bytes": 5563,
+      "sha256": "e355630549b761970277982e16488c3bd72497849ade640f45e21925ec260520"
+    }
+  ],
+  "private_runtime_reused_plan_only": true,
+  "actual_runtime_or_wheel_accessed": false,
+  "B3_first_output_sha256": null,
+  "B3_first_output_built": false
+}

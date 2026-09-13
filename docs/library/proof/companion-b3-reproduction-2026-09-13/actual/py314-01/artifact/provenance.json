@@ -1,0 +1,220 @@
+{
+  "status": "BUILT_AND_BYTE_VERIFIED",
+  "release_ready": false,
+  "created_utc": "2026-09-13T14:47:59.528391+00:00",
+  "python": "3.14.6 (tags/v3.14.6:c63aec6, Jun 10 2026, 10:26:10) [MSC v.1944 64 bit (AMD64)]",
+  "builder_sha256": "f25530a3ee58169c049e63c2e6bfff444061f2c04c9a87ec2af43c8850b81892",
+  "recipe_hashes": {
+    "B2.py.txt": "bf452635becacf6bba46825be6d6eea533da472ce966ee47f5ce7bccfc3bf06d",
+    "member-manifest.json": "a331424f8d4323878cc4732bbd8b3b4ed2927cf90c7ba9455205984db2e77241",
+    "NOTICE.txt": "9696cab401e9798323f8a5cd90874760ce23a53be9860c26b4391446db7be0b1",
+    "patch.txt": "43b62bbcc5c4bd6bb13a584a166c5deb867561383905fadc671fa5fe44b7733e",
+    "utils.py.txt": "ecec29ad34688e2d559218685672c3c2f1086f524d78bcfd53e633a5739d5b19"
+  },
+  "upstream": {
+    "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\b3-real-wheel-py314-01\\upstream\\faster_whisper-1.2.1-py3-none-any.whl",
+    "filename": "faster_whisper-1.2.1-py3-none-any.whl",
+    "size": 1118909,
+    "sha256": "79a66ad50688c0b794dd501dc340a736992a6342f7f95e5811be60b5224a26a7"
+  },
+  "output": {
+    "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\b3-real-wheel-py314-01\\artifact\\faster_whisper-1.2.1+uoink.localassets2-py3-none-any.whl",
+    "filename": "faster_whisper-1.2.1+uoink.localassets2-py3-none-any.whl",
+    "version": "1.2.1+uoink.localassets2",
+    "size": 1388022,
+    "sha256": "97bdde2d33fe71660b4cf8a318853e2e1b647ad900918e7e24397990162f29e4"
+  },
+  "input_members": {
+    "faster_whisper-1.2.1.dist-info/LICENSE": {
+      "bytes": 1064,
+      "sha256": "af6798135e729f8aa6c853936d037dfdea449734d26b8ea6a89805fca758c0d5"
+    },
+    "faster_whisper-1.2.1.dist-info/METADATA": {
+      "bytes": 16616,
+      "sha256": "b85622132a43897972924db98e024c0d40dcec19c577b1ee5640f1bc1b59aada"
+    },
+    "faster_whisper-1.2.1.dist-info/RECORD": {
+      "bytes": 1272,
+      "sha256": "e8310953652f87686fad83a18e07e4e8093c81260a738eb8ef3dab5157391d35"
+    },
+    "faster_whisper-1.2.1.dist-info/WHEEL": {
+      "bytes": 92,
+      "sha256": "b59a1e1a3b56c5645f769944ec4ddde3954f94b3509ef6ca8989f1ee0c00cbc0"
+    },
+    "faster_whisper-1.2.1.dist-info/top_level.txt": {
+      "bytes": 15,
+      "sha256": "636865f23cdf2058d3db77b66d6d7f8d4154e9894fcf7700374dfb847b76b188"
+    },
+    "faster_whisper/__init__.py": {
+      "bytes": 430,
+      "sha256": "5396c3a025a7b0cf81246fcd680c0bb7e384e2e587cc2e18f9518cef4c26d56c"
+    },
+    "faster_whisper/assets/__init__.py": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "faster_whisper/assets/silero_vad_v6.onnx": {
+      "bytes": 1245151,
+      "sha256": "4cbf549b8326f60f80f2536d9eefeb450a9abe83365a098031c89719f1be17d2"
+    },
+    "faster_whisper/audio.py": {
+      "bytes": 3506,
+      "sha256": "60a1d8638f718cbf6d245aed3e5a5aa61c1f822a0b0fe9b48a7c928d47c23909"
+    },
+    "faster_whisper/feature_extractor.py": {
+      "bytes": 7592,
+      "sha256": "e403966dbc592a53695eea2aea24fa60bab50ef6755e0076b311f907be7a397c"
+    },
+    "faster_whisper/tokenizer.py": {
+      "bytes": 8429,
+      "sha256": "614a96b6a9660096e4f4e9fbe8860cd75ad250dce8e85a847998a3d6d48165d2"
+    },
+    "faster_whisper/transcribe.py": {
+      "bytes": 80403,
+      "sha256": "5d5ffb00018561d3d529b2c72e1d9f5fff055bea725f3cccc7c6c67f5cc8ffe4"
+    },
+    "faster_whisper/utils.py": {
+      "bytes": 4946,
+      "sha256": "5b36ceb9d0fd3961de8cfb144bd82f9a4ef3151b2e5958405a11efb4f3ac4f82"
+    },
+    "faster_whisper/vad.py": {
+      "bytes": 12543,
+      "sha256": "37a9c774aefdd3162d936b896c8dcf5571b2ed938d65bffecfd631770049a18d"
+    },
+    "faster_whisper/version.py": {
+      "bytes": 50,
+      "sha256": "70ee45276562706d9787f105fb3010417fa9621fe6a9e2fad01a209f3044d9c5"
+    }
+  },
+  "output_members": [
+    {
+      "member": "faster_whisper-1.2.1+uoink.localassets2.dist-info/LICENSE",
+      "bytes": 1064,
+      "sha256": "af6798135e729f8aa6c853936d037dfdea449734d26b8ea6a89805fca758c0d5",
+      "basis": "Proposed B3 text; not packaged",
+      "record_hash": "sha256=r2eYE15yn4qmyFOTbQN9_epElzTSa46mqJgF_KdYwNU"
+    },
+    {
+      "member": "faster_whisper-1.2.1+uoink.localassets2.dist-info/METADATA",
+      "bytes": 16635,
+      "sha256": "245d1bd72284ac121f12cfff9eadaced03838acd01450fdc1c04c5c170ee05fc",
+      "basis": "Proposed B3 text; not packaged",
+      "record_hash": "sha256=JF0b1yKErBIfEs__nq2s7QODis0BRQ_cHATFwXDuBfw"
+    },
+    {
+      "member": "faster_whisper-1.2.1+uoink.localassets2.dist-info/UOINK-LOCALASSETS-NOTICE.txt",
+      "bytes": 945,
+      "sha256": "9696cab401e9798323f8a5cd90874760ce23a53be9860c26b4391446db7be0b1",
+      "basis": "Proposed B3 text; not packaged",
+      "record_hash": "sha256=lpbKtAHpeYMj-KXNkIdHYM4jpTvphgwmtDkURtt74LE"
+    },
+    {
+      "member": "faster_whisper-1.2.1+uoink.localassets2.dist-info/WHEEL",
+      "bytes": 99,
+      "sha256": "30e4224f649e5b14681b14d5b6ea11e1b8dc9d7b1ab6a00417b22868e3acc8ee",
+      "basis": "Proposed B3 text; not packaged",
+      "record_hash": "sha256=MOQiT2SeWxRoGxTVtuoR4bjcnXsatqAEF7IoaOOsyO4"
+    },
+    {
+      "member": "faster_whisper-1.2.1+uoink.localassets2.dist-info/top_level.txt",
+      "bytes": 15,
+      "sha256": "636865f23cdf2058d3db77b66d6d7f8d4154e9894fcf7700374dfb847b76b188",
+      "basis": "Proposed B3 text; not packaged",
+      "record_hash": "sha256=Y2hl8jzfIFjT23e2bW1_jUFU6YlPz3cAN037hHt2sYg"
+    },
+    {
+      "member": "faster_whisper/__init__.py",
+      "bytes": 430,
+      "sha256": "5396c3a025a7b0cf81246fcd680c0bb7e384e2e587cc2e18f9518cef4c26d56c",
+      "basis": "Proposed B3 text; not packaged",
+      "record_hash": "sha256=U5bDoCWnsM-BJG_NaAwLt-OE4uWHzC4Y-VGM70wm1Ww"
+    },
+    {
+      "member": "faster_whisper/assets/__init__.py",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "basis": "Proposed B3 text; not packaged",
+      "record_hash": "sha256=47DEQpj8HBSa-_TImW-5JCeuQeRkm5NMpJWZG3hSuFU"
+    },
+    {
+      "member": "faster_whisper/assets/silero_vad_v6.onnx",
+      "bytes": 1245151,
+      "sha256": "4cbf549b8326f60f80f2536d9eefeb450a9abe83365a098031c89719f1be17d2",
+      "basis": "Inherited recorded asset identity; no B3 asset read or build",
+      "record_hash": "sha256=TL9Um4Mm9g-A8lNtnu_rRQqavoM2WgmAMciXGfG-F9I"
+    },
+    {
+      "member": "faster_whisper/audio.py",
+      "bytes": 3506,
+      "sha256": "60a1d8638f718cbf6d245aed3e5a5aa61c1f822a0b0fe9b48a7c928d47c23909",
+      "basis": "Proposed B3 text; not packaged",
+      "record_hash": "sha256=YKHYY49xjL9tJFrtPlpaphwfgioLD-m0inySjUfCOQk"
+    },
+    {
+      "member": "faster_whisper/feature_extractor.py",
+      "bytes": 7592,
+      "sha256": "e403966dbc592a53695eea2aea24fa60bab50ef6755e0076b311f907be7a397c",
+      "basis": "Proposed B3 text; not packaged",
+      "record_hash": "sha256=5AOWbbxZKlNpXuoq6iT6YLq1DvZ1XgB2sxH5B756OXw"
+    },
+    {
+      "member": "faster_whisper/tokenizer.py",
+      "bytes": 8429,
+      "sha256": "614a96b6a9660096e4f4e9fbe8860cd75ad250dce8e85a847998a3d6d48165d2",
+      "basis": "Proposed B3 text; not packaged",
+      "record_hash": "sha256=YUqWtqlmAJbk9On76IYM11rSUNzo6FqEeZij1tSBZdI"
+    },
+    {
+      "member": "faster_whisper/transcribe.py",
+      "bytes": 82612,
+      "sha256": "bf452635becacf6bba46825be6d6eea533da472ce966ee47f5ce7bccfc3bf06d",
+      "basis": "Proposed B3 text; not packaged",
+      "record_hash": "sha256=v0UmNb7Kz2u6RoJb5tbupTPaRyzpZu5H9c57zPw78G0"
+    },
+    {
+      "member": "faster_whisper/utils.py",
+      "bytes": 4897,
+      "sha256": "ecec29ad34688e2d559218685672c3c2f1086f524d78bcfd53e633a5739d5b19",
+      "basis": "Proposed B3 text; not packaged",
+      "record_hash": "sha256=7OwprTRoji1VkhhoVnLDwvEIb1JNeLz9U-YzpXOdWxk"
+    },
+    {
+      "member": "faster_whisper/vad.py",
+      "bytes": 12543,
+      "sha256": "37a9c774aefdd3162d936b896c8dcf5571b2ed938d65bffecfd631770049a18d",
+      "basis": "Proposed B3 text; not packaged",
+      "record_hash": "sha256=N6nHdK790xYtk2uJbI3PVXGy7ZONZb_-z9YxdwBJoY0"
+    },
+    {
+      "member": "faster_whisper/version.py",
+      "bytes": 69,
+      "sha256": "f7e8d49e192e6ee5588195d1ecf11a7d17576e91f89c52a9f63c8b1681b487eb",
+      "basis": "Proposed B3 text; not packaged",
+      "record_hash": "sha256=9-jUnhkubuVYgZXR7PEafRdXbpH4nFKp9jyLFoG0h-s"
+    },
+    {
+      "member": "faster_whisper-1.2.1+uoink.localassets2.dist-info/RECORD",
+      "bytes": 1501,
+      "sha256": "e4110f44f79d5eac66aec6e9f303c672b0efffcf59c48c3222a9f7253f9d4f46",
+      "record_hash": "",
+      "basis": "Proposed B3 RECORD derived from member identities; not packaged"
+    }
+  ],
+  "zip": {
+    "compression": "ZIP_STORED",
+    "timestamp": [
+      2026,
+      9,
+      13,
+      0,
+      0,
+      0
+    ],
+    "create_system": 3,
+    "file_mode": "0o100644",
+    "order": "sorted non-RECORD members, then RECORD",
+    "comments": "empty"
+  },
+  "dependencies_imported": false,
+  "model_execution": false
+}

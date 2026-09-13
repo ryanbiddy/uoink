@@ -24,8 +24,9 @@ Source work after package 08 includes signing receipts at `0b3629d`, the
 accepted local NLTK wheel at `52d9f7d` and installer binding at `07084fe`,
 owner/process repairs at `ff67b84` and `747fb6b`, and the ASR cache-consent guard
 at `b96dbd0`. These changes are covered by the latest complete source tree.
-The tokenizer derivative now builds identically under Python 3.13 and 3.14;
-it remains uninstalled. The fixed VAD loader is still in preparation.
+The combined tokenizer and Hub-argument derivative now builds identically under
+Python 3.13 and 3.14; it remains uninstalled. The fixed VAD factory and schema
+are reviewed proposals; conversion and runtime qualification remain open.
 The last completed branch backup
 is `19d51a8`; later commits are local until another authorized branch backup.
 
@@ -149,9 +150,16 @@ Python 3.13 and 3.14 builds produce the same 1,387,859-byte wheel, SHA256
 `d64027be41a352117199ecedfa1e9eed48d323140aa4e2c77065111f288b7883`.
 All 16 members and RECORD pass byte checks; the license and opaque ONNX asset
 are unchanged. The private Python 3.13 runtime uses verified no-site startup.
-No package or model was imported or installed. This qualifies packaging only;
-the optional Hub-argument compatibility repair is a separate pending proposal.
+No package or model was imported or installed. This qualifies packaging only.
 See [the reproduction verdict](proof/companion-b2-reproduction-2026-09-13/VERDICT.md).
+
+The combined B3 derivative includes both the tokenizer repair and the one-line
+Hub-argument removal. Its 68 synthetic cases pass in both independent runs.
+Actual Python 3.14/3.13 builds each produce 1,388,022 bytes, SHA256
+`97bdde2d33fe71660b4cf8a318853e2e1b647ad900918e7e24397990162f29e4`,
+with all exits zero and identical output bytes. All 16 members, RECORD, license
+and opaque asset checks pass. This localassets2 wheel is uninstalled and does
+not qualify the target dependency stack. See [the combined packaging verdict](proof/companion-b3-reproduction-2026-09-13/VERDICT.md).
 
 Bounded static inspection of the packaged VAD checkpoint is archived at
 `01163e1`. Runs01/02 refused; reviewed runs03/04 completed without constructing
@@ -165,6 +173,12 @@ contains 1,069 nodes and 54 tensor argument descriptors, with recorded model
 configuration available as partial, untrusted metadata. Both synthetic runs
 pass 63 cases. No object, tensor or model was constructed; provenance and
 native compatibility remain open. See [the projection verdict](ASTRA-VAD-SELECTED-PROJECTION-VERDICT-2026-09-13.md).
+
+The subsequent fixed-factory proposal at `de07dfe` maps all 54 declarations
+across 23 storage groups and explicitly records its proposed version bridge.
+Independent review found no schema mismatch. It has not loaded model data;
+provenance, storage format, non-pickle conversion and numerical qualification
+are still required. See [the factory verdict](ASTRA-VAD-FIXED-FACTORY-VERDICT-2026-09-13.md).
 
 Package 08 contains Pillow 12.3.0, MCP 1.28.1, cryptography 50.0.1 and NLTK 3.10.3.
 The September 11 exact-version OSV observation of all 140 top-level pins retains

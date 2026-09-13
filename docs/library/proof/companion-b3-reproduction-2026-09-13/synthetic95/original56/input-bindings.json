@@ -1,0 +1,140 @@
+{
+  "created_utc": "2026-09-13T14:28:49.065629+00:00",
+  "bindings": [
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-b2-builder01\\fixtures\\upstream-text\\faster_whisper\\__init__.py.txt",
+      "target": "fixtures/upstream-text/faster_whisper/__init__.py.txt",
+      "bytes": 430,
+      "sha256": "5396c3a025a7b0cf81246fcd680c0bb7e384e2e587cc2e18f9518cef4c26d56c"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-b2-builder01\\fixtures\\upstream-text\\faster_whisper\\assets\\__init__.py.txt",
+      "target": "fixtures/upstream-text/faster_whisper/assets/__init__.py.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-b2-builder01\\fixtures\\upstream-text\\faster_whisper\\audio.py.txt",
+      "target": "fixtures/upstream-text/faster_whisper/audio.py.txt",
+      "bytes": 3506,
+      "sha256": "60a1d8638f718cbf6d245aed3e5a5aa61c1f822a0b0fe9b48a7c928d47c23909"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-b2-builder01\\fixtures\\upstream-text\\faster_whisper\\feature_extractor.py.txt",
+      "target": "fixtures/upstream-text/faster_whisper/feature_extractor.py.txt",
+      "bytes": 7592,
+      "sha256": "e403966dbc592a53695eea2aea24fa60bab50ef6755e0076b311f907be7a397c"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-b2-builder01\\fixtures\\upstream-text\\faster_whisper\\tokenizer.py.txt",
+      "target": "fixtures/upstream-text/faster_whisper/tokenizer.py.txt",
+      "bytes": 8429,
+      "sha256": "614a96b6a9660096e4f4e9fbe8860cd75ad250dce8e85a847998a3d6d48165d2"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-b2-builder01\\fixtures\\upstream-text\\faster_whisper\\transcribe.py.txt",
+      "target": "fixtures/upstream-text/faster_whisper/transcribe.py.txt",
+      "bytes": 80403,
+      "sha256": "5d5ffb00018561d3d529b2c72e1d9f5fff055bea725f3cccc7c6c67f5cc8ffe4"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-b2-builder01\\fixtures\\upstream-text\\faster_whisper\\utils.py.txt",
+      "target": "fixtures/upstream-text/faster_whisper/utils.py.txt",
+      "bytes": 4946,
+      "sha256": "5b36ceb9d0fd3961de8cfb144bd82f9a4ef3151b2e5958405a11efb4f3ac4f82"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-b2-builder01\\fixtures\\upstream-text\\faster_whisper\\vad.py.txt",
+      "target": "fixtures/upstream-text/faster_whisper/vad.py.txt",
+      "bytes": 12543,
+      "sha256": "37a9c774aefdd3162d936b896c8dcf5571b2ed938d65bffecfd631770049a18d"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-b2-builder01\\fixtures\\upstream-text\\faster_whisper\\version.py.txt",
+      "target": "fixtures/upstream-text/faster_whisper/version.py.txt",
+      "bytes": 50,
+      "sha256": "70ee45276562706d9787f105fb3010417fa9621fe6a9e2fad01a209f3044d9c5"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-b2-builder01\\fixtures\\upstream-text\\faster_whisper-1.2.1.dist-info\\LICENSE.txt",
+      "target": "fixtures/upstream-text/faster_whisper-1.2.1.dist-info/LICENSE.txt",
+      "bytes": 1064,
+      "sha256": "af6798135e729f8aa6c853936d037dfdea449734d26b8ea6a89805fca758c0d5"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-b2-builder01\\fixtures\\upstream-text\\faster_whisper-1.2.1.dist-info\\METADATA.txt",
+      "target": "fixtures/upstream-text/faster_whisper-1.2.1.dist-info/METADATA.txt",
+      "bytes": 16616,
+      "sha256": "b85622132a43897972924db98e024c0d40dcec19c577b1ee5640f1bc1b59aada"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-b2-builder01\\fixtures\\upstream-text\\faster_whisper-1.2.1.dist-info\\RECORD.txt",
+      "target": "fixtures/upstream-text/faster_whisper-1.2.1.dist-info/RECORD.txt",
+      "bytes": 1272,
+      "sha256": "e8310953652f87686fad83a18e07e4e8093c81260a738eb8ef3dab5157391d35"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-b2-builder01\\fixtures\\upstream-text\\faster_whisper-1.2.1.dist-info\\top_level.txt.txt",
+      "target": "fixtures/upstream-text/faster_whisper-1.2.1.dist-info/top_level.txt.txt",
+      "bytes": 15,
+      "sha256": "636865f23cdf2058d3db77b66d6d7f8d4154e9894fcf7700374dfb847b76b188"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-b2-builder01\\fixtures\\upstream-text\\faster_whisper-1.2.1.dist-info\\WHEEL.txt",
+      "target": "fixtures/upstream-text/faster_whisper-1.2.1.dist-info/WHEEL.txt",
+      "bytes": 92,
+      "sha256": "b59a1e1a3b56c5645f769944ec4ddde3954f94b3509ef6ca8989f1ee0c00cbc0"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-b2-builder01\\recipe\\B2.py.txt",
+      "target": "recipe/B2.py.txt",
+      "bytes": 82612,
+      "sha256": "bf452635becacf6bba46825be6d6eea533da472ce966ee47f5ce7bccfc3bf06d"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-hub-keyword-review01\\qualification\\utils-after.py.txt",
+      "target": "recipe/utils.py.txt",
+      "bytes": 4897,
+      "sha256": "ecec29ad34688e2d559218685672c3c2f1086f524d78bcfd53e633a5739d5b19"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-b2-builder01\\recipe\\patch.txt",
+      "target": null,
+      "bytes": 1377,
+      "sha256": "57451db2279d34c1e5c60f9a9d2c59b3b4a2a921607b53103533bb19a5d8e970"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-b2-builder01\\recipe\\member-manifest.json",
+      "target": "prior-inputs/B2-member-manifest.json",
+      "bytes": 5867,
+      "sha256": "2f1816cf0f521339d8b6709bfa27b0b6a7762582a61939f3ac901d65cdb26296"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-b2-builder01\\build_faster_whisper_localassets_wheel.py",
+      "target": "prior-inputs/B2-builder.py.txt",
+      "bytes": 16354,
+      "sha256": "ef7189180bc443f7b0b68386b8452d0b57b2be4beca3eee9d81409a7658b4c3f"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-b2-builder01\\tests-synthetic.py",
+      "target": "prior-inputs/B2-tests.py.txt",
+      "bytes": 17233,
+      "sha256": "4850a083264e305871b81a9ae5a16390b63950ce9b9efca630c7aa89fd153417"
+    },
+    {
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\companion-b2-builder01\\run-synthetic.py",
+      "target": "prior-inputs/B2-run-synthetic.py.txt",
+      "bytes": 5210,
+      "sha256": "98712acf8c7fd3a18efc6a72a97dcd40d447f74fad858693fc1320168295559a"
+    }
+  ],
+  "upstream_wheel_or_asset_accessed": false,
+  "builder_executed_during_preparation": false,
+  "recipe_hashes": {
+    "B2.py.txt": "bf452635becacf6bba46825be6d6eea533da472ce966ee47f5ce7bccfc3bf06d",
+    "member-manifest.json": "a331424f8d4323878cc4732bbd8b3b4ed2927cf90c7ba9455205984db2e77241",
+    "NOTICE.txt": "9696cab401e9798323f8a5cd90874760ce23a53be9860c26b4391446db7be0b1",
+    "patch.txt": "43b62bbcc5c4bd6bb13a584a166c5deb867561383905fadc671fa5fe44b7733e",
+    "utils.py.txt": "ecec29ad34688e2d559218685672c3c2f1086f524d78bcfd53e633a5739d5b19"
+  }
+}

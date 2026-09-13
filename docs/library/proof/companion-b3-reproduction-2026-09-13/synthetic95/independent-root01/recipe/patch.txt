@@ -1,0 +1,42 @@
+--- a/faster_whisper/transcribe.py
++++ b/faster_whisper/transcribe.py
+@@ -686,6 +686,15 @@
+                 use_auth_token=use_auth_token,
+             )
+ 
++        tokenizer_file = os.path.join(model_path, 'tokenizer.json')
++        prepared_tokenizer = None
++        if tokenizer_bytes is not None:
++            prepared_tokenizer = tokenizers.Tokenizer.from_buffer(tokenizer_bytes)
++        elif os.path.isfile(tokenizer_file):
++            prepared_tokenizer = tokenizers.Tokenizer.from_file(tokenizer_file)
++        elif local_files_only:
++            raise FileNotFoundError('Local Whisper snapshot is missing tokenizer.json')
++
+         self.model = ctranslate2.models.Whisper(
+             model_path,
+             device=device,
+@@ -697,11 +706,8 @@
+             **model_kwargs,
+         )
+ 
+-        tokenizer_file = os.path.join(model_path, "tokenizer.json")
+-        if tokenizer_bytes:
+-            self.hf_tokenizer = tokenizers.Tokenizer.from_buffer(tokenizer_bytes)
+-        elif os.path.isfile(tokenizer_file):
+-            self.hf_tokenizer = tokenizers.Tokenizer.from_file(tokenizer_file)
++        if prepared_tokenizer is not None:
++            self.hf_tokenizer = prepared_tokenizer
+         else:
+             self.hf_tokenizer = tokenizers.Tokenizer.from_pretrained(
+                 "openai/whisper-tiny" + ("" if self.model.is_multilingual else ".en")
+--- a/faster_whisper/utils.py
++++ b/faster_whisper/utils.py
+@@ -105,7 +105,6 @@
+ 
+     if output_dir is not None:
+         kwargs["local_dir"] = output_dir
+-        kwargs["local_dir_use_symlinks"] = False
+ 
+     if cache_dir is not None:
+         kwargs["cache_dir"] = cache_dir

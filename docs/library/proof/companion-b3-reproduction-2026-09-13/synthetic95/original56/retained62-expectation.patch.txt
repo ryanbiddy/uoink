@@ -1,0 +1,18 @@
+--- B2/tests.py
++++ B3/retained62.py
+@@ -195,13 +195,13 @@
+ 
+     def test_only_approved_member_content_changes(self):
+         result = builder.transform_members(self.original, self.recipe)
+-        changed = {"faster_whisper/transcribe.py", "faster_whisper/version.py", DIST + "/METADATA", DIST + "/WHEEL", DIST + "/RECORD"}
++        changed = {"faster_whisper/utils.py", "faster_whisper/transcribe.py", "faster_whisper/version.py", DIST + "/METADATA", DIST + "/WHEEL", DIST + "/RECORD"}
+         for name, raw in self.original.items():
+             if name not in changed:
+                 target = name.replace(DIST + "/", builder.dist_info(builder.OUTPUT_VERSION) + "/", 1)
+                 self.assertEqual(result[target], raw, name)
+         self.assertEqual(result["faster_whisper/transcribe.py"], self.recipe["B2.py.txt"])
+-        self.assertIn(b'__version__ = "1.2.1+uoink.localassets1"', result["faster_whisper/version.py"])
++        self.assertIn(b'__version__ = "1.2.1+uoink.localassets2"', result["faster_whisper/version.py"])
+         builder.validate_archive(builder.serialize_members(result), builder.OUTPUT_VERSION)
+ 
+     def test_recipe_tampering_refused(self):

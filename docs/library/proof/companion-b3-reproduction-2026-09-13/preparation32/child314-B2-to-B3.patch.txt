@@ -1,0 +1,31 @@
+--- successful-B2/child314.py
++++ proposed-B3/child314.py
+@@ -21,7 +21,7 @@
+ parser.add_argument("label", choices=("py314-01",))
+ parser.add_argument("--execute-reviewed-build", action="store_true", required=True)
+ args = parser.parse_args()
+-run = out.parent / ("b2-real-wheel-" + args.label)
++run = out.parent / ("b3-real-wheel-" + args.label)
+ if not run.is_dir() or not (run / "launch-plan.json").is_file() or (run / "build-result.json").exists():
+     raise ValueError("Fresh outer launch directory required")
+ 
+@@ -80,8 +80,8 @@
+ code = 1
+ try:
+     source = out / "inputs/build_faster_whisper_localassets_wheel.py"
+-    builder_bytes = bounded(source, 16354, 16354)
+-    if hashlib.sha256(builder_bytes).hexdigest() != "ef7189180bc443f7b0b68386b8452d0b57b2be4beca3eee9d81409a7658b4c3f":
++    builder_bytes = bounded(source, 16660, 16660)
++    if hashlib.sha256(builder_bytes).hexdigest() != "f25530a3ee58169c049e63c2e6bfff444061f2c04c9a87ec2af43c8850b81892":
+         raise ValueError("Reviewed builder identity mismatch")
+     builder = types.ModuleType("reviewed_localassets_builder")
+     builder.__file__ = str(source)
+@@ -123,7 +123,7 @@
+     receipt.update(status="BUILT_AND_BYTE_VERIFIED", builder_sha256=builder.digest(builder_bytes),
+         recipe_hashes=builder.RECIPE_HASHES, output=built["output"], member_count=len(members),
+         manifest_and_record_verified=True, opaque_asset_and_license_unchanged=True,
+-        opaque_asset_sha256=builder.digest(members[asset]), reproducibility_python313="PENDING_PRIVATE_RUNTIME_REVIEW")
++        opaque_asset_sha256=builder.digest(members[asset]), reproducibility_python313="PENDING_B3_REPRODUCTION")
+     code = 0
+ except Exception as exc:
+     receipt["failure"] = {"type": type(exc).__name__, "message": str(exc)}

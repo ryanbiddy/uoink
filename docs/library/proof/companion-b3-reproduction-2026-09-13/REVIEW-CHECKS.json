@@ -1,0 +1,51 @@
+{
+  "created_utc": "2026-09-13T14:52:15.242424+00:00",
+  "status": "PACKAGING_RECEIPTS_CONSISTENT",
+  "checks": [
+    {
+      "label": "py314-01",
+      "output": {
+        "filename": "faster_whisper-1.2.1+uoink.localassets2-py3-none-any.whl",
+        "version": "1.2.1+uoink.localassets2",
+        "size": 1388022,
+        "sha256": "97bdde2d33fe71660b4cf8a318853e2e1b647ad900918e7e24397990162f29e4"
+      },
+      "actual_child_exit": 0,
+      "launcher_return_code": 0,
+      "actual_outer_exit": 0,
+      "guard_valid": true,
+      "source_date_epoch": "1",
+      "original_reproduction_field": "PENDING_B3_REPRODUCTION",
+      "result_sha256": "0a27da291b345d8573f9f64c476543f25344de10da79d4b947854005c1237ca9",
+      "receipt_and_protocol_review_only": true
+    },
+    {
+      "label": "py313-01",
+      "output": {
+        "filename": "faster_whisper-1.2.1+uoink.localassets2-py3-none-any.whl",
+        "version": "1.2.1+uoink.localassets2",
+        "size": 1388022,
+        "sha256": "97bdde2d33fe71660b4cf8a318853e2e1b647ad900918e7e24397990162f29e4"
+      },
+      "actual_child_exit": 0,
+      "launcher_return_code": 0,
+      "actual_outer_exit": 0,
+      "guard_valid": true,
+      "source_date_epoch": "2000000000",
+      "original_reproduction_field": "BYTE_IDENTICAL",
+      "result_sha256": "81ccec78e8955788f39cd7c1e2832316289b079c00f3fd9f979608b3e1d44752",
+      "receipt_and_protocol_review_only": true
+    }
+  ],
+  "preserved_original_archive_counts": [
+    95,
+    32
+  ],
+  "raw_actual_text_receipts": 12,
+  "first_receipt_not_rewritten": true,
+  "proposal_basis_prose_preserved": true,
+  "binary_payloads_included": false,
+  "wheel_or_runtime_or_model_accessed_by_reviewer": false,
+  "no_execution_or_build_during_review": true,
+  "migration_installation_market_acceptance": false
+}

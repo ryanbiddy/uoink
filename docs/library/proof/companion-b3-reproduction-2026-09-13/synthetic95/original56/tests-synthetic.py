@@ -1,0 +1,385 @@
+"""Synthetic archive boundary tests. builder and WORK_DIR are injected."""
+import copy
+import io
+import json
+import os
+from pathlib import Path
+import stat
+import struct
+import tempfile
+from types import SimpleNamespace
+import unittest
+from unittest import mock
+import zipfile
+
+DIST = builder.dist_info(builder.UPSTREAM_VERSION)
+
+def synthetic_members():
+    result = {}
+    for path in (WORK_DIR / "fixtures/upstream-text").rglob("*.txt"):
+        name = path.relative_to(WORK_DIR / "fixtures/upstream-text").as_posix()[:-4]
+        if not name.endswith("/RECORD"):
+            result[name] = path.read_bytes()
+    result["faster_whisper/assets/silero_vad_v6.onnx"] = b"SYNTHETIC PLACEHOLDER: NOT AN ONNX MODEL"
+    result[DIST + "/RECORD"] = builder.make_record(result, builder.UPSTREAM_VERSION)
+    return result
+
+def synthetic_zip(members, info_edit=None, archive_comment=b""):
+    stream = io.BytesIO()
+    with zipfile.ZipFile(stream, "w", compression=zipfile.ZIP_STORED) as archive:
+        archive.comment = archive_comment
+        for name, data in members.items():
+            info = zipfile.ZipInfo(name, (2000, 1, 1, 0, 0, 0))
+            info.create_system = 3
+            info.external_attr = 0o100644 << 16
+            if info_edit:
+                info_edit(info)
+            archive.writestr(info, data)
+    return stream.getvalue()
+
+def raw_header_change(blob, *, flags=None, compression=None, each_size=None):
+    data = bytearray(blob)
+    for marker, flag_offset, compression_offset, size_offset in ((b"PK\x03\x04", 6, 8, 22), (b"PK\x01\x02", 8, 10, 24)):
+        start = 0
+        while True:
+            index = data.find(marker, start)
+            if index < 0:
+                break
+            if flags is not None:
+                struct.pack_into("<H", data, index + flag_offset, flags)
+            if compression is not None:
+                struct.pack_into("<H", data, index + compression_offset, compression)
+            if each_size is not None:
+                struct.pack_into("<I", data, index + size_offset, each_size)
+            start = index + 4
+    return bytes(data)
+
+def raw_filename_change(blob, before, after):
+    """Preserve forbidden names that ZipInfo normalizes on Windows."""
+    assert len(before) == len(after)
+    data = bytearray(blob)
+    changes = 0
+    for marker, length_offset, name_offset in ((b"PK\x03\x04", 26, 30), (b"PK\x01\x02", 28, 46)):
+        start = 0
+        while True:
+            index = data.find(marker, start)
+            if index < 0:
+                break
+            length = struct.unpack_from("<H", data, index + length_offset)[0]
+            if data[index + name_offset:index + name_offset + length] == before:
+                data[index + name_offset:index + name_offset + length] = after
+                changes += 1
+            start = index + 4
+    assert changes == 2
+    return bytes(data)
+
+class ArchiveContracts(unittest.TestCase):
+    def setUp(self):
+        self.members = synthetic_members()
+
+    def test_valid_synthetic_archive_roundtrips(self):
+        self.assertEqual(builder.validate_archive(synthetic_zip(self.members)), self.members)
+
+    def test_complete_record_covers_placeholder_asset(self):
+        parsed = builder.validate_archive(synthetic_zip(self.members))
+        self.assertEqual(parsed["faster_whisper/assets/silero_vad_v6.onnx"], b"SYNTHETIC PLACEHOLDER: NOT AN ONNX MODEL")
+
+    def test_archive_size_bound(self):
+        with self.assertRaises(ValueError):
+            builder.validate_archive(b"x" * (builder.MAX_ARCHIVE_SIZE + 1))
+
+    def test_archive_comment_refused(self):
+        with self.assertRaises(ValueError):
+            builder.validate_archive(synthetic_zip(self.members, archive_comment=b"unreviewed"))
+
+    def test_advertised_member_size_refused_before_decompression(self):
+        blob = raw_header_change(synthetic_zip(self.members), each_size=builder.MAX_MEMBER_SIZE + 1)
+        with self.assertRaisesRegex(ValueError, "size"):
+            builder.validate_archive(blob)
+
+    def test_advertised_total_size_refused_before_decompression(self):
+        blob = raw_header_change(synthetic_zip(self.members), each_size=400000)
+        with self.assertRaisesRegex(ValueError, "total size"):
+            builder.validate_archive(blob)
+
+    def test_encryption_flag_refused_before_decompression(self):
+        with self.assertRaisesRegex(ValueError, "Encrypted"):
+            builder.validate_archive(raw_header_change(synthetic_zip(self.members), flags=1))
+
+    def test_unknown_compression_refused_before_decompression(self):
+        with self.assertRaisesRegex(ValueError, "compression"):
+            builder.validate_archive(raw_header_change(synthetic_zip(self.members), compression=99))
+
+def name_contract(replacement):
+    def test(self):
+        data = self.members.pop("faster_whisper/audio.py")
+        self.members[replacement] = data
+        blob = synthetic_zip(self.members)
+        if "\\" in replacement:
+            blob = raw_filename_change(blob, replacement.replace("\\", "/").encode(), replacement.encode())
+        with self.assertRaises(ValueError):
+            builder.validate_archive(blob)
+    return test
+
+for label, replacement in {
+    "parent_traversal": "../audio.py", "absolute": "/audio.py", "backslash": "faster_whisper\\audio.py",
+    "ads": "faster_whisper/audio.py:stream", "device": "faster_whisper/CON.txt", "trailing_dot": "faster_whisper/audio.py.",
+    "empty_component": "faster_whisper//audio.py", "dot_component": "faster_whisper/./audio.py",
+    "case_collision": "FASTER_WHISPER/TOKENIZER.PY", "unexpected_root": "other_distribution/audio.py",
+    "signature": DIST + "/RECORD.jws",
+}.items():
+    setattr(ArchiveContracts, "test_member_" + label + "_refused", name_contract(replacement))
+
+def info_contract(kind):
+    def test(self):
+        def change(info):
+            if info.filename == "faster_whisper/audio.py":
+                if kind == "symlink": info.external_attr = (stat.S_IFLNK | 0o777) << 16
+                elif kind == "fifo": info.external_attr = (stat.S_IFIFO | 0o644) << 16
+                elif kind == "reparse": info.external_attr |= 0x400
+                elif kind == "extra": info.extra = b"\xfe\xca\x00\x00"
+                elif kind == "comment": info.comment = b"unexpected"
+        with self.assertRaises(ValueError):
+            builder.validate_archive(synthetic_zip(self.members, info_edit=change))
+    return test
+for kind in ("symlink", "fifo", "reparse", "extra", "comment"):
+    setattr(ArchiveContracts, "test_member_" + kind + "_refused", info_contract(kind))
+
+def record_contract(kind):
+    def test(self):
+        name = DIST + "/RECORD"
+        raw = self.members[name]
+        lines = raw.splitlines(keepends=True)
+        if kind == "missing_self": raw = b"".join(line for line in lines if not line.startswith(name.encode() + b","))
+        elif kind == "nonempty_self": raw = raw.replace(name.encode() + b",,", name.encode() + b",sha256=x,1")
+        elif kind == "duplicate": raw += lines[0]
+        elif kind == "missing_member": raw = b"".join(lines[1:])
+        elif kind == "ghost": raw += b"faster_whisper/ghost.py,sha256=x,1\n"
+        elif kind == "hash": raw = raw.replace(b"sha256=", b"sha512=", 1)
+        elif kind == "size": raw = raw.replace(b",1064\n", b",01064\n", 1)
+        elif kind == "columns": raw += b"extra,column\n"
+        self.members[name] = raw
+        with self.assertRaises(ValueError):
+            builder.validate_archive(synthetic_zip(self.members))
+    return test
+for kind in ("missing_self", "nonempty_self", "duplicate", "missing_member", "ghost", "hash", "size", "columns"):
+    setattr(ArchiveContracts, "test_record_" + kind + "_refused", record_contract(kind))
+
+def metadata_contract(kind):
+    def test(self):
+        if kind == "duplicate_name":
+            member, before, after = DIST + "/METADATA", b"Name: faster-whisper\n", b"Name: faster-whisper\nName: other\n"
+        elif kind == "wrong_version":
+            member, before, after = DIST + "/METADATA", b"Version: 1.2.1\n", b"Version: 99\n"
+        elif kind == "duplicate_tag":
+            member, before, after = DIST + "/WHEEL", b"Tag: py3-none-any\n", b"Tag: py3-none-any\nTag: cp313-none-any\n"
+        elif kind == "purelib":
+            member, before, after = DIST + "/WHEEL", b"Root-Is-Purelib: true\n", b"Root-Is-Purelib: false\n"
+        elif kind == "python":
+            member, before, after = DIST + "/METADATA", b"Requires-Python: >=3.9\n", b"Requires-Python: >=9\n"
+        elif kind == "license":
+            member, before, after = DIST + "/METADATA", b"License: MIT\n", b"License: other\n"
+        self.assertIn(before, self.members[member])
+        self.members[member] = self.members[member].replace(before, after)
+        self.members[DIST + "/RECORD"] = builder.make_record(self.members, builder.UPSTREAM_VERSION)
+        with self.assertRaises(ValueError):
+            builder.validate_archive(synthetic_zip(self.members))
+    return test
+for kind in ("duplicate_name", "wrong_version", "duplicate_tag", "purelib", "python", "license"):
+    setattr(ArchiveContracts, "test_metadata_" + kind + "_refused", metadata_contract(kind))
+
+class TransformContracts(unittest.TestCase):
+    def setUp(self):
+        self.original = synthetic_members()
+        self.recipe = builder.load_recipe()
+
+    def test_only_approved_member_content_changes(self):
+        result = builder.transform_members(self.original, self.recipe)
+        changed = {"faster_whisper/utils.py", "faster_whisper/transcribe.py", "faster_whisper/version.py", DIST + "/METADATA", DIST + "/WHEEL", DIST + "/RECORD"}
+        for name, raw in self.original.items():
+            if name not in changed:
+                target = name.replace(DIST + "/", builder.dist_info(builder.OUTPUT_VERSION) + "/", 1)
+                self.assertEqual(result[target], raw, name)
+        self.assertEqual(result["faster_whisper/transcribe.py"], self.recipe["B2.py.txt"])
+        self.assertIn(b'__version__ = "1.2.1+uoink.localassets2"', result["faster_whisper/version.py"])
+        builder.validate_archive(builder.serialize_members(result), builder.OUTPUT_VERSION)
+
+    def test_recipe_tampering_refused(self):
+        self.recipe["B2.py.txt"] += b"\n"
+        with self.assertRaisesRegex(ValueError, "Recipe"):
+            builder.transform_members(self.original, self.recipe)
+
+    def test_source_tampering_refused(self):
+        self.original["faster_whisper/transcribe.py"] += b"\n"
+        with self.assertRaisesRegex(ValueError, "Source"):
+            builder.transform_members(self.original, self.recipe)
+
+    def test_version_source_tampering_refused(self):
+        self.original["faster_whisper/version.py"] += b"\n"
+        with self.assertRaisesRegex(ValueError, "Source"):
+            builder.transform_members(self.original, self.recipe)
+
+    def test_fixed_real_manifest_refuses_synthetic_asset(self):
+        result = builder.transform_members(self.original, self.recipe)
+        expected = json.loads(self.recipe["member-manifest.json"])["members"]
+        with self.assertRaisesRegex(ValueError, "silero_vad_v6.onnx"):
+            builder.verify_manifest(result, expected)
+
+    def test_synthetic_output_is_deterministic_and_parameters_fixed(self):
+        result = builder.transform_members(self.original, self.recipe)
+        first = builder.serialize_members(result)
+        with mock.patch.dict(os.environ, {"SOURCE_DATE_EPOCH": "1", "TZ": "Pacific/Honolulu"}):
+            second = builder.serialize_members(dict(reversed(list(result.items()))))
+        self.assertEqual(first, second)
+        with zipfile.ZipFile(io.BytesIO(first)) as archive:
+            self.assertEqual(archive.namelist()[-1], builder.dist_info(builder.OUTPUT_VERSION) + "/RECORD")
+            for info in archive.infolist():
+                self.assertEqual((info.date_time, info.compress_type, info.create_system, info.external_attr >> 16),
+                                 (builder.ZIP_TIME, zipfile.ZIP_STORED, 3, 0o100644))
+                self.assertEqual((info.extra, info.comment), (b"", b""))
+
+    def test_manifest_detects_output_tampering(self):
+        result = builder.transform_members(self.original, self.recipe)
+        expected = [{"member": name, "bytes": len(raw), "sha256": builder.digest(raw)} for name, raw in result.items()]
+        builder.verify_manifest(result, expected)
+        result["faster_whisper/audio.py"] += b"changed"
+        with self.assertRaisesRegex(ValueError, "manifest"):
+            builder.verify_manifest(result, expected)
+
+class PathAndIdentityContracts(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory(prefix="synthetic-wheel-boundary-")
+        self.addCleanup(self.tmp.cleanup)
+        self.directory = Path(self.tmp.name)
+
+    def test_fresh_destination_accepted(self):
+        target = self.directory / "new"
+        self.assertEqual(builder.fresh_destination(target, self.directory / "input.whl"), target)
+
+    def test_destination_reuse_refused(self):
+        with self.assertRaises(FileExistsError):
+            builder.fresh_destination(self.directory, self.directory.parent / "input.whl")
+
+    def test_destination_overlap_refused(self):
+        with self.assertRaisesRegex(ValueError, "overlap"):
+            builder.fresh_destination(self.directory, self.directory / "input.whl")
+
+    def test_reparse_ancestor_refused(self):
+        fake = SimpleNamespace(st_mode=stat.S_IFDIR, st_reparse_tag=1, st_file_attributes=0)
+        with mock.patch.object(Path, "lstat", return_value=fake):
+            with self.assertRaisesRegex(ValueError, "reparse"):
+                builder.safe_path(self.directory / "new")
+
+    def test_hash_override_argument_refused(self):
+        with self.assertRaises(TypeError):
+            builder.build("synthetic", "new", expected_hash="override")
+
+    def test_wrong_filename_refused(self):
+        path = self.directory / "wrong.whl"
+        path.write_bytes(b"synthetic")
+        with self.assertRaisesRegex(ValueError, "filename"):
+            builder.build(path, self.directory / "output")
+
+    def test_wrong_size_refused_without_output(self):
+        path = self.directory / builder.EXPECTED_WHEEL_NAME
+        path.write_bytes(b"synthetic")
+        with self.assertRaisesRegex(ValueError, "size"):
+            builder.build(path, self.directory / "output")
+        self.assertFalse((self.directory / "output").exists())
+
+    def test_wrong_hash_refused_without_output(self):
+        path = self.directory / builder.EXPECTED_WHEEL_NAME
+        path.write_bytes(b"X" * builder.EXPECTED_WHEEL_SIZE)
+        with self.assertRaisesRegex(ValueError, "hash"):
+            builder.build(path, self.directory / "output")
+        self.assertFalse((self.directory / "output").exists())
+
+    def test_growing_input_uses_only_cap_plus_one_and_refuses(self):
+        path = self.directory / "growing.synthetic"
+        path.write_bytes(b"1234")
+        identity = path.stat()
+        requests = []
+        class GrowingStream:
+            def __enter__(self): return self
+            def __exit__(self, *args): return False
+            def fileno(self): return 987654
+            def read(self, size=-1):
+                requests.append(size)
+                if size != 5:
+                    raise AssertionError("Unbounded or incorrect read request")
+                return b"x" * size
+        with mock.patch.object(Path, "open", return_value=GrowingStream()), mock.patch.object(builder.os, "fstat", return_value=identity):
+            with self.assertRaisesRegex(ValueError, "bounded read"):
+                builder.read_regular_file(path, 4, 4)
+        self.assertEqual(requests, [5])
+
+    def test_oversized_input_refused_before_open(self):
+        path = self.directory / "large.synthetic"
+        path.write_bytes(b"12345")
+        with mock.patch.object(Path, "open", side_effect=AssertionError("Must refuse before open")):
+            with self.assertRaisesRegex(ValueError, "size bound"):
+                builder.read_regular_file(path, 4, 4)
+
+    def test_opened_identity_drift_refused_before_read(self):
+        path = self.directory / "swapped.synthetic"
+        path.write_bytes(b"1234")
+        info = path.stat()
+        changed = SimpleNamespace(st_mode=info.st_mode, st_dev=info.st_dev, st_ino=info.st_ino + 1,
+                                  st_size=info.st_size, st_mtime_ns=info.st_mtime_ns)
+        handle = mock.MagicMock()
+        handle.__enter__.return_value = handle
+        with mock.patch.object(Path, "open", return_value=handle), mock.patch.object(builder.os, "fstat", return_value=changed):
+            with self.assertRaisesRegex(ValueError, "identity changed"):
+                builder.read_regular_file(path, 4, 4)
+        handle.read.assert_not_called()
+
+def path_contract(value):
+    def test(self):
+        with self.assertRaises(ValueError):
+            builder.safe_path(value)
+    return test
+for label, value in {"unc": r"\\server\share\file", "drive_relative": r"E:file", "parent": r"E:\a\..\b",
+                     "ads": r"E:\a\b:stream", "device": r"E:\a\NUL.txt", "trailing_space": "E:\\a\\b "}.items():
+    setattr(PathAndIdentityContracts, "test_path_" + label + "_refused", path_contract(value))
+
+# Six additional B3 boundaries; no upstream package or actual asset execution.
+def test_utils_source_tampering_refused(self):
+    self.original["faster_whisper/utils.py"] += b"\n"
+    with self.assertRaisesRegex(ValueError, "Source"):
+        builder.transform_members(self.original, self.recipe)
+TransformContracts.test_utils_source_tampering_refused = test_utils_source_tampering_refused
+
+def test_utils_recipe_tampering_refused(self):
+    self.recipe["utils.py.txt"] += b"\n"
+    with self.assertRaisesRegex(ValueError, "Recipe"):
+        builder.transform_members(self.original, self.recipe)
+TransformContracts.test_utils_recipe_tampering_refused = test_utils_recipe_tampering_refused
+
+def test_missing_utils_recipe_refused(self):
+    del self.recipe["utils.py.txt"]
+    with self.assertRaisesRegex(ValueError, "Recipe"):
+        builder.transform_members(self.original, self.recipe)
+TransformContracts.test_missing_utils_recipe_refused = test_missing_utils_recipe_refused
+
+def test_both_repaired_sources_have_exact_bound_outputs(self):
+    result = builder.transform_members(self.original, self.recipe)
+    self.assertEqual(result["faster_whisper/utils.py"], self.recipe["utils.py.txt"])
+    self.assertEqual(builder.digest(result["faster_whisper/transcribe.py"]), "bf452635becacf6bba46825be6d6eea533da472ce966ee47f5ce7bccfc3bf06d")
+    self.assertEqual(builder.digest(result["faster_whisper/utils.py"]), "ecec29ad34688e2d559218685672c3c2f1086f524d78bcfd53e633a5739d5b19")
+TransformContracts.test_both_repaired_sources_have_exact_bound_outputs = test_both_repaired_sources_have_exact_bound_outputs
+
+def test_only_two_python_source_members_plus_version_change(self):
+    result = builder.transform_members(self.original, self.recipe)
+    changed = {name for name, raw in self.original.items() if name.endswith(".py") and result[name] != raw}
+    self.assertEqual(changed, {"faster_whisper/transcribe.py", "faster_whisper/utils.py", "faster_whisper/version.py"})
+TransformContracts.test_only_two_python_source_members_plus_version_change = test_only_two_python_source_members_plus_version_change
+
+def test_dependency_metadata_and_license_and_asset_preserved(self):
+    result = builder.transform_members(self.original, self.recipe)
+    new = builder.dist_info(builder.OUTPUT_VERSION)
+    old_requirements = [line for line in self.original[DIST + "/METADATA"].splitlines() if line.startswith(b"Requires-Dist:")]
+    new_requirements = [line for line in result[new + "/METADATA"].splitlines() if line.startswith(b"Requires-Dist:")]
+    self.assertEqual(new_requirements, old_requirements)
+    self.assertEqual(result[new + "/LICENSE"], self.original[DIST + "/LICENSE"])
+    self.assertEqual(result["faster_whisper/assets/silero_vad_v6.onnx"], self.original["faster_whisper/assets/silero_vad_v6.onnx"])
+TransformContracts.test_dependency_metadata_and_license_and_asset_preserved = test_dependency_metadata_and_license_and_asset_preserved
