@@ -1,0 +1,50 @@
+{
+  "failed_preflight": "seal_gemini_authority_checkout.py asserted at .gitattributes after writing its draft manifest; no success reported",
+  "reason": "Git apply materialized new proof files before their new binary attributes controlled working-tree checkout; changed line endings only",
+  "repair": "restore only the mismatched proof copies from the worker bytes already bound by its seal; preserve changed copies; stage and verify Git/disk hashes",
+  "changed": [
+    {
+      "path": ".gitattributes",
+      "before_sha256": "8b9c3028d6467ff3be7c793141927841d70f47f52d0590677438f488ca154992",
+      "expected_sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da",
+      "line_ending_conversion_only": true
+    },
+    {
+      "path": "archive_gemini_mirror_authority.py",
+      "before_sha256": "74548be252b6eb821f85c6362b77e019dc2aba9e5373d963336e570717a1a59a",
+      "expected_sha256": "5d00afb5bc3a3154222e2b12315a8b11abbaf827565f9b38ed66c0b33c6c49e3",
+      "line_ending_conversion_only": true
+    },
+    {
+      "path": "integrator_verify.py",
+      "before_sha256": "4881c9b6ce8d0e3eb0925e5b5ee89b65f5efe53c376c9ea1132998b619ab9195",
+      "expected_sha256": "280cfdad5ebc56a1748ce53cf9c6850335b7046ab1b9998f7cdd9a196c44e7e2",
+      "line_ending_conversion_only": true
+    },
+    {
+      "path": "MIRROR-PROCESS-AUTHORITY-GEMINI-2026-09-13.md",
+      "before_sha256": "6c88fea30856d8f63c2368cd081e2ab3450af1a5cbeb07dbbf164b504956c2c4",
+      "expected_sha256": "03509d6b4a097b67f4e177cba02ffc634611b91eb01a001e8ab9f069c9449c17",
+      "line_ending_conversion_only": true
+    },
+    {
+      "path": "original-worker.diff",
+      "before_sha256": "acb3167e5ebed50f1509b25fb6f345f8105c6ab1c128737c9b22e4a5dcf19574",
+      "expected_sha256": "34ca3d2c8acc4c5b20ab48ea3c80667938171de2ab2a618a833fbbaf26a7527c",
+      "line_ending_conversion_only": true
+    },
+    {
+      "path": "run_gemini_authority_verification.ps1",
+      "before_sha256": "2f357a9215f47156a1570a9635fbe83c43e0172d4d4476241a571d6dec72429a",
+      "expected_sha256": "7417be8df8afce5cc4ab8fab7da39e6a7689426da8b9b47e0f62f13caf5310d4",
+      "line_ending_conversion_only": true
+    },
+    {
+      "path": "test_gemini_synthetic_process_authority.py",
+      "before_sha256": "1843972b009dca4c8f1969223818ee760c34363eda32b9c956efc10c175bc4a0",
+      "expected_sha256": "ba60842ca1ec7f7f63037bfc8d91e75e057d75e0740ddf7b3a07b5eaa13f61fe",
+      "line_ending_conversion_only": true
+    }
+  ],
+  "verified_payloads": 28
+}

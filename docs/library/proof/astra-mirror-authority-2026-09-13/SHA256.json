@@ -1,0 +1,77 @@
+{
+  "algorithm": "sha256",
+  "files": {
+    ".gitattributes": {
+      "bytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+    },
+    "ASTRA-MIRROR-PROCESS-AUTHORITY-VERDICT-2026-09-13.md": {
+      "bytes": 2274,
+      "sha256": "b323994a71dae1927cfbb1716927abf132679a50e4ec2d9d30436194ea4f6c43"
+    },
+    "copy-preflight/.gitattributes": {
+      "bytes": 9,
+      "sha256": "8b9c3028d6467ff3be7c793141927841d70f47f52d0590677438f488ca154992"
+    },
+    "copy-preflight/archive_gemini_mirror_authority.py": {
+      "bytes": 3089,
+      "sha256": "74548be252b6eb821f85c6362b77e019dc2aba9e5373d963336e570717a1a59a"
+    },
+    "copy-preflight/integrator_verify.py": {
+      "bytes": 4496,
+      "sha256": "4881c9b6ce8d0e3eb0925e5b5ee89b65f5efe53c376c9ea1132998b619ab9195"
+    },
+    "copy-preflight/MIRROR-PROCESS-AUTHORITY-GEMINI-2026-09-13.md": {
+      "bytes": 23059,
+      "sha256": "6c88fea30856d8f63c2368cd081e2ab3450af1a5cbeb07dbbf164b504956c2c4"
+    },
+    "copy-preflight/original-worker.diff": {
+      "bytes": 33630,
+      "sha256": "acb3167e5ebed50f1509b25fb6f345f8105c6ab1c128737c9b22e4a5dcf19574"
+    },
+    "copy-preflight/preflight-draft-SHA256.json": {
+      "bytes": 1264,
+      "sha256": "558a3d4b555e628bea1ff3e1640a6fd2fb2e2f51230e37dea917a5cca126ffdd"
+    },
+    "copy-preflight/repair.json": {
+      "bytes": 2562,
+      "sha256": "0e30de72c25d7e163577b90c51767e961dc5c258c416cafa9f81352d023f4637"
+    },
+    "copy-preflight/run_gemini_authority_verification.ps1": {
+      "bytes": 1289,
+      "sha256": "2f357a9215f47156a1570a9635fbe83c43e0172d4d4476241a571d6dec72429a"
+    },
+    "copy-preflight/test_gemini_synthetic_process_authority.py": {
+      "bytes": 9497,
+      "sha256": "1843972b009dca4c8f1969223818ee760c34363eda32b9c956efc10c175bc4a0"
+    },
+    "gemini-mirror-authority-reviewed.diff": {
+      "bytes": 134324,
+      "sha256": "5fa62fbbc9ff43b3a4a95100bdfad4e0226c91233eff100ed6ed4fbc35bd4e31"
+    },
+    "MIRROR-PROCESS-AUTHORITY-REPAIR-BRIEF-2026-09-13.md": {
+      "bytes": 4027,
+      "sha256": "ad6f31addf9389ff5b3fd9504879c25058f6b8cf5848b7bf15547a2b05371fb6"
+    },
+    "repair_authority_proof_copy01.py": {
+      "bytes": 2682,
+      "sha256": "50d7d75723c4f440f56d9d284ad3dc112293648779659c8fe2844e300d0aba28"
+    },
+    "results.json": {
+      "bytes": 835,
+      "sha256": "c49a0bc3839d3b0812effd06bb3765f47fe657493d2b39d908eb9f7f9c1ff1f8"
+    },
+    "seal_gemini_authority_checkout.py": {
+      "bytes": 1560,
+      "sha256": "f44f1fdabceb12f4de7211d81b0b68588266fccba2d6397fe1a822446f26e431"
+    },
+    "tests.log": {
+      "bytes": 100,
+      "sha256": "f7e3f7d69f010843c3e2b989b4630e527920cf0e55ebcd5bed125ef9d6375cc1"
+    },
+    "tests.xml": {
+      "bytes": 1433,
+      "sha256": "4cc57b7fc2a42557a77483dbc807657ac93e27a67527f0eb0e343bcf945df37c"
+    }
+  }
+}

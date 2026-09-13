@@ -1,0 +1,2180 @@
+diff --git a/docs/library/MIRROR-PROCESS-AUTHORITY-GEMINI-2026-09-13.md b/docs/library/MIRROR-PROCESS-AUTHORITY-GEMINI-2026-09-13.md
+new file mode 100644
+index 0000000..0b19bf4
+--- /dev/null
++++ b/docs/library/MIRROR-PROCESS-AUTHORITY-GEMINI-2026-09-13.md
+@@ -0,0 +1,341 @@
++# Mirror Process Authority and Lifecycle Diagnosis (Gemini)
++
++**Date**: 2026-09-13  
++**Worker**: Gemini  
++**Workspace**: `C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\213914a5-528\gemini`  
++**Reference Brief**: `docs/library/MIRROR-TREE08-REPAIR-BRIEF-2026-09-13.md`  
++**Boundary Rules**: Diagnostic review and synthetic inert-process regression probes only. No product edits, existing-test edits, real process manipulation, kernel gate acquisition, model execution, live index access, port 5179 listeners, new fetch, paid API calls, commits, pushes, or subagents.
++
++---
++
++## 1. Assignment Scope and Authority Boundaries
++
++Tree08 produced 51 mirror failures across 2,729 test cases (proof record: `proof/ryan-final-partitioned-08-2026-09-13/SHA256.json`). The first failure was `test_live_worker_lease_blocks_a_second_mirror` in `tests/test_phase4_av5m3_isolation.py` at initial export, followed by cascading failures reaching `WaitForSingleObject` and `destination exclusion unavailable`.
++
++Astra is independently investigating cancellation and owner lifetime. Gemini owns the bounded security and lifecycle assignment: inspect the process authority mechanisms in [library_mirror.py](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/213914a5-528/gemini/library_mirror.py), specifically:
++1. Authority used by `owned_pids`, `physical_liveness`, and termination.
++2. Windows Toolhelp parent PID persistence (`th32ParentProcessID`) outliving parent process identity.
++3. Whether a recycled or orphan parent PID causes a foreign child to be adopted, retained, or killed.
++4. Whether a confirmed process exit can be forgotten on a later failed query.
++
++All diagnostic assertions in this report were verified with synthetic regression probes in [tests/test_gemini_synthetic_process_authority.py](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/213914a5-528/gemini/tests/test_gemini_synthetic_process_authority.py) executed via the guarded native verifier.
++
++---
++
++## 2. Source-Level Authority Analysis
++
++### 2.1 Toolhelp Snapshot Mechanics and Orphan Ingestion
++
++In [library_mirror.py](file:///C:/Users/hello/AppData/Local/AgentControlRoom\worktrees\uoink-library\213914a5-528\gemini/library_mirror.py#L529-L561):
++```python
++529: def _windows_process_children(parent_pid: int | None) -> list[dict[str, Any]]:
++...
++540:     snapshot = k32.CreateToolhelp32Snapshot(_TH32CS_SNAPPROCESS, 0)
++...
++549:         while True:
++550:             if int(entry.th32ParentProcessID) == int(parent_pid):
++551:                 out.append({
++552:                     "pid": int(entry.th32ProcessID),
++553:                     "exe": str(entry.szExeFile or ""),
++554:                     "ppid": int(entry.th32ParentProcessID),
++555:                 })
++556:             if not Process32NextW(snapshot, ctypes.byref(entry)):
++557:                 break
++558:         return out
++```
++
++In the Windows NT kernel, `th32ParentProcessID` reflects the creator PID assigned at process initialization (`InheritedFromUniqueProcessId`). Windows does not update, re-parent, or clear this field when the parent process exits. When an old process terminates, any surviving children retain that creator PID as their parent PID indefinitely.
++
++Because Windows reuses PIDs rapidly, when a new process is spawned and receives a recycled PID, any preexisting orphan processes whose original creator had that same PID match `entry.th32ParentProcessID == parent_pid`.
++
++### 2.2 Unchecked Adoption in `owned_pids()`
++
++In [library_mirror.py](file:///C:/Users/hello/AppData/Local/AgentControlRoom\worktrees\uoink-library\213914a5-528\gemini/library_mirror.py#L1427-L1456):
++```python
++1427:     def owned_pids(self) -> list[int]:
++1428:         pids: list[int] = []
++1429:         seen: set[int] = set()
++1430: 
++1431:         def add(pid: int | None, exe: str = "", created: int | None = None) -> None:
++1432:             if not isinstance(pid, int) or pid <= 0 or pid in seen:
++1433:                 return
++1434:             seen.add(pid)
++1435:             pids.append(pid)
++1436:             if exe:
++1437:                 self._owned_exe[pid] = exe
++1438:             if pid not in self._owned_created:
++1439:                 self._owned_created[pid] = created if created is not None else _process_created_ms(pid)
++1440: 
++1441:         add(self.pid, created=self.created_ms)
++1442:         add(self.writer_pid, created=self.writer_created_ms)
++1443:         if os.name == "nt" and self.pid:
++1444:             for child in _windows_process_children(self.pid):
++1445:                 exe = str(child.get("exe") or "")
++1446:                 if _is_console_host(exe):
++1447:                     continue
++1448:                 add(int(child["pid"]), exe)
++```
++
++Three critical authority defects exist here:
++1. **Missing Creation Order Verification**: `add()` receives `int(child["pid"])` without `created`. Line 1439 calls `_process_created_ms(pid)` for the child, but never compares it against `self.created_ms`. If the child was created at $T_0$ and the session launcher was created at $T_1$ with $T_0 < T_1$, the child is an orphan from an earlier dead process. `owned_pids()` adopts it regardless.
++2. **Missing Parent Liveness Check**: Lines 1443-1444 check `if os.name == "nt" and self.pid:`. They never verify whether `self.pid` is still running or matches `self.created_ms`. If `self.proc` has exited and its PID has been recycled by an unrelated host process, Toolhelp returns children spawned by that unrelated host process, and `owned_pids()` adopts them.
++3. **Self-Authenticating Registration**: Line 1439 stores the child's own creation timestamp in `self._owned_created[pid]`. Storing the foreign child's own timestamp grants it legitimate authority under all subsequent identity checks.
++
++### 2.3 Lifecycle Consequences: Retention, Gate Leaks, and Unintended Termination
++
++#### Consequence 1: Adoption
++The foreign PID enters `pids` (line 1435), `self._owned_created` (line 1439), and `self.owns_pid(pid)` (line 1492: `return pid in self.owned_pids()`).
++
++#### Consequence 2: Retention and Gate Lockout
++In [library_mirror.py](file:///C:/Users/hello/AppData/Local/AgentControlRoom\worktrees\uoink-library\213914a5-528\gemini/library_mirror.py#L1475-L1483):
++```python
++1475:         for pid, created in list(self._owned_created.items()):
++1476:             if pid in (self.pid, self.writer_pid):
++1477:                 continue
++1478:             states.append(_process_liveness(pid, created))
++1479:         if "alive" in states:
++1480:             return "alive"
++```
++Because the foreign process is alive on the machine, `_process_liveness` returns `"alive"`. Therefore:
++- `self.physical_liveness()` returns `"alive"`.
++- `self.physically_alive()` returns `True` (line 1487: `return self.physical_liveness() != "dead"`).
++- `_abandon_unstarted()` (lines 1694-1700) aborts immediately:
++  ```python
++  1694:         if self.physically_alive() or self._popen_in_progress:
++  1695:             return
++  ```
++  It cannot drop the session from `_retained_sessions` and cannot call `self._release_held_exclusion()`.
++- `_owner_blocks_replacement()` (lines 1268-1269) blocks any subsequent mirror on the same destination:
++  ```python
++  1268:         if session.physically_alive():
++  1269:             return True
++  ```
++  The destination exclusion is permanently held, producing cascading `destination exclusion unavailable` errors.
++
++#### Consequence 3: Host Process Termination Hazard
++In [library_mirror.py](file:///C:/Users/hello/AppData/Local/AgentControlRoom\worktrees\uoink-library\213914a5-528\gemini/library_mirror.py#L1960-L1963):
++```python
++1960:         if os.name == "nt":
++1961:             for pid in owned:
++1962:                 if self.owns_pid(pid):
++1963:                     _win_terminate_pid(pid, self._created_for_pid(pid))
++```
++`self._created_for_pid(pid)` returns `self._owned_created.get(pid)`, which matches the foreign process's creation timestamp. In `_win_terminate_pid` (lines 578-585):
++```python
++578:             actual = _windows_process_created_ms(handle)
++579:             if actual is not None and abs(actual - int(created_ms)) > _PROCESS_START_TOLERANCE_MS:
++580:                 return False
++...
++585:         return bool(k32.TerminateProcess(handle, 1))
++```
++Because `actual` matches `created_ms`, the identity check passes. `TerminateProcess(handle, 1)` is called on the foreign process.
++
++---
++
++### 2.4 Process Exit Amnesia (Confirmed Death Forgotten)
++
++The brief directly asks:
++> "and whether a confirmed process exit can be forgotten on a later failed query."
++
++Analysis of `_process_liveness` and `physical_liveness` confirms that a process exit is forgotten in two ways:
++
++#### Defect 1: Inaccessible Recycled PID Flips "dead" to "unknown"
++In [library_mirror.py](file:///C:/Users/hello/AppData/Local/AgentControlRoom\worktrees\uoink-library\213914a5-528\gemini/library_mirror.py#L653-L656):
++```python
++653:         handle = k32.OpenProcess(0x1000, False, int(pid))
++654:         if not handle:
++655:             error = ctypes.get_last_error()
++656:             return "dead" if error == 87 else "unknown"
++```
++1. At time $T_1$, the tracked process exits. The PID is vacant. `OpenProcess` fails with `error == 87` (`ERROR_INVALID_PARAMETER`). `_process_liveness` returns `"dead"`.
++2. `_VaultIoSession` has no latch or memory for dead PIDs. It never removes dead PIDs from `self._owned_created` and never clears `self.writer_pid`.
++3. At time $T_2$, the host OS reuses that PID for a protected or privileged process (e.g. system service or elevated process). `OpenProcess(0x1000)` fails with `ERROR_ACCESS_DENIED` (`error == 5`).
++4. Line 656 evaluates `error == 87` as `False`, returning `"unknown"`.
++5. In `physical_liveness()` (line 1481):
++   ```python
++   1481:         if "unknown" in states:
++   1482:             return "unknown"
++   ```
++   The session's status changes from `"dead"` back to `"unknown"`.
++6. Line 1487 evaluates `self.physical_liveness() != "dead"` as `True`.
++7. **Result**: A confirmed process exit is forgotten. The session is treated as alive.
++
++#### Defect 2: Subprocess Handle Termination Overridden by Raw PID Query
++In [library_mirror.py](file:///C:/Users/hello/AppData/Local/AgentControlRoom\worktrees\uoink-library\213914a5-528\gemini/library_mirror.py#L1461-L1474):
++```python
++1461:         proc = self.proc
++1462:         if proc is not None:
++1463:             try:
++1464:                 poll = proc.poll()
++...
++1468:                 if poll is None:
++1469:                     return "alive"
++...
++1473:         if self.pid:
++1474:             states.append(_process_liveness(self.pid, self.created_ms))
++```
++When `proc.poll()` returns an integer return code, Python's underlying process handle proves that `self.proc` has terminated. However, lines 1473-1474 query `_process_liveness(self.pid, self.created_ms)` by raw PID. If `self.pid` has been recycled into a process where `OpenProcess` yields `ERROR_ACCESS_DENIED`, line 1474 appends `"unknown"` to `states`. Line 1482 returns `"unknown"`, overriding the process handle's proof of death.
++
++#### Defect 3: Start Time Query Failure Falls Through to "alive"
++In [library_mirror.py](file:///C:/Users/hello/AppData/Local/AgentControlRoom\worktrees\uoink-library\213914a5-528\gemini/library_mirror.py#L663-L667):
++```python
++663:             if created_ms is not None:
++664:                 actual = _windows_process_created_ms(handle)
++665:                 if actual is not None and abs(actual - int(created_ms)) > _PROCESS_START_TOLERANCE_MS:
++666:                     return "dead"
++667:             return "alive"
++```
++If `_windows_process_created_ms(handle)` fails (e.g., `GetProcessTimes` returns 0 on a terminating process), `actual` is `None`. Line 665 evaluates to `False`. The function falls through to line 667 and returns `"alive"`, even though `created_ms` validation could not be performed.
++
++---
++
++## 3. Synthetic Regression Probe Evidence
++
++Probes were implemented in [tests/test_gemini_synthetic_process_authority.py](file:///C:/Users/hello/AppData/Local/AgentControlRoom\worktrees\uoink-library\213914a5-528\gemini/tests/test_gemini_synthetic_process_authority.py) using inert PID values (70001, 80002, 70002, 70003, 70004) and mocked kernel structures. Real processes were not launched, suspended, or terminated.
++
++### Attempt History and Outcomes
++
++#### Attempt 1 (Label: `gemini-authority-01`)
++- **Command**:
++  ```powershell
++  $env:PYTHONDONTWRITEBYTECODE="1"; $env:PHASE3_REQUIRE_IMPLEMENTATION="1"; $env:IG_FORBIDDEN_LIVE="C:\Users\hello\AppData\Local\Uoink\index.db"; & "E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\ig-native\Scripts\python.exe" "E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\integrator_verify.py" --root "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\213914a5-528\gemini" --label "gemini-authority-01" tests/test_gemini_synthetic_process_authority.py
++  ```
++- **Exit Code**: 1
++- **Summary**: 4 passed, 2 failed in 0.48 s.
++  - Passed:
++    - `test_probe_toolhelp_orphan_child_adopted_without_temporal_check`
++    - `test_probe_foreign_orphan_retains_session_and_blocks_abandonment`
++    - `test_probe_confirmed_exit_forgotten_on_recycled_pid_access_denied`
++    - `test_probe_proc_poll_death_overridden_by_recycled_pid_query`
++  - Failed:
++    - `test_probe_foreign_orphan_targeted_by_terminate`: `AttributeError: 'types.SimpleNamespace' object has no attribute 'stdin'` inside `_close_streams()` (line 1525).
++    - `test_probe_process_times_failure_bypasses_start_time_check`: `AttributeError: '_ctypes.CArgObject' object has no attribute 'contents'` when attempting to mutate mock argument from `ctypes.byref(code)`.
++- **Log**: `_scratch/gemini-authority-01/tests.log`
++
++#### Attempt 2 (Label: `gemini-authority-02`)
++- **Correction Applied**: Added `stdin=None, stdout=None, stderr=None` to `SimpleNamespace`. Replaced ctypes argument mutation with a subclass of `wintypes.DWORD`.
++- **Command**:
++  ```powershell
++  $env:PYTHONDONTWRITEBYTECODE="1"; $env:PHASE3_REQUIRE_IMPLEMENTATION="1"; $env:IG_FORBIDDEN_LIVE="C:\Users\hello\AppData\Local\Uoink\index.db"; & "E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\ig-native\Scripts\python.exe" "E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\integrator_verify.py" --root "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\213914a5-528\gemini" --label "gemini-authority-02" tests/test_gemini_synthetic_process_authority.py
++  ```
++- **Exit Code**: 1
++- **Summary**: 5 passed, 1 failed in 0.26 s.
++  - `test_probe_foreign_orphan_targeted_by_terminate` passed.
++  - `test_probe_process_times_failure_bypasses_start_time_check` failed with `TypeError: __class__ set to ...` in Python 3.14 due to function-scoped ctypes structure subclassing.
++- **Log**: `_scratch/gemini-authority-02/tests.log`
++
++#### Attempt 3 (Label: `gemini-authority-03`)
++- **Correction Applied**: Replaced ctypes subclassing with a lightweight `FakeDWORD` and mocked `ctypes.byref` to return the instance directly.
++- **Command**:
++  ```powershell
++  $env:PYTHONDONTWRITEBYTECODE="1"; $env:PHASE3_REQUIRE_IMPLEMENTATION="1"; $env:IG_FORBIDDEN_LIVE="C:\Users\hello\AppData\Local\Uoink\index.db"; & "E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\ig-native\Scripts\python.exe" "E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\integrator_verify.py" --root "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\213914a5-528\gemini" --label "gemini-authority-03" tests/test_gemini_synthetic_process_authority.py
++  ```
++- **Exit Code**: 0
++- **Summary**: 6 passed in 0.25 s.
++- **Log**: `_scratch/gemini-authority-03/tests.log`
++- **Results JSON**: `_scratch/gemini-authority-03/results.json`
++
++### Summary of Probe Results
++
++| Probe Name | Tested Authority Boundary | Measured Outcome | Confirmed Defect |
++|---|---|---|---|
++| `test_probe_toolhelp_orphan_child_adopted_without_temporal_check` | `owned_pids` adopts orphan child created before launcher | PID 80002 admitted to `owned_pids`, claimed by `owns_pid`, recorded in `_owned_created` | Unchecked Toolhelp child adoption |
++| `test_probe_foreign_orphan_retains_session_and_blocks_abandonment` | Foreign orphan keeps `physical_liveness() == "alive"` after launcher exits | `physical_liveness()` is `"alive"`, `_abandon_unstarted` blocked, exclusion held | Foreign process retention and admission leak |
++| `test_probe_foreign_orphan_targeted_by_terminate` | `terminate()` issues kill to adopted foreign orphan | `_win_terminate_pid` invoked on `(80002, 500_000)` | Unintended host process termination hazard |
++| `test_probe_confirmed_exit_forgotten_on_recycled_pid_access_denied` | Recycled PID error 5 flips confirmed `"dead"` to `"unknown"` | Status flips from `"dead"` to `"unknown"`; `physically_alive()` reverts to `True` | Process exit amnesia |
++| `test_probe_proc_poll_death_overridden_by_recycled_pid_query` | Subprocess handle exit code 0 overridden by raw PID lookup | `physical_liveness()` reports `"unknown"`; `physically_alive()` returns `True` | Handle authority overridden by raw PID |
++| `test_probe_process_times_failure_bypasses_start_time_check` | `GetProcessTimes` failure bypasses start time validation | Returns `"alive"` without validating `created_ms` | Incomplete identity validation fallthrough |
++
++---
++
++## 4. Distinction: Confirmed Defects vs. Plausible Explanations of Tree08
++
++### Confirmed Source Defects
++1. **Unchecked Toolhelp Child Adoption**: Toolhelp parent PID enumeration in `owned_pids()` ingests preexisting orphan processes because it lacks a check ensuring `child_created_ms >= parent_created_ms`.
++2. **Missing Parent Liveness Check Before Toolhelp Enumeration**: `owned_pids()` queries Toolhelp using `self.pid` even when the parent process has already exited, allowing adoption of children spawned by an unrelated process reusing the PID.
++3. **Self-Authenticating Timestamp Ingestion**: Storing the foreign child's own timestamp in `_owned_created` causes `_win_terminate_pid` to target the foreign process for termination.
++4. **Admission Leak via Foreign Retention**: An adopted foreign process keeps `physical_liveness()` as `"alive"`, preventing `_abandon_unstarted()` from releasing exclusion and blocking replacement sessions.
++5. **Process Exit Amnesia**: A confirmed dead process is forgotten if a subsequent query encounters `ERROR_ACCESS_DENIED`, transitioning the session from dead back to unconfirmed.
++6. **Subprocess Exit Override**: Definitive process exit recorded by `proc.poll()` is overridden by ambiguous raw PID queries.
++
++### Plausible Explanations vs. Tree08 Real-World Evidence
++- In Tree08, the failure sequence began at `test_live_worker_lease_blocks_a_second_mirror` in `tests/test_phase4_av5m3_isolation.py` during `export(env)`. The preceding test (`test_timeout_kills_worker_and_keeps_independent_user_edit`) ran a timed-out mirror and initiated termination.
++- Under high-velocity test execution (2,700+ cases), PID recycling occurs frequently on Windows.
++- If a terminated worker's PID was recycled into a system or service process yielding Access Denied, or if Toolhelp adopted an orphan process with the same creator PID:
++  - `physical_liveness()` would report `"alive"` or `"unknown"`.
++  - Destination exclusion would not be released by `_abandon_unstarted()`.
++  - The subsequent test's `export(env)` call would fail with `destination exclusion unavailable` or `WaitForSingleObject` timeout.
++- **Boundary Note**: While these mechanisms explain how a gate can be starved and why destination exclusion errors cascade across tests, Gemini's investigation was bounded to synthetic inert-process authority. Astra is investigating cancellation and mutex owner lifetime independently. Whether Tree08 was caused by PID recycling, orphan adoption, or mutex thread affinity during cancellation remains a combined question for the post-diagnostic synthesis.
++
++---
++
++## 5. Proposed Reviewed Fix (For Post-Diagnostic Implementation)
++
++To address all confirmed authority defects without modifying production source during this diagnostic phase, the following reviewed changes are proposed for [library_mirror.py](file:///C:/Users/hello/AppData/Local/AgentControlRoom\worktrees\uoink-library\213914a5-528\gemini/library_mirror.py):
++
++### 1. Enforce Creation Order and Parent Liveness in `owned_pids()`
++```python
++# In _VaultIoSession.owned_pids():
++# Only enumerate Toolhelp children if self.pid is confirmed alive and matches self.created_ms
++if os.name == "nt" and self.pid and _pid_is_alive(self.pid, self.created_ms):
++    parent_created = self.created_ms or _process_created_ms(self.pid)
++    for child in _windows_process_children(self.pid):
++        exe = str(child.get("exe") or "")
++        if _is_console_host(exe):
++            continue
++        child_pid = int(child["pid"])
++        child_created = _process_created_ms(child_pid)
++        # Discard any orphan created before the parent
++        if parent_created is not None and child_created is not None:
++            if child_created < (parent_created - _PROCESS_START_TOLERANCE_MS):
++                continue
++        add(child_pid, exe, created=child_created)
++```
++
++### 2. Latch Confirmed Process Death to Prevent Exit Amnesia
++```python
++# In _VaultIoSession.__init__():
++self._dead_pids: set[int] = set()
++
++# In _VaultIoSession.physical_liveness():
++# If proc.poll() confirmed death, latch self.pid as dead and do not query by raw PID
++if proc is not None:
++    try:
++        poll = proc.poll()
++    except Exception:
++        states.append("unknown")
++    else:
++        if poll is None:
++            return "alive"
++        if self.pid:
++            self._dead_pids.add(self.pid)
++
++# When checking writer_pid and owned PIDs, skip latched dead PIDs
++for pid, created in list(self._owned_created.items()):
++    if pid in self._dead_pids:
++        states.append("dead")
++        continue
++    status = _process_liveness(pid, created)
++    if status == "dead":
++        self._dead_pids.add(pid)
++    states.append(status)
++```
++
++### 3. Handle `GetProcessTimes` Failure in `_process_liveness`
++```python
++# In _process_liveness:
++if created_ms is not None:
++    actual = _windows_process_created_ms(handle)
++    if actual is None:
++        # Cannot confirm identity; must not fall through to "alive"
++        return "unknown"
++    if abs(actual - int(created_ms)) > _PROCESS_START_TOLERANCE_MS:
++        return "dead"
++```
++
++These changes:
++1. Retain unknown-child exclusion (unverified children remain unknown).
++2. Retain late-write refusal (dead sessions remain dead).
++3. Retain destination-alias safety (gate locks remain keyed to destination identity).
++4. Retain independent user bytes (stale sessions cannot write).
++5. Release admission after known death (confirmed death is latched and cannot revert to alive).
+diff --git a/docs/library/proof/gemini-mirror-authority-2026-09-13/.gitattributes b/docs/library/proof/gemini-mirror-authority-2026-09-13/.gitattributes
+new file mode 100644
+index 0000000..fa1385d
+--- /dev/null
++++ b/docs/library/proof/gemini-mirror-authority-2026-09-13/.gitattributes
+@@ -0,0 +1 @@
++* -text
+diff --git a/docs/library/proof/gemini-mirror-authority-2026-09-13/MIRROR-PROCESS-AUTHORITY-GEMINI-2026-09-13.md b/docs/library/proof/gemini-mirror-authority-2026-09-13/MIRROR-PROCESS-AUTHORITY-GEMINI-2026-09-13.md
+new file mode 100644
+index 0000000..0b19bf4
+--- /dev/null
++++ b/docs/library/proof/gemini-mirror-authority-2026-09-13/MIRROR-PROCESS-AUTHORITY-GEMINI-2026-09-13.md
+@@ -0,0 +1,341 @@
++# Mirror Process Authority and Lifecycle Diagnosis (Gemini)
++
++**Date**: 2026-09-13  
++**Worker**: Gemini  
++**Workspace**: `C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\213914a5-528\gemini`  
++**Reference Brief**: `docs/library/MIRROR-TREE08-REPAIR-BRIEF-2026-09-13.md`  
++**Boundary Rules**: Diagnostic review and synthetic inert-process regression probes only. No product edits, existing-test edits, real process manipulation, kernel gate acquisition, model execution, live index access, port 5179 listeners, new fetch, paid API calls, commits, pushes, or subagents.
++
++---
++
++## 1. Assignment Scope and Authority Boundaries
++
++Tree08 produced 51 mirror failures across 2,729 test cases (proof record: `proof/ryan-final-partitioned-08-2026-09-13/SHA256.json`). The first failure was `test_live_worker_lease_blocks_a_second_mirror` in `tests/test_phase4_av5m3_isolation.py` at initial export, followed by cascading failures reaching `WaitForSingleObject` and `destination exclusion unavailable`.
++
++Astra is independently investigating cancellation and owner lifetime. Gemini owns the bounded security and lifecycle assignment: inspect the process authority mechanisms in [library_mirror.py](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/213914a5-528/gemini/library_mirror.py), specifically:
++1. Authority used by `owned_pids`, `physical_liveness`, and termination.
++2. Windows Toolhelp parent PID persistence (`th32ParentProcessID`) outliving parent process identity.
++3. Whether a recycled or orphan parent PID causes a foreign child to be adopted, retained, or killed.
++4. Whether a confirmed process exit can be forgotten on a later failed query.
++
++All diagnostic assertions in this report were verified with synthetic regression probes in [tests/test_gemini_synthetic_process_authority.py](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/213914a5-528/gemini/tests/test_gemini_synthetic_process_authority.py) executed via the guarded native verifier.
++
++---
++
++## 2. Source-Level Authority Analysis
++
++### 2.1 Toolhelp Snapshot Mechanics and Orphan Ingestion
++
++In [library_mirror.py](file:///C:/Users/hello/AppData/Local/AgentControlRoom\worktrees\uoink-library\213914a5-528\gemini/library_mirror.py#L529-L561):
++```python
++529: def _windows_process_children(parent_pid: int | None) -> list[dict[str, Any]]:
++...
++540:     snapshot = k32.CreateToolhelp32Snapshot(_TH32CS_SNAPPROCESS, 0)
++...
++549:         while True:
++550:             if int(entry.th32ParentProcessID) == int(parent_pid):
++551:                 out.append({
++552:                     "pid": int(entry.th32ProcessID),
++553:                     "exe": str(entry.szExeFile or ""),
++554:                     "ppid": int(entry.th32ParentProcessID),
++555:                 })
++556:             if not Process32NextW(snapshot, ctypes.byref(entry)):
++557:                 break
++558:         return out
++```
++
++In the Windows NT kernel, `th32ParentProcessID` reflects the creator PID assigned at process initialization (`InheritedFromUniqueProcessId`). Windows does not update, re-parent, or clear this field when the parent process exits. When an old process terminates, any surviving children retain that creator PID as their parent PID indefinitely.
++
++Because Windows reuses PIDs rapidly, when a new process is spawned and receives a recycled PID, any preexisting orphan processes whose original creator had that same PID match `entry.th32ParentProcessID == parent_pid`.
++
++### 2.2 Unchecked Adoption in `owned_pids()`
++
++In [library_mirror.py](file:///C:/Users/hello/AppData/Local/AgentControlRoom\worktrees\uoink-library\213914a5-528\gemini/library_mirror.py#L1427-L1456):
++```python
++1427:     def owned_pids(self) -> list[int]:
++1428:         pids: list[int] = []
++1429:         seen: set[int] = set()
++1430: 
++1431:         def add(pid: int | None, exe: str = "", created: int | None = None) -> None:
++1432:             if not isinstance(pid, int) or pid <= 0 or pid in seen:
++1433:                 return
++1434:             seen.add(pid)
++1435:             pids.append(pid)
++1436:             if exe:
++1437:                 self._owned_exe[pid] = exe
++1438:             if pid not in self._owned_created:
++1439:                 self._owned_created[pid] = created if created is not None else _process_created_ms(pid)
++1440: 
++1441:         add(self.pid, created=self.created_ms)
++1442:         add(self.writer_pid, created=self.writer_created_ms)
++1443:         if os.name == "nt" and self.pid:
++1444:             for child in _windows_process_children(self.pid):
++1445:                 exe = str(child.get("exe") or "")
++1446:                 if _is_console_host(exe):
++1447:                     continue
++1448:                 add(int(child["pid"]), exe)
++```
++
++Three critical authority defects exist here:
++1. **Missing Creation Order Verification**: `add()` receives `int(child["pid"])` without `created`. Line 1439 calls `_process_created_ms(pid)` for the child, but never compares it against `self.created_ms`. If the child was created at $T_0$ and the session launcher was created at $T_1$ with $T_0 < T_1$, the child is an orphan from an earlier dead process. `owned_pids()` adopts it regardless.
++2. **Missing Parent Liveness Check**: Lines 1443-1444 check `if os.name == "nt" and self.pid:`. They never verify whether `self.pid` is still running or matches `self.created_ms`. If `self.proc` has exited and its PID has been recycled by an unrelated host process, Toolhelp returns children spawned by that unrelated host process, and `owned_pids()` adopts them.
++3. **Self-Authenticating Registration**: Line 1439 stores the child's own creation timestamp in `self._owned_created[pid]`. Storing the foreign child's own timestamp grants it legitimate authority under all subsequent identity checks.
++
++### 2.3 Lifecycle Consequences: Retention, Gate Leaks, and Unintended Termination
++
++#### Consequence 1: Adoption
++The foreign PID enters `pids` (line 1435), `self._owned_created` (line 1439), and `self.owns_pid(pid)` (line 1492: `return pid in self.owned_pids()`).
++
++#### Consequence 2: Retention and Gate Lockout
++In [library_mirror.py](file:///C:/Users/hello/AppData/Local/AgentControlRoom\worktrees\uoink-library\213914a5-528\gemini/library_mirror.py#L1475-L1483):
++```python
++1475:         for pid, created in list(self._owned_created.items()):
++1476:             if pid in (self.pid, self.writer_pid):
++1477:                 continue
++1478:             states.append(_process_liveness(pid, created))
++1479:         if "alive" in states:
++1480:             return "alive"
++```
++Because the foreign process is alive on the machine, `_process_liveness` returns `"alive"`. Therefore:
++- `self.physical_liveness()` returns `"alive"`.
++- `self.physically_alive()` returns `True` (line 1487: `return self.physical_liveness() != "dead"`).
++- `_abandon_unstarted()` (lines 1694-1700) aborts immediately:
++  ```python
++  1694:         if self.physically_alive() or self._popen_in_progress:
++  1695:             return
++  ```
++  It cannot drop the session from `_retained_sessions` and cannot call `self._release_held_exclusion()`.
++- `_owner_blocks_replacement()` (lines 1268-1269) blocks any subsequent mirror on the same destination:
++  ```python
++  1268:         if session.physically_alive():
++  1269:             return True
++  ```
++  The destination exclusion is permanently held, producing cascading `destination exclusion unavailable` errors.
++
++#### Consequence 3: Host Process Termination Hazard
++In [library_mirror.py](file:///C:/Users/hello/AppData/Local/AgentControlRoom\worktrees\uoink-library\213914a5-528\gemini/library_mirror.py#L1960-L1963):
++```python
++1960:         if os.name == "nt":
++1961:             for pid in owned:
++1962:                 if self.owns_pid(pid):
++1963:                     _win_terminate_pid(pid, self._created_for_pid(pid))
++```
++`self._created_for_pid(pid)` returns `self._owned_created.get(pid)`, which matches the foreign process's creation timestamp. In `_win_terminate_pid` (lines 578-585):
++```python
++578:             actual = _windows_process_created_ms(handle)
++579:             if actual is not None and abs(actual - int(created_ms)) > _PROCESS_START_TOLERANCE_MS:
++580:                 return False
++...
++585:         return bool(k32.TerminateProcess(handle, 1))
++```
++Because `actual` matches `created_ms`, the identity check passes. `TerminateProcess(handle, 1)` is called on the foreign process.
++
++---
++
++### 2.4 Process Exit Amnesia (Confirmed Death Forgotten)
++
++The brief directly asks:
++> "and whether a confirmed process exit can be forgotten on a later failed query."
++
++Analysis of `_process_liveness` and `physical_liveness` confirms that a process exit is forgotten in two ways:
++
++#### Defect 1: Inaccessible Recycled PID Flips "dead" to "unknown"
++In [library_mirror.py](file:///C:/Users/hello/AppData/Local/AgentControlRoom\worktrees\uoink-library\213914a5-528\gemini/library_mirror.py#L653-L656):
++```python
++653:         handle = k32.OpenProcess(0x1000, False, int(pid))
++654:         if not handle:
++655:             error = ctypes.get_last_error()
++656:             return "dead" if error == 87 else "unknown"
++```
++1. At time $T_1$, the tracked process exits. The PID is vacant. `OpenProcess` fails with `error == 87` (`ERROR_INVALID_PARAMETER`). `_process_liveness` returns `"dead"`.
++2. `_VaultIoSession` has no latch or memory for dead PIDs. It never removes dead PIDs from `self._owned_created` and never clears `self.writer_pid`.
++3. At time $T_2$, the host OS reuses that PID for a protected or privileged process (e.g. system service or elevated process). `OpenProcess(0x1000)` fails with `ERROR_ACCESS_DENIED` (`error == 5`).
++4. Line 656 evaluates `error == 87` as `False`, returning `"unknown"`.
++5. In `physical_liveness()` (line 1481):
++   ```python
++   1481:         if "unknown" in states:
++   1482:             return "unknown"
++   ```
++   The session's status changes from `"dead"` back to `"unknown"`.
++6. Line 1487 evaluates `self.physical_liveness() != "dead"` as `True`.
++7. **Result**: A confirmed process exit is forgotten. The session is treated as alive.
++
++#### Defect 2: Subprocess Handle Termination Overridden by Raw PID Query
++In [library_mirror.py](file:///C:/Users/hello/AppData/Local/AgentControlRoom\worktrees\uoink-library\213914a5-528\gemini/library_mirror.py#L1461-L1474):
++```python
++1461:         proc = self.proc
++1462:         if proc is not None:
++1463:             try:
++1464:                 poll = proc.poll()
++...
++1468:                 if poll is None:
++1469:                     return "alive"
++...
++1473:         if self.pid:
++1474:             states.append(_process_liveness(self.pid, self.created_ms))
++```
++When `proc.poll()` returns an integer return code, Python's underlying process handle proves that `self.proc` has terminated. However, lines 1473-1474 query `_process_liveness(self.pid, self.created_ms)` by raw PID. If `self.pid` has been recycled into a process where `OpenProcess` yields `ERROR_ACCESS_DENIED`, line 1474 appends `"unknown"` to `states`. Line 1482 returns `"unknown"`, overriding the process handle's proof of death.
++
++#### Defect 3: Start Time Query Failure Falls Through to "alive"
++In [library_mirror.py](file:///C:/Users/hello/AppData/Local/AgentControlRoom\worktrees\uoink-library\213914a5-528\gemini/library_mirror.py#L663-L667):
++```python
++663:             if created_ms is not None:
++664:                 actual = _windows_process_created_ms(handle)
++665:                 if actual is not None and abs(actual - int(created_ms)) > _PROCESS_START_TOLERANCE_MS:
++666:                     return "dead"
++667:             return "alive"
++```
++If `_windows_process_created_ms(handle)` fails (e.g., `GetProcessTimes` returns 0 on a terminating process), `actual` is `None`. Line 665 evaluates to `False`. The function falls through to line 667 and returns `"alive"`, even though `created_ms` validation could not be performed.
++
++---
++
++## 3. Synthetic Regression Probe Evidence
++
++Probes were implemented in [tests/test_gemini_synthetic_process_authority.py](file:///C:/Users/hello/AppData/Local/AgentControlRoom\worktrees\uoink-library\213914a5-528\gemini/tests/test_gemini_synthetic_process_authority.py) using inert PID values (70001, 80002, 70002, 70003, 70004) and mocked kernel structures. Real processes were not launched, suspended, or terminated.
++
++### Attempt History and Outcomes
++
++#### Attempt 1 (Label: `gemini-authority-01`)
++- **Command**:
++  ```powershell
++  $env:PYTHONDONTWRITEBYTECODE="1"; $env:PHASE3_REQUIRE_IMPLEMENTATION="1"; $env:IG_FORBIDDEN_LIVE="C:\Users\hello\AppData\Local\Uoink\index.db"; & "E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\ig-native\Scripts\python.exe" "E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\integrator_verify.py" --root "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\213914a5-528\gemini" --label "gemini-authority-01" tests/test_gemini_synthetic_process_authority.py
++  ```
++- **Exit Code**: 1
++- **Summary**: 4 passed, 2 failed in 0.48 s.
++  - Passed:
++    - `test_probe_toolhelp_orphan_child_adopted_without_temporal_check`
++    - `test_probe_foreign_orphan_retains_session_and_blocks_abandonment`
++    - `test_probe_confirmed_exit_forgotten_on_recycled_pid_access_denied`
++    - `test_probe_proc_poll_death_overridden_by_recycled_pid_query`
++  - Failed:
++    - `test_probe_foreign_orphan_targeted_by_terminate`: `AttributeError: 'types.SimpleNamespace' object has no attribute 'stdin'` inside `_close_streams()` (line 1525).
++    - `test_probe_process_times_failure_bypasses_start_time_check`: `AttributeError: '_ctypes.CArgObject' object has no attribute 'contents'` when attempting to mutate mock argument from `ctypes.byref(code)`.
++- **Log**: `_scratch/gemini-authority-01/tests.log`
++
++#### Attempt 2 (Label: `gemini-authority-02`)
++- **Correction Applied**: Added `stdin=None, stdout=None, stderr=None` to `SimpleNamespace`. Replaced ctypes argument mutation with a subclass of `wintypes.DWORD`.
++- **Command**:
++  ```powershell
++  $env:PYTHONDONTWRITEBYTECODE="1"; $env:PHASE3_REQUIRE_IMPLEMENTATION="1"; $env:IG_FORBIDDEN_LIVE="C:\Users\hello\AppData\Local\Uoink\index.db"; & "E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\ig-native\Scripts\python.exe" "E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\integrator_verify.py" --root "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\213914a5-528\gemini" --label "gemini-authority-02" tests/test_gemini_synthetic_process_authority.py
++  ```
++- **Exit Code**: 1
++- **Summary**: 5 passed, 1 failed in 0.26 s.
++  - `test_probe_foreign_orphan_targeted_by_terminate` passed.
++  - `test_probe_process_times_failure_bypasses_start_time_check` failed with `TypeError: __class__ set to ...` in Python 3.14 due to function-scoped ctypes structure subclassing.
++- **Log**: `_scratch/gemini-authority-02/tests.log`
++
++#### Attempt 3 (Label: `gemini-authority-03`)
++- **Correction Applied**: Replaced ctypes subclassing with a lightweight `FakeDWORD` and mocked `ctypes.byref` to return the instance directly.
++- **Command**:
++  ```powershell
++  $env:PYTHONDONTWRITEBYTECODE="1"; $env:PHASE3_REQUIRE_IMPLEMENTATION="1"; $env:IG_FORBIDDEN_LIVE="C:\Users\hello\AppData\Local\Uoink\index.db"; & "E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\ig-native\Scripts\python.exe" "E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\integrator_verify.py" --root "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\213914a5-528\gemini" --label "gemini-authority-03" tests/test_gemini_synthetic_process_authority.py
++  ```
++- **Exit Code**: 0
++- **Summary**: 6 passed in 0.25 s.
++- **Log**: `_scratch/gemini-authority-03/tests.log`
++- **Results JSON**: `_scratch/gemini-authority-03/results.json`
++
++### Summary of Probe Results
++
++| Probe Name | Tested Authority Boundary | Measured Outcome | Confirmed Defect |
++|---|---|---|---|
++| `test_probe_toolhelp_orphan_child_adopted_without_temporal_check` | `owned_pids` adopts orphan child created before launcher | PID 80002 admitted to `owned_pids`, claimed by `owns_pid`, recorded in `_owned_created` | Unchecked Toolhelp child adoption |
++| `test_probe_foreign_orphan_retains_session_and_blocks_abandonment` | Foreign orphan keeps `physical_liveness() == "alive"` after launcher exits | `physical_liveness()` is `"alive"`, `_abandon_unstarted` blocked, exclusion held | Foreign process retention and admission leak |
++| `test_probe_foreign_orphan_targeted_by_terminate` | `terminate()` issues kill to adopted foreign orphan | `_win_terminate_pid` invoked on `(80002, 500_000)` | Unintended host process termination hazard |
++| `test_probe_confirmed_exit_forgotten_on_recycled_pid_access_denied` | Recycled PID error 5 flips confirmed `"dead"` to `"unknown"` | Status flips from `"dead"` to `"unknown"`; `physically_alive()` reverts to `True` | Process exit amnesia |
++| `test_probe_proc_poll_death_overridden_by_recycled_pid_query` | Subprocess handle exit code 0 overridden by raw PID lookup | `physical_liveness()` reports `"unknown"`; `physically_alive()` returns `True` | Handle authority overridden by raw PID |
++| `test_probe_process_times_failure_bypasses_start_time_check` | `GetProcessTimes` failure bypasses start time validation | Returns `"alive"` without validating `created_ms` | Incomplete identity validation fallthrough |
++
++---
++
++## 4. Distinction: Confirmed Defects vs. Plausible Explanations of Tree08
++
++### Confirmed Source Defects
++1. **Unchecked Toolhelp Child Adoption**: Toolhelp parent PID enumeration in `owned_pids()` ingests preexisting orphan processes because it lacks a check ensuring `child_created_ms >= parent_created_ms`.
++2. **Missing Parent Liveness Check Before Toolhelp Enumeration**: `owned_pids()` queries Toolhelp using `self.pid` even when the parent process has already exited, allowing adoption of children spawned by an unrelated process reusing the PID.
++3. **Self-Authenticating Timestamp Ingestion**: Storing the foreign child's own timestamp in `_owned_created` causes `_win_terminate_pid` to target the foreign process for termination.
++4. **Admission Leak via Foreign Retention**: An adopted foreign process keeps `physical_liveness()` as `"alive"`, preventing `_abandon_unstarted()` from releasing exclusion and blocking replacement sessions.
++5. **Process Exit Amnesia**: A confirmed dead process is forgotten if a subsequent query encounters `ERROR_ACCESS_DENIED`, transitioning the session from dead back to unconfirmed.
++6. **Subprocess Exit Override**: Definitive process exit recorded by `proc.poll()` is overridden by ambiguous raw PID queries.
++
++### Plausible Explanations vs. Tree08 Real-World Evidence
++- In Tree08, the failure sequence began at `test_live_worker_lease_blocks_a_second_mirror` in `tests/test_phase4_av5m3_isolation.py` during `export(env)`. The preceding test (`test_timeout_kills_worker_and_keeps_independent_user_edit`) ran a timed-out mirror and initiated termination.
++- Under high-velocity test execution (2,700+ cases), PID recycling occurs frequently on Windows.
++- If a terminated worker's PID was recycled into a system or service process yielding Access Denied, or if Toolhelp adopted an orphan process with the same creator PID:
++  - `physical_liveness()` would report `"alive"` or `"unknown"`.
++  - Destination exclusion would not be released by `_abandon_unstarted()`.
++  - The subsequent test's `export(env)` call would fail with `destination exclusion unavailable` or `WaitForSingleObject` timeout.
++- **Boundary Note**: While these mechanisms explain how a gate can be starved and why destination exclusion errors cascade across tests, Gemini's investigation was bounded to synthetic inert-process authority. Astra is investigating cancellation and mutex owner lifetime independently. Whether Tree08 was caused by PID recycling, orphan adoption, or mutex thread affinity during cancellation remains a combined question for the post-diagnostic synthesis.
++
++---
++
++## 5. Proposed Reviewed Fix (For Post-Diagnostic Implementation)
++
++To address all confirmed authority defects without modifying production source during this diagnostic phase, the following reviewed changes are proposed for [library_mirror.py](file:///C:/Users/hello/AppData/Local/AgentControlRoom\worktrees\uoink-library\213914a5-528\gemini/library_mirror.py):
++
++### 1. Enforce Creation Order and Parent Liveness in `owned_pids()`
++```python
++# In _VaultIoSession.owned_pids():
++# Only enumerate Toolhelp children if self.pid is confirmed alive and matches self.created_ms
++if os.name == "nt" and self.pid and _pid_is_alive(self.pid, self.created_ms):
++    parent_created = self.created_ms or _process_created_ms(self.pid)
++    for child in _windows_process_children(self.pid):
++        exe = str(child.get("exe") or "")
++        if _is_console_host(exe):
++            continue
++        child_pid = int(child["pid"])
++        child_created = _process_created_ms(child_pid)
++        # Discard any orphan created before the parent
++        if parent_created is not None and child_created is not None:
++            if child_created < (parent_created - _PROCESS_START_TOLERANCE_MS):
++                continue
++        add(child_pid, exe, created=child_created)
++```
++
++### 2. Latch Confirmed Process Death to Prevent Exit Amnesia
++```python
++# In _VaultIoSession.__init__():
++self._dead_pids: set[int] = set()
++
++# In _VaultIoSession.physical_liveness():
++# If proc.poll() confirmed death, latch self.pid as dead and do not query by raw PID
++if proc is not None:
++    try:
++        poll = proc.poll()
++    except Exception:
++        states.append("unknown")
++    else:
++        if poll is None:
++            return "alive"
++        if self.pid:
++            self._dead_pids.add(self.pid)
++
++# When checking writer_pid and owned PIDs, skip latched dead PIDs
++for pid, created in list(self._owned_created.items()):
++    if pid in self._dead_pids:
++        states.append("dead")
++        continue
++    status = _process_liveness(pid, created)
++    if status == "dead":
++        self._dead_pids.add(pid)
++    states.append(status)
++```
++
++### 3. Handle `GetProcessTimes` Failure in `_process_liveness`
++```python
++# In _process_liveness:
++if created_ms is not None:
++    actual = _windows_process_created_ms(handle)
++    if actual is None:
++        # Cannot confirm identity; must not fall through to "alive"
++        return "unknown"
++    if abs(actual - int(created_ms)) > _PROCESS_START_TOLERANCE_MS:
++        return "dead"
++```
++
++These changes:
++1. Retain unknown-child exclusion (unverified children remain unknown).
++2. Retain late-write refusal (dead sessions remain dead).
++3. Retain destination-alias safety (gate locks remain keyed to destination identity).
++4. Retain independent user bytes (stale sessions cannot write).
++5. Release admission after known death (confirmed death is latched and cannot revert to alive).
+diff --git a/docs/library/proof/gemini-mirror-authority-2026-09-13/SHA256.json b/docs/library/proof/gemini-mirror-authority-2026-09-13/SHA256.json
+new file mode 100644
+index 0000000..8065512
+--- /dev/null
++++ b/docs/library/proof/gemini-mirror-authority-2026-09-13/SHA256.json
+@@ -0,0 +1,117 @@
++{
++  "algorithm": "sha256",
++  "files": {
++    ".gitattributes": {
++      "bytes": 8,
++      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
++    },
++    "archive_gemini_mirror_authority.py": {
++      "bytes": 3051,
++      "sha256": "5d00afb5bc3a3154222e2b12315a8b11abbaf827565f9b38ed66c0b33c6c49e3"
++    },
++    "astra-gemini-authority01/guard/ig_paths.py": {
++      "bytes": 106,
++      "sha256": "226f4e0dd35385e5edcbfc351b062c9b7680c16ddf0630573338f7b8a5fdbed6"
++    },
++    "astra-gemini-authority01/guard/sitecustomize.py": {
++      "bytes": 1216,
++      "sha256": "2bd3820ac4a345039c6550308c32a7731e93494dee5933166a0a1da54620017f"
++    },
++    "astra-gemini-authority01/results.json": {
++      "bytes": 907,
++      "sha256": "0754eebd084b4769dcd923d740fb23ca15f2bc9d465a60e63844411b43c44638"
++    },
++    "astra-gemini-authority01/tests.log": {
++      "bytes": 100,
++      "sha256": "39d498abd87b556064f38823a9d12a75c7af3951bd417f4543f9e31dbc249a56"
++    },
++    "astra-gemini-authority01/tests.xml": {
++      "bytes": 1145,
++      "sha256": "05dbf12611d490a54ddf5d8f5cb2bd3915e0de2ebf2a5849eb6900e90ef4ea3d"
++    },
++    "gemini-authority-01/guard/ig_paths.py": {
++      "bytes": 106,
++      "sha256": "226f4e0dd35385e5edcbfc351b062c9b7680c16ddf0630573338f7b8a5fdbed6"
++    },
++    "gemini-authority-01/guard/sitecustomize.py": {
++      "bytes": 1216,
++      "sha256": "2bd3820ac4a345039c6550308c32a7731e93494dee5933166a0a1da54620017f"
++    },
++    "gemini-authority-01/results.json": {
++      "bytes": 871,
++      "sha256": "1c34866f1eebf3f927ee6f267ede50f3df757cca4cebec31739440787cc382c0"
++    },
++    "gemini-authority-01/tests.log": {
++      "bytes": 2260,
++      "sha256": "71cac960742c020d5955b65d8aa7bd4c154ec282529c2f33b1e885c2b979ddb0"
++    },
++    "gemini-authority-01/tests.xml": {
++      "bytes": 2964,
++      "sha256": "68c188a1288d49818262c6599356adeb10c7d2faaa58afb0e05419756d9cac3d"
++    },
++    "gemini-authority-02/guard/ig_paths.py": {
++      "bytes": 106,
++      "sha256": "226f4e0dd35385e5edcbfc351b062c9b7680c16ddf0630573338f7b8a5fdbed6"
++    },
++    "gemini-authority-02/guard/sitecustomize.py": {
++      "bytes": 1216,
++      "sha256": "2bd3820ac4a345039c6550308c32a7731e93494dee5933166a0a1da54620017f"
++    },
++    "gemini-authority-02/results.json": {
++      "bytes": 871,
++      "sha256": "9aae6e8bea7304b18f24e448f98411fbee8d90144c01faa298d7a3e6fc5e6896"
++    },
++    "gemini-authority-02/tests.log": {
++      "bytes": 946,
++      "sha256": "c303d2659d09ddd013b28db899554009f07e71e0fc6f1589bb69ddd5c610c07c"
++    },
++    "gemini-authority-02/tests.xml": {
++      "bytes": 2019,
++      "sha256": "681d969c8df4d9ff85a680e65ee7d0e4cf598fddb26372f4c92f2a43c6cd4400"
++    },
++    "gemini-authority-03/guard/ig_paths.py": {
++      "bytes": 106,
++      "sha256": "226f4e0dd35385e5edcbfc351b062c9b7680c16ddf0630573338f7b8a5fdbed6"
++    },
++    "gemini-authority-03/guard/sitecustomize.py": {
++      "bytes": 1216,
++      "sha256": "2bd3820ac4a345039c6550308c32a7731e93494dee5933166a0a1da54620017f"
++    },
++    "gemini-authority-03/results.json": {
++      "bytes": 871,
++      "sha256": "007805bbaa57e0d890f78129b6565275791554a987909bace99ded320e04ef29"
++    },
++    "gemini-authority-03/tests.log": {
++      "bytes": 100,
++      "sha256": "55fe2dfb2e48c49aba1a4c760a643a9b83191fccd68594aadfeb4bdf1dc51335"
++    },
++    "gemini-authority-03/tests.xml": {
++      "bytes": 1145,
++      "sha256": "675d802b0f5ca2ef3a6e43fb547dc118b3ff76eceb3be6c6a568870e093c9b30"
++    },
++    "integrator_verify.py": {
++      "bytes": 4420,
++      "sha256": "280cfdad5ebc56a1748ce53cf9c6850335b7046ab1b9998f7cdd9a196c44e7e2"
++    },
++    "MIRROR-PROCESS-AUTHORITY-GEMINI-2026-09-13.md": {
++      "bytes": 22718,
++      "sha256": "03509d6b4a097b67f4e177cba02ffc634611b91eb01a001e8ab9f069c9449c17"
++    },
++    "original-worker.diff": {
++      "bytes": 33074,
++      "sha256": "34ca3d2c8acc4c5b20ab48ea3c80667938171de2ab2a618a833fbbaf26a7527c"
++    },
++    "review-limits.json": {
++      "bytes": 932,
++      "sha256": "a5976fa3b7adcf3a2b97fe1fb08b51ed1d596dc5e80ad88c8840aefc67b2405d"
++    },
++    "run_gemini_authority_verification.ps1": {
++      "bytes": 1274,
++      "sha256": "7417be8df8afce5cc4ab8fab7da39e6a7689426da8b9b47e0f62f13caf5310d4"
++    },
++    "test_gemini_synthetic_process_authority.py": {
++      "bytes": 9294,
++      "sha256": "ba60842ca1ec7f7f63037bfc8d91e75e057d75e0740ddf7b3a07b5eaa13f61fe"
++    }
++  }
++}
+diff --git a/docs/library/proof/gemini-mirror-authority-2026-09-13/archive_gemini_mirror_authority.py b/docs/library/proof/gemini-mirror-authority-2026-09-13/archive_gemini_mirror_authority.py
+new file mode 100644
+index 0000000..ff38a50
+--- /dev/null
++++ b/docs/library/proof/gemini-mirror-authority-2026-09-13/archive_gemini_mirror_authority.py
+@@ -0,0 +1,38 @@
++import hashlib, json, shutil, subprocess
++from pathlib import Path
++r=Path(__file__).resolve().parents[1]
++w=Path(r'C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\213914a5-528\gemini')
++assert subprocess.check_output(['git','rev-parse','HEAD'],cwd=w,text=True).strip()=='b62aab325ef6b2dfde95e23b97b4b23e263e6e9a'
++assert not subprocess.check_output(['git','diff','--name-only'],cwd=w,text=True).strip()
++report='docs/library/MIRROR-PROCESS-AUTHORITY-GEMINI-2026-09-13.md'
++probe='tests/test_gemini_synthetic_process_authority.py'
++out=w/'docs/library/proof/gemini-mirror-authority-2026-09-13'
++out.mkdir(exist_ok=False,parents=True)
++(out/'.gitattributes').write_text('* -text\n',encoding='utf8',newline='\n')
++for name in [report,probe]:
++    shutil.copyfile(w/name,out/Path(name).name)
++subprocess.run(['git','add','-N',report,probe],cwd=w,check=True)
++(out/'original-worker.diff').write_bytes(subprocess.check_output(['git','diff','--binary','--',report,probe],cwd=w))
++subprocess.run(['git','reset','--',probe],cwd=w,check=True)
++for label in ['gemini-authority-01','gemini-authority-02','gemini-authority-03','astra-gemini-authority01']:
++    for p in (w/'_scratch'/label).rglob('*'):
++        if p.is_file() and p.suffix in ('.py','.log','.xml','.json'):
++            dest=out/label/p.relative_to(w/'_scratch'/label)
++            dest.parent.mkdir(parents=True,exist_ok=True)
++            shutil.copyfile(p,dest)
++for name in ['integrator_verify.py','run_gemini_authority_verification.ps1','archive_gemini_mirror_authority.py']:
++    shutil.copyfile(r/'_scratch'/name,out/name)
++(out/'review-limits.json').write_text(json.dumps({
++ 'source':'b62aab325ef6b2dfde95e23b97b4b23e263e6e9a',
++ 'worker_attempt_counts':[{'passed':4,'failed':2},{'passed':5,'failed':1},{'passed':6,'failed':0}],
++ 'astra_worker_observation':{'passed':6,'failed':0},
++ 'meaning':'These probes assert current defects; passing is reproduction, not product clearance.',
++ 'unverified_claims':['Probe 2 teardown flags assign globals but assert unchanged locals; no real owner/retain is set, so exclusion-held claim is unsupported.','Report opening says 51 mirror failures; actual tree08 has 50 mirror failures plus AT6.','Earlier probe drafts were overwritten by worker; logs remain but exact v1/v2 source bytes were not located.','Tree08 causal link remains unproved.'],
++ 'product_edits':False,'accepted_regression_tests':False
++},indent=2)+'\n',encoding='utf8')
++files={p.relative_to(out).as_posix():{'bytes':p.stat().st_size,'sha256':hashlib.sha256(p.read_bytes()).hexdigest()} for p in sorted(out.rglob('*')) if p.is_file()}
++(out/'SHA256.json').write_text(json.dumps({'algorithm':'sha256','files':files},indent=2)+'\n',encoding='utf8')
++subprocess.run(['git','add','-N','-f',str(out)],cwd=w,check=True)
++patch=r/'_scratch/gemini-mirror-authority-reviewed.diff'
++patch.write_bytes(subprocess.check_output(['git','diff','--binary','--',report,str(out)],cwd=w))
++print(json.dumps({'payloads':len(files),'patch':str(patch),'patch_sha256':hashlib.sha256(patch.read_bytes()).hexdigest()}))
+diff --git a/docs/library/proof/gemini-mirror-authority-2026-09-13/astra-gemini-authority01/guard/ig_paths.py b/docs/library/proof/gemini-mirror-authority-2026-09-13/astra-gemini-authority01/guard/ig_paths.py
+new file mode 100644
+index 0000000..3b31d9f
+--- /dev/null
++++ b/docs/library/proof/gemini-mirror-authority-2026-09-13/astra-gemini-authority01/guard/ig_paths.py
+@@ -0,0 +1,4 @@
++import pytest
++@pytest.fixture
++def tmp_path(tmp_path_factory):
++    return tmp_path_factory.mktemp("t")
+diff --git a/docs/library/proof/gemini-mirror-authority-2026-09-13/astra-gemini-authority01/guard/sitecustomize.py b/docs/library/proof/gemini-mirror-authority-2026-09-13/astra-gemini-authority01/guard/sitecustomize.py
+new file mode 100644
+index 0000000..73b1d4d
+--- /dev/null
++++ b/docs/library/proof/gemini-mirror-authority-2026-09-13/astra-gemini-authority01/guard/sitecustomize.py
+@@ -0,0 +1,20 @@
++import os, sys
++def audit(event, args):
++    if event in ('open', 'sqlite3.connect'):
++        value = args[0]
++        if isinstance(value, (str, bytes, os.PathLike)):
++            name = os.fsdecode(value).replace('\\', '/').lower()
++            forbidden = os.environ['IG_FORBIDDEN_LIVE'].replace('\\', '/').lower()
++            if forbidden in name:
++                raise PermissionError('Integrator guard: live index forbidden')
++    if event in ('socket.connect', 'socket.bind', 'socket.sendto', 'socket.getaddrinfo'):
++        addr = args[:2] if event == 'socket.getaddrinfo' else args[1]
++        if isinstance(addr, tuple) and (str(addr[1]) == '5179' or addr[0] not in ('127.0.0.1', '::1', 'localhost', '0.0.0.0', '')):
++            raise PermissionError('Integrator guard: external network / 5179 forbidden')
++    if event == 'subprocess.Popen':
++        cmd = args[1]
++        first = cmd[0] if isinstance(cmd, (list, tuple)) and cmd else str(cmd).split()[0]
++        name = os.path.basename(str(first)).lower().strip('"')
++        if name.split('.')[0] in ('claude','codex','gemini','grok'):
++            raise PermissionError('Integrator guard: real model process forbidden')
++sys.addaudithook(audit)
+diff --git a/docs/library/proof/gemini-mirror-authority-2026-09-13/astra-gemini-authority01/results.json b/docs/library/proof/gemini-mirror-authority-2026-09-13/astra-gemini-authority01/results.json
+new file mode 100644
+index 0000000..19fa562
+--- /dev/null
++++ b/docs/library/proof/gemini-mirror-authority-2026-09-13/astra-gemini-authority01/results.json
+@@ -0,0 +1,24 @@
++[
++  {
++    "name": "tests",
++    "command": [
++      "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native\\Scripts\\python.exe",
++      "-B",
++      "-m",
++      "pytest",
++      "-q",
++      "-ra",
++      "--tb=short",
++      "-p",
++      "no:cacheprovider",
++      "-p",
++      "ig_paths",
++      "tests/test_gemini_synthetic_process_authority.py",
++      "--runxfail",
++      "--basetemp=C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\213914a5-528\\gemini\\_scratch\\astra-gemini-authority01-0",
++      "--junitxml=C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\213914a5-528\\gemini\\_scratch\\astra-gemini-authority01\\tests.xml"
++    ],
++    "exit": 0,
++    "log": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\213914a5-528\\gemini\\_scratch\\astra-gemini-authority01\\tests.log"
++  }
++]
+\ No newline at end of file
+diff --git a/docs/library/proof/gemini-mirror-authority-2026-09-13/astra-gemini-authority01/tests.log b/docs/library/proof/gemini-mirror-authority-2026-09-13/astra-gemini-authority01/tests.log
+new file mode 100644
+index 0000000..745382d
+--- /dev/null
++++ b/docs/library/proof/gemini-mirror-authority-2026-09-13/astra-gemini-authority01/tests.log
+@@ -0,0 +1,2 @@
++......                                                                   [100%]
++6 passed in 0.23s
+diff --git a/docs/library/proof/gemini-mirror-authority-2026-09-13/astra-gemini-authority01/tests.xml b/docs/library/proof/gemini-mirror-authority-2026-09-13/astra-gemini-authority01/tests.xml
+new file mode 100644
+index 0000000..6318bab
+--- /dev/null
++++ b/docs/library/proof/gemini-mirror-authority-2026-09-13/astra-gemini-authority01/tests.xml
+@@ -0,0 +1 @@
++<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="0" skipped="0" tests="6" time="0.203" timestamp="2026-09-13T03:26:42.005458-07:00" hostname="Ryan-PC"><testcase classname="tests.test_gemini_synthetic_process_authority" name="test_probe_toolhelp_orphan_child_adopted_without_temporal_check" time="0.000" /><testcase classname="tests.test_gemini_synthetic_process_authority" name="test_probe_foreign_orphan_retains_session_and_blocks_abandonment" time="0.000" /><testcase classname="tests.test_gemini_synthetic_process_authority" name="test_probe_foreign_orphan_targeted_by_terminate" time="0.000" /><testcase classname="tests.test_gemini_synthetic_process_authority" name="test_probe_confirmed_exit_forgotten_on_recycled_pid_access_denied" time="0.000" /><testcase classname="tests.test_gemini_synthetic_process_authority" name="test_probe_proc_poll_death_overridden_by_recycled_pid_query" time="0.000" /><testcase classname="tests.test_gemini_synthetic_process_authority" name="test_probe_process_times_failure_bypasses_start_time_check" time="0.001" /></testsuite></testsuites>
+\ No newline at end of file
+diff --git a/docs/library/proof/gemini-mirror-authority-2026-09-13/gemini-authority-01/guard/ig_paths.py b/docs/library/proof/gemini-mirror-authority-2026-09-13/gemini-authority-01/guard/ig_paths.py
+new file mode 100644
+index 0000000..3b31d9f
+--- /dev/null
++++ b/docs/library/proof/gemini-mirror-authority-2026-09-13/gemini-authority-01/guard/ig_paths.py
+@@ -0,0 +1,4 @@
++import pytest
++@pytest.fixture
++def tmp_path(tmp_path_factory):
++    return tmp_path_factory.mktemp("t")
+diff --git a/docs/library/proof/gemini-mirror-authority-2026-09-13/gemini-authority-01/guard/sitecustomize.py b/docs/library/proof/gemini-mirror-authority-2026-09-13/gemini-authority-01/guard/sitecustomize.py
+new file mode 100644
+index 0000000..73b1d4d
+--- /dev/null
++++ b/docs/library/proof/gemini-mirror-authority-2026-09-13/gemini-authority-01/guard/sitecustomize.py
+@@ -0,0 +1,20 @@
++import os, sys
++def audit(event, args):
++    if event in ('open', 'sqlite3.connect'):
++        value = args[0]
++        if isinstance(value, (str, bytes, os.PathLike)):
++            name = os.fsdecode(value).replace('\\', '/').lower()
++            forbidden = os.environ['IG_FORBIDDEN_LIVE'].replace('\\', '/').lower()
++            if forbidden in name:
++                raise PermissionError('Integrator guard: live index forbidden')
++    if event in ('socket.connect', 'socket.bind', 'socket.sendto', 'socket.getaddrinfo'):
++        addr = args[:2] if event == 'socket.getaddrinfo' else args[1]
++        if isinstance(addr, tuple) and (str(addr[1]) == '5179' or addr[0] not in ('127.0.0.1', '::1', 'localhost', '0.0.0.0', '')):
++            raise PermissionError('Integrator guard: external network / 5179 forbidden')
++    if event == 'subprocess.Popen':
++        cmd = args[1]
++        first = cmd[0] if isinstance(cmd, (list, tuple)) and cmd else str(cmd).split()[0]
++        name = os.path.basename(str(first)).lower().strip('"')
++        if name.split('.')[0] in ('claude','codex','gemini','grok'):
++            raise PermissionError('Integrator guard: real model process forbidden')
++sys.addaudithook(audit)
+diff --git a/docs/library/proof/gemini-mirror-authority-2026-09-13/gemini-authority-01/results.json b/docs/library/proof/gemini-mirror-authority-2026-09-13/gemini-authority-01/results.json
+new file mode 100644
+index 0000000..60e694c
+--- /dev/null
++++ b/docs/library/proof/gemini-mirror-authority-2026-09-13/gemini-authority-01/results.json
+@@ -0,0 +1,23 @@
++[
++  {
++    "name": "tests",
++    "command": [
++      "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native\\Scripts\\python.exe",
++      "-B",
++      "-m",
++      "pytest",
++      "-q",
++      "-ra",
++      "--tb=short",
++      "-p",
++      "no:cacheprovider",
++      "-p",
++      "ig_paths",
++      "tests/test_gemini_synthetic_process_authority.py",
++      "--basetemp=C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\213914a5-528\\gemini\\_scratch\\gemini-authority-01-0",
++      "--junitxml=C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\213914a5-528\\gemini\\_scratch\\gemini-authority-01\\tests.xml"
++    ],
++    "exit": 1,
++    "log": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\213914a5-528\\gemini\\_scratch\\gemini-authority-01\\tests.log"
++  }
++]
+\ No newline at end of file
+diff --git a/docs/library/proof/gemini-mirror-authority-2026-09-13/gemini-authority-01/tests.log b/docs/library/proof/gemini-mirror-authority-2026-09-13/gemini-authority-01/tests.log
+new file mode 100644
+index 0000000..81305bd
+--- /dev/null
++++ b/docs/library/proof/gemini-mirror-authority-2026-09-13/gemini-authority-01/tests.log
+@@ -0,0 +1,38 @@
++..F..F                                                                   [100%]
++================================== FAILURES ===================================
++_______________ test_probe_foreign_orphan_targeted_by_terminate _______________
++tests\test_gemini_synthetic_process_authority.py:119: in test_probe_foreign_orphan_targeted_by_terminate
++    session.terminate()
++library_mirror.py:1938: in terminate
++    return self._terminate_owned()
++           ^^^^^^^^^^^^^^^^^^^^^^^
++library_mirror.py:2000: in _terminate_owned
++    self._close_streams()
++library_mirror.py:1525: in _close_streams
++    for stream in (proc.stdin, proc.stdout, proc.stderr):
++                   ^^^^^^^^^^
++E   AttributeError: 'types.SimpleNamespace' object has no attribute 'stdin'
++_________ test_probe_process_times_failure_bypasses_start_time_check __________
++tests\test_gemini_synthetic_process_authority.py:195: in test_probe_process_times_failure_bypasses_start_time_check
++    result = mirror._process_liveness(70004, created_ms=1_000_000)
++             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++library_mirror.py:659: in _process_liveness
++    if not k32.GetExitCodeProcess(handle, ctypes.byref(code)):
++           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++C:\Python314\Lib\unittest\mock.py:1176: in __call__
++    return self._mock_call(*args, **kwargs)
++           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++C:\Python314\Lib\unittest\mock.py:1180: in _mock_call
++    return self._execute_mock_call(*args, **kwargs)
++           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++C:\Python314\Lib\unittest\mock.py:1247: in _execute_mock_call
++    result = effect(*args, **kwargs)
++             ^^^^^^^^^^^^^^^^^^^^^^^
++tests\test_gemini_synthetic_process_authority.py:186: in mock_get_exit_code
++    code_ptr.contents.value = 259
++    ^^^^^^^^^^^^^^^^^
++E   AttributeError: '_ctypes.CArgObject' object has no attribute 'contents'
++=========================== short test summary info ===========================
++FAILED tests/test_gemini_synthetic_process_authority.py::test_probe_foreign_orphan_targeted_by_terminate
++FAILED tests/test_gemini_synthetic_process_authority.py::test_probe_process_times_failure_bypasses_start_time_check
++2 failed, 4 passed in 0.48s
+diff --git a/docs/library/proof/gemini-mirror-authority-2026-09-13/gemini-authority-01/tests.xml b/docs/library/proof/gemini-mirror-authority-2026-09-13/gemini-authority-01/tests.xml
+new file mode 100644
+index 0000000..38fbcc7
+--- /dev/null
++++ b/docs/library/proof/gemini-mirror-authority-2026-09-13/gemini-authority-01/tests.xml
+@@ -0,0 +1,29 @@
++<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="6" time="0.416" timestamp="2026-09-13T03:18:46.333607-07:00" hostname="Ryan-PC"><testcase classname="tests.test_gemini_synthetic_process_authority" name="test_probe_toolhelp_orphan_child_adopted_without_temporal_check" time="0.000" /><testcase classname="tests.test_gemini_synthetic_process_authority" name="test_probe_foreign_orphan_retains_session_and_blocks_abandonment" time="0.000" /><testcase classname="tests.test_gemini_synthetic_process_authority" name="test_probe_foreign_orphan_targeted_by_terminate" time="0.000"><failure message="AttributeError: 'types.SimpleNamespace' object has no attribute 'stdin'">tests\test_gemini_synthetic_process_authority.py:119: in test_probe_foreign_orphan_targeted_by_terminate
++    session.terminate()
++library_mirror.py:1938: in terminate
++    return self._terminate_owned()
++           ^^^^^^^^^^^^^^^^^^^^^^^
++library_mirror.py:2000: in _terminate_owned
++    self._close_streams()
++library_mirror.py:1525: in _close_streams
++    for stream in (proc.stdin, proc.stdout, proc.stderr):
++                   ^^^^^^^^^^
++E   AttributeError: 'types.SimpleNamespace' object has no attribute 'stdin'</failure></testcase><testcase classname="tests.test_gemini_synthetic_process_authority" name="test_probe_confirmed_exit_forgotten_on_recycled_pid_access_denied" time="0.000" /><testcase classname="tests.test_gemini_synthetic_process_authority" name="test_probe_proc_poll_death_overridden_by_recycled_pid_query" time="0.000" /><testcase classname="tests.test_gemini_synthetic_process_authority" name="test_probe_process_times_failure_bypasses_start_time_check" time="0.001"><failure message="AttributeError: '_ctypes.CArgObject' object has no attribute 'contents'">tests\test_gemini_synthetic_process_authority.py:195: in test_probe_process_times_failure_bypasses_start_time_check
++    result = mirror._process_liveness(70004, created_ms=1_000_000)
++             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++library_mirror.py:659: in _process_liveness
++    if not k32.GetExitCodeProcess(handle, ctypes.byref(code)):
++           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++C:\Python314\Lib\unittest\mock.py:1176: in __call__
++    return self._mock_call(*args, **kwargs)
++           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++C:\Python314\Lib\unittest\mock.py:1180: in _mock_call
++    return self._execute_mock_call(*args, **kwargs)
++           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++C:\Python314\Lib\unittest\mock.py:1247: in _execute_mock_call
++    result = effect(*args, **kwargs)
++             ^^^^^^^^^^^^^^^^^^^^^^^
++tests\test_gemini_synthetic_process_authority.py:186: in mock_get_exit_code
++    code_ptr.contents.value = 259
++    ^^^^^^^^^^^^^^^^^
++E   AttributeError: '_ctypes.CArgObject' object has no attribute 'contents'</failure></testcase></testsuite></testsuites>
+\ No newline at end of file
+diff --git a/docs/library/proof/gemini-mirror-authority-2026-09-13/gemini-authority-02/guard/ig_paths.py b/docs/library/proof/gemini-mirror-authority-2026-09-13/gemini-authority-02/guard/ig_paths.py
+new file mode 100644
+index 0000000..3b31d9f
+--- /dev/null
++++ b/docs/library/proof/gemini-mirror-authority-2026-09-13/gemini-authority-02/guard/ig_paths.py
+@@ -0,0 +1,4 @@
++import pytest
++@pytest.fixture
++def tmp_path(tmp_path_factory):
++    return tmp_path_factory.mktemp("t")
+diff --git a/docs/library/proof/gemini-mirror-authority-2026-09-13/gemini-authority-02/guard/sitecustomize.py b/docs/library/proof/gemini-mirror-authority-2026-09-13/gemini-authority-02/guard/sitecustomize.py
+new file mode 100644
+index 0000000..73b1d4d
+--- /dev/null
++++ b/docs/library/proof/gemini-mirror-authority-2026-09-13/gemini-authority-02/guard/sitecustomize.py
+@@ -0,0 +1,20 @@
++import os, sys
++def audit(event, args):
++    if event in ('open', 'sqlite3.connect'):
++        value = args[0]
++        if isinstance(value, (str, bytes, os.PathLike)):
++            name = os.fsdecode(value).replace('\\', '/').lower()
++            forbidden = os.environ['IG_FORBIDDEN_LIVE'].replace('\\', '/').lower()
++            if forbidden in name:
++                raise PermissionError('Integrator guard: live index forbidden')
++    if event in ('socket.connect', 'socket.bind', 'socket.sendto', 'socket.getaddrinfo'):
++        addr = args[:2] if event == 'socket.getaddrinfo' else args[1]
++        if isinstance(addr, tuple) and (str(addr[1]) == '5179' or addr[0] not in ('127.0.0.1', '::1', 'localhost', '0.0.0.0', '')):
++            raise PermissionError('Integrator guard: external network / 5179 forbidden')
++    if event == 'subprocess.Popen':
++        cmd = args[1]
++        first = cmd[0] if isinstance(cmd, (list, tuple)) and cmd else str(cmd).split()[0]
++        name = os.path.basename(str(first)).lower().strip('"')
++        if name.split('.')[0] in ('claude','codex','gemini','grok'):
++            raise PermissionError('Integrator guard: real model process forbidden')
++sys.addaudithook(audit)
+diff --git a/docs/library/proof/gemini-mirror-authority-2026-09-13/gemini-authority-02/results.json b/docs/library/proof/gemini-mirror-authority-2026-09-13/gemini-authority-02/results.json
+new file mode 100644
+index 0000000..2e793f2
+--- /dev/null
++++ b/docs/library/proof/gemini-mirror-authority-2026-09-13/gemini-authority-02/results.json
+@@ -0,0 +1,23 @@
++[
++  {
++    "name": "tests",
++    "command": [
++      "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native\\Scripts\\python.exe",
++      "-B",
++      "-m",
++      "pytest",
++      "-q",
++      "-ra",
++      "--tb=short",
++      "-p",
++      "no:cacheprovider",
++      "-p",
++      "ig_paths",
++      "tests/test_gemini_synthetic_process_authority.py",
++      "--basetemp=C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\213914a5-528\\gemini\\_scratch\\gemini-authority-02-0",
++      "--junitxml=C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\213914a5-528\\gemini\\_scratch\\gemini-authority-02\\tests.xml"
++    ],
++    "exit": 1,
++    "log": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\213914a5-528\\gemini\\_scratch\\gemini-authority-02\\tests.log"
++  }
++]
+\ No newline at end of file
+diff --git a/docs/library/proof/gemini-mirror-authority-2026-09-13/gemini-authority-02/tests.log b/docs/library/proof/gemini-mirror-authority-2026-09-13/gemini-authority-02/tests.log
+new file mode 100644
+index 0000000..0d9a467
+--- /dev/null
++++ b/docs/library/proof/gemini-mirror-authority-2026-09-13/gemini-authority-02/tests.log
+@@ -0,0 +1,9 @@
++.....F                                                                   [100%]
++================================== FAILURES ===================================
++_________ test_probe_process_times_failure_bypasses_start_time_check __________
++tests\test_gemini_synthetic_process_authority.py:184: in test_probe_process_times_failure_bypasses_start_time_check
++    class ActiveDWORD(wintypes.DWORD):
++E   TypeError: __class__ set to <class 'test_gemini_synthetic_process_authority.test_probe_process_times_failure_bypasses_start_time_check.<locals>.ActiveDWORD'> defining 'ActiveDWORD' as <class 'test_gemini_synthetic_process_authority.test_probe_process_times_failure_bypasses_start_time_check.<locals>.ActiveDWORD'>
++=========================== short test summary info ===========================
++FAILED tests/test_gemini_synthetic_process_authority.py::test_probe_process_times_failure_bypasses_start_time_check
++1 failed, 5 passed in 0.26s
+diff --git a/docs/library/proof/gemini-mirror-authority-2026-09-13/gemini-authority-02/tests.xml b/docs/library/proof/gemini-mirror-authority-2026-09-13/gemini-authority-02/tests.xml
+new file mode 100644
+index 0000000..7d042b5
+--- /dev/null
++++ b/docs/library/proof/gemini-mirror-authority-2026-09-13/gemini-authority-02/tests.xml
+@@ -0,0 +1,3 @@
++<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="6" time="0.229" timestamp="2026-09-13T03:19:25.236521-07:00" hostname="Ryan-PC"><testcase classname="tests.test_gemini_synthetic_process_authority" name="test_probe_toolhelp_orphan_child_adopted_without_temporal_check" time="0.000" /><testcase classname="tests.test_gemini_synthetic_process_authority" name="test_probe_foreign_orphan_retains_session_and_blocks_abandonment" time="0.000" /><testcase classname="tests.test_gemini_synthetic_process_authority" name="test_probe_foreign_orphan_targeted_by_terminate" time="0.000" /><testcase classname="tests.test_gemini_synthetic_process_authority" name="test_probe_confirmed_exit_forgotten_on_recycled_pid_access_denied" time="0.000" /><testcase classname="tests.test_gemini_synthetic_process_authority" name="test_probe_proc_poll_death_overridden_by_recycled_pid_query" time="0.000" /><testcase classname="tests.test_gemini_synthetic_process_authority" name="test_probe_process_times_failure_bypasses_start_time_check" time="0.000"><failure message="TypeError: __class__ set to &lt;class 'test_gemini_synthetic_process_authority.test_probe_process_times_failure_bypasses_start_time_check.&lt;locals&gt;.ActiveDWORD'&gt; defining 'ActiveDWORD' as &lt;class 'test_gemini_synthetic_process_authority.test_probe_process_times_failure_bypasses_start_time_check.&lt;locals&gt;.ActiveDWORD'&gt;">tests\test_gemini_synthetic_process_authority.py:184: in test_probe_process_times_failure_bypasses_start_time_check
++    class ActiveDWORD(wintypes.DWORD):
++E   TypeError: __class__ set to &lt;class 'test_gemini_synthetic_process_authority.test_probe_process_times_failure_bypasses_start_time_check.&lt;locals&gt;.ActiveDWORD'&gt; defining 'ActiveDWORD' as &lt;class 'test_gemini_synthetic_process_authority.test_probe_process_times_failure_bypasses_start_time_check.&lt;locals&gt;.ActiveDWORD'&gt;</failure></testcase></testsuite></testsuites>
+\ No newline at end of file
+diff --git a/docs/library/proof/gemini-mirror-authority-2026-09-13/gemini-authority-03/guard/ig_paths.py b/docs/library/proof/gemini-mirror-authority-2026-09-13/gemini-authority-03/guard/ig_paths.py
+new file mode 100644
+index 0000000..3b31d9f
+--- /dev/null
++++ b/docs/library/proof/gemini-mirror-authority-2026-09-13/gemini-authority-03/guard/ig_paths.py
+@@ -0,0 +1,4 @@
++import pytest
++@pytest.fixture
++def tmp_path(tmp_path_factory):
++    return tmp_path_factory.mktemp("t")
+diff --git a/docs/library/proof/gemini-mirror-authority-2026-09-13/gemini-authority-03/guard/sitecustomize.py b/docs/library/proof/gemini-mirror-authority-2026-09-13/gemini-authority-03/guard/sitecustomize.py
+new file mode 100644
+index 0000000..73b1d4d
+--- /dev/null
++++ b/docs/library/proof/gemini-mirror-authority-2026-09-13/gemini-authority-03/guard/sitecustomize.py
+@@ -0,0 +1,20 @@
++import os, sys
++def audit(event, args):
++    if event in ('open', 'sqlite3.connect'):
++        value = args[0]
++        if isinstance(value, (str, bytes, os.PathLike)):
++            name = os.fsdecode(value).replace('\\', '/').lower()
++            forbidden = os.environ['IG_FORBIDDEN_LIVE'].replace('\\', '/').lower()
++            if forbidden in name:
++                raise PermissionError('Integrator guard: live index forbidden')
++    if event in ('socket.connect', 'socket.bind', 'socket.sendto', 'socket.getaddrinfo'):
++        addr = args[:2] if event == 'socket.getaddrinfo' else args[1]
++        if isinstance(addr, tuple) and (str(addr[1]) == '5179' or addr[0] not in ('127.0.0.1', '::1', 'localhost', '0.0.0.0', '')):
++            raise PermissionError('Integrator guard: external network / 5179 forbidden')
++    if event == 'subprocess.Popen':
++        cmd = args[1]
++        first = cmd[0] if isinstance(cmd, (list, tuple)) and cmd else str(cmd).split()[0]
++        name = os.path.basename(str(first)).lower().strip('"')
++        if name.split('.')[0] in ('claude','codex','gemini','grok'):
++            raise PermissionError('Integrator guard: real model process forbidden')
++sys.addaudithook(audit)
+diff --git a/docs/library/proof/gemini-mirror-authority-2026-09-13/gemini-authority-03/results.json b/docs/library/proof/gemini-mirror-authority-2026-09-13/gemini-authority-03/results.json
+new file mode 100644
+index 0000000..441880c
+--- /dev/null
++++ b/docs/library/proof/gemini-mirror-authority-2026-09-13/gemini-authority-03/results.json
+@@ -0,0 +1,23 @@
++[
++  {
++    "name": "tests",
++    "command": [
++      "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-native\\Scripts\\python.exe",
++      "-B",
++      "-m",
++      "pytest",
++      "-q",
++      "-ra",
++      "--tb=short",
++      "-p",
++      "no:cacheprovider",
++      "-p",
++      "ig_paths",
++      "tests/test_gemini_synthetic_process_authority.py",
++      "--basetemp=C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\213914a5-528\\gemini\\_scratch\\gemini-authority-03-0",
++      "--junitxml=C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\213914a5-528\\gemini\\_scratch\\gemini-authority-03\\tests.xml"
++    ],
++    "exit": 0,
++    "log": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\213914a5-528\\gemini\\_scratch\\gemini-authority-03\\tests.log"
++  }
++]
+\ No newline at end of file
+diff --git a/docs/library/proof/gemini-mirror-authority-2026-09-13/gemini-authority-03/tests.log b/docs/library/proof/gemini-mirror-authority-2026-09-13/gemini-authority-03/tests.log
+new file mode 100644
+index 0000000..330a8c6
+--- /dev/null
++++ b/docs/library/proof/gemini-mirror-authority-2026-09-13/gemini-authority-03/tests.log
+@@ -0,0 +1,2 @@
++......                                                                   [100%]
++6 passed in 0.25s
+diff --git a/docs/library/proof/gemini-mirror-authority-2026-09-13/gemini-authority-03/tests.xml b/docs/library/proof/gemini-mirror-authority-2026-09-13/gemini-authority-03/tests.xml
+new file mode 100644
+index 0000000..73550b2
+--- /dev/null
++++ b/docs/library/proof/gemini-mirror-authority-2026-09-13/gemini-authority-03/tests.xml
+@@ -0,0 +1 @@
++<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="0" skipped="0" tests="6" time="0.223" timestamp="2026-09-13T03:19:32.495422-07:00" hostname="Ryan-PC"><testcase classname="tests.test_gemini_synthetic_process_authority" name="test_probe_toolhelp_orphan_child_adopted_without_temporal_check" time="0.000" /><testcase classname="tests.test_gemini_synthetic_process_authority" name="test_probe_foreign_orphan_retains_session_and_blocks_abandonment" time="0.000" /><testcase classname="tests.test_gemini_synthetic_process_authority" name="test_probe_foreign_orphan_targeted_by_terminate" time="0.000" /><testcase classname="tests.test_gemini_synthetic_process_authority" name="test_probe_confirmed_exit_forgotten_on_recycled_pid_access_denied" time="0.000" /><testcase classname="tests.test_gemini_synthetic_process_authority" name="test_probe_proc_poll_death_overridden_by_recycled_pid_query" time="0.000" /><testcase classname="tests.test_gemini_synthetic_process_authority" name="test_probe_process_times_failure_bypasses_start_time_check" time="0.001" /></testsuite></testsuites>
+\ No newline at end of file
+diff --git a/docs/library/proof/gemini-mirror-authority-2026-09-13/integrator_verify.py b/docs/library/proof/gemini-mirror-authority-2026-09-13/integrator_verify.py
+new file mode 100644
+index 0000000..a475cc7
+--- /dev/null
++++ b/docs/library/proof/gemini-mirror-authority-2026-09-13/integrator_verify.py
+@@ -0,0 +1,76 @@
++"""Integrator-only isolated verification. Does not modify implementation or tests."""
++import argparse
++import json
++import os
++from pathlib import Path
++import site
++import subprocess
++import sys
++
++p = argparse.ArgumentParser()
++p.add_argument('--root', required=True)
++p.add_argument('--label', required=True)
++p.add_argument('--as9', action='store_true')
++p.add_argument('selectors', nargs='*')
++args, extras = p.parse_known_args()
++root = Path(args.root).resolve()
++scratch = root / '_scratch' / args.label
++scratch.mkdir(parents=True, exist_ok=False)
++packages = Path(site.getusersitepackages())
++original_local = os.environ['LOCALAPPDATA']
++guard = scratch / 'guard'
++guard.mkdir()
++(guard / 'ig_paths.py').write_text('import pytest\n@pytest.fixture\ndef tmp_path(tmp_path_factory):\n    return tmp_path_factory.mktemp("t")\n', encoding='utf-8')
++(guard / 'sitecustomize.py').write_text('''import os, sys
++def audit(event, args):
++    if event in ('open', 'sqlite3.connect'):
++        value = args[0]
++        if isinstance(value, (str, bytes, os.PathLike)):
++            name = os.fsdecode(value).replace('\\\\', '/').lower()
++            forbidden = os.environ['IG_FORBIDDEN_LIVE'].replace('\\\\', '/').lower()
++            if forbidden in name:
++                raise PermissionError('Integrator guard: live index forbidden')
++    if event in ('socket.connect', 'socket.bind', 'socket.sendto', 'socket.getaddrinfo'):
++        addr = args[:2] if event == 'socket.getaddrinfo' else args[1]
++        if isinstance(addr, tuple) and (str(addr[1]) == '5179' or addr[0] not in ('127.0.0.1', '::1', 'localhost', '0.0.0.0', '')):
++            raise PermissionError('Integrator guard: external network / 5179 forbidden')
++    if event == 'subprocess.Popen':
++        cmd = args[1]
++        first = cmd[0] if isinstance(cmd, (list, tuple)) and cmd else str(cmd).split()[0]
++        name = os.path.basename(str(first)).lower().strip('"')
++        if name.split('.')[0] in ('claude','codex','gemini','grok'):
++            raise PermissionError('Integrator guard: real model process forbidden')
++sys.addaudithook(audit)
++''', encoding='utf-8')
++env = os.environ.copy()
++env.pop('ANTHROPIC_API_KEY', None)
++env.update(PYTHONDONTWRITEBYTECODE='1', PYTHONUTF8='1',
++    PHASE3_REQUIRE_IMPLEMENTATION='1', PYTEST_DISABLE_PLUGIN_AUTOLOAD='1',
++    IG_FORBIDDEN_LIVE=str(Path(original_local) / 'Uoink' / 'index.db'),
++    PYTHONPATH=os.pathsep.join(map(str, [guard, root, packages, packages/'win32', packages/'win32/lib', packages/'pythonwin'])))
++for key in ('LOCALAPPDATA','APPDATA','XDG_DATA_HOME','TEMP','TMP','UOINK_DATA_ROOT','UOINK_OUTPUT_ROOT','UOINK_OUTPUT_DIR','YOINK_OUTPUT_DIR'):
++    env[key] = str(scratch)
++env['UOINK_INDEX_PATH'] = str(scratch / 'unused-index.db')
++prefix = [sys.executable, '-B', '-m', 'pytest', '-q', '-ra', '--tb=short', '-p', 'no:cacheprovider', '-p', 'ig_paths']
++groups = {}
++if args.as9:
++    groups['confirmation'] = prefix + ['tests/library_work_astra/test_phase3_acceptance8.py','tests/library_work_astra/test_phase3_acceptance9.py']
++    groups['strict'] = prefix + [str(x.relative_to(root)) for x in sorted((root/'tests/library_work_astra').glob('test_phase3_*.py')) if x.name != 'test_phase3_s21.py']
++    for group in ('service','dashboard','legacy','adapter','podcast','packaging','heartbeat','extra','phase4'):
++        groups['companion-'+group] = [sys.executable, '-B', 'tests/library_work_astra/run_phase3_companions.py', group]
++    groups['dashboard'] = prefix + ['tests/test_dashboard_sources_api.py','tests/test_dashboard_sources_ui.py','tests/test_dashboard_v324_ui.py']
++else:
++    groups['tests'] = prefix + args.selectors + extras
++results = []
++for i, (name, command) in enumerate(groups.items()):
++    if '-m' in command:
++        command += ['--basetemp='+str(root/'_scratch'/f'{args.label}-{i}'), '--junitxml='+str(scratch/(name+'.xml'))]
++    log = scratch / (name+'.log')
++    print('START', name, flush=True)
++    with log.open('w', encoding='utf-8') as f:
++        result = subprocess.run(command, cwd=root, env=env, stdout=f, stderr=subprocess.STDOUT)
++    output = log.read_text(encoding='utf-8')
++    print(name, 'exit', result.returncode, '\n'+'\n'.join(output.splitlines()[-18:]), flush=True)
++    results.append({'name':name,'command':command,'exit':result.returncode,'log':str(log)})
++    (scratch/'results.json').write_text(json.dumps(results, indent=2), encoding='utf-8')
++raise SystemExit(int(any(x['exit'] for x in results)))
+diff --git a/docs/library/proof/gemini-mirror-authority-2026-09-13/original-worker.diff b/docs/library/proof/gemini-mirror-authority-2026-09-13/original-worker.diff
+new file mode 100644
+index 0000000..10b3c8e
+--- /dev/null
++++ b/docs/library/proof/gemini-mirror-authority-2026-09-13/original-worker.diff
+@@ -0,0 +1,556 @@
++diff --git a/docs/library/MIRROR-PROCESS-AUTHORITY-GEMINI-2026-09-13.md b/docs/library/MIRROR-PROCESS-AUTHORITY-GEMINI-2026-09-13.md
++new file mode 100644
++index 0000000..0b19bf4
++--- /dev/null
+++++ b/docs/library/MIRROR-PROCESS-AUTHORITY-GEMINI-2026-09-13.md
++@@ -0,0 +1,341 @@
+++# Mirror Process Authority and Lifecycle Diagnosis (Gemini)
+++
+++**Date**: 2026-09-13  
+++**Worker**: Gemini  
+++**Workspace**: `C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\213914a5-528\gemini`  
+++**Reference Brief**: `docs/library/MIRROR-TREE08-REPAIR-BRIEF-2026-09-13.md`  
+++**Boundary Rules**: Diagnostic review and synthetic inert-process regression probes only. No product edits, existing-test edits, real process manipulation, kernel gate acquisition, model execution, live index access, port 5179 listeners, new fetch, paid API calls, commits, pushes, or subagents.
+++
+++---
+++
+++## 1. Assignment Scope and Authority Boundaries
+++
+++Tree08 produced 51 mirror failures across 2,729 test cases (proof record: `proof/ryan-final-partitioned-08-2026-09-13/SHA256.json`). The first failure was `test_live_worker_lease_blocks_a_second_mirror` in `tests/test_phase4_av5m3_isolation.py` at initial export, followed by cascading failures reaching `WaitForSingleObject` and `destination exclusion unavailable`.
+++
+++Astra is independently investigating cancellation and owner lifetime. Gemini owns the bounded security and lifecycle assignment: inspect the process authority mechanisms in [library_mirror.py](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/213914a5-528/gemini/library_mirror.py), specifically:
+++1. Authority used by `owned_pids`, `physical_liveness`, and termination.
+++2. Windows Toolhelp parent PID persistence (`th32ParentProcessID`) outliving parent process identity.
+++3. Whether a recycled or orphan parent PID causes a foreign child to be adopted, retained, or killed.
+++4. Whether a confirmed process exit can be forgotten on a later failed query.
+++
+++All diagnostic assertions in this report were verified with synthetic regression probes in [tests/test_gemini_synthetic_process_authority.py](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/213914a5-528/gemini/tests/test_gemini_synthetic_process_authority.py) executed via the guarded native verifier.
+++
+++---
+++
+++## 2. Source-Level Authority Analysis
+++
+++### 2.1 Toolhelp Snapshot Mechanics and Orphan Ingestion
+++
+++In [library_mirror.py](file:///C:/Users/hello/AppData/Local/AgentControlRoom\worktrees\uoink-library\213914a5-528\gemini/library_mirror.py#L529-L561):
+++```python
+++529: def _windows_process_children(parent_pid: int | None) -> list[dict[str, Any]]:
+++...
+++540:     snapshot = k32.CreateToolhelp32Snapshot(_TH32CS_SNAPPROCESS, 0)
+++...
+++549:         while True:
+++550:             if int(entry.th32ParentProcessID) == int(parent_pid):
+++551:                 out.append({
+++552:                     "pid": int(entry.th32ProcessID),
+++553:                     "exe": str(entry.szExeFile or ""),
+++554:                     "ppid": int(entry.th32ParentProcessID),
+++555:                 })
+++556:             if not Process32NextW(snapshot, ctypes.byref(entry)):
+++557:                 break
+++558:         return out
+++```
+++
+++In the Windows NT kernel, `th32ParentProcessID` reflects the creator PID assigned at process initialization (`InheritedFromUniqueProcessId`). Windows does not update, re-parent, or clear this field when the parent process exits. When an old process terminates, any surviving children retain that creator PID as their parent PID indefinitely.
+++
+++Because Windows reuses PIDs rapidly, when a new process is spawned and receives a recycled PID, any preexisting orphan processes whose original creator had that same PID match `entry.th32ParentProcessID == parent_pid`.
+++
+++### 2.2 Unchecked Adoption in `owned_pids()`
+++
+++In [library_mirror.py](file:///C:/Users/hello/AppData/Local/AgentControlRoom\worktrees\uoink-library\213914a5-528\gemini/library_mirror.py#L1427-L1456):
+++```python
+++1427:     def owned_pids(self) -> list[int]:
+++1428:         pids: list[int] = []
+++1429:         seen: set[int] = set()
+++1430: 
+++1431:         def add(pid: int | None, exe: str = "", created: int | None = None) -> None:
+++1432:             if not isinstance(pid, int) or pid <= 0 or pid in seen:
+++1433:                 return
+++1434:             seen.add(pid)
+++1435:             pids.append(pid)
+++1436:             if exe:
+++1437:                 self._owned_exe[pid] = exe
+++1438:             if pid not in self._owned_created:
+++1439:                 self._owned_created[pid] = created if created is not None else _process_created_ms(pid)
+++1440: 
+++1441:         add(self.pid, created=self.created_ms)
+++1442:         add(self.writer_pid, created=self.writer_created_ms)
+++1443:         if os.name == "nt" and self.pid:
+++1444:             for child in _windows_process_children(self.pid):
+++1445:                 exe = str(child.get("exe") or "")
+++1446:                 if _is_console_host(exe):
+++1447:                     continue
+++1448:                 add(int(child["pid"]), exe)
+++```
+++
+++Three critical authority defects exist here:
+++1. **Missing Creation Order Verification**: `add()` receives `int(child["pid"])` without `created`. Line 1439 calls `_process_created_ms(pid)` for the child, but never compares it against `self.created_ms`. If the child was created at $T_0$ and the session launcher was created at $T_1$ with $T_0 < T_1$, the child is an orphan from an earlier dead process. `owned_pids()` adopts it regardless.
+++2. **Missing Parent Liveness Check**: Lines 1443-1444 check `if os.name == "nt" and self.pid:`. They never verify whether `self.pid` is still running or matches `self.created_ms`. If `self.proc` has exited and its PID has been recycled by an unrelated host process, Toolhelp returns children spawned by that unrelated host process, and `owned_pids()` adopts them.
+++3. **Self-Authenticating Registration**: Line 1439 stores the child's own creation timestamp in `self._owned_created[pid]`. Storing the foreign child's own timestamp grants it legitimate authority under all subsequent identity checks.
+++
+++### 2.3 Lifecycle Consequences: Retention, Gate Leaks, and Unintended Termination
+++
+++#### Consequence 1: Adoption
+++The foreign PID enters `pids` (line 1435), `self._owned_created` (line 1439), and `self.owns_pid(pid)` (line 1492: `return pid in self.owned_pids()`).
+++
+++#### Consequence 2: Retention and Gate Lockout
+++In [library_mirror.py](file:///C:/Users/hello/AppData/Local/AgentControlRoom\worktrees\uoink-library\213914a5-528\gemini/library_mirror.py#L1475-L1483):
+++```python
+++1475:         for pid, created in list(self._owned_created.items()):
+++1476:             if pid in (self.pid, self.writer_pid):
+++1477:                 continue
+++1478:             states.append(_process_liveness(pid, created))
+++1479:         if "alive" in states:
+++1480:             return "alive"
+++```
+++Because the foreign process is alive on the machine, `_process_liveness` returns `"alive"`. Therefore:
+++- `self.physical_liveness()` returns `"alive"`.
+++- `self.physically_alive()` returns `True` (line 1487: `return self.physical_liveness() != "dead"`).
+++- `_abandon_unstarted()` (lines 1694-1700) aborts immediately:
+++  ```python
+++  1694:         if self.physically_alive() or self._popen_in_progress:
+++  1695:             return
+++  ```
+++  It cannot drop the session from `_retained_sessions` and cannot call `self._release_held_exclusion()`.
+++- `_owner_blocks_replacement()` (lines 1268-1269) blocks any subsequent mirror on the same destination:
+++  ```python
+++  1268:         if session.physically_alive():
+++  1269:             return True
+++  ```
+++  The destination exclusion is permanently held, producing cascading `destination exclusion unavailable` errors.
+++
+++#### Consequence 3: Host Process Termination Hazard
+++In [library_mirror.py](file:///C:/Users/hello/AppData/Local/AgentControlRoom\worktrees\uoink-library\213914a5-528\gemini/library_mirror.py#L1960-L1963):
+++```python
+++1960:         if os.name == "nt":
+++1961:             for pid in owned:
+++1962:                 if self.owns_pid(pid):
+++1963:                     _win_terminate_pid(pid, self._created_for_pid(pid))
+++```
+++`self._created_for_pid(pid)` returns `self._owned_created.get(pid)`, which matches the foreign process's creation timestamp. In `_win_terminate_pid` (lines 578-585):
+++```python
+++578:             actual = _windows_process_created_ms(handle)
+++579:             if actual is not None and abs(actual - int(created_ms)) > _PROCESS_START_TOLERANCE_MS:
+++580:                 return False
+++...
+++585:         return bool(k32.TerminateProcess(handle, 1))
+++```
+++Because `actual` matches `created_ms`, the identity check passes. `TerminateProcess(handle, 1)` is called on the foreign process.
+++
+++---
+++
+++### 2.4 Process Exit Amnesia (Confirmed Death Forgotten)
+++
+++The brief directly asks:
+++> "and whether a confirmed process exit can be forgotten on a later failed query."
+++
+++Analysis of `_process_liveness` and `physical_liveness` confirms that a process exit is forgotten in two ways:
+++
+++#### Defect 1: Inaccessible Recycled PID Flips "dead" to "unknown"
+++In [library_mirror.py](file:///C:/Users/hello/AppData/Local/AgentControlRoom\worktrees\uoink-library\213914a5-528\gemini/library_mirror.py#L653-L656):
+++```python
+++653:         handle = k32.OpenProcess(0x1000, False, int(pid))
+++654:         if not handle:
+++655:             error = ctypes.get_last_error()
+++656:             return "dead" if error == 87 else "unknown"
+++```
+++1. At time $T_1$, the tracked process exits. The PID is vacant. `OpenProcess` fails with `error == 87` (`ERROR_INVALID_PARAMETER`). `_process_liveness` returns `"dead"`.
+++2. `_VaultIoSession` has no latch or memory for dead PIDs. It never removes dead PIDs from `self._owned_created` and never clears `self.writer_pid`.
+++3. At time $T_2$, the host OS reuses that PID for a protected or privileged process (e.g. system service or elevated process). `OpenProcess(0x1000)` fails with `ERROR_ACCESS_DENIED` (`error == 5`).
+++4. Line 656 evaluates `error == 87` as `False`, returning `"unknown"`.
+++5. In `physical_liveness()` (line 1481):
+++   ```python
+++   1481:         if "unknown" in states:
+++   1482:             return "unknown"
+++   ```
+++   The session's status changes from `"dead"` back to `"unknown"`.
+++6. Line 1487 evaluates `self.physical_liveness() != "dead"` as `True`.
+++7. **Result**: A confirmed process exit is forgotten. The session is treated as alive.
+++
+++#### Defect 2: Subprocess Handle Termination Overridden by Raw PID Query
+++In [library_mirror.py](file:///C:/Users/hello/AppData/Local/AgentControlRoom\worktrees\uoink-library\213914a5-528\gemini/library_mirror.py#L1461-L1474):
+++```python
+++1461:         proc = self.proc
+++1462:         if proc is not None:
+++1463:             try:
+++1464:                 poll = proc.poll()
+++...
+++1468:                 if poll is None:
+++1469:                     return "alive"
+++...
+++1473:         if self.pid:
+++1474:             states.append(_process_liveness(self.pid, self.created_ms))
+++```
+++When `proc.poll()` returns an integer return code, Python's underlying process handle proves that `self.proc` has terminated. However, lines 1473-1474 query `_process_liveness(self.pid, self.created_ms)` by raw PID. If `self.pid` has been recycled into a process where `OpenProcess` yields `ERROR_ACCESS_DENIED`, line 1474 appends `"unknown"` to `states`. Line 1482 returns `"unknown"`, overriding the process handle's proof of death.
+++
+++#### Defect 3: Start Time Query Failure Falls Through to "alive"
+++In [library_mirror.py](file:///C:/Users/hello/AppData/Local/AgentControlRoom\worktrees\uoink-library\213914a5-528\gemini/library_mirror.py#L663-L667):
+++```python
+++663:             if created_ms is not None:
+++664:                 actual = _windows_process_created_ms(handle)
+++665:                 if actual is not None and abs(actual - int(created_ms)) > _PROCESS_START_TOLERANCE_MS:
+++666:                     return "dead"
+++667:             return "alive"
+++```
+++If `_windows_process_created_ms(handle)` fails (e.g., `GetProcessTimes` returns 0 on a terminating process), `actual` is `None`. Line 665 evaluates to `False`. The function falls through to line 667 and returns `"alive"`, even though `created_ms` validation could not be performed.
+++
+++---
+++
+++## 3. Synthetic Regression Probe Evidence
+++
+++Probes were implemented in [tests/test_gemini_synthetic_process_authority.py](file:///C:/Users/hello/AppData/Local/AgentControlRoom\worktrees\uoink-library\213914a5-528\gemini/tests/test_gemini_synthetic_process_authority.py) using inert PID values (70001, 80002, 70002, 70003, 70004) and mocked kernel structures. Real processes were not launched, suspended, or terminated.
+++
+++### Attempt History and Outcomes
+++
+++#### Attempt 1 (Label: `gemini-authority-01`)
+++- **Command**:
+++  ```powershell
+++  $env:PYTHONDONTWRITEBYTECODE="1"; $env:PHASE3_REQUIRE_IMPLEMENTATION="1"; $env:IG_FORBIDDEN_LIVE="C:\Users\hello\AppData\Local\Uoink\index.db"; & "E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\ig-native\Scripts\python.exe" "E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\integrator_verify.py" --root "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\213914a5-528\gemini" --label "gemini-authority-01" tests/test_gemini_synthetic_process_authority.py
+++  ```
+++- **Exit Code**: 1
+++- **Summary**: 4 passed, 2 failed in 0.48 s.
+++  - Passed:
+++    - `test_probe_toolhelp_orphan_child_adopted_without_temporal_check`
+++    - `test_probe_foreign_orphan_retains_session_and_blocks_abandonment`
+++    - `test_probe_confirmed_exit_forgotten_on_recycled_pid_access_denied`
+++    - `test_probe_proc_poll_death_overridden_by_recycled_pid_query`
+++  - Failed:
+++    - `test_probe_foreign_orphan_targeted_by_terminate`: `AttributeError: 'types.SimpleNamespace' object has no attribute 'stdin'` inside `_close_streams()` (line 1525).
+++    - `test_probe_process_times_failure_bypasses_start_time_check`: `AttributeError: '_ctypes.CArgObject' object has no attribute 'contents'` when attempting to mutate mock argument from `ctypes.byref(code)`.
+++- **Log**: `_scratch/gemini-authority-01/tests.log`
+++
+++#### Attempt 2 (Label: `gemini-authority-02`)
+++- **Correction Applied**: Added `stdin=None, stdout=None, stderr=None` to `SimpleNamespace`. Replaced ctypes argument mutation with a subclass of `wintypes.DWORD`.
+++- **Command**:
+++  ```powershell
+++  $env:PYTHONDONTWRITEBYTECODE="1"; $env:PHASE3_REQUIRE_IMPLEMENTATION="1"; $env:IG_FORBIDDEN_LIVE="C:\Users\hello\AppData\Local\Uoink\index.db"; & "E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\ig-native\Scripts\python.exe" "E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\integrator_verify.py" --root "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\213914a5-528\gemini" --label "gemini-authority-02" tests/test_gemini_synthetic_process_authority.py
+++  ```
+++- **Exit Code**: 1
+++- **Summary**: 5 passed, 1 failed in 0.26 s.
+++  - `test_probe_foreign_orphan_targeted_by_terminate` passed.
+++  - `test_probe_process_times_failure_bypasses_start_time_check` failed with `TypeError: __class__ set to ...` in Python 3.14 due to function-scoped ctypes structure subclassing.
+++- **Log**: `_scratch/gemini-authority-02/tests.log`
+++
+++#### Attempt 3 (Label: `gemini-authority-03`)
+++- **Correction Applied**: Replaced ctypes subclassing with a lightweight `FakeDWORD` and mocked `ctypes.byref` to return the instance directly.
+++- **Command**:
+++  ```powershell
+++  $env:PYTHONDONTWRITEBYTECODE="1"; $env:PHASE3_REQUIRE_IMPLEMENTATION="1"; $env:IG_FORBIDDEN_LIVE="C:\Users\hello\AppData\Local\Uoink\index.db"; & "E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\ig-native\Scripts\python.exe" "E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\integrator_verify.py" --root "C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\213914a5-528\gemini" --label "gemini-authority-03" tests/test_gemini_synthetic_process_authority.py
+++  ```
+++- **Exit Code**: 0
+++- **Summary**: 6 passed in 0.25 s.
+++- **Log**: `_scratch/gemini-authority-03/tests.log`
+++- **Results JSON**: `_scratch/gemini-authority-03/results.json`
+++
+++### Summary of Probe Results
+++
+++| Probe Name | Tested Authority Boundary | Measured Outcome | Confirmed Defect |
+++|---|---|---|---|
+++| `test_probe_toolhelp_orphan_child_adopted_without_temporal_check` | `owned_pids` adopts orphan child created before launcher | PID 80002 admitted to `owned_pids`, claimed by `owns_pid`, recorded in `_owned_created` | Unchecked Toolhelp child adoption |
+++| `test_probe_foreign_orphan_retains_session_and_blocks_abandonment` | Foreign orphan keeps `physical_liveness() == "alive"` after launcher exits | `physical_liveness()` is `"alive"`, `_abandon_unstarted` blocked, exclusion held | Foreign process retention and admission leak |
+++| `test_probe_foreign_orphan_targeted_by_terminate` | `terminate()` issues kill to adopted foreign orphan | `_win_terminate_pid` invoked on `(80002, 500_000)` | Unintended host process termination hazard |
+++| `test_probe_confirmed_exit_forgotten_on_recycled_pid_access_denied` | Recycled PID error 5 flips confirmed `"dead"` to `"unknown"` | Status flips from `"dead"` to `"unknown"`; `physically_alive()` reverts to `True` | Process exit amnesia |
+++| `test_probe_proc_poll_death_overridden_by_recycled_pid_query` | Subprocess handle exit code 0 overridden by raw PID lookup | `physical_liveness()` reports `"unknown"`; `physically_alive()` returns `True` | Handle authority overridden by raw PID |
+++| `test_probe_process_times_failure_bypasses_start_time_check` | `GetProcessTimes` failure bypasses start time validation | Returns `"alive"` without validating `created_ms` | Incomplete identity validation fallthrough |
+++
+++---
+++
+++## 4. Distinction: Confirmed Defects vs. Plausible Explanations of Tree08
+++
+++### Confirmed Source Defects
+++1. **Unchecked Toolhelp Child Adoption**: Toolhelp parent PID enumeration in `owned_pids()` ingests preexisting orphan processes because it lacks a check ensuring `child_created_ms >= parent_created_ms`.
+++2. **Missing Parent Liveness Check Before Toolhelp Enumeration**: `owned_pids()` queries Toolhelp using `self.pid` even when the parent process has already exited, allowing adoption of children spawned by an unrelated process reusing the PID.
+++3. **Self-Authenticating Timestamp Ingestion**: Storing the foreign child's own timestamp in `_owned_created` causes `_win_terminate_pid` to target the foreign process for termination.
+++4. **Admission Leak via Foreign Retention**: An adopted foreign process keeps `physical_liveness()` as `"alive"`, preventing `_abandon_unstarted()` from releasing exclusion and blocking replacement sessions.
+++5. **Process Exit Amnesia**: A confirmed dead process is forgotten if a subsequent query encounters `ERROR_ACCESS_DENIED`, transitioning the session from dead back to unconfirmed.
+++6. **Subprocess Exit Override**: Definitive process exit recorded by `proc.poll()` is overridden by ambiguous raw PID queries.
+++
+++### Plausible Explanations vs. Tree08 Real-World Evidence
+++- In Tree08, the failure sequence began at `test_live_worker_lease_blocks_a_second_mirror` in `tests/test_phase4_av5m3_isolation.py` during `export(env)`. The preceding test (`test_timeout_kills_worker_and_keeps_independent_user_edit`) ran a timed-out mirror and initiated termination.
+++- Under high-velocity test execution (2,700+ cases), PID recycling occurs frequently on Windows.
+++- If a terminated worker's PID was recycled into a system or service process yielding Access Denied, or if Toolhelp adopted an orphan process with the same creator PID:
+++  - `physical_liveness()` would report `"alive"` or `"unknown"`.
+++  - Destination exclusion would not be released by `_abandon_unstarted()`.
+++  - The subsequent test's `export(env)` call would fail with `destination exclusion unavailable` or `WaitForSingleObject` timeout.
+++- **Boundary Note**: While these mechanisms explain how a gate can be starved and why destination exclusion errors cascade across tests, Gemini's investigation was bounded to synthetic inert-process authority. Astra is investigating cancellation and mutex owner lifetime independently. Whether Tree08 was caused by PID recycling, orphan adoption, or mutex thread affinity during cancellation remains a combined question for the post-diagnostic synthesis.
+++
+++---
+++
+++## 5. Proposed Reviewed Fix (For Post-Diagnostic Implementation)
+++
+++To address all confirmed authority defects without modifying production source during this diagnostic phase, the following reviewed changes are proposed for [library_mirror.py](file:///C:/Users/hello/AppData/Local/AgentControlRoom\worktrees\uoink-library\213914a5-528\gemini/library_mirror.py):
+++
+++### 1. Enforce Creation Order and Parent Liveness in `owned_pids()`
+++```python
+++# In _VaultIoSession.owned_pids():
+++# Only enumerate Toolhelp children if self.pid is confirmed alive and matches self.created_ms
+++if os.name == "nt" and self.pid and _pid_is_alive(self.pid, self.created_ms):
+++    parent_created = self.created_ms or _process_created_ms(self.pid)
+++    for child in _windows_process_children(self.pid):
+++        exe = str(child.get("exe") or "")
+++        if _is_console_host(exe):
+++            continue
+++        child_pid = int(child["pid"])
+++        child_created = _process_created_ms(child_pid)
+++        # Discard any orphan created before the parent
+++        if parent_created is not None and child_created is not None:
+++            if child_created < (parent_created - _PROCESS_START_TOLERANCE_MS):
+++                continue
+++        add(child_pid, exe, created=child_created)
+++```
+++
+++### 2. Latch Confirmed Process Death to Prevent Exit Amnesia
+++```python
+++# In _VaultIoSession.__init__():
+++self._dead_pids: set[int] = set()
+++
+++# In _VaultIoSession.physical_liveness():
+++# If proc.poll() confirmed death, latch self.pid as dead and do not query by raw PID
+++if proc is not None:
+++    try:
+++        poll = proc.poll()
+++    except Exception:
+++        states.append("unknown")
+++    else:
+++        if poll is None:
+++            return "alive"
+++        if self.pid:
+++            self._dead_pids.add(self.pid)
+++
+++# When checking writer_pid and owned PIDs, skip latched dead PIDs
+++for pid, created in list(self._owned_created.items()):
+++    if pid in self._dead_pids:
+++        states.append("dead")
+++        continue
+++    status = _process_liveness(pid, created)
+++    if status == "dead":
+++        self._dead_pids.add(pid)
+++    states.append(status)
+++```
+++
+++### 3. Handle `GetProcessTimes` Failure in `_process_liveness`
+++```python
+++# In _process_liveness:
+++if created_ms is not None:
+++    actual = _windows_process_created_ms(handle)
+++    if actual is None:
+++        # Cannot confirm identity; must not fall through to "alive"
+++        return "unknown"
+++    if abs(actual - int(created_ms)) > _PROCESS_START_TOLERANCE_MS:
+++        return "dead"
+++```
+++
+++These changes:
+++1. Retain unknown-child exclusion (unverified children remain unknown).
+++2. Retain late-write refusal (dead sessions remain dead).
+++3. Retain destination-alias safety (gate locks remain keyed to destination identity).
+++4. Retain independent user bytes (stale sessions cannot write).
+++5. Release admission after known death (confirmed death is latched and cannot revert to alive).
++diff --git a/tests/test_gemini_synthetic_process_authority.py b/tests/test_gemini_synthetic_process_authority.py
++new file mode 100644
++index 0000000..f0a229d
++--- /dev/null
+++++ b/tests/test_gemini_synthetic_process_authority.py
++@@ -0,0 +1,203 @@
+++"""Synthetic process-authority and lifecycle regression probes for Gemini.
+++
+++Diagnostic assignment: inspect authority in owned_pids, physical_liveness,
+++and termination. All probes use inert PIDs and mocked observations.
+++No real processes are launched, suspended, or terminated.
+++"""
+++from __future__ import annotations
+++
+++import os
+++from types import SimpleNamespace
+++from unittest.mock import MagicMock
+++
+++import pytest
+++
+++import library_mirror as mirror
+++
+++
+++def test_probe_toolhelp_orphan_child_adopted_without_temporal_check(monkeypatch):
+++    """Toolhelp parent PID outlives creator: orphan child adopted without created_ms check.
+++    
+++    If launcher PID 70001 is recycled from an earlier dead process that spawned 80002,
+++    80002 has th32ParentProcessID == 70001 but was created before 70001.
+++    Current owned_pids adopts 80002 into _owned_created and claims ownership.
+++    """
+++    session = mirror._VaultIoSession()
+++    session.proc = SimpleNamespace(pid=70001, poll=lambda: None)
+++    session.created_ms = 1_000_000  # Launcher born at T=1,000,000 ms
+++
+++    # Foreign orphan created at T=500,000 ms (500s BEFORE launcher was born)
+++    orphan_entry = {"pid": 80002, "exe": "foreign_orphan.exe", "ppid": 70001}
+++    monkeypatch.setattr(mirror, "_windows_process_children", lambda ppid: [orphan_entry] if ppid == 70001 else [])
+++    
+++    def mock_created_ms(pid):
+++        if pid == 70001:
+++            return 1_000_000
+++        if pid == 80002:
+++            return 500_000  # Predates launcher!
+++        return None
+++
+++    monkeypatch.setattr(mirror, "_process_created_ms", mock_created_ms)
+++    monkeypatch.setattr(os, "name", "nt")
+++
+++    pids = session.owned_pids()
+++
+++    # Confirmed defect: 80002 was adopted without verifying creation timestamp against session.created_ms
+++    assert 80002 in pids, "Foreign orphan was not ingested into owned_pids"
+++    assert session.owns_pid(80002), "Foreign orphan is claimed as owned"
+++    assert session._owned_created.get(80002) == 500_000, "Foreign orphan timestamp recorded as valid authority"
+++
+++
+++def test_probe_foreign_orphan_retains_session_and_blocks_abandonment(monkeypatch):
+++    """Foreign orphan retention: session remains 'alive' and refuses cleanup.
+++    
+++    Even when the launcher (70001) has exited (poll() == 0), the presence of the
+++    running orphan (80002) causes physical_liveness() to report 'alive'.
+++    _abandon_unstarted refuses to drop retain or release exclusion.
+++    """
+++    session = mirror._VaultIoSession()
+++    session.dest = "C:\\fake\\dest"
+++    session.proc = SimpleNamespace(pid=70001, poll=lambda: 0)  # Launcher exited!
+++    session.created_ms = 1_000_000
+++
+++    orphan_entry = {"pid": 80002, "exe": "foreign_orphan.exe", "ppid": 70001}
+++    monkeypatch.setattr(mirror, "_windows_process_children", lambda ppid: [orphan_entry] if ppid == 70001 else [])
+++    monkeypatch.setattr(mirror, "_process_created_ms", lambda pid: 500_000 if pid == 80002 else 1_000_000)
+++    monkeypatch.setattr(os, "name", "nt")
+++
+++    # Ingest orphan
+++    session.owned_pids()
+++
+++    # Launcher is dead, orphan is alive
+++    def mock_liveness(pid, created_ms=None):
+++        if pid == 70001:
+++            return "dead"
+++        if pid == 80002:
+++            return "alive"
+++        return "dead"
+++
+++    monkeypatch.setattr(mirror, "_process_liveness", mock_liveness)
+++
+++    # Confirmed defect: physical_liveness reports 'alive' due to the foreign orphan
+++    assert session.physical_liveness() == "alive"
+++    assert session.physically_alive() is True
+++
+++    # _abandon_unstarted cannot release exclusion or drop retain because physically_alive() is True
+++    dropped = False
+++    released = False
+++    monkeypatch.setattr(mirror, "_drop_retained_session", lambda s: globals().update(dropped=True))
+++    monkeypatch.setattr(session, "_release_held_exclusion", lambda: globals().update(released=True))
+++
+++    session._abandon_unstarted()
+++    assert not dropped, "_abandon_unstarted unexpectedly dropped session despite physically_alive()"
+++    assert not released, "_abandon_unstarted unexpectedly released exclusion despite physically_alive()"
+++
+++
+++def test_probe_foreign_orphan_targeted_by_terminate(monkeypatch):
+++    """Foreign orphan kill hazard: termination invokes _win_terminate_pid on foreign child.
+++    
+++    Because the foreign orphan's timestamp was recorded in _owned_created,
+++    _created_for_pid matches the orphan's actual timestamp, and terminate()
+++    attempts to kill the foreign process.
+++    """
+++    session = mirror._VaultIoSession()
+++    session.proc = SimpleNamespace(pid=70001, poll=lambda: 0, wait=lambda **k: 0,
+++                                   stdin=None, stdout=None, stderr=None)
+++    session.created_ms = 1_000_000
+++
+++    orphan_entry = {"pid": 80002, "exe": "foreign_orphan.exe", "ppid": 70001}
+++    monkeypatch.setattr(mirror, "_windows_process_children", lambda ppid: [orphan_entry] if ppid == 70001 else [])
+++    monkeypatch.setattr(mirror, "_process_created_ms", lambda pid: 500_000 if pid == 80002 else 1_000_000)
+++    monkeypatch.setattr(os, "name", "nt")
+++
+++    session.owned_pids()
+++
+++    terminated_calls = []
+++    monkeypatch.setattr(mirror, "_win_terminate_job", lambda job: None)
+++    monkeypatch.setattr(mirror, "_win_terminate_pid", lambda pid, created_ms: terminated_calls.append((pid, created_ms)) or True)
+++    monkeypatch.setattr(mirror, "_process_liveness", lambda *a, **k: "dead")
+++
+++    session.terminate()
+++
+++    # Confirmed defect: terminate targeted the foreign orphan PID with its recorded timestamp
+++    assert (80002, 500_000) in terminated_calls, f"Foreign orphan 80002 was not targeted for termination: {terminated_calls}"
+++
+++
+++def test_probe_confirmed_exit_forgotten_on_recycled_pid_access_denied(monkeypatch):
+++    """Confirmed process exit is forgotten when subsequent query encounters Access Denied.
+++    
+++    If writer 70002 was confirmed 'dead' at time T1, but the PID is later recycled
+++    into a protected system process causing OpenProcess to fail with error 5 (Access Denied),
+++    _process_liveness returns 'unknown'.
+++    physical_liveness forgets the confirmed death and transitions from 'dead' back to 'unknown'.
+++    """
+++    session = mirror._VaultIoSession()
+++    session.proc = None
+++    session.writer_pid = 70002
+++    session.writer_created_ms = 1_000_000
+++    session._owned_created[70002] = 1_000_000
+++
+++    liveness_status = "dead"
+++    monkeypatch.setattr(mirror, "_process_liveness", lambda pid, created_ms=None: liveness_status)
+++
+++    # Query 1: writer is confirmed dead
+++    assert session.physical_liveness() == "dead"
+++    assert session.physically_alive() is False
+++
+++    # OS recycles PID 70002 to a protected process -> OpenProcess returns Access Denied -> 'unknown'
+++    liveness_status = "unknown"
+++
+++    # Query 2: confirmed exit is forgotten!
+++    assert session.physical_liveness() == "unknown", "physical_liveness did not return unknown on failed query"
+++    assert session.physically_alive() is True, "Confirmed dead process was not forgotten on subsequent query"
+++
+++
+++def test_probe_proc_poll_death_overridden_by_recycled_pid_query(monkeypatch):
+++    """Definitive subprocess handle exit is overridden by raw PID lookup.
+++    
+++    proc.poll() returns 0 (definitive kernel proof that the subprocess exited).
+++    However, physical_liveness still queries _process_liveness(self.pid, self.created_ms).
+++    If that raw PID query returns 'unknown' (due to recycling/permission error),
+++    the session reports 'unknown' and physically_alive() returns True.
+++    """
+++    session = mirror._VaultIoSession()
+++    session.proc = SimpleNamespace(pid=70003, poll=lambda: 0)  # Exited with code 0!
+++    session.created_ms = 1_000_000
+++
+++    # Raw PID query yields 'unknown' (e.g. Access Denied on recycled PID)
+++    monkeypatch.setattr(mirror, "_process_liveness", lambda pid, created_ms=None: "unknown")
+++
+++    # Confirmed defect: proc.poll() == 0 is overridden by raw PID query
+++    assert session.physical_liveness() == "unknown"
+++    assert session.physically_alive() is True, "Subprocess exit code 0 was overridden by raw PID lookup"
+++
+++
+++def test_probe_process_times_failure_bypasses_start_time_check(monkeypatch):
+++    """When GetProcessTimes fails on a live handle, _process_liveness returns 'alive' instead of verifying created_ms.
+++    
+++    In _process_liveness (line 663-667), if actual is None (GetProcessTimes failed),
+++    the timestamp check is bypassed and the function falls through to return 'alive'.
+++    """
+++    import ctypes
+++
+++    class FakeDWORD:
+++        def __init__(self, *args, **kwargs):
+++            self.value = mirror._STILL_ACTIVE
+++
+++    mock_k32 = MagicMock()
+++    mock_k32.OpenProcess.return_value = 12345
+++    mock_k32.GetExitCodeProcess.return_value = 1
+++    mock_k32.CloseHandle.return_value = 1
+++
+++    monkeypatch.setattr(mirror, "_kernel32", lambda: mock_k32)
+++    monkeypatch.setattr(ctypes, "byref", lambda obj: obj)
+++    from ctypes import wintypes
+++    monkeypatch.setattr(wintypes, "DWORD", FakeDWORD)
+++    monkeypatch.setattr(mirror, "_windows_process_created_ms", lambda handle: None)  # GetProcessTimes failed!
+++    monkeypatch.setattr(os, "name", "nt")
+++
+++    # Call _process_liveness with a specific expected created_ms
+++    result = mirror._process_liveness(70004, created_ms=1_000_000)
+++
+++    # Confirmed defect: Returns 'alive' even though created_ms could not be validated
+++    assert result == "alive", f"Expected fallthrough to 'alive', got {result}"
+diff --git a/docs/library/proof/gemini-mirror-authority-2026-09-13/review-limits.json b/docs/library/proof/gemini-mirror-authority-2026-09-13/review-limits.json
+new file mode 100644
+index 0000000..29f8f19
+--- /dev/null
++++ b/docs/library/proof/gemini-mirror-authority-2026-09-13/review-limits.json
+@@ -0,0 +1,30 @@
++{
++  "source": "b62aab325ef6b2dfde95e23b97b4b23e263e6e9a",
++  "worker_attempt_counts": [
++    {
++      "passed": 4,
++      "failed": 2
++    },
++    {
++      "passed": 5,
++      "failed": 1
++    },
++    {
++      "passed": 6,
++      "failed": 0
++    }
++  ],
++  "astra_worker_observation": {
++    "passed": 6,
++    "failed": 0
++  },
++  "meaning": "These probes assert current defects; passing is reproduction, not product clearance.",
++  "unverified_claims": [
++    "Probe 2 teardown flags assign globals but assert unchanged locals; no real owner/retain is set, so exclusion-held claim is unsupported.",
++    "Report opening says 51 mirror failures; actual tree08 has 50 mirror failures plus AT6.",
++    "Earlier probe drafts were overwritten by worker; logs remain but exact v1/v2 source bytes were not located.",
++    "Tree08 causal link remains unproved."
++  ],
++  "product_edits": false,
++  "accepted_regression_tests": false
++}
+diff --git a/docs/library/proof/gemini-mirror-authority-2026-09-13/run_gemini_authority_verification.ps1 b/docs/library/proof/gemini-mirror-authority-2026-09-13/run_gemini_authority_verification.ps1
+new file mode 100644
+index 0000000..a84ccfe
+--- /dev/null
++++ b/docs/library/proof/gemini-mirror-authority-2026-09-13/run_gemini_authority_verification.ps1
+@@ -0,0 +1,15 @@
++param([ValidateSet('worker','checkout')][string]$Target, [Parameter(Mandatory=$true)][string]$Label)
++$ErrorActionPreference='Stop'
++$taskCheckout='E:\AI\projects\uoink\checkouts\Yoink-library'
++$taskWorker='C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\213914a5-528\gemini'
++$taskRoot=if ($Target -eq 'worker') { $taskWorker } else { $taskCheckout }
++if ($Label -notmatch '^[a-z0-9-]+$') { throw 'Invalid label' }
++Get-ChildItem Env: | Where-Object { $_.Name -match '(API_KEY|AUTH_TOKEN|ACCESS_TOKEN|BASE_URL|OAUTH_TOKEN)' -or $_.Name -match '^(ANTHROPIC|OPENAI|GEMINI|GOOGLE_API|XAI|GROK)_' } | ForEach-Object { Remove-Item -LiteralPath ('Env:'+ $_.Name) }
++$env:IG_FORBIDDEN_LIVE='C:\Users\hello\AppData\Local\Uoink\index.db'
++$env:PYTHONDONTWRITEBYTECODE='1'
++$env:PHASE3_REQUIRE_IMPLEMENTATION='1'
++$env:HF_HUB_OFFLINE='1'
++$env:TRANSFORMERS_OFFLINE='1'
++$taskProbe=if ($Target -eq 'worker') { 'tests/test_gemini_synthetic_process_authority.py' } else { 'docs/library/proof/gemini-mirror-authority-2026-09-13/test_gemini_synthetic_process_authority.py' }
++& (Join-Path $taskCheckout '_scratch\ig-native\Scripts\python.exe') -B (Join-Path $taskCheckout '_scratch\integrator_verify.py') --root $taskRoot --label $Label $taskProbe --runxfail
++exit $LASTEXITCODE
+diff --git a/docs/library/proof/gemini-mirror-authority-2026-09-13/test_gemini_synthetic_process_authority.py b/docs/library/proof/gemini-mirror-authority-2026-09-13/test_gemini_synthetic_process_authority.py
+new file mode 100644
+index 0000000..f0a229d
+--- /dev/null
++++ b/docs/library/proof/gemini-mirror-authority-2026-09-13/test_gemini_synthetic_process_authority.py
+@@ -0,0 +1,203 @@
++"""Synthetic process-authority and lifecycle regression probes for Gemini.
++
++Diagnostic assignment: inspect authority in owned_pids, physical_liveness,
++and termination. All probes use inert PIDs and mocked observations.
++No real processes are launched, suspended, or terminated.
++"""
++from __future__ import annotations
++
++import os
++from types import SimpleNamespace
++from unittest.mock import MagicMock
++
++import pytest
++
++import library_mirror as mirror
++
++
++def test_probe_toolhelp_orphan_child_adopted_without_temporal_check(monkeypatch):
++    """Toolhelp parent PID outlives creator: orphan child adopted without created_ms check.
++    
++    If launcher PID 70001 is recycled from an earlier dead process that spawned 80002,
++    80002 has th32ParentProcessID == 70001 but was created before 70001.
++    Current owned_pids adopts 80002 into _owned_created and claims ownership.
++    """
++    session = mirror._VaultIoSession()
++    session.proc = SimpleNamespace(pid=70001, poll=lambda: None)
++    session.created_ms = 1_000_000  # Launcher born at T=1,000,000 ms
++
++    # Foreign orphan created at T=500,000 ms (500s BEFORE launcher was born)
++    orphan_entry = {"pid": 80002, "exe": "foreign_orphan.exe", "ppid": 70001}
++    monkeypatch.setattr(mirror, "_windows_process_children", lambda ppid: [orphan_entry] if ppid == 70001 else [])
++    
++    def mock_created_ms(pid):
++        if pid == 70001:
++            return 1_000_000
++        if pid == 80002:
++            return 500_000  # Predates launcher!
++        return None
++
++    monkeypatch.setattr(mirror, "_process_created_ms", mock_created_ms)
++    monkeypatch.setattr(os, "name", "nt")
++
++    pids = session.owned_pids()
++
++    # Confirmed defect: 80002 was adopted without verifying creation timestamp against session.created_ms
++    assert 80002 in pids, "Foreign orphan was not ingested into owned_pids"
++    assert session.owns_pid(80002), "Foreign orphan is claimed as owned"
++    assert session._owned_created.get(80002) == 500_000, "Foreign orphan timestamp recorded as valid authority"
++
++
++def test_probe_foreign_orphan_retains_session_and_blocks_abandonment(monkeypatch):
++    """Foreign orphan retention: session remains 'alive' and refuses cleanup.
++    
++    Even when the launcher (70001) has exited (poll() == 0), the presence of the
++    running orphan (80002) causes physical_liveness() to report 'alive'.
++    _abandon_unstarted refuses to drop retain or release exclusion.
++    """
++    session = mirror._VaultIoSession()
++    session.dest = "C:\\fake\\dest"
++    session.proc = SimpleNamespace(pid=70001, poll=lambda: 0)  # Launcher exited!
++    session.created_ms = 1_000_000
++
++    orphan_entry = {"pid": 80002, "exe": "foreign_orphan.exe", "ppid": 70001}
++    monkeypatch.setattr(mirror, "_windows_process_children", lambda ppid: [orphan_entry] if ppid == 70001 else [])
++    monkeypatch.setattr(mirror, "_process_created_ms", lambda pid: 500_000 if pid == 80002 else 1_000_000)
++    monkeypatch.setattr(os, "name", "nt")
++
++    # Ingest orphan
++    session.owned_pids()
++
++    # Launcher is dead, orphan is alive
++    def mock_liveness(pid, created_ms=None):
++        if pid == 70001:
++            return "dead"
++        if pid == 80002:
++            return "alive"
++        return "dead"
++
++    monkeypatch.setattr(mirror, "_process_liveness", mock_liveness)
++
++    # Confirmed defect: physical_liveness reports 'alive' due to the foreign orphan
++    assert session.physical_liveness() == "alive"
++    assert session.physically_alive() is True
++
++    # _abandon_unstarted cannot release exclusion or drop retain because physically_alive() is True
++    dropped = False
++    released = False
++    monkeypatch.setattr(mirror, "_drop_retained_session", lambda s: globals().update(dropped=True))
++    monkeypatch.setattr(session, "_release_held_exclusion", lambda: globals().update(released=True))
++
++    session._abandon_unstarted()
++    assert not dropped, "_abandon_unstarted unexpectedly dropped session despite physically_alive()"
++    assert not released, "_abandon_unstarted unexpectedly released exclusion despite physically_alive()"
++
++
++def test_probe_foreign_orphan_targeted_by_terminate(monkeypatch):
++    """Foreign orphan kill hazard: termination invokes _win_terminate_pid on foreign child.
++    
++    Because the foreign orphan's timestamp was recorded in _owned_created,
++    _created_for_pid matches the orphan's actual timestamp, and terminate()
++    attempts to kill the foreign process.
++    """
++    session = mirror._VaultIoSession()
++    session.proc = SimpleNamespace(pid=70001, poll=lambda: 0, wait=lambda **k: 0,
++                                   stdin=None, stdout=None, stderr=None)
++    session.created_ms = 1_000_000
++
++    orphan_entry = {"pid": 80002, "exe": "foreign_orphan.exe", "ppid": 70001}
++    monkeypatch.setattr(mirror, "_windows_process_children", lambda ppid: [orphan_entry] if ppid == 70001 else [])
++    monkeypatch.setattr(mirror, "_process_created_ms", lambda pid: 500_000 if pid == 80002 else 1_000_000)
++    monkeypatch.setattr(os, "name", "nt")
++
++    session.owned_pids()
++
++    terminated_calls = []
++    monkeypatch.setattr(mirror, "_win_terminate_job", lambda job: None)
++    monkeypatch.setattr(mirror, "_win_terminate_pid", lambda pid, created_ms: terminated_calls.append((pid, created_ms)) or True)
++    monkeypatch.setattr(mirror, "_process_liveness", lambda *a, **k: "dead")
++
++    session.terminate()
++
++    # Confirmed defect: terminate targeted the foreign orphan PID with its recorded timestamp
++    assert (80002, 500_000) in terminated_calls, f"Foreign orphan 80002 was not targeted for termination: {terminated_calls}"
++
++
++def test_probe_confirmed_exit_forgotten_on_recycled_pid_access_denied(monkeypatch):
++    """Confirmed process exit is forgotten when subsequent query encounters Access Denied.
++    
++    If writer 70002 was confirmed 'dead' at time T1, but the PID is later recycled
++    into a protected system process causing OpenProcess to fail with error 5 (Access Denied),
++    _process_liveness returns 'unknown'.
++    physical_liveness forgets the confirmed death and transitions from 'dead' back to 'unknown'.
++    """
++    session = mirror._VaultIoSession()
++    session.proc = None
++    session.writer_pid = 70002
++    session.writer_created_ms = 1_000_000
++    session._owned_created[70002] = 1_000_000
++
++    liveness_status = "dead"
++    monkeypatch.setattr(mirror, "_process_liveness", lambda pid, created_ms=None: liveness_status)
++
++    # Query 1: writer is confirmed dead
++    assert session.physical_liveness() == "dead"
++    assert session.physically_alive() is False
++
++    # OS recycles PID 70002 to a protected process -> OpenProcess returns Access Denied -> 'unknown'
++    liveness_status = "unknown"
++
++    # Query 2: confirmed exit is forgotten!
++    assert session.physical_liveness() == "unknown", "physical_liveness did not return unknown on failed query"
++    assert session.physically_alive() is True, "Confirmed dead process was not forgotten on subsequent query"
++
++
++def test_probe_proc_poll_death_overridden_by_recycled_pid_query(monkeypatch):
++    """Definitive subprocess handle exit is overridden by raw PID lookup.
++    
++    proc.poll() returns 0 (definitive kernel proof that the subprocess exited).
++    However, physical_liveness still queries _process_liveness(self.pid, self.created_ms).
++    If that raw PID query returns 'unknown' (due to recycling/permission error),
++    the session reports 'unknown' and physically_alive() returns True.
++    """
++    session = mirror._VaultIoSession()
++    session.proc = SimpleNamespace(pid=70003, poll=lambda: 0)  # Exited with code 0!
++    session.created_ms = 1_000_000
++
++    # Raw PID query yields 'unknown' (e.g. Access Denied on recycled PID)
++    monkeypatch.setattr(mirror, "_process_liveness", lambda pid, created_ms=None: "unknown")
++
++    # Confirmed defect: proc.poll() == 0 is overridden by raw PID query
++    assert session.physical_liveness() == "unknown"
++    assert session.physically_alive() is True, "Subprocess exit code 0 was overridden by raw PID lookup"
++
++
++def test_probe_process_times_failure_bypasses_start_time_check(monkeypatch):
++    """When GetProcessTimes fails on a live handle, _process_liveness returns 'alive' instead of verifying created_ms.
++    
++    In _process_liveness (line 663-667), if actual is None (GetProcessTimes failed),
++    the timestamp check is bypassed and the function falls through to return 'alive'.
++    """
++    import ctypes
++
++    class FakeDWORD:
++        def __init__(self, *args, **kwargs):
++            self.value = mirror._STILL_ACTIVE
++
++    mock_k32 = MagicMock()
++    mock_k32.OpenProcess.return_value = 12345
++    mock_k32.GetExitCodeProcess.return_value = 1
++    mock_k32.CloseHandle.return_value = 1
++
++    monkeypatch.setattr(mirror, "_kernel32", lambda: mock_k32)
++    monkeypatch.setattr(ctypes, "byref", lambda obj: obj)
++    from ctypes import wintypes
++    monkeypatch.setattr(wintypes, "DWORD", FakeDWORD)
++    monkeypatch.setattr(mirror, "_windows_process_created_ms", lambda handle: None)  # GetProcessTimes failed!
++    monkeypatch.setattr(os, "name", "nt")
++
++    # Call _process_liveness with a specific expected created_ms
++    result = mirror._process_liveness(70004, created_ms=1_000_000)
++
++    # Confirmed defect: Returns 'alive' even though created_ms could not be validated
++    assert result == "alive", f"Expected fallthrough to 'alive', got {result}"

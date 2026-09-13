@@ -1,0 +1,117 @@
+{
+  "algorithm": "sha256",
+  "files": {
+    ".gitattributes": {
+      "bytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+    },
+    "archive_gemini_mirror_authority.py": {
+      "bytes": 3051,
+      "sha256": "5d00afb5bc3a3154222e2b12315a8b11abbaf827565f9b38ed66c0b33c6c49e3"
+    },
+    "astra-gemini-authority01/guard/ig_paths.py": {
+      "bytes": 106,
+      "sha256": "226f4e0dd35385e5edcbfc351b062c9b7680c16ddf0630573338f7b8a5fdbed6"
+    },
+    "astra-gemini-authority01/guard/sitecustomize.py": {
+      "bytes": 1216,
+      "sha256": "2bd3820ac4a345039c6550308c32a7731e93494dee5933166a0a1da54620017f"
+    },
+    "astra-gemini-authority01/results.json": {
+      "bytes": 907,
+      "sha256": "0754eebd084b4769dcd923d740fb23ca15f2bc9d465a60e63844411b43c44638"
+    },
+    "astra-gemini-authority01/tests.log": {
+      "bytes": 100,
+      "sha256": "39d498abd87b556064f38823a9d12a75c7af3951bd417f4543f9e31dbc249a56"
+    },
+    "astra-gemini-authority01/tests.xml": {
+      "bytes": 1145,
+      "sha256": "05dbf12611d490a54ddf5d8f5cb2bd3915e0de2ebf2a5849eb6900e90ef4ea3d"
+    },
+    "gemini-authority-01/guard/ig_paths.py": {
+      "bytes": 106,
+      "sha256": "226f4e0dd35385e5edcbfc351b062c9b7680c16ddf0630573338f7b8a5fdbed6"
+    },
+    "gemini-authority-01/guard/sitecustomize.py": {
+      "bytes": 1216,
+      "sha256": "2bd3820ac4a345039c6550308c32a7731e93494dee5933166a0a1da54620017f"
+    },
+    "gemini-authority-01/results.json": {
+      "bytes": 871,
+      "sha256": "1c34866f1eebf3f927ee6f267ede50f3df757cca4cebec31739440787cc382c0"
+    },
+    "gemini-authority-01/tests.log": {
+      "bytes": 2260,
+      "sha256": "71cac960742c020d5955b65d8aa7bd4c154ec282529c2f33b1e885c2b979ddb0"
+    },
+    "gemini-authority-01/tests.xml": {
+      "bytes": 2964,
+      "sha256": "68c188a1288d49818262c6599356adeb10c7d2faaa58afb0e05419756d9cac3d"
+    },
+    "gemini-authority-02/guard/ig_paths.py": {
+      "bytes": 106,
+      "sha256": "226f4e0dd35385e5edcbfc351b062c9b7680c16ddf0630573338f7b8a5fdbed6"
+    },
+    "gemini-authority-02/guard/sitecustomize.py": {
+      "bytes": 1216,
+      "sha256": "2bd3820ac4a345039c6550308c32a7731e93494dee5933166a0a1da54620017f"
+    },
+    "gemini-authority-02/results.json": {
+      "bytes": 871,
+      "sha256": "9aae6e8bea7304b18f24e448f98411fbee8d90144c01faa298d7a3e6fc5e6896"
+    },
+    "gemini-authority-02/tests.log": {
+      "bytes": 946,
+      "sha256": "c303d2659d09ddd013b28db899554009f07e71e0fc6f1589bb69ddd5c610c07c"
+    },
+    "gemini-authority-02/tests.xml": {
+      "bytes": 2019,
+      "sha256": "681d969c8df4d9ff85a680e65ee7d0e4cf598fddb26372f4c92f2a43c6cd4400"
+    },
+    "gemini-authority-03/guard/ig_paths.py": {
+      "bytes": 106,
+      "sha256": "226f4e0dd35385e5edcbfc351b062c9b7680c16ddf0630573338f7b8a5fdbed6"
+    },
+    "gemini-authority-03/guard/sitecustomize.py": {
+      "bytes": 1216,
+      "sha256": "2bd3820ac4a345039c6550308c32a7731e93494dee5933166a0a1da54620017f"
+    },
+    "gemini-authority-03/results.json": {
+      "bytes": 871,
+      "sha256": "007805bbaa57e0d890f78129b6565275791554a987909bace99ded320e04ef29"
+    },
+    "gemini-authority-03/tests.log": {
+      "bytes": 100,
+      "sha256": "55fe2dfb2e48c49aba1a4c760a643a9b83191fccd68594aadfeb4bdf1dc51335"
+    },
+    "gemini-authority-03/tests.xml": {
+      "bytes": 1145,
+      "sha256": "675d802b0f5ca2ef3a6e43fb547dc118b3ff76eceb3be6c6a568870e093c9b30"
+    },
+    "integrator_verify.py": {
+      "bytes": 4420,
+      "sha256": "280cfdad5ebc56a1748ce53cf9c6850335b7046ab1b9998f7cdd9a196c44e7e2"
+    },
+    "MIRROR-PROCESS-AUTHORITY-GEMINI-2026-09-13.md": {
+      "bytes": 22718,
+      "sha256": "03509d6b4a097b67f4e177cba02ffc634611b91eb01a001e8ab9f069c9449c17"
+    },
+    "original-worker.diff": {
+      "bytes": 33074,
+      "sha256": "34ca3d2c8acc4c5b20ab48ea3c80667938171de2ab2a618a833fbbaf26a7527c"
+    },
+    "review-limits.json": {
+      "bytes": 932,
+      "sha256": "a5976fa3b7adcf3a2b97fe1fb08b51ed1d596dc5e80ad88c8840aefc67b2405d"
+    },
+    "run_gemini_authority_verification.ps1": {
+      "bytes": 1274,
+      "sha256": "7417be8df8afce5cc4ab8fab7da39e6a7689426da8b9b47e0f62f13caf5310d4"
+    },
+    "test_gemini_synthetic_process_authority.py": {
+      "bytes": 9294,
+      "sha256": "ba60842ca1ec7f7f63037bfc8d91e75e057d75e0740ddf7b3a07b5eaa13f61fe"
+    }
+  }
+}
