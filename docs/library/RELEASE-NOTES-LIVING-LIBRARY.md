@@ -22,6 +22,13 @@ now stops the build. Author and actual checkout each pass 20 Python cases and
 candidate still needs a fresh installed inventory and exact installed notice
 checks; see [the notice verdict](ASTRA-NOTICE-INTEGRATION-VERDICT-2026-09-13.md).
 
+Generated reservation recovery at `f9ab6fe` passes 42 cases in each independent
+copy, with zero failures or skips and 20 passing nested subtests. The component
+retains uncertain ownership and requires explicit reconciliation before reuse.
+These checks use fake workers and journals. Retained Windows handles, native
+recovery and real model qualification remain open. Gemini's latest review is
+partial at `870fa00`; a supplement is running to cover its omitted source files.
+
 Package 08 remains the latest built and installed review artifact. It includes
 the native note and saved-media repairs at `d2caac5` and `60d203f`; its source
 is `b8e44fb`. Its recorded installation, browser, CLI and native Uoink checks

@@ -111,6 +111,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | Windows namespace and ASR connection | Timeout at 0d93186; adoption at 428707d; adapter at d58bebe; council at ca61046; operations at 7fba83a; actual adapter connection at 7ced134 | Generated drain/cancel pass; actual proposed-adapter Windows drain fc23ea also returns0 with valid guards, restored services and child0/job0 before release. All63 latest proof payloads match Git/disk | Durable reservation/recovery and worker-local runtime owner are next. Real models and final runtime qualification remain open |
 | Local wheel graph and notices | Graph at 616f670; cached wheels at 95a7f29; source notices at d887f8a; council at ca61046; installer source fix at 71d3e70 | Notice author and actual checkout each pass20 Python cases and10 inert build-block cases. All128 proof payloads and four product notice files match Git/disk. Metadata graph passes144pins/287edges; conflict remains explicit | Verify fresh inventory and installed notice bytes in the eventual candidate. Native compatibility and release security remain open |
 | Latest component council | Gemini report retained as partial at 870fa00 | Run e30846da completed, but activity records show direct views of only30 of69 selected paths. Root verified all69 input bytes in both checkouts; this does not substitute for council review | Complete a focused supplement for omitted source, then reassess. No overall release acceptance |
+| Generated reservation recovery | Component and evidence integrated at f9ab6fe | Author70b48e and independentfd86f5 each pass42 cases, with20 passing nested subtests and all10 guards valid. All123 proof payloads match Git/disk | Connect retained Windows gate/journal handles and split create/resume/startup. Native recovery and runtime acceptance remain open |
 | Integration | Reliability repair at e8d058f and notice packaging at 71d3e70 after tree09 | Reliability:53 focused cases plus13 subtests per root. Notices:20 Python/10 block cases per root. Tree09 at 56d9d4c remains2,796 passed/1 failed/3 skipped across2,800 cases plus13 subtests; it predates both repairs | Finish runtime work, then run a new committed complete tree and rebuild/reseal. Package08 and website/marketing remain held. No current-source package or installation credit |
 | Desktop incident | Isolation failed in package-07 attempt; corrected at `e10ba3a` | Ordinary Uoink and filesystem connectors launched; earlier live-index/5179 effects unknown. Owned job cleaned | No further override launch; only guarded Uoink dashboard observed for package 08 |
 
@@ -316,6 +317,12 @@ path and adapter-owned cleanup, with explicit generated authority seams.
 Read ASTRA-GENERATED-ADAPTER-VERDICT-2026-09-13.md; all63 proof payloads match
 Git/disk. No real runtime authority was granted. Durable reservation/recovery
 and the worker-local runtime owner remain the next implementation work.
+The generated reservation unit is now accepted atf9ab6fe; read
+ASTRA-GENERATED-RESERVATION-VERDICT-2026-09-13.md. Author70b48e and independent
+fd86f5 each pass42 cases with20 nested subtests, zero failures/skips and valid
+guards. All123 proof payloads match Git/disk. Implement the Windows retained
+journal/gate port, split create/resume/finish_start and exact durable adapter
+migration next; these native connections have no execution credit yet.
 The next Gemini source review is frozen in
 proof/notices-operations-adapter-council-brief-2026-09-13/BRIEF.md,
 SHA1a5b1be80e7f4443cd7096026b75ad32ea992e702cb5af8763773be01776d149.
@@ -5344,3 +5351,23 @@ and20 nested subtests, with zero failures/skips and valid guards. Evidence
 integration follows. Runtime-owner review found result publication could outlive
 VAD retirement or replacement; its source repair remains unexecuted. Website
 and marketing remain paused.
+
+### 2026-09-13 - Generated reservation recovery integrated
+
+Commit f9ab6fe accepts the generated source and both root-executed42-case runs.
+Author70b48e and independentfd86f5 have exact case membership,20 passing nested
+subtests, valid guards, unchanged16-input bindings, stderr0 and native/outer0.
+Root copy verification27aae7 matched120 planned files; disk/Git check6a4dfc
+matched123 sealed payloads/998,212 bytes. Seal:
+6a350a3cef7947fffa9df5a60f5389d52ad753ad6e93f92de6fe13e1bb0059fd.
+The old46 lifecycle cases were not rerun. This is generated-component evidence.
+
+Concrete Windows implementation preparation now owns the retained journal as
+both exclusive gate and stream. The worker transaction must separate suspended
+creation, durable identity binding, nonblocking resume and blocking finish_start
+before publication. Source review and bounded native protocols follow; readable
+journal bytes alone still cannot establish prior-worker quiescence.
+
+The council supplement was dispatched from8a81250 through the existing
+subscription Control Room path, session34207. Original partial review remains
+partial until omitted source is reviewed. Website and marketing remain paused.
