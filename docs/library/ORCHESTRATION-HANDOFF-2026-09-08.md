@@ -93,12 +93,12 @@ establish safe installation isolation, and verify/correct resulting findings.
 | 0–1 | Unicode search repair integrated at `41c0d1d`; package-08 installed checks reviewed at `49e2b31` | 137 focused passes in both roots and complete tree; original assertions/markers unchanged | Preserve foundation exceptions and positive Recall limit |
 | 2 | Option 3 authorized by Ryan; Stage 4 P2-7 remains FAIL (39/46, 6/11) | Keep 0.90 for autonomous filing and apply false; proposals are reviewable suggestions | No quality-rule decision pending |
 | 3 | Package-08 C22 and browser review complete at `49e2b31` | Setup/reinstall exit 0; C22 11 pass / 0 fail / 3 raw manual placeholders; four browser images match consent/charge/recovery state | Original AT6 exit disposition remains Ryan's |
-| 4 | Owner repair ff67b84 accepted; earlier process proposals remain held; Astra repair03 worker qualification complete | Final stable-handle source has 49 synthetic passes and 233 Phase 4 passes. The first long-label run remains 174 passed / 59 failed; documented verifier path correction changes no source or tests | Raw diff/three-way integration and the same checkout suite next. Tree08 cause remains unproved |
+| 4 | Owner repair ff67b84 and process repair747fb6b accepted for combined qualification | 233 Phase 4 passes in each root; exact case sets match. All 116 new proof payloads match disk and Git. The original long-label run remains 174 passed / 59 failed | Combine the independent cache-consent guard if it qualifies, then committed tree09. Tree08 cause remains unproved |
 | 5 | Part A repaired; SDK union 267 passed in each root and corrected complete-tree case passes | BA-4/unary-clock failures close; dashboard 24,576-byte target remains missed | Preserve performance limit; Part B deferred |
 | 6 | Package-08 production publication and cited-range review complete at `49e2b31` | Exact export after 2.1001697 s protocol delay; first actual client export succeeds after separate 1.9874018 s delay | No speaker or player-seek credit; speakers blocked, no new fetch |
 | Security | NLTK wheel at 52d9f7d, binding at 07084fe; candidate02 graph f22456c and security scope 14aa0df reviewed | Uninstalled candidate: 144 advisory queries, one raw entry / one group; separate upstream NLTK one/one. Source review confirms unsafe default VAD and incomplete-cache/tokenizer guards. All 111 new proof payloads match Git and disk. Graph still fails five caps | Build exact asset/loader and compatibility repairs; no runtime or installed clearance. Combined tree/package09 follow mirror repair; model qualification retains Ryan gates |
 | Signing | Gemini review and repaired path integrated at 0b3629d | 48 focused passes; 77 proof payloads match Git. Real Inno direct callback refuses missing certificate and keeps a durable error. No successful signing credit | Full combined candidate tree after runtime work settles; actual certificate/service choice remains Ryan's |
-| Integration | Complete tree08 at 9dd0cfb remains failed; future receipt instruments reviewed at e8b5d8e | Tree08: 2,675 passed / 51 failed / 3 skipped across all 2,729 cases. Corrected partition validator: 53 synthetic passes in agent and Astra runs; abnormal shutdown is refused | Finish process-authority repair03, qualify combined source, then package09. Package08 held; website/marketing paused |
+| Integration | Complete tree08 at 9dd0cfb remains failed; process repair747fb6b qualifies in both roots; tree09 instruments reviewed at e8b5d8e | Tree08: 2,675 passed / 51 failed / 3 skipped across all 2,729 cases. Corrected partition validator: 53 synthetic passes in agent and Astra runs; abnormal shutdown is refused | Finish ordinary cache-consent guard qualification, then committed combined tree09 and package09. Package08 held; website/marketing paused |
 | Desktop incident | Isolation failed in package-07 attempt; corrected at `e10ba3a` | Ordinary Uoink and filesystem connectors launched; earlier live-index/5179 effects unknown. Owned job cleaned | No further override launch; only guarded Uoink dashboard observed for package 08 |
 
 Receipts and artifacts: `docs/library/proof/` (stage archives, S20 matrix, S21 incl. run at7, S22, AW,
@@ -177,7 +177,14 @@ is complete but is not this goal's completion. Current queue:
    requests bind fourteen upstream files to five release commits; the new seal
    has 111 verified payloads. Default unrestricted VAD, incomplete-cache consent,
    tokenizer fallback and optional API incompatibilities remain. No models or
-   dependencies were installed or executed. Prepare an exact derivative and protocol before Ryan's
+   dependencies were installed or executed. Ordinary cache guard proposal A is
+   now concrete under _scratch/runtime-asset-guard-proposal01: preserve the six
+   model options and explicit consent, require the minimum expected ASR files,
+   resolve acquisition before construction and pass a local snapshot. Implement
+   and synthetically qualify A before the expensive combined tree. This does not
+   establish a trusted model manifest or repair VAD. Faster-whisper companion B
+   remains an inert exact source proposal under the model migration review.
+   Prepare an exact derivative and protocol before Ryan's
    frozen-test/model decision; do not replace the current lock with this graph.
 3. NLTK is prepared at 4aec8ff. Read ASTRA-NLTK-PATHSEC-VERDICT-2026-09-12.md
    before the retained worker reports. Hash-override, path/receipt and test
@@ -214,9 +221,12 @@ is complete but is not this goal's completion. Current queue:
    118.37 s). First Phase 4 run remains 174 passed / 59 failed, 100.51 s: its
    long verifier label made the first temporary export path 256 characters,
    above the unchanged 240-character cap. The documented shorter label produces
-   220 characters, with source and test bytes unchanged. Integrate the reviewed
-   patch by raw diff/three-way apply, then run checkout label a3c01. Preserve
-   both outcomes and the path-qualification repair brief; no full tree yet.
+   220 characters, with source and test bytes unchanged. The reviewed patch is
+   integrated at747fb6b by raw diff/three-way apply; checkout a3c01 passes all233
+   in113.20 s with identical case membership. Read ASTRA-AUTHORITY-REPAIR03-VERDICT
+   and its116-payload proof. Both outcomes and the path repair remain preserved.
+   The process patch now qualifies for committed combined tree09 after the
+   independent ordinary cache-consent guard. No full tree has run yet.
    The retained proposal and failed tests remain unaccepted product. Read
    ASTRA-AUTHORITY-C1008-REVIEW-2026-09-13.md. Owner admission is accepted at ff67b84 after raw
    diff/three-way integration and 12 focused plus 184 Phase 4 passes in each
@@ -3740,3 +3750,25 @@ Next: raw patch integration and checkout a3c01, then product/proof and handoff
 commits before complete tree09. The original failed runs remain failed; this
 focused result does not establish tree08's cause or release readiness. No website,
 marketing, install, model run or push occurred.
+
+### 2026-09-13 — Stable process ownership integrated in747fb6b
+
+Raw worker diff and three-way apply preserved the accepted owner repair and every
+committed test. All233 Phase4/owner/authority cases pass in worker118.37 s and
+checkout113.20 s. Case IDs match, as do normalized source/test/helper bytes. All
+116 proof payloads and their manifest match Git and disk. The earlier174/59
+long-label failure remains preserved with its documented verification correction.
+
+The blanket whitespace inspection also flagged CRLF bytes intentionally retained
+under proof's -text attributes and two existing blank-line spaces in a newly
+admitted historical test file. It was not a product test failure; no sealed bytes
+or behavior assertions were rewritten to silence it. Scope future style checks
+to authored source rather than raw evidence archives.
+
+Before the expensive combined tree, finish the now-concrete ordinary cache guard
+A. It needs no new owner ruling: incomplete ASR files must not bypass download
+consent, and construction should receive a checked local snapshot. The proposed
+third-party constructor-order repair B, trusted artifact manifest, unsafe default
+VAD and actual model trial remain separate, explicit migration work. Neither
+structural cache checks nor233 mirror passes grant runtime/release acceptance.
+Website and marketing remain paused; no new installer, model run or push.
