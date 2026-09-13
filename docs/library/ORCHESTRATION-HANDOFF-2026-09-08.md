@@ -96,7 +96,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | 4 | Owner ff67b84 and process 747fb6b accepted; combined tree09 sealed at 9a46b38 | All 50 previously failing Phase 4 cases now pass in the complete run. Original 233-case focused results and Gemini scope review remain intact | No mirror rerun needed. Preserve tree08 failure and unresolved exact historical cause; continue runtime security |
 | 5 | Part A repaired; SDK union 267 passed in each root and corrected complete-tree case passes | BA-4/unary-clock failures close; dashboard 24,576-byte target remains missed | Preserve performance limit; Part B deferred |
 | 6 | Package-08 production publication and cited-range review complete at `49e2b31` | Exact export after 2.1001697 s protocol delay; first actual client export succeeds after separate 1.9874018 s delay | No speaker or player-seek credit; speakers blocked, no new fetch |
-| Security | NLTK wheel at 52d9f7d, binding at 07084fe; graph f22456c and security scope 14aa0df reviewed; cache guard b96dbd0 accepted | Cache guard: 144 passed plus 13 subtests in each independent root; all 117 proof payloads match Git and disk. Candidate advisory count remains one entry / one group; graph still fails five caps. Default VAD remains open; Gemini cache review integrated at 9d25eda. B2 empty-buffer derivative passes ten synthetic cases independently but is unapplied | Finish exact loader/compatibility and distribution proposals. Static inventory and fixed-loader proposal archived at 01163e1; runs03/04 completed after retained refusals. Symbolic adapter review is next; no model execution. No runtime or installed clearance |
+| Security | NLTK wheel at 52d9f7d, binding at 07084fe; graph f22456c and security scope 14aa0df reviewed; cache guard b96dbd0 accepted | Cache guard: 144 passed plus 13 subtests in each independent root; all 117 proof payloads match Git and disk. Candidate advisory count remains one entry / one group; graph still fails five caps. Default VAD remains open; Gemini cache review integrated at 9d25eda. B2 derivative and distribution preparation sealed at f0181f8: ten synthetic cases pass independently; derivative remains unapplied | Finish exact loader/compatibility and distribution proposals. Static inventory and fixed-loader proposal archived at 01163e1; runs03/04 completed after retained refusals. Symbolic adapter review is next; no model execution. No runtime or installed clearance |
 | Signing | Gemini review and repaired path integrated at 0b3629d | 48 focused passes; 77 proof payloads match Git. Real Inno direct callback refuses missing certificate and keeps a durable error. No successful signing credit | Full combined candidate tree after runtime work settles; actual certificate/service choice remains Ryan's |
 | Integration | Complete tree09 at source 56d9d4c sealed in 9a46b38; historical receipt failure remains | 2,796 passed / 1 failed / 3 skipped across 2,800 cases, plus 13 passed subtests. Exact union and exits verified; 174 passive captures, no observer errors; 62 payloads match Git and disk | Continue tokenizer/VAD and dependency proposals. No blind rerun; package08 and website/marketing remain held |
 | Desktop incident | Isolation failed in package-07 attempt; corrected at `e10ba3a` | Ordinary Uoink and filesystem connectors launched; earlier live-index/5179 effects unknown. Owned job cleaned | No further override launch; only guarded Uoink dashboard observed for package 08 |
@@ -192,6 +192,10 @@ is complete but is not this goal's completion. Current queue:
    Gemini review is integrated at 9d25eda; read ASTRA-ASSET-COUNCIL-VERDICT-2026-09-13.md.
    B2 fixes the empty-buffer finding and passes ten synthetic cases in author
    and independent runs; B1 remains six pass / four fail on that protocol.
+   Its complete review and distribution plan are sealed at f0181f8 (195
+   payloads). Read ASTRA-COMPANION-B2-PREPARATION-VERDICT-2026-09-13.md.
+   Qualify the deterministic builder only with synthetic ZIPs until exact
+   code review; the current builder draft needs bounded input reads.
    Windows casing alone is not a Path inequality; reject the resolve-first
    suggestion because it discards alias evidence. B2 is not built or installed.
    Static VAD evidence and fixed-loader preparation are archived at 01163e1.
@@ -3950,3 +3954,16 @@ manifests then passed a separately named schema-aware verifier that retains
 membership, containment, length/hash and Git-byte checks. This is a transport
 instrument correction, not a changed product result or model acceptance.
 No production source changed; the complete-tree result remains unchanged.
+
+### 2026-09-13 - B2 and derivative distribution plan preserved
+
+Commit f0181f8 preserves the 67-payload B1 review, 52-payload distribution
+plan and 70-payload B2 review inside a 195-payload outer archive; all bytes
+match Git and disk. The original failed B1 boundaries and original seals
+remain unchanged. B2 is still inert source, not a runtime or installed fix.
+
+The proposed faster-whisper local version is 1.2.1+uoink.localassets1. Its
+builder is being qualified with synthetic ZIPs. Root review found unbounded
+read_bytes after stat/hash preconditions; the author is repairing those reads
+before qualification. No actual wheel build, model asset decompression,
+installation, frozen-test change or new complete-tree run occurred.
