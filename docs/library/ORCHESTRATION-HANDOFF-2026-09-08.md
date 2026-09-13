@@ -98,7 +98,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | 6 | Package-08 production publication and cited-range review complete at `49e2b31` | Exact export after 2.1001697 s protocol delay; first actual client export succeeds after separate 1.9874018 s delay | No speaker or player-seek credit; speakers blocked, no new fetch |
 | Security | NLTK wheel at 52d9f7d and installer binding at 07084fe; graph checker at 5e46f2f | Wheel 43/0/0 and build/signing/notices 51/0/0 in each root. Fixed wheel hash matches build constant. It is not installed. Raw scan remains 19 / 15; separating Lightning leaves 18 / 14 | Run combined full tree, build and qualify package 09. Runtime migration/model qualification retain Ryan gates |
 | Signing | Gemini review and repaired path integrated at 0b3629d | 48 focused passes; 77 proof payloads match Git. Real Inno direct callback refuses missing certificate and keeps a durable error. No successful signing credit | Full combined candidate tree after runtime work settles; actual certificate/service choice remains Ryan's |
-| Integration | Package 08 at `755c37e`, installed/native evidence at `49e2b31`, verified review kit at `684a4a3` | Source b8e44fb: 2,579 pass / one historical failure / two skips. ZIP has 3,659 verified payloads; release_ready=false | Final branch backup is complete only if external package-08 .backup.json has verified=true and exact source/local/remote equality |
+| Integration | Package 08 remains held; partial combined tree07 is preserved at `784fb73` | e53fe0e collected 2,729 cases but ended without a main exit/summary: 2,203 completed passes, one failure, two skips; one setup-only case and 522 unreported. Not a complete result | Run complete tree08 with the repaired durable supervisor, then qualify package 09. Last complete source b8e44fb remains 2,579 / 1 / 2 |
 | Desktop incident | Isolation failed in package-07 attempt; corrected at `e10ba3a` | Ordinary Uoink and filesystem connectors launched; earlier live-index/5179 effects unknown. Owned job cleaned | No further override launch; only guarded Uoink dashboard observed for package 08 |
 
 Receipts and artifacts: `docs/library/proof/` (stage archives, S20 matrix, S21 incl. run at7, S22, AW,
@@ -180,6 +180,12 @@ is complete but is not this goal's completion. Current queue:
    with complete before/copy/after hash equality and a separate receipt.
 4. Integrate only reviewed fixes, update this State/Queue, then run the complete
    tree on the committed combined source. Build/reseal only after code settles.
+   Tree07 stopped without a final process result and is preserved at 784fb73.
+   Read COMPLETE-TREE-INTERRUPTION-REPAIR-BRIEF-2026-09-13.md. Use fresh label
+   ryan-final-partitioned-08 with the hidden durable supervisor; its no-op child
+   preflight exits zero. Preserve the original 2,729-case scope and compare to
+   the last complete tree, not the partial result. Rebind unused package observers
+   to this documentary checkpoint before execution. Production source is unchanged.
    Follow PACKAGE-09-INTEGRATION-BRIEF-2026-09-12.md for local-wheel binding,
    source-fixture preservation, full-tree membership and new installed receipts.
    Package 08 remains the unchanged held review artifact, not evidence for the
@@ -193,6 +199,11 @@ is complete but is not this goal's completion. Current queue:
    PUBLIC-RELEASE-NOTES-LIVING-LIBRARY-DRAFT.md provides concise private copy.
    RELEASE-OWNER-DECISIONS-2026-09-12.md lists the concrete remaining decisions;
    neither document authorizes publication or broadens model/client scope.
+
+Ryan confirmed on September 13 that the website scope includes https://uoink.app/,
+https://uoink-site.vercel.app/ and the Uoink section of his main site. Review the
+two deployed destinations and identify their source project before editing.
+Do not infer that the old local HQ template is the current Uoink product site.
 
 The completed earlier sequence below is retained as history.
 
@@ -3488,3 +3499,28 @@ This instruction alone is not a successful push; only verified=true and exact
 source/local/remote equality establish completion. No main merge, candidate-branch
 push, ordinary upgrade or publication is included. Keep that final transport
 record outside Git so recording a commit does not require another commit.
+
+### 2026-09-13 — interrupted combined tree and durable qualification repair
+
+784fb73 preserves the original partial tree07. Its child exit and aggregate are
+unknown; the last report is BC3e chapter_metadata setup. No relevant Python
+process remained at 09:33 UTC and the host had not rebooted during the attempt.
+The exact stop cause is unknown. Keep 2,203 completed passes, one failure and
+two skips separate from the one incomplete and 522 unreported cases. The media
+partition never ran. The 24-payload seal matches Git and disk. Three interrupted
+synthetic fixture files moved into _scratch with exact hashes; no live data was
+opened, and no old receipt or assertion was changed.
+
+The new supervisor retains its own and child PIDs, heartbeat, output and actual
+exit independently of the interactive handle. Its no-op child exits zero. The
+fresh full scope is tree08; no package build is yet authorized by that preflight.
+Unused package09 instrument drafts and their preparation refusals are retained.
+Package08's installer is independently preserved byte-identically. A signing
+receipt did not exist beside that older build; do not invent one retrospectively.
+
+Control Room de06906 rejects timeout/partial diagnostics and missing terminal
+SUCCESS instead of reporting completion. Ten replay cases and all 48 tests pass;
+no provider was invoked. 8d7cc1a records the repaired local web server starting
+after its prior endpoint refused connection. Six August records for other
+projects remain unconfirmed, with no owner/heartbeat. Their history was not
+rewritten, and no Uoink worker is active.
