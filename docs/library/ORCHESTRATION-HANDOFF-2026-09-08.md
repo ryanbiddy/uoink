@@ -96,7 +96,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | 4 | Owner ff67b84 and process 747fb6b accepted; combined tree09 sealed at 9a46b38 | All 50 previously failing Phase 4 cases now pass in the complete run. Original 233-case focused results and Gemini scope review remain intact | No mirror rerun needed. Preserve tree08 failure and unresolved exact historical cause; continue runtime security |
 | 5 | Part A repaired; SDK union 267 passed in each root and corrected complete-tree case passes | BA-4/unary-clock failures close; dashboard 24,576-byte target remains missed | Preserve performance limit; Part B deferred |
 | 6 | Package-08 production publication and cited-range review complete at `49e2b31` | Exact export after 2.1001697 s protocol delay; first actual client export succeeds after separate 1.9874018 s delay | No speaker or player-seek credit; speakers blocked, no new fetch |
-| Security | NLTK wheel at 52d9f7d, binding at 07084fe; graph f22456c and security scope 14aa0df reviewed; cache guard b96dbd0 accepted | Cache guard: 144 passed plus 13 subtests in each independent root; all 117 proof payloads match Git and disk. Candidate advisory count remains one entry / one group; graph still fails five caps. Default VAD and companion tokenizer loader remain open | Finish exact loader/compatibility proposal. Static checkpoint inventory run01 refused on unsupported ZIP header; no model execution. No runtime or installed clearance |
+| Security | NLTK wheel at 52d9f7d, binding at 07084fe; graph f22456c and security scope 14aa0df reviewed; cache guard b96dbd0 accepted | Cache guard: 144 passed plus 13 subtests in each independent root; all 117 proof payloads match Git and disk. Candidate advisory count remains one entry / one group; graph still fails five caps. Default VAD remains open; Gemini cache review integrated at 9d25eda. B2 empty-buffer derivative passes ten synthetic cases independently but is unapplied | Finish exact loader/compatibility and distribution proposals. Static checkpoint inventory run01 refused on unsupported ZIP header; no model execution. No runtime or installed clearance |
 | Signing | Gemini review and repaired path integrated at 0b3629d | 48 focused passes; 77 proof payloads match Git. Real Inno direct callback refuses missing certificate and keeps a durable error. No successful signing credit | Full combined candidate tree after runtime work settles; actual certificate/service choice remains Ryan's |
 | Integration | Complete tree09 at source 56d9d4c sealed in 9a46b38; historical receipt failure remains | 2,796 passed / 1 failed / 3 skipped across 2,800 cases, plus 13 passed subtests. Exact union and exits verified; 174 passive captures, no observer errors; 62 payloads match Git and disk | Continue tokenizer/VAD and dependency proposals. No blind rerun; package08 and website/marketing remain held |
 | Desktop incident | Isolation failed in package-07 attempt; corrected at `e10ba3a` | Ordinary Uoink and filesystem connectors launched; earlier live-index/5179 effects unknown. Owned job cleaned | No further override launch; only guarded Uoink dashboard observed for package 08 |
@@ -189,6 +189,11 @@ is complete but is not this goal's completion. Current queue:
    Git and disk. The guard does not cover child-process imports. This does not
    establish a trusted model manifest or repair VAD. Faster-whisper companion B
    remains an inert exact source proposal under the model migration review.
+   Gemini review is integrated at 9d25eda; read ASTRA-ASSET-COUNCIL-VERDICT-2026-09-13.md.
+   B2 fixes the empty-buffer finding and passes ten synthetic cases in author
+   and independent runs; B1 remains six pass / four fail on that protocol.
+   Windows casing alone is not a Path inequality; reject the resolve-first
+   suggestion because it discards alias evidence. B2 is not built or installed.
    Prepare an exact derivative and protocol before Ryan's
    frozen-test/model decision; do not replace the current lock with this graph.
 3. NLTK is prepared at 4aec8ff. Read ASTRA-NLTK-PATHSEC-VERDICT-2026-09-12.md
@@ -3896,3 +3901,24 @@ Static VAD inventories completed under exact-hash, nonexecuting readers; their
 proof and the fixed-loader proposal are awaiting documentary integration. The
 next bounded preparation is a symbolic metadata trace; no model conversion,
 load, inference or frozen dependency-test change has been authorized.
+
+### 2026-09-13 — Gemini cache review integrated; tokenizer B2 qualifies synthetically
+
+Commit 9d25eda integrates Gemini run 131e52c7 through raw diff and three-way
+apply. All 19 proof payloads match Git and disk. The report is preserved with
+Astra's disposition: the empty-buffer finding is valid, the Windows casing
+premise is false, and the unapplied tokenizer race remains an existing gap.
+The source-only brief required zero tests; this integration changes no product
+source and does not justify repeating the complete tree.
+
+B2 changes only the supplied-buffer condition to `is not None`. Four additional
+cases cross local-only mode with ambient tokenizer-file presence. The author's
+B1 run is six passed / four failed; B2 and Astra's exact-input independent run
+each pass all ten with zero failures, errors or skips and actual exit zero.
+The original six assertions remain unchanged. Only a selected constructor
+prefix with inert seams ran. No model, package build or installation followed.
+
+Keep B2 under the exact derivative/distribution review. The full tree at
+56d9d4c remains 2,796 passed / one failed / three skipped plus 13 passed
+subtests. Runtime security, historical AT6 disposition, real signing and
+verified separate-client isolation still prevent market approval.
