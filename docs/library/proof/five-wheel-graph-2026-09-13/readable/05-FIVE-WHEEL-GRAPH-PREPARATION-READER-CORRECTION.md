@@ -1,0 +1,5 @@
+# Five-record graph preparation reader correction, 2026-09-13
+
+The frozen 47-input proposal was not executed. A read-only final membership check (tool a70513, exit 1) used a basename exclusion for INPUT-HASHES.json, which also excluded the preserved before/INPUT-HASHES.json. Every payload hash had already matched before that membership assertion failed. The corrected reader excludes only the exact root manifest path. No proposal input or assertion is changed, and no graph/test rerun is involved.
+
+The first console summary also printed null for total bytes because Measure-Object did not bind an OrderedDictionary key as intended. The corrected reader sums parsed manifest row byte fields explicitly and enforces the existing 16 MiB preparation bound. These are reporting/checker setup observations, not graph outcomes. This note remains outside the frozen preparation.

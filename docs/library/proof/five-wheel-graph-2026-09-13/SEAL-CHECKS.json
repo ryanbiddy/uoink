@@ -1,0 +1,15 @@
+{
+  "source_paths": 1050,
+  "new_unique_payloads": 63,
+  "new_bytes": 2050594,
+  "external_payloads": 415,
+  "external_archive_commit": "4827288",
+  "current_preparations": 4,
+  "current_preparation_members": 797,
+  "author_root_cases": 68,
+  "full_graph_pins": 144,
+  "full_graph_edges": 287,
+  "source_hashes_before_after_equal": true,
+  "archived_source_execution": 0,
+  "scope": "Documentary seal only; archive4827288 is required"
+}

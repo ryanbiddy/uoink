@@ -1,0 +1,50 @@
+[
+  {
+    "path": "readable/00-result.json",
+    "source_path": "runtime-candidate03-five-wheel-qualification01/runs/qualification01/result.json",
+    "sha256": "b634e6b0e6d0011a3281da88ae3e1b8790d80e2f26604cecb20a14ccc9ded657",
+    "bytes": 298436,
+    "member": "sha256/b634e6b0e6d0011a3281da88ae3e1b8790d80e2f26604cecb20a14ccc9ded657",
+    "storage": "new-payload"
+  },
+  {
+    "path": "readable/01-result.json",
+    "source_path": "astra-five-wheel68-qualification01/runs/qualification01/result.json",
+    "sha256": "8bc2766cdab410328ad7ede3d747b4b425be58c701fb23b5edf7aa1cac7d52a5",
+    "bytes": 298433,
+    "member": "sha256/8bc2766cdab410328ad7ede3d747b4b425be58c701fb23b5edf7aa1cac7d52a5",
+    "storage": "new-payload"
+  },
+  {
+    "path": "readable/02-raw-graph.json",
+    "source_path": "runtime-candidate03-five-wheel-graph01/results/graph01/raw-graph.json",
+    "sha256": "28f25e7542de97c9ec4006781735cd97aa22b70b24a2e2d1c14698a8c3805dd3",
+    "bytes": 143241,
+    "member": "sha256/28f25e7542de97c9ec4006781735cd97aa22b70b24a2e2d1c14698a8c3805dd3",
+    "storage": "new-payload"
+  },
+  {
+    "path": "readable/03-invocation.json",
+    "source_path": "runtime-candidate03-five-wheel-graph01/results/graph01/invocation.json",
+    "sha256": "8552b404add0aabb72c3b512bb88b145d2cff71c1688e44ba156599bc97b8386",
+    "bytes": 426331,
+    "member": "sha256/8552b404add0aabb72c3b512bb88b145d2cff71c1688e44ba156599bc97b8386",
+    "storage": "new-payload"
+  },
+  {
+    "path": "readable/04-FIVE-WHEEL-FULL144-ACTUAL.json",
+    "source_path": "FIVE-WHEEL-FULL144-ACTUAL.json",
+    "sha256": "0ab300a29cbd02776f4518a75684026bee6a42ac72f3a609819d62fb42838ab8",
+    "bytes": 124,
+    "member": "sha256/0ab300a29cbd02776f4518a75684026bee6a42ac72f3a609819d62fb42838ab8",
+    "storage": "new-payload"
+  },
+  {
+    "path": "readable/05-FIVE-WHEEL-GRAPH-PREPARATION-READER-CORRECTION.md",
+    "source_path": "FIVE-WHEEL-GRAPH-PREPARATION-READER-CORRECTION.md",
+    "sha256": "b8f9747dcb273c3fc5c40c0e74f9a106b15ca6b68a1c8e060753e0b7cd16fb28",
+    "bytes": 874,
+    "member": "sha256/b8f9747dcb273c3fc5c40c0e74f9a106b15ca6b68a1c8e060753e0b7cd16fb28",
+    "storage": "new-payload"
+  }
+]
