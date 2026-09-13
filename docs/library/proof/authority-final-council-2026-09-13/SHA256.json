@@ -1,0 +1,48 @@
+{
+  "files": {
+    ".gitattributes": {
+      "bytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+    },
+    "apply.log": {
+      "bytes": 1140,
+      "sha256": "77b1b6704f60187eeb38c7fdb4f548161440babdda4d00cfaf0ef2d7e543a3fc"
+    },
+    "integrator.py": {
+      "bytes": 2789,
+      "sha256": "5400443ed2a60b30d3250afb0f4db1a500ed30c00e4def04520e0dc9a937c379"
+    },
+    "library_mirror.git.py": {
+      "bytes": 219984,
+      "sha256": "843a08b1fba0364c2233fabb127197a0b2ca2be50c62930897666c3cfe220cdd"
+    },
+    "receipt.json": {
+      "bytes": 360,
+      "sha256": "e07ba225f13cc9579ff4a1e731dc9a647ac3da0cb368b7ef4cd39a995d87e468"
+    },
+    "review-brief.md": {
+      "bytes": 1799,
+      "sha256": "e95bc1c6f98f25e2ece834d4499a54dc4251af59f7536e6686c2653a8552427d"
+    },
+    "worker-report-original.md": {
+      "bytes": 6784,
+      "sha256": "f56c82f4acd06be264a5c5058e6b8e07017146adbf9572261211420925b4bb1e"
+    },
+    "worker.patch": {
+      "bytes": 7120,
+      "sha256": "7c279f60eda38ea01fc6b71f7e422b4bc9a958b9da379eeaba39f382d17b5e3e"
+    },
+    "dispatch/command.json": {
+      "bytes": 460,
+      "sha256": "034dc004991426e52bae4ac240bfabb0bfbe99033010eacfaf5a4878f898b96c"
+    },
+    "dispatch/dispatch.log": {
+      "bytes": 19612,
+      "sha256": "60f95f5bbaef6ae8c6536b21f91c267c8d5ab69d39892fd7b12a029c8b1ce96e"
+    },
+    "dispatch/exit.json": {
+      "bytes": 13,
+      "sha256": "267aefd78a72c9453478263faba0b4430d9c3bd7f3b3f027154ac04225645a88"
+    }
+  }
+}
