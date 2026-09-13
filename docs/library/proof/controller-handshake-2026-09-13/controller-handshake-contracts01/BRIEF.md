@@ -1,0 +1,5 @@
+2026-09-13. Prepare eight focused, in-memory ControllerHandshake contracts before the generated Windows observation. No execution is authorized by this brief.
+
+Use the exact already-qualified lifecycle a80514aa and protocol 78c395da source. A small fake port returns passive worker records and exchanges generated authenticated frames in memory. Real SnapshotLifecycle.read_lease and OwnedRuntimeFactory create the owner and permit; the actual ControllerHandshake methods enforce the reserved/running phases. Cover the connected positive path, a begin attempt during startup, foreign permit, unowned worker, wrong phase, substituted record, repeated ready and use after session closure.
+
+Reuse the closed-content, 12 metadata-trap, 25 startup-registry-trap, import and raw-exit conventions from namespace nsp01. No ctypes, Windows API, process, socket, model, filesystem fixture, production import or frozen test change. These eight cases add coverage missing from the earlier 54; they do not retest or relabel those 54. The separately reviewed dummy worker will still need actual kernel observation.

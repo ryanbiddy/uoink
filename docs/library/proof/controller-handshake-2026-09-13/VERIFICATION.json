@@ -1,0 +1,18 @@
+{
+  "scope": "Completed in-memory handshake evidence only",
+  "author": {
+    "passed": 8,
+    "failed": 0,
+    "skipped": 0,
+    "elapsed_seconds": 0.0011653999972622842
+  },
+  "root": {
+    "passed": 8,
+    "failed": 0,
+    "skipped": 0,
+    "elapsed_seconds": 0.0012442000152077526
+  },
+  "ordered_case_rows_equal": true,
+  "seven_source_control_inputs_checked_each": true,
+  "archived_code_executed_by_sealer": false
+}

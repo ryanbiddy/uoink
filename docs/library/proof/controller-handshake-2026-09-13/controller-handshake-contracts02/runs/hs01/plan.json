@@ -1,0 +1,60 @@
+{
+  "label": "hs01",
+  "inputs": [
+    {
+      "name": "snapshot_lifecycle.py",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\controller-handshake-contracts02\\snapshot_lifecycle.py",
+      "sha256": "a80514aac6b1e75b9b872052852fa993a23cd5273b6bed4ffb4eef7404cb69dd"
+    },
+    {
+      "name": "owned_generation_protocol.py",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\controller-handshake-contracts02\\owned_generation_protocol.py",
+      "sha256": "78c395da77ff5a0dd660a27a7ea47d6e52061fc016937aa7046556f1fa026507"
+    },
+    {
+      "name": "handshake_cases.py",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\controller-handshake-contracts02\\handshake_cases.py",
+      "sha256": "cd55230d2545f2247fdb058eca7d251f68bd9af107cd5d2e6c14365cd3861cfa"
+    },
+    {
+      "name": "qualify_handshake.py",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\controller-handshake-contracts02\\qualify_handshake.py",
+      "sha256": "fe0f509b2081d02e3aa8a24f13732a01f43236e03202289dd9ea2a051fdaefdb"
+    },
+    {
+      "name": "EXPECTED-CASES.json",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\controller-handshake-contracts02\\EXPECTED-CASES.json",
+      "sha256": "34994ebe54d4c19a5efdbe24e92f0151d1f1e6839c6503d21dfe236d997944d0"
+    },
+    {
+      "name": "run_handshake01.ps1",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\controller-handshake-contracts02\\run_handshake01.ps1",
+      "sha256": "101d2f60db37284e7994511c1c6d33d2fc8fe4977833e283567654617f983a2e"
+    },
+    {
+      "name": "ROOT-ADMISSION.json",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\controller-handshake-contracts02\\ROOT-ADMISSION.json",
+      "sha256": "80cbb1cc0579edaf13b79601d49449137ef00219ff8e042167b5d79b1e9dcedc"
+    }
+  ],
+  "interpreter": "C:\\Python314\\python.exe",
+  "arguments": [
+    "-I",
+    "-S",
+    "-B",
+    "qualify_handshake.py"
+  ],
+  "scope": "8 generated-memory fake API cases only",
+  "no_native_or_model_activity": true,
+  "planned_cases": [
+    "handshake_real_lifecycle_reserved_ready_running_begin",
+    "handshake_begin_during_reserved_startup_refused",
+    "handshake_foreign_local_permit_refused_before_frame",
+    "handshake_unregistered_worker_refused_before_frame",
+    "handshake_wrong_lifecycle_phase_refused_before_frame",
+    "handshake_substituted_registry_record_refused",
+    "handshake_repeated_ready_refused_while_reserved",
+    "handshake_begin_after_owned_session_close_refused"
+  ],
+  "startup_binding_set": true
+}

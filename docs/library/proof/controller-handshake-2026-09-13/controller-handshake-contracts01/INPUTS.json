@@ -1,0 +1,18 @@
+{
+  "schema": "uoink.handshake-inputs.v1",
+  "input_sha256": {
+    "snapshot_lifecycle.py": "a80514aac6b1e75b9b872052852fa993a23cd5273b6bed4ffb4eef7404cb69dd",
+    "owned_generation_protocol.py": "78c395da77ff5a0dd660a27a7ea47d6e52061fc016937aa7046556f1fa026507",
+    "handshake_cases.py": "cd55230d2545f2247fdb058eca7d251f68bd9af107cd5d2e6c14365cd3861cfa",
+    "qualify_handshake.py": "fe0f509b2081d02e3aa8a24f13732a01f43236e03202289dd9ea2a051fdaefdb",
+    "EXPECTED-CASES.json": "34994ebe54d4c19a5efdbe24e92f0151d1f1e6839c6503d21dfe236d997944d0",
+    "run_handshake01.ps1": "b3fe96646c4f1601c5a8af5da08ed905ceab5cfbd47b6cb34d8905cd8dd41488"
+  },
+  "retained_namespace_inputs": {
+    "snapshot_lifecycle.py": "a80514aac6b1e75b9b872052852fa993a23cd5273b6bed4ffb4eef7404cb69dd",
+    "owned_generation_protocol.py": "78c395da77ff5a0dd660a27a7ea47d6e52061fc016937aa7046556f1fa026507",
+    "qualify_namespace.py": "ce4b149a4b5920c370c45d0ea31bf96ec65fb1ddf714cde63ae012d4298125d9",
+    "run_namespace01.ps1": "9bf9e632508df3e3d90a8a8d070b43d3efbcf5ccc58f155d2a169a5576f1fe4f"
+  },
+  "candidate_executed": false
+}

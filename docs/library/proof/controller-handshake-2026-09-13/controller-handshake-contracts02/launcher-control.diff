@@ -1,0 +1,29 @@
+--- proposal01/run_handshake01.ps1
++++ proposal02/run_handshake01.ps1
+@@ -1,8 +1,9 @@
+ $ErrorActionPreference='Stop'
+ $PSNativeCommandUseErrorActionPreference=$false
+-$taskProposal='E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\controller-handshake-contracts01'
++$taskProposal='E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\controller-handshake-contracts02'
+ $taskRun=Join-Path $taskProposal 'runs\hs01'
+ $taskAdmissionPath=Join-Path $taskProposal 'ROOT-ADMISSION.json'
++$taskAdmissionHash=(Get-FileHash -LiteralPath $taskAdmissionPath -Algorithm SHA256).Hash.ToLowerInvariant()
+ $taskAdmission=Get-Content -LiteralPath $taskAdmissionPath -Raw | ConvertFrom-Json
+ if($taskAdmission.root_reviewed -isnot [bool] -or $taskAdmission.root_reviewed -cne $true -or $taskAdmission.scope -cne 'controller-handshake-fake-port-8-only' -or $taskAdmission.label -cne 'hs01'){throw 'Exact root admission required'}
+ if(Test-Path -LiteralPath $taskRun){throw 'Fresh qualification label required'}
+@@ -21,6 +22,7 @@
+     if($taskAdmission.input_sha256.$taskName -cne $taskHash){throw 'Root admission input mismatch'}
+     $taskRecords += [ordered]@{name=$taskName;source=$taskSource;sha256=$taskHash}
+ }
++$taskRecords += [ordered]@{name='ROOT-ADMISSION.json';source=$taskAdmissionPath;sha256=$taskAdmissionHash}
+ $taskExpectedCases=Get-Content -LiteralPath (Join-Path $taskProposal 'EXPECTED-CASES.json') -Raw | ConvertFrom-Json
+ if($taskExpectedCases.schema -cne 'uoink.handshake-expected-cases.v1' -or $taskExpectedCases.count -ne 8 -or @($taskExpectedCases.ordered_cases).Count -ne 8){throw 'Expected case input refused'}
+ if(@($taskAdmission.expected_cases).Count -ne 8){throw 'Admission case count refused'}
+@@ -32,7 +34,6 @@
+     Copy-Item -LiteralPath $taskRecord.source -Destination (Join-Path $taskRun $taskRecord.name) -ErrorAction Stop
+     if((Get-FileHash -LiteralPath (Join-Path $taskRun $taskRecord.name) -Algorithm SHA256).Hash.ToLowerInvariant() -cne $taskRecord.sha256){throw 'Input copy mismatch'}
+ }
+-Copy-Item -LiteralPath $taskAdmissionPath -Destination (Join-Path $taskRun 'ROOT-ADMISSION.json') -ErrorAction Stop
+ Get-ChildItem Env: | Where-Object { $_.Name -match '(API_KEY|TOKEN|SECRET|PASSWORD|CREDENTIAL|BASE_URL)' -or $_.Name -match '^(ANTHROPIC|OPENAI|GEMINI|GOOGLE_API|GROK|XAI)_' } | ForEach-Object { Remove-Item -LiteralPath ('Env:' + $_.Name) }
+ $env:IG_FORBIDDEN_LIVE='C:\Users\hello\AppData\Local\Uoink\index.db'
+ $env:TORCH_DEVICE_BACKEND_AUTOLOAD='0'
