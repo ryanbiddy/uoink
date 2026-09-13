@@ -93,12 +93,12 @@ establish safe installation isolation, and verify/correct resulting findings.
 | 0–1 | Unicode search repair integrated at `41c0d1d`; package-08 installed checks reviewed at `49e2b31` | 137 focused passes in both roots and complete tree; original assertions/markers unchanged | Preserve foundation exceptions and positive Recall limit |
 | 2 | Option 3 authorized by Ryan; Stage 4 P2-7 remains FAIL (39/46, 6/11) | Keep 0.90 for autonomous filing and apply false; proposals are reviewable suggestions | No quality-rule decision pending |
 | 3 | Package-08 C22 and browser review complete at `49e2b31` | Setup/reinstall exit 0; C22 11 pass / 0 fail / 3 raw manual placeholders; four browser images match consent/charge/recovery state | Original AT6 exit disposition remains Ryan's |
-| 4 | Owner repair ff67b84 accepted; process proposal c1008e0b rejected at 6bf144d | Owner: 12 focused and 184 Phase 4 passes in each root. Process proposal: 11 worker cases pass but 10 Astra identity boundaries fail | Follow MIRROR-PROCESS-AUTHORITY-REPAIR02-BRIEF with Grok; review before real-process suites. Tree08 cause remains unproved |
+| 4 | Owner repair ff67b84 accepted; process proposals c1008e0b and a5e7ba0d held | Grok: 35 worker cases pass, two new boundaries fail and two controls pass. Astra's first correction has 39 synthetic passes; stable native discovery remains under repair | Follow MIRROR-AUTHORITY-ASTRA-REPAIR03-BRIEF in the completed Grok worktree; no real-process suites until review. Tree08 cause remains unproved |
 | 5 | Part A repaired; SDK union 267 passed in each root and corrected complete-tree case passes | BA-4/unary-clock failures close; dashboard 24,576-byte target remains missed | Preserve performance limit; Part B deferred |
 | 6 | Package-08 production publication and cited-range review complete at `49e2b31` | Exact export after 2.1001697 s protocol delay; first actual client export succeeds after separate 1.9874018 s delay | No speaker or player-seek credit; speakers blocked, no new fetch |
 | Security | NLTK wheel at 52d9f7d and installer binding at 07084fe; graph checker at 5e46f2f | Wheel 43/0/0 and build/signing/notices 51/0/0 in each root. Fixed wheel hash matches build constant. It is not installed. Raw scan remains 19 / 15; separating Lightning leaves 18 / 14 | Run combined full tree, build and qualify package 09. Runtime migration/model qualification retain Ryan gates |
 | Signing | Gemini review and repaired path integrated at 0b3629d | 48 focused passes; 77 proof payloads match Git. Real Inno direct callback refuses missing certificate and keeps a durable error. No successful signing credit | Full combined candidate tree after runtime work settles; actual certificate/service choice remains Ryan's |
-| Integration | Complete tree08 at 9dd0cfb remains failed; owner repair ff67b84 has focused verification | Tree08: 2,675 passed / 51 failed / 3 skipped across all 2,729 cases. Process proposal c1008e0b remains rejected; its failures are sealed at 6bf144d | Finish process-authority repair02, qualify combined source, then package09. Package08 held; website/marketing paused |
+| Integration | Complete tree08 at 9dd0cfb remains failed; future receipt instruments reviewed at e8b5d8e | Tree08: 2,675 passed / 51 failed / 3 skipped across all 2,729 cases. Corrected partition validator: 53 synthetic passes in agent and Astra runs; abnormal shutdown is refused | Finish process-authority repair03, qualify combined source, then package09. Package08 held; website/marketing paused |
 | Desktop incident | Isolation failed in package-07 attempt; corrected at `e10ba3a` | Ordinary Uoink and filesystem connectors launched; earlier live-index/5179 effects unknown. Owned job cleaned | No further override launch; only guarded Uoink dashboard observed for package 08 |
 
 Receipts and artifacts: `docs/library/proof/` (stage archives, S20 matrix, S21 incl. run at7, S22, AW,
@@ -190,9 +190,13 @@ is complete but is not this goal's completion. Current queue:
    retention claim and missing early probe drafts are explicit in Astra's
    verdict. Process proposal c1008e0b is rejected at 6bf144d: 11 worker cases
    pass, but 10 new Astra identity boundaries fail. No real mirror/process
-   suite ran against it. Dispatch Grok under
-   MIRROR-PROCESS-AUTHORITY-REPAIR02-BRIEF-2026-09-13.md; the retained proposal
-   and failed tests are its starting draft, not accepted product. Read
+   suite ran against it. Grok continuation a5e7ba0d has completed and is held
+   at e8b5d8e: its 35 synthetic cases pass independently, but two new review
+   boundaries fail and two controls pass. Read ASTRA-AUTHORITY-A5-REVIEW and
+   MIRROR-AUTHORITY-ASTRA-REPAIR03-BRIEF-2026-09-13.md. Astra's first correction
+   has 39 synthetic passes; native handle discovery/lifetime is still under
+   repair in the completed Grok worktree. No real-process suite has run there.
+   The retained proposal and failed tests remain unaccepted product. Read
    ASTRA-AUTHORITY-C1008-REVIEW-2026-09-13.md. Owner admission is accepted at ff67b84 after raw
    diff/three-way integration and 12 focused plus 184 Phase 4 passes in each
    root. Its 48-payload seal preserves all drafts and observations. Read
@@ -202,6 +206,12 @@ is complete but is not this goal's completion. Current queue:
    Tree07's interrupted evidence remains at 784fb73. Preserve all original tests,
    guards and failed measurements. Integrate a reviewed product repair, verify
    both roots, then run a fresh committed complete tree with the durable observer.
+   Future tree09 instruments are reviewed at e8b5d8e. Read
+   MIRROR-TREE09-OBSERVER-REVIEW-2026-09-13.md: the validator reconciles actual
+   pytest/session/verifier exits for both partitions and preserves multiple
+   failed phases for one case. Agent and Astra each record 53 synthetic passes;
+   two deliberate smoke failures stay failed/refused. All archived tree08 counts
+   remain unchanged. The three new seals total 201 payloads matching Git and disk.
    Rebind the unused package09 instruments to that new qualified source before
    following PACKAGE-09-INTEGRATION-BRIEF-2026-09-12.md. Package08 remains held;
    no new installed NLTK or signing credit exists.
@@ -3632,3 +3642,34 @@ no provider was invoked. 8d7cc1a records the repaired local web server starting
 after its prior endpoint refused connection. Six August records for other
 projects remain unconfirmed, with no owner/heartbeat. Their history was not
 rewritten, and no Uoink worker is active.
+
+### 2026-09-13 — process proposal held and partition receipts corrected
+
+Documentary integration e8b5d8e retains Grok a5e7ba0d's original 32/3 and final
+35-pass observations, Astra's independent 35 passes and two-pass/two-failure
+boundary review. A distinct ready.pid was registered and job-assigned without
+proved ownership; cancellation also released another caller's handle count.
+The first Astra correction passes all 39 cases. It remains unintegrated pending
+stable native parent/child authority and lifetime review. No real-process suite
+has run against that draft. Read the repair03 brief before continuing.
+
+One proposed review test was withdrawn before execution because it modeled PID
+reuse while a valid original Popen handle was retained. Its original bytes and
+correction are preserved. Never make Windows handle lifetime impossible merely
+to obtain a failing probe.
+
+The unused full-tree runner/sealer inherited two receipt bugs: counts could hide
+a late abnormal pytest exit, and JUnit's separate call/teardown failures could
+prevent recording a complete failed case. The corrected pure validator has 53
+passes in both agent and Astra runs. Actual inert smokes preserve a double
+failure and refuse a green-case run whose shutdown exits one. Tree08 was read,
+not rerun: all 2,729 cases retain 2,675 passed / 51 failed / three skipped.
+The 54 preliminary, 92 corrected-instrument and 55 A5-review payloads all match
+staged Git and disk. No product source changed in the checkout.
+
+Separate metadata preparation reduced the proposed runtime graph to zero
+missing targets across 144 pins and 282 active edges. It still fails on five
+WhisperX constraints, two known source-only wheel records and the local NLTK
+artifact's absence from public PyPI. The new 342-payload scratch capture is not
+an accepted runtime or installed artifact. Source/API review follows without
+models or binary downloads. Website and marketing remain paused.
