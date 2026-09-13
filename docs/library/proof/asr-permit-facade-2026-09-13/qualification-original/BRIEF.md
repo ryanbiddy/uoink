@@ -1,0 +1,11 @@
+# Six connected ASR cases — preparation, 2026-09-13
+
+Prepare one guarded run of the six frozen cases in `asr-permit-facade-proposal01/connection_cases.py`. Root must review the final source, launcher, bindings and admission before any execution. This preparation does not run the cases.
+
+Reuse the qualified ASR adapter instrument at `asr-adapter-combined-proof01/author-history209/asr-author03/adapter-preflight03`. Keep its durable global native-exit block unchanged. Copy the exact new adapter, resolver, lifecycle and case sources; replace only the historical test registration block with the six connected cases. Preserve the old runner and guard beside the derivative and record complete diffs.
+
+The new input set needs `enum`, `math` and `threading` loaded before import closure because the actual lifecycle uses them. Close the fixed source-read window after loading the five text inputs. Install the existing eleven metadata traps before compiling candidate source, with an additional `os.path.realpath` trap. Final validity must include the closed read window, all twelve trap identities, unchanged real resolver functions and approval, restored adapter globals and `_release`, exact ordered six IDs, raw counts and source hashes. These changes address the new source dependencies and tighten the instrument; they do not change case assertions.
+
+Use the existing native verifier Python with `-I -S -B`. Set the lexical forbidden-index binding before the outer launcher starts and again before child startup. Scrub provider secrets without printing them; force offline flags and disable backend autoload. Candidate code receives only exact reviewed in-memory modules and dummy ports. No file fixtures, processes, registry calls, native packages, model assets, network or installed-client work are permitted in the child.
+
+The old 58 cases remain historical evidence for the old interface. The planned six cases exercise the new permit/facade interface and make no claim about native worker execution, model loading or release readiness. Inner loops in two cases do not create additional case credit. A failure must be retained with the actual native and outer results; another run requires a documented repair and fresh label.

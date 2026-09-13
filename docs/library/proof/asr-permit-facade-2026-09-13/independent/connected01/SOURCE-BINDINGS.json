@@ -1,0 +1,44 @@
+{
+  "schema": "uoink.asr-permit-facade-preparation.v1",
+  "executions": 0,
+  "sources": [
+    {
+      "name": "asr_loading_adapter.py",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-permit-facade-proposal01\\asr_loading_adapter.py",
+      "sha256": "2b6cbbad24264423e520bac54b7c2fb4c40ae771e5c15b08381dac1d2228a63c",
+      "bytes": 12073
+    },
+    {
+      "name": "connection_cases.py",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-permit-facade-proposal01\\connection_cases.py",
+      "sha256": "0ef40eab642099f83ce35d2e70a0d0521d57ad2f7e8d467e940cb2600365630a",
+      "bytes": 12923
+    },
+    {
+      "name": "snapshot_lifecycle.py",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-worker-namespace-proposal01\\snapshot_lifecycle.py",
+      "sha256": "a80514aac6b1e75b9b872052852fa993a23cd5273b6bed4ffb4eef7404cb69dd",
+      "bytes": 22138
+    },
+    {
+      "name": "trusted_asr_resolver.py",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-trusted-manifest-resolver-proof02\\proposal\\trusted_asr_resolver.py",
+      "sha256": "16a5a1245f649a3eb04d077b661835503f08bef0ff8822dcb545176f0cc30833",
+      "bytes": 13373
+    }
+  ],
+  "instrument_sha256": "3c631f7f1b1aa67f08d9b563df641db9b7a52dc1dbdb9f221f7f75080797571a",
+  "launcher_sha256": "6fe947785355373152568560c4e484cc5511656c45868cd967c5ecc44079e872",
+  "historical_guard_sha256": "68eaeeaaa3d32d6c97102aae17e4f7490702a495b9e2cb72adf38aab438ff545",
+  "historical_runner_sha256": "3b944b1ef68db540c1c7bf360b9362aebc2b07a15efcaae7bcad8ec03c264015",
+  "expected_case_ids": [
+    "exact_lease_permit_and_usage_reach_owned_startup",
+    "retained_facade_refuses_after_context_close",
+    "lazy_segments_require_live_owned_lease",
+    "foreign_factory_refused_before_native_reservation",
+    "binding_or_start_failure_preserves_original_and_quarantine",
+    "unconfirmed_close_keeps_snapshot_quarantined"
+  ],
+  "historical_58_claimed_for_new_interface": false,
+  "native_exit_marked_block_unchanged": true
+}

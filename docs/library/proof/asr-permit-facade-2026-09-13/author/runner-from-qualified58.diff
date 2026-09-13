@@ -1,0 +1,105 @@
+--- historical/run_preflight03.ps1
++++ run_connected01.ps1
+@@ -1,32 +1,38 @@
+ $ErrorActionPreference='Stop'
+ $PSNativeCommandUseErrorActionPreference=$false
+ $taskBase='E:\AI\projects\uoink\checkouts\Yoink-library'
+-$taskProposal=Join-Path $taskBase '_scratch\asr-native-exit-scope-repair01\candidate'
+-$taskRun=Join-Path $taskProposal 'adapter-preflight03'
++$taskProposal=Join-Path $taskBase '_scratch\asr-permit-facade-qualification01'
++$taskRun=Join-Path $taskProposal 'connected01'
+ if(Test-Path -LiteralPath $taskRun){throw 'Fresh adapter qualification label required'}
+ $taskAdmission=Join-Path $taskProposal 'ROOT-ADMISSION.md'
+ if(-not (Test-Path -LiteralPath $taskAdmission -PathType Leaf)){throw 'Root exact-source admission record required before execution'}
+ $taskExpected=@{
+-    'asr_loading_adapter.py'='03294344c0806b98b6d861c17371c1038c76dc0b874b9f756bf034187e849900'
++    'asr_loading_adapter.py'='2b6cbbad24264423e520bac54b7c2fb4c40ae771e5c15b08381dac1d2228a63c'
++    'connection_cases.py'='0ef40eab642099f83ce35d2e70a0d0521d57ad2f7e8d467e940cb2600365630a'
++    'snapshot_lifecycle.py'='a80514aac6b1e75b9b872052852fa993a23cd5273b6bed4ffb4eef7404cb69dd'
+     'trusted_asr_resolver.py'='16a5a1245f649a3eb04d077b661835503f08bef0ff8822dcb545176f0cc30833'
+-    'qualify_adapter.py'='68eaeeaaa3d32d6c97102aae17e4f7490702a495b9e2cb72adf38aab438ff545'
++    'qualify_adapter.py'='3c631f7f1b1aa67f08d9b563df641db9b7a52dc1dbdb9f221f7f75080797571a'
+ }
++$taskExpectedCases=@(
++    'exact_lease_permit_and_usage_reach_owned_startup',
++    'retained_facade_refuses_after_context_close',
++    'lazy_segments_require_live_owned_lease',
++    'foreign_factory_refused_before_native_reservation',
++    'binding_or_start_failure_preserves_original_and_quarantine',
++    'unconfirmed_close_keeps_snapshot_quarantined'
++)
+ $taskFiles=@(
+     @('asr_loading_adapter.py',(Join-Path $taskProposal 'asr_loading_adapter.py')),
+-    @('trusted_asr_resolver.py',(Join-Path $taskBase '_scratch\asr-trusted-manifest-resolver-proposal01\trusted_asr_resolver.py')),
++    @('connection_cases.py',(Join-Path $taskProposal 'connection_cases.py')),
++    @('snapshot_lifecycle.py',(Join-Path $taskProposal 'snapshot_lifecycle.py')),
++    @('trusted_asr_resolver.py',(Join-Path $taskProposal 'trusted_asr_resolver.py')),
+     @('qualify_adapter.py',(Join-Path $taskProposal 'qualify_adapter.py')),
+     @('BRIEF.md',(Join-Path $taskProposal 'BRIEF.md')),
+-    @('PORT-CONTRACTS.md',(Join-Path $taskProposal 'PORT-CONTRACTS.md')),
+-    @('TEST-PLAN.md',(Join-Path $taskProposal 'TEST-PLAN.md')),
+-    @('REVIEW.md',(Join-Path $taskProposal 'REVIEW.md')),
+-    @('CALL-SITE-SPLICES.md',(Join-Path $taskProposal 'CALL-SITE-SPLICES.md')),
++    @('PROTOCOL.md',(Join-Path $taskProposal 'PROTOCOL.md')),
++    @('EXPECTED-CASES.json',(Join-Path $taskProposal 'EXPECTED-CASES.json')),
+     @('SOURCE-BINDINGS.json',(Join-Path $taskProposal 'SOURCE-BINDINGS.json')),
+-    @('WAVEFORM-STARTUP-CORRECTION.md',(Join-Path $taskProposal 'WAVEFORM-STARTUP-CORRECTION.md')),
+-    @('HARNESS-PREPARATION.md',(Join-Path $taskProposal 'HARNESS-PREPARATION.md')),
+-    @('QUALIFICATION03-PROTOCOL.md',(Join-Path $taskProposal 'QUALIFICATION03-PROTOCOL.md')),
+-    @('adapter-addition.patch.txt',(Join-Path $taskProposal 'adapter-addition.patch.txt')),
+-    @('run_preflight03.ps1',(Join-Path $taskProposal 'run_preflight03.ps1')),
+-    @('ROOT-ADMISSION.md',$taskAdmission)
++    @('run_connected01.ps1',(Join-Path $taskProposal 'run_connected01.ps1')),
++    @('ROOT-ADMISSION.md',(Join-Path $taskProposal 'ROOT-ADMISSION.md'))
+ )
+ $taskRecords=@()
+ New-Item -ItemType Directory -Path $taskRun -ErrorAction Stop | Out-Null
+@@ -41,10 +47,14 @@
+ Get-ChildItem Env: | Where-Object { $_.Name -match '(API_KEY|AUTH_TOKEN|ACCESS_TOKEN|BASE_URL|OAUTH_TOKEN)' -or $_.Name -match '^(ANTHROPIC|OPENAI|GEMINI|GOOGLE_API|GROK|XAI)_' } | ForEach-Object { Remove-Item -LiteralPath ('Env:' + $_.Name) }
+ $env:IG_FORBIDDEN_LIVE='C:\Users\hello\AppData\Local\Uoink\index.db'
+ $env:TORCH_DEVICE_BACKEND_AUTOLOAD='0'
++$env:HF_HUB_OFFLINE='1'
++$env:TRANSFORMERS_OFFLINE='1'
++$env:HF_DATASETS_OFFLINE='1'
++$env:PYANNOTE_METRICS_ENABLED='0'
+ $taskPython=Join-Path $taskBase '_scratch\ig-native\Scripts\python.exe'
+ $taskStdout=Join-Path $taskRun 'stdout.json'
+ $taskStderr=Join-Path $taskRun 'stderr.log'
+-[ordered]@{label='adapter-preflight03';inputs=$taskRecords;interpreter=$taskPython;startup_binding_set=$true;torch_backend_autoload_disabled=$true;arguments=@('-I','-S','-B','qualify_adapter.py');fake_ports_only=$true;actual_asset_fixtures=$false;real_approval_available=$false;planned_case_count=58} | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath (Join-Path $taskRun 'plan.json') -Encoding utf8
++[ordered]@{label='connected01';inputs=$taskRecords;interpreter=$taskPython;startup_binding_set=$true;torch_backend_autoload_disabled=$true;arguments=@('-I','-S','-B','qualify_adapter.py');fake_ports_only=$true;actual_asset_fixtures=$false;real_approval_available=$false;planned_case_count=6;expected_case_ids=$taskExpectedCases} | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath (Join-Path $taskRun 'plan.json') -Encoding utf8
+ # BEGIN EXACT NATIVE RECEIPT BLOCK
+ # Override any inherited native-error promotion at this invocation boundary.
+ $PSNativeCommandUseErrorActionPreference=$false
+@@ -73,21 +83,29 @@
+ $taskReceiptValid=$false
+ $taskReceiptError=$null
+ try{
++    if((Get-Item -LiteralPath $taskStdout).Length -gt 65536){throw 'Bounded result text exceeded'}
+     $taskResult=Get-Content -LiteralPath $taskStdout -Raw | ConvertFrom-Json
+     $taskPass=@($taskResult.cases | Where-Object { $_.passed -is [bool] -and $_.passed -ceq $true }).Count
+     $taskFail=@($taskResult.cases | Where-Object { $_.passed -is [bool] -and $_.passed -ceq $false }).Count
+     $taskUnique=@($taskResult.cases.name | Sort-Object -Unique).Count
++    $taskMembership=(@($taskResult.cases.name).Count -eq $taskExpectedCases.Count)
++    if($taskMembership){for($taskI=0;$taskI -lt $taskExpectedCases.Count;$taskI++){if($taskResult.cases[$taskI].name -cne $taskExpectedCases[$taskI]){$taskMembership=$false}}}
+     $taskCountExit=1
+     if($taskFail -eq 0){$taskCountExit=0}
+     $taskReceiptValid=(
++        $taskMembership -and $taskResult.skipped -eq 0 -and
++        $taskResult.content_reads_closed -ceq $true -and $taskResult.adapter_release_restored -ceq $true -and
++        $taskResult.ordered_membership_matches -ceq $true -and
++        $taskResult.offline_flags.HF_HUB_OFFLINE -ceq '1' -and $taskResult.offline_flags.TRANSFORMERS_OFFLINE -ceq '1' -and
++        $taskResult.offline_flags.HF_DATASETS_OFFLINE -ceq '1' -and $taskResult.offline_flags.PYANNOTE_METRICS_ENABLED -ceq '0' -and
+         $taskResult.schema -ceq 'uoink.inert-asr-adapter-qualification.v1' -and
+-        @($taskResult.cases).Count -eq 58 -and $taskUnique -eq 58 -and
+-        $taskPass+$taskFail -eq 58 -and $taskResult.passed -eq $taskPass -and $taskResult.failed -eq $taskFail -and
++        @($taskResult.cases).Count -eq 6 -and $taskUnique -eq 6 -and
++        $taskPass+$taskFail -eq 6 -and $taskResult.passed -eq $taskPass -and $taskResult.failed -eq $taskFail -and
+         $taskResult.qualification_exit -eq $taskNativeExit -and $taskNativeExit -eq $taskCountExit -and
+         $taskResult.startup_binding_asserted -ceq $true -and $taskResult.torch_backend_autoload_disabled_before_startup -ceq $true -and
+         $taskResult.real_resolver_approval_unchanged_none -ceq $true -and $taskResult.real_resolver_functions_unchanged -ceq $true -and
+         $taskResult.adapter_globals_restored -ceq $true -and $taskResult.guard_valid -ceq $true -and
+-        $taskResult.metadata_traps_installed -ceq $true -and $taskResult.metadata_trap_count -eq 11 -and
++        $taskResult.metadata_traps_installed -ceq $true -and $taskResult.metadata_trap_count -eq 12 -and
+         @($taskResult.metadata_trap_mismatches).Count -eq 0 -and
+         @($taskResult.guard_denials).Count -eq 0 -and @($taskResult.heavy_roots_loaded).Count -eq 0
+     )

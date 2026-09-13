@@ -1,0 +1,62 @@
+{
+  "schema": "uoink.inert-asr-adapter-qualification.v1",
+  "passed": 6,
+  "failed": 0,
+  "skipped": 0,
+  "elapsed_seconds": 0.000558,
+  "cases": [
+    {
+      "name": "exact_lease_permit_and_usage_reach_owned_startup",
+      "passed": true
+    },
+    {
+      "name": "retained_facade_refuses_after_context_close",
+      "passed": true
+    },
+    {
+      "name": "lazy_segments_require_live_owned_lease",
+      "passed": true
+    },
+    {
+      "name": "foreign_factory_refused_before_native_reservation",
+      "passed": true
+    },
+    {
+      "name": "binding_or_start_failure_preserves_original_and_quarantine",
+      "passed": true
+    },
+    {
+      "name": "unconfirmed_close_keeps_snapshot_quarantined",
+      "passed": true
+    }
+  ],
+  "input_sha256": {
+    "asr_loading_adapter.py": "2b6cbbad24264423e520bac54b7c2fb4c40ae771e5c15b08381dac1d2228a63c",
+    "trusted_asr_resolver.py": "16a5a1245f649a3eb04d077b661835503f08bef0ff8822dcb545176f0cc30833",
+    "snapshot_lifecycle.py": "a80514aac6b1e75b9b872052852fa993a23cd5273b6bed4ffb4eef7404cb69dd",
+    "connection_cases.py": "0ef40eab642099f83ce35d2e70a0d0521d57ad2f7e8d467e940cb2600365630a",
+    "qualify_adapter.py": "3c631f7f1b1aa67f08d9b563df641db9b7a52dc1dbdb9f221f7f75080797571a"
+  },
+  "guard_denials": [],
+  "heavy_roots_loaded": [],
+  "real_resolver_approval_unchanged_none": true,
+  "real_resolver_functions_unchanged": true,
+  "adapter_globals_restored": true,
+  "guard_valid": true,
+  "metadata_traps_installed": true,
+  "metadata_trap_count": 12,
+  "metadata_trap_mismatches": [],
+  "content_reads_closed": true,
+  "adapter_release_restored": true,
+  "ordered_membership_matches": true,
+  "offline_flags": {
+    "HF_HUB_OFFLINE": "1",
+    "TRANSFORMERS_OFFLINE": "1",
+    "HF_DATASETS_OFFLINE": "1",
+    "PYANNOTE_METRICS_ENABLED": "0"
+  },
+  "scope": "Six connected cases with actual pure-Python lifecycle and dummy kernel; no assets or native worker",
+  "startup_binding_asserted": true,
+  "torch_backend_autoload_disabled_before_startup": true,
+  "qualification_exit": 0
+}

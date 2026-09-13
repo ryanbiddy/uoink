@@ -1,0 +1,33 @@
+{
+  "preserved_files": [
+    {
+      "copy": "original58/asr_loading_adapter.py",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-production-adapter-proposal01\\asr_loading_adapter.py",
+      "bytes": 10400,
+      "sha256": "03294344c0806b98b6d861c17371c1038c76dc0b874b9f756bf034187e849900"
+    },
+    {
+      "copy": "original58/qualify_adapter.py",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-adapter-combined-proof01\\author-history209\\asr-author03\\adapter-preflight03\\qualify_adapter.py",
+      "bytes": 29228,
+      "sha256": "68eaeeaaa3d32d6c97102aae17e4f7490702a495b9e2cb72adf38aab438ff545"
+    },
+    {
+      "copy": "original58/RESULTS.json",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-adapter-combined-proof01\\RESULTS.json",
+      "bytes": 3300,
+      "sha256": "3538efcad1a7dc69ac9873357502312f2b820f63c4447f1a9fc416ff49765635"
+    },
+    {
+      "copy": "original58/COMBINED-SHA256.json",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-adapter-combined-proof01\\SHA256.json",
+      "bytes": 50949,
+      "sha256": "0e75c738cdf7725d49730db08043ffee1d0882e6658a49e05583bef9b9bf60e5"
+    }
+  ],
+  "qualified_assertion_bodies_match_original": true,
+  "original_distinct_case_count": 58,
+  "decorated_function_definitions_compared": 28,
+  "new_candidate_tested": false,
+  "new_adapter_sha256": "73a0100e36a4ec8e4f75f8dd02065ecc79d1312ebad4ff5798edce4734a9f24a"
+}
