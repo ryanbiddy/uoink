@@ -1,0 +1,19 @@
+{
+  "source": "56370e96f58e4857ab5643864b64b82c0c72d7ca",
+  "original_payloads_unchanged": 342,
+  "retrievals_verified": 9,
+  "exact_metadata_bindings_verified": 141,
+  "agent_exit": 1,
+  "astra_exit": 1,
+  "results_equal": true,
+  "selected_versions": 144,
+  "active_edges": 282,
+  "missing_targets": 0,
+  "conflicts": 5,
+  "wheel_failures": 2,
+  "incomplete_evidence": 1,
+  "result": "FAIL",
+  "withdrawn_preflight_checker_invoked": false,
+  "release_ready": false,
+  "product_or_model_execution": false
+}

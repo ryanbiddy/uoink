@@ -1,0 +1,19 @@
+[
+  {
+    "package": "antlr4-python3-runtime",
+    "version": "4.9.3",
+    "error": "No wheel distributions found for antlr4-python3-runtime==4.9.3 in release files",
+    "status": "NO_WHEELS"
+  },
+  {
+    "package": "nltk",
+    "version": "3.10.3+uoink.pathsec1",
+    "error": "Selected version not in retained PyPI record; no implicit refetch or local-artifact substitution"
+  },
+  {
+    "package": "proxy-tools",
+    "version": "0.1.0",
+    "error": "No wheel distributions found for proxy-tools==0.1.0 in release files",
+    "status": "NO_WHEELS"
+  }
+]

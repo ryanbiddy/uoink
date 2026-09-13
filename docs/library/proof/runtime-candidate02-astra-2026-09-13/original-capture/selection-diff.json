@@ -1,0 +1,57 @@
+{
+  "changed": {
+    "huggingface-hub": {
+      "before": "0.36.2",
+      "after": "1.31.0"
+    },
+    "tokenizers": {
+      "before": "0.22.2",
+      "after": "0.23.2"
+    },
+    "torch": {
+      "before": "2.8.0",
+      "after": "2.13.0"
+    },
+    "torchaudio": {
+      "before": "2.8.0",
+      "after": "2.11.0"
+    },
+    "torchcodec": {
+      "before": "0.7.0",
+      "after": "0.16.0"
+    },
+    "torchvision": {
+      "before": "0.23.0",
+      "after": "0.28.0"
+    },
+    "transformers": {
+      "before": "4.57.6",
+      "after": "5.17.0"
+    },
+    "hf-xet": {
+      "before": null,
+      "after": "1.6.0"
+    },
+    "typer": {
+      "before": null,
+      "after": "0.27.2"
+    },
+    "annotated-doc": {
+      "before": null,
+      "after": "0.0.5"
+    },
+    "shellingham": {
+      "before": null,
+      "after": "1.5.4"
+    }
+  },
+  "removed": [],
+  "extras": {
+    "fsspec": [
+      "http"
+    ],
+    "pyjwt": [
+      "crypto"
+    ]
+  }
+}
