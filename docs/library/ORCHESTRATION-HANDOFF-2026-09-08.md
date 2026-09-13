@@ -108,6 +108,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | ASR orchestration | Fake-port adapter qualified at a3e02f4 | Author and Astra each 58 passed / 0 failed with exact cases and 11 final traps intact. All 260 proof payloads match Git/disk; original null exit remains failed | Implement Windows snapshot lifetime and the owned operation worker. No real model, package or installed clearance |
 | Orchestration council | Gemini review integrated at cf5614d | All three groups accepted for their limited scope, with Astra's cleanup/exit/ownership corrections. Eight source/contract files match both checkouts and original seals; all 27 new proof payloads match Git/disk | Continue concrete runtime implementations. This review grants no native, installed or market acceptance |
 | Component council | Gemini98b5e1a3 integrated at 488a7fd | CPU/factory, lifecycle and owned WhisperX accepted for tested scope, with Astra's three wording corrections. Seventeen current bindings checked; all 99 proof payloads match Git/disk | Qualify the connected Windows worker and final dependency set. No runtime, installed or market acceptance |
+| Windows namespace | Protocol and pipe contracts integrated at 9c40271 | Author and Astra each pass the same 54 generated-memory cases; all 65 proof payloads match Git/disk and preserve 87 logical files | Complete the generated-only real Windows child observation. No native model or release acceptance |
 | Integration | Reliability consent/readiness/settings repair integrated at e8d058f after tree09 | Each root passes 53 focused cases plus 13 subtests; all guards and exact membership valid. Tree09 at 56d9d4c remains 2,796 passed / 1 failed / 3 skipped across 2,800 cases, plus 13 subtests; it predates this repair | Continue VAD/plain-state and ASR manifest proposals, then a new committed complete tree when source settles. Package08 and website/marketing remain held. No current-source package or installation credit |
 | Desktop incident | Isolation failed in package-07 attempt; corrected at `e10ba3a` | Ordinary Uoink and filesystem connectors launched; earlier live-index/5179 effects unknown. Owned job cleaned | No further override launch; only guarded Uoink dashboard observed for package 08 |
 
@@ -259,16 +260,18 @@ suite was named or run for that review. Its verified-inputs=12 event is a
 reference counter without membership; seventeen current bindings were checked
 separately and must not be called the original preflight manifest.
 
-Next integrate the Windows namespace/protocol fake-API evidence: author and
-Astra each pass the same 54 cases; both actual outer exits are zero, guards
-valid, nine inputs unchanged. The prepared combined proof awaits root review.
-Then qualify the connected generated-only Windows child, inherited pipe,
+The Windows namespace/protocol fake-API evidence is integrated at 9c40271.
+Read ASTRA-WINDOWS-NAMESPACE-VERDICT-2026-09-13.md. Author and Astra each pass
+the same 54 cases; both actual outer exits are zero, guards valid and nine
+inputs unchanged. All 65 proof payloads match Git/disk. Next qualify the
+connected generated-only Windows child, inherited pipe,
 child-held file guard and actual process/job shutdown. No model is involved.
 Candidate03 graph qualification01 remains FAIL: 51 passed / 11 failed,
 25 guard denials for generated package@version JSON metadata probes. No valid
-subset credit. Preserve the first run; review the narrow guard repair and
-fresh qualification02 before invocation. The exact local NLTK METADATA reader
-is prepared for separate review. Neither the current 144-pin graph nor native
+subset credit. The narrow guard repair and fresh qualification02 were admitted
+after root source review; the worker reports 62/0 and valid guards. The separately
+admitted exact NLTK metadata reader reports PASS. Verify both raw records, then
+qualify the literal third local-wheel record. Neither the current 144-pin graph nor native
 models have run. Preserve all failures and keep model authority closed.
 
 The authorized backup push of 01e22fb is waiting at Git's account selector;
@@ -4830,3 +4833,28 @@ qualification02 are prepared. Local NLTK METADATA extraction is a separate
 bounded step; neither it nor the current144-pin graph has run. Git backup
 session35629 still waits at account selection (df4678, no output), with no
 duplicate push. Production remains e8d058f; release/web/marketing stay held.
+
+### 2026-09-13 - Windows namespace contracts sealed and integrated
+
+Integration9c40271 accepts the two54-case fake-API runs within their tested
+scope. Documentary builderb0529b and verifier289171 both exit0 without running
+tests. Root index verificationa34359 checks all65 payloads/509620 bytes and
+the unchanged seal34b4c1d9252c02f65d2756adf35c6b3484738939d717a973bb5230391868f1b0.
+The outer manifest is renamed SHA256.json on repository copy; no bytes change.
+Both actual test tool objects and the original37-payload preparation remain
+in the content-addressed proof. The root comparisonc8b2e4 had no separately
+saved raw object; the verdict states that limit.
+
+Native dummy preparation uses only a fresh generated text file, one fixed
+stdlib child and the existing Python3.14/ctypes/System32 support. Peer review
+found missing get_last_error bookkeeping permission and a cleanup-budget
+problem; both were repaired before execution, including remaining-time wait
+caps. Root and peer are reviewing the exact outer launcher; no native run has
+occurred. This test will observe child-only file protection after the parent's
+original handle closes, followed by actual child exit and empty-job evidence.
+
+Root admitted graph qualification02 and exact NLTK METADATA read01 after the
+final source/launcher review. Worker reports62/0 and metadata PASS; raw review
+and integration are next. The failed51/11 qualification01 stays failed. The
+144-pin graph and real model gates remain open. Production remains e8d058f;
+website and marketing stay paused until council and Astra accept the release.
