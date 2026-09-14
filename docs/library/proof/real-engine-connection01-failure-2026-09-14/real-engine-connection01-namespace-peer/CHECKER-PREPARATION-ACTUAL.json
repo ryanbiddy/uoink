@@ -1,0 +1,7 @@
+{
+  "chunk_id": "83a632",
+  "wall_time_seconds": 0.2253694,
+  "exit_code": 0,
+  "original_token_count": 57,
+  "output": "{\r\n  \"source_preparation\": true,\r\n  \"helper_origin\": \"_scratch/protected-engine-ownership-instrument-peer01/check_source02.ps1\",\r\n  \"new_passive_script\": \"fe971c621cff005843c9ed5f1bc065a0d3f4369fc0a632afd331d2f4791d3044\"\r\n}\r\n"
+}

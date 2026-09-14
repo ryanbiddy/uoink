@@ -1,0 +1,7 @@
+{
+  "chunk_id": "c52eb7",
+  "wall_time_seconds": 0.2027058,
+  "exit_code": 0,
+  "original_token_count": 61,
+  "output": "{\"proof\":\"docs/library/proof/real-engine-connection-plan-2026-09-14\",\"verified_existing_source_texts\":23,\"source_bytes\":392766,\"payloads\":26,\"bytes\":337326,\"manifest_sha256\":\"59bfc25524cb76ddb42f117c2cffed590e1023462075675bbc754c56b5e8a11e\"}\n"
+}

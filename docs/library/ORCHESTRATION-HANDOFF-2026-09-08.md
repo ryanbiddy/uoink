@@ -121,7 +121,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | Worker runtime owner and bootstrap | Connected fake33 at 3661608; generated native cancellation at 3b8f9e0 | Both fake copies 33/0/0. Native a9321b/exit 0, root dd7190 and peer 4984ac agree on 32 unchanged pairs, valid guards, one segment, closed owner, child/contender exit 0 with empty jobs, and four journal frames. All 127 native proof payloads match Git/disk | Interrupted-owner retirement direction is committed at 77dc339. Real inference, protected loader/PCM/filter routes, crash/restart and release remain open |
 | Interrupted owned-worker retirement | Native02 accepted at99ce3c9; Native01 remains FAILED at7f142e8 | Actual9753fb returns outer/controller0; root4b342d and peerf633ad agree on10 write observations,15 retirement events, primaryexit1/job0 and5 journal frames. All160 native/integration payloads match Git/disk. Fake30 atc8e7a44 remains30/0/0 plus62 per root | Do not repeat native02. The subsequent constructor source review FAILED; bounded ownership repair and caller work continue without production or release authority |
 | Protected ASR constructor | Gemini e6133b1f source review FAILED at22949dc; 13 proposed tests unexecuted | Original ownership, namespace, fallback, fixture and provenance failures remain preserved. All42 documentary payloads match Git/disk at4faa90; the smaller generated repair is recorded below | Implement authenticated real namespace and fixed constructor binding; real constructor/media/runtime remain closed |
-| Generated engine ownership | Qualified at9e3a77d: both scoped fake39 copies pass39/0/0; original33 preserved | Author09d91a and confirmationf5c18c return0. Root0c050f and peeraa242c verify identical full cases/38 hashes, ten guards, unchanged40 inputs/one admission and47 outputs each. All347 payloads match Git/disk; no separate subtest count | Follow REAL-ENGINE-CONNECTION-BRIEF-2026-09-14.md for authenticated five-file namespace and fixed constructors. Its26 planning/transport payloads match Git/disk; no real model or production credit |
+| Generated engine ownership | Qualified at9e3a77d: both scoped fake39 copies pass39/0/0; original33 preserved | Author09d91a and confirmationf5c18c return0. Root0c050f and peeraa242c verify identical full cases/38 hashes, ten guards, unchanged40 inputs/one admission and47 outputs each. All347 payloads match Git/disk; no separate subtest count | Connection01 source review failed after delivery55e4a9/0; its15 tests remain unexecuted. All94 failure/review payloads match Git/disk. Follow REAL-STARTUP-AUTHORITY-REPAIR-BRIEF-2026-09-14.md before child namespace/constructor repair |
 | Reliability request/stream caller | Both scoped fake11 copies pass11/0/0 plus15 subtests | Author121f97 and confirmationff51d7 return0. Roota05d87 and peer88b1f3 verify identical cases/nine hashes, ten guards, unchanged13 inputs/three controls and21 outputs each | Production unchanged. Resolve actual ticket issuance, CPU/int8 profile binding and two prospective legacy test contracts before migration; continue constructor and completion-info work |
 | Completion language metadata | Both scoped fake59 copies pass59/0/0 plus29 subtests; original46 preserved | Author577e68 and confirmation8fd760 return0. Root993295 and peera39b40 verify identical full cases/five hashes, ten guards, unchanged nine inputs/three controls and17 outputs each | Connect authenticated backend completion and controller registry, then migrate WhisperX caller. Engine fake39 is qualified below; real/runtime/production gates remain closed |
 | Release notes | Current progress and remaining gates committed at 376eb47 | All seven proof payloads match Git/disk; 57 table lines and historical package/review-kit sections remain unchanged. D1/D2 completion and generated cancellation/recovery are explicit | Continue runtime qualification. No production source, package, installation, public draft or website changed |
@@ -290,12 +290,17 @@ Its frozen plan140c4db6 and23-source map89caa88f are preserved in
 proof/real-engine-connection-plan-2026-09-14. Rootc52eb7 checks all392,766 input
 bytes; index5ec770 verifies26 documentary payloads, seal59bfc255. This supplies
 no source implementation result. Control Room run56af690a-060b-453d-bb64-d9621a5553c9
-is active from committed brief969ac9b, worker433ea884-2ada-4049-8a0f-b9891a8e9443,
-Gemini3.8-flash-high/high through the existing Antigravity subscription. Worktree:
-C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/56af690a-060/gemini.
-Dispatchc4a98c yielded session19744; polle41f55 remains running. Preserve actual
-completion and review its diff before any qualification. No Python/tests/model/
-native access is authorized for this worker. No source result is accepted yet.
+completed with55e4a9/0 at11:27:25UTC; session19744 is closed. Its25-file delivery
+fails root and independent source reviews. Read
+ASTRA-REAL-ENGINE-CONNECTION01-FAILURE-2026-09-14.md. All15 proposed tests remain
+unexecuted. Namespace trust, begin ordering, retained custody, fixed factory/VAD
+links and constructor/test setup require repair. Source provenance checks pass;
+they do not change that verdict. Archive951379 and index9716d4 bind94 payloads,
+seal c06462bc. Some provider commands are shortened previews, so complete command
+coverage is unverified. Preserve both failed constructor proposals.
+Next follow REAL-STARTUP-AUTHORITY-REPAIR-BRIEF-2026-09-14.md: retain controller
+manifest/admission/profile/permit authority before the child namespace and fixed
+constructor work. This smaller unit must keep absent real authority closed.
 Keep these source tasks separate from real PCM/filter and D3/D4 qualification.
 The frozen broader plan is archived in30 payloads under
 proof/runtime-next-source-plan-2026-09-14, index8ef211; no implementation pass is
@@ -6760,3 +6765,29 @@ need a separate verified backup. Raw tool objects are retained under _scratch.
 The Blockers audit wording now distinguishes the historical19-entry/15-issue
 baseline from the later proposed one-entry/one-group metadata. This is a scope
 correction from existing records, not a fresh scan or runtime security acceptance.
+
+### 2026-09-14 — Second constructor delivery rejected before execution
+
+Run56af690a completed with55e4a9/0. The frozen25 files total301,499 bytes.
+Root's full engine/test and contract review plus namespace a0676993 and owner
+f09c4824 reject the source. The fifteen proposed tests remain unexecuted, with
+undefined imports, invalid binding setup and direct private VAD seeding among
+their defects. No accepted test changed. Read the one-page failure verdict and
+REAL-STARTUP-AUTHORITY-REPAIR-BRIEF-2026-09-14.md before further implementation.
+
+Channel authentication alone does not establish the supplied key's provenance.
+The next repair starts with retained controller approval/admission/profile and
+live permit identity. Keep that permit local. Actual factory returns the VAD;
+its owner wrapper is internal. Captured B3 options require26 explicit fields.
+Retain a returned pipeline before any setter or liveness check. Do not hide a
+missing production import or broken fixture behind a permissive loader.
+
+Archive951379 freezes94 payloads/1,412,386 bytes, seal
+c06462bce30f654edb0f81295f4a7d9d2a14892cadf3c60f22072b8ff83d2df5.
+Raw diff/apply365451 succeeds (patch1,493,318 bytes, SHA256
+dbd4ba7f4528558c430d0b1ace85d703ccda68f6bc86f7c90c3e369b066a2e85).
+All93 transport differences were proven newline-only before exact restoration.
+Index9716d4 verifies all94 payloads in Git/disk. Original reviews, provider
+records, shortened command previews and truncated outputs remain preserved.
+Complete provider command coverage is unverified. No subject rerun occurred.
+Production remains71d3e70; no package rebuild or market clearance follows.

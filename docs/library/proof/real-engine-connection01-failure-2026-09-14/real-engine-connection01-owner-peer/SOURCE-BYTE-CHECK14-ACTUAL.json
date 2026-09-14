@@ -1,0 +1,7 @@
+{
+  "chunk_id": "5509b4",
+  "wall_time_seconds": 0.4218409,
+  "exit_code": 0,
+  "original_token_count": 46,
+  "output": "{\r\n  \"fixed_text_files\": 25,\r\n  \"full_deltas\": 4,\r\n  \"forward_reverse\": true,\r\n  \"repair02_originals_matched\": true,\r\n  \"subject_executed\": false,\r\n  \"source_acceptance\": false\r\n}\r\n"
+}

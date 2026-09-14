@@ -1,0 +1,192 @@
+{
+  "scope": "Documented Git newline transport restoration; no subject rerun",
+  "proof": "docs/library/proof/real-engine-connection-plan-2026-09-14",
+  "payloads": 26,
+  "bytes": 337326,
+  "manifest_sha256": "59bfc25524cb76ddb42f117c2cffed590e1023462075675bbc754c56b5e8a11e",
+  "restored": [
+    {
+      "path": ".gitattributes",
+      "before_bytes": 9,
+      "before_sha256": "8b9c3028d6467ff3be7c793141927841d70f47f52d0590677438f488ca154992",
+      "after_bytes": 8,
+      "after_sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+    },
+    {
+      "path": "contracts/REAL-ENGINE-CONNECTION-BRIEF-2026-09-14.md",
+      "before_bytes": 4357,
+      "before_sha256": "ed3e8ca3a9020fc0cc5429ac909320e89938f48e5eb390b49c0b52c7f3af7937",
+      "after_bytes": 4293,
+      "after_sha256": "fca0f5d69f150e196a5d3f7884737eb2c90b016f4fa81cc7f3068ac7e8c1a5b2"
+    },
+    {
+      "path": "plan/ADOPTION-ACTUAL.json",
+      "before_bytes": 15071,
+      "before_sha256": "1c004a38f03c3752f92df8b2214ef0e5094ef10e4cb35fc86edb56efffc27f17",
+      "after_bytes": 15064,
+      "after_sha256": "ce3284661199909381ea16fda7bbae19d32e07a0483a216e28c330fa1e978cb9"
+    },
+    {
+      "path": "plan/BRIDGE-ACTUAL.json",
+      "before_bytes": 18209,
+      "before_sha256": "c7b993f5e00dd861a30fa074b3fe72cee7afb7850e7f33ab4364a6eaa6b59861",
+      "after_bytes": 18202,
+      "after_sha256": "acd1d49a9d565662b090112fa7ce6ae75ce89258b57fe74451e80d8f36bcb2f6"
+    },
+    {
+      "path": "plan/BRIEF.md",
+      "before_bytes": 7763,
+      "before_sha256": "50b9b59b487470e91c63c2b7d92521e142e6f809c9bae3f4377e4d7d902edf6b",
+      "after_bytes": 7744,
+      "after_sha256": "140c4db6c85f7f606533324fa1f3b7d4f8e9922ba6b2c8189c380cd8e8086558"
+    },
+    {
+      "path": "plan/COMPANION-CONSTRUCTOR-ACTUAL.json",
+      "before_bytes": 10744,
+      "before_sha256": "dea43788ccfbe6447cea32dc8627c26b1b4c8cd6f04e8a9dd952bc375c6aa2ad",
+      "after_bytes": 10737,
+      "after_sha256": "b96f5f821fb7733a4773161603f3a2315652fe30926dcd3860aec2ffd68ed4e6"
+    },
+    {
+      "path": "plan/CONTRACT-AND-CHILD-VIEW-ACTUAL.json",
+      "before_bytes": 15004,
+      "before_sha256": "7886238d46adfce5fd65a5d06a1261da972b7d159bff07bad30ab4b79849b59d",
+      "after_bytes": 14997,
+      "after_sha256": "b246ab9cbd51d69add758d09c5bd144e7dd92b257c0cb1e0b8552351bf3e8ae5"
+    },
+    {
+      "path": "plan/DRAFT-FINAL-READ-ACTUAL.json",
+      "before_bytes": 8003,
+      "before_sha256": "91c77c71f7ff318af24d8c2999bc73eae93a9c1edea84a8f53527b70657dfb34",
+      "after_bytes": 7996,
+      "after_sha256": "f98850d7023172532a9607c53ad9dc58e7d49548799d24db09c3e0e680de3169"
+    },
+    {
+      "path": "plan/FREEZE-ACTUAL.json",
+      "before_bytes": 1472,
+      "before_sha256": "a9a81c39e499c890d381aae31f7ae00303ef064275e466da6d6cf547a44c80ca",
+      "after_bytes": 1465,
+      "after_sha256": "97ffbd18b826c35dea39ba95183702ff83dcd8a4f76ce08485de24da1fed3a4d"
+    },
+    {
+      "path": "plan/INPUT-BINDING-ACTUAL.json",
+      "before_bytes": 437,
+      "before_sha256": "6fd7750d79597294dc2764ed20028d6a66073341ee32b5c0fce9242f62710d18",
+      "after_bytes": 430,
+      "after_sha256": "38214a1be4a761c65e135615cef8a7912d8be05a211ca465a898ce34fc4d7733"
+    },
+    {
+      "path": "plan/NAMESPACE-RESOLVER-ACTUAL.json",
+      "before_bytes": 26292,
+      "before_sha256": "9e2842510913cb73ee4f9db1e1ca4b0a408fb4b3a0b4cc82478d2be22e227bf9",
+      "after_bytes": 26285,
+      "after_sha256": "3f69dfcbe9352dd39ef9233cd770e6d2d6e159152d5332a275545bf39e895184"
+    },
+    {
+      "path": "plan/ORIGINAL-PLAN-VIEW-ACTUAL.json",
+      "before_bytes": 30490,
+      "before_sha256": "d637cfb6ac086ccae4a689a2a9708155061abeedb9f831ba294cf677bea8e85c",
+      "after_bytes": 30483,
+      "after_sha256": "17ce3ef98ec6ee037eed80b3d4d547aa5eaa9134109d992429d1a288e1b4d4b9"
+    },
+    {
+      "path": "plan/OWNED-ASR-ACTUAL.json",
+      "before_bytes": 24943,
+      "before_sha256": "cc0e91f439ea61c89c45624c99ac0a2015bcfbd2de8eb637ea4385234581d6c4",
+      "after_bytes": 24936,
+      "after_sha256": "17d0e70e068a64daee16a7e5bf346b8f737641d2568318fa705600fa7947327d"
+    },
+    {
+      "path": "plan/OWNER-REVIEW-ACTUAL.json",
+      "before_bytes": 18321,
+      "before_sha256": "afe0ba1945d42686b88c78bf42a66b1aa233fe9fa53debed77df8e02f16aab48",
+      "after_bytes": 18314,
+      "after_sha256": "651418a46180bc8722898577c8ba1610d92bbfa2efe5e73a6cb6c116724aa8c1"
+    },
+    {
+      "path": "plan/PASSIVE-VIEW-NOTE.md",
+      "before_bytes": 1489,
+      "before_sha256": "69fd281c814b88691d90486dbbf951efa36da51a403a8d1c1c81850a27d21c60",
+      "after_bytes": 1482,
+      "after_sha256": "dc7ee0a4c04510cda896b2543313263a59aebaf1f163478b77826eb58b46c527"
+    },
+    {
+      "path": "plan/PROFILE-AND-INPUTS-ACTUAL.json",
+      "before_bytes": 16622,
+      "before_sha256": "ca7862af1bf806e6fe268cd16afece7f844bd71aa39875851674907b3546bf8e",
+      "after_bytes": 16615,
+      "after_sha256": "a031baaedd0a94f1efd2623cf59f628bcc8b88e1eb645925e53a19eb1daf9814"
+    },
+    {
+      "path": "plan/QUEUE-INVENTORY-ACTUAL.json",
+      "before_bytes": 4117,
+      "before_sha256": "2c2d1ba6e6f4eb130a8528eb53247504f5366bf9248a0d91ec60b7870b23891d",
+      "after_bytes": 4110,
+      "after_sha256": "e5af44d755ba71c3eb0405ef4863ebf7ba1472994c8a16631b255d391f4947b6"
+    },
+    {
+      "path": "plan/QUEUE-VIEW-ACTUAL.json",
+      "before_bytes": 19628,
+      "before_sha256": "f20f3fc3ad77ed8e55524fcfb052e4fd576aa793a25b2c4909112b7bf247309f",
+      "after_bytes": 19621,
+      "after_sha256": "c726d5e26d6dca455662005aef6326a34cc8365081a026e2f70df1dcbf2f393e"
+    },
+    {
+      "path": "root/archive-real-engine-plan01.mjs",
+      "before_bytes": 2901,
+      "before_sha256": "4cef174d644af4d170a71097782beb325317cdff4742b77da640279cf6a315db",
+      "after_bytes": 2890,
+      "after_sha256": "d58003d151a7b38aa2e6a28a3724aeaaaf1bb011e013998a643b66e54b38dc64"
+    },
+    {
+      "path": "root/ENGINE-FAKE39-ARCHIVE-ACTUAL.json",
+      "before_bytes": 327,
+      "before_sha256": "1ec3773506b288b2f389f3a2518cae46a9abb6365b4938ea96e4453b81fe1ed3",
+      "after_bytes": 320,
+      "after_sha256": "949c438562212d11d9ff2bff79b2f56d9d85fc787f8a74b35764cda337a8a337"
+    },
+    {
+      "path": "root/ENGINE-FAKE39-COMMIT-ACTUAL.json",
+      "before_bytes": 1903,
+      "before_sha256": "aa7f47a85a0f656b9de602b0a880b3baf263e41b1b0f8a09e86ea970b5c78800",
+      "after_bytes": 1896,
+      "after_sha256": "1861ebfca48f1e9516d4a7a7131f34d3c5f99067affbf27e2154c1e83d586a49"
+    },
+    {
+      "path": "root/ENGINE-FAKE39-INDEX-FINAL-ACTUAL.json",
+      "before_bytes": 358,
+      "before_sha256": "1c3af7a7e372332989ca1ec3b387590c057017db9b2324566cb274bf6803d93e",
+      "after_bytes": 351,
+      "after_sha256": "87db97c9efbc84389c260c5056d7ed0b33cc05ec46618b9268057ad0096b0351"
+    },
+    {
+      "path": "root/ENGINE-FAKE39-INTEGRATION-ACTUAL.json",
+      "before_bytes": 371,
+      "before_sha256": "daba9c3a9d0bfb7831b6210f80c5d68e44d6f40f9e017ffbfaafbcaaf1003b0f",
+      "after_bytes": 364,
+      "after_sha256": "23c4078b4610c2bb7283add7445776203fce107b7ad823f9f10308fe92313fd4"
+    },
+    {
+      "path": "root/ENGINE-FAKE39-TRANSPORT-INDEX-ACTUAL.json",
+      "before_bytes": 342,
+      "before_sha256": "eb0521d962e2ea119219ca9bb6d916d37fa2e22fe3da300a5e81b998e74a523e",
+      "after_bytes": 335,
+      "after_sha256": "e67d12f114123d20a95b26b41e59ace4f914242f1c7f2fd7e200ac47081bebda"
+    },
+    {
+      "path": "root/ENGINE-FAKE39-TRANSPORT-RESULT.json",
+      "before_bytes": 102752,
+      "before_sha256": "043d19d2418433413b4cdb43c8113a8d6f16d2b2d0a7f46e3115c788625715b3",
+      "after_bytes": 100481,
+      "after_sha256": "80ae12d19657e3e05527cc40aeee2a241915eb425a6cc48ceed7192b004af91c"
+    },
+    {
+      "path": "SHA256.json",
+      "before_bytes": 4697,
+      "before_sha256": "42343860c08f9434c01a6f51caefbfe3ef9c181139ce7e312d8f6c38e8fd2f86",
+      "after_bytes": 4561,
+      "after_sha256": "59bfc25524cb76ddb42f117c2cffed590e1023462075675bbc754c56b5e8a11e"
+    }
+  ],
+  "all_raw_payloads_and_seal_equal_donor": true
+}

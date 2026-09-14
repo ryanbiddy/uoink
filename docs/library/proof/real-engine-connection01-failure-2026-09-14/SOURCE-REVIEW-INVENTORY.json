@@ -1,0 +1,26 @@
+{
+  "scope": "Passive source inventory; no test results",
+  "proposed_case_count": 15,
+  "ordered_ids": [
+    "test_01_authenticated_selection_and_member_mismatch_refused",
+    "test_02_pre_begin_cancel_admits_no_buffers_or_factory",
+    "test_03_copied_or_forged_lease_refused",
+    "test_04_successful_admitted_engine_construction_positive",
+    "test_05_four_file_model_refused_before_path_service",
+    "test_06_empty_preprocessor_bytes_refused",
+    "test_07_missing_or_empty_tokenizer_bytes_refused",
+    "test_08_buffer_mutation_immunity",
+    "test_09_cpu_and_options_policy_mismatch_refused",
+    "test_10_revocation_during_construction_retains_returned_objects",
+    "test_11_tokenizer_constructor_failure_retains_model",
+    "test_12_pipeline_constructor_failure_retains_model_and_tokenizer",
+    "test_13_publication_refusal_after_revocation",
+    "test_14_secondary_cleanup_failure_preserves_first_error",
+    "test_15_nested_or_overlapping_operation_refused"
+  ],
+  "frozen_source_count": 25,
+  "frozen_source_bytes": 301499,
+  "source_review": "failed",
+  "transport_completion": "55e4a9/0; final tool output truncated, original database export separately retained",
+  "command_coverage": "Some provider parameters are shortened; complete coverage unverified"
+}

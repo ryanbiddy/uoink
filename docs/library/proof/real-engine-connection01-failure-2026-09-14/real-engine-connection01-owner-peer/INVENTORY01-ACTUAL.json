@@ -1,0 +1,7 @@
+{
+  "chunk_id": "97a039",
+  "wall_time_seconds": 0.2720235,
+  "exit_code": 0,
+  "original_token_count": 140,
+  "output": "MethodInvocationException: \r\nLine |\r\n   2 |  … ew/frozen'; [IO.File]::ReadAllText((Join-Path $r 'PINS.json')); rg -- …\r\n     |                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\r\n     | Exception calling \"ReadAllText\" with \"1\" argument(s): \"Could not find file 'E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\real-engine-connection01-root-review\\frozen\\PINS.json'.\"\r\ndocs/library\\REAL-ENGINE-CONNECTION-BRIEF-2026-09-14.md\ndocs/library\\proof\\real-engine-connection-plan-2026-09-14\\contracts\\REAL-ENGINE-CONNECTION-BRIEF-2026-09-14.md\n"
+}

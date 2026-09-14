@@ -741,3 +741,10 @@ commits; `BUNDLE-SHA256.json` records every payload. It pairs package-06 with
 the matching receipt tools, notices, notes and evidence, with release_ready=false.
 The earlier package-05 EXE and review ZIP remain preserved. No ordinary upgrade,
 main merge or publication is included in delivery.
+
+On2026-09-14 the next real-constructor source proposal failed review after a
+completed Gemini delivery. Its15 proposed tests were not executed. Qualified
+generated ownership remains39/0/0 in each copy at9e3a77d. The new source's trust,
+factory connection and retained-object defects must be repaired before runtime
+qualification. Production and package status are unchanged; website and marketing
+remain held. See ASTRA-REAL-ENGINE-CONNECTION01-FAILURE-2026-09-14.md.

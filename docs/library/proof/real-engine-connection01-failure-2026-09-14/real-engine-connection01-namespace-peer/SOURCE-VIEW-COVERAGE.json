@@ -1,0 +1,148 @@
+{
+  "scope": "Source-only namespace/adoption and relevant startup/issuance review",
+  "frozen_map_sha256": "860ac15701fe82f0960867b9f9058e67792b3f2ca73d4ecef7a9799deb611371",
+  "full_model_visible_reads": [
+    {
+      "path": "docs/library/REAL-ENGINE-CONNECTION-BRIEF-2026-09-14.md",
+      "actual": "BRIEF-CONTEXT-ACTUAL.json"
+    },
+    {
+      "path": "docs/library/proof/real-engine-connection-plan-2026-09-14/plan/BRIEF.md",
+      "actual": "PLAN-FREEZE-ACTUAL.json"
+    },
+    {
+      "path": "_scratch/real-engine-connection01-root-review/FROZEN-SOURCE-PINS.json",
+      "actual": "PLAN-FREEZE-ACTUAL.json"
+    },
+    {
+      "path": "frozen/SOURCE-INPUTS.json",
+      "actual": "PLAN-MAP-ACTUAL.json"
+    },
+    {
+      "path": "frozen/pinned_buffer_namespace.py",
+      "actual": "NAMESPACE-READ-ACTUAL.json"
+    },
+    {
+      "path": "frozen/pinned_buffer_namespace.diff",
+      "actual": "NAMESPACE-READ-ACTUAL.json"
+    },
+    {
+      "path": "frozen/inherited_readset.py",
+      "lines": [
+        1,
+        329
+      ],
+      "actual": "ADOPTION-READ-ACTUAL.json"
+    },
+    {
+      "path": "frozen/inherited_readset.diff",
+      "actual": "ADOPTION-PROTOCOL-DELTA-ACTUAL.json"
+    },
+    {
+      "path": "frozen/owned_generation_protocol.diff",
+      "actual": "ADOPTION-PROTOCOL-DELTA-ACTUAL.json"
+    }
+  ],
+  "targeted_reads": [
+    {
+      "path": "frozen/owned_generation_protocol.py",
+      "requested_ranges": [
+        [
+          120,
+          205
+        ],
+        [
+          256,
+          353
+        ],
+        [
+          484,
+          551
+        ],
+        [
+          555,
+          608
+        ]
+      ],
+      "actual": "BOOTSTRAP-CONTEXT-TRUNCATED-ACTUAL.json",
+      "limitation": "Actual output truncated; not counted as a complete full-file review. Entire new delta separately read."
+    },
+    {
+      "path": "frozen/owned_generation_protocol.py",
+      "complete_ranges": [
+        [
+          316,
+          353
+        ]
+      ],
+      "actual": "ISSUANCE-CONTEXT-ACTUAL.json"
+    },
+    {
+      "path": "frozen/worker_runtime_owner.py",
+      "complete_ranges": [
+        [
+          40,
+          68
+        ],
+        [
+          180,
+          226
+        ]
+      ],
+      "actual": "ISSUANCE-CONTEXT-ACTUAL.json"
+    },
+    {
+      "path": "frozen/test_real_engine_connection.py",
+      "complete_ranges": [
+        [
+          1,
+          155
+        ]
+      ],
+      "actual": "ISSUANCE-CONTEXT-ACTUAL.json",
+      "additional": "Targeted call/import matches only; not full test review."
+    },
+    {
+      "path": "_scratch/windows-interrupted-owner-native-proposal02/trusted_asr_resolver.py",
+      "complete_ranges": [
+        [
+          45,
+          97
+        ],
+        [
+          254,
+          292
+        ]
+      ],
+      "actual": "ISSUANCE-CONTEXT-ACTUAL.json",
+      "additional": "Targeted resolver/admission symbols also displayed in BOOTSTRAP-CONTEXT-TRUNCATED-ACTUAL.json."
+    }
+  ],
+  "passive_checks": {
+    "actual": "SCOPED-CHECK-ACTUAL.json",
+    "chunk_id": "f456f6",
+    "exit_code": 0,
+    "scoped_pin_count": 12,
+    "original_plan_count": 23,
+    "complete_forward_reverse_hunks": {
+      "pinned_buffer_namespace": 2,
+      "inherited_readset": 6,
+      "owned_generation_protocol": 4
+    },
+    "baseline_comparison": "Before files read as text by checker and matched bound original sources; this is mechanical comparison, not a separate human full-baseline review."
+  },
+  "excluded": [
+    "Full owned_asr_engine review",
+    "Full worker_runtime_owner review",
+    "Full proposed 15-test review",
+    "Gemini report acceptance",
+    "Control Room trace audit",
+    "Candidate execution",
+    "Native or model acceptance"
+  ],
+  "initial_lookup_failure": {
+    "actual": "INVENTORY-LOOKUP-ACTUAL.json",
+    "reason": "Requested frozen/PINS.json; actual parent manifest is FROZEN-SOURCE-PINS.json. Source lookup only."
+  },
+  "candidate_executed": false
+}

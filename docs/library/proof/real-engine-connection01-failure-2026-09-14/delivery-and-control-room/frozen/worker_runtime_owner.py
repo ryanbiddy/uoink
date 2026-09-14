@@ -1,0 +1,539 @@
+"""Protected engine ownership repair; retains attempt and returned objects.
+
+This derives from the repaired owner core9e3a77d. State locks do not span work;
+the active operation/thread identity prevents overlap.
+"""
+from dataclasses import dataclass
+import hashlib
+import math
+from os import getpid
+import struct
+from threading import current_thread, get_ident, RLock
+from types import MappingProxyType, ModuleType
+
+from model_binding_registry import _WorkerModelRegistryProposal, _FactoryModelCapability
+from owned_factory_port import _OwnedFactoryPortProposal, _FactoryOwner
+from generated_engine_objects import _GeneratedEngineModel, _GeneratedEnginePipeline
+
+GENERATED_MAX_SAMPLES = 64
+FOUR = frozenset(("config.json", "model.bin", "tokenizer.json", "vocabulary.txt"))
+FIVE = frozenset(("config.json", "model.bin", "preprocessor_config.json", "tokenizer.json", "vocabulary.json"))
+_NAMES = ('config.json', 'model.bin', 'preprocessor_config.json', 'tokenizer.json', 'vocabulary.json')
+_PHASES = ('issue', 'factory', 'use', 'release', 'engine')
+
+
+class RuntimeOwnerRefusal(RuntimeError):
+    pass
+
+
+def _require(condition, reason):
+    if not condition:
+        raise RuntimeOwnerRefusal(reason)
+
+
+def open_real_runtime_owner(*args, **kwargs):
+    raise RuntimeOwnerRefusal('real_worker_bootstrap_absent')
+
+
+@dataclass(slots=True)
+class _GeneratedNamespace:
+    label: str
+    members: tuple
+
+
+@dataclass(slots=True)
+class _AdmittedNamespaceLease:
+    owner: object
+    generation: object
+    read_set: object
+    pinned_namespace: object
+    buffers: object
+    model: object
+    profile: object
+    manifest_sha256: str
+    namespace_sha256: str
+    label: str
+    active: bool = True
+
+
+class _GeneratedPCM:
+    __slots__ = ('_storage',)
+
+    def __init__(self, raw):
+        self._storage = bytearray(raw)
+
+
+@dataclass(slots=True)
+class _PCMOwner:
+    pcm: object
+    storage: bytearray
+    media: object
+    samples: int
+    digest: bytes
+    generation: object
+    active: bool = True
+
+
+@dataclass(slots=True)
+class _VADOwner:
+    factory: object
+    owned_module: ModuleType
+    model: object
+    vad: object
+    lease: object
+    generation: object
+    active: bool = True
+
+
+@dataclass(slots=True)
+class _EngineConstructionAttempt:
+    owner: object
+    generation: object
+    operation: object
+    namespace: object
+    product: object
+    model: object = None
+    tokenizer: object = None
+    pipeline: object = None
+    model_returned: bool = False
+    tokenizer_returned: bool = False
+    pipeline_returned: bool = False
+    active: bool = True
+    published: bool = False
+    failure: object = None
+
+
+class _WorkerRuntimeOwnerProposal(_WorkerModelRegistryProposal):
+    """The inherited registry itself remains the capability's runtime identity.
+
+    One private bootstrap permit controls serial operation entry. State locks do
+    not span work; the active operation/thread identity prevents overlap. Real
+    callers still need the unimplemented trusted bootstrap/loader/PCM ports.
+    """
+
+    def __init__(self, bootstrap_permit, expected_factory_type):
+        _require(expected_factory_type is _OwnedFactoryPortProposal, 'fixed_factory_type_required')
+        super().__init__(bootstrap_permit, expected_factory_type)
+        self._operation = None
+        self._namespace = None
+        self._namespace_lease = None
+        self._product = None
+        self._pcm_owner = None
+        self._pcm_issued = False
+        self._retained = None
+        self._engine_attempt = None
+
+    def _permit_locked(self, permit):
+        _require(permit is self._bootstrap_permit, 'bootstrap_permit_identity')
+
+    def _entry_locked(self, phases):
+        self._live_locked()
+        entry = self._operation
+        _require(entry is not None and entry[1] == get_ident() and entry[2] in phases,
+                 'serial_operation_required')
+        return entry[0]
+
+    @contextmanager
+    def operation(self, permit, phase):
+        with self._lock:
+            self._permit_locked(permit)
+            self._live_locked()
+            _require(type(phase) is str and phase in _PHASES, 'operation_phase')
+            _require(self._operation is None, 'operation_already_active')
+            token = object()
+            self._operation = (token, get_ident(), phase)
+        try:
+            yield token
+        except BaseException as original:
+            try:
+                self.revoke_generation(permit)
+            except BaseException as cleanup:
+                BaseException.add_note(original, 'Runtime owner revocation unconfirmed: ' + type(cleanup).__name__)
+            raise
+        finally:
+            with self._lock:
+                # No references to native products are dropped by leaving work.
+                if self._operation is not None and self._operation[0] is token:
+                    self._operation = None
+
+    def issue_generated_namespace(self, permit, pieces):
+        with self._lock:
+            self._permit_locked(permit)
+            self._entry_locked(('issue',))
+            _require(self._namespace is None and type(pieces) is tuple and len(pieces) == len(_NAMES),
+                     'generated_namespace_single_issue')
+            _require(all(type(raw) is bytes and 0 < len(raw) <= 128 for raw in pieces),
+                     'generated_member_bound')
+            members = tuple((name, raw) for name, raw in zip(_NAMES, pieces, strict=True))
+            # A deliberately non-path label. It cannot pass the real owned
+            # loader's absolute-path check or authenticate a real namespace.
+            digest = hashlib.sha256(b''.join(len(raw).to_bytes(2, 'big') + raw for raw in pieces)).hexdigest()
+            self._namespace = _GeneratedNamespace('generated:' + digest, members)
+            return self._namespace
+
+    def assert_generated_namespace_binding(self, namespace):
+        with self._lock:
+            self._entry_locked(('factory', 'use'))
+            _require(namespace is self._namespace and type(namespace) is _GeneratedNamespace,
+                     'namespace_identity')
+
+    def issue_admitted_namespace_lease(self, permit, pinned_namespace, read_set, model, profile, manifest_sha256):
+        with self._lock:
+            self._permit_locked(permit)
+            self._entry_locked(('issue',))
+            _require(self._namespace_lease is None, 'admitted_namespace_lease_already_issued')
+            _require(pinned_namespace is not None and getattr(pinned_namespace, '_ready', False) is True,
+                     'materialized_pinned_namespace_required')
+            _require(read_set is not None and not read_set.unconfirmed and not read_set.released,
+                     'live_read_set_required')
+            _require(pinned_namespace._read_set is read_set, 'read_set_namespace_binding')
+            _require(type(manifest_sha256) is str and len(manifest_sha256) == 64
+                     and all(c in '0123456789abcdef' for c in manifest_sha256), 'manifest_sha256_hex')
+            _require(model is not None and hasattr(model, 'assets'), 'admitted_model_required')
+            _require(profile is not None and getattr(profile, 'device', None) == 'cpu', 'qualified_cpu_profile_required')
+            buffers = pinned_namespace.buffers
+            _require(type(buffers) is MappingProxyType and len(buffers) in (4, 5), 'immutable_buffers_required')
+            label = 'uoink-memory-' + pinned_namespace.namespace_sha256
+            lease = _AdmittedNamespaceLease(
+                owner=self,
+                generation=self._generation,
+                read_set=read_set,
+                pinned_namespace=pinned_namespace,
+                buffers=buffers,
+                model=model,
+                profile=profile,
+                manifest_sha256=manifest_sha256,
+                namespace_sha256=pinned_namespace.namespace_sha256,
+                label=label,
+                active=True,
+            )
+            self._namespace_lease = lease
+            return lease
+
+    def assert_admitted_namespace_binding(self, lease):
+        with self._lock:
+            self._entry_locked(('factory', 'engine', 'use'))
+            _require(self._namespace_lease is not None and self._namespace_lease is lease
+                     and type(lease) is _AdmittedNamespaceLease,
+                     'admitted_namespace_lease_identity')
+            _require(lease.active is True and lease.generation is self._generation and lease.owner is self,
+                     'admitted_namespace_lease_active_and_generation')
+            _require(not lease.read_set.unconfirmed and not lease.read_set.released,
+                     'admitted_read_set_unconfirmed_or_released')
+            _require(lease.pinned_namespace._ready, 'admitted_namespace_not_ready')
+
+    def register_vad_product_for_bootstrap(self, permit, factory, product, owned_module):
+        with self._lock:
+            self._permit_locked(permit)
+            self._entry_locked(('factory',))
+            _require((self._namespace is not None or self._namespace_lease is not None) and self._product is None,
+                     'namespace_or_product_order')
+            _require(type(factory) is self._factory_type and type(owned_module) is ModuleType
+                     and factory._owned_runtime_module is owned_module and owned_module._RUNTIME is self,
+                     'factory_runtime_identity')
+            capability = self._capability
+            _require(type(capability) is _FactoryModelCapability and factory._model_capability is capability,
+                     'registered_factory_capability')
+            completed = factory._completed
+            _require(factory._attempted is True and factory._quarantined_owner is None
+                     and type(completed) is _FactoryOwner and completed.vad is product
+                     and product is not None and type(product) is factory._factory.VoiceActivitySegmentation
+                     and completed.model_lease is self._lease, 'completed_factory_product')
+            capability.assert_factory_and_runtime(factory, owned_module)
+            completed.model_lease.assert_bound(factory, completed.model)
+            self._product = _VADOwner(factory, owned_module, completed.model, product,
+                                      completed.model_lease, self._generation)
+
+    def _vad_locked(self, vad):
+        record = self._product
+        _require(record is not None and record.active is True and record.generation is self._generation
+                 and record.vad is vad, 'vad_product_identity')
+        completed = record.factory._completed
+        if not (record.factory._owned_runtime_module is record.owned_module
+                and record.owned_module._RUNTIME is self and type(completed) is _FactoryOwner
+                and completed.vad is vad and completed.model is record.model
+                and completed.model_lease is record.lease):
+            self.revoke_generation(self._bootstrap_permit)
+            raise RuntimeOwnerRefusal('factory_product_or_runtime_changed')
+        record.lease.assert_bound(record.factory, record.model)
+        return record
+
+    def assert_vad_binding(self, vad):
+        with self._lock:
+            self._entry_locked(('factory', 'engine', 'use'))
+            self._vad_locked(vad)
+
+    def assert_model_binding(self, path, vad):
+        with self._lock:
+            self._entry_locked(('factory', 'engine', 'use'))
+            _require((self._namespace is not None and type(path) is str and path == self._namespace.label)
+                     or (self._namespace_lease is not None and type(path) is str and path == self._namespace_lease.label),
+                     'model_path_binding')
+            self._vad_locked(vad)
+
+    def _begin_generated_engine(self, permit, namespace, vad):
+        with self._lock:
+            self._permit_locked(permit)
+            operation = self._entry_locked(('engine',))
+            _require(self._engine_attempt is None, 'engine_single_attempt')
+            _require(type(namespace) is _GeneratedNamespace and namespace is self._namespace,
+                     'issued_generated_namespace_required')
+            product = self._vad_locked(vad)
+            attempt = _EngineConstructionAttempt(
+                self, self._generation, operation, namespace, product)
+            # Retain before any constructor or later preparation step. A private
+            # record created elsewhere cannot pass the identity check below.
+            self._engine_attempt = attempt
+            return attempt
+
+    def _begin_admitted_engine(self, permit, namespace_lease, vad):
+        with self._lock:
+            self._permit_locked(permit)
+            operation = self._entry_locked(('engine',))
+            _require(self._engine_attempt is None, 'engine_single_attempt')
+            _require(type(namespace_lease) is _AdmittedNamespaceLease and namespace_lease is self._namespace_lease,
+                     'admitted_namespace_lease_identity')
+            _require(namespace_lease.active is True and namespace_lease.generation is self._generation
+                     and namespace_lease.owner is self, 'admitted_namespace_lease_active')
+            product = self._vad_locked(vad)
+            _require(product is self._product, 'product_vad_mismatch')
+            attempt = _EngineConstructionAttempt(
+                self, self._generation, operation, namespace_lease, product)
+            self._engine_attempt = attempt
+            return attempt
+
+    def _engine_identity_locked(self, attempt):
+        _require(type(attempt) is _EngineConstructionAttempt
+                 and self._engine_attempt is attempt and attempt.owner is self
+                 and attempt.generation is self._generation,
+                 'engine_attempt_identity')
+
+    def _engine_live_locked(self, attempt):
+        self._engine_identity_locked(attempt)
+        _require(self._entry_locked(('engine',)) is attempt.operation
+                 and attempt.active is True, 'engine_operation_identity')
+        _require(((type(attempt.namespace) is _GeneratedNamespace and attempt.namespace is self._namespace)
+                  or (type(attempt.namespace) is _AdmittedNamespaceLease and attempt.namespace is self._namespace_lease
+                      and attempt.namespace.active is True))
+                 and attempt.product is self._product, 'engine_issuance_changed')
+        self._vad_locked(attempt.product.vad)
+
+    def _retain_generated_engine_model(self, attempt, model):
+        with self._lock:
+            self._engine_identity_locked(attempt)
+            _require(not attempt.model_returned, 'engine_model_already_returned')
+            # Custody precedes liveness/type checks. Revoke may have won while
+            # the constructor ran; its returned value must still be retained.
+            attempt.model = model
+            attempt.model_returned = True
+            self._engine_live_locked(attempt)
+            _require(type(model) is _GeneratedEngineModel, 'generated_engine_model_type')
+
+    def _check_generated_engine_model_ready(self, attempt):
+        with self._lock:
+            self._engine_live_locked(attempt)
+            _require(attempt.model_returned
+                     and type(attempt.model) is _GeneratedEngineModel
+                     and attempt.model.prepared is True
+                     and attempt.model.namespace is attempt.namespace
+                     and attempt.model.vad is attempt.product.vad,
+                     'engine_model_preparation_order')
+
+    def _retain_generated_engine_pipeline(self, attempt, pipeline):
+        with self._lock:
+            self._engine_identity_locked(attempt)
+            _require(not attempt.pipeline_returned, 'engine_pipeline_already_returned')
+            attempt.pipeline = pipeline
+            attempt.pipeline_returned = True
+            self._engine_live_locked(attempt)
+            _require(attempt.model_returned and type(attempt.model) is _GeneratedEngineModel
+                     and attempt.model.prepared is True, 'engine_model_preparation_order')
+            _require(type(pipeline) is _GeneratedEnginePipeline, 'generated_engine_pipeline_type')
+
+    def _publish_generated_engine(self, attempt):
+        with self._lock:
+            self._engine_live_locked(attempt)
+            model, pipeline = attempt.model, attempt.pipeline
+            _require(attempt.model_returned and attempt.pipeline_returned
+                     and not attempt.published
+                     and type(model) is _GeneratedEngineModel
+                     and type(pipeline) is _GeneratedEnginePipeline,
+                     'engine_complete_before_publication')
+            _require(model.prepared is True and pipeline.prepared is True
+                     and model.namespace is attempt.namespace
+                     and model.vad is attempt.product.vad
+                     and pipeline.model is model and pipeline.vad is attempt.product.vad,
+                     'generated_engine_final_identity')
+            # This attribute is the retained generated fixture's actual link.
+            # No inference about a real WhisperX object's shape is admitted.
+            _require(getattr(attempt.product.vad, 'segmentation', None)
+                     is attempt.product.model, 'generated_vad_model_link')
+            attempt.published = True
+            return {'generated_engine_constructed': True}
+
+    def _retain_admitted_engine_model(self, attempt, model):
+        with self._lock:
+            self._engine_identity_locked(attempt)
+            _require(not attempt.model_returned, 'engine_model_already_returned')
+            attempt.model = model
+            attempt.model_returned = True
+            self._engine_live_locked(attempt)
+
+    def _check_admitted_engine_model_ready(self, attempt):
+        with self._lock:
+            self._engine_live_locked(attempt)
+            _require(attempt.model_returned and attempt.model is not None, 'engine_model_not_ready')
+
+    def _retain_admitted_engine_tokenizer(self, attempt, tokenizer):
+        with self._lock:
+            self._engine_identity_locked(attempt)
+            _require(not attempt.tokenizer_returned, 'engine_tokenizer_already_returned')
+            attempt.tokenizer = tokenizer
+            attempt.tokenizer_returned = True
+            self._engine_live_locked(attempt)
+
+    def _retain_admitted_engine_pipeline(self, attempt, pipeline):
+        with self._lock:
+            self._engine_identity_locked(attempt)
+            _require(not attempt.pipeline_returned, 'engine_pipeline_already_returned')
+            attempt.pipeline = pipeline
+            attempt.pipeline_returned = True
+            self._engine_live_locked(attempt)
+            _require(attempt.model_returned and attempt.model is not None, 'engine_model_order')
+
+    def _publish_admitted_engine(self, attempt):
+        with self._lock:
+            self._engine_live_locked(attempt)
+            model, pipeline = attempt.model, attempt.pipeline
+            _require(attempt.model_returned and attempt.pipeline_returned and not attempt.published,
+                     'engine_complete_before_publication')
+            _require(pipeline.model is model, 'pipeline_model_link')
+            _require(getattr(pipeline, 'vad_model', None) is attempt.product.vad, 'real_vad_model_link')
+            attempt.published = True
+            return {'admitted_engine_constructed': True}
+
+    def _fail_generated_engine(self, attempt, error):
+        with self._lock:
+            self._engine_identity_locked(attempt)
+            if attempt.failure is None:
+                attempt.failure = error
+            attempt.active = False
+        # Keep attempt, namespace, exact VAD owner and every returned object.
+        # Logical close is not backend retirement; no cleanup boolean is used.
+
+    def _fail_admitted_engine(self, attempt, error):
+        with self._lock:
+            self._engine_identity_locked(attempt)
+            if attempt.failure is None:
+                attempt.failure = error
+            attempt.active = False
+
+    def assert_load_parameters(self, **values):
+        # No combination of generated labels/records or module assignments may
+        # enable WhisperModel while the exact protected constructor is absent.
+        raise RuntimeOwnerRefusal('real_constructor_policy_and_namespace_route_absent')
+
+    @property
+    def max_audio_samples(self):
+        with self._lock:
+            self._live_locked()
+            _require(self._namespace is not None or self._namespace_lease is not None, 'fixture_not_issued')
+            return GENERATED_MAX_SAMPLES
+
+    def issue_generated_pcm(self, permit, media_identity, raw_f32le):
+        with self._lock:
+            self._permit_locked(permit)
+            self._entry_locked(('issue',))
+            _require(self._namespace is not None and not self._pcm_issued
+                     and type(media_identity) is object, 'generated_pcm_single_issue')
+            _require(type(raw_f32le) is bytes and 0 < len(raw_f32le) <= GENERATED_MAX_SAMPLES * 4
+                     and len(raw_f32le) % 4 == 0, 'generated_pcm_byte_bound')
+            _require(all(math.isfinite(row[0]) for row in struct.iter_unpack('<f', raw_f32le)),
+                     'generated_pcm_finite')
+            pcm = _GeneratedPCM(raw_f32le)
+            self._pcm_owner = _PCMOwner(pcm, pcm._storage, media_identity, len(raw_f32le) // 4,
+                                        hashlib.sha256(raw_f32le).digest(), self._generation)
+            self._pcm_issued = True
+            return pcm
+
+    def _pcm_locked(self, pcm, sample_rate):
+        record = self._pcm_owner
+        _require(type(sample_rate) is int and sample_rate == 16000, 'owned_pcm_sample_rate')
+        _require(record is not None and record.active is True and record.generation is self._generation
+                 and record.pcm is pcm and type(pcm) is _GeneratedPCM, 'owned_pcm_identity')
+        if not (type(pcm._storage) is bytearray and pcm._storage is record.storage
+                and len(record.storage) == record.samples * 4
+                and hashlib.sha256(record.storage).digest() == record.digest):
+            self.revoke_generation(self._bootstrap_permit)
+            raise RuntimeOwnerRefusal('owned_pcm_storage_changed')
+        return record
+
+    def assert_waveform_binding(self, audio, *, sample_rate):
+        with self._lock:
+            self._entry_locked(('use',))
+            self._pcm_locked(audio, sample_rate)
+
+    def retire_generated_pcm(self, permit, pcm):
+        with self._lock:
+            self._permit_locked(permit)
+            self._entry_locked(('release',))
+            record = self._pcm_locked(pcm, 16000)
+            record.active = False
+            self._pcm_owner = None
+        # Generated storage only. This is no native cancellation/free receipt.
+
+    def retire_vad_product_for_bootstrap(self, permit, factory, product):
+        with self._lock:
+            self._permit_locked(permit)
+            self._entry_locked(('release',))
+            record = self._vad_locked(product)
+            _require(record.factory is factory, 'factory_product_identity')
+            record.active = False
+        # Retain the owner record until the existing exact factory retires it.
+        # The surrounding operation revokes and retains on any BaseException.
+        factory.release_product(product)
+        with self._lock:
+            self._live_locked()
+            _require(self._product is record, 'product_retirement_changed')
+            self._product = None
+
+    def publish_generated_text(self, token, pcm, text):
+        with self._lock:
+            _require(self._entry_locked(('use',)) is token, 'operation_token_identity')
+            self._pcm_locked(pcm, 16000)
+            product = self._product
+            _require(product is not None, 'vad_product_required_at_publication')
+            self._vad_locked(product.vad)
+            _require(type(text) is str and len(text) <= 256, 'generated_result_bound')
+            return text
+
+    def get_mel_filters(self, n_mels):
+        raise RuntimeOwnerRefusal('real_filter_record_and_issuance_absent')
+
+    def issue_real_pcm(self, *args, **kwargs):
+        raise RuntimeOwnerRefusal('real_decoder_pcm_issuance_absent')
+
+    def issue_real_filter_record(self, *args, **kwargs):
+        raise RuntimeOwnerRefusal('real_filter_record_and_issuance_absent')
+
+    def revoke_generation(self, permit):
+        with self._lock:
+            self._permit_locked(permit)
+            if self._namespace_lease is not None:
+                self._namespace_lease.active = False
+            if self._engine_attempt is not None:
+                self._engine_attempt.active = False
+            if self._retained is None:
+                # Keep references that base revocation drops. No model/VAD/PCM
+                # storage is reclaimed merely because liveness was revoked.
+                self._retained = (self._product, self._pcm_owner, self._namespace,
+                                  None if self._lease is None else self._lease._model,
+                                  None if self._capability is None else self._capability._factory,
+                                  self._namespace_lease)
+            if self._product is not None:
+                self._product.active = False
+            if self._pcm_owner is not None:
+                self._pcm_owner.active = False
+            super().revoke_generation(permit)
+        # There is intentionally no caller-controlled 'quiescent=True' cleanup.
+        # Actual retirement after native uncertainty remains bootstrap/OS work.
