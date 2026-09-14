@@ -6389,3 +6389,18 @@ the original seal unchanged. Completed index18c81b verifies every payload and
 seal against Git. Eleven root integration records/72,875 bytes, seal
 768469023a953168133c09985ff0b87f5870315f8c592725da63a8f91c9fb210,
 pass raw index check841604. No native rerun was used for archival.
+
+### 2026-09-14 — Failed native record committed and backed up
+
+Commit7f142e874ac1e301cb8cca5548ff120ab437965d preserves the failed run,
+215 verified proof payloads, diagnoses, current state and release notes.
+The authorized backup branch advanced by checked fast-forward fromfeee2f7.
+Push219523 and remote check0d57ad return0; origin/cc/living-library matches
+7f142e8 exactly. Actual objects remain BACKUP-PUSH-7F142E8-ACTUAL.json and its
+REMOTE counterpart. No main merge, candidate-branch push or publication occurred.
+
+Repair03 source24844bf4 adds only the two required probe-loop lines and passes
+root/peer source review. Two new controller-boundary controls6370a484 preserve
+the original28 cases and57 subtests. Their proposed five failure-position
+subtests and30-case total remain unmeasured. Review the complete fresh fake
+instrument before execution; the prior native01 result stays failed.
