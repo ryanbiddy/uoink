@@ -1,0 +1,218 @@
+--- a/worker_runtime_owner.py
++++ b/worker_runtime_owner.py
+@@ -16,8 +16,10 @@
+ from owned_factory_port import _OwnedFactoryPortProposal, _FactoryOwner
+ 
+ GENERATED_MAX_SAMPLES = 64
++FOUR = frozenset(("config.json", "model.bin", "tokenizer.json", "vocabulary.txt"))
++FIVE = frozenset(("config.json", "model.bin", "preprocessor_config.json", "tokenizer.json", "vocabulary.json"))
+ _NAMES = ('config.json', 'model.bin', 'preprocessor_config.json', 'tokenizer.json', 'vocabulary.json')
+-_PHASES = ('issue', 'factory', 'use', 'release')
++_PHASES = ('issue', 'factory', 'engine', 'use', 'release')
+ 
+ 
+ class RuntimeOwnerRefusal(RuntimeError):
+@@ -39,6 +41,27 @@
+     label: str
+     members: tuple
+ 
++
++@dataclass(slots=True)
++class _AdmittedNamespace:
++    namespace: object
++    read_set: object
++    manifest_sha256: str
++    generation: object
++    label: str
++    schema_name: str
++    active: bool = True
++
++
++@dataclass(slots=True)
++class _EngineOwner:
++    engine: object
++    pipeline: object
++    model: object
++    vad: object
++    namespace_record: object
++    generation: object
++    active: bool = True
+ 
+ class _GeneratedPCM:
+     __slots__ = ('_storage',)
+@@ -81,6 +104,10 @@
+         super().__init__(bootstrap_permit, expected_factory_type)
+         self._operation = None
+         self._namespace = None
++        self._admitted_namespace = None
++        self._engine_owner = None
++        self._engine_attempted = False
++        self._quarantined_engine = None
+         self._product = None
+         self._pcm_owner = None
+         self._pcm_issued = False
+@@ -140,11 +167,49 @@
+             _require(namespace is self._namespace and type(namespace) is _GeneratedNamespace,
+                      'namespace_identity')
+ 
++    def issue_admitted_namespace(self, permit, pinned_namespace, read_set, manifest_sha256):
++        with self._lock:
++            self._permit_locked(permit)
++            self._entry_locked(('issue', 'factory', 'engine'))
++            _require(self._admitted_namespace is None, 'admitted_namespace_already_issued')
++            _require(pinned_namespace is not None and getattr(pinned_namespace, '_ready', False) is True,
++                     'materialized_pinned_namespace_required')
++            _require(read_set is not None and not read_set.unconfirmed and not read_set.released,
++                     'live_read_set_required')
++            _require(pinned_namespace._read_set is read_set, 'read_set_namespace_binding')
++            _require(type(manifest_sha256) is str and len(manifest_sha256) == 64
++                     and all(c in '0123456789abcdef' for c in manifest_sha256), 'manifest_sha256_hex')
++            names = frozenset(pinned_namespace.buffers.keys())
++            _require(names in (FOUR, FIVE), 'admitted_namespace_schema')
++            schema_name = 'four_file' if names == FOUR else 'five_file'
++            label = 'uoink-memory-' + pinned_namespace.namespace_sha256
++            record = _AdmittedNamespace(
++                namespace=pinned_namespace,
++                read_set=read_set,
++                manifest_sha256=manifest_sha256,
++                generation=self._generation,
++                label=label,
++                schema_name=schema_name,
++                active=True,
++            )
++            self._admitted_namespace = record
++            return record
++
++    def assert_admitted_namespace_binding(self, record):
++        with self._lock:
++            self._entry_locked(('factory', 'engine', 'use'))
++            _require(self._admitted_namespace is not None and self._admitted_namespace is record,
++                     'admitted_namespace_identity')
++            _require(record.active is True and record.generation is self._generation,
++                     'admitted_namespace_active_and_generation')
++            _require(not record.read_set.unconfirmed and not record.read_set.released,
++                     'admitted_read_set_unconfirmed_or_released')
++            _require(record.namespace._ready, 'admitted_namespace_not_ready')
++
+     def register_vad_product_for_bootstrap(self, permit, factory, product, owned_module):
+         with self._lock:
+             self._permit_locked(permit)
+             self._entry_locked(('factory',))
+-            _require(self._namespace is not None and self._product is None, 'namespace_or_product_order')
++            _require((self._namespace is not None or self._admitted_namespace is not None)
++                     and self._product is None, 'namespace_or_product_order')
+             _require(type(factory) is self._factory_type and type(owned_module) is ModuleType
+                      and factory._owned_runtime_module is owned_module and owned_module._RUNTIME is self,
+                      'factory_runtime_identity')
+@@ -176,17 +241,68 @@
+         return record
+ 
+     def assert_vad_binding(self, vad):
+         with self._lock:
+-            self._entry_locked(('factory', 'use'))
++            self._entry_locked(('factory', 'engine', 'use'))
+             self._vad_locked(vad)
+ 
+     def assert_model_binding(self, path, vad):
+         with self._lock:
+-            self._entry_locked(('factory', 'use'))
+-            _require(self._namespace is not None and type(path) is str and path == self._namespace.label,
+-                     'generated_namespace_label')
++            self._entry_locked(('factory', 'engine', 'use'))
++            if self._admitted_namespace is not None:
++                _require(type(path) is str and (path == self._admitted_namespace.label
++                         or path == "uoink-memory-" + self._admitted_namespace.namespace.namespace_sha256),
++                         'admitted_namespace_label')
++            else:
++                _require(self._namespace is not None and type(path) is str and path == self._namespace.label,
++                         'generated_namespace_label')
+             self._vad_locked(vad)
+ 
++    def connect_engine_before_construction(self, permit, namespace_record, vad):
++        with self._lock:
++            self._permit_locked(permit)
++            self._entry_locked(('engine',))
++            _require(not self._engine_attempted, 'engine_already_attempted')
++            self.assert_admitted_namespace_binding(namespace_record)
++            self._vad_locked(vad)
++            self._engine_attempted = True
++
++    def register_engine_product(self, permit, engine, pipeline, model, vad, namespace_record):
++        with self._lock:
++            self._permit_locked(permit)
++            self._entry_locked(('engine',))
++            _require(self._engine_attempted is True and self._engine_owner is None,
++                     'engine_registration_order')
++            self.assert_admitted_namespace_binding(namespace_record)
++            self._vad_locked(vad)
++            _require(engine is not None and pipeline is not None and model is not None,
++                     'engine_pipeline_model_required')
++            self._engine_owner = _EngineOwner(
++                engine=engine,
++                pipeline=pipeline,
++                model=model,
++                vad=vad,
++                namespace_record=namespace_record,
++                generation=self._generation,
++                active=True,
++            )
++            return self._engine_owner
++
++    def assert_engine_binding(self, engine):
++        with self._lock:
++            self._entry_locked(('engine', 'use'))
++            record = self._engine_owner
++            _require(record is not None and record.active is True
++                     and record.generation is self._generation
++                     and record.engine is engine, 'engine_identity')
++            self.assert_admitted_namespace_binding(record.namespace_record)
++            self._vad_locked(record.vad)
++            return record
++
++    def retire_engine_product(self, permit, engine):
++        with self._lock:
++            self._permit_locked(permit)
++            self._entry_locked(('release',))
++            record = self._engine_owner
++            _require(record is not None and record.engine is engine, 'engine_identity')
++            record.active = False
++            self._engine_owner = None
++
++    def quarantine_engine(self, permit, namespace_record, vad, original):
++        with self._lock:
++            self._permit_locked(permit)
++            self._quarantined_engine = (namespace_record, vad, original)
++            if self._engine_owner is not None:
++                self._engine_owner.active = False
++
+     def assert_load_parameters(self, **values):
+         # No combination of generated labels/records or module assignments may
+         # enable WhisperModel while the exact protected constructor is absent.
+@@ -195,7 +311,8 @@
+     @property
+     def max_audio_samples(self):
+         with self._lock:
+             self._live_locked()
+-            _require(self._namespace is not None, 'generated_fixture_not_issued')
++            _require(self._namespace is not None or self._admitted_namespace is not None,
++                     'fixture_or_admitted_namespace_not_issued')
+             return GENERATED_MAX_SAMPLES
+ 
+     def issue_generated_pcm(self, permit, media_identity, raw_f32le):
+@@ -280,10 +397,15 @@
+             if self._retained is None:
+                 # Keep references that base revocation drops. No model/VAD/PCM
+                 # storage is reclaimed merely because liveness was revoked.
+                 self._retained = (self._product, self._pcm_owner, self._namespace,
++                                  self._admitted_namespace, self._engine_owner,
+                                   None if self._lease is None else self._lease._model,
+                                   None if self._capability is None else self._capability._factory)
+             if self._product is not None:
+                 self._product.active = False
+             if self._pcm_owner is not None:
+                 self._pcm_owner.active = False
++            if self._admitted_namespace is not None:
++                self._admitted_namespace.active = False
++            if self._engine_owner is not None:
++                self._engine_owner.active = False
+             super().revoke_generation(permit)

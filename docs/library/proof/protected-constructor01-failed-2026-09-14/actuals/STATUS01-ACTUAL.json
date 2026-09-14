@@ -1,0 +1,7 @@
+{
+  "chunk_id": "a8f991",
+  "wall_time_seconds": 1.2382967,
+  "exit_code": 0,
+  "original_token_count": 112,
+  "output": "{\"run\":{\"id\":\"e6133b1f-fc8e-4f78-b252-1fae0659ef5e\",\"status\":\"running\",\"started_at\":\"2026-09-14T09:45:22.206Z\",\"finished_at\":null},\"workers\":[{\"id\":\"33b742e7-9a1c-4c32-a7b9-f4cfb47c8b29\",\"agent\":\"gemini\",\"model\":\"gemini-3.8-flash-high\",\"status\":\"running\",\"worktree_path\":\"C:\\\\Users\\\\hello\\\\AppData\\\\Local\\\\AgentControlRoom\\\\worktrees\\\\uoink-library\\\\e6133b1f-fc8\\\\gemini\",\"started_at\":\"2026-09-14T09:45:22.215Z\",\"finished_at\":null,\"error\":\"\"}]}\n"
+}

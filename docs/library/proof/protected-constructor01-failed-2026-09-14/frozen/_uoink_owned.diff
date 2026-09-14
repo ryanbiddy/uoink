@@ -1,0 +1,19 @@
+--- a/after/whisperx/_uoink_owned.py
++++ b/after/whisperx/_uoink_owned.py
+@@ -32,6 +32,15 @@
+     runtime.assert_model_binding(path, vad)
+ 
+ 
++def require_owned_namespace(namespace_record, vad):
++    runtime = require_owned_runtime()
++    if vad is None:
++        raise ValueError("Owned fixed VAD injection is required")
++    if namespace_record is None:
++        raise ValueError("Admitted namespace record is required")
++    runtime.assert_vad_binding(vad)
++    runtime.assert_admitted_namespace_binding(namespace_record)
++
++
+ def validate_waveform(audio, *, owned_input=False):
+     runtime = require_owned_runtime()
+     # Import only after the closed process-level gate. No decoder is invoked.

@@ -120,6 +120,12 @@ remain open. Native01 stays failed.
 See [the focused qualification](ASTRA-PRELOCK30-QUALIFICATION-VERDICT-2026-09-14.md).
 See [the native02 verdict](ASTRA-INTERRUPTED-NATIVE02-VERDICT-2026-09-14.md).
 
+The following protected-constructor proposal failed source review. Ownership
+scope and retention, namespace authority, fallback and test-setup defects remain
+repair work. Its 13 proposed checks were not executed. Independent caller and
+language-metadata proposals are under review; neither changes production or
+qualifies the runtime. See [the constructor review](ASTRA-PROTECTED-CONSTRUCTOR01-FAILURE-2026-09-14.md).
+
 Ryan's approved D1 static checkpoint inspection is recorded at `4b38948`. One
 guarded invocation verified the fixed hash, ZIP inventory and version bytes,
 and found little-endian consistency in the two selected buffers. Only 1,002

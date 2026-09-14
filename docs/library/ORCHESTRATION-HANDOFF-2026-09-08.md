@@ -119,7 +119,8 @@ establish safe installation isolation, and verify/correct resulting findings.
 | Actual adapter cancellation | Generated qualification integrated at60b3bb5 | Author and independent copies each89 passed/0 failed/0 skipped,86 passing subtests; all216 proof payloads match Git/disk | Native cancellation integrated ata25b34b: all100 proof payloads match Git/disk. Final-clear recovery is recorded at 5671b51; interrupted-owner retirement, crash/restart, real models and release remain unqualified |
 | Retired-owner final-clear recovery | Fake22 at a83ae1a; generated native recovery at5671b51 | Both fake copies22/0/0 plus21 passing subtests. Nativee97a44/exit0, root5214fa and peer503717 verify exact retirement, four confirmed phases/flushes and still-revoked owner/token. All91 newest proof payloads match Git/disk | The generated runtime-owner connection is recorded at 3661608 and 3b8f9e0. Continue interrupted-owner retirement; no OS-interruption, active-worker recovery, crash/restart or model credit |
 | Worker runtime owner and bootstrap | Connected fake33 at 3661608; generated native cancellation at 3b8f9e0 | Both fake copies 33/0/0. Native a9321b/exit 0, root dd7190 and peer 4984ac agree on 32 unchanged pairs, valid guards, one segment, closed owner, child/contender exit 0 with empty jobs, and four journal frames. All 127 native proof payloads match Git/disk | Interrupted-owner retirement direction is committed at 77dc339. Real inference, protected loader/PCM/filter routes, crash/restart and release remain open |
-| Interrupted owned-worker retirement | Native02 accepted at99ce3c9; Native01 remains FAILED at7f142e8 | Actual9753fb returns outer/controller0; root4b342d and peerf633ad agree on10 write observations,15 retirement events, primaryexit1/job0 and5 journal frames. All160 native/integration payloads match Git/disk. Fake30 atc8e7a44 remains30/0/0 plus62 per root | Constructor source rune6133b1f is active under793fe12; independent reliability request/stream derivative follows the frozen plan. No real-model, production or release authority; do not repeat native02 |
+| Interrupted owned-worker retirement | Native02 accepted at99ce3c9; Native01 remains FAILED at7f142e8 | Actual9753fb returns outer/controller0; root4b342d and peerf633ad agree on10 write observations,15 retirement events, primaryexit1/job0 and5 journal frames. All160 native/integration payloads match Git/disk. Fake30 atc8e7a44 remains30/0/0 plus62 per root | Do not repeat native02. The subsequent constructor source review FAILED; bounded ownership repair and caller work continue without production or release authority |
+| Protected ASR constructor | Gemini e6133b1f source review FAILED; 13 proposed tests unexecuted | Ownership scope/retention, namespace authority, fallback, fixture and provenance defects block admission. All42 documentary payloads match Git/disk at4faa90 | Follow PROTECTED-ENGINE-OWNERSHIP-REPAIR-BRIEF-2026-09-14.md; independently qualify the frozen reliability caller after root admission. Real constructor/media/runtime remain closed |
 | Release notes | Current progress and remaining gates committed at 376eb47 | All seven proof payloads match Git/disk; 57 table lines and historical package/review-kit sections remain unchanged. D1/D2 completion and generated cancellation/recovery are explicit | Continue runtime qualification. No production source, package, installation, public draft or website changed |
 | Integration | Reliability repair at e8d058f and notice packaging at 71d3e70 after tree09 | Reliability:53 focused cases plus13 subtests per root. Notices:20 Python/10 block cases per root. Tree09 at 56d9d4c remains2,796 passed/1 failed/3 skipped across2,800 cases plus13 subtests; it predates both repairs | Finish runtime work, then run a new committed complete tree and rebuild/reseal. Package08 and website/marketing remain held. No current-source package or installation credit |
 | Desktop incident | Isolation failed in package-07 attempt; corrected at `e10ba3a` | Ordinary Uoink and filesystem connectors launched; earlier live-index/5179 effects unknown. Owned job cleaned | No further override launch; only guarded Uoink dashboard observed for package 08 |
@@ -248,17 +249,25 @@ and migrate call sites to TranscribeRequest/SegmentStream; real model/runtime
 qualification remains separately gated. The passive root checker failurebbc2c5,
 diagnosiscce7c5 and variable-only repair are preserved; no subject rerun occurred.
 Native acceptance is committed at99ce3c9 and backed up to the authorized branch.
-Constructor source-only rune6133b1f-fc8e-4f78-b252-1fae0659ef5e is active under
-PROTECTED-ASR-CONSTRUCTOR-BRIEF-2026-09-14.md at793fe12. Gemini uses the existing
-Antigravity subscription, gemini-3.8-flash-high/high; worktree is
-C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/e6133b1f-fc8/gemini.
-Dispatch5036ca is still session88961; no subject tests or native execution are
-authorized by this source assignment. Inspect actual commands and finished files,
-review the source, then admit the existing guarded qualification with its new cases.
-An independent Astra worker prepares the English reliability request/stream
-derivative in_scratch/reliability-request-stream-proposal01, with production and
-accepted tests unchanged. Keep both source tasks separate from real PCM/filter
-and D3/D4 qualification. The frozen broader plan is archived in30 payloads under
+Constructor source-only rune6133b1f-fc8e-4f78-b252-1fae0659ef5e completed at
+ba1e30/exit0; session88961 is closed. SOURCE REVIEW FAILED. Read
+ASTRA-PROTECTED-CONSTRUCTOR01-FAILURE-2026-09-14.md. The original22 files,
+five passive review records, actual tool objects and full Control Room record
+are archived in42 payloads, sealdb20a253; index4faa90 verifies exact Git/disk.
+The final outer output is preserved truncated, with a separate original database
+export. No proposed tests ran. Follow the smaller ownership repair brief in
+_scratch/protected-engine-ownership-repair02, preserving generated behavior and
+real-entry refusals. No active Control Room run remains.
+The independent English reliability request/stream derivative is frozen in
+_scratch/reliability-request-stream-proposal01; its fake11 preparation has
+PINSf8685dc3, qualifier045aaa73 and launcher2ae106d2. Root and peer source
+review permit a separate exact admission; no execution result exists yet.
+Completion-info source in_scratch/asr-completion-info-proposal01 adds13 proposed
+controls. Its fake registry issuance needs the publication lock before admission;
+preserve01 and review a narrow02 fixture correction. Lifecycle source is unchanged
+by that proposed fixture repair. Production and accepted tests remain unchanged.
+Keep these source tasks separate from real PCM/filter and D3/D4 qualification.
+The frozen broader plan is archived in30 payloads under
 proof/runtime-next-source-plan-2026-09-14, index8ef211; no implementation pass is
 claimed from that plan.
 The first
@@ -1256,6 +1265,14 @@ required committed input (never write `_scratch/` in backticks). `git config --g
 core.longpaths true` must stay set (worktree checkouts fail without it).
 
 ## Blockers for Ryan
+
+- The dormant reliability caller changes the ordinary route from a raw model
+  constructor to an owned request/stream. Two unchanged tests at
+  tests/test_reliability_local_only_load.py:55–68 and101–113 expect the raw
+  constructor to be called. These are prospective contract conflicts, not
+  measured failures; production and tests remain unchanged. A concrete test
+  adaptation will need review and Ryan's authorization before production
+  migration. Do not weaken the local-only/no-download behavior assertions.
 
 - D2 local conversion is resolved: Ryan approved the exact question at017b559,
   including its four interpretation/migration/notice assumptions. Actual2827f8
@@ -6546,3 +6563,28 @@ The frozen plan,20 read records, prior native commit/index, backup and dispatch
 actuals comprise30 documentary payloads/428,684 bytes. Seal
 bf612a105888a9dcd4d40d25bf088b1408ca7283cb4a6cef7399ea69b4a70b07
 passes Git/disk check8ef211. It grants no execution, release or market acceptance.
+
+### 2026-09-14 — Constructor source rejected; caller review completes
+
+Gemini constructor01 completed transport atba1e30/0 but failed source review.
+It checked ownership outside its required operation, lost partial engine custody,
+accepted insufficient namespace authority and left fallback/fixture defects.
+Passivee13803 finds five invalid input-map rows; e82f70 finds five malformed
+diff headers among six patches. The original13 proposed tests stay unexecuted.
+The eight recorded source/hash/Git commands include no Python/native/model call.
+Preserve that distinction from the earlier ambient-Python violation.
+
+Archive8a10da freezes42 payloads/741,143 bytes. Raw worktree diff/application
+7a3d99 returns0, patch779,608 bytes SHA256
+327a05867438c46d08e632ca231d21f168eda3c1c902ee6f8175a4a5779350bb.
+All43 payload/seal differences were proven newline-only before restoring donor
+bytes;3a28b3 verifies equality and4faa90 verifies the Git index. Seal
+db20a2538a01a777b7d4ef8423dc762549a9a4c4125ba52435a262c0d44f774c
+binds the failure, full original database record and exact truncated outer result.
+
+The smaller ownership repair starts from accepted originals. Reliability caller
+source0165e56a and its11-case guarded preparation pass peer source review12c203;
+root admission and actual outcomes remain next. Completion-info source review
+found a fake registry write outside its declared publication lock; fix that new
+fixture in a preserved derivative before execution. No production, complete-tree,
+package, installed-client or market acceptance changes.

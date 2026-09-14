@@ -1,0 +1,470 @@
+{
+  "scope": "Passive comparison of delivered map; no subject execution",
+  "checks": [
+    {
+      "group": "inputs",
+      "path": "_scratch/windows-interrupted-owner-native-proposal02/pinned_buffer_namespace.py",
+      "expected": {
+        "bytes": 7893,
+        "sha256": "2cc25a7a254f35d802336ef121cc860887a4301b3257588438dddec392fe0b7b"
+      },
+      "actual": {
+        "bytes": 7893,
+        "sha256": "2cc25a7a254f35d802336ef121cc860887a4301b3257588438dddec392fe0b7b"
+      },
+      "match": true
+    },
+    {
+      "group": "inputs",
+      "path": "_scratch/windows-interrupted-owner-native-proposal02/inherited_readset.py",
+      "expected": {
+        "bytes": 12391,
+        "sha256": "02be8e04f4bea3030faf0882ae48ead40716c5782f95e2790e1a9897c5be76e3"
+      },
+      "actual": {
+        "bytes": 12391,
+        "sha256": "02be8e04f4bea3030faf0882ae48ead40716c5782f95e2790e1a9897c5be76e3"
+      },
+      "match": true
+    },
+    {
+      "group": "inputs",
+      "path": "_scratch/windows-interrupted-owner-native-proposal02/worker_runtime_owner.py",
+      "expected": {
+        "bytes": 12997,
+        "sha256": "5647023ed03c5acfd8b1aa981a56171dd92228ccc0972f12546bb0b3d411ce87"
+      },
+      "actual": {
+        "bytes": 12997,
+        "sha256": "5647023ed03c5acfd8b1aa981a56171dd92228ccc0972f12546bb0b3d411ce87"
+      },
+      "match": true
+    },
+    {
+      "group": "inputs",
+      "path": "_scratch/windows-interrupted-owner-native-proposal02/owned_generation_protocol.py",
+      "expected": {
+        "bytes": 24403,
+        "sha256": "bd5204ef0d3fc2a459df19bc5f02fd7b6d78041e2306b4031ab888387aa362c0"
+      },
+      "actual": {
+        "bytes": 24403,
+        "sha256": "bd5204ef0d3fc2a459df19bc5f02fd7b6d78041e2306b4031ab888387aa362c0"
+      },
+      "match": true
+    },
+    {
+      "group": "inputs",
+      "path": "_scratch/windows-interrupted-owner-native-proposal02/model_binding_registry.py",
+      "expected": {
+        "bytes": 12891,
+        "sha256": "48567add0f0ac2ac9140e9aa86b06f077454c98e2f0773100da5ba070f7b3deb"
+      },
+      "actual": {
+        "bytes": 8732,
+        "sha256": "48567add0f0ac2ac9140e9aa86b06f077454c98e2f0773100da5ba070f7b3deb"
+      },
+      "match": false
+    },
+    {
+      "group": "inputs",
+      "path": "_scratch/windows-interrupted-owner-native-proposal02/owned_factory_port.py",
+      "expected": {
+        "bytes": 9763,
+        "sha256": "2569853c7634b795e3d2cf717129ec3dbc4e11d96ddb347098dcc4fbc532f0d4"
+      },
+      "actual": {
+        "bytes": 15463,
+        "sha256": "2569853c7634b795e3d2cf717129ec3dbc4e11d96ddb347098dcc4fbc532f0d4"
+      },
+      "match": false
+    },
+    {
+      "group": "inputs",
+      "path": "_scratch/whisperx-owned-derivative-proposal01/after/whisperx/asr.py",
+      "expected": {
+        "bytes": 17608,
+        "sha256": "723bfba5775cb4a610368e1ad706fc55131bc9a2e8ea2f1e1a2b55cd6e8b5d42"
+      },
+      "actual": {
+        "bytes": 17608,
+        "sha256": "723bfba5775cb4a610368e1ad706fc55131bc9a2e8ea2f1e1a2b55cd6e8b5d42"
+      },
+      "match": true
+    },
+    {
+      "group": "inputs",
+      "path": "_scratch/whisperx-owned-derivative-proposal01/after/whisperx/_uoink_owned.py",
+      "expected": {
+        "bytes": 2109,
+        "sha256": "7672f614d81cf0be5e7bd408f8f856af328fe34e6ca7ee707c9d0db838e56d1f"
+      },
+      "actual": {
+        "bytes": 2109,
+        "sha256": "7672f614d81cf0be5e7bd408f8f856af328fe34e6ca7ee707c9d0db838e56d1f"
+      },
+      "match": true
+    },
+    {
+      "group": "inputs",
+      "path": "_scratch/b3-offline-wheel-cleanroom-2026-09-08/recipe/B2.py.txt",
+      "expected": {
+        "bytes": 27284,
+        "sha256": "a41a4a4d6735e5ef050eb4323c28b6d8591ef140f0c053531bcf6a6f1dffb6f8"
+      },
+      "actual": null,
+      "match": false
+    },
+    {
+      "group": "inputs",
+      "path": "_scratch/runtime-migration-faster-whisper-fixtures-2026-09-12/fixtures/upstream-text/faster_whisper/feature_extractor.py.txt",
+      "expected": {
+        "bytes": 6634,
+        "sha256": "8140db02ca1e4fcb48e3cf241bf8f6b28ebecb7814b77f98502ce5fdb649f8bb"
+      },
+      "actual": null,
+      "match": false
+    },
+    {
+      "group": "inputs",
+      "path": "_scratch/runtime-owner-native-fake33-2026-09-13/author-preparation/EXPECTED-CASES.json",
+      "expected": {
+        "bytes": 3274,
+        "sha256": "cfbb1f919d369f4460c4fa7df7042a3ebefd996cb88a0889246114ec31b54a85"
+      },
+      "actual": null,
+      "match": false
+    },
+    {
+      "group": "inputs",
+      "path": "_scratch/whisperx-owned-builder-proposal01/EXPECTED-CASES.json",
+      "expected": {
+        "bytes": 4997,
+        "sha256": "ba102b90a7286cda90739ae2ffb2e3f6dad733a93f707193197f3044f44a6e53"
+      },
+      "actual": {
+        "bytes": 4997,
+        "sha256": "ba102b90a7286cda90739ae2ffb2e3f6dad733a93f707193197f3044f44a6e53"
+      },
+      "match": true
+    },
+    {
+      "group": "before_copies",
+      "path": "_scratch/protected-asr-constructor01/before/pinned_buffer_namespace.py",
+      "expected": {
+        "bytes": 7893,
+        "sha256": "2cc25a7a254f35d802336ef121cc860887a4301b3257588438dddec392fe0b7b"
+      },
+      "actual": {
+        "bytes": 7893,
+        "sha256": "2cc25a7a254f35d802336ef121cc860887a4301b3257588438dddec392fe0b7b"
+      },
+      "match": true
+    },
+    {
+      "group": "before_copies",
+      "path": "_scratch/protected-asr-constructor01/before/inherited_readset.py",
+      "expected": {
+        "bytes": 12391,
+        "sha256": "02be8e04f4bea3030faf0882ae48ead40716c5782f95e2790e1a9897c5be76e3"
+      },
+      "actual": {
+        "bytes": 12391,
+        "sha256": "02be8e04f4bea3030faf0882ae48ead40716c5782f95e2790e1a9897c5be76e3"
+      },
+      "match": true
+    },
+    {
+      "group": "before_copies",
+      "path": "_scratch/protected-asr-constructor01/before/worker_runtime_owner.py",
+      "expected": {
+        "bytes": 12997,
+        "sha256": "5647023ed03c5acfd8b1aa981a56171dd92228ccc0972f12546bb0b3d411ce87"
+      },
+      "actual": {
+        "bytes": 12997,
+        "sha256": "5647023ed03c5acfd8b1aa981a56171dd92228ccc0972f12546bb0b3d411ce87"
+      },
+      "match": true
+    },
+    {
+      "group": "before_copies",
+      "path": "_scratch/protected-asr-constructor01/before/owned_generation_protocol.py",
+      "expected": {
+        "bytes": 24403,
+        "sha256": "bd5204ef0d3fc2a459df19bc5f02fd7b6d78041e2306b4031ab888387aa362c0"
+      },
+      "actual": {
+        "bytes": 24403,
+        "sha256": "bd5204ef0d3fc2a459df19bc5f02fd7b6d78041e2306b4031ab888387aa362c0"
+      },
+      "match": true
+    },
+    {
+      "group": "before_copies",
+      "path": "_scratch/protected-asr-constructor01/before/after/whisperx/asr.py",
+      "expected": {
+        "bytes": 17608,
+        "sha256": "723bfba5775cb4a610368e1ad706fc55131bc9a2e8ea2f1e1a2b55cd6e8b5d42"
+      },
+      "actual": {
+        "bytes": 17608,
+        "sha256": "723bfba5775cb4a610368e1ad706fc55131bc9a2e8ea2f1e1a2b55cd6e8b5d42"
+      },
+      "match": true
+    },
+    {
+      "group": "before_copies",
+      "path": "_scratch/protected-asr-constructor01/before/after/whisperx/_uoink_owned.py",
+      "expected": {
+        "bytes": 2109,
+        "sha256": "7672f614d81cf0be5e7bd408f8f856af328fe34e6ca7ee707c9d0db838e56d1f"
+      },
+      "actual": {
+        "bytes": 2109,
+        "sha256": "7672f614d81cf0be5e7bd408f8f856af328fe34e6ca7ee707c9d0db838e56d1f"
+      },
+      "match": true
+    },
+    {
+      "group": "delivered_source_files",
+      "path": "_scratch/protected-asr-constructor01/pinned_buffer_namespace.py",
+      "expected": {
+        "bytes": 8839,
+        "sha256": "c753b13739ab339b60924ea040eb9b313624a3b60af2ff68b5883efee5e817af"
+      },
+      "actual": {
+        "bytes": 8839,
+        "sha256": "c753b13739ab339b60924ea040eb9b313624a3b60af2ff68b5883efee5e817af"
+      },
+      "match": true
+    },
+    {
+      "group": "delivered_source_files",
+      "path": "_scratch/protected-asr-constructor01/inherited_readset.py",
+      "expected": {
+        "bytes": 13377,
+        "sha256": "6bac68f40d0b1138e93f7272577097035073a15c6957e13a436d90d33a420dda"
+      },
+      "actual": {
+        "bytes": 13377,
+        "sha256": "6bac68f40d0b1138e93f7272577097035073a15c6957e13a436d90d33a420dda"
+      },
+      "match": true
+    },
+    {
+      "group": "delivered_source_files",
+      "path": "_scratch/protected-asr-constructor01/worker_runtime_owner.py",
+      "expected": {
+        "bytes": 19297,
+        "sha256": "95c7aefbc735cca2ad30135d5dd966eea1857c142d06b052063c678c86dd33a9"
+      },
+      "actual": {
+        "bytes": 19297,
+        "sha256": "95c7aefbc735cca2ad30135d5dd966eea1857c142d06b052063c678c86dd33a9"
+      },
+      "match": true
+    },
+    {
+      "group": "delivered_source_files",
+      "path": "_scratch/protected-asr-constructor01/owned_generation_protocol.py",
+      "expected": {
+        "bytes": 25977,
+        "sha256": "e518cb468f4340a1599acb50fc059145fb27f290d969e440762d35dda5f5e8c5"
+      },
+      "actual": {
+        "bytes": 25977,
+        "sha256": "e518cb468f4340a1599acb50fc059145fb27f290d969e440762d35dda5f5e8c5"
+      },
+      "match": true
+    },
+    {
+      "group": "delivered_source_files",
+      "path": "_scratch/protected-asr-constructor01/after/whisperx/asr.py",
+      "expected": {
+        "bytes": 22076,
+        "sha256": "4ea96ed4aceacf496690ea113b72fd2fab24dcc3c3078b2c01129e94451be582"
+      },
+      "actual": {
+        "bytes": 22076,
+        "sha256": "4ea96ed4aceacf496690ea113b72fd2fab24dcc3c3078b2c01129e94451be582"
+      },
+      "match": true
+    },
+    {
+      "group": "delivered_source_files",
+      "path": "_scratch/protected-asr-constructor01/after/whisperx/_uoink_owned.py",
+      "expected": {
+        "bytes": 2486,
+        "sha256": "9ec39fafbb5dc8500abf76d8ffdd9441d6e6ca4fd1994bdd08d6eb3565a6bbc3"
+      },
+      "actual": {
+        "bytes": 2486,
+        "sha256": "9ec39fafbb5dc8500abf76d8ffdd9441d6e6ca4fd1994bdd08d6eb3565a6bbc3"
+      },
+      "match": true
+    },
+    {
+      "group": "delivered_source_files",
+      "path": "_scratch/protected-asr-constructor01/owned_asr_engine.py",
+      "expected": {
+        "bytes": 9580,
+        "sha256": "dc06b5fff1c3fccd80f8afe65f9070adb7da4d0c1aa3d16070bb05b4337f5af0"
+      },
+      "actual": {
+        "bytes": 9580,
+        "sha256": "dc06b5fff1c3fccd80f8afe65f9070adb7da4d0c1aa3d16070bb05b4337f5af0"
+      },
+      "match": true
+    },
+    {
+      "group": "delivered_source_files",
+      "path": "_scratch/protected-asr-constructor01/test_protected_asr_constructor.py",
+      "expected": {
+        "bytes": 23493,
+        "sha256": "a304eb44d0ab9428e1771176cce9ebfd9f09f2df7f21348ec13bf951043efda0"
+      },
+      "actual": {
+        "bytes": 23493,
+        "sha256": "a304eb44d0ab9428e1771176cce9ebfd9f09f2df7f21348ec13bf951043efda0"
+      },
+      "match": true
+    },
+    {
+      "group": "unified_diffs",
+      "path": "_scratch/protected-asr-constructor01/pinned_buffer_namespace.diff",
+      "expected": {
+        "bytes": 1470,
+        "sha256": "7e61e57edbf05a4b47f300784b1206d081699f6f508bab78335e64f191ad61e4"
+      },
+      "actual": {
+        "bytes": 1470,
+        "sha256": "7e61e57edbf05a4b47f300784b1206d081699f6f508bab78335e64f191ad61e4"
+      },
+      "match": true
+    },
+    {
+      "group": "unified_diffs",
+      "path": "_scratch/protected-asr-constructor01/inherited_readset.diff",
+      "expected": {
+        "bytes": 2038,
+        "sha256": "00676f72774ffd9d4f4eee6bb9771c7e6c156c4650faeaf4407e921ee3b62561"
+      },
+      "actual": {
+        "bytes": 2038,
+        "sha256": "00676f72774ffd9d4f4eee6bb9771c7e6c156c4650faeaf4407e921ee3b62561"
+      },
+      "match": true
+    },
+    {
+      "group": "unified_diffs",
+      "path": "_scratch/protected-asr-constructor01/worker_runtime_owner.diff",
+      "expected": {
+        "bytes": 10181,
+        "sha256": "b5aaafc80a1adccf928c3ddc0db3adc2cdf27a8f1f1dba1289f26ff9c650ba41"
+      },
+      "actual": {
+        "bytes": 10181,
+        "sha256": "b5aaafc80a1adccf928c3ddc0db3adc2cdf27a8f1f1dba1289f26ff9c650ba41"
+      },
+      "match": true
+    },
+    {
+      "group": "unified_diffs",
+      "path": "_scratch/protected-asr-constructor01/owned_generation_protocol.diff",
+      "expected": {
+        "bytes": 3582,
+        "sha256": "b744783778f97695ee39474128c1df6604b47d577682f0dcf7038f9e0cfb5cda"
+      },
+      "actual": {
+        "bytes": 3582,
+        "sha256": "b744783778f97695ee39474128c1df6604b47d577682f0dcf7038f9e0cfb5cda"
+      },
+      "match": true
+    },
+    {
+      "group": "unified_diffs",
+      "path": "_scratch/protected-asr-constructor01/asr.diff",
+      "expected": {
+        "bytes": 4895,
+        "sha256": "bcf21570b18c1c193accfec7cec1babb6191dafd817c8378af4a3db4188c103d"
+      },
+      "actual": {
+        "bytes": 4895,
+        "sha256": "bcf21570b18c1c193accfec7cec1babb6191dafd817c8378af4a3db4188c103d"
+      },
+      "match": true
+    },
+    {
+      "group": "unified_diffs",
+      "path": "_scratch/protected-asr-constructor01/_uoink_owned.diff",
+      "expected": {
+        "bytes": 700,
+        "sha256": "d1eb4f599d65e132f6adc47d727bf451e1baca5dc81a0cd629168e23af4a81c2"
+      },
+      "actual": {
+        "bytes": 700,
+        "sha256": "d1eb4f599d65e132f6adc47d727bf451e1baca5dc81a0cd629168e23af4a81c2"
+      },
+      "match": true
+    }
+  ],
+  "mismatches": [
+    {
+      "group": "inputs",
+      "path": "_scratch/windows-interrupted-owner-native-proposal02/model_binding_registry.py",
+      "expected": {
+        "bytes": 12891,
+        "sha256": "48567add0f0ac2ac9140e9aa86b06f077454c98e2f0773100da5ba070f7b3deb"
+      },
+      "actual": {
+        "bytes": 8732,
+        "sha256": "48567add0f0ac2ac9140e9aa86b06f077454c98e2f0773100da5ba070f7b3deb"
+      },
+      "match": false
+    },
+    {
+      "group": "inputs",
+      "path": "_scratch/windows-interrupted-owner-native-proposal02/owned_factory_port.py",
+      "expected": {
+        "bytes": 9763,
+        "sha256": "2569853c7634b795e3d2cf717129ec3dbc4e11d96ddb347098dcc4fbc532f0d4"
+      },
+      "actual": {
+        "bytes": 15463,
+        "sha256": "2569853c7634b795e3d2cf717129ec3dbc4e11d96ddb347098dcc4fbc532f0d4"
+      },
+      "match": false
+    },
+    {
+      "group": "inputs",
+      "path": "_scratch/b3-offline-wheel-cleanroom-2026-09-08/recipe/B2.py.txt",
+      "expected": {
+        "bytes": 27284,
+        "sha256": "a41a4a4d6735e5ef050eb4323c28b6d8591ef140f0c053531bcf6a6f1dffb6f8"
+      },
+      "actual": null,
+      "match": false
+    },
+    {
+      "group": "inputs",
+      "path": "_scratch/runtime-migration-faster-whisper-fixtures-2026-09-12/fixtures/upstream-text/faster_whisper/feature_extractor.py.txt",
+      "expected": {
+        "bytes": 6634,
+        "sha256": "8140db02ca1e4fcb48e3cf241bf8f6b28ebecb7814b77f98502ce5fdb649f8bb"
+      },
+      "actual": null,
+      "match": false
+    },
+    {
+      "group": "inputs",
+      "path": "_scratch/runtime-owner-native-fake33-2026-09-13/author-preparation/EXPECTED-CASES.json",
+      "expected": {
+        "bytes": 3274,
+        "sha256": "cfbb1f919d369f4460c4fa7df7042a3ebefd996cb88a0889246114ec31b54a85"
+      },
+      "actual": null,
+      "match": false
+    }
+  ]
+}

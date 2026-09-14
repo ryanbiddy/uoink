@@ -1,0 +1,209 @@
+{
+  "schema": "uoink.protected-asr-constructor.v1",
+  "scope": "Protected ASR constructor connection source proposal, before copies, diffs, and inert unit tests",
+  "repository": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library",
+  "worktree": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\e6133b1f-fc8\\gemini",
+  "proposal_root": "_scratch/protected-asr-constructor01",
+  "brief": "docs/library/PROTECTED-ASR-CONSTRUCTOR-BRIEF-2026-09-14.md",
+  "native02_verdict": "docs/library/ASTRA-INTERRUPTED-NATIVE02-VERDICT-2026-09-14.md",
+  "execution_authority": false,
+  "inputs": [
+    {
+      "path": "_scratch/windows-interrupted-owner-native-proposal02/pinned_buffer_namespace.py",
+      "bytes": 7893,
+      "sha256": "2cc25a7a254f35d802336ef121cc860887a4301b3257588438dddec392fe0b7b",
+      "role": "native02 pinned buffer namespace source"
+    },
+    {
+      "path": "_scratch/windows-interrupted-owner-native-proposal02/inherited_readset.py",
+      "bytes": 12391,
+      "sha256": "02be8e04f4bea3030faf0882ae48ead40716c5782f95e2790e1a9897c5be76e3",
+      "role": "native02 inherited readset source"
+    },
+    {
+      "path": "_scratch/windows-interrupted-owner-native-proposal02/worker_runtime_owner.py",
+      "bytes": 12997,
+      "sha256": "5647023ed03c5acfd8b1aa981a56171dd92228ccc0972f12546bb0b3d411ce87",
+      "role": "native02 worker runtime owner proposal source"
+    },
+    {
+      "path": "_scratch/windows-interrupted-owner-native-proposal02/owned_generation_protocol.py",
+      "bytes": 24403,
+      "sha256": "bd5204ef0d3fc2a459df19bc5f02fd7b6d78041e2306b4031ab888387aa362c0",
+      "role": "native02 owned generation protocol and WorkerBootstrap source"
+    },
+    {
+      "path": "_scratch/windows-interrupted-owner-native-proposal02/model_binding_registry.py",
+      "bytes": 12891,
+      "sha256": "48567add0f0ac2ac9140e9aa86b06f077454c98e2f0773100da5ba070f7b3deb",
+      "role": "native02 model binding registry context"
+    },
+    {
+      "path": "_scratch/windows-interrupted-owner-native-proposal02/owned_factory_port.py",
+      "bytes": 9763,
+      "sha256": "2569853c7634b795e3d2cf717129ec3dbc4e11d96ddb347098dcc4fbc532f0d4",
+      "role": "native02 owned factory port and VAD context"
+    },
+    {
+      "path": "_scratch/whisperx-owned-derivative-proposal01/after/whisperx/asr.py",
+      "bytes": 17608,
+      "sha256": "723bfba5775cb4a610368e1ad706fc55131bc9a2e8ea2f1e1a2b55cd6e8b5d42",
+      "role": "owned WhisperX derivative ASR loader source"
+    },
+    {
+      "path": "_scratch/whisperx-owned-derivative-proposal01/after/whisperx/_uoink_owned.py",
+      "bytes": 2109,
+      "sha256": "7672f614d81cf0be5e7bd408f8f856af328fe34e6ca7ee707c9d0db838e56d1f",
+      "role": "owned WhisperX derivative helpers source"
+    },
+    {
+      "path": "_scratch/b3-offline-wheel-cleanroom-2026-09-08/recipe/B2.py.txt",
+      "bytes": 27284,
+      "sha256": "a41a4a4d6735e5ef050eb4323c28b6d8591ef140f0c053531bcf6a6f1dffb6f8",
+      "role": "captured B3 faster-whisper WhisperModel constructor recipe"
+    },
+    {
+      "path": "_scratch/runtime-migration-faster-whisper-fixtures-2026-09-12/fixtures/upstream-text/faster_whisper/feature_extractor.py.txt",
+      "bytes": 6634,
+      "sha256": "8140db02ca1e4fcb48e3cf241bf8f6b28ebecb7814b77f98502ce5fdb649f8bb",
+      "role": "captured upstream feature extractor defaults reference"
+    },
+    {
+      "path": "_scratch/runtime-owner-native-fake33-2026-09-13/author-preparation/EXPECTED-CASES.json",
+      "bytes": 3274,
+      "sha256": "cfbb1f919d369f4460c4fa7df7042a3ebefd996cb88a0889246114ec31b54a85",
+      "role": "unchanged fake33 owner test inventory"
+    },
+    {
+      "path": "_scratch/whisperx-owned-builder-proposal01/EXPECTED-CASES.json",
+      "bytes": 4997,
+      "sha256": "ba102b90a7286cda90739ae2ffb2e3f6dad733a93f707193197f3044f44a6e53",
+      "role": "unchanged owned WhisperX50 test inventory"
+    }
+  ],
+  "before_copies": [
+    {
+      "path": "_scratch/protected-asr-constructor01/before/pinned_buffer_namespace.py",
+      "bytes": 7893,
+      "sha256": "2cc25a7a254f35d802336ef121cc860887a4301b3257588438dddec392fe0b7b"
+    },
+    {
+      "path": "_scratch/protected-asr-constructor01/before/inherited_readset.py",
+      "bytes": 12391,
+      "sha256": "02be8e04f4bea3030faf0882ae48ead40716c5782f95e2790e1a9897c5be76e3"
+    },
+    {
+      "path": "_scratch/protected-asr-constructor01/before/worker_runtime_owner.py",
+      "bytes": 12997,
+      "sha256": "5647023ed03c5acfd8b1aa981a56171dd92228ccc0972f12546bb0b3d411ce87"
+    },
+    {
+      "path": "_scratch/protected-asr-constructor01/before/owned_generation_protocol.py",
+      "bytes": 24403,
+      "sha256": "bd5204ef0d3fc2a459df19bc5f02fd7b6d78041e2306b4031ab888387aa362c0"
+    },
+    {
+      "path": "_scratch/protected-asr-constructor01/before/after/whisperx/asr.py",
+      "bytes": 17608,
+      "sha256": "723bfba5775cb4a610368e1ad706fc55131bc9a2e8ea2f1e1a2b55cd6e8b5d42"
+    },
+    {
+      "path": "_scratch/protected-asr-constructor01/before/after/whisperx/_uoink_owned.py",
+      "bytes": 2109,
+      "sha256": "7672f614d81cf0be5e7bd408f8f856af328fe34e6ca7ee707c9d0db838e56d1f"
+    }
+  ],
+  "delivered_source_files": [
+    {
+      "path": "_scratch/protected-asr-constructor01/pinned_buffer_namespace.py",
+      "bytes": 8839,
+      "sha256": "c753b13739ab339b60924ea040eb9b313624a3b60af2ff68b5883efee5e817af"
+    },
+    {
+      "path": "_scratch/protected-asr-constructor01/inherited_readset.py",
+      "bytes": 13377,
+      "sha256": "6bac68f40d0b1138e93f7272577097035073a15c6957e13a436d90d33a420dda"
+    },
+    {
+      "path": "_scratch/protected-asr-constructor01/worker_runtime_owner.py",
+      "bytes": 19297,
+      "sha256": "95c7aefbc735cca2ad30135d5dd966eea1857c142d06b052063c678c86dd33a9"
+    },
+    {
+      "path": "_scratch/protected-asr-constructor01/owned_generation_protocol.py",
+      "bytes": 25977,
+      "sha256": "e518cb468f4340a1599acb50fc059145fb27f290d969e440762d35dda5f5e8c5"
+    },
+    {
+      "path": "_scratch/protected-asr-constructor01/after/whisperx/asr.py",
+      "bytes": 22076,
+      "sha256": "4ea96ed4aceacf496690ea113b72fd2fab24dcc3c3078b2c01129e94451be582"
+    },
+    {
+      "path": "_scratch/protected-asr-constructor01/after/whisperx/_uoink_owned.py",
+      "bytes": 2486,
+      "sha256": "9ec39fafbb5dc8500abf76d8ffdd9441d6e6ca4fd1994bdd08d6eb3565a6bbc3"
+    },
+    {
+      "path": "_scratch/protected-asr-constructor01/owned_asr_engine.py",
+      "bytes": 9580,
+      "sha256": "dc06b5fff1c3fccd80f8afe65f9070adb7da4d0c1aa3d16070bb05b4337f5af0"
+    },
+    {
+      "path": "_scratch/protected-asr-constructor01/test_protected_asr_constructor.py",
+      "bytes": 23493,
+      "sha256": "a304eb44d0ab9428e1771176cce9ebfd9f09f2df7f21348ec13bf951043efda0"
+    }
+  ],
+  "unified_diffs": [
+    {
+      "path": "_scratch/protected-asr-constructor01/pinned_buffer_namespace.diff",
+      "bytes": 1470,
+      "sha256": "7e61e57edbf05a4b47f300784b1206d081699f6f508bab78335e64f191ad61e4"
+    },
+    {
+      "path": "_scratch/protected-asr-constructor01/inherited_readset.diff",
+      "bytes": 2038,
+      "sha256": "00676f72774ffd9d4f4eee6bb9771c7e6c156c4650faeaf4407e921ee3b62561"
+    },
+    {
+      "path": "_scratch/protected-asr-constructor01/worker_runtime_owner.diff",
+      "bytes": 10181,
+      "sha256": "b5aaafc80a1adccf928c3ddc0db3adc2cdf27a8f1f1dba1289f26ff9c650ba41"
+    },
+    {
+      "path": "_scratch/protected-asr-constructor01/owned_generation_protocol.diff",
+      "bytes": 3582,
+      "sha256": "b744783778f97695ee39474128c1df6604b47d577682f0dcf7038f9e0cfb5cda"
+    },
+    {
+      "path": "_scratch/protected-asr-constructor01/asr.diff",
+      "bytes": 4895,
+      "sha256": "bcf21570b18c1c193accfec7cec1babb6191dafd817c8378af4a3db4188c103d"
+    },
+    {
+      "path": "_scratch/protected-asr-constructor01/_uoink_owned.diff",
+      "bytes": 700,
+      "sha256": "d1eb4f599d65e132f6adc47d727bf451e1baca5dc81a0cd629168e23af4a81c2"
+    }
+  ],
+  "qualification_suites": {
+    "fake33_cases_unchanged": 33,
+    "whisperx50_cases_unchanged": 50,
+    "new_case_ids": [
+      "test_protected_asr_constructor.ProtectedASRConstructorCases.test_01_five_file_forwarding_preserves_namespace_and_returns_engine_ownership",
+      "test_protected_asr_constructor.ProtectedASRConstructorCases.test_02_four_file_model_policy_tiny_refuses_path_probe_and_identifies_companion_delta",
+      "test_protected_asr_constructor.ProtectedASRConstructorCases.test_03_four_file_model_policy_base_refuses_path_probe_and_identifies_companion_delta",
+      "test_protected_asr_constructor.ProtectedASRConstructorCases.test_04_four_file_model_policy_small_refuses_path_probe_and_identifies_companion_delta",
+      "test_protected_asr_constructor.ProtectedASRConstructorCases.test_05_four_file_model_policy_medium_refuses_path_probe_and_identifies_companion_delta",
+      "test_protected_asr_constructor.ProtectedASRConstructorCases.test_06_missing_tokenizer_refused_before_constructor_and_hub_fallback",
+      "test_protected_asr_constructor.ProtectedASRConstructorCases.test_07_preprocessor_path_fallback_blocked_without_companion_delta",
+      "test_protected_asr_constructor.ProtectedASRConstructorCases.test_08_forged_caller_created_namespace_refused_by_owner",
+      "test_protected_asr_constructor.ProtectedASRConstructorCases.test_09_stale_and_revoked_namespace_refused_by_owner",
+      "test_protected_asr_constructor.ProtectedASRConstructorCases.test_10_foreign_namespace_from_different_owner_refused",
+      "test_protected_asr_constructor.ProtectedASRConstructorCases.test_11_cpu_and_options_mismatch_refused",
+      "test_protected_asr_constructor.ProtectedASRConstructorCases.test_12_constructor_failure_preserves_first_error_and_retains_uncertain_owner",
+      "test_protected_asr_constructor.ProtectedASRConstructorCases.test_13_revocation_and_cleanup_failure_retains_process_retirement_path"
+    ]
+  }
+}
