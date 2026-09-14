@@ -1,0 +1,7 @@
+{
+  "chunk_id": "334b30",
+  "wall_time_seconds": 1.1301599,
+  "exit_code": 0,
+  "original_token_count": 216,
+  "output": "{\r\n  \"files\": 193,\r\n  \"bytes\": 2178625,\r\n  \"maximum_file_bytes\": 44041,\r\n  \"groups\": [\r\n    {\r\n      \"source_root\": \"_scratch/windows-stable-directory-identity-proposal01\",\r\n      \"destination_root\": \"proposal01\",\r\n      \"files\": 112,\r\n      \"bytes\": 1297153\r\n    },\r\n    {\r\n      \"source_root\": \"_scratch/astra-stable-directory-confirmation01\",\r\n      \"destination_root\": \"independent01\",\r\n      \"files\": 70,\r\n      \"bytes\": 861501\r\n    },\r\n    {\r\n      \"source_root\": \"_scratch/windows-stable-directory-source-review01\",\r\n      \"destination_root\": \"source-review01\",\r\n      \"files\": 3,\r\n      \"bytes\": 11127\r\n    },\r\n    {\r\n      \"source_root\": \"eight exact named root files\",\r\n      \"destination_root\": \"root\",\r\n      \"files\": 8,\r\n      \"bytes\": 8844\r\n    }\r\n  ],\r\n  \"inventory_sha256\": \"426731154672e23c504d0a9c01f0fdcbf29c7011e911184b60e7f1252deb8a62\"\r\n}\r\n"
+}

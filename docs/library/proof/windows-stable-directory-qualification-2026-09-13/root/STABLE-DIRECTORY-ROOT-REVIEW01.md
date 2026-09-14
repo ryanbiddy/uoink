@@ -1,0 +1,13 @@
+# Stable directory identity qualification review
+
+2026-09-13. Root source review supports one generated 81-case run after the final independent review and exact admission. No native or model execution is included. Failed writer02/03 remain failed.
+
+Root read both complete product diffs, all 11 new regression cases, the full qualifier and PowerShell launcher, the affected native identity and pin methods, brief, protocol and wider comparison review. The new helper separates directory identity from mutable size while leaving the six-field dataclass and regular-file equality unchanged. Exact path, volume, file ID, link count and true directory flags remain required; invalid size domains still refuse. The existing native query rejects reparses, pending deletion and negative sizes before comparison. No query or permission was added.
+
+The native03 receipt directly records size4096 to8192 with the other fields identical. Microsoft's [FILE_ID_INFO](https://learn.microsoft.com/en-us/windows/win32/api/winbase/ns-winbase-file_id_info) documentation identifies an open file by volume serial and file ID; [FILE_STANDARD_INFO](https://learn.microsoft.com/en-us/windows/win32/api/winbase/ns-winbase-file_standard_info) reports size separately. The observed growth comes from the receipt, not an inference that Microsoft promises directory sizes are constant or describes this exact workload.
+
+The 70 original cases remain byte-identical. Eleven added controls exercise ancestor growth through clear/release, other-field replacement before and after journal ownership, invalid sizes, both directory and regular-file pinning, reparse/delete refusals, diagnostic preservation and refusal after flush failure. Their fixed fake FFI values do not measure a Windows ABI or physical flush.
+
+The runner adds only the module/case membership and81 counts. All ten guards, closed content reads,12 metadata traps,25 built-in registry traps, actual-exit recording and source/control after-checks remain. Root read the final30-entry map identity after the documented seven-to-six historical-note correction:0462d15628f65591b3fc19dc36e50e19534f0e66db9de84536a90c3d951821df. Source hashes: primitive60d22036d6827205be5d0657af8e4693aa534605bdfb1b501878eb2a889fe25f; portb93076ab07b8c0567f6608520c99f5e5523be3dd388010a5a49037a4a899f775; runnera52142fdafd7784bdd23362c2798dce113a9f52e4c24c88bee54c8dd93715f4d; launcher48b4fd0cbf81893624a658893e8b80e1ea522be538882e13b045e54bfe872d66.
+
+No real checkpoint, converter, reader, namespace admission, runtime, installation or release is qualified by this source review. A new native writer04 observation requires its own reviewed source and admission after the generated checks.

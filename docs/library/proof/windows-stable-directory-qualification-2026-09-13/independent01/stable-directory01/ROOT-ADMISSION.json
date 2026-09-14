@@ -1,0 +1,7 @@
+{
+  "approved": true,
+  "label": "stable-directory01",
+  "pins_sha256": "0462d15628f65591b3fc19dc36e50e19534f0e66db9de84536a90c3d951821df",
+  "scope": "generated_bytes_and_fake_ports_only",
+  "note": "One independent generated stable-directory01 qualification in astra-stable-directory-confirmation01. All31 copied source/map bytes match reviewed author. Root1508fa08014e764d25a64300799b24bd75a60be5b6f9c74ad9d9cdb7b16fdf89; peer04bb6273b607d5a8698e81f5b4c17021a1093105d8e4e85c25a1ea585430540a. No native/model/D2 scope."
+}

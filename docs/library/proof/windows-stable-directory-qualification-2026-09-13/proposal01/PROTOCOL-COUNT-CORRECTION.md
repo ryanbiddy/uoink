@@ -1,0 +1,1 @@
+The unexecuted protocol draft counted seven historical notes. The actual 30-entry map retains six: API-AND-INTEGRATION, STARTUP-SPLIT, RELEASE-LOCK-REFINEMENT01, STOP-REFINEMENT02, PEER-REVIEW03-POISONING and NO-WORKER-REVIEW04. The wording is corrected to six; original draft is preserved. No source, test, runner, launcher or membership changed.

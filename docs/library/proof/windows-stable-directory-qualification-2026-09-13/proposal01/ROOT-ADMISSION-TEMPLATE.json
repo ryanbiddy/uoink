@@ -1,0 +1,7 @@
+{
+  "approved": false,
+  "label": "stable-directory01",
+  "pins_sha256": "0462d15628f65591b3fc19dc36e50e19534f0e66db9de84536a90c3d951821df",
+  "scope": "generated_bytes_and_fake_ports_only",
+  "note": "Unexecuted proposal; root must review and issue a distinct exact admission. No native/model scope."
+}

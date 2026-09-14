@@ -1,0 +1,7 @@
+{
+  "chunk_id": "a1b3f5",
+  "wall_time_seconds": 0.3494598,
+  "exit_code": 0,
+  "original_token_count": 46,
+  "output": "{\"author_passed\":81,\"copied_inputs\":31,\"all_source_and_map_bytes_unchanged\":true,\"independent_admission_sha256\":\"1beed4fdf2ab36dddae16b22d631c5eca8690e7c3abad8a745bf04bf5234d3e8\"}\r\n"
+}

@@ -1,0 +1,37 @@
+diff --git "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\windows-stable-directory-identity-proposal01\\before\\win32_worker_connection.py" "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\windows-stable-directory-identity-proposal01\\win32_worker_connection.py"
+index 953547d..057eec0 100644
+--- "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\windows-stable-directory-identity-proposal01\\before\\win32_worker_connection.py"
++++ "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\windows-stable-directory-identity-proposal01\\win32_worker_connection.py"
+@@ -166,6 +166,21 @@ class FileIdentity:
+     directory: bool
+ 
+ 
++def same_directory_identity(actual, expected):
++    """Retained directory identity; its observed byte length may change.
++
++    The native identity query still rejects reparse points and pending deletion.
++    Keep FileIdentity equality intact for regular files and recorded evidence.
++    """
++    return (type(actual) is FileIdentity and type(expected) is FileIdentity
++            and actual.directory is True and expected.directory is True
++            and type(actual.size) is int and 0 <= actual.size < 1 << 63
++            and type(expected.size) is int and 0 <= expected.size < 1 << 63
++            and actual.final_path == expected.final_path
++            and actual.volume_serial == expected.volume_serial
++            and actual.file_id == expected.file_id and actual.links == expected.links)
++
++
+ @dataclass
+ class HandleRecord:
+     value: int
+@@ -336,7 +351,9 @@ class OwnedWin32Primitives:
+                 handle = self._retain(value, "read-member")
+                 read_set.members.append(handle)
+                 actual = self.identity(handle)
+-                if actual != expected or (not actual.directory and actual.links != 1):
++                matched = (same_directory_identity(actual, expected) if expected.directory
++                           else actual == expected)
++                if not matched or (not actual.directory and actual.links != 1):
+                     raise KernelUnavailable("Opened identity differs from the exact approved member")
+                 read_set.identities.append(actual)
+             return read_set

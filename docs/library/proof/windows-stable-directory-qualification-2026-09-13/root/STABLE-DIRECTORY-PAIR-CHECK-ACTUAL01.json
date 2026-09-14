@@ -1,0 +1,7 @@
+{
+  "chunk_id": "92aef7",
+  "wall_time_seconds": 0.1716898,
+  "exit_code": 0,
+  "original_token_count": 272,
+  "output": "{\r\n  \"scope\": \"Generated stable-directory repair only\",\r\n  \"same_ordered_case_objects\": true,\r\n  \"observations\": [\r\n    {\r\n      \"root\": \"_scratch/windows-stable-directory-identity-proposal01\",\r\n      \"passed\": 81,\r\n      \"failed\": 0,\r\n      \"skipped\": 0,\r\n      \"subtests\": 72,\r\n      \"guards\": 10,\r\n      \"registry_traps\": 25,\r\n      \"elapsed_case_seconds\": 0.09175220000906847,\r\n      \"stdout_bytes\": 44041,\r\n      \"stdout_sha256\": \"04717a40fbc70a366d4b95126b64dfa0fa6490ee657bfe6a4a38d4caa31c40b5\",\r\n      \"inputs_unchanged\": true,\r\n      \"native_exit\": 0,\r\n      \"qualification_exit\": 0\r\n    },\r\n    {\r\n      \"root\": \"_scratch/astra-stable-directory-confirmation01\",\r\n      \"passed\": 81,\r\n      \"failed\": 0,\r\n      \"skipped\": 0,\r\n      \"subtests\": 72,\r\n      \"guards\": 10,\r\n      \"registry_traps\": 25,\r\n      \"elapsed_case_seconds\": 0.08587920002173632,\r\n      \"stdout_bytes\": 44041,\r\n      \"stdout_sha256\": \"1e3a5283cae7b9be6da83ba0e44da42b22349cc05e7a47c87e8b4ccc6052a7cb\",\r\n      \"inputs_unchanged\": true,\r\n      \"native_exit\": 0,\r\n      \"qualification_exit\": 0\r\n    }\r\n  ]\r\n}\r\n"
+}

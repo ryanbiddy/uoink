@@ -1,0 +1,71 @@
+diff --git "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\windows-stable-directory-identity-proposal01\\before\\windows_reservation_port.py" "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\windows-stable-directory-identity-proposal01\\windows_reservation_port.py"
+index 0e3a742..24de1cc 100644
+--- "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\windows-stable-directory-identity-proposal01\\before\\windows_reservation_port.py"
++++ "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\windows-stable-directory-identity-proposal01\\windows_reservation_port.py"
+@@ -5,7 +5,7 @@ from reservation_file_port import RetainedJournal, PersistenceUnconfirmed, MAX_J
+ from snapshot_reservations import (GeneratedGateRegistry, PhysicalSnapshot,
+     ReservationRefused, decode_journal)
+ from win32_worker_connection import (Win32API, FileIdentity, ReadSet, GENERIC_READ,
+-    OPEN_EXISTING, FILE_FLAG_OPEN_REPARSE_POINT, _absolute_local_path)
++    OPEN_EXISTING, FILE_FLAG_OPEN_REPARSE_POINT, _absolute_local_path, same_directory_identity)
+ 
+ GENERIC_WRITE = 0x40000000
+ FILE_FLAG_WRITE_THROUGH = 0x80000000
+@@ -94,12 +94,54 @@ def _check_scope(primitives, scope):
+           "entire_directory_ancestor_chain_required")
+     for path, handle, expected in zip(paths, owned.members, owned.identities):
+         actual = primitives.identity(handle)
+-        _need(type(expected) is FileIdentity and actual == expected and actual.directory
+-              and actual.final_path.casefold() == ("\\\\?\\" + path).casefold(),
+-              "directory_identity_or_final_path_changed")
++        try:
++            _need(same_directory_identity(actual, expected)
++                  and actual.final_path.casefold() == ("\\\\?\\" + path).casefold(),
++                  "directory_identity_or_final_path_changed")
++        except PersistenceUnconfirmed as error:
++            # Reporting only: the comparison has already refused. Retain no
++            # handle, buffer or new observation and never replace its exception.
++            try:
++                error._generated_directory_comparison = (expected, actual, paths.index(path), len(paths))
++            except BaseException:
++                pass
++            raise
+     return owned.identities[-1]
+ 
+ 
++def directory_refusal_diagnostic(error):
++    """Bounded passive fields from this exact comparison, never an I/O probe."""
++    if type(error) is not PersistenceUnconfirmed:
++        return None
++    values = vars(error).get("_generated_directory_comparison")
++    if values is None:
++        return None
++    unavailable = {"stage": "retained_directory_identity_comparison", "available": False}
++    try:
++        if (type(values) is not tuple or len(values) != 4
++                or type(values[2]) is not int or type(values[3]) is not int
++                or not 0 <= values[2] < values[3] <= 128):
++            return unavailable
++        rows = []
++        for value in values[:2]:
++            if (type(value) is not FileIdentity or type(value.final_path) is not str
++                    or not 0 < len(value.final_path) <= 32768
++                    or type(value.volume_serial) is not int or not 0 <= value.volume_serial < 1 << 64
++                    or type(value.file_id) is not bytes or len(value.file_id) != 16
++                    or type(value.size) is not int or not 0 <= value.size < 1 << 63
++                    or type(value.links) is not int or not 0 <= value.links < 1 << 32
++                    or type(value.directory) is not bool):
++                return unavailable
++            rows.append({"final_path": value.final_path, "volume_serial": value.volume_serial,
++                         "file_id": value.file_id.hex(), "size": value.size,
++                         "links": value.links, "directory": value.directory})
++        return {"stage": "retained_directory_identity_comparison", "available": True,
++                "prefix_index": values[2], "scope_depth": values[3],
++                "expected": rows[0], "observed": rows[1]}
++    except BaseException:
++        return unavailable
++
++
+ class WindowsJournalStream:
+     """Synchronous retained-handle stream. Flush latency is not hard-bounded.
+ 
