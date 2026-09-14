@@ -1,0 +1,114 @@
+{
+  "schema": "uoink.fixed-text-archive-map.v1",
+  "status": "SOURCE_CONCLUSION_ACCEPTED_WITH_MANDATORY_CORRECTIONS",
+  "run_id": "5444c59a-8ae1-4188-9b57-d967f04bbbb6",
+  "proof": "docs/library/proof/gemini-writer-correction02-2026-09-13",
+  "payload_count": 17,
+  "total_payload_bytes": 59369,
+  "worker_view_trace_verified": false,
+  "native_acceptance": false,
+  "files": [
+    {
+      "source": "docs/library/GEMINI-WRITER-EXCLUSION-CORRECTION02-2026-09-13.md",
+      "bytes": 3929,
+      "sha256": "266bed30fd2ba50b2b3d4fda488ea567e94e86de9ea1fbf494f072543de0093f",
+      "destination": "worker/GEMINI-WRITER-EXCLUSION-CORRECTION02-2026-09-13.md"
+    },
+    {
+      "source": "docs/library/GEMINI-WRITER-EXCLUSION-CORRECTION02-2026-09-13.coverage.json",
+      "bytes": 358,
+      "sha256": "5f4a48ae431e980679962539e7ac4b07001f0077f0414cfa312b6bd742c5611b",
+      "destination": "worker/GEMINI-WRITER-EXCLUSION-CORRECTION02-2026-09-13.coverage.json"
+    },
+    {
+      "source": "docs/library/ASTRA-GEMINI-WRITER-CORRECTION02-VERDICT-2026-09-13.md",
+      "bytes": 3178,
+      "sha256": "86d383b35adb8c9dc133a426133de3b044c9410af244e2d9e0680a363080cdd8",
+      "destination": "root/ASTRA-GEMINI-WRITER-CORRECTION02-VERDICT-2026-09-13.md"
+    },
+    {
+      "source": "_scratch/check-gemini-writer-correction02.py",
+      "bytes": 1875,
+      "sha256": "e7984db31cc0b9b4aeacb1989dd11c0d1f1bb683aedd427412b63322890b1629",
+      "destination": "root/check-gemini-writer-correction02.py"
+    },
+    {
+      "source": "_scratch/GEMINI-WRITER-CORRECTION02.patch",
+      "bytes": 5082,
+      "sha256": "6260660cb0ef3c57863e851ea361ac7b923fc869411791832f4044dee5558df9",
+      "destination": "worker/GEMINI-WRITER-CORRECTION02.patch"
+    },
+    {
+      "source": "_scratch/GEMINI-WRITER-CORRECTION02-DISPATCH-ACTUAL.json",
+      "bytes": 1618,
+      "sha256": "43b6bb7bb36f3e78136e966877d56ba6ff29b596bfbe138b80ad4efb5d9f360d",
+      "destination": "actual/GEMINI-WRITER-CORRECTION02-DISPATCH-ACTUAL.json"
+    },
+    {
+      "source": "_scratch/GEMINI-WRITER-CORRECTION02-POLL01-ACTUAL.json",
+      "bytes": 968,
+      "sha256": "b29cc2058b1560876cece00ad66a194ecb81e219a0d140f6826be3de3c83bb64",
+      "destination": "actual/GEMINI-WRITER-CORRECTION02-POLL01-ACTUAL.json"
+    },
+    {
+      "source": "_scratch/GEMINI-WRITER-CORRECTION02-COMPLETION-ACTUAL.json",
+      "bytes": 7549,
+      "sha256": "625bfe6817a374f8b92ca3ea00f5475a54650e44b2a7ec4414d28ef897fc9919",
+      "destination": "actual/GEMINI-WRITER-CORRECTION02-COMPLETION-ACTUAL.json"
+    },
+    {
+      "source": "_scratch/GEMINI-WRITER-CORRECTION02-ROOT-CHECK-ACTUAL.json",
+      "bytes": 593,
+      "sha256": "a73e51fa1283e790b95cafcc847e0cde8b3abb398d35d542e491bccb34ae369e",
+      "destination": "actual/GEMINI-WRITER-CORRECTION02-ROOT-CHECK-ACTUAL.json"
+    },
+    {
+      "source": "_scratch/GEMINI-WRITER-CORRECTION02-WORKER-PATCH-ACTUAL.json",
+      "bytes": 450,
+      "sha256": "09b355f00afa63483461e8aa34e56b743f1ff8be1ecebd05d0a7b64b0017a827",
+      "destination": "actual/GEMINI-WRITER-CORRECTION02-WORKER-PATCH-ACTUAL.json"
+    },
+    {
+      "source": "_scratch/GEMINI-WRITER-CORRECTION02-METADATA-ACTUAL.json",
+      "bytes": 845,
+      "sha256": "b2c1ddd0073a7d20ce79cbe2ad27ebf4a6b5a92f6ef483a57961fd56ae9563e8",
+      "destination": "actual/GEMINI-WRITER-CORRECTION02-METADATA-ACTUAL.json"
+    },
+    {
+      "source": "_scratch/GEMINI-WRITER-CORRECTION02-EXACT-BYTES-ACTUAL.json",
+      "bytes": 10483,
+      "sha256": "5ac16a7d2c6e36dc42ea0c8d54fd66b31275e28b8c1f31575e41676caae22b3d",
+      "destination": "actual/GEMINI-WRITER-CORRECTION02-EXACT-BYTES-ACTUAL.json"
+    },
+    {
+      "source": "_scratch/gemini-writer-correction02-peer-review01/VERDICT.md",
+      "bytes": 3775,
+      "sha256": "5b192571fc45456feec1d896ecd5b48472709c28d109824661a608a0a47c9dda",
+      "destination": "peer/VERDICT.md"
+    },
+    {
+      "source": "_scratch/gemini-writer-correction02-peer-review01/check_text.ps1",
+      "bytes": 5607,
+      "sha256": "e161c4fcd210e0b7774afb0f527b70f8ae744906da7d6ef770ec243be81b857b",
+      "destination": "peer/check_text.ps1"
+    },
+    {
+      "source": "_scratch/gemini-writer-correction02-peer-review01/CHECK-ACTUAL.json",
+      "bytes": 7017,
+      "sha256": "841bece7c3fc1a7f1d94a4673af4bcb391fbb3317e384fe75961066e0b0c7b10",
+      "destination": "peer/CHECK-ACTUAL.json"
+    },
+    {
+      "source": "docs/library/proof/writer-exclusion-correction02-brief-2026-09-13/BRIEF.md",
+      "bytes": 3855,
+      "sha256": "755c5cd51792444f8d4418bbe4e3df5937147975c65cb5bf4093e8233fef77b3",
+      "destination": "brief/BRIEF.md"
+    },
+    {
+      "source": "docs/library/proof/writer-exclusion-correction02-brief-2026-09-13/INPUT-SELECTION.json",
+      "bytes": 2187,
+      "sha256": "173324c8aa8b66ce55c35ba151bb34b89eb5351f7bb80fa332c87340b77b62ed",
+      "destination": "brief/INPUT-SELECTION.json"
+    }
+  ]
+}

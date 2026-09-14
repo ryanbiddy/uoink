@@ -1,0 +1,20 @@
+{
+  "schema": "uoink.archive-instrument-pins.v1",
+  "files": [
+    {
+      "path": "archive.ps1",
+      "bytes": 11353,
+      "sha256": "2ab68aa199d6024ccc513aab009a2c6679d974077d31fb7ea481ccf3fb68f370"
+    },
+    {
+      "path": "COPY-MAP.json",
+      "bytes": 4920,
+      "sha256": "2db1c9e28027fb2a4dde689f0f73965b827bbf77b0c41646e2440d4164c26c8b"
+    },
+    {
+      "path": "PROTOCOL.md",
+      "bytes": 2696,
+      "sha256": "35fadec318f9861e00af282dc04a6627c8d1a4615dba2c4ba0b0435355f2c48d"
+    }
+  ]
+}
