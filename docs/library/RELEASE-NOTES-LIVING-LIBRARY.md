@@ -36,6 +36,12 @@ Only the two exception expectations Ryan approved changed. Every retention
 assertion now executes successfully. The original 63-pass/2-fail observation
 at `58335df` stays failed. Native journal and recovery qualification remain open.
 
+The later retained-handle transfer at `2f4311f` passes70 cases and35 nested
+subtests in both copies. It preserves all corrected65 cases and adds five
+ownership/failure controls. These use fake services; actual Windows journal
+and crash-recovery behavior still require separate observations. Gemini's
+worker/journal council is running against the frozen brief at `d996dba`.
+
 The worker runtime owner at `1f200eb` passes the same 11 generated cases in both
 copies. It refuses result publication after VAD retirement, product/module
 replacement or model-lease revocation. The actual factory method uses fake tensor
