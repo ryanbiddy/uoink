@@ -1,0 +1,219 @@
+--- before/owned_generation_protocol.py
++++ proposal/owned_generation_protocol.py
+@@ -12,6 +12,8 @@
+ import struct
+ from threading import RLock
+ from snapshot_lifecycle import Phase
++from worker_runtime_owner import _WorkerRuntimeOwnerProposal
++from owned_factory_port import _OwnedFactoryPortProposal
+ 
+ MAGIC = b"UOINKGP1"
+ HEADER = struct.Struct("!8sBQI")
+@@ -251,28 +253,31 @@
+ 
+ 
+ class WorkerBootstrap:
+-    """Connects one authenticated challenge to the existing local model registry.
+-
+-    registry_type/factory_type come from fixed bootstrap imports and must never
+-    be selected by a frame. Actual trusted pipe/launch provenance is not supplied
+-    by this object; the public real launcher remains unavailable.
++    """Fixed worker-local owner connection; real worker activation stays closed.
++
++    Type identities come from fixed source-bound imports, never an IPC frame.
++    The generated input helpers are not real namespace/PCM issuance. Guard
++    installation and native quiescence still belong to the admitted bootstrap.
+     """
+ 
+     def __init__(self, channel, registry_type, factory_type):
+         _require(type(channel) is GenerationChannel and channel._send_direction == 1, "worker_channel_required")
+-        _require(isinstance(registry_type, type) and isinstance(factory_type, type), "fixed_bootstrap_types")
++        _require(registry_type is _WorkerRuntimeOwnerProposal
++                 and factory_type is _OwnedFactoryPortProposal, "fixed_owner_and_factory_types")
+         self._channel, self._registry_type, self._factory_type = channel, registry_type, factory_type
+         self._permit = None
+         self.registry = None
+         self._ready = False
+         self._started = False
+         self._closed = False
+-        self._factory_lock = RLock()
+-        self._factory_active = False
++        self._quarantined = False
+         self._factory_attempted = False
++        self._factory_inputs = None
+         self._factory = None
+         self._product = None
+         self._runtime_module = None
++        self._generated_namespace = None
++        self._generated_pcm = None
+ 
+     def accept_challenge(self, frame):
+         _require(not self._ready and not self._closed, "bootstrap_single_use")
+@@ -293,55 +298,90 @@
+             raise
+ 
+     @contextmanager
+-    def _factory_operation(self):
+-        with self._factory_lock:
+-            _require(not self._factory_active, "factory_operation_already_active")
+-            self._factory_active = True
++    def _owner_operation(self, phase):
++        # This is the only work admission mechanism. No independent factory
++        # mutex can allow use/release to overlap a constructor or lazy step.
+         try:
+-            yield
+-        finally:
+-            with self._factory_lock:
+-                self._factory_active = False
++            owner = self.registry
++            _require(type(owner) is _WorkerRuntimeOwnerProposal, "worker_owner_identity")
++            with owner.operation(self._permit, phase) as token:
++                _require(self._ready and self._started and not self._closed,
++                         "worker_generation_not_started")
++                self._channel._live()
++                yield token
++                with owner._lock:
++                    owner._live_locked()
++                    _require(not self._closed and self.registry is owner, "worker_publication_revoked")
++        except BaseException as original:
++            self.close_preserving(original)
++            raise
++
++    def issue_generated_inputs(self, pieces, media_identity, raw_f32le):
++        # Fixed generated qualification only. Nothing here attests a decoder,
++        # authenticated ReadSet, absolute model path or native ndarray storage.
++        with self._owner_operation("issue"):
++            self._generated_namespace = self.registry.issue_generated_namespace(self._permit, pieces)
++            self._generated_pcm = self.registry.issue_generated_pcm(self._permit, media_identity, raw_f32le)
++            return {"issued_generated_inputs": True}
+ 
+     def build_factory_product(self, fixed_factory, tensor_port, owned_runtime_module,
+                               state, state_binding, fixed_recipe_sha256):
+-        # All arguments are fixed worker-side inputs, never decoded frame data.
+-        with self._factory_operation():
+-            _require(self._ready and self._started and not self._closed and not self._factory_attempted,
+-                     "worker_generation_not_started_or_factory_used")
+-            self._channel._live()
+-            self.registry.assert_active()
++        # Worker-side fixed inputs only. No model/factory object enters IPC.
++        with self._owner_operation("factory"):
++            _require(not self._factory_attempted, "factory_already_attempted")
+             _require(getattr(owned_runtime_module, "_RUNTIME", None) is self.registry,
+                      "owned_runtime_registry_binding_required")
++            self.registry.assert_generated_namespace_binding(self._generated_namespace)
+             self._factory_attempted = True
+             self._runtime_module = owned_runtime_module
+-            try:
+-                factory = self._factory_type(fixed_factory, tensor_port, owned_runtime_module)
+-                self._factory = factory
+-                capability = self.registry._issue_for_bootstrap(self._permit, factory, state_binding, fixed_recipe_sha256)
+-                factory._bind_model_capability(capability)
+-                self._product = factory.build_strict_owned(state)
+-                self.registry.assert_active()
+-                _require(getattr(self._runtime_module, "_RUNTIME", None) is self.registry,
+-                         "owned_runtime_registry_binding_changed")
+-                _require(not self._closed and self._product is not None, "factory_publication_revoked")
++            # Retain inputs before constructor entry, including failures before
++            # a returned factory can be assigned. No close path clears them.
++            self._factory_inputs = (fixed_factory, tensor_port, state, state_binding)
++            factory = self._factory_type(fixed_factory, tensor_port, owned_runtime_module)
++            self._factory = factory
++            capability = self.registry._issue_for_bootstrap(self._permit, factory, state_binding, fixed_recipe_sha256)
++            factory._bind_model_capability(capability)
++            self._product = factory.build_strict_owned(state)
++            self.registry.register_vad_product_for_bootstrap(
++                self._permit, factory, self._product, owned_runtime_module)
++            # Register the actual completed model/product/lease before any
++            # passive success is returned. The real inference link is unproved.
++            with self.registry._lock:
++                self.registry.assert_vad_binding(self._product)
++                _require(not self._closed, "factory_publication_revoked")
+                 return {"built": True}
+-            except BaseException as original:
+-                self.close_preserving(original)
+-                raise
++
++    @contextmanager
++    def use_operation(self):
++        # A fixed future dispatcher keeps each native/lazy cursor step inside
++        # this scope. The token stays local and conveys no model authority.
++        with self._owner_operation("use") as token:
++            self.registry.assert_vad_binding(self._product)
++            yield token
++            self.registry.assert_vad_binding(self._product)
++
++    def encode_generated_text(self, text):
++        with self.use_operation() as token:
++            # Commit passive output under the same owner state lock as revoke.
++            # A frame committed first may reach its caller after a later close;
++            # controller lifecycle/publication checks still govern consumption.
++            with self.registry._lock:
++                _require(not self._closed, "worker_publication_revoked")
++                self.registry.assert_waveform_binding(self._generated_pcm, sample_rate=16000)
++                value = self.registry.publish_generated_text(token, self._generated_pcm, text)
++                return self._channel.encode("done", {"generated_text": value})
+ 
+     def release_factory_product(self):
+-        with self._factory_operation():
++        with self._owner_operation("release"):
+             _require(self._factory is not None and self._product is not None, "owned_factory_product_absent")
+-            try:
+-                _require(getattr(self._runtime_module, "_RUNTIME", None) is self.registry,
+-                         "owned_runtime_registry_binding_changed")
+-                self._factory.release_product(self._product)
++            # The owner marks the exact VAD inactive, calls the actual factory
++            # release, and retains its record if release raises or revoke wins.
++            self.registry.retire_vad_product_for_bootstrap(self._permit, self._factory, self._product)
++            with self.registry._lock:
++                self.registry._live_locked()
++                _require(not self._closed, "factory_retirement_revoked")
+                 self._product = None
+                 return {"retired_by_factory": True}
+-            except BaseException as original:
+-                self.close_preserving(original)
+-                raise
+ 
+     def accept_begin(self, frame):
+         _require(self._ready and not self._started and not self._closed, "begin_order")
+@@ -356,17 +396,33 @@
+             raise
+ 
+     def close_preserving(self, original=None):
++        # Retain inputs/factory/product/PCM. This is logical revocation, not a
++        # native cancel/join, destructor call or durable recovery observation.
+         self._closed = True
+         self._ready = False
+         self._started = False
+-        self._channel.revoke()
+-        try:
+-            if self.registry is not None:
+-                self.registry.revoke_generation(self._permit)
+-        except BaseException as error:
+-            if original is None:
+-                raise
+-            original.add_note("Worker registry revocation remains unconfirmed: " + type(error).__name__)
++        if original is not None:
++            self._quarantined = True
++        first = original
++        failures = []
++        # Each revocation is attempted even if the other raises. Preserve the
++        # first exception identity; notes never replace the original failure.
++        for operation in (self._revoke_owner, self._channel.revoke):
++            try:
++                operation()
++            except BaseException as error:
++                self._quarantined = True
++                failures.append(type(error).__name__)
++                if first is None:
++                    first = error
++                else:
++                    BaseException.add_note(first, "Worker revocation remains unconfirmed: " + type(error).__name__)
++        if original is None and first is not None:
++            raise first
++
++    def _revoke_owner(self):
++        if self.registry is not None:
++            self.registry.revoke_generation(self._permit)
+ 
+ 
+ class ControllerHandshake:

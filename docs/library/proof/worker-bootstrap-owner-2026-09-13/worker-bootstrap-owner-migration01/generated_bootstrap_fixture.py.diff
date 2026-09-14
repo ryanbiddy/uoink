@@ -1,0 +1,64 @@
+--- retained/generated_factory_fixture.py
++++ proposal/generated_bootstrap_fixture.py
+@@ -5,6 +5,7 @@
+ import math
+ import struct
+ import types
++import owned_generation_protocol as protocol
+ import state_bridge as bridge
+ import owned_cpu_tensor_port as cpu
+ import model_binding_registry as registry_module
+@@ -126,31 +127,25 @@
+         digests.append((key, shape, hashlib.sha256(bytes(tensor.storage.data)).digest()))
+     binding = Binding(hashlib.sha256(b'inert generated state').hexdigest(),
+                       hashlib.sha256(b'inert admitted profile').hexdigest(), tuple(digests))
+-    bootstrap = object()
+-    registry = Registry(bootstrap, Factory)
++    generation = protocol.GenerationBinding('11' * 32, '22' * 32, '33' * 32, '44' * 32, 1)
++    # Fixed generated channel material, not a provider credential or real IPC.
++    controller = protocol.GenerationChannel(generation, b'\x55' * 32, 'controller')
++    channel = protocol.GenerationChannel(generation, b'\x55' * 32, 'worker')
++    bootstrap = protocol.WorkerBootstrap(channel, Registry, Factory)
+     previous_runtime, previous_model = guard._RUNTIME, Model
+-    guard._RUNTIME, Model = registry, FakePyanNet
+-    factory = None
++    assert previous_runtime is None and previous_model is object
++    Model = FakePyanNet
+     try:
+-        with registry.operation(bootstrap, 'issue'):
+-            namespace = registry.issue_generated_namespace(bootstrap, (b'config', b'generated text', b'preprocessor', b'tokens', b'vocabulary'))
+-            media = object()
+-            pcm = registry.issue_generated_pcm(bootstrap, media, struct.pack('<4f', 0.0, 0.25, -0.25, 0.0))
+-        with registry.operation(bootstrap, 'factory'):
+-            factory = Factory(fixed, tensor_port, guard)
+-            capability = registry._issue_for_bootstrap(bootstrap, factory, binding, registry_module.FIXED_RECIPE_SHA256)
+-            factory._bind_model_capability(capability)
+-            product = factory.build_strict_owned(state)
+-            registry.register_vad_product_for_bootstrap(bootstrap, factory, product, guard)
+-        value = types.SimpleNamespace(runtime=runtime, fixed=fixed, port=tensor_port, state=state,
+-                                      binding=binding, bootstrap=bootstrap, registry=registry,
+-                                      factory=factory, capability=capability, product=product,
+-                                      namespace=namespace, pcm=pcm, media=media)
+-        yield value
++        # No model, VAD, capability, generated PCM or namespace exists yet.
++        # The actual case must drive bootstrap issue/build/register itself.
++        yield types.SimpleNamespace(runtime=runtime, fixed=fixed, port=tensor_port,
++            state=state, state_binding=binding, generation=generation,
++            controller=controller, channel=channel, bootstrap=bootstrap)
+     finally:
+-        # Fixture teardown only, after assertions. Do not call the factory again
+-        # or reinterpret a failed cleanup as successful native reclamation.
+-        registry.revoke_generation(bootstrap)
++        # Generated teardown only. It is not evidence of native cleanup or a
++        # substitute for bootstrap retirement assertions in the case body.
++        bootstrap.close_preserving()
++        factory = bootstrap._factory
+         if factory is not None and factory._completed is not None:
+             factory.release_product(factory._completed.vad)
+         if factory is not None and factory._quarantined_owner is not None:
+@@ -158,4 +153,5 @@
+         for tensor in state.values():
+             tensor_port.release_owned(tensor)
+         state.clear()
++        controller.revoke()
+         guard._RUNTIME, Model = previous_runtime, previous_model

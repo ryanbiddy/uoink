@@ -1,0 +1,39 @@
+{
+  "candidate_execution": false,
+  "distinct_cases": 17,
+  "observations": [
+    {
+      "root": "worker-bootstrap-owner-instrument01",
+      "cases": 17,
+      "passed": 17,
+      "failed": 0,
+      "skipped": 0,
+      "elapsed_seconds": 27.749082199996337,
+      "native_exit": 0,
+      "outer_exit": 0,
+      "stdout_bytes": 7211,
+      "stderr_bytes": 0,
+      "guard_valid": true,
+      "inputs_unchanged": true,
+      "admission_sha256": "0e5be64fbe020baa428ecad357cd5ba501f97e4a5ba47abc4b752751a4a593dc"
+    },
+    {
+      "root": "astra-worker-bootstrap-owner-confirmation01",
+      "cases": 17,
+      "passed": 17,
+      "failed": 0,
+      "skipped": 0,
+      "elapsed_seconds": 27.439695799985202,
+      "native_exit": 0,
+      "outer_exit": 0,
+      "stdout_bytes": 7211,
+      "stderr_bytes": 0,
+      "guard_valid": true,
+      "inputs_unchanged": true,
+      "admission_sha256": "9b488f9dbe4fe28d042a8589b074b30b3ba2317d05595708bb3b5eac61c437c8"
+    }
+  ],
+  "exact_ordered_case_objects_equal": true,
+  "all_seventeen_child_hashes_equal": true,
+  "preparation75_verified_unchanged": true
+}

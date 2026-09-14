@@ -1,0 +1,51 @@
+--- author/run_bootstrap01.ps1
++++ independent/run_bootstrap01.ps1
+@@ -1,6 +1,6 @@
+ $ErrorActionPreference='Stop'
+ $PSNativeCommandUseErrorActionPreference=$false
+-$taskProposal='E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\worker-bootstrap-owner-instrument01'
++$taskProposal='E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\astra-worker-bootstrap-owner-confirmation01'
+ $taskRun=Join-Path $taskProposal 'runs\wbo01'
+ $taskAdmissionPath=Join-Path $taskProposal 'ROOT-ADMISSION.json'
+ $taskAdmissionHashBefore=(Get-FileHash -LiteralPath $taskAdmissionPath -Algorithm SHA256).Hash.ToLowerInvariant()
+@@ -28,23 +28,23 @@
+     'EXPECTED-CASES.json'='a2ff3a917ee7d2d90e87054e16294adfac7e3643fe31dc55265f6c5d5d657fa3'
+ }
+ $taskSourcePaths=@{
+-    'plain_state_reader.py'='E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\worker-runtime-owner-proposal02\plain_state_reader.py'
+-    'state_bridge.py'='E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\worker-runtime-owner-proposal02\state_bridge.py'
+-    'owned_cpu_tensor_port.py'='E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\worker-runtime-owner-proposal02\owned_cpu_tensor_port.py'
+-    'model_binding_registry.py'='E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\worker-runtime-owner-proposal02\model_binding_registry.py'
+-    'owned_factory_port.py'='E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\worker-runtime-owner-proposal02\owned_factory_port.py'
+-    'owned_guard.py'='E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\worker-runtime-owner-proposal02\owned_guard.py'
+-    'fake_torch_support.py'='E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\worker-runtime-owner-proposal02\fake_torch_support.py'
+-    'fixed_schema_helpers.py'='E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\worker-runtime-owner-proposal02\fixed_schema_helpers.py'
+-    'worker_runtime_owner.py'='E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\worker-runtime-owner-proposal02\worker_runtime_owner.py'
+-    'generated_factory_fixture.py'='E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\worker-runtime-owner-proposal02\generated_factory_fixture.py'
+-    'generated_unit_cases.py'='E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\worker-runtime-owner-proposal02\generated_unit_cases.py'
+-    'snapshot_lifecycle.py'='E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\worker-bootstrap-owner-migration01\snapshot_lifecycle.py'
+-    'owned_generation_protocol.py'='E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\worker-bootstrap-owner-migration01\owned_generation_protocol.py'
+-    'generated_bootstrap_fixture.py'='E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\worker-bootstrap-owner-migration01\generated_bootstrap_fixture.py'
+-    'connection_cases.py'='E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\worker-bootstrap-owner-migration01\connection_cases.py'
+-    'qualify_owner.py'='E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\worker-bootstrap-owner-instrument01\qualify_owner.py'
+-    'EXPECTED-CASES.json'='E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\worker-bootstrap-owner-instrument01\EXPECTED-CASES.json'
++    'plain_state_reader.py'='E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\astra-worker-bootstrap-owner-confirmation01\plain_state_reader.py'
++    'state_bridge.py'='E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\astra-worker-bootstrap-owner-confirmation01\state_bridge.py'
++    'owned_cpu_tensor_port.py'='E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\astra-worker-bootstrap-owner-confirmation01\owned_cpu_tensor_port.py'
++    'model_binding_registry.py'='E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\astra-worker-bootstrap-owner-confirmation01\model_binding_registry.py'
++    'owned_factory_port.py'='E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\astra-worker-bootstrap-owner-confirmation01\owned_factory_port.py'
++    'owned_guard.py'='E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\astra-worker-bootstrap-owner-confirmation01\owned_guard.py'
++    'fake_torch_support.py'='E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\astra-worker-bootstrap-owner-confirmation01\fake_torch_support.py'
++    'fixed_schema_helpers.py'='E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\astra-worker-bootstrap-owner-confirmation01\fixed_schema_helpers.py'
++    'worker_runtime_owner.py'='E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\astra-worker-bootstrap-owner-confirmation01\worker_runtime_owner.py'
++    'generated_factory_fixture.py'='E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\astra-worker-bootstrap-owner-confirmation01\generated_factory_fixture.py'
++    'generated_unit_cases.py'='E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\astra-worker-bootstrap-owner-confirmation01\generated_unit_cases.py'
++    'snapshot_lifecycle.py'='E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\astra-worker-bootstrap-owner-confirmation01\snapshot_lifecycle.py'
++    'owned_generation_protocol.py'='E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\astra-worker-bootstrap-owner-confirmation01\owned_generation_protocol.py'
++    'generated_bootstrap_fixture.py'='E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\astra-worker-bootstrap-owner-confirmation01\generated_bootstrap_fixture.py'
++    'connection_cases.py'='E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\astra-worker-bootstrap-owner-confirmation01\connection_cases.py'
++    'qualify_owner.py'='E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\astra-worker-bootstrap-owner-confirmation01\qualify_owner.py'
++    'EXPECTED-CASES.json'='E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\astra-worker-bootstrap-owner-confirmation01\EXPECTED-CASES.json'
+ }
+ $taskInputNames=@('plain_state_reader.py','state_bridge.py','owned_cpu_tensor_port.py','model_binding_registry.py','owned_factory_port.py','owned_guard.py','fake_torch_support.py','fixed_schema_helpers.py','worker_runtime_owner.py','generated_factory_fixture.py','generated_unit_cases.py','snapshot_lifecycle.py','owned_generation_protocol.py','generated_bootstrap_fixture.py','connection_cases.py','qualify_owner.py','EXPECTED-CASES.json','SOURCE-INPUTS.json','run_bootstrap01.ps1')
+ $taskRecords=@()

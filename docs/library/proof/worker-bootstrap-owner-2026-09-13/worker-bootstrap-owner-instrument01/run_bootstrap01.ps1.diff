@@ -1,0 +1,95 @@
+--- before/run_bootstrap01.ps1
++++ proposal/run_bootstrap01.ps1
+@@ -1,12 +1,12 @@
+ $ErrorActionPreference='Stop'
+ $PSNativeCommandUseErrorActionPreference=$false
+-$taskProposal='E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\worker-runtime-owner-instrument01'
+-$taskRun=Join-Path $taskProposal 'runs\rto01'
++$taskProposal='E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\worker-bootstrap-owner-instrument01'
++$taskRun=Join-Path $taskProposal 'runs\wbo01'
+ $taskAdmissionPath=Join-Path $taskProposal 'ROOT-ADMISSION.json'
+ $taskAdmissionHashBefore=(Get-FileHash -LiteralPath $taskAdmissionPath -Algorithm SHA256).Hash.ToLowerInvariant()
+ $taskAdmission=Get-Content -LiteralPath $taskAdmissionPath -Raw | ConvertFrom-Json
+ if((Get-FileHash -LiteralPath $taskAdmissionPath -Algorithm SHA256).Hash.ToLowerInvariant() -cne $taskAdmissionHashBefore){throw 'Admission changed during read'}
+-if($taskAdmission.root_reviewed -isnot [bool] -or $taskAdmission.root_reviewed -cne $true -or $taskAdmission.scope -cne 'runtime-owner-generated-11-only' -or $taskAdmission.label -cne 'rto01'){throw 'Exact root admission required'}
++if($taskAdmission.root_reviewed -isnot [bool] -or $taskAdmission.root_reviewed -cne $true -or $taskAdmission.scope -cne 'worker-bootstrap-generated-17-only' -or $taskAdmission.label -cne 'wbo01'){throw 'Exact root admission required'}
+ if(Test-Path -LiteralPath $taskRun){throw 'Fresh qualification label required'}
+ $taskExpected=@{
+     'plain_state_reader.py'='3962d355cffe928f78b741d2d920cc9c727a9fbd10305e20462b60f4cef9990c'
+@@ -20,8 +20,12 @@
+     'worker_runtime_owner.py'='5647023ed03c5acfd8b1aa981a56171dd92228ccc0972f12546bb0b3d411ce87'
+     'generated_factory_fixture.py'='1c60507a82c238116b630f146c44e7a81fdc57eb74f05841489c3128f150eb6f'
+     'generated_unit_cases.py'='58ce1ba84b4baa457c3973cea5745ad3be94caa4ce627da732d67e9c8e148979'
+-    'qualify_owner.py'='e08653d576dd3ca8367efde9e9438f485de5835f3831e0f7a1f8571fefa6acc1'
+-    'EXPECTED-CASES.json'='954ca4783d70c2dc654e19a110aee6b7c453cd1e6f00098c46bd1b84a4738ba3'
++    'snapshot_lifecycle.py'='a80514aac6b1e75b9b872052852fa993a23cd5273b6bed4ffb4eef7404cb69dd'
++    'owned_generation_protocol.py'='0a56116d51e50f881f6366f17628bb99ec4f400cb680814a37f9d1d66da263ba'
++    'generated_bootstrap_fixture.py'='6ea5e4e7cebff54380193b1ad0cc1b1cf08e4a7f34a8162d2f0f6ce73371d469'
++    'connection_cases.py'='2e598f26c7edd2e60b06495a62a350411ceb0a60ed6fd3486c1a1294d04cbea6'
++    'qualify_owner.py'='7b977ea77c8bc8e2fb63d03221bc61dafd2f9f48bd37716f18d71f65267c1d6b'
++    'EXPECTED-CASES.json'='a2ff3a917ee7d2d90e87054e16294adfac7e3643fe31dc55265f6c5d5d657fa3'
+ }
+ $taskSourcePaths=@{
+     'plain_state_reader.py'='E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\worker-runtime-owner-proposal02\plain_state_reader.py'
+@@ -35,10 +39,14 @@
+     'worker_runtime_owner.py'='E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\worker-runtime-owner-proposal02\worker_runtime_owner.py'
+     'generated_factory_fixture.py'='E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\worker-runtime-owner-proposal02\generated_factory_fixture.py'
+     'generated_unit_cases.py'='E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\worker-runtime-owner-proposal02\generated_unit_cases.py'
+-    'qualify_owner.py'='E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\worker-runtime-owner-instrument01\qualify_owner.py'
+-    'EXPECTED-CASES.json'='E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\worker-runtime-owner-instrument01\EXPECTED-CASES.json'
++    'snapshot_lifecycle.py'='E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\worker-bootstrap-owner-migration01\snapshot_lifecycle.py'
++    'owned_generation_protocol.py'='E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\worker-bootstrap-owner-migration01\owned_generation_protocol.py'
++    'generated_bootstrap_fixture.py'='E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\worker-bootstrap-owner-migration01\generated_bootstrap_fixture.py'
++    'connection_cases.py'='E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\worker-bootstrap-owner-migration01\connection_cases.py'
++    'qualify_owner.py'='E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\worker-bootstrap-owner-instrument01\qualify_owner.py'
++    'EXPECTED-CASES.json'='E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\worker-bootstrap-owner-instrument01\EXPECTED-CASES.json'
+ }
+-$taskInputNames=@('plain_state_reader.py','state_bridge.py','owned_cpu_tensor_port.py','model_binding_registry.py','owned_factory_port.py','owned_guard.py','fake_torch_support.py','fixed_schema_helpers.py','worker_runtime_owner.py','generated_factory_fixture.py','generated_unit_cases.py','qualify_owner.py','EXPECTED-CASES.json','SOURCE-INPUTS.json','run_owner01.ps1')
++$taskInputNames=@('plain_state_reader.py','state_bridge.py','owned_cpu_tensor_port.py','model_binding_registry.py','owned_factory_port.py','owned_guard.py','fake_torch_support.py','fixed_schema_helpers.py','worker_runtime_owner.py','generated_factory_fixture.py','generated_unit_cases.py','snapshot_lifecycle.py','owned_generation_protocol.py','generated_bootstrap_fixture.py','connection_cases.py','qualify_owner.py','EXPECTED-CASES.json','SOURCE-INPUTS.json','run_bootstrap01.ps1')
+ $taskRecords=@()
+ foreach($taskName in $taskInputNames){
+     $taskSource=Join-Path $taskProposal $taskName
+@@ -49,9 +57,9 @@
+     $taskRecords += [ordered]@{name=$taskName;source=$taskSource;sha256=$taskHash}
+ }
+ $taskExpectedCases=Get-Content -LiteralPath (Join-Path $taskProposal 'EXPECTED-CASES.json') -Raw | ConvertFrom-Json
+-if($taskExpectedCases.schema -cne 'uoink.runtime-owner-expected-cases.v1' -or $taskExpectedCases.count -ne 11 -or @($taskExpectedCases.ordered_cases).Count -ne 11){throw 'Expected case input refused'}
+-if(@($taskAdmission.expected_cases).Count -ne 11){throw 'Admission case count refused'}
+-for($taskIndex=0;$taskIndex -lt 11;$taskIndex++){
++if($taskExpectedCases.schema -cne 'uoink.worker-bootstrap-expected-cases.v1' -or $taskExpectedCases.count -ne 17 -or @($taskExpectedCases.ordered_cases).Count -ne 17){throw 'Expected case input refused'}
++if(@($taskAdmission.expected_cases).Count -ne 17){throw 'Admission case count refused'}
++for($taskIndex=0;$taskIndex -lt 17;$taskIndex++){
+     if($taskAdmission.expected_cases[$taskIndex] -cne $taskExpectedCases.ordered_cases[$taskIndex]){throw 'Admission case sequence mismatch'}
+ }
+ New-Item -ItemType Directory -Path $taskRun -ErrorAction Stop | Out-Null
+@@ -70,7 +78,7 @@
+ $taskPython='C:\Python314\python.exe'
+ $taskStdout=Join-Path $taskRun 'stdout.json'
+ $taskStderr=Join-Path $taskRun 'stderr.log'
+-[ordered]@{label='rto01';inputs=$taskRecords;interpreter=$taskPython;arguments=@('-I','-S','-B','qualify_owner.py');scope='11 generated fake factory and owner cases only';no_native_or_model_activity=$true;planned_cases=$taskExpectedCases.ordered_cases;startup_binding_set=$true} | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath (Join-Path $taskRun 'plan.json') -Encoding utf8
++[ordered]@{label='wbo01';inputs=$taskRecords;interpreter=$taskPython;arguments=@('-I','-S','-B','qualify_owner.py');scope='11 owner plus 6 actual bootstrap generated cases only';no_native_or_model_activity=$true;planned_cases=$taskExpectedCases.ordered_cases;startup_binding_set=$true} | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath (Join-Path $taskRun 'plan.json') -Encoding utf8
+ # BEGIN EXACT NATIVE RECEIPT BLOCK
+ $PSNativeCommandUseErrorActionPreference=$false
+ $global:LASTEXITCODE=$null
+@@ -104,17 +112,17 @@
+     $taskResult=Get-Content -LiteralPath $taskStdout -Raw | ConvertFrom-Json
+     $taskPass=@($taskResult.cases | Where-Object {$_.passed -is [bool] -and $_.passed -ceq $true}).Count
+     $taskFail=@($taskResult.cases | Where-Object {$_.passed -is [bool] -and $_.passed -ceq $false}).Count
+-    $taskMembership=(@($taskResult.cases).Count -eq 11 -and @($taskResult.expected_cases).Count -eq 11)
++    $taskMembership=(@($taskResult.cases).Count -eq 17 -and @($taskResult.expected_cases).Count -eq 17)
+     if($taskMembership){
+-        for($taskIndex=0;$taskIndex -lt 11;$taskIndex++){
++        for($taskIndex=0;$taskIndex -lt 17;$taskIndex++){
+             if($taskResult.cases[$taskIndex].name -cne $taskExpectedCases.ordered_cases[$taskIndex] -or $taskResult.expected_cases[$taskIndex] -cne $taskExpectedCases.ordered_cases[$taskIndex]){$taskMembership=$false}
+         }
+     }
+     $taskCountExit=1
+     if($taskFail -eq 0 -and $taskResult.guard_valid -ceq $true){$taskCountExit=0}
+     $taskReceiptValid=(
+-        $taskResult.schema -ceq 'uoink.runtime-owner-synthetic.v1' -and $taskMembership -and
+-        $taskPass+$taskFail -eq 11 -and $taskResult.count -eq 11 -and $taskResult.skipped -eq 0 -and
++        $taskResult.schema -ceq 'uoink.worker-bootstrap-synthetic.v1' -and $taskMembership -and
++        $taskPass+$taskFail -eq 17 -and $taskResult.count -eq 17 -and $taskResult.skipped -eq 0 -and
+         $taskResult.passed -eq $taskPass -and $taskResult.failed -eq $taskFail -and
+         $taskResult.elapsed_seconds -is [ValueType] -and $taskResult.elapsed_seconds -ge 0 -and $taskResult.elapsed_seconds -lt 3600 -and
+         $taskResult.native_exit -eq $taskNativeExit -and $taskNativeExit -eq $taskCountExit -and

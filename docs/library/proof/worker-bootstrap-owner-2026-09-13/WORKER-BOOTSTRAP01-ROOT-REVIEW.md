@@ -1,0 +1,11 @@
+# Worker bootstrap first-run admission
+
+2026-09-13. Astra admits the fixed `wbo01` generated qualification after root and independent source review. It contains the unchanged eleven owner cases and six new cases through the actual WorkerBootstrap. No model, native Windows call, decoder, filter or real runtime entry is admitted.
+
+Root read the complete fixture and six cases in `9c2098`, the current WorkerBootstrap and owner integration methods in `c521a8`, the complete qualifier in `da1523`, launcher in `3f578d`, exact map/template and qualifier delta in `0f6958`, and protocol in `cbcb9c`. Two guessed read filenames in `3f578d` did not exist; its launcher read was complete, and no candidate ran. Independent review found no blocking source issue in protocol `0a56116d`, fixture `6ea5e4e7` or cases `2e598f26`.
+
+The fixture starts with generated state and an unbuilt bootstrap. Actual authenticated challenge/begin, input issuance, unchanged strict factory construction and completed-product registration precede passive publication. Controls cover retirement, missing guard, registration and constructor failure, retained ownership, both revocation attempts and first-error preservation. The overlap control uses nested calls; it is not a cross-thread timing observation. Each new expected exception was checked against the declaring implementation. The original eleven assertions remain unchanged.
+
+The qualifier is `7b977ea77c8bc8e2fb63d03221bc61dafd2f9f48bd37716f18d71f65267c1d6b`; launcher `8931a35859bb1dc7e6dba346f966328854ca4068f03769d321bbe050dca4a7d7`; source map `41624afcab27fa350ed91530a3fbd6ae94f8ce0f44e4d0facf465074ec276488`. Root admission binds nineteen inputs and seventeen exact case IDs. The prior guard retains fixed-byte capture, closed content reads, metadata and registry traps, no heavy imports, bounded output and actual native-exit recording before postchecks. New protocol classes and the second fixture join final identity checks. These controls are not an OS sandbox.
+
+Use the reviewed PowerShell 7 launcher and C:\Python314\python.exe `-I -S -B`, with the lexical live-path prohibition set before child startup. Preserve raw results and actual returned tool objects. A failed attempt requires diagnosis and a fresh brief before any rerun; this admission permits only the first run. Real worker activation remains closed.
