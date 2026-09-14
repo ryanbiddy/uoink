@@ -1,0 +1,16 @@
+{
+  "scope": "Root passive final delivery bindings, not source acceptance or execution",
+  "frozen_files": 13,
+  "frozen_bytes": 227359,
+  "originals": 8,
+  "original_bytes": 227073,
+  "derivatives": 11,
+  "before_copies": 2,
+  "unchanged_adapter_prefix": 34968,
+  "ordered_unexecuted_cases": 10,
+  "original_events": 746,
+  "command_records": 40,
+  "command_steps": 20,
+  "truncated_command_previews": 11,
+  "complete_command_coverage": false
+}

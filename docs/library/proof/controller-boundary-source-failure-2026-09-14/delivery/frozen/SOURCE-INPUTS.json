@@ -1,0 +1,134 @@
+{
+  "schema": "uoink.controller-resume-publication-source.v1",
+  "root": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library",
+  "scope": "source-only implementation and 10 proposed controls; no qualification admission or execution",
+  "brief": {
+    "path": "docs/library/CONTROLLER-RESUME-PUBLICATION-IMPLEMENTATION-BRIEF-2026-09-14.md",
+    "sha256": "691bc362c8aa2fd1b3e9623a2638dc68617d585a129a8dfee00e41dd0a822d36"
+  },
+  "plan": {
+    "path": "docs/library/proof/controller-boundary-plan-2026-09-14/plan/BRIEF.md",
+    "sha256": "2dfb90f807e83dc6124a3cadadd9ebd07badbec7896b266168669396d0aa865f",
+    "source_bindings": "00c3e86b6ba90b41e9077c5efd14e666b1ed8654e1763e1eb3a04304bfe7e72b"
+  },
+  "source_inputs": [
+    {
+      "path": "_scratch/real-startup-authority-repair01/inputs/durable_lifecycle.py",
+      "sha256": "3c8963eaa02bbc1d810ee2632d0363303bfe05ec6ceeef73771ca8005a00ece3",
+      "role": "factory/kernel origin",
+      "bytes": 32833
+    },
+    {
+      "path": "_scratch/controller-worker-stage-repair01/asr_loading_adapter.py",
+      "sha256": "2f12cbf5a5f1142f892aa34df7d23af77107148b448fb4294329532e36be63ee",
+      "role": "startup/stage derivative origin",
+      "bytes": 34968
+    },
+    {
+      "path": "_scratch/windows-interrupted-owner-native-proposal02/snapshot_reservations.py",
+      "sha256": "e80ae881fa4af9cc7d1a3e4a06624f5b19abe4de09aec3844e8a541449335b98",
+      "role": "unchanged reservation callback contract",
+      "bytes": 23634
+    },
+    {
+      "path": "_scratch/real-startup-authority-repair01/startup_authority_fixture.py",
+      "sha256": "fe82ffe16117a9a74b3194e607c86c69b4411076337965ccb5d78c8a9cec897a",
+      "role": "unchanged isolated fixture origin",
+      "bytes": 8556
+    },
+    {
+      "path": "_scratch/real-startup-authority-repair01/FIXTURE-LOADER-CONTRACT.md",
+      "sha256": "8e59a89853faeb21c4ce8694fe7613856e44baed3feabe5c891174044b9952c4",
+      "role": "unchanged existing isolated import contract",
+      "bytes": 2397
+    },
+    {
+      "path": "_scratch/windows-interrupted-owner-native-proposal02/generated_worker_flow.py",
+      "sha256": "1ab240d60ceaca130ac85f5d2e908ef5895da5297f35d78a1caba1c62e622238",
+      "role": "unchanged generated sentinel gate",
+      "bytes": 22853
+    },
+    {
+      "path": "_scratch/windows-interrupted-owner-native-proposal02/generated_adapter_flow.py",
+      "sha256": "24844bf419e4d34adaf0d5c5a2678de33a4796de86dad0f83b7e386f1785f961",
+      "role": "unchanged generated adapter gate",
+      "bytes": 90105
+    },
+    {
+      "path": "_scratch/admitted-controller-connection-plan01/PLAN.md",
+      "sha256": "20574f4516c1443347b8eb2f948379628a432b7ae51ba04cb437a7dea64ffad5",
+      "role": "frozen parent plan, preserved",
+      "bytes": 11727
+    }
+  ],
+  "derivatives": [
+    {
+      "name": "before/durable_lifecycle.py",
+      "bytes": 32833,
+      "sha256": "3c8963eaa02bbc1d810ee2632d0363303bfe05ec6ceeef73771ca8005a00ece3",
+      "role": "immutable before copy of durable_lifecycle.py"
+    },
+    {
+      "name": "before/asr_loading_adapter.py",
+      "bytes": 34968,
+      "sha256": "2f12cbf5a5f1142f892aa34df7d23af77107148b448fb4294329532e36be63ee",
+      "role": "immutable before copy of asr_loading_adapter.py"
+    },
+    {
+      "name": "durable_lifecycle.py",
+      "bytes": 34002,
+      "sha256": "4eeeade5384ca8172c3724a3ee2a6574ca6801e3af3408f177e586c9cd9a4dc3",
+      "role": "source derivative adding pre-resume and publication checks"
+    },
+    {
+      "name": "asr_loading_adapter.py",
+      "bytes": 42939,
+      "sha256": "94e522e622b8de3304ef48c97258a91692e70f22c3112dd6afabd6b493438611",
+      "role": "source derivative adding _validate_controller_pre_resume and _classify_controller_attempt"
+    },
+    {
+      "name": "durable_lifecycle.diff",
+      "bytes": 9173,
+      "sha256": "bf1e477feb591e448f54266a7699d9d3d033fed665e7d7465d62f9c4a05713a9",
+      "role": "mechanical full diff for durable_lifecycle.py"
+    },
+    {
+      "name": "asr_loading_adapter.diff",
+      "bytes": 8321,
+      "sha256": "360be788a6673b4f50cb21c490b0f4e62d8a7b262fa8b5486eda8250b2ef6e91",
+      "role": "mechanical full diff for asr_loading_adapter.py"
+    },
+    {
+      "name": "controller_boundary_fixture.py",
+      "bytes": 9592,
+      "sha256": "e9229f73dc8d004a71a6c45f73cae7e57985cf3458ca00a96dbb2120bcfbf215",
+      "role": "canonical-family inert fixture for controller boundary controls"
+    },
+    {
+      "name": "controller_boundary_fixture.py.diff",
+      "bytes": 9853,
+      "sha256": "cd283a0048b18b73f080488c766bb0e55007b6c69373acfe727cbde9cdcc1051",
+      "role": "mechanical diff for controller_boundary_fixture.py"
+    },
+    {
+      "name": "test_controller_resume_publication.py",
+      "bytes": 11682,
+      "sha256": "b2c4b52127e3a51a43b05367124993c0bb4ed1f621b7eab20d63ac5d97113511",
+      "role": "proposed 10 controls for controller boundary repair"
+    },
+    {
+      "name": "test_controller_resume_publication.py.diff",
+      "bytes": 11978,
+      "sha256": "c02c4220f80a984f27bcc918f600a76283c94e90a3be359ec1df5566ca150dea",
+      "role": "mechanical diff for test_controller_resume_publication.py"
+    },
+    {
+      "name": "EXPECTED-CASES.json",
+      "bytes": 1412,
+      "sha256": "401a3149a38ca03fc49ea150575340318e736b612c3941539a7c6d8b8c2e58f0",
+      "role": "source-ordered list of 10 proposed case IDs"
+    }
+  ],
+  "source_hashes_unchanged": true,
+  "candidate_executed": false
+}

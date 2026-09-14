@@ -1,0 +1,150 @@
+{
+  "scope": "passive source/hash/unified-diff review only",
+  "frozen_count": 13,
+  "frozen_bytes": 227359,
+  "frozen_pins": [
+    {
+      "path": "frozen/asr_loading_adapter.diff",
+      "bytes": 8321,
+      "sha256": "360be788a6673b4f50cb21c490b0f4e62d8a7b262fa8b5486eda8250b2ef6e91"
+    },
+    {
+      "path": "frozen/asr_loading_adapter.py",
+      "bytes": 42939,
+      "sha256": "94e522e622b8de3304ef48c97258a91692e70f22c3112dd6afabd6b493438611"
+    },
+    {
+      "path": "frozen/before/asr_loading_adapter.py",
+      "bytes": 34968,
+      "sha256": "2f12cbf5a5f1142f892aa34df7d23af77107148b448fb4294329532e36be63ee"
+    },
+    {
+      "path": "frozen/before/durable_lifecycle.py",
+      "bytes": 32833,
+      "sha256": "3c8963eaa02bbc1d810ee2632d0363303bfe05ec6ceeef73771ca8005a00ece3"
+    },
+    {
+      "path": "frozen/controller_boundary_fixture.py",
+      "bytes": 9592,
+      "sha256": "e9229f73dc8d004a71a6c45f73cae7e57985cf3458ca00a96dbb2120bcfbf215"
+    },
+    {
+      "path": "frozen/controller_boundary_fixture.py.diff",
+      "bytes": 9853,
+      "sha256": "cd283a0048b18b73f080488c766bb0e55007b6c69373acfe727cbde9cdcc1051"
+    },
+    {
+      "path": "frozen/durable_lifecycle.diff",
+      "bytes": 9173,
+      "sha256": "bf1e477feb591e448f54266a7699d9d3d033fed665e7d7465d62f9c4a05713a9"
+    },
+    {
+      "path": "frozen/durable_lifecycle.py",
+      "bytes": 34002,
+      "sha256": "4eeeade5384ca8172c3724a3ee2a6574ca6801e3af3408f177e586c9cd9a4dc3"
+    },
+    {
+      "path": "frozen/EXPECTED-CASES.json",
+      "bytes": 1412,
+      "sha256": "401a3149a38ca03fc49ea150575340318e736b612c3941539a7c6d8b8c2e58f0"
+    },
+    {
+      "path": "frozen/REPORT.md",
+      "bytes": 15157,
+      "sha256": "4e7e13420f7e8fcbbc48817e25c5a6f370e82efd0030fc5ca0b62df06d935674"
+    },
+    {
+      "path": "frozen/SOURCE-INPUTS.json",
+      "bytes": 5449,
+      "sha256": "6abf08a7f718d7aa6d19f995e12408f582704841095d618fda787c4c292cd1d3"
+    },
+    {
+      "path": "frozen/test_controller_resume_publication.py",
+      "bytes": 11682,
+      "sha256": "b2c4b52127e3a51a43b05367124993c0bb4ed1f621b7eab20d63ac5d97113511"
+    },
+    {
+      "path": "frozen/test_controller_resume_publication.py.diff",
+      "bytes": 11978,
+      "sha256": "c02c4220f80a984f27bcc918f600a76283c94e90a3be359ec1df5566ca150dea"
+    }
+  ],
+  "origin_count": 8,
+  "origin_bytes": 227073,
+  "origins": [
+    {
+      "path": "_scratch/real-startup-authority-repair01/inputs/durable_lifecycle.py",
+      "sha256": "3c8963eaa02bbc1d810ee2632d0363303bfe05ec6ceeef73771ca8005a00ece3",
+      "role": "factory/kernel origin",
+      "bytes": 32833
+    },
+    {
+      "path": "_scratch/controller-worker-stage-repair01/asr_loading_adapter.py",
+      "sha256": "2f12cbf5a5f1142f892aa34df7d23af77107148b448fb4294329532e36be63ee",
+      "role": "startup/stage derivative origin",
+      "bytes": 34968
+    },
+    {
+      "path": "_scratch/windows-interrupted-owner-native-proposal02/snapshot_reservations.py",
+      "sha256": "e80ae881fa4af9cc7d1a3e4a06624f5b19abe4de09aec3844e8a541449335b98",
+      "role": "unchanged reservation callback contract",
+      "bytes": 23634
+    },
+    {
+      "path": "_scratch/real-startup-authority-repair01/startup_authority_fixture.py",
+      "sha256": "fe82ffe16117a9a74b3194e607c86c69b4411076337965ccb5d78c8a9cec897a",
+      "role": "unchanged isolated fixture origin",
+      "bytes": 8556
+    },
+    {
+      "path": "_scratch/real-startup-authority-repair01/FIXTURE-LOADER-CONTRACT.md",
+      "sha256": "8e59a89853faeb21c4ce8694fe7613856e44baed3feabe5c891174044b9952c4",
+      "role": "unchanged existing isolated import contract",
+      "bytes": 2397
+    },
+    {
+      "path": "_scratch/windows-interrupted-owner-native-proposal02/generated_worker_flow.py",
+      "sha256": "1ab240d60ceaca130ac85f5d2e908ef5895da5297f35d78a1caba1c62e622238",
+      "role": "unchanged generated sentinel gate",
+      "bytes": 22853
+    },
+    {
+      "path": "_scratch/windows-interrupted-owner-native-proposal02/generated_adapter_flow.py",
+      "sha256": "24844bf419e4d34adaf0d5c5a2678de33a4796de86dad0f83b7e386f1785f961",
+      "role": "unchanged generated adapter gate",
+      "bytes": 90105
+    },
+    {
+      "path": "_scratch/admitted-controller-connection-plan01/PLAN.md",
+      "sha256": "20574f4516c1443347b8eb2f948379628a432b7ae51ba04cb437a7dea64ffad5",
+      "role": "frozen parent plan, preserved",
+      "bytes": 11727
+    }
+  ],
+  "source_input_map_consistent": true,
+  "adapter_prefix_byte_identical": true,
+  "diffs": [
+    {
+      "name": "durable_lifecycle",
+      "before_sha256": "3c8963eaa02bbc1d810ee2632d0363303bfe05ec6ceeef73771ca8005a00ece3",
+      "after_sha256": "4eeeade5384ca8172c3724a3ee2a6574ca6801e3af3408f177e586c9cd9a4dc3",
+      "patch_sha256": "bf1e477feb591e448f54266a7699d9d3d033fed665e7d7465d62f9c4a05713a9",
+      "normalization": "CRLF to LF only",
+      "hunks": 1,
+      "forward": true,
+      "reverse": true
+    },
+    {
+      "name": "asr_loading_adapter",
+      "before_sha256": "2f12cbf5a5f1142f892aa34df7d23af77107148b448fb4294329532e36be63ee",
+      "after_sha256": "94e522e622b8de3304ef48c97258a91692e70f22c3112dd6afabd6b493438611",
+      "patch_sha256": "360be788a6673b4f50cb21c490b0f4e62d8a7b262fa8b5486eda8250b2ef6e91",
+      "normalization": "CRLF to LF only",
+      "forward": false,
+      "reverse": false,
+      "failure": "invalid unified body marker at patch line 9: \"\""
+    }
+  ],
+  "all_sources_unchanged": true,
+  "candidate_executed": false
+}

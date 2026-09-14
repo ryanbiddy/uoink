@@ -1,0 +1,64 @@
+{
+  "scope": "source-only factory/controller review; proposed tests, fixture and provider compliance owned by root/other peer",
+  "frozen_manifest": "_scratch/controller-boundary01-root-review/FROZEN-SOURCE-PINS.json",
+  "frozen_manifest_sha256": "1679fc8f78e08f6585232f9400cc12e3d2b2c15bcadb0d22bda31d50d149a438",
+  "reads": [
+    {
+      "actual": "READ-BRIEF-INVENTORY-ACTUAL.json",
+      "tool": "b720ef",
+      "exit": 0,
+      "coverage": [
+        "complete canonical CONTROLLER-RESUME-PUBLICATION-IMPLEMENTATION-BRIEF-2026-09-14.md",
+        "fixed root/frozen file inventory"
+      ]
+    },
+    {
+      "actual": "READ-PINS-DIFFS-ACTUAL.json",
+      "tool": "2abbb5",
+      "exit": 0,
+      "coverage": [
+        "complete frozen pin manifest and SOURCE-INPUTS.json",
+        "complete durable_lifecycle.diff and asr_loading_adapter.diff"
+      ]
+    },
+    {
+      "actual": "READ-CURRENT-BOUNDARIES-ACTUAL.json",
+      "tool": "a588a2",
+      "exit": 0,
+      "coverage": [
+        "frozen durable_lifecycle.py:462-590",
+        "frozen asr_loading_adapter.py:624-780,322-335,378-463"
+      ]
+    },
+    {
+      "actual": "READ-CALLED-CONTRACTS-ACTUAL.json",
+      "tool": "8bb769",
+      "exit": 0,
+      "coverage": [
+        "frozen asr_loading_adapter.py:337-375,466-468,551-621",
+        "unchanged snapshot_reservations.py:345-399"
+      ]
+    }
+  ],
+  "inherited_review_context": [
+    {
+      "path": "_scratch/controller-resume-publication-brief01/READ-PLAN-AND-LOADER-ACTUAL.json",
+      "description": "previous complete read of matching plan text2dfb90f8 and fixture loader contract; no claim of a new full read"
+    },
+    {
+      "path": "_scratch/controller-resume-publication-brief01/READ-GENERATED-EXACT-GATES-ACTUAL.json",
+      "description": "previous exact unchanged generated gate bodies; matching origins independently hashed in this review"
+    }
+  ],
+  "passive_check": {
+    "source": "check_sources.mjs",
+    "actual": "CHECK-ACTUAL.json",
+    "result": "CHECK-RESULT.json",
+    "tool": "8a07a3",
+    "exit": 1,
+    "meaning": "all13 frozen/eight origin pins unchanged; durable diff reconstructs both ways; supplied adapter diff malformed"
+  },
+  "candidate_execution": false,
+  "whole_source_semantic_review": false,
+  "semantic_review_limit": "complete affected factory/kernel delta, complete adapter addition and called retained-record predicates; unchanged unrelated lifecycle bodies not re-reviewed"
+}

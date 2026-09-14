@@ -1,0 +1,225 @@
+--- /dev/null
++++ test_controller_resume_publication.py
+@@ -0,0 +1,222 @@
++"""Proposed inert controls for fixed controller classification and pre-resume/final-publication checks.
++
++No Python startup/import/compile/test, native execution, model construction or child transport is performed.
++All proposed cases exercise the changed reverse dependency and actual factory path using inert lower services.
++"""
++from dataclasses import replace
++import unittest
++
++import asr_loading_adapter as adapter
++import trusted_asr_resolver as resolver
++import durable_lifecycle as durable
++import snapshot_lifecycle as lifecycle
++from snapshot_lifecycle import Phase, SessionClosed, LifecycleUnavailable
++from controller_boundary_fixture import ControllerBoundaryFixture, StopAtControllerSeam
++
++
++class ControllerBoundaryContracts(unittest.TestCase):
++    def test_actual_controller_startup_sequence_order_and_lock_ownership(self):
++        f = ControllerBoundaryFixture()
++        with f:
++            with f.published() as (startup, session, worker):
++                self.assertIs(type(startup), adapter._ControllerASRStart)
++                self.assertIs(type(session), lifecycle.OwnedSession)
++                self.assertIs(session._worker, worker)
++                self.assertIs(session._record.phase, Phase.NATIVE_RUNNING)
++                token = f.manager._token(startup.permit.record.key)
++                self.assertEqual(token.phase, "WORKER_BOUND")
++                self.assertTrue(token.resume_attempted)
++                self.assertIs(token.worker, worker)
++                self.assertIs(f.manager._kernel._starts.get(startup.permit.identity), worker)
++
++                expected_order = ["delegate_create_suspended", "controller_consumed", "delegate_resume", "delegate_finish_start"]
++                self.assertEqual(f.seam_events, expected_order)
++
++                self.assertFalse(f.lock_states["create_manager_locked"])
++                self.assertTrue(f.lock_states["resume_manager_locked"])
++                self.assertTrue(f.lock_states["resume_token_locked"])
++                self.assertFalse(f.lock_states["finish_manager_locked"])
++                self.assertFalse(f.lock_states["finish_token_locked"])
++
++    def test_selection_or_value_change_before_resume_stops_worker_without_resume(self):
++        f = ControllerBoundaryFixture()
++        with f:
++            def mutate_selection_before_resume(startup, session, worker):
++                custody = f.custody(startup)
++                f.profile = replace(f.profile, profile_id="altered-profile-id")
++                adapter.RUNTIME_PROFILE = f.profile
++
++            f.on_created = mutate_selection_before_resume
++            with self.assertRaises(adapter.AdapterUnavailable):
++                with f.scope() as startup:
++                    f.factory.open_owned_session(startup, startup.permit)
++
++            self.assertNotIn("delegate_resume", f.seam_events)
++            self.assertEqual(f.f.events.count("stop_exact"), 1)
++            token = next(iter(f.manager._tokens.values()))
++            self.assertEqual(token.phase, "QUARANTINED")
++            self.assertTrue(token.revoked)
++
++    def test_token_record_worker_substitution_before_resume_refuses(self):
++        for mode in ("substitute_worker", "substitute_token_worker", "substitute_owner"):
++            with self.subTest(mode=mode):
++                f = ControllerBoundaryFixture()
++                with f:
++                    def substitute_before_resume(startup, session, worker):
++                        token = f.manager._token(startup.permit.record.key)
++                        if mode == "substitute_worker":
++                            f.manager._kernel._starts[startup.permit.identity] = object()
++                        elif mode == "substitute_token_worker":
++                            token.worker = object()
++                        elif mode == "substitute_owner":
++                            startup.permit.record.owner = object()
++
++                    f.on_created = substitute_before_resume
++                    with self.assertRaises((adapter.AdapterUnavailable, lifecycle.LifecycleUnavailable, SessionClosed)):
++                        with f.scope() as startup:
++                            f.factory.open_owned_session(startup, startup.permit)
++
++                    self.assertNotIn("delegate_resume", f.seam_events)
++                    self.assertEqual(f.f.events.count("stop_exact"), 1)
++
++    def test_already_attempted_resume_refuses_before_resume_without_reset(self):
++        f = ControllerBoundaryFixture()
++        with f:
++            def hand_set_resume_attempted(startup, session, worker):
++                token = f.manager._token(startup.permit.record.key)
++                token.resume_attempted = True
++
++            f.on_created = hand_set_resume_attempted
++            with self.assertRaises(adapter.AdapterUnavailable):
++                with f.scope() as startup:
++                    f.factory.open_owned_session(startup, startup.permit)
++
++            self.assertNotIn("delegate_resume", f.seam_events)
++            self.assertEqual(f.f.events.count("stop_exact"), 1)
++            token = next(iter(f.manager._tokens.values()))
++            self.assertEqual(token.phase, "QUARANTINED")
++            self.assertTrue(token.revoked)
++
++    def test_selection_change_after_finish_start_refuses_publication_and_stops_worker(self):
++        f = ControllerBoundaryFixture()
++        with f:
++            def mutate_after_finish(worker, permit_id, startup):
++                f.profile = replace(f.profile, profile_id="altered-profile-id-at-finish")
++                adapter.RUNTIME_PROFILE = f.profile
++
++            f.on_finish = mutate_after_finish
++            with self.assertRaises(adapter.AdapterUnavailable):
++                with f.scope() as startup:
++                    f.factory.open_owned_session(startup, startup.permit)
++
++            self.assertIn("delegate_finish_start", f.seam_events)
++            self.assertEqual(f.f.events.count("stop_exact"), 1)
++            record = next(iter(f.manager._records.values()))
++            self.assertIs(record.phase, Phase.QUARANTINED)
++            self.assertIsNone(record.owner._worker)
++
++    def test_revocation_or_lease_exit_at_either_boundary_preserves_first_error(self):
++        for boundary in ("before_resume", "before_publication"):
++            for fail_cleanup in (False, True):
++                with self.subTest(boundary=boundary, fail_cleanup=fail_cleanup):
++                    f = ControllerBoundaryFixture()
++                    with f:
++                        if fail_cleanup:
++                            f.f.sync_action = lambda: (_ for _ in ()).throw(RuntimeError("secondary_sync_failure"))
++
++                        if boundary == "before_resume":
++                            def revoke_before_resume(startup, session, worker):
++                                session._revoked = True
++                            f.on_created = revoke_before_resume
++                            expected_exc = SessionClosed
++                        else:
++                            def revoke_before_publication(worker, permit_id, startup):
++                                record = next(iter(f.manager._records.values()))
++                                record.owner._revoked = True
++                            f.on_finish = revoke_before_publication
++                            expected_exc = SessionClosed
++
++                        with self.assertRaises(expected_exc) as caught:
++                            with f.scope() as startup:
++                                f.factory.open_owned_session(startup, startup.permit)
++
++                        self.assertEqual(f.f.events.count("stop_exact"), 1)
++                        record = next(iter(f.manager._records.values()))
++                        self.assertIs(record.phase, Phase.QUARANTINED)
++                        self.assertIsNone(record.owner._worker)
++                        if fail_cleanup:
++                            self.assertTrue(caught.exception.__notes__)
++
++    def test_classification_refuses_foreign_subclassed_or_unissued_controller_without_generated_fallback(self):
++        f = ControllerBoundaryFixture()
++        with f:
++            with f.scope() as startup:
++                class SubclassedController(adapter._ControllerASRStart):
++                    pass
++                subclassed = SubclassedController(
++                    startup.release, startup.approval, startup.manifest, startup.admission,
++                    startup.selected, startup.policy, startup.usage, startup.binding, startup.permit
++                )
++                with self.assertRaisesRegex(adapter.AdapterUnavailable, "subclasses and foreign"):
++                    f.factory.open_owned_session(subclassed, startup.permit)
++
++                unissued = adapter._ControllerASRStart(
++                    startup.release, startup.approval, startup.manifest, startup.admission,
++                    startup.selected, startup.policy, startup.usage, startup.binding, startup.permit
++                )
++                with self.assertRaisesRegex(adapter.AdapterUnavailable, "without issuance"):
++                    f.factory.open_owned_session(unissued, startup.permit)
++
++                fake_profile = {"controller": True, "choice": "large"}
++                with self.assertRaisesRegex(adapter.AdapterUnavailable, "Replaced profile"):
++                    f.factory.open_owned_session(fake_profile, startup.permit)
++
++            self.assertEqual(f.seam_events, [])
++
++    def test_removed_or_substituted_custody_after_classification_refuses_without_fallback(self):
++        f = ControllerBoundaryFixture()
++        with f:
++            def remove_custody_after_create(startup, session, worker):
++                del adapter._CONTROLLER_STARTUPS[id(startup)]
++
++            f.on_created = remove_custody_after_create
++            with self.assertRaises(adapter.AdapterUnavailable):
++                with f.scope() as startup:
++                    f.factory.open_owned_session(startup, startup.permit)
++
++            self.assertNotIn("delegate_resume", f.seam_events)
++            self.assertEqual(f.f.events.count("stop_exact"), 1)
++
++    def test_unchanged_generated_route_preserves_gates_and_wrong_profile_refusal(self):
++        f = ControllerBoundaryFixture()
++        with f:
++            with f.manager.read_lease("inert-root", "large", "revision") as lease:
++                permit = lease.begin_native_session()
++                gen_profile = object()
++                session = f.factory.open_owned_session(gen_profile, permit)
++                self.assertIs(type(session), lifecycle.OwnedSession)
++                self.assertIs(session._worker, f.f.worker)
++                self.assertIs(session._record.phase, Phase.NATIVE_RUNNING)
++                self.assertTrue(session.close_and_join())
++                lease.confirm_native_closed()
++
++    def test_canonical_import_identity_and_closed_real_entries_restored(self):
++        f = ControllerBoundaryFixture()
++        self.assertIsNone(resolver.REAL_APPROVAL)
++        self.assertIsNone(adapter.RELEASE_AUTHORITY)
++        self.assertIsNone(adapter.RUNTIME_PROFILE)
++        self.assertIsNone(adapter.SNAPSHOT_LIFECYCLE)
++        self.assertIsNone(adapter.RUNTIME_FACTORY)
++
++        with f:
++            self.assertIsNotNone(resolver.REAL_APPROVAL)
++            self.assertIsNotNone(adapter.RELEASE_AUTHORITY)
++            with f.scope() as startup:
++                with self.assertRaisesRegex(adapter.AdapterUnavailable, "child transport"):
++                    adapter._fixed_real_worker_start(startup, startup.permit, None)
++
++        self.assertIsNone(resolver.REAL_APPROVAL)
++        self.assertIsNone(adapter.RELEASE_AUTHORITY)
++        self.assertIsNone(adapter.RUNTIME_PROFILE)
++        self.assertIsNone(adapter.SNAPSHOT_LIFECYCLE)
++        self.assertIsNone(adapter.RUNTIME_FACTORY)

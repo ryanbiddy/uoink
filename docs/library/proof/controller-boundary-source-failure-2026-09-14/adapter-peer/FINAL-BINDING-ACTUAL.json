@@ -1,0 +1,7 @@
+{
+  "chunk_id": "90d3af",
+  "wall_time_seconds": 0.2145624,
+  "exit_code": 0,
+  "original_token_count": 243,
+  "output": "{\r\n  \"result\": \"PASS\",\r\n  \"scope\": \"Final adapter/before binding only, no factory or test acceptance\",\r\n  \"frozen_map_sha256\": \"1679fc8f78e08f6585232f9400cc12e3d2b2c15bcadb0d22bda31d50d149a438\",\r\n  \"run\": \"19ac6c2d-eaa3-428a-829c-5dc2a2289a40\",\r\n  \"map_copy_bytes\": 2510,\r\n  \"pairs\": [\r\n    {\r\n      \"final\": \"frozen/asr_loading_adapter.py\",\r\n      \"snapshot\": \"adapter-snapshot.py\",\r\n      \"bytes\": 42939,\r\n      \"sha256\": \"94e522e622b8de3304ef48c97258a91692e70f22c3112dd6afabd6b493438611\",\r\n      \"byte_identical\": true,\r\n      \"frozen_map_agrees\": true\r\n    },\r\n    {\r\n      \"final\": \"frozen/before/asr_loading_adapter.py\",\r\n      \"snapshot\": \"before-asr_loading_adapter.py\",\r\n      \"bytes\": 34968,\r\n      \"sha256\": \"2f12cbf5a5f1142f892aa34df7d23af77107148b448fb4294329532e36be63ee\",\r\n      \"byte_identical\": true,\r\n      \"frozen_map_agrees\": true\r\n    }\r\n  ],\r\n  \"original_preliminary_sha256\": \"c6faac5ccab6cbbc4325bc65ce1419541a85c14dcd4b958763400517e178c902\"\r\n}\r\n"
+}

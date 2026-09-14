@@ -1,0 +1,7 @@
+{
+  "chunk_id": "bfddf7",
+  "wall_time_seconds": 1.342251,
+  "exit_code": 1,
+  "original_token_count": 38,
+  "output": "_scratch\\freeze-real-child-namespace01.mjs\r\n_scratch\\REAL-CHILD-NAMESPACE01-FREEZE-ACTUAL.json\r\n_scratch\\RESUME-CHILD01-DOC-FREEZE-READ-ACTUAL.json\r\n"
+}

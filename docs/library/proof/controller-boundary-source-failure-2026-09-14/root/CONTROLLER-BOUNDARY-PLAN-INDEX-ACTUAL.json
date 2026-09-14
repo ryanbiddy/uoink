@@ -1,0 +1,7 @@
+{
+  "chunk_id": "1bf3cb",
+  "wall_time_seconds": 2.3955845,
+  "exit_code": 0,
+  "original_token_count": 53,
+  "output": "{\"proof\": \"docs/library/proof/controller-boundary-plan-2026-09-14\", \"payloads_matching_disk_and_git\": 28, \"bytes\": 253228, \"manifest_sha256\": \"4e018630c306e74cb79fac1b0d0d163c3e4664a144603e0a845b4428450ac8e7\"}\r\n"
+}

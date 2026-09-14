@@ -127,6 +127,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | Control Room command audit | Adapter fix committed atc3607c3 on feat/desktop-control-room | Same16 focused replay cases pass in isolated and checkout copies; TypeScript check passes. All24 proof payloads match Git/disk | A new process loads the preview warning. Existing server not restarted or observed with it; no real-provider or complete-command attestation |
 | Controller startup authority | Source6482b782/map23591b4c passes both guarded81 copies; original65 preserved | Author28a03e and confirmation9a8704 return0, each81/0/0 plus48 passing subtests. Root151c60 and peere49d09 verify complete cases,23 hashes,ten guards,27 inputs/three controls and35 outputs each. All256 payloads match Git/disk | Continue authenticated child namespace/fixed constructor connection. The real-worker seam remains closed; no native/model or release clearance |
 | Controller worker stages | Source2f12cbf5 qualified and committed atfc17b67: each guarded copy95 passed/0 failed/0 skipped plus95 passing subtests | Author02dc46 and confirmation8a6166 exit0; rootdc197f and peerfdc459 verify complete identical case/subtest objects,25 child hashes,29 inputs+3 controls,10 guards and37 output files. Original81 cases and fixtures unchanged | Follow CONTROLLER-RESUME-PUBLICATION-IMPLEMENTATION-BRIEF-2026-09-14.md for the next source-only repair. Local lifecycle relation only; native controller/child connection and real model/release clearance remain open |
+| Controller resume/publication connection | Gemini19ac6c2d source review FAILED; ten proposed cases unexecuted | Exact13-file delivery/map1679fc8f retained; root pins and two peer reviews agree on custody/helper/attempt and fixture reachability gaps. Passive patch check8a07a3 fails the delivered adapter diff | Follow CONTROLLER-BOUNDARY-CUSTODY-REPAIR-BRIEF-2026-09-14.md. Source-only repair; accepted95 and production71d3e70 unchanged |
 | Authenticated child namespace | Gemini05a3bf93 source review FAILED; all17 proposed tests unexecuted | Outer7481e5/0 completed with truncated output. Freeze47c823 retains26 files/553800B and1042 original events; root14eaa9 verifies all pins and input pairs. Controller and child contract/ownership findings require repair | Smaller stage source is reviewed above. Preserve failed delivery; native transport/adoption/namespace repairs remain. No source, runtime or release acceptance from this delivery |
 | Release notes | Startup81 progress, child-source failure and remaining gates updated for this integration | Root68f856 verifies three declared edits plus final status amendment, seven input bindings and all57 unchanged table lines. Frozen original drafts/amendments preserve status changes | Continue runtime qualification. Production remains71d3e70; no package, installation, public draft or website changed |
 | Integration | Reliability repair at e8d058f and notice packaging at 71d3e70 after tree09 | Reliability:53 focused cases plus13 subtests per root. Notices:20 Python/10 block cases per root. Tree09 at 56d9d4c remains2,796 passed/1 failed/3 skipped across2,800 cases plus13 subtests; it predates both repairs | Finish runtime work, then run a new committed complete tree and rebuild/reseal. Package08 and website/marketing remain held. No current-source package or installation credit |
@@ -335,14 +336,19 @@ runs02dc46/0 and8a6166/0 each pass95/0/0 plus95 subtests. Rootdc197f/0 and
 peerfdc459/0 verify identical full cases/subtests,25 child hashes,29 inputs,
 three controls,ten guards and37 output files. Read the controller95 result
 verdict. Results are committed atfc17b67; do not repeat these observations for
-documentation. Control Room run19ac6c2d-eaa3-428a-829c-5dc2a2289a40 is active
-from CONTROLLER-RESUME-PUBLICATION-IMPLEMENTATION-BRIEF-2026-09-14.md at frozen
-basee0bbbd6. Gemini3.8-flash-high/high uses the existing Antigravity subscription
-for source-only work in its fresh worktree. Frozen plan2dfb90f8/map00c3e86b
-binds eight sources/227,073 bytes and narrows fixed classification, pre-resume
-and actual final-publication checks. Preserve generated routing and all accepted
-tests. Native bootstrap/transport and child adoption remain later units. Keep
-real startup and model entry refusals closed.
+documentation. Control Room run19ac6c2d-eaa3-428a-829c-5dc2a2289a40 completed
+at3c630a/0 from frozen basee0bbbd6, but source review FAILED. Read
+ASTRA-CONTROLLER-BOUNDARY01-SOURCE-FAILURE-2026-09-14.md and follow
+CONTROLLER-BOUNDARY-CUSTODY-REPAIR-BRIEF-2026-09-14.md next. Freeze7fefb4
+retains13 files/227,359 bytes and746 original events, map1679fc8f.
+Rootcf4fb8 validates the source pins; factory peer9f85fdc6 and fixture
+peer91dc2d1e confirm custody/helper/attempt and fixture-boundary defects.
+The ten new proposed tests remain unexecuted. Passive8a07a3/1 records a
+malformed adapter diff; it is not a candidate test result. Preserve original
+delivery and truncated command evidence. Astra's bounded source and fixture
+repairs use separate fresh directories under the committed brief. All accepted
+tests and generated gates remain unchanged. Native bootstrap/transport and
+child adoption remain later units; real startup and model entry stay closed.
 The original failed namespace delivery is retained; its frozen plan and
 mandatory member-scope correction are archived under
 proof/real-child-namespace-plan-2026-09-14. All52 documentary payloads match
@@ -7148,3 +7154,33 @@ Root preserves the command, initial actual and every poll. PTY session46268 is
 still active at this entry; no source or execution pass is claimed. Wait for
 delivery, freeze its exact text/Control Room record, then review the complete
 diff and proposed canonical-family fixture before any qualification.
+
+### 2026-09-14 — Fixed-boundary delivery rejected; custody repair follows
+
+Gemini run19ac6c2d finished at3c630a/0. Freeze7fefb4 preserves13 delivered
+files/227,359 bytes, original746-event Control Room record and20 command steps.
+Rootcf4fb8 verifies all pins, eight origins/227,073 bytes, eleven derivatives,
+two before copies and ten source-ordered IDs. Eleven command previews and the
+final outer output are truncated; complete command coverage remains unverified.
+The report's no-Git claim conflicts with recorded read-only status step254.
+
+Factory peer9f85fdc6 and fixture peer91dc2d1e confirm the missing initial
+custody identity, dynamic helper lookup, optional unchecked attempt path and
+incorrect negative-hook timing. The generated case never reaches the actual
+generated gate. No proposed test ran. Passive8a07a3/1 preserves the malformed
+adapter diff; the durable diff reconstructs both directions. The accepted
+34,968-byte adapter prefix is unchanged. Preserve these distinct findings:
+source failure, documentary patch failure and unexecuted tests.
+
+The new custody repair brief authorizes only corrections to these fresh drafts,
+with before copies and reasons, in separate source/fixture directories. It
+does not authorize accepted assertion edits or qualification execution. Retain
+exact initial custody and fixed helper references through both boundaries;
+test the actual post-bind point and actual generated gates with inert services.
+Production stays71d3e70. D2 stays complete atd13534f without repeat access.
+Runtime, complete-tree, package, installed-client and market gates remain open.
+
+Failure archive5c33c4/raw diff-applyb498fc and index902822 preserve127 payloads /
+2,174,831 bytes at seal5ce72a88. Every raw payload matches Git and disk after
+checked newline-only restoration. The malformed delivered adapter diff remains
+inside that archive unchanged; successful archive transport does not repair it.

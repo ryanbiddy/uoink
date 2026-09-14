@@ -1,0 +1,7 @@
+{
+  "chunk_id": "53270a",
+  "wall_time_seconds": 30.0157404,
+  "session_id": 46268,
+  "original_token_count": 320,
+  "output": "gemini  tool    run_command\ngemini  tool    run_command\ngemini  message Note: The user-specified command is still running in the background. I will proceed with other tasks or wait for completion. No further tool call is needed right now. Please wait f\ngemini  tool    manage_task\ngemini  tool    manage_task\ngemini  tool    manage_task\ngemini  tool    manage_task\ngemini  tool    run_command\ngemini  status  Possible command truncation: Antigravity supplied a command preview; full command coverage is unverified.\ngemini  tool    run_command\ngemini  status  Possible command truncation: Antigravity supplied a command preview; full command coverage is unverified.\ngemini  tool    manage_task\ngemini  tool    manage_task\ngemini  tool    run_command\ngemini  status  Possible command truncation: Antigravity supplied a command preview; full command coverage is unverified.\ngemini  tool    run_command\ngemini  status  Possible command truncation: Antigravity supplied a command preview; full command coverage is unverified.\ngemini  tool    manage_task\ngemini  tool    manage_task\ngemini  tool    view_file\ngemini  tool    view_file\ngemini  tool    run_command\ngemini  status  Possible command truncation: Antigravity supplied a command preview; full command coverage is unverified.\n"
+}

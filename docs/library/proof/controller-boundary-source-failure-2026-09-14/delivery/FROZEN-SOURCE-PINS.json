@@ -1,0 +1,73 @@
+{
+  "scope": "Frozen source delivery only; source review pending and proposed tests unexecuted",
+  "run": "19ac6c2d-eaa3-428a-829c-5dc2a2289a40",
+  "worker": "0f5b2a05-d653-4d6a-8dca-c45b6eb35f4b",
+  "worktree": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/19ac6c2d-eaa/gemini",
+  "files": [
+    {
+      "path": "frozen/asr_loading_adapter.diff",
+      "bytes": 8321,
+      "sha256": "360be788a6673b4f50cb21c490b0f4e62d8a7b262fa8b5486eda8250b2ef6e91"
+    },
+    {
+      "path": "frozen/asr_loading_adapter.py",
+      "bytes": 42939,
+      "sha256": "94e522e622b8de3304ef48c97258a91692e70f22c3112dd6afabd6b493438611"
+    },
+    {
+      "path": "frozen/before/asr_loading_adapter.py",
+      "bytes": 34968,
+      "sha256": "2f12cbf5a5f1142f892aa34df7d23af77107148b448fb4294329532e36be63ee"
+    },
+    {
+      "path": "frozen/before/durable_lifecycle.py",
+      "bytes": 32833,
+      "sha256": "3c8963eaa02bbc1d810ee2632d0363303bfe05ec6ceeef73771ca8005a00ece3"
+    },
+    {
+      "path": "frozen/controller_boundary_fixture.py",
+      "bytes": 9592,
+      "sha256": "e9229f73dc8d004a71a6c45f73cae7e57985cf3458ca00a96dbb2120bcfbf215"
+    },
+    {
+      "path": "frozen/controller_boundary_fixture.py.diff",
+      "bytes": 9853,
+      "sha256": "cd283a0048b18b73f080488c766bb0e55007b6c69373acfe727cbde9cdcc1051"
+    },
+    {
+      "path": "frozen/durable_lifecycle.diff",
+      "bytes": 9173,
+      "sha256": "bf1e477feb591e448f54266a7699d9d3d033fed665e7d7465d62f9c4a05713a9"
+    },
+    {
+      "path": "frozen/durable_lifecycle.py",
+      "bytes": 34002,
+      "sha256": "4eeeade5384ca8172c3724a3ee2a6574ca6801e3af3408f177e586c9cd9a4dc3"
+    },
+    {
+      "path": "frozen/EXPECTED-CASES.json",
+      "bytes": 1412,
+      "sha256": "401a3149a38ca03fc49ea150575340318e736b612c3941539a7c6d8b8c2e58f0"
+    },
+    {
+      "path": "frozen/REPORT.md",
+      "bytes": 15157,
+      "sha256": "4e7e13420f7e8fcbbc48817e25c5a6f370e82efd0030fc5ca0b62df06d935674"
+    },
+    {
+      "path": "frozen/SOURCE-INPUTS.json",
+      "bytes": 5449,
+      "sha256": "6abf08a7f718d7aa6d19f995e12408f582704841095d618fda787c4c292cd1d3"
+    },
+    {
+      "path": "frozen/test_controller_resume_publication.py",
+      "bytes": 11682,
+      "sha256": "b2c4b52127e3a51a43b05367124993c0bb4ed1f621b7eab20d63ac5d97113511"
+    },
+    {
+      "path": "frozen/test_controller_resume_publication.py.diff",
+      "bytes": 11978,
+      "sha256": "c02c4220f80a984f27bcc918f600a76283c94e90a3be359ec1df5566ca150dea"
+    }
+  ]
+}

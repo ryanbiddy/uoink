@@ -1,0 +1,147 @@
+--- before/asr_loading_adapter.py
++++ asr_loading_adapter.py
+@@ -640,3 +640,141 @@
+ 
+            _validate_controller_worker_stage_locked(custody, startup, permit, session, worker, stage)
+ 
+    return startup
+ 
+
++
++def _validate_controller_pre_resume_locked(custody, startup, permit, session, worker):
++    manager, record, token = custody.manager, custody.record, custody.token
++    _require(custody.active and custody.startup is startup
++             and _CONTROLLER_STARTUPS.get(id(startup)) is custody
++             and custody.consumed_by is session, "Exact consumed controller startup required")
++    # These captured helpers inspect the already retained scalar records only.
++    # No delegate, journal, worker callback or native service is called here.
++    _startup_selection_current(custody)
++    current = _startup_references(custody)
++    _require(len(current) == len(custody.references)
++             and all(a is b for a, b in zip(current, custody.references))
++             and _startup_values(custody) == custody.values,
++             "Retained startup selection changed")
++    _require(custody.admission.manifest == custody.manifest
++             and custody.admission.manifest.approval is custody.release.manifest_approval
++             and custody.selected is next(model for model in custody.admission.manifest.models
++                 if model.choice == custody.admission.choice)
++             and custody.selected == next(model for model in custody.manifest.models
++                 if model.choice == custody.admission.choice),
++             "Admission model differs from approved selection")
++    _require(startup.release is custody.release
++             and startup.approval is custody.release.manifest_approval
++             and startup.manifest is custody.manifest
++             and startup.admission is custody.admission
++             and startup.selected is custody.selected and startup.policy is custody.profile
++             and startup.usage == custody.usage and startup.binding is custody.binding
++             and startup.permit is custody.permit, "Startup record was replaced or changed")
++    _require(type(manager) is DurableSnapshotLifecycle
++             and type(permit) is _NativePermit and permit is custody.permit
++             and permit.manager is manager and permit.record is record
++             and record.key is custody.key and manager._records.get(record.key) is record
++             and record.permit is permit.identity and record.protection is custody.protection
++             and type(custody.lease) is _DurableLease and custody.lease.manager is manager
++             and not custody.lease.inner._exited and not custody.lease._finalization_started,
++             "Current startup lease permit required")
++    _require(type(token) is Reservation and custody.lease.token is token
++             and manager._tokens.get(record.key) is token
++             and token.service is manager._reservations
++             and token.service._live.get(token.gate) is token
++             and token.phase == "WORKER_BOUND" and token.pending is None
++             and token.persistence_failure is None and token.revoked is False
++             and not token.resume_attempted,
++             "Current pre-resume reservation required")
++    _require(record.key.store_root == custody.admission.private_root
++             and record.key.choice == custody.admission.choice == custody.selected.choice
++             and record.key.revision == custody.selected.revision
++             and token.physical is custody.lease.binding[0]
++             and token.semantic is custody.lease.binding[1]
++             and token.generation == custody.lease.binding[2],
++             "Exact reserved startup selection required")
++    _require(token.semantic.choice == custody.selected.choice
++             and token.semantic.revision == custody.selected.revision
++             and token.semantic.manifest == custody.release.manifest_approval.manifest_sha256,
++             "Durable selection differs from approved startup")
++    _require(type(session) is OwnedSession and record.owner is session
++             and session._record is record and session._manager is manager
++             and not session._revoked and not session._closing
++             and session._active == 0 and not session._closed_verified,
++             "Exact live consumed session required")
++    kernel = manager._kernel
++    _require(type(kernel) is _DurableKernel and kernel.manager is manager
++             and worker is not None and token.worker is worker
++             and kernel._starts.get(permit.identity) is worker,
++             "Exact retained durable worker required")
++    _require(record.phase is Phase.NATIVE_RESERVED and session._worker is None,
++             "Pre-resume stage requires unpublished reserved session")
++
++
++def _validate_controller_pre_resume(startup, permit, session, worker):
++    """Validate unpublished reserved pre-resume stage; never mint a worker witness.
++
++    All four arguments are mandatory. Success reports the current locked local
++    relation only, not observed native resume, assigned-job/read-set ownership,
++    pipe provenance, completed child startup or permission to construct.
++    """
++    _require(type(startup) is _ControllerASRStart and type(session) is OwnedSession
++             and worker is not None, "Exact startup, session and non-None worker required")
++    custody = _CONTROLLER_STARTUPS.get(id(startup))
++    _require(type(custody) is _StartupCustody and custody.startup is startup,
++             "Copied controller startup has no issuance authority")
++    with custody.manager._lock:
++        with custody.token._lock:
++            _validate_controller_pre_resume_locked(custody, startup, permit, session, worker)
++    return startup
++
++
++def _classify_controller_attempt(profile, permit):
++    """Classify a candidate start as a controller attempt or non-controller.
++
++    Classification is a refusal rule, not new authority. Identify a controller attempt
++    through the canonical exact _ControllerASRStart and its existing issued custody,
++    including the retained permit/record relation. Check existing custody for that
++    permit/record as well as the candidate object: replacing the profile with a
++    dictionary, foreign type or copied startup must not hide an already issued controller
++    attempt. Refuse ambiguous, stale or mismatched custody. Exact controller instances
++    without issuance, and subclasses/foreign controller instances offered against that
++    controller permit, must refuse before create.
++    """
++    profile_type = type(profile)
++    is_exact_controller = profile_type is _ControllerASRStart
++    is_foreign_or_subclass = (
++        not is_exact_controller
++        and (isinstance(profile, _ControllerASRStart) or profile_type.__name__ == "_ControllerASRStart")
++    )
++    if is_foreign_or_subclass:
++        raise AdapterUnavailable("Controller subclasses and foreign controller instances are refused")
++
++    object_custody = _CONTROLLER_STARTUPS.get(id(profile)) if is_exact_controller else None
++
++    record = getattr(permit, "record", None)
++    permit_custodies = [
++        c for c in _CONTROLLER_STARTUP_ATTEMPTS.values()
++        if c.permit is permit or (record is not None and c.record is record)
++    ]
++
++    if not is_exact_controller and not permit_custodies:
++        return False
++
++    if len(permit_custodies) > 1:
++        raise AdapterUnavailable("Ambiguous controller startup custody")
++
++    permit_custody = permit_custodies[0] if permit_custodies else None
++
++    if is_exact_controller:
++        _require(type(object_custody) is _StartupCustody and object_custody.startup is profile,
++                 "Exact controller instance without issuance is refused")
++        _require(permit_custody is object_custody,
++                 "Candidate controller startup does not match permit custody")
++        _require(object_custody.permit is permit and object_custody.record is record,
++                 "Mismatched controller permit custody")
++        _require(object_custody.active, "Stale controller startup custody is refused")
++        return True
++
++    if permit_custody is not None:
++        raise AdapterUnavailable("Replaced profile against issued controller permit is refused")
++
++    return False

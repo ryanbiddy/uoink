@@ -1,0 +1,7 @@
+{
+  "chunk_id": "791f45",
+  "wall_time_seconds": 0.2720267,
+  "exit_code": 0,
+  "original_token_count": 174,
+  "output": "{\n  \"scope\": \"Read-only requested Control Room status\",\n  \"run\": {\n    \"id\": \"19ac6c2d-eaa3-428a-829c-5dc2a2289a40\",\n    \"status\": \"running\",\n    \"started_at\": \"2026-09-14T14:07:41.063Z\",\n    \"finished_at\": null,\n    \"created_at\": \"2026-09-14T14:07:41.058Z\"\n  },\n  \"workers\": [\n    {\n      \"id\": \"0f5b2a05-d653-4d6a-8dca-c45b6eb35f4b\",\n      \"run_id\": \"19ac6c2d-eaa3-428a-829c-5dc2a2289a40\",\n      \"agent\": \"gemini\",\n      \"model\": \"gemini-3.8-flash-high\",\n      \"status\": \"running\",\n      \"worktree_path\": \"C:\\\\Users\\\\hello\\\\AppData\\\\Local\\\\AgentControlRoom\\\\worktrees\\\\uoink-library\\\\19ac6c2d-eaa\\\\gemini\",\n      \"started_at\": \"2026-09-14T14:07:41.073Z\",\n      \"finished_at\": null\n    }\n  ]\n}\n"
+}

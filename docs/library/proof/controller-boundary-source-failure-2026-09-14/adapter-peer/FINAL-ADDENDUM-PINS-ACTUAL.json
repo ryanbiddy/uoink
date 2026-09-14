@@ -1,0 +1,7 @@
+{
+  "chunk_id": "e42e77",
+  "wall_time_seconds": 0.172064,
+  "exit_code": 0,
+  "original_token_count": 64,
+  "output": "{\"path\":\"FINAL-BINDING-ADDENDUM.md\",\"bytes\":1133,\"sha256\":\"b4843408f1885e3ee2dfaf1fae0629bcf95601a830639923521d40a14fea6d9e\"}\r\n{\"path\":\"FINAL-BINDING-ACTUAL.json\",\"bytes\":1207,\"sha256\":\"68ea51f1444172dcf51b47fd56d726e4117d3de3cfb76139f489a23ab87dcfc6\"}\r\n"
+}
