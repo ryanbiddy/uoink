@@ -1,0 +1,11 @@
+{
+  "root_reviewed": false,
+  "scope": "generated-windows-retired-owner-recovery-only",
+  "case": "positive",
+  "operation_mode": "cancel",
+  "run_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\windows-retired-owner-recovery01",
+  "source_inputs_sha256": "9d988684ca8dfe487521f7d711ec67855393922d53ffe3cce3e13a2c660e34c3",
+  "launcher_sha256": "75a9baea9307658a99217816f7653adfdbb9d0df44286a5b244ea5d3cad43444",
+  "native_execution_admitted": false,
+  "note": "Dormant generated retired-owner recovery proposal. No root admission or execution; active/uncertain worker recovery remains excluded."
+}

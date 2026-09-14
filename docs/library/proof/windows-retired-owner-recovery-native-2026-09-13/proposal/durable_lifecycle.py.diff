@@ -1,0 +1,125 @@
+--- before/durable_lifecycle.py
++++ proposal/durable_lifecycle.py
+@@ -6,7 +6,25 @@
+ """
+ from snapshot_lifecycle import (SnapshotLifecycle, SnapshotKey, OwnedSession,
+     _NativePermit, Phase, LifecycleUnavailable, SessionClosed, CleanupUnconfirmed, SnapshotBusy)
++from snapshot_reservations import ReservationService, ReservationRefused, Reservation, decode_journal
++from dataclasses import dataclass
++
++
++@dataclass(frozen=True)
++class _RetiredRecovery:
++    manager: object
++    record: object
++    owner: object
++    token: object
++    service: object
++    gates: object
++    worker: object
++    permit: object
++    gate: object
++    journal: object
++    raw: bytes
++    head: str
++    revision: int
+-from snapshot_reservations import ReservationService, ReservationRefused
+ 
+ 
+ class DurableSnapshotLifecycle(SnapshotLifecycle):
+@@ -17,6 +35,7 @@
+         self._bindings = binding_lookup
+         self._tokens = {}
+         self._entering = {}
++        self._retired_recoveries = {}
+         self._delegate = kernel
+         super().__init__(_DurableKernel(self))
+ 
+@@ -33,6 +52,87 @@
+             raise LifecycleUnavailable("Durable reservation is absent")
+         return token
+ 
++    def reconcile_retired_owner(self, owner):
++        """Private live-object recovery after verified retirement, never restart.
++
++        The fixed service observer must inspect the exact retained dead worker
++        and retired guards before any clear write. No caller supplies evidence.
++        This manager reserves publication only; its lock is not an OS gate.
++        """
++        if (type(self) is not DurableSnapshotLifecycle or type(owner) is not OwnedSession
++                or owner._manager is not self):
++            raise LifecycleUnavailable("Exact retained owner and manager required")
++        with self._lock:
++            record = owner._record
++            key = record.key
++            if (self._records.get(key) is not record or record.owner is not owner
++                    or key in self._entering or key in self._retired_recoveries
++                    or record.phase is not Phase.QUARANTINED or record.protection is not None
++                    or record.permit is None or owner._worker is None
++                    or owner._revoked is not True or owner._closed_verified is not True
++                    or owner._closing is not True or type(owner._active) is not int or owner._active != 0):
++                raise CleanupUnconfirmed("Current already-retired quarantined owner required")
++            service, token = self._reservations, self._tokens.get(key)
++            if (type(service) is not ReservationService or type(token) is not Reservation
++                    or token.service is not service or token.worker is not owner._worker):
++                raise LifecycleUnavailable("Exact retained reservation connection required")
++            with token._lock:
++                service._owned(token)
++                if (token.phase != "QUARANTINED" or token.revoked is not True
++                        or token.pending is not None or token.journal is None):
++                    raise CleanupUnconfirmed("Quarantined idle reservation required")
++                rows, head = decode_journal(token.raw)
++                if (rows[-1]["phase"] not in ("WORKER_BOUND", "QUARANTINED")
++                        or rows[-1]["generation"] != token.generation or rows[-1]["process"] is None):
++                    raise CleanupUnconfirmed("Retained bound-worker journal required")
++                attempt = _RetiredRecovery(self, record, owner, token, service, service.gates,
++                    owner._worker, record.permit, token.gate, token.journal, token.raw, head, token.revision)
++                self._retired_recoveries[key] = attempt
++        try:
++            # Reconciliation, including journal I/O and native journal close,
++            # runs outside the manager lock. The old owner stays revoked.
++            if service.reconcile_live(token) is not True:
++                raise CleanupUnconfirmed("Retired reservation reconciliation was not confirmed")
++            with self._lock:
++                with token._lock:
++                    after, head = decode_journal(token.raw)
++                    if (self._retired_recoveries.get(key) is not attempt
++                            or self._records.get(key) is not record or record.owner is not owner
++                            or owner._record is not record or owner._manager is not self
++                            or self._tokens.get(key) is not token or self._reservations is not service
++                            or service.gates is not attempt.gates or token.service is not service
++                            or token.worker is not attempt.worker or owner._worker is not attempt.worker
++                            or record.permit is not attempt.permit or token.gate is not attempt.gate
++                            or token.journal is not attempt.journal or token.revision != attempt.revision
++                            or record.phase is not Phase.QUARANTINED or record.protection is not None
++                            or owner._revoked is not True or owner._closed_verified is not True
++                            or owner._closing is not True or type(owner._active) is not int or owner._active != 0
++                            or token.revoked is not True or token.phase != "CLEARED" or token.pending is not None
++                            or token.gate in service._live or token.physical in attempt.gates._held
++                            or attempt.gates._known_clean.get(token.physical) != head
++                            or not token.raw.startswith(attempt.raw) or token.raw == attempt.raw
++                            or after[-1]["phase"] != "CLEARED" or after[-1]["previous"] != attempt.head):
++                        raise CleanupUnconfirmed("Retired recovery changed before manager publication")
++                    record.phase = Phase.RELEASED
++                    record.reason = "Explicit retired-owner reconciliation confirmed"
++                    record.quarantine_failure_type = None
++                    # No authority is restored to this owner, permit or facade.
++                    return True
++        except BaseException as original:
++            with self._lock:
++                owner._revoked = True
++                if self._records.get(key) is record and record.owner is owner:
++                    record.phase = Phase.QUARANTINED
++                    record.reason = "Retired-owner reconciliation was not published"
++                    record.quarantine_failure_type = type(original).__name__
++            # Preserve the service's actual gate/poison state, including a gate
++            # already released before a later manager-publication refusal.
++            raise
++        finally:
++            with self._lock:
++                if self._retired_recoveries.get(key) is attempt:
++                    del self._retired_recoveries[key]
++
+     def _flush_quarantine(self, key, original=None):
+         token = self._token(key)
+         try:

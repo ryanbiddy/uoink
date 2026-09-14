@@ -1,0 +1,7 @@
+{
+  "chunk_id": "88229c",
+  "wall_time_seconds": 1.4563225,
+  "exit_code": 0,
+  "original_token_count": 129,
+  "output": "{\r\n  \"created_admission\": \"E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\_scratch\\\\windows-retired-owner-recovery-proposal01\\\\ROOT-ADMISSION-cancel.json\",\r\n  \"bytes\": 1608,\r\n  \"sha256\": \"5b603707a9efd1736d9e6bfa07b45283c93cdad896d12696d6b21bbbe8c8bfc0\",\r\n  \"source_count\": 18,\r\n  \"support_metadata_rows\": 9,\r\n  \"support_paths_accessed\": 0,\r\n  \"fake_runs\": 2,\r\n  \"cases_per_run\": 22,\r\n  \"subtests_per_run\": 21,\r\n  \"false_template_preserved\": true,\r\n  \"inputs_unchanged\": true,\r\n  \"native_launched\": false\r\n}\r\n"
+}

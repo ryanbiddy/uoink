@@ -1,0 +1,7 @@
+{
+  "chunk_id": "5214fa",
+  "wall_time_seconds": 0.2834705,
+  "exit_code": 0,
+  "original_token_count": 208,
+  "output": "{\"before_recovery_sha256\": \"525f7a8ba647c11d69db51834ec045013d264b73387a8a6effe501b2fedd26b5\", \"dispatch_calls\": {\"child\": 271, \"contender\": 137, \"controller\": 8251}, \"elapsed_seconds\": {\"child\": 0.018493800016585737, \"contender\": 0.002886000002035871, \"controller\": 0.668390900013037}, \"guards_valid\": true, \"journal_bytes\": 2118, \"journal_sha256\": \"d95209027ccef2ace9fa80cc8753612eb19cd918df68fcf587cf02bf3bbf8357\", \"model_runtime_restart_release_accepted\": false, \"native_calls\": {\"child\": 237, \"contender\": 103, \"controller\": 8215}, \"operation_events\": [\"admit_generated_media\", \"begin_generated_transcription\", \"next_generated_segment\", \"cancel_generated_cursor\"], \"process_and_jobs_closed\": true, \"receipt_roles\": 3, \"segments\": 1, \"source_control_pairs\": 21, \"status\": \"PASS_GENERATED_NATIVE_RETIRED_OWNER_RECOVERY_ONLY\"}\r\n"
+}

@@ -1,0 +1,3 @@
+The first read-only pin inventory command used unparenthesized PowerShell string concatenations inside a comma-separated array. Get-Item reported an invalid combined path. The orchestration then tried to parse that output as JSON and failed with `SyntaxError: Unexpected token 'G'` before retaining the nested command's raw result. That raw result is unavailable and is not reconstructed here.
+
+No writer, admission file or native run was created or executed. The corrected inventory uses an explicit list of complete literal relative paths, stops on read errors, and retains the actual result before JSON parsing. This is preparation bookkeeping; it changes no candidate source, test, map, template or result.

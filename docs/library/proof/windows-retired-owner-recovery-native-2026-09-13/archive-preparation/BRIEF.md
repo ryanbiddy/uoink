@@ -1,0 +1,11 @@
+# Generated native retired-owner recovery archive — 2026-09-13
+
+Prepare, but do not execute, a fixed text-only copy into docs/library/proof/windows-retired-owner-recovery-native-2026-09-13. Root will review the exact inventory and copier before one documentary invocation. The native observation has already run once; archival must not rerun it.
+
+Include the 18 reviewed proposal sources, current native controls, protocol and connected diffs; the run's 21 copied source/control files and recorded JSON/logs; root admission preparation, review, actual tool objects, checker and verdict; and frozen source/result peer reviews. Preserve the fixed fixture-generation source and recorded before/after identities. Exclude the five physical generated fixtures, registry directory and journal, all support binaries, checkpoints and converted outputs. Paths inside receipts are data and must never be dereferenced by this copier.
+
+The fake prerequisite is preserved in commit a83ae1a at docs/library/proof/retired-owner-recovery-qualification-2026-09-13. Reference its exact manifest instead of nesting its 204 payloads again. This archive binds the distinct native observation and does not repeat the fake suite.
+
+Actuale97a44 returned0 and root checker5214fa confirmed the three valid role receipts, unchanged21 source/control pairs, exact child/job retirement and four confirmed journal phases/flushes. The injected KeyboardInterrupt occurred after verified teardown, before clear I/O. Explicit manager recovery released that same retained record while its owner and token remained revoked. The result is limited to this generated case: no active-worker, OS-interruption, crash/restart, real model or release acceptance follows.
+
+Reuse the reviewed bounded UTF-8 documentary copier from the preceding fake22 archive. The fresh inventory contains only named text paths and exact byte/hash bindings. Before mutation it validates every input; afterward it verifies every copy and original, records * -text attributes and seals exact membership in SHA256.json. Any failure remains a failed process with partial output retained; no overwrite, cleanup or retry is built in. The checks assume quiescent paths and do not provide an atomic snapshot or hostile-writer boundary.
