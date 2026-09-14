@@ -6791,3 +6791,26 @@ Index9716d4 verifies all94 payloads in Git/disk. Original reviews, provider
 records, shortened command previews and truncated outputs remain preserved.
 Complete provider command coverage is unverified. No subject rerun occurred.
 Production remains71d3e70; no package rebuild or market clearance follows.
+
+### 2026-09-14 — Control Room command-preview warning integrated
+
+Control Room branchfeat/desktop-control-room now containsc3607c3. The adapter
+adds an uncertainty notice when Antigravity's run_command parameter is513 UTF-16
+units ending in an ellipsis. The original provider payload is unchanged; the
+notice copies no command text or secrets. Literal commands can match the heuristic,
+and an absent notice does not attest complete command coverage. Missing historical
+command text has not been recovered.
+
+Isolated39b82a and checkout2c64ef each pass the same16 cases (ten original plus
+six new), with zero failures/skips/cancellations. TypeScriptf63965 passes.
+Raw worktree diff/apply4bc4c9 succeeds. CR proof archive743de3/index17e055 verifies
+24 payloads,46,625 bytes, seala814a154066b5ed35618a1e1b4bcd3c15477ee4cadf1383448e2a900b1a798fa.
+The existing server was not restarted, and no actual provider run was used for
+this qualification. A new Control Room process loads the committed adapter.
+No CR push occurred. Uoink source and release gates are unchanged.
+
+Uoink's rejected constructor archive and smaller repair brief are committed at
+4d026c2. Astra's delegated source author is implementing only the controller
+startup authority unit under_scratch/real-startup-authority-repair01. It has no
+execution admission. Preserve the original generated adapter route and its tests;
+child transport, namespace, constructor and runtime qualification remain separate.
