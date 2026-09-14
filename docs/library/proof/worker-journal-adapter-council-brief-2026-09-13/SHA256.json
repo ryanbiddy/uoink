@@ -1,0 +1,67 @@
+[
+  {
+    "path": "BRIEF.md",
+    "bytes": 6953,
+    "sha256": "44597da3b84113dd79ccf0c2eed28be2704cf8e00060dd975f6065682008308e"
+  },
+  {
+    "path": "SELECTED-INPUTS.json",
+    "bytes": 40014,
+    "sha256": "84e68e6b125f86f750335f29606e94cab7af6b6df46f3c007ec9169c41a0875e"
+  },
+  {
+    "path": "READ-COVERAGE.md",
+    "bytes": 4486,
+    "sha256": "b80231e0ec0212b1444e16f0b97b45e87e660849b88c583ff47227cc3fd140dc"
+  },
+  {
+    "path": "FINALIZATION-NOTE.md",
+    "bytes": 2234,
+    "sha256": "9709226652347365cbde115b207ca523b7a77f271c9d93177b0056da4464409f"
+  },
+  {
+    "path": "TEXT-BINDING-CHECK.json",
+    "bytes": 28793,
+    "sha256": "fce88ae2290030c7a4860257128648519ed96ca630fbb77c118f0592463918d4"
+  },
+  {
+    "path": ".gitattributes",
+    "bytes": 8,
+    "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+  },
+  {
+    "path": "drafts/BRIEF-DRAFT.md",
+    "bytes": 6609,
+    "sha256": "7536b6a0780f65f27b6a2920370e988a7a30ff0789d551c47e28e1f2b8d2be47"
+  },
+  {
+    "path": "drafts/COVERAGE-DRAFT.json",
+    "bytes": 27953,
+    "sha256": "91fccccdae6ea56ca57487951cf4d5eaa9f12840d6b98ba945c5c554df28a485"
+  },
+  {
+    "path": "drafts/COVERAGE-DRAFT-before-accounting.json",
+    "bytes": 26339,
+    "sha256": "5fac301b4bf53d87557605b6a1b77f2ca5abec1eb7e35552c37c2e98a96c7fbf"
+  },
+  {
+    "path": "drafts/DRAFT-ACCOUNTING-CORRECTION.md",
+    "bytes": 821,
+    "sha256": "29dcc010da82036259840f01673743daf8bb8271eba5dbb46f278795e55d31a4"
+  },
+  {
+    "path": "FIXED-COPY-LIST.json",
+    "bytes": 3211,
+    "sha256": "391adbac7452185140ed3e9d16a5bee5da36eb9e294cc962b6082c5f1b3595c7"
+  },
+  {
+    "path": "ROOT-BINDINGS-ACTUAL.json",
+    "bytes": 305,
+    "sha256": "5da98ac5028b68932903b4ba8a941a900e1ac317a3223041994d4d34b0689341"
+  },
+  {
+    "path": "ASTRA-VERDICT.md",
+    "bytes": 1807,
+    "sha256": "f624a79ef58770c8eb91d41fd259d120623d0db9d19a384e476ef07e2c35e927"
+  }
+]

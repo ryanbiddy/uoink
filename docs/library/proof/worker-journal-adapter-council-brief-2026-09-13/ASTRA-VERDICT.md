@@ -1,0 +1,9 @@
+# Astra worker and journal council brief review
+
+Accept the three-group source-only brief for one Gemini Control Room review. Root read the full brief, required coverage and finalization note. The 70 selected text inputs and three proof manifests match current Git and disk bytes at 98a7e06 in check ce4d10; selected content totals 700,114 bytes. The final dispatch commit will include this frozen brief and its exact input catalog.
+
+The groups cover actual worker-bootstrap ownership, Windows journal/recovery invariants, and durable startup plus adapter cleanup. The catalog includes direct dependencies, complete case assertions, raw exits and input/guard records. It preserves the first 63/2 failure and the exact approved two-line correction, alongside both 65-case passes and both 17-case bootstrap passes. Shared unchanged source is selected once; distinct generation-protocol versions stay distinct. The later creation-transfer70 derivative, native observation and D1 are outside this review.
+
+The only requested worker mutation is its one report. No tests, imports, launchers, model/archive/binary reads, native operations, network/fetch, database access, staging, commits or pushes are requested. No suites need rerunning for a source-only report. Root will review findings, verify the actual worker diff and integrate it through the prescribed patch path. Any incomplete coverage remains incomplete; worker-reported line coverage is not independently proved by file-size metadata. Existing execution results retain their original scope and failures.
+
+This council may qualify the reviewed components within their measured limits. It cannot approve model execution, installed behavior, website/marketing or overall release readiness. No new approval requirements should be invented in its report.
