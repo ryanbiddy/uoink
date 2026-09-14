@@ -29,13 +29,14 @@ Phase 2 suggestions-only scope, the 0.90 autonomous threshold, apply=false,
 the X blocked-link condition, no speaker claims and deferred Phase 5 Part B are
 already decided. Ryan does not need to approve them again.
 
-Updated 2026-09-13. The latest production repair is71d3e70: notice generation
+Updated 2026-09-14. The latest production repair is71d3e70: notice generation
 and installer attribution, with20 Python and10 inert build-block cases passing
 in each root. It follows e8d058f's53 focused passes and13 passing subtests in each
 root. Complete tree09 at56d9d4c predates both repairs and remains2,796 passed,
 one failed, three skipped, plus13 subtests.
 Package 08 still represents b8e44fb; no current-source package or installation
-credit exists. The latest completed branch backup is 01e22fb (2026-09-13), with
-push and remote-check exits0. Later commits remain local. Preserve these
+credit exists. The latest completed authorized branch-only backup is verified at6730c8e.
+Later commits require a separate verified backup; no candidate-branch push,
+main merge or publication follows. Preserve these
 separate identities until replacement build and qualification are complete.
 Website and marketing remain paused until council and integrator accept Uoink.

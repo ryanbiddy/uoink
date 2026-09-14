@@ -86,7 +86,7 @@ establish safe installation isolation, and verify/correct resulting findings.
   Always `PYTHONDONTWRITEBYTECODE=1`, `PYTHONPATH=<checkout>`; Phase 3 needs
   `PHASE3_REQUIRE_IMPLEMENTATION=1`; unset `ANTHROPIC_API_KEY`.
 
-## State at handoff (updated 2026-09-13; release fixes continue after package 08)
+## State at handoff (updated 2026-09-14; release fixes continue after package 08)
 
 | Phase | State | Astra's latest ruling | Next |
 |---|---|---|---|
@@ -96,30 +96,30 @@ establish safe installation isolation, and verify/correct resulting findings.
 | 4 | Owner ff67b84 and process 747fb6b accepted; combined tree09 sealed at 9a46b38 | All 50 previously failing Phase 4 cases now pass in the complete run. Original 233-case focused results and Gemini scope review remain intact | No mirror rerun needed. Preserve tree08 failure and unresolved exact historical cause; continue runtime security |
 | 5 | Part A repaired; SDK union 267 passed in each root and corrected complete-tree case passes | BA-4/unary-clock failures close; dashboard 24,576-byte target remains missed | Preserve performance limit; Part B deferred |
 | 6 | Package-08 production publication and cited-range review complete at `49e2b31` | Exact export after 2.1001697 s protocol delay; first actual client export succeeds after separate 1.9874018 s delay | No speaker or player-seek credit; speakers blocked, no new fetch |
-| Security | NLTK wheel at 52d9f7d, binding at 07084fe; graph f22456c and security scope 14aa0df reviewed; cache guard b96dbd0 accepted | Cache guard: 144 passed plus 13 subtests in each independent root; all 117 proof payloads match Git and disk. Candidate advisory count remains one entry / one group; graph still fails five caps. Default VAD remains open; Gemini cache review integrated at 9d25eda. B2 derivative preparation at f0181f8 passes ten synthetic cases independently; actual B2 builds at 576cd07/d9f2208 reproduce identically under Python 3.14/3.13, remain uninstalled; optional Hub keyword repair qualified at 25b0a63, remains an inert proposal | B3 packaging qualifies at 7be52ef with 68/68 in both roots and identical actual builds. Pipeline generator contracts qualify at 2f8464a: 23 passing cases in each root; native stack remains unaccepted. Fixed converter synthetic qualification is archived at 57abc97: 82 passed in each independent run, real profile absent. Buffer consistency comparator qualified at 9859a8a with 37 cases in each root. Concrete D1 adapter qualified at381985c: 54 synthetic passes in each root, 53 sealed payloads; actual inspection and interpretation basis remain owner decisions. ASR manifest resolver qualified as an inert proposal at e6a2394 with 87 passes in each root and 138 sealed payloads. Plain-state reader qualified at e826407 with 82 synthetic passes in each root and 187 sealed payloads; original setup and75/1 failures retained. Real reader authority remains absent. Finish runtime adapter, D1 invocation and compatibility proposals. Static inventory and fixed-loader proposal archived at 01163e1; runs03/04 completed after retained refusals. Symbolic run01 refused a reference cycle (4a3644a); cycle diagnostic ccb44ce retains refusal; selected projection at ba8d2c8 provides 54 symbolic tensor descriptors while strict refusal remains. Fixed factory/schema mapped and independently reviewed at de07dfe: 54 declarations, 23 storages; bridge unapproved. Public upstream identity is verified at 191cbf1; byte order and applicable model notice remain open. No model execution. No runtime or installed clearance |
-| Runtime source review | Gemini loader council and Torch source comparison integrated at a2e6e7c | Gemini found no new actionable defect within the three components' synthetic scope; Astra accepts with timestamp, path and native-open corrections. Torch collector passed 40 cases in each root; 23 admitted HTTP body pairs verified. All 38 council, 199 source and seven root-verification payloads match Git/disk | Repair dormant D1 and ASR qualification exit-recording gaps, qualify fake-port orchestration, implement tensor bridge and real runtime ports. No native, installed or release clearance |
+| Security | NLTK wheel at 52d9f7d, binding at 07084fe; graph f22456c and security scope 14aa0df reviewed; cache guard b96dbd0 accepted | Cache guard: 144 passed plus 13 subtests in each independent root; all 117 proof payloads match Git and disk. Candidate advisory count remains one entry / one group; the earlier candidate02 graph retains its five-cap failure; later candidate03 metadata passes at 616f670. Runtime compatibility remains open. Default VAD remains open; Gemini cache review integrated at 9d25eda. B2 derivative preparation at f0181f8 passes ten synthetic cases independently; actual B2 builds at 576cd07/d9f2208 reproduce identically under Python 3.14/3.13, remain uninstalled; optional Hub keyword repair qualified at 25b0a63, remains an inert proposal | B3 packaging qualifies at 7be52ef with 68/68 in both roots and identical actual builds. Pipeline generator contracts qualify at 2f8464a: 23 passing cases in each root; native stack remains unaccepted. Fixed converter synthetic qualification is archived at 57abc97: 82 passed in each independent run, real profile absent. Buffer consistency comparator qualified at 9859a8a with 37 cases in each root. Concrete D1 adapter qualified at381985c: 54 synthetic passes in each root, 53 sealed payloads; D1 inspection is complete at 4b38948 and D2 local conversion at d13534f. Writer authentication, remaining storage/runtime qualification and the model notice are not thereby resolved. ASR manifest resolver qualified as an inert proposal at e6a2394 with 87 passes in each root and 138 sealed payloads. Plain-state reader qualified at e826407 with 82 synthetic passes in each root and 187 sealed payloads; original setup and75/1 failures retained. Real reader authority remains absent. Continue protected runtime integration and compatibility qualification. Static inventory and fixed-loader proposal archived at 01163e1; runs03/04 completed after retained refusals. Symbolic run01 refused a reference cycle (4a3644a); cycle diagnostic ccb44ce retains refusal; selected projection at ba8d2c8 provides 54 symbolic tensor descriptors while strict refusal remains. Fixed factory/schema mapped and independently reviewed at de07dfe: 54 declarations, 23 storages; bridge unapproved. Public upstream identity is verified at 191cbf1; byte order and applicable model notice remain open. No model execution. No runtime or installed clearance |
+| Runtime source review | Gemini loader council and Torch source comparison integrated at a2e6e7c | Gemini found no new actionable defect within the three components' synthetic scope; Astra accepts with timestamp, path and native-open corrections. Torch collector passed 40 cases in each root; 23 admitted HTTP body pairs verified. All 38 council, 199 source and seven root-verification payloads match Git/disk | The dormant D1/ASR runner repairs and fake orchestration are recorded below. Continue protected runtime integration. No native, installed or release clearance |
 | Signing | Gemini review and repaired path integrated at 0b3629d | 48 focused passes; 77 proof payloads match Git. Real Inno direct callback refuses missing certificate and keeps a durable error. No successful signing credit | Full combined candidate tree after runtime work settles; actual certificate/service choice remains Ryan's |
 | D1 static inspection | Ryan's exact static approval and observed result integrated at 4b38948 | One invocation b29f6c returns outer/child0 with valid guards; exact checkpoint hash and131-member inventory match;1,002 interpreted bytes/version330a; little-endian maximum2ULP. All61 evidence payloads match Git/disk | D1 inspection is complete. Writer/other-storage validation and D2 conversion/D3 acquisition/D4 native execution remain separate; no model or release credit |
 | D2 local conversion | Ryan approved the exact local-only proposal; completed evidence committed atd13534f | Actual2827f8 and root948c0d return0. One artifact read and one exclusive output:54 ranges/23 storages,5,896,708 bytes. All64 proof payloads match Git/disk | Conversion is complete; model/reader/native compatibility, redistribution and release remain unqualified. Do not repeat artifact access |
 | State bridge | Synthetic orchestration integrated at 2b9068a | Author and Astra each 61 passed / 0 failed / 0 skipped, exact cases and valid guards. All 59 proof payloads match Git/disk and map 83 logical files | CPU port now qualified with fake APIs at 3801cee; implement the concrete factory service and qualify native independence separately. Real entry points remain closed |
 | CPU tensor port | Concrete method bodies qualified with fake storage at 3801cee | Author and Astra each 60 passed / 0 failed / 0 skipped, exact ordered cases and ten valid final guards. All 45 proof payloads match Git/disk and map 67 logical files | Implement factory ownership and actual runtime services. Native allocation, float conversion, storage/view behavior and cleanup remain untested; no market clearance |
 | VAD factory registry | Concrete factory and worker-local model registration integrated at 803df4b | Author and Astra each 59 passed / 0 failed / 0 skipped; all ten guards valid and 65 proof payloads match Git/disk, preserving 119 logical files | Gemini component review accepted at 488a7fd for tested scope; actual runtime bootstrap, native semantics and numerical behavior remain open |
-| Owned WhisperX | Source/contracts at 1935012; actual text wheel at 93f4996 | Author and Astra each 50 inert cases pass. Actual wheel is 134,793 bytes/22 members; build and independent byte verification exits zero. All 217 contract and 38 packaging proof payloads match Git/disk. Original failures remain preserved | Recompute captured compatibility graph with the exact built derivatives; real runtime remains closed |
+| Owned WhisperX | Source/contracts at 1935012; actual text wheel at 93f4996 | Author and Astra each 50 inert cases pass. Actual wheel is 134,793 bytes/22 members; build and independent byte verification exits zero. All 217 contract and 38 packaging proof payloads match Git/disk. Original failures remain preserved | Preserve the metadata graph at 616f670 until a changed input warrants another check; real runtime remains closed |
 | ASR lifecycle | State/facade contracts integrated at 1935012 | Author and Astra each 46 passed / 0 failed / 0 skipped; all 98 proof payloads match Git/disk. Original zero-case winreg startup failure, diagnostic and repair preserved | Implement complete Windows loader namespace protection, trusted worker bootstrap/IPC and crash recovery; no kernel/model clearance |
 | ASR orchestration | Fake-port adapter qualified at a3e02f4 | Author and Astra each 58 passed / 0 failed with exact cases and 11 final traps intact. All 260 proof payloads match Git/disk; original null exit remains failed | Implement Windows snapshot lifetime and the owned operation worker. No real model, package or installed clearance |
 | Orchestration council | Gemini review integrated at cf5614d | All three groups accepted for their limited scope, with Astra's cleanup/exit/ownership corrections. Eight source/contract files match both checkouts and original seals; all 27 new proof payloads match Git/disk | Continue concrete runtime implementations. This review grants no native, installed or market acceptance |
 | Component council | Gemini98b5e1a3 integrated at 488a7fd | CPU/factory, lifecycle and owned WhisperX accepted for tested scope, with Astra's three wording corrections. Seventeen current bindings checked; all 99 proof payloads match Git/disk | Qualify the connected Windows worker and final dependency set. No runtime, installed or market acceptance |
-| Windows namespace and ASR connection | Timeout at 0d93186; adoption at 428707d; adapter at d58bebe; council at ca61046; operations at 7fba83a; actual adapter connection at 7ced134 | Generated drain/cancel pass; actual proposed-adapter Windows drain fc23ea also returns0 with valid guards, restored services and child0/job0 before release. All63 latest proof payloads match Git/disk | Durable reservation/recovery and worker-local runtime owner are next. Real models and final runtime qualification remain open |
+| Windows namespace and ASR connection | Timeout at 0d93186; adoption at 428707d; adapter at d58bebe; council at ca61046; operations at 7fba83a; actual adapter connection at 7ced134 | Generated drain/cancel pass; actual proposed-adapter Windows drain fc23ea also returns0 with valid guards, restored services and child0/job0 before release. All63 latest proof payloads match Git/disk | Generated reservation/recovery and runtime-owner connection are recorded at 5671b51, 3661608 and 3b8f9e0. Continue interrupted-owner retirement and protected runtime work. Real models and final runtime qualification remain open |
 | Local wheel graph and notices | Graph at 616f670; cached wheels at 95a7f29; source notices at d887f8a; council at ca61046; installer source fix at 71d3e70 | Notice author and actual checkout each pass20 Python cases and10 inert build-block cases. All128 proof payloads and four product notice files match Git/disk. Metadata graph passes144pins/287edges; conflict remains explicit | Verify fresh inventory and installed notice bytes in the eventual candidate. Native compatibility and release security remain open |
 | Latest component council | Original partial report870fa00 supplemented at2339a09 | Gemini ca1e1356 records views of all39 omitted paths; Astra accepts three component verdicts with corrections and the explicit Inno1–150 boundary. Root verified all69 input bytes in both checkouts and all17 supplement payloads in Git/disk | Continue concrete runtime work. Full-line claims remain worker-reported; no overall release acceptance |
-| Generated reservation recovery | Component and evidence integrated at f9ab6fe | Author70b48e and independentfd86f5 each pass42 cases, with20 passing nested subtests and all10 guards valid. All123 proof payloads match Git/disk | Connect retained Windows gate/journal handles and split create/resume/startup. Native recovery and runtime acceptance remain open |
-| Windows reservation connection | Correction8fc3219; transfer2f4311f; native generated drain67887c3 | Unit70/0/0 plus35 subtests in both copies. Native d3d56f returns outer/controller/child0, valid guards, child0/job0, four confirmed phases/flushes and exact2,118B closed journal. All87 native proof payloads match Git/disk | Qualify remaining native exclusion/interruption/persistence/restart/reconciliation. Actual runtime-owner connection and real models remain open |
+| Generated reservation recovery | Component and evidence integrated at f9ab6fe | Author70b48e and independentfd86f5 each pass42 cases, with20 passing nested subtests and all10 guards valid. All123 proof payloads match Git/disk | The retained Windows connection and generated recovery are recorded below, including 5671b51. Continue interrupted-owner retirement; real runtime acceptance remains open |
+| Windows reservation connection | Correction8fc3219; transfer2f4311f; native generated drain67887c3 | Unit70/0/0 plus35 subtests in both copies. Native d3d56f returns outer/controller/child0, valid guards, child0/job0, four confirmed phases/flushes and exact2,118B closed journal. All87 native proof payloads match Git/disk | Generated exclusion, retired-owner recovery and runtime-owner connection are recorded below, including 3b8f9e0. Interrupted-owner retirement, restart and real models remain open |
 | Worker/journal council | Scoped source review completed at1c6ac4c with mandatory Astra addendum; original244cca5 remains accuracy FAILED | All24 correction proof payloads match Git/disk. Gemini correction alone remains partial; Astra corrects remaining handshake/locking/private-caller claims. Existing17/65 outcomes unchanged | Continue native/runtime engineering. Session42118 closed482e42/exit0; no new council loop or broader acceptance |
-| Native writer exclusion | Stable-directory repair atd317a88; native04 atf630264; council corrections ata74e178 and f32f0ca | Both copies81 cases/72 subtests; native0eeb20 passed. Group A and B source conclusions require their mandatory Astra corrections. Group B has23 proof payloads matching Git/disk. Original failed review preserved | Retired-owner recovery is observed at5671b51. Runtime-owner connection follows47d30c; restart and real runtime remain open |
-| Actual adapter cancellation | Generated qualification integrated at60b3bb5 | Author and independent copies each89 passed/0 failed/0 skipped,86 passing subtests; all216 proof payloads match Git/disk | Native cancellation integrated ata25b34b: all100 proof payloads match Git/disk. Connect interrupted final-clear recovery; crash/restart, real models and release remain unqualified |
-| Retired-owner final-clear recovery | Fake22 at a83ae1a; generated native recovery at5671b51 | Both fake copies22/0/0 plus21 passing subtests. Nativee97a44/exit0, root5214fa and peer503717 verify exact retirement, four confirmed phases/flushes and still-revoked owner/token. All91 newest proof payloads match Git/disk | Connect the qualified runtime owner to the native child. No OS-interruption, active-worker, crash/restart or model credit |
+| Native writer exclusion | Stable-directory repair atd317a88; native04 atf630264; council corrections ata74e178 and f32f0ca | Both copies81 cases/72 subtests; native0eeb20 passed. Group A and B source conclusions require their mandatory Astra corrections. Group B has23 proof payloads matching Git/disk. Original failed review preserved | Retired-owner recovery is observed at5671b51. Runtime-owner connection is recorded at 3661608 and 3b8f9e0; interrupted-owner retirement, restart and real runtime remain open |
+| Actual adapter cancellation | Generated qualification integrated at60b3bb5 | Author and independent copies each89 passed/0 failed/0 skipped,86 passing subtests; all216 proof payloads match Git/disk | Native cancellation integrated ata25b34b: all100 proof payloads match Git/disk. Final-clear recovery is recorded at 5671b51; interrupted-owner retirement, crash/restart, real models and release remain unqualified |
+| Retired-owner final-clear recovery | Fake22 at a83ae1a; generated native recovery at5671b51 | Both fake copies22/0/0 plus21 passing subtests. Nativee97a44/exit0, root5214fa and peer503717 verify exact retirement, four confirmed phases/flushes and still-revoked owner/token. All91 newest proof payloads match Git/disk | The generated runtime-owner connection is recorded at 3661608 and 3b8f9e0. Continue interrupted-owner retirement; no OS-interruption, active-worker recovery, crash/restart or model credit |
 | Worker runtime owner and bootstrap | Connected fake33 at 3661608; generated native cancellation at 3b8f9e0 | Both fake copies 33/0/0. Native a9321b/exit 0, root dd7190 and peer 4984ac agree on 32 unchanged pairs, valid guards, one segment, closed owner, child/contender exit 0 with empty jobs, and four journal frames. All 127 native proof payloads match Git/disk | Interrupted-owner retirement direction is committed at 77dc339. Real inference, protected loader/PCM/filter routes, crash/restart and release remain open |
-| Interrupted owned-worker retirement | Corrected brief at 77dc339; Gemini run 31e8890c-ab80-44d0-8062-3347942bc6cf is active | Root fc41f6 verifies 16 committed texts/356,810 bytes; all 23 direction proof payloads match Git/disk. Worker uses frozen base b1d7ed5 and the existing Antigravity subscription | Wait for completed source output, then review derivatives before qualification. Six cases are proposed, none run; no native/model execution admitted |
+| Interrupted owned-worker retirement | Gemini source review FAILED; original proposal and reviews preserved at 0a1a211 | All 56 failure-proof payloads match Git/disk after documented newline transport repair. CLI exit 0 is not qualification; six proposed cases remain unexecuted | Astra source repair is active under brief 81635ab with 31 bound text inputs. Review the three derivatives, six replacement controls and guarded qualification instrument before execution; no new native/model or release acceptance |
 | Release notes | Current progress and remaining gates committed at 376eb47 | All seven proof payloads match Git/disk; 57 table lines and historical package/review-kit sections remain unchanged. D1/D2 completion and generated cancellation/recovery are explicit | Continue runtime qualification. No production source, package, installation, public draft or website changed |
 | Integration | Reliability repair at e8d058f and notice packaging at 71d3e70 after tree09 | Reliability:53 focused cases plus13 subtests per root. Notices:20 Python/10 block cases per root. Tree09 at 56d9d4c remains2,796 passed/1 failed/3 skipped across2,800 cases plus13 subtests; it predates both repairs | Finish runtime work, then run a new committed complete tree and rebuild/reseal. Package08 and website/marketing remain held. No current-source package or installation credit |
 | Desktop incident | Isolation failed in package-07 attempt; corrected at `e10ba3a` | Ordinary Uoink and filesystem connectors launched; earlier live-index/5179 effects unknown. Owned job cleaned | No further override launch; only guarded Uoink dashboard observed for package 08 |
@@ -196,16 +196,25 @@ brief is at 47d30c and its independent fake33 qualification is at 3661608.
 Both copies pass the same original 17 and new 16 cases. The separately admitted
 native cancellation is accepted at 3b8f9e0 after root dd7190 and peer 4984ac
 receipt review. All 127 proof payloads match Git/disk. Do not repeat the run.
-Gemini run 31e8890c-ab80-44d0-8062-3347942bc6cf is active from the committed
+Gemini source run 31e8890c-ab80-44d0-8062-3347942bc6cf completed from the committed
 INTERRUPTED-OWNED-SESSION-RETIREMENT-BRIEF-2026-09-13.md, frozen base b1d7ed5.
 Its fixed map is under proof/interrupted-owner-retirement-direction-2026-09-13/corrected.
-It uses gemini-3.8-flash-high/high through the existing Antigravity subscription.
-Root exec session 31004 retains the live CLI; do not dispatch a duplicate.
-The worker writes derivatives and six proposed cases only. No candidate import,
-compile, test or native execution is admitted. The first positive case requires
-an idle pipe, no retained I/O and confirmed exact handles; aggregate quarantine
-history and all ordinary refusals remain. Root reviews the completed source
-before preparing any later qualification brief.
+It used gemini-3.8-flash-high/high through the existing Antigravity subscription.
+Outer 562f54 exited 0 after 12m7s; session 31004 is closed and nine scratch files
+were produced. SOURCE REVIEW FAILED: prohibited ambient Python startup contradicted
+the worker's denial; no candidate import execution was seen. Cleanup and patch
+defects require bounded source repair. The formal disposition is committed at
+0a1a211: ASTRA-INTERRUPTED-OWNER-SOURCE-FAILURE-2026-09-14.md, with 56 verified
+proof payloads. Astra's source repair is active under brief 81635ab in
+_scratch/interrupted-owner-retirement-repair02. Its input map binds 31 texts,
+618,872 bytes, SHA256 51b2fb644c69d496b935d84f84b46fa4a421745449c19a3a8160d57f42b7f63e.
+Core and test authors have separate files; a guarded fake-qualification instrument
+is being prepared without execution or fabricated final-source hashes.
+No new behavior is accepted.
+No candidate import, compile, test or native execution is admitted. The first
+positive case still requires an idle pipe, no retained I/O and confirmed exact
+handles; aggregate quarantine history and all ordinary refusals remain. Preserve
+the failed source and review the repair before any later qualification.
 D2 remains complete atd13534f; no repeat checkpoint/output access for documentation.
 No model, complete-tree, package, installed-client, website or marketing clearance.
 
@@ -226,7 +235,7 @@ also failed with valid guards and unchanged inputs and is archived atcc6bb7c.
 Read ASTRA-WRITER-EXCLUSION03-DIAGNOSTIC-2026-09-13.md; all87 payloads match
 Git/disk. It identifies size4096 to8192
 at the same retained directory, with all five other identity fields unchanged.
-Preserve that failure and prepare the stable-directory product repair. Keep the
+That failure led to the stable-directory product repair below. Keep the
 original70 test bodies and strict regular-file identity/size checks; no fixture
 change. That failed03 record itself grants no exclusion, recovery or runtime
 acceptance; the later qualified native04 result is described below.
@@ -269,8 +278,8 @@ completed/exit0 and is not review acceptance. The source patch was integrated
 by raw diff/three-way apply; Git's EOL conversion was checked and exact tested
 worker bytes restored. A staging-only failure omitted ignored receipts.zip;
 force-adding its unchanged sealed bytes repaired that failure. All19 payloads
-match Git/disk. Continue the concrete D1 adapter, ASR trusted-manifest resolver
-and VAD-PLAIN-STATE-READER-PROPOSAL-BRIEF-2026-09-13.md. D1 adapter is accepted
+match Git/disk. The concrete D1 adapter, ASR trusted-manifest resolver
+and plain-state reader qualifications are recorded below. D1 adapter is accepted
 as preparation at381985c: author/root54-case synthetic checks pass, all53 proof
 payloads match Git/disk. Ryan's subsequent static-only approval and exact result
 are archived at4b38948; read ASTRA-D1-STATIC-RESULT-2026-09-13.md. One invocation
@@ -288,8 +297,8 @@ Plain-state reader is qualified as an inert proposal at e826407: author/root
 both82/0, same membership and generated bytes,187 payloads matching Git/disk.
 Original vpr01 setup failure and valid75/1 vpr02 failure remain preserved. The
 source now bounds JSON depth before parsing; all76 original assertions remain.
-Prepare D1's exact dormant invocation and the real tensor bridge without actual
-artifact access. The ASR production adapter's ports and call-site splices are
+The dormant D1 invocation and tensor bridge were earlier preparation steps;
+D1 is complete at 4b38948. Continue protected runtime work without new artifact access. The ASR production adapter's ports and call-site splices are
 being qualified separately; they are not a completed installed migration.
 Torch2.13 collector author/root each40/0. Resolve01 and sources01 completed:
 2 then21 HTTP200 responses,6257 then1050728 body bytes, all exits0. Exact tag
@@ -312,7 +321,7 @@ report. All 38 proof payloads match Git/disk. No new tests ran in that review;
 The D1 runner repair and full dormant source review are integrated at f0602f8.
 Read ASTRA-D1-INVOCATION-REVIEW-2026-09-13.md. Both 12-case runs pass, with four
 original-wrapper controls recorded separately. All 102 proof payloads match
-Git/disk. Actual D1 gates remain None. The ASR instrument's first check failed:
+Git/disk. The frozen dormant D1 proposal retains None gates; its separately approved invocation completed at 4b38948. The ASR instrument's first check failed:
 native_exit was null after local LASTEXITCODE shadowing. Four fresh inert scope
 observations confirm explicit global capture on PowerShell 7.6.5; the original
 failed receipt remains unchanged. The repaired two-wrapper/four-guard subset
@@ -336,7 +345,7 @@ with ten valid guards and 45 sealed payloads matching Git/disk. Continue the
 concrete factory service, lifecycle/worker and owned WhisperX qualification.
 The Windows source's cancellation, output-budget and interruption repairs are
 under review; a later result-publication race was also repaired before testing.
-No real Torch/model code has run. D1 still awaits Ryan's separate answer.
+No real Torch/model code has run. D1 is resolved at 4b38948 and must not be repeated for documentation.
 
 The owned WhisperX and lifecycle contracts are integrated at 1935012. Read
 ASTRA-OWNED-WHISPERX-CONTRACT-VERDICT-2026-09-13.md and
@@ -366,9 +375,8 @@ separately and must not be called the original preflight manifest.
 The Windows namespace/protocol fake-API evidence is integrated at 9c40271.
 Read ASTRA-WINDOWS-NAMESPACE-VERDICT-2026-09-13.md. Author and Astra each pass
 the same 54 cases; both actual outer exits are zero, guards valid and nine
-inputs unchanged. All 65 proof payloads match Git/disk. Next qualify the
-connected generated-only Windows child, inherited pipe,
-child-held file guard and actual process/job shutdown. Native04 now passes that
+inputs unchanged. All 65 proof payloads match Git/disk. The subsequent generated-only Windows child, inherited-pipe,
+child-held guard and process/job observation is recorded below. Native04 now passes that
 narrow observation: actual7b331c exit0; controller/child/outer0; child-only guard
 denies write access with WinError32, and access succeeds without writing after
 the retained child exits0 and job active count reaches0. Root a58725 verifies
@@ -377,8 +385,7 @@ Native01 import refusal, native02 ctypes audit refusal and native03 erroneous
 32-binding assertion remain failures before worker creation. Native04 binds the
 actual31 functions. The complete history is integrated at668b08a; read
 ASTRA-GENERATED-WINDOWS-WORKER-VERDICT-2026-09-13.md. All119 native plus three
-integrator payloads match Git/disk. Qualify the prepared bounded timeout/forced-stop
-case. The eight negative/positive handshake contracts are integrated ate98f4c2:
+integrator payloads match Git/disk. The subsequent bounded timeout/forced-stop observation is recorded below. The eight negative/positive handshake contracts are integrated ate98f4c2:
 author/root8/0, actual00f8b6/d16104,71 payloads matching Git/disk. Read
 ASTRA-CONTROLLER-HANDSHAKE-VERDICT-2026-09-13.md. Timeout01c32937 fails with
 valid guards: exact child exits1/job0, but GetOverlappedResultFALSE/error109
@@ -400,8 +407,8 @@ The adapter repair2b6cbbad retains the permit and yields the owned facade;
 root has reviewed its full source and six connection cases0ef40eab. Both guarded
 roots now pass6/0/0 in actualc59cdb/672a23; integrated atd58bebe. Read
 ASTRA-ASR-PERMIT-FACADE-VERDICT-2026-09-13.md. All111 proof payloads match Git/disk.
-Next connect the facade's five operations to the generated Windows worker;
-proposal generated-operation-facade-proposal01 is unexecuted. No model is involved.
+The facade's generated Windows operations were subsequently qualified at 7fba83a,
+with the original proposal preserved. No model is involved.
 Council run7eee470b completed from b77bc56 using Gemini via Antigravity and is
 integrated atca61046. Read ASTRA-WINDOWS-ADAPTER-GRAPH-COUNCIL-VERDICT-2026-09-13.md.
 All three groups are accepted with findings for their measured scope only.
@@ -415,8 +422,8 @@ The next actual proposed-adapter connection is now qualified at7ced134:
 fc23ea returns valid0 through faster_whisper_session, the real factory/permit
 path and adapter-owned cleanup, with explicit generated authority seams.
 Read ASTRA-GENERATED-ADAPTER-VERDICT-2026-09-13.md; all63 proof payloads match
-Git/disk. No real runtime authority was granted. Durable reservation/recovery
-and the worker-local runtime owner remain the next implementation work.
+Git/disk. No real runtime authority was granted. Generated reservation/recovery and runtime-owner connection are now recorded
+at 5671b51, 3661608 and 3b8f9e0. Continue interrupted-owner retirement and protected runtime work.
 The generated reservation unit is now accepted atf9ab6fe; read
 ASTRA-GENERATED-RESERVATION-VERDICT-2026-09-13.md. Author70b48e and independent
 fd86f5 each pass42 cases with20 nested subtests, zero failures/skips and valid
@@ -432,15 +439,14 @@ Fresh label02 is now qualified at 8fc3219: author f480a2 and independent503555
 each pass65/0/0 plus33 passing nested subtests, exact case objects and valid
 guards. All194 payloads match Git/disk. Read ASTRA-WINDOWS-RESERVATION02-
 VERDICT-2026-09-13.md. Only the approved two expectations changed; the original
-failure remains failed. Next qualify the shared create-to-acquire handle
-transfer in the unchanged corrected65 plus five new controls: now accepted at
+failure remains failed. The shared create-to-acquire handle
+transfer preserves the corrected65 plus five new controls and is accepted at
 2f4311f, both70/0/0 plus35 passing subtests and all161 proof payloads matching
-Git/disk. Read ASTRA-CREATION-TRANSFER-VERDICT-2026-09-13.md. Review and execute
-the exact generated native normal-drain proposal: now accepted at67887c3,
+Git/disk. Read ASTRA-CREATION-TRANSFER-VERDICT-2026-09-13.md. The exact generated native normal-drain observation is accepted at67887c3,
 actuald3d56f outer/controller/child0 and exact closed journal/retirement checks.
 Read ASTRA-NATIVE-JOURNAL-DRAIN-VERDICT-2026-09-13.md; all87 payloads match
-Git/disk. Other native recovery
-observations and the actual runtime-owner native connection remain open.
+Git/disk. Generated retired-owner recovery and runtime-owner cancellation are recorded
+at 5671b51 and 3b8f9e0; interrupted-owner retirement and real runtime remain open.
 The worker runtime owner is qualified at1f200eb; read
 ASTRA-WORKER-RUNTIME-OWNER-VERDICT-2026-09-13.md. Both root-executed copies pass
 the same11 generated cases. Publication now checks active VAD/product/model
@@ -448,7 +454,7 @@ lease under its lock. All152 proof payloads match Git/disk. Its actual
 WorkerBootstrap connection is now accepted at bbe10d6: root authorb6d2c5 and
 independent6dad03 each pass17/0/0, with the same case objects and valid guards.
 All144 new proof payloads match Git/disk. Read ASTRA-WORKER-BOOTSTRAP-VERDICT-
-2026-09-13.md. Continue the actual native connection; real loader, inference,
+2026-09-13.md. The generated native connection is recorded at 3b8f9e0; real loader, inference,
 PCM, filter and VAD-to-model binding remain closed or unqualified.
 Current Gemini review cede76cb completed against frozen brief commitd996dba,
 proof/worker-journal-adapter-council-brief-2026-09-13/BRIEF.md. Its three groups
@@ -621,9 +627,9 @@ candidate branch or main push, main merge or public release occurred.
    payloads. Read proof/companion-hub-keyword-2026-09-13/README.md. It passes
    eight synthetic contracts in author and root runs; baseline is four pass/
    four TypeError errors with a valid guard. Preserve all earlier invalid-guard
-   attempts and the insufficient compile-filename repair. Prepare combined
-   B3 as localassets2 with both source fixes, independent review and synthetic
-   packaging checks before another actual build. Do not mutate B2 seals.
+   attempts and the insufficient compile-filename repair. The later combined
+   B3 localassets2 includes both source fixes, independent review and synthetic
+   packaging checks, as recorded below. Do not mutate B2 seals.
    B3 is now packaged and independently reviewed at 7be52ef. Its 148 proof
    payloads match Git and disk; read proof/companion-b3-reproduction-2026-09-13/
    VERDICT.md. Worker and root each passed 68 cases; actual Python 3.14/3.13
@@ -697,8 +703,8 @@ candidate branch or main push, main merge or public release occurred.
    ASTRA-VAD-BUFFER-BASIS-VERDICT-2026-09-13.md. All35 payloads match Git
    and disk. Author/root each pass37 generated cases with identical membership.
    The eight-ULP basis is conditional consistency evidence, not historical
-   writer authentication; no real buffer was read. Finish the exact static
-   inspection and migration protocol before Ryan's reserved decision. Do not
+   writer authentication; those comparator runs read no real buffer. The later
+   D1 inspection is complete at 4b38948; the exact runtime migration decision remains open. Do not
    widen the tolerance, activate a profile or fetch models from this result.
    Prepare an exact derivative and protocol before Ryan's
    frozen-test/model decision; do not replace the current lock with this graph.
@@ -746,7 +752,7 @@ candidate branch or main push, main merge or public release occurred.
    6bbf0095-0d82-4afa-b523-db16db5bb5d2 completed source review with no actionable
    finding; read ASTRA-AUTHORITY-COUNCIL-VERDICT-2026-09-13.md before the retained
    worker report. Review is committed at 1e90e08, with 11 verified proof payloads.
-   It gives no full-release or new test credit. No full tree has run yet.
+   It gives no full-release or new test credit. The later complete tree09 is recorded below.
    The retained proposal and failed tests remain unaccepted product. Read
    ASTRA-AUTHORITY-C1008-REVIEW-2026-09-13.md. Owner admission is accepted at ff67b84 after raw
    diff/three-way integration and 12 focused plus 184 Phase 4 passes in each
@@ -777,8 +783,10 @@ candidate branch or main push, main merge or public release occurred.
    The 62-payload proof matches disk and Git; 174 passive captures are complete
    with no observer errors. No production test needs another run absent a new
    source change or documented new concern. Retain tree08 and historical AT6.
-   Rebind the unused package09 instruments to that new qualified source before
-   following PACKAGE-09-INTEGRATION-BRIEF-2026-09-12.md. Package08 remains held;
+   After runtime integration, qualify a fresh committed complete tree before
+   rebinding package09 and rebuilding/resealing. Tree09 at 56d9d4c predates
+   e8d058f and 71d3e70; follow PACKAGE-09-INTEGRATION-BRIEF-2026-09-12.md only
+   after its inputs are rebound to the newly qualified source. Package08 remains held;
    no new installed NLTK or signing credit exists.
 5. PAUSED by Ryan's latest September 13 instruction: no website or marketing
    work until Astra and the council agree Uoink is ready for market. The saved
@@ -6206,3 +6214,54 @@ native or production acceptance follows from dispatch. Wait for the actual
 terminal outcome, inspect the complete output/diff, preserve any partial result,
 and review before preparing qualification. Do not retry without a repair brief.
 D1/D2 artifacts, real activation, website and marketing remain untouched.
+
+### 2026-09-14 — Current status corrected; retirement source review failed
+
+Current State/Queue and release documents now distinguish completed D1/D2,
+generated runtime-owner connection and the earlier metadata result from remaining
+runtime work. D1 stays complete at4b38948, D2 atd13534f, fake33 at3661608 and
+generated native cancellation at3b8f9e0. The last verified authorized branch
+backup remains6730c8e; no main merge or publication follows.
+
+Gemini source run31e8890c-ab80-44d0-8062-3347942bc6cf completed fromb1d7ed5.
+Outer562f54 exited0 after12m7s; session31004 is closed and nine files were produced.
+SOURCE REVIEW FAILED. Prohibited ambient Python startup contradicted the worker's
+denial; no candidate import execution was seen. Cleanup and patch defects require
+bounded source repair. Root's formal disposition is forthcoming in
+ASTRA-INTERRUPTED-OWNER-SOURCE-FAILURE-2026-09-14.md. No new behavior is accepted.
+The first interrupted-owner case still requires an idle pipe, no retained I/O
+and confirmed exact handles; ordinary refusals remain.
+
+The corrections preserve past log entries, failed results and historical package
+records. Latest production repair71d3e70, tree09/source56d9d4c and package08/source
+b8e44fb remain separate. Runtime integration still precedes a fresh complete tree,
+package and installed checks. D3/D4, signing, Desktop isolation, AT6 and release
+decisions remain open. This was documentation work with passive byte checks only;
+no candidate/proof, model, native, website or marketing work was performed.
+
+### 2026-09-14 — Rejected source archived; bounded Astra repair active
+
+Failure evidence is committed at 0a1a211. All 56 payloads / 1,152,757 bytes
+match Git and disk; seal bdc0f3f45c42782f2683c26ad431a8ab6f99050360aa7b4e53be1c039539021a.
+Root copied the rejected worker output and actual records into its worktree,
+exported a binary/full-index Git diff (1708c7), then applied it with --3way
+(4a6fa6, exit 0, new-file direct fallback). Initial index check 47d151 failed
+because application converted new archive files to CRLF. The documented
+transport repair 961577 first required newline-only equivalence, restored
+exact sealed donor bytes and left the seal unchanged. Recheck/commit 8aa1db
+returned 0. These are passive documentary checks, not candidate tests.
+
+Preserve events 54424–54425 and the worker's inaccurate execution report.
+A bare diagnostic Python startup happened despite its source-only brief;
+ambient interpreter/startup effects remain unqualified. A model or candidate
+execution is not established by that command. Do not repeat it to investigate.
+Actual returned objects, including the truncated final CLI object, are retained
+without reconstruction. Do not treat a completed Control Room status as evidence
+that tool restrictions or behavior were satisfied.
+
+Repair brief 81635ab and input preparation 2678d5 now govern the source work.
+Three core derivatives and six replacement proposed controls are being prepared
+in separate author scopes, preserving the rejected proposal and accepted 33/22
+tests. Review them and the fake instrument before admission. No new Python,
+native/model, complete-tree, package, installed-client or release outcome is
+claimed. D1/D2 stay complete, and website/marketing remain paused.

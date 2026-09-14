@@ -1,6 +1,6 @@
 # Living Library 3.8.0 release candidate
 
-Updated 2026-09-13. Release remains held. Website work and marketing are paused
+Updated 2026-09-14. Release remains held. Website work and marketing are paused
 until the council and integrator accept the product for market.
 
 The latest complete source tree at `56d9d4c` records **2,796 passed, one failed
@@ -83,9 +83,9 @@ copies. It refuses result publication after VAD retirement, product/module
 replacement or model-lease revocation. The actual factory method uses fake tensor
 and model classes in these checks. Its actual worker-bootstrap connection is
 qualified at `bbe10d6`: both copies pass the same 17 cases, including six new
-construction, registration, retirement and failure controls. Connecting this
-owner to the generated native child is proposed at `47d30c`; that connection
-has no native qualification yet. Native inference, protected model loading,
+construction, registration, retirement and failure controls. The connection now passes the same
+33 generated cases in both roots at `3661608`. Generated native cancellation is
+accepted at `3b8f9e0`. Native inference, protected model loading,
 decoder/filter authority and the actual VAD-to-model link remain unqualified.
 No production runtime migration is accepted.
 
@@ -127,9 +127,9 @@ The combined tokenizer and Hub-argument derivative now builds identically under
 Python 3.13 and 3.14; it remains uninstalled. The fixed VAD factory and schema
 are reviewed proposals. D2 local conversion is complete as recorded above;
 reader/model integration and runtime qualification remain open.
-The last completed branch backup is `01e22fb`, verified on September 13 with
-push and remote-check exits 0. Later commits remain local until the next
-authorized branch backup.
+The latest completed authorized branch-only backup is verified at `6730c8e`.
+Later commits require a separate verified backup; no candidate-branch push,
+main merge or publication follows.
 
 The ASR manifest resolver and plain-state reader now pass 87 and 82 synthetic
 cases respectively in both author and independent runs (`e6a2394`, `e826407`).
