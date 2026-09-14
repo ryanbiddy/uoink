@@ -1,0 +1,7 @@
+{
+  "chunk_id": "afb41d",
+  "wall_time_seconds": 0.6605458,
+  "exit_code": 0,
+  "original_token_count": 48,
+  "output": "{\"payloads\":256,\"bytes\":2979016,\"manifest_sha256\":\"34b8e9f7ce12dcfd048c83b8e75dac6d0ee94577c9f2ee7ac28edc02df8fe899\",\"newline_only_restored\":235,\"all_raw_payloads_and_seal_equal_donor\":true}\n"
+}

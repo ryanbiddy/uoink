@@ -1,0 +1,7 @@
+{
+  "chunk_id": "7b246b",
+  "wall_time_seconds": 0.0000019,
+  "exit_code": 0,
+  "original_token_count": 54,
+  "output": "{\"proof\": \"docs/library/proof/startup-authority-fake81-2026-09-14\", \"payloads_matching_disk_and_git\": 256, \"bytes\": 2979016, \"manifest_sha256\": \"34b8e9f7ce12dcfd048c83b8e75dac6d0ee94577c9f2ee7ac28edc02df8fe899\"}\r\n"
+}

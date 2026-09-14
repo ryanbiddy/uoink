@@ -310,9 +310,13 @@ subtests. Original65 preserved. Root151c60 and peere49d09 verify all complete
 case objects,23 hashes,ten guards,27 inputs/three controls and35 outputs each.
 The instrument source verdict06f077ce and root verdict correct one frozen protocol
 claim: early setup failures rely on the outer actual, not launch-failure.json.
-Do not repeat these scoped observations. Next review the bounded child namespace
-repair brief being prepared under _scratch/real-child-namespace-plan01, then
-dispatch its implementation. Real-worker startup and model authority remain closed.
+Do not repeat these scoped observations. Next dispatch
+REAL-CHILD-NAMESPACE-IMPLEMENTATION-BRIEF-2026-09-14.md. Its frozen plan and
+mandatory member-scope correction are archived under
+proof/real-child-namespace-plan-2026-09-14. All52 documentary payloads match
+Git/disk at72e8b2, seal6bb671fa. The selected18 source inputs total306,861 bytes.
+The unit has17 proposed control scenarios; no implementation or execution pass
+exists yet. Real-worker startup and model authority remain closed.
 Source archive9593bc/index9cc34c preserves145 payloads, seald207df4b. Result
 archivea26abf/index7b246b preserves256 payloads, seal34b8e9f7; raw diff/apply8811ba succeeds.
 Control Room's independent
@@ -6915,3 +6919,41 @@ All235 transport differences were proven UTF-8 newline-only before restoration.
 Production remains71d3e70. The next repair is the authenticated child namespace;
 constructor, backend metadata, PCM/filter, caller and native qualification remain.
 Index7b246b/0 verifies all256 payloads against both Git and disk.
+
+### 2026-09-14 — Startup81 accepted and backed up; child namespace brief follows
+
+Qualification and handoff changes are committed at9c87ec2. Pushdf22eb/0 and
+remoteee14db/0 verify origin/cc/living-library at
+9c87ec216768fcd7b86cc97c9c8779f1fdafa49a after clean-candidate, ancestry and CAS
+checks. No main merge or other branch push occurred.
+
+The next bounded brief prepares the controller-to-child namespace connection.
+Preserve the accepted pre-worker validator: it deliberately requires a reserved
+token with no worker. Later worker binding/publication needs a separate stage
+check retaining the same consumed startup/session/permit and selection. The
+authenticated envelope digest and approved release-manifest digest are distinct.
+The brief must preserve that distinction and stop before constructors or PCM.
+
+### 2026-09-14 — Child namespace plan frozen with exact model membership
+
+REAL-CHILD-NAMESPACE-IMPLEMENTATION-BRIEF-2026-09-14.md narrows the next worker
+to controller stage validation, authenticated envelope/adoption, begin-gated
+child-local issuance and retained materialization. Rootef1028/d40717/58cf81 reads
+the plan/map and directly called transport/adoption/bootstrap methods. Source
+checke95b26 verifies17 selected texts,293,488 bytes, plus the direct resolver.
+
+Root3dfe02 found that the initial plan assumed five members. The accepted resolver
+actually has four files for tiny/base/small/medium (vocabulary.txt), and five for
+large/large-v3-turbo (preprocessor_config.json and vocabulary.json). Preserve
+frozen brief86d66542/mapa397a5c1 with addendum50c711e6 and supplementcb37362a.
+The admitted route must bind the selected four-or-five set; the generated five
+route stays intact. A seventeenth proposed control covers four-file success.
+No new source or model ran to resolve this planning mistake.
+
+Archive9ffd85/0 preserves52 payloads,598,931 bytes, seal
+6bb671fa20947bcb79ecca984f8ccdc683f90028759d3d01d321e38fabd62299.
+It includes all18 selected source texts and prior startup81 integration/backup
+receipts. Raw diff/applyb7670d/0 transports643,400 bytes at
+3766cf74d2114048236a72cb11be4b8ff6c5d7745fab45a28b870ef45fabb895.
+All50 transport differences were proven newline-only; index72e8b2/0 verifies
+all52 raw payloads against Git and disk. Dispatch source implementation next.

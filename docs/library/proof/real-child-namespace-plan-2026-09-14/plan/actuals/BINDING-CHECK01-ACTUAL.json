@@ -1,0 +1,7 @@
+{
+  "chunk_id": "67f926",
+  "wall_time_seconds": 0.226608,
+  "exit_code": 0,
+  "original_token_count": 74,
+  "output": "{\"status\":\"PASS\",\"fixed_text_rows\":17,\"source_bytes\":null,\"source_pins_checked\":true,\"map_sha256\":\"a397a5c167a63bfcec1ce1f577a42f3225e2e4ea3da6b42e5e792c6ca3ec6dc4\",\"brief_sha256\":\"86d66542bfcac53d74499bf8808edc2855406b026610452d9f42363615a668e6\",\"brief_words\":802,\"candidate_execution\":false}\r\n"
+}

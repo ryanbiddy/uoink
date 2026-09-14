@@ -1,0 +1,7 @@
+{
+  "chunk_id": "e95b26",
+  "wall_time_seconds": 0.1871177,
+  "exit_code": 0,
+  "original_token_count": 132,
+  "output": "{\n  \"scope\": \"passive source plan binding only; no candidate execution\",\n  \"sources\": 17,\n  \"bytes\": 293488,\n  \"brief_sha256\": \"86d66542bfcac53d74499bf8808edc2855406b026610452d9f42363615a668e6\",\n  \"map_sha256\": \"a397a5c167a63bfcec1ce1f577a42f3225e2e4ea3da6b42e5e792c6ca3ec6dc4\",\n  \"supplemental_resolver\": {\n    \"bytes\": 13373,\n    \"sha256\": \"16a5a1245f649a3eb04d077b661835503f08bef0ff8822dcb545176f0cc30833\"\n  },\n  \"required_correction\": \"Admitted selection has four or five members; generated five-member route unchanged\"\n}\n"
+}
