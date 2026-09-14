@@ -116,7 +116,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | Windows reservation connection | Correction8fc3219; transfer2f4311f; native generated drain67887c3 | Unit70/0/0 plus35 subtests in both copies. Native d3d56f returns outer/controller/child0, valid guards, child0/job0, four confirmed phases/flushes and exact2,118B closed journal. All87 native proof payloads match Git/disk | Qualify remaining native exclusion/interruption/persistence/restart/reconciliation. Actual runtime-owner connection and real models remain open |
 | Worker/journal council | Scoped source review completed at1c6ac4c with mandatory Astra addendum; original244cca5 remains accuracy FAILED | All24 correction proof payloads match Git/disk. Gemini correction alone remains partial; Astra corrects remaining handshake/locking/private-caller claims. Existing17/65 outcomes unchanged | Continue native/runtime engineering. Session42118 closed482e42/exit0; no new council loop or broader acceptance |
 | Native writer exclusion | Stable-directory repair atd317a88; generated native04 pass atf630264; failed02/03 preserved | Both copies pass81 cases+72 subtests. All200 unit and93 native proof payloads match Git/disk. Native0eeb20 returns0, both exact childrenexit0/job0, four phases/flushes and matching closed journal | Gemini review preserved as accuracy FAILED at89c1579; Group A correction dispatched fromd8caad9. Cancellation qualification at60b3bb5; native793018 passes, archival next. Interruption/restart/reconciliation and real runtime remain open |
-| Actual adapter cancellation | Generated qualification integrated at60b3bb5 | Author and independent copies each89 passed/0 failed/0 skipped,86 passing subtests; all216 proof payloads match Git/disk | Native cancellation793018 and rootd388e0 pass; archive its distinct evidence next. Crash/restart, real models and release remain unqualified |
+| Actual adapter cancellation | Generated qualification integrated at60b3bb5 | Author and independent copies each89 passed/0 failed/0 skipped,86 passing subtests; all216 proof payloads match Git/disk | Native cancellation integrated ata25b34b: all100 proof payloads match Git/disk. Connect interrupted final-clear recovery; crash/restart, real models and release remain unqualified |
 | Worker runtime owner and bootstrap | Owner at 1f200eb; actual bootstrap connection at bbe10d6 | Both copies pass17/0/0: eleven retained owner cases plus six bootstrap cases. Exact case objects, valid guards, unchanged19 inputs plus admission. All144 newest proof payloads match Git/disk | Connect exact ownership through native services. Real inference, PCM/filter, VAD-to-model binding and protected constructor routes remain open |
 | Integration | Reliability repair at e8d058f and notice packaging at 71d3e70 after tree09 | Reliability:53 focused cases plus13 subtests per root. Notices:20 Python/10 block cases per root. Tree09 at 56d9d4c remains2,796 passed/1 failed/3 skipped across2,800 cases plus13 subtests; it predates both repairs | Finish runtime work, then run a new committed complete tree and rebuild/reseal. Package08 and website/marketing remain held. No current-source package or installation credit |
 | Desktop incident | Isolation failed in package-07 attempt; corrected at `e10ba3a` | Ordinary Uoink and filesystem connectors launched; earlier live-index/5179 effects unknown. Owned job cleaned | No further override launch; only guarded Uoink dashboard observed for package 08 |
@@ -169,7 +169,9 @@ Ryan's renewed goal is to continue fixing the product until it is ready for
 release, website/GitHub updates and marketing. The earlier review-kit delivery
 is complete but is not this goal's completion. Current queue:
 
-Latest execution order: archive the single native cancellation793018 observation.
+Latest execution order: native cancellation793018 is archived ata25b34b; all100
+payloads match Git/disk. Integrate the completed Group A source correction with
+its mandatory Astra addendum, then dispatch the separate Group B brief.
 Rootd388e0 verifies three guarded role receipts,21 source/control pairs, one
 segment/four actions, retained WORKER_BOUND during acknowledged cancellation,
 then child0/job0, CLEARED/four flushes and closed2,118-byte journal. Both earlier
@@ -5932,3 +5934,17 @@ seal831212c5b2e4e500b3333a98d5a0a5c62f073100461d07318a7d8c0250c719ac.
 Rootb6486c verifies canonical and selected source bytes; nothing was regenerated.
 Dispatchd5e4c4 starts session42728 with Gemini3.8-flash-high/Antigravity and
 frozen based8caad9. The original failed council review remains at89c1579.
+### 2026-09-13 — Native clean cancellation evidence committed
+
+Commita25b34b preserves actual793018 and rootd388e0 with the reviewed source,
+admission, prior source reviews and independent resultc88f4a. Copierda4fb7
+returned0; root042c2a verifies100 payloads/1,437,666 bytes against Git/disk.
+Sealc9b21d3b2929c63eee8656ba116da158dab236b3d2bc7797a26794ea9581b85e.
+Only exact tiny generated ASCII fixtures were copied. The physical journal,
+checkpoint, D2 output and support binaries were excluded. No native rerun.
+
+The next implementation is the already-retired owner's interrupted final clear:
+connect existing service reconciliation back to the quarantined manager record,
+with a fixed pre-append interrupt and separate focused controls. Preparation is
+under _scratch/windows-retired-owner-recovery-proposal01. No test/native admission
+exists yet. Clean cancellation does not establish this distinct recovery path.
