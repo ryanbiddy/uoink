@@ -1,0 +1,7 @@
+{
+  "chunk_id": "91fabc",
+  "wall_time_seconds": 0.1652237,
+  "exit_code": 0,
+  "original_token_count": 48,
+  "output": "{\"selected_count\": 33, \"selected_bytes\": 440045, \"required_lines\": 6422, \"map_sha256\": \"f095e168acba3e4c28fb9678a326730de0eaac37cc2d7b9dc6f4666d98b9e36e\", \"original_report_unchanged\": true}\r\n"
+}
