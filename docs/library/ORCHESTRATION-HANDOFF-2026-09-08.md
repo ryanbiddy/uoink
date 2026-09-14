@@ -115,8 +115,8 @@ establish safe installation isolation, and verify/correct resulting findings.
 | Generated reservation recovery | Component and evidence integrated at f9ab6fe | Author70b48e and independentfd86f5 each pass42 cases, with20 passing nested subtests and all10 guards valid. All123 proof payloads match Git/disk | Connect retained Windows gate/journal handles and split create/resume/startup. Native recovery and runtime acceptance remain open |
 | Windows reservation connection | Correction8fc3219; transfer2f4311f; native generated drain67887c3 | Unit70/0/0 plus35 subtests in both copies. Native d3d56f returns outer/controller/child0, valid guards, child0/job0, four confirmed phases/flushes and exact2,118B closed journal. All87 native proof payloads match Git/disk | Qualify remaining native exclusion/interruption/persistence/restart/reconciliation. Actual runtime-owner connection and real models remain open |
 | Worker/journal council | Scoped source review completed at1c6ac4c with mandatory Astra addendum; original244cca5 remains accuracy FAILED | All24 correction proof payloads match Git/disk. Gemini correction alone remains partial; Astra corrects remaining handshake/locking/private-caller claims. Existing17/65 outcomes unchanged | Continue native/runtime engineering. Session42118 closed482e42/exit0; no new council loop or broader acceptance |
-| Native writer exclusion | Stable-directory repair atd317a88; generated native04 pass atf630264; failed02/03 preserved | Both copies pass81 cases+72 subtests. All200 unit and93 native proof payloads match Git/disk. Native0eeb20 returns0, both exact childrenexit0/job0, four phases/flushes and matching closed journal | Gemini review preserved as accuracy FAILED at89c1579; smaller correction brief next. Cancellation qualification at60b3bb5; native observation next. Interruption/restart/reconciliation and real runtime remain open |
-| Actual adapter cancellation | Generated qualification integrated at60b3bb5 | Author and independent copies each89 passed/0 failed/0 skipped,86 passing subtests; all216 proof payloads match Git/disk | Admit the separate generated native cancellation observation. Crash/restart, real models and release remain unqualified |
+| Native writer exclusion | Stable-directory repair atd317a88; generated native04 pass atf630264; failed02/03 preserved | Both copies pass81 cases+72 subtests. All200 unit and93 native proof payloads match Git/disk. Native0eeb20 returns0, both exact childrenexit0/job0, four phases/flushes and matching closed journal | Gemini review preserved as accuracy FAILED at89c1579; Group A correction dispatched fromd8caad9. Cancellation qualification at60b3bb5; native793018 passes, archival next. Interruption/restart/reconciliation and real runtime remain open |
+| Actual adapter cancellation | Generated qualification integrated at60b3bb5 | Author and independent copies each89 passed/0 failed/0 skipped,86 passing subtests; all216 proof payloads match Git/disk | Native cancellation793018 and rootd388e0 pass; archive its distinct evidence next. Crash/restart, real models and release remain unqualified |
 | Worker runtime owner and bootstrap | Owner at 1f200eb; actual bootstrap connection at bbe10d6 | Both copies pass17/0/0: eleven retained owner cases plus six bootstrap cases. Exact case objects, valid guards, unchanged19 inputs plus admission. All144 newest proof payloads match Git/disk | Connect exact ownership through native services. Real inference, PCM/filter, VAD-to-model binding and protected constructor routes remain open |
 | Integration | Reliability repair at e8d058f and notice packaging at 71d3e70 after tree09 | Reliability:53 focused cases plus13 subtests per root. Notices:20 Python/10 block cases per root. Tree09 at 56d9d4c remains2,796 passed/1 failed/3 skipped across2,800 cases plus13 subtests; it predates both repairs | Finish runtime work, then run a new committed complete tree and rebuild/reseal. Package08 and website/marketing remain held. No current-source package or installation credit |
 | Desktop incident | Isolation failed in package-07 attempt; corrected at `e10ba3a` | Ordinary Uoink and filesystem connectors launched; earlier live-index/5179 effects unknown. Owned job cleaned | No further override launch; only guarded Uoink dashboard observed for package 08 |
@@ -169,20 +169,22 @@ Ryan's renewed goal is to continue fixing the product until it is ready for
 release, website/GitHub updates and marketing. The earlier review-kit delivery
 is complete but is not this goal's completion. Current queue:
 
-Latest execution order: cancellation89 qualification is archived at60b3bb5;
-review/admit its distinct native observation through the actual adapter and
-retained journal. Author05ca07 and independentfbff79 both pass89 cases/86 subtests;
-root2d4ad6 confirms exact cases, valid guards and unchanged inputs. Rootfe42d4
-verifies all216 sealed payloads against Git/disk. The original81
-cases remain unchanged. D2 is complete and archived atd13534f; no repeat access.
-Gemini2b39a17c completed from brief74d209c, but its review accuracy is FAILED:
-root99288b finds45 wrong hash/size pairs,29 wrong paths and eight nonexistent
-test names. Report and rejection are archived at89c1579, with24 payloads matching
-Git/disk. Use a documented smaller
-correction brief before another council run. Existing component measurements
-remain valid within their scopes. No model, complete-tree, package, installation,
-website or marketing clearance follows.
+Latest execution order: archive the single native cancellation793018 observation.
+Rootd388e0 verifies three guarded role receipts,21 source/control pairs, one
+segment/four actions, retained WORKER_BOUND during acknowledged cancellation,
+then child0/job0, CLEARED/four flushes and closed2,118-byte journal. Both earlier
+89-case qualifications remain committed at60b3bb5; all216 payloads match Git/disk.
+D2 is complete atd13534f and must not repeat for documentation.
 
+Gemini's original2b39a17c review remains accuracy FAILED and is preserved at89c1579.
+The smaller Group A correction brief is committed atd8caad9; dispatchd5e4c4 uses
+session42728, existing Antigravity subscription and frozen based8caad9. Review
+its completed output before integration. Group B needs its separate bounded
+follow-up. The brief's materializer9ab1aa remains exit1 at final reporting;
+independent verificatione5d5fe/b6486c confirms all15 payloads, canonical brief
+and five input bytes, without rerunning the materializer or any product measure.
+Then connect the retired-owner interruption/reconciliation path in its own brief.
+No model, complete-tree, package, installation, website or marketing clearance.
 Native writer-exclusion02 is preserved at c5e72a2; read
 ASTRA-WRITER-EXCLUSION02-FAILURE-2026-09-13.md. All130 proof payloads match
 Git/disk. One separately admitted reporting-only diagnostic03, actual1ad784,
@@ -5913,3 +5915,20 @@ is not review acceptance. The smaller Group A correction will select only two
 implementation files, their diffs and eleven new test bodies. Group B needs a
 separate bounded review. No product suite or native observation was repeated.
 Backup pollab55c9 remains pending account selection; no successful push receipt.
+### 2026-09-13 — Native cancellation observed; smaller council correction running
+
+Actual793018 returned0 after separately reviewed admissiona3cc13. Rootd388e0
+checks three valid role receipts and21 unchanged source/control pairs. One
+segment and four actions end in acknowledged cancellation, with the same held
+WORKER_BOUND journal until adapter cleanup. Both exact children exit0/job0;
+four phases/flushes end in CLEARED and a closed2,118-byte journal matching
+SHA11dbc95a56ae1397fb0663113f8ba606e461f8253e00600608ca9e81381f9fb8.
+Archive next. No crash/restart, model or market qualification follows.
+
+Briefd8caad9 narrows Group A to five texts/65,576 bytes and a600-word critique.
+Materializer9ab1aa exited1 at its final byte-sum display; keep that failure.
+Root e5d5fe independently verifies15 payloads/36,012 bytes against Git/disk,
+seal831212c5b2e4e500b3333a98d5a0a5c62f073100461d07318a7d8c0250c719ac.
+Rootb6486c verifies canonical and selected source bytes; nothing was regenerated.
+Dispatchd5e4c4 starts session42728 with Gemini3.8-flash-high/Antigravity and
+frozen based8caad9. The original failed council review remains at89c1579.
