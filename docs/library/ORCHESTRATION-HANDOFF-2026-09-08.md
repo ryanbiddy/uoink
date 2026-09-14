@@ -124,6 +124,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | Generated engine ownership | Qualified at9e3a77d: both scoped fake39 copies pass39/0/0; original33 preserved | Author09d91a and confirmationf5c18c return0. Root0c050f and peeraa242c verify identical full cases/38 hashes, ten guards, unchanged40 inputs/one admission and47 outputs each. All347 payloads match Git/disk; no separate subtest count | Connection01 source review failed after delivery55e4a9/0; its15 tests remain unexecuted. All94 failure/review payloads match Git/disk. Follow REAL-STARTUP-AUTHORITY-REPAIR-BRIEF-2026-09-14.md before child namespace/constructor repair |
 | Reliability request/stream caller | Both scoped fake11 copies pass11/0/0 plus15 subtests | Author121f97 and confirmationff51d7 return0. Roota05d87 and peer88b1f3 verify identical cases/nine hashes, ten guards, unchanged13 inputs/three controls and21 outputs each | Production unchanged. Resolve actual ticket issuance, CPU/int8 profile binding and two prospective legacy test contracts before migration; continue constructor and completion-info work |
 | Completion language metadata | Both scoped fake59 copies pass59/0/0 plus29 subtests; original46 preserved | Author577e68 and confirmation8fd760 return0. Root993295 and peera39b40 verify identical full cases/five hashes, ten guards, unchanged nine inputs/three controls and17 outputs each | Connect authenticated backend completion and controller registry, then migrate WhisperX caller. Engine fake39 is qualified below; real/runtime/production gates remain closed |
+| Control Room command audit | Adapter fix committed atc3607c3 on feat/desktop-control-room | Same16 focused replay cases pass in isolated and checkout copies; TypeScript check passes. All24 proof payloads match Git/disk | A new process loads the preview warning. Existing server not restarted or observed with it; no real-provider or complete-command attestation |
 | Release notes | Current progress and remaining gates committed at 376eb47 | All seven proof payloads match Git/disk; 57 table lines and historical package/review-kit sections remain unchanged. D1/D2 completion and generated cancellation/recovery are explicit | Continue runtime qualification. No production source, package, installation, public draft or website changed |
 | Integration | Reliability repair at e8d058f and notice packaging at 71d3e70 after tree09 | Reliability:53 focused cases plus13 subtests per root. Notices:20 Python/10 block cases per root. Tree09 at 56d9d4c remains2,796 passed/1 failed/3 skipped across2,800 cases plus13 subtests; it predates both repairs | Finish runtime work, then run a new committed complete tree and rebuild/reseal. Package08 and website/marketing remain held. No current-source package or installation credit |
 | Desktop incident | Isolation failed in package-07 attempt; corrected at `e10ba3a` | Ordinary Uoink and filesystem connectors launched; earlier live-index/5179 effects unknown. Owned job cleaned | No further override launch; only guarded Uoink dashboard observed for package 08 |
@@ -301,6 +302,10 @@ coverage is unverified. Preserve both failed constructor proposals.
 Next follow REAL-STARTUP-AUTHORITY-REPAIR-BRIEF-2026-09-14.md: retain controller
 manifest/admission/profile/permit authority before the child namespace and fixed
 constructor work. This smaller unit must keep absent real authority closed.
+Astra's source author is active under _scratch/real-startup-authority-repair01;
+no execution admission or source acceptance exists. Control Room's independent
+command-preview fix is committed atc3607c3 with16/0/0 in both copies and a passing
+TypeScript check. It needs no Uoink subject rerun; existing server was not restarted.
 Keep these source tasks separate from real PCM/filter and D3/D4 qualification.
 The frozen broader plan is archived in30 payloads under
 proof/runtime-next-source-plan-2026-09-14, index8ef211; no implementation pass is
@@ -6811,6 +6816,6 @@ No CR push occurred. Uoink source and release gates are unchanged.
 
 Uoink's rejected constructor archive and smaller repair brief are committed at
 4d026c2. Astra's delegated source author is implementing only the controller
-startup authority unit under_scratch/real-startup-authority-repair01. It has no
+startup authority unit under _scratch/real-startup-authority-repair01. It has no
 execution admission. Preserve the original generated adapter route and its tests;
 child transport, namespace, constructor and runtime qualification remain separate.
