@@ -1,0 +1,7 @@
+{
+  "chunk_id": "df6c0c",
+  "wall_time_seconds": 0.1205036,
+  "exit_code": 1,
+  "original_token_count": 104,
+  "output": "Traceback (most recent call last):\r\n  File \"E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\check-native-runtime-owner-cancel01.py\", line 37, in <module>\r\n    assert source.parent == proposal and source.name == original['name'] and source.suffix in ('.py','.json','.ps1')\r\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\r\nAssertionError\r\n"
+}

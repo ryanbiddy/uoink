@@ -1,0 +1,7 @@
+{
+  "chunk_id": "dd7190",
+  "wall_time_seconds": 0.10625,
+  "exit_code": 0,
+  "original_token_count": 308,
+  "output": "{\"cancel_bound_sha256\": \"aa9c2de91b2c2706280057c5f47ea7f41d6db2afa2aa9dbc82e3426989065e52\", \"dispatch_calls\": {\"child\": 271, \"contender\": 137, \"controller\": 8251}, \"elapsed_seconds\": {\"child\": 1.0239387000037823, \"contender\": 0.001271700020879507, \"controller\": 1.4134899000055157}, \"guards_valid\": true, \"journal_bytes\": 2118, \"journal_sha256\": \"ee70c6bcddcd9b90f0988d5ea49e19cef6c976895804fc4ef012ec6a60e3fa4a\", \"model_runtime_restart_release_accepted\": false, \"native_calls\": {\"child\": 237, \"contender\": 103, \"controller\": 8215}, \"operation_events\": [\"admit_generated_media\", \"begin_generated_transcription\", \"next_generated_segment\", \"cancel_generated_cursor\"], \"owner_events\": [\"owner_ready\", \"readset_adopted\", \"policy_acknowledged\", \"begun\", \"namespace_materialized\", \"generated_inputs_issued\", \"actual_factory_registered\", \"control_committed\", \"control_committed\", \"segment_committed\", \"control_committed\", \"actual_factory_retired\", \"child_readset_released\", \"closed_frame_committed\", \"closed_frame_written\", \"owner_and_channel_revoked\"], \"owner_state\": \"closed\", \"process_and_jobs_closed\": true, \"receipt_roles\": 3, \"segments\": 1, \"source_control_pairs\": 32, \"status\": \"PASS_GENERATED_NATIVE_RUNTIME_OWNER_CANCEL_ONLY\"}\r\n"
+}

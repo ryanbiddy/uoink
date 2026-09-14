@@ -1,0 +1,7 @@
+{
+  "chunk_id": "f8546d",
+  "wall_time_seconds": 0.178637,
+  "exit_code": 0,
+  "original_token_count": 84,
+  "output": "{\r\n  \"files\": 47,\r\n  \"bytes\": 727148,\r\n  \"pins_sha256\": \"1f74a81c4ca363dad2584c68fe577ec39fb4ecd88cba216a33239aeb9c20fd45\",\r\n  \"decoded_source_paths\": 29,\r\n  \"exact_fake_modules\": 28,\r\n  \"native_binding_metadata_rows\": 9,\r\n  \"support_paths_accessed\": 0,\r\n  \"template_false\": true,\r\n  \"admission_absent\": true,\r\n  \"run_absent\": true\r\n}\r\n"
+}

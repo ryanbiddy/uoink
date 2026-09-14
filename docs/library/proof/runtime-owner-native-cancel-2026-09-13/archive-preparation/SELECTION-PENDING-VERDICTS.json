@@ -1,0 +1,661 @@
+{
+  "scope": "Pending fixed source selection only; not an operative copy inventory",
+  "files": [
+    {
+      "source": "_scratch/runtime-owner-native-connection-native-proposal01/.gitattributes",
+      "path": "native-preparation/.gitattributes",
+      "bytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-connection-native-proposal01/asr_loading_adapter.py",
+      "path": "native-preparation/asr_loading_adapter.py",
+      "bytes": 12113,
+      "sha256": "635d2c22db75d12ffe6965fb656fdca47450ccbbaeb4d8cc8aaff9fcc79dd243"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-connection-native-proposal01/before/dummy_bootstrap-controller-draft01.py",
+      "path": "native-preparation/before/dummy_bootstrap-controller-draft01.py",
+      "bytes": 39121,
+      "sha256": "f24c5f2b58d73b0f6e81b8b18c5a1140dc2063b67ed7631e6960f2a990d8287b"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-connection-native-proposal01/before/dummy_bootstrap.py",
+      "path": "native-preparation/before/dummy_bootstrap.py",
+      "bytes": 35927,
+      "sha256": "93de35cdcaeac944c12cb7760ceafda48f4719cc545a701bf20da177e509e725"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-connection-native-proposal01/before/recovery-SOURCE-INPUTS.json",
+      "path": "native-preparation/before/recovery-SOURCE-INPUTS.json",
+      "bytes": 6303,
+      "sha256": "9d988684ca8dfe487521f7d711ec67855393922d53ffe3cce3e13a2c660e34c3"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-connection-native-proposal01/before/run_journal_cancel01.ps1",
+      "path": "native-preparation/before/run_journal_cancel01.ps1",
+      "bytes": 34781,
+      "sha256": "70ab9cc3879ed792db0f8deaec4fd343f6a96438811bad9e37977ae510fa11d6"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-connection-native-proposal01/before/run_retired_recovery01.ps1",
+      "path": "native-preparation/before/run_retired_recovery01.ps1",
+      "bytes": 36996,
+      "sha256": "75a9baea9307658a99217816f7653adfdbb9d0df44286a5b244ea5d3cad43444"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-connection-native-proposal01/BRIEF.md",
+      "path": "native-preparation/BRIEF.md",
+      "bytes": 3746,
+      "sha256": "ff7856f3397649ec8856c57e3b0b09e88bef2dc70c762fb8b3f8bca036fda404"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-connection-native-proposal01/controller-selection-repair01.diff",
+      "path": "native-preparation/controller-selection-repair01.diff",
+      "bytes": 640,
+      "sha256": "be2ca535007ff1e3e06df5c89ecb9f387fbcf5c571f2453500829b5495dff753"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-connection-native-proposal01/CONTROLLER-SELECTION-REPAIR01.md",
+      "path": "native-preparation/CONTROLLER-SELECTION-REPAIR01.md",
+      "bytes": 833,
+      "sha256": "843a76470c108266b4b4e018495eb53997017dbaf65aa9bdb71b403c7467bf59"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-connection-native-proposal01/dummy_bootstrap.diff",
+      "path": "native-preparation/dummy_bootstrap.diff",
+      "bytes": 11003,
+      "sha256": "e6813ce793d4bedd561b62a4217636805cfdb4cffdd5762bae89cc0ff420d0ac"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-connection-native-proposal01/dummy_bootstrap.py",
+      "path": "native-preparation/dummy_bootstrap.py",
+      "bytes": 39128,
+      "sha256": "2b3ff16486720294b2e1571ed7dfa3990ec8d46db01b1c20ce101e7951ec879b"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-connection-native-proposal01/durable_lifecycle.py",
+      "path": "native-preparation/durable_lifecycle.py",
+      "bytes": 19187,
+      "sha256": "ef1519262dc0762c96d86582e211e8c2d9dfcbf93d8a3a03b0a6fc4dba5de352"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-connection-native-proposal01/fake_torch_support.py",
+      "path": "native-preparation/fake_torch_support.py",
+      "bytes": 5204,
+      "sha256": "5e1381eac70634292945422dfaf70786bb5fb96cbab7ea14a3fcc08fa29a185b"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-connection-native-proposal01/fixed_schema_helpers.py",
+      "path": "native-preparation/fixed_schema_helpers.py",
+      "bytes": 2837,
+      "sha256": "d61e9a48ecfa906862fedb5b91415f1d2a0b71adc27d3e43ef245842c9e5b188"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-connection-native-proposal01/generated_adapter_flow.py",
+      "path": "native-preparation/generated_adapter_flow.py",
+      "bytes": 56180,
+      "sha256": "4d1bc0ac6e25733b13cc2d16c327be23d90c68d22b1402736ff8147b302a0e8c"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-connection-native-proposal01/generated_journal_setup.py",
+      "path": "native-preparation/generated_journal_setup.py",
+      "bytes": 14954,
+      "sha256": "e6a0b9aab01c1ee4f8da948bd76b420c709d10b79b094026493384a2fe89d9d6"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-connection-native-proposal01/generated_operation_flow.py",
+      "path": "native-preparation/generated_operation_flow.py",
+      "bytes": 21274,
+      "sha256": "6f09b4e6490b2078e792e49559a9dd0db95a895a778c31294a3577eeabdc98ed"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-connection-native-proposal01/generated_worker_factory_inputs.py",
+      "path": "native-preparation/generated_worker_factory_inputs.py",
+      "bytes": 6415,
+      "sha256": "dbf5f1859fbe6f90d0f892e5a8dc7652f7336b32f51bf1dec0278f5fecfca046"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-connection-native-proposal01/generated_worker_flow.py",
+      "path": "native-preparation/generated_worker_flow.py",
+      "bytes": 22853,
+      "sha256": "1ab240d60ceaca130ac85f5d2e908ef5895da5297f35d78a1caba1c62e622238"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-connection-native-proposal01/generated_worker_runtime_bridge.py",
+      "path": "native-preparation/generated_worker_runtime_bridge.py",
+      "bytes": 12096,
+      "sha256": "11eff72f6d96b5c4248987635b5373672da706e1ac0fac53188aac7a3a253716"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-connection-native-proposal01/generated_writer_exclusion.py",
+      "path": "native-preparation/generated_writer_exclusion.py",
+      "bytes": 11647,
+      "sha256": "8173d7394f4a893c14d2979283a0c17ed273e25f196e14560590be3a0f22058b"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-connection-native-proposal01/inherited_readset.py",
+      "path": "native-preparation/inherited_readset.py",
+      "bytes": 12391,
+      "sha256": "02be8e04f4bea3030faf0882ae48ead40716c5782f95e2790e1a9897c5be76e3"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-connection-native-proposal01/model_binding_registry.py",
+      "path": "native-preparation/model_binding_registry.py",
+      "bytes": 8732,
+      "sha256": "48567add0f0ac2ac9140e9aa86b06f077454c98e2f0773100da5ba070f7b3deb"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-connection-native-proposal01/NATIVE-PROTOCOL.md",
+      "path": "native-preparation/NATIVE-PROTOCOL.md",
+      "bytes": 3476,
+      "sha256": "209d8acc5d5afdca64232e65c0c85b6c8d825073e808e98ff3d8fe1d07328833"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-connection-native-proposal01/ORIGINS.json",
+      "path": "native-preparation/ORIGINS.json",
+      "bytes": 9912,
+      "sha256": "8963aaaa90f5ec6a950951390dc0c7bca142528d114c8ff1e5f744fc8ad21b29"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-connection-native-proposal01/owned_cpu_tensor_port.py",
+      "path": "native-preparation/owned_cpu_tensor_port.py",
+      "bytes": 11768,
+      "sha256": "ac9eb28194723ffaf2d98bb2cd691a7b27b0a1638694fdfd8cb198c3084e8964"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-connection-native-proposal01/owned_factory_port.py",
+      "path": "native-preparation/owned_factory_port.py",
+      "bytes": 15463,
+      "sha256": "2569853c7634b795e3d2cf717129ec3dbc4e11d96ddb347098dcc4fbc532f0d4"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-connection-native-proposal01/owned_generation_protocol.py",
+      "path": "native-preparation/owned_generation_protocol.py",
+      "bytes": 24403,
+      "sha256": "bd5204ef0d3fc2a459df19bc5f02fd7b6d78041e2306b4031ab888387aa362c0"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-connection-native-proposal01/owned_guard.py",
+      "path": "native-preparation/owned_guard.py",
+      "bytes": 2109,
+      "sha256": "7672f614d81cf0be5e7bd408f8f856af328fe34e6ca7ee707c9d0db838e56d1f"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-connection-native-proposal01/pinned_buffer_namespace.py",
+      "path": "native-preparation/pinned_buffer_namespace.py",
+      "bytes": 7893,
+      "sha256": "2cc25a7a254f35d802336ef121cc860887a4301b3257588438dddec392fe0b7b"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-connection-native-proposal01/plain_state_reader.py",
+      "path": "native-preparation/plain_state_reader.py",
+      "bytes": 10629,
+      "sha256": "3962d355cffe928f78b741d2d920cc9c727a9fbd10305e20462b60f4cef9990c"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-connection-native-proposal01/PREPARATION-ACTUAL.json",
+      "path": "native-preparation/PREPARATION-ACTUAL.json",
+      "bytes": 3784,
+      "sha256": "49cacc6866ccf41f2aa17f1335b006b324835c97db7955e2affc95eabd897128"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-connection-native-proposal01/reservation_file_port.py",
+      "path": "native-preparation/reservation_file_port.py",
+      "bytes": 4694,
+      "sha256": "708554378ab8a8e6c4477e637c999256665cbd2855b94c6fa3c2d04a19d3a224"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-connection-native-proposal01/ROOT-ADMISSION-TEMPLATE.json",
+      "path": "native-preparation/ROOT-ADMISSION-TEMPLATE.json",
+      "bytes": 647,
+      "sha256": "9516a3dad9ee5ba8aa4eac53bfd76b5c35ebc0d38d61bc2a5c26b884b8114e67"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-connection-native-proposal01/run_native_owner_cancel01.diff",
+      "path": "native-preparation/run_native_owner_cancel01.diff",
+      "bytes": 10416,
+      "sha256": "036ef0f714689b91c16e22e03108886f370b157f9b753dd64abaf9c3e47db7b9"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-connection-native-proposal01/run_native_owner_cancel01.ps1",
+      "path": "native-preparation/run_native_owner_cancel01.ps1",
+      "bytes": 38531,
+      "sha256": "8f1a5c2e935c05d24790616ef0a005ba753c5ac77043db88fc0cef300afd0203"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-connection-native-proposal01/snapshot_lifecycle.py",
+      "path": "native-preparation/snapshot_lifecycle.py",
+      "bytes": 22138,
+      "sha256": "a80514aac6b1e75b9b872052852fa993a23cd5273b6bed4ffb4eef7404cb69dd"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-connection-native-proposal01/snapshot_reservations.py",
+      "path": "native-preparation/snapshot_reservations.py",
+      "bytes": 23634,
+      "sha256": "e80ae881fa4af9cc7d1a3e4a06624f5b19abe4de09aec3844e8a541449335b98"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-connection-native-proposal01/SOURCE-INPUTS.json",
+      "path": "native-preparation/SOURCE-INPUTS.json",
+      "bytes": 9434,
+      "sha256": "59f9e0d3cd15e632e8b5dd8e225d5b4c66d81020b8f0ec541128bcdd910940b4"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-connection-native-proposal01/SOURCE-PRESERVATION.json",
+      "path": "native-preparation/SOURCE-PRESERVATION.json",
+      "bytes": 9655,
+      "sha256": "0a9b76e0da844e480fbbf08640fe06e71eb0f1ff73cbd36162fb4399df60b7ba"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-connection-native-proposal01/state_bridge.py",
+      "path": "native-preparation/state_bridge.py",
+      "bytes": 11316,
+      "sha256": "b3ff126f29942e7daaf51e463ca9f35c4c423b6c638dbc38e5246946a8b7a6b2"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-connection-native-proposal01/trusted_asr_resolver.py",
+      "path": "native-preparation/trusted_asr_resolver.py",
+      "bytes": 13373,
+      "sha256": "16a5a1245f649a3eb04d077b661835503f08bef0ff8822dcb545176f0cc30833"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-connection-native-proposal01/win32_private_pipe.py",
+      "path": "native-preparation/win32_private_pipe.py",
+      "bytes": 18613,
+      "sha256": "73a1109a55f2bc807594655c71b24a3e35eb88d7f744497df2cc328dc224cae7"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-connection-native-proposal01/win32_worker_connection.py",
+      "path": "native-preparation/win32_worker_connection.py",
+      "bytes": 29660,
+      "sha256": "60d22036d6827205be5d0657af8e4693aa534605bdfb1b501878eb2a889fe25f"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-connection-native-proposal01/windows_reservation_port.py",
+      "path": "native-preparation/windows_reservation_port.py",
+      "bytes": 18234,
+      "sha256": "b93076ab07b8c0567f6608520c99f5e5523be3dd388010a5a49037a4a899f775"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-connection-native-proposal01/worker_runtime_owner.py",
+      "path": "native-preparation/worker_runtime_owner.py",
+      "bytes": 12997,
+      "sha256": "5647023ed03c5acfd8b1aa981a56171dd92228ccc0972f12546bb0b3d411ce87"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-connection-native-proposal01/PINS.json",
+      "path": "native-preparation/PINS.json",
+      "bytes": 8054,
+      "sha256": "1f74a81c4ca363dad2584c68fe577ec39fb4ecd88cba216a33239aeb9c20fd45"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-connection-native-proposal01/ROOT-ADMISSION-cancel.json",
+      "path": "native-preparation/ROOT-ADMISSION-cancel.json",
+      "bytes": 786,
+      "sha256": "7e641689c4985a4df4d1f860613f2da859f1f98843a16b43ec01cbad6125dbfd"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-connection01/plain_state_reader.py",
+      "path": "native-run/plain_state_reader.py",
+      "bytes": 10629,
+      "sha256": "3962d355cffe928f78b741d2d920cc9c727a9fbd10305e20462b60f4cef9990c"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-connection01/state_bridge.py",
+      "path": "native-run/state_bridge.py",
+      "bytes": 11316,
+      "sha256": "b3ff126f29942e7daaf51e463ca9f35c4c423b6c638dbc38e5246946a8b7a6b2"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-connection01/owned_cpu_tensor_port.py",
+      "path": "native-run/owned_cpu_tensor_port.py",
+      "bytes": 11768,
+      "sha256": "ac9eb28194723ffaf2d98bb2cd691a7b27b0a1638694fdfd8cb198c3084e8964"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-connection01/model_binding_registry.py",
+      "path": "native-run/model_binding_registry.py",
+      "bytes": 8732,
+      "sha256": "48567add0f0ac2ac9140e9aa86b06f077454c98e2f0773100da5ba070f7b3deb"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-connection01/owned_factory_port.py",
+      "path": "native-run/owned_factory_port.py",
+      "bytes": 15463,
+      "sha256": "2569853c7634b795e3d2cf717129ec3dbc4e11d96ddb347098dcc4fbc532f0d4"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-connection01/owned_guard.py",
+      "path": "native-run/owned_guard.py",
+      "bytes": 2109,
+      "sha256": "7672f614d81cf0be5e7bd408f8f856af328fe34e6ca7ee707c9d0db838e56d1f"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-connection01/fake_torch_support.py",
+      "path": "native-run/fake_torch_support.py",
+      "bytes": 5204,
+      "sha256": "5e1381eac70634292945422dfaf70786bb5fb96cbab7ea14a3fcc08fa29a185b"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-connection01/fixed_schema_helpers.py",
+      "path": "native-run/fixed_schema_helpers.py",
+      "bytes": 2837,
+      "sha256": "d61e9a48ecfa906862fedb5b91415f1d2a0b71adc27d3e43ef245842c9e5b188"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-connection01/worker_runtime_owner.py",
+      "path": "native-run/worker_runtime_owner.py",
+      "bytes": 12997,
+      "sha256": "5647023ed03c5acfd8b1aa981a56171dd92228ccc0972f12546bb0b3d411ce87"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-connection01/reservation_file_port.py",
+      "path": "native-run/reservation_file_port.py",
+      "bytes": 4694,
+      "sha256": "708554378ab8a8e6c4477e637c999256665cbd2855b94c6fa3c2d04a19d3a224"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-connection01/snapshot_reservations.py",
+      "path": "native-run/snapshot_reservations.py",
+      "bytes": 23634,
+      "sha256": "e80ae881fa4af9cc7d1a3e4a06624f5b19abe4de09aec3844e8a541449335b98"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-connection01/snapshot_lifecycle.py",
+      "path": "native-run/snapshot_lifecycle.py",
+      "bytes": 22138,
+      "sha256": "a80514aac6b1e75b9b872052852fa993a23cd5273b6bed4ffb4eef7404cb69dd"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-connection01/durable_lifecycle.py",
+      "path": "native-run/durable_lifecycle.py",
+      "bytes": 19187,
+      "sha256": "ef1519262dc0762c96d86582e211e8c2d9dfcbf93d8a3a03b0a6fc4dba5de352"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-connection01/win32_worker_connection.py",
+      "path": "native-run/win32_worker_connection.py",
+      "bytes": 29660,
+      "sha256": "60d22036d6827205be5d0657af8e4693aa534605bdfb1b501878eb2a889fe25f"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-connection01/windows_reservation_port.py",
+      "path": "native-run/windows_reservation_port.py",
+      "bytes": 18234,
+      "sha256": "b93076ab07b8c0567f6608520c99f5e5523be3dd388010a5a49037a4a899f775"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-connection01/owned_generation_protocol.py",
+      "path": "native-run/owned_generation_protocol.py",
+      "bytes": 24403,
+      "sha256": "bd5204ef0d3fc2a459df19bc5f02fd7b6d78041e2306b4031ab888387aa362c0"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-connection01/win32_private_pipe.py",
+      "path": "native-run/win32_private_pipe.py",
+      "bytes": 18613,
+      "sha256": "73a1109a55f2bc807594655c71b24a3e35eb88d7f744497df2cc328dc224cae7"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-connection01/pinned_buffer_namespace.py",
+      "path": "native-run/pinned_buffer_namespace.py",
+      "bytes": 7893,
+      "sha256": "2cc25a7a254f35d802336ef121cc860887a4301b3257588438dddec392fe0b7b"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-connection01/inherited_readset.py",
+      "path": "native-run/inherited_readset.py",
+      "bytes": 12391,
+      "sha256": "02be8e04f4bea3030faf0882ae48ead40716c5782f95e2790e1a9897c5be76e3"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-connection01/generated_worker_flow.py",
+      "path": "native-run/generated_worker_flow.py",
+      "bytes": 22853,
+      "sha256": "1ab240d60ceaca130ac85f5d2e908ef5895da5297f35d78a1caba1c62e622238"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-connection01/generated_operation_flow.py",
+      "path": "native-run/generated_operation_flow.py",
+      "bytes": 21274,
+      "sha256": "6f09b4e6490b2078e792e49559a9dd0db95a895a778c31294a3577eeabdc98ed"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-connection01/trusted_asr_resolver.py",
+      "path": "native-run/trusted_asr_resolver.py",
+      "bytes": 13373,
+      "sha256": "16a5a1245f649a3eb04d077b661835503f08bef0ff8822dcb545176f0cc30833"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-connection01/asr_loading_adapter.py",
+      "path": "native-run/asr_loading_adapter.py",
+      "bytes": 12113,
+      "sha256": "635d2c22db75d12ffe6965fb656fdca47450ccbbaeb4d8cc8aaff9fcc79dd243"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-connection01/generated_journal_setup.py",
+      "path": "native-run/generated_journal_setup.py",
+      "bytes": 14954,
+      "sha256": "e6a0b9aab01c1ee4f8da948bd76b420c709d10b79b094026493384a2fe89d9d6"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-connection01/generated_writer_exclusion.py",
+      "path": "native-run/generated_writer_exclusion.py",
+      "bytes": 11647,
+      "sha256": "8173d7394f4a893c14d2979283a0c17ed273e25f196e14560590be3a0f22058b"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-connection01/generated_worker_factory_inputs.py",
+      "path": "native-run/generated_worker_factory_inputs.py",
+      "bytes": 6415,
+      "sha256": "dbf5f1859fbe6f90d0f892e5a8dc7652f7336b32f51bf1dec0278f5fecfca046"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-connection01/generated_worker_runtime_bridge.py",
+      "path": "native-run/generated_worker_runtime_bridge.py",
+      "bytes": 12096,
+      "sha256": "11eff72f6d96b5c4248987635b5373672da706e1ac0fac53188aac7a3a253716"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-connection01/generated_adapter_flow.py",
+      "path": "native-run/generated_adapter_flow.py",
+      "bytes": 56180,
+      "sha256": "4d1bc0ac6e25733b13cc2d16c327be23d90c68d22b1402736ff8147b302a0e8c"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-connection01/dummy_bootstrap.py",
+      "path": "native-run/dummy_bootstrap.py",
+      "bytes": 39128,
+      "sha256": "2b3ff16486720294b2e1571ed7dfa3990ec8d46db01b1c20ce101e7951ec879b"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-connection01/ROOT-ADMISSION.json",
+      "path": "native-run/ROOT-ADMISSION.json",
+      "bytes": 786,
+      "sha256": "7e641689c4985a4df4d1f860613f2da859f1f98843a16b43ec01cbad6125dbfd"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-connection01/SOURCE-INPUTS.json",
+      "path": "native-run/SOURCE-INPUTS.json",
+      "bytes": 9434,
+      "sha256": "59f9e0d3cd15e632e8b5dd8e225d5b4c66d81020b8f0ec541128bcdd910940b4"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-connection01/run_native_owner_cancel01.ps1",
+      "path": "native-run/run_native_owner_cancel01.ps1",
+      "bytes": 38531,
+      "sha256": "8f1a5c2e935c05d24790616ef0a005ba753c5ac77043db88fc0cef300afd0203"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-connection01/controller-result.json",
+      "path": "native-run/controller-result.json",
+      "bytes": 310344,
+      "sha256": "f8942f2e1e83ac7426c181033fa16b4703959950d884b1af451e853c4684d4a4"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-connection01/child-result.json",
+      "path": "native-run/child-result.json",
+      "bytes": 20639,
+      "sha256": "5f41e79137215acd3ba4923fa3f12afebb14e54044968322ea32aa4a99e866fe"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-connection01/contender-result.json",
+      "path": "native-run/contender-result.json",
+      "bytes": 8638,
+      "sha256": "ad3ea0385e01b06b40d1a5e2ff3a4be6fb11352da881f7bc4c663f8fad41fe09"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-connection01/before.json",
+      "path": "native-run/before.json",
+      "bytes": 12846,
+      "sha256": "97c72d48104a8131fd1362abcfd9d327c936331ed591fbf78f6bd2c25c34d2f7"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-connection01/after.json",
+      "path": "native-run/after.json",
+      "bytes": 15243,
+      "sha256": "41fbb9b5dff5a9429d95f1c37bade0ad17d4306a3706bf8e2bdeedc5b45891cb"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-connection01/exit.json",
+      "path": "native-run/exit.json",
+      "bytes": 357,
+      "sha256": "bbf7f6cfdf5050e49013468246e606c378ffa2347d6ec6fca467792e64183078"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-connection01/native-exit.json",
+      "path": "native-run/native-exit.json",
+      "bytes": 71,
+      "sha256": "c06d0922ffd181268bb4c6f173e1a81b4d24baa3fd0e2c0e64e7a8b63665b8aa"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-connection01/controller-stdout.log",
+      "path": "native-run/controller-stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-connection01/controller-stderr.log",
+      "path": "native-run/controller-stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-connection01/closed-journal-observation.json",
+      "path": "native-run/closed-journal-observation.json",
+      "bytes": 414,
+      "sha256": "29ff10433ba50bb1dc44c19e6a7b4ae0679a4f58ea79d8bcbe7c3dbfdb1f36ae"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-instrument-source-review01/VERDICT.md",
+      "path": "source-review/VERDICT.md",
+      "bytes": 4793,
+      "sha256": "3629c9180a7730e4d6a8a31dc168587d8c1afadf0588090776afbcaef12707b5"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-instrument-source-review01/CHECK-ACTUALS.json",
+      "path": "source-review/CHECK-ACTUALS.json",
+      "bytes": 5370,
+      "sha256": "fe6a12387e6050e2b0603b938d2b6963331055cae6d2b34db4681cdf2e6f6cdc"
+    },
+    {
+      "source": "_scratch/ASTRA-RUNTIME-OWNER-NATIVE-ADMISSION-2026-09-13.md",
+      "path": "root/ASTRA-RUNTIME-OWNER-NATIVE-ADMISSION-2026-09-13.md",
+      "bytes": 2955,
+      "sha256": "d2e5c5c21a740f7d461c5e4bda4150a60ec7b54f000bd3a54c8bd30dc5e11b0c"
+    },
+    {
+      "source": "_scratch/RUNTIME-OWNER-NATIVE-ROOT-FREEZE-ACTUAL.json",
+      "path": "root/RUNTIME-OWNER-NATIVE-ROOT-FREEZE-ACTUAL.json",
+      "bytes": 506,
+      "sha256": "81d62210b916193966a38661b59f0dc34641cf32c5063bd435a75456d1d9c227"
+    },
+    {
+      "source": "_scratch/RUNTIME-OWNER-NATIVE-ADMISSION-ACTUAL.json",
+      "path": "root/RUNTIME-OWNER-NATIVE-ADMISSION-ACTUAL.json",
+      "bytes": 549,
+      "sha256": "87ee997fefde13396577f4beef5669690e233656020605e18e8ede2b3cb434a5"
+    },
+    {
+      "source": "_scratch/RUNTIME-OWNER-NATIVE-CANCEL01-ACTUAL.json",
+      "path": "root/RUNTIME-OWNER-NATIVE-CANCEL01-ACTUAL.json",
+      "bytes": 124,
+      "sha256": "7f6db7ca088c12be2ae757f9963124b416da35a4bc10655714197802d3668af5"
+    },
+    {
+      "source": "_scratch/RUNTIME-OWNER-NATIVE-FIRST-RECEIPTS-ACTUAL.json",
+      "path": "root/RUNTIME-OWNER-NATIVE-FIRST-RECEIPTS-ACTUAL.json",
+      "bytes": 4348,
+      "sha256": "6f28c60dcfe8d4498feab3017b896bbb1058edbc242ad734cc01114c93ed4c2c"
+    },
+    {
+      "source": "_scratch/check-native-runtime-owner-cancel01.py",
+      "path": "root/check-native-runtime-owner-cancel01.py",
+      "bytes": 9788,
+      "sha256": "7bf6614a20975881d25a45040babb91dbc2a7aa6bfc2940379c77478323d823e"
+    },
+    {
+      "source": "_scratch/check-native-runtime-owner-cancel02.py",
+      "path": "root/check-native-runtime-owner-cancel02.py",
+      "bytes": 9869,
+      "sha256": "fc917682dee3af209e9c6178c04af176922b18a695657b8adc32014f1d1fbde3"
+    },
+    {
+      "source": "_scratch/RUNTIME-OWNER-NATIVE-ROOT-RECEIPT-CHECK-ACTUAL.json",
+      "path": "root/RUNTIME-OWNER-NATIVE-ROOT-RECEIPT-CHECK-ACTUAL.json",
+      "bytes": 558,
+      "sha256": "fa5559772e3d70c90b6d6dd367bcc539ff7d8d1dfacb5d54a43c720c716e0252"
+    },
+    {
+      "source": "_scratch/RUNTIME-OWNER-NATIVE-ROOT-RECEIPT-CHECK02-ACTUAL.json",
+      "path": "root/RUNTIME-OWNER-NATIVE-ROOT-RECEIPT-CHECK02-ACTUAL.json",
+      "bytes": 1454,
+      "sha256": "371e9fe242c489c07960daeb35a55812fc3bb48f980dc8fad8580c025c901acc"
+    },
+    {
+      "source": "_scratch/NATIVE-OWNER-ROOT-CHECKER-REPAIR02.md",
+      "path": "root/NATIVE-OWNER-ROOT-CHECKER-REPAIR02.md",
+      "bytes": 893,
+      "sha256": "10215c754727cc9295be31d4ff8544d18217cdff8b962caaa8a259f698bb84d3"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-receipt-check-proposal01/check_receipts.ps1",
+      "path": "passive-checker-unexecuted/check_receipts.ps1",
+      "bytes": 26821,
+      "sha256": "3ae4e0d6c4b056271b01487ae5cc073df40d1f685ee25e85ffebef7a9784a02d"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-receipt-check-proposal01/BRIEF.md",
+      "path": "passive-checker-unexecuted/BRIEF.md",
+      "bytes": 2941,
+      "sha256": "f56d782fd60655a354fcaffbe8e3bf18c0c057c7818a17091ae751f41ea6b34d"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-receipt-check-proposal01/INPUT-PINS.json",
+      "path": "passive-checker-unexecuted/INPUT-PINS.json",
+      "bytes": 2999,
+      "sha256": "371c659daa337a642331a284f6834b685b2441839974650740d8ca387594a6b2"
+    },
+    {
+      "source": "_scratch/runtime-owner-native-receipt-check-proposal01/EXPECTED-READS.json",
+      "path": "passive-checker-unexecuted/EXPECTED-READS.json",
+      "bytes": 16514,
+      "sha256": "4c5706f14d5fc8fe79b6b10c032a15a16db11050df05560d1c55b4dc36ce85cb"
+    }
+  ],
+  "file_count": 107,
+  "bytes": 1715708,
+  "pending": [
+    "docs/library/ASTRA-RUNTIME-OWNER-NATIVE-CANCEL-VERDICT-2026-09-13.md",
+    "Peer native result verdict/check records, exact filenames pending"
+  ],
+  "excluded": [
+    "physical generated fixtures",
+    "physical registry journal",
+    "support binaries",
+    "checkpoint",
+    "D2 output",
+    "committed fake33 payloads"
+  ]
+}

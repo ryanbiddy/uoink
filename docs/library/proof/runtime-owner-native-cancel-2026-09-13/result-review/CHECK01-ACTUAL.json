@@ -1,0 +1,7 @@
+{
+  "chunk_id": "c7baa8",
+  "wall_time_seconds": 0.3761457,
+  "exit_code": 1,
+  "original_token_count": 72,
+  "output": "Exception: E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\runtime-owner-native-result-review01\\check_receipts.ps1:5\r\nLine |\r\n   5 |  function Need($ok,[string]$why){if(-not $ok){throw $why}}\r\n     |                                               ~~~~~~~~~~\r\n     | Reply binding\r\n"
+}

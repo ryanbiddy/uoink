@@ -1,0 +1,7 @@
+{
+  "chunk_id": "41fbd2",
+  "wall_time_seconds": 0.1476554,
+  "exit_code": 0,
+  "original_token_count": 95,
+  "output": "{\r\n  \"created\": \"E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\_scratch\\\\runtime-owner-native-connection-native-proposal01\\\\ROOT-ADMISSION-cancel.json\",\r\n  \"bytes\": 786,\r\n  \"sha256\": \"7e641689c4985a4df4d1f860613f2da859f1f98843a16b43ec01cbad6125dbfd\",\r\n  \"template_sha256\": \"9516a3dad9ee5ba8aa4eac53bfd76b5c35ebc0d38d61bc2a5c26b884b8114e67\",\r\n  \"native_executed\": false\r\n}\r\n"
+}

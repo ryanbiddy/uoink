@@ -1,0 +1,10 @@
+{
+  "root_reviewed": true,
+  "scope": "generated-windows-runtime-owner-cancel-only",
+  "case": "positive",
+  "operation_mode": "cancel",
+  "run_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\runtime-owner-native-connection01",
+  "source_inputs_sha256": "59f9e0d3cd15e632e8b5dd8e225d5b4c66d81020b8f0ec541128bcdd910940b4",
+  "launcher_sha256": "8f1a5c2e935c05d24790616ef0a005ba753c5ac77043db88fc0cef300afd0203",
+  "reason": "Root reviewed one generated Windows cancellation observation after two 33/0/0 fake runs and source reviews. See _scratch/ASTRA-RUNTIME-OWNER-NATIVE-ADMISSION-2026-09-13.md. Same nine fixed support bindings only. No real model, checkpoint, D2 output, D3/D4, live index, port 5179, paid API, installed-client or release authority."
+}

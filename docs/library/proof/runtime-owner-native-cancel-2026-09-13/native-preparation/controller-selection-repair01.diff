@@ -1,0 +1,13 @@
+diff --git a/before/dummy_bootstrap-controller-draft01.py b/dummy_bootstrap.py
+index c5aee50..20e47f6 100644
+--- a/before/dummy_bootstrap-controller-draft01.py
++++ b/dummy_bootstrap.py
+@@ -626,7 +626,7 @@ try:
+             journal_setup.connect(port)
+             monitor.contender = EXCLUSION.OwnedContender(primitives, monitor, journal_setup, __file__)
+             port._bind_contender(monitor.contender)
+-            outcome = FLOW.controller_flow(port)
++            outcome = FLOW.controller_cancel_flow(port)
+             outcome["durable_journal"] = journal_setup.complete()
+             code = 0
+     except BaseException as error:

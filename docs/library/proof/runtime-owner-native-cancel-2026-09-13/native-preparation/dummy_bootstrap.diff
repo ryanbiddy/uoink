@@ -1,0 +1,180 @@
+diff --git a/before/dummy_bootstrap.py b/dummy_bootstrap.py
+index 8e7e833..20e47f6 100644
+--- a/before/dummy_bootstrap.py
++++ b/dummy_bootstrap.py
+@@ -26,6 +26,7 @@ def early_audit(event, args):
+ 
+ 
+ sys.addaudithook(early_audit)
++import collections
+ import contextlib
+ import dataclasses
+ import enum
+@@ -35,6 +36,8 @@ import importlib.machinery
+ import json
+ import math
+ import os
++import re
++import stat
+ from pathlib import Path
+ import struct
+ import sysconfig
+@@ -43,11 +46,12 @@ import time
+ import types
+ import encodings.utf_16_le
+ import warnings
++import weakref
+ 
+ PROCESS_ABORT = os._exit  # Retained current-process failure exit; never an IPC operation.
+ 
+ FORBIDDEN = r"C:\Users\hello\AppData\Local\Uoink\index.db"
+-FIXED_RUNS = {'cancel': 'E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\windows-retired-owner-recovery01'}
++FIXED_RUNS = {'cancel': 'E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\runtime-owner-native-connection01'}
+ LOCATION = os.path.normcase(os.path.dirname(os.path.abspath(__file__)))
+ MODE = next((mode for mode, path in FIXED_RUNS.items() if os.path.normcase(path) == LOCATION), None)
+ assert MODE is not None, "fixed_fresh_generated_operation_directory"
+@@ -83,10 +87,36 @@ NATIVE = {
+     r"C:\Python314\Lib\ctypes\_layout.py": (11772, "13eb492c805248ffd411aa4d61e4de90dbd89ef05b5c85152262847c690a7916"),
+     r"C:\Python314\Lib\ctypes\_endian.py": (2635, "f2752ab2425dac9bfaff5aa1a3c6cd66aa342fee0db2f2a42de568fc59d5cbea"),
+ }
+-MODULES = ("reservation_file_port", "snapshot_reservations", "snapshot_lifecycle", "durable_lifecycle",
+-           "win32_worker_connection", "windows_reservation_port", "owned_generation_protocol",
+-           "win32_private_pipe", "pinned_buffer_namespace", "inherited_readset", "generated_worker_flow", "generated_operation_flow",
+-           "trusted_asr_resolver", "asr_loading_adapter", "generated_journal_setup", "generated_writer_exclusion", "generated_adapter_flow")
++MODULES = (
++    "plain_state_reader",
++    "state_bridge",
++    "owned_cpu_tensor_port",
++    "model_binding_registry",
++    "owned_factory_port",
++    "owned_guard",
++    "fake_torch_support",
++    "fixed_schema_helpers",
++    "worker_runtime_owner",
++    "reservation_file_port",
++    "snapshot_reservations",
++    "snapshot_lifecycle",
++    "durable_lifecycle",
++    "win32_worker_connection",
++    "windows_reservation_port",
++    "owned_generation_protocol",
++    "win32_private_pipe",
++    "pinned_buffer_namespace",
++    "inherited_readset",
++    "generated_worker_flow",
++    "generated_operation_flow",
++    "trusted_asr_resolver",
++    "asr_loading_adapter",
++    "generated_journal_setup",
++    "generated_writer_exclusion",
++    "generated_worker_factory_inputs",
++    "generated_worker_runtime_bridge",
++    "generated_adapter_flow",
++)
+ SETUP_NAMES = tuple(name + ".py" for name in MODULES) + ("dummy_bootstrap.py", "SOURCE-INPUTS.json", "ROOT-ADMISSION.json")
+ SETUP_READS = {os.path.normcase(os.path.join(EXPECTED_RUN, name)) for name in SETUP_NAMES}
+ SETUP_READS |= {os.path.normcase(path) for path in NATIVE}
+@@ -168,7 +198,7 @@ def read_bounded(path, cap):
+ 
+ source_map = json.loads(read_bounded(os.path.join(EXPECTED_RUN, "SOURCE-INPUTS.json"), 65536))
+ admission = json.loads(read_bounded(os.path.join(EXPECTED_RUN, "ROOT-ADMISSION.json"), 65536))
+-assert admission["root_reviewed"] is True and admission["scope"] == "generated-windows-retired-owner-recovery-only"
++assert admission["root_reviewed"] is True and admission["scope"] == "generated-windows-runtime-owner-cancel-only"
+ assert admission["case"] == CASE and admission["operation_mode"] == MODE and admission["run_path"] == EXPECTED_RUN
+ assert admission["source_inputs_sha256"] == hashlib.sha256(read_bounded(os.path.join(EXPECTED_RUN, "SOURCE-INPUTS.json"), 65536)).hexdigest()
+ assert source_map["native_bindings"] == {path: {"bytes": size, "sha256": sha} for path, (size, sha) in NATIVE.items()}
+@@ -253,6 +283,29 @@ ADAPTER_GLOBAL_NAMES = ("RELEASE_AUTHORITY", "RUNTIME_PROFILE", "SNAPSHOT_LIFECY
+ assert REAL_RESOLVER.REAL_APPROVAL is None and ADAPTER.resolver is REAL_RESOLVER
+ assert all(getattr(ADAPTER, name) is None for name in ADAPTER_GLOBAL_NAMES)
+ assert ADOPTION.NAMES == GENERATED_NAMES and dict(ADOPTION.GENERATED) == GENERATED_BYTES
++# Source-bound ownership guards, as in the qualified fake instrument.
++OWNER_MODULES = tuple((name, sys.modules[name]) for name in MODULES)
++OWNER_GUARD = sys.modules['owned_guard']
++OWNER_CLASSES = tuple(getattr(sys.modules[module], name) for module, name in (
++    ('model_binding_registry', '_WorkerModelRegistryProposal'),
++    ('model_binding_registry', '_FactoryModelCapability'),
++    ('model_binding_registry', '_ModelRegistrationLease'),
++    ('owned_factory_port', '_OwnedFactoryPortProposal'), ('owned_factory_port', '_FactoryOwner'),
++    ('owned_cpu_tensor_port', '_OwnedCPUTorchPortProposal'),
++    ('worker_runtime_owner', '_WorkerRuntimeOwnerProposal'),
++    ('owned_generation_protocol', 'GenerationChannel'), ('owned_generation_protocol', 'WorkerBootstrap'),
++    ('owned_generation_protocol', 'ControllerHandshake'), ('owned_generation_protocol', 'GenerationBinding'),
++    ('generated_worker_runtime_bridge', 'GeneratedWorkerRuntimeBridge'),
++    ('generated_worker_factory_inputs', 'GeneratedFactoryInputs'),
++    ('inherited_readset', 'InheritedReadSetAdoption')))
++OWNER_METHODS = tuple((cls, name, value) for cls in OWNER_CLASSES for name, value in vars(cls).items()
++    if callable(value) or isinstance(value, (property, staticmethod, classmethod)))
++OWNER_CLOSED = tuple((sys.modules[module], name, getattr(sys.modules[module], name)) for module, name in (
++    ('model_binding_registry', 'open_real_model_registry'), ('owned_factory_port', 'open_real_factory_port'),
++    ('owned_cpu_tensor_port', 'open_real_tensor_port'), ('state_bridge', 'build_real_vad'),
++    ('worker_runtime_owner', 'open_real_runtime_owner'), ('owned_generation_protocol', 'activate_real_worker')))
++ORIGINAL_REQUIRE_OWNED_RUNTIME = OWNER_GUARD.require_owned_runtime
++assert OWNER_GUARD._RUNTIME is None and FLOW._RETAINED_CHILD_RUNTIME_BRIDGE is None
+ DLL_STAGE = "binding"
+ import ctypes
+ assert ctypes.__file__ == r"C:\Python314\Lib\ctypes\__init__.py"
+@@ -504,7 +557,7 @@ class NativeMonitor:
+             else:
+                 self.journal_setup.before_process(name)
+             if name == "CloseHandle":
+-                self.journal_setup.before_recovery_close(args)
++                self.journal_setup.before_close(args)
+         asset_name = None if is_journal else self._asset_scope(name, args)
+         self.calls.append(name)  # Never record buffers, secrets or API arguments.
+         if name == "InitializeProcThreadAttributeList" and args[0] is not None:
+@@ -547,7 +600,7 @@ try:
+             outcome = observation.run()
+             code = 0
+         elif ROLE == "child":
+-            outcome = FLOW.child_flow(primitives, pipes, CONTROL, source_map["source_sha256"]["dummy_bootstrap.py"], EXPECTED_RUN, CASE)
++            outcome = FLOW.child_runtime_owner_flow(primitives, pipes, CONTROL, source_map["source_sha256"]["dummy_bootstrap.py"], EXPECTED_RUN, CASE)
+             code = outcome["child_flow_return"]
+         else:
+             journal_setup = JOURNAL_SETUP.GeneratedJournalSetup(primitives, monitor, EXPECTED_RUN)
+@@ -573,10 +626,8 @@ try:
+             journal_setup.connect(port)
+             monitor.contender = EXCLUSION.OwnedContender(primitives, monitor, journal_setup, __file__)
+             port._bind_contender(monitor.contender)
+-            recovery_probe = FLOW._RetiredClearProbe(port, journal_setup)
+-            port._bind_retired_clear_probe(recovery_probe)
+-            outcome = FLOW.controller_retired_recovery_flow(port)
+-            outcome["durable_journal"] = journal_setup.complete_recovery()
++            outcome = FLOW.controller_cancel_flow(port)
++            outcome["durable_journal"] = journal_setup.complete()
+             code = 0
+     except BaseException as error:
+         error_type = type(error).__name__
+@@ -594,7 +645,20 @@ try:
+         "services_unconfigured": all(getattr(ADAPTER, name) is None for name in ADAPTER_GLOBAL_NAMES),
+         "resolver_module_restored": ADAPTER.resolver is REAL_RESOLVER,
+     }
+-    guard = (all(adapter_state.values()) and dispatch.valid(monitor.functions) and not DENIALS and not CONTENT_OPEN and DLL_STAGE == "closed" and sys.meta_path[0] is FINDER
++    retained_bridge = FLOW._RETAINED_CHILD_RUNTIME_BRIDGE
++    retained_bridge_type_valid = (retained_bridge is None or type(retained_bridge) is
++        sys.modules['generated_worker_runtime_bridge'].GeneratedWorkerRuntimeBridge)
++    owner_state = {
++        "methods_unchanged": all(vars(cls).get(name) is value for cls, name, value in OWNER_METHODS),
++        "closed_entries_unchanged": all(getattr(module, name, None) is value for module, name, value in OWNER_CLOSED),
++        "module_identities_unchanged": all(sys.modules.get(name) is module for name, module in OWNER_MODULES),
++        "owned_guard_restored_none": OWNER_GUARD._RUNTIME is None,
++        "require_owned_runtime_unchanged": OWNER_GUARD.require_owned_runtime is ORIGINAL_REQUIRE_OWNED_RUNTIME,
++        "retained_bridge_type_valid": retained_bridge_type_valid,
++    }
++    retained_runtime_owner = (retained_bridge.receipt() if retained_bridge is not None
++                              and retained_bridge_type_valid else None)
++    guard = (all(owner_state.values()) and all(adapter_state.values()) and dispatch.valid(monitor.functions) and not DENIALS and not CONTENT_OPEN and DLL_STAGE == "closed" and sys.meta_path[0] is FINDER
+              and all(getattr(module, name) is original for module, name, original in ORIGINAL_RESERVATION_ENTRIES)
+              and sys.modules.get("winreg") is BASELINE_WINREG
+              and set(vars(BASELINE_WINREG)) == set(registry_expected)
+@@ -605,9 +669,10 @@ try:
+              and not HEAVY.intersection(name.split(".")[0] for name in sys.modules))
+     if not guard:
+         code = 1
+-    receipt = {"schema": "uoink.generated-windows-retired-owner-recovery.v1", "role": ROLE, "case": CASE, "operation_mode": MODE, "result": outcome, "error_type": error_type,
++    receipt = {"schema": "uoink.generated-windows-runtime-owner-cancel.v1", "role": ROLE, "case": CASE, "operation_mode": MODE, "result": outcome, "error_type": error_type,
+                "directory_refusal": directory_refusal,
+                "writer_exclusion": monitor.contender.receipt() if monitor.contender is not None else None,
++               "owner_state": owner_state, "retained_runtime_owner": retained_runtime_owner,
+                "adapter_state": adapter_state, "native_exit_planned": code, "elapsed_seconds": elapsed, "guard_valid": guard, "guard_denials": DENIALS,
+                "metadata_traps": len(METADATA_TRAPS), "registry_traps": len(REGISTRY_TRAPS),
+                "fixed_dispatch_valid": dispatch.valid(monitor.functions),
