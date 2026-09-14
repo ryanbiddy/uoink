@@ -115,7 +115,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | Generated reservation recovery | Component and evidence integrated at f9ab6fe | Author70b48e and independentfd86f5 each pass42 cases, with20 passing nested subtests and all10 guards valid. All123 proof payloads match Git/disk | Connect retained Windows gate/journal handles and split create/resume/startup. Native recovery and runtime acceptance remain open |
 | Windows reservation connection | Correction8fc3219; transfer2f4311f; native generated drain67887c3 | Unit70/0/0 plus35 subtests in both copies. Native d3d56f returns outer/controller/child0, valid guards, child0/job0, four confirmed phases/flushes and exact2,118B closed journal. All87 native proof payloads match Git/disk | Qualify remaining native exclusion/interruption/persistence/restart/reconciliation. Actual runtime-owner connection and real models remain open |
 | Worker/journal council | Scoped source review completed at1c6ac4c with mandatory Astra addendum; original244cca5 remains accuracy FAILED | All24 correction proof payloads match Git/disk. Gemini correction alone remains partial; Astra corrects remaining handshake/locking/private-caller claims. Existing17/65 outcomes unchanged | Continue native/runtime engineering. Session42118 closed482e42/exit0; no new council loop or broader acceptance |
-| Native writer exclusion | Stable-directory repair atd317a88; generated native04 pass atf630264; failed02/03 preserved | Both copies pass81 cases+72 subtests. All200 unit and93 native proof payloads match Git/disk. Native0eeb20 returns0, both exact childrenexit0/job0, four phases/flushes and matching closed journal | Gemini review preserved as accuracy FAILED at89c1579; Group A correction dispatched fromd8caad9. Cancellation qualification at60b3bb5; native793018 passes, archival next. Interruption/restart/reconciliation and real runtime remain open |
+| Native writer exclusion | Stable-directory repair atd317a88; native04 atf630264; Group A council correction ata74e178 | Both copies81 cases/72 subtests; native0eeb20 passed. Group A source accepted only with mandatory Astra corrections; all24 new proof payloads match Git/disk. Original failed reviews preserved | Dispatch separate Group B source review. Interruption/restart/reconciliation and real runtime remain open |
 | Actual adapter cancellation | Generated qualification integrated at60b3bb5 | Author and independent copies each89 passed/0 failed/0 skipped,86 passing subtests; all216 proof payloads match Git/disk | Native cancellation integrated ata25b34b: all100 proof payloads match Git/disk. Connect interrupted final-clear recovery; crash/restart, real models and release remain unqualified |
 | Worker runtime owner and bootstrap | Owner at 1f200eb; actual bootstrap connection at bbe10d6 | Both copies pass17/0/0: eleven retained owner cases plus six bootstrap cases. Exact case objects, valid guards, unchanged19 inputs plus admission. All144 newest proof payloads match Git/disk | Connect exact ownership through native services. Real inference, PCM/filter, VAD-to-model binding and protected constructor routes remain open |
 | Integration | Reliability repair at e8d058f and notice packaging at 71d3e70 after tree09 | Reliability:53 focused cases plus13 subtests per root. Notices:20 Python/10 block cases per root. Tree09 at 56d9d4c remains2,796 passed/1 failed/3 skipped across2,800 cases plus13 subtests; it predates both repairs | Finish runtime work, then run a new committed complete tree and rebuild/reseal. Package08 and website/marketing remain held. No current-source package or installation credit |
@@ -169,24 +169,20 @@ Ryan's renewed goal is to continue fixing the product until it is ready for
 release, website/GitHub updates and marketing. The earlier review-kit delivery
 is complete but is not this goal's completion. Current queue:
 
-Latest execution order: native cancellation793018 is archived ata25b34b; all100
-payloads match Git/disk. Integrate the completed Group A source correction with
-its mandatory Astra addendum, then dispatch the separate Group B brief.
-Rootd388e0 verifies three guarded role receipts,21 source/control pairs, one
-segment/four actions, retained WORKER_BOUND during acknowledged cancellation,
-then child0/job0, CLEARED/four flushes and closed2,118-byte journal. Both earlier
-89-case qualifications remain committed at60b3bb5; all216 payloads match Git/disk.
-D2 is complete atd13534f and must not repeat for documentation.
+Latest execution order: native cancellation is committed ata25b34b, with100
+verified proof payloads. Group A correction is integrated ata74e178, with24
+verified payloads and mandatory Astra corrections for journal size and selected
+ctypes declarations. Its viewing trace remains unverified; the prior failed
+48-input review stays failed at89c1579. No product measurement was repeated.
 
-Gemini's original2b39a17c review remains accuracy FAILED and is preserved at89c1579.
-The smaller Group A correction brief is committed atd8caad9; dispatchd5e4c4 uses
-session42728, existing Antigravity subscription and frozen based8caad9. Review
-its completed output before integration. Group B needs its separate bounded
-follow-up. The brief's materializer9ab1aa remains exit1 at final reporting;
-independent verificatione5d5fe/b6486c confirms all15 payloads, canonical brief
-and five input bytes, without rerunning the materializer or any product measure.
-Then connect the retired-owner interruption/reconciliation path in its own brief.
-No model, complete-tree, package, installation, website or marketing clearance.
+Commit and dispatch the separate five-input Group B source brief, then review
+and integrate its results. The retired-owner interrupted-final-clear proposal
+is being implemented under _scratch/windows-retired-owner-recovery-proposal01;
+review its exact changes and frozen focused controls before qualification.
+Neither tests nor native execution for that derivative are admitted yet.
+D2 remains complete atd13534f; no repeat checkpoint/output access for documentation.
+No model, complete-tree, package, installed-client, website or marketing clearance.
+
 Native writer-exclusion02 is preserved at c5e72a2; read
 ASTRA-WRITER-EXCLUSION02-FAILURE-2026-09-13.md. All130 proof payloads match
 Git/disk. One separately admitted reporting-only diagnostic03, actual1ad784,
@@ -5948,3 +5944,14 @@ connect existing service reconciliation back to the quarantined manager record,
 with a fixed pre-append interrupt and separate focused controls. Preparation is
 under _scratch/windows-retired-owner-recovery-proposal01. No test/native admission
 exists yet. Clean cancellation does not establish this distinct recovery path.
+### 2026-09-13 — Group A correction accepted with mandatory addendum
+
+Commita74e178 integrates the completed Gemini correction and root/peer review.
+Copier607067 returned0; root036223 verifies24 payloads/74,696 bytes against
+Git/disk, seal4c027c68b2055a03864a16479b66bf47857a771b944f2c98c9777b7e16e31f8b.
+The454-word report names all11 real test methods. Read the mandatory Astra
+addendum: live journal size is bounded rather than fixed; binding declarations
+are selected, although actual supplied modules/DLL/runtime remain unreviewed.
+The comparator's file-ID equality is not an independent16-byte-length validator.
+Coverage endpoints include terminal empty catalog slots; actual worker viewing
+trace remains unverified. Original48-input review remains failed. Group B is next.
