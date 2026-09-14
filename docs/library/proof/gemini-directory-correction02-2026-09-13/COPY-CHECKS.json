@@ -1,0 +1,148 @@
+{
+  "scope": "Documentary byte copies only",
+  "recorded_status": "SOURCE_CONCLUSION_ACCEPTED_WITH_MANDATORY_CORRECTIONS",
+  "inventory_payloads": 17,
+  "copied_files": 22,
+  "source_membership_and_hashes_checked_before_after": true,
+  "all_copies_rehashed": true,
+  "per_file_cap_bytes": 1048576,
+  "no_reparse_in_checked_chains": true,
+  "worker_view_trace_verified": false,
+  "candidate_execution_performed": false,
+  "tests_or_observations_rerun": 0,
+  "script_sha256": "083b21bca8b761bb1a10d4ca05800635a3867df567f6684421dedd678de14f38",
+  "copies": [
+    {
+      "source": "docs/library/GEMINI-STABLE-DIRECTORY-CORRECTION02-2026-09-13.md",
+      "destination": "worker/report.md",
+      "bytes": 4163,
+      "sha256": "1a0ced7a1865ee48756946886d05b96badeb5ae305c602c87cde6c4bb2fd9709"
+    },
+    {
+      "source": "docs/library/GEMINI-STABLE-DIRECTORY-CORRECTION02-2026-09-13.coverage.json",
+      "destination": "worker/coverage.json",
+      "bytes": 356,
+      "sha256": "16818d49930b28afdd58aa64a74e9ee7be5f3c9a48aa4dec5b73d33f9732baf5"
+    },
+    {
+      "source": "docs/library/ASTRA-GEMINI-DIRECTORY-CORRECTION02-VERDICT-2026-09-13.md",
+      "destination": "root/VERDICT.md",
+      "bytes": 3057,
+      "sha256": "61c8b31f7bf9879fc4a0b3fca414e6b2a417237b2f0b7475b72db892e1c15a18"
+    },
+    {
+      "source": "docs/library/proof/stable-directory-correction02-brief-2026-09-13/INPUT-SELECTION.json",
+      "destination": "selection/INPUT-SELECTION.json",
+      "bytes": 2220,
+      "sha256": "874b686d4a078d37385cac6b5a860a21aebeec08781d2ec150cd3f2e0491b277"
+    },
+    {
+      "source": "_scratch/GEMINI-DIRECTORY-CORRECTION02-APPLY-ACTUAL.json",
+      "destination": "root/APPLY-ACTUAL.json",
+      "bytes": 468,
+      "sha256": "f770b9b4b47c1a8a52a3f6c3bfe94aac93bda359fb092f65980f18aae5771eb2"
+    },
+    {
+      "source": "_scratch/GEMINI-DIRECTORY-CORRECTION02-COMPLETION-ACTUAL.json",
+      "destination": "root/COMPLETION-ACTUAL.json",
+      "bytes": 12406,
+      "sha256": "f707add420a4a0070208e5c491c611d94e31029bff059dab86d8a0583449da99"
+    },
+    {
+      "source": "_scratch/GEMINI-DIRECTORY-CORRECTION02-DISPATCH-ACTUAL.json",
+      "destination": "root/DISPATCH-ACTUAL.json",
+      "bytes": 1519,
+      "sha256": "3cebe8d126d477d038fa97b6a37020a7608e75a616dd56f0ccac223f574369c9"
+    },
+    {
+      "source": "_scratch/GEMINI-DIRECTORY-CORRECTION02-METADATA-ACTUAL.json",
+      "destination": "root/METADATA-ACTUAL.json",
+      "bytes": 845,
+      "sha256": "d6b022137a95de3c10aa622035e4ed912866d47c56e9fb20481bd59668657c9a"
+    },
+    {
+      "source": "_scratch/GEMINI-DIRECTORY-CORRECTION02-POLL1-ACTUAL.json",
+      "destination": "root/POLL1-ACTUAL.json",
+      "bytes": 1243,
+      "sha256": "926f5352e13216eebfcd1d91fd76a64e3bf57225cb581610d6dc35bc43f1eda0"
+    },
+    {
+      "source": "_scratch/GEMINI-DIRECTORY-CORRECTION02-POLL2-ACTUAL.json",
+      "destination": "root/POLL2-ACTUAL.json",
+      "bytes": 657,
+      "sha256": "9719570cd13610c17fed08bd1e0d5f4bae75d782f5d320fc31edc383d2926ae9"
+    },
+    {
+      "source": "_scratch/GEMINI-DIRECTORY-CORRECTION02-ROOT-CHECK-ACTUAL.json",
+      "destination": "root/ROOT-CHECK-ACTUAL.json",
+      "bytes": 715,
+      "sha256": "8ee8458783d4c4c24be8d52c3eeccd2ef924c9b72843feb3e7ad0bd00fae56df"
+    },
+    {
+      "source": "_scratch/GEMINI-DIRECTORY-CORRECTION02-WORKER-PATCH-ACTUAL.json",
+      "destination": "root/WORKER-PATCH-ACTUAL.json",
+      "bytes": 450,
+      "sha256": "679a5e66f70bc649e9c5beb22513a0d794bb949af612d031a6658f9f39c8108a"
+    },
+    {
+      "source": "_scratch/GEMINI-DIRECTORY-CORRECTION02.patch",
+      "destination": "root/worker.patch",
+      "bytes": 5328,
+      "sha256": "b89bc473f31fb3ef17c9ff03daa39bda1afd0e3b9d5c36e1dbf651dd3af69d8f"
+    },
+    {
+      "source": "_scratch/check-gemini-directory-correction02.py",
+      "destination": "root/check-gemini-directory-correction02.py",
+      "bytes": 2208,
+      "sha256": "38b6d8ab88e9acc58363ea4e67146c54c58d45d09f7905b9c8d95c2601a7ce61"
+    },
+    {
+      "source": "_scratch/gemini-stable-directory-correction02-peer-review01/check_text.ps1",
+      "destination": "peer/check_text.ps1",
+      "bytes": 5021,
+      "sha256": "5a4a50d0ac60da2c88d346e0dfb015a16d03d43fadd5c620493ca7578dab3092"
+    },
+    {
+      "source": "_scratch/gemini-stable-directory-correction02-peer-review01/CHECK-ACTUAL.json",
+      "destination": "peer/CHECK-ACTUAL.json",
+      "bytes": 6341,
+      "sha256": "23567884fc43c2e91fcab12b8eefe3acba00bd04c10d15e07f7f585e7134c1de"
+    },
+    {
+      "source": "_scratch/gemini-stable-directory-correction02-peer-review01/VERDICT.md",
+      "destination": "peer/VERDICT.md",
+      "bytes": 2476,
+      "sha256": "056efad1d0c3dd0531eda96f1d97189081b41a260848f0f782ee444b94e19bc1"
+    },
+    {
+      "source": "_scratch/archive-gemini-directory-correction02-proposal01/archive.ps1",
+      "destination": "archive/archive.ps1",
+      "bytes": 12170,
+      "sha256": "083b21bca8b761bb1a10d4ca05800635a3867df567f6684421dedd678de14f38"
+    },
+    {
+      "source": "_scratch/gemini-directory-correction02-copy-inventory01/.gitattributes",
+      "destination": "inventory/.gitattributes",
+      "bytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+    },
+    {
+      "source": "_scratch/gemini-directory-correction02-copy-inventory01/COPY-INVENTORY.json",
+      "destination": "inventory/COPY-INVENTORY.json",
+      "bytes": 4794,
+      "sha256": "e5d4fa3fd3691bdc61289030a5477045b3a810bd245f379fce70cc3b57feac15"
+    },
+    {
+      "source": "_scratch/gemini-directory-correction02-copy-inventory01/INVENTORY-ACTUAL.json",
+      "destination": "inventory/INVENTORY-ACTUAL.json",
+      "bytes": 349,
+      "sha256": "292e6f82b6ee17131f4a932098228093befc45980e7f12bd5c7c60d4203164f1"
+    },
+    {
+      "source": "_scratch/gemini-directory-correction02-copy-inventory01/README.md",
+      "destination": "inventory/README.md",
+      "bytes": 1680,
+      "sha256": "1e4ab0929599862369e03ef5fc9e2f2557961ee3ac36719e069ad58d51a42440"
+    }
+  ]
+}
