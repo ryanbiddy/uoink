@@ -1,0 +1,16 @@
+{
+  "schema": "uoink.stable-writer-council-archive-source-pins.v1",
+  "count": 2,
+  "files": [
+    {
+      "path": "archive.ps1",
+      "bytes": 13064,
+      "sha256": "9ae759bfe04f67e14ad9f5c2520940a4e205ca94cb888b46ec5238ef3045f0f5"
+    },
+    {
+      "path": "COPY-MAP.json",
+      "bytes": 21744,
+      "sha256": "975b81f29300b0b18c608fade5150d2e5bb315b0cf4402df93859141ee284a19"
+    }
+  ]
+}

@@ -1,0 +1,470 @@
+{
+  "scope": "Fixed documentary text/control copies only",
+  "run_id": "2b39a17c-9418-4cfe-85d8-ecc07d7cdde2",
+  "recorded_run_status": "completed",
+  "review_accuracy": "FAILED",
+  "component_measurements_changed": false,
+  "council_acceptance": false,
+  "tests_or_observations_rerun": 0,
+  "source_payloads": 19,
+  "source_payload_bytes": 240606,
+  "copied_files": 22,
+  "copies": [
+    {
+      "source": "docs/library/GEMINI-STABLE-DIRECTORY-WRITER-COUNCIL-2026-09-13.md",
+      "destination": "worker/GEMINI-STABLE-DIRECTORY-WRITER-COUNCIL-2026-09-13.md",
+      "bytes": 27911,
+      "sha256": "b3dce71da680b85fac64c0a14ce649b906187342468732d88466dee881cbac53"
+    },
+    {
+      "source": "docs/library/GEMINI-STABLE-DIRECTORY-WRITER-COUNCIL-2026-09-13-COVERAGE.json",
+      "destination": "worker/GEMINI-STABLE-DIRECTORY-WRITER-COUNCIL-2026-09-13-COVERAGE.json",
+      "bytes": 20076,
+      "sha256": "0e13e124b488e8ceb5bcd7d985a4e48fa0f3a8c79469615b7b6165a454a8da6e"
+    },
+    {
+      "source": "docs/library/ASTRA-STABLE-WRITER-COUNCIL01-REJECTION-2026-09-13.md",
+      "destination": "ROOT-REJECTION.md",
+      "bytes": 2428,
+      "sha256": "a7cbf7dfbce5236a5ac9d9182d0d82dbdee0385a2cc2d5768bf427f8e91c3245"
+    },
+    {
+      "source": "_scratch/gemini-stable-writer-accuracy-review01/.gitattributes",
+      "destination": "accuracy-review/.gitattributes",
+      "bytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+    },
+    {
+      "source": "_scratch/gemini-stable-writer-accuracy-review01/ACTUAL-COMPARISON.json",
+      "destination": "accuracy-review/ACTUAL-COMPARISON.json",
+      "bytes": 11225,
+      "sha256": "caae4db6768916fd55dd3be37e2d3125512d8922e4db181aa656d14672261a59"
+    },
+    {
+      "source": "_scratch/gemini-stable-writer-accuracy-review01/ACTUAL-SOURCE-FACTS.json",
+      "destination": "accuracy-review/ACTUAL-SOURCE-FACTS.json",
+      "bytes": 10462,
+      "sha256": "d622c0f42f4f9c0e0bc0c4c1779b6eabb49102c147bda24a6e8ce9c2fd1c1870"
+    },
+    {
+      "source": "_scratch/gemini-stable-writer-accuracy-review01/COVERAGE-MISMATCHES.json",
+      "destination": "accuracy-review/COVERAGE-MISMATCHES.json",
+      "bytes": 45772,
+      "sha256": "47fe976bb605a9e9c7fb6b509374c73fb7b17650cf193e610a3811ba79ac7a84"
+    },
+    {
+      "source": "_scratch/gemini-stable-writer-accuracy-review01/TEST-NAME-CORRECTIONS.json",
+      "destination": "accuracy-review/TEST-NAME-CORRECTIONS.json",
+      "bytes": 1597,
+      "sha256": "5deb1da814f3536e1a93f59662bbe39d6c676c63c4f39c6cfa83d3a90b880d2e"
+    },
+    {
+      "source": "_scratch/gemini-stable-writer-accuracy-review01/VERDICT.md",
+      "destination": "accuracy-review/VERDICT.md",
+      "bytes": 5551,
+      "sha256": "ea5af8e44cc1cd067eb8377a9410bc1237aa412163f0029dc20fe63ba6121485"
+    },
+    {
+      "source": "_scratch/STABLE-WRITER-COUNCIL01-APPLY-ACTUAL.json",
+      "destination": "run/STABLE-WRITER-COUNCIL01-APPLY-ACTUAL.json",
+      "bytes": 599,
+      "sha256": "d1a2096938ffec9ec79d249ab09abd40a5669ef6c59d9c480473d8ba1857acbb"
+    },
+    {
+      "source": "_scratch/STABLE-WRITER-COUNCIL01-COMPLETION-ACTUAL.json",
+      "destination": "run/STABLE-WRITER-COUNCIL01-COMPLETION-ACTUAL.json",
+      "bytes": 2690,
+      "sha256": "4af54f1ae30ef264fd2d14a46fb8709e14732ab753cf78f5d96107ebe9ef9d72"
+    },
+    {
+      "source": "_scratch/STABLE-WRITER-COUNCIL01-DISPATCH-ACTUAL.json",
+      "destination": "run/STABLE-WRITER-COUNCIL01-DISPATCH-ACTUAL.json",
+      "bytes": 1307,
+      "sha256": "bd5c640092a3ee8822966e376bffb39d0e98ea8e1dd7b7a2c469d440f9d49d88"
+    },
+    {
+      "source": "_scratch/STABLE-WRITER-COUNCIL01-METADATA-ACTUAL.json",
+      "destination": "run/STABLE-WRITER-COUNCIL01-METADATA-ACTUAL.json",
+      "bytes": 848,
+      "sha256": "0a4b96fa328744b4798011ed8cb367b148cc9718f299675a22f5a807414c45d4"
+    },
+    {
+      "source": "_scratch/STABLE-WRITER-COUNCIL01-ROOT-CHECK-ACTUAL.json",
+      "destination": "run/STABLE-WRITER-COUNCIL01-ROOT-CHECK-ACTUAL.json",
+      "bytes": 1061,
+      "sha256": "66ab5b115c9d3ee1f67554fb7296bf7558ba152dfd32cdc7bb7ff2228d4dd7e1"
+    },
+    {
+      "source": "_scratch/STABLE-WRITER-COUNCIL01-ROOT-CHECK.json",
+      "destination": "run/STABLE-WRITER-COUNCIL01-ROOT-CHECK.json",
+      "bytes": 26794,
+      "sha256": "74c5082728e0cdf3fd6620c763dfe36a52e7eedb7fb2c7214d8bf8a59f30347e"
+    },
+    {
+      "source": "_scratch/STABLE-WRITER-COUNCIL01.patch",
+      "destination": "run/STABLE-WRITER-COUNCIL01.patch",
+      "bytes": 49575,
+      "sha256": "77a0ee13616001c366f429f43bcc465ab007a7f2572945f2aac5cfdc11b6ee1d"
+    },
+    {
+      "source": "_scratch/check-stable-writer-council01.py",
+      "destination": "instruments/check-stable-writer-council01.py",
+      "bytes": 3529,
+      "sha256": "2ac7e7dc67451891a8dc155db71eb1f7434074186bbce7105aec310a643b6af8"
+    },
+    {
+      "source": "_scratch/read-stable-writer-council-run01.py",
+      "destination": "instruments/read-stable-writer-council-run01.py",
+      "bytes": 977,
+      "sha256": "ff16d1a296998eaad2acf8c8badb65ed397efb1f4bc275635af64a9a60e6609b"
+    },
+    {
+      "source": "docs/library/proof/stable-writer-council-brief-2026-09-13/INPUT-SELECTION.json",
+      "destination": "original-brief/INPUT-SELECTION.json",
+      "bytes": 28196,
+      "sha256": "3053c328e65636d895f8caa1545425638492f9cb816fc0ac8bdff4fe19baa51d"
+    },
+    {
+      "source": "_scratch/archive-stable-writer-council-failed-proposal01/archive.ps1",
+      "destination": "archive/archive.ps1",
+      "bytes": 13064,
+      "sha256": "9ae759bfe04f67e14ad9f5c2520940a4e205ca94cb888b46ec5238ef3045f0f5"
+    },
+    {
+      "source": "_scratch/archive-stable-writer-council-failed-proposal01/COPY-MAP.json",
+      "destination": "archive/COPY-MAP.json",
+      "bytes": 21744,
+      "sha256": "975b81f29300b0b18c608fade5150d2e5bb315b0cf4402df93859141ee284a19"
+    },
+    {
+      "source": "_scratch/archive-stable-writer-council-failed-proposal01/PINS.json",
+      "destination": "archive/PINS.json",
+      "bytes": 411,
+      "sha256": "00c1a01052efcd1061a14d367b74fc8f4d4bc6a6c381c3a23fb8c8d950bb4315"
+    }
+  ],
+  "source_membership_and_hashes_checked_before_after": true,
+  "all_copies_rehashed": true,
+  "git_commit": "b45aaad866d67823a319779bb854018b8cb218f9",
+  "git_proof_count": 52,
+  "git_proof_hashes_and_blobs_checked_before_after": true,
+  "git_proofs": [
+    {
+      "path": "docs/library/proof/windows-stable-directory-qualification-2026-09-13/proposal01/win32_worker_connection.py",
+      "bytes": 29660,
+      "sha256": "60d22036d6827205be5d0657af8e4693aa534605bdfb1b501878eb2a889fe25f",
+      "git_blob": "057eec0432e6e24a5d6b04c4a6696827bc3c7758"
+    },
+    {
+      "path": "docs/library/proof/windows-stable-directory-qualification-2026-09-13/proposal01/windows_reservation_port.py",
+      "bytes": 18234,
+      "sha256": "b93076ab07b8c0567f6608520c99f5e5523be3dd388010a5a49037a4a899f775",
+      "git_blob": "24de1cc2fdfec98142d9232b7c16c35c01e74b5b"
+    },
+    {
+      "path": "docs/library/proof/windows-stable-directory-qualification-2026-09-13/proposal01/win32_worker_connection.py.diff",
+      "bytes": 2245,
+      "sha256": "8affde1a60913d81671e247c77b85a709c168074685dc8984787df4c3c4924e4",
+      "git_blob": "9cfb693d6edf8f49e09a4c1f0d58f26af55710cc"
+    },
+    {
+      "path": "docs/library/proof/windows-stable-directory-qualification-2026-09-13/proposal01/directory-policy-vs-diagnostic03.diff",
+      "bytes": 1732,
+      "sha256": "b097889be467f13c537f3c0f094de18957c8f76d439032d57bc8617215c49644",
+      "git_blob": "2fdac6d0e487d674a68b223a669079b11ce1029d"
+    },
+    {
+      "path": "docs/library/proof/windows-stable-directory-qualification-2026-09-13/proposal01/test_stable_directory.py",
+      "bytes": 13705,
+      "sha256": "daf8ba2f87a0b6e7805a659abd93a8a79d2fe5830f26ae0986b8867bf5314478",
+      "git_blob": "deb384366e16b7c6f1748465eccd41b20803ecd8"
+    },
+    {
+      "path": "docs/library/proof/windows-stable-directory-qualification-2026-09-13/proposal01/qualify_windows_reservations.py",
+      "bytes": 10033,
+      "sha256": "a52142fdafd7784bdd23362c2798dce113a9f52e4c24c88bee54c8dd93715f4d",
+      "git_blob": "f3614493177f40bce7fd68e09bda12267bb1be87"
+    },
+    {
+      "path": "docs/library/proof/windows-stable-directory-qualification-2026-09-13/proposal01/run_preflight01.ps1",
+      "bytes": 8849,
+      "sha256": "48b4fd0cbf81893624a658893e8b80e1ea522be538882e13b045e54bfe872d66",
+      "git_blob": "6e9e70eb82e1d3bcf324a8d2d1a472f05a60500d"
+    },
+    {
+      "path": "docs/library/proof/windows-stable-directory-qualification-2026-09-13/proposal01/QUALIFICATION-PROTOCOL.md",
+      "bytes": 3021,
+      "sha256": "ebab347821ae0c1ea46dc2f6e8fdbc9bc01d0441a5faacfb5d20c2b2b478a550",
+      "git_blob": "23af17ebb5c8b79af23aff0cce694a67f95d962a"
+    },
+    {
+      "path": "docs/library/proof/windows-stable-directory-qualification-2026-09-13/proposal01/EXPECTED-CASES.json",
+      "bytes": 8519,
+      "sha256": "63deaa367166c6b337422a6f492b9cb926a578c4e2d062c7fa3387c04434b47a",
+      "git_blob": "0546d38b2f5d6821729c608a4e445dc40c1b1591"
+    },
+    {
+      "path": "docs/library/proof/windows-stable-directory-qualification-2026-09-13/proposal01/PRESERVATION-CHECKS.json",
+      "bytes": 8115,
+      "sha256": "82da94990ff52f8bd38ff2d894befa144d3a09650705e0c8f952cc4b3ed6984b",
+      "git_blob": "d4cd4880fc0e6a35a767b46b7d17bd9cf68a81c3"
+    },
+    {
+      "path": "docs/library/proof/windows-stable-directory-qualification-2026-09-13/proposal01/stable-directory01/stdout.json",
+      "bytes": 44041,
+      "sha256": "04717a40fbc70a366d4b95126b64dfa0fa6490ee657bfe6a4a38d4caa31c40b5",
+      "git_blob": "5a30935afb3e013e32e77f4658b58e001b5aa7d5"
+    },
+    {
+      "path": "docs/library/proof/windows-stable-directory-qualification-2026-09-13/independent01/stable-directory01/stdout.json",
+      "bytes": 44041,
+      "sha256": "1e3a5283cae7b9be6da83ba0e44da42b22349cc05e7a47c87e8b4ccc6052a7cb",
+      "git_blob": "1500ab4249806690575cf6c2740e61a375a9bd1f"
+    },
+    {
+      "path": "docs/library/proof/windows-stable-directory-qualification-2026-09-13/proposal01/stable-directory01/exit.json",
+      "bytes": 341,
+      "sha256": "e8cf35e27f5898156f0894b045b94aec7cc79cbbf1931c2455d8c73416cde6b6",
+      "git_blob": "3ead0487f5fb532a7bbc19cb8966f2e9f5c576c0"
+    },
+    {
+      "path": "docs/library/proof/windows-stable-directory-qualification-2026-09-13/independent01/stable-directory01/exit.json",
+      "bytes": 341,
+      "sha256": "c43c2e5bd7c5168ceb3b83155297a2aff70bf56c7431b2746d7cff20b338f94f",
+      "git_blob": "73b8de03f9e113a8330b4ed17c1cc3ab6a0adce3"
+    },
+    {
+      "path": "docs/library/proof/windows-stable-directory-qualification-2026-09-13/root/STABLE-DIRECTORY-AUTHOR-ACTUAL01.json",
+      "bytes": 202,
+      "sha256": "024ea8de072ee83a1207bc420c716b531d068baf54f9215841b02ecee566f696",
+      "git_blob": "d0cfdbc9e9d80a9077526a1cbfc25c530ba4fe05"
+    },
+    {
+      "path": "docs/library/proof/windows-stable-directory-qualification-2026-09-13/root/STABLE-DIRECTORY-INDEPENDENT-ACTUAL01.json",
+      "bytes": 202,
+      "sha256": "7c04e292b966989da417d6b1e759f0d7102b498485c52ff4eca2328ac257f02c",
+      "git_blob": "6b52f26ea2543aa6bd23f6046f1fed389fa2aeb4"
+    },
+    {
+      "path": "docs/library/proof/windows-stable-directory-qualification-2026-09-13/root/STABLE-DIRECTORY-PAIR-CHECK01.json",
+      "bytes": 1086,
+      "sha256": "9b0db6b6cd8fe7b8bea78f2543f60ab6819f514863d49a7aa49f545d8aa20058",
+      "git_blob": "fe90d3a8e96b719dfac17a84694427bbcbe59898"
+    },
+    {
+      "path": "docs/library/proof/windows-stable-directory-qualification-2026-09-13/root/ASTRA-STABLE-DIRECTORY-VERDICT-2026-09-13.md",
+      "bytes": 2646,
+      "sha256": "275ab1b42e8bd540a1709a54344d0c1dfac8281594e8a18cb1dd7ff07416a6a3",
+      "git_blob": "48a3c6692ad313734e2138d2628ccde4fe39ddba"
+    },
+    {
+      "path": "docs/library/proof/windows-writer-exclusion-native-2026-09-13/proposal04/generated_writer_exclusion.py",
+      "bytes": 11647,
+      "sha256": "8173d7394f4a893c14d2979283a0c17ed273e25f196e14560590be3a0f22058b",
+      "git_blob": "e9db9e9e90f74cb2f0490497325d7141be26a724"
+    },
+    {
+      "path": "docs/library/proof/windows-writer-exclusion-native-2026-09-13/proposal04/generated_adapter_flow.py",
+      "bytes": 26951,
+      "sha256": "ca4676060382e189953f56b830f2c08227c1079280cd09b2b36fb6770ce6e4ce",
+      "git_blob": "84a8f3af0385949cee4be4e0d97a2efae38511f5"
+    },
+    {
+      "path": "docs/library/proof/windows-writer-exclusion-native-2026-09-13/proposal04/generated_journal_setup.py",
+      "bytes": 11954,
+      "sha256": "df7ed56cdcbd23352b3e69a6f6790a012182b294491f38f8ed19610f000b485d",
+      "git_blob": "6e30c64329dda3a5dc6230703805dc45ffa8f618"
+    },
+    {
+      "path": "docs/library/proof/windows-writer-exclusion-native-2026-09-13/proposal04/dummy_bootstrap.py",
+      "bytes": 35768,
+      "sha256": "57ae722cda705e7f7a79a79442b316594719aeb390d63575aeaee3422949a469",
+      "git_blob": "4412d0c0d3ce77dc4adad90f0a91dd50ed3f2891"
+    },
+    {
+      "path": "docs/library/proof/windows-writer-exclusion-native-2026-09-13/proposal04/run_writer_exclusion04.ps1",
+      "bytes": 34055,
+      "sha256": "8212531968abdc9fbf55f4d9607768d1cf14198b62f8443b670715ce0da07c26",
+      "git_blob": "9045f0c2dff5a7dec0be966e4645125b6649a23b"
+    },
+    {
+      "path": "docs/library/proof/windows-writer-exclusion-native-2026-09-13/proposal04/win32_private_pipe.py",
+      "bytes": 18613,
+      "sha256": "73a1109a55f2bc807594655c71b24a3e35eb88d7f744497df2cc328dc224cae7",
+      "git_blob": "19b7e1eb3224df7a2f1e5b6d052c0baac19c01df"
+    },
+    {
+      "path": "docs/library/proof/windows-writer-exclusion-native-2026-09-13/proposal04/reservation_file_port.py",
+      "bytes": 4694,
+      "sha256": "708554378ab8a8e6c4477e637c999256665cbd2855b94c6fa3c2d04a19d3a224",
+      "git_blob": "6cf3cb4fac43cb702f4cb25e993e731a9078f8b6"
+    },
+    {
+      "path": "docs/library/proof/windows-writer-exclusion-native-2026-09-13/proposal04/snapshot_reservations.py",
+      "bytes": 23634,
+      "sha256": "e80ae881fa4af9cc7d1a3e4a06624f5b19abe4de09aec3844e8a541449335b98",
+      "git_blob": "601f54d5d75bb0eca97b211da59ebddd65073675"
+    },
+    {
+      "path": "docs/library/proof/windows-writer-exclusion-native-2026-09-13/proposal04/durable_lifecycle.py",
+      "bytes": 13075,
+      "sha256": "f95cc8f2c61fd1953b642669ee4027a968660e39b97d9e84782fb83ac62abacb",
+      "git_blob": "d1d61ddc8835d9113056a11855848a5bb553b29d"
+    },
+    {
+      "path": "docs/library/proof/windows-writer-exclusion-native-2026-09-13/proposal04/snapshot_lifecycle.py",
+      "bytes": 22138,
+      "sha256": "a80514aac6b1e75b9b872052852fa993a23cd5273b6bed4ffb4eef7404cb69dd",
+      "git_blob": "2fb0a6618dd6c638ea8d829b729b13273660eae2"
+    },
+    {
+      "path": "docs/library/proof/windows-writer-exclusion-native-2026-09-13/proposal04/SOURCE-INPUTS.json",
+      "bytes": 6412,
+      "sha256": "7a18d5a7d49942d611d4e5a3a7a80144e081a89d05f58e34baa16aff5b4a0059",
+      "git_blob": "140a85291df003adbe7fe5411a274eacf274ca9d"
+    },
+    {
+      "path": "docs/library/proof/windows-writer-exclusion-native-2026-09-13/proposal04/SOURCE-PRESERVATION.json",
+      "bytes": 5081,
+      "sha256": "19a8e5bca7097e9eb85a120c4eb22fbb4f4001103535e3af6a427895b05a6b13",
+      "git_blob": "67cf07f746a8c0ca3b7e4c67a535614e9aea35df"
+    },
+    {
+      "path": "docs/library/proof/windows-writer-exclusion-native-2026-09-13/proposal04/dummy_bootstrap.py.diff",
+      "bytes": 1268,
+      "sha256": "6811a6b97d45c15ac6c70e2e103d2a2c3af6de023e9f7a630d518189940b6d5a",
+      "git_blob": "ca6302fcd8f54d79081830f68481d85d610fb622"
+    },
+    {
+      "path": "docs/library/proof/windows-writer-exclusion-native-2026-09-13/proposal04/run_writer_exclusion04.ps1.diff",
+      "bytes": 2231,
+      "sha256": "23b17e578334242f8cb22fda2f308840988ae38e6ffa7faa6b712b6144d81214",
+      "git_blob": "37227662c419ac0b244eb51358d33e0602e68bbc"
+    },
+    {
+      "path": "docs/library/proof/windows-writer-exclusion-native-2026-09-13/proposal04/NATIVE-PROTOCOL.md",
+      "bytes": 1718,
+      "sha256": "229fb6a2fda82ee5960510ac77f9431f1597cd8a13f07d099f5279bfb84efe90",
+      "git_blob": "3f3d1a2799e596aa5ec251fca957d79206b9f042"
+    },
+    {
+      "path": "docs/library/proof/windows-writer-exclusion-native-2026-09-13/proposal04/API-AND-BOUNDS.md",
+      "bytes": 1175,
+      "sha256": "ec487a44cb2bc7fc84420b7920a12762a6b0ed6601d8fcdb638690a2dd9d5ccd",
+      "git_blob": "4a9d385595b0b9e634fa9f2186726a8f49723d08"
+    },
+    {
+      "path": "docs/library/proof/stable-writer-council-brief-2026-09-13/controller-selected-fields.json",
+      "bytes": 26029,
+      "sha256": "e35bbf7338ba599bfa2bcfcf940edc58adb8044ec15b25d7c14aec717f617568",
+      "git_blob": "d4c09b9783a56dbf96ed74aef880b46fe23398d1"
+    },
+    {
+      "path": "docs/library/proof/windows-writer-exclusion-native-2026-09-13/run04/child-result.json",
+      "bytes": 14648,
+      "sha256": "5530b90bbeea7a0fa1fd7e34e42c9c5111240d0c733831973fc3e8346fa5aa41",
+      "git_blob": "dbaf1718f2820cdf14ac87ceeb605b1603e38406"
+    },
+    {
+      "path": "docs/library/proof/windows-writer-exclusion-native-2026-09-13/run04/contender-result.json",
+      "bytes": 7265,
+      "sha256": "d3a5d655e0832728879261a71056667edddfb0b1e651dd63a714b6d2d5cbc4ae",
+      "git_blob": "821b9314f1016a704ffa352ecba4177a1692ed69"
+    },
+    {
+      "path": "docs/library/proof/windows-writer-exclusion-native-2026-09-13/run04/closed-journal-observation.json",
+      "bytes": 419,
+      "sha256": "216d7a4e46075c7839573f68094bcd8f0a19a5041e57aa582c1ff33218510611",
+      "git_blob": "48385d17c1997f7df83de7c7e581c21afdbe0321"
+    },
+    {
+      "path": "docs/library/proof/windows-writer-exclusion-native-2026-09-13/run04/exit.json",
+      "bytes": 356,
+      "sha256": "81c396d475dbcfa28f01401cd94ce791e8f6971ac6fa673f32cefdac24a56afc",
+      "git_blob": "5756e1393de576c2157cf8a1a80da7e920742880"
+    },
+    {
+      "path": "docs/library/proof/windows-writer-exclusion-native-2026-09-13/run04/native-exit.json",
+      "bytes": 71,
+      "sha256": "c06d0922ffd181268bb4c6f173e1a81b4d24baa3fd0e2c0e64e7a8b63665b8aa",
+      "git_blob": "213c6abc2af225d7bf06bc1528cbb67a13912d38"
+    },
+    {
+      "path": "docs/library/proof/windows-writer-exclusion-native-2026-09-13/root/WINDOWS-WRITER-EXCLUSION04-ACTUAL.json",
+      "bytes": 124,
+      "sha256": "a87a45756c846a1b113ff9e66385b088577aa8c073b87fea7b68a61c186a605b",
+      "git_blob": "fe02a42c37c0a423273115b201bd5bd7b72e949c"
+    },
+    {
+      "path": "docs/library/proof/windows-writer-exclusion-native-2026-09-13/root/WINDOWS-WRITER-EXCLUSION04-ROOT-CHECK.json",
+      "bytes": 710,
+      "sha256": "104aaf17e333c92576a72a793a7f6c58e3bbba9a1fbe3ec8b4e7db7a88e46f3e",
+      "git_blob": "eeeac848c9488c6139871bcbecc846185a5e55f1"
+    },
+    {
+      "path": "docs/library/proof/windows-writer-exclusion-native-2026-09-13/root/WINDOWS-WRITER-EXCLUSION04-ROOT-CHECK-ACTUAL.json",
+      "bytes": 916,
+      "sha256": "50f376997bc13113684a2f94cca90eda979521b0bedf0f85fdf5a4691e7d0050",
+      "git_blob": "d675d468d27bccb75c6698e6e11a808a9ddb11b9"
+    },
+    {
+      "path": "docs/library/proof/windows-writer-exclusion-native-2026-09-13/root/WINDOWS-WRITER-EXCLUSION04-ROOT-REVIEW.md",
+      "bytes": 2090,
+      "sha256": "34adf77a311835ebd87f85fe2d7250f182f23d7dbd6407a05bab4057c81c77e3",
+      "git_blob": "058d4deb52ed7039792c8e1e4c4474ff4a64609d"
+    },
+    {
+      "path": "docs/library/proof/windows-writer-exclusion-native-2026-09-13/root/ASTRA-WRITER-EXCLUSION04-VERDICT-2026-09-13.md",
+      "bytes": 3053,
+      "sha256": "3ce17b622c0c230730dc39f25b49fb0f2fcea4beabdc447ab6b8588775d54c55",
+      "git_blob": "054663da4c37cc4a988008c19799432c1dea4473"
+    },
+    {
+      "path": "docs/library/proof/stable-writer-council-brief-2026-09-13/extract-controller.ps1",
+      "bytes": 3348,
+      "sha256": "08ba62c552f397e1381db2036d78a28c583219cfcb7b6da844ce3a48f7431b1c",
+      "git_blob": "0df65eb40f43fe27d032e7adb296e10fbe1d2823"
+    },
+    {
+      "path": "docs/library/proof/windows-writer-exclusion-diagnostic-2026-09-13/root/ASTRA-WRITER-EXCLUSION03-DIAGNOSTIC-2026-09-13.md",
+      "bytes": 1942,
+      "sha256": "9d883c3c45db3e1677d4eddc200859024ec9e75d3eda94df3f6c3b3261be6535",
+      "git_blob": "b24848e1908f0be9bb7f823936ebf3829b77df97"
+    },
+    {
+      "path": "docs/library/proof/windows-writer-exclusion-diagnostic-2026-09-13/root/WINDOWS-WRITER-EXCLUSION03-ROOT-REVIEW.md",
+      "bytes": 2164,
+      "sha256": "865f6a7b5da671747ab21d712a78ec3f80c998068a3d6aa052508f26a32436c3",
+      "git_blob": "8e38b6c04efe29bd430b46e54be12640b779690c"
+    },
+    {
+      "path": "docs/library/proof/stable-writer-council-brief-2026-09-13/INPUT-SELECTION.json",
+      "bytes": 28196,
+      "sha256": "3053c328e65636d895f8caa1545425638492f9cb816fc0ac8bdff4fe19baa51d",
+      "git_blob": "a0b37032484e4fd12de9f9bd280337244b05b930"
+    },
+    {
+      "path": "docs/library/proof/windows-stable-directory-qualification-2026-09-13/SHA256.json",
+      "bytes": 36599,
+      "sha256": "f15a1a85baad9ccfcdf15edfbc4a43933c0093a7207a7de00c4cb2fdf9b80dd4",
+      "git_blob": "e35c59debc73304ce2800652746d9510a9ec7d5a"
+    },
+    {
+      "path": "docs/library/proof/windows-writer-exclusion-native-2026-09-13/SHA256.json",
+      "bytes": 16051,
+      "sha256": "393c1cc60616933e69baced60630c13867bdc8bb12f71c295b12d237b143ee57",
+      "git_blob": "a079088f6c7ef35064e0283b967b5f17f820387d"
+    },
+    {
+      "path": "docs/library/proof/windows-writer-exclusion-diagnostic-2026-09-13/SHA256.json",
+      "bytes": 15055,
+      "sha256": "6f370206ba29fd225ab60c5cc7d053c57bf29c3522b56368d92146cae9193b16",
+      "git_blob": "2fe72944755bde6f4cc3e0cac2de9023fbd52dc5"
+    }
+  ],
+  "per_file_cap_bytes": 1048576,
+  "no_reparse_in_checked_chains": true,
+  "saved_completion_truncation": "Original markers and omissions preserved; no reconstructed tool output or proof of complete source reading",
+  "script_sha256": "9ae759bfe04f67e14ad9f5c2520940a4e205ca94cb888b46ec5238ef3045f0f5",
+  "pins_sha256": "00c1a01052efcd1061a14d367b74fc8f4d4bc6a6c381c3a23fb8c8d950bb4315"
+}

@@ -1,0 +1,7 @@
+{
+  "chunk_id": "80004c",
+  "wall_time_seconds": 0.3723357,
+  "exit_code": 0,
+  "original_token_count": 112,
+  "output": "Falling back to direct application...\nFalling back to direct application...\n{\"file\":\"docs/library/GEMINI-STABLE-DIRECTORY-WRITER-COUNCIL-2026-09-13.md\",\"sha256\":\"b3dce71da680b85fac64c0a14ce649b906187342468732d88466dee881cbac53\",\"exact_worker_bytes\":true}\r\n{\"file\":\"docs/library/GEMINI-STABLE-DIRECTORY-WRITER-COUNCIL-2026-09-13-COVERAGE.json\",\"sha256\":\"0e13e124b488e8ceb5bcd7d985a4e48fa0f3a8c79469615b7b6165a454a8da6e\",\"exact_worker_bytes\":true}\r\n"
+}

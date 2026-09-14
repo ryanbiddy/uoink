@@ -1,0 +1,7 @@
+{
+  "chunk_id": "99288b",
+  "wall_time_seconds": 0.3285109,
+  "exit_code": 0,
+  "original_token_count": 222,
+  "output": "{\"review_run\": \"2b39a17c-9418-4cfe-85d8-ecc07d7cdde2\", \"actual_selected_inputs_match_both_roots\": 48, \"exact_worker_output_copies\": 2, \"coverage_rows_with_mismatch\": 45, \"coverage_mismatch_counts\": {\"path\": 29, \"bytes\": 45, \"lines\": 0, \"sha256\": 45}, \"claimed_test_names_absent_from_source\": [\"test_stable_directory_identity_allows_positive_size_growth\", \"test_regular_file_size_change_still_refuses\", \"test_reparse_or_delete_pending_directory_still_refuses\", \"test_partial_failure_retains_parent_custody\", \"test_unconfirmed_flush_refuses_clear_and_retains_custody\", \"test_poisoned_reservation_blocks_retained_directory_release\", \"test_duplicate_and_disjoint_ancestor_chains_behave_deterministically\", \"test_full_lifecycle_with_multiple_directory_growths_and_clean_release\"], \"review_accuracy\": \"FAILED\", \"component_measurements_changed\": false, \"candidate_or_native_execution\": false}\r\n"
+}
