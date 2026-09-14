@@ -1,0 +1,49 @@
+{
+  "scope": "D2_ONE_LOCAL_FIXED54_CONVERSION_ONLY",
+  "reviewed_proposal_commit": "017b559b67e529d9a05d89911b713499cf6006ce",
+  "original_relative": "_scratch/vad-d2-dormant-invocation-proposal02",
+  "activated_relative": "_scratch/vad-d2-activated-invocation01",
+  "owner_note_sha256": "aa9abd446dec6672524c244d2028ca8db428f8f37d268158bd1d401551010ca7",
+  "owner_decision_sha256": "dbcf0c2abfde5ef7a21482da7358c14361e0195887aa32772f57546c40fc65fa",
+  "root_admission_sha256": "9ee0858631e0e32a7539d39be842de7c640c8dad2245dab83c8e4cd038a73796",
+  "changed_source_pins": [
+    "d2_child.py",
+    "d2_adapter.py",
+    "launch_d2.py"
+  ],
+  "pin_only_changes": true,
+  "unchanged_source_count": 7,
+  "child_map_count": 8,
+  "root_source_count": 11,
+  "metadata_note": "Dormant labels and comments are preserved from reviewed source; authority comes only from the exact owner record and three activated pins.",
+  "approval_time_unknown": true,
+  "checkpoint_accessed": false,
+  "output_created": false,
+  "conversion_executed": false,
+  "original_hashes": {
+    "d2_child.py": "09146650b3deefc45f12c31d353844568a0df924c6869ed9d09f0a2dde5db94c",
+    "zip_bounds.py": "bfe582cb2caa69a344a8147870c4ca161aa14d5202683c2e26e3f9ab040690c6",
+    "fixed_converter.py": "b31915b2e6d78a29ec05699952e5e0bfa01d234fec31ed37481c21665cfba54b",
+    "d2_adapter.py": "36546634d8ca42ee8e29280cd463cc829d994e67f2841f932110aba40fb805f0",
+    "fixed-plan.json": "37af25ab777ca7c322e00bec20dfffc1b6959d32c5bbd1a8c678bfc4126c91bf",
+    "D1-RESULT.json": "754ca6dea6aed81de072940b35ad4c283f270b5770a88236ef55fd0a09d46e75",
+    "known-inventory.json": "73ef1afe29719273272b4c27e0139a6d00393408455ec68f659bc53608c3fdcc",
+    "D2-PROFILE.json": "f0c60e2fa349b945108b4d15dccc8fe2d68ca4cab8588e8c0ff7f2e8762f75d3",
+    "INPUTS.json": "89e3bee7737e29e06107fb765668fe30f203d624c70663bb8d4176241413b8d3",
+    "launch_d2.py": "39b9fa629c6d01c510587b6889239ec8c7f7092c851c83bbb9005344c6d125f8",
+    "run-root.ps1": "b5ae9ca01172dd7b99b9db28126fc562e4339bfccf6a185c151e1fb0cfb63ae8"
+  },
+  "activated_hashes": {
+    "d2_child.py": "e7e5eaa60ffe25a928fab1c3367357ea3950010f9a692c1dd634950dee31084b",
+    "zip_bounds.py": "bfe582cb2caa69a344a8147870c4ca161aa14d5202683c2e26e3f9ab040690c6",
+    "fixed_converter.py": "b31915b2e6d78a29ec05699952e5e0bfa01d234fec31ed37481c21665cfba54b",
+    "d2_adapter.py": "e15d6968c066b22beb5389352681fa56a7842cdcc32550dec507c7b97e81ffdf",
+    "fixed-plan.json": "37af25ab777ca7c322e00bec20dfffc1b6959d32c5bbd1a8c678bfc4126c91bf",
+    "D1-RESULT.json": "754ca6dea6aed81de072940b35ad4c283f270b5770a88236ef55fd0a09d46e75",
+    "known-inventory.json": "73ef1afe29719273272b4c27e0139a6d00393408455ec68f659bc53608c3fdcc",
+    "D2-PROFILE.json": "f0c60e2fa349b945108b4d15dccc8fe2d68ca4cab8588e8c0ff7f2e8762f75d3",
+    "INPUTS.json": "11b87efa95fcdeb7c980850cdea88e6dc191c4703c1e0f5ae92100db4e2caa76",
+    "launch_d2.py": "ad422c067d6687216e1d8ed46dbc337b5b8e9b53947c6a3cc42bd1b5756d7c96",
+    "run-root.ps1": "b5ae9ca01172dd7b99b9db28126fc562e4339bfccf6a185c151e1fb0cfb63ae8"
+  }
+}

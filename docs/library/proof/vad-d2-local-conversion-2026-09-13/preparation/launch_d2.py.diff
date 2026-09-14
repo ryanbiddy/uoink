@@ -1,0 +1,13 @@
+diff --git "a/_scratch\\vad-d2-dormant-invocation-proposal02\\launch_d2.py" "b/_scratch\\vad-d2-activated-invocation01\\launch_d2.py"
+index 3298cf2f6ccbb48271590254c853a3edf68feb88..d11500b1260cfae63d5a82ce453756d17113d839 100644
+--- "a/_scratch\\vad-d2-dormant-invocation-proposal02\\launch_d2.py"
++++ "b/_scratch\\vad-d2-activated-invocation01\\launch_d2.py"
+@@ -9,7 +9,7 @@ import stat
+ import subprocess
+ import sys
+ 
+-OWNER_DECISION_SHA256 = None
++OWNER_DECISION_SHA256 = 'dbcf0c2abfde5ef7a21482da7358c14361e0195887aa32772f57546c40fc65fa'
+ FORBIDDEN = r'C:\Users\hello\AppData\Local\Uoink\index.db'
+ PYTHON = r'C:\Python314\python.exe'
+ CHECKOUT = Path(r'E:\AI\projects\uoink\checkouts\Yoink-library')

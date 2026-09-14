@@ -1,0 +1,32 @@
+{
+  "schema": "uoink.d2.proposed-profile.v1",
+  "status": "proposal_no_execution_authority",
+  "profile_id": "reviewed-d2-existing-f32-v1",
+  "scope": "D2_ONE_LOCAL_FIXED54_CONVERSION_ONLY",
+  "input_sha256": "0b5b3216d60a2d32fc086b47ea8c67589aaeb26b7e07fcbe620d6d0b83e209ea",
+  "input_bytes": 17719103,
+  "source_byte_order": "little",
+  "scalar_encoding": "IEEE754-binary32",
+  "archive_version_hex": "330a",
+  "d1_receipt_sha256": "754ca6dea6aed81de072940b35ad4c283f270b5770a88236ef55fd0a09d46e75",
+  "inventory_sha256": "73ef1afe29719273272b4c27e0139a6d00393408455ec68f659bc53608c3fdcc",
+  "plan_sha256": "37af25ab777ca7c322e00bec20dfffc1b6959d32c5bbd1a8c678bfc4126c91bf",
+  "output_basename": "default-vad-d2-01.safetensors",
+  "tensor_entries": 54,
+  "selected_storages": 23,
+  "dense_data_bytes": 5891996,
+  "maximum_input_bytes": 33554432,
+  "maximum_output_bytes": 6291456,
+  "maximum_header_bytes": 32768,
+  "cooperative_seconds": 30,
+  "owner_prerequisites": [
+    "accept_uniform_raw_storage_writer_assumption",
+    "accept_IEEE754_binary32_interpretation",
+    "accept_dense_fixed_ranges_and_omitted_legacy_metadata",
+    "accept_local_conversion_only_with_model_notice_unresolved"
+  ],
+  "model_execution_authorized": false,
+  "network_authorized": false,
+  "redistribution_authorized": false,
+  "release_trust_anchor": null
+}

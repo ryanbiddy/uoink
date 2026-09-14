@@ -1,0 +1,29 @@
+{
+  "actual_child_exit": 0,
+  "guard_valid": true,
+  "inputs_unchanged": true,
+  "conversion_result": {
+    "status": "conversion_bytes_produced_unqualified",
+    "profile_id": "reviewed-d2-existing-f32-v1",
+    "input_sha256": "0b5b3216d60a2d32fc086b47ea8c67589aaeb26b7e07fcbe620d6d0b83e209ea",
+    "input_bytes": 17719103,
+    "output_sha256": "8c15e718b6d502e7e351761f6cfee1a6917450e03c9a4c5318bc0d41d3fdd8c4",
+    "output_bytes": 5896708,
+    "tensor_entries": 54,
+    "selected_storages": 23,
+    "dense_data_bytes": 5891996,
+    "model_or_tensor_constructed": false,
+    "pickle_interpreted": false,
+    "model_compatibility_qualified": false,
+    "release_approved": false,
+    "elapsed_seconds": 0.166871,
+    "whole_file_elapsed_seconds": 0.183642
+  },
+  "original_and_copied_authority_unchanged": true,
+  "conversion_operation": {
+    "file_conversion_calls": 1,
+    "file_conversion_returns": 1
+  },
+  "output_identity_verified": true,
+  "runtime_or_release_approved": false
+}

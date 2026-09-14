@@ -1,0 +1,7 @@
+{
+  "chunk_id": "9c4f84",
+  "wall_time_seconds": 0.8297771,
+  "exit_code": 0,
+  "original_token_count": 209,
+  "output": "{\r\n  \"payload_count\": 54,\r\n  \"total_payload_bytes\": null,\r\n  \"maximum_payload_bytes\": null,\r\n  \"groups\": [\r\n    {\r\n      \"source_root\": \"_scratch/vad-d2-activated-invocation01\",\r\n      \"destination_prefix\": \"activation\",\r\n      \"payloads\": 37,\r\n      \"bytes\": 180053\r\n    },\r\n    {\r\n      \"source_root\": \"_scratch/vad-d2-activation-preparation01\",\r\n      \"destination_prefix\": \"preparation\",\r\n      \"payloads\": 15,\r\n      \"bytes\": 36948\r\n    },\r\n    {\r\n      \"source_root\": \"_scratch/vad-d2-activation-source-review01\",\r\n      \"destination_prefix\": \"source-review\",\r\n      \"payloads\": 2,\r\n      \"bytes\": 6709\r\n    }\r\n  ],\r\n  \"map_bytes\": 15809,\r\n  \"map_sha256\": \"e52a3d8e0c1bc071352e58cf595325b3bf01272dd3bdcbe615aa86328a9a2b62\",\r\n  \"source_or_archive_execution_performed\": false,\r\n  \"checkpoint_or_output_access_performed\": false\r\n}\r\n"
+}

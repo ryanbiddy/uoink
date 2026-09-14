@@ -1,0 +1,13 @@
+diff --git "a/_scratch\\vad-d2-dormant-invocation-proposal02\\d2_adapter.py" "b/_scratch\\vad-d2-activated-invocation01\\d2_adapter.py"
+index f6d57bcb5d4aa060ab95942ac5181fd76fcf299d..79e0c019cb0f7a7e2da598bf41c173cef0020b3e 100644
+--- "a/_scratch\\vad-d2-dormant-invocation-proposal02\\d2_adapter.py"
++++ "b/_scratch\\vad-d2-activated-invocation01\\d2_adapter.py"
+@@ -7,7 +7,7 @@ import hashlib
+ import json
+ import re
+ 
+-OWNER_DECISION_SHA256 = None
++OWNER_DECISION_SHA256 = 'dbcf0c2abfde5ef7a21482da7358c14361e0195887aa32772f57546c40fc65fa'
+ SCOPE = 'D2_ONE_LOCAL_FIXED54_CONVERSION_ONLY'
+ RUN_ID = 'd2-real-01'
+ PROFILE_SHA256 = 'f0c60e2fa349b945108b4d15dccc8fe2d68ca4cab8588e8c0ff7f2e8762f75d3'
