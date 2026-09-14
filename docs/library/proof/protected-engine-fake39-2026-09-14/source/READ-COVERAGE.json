@@ -1,0 +1,83 @@
+{
+  "scope": "Bounded source authoring and passive text/hash/JSON verification only",
+  "complete_reads": [
+    {
+      "actual": "BRIEF-READ01-ACTUAL.json",
+      "chunk_id": "aaeb85",
+      "subjects": [
+        "canonical repair brief"
+      ]
+    },
+    {
+      "actual": "FAILURE-MAP-READ02-ACTUAL.json",
+      "chunk_id": "af89fe",
+      "subjects": [
+        "complete constructor01 failure verdict",
+        "complete original 35-row source plan"
+      ]
+    },
+    {
+      "actual": "CORE-ORIGINALS-READ03-ACTUAL.json",
+      "chunk_id": "0742e6",
+      "subjects": [
+        "original worker_runtime_owner.py",
+        "original owned_factory_port.py"
+      ],
+      "limit": "Combined display omitted an internal protocol span; protocol was reread separately in full."
+    },
+    {
+      "actual": "PROTOCOL-FULL-READ04-ACTUAL.json",
+      "chunk_id": "f75c7e",
+      "subjects": [
+        "complete original owned_generation_protocol.py"
+      ]
+    },
+    {
+      "actual": "FIXTURES-READ05-ACTUAL.json",
+      "chunk_id": "add76a",
+      "subjects": [
+        "complete generated_factory_fixture.py",
+        "complete generated_bootstrap_fixture.py",
+        "complete generated_worker_factory_inputs.py",
+        "complete generated_native_owner_fixture.py"
+      ]
+    },
+    {
+      "actual": "REGISTRY-TEST-SEAMS-READ06-ACTUAL.json",
+      "chunk_id": "060ed4",
+      "subjects": [
+        "complete model_binding_registry.py",
+        "complete owned_guard.py"
+      ]
+    },
+    {
+      "actual": "ACCEPTED-OWNER-CASES-READ09-ACTUAL.json",
+      "chunk_id": "a1c784",
+      "subjects": [
+        "complete generated_unit_cases.py",
+        "complete connection_cases.py"
+      ]
+    }
+  ],
+  "selected_reads": [
+    {
+      "actual": "TEST-INVENTORY07-ACTUAL.json",
+      "chunk_id": "ebab50",
+      "subjects": [
+        "fixed directory Python filename inventory",
+        "accepted qualifier source pins/import/case rows"
+      ]
+    }
+  ],
+  "verification": {
+    "actual": "SOURCE-BYTE-CHECK12-ACTUAL.json",
+    "chunk_id": "c629e7",
+    "exit_code": 0,
+    "source_rows": 29,
+    "new_cases": 6,
+    "full_forward_reverse_deltas": 2,
+    "originals_unchanged": true,
+    "candidate_execution": false
+  },
+  "remaining_coverage": "native_owner_cases.py, state/CPU/schema support and prior accepted native/protocol machinery are reused hash-bound context, not newly requalified or fully rereviewed here."
+}

@@ -1,0 +1,23 @@
+{
+  "scope": "Independent bounded source review; no candidate execution or admission",
+  "proposal": "_scratch/protected-engine-ownership-repair02",
+  "pins_sha256": "a7c9b53b2aec5340d764499ab1ae1efcf095a37eabaecece53a8ec37a981ba69",
+  "complete_reads": [
+    {"actual": "CONTRACT-VIEW-ACTUAL.json", "tool": "317a01", "subjects": ["canonical repair brief", "constructor01 failure verdict"]},
+    {"actual": "PLAN-MAP-ACTUAL.json", "tool": "24a854", "subjects": ["frozen original source-plan map; historical handoff row was not dereferenced"]},
+    {"actual": "BASELINE-OWNER-ACTUAL.json", "tool": "c91cf2", "subjects": ["full accepted owner, 292 lines"]},
+    {"actual": "BASELINE-FACTORY-ACTUAL.json", "tool": "c4a03d", "subjects": ["full accepted fixed factory, 319 lines"]},
+    {"actual": "BASELINE-PROTOCOL-ACTUAL.json", "tool": "0281db", "subjects": ["full accepted protocol, 506 lines"]},
+    {"actual": "SOURCE-MAP-VIEW-ACTUAL.json", "tool": "bad6a7", "subjects": ["complete new 29-row input map and scoped inventory"]},
+    {"actual": "NEW-CORE-ACTUAL.json", "tool": "24a9ce", "subjects": ["full current owner, 405 lines"], "display_limit": "Combined tool display truncated the owner tail; lines 354-405 were subsequently displayed from this exact retained raw object. The nested raw object itself is complete."},
+    {"actual": "NEW-DELTA-ACTUAL.json", "tool": "bca76d", "subjects": ["both complete core diffs", "generated_engine_objects.py", "BRIEF", "TEST-PLAN", "DRAFT-CORRECTION01"]},
+    {"actual": "TESTS-ACTUAL.json", "tool": "3467aa", "subjects": ["complete new six-case module, 287 lines"]},
+    {"actual": "FIXTURES-ACTUAL.json", "tool": "2cd74b", "subjects": ["complete reused generated_bootstrap_fixture", "complete connection_cases including actual begin/build/replaced helpers", "complete accepted model_binding_registry"]},
+    {"actual": "FREEZE-DOCS-ACTUAL.json", "tool": "a0e47c", "subjects": ["final PINS", "author SOURCE-VERDICT", "READ-COVERAGE", "six ordered NEW-CASE-IDS"]}
+  ],
+  "passive_check": {"actual": "CHECK-ACTUAL.json", "tool": "0d45f2", "exit": 0, "pins": 15, "input_bindings": 29, "ordered_new_ids": 6, "full_forward_reverse_diffs": 2},
+  "line_check": {"actual": "LINES-ACTUAL.json", "tool": "12655a", "exit": 0, "scope": "Current protocol method and custody/error call locations"},
+  "limits": "Existing unchanged generated_factory_fixture, accepted owner/native case modules and lower state/CPU/fake support remain hash-bound reused context, not a fresh complete review or execution. No claim of direct coverage for pipeline constructor failure or constructor return after revocation. Real backend construction and retirement remain closed.",
+  "candidate_executed": false,
+  "frozen_sources_changed": false
+}

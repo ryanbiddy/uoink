@@ -1,0 +1,60 @@
+{
+  "schema": "uoink.protected-engine-fake39-source-read-coverage.v1",
+  "subject_executed": false,
+  "reads": [
+    {
+      "path": "before/qualify_owner.py",
+      "sha256": "b1771412162632a9e9f98a0321bb5b030372546a7e9cf932318d10b34d53b02b",
+      "complete": true,
+      "lines": 259,
+      "receipts": [
+        "INSTRUMENT-READ01-ACTUAL.json",
+        "INSTRUMENT-READ02-ACTUAL.json",
+        "INSTRUMENT-READ05-ACTUAL.json",
+        "FIXED-TEXT-READ07-ACTUAL.json"
+      ],
+      "note": "First combined display was truncated; later bounded views cover81–259 and retained-byte view covers1–80."
+    },
+    {
+      "path": "before/run_fake33_01.ps1",
+      "sha256": "2ebd5b28355e9002a264959a582431ade64778d008aaefa616fb9b3b4061fb78",
+      "complete": true,
+      "lines": 182,
+      "receipts": [
+        "INSTRUMENT-READ03-ACTUAL.json",
+        "INSTRUMENT-READ06-ACTUAL.json",
+        "FIXED-TEXT-READ07-ACTUAL.json"
+      ]
+    },
+    {
+      "path": "before/QUALIFICATION-PROTOCOL.md",
+      "sha256": "2472a56eed35e0a83ef8570d8a46dc621a3b2040a8dbd1af6681f5b8e0abe5f2",
+      "complete": true,
+      "receipts": [
+        "CONTROL-READ04-ACTUAL.json",
+        "FIXED-TEXT-READ07-ACTUAL.json"
+      ]
+    },
+    {
+      "path": "qualify_owner.py",
+      "sha256": "01e5b28a81afb9b1da4b1baa541fafb75fe8702bb818932dd7ec119c12aba428",
+      "basis": "Complete old source plus every declared replacement and full forward/reverse reconstruction."
+    },
+    {
+      "path": "run_fake39_01.ps1",
+      "sha256": "7ecac7b7484072f31a60cae3d2accad30bb2ac41c93852a29fd1b2a50198a31a",
+      "basis": "Complete old source plus every declared replacement and full forward/reverse reconstruction."
+    }
+  ],
+  "closure_review": {
+    "new_modules": [
+      "generated_engine_objects",
+      "test_engine_ownership"
+    ],
+    "object_module_before": "worker_runtime_owner",
+    "case_module_position": "last",
+    "new_stdlib_preloads": [],
+    "remaining_closure_obstacle": null
+  },
+  "limits": "Text/source preparation only; complete input membership is bound separately. No candidate imports, compilation or behavioral observations."
+}

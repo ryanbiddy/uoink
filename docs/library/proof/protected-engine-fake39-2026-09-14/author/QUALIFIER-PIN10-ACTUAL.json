@@ -1,0 +1,7 @@
+{
+  "chunk_id": "5ce164",
+  "wall_time_seconds": 0.148003,
+  "exit_code": 0,
+  "original_token_count": 32,
+  "output": "{\r\n  \"bytes\": 24714,\r\n  \"sha256\": \"01e5b28a81afb9b1da4b1baa541fafb75fe8702bb818932dd7ec119c12aba428\",\r\n  \"lf_slots\": 272\r\n}\r\n"
+}

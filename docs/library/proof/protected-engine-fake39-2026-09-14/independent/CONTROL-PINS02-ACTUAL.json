@@ -1,0 +1,7 @@
+{
+  "chunk_id": "b62cef",
+  "wall_time_seconds": 0.1576048,
+  "exit_code": 0,
+  "original_token_count": 76,
+  "output": "[\r\n  {\r\n    \"name\": \"run_fake39_01.ps1\",\r\n    \"bytes\": 20422,\r\n    \"sha256\": \"e43bebc426e425af7a8f5670a9c5ad77bcd098cd80455463d7d9b27dc03d2a47\"\r\n  },\r\n  {\r\n    \"name\": \"SOURCE-INPUTS.json\",\r\n    \"bytes\": 10453,\r\n    \"sha256\": \"80218763e7b3b5582773e848f2066574ebd6b72dbbcc7ab5dc7cd5c7ab9df4cd\"\r\n  }\r\n]\r\n"
+}

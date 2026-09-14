@@ -271,7 +271,8 @@ This changes newly authored fixture preparation before its first execution;
 no accepted test or behavior assertion changes. All13 proposed case bodies,
 the original46 lifecycle controls and lifecycle source22b66293 are unchanged.
 Passivecaca11 verifies the exact replacement; no measured failure is converted
-to a pass. The combined59-case instrument still needs source review/admission.
+to a pass. The combined59-case instrument subsequently qualified at1e2167a:
+both copies pass59/0/0 plus29 subtests, with original46 case bodies unchanged.
 The repair reason and scope are in FIXTURE-REGISTRY-LOCK-REPAIR02.md beside the
 diff. A later full candidate tree remains required after production migration.
 

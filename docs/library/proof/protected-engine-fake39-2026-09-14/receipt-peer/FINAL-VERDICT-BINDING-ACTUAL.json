@@ -1,0 +1,7 @@
+{
+  "chunk_id": "c79d92",
+  "wall_time_seconds": 0.1657981,
+  "exit_code": 0,
+  "original_token_count": 100,
+  "output": "[\r\n  {\r\n    \"path\": \"_scratch/protected-engine-ownership-receipt-peer01/VERDICT.md\",\r\n    \"bytes\": 2174,\r\n    \"sha256\": \"ac2e9bcc5174b62a96c2bf9fc7e3fdd6663013878bd38234a50c59a905b04c69\"\r\n  },\r\n  {\r\n    \"path\": \"_scratch/protected-engine-ownership-receipt-peer01/PAIR-CHECK-ACTUAL.json\",\r\n    \"bytes\": 1986,\r\n    \"sha256\": \"4d5becfbcc998434370d996217816ae1ac4936cb2af997216d2c2d46ee978da9\"\r\n  }\r\n]\r\n"
+}

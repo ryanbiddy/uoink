@@ -1,0 +1,11 @@
+2026-09-14 — ready for source review; no execution admitted
+
+The two core derivatives, fixed generated stand-ins and six proposed cases are complete. The accepted fixed factory, registry, fixtures and original33 test references remain byte-identical. Passive check c629e7 exited 0: all29 source rows bind actual text files; both unified diffs reconstruct the complete old/new files in both directions; declared edits and all six ordered IDs match. SOURCE-INPUTS.json is b4e1c6a8f99c5c3aa0e4bfc4f3c7bac955e8eb90b0828ed0ec74a74c2403f7a9.
+
+The new owner retains the construction attempt before generated constructor entry. Each returned object is held before the next preparation or liveness check. Publication remains inside the same serial engine operation and validates the actual issued namespace, current VAD owner/model lease and exact generated object links. The attempt remains reachable after ordinary factory release, logical close, revocation and secondary cleanup failure. No new API can declare a backend retired.
+
+The proposed positives use the unchanged generated bootstrap fixture, actual challenge/begin/issue/build/register path and exact existing factory/owned module types. They do not patch issuance, authority, liveness or publication checks. Fixed generated prepare methods are wrapped for observation or made to fail; cleanup failure injection raises rather than providing a successful revocation answer.
+
+The unexecuted first draft's missing between-constructor liveness check and too-narrow error catch are preserved under before/ and DRAFT-CORRECTION01.md. DECLARED-CORE-EDITS.json records that first draft; FINAL-CORE-EDITS.json is the operative complete edit sequence. No candidate import, compilation, test, constructor or native operation occurred. The only execution was passive text/hash/JSON checking.
+
+The real authenticated namespace, CPU/backend policy, actual WhisperX constructors and PCM/filter connection remain refused. An allocation that a constructor never returns is outside this Python record's custody; the retained worker remains responsible until separately confirmed process retirement. Original constructor01 stays failed. These source changes convey no D3/D4, package/install, production or market acceptance.

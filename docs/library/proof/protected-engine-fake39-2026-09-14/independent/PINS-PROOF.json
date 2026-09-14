@@ -1,0 +1,41 @@
+{
+  "schema": "uoink.protected-engine-fake39-independent-pins-proof.v1",
+  "subject_executed": false,
+  "execution_authority": false,
+  "parent_inputs": 40,
+  "parent_bytes": 579045,
+  "unchanged_child_texts": 38,
+  "launcher_literal_child_pins": 38,
+  "qualifier_noncircular_pins": 37,
+  "unchanged_ordered_case_ids": 39,
+  "original33_and_new6_bodies_unchanged": true,
+  "source_copy_pairs": 42,
+  "changed_parent_controls": [
+    "SOURCE-INPUTS.json",
+    "run_fake39_01.ps1"
+  ],
+  "source_paths_relocated": 38,
+  "launcher_root_substitutions": 39,
+  "launcher_label_substitutions": 3,
+  "deltas": [
+    {
+      "input": "run_fake39_01.ps1",
+      "before_sha256": "7ecac7b7484072f31a60cae3d2accad30bb2ac41c93852a29fd1b2a50198a31a",
+      "after_sha256": "e43bebc426e425af7a8f5670a9c5ad77bcd098cd80455463d7d9b27dc03d2a47",
+      "forward": true,
+      "reverse": true,
+      "declared_substitutions_only": true
+    },
+    {
+      "input": "SOURCE-INPUTS.json",
+      "before_sha256": "11d141e91e38872d149744aaf73fa44baed622adf35bebcbc91d82a8e9d428ff",
+      "after_sha256": "80218763e7b3b5582773e848f2066574ebd6b72dbbcc7ab5dc7cd5c7ab9df4cd",
+      "forward": true,
+      "reverse": true,
+      "declared_substitutions_only": true
+    }
+  ],
+  "native_receipt_block_unchanged": true,
+  "false_template": true,
+  "actual_admission_or_run_created": false
+}

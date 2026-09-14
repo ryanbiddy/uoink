@@ -1,0 +1,7 @@
+{
+  "chunk_id": "357a02",
+  "wall_time_seconds": 0.1876019,
+  "exit_code": 0,
+  "original_token_count": 119,
+  "output": "{\"scope\":\"Root passive exact independent derivation; no subject execution\",\"parent_inputs\":40,\"unchanged_child_texts\":38,\"ordered_cases\":39,\"launcher_root_substitutions\":39,\"launcher_label_substitutions\":3,\"source_path_substitutions\":38,\"pins\":\"570221683bb0e49c52ee5a3fe81261eb2c30c3ff37206120ef0ee8d074173154\",\"launcher\":\"e43bebc426e425af7a8f5670a9c5ad77bcd098cd80455463d7d9b27dc03d2a47\",\"false_template\":\"8c85c42760d58914a03538d72a8fca9b80c15546ca32c3e7302677b05a235765\"}\n"
+}

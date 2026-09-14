@@ -1,0 +1,7 @@
+{
+  "chunk_id": "dbf201",
+  "wall_time_seconds": 0.2064447,
+  "exit_code": 0,
+  "original_token_count": 140,
+  "output": "{\r\n  \"reason\": \"Review checker01 compared JSON object key order to launcher order; membership and per-key hashes are the required binding. Only that reviewer assertion now sorts keys.\",\r\n  \"actual_template_keys_first\": [\r\n    \"plain_state_reader.py\",\r\n    \"state_bridge.py\",\r\n    \"owned_cpu_tensor_port.py\",\r\n    \"model_binding_registry.py\"\r\n  ],\r\n  \"source_before\": \"d2ff95155ed958d915463dc1fd978f6c2d0eca5dad733f61fa5834db675e1a08\",\r\n  \"source_after\": \"2bb9b568751725d76d1fd0b89540aec37548e05b2e24eb76366900bf619d4cd4\",\r\n  \"candidate_unchanged\": true\r\n}\r\n"
+}

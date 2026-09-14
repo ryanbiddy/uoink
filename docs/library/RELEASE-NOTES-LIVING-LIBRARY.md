@@ -125,6 +125,14 @@ Ownership scope and retention, namespace authority, fallback and test-setup
 defects remain repair work. Its 13 proposed checks were not executed. See
 [the constructor review](ASTRA-PROTECTED-CONSTRUCTOR01-FAILURE-2026-09-14.md).
 
+The smaller generated ownership repair passes **39 cases in each independent
+copy**, with zero failures or skips. It preserves the original 33 cases and
+retains returned constructor objects before later fallible steps. Both copies
+have matching case results and all 38 child-source hashes, with ten valid guards.
+These checks use inert objects and supply no separate subtest count. Real
+namespace authentication and fixed backend construction remain the next work.
+See [the ownership verdict](ASTRA-ENGINE-FAKE39-VERDICT-2026-09-14.md).
+
 The dormant reliability caller now passes **11 cases and 15 subtests in each
 independent copy**, with zero failures or skips. The results cover request
 options, word normalization, context lifetime and cleanup with inert services.

@@ -1,0 +1,7 @@
+{
+  "chunk_id": "7b4c12",
+  "wall_time_seconds": 0.1092026,
+  "exit_code": 0,
+  "original_token_count": 170,
+  "output": "{\r\n  \"native_exit\": 0,\r\n  \"outer_exit\": 0,\r\n  \"inputs_unchanged\": true,\r\n  \"receipt_valid\": true,\r\n  \"receipt_parse_error_type\": null,\r\n  \"stdout_bytes\": 14929,\r\n  \"stderr_bytes\": 0,\r\n  \"startup_binding_set\": true\r\n}\r\n\r\n{\"schema\":\"uoink.native-exit.v1\",\"child_returned\":true,\"native_exit\":0}\r\n{\n  \"chunk_id\": \"4e81bd\",\n  \"wall_time_seconds\": 10.0091621,\n  \"session_id\": 7190,\n  \"original_token_count\": 0,\n  \"output\": \"\"\n}\n\r\n{\n  \"chunk_id\": \"7e49b6\",\n  \"wall_time_seconds\": 5.0040875,\n  \"session_id\": 7190,\n  \"original_token_count\": 0,\n  \"output\": \"\"\n}\n\r\n{\n  \"chunk_id\": \"09d91a\",\n  \"wall_time_seconds\": 0.0000016,\n  \"exit_code\": 0,\n  \"original_token_count\": 0,\n  \"output\": \"\"\n}\n\r\n"
+}
