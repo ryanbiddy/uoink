@@ -1,0 +1,256 @@
+{
+  "schema": "uoink.runtime-next-source-plan.v1",
+  "scope": "Text/hash bindings only; selected read coverage is explicit per row",
+  "repository": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library",
+  "input_count": 35,
+  "files": [
+    {
+      "path": "docs/library/ORCHESTRATION-HANDOFF-2026-09-08.md",
+      "bytes": 441148,
+      "sha256": "1770d3bd8b146bd90c4be54ef59b5b2ddb125c47ff9b4054279a165341d819bb",
+      "role": "active Queue context",
+      "read_scope": "167-599,606-742"
+    },
+    {
+      "path": "_scratch/asr-production-adapter-proposal01/CALL-SITE-SPLICES.md",
+      "bytes": 6470,
+      "sha256": "44548ba86da4f8a5d1be868d47f65b01c227b80589f55b306504cd8e9f8aa3a4",
+      "role": "obsolete caller shapes to replace",
+      "read_scope": "full"
+    },
+    {
+      "path": "_scratch/worker-runtime-owner-proposal02/MIGRATION.md",
+      "bytes": 3810,
+      "sha256": "c0aa3e078e10c453b9e341c37ab15b1e9598a695e01dcce69f6530f6e0d34059",
+      "role": "remaining ownership connections",
+      "read_scope": "full"
+    },
+    {
+      "path": "_scratch/whisperx-owned-derivative-proposal01/RUNTIME-PORT.md",
+      "bytes": 3803,
+      "sha256": "dbf25a10f7d37021584107beb31f0f30582562193678517dcbb192165e5b7da0",
+      "role": "real runtime/PCM/filter requirements",
+      "read_scope": "full"
+    },
+    {
+      "path": "_scratch/runtime-migration-owner-protocol01/OWNER-REVIEW-DRAFT.md",
+      "bytes": 15049,
+      "sha256": "3d6529bbc9970535a721fde8fbcfd2be16185e3c23a0653bc8858148f7aee600",
+      "role": "D3/D4 distinction; historical claims superseded by Queue",
+      "read_scope": "full"
+    },
+    {
+      "path": "_scratch/runtime-migration-owner-protocol01/QUALIFICATION-DRAFT.md",
+      "bytes": 7664,
+      "sha256": "0ee3363d465148b6cbf8bcc017f90da62b694e90f60dfa55d93ccd4cd7e67b2d",
+      "role": "future CPU runtime stages; not executable authority",
+      "read_scope": "full"
+    },
+    {
+      "path": "_scratch/windows-interrupted-owner-native-proposal02/worker_runtime_owner.py",
+      "bytes": 12997,
+      "sha256": "5647023ed03c5acfd8b1aa981a56171dd92228ccc0972f12546bb0b3d411ce87",
+      "role": "owner derivative",
+      "read_scope": "full"
+    },
+    {
+      "path": "_scratch/windows-interrupted-owner-native-proposal02/asr_loading_adapter.py",
+      "bytes": 12113,
+      "sha256": "635d2c22db75d12ffe6965fb656fdca47450ccbbaeb4d8cc8aaff9fcc79dd243",
+      "role": "current exact facade adapter",
+      "read_scope": "full"
+    },
+    {
+      "path": "_scratch/windows-interrupted-owner-native-proposal02/generated_worker_runtime_bridge.py",
+      "bytes": 12096,
+      "sha256": "11eff72f6d96b5c4248987635b5373672da706e1ac0fac53188aac7a3a253716",
+      "role": "generated service to retain beside new real service",
+      "read_scope": "full"
+    },
+    {
+      "path": "_scratch/windows-interrupted-owner-native-proposal02/owned_generation_protocol.py",
+      "bytes": 24403,
+      "sha256": "bd5204ef0d3fc2a459df19bc5f02fd7b6d78041e2306b4031ab888387aa362c0",
+      "role": "fixed bootstrap owner/class/operation contract",
+      "read_scope": "symbol inventory; prior accepted source context"
+    },
+    {
+      "path": "_scratch/windows-interrupted-owner-native-proposal02/snapshot_lifecycle.py",
+      "bytes": 22138,
+      "sha256": "a80514aac6b1e75b9b872052852fa993a23cd5273b6bed4ffb4eef7404cb69dd",
+      "role": "request/stream and passive result contract",
+      "read_scope": "40-122,386-512"
+    },
+    {
+      "path": "_scratch/windows-interrupted-owner-native-proposal02/pinned_buffer_namespace.py",
+      "bytes": 7893,
+      "sha256": "2cc25a7a254f35d802336ef121cc860887a4301b3257588438dddec392fe0b7b",
+      "role": "constructor namespace connection",
+      "read_scope": "full"
+    },
+    {
+      "path": "_scratch/windows-interrupted-owner-native-proposal02/inherited_readset.py",
+      "bytes": 12391,
+      "sha256": "02be8e04f4bea3030faf0882ae48ead40716c5782f95e2790e1a9897c5be76e3",
+      "role": "authenticated adoption connection",
+      "read_scope": "full"
+    },
+    {
+      "path": "_scratch/windows-interrupted-owner-native-proposal02/generated_adapter_flow.py",
+      "bytes": 90105,
+      "sha256": "24844bf419e4d34adaf0d5c5a2678de33a4796de86dad0f83b7e386f1785f961",
+      "role": "current controller/child connection and prelock source",
+      "read_scope": "symbol inventory; exact source authored/reviewed in prior task"
+    },
+    {
+      "path": "_scratch/windows-interrupted-owner-native-proposal02/durable_lifecycle.py",
+      "bytes": 32833,
+      "sha256": "3c8963eaa02bbc1d810ee2632d0363303bfe05ec6ceeef73771ca8005a00ece3",
+      "role": "unchanged durable ownership dependency",
+      "read_scope": "hash binding; prior accepted source context"
+    },
+    {
+      "path": "_scratch/windows-interrupted-owner-native-proposal02/trusted_asr_resolver.py",
+      "bytes": 13373,
+      "sha256": "16a5a1245f649a3eb04d077b661835503f08bef0ff8822dcb545176f0cc30833",
+      "role": "six model schemas and real approval closure",
+      "read_scope": "selected symbols/model specifications"
+    },
+    {
+      "path": "_scratch/windows-interrupted-owner-native-proposal02/owned_factory_port.py",
+      "bytes": 15463,
+      "sha256": "2569853c7634b795e3d2cf717129ec3dbc4e11d96ddb347098dcc4fbc532f0d4",
+      "role": "reuse exact fixed factory",
+      "read_scope": "hash binding; prior accepted source context"
+    },
+    {
+      "path": "_scratch/windows-interrupted-owner-native-proposal02/model_binding_registry.py",
+      "bytes": 8732,
+      "sha256": "48567add0f0ac2ac9140e9aa86b06f077454c98e2f0773100da5ba070f7b3deb",
+      "role": "reuse exact model lease registry",
+      "read_scope": "hash binding; prior accepted source context"
+    },
+    {
+      "path": "_scratch/whisperx-owned-derivative-proposal01/after/whisperx/asr.py",
+      "bytes": 17608,
+      "sha256": "723bfba5775cb4a610368e1ad706fc55131bc9a2e8ea2f1e1a2b55cd6e8b5d42",
+      "role": "owned constructor and actual list-returning transcribe",
+      "read_scope": "201-300,316-438"
+    },
+    {
+      "path": "_scratch/whisperx-owned-derivative-proposal01/after/whisperx/_uoink_owned.py",
+      "bytes": 2109,
+      "sha256": "7672f614d81cf0be5e7bd408f8f856af328fe34e6ca7ee707c9d0db838e56d1f",
+      "role": "closed owned namespace/waveform guard",
+      "read_scope": "full"
+    },
+    {
+      "path": "_scratch/whisperx-owned-derivative-proposal01/after/whisperx/audio.py",
+      "bytes": 3976,
+      "sha256": "c7b696df836e415e7c732c03edae496c4317cb741eaac7357e8c9c7bdcf38152",
+      "role": "closed decoder and required filter port",
+      "read_scope": "1-70"
+    },
+    {
+      "path": "_scratch/companion-b3-builder01/recipe/B2.py.txt",
+      "bytes": 82612,
+      "sha256": "bf452635becacf6bba46825be6d6eea533da472ce966ee47f5ce7bccfc3bf06d",
+      "role": "exact B3 constructor/feature helper despite historical filename",
+      "read_scope": "620-751; symbol inventory"
+    },
+    {
+      "path": "_scratch/companion-b3-builder01/fixtures/upstream-text/faster_whisper/feature_extractor.py.txt",
+      "bytes": 7592,
+      "sha256": "e403966dbc592a53695eea2aea24fa60bab50ef6755e0076b311f907be7a397c",
+      "role": "captured default feature policy",
+      "read_scope": "1-70; mel symbol inventory"
+    },
+    {
+      "path": "whisper_runner.py",
+      "bytes": 22899,
+      "sha256": "6586d9f19fea0d20054d6e317b48b9914904e1126bbc7b788ba255633251996f",
+      "role": "primary caller derivative",
+      "read_scope": "382-478; import/load symbol inventory"
+    },
+    {
+      "path": "uoink_reliability.py",
+      "bytes": 17162,
+      "sha256": "81a6d68fcd5c4fa9b66b752f9f7ebcaff2d76ccb1026f889a055525a5c1acad6",
+      "role": "reliability/capture caller derivative",
+      "read_scope": "83-144,287-317,410-446; symbol inventory"
+    },
+    {
+      "path": "_scratch/runtime-owner-native-connection-proposal01/qualify_owner.py",
+      "bytes": 22698,
+      "sha256": "b1771412162632a9e9f98a0321bb5b030372546a7e9cf932318d10b34d53b02b",
+      "role": "existing guard/loader to adapt after review",
+      "read_scope": "filename/size inventory; prior accepted instrument context"
+    },
+    {
+      "path": "_scratch/runtime-owner-native-connection-proposal01/EXPECTED-CASES.json",
+      "bytes": 3293,
+      "sha256": "2c1fadce72b41ed443fcbcd2be88758db9f1cb55e530c7a33010377c598d164e",
+      "role": "preserve accepted33 membership",
+      "read_scope": "filename/size inventory"
+    },
+    {
+      "path": "_scratch/interrupted-owner-prelock-fake30-author03/EXPECTED-CASES.json",
+      "bytes": 3608,
+      "sha256": "4a16fc0cf6c0d6edb0dfa81b9a90ae95869dd0f62136012e10bd7ce0cbd8ca4b",
+      "role": "preserve recovery30 membership",
+      "read_scope": "filename/size inventory; prior preparation context"
+    },
+    {
+      "path": "_scratch/whisperx-owned-builder-proposal01/EXPECTED-CASES.json",
+      "bytes": 4997,
+      "sha256": "ba102b90a7286cda90739ae2ffb2e3f6dad733a93f707193197f3044f44a6e53",
+      "role": "preserve owned WhisperX50 membership",
+      "read_scope": "filename/size inventory"
+    },
+    {
+      "path": "tests/test_whisper_cache_consent.py",
+      "bytes": 8774,
+      "sha256": "2595fee1b281d77856918ddfd1fb8ef17e432313b6e1ea1e73c44db3d63f9ea3",
+      "role": "unchanged product regression input",
+      "read_scope": "selected symbol/name inventory"
+    },
+    {
+      "path": "tests/test_reliability_local_only_load.py",
+      "bytes": 4995,
+      "sha256": "787b300bc7e170e1f4b55eb771b9c1625f4bd492117a568dc169c9beac2a01be",
+      "role": "unchanged product regression input",
+      "read_scope": "selected symbol/name inventory"
+    },
+    {
+      "path": "tests/test_c02_reliability_faster_whisper.py",
+      "bytes": 6289,
+      "sha256": "c0af159e45879fe68ab3333d94dfc05320052942d01ef2a6924cbb873033ed97",
+      "role": "unchanged product regression input",
+      "read_scope": "selected symbol/name inventory"
+    },
+    {
+      "path": "tests/test_cm11_asr_fallback.py",
+      "bytes": 12946,
+      "sha256": "2e30006826ee7ece274c7150bcc1a4969368eef449279d8500fb944e1d3408da",
+      "role": "unchanged product regression input",
+      "read_scope": "137-187; symbol inventory"
+    },
+    {
+      "path": "tests/test_reliability_model_readiness.py",
+      "bytes": 9079,
+      "sha256": "c00ff20cfccaa9b4c84e73d86328d3b4531e09d556c89dc6c4703bf8b6885ec9",
+      "role": "unchanged product regression input",
+      "read_scope": "selected symbol/name inventory"
+    },
+    {
+      "path": "tests/test_reliability_review_boundaries.py",
+      "bytes": 1668,
+      "sha256": "40ae59f1340adf3f7048a167a2315a4a3b5cc0d217243dca08fe149e8ff5c641",
+      "role": "unchanged product regression input",
+      "read_scope": "selected symbol/name inventory"
+    }
+  ],
+  "planned_new_file": "owned_asr_engine.py (not implemented or qualified)",
+  "native02_result_basis": "Root reported actual9753fb outer/controller0; no independent receipt recheck in this planning task",
+  "execution_authority": false
+}

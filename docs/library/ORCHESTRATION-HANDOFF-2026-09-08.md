@@ -119,7 +119,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | Actual adapter cancellation | Generated qualification integrated at60b3bb5 | Author and independent copies each89 passed/0 failed/0 skipped,86 passing subtests; all216 proof payloads match Git/disk | Native cancellation integrated ata25b34b: all100 proof payloads match Git/disk. Final-clear recovery is recorded at 5671b51; interrupted-owner retirement, crash/restart, real models and release remain unqualified |
 | Retired-owner final-clear recovery | Fake22 at a83ae1a; generated native recovery at5671b51 | Both fake copies22/0/0 plus21 passing subtests. Nativee97a44/exit0, root5214fa and peer503717 verify exact retirement, four confirmed phases/flushes and still-revoked owner/token. All91 newest proof payloads match Git/disk | The generated runtime-owner connection is recorded at 3661608 and 3b8f9e0. Continue interrupted-owner retirement; no OS-interruption, active-worker recovery, crash/restart or model credit |
 | Worker runtime owner and bootstrap | Connected fake33 at 3661608; generated native cancellation at 3b8f9e0 | Both fake copies 33/0/0. Native a9321b/exit 0, root dd7190 and peer 4984ac agree on 32 unchanged pairs, valid guards, one segment, closed owner, child/contender exit 0 with empty jobs, and four journal frames. All 127 native proof payloads match Git/disk | Interrupted-owner retirement direction is committed at 77dc339. Real inference, protected loader/PCM/filter routes, crash/restart and release remain open |
-| Interrupted owned-worker retirement | Native02 accepted after admissiond1b0e61; Native01 remains FAILED at7f142e8 | Actual9753fb returns outer/controller0; root4b342d and peerf633ad agree on10 write observations,15 retirement events, primaryexit1/job0 and5 journal frames. All160 native/integration payloads match Git/disk. Fake30 atc8e7a44 remains30/0/0 plus62 per root | Implement the protected namespace/constructor and request/stream connection. No real-model, production or release authority; do not repeat native02 |
+| Interrupted owned-worker retirement | Native02 accepted at99ce3c9; Native01 remains FAILED at7f142e8 | Actual9753fb returns outer/controller0; root4b342d and peerf633ad agree on10 write observations,15 retirement events, primaryexit1/job0 and5 journal frames. All160 native/integration payloads match Git/disk. Fake30 atc8e7a44 remains30/0/0 plus62 per root | Constructor source rune6133b1f is active under793fe12; independent reliability request/stream derivative follows the frozen plan. No real-model, production or release authority; do not repeat native02 |
 | Release notes | Current progress and remaining gates committed at 376eb47 | All seven proof payloads match Git/disk; 57 table lines and historical package/review-kit sections remain unchanged. D1/D2 completion and generated cancellation/recovery are explicit | Continue runtime qualification. No production source, package, installation, public draft or website changed |
 | Integration | Reliability repair at e8d058f and notice packaging at 71d3e70 after tree09 | Reliability:53 focused cases plus13 subtests per root. Notices:20 Python/10 block cases per root. Tree09 at 56d9d4c remains2,796 passed/1 failed/3 skipped across2,800 cases plus13 subtests; it predates both repairs | Finish runtime work, then run a new committed complete tree and rebuild/reseal. Package08 and website/marketing remain held. No current-source package or installation credit |
 | Desktop incident | Isolation failed in package-07 attempt; corrected at `e10ba3a` | Ordinary Uoink and filesystem connectors launched; earlier live-index/5179 effects unknown. Owned job cleaned | No further override launch; only guarded Uoink dashboard observed for package 08 |
@@ -247,6 +247,20 @@ Do not repeat it. Continue the actual protected namespace/constructor connection
 and migrate call sites to TranscribeRequest/SegmentStream; real model/runtime
 qualification remains separately gated. The passive root checker failurebbc2c5,
 diagnosiscce7c5 and variable-only repair are preserved; no subject rerun occurred.
+Native acceptance is committed at99ce3c9 and backed up to the authorized branch.
+Constructor source-only rune6133b1f-fc8e-4f78-b252-1fae0659ef5e is active under
+PROTECTED-ASR-CONSTRUCTOR-BRIEF-2026-09-14.md at793fe12. Gemini uses the existing
+Antigravity subscription, gemini-3.8-flash-high/high; worktree is
+C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/e6133b1f-fc8/gemini.
+Dispatch5036ca is still session88961; no subject tests or native execution are
+authorized by this source assignment. Inspect actual commands and finished files,
+review the source, then admit the existing guarded qualification with its new cases.
+An independent Astra worker prepares the English reliability request/stream
+derivative in_scratch/reliability-request-stream-proposal01, with production and
+accepted tests unchanged. Keep both source tasks separate from real PCM/filter
+and D3/D4 qualification. The frozen broader plan is archived in30 payloads under
+proof/runtime-next-source-plan-2026-09-14, index8ef211; no implementation pass is
+claimed from that plan.
 The first
 positive case still requires an idle pipe, no retained I/O and confirmed exact
 handles; aggregate quarantine history and all ordinary refusals remain. Preserve
@@ -6509,3 +6523,26 @@ TranscribeRequest and returns SegmentStream, while older splice proposals still
 pass raw audio and assume tuple/dict results. Complete that connection before
 the remaining PCM/filter and separately approved real-runtime checks. Production
 source is still71d3e70; package08, current installation and market gates stay held.
+
+### 2026-09-14 — Native acceptance backed up; constructor implementation dispatched
+
+Commit99ce3c9e162b315e5006a489a6af371755db0f06 contains the native verdict,
+handoff/notes and160 verified proof payloads. After checked fast-forward from
+7f142e8, push95b29d and remote verification4e4a58 return0 and confirm
+origin/cc/living-library exactly99ce3c9. No main merge, candidate-branch push or
+publication occurred. The actuals are preserved with the next-source plan.
+
+The plan binds35 selected text inputs/974,786 bytes with explicit read coverage;
+its complete source audit is not implied. Split its broad draft into a protected
+constructor/ownership unit and caller request/stream work. Constructor brief
+793fe12 dispatches Gemini rune6133b1f through the existing subscription; the
+worker must write code and inert tests without Python/model/native execution.
+The previous ambient-Python violation is explicitly prohibited. Current source
+inventory is protected by exact hashes; later source review and admitted tests
+remain required. Independent English reliability caller work uses the accepted
+facade rather than the obsolete raw-model splice.
+
+The frozen plan,20 read records, prior native commit/index, backup and dispatch
+actuals comprise30 documentary payloads/428,684 bytes. Seal
+bf612a105888a9dcd4d40d25bf088b1408ca7283cb4a6cef7399ea69b4a70b07
+passes Git/disk check8ef211. It grants no execution, release or market acceptance.

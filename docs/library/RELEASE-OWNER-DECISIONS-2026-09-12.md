@@ -35,7 +35,7 @@ in each root. It follows e8d058f's53 focused passes and13 passing subtests in ea
 root. Complete tree09 at56d9d4c predates both repairs and remains2,796 passed,
 one failed, three skipped, plus13 subtests.
 Package 08 still represents b8e44fb; no current-source package or installation
-credit exists. The latest completed authorized branch-only backup is verified at 7f142e8.
+credit exists. The latest completed authorized branch-only backup is verified at 99ce3c9.
 Later commits require a separate verified backup; no candidate-branch push,
 main merge or publication follows. Preserve these
 separate identities until replacement build and qualification are complete.

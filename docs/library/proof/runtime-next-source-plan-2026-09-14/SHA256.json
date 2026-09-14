@@ -1,0 +1,156 @@
+{
+  "schema": "documentary-proof-v1",
+  "scope": "Frozen source plan, selected read coverage, prior native integration index/commit, branch backup and constructor dispatch. No execution acceptance or artifact access.",
+  "files": [
+    {
+      "path": ".gitattributes",
+      "bytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+    },
+    {
+      "path": "BRIEF.md",
+      "bytes": 8414,
+      "sha256": "d3f08d4918dac131a92ad541cd826d3e7e5b550de4a56b2deeb75fcf48573e32"
+    },
+    {
+      "path": "reads/01-INVENTORY-ACTUAL.json",
+      "bytes": 28124,
+      "sha256": "a749c80f5402f8ce6f882231aef7a4c8a3dd9e7ec801d623f0a4aa7b13a8b7a6"
+    },
+    {
+      "path": "reads/02-WRITING-REFERENCES-ACTUAL.json",
+      "bytes": 45858,
+      "sha256": "37e3e91b0c8e5a91a64b3af74d89aa39b8bb238ba3cc8ebc941f0e0f63865f90"
+    },
+    {
+      "path": "reads/03-HANDOFF-INDEX-ACTUAL.json",
+      "bytes": 27412,
+      "sha256": "d4d3e80aa1326f1ef7bc299665efca0df2dbfd15db62f80ec79ec7d850b42cbf"
+    },
+    {
+      "path": "reads/04-QUEUE-167-329-ACTUAL.json",
+      "bytes": 17301,
+      "sha256": "80cc694030a3a6efa836b3d5ca4f9b14ba0c564a0c92575060164f2cd598257f"
+    },
+    {
+      "path": "reads/05-QUEUE-330-599-ACTUAL.json",
+      "bytes": 22743,
+      "sha256": "b822428ebfa9d27f6811ea41c9ef280bd68a016054472fbf3b3cf888fcc74c5b"
+    },
+    {
+      "path": "reads/06-QUEUE-606-742-AND-PATHS-ACTUAL.json",
+      "bytes": 39225,
+      "sha256": "b46355459c68aa8368af1af393fbbb1d51be2084a5ee2c3ddce46f9d857e5b42"
+    },
+    {
+      "path": "reads/07-SOURCE-PATHS-ACTUAL.json",
+      "bytes": 9904,
+      "sha256": "80eaea90dfe7695c1f76a4bac29f48edb2c39ce6518d7f306138ec27906bbc47"
+    },
+    {
+      "path": "reads/08-OWNER-ADAPTER-BRIDGE-ACTUAL.json",
+      "bytes": 43472,
+      "sha256": "0b09c0acc84ebf3ae29fe7735babd3f4cf13fe609913ff800f0e962dcfcd89af"
+    },
+    {
+      "path": "reads/09-MIGRATION-CONTRACTS-ACTUAL.json",
+      "bytes": 30113,
+      "sha256": "5c3bcda4ce3e6a0b3d7929b0ae8ea4c5efbc8686a509edb08b48de091d8ca885"
+    },
+    {
+      "path": "reads/10-SYMBOLS-ACTUAL.json",
+      "bytes": 9377,
+      "sha256": "e83dee66e2af986f81ba54cdbdc457a1973e160560225648d9dfc695b8f1f261"
+    },
+    {
+      "path": "reads/11-RUNTIME-EDGES-ACTUAL.json",
+      "bytes": 25179,
+      "sha256": "f97519e6eae388fd220bc0b1657f986433e1a4880931ab86c36df44638008de3"
+    },
+    {
+      "path": "reads/12-NAMESPACE-ADOPTION-ACTUAL.json",
+      "bytes": 22560,
+      "sha256": "ce48328628aca0585ddc9535f1ccd6ae5d7d2a6da2e0709fd397527962a6ca5b"
+    },
+    {
+      "path": "reads/13-PORTS-AND-VERDICTS-ACTUAL.json",
+      "bytes": 11947,
+      "sha256": "79fe7f869a0735bee9c6539209764cf821dc62497135f0db604d6da83ecd2060"
+    },
+    {
+      "path": "reads/14-ACCEPTANCE-INVENTORY-ACTUAL.json",
+      "bytes": 9304,
+      "sha256": "3c0a3d5582c6f51dd51de4830ce0e3a4cb9ecb59f3600a51a37bb19e546ce3fb"
+    },
+    {
+      "path": "reads/15-PRODUCT-CALLS-ACTUAL.json",
+      "bytes": 15788,
+      "sha256": "ba56b87ec1b36af40b195e00d1d5295792407c95f97fd94a79abfd37ea549928"
+    },
+    {
+      "path": "reads/16-B3-AND-OWNER-BOUNDARY-ACTUAL.json",
+      "bytes": 18440,
+      "sha256": "d6c466a0cfc901077dd93911733fd437952a702638cc4d796de92d33b00aa8e2"
+    },
+    {
+      "path": "reads/17-FINAL-EDGES-ACTUAL.json",
+      "bytes": 8270,
+      "sha256": "d3a61d0eb16e8ebf122ab6bd8e98ff2994c6be75efd3c3ed45ebb3eca5583256"
+    },
+    {
+      "path": "reads/18-FEATURE-AND-REGRESSION-ACTUAL.json",
+      "bytes": 5712,
+      "sha256": "7bff94840f47c39a9d6880192e829fb70abb97fa7dbecc2e71f4e76a7e1815b4"
+    },
+    {
+      "path": "reads/19-HARNESS-INVENTORY-ACTUAL.json",
+      "bytes": 4806,
+      "sha256": "608a14dc094811ace44dad76d9f32219ed2674a7e5c861a0ddbf8f7df5d8cefb"
+    },
+    {
+      "path": "reads/20-SOURCE-BINDINGS-ACTUAL.json",
+      "bytes": 474,
+      "sha256": "c4198775f9e810cb383bd1a033294e0d8b5d3b71e745005dd38c0e5dda89c29b"
+    },
+    {
+      "path": "root-records/archive-runtime-next-plan01.mjs",
+      "bytes": 2529,
+      "sha256": "dda2f1f20184c8afbe00583b613f41b3f86d5d42c31cd91eecaf81e622c1836f"
+    },
+    {
+      "path": "root-records/BACKUP-PUSH-99CE3C9-ACTUAL.json",
+      "bytes": 238,
+      "sha256": "dbe6bfce95d6e700d26bd090c0a4ff11671df86a0078116a6294752d025a791b"
+    },
+    {
+      "path": "root-records/BACKUP-PUSH-99CE3C9-REMOTE-ACTUAL.json",
+      "bytes": 197,
+      "sha256": "a1c98dc77c3741d581c5d07a24b2213f93ff71affc1e945a989386dec73fbfb3"
+    },
+    {
+      "path": "root-records/INTERRUPTED-NATIVE02-ACCEPTANCE-COMMIT-ACTUAL.json",
+      "bytes": 1318,
+      "sha256": "7f0a92673ac204efbdf79ed828dc261ca20d2ffd003ec12f678ebbd266779d96"
+    },
+    {
+      "path": "root-records/INTERRUPTED-NATIVE02-ROOT-INTEGRATION-INDEX-ACTUAL.json",
+      "bytes": 590,
+      "sha256": "14c3f2d11788ff5815a125a70b34fe917801a766393db9fb5d33ba48d2d6b71b"
+    },
+    {
+      "path": "root-records/PROTECTED-ASR-CONSTRUCTOR01-DISPATCH-ACTUAL.json",
+      "bytes": 1194,
+      "sha256": "9822dfef924976c7bcca288c218a7f378fcc17ab8357197a163663cfdca778d0"
+    },
+    {
+      "path": "SELECTED-INPUTS.json",
+      "bytes": 6943,
+      "sha256": "2729f6b5b0610651beb07ae68b1ef3243490d8608d23494f7556bda31623cf7a"
+    },
+    {
+      "path": "SOURCE-INPUTS.json",
+      "bytes": 11244,
+      "sha256": "6671ae07b89f5312c9e22a17d2126291d3bfbd86bdbd89c32c63a4c67fdf53ce"
+    }
+  ]
+}
