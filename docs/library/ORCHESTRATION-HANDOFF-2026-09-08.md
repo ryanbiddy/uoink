@@ -118,7 +118,8 @@ establish safe installation isolation, and verify/correct resulting findings.
 | Native writer exclusion | Stable-directory repair atd317a88; native04 atf630264; council corrections ata74e178 and f32f0ca | Both copies81 cases/72 subtests; native0eeb20 passed. Group A and B source conclusions require their mandatory Astra corrections. Group B has23 proof payloads matching Git/disk. Original failed review preserved | Retired-owner recovery is observed at5671b51. Runtime-owner connection follows47d30c; restart and real runtime remain open |
 | Actual adapter cancellation | Generated qualification integrated at60b3bb5 | Author and independent copies each89 passed/0 failed/0 skipped,86 passing subtests; all216 proof payloads match Git/disk | Native cancellation integrated ata25b34b: all100 proof payloads match Git/disk. Connect interrupted final-clear recovery; crash/restart, real models and release remain unqualified |
 | Retired-owner final-clear recovery | Fake22 at a83ae1a; generated native recovery at5671b51 | Both fake copies22/0/0 plus21 passing subtests. Nativee97a44/exit0, root5214fa and peer503717 verify exact retirement, four confirmed phases/flushes and still-revoked owner/token. All91 newest proof payloads match Git/disk | Connect the qualified runtime owner to the native child. No OS-interruption, active-worker, crash/restart or model credit |
-| Worker runtime owner and bootstrap | Connected fake33 at 3661608; generated native cancellation at 3b8f9e0 | Both fake copies 33/0/0. Native a9321b/exit 0, root dd7190 and peer 4984ac agree on 32 unchanged pairs, valid guards, one segment, closed owner, child/contender exit 0 with empty jobs, and four journal frames. All 127 native proof payloads match Git/disk | Review the interrupted-owned-session retirement brief before implementation. Real inference, protected loader/PCM/filter routes, crash/restart and release remain open |
+| Worker runtime owner and bootstrap | Connected fake33 at 3661608; generated native cancellation at 3b8f9e0 | Both fake copies 33/0/0. Native a9321b/exit 0, root dd7190 and peer 4984ac agree on 32 unchanged pairs, valid guards, one segment, closed owner, child/contender exit 0 with empty jobs, and four journal frames. All 127 native proof payloads match Git/disk | Interrupted-owner retirement direction is committed at 77dc339. Real inference, protected loader/PCM/filter routes, crash/restart and release remain open |
+| Interrupted owned-worker retirement | Corrected source-only brief and review committed at 77dc339 | Root fc41f6 verifies 16 committed texts/356,810 bytes; all 23 direction proof payloads match Git/disk. First positive refuses retained I/O and uncertain handles, preserves aggregate quarantine and uses separate retirement/journal witnesses | Dispatch bounded Gemini source-only implementation, then review derivatives before preparing qualification. Six cases are proposed, none run |
 | Release notes | Current progress and remaining gates committed at 376eb47 | All seven proof payloads match Git/disk; 57 table lines and historical package/review-kit sections remain unchanged. D1/D2 completion and generated cancellation/recovery are explicit | Continue runtime qualification. No production source, package, installation, public draft or website changed |
 | Integration | Reliability repair at e8d058f and notice packaging at 71d3e70 after tree09 | Reliability:53 focused cases plus13 subtests per root. Notices:20 Python/10 block cases per root. Tree09 at 56d9d4c remains2,796 passed/1 failed/3 skipped across2,800 cases plus13 subtests; it predates both repairs | Finish runtime work, then run a new committed complete tree and rebuild/reseal. Package08 and website/marketing remain held. No current-source package or installation credit |
 | Desktop incident | Isolation failed in package-07 attempt; corrected at `e10ba3a` | Ordinary Uoink and filesystem connectors launched; earlier live-index/5179 effects unknown. Owned job cleaned | No further override launch; only guarded Uoink dashboard observed for package 08 |
@@ -195,10 +196,15 @@ brief is at 47d30c and its independent fake33 qualification is at 3661608.
 Both copies pass the same original 17 and new 16 cases. The separately admitted
 native cancellation is accepted at 3b8f9e0 after root dd7190 and peer 4984ac
 receipt review. All 127 proof payloads match Git/disk. Do not repeat the run.
-Next, review _scratch/interrupted-owned-session-retirement-brief01 before any
-implementation. The first positive case must retain confirmed native handle
-ownership; actual handle uncertainty stays quarantined. No new execution is
-admitted by that source-only brief.
+Next, dispatch Gemini from the committed
+INTERRUPTED-OWNED-SESSION-RETIREMENT-BRIEF-2026-09-13.md at 77dc339, with its
+fixed map under proof/interrupted-owner-retirement-direction-2026-09-13/corrected.
+Use the saved gemini-3.8-flash-high/high Antigravity subscription configuration.
+The worker writes derivatives and six proposed cases only. No candidate import,
+compile, test or native execution is admitted. The first positive case requires
+an idle pipe, no retained I/O and confirmed exact handles; aggregate quarantine
+history and all ordinary refusals remain. Root reviews the completed source
+before preparing any later qualification brief.
 D2 remains complete atd13534f; no repeat checkpoint/output access for documentation.
 No model, complete-tree, package, installed-client, website or marketing clearance.
 
@@ -6161,3 +6167,25 @@ variable before future calls rather than assigning 0. The authentication repair
 brief and original waiting/cancelled/repaired outcomes remain under _scratch.
 The full taskkill tool object was not saved; its observed 561f5e result is not
 reconstructed. These were backup operations, not product measurements.
+
+### 2026-09-13 — Interrupted-owner retirement brief frozen for Gemini
+
+Commit 77dc339 preserves corrected brief 3ed998a7 and fixed map 8095884b.
+Root fc41f6 verifies all 16 selected committed texts/356,810 bytes against the
+two original seals. Documentary copy 32d8ba returned 0; root bafe70 verifies
+23 payloads/54,417 bytes against Git/disk, seal
+5b2c5294f1d353d24381e33abab91972753ef5ea87954d5c65528e0ce3f5c292.
+The full 32d8ba copy tool object was not saved or reconstructed.
+
+Peer review 3a5ba2c8 narrowed the positive path to an idle pair with no retained
+I/O and confirmed individual handles. A distinct witness preserves aggregate
+quarantine history; separate journal observers cover the interrupted five-frame
+route while all normal four-frame assertions stay intact. The source worker
+must use the 16 committed inputs, write derivatives and six proposed cases,
+and report actual viewed ranges. No code execution or production activation.
+
+Original malformed range and empty input maps remain with their corrections.
+Root ca0158 also rejected win32 filenames because its regex omitted digits;
+separate passive checker fc41f6 corrects that gate. These are preparation/checker
+errors, not candidate failures. Do not relabel any of them as a test pass.
+Dispatch the saved Gemini subscription configuration through Control Room next.
