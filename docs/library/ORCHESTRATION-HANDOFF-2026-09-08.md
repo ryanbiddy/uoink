@@ -119,6 +119,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | Actual adapter cancellation | Generated qualification integrated at60b3bb5 | Author and independent copies each89 passed/0 failed/0 skipped,86 passing subtests; all216 proof payloads match Git/disk | Native cancellation integrated ata25b34b: all100 proof payloads match Git/disk. Connect interrupted final-clear recovery; crash/restart, real models and release remain unqualified |
 | Retired-owner final-clear recovery | Fake22 at a83ae1a; generated native recovery at5671b51 | Both fake copies22/0/0 plus21 passing subtests. Nativee97a44/exit0, root5214fa and peer503717 verify exact retirement, four confirmed phases/flushes and still-revoked owner/token. All91 newest proof payloads match Git/disk | Connect the qualified runtime owner to the native child. No OS-interruption, active-worker, crash/restart or model credit |
 | Worker runtime owner and bootstrap | Owner at 1f200eb; bootstrap at bbe10d6; next native connection brief47d30c | Both copies17/0/0, with exact cases/guards/inputs. New brief has6 proof payloads matching Git/disk;24 stable source/verdict inputs match and its handoff row stays historical | Implement/review the same-channel bridge, fixed publisher, retained generated inputs and clean pre-begin cancellation before freezing cases. No new qualification/admission yet; real inference and protected loader/PCM/filter routes remain open |
+| Release notes | Current progress and remaining gates committed at 376eb47 | All seven proof payloads match Git/disk; 57 table lines and historical package/review-kit sections remain unchanged. D1/D2 completion and generated cancellation/recovery are explicit | Continue runtime qualification. No production source, package, installation, public draft or website changed |
 | Integration | Reliability repair at e8d058f and notice packaging at 71d3e70 after tree09 | Reliability:53 focused cases plus13 subtests per root. Notices:20 Python/10 block cases per root. Tree09 at 56d9d4c remains2,796 passed/1 failed/3 skipped across2,800 cases plus13 subtests; it predates both repairs | Finish runtime work, then run a new committed complete tree and rebuild/reseal. Package08 and website/marketing remain held. No current-source package or installation credit |
 | Desktop incident | Isolation failed in package-07 attempt; corrected at `e10ba3a` | Ordinary Uoink and filesystem connectors launched; earlier live-index/5179 effects unknown. Owned job cleaned | No further override launch; only guarded Uoink dashboard observed for package 08 |
 
@@ -195,6 +196,13 @@ without test/native admission. Preserve clean pre-begin cancellation and all17
 original cases while connecting the same authenticated channel and actual owner.
 D2 remains complete atd13534f; no repeat checkpoint/output access for documentation.
 No model, complete-tree, package, installed-client, website or marketing clearance.
+
+Release notes are updated at 376eb47 with seven verified proof payloads. Read
+ASTRA-RELEASE-NOTES-PROGRESS-VERDICT-2026-09-13.md. Runtime-owner source review
+found and repaired a constructor/standalone-revoke first-error gap before any
+execution; a new test's missing lease-revoke argument was also corrected before
+execution, preserving its assertions. The proposed set is the original 17 cases
+plus 16 new connection cases. Finish final instrumentation review before admission.
 
 Native writer-exclusion02 is preserved at c5e72a2; read
 ASTRA-WRITER-EXCLUSION02-FAILURE-2026-09-13.md. All130 proof payloads match
@@ -6045,3 +6053,25 @@ historical handoff snapshot; it is preserved and excluded from a current-state
 hash claim. Implementation is under _scratch/runtime-owner-native-connection-proposal01
 with source review in parallel. No module, test or native execution is admitted
 by the brief. Keep the old17 test bodies and every real activation gate intact.
+
+### 2026-09-13 — Release progress notes updated without new product measurement
+
+Commit 376eb47 applies the reviewed notes and preserves the seven-payload
+proposal. Root e159b1 verifies 115,252 bytes against Git/disk, seal
+2b739f16a44aa61f9f9f309bf6576da7dcc3eca66dddbb35488988f8fb91c4ee.
+All 57 table lines match. D1/D2 completion, generated cancellation and the narrow
+retired-owner recovery are recorded with their limits and council addenda.
+Production change 71d3e70, complete tree 56d9d4c and package 08 remain distinct.
+
+Application 86fd79 fell back to a direct patch and then failed the exact-byte
+check: Git added 686 CRLF endings. Passive bd217b proved normalized text equality;
+d921b6 restored the reviewed LF bytes before archival. This was documentary
+application handling, with no product/test rerun. The missing full 86fd79 tool
+object was not reconstructed. Preserve the before/after and this correction.
+
+Runtime-owner source and 33-case preparation are reviewed separately. Peer
+99dff006 records the constructor/revoke repair and the corrected new-case
+injection; neither was a failed candidate run. A suspected doubled-separator
+source-map issue was only outer tool-JSON escaping: passive e07e1a verifies all
+36 decoded paths against their exact expected paths. No map repair was needed.
+Instrumentation review and admission still precede any new measurement.
