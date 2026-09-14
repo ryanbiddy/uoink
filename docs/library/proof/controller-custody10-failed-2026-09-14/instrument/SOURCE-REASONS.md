@@ -1,0 +1,5 @@
+This derivative implements the accepted plan with six qualifier replacement blocks and five launcher replacement rules. The early startup/registry/preload block, audit and metadata closure, capture implementation, Results, explicit selector and nine unchanged guard predicates remain donor bytes. The tenth guard adapts the finite canonical captures. Only counts, fixed labels and reported scope change elsewhere.
+
+The exact 19-entry tuple, fixed factory anchor, 38 function attributes, 12 classes, 6 methods and two remaining refusal entries are captured before fixture definitions. Type aliases and resolver hooks are checked after all cases. The fixture may retain failed custody; no registry clearing is introduced. Generated-adapter imports remain closed.
+
+Both unified source patches and the confirmation label patch reconstruct the complete old and new texts in both directions. Original donor inputs and the accepted plan/brief are retained under before. No subject source or assertion was changed. All preparation is Node text/data work; no Python or candidate command runs.

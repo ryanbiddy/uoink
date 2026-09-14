@@ -1,0 +1,7 @@
+{
+  "chunk_id": "edc0e3",
+  "wall_time_seconds": 0.1889966,
+  "exit_code": 0,
+  "original_token_count": 104,
+  "output": "{\n  \"scope\": \"Verification of FAILED controller observation; no acceptance\",\n  \"role\": \"author\",\n  \"label\": \"controller-custody-fake01\",\n  \"passed\": 8,\n  \"failed\": 2,\n  \"skipped\": 0,\n  \"total_subtests\": 104,\n  \"passing_subtests\": 102,\n  \"guards\": 10,\n  \"child_hashes\": 11,\n  \"unchanged_inputs\": 15,\n  \"unchanged_controls\": 3,\n  \"output_files\": 23,\n  \"registry_traps\": 25,\n  \"elapsed_seconds\": 0.24541299999691546\n}\n"
+}

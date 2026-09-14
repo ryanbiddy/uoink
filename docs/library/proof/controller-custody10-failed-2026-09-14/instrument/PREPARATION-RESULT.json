@@ -1,0 +1,53 @@
+{
+  "scope": "data_only_qualification_preparation",
+  "candidate_execution": false,
+  "modules": 9,
+  "child_inputs": 11,
+  "parent_inputs": 15,
+  "cases": 10,
+  "proposed_subtests": 104,
+  "qualifier": {
+    "bytes": 15911,
+    "sha256": "c0a51539cbb3aa7f89e48fb9711827fc7965c8326aed55d63875a69b1d75cac0"
+  },
+  "launcher": {
+    "bytes": 8884,
+    "sha256": "668cf992f7336d451ef892cc68afd63ce1b3a929dfb57565e48170e914bb44a1"
+  },
+  "pins": {
+    "bytes": 2482,
+    "sha256": "25f302701d5ae62e481c0217338a84ff6eaef3febff54ca1458ea9ee28283d2a"
+  },
+  "source_map": {
+    "bytes": 13338,
+    "sha256": "403d9c9f6aa36d8bffd94220424c37beb486c9da49aef813e1c1d8edf7153039"
+  },
+  "copies": [
+    {
+      "directory": "_scratch/controller-custody-fake10-author01",
+      "label": "controller-custody-fake01",
+      "pins": {
+        "bytes": 2482,
+        "sha256": "25f302701d5ae62e481c0217338a84ff6eaef3febff54ca1458ea9ee28283d2a"
+      },
+      "false_template": {
+        "bytes": 199,
+        "sha256": "ec7f997dcf5b34183b3cb6210320878711841859b23b82b3835317a8f338f99d"
+      }
+    },
+    {
+      "directory": "_scratch/controller-custody-fake10-confirmation01",
+      "label": "controller-custody-confirmation01",
+      "pins": {
+        "bytes": 2482,
+        "sha256": "df339faa9011e91671c5c56541a7a015e0ed5c787278d422e11d7ebee799d087"
+      },
+      "false_template": {
+        "bytes": 207,
+        "sha256": "75ed2ceffe89e6c01a0f9ccf00c9f91303d7623ca5baccd3eb352c11c687ee7c"
+      }
+    }
+  ],
+  "full_forward_reverse_diffs": true,
+  "actual_admissions_created": false
+}

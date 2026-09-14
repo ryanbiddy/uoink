@@ -1,0 +1,7 @@
+{
+  "chunk_id": "7efeaf",
+  "wall_time_seconds": 0.8064245,
+  "exit_code": 0,
+  "original_token_count": 65,
+  "output": "{\"proof\":\"docs/library/proof/controller-custody-source-2026-09-14\",\"payloads\":275,\"bytes\":3138313,\"manifest_sha256\":\"998f25720b3c927da48177f8353ac5d4ab1c1a5d5bda4a72e8eb5fdb158ef36e\",\"newline_only_restored\":274,\"all_raw_payloads_and_seal_equal_donor\":true}\n"
+}

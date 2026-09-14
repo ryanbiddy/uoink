@@ -1,0 +1,7 @@
+{
+  "chunk_id": "2e0411",
+  "wall_time_seconds": 0.1682674,
+  "exit_code": 0,
+  "original_token_count": 240,
+  "output": "{\r\n  \"status\": \"source_plan_frozen\",\r\n  \"existing_modules\": 28,\r\n  \"existing_bytes\": 527418,\r\n  \"pending_new_modules\": 2,\r\n  \"implementation_invocations\": 0,\r\n  \"documents\": [\r\n    {\r\n      \"name\": \"PLAN.md\",\r\n      \"bytes\": 5891,\r\n      \"sha256\": \"59bb707c9911a0be35393bc82446ae4030b1898940d5c0b46d5f19fb133222f3\"\r\n    },\r\n    {\r\n      \"name\": \"LOWER-SERVICES.md\",\r\n      \"bytes\": 4100,\r\n      \"sha256\": \"0927559ee2720a561f52a14ee470d812634ccb980555ac845d1d568fd64743ad\"\r\n    },\r\n    {\r\n      \"name\": \"SOURCE-BINDINGS.json\",\r\n      \"bytes\": 14793,\r\n      \"sha256\": \"be86cbad47a6496f622f23c09d6dc7a6e1787b5356c52290a5504ca9ea816f01\"\r\n    },\r\n    {\r\n      \"name\": \"READ-COVERAGE.json\",\r\n      \"bytes\": 3329,\r\n      \"sha256\": \"277e69d7234c59bac43db3ed0b18a03e6a69286e71914ad5824421fd71006218\"\r\n    },\r\n    {\r\n      \"name\": \"VERDICT.md\",\r\n      \"bytes\": 1490,\r\n      \"sha256\": \"5dfc7d665fb3320ac69998625029a050eb495b3effd1ba93857672e9bd026142\"\r\n    }\r\n  ]\r\n}\r\n"
+}

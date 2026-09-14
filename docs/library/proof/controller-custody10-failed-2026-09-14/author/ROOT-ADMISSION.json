@@ -1,0 +1,12 @@
+{
+  "approved": true,
+  "label": "controller-custody-fake01",
+  "pins_sha256": "25f302701d5ae62e481c0217338a84ff6eaef3febff54ca1458ea9ee28283d2a",
+  "scope": "generated_bytes_and_fake_ports_only",
+  "source_checkpoint": "71df9d34327357be32510758ffe0cbada11ede95",
+  "root_verdict_sha256": "f9a79c40bbf82915e39c37332895168fba6d55b65fe41941b6545d2a468468fc",
+  "peer_verdict_sha256": "1e3d1aa246b532a5acd483b8aec355d2919c13d8b586f24d20e6ec5fde4d93a9",
+  "case_count": 10,
+  "invocations": 1,
+  "no_retry": true
+}

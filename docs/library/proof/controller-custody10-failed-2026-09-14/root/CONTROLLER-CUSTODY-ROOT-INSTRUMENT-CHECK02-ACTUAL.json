@@ -1,0 +1,7 @@
+{
+  "chunk_id": "2b8686",
+  "wall_time_seconds": 0.2030343,
+  "exit_code": 0,
+  "original_token_count": 175,
+  "output": "{\"scope\":\"Passive source and copy binding only; no candidate invocation\",\"parent_inputs\":15,\"canonical_modules\":9,\"child_inputs\":11,\"cases\":10,\"deltas\":[{\"file\":\"qualify_windows_reservations.py\",\"edits\":6,\"forward\":true,\"reverse\":true},{\"file\":\"run_preflight01.ps1\",\"edits\":5,\"forward\":true,\"reverse\":true}],\"copies\":[{\"role\":\"author\",\"label\":\"controller-custody-fake01\",\"pins_sha256\":\"25f302701d5ae62e481c0217338a84ff6eaef3febff54ca1458ea9ee28283d2a\",\"parent_inputs\":15,\"child_inputs_identical\":11},{\"role\":\"confirmation\",\"label\":\"controller-custody-confirmation01\",\"pins_sha256\":\"df339faa9011e91671c5c56541a7a015e0ed5c787278d422e11d7ebee799d087\",\"parent_inputs\":15,\"child_inputs_identical\":11}]}\n"
+}

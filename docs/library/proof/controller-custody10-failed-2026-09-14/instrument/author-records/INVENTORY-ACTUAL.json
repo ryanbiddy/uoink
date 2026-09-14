@@ -1,0 +1,8 @@
+{
+  "chunk_id": "946a92",
+  "wall_time_seconds": 0.3021588,
+  "exit_code": 0,
+  "original_token_count": 334,
+  "output": "{\r\n  \"inventory_count\": 48,\r\n  \"inventory_sha256\": \"a8f278fc2d25a67a7877395810ea0d62777b095620f9528c8100744fb49449f6\",\r\n  \"source_review\": {\r\n    \"path\": \"SOURCE-REVIEW.md\",\r\n    \"bytes\": 1931,\r\n    \"sha256\": \"183e87c0292ab947021ba17318696812fdfa2c9e307aaf13bac2b564e762891c\"\r\n  },\r\n  \"deltas\": [\r\n    {\r\n      \"path\": \"confirmation-launcher.diff\",\r\n      \"bytes\": 2689,\r\n      \"sha256\": \"f59154f333221138ab2cc9b40c931992eea6726dc59f73dff1c044110576ce57\"\r\n    },\r\n    {\r\n      \"path\": \"qualify_windows_reservations.diff\",\r\n      \"bytes\": 15191,\r\n      \"sha256\": \"6a1a1bbb7c08c9da46b363429ecac531ee55bd7dfc6faa2503f42fd32a65f19d\"\r\n    },\r\n    {\r\n      \"path\": \"run_preflight01.diff\",\r\n      \"bytes\": 4416,\r\n      \"sha256\": \"e83a02689faafaebc1b43b526b098f4f3c0b124d98410d6ea0b04514eecb0152\"\r\n    }\r\n  ],\r\n  \"pins\": [\r\n    {\r\n      \"path\": \"PINS.json\",\r\n      \"bytes\": 2482,\r\n      \"sha256\": \"25f302701d5ae62e481c0217338a84ff6eaef3febff54ca1458ea9ee28283d2a\"\r\n    },\r\n    {\r\n      \"path\": \"ROOT-ADMISSION.template.json\",\r\n      \"bytes\": 199,\r\n      \"sha256\": \"ec7f997dcf5b34183b3cb6210320878711841859b23b82b3835317a8f338f99d\"\r\n    },\r\n    {\r\n      \"path\": \"SOURCE-INPUTS.json\",\r\n      \"bytes\": 13338,\r\n      \"sha256\": \"403d9c9f6aa36d8bffd94220424c37beb486c9da49aef813e1c1d8edf7153039\"\r\n    }\r\n  ],\r\n  \"no_candidate_execution\": true\r\n}\r\n"
+}
+

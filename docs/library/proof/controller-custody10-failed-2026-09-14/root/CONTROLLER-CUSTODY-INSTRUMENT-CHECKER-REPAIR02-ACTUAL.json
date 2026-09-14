@@ -1,0 +1,7 @@
+{
+  "chunk_id": "324c71",
+  "wall_time_seconds": 0.172066,
+  "exit_code": 0,
+  "original_token_count": 35,
+  "output": "{\"passive_checker_repaired\":true,\"subject_changed\":false,\"after_sha256\":\"8145bd6ed0f8a42f9a78f2a843ea39f12211967bf095e200eff8a14c429cc059\"}\n"
+}

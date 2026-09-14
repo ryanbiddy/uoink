@@ -1,0 +1,46 @@
+--- before/run_preflight01.ps1
++++ run_preflight01.ps1
+@@ -1,6 +1,6 @@
+ $ErrorActionPreference = 'Stop'
+ $taskSource = $PSScriptRoot
+-$taskRun = Join-Path $taskSource 'controller-custody-fake01'
++$taskRun = Join-Path $taskSource 'controller-custody-confirmation01'
+ $taskPython = 'C:\Python314\python.exe'
+ $taskNative = $null
+ $taskRunStarted = [DateTimeOffset]::UtcNow.ToString('o')
+@@ -17,7 +17,7 @@
+     return [ordered]@{ bytes = $taskItem.Length; sha256 = (Get-FileHash -Algorithm SHA256 -LiteralPath $taskPath).Hash.ToLowerInvariant() }
+ }
+ 
+-if (Test-Path -LiteralPath $taskRun) { throw 'Fresh controller-custody-fake01 output required' }
++if (Test-Path -LiteralPath $taskRun) { throw 'Fresh controller-custody-confirmation01 output required' }
+ $taskPinsPath = Join-Path $taskSource 'PINS.json'
+ $taskAdmissionPath = Join-Path $taskSource 'ROOT-ADMISSION.json'
+ $taskPinsBinding = Get-TaskBinding $taskPinsPath
+@@ -25,7 +25,7 @@
+ $taskLauncherBinding = Get-TaskBinding $PSCommandPath
+ $taskPins = Get-Content -LiteralPath $taskPinsPath -Raw | ConvertFrom-Json
+ $taskAdmission = Get-Content -LiteralPath $taskAdmissionPath -Raw | ConvertFrom-Json
+-if ($taskAdmission.approved -cne $true -or $taskAdmission.label -cne 'controller-custody-fake01' -or
++if ($taskAdmission.approved -cne $true -or $taskAdmission.label -cne 'controller-custody-confirmation01' -or
+     $taskAdmission.pins_sha256 -cne $taskPinsBinding.sha256 -or
+     $taskAdmission.scope -cne 'generated_bytes_and_fake_ports_only') { throw 'Exact root admission required' }
+ $taskRows = @($taskPins.files)
+@@ -64,7 +64,7 @@
+ }
+ $env:IG_FORBIDDEN_LIVE = 'C:\Users\hello\AppData\Local\Uoink\index.db'
+ Write-TaskJson (Join-Path $taskRun 'plan.json') ([ordered]@{
+-    schema='uoink.windows-reservation-fake-launch.v1'; label='controller-custody-fake01'; python=$taskPython;
++    schema='uoink.windows-reservation-fake-launch.v1'; label='controller-custody-confirmation01'; python=$taskPython;
+     arguments=@('-I','-S','-B',(Join-Path $taskRun 'qualify_windows_reservations.py'));
+     started_utc=$taskRunStarted; before=$taskBefore; controls=$taskControls;
+     removed_environment_names=$taskRemovedNames; startup_binding_set=$true;
+@@ -121,7 +121,7 @@
+         finished_utc=[DateTimeOffset]::UtcNow.ToString('o'); elapsed_seconds=$taskClock.Elapsed.TotalSeconds
+     })
+     if (-not $taskValid) { exit 1 }
+-    Write-Output 'controller-custody-fake01: 10 passed, 0 failed, 0 skipped; generated scope only.'
++    Write-Output 'controller-custody-confirmation01: 10 passed, 0 failed, 0 skipped; generated scope only.'
+     exit 0
+ } catch {
+     Write-TaskJson (Join-Path $taskRun 'launch-failure.json') ([ordered]@{

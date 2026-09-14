@@ -1,0 +1,9 @@
+{
+  "scope": "Passive checker only; subject and fixtures unchanged",
+  "failed_actual": "b7b59d/1",
+  "reason": "Global inverse substitution collided with pre-existing -eq 10 guard text. Record only forward substitution positions, then undo those exact positions in reverse stage order.",
+  "before_sha256": "936412a9d351f76c34a801e6b4e84a1e7d4f8fb6709bd91f0710f5578064682b",
+  "after_sha256": "8145bd6ed0f8a42f9a78f2a843ea39f12211967bf095e200eff8a14c429cc059",
+  "from": "let value=lf(old);const edits=json(path.join(dir,editsFile));for(const e of edits){assert(value.split(e.from).length-1===(e.count??1),'Forward count');value=value.replaceAll(e.from,e.to);}assert(value===lf(read(path.join(dir,file))),'Undeclared instrument edits');for(const e of [...edits].reverse()){assert(value.split(e.to).length-1===(e.count??1),'Reverse count');value=value.replaceAll(e.to,e.from);}assert(value===lf(old),'Reverse delta');",
+  "to": "let value=lf(old);const edits=json(path.join(dir,editsFile)),steps=[];for(const e of edits){const parts=value.split(e.from);assert(parts.length-1===(e.count??1),'Forward count');const positions=[];let offset=parts[0].length;for(let i=1;i<parts.length;i++){positions.push(offset);offset+=e.to.length+parts[i].length;}value=parts.join(e.to);steps.push({e,positions,after:value});}assert(value===lf(read(path.join(dir,file))),'Undeclared instrument edits');for(const step of [...steps].reverse()){assert(value===step.after,'Reverse stage');for(const pos of [...step.positions].reverse()){assert(value.slice(pos,pos+step.e.to.length)===step.e.to,'Exact inverse slot');value=value.slice(0,pos)+step.e.from+value.slice(pos+step.e.to.length);}}assert(value===lf(old),'Reverse delta');"
+}

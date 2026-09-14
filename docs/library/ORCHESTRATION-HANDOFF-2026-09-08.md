@@ -127,7 +127,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | Control Room command audit | Adapter fix committed atc3607c3 on feat/desktop-control-room | Same16 focused replay cases pass in isolated and checkout copies; TypeScript check passes. All24 proof payloads match Git/disk | A new process loads the preview warning. Existing server not restarted or observed with it; no real-provider or complete-command attestation |
 | Controller startup authority | Source6482b782/map23591b4c passes both guarded81 copies; original65 preserved | Author28a03e and confirmation9a8704 return0, each81/0/0 plus48 passing subtests. Root151c60 and peere49d09 verify complete cases,23 hashes,ten guards,27 inputs/three controls and35 outputs each. All256 payloads match Git/disk | Continue authenticated child namespace/fixed constructor connection. The real-worker seam remains closed; no native/model or release clearance |
 | Controller worker stages | Source2f12cbf5 qualified and committed atfc17b67: each guarded copy95 passed/0 failed/0 skipped plus95 passing subtests | Author02dc46 and confirmation8a6166 exit0; rootdc197f and peerfdc459 verify complete identical case/subtest objects,25 child hashes,29 inputs+3 controls,10 guards and37 output files. Original81 cases and fixtures unchanged | Preserve this observation; new canonical custody source needs its own qualification below. Native controller/child connection and real model/release clearance remain open |
-| Controller resume/publication connection | Gemini19ac6c2d failure preserved atfa27d47; repaired source now reviewed, ten proposed cases unexecuted | Corece69903d/227395c4 and fixture63642115/tests061b7eb7 pass separate source reviews e24c201b/c0fbb1e3. Root8a68c0 verifies final maps, exact IDs and unchanged old95 inputs;104 subtests are proposed only | Follow CONTROLLER-CUSTODY-QUALIFICATION-BRIEF-2026-09-14.md. Prepare/review both guarded copies before separate admissions; full latest generated compatibility remains required. Production71d3e70 unchanged |
+| Controller resume/publication connection | Source checkpoint71df9d3; first controller10 run FAILED8/2/0 plus102/104 passing subtests | Actual6ba3f1/1 and rootedc0e3 verify unchanged15inputs/3controls,11childhashes,ten valid guards and23outputs. Wrong_permit and active_owner raise the correct SessionClosed class omitted by their expected arguments; later assertions were not reached | Preserve failure; exact two-expectation correction awaits Ryan. Confirmation remains unadmitted. Continue source-only generated-native preparation; production71d3e70 unchanged |
 | Authenticated child namespace | Gemini05a3bf93 source review FAILED; all17 proposed tests unexecuted | Outer7481e5/0 completed with truncated output. Freeze47c823 retains26 files/553800B and1042 original events; root14eaa9 verifies all pins and input pairs. Controller and child contract/ownership findings require repair | Smaller stage source is reviewed above. Preserve failed delivery; native transport/adoption/namespace repairs remain. No source, runtime or release acceptance from this delivery |
 | Release notes | Startup81 progress, child-source failure and remaining gates updated for this integration | Root68f856 verifies three declared edits plus final status amendment, seven input bindings and all57 unchanged table lines. Frozen original drafts/amendments preserve status changes | Continue runtime qualification. Production remains71d3e70; no package, installation, public draft or website changed |
 | Integration | Reliability repair at e8d058f and notice packaging at 71d3e70 after tree09 | Reliability:53 focused cases plus13 subtests per root. Notices:20 Python/10 block cases per root. Tree09 at 56d9d4c remains2,796 passed/1 failed/3 skipped across2,800 cases plus13 subtests; it predates both repairs | Finish runtime work, then run a new committed complete tree and rebuild/reseal. Package08 and website/marketing remain held. No current-source package or installation credit |
@@ -352,7 +352,15 @@ Corece69903d/adapter227395c4 retain original custody and fixed checks;
 fixture63642115/tests061b7eb7 contain ten IDs and104 proposed subtests.
 Read ASTRA-CONTROLLER-CUSTODY-SOURCE-VERDICT-2026-09-14.md and follow
 CONTROLLER-CUSTODY-QUALIFICATION-BRIEF-2026-09-14.md next: complete instrument
-and copy review, then separate author/confirmation admissions. No case has run.
+and copy review. That review is complete: qualifierc0a51539, PINS25f30270/df339faa,
+independent1e3d1aa2 and root2b8686. Author admission405207 selected one invocation;
+actual6ba3f1/1 now records8 passed/two failed/zero skipped,102/104 subtests passing.
+Rootedc0e3 verifies all guards, hashes, controls and output membership. The two
+SessionClosed expectation conflicts require Ryan's separate assertion ruling;
+read ASTRA-CONTROLLER-CUSTODY10-FAILED-VERDICT-2026-09-14.md. No confirmation or
+rerun is admitted. Source-only preparation may continue under
+CONTROLLER-GENERATED-NATIVE-COMPATIBILITY-BRIEF-2026-09-14.md; its invocation
+waits for both corrected controller copies to qualify.
 Full latest generated-start compatibility stays required in its separate
 strict-contender family; a refusal or partial gate probe is not that result.
 All accepted tests and generated gates remain unchanged. Native bootstrap/transport and
@@ -1367,6 +1375,14 @@ required committed input (never write `_scratch/` in backticks). `git config --g
 core.longpaths true` must stay set (worktree checkouts fail without it).
 
 ## Blockers for Ryan
+
+- Controller10's first run at source71df9d3 is8/2/0 with102/104 passing subtests.
+  Two new expected-exception arguments omit the existing SessionClosed contract:
+  wrong_permit at test_controller_resume_publication.py:128 and active at300.
+  The proposed two-line correction selects SessionClosed only for those faults;
+  all later behavior assertions stay unchanged and remain unverified in those
+  branches. This exact edit awaits Ryan; approval58335df was for older tests only.
+  Preserve actual6ba3f1/1 and do not rerun or admit confirmation meanwhile.
 
 - The dormant reliability caller changes the ordinary route from a raw model
   constructor to an owned request/stream. Two unchanged tests at
@@ -7222,3 +7238,33 @@ Archive1f09cf and index50cd9d preserve275 payloads/3,138,313 bytes under
 proof/controller-custody-source-2026-09-14, seal998f2572. Raw diff/apply4f95f6
 succeeds;7efeaf restores274 verified newline-only differences. Every payload
 and seal matches the original worktree bytes, and every payload matches Git.
+
+### 2026-09-14 — Controller10 fails two exception expectations
+
+Source checkpoint71df9d3 is backed up byfc6937/0 and fresh remotebf2dac/0.
+The complete new instrument/copies passed root and independent1e3d1aa2 source
+review. Root2b8686 verifies all15 parent/nine module/11 child bindings and exact
+six/five mechanical edit rules. The initial passive inverse checker failed on
+an existing -eq10 literal; its offset-based repair and original result remain.
+
+Author admission405207/0 led to the single actual6ba3f1/1:8/2/0 and102/104
+passing subtests. Rootedc0e3 verifies unchanged inputs/controls and exact23-file
+membership, ten valid guards, empty stderr/denials and the two retained child
+failure exits. Wrong_permit and active_owner throw SessionClosed, which the two
+expected arguments omit. Later branch assertions did not run. The source review
+missed this mismatch; no product exception change or successful qualification
+is justified. Preserve the failed result and request the exact two-line assertion
+correction from Ryan. Confirmation remains false and unexecuted.
+
+The generated compatibility alternative reuses the accepted native02 protocol
+with two changed core modules and fresh identity controls. It can observe actual
+startup before the existing interruption, avoiding a large new simulated Windows
+backend. It gives no ordinary-close or model credit. Source-only preparation may
+continue under its new brief; invocation waits for corrected controller10.
+D2 stays complete atd13534f without repeat access. All release gates remain open.
+
+Failure archiveeae595 and indexd745d0 retain294 payloads/3,308,049 bytes, seal
+a386b5cb. Raw diff/apply19683e succeeds;30acd1 restores287 proven newline-only
+differences. All raw payloads and seal match the worktree;294 payloads match Git
+and disk. The exact UNAPPLIED patchf1c8950d is preserved with its original
+documentary draft errors and two source diagnoses. No assertion was changed.

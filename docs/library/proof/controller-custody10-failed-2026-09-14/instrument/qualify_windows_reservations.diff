@@ -1,0 +1,188 @@
+--- before/qualify_windows_reservations.py
++++ qualify_windows_reservations.py
+@@ -49,7 +49,7 @@
+ STARTUP_BOUND = os.environ.get("IG_FORBIDDEN_LIVE") == r"C:\Users\hello\AppData\Local\Uoink\index.db"
+ assert STARTUP_BOUND
+ HERE = os.path.dirname(os.path.abspath(__file__))
+-MODULES = ("reservation_file_port", "snapshot_reservations", "snapshot_lifecycle", "durable_lifecycle", "win32_worker_connection", "windows_reservation_port", "trusted_asr_resolver", "asr_loading_adapter", "pinned_buffer_namespace", "owned_generation_protocol", "inherited_readset", "generated_worker_flow", "generated_operation_flow", "generated_adapter_flow", "win32_private_pipe", "startup_fixture_resolver", "startup_fixture_adapter", "test_reservations", "test_windows_reservations", "startup_authority_fixture", "test_startup_authority", "worker_stage_fixture", "test_controller_worker_stage")
++MODULES = ("trusted_asr_resolver", "snapshot_lifecycle", "snapshot_reservations", "reservation_file_port", "durable_lifecycle", "asr_loading_adapter", "test_reservations", "controller_boundary_fixture", "test_controller_resume_publication")
+ INPUTS = tuple(name + ".py" for name in MODULES) + ("qualify_windows_reservations.py", "EXPECTED-CASES.json")
+ READS = {os.path.normcase(os.path.join(HERE, name)) for name in INPUTS}
+ HEAVY = {"torch", "torchaudio", "torchvision", "torchcodec", "whisperx", "faster_whisper", "ctranslate2",
+@@ -83,7 +83,7 @@
+ CONTENT_OPEN = False
+ HASHES = {name: hashlib.sha256(raw).hexdigest() for name, raw in RAW.items()}
+ EXPECTED = json.loads(RAW["EXPECTED-CASES.json"])
+-assert type(EXPECTED) is list and len(EXPECTED) == 95 and len(set(EXPECTED)) == 95
++assert type(EXPECTED) is list and len(EXPECTED) == 10 and len(set(EXPECTED)) == 10
+ 
+ def deny_metadata(*args, **kwargs):
+     DENIALS.append("metadata")
+@@ -118,56 +118,84 @@
+ AUTHORITY_NAMES = ("RELEASE_AUTHORITY", "RUNTIME_PROFILE", "SNAPSHOT_LIFECYCLE", "RUNTIME_FACTORY", "ACQUISITION_SERVICE")
+ 
+ def startup_pair_valid():
+-    canonical_resolver = LOADED["trusted_asr_resolver"]
+-    canonical_adapter = LOADED["asr_loading_adapter"]
+-    fixture_resolver = LOADED["startup_fixture_resolver"]
+-    fixture_adapter = LOADED["startup_fixture_adapter"]
+-    return (canonical_resolver is not fixture_resolver and canonical_adapter is not fixture_adapter
+-        and all(sys.modules.get(name) is LOADED[name] for name in
+-                ("trusted_asr_resolver", "asr_loading_adapter", "startup_fixture_resolver", "startup_fixture_adapter"))
+-        and canonical_adapter.resolver is canonical_resolver
+-        and fixture_adapter.resolver is fixture_resolver and fixture_adapter._STARTUP_RESOLVER is fixture_resolver
+-        and canonical_resolver.REAL_APPROVAL is None and fixture_resolver.REAL_APPROVAL is None
+-        and all(getattr(module, name) is None for module in (canonical_adapter, fixture_adapter) for name in AUTHORITY_NAMES))
++    resolver = LOADED["trusted_asr_resolver"]
++    adapter = LOADED["asr_loading_adapter"]
++    durable = LOADED["durable_lifecycle"]
++    lifecycle = LOADED["snapshot_lifecycle"]
++    reservations = LOADED["snapshot_reservations"]
++    return (all(sys.modules.get(name) is module for name, module in LOADED.items())
++        and adapter.resolver is resolver and adapter._STARTUP_RESOLVER is resolver
++        and resolver.REAL_APPROVAL is None
++        and all(getattr(adapter, name) is None for name in AUTHORITY_NAMES)
++        and adapter._STARTUP_LOAD is resolver.load_manifest
++        and adapter._STARTUP_ADMIT is resolver.admit_snapshot
++        and adapter._STARTUP_BIND is resolver.bind_for_constructor
++        and adapter._STARTUP_RELEASE is adapter._release
++        and adapter._STARTUP_PROFILE is adapter._runtime_profile
++        and durable._FIXED_FACTORY_START_CHECK is durable._require_factory_start
++        and adapter.DurableOwnedRuntimeFactory is durable.DurableOwnedRuntimeFactory
++        and adapter.DurableSnapshotLifecycle is durable.DurableSnapshotLifecycle
++        and adapter._DurableKernel is durable._DurableKernel
++        and adapter._DurableLease is durable._DurableLease
++        and adapter.OwnedSession is lifecycle.OwnedSession
++        and adapter._NativePermit is lifecycle._NativePermit
++        and adapter.Phase is lifecycle.Phase
++        and adapter.Reservation is reservations.Reservation)
+ 
+ STARTUP_VALIDATOR = startup_pair_valid
+ STARTUP_ENTRY_VALID = False
+ STARTUP_FUNCTIONS = ()
++STARTUP_TYPES = ()
++STARTUP_METHODS = ()
+ STARTUP_KERNEL_TYPE = None
++BOUNDARY_FUNCTIONS = None
++FACTORY_CHECK = None
++REAL_ENTRIES = ()
++BOUNDARY_NAMES = ("_capture_controller_boundary", "_check_controller_entry", "_check_controller_boundary", "_require_fixed_controller_functions", "_classify_controller_custody", "_require_controller_binding", "_validate_controller_pre_resume", "_validate_controller_pre_resume_locked", "_validate_controller_worker_stage", "_validate_controller_worker_stage_locked", "_validate_controller_startup", "_validate_startup_locked", "_startup_selection_current", "_startup_references", "_startup_values", "_startup_authority_snapshot", "_startup_configuration", "_require", "_STARTUP_PROFILE")
+ for name in MODULES:
+     module = types.ModuleType(name)
+     module.__file__ = os.path.join(HERE, name + ".py")
+     sys.modules[name] = module
+-    if name == "startup_fixture_adapter":
+-        canonical_resolver = LOADED["trusted_asr_resolver"]
+-        assert sys.modules["trusted_asr_resolver"] is canonical_resolver
+-        sys.modules["trusted_asr_resolver"] = LOADED["startup_fixture_resolver"]
+-        try:
+-            exec(compile(RAW[name + ".py"], module.__file__, "exec"), module.__dict__)
+-        finally:
+-            sys.modules["trusted_asr_resolver"] = canonical_resolver
+-    else:
+-        if name == "test_reservations":
+-            # Both pairs are closed and the one resolver alias is restored
+-            # before any test definitions are loaded.
+-            STARTUP_ENTRY_VALID = startup_pair_valid()
+-            assert STARTUP_ENTRY_VALID
+-            STARTUP_KERNEL_TYPE = LOADED["durable_lifecycle"]._DurableKernel
+-            assert LOADED["startup_fixture_adapter"]._DurableKernel is STARTUP_KERNEL_TYPE
+-            STARTUP_FUNCTIONS = tuple(
+-                (LOADED[module_name], method, getattr(LOADED[module_name], method))
+-                for module_name, methods in (
+-                    ("trusted_asr_resolver", ("load_manifest", "admit_snapshot", "bind_for_constructor")),
+-                    ("startup_fixture_resolver", ("load_manifest", "admit_snapshot", "bind_for_constructor")),
+-                    ("asr_loading_adapter", ("_require", "policy_status", "_release", "_plan", "_leased_admission", "ensure_assets", "_runtime_profile", "_model_session", "whisperx_session", "faster_whisper_session")),
+-                    ("startup_fixture_adapter", ("_require", "policy_status", "_release", "_plan", "_leased_admission", "ensure_assets", "_runtime_profile", "_model_session", "whisperx_session", "faster_whisper_session", "_startup_configuration", "_startup_authority_snapshot", "_startup_selection_current", "_startup_values", "_startup_references", "_validate_startup_locked", "_validate_controller_startup", "_consume_controller_startup", "_fixed_real_worker_start", "_controller_startup_scope", "_validate_controller_worker_stage", "_validate_controller_worker_stage_locked")),
+-                ) for method in methods)
+-        exec(compile(RAW[name + ".py"], module.__file__, "exec"), module.__dict__)
++    if name == "test_reservations":
++        # Capture original canonical subjects before any fixture/test definitions.
++        STARTUP_ENTRY_VALID = startup_pair_valid()
++        assert STARTUP_ENTRY_VALID
++        adapter = LOADED["asr_loading_adapter"]
++        durable = LOADED["durable_lifecycle"]
++        STARTUP_KERNEL_TYPE = durable._DurableKernel
++        BOUNDARY_FUNCTIONS = adapter._CONTROLLER_BOUNDARY_FUNCTIONS
++        FACTORY_CHECK = durable._FIXED_FACTORY_START_CHECK
++        assert type(BOUNDARY_FUNCTIONS) is tuple and len(BOUNDARY_FUNCTIONS) == 19
++        assert all(function is getattr(adapter, name) for name, function in zip(BOUNDARY_NAMES, BOUNDARY_FUNCTIONS))
++        STARTUP_FUNCTIONS = tuple(
++            (LOADED[module_name], method, getattr(LOADED[module_name], method))
++            for module_name, methods in (
++                ("trusted_asr_resolver", ("load_manifest", "admit_snapshot", "bind_for_constructor", "_checked_chain", "_inventory", "_hash_asset")),
++                ("asr_loading_adapter", ("_require", "policy_status", "_release", "_plan", "_leased_admission", "ensure_assets", "_runtime_profile", "_model_session", "whisperx_session", "faster_whisper_session", "_startup_configuration", "_startup_authority_snapshot", "_startup_selection_current", "_startup_values", "_startup_references", "_validate_startup_locked", "_validate_controller_startup", "_consume_controller_startup", "_fixed_real_worker_start", "_controller_startup_scope", "_validate_controller_worker_stage", "_validate_controller_worker_stage_locked", "_validate_controller_pre_resume", "_validate_controller_pre_resume_locked", "_capture_controller_boundary", "_check_controller_entry", "_check_controller_boundary", "_require_fixed_controller_functions", "_classify_controller_custody", "_require_controller_binding", "_STARTUP_PROFILE")),
++                ("durable_lifecycle", ("_require_factory_start",)),
++            ) for method in methods)
++        assert len(STARTUP_FUNCTIONS) == 38
++        STARTUP_TYPES = tuple(
++            (LOADED[module_name], name, getattr(LOADED[module_name], name))
++            for module_name, names in (
++                ("asr_loading_adapter", ("_ControllerASRStart", "_StartupCustody", "_ControllerBoundary")),
++                ("durable_lifecycle", ("_FactoryStartAttempt", "DurableOwnedRuntimeFactory", "DurableSnapshotLifecycle", "_DurableKernel", "_DurableLease")),
++                ("snapshot_lifecycle", ("OwnedSession", "_NativePermit", "Phase")),
++                ("snapshot_reservations", ("Reservation",)),
++            ) for name in names)
++        assert len(STARTUP_TYPES) == 12
++        STARTUP_METHODS = tuple(
++            (owner, name, getattr(owner, name))
++            for owner, names in (
++                (durable.DurableOwnedRuntimeFactory, ("__init__", "open_owned_session")),
++                (durable._DurableKernel, ("__init__", "start_owned_worker", "stop_unpublished")),
++                (durable.DurableSnapshotLifecycle, ("_flush_quarantine",)),
++            ) for name in names)
++        assert len(STARTUP_METHODS) == 6
++        REAL_ENTRIES = ((LOADED["reservation_file_port"], "real_journal_port", LOADED["reservation_file_port"].real_journal_port),
++                        (LOADED["snapshot_reservations"], "real_reservation_service", LOADED["snapshot_reservations"].real_reservation_service))
++    exec(compile(RAW[name + ".py"], module.__file__, "exec"), module.__dict__)
+     LOADED[name] = module
+-REAL_ENTRIES = ((LOADED["reservation_file_port"], "real_journal_port", LOADED["reservation_file_port"].real_journal_port),
+-                (LOADED["snapshot_reservations"], "real_reservation_service", LOADED["snapshot_reservations"].real_reservation_service),
+-                (LOADED["windows_reservation_port"], "real_windows_reservation_service", LOADED["windows_reservation_port"].real_windows_reservation_service),
+-                (LOADED["win32_worker_connection"], "real_kernel_port", LOADED["win32_worker_connection"].real_kernel_port))
+ 
+ class Results(unittest.TestResult):
+     def __init__(self):
+@@ -221,27 +249,36 @@
+         and all(getattr(BASELINE_WINREG, name, None) is installed for name, original, installed in REGISTRY_TRAPS),
+     "captures_installed": sys.stdout is CAPTURE_OUT and sys.stderr is CAPTURE_ERR,
+     "capture_valid": not CAPTURE_OUT.overflow and not CAPTURE_ERR.overflow and CAPTURE_OUT.count == CAPTURE_ERR.count == 0,
+-    "real_entrypoints_unchanged": all(getattr(module, name) is function for module, name, function in REAL_ENTRIES)
+-        and LOADED["trusted_asr_resolver"].REAL_APPROVAL is None
+-        and all(getattr(LOADED["asr_loading_adapter"], name) is None for name in ("RELEASE_AUTHORITY", "RUNTIME_PROFILE", "SNAPSHOT_LIFECYCLE", "RUNTIME_FACTORY", "ACQUISITION_SERVICE"))
++    "real_entrypoints_unchanged": len(REAL_ENTRIES) == 2
++        and all(getattr(module, name) is function for module, name, function in REAL_ENTRIES)
+         and STARTUP_ENTRY_VALID and startup_pair_valid is STARTUP_VALIDATOR and startup_pair_valid()
+         and len(STARTUP_FUNCTIONS) == 38
+         and all(getattr(module, name) is function for module, name, function in STARTUP_FUNCTIONS)
++        and len(STARTUP_TYPES) == 12
++        and all(getattr(module, name) is original for module, name, original in STARTUP_TYPES)
++        and len(STARTUP_METHODS) == 6
++        and all(getattr(owner, name) is original for owner, name, original in STARTUP_METHODS)
+         and LOADED["durable_lifecycle"]._DurableKernel is STARTUP_KERNEL_TYPE
+-        and LOADED["startup_fixture_adapter"]._DurableKernel is STARTUP_KERNEL_TYPE,
++        and LOADED["asr_loading_adapter"]._DurableKernel is STARTUP_KERNEL_TYPE
++        and LOADED["asr_loading_adapter"]._CONTROLLER_BOUNDARY_FUNCTIONS is BOUNDARY_FUNCTIONS
++        and type(BOUNDARY_FUNCTIONS) is tuple and len(BOUNDARY_FUNCTIONS) == 19
++        and all(function is getattr(LOADED["asr_loading_adapter"], name)
++                for name, function in zip(BOUNDARY_NAMES, BOUNDARY_FUNCTIONS))
++        and LOADED["durable_lifecycle"]._FIXED_FACTORY_START_CHECK is FACTORY_CHECK
++        and LOADED["durable_lifecycle"]._require_factory_start is FACTORY_CHECK,
+ }
+ membership = [row["id"] for row in cases] == EXPECTED and result.testsRun == len(EXPECTED)
+ passed = sum(row["passed"] for row in cases)
+ skipped = sum(row["skipped"] for row in cases)
+ valid = membership and all(guards.values()) and not DENIALS and not REGISTRY_DENIALS and not heavy
+-code = 0 if valid and passed == 95 and skipped == 0 else 1
++code = 0 if valid and passed == 10 and skipped == 0 else 1
+ payload = json.dumps({"schema": "uoink.windows-reservation-fake-preflight.v1", "cases": cases,
+     "passed": passed, "failed": len(cases) - passed - skipped, "skipped": skipped,
+     "count": len(cases), "expected_cases": EXPECTED, "membership_valid": membership,
+     "guards": guards, "guard_valid": valid, "guard_denials": DENIALS, "registry_denials": REGISTRY_DENIALS,
+     "heavy_roots_loaded": heavy, "metadata_trap_count": len(TRAPS), "registry_trap_count": len(REGISTRY_TRAPS),
+     "input_sha256": HASHES, "elapsed_seconds": elapsed, "qualification_exit": code,
+-    "scope": "Original81 plus14 controller worker-stage cases; isolated synthetic authority and fake services only; real worker remains closed"}, indent=2)
++    "scope": "Ten canonical controller custody cases; generated metadata and fake lower services only; generated-start and real worker qualification remain closed"}, indent=2)
+ assert len(payload.encode("utf-8")) <= 262144
+ OUTPUT.write(payload + "\n")
+ OUTPUT.flush()

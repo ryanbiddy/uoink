@@ -1,0 +1,7 @@
+{
+  "chunk_id": "50cd9d",
+  "wall_time_seconds": 0.000092,
+  "exit_code": 0,
+  "original_token_count": 54,
+  "output": "{\"proof\": \"docs/library/proof/controller-custody-source-2026-09-14\", \"payloads_matching_disk_and_git\": 275, \"bytes\": 3138313, \"manifest_sha256\": \"998f25720b3c927da48177f8353ac5d4ab1c1a5d5bda4a72e8eb5fdb158ef36e\"}\r\n"
+}

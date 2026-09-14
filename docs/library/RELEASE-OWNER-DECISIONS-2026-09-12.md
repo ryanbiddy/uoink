@@ -7,6 +7,7 @@ handoff reserves for Ryan. Resolved decisions are explicitly marked below.
 
 | Decision | Concrete choice and effect | Evidence needed before execution |
 |---|---|---|
+| Controller10 exception expectations | Approve only the two proposed expected-exception arguments for wrong_permit and active_owner, selecting the existing SessionClosed class for those faults. | First result6ba3f1 is8 passed/two failed/zero skipped,102/104 subtests passing. Preserve it and the later unexecuted assertions. Exact diff/reason and one-page verdict are in the controller10 failure record; the older58335df approval does not cover this edit. No product or global REFUSALS change is proposed. |
 | Publisher signing | Select the publisher identity/certificate and HTTPS timestamp service. Use the repaired build's explicit certificate selector; do not buy a service, install trust roots or choose a certificate automatically. | SigningCertificateThumbprint, TimestampUrl and the approved signing mechanism. The existing SDK SignTool path is available; no Uoink signing certificate was found. Both installer and uninstaller must verify afterward. |
 | Claude Desktop isolation | Provide or authorize a fresh standard Windows account or VM, then complete its normal client sign-in. Do not reuse the failed profile-override technique. | Verify a different account/SID, fresh client configuration, no ordinary connectors or copied credentials, and access only to the test installation/profile. Inspect configuration before launch. No live-index/5179 probe is allowed. |
 | Historical AT6 evidence | Decide whether the original missing child-exit record blocks release or can be disclosed as an unrecoverable historical receipt gap. | Keep the original failing assertion, replacement receipts and failure count. A successful new run cannot recreate the old exit status. This decision gives no security or client acceptance. |
@@ -35,7 +36,7 @@ in each root. It follows e8d058f's53 focused passes and13 passing subtests in ea
 root. Complete tree09 at56d9d4c predates both repairs and remains2,796 passed,
 one failed, three skipped, plus13 subtests.
 Package 08 still represents b8e44fb; no current-source package or installation
-credit exists. The latest completed authorized branch-only backup is verified at fa27d47.
+credit exists. The latest completed authorized branch-only backup is verified at 71df9d3.
 Later commits require a separate verified backup; no candidate-branch push,
 main merge or publication follows. Preserve these
 separate identities until replacement build and qualification are complete.

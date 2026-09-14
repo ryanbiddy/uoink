@@ -287,3 +287,26 @@ Both fake11 copies pass the new caller controls at4a01ef2, while production and
 the existing tests remain unchanged. This is a prospective integration conflict,
 not an observed full-tree failure. Do not patch tests or route around mocks;
 prepare an exact reviewed adaptation for Ryan before production migration.
+
+## 2026-09-14 — controller10 expected exceptions, decision pending
+
+The new controller10 test at source71df9d3 fails8/2/0, with102 of104 subtests
+passing. Actual6ba3f1 records outer and child exits1; all ten guards remain valid.
+The wrong_permit and active_owner faults correctly throw SessionClosed. Their
+assertRaises/fail_start arguments accept only AdapterUnavailable or
+LifecycleUnavailable, which are different classes. The source review missed this.
+
+The proposed exact two-line diff selects SessionClosed only for wrong_permit at
+test_controller_resume_publication.py:128 and active at300. Global REFUSALS,
+all fault inputs, messages, case IDs and later assertions remain unchanged.
+Assertions149–155 and301–309 were not reached and remain unverified for those
+inputs. The exact unapplied patch/reason are retained in the controller10 failure
+proof at test-contract-diagnosis/PROPOSED-EXPECTATIONS.UNAPPLIED.patch.txt,
+SHA256f1c8950dfbe84ddbeb5838cdc518a25a2c5eaed2011802ea8dab7e1c25aa4e8a.
+Read ASTRA-CONTROLLER-CUSTODY10-FAILED-VERDICT-2026-09-14.md.
+
+Ryan's previous58335df approval applied only to the two older KernelUnconfirmed
+expectations. This new assertion correction remains pending. No test or fixture
+has changed and no rerun/confirmation is authorized. Preserve the failed record;
+after approval, a fresh repair brief and separately reviewed copies are required.
+The eventual committed complete-tree qualification remains outstanding.

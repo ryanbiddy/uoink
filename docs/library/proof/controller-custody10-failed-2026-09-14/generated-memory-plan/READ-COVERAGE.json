@@ -1,0 +1,170 @@
+{
+  "scope": "Selected source text review only. Hashing the 28-file family does not claim full rendered review of every module.",
+  "full_inputs": [
+    "_scratch/controller-boundary-fixture-design01/GENERATED-COMPATIBILITY.md",
+    "_scratch/controller-boundary-fixture-design01/GENERATED-FAMILY.json"
+  ],
+  "source_ranges": [
+    {
+      "file": "generated_writer_exclusion.py",
+      "ranges": [
+        [
+          1,
+          196
+        ]
+      ],
+      "actual": "CONTENDER03"
+    },
+    {
+      "file": "generated_journal_setup.py",
+      "ranges": [
+        [
+          1,
+          308
+        ]
+      ],
+      "actual": "JOURNAL-SETUP04"
+    },
+    {
+      "file": "test_windows_reservations.py",
+      "ranges": [
+        [
+          1,
+          168
+        ],
+        [
+          365,
+          482
+        ]
+      ],
+      "actual": "DONOR-SEAMS05"
+    },
+    {
+      "file": "generated_worker_flow.py",
+      "ranges": [
+        [
+          1,
+          267
+        ]
+      ],
+      "actual": "PRIMARY-START06"
+    },
+    {
+      "file": "generated_adapter_flow.py",
+      "ranges": [
+        [
+          466,
+          491
+        ],
+        [
+          515,
+          654
+        ],
+        [
+          726,
+          905
+        ],
+        [
+          1250,
+          1314
+        ]
+      ],
+      "actuals": [
+        "PRIMARY-START06",
+        "GATE-PORT08",
+        "PIPE-CHILD09"
+      ]
+    },
+    {
+      "file": "win32_worker_connection.py",
+      "ranges": [
+        [
+          143,
+          588
+        ]
+      ],
+      "actual": "PRIMITIVES07"
+    },
+    {
+      "file": "windows_reservation_port.py",
+      "ranges": [
+        [
+          1,
+          391
+        ]
+      ],
+      "actual": "GATE-PORT08"
+    },
+    {
+      "file": "win32_private_pipe.py",
+      "ranges": [
+        [
+          55,
+          390
+        ]
+      ],
+      "actual": "PIPE-CHILD09"
+    },
+    {
+      "file": "generated_operation_flow.py",
+      "ranges": [
+        [
+          1,
+          187
+        ],
+        [
+          250,
+          366
+        ]
+      ],
+      "actuals": [
+        "OPERATION-ADOPTION10",
+        "BUFFER-MONITOR-INDEX11"
+      ]
+    },
+    {
+      "file": "inherited_readset.py",
+      "ranges": [
+        [
+          1,
+          222
+        ]
+      ],
+      "actual": "OPERATION-ADOPTION10"
+    },
+    {
+      "file": "pinned_buffer_namespace.py",
+      "ranges": [
+        [
+          1,
+          154
+        ]
+      ],
+      "actual": "BUFFER-MONITOR-INDEX11"
+    },
+    {
+      "file": "dummy_bootstrap.py",
+      "ranges": [
+        [
+          415,
+          433
+        ],
+        [
+          536,
+          647
+        ]
+      ],
+      "actual": "MONITOR-ROUTING12",
+      "role": "monitor source context only; excluded from loaded family"
+    }
+  ],
+  "truncation_notes": [
+    "Combined donor/index read05 truncated the later method index; no full-index coverage claimed.",
+    "Combined primary read06 truncated unrelated probe-binding context; the relevant contender binding/connect interval was read separately in08.",
+    "Combined craft result02 was truncated at the outer display; documentation/revision/anti-slop sections were read again in12."
+  ],
+  "candidate_invocations": 0,
+  "source_reads_directory": "reads",
+  "family_metadata_actual": "FAMILY-BINDINGS13"
+}
+

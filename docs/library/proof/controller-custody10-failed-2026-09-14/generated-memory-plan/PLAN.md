@@ -1,0 +1,29 @@
+# Latest generated startup compatibility plan
+
+Prepare a new in-memory lower API fixture that drives the actual latest generated startup through publication and ordinary close. Keep `OwnedWin32Primitives`, `PrivatePipeController`, `OwnedContender.run`, `ContenderObservation.run`, `GeneratedJournalSetup`, `WindowsGateRegistry`, the repaired durable factory, and the generated adapter/child methods unchanged. This is a source plan; nothing has been implemented or invoked.
+
+The bounded positive uses `generated_authority_seams(port)` and the actual `adapter.faster_whisper_session`. Its body checks the published facade/session, original factory attempt, generated binding and worker policy acknowledgement, then exits without issuing a media ticket. The actual child `_worker_operations` cancel-before-begin branch (254–266) releases its unread inherited set and replies closed. Parent wait/job queries, endpoint/handle retirement, lease completion, the ordinary journal close observer and `setup.complete()` must then succeed.
+
+Before implementation, use the 28 exact modules in `SOURCE-BINDINGS.json`: 26 unchanged native02 texts plus durable `ce69903d` and adapter `227395c4`, 527,418 bytes total. Proposed new files are `generated_compatibility_fixture.py` and `test_generated_start_compatibility.py` under a fresh implementation directory selected in the later brief. This makes a prospective 30-module family, with new hashes still absent. Existing tests are donor context, not imported test dependencies or silently counted results. No bootstrap import, DLL declaration, loader constructor or runtime-owner build is needed.
+
+Build the fixture around one shared memory store with separate controller, contender and primary-child handle namespaces. Instantiate actual primitives for each namespace and actual pipe controllers for the controller and primary child. Open/connect the actual journal setup, construct the exact generated port from the five fixed ASCII member identities, construct/bind the actual OwnedContender before lease entry, then enter the adapter context. The memory store supplies API results; it must never assign product `completed`, `assigned`, `resumed`, `quiescent`, `released`, journal confirmation or custody fields.
+
+The strict contender must execute its independent `ContenderObservation.run` against the same memory journal while the primary holds its exclusive creation handle. Its one OPEN_EXISTING attempt returns sharing error 32 through the memory share rules. No journal content I/O occurs in that context. Only after the observer actually returns does its simulated process become exited. Actual parent primitives observe that exit, close its handles and retire its one-member guard before primary creation.
+
+The unchanged primary `child_flow` blocks on duplex reads. Use one fixed in-process thread for that exact function, with a bounded Condition-backed byte transport; do not copy its protocol into a canned reply table. The contender observer can run synchronously at its simulated ResumeThread. Choose these two fixed targets from validated fixed command shapes, never a caller-provided callback. Model process exit only after target return/exception and inherited-handle closure; an unjoined target cannot yield active-count zero. This is new fixture machinery requiring review, not an existing donor or OS process observation. Observer calls and target execution must occur outside the store's state lock.
+
+The new monitor routes calls into the actual `allow_create`, `journal_scope`, `before_process` and `observe` methods. Primary CloseHandle uses **ordinary `before_close`**, then `complete()`. The captured native02 bootstrap uses the interrupted-close route and cannot be copied wholesale. The fixture keeps phase/milestone assertions and records only bounded names, statuses, counts and identity relationships.
+
+Proposed controls:
+
+| Group | Required observation |
+| --- | --- |
+| Full startup and close | Exact adapter/factory publication; contender completes after actual error-32 refusal; primary ready/adoption/policy responses come from actual child code; no begin/media/materialization; both simulated targets exit; actual owner/guard retirement; INITIALIZED→RESERVED→WORKER_BOUND→CLEARED and four confirmed flushes. |
+| Wrong owned policy/binding | A declared negative-only delegate-call seam passes an altered startup into the actual generated gate after genuine factory issuance. Require refusal before contender/primary creation, no publication, and retained failure custody. The positive has no such wrapper. |
+| Failed contender exclusion | Let the memory backend return an unexpected journal handle for its fixed negative. Actual observer must retain it and fail; actual OwnedContender must not publish completed or allow primary creation. Record cleanup uncertainty without inventing clean release. |
+| Unconfirmed terminal lifetime | After actual startup and cancel reply, return a fixed nonempty-job observation or close failure from the lower API. Require actual refusal/quarantine, retained exact handles/read set/gate and no CLEARED completion. |
+
+Every case has a fixture `finally`: unblock any remaining memory waits, join the exact child target within the declared bound, preserve the first error and retain uncertain product owners for assertions. Closing a test's memory transport is not product cleanup credit. The later instrument must explicitly review thread lifetime, false/native guards, output bounds and source closure; it cannot relax guards to make this work.
+
+Acceptance would cover generated startup/ownership compatibility only. It would not establish OS inheritance or exclusion, ABI correctness, native timing, model construction/inference, media handling, real runtime completion, crash/restart recovery or release readiness. Old95 and the new controller10 remain distinct evidence.
+

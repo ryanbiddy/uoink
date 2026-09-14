@@ -1,0 +1,12 @@
+{
+  "scope": "Root read-only preparation diagnostic; no candidate invocation",
+  "visible_tool_chunk_id": "8b22ba",
+  "visible_exit_code": 1,
+  "mistakes": [
+    "Requested nonexistent inputs property from the existing stage95 SOURCE-INPUTS.json.",
+    "Guessed nonexistent qualify_controller_stage.py instead of listing actual names."
+  ],
+  "candidate_executed": false,
+  "complete_tool_object_archived": false,
+  "evidence_limit": "The complete returned object was not saved in its original orchestration call. This note records the observed preparation error and does not reconstruct a replacement actual."
+}

@@ -1,0 +1,42 @@
+{
+  "scope": "Passive source and documentary bindings; patch is unapplied.",
+  "passive_only": true,
+  "applied": false,
+  "executed": false,
+  "two_hunks": 2,
+  "removed_lines": 2,
+  "added_lines": 2,
+  "original_and_run_test_match": true,
+  "files": [
+    {
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\controller-boundary-fixture-repair01\\test_controller_resume_publication.py",
+      "bytes": 26466,
+      "sha256": "061b7eb77db2ee834b54d790012fe280b1e1ac82e82dfb289681e926adbbec8d"
+    },
+    {
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\controller-custody-fake10-author01\\controller-custody-fake01\\stdout.json",
+      "bytes": 32216,
+      "sha256": "8fc3efa7a4c717cb7d303574f746cb99f52e199544cf15bbcbbeb769574f6227"
+    },
+    {
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\controller-custody10-test-contract-diagnosis01\\PROPOSED-EXPECTATIONS.UNAPPLIED.patch.txt",
+      "bytes": 1009,
+      "sha256": "f1c8950dfbe84ddbeb5838cdc518a25a2c5eaed2011802ea8dab7e1c25aa4e8a"
+    },
+    {
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\controller-custody10-test-contract-diagnosis01\\REASON.md",
+      "bytes": 3135,
+      "sha256": "461e8cdb2b24da0a6f959d0c98fe72b53ba142051e5d8a7b6bfd8de370ca3cee"
+    },
+    {
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\controller-custody10-test-contract-diagnosis01\\VERDICT.md",
+      "bytes": 1860,
+      "sha256": "de4e20a2da4a21f69751650b64cd0d23fc0aefa510e7e66b0e67f33c5aef3b59"
+    },
+    {
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\controller-custody10-test-contract-diagnosis01\\before-context-spacing01.patch.txt",
+      "bytes": 1010,
+      "sha256": "45ba3bf645209df6a1efd231a5a7b5b7056cda0719a689711550c02ef4e0f72e"
+    }
+  ]
+}
