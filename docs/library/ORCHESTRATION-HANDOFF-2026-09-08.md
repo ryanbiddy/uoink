@@ -115,10 +115,10 @@ establish safe installation isolation, and verify/correct resulting findings.
 | Generated reservation recovery | Component and evidence integrated at f9ab6fe | Author70b48e and independentfd86f5 each pass42 cases, with20 passing nested subtests and all10 guards valid. All123 proof payloads match Git/disk | Connect retained Windows gate/journal handles and split create/resume/startup. Native recovery and runtime acceptance remain open |
 | Windows reservation connection | Correction8fc3219; transfer2f4311f; native generated drain67887c3 | Unit70/0/0 plus35 subtests in both copies. Native d3d56f returns outer/controller/child0, valid guards, child0/job0, four confirmed phases/flushes and exact2,118B closed journal. All87 native proof payloads match Git/disk | Qualify remaining native exclusion/interruption/persistence/restart/reconciliation. Actual runtime-owner connection and real models remain open |
 | Worker/journal council | Scoped source review completed at1c6ac4c with mandatory Astra addendum; original244cca5 remains accuracy FAILED | All24 correction proof payloads match Git/disk. Gemini correction alone remains partial; Astra corrects remaining handshake/locking/private-caller claims. Existing17/65 outcomes unchanged | Continue native/runtime engineering. Session42118 closed482e42/exit0; no new council loop or broader acceptance |
-| Native writer exclusion | Stable-directory repair atd317a88; native04 atf630264; council corrections ata74e178 and f32f0ca | Both copies81 cases/72 subtests; native0eeb20 passed. Group A and B source conclusions require their mandatory Astra corrections. Group B has23 proof payloads matching Git/disk. Original failed review preserved | Retired-owner fake22 qualifies at a83ae1a. Separate native admission is next; restart and real runtime remain open |
+| Native writer exclusion | Stable-directory repair atd317a88; native04 atf630264; council corrections ata74e178 and f32f0ca | Both copies81 cases/72 subtests; native0eeb20 passed. Group A and B source conclusions require their mandatory Astra corrections. Group B has23 proof payloads matching Git/disk. Original failed review preserved | Retired-owner recovery is observed at5671b51. Runtime-owner connection follows47d30c; restart and real runtime remain open |
 | Actual adapter cancellation | Generated qualification integrated at60b3bb5 | Author and independent copies each89 passed/0 failed/0 skipped,86 passing subtests; all216 proof payloads match Git/disk | Native cancellation integrated ata25b34b: all100 proof payloads match Git/disk. Connect interrupted final-clear recovery; crash/restart, real models and release remain unqualified |
 | Retired-owner final-clear recovery | Fake22 at a83ae1a; generated native recovery at5671b51 | Both fake copies22/0/0 plus21 passing subtests. Nativee97a44/exit0, root5214fa and peer503717 verify exact retirement, four confirmed phases/flushes and still-revoked owner/token. All91 newest proof payloads match Git/disk | Connect the qualified runtime owner to the native child. No OS-interruption, active-worker, crash/restart or model credit |
-| Worker runtime owner and bootstrap | Owner at 1f200eb; actual bootstrap connection at bbe10d6 | Both copies pass17/0/0: eleven retained owner cases plus six bootstrap cases. Exact case objects, valid guards, unchanged19 inputs plus admission. All144 newest proof payloads match Git/disk | Connect exact ownership through native services. Real inference, PCM/filter, VAD-to-model binding and protected constructor routes remain open |
+| Worker runtime owner and bootstrap | Owner at 1f200eb; bootstrap at bbe10d6; next native connection brief47d30c | Both copies17/0/0, with exact cases/guards/inputs. New brief has6 proof payloads matching Git/disk;24 stable source/verdict inputs match and its handoff row stays historical | Implement/review the same-channel bridge, fixed publisher, retained generated inputs and clean pre-begin cancellation before freezing cases. No new qualification/admission yet; real inference and protected loader/PCM/filter routes remain open |
 | Integration | Reliability repair at e8d058f and notice packaging at 71d3e70 after tree09 | Reliability:53 focused cases plus13 subtests per root. Notices:20 Python/10 block cases per root. Tree09 at 56d9d4c remains2,796 passed/1 failed/3 skipped across2,800 cases plus13 subtests; it predates both repairs | Finish runtime work, then run a new committed complete tree and rebuild/reseal. Package08 and website/marketing remain held. No current-source package or installation credit |
 | Desktop incident | Isolation failed in package-07 attempt; corrected at `e10ba3a` | Ordinary Uoink and filesystem connectors launched; earlier live-index/5179 effects unknown. Owned job cleaned | No further override launch; only guarded Uoink dashboard observed for package 08 |
 
@@ -190,7 +190,7 @@ Qualification is committed at a83ae1a with204 verified payloads. Native recovery
 is now committed at5671b51 with91 verified payloads: actuale97a44/exit0,
 root5214fa and independent passive503717 agree on the one generated observation.
 Do not repeat it for documentation. The next child-side runtime-owner connection
-brief and integrator direction are prepared; source implementation is underway
+brief and integrator direction are committed at47d30c; source implementation is underway
 without test/native admission. Preserve clean pre-begin cancellation and all17
 original cases while connecting the same authenticated channel and actual owner.
 D2 remains complete atd13534f; no repeat checkpoint/output access for documentation.
@@ -6034,3 +6034,14 @@ entry for begin or empty cancel, leaving accept_begin and17 original test bodies
 unchanged. Early cancel must allocate no generated state/PCM/factory product.
 The pending implementation uses the latest recovery adapter before copy and
 preserves all old controllers/child route. D3/D4 and release remain separate.
+
+### 2026-09-13 — Runtime-owner native connection brief committed
+
+Commit47d30c freezes the next brief, root direction and6 proof payloads.
+Documentary copy895ef6 returned0; roote1c55f verifies26,235 bytes against
+Git/disk, sealfbc36e1a54f320487ee2ce4d167f59958d4c0a8f5923c545c525f24f590d1728.
+All24 stable source/verdict inputs match. The25th row is the brief author's
+historical handoff snapshot; it is preserved and excluded from a current-state
+hash claim. Implementation is under _scratch/runtime-owner-native-connection-proposal01
+with source review in parallel. No module, test or native execution is admitted
+by the brief. Keep the old17 test bodies and every real activation gate intact.
