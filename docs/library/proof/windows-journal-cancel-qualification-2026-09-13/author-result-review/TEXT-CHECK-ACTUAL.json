@@ -1,0 +1,7 @@
+{
+  "chunk_id": "c30ea9",
+  "wall_time_seconds": 0.5504429,
+  "exit_code": 0,
+  "original_token_count": 230,
+  "output": "{\r\n  \"scope\": \"Independent retained source/receipt review only\",\r\n  \"passed\": 89,\r\n  \"failed\": 0,\r\n  \"skipped\": 0,\r\n  \"nested_passed\": 86,\r\n  \"nested_original81\": 72,\r\n  \"nested_new8\": 14,\r\n  \"exact89_order\": true,\r\n  \"original81_and_four_sources_unchanged\": true,\r\n  \"ten_guards_valid\": true,\r\n  \"registry_traps\": 25,\r\n  \"metadata_traps\": 12,\r\n  \"guard_denials\": 0,\r\n  \"native_exit\": 0,\r\n  \"qualification_exit\": 0,\r\n  \"recorded_elapsed_seconds\": 0.14585950001492165,\r\n  \"launcher_elapsed_seconds\": 0.6921387,\r\n  \"current_and_recorded_input_bindings_verified\": 33,\r\n  \"current_and_recorded_control_bindings_verified\": 3,\r\n  \"child_input_hashes_verified\": 24,\r\n  \"stderr_bytes\": 0,\r\n  \"stdout_bytes\": 49786,\r\n  \"stdout_sha256\": \"2d01721ee94455cd0e4822591414efc80cf84bba79e38c654c51afc3583ac2b1\",\r\n  \"pins_sha256\": \"e60aa77cdd2dd4477960f44f24770f22f7a1e1ff3c334b8985047acb8e8f1a79\",\r\n  \"suite_or_native_rerun\": false\r\n}\r\n"
+}

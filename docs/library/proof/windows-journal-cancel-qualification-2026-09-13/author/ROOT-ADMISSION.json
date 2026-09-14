@@ -1,0 +1,8 @@
+{
+  "approved": true,
+  "label": "journal-cancel-fake01",
+  "pins_sha256": "e60aa77cdd2dd4477960f44f24770f22f7a1e1ff3c334b8985047acb8e8f1a79",
+  "scope": "generated_bytes_and_fake_ports_only",
+  "root_review_sha256": "557769691d90b4b56da1b6aac4e9f1dc6cba4d135eb80e187bd16a91d1e43e25",
+  "note": "One initial qualification of unchanged81 plus8 new controls; no native or model authority."
+}

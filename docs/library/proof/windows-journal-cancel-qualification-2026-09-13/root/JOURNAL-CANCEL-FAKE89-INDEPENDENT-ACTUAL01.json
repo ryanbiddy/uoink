@@ -1,0 +1,7 @@
+{
+  "chunk_id": "fbff79",
+  "wall_time_seconds": 1.6003093000000002,
+  "exit_code": 0,
+  "original_token_count": 20,
+  "output": "journal-cancel-fake01: 89 passed, 0 failed, 0 skipped; generated scope only.\r\n"
+}
