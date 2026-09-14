@@ -108,9 +108,16 @@ See [the failure review](ASTRA-INTERRUPTED-NATIVE01-FAILURE-2026-09-14.md).
 The repaired complete controller now passes **30 cases and 62 nested subtests
 in each independent fake run**, with zero failures or skips. Admission `7316e53`
 binds both inputs; root `50475b` verifies identical results and source hashes.
-The two added cases cover probe ordering and each refusal position. Native02
-preparation is under `6dc7b8b`; an actual Windows result is still required.
+The two added cases cover probe ordering and each refusal position. The one
+native02 observation admitted at `d1b0e61` now returns outer/controller exit 0.
+Root `4b342d` and independent `f633ad` confirm all ten write observations, retained
+primary exit 1/job count zero, fifteen retirement events and five journal frames.
+All 160 native/integration evidence payloads match Git and disk. The child-final
+receipt is absent, and no ordinary parent-guard claim is made. This qualifies
+the fixed generated interruption only; real models and production migration
+remain open. Native01 stays failed.
 See [the focused qualification](ASTRA-PRELOCK30-QUALIFICATION-VERDICT-2026-09-14.md).
+See [the native02 verdict](ASTRA-INTERRUPTED-NATIVE02-VERDICT-2026-09-14.md).
 
 Ryan's approved D1 static checkpoint inspection is recorded at `4b38948`. One
 guarded invocation verified the fixed hash, ZIP inventory and version bytes,

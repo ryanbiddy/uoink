@@ -1,0 +1,7 @@
+{
+  "chunk_id": "3a72ef",
+  "wall_time_seconds": 0.1880548,
+  "exit_code": 0,
+  "original_token_count": 209,
+  "output": "{\"scope\":\"Passive fixed source/metadata comparison only\",\"payloads\":56,\"payload_bytes\":835488,\"pins_sha256\":\"c5808c7af66630b77d399409564733893a074de36169817ff4cd5234981c250d\",\"source_files\":29,\"source_bytes\":529153,\"unchanged_sources\":27,\"bootstrap_label_substitutions\":1,\"launcher_substitutions\":[{\"before\":\"windows-interrupted-owner-native-proposal01\",\"after\":\"windows-interrupted-owner-native-proposal02\",\"count\":1},{\"before\":\"windows-interrupted-owner-retirement01\",\"after\":\"windows-interrupted-owner-retirement02\",\"count\":1},{\"before\":\"run_interrupted_owner01.ps1\",\"after\":\"run_interrupted_owner02.ps1\",\"count\":2}],\"all_launcher_predicates_unchanged\":true,\"qualified_driver_exact\":true,\"support_metadata_rows\":9,\"support_access\":false,\"template_false\":true,\"admission_absent\":true,\"run_absent\":true,\"candidate_execution\":false}\n"
+}

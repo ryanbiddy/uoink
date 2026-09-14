@@ -1,0 +1,10 @@
+{
+  "root_reviewed": true,
+  "scope": "generated-windows-interrupted-owner-retirement-only",
+  "case": "positive",
+  "operation_mode": "drain",
+  "run_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\windows-interrupted-owner-retirement02",
+  "source_inputs_sha256": "b23d95a782fe39cff9d533f46fdf6b4a3f105dc85b09a9183c2258a4e6091f26",
+  "launcher_sha256": "0ca7fa0fa81596c14659117f4e92688eea83b06d0d57a3e68073fa5922e8cc4f",
+  "reason": "One exact generated Windows observation admitted at d1b0e6110244f23dac9dfa74b9c376e710f1fd1f after fake30 integration c8e7a44, root 3a72ef and peer b3bd1d76. Preserve all original receipt predicates. No model, D1/D2 repeat, D3/D4 or release authority."
+}

@@ -1,0 +1,22 @@
+--- a/run_interrupted_owner01.ps1
++++ b/run_interrupted_owner02.ps1
+@@ -2,15 +2,15 @@
+ $taskCase='positive'
+ $ErrorActionPreference='Stop'
+ $PSNativeCommandUseErrorActionPreference=$false
+-$taskProposal='E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\windows-interrupted-owner-native-proposal01'
++$taskProposal='E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\windows-interrupted-owner-native-proposal02'
+-$taskRuns=@{drain='E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\windows-interrupted-owner-retirement01'}
++$taskRuns=@{drain='E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\windows-interrupted-owner-retirement02'}
+ $taskRun=$taskRuns[$taskMode]
+ $taskPython='C:\Python314\python.exe'
+ $taskAdmissionPath=Join-Path $taskProposal ('ROOT-ADMISSION-'+$taskMode+'.json')
+ $taskSourceMapPath=Join-Path $taskProposal 'SOURCE-INPUTS.json'
+-$taskLauncherPath=Join-Path $taskProposal 'run_interrupted_owner01.ps1'
++$taskLauncherPath=Join-Path $taskProposal 'run_interrupted_owner02.ps1'
+ $taskControls=@()
+-foreach($taskPair in @(@('ROOT-ADMISSION.json',$taskAdmissionPath),@('SOURCE-INPUTS.json',$taskSourceMapPath),@('run_interrupted_owner01.ps1',$taskLauncherPath))){
++foreach($taskPair in @(@('ROOT-ADMISSION.json',$taskAdmissionPath),@('SOURCE-INPUTS.json',$taskSourceMapPath),@('run_interrupted_owner02.ps1',$taskLauncherPath))){
+     $taskControls += [ordered]@{name=$taskPair[0];path=$taskPair[1];sha256=(Get-FileHash -LiteralPath $taskPair[1] -Algorithm SHA256).Hash.ToLowerInvariant()}
+ }
+ $taskAdmission=Get-Content -LiteralPath $taskAdmissionPath -Raw | ConvertFrom-Json

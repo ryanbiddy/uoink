@@ -1,0 +1,28 @@
+{
+  "frames": 5,
+  "phases": [
+    "INITIALIZED",
+    "RESERVED",
+    "WORKER_BOUND",
+    "QUARANTINED",
+    "CLEARED"
+  ],
+  "frame_heads": [
+    "09964f48782f2390be79a06057359fcb659c673dbea3134e9d83dfaaaf554f5c",
+    "4e705f5a67e299aee5dacfc705c20bd87550f9c8cfbdd3de02f03b292504b1fa",
+    "c6a14fab19675869eaa62c3a3dfcbe5543b39e48357a866d6d2aa9809b0c518a",
+    "893e2e6fbd28906abb7e488ff1f0e2c91a07d61eee03f4ad3903e2a07007fa9e",
+    "0e564cbc46a79ae3538bd632291265a0e94cc15aee883afc54c1496408197c68"
+  ],
+  "quarantine_prefix_bytes": 2136,
+  "quarantine_prefix_sha256": "cc2724e3290080880f9d3798876bd8d369da94c0ace6e4e5a90e21b87ff9b092",
+  "pre_interruption_revision": 0,
+  "post_quarantine_revision": 3,
+  "completion_revision": 3,
+  "primary_native_exit": 1,
+  "primary_job_active_processes": 0,
+  "process_job_observed_before_individual_close": true,
+  "final_child_state_claimed": false,
+  "ordinary_parent_guard_claim_available": false,
+  "native_crash_restart_or_power_loss_claim": false
+}

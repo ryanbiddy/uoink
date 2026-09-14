@@ -1,0 +1,7 @@
+{
+  "chunk_id": "0c85b1",
+  "wall_time_seconds": 0.1872121,
+  "exit_code": 0,
+  "original_token_count": 272,
+  "output": "[\r\n  {\r\n    \"path\": \"VERDICT.md\",\r\n    \"bytes\": 2512,\r\n    \"sha256\": \"ad51ab36e9a0eda518887ef6ca42e8bf5e07e5254df3cbf63203030dfbcf80a8\"\r\n  },\r\n  {\r\n    \"path\": \"SOURCE-BINDINGS.json\",\r\n    \"bytes\": 10113,\r\n    \"sha256\": \"ec6a89d86c330125230c7c08b103bebbf7a8ce731fddb3c48440ea445f265e55\"\r\n  },\r\n  {\r\n    \"path\": \"check_source_relation.ps1\",\r\n    \"bytes\": 6846,\r\n    \"sha256\": \"a1f41c4eeee3d2f077675d02cabea26568c92c664970119275080b49f1cf4125\"\r\n  },\r\n  {\r\n    \"path\": \"check_unified_diffs.ps1\",\r\n    \"bytes\": 4582,\r\n    \"sha256\": \"68cc97a1525520a69733a9ba4bb3663c1118d16070a572b159eec52ffbb56978\"\r\n  },\r\n  {\r\n    \"path\": \"SOURCE-RELATION06-ACTUAL.json\",\r\n    \"bytes\": 10117,\r\n    \"sha256\": \"4f965d7796de2563a3fbac119f39e3782f319a67180400548294d78308ccab12\"\r\n  },\r\n  {\r\n    \"path\": \"DIFF-RECONSTRUCTION07-ACTUAL.json\",\r\n    \"bytes\": 2044,\r\n    \"sha256\": \"1bffb7ffb19cd1f96073dacd2072470e656a7094517f8a6f1241a4b282d4b680\"\r\n  },\r\n  {\r\n    \"path\": \"PREPARATION-CHECK08-ACTUAL.json\",\r\n    \"bytes\": 3296,\r\n    \"sha256\": \"a732ea6aea0e48535a9d4f47aa9b76edcac1387240a442c5568e2191b70c5676\"\r\n  }\r\n]\r\n"
+}

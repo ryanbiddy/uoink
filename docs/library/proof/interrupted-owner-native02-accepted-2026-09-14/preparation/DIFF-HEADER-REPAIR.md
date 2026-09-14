@@ -1,0 +1,3 @@
+The first documentary diff writer joined the three unified-diff headers onto one line. The displayed output exposed this formatting error; the writer itself exited zero. Its actual tool object and both malformed drafts are retained in reads/DIFF-DRAFT-ACTUAL.json and before/*-header-draft01.diff.
+
+Only the two documentary headers were repaired using three explicit lines. The bootstrap, launcher and adapter bytes did not change. The passive text check 33ad0d exited zero and reconstructed all three complete source pairs in both directions, checking every context line and hunk count. Its actual object is reads/DIFF-REPAIR-ACTUAL.json. No candidate or native invocation occurred.

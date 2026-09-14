@@ -1,0 +1,11 @@
+--- a/dummy_bootstrap.py
++++ b/dummy_bootstrap.py
+@@ -51,7 +51,7 @@
+ PROCESS_ABORT = os._exit  # Retained current-process failure exit; never an IPC operation.
+ 
+ FORBIDDEN = r"C:\Users\hello\AppData\Local\Uoink\index.db"
+-FIXED_RUNS = {'drain': 'E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\windows-interrupted-owner-retirement01'}
++FIXED_RUNS = {'drain': 'E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\windows-interrupted-owner-retirement02'}
+ LOCATION = os.path.normcase(os.path.dirname(os.path.abspath(__file__)))
+ MODE = next((mode for mode, path in FIXED_RUNS.items() if os.path.normcase(path) == LOCATION), None)
+ assert MODE is not None, "fixed_fresh_generated_operation_directory"

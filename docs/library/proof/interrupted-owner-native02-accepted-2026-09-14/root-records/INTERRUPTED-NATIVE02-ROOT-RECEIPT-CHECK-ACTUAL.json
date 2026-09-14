@@ -1,0 +1,7 @@
+{
+  "chunk_id": "bbc2c5",
+  "wall_time_seconds": 0.5617092,
+  "exit_code": 1,
+  "original_token_count": 75,
+  "output": "Exception: E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\check-native02-root-receipts.ps1:69\r\nLine |\r\n  69 |  … r[0].copy_after_sha256 -cne $input.sha256){throw 'Saved source pair'}\r\n     |                                               ~~~~~~~~~~~~~~~~~~~~~~~~~\r\n     | Saved source pair\r\n"
+}

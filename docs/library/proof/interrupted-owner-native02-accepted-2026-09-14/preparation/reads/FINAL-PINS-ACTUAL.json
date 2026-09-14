@@ -1,0 +1,16 @@
+{
+  "freeze_actual": {
+    "chunk_id": "a73631",
+    "wall_time_seconds": 0.3177282,
+    "exit_code": 0,
+    "original_token_count": 261,
+    "output": "{\r\n  \"payload_count\": 56,\r\n  \"payload_bytes\": null,\r\n  \"pins_sha256\": \"c5808c7af66630b77d399409564733893a074de36169817ff4cd5234981c250d\",\r\n  \"source_count\": 29,\r\n  \"unchanged_sources\": 27,\r\n  \"changed_sources\": [\r\n    \"generated_adapter_flow.py\",\r\n    \"dummy_bootstrap.py\"\r\n  ],\r\n  \"source_map\": \"b23d95a782fe39cff9d533f46fdf6b4a3f105dc85b09a9183c2258a4e6091f26\",\r\n  \"bootstrap\": \"7969a4405470588c6bbc501b929d5e5f3eec85b116e50384ba64aa9036a5d198\",\r\n  \"adapter\": \"24844bf419e4d34adaf0d5c5a2678de33a4796de86dad0f83b7e386f1785f961\",\r\n  \"launcher\": \"0ca7fa0fa81596c14659117f4e92688eea83b06d0d57a3e68073fa5922e8cc4f\",\r\n  \"false_template\": \"7fb66941193cc95aca324cc795ff4aeabe5d6defb14fe00035ab13f40f72452f\",\r\n  \"protocol\": \"a13e8908cc20c37f17e8814570ac1abe4cfc15e43780195438b31a33ae73718a\",\r\n  \"support_metadata_records\": 9,\r\n  \"support_paths_accessed\": false,\r\n  \"future_control_pairs\": 32,\r\n  \"inverse_source_bytes_exact\": true,\r\n  \"all_pins_rechecked\": true,\r\n  \"admission_absent\": true,\r\n  \"run_absent\": true,\r\n  \"candidate_executed\": false\r\n}\r\n"
+  },
+  "byte_sum_actual": {
+    "chunk_id": "1301d5",
+    "wall_time_seconds": 0.1973092,
+    "exit_code": 0,
+    "original_token_count": 87,
+    "output": "{\r\n  \"note\": \"The prior actual a73631 payload_bytes was null because Measure-Object was used on ordered dictionary rows. This independent sum reads the unchanged frozen manifest rows; no source or manifest was changed.\",\r\n  \"files\": 56,\r\n  \"bytes\": 835488,\r\n  \"pins_sha256\": \"c5808c7af66630b77d399409564733893a074de36169817ff4cd5234981c250d\"\r\n}\r\n"
+  }
+}

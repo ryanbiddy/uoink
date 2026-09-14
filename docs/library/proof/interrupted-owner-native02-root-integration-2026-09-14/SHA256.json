@@ -1,0 +1,61 @@
+{
+  "schema": "documentary-proof-v1",
+  "scope": "Native02 raw worktree diff/application, verified newline-only transport restoration and completed disk/index proof. No native rerun.",
+  "files": [
+    {
+      "path": ".gitattributes",
+      "bytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+    },
+    {
+      "path": "archive-native02-root-integration.mjs",
+      "bytes": 2117,
+      "sha256": "0ac30215716df992b71b89799900ae6c4058ef2515652914a8a512f712c19697"
+    },
+    {
+      "path": "integrate-interrupted-native02-accepted.ps1",
+      "bytes": 1287,
+      "sha256": "fa7163abc9819926426938cf5fdd2c89240f5c67438bb54eae1f7d15f91b8263"
+    },
+    {
+      "path": "interrupted-native02-apply.stderr.log",
+      "bytes": 5850,
+      "sha256": "4222e38dc2c297a19f2e113cebd998b4af2c33969f8afba4509f97c7692cad07"
+    },
+    {
+      "path": "interrupted-native02-apply.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "INTERRUPTED-NATIVE02-ARCHIVE-COPY-ACTUAL.json",
+      "bytes": 332,
+      "sha256": "661e01341446e958c8291cc463c257b508252a3678331d417163f5eb9ed02582"
+    },
+    {
+      "path": "INTERRUPTED-NATIVE02-INDEX-POLL01-ACTUAL.json",
+      "bytes": 362,
+      "sha256": "4ba12dc71150bd9cd19126a826170a28c6462562f7e068041d0c2cd3d6478eb0"
+    },
+    {
+      "path": "INTERRUPTED-NATIVE02-INTEGRATION-ACTUAL.json",
+      "bytes": 494,
+      "sha256": "1be8fbb23ab0870f0a278a73805aac16b71c29b6b080d6361230c50e40d9b3c9"
+    },
+    {
+      "path": "INTERRUPTED-NATIVE02-TRANSPORT-INDEX-ACTUAL.json",
+      "bytes": 334,
+      "sha256": "cfad03a8a2ef34e054babcdac76a9955c3b2b800f80bf9aaa3a8d3ee37e0d65c"
+    },
+    {
+      "path": "INTERRUPTED-NATIVE02-TRANSPORT-RESULT.json",
+      "bytes": 40567,
+      "sha256": "ea23cfbe95c274a9ed1df597cb9384e5ed1f8dd486672aa3ea7261a7dc174e38"
+    },
+    {
+      "path": "restore-interrupted-native02-transport.mjs",
+      "bytes": 2099,
+      "sha256": "8b2ad6aa3d165c088dc0eb4bf7d6a7ed9fee6d3c1c32292d6dc1be70a2664553"
+    }
+  ]
+}

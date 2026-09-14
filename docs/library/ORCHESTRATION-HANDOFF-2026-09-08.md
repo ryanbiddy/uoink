@@ -119,7 +119,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | Actual adapter cancellation | Generated qualification integrated at60b3bb5 | Author and independent copies each89 passed/0 failed/0 skipped,86 passing subtests; all216 proof payloads match Git/disk | Native cancellation integrated ata25b34b: all100 proof payloads match Git/disk. Final-clear recovery is recorded at 5671b51; interrupted-owner retirement, crash/restart, real models and release remain unqualified |
 | Retired-owner final-clear recovery | Fake22 at a83ae1a; generated native recovery at5671b51 | Both fake copies22/0/0 plus21 passing subtests. Nativee97a44/exit0, root5214fa and peer503717 verify exact retirement, four confirmed phases/flushes and still-revoked owner/token. All91 newest proof payloads match Git/disk | The generated runtime-owner connection is recorded at 3661608 and 3b8f9e0. Continue interrupted-owner retirement; no OS-interruption, active-worker recovery, crash/restart or model credit |
 | Worker runtime owner and bootstrap | Connected fake33 at 3661608; generated native cancellation at 3b8f9e0 | Both fake copies 33/0/0. Native a9321b/exit 0, root dd7190 and peer 4984ac agree on 32 unchanged pairs, valid guards, one segment, closed owner, child/contender exit 0 with empty jobs, and four journal frames. All 127 native proof payloads match Git/disk | Interrupted-owner retirement direction is committed at 77dc339. Real inference, protected loader/PCM/filter routes, crash/restart and release remain open |
-| Interrupted owned-worker retirement | Native01 remains FAILED at7f142e8; repaired driver and fake30 qualification integrated atc8e7a44 | Both copies30/0/0 plus62 subtests; root50475b and peer10a40c verify identical cases/36 child hashes and valid guards. All329 qualification/integration payloads match Git/disk. Original28/57 and assertions remain intact | Native02 source review is clear; one generated Windows invocation is admitted by ASTRA-NATIVE-INTERRUPTED-OWNER02-ADMISSION-2026-09-14.md. Review its actual result before acceptance. No real-model, production or release authority |
+| Interrupted owned-worker retirement | Native02 accepted after admissiond1b0e61; Native01 remains FAILED at7f142e8 | Actual9753fb returns outer/controller0; root4b342d and peerf633ad agree on10 write observations,15 retirement events, primaryexit1/job0 and5 journal frames. All160 native/integration payloads match Git/disk. Fake30 atc8e7a44 remains30/0/0 plus62 per root | Implement the protected namespace/constructor and request/stream connection. No real-model, production or release authority; do not repeat native02 |
 | Release notes | Current progress and remaining gates committed at 376eb47 | All seven proof payloads match Git/disk; 57 table lines and historical package/review-kit sections remain unchanged. D1/D2 completion and generated cancellation/recovery are explicit | Continue runtime qualification. No production source, package, installation, public draft or website changed |
 | Integration | Reliability repair at e8d058f and notice packaging at 71d3e70 after tree09 | Reliability:53 focused cases plus13 subtests per root. Notices:20 Python/10 block cases per root. Tree09 at 56d9d4c remains2,796 passed/1 failed/3 skipped across2,800 cases plus13 subtests; it predates both repairs | Finish runtime work, then run a new committed complete tree and rebuild/reseal. Package08 and website/marketing remain held. No current-source package or installation credit |
 | Desktop incident | Isolation failed in package-07 attempt; corrected at `e10ba3a` | Ordinary Uoink and filesystem connectors launched; earlier live-index/5179 effects unknown. Owned job cleaned | No further override launch; only guarded Uoink dashboard observed for package 08 |
@@ -238,8 +238,15 @@ root integration payloads pass Git/disk verification1fb9c3 and06a064.
 Qualification is integrated atc8e7a44. Native02 source preparation follows
 6dc7b8b, with all original Windows receipt predicates retained. Root3a72ef
 and peerb3bd1d76 verify the frozen bindings and narrow deltas. Follow the exact
-ASTRA-NATIVE-INTERRUPTED-OWNER02-ADMISSION-2026-09-14.md for one generated
-invocation and review its actual saved result. No new native outcome is yet claimed.
+ASTRA-NATIVE-INTERRUPTED-OWNER02-ADMISSION-2026-09-14.md bound the one generated
+invocation9753fb, now accepted with outer/controller0. Root4b342d and peerf633ad
+verify all10 write observations,32 source/control pairs,15 retirement events and
+five recorded frames. Indexd2a381 and4f96ad verify149 native plus11 root
+integration payloads in Git/disk. Read ASTRA-INTERRUPTED-NATIVE02-VERDICT-2026-09-14.md.
+Do not repeat it. Continue the actual protected namespace/constructor connection
+and migrate call sites to TranscribeRequest/SegmentStream; real model/runtime
+qualification remains separately gated. The passive root checker failurebbc2c5,
+diagnosiscce7c5 and variable-only repair are preserved; no subject rerun occurred.
 The first
 positive case still requires an idle pipe, no retained I/O and confirmed exact
 handles; aggregate quarantine history and all ordinary refusals remain. Preserve
@@ -6464,3 +6471,41 @@ and four launcher path/filename substitutions. Every receipt predicate remains,
 including the five locked plus five post-retirement probes missing from run01.
 One generated Windows observation is admitted separately; preserve its actual
 status and all partial evidence. Do not infer a pass or repeat it automatically.
+
+### 2026-09-14 — Repaired interrupted-worker Windows result accepted
+
+The invocation admitted atd1b0e61 completed once as9753fb: outer/controller0,
+3.6890868 seconds, valid receipt and empty logs. All ten write observations now
+appear: five locked error32 refusals and five post-retirement opens writing0B.
+The primary retained process exits1/job0 before nine individual closes; the
+contender exits0/job0. One generated segment precedes the injected Python
+KeyboardInterrupt. Fifteen attributed events and five confirmed journal frames
+preserve quarantine-before-recovery and clear-after-retirement ordering.
+
+Root4b342d passes116 nonthrowing comparisons and checks32 current source/control
+pairs,14 recorded support/fixture pairs and the saved chain. Peerf633ad confirms
+the complete guard, canonical record and identity checks. Physical journal,
+support and model artifacts were not reopened for review or archival. The child
+final receipt is absent; ordinary parent and final-child guard claims stay false.
+Native01 remains failed. No native interruption/crash/restart/power-loss or real
+model claim follows. Read ASTRA-INTERRUPTED-NATIVE02-VERDICT-2026-09-14.md.
+
+The first root passive checkerbbc2c5 failed because PowerShell's automatic
+$input variable changed its pipeline lookup. Diagnosiscce7c5 shows matching
+saved data; the corrected helper changes only that variable name. Preserve this
+failure and repair. Prefer dedicated task variables in documentary pipelines.
+
+Archive5eb8e4 contains149 payloads/2,286,271 bytes, seal
+cd495a7146653fc9de7776d3eeb1d27c4a292f4976535322800c63285a90bc75.
+Raw worktree diff/application85b236 succeeds. All131 differing files were proven
+newline-only before restoring exact donor bytes; indexd2a381 confirms the seal
+and payloads. Eleven root records/53,450 bytes, seal
+e7d5c95dc1247c3de7834b193e158a868c648d061c599677191467a437eed281,
+pass index4f96ad. No source measurement was repeated to build these archives.
+
+The next useful source deliverable is the protected namespace-to-constructor
+connection and correct request/stream use. The existing facade requires
+TranscribeRequest and returns SegmentStream, while older splice proposals still
+pass raw audio and assume tuple/dict results. Complete that connection before
+the remaining PCM/filter and separately approved real-runtime checks. Production
+source is still71d3e70; package08, current installation and market gates stay held.

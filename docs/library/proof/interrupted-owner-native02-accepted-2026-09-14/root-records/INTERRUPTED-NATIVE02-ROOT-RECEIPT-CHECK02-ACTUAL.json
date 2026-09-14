@@ -1,0 +1,7 @@
+{
+  "chunk_id": "4b342d",
+  "wall_time_seconds": 0.4838475,
+  "exit_code": 0,
+  "original_token_count": 52,
+  "output": "{\"soft_comparisons\":116,\"soft_failures\":0,\"source_control_pairs\":32,\"recorded_support_fixture_pairs\":14,\"write_observations\":10,\"retained_events\":15,\"frames\":5,\"journal_bytes\":2688,\"native_replayed\":false}\r\n"
+}

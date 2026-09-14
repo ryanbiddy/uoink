@@ -1,0 +1,7 @@
+{
+  "chunk_id": "33ad0d",
+  "wall_time_seconds": 0.230268,
+  "exit_code": 0,
+  "original_token_count": 176,
+  "output": "[\r\n  {\r\n    \"diff\": \"dummy_bootstrap.diff\",\r\n    \"sha256\": \"d8ce699e7f5111cb763a6e3d67c680004a9e0d0736a0cb182c830ca63407a49d\",\r\n    \"old_hunk\": 7,\r\n    \"new_hunk\": 7,\r\n    \"forward_exact\": true,\r\n    \"reverse_exact\": true\r\n  },\r\n  {\r\n    \"diff\": \"run_interrupted_owner02.diff\",\r\n    \"sha256\": \"5acd39013f4c5041ec9c8a5ff5a4155d636aadf4efcc44eefccc1f1765409ec8\",\r\n    \"old_hunk\": 15,\r\n    \"new_hunk\": 15,\r\n    \"forward_exact\": true,\r\n    \"reverse_exact\": true\r\n  },\r\n  {\r\n    \"diff\": \"generated_adapter_flow.diff\",\r\n    \"sha256\": \"445a9d1a4beb44fd083bb90512a986e6b20b3e0662216204b31241af9f88a7fe\",\r\n    \"old_hunk\": 8,\r\n    \"new_hunk\": 10,\r\n    \"forward_exact\": true,\r\n    \"reverse_exact\": true\r\n  }\r\n]\r\n"
+}
