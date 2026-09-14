@@ -1,0 +1,7 @@
+{
+  "chunk_id": "cbca67",
+  "wall_time_seconds": 0.3315415,
+  "exit_code": 0,
+  "original_token_count": 51,
+  "output": "{\r\n  \"selected_count\": 5,\r\n  \"bytes\": 120375,\r\n  \"catalog_slots\": 1773,\r\n  \"selected_files_match_original\": true,\r\n  \"map_sha256\": \"173324c8aa8b66ce55c35ba151bb34b89eb5351f7bb80fa332c87340b77b62ed\"\r\n}\r\n"
+}

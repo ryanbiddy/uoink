@@ -1,0 +1,46 @@
+{
+  "scope": "Documentary copy only; source inputs unchanged; no dispatch or candidate execution",
+  "selected_inputs": [
+    {
+      "id": "B-01",
+      "path": "docs/library/proof/windows-writer-exclusion-native-2026-09-13/proposal04/generated_writer_exclusion.py",
+      "bytes": 11647,
+      "sha256": "8173d7394f4a893c14d2979283a0c17ed273e25f196e14560590be3a0f22058b",
+      "lines": 197,
+      "required_complete_read": true
+    },
+    {
+      "id": "B-02",
+      "path": "docs/library/proof/windows-writer-exclusion-native-2026-09-13/proposal04/generated_adapter_flow.py",
+      "bytes": 26951,
+      "sha256": "ca4676060382e189953f56b830f2c08227c1079280cd09b2b36fb6770ce6e4ce",
+      "lines": 427,
+      "required_complete_read": true
+    },
+    {
+      "id": "B-03",
+      "path": "docs/library/proof/windows-writer-exclusion-native-2026-09-13/proposal04/generated_journal_setup.py",
+      "bytes": 11954,
+      "sha256": "df7ed56cdcbd23352b3e69a6f6790a012182b294491f38f8ed19610f000b485d",
+      "lines": 206,
+      "required_complete_read": true
+    },
+    {
+      "id": "B-04",
+      "path": "docs/library/proof/windows-writer-exclusion-native-2026-09-13/proposal04/dummy_bootstrap.py",
+      "bytes": 35768,
+      "sha256": "57ae722cda705e7f7a79a79442b316594719aeb390d63575aeaee3422949a469",
+      "lines": 636,
+      "required_complete_read": true
+    },
+    {
+      "id": "B-05",
+      "path": "docs/library/proof/windows-writer-exclusion-native-2026-09-13/proposal04/run_writer_exclusion04.ps1",
+      "bytes": 34055,
+      "sha256": "8212531968abdc9fbf55f4d9607768d1cf14198b62f8443b670715ce0da07c26",
+      "lines": 307,
+      "required_complete_read": true
+    }
+  ],
+  "canonical_sha256": "755c5cd51792444f8d4418bbe4e3df5937147975c65cb5bf4093e8233fef77b3"
+}
