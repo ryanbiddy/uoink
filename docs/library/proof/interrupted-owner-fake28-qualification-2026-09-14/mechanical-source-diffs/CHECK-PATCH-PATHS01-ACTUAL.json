@@ -1,0 +1,7 @@
+{
+  "chunk_id": "8f89b0",
+  "wall_time_seconds": 0.1912234,
+  "exit_code": 0,
+  "original_token_count": 193,
+  "output": "[\r\n  {\r\n    \"name\": \"durable_lifecycle.py\",\r\n    \"header\": \"diff --git a/original/durable_lifecycle.py b/candidate/durable_lifecycle.py\",\r\n    \"bytes\": 15362,\r\n    \"sha256\": \"657bb42c17632ec3b247b900c1be63d1aa99ac08a9e3b4166907271b14a618f7\"\r\n  },\r\n  {\r\n    \"name\": \"generated_adapter_flow.py\",\r\n    \"header\": \"diff --git a/original/generated_adapter_flow.py b/candidate/generated_adapter_flow.py\",\r\n    \"bytes\": 38974,\r\n    \"sha256\": \"d21cc4d81cc754e1f5eea202a64322a53b1692c9c1ade9f54b257f84c469e8a7\"\r\n  },\r\n  {\r\n    \"name\": \"generated_journal_setup.py\",\r\n    \"header\": \"diff --git a/original/generated_journal_setup.py b/candidate/generated_journal_setup.py\",\r\n    \"bytes\": 5430,\r\n    \"sha256\": \"4833467b67887da37fffd2c9e2874661b26117db5e2afe523755ae7d9a279133\"\r\n  }\r\n]\r\n"
+}

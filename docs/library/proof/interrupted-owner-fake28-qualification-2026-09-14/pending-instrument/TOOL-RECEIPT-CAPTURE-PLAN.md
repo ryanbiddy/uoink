@@ -1,0 +1,9 @@
+# Exact future tool receipts
+
+The caller, not the candidate, must save every actual tools.exec_command return object immediately. Preserve chunk_id, exit_code, output, wall_time_seconds and any session_id exactly. A returned running session is not an exit: save the initial object, then each actual write_stdin result, including the final exit. Do not manufacture a single merged raw object.
+
+Before the known PowerShell host starts, set the lexical IG_FORBIDDEN_LIVE value and scrub provider/token/Python-startup environment names without printing values. The future author command is the known PowerShell executable with `-NoProfile -File` and the absolute author run_preflight01.ps1 path. Immediately after that host returns, capture and exit with `$global:LASTEXITCODE`. This preserves the wrapper's actual status in the outer tool result.
+
+Inside the reviewed launcher, disable inherited native-error preference and capture the Python child's global LASTEXITCODE immediately after return, then durably write native-exit.json before postchecks. The existing global capture is retained. Child failure, wrapper postcheck failure and actual outer failure remain separate fields/objects. On launch failure retain launch-failure.json and every partial raw file; absence of a later receipt is not success.
+
+Expected successful run text membership is the 38 pinned payload copies plus PINS.json, ROOT-ADMISSION.json, plan.json, stdout.json, stderr.log, native-exit.json, input-check.json and exit.json. Preserve the full cases/subtests JSON and all raw exits, not only totals. A failure may add launch-failure.json or omit later receipts. Root independently compares the two ordered case-object arrays, 35 child hashes, 38 original/copy pairs and three control checks. No physical fixtures, journals, runtime binaries or model assets belong to this fake unit.

@@ -1,0 +1,20 @@
+{
+  "module_count": 33,
+  "frozen_modules": 29,
+  "pending_modules": 4,
+  "child_input_count": 35,
+  "planned_pins_count": 38,
+  "qualifier": {
+    "bytes": 10459,
+    "sha256": "f37060a5269d154b28faa04cacd6ca882de800e258a15e9c76433b8879c3eb4d"
+  },
+  "launcher": {
+    "bytes": 9104,
+    "sha256": "3c64742ef1eb47f82ba0158808aa07c48fe05947628e69aff98da76b782508c4"
+  },
+  "expected": {
+    "bytes": 3344,
+    "sha256": "226ac87eb7d0167312ebc0b77cddd13b8354d2f1624ad8555a3dbae27b1f7f39"
+  },
+  "executed_candidate": false
+}

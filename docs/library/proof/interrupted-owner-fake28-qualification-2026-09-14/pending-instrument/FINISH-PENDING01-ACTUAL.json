@@ -1,0 +1,7 @@
+{
+  "chunk_id": "a7278c",
+  "wall_time_seconds": 0.4256347,
+  "exit_code": 0,
+  "original_token_count": 125,
+  "output": "{\r\n  \"count\": 28,\r\n  \"frozen\": 29,\r\n  \"pending\": 4,\r\n  \"qualifier\": {\r\n    \"bytes\": 10459,\r\n    \"sha256\": \"f37060a5269d154b28faa04cacd6ca882de800e258a15e9c76433b8879c3eb4d\"\r\n  },\r\n  \"launcher\": {\r\n    \"bytes\": 9104,\r\n    \"sha256\": \"3c64742ef1eb47f82ba0158808aa07c48fe05947628e69aff98da76b782508c4\"\r\n  },\r\n  \"pins\": {\r\n    \"bytes\": 7547,\r\n    \"sha256\": \"d5099f5b81644ebf0cd3e0c91ba6233c664a2c062722f0219a115a6046ca5961\"\r\n  },\r\n  \"independent_label_replacements\": 5,\r\n  \"source_execution\": false\r\n}\r\n"
+}

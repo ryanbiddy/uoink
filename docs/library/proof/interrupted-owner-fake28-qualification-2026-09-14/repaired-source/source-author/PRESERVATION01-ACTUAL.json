@@ -1,0 +1,7 @@
+{
+  "chunk_id": "e39e22",
+  "wall_time_seconds": 0.2769192,
+  "exit_code": 0,
+  "original_token_count": 203,
+  "output": "{\r\n  \"checks\": 73,\r\n  \"failures\": [\r\n    {\r\n      \"file\": \"generated_adapter_flow.py\",\r\n      \"name\": \"bind_service_attempt@4\",\r\n      \"instances\": 1,\r\n      \"equal_normalized_text\": false\r\n    },\r\n    {\r\n      \"file\": \"generated_adapter_flow.py\",\r\n      \"name\": \"observe_interruption@4\",\r\n      \"instances\": 1,\r\n      \"equal_normalized_text\": false\r\n    }\r\n  ],\r\n  \"files\": [\r\n    {\r\n      \"name\": \"durable_lifecycle.py\",\r\n      \"sha256\": \"3c8963eaa02bbc1d810ee2632d0363303bfe05ec6ceeef73771ca8005a00ece3\"\r\n    },\r\n    {\r\n      \"name\": \"generated_adapter_flow.py\",\r\n      \"sha256\": \"d1e6835f25f4c24f7c3bfb2907437cdcdfd36fc279cd6a87284cc6511bfcf763\"\r\n    },\r\n    {\r\n      \"name\": \"generated_journal_setup.py\",\r\n      \"sha256\": \"44bdaeeb7ba95b202d7fa0bfd202c8e95f3c5bbae4173786a71aa58071184c9c\"\r\n    }\r\n  ]\r\n}\r\n"
+}

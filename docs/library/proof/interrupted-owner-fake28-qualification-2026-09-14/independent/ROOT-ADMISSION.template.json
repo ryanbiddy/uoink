@@ -1,0 +1,7 @@
+{
+  "approved": false,
+  "label": "interrupted-retirement-confirmation01",
+  "pins_sha256": "bf5917433c3e0220a79625b9a0708a3fbfa359dac8023a2b4b6ae1951048e4de",
+  "scope": "generated_bytes_and_fake_ports_only",
+  "note": "Independent package only; root source review and separate actual admission required."
+}

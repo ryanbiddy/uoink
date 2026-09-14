@@ -1,0 +1,81 @@
+diff --git a/original/generated_journal_setup.py b/candidate/generated_journal_setup.py
+index b7a48c7..873b6c5 100644
+--- a/original/generated_journal_setup.py
++++ b/candidate/generated_journal_setup.py
+@@ -34,6 +34,7 @@ class GeneratedJournalSetup:
+         self.events, self.milestones = [], []
+         self.flush_successes = 0
+         self._recovery_probe = None
++        self._interrupted_probe = None
+ 
+     def _scope(self, path):
+         read_set = ReadSet()
+@@ -182,6 +183,18 @@ class GeneratedJournalSetup:
+             self.milestones.append({"api": "CloseHandle", "phase": "CLEARED", "head": head,
+                                     "call_index": len(self.monitor.calls), "flush_successes": self.flush_successes})
+ 
++    def before_interrupted_close(self, args):
++        # Separate observer for interrupted-owner route with 5 frames.
++        if args and self._journal_handle(args[0]):
++            from generated_adapter_flow import _InterruptedOperationProbe
++            probe = self._interrupted_probe
++            require(type(probe) is _InterruptedOperationProbe and probe.setup is self
++                    and probe.port is self.port, "fixed_interrupted_close_observer")
++            token = self.port.lifecycle._token(self.port.key)
++            head = probe.before_interrupted_close(token)
++            self.milestones.append({"api": "CloseHandle", "phase": "CLEARED", "head": head,
++                                    "call_index": len(self.monitor.calls), "flush_successes": self.flush_successes})
++
+     def complete_recovery(self):
+         from generated_adapter_flow import _RetiredClearProbe
+         from snapshot_lifecycle import Phase
+@@ -214,6 +227,49 @@ class GeneratedJournalSetup:
+                 "fresh_process_query_after_retirement": False,
+                 "os_interrupt_or_crash_claim": False}
+ 
++    def complete_interrupted_recovery(self):
++        from generated_adapter_flow import _InterruptedOperationProbe
++        from snapshot_lifecycle import Phase
++        probe = self._interrupted_probe
++        require(type(probe) is _InterruptedOperationProbe and probe.setup is self and probe.observed
++                and probe.close_observed and probe.service_attempt is not None,
++                "observed_interrupted_recovery_before_completion")
++        token, owner, record = probe.token, probe.owner, probe.record
++        rows, head = reservations.decode_journal(token.raw)
++        require(self.port.lifecycle._records.get(self.port.key) is record and record.owner is owner
++                and record.phase is Phase.RELEASED and owner._revoked is True
++                and owner._closed_verified is True and owner._active == 0
++                and self.port.key not in self.port.lifecycle._interrupted_retirements
++                and self.port.lifecycle._token(self.port.key) is token and token.revoked is True
++                and head == probe.close_head
++                and [row["phase"] for row in rows] == ["INITIALIZED", "RESERVED", "WORKER_BOUND", "QUARANTINED", "CLEARED"]
++                and token.phase == "CLEARED" and self.physical not in self.gates._held
++                and self.physical not in self.gates.attempts and self.created_handle.closed
++                and not self.created_handle.unconfirmed and self.flush_successes == 5
++                and [event["api"] for event in self.milestones] == ["CreateProcessW", "ResumeThread", "CloseHandle"],
++                "complete_interrupted_generated_journal")
++        for read_set in reversed(self.scopes):
++            require(self.primitives.release_read_set(read_set) is True, "retire_registry_ancestor_guards")
++        require(all(scope.released and not scope.unconfirmed and all(h.closed for h in scope.members)
++                    for scope in self.scopes), "all_directory_guards_retired")
++        return {"physical": self.physical.wire(), "journal_path": self.journal_path,
++                "journal_bytes": len(token.raw), "journal_sha256": hashlib.sha256(token.raw).hexdigest(),
++                "journal_hex": token.raw.hex(), "head": head, "phases": [row["phase"] for row in rows],
++                "flush_successes": self.flush_successes, "milestones": self.milestones,
++                "io_events": self.events, "creation_handle_transferred_without_close": True,
++                "journal_handle_closed": self.created_handle.closed, "directory_guards_retired": True,
++                "explicit_interrupted_owner_recovery": True,
++                "old_owner_still_revoked": owner._revoked,
++                "old_token_still_revoked": token.revoked,
++                "injected_interrupt_type": type(probe.error).__name__,
++                "injected_interrupt_identity_observed": probe.observed,
++                "injected_stage": "after_next_segment_before_return",
++                "before_recovery_phases": ["INITIALIZED", "RESERVED", "WORKER_BOUND", "QUARANTINED"],
++                "before_recovery_sha256": hashlib.sha256(probe.quarantine_raw).hexdigest(),
++                "same_manager_and_service_attempt": probe.close_observed,
++                "fresh_process_query_after_retirement": False,
++                "native_power_loss_or_restart_claim": False}
++
+     def observe(self, name, args, result, is_journal):
+         if name == "CreateFileW" and args[0] == self.journal_path:
+             self.create_succeeded = result not in (None, 0, self.monitor.ffi.c_void_p(-1).value)

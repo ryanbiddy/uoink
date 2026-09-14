@@ -1,0 +1,7 @@
+{
+  "chunk_id": "ee4402",
+  "wall_time_seconds": 0.2164539,
+  "exit_code": 0,
+  "original_token_count": 315,
+  "output": "\r\nAI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\interrupted-owner-retirement-repair02\\test_interrupted_owner_retirem\r\nent.py:307:    def test_actual_adapter_interruption_preserves_error_and_quarantine(self):\r\nAI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\interrupted-owner-retirement-repair02\\test_interrupted_owner_retirem\r\nent.py:338:    def test_confirmed_idle_owner_retires_and_reconciles_once(self):\r\nAI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\interrupted-owner-retirement-repair02\\test_interrupted_owner_retirem\r\nent.py:365:    def test_foreign_stale_active_or_pending_attempt_refuses(self):\r\nAI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\interrupted-owner-retirement-repair02\\test_interrupted_owner_retirem\r\nent.py:396:    def test_retained_io_or_uncertain_handle_refuses_without_retirement(self):\r\nAI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\interrupted-owner-retirement-repair02\\test_interrupted_owner_retirem\r\nent.py:421:    def test_unobserved_exit_nonempty_job_or_close_failure_retains_custody(self):\r\nAI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\interrupted-owner-retirement-repair02\\test_interrupted_owner_retirem\r\nent.py:441:    def test_reentrant_or_clear_failure_preserves_first_error_and_gate(self):\r\n\r\n"
+}

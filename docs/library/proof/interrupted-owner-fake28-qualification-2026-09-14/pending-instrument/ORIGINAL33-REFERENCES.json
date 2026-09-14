@@ -1,0 +1,68 @@
+{
+  "scope": "Historical33 evidence preserved; no claim of 33 observations in proposed28",
+  "files": [
+    {
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\docs\\library\\proof\\runtime-owner-native-fake33-2026-09-13\\author-preparation\\generated_native_owner_fixture.py",
+      "bytes": 6888,
+      "sha256": "a86b143a11f4abb8683f859ff7fd9f04b374aa591a6f478b724a4866fab51beb",
+      "action": "reference_only_unchanged",
+      "cases_executed": false
+    },
+    {
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\docs\\library\\proof\\runtime-owner-native-fake33-2026-09-13\\author-preparation\\generated_unit_cases.py",
+      "bytes": 13846,
+      "sha256": "58ce1ba84b4baa457c3973cea5745ad3be94caa4ce627da732d67e9c8e148979",
+      "action": "reference_only_unchanged",
+      "cases_executed": false
+    },
+    {
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\docs\\library\\proof\\runtime-owner-native-fake33-2026-09-13\\author-preparation\\connection_cases.py",
+      "bytes": 10526,
+      "sha256": "2e598f26c7edd2e60b06495a62a350411ceb0a60ed6fd3486c1a1294d04cbea6",
+      "action": "reference_only_unchanged",
+      "cases_executed": false
+    },
+    {
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\docs\\library\\proof\\runtime-owner-native-fake33-2026-09-13\\author-preparation\\native_owner_cases.py",
+      "bytes": 16273,
+      "sha256": "2a2ec0245524532e383472e737b60a9dea125c27118b75c16ec00ade634e851d",
+      "action": "reference_only_unchanged",
+      "cases_executed": false
+    },
+    {
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\docs\\library\\proof\\runtime-owner-native-fake33-2026-09-13\\author-preparation\\generated_bootstrap_fixture.py",
+      "bytes": 7205,
+      "sha256": "6ea5e4e7cebff54380193b1ad0cc1b1cf08e4a7f34a8162d2f0f6ce73371d469",
+      "action": "reference_only_unchanged",
+      "cases_executed": false
+    },
+    {
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\docs\\library\\proof\\runtime-owner-native-fake33-2026-09-13\\author-preparation\\generated_factory_fixture.py",
+      "bytes": 7539,
+      "sha256": "1c60507a82c238116b630f146c44e7a81fdc57eb74f05841489c3128f150eb6f",
+      "action": "reference_only_unchanged",
+      "cases_executed": false
+    },
+    {
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\docs\\library\\proof\\runtime-owner-native-fake33-2026-09-13\\author-preparation\\EXPECTED-CASES.json",
+      "bytes": 3293,
+      "sha256": "2c1fadce72b41ed443fcbcd2be88758db9f1cb55e530c7a33010377c598d164e",
+      "action": "reference_only_unchanged",
+      "cases_executed": false
+    },
+    {
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\docs\\library\\proof\\runtime-owner-native-fake33-2026-09-13\\author-preparation\\SOURCE-INPUTS.json",
+      "bytes": 9804,
+      "sha256": "91ef05ed659e54fefeeb798ad128a18d1f6cc74723fce0a2d5e04578b180e663",
+      "action": "reference_only_unchanged",
+      "cases_executed": false
+    },
+    {
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\docs\\library\\proof\\runtime-owner-native-fake33-2026-09-13\\author-preparation\\qualify_owner.py",
+      "bytes": 22698,
+      "sha256": "b1771412162632a9e9f98a0321bb5b030372546a7e9cf932318d10b34d53b02b",
+      "action": "reference_only_unchanged",
+      "cases_executed": false
+    }
+  ]
+}

@@ -1,0 +1,133 @@
+{
+  "schema": "interrupted-repair02-core-peer-view-v1",
+  "scope": "bounded source-only review under brief81635ab",
+  "verdict": "no remaining blocking source issue found; qualification and native admission not implied",
+  "author_freeze_confirmed": true,
+  "sources": [
+    {
+      "file": "durable_lifecycle.py",
+      "bytes": 32833,
+      "sha256": "3c8963eaa02bbc1d810ee2632d0363303bfe05ec6ceeef73771ca8005a00ece3",
+      "displayed_ranges": [
+        [
+          1,
+          360
+        ]
+      ]
+    },
+    {
+      "file": "generated_adapter_flow.py",
+      "bytes": 89924,
+      "sha256": "6a008136802d614ead53297f030dda3da01767ca8a63d313421f142c4d8a160b",
+      "displayed_ranges": [
+        [
+          1,
+          43
+        ],
+        [
+          174,
+          516
+        ],
+        [
+          564,
+          576
+        ],
+        [
+          639,
+          724
+        ],
+        [
+          1098,
+          1292
+        ]
+      ]
+    },
+    {
+      "file": "generated_journal_setup.py",
+      "bytes": 19100,
+      "sha256": "44bdaeeb7ba95b202d7fa0bfd202c8e95f3c5bbae4173786a71aa58071184c9c",
+      "displayed_ranges": [
+        [
+          1,
+          58
+        ],
+        [
+          186,
+          273
+        ]
+      ]
+    }
+  ],
+  "actual_records": [
+    {
+      "file": "INVENTORY01-ACTUAL.json",
+      "tool": "1d1c98",
+      "exit_code": 0,
+      "scope": "fixed preparation file inventory and three source hashes"
+    },
+    {
+      "file": "VIEW01-ACTUAL.json",
+      "tool": "d9d9d9",
+      "exit_code": 0,
+      "scope": "durable lines1-360"
+    },
+    {
+      "file": "VIEW02-ACTUAL.json",
+      "tool": "37a1d6",
+      "exit_code": 0,
+      "scope": "adapter lines1-43 and174-455"
+    },
+    {
+      "file": "VIEW03-ACTUAL.json",
+      "tool": "fce8e6",
+      "exit_code": 0,
+      "scope": "adapter456-516,564-576,639-724,1098-1225; journal1-58,186-273"
+    },
+    {
+      "file": "VIEW04-ACTUAL.json",
+      "tool": "e59573",
+      "exit_code": 0,
+      "scope": "adapter1225-1292; fixed controller and observer symbol locations"
+    },
+    {
+      "file": "ORDINARY-COMPARISON01-ACTUAL.json",
+      "tool": "cabce6",
+      "exit_code": 0,
+      "scope": "passive line-based text extraction/comparison of11 ordinary methods; retired reconcile unchanged after removing exactly one new busy guard"
+    }
+  ],
+  "comparison_normalization": "CRLF converted to LF and trailing whitespace at each extracted block end removed; no candidate parser/import/execution",
+  "ordinary_symbols": {
+    "generated_adapter_flow.py": [
+      "_retired",
+      "completion_evidence",
+      "confirm_teardown",
+      "controller_flow",
+      "controller_cancel_flow",
+      "controller_retired_recovery_flow"
+    ],
+    "generated_journal_setup.py": [
+      "before_process",
+      "before_close",
+      "before_recovery_close",
+      "complete",
+      "complete_recovery"
+    ],
+    "durable_lifecycle.py": {
+      "symbol": "reconcile_retired_owner",
+      "only_delta": "one added key-in-_interrupted_retirements busy guard"
+    }
+  },
+  "baseline_root": "docs/library/proof/runtime-owner-native-cancel-2026-09-13/native-preparation",
+  "prior_rejected_verdict": {
+    "path": "../interrupted-retirement-process-review01/VERDICT.md",
+    "sha256": "a494365364e83a056ad0716c8c1d821ec992723aa1f2248195048eb28cf24b74"
+  },
+  "limits": [
+    "Focused introduced code plus exact ordinary-method text comparisons, not a fresh full review of all baseline dependencies.",
+    "Passive file reads by the comparison are not represented as model-visible full-file view coverage.",
+    "All displayed outputs were within their returned token budgets; no truncated view is used as complete range evidence.",
+    "Reviewer authored the separate six-case test proposal; root independently reviews those tests and instrumentation.",
+    "No candidate import, compile, tests, Python startup, native call, artifact/support access, network or Git action."
+  ]
+}

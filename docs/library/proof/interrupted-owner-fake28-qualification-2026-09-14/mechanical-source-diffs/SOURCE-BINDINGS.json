@@ -1,0 +1,76 @@
+{
+  "schema": "uoink.interrupted-repair02-mechanical-inputs.v1",
+  "input_map": {
+    "bytes": 13831,
+    "sha256": "51b2fb644c69d496b935d84f84b46fa4a421745449c19a3a8160d57f42b7f63e"
+  },
+  "core": [
+    {
+      "name": "durable_lifecycle.py",
+      "original_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\docs\\library\\proof\\runtime-owner-native-cancel-2026-09-13\\native-preparation\\durable_lifecycle.py",
+      "original": {
+        "bytes": 19187,
+        "sha256": "ef1519262dc0762c96d86582e211e8c2d9dfcbf93d8a3a03b0a6fc4dba5de352"
+      },
+      "candidate_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\interrupted-owner-retirement-repair02\\durable_lifecycle.py",
+      "candidate": {
+        "bytes": 32833,
+        "sha256": "3c8963eaa02bbc1d810ee2632d0363303bfe05ec6ceeef73771ca8005a00ece3"
+      },
+      "raw_diff_original": "original/durable_lifecycle.py",
+      "raw_diff_candidate": "candidate/durable_lifecycle.py",
+      "forward_path": "reconstruction/forward/durable_lifecycle.py",
+      "reverse_path": "reconstruction/reverse/durable_lifecycle.py"
+    },
+    {
+      "name": "generated_adapter_flow.py",
+      "original_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\docs\\library\\proof\\runtime-owner-native-cancel-2026-09-13\\native-preparation\\generated_adapter_flow.py",
+      "original": {
+        "bytes": 56180,
+        "sha256": "4d1bc0ac6e25733b13cc2d16c327be23d90c68d22b1402736ff8147b302a0e8c"
+      },
+      "candidate_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\interrupted-owner-retirement-repair02\\generated_adapter_flow.py",
+      "candidate": {
+        "bytes": 89924,
+        "sha256": "6a008136802d614ead53297f030dda3da01767ca8a63d313421f142c4d8a160b"
+      },
+      "raw_diff_original": "original/generated_adapter_flow.py",
+      "raw_diff_candidate": "candidate/generated_adapter_flow.py",
+      "forward_path": "reconstruction/forward/generated_adapter_flow.py",
+      "reverse_path": "reconstruction/reverse/generated_adapter_flow.py"
+    },
+    {
+      "name": "generated_journal_setup.py",
+      "original_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\docs\\library\\proof\\runtime-owner-native-cancel-2026-09-13\\native-preparation\\generated_journal_setup.py",
+      "original": {
+        "bytes": 14954,
+        "sha256": "e6a0b9aab01c1ee4f8da948bd76b420c709d10b79b094026493384a2fe89d9d6"
+      },
+      "candidate_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\interrupted-owner-retirement-repair02\\generated_journal_setup.py",
+      "candidate": {
+        "bytes": 19100,
+        "sha256": "44bdaeeb7ba95b202d7fa0bfd202c8e95f3c5bbae4173786a71aa58071184c9c"
+      },
+      "raw_diff_original": "original/generated_journal_setup.py",
+      "raw_diff_candidate": "candidate/generated_journal_setup.py",
+      "forward_path": "reconstruction/forward/generated_journal_setup.py",
+      "reverse_path": "reconstruction/reverse/generated_journal_setup.py"
+    }
+  ],
+  "test_proposal": {
+    "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\interrupted-owner-retirement-repair02\\test_interrupted_owner_retirement.py",
+    "binding": {
+      "bytes": 27790,
+      "sha256": "c833cf67e5534c8a0c57e27ae6fec5cb8f6d2c68e8db6844ef7b47075998a2d0"
+    },
+    "changed_here": false,
+    "role": "new six-case source proposal; no diff application"
+  },
+  "rejected_test_reference": {
+    "path": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\31e8890c-ab8\\gemini\\_scratch\\interrupted-owned-session-retirement-implementation01\\test_interrupted_owner_retirement.py",
+    "bytes": 20770,
+    "sha256": "39f66d42d3a12e25546633b08e79af1bff6c25de4fcf59fa0b903eeae8e11625",
+    "provenance": "F09 of root INPUTS.json; reference retained, not reread here"
+  },
+  "scope": "Byte-identical source copies for raw no-index diff and disposable reconstruction only"
+}

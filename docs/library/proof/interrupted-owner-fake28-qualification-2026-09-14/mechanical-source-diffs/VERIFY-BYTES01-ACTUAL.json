@@ -1,0 +1,7 @@
+{
+  "chunk_id": "2b970f",
+  "wall_time_seconds": 0.329372,
+  "exit_code": 0,
+  "original_token_count": 103,
+  "output": "{\r\n  \"patches\": 3,\r\n  \"raw_diff_exits\": [\r\n    1,\r\n    1,\r\n    1\r\n  ],\r\n  \"reconstruction_checks\": 12,\r\n  \"all_original_and_derivative_bytes_unchanged\": true,\r\n  \"all_forward_and_reverse_hashes_exact\": true,\r\n  \"test_proposal_unchanged\": true,\r\n  \"disposable_text_copies_removed\": 12,\r\n  \"report\": {\r\n    \"bytes\": 6551,\r\n    \"sha256\": \"346ff375dbef0b01901b1b8c65ca6d2958df31acb223f35865585bb1a533c759\"\r\n  }\r\n}\r\n"
+}

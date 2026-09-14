@@ -1,0 +1,9 @@
+{
+  "approved": true,
+  "label": "interrupted-retirement-fake01",
+  "pins_sha256": "eb108b71b9f2a7d10db57efb2aa92b7b8df20a25bf44923ca273f456ab753bc1",
+  "scope": "generated_bytes_and_fake_ports_only",
+  "reviewer": "Astra",
+  "admission_commit": "e2801a587daba4467999f4c58ca21fe9c6957f27",
+  "prior_check": "c10a0a"
+}

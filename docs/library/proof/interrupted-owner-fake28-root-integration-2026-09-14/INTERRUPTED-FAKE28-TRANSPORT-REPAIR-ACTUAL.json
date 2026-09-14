@@ -1,0 +1,7 @@
+{
+  "chunk_id": "4034f0",
+  "wall_time_seconds": 0.7197437,
+  "exit_code": 0,
+  "original_token_count": 44,
+  "output": "{\"payloads\":404,\"restored\":363,\"manifest_sha256\":\"40ec76a51c897fe317ff09a03be31f0ade01653aa152b7bc401733f2f10720ce\",\"report\":\"_scratch/FAKE28-TRANSPORT-REPAIR02-RESULT.json\"}\n"
+}

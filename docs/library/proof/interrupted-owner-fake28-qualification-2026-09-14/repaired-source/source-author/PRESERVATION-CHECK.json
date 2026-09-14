@@ -1,0 +1,444 @@
+{
+  "checks": [
+    {
+      "file": "durable_lifecycle.py",
+      "name": "__enter__@4",
+      "instances": 1,
+      "equal_normalized_text": true
+    },
+    {
+      "file": "durable_lifecycle.py",
+      "name": "__exit__@4",
+      "instances": 1,
+      "equal_normalized_text": true
+    },
+    {
+      "file": "durable_lifecycle.py",
+      "name": "_flush_quarantine@4",
+      "instances": 1,
+      "equal_normalized_text": true
+    },
+    {
+      "file": "durable_lifecycle.py",
+      "name": "_record@4",
+      "instances": 1,
+      "equal_normalized_text": true
+    },
+    {
+      "file": "durable_lifecycle.py",
+      "name": "_token@4",
+      "instances": 1,
+      "equal_normalized_text": true
+    },
+    {
+      "file": "durable_lifecycle.py",
+      "name": "acquire_read@4",
+      "instances": 1,
+      "equal_normalized_text": true
+    },
+    {
+      "file": "durable_lifecycle.py",
+      "name": "admit_media_request@4",
+      "instances": 1,
+      "equal_normalized_text": true
+    },
+    {
+      "file": "durable_lifecycle.py",
+      "name": "begin_native_session@4",
+      "instances": 1,
+      "equal_normalized_text": true
+    },
+    {
+      "file": "durable_lifecycle.py",
+      "name": "begin_transcription@4",
+      "instances": 1,
+      "equal_normalized_text": true
+    },
+    {
+      "file": "durable_lifecycle.py",
+      "name": "cancel_transcription@4",
+      "instances": 1,
+      "equal_normalized_text": true
+    },
+    {
+      "file": "durable_lifecycle.py",
+      "name": "close_and_join@4",
+      "instances": 1,
+      "equal_normalized_text": true
+    },
+    {
+      "file": "durable_lifecycle.py",
+      "name": "confirm_native_closed@4",
+      "instances": 1,
+      "equal_normalized_text": true
+    },
+    {
+      "file": "durable_lifecycle.py",
+      "name": "confirm_quiescent@4",
+      "instances": 1,
+      "equal_normalized_text": true
+    },
+    {
+      "file": "durable_lifecycle.py",
+      "name": "is_issued_media_contract@4",
+      "instances": 1,
+      "equal_normalized_text": true
+    },
+    {
+      "file": "durable_lifecycle.py",
+      "name": "next_segment@4",
+      "instances": 1,
+      "equal_normalized_text": true
+    },
+    {
+      "file": "durable_lifecycle.py",
+      "name": "open_owned_session@4",
+      "instances": 1,
+      "equal_normalized_text": true
+    },
+    {
+      "file": "durable_lifecycle.py",
+      "name": "quarantine@4",
+      "instances": 1,
+      "equal_normalized_text": true
+    },
+    {
+      "file": "durable_lifecycle.py",
+      "name": "read_lease@4",
+      "instances": 1,
+      "equal_normalized_text": true
+    },
+    {
+      "file": "durable_lifecycle.py",
+      "name": "reconcile_retired_owner@4",
+      "instances": 1,
+      "equal_normalized_text": true
+    },
+    {
+      "file": "durable_lifecycle.py",
+      "name": "release_read@4",
+      "instances": 1,
+      "equal_normalized_text": true
+    },
+    {
+      "file": "durable_lifecycle.py",
+      "name": "start_owned_worker@4",
+      "instances": 1,
+      "equal_normalized_text": true
+    },
+    {
+      "file": "durable_lifecycle.py",
+      "name": "stop_unpublished@4",
+      "instances": 1,
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_adapter_flow.py",
+      "name": "_bind_contender@4",
+      "instances": 1,
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_adapter_flow.py",
+      "name": "_bind_retired_clear_probe@4",
+      "instances": 1,
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_adapter_flow.py",
+      "name": "_bound_cancel_journal@0",
+      "instances": 1,
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_adapter_flow.py",
+      "name": "_bound_worker_operations@0",
+      "instances": 1,
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_adapter_flow.py",
+      "name": "_consume_one_then_cancel@0",
+      "instances": 1,
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_adapter_flow.py",
+      "name": "_never_started@4",
+      "instances": 1,
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_adapter_flow.py",
+      "name": "_no_worker_retired@4",
+      "instances": 1,
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_adapter_flow.py",
+      "name": "_replace@0",
+      "instances": 1,
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_adapter_flow.py",
+      "name": "_require_retired@4",
+      "instances": 1,
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_adapter_flow.py",
+      "name": "_retired@4",
+      "instances": 1,
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_adapter_flow.py",
+      "name": "_retirement_matches@4",
+      "instances": 1,
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_adapter_flow.py",
+      "name": "acquire_read@4",
+      "instances": 1,
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_adapter_flow.py",
+      "name": "before_recovery_close@4",
+      "instances": 1,
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_adapter_flow.py",
+      "name": "bind_service_attempt@4",
+      "instances": 1,
+      "equal_normalized_text": false
+    },
+    {
+      "file": "generated_adapter_flow.py",
+      "name": "child_flow@0",
+      "instances": 1,
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_adapter_flow.py",
+      "name": "child_runtime_owner_flow@0",
+      "instances": 1,
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_adapter_flow.py",
+      "name": "completion_evidence@4",
+      "instances": 1,
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_adapter_flow.py",
+      "name": "confirm_teardown@4",
+      "instances": 1,
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_adapter_flow.py",
+      "name": "connect_durable_registry@4",
+      "instances": 1,
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_adapter_flow.py",
+      "name": "controller_cancel_flow@0",
+      "instances": 1,
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_adapter_flow.py",
+      "name": "controller_flow@0",
+      "instances": 1,
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_adapter_flow.py",
+      "name": "controller_retired_recovery_flow@0",
+      "instances": 1,
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_adapter_flow.py",
+      "name": "create_suspended@4",
+      "instances": 1,
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_adapter_flow.py",
+      "name": "finish_start@4",
+      "instances": 1,
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_adapter_flow.py",
+      "name": "generated_admit@4",
+      "instances": 1,
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_adapter_flow.py",
+      "name": "generated_authority_seams@0",
+      "instances": 1,
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_adapter_flow.py",
+      "name": "generated_bind@4",
+      "instances": 1,
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_adapter_flow.py",
+      "name": "generated_release@4",
+      "instances": 1,
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_adapter_flow.py",
+      "name": "interrupt_after_teardown@4",
+      "instances": 1,
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_adapter_flow.py",
+      "name": "lookup@8",
+      "instances": 1,
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_adapter_flow.py",
+      "name": "observe_interruption@4",
+      "instances": 1,
+      "equal_normalized_text": false
+    },
+    {
+      "file": "generated_adapter_flow.py",
+      "name": "observe_owned_worker@4",
+      "instances": 1,
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_adapter_flow.py",
+      "name": "policy_ack@0",
+      "instances": 1,
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_adapter_flow.py",
+      "name": "policy_payload@0",
+      "instances": 1,
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_adapter_flow.py",
+      "name": "release_read@4",
+      "instances": 1,
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_adapter_flow.py",
+      "name": "start_owned_worker@4",
+      "instances": 1,
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_journal_setup.py",
+      "name": "_confirmed_phase@4",
+      "instances": 1,
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_journal_setup.py",
+      "name": "_journal_handle@4",
+      "instances": 1,
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_journal_setup.py",
+      "name": "_scope@4",
+      "instances": 1,
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_journal_setup.py",
+      "name": "allow_create@4",
+      "instances": 1,
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_journal_setup.py",
+      "name": "before_close@4",
+      "instances": 1,
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_journal_setup.py",
+      "name": "before_process@4",
+      "instances": 1,
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_journal_setup.py",
+      "name": "before_recovery_close@4",
+      "instances": 1,
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_journal_setup.py",
+      "name": "complete_recovery@4",
+      "instances": 1,
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_journal_setup.py",
+      "name": "complete@4",
+      "instances": 1,
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_journal_setup.py",
+      "name": "confirm_creation@4",
+      "instances": 1,
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_journal_setup.py",
+      "name": "connect@4",
+      "instances": 1,
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_journal_setup.py",
+      "name": "journal_scope@4",
+      "instances": 1,
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_journal_setup.py",
+      "name": "observe@4",
+      "instances": 1,
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_journal_setup.py",
+      "name": "open@4",
+      "instances": 1,
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_journal_setup.py",
+      "name": "require@0",
+      "instances": 1,
+      "equal_normalized_text": true
+    }
+  ],
+  "scope": "Passive source-text block comparison; not Python parsing, compilation, imports or tests. Constructors and changed live-reconciliation observer excluded; the one added manager collision clause removed for comparison.",
+  "failures": 2
+}

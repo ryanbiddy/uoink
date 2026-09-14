@@ -89,6 +89,15 @@ accepted at `3b8f9e0`. Native inference, protected model loading,
 decoder/filter authority and the actual VAD-to-model link remain unqualified.
 No production runtime migration is accepted.
 
+The repaired interrupted-owner connection now passes 28 fixed cases and 57
+nested subtests in each independent copy, with no failures or skips. Author
+`70e7f4` and independent `dd5dc7` return 0; root check `9cdc98` verifies identical
+case objects, all 35 child-input hashes and all ten guards. Admission was
+committed at `e2801a5`. The original Gemini source proposal remains rejected at
+`0a1a211`. These new checks use inert system calls; native forced termination,
+the real runtime, production migration and release remain unqualified. See
+[the qualification verdict](ASTRA-INTERRUPTED-OWNER-FAKE28-VERDICT-2026-09-14.md).
+
 Ryan's approved D1 static checkpoint inspection is recorded at `4b38948`. One
 guarded invocation verified the fixed hash, ZIP inventory and version bytes,
 and found little-endian consistency in the two selected buffers. Only 1,002

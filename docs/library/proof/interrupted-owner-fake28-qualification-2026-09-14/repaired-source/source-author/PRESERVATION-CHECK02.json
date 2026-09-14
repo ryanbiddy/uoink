@@ -1,0 +1,371 @@
+{
+  "checks": [
+    {
+      "file": "durable_lifecycle.py",
+      "name": "_DurableKernel._record@4",
+      "equal_normalized_text": true
+    },
+    {
+      "file": "durable_lifecycle.py",
+      "name": "_DurableKernel.acquire_read@4",
+      "equal_normalized_text": true
+    },
+    {
+      "file": "durable_lifecycle.py",
+      "name": "_DurableKernel.admit_media_request@4",
+      "equal_normalized_text": true
+    },
+    {
+      "file": "durable_lifecycle.py",
+      "name": "_DurableKernel.begin_transcription@4",
+      "equal_normalized_text": true
+    },
+    {
+      "file": "durable_lifecycle.py",
+      "name": "_DurableKernel.cancel_transcription@4",
+      "equal_normalized_text": true
+    },
+    {
+      "file": "durable_lifecycle.py",
+      "name": "_DurableKernel.close_and_join@4",
+      "equal_normalized_text": true
+    },
+    {
+      "file": "durable_lifecycle.py",
+      "name": "_DurableKernel.confirm_quiescent@4",
+      "equal_normalized_text": true
+    },
+    {
+      "file": "durable_lifecycle.py",
+      "name": "_DurableKernel.is_issued_media_contract@4",
+      "equal_normalized_text": true
+    },
+    {
+      "file": "durable_lifecycle.py",
+      "name": "_DurableKernel.next_segment@4",
+      "equal_normalized_text": true
+    },
+    {
+      "file": "durable_lifecycle.py",
+      "name": "_DurableKernel.quarantine@4",
+      "equal_normalized_text": true
+    },
+    {
+      "file": "durable_lifecycle.py",
+      "name": "_DurableKernel.release_read@4",
+      "equal_normalized_text": true
+    },
+    {
+      "file": "durable_lifecycle.py",
+      "name": "_DurableKernel.start_owned_worker@4",
+      "equal_normalized_text": true
+    },
+    {
+      "file": "durable_lifecycle.py",
+      "name": "_DurableKernel.stop_unpublished@4",
+      "equal_normalized_text": true
+    },
+    {
+      "file": "durable_lifecycle.py",
+      "name": "_DurableLease.__enter__@4",
+      "equal_normalized_text": true
+    },
+    {
+      "file": "durable_lifecycle.py",
+      "name": "_DurableLease.__exit__@4",
+      "equal_normalized_text": true
+    },
+    {
+      "file": "durable_lifecycle.py",
+      "name": "_DurableLease.begin_native_session@4",
+      "equal_normalized_text": true
+    },
+    {
+      "file": "durable_lifecycle.py",
+      "name": "_DurableLease.confirm_native_closed@4",
+      "equal_normalized_text": true
+    },
+    {
+      "file": "durable_lifecycle.py",
+      "name": "DurableOwnedRuntimeFactory.open_owned_session@4",
+      "equal_normalized_text": true
+    },
+    {
+      "file": "durable_lifecycle.py",
+      "name": "DurableSnapshotLifecycle._flush_quarantine@4",
+      "equal_normalized_text": true
+    },
+    {
+      "file": "durable_lifecycle.py",
+      "name": "DurableSnapshotLifecycle._token@4",
+      "equal_normalized_text": true
+    },
+    {
+      "file": "durable_lifecycle.py",
+      "name": "DurableSnapshotLifecycle.read_lease@4",
+      "equal_normalized_text": true
+    },
+    {
+      "file": "durable_lifecycle.py",
+      "name": "DurableSnapshotLifecycle.reconcile_retired_owner@4",
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_adapter_flow.py",
+      "name": "_RetiredClearProbe._require_retired@4",
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_adapter_flow.py",
+      "name": "_RetiredClearProbe.before_recovery_close@4",
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_adapter_flow.py",
+      "name": "_RetiredClearProbe.bind_service_attempt@4",
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_adapter_flow.py",
+      "name": "_RetiredClearProbe.interrupt_after_teardown@4",
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_adapter_flow.py",
+      "name": "_RetiredClearProbe.observe_interruption@4",
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_adapter_flow.py",
+      "name": "._bound_cancel_journal@0",
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_adapter_flow.py",
+      "name": "._bound_worker_operations@0",
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_adapter_flow.py",
+      "name": "._consume_one_then_cancel@0",
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_adapter_flow.py",
+      "name": "._replace@0",
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_adapter_flow.py",
+      "name": ".child_flow@0",
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_adapter_flow.py",
+      "name": ".child_runtime_owner_flow@0",
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_adapter_flow.py",
+      "name": ".controller_cancel_flow@0",
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_adapter_flow.py",
+      "name": ".controller_flow@0",
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_adapter_flow.py",
+      "name": ".controller_retired_recovery_flow@0",
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_adapter_flow.py",
+      "name": ".generated_authority_seams@0",
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_adapter_flow.py",
+      "name": ".policy_ack@0",
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_adapter_flow.py",
+      "name": ".policy_payload@0",
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_adapter_flow.py",
+      "name": "GeneratedLifecyclePort._bind_contender@4",
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_adapter_flow.py",
+      "name": "GeneratedLifecyclePort._bind_retired_clear_probe@4",
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_adapter_flow.py",
+      "name": "GeneratedLifecyclePort._never_started@4",
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_adapter_flow.py",
+      "name": "GeneratedLifecyclePort._no_worker_retired@4",
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_adapter_flow.py",
+      "name": "GeneratedLifecyclePort._retired@4",
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_adapter_flow.py",
+      "name": "GeneratedLifecyclePort._retirement_matches@4",
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_adapter_flow.py",
+      "name": "GeneratedLifecyclePort.acquire_read@4",
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_adapter_flow.py",
+      "name": "GeneratedLifecyclePort.completion_evidence@4",
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_adapter_flow.py",
+      "name": "GeneratedLifecyclePort.confirm_teardown@4",
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_adapter_flow.py",
+      "name": "GeneratedLifecyclePort.connect_durable_registry@4",
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_adapter_flow.py",
+      "name": "GeneratedLifecyclePort.create_suspended@4",
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_adapter_flow.py",
+      "name": "GeneratedLifecyclePort.finish_start@4",
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_adapter_flow.py",
+      "name": "GeneratedLifecyclePort.generated_admit@4",
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_adapter_flow.py",
+      "name": "GeneratedLifecyclePort.generated_bind@4",
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_adapter_flow.py",
+      "name": "GeneratedLifecyclePort.generated_release@4",
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_adapter_flow.py",
+      "name": "GeneratedLifecyclePort.lookup@8",
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_adapter_flow.py",
+      "name": "GeneratedLifecyclePort.observe_owned_worker@4",
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_adapter_flow.py",
+      "name": "GeneratedLifecyclePort.release_read@4",
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_adapter_flow.py",
+      "name": "GeneratedLifecyclePort.start_owned_worker@4",
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_journal_setup.py",
+      "name": ".require@0",
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_journal_setup.py",
+      "name": "GeneratedJournalSetup._confirmed_phase@4",
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_journal_setup.py",
+      "name": "GeneratedJournalSetup._journal_handle@4",
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_journal_setup.py",
+      "name": "GeneratedJournalSetup._scope@4",
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_journal_setup.py",
+      "name": "GeneratedJournalSetup.allow_create@4",
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_journal_setup.py",
+      "name": "GeneratedJournalSetup.before_close@4",
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_journal_setup.py",
+      "name": "GeneratedJournalSetup.before_process@4",
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_journal_setup.py",
+      "name": "GeneratedJournalSetup.before_recovery_close@4",
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_journal_setup.py",
+      "name": "GeneratedJournalSetup.complete_recovery@4",
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_journal_setup.py",
+      "name": "GeneratedJournalSetup.complete@4",
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_journal_setup.py",
+      "name": "GeneratedJournalSetup.confirm_creation@4",
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_journal_setup.py",
+      "name": "GeneratedJournalSetup.connect@4",
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_journal_setup.py",
+      "name": "GeneratedJournalSetup.journal_scope@4",
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_journal_setup.py",
+      "name": "GeneratedJournalSetup.observe@4",
+      "equal_normalized_text": true
+    },
+    {
+      "file": "generated_journal_setup.py",
+      "name": "GeneratedJournalSetup.open@4",
+      "equal_normalized_text": true
+    }
+  ],
+  "scope": "Class-qualified source text blocks, not Python execution/parsing. Constructors and changed live observer excluded; sole manager collision clause removed.",
+  "failures": 0
+}

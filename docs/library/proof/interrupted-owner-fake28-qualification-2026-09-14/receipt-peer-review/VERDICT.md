@@ -1,0 +1,18 @@
+# Fake28 passive receipt verdict
+
+Both completed runs pass the independent receipt checks. Each contains 28 passed, zero failed and zero skipped cases, with 57 passing subtests. The complete ordered case objects match, including all nested outcomes. The original 22 IDs remain in order, the four inherited test files retain their exact historical pins, and the six repaired cases follow them.
+
+| Run | Actual outer tool | Case time | Outer time | Exit |
+| --- | --- | ---: | ---: | ---: |
+| Author | 70e7f4 | 0.3367143999785185 s | 1.7018688 s | 0 |
+| Independent | dd5dc7 | 0.3255256999982521 s | 1.448017 s | 0 |
+
+The raw child-native and qualification exits are also zero. Both outputs have exactly 46 files and no subdirectories. All 38 pinned payloads, their original/copy before-and-after bindings, three control records and 35 child-reported input hashes match the retained text. Both sets have all ten guard fields true, 12 metadata traps and 25 registry traps, with no recorded denials, heavy module roots or stderr.
+
+The independent preparation preserves 37 payloads exactly. Its one changed launcher has exactly five replacements of the fixed run label; all other launcher bytes match. Its separate pins and actual admission bind that derivative. False admission templates remain historical preparation records. The 38 copy relations and source-after records agree with disk hashes. The verifier checked all 178 text inputs again after reading them.
+
+The reviewer read the author's complete raw case list and both guard/exit/control summaries, then independently checked every raw case and binding in both runs with verify_receipts.ps1. The passive check ran once as tool 4bc27f, exit 0 in 0.769652 s. CHECK01-ACTUAL.json preserves that actual result; RESULT01.json contains the derived observations and exact read bindings. Original outer tool objects are copied unchanged as AUTHOR-RUN-ACTUAL.json and INDEPENDENT-RUN-ACTUAL.json. VIEW01-ACTUAL.json includes a PowerShell-rendered view of some timestamp fields; timestamp representation is not used as an acceptance condition, and the original JSON bytes remain bound unchanged.
+
+These are generated-data and fake-service observations. They cover the repaired adapter operation, quarantine, retained-owner checks and persistence logic through the declared inert boundaries. They do not measure Windows process retirement, actual handle inheritance, native storage durability, interruption by the OS, restart recovery or model behavior. Guard receipts are not a claim of a complete OS sandbox.
+
+The reviewer authored the separate six-case proposal and independently reviewed the core repair earlier; this step is an independent derivation from the two saved runs, not a third test run. No candidate import, compilation, Python startup, test/native execution, support/artifact read, network or Git change occurred during this review.

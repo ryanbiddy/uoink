@@ -1,0 +1,7 @@
+{
+  "chunk_id": "aa7257",
+  "wall_time_seconds": 0.191624,
+  "exit_code": 0,
+  "original_token_count": 96,
+  "output": "{\"author\":{\"label\":\"interrupted-retirement-fake01\",\"outer_chunk\":\"70e7f4\",\"passed\":28,\"failed\":0,\"skipped\":0,\"subtests\":57,\"guard_count\":10,\"child_inputs\":35,\"run_files\":46},\"independent_inputs_verified\":true,\"independent_map_sha256\":\"bf5917433c3e0220a79625b9a0708a3fbfa359dac8023a2b4b6ae1951048e4de\",\"source_relations\":{\"identical\":37,\"label_only\":1},\"independent_admission\":false}\n"
+}

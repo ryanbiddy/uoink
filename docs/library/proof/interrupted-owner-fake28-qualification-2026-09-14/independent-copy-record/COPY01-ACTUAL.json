@@ -1,0 +1,7 @@
+{
+  "chunk_id": "6c293e",
+  "wall_time_seconds": 0.7053362,
+  "exit_code": 0,
+  "original_token_count": 196,
+  "output": "{\r\n  \"target\": \"E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\_scratch\\\\astra-interrupted-retirement-confirmation01\",\r\n  \"payloads\": 38,\r\n  \"child_inputs\": 35,\r\n  \"independent_pins\": {\r\n    \"bytes\": 7774,\r\n    \"sha256\": \"bf5917433c3e0220a79625b9a0708a3fbfa359dac8023a2b4b6ae1951048e4de\"\r\n  },\r\n  \"launcher\": {\r\n    \"bytes\": 9144,\r\n    \"sha256\": \"5bab7ad46fb7d52cffe458e7e8f9d26e9aa198afd5b22047d41bc461f7f05e4f\"\r\n  },\r\n  \"template\": {\r\n    \"bytes\": 315,\r\n    \"sha256\": \"ea95254cea90b64e6851077e4a4ee4692c609e47386515d60e19915a3f832f58\"\r\n  },\r\n  \"copy_bindings\": {\r\n    \"bytes\": 36494,\r\n    \"sha256\": \"f041aebc73b0cfe06173869d24f97eb236447e6c7b6eeb66f9273af657c72845\"\r\n  },\r\n  \"actual_admission_absent\": true,\r\n  \"run_directory_absent\": true,\r\n  \"candidate_executed\": false\r\n}\n\r\n"
+}

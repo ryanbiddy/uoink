@@ -1,0 +1,279 @@
+{
+  "schema": "uoink.interrupted-retirement-source-preparation.v1",
+  "finalized": false,
+  "module_count": 33,
+  "modules": [
+    "plain_state_reader",
+    "state_bridge",
+    "owned_cpu_tensor_port",
+    "model_binding_registry",
+    "owned_factory_port",
+    "owned_guard",
+    "fake_torch_support",
+    "fixed_schema_helpers",
+    "worker_runtime_owner",
+    "reservation_file_port",
+    "snapshot_reservations",
+    "snapshot_lifecycle",
+    "durable_lifecycle",
+    "win32_worker_connection",
+    "windows_reservation_port",
+    "owned_generation_protocol",
+    "win32_private_pipe",
+    "pinned_buffer_namespace",
+    "inherited_readset",
+    "generated_worker_flow",
+    "generated_operation_flow",
+    "trusted_asr_resolver",
+    "asr_loading_adapter",
+    "generated_journal_setup",
+    "generated_writer_exclusion",
+    "generated_worker_factory_inputs",
+    "generated_worker_runtime_bridge",
+    "generated_adapter_flow",
+    "test_reservations",
+    "test_windows_reservations",
+    "test_journal_cancel",
+    "test_retired_owner_recovery",
+    "test_interrupted_owner_retirement"
+  ],
+  "frozen_rows": [
+    {
+      "path": "plain_state_reader.py",
+      "source_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\docs\\library\\proof\\runtime-owner-native-cancel-2026-09-13\\native-preparation\\plain_state_reader.py",
+      "status": "frozen_inherited",
+      "bytes": 10629,
+      "sha256": "3962d355cffe928f78b741d2d920cc9c727a9fbd10305e20462b60f4cef9990c"
+    },
+    {
+      "path": "state_bridge.py",
+      "source_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\docs\\library\\proof\\runtime-owner-native-cancel-2026-09-13\\native-preparation\\state_bridge.py",
+      "status": "frozen_inherited",
+      "bytes": 11316,
+      "sha256": "b3ff126f29942e7daaf51e463ca9f35c4c423b6c638dbc38e5246946a8b7a6b2"
+    },
+    {
+      "path": "owned_cpu_tensor_port.py",
+      "source_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\docs\\library\\proof\\runtime-owner-native-cancel-2026-09-13\\native-preparation\\owned_cpu_tensor_port.py",
+      "status": "frozen_inherited",
+      "bytes": 11768,
+      "sha256": "ac9eb28194723ffaf2d98bb2cd691a7b27b0a1638694fdfd8cb198c3084e8964"
+    },
+    {
+      "path": "model_binding_registry.py",
+      "source_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\docs\\library\\proof\\runtime-owner-native-cancel-2026-09-13\\native-preparation\\model_binding_registry.py",
+      "status": "frozen_inherited",
+      "bytes": 8732,
+      "sha256": "48567add0f0ac2ac9140e9aa86b06f077454c98e2f0773100da5ba070f7b3deb"
+    },
+    {
+      "path": "owned_factory_port.py",
+      "source_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\docs\\library\\proof\\runtime-owner-native-cancel-2026-09-13\\native-preparation\\owned_factory_port.py",
+      "status": "frozen_inherited",
+      "bytes": 15463,
+      "sha256": "2569853c7634b795e3d2cf717129ec3dbc4e11d96ddb347098dcc4fbc532f0d4"
+    },
+    {
+      "path": "owned_guard.py",
+      "source_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\docs\\library\\proof\\runtime-owner-native-cancel-2026-09-13\\native-preparation\\owned_guard.py",
+      "status": "frozen_inherited",
+      "bytes": 2109,
+      "sha256": "7672f614d81cf0be5e7bd408f8f856af328fe34e6ca7ee707c9d0db838e56d1f"
+    },
+    {
+      "path": "fake_torch_support.py",
+      "source_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\docs\\library\\proof\\runtime-owner-native-cancel-2026-09-13\\native-preparation\\fake_torch_support.py",
+      "status": "frozen_inherited",
+      "bytes": 5204,
+      "sha256": "5e1381eac70634292945422dfaf70786bb5fb96cbab7ea14a3fcc08fa29a185b"
+    },
+    {
+      "path": "fixed_schema_helpers.py",
+      "source_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\docs\\library\\proof\\runtime-owner-native-cancel-2026-09-13\\native-preparation\\fixed_schema_helpers.py",
+      "status": "frozen_inherited",
+      "bytes": 2837,
+      "sha256": "d61e9a48ecfa906862fedb5b91415f1d2a0b71adc27d3e43ef245842c9e5b188"
+    },
+    {
+      "path": "worker_runtime_owner.py",
+      "source_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\docs\\library\\proof\\runtime-owner-native-cancel-2026-09-13\\native-preparation\\worker_runtime_owner.py",
+      "status": "frozen_inherited",
+      "bytes": 12997,
+      "sha256": "5647023ed03c5acfd8b1aa981a56171dd92228ccc0972f12546bb0b3d411ce87"
+    },
+    {
+      "path": "reservation_file_port.py",
+      "source_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\docs\\library\\proof\\runtime-owner-native-cancel-2026-09-13\\native-preparation\\reservation_file_port.py",
+      "status": "frozen_inherited",
+      "bytes": 4694,
+      "sha256": "708554378ab8a8e6c4477e637c999256665cbd2855b94c6fa3c2d04a19d3a224"
+    },
+    {
+      "path": "snapshot_reservations.py",
+      "source_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\docs\\library\\proof\\runtime-owner-native-cancel-2026-09-13\\native-preparation\\snapshot_reservations.py",
+      "status": "frozen_inherited",
+      "bytes": 23634,
+      "sha256": "e80ae881fa4af9cc7d1a3e4a06624f5b19abe4de09aec3844e8a541449335b98"
+    },
+    {
+      "path": "snapshot_lifecycle.py",
+      "source_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\docs\\library\\proof\\runtime-owner-native-cancel-2026-09-13\\native-preparation\\snapshot_lifecycle.py",
+      "status": "frozen_inherited",
+      "bytes": 22138,
+      "sha256": "a80514aac6b1e75b9b872052852fa993a23cd5273b6bed4ffb4eef7404cb69dd"
+    },
+    {
+      "path": "win32_worker_connection.py",
+      "source_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\docs\\library\\proof\\runtime-owner-native-cancel-2026-09-13\\native-preparation\\win32_worker_connection.py",
+      "status": "frozen_inherited",
+      "bytes": 29660,
+      "sha256": "60d22036d6827205be5d0657af8e4693aa534605bdfb1b501878eb2a889fe25f"
+    },
+    {
+      "path": "windows_reservation_port.py",
+      "source_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\docs\\library\\proof\\runtime-owner-native-cancel-2026-09-13\\native-preparation\\windows_reservation_port.py",
+      "status": "frozen_inherited",
+      "bytes": 18234,
+      "sha256": "b93076ab07b8c0567f6608520c99f5e5523be3dd388010a5a49037a4a899f775"
+    },
+    {
+      "path": "owned_generation_protocol.py",
+      "source_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\docs\\library\\proof\\runtime-owner-native-cancel-2026-09-13\\native-preparation\\owned_generation_protocol.py",
+      "status": "frozen_inherited",
+      "bytes": 24403,
+      "sha256": "bd5204ef0d3fc2a459df19bc5f02fd7b6d78041e2306b4031ab888387aa362c0"
+    },
+    {
+      "path": "win32_private_pipe.py",
+      "source_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\docs\\library\\proof\\runtime-owner-native-cancel-2026-09-13\\native-preparation\\win32_private_pipe.py",
+      "status": "frozen_inherited",
+      "bytes": 18613,
+      "sha256": "73a1109a55f2bc807594655c71b24a3e35eb88d7f744497df2cc328dc224cae7"
+    },
+    {
+      "path": "pinned_buffer_namespace.py",
+      "source_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\docs\\library\\proof\\runtime-owner-native-cancel-2026-09-13\\native-preparation\\pinned_buffer_namespace.py",
+      "status": "frozen_inherited",
+      "bytes": 7893,
+      "sha256": "2cc25a7a254f35d802336ef121cc860887a4301b3257588438dddec392fe0b7b"
+    },
+    {
+      "path": "inherited_readset.py",
+      "source_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\docs\\library\\proof\\runtime-owner-native-cancel-2026-09-13\\native-preparation\\inherited_readset.py",
+      "status": "frozen_inherited",
+      "bytes": 12391,
+      "sha256": "02be8e04f4bea3030faf0882ae48ead40716c5782f95e2790e1a9897c5be76e3"
+    },
+    {
+      "path": "generated_worker_flow.py",
+      "source_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\docs\\library\\proof\\runtime-owner-native-cancel-2026-09-13\\native-preparation\\generated_worker_flow.py",
+      "status": "frozen_inherited",
+      "bytes": 22853,
+      "sha256": "1ab240d60ceaca130ac85f5d2e908ef5895da5297f35d78a1caba1c62e622238"
+    },
+    {
+      "path": "generated_operation_flow.py",
+      "source_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\docs\\library\\proof\\runtime-owner-native-cancel-2026-09-13\\native-preparation\\generated_operation_flow.py",
+      "status": "frozen_inherited",
+      "bytes": 21274,
+      "sha256": "6f09b4e6490b2078e792e49559a9dd0db95a895a778c31294a3577eeabdc98ed"
+    },
+    {
+      "path": "trusted_asr_resolver.py",
+      "source_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\docs\\library\\proof\\runtime-owner-native-cancel-2026-09-13\\native-preparation\\trusted_asr_resolver.py",
+      "status": "frozen_inherited",
+      "bytes": 13373,
+      "sha256": "16a5a1245f649a3eb04d077b661835503f08bef0ff8822dcb545176f0cc30833"
+    },
+    {
+      "path": "asr_loading_adapter.py",
+      "source_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\docs\\library\\proof\\runtime-owner-native-cancel-2026-09-13\\native-preparation\\asr_loading_adapter.py",
+      "status": "frozen_inherited",
+      "bytes": 12113,
+      "sha256": "635d2c22db75d12ffe6965fb656fdca47450ccbbaeb4d8cc8aaff9fcc79dd243"
+    },
+    {
+      "path": "generated_writer_exclusion.py",
+      "source_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\docs\\library\\proof\\runtime-owner-native-cancel-2026-09-13\\native-preparation\\generated_writer_exclusion.py",
+      "status": "frozen_inherited",
+      "bytes": 11647,
+      "sha256": "8173d7394f4a893c14d2979283a0c17ed273e25f196e14560590be3a0f22058b"
+    },
+    {
+      "path": "generated_worker_factory_inputs.py",
+      "source_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\docs\\library\\proof\\runtime-owner-native-cancel-2026-09-13\\native-preparation\\generated_worker_factory_inputs.py",
+      "status": "frozen_inherited",
+      "bytes": 6415,
+      "sha256": "dbf5f1859fbe6f90d0f892e5a8dc7652f7336b32f51bf1dec0278f5fecfca046"
+    },
+    {
+      "path": "generated_worker_runtime_bridge.py",
+      "source_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\docs\\library\\proof\\runtime-owner-native-cancel-2026-09-13\\native-preparation\\generated_worker_runtime_bridge.py",
+      "status": "frozen_inherited",
+      "bytes": 12096,
+      "sha256": "11eff72f6d96b5c4248987635b5373672da706e1ac0fac53188aac7a3a253716"
+    },
+    {
+      "path": "test_reservations.py",
+      "source_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\docs\\library\\proof\\retired-owner-recovery-qualification-2026-09-13\\proposal\\test_reservations.py",
+      "status": "frozen_inherited",
+      "bytes": 37737,
+      "sha256": "604a295d5e925b9a9d7f55750bfeb1ddcda3e6a9873d6d8d7f9e98c84d9b4b9e"
+    },
+    {
+      "path": "test_windows_reservations.py",
+      "source_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\docs\\library\\proof\\retired-owner-recovery-qualification-2026-09-13\\proposal\\test_windows_reservations.py",
+      "status": "frozen_inherited",
+      "bytes": 27701,
+      "sha256": "91b0de71eb55d088ee2fdbcd11ff3e6a074f18f713dfcd5b384814a1dc78300c"
+    },
+    {
+      "path": "test_journal_cancel.py",
+      "source_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\docs\\library\\proof\\retired-owner-recovery-qualification-2026-09-13\\proposal\\test_journal_cancel.py",
+      "status": "frozen_inherited",
+      "bytes": 8241,
+      "sha256": "b02f35091e45af10380d725de77fc84e1f3e4c42f8bd163e41c78222b4aa6b31"
+    },
+    {
+      "path": "test_retired_owner_recovery.py",
+      "source_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\docs\\library\\proof\\retired-owner-recovery-qualification-2026-09-13\\proposal\\test_retired_owner_recovery.py",
+      "status": "frozen_inherited",
+      "bytes": 15447,
+      "sha256": "1da9c5f8eefdad3ae4f2b22d8b632b242a2cb27296bbec6e6dd96c24da687f0c"
+    }
+  ],
+  "pending_rows": [
+    {
+      "path": "durable_lifecycle.py",
+      "source_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\interrupted-owner-retirement-repair02\\durable_lifecycle.py",
+      "status": "pending_author_freeze",
+      "bytes": null,
+      "sha256": null,
+      "inherited_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\docs\\library\\proof\\runtime-owner-native-cancel-2026-09-13\\native-preparation\\durable_lifecycle.py"
+    },
+    {
+      "path": "generated_journal_setup.py",
+      "source_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\interrupted-owner-retirement-repair02\\generated_journal_setup.py",
+      "status": "pending_author_freeze",
+      "bytes": null,
+      "sha256": null,
+      "inherited_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\docs\\library\\proof\\runtime-owner-native-cancel-2026-09-13\\native-preparation\\generated_journal_setup.py"
+    },
+    {
+      "path": "generated_adapter_flow.py",
+      "source_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\interrupted-owner-retirement-repair02\\generated_adapter_flow.py",
+      "status": "pending_author_freeze",
+      "bytes": null,
+      "sha256": null,
+      "inherited_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\docs\\library\\proof\\runtime-owner-native-cancel-2026-09-13\\native-preparation\\generated_adapter_flow.py"
+    },
+    {
+      "path": "test_interrupted_owner_retirement.py",
+      "source_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\interrupted-owner-retirement-repair02\\test_interrupted_owner_retirement.py",
+      "status": "pending_author_freeze",
+      "bytes": null,
+      "sha256": null,
+      "inherited_path": null
+    }
+  ]
+}

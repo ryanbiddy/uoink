@@ -1,0 +1,11 @@
+{
+  "approved": true,
+  "label": "interrupted-retirement-confirmation01",
+  "pins_sha256": "bf5917433c3e0220a79625b9a0708a3fbfa359dac8023a2b4b6ae1951048e4de",
+  "scope": "generated_bytes_and_fake_ports_only",
+  "reviewer": "Astra",
+  "admission_commit": "e2801a587daba4467999f4c58ca21fe9c6957f27",
+  "author_run": "70e7f4",
+  "author_and_independent_preparation_verification": "aa7257",
+  "review": "All 38 payloads verified: 37 exact copies, one launcher with five label-only replacements. All 35 child texts match. Author28/0/0 plus57 subtests, guards and child/outer exits0 are verified. One independent confirmation is admitted."
+}

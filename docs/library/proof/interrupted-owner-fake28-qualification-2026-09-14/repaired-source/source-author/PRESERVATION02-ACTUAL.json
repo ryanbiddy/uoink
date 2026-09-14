@@ -1,0 +1,7 @@
+{
+  "chunk_id": "3579ce",
+  "wall_time_seconds": 0.2791748,
+  "exit_code": 0,
+  "original_token_count": 30,
+  "output": "{\r\n  \"blocks\": 73,\r\n  \"failures\": [],\r\n  \"raw\": \"c73e96129360d7acd734f0bb79a5e168ff4644b6198d408f8d6f9918e464da0f\"\r\n}\r\n"
+}

@@ -1,0 +1,7 @@
+{
+  "chunk_id": "882803",
+  "wall_time_seconds": 1.7059194,
+  "exit_code": 0,
+  "original_token_count": 113,
+  "output": "{\"patch\":\"E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\_scratch\\\\interrupted-fake28-integration01.patch\",\"bytes\":5620528,\"sha256\":\"f4425fe82dd1772f9dfe2197678e942fe1669871794f528750b5ccc7f12cda19\",\"apply_exit\":0,\"stdout\":\"_scratch/interrupted-fake28-apply01.stdout.log\",\"stderr\":\"_scratch/interrupted-fake28-apply01.stderr.log\",\"transport\":\"Raw PowerShell7 native redirection; core.autocrlf=false for application; verify seal before staging.\"}\r\n"
+}

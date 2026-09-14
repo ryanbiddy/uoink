@@ -1,0 +1,98 @@
+$ErrorActionPreference = 'Stop'
+$taskRoot = 'E:\AI\projects\uoink\checkouts\Yoink-library'
+$taskDest = $PSScriptRoot
+$taskOld = Join-Path $taskRoot 'docs\library\proof\retired-owner-recovery-qualification-2026-09-13\proposal'
+$taskNative = Join-Path $taskRoot 'docs\library\proof\runtime-owner-native-cancel-2026-09-13\native-preparation'
+$taskFake33 = Join-Path $taskRoot 'docs\library\proof\runtime-owner-native-fake33-2026-09-13\author-preparation'
+$taskRepair = Join-Path $taskRoot '_scratch\interrupted-owner-retirement-repair02'
+$taskUtf8 = [Text.UTF8Encoding]::new($false)
+$taskLf = [string][char]10
+function Save-Text([string]$path,[string]$text) {
+    if (Test-Path -LiteralPath $path) { throw "Refuse overwrite: $path" }
+    [IO.File]::WriteAllText($path,$text,$taskUtf8)
+}
+function Save-Json([string]$path,$value) { Save-Text $path (($value | ConvertTo-Json -Depth 32) + [char]10) }
+function Binding([string]$path) {
+    $bytes=[IO.File]::ReadAllBytes($path)
+    return [ordered]@{bytes=$bytes.Length; sha256=[Convert]::ToHexString([Security.Cryptography.SHA256]::HashData($bytes)).ToLowerInvariant()}
+}
+function Exact-Replace([string]$text,[string]$old,[string]$new) {
+    if (($text.Split(@($old),[StringSplitOptions]::None).Count - 1) -ne 1) { throw "Expected exactly one fragment: $old" }
+    return $text.Replace($old,$new)
+}
+$taskModules=@(
+'plain_state_reader','state_bridge','owned_cpu_tensor_port','model_binding_registry',
+'owned_factory_port','owned_guard','fake_torch_support','fixed_schema_helpers','worker_runtime_owner',
+'reservation_file_port','snapshot_reservations','snapshot_lifecycle','durable_lifecycle',
+'win32_worker_connection','windows_reservation_port','owned_generation_protocol','win32_private_pipe',
+'pinned_buffer_namespace','inherited_readset','generated_worker_flow','generated_operation_flow',
+'trusted_asr_resolver','asr_loading_adapter','generated_journal_setup','generated_writer_exclusion',
+'generated_worker_factory_inputs','generated_worker_runtime_bridge','generated_adapter_flow',
+'test_reservations','test_windows_reservations','test_journal_cancel','test_retired_owner_recovery',
+'test_interrupted_owner_retirement')
+if ($taskModules.Count -ne 33) { throw 'Fixed 33 module names required' }
+$taskPending=@('durable_lifecycle.py','generated_adapter_flow.py','generated_journal_setup.py','test_interrupted_owner_retirement.py')
+$taskOldPins=Get-Content -LiteralPath (Join-Path $taskOld 'PINS.json') -Raw | ConvertFrom-Json
+$taskNativeMap=Get-Content -LiteralPath (Join-Path $taskNative 'SOURCE-INPUTS.json') -Raw | ConvertFrom-Json
+$taskOldByName=@{}
+foreach($row in $taskOldPins.files){$taskOldByName[$row.path]=$row}
+$taskBefore=Join-Path $taskDest 'before'
+New-Item -ItemType Directory -Path $taskBefore -ErrorAction Stop | Out-Null
+foreach($name in @('qualify_windows_reservations.py','run_preflight01.ps1','EXPECTED-CASES.json','PINS.json','QUALIFICATION-PROTOCOL.md','QUALIFICATION-ADMISSION-TEMPLATE.json')){
+    [IO.File]::WriteAllBytes((Join-Path $taskBefore $name),[IO.File]::ReadAllBytes((Join-Path $taskOld $name)))
+}
+$taskRows=@()
+foreach($name in $taskModules){
+    $file=$name+'.py'
+    $pending=$file -cin $taskPending
+    $origin=if($name.StartsWith('test_')){Join-Path $taskOld $file}else{Join-Path $taskNative $file}
+    if($pending){
+        $taskRows += [ordered]@{path=$file; source_path=(Join-Path $taskRepair $file); status='pending_author_freeze'; bytes=$null; sha256=$null; inherited_path=$(if($file -ceq 'test_interrupted_owner_retirement.py'){$null}else{$origin})}
+        continue
+    }
+    $actual=Binding $origin
+    $expected=if($name.StartsWith('test_')){$taskOldByName[$file].sha256}else{$taskNativeMap.source_sha256.$file}
+    if($actual.sha256 -cne $expected){throw 'Inherited source binding mismatch'}
+    [IO.File]::WriteAllBytes((Join-Path $taskDest $file),[IO.File]::ReadAllBytes($origin))
+    $copy=Binding (Join-Path $taskDest $file)
+    if($copy.sha256 -cne $actual.sha256 -or $copy.bytes -ne $actual.bytes){throw 'Text copy mismatch'}
+    $taskRows += [ordered]@{path=$file; source_path=$origin; status='frozen_inherited'; bytes=$actual.bytes; sha256=$actual.sha256}
+}
+$taskQualifier=[IO.File]::ReadAllText((Join-Path $taskOld 'qualify_windows_reservations.py'))
+$moduleLine=(@($taskQualifier -split '\r?\n' | Where-Object { $_.StartsWith('MODULES = ') }))[0]
+$newModuleLine='MODULES = ('+(($taskModules | ForEach-Object {'"'+$_+'"'}) -join ', ')+')'
+$taskQualifier=Exact-Replace $taskQualifier $moduleLine $newModuleLine
+$taskQualifier=Exact-Replace $taskQualifier 'import contextlib' ((@('import collections','import copy','import weakref','import typing','import encodings.utf_8_sig','import contextlib')) -join $taskLf)
+$taskQualifier=Exact-Replace $taskQualifier 'len(EXPECTED) == 22 and len(set(EXPECTED)) == 22' 'len(EXPECTED) == 28 and len(set(EXPECTED)) == 28'
+$taskQualifier=Exact-Replace $taskQualifier 'passed == 22' 'passed == 28'
+$taskQualifier=Exact-Replace $taskQualifier '"Generated bytes and fake Windows services; actual source paths exercised, native behavior unmeasured"' '"Original22 plus six interrupted-owner cases; fake Windows services only; native interruption, restart and model behavior unmeasured"'
+Save-Text (Join-Path $taskDest 'qualify_windows_reservations.py') $taskQualifier
+$taskLauncher=[IO.File]::ReadAllText((Join-Path $taskOld 'run_preflight01.ps1'))
+$taskLauncher=$taskLauncher.Replace('retired-recovery-fake01','interrupted-retirement-fake01').Replace('26-entry','38-entry').Replace('Count -ne 26','Count -ne 38').Replace('Count -eq 22','Count -eq 28').Replace('passed -eq 22','passed -eq 28').Replace('22 passed','28 passed')
+$taskLauncher=Exact-Replace $taskLauncher '$taskRows = @($taskPins.files)' @'
+if ($taskPins.finalized -cne $true -or @($taskPins.files | Where-Object { $_.status -ceq 'pending_author_freeze' }).Count -ne 0) {
+    throw 'Source preparation remains pending; no launch admitted'
+}
+$taskRows = @($taskPins.files)
+'@
+Save-Text (Join-Path $taskDest 'run_preflight01.ps1') $taskLauncher
+$taskNewMethods=@(
+'test_actual_adapter_interruption_preserves_error_and_quarantine',
+'test_confirmed_idle_owner_retires_and_reconciles_once',
+'test_foreign_stale_active_or_pending_attempt_refuses',
+'test_reentrant_or_clear_failure_preserves_first_error_and_gate',
+'test_retained_io_or_uncertain_handle_refuses_without_retirement',
+'test_unobserved_exit_nonempty_job_or_close_failure_retains_custody')
+$taskOriginal22=@(Get-Content -LiteralPath (Join-Path $taskOld 'EXPECTED-CASES.json') -Raw | ConvertFrom-Json)
+$taskNewIDs=@($taskNewMethods | ForEach-Object { 'test_interrupted_owner_retirement.InterruptedOwnerRetirementContracts.'+$_ })
+Save-Json (Join-Path $taskDest 'EXPECTED-CASES.json') @($taskOriginal22 + $taskNewIDs)
+Save-Json (Join-Path $taskDest 'SOURCE-ROWS.pending.json') ([ordered]@{schema='uoink.interrupted-retirement-source-preparation.v1'; finalized=$false; module_count=33; modules=$taskModules; frozen_rows=@($taskRows | Where-Object {$_.status -ceq 'frozen_inherited'}); pending_rows=@($taskRows | Where-Object {$_.status -ceq 'pending_author_freeze'})})
+$taskPreserved=@()
+foreach($name in @('generated_native_owner_fixture.py','generated_unit_cases.py','connection_cases.py','native_owner_cases.py','generated_bootstrap_fixture.py','generated_factory_fixture.py','EXPECTED-CASES.json','SOURCE-INPUTS.json','qualify_owner.py')){
+    $file=Join-Path $taskFake33 $name; $binding=Binding $file
+    $taskPreserved += [ordered]@{path=$file; bytes=$binding.bytes; sha256=$binding.sha256; action='reference_only_unchanged'; cases_executed=$false}
+}
+Save-Json (Join-Path $taskDest 'ORIGINAL33-REFERENCES.json') ([ordered]@{scope='Historical33 evidence preserved; no claim of 33 observations in proposed28'; files=$taskPreserved})
+Save-Json (Join-Path $taskDest 'DRAFT-TEXT-CHECK.json') ([ordered]@{module_count=33; frozen_modules=@($taskRows | Where-Object {$_.status -ceq 'frozen_inherited'}).Count; pending_modules=4; child_input_count=35; planned_pins_count=38; qualifier=(Binding (Join-Path $taskDest 'qualify_windows_reservations.py')); launcher=(Binding (Join-Path $taskDest 'run_preflight01.ps1')); expected=(Binding (Join-Path $taskDest 'EXPECTED-CASES.json')); executed_candidate=$false})
+Write-Output 'Prepared text-only draft: 33 module names, 29 inherited text copies, four pending rows; no candidate process.'
+
