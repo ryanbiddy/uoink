@@ -113,7 +113,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | Latest component council | Original partial report870fa00 supplemented at2339a09 | Gemini ca1e1356 records views of all39 omitted paths; Astra accepts three component verdicts with corrections and the explicit Inno1–150 boundary. Root verified all69 input bytes in both checkouts and all17 supplement payloads in Git/disk | Continue concrete runtime work. Full-line claims remain worker-reported; no overall release acceptance |
 | Generated reservation recovery | Component and evidence integrated at f9ab6fe | Author70b48e and independentfd86f5 each pass42 cases, with20 passing nested subtests and all10 guards valid. All123 proof payloads match Git/disk | Connect retained Windows gate/journal handles and split create/resume/startup. Native recovery and runtime acceptance remain open |
 | Windows reservation connection | Correction8fc3219; transfer2f4311f; native generated drain67887c3 | Unit70/0/0 plus35 subtests in both copies. Native d3d56f returns outer/controller/child0, valid guards, child0/job0, four confirmed phases/flushes and exact2,118B closed journal. All87 native proof payloads match Git/disk | Qualify remaining native exclusion/interruption/persistence/restart/reconciliation. Actual runtime-owner connection and real models remain open |
-| Worker/journal council | Briefd996dba; Gemini cede76cb original preserved at244cca5; root accuracy review FAILED | All70 paths have completed view metadata; canonical inputs and three manifests match. All19 failed-review proof payloads match Git/disk. Report misquotes the patch and conflates protocol/lock details; test results remain valid | Complete and freeze the three-group source-correction brief, then dispatch once. Session84611 closed707094/exit0; process completion is not acceptance |
+| Worker/journal council | Original244cca5 remains accuracy FAILED; correction brief e3ff5b0; Gemini371ebc24 running | Original70 path views remain metadata only. Correction binds33 exact files/440,045 bytes and6,422 required lines; all12 brief payloads match Git/disk | Wait for session42118 and review its one correction report. No duplicate dispatch, test rerun or broader acceptance |
 | Worker runtime owner and bootstrap | Owner at 1f200eb; actual bootstrap connection at bbe10d6 | Both copies pass17/0/0: eleven retained owner cases plus six bootstrap cases. Exact case objects, valid guards, unchanged19 inputs plus admission. All144 newest proof payloads match Git/disk | Connect exact ownership through native services. Real inference, PCM/filter, VAD-to-model binding and protected constructor routes remain open |
 | Integration | Reliability repair at e8d058f and notice packaging at 71d3e70 after tree09 | Reliability:53 focused cases plus13 subtests per root. Notices:20 Python/10 block cases per root. Tree09 at 56d9d4c remains2,796 passed/1 failed/3 skipped across2,800 cases plus13 subtests; it predates both repairs | Finish runtime work, then run a new committed complete tree and rebuild/reseal. Package08 and website/marketing remain held. No current-source package or installation credit |
 | Desktop incident | Isolation failed in package-07 attempt; corrected at `e10ba3a` | Ordinary Uoink and filesystem connectors launched; earlier live-index/5179 effects unknown. Owned job cleaned | No further override launch; only guarded Uoink dashboard observed for package 08 |
@@ -365,7 +365,17 @@ It excludes creation-transfer70, D1 and the newer native observation. Root rejec
 the original report's accuracy: it misquotes the exact approved patch and
 conflates protocol/exception/lock descriptions. Original and root verdict are
 preserved at244cca5; read ASTRA-WORKER-JOURNAL-COUNCIL-FAILED-VERDICT-2026-09-13.md.
-All19 proof payloads match Git/disk. Use a concrete source-correction brief.
+All19 proof payloads match Git/disk. Correction brief e3ff5b0 now freezes
+proof/worker-journal-council-correction-brief-2026-09-13/BRIEF.md,
+SHA74750efa942ab5e8f76e0ddcb2b42c1d9935e349b0183f318ea35a397753587a.
+Root e89711 verifies33 selected files/440,045 bytes against Git/disk;12 proof
+payloads/79,451 bytes match in57cd28. That command's final exit1 came from an
+optional missing-process inventory after successful proof and prose checks;
+no suite or candidate ran. Commit4de597/e3ff5b0 completed with exit0.
+Dispatch500400 starts one Gemini371ebc24 from that exact base, session42118.
+Wait and review its separate correction report; the original stays failed.
+The initial JavaScript dispatch expression had a syntax error before any nested
+tool; its template-literal repair and actual dispatch are retained in scratch.
 All70 selected paths have
 completed view metadata; full rendered-line coverage is still worker-reported.
 Session84611 closed707094 with exit0, which does not make the report accepted.
@@ -442,7 +452,12 @@ The authorized backup push of 01e22fb completed. Session 35629 closed at
 8d94c9 with push and remote-check exit 0; origin/cc/living-library matched
 01e22fb. The receipt is build/Uoink-Living-Library-branch-backup-2026-09-13-02.json,
 SHA3d8f033bb80e8cfb9a0fbcd0ef403879275671052bee48e9979b4796842c3dc7.
-Newer work remains local until the next authorized branch-only backup. No
+The next authorized branch-only backup targets5ad7c174, advanced locally by
+fast-forward compare-and-swap from01e22fb. Session84911 is waiting at GitHub's
+Select an account window; no successful push or remote receipt exists yet.
+Ryan has been asked to select his existing account because native UI control
+is unavailable in this session. Do not duplicate the active push. Newer work
+remains local. No
 candidate branch or main push, main merge or public release occurred.
 
 1. Signing review e922b3bf and local repairs are integrated at 0b3629d. Read
@@ -5630,3 +5645,26 @@ fixture excerpts also need source-specific correction. The bounded follow-up
 brief is being prepared from exact selected sources; no blind rerun or new
 product/test changes. Completed view metadata covers all70 paths, while displayed
 line coverage remains unverified independently. Website and marketing stay paused.
+
+### 2026-09-13 - Council correction dispatched; native proposal defects caught before execution
+
+Commit e3ff5b0 freezes the three-group source correction. Root checked the key
+owner/product/patch/protocol passages and all33 fixed file identities. The12
+brief payloads total79,451 bytes; seal
+1fc1cb137a6f7ed0e23539dcc95ea72f3a969878c1168316daace149adfeb8ee.
+Gemini run371ebc24, worker93e40f12, uses gemini-3.8-flash-high through the
+existing Antigravity subscription. Session42118 is active. The original report
+at244cca5 remains REVIEW_ACCURACY_FAILED. There is no new measurement authority.
+
+Independent review of the unexecuted writer-exclusion proposal found two startup
+wiring defects: a subclass fails the unchanged exact type check, and its hook
+receives an adapter startup object where it expects an internal sentinel. Keep
+proposal01 and the source verdict c5cc7dfe. A fresh derivative is being prepared
+with the exact original port and a hook after existing authority validation.
+No native invocation occurred. Review the derivative before any new admission.
+
+D2's dormant proposal also has a documented pre-execution reporting correction:
+an active-at-exit field must not claim that temporary profile activation never
+occurred. A fresh source derivative is being prepared. D1 remains resolved at
+4b38948 and must not be repeated. D2 conversion, fetch, runtime, release and
+website/marketing gates remain closed.

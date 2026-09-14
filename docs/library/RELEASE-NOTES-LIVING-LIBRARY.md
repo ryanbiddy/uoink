@@ -42,8 +42,9 @@ ownership/failure controls. These use fake services; actual Windows journal
 normal drain is now observed at `67887c3`: child exit0, empty job, four confirmed
 phases/flushes and exact closed journal bytes. Crash/recovery and real models
 remain unqualified. Gemini's worker/journal report from brief `d996dba` is preserved
-with a failed accuracy verdict at `244cca5`. A correction is required before
-acceptance; the underlying test outcomes remain unchanged.
+with a failed accuracy verdict at `244cca5`. Correction brief `e3ff5b0` is now
+running as Gemini371ebc24 against33 fixed source files. Its report still needs
+Astra review; the underlying test outcomes remain unchanged.
 
 The worker runtime owner at `1f200eb` passes the same 11 generated cases in both
 copies. It refuses result publication after VAD retirement, product/module
