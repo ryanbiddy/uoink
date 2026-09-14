@@ -6620,3 +6620,17 @@ remain preserved. Prepare the combined original46/new13 instrument next. The
 bounded generated engine-ownership transaction is written and awaits source
 review. Production remains71d3e70; D1/D2, full-tree/package/install and market
 gates keep their existing dispositions.
+
+### 2026-09-14 — Caller qualification backed up; metadata regression preparation
+
+Commit4a01ef2d5da474bec40ebb6453483a1761fb6f1a contains the qualified dormant
+caller,150 verified payloads and current notes. Checked local branch fast-forward
+99ce3c9→4a01ef2 preceded pushdb65b7/0; remote check32cd59/0 confirms exactly
+4a01ef2 on origin/cc/living-library. No other branch was pushed or merged.
+
+The combined metadata instrument preserves all original46 lifecycle controls
+and adds corrected13 controls. It remains source preparation only. Its fake
+registry lock correction and the two prospective reliability test conflicts
+are recorded in INTEGRATOR-CONTRACT-CONFLICTS-2026-09-08.md. The engine ownership
+repair's independent source review is next; no constructor or backend gate is
+opened by either proposal.

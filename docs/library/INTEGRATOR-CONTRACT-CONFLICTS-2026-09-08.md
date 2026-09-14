@@ -256,3 +256,33 @@ admission7316e53, both copies pass30/0/0 plus62 subtests, preserving all origina
 28 case objects and57 subtests. Root50475b verifies the receipts; the one-page
 review is ASTRA-PRELOCK30-QUALIFICATION-VERDICT-2026-09-14.md. Native01 remains
 failed. A fresh full candidate tree is still required after runtime source work.
+
+## 2026-09-14 — new metadata fixture correction before first execution
+
+Independent source review of the unexecuted completion-info proposal01 found
+that its fake port issued metadata outside the publication lock required by
+PORT-CONTRACT.md. The new fixture now takes `self.manager._lock` and asserts
+ownership before its two registry assignments. Exact one-hunk diff:
+_scratch/asr-completion-info-proposal02/test_completion_info.diff, SHA256
+d8be0fb6e0de58356aa83fe04876742eb14f5198c77de77ec23ebd9fd2a37e1e.
+The original file and correction-required verdictaf448cd9 remain preserved.
+
+This changes newly authored fixture preparation before its first execution;
+no accepted test or behavior assertion changes. All13 proposed case bodies,
+the original46 lifecycle controls and lifecycle source22b66293 are unchanged.
+Passivecaca11 verifies the exact replacement; no measured failure is converted
+to a pass. The combined59-case instrument still needs source review/admission.
+The repair reason and scope are in FIXTURE-REGISTRY-LOCK-REPAIR02.md beside the
+diff. A later full candidate tree remains required after production migration.
+
+## 2026-09-14 — prospective reliability caller test conflicts
+
+The qualified dormant reliability source0165e56a routes ordinary detection
+through a privately admitted media ticket, TranscribeRequest and SegmentStream.
+The two existing raw-loader fixtures at test_reliability_local_only_load.py
+lines55–68 and101–113 expect a raw constructor call. Its exact caller delta is
+preserved in proof/reliability-request-stream-fake11-2026-09-14/proposal/uoink_reliability.diff.
+Both fake11 copies pass the new caller controls at4a01ef2, while production and
+the existing tests remain unchanged. This is a prospective integration conflict,
+not an observed full-tree failure. Do not patch tests or route around mocks;
+prepare an exact reviewed adaptation for Ryan before production migration.
