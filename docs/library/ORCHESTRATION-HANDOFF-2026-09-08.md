@@ -542,11 +542,14 @@ The authorized backup push of 01e22fb completed. Session 35629 closed at
 8d94c9 with push and remote-check exit 0; origin/cc/living-library matched
 01e22fb. The receipt is build/Uoink-Living-Library-branch-backup-2026-09-13-02.json,
 SHA3d8f033bb80e8cfb9a0fbcd0ef403879275671052bee48e9979b4796842c3dc7.
-The next authorized branch-only backup completed at 5ad7c174. Session 84911
-closed as c29af6/exit 0; passive remote verification afdff6 confirms the full
-5ad7c174fca197581dc73b5f2410d7c2d54985bc commit. Its account-selection blocker
-is resolved. Do not poll the closed session or recreate that push. Newer work
-will be backed up after integration using another fast-forward compare-and-swap.
+The latest authorized branch-only backup is verified at
+6730c8eeb99df3ea97135c96dea8c70212f8cd1f (push d0c897, remote 9caca9).
+The previous 5ad7c174 push also completed. Sessions 84911 and 5313 are closed;
+do not poll or recreate them. The latter was cancelled at Git's account picker,
+then retried with the already authenticated GitHub CLI helper in per-process
+Git configuration. No global credential settings changed. Remove trace
+environment variables before future backups: GIT_CURL_VERBOSE=0 still enables
+HTTP tracing. Use the same authorized branch and fast-forward compare-and-swap.
 No
 candidate branch or main push, main merge or public release occurred.
 
@@ -6139,3 +6142,22 @@ confirms origin/cc/living-library at 5ad7c174fca197581dc73b5f2410d7c2d54985bc.
 Its previous account-selection entries are historical; newer completed work is
 next for the same authorized branch-only backup. D1/D2 remain complete, and
 real runtime, full-tree, package, installation and market acceptance stay open.
+
+### 2026-09-13 — Branch backup verified through native-owner evidence
+
+The branch-only backup now matches completed candidate
+6730c8eeb99df3ea97135c96dea8c70212f8cd1f. The first new push waited on account
+selection (f77852/6f59b0); only its verified process tree was cancelled, and
+session 5313 returned exit 1 as 04c433. Remote d13c08 still showed 5ad7c174.
+The existing GitHub CLI sign-in was confirmed as ryanbiddy without printing a
+token. A per-process credential-helper selection allowed the same authorized
+push to complete as d0c897/exit 0; remote 9caca9 confirms the exact new commit.
+No global credential setting, main/candidate push or force push was used.
+
+The repaired command mistakenly set GIT_CURL_VERBOSE to the string 0; presence
+still enables its HTTP trace. The returned object is truncated and preserved
+as returned, with no missing output reconstructed. Remove that environment
+variable before future calls rather than assigning 0. The authentication repair
+brief and original waiting/cancelled/repaired outcomes remain under _scratch.
+The full taskkill tool object was not saved; its observed 561f5e result is not
+reconstructed. These were backup operations, not product measurements.
