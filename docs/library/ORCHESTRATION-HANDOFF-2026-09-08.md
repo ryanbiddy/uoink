@@ -100,6 +100,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | Runtime source review | Gemini loader council and Torch source comparison integrated at a2e6e7c | Gemini found no new actionable defect within the three components' synthetic scope; Astra accepts with timestamp, path and native-open corrections. Torch collector passed 40 cases in each root; 23 admitted HTTP body pairs verified. All 38 council, 199 source and seven root-verification payloads match Git/disk | Repair dormant D1 and ASR qualification exit-recording gaps, qualify fake-port orchestration, implement tensor bridge and real runtime ports. No native, installed or release clearance |
 | Signing | Gemini review and repaired path integrated at 0b3629d | 48 focused passes; 77 proof payloads match Git. Real Inno direct callback refuses missing certificate and keeps a durable error. No successful signing credit | Full combined candidate tree after runtime work settles; actual certificate/service choice remains Ryan's |
 | D1 static inspection | Ryan's exact static approval and observed result integrated at 4b38948 | One invocation b29f6c returns outer/child0 with valid guards; exact checkpoint hash and131-member inventory match;1,002 interpreted bytes/version330a; little-endian maximum2ULP. All61 evidence payloads match Git/disk | D1 inspection is complete. Writer/other-storage validation and D2 conversion/D3 acquisition/D4 native execution remain separate; no model or release credit |
+| D2 local conversion preparation | Generated adapter and owner proposal committed at017b559 | Both copies pass23/0/0/0 with exact cases, nine valid guards,25 registry traps and actual exits0. All124 proof payloads match Git/disk; real parent/child reviewed but unexecuted | Ask Ryan for the exact local-only conversion and four profile assumptions. Three real owner pins remainNone; no checkpoint access until separate approval/admission |
 | State bridge | Synthetic orchestration integrated at 2b9068a | Author and Astra each 61 passed / 0 failed / 0 skipped, exact cases and valid guards. All 59 proof payloads match Git/disk and map 83 logical files | CPU port now qualified with fake APIs at 3801cee; implement the concrete factory service and qualify native independence separately. Real entry points remain closed |
 | CPU tensor port | Concrete method bodies qualified with fake storage at 3801cee | Author and Astra each 60 passed / 0 failed / 0 skipped, exact ordered cases and ten valid final guards. All 45 proof payloads match Git/disk and map 67 logical files | Implement factory ownership and actual runtime services. Native allocation, float conversion, storage/view behavior and cleanup remain untested; no market clearance |
 | VAD factory registry | Concrete factory and worker-local model registration integrated at 803df4b | Author and Astra each 59 passed / 0 failed / 0 skipped; all ten guards valid and 65 proof payloads match Git/disk, preserving 119 logical files | Gemini component review accepted at 488a7fd for tested scope; actual runtime bootstrap, native semantics and numerical behavior remain open |
@@ -175,6 +176,18 @@ at the same retained directory, with all five other identity fields unchanged.
 Preserve that failure and prepare the stable-directory product repair. Keep the
 original70 test bodies and strict regular-file identity/size checks; no fixture
 change. Native exclusion, restart/recovery and actual runtime remain unaccepted.
+
+D2 generated adapter qualification is committed at017b559. Read
+ASTRA-D2-FAKE23-VERDICT-2026-09-13.md and
+D2-LOCAL-CONVERSION-DECISION-2026-09-13.md. Authora23605 and independent950011
+each pass the same23 cases with zero failures/errors/skips/subtests; both actual
+and recorded exits are0. Rootbadfc7 verifies cases, guards and unchanged inputs.
+All124 proof payloads match Git/disk. The real parent/child/wrapper and profile
+are reviewed; no concrete additional prerequisite test was identified before
+asking the owner. These23 cases do not qualify those real boundaries. Obtain
+Ryan's exact D2 decision before binding the three real owner pins and issuing a
+fresh root admission. D1 must not repeat; D3/D4 remain separate. Continue the
+independent Windows identity and runtime engineering while this decision waits.
 
 Reliability repair is accepted at e8d058f. Read
 ASTRA-RELIABILITY-CONSENT-VERDICT-2026-09-13.md and its 19-payload proof with
@@ -1111,6 +1124,14 @@ core.longpaths true` must stay set (worktree checkouts fail without it).
 
 ## Blockers for Ryan
 
+- D2 local conversion is ready for a decision at017b559. See
+  D2-LOCAL-CONVERSION-DECISION-2026-09-13.md: one existing checkpoint to one fresh
+  Safetensors output,23 storages/54 fixed ranges. Approval must accept uniform
+  raw-storage writer and little-endian IEEE754-binary32 assumptions, dense ranges
+  with omitted legacy metadata, and local-only conversion while the complete
+  model notice remains unresolved. D1 sampled two buffers; it did not validate
+  every storage's meaning. No pickle evaluation, model, reader activation,
+  network or redistribution is included. Actual D2 remains unapproved.
 - D1 static inspection is resolved: Ryan answered "Approve D1 static inspection
   only" and the exact admitted invocation b29f6c completed with outer/child0,
   valid guards and 1,002 interpreted bytes. The fixed checkpoint hash,131-member
@@ -5720,3 +5741,22 @@ and controller1. The new passive diagnostic reports prefix7/depth9: size changed
 run remains FAILED. Source work now targets stable directory identity while
 preserving strict regular-file size and every original test assertion. No D1
 repeat, model, package, installation or release activity occurred.
+
+### 2026-09-13 — D2 adapter qualified; exact owner proposal ready
+
+Commit017b559 preserves the dormant source, pre-execution repairs, original
+unchanged23 assertions and both successful generated runs. Authora23605 and
+independent950011 return actual/native/qualification0; each23/0/0/0 with nine
+valid guards and25 registry traps. Paircheckbadfc7 confirms exact ordered cases
+and source/control hashes. Rootcb64e6 verifies124 payloads/609,211 bytes against
+Git/disk; seal617c5e38011a1eb8f4fb031975ca76ce3ff4e285a2154f6abe0da02e67a1d676.
+No real converter or checkpoint ran. Earlier preparation stops are preserved
+as preparation failures, without changing measured results.
+
+Independent readiness review found no remaining material source blocker before
+the D2 owner question. Its earlier d19350 raw tool object was not retained; the
+separately saved fresh text checke329db is labeled accurately and is not its
+reconstruction. The real parent/child and filesystem behavior remain unqualified
+by fake23. D2-LOCAL-CONVERSION-DECISION-2026-09-13.md gives the exact scope and
+four assumptions; the owner pins remainNone. D1 stays complete at4b38948 and
+must not be repeated. Runtime, complete tree, packaging and release remain open.

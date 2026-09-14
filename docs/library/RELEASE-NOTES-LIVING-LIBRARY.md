@@ -67,6 +67,12 @@ payload bytes were interpreted; no pickle evaluation, conversion, model or
 download ran. This resolves the inspection step. It does not authenticate the
 writer, qualify other storage values or approve model/runtime execution.
 
+The dormant D2 conversion adapter is qualified at `017b559`: two copies pass
+the same 23 generated cases, with zero failures/errors/skips and valid guards.
+All 124 proof payloads match Git/disk. The reviewed local conversion proposal
+awaits Ryan's separate decision; no real converter, output persistence, model
+reader or runtime was exercised by these checks.
+
 Package 08 remains the latest built and installed review artifact. It includes
 the native note and saved-media repairs at `d2caac5` and `60d203f`; its source
 is `b8e44fb`. Its recorded installation, browser, CLI and native Uoink checks
