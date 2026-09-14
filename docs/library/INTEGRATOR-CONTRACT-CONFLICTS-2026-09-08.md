@@ -217,3 +217,9 @@ is outside Ryan's named September 9 fixture scope and awaits his ruling.
 Read ASTRA-WINDOWS-RESERVATION-FAILED-VERDICT-2026-09-13.md. The failed result,
 earlier source-review oversight and exact source inputs remain preserved; no
 rerun or independent confirmation has occurred.
+
+Ryan subsequently answered "Approve the two-line correction" to the explicit
+question tied to commit58335df. The exact proposed patch is now authorized.
+Fresh label02 and a repair brief will preserve the unchanged implementation,
+all65 case IDs and every other assertion. This approval does not change the
+original failed result or authorize further fixture corrections.

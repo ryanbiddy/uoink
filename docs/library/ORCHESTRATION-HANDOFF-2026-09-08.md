@@ -112,8 +112,8 @@ establish safe installation isolation, and verify/correct resulting findings.
 | Local wheel graph and notices | Graph at 616f670; cached wheels at 95a7f29; source notices at d887f8a; council at ca61046; installer source fix at 71d3e70 | Notice author and actual checkout each pass20 Python cases and10 inert build-block cases. All128 proof payloads and four product notice files match Git/disk. Metadata graph passes144pins/287edges; conflict remains explicit | Verify fresh inventory and installed notice bytes in the eventual candidate. Native compatibility and release security remain open |
 | Latest component council | Original partial report870fa00 supplemented at2339a09 | Gemini ca1e1356 records views of all39 omitted paths; Astra accepts three component verdicts with corrections and the explicit Inno1–150 boundary. Root verified all69 input bytes in both checkouts and all17 supplement payloads in Git/disk | Continue concrete runtime work. Full-line claims remain worker-reported; no overall release acceptance |
 | Generated reservation recovery | Component and evidence integrated at f9ab6fe | Author70b48e and independentfd86f5 each pass42 cases, with20 passing nested subtests and all10 guards valid. All123 proof payloads match Git/disk | Connect retained Windows gate/journal handles and split create/resume/startup. Native recovery and runtime acceptance remain open |
-| Windows reservation connection | First generated unit retained at 58335df | 63 passed / 2 failed / 0 skipped; 33 nested subtests, six failed. All ten guards and inputs valid. All 120 proof payloads match Git/disk | Two new exception expectations conflict with unchanged KernelUnconfirmed behavior. Proposed two-line correction awaits Ryan; no rerun. Continue separate native source preparation |
-| Worker runtime owner | Generated component and publication repair integrated at1f200eb | Author9889ba and independentc636d0 each pass11 cases, with zero failures/skips, exact case objects and valid guards. All152 proof payloads match Git/disk | Connect exact owner to the worker bootstrap and completed VAD registration. Real inference, PCM/filter and protected constructor routes remain open |
+| Windows reservation connection | First generated unit retained at 58335df | 63 passed / 2 failed / 0 skipped; 33 nested subtests, six failed. All ten guards and inputs valid. All 120 proof payloads match Git/disk | Ryan approved the exact two-line exception correction. Prepare fresh label02 and verify all65 cases without other assertion changes. Native source preparation continues |
+| Worker runtime owner and bootstrap | Owner at 1f200eb; actual bootstrap connection at bbe10d6 | Both copies pass17/0/0: eleven retained owner cases plus six bootstrap cases. Exact case objects, valid guards, unchanged19 inputs plus admission. All144 newest proof payloads match Git/disk | Connect exact ownership through native services. Real inference, PCM/filter, VAD-to-model binding and protected constructor routes remain open |
 | Integration | Reliability repair at e8d058f and notice packaging at 71d3e70 after tree09 | Reliability:53 focused cases plus13 subtests per root. Notices:20 Python/10 block cases per root. Tree09 at 56d9d4c remains2,796 passed/1 failed/3 skipped across2,800 cases plus13 subtests; it predates both repairs | Finish runtime work, then run a new committed complete tree and rebuild/reseal. Package08 and website/marketing remain held. No current-source package or installation credit |
 | Desktop incident | Isolation failed in package-07 attempt; corrected at `e10ba3a` | Ordinary Uoink and filesystem connectors launched; earlier live-index/5179 effects unknown. Owned job cleaned | No further override launch; only guarded Uoink dashboard observed for package 08 |
 
@@ -328,15 +328,20 @@ migration are now prepared. Their first fake-service unit is FAILED at 58335df:
 63/2/0 across 65 cases, plus 33 subtests with six failures. Read
 ASTRA-WINDOWS-RESERVATION-FAILED-VERDICT-2026-09-13.md. Two new controls expect
 AssertionError where the inherited helper raises KernelUnconfirmed. Later
-retention assertions in those branches remain unverified. No product or test
-change and no rerun is authorized by that diagnosis. The unapplied two-line
-correction is under Blockers for Ryan; native source preparation continues.
+retention assertions in those branches remain unverified. Ryan subsequently
+approved the exact two-line correction in response to the reviewable patch.
+Prepare label02, a new brief and pins; change only those two expectations.
+No other fixture or product changes are covered. Native source preparation
+continues independently, and the first result remains failed.
 The worker runtime owner is qualified at1f200eb; read
 ASTRA-WORKER-RUNTIME-OWNER-VERDICT-2026-09-13.md. Both root-executed copies pass
 the same11 generated cases. Publication now checks active VAD/product/model
-lease under its lock. All152 proof payloads match Git/disk. Connect the owner
-to the existing WorkerBootstrap with its exact registry identity and operation
-phases next; real loader, inference, PCM and filter authority remain closed.
+lease under its lock. All152 proof payloads match Git/disk. Its actual
+WorkerBootstrap connection is now accepted at bbe10d6: root authorb6d2c5 and
+independent6dad03 each pass17/0/0, with the same case objects and valid guards.
+All144 new proof payloads match Git/disk. Read ASTRA-WORKER-BOOTSTRAP-VERDICT-
+2026-09-13.md. Continue the actual native connection; real loader, inference,
+PCM, filter and VAD-to-model binding remain closed or unqualified.
 The next Gemini source review is frozen in
 proof/notices-operations-adapter-council-brief-2026-09-13/BRIEF.md,
 SHA1a5b1be80e7f4443cd7096026b75ad32ea992e702cb5af8763773be01776d149.
@@ -1050,14 +1055,6 @@ core.longpaths true` must stay set (worktree checkouts fail without it).
 
 ## Blockers for Ryan
 
-- Decide the unapplied two-line correction in
-  proof/windows-reservation-failed-2026-09-13/preparation/fixture-correction.UNAPPLIED.patch.txt
-  (58335df). It changes only two new tests to expect the existing
-  KernelUnconfirmed class instead of AssertionError. All message, fault and
-  retention assertions stay unchanged. The first run remains 63/2/0, with
-  six failed subtests; no retry has occurred. Your standing assertion rule
-  and five named September 9 corrections do not cover this new expectation
-  change. Review ASTRA-WINDOWS-RESERVATION-FAILED-VERDICT-2026-09-13.md.
 - D1 is now a concrete optional static inspection decision: read
   ASTRA-D1-INVOCATION-REVIEW-2026-09-13.md (f0602f8) and the earlier
   ASTRA-VAD-D1-ADAPTER-VERDICT-2026-09-13.md (381985c). The reviewed adapter
@@ -5466,3 +5463,22 @@ Backup session 35629 completed at 8d94c9. Push and remote check both return 0,
 and origin/cc/living-library matches 01e22fb. Earlier waiting entries are
 historical. Newer work remains local. The separate WorkerBootstrap connection
 has now passed both 17-case generated runs; its evidence integration follows.
+
+### 2026-09-13 - Bootstrap connection qualified; exact test correction approved
+
+Commit bbe10d6 accepts the actual WorkerBootstrap generated connection.
+Authorb6d2c5 and independent6dad03 each pass17/0/0 in case intervals
+27.749082199996337s and27.439695799985202s. Exact ordered case objects match;
+all19 inputs plus admission are unchanged; both native/outer exits are0,
+7211 stdout bytes and zero stderr per run. Index checkc4ae54 verifies144
+payloads/1,151,233 bytes, seal998464ae75144e3c4048b2a54cac19dbdaebebdcb0eacaf3586c16dc3869541f.
+The six new cases construct through the actual bootstrap and factory, then
+register the completed VAD/model lease; no prebuilt owner is injected.
+Native runtime, actual inference and installed readiness remain open.
+
+Ryan answered "Approve the two-line correction" to the explicit question
+about patch58335df. This authorizes only the two new Windows assertRaises
+exception arguments, selecting the existing KernelUnconfirmed class. The
+message, six fault inputs, all retention checks and implementation bytes stay
+unchanged. The original63/2 measurement and its review oversight remain.
+Fresh label02 and its repair brief are in preparation; no new outcome yet.
