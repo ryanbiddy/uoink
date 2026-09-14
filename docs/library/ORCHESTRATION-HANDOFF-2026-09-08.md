@@ -100,7 +100,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | Runtime source review | Gemini loader council and Torch source comparison integrated at a2e6e7c | Gemini found no new actionable defect within the three components' synthetic scope; Astra accepts with timestamp, path and native-open corrections. Torch collector passed 40 cases in each root; 23 admitted HTTP body pairs verified. All 38 council, 199 source and seven root-verification payloads match Git/disk | Repair dormant D1 and ASR qualification exit-recording gaps, qualify fake-port orchestration, implement tensor bridge and real runtime ports. No native, installed or release clearance |
 | Signing | Gemini review and repaired path integrated at 0b3629d | 48 focused passes; 77 proof payloads match Git. Real Inno direct callback refuses missing certificate and keeps a durable error. No successful signing credit | Full combined candidate tree after runtime work settles; actual certificate/service choice remains Ryan's |
 | D1 static inspection | Ryan's exact static approval and observed result integrated at 4b38948 | One invocation b29f6c returns outer/child0 with valid guards; exact checkpoint hash and131-member inventory match;1,002 interpreted bytes/version330a; little-endian maximum2ULP. All61 evidence payloads match Git/disk | D1 inspection is complete. Writer/other-storage validation and D2 conversion/D3 acquisition/D4 native execution remain separate; no model or release credit |
-| D2 local conversion | Ryan approved the exact local-only proposal at017b559; actual2827f8 and root948c0d return0 | One artifact read and one exclusive output: 54 ranges/23 storages, 5,896,708 bytes; parent verifies output identity, guards pass and sources remain unchanged | Seal the text evidence. Conversion is complete; model/reader/native compatibility, redistribution and release remain unqualified. Do not repeat artifact access |
+| D2 local conversion | Ryan approved the exact local-only proposal; completed evidence committed atd13534f | Actual2827f8 and root948c0d return0. One artifact read and one exclusive output:54 ranges/23 storages,5,896,708 bytes. All64 proof payloads match Git/disk | Conversion is complete; model/reader/native compatibility, redistribution and release remain unqualified. Do not repeat artifact access |
 | State bridge | Synthetic orchestration integrated at 2b9068a | Author and Astra each 61 passed / 0 failed / 0 skipped, exact cases and valid guards. All 59 proof payloads match Git/disk and map 83 logical files | CPU port now qualified with fake APIs at 3801cee; implement the concrete factory service and qualify native independence separately. Real entry points remain closed |
 | CPU tensor port | Concrete method bodies qualified with fake storage at 3801cee | Author and Astra each 60 passed / 0 failed / 0 skipped, exact ordered cases and ten valid final guards. All 45 proof payloads match Git/disk and map 67 logical files | Implement factory ownership and actual runtime services. Native allocation, float conversion, storage/view behavior and cleanup remain untested; no market clearance |
 | VAD factory registry | Concrete factory and worker-local model registration integrated at 803df4b | Author and Astra each 59 passed / 0 failed / 0 skipped; all ten guards valid and 65 proof payloads match Git/disk, preserving 119 logical files | Gemini component review accepted at 488a7fd for tested scope; actual runtime bootstrap, native semantics and numerical behavior remain open |
@@ -168,15 +168,17 @@ Ryan's renewed goal is to continue fixing the product until it is ready for
 release, website/GitHub updates and marketing. The earlier review-kit delivery
 is complete but is not this goal's completion. Current queue:
 
-Latest execution order: seal Ryan's approved D2 result, actual2827f8/root948c0d,
-then qualify the reviewed cancellation proposal through the actual adapter and
-retained journal. Its eight new controls must pass with the unchanged81 before
-any native admission. The scoped Gemini review is running through Control Room,
-session73969, from frozen brief74d209c and Gemini3.8-flash-high at high effort.
-The brief's14 proof payloads match Git/disk; all48 selected inputs were verified.
-Review the complete council report and coverage before integration. Native04
-remains accepted only for generated competing access and normal drain. No model,
-complete-tree, package, installation, website or marketing clearance follows.
+Latest execution order: archive the completed cancellation89 qualification,
+then review/admit its distinct native observation through the actual adapter and
+retained journal. Author05ca07 and independentfbff79 both pass89 cases/86 subtests;
+root2d4ad6 confirms exact cases, valid guards and unchanged inputs. The original81
+cases remain unchanged. D2 is complete and archived atd13534f; no repeat access.
+Gemini2b39a17c completed from brief74d209c, but its review accuracy is FAILED:
+root99288b finds45 wrong hash/size pairs,29 wrong paths and eight nonexistent
+test names. Preserve the report and root verdict, then use a documented smaller
+correction brief before another council run. Existing component measurements
+remain valid within their scopes. No model, complete-tree, package, installation,
+website or marketing clearance follows.
 
 Native writer-exclusion02 is preserved at c5e72a2; read
 ASTRA-WRITER-EXCLUSION02-FAILURE-2026-09-13.md. All130 proof payloads match
@@ -213,7 +215,8 @@ now answered "Approve D2 local conversion only." The three pins bind decision
 dbcf0c2a; independent activation review e22d5ac6 found no blocker. One fresh
 invocation2827f8 returned outer/parent/child0 and produced54 ranges/23 storages.
 Root948c0d verifies the receipts and unchanged sources without artifact/output
-access. Evidence archival is next. D1 and D2 must not repeat for documentation;
+access. Evidence is committed atd13534f; all64 payloads match Git/disk. Read
+ASTRA-D2-LOCAL-CONVERSION-VERDICT-2026-09-13.md. D1 and D2 must not repeat for documentation;
 D3/D4 and actual model/reader qualification remain separate.
 
 Reliability repair is accepted at e8d058f. Read
@@ -1158,7 +1161,7 @@ core.longpaths true` must stay set (worktree checkouts fail without it).
   read, one output and54 ranges/23 storages. The5,896,708-byte output identity is
   verified by the parent. No model, reader, network, redistribution or release
   authority follows; the complete model notice remains unresolved. Text evidence
-  is awaiting archival integration. This decision need not be asked again.
+  is committed atd13534f with64 verified payloads. This decision need not be asked again.
 - D1 static inspection is resolved: Ryan answered "Approve D1 static inspection
   only" and the exact admitted invocation b29f6c completed with outer/child0,
   valid guards and 1,002 interpreted bytes. The fixed checkpoint hash,131-member
@@ -5865,3 +5868,25 @@ cover480,562B; all31 controller fields outside the8230-call array are preserved.
 The omitted array stays explicitly outside council reading coverage. No test or
 native rerun is requested by that source-only review. Backup session84911 is
 still waiting for Git account selection; its latest poll43e2f9 has no completion.
+
+### 2026-09-13 — D2 evidence sealed; cancellation89 passes twice
+
+Commitd13534f archives the exact approved activation and result. Documentary
+copyc1acfc returned0 without checkpoint/output access or a measurement rerun.
+Root4d7e87 verifies64 payloads/289,572B against Git/disk, sealf59e99fa7a4b14271095ddf2dce08d2bf78c73bbea082dbd336e633a56144406.
+The converted Safetensors binary stays private and is excluded from Git proof.
+Preparation retained a null aggregate-field display mistake and its correction;
+all underlying inventory rows were preserved. D2 is resolved within local scope.
+
+The new cancellation fake qualification completed as05ca07 andfbff79, both0.
+Root2d4ad6 confirms identical89 case objects,86 passing nested subtests, ten valid
+guards,25 registry traps and unchanged source/control copies. Original81 cases
+and four test files are unchanged. This does not execute native cancellation;
+archive the qualification, then review its separate native admission.
+
+Gemini2b39a17c completed with processb7e841/exit0 but fails review accuracy.
+Root99288b verifies all48 actual selected inputs still match in both roots;
+45 coverage hash/size pairs and29 paths are wrong, and eight enumerated tests
+are absent from source. No product measurement changes. Preserve the raw report
+and precise rejection before a smaller correction brief; no council acceptance
+or repeated measurement is justified by that completed engine status.

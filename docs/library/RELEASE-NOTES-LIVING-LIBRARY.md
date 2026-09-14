@@ -79,7 +79,8 @@ conversion or model runtime. Ryan subsequently approved the exact local-only
 conversion: actual2827f8 returned outer/parent/child0, with valid guards and one
 checkpoint read. It produced54 ranges from23 storages in a5,896,708-byte file;
 the parent verified output SHA8c15e718b6d502e7e351761f6cfee1a6917450e03c9a4c5318bc0d41d3fdd8c4.
-Root948c0d confirms the receipts and unchanged inputs; archival is next. No
+Root948c0d confirms the receipts and unchanged inputs. Evidence atd13534f has64
+payloads matching Git/disk. No
 model/reader activation, fetching or redistribution occurred. Native model
 compatibility and release suitability remain unqualified.
 
