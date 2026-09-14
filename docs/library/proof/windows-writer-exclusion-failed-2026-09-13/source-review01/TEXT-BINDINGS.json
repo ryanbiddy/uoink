@@ -1,0 +1,173 @@
+{
+  "scope": "Text/hash-only source review; zero candidate/native execution and no support-path access",
+  "source_count": 18,
+  "unchanged_inherited_count": 16,
+  "support_metadata_unchanged": true,
+  "support_files_accessed": false,
+  "sources": [
+    {
+      "name": "reservation_file_port.py",
+      "sha256": "708554378ab8a8e6c4477e637c999256665cbd2855b94c6fa3c2d04a19d3a224",
+      "baseline_sha256": "708554378ab8a8e6c4477e637c999256665cbd2855b94c6fa3c2d04a19d3a224",
+      "map_verified": true,
+      "lines": 106
+    },
+    {
+      "name": "snapshot_reservations.py",
+      "sha256": "e80ae881fa4af9cc7d1a3e4a06624f5b19abe4de09aec3844e8a541449335b98",
+      "baseline_sha256": "e80ae881fa4af9cc7d1a3e4a06624f5b19abe4de09aec3844e8a541449335b98",
+      "map_verified": true,
+      "lines": 487
+    },
+    {
+      "name": "snapshot_lifecycle.py",
+      "sha256": "a80514aac6b1e75b9b872052852fa993a23cd5273b6bed4ffb4eef7404cb69dd",
+      "baseline_sha256": "a80514aac6b1e75b9b872052852fa993a23cd5273b6bed4ffb4eef7404cb69dd",
+      "map_verified": true,
+      "lines": 517
+    },
+    {
+      "name": "durable_lifecycle.py",
+      "sha256": "f95cc8f2c61fd1953b642669ee4027a968660e39b97d9e84782fb83ac62abacb",
+      "baseline_sha256": "f95cc8f2c61fd1953b642669ee4027a968660e39b97d9e84782fb83ac62abacb",
+      "map_verified": true,
+      "lines": 273
+    },
+    {
+      "name": "win32_worker_connection.py",
+      "sha256": "b39a29cea1f3d60e4416111fd87417b21458b1f6f23dcb7700d522050b0b0b45",
+      "baseline_sha256": "b39a29cea1f3d60e4416111fd87417b21458b1f6f23dcb7700d522050b0b0b45",
+      "map_verified": true,
+      "lines": 571
+    },
+    {
+      "name": "windows_reservation_port.py",
+      "sha256": "dd33becb60e4302152179c4a41e4a2bf04d7d1a82bc3371461283688f3105a2e",
+      "baseline_sha256": "dd33becb60e4302152179c4a41e4a2bf04d7d1a82bc3371461283688f3105a2e",
+      "map_verified": true,
+      "lines": 349
+    },
+    {
+      "name": "owned_generation_protocol.py",
+      "sha256": "437e0880e10c91555df61b3c07c8be665430098c54c7d6ef687a99a0aa4a79d9",
+      "baseline_sha256": "437e0880e10c91555df61b3c07c8be665430098c54c7d6ef687a99a0aa4a79d9",
+      "map_verified": true,
+      "lines": 422
+    },
+    {
+      "name": "win32_private_pipe.py",
+      "sha256": "73a1109a55f2bc807594655c71b24a3e35eb88d7f744497df2cc328dc224cae7",
+      "baseline_sha256": "73a1109a55f2bc807594655c71b24a3e35eb88d7f744497df2cc328dc224cae7",
+      "map_verified": true,
+      "lines": 390
+    },
+    {
+      "name": "pinned_buffer_namespace.py",
+      "sha256": "2cc25a7a254f35d802336ef121cc860887a4301b3257588438dddec392fe0b7b",
+      "baseline_sha256": "2cc25a7a254f35d802336ef121cc860887a4301b3257588438dddec392fe0b7b",
+      "map_verified": true,
+      "lines": 154
+    },
+    {
+      "name": "inherited_readset.py",
+      "sha256": "02be8e04f4bea3030faf0882ae48ead40716c5782f95e2790e1a9897c5be76e3",
+      "baseline_sha256": "02be8e04f4bea3030faf0882ae48ead40716c5782f95e2790e1a9897c5be76e3",
+      "map_verified": true,
+      "lines": 222
+    },
+    {
+      "name": "generated_worker_flow.py",
+      "sha256": "1ab240d60ceaca130ac85f5d2e908ef5895da5297f35d78a1caba1c62e622238",
+      "baseline_sha256": "1ab240d60ceaca130ac85f5d2e908ef5895da5297f35d78a1caba1c62e622238",
+      "map_verified": true,
+      "lines": 371
+    },
+    {
+      "name": "generated_operation_flow.py",
+      "sha256": "6f09b4e6490b2078e792e49559a9dd0db95a895a778c31294a3577eeabdc98ed",
+      "baseline_sha256": "6f09b4e6490b2078e792e49559a9dd0db95a895a778c31294a3577eeabdc98ed",
+      "map_verified": true,
+      "lines": 366
+    },
+    {
+      "name": "trusted_asr_resolver.py",
+      "sha256": "16a5a1245f649a3eb04d077b661835503f08bef0ff8822dcb545176f0cc30833",
+      "baseline_sha256": "16a5a1245f649a3eb04d077b661835503f08bef0ff8822dcb545176f0cc30833",
+      "map_verified": true,
+      "lines": 292
+    },
+    {
+      "name": "asr_loading_adapter.py",
+      "sha256": "635d2c22db75d12ffe6965fb656fdca47450ccbbaeb4d8cc8aaff9fcc79dd243",
+      "baseline_sha256": "635d2c22db75d12ffe6965fb656fdca47450ccbbaeb4d8cc8aaff9fcc79dd243",
+      "map_verified": true,
+      "lines": 248
+    },
+    {
+      "name": "generated_adapter_flow.py",
+      "sha256": "b43ce2335da60f7879305903b5a89bf70352acd47dc5f336bc90757f6d7873bd",
+      "baseline_sha256": "b43ce2335da60f7879305903b5a89bf70352acd47dc5f336bc90757f6d7873bd",
+      "map_verified": true,
+      "lines": 405
+    },
+    {
+      "name": "generated_journal_setup.py",
+      "sha256": "df7ed56cdcbd23352b3e69a6f6790a012182b294491f38f8ed19610f000b485d",
+      "baseline_sha256": "df7ed56cdcbd23352b3e69a6f6790a012182b294491f38f8ed19610f000b485d",
+      "map_verified": true,
+      "lines": 206
+    },
+    {
+      "name": "generated_writer_exclusion.py",
+      "sha256": "f636c492e89135116f73f4e1a3279cf8e5b5e92a01590a13cf3b72672acd49b4",
+      "baseline_sha256": null,
+      "map_verified": true,
+      "lines": 198
+    },
+    {
+      "name": "dummy_bootstrap.py",
+      "sha256": "0779f8b76e67a42465482b0be0241c8ad2dd87883f621c3dddd98127bf00b4ee",
+      "baseline_sha256": null,
+      "map_verified": true,
+      "lines": 632
+    }
+  ],
+  "controls": [
+    {
+      "name": "SOURCE-INPUTS.json",
+      "sha256": "5ba3159c46c5c0e1b54bc6bb2851699a4c033b4c2ee057b2aca473f1faca49df"
+    },
+    {
+      "name": "run_writer_exclusion01.ps1",
+      "sha256": "143f3450268e8875887eb366649f5c104fecdad67f27a049b548d3977b0f8fb6"
+    },
+    {
+      "name": "ROOT-ADMISSION-TEMPLATE.json",
+      "sha256": "ee44735bd7764711b98423b347b6435e9fe63d55fd443f9226617e195f4029c6"
+    },
+    {
+      "name": "BRIEF.md",
+      "sha256": "d99862434fe1259488382af60b4cb6968639bd1830dbfa06e73fd0ae6f35014b"
+    },
+    {
+      "name": "API-AND-BOUNDS.md",
+      "sha256": "dedb4965145e32bfc8b1a973eda1904641f8395f9f7108b2505469cb4bed2a61"
+    },
+    {
+      "name": "NATIVE-PROTOCOL.md",
+      "sha256": "4c4a1e92255346e5ab9a2c48310c05b5249888fb6fe89dc93413f04699d5e3a9"
+    },
+    {
+      "name": "PREFLIGHT-REFINEMENT01.md",
+      "sha256": "69ec385f8a07a335b8d1a97849614769051d9db5cb49b4754f9f1dce85b0086b"
+    },
+    {
+      "name": "dummy_bootstrap.py.diff",
+      "sha256": "b94e588f13f406899f66a07a36a2ac6f8ab36c5636247414dbb23088c9f8f656"
+    },
+    {
+      "name": "run_writer_exclusion01.ps1.diff",
+      "sha256": "a75ab3bb8777542c33240258d90a6fd35d43d84694c5a7a5dc40f2f48e4b11b9"
+    }
+  ]
+}

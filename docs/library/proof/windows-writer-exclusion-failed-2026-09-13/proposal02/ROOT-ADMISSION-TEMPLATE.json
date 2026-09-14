@@ -1,0 +1,11 @@
+{
+  "root_reviewed": false,
+  "scope": "generated-windows-journal-writer-exclusion-only",
+  "case": "positive",
+  "operation_mode": "drain",
+  "run_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\windows-reservation-writer-exclusion02",
+  "source_inputs_sha256": "91a6b8228bc364d8c15be4287b291724946c4b6eab49388e900a1ad1ce3fc69a",
+  "launcher_sha256": "815829b672d835875d5b62e6cf4e09d6d50c356920614524ecdc3cc33f83d103",
+  "native_execution_admitted": false,
+  "note": "Unexecuted source proposal. Root must review and issue a distinct exact admission before one future generated contender observation."
+}

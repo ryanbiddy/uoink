@@ -1,0 +1,153 @@
+diff --git "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\windows-reservation-writer-exclusion-proposal01\\origins\\dummy_bootstrap.py" "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\windows-reservation-writer-exclusion-proposal01\\dummy_bootstrap.py"
+index 38f9c6f..5737e77 100644
+--- "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\windows-reservation-writer-exclusion-proposal01\\origins\\dummy_bootstrap.py"
++++ "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\windows-reservation-writer-exclusion-proposal01\\dummy_bootstrap.py"
+@@ -47,7 +47,7 @@ import warnings
+ PROCESS_ABORT = os._exit  # Retained current-process failure exit; never an IPC operation.
+ 
+ FORBIDDEN = r"C:\Users\hello\AppData\Local\Uoink\index.db"
+-FIXED_RUNS = {'drain': 'E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\windows-reservation-native-drain01'}
++FIXED_RUNS = {'drain': 'E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\windows-reservation-writer-exclusion01'}
+ LOCATION = os.path.normcase(os.path.dirname(os.path.abspath(__file__)))
+ MODE = next((mode for mode, path in FIXED_RUNS.items() if os.path.normcase(path) == LOCATION), None)
+ assert MODE is not None, "fixed_fresh_generated_operation_directory"
+@@ -58,7 +58,7 @@ assert os.environ.get("IG_FORBIDDEN_LIVE") == FORBIDDEN
+ assert os.path.normcase(os.path.dirname(os.path.abspath(__file__))) == os.path.normcase(EXPECTED_RUN)
+ assert sys.executable.casefold() == r"C:\Python314\python.exe".casefold()
+ ROLE = sys.argv[1] if len(sys.argv) >= 2 else None
+-assert (ROLE == "controller" and len(sys.argv) == 2) or (ROLE == "child" and len(sys.argv) == 4 and sys.argv[2] == "--control-handle")
++assert (ROLE in ("controller", "contender") and len(sys.argv) == 2) or (ROLE == "child" and len(sys.argv) == 4 and sys.argv[2] == "--control-handle")
+ CONTROL = int(sys.argv[3]) if ROLE == "child" and sys.argv[3].isascii() and sys.argv[3].isdigit() else None
+ if ROLE == "child":
+     assert CONTROL is not None and 0 < CONTROL < (1 << 64) - 1
+@@ -86,7 +86,7 @@ NATIVE = {
+ MODULES = ("reservation_file_port", "snapshot_reservations", "snapshot_lifecycle", "durable_lifecycle",
+            "win32_worker_connection", "windows_reservation_port", "owned_generation_protocol",
+            "win32_private_pipe", "pinned_buffer_namespace", "inherited_readset", "generated_worker_flow", "generated_operation_flow",
+-           "trusted_asr_resolver", "asr_loading_adapter", "generated_adapter_flow", "generated_journal_setup")
++           "trusted_asr_resolver", "asr_loading_adapter", "generated_adapter_flow", "generated_journal_setup", "generated_writer_exclusion")
+ SETUP_NAMES = tuple(name + ".py" for name in MODULES) + ("dummy_bootstrap.py", "SOURCE-INPUTS.json", "ROOT-ADMISSION.json")
+ SETUP_READS = {os.path.normcase(os.path.join(EXPECTED_RUN, name)) for name in SETUP_NAMES}
+ SETUP_READS |= {os.path.normcase(path) for path in NATIVE}
+@@ -168,7 +168,7 @@ def read_bounded(path, cap):
+ 
+ source_map = json.loads(read_bounded(os.path.join(EXPECTED_RUN, "SOURCE-INPUTS.json"), 65536))
+ admission = json.loads(read_bounded(os.path.join(EXPECTED_RUN, "ROOT-ADMISSION.json"), 65536))
+-assert admission["root_reviewed"] is True and admission["scope"] == "generated-windows-journal-normal-drain-only"
++assert admission["root_reviewed"] is True and admission["scope"] == "generated-windows-journal-writer-exclusion-only"
+ assert admission["case"] == CASE and admission["operation_mode"] == MODE and admission["run_path"] == EXPECTED_RUN
+ assert admission["source_inputs_sha256"] == hashlib.sha256(read_bounded(os.path.join(EXPECTED_RUN, "SOURCE-INPUTS.json"), 65536)).hexdigest()
+ assert source_map["native_bindings"] == {path: {"bytes": size, "sha256": sha} for path, (size, sha) in NATIVE.items()}
+@@ -242,6 +242,7 @@ REAL_RESOLVER = sys.modules["trusted_asr_resolver"]
+ ADAPTER = sys.modules["asr_loading_adapter"]
+ JOURNAL_PORT = sys.modules["windows_reservation_port"]
+ JOURNAL_SETUP = sys.modules["generated_journal_setup"]
++EXCLUSION = sys.modules["generated_writer_exclusion"]
+ ORIGINAL_RESERVATION_ENTRIES = tuple((sys.modules[name], entry, getattr(sys.modules[name], entry))
+     for name, entry in (("windows_reservation_port", "real_windows_reservation_service"),
+                         ("snapshot_reservations", "real_reservation_service"),
+@@ -329,7 +330,7 @@ class FixedNativeDispatch:
+         else:
+             assert not self.binding_open and ROLE == "controller" and obj is self.attribute_buffer
+             assert obj is not None and isinstance(obj, self.ffi.Array) and obj._type_ is self.ffi.c_char
+-            assert 0 < self.ffi.sizeof(obj) <= 65536 and self.cast_calls == 0
++            assert 0 < self.ffi.sizeof(obj) <= 65536 and self.cast_calls < 2
+             self.cast_calls += 1
+         return self._invoke(self.cast_helper, self.cast_address, (obj, obj, target), "fixed_cast_helper")
+ 
+@@ -372,6 +373,7 @@ class NativeMonitor:
+         self.cleanup_wait_caps = []
+         self.asset_io = {name: {"seeks": 0, "reads": 0, "bytes": 0} for name in GENERATED_NAMES}
+         self.journal_setup = None
++        self.contender = self.contender_observation = None
+ 
+     def _cleanup_scope(self, name, args, now):
+         if self.cleanup_started is None:
+@@ -465,29 +467,42 @@ class NativeMonitor:
+                             "ReadFile", "WriteFile", "WaitForSingleObject", "GetOverlappedResult", "CancelIoEx",
+                             "GetCurrentProcess", "GetProcessTimes", "SetFilePointerEx",
+                             "GetFileInformationByHandleEx", "GetFinalPathNameByHandleW"}
++        elif ROLE == "contender":
++            assert name in {"CreateFileW", "GetFileInformationByHandleEx", "GetFinalPathNameByHandleW", "CloseHandle"}, "fixed_contender_readonly_metadata_and_open_scope"
+         if name == "CreateNamedPipeW":
+             assert ROLE == "controller" and self.pipe_name is None
+             assert type(args[0]) is str and args[0].startswith("\\\\.\\pipe\\uoink-owned-")
+             assert len(args[0]) == len("\\\\.\\pipe\\uoink-owned-") + 64
+             self.pipe_name = args[0]
+         if name == "CreateFileW":
+-            assert ROLE == "controller"
+-            journal_create = self.journal_setup is not None and self.journal_setup.allow_create(args)
+-            if not journal_create:
++            assert ROLE in ("controller", "contender")
++            contender_open = ROLE == "contender"
++            if contender_open:
++                assert self.contender_observation is not None and self.contender_observation.allow_create(args)
++            journal_create = ROLE == "controller" and self.journal_setup is not None and self.journal_setup.allow_create(args)
++            if not journal_create and not contender_open:
+                 assert args[0] in (*GENERATED_PATHS, self.pipe_name)
+                 if args[0] in GENERATED_PATHS:
+                     assert (args[1], args[2], args[4], args[5]) in ((0x80000000, 1, 3, 0x00200000), (0x40000000, 7, 3, 0x00200000))
+                 else:
+                     assert (args[1], args[2], args[4], args[5]) == (0xC0000000, 0, 3, 0x40000000)
+         if name == "CreateProcessW":
+-            assert ROLE == "controller" and sum(item == name for item in self.calls) == 0
++            assert ROLE == "controller" and self.contender is not None
+             worker = self.primitives.workers[-1]
+-            expected = (r"C:\Python314\python.exe", "-I", "-S", "-B", __file__, "child", "--control-handle", str(worker.child_control_handle))
++            if self.contender.creating:
++                assert sum(item == name for item in self.calls) == 0
++                expected = (r"C:\Python314\python.exe", "-I", "-S", "-B", __file__, "contender")
++            else:
++                assert self.contender.completed and sum(item == name for item in self.calls) == 1
++                expected = (r"C:\Python314\python.exe", "-I", "-S", "-B", __file__, "child", "--control-handle", str(worker.child_control_handle))
+             assert args[0] == expected[0] and args[1].value == " ".join(K._quote_argument(value) for value in expected)
+         is_journal = False
+         if ROLE == "controller" and self.journal_setup is not None:
+             is_journal = self.journal_setup.journal_scope(name, args)
+-            self.journal_setup.before_process(name)
++            if name in ("CreateProcessW", "ResumeThread") and self.contender is not None and (self.contender.creating or self.contender.resuming):
++                self.contender.before_process(name, args)
++            else:
++                self.journal_setup.before_process(name)
+             if name == "CloseHandle":
+                 self.journal_setup.before_close(args)
+         asset_name = None if is_journal else self._asset_scope(name, args)
+@@ -525,7 +540,12 @@ try:
+     started = time.perf_counter()
+     outcome, error_type, code = None, None, 1
+     try:
+-        if ROLE == "child":
++        if ROLE == "contender":
++            observation = EXCLUSION.ContenderObservation(primitives, monitor, EXPECTED_RUN)
++            monitor.contender_observation = observation
++            outcome = observation.run()
++            code = 0
++        elif ROLE == "child":
+             outcome = FLOW.child_flow(primitives, pipes, CONTROL, source_map["source_sha256"]["dummy_bootstrap.py"], EXPECTED_RUN, CASE)
+             code = outcome["child_flow_return"]
+         else:
+@@ -545,11 +565,13 @@ try:
+                            "PYANNOTE_METRICS_ENABLED": "0", "IG_FORBIDDEN_LIVE": FORBIDDEN}
+             namespace_sha = ADOPTION.namespace_digest()
+             manifest_sha = "0" * 64  # Replaced before bootstrap by the exact inherited-handle map.
+-            port = FLOW.GeneratedLifecyclePort(primitives, pipes, tuple(expectations), r"C:\Python314\python.exe",
++            port = EXCLUSION.GeneratedExclusionPort(primitives, pipes, tuple(expectations), r"C:\Python314\python.exe",
+                 ("-I", "-S", "-B", __file__, "child"), EXPECTED_RUN, environment,
+                 os.urandom(32).hex(), manifest_sha, namespace_sha, source_map["source_sha256"]["dummy_bootstrap.py"],
+                 os.urandom(32), os.urandom(32), CASE, operation_mode=MODE)
+             journal_setup.connect(port)
++            monitor.contender = EXCLUSION.OwnedContender(primitives, monitor, journal_setup, __file__)
++            port.bind_contender(monitor.contender)
+             outcome = FLOW.controller_flow(port)
+             outcome["durable_journal"] = journal_setup.complete()
+             code = 0
+@@ -579,7 +601,8 @@ try:
+              and not HEAVY.intersection(name.split(".")[0] for name in sys.modules))
+     if not guard:
+         code = 1
+-    receipt = {"schema": "uoink.generated-windows-journal-normal-drain.v1", "role": ROLE, "case": CASE, "operation_mode": MODE, "result": outcome, "error_type": error_type,
++    receipt = {"schema": "uoink.generated-windows-journal-writer-exclusion.v1", "role": ROLE, "case": CASE, "operation_mode": MODE, "result": outcome, "error_type": error_type,
++               "writer_exclusion": monitor.contender.receipt() if monitor.contender is not None else None,
+                "adapter_state": adapter_state, "native_exit_planned": code, "elapsed_seconds": elapsed, "guard_valid": guard, "guard_denials": DENIALS,
+                "metadata_traps": len(METADATA_TRAPS), "registry_traps": len(REGISTRY_TRAPS),
+                "fixed_dispatch_valid": dispatch.valid(monitor.functions),

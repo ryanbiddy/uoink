@@ -1,0 +1,11 @@
+{
+  "root_reviewed": true,
+  "scope": "generated-windows-journal-writer-exclusion-only",
+  "case": "positive",
+  "operation_mode": "drain",
+  "run_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\windows-reservation-writer-exclusion02",
+  "source_inputs_sha256": "91a6b8228bc364d8c15be4287b291724946c4b6eab49388e900a1ad1ce3fc69a",
+  "launcher_sha256": "815829b672d835875d5b62e6cf4e09d6d50c356920614524ecdc3cc33f83d103",
+  "native_execution_admitted": true,
+  "note": "One generated writer-exclusion02 only under existing guarded Windows observation authorization. Root review SHA256 8818242a36f5a611dfbd24b0373a950d4b161a1ebce93176f9724cd03760edec; independent source verdict SHA256 bb30c006711668ab056efa8cf5cdd718ba83674bf936fe033e76be64ec63c9e0. No D1 checkpoint access or model execution."
+}
