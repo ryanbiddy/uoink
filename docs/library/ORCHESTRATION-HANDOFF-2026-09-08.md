@@ -115,7 +115,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | Generated reservation recovery | Component and evidence integrated at f9ab6fe | Author70b48e and independentfd86f5 each pass42 cases, with20 passing nested subtests and all10 guards valid. All123 proof payloads match Git/disk | Connect retained Windows gate/journal handles and split create/resume/startup. Native recovery and runtime acceptance remain open |
 | Windows reservation connection | Correction8fc3219; transfer2f4311f; native generated drain67887c3 | Unit70/0/0 plus35 subtests in both copies. Native d3d56f returns outer/controller/child0, valid guards, child0/job0, four confirmed phases/flushes and exact2,118B closed journal. All87 native proof payloads match Git/disk | Qualify remaining native exclusion/interruption/persistence/restart/reconciliation. Actual runtime-owner connection and real models remain open |
 | Worker/journal council | Scoped source review completed at1c6ac4c with mandatory Astra addendum; original244cca5 remains accuracy FAILED | All24 correction proof payloads match Git/disk. Gemini correction alone remains partial; Astra corrects remaining handshake/locking/private-caller claims. Existing17/65 outcomes unchanged | Continue native/runtime engineering. Session42118 closed482e42/exit0; no new council loop or broader acceptance |
-| Native writer exclusion | Failed02 archived at c5e72a2; diagnostic03 also FAILED | All130 failed02 proof payloads match Git/disk. Diagnostic1ad784 observes only retained directory size changing4096 to8192; path/volume/file ID/links/type match | Repair stable directory identity without changing fixtures or regular-file size assertions; review and qualify fresh source before another native run |
+| Native writer exclusion | Failed02 archived at c5e72a2; failed diagnostic03 atcc6bb7c | All130 failed02 and87 failed03 proof payloads match Git/disk. Diagnostic1ad784 observes only retained directory size changing4096 to8192; path/volume/file ID/links/type match | Stable-directory repair81-case source is reviewed; qualify both copies before admitting the separate writer04 native proposal |
 | Worker runtime owner and bootstrap | Owner at 1f200eb; actual bootstrap connection at bbe10d6 | Both copies pass17/0/0: eleven retained owner cases plus six bootstrap cases. Exact case objects, valid guards, unchanged19 inputs plus admission. All144 newest proof payloads match Git/disk | Connect exact ownership through native services. Real inference, PCM/filter, VAD-to-model binding and protected constructor routes remain open |
 | Integration | Reliability repair at e8d058f and notice packaging at 71d3e70 after tree09 | Reliability:53 focused cases plus13 subtests per root. Notices:20 Python/10 block cases per root. Tree09 at 56d9d4c remains2,796 passed/1 failed/3 skipped across2,800 cases plus13 subtests; it predates both repairs | Finish runtime work, then run a new committed complete tree and rebuild/reseal. Package08 and website/marketing remain held. No current-source package or installation credit |
 | Desktop incident | Isolation failed in package-07 attempt; corrected at `e10ba3a` | Ordinary Uoink and filesystem connectors launched; earlier live-index/5179 effects unknown. Owned job cleaned | No further override launch; only guarded Uoink dashboard observed for package 08 |
@@ -171,7 +171,9 @@ is complete but is not this goal's completion. Current queue:
 Native writer-exclusion02 is preserved at c5e72a2; read
 ASTRA-WRITER-EXCLUSION02-FAILURE-2026-09-13.md. All130 proof payloads match
 Git/disk. One separately admitted reporting-only diagnostic03, actual1ad784,
-also failed with valid guards and unchanged inputs. It identifies size4096 to8192
+also failed with valid guards and unchanged inputs and is archived atcc6bb7c.
+Read ASTRA-WRITER-EXCLUSION03-DIAGNOSTIC-2026-09-13.md; all87 payloads match
+Git/disk. It identifies size4096 to8192
 at the same retained directory, with all five other identity fields unchanged.
 Preserve that failure and prepare the stable-directory product repair. Keep the
 original70 test bodies and strict regular-file identity/size checks; no fixture
@@ -5760,3 +5762,19 @@ reconstruction. The real parent/child and filesystem behavior remain unqualified
 by fake23. D2-LOCAL-CONVERSION-DECISION-2026-09-13.md gives the exact scope and
 four assumptions; the owner pins remainNone. D1 stays complete at4b38948 and
 must not be repeated. Runtime, complete tree, packaging and release remain open.
+
+### 2026-09-13 — Directory diagnostic preserved; repair source reviewed
+
+Commitcc6bb7c preserves the full failed03 preparation/run, exact admission,
+actual tool objects and passive size-only diagnostic. Copy5b7ab4 returned0;
+rootf32ab4 verifies87 payloads/1,216,659 bytes against Git/disk, with
+seal6f370206ba29fd225ab60c5cc7d053c57bf29c3522b56368d92146cae9193b16.
+The diagnosis remains a failed native run and gives no recovery credit.
+
+The stable-directory repair now has root and independent source review. Its
+final30-input map is0462d156; original70 cases are byte-identical and11 new
+controls cover directory growth/replacement and strict regular-file sizes.
+Qualify both copies before admitting the fresh writer04 native proposal. The
+D2 owner question is pending; D1 is complete and must not repeat. An initial
+handoff patch failed on a case-mismatched context line; removing that unused
+hunk repaired the documentation edit without changing source or measurements.

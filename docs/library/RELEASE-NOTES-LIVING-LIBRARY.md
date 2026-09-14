@@ -48,7 +48,7 @@ partial correction. The underlying test outcomes remain unchanged. A later
 writer-exclusion observation failed overall with PersistenceUnconfirmed during
 drain; its partial sharing-refusal result does not qualify recovery or release.
 That failure is sealed at `c5e72a2` with 130 verified proof payloads. A separate
-diagnostic also failed and identified mutable directory size in the identity
+diagnostic at `cc6bb7c` also failed and identified mutable directory size in the identity
 comparison. A product repair is in progress; regular-file size checks and the
 original acceptance assertions remain required.
 
