@@ -1,0 +1,7 @@
+{
+  "chunk_id": "002d1a",
+  "wall_time_seconds": 0.2031066,
+  "exit_code": 0,
+  "original_token_count": 39,
+  "output": "{\"status\":\"PASS\",\"source_count\":29,\"unchanged_subjects\":26,\"diff_pairs\":5,\"before_files\":35,\"bindings\":128,\"subject_executed\":false,\"support_access\":false}\n"
+}

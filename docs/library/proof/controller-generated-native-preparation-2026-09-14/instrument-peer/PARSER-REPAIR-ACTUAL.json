@@ -1,0 +1,7 @@
+{
+  "chunk_id": "fe1139",
+  "wall_time_seconds": 0.1883405,
+  "exit_code": 0,
+  "original_token_count": 64,
+  "output": "{\r\n  \"Algorithm\": \"SHA256\",\r\n  \"Hash\": \"DC274ABB3940B7B0E743679D1977BB843FB442DDC8CBDA1F94AF57AC36EE31F4\",\r\n  \"Path\": \"E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\_scratch\\\\controller-generated-native-compatibility-peer01\\\\check_source02.mjs\"\r\n}\r\n"
+}

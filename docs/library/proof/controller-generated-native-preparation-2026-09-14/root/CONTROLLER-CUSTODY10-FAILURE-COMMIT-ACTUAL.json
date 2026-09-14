@@ -1,0 +1,7 @@
+{
+  "chunk_id": "1db7d9",
+  "wall_time_seconds": 0.9639929,
+  "exit_code": 0,
+  "original_token_count": 272,
+  "output": "warning: in the working copy of 'docs/library/INTEGRATOR-CONTRACT-CONFLICTS-2026-09-08.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/library/ORCHESTRATION-HANDOFF-2026-09-08.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/library/RELEASE-OWNER-DECISIONS-2026-09-12.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/library/ASTRA-CONTROLLER-CUSTODY-INSTRUMENT-VERDICT-2026-09-14.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/library/ASTRA-CONTROLLER-CUSTODY10-FAILED-VERDICT-2026-09-14.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/library/CONTROLLER-GENERATED-NATIVE-COMPATIBILITY-BRIEF-2026-09-14.md', LF will be replaced by CRLF the next time Git touches it\n0a74367fce366f02a23f8938db4fc8728fbc6a88 docs(library): retain controller10 failure and exact expectation proposal [Astra]\nExact301FilesCommitted;CheckoutClean\r\n"
+}

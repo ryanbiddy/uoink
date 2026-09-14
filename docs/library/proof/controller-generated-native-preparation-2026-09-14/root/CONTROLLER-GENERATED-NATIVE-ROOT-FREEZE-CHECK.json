@@ -1,0 +1,9 @@
+{
+  "scope": "Passive text-only preparation freeze verification",
+  "payloads": 91,
+  "bytes": 1569239,
+  "folder_files": 93,
+  "pins_sha256": "f8ee47b3977da4d562850ccf616855e02d5a74df8e3bebf6dd7f4714172c0824",
+  "support_access": false,
+  "candidate_executed": false
+}

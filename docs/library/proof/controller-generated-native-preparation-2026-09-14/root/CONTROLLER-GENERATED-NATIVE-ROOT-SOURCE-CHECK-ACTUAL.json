@@ -1,0 +1,7 @@
+{
+  "chunk_id": "5ad7f5",
+  "wall_time_seconds": 0.1801494,
+  "exit_code": 0,
+  "original_token_count": 171,
+  "output": "{\"scope\":\"Passive source-only native compatibility preparation review; no support/native/artifact access\",\"source_count\":29,\"unchanged_subjects\":26,\"exact_reviewed_core_replacements\":2,\"native_metadata_rows_unchanged\":9,\"deltas\":[{\"name\":\"dummy_bootstrap.py\",\"rules\":2,\"forward\":true,\"reverse\":true},{\"name\":\"run_controller_generated_compatibility01.ps1\",\"rules\":4,\"forward\":true,\"reverse\":true},{\"name\":\"SOURCE-INPUTS.json\",\"rules\":4,\"forward\":true,\"reverse\":true}],\"source_inputs_sha256\":\"ab6f7f2d22fb970473a41b336516de9905793c225b89a47b4dd98c29f64d6838\",\"launcher_sha256\":\"b8318a2129ab129035ff90b3b4d02849a7049aad2e7ae9d7fcceb83698448fe3\",\"false_template\":true,\"run_absent\":true}\n"
+}

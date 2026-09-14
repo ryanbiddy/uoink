@@ -1,0 +1,68 @@
+{
+  "dummy_bootstrap.py": [
+    {
+      "from": "windows-interrupted-owner-retirement02",
+      "to": "controller-generated-native-compatibility01",
+      "count": 1,
+      "reason": "Fresh fixed run identity."
+    },
+    {
+      "from": "generated-windows-interrupted-owner-retirement-only",
+      "to": "generated-controller-core-start-compatibility-only",
+      "count": 1,
+      "reason": "Exact compatibility admission scope."
+    }
+  ],
+  "run_controller_generated_compatibility01.ps1": [
+    {
+      "from": "windows-interrupted-owner-native-proposal02",
+      "to": "controller-generated-native-compatibility-proposal01",
+      "count": 1,
+      "reason": "Fresh source proposal identity."
+    },
+    {
+      "from": "windows-interrupted-owner-retirement02",
+      "to": "controller-generated-native-compatibility01",
+      "count": 1,
+      "reason": "Fresh output identity."
+    },
+    {
+      "from": "run_interrupted_owner02.ps1",
+      "to": "run_controller_generated_compatibility01.ps1",
+      "count": 2,
+      "reason": "Exact original/copied launcher control name."
+    },
+    {
+      "from": "generated-windows-interrupted-owner-retirement-only",
+      "to": "generated-controller-core-start-compatibility-only",
+      "count": 1,
+      "reason": "Exact compatibility admission scope."
+    }
+  ],
+  "SOURCE-INPUTS.json": [
+    {
+      "from": "windows-interrupted-owner-native-proposal02",
+      "to": "controller-generated-native-compatibility-proposal01",
+      "count": 29,
+      "reason": "Only the fixed source-path proposal component changes."
+    },
+    {
+      "from": "3c8963eaa02bbc1d810ee2632d0363303bfe05ec6ceeef73771ca8005a00ece3",
+      "to": "ce69903d93daf41ae3717008f8d0dbd0b3ead7b11662b674eddf43828567b222",
+      "count": 1,
+      "reason": "Pin durable_lifecycle.py"
+    },
+    {
+      "from": "635d2c22db75d12ffe6965fb656fdca47450ccbbaeb4d8cc8aaff9fcc79dd243",
+      "to": "227395c4e1f25f75f13dc950e3b2e222af4a4d8b307a36091908229b58ed0c0f",
+      "count": 1,
+      "reason": "Pin asr_loading_adapter.py"
+    },
+    {
+      "from": "7969a4405470588c6bbc501b929d5e5f3eec85b116e50384ba64aa9036a5d198",
+      "to": "84881e927563bf68f78ebcd1d26c1a0eae83d9d2f42902426938dd432efae57b",
+      "count": 1,
+      "reason": "Pin dummy_bootstrap.py"
+    }
+  ]
+}

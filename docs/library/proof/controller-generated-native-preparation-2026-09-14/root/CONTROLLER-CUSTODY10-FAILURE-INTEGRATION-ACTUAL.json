@@ -1,0 +1,7 @@
+{
+  "chunk_id": "19683e",
+  "wall_time_seconds": 1.1168699,
+  "exit_code": 0,
+  "original_token_count": 74,
+  "output": "{\"proof\":\"docs/library/proof/controller-custody10-failed-2026-09-14\",\"patch\":\"E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\_scratch\\\\controller-custody10-failed-2026-09-14.patch\",\"bytes\":3538327,\"sha256\":\"542a796a1b86cd98e03da2a70fed7c815d36c88b09f5aba9e262d49d9a5568e1\",\"apply_exit\":0}\r\n"
+}

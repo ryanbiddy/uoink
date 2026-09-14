@@ -1,0 +1,13 @@
+Source preparation is frozen for independent review. No source blocker was found in the bounded positive generated-start route. This is not an execution verdict or native admission.
+
+The two subject replacements are exact reviewed custody sources: durable_lifecycle.py ce69903d93daf41ae3717008f8d0dbd0b3ead7b11662b674eddf43828567b222 and asr_loading_adapter.py 227395c4e1f25f75f13dc950e3b2e222af4a4d8b307a36091908229b58ed0c0f. All 26 other subject modules remain native02 bytes. The same 29 source names and nine support metadata records are retained.
+
+The complete donor bootstrap and launcher were read. The final full deltas and whole-text inverse checks establish only two bootstrap literal changes and four launcher replacement rules covering five occurrences. The existing behavioral predicates remain exact: five protected write refusals plus five post-retirement successes; one delivered segment before the fixed interruption; retained primary exit 1 and empty job; fifteen attributed process/close calls; five journal phases/flushes and the 20,666-byte decoder bound; unchanged controller/contender guard and exit requirements. The ordinary parent_guards_held_through_exit=False claim and optional raw-only killed-child receipt remain explicit.
+
+The called generated startup, strict contender, factory entry/start and interrupted observer paths were read in the ranges recorded in SOURCE-VIEW-COVERAGE.json. The generated branch still uses the exact factory-issued attempt and current token/worker relations. The reviewed custody checks do not convert generated fixture data into real runtime authority.
+
+Data-only preparation 311942/0 reconstructs all five complete patches forward and reverse. Independent inline check af261c/0 verifies all 29 current source bindings and before copies, both replacement originals, 26 unchanged subjects, nine metadata rows, full instrument/map inverse relations, false template bindings, and absent actual admission/run. Installed support targets and physical/generated artifacts were not accessed.
+
+Both corrected controller10 copies must qualify before any native admission. A later separately admitted observation can establish only positive generated startup/facade publication followed by this fixed interruption and explicit retirement. Ordinary close, real construction/inference, negative generated-policy controls and D3/D4 remain outside this preparation. No candidate, Python, native or model operation was executed.
+
+PINS.json covers the fixed preparation payloads. It excludes itself and the subsequently saved actual object of pin creation to avoid self-reference. All preserved before files, source deltas, source/control maps and preparation/read actuals are included.

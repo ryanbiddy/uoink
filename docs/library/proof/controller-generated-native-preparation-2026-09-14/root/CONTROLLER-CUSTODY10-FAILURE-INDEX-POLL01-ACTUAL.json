@@ -1,0 +1,7 @@
+{
+  "chunk_id": "d745d0",
+  "wall_time_seconds": 0.000002,
+  "exit_code": 0,
+  "original_token_count": 54,
+  "output": "{\"proof\": \"docs/library/proof/controller-custody10-failed-2026-09-14\", \"payloads_matching_disk_and_git\": 294, \"bytes\": 3308049, \"manifest_sha256\": \"a386b5cb80356568eed10135c00e3f79aa10e10ec3c4436eeb31e5b2d64c2cd1\"}\r\n"
+}

@@ -1,0 +1,234 @@
+{
+  "schema": "generated-native-compatibility-peer-view-v1",
+  "scope": "Independent instrument/source-derivation review; not an independent review of the two core modules authored by this peer.",
+  "complete_reads": [
+    {
+      "path": "docs/library/CONTROLLER-GENERATED-NATIVE-COMPATIBILITY-BRIEF-2026-09-14.md",
+      "actual": "BRIEF-READ-ACTUAL.json",
+      "tool": "f136cc"
+    },
+    {
+      "path": "_scratch/controller-generated-compatibility-alternative01/ALTERNATIVE.md",
+      "actual": "BRIEF-READ-ACTUAL.json",
+      "tool": "f136cc"
+    },
+    {
+      "path": "_scratch/windows-interrupted-owner-native-proposal02/BRIEF.md",
+      "actual": "DONOR-METADATA-READ-ACTUAL.json",
+      "tool": "02ff86",
+      "note": "Complete retained output redisplayed after initial context truncation."
+    },
+    {
+      "path": "_scratch/windows-interrupted-owner-native-proposal02/NATIVE-PROTOCOL.md",
+      "actual": "DONOR-METADATA-READ-ACTUAL.json",
+      "tool": "02ff86"
+    },
+    {
+      "path": "_scratch/windows-interrupted-owner-native-proposal02/SOURCE-INPUTS.json",
+      "actual": "DONOR-METADATA-READ-ACTUAL.json",
+      "tool": "02ff86",
+      "note": "Support metadata values only; no referenced support path accessed."
+    },
+    {
+      "path": "_scratch/controller-generated-compatibility-alternative01/SOURCE-BINDINGS.json",
+      "actual": "DONOR-METADATA-READ-ACTUAL.json",
+      "tool": "02ff86"
+    },
+    {
+      "path": "_scratch/windows-interrupted-owner-native-proposal02/PINS.json",
+      "actual": "DONOR-PINS-READ-ACTUAL.json",
+      "tool": "71c339",
+      "note": "Read the map, not its historical referenced proof files."
+    },
+    {
+      "path": "_scratch/windows-interrupted-owner-native-proposal02/dummy_bootstrap.py",
+      "ranges": [
+        [
+          1,
+          200
+        ],
+        [
+          201,
+          400
+        ],
+        [
+          401,
+          600
+        ],
+        [
+          601,
+          787
+        ]
+      ],
+      "actuals": [
+        "DONOR-BOOTSTRAP01-ACTUAL.json",
+        "DONOR-BOOTSTRAP02-ACTUAL.json",
+        "DONOR-BOOTSTRAP03-ACTUAL.json",
+        "DONOR-BOOTSTRAP04-ACTUAL.json"
+      ],
+      "tools": [
+        "968903",
+        "250a62",
+        "368bfe",
+        "dce5e6"
+      ]
+    },
+    {
+      "path": "_scratch/windows-interrupted-owner-native-proposal02/run_interrupted_owner02.ps1",
+      "ranges": [
+        [
+          1,
+          160
+        ],
+        [
+          161,
+          300
+        ],
+        [
+          301,
+          346
+        ]
+      ],
+      "actuals": [
+        "DONOR-LAUNCHER01-ACTUAL.json",
+        "DONOR-LAUNCHER02-ACTUAL.json",
+        "DONOR-LAUNCHER03-ACTUAL.json"
+      ],
+      "tools": [
+        "6112a0",
+        "acc12d",
+        "b6976c"
+      ]
+    },
+    {
+      "path": "_scratch/windows-interrupted-owner-native-proposal02/generated_writer_exclusion.py",
+      "ranges": [
+        [
+          1,
+          196
+        ]
+      ],
+      "actual": "DONOR-CONTENDER-ACTUAL.json",
+      "tool": "eae928"
+    }
+  ],
+  "final_controls_complete_read": {
+    "directory": "_scratch/controller-generated-native-compatibility-proposal01",
+    "files": [
+      "BRIEF.md",
+      "NATIVE-PROTOCOL.md",
+      "ROOT-ADMISSION-TEMPLATE.json",
+      "DECLARED-EDITS.json",
+      "dummy_bootstrap.diff",
+      "run_controller_generated_compatibility01.diff"
+    ],
+    "actual": "FINAL-CONTROLS-AND-CALLED-ENTRY-ACTUAL.json",
+    "tool": "8dd5d1",
+    "note": "Final whole bootstrap/launcher coverage derives from complete donor reads plus complete exact deltas; unchanged bodies were not redundantly redisplayed."
+  },
+  "called_contracts": [
+    {
+      "path": "_scratch/windows-interrupted-owner-native-proposal02/generated_adapter_flow.py",
+      "ranges": [
+        [
+          466,
+          535
+        ],
+        [
+          761,
+          811
+        ],
+        [
+          1167,
+          1260
+        ]
+      ],
+      "actual": "FINAL-CONTROLS-AND-CALLED-ENTRY-ACTUAL.json",
+      "tool": "8dd5d1"
+    },
+    {
+      "path": "_scratch/windows-interrupted-owner-native-proposal02/generated_worker_flow.py",
+      "ranges": [
+        [
+          38,
+          75
+        ],
+        [
+          129,
+          205
+        ]
+      ],
+      "actual": "CALLED-START-AND-BEFORE-INVENTORY-ACTUAL.json",
+      "tool": "beba13"
+    },
+    {
+      "path": "_scratch/windows-interrupted-owner-native-proposal02/generated_journal_setup.py",
+      "ranges": [
+        [
+          1,
+          198
+        ],
+        [
+          230,
+          288
+        ]
+      ],
+      "actual": "DONOR-JOURNAL-SCOPE-ACTUAL.json",
+      "tool": "7faa43",
+      "note": "Boundary definition lines 198 and 288 were displayed, but unrelated ordinary completion bodies were not reread."
+    }
+  ],
+  "passive_check": {
+    "actual": "CHECK02-ACTUAL.json",
+    "tool": "002d1a",
+    "exit": 0,
+    "script": "check_source02.mjs",
+    "result": "CHECK-RESULT.json",
+    "checks": [
+      "29 mapped subject/bootstrap files",
+      "26 unchanged non-core modules",
+      "2 exact reviewed core copies",
+      "35 retained before files",
+      "9 metadata-only support rows unchanged",
+      "5 whole unified diff pairs, LF-normalized forward/reverse with complete context/count checks",
+      "2 bootstrap, 4 launcher and 4 map rules, exact raw literal forward/reverse",
+      "29-name bootstrap and launcher order",
+      "false template and absent future admission/run",
+      "128 read bindings rehashed unchanged"
+    ]
+  },
+  "preserved_passive_error": {
+    "actual": "CHECK-ACTUAL.json",
+    "tool": "289cfb",
+    "exit": 1,
+    "reason": "Module parser excluded digits, omitting win32 names; only passive parser corrected.",
+    "repair_actual": "PARSER-REPAIR-ACTUAL.json",
+    "repair_tool": "fe1139"
+  },
+  "prohibited_activity": {
+    "subject_execution": false,
+    "python_startup": false,
+    "native_calls": false,
+    "prior_native_output_access": false,
+    "support_path_access": false,
+    "artifact_or_physical_journal_access": false,
+    "network": false,
+    "git": false
+  },
+  "final_freeze": {
+    "read_actual": "FINAL-FREEZE-READ-ACTUAL.json",
+    "read_tool": "528509",
+    "complete_reads": ["PINS.json", "SOURCE-REVIEW.md", "SOURCE-VIEW-COVERAGE.json"],
+    "check_actual": "FINAL-FREEZE-CHECK-ACTUAL.json",
+    "check_tool": "22bb3a",
+    "check_exit": 0,
+    "script": "check_final_pins01.mjs",
+    "result": "FINAL-FREEZE-BINDINGS.json",
+    "pins_sha256": "f8ee47b3977da4d562850ccf616855e02d5a74df8e3bebf6dd7f4714172c0824",
+    "payload_count": 91,
+    "payload_bytes": 1569239,
+    "exact_folder_files": 93,
+    "prior_bound_payloads_unchanged": 73,
+    "limit": "Author coverage was read as a source claim; this peer's own views and actual checks are listed separately above."
+  }
+}
