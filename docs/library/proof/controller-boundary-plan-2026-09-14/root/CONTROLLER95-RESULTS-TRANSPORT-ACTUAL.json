@@ -1,0 +1,7 @@
+{
+  "chunk_id": "11b32c",
+  "wall_time_seconds": 0.7173278,
+  "exit_code": 0,
+  "original_token_count": 64,
+  "output": "{\"proof\":\"docs/library/proof/controller-stage-fake95-2026-09-14\",\"payloads\":317,\"bytes\":3624570,\"manifest_sha256\":\"fffc3164d749b7f5386f75413b5cbacb5944e66ab79660c9870315ce94960c3f\",\"newline_only_restored\":296,\"all_raw_payloads_and_seal_equal_donor\":true}\n"
+}

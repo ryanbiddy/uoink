@@ -1,0 +1,7 @@
+{
+  "chunk_id": "f9c8b5",
+  "wall_time_seconds": 5.9991924,
+  "exit_code": 0,
+  "original_token_count": 80,
+  "output": "To https://github.com/ryanbiddy/uoink.git\n   a152cbf..fc17b67  cc/living-library -> cc/living-library\n{\"old\":\"a152cbfde3e2df23451ca8d04793209a55acaaba\",\"new\":\"fc17b6702f4ce8cdfda295f695dbbe02820ac191\",\"branch\":\"cc/living-library\",\"candidate_clean\":true,\"ancestry_checked\":true,\"cas_fast_forward\":true,\"push_exit\":0}\r\n"
+}

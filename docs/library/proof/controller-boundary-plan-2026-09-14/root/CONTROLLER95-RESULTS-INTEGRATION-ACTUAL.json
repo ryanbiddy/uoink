@@ -1,0 +1,7 @@
+{
+  "chunk_id": "4b64a6",
+  "wall_time_seconds": 1.2236526,
+  "exit_code": 0,
+  "original_token_count": 72,
+  "output": "{\"proof\":\"docs/library/proof/controller-stage-fake95-2026-09-14\",\"patch\":\"E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\_scratch\\\\controller-stage-fake95-2026-09-14.patch\",\"bytes\":3912102,\"sha256\":\"a4f5eec047fa563969fbb12181e4aec8aedf6eaaf3c36437e8e58d752249e0bb\",\"apply_exit\":0}\r\n"
+}

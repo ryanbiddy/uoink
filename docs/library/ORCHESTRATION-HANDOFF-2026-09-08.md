@@ -126,7 +126,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | Completion language metadata | Both scoped fake59 copies pass59/0/0 plus29 subtests; original46 preserved | Author577e68 and confirmation8fd760 return0. Root993295 and peera39b40 verify identical full cases/five hashes, ten guards, unchanged nine inputs/three controls and17 outputs each | Connect authenticated backend completion and controller registry, then migrate WhisperX caller. Engine fake39 is qualified below; real/runtime/production gates remain closed |
 | Control Room command audit | Adapter fix committed atc3607c3 on feat/desktop-control-room | Same16 focused replay cases pass in isolated and checkout copies; TypeScript check passes. All24 proof payloads match Git/disk | A new process loads the preview warning. Existing server not restarted or observed with it; no real-provider or complete-command attestation |
 | Controller startup authority | Source6482b782/map23591b4c passes both guarded81 copies; original65 preserved | Author28a03e and confirmation9a8704 return0, each81/0/0 plus48 passing subtests. Root151c60 and peere49d09 verify complete cases,23 hashes,ten guards,27 inputs/three controls and35 outputs each. All256 payloads match Git/disk | Continue authenticated child namespace/fixed constructor connection. The real-worker seam remains closed; no native/model or release clearance |
-| Controller worker stages | Source2f12cbf5 qualified at checkpoint851bcdd: each guarded copy95 passed/0 failed/0 skipped plus95 passing subtests | Author02dc46 and confirmation8a6166 exit0; rootdc197f and peerfdc459 verify complete identical case/subtest objects,25 child hashes,29 inputs+3 controls,10 guards and37 output files. Original81 cases and fixtures unchanged | Read ASTRA-CONTROLLER95-RESULT-VERDICT-2026-09-14.md. Continue fixed pre-resume/final-publication checks and then native controller/child connection. Local lifecycle relation only; no real model or release clearance |
+| Controller worker stages | Source2f12cbf5 qualified and committed atfc17b67: each guarded copy95 passed/0 failed/0 skipped plus95 passing subtests | Author02dc46 and confirmation8a6166 exit0; rootdc197f and peerfdc459 verify complete identical case/subtest objects,25 child hashes,29 inputs+3 controls,10 guards and37 output files. Original81 cases and fixtures unchanged | Follow CONTROLLER-RESUME-PUBLICATION-IMPLEMENTATION-BRIEF-2026-09-14.md for the next source-only repair. Local lifecycle relation only; native controller/child connection and real model/release clearance remain open |
 | Authenticated child namespace | Gemini05a3bf93 source review FAILED; all17 proposed tests unexecuted | Outer7481e5/0 completed with truncated output. Freeze47c823 retains26 files/553800B and1042 original events; root14eaa9 verifies all pins and input pairs. Controller and child contract/ownership findings require repair | Smaller stage source is reviewed above. Preserve failed delivery; native transport/adoption/namespace repairs remain. No source, runtime or release acceptance from this delivery |
 | Release notes | Startup81 progress, child-source failure and remaining gates updated for this integration | Root68f856 verifies three declared edits plus final status amendment, seven input bindings and all57 unchanged table lines. Frozen original drafts/amendments preserve status changes | Continue runtime qualification. Production remains71d3e70; no package, installation, public draft or website changed |
 | Integration | Reliability repair at e8d058f and notice packaging at 71d3e70 after tree09 | Reliability:53 focused cases plus13 subtests per root. Notices:20 Python/10 block cases per root. Tree09 at 56d9d4c remains2,796 passed/1 failed/3 skipped across2,800 cases plus13 subtests; it predates both repairs | Finish runtime work, then run a new committed complete tree and rebuild/reseal. Package08 and website/marketing remain held. No current-source package or installation credit |
@@ -334,11 +334,13 @@ root verdict accept the exact author/confirmation copies. Separate admitted
 runs02dc46/0 and8a6166/0 each pass95/0/0 plus95 subtests. Rootdc197f/0 and
 peerfdc459/0 verify identical full cases/subtests,25 child hashes,29 inputs,
 three controls,ten guards and37 output files. Read the controller95 result
-verdict. Do not repeat these observations for documentation. Next narrow the
-fixed pre-resume and actual final-publication selection checks using the
-reviewed contract plan20574f45/mapb31f4633; preserve generated routing and
-all accepted tests. Native bootstrap/transport and child adoption remain later
-units. Keep real startup and model entry refusals closed.
+verdict. Results are committed atfc17b67; do not repeat these observations for
+documentation. Next dispatch CONTROLLER-RESUME-PUBLICATION-IMPLEMENTATION-BRIEF-2026-09-14.md
+to Gemini for source-only work in its fresh worktree. Frozen plan2dfb90f8/map00c3e86b
+binds eight sources/227,073 bytes and narrows fixed classification, pre-resume
+and actual final-publication checks. Preserve generated routing and all accepted
+tests. Native bootstrap/transport and child adoption remain later units. Keep
+real startup and model entry refusals closed.
 The original failed namespace delivery is retained; its frozen plan and
 mandatory member-scope correction are archived under
 proof/real-child-namespace-plan-2026-09-14. All52 documentary payloads match
@@ -7107,3 +7109,26 @@ for the missing real bootstrap and authenticated child connection.
 Production remains71d3e70. No D1/D2 artifact access, native/model invocation,
 complete-tree rerun, candidate rebuild, install, website or marketing run follows
 from this result. D2 conversion stays completed atd13534f; release remains held.
+
+### 2026-09-14 — Stage95 backed up; fixed boundary implementation brief ready
+
+Results and updated notes are committed atfc17b6702f4ce8cdfda295f695dbbe02820ac191.
+Pushf9c8b5/0 and remote648e7d/0 verify that exact local/remote cc/living-library
+backup after clean candidate, ancestry and CAS checks. Main/candidate branches
+were not pushed. The commit tool output5d5cfa is retained with its actual
+truncation; the commit id and clean result are visible and separately verified.
+
+The next brief binds plan2dfb90f8/map00c3e86b. Root27efcd reads both completely;
+1b7f6d verifies all eight inputs/227,073 bytes. Fixed imports resolve outside
+locks; controller classification remains retained and cannot fail into a
+generated fallback. New cases need a separate fixed canonical module family:
+the accepted95 isolated fixture does not test the new reverse dependency.
+Keep that fixture and every accepted assertion unchanged. No generic callback,
+test-detection path, authority seeding or native activation is permitted.
+
+Archive014601 and index1bf3cb preserve28 payloads/253,228 bytes, seal
+4e018630c306e74cb79fac1b0d0d163c3e4664a144603e0a845b4428450ac8e7.
+Raw diff/apply25984f succeeds; a501e4 restores28 proven newline-only differences.
+The archive retains stage95 integration and branch-backup receipts. This new
+source-only repair has no execution result yet; frozen planning read diagnostics
+remain preserved. No Ryan-only decision is required for this bounded source work.
