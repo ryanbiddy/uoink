@@ -1,0 +1,80 @@
+{
+  "schema": "uoink-proof-sha256-1",
+  "files": [
+    {
+      "path": "original-preparation/.gitattributes",
+      "bytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+    },
+    {
+      "path": "original-preparation/BRIEF.md",
+      "bytes": 3929,
+      "sha256": "a95db5f71a853fe18111842c82909babeac61fc67087c55b2fc31bac638ff174"
+    },
+    {
+      "path": "original-preparation/INPUT-SELECTION.json",
+      "bytes": 2220,
+      "sha256": "874b686d4a078d37385cac6b5a860a21aebeec08781d2ec150cd3f2e0491b277"
+    },
+    {
+      "path": "original-preparation/LINE-CONVENTION-DIAGNOSTIC01-ACTUAL.json",
+      "bytes": 575,
+      "sha256": "a6ca6df10af89757d88d75ef04cf6d72a4076fe9152036c165397d9ba017a194"
+    },
+    {
+      "path": "original-preparation/MAP-PREPARATION01-FAILURE-ACTUAL.json",
+      "bytes": 353,
+      "sha256": "4a87e87117367d9ca73b4a99569483910729645dc52aa3987e8becf22d99a9a9"
+    },
+    {
+      "path": "original-preparation/MAP-PREPARATION02-SUCCESS-ACTUAL.json",
+      "bytes": 1186,
+      "sha256": "032c6cd20a1e72bad2d8ce82f411c37f18666856ef14dfd381add5ecd40ef92f"
+    },
+    {
+      "path": "original-preparation/PREPARATION-REPAIR01.md",
+      "bytes": 1046,
+      "sha256": "5f206acd87f5c0b130730e3870ed3abb13948beb52a238e23a644d0549ba79bc"
+    },
+    {
+      "path": "original-preparation/ROOT-HANDOFF.md",
+      "bytes": 1565,
+      "sha256": "a2bcb5c0e3130f9dd7475f9a1d06541f660e2569f134dad68be20abfb217edba"
+    },
+    {
+      "path": "INPUT-SELECTION.json",
+      "bytes": 2220,
+      "sha256": "874b686d4a078d37385cac6b5a860a21aebeec08781d2ec150cd3f2e0491b277"
+    },
+    {
+      "path": "CANONICAL-BRIEF.md",
+      "bytes": 3950,
+      "sha256": "23ab81309cf61b840aa8e2d666eba8449bcf941d9d91cc383ad7b875581fb15e"
+    },
+    {
+      "path": "canonical-brief-change.diff",
+      "bytes": 860,
+      "sha256": "4d02cb3abe7a555306547bf3d39a7197c836c2867e21dbeaf5fb6a4d6b017c3d"
+    },
+    {
+      "path": "MATERIALIZATION-PLAN.md",
+      "bytes": 2080,
+      "sha256": "f183ece1b7fcd4b25ee1919deba5121087f0d6c7293b5a94d4785cf7e906600f"
+    },
+    {
+      "path": ".gitattributes",
+      "bytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+    },
+    {
+      "path": "materialize.ps1",
+      "bytes": 9940,
+      "sha256": "1b195badc40ea5be0750085c7efe9219ee18acd03c14b7401099a97c6d28e018"
+    },
+    {
+      "path": "COPY-RECEIPT.json",
+      "bytes": 6072,
+      "sha256": "cd564c4ed4b2d65825e0c4fd78febe9940333888d09a29c061a6000ff370a84b"
+    }
+  ]
+}

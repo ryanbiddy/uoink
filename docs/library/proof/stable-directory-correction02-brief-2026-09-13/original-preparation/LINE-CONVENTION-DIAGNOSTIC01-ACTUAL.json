@@ -1,0 +1,7 @@
+{
+  "chunk_id": "41522e",
+  "wall_time_seconds": 0.2714404,
+  "exit_code": 0,
+  "original_token_count": 100,
+  "output": "{\r\n  \"id\": \"A-01\",\r\n  \"expected_bytes\": 29660,\r\n  \"actual_bytes\": 29660,\r\n  \"expected_sha256\": \"60d22036d6827205be5d0657af8e4693aa534605bdfb1b501878eb2a889fe25f\",\r\n  \"actual_sha256\": \"60d22036d6827205be5d0657af8e4693aa534605bdfb1b501878eb2a889fe25f\",\r\n  \"expected_catalog_lines\": 589,\r\n  \"ReadAllLines_count\": 588,\r\n  \"LF_split_elements\": 589,\r\n  \"ends_with_LF\": true,\r\n  \"output_exists\": false\r\n}\r\n"
+}
