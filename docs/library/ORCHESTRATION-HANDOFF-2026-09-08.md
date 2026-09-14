@@ -119,7 +119,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | Actual adapter cancellation | Generated qualification integrated at60b3bb5 | Author and independent copies each89 passed/0 failed/0 skipped,86 passing subtests; all216 proof payloads match Git/disk | Native cancellation integrated ata25b34b: all100 proof payloads match Git/disk. Final-clear recovery is recorded at 5671b51; interrupted-owner retirement, crash/restart, real models and release remain unqualified |
 | Retired-owner final-clear recovery | Fake22 at a83ae1a; generated native recovery at5671b51 | Both fake copies22/0/0 plus21 passing subtests. Nativee97a44/exit0, root5214fa and peer503717 verify exact retirement, four confirmed phases/flushes and still-revoked owner/token. All91 newest proof payloads match Git/disk | The generated runtime-owner connection is recorded at 3661608 and 3b8f9e0. Continue interrupted-owner retirement; no OS-interruption, active-worker recovery, crash/restart or model credit |
 | Worker runtime owner and bootstrap | Connected fake33 at 3661608; generated native cancellation at 3b8f9e0 | Both fake copies 33/0/0. Native a9321b/exit 0, root dd7190 and peer 4984ac agree on 32 unchanged pairs, valid guards, one segment, closed owner, child/contender exit 0 with empty jobs, and four journal frames. All 127 native proof payloads match Git/disk | Interrupted-owner retirement direction is committed at 77dc339. Real inference, protected loader/PCM/filter routes, crash/restart and release remain open |
-| Interrupted owned-worker retirement | Gemini source remains FAILED at 0a1a211; corrected fake28 qualification completed under e2801a5 | Author70e7f4 and independentdd5dc7 each28/0/0 plus57 passing subtests; root9cdc98 and peer4bc27f agree. All404 qualification and17 integration payloads match Git/disk | Native source preparation is active under abbc4de. Review/admit its distinct forced-termination instrument before execution. No native/model, production or release acceptance |
+| Interrupted owned-worker retirement | Gemini source remains FAILED at 0a1a211; corrected fake28 qualification integrated at feee2f7 | Author70e7f4 and independentdd5dc7 each28/0/0 plus57 passing subtests; root9cdc98 and peer4bc27f agree. All404 qualification and17 integration payloads match Git/disk | Native source preparation is active under abbc4de. Review/admit its distinct forced-termination instrument before execution. No native/model, production or release acceptance |
 | Release notes | Current progress and remaining gates committed at 376eb47 | All seven proof payloads match Git/disk; 57 table lines and historical package/review-kit sections remain unchanged. D1/D2 completion and generated cancellation/recovery are explicit | Continue runtime qualification. No production source, package, installation, public draft or website changed |
 | Integration | Reliability repair at e8d058f and notice packaging at 71d3e70 after tree09 | Reliability:53 focused cases plus13 subtests per root. Notices:20 Python/10 block cases per root. Tree09 at 56d9d4c remains2,796 passed/1 failed/3 skipped across2,800 cases plus13 subtests; it predates both repairs | Finish runtime work, then run a new committed complete tree and rebuild/reseal. Package08 and website/marketing remain held. No current-source package or installation credit |
 | Desktop incident | Isolation failed in package-07 attempt; corrected at `e10ba3a` | Ordinary Uoink and filesystem connectors launched; earlier live-index/5179 effects unknown. Owned job cleaned | No further override launch; only guarded Uoink dashboard observed for package 08 |
@@ -216,7 +216,7 @@ The exact author map eb108b71 was admitted under e2801a5 for fake28. Author
 passing subtests. Root9cdc98 verifies identical case objects and35 child hashes,
 all10 guards, unchanged38 payloads/3 controls and exact46-file output membership.
 Do not repeat these runs for documentation. Both actual results and repair
-records are sealed: b2099f verifies404 qualification payloads and c8fa06 verifies17
+records are integrated at feee2f7: b2099f verifies404 qualification payloads and c8fa06 verifies17
 root integration payloads in Git/disk. Native source preparation under abbc4de
 uses a distinct forced-termination contract and retained parent process/job
 evidence. Review it before separate admission. Native execution remains closed. The first
@@ -565,8 +565,8 @@ The authorized backup push of 01e22fb completed. Session 35629 closed at
 SHA3d8f033bb80e8cfb9a0fbcd0ef403879275671052bee48e9979b4796842c3dc7.
 The earlier authorized branch-only backup is verified at
 6730c8eeb99df3ea97135c96dea8c70212f8cd1f (push d0c897, remote 9caca9).
-The latest verified backup is 41d01e024a8becc1f87fa721c9401e8cd7d2c1ae
-(September 14; push 58f295 / exit 0, remote f7faf5 / exit 0).
+The latest verified backup is feee2f76b60761e3b7a50b3aad10ce4a15e5cf27
+(September 14; push ede3af / exit 0, remote c74322 / exit 0).
 The previous 5ad7c174 push also completed. Sessions 84911 and 5313 are closed;
 do not poll or recreate them. The latter was cancelled at Git's account picker,
 then retried with the already authenticated GitHub CLI helper in per-process
@@ -6329,3 +6329,19 @@ kept the seal intact. Recheck02e039 and completed index checkb2099f return0.
 The root integration record preserves this failure and repair in17 payloads/
 75,431 bytes, seald7f0ed2fb209a72a06178a07f2f4ed05f700e829f4c51d0004feceef955f13fb;
 index checkc8fa06 returns0. No subject rerun was used for archival.
+
+### 2026-09-14 — Fake28 integrated and authorized backup verified
+
+Commit feee2f76b60761e3b7a50b3aad10ce4a15e5cf27 contains the repaired connection,
+both qualified copies,421 verified evidence payloads and current release notes.
+Its commit operation d2fcf5 returned0 with a clean candidate checkout. The local
+backup branch advanced by checked fast-forward from41d01e0 tofeee2f7. Pushede3af
+and remote checkc74322 return0; origin/cc/living-library matches that exact SHA.
+No main merge, candidate-branch push or publication occurred. Raw actual backup
+objects remain BACKUP-PUSH-FEEE2F7-ACTUAL.json and its REMOTE counterpart.
+
+Native instrument source preparation under abbc4de is active in
+_scratch/windows-interrupted-owner-native-proposal01, with a separate peer
+review. No new native run is admitted. D2 remains completed atd13534f and must
+not be repeated; real-runtime decisions and the later full-tree/build/install
+gates remain open. Later commits need a separate verified backup.
