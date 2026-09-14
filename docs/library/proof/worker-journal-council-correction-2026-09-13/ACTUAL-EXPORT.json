@@ -1,0 +1,8 @@
+{
+  "chunk_id": "0dce17",
+  "wall_time_seconds": 1.9832949,
+  "exit_code": 0,
+  "original_token_count": 90,
+  "output": "{\"status\": \"FIXED_INPUTS_MATCH\", \"source_count\": 33, \"source_bytes\": 440045, \"original_unchanged\": true, \"report\": {\"path\": \"docs/library/GEMINI-WORKER-JOURNAL-ADAPTER-CORRECTION-2026-09-13.md\", \"bytes\": 38567, \"sha256\": \"f17d009e5daaeb397ec655598f269fa67cc0e634e7c77ae28cf7756de00102cb\", \"lines\": 327}, \"retained_nonmessage_events\": 145, \"view_events\": 128}\r\n"
+}
+
