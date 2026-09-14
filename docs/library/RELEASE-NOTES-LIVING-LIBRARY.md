@@ -74,9 +74,14 @@ writer, qualify other storage values or approve model/runtime execution.
 
 The dormant D2 conversion adapter is qualified at `017b559`: two copies pass
 the same 23 generated cases, with zero failures/errors/skips and valid guards.
-All 124 proof payloads match Git/disk. The reviewed local conversion proposal
-awaits Ryan's separate decision; no real converter, output persistence, model
-reader or runtime was exercised by these checks.
+All 124 proof payloads match Git/disk. Those checks did not exercise the real
+conversion or model runtime. Ryan subsequently approved the exact local-only
+conversion: actual2827f8 returned outer/parent/child0, with valid guards and one
+checkpoint read. It produced54 ranges from23 storages in a5,896,708-byte file;
+the parent verified output SHA8c15e718b6d502e7e351761f6cfee1a6917450e03c9a4c5318bc0d41d3fdd8c4.
+Root948c0d confirms the receipts and unchanged inputs; archival is next. No
+model/reader activation, fetching or redistribution occurred. Native model
+compatibility and release suitability remain unqualified.
 
 Package 08 remains the latest built and installed review artifact. It includes
 the native note and saved-media repairs at `d2caac5` and `60d203f`; its source
