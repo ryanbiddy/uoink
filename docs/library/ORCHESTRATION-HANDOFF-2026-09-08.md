@@ -118,7 +118,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | Native writer exclusion | Stable-directory repair atd317a88; native04 atf630264; council corrections ata74e178 and f32f0ca | Both copies81 cases/72 subtests; native0eeb20 passed. Group A and B source conclusions require their mandatory Astra corrections. Group B has23 proof payloads matching Git/disk. Original failed review preserved | Retired-owner recovery is observed at5671b51. Runtime-owner connection follows47d30c; restart and real runtime remain open |
 | Actual adapter cancellation | Generated qualification integrated at60b3bb5 | Author and independent copies each89 passed/0 failed/0 skipped,86 passing subtests; all216 proof payloads match Git/disk | Native cancellation integrated ata25b34b: all100 proof payloads match Git/disk. Connect interrupted final-clear recovery; crash/restart, real models and release remain unqualified |
 | Retired-owner final-clear recovery | Fake22 at a83ae1a; generated native recovery at5671b51 | Both fake copies22/0/0 plus21 passing subtests. Nativee97a44/exit0, root5214fa and peer503717 verify exact retirement, four confirmed phases/flushes and still-revoked owner/token. All91 newest proof payloads match Git/disk | Connect the qualified runtime owner to the native child. No OS-interruption, active-worker, crash/restart or model credit |
-| Worker runtime owner and bootstrap | Owner at 1f200eb; bootstrap at bbe10d6; next native connection brief47d30c | Both copies17/0/0, with exact cases/guards/inputs. New brief has6 proof payloads matching Git/disk;24 stable source/verdict inputs match and its handoff row stays historical | Implement/review the same-channel bridge, fixed publisher, retained generated inputs and clean pre-begin cancellation before freezing cases. No new qualification/admission yet; real inference and protected loader/PCM/filter routes remain open |
+| Worker runtime owner and bootstrap | Owner at 1f200eb; bootstrap at bbe10d6; connected fake33 qualification at 3661608 | Author and independent copies each 33 passed / 0 failed / 0 skipped. Root da4a3b verifies identical cases/inputs and valid guards; all 275 proof payloads match Git/disk | Native generated cancellation a9321b returned exit 0; finish separate root/peer receipt review and archive before accepting that scope. Real inference, protected loader/PCM/filter routes and release remain open |
 | Release notes | Current progress and remaining gates committed at 376eb47 | All seven proof payloads match Git/disk; 57 table lines and historical package/review-kit sections remain unchanged. D1/D2 completion and generated cancellation/recovery are explicit | Continue runtime qualification. No production source, package, installation, public draft or website changed |
 | Integration | Reliability repair at e8d058f and notice packaging at 71d3e70 after tree09 | Reliability:53 focused cases plus13 subtests per root. Notices:20 Python/10 block cases per root. Tree09 at 56d9d4c remains2,796 passed/1 failed/3 skipped across2,800 cases plus13 subtests; it predates both repairs | Finish runtime work, then run a new committed complete tree and rebuild/reseal. Package08 and website/marketing remain held. No current-source package or installation credit |
 | Desktop incident | Isolation failed in package-07 attempt; corrected at `e10ba3a` | Ordinary Uoink and filesystem connectors launched; earlier live-index/5179 effects unknown. Owned job cleaned | No further override launch; only guarded Uoink dashboard observed for package 08 |
@@ -190,10 +190,11 @@ both independent copies, with identical case objects and all guards valid.
 Qualification is committed at a83ae1a with204 verified payloads. Native recovery
 is now committed at5671b51 with91 verified payloads: actuale97a44/exit0,
 root5214fa and independent passive503717 agree on the one generated observation.
-Do not repeat it for documentation. The next child-side runtime-owner connection
-brief and integrator direction are committed at47d30c; source implementation is underway
-without test/native admission. Preserve clean pre-begin cancellation and all17
-original cases while connecting the same authenticated channel and actual owner.
+Do not repeat it for documentation. The child-side runtime-owner connection
+brief is at 47d30c and its independent fake33 qualification is at 3661608.
+Both copies pass the same original 17 and new 16 cases. The separately admitted
+native cancellation a9321b returned exit 0; root/peer receipt review and archival
+are next. Do not repeat the native run to obtain its documentation.
 D2 remains complete atd13534f; no repeat checkpoint/output access for documentation.
 No model, complete-tree, package, installed-client, website or marketing clearance.
 
@@ -202,7 +203,10 @@ ASTRA-RELEASE-NOTES-PROGRESS-VERDICT-2026-09-13.md. Runtime-owner source review
 found and repaired a constructor/standalone-revoke first-error gap before any
 execution; a new test's missing lease-revoke argument was also corrected before
 execution, preserving its assertions. The proposed set is the original 17 cases
-plus 16 new connection cases. Finish final instrumentation review before admission.
+plus 16 new connection cases, now qualified at 3661608. Native preparation pins
+1f74a81c preserve the pre-execution controller-selection correction. Root
+f8546d verifies all 47 texts/727,148 bytes; admission 41fbd2 binds the exact
+launcher and map. This generated check grants no D2/D3/D4 or model authority.
 
 Native writer-exclusion02 is preserved at c5e72a2; read
 ASTRA-WRITER-EXCLUSION02-FAILURE-2026-09-13.md. All130 proof payloads match
@@ -6075,3 +6079,27 @@ injection; neither was a failed candidate run. A suspected doubled-separator
 source-map issue was only outer tool-JSON escaping: passive e07e1a verifies all
 36 decoded paths against their exact expected paths. No map repair was needed.
 Instrumentation review and admission still precede any new measurement.
+
+### 2026-09-13 — Connected runtime-owner fake33 evidence committed
+
+Commit 3661608 preserves author 68cef1/16c97f and independent b78869/0b9323:
+each 33 passed, 0 failed and 0 skipped. Root da4a3b verifies identical case
+objects and all 36 child input hashes, ten valid guards, 12 metadata traps,
+25 registry traps and 39 unchanged source/control pairs in each root. These
+are two observations of the same 33 distinct cases, not 66 distinct cases.
+
+Copier 7bb4fc returned 0; root e24e8e verifies all 275 payloads/3,479,909 bytes
+against Git/disk, seal 51dc8098baca8995af23fadc41d2a0289f032ed6be8fdbce9cba663379f677bf.
+The original sealed copy preparation's unresolved hash placeholder remains.
+Root's separate two-line derivative and actual copy 15509e are recorded; no
+candidate failure or original-copier execution is invented. Source repairs
+preceded measurement and preserve the accepted assertions.
+
+Native preparation's first draft selected the existing drain controller instead
+of the cancellation controller. Peer review caught this before execution; the
+old draft and one-selector repair remain. Root f8546d verifies all 47 pinned
+texts/727,148 bytes and 28 exact fake33 module copies. Admission 41fbd2 precedes
+the single generated native observation a9321b, which returned exit 0 in
+2.3488006 seconds with blank output. Initial receipt read 4eae22 shows valid
+guards and closed owner state; independent receipt review is still pending.
+No checkpoint, D2 output or physical journal was reopened for this update.
