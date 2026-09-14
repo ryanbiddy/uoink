@@ -1,0 +1,94 @@
+{
+  "schema": "uoink.retired-owner-recovery-brief-bindings.v1",
+  "scope": "Current text-source bindings for a prospective implementation brief; no tests or native execution",
+  "count": 17,
+  "files": [
+    {
+      "path": "_scratch/windows-journal-cancel-proposal01/durable_lifecycle.py",
+      "bytes": 13075,
+      "sha256": "f95cc8f2c61fd1953b642669ee4027a968660e39b97d9e84782fb83ac62abacb"
+    },
+    {
+      "path": "_scratch/windows-journal-cancel-proposal01/snapshot_lifecycle.py",
+      "bytes": 22138,
+      "sha256": "a80514aac6b1e75b9b872052852fa993a23cd5273b6bed4ffb4eef7404cb69dd"
+    },
+    {
+      "path": "_scratch/windows-journal-cancel-proposal01/snapshot_reservations.py",
+      "bytes": 23634,
+      "sha256": "e80ae881fa4af9cc7d1a3e4a06624f5b19abe4de09aec3844e8a541449335b98"
+    },
+    {
+      "path": "_scratch/windows-journal-cancel-proposal01/generated_adapter_flow.py",
+      "bytes": 33890,
+      "sha256": "cc0b7ff4f445ef73b4acdc63475c1aa375b5d0cfbe461ee6c50809cd0f19b4b4"
+    },
+    {
+      "path": "_scratch/windows-journal-cancel-proposal01/generated_journal_setup.py",
+      "bytes": 11954,
+      "sha256": "df7ed56cdcbd23352b3e69a6f6790a012182b294491f38f8ed19610f000b485d"
+    },
+    {
+      "path": "_scratch/windows-journal-cancel-proposal01/windows_reservation_port.py",
+      "bytes": 18234,
+      "sha256": "b93076ab07b8c0567f6608520c99f5e5523be3dd388010a5a49037a4a899f775"
+    },
+    {
+      "path": "_scratch/windows-journal-cancel-proposal01/win32_worker_connection.py",
+      "bytes": 29660,
+      "sha256": "60d22036d6827205be5d0657af8e4693aa534605bdfb1b501878eb2a889fe25f"
+    },
+    {
+      "path": "_scratch/windows-journal-cancel-proposal01/win32_private_pipe.py",
+      "bytes": 18613,
+      "sha256": "73a1109a55f2bc807594655c71b24a3e35eb88d7f744497df2cc328dc224cae7"
+    },
+    {
+      "path": "_scratch/windows-journal-cancel-proposal01/generated_worker_flow.py",
+      "bytes": 22853,
+      "sha256": "1ab240d60ceaca130ac85f5d2e908ef5895da5297f35d78a1caba1c62e622238"
+    },
+    {
+      "path": "_scratch/windows-journal-cancel-proposal01/generated_operation_flow.py",
+      "bytes": 21274,
+      "sha256": "6f09b4e6490b2078e792e49559a9dd0db95a895a778c31294a3577eeabdc98ed"
+    },
+    {
+      "path": "_scratch/windows-journal-cancel-proposal01/asr_loading_adapter.py",
+      "bytes": 12113,
+      "sha256": "635d2c22db75d12ffe6965fb656fdca47450ccbbaeb4d8cc8aaff9fcc79dd243"
+    },
+    {
+      "path": "_scratch/windows-journal-cancel-proposal01/dummy_bootstrap.py",
+      "bytes": 35742,
+      "sha256": "ed99209c7da9bb98faf960999a38667bd5e96b75bae1e0542d69733b62cc593c"
+    },
+    {
+      "path": "_scratch/windows-journal-cancel-proposal01/run_journal_cancel01.ps1",
+      "bytes": 34781,
+      "sha256": "70ab9cc3879ed792db0f8deaec4fd343f6a96438811bad9e37977ae510fa11d6"
+    },
+    {
+      "path": "_scratch/windows-journal-cancel-fake-proposal01/test_reservations.py",
+      "bytes": 37737,
+      "sha256": "604a295d5e925b9a9d7f55750bfeb1ddcda3e6a9873d6d8d7f9e98c84d9b4b9e"
+    },
+    {
+      "path": "_scratch/windows-journal-cancel-fake-proposal01/test_windows_reservations.py",
+      "bytes": 27701,
+      "sha256": "91b0de71eb55d088ee2fdbcd11ff3e6a074f18f713dfcd5b384814a1dc78300c"
+    },
+    {
+      "path": "_scratch/windows-reservation-integration-brief01/BRIEF.md",
+      "bytes": 10207,
+      "sha256": "2433c89876622e206e58a77d407a2a0814b090d3d7612ed626a6e8d93ee08d86"
+    },
+    {
+      "path": "docs/library/ORCHESTRATION-HANDOFF-2026-09-08.md",
+      "bytes": 399750,
+      "sha256": "01c6e94085e8a4e86b37552db025539d4b3fdcc21c25d01daf61e5de20cb1046"
+    }
+  ],
+  "handoff_scope": "Only current state/queue passages about cancellation and remaining native recovery were used; handoff hash is the full file at this read.",
+  "pending": "No implementation, fake qualification or native observation admitted by this brief."
+}

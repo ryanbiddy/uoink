@@ -1,0 +1,9 @@
+# Qualifier preparation finding — 2026-09-13
+
+The new case-selection call in qualifier SHA-256 e9dfbc404a8a6d4da76b7628340786cdebc0024eb63218230e254995ea398ec8 uses `loadTestsFromName(name)` on each full `module.Class.method` ID without supplying the already loaded module. This adds avoidable import/traceback work after content reads have closed and filesystem metadata traps are installed.
+
+Installed text `C:/Python314/Lib/unittest/loader.py:139–154` first calls `__import__` on the full name and catches ImportError while removing attribute components. These test modules are plain ModuleType instances without __path__. The corresponding importlib branch raises ModuleNotFoundError for a non-package parent (`Lib/importlib/_bootstrap.py:1319–1324`). The loader then constructs a failed-import record with `traceback.format_exc()` (`loader.py:36–40`), whose default source-line lookup can call linecache/os.stat (`traceback.py:460–504`, `linecache.py:138`). Import or metadata guards can therefore refuse setup before any case runs.
+
+Resolve each pinned ID relative to its existing LOADED module: split at the first dot, validate that module against LOADED, and pass the relative Class.method plus module object to loadTestsFromName. Its module argument bypasses the import fallback. Preserve the 22 IDs, all assertion bodies and every guard. Root agreed this narrow preparation correction; author owns the source repair and preservation.
+
+This is source analysis, not an observed failed test. No qualifier/module/test was executed. The associated frozen launcher is 6aca0b469c27656bb9ac9a7213b1c3f6f99b02284edb718846a113c4f6fbd1af; PINS is 13ef8f2e30fe133a23d7516cdfc7a42b80677faa969f25ec93d601f88c66dd94; EXPECTED-CASES is caf804d796524c52d95481b9c1c84aae60b34e82cd656f278e21559fbf1242cd. The earlier core source verdict remains unchanged.

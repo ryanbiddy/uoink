@@ -1,0 +1,7 @@
+{
+  "chunk_id": "5e0062",
+  "wall_time_seconds": 0.2471287,
+  "exit_code": 0,
+  "original_token_count": 164,
+  "output": "{\r\n  \"scope\": \"Text and source-hash verification only\",\r\n  \"fake_pins_count\": 26,\r\n  \"unchanged_other_pins\": 25,\r\n  \"qualifier_exact_one_line_delta\": true,\r\n  \"all22_ids_and_test_sources_unchanged\": true,\r\n  \"all_guards_unchanged_by_exact_delta\": true,\r\n  \"native_source_count\": 18,\r\n  \"native_map_sha256\": \"9d988684ca8dfe487521f7d711ec67855393922d53ffe3cce3e13a2c660e34c3\",\r\n  \"native_support_paths_accessed\": 0,\r\n  \"original_native_launcher_preserved_sha256\": \"70ab9cc3879ed792db0f8deaec4fd343f6a96438811bad9e37977ae510fa11d6\",\r\n  \"final_pins_sha256\": \"f7c3b964ed77a681ed71d9b03fee934cf402721bc232d869e5ee42c9f564e3a1\",\r\n  \"candidate_executions\": 0\r\n}\r\n"
+}

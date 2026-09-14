@@ -1,0 +1,51 @@
+--- before/dummy_bootstrap.py
++++ proposal/dummy_bootstrap.py
+@@ -47,7 +47,7 @@
+ PROCESS_ABORT = os._exit  # Retained current-process failure exit; never an IPC operation.
+ 
+ FORBIDDEN = r"C:\Users\hello\AppData\Local\Uoink\index.db"
++FIXED_RUNS = {'cancel': 'E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\windows-retired-owner-recovery01'}
+-FIXED_RUNS = {'cancel': 'E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\windows-journal-cancel01'}
+ LOCATION = os.path.normcase(os.path.dirname(os.path.abspath(__file__)))
+ MODE = next((mode for mode, path in FIXED_RUNS.items() if os.path.normcase(path) == LOCATION), None)
+ assert MODE is not None, "fixed_fresh_generated_operation_directory"
+@@ -168,7 +168,7 @@
+ 
+ source_map = json.loads(read_bounded(os.path.join(EXPECTED_RUN, "SOURCE-INPUTS.json"), 65536))
+ admission = json.loads(read_bounded(os.path.join(EXPECTED_RUN, "ROOT-ADMISSION.json"), 65536))
++assert admission["root_reviewed"] is True and admission["scope"] == "generated-windows-retired-owner-recovery-only"
+-assert admission["root_reviewed"] is True and admission["scope"] == "generated-windows-journal-cancel-only"
+ assert admission["case"] == CASE and admission["operation_mode"] == MODE and admission["run_path"] == EXPECTED_RUN
+ assert admission["source_inputs_sha256"] == hashlib.sha256(read_bounded(os.path.join(EXPECTED_RUN, "SOURCE-INPUTS.json"), 65536)).hexdigest()
+ assert source_map["native_bindings"] == {path: {"bytes": size, "sha256": sha} for path, (size, sha) in NATIVE.items()}
+@@ -504,7 +504,7 @@
+             else:
+                 self.journal_setup.before_process(name)
+             if name == "CloseHandle":
++                self.journal_setup.before_recovery_close(args)
+-                self.journal_setup.before_close(args)
+         asset_name = None if is_journal else self._asset_scope(name, args)
+         self.calls.append(name)  # Never record buffers, secrets or API arguments.
+         if name == "InitializeProcThreadAttributeList" and args[0] is not None:
+@@ -573,8 +573,10 @@
+             journal_setup.connect(port)
+             monitor.contender = EXCLUSION.OwnedContender(primitives, monitor, journal_setup, __file__)
+             port._bind_contender(monitor.contender)
++            recovery_probe = FLOW._RetiredClearProbe(port, journal_setup)
++            port._bind_retired_clear_probe(recovery_probe)
++            outcome = FLOW.controller_retired_recovery_flow(port)
++            outcome["durable_journal"] = journal_setup.complete_recovery()
+-            outcome = FLOW.controller_cancel_flow(port)
+-            outcome["durable_journal"] = journal_setup.complete()
+             code = 0
+     except BaseException as error:
+         error_type = type(error).__name__
+@@ -603,7 +605,7 @@
+              and not HEAVY.intersection(name.split(".")[0] for name in sys.modules))
+     if not guard:
+         code = 1
++    receipt = {"schema": "uoink.generated-windows-retired-owner-recovery.v1", "role": ROLE, "case": CASE, "operation_mode": MODE, "result": outcome, "error_type": error_type,
+-    receipt = {"schema": "uoink.generated-windows-journal-cancel.v1", "role": ROLE, "case": CASE, "operation_mode": MODE, "result": outcome, "error_type": error_type,
+                "directory_refusal": directory_refusal,
+                "writer_exclusion": monitor.contender.receipt() if monitor.contender is not None else None,
+                "adapter_state": adapter_state, "native_exit_planned": code, "elapsed_seconds": elapsed, "guard_valid": guard, "guard_denials": DENIALS,

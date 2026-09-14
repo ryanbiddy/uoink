@@ -1,0 +1,7 @@
+{
+  "chunk_id": "d3c2a4",
+  "wall_time_seconds": 0.2838177,
+  "exit_code": 0,
+  "original_token_count": 316,
+  "output": "{\r\n  \"runs\": [\r\n    {\r\n      \"root\": \"E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\_scratch\\\\windows-retired-owner-recovery-proposal01\",\r\n      \"passed\": 22,\r\n      \"failed\": 0,\r\n      \"skipped\": 0,\r\n      \"passing_subtests\": 21,\r\n      \"guards\": 10,\r\n      \"metadata_traps\": 12,\r\n      \"registry_traps\": 25,\r\n      \"fixed_inputs\": 26,\r\n      \"controls\": 3,\r\n      \"child_inputs\": 23,\r\n      \"stdout_bytes\": 15257,\r\n      \"stdout_sha256\": \"056412f747a1e4e02d78f509ec7e179b6e7f8ed63a87d9cf6aca05bee0022266\",\r\n      \"native_exit\": 0\r\n    },\r\n    {\r\n      \"root\": \"E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\_scratch\\\\astra-retired-recovery-confirmation01\",\r\n      \"passed\": 22,\r\n      \"failed\": 0,\r\n      \"skipped\": 0,\r\n      \"passing_subtests\": 21,\r\n      \"guards\": 10,\r\n      \"metadata_traps\": 12,\r\n      \"registry_traps\": 25,\r\n      \"fixed_inputs\": 26,\r\n      \"controls\": 3,\r\n      \"child_inputs\": 23,\r\n      \"stdout_bytes\": 15257,\r\n      \"stdout_sha256\": \"957bb81b5d18c6f1ea16091fd4403c79ca0e53e502cbf159ab9dde1b6769c041\",\r\n      \"native_exit\": 0\r\n    }\r\n  ],\r\n  \"case_objects_identical\": true,\r\n  \"historical_cases_per_run\": 12,\r\n  \"new_cases_per_run\": 10,\r\n  \"candidate_executions_by_this_checker\": 0,\r\n  \"native_recovery_qualified\": false\r\n}\r\n"
+}

@@ -1,0 +1,7 @@
+{
+  "chunk_id": "583ea4",
+  "wall_time_seconds": 0.1599998,
+  "exit_code": 0,
+  "original_token_count": 26,
+  "output": "{\r\n  \"copied\": 7,\r\n  \"scope\": \"Text preservation before loader-only repair; no candidate execution\"\r\n}\r\n"
+}

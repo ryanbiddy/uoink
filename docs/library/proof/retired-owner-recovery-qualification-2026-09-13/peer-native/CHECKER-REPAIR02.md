@@ -1,0 +1,3 @@
+The first passive source check (0f4547, exit 1) rejected a fixed source filename because its text-only filename expression allowed letters and underscores but omitted digits. The map contains win32_worker_connection.py and win32_private_pipe.py. Their paths remain fixed by the reviewed map and exact proposal-directory equality.
+
+Preserve check_sources.ps1 and CHECK01-ACTUAL.json unchanged. In check_sources02.ps1, change only that expression from [a-z_]+ to [a-z0-9_]+ before repeating the passive text check. No candidate source, assertion, pin or admission changes. No Python, native, model or support execution occurred.

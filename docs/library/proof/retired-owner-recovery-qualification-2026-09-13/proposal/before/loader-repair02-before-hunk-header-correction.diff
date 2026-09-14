@@ -1,0 +1,10 @@
+--- before/prequalification-loader01-qualify_windows_reservations.py
++++ proposal/qualify_windows_reservations.py
+@@ -155,7 +155,7 @@
+             self.addFailure(test, err)
+ 
+-suite = unittest.TestSuite(unittest.defaultTestLoader.loadTestsFromName(name) for name in EXPECTED)
++suite = unittest.TestSuite(unittest.defaultTestLoader.loadTestsFromName(name.split(".", 1)[1], LOADED[name.split(".", 1)[0]]) for name in EXPECTED)
+ result = Results()
+ started = time.perf_counter()
+ suite.run(result)

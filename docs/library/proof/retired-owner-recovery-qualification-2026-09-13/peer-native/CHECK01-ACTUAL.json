@@ -1,0 +1,7 @@
+{
+  "chunk_id": "0f4547",
+  "wall_time_seconds": 0.4636171,
+  "exit_code": 1,
+  "original_token_count": 76,
+  "output": "Exception: E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\windows-retired-owner-native-source-review01\\check_sources.ps1:4\r\nLine |\r\n   4 |  function Need($ok,[string]$why){if(-not $ok){throw $why}}\r\n     |                                               ~~~~~~~~~~\r\n     | Unexpected source path\r\n"
+}
