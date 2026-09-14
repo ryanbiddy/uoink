@@ -1,0 +1,19 @@
+{
+  "kind": "passive-documentary-check",
+  "original_history_files_unchanged": 7,
+  "fixed_committed_input_count": 16,
+  "fixed_input_bytes": 356810,
+  "proposed_case_ids": [
+    "test_actual_adapter_interruption_preserves_error_and_quarantine",
+    "test_confirmed_idle_owner_retires_and_reconciles_once",
+    "test_foreign_stale_active_or_pending_attempt_refuses",
+    "test_retained_io_or_uncertain_handle_refuses_without_retirement",
+    "test_unobserved_exit_nonempty_job_or_close_failure_retains_custody",
+    "test_reentrant_or_clear_failure_preserves_first_error_and_gate"
+  ],
+  "implementation_output_absent": true,
+  "admission_created": false,
+  "new_implementation_or_subject_execution": false,
+  "map_validation": "58f198 exited0 and validated all16 source members against committed manifests, then reloaded the16-row map.",
+  "failed_metadata_history_retained": true
+}

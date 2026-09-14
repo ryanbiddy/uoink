@@ -1,0 +1,131 @@
+{
+  "scope": "Source-text preparation only. Listed ranges were read; no whole-file review is claimed for these inputs. Hashing text files is not candidate execution.",
+  "source_root": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library",
+  "inputs": [
+    {
+      "id": "handoff",
+      "path": "docs/library/ORCHESTRATION-HANDOFF-2026-09-08.md",
+      "bytes": 413093,
+      "sha256": "01a657e3520dbbddd530eaad0ceb431f5b502d081bb9f7ec1f6ca80ed716b939",
+      "viewed_ranges": [
+        {
+          "first": 96,
+          "last": 250
+        }
+      ]
+    },
+    {
+      "id": "lifecycle",
+      "path": "_scratch/runtime-owner-native-connection-native-proposal01/snapshot_lifecycle.py",
+      "bytes": 22138,
+      "sha256": "a80514aac6b1e75b9b872052852fa993a23cd5273b6bed4ffb4eef7404cb69dd",
+      "viewed_ranges": [
+        {
+          "first": 90,
+          "last": 169
+        },
+        {
+          "first": 230,
+          "last": 386
+        }
+      ]
+    },
+    {
+      "id": "durable",
+      "path": "_scratch/runtime-owner-native-connection-native-proposal01/durable_lifecycle.py",
+      "bytes": 19187,
+      "sha256": "ef1519262dc0762c96d86582e211e8c2d9dfcbf93d8a3a03b0a6fc4dba5de352",
+      "viewed_ranges": [
+        {
+          "first": 1,
+          "last": 179
+        },
+        {
+          "first": 201,
+          "last": 242
+        },
+        {
+          "first": 260,
+          "last": 368
+        }
+      ]
+    },
+    {
+      "id": "adapter",
+      "path": "_scratch/runtime-owner-native-connection-native-proposal01/asr_loading_adapter.py",
+      "bytes": 12113,
+      "sha256": "635d2c22db75d12ffe6965fb656fdca47450ccbbaeb4d8cc8aaff9fcc79dd243",
+      "viewed_ranges": [
+        {
+          "first": 193,
+          "last": 248
+        }
+      ]
+    },
+    {
+      "id": "generated_adapter",
+      "path": "_scratch/runtime-owner-native-connection-native-proposal01/generated_adapter_flow.py",
+      "bytes": 56180,
+      "sha256": "4d1bc0ac6e25733b13cc2d16c327be23d90c68d22b1402736ff8147b302a0e8c",
+      "viewed_ranges": [
+        {
+          "first": 236,
+          "last": 329
+        }
+      ]
+    },
+    {
+      "id": "operation",
+      "path": "_scratch/runtime-owner-native-connection-native-proposal01/generated_operation_flow.py",
+      "bytes": 21274,
+      "sha256": "6f09b4e6490b2078e792e49559a9dd0db95a895a778c31294a3577eeabdc98ed",
+      "viewed_ranges": [
+        {
+          "first": 110,
+          "last": 215
+        }
+      ]
+    },
+    {
+      "id": "worker",
+      "path": "_scratch/runtime-owner-native-connection-native-proposal01/generated_worker_flow.py",
+      "bytes": 22853,
+      "sha256": "1ab240d60ceaca130ac85f5d2e908ef5895da5297f35d78a1caba1c62e622238",
+      "viewed_ranges": [
+        {
+          "first": 170,
+          "last": 325
+        }
+      ]
+    },
+    {
+      "id": "pipe",
+      "path": "_scratch/runtime-owner-native-connection-native-proposal01/win32_private_pipe.py",
+      "bytes": 18613,
+      "sha256": "73a1109a55f2bc807594655c71b24a3e35eb88d7f744497df2cc328dc224cae7",
+      "viewed_ranges": [
+        {
+          "first": 115,
+          "last": 218
+        },
+        {
+          "first": 370,
+          "last": 390
+        }
+      ]
+    },
+    {
+      "id": "primitives",
+      "path": "_scratch/runtime-owner-native-connection-native-proposal01/win32_worker_connection.py",
+      "bytes": 29660,
+      "sha256": "60d22036d6827205be5d0657af8e4693aa534605bdfb1b501878eb2a889fe25f",
+      "viewed_ranges": [
+        {
+          "first": 501,
+          "last": 588
+        }
+      ]
+    }
+  ],
+  "receipt_scope": "The native a9321b and dd7190 outcomes are parent-reported context. No native receipt, physical generated file, support binary, model, checkpoint or D2 output was accessed for this brief."
+}

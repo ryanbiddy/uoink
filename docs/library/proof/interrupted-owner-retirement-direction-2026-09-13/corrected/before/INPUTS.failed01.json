@@ -1,0 +1,24 @@
+{
+  "schema": "fixed-source-implementation-inputs-v1",
+  "scope": "Source-only implementation proposal. Input hashes are centralized here; coverage must report actual IDs/ranges viewed separately.",
+  "input_count": 0,
+  "input_bytes": 356810,
+  "inputs": [],
+  "provenance_manifests": [
+    {
+      "path": "docs/library/proof/runtime-owner-native-cancel-2026-09-13/SHA256.json",
+      "bytes": 22834,
+      "sha256": "20cea1419a8ef651d28d7309a3761f470fa753ee49b340c9d9f870a75d436e66",
+      "verification": "Only selected text members below were checked against this unchanged manifest."
+    },
+    {
+      "path": "docs/library/proof/retired-owner-recovery-qualification-2026-09-13/SHA256.json",
+      "bytes": 36137,
+      "sha256": "9265dee370be5b1b5c9801f4fc1f18e0727a26f929fc3fa07de14fa151885250",
+      "verification": "Only selected text members below were checked against this unchanged manifest."
+    }
+  ],
+  "output_directory": "_scratch/interrupted-owned-session-retirement-implementation01",
+  "output_must_be_fresh": true,
+  "admission_created": false
+}

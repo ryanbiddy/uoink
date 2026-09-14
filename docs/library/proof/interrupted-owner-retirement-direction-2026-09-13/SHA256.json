@@ -1,0 +1,119 @@
+{
+  "files": [
+    {
+      "bytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da",
+      "path": ".gitattributes"
+    },
+    {
+      "bytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da",
+      "path": "corrected/.gitattributes"
+    },
+    {
+      "bytes": 1093,
+      "sha256": "978318123815ccd721a09f438240742072c38dbaab0022b124c89226311a29ac",
+      "path": "corrected/before/INPUTS.failed01.json"
+    },
+    {
+      "bytes": 7187,
+      "sha256": "3ed998a704c668bf85819e2495574982780d20722abb39a9208db74d7c5857c5",
+      "path": "corrected/BRIEF.md"
+    },
+    {
+      "bytes": 1037,
+      "sha256": "1b2dc54940997fc49c2555cb2a621dfb2c8a5128f69a0db3c29911eae168ca47",
+      "path": "corrected/CORRECTION-REASON.md"
+    },
+    {
+      "bytes": 691,
+      "sha256": "8869e622e6a78cf1ff62a981817b13c81f16fa626ade90821f4e088ec496c95f",
+      "path": "corrected/INPUT-MAP-PREPARATION-REPAIR01.md"
+    },
+    {
+      "bytes": 8000,
+      "sha256": "8095884beb5a03eacfff58a1db044689d247a036dd2c630441a3212a33273eb6",
+      "path": "corrected/INPUTS.json"
+    },
+    {
+      "bytes": 902,
+      "sha256": "3557ff2a78e1ffd54f07410e351d4487be9e16b281cf2cb963bcf796b338592e",
+      "path": "corrected/PRESERVATION-CHECK.json"
+    },
+    {
+      "bytes": 1928,
+      "sha256": "7becee23a524c1ccfdb23f462b4b09c0d54a520bbd8aaa022d37b551258facf3",
+      "path": "corrected/PROVENANCE.json"
+    },
+    {
+      "bytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da",
+      "path": "original/.gitattributes"
+    },
+    {
+      "bytes": 4755,
+      "sha256": "8a4fabb606d45f2ef64f523971135142e58e361c8cb2667cb5ec6cbf9571335b",
+      "path": "original/before/BRIEF.initial.md"
+    },
+    {
+      "bytes": 5113,
+      "sha256": "37ee60f6f2a1009ea1ef0c0887e95aa45d31e81f1b728e8734f9d5bf4011a273",
+      "path": "original/BRIEF.md"
+    },
+    {
+      "bytes": 619,
+      "sha256": "83fd5e7288331dcb2d6549d920fb4b7fd1f3a6c6648a60c9cf5287003cce0bfb",
+      "path": "original/PREPARATION-NOTE.md"
+    },
+    {
+      "bytes": 696,
+      "sha256": "3fdb9baed36cda088cae6f391cd84b6c8eafbeec98a97cdf1a03cc60ec72b2c4",
+      "path": "original/RANGE-METADATA-REPAIR01.md"
+    },
+    {
+      "bytes": 3911,
+      "sha256": "2dc0e14bbbcc6aa937cadc6618a96fce4786e6da13fe2f53fdf8d4e1990274c7",
+      "path": "original/SOURCE-BINDINGS.corrected.json"
+    },
+    {
+      "bytes": 4313,
+      "sha256": "7aafb86d5690c6e19a1eb8dfa2169db7d42082761074257f5c6cccbae2cdae84",
+      "path": "original/SOURCE-BINDINGS.json"
+    },
+    {
+      "bytes": 4222,
+      "sha256": "f1e1520bca75865d0633149c2e1a0e5b9ca4c9efe72c5854f5c0f4651d678044",
+      "path": "peer/SOURCE-CHECK-ACTUAL.json"
+    },
+    {
+      "bytes": 3852,
+      "sha256": "3a5ba2c8482ffa4e23f766bd9e0f3130460bd799ec113983d47c1bc443bbc5de",
+      "path": "peer/VERDICT.md"
+    },
+    {
+      "bytes": 2333,
+      "sha256": "f253edee07a0aa08489aa75f10389f8676a72a070ffc7a1f63af39525b134687",
+      "path": "root/ASTRA-INTERRUPTED-OWNER-RETIREMENT-BRIEF-VERDICT-2026-09-13.md"
+    },
+    {
+      "bytes": 2416,
+      "sha256": "abde9cfe2abb89df0e0db13ea45e780cffd79fa07714d282bd9949a02aaba55e",
+      "path": "root/check-interrupted-retirement-brief02.ps1"
+    },
+    {
+      "bytes": 354,
+      "sha256": "ad29ef4cc96dbc91eba95d735e8468401d6e2651ee4f2b6cce0879e0ef0a9ef0",
+      "path": "root/INTERRUPTED-RETIREMENT-BRIEF-ROOT-CHECK-ACTUAL.json"
+    },
+    {
+      "bytes": 418,
+      "sha256": "d55ecb143d7875ed860ea8c24159d7a39ac011d669bacb1b9694f4ae47bfa7f3",
+      "path": "root/INTERRUPTED-RETIREMENT-BRIEF-ROOT-CHECK-REPAIR02.md"
+    },
+    {
+      "bytes": 553,
+      "sha256": "0afc4eadb03dd55a7adcc494f83ed8e204df12c689a057e88ebd5aa3e406b5c5",
+      "path": "root/INTERRUPTED-RETIREMENT-BRIEF-ROOT-CHECK02-ACTUAL.json"
+    }
+  ]
+}
