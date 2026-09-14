@@ -1,0 +1,8 @@
+{
+  "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\windows-reservation-native-drain01\\registry\\4640b95540b94d05-79692100000001000000000000000000.journal",
+  "bytes": 2118,
+  "sha256": "b6b59a4bf7845eb45bc0039874388b175b98d2d3fe2c39daa009cb8d9f170cc9",
+  "matches_controller_confirmed_bytes": true,
+  "exclusive_postexit_read_closed": true,
+  "power_loss_or_restart_proven": false
+}

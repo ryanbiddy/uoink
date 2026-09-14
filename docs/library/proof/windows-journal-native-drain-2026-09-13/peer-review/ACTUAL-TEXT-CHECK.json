@@ -1,0 +1,7 @@
+{
+  "chunk_id": "b80ab2",
+  "wall_time_seconds": 0.341846,
+  "exit_code": 0,
+  "original_token_count": 193,
+  "output": "[\r\n  {\r\n    \"name\": \"windows_reservation_port.py\",\r\n    \"bytes\": 16028,\r\n    \"sha256\": \"dd33becb60e4302152179c4a41e4a2bf04d7d1a82bc3371461283688f3105a2e\"\r\n  },\r\n  {\r\n    \"name\": \"generated_journal_setup.py\",\r\n    \"bytes\": 11954,\r\n    \"sha256\": \"df7ed56cdcbd23352b3e69a6f6790a012182b294491f38f8ed19610f000b485d\"\r\n  },\r\n  {\r\n    \"name\": \"dummy_bootstrap.py\",\r\n    \"bytes\": 33939,\r\n    \"sha256\": \"e0f424cfcdebfe93709a06eb135ed4d8a598ba704298b7a37d269a8f1f9c0b96\"\r\n  },\r\n  {\r\n    \"name\": \"SOURCE-INPUTS.json\",\r\n    \"bytes\": 6056,\r\n    \"sha256\": \"e4c15e6b414c36e9fe69346cc214bc7d5c7b4f5bf3808e3b165696066de11dcc\"\r\n  },\r\n  {\r\n    \"name\": \"run_normal_drain01.ps1\",\r\n    \"bytes\": 29745,\r\n    \"sha256\": \"b9c532a561e31afea34c47d4f060242d23f28fb5ece0eae102ae094a3eb4cb8e\"\r\n  }\r\n]\r\n"
+}

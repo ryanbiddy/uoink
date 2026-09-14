@@ -1,0 +1,7 @@
+{
+  "chunk_id": "71a1fc",
+  "wall_time_seconds": 0.4704253,
+  "exit_code": 0,
+  "original_token_count": 58,
+  "output": "{\r\n  \"source_count\": 17,\r\n  \"qualified_shared_sources\": 15,\r\n  \"support_bindings_compared_as_text\": 9,\r\n  \"support_files_touched\": false,\r\n  \"admission_sha256\": \"6cea34f867d1aa6263331b86cb65d4d605210dd677fde237c43908250256190a\"\r\n}\r\n"
+}
