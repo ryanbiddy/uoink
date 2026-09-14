@@ -1,0 +1,34 @@
+{
+  "files": [
+    {
+      "path": "BRIEF.md",
+      "bytes": 7161,
+      "sha256": "78311a84a5f54e3b1e1660496f07647f0978d8f27bd13e5a0829c3121e310d4e"
+    },
+    {
+      "path": "SOURCE-BINDINGS.json",
+      "bytes": 10926,
+      "sha256": "a95374737f5a49a97fedd8e689b5a1890e31c21c1e9997997dced792c0537659"
+    },
+    {
+      "path": "TEXT-BINDING-CHECK-ACTUAL.json",
+      "bytes": 1488,
+      "sha256": "a21a51fc6d0e0cdebb25800a699924db3c6b60a1e56a0b5d6d8dc96646af5484"
+    },
+    {
+      "path": "ROOT-DIRECTION.md",
+      "bytes": 1194,
+      "sha256": "1e6982126947cae46aeabd28f559a906d4fae0691718d6e75af9d2642476b690"
+    },
+    {
+      "path": ".gitattributes",
+      "bytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+    },
+    {
+      "path": "materialize-runtime-owner-native-brief01.ps1",
+      "bytes": 5458,
+      "sha256": "7f16b603f6bb1076873d60af12869ca969c478b7c8b5e40fd37a4e6c6cd3e948"
+    }
+  ]
+}

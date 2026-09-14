@@ -1,0 +1,219 @@
+{
+  "schema": "runtime-owner-native-connection-selected-text-v1",
+  "observed_utc": "2026-09-14T05:27:58.3761133Z",
+  "repo_root": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library",
+  "scope": "Data-only selected source/text binding. No candidate, test, native, model, support, checkpoint or converted-output access.",
+  "commit_references": {
+    "runtime_owner": "1f200ebda94e6d925d959e147793b57140ba5f5d",
+    "bootstrap": "bbe10d66023302db6ff8dadd176103751c430b99",
+    "native_cancel": "a25b34b7228e8b7a06917bb1aa770895cd551a68",
+    "d2": "d13534fde6e1ed3f52a17b3654e376dd0418f8d2"
+  },
+  "commit_note": "Commit references resolved read-only. These rows bind current disk text; no claim of a new complete Git-proof audit.",
+  "count": 25,
+  "total_bytes": 708005,
+  "new_execution_or_admission": false,
+  "files": [
+    {
+      "id": "HANDOFF",
+      "path": "docs/library/ORCHESTRATION-HANDOFF-2026-09-08.md",
+      "bytes": 406634,
+      "sha256": "d4f791941ebdb168826c43c02f587c493ceea5e23c6ba1bf3ea7fc9a65c072b0",
+      "role": "Current queue; snapshot may precede concurrent root observations",
+      "review_extent": "Read lines89-121,164-253,414-424"
+    },
+    {
+      "id": "OWNER-VERDICT",
+      "path": "docs/library/ASTRA-WORKER-RUNTIME-OWNER-VERDICT-2026-09-13.md",
+      "bytes": 2189,
+      "sha256": "e23d8b823b249fc1d4bc4d77ab9dddbfb4f1417f7bbc3e8220a862ac02576081",
+      "role": "Two generated11-case observations",
+      "review_extent": "Full text"
+    },
+    {
+      "id": "BOOTSTRAP-VERDICT",
+      "path": "docs/library/ASTRA-WORKER-BOOTSTRAP-VERDICT-2026-09-13.md",
+      "bytes": 2567,
+      "sha256": "d3ad9470f2e18014e5a218bc3e819d192d0fe9baec1f1e04c1879acd8b77fda3",
+      "role": "Two generated17-case observations",
+      "review_extent": "Full text"
+    },
+    {
+      "id": "NATIVE-VERDICT",
+      "path": "docs/library/ASTRA-NATIVE-JOURNAL-CANCEL01-VERDICT-2026-09-13.md",
+      "bytes": 2543,
+      "sha256": "0b735e3e4c8bb2dc5842909f3dba6ca8287d4580ee227e29b864675ae7685731",
+      "role": "One generated native cancellation",
+      "review_extent": "Full text"
+    },
+    {
+      "id": "D2-VERDICT",
+      "path": "docs/library/ASTRA-D2-LOCAL-CONVERSION-VERDICT-2026-09-13.md",
+      "bytes": 2973,
+      "sha256": "3745c4de1dbc83e36477e3daa9b54c0b1a86db836efdab37acbc776a098fdb95",
+      "role": "Conversion scope and closed runtime gates",
+      "review_extent": "Full text"
+    },
+    {
+      "id": "BOOTSTRAP",
+      "path": "docs/library/proof/worker-bootstrap-owner-2026-09-13/worker-bootstrap-owner-migration01/owned_generation_protocol.py",
+      "bytes": 23003,
+      "sha256": "0a56116d51e50f881f6366f17628bb99ec4f400cb680814a37f9d1d66da263ba",
+      "role": "Exact qualified bootstrap; proposed single protocol module identity",
+      "review_extent": "Full source"
+    },
+    {
+      "id": "OWNER",
+      "path": "docs/library/proof/worker-bootstrap-owner-2026-09-13/worker-bootstrap-owner-migration01/worker_runtime_owner.py",
+      "bytes": 12997,
+      "sha256": "5647023ed03c5acfd8b1aa981a56171dd92228ccc0972f12546bb0b3d411ce87",
+      "role": "Exact serial owner and current-product publication checks",
+      "review_extent": "Full source"
+    },
+    {
+      "id": "FIXTURE",
+      "path": "docs/library/proof/worker-bootstrap-owner-2026-09-13/worker-bootstrap-owner-migration01/generated_bootstrap_fixture.py",
+      "bytes": 7205,
+      "sha256": "6ea5e4e7cebff54380193b1ad0cc1b1cf08e4a7f34a8162d2f0f6ce73371d469",
+      "role": "Extraction origin; synthetic channel and teardown are excluded",
+      "review_extent": "Full source"
+    },
+    {
+      "id": "CONNECTION-CASES",
+      "path": "docs/library/proof/worker-bootstrap-owner-2026-09-13/worker-bootstrap-owner-migration01/connection_cases.py",
+      "bytes": 10526,
+      "sha256": "2e598f26c7edd2e60b06495a62a350411ceb0a60ed6fd3486c1a1294d04cbea6",
+      "role": "Six connection cases to preserve with existing11",
+      "review_extent": "Full source"
+    },
+    {
+      "id": "BOOTSTRAP-REVIEW",
+      "path": "docs/library/proof/worker-bootstrap-owner-2026-09-13/worker-bootstrap-owner-migration01/SOURCE-REVIEW.md",
+      "bytes": 3769,
+      "sha256": "889f299598daae534f18e1baaf19d333c3702aeedfe367c46c71b1b55d384dbe",
+      "role": "Existing source review limits",
+      "review_extent": "Full text"
+    },
+    {
+      "id": "FACTORY",
+      "path": "docs/library/proof/worker-bootstrap-owner-2026-09-13/worker-bootstrap-owner-migration01/owned_factory_port.py",
+      "bytes": 15463,
+      "sha256": "2569853c7634b795e3d2cf717129ec3dbc4e11d96ddb347098dcc4fbc532f0d4",
+      "role": "Unchanged factory dependency",
+      "review_extent": "Previously reviewed; current byte binding only"
+    },
+    {
+      "id": "REGISTRY",
+      "path": "docs/library/proof/worker-bootstrap-owner-2026-09-13/worker-bootstrap-owner-migration01/model_binding_registry.py",
+      "bytes": 8732,
+      "sha256": "48567add0f0ac2ac9140e9aa86b06f077454c98e2f0773100da5ba070f7b3deb",
+      "role": "Unchanged capability and lease dependency",
+      "review_extent": "Previously reviewed; current byte binding only"
+    },
+    {
+      "id": "OWNED-GUARD",
+      "path": "docs/library/proof/worker-bootstrap-owner-2026-09-13/worker-bootstrap-owner-migration01/owned_guard.py",
+      "bytes": 2109,
+      "sha256": "7672f614d81cf0be5e7bd408f8f856af328fe34e6ca7ee707c9d0db838e56d1f",
+      "role": "Unchanged owned-module registry guard",
+      "review_extent": "Previously reviewed; current byte binding only"
+    },
+    {
+      "id": "FAKE-TENSORS",
+      "path": "docs/library/proof/worker-bootstrap-owner-2026-09-13/astra-worker-bootstrap-owner-confirmation01/fake_torch_support.py",
+      "bytes": 5204,
+      "sha256": "5e1381eac70634292945422dfaf70786bb5fb96cbab7ea14a3fcc08fa29a185b",
+      "role": "Generated tensor implementation, not torch",
+      "review_extent": "Header/source dependency check; current byte binding"
+    },
+    {
+      "id": "FIXED-SCHEMA",
+      "path": "docs/library/proof/worker-bootstrap-owner-2026-09-13/astra-worker-bootstrap-owner-confirmation01/fixed_schema_helpers.py",
+      "bytes": 2837,
+      "sha256": "d61e9a48ecfa906862fedb5b91415f1d2a0b71adc27d3e43ef245842c9e5b188",
+      "role": "Generated fixed-schema helper",
+      "review_extent": "Header/source dependency check; current byte binding"
+    },
+    {
+      "id": "STATE-BRIDGE",
+      "path": "docs/library/proof/worker-bootstrap-owner-2026-09-13/astra-worker-bootstrap-owner-confirmation01/state_bridge.py",
+      "bytes": 11316,
+      "sha256": "b3ff126f29942e7daaf51e463ca9f35c4c423b6c638dbc38e5246946a8b7a6b2",
+      "role": "Unchanged qualified state bridge dependency",
+      "review_extent": "Previously reviewed; current byte binding only"
+    },
+    {
+      "id": "CPU-PORT",
+      "path": "docs/library/proof/worker-bootstrap-owner-2026-09-13/astra-worker-bootstrap-owner-confirmation01/owned_cpu_tensor_port.py",
+      "bytes": 11768,
+      "sha256": "ac9eb28194723ffaf2d98bb2cd691a7b27b0a1638694fdfd8cb198c3084e8964",
+      "role": "Unchanged qualified CPU port dependency",
+      "review_extent": "Previously reviewed; current byte binding only"
+    },
+    {
+      "id": "PLAIN-READER",
+      "path": "docs/library/proof/worker-bootstrap-owner-2026-09-13/astra-worker-bootstrap-owner-confirmation01/plain_state_reader.py",
+      "bytes": 10629,
+      "sha256": "3962d355cffe928f78b741d2d920cc9c727a9fbd10305e20462b60f4cef9990c",
+      "role": "Transitive source dependency; no real file read proposed",
+      "review_extent": "Previously reviewed; current byte binding only"
+    },
+    {
+      "id": "NATIVE-ADAPTER",
+      "path": "docs/library/proof/windows-journal-cancel-native-2026-09-13/proposal01/generated_adapter_flow.py",
+      "bytes": 33890,
+      "sha256": "cc0b7ff4f445ef73b4acdc63475c1aa375b5d0cfbe461ee6c50809cd0f19b4b4",
+      "role": "Current child adoption/policy and adapter cancellation",
+      "review_extent": "Full source; focused current reread474-530"
+    },
+    {
+      "id": "NATIVE-OPERATIONS",
+      "path": "docs/library/proof/windows-journal-cancel-native-2026-09-13/proposal01/generated_operation_flow.py",
+      "bytes": 21274,
+      "sha256": "6f09b4e6490b2078e792e49559a9dd0db95a895a778c31294a3577eeabdc98ed",
+      "role": "Fixed generated request and reply schemas",
+      "review_extent": "Full source; focused current reread254-325"
+    },
+    {
+      "id": "ADOPTION",
+      "path": "docs/library/proof/windows-journal-cancel-native-2026-09-13/proposal01/inherited_readset.py",
+      "bytes": 12391,
+      "sha256": "02be8e04f4bea3030faf0882ae48ead40716c5782f95e2790e1a9897c5be76e3",
+      "role": "Authenticated readset and exact generated readback",
+      "review_extent": "Full source; focused current reread187-217"
+    },
+    {
+      "id": "NATIVE-PROTOCOL",
+      "path": "docs/library/proof/windows-journal-cancel-native-2026-09-13/proposal01/owned_generation_protocol.py",
+      "bytes": 19570,
+      "sha256": "437e0880e10c91555df61b3c07c8be665430098c54c7d6ef687a99a0aa4a79d9",
+      "role": "Current native protocol before bootstrap replacement",
+      "review_extent": "Compared source delta to BOOTSTRAP; current byte binding"
+    },
+    {
+      "id": "NATIVE-BOOTSTRAP",
+      "path": "docs/library/proof/windows-journal-cancel-native-2026-09-13/proposal01/dummy_bootstrap.py",
+      "bytes": 35742,
+      "sha256": "ed99209c7da9bb98faf960999a38667bd5e96b75bae1e0542d69733b62cc593c",
+      "role": "Exact module/native/import guard integration point",
+      "review_extent": "Source guard/module/finalizer review; current byte binding"
+    },
+    {
+      "id": "NATIVE-NAMESPACE",
+      "path": "docs/library/proof/windows-journal-cancel-native-2026-09-13/proposal01/pinned_buffer_namespace.py",
+      "bytes": 7893,
+      "sha256": "2cc25a7a254f35d802336ef121cc860887a4301b3257588438dddec392fe0b7b",
+      "role": "Current adopted generated namespace dependency",
+      "review_extent": "Header/API dependency check; current byte binding"
+    },
+    {
+      "id": "NATIVE-LAUNCHER",
+      "path": "docs/library/proof/windows-journal-cancel-native-2026-09-13/proposal01/run_journal_cancel01.ps1",
+      "bytes": 34781,
+      "sha256": "70ab9cc3879ed792db0f8deaec4fd343f6a96438811bad9e37977ae510fa11d6",
+      "role": "Existing native admission/support/receipt scope",
+      "review_extent": "Previously reviewed; current byte binding only"
+    }
+  ],
+  "preparation_note": "The first data-only writer displayed a null aggregate because Measure-Object did not sum the ordered-dictionary rows. Before publication, total_bytes was recomputed from all25 explicit lengths; every source size/hash was rechecked. No candidate run occurred."
+}
