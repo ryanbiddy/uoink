@@ -1,0 +1,7 @@
+{
+  "chunk_id": "d388e0",
+  "wall_time_seconds": 0.2856226,
+  "exit_code": 0,
+  "original_token_count": 152,
+  "output": "{\"dispatch_calls\": {\"child\": 271, \"contender\": 137, \"controller\": 8251}, \"guards_valid\": true, \"journal_bytes\": 2118, \"journal_sha256\": \"11dbc95a56ae1397fb0663113f8ba606e461f8253e00600608ca9e81381f9fb8\", \"model_runtime_restart_release_accepted\": false, \"native_calls\": {\"child\": 237, \"contender\": 103, \"controller\": 8215}, \"operation_events\": [\"admit_generated_media\", \"begin_generated_transcription\", \"next_generated_segment\", \"cancel_generated_cursor\"], \"process_and_jobs_closed\": true, \"receipt_roles\": 3, \"segments\": 1, \"source_control_pairs\": 21, \"status\": \"PASS_GENERATED_NATIVE_CLEAN_CANCEL_ONLY\"}\r\n"
+}

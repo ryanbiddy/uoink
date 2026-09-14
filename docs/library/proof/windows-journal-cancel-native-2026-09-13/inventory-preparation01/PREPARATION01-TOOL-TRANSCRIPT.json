@@ -1,0 +1,12 @@
+{
+  "record_kind": "tool_response_transcription",
+  "chunk_id": "0e1390",
+  "wall_time_seconds": 0.5431477,
+  "exit_code": 1,
+  "original_token_count": 169,
+  "output": "Get-Item: \r\nLine |\r\n  28 |  … $taskPair[0];$taskItem=Get-Item -LiteralPath $taskPath -Force;if($tas …\r\n     |                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\r\n     | Cannot find path 'E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\windows-journal-cancel-proposal01\\API-AND-BOUNDS.md proposal01\\API-AND-BOUNDS.md' because it does not exist.\r\nException: \r\nLine |\r\n  30 |  … iff','.txt','.log')){throw ('Non-text source refused '+$taskPair[0])}\r\n     |                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\r\n     | Non-text source refused _scratch/windows-journal-cancel-proposal01/API-AND-BOUNDS.md proposal01/API-AND-BOUNDS.md\r\n",
+  "source": "Visible exec_command response; no separate raw-object capture retained",
+  "candidate_execution": false,
+  "map_written": false,
+  "archive_written": false
+}

@@ -1,0 +1,617 @@
+{
+  "scope": "Documentary copies of one recorded generated native clean cancellation",
+  "recorded_status": "PASSED_GENERATED_NATIVE_CLEAN_CANCEL_ONLY",
+  "source_payloads": 95,
+  "source_payload_bytes": 1368823,
+  "copied_files": 98,
+  "copies": [
+    {
+      "source": "_scratch/windows-journal-cancel-proposal01/API-AND-BOUNDS.md",
+      "destination": "proposal01/API-AND-BOUNDS.md",
+      "bytes": 1115,
+      "sha256": "2352fb69bfddfcd51df580250f500394f788e08da0491aeb630b8da82523a89a"
+    },
+    {
+      "source": "_scratch/windows-journal-cancel-proposal01/asr_loading_adapter.py",
+      "destination": "proposal01/asr_loading_adapter.py",
+      "bytes": 12113,
+      "sha256": "635d2c22db75d12ffe6965fb656fdca47450ccbbaeb4d8cc8aaff9fcc79dd243"
+    },
+    {
+      "source": "_scratch/windows-journal-cancel-proposal01/before/adapter-cancel-draft01.py",
+      "destination": "proposal01/before/adapter-cancel-draft01.py",
+      "bytes": 33817,
+      "sha256": "adabc38d748360298925036b1ca480b43f3dfdc68e8d553a1cfbe65354545a67"
+    },
+    {
+      "source": "_scratch/windows-journal-cancel-proposal01/before/API-AND-BOUNDS.md",
+      "destination": "proposal01/before/API-AND-BOUNDS.md",
+      "bytes": 1175,
+      "sha256": "ec487a44cb2bc7fc84420b7920a12762a6b0ed6601d8fcdb638690a2dd9d5ccd"
+    },
+    {
+      "source": "_scratch/windows-journal-cancel-proposal01/before/dummy_bootstrap.py",
+      "destination": "proposal01/before/dummy_bootstrap.py",
+      "bytes": 35768,
+      "sha256": "57ae722cda705e7f7a79a79442b316594719aeb390d63575aeaee3422949a469"
+    },
+    {
+      "source": "_scratch/windows-journal-cancel-proposal01/before/generated_adapter_flow.py",
+      "destination": "proposal01/before/generated_adapter_flow.py",
+      "bytes": 26951,
+      "sha256": "ca4676060382e189953f56b830f2c08227c1079280cd09b2b36fb6770ce6e4ce"
+    },
+    {
+      "source": "_scratch/windows-journal-cancel-proposal01/before/NATIVE-PROTOCOL.md",
+      "destination": "proposal01/before/NATIVE-PROTOCOL.md",
+      "bytes": 1718,
+      "sha256": "229fb6a2fda82ee5960510ac77f9431f1597cd8a13f07d099f5279bfb84efe90"
+    },
+    {
+      "source": "_scratch/windows-journal-cancel-proposal01/before/ROOT-ADMISSION-TEMPLATE.json",
+      "destination": "proposal01/before/ROOT-ADMISSION-TEMPLATE.json",
+      "bytes": 633,
+      "sha256": "45acb43c7bbc85f17dcff3849451eb16a59c8f0cdfa6c7ecb4f3fc5a2941b2f2"
+    },
+    {
+      "source": "_scratch/windows-journal-cancel-proposal01/before/run_writer_exclusion04.ps1",
+      "destination": "proposal01/before/run_writer_exclusion04.ps1",
+      "bytes": 34055,
+      "sha256": "8212531968abdc9fbf55f4d9607768d1cf14198b62f8443b670715ce0da07c26"
+    },
+    {
+      "source": "_scratch/windows-journal-cancel-proposal01/before/SOURCE-INPUTS.json",
+      "destination": "proposal01/before/SOURCE-INPUTS.json",
+      "bytes": 6412,
+      "sha256": "7a18d5a7d49942d611d4e5a3a7a80144e081a89d05f58e34baa16aff5b4a0059"
+    },
+    {
+      "source": "_scratch/windows-journal-cancel-proposal01/BRIEF.md",
+      "destination": "proposal01/BRIEF.md",
+      "bytes": 3284,
+      "sha256": "affccc2d1271b7ecf0f43bd8ea6dca18043d03bc96f95dae1213b44229b84fd0"
+    },
+    {
+      "source": "_scratch/windows-journal-cancel-proposal01/dummy_bootstrap.py",
+      "destination": "proposal01/dummy_bootstrap.py",
+      "bytes": 35742,
+      "sha256": "ed99209c7da9bb98faf960999a38667bd5e96b75bae1e0542d69733b62cc593c"
+    },
+    {
+      "source": "_scratch/windows-journal-cancel-proposal01/dummy_bootstrap.py.diff",
+      "destination": "proposal01/dummy_bootstrap.py.diff",
+      "bytes": 3331,
+      "sha256": "1bc081972b83f6d595db585d8f39ea4cbbb819be5a8c862e8565c7fdc67bb7ff"
+    },
+    {
+      "source": "_scratch/windows-journal-cancel-proposal01/durable_lifecycle.py",
+      "destination": "proposal01/durable_lifecycle.py",
+      "bytes": 13075,
+      "sha256": "f95cc8f2c61fd1953b642669ee4027a968660e39b97d9e84782fb83ac62abacb"
+    },
+    {
+      "source": "_scratch/windows-journal-cancel-proposal01/generated_adapter_flow.py",
+      "destination": "proposal01/generated_adapter_flow.py",
+      "bytes": 33890,
+      "sha256": "cc0b7ff4f445ef73b4acdc63475c1aa375b5d0cfbe461ee6c50809cd0f19b4b4"
+    },
+    {
+      "source": "_scratch/windows-journal-cancel-proposal01/generated_adapter_flow.py.diff",
+      "destination": "proposal01/generated_adapter_flow.py.diff",
+      "bytes": 8636,
+      "sha256": "0f5f522c7746ddd6455bfebdd5e6cb2fc9db61bea6edb3579098fbce57461511"
+    },
+    {
+      "source": "_scratch/windows-journal-cancel-proposal01/generated_journal_setup.py",
+      "destination": "proposal01/generated_journal_setup.py",
+      "bytes": 11954,
+      "sha256": "df7ed56cdcbd23352b3e69a6f6790a012182b294491f38f8ed19610f000b485d"
+    },
+    {
+      "source": "_scratch/windows-journal-cancel-proposal01/generated_operation_flow.py",
+      "destination": "proposal01/generated_operation_flow.py",
+      "bytes": 21274,
+      "sha256": "6f09b4e6490b2078e792e49559a9dd0db95a895a778c31294a3577eeabdc98ed"
+    },
+    {
+      "source": "_scratch/windows-journal-cancel-proposal01/generated_worker_flow.py",
+      "destination": "proposal01/generated_worker_flow.py",
+      "bytes": 22853,
+      "sha256": "1ab240d60ceaca130ac85f5d2e908ef5895da5297f35d78a1caba1c62e622238"
+    },
+    {
+      "source": "_scratch/windows-journal-cancel-proposal01/generated_writer_exclusion.py",
+      "destination": "proposal01/generated_writer_exclusion.py",
+      "bytes": 11647,
+      "sha256": "8173d7394f4a893c14d2979283a0c17ed273e25f196e14560590be3a0f22058b"
+    },
+    {
+      "source": "_scratch/windows-journal-cancel-proposal01/inherited_readset.py",
+      "destination": "proposal01/inherited_readset.py",
+      "bytes": 12391,
+      "sha256": "02be8e04f4bea3030faf0882ae48ead40716c5782f95e2790e1a9897c5be76e3"
+    },
+    {
+      "source": "_scratch/windows-journal-cancel-proposal01/NATIVE-PROTOCOL.md",
+      "destination": "proposal01/NATIVE-PROTOCOL.md",
+      "bytes": 2434,
+      "sha256": "a9fa921b434e42552f85f4751ce7b0de52a432c6520672b0c79794ab5e601f9d"
+    },
+    {
+      "source": "_scratch/windows-journal-cancel-proposal01/OBSERVER-GATE-REFINEMENT.md",
+      "destination": "proposal01/OBSERVER-GATE-REFINEMENT.md",
+      "bytes": 352,
+      "sha256": "859780f0f978e3c54be86369608eeea100c2d62e3e8fb871dde1142ea4d1ddf5"
+    },
+    {
+      "source": "_scratch/windows-journal-cancel-proposal01/ORIGIN-BINDINGS.json",
+      "destination": "proposal01/ORIGIN-BINDINGS.json",
+      "bytes": 4772,
+      "sha256": "8c74d174140d042c7b7498141804eb6f9274a417a8b5facf0f94d62f1b3f0dcd"
+    },
+    {
+      "source": "_scratch/windows-journal-cancel-proposal01/owned_generation_protocol.py",
+      "destination": "proposal01/owned_generation_protocol.py",
+      "bytes": 19570,
+      "sha256": "437e0880e10c91555df61b3c07c8be665430098c54c7d6ef687a99a0aa4a79d9"
+    },
+    {
+      "source": "_scratch/windows-journal-cancel-proposal01/pinned_buffer_namespace.py",
+      "destination": "proposal01/pinned_buffer_namespace.py",
+      "bytes": 7893,
+      "sha256": "2cc25a7a254f35d802336ef121cc860887a4301b3257588438dddec392fe0b7b"
+    },
+    {
+      "source": "_scratch/windows-journal-cancel-proposal01/reservation_file_port.py",
+      "destination": "proposal01/reservation_file_port.py",
+      "bytes": 4694,
+      "sha256": "708554378ab8a8e6c4477e637c999256665cbd2855b94c6fa3c2d04a19d3a224"
+    },
+    {
+      "source": "_scratch/windows-journal-cancel-proposal01/ROOT-ADMISSION-cancel.json",
+      "destination": "proposal01/ROOT-ADMISSION-cancel.json",
+      "bytes": 1126,
+      "sha256": "89c44b6611f4145f5f90c739fb700305a7454433f2cb463a62549a8475a127bb"
+    },
+    {
+      "source": "_scratch/windows-journal-cancel-proposal01/ROOT-ADMISSION-TEMPLATE.json",
+      "destination": "proposal01/ROOT-ADMISSION-TEMPLATE.json",
+      "bytes": 612,
+      "sha256": "51281e51422a7c313809ecf99d508bbae85df90410d0ade139125704536b068d"
+    },
+    {
+      "source": "_scratch/windows-journal-cancel-proposal01/run_journal_cancel01.ps1",
+      "destination": "proposal01/run_journal_cancel01.ps1",
+      "bytes": 34781,
+      "sha256": "70ab9cc3879ed792db0f8deaec4fd343f6a96438811bad9e37977ae510fa11d6"
+    },
+    {
+      "source": "_scratch/windows-journal-cancel-proposal01/run_journal_cancel01.ps1.diff",
+      "destination": "proposal01/run_journal_cancel01.ps1.diff",
+      "bytes": 6472,
+      "sha256": "7005ff82de0119fab7971f6ab11308ef9b7516f54944c7c70db28adcbdc5ca27"
+    },
+    {
+      "source": "_scratch/windows-journal-cancel-proposal01/snapshot_lifecycle.py",
+      "destination": "proposal01/snapshot_lifecycle.py",
+      "bytes": 22138,
+      "sha256": "a80514aac6b1e75b9b872052852fa993a23cd5273b6bed4ffb4eef7404cb69dd"
+    },
+    {
+      "source": "_scratch/windows-journal-cancel-proposal01/snapshot_reservations.py",
+      "destination": "proposal01/snapshot_reservations.py",
+      "bytes": 23634,
+      "sha256": "e80ae881fa4af9cc7d1a3e4a06624f5b19abe4de09aec3844e8a541449335b98"
+    },
+    {
+      "source": "_scratch/windows-journal-cancel-proposal01/SOURCE-INPUTS.json",
+      "destination": "proposal01/SOURCE-INPUTS.json",
+      "bytes": 6160,
+      "sha256": "f5e1b8b4d282c28c7ac12aad05b4e2466340769215574948682b69633e4fa4b3"
+    },
+    {
+      "source": "_scratch/windows-journal-cancel-proposal01/SOURCE-PRESERVATION.json",
+      "destination": "proposal01/SOURCE-PRESERVATION.json",
+      "bytes": 4997,
+      "sha256": "a042c99b8c2db11e3afc82f71bd9e8a756df8a609609c74fc44f331cf7ba4d11"
+    },
+    {
+      "source": "_scratch/windows-journal-cancel-proposal01/trusted_asr_resolver.py",
+      "destination": "proposal01/trusted_asr_resolver.py",
+      "bytes": 13373,
+      "sha256": "16a5a1245f649a3eb04d077b661835503f08bef0ff8822dcb545176f0cc30833"
+    },
+    {
+      "source": "_scratch/windows-journal-cancel-proposal01/win32_private_pipe.py",
+      "destination": "proposal01/win32_private_pipe.py",
+      "bytes": 18613,
+      "sha256": "73a1109a55f2bc807594655c71b24a3e35eb88d7f744497df2cc328dc224cae7"
+    },
+    {
+      "source": "_scratch/windows-journal-cancel-proposal01/win32_worker_connection.py",
+      "destination": "proposal01/win32_worker_connection.py",
+      "bytes": 29660,
+      "sha256": "60d22036d6827205be5d0657af8e4693aa534605bdfb1b501878eb2a889fe25f"
+    },
+    {
+      "source": "_scratch/windows-journal-cancel-proposal01/windows_reservation_port.py",
+      "destination": "proposal01/windows_reservation_port.py",
+      "bytes": 18234,
+      "sha256": "b93076ab07b8c0567f6608520c99f5e5523be3dd388010a5a49037a4a899f775"
+    },
+    {
+      "source": "_scratch/journal-cancel-native-admission-preparation01/INPUT-BINDINGS.json",
+      "destination": "admission-preparation01/INPUT-BINDINGS.json",
+      "bytes": 9508,
+      "sha256": "5eace362057b19cf1f6c1a7d3e6545f212457f6b5ac4e08e36dca783e2c13aad"
+    },
+    {
+      "source": "_scratch/journal-cancel-native-admission-preparation01/PREPARATION-CHECK-ACTUAL.json",
+      "destination": "admission-preparation01/PREPARATION-CHECK-ACTUAL.json",
+      "bytes": 595,
+      "sha256": "6d57d75d028b7f0e03c8a0c8809e42e331f79f1606129f097756d84e2e67de5f"
+    },
+    {
+      "source": "_scratch/journal-cancel-native-admission-preparation01/prepare_admission.ps1",
+      "destination": "admission-preparation01/prepare_admission.ps1",
+      "bytes": 9093,
+      "sha256": "b7613053f46e7a7340f008c5ef6fbc671df08ecf3b8659fcdcdca37c3ff4524f"
+    },
+    {
+      "source": "_scratch/journal-cancel-native-admission-preparation01/REVIEW.md",
+      "destination": "admission-preparation01/REVIEW.md",
+      "bytes": 2455,
+      "sha256": "4ad66d15d5529bafe8d4da473032030faa51bdaa87bde35ad14796f3c1f4c5a1"
+    },
+    {
+      "source": "_scratch/journal-cancel-native-admission-preparation01/TEXT-BINDING-CHECK-ACTUAL.json",
+      "destination": "admission-preparation01/TEXT-BINDING-CHECK-ACTUAL.json",
+      "bytes": 10804,
+      "sha256": "00a2f3c569bad3c2bb02543354a382d03c9a6d978ef977bbe96903f5df0839d9"
+    },
+    {
+      "source": "_scratch/windows-journal-cancel-source-review01/TEXT-CHECK-ACTUAL.json",
+      "destination": "source-review01/TEXT-CHECK-ACTUAL.json",
+      "bytes": 3906,
+      "sha256": "6ee00c19504d42b625c14a997d822951210ff5f79da00dc8d4e8fb7e2f0463bd"
+    },
+    {
+      "source": "_scratch/windows-journal-cancel-source-review01/VERDICT.md",
+      "destination": "source-review01/VERDICT.md",
+      "bytes": 2422,
+      "sha256": "4038d6085a2f529f5661cad83dfd71e3fe2f718b425c106ab797adcc1ebfbefe"
+    },
+    {
+      "source": "_scratch/windows-journal-cancel-complementary-review01/.gitattributes",
+      "destination": "complementary-review01/.gitattributes",
+      "bytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+    },
+    {
+      "source": "_scratch/windows-journal-cancel-complementary-review01/VERDICT.md",
+      "destination": "complementary-review01/VERDICT.md",
+      "bytes": 3709,
+      "sha256": "753f97afe4891618c4e256ee8a4177886ec092652d7096abb4a9054a8722695d"
+    },
+    {
+      "source": "_scratch/windows-journal-cancel-native-result-review01/check_receipts.ps1",
+      "destination": "native-result-review01/check_receipts.ps1",
+      "bytes": 16254,
+      "sha256": "8066f1c0c0d958c91ea694364fdf88eb4e6b9db0a0618a30e56fc30addf8d12d"
+    },
+    {
+      "source": "_scratch/windows-journal-cancel-native-result-review01/CHECK-ACTUAL.json",
+      "destination": "native-result-review01/CHECK-ACTUAL.json",
+      "bytes": 14435,
+      "sha256": "ffece575fb859bfe88aa246f0deb49fd130ca5c778a7eee24551881e38410881"
+    },
+    {
+      "source": "_scratch/windows-journal-cancel-native-result-review01/VERDICT.md",
+      "destination": "native-result-review01/VERDICT.md",
+      "bytes": 2408,
+      "sha256": "4084a68ba4d334e87f47b377f3e2108cd992607359e2145e805dfd8a8fa65178"
+    },
+    {
+      "source": "_scratch/native-journal-cancel-inventory-preparation01/CORRECTION.md",
+      "destination": "inventory-preparation01/CORRECTION.md",
+      "bytes": 939,
+      "sha256": "13fa6fd96a40f2d077f21353764463891934737a6ada9f8d2e5ef036acd6d8ca"
+    },
+    {
+      "source": "_scratch/native-journal-cancel-inventory-preparation01/PREPARATION01-TOOL-TRANSCRIPT.json",
+      "destination": "inventory-preparation01/PREPARATION01-TOOL-TRANSCRIPT.json",
+      "bytes": 1059,
+      "sha256": "7c9ae86bce9fa49caa8b6f2020f3e58d875dee90fc953c1ad6f934293d276440"
+    },
+    {
+      "source": "_scratch/windows-journal-cancel01/after.json",
+      "destination": "run01/after.json",
+      "bytes": 11429,
+      "sha256": "3514d93853c32398282f43049e7684f40bfbf2c6e4846378e35b4294af2c51ee"
+    },
+    {
+      "source": "_scratch/windows-journal-cancel01/asr_loading_adapter.py",
+      "destination": "run01/asr_loading_adapter.py",
+      "bytes": 12113,
+      "sha256": "635d2c22db75d12ffe6965fb656fdca47450ccbbaeb4d8cc8aaff9fcc79dd243"
+    },
+    {
+      "source": "_scratch/windows-journal-cancel01/before.json",
+      "destination": "run01/before.json",
+      "bytes": 9206,
+      "sha256": "c5bea90c4632475e984b7f515169867385030ce5842e91cf63b7c7925cf33270"
+    },
+    {
+      "source": "_scratch/windows-journal-cancel01/child-result.json",
+      "destination": "run01/child-result.json",
+      "bytes": 14202,
+      "sha256": "55fb44cc75103bf9fb1f82a1ae4a22811e82eb154eb2e23c44d2a8d65367f810"
+    },
+    {
+      "source": "_scratch/windows-journal-cancel01/closed-journal-observation.json",
+      "destination": "run01/closed-journal-observation.json",
+      "bytes": 405,
+      "sha256": "4d3ef160b80cbbbc07b79f8d3266009e46c33ac6514616963940b00080f1c5b6"
+    },
+    {
+      "source": "_scratch/windows-journal-cancel01/config.json",
+      "destination": "run01/config.json",
+      "bytes": 62,
+      "sha256": "92af29b31bce62fd4c8b97e3930ec4a3f816eb68d4be728427913780e408e1c2"
+    },
+    {
+      "source": "_scratch/windows-journal-cancel01/contender-result.json",
+      "destination": "run01/contender-result.json",
+      "bytes": 7241,
+      "sha256": "79eaf6bbbd9c851062f47e2a8528826c164ad54ccf8cae6edbb3abf25afcbe4c"
+    },
+    {
+      "source": "_scratch/windows-journal-cancel01/controller-result.json",
+      "destination": "run01/controller-result.json",
+      "bytes": 308893,
+      "sha256": "3b1c1fcd9844497f3881a9cc0db484223c0699e247ee4229dabde05850deb14e"
+    },
+    {
+      "source": "_scratch/windows-journal-cancel01/controller-stderr.log",
+      "destination": "run01/controller-stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "_scratch/windows-journal-cancel01/controller-stdout.log",
+      "destination": "run01/controller-stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "_scratch/windows-journal-cancel01/dummy_bootstrap.py",
+      "destination": "run01/dummy_bootstrap.py",
+      "bytes": 35742,
+      "sha256": "ed99209c7da9bb98faf960999a38667bd5e96b75bae1e0542d69733b62cc593c"
+    },
+    {
+      "source": "_scratch/windows-journal-cancel01/durable_lifecycle.py",
+      "destination": "run01/durable_lifecycle.py",
+      "bytes": 13075,
+      "sha256": "f95cc8f2c61fd1953b642669ee4027a968660e39b97d9e84782fb83ac62abacb"
+    },
+    {
+      "source": "_scratch/windows-journal-cancel01/exit.json",
+      "destination": "run01/exit.json",
+      "bytes": 357,
+      "sha256": "bbf7f6cfdf5050e49013468246e606c378ffa2347d6ec6fca467792e64183078"
+    },
+    {
+      "source": "_scratch/windows-journal-cancel01/generated_adapter_flow.py",
+      "destination": "run01/generated_adapter_flow.py",
+      "bytes": 33890,
+      "sha256": "cc0b7ff4f445ef73b4acdc63475c1aa375b5d0cfbe461ee6c50809cd0f19b4b4"
+    },
+    {
+      "source": "_scratch/windows-journal-cancel01/generated_journal_setup.py",
+      "destination": "run01/generated_journal_setup.py",
+      "bytes": 11954,
+      "sha256": "df7ed56cdcbd23352b3e69a6f6790a012182b294491f38f8ed19610f000b485d"
+    },
+    {
+      "source": "_scratch/windows-journal-cancel01/generated_operation_flow.py",
+      "destination": "run01/generated_operation_flow.py",
+      "bytes": 21274,
+      "sha256": "6f09b4e6490b2078e792e49559a9dd0db95a895a778c31294a3577eeabdc98ed"
+    },
+    {
+      "source": "_scratch/windows-journal-cancel01/generated_worker_flow.py",
+      "destination": "run01/generated_worker_flow.py",
+      "bytes": 22853,
+      "sha256": "1ab240d60ceaca130ac85f5d2e908ef5895da5297f35d78a1caba1c62e622238"
+    },
+    {
+      "source": "_scratch/windows-journal-cancel01/generated_writer_exclusion.py",
+      "destination": "run01/generated_writer_exclusion.py",
+      "bytes": 11647,
+      "sha256": "8173d7394f4a893c14d2979283a0c17ed273e25f196e14560590be3a0f22058b"
+    },
+    {
+      "source": "_scratch/windows-journal-cancel01/inherited_readset.py",
+      "destination": "run01/inherited_readset.py",
+      "bytes": 12391,
+      "sha256": "02be8e04f4bea3030faf0882ae48ead40716c5782f95e2790e1a9897c5be76e3"
+    },
+    {
+      "source": "_scratch/windows-journal-cancel01/model.bin",
+      "destination": "run01/model.bin",
+      "bytes": 60,
+      "sha256": "e0a9fc9e76fc24578e81900fcb506dc23fa39c17dcb7313e83c382d731ed1f27"
+    },
+    {
+      "source": "_scratch/windows-journal-cancel01/native-exit.json",
+      "destination": "run01/native-exit.json",
+      "bytes": 71,
+      "sha256": "c06d0922ffd181268bb4c6f173e1a81b4d24baa3fd0e2c0e64e7a8b63665b8aa"
+    },
+    {
+      "source": "_scratch/windows-journal-cancel01/owned_generation_protocol.py",
+      "destination": "run01/owned_generation_protocol.py",
+      "bytes": 19570,
+      "sha256": "437e0880e10c91555df61b3c07c8be665430098c54c7d6ef687a99a0aa4a79d9"
+    },
+    {
+      "source": "_scratch/windows-journal-cancel01/pinned_buffer_namespace.py",
+      "destination": "run01/pinned_buffer_namespace.py",
+      "bytes": 7893,
+      "sha256": "2cc25a7a254f35d802336ef121cc860887a4301b3257588438dddec392fe0b7b"
+    },
+    {
+      "source": "_scratch/windows-journal-cancel01/preprocessor_config.json",
+      "destination": "run01/preprocessor_config.json",
+      "bytes": 75,
+      "sha256": "34d11738f6a5c42da4ac39a7ae8f999bdec3b3543790c63f7d2f0134bf8ac31b"
+    },
+    {
+      "source": "_scratch/windows-journal-cancel01/reservation_file_port.py",
+      "destination": "run01/reservation_file_port.py",
+      "bytes": 4694,
+      "sha256": "708554378ab8a8e6c4477e637c999256665cbd2855b94c6fa3c2d04a19d3a224"
+    },
+    {
+      "source": "_scratch/windows-journal-cancel01/ROOT-ADMISSION.json",
+      "destination": "run01/ROOT-ADMISSION.json",
+      "bytes": 1126,
+      "sha256": "89c44b6611f4145f5f90c739fb700305a7454433f2cb463a62549a8475a127bb"
+    },
+    {
+      "source": "_scratch/windows-journal-cancel01/run_journal_cancel01.ps1",
+      "destination": "run01/run_journal_cancel01.ps1",
+      "bytes": 34781,
+      "sha256": "70ab9cc3879ed792db0f8deaec4fd343f6a96438811bad9e37977ae510fa11d6"
+    },
+    {
+      "source": "_scratch/windows-journal-cancel01/snapshot_lifecycle.py",
+      "destination": "run01/snapshot_lifecycle.py",
+      "bytes": 22138,
+      "sha256": "a80514aac6b1e75b9b872052852fa993a23cd5273b6bed4ffb4eef7404cb69dd"
+    },
+    {
+      "source": "_scratch/windows-journal-cancel01/snapshot_reservations.py",
+      "destination": "run01/snapshot_reservations.py",
+      "bytes": 23634,
+      "sha256": "e80ae881fa4af9cc7d1a3e4a06624f5b19abe4de09aec3844e8a541449335b98"
+    },
+    {
+      "source": "_scratch/windows-journal-cancel01/SOURCE-INPUTS.json",
+      "destination": "run01/SOURCE-INPUTS.json",
+      "bytes": 6160,
+      "sha256": "f5e1b8b4d282c28c7ac12aad05b4e2466340769215574948682b69633e4fa4b3"
+    },
+    {
+      "source": "_scratch/windows-journal-cancel01/tokenizer.json",
+      "destination": "run01/tokenizer.json",
+      "bytes": 65,
+      "sha256": "27154d8f1698bcf00355d7d75f4e02788b9bd613ad7844cb869c8450583e0fd8"
+    },
+    {
+      "source": "_scratch/windows-journal-cancel01/trusted_asr_resolver.py",
+      "destination": "run01/trusted_asr_resolver.py",
+      "bytes": 13373,
+      "sha256": "16a5a1245f649a3eb04d077b661835503f08bef0ff8822dcb545176f0cc30833"
+    },
+    {
+      "source": "_scratch/windows-journal-cancel01/vocabulary.json",
+      "destination": "run01/vocabulary.json",
+      "bytes": 66,
+      "sha256": "ef75ec76b1b25d78dde4cddecd894a0657a7d65e473cb18be9a6cadec879a111"
+    },
+    {
+      "source": "_scratch/windows-journal-cancel01/win32_private_pipe.py",
+      "destination": "run01/win32_private_pipe.py",
+      "bytes": 18613,
+      "sha256": "73a1109a55f2bc807594655c71b24a3e35eb88d7f744497df2cc328dc224cae7"
+    },
+    {
+      "source": "_scratch/windows-journal-cancel01/win32_worker_connection.py",
+      "destination": "run01/win32_worker_connection.py",
+      "bytes": 29660,
+      "sha256": "60d22036d6827205be5d0657af8e4693aa534605bdfb1b501878eb2a889fe25f"
+    },
+    {
+      "source": "_scratch/windows-journal-cancel01/windows_reservation_port.py",
+      "destination": "run01/windows_reservation_port.py",
+      "bytes": 18234,
+      "sha256": "b93076ab07b8c0567f6608520c99f5e5523be3dd388010a5a49037a4a899f775"
+    },
+    {
+      "source": "_scratch/WINDOWS-JOURNAL-CANCEL01-ACTUAL.json",
+      "destination": "root/WINDOWS-JOURNAL-CANCEL01-ACTUAL.json",
+      "bytes": 123,
+      "sha256": "e1ec143850e16d511e1a419641ea09619b53105c920c3635d048264ff6d0ffe8"
+    },
+    {
+      "source": "_scratch/WINDOWS-JOURNAL-CANCEL01-ADMISSION-ACTUAL.json",
+      "destination": "root/WINDOWS-JOURNAL-CANCEL01-ADMISSION-ACTUAL.json",
+      "bytes": 677,
+      "sha256": "3c73a0118b95fd88cfe7adbde93d9c3c33fe6bcb238afb7c0cdb2d8c839429ca"
+    },
+    {
+      "source": "_scratch/WINDOWS-JOURNAL-CANCEL01-ROOT-CHECK-ACTUAL.json",
+      "destination": "root/WINDOWS-JOURNAL-CANCEL01-ROOT-CHECK-ACTUAL.json",
+      "bytes": 782,
+      "sha256": "0432e85c43b54177035131109fd23ffe2c3adc26982f1f26eb8c3194fbae6ebe"
+    },
+    {
+      "source": "_scratch/WINDOWS-JOURNAL-CANCEL01-ROOT-REVIEW.md",
+      "destination": "root/WINDOWS-JOURNAL-CANCEL01-ROOT-REVIEW.md",
+      "bytes": 2717,
+      "sha256": "cf115f87231338b23bc880fb074259f95a3931449a0f7774d56545880746d701"
+    },
+    {
+      "source": "_scratch/check-native-journal-cancel01.py",
+      "destination": "root/check-native-journal-cancel01.py",
+      "bytes": 6090,
+      "sha256": "cd0ed41b036e5caa6a1c8c4f3bdf7015368ca47e26cd1777a2d6f04961b9748d"
+    },
+    {
+      "source": "docs/library/ASTRA-NATIVE-JOURNAL-CANCEL01-VERDICT-2026-09-13.md",
+      "destination": "root/ASTRA-NATIVE-JOURNAL-CANCEL01-VERDICT-2026-09-13.md",
+      "bytes": 2543,
+      "sha256": "0b735e3e4c8bb2dc5842909f3dba6ca8287d4580ee227e29b864675ae7685731"
+    },
+    {
+      "source": "_scratch/archive-native-journal-cancel-proposal01/archive.ps1",
+      "destination": "archive/archive.ps1",
+      "bytes": 12792,
+      "sha256": "bbe5cdbc3138d1ba550efa955f4bfcfa8a83e3f3e56820fb2c6e89f0862bda63"
+    },
+    {
+      "source": "_scratch/archive-native-journal-cancel-proposal01/COPY-MAP.json",
+      "destination": "archive/COPY-MAP.json",
+      "bytes": 28438,
+      "sha256": "ba398da5aa929969f148a854818f732e94f0694dbf4c2230626ec7d4656e407a"
+    },
+    {
+      "source": "_scratch/archive-native-journal-cancel-proposal01/PINS.json",
+      "destination": "archive/PINS.json",
+      "bytes": 404,
+      "sha256": "d7f292a1e0e944584f75c156069f09ef8ea3606c63161f8aa82eba8d22570aca"
+    }
+  ],
+  "source_membership_and_hashes_checked_before_after": true,
+  "all_copies_rehashed": true,
+  "prior_qualification": {
+    "commit": "60b3bb5",
+    "path": "docs/library/proof/windows-journal-cancel-qualification-2026-09-13/SHA256.json",
+    "sha256": "635ae8077f66006140df1bcee544bbd2ca086cfc121a909d53f4d18206a8dc5f",
+    "recopied": false
+  },
+  "per_file_cap_bytes": 1048576,
+  "no_reparse_in_checked_chains": true,
+  "physical_journal_read_hashed_or_copied": false,
+  "registry_contents_enumerated": false,
+  "generated_fixture_count": 5,
+  "fixtures_match_exact_source_ascii": true,
+  "support_checkpoint_or_converted_output_accessed": false,
+  "tests_or_native_observations_rerun": 0,
+  "interruption_restart_power_loss_model_or_release_accepted": false,
+  "preparation_failure": "Initial inventory pair construction failed before writes; its clearly labeled tool transcript and correction are preserved",
+  "script_sha256": "bbe5cdbc3138d1ba550efa955f4bfcfa8a83e3f3e56820fb2c6e89f0862bda63",
+  "pins_sha256": "d7f292a1e0e944584f75c156069f09ef8ea3606c63161f8aa82eba8d22570aca"
+}

@@ -1,0 +1,7 @@
+{
+  "chunk_id": "a3cc13",
+  "wall_time_seconds": 1.5664508000000001,
+  "exit_code": 0,
+  "original_token_count": 120,
+  "output": "{\r\n  \"created_admission\": \"E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\_scratch\\\\windows-journal-cancel-proposal01\\\\ROOT-ADMISSION-cancel.json\",\r\n  \"bytes\": 1126,\r\n  \"sha256\": \"89c44b6611f4145f5f90c739fb700305a7454433f2cb463a62549a8475a127bb\",\r\n  \"source_count\": 18,\r\n  \"unchanged_writer04_count\": 16,\r\n  \"support_metadata_records\": 9,\r\n  \"support_files_inspected\": false,\r\n  \"false_template_preserved\": true,\r\n  \"inputs_unchanged\": true,\r\n  \"native_launched\": false\r\n}\r\n"
+}

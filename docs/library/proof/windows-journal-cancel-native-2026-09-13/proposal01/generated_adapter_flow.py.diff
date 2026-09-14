@@ -1,0 +1,124 @@
+diff --git "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\windows-journal-cancel-proposal01\\before\\generated_adapter_flow.py" "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\windows-journal-cancel-proposal01\\generated_adapter_flow.py"
+index 84a8f3a..ab1119d 100644
+--- "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\windows-journal-cancel-proposal01\\before\\generated_adapter_flow.py"
++++ "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\windows-journal-cancel-proposal01\\generated_adapter_flow.py"
+@@ -50,7 +50,10 @@ def policy_ack(payload):
+ 
+ class GeneratedLifecyclePort(operation_flow.GeneratedLifecyclePort):
+     def __init__(self, *args, operation_mode="drain", **kwargs):
+-        _assert(operation_mode == "drain", "one_actual_adapter_drain_scope")
++        if operation_mode == "cancel":
++            _assert(type(operation_mode) is str, "exact_actual_adapter_cancel_mode")
++        else:
++            _assert(operation_mode == "drain", "one_actual_adapter_drain_scope")
+         super().__init__(*args, operation_mode=operation_mode, **kwargs)
+         _assert(real_resolver.REAL_APPROVAL is None, "real_model_authority_must_remain_absent")
+         self.adapter_profile = adapter.RuntimeProfile(PROFILE_ID, "cpu", "int8", None, None)
+@@ -367,6 +370,107 @@ def controller_flow(port):
+             "controller_handshake_begun": port.handshake._begun, "model_calls": 0}
+ 
+ 
++def _consume_one_then_cancel(port, stream):
++    """One fixed cancel-case driver; stop/join remains the adapter's finally."""
++    _assert(type(port.operation_mode) is str and port.operation_mode == "cancel",
++            "exact_cancel_driver_mode")
++    observed = [next(stream)]
++    stream.close()
++    _assert(port._cursor_state == "cancelled" and port._next_index == 1,
++            "adapter_cancel_stops_before_second_generated_segment")
++    before = tuple(port.operation_events)
++    _assert(before == ("admit_generated_media", "begin_generated_transcription",
++                       "next_generated_segment", "cancel_generated_cursor"),
++            "exact_adapter_cancel_exchange_order")
++    try:
++        next(stream)
++    except StopIteration:
++        pass
++    else:
++        raise AssertionError("Cancelled adapter stream must not yield another segment")
++    _assert(tuple(port.operation_events) == before, "cancelled_adapter_stream_has_no_wire_use")
++    return observed
++
++
++def _bound_cancel_journal(port):
++    """Passive serial-probe observation, not a new lifecycle capability."""
++    token = port.lifecycle._token(port.key)
++    gates = port.reservations.gates
++    attempt = gates.attempts.get(token.physical)
++    _assert(token.phase == "WORKER_BOUND" and not token.revoked and token.pending is None
++            and token.worker is port.worker and token.physical == port._physical
++            and token.gate is not None and token.physical in gates._held
++            and gates._held.get(token.physical) is token.gate
++            and attempt is not None and attempt.token is token.gate
++            and attempt.journal is token.journal and attempt.failure is None
++            and attempt.handle is token.journal._stream.handle
++            and not attempt.handle.closed and not attempt.handle.unconfirmed
++            and token.journal.confirmed_bytes == token.raw
++            and token.journal.confirmed_revision == token.journal._stream.write_revision
++            and not token.journal._poisoned and not token.journal._stream.poisoned,
++            "confirmed_bound_journal_held_during_cancel")
++    return token, token.raw, attempt.handle
++
++
++def controller_cancel_flow(port):
++    _assert(type(port) is GeneratedLifecyclePort and type(port.operation_mode) is str
++            and port.operation_mode == "cancel", "exact_actual_adapter_cancel_port")
++    with generated_authority_seams(port):
++        with adapter.faster_whisper_session(CHOICE, model_root=port.cwd) as facade:
++            _assert(type(facade) is OperationFacade and facade._session._manager is port.lifecycle,
++                    "actual_adapter_owned_facade")
++            session = facade._session
++            record = session._record
++            _assert(record.protection is port.read_set and record.permit is port.permit
++                    and record.owner is session and port.adapter_startup.policy is port.adapter_profile
++                    and port.adapter_startup.binding is port.generated_binding and port.adapter_start_ack is not None,
++                    "actual_start_permit_and_worker_ack")
++            ticket = port.issue_generated_media_ticket(session)
++            request = TranscribeRequest(ticket, language="en")
++            stream = facade.transcribe(request)
++            _assert(port._next_index == 0 and port.operation_events == ["admit_generated_media", "begin_generated_transcription"],
++                    "actual_adapter_start_keeps_segments_lazy")
++            token_before, raw_before, handle_before = _bound_cancel_journal(port)
++            observed = _consume_one_then_cancel(port, stream)
++            token_after, raw_after, handle_after = _bound_cancel_journal(port)
++            _assert(token_after is token_before and raw_after == raw_before and handle_after is handle_before
++                    and record.phase is Phase.NATIVE_RUNNING and not session._closing
++                    and not session._revoked and all(not h.closed for h in port.read_set.members),
++                    "cancel_ack_does_not_clear_or_release_owned_lifetime")
++            cancellation_journal = {"phase_before": "WORKER_BOUND", "phase_after": "WORKER_BOUND",
++                "confirmed_before_sha256": hashlib.sha256(raw_before).hexdigest(),
++                "confirmed_after_sha256": hashlib.sha256(raw_after).hexdigest(),
++                "same_token_and_handle": True, "gate_held_before_stop": True,
++                "journal_open_before_stop": True, "clear_deferred_until_adapter_finally": True}
++            for path, expected in port.expectations:
++                port.observations.append(operation_flow.adoption_flow._write_access_probe(port.primitives, path, True))
++        # The existing adapter finally alone performs owned close/join and lease exit.
++        _assert(record.phase is Phase.RELEASED and session._closed_verified
++                and port.read_set.released and port.pair.closed, "actual_adapter_finally_released_after_join")
++    before = tuple(port.operation_events)
++    operation_flow._require_session_closed(lambda: facade.transcribe(request))
++    operation_flow._require_session_closed(lambda: next(stream))
++    _assert(tuple(port.operation_events) == before, "actual_adapter_retained_references_have_no_wire_use")
++    for path, expected in port.expectations:
++        port.observations.append(operation_flow.adoption_flow._write_access_probe(port.primitives, path, False))
++    return {"operation_mode": "cancel", "actual_adapter_context": "faster_whisper_session",
++            "segments": [{"start": s.start, "end": s.end, "text": s.text, "words": []} for s in observed],
++            "operation_events": port.operation_events, "cursor_state": port._cursor_state, "cursor_start": port.start_observation,
++            "cancellation_journal": cancellation_journal,
++            "authority_events": port.authority_events, "adapter_start": port.adapter_start_payload,
++            "adapter_start_ack": port.adapter_start_ack, "adapter_globals_restored": True,
++            "real_resolver_approval_unchanged_none": real_resolver.REAL_APPROVAL is None,
++            "binding_calls": port.binding_calls, "actual_factory_and_permit": True,
++            "adapter_owned_cleanup": True, "retained_facade_and_stream_refused": True,
++            "lifecycle_phase": record.phase.value, "read_set_released": port.read_set.released,
++            "pipe_retired": port.pair.closed, "exit_observation": port.exit_observation,
++            "write_access_observations": port.observations,
++            "parent_guards_held_through_exit": port.parent_guards_held_through_exit,
++            "adoption_case": port.case, "adoption_response": port.adoption_response,
++            "authenticated_manifest": port.adoption_payload, "manifest_sha256": port.manifest,
++            "controller_handshake_begun": port.handshake._begun, "model_calls": 0}
++
++
+ def _bound_worker_operations(pipes, pair, channel, adoption, fixed_root):
+     _assert(real_resolver.REAL_APPROVAL is None, "child_real_model_authority_absent")
+     original_functions = (real_resolver.load_manifest, real_resolver.admit_snapshot, real_resolver.bind_for_constructor)

@@ -1,0 +1,16 @@
+{
+  "schema": "uoink.native-journal-cancel-archive-pins.v1",
+  "count": 2,
+  "files": [
+    {
+      "path": "archive.ps1",
+      "bytes": 12792,
+      "sha256": "bbe5cdbc3138d1ba550efa955f4bfcfa8a83e3f3e56820fb2c6e89f0862bda63"
+    },
+    {
+      "path": "COPY-MAP.json",
+      "bytes": 28438,
+      "sha256": "ba398da5aa929969f148a854818f732e94f0694dbf4c2230626ec7d4656e407a"
+    }
+  ]
+}
