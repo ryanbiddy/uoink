@@ -1,0 +1,7 @@
+{
+  "chunk_id": "730499",
+  "wall_time_seconds": 0.498344,
+  "exit_code": 0,
+  "original_token_count": 60,
+  "output": "{\r\n  \"exact_copied_inputs\": 29,\r\n  \"launcher_changes\": 0,\r\n  \"pins_sha256\": \"8ea1128704f3a943de3aab3b26e84c5f1a3d637af8cb5c532f736d23c9e9b7cc\",\r\n  \"admission_sha256\": \"3346aebca0b4c8d183bfbad9bab5c5df7ccef19aeec60a294bbf78ecd76bd4ed\"\r\n}\r\n"
+}

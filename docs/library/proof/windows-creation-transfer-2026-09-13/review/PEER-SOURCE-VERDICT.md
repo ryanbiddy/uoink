@@ -1,0 +1,18 @@
+2026-09-13. No blocking source finding in the 70-case creation-transfer proposal. This is an independent source and text-binding review, not an admission or executed test result. I read the complete changed port, five new cases, qualifier, launcher, protocol and diffs, and checked the called handle-ownership and creation-ticket contracts. The corrected 65 source bodies were previously read and are byte-identical here.
+
+The new private staging method requires the exact registered binding, an owned live handle and its empty journal identity. It does not mint creation evidence. Acquire moves that handle into the retained attempt before further ancestor/identity checks; a later failure leaves the attempt, gate and same handle reachable. Successful transfer uses the existing handle instead of CreateFileW, and clean release closes that owner once. The existing non-staged path, poisoned uncertainty and confirmed-head release rules remain in place. Failure during staging leaves the still-retained handle with the supplying primitive/bootstrap; no new cleanup or native-create observation is invented.
+
+The five cases cover transfer without reopen, retention after post-transfer failure, duplicate/foreign handle refusal, changed/nonempty identity and missing separate creation authority. Their exception expectations match the actual declaring source: PersistenceUnconfirmed and ReservationRefused, plus the explicitly identified FakePrimitives AssertionError for a foreign record. The two identity faults are nested subtests, not additional top-level cases. These cases use retained generated handles and fake services; they do not prove CREATE_NEW, exclusive sharing, flush behavior or cross-process recovery.
+
+Read-only check 5c6fd7 verified every 29-entry PINS row and compared all inputs with corrected proposal02. Both corrected test files, their fixture services and all other product sources are unchanged; only windows_reservation_port.py is a product delta. The first 65 expected IDs are exact and the five appended IDs equal the sorted new method names. Complete qualifier text equals the original after only adding one module to its load/suite lists and changing the three count literals. Complete launcher text equals the original after only label/input-count/case-count replacements. Content closure, 12 metadata traps, built-in-registry traps, ten final guard predicates, exact ordered membership, empty-stderr requirement, immediate global native-exit capture and before/after input checks are preserved. The new admission template remains false.
+
+The original 63/2 failure and corrected 65 passes remain separate historical observations. Seventy cases have not run as part of this review, and the earlier passing 65 does not qualify the new shared acquisition path. Root owns any new admission. No candidate import/compile, tests, FFI/native operation, checkpoint/model/artifact access, network or source mutation occurred. No council brief was frozen.
+
+SHA-256 bindings:
+
+- PINS.json: 8ea1128704f3a943de3aab3b26e84c5f1a3d637af8cb5c532f736d23c9e9b7cc
+- windows_reservation_port.py: dd33becb60e4302152179c4a41e4a2bf04d7d1a82bc3371461283688f3105a2e
+- test_creation_transfer.py: 9487d6be472babd85cd1844852ffdb9478aba48948cfea6aba546e8329e44573
+- qualify_windows_reservations.py: fa56a4373defd995b484e9958b8181b35b38ef065295a42eff4df2a1cbe77cc2
+- run_preflight01.ps1: c50350550835c889f83e34dc342ddf5c6f38fbe3b1b6ab7071502130ae8da700
+- QUALIFICATION-PROTOCOL.md: 7055d3717f61863ad51a36af3054ed0ec4ee5817eebacb9b64ba4183cf28784d

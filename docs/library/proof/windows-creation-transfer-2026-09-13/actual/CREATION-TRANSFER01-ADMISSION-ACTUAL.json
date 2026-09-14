@@ -1,0 +1,7 @@
+{
+  "chunk_id": "cba43c",
+  "wall_time_seconds": 0.3823774,
+  "exit_code": 0,
+  "original_token_count": 38,
+  "output": "{\r\n  \"verified_inputs\": 29,\r\n  \"old65_unchanged\": true,\r\n  \"admission_sha256\": \"bc2c94338cdb46d2d4953515c953292a7609485b18ca2cb931b40d14ee7c9f4a\"\r\n}\r\n"
+}
