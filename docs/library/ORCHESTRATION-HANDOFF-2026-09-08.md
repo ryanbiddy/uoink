@@ -289,8 +289,13 @@ The next source-only implementation brief is REAL-ENGINE-CONNECTION-BRIEF-2026-0
 Its frozen plan140c4db6 and23-source map89caa88f are preserved in
 proof/real-engine-connection-plan-2026-09-14. Rootc52eb7 checks all392,766 input
 bytes; index5ec770 verifies26 documentary payloads, seal59bfc255. This supplies
-no source implementation result. Dispatch the brief through Control Room Gemini,
-existing Antigravity subscription only, with no Python/tests/model/native access.
+no source implementation result. Control Room run56af690a-060b-453d-bb64-d9621a5553c9
+is active from committed brief969ac9b, worker433ea884-2ada-4049-8a0f-b9891a8e9443,
+Gemini3.8-flash-high/high through the existing Antigravity subscription. Worktree:
+C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/56af690a-060/gemini.
+Dispatchc4a98c yielded session19744; polle41f55 remains running. Preserve actual
+completion and review its diff before any qualification. No Python/tests/model/
+native access is authorized for this worker. No source result is accepted yet.
 Keep these source tasks separate from real PCM/filter and D3/D4 qualification.
 The frozen broader plan is archived in30 payloads under
 proof/runtime-next-source-plan-2026-09-14, index8ef211; no implementation pass is
@@ -1328,9 +1333,10 @@ core.longpaths true` must stay set (worktree checkouts fail without it).
 
 - The historical AT6 child exit cannot be reconstructed. Its audit outcome stays
   failed; any release disposition of missing evidence belongs to Ryan.
-- The revised dependency audit retains 19 entries / 15 distinct issues in four
-  packages. Keep Astra's reachability and compatibility findings in the release
-  notes. Their release disposition cannot be described as a clean security audit.
+- The historical dependency audit retains 19 entries / 15 distinct issues in four
+  packages. The later proposed candidate metadata has one entry / one group,
+  with runtime compatibility still unqualified. Preserve both scopes and Astra's
+  reachability findings; neither supplies a clean release security verdict.
 - Phase 6 speaker attribution remains blocked by Ryan's explicit ruling. No
   diarization runs; chapters and cited ranges are the release scope.
 - Desktop-client citation/brief/chapter GUI acceptance remains unobserved.
@@ -6735,3 +6741,22 @@ Raw worktree diff/apply978113 succeeds;26 newline-only differences were verified
 before raw restoration. Index5ec770 confirms exact Git/disk. No subject was
 repeated for this archive. Dispatch REAL-ENGINE-CONNECTION-BRIEF-2026-09-14.md
 next; preserve incomplete implementations as partial rather than passing them.
+
+### 2026-09-14 — Constructor implementation active; branch backup verified
+
+Control Room run56af690a-060b-453d-bb64-d9621a5553c9 started at11:08:47UTC
+from969ac9b, using Gemini3.8-flash-high/high through the existing Antigravity
+subscription. Worker433ea884-2ada-4049-8a0f-b9891a8e9443 owns the isolated
+56af690a-060/gemini worktree. Initialc4a98c and polle41f55 are pending-session
+records for19744. Original database identity9fddad agrees. Source-only work is
+active; no implementation, execution or real runtime acceptance is claimed.
+
+The completed candidate and brief are backed up through969ac9b93fbbb52d69ffd1efc0d2172d8ed625da.
+The clean candidate and local/remote4a01ef2 were checked before CAS fast-forward.
+Pushdc3eab/0 and remote50664b/0 confirm origin/cc/living-library exactly matches.
+No other branch was pushed and no main merge/publication occurred. Later commits
+need a separate verified backup. Raw tool objects are retained under _scratch.
+
+The Blockers audit wording now distinguishes the historical19-entry/15-issue
+baseline from the later proposed one-entry/one-group metadata. This is a scope
+correction from existing records, not a fresh scan or runtime security acceptance.
