@@ -113,7 +113,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | Latest component council | Original partial report870fa00 supplemented at2339a09 | Gemini ca1e1356 records views of all39 omitted paths; Astra accepts three component verdicts with corrections and the explicit Inno1–150 boundary. Root verified all69 input bytes in both checkouts and all17 supplement payloads in Git/disk | Continue concrete runtime work. Full-line claims remain worker-reported; no overall release acceptance |
 | Generated reservation recovery | Component and evidence integrated at f9ab6fe | Author70b48e and independentfd86f5 each pass42 cases, with20 passing nested subtests and all10 guards valid. All123 proof payloads match Git/disk | Connect retained Windows gate/journal handles and split create/resume/startup. Native recovery and runtime acceptance remain open |
 | Windows reservation connection | Correction8fc3219; transfer2f4311f; native generated drain67887c3 | Unit70/0/0 plus35 subtests in both copies. Native d3d56f returns outer/controller/child0, valid guards, child0/job0, four confirmed phases/flushes and exact2,118B closed journal. All87 native proof payloads match Git/disk | Qualify remaining native exclusion/interruption/persistence/restart/reconciliation. Actual runtime-owner connection and real models remain open |
-| Worker/journal council | Original244cca5 remains accuracy FAILED; correction brief e3ff5b0; Gemini371ebc24 running | Original70 path views remain metadata only. Correction binds33 exact files/440,045 bytes and6,422 required lines; all12 brief payloads match Git/disk | Wait for session42118 and review its one correction report. No duplicate dispatch, test rerun or broader acceptance |
+| Worker/journal council | Scoped source review completed at1c6ac4c with mandatory Astra addendum; original244cca5 remains accuracy FAILED | All24 correction proof payloads match Git/disk. Gemini correction alone remains partial; Astra corrects remaining handshake/locking/private-caller claims. Existing17/65 outcomes unchanged | Continue native/runtime engineering. Session42118 closed482e42/exit0; no new council loop or broader acceptance |
 | Worker runtime owner and bootstrap | Owner at 1f200eb; actual bootstrap connection at bbe10d6 | Both copies pass17/0/0: eleven retained owner cases plus six bootstrap cases. Exact case objects, valid guards, unchanged19 inputs plus admission. All144 newest proof payloads match Git/disk | Connect exact ownership through native services. Real inference, PCM/filter, VAD-to-model binding and protected constructor routes remain open |
 | Integration | Reliability repair at e8d058f and notice packaging at 71d3e70 after tree09 | Reliability:53 focused cases plus13 subtests per root. Notices:20 Python/10 block cases per root. Tree09 at 56d9d4c remains2,796 passed/1 failed/3 skipped across2,800 cases plus13 subtests; it predates both repairs | Finish runtime work, then run a new committed complete tree and rebuild/reseal. Package08 and website/marketing remain held. No current-source package or installation credit |
 | Desktop incident | Isolation failed in package-07 attempt; corrected at `e10ba3a` | Ordinary Uoink and filesystem connectors launched; earlier live-index/5179 effects unknown. Owned job cleaned | No further override launch; only guarded Uoink dashboard observed for package 08 |
@@ -372,8 +372,12 @@ Root e89711 verifies33 selected files/440,045 bytes against Git/disk;12 proof
 payloads/79,451 bytes match in57cd28. That command's final exit1 came from an
 optional missing-process inventory after successful proof and prose checks;
 no suite or candidate ran. Commit4de597/e3ff5b0 completed with exit0.
-Dispatch500400 starts one Gemini371ebc24 from that exact base, session42118.
-Wait and review its separate correction report; the original stays failed.
+Dispatch500400 started Gemini371ebc24 from that exact base. Session42118 closed
+482e42/exit0. Root review and mandatory source addendum are now committed at
+1c6ac4c; read ASTRA-WORKER-JOURNAL-CORRECTION-VERDICT-2026-09-13.md and
+ASTRA-WORKER-JOURNAL-SOURCE-ADDENDUM-2026-09-13.md. All24 proof payloads match
+Git/disk. The raw correction report remains partial on its own; the original
+stays failed. No further Gemini loop is required for these documentary errors.
 The initial JavaScript dispatch expression had a syntax error before any nested
 tool; its template-literal repair and actual dispatch are retained in scratch.
 All70 selected paths have
@@ -5668,3 +5672,26 @@ an active-at-exit field must not claim that temporary profile activation never
 occurred. A fresh source derivative is being prepared. D1 remains resolved at
 4b38948 and must not be repeated. D2 conversion, fetch, runtime, release and
 website/marketing gates remain closed.
+
+### 2026-09-13 - Scoped council source review completed; writer observation failed
+
+Commit1c6ac4c retains Gemini's38,567-byte correction f17d009e and the mandatory
+Astra source addendum. All24 payloads/515,882 bytes match Git/disk in6bf23f;
+seal66ef42a77d2381796979829e718df5cbb027ed3f91cb1fd7b8840e6b66b258ee.
+The raw correction remains partial: actual handshake exchange is in finish_start,
+journal append occurs outside token state locks, and the private-caller boundary
+is an assumption rather than proved prevention. Root and independent source
+review resolve those statements without changing product/tests or measurements.
+All33 inputs and four controls match Git/both roots. All33 paths have completed
+view metadata;63 views complete, one premature missing-output view fails. A
+later stop of already-completed git-status also fails; both are preserved. The
+6,422-line display claim remains worker-reported. No market agreement follows.
+
+One separately admitted writer-exclusion02 native observation829f4f returned
+outer1/controller1 with valid guards and unchanged inputs. The contender records
+error32/no content I/O and the controller observes its exit0/job0, but the later
+primary drain raises PersistenceUnconfirmed. Overall result is FAILED; no partial
+pass or native-exclusion acceptance. The primary child result reports its normal
+generated flow, but overall teardown/release is unconfirmed. Source/receipt-only
+diagnosis is tracing the final ancestor comparison. Preserve all receipts and
+proposal01/02; a bounded diagnostic/source repair brief must precede any rerun.
