@@ -1,0 +1,7 @@
+{
+  "chunk_id": "078217",
+  "wall_time_seconds": 0.1645262,
+  "exit_code": 0,
+  "original_token_count": 88,
+  "output": "[\r\n  {\r\n    \"path\": \"draft01/controller_boundary_fixture.py\",\r\n    \"bytes\": 12943,\r\n    \"sha256\": \"63642115cf53a21911ea8fd1e31af91ff20c2807639e39dab5ec23fce94c06f7\"\r\n  },\r\n  {\r\n    \"path\": \"draft01/test_controller_resume_publication.py\",\r\n    \"bytes\": 23553,\r\n    \"sha256\": \"6bcbef25679cdcaa1ee0cd663a0cca646f29a8b08ba8476b8435ed0a50ef2199\"\r\n  }\r\n]\r\n"
+}

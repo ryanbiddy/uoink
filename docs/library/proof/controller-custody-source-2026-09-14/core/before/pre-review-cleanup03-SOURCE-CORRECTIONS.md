@@ -1,0 +1,14 @@
+Preparation and review history; all subject stages remain unexecuted.
+
+1. The approved design initially described one kernel entry map. Before the first coherent source pair, source reasoning showed that a same-field slot replacement before kernel entry needed an independent issued-object reference. The factory therefore retains the original in _start_attempts; the kernel index must point to the same object. Original DESIGN.md remains in controller-boundary-custody-design01. The initial durable fragment is preserved unchanged; compose_sources.mjs records its finite additions before first assembly.
+
+2. Root approved the additional pure _check_controller_entry(binding,startup,permit,session) interface. It verifies original custody/helpers and the accepted pre-worker predicate without consuming startup; the actual delegate consumes once. This makes pre-effect refusal explicit rather than misusing the pre_resume label. Other wrappers remain _capture_controller_boundary(profile,permit) and _check_controller_boundary(binding,startup,permit,session,worker,stage), with only pre_resume/finish_start checkpoint labels.
+
+3. Initial pair410e958c/227395c4 was preserved as before/pre-review-helper01-*.py. Root identified that the newly introduced _require_factory_start itself was dynamically looked up. Source-only repair13e8f8/0 added retained factory_check and direct identity refusals at all three calls, yielding durablebc95b798. repair_factory_helper01.mjs retains the exact six edits.
+
+4. That pair is preserved as before/pre-review-entry02-*.py. Root/peer identified initial binding selection still called a replaced named capture before its tuple guard and could capture a replaced durable guard as original. Source-only repair9eafa1/0 selects capture/entry/check from the literal original19-function tuple after shape/name checks and its original guard, outside locks. A source-owned _FIXED_FACTORY_START_CHECK anchor selects/checks the durable helper at entry and later calls. Final durable is8de6757d; adapter227395c4 has never changed after initial assembly. repair_entry_selection02.mjs records the edits.
+
+5. Passive checker01ce2e81 exited1 after writing/reconstructing five diffs because its unrelated-prefix check incorrectly assumed CRLF at the new dataclass boundary. This was an apparatus text-matching error, not a candidate failure. Original checker, actual and all five outputs remain. Checker02 uses the fixed dataclass marker without assuming line endings; it writes separately named final/history diffs. Preparation563923/0 and check967ae7/0 are retained. No failed subject outcome was overwritten or relabeled.
+
+The original five non-final diffs describe the pre-entry02 pair; they are history only. Current source mappings use *.final.diff and the two explicitly named valid correction diffs. Every before copy and source instrument is listed separately; no recursive or executable proof framework was added.
+

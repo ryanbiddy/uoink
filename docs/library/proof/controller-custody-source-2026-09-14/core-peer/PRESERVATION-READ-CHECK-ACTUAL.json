@@ -1,0 +1,7 @@
+{
+  "chunk_id": "03e249",
+  "wall_time_seconds": 0.2563514,
+  "exit_code": 0,
+  "original_token_count": 157,
+  "output": "{\r\n  \"scope\": \"Passive accepted-prefix and ordinary-kernel preservation only\",\r\n  \"adapter_prefix_exact\": 34968,\r\n  \"durable_pre_factory_head_unchanged\": true,\r\n  \"unchanged_kernel_methods\": [\r\n    \"acquire_read\",\r\n    \"_record\",\r\n    \"stop_unpublished\",\r\n    \"quarantine\",\r\n    \"release_read\",\r\n    \"close_and_join\",\r\n    \"confirm_quiescent\",\r\n    \"admit_media_request\",\r\n    \"is_issued_media_contract\",\r\n    \"begin_transcription\",\r\n    \"next_segment\",\r\n    \"cancel_transcription\"\r\n  ],\r\n  \"comparison\": \"complete function text with CRLF normalized and trailing separation trimmed\",\r\n  \"kernel_signature_unchanged\": true\r\n}\r\n"
+}

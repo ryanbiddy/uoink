@@ -1,0 +1,15 @@
+No blocking fixture or test-source defect found in this bounded review. This is source review, not qualification or execution approval.
+
+Reviewed the complete frozen controller_boundary_fixture.py (63642115cf53a21911ea8fd1e31af91ff20c2807639e39dab5ec23fce94c06f7) and test_controller_resume_publication.py (061b7eb77db2ee834b54d790012fe280b1e1ac82e82dfb289681e926adbbec8d), bound to durable ce69903d and adapter 227395c4. Core references here establish called fixture contracts; they are not an independent review of my own core implementation.
+
+The fixture obtains actual startup custody and permits, consumes through the actual adapter method, and uses the inherited generated worker return. Its transparent bind wrapper completes the retained ReservationService.bind_worker before mutation; the resume service and factory remain actual. The declared finish wrapper injects after the inert lower finish returns and before actual factory publication. Event assertions distinguish those boundaries and require both locks only at resume.
+
+All ten groups reach their stated paths by source inspection. Before-open and later helper replacements are refusal traps with zero-call assertions. Custody, worker and attempt substitutions are negative mutations after issuance. Reentrant entry does not reset the consumed bit. Actual revoke and actual lease exit are called; early scope close drains its ExitStack once. Failure checks retain worker/token/attempt references, prohibit publication/release, and preserve known primary exception identity across stop, persistence and published-body cleanup failures. The two missing-token subcases remove the manager entry after bind or finish and require the exact unconfirmed-quarantine note.
+
+Published-session cleanup runs in finally and confirms native closure before lease release. Scoped function and authority-configuration replacements restore on exit. Failed/quarantined custody records intentionally remain retained; this fixture does not claim the custody registries return to empty or that injected corruption has been repaired. Those retained records are not production authority.
+
+Independent passive e38ac5/0 verified nine module pins plus expected IDs, snapshot the final pair, reconstructed both repair and new-file diff pairs forward/reverse, and confirmed unchanged inputs and ten exact source-order IDs. The declared finite subtest arithmetic is 104 total, at most 48 per case; no subtest outcome was measured. The author's saved 5b95a5/0 reconstruction result was read separately.
+
+READ02-ACTUAL.json preserves a read-only exit 1: the final directory listing used a nonexistent source-author path. The preceding source reads completed; a subsequent bounded inventory identified reads/ and its saved actual. No candidate or test failed or ran.
+
+Generated-start compatibility and the unchanged accepted 95-case regression remain separate, pending work for this derivative. No loader, Python startup, import, compile, test, native/model/support/physical-journal access, network or Git operation occurred in this review.

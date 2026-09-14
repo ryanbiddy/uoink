@@ -1,0 +1,331 @@
+--- before/accepted-durable_lifecycle.py
++++ durable_lifecycle.py
+@@ -459,104 +459,230 @@
+         return result
+ 
+ 
+-class DurableOwnedRuntimeFactory:
+-    def __init__(self, lifecycle):
+-        if type(lifecycle) is not DurableSnapshotLifecycle:
+-            raise LifecycleUnavailable("Exact durable lifecycle required")
+-        self.manager = lifecycle
+-
+-    def open_owned_session(self, profile, permit):
+-        manager = self.manager
+-        if type(permit) is not _NativePermit or permit.manager is not manager:
+-            raise LifecycleUnavailable("The active lease's native permit is required")
+-        with manager._lock:
+-            record = permit.record
+-            if (manager._records.get(record.key) is not record or record.permit is not permit.identity
+-                    or record.phase is not Phase.NATIVE_RESERVED or record.owner is not None):
+-                raise SessionClosed("Native permit is stale or already consumed")
+-            owner = OwnedSession(manager, record)
+-            record.owner = owner
+-        worker = None
+-        try:
+-            # Pending start remains NATIVE_RESERVED with its owner set. Other
+-            # entrants cannot start it; lease exit can revoke without waiting
+-            # for the journal flush or suspended-process preparation.
+-            worker = manager._kernel.start_owned_worker(record.protection, permit.identity, profile)
+-            with manager._lock:
+-                if record.phase is not Phase.NATIVE_RESERVED or owner._revoked:
+-                    raise SessionClosed("Worker start was revoked before publication")
+-                owner._worker = worker
+-                record.phase = Phase.NATIVE_RUNNING
+-                return owner
+-        except BaseException as original:
+-            if worker is not None:
+-                # A resumed worker may lose publication to lease revocation.
+-                # owner._worker is still None here; retain/use this exact owner.
+-                manager._kernel.stop_unpublished(worker, permit.identity, original)
+-            with manager._lock:
+-                manager._quarantine_preserving(record, "Owned worker start did not complete", original)
+-            manager._flush_quarantine(record.key, original)
+-            raise
+-
+-
+-class _DurableKernel:
+-    def __init__(self, manager):
+-        self.manager = manager
+-        self._starts = {}
+-        self._pending_quarantine = {}
+-
+-    def acquire_read(self, key):
+-        self.manager._token(key)
+-        return self.manager._delegate.acquire_read(key)
+-
+-    def _record(self, protection, permit):
+-        with self.manager._lock:
+-            matches = [r for r in self.manager._records.values()
+-                       if r.protection is protection and r.permit is permit and r.owner is not None]
+-            if len(matches) != 1:
+-                raise LifecycleUnavailable("Exact current owned record required")
+-            return matches[0]
+-
+-    def start_owned_worker(self, protection, permit, profile):
+-        manager = self.manager
+-        record = self._record(protection, permit)
+-        token = manager._token(record.key)
+-        worker = None
+-        try:
+-            worker = manager._delegate.create_suspended(protection, permit, profile)
+-            if worker is None:
+-                raise LifecycleUnavailable("Suspended worker was not returned")
+-            self._starts[permit] = worker
+-            manager._reservations.bind_worker(token, worker)
+-            # Shared lock order is manager state, then reservation state. The
+-            # fixed resume callback must be nonblocking; no file I/O here.
+-            with manager._lock:
+-                if record.phase is not Phase.NATIVE_RESERVED or record.owner._revoked:
+-                    raise SessionClosed("Start revoked before resume")
+-                manager._reservations.resume_owned(token, manager._delegate.resume)
+-            # Pipe bootstrap, adoption and policy acknowledgement may block.
+-            # They complete outside both manager and reservation state locks.
+-            if manager._delegate.finish_start(worker, permit, profile) is not True:
+-                raise LifecycleUnavailable("Owned startup completion unconfirmed")
+-            return worker
+-        except BaseException as original:
+-            try:
+-                manager._reservations.revoke_local(token)
+-            except BaseException as revoke_error:
+-                original.add_note("Local revocation raised: " + type(revoke_error).__name__)
+-            if worker is not None:
+-                self.stop_unpublished(worker, permit, original)
+-            raise
+-
+-    def stop_unpublished(self, worker, permit, original):
+-        """Retained identity, not PID data or owner publication, authorizes stop."""
+-        try:
+-            if worker is None or self._starts.get(permit) is not worker:
+-                raise LifecycleUnavailable("Exact retained unpublished worker required")
+-            if self.manager._delegate.stop_start_failure(worker) is not True:
+-                original.add_note("Exact worker stop remains unconfirmed")
+-        except BaseException as stop_error:
+-            original.add_note("Exact worker stop raised: " + type(stop_error).__name__)
++@dataclass(frozen=True, eq=False)
++class _FactoryStartAttempt:
++    factory: object
++    manager: object
++    kernel: object
++    delegate: object
++    profile: object
++    permit: object
++    permit_identity: object
++    record: object
++    owner: object
++    protection: object
++    token: object
++    controller: object
++    adapter: object
++    capture: object
++    entry_check: object
++    boundary_check: object
++    functions: tuple
++    factory_check: object
++
++
++def _require_factory_start(kernel, attempt, entered, worker=None):
++    # Called only under the retained manager then token locks.
++    if type(attempt) is not _FactoryStartAttempt:
++        raise LifecycleUnavailable("Exact factory-issued start attempt required")
++    manager, record, token = attempt.manager, attempt.record, attempt.token
++    slot = kernel._factory_starts.get(attempt.permit_identity)
++    if (type(slot) is not tuple or len(slot) != 2 or slot[0] is not attempt
++            or slot[1] is not entered or type(entered) is not bool
++            or type(kernel) is not _DurableKernel or kernel is not attempt.kernel
++            or kernel.manager is not manager or manager._kernel is not kernel
++            or type(attempt.factory) is not DurableOwnedRuntimeFactory
++            or attempt.factory.manager is not manager
++            or attempt.factory._start_attempts.get(attempt.permit_identity) is not attempt
++            or manager._delegate is not attempt.delegate
++            or type(attempt.permit) is not _NativePermit
++            or attempt.permit.manager is not manager or attempt.permit.record is not record
++            or attempt.permit.identity is not attempt.permit_identity
++            or manager._records.get(record.key) is not record
++            or record.permit is not attempt.permit_identity
++            or record.protection is not attempt.protection
++            or record.owner is not attempt.owner
++            or type(attempt.owner) is not OwnedSession
++            or attempt.owner._manager is not manager or attempt.owner._record is not record
++            or type(token) is not Reservation or manager._tokens.get(record.key) is not token
++            or token.service is not manager._reservations
++            or token.service._live.get(token.gate) is not token):
++        raise LifecycleUnavailable("Factory start identity changed")
++    if (record.phase is not Phase.NATIVE_RESERVED or attempt.owner._revoked
++            or attempt.owner._closing or attempt.owner._closed_verified
++            or attempt.owner._active != 0 or attempt.owner._worker is not None):
++        raise SessionClosed("Factory start owner is not live and unpublished")
++    if (attempt.adapter._capture_controller_boundary is not attempt.capture
++            or attempt.adapter._check_controller_entry is not attempt.entry_check
++            or attempt.adapter._check_controller_boundary is not attempt.boundary_check
++            or attempt.adapter._CONTROLLER_BOUNDARY_FUNCTIONS is not attempt.functions):
++        raise LifecycleUnavailable("Fixed controller boundary function changed")
++    if worker is not None and (kernel._starts.get(attempt.permit_identity) is not worker
++                               or token.worker is not worker):
++        raise LifecycleUnavailable("Exact returned factory worker required")
++    return attempt
++
++
++_FIXED_FACTORY_START_CHECK = _require_factory_start
++
++
++class DurableOwnedRuntimeFactory:
++    def __init__(self, lifecycle):
++        if type(lifecycle) is not DurableSnapshotLifecycle:
++            raise LifecycleUnavailable("Exact durable lifecycle required")
++        self.manager = lifecycle
++        self._start_attempts = {}
++
++    def open_owned_session(self, profile, permit):
++        manager = self.manager
++        if type(permit) is not _NativePermit or permit.manager is not manager:
++            raise LifecycleUnavailable("The active lease's native permit is required")
++        # Fixed reverse dependency is resolved after initialization, outside locks.
++        import asr_loading_adapter as adapter
++        functions = adapter._CONTROLLER_BOUNDARY_FUNCTIONS
++        factory_check = _FIXED_FACTORY_START_CHECK
++        if (type(functions) is not tuple or len(functions) != 19
++                or functions[0] is not adapter._capture_controller_boundary
++                or functions[1] is not adapter._check_controller_entry
++                or functions[2] is not adapter._check_controller_boundary
++                or functions[3] is not adapter._require_fixed_controller_functions
++                or _require_factory_start is not factory_check):
++            raise LifecycleUnavailable("Fixed startup helper selection changed")
++        functions[3](functions)
++        capture, entry_check, boundary_check = functions[:3]
++        owner = worker = attempt = None
++        record = permit.record
++        kernel = manager._kernel
++        try:
++            with manager._lock:
++                token = manager._token(record.key)
++                with token._lock:
++                    if (type(kernel) is not _DurableKernel or kernel.manager is not manager
++                            or manager._records.get(record.key) is not record
++                            or record.permit is not permit.identity
++                            or record.phase is not Phase.NATIVE_RESERVED or record.owner is not None
++                            or permit.identity in kernel._factory_starts
++                            or permit.identity in self._start_attempts):
++                        raise SessionClosed("Native permit is stale or already consumed")
++                    controller = capture(profile, permit)
++                    if controller is not None and (controller.factory is not self
++                            or controller.manager is not manager or controller.record is not record
++                            or controller.token is not token):
++                        raise LifecycleUnavailable("Controller custody belongs to another factory")
++                    owner = OwnedSession(manager, record)
++                    record.owner = owner
++                    attempt = _FactoryStartAttempt(self, manager, kernel, manager._delegate,
++                        profile, permit, permit.identity, record, owner, record.protection,
++                        token, controller, adapter, capture, entry_check, boundary_check, functions, factory_check)
++                    self._start_attempts[permit.identity] = attempt
++                    kernel._factory_starts[permit.identity] = (attempt, False)
++            # Actual lower delegate consumes controller startup. It owns any
++            # partial worker before returning; this factory invents no transport.
++            worker = kernel.start_owned_worker(attempt.protection, attempt.permit_identity, profile)
++            with manager._lock:
++                with attempt.token._lock:
++                    if (_require_factory_start is not attempt.factory_check
++                            or _FIXED_FACTORY_START_CHECK is not attempt.factory_check):
++                        raise LifecycleUnavailable("Fixed factory start function changed")
++                    attempt.factory_check(kernel, attempt, True, worker)
++                    attempt.boundary_check(attempt.controller, attempt.profile, attempt.permit,
++                        attempt.owner, worker, "finish_start")
++                    owner._worker = worker
++                    record.phase = Phase.NATIVE_RUNNING
++                    return owner
++        except BaseException as original:
++            if owner is not None:
++                if worker is not None:
++                    # Returned worker remains owned before owner publication.
++                    kernel.stop_unpublished(worker, attempt.permit_identity, original)
++                with manager._lock:
++                    manager._quarantine_preserving(record, "Owned worker start did not complete", original)
++                manager._flush_quarantine(record.key, original)
++            raise
++
++
++class _DurableKernel:
++    def __init__(self, manager):
++        self.manager = manager
++        self._starts = {}
++        self._pending_quarantine = {}
++        # Factory-only issuance. The entered bit is consumed before create and
++        # retained on failure; no direct or replayed start can select a callback.
++        self._factory_starts = {}
++
++    def acquire_read(self, key):
++        self.manager._token(key)
++        return self.manager._delegate.acquire_read(key)
++
++    def _record(self, protection, permit):
++        with self.manager._lock:
++            matches = [r for r in self.manager._records.values()
++                       if r.protection is protection and r.permit is permit and r.owner is not None]
++            if len(matches) != 1:
++                raise LifecycleUnavailable("Exact current owned record required")
++            return matches[0]
++
++    def start_owned_worker(self, protection, permit, profile):
++        manager = self.manager
++        worker = None
++        with manager._lock:
++            slot = self._factory_starts.get(permit)
++            if (type(slot) is not tuple or len(slot) != 2
++                    or type(slot[0]) is not _FactoryStartAttempt):
++                raise LifecycleUnavailable("Start requires the concrete durable factory")
++            attempt = slot[0]
++            token, record = attempt.token, attempt.record
++            if type(token) is not Reservation:
++                raise LifecycleUnavailable("Exact retained factory token required")
++            with token._lock:
++                if (_require_factory_start is not attempt.factory_check
++                            or _FIXED_FACTORY_START_CHECK is not attempt.factory_check):
++                    raise LifecycleUnavailable("Fixed factory start function changed")
++                attempt.factory_check(self, attempt, False)
++                if (attempt.protection is not protection or attempt.permit_identity is not permit
++                        or attempt.profile is not profile):
++                    raise LifecycleUnavailable("Factory start arguments changed")
++                attempt.entry_check(attempt.controller, profile, attempt.permit, attempt.owner)
++                self._factory_starts[permit] = (attempt, True)
++        try:
++            worker = manager._delegate.create_suspended(protection, permit, profile)
++            if worker is None:
++                raise LifecycleUnavailable("Suspended worker was not returned")
++            self._starts[permit] = worker
++            manager._reservations.bind_worker(token, worker)
++            # No import or journal work under these state locks.
++            with manager._lock:
++                with token._lock:
++                    if (_require_factory_start is not attempt.factory_check
++                            or _FIXED_FACTORY_START_CHECK is not attempt.factory_check):
++                        raise LifecycleUnavailable("Fixed factory start function changed")
++                    attempt.factory_check(self, attempt, True, worker)
++                    attempt.boundary_check(attempt.controller, profile, attempt.permit,
++                        attempt.owner, worker, "pre_resume")
++                    manager._reservations.resume_owned(token, manager._delegate.resume)
++            # Startup acknowledgement may block; keep it outside both locks.
++            if manager._delegate.finish_start(worker, permit, profile) is not True:
++                raise LifecycleUnavailable("Owned startup completion unconfirmed")
++            return worker
++        except BaseException as original:
++            try:
++                manager._reservations.revoke_local(token)
++            except BaseException as revoke_error:
++                original.add_note("Local revocation raised: " + type(revoke_error).__name__)
++            if worker is not None:
++                self.stop_unpublished(worker, permit, original)
++            raise
++
++    def stop_unpublished(self, worker, permit, original):
++        """Retained identity, not PID data or owner publication, authorizes stop."""
++        try:
++            if worker is None or self._starts.get(permit) is not worker:
++                raise LifecycleUnavailable("Exact retained unpublished worker required")
++            if self.manager._delegate.stop_start_failure(worker) is not True:
++                original.add_note("Exact worker stop remains unconfirmed")
++        except BaseException as stop_error:
++            original.add_note("Exact worker stop raised: " + type(stop_error).__name__)
++
+ 
+     def quarantine(self, key, protection, permit, reason):
+         # The base calls here with its state lock held. Revoke without file I/O;

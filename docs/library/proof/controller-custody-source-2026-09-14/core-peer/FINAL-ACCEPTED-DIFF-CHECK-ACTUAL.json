@@ -1,0 +1,7 @@
+{
+  "chunk_id": "987579",
+  "wall_time_seconds": 0.4393332,
+  "exit_code": 0,
+  "original_token_count": 258,
+  "output": "{\r\n  \"scope\": \"Independent source/data check only; no subject execution\",\r\n  \"result\": \"PASS\",\r\n  \"comparison\": \"Complete text, CRLF normalized to LF; source file hashes exact\",\r\n  \"sources\": [\r\n    {\r\n      \"file\": \"asr_loading_adapter.py\",\r\n      \"bytes\": 47660,\r\n      \"sha256\": \"227395c4e1f25f75f13dc950e3b2e222af4a4d8b307a36091908229b58ed0c0f\",\r\n      \"snapshot_exact\": true,\r\n      \"diff\": \"asr_loading_adapter.from-accepted.final03.diff\",\r\n      \"diff_sha256\": \"a0344e59cd87f26fd1fded756b87580156396e0fe08cfec167c239d00778e537\",\r\n      \"hunks\": 1,\r\n      \"forward\": true,\r\n      \"reverse\": true\r\n    },\r\n    {\r\n      \"file\": \"durable_lifecycle.py\",\r\n      \"bytes\": 40180,\r\n      \"sha256\": \"ce69903d93daf41ae3717008f8d0dbd0b3ead7b11662b674eddf43828567b222\",\r\n      \"snapshot_exact\": true,\r\n      \"diff\": \"durable_lifecycle.from-accepted.final03.diff\",\r\n      \"diff_sha256\": \"e14e8f1d4d3f65145aa23c79085f9241439ed59e3c64e846c9fba60ba430e691\",\r\n      \"hunks\": 1,\r\n      \"forward\": true,\r\n      \"reverse\": true\r\n    }\r\n  ]\r\n}\r\n"
+}

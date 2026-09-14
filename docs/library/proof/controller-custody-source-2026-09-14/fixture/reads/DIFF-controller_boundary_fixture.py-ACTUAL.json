@@ -1,0 +1,7 @@
+{
+  "chunk_id": "4f9950",
+  "wall_time_seconds": 0.1889313,
+  "exit_code": 1,
+  "original_token_count": 64,
+  "output": "warning: in the working copy of 'before/controller_boundary_fixture.py', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'controller_boundary_fixture.py', LF will be replaced by CRLF the next time Git touches it\n"
+}

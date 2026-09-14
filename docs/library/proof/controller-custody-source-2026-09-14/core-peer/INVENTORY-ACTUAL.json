@@ -1,0 +1,7 @@
+{
+  "chunk_id": "6c3e77",
+  "wall_time_seconds": 0.1832722,
+  "exit_code": 0,
+  "original_token_count": 131,
+  "output": "{\r\n  \"Name\": \"CONTROLLER-BOUNDARY-CUSTODY-REPAIR-BRIEF-2026-09-14.md\",\r\n  \"Length\": 4844\r\n}\r\n[\r\n  {\r\n    \"Name\": \"bind_sources.ps1\",\r\n    \"Length\": 3280\r\n  },\r\n  {\r\n    \"Name\": \"DESIGN.md\",\r\n    \"Length\": 9923\r\n  },\r\n  {\r\n    \"Name\": \"DIRECT-CALL-CONTRACT-ACTUAL.json\",\r\n    \"Length\": 5010\r\n  },\r\n  {\r\n    \"Name\": \"READ-ENTRY-CONTRACTS-ACTUAL.json\",\r\n    \"Length\": 7392\r\n  },\r\n  {\r\n    \"Name\": \"SOURCE-BINDINGS-ACTUAL.json\",\r\n    \"Length\": 792\r\n  },\r\n  {\r\n    \"Name\": \"SOURCE-BINDINGS.json\",\r\n    \"Length\": 2437\r\n  }\r\n]\r\n"
+}

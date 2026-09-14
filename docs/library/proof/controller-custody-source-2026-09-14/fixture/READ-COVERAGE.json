@@ -1,0 +1,46 @@
+{
+  "scope": "Authored source review and passive text checks; no import, compilation or candidate execution.",
+  "new_sources": [
+    {
+      "path": "controller_boundary_fixture.py",
+      "sha256": "63642115cf53a21911ea8fd1e31af91ff20c2807639e39dab5ec23fce94c06f7",
+      "authored_full": true,
+      "read_ranges": [
+        [
+          1,
+          289
+        ]
+      ],
+      "read_actual": "reads/CURRENT-SOURCE11-ACTUAL.json"
+    },
+    {
+      "path": "test_controller_resume_publication.py",
+      "sha256": "061b7eb77db2ee834b54d790012fe280b1e1ac82e82dfb289681e926adbbec8d",
+      "authored_full": true,
+      "read_ranges": [
+        [
+          1,
+          310
+        ],
+        [
+          311,
+          358
+        ],
+        [
+          356,
+          447
+        ]
+      ],
+      "read_actuals": [
+        "reads/CURRENT-SOURCE11-ACTUAL.json",
+        "reads/CLEANUP-CONTEXT13-ACTUAL.json",
+        "reads/FINAL-ADDITION-MAP19-ACTUAL.json"
+      ]
+    }
+  ],
+  "limitations": [
+    "Combined reads 11 and 19 were truncated; the missing case body interval from read 11 was read separately in 13. No claim of full rendered coverage of the large core map in 19.",
+    "Final durable entry/kernel 462–716 and cleanup 353–384 were read in 12/13. Prior accepted-context and full relevant adapter source reads are retained separately; this is fixture authorship, not an independent final core verdict.",
+    "Source input binding checks hash only fixed text paths; generated compatibility notes describe an unexecuted separate family."
+  ]
+}

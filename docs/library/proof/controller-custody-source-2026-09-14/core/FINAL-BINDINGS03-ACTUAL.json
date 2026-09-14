@@ -1,0 +1,7 @@
+{
+  "chunk_id": "14be40",
+  "wall_time_seconds": 0.2038625,
+  "exit_code": 0,
+  "original_token_count": 191,
+  "output": "{\n  \"selected_inputs\": 15,\n  \"original_copy_pairs\": 6,\n  \"derivative_count\": 76,\n  \"derivative_bytes\": 969817,\n  \"core_module_count\": 7,\n  \"source_map\": {\n    \"bytes\": 20022,\n    \"sha256\": \"0d8e9d7b8f3fd112d477ecb9ef9c165058d6bb1c3ef938458c308eebc0ac18ec\"\n  },\n  \"sources\": [\n    {\n      \"name\": \"durable_lifecycle.py\",\n      \"bytes\": 40180,\n      \"sha256\": \"ce69903d93daf41ae3717008f8d0dbd0b3ead7b11662b674eddf43828567b222\"\n    },\n    {\n      \"name\": \"asr_loading_adapter.py\",\n      \"bytes\": 47660,\n      \"sha256\": \"227395c4e1f25f75f13dc950e3b2e222af4a4d8b307a36091908229b58ed0c0f\"\n    }\n  ],\n  \"report\": {\n    \"sha256\": \"d5df29e4897fa6582b6566533e7702d02a60080119839644f12a096110dd1309\"\n  },\n  \"source_hashes_unchanged\": true,\n  \"candidate_executed\": false\n}\n"
+}

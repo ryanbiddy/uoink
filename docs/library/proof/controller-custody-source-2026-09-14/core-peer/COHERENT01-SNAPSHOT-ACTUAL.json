@@ -1,0 +1,7 @@
+{
+  "chunk_id": "d145e7",
+  "wall_time_seconds": 0.1965372,
+  "exit_code": 0,
+  "original_token_count": 171,
+  "output": "{\r\n  \"scope\": \"One coherent mutable-source snapshot for independent review\",\r\n  \"files\": [\r\n    {\r\n      \"file\": \"durable_lifecycle.py\",\r\n      \"bytes\": 38834,\r\n      \"sha256\": \"410e958c8dce2762a3f7d7e5cfefe91ebd8dde7172da8cc3fde327535d64aa41\",\r\n      \"source_after\": \"410e958c8dce2762a3f7d7e5cfefe91ebd8dde7172da8cc3fde327535d64aa41\",\r\n      \"unchanged_across_read\": true\r\n    },\r\n    {\r\n      \"file\": \"asr_loading_adapter.py\",\r\n      \"bytes\": 47660,\r\n      \"sha256\": \"227395c4e1f25f75f13dc950e3b2e222af4a4d8b307a36091908229b58ed0c0f\",\r\n      \"source_after\": \"227395c4e1f25f75f13dc950e3b2e222af4a4d8b307a36091908229b58ed0c0f\",\r\n      \"unchanged_across_read\": true\r\n    }\r\n  ]\r\n}\r\n"
+}

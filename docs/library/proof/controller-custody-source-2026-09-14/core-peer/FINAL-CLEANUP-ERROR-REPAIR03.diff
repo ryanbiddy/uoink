@@ -1,0 +1,13 @@
+--- before/pre-review-cleanup03-durable_lifecycle.py
++++ durable_lifecycle.py
+@@ -351,8 +351,8 @@
+     reconcile_interrupted_owner = retire_and_reconcile_interrupted_owner
+ 
+     def _flush_quarantine(self, key, original=None):
+-        token = self._token(key)
+-        try:
++        try:
++            token = self._token(key)
+             with self._lock:
+                 pending = self._kernel._pending_quarantine.pop(key, None)
+             if pending is not None:

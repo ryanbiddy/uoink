@@ -1,0 +1,7 @@
+{
+  "chunk_id": "1f2e96",
+  "wall_time_seconds": 0.1801844,
+  "exit_code": 0,
+  "original_token_count": 167,
+  "output": "{\"path\":\"VERDICT.md\",\"bytes\":4076,\"sha256\":\"e24c201ba7f23d026c1a4fdad64f5d0eaa84c24984d2a4a6ec9866a1b3f77fe3\"}\r\n{\"path\":\"SOURCE-VIEW-COVERAGE.json\",\"bytes\":3261,\"sha256\":\"d867970c0842b8dab142c901af06b96c35684aeb50f6e136b9bc74b6ffc74671\"}\r\n{\"path\":\"FINAL-ACCEPTED-DIFF-CHECK-ACTUAL.json\",\"bytes\":1280,\"sha256\":\"c1854f3192c9da5305ad3ac2c721b332e94e4a893af8905be1039b656bb7fed7\"}\r\n{\"path\":\"FINAL-MAP-CHECK-ACTUAL.json\",\"bytes\":5287,\"sha256\":\"61fd9ee338c7584bf45884f3618b54661026bd073fd317e65edf90242838fbc7\"}\r\n{\"path\":\"FINAL-REJECTED-CLEANUP-DIFF-CHECK-ACTUAL.json\",\"bytes\":1369,\"sha256\":\"08ef99a299d71906dd3c78b3d5fefa3739a02a6d7c6af2b5ab7c058052d060e7\"}\r\n{\"files\":44}\r\n"
+}

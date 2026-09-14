@@ -1,0 +1,396 @@
+{
+  "scope": "frozen source repair only; no harness/test/native admission",
+  "root": "E:/AI/projects/uoink/checkouts/Yoink-library",
+  "selected_inputs": [
+    {
+      "path": "docs/library/CONTROLLER-BOUNDARY-CUSTODY-REPAIR-BRIEF-2026-09-14.md",
+      "bytes": 4844,
+      "sha256": "cd2d52c18d60b23b9bf1720e977c09df1d04c378fb5db02b749cc32dbde2ec46"
+    },
+    {
+      "path": "docs/library/CONTROLLER-RESUME-PUBLICATION-IMPLEMENTATION-BRIEF-2026-09-14.md",
+      "bytes": 3381,
+      "sha256": "691bc362c8aa2fd1b3e9623a2638dc68617d585a129a8dfee00e41dd0a822d36"
+    },
+    {
+      "path": "docs/library/ASTRA-CONTROLLER-BOUNDARY01-SOURCE-FAILURE-2026-09-14.md",
+      "bytes": 3602,
+      "sha256": "49b1870e3d706a8fd61d1afa12df8a6bf893a34253d5c93d84550eb1558f70e6"
+    },
+    {
+      "path": "docs/library/proof/controller-boundary-source-failure-2026-09-14/delivery/FROZEN-SOURCE-PINS.json",
+      "bytes": 2510,
+      "sha256": "1679fc8f78e08f6585232f9400cc12e3d2b2c15bcadb0d22bda31d50d149a438"
+    },
+    {
+      "path": "docs/library/proof/controller-boundary-source-failure-2026-09-14/factory-peer/VERDICT.md",
+      "bytes": 6871,
+      "sha256": "9f85fdc6d4be5b519b5b6059ca184b2197cc067a9947e5296a147ee449c5c66e"
+    },
+    {
+      "path": "docs/library/proof/controller-boundary-source-failure-2026-09-14/fixture-peer/VERDICT.md",
+      "bytes": 4629,
+      "sha256": "91dc2d1ebfdae5a0b57f50684463d4a35d56133930a0f36abac49ec1eaecb462"
+    },
+    {
+      "path": "_scratch/controller-boundary-custody-design01/DESIGN.md",
+      "bytes": 9923,
+      "sha256": "f65ab5d9bff0a4fddfec6363ce6074198e3b989d271c3cb5d02d20f681e0f2b3"
+    },
+    {
+      "path": "_scratch/windows-reservation-implementation-proposal02/reservation_file_port.py",
+      "bytes": 4694,
+      "sha256": "708554378ab8a8e6c4477e637c999256665cbd2855b94c6fa3c2d04a19d3a224"
+    },
+    {
+      "path": "_scratch/windows-interrupted-owner-native-proposal02/snapshot_reservations.py",
+      "bytes": 23634,
+      "sha256": "e80ae881fa4af9cc7d1a3e4a06624f5b19abe4de09aec3844e8a541449335b98"
+    },
+    {
+      "path": "_scratch/windows-interrupted-owner-native-proposal02/snapshot_lifecycle.py",
+      "bytes": 22138,
+      "sha256": "a80514aac6b1e75b9b872052852fa993a23cd5273b6bed4ffb4eef7404cb69dd"
+    },
+    {
+      "path": "_scratch/windows-interrupted-owner-native-proposal02/trusted_asr_resolver.py",
+      "bytes": 13373,
+      "sha256": "16a5a1245f649a3eb04d077b661835503f08bef0ff8822dcb545176f0cc30833"
+    },
+    {
+      "path": "_scratch/windows-reservation-implementation-proposal02/test_reservations.py",
+      "bytes": 37737,
+      "sha256": "604a295d5e925b9a9d7f55750bfeb1ddcda3e6a9873d6d8d7f9e98c84d9b4b9e"
+    },
+    {
+      "path": "_scratch/windows-reservation-implementation-proposal02/test_windows_reservations.py",
+      "bytes": 27701,
+      "sha256": "91b0de71eb55d088ee2fdbcd11ff3e6a074f18f713dfcd5b384814a1dc78300c"
+    },
+    {
+      "path": "_scratch/windows-interrupted-owner-native-proposal02/generated_worker_flow.py",
+      "bytes": 22853,
+      "sha256": "1ab240d60ceaca130ac85f5d2e908ef5895da5297f35d78a1caba1c62e622238"
+    },
+    {
+      "path": "_scratch/windows-interrupted-owner-native-proposal02/generated_adapter_flow.py",
+      "bytes": 90105,
+      "sha256": "24844bf419e4d34adaf0d5c5a2678de33a4796de86dad0f83b7e386f1785f961"
+    }
+  ],
+  "original_and_copy_bindings": [
+    {
+      "copy": "before/accepted-durable_lifecycle.py",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\docs\\library\\proof\\controller-boundary-source-failure-2026-09-14\\delivery\\frozen\\before\\durable_lifecycle.py",
+      "bytes": 32833,
+      "sha256": "3c8963eaa02bbc1d810ee2632d0363303bfe05ec6ceeef73771ca8005a00ece3"
+    },
+    {
+      "copy": "before/accepted-asr_loading_adapter.py",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\docs\\library\\proof\\controller-boundary-source-failure-2026-09-14\\delivery\\frozen\\before\\asr_loading_adapter.py",
+      "bytes": 34968,
+      "sha256": "2f12cbf5a5f1142f892aa34df7d23af77107148b448fb4294329532e36be63ee"
+    },
+    {
+      "copy": "before/rejected-durable_lifecycle.py",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\docs\\library\\proof\\controller-boundary-source-failure-2026-09-14\\delivery\\frozen\\durable_lifecycle.py",
+      "bytes": 34002,
+      "sha256": "4eeeade5384ca8172c3724a3ee2a6574ca6801e3af3408f177e586c9cd9a4dc3"
+    },
+    {
+      "copy": "before/rejected-asr_loading_adapter.py",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\docs\\library\\proof\\controller-boundary-source-failure-2026-09-14\\delivery\\frozen\\asr_loading_adapter.py",
+      "bytes": 42939,
+      "sha256": "94e522e622b8de3304ef48c97258a91692e70f22c3112dd6afabd6b493438611"
+    },
+    {
+      "copy": "before/rejected-durable_lifecycle.diff",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\docs\\library\\proof\\controller-boundary-source-failure-2026-09-14\\delivery\\frozen\\durable_lifecycle.diff",
+      "bytes": 9173,
+      "sha256": "bf1e477feb591e448f54266a7699d9d3d033fed665e7d7465d62f9c4a05713a9"
+    },
+    {
+      "copy": "before/rejected-asr_loading_adapter.diff",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\docs\\library\\proof\\controller-boundary-source-failure-2026-09-14\\delivery\\frozen\\asr_loading_adapter.diff",
+      "bytes": 8321,
+      "sha256": "360be788a6673b4f50cb21c490b0f4e62d8a7b262fa8b5486eda8250b2ef6e91"
+    }
+  ],
+  "derivatives": [
+    {
+      "name": "DIFF-CHECK-ACTUAL.json",
+      "bytes": 819,
+      "sha256": "9e74da78946247b7ea0b23ed4c4dd2a21a66a10c9dc9c193c114f3f682568e89"
+    },
+    {
+      "name": "DIFF-CHECK02-ACTUAL.json",
+      "bytes": 4034,
+      "sha256": "5097001ba7b41f9b2944b8923ec61d6dfc6a0ea1ed25227d2bad2d70687ce39e"
+    },
+    {
+      "name": "DIFF-CHECK02-PREP-ACTUAL.json",
+      "bytes": 205,
+      "sha256": "a5418b4fa10156b04da769b57c5a2f6be846884c0588f397309e3e2a38da3b17"
+    },
+    {
+      "name": "DIFF-CHECK02-RESULT.json",
+      "bytes": 3607,
+      "sha256": "b666e1d40b06d8d9d2fc3cb430d025f9045ccb871f52168d3448204e101a09bd"
+    },
+    {
+      "name": "ENTRY-SELECTION-REPAIR02-ACTUAL.json",
+      "bytes": 433,
+      "sha256": "7238bd8c1f8d34274bc4548759348c46326e6e614bd5d590132eaa520f75c396"
+    },
+    {
+      "name": "ENTRY-SELECTION-REPAIR02.diff",
+      "bytes": 14817,
+      "sha256": "f35e53c412df9c86bde59538e59ec56f1076ab0feb6d2ffd52bd69bf1467899b"
+    },
+    {
+      "name": "FACTORY-HELPER-REPAIR01-ACTUAL.json",
+      "bytes": 452,
+      "sha256": "513fc25debb9ef55ad420d1dc7bd75d2baf4b9dc0c11b74a57260d8a2925a33f"
+    },
+    {
+      "name": "FACTORY-HELPER-REPAIR01.diff",
+      "bytes": 19636,
+      "sha256": "997f460f54971ff2570111500e582a1b7b2177f516085e9fa12c1b59f9b5e35c"
+    },
+    {
+      "name": "FACTORY-HELPER-REPAIR01.valid.diff",
+      "bytes": 19662,
+      "sha256": "102255327805a3751aa155f82c3afa409eeb4e41991f5e61c5112a12792a943a"
+    },
+    {
+      "name": "IMPORT-CLOSURE.md",
+      "bytes": 1851,
+      "sha256": "b754e20a5b355ec841bb0058c912bd476b0a0af6a4cbe6d6d33a938812519b1d"
+    },
+    {
+      "name": "INITIAL-COMPOSITION-ACTUAL.json",
+      "bytes": 3081,
+      "sha256": "90a9eb5a30bfb822f42fdf0f4a7d397d316c4260bd72d7d0a977736e8ee7d7a0"
+    },
+    {
+      "name": "INITIAL-SOURCE-PINS.json",
+      "bytes": 2636,
+      "sha256": "6007ff36216ae1f13ebc6044d00f3821304573f407e9e75d3ef5b436659c983c"
+    },
+    {
+      "name": "READ-ENTRY-SELECTION02-ACTUAL.json",
+      "bytes": 9806,
+      "sha256": "483a54e1b844ff0c4664964627f34050e0ba650fbc1a8135cb2e4f35ae84266b"
+    },
+    {
+      "name": "READ-FAILURE-VERDICT-ACTUAL.json",
+      "bytes": 4321,
+      "sha256": "9f2c4ba2fbb31bb94e1293eec8fcf9b0fb964c336a043302a4368141aa3b0fd7"
+    },
+    {
+      "name": "READ-PEER-AND-IMPORTS-ACTUAL.json",
+      "bytes": 8661,
+      "sha256": "427208f039fd1fa95b8458a85c8a577f580352e9330c4d1ab0948098d3d00efe"
+    },
+    {
+      "name": "READ-REPAIR-BRIEF-ACTUAL.json",
+      "bytes": 11751,
+      "sha256": "8f611b397dcef58432f6104ee1ba287dde217ac4820b399292f3a8bfff8f86d1"
+    },
+    {
+      "name": "REPORT.md",
+      "bytes": 3222,
+      "sha256": "738e982011ff5e108f4efb78bb2337b4f372c4ee22c2eed19c7225455da14aa3"
+    },
+    {
+      "name": "SOURCE-CORRECTIONS.md",
+      "bytes": 2943,
+      "sha256": "d08c35b321f3e2e740d2d856790a5f9984c71956a05ec69006e32743dc9cc237"
+    },
+    {
+      "name": "adapter_binding.fragment.txt",
+      "bytes": 7203,
+      "sha256": "69e07080d4183f6cd1ba9ca3d87b97cd38fc651544b68aed206af30e22da15ca"
+    },
+    {
+      "name": "asr_loading_adapter.from-accepted.diff",
+      "bytes": 13139,
+      "sha256": "a0344e59cd87f26fd1fded756b87580156396e0fe08cfec167c239d00778e537"
+    },
+    {
+      "name": "asr_loading_adapter.from-accepted.final.diff",
+      "bytes": 13139,
+      "sha256": "a0344e59cd87f26fd1fded756b87580156396e0fe08cfec167c239d00778e537"
+    },
+    {
+      "name": "asr_loading_adapter.from-rejected.diff",
+      "bytes": 9995,
+      "sha256": "4bd6c76a6f5b28366a8e3c8fa7595ec4792eef625993d5de5143a93b8eecbd64"
+    },
+    {
+      "name": "asr_loading_adapter.from-rejected.final.diff",
+      "bytes": 9995,
+      "sha256": "4bd6c76a6f5b28366a8e3c8fa7595ec4792eef625993d5de5143a93b8eecbd64"
+    },
+    {
+      "name": "asr_loading_adapter.py",
+      "bytes": 47660,
+      "sha256": "227395c4e1f25f75f13dc950e3b2e222af4a4d8b307a36091908229b58ed0c0f"
+    },
+    {
+      "name": "before/accepted-asr_loading_adapter.py",
+      "bytes": 34968,
+      "sha256": "2f12cbf5a5f1142f892aa34df7d23af77107148b448fb4294329532e36be63ee"
+    },
+    {
+      "name": "before/accepted-durable_lifecycle.py",
+      "bytes": 32833,
+      "sha256": "3c8963eaa02bbc1d810ee2632d0363303bfe05ec6ceeef73771ca8005a00ece3"
+    },
+    {
+      "name": "before/pre-review-entry02-asr_loading_adapter.py",
+      "bytes": 47660,
+      "sha256": "227395c4e1f25f75f13dc950e3b2e222af4a4d8b307a36091908229b58ed0c0f"
+    },
+    {
+      "name": "before/pre-review-entry02-durable_lifecycle.py",
+      "bytes": 39412,
+      "sha256": "bc95b798512a588af9a46e591fb7d1d69d19f7c5d8218d7c7e13ad5f071fd20e"
+    },
+    {
+      "name": "before/pre-review-helper01-asr_loading_adapter.py",
+      "bytes": 47660,
+      "sha256": "227395c4e1f25f75f13dc950e3b2e222af4a4d8b307a36091908229b58ed0c0f"
+    },
+    {
+      "name": "before/pre-review-helper01-durable_lifecycle.py",
+      "bytes": 38834,
+      "sha256": "410e958c8dce2762a3f7d7e5cfefe91ebd8dde7172da8cc3fde327535d64aa41"
+    },
+    {
+      "name": "before/rejected-asr_loading_adapter.diff",
+      "bytes": 8321,
+      "sha256": "360be788a6673b4f50cb21c490b0f4e62d8a7b262fa8b5486eda8250b2ef6e91"
+    },
+    {
+      "name": "before/rejected-asr_loading_adapter.py",
+      "bytes": 42939,
+      "sha256": "94e522e622b8de3304ef48c97258a91692e70f22c3112dd6afabd6b493438611"
+    },
+    {
+      "name": "before/rejected-durable_lifecycle.diff",
+      "bytes": 9173,
+      "sha256": "bf1e477feb591e448f54266a7699d9d3d033fed665e7d7465d62f9c4a05713a9"
+    },
+    {
+      "name": "before/rejected-durable_lifecycle.py",
+      "bytes": 34002,
+      "sha256": "4eeeade5384ca8172c3724a3ee2a6574ca6801e3af3408f177e586c9cd9a4dc3"
+    },
+    {
+      "name": "bind_final_sources.mjs",
+      "bytes": 5651,
+      "sha256": "f96df9de0bd2dbace650d102d9e39540cdeb9f8a67996a757e4d520a78de82ce"
+    },
+    {
+      "name": "compose_sources.mjs",
+      "bytes": 5561,
+      "sha256": "064d8096b13be8bdd0d6f0739b804613109328fd4c820d69dfa7c173360b2435"
+    },
+    {
+      "name": "durable_boundary.fragment.txt",
+      "bytes": 10271,
+      "sha256": "c64220f232753138d4226f75f3bd6508387ffc9653f56e01dfdab4d435c73ba7"
+    },
+    {
+      "name": "durable_lifecycle.from-accepted.diff",
+      "bytes": 17286,
+      "sha256": "c3d172e89fa9335d8119f45221099306e158626b7e889501b56bc668db5cd602"
+    },
+    {
+      "name": "durable_lifecycle.from-accepted.final.diff",
+      "bytes": 18062,
+      "sha256": "c513797026442350aa345bcbb5d3fdd423623b6616475cd8018767fcbefbf58e"
+    },
+    {
+      "name": "durable_lifecycle.from-rejected.diff",
+      "bytes": 18482,
+      "sha256": "d4ed4d286ad55aca58f35732113d279144b0652dc611f34ff53b93aab1df5c7d"
+    },
+    {
+      "name": "durable_lifecycle.from-rejected.final.diff",
+      "bytes": 19258,
+      "sha256": "e069bf91e2dcbbbc3e5e030ef004a97b468cd667353e727cd88a8a0fdb645e86"
+    },
+    {
+      "name": "durable_lifecycle.py",
+      "bytes": 40176,
+      "sha256": "8de6757dd1c21399d8bae5cf0accdeac28368b150d27e4fa54622559ed4b047b"
+    },
+    {
+      "name": "prepare_diffs02.mjs",
+      "bytes": 1556,
+      "sha256": "bdb8d5afa1836ddb877890daaee8bdab28a212353887021b89c6ce8137bdbce2"
+    },
+    {
+      "name": "repair_entry_selection02.mjs",
+      "bytes": 2778,
+      "sha256": "9fd8eaee8f58a53fa483c02b8f849a2fe4181401282cb8028afd9165cf1f8f90"
+    },
+    {
+      "name": "repair_factory_helper01.mjs",
+      "bytes": 2869,
+      "sha256": "958be53b8625fcdbd5d8b69e777e29acf8b1e4ccc5c3c4ab34ff5523eb498af5"
+    },
+    {
+      "name": "write_and_check_diffs.mjs",
+      "bytes": 4506,
+      "sha256": "bbff24dd9a733e17bddbf7117b2eedd0fc453ef0aa90fa5b2704f046d913dbda"
+    },
+    {
+      "name": "write_and_check_diffs02.mjs",
+      "bytes": 4650,
+      "sha256": "972e0aea5b461a7d6a47df5633a2f76c5fa46c0cff0542a84ba5ec02a7afe36d"
+    }
+  ],
+  "core_canonical_modules": [
+    {
+      "module": "reservation_file_port",
+      "path": "_scratch/windows-reservation-implementation-proposal02/reservation_file_port.py",
+      "sha256": "708554378ab8a8e6c4477e637c999256665cbd2855b94c6fa3c2d04a19d3a224"
+    },
+    {
+      "module": "snapshot_reservations",
+      "path": "_scratch/windows-interrupted-owner-native-proposal02/snapshot_reservations.py",
+      "sha256": "e80ae881fa4af9cc7d1a3e4a06624f5b19abe4de09aec3844e8a541449335b98"
+    },
+    {
+      "module": "snapshot_lifecycle",
+      "path": "_scratch/windows-interrupted-owner-native-proposal02/snapshot_lifecycle.py",
+      "sha256": "a80514aac6b1e75b9b872052852fa993a23cd5273b6bed4ffb4eef7404cb69dd"
+    },
+    {
+      "module": "durable_lifecycle",
+      "path": "_scratch/controller-boundary-custody-repair01/durable_lifecycle.py",
+      "sha256": "8de6757dd1c21399d8bae5cf0accdeac28368b150d27e4fa54622559ed4b047b"
+    },
+    {
+      "module": "trusted_asr_resolver",
+      "path": "_scratch/windows-interrupted-owner-native-proposal02/trusted_asr_resolver.py",
+      "sha256": "16a5a1245f649a3eb04d077b661835503f08bef0ff8822dcb545176f0cc30833"
+    },
+    {
+      "module": "asr_loading_adapter",
+      "path": "_scratch/controller-boundary-custody-repair01/asr_loading_adapter.py",
+      "sha256": "227395c4e1f25f75f13dc950e3b2e222af4a4d8b307a36091908229b58ed0c0f"
+    },
+    {
+      "module": "test_reservations",
+      "path": "_scratch/windows-reservation-implementation-proposal02/test_reservations.py",
+      "sha256": "604a295d5e925b9a9d7f55750bfeb1ddcda3e6a9873d6d8d7f9e98c84d9b4b9e"
+    }
+  ],
+  "test_closure_status": "Separate fixture/gate closure and new cases are not qualified here",
+  "source_hashes_unchanged": true,
+  "candidate_executed": false
+}

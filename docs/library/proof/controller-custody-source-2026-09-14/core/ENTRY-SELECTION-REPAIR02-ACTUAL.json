@@ -1,0 +1,7 @@
+{
+  "chunk_id": "9eafa1",
+  "wall_time_seconds": 0.2171332,
+  "exit_code": 0,
+  "original_token_count": 71,
+  "output": "{\n  \"scope\": \"source-text correction only\",\n  \"before\": \"bc95b798512a588af9a46e591fb7d1d69d19f7c5d8218d7c7e13ad5f071fd20e\",\n  \"after\": \"8de6757dd1c21399d8bae5cf0accdeac28368b150d27e4fa54622559ed4b047b\",\n  \"bytes\": 40176,\n  \"adapter_unchanged\": true,\n  \"candidate_executed\": false\n}\n"
+}

@@ -1,0 +1,7 @@
+{
+  "chunk_id": "0d8088",
+  "wall_time_seconds": 0.9660893,
+  "exit_code": 0,
+  "original_token_count": 75,
+  "output": "\r\nName                              Length\r\n----                              ------\r\nadapter_binding.fragment.txt        7203\r\ndurable_boundary.fragment.txt      10271\r\nREAD-FAILURE-VERDICT-ACTUAL.json    4321\r\nREAD-PEER-AND-IMPORTS-ACTUAL.json   8661\r\nREAD-REPAIR-BRIEF-ACTUAL.json      11751\r\n\r\n"
+}

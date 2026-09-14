@@ -1,0 +1,7 @@
+{
+  "chunk_id": "937966",
+  "wall_time_seconds": 0.224107,
+  "exit_code": 0,
+  "original_token_count": 298,
+  "output": "E:/AI/projects/uoink/checkouts/Yoink-library/docs/library/proof/controller-boundary-source-failure-2026-09-14\\fixture-peer\\VERDICT.md\nE:/AI/projects/uoink/checkouts/Yoink-library/docs/library/proof/controller-boundary-source-failure-2026-09-14\\factory-peer\\VERDICT.md\nE:/AI/projects/uoink/checkouts/Yoink-library/docs/library/proof/controller-boundary-source-failure-2026-09-14\\adapter-peer\\PRELIMINARY-VERDICT.md\n[\r\n  {\r\n    \"path\": \"E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/controller-boundary-fixture-repair01/before/controller_boundary_fixture.py\",\r\n    \"bytes\": 9592,\r\n    \"sha256\": \"e9229f73dc8d004a71a6c45f73cae7e57985cf3458ca00a96dbb2120bcfbf215\"\r\n  },\r\n  {\r\n    \"path\": \"E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/controller-boundary-fixture-repair01/before/test_controller_resume_publication.py\",\r\n    \"bytes\": 11682,\r\n    \"sha256\": \"b2c4b52127e3a51a43b05367124993c0bb4ed1f621b7eab20d63ac5d97113511\"\r\n  },\r\n  {\r\n    \"path\": \"E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/controller-boundary-fixture-repair01/before/EXPECTED-CASES.json\",\r\n    \"bytes\": 1412,\r\n    \"sha256\": \"401a3149a38ca03fc49ea150575340318e736b612c3941539a7c6d8b8c2e58f0\"\r\n  }\r\n]\r\n"
+}

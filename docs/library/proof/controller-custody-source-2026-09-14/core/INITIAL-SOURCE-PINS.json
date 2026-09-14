@@ -1,0 +1,55 @@
+{
+  "scope": "data-only source composition; no subject parse/import/compile",
+  "inputs": [
+    {
+      "copy": "before/accepted-durable_lifecycle.py",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\docs\\library\\proof\\controller-boundary-source-failure-2026-09-14\\delivery\\frozen\\before\\durable_lifecycle.py",
+      "bytes": 32833,
+      "sha256": "3c8963eaa02bbc1d810ee2632d0363303bfe05ec6ceeef73771ca8005a00ece3"
+    },
+    {
+      "copy": "before/accepted-asr_loading_adapter.py",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\docs\\library\\proof\\controller-boundary-source-failure-2026-09-14\\delivery\\frozen\\before\\asr_loading_adapter.py",
+      "bytes": 34968,
+      "sha256": "2f12cbf5a5f1142f892aa34df7d23af77107148b448fb4294329532e36be63ee"
+    },
+    {
+      "copy": "before/rejected-durable_lifecycle.py",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\docs\\library\\proof\\controller-boundary-source-failure-2026-09-14\\delivery\\frozen\\durable_lifecycle.py",
+      "bytes": 34002,
+      "sha256": "4eeeade5384ca8172c3724a3ee2a6574ca6801e3af3408f177e586c9cd9a4dc3"
+    },
+    {
+      "copy": "before/rejected-asr_loading_adapter.py",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\docs\\library\\proof\\controller-boundary-source-failure-2026-09-14\\delivery\\frozen\\asr_loading_adapter.py",
+      "bytes": 42939,
+      "sha256": "94e522e622b8de3304ef48c97258a91692e70f22c3112dd6afabd6b493438611"
+    },
+    {
+      "copy": "before/rejected-durable_lifecycle.diff",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\docs\\library\\proof\\controller-boundary-source-failure-2026-09-14\\delivery\\frozen\\durable_lifecycle.diff",
+      "bytes": 9173,
+      "sha256": "bf1e477feb591e448f54266a7699d9d3d033fed665e7d7465d62f9c4a05713a9"
+    },
+    {
+      "copy": "before/rejected-asr_loading_adapter.diff",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\docs\\library\\proof\\controller-boundary-source-failure-2026-09-14\\delivery\\frozen\\asr_loading_adapter.diff",
+      "bytes": 8321,
+      "sha256": "360be788a6673b4f50cb21c490b0f4e62d8a7b262fa8b5486eda8250b2ef6e91"
+    }
+  ],
+  "outputs": [
+    {
+      "name": "durable_lifecycle.py",
+      "bytes": 38834,
+      "sha256": "410e958c8dce2762a3f7d7e5cfefe91ebd8dde7172da8cc3fde327535d64aa41"
+    },
+    {
+      "name": "asr_loading_adapter.py",
+      "bytes": 47660,
+      "sha256": "227395c4e1f25f75f13dc950e3b2e222af4a4d8b307a36091908229b58ed0c0f"
+    }
+  ],
+  "adapter_prefix_byte_identical": true,
+  "candidate_executed": false
+}

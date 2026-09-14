@@ -1,0 +1,61 @@
+{
+  "scope": "source design only; not a runnable closure or authority",
+  "root": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library",
+  "inputs": [
+    {
+      "path": "_scratch/real-startup-authority-repair01/inputs/durable_lifecycle.py",
+      "bytes": 32833,
+      "sha256": "3c8963eaa02bbc1d810ee2632d0363303bfe05ec6ceeef73771ca8005a00ece3"
+    },
+    {
+      "path": "_scratch/controller-worker-stage-repair01/asr_loading_adapter.py",
+      "bytes": 34968,
+      "sha256": "2f12cbf5a5f1142f892aa34df7d23af77107148b448fb4294329532e36be63ee"
+    },
+    {
+      "path": "_scratch/windows-interrupted-owner-native-proposal02/snapshot_reservations.py",
+      "bytes": 23634,
+      "sha256": "e80ae881fa4af9cc7d1a3e4a06624f5b19abe4de09aec3844e8a541449335b98"
+    },
+    {
+      "path": "_scratch/real-startup-authority-repair01/startup_authority_fixture.py",
+      "bytes": 8556,
+      "sha256": "fe82ffe16117a9a74b3194e607c86c69b4411076337965ccb5d78c8a9cec897a"
+    },
+    {
+      "path": "_scratch/controller-worker-stage-repair01/worker_stage_fixture.py",
+      "bytes": 2405,
+      "sha256": "3996ca4896ff2fc18308bca1caf14a7f87334309bd62f6bef408eeed87707bc4"
+    },
+    {
+      "path": "_scratch/controller-boundary01-root-review/frozen/durable_lifecycle.py",
+      "bytes": 34002,
+      "sha256": "4eeeade5384ca8172c3724a3ee2a6574ca6801e3af3408f177e586c9cd9a4dc3"
+    },
+    {
+      "path": "_scratch/controller-boundary01-root-review/frozen/asr_loading_adapter.py",
+      "bytes": 42939,
+      "sha256": "94e522e622b8de3304ef48c97258a91692e70f22c3112dd6afabd6b493438611"
+    },
+    {
+      "path": "_scratch/controller-boundary01-factory-peer/VERDICT.md",
+      "bytes": 6871,
+      "sha256": "9f85fdc6d4be5b519b5b6059ca184b2197cc067a9947e5296a147ee449c5c66e"
+    },
+    {
+      "path": "docs/library/CONTROLLER-RESUME-PUBLICATION-IMPLEMENTATION-BRIEF-2026-09-14.md",
+      "bytes": 3381,
+      "sha256": "691bc362c8aa2fd1b3e9623a2638dc68617d585a129a8dfee00e41dd0a822d36"
+    }
+  ],
+  "count": 9,
+  "bytes": 189589,
+  "unchanged": true,
+  "candidate_executed": false,
+  "read_evidence": [
+    "READ-ENTRY-CONTRACTS-ACTUAL.json",
+    "../controller-boundary01-factory-peer/READ-BRIEF-INVENTORY-ACTUAL.json",
+    "../controller-boundary01-factory-peer/READ-CURRENT-BOUNDARIES-ACTUAL.json",
+    "../controller-boundary01-factory-peer/READ-CALLED-CONTRACTS-ACTUAL.json"
+  ]
+}

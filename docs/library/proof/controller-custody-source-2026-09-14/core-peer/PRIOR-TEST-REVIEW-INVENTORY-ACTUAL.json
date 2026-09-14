@@ -1,0 +1,7 @@
+{
+  "chunk_id": "0b8970",
+  "wall_time_seconds": 0.168966,
+  "exit_code": 0,
+  "original_token_count": 87,
+  "output": "[\r\n  {\r\n    \"Name\": \"check_frozen_sources.ps1\",\r\n    \"Length\": 7992\r\n  },\r\n  {\r\n    \"Name\": \"CHECK11-ACTUAL.json\",\r\n    \"Length\": 7680\r\n  },\r\n  {\r\n    \"Name\": \"FINAL-BINDINGS14-ACTUAL.json\",\r\n    \"Length\": 808\r\n  },\r\n  {\r\n    \"Name\": \"SOURCE-BINDINGS.json\",\r\n    \"Length\": 9472\r\n  },\r\n  {\r\n    \"Name\": \"VERDICT.md\",\r\n    \"Length\": 4629\r\n  }\r\n]\r\n"
+}

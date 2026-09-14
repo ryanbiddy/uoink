@@ -1,0 +1,106 @@
+{
+  "scope": "fixture/test source only; core inspected solely as called contracts",
+  "reads": [
+    {
+      "actual": "READ01-ACTUAL.json",
+      "tool": "5ac8f2",
+      "exit": 0,
+      "files": [
+        [
+          "controller_boundary_fixture.py",
+          1,
+          289
+        ],
+        [
+          "test_controller_resume_publication.py",
+          1,
+          260
+        ]
+      ]
+    },
+    {
+      "actual": "READ02-ACTUAL.json",
+      "tool": "745a90",
+      "exit": 1,
+      "files": [
+        [
+          "test_controller_resume_publication.py",
+          261,
+          447
+        ],
+        [
+          "SOURCE-INPUTS.json",
+          "full"
+        ],
+        [
+          "REASONS.md",
+          "full"
+        ],
+        [
+          "VERDICT.md",
+          "full"
+        ]
+      ],
+      "error": "Only final inventory of nonexistent source-author directory failed"
+    },
+    {
+      "actual": "READ03-ACTUAL.json",
+      "tool": "238648",
+      "exit": 0,
+      "contracts": [
+        "asr_loading_adapter.py:466–550",
+        "durable_lifecycle.py:352–471",
+        "test_reservations.py:1–115,428–582",
+        "snapshot_lifecycle.py:158–252"
+      ]
+    },
+    {
+      "actual": "READ04-ACTUAL.json",
+      "tool": "7636a4",
+      "exit": 0,
+      "contracts": [
+        "test_reservations.py:582–610",
+        "snapshot_lifecycle.py:241–284,349–392",
+        "snapshot_reservations.py:344–465",
+        "durable_lifecycle.py:530–717"
+      ],
+      "other": [
+        "reads/DIFF-RECONSTRUCTION17-ACTUAL.json full",
+        "check_source_diffs.ps1 full"
+      ]
+    },
+    {
+      "actual": "READ05-ACTUAL.json",
+      "tool": "414b66",
+      "exit": 0,
+      "contracts": [
+        "test_reservations.py:611–633",
+        "reservation_file_port.py:1–107",
+        "asr_loading_adapter.py:736–872"
+      ],
+      "other": [
+        "DRAFT-CLEANUP-REPAIR03.md full"
+      ]
+    },
+    {
+      "actual": "READ06-ACTUAL.json",
+      "tool": "a563c3",
+      "exit": 0,
+      "contracts": [
+        "test_reservations.py:703–713"
+      ],
+      "other": [
+        "EXPECTED-CASES.json full",
+        "four raw mechanical diffs reconstructed by independent passive checker"
+      ]
+    },
+    {
+      "actual": "CHECK-ACTUAL.json",
+      "tool": "e38ac5",
+      "exit": 0,
+      "scope": "fixed-text snapshots, hashes, complete diff reconstruction and membership"
+    }
+  ],
+  "candidate_executed": false,
+  "core_independent_review_claim": false
+}

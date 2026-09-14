@@ -1,0 +1,142 @@
+
+@dataclass(frozen=True, eq=False)
+class _ControllerBoundary:
+    custody: object
+    startup: object
+    permit: object
+    permit_identity: object
+    factory: object
+    manager: object
+    record: object
+    token: object
+    lease: object
+    protection: object
+    references: object
+    values: object
+    initial_references: object
+    initial_values: object
+    functions: tuple
+
+
+def _require_fixed_controller_functions(functions):
+    current = (
+        _capture_controller_boundary, _check_controller_entry, _check_controller_boundary,
+        _require_fixed_controller_functions, _classify_controller_custody,
+        _require_controller_binding, _validate_controller_pre_resume,
+        _validate_controller_pre_resume_locked, _validate_controller_worker_stage,
+        _validate_controller_worker_stage_locked, _validate_controller_startup,
+        _validate_startup_locked, _startup_selection_current, _startup_references,
+        _startup_values, _startup_authority_snapshot, _startup_configuration, _require,
+        _STARTUP_PROFILE,
+    )
+    if (functions is not _CONTROLLER_BOUNDARY_FUNCTIONS or type(functions) is not tuple
+            or len(functions) != len(current)
+            or any(old is not now for old, now in zip(functions, current))):
+        raise AdapterUnavailable("Fixed controller helper binding changed")
+
+
+def _classify_controller_custody(profile, permit):
+    # The current permit/record relation, never type spelling or field shape,
+    # prevents an issued controller attempt from acquiring a generated fallback.
+    _require(type(permit) is _NativePermit, "Exact controller classification permit required")
+    is_controller = type(profile) is _ControllerASRStart
+    if isinstance(profile, _ControllerASRStart) and not is_controller:
+        raise AdapterUnavailable("Controller startup subclass refused")
+    current = _CONTROLLER_STARTUPS.get(id(profile)) if is_controller else None
+    matches = [c for c in _CONTROLLER_STARTUP_ATTEMPTS.values()
+               if c.permit is permit or c.record is permit.record]
+    if not is_controller and not matches:
+        return None
+    _require(is_controller and len(matches) == 1 and type(current) is _StartupCustody
+             and matches[0] is current and current.startup is profile
+             and current.permit is permit and current.record is permit.record
+             and current.active and _CONTROLLER_STARTUP_ATTEMPTS.get(id(current)) is current,
+             "Exact initially issued controller custody required")
+    return current
+
+
+def _capture_controller_boundary(profile, permit):
+    functions = _CONTROLLER_BOUNDARY_FUNCTIONS
+    if _require_fixed_controller_functions is not functions[3]:
+        raise AdapterUnavailable("Fixed controller function guard changed")
+    functions[3](functions)
+    custody = functions[4](profile, permit)
+    if custody is None:
+        return None
+    # Factory calls under manager then reservation locks, before owner issuance.
+    functions[10](profile, permit)
+    return _ControllerBoundary(custody, profile, permit, permit.identity, custody.factory,
+        custody.manager, custody.record, custody.token, custody.lease, custody.protection,
+        custody.references, custody.values, custody.initial_references, custody.initial_values,
+        functions)
+
+
+def _require_controller_binding(binding, startup, permit, session):
+    if binding is None:
+        # This is no authorization. The original generated delegate must still
+        # accept its exact profile/sentinel/binding before doing any work.
+        _require(_CONTROLLER_BOUNDARY_FUNCTIONS[4](startup, permit) is None,
+                 "Generated start acquired conflicting controller custody")
+        return None
+    _require(type(binding) is _ControllerBoundary, "Exact captured controller binding required")
+    custody = binding.custody
+    _require(type(custody) is _StartupCustody and custody is _CONTROLLER_STARTUPS.get(id(startup))
+             and _CONTROLLER_STARTUP_ATTEMPTS.get(id(custody)) is custody
+             and binding.startup is startup and custody.startup is startup
+             and binding.permit is permit and custody.permit is permit
+             and permit.identity is binding.permit_identity
+             and custody.factory is binding.factory and custody.manager is binding.manager
+             and custody.record is binding.record and custody.token is binding.token
+             and custody.lease is binding.lease and custody.protection is binding.protection
+             and custody.references is binding.references and custody.values is binding.values
+             and custody.initial_references is binding.initial_references
+             and custody.initial_values is binding.initial_values
+             and binding.functions is _CONTROLLER_BOUNDARY_FUNCTIONS
+             and custody.active and type(session) is OwnedSession
+             and session._manager is binding.manager and session._record is binding.record
+             and binding.record.owner is session,
+             "Original controller custody or binding changed")
+    return custody
+
+
+def _check_controller_entry(binding, startup, permit, session):
+    functions = _CONTROLLER_BOUNDARY_FUNCTIONS if binding is None else binding.functions
+    if _require_fixed_controller_functions is not functions[3]:
+        raise AdapterUnavailable("Fixed controller function guard changed")
+    functions[3](functions)
+    custody = functions[5](binding, startup, permit, session)
+    if custody is not None:
+        _require(custody.consumed_by is None, "Controller startup already consumed before delegate")
+        functions[10](startup, permit, session)
+    return startup
+
+
+def _check_controller_boundary(binding, startup, permit, session, worker, stage):
+    functions = _CONTROLLER_BOUNDARY_FUNCTIONS if binding is None else binding.functions
+    if _require_fixed_controller_functions is not functions[3]:
+        raise AdapterUnavailable("Fixed controller function guard changed")
+    functions[3](functions)
+    _require(type(stage) is str and stage in ("pre_resume", "finish_start"),
+             "Exact fixed controller checkpoint required")
+    custody = functions[5](binding, startup, permit, session)
+    if custody is not None:
+        if stage == "pre_resume":
+            functions[6](startup, permit, session, worker)
+        else:
+            functions[8](startup, permit, session, worker, "finish_start")
+    return startup
+
+
+# Fixed source-owned function set. It is retained by each actual factory attempt;
+# neither an IPC record nor a caller parameter can select any member.
+_CONTROLLER_BOUNDARY_FUNCTIONS = (
+    _capture_controller_boundary, _check_controller_entry, _check_controller_boundary,
+    _require_fixed_controller_functions, _classify_controller_custody,
+    _require_controller_binding, _validate_controller_pre_resume,
+    _validate_controller_pre_resume_locked, _validate_controller_worker_stage,
+    _validate_controller_worker_stage_locked, _validate_controller_startup,
+    _validate_startup_locked, _startup_selection_current, _startup_references,
+    _startup_values, _startup_authority_snapshot, _startup_configuration, _require,
+    _STARTUP_PROFILE,
+)
+

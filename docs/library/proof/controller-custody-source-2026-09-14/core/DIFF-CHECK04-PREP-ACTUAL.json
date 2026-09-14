@@ -1,0 +1,7 @@
+{
+  "chunk_id": "0eb969",
+  "wall_time_seconds": 0.178334,
+  "exit_code": 0,
+  "original_token_count": 34,
+  "output": "{\"source_only_checker_repair\":\"escape three newlines expanded by preparer template\",\"prior_unchanged\":true,\"candidate_executed\":false}\n"
+}
