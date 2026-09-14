@@ -1,0 +1,15 @@
+{
+  "native_exit": 1,
+  "qualification_exit": 1,
+  "valid": false,
+  "inputs_unchanged": true,
+  "membership_valid": true,
+  "guards_valid": true,
+  "passed": 63,
+  "failed": 2,
+  "skipped": 0,
+  "stdout_bytes": 31665,
+  "stderr_bytes": 0,
+  "finished_utc": "2026-09-14T00:58:52.0915404+00:00",
+  "elapsed_seconds": 0.6907775
+}

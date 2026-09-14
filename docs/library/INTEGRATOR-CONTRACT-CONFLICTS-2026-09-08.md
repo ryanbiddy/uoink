@@ -199,3 +199,21 @@ Exact before/after diffs and reasons are in proof/media-detail12-astra-review-
 The earlier generator syntax error and no-file pytest result are also preserved.
 No existing accepted fixture or test was modified. Read ASTRA-MEDIA-DETAIL-
 REVIEW-2026-09-12.md for the one-page verdict, repairs and final 58/58 counts.
+
+## 2026-09-13 — two new Windows exception expectations, decision pending
+
+The first generated Windows reservation unit failed 63/2/0 across 65 cases,
+with six failed nested subtests. Both new controls expected AssertionError;
+the unchanged inherited helper raises KernelUnconfirmed(RuntimeError).
+Subsequent retention assertions in those branches remain unverified. Root,
+author and independent reviewer found no justified product exception change.
+
+The unapplied two-line diff is retained in
+proof/windows-reservation-failed-2026-09-13/preparation/fixture-correction.UNAPPLIED.patch.txt.
+It selects the existing exact exception class through the imported module chain,
+with no import, message, fault-input, retention-assertion or product change.
+All 42 original case bodies stay unchanged. This proposed assertion correction
+is outside Ryan's named September 9 fixture scope and awaits his ruling.
+Read ASTRA-WINDOWS-RESERVATION-FAILED-VERDICT-2026-09-13.md. The failed result,
+earlier source-review oversight and exact source inputs remain preserved; no
+rerun or independent confirmation has occurred.

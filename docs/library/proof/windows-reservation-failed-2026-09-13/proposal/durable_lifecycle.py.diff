@@ -1,0 +1,15 @@
+diff --git "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\windows-reservation-implementation-proposal01\\origins\\durable_lifecycle.py" "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\windows-reservation-implementation-proposal01\\durable_lifecycle.py"
+index a26bb7f..d1d61dd 100644
+--- "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\windows-reservation-implementation-proposal01\\origins\\durable_lifecycle.py"
++++ "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\windows-reservation-implementation-proposal01\\durable_lifecycle.py"
+@@ -217,6 +217,10 @@ class _DurableKernel:
+                 if record.phase is not Phase.NATIVE_RESERVED or record.owner._revoked:
+                     raise SessionClosed("Start revoked before resume")
+                 manager._reservations.resume_owned(token, manager._delegate.resume)
++            # Pipe bootstrap, adoption and policy acknowledgement may block.
++            # They complete outside both manager and reservation state locks.
++            if manager._delegate.finish_start(worker, permit, profile) is not True:
++                raise LifecycleUnavailable("Owned startup completion unconfirmed")
+             return worker
+         except BaseException as original:
+             try:

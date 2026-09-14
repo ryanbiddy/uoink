@@ -1,0 +1,16 @@
+diff --git "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\windows-reservation-implementation-proposal01\\origins\\test_reservations.py" "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\windows-reservation-implementation-proposal01\\test_reservations.py"
+index d2637b0..4f9ba28 100644
+--- "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\windows-reservation-implementation-proposal01\\origins\\test_reservations.py"
++++ "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\windows-reservation-implementation-proposal01\\test_reservations.py"
+@@ -551,6 +551,11 @@ class Kernel:
+         self.f.events.append("resume")
+         return True
+ 
++    def finish_start(self, worker, permit, profile):
++        assert worker is self.f.worker
++        self.f.events.append("finish_start")
++        return True
++
+     def stop_start_failure(self, worker):
+         assert worker is self.f.worker
+         self.f.events.append("stop_exact")

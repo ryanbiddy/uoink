@@ -1,0 +1,90 @@
+diff --git "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\windows-reservation-implementation-proposal01\\origins\\generated_worker_flow.py" "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\windows-reservation-implementation-proposal01\\generated_worker_flow.py"
+index f866381..712f6d4 100644
+--- "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\windows-reservation-implementation-proposal01\\origins\\generated_worker_flow.py"
++++ "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\windows-reservation-implementation-proposal01\\generated_worker_flow.py"
+@@ -111,6 +111,7 @@ class GeneratedLifecyclePort:
+         self.exit_observation = None
+         self.observations = []
+         self.parent_guards_held_through_exit = False
++        self._start_attempted = self._resume_attempted = False
+ 
+     def acquire_read(self, key):
+         _assert(self.key is None and self.read_set is None, "single_generated_acquisition")
+@@ -126,9 +127,13 @@ class GeneratedLifecyclePort:
+         return record
+ 
+     def start_owned_worker(self, protection, permit, profile):
++        raise KernelUnavailable("Split durable startup is required")
++
++    def create_suspended(self, protection, permit, profile):
+         record = self._record(protection, permit)
+         _assert(record.phase is Phase.NATIVE_RESERVED and profile is self.profile and self.worker is None,
+                 "dummy_start_order_and_profile")
++        self._start_attempted = True
+         self.permit = permit
+         self.pair = self.pipes.create_pair(self.pipe_material, _remaining(self.pipes.clock))
+         self.pair.read_set = protection
+@@ -140,8 +145,27 @@ class GeneratedLifecyclePort:
+             binding = GenerationBinding(self.generation, self.manifest, self.namespace, self.source, self.worker.creation_time)
+             self.channel = GenerationChannel(binding, self.master_key, "controller")
+             self.handshake = ControllerHandshake(self.channel, record.owner, permit, self.primitives, self.worker)
+-            self.primitives._resume_after_future_admission(self.worker)
+-            self.pipes.write_bytes(self.pair, encode_private_bootstrap(binding, self.master_key), _remaining(self.pipes.clock))
++            return self.worker
++        except BaseException:
++            self.pipes._quarantine(self.pair)
++            raise
++
++    def resume(self, worker):
++        record = self._record(self.read_set, self.permit)
++        _assert(worker is self.worker and record.phase is Phase.NATIVE_RESERVED
++                and not record.owner._revoked, "exact_suspended_resume_owner")
++        self._resume_attempted = True
++        self.primitives._resume_after_future_admission(worker)
++        return True
++
++    def finish_start(self, worker, permit, profile):
++        record = self._record(self.read_set, permit)
++        _assert(worker is self.worker and permit is self.permit and profile is self.profile
++                and worker.resumed and record.phase is Phase.NATIVE_RESERVED
++                and not record.owner._revoked and self.adoption_response is None,
++                "exact_postresume_start_owner")
++        try:
++            self.pipes.write_bytes(self.pair, encode_private_bootstrap(self.channel.binding, self.master_key), _remaining(self.pipes.clock))
+             self.pipes.write_bytes(self.pair, self.handshake.challenge(), _remaining(self.pipes.clock))
+             self.handshake.accept_ready(self.pipes.read_frame(self.pair, _remaining(self.pipes.clock)))
+             self.handshake._owned_phase(True)
+@@ -151,11 +175,32 @@ class GeneratedLifecyclePort:
+             expected_operation = "readset_ready" if self.case == "positive" else "readset_rejected"
+             _assert(operation == expected_operation and response == expected_adoption_response(self.case), "fixed_adoption_response")
+             self.adoption_response = response
+-            return self.worker
++            return True
+         except BaseException:
+             self.pipes._quarantine(self.pair)
+             raise
+ 
++    def stop_start_failure(self, worker):
++        _assert(worker is self.worker and any(item is worker for item in self.primitives.workers)
++                and self.pair is not None and self.pair.worker is worker and self.pair.role == "controller",
++                "exact_retained_start_failure_owner")
++        # This is terminal observation only, never logical cleanup or guard
++        # retirement. The pipe port retains uncertainty and pending buffers.
++        if self.channel is not None:
++            self.channel.revoke()
++        self.pipes._quarantine(self.pair)
++        _assert(self.pair.forced_stop_attempted and self.pair.forced_process_stop_observed is True,
++                "start_failure_process_exit_unconfirmed")
++        api = self.primitives.api
++        exit_code = api.ffi.c_uint32()
++        api.checked("GetExitCodeProcess", self.primitives._owned(worker.process), api.ffi.byref(exit_code))
++        accounting, returned = api.structure("JOBOBJECT_BASIC_ACCOUNTING_INFORMATION"), api.ffi.c_uint32()
++        api.checked("QueryInformationJobObject", self.primitives._owned(worker.job), JOB_BASIC_ACCOUNTING_CLASS,
++                    api.ffi.byref(accounting), api.ffi.sizeof(accounting), api.ffi.byref(returned))
++        _assert(exit_code.value != 259 and returned.value == api.ffi.sizeof(accounting)
++                and accounting.active_processes == 0, "start_failure_job_exit_unconfirmed")
++        return not self.pair.operations
++
+     def probe_generated(self, worker, permit):
+         record = self._record(self.read_set, permit)
+         _assert(worker is self.worker and record.phase is Phase.NATIVE_RUNNING

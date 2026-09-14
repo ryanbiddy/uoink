@@ -1,0 +1,82 @@
+diff --git "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\windows-reservation-implementation-proposal01\\origins\\qualify_reservations.py" "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\windows-reservation-implementation-proposal01\\qualify_windows_reservations.py"
+index ebf946f..aaaeeb3 100644
+--- "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\windows-reservation-implementation-proposal01\\origins\\qualify_reservations.py"
++++ "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\windows-reservation-implementation-proposal01\\qualify_windows_reservations.py"
+@@ -27,6 +27,10 @@ def registry_audit(event, args):
+ REGISTRY_AUDIT = registry_audit
+ sys.addaudithook(REGISTRY_AUDIT)
+ 
++import contextlib
++import hmac
++import re
++import stat
+ import dataclasses
+ import enum
+ import hashlib
+@@ -45,8 +49,8 @@ assert sys.flags.isolated and sys.flags.no_site and sys.dont_write_bytecode
+ STARTUP_BOUND = os.environ.get("IG_FORBIDDEN_LIVE") == r"C:\Users\hello\AppData\Local\Uoink\index.db"
+ assert STARTUP_BOUND
+ HERE = os.path.dirname(os.path.abspath(__file__))
+-MODULES = ("reservation_file_port", "snapshot_reservations", "snapshot_lifecycle", "durable_lifecycle", "test_reservations")
+-INPUTS = tuple(name + ".py" for name in MODULES) + ("qualify_reservations.py", "EXPECTED-CASES.json")
++MODULES = ("reservation_file_port", "snapshot_reservations", "snapshot_lifecycle", "durable_lifecycle", "win32_worker_connection", "windows_reservation_port", "trusted_asr_resolver", "asr_loading_adapter", "pinned_buffer_namespace", "owned_generation_protocol", "inherited_readset", "generated_worker_flow", "generated_operation_flow", "generated_adapter_flow", "win32_private_pipe", "test_reservations", "test_windows_reservations")
++INPUTS = tuple(name + ".py" for name in MODULES) + ("qualify_windows_reservations.py", "EXPECTED-CASES.json")
+ READS = {os.path.normcase(os.path.join(HERE, name)) for name in INPUTS}
+ HEAVY = {"torch", "torchaudio", "torchvision", "torchcodec", "whisperx", "faster_whisper", "ctranslate2",
+          "transformers", "tokenizers", "pyannote", "onnxruntime", "numpy", "ctypes", "subprocess", "socket", "winreg"}
+@@ -79,7 +83,7 @@ for name in INPUTS:
+ CONTENT_OPEN = False
+ HASHES = {name: hashlib.sha256(raw).hexdigest() for name, raw in RAW.items()}
+ EXPECTED = json.loads(RAW["EXPECTED-CASES.json"])
+-assert type(EXPECTED) is list and len(EXPECTED) == 42 and len(set(EXPECTED)) == 42
++assert type(EXPECTED) is list and len(EXPECTED) == 65 and len(set(EXPECTED)) == 65
+ 
+ def deny_metadata(*args, **kwargs):
+     DENIALS.append("metadata")
+@@ -118,7 +122,9 @@ for name in MODULES:
+     exec(compile(RAW[name + ".py"], module.__file__, "exec"), module.__dict__)
+     LOADED[name] = module
+ REAL_ENTRIES = ((LOADED["reservation_file_port"], "real_journal_port", LOADED["reservation_file_port"].real_journal_port),
+-                (LOADED["snapshot_reservations"], "real_reservation_service", LOADED["snapshot_reservations"].real_reservation_service))
++                (LOADED["snapshot_reservations"], "real_reservation_service", LOADED["snapshot_reservations"].real_reservation_service),
++                (LOADED["windows_reservation_port"], "real_windows_reservation_service", LOADED["windows_reservation_port"].real_windows_reservation_service),
++                (LOADED["win32_worker_connection"], "real_kernel_port", LOADED["win32_worker_connection"].real_kernel_port))
+ 
+ class Results(unittest.TestResult):
+     def __init__(self):
+@@ -149,7 +155,7 @@ class Results(unittest.TestResult):
+         if err is not None:
+             self.addFailure(test, err)
+ 
+-suite = unittest.defaultTestLoader.loadTestsFromModule(LOADED["test_reservations"])
++suite = unittest.TestSuite(unittest.defaultTestLoader.loadTestsFromModule(LOADED[name]) for name in ("test_reservations", "test_windows_reservations"))
+ result = Results()
+ started = time.perf_counter()
+ suite.run(result)
+@@ -172,20 +178,22 @@ guards = {
+         and all(getattr(BASELINE_WINREG, name, None) is installed for name, original, installed in REGISTRY_TRAPS),
+     "captures_installed": sys.stdout is CAPTURE_OUT and sys.stderr is CAPTURE_ERR,
+     "capture_valid": not CAPTURE_OUT.overflow and not CAPTURE_ERR.overflow and CAPTURE_OUT.count == CAPTURE_ERR.count == 0,
+-    "real_entrypoints_unchanged": all(getattr(module, name) is function for module, name, function in REAL_ENTRIES),
++    "real_entrypoints_unchanged": all(getattr(module, name) is function for module, name, function in REAL_ENTRIES)
++        and LOADED["trusted_asr_resolver"].REAL_APPROVAL is None
++        and all(getattr(LOADED["asr_loading_adapter"], name) is None for name in ("RELEASE_AUTHORITY", "RUNTIME_PROFILE", "SNAPSHOT_LIFECYCLE", "RUNTIME_FACTORY", "ACQUISITION_SERVICE")),
+ }
+ membership = [row["id"] for row in cases] == EXPECTED and result.testsRun == len(EXPECTED)
+ passed = sum(row["passed"] for row in cases)
+ skipped = sum(row["skipped"] for row in cases)
+ valid = membership and all(guards.values()) and not DENIALS and not REGISTRY_DENIALS and not heavy
+-code = 0 if valid and passed == 42 and skipped == 0 else 1
+-payload = json.dumps({"schema": "uoink.generated-reservation-preflight.v1", "cases": cases,
++code = 0 if valid and passed == 65 and skipped == 0 else 1
++payload = json.dumps({"schema": "uoink.windows-reservation-fake-preflight.v1", "cases": cases,
+     "passed": passed, "failed": len(cases) - passed - skipped, "skipped": skipped,
+     "count": len(cases), "expected_cases": EXPECTED, "membership_valid": membership,
+     "guards": guards, "guard_valid": valid, "guard_denials": DENIALS, "registry_denials": REGISTRY_DENIALS,
+     "heavy_roots_loaded": heavy, "metadata_trap_count": len(TRAPS), "registry_trap_count": len(REGISTRY_TRAPS),
+     "input_sha256": HASHES, "elapsed_seconds": elapsed, "qualification_exit": code,
+-    "scope": "Generated in-memory journals and fake owned kernel only; native ports unimplemented"}, indent=2)
++    "scope": "Generated bytes and fake Windows services; actual source paths exercised, native behavior unmeasured"}, indent=2)
+ assert len(payload.encode("utf-8")) <= 262144
+ OUTPUT.write(payload + "\n")
+ OUTPUT.flush()
