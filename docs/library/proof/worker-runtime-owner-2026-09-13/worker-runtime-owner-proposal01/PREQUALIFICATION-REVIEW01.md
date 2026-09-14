@@ -1,0 +1,9 @@
+2026-09-13. Preserve the first source/brief in before. No case has executed.
+
+Root reviewed the initial source and requested actual factory publication with the retained inert fixture, rather than seeded `_FactoryOwner` fields followed by a factory qualification claim. The case setup will run unchanged `build_strict_owned` with the existing bytearray/FakeTensor source and fixed schema helpers. This remains fake-port source qualification; it is not a native/model build. The initial brief's seeded-result approach is superseded before execution.
+
+Author source review additionally tightened the published record. Retain the exact owned-module identity, require the factory's completed attempt with no quarantined owner, and recheck the module/runtime reference during bound use. An unexpected changed completed product/module or replaced/mutated generated PCM storage revokes the generation and retains owners immediately, even if the caller catches the refusal. Foreign caller identities still refuse without being mistaken for mutations of an issued record. These are source-review changes, not measured failures or reruns.
+
+The root also identified a remaining real-runtime connection: the actual VAD's inference-to-model reference must be validated, not merely the factory's completed model/VAD/lease fields. This proposal does not guess that upstream attribute shape. The generated fixture cannot qualify that real link, so it remains a required source-bound check before real binding/operation activation.
+
+A text-only lookup initially used nonexistent context/fake_torch_support.py and context/literal_parity.py paths (tool 8c4d37, exit 1). The exact files were then read from the known factory-preflight01 directory. No candidate executed during that lookup; the input-copy map must bind these actual paths and hashes.

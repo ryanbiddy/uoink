@@ -1,0 +1,12 @@
+{
+  "candidate_execution": false,
+  "data_only_preparer_tool_chunk": "538fc7",
+  "data_only_preparer_exit": 0,
+  "data_only_preparer_wall_seconds": 0.1235101,
+  "exact_child_copies": 13,
+  "expected_cases": 11,
+  "launcher_only_literal_path_changes": 14,
+  "source_and_case_assertions_changed": false,
+  "actual_admission_created": false,
+  "pending": ["root review", "separate actual admission", "one independent confirmation observation"]
+}

@@ -1,0 +1,72 @@
+--- before/generated_unit_cases.py
++++ generated_unit_cases.py
+@@ -1,4 +1,4 @@
+-"""Seven proposed generated ownership cases. Guarded execution is not admitted.
++"""Eleven proposed generated ownership cases. Guarded execution is not admitted.
+ 
+ fixture() runs the unchanged factory/CPU port with retained inert bytearray
+ support; no native Tensor, decoder, model or real runtime module is involved.
+@@ -19,6 +19,10 @@
+     'generated_unit_cases.OwnerContracts.test_05_overlapping_operation_and_release_refused',
+     'generated_unit_cases.OwnerContracts.test_06_revocation_blocks_publication_and_retains_owners',
+     'generated_unit_cases.OwnerContracts.test_07_real_constructor_pcm_and_filter_routes_remain_closed',
++    'generated_unit_cases.OwnerContracts.test_08_vad_only_retirement_blocks_publication',
++    'generated_unit_cases.OwnerContracts.test_09_replaced_completed_product_blocks_publication',
++    'generated_unit_cases.OwnerContracts.test_10_replaced_runtime_module_blocks_publication',
++    'generated_unit_cases.OwnerContracts.test_11_revoked_model_lease_blocks_publication',
+ )
+ 
+ 
+@@ -175,3 +179,52 @@
+             self.assertEqual(f.registry.max_audio_samples, 64)
+             with self.assertRaises(AttributeError):
+                 f.registry.max_audio_samples = 1
++
++    def test_08_vad_only_retirement_blocks_publication(self):
++        with fixture() as f:
++            with f.registry.operation(f.bootstrap, 'release'):
++                f.registry.retire_vad_product_for_bootstrap(f.bootstrap, f.factory, f.product)
++            self.assertTrue(f.registry._active)
++            self.assertTrue(f.registry._pcm_owner.active)
++            self.assertFalse(f.registry._lease._active)
++            with f.registry.operation(f.bootstrap, 'use') as token:
++                f.registry.assert_waveform_binding(f.pcm, sample_rate=16000)
++                with self.assertRaisesRegex(proposed.RuntimeOwnerRefusal, 'vad_product_required_at_publication'):
++                    f.registry.publish_generated_text(token, f.pcm, 'retired product')
++
++    def test_09_replaced_completed_product_blocks_publication(self):
++        with fixture() as f:
++            original = f.product
++            with f.registry.operation(f.bootstrap, 'use') as token:
++                f.factory._completed.vad = object()
++                with self.assertRaisesRegex(proposed.RuntimeOwnerRefusal, 'factory_product_or_runtime_changed'):
++                    f.registry.publish_generated_text(token, f.pcm, 'replaced product')
++            self.assertFalse(f.registry._active)
++            self.assertIs(f.registry._retained[0].vad, original)
++            self.assertIs(f.registry._retained[1].pcm, f.pcm)
++
++    def test_10_replaced_runtime_module_blocks_publication(self):
++        with fixture() as f:
++            original = f.factory._owned_runtime_module
++            try:
++                with f.registry.operation(f.bootstrap, 'use') as token:
++                    f.factory._owned_runtime_module = object()
++                    with self.assertRaisesRegex(proposed.RuntimeOwnerRefusal, 'factory_product_or_runtime_changed'):
++                        f.registry.publish_generated_text(token, f.pcm, 'replaced runtime module')
++                self.assertFalse(f.registry._active)
++                self.assertIs(f.registry._retained[0].owned_module, original)
++            finally:
++                # Restore only the inert fixture field for its inherited cleanup.
++                # This cannot reactivate the revoked generation or create a pass.
++                f.factory._owned_runtime_module = original
++
++    def test_11_revoked_model_lease_blocks_publication(self):
++        with fixture() as f:
++            with f.registry.operation(f.bootstrap, 'use') as token:
++                f.capability.revoke(f.factory)
++                self.assertTrue(f.registry._active)
++                self.assertTrue(f.registry._pcm_owner.active)
++                self.assertIs(f.registry._product.vad, f.product)
++                self.assertFalse(f.registry._lease._active)
++                with self.assertRaises(registry_module.ModelBindingRefusal):
++                    f.registry.publish_generated_text(token, f.pcm, 'revoked model lease')

@@ -1,0 +1,897 @@
+"""Prepared combined inert factory/registry cases; exact root admission required."""
+import ast
+from collections import OrderedDict
+from contextlib import contextmanager
+import copy
+import dataclasses
+import encodings.utf_8_sig
+import gc
+import hashlib
+import inspect
+import json
+import math
+import ntpath
+import os
+from pathlib import Path
+import re
+import struct
+import sys
+import threading
+import time
+import types
+import typing
+import weakref
+
+HERE = Path(__file__).absolute().parent
+FORBIDDEN = r'C:\Users\hello\AppData\Local\Uoink\index.db'
+assert os.environ.get('IG_FORBIDDEN_LIVE') == FORBIDDEN
+assert os.environ.get('TORCH_DEVICE_BACKEND_AUTOLOAD') == '0'
+assert os.environ.get('PYANNOTE_METRICS_ENABLED') == '0'
+assert sys.flags.isolated and sys.flags.no_site and sys.dont_write_bytecode
+NAMES = ('plain_state_reader.py', 'state_bridge.py', 'owned_cpu_tensor_port.py',
+         'model_binding_registry.py', 'owned_factory_port.py', 'owned_guard.py',
+         'fake_torch_support.py', 'literal_parity.py', 'fixed-factory.proposal.txt',
+         'owned-pyannote.reference.txt', 'qualify_factory.py', 'EXPECTED-CASES.json', 'INPUTS.json')
+READS = {ntpath.normcase(str(HERE / name)) for name in NAMES}
+HEAVY = {'torch', 'torchaudio', 'whisperx', 'whisper', 'faster_whisper', 'ctranslate2',
+         'pyannote', 'transformers', 'tokenizers', 'safetensors', 'numpy', 'huggingface_hub'}
+assert not [name for name in sys.modules if name.split('.')[0] in HEAVY]
+MODULE_NAMES = ('plain_state_reader', 'state_bridge', 'owned_cpu_tensor_port',
+                'model_binding_registry', 'owned_factory_port', 'owned_guard',
+                'fake_torch_support', 'literal_parity')
+ALLOWED_IMPORTS = set(sys.modules) | set(MODULE_NAMES)
+EVENTS = []
+READS_OPEN = True
+
+
+def deny(event):
+    EVENTS.append(event)
+    raise AssertionError('Factory synthetic guard denied ' + event)
+
+
+def allowed_path(path):
+    return (isinstance(path, (str, bytes, os.PathLike))
+            and ntpath.normcase(ntpath.abspath(os.fsdecode(path))) in READS)
+
+
+def audit(event, args):
+    if event == 'open':
+        path, mode, flags = args
+        if (not READS_OPEN or not allowed_path(path)
+                or flags & (os.O_WRONLY | os.O_RDWR | os.O_CREAT | os.O_TRUNC | os.O_APPEND)):
+            deny(event)
+    elif event == 'import' and args[0] not in ALLOWED_IMPORTS:
+        deny('import:' + str(args[0]))
+    elif event.startswith(('socket.', 'subprocess.', 'ctypes.', 'winreg.')) or event in {
+            'os.system', 'os.startfile', 'os.startfile/2', 'os.spawn', 'os.fork', 'os.exec',
+            'os.add_dll_directory', 'os.listdir', 'os.scandir', 'os.mkdir', 'os.remove',
+            'os.rmdir', 'os.rename', 'os.link', 'os.symlink', 'os.chmod', 'os.utime'}:
+        deny(event)
+
+
+INSTALLED_METADATA = []
+for metadata_name in ('stat', 'lstat', 'readlink'):
+    original = getattr(os, metadata_name)
+    def wrapped(path, *args, _original=original, **kwargs):
+        if not READS_OPEN or not allowed_path(path):
+            deny('metadata')
+        return _original(path, *args, **kwargs)
+    setattr(os, metadata_name, wrapped)
+    INSTALLED_METADATA.append((metadata_name, wrapped))
+INSTALLED_METADATA = tuple(INSTALLED_METADATA)
+ORIGINAL_REALPATH = os.path.realpath
+
+
+def wrapped_realpath(path, *args, **kwargs):
+    if not READS_OPEN or not allowed_path(path):
+        deny('realpath')
+    return ORIGINAL_REALPATH(path, *args, **kwargs)
+
+
+os.path.realpath = wrapped_realpath
+sys.addaudithook(audit)
+RAW = {name: (HERE / name).read_bytes() for name in NAMES}
+INPUTS = json.loads(RAW['INPUTS.json'].decode('utf-8-sig'))
+for name in NAMES[:-1]:
+    assert hashlib.sha256(RAW[name]).hexdigest() == INPUTS['child_files'][name]
+PINNED = {
+    'plain_state_reader.py': '3962d355cffe928f78b741d2d920cc9c727a9fbd10305e20462b60f4cef9990c',
+    'state_bridge.py': 'b3ff126f29942e7daaf51e463ca9f35c4c423b6c638dbc38e5246946a8b7a6b2',
+    'owned_cpu_tensor_port.py': 'ac9eb28194723ffaf2d98bb2cd691a7b27b0a1638694fdfd8cb198c3084e8964',
+    'model_binding_registry.py': '48567add0f0ac2ac9140e9aa86b06f077454c98e2f0773100da5ba070f7b3deb',
+    'owned_factory_port.py': '2569853c7634b795e3d2cf717129ec3dbc4e11d96ddb347098dcc4fbc532f0d4',
+    'owned_guard.py': '7672f614d81cf0be5e7bd408f8f856af328fe34e6ca7ee707c9d0db838e56d1f',
+    'fixed-factory.proposal.txt': '69136c1f7d5cd7bf283e3634dff730c9fd951a314a80b0fa134208f3d1c1820b',
+    'owned-pyannote.reference.txt': 'aeec3ec09d1ed7e11f827353c4f9087de665b1cd3dabf3ff47bb5917c679c6f2',
+}
+for name, digest in PINNED.items():
+    assert hashlib.sha256(RAW[name]).hexdigest() == digest
+READS_OPEN = False
+for module_name in MODULE_NAMES:
+    module = types.ModuleType(module_name)
+    module.__file__ = str(HERE / (module_name + '.py'))
+    sys.modules[module_name] = module
+    exec(compile(RAW[module_name + '.py'], module.__file__, 'exec'), module.__dict__)
+reader, bridge, cpu, registry_module, factory_module, guard, support, parity = (
+    sys.modules[name] for name in MODULE_NAMES)
+Factory = factory_module._OwnedFactoryPortProposal
+Registry = registry_module._WorkerModelRegistryProposal
+Binding = registry_module._StateBindingProposal
+MODEL_CLASSES = (Factory, factory_module._FactoryOwner, Registry,
+                 registry_module._FactoryModelCapability, registry_module._ModelRegistrationLease)
+METHODS = tuple((cls, name, value) for cls in MODEL_CLASSES for name, value in vars(cls).items()
+                if callable(value) or isinstance(value, staticmethod))
+ORIGINAL_OWNER = factory_module._FactoryOwner
+ORIGINAL_FACTORY_ENTRY = factory_module.open_real_factory_port
+ORIGINAL_REGISTRY_ENTRY = registry_module.open_real_model_registry
+ORIGINAL_REQUIRE = guard.require_owned_runtime
+ORIGINAL_WEAKREF = weakref.ref
+HELPER_CODE = compile(parity.helper_tree(RAW['fixed-factory.proposal.txt'].decode('utf-8-sig')),
+                      '<fixed-own-source-schema-helpers-only>', 'exec')
+EXPECTED = json.loads(RAW['EXPECTED-CASES.json'].decode('utf-8-sig'))
+PATTERN = struct.pack('<12I', 0, 0x80000000, 1, 0x80000001,
+                      0x007fffff, 0x807fffff, 0x00800000, 0x80800000,
+                      0x7f7fffff, 0xff7fffff, 0x3f800000, 0xbf800000)
+Model = object
+require_owned_runtime = guard.require_owned_runtime
+
+
+def pattern(size):
+    return (PATTERN * ((size + len(PATTERN) - 1) // len(PATTERN)))[:size]
+
+
+@contextmanager
+def patched(owner, name, value):
+    previous = getattr(owner, name)
+    setattr(owner, name, value)
+    try: yield
+    finally: setattr(owner, name, previous)
+
+
+@contextmanager
+def environment(name, value):
+    previous = os.environ.get(name)
+    os.environ[name] = value
+    try: yield
+    finally:
+        if previous is None: del os.environ[name]
+        else: os.environ[name] = previous
+
+
+class FakeVoiceParent:
+    def __init__(self, *, segmentation, fscore, token, **inference_kwargs):
+        self.segmentation = segmentation
+        self.runtime = segmentation.runtime
+        self.runtime.events.append('vad_parent_after_owned_guard')
+        self.runtime.act('vad_constructor', self)
+        self.arguments = dict(inference_kwargs)
+        self.fscore = fscore
+        self.token = token
+
+    def instantiate(self, thresholds):
+        self.runtime.events.append('vad_instantiate')
+        self.thresholds = dict(thresholds)
+        self.runtime.act('vad_instantiate', self)
+
+
+class FakeVoiceActivitySegmentation(FakeVoiceParent):
+    def __init__(self, segmentation, fscore=False, token=None, **inference_kwargs):
+        if not isinstance(segmentation, Model) or token is not None:
+            raise ValueError("An owned Model instance is required; names, paths and tokens are refused")
+        require_owned_runtime().assert_vad_model_binding(segmentation)
+        super().__init__(segmentation=segmentation, fscore=fscore, token=token, **inference_kwargs)
+
+
+@contextmanager
+def fixture():
+    global Model
+    runtime = support.fake_torch()
+    runtime.events = []
+    runtime.hooks = {}
+    def act(name, *args):
+        hook = runtime.hooks.get(name)
+        if hook is not None: hook(*args)
+    runtime.act = act
+
+    class Device:
+        def __init__(self, name): assert name == 'cpu'; self.type = name
+        def __enter__(self): return self
+        def __exit__(self, *args): return False
+    runtime.device = Device
+    def isfinite(tensor):
+        values = tensor.tolist()
+        answer = all(math.isfinite(value) for value in values)
+        return types.SimpleNamespace(all=lambda: types.SimpleNamespace(item=lambda: answer))
+    runtime.isfinite = isfinite
+
+    class FakePyanNet:
+        def __init__(self, **kwargs):
+            self.runtime = runtime
+            self.arguments = kwargs
+            self.state = {}
+            self.build_count = self.load_count = self.state_dict_count = 0
+            self.evaluated = False
+            for name in factory_module._STATE_HOOKS: setattr(self, name, OrderedDict())
+            runtime.events.append('model_constructor')
+            runtime.act('model_constructor', self)
+        def modules(self): yield self
+        def build(self):
+            self.build_count += 1
+            runtime.events.append('model_build')
+            runtime.act('build_before', self)
+            self.state = {key: runtime.fresh(shape) for key, shape in bridge.FIXED_SHAPES}
+            runtime.act('build_after', self)
+        def state_dict(self):
+            self.state_dict_count += 1
+            runtime.act('state_dict', self)
+            return dict(self.state)
+        def load_state_dict(self, state, *, strict, assign):
+            self.load_count += 1
+            self.load_arguments = (strict, assign)
+            runtime.events.append('strict_load')
+            runtime.act('load_before', self, state)
+            for key in state: self.state[key].copy_(state[key])
+            runtime.act('load_after', self, state)
+            return types.SimpleNamespace(missing_keys=[], unexpected_keys=[])
+        def requires_grad_(self, value):
+            assert value is False
+            for tensor in self.state.values(): tensor.requires_grad = False
+            return self
+        def eval(self): self.evaluated = True; return self
+
+    fixed = types.ModuleType('inert_fixed_factory')
+    fixed.torch = runtime
+    fixed.PyanNet = FakePyanNet
+    fixed.Problem = types.SimpleNamespace(MULTI_LABEL_CLASSIFICATION=object())
+    fixed.Resolution = types.SimpleNamespace(FRAME=object())
+    fixed.Specifications = lambda **kwargs: types.SimpleNamespace(**kwargs)
+    fixed.VoiceActivitySegmentation = FakeVoiceActivitySegmentation
+    exec(HELPER_CODE, fixed.__dict__)  # Only the two pinned own-source helpers.
+    tensor_port = cpu._OwnedCPUTorchPortProposal(runtime)
+    state, digests = {}, []
+    for key, shape in bridge.FIXED_SHAPES:
+        tensor = tensor_port.allocate_owned_cpu_f32(shape)
+        tensor.storage.data[:] = pattern(math.prod(shape) * 4)  # Generated fake storage only.
+        state[key] = tensor
+        digests.append((key, shape, hashlib.sha256(bytes(tensor.storage.data)).digest()))
+    binding = Binding(hashlib.sha256(b'inert generated state').hexdigest(),
+                      hashlib.sha256(b'inert admitted profile').hexdigest(), tuple(digests))
+    bootstrap = object()
+    registry = Registry(bootstrap, Factory)
+    previous_runtime, previous_model = guard._RUNTIME, Model
+    guard._RUNTIME, Model = registry, FakePyanNet
+    factory = Factory(fixed, tensor_port, guard)
+    capability = registry._issue_for_bootstrap(bootstrap, factory, binding, registry_module.FIXED_RECIPE_SHA256)
+    factory._bind_model_capability(capability)
+    value = types.SimpleNamespace(runtime=runtime, fixed=fixed, port=tensor_port, state=state,
+                                  binding=binding, bootstrap=bootstrap, registry=registry,
+                                  factory=factory, capability=capability)
+    try:
+        yield value
+    finally:
+        # Fixture teardown only, after assertions. Do not call the factory again
+        # or reinterpret a failed cleanup as successful native reclamation.
+        registry.revoke_generation(bootstrap)
+        if factory._completed is not None:
+            factory.release_product(factory._completed.vad)
+        if factory._quarantined_owner is not None:
+            factory._quarantined_owner.forget()
+        for tensor in state.values():
+            tensor_port.release_owned(tensor)
+        state.clear()
+        guard._RUNTIME, Model = previous_runtime, previous_model
+
+
+def refused(action, message=None):
+    try: action()
+    except (factory_module.FactoryPortRefusal, registry_module.ModelBindingRefusal) as error:
+        if message is not None: assert str(error) == message, (str(error), message)
+        return error
+    raise AssertionError('Expected factory/registry refusal')
+
+
+def fail(*args): raise RuntimeError('inert injected failure')
+
+
+CASES = []
+def case(name):
+    def register(fn): CASES.append((name, fn)); return fn
+    return register
+
+
+@case('fixed_constructor_load_vad_literal_parity')
+def _():
+    targets = parity.assert_fixed_calls(RAW['fixed-factory.proposal.txt'].decode('utf-8-sig'),
+                                        RAW['owned_factory_port.py'].decode('utf-8-sig'))
+    assert len(targets) == 8
+
+
+@case('literal_parity_rejects_changed_stride')
+def _():
+    altered = RAW['owned_factory_port.py'].decode('utf-8-sig').replace("'stride': 10", "'stride': 11", 1)
+    try: parity.assert_fixed_calls(RAW['fixed-factory.proposal.txt'].decode('utf-8-sig'), altered)
+    except AssertionError: return
+    raise AssertionError('Changed constructor literal accepted')
+
+
+@case('literal_parity_rejects_assign_true')
+def _():
+    altered = RAW['owned_factory_port.py'].decode('utf-8-sig').replace('strict=True, assign=False', 'strict=True, assign=True', 1)
+    try: parity.assert_fixed_calls(RAW['fixed-factory.proposal.txt'].decode('utf-8-sig'), altered)
+    except AssertionError: return
+    raise AssertionError('Changed load literal accepted')
+
+
+@case('actual_owned_constructor_body_and_arguments_match')
+def _():
+    parity.assert_owned_constructor(RAW['owned-pyannote.reference.txt'].decode('utf-8-sig'),
+                                    RAW['qualify_factory.py'].decode('utf-8-sig'))
+
+
+@case('real_entries_refuse_without_argument_inspection')
+def _():
+    class Poison:
+        def __getattribute__(self, name): raise AssertionError('Argument inspected')
+    refused(lambda: factory_module.open_real_factory_port(Poison()), 'real_authority_absent')
+    refused(lambda: registry_module.open_real_model_registry(Poison()), 'real_worker_bootstrap_absent')
+
+
+@case('complete_factory_has_live_exact_model_lease')
+def _():
+    with fixture() as f:
+        product = f.factory.build_strict_owned(f.state)
+        model = product.segmentation
+        f.registry.assert_vad_model_binding(model)
+        assert model.build_count == model.load_count == 1 and model.load_arguments == (True, False)
+        assert model.evaluated and len(f.factory._completed.model_state) == 54
+        assert f.registry._lease is f.factory._completed.model_lease
+        assert product.thresholds == {'onset': .500, 'offset': .363, 'min_duration_on': .1, 'min_duration_off': .1}
+        assert f.runtime.events.index('strict_load') < f.runtime.events.index('vad_parent_after_owned_guard')
+
+
+@case('input_zeroing_preserves_model_values_and_active_lease')
+def _():
+    with fixture() as f:
+        product = f.factory.build_strict_owned(f.state)
+        for tensor in f.state.values(): f.port.release_owned(tensor)
+        for key, shape, digest in f.binding.tensor_digests:
+            assert hashlib.sha256(bytes(product.segmentation.state[key].storage.data)).digest() == digest
+        f.registry.assert_vad_model_binding(product.segmentation)
+
+
+@case('release_revokes_before_retiring_product_owner')
+def _():
+    with fixture() as f:
+        product = f.factory.build_strict_owned(f.state)
+        owner = f.factory._completed
+        original = owner.forget
+        observed = []
+        def check_forget(self):
+            refused(lambda: f.registry.assert_vad_model_binding(product.segmentation), 'model_identity_not_registered')
+            observed.append(True)
+            original()
+        with patched(factory_module._FactoryOwner, 'forget', check_forget):
+            f.factory.release_product(product)
+        assert observed == [True] and f.factory._completed is None
+
+
+@case('repeated_product_release_only_confirms_retirement')
+def _():
+    with fixture() as f:
+        product = f.factory.build_strict_owned(f.state)
+        f.factory.release_product(product); f.factory.release_product(product)
+        assert f.factory._retired() is product and f.factory._completed is None
+        refused(lambda: f.registry.assert_vad_model_binding(product.segmentation), 'model_identity_not_registered')
+
+
+@case('foreign_product_release_refused_without_revoking_real_product')
+def _():
+    with fixture() as f:
+        product = f.factory.build_strict_owned(f.state)
+        refused(lambda: f.factory.release_product(object()), 'foreign_product')
+        f.registry.assert_vad_model_binding(product.segmentation)
+
+
+@case('second_build_refused_without_revoking_first_product')
+def _():
+    with fixture() as f:
+        product = f.factory.build_strict_owned(f.state)
+        refused(lambda: f.factory.build_strict_owned(f.state), 'one_factory_attempt_only')
+        f.registry.assert_vad_model_binding(product.segmentation)
+
+
+@case('completed_record_contains_only_model_state_owners')
+def _():
+    with fixture() as f:
+        f.factory.build_strict_owned(f.state)
+        owner = f.factory._completed
+        inputs = tuple(f.state.values())
+        assert set(owner.__slots__) == {'model', 'vad', 'model_state', 'model_lease'}
+        for key, tensor, storage, shape, start, size, offset, digest in owner.model_state:
+            assert all(tensor is not candidate for candidate in inputs)
+            assert all(storage is not candidate.storage for candidate in inputs)
+        assert all(type(row[2]) is bytes for row in f.capability._state_binding.tensor_digests)
+
+
+@case('string_bootstrap_permit_refused')
+def _():
+    refused(lambda: Registry('serializable', Factory), 'bootstrap_binding')
+
+
+@case('passive_binding_cannot_replace_bootstrap_permit')
+def _():
+    with fixture() as f:
+        other = Registry(object(), Factory)
+        refused(lambda: other._issue_for_bootstrap(f.binding, f.factory, f.binding,
+                                                   registry_module.FIXED_RECIPE_SHA256), 'bootstrap_permit_identity')
+
+
+@case('wrong_bootstrap_identity_refused')
+def _():
+    with fixture() as f:
+        refused(lambda: f.registry.revoke_generation(object()), 'bootstrap_permit_identity')
+        f.registry.assert_active()
+
+
+@case('capability_cannot_be_issued_twice')
+def _():
+    with fixture() as f:
+        refused(lambda: f.registry._issue_for_bootstrap(f.bootstrap, f.factory, f.binding,
+                                                        registry_module.FIXED_RECIPE_SHA256),
+                'factory_capability_already_issued_or_foreign')
+
+
+@case('changed_recipe_binding_refused')
+def _():
+    with fixture() as f:
+        key = object(); registry = Registry(key, Factory)
+        refused(lambda: registry._issue_for_bootstrap(key, f.factory, f.binding, '0' * 64), 'fixed_recipe')
+
+
+@case('malformed_state_digest_refused')
+def _():
+    with fixture() as f:
+        key = object(); registry = Registry(key, Factory)
+        bad = dataclasses.replace(f.binding, output_sha256='not-a-digest')
+        refused(lambda: registry._issue_for_bootstrap(key, f.factory, bad,
+                                                     registry_module.FIXED_RECIPE_SHA256), 'state_binding_digest')
+
+
+@case('missing_state_row_refused')
+def _():
+    with fixture() as f:
+        key = object(); registry = Registry(key, Factory)
+        bad = dataclasses.replace(f.binding, tensor_digests=f.binding.tensor_digests[:-1])
+        refused(lambda: registry._issue_for_bootstrap(key, f.factory, bad,
+                                                     registry_module.FIXED_RECIPE_SHA256), 'state_binding_schema')
+
+
+@case('bool_dimension_in_state_binding_refused')
+def _():
+    with fixture() as f:
+        key = object(); registry = Registry(key, Factory)
+        rows = list(f.binding.tensor_digests)
+        name, shape, digest = rows[0]; rows[0] = (name, (True,), digest)
+        bad = dataclasses.replace(f.binding, tensor_digests=tuple(rows))
+        refused(lambda: registry._issue_for_bootstrap(key, f.factory, bad,
+                                                     registry_module.FIXED_RECIPE_SHA256), 'state_binding_schema')
+
+
+@case('forged_capability_object_not_registered')
+def _():
+    with fixture() as f:
+        forged = registry_module._FactoryModelCapability(f.registry, f.factory, f.binding, f.registry._generation)
+        refused(lambda: forged.assert_factory_and_runtime(f.factory, guard), 'factory_capability_identity')
+
+
+@case('capability_cannot_bind_foreign_factory')
+def _():
+    with fixture() as f:
+        refused(lambda: f.capability.assert_factory_and_runtime(object(), guard), 'factory_capability_identity')
+
+
+@case('swapped_owned_runtime_registry_refused_and_capability_revoked')
+def _():
+    with fixture() as f:
+        with patched(guard, '_RUNTIME', Registry(object(), Factory)):
+            error = refused(lambda: f.factory.build_strict_owned(f.state), 'factory_context')
+            assert type(error.__cause__) is registry_module.ModelBindingRefusal
+            assert str(error.__cause__) == 'owned_runtime_registry_identity'
+        assert not f.capability._active and not f.runtime.events
+
+
+@case('actual_owned_guard_rejects_unregistered_model_before_parent')
+def _():
+    with fixture() as f:
+        model = f.fixed.PyanNet()
+        refused(lambda: f.fixed.VoiceActivitySegmentation(model), 'model_identity_not_registered')
+        assert 'vad_parent_after_owned_guard' not in f.runtime.events
+
+
+@case('actual_owned_guard_rejects_token_before_parent')
+def _():
+    with fixture() as f:
+        model = f.fixed.PyanNet()
+        try: f.fixed.VoiceActivitySegmentation(model, token='forbidden')
+        except ValueError as error:
+            assert 'owned Model instance' in str(error)
+        else: raise AssertionError('Token accepted')
+        assert 'vad_parent_after_owned_guard' not in f.runtime.events
+
+
+@case('wrong_verified_digest_rows_refuse_registration')
+def _():
+    with fixture() as f:
+        rows = list(f.binding.tensor_digests)
+        name, shape, digest = rows[0]; rows[0] = (name, shape, b'x' * 32)
+        model = f.fixed.PyanNet()
+        refused(lambda: f.capability.register_verified_model(f.factory, guard, model, tuple(rows)),
+                'verified_state_binding_mismatch')
+        assert f.registry._lease is None
+
+
+@case('successful_registration_is_single_use')
+def _():
+    with fixture() as f:
+        product = f.factory.build_strict_owned(f.state)
+        refused(lambda: f.capability.register_verified_model(f.factory, guard, product.segmentation,
+                                                             f.binding.tensor_digests),
+                'model_registration_already_used')
+
+
+@case('foreign_model_same_class_refused_by_live_registry')
+def _():
+    with fixture() as f:
+        product = f.factory.build_strict_owned(f.state)
+        foreign = f.fixed.PyanNet()
+        refused(lambda: f.registry.assert_vad_model_binding(foreign), 'model_identity_not_registered')
+        f.registry.assert_vad_model_binding(product.segmentation)
+
+
+@case('generation_revocation_rejects_retained_model_and_vad')
+def _():
+    with fixture() as f:
+        product = f.factory.build_strict_owned(f.state)
+        f.registry.revoke_generation(f.bootstrap)
+        refused(lambda: f.registry.assert_vad_model_binding(product.segmentation), 'worker_generation_revoked')
+        refused(lambda: f.fixed.VoiceActivitySegmentation(product.segmentation), 'worker_generation_revoked')
+        f.factory.release_product(product)
+
+
+@case('new_generation_does_not_accept_old_model_or_capability')
+def _():
+    with fixture() as f:
+        product = f.factory.build_strict_owned(f.state)
+        new_registry = Registry(object(), Factory)
+        refused(lambda: new_registry.assert_vad_model_binding(product.segmentation), 'model_identity_not_registered')
+        with patched(guard, '_RUNTIME', new_registry):
+            refused(lambda: f.capability.assert_factory_and_runtime(f.factory, guard), 'owned_runtime_registry_identity')
+
+
+@case('pre_build_dtype_failure_revokes_issued_capability')
+def _():
+    with fixture() as f:
+        f.runtime.default_dtype = object()
+        refused(lambda: f.factory.build_strict_owned(f.state), 'default_dtype')
+        assert f.factory._attempted and not f.capability._active and not f.runtime.events
+
+
+@case('pre_build_import_setting_failure_revokes_capability')
+def _():
+    with fixture() as f:
+        with environment('PYANNOTE_METRICS_ENABLED', '1'):
+            refused(lambda: f.factory.build_strict_owned(f.state), 'current_import_settings')
+        assert not f.capability._active and not f.runtime.events
+
+
+@case('owner_creation_failure_revokes_capability')
+def _():
+    with fixture() as f:
+        with patched(factory_module, '_FactoryOwner', fail):
+            refused(lambda: f.factory.build_strict_owned(f.state), 'factory_context')
+        assert not f.capability._active and f.factory._completed is None
+
+
+@case('invalid_input_key_refused_before_model_construction')
+def _():
+    with fixture() as f:
+        changed = dict(f.state); changed[object()] = changed.pop(next(iter(changed)))
+        refused(lambda: f.factory.build_strict_owned(changed), 'input_validation')
+        assert not f.runtime.events and not f.capability._active
+
+
+@case('model_constructor_failure_revokes_capability')
+def _():
+    with fixture() as f:
+        f.runtime.hooks['model_constructor'] = fail
+        refused(lambda: f.factory.build_strict_owned(f.state), 'model_construction')
+        assert not f.capability._active and f.factory._completed is None
+
+
+@case('model_build_failure_revokes_before_owner_retirement')
+def _():
+    with fixture() as f:
+        f.runtime.hooks['build_after'] = fail
+        refused(lambda: f.factory.build_strict_owned(f.state), 'model_build')
+        assert not f.capability._active and f.registry._lease is None
+
+
+@case('state_hook_refused_before_state_dict_call')
+def _():
+    with fixture() as f:
+        models = []
+        def hook(model):
+            models.append(model); model._state_dict_hooks[0] = object()
+        f.runtime.hooks['build_after'] = hook
+        refused(lambda: f.factory.build_strict_owned(f.state), 'state_hooks_present')
+        assert models[0].state_dict_count == 0 and not f.capability._active
+
+
+@case('state_load_failure_revokes_capability')
+def _():
+    with fixture() as f:
+        f.runtime.hooks['load_before'] = fail
+        refused(lambda: f.factory.build_strict_owned(f.state), 'strict_state_load')
+        assert not f.capability._active and f.registry._lease is None
+
+
+@case('model_value_change_refused_before_registration')
+def _():
+    with fixture() as f:
+        def changed(model, state): model.state[next(iter(state))].storage.data[0:4] = struct.pack('<f', 2.0)
+        f.runtime.hooks['load_after'] = changed
+        refused(lambda: f.factory.build_strict_owned(f.state), 'model_value_mismatch')
+        assert f.registry._lease is None and 'vad_parent_after_owned_guard' not in f.runtime.events
+
+
+@case('model_storage_alias_of_input_refused')
+def _():
+    with fixture() as f:
+        def alias(model, state):
+            name = next(iter(state)); model.state[name] = state[name]
+        f.runtime.hooks['load_after'] = alias
+        refused(lambda: f.factory.build_strict_owned(f.state), 'model_aliases_input_storage')
+        assert f.registry._lease is None and not f.capability._active
+
+
+@case('input_value_mutation_during_load_refused')
+def _():
+    with fixture() as f:
+        def changed(model, state): state[next(iter(state))].storage.data[0:4] = struct.pack('<f', 2.0)
+        f.runtime.hooks['load_after'] = changed
+        refused(lambda: f.factory.build_strict_owned(f.state), 'input_changed_during_factory')
+        assert not f.capability._active
+
+
+@case('native_readback_wrong_length_refused')
+def _():
+    with fixture() as f:
+        def changed(model, state): f.runtime.read_hook = lambda values: values + [0.0]
+        f.runtime.hooks['load_after'] = changed
+        refused(lambda: f.factory.build_strict_owned(f.state), 'model_readback_values')
+        assert not f.capability._active
+
+
+@case('native_model_storage_range_change_refused')
+def _():
+    with fixture() as f:
+        def changed(model, state): model.state[next(iter(state))].storage.advertised += 5891996
+        f.runtime.hooks['load_after'] = changed
+        refused(lambda: f.factory.build_strict_owned(f.state), 'model_storage_range')
+        assert not f.capability._active
+
+
+@case('vad_constructor_failure_revokes_registered_model')
+def _():
+    with fixture() as f:
+        f.runtime.hooks['vad_constructor'] = fail
+        refused(lambda: f.factory.build_strict_owned(f.state), 'vad_construction')
+        assert f.registry._lease is not None and not f.registry._lease._active
+        assert f.registry._lease._model is None and not f.capability._active
+
+
+@case('vad_instantiate_failure_revokes_registered_model')
+def _():
+    with fixture() as f:
+        f.runtime.hooks['vad_instantiate'] = fail
+        refused(lambda: f.factory.build_strict_owned(f.state), 'vad_instantiate')
+        assert not f.registry._lease._active and f.factory._completed is None
+
+
+@case('vad_model_value_change_refused_by_final_verification')
+def _():
+    with fixture() as f:
+        def changed(vad): vad.segmentation.state[next(iter(f.state))].storage.data[0:4] = struct.pack('<f', 2.0)
+        f.runtime.hooks['vad_instantiate'] = changed
+        refused(lambda: f.factory.build_strict_owned(f.state), 'model_value_mismatch')
+        assert not f.registry._lease._active and f.factory._completed is None
+
+
+@case('generation_revoked_in_model_build_prevents_vad_publication')
+def _():
+    with fixture() as f:
+        f.runtime.hooks['build_after'] = lambda model: f.registry.revoke_generation(f.bootstrap)
+        refused(lambda: f.factory.build_strict_owned(f.state))
+        assert 'vad_parent_after_owned_guard' not in f.runtime.events and f.factory._completed is None
+
+
+@case('generation_revoked_in_vad_constructor_prevents_publication')
+def _():
+    with fixture() as f:
+        f.runtime.hooks['vad_constructor'] = lambda vad: f.registry.revoke_generation(f.bootstrap)
+        refused(lambda: f.factory.build_strict_owned(f.state))
+        assert f.factory._completed is None and 'vad_instantiate' not in f.runtime.events
+
+
+@case('generation_revoked_in_instantiate_prevents_publication')
+def _():
+    with fixture() as f:
+        f.runtime.hooks['vad_instantiate'] = lambda vad: f.registry.revoke_generation(f.bootstrap)
+        refused(lambda: f.factory.build_strict_owned(f.state))
+        assert f.factory._completed is None and not f.registry._active
+
+
+@case('deadline_after_model_build_revokes_capability')
+def _():
+    with fixture() as f:
+        clock = [100.0]
+        f.runtime.hooks['build_after'] = lambda model: clock.__setitem__(0, 131.0)
+        with patched(factory_module, 'monotonic', lambda: clock[0]):
+            refused(lambda: f.factory.build_strict_owned(f.state), 'factory_deadline_exceeded')
+        assert not f.capability._active and f.factory._completed is None
+
+
+@case('deadline_after_instantiate_revokes_model_lease')
+def _():
+    with fixture() as f:
+        clock = [100.0]
+        f.runtime.hooks['vad_instantiate'] = lambda vad: clock.__setitem__(0, 131.0)
+        with patched(factory_module, 'monotonic', lambda: clock[0]):
+            refused(lambda: f.factory.build_strict_owned(f.state), 'factory_deadline_exceeded')
+        assert not f.registry._lease._active and f.factory._completed is None
+
+
+@case('release_revocation_failure_retains_complete_owner')
+def _():
+    with fixture() as f:
+        product = f.factory.build_strict_owned(f.state)
+        owner = f.factory._completed
+        with patched(registry_module._ModelRegistrationLease, 'revoke', fail):
+            try: f.factory.release_product(product)
+            except RuntimeError: pass
+            else: raise AssertionError('Revocation failure suppressed')
+        assert f.factory._completed is owner and owner.vad is product
+        f.registry.assert_vad_model_binding(product.segmentation)
+        f.factory.release_product(product)
+
+
+@case('failed_build_revocation_failure_retains_quarantined_owner')
+def _():
+    with fixture() as f:
+        f.runtime.hooks['build_after'] = fail
+        with patched(registry_module._FactoryModelCapability, 'revoke', fail):
+            refused(lambda: f.factory.build_strict_owned(f.state), 'model_revocation_unconfirmed')
+        assert f.factory._quarantined_owner is not None
+        assert f.factory._quarantined_owner.model is not None
+        assert f.capability._active  # Preserved failure; no closure claimed.
+
+
+@case('cancellation_in_model_build_revokes_before_propagation')
+def _():
+    with fixture() as f:
+        def cancel(model): raise KeyboardInterrupt('inert cancellation')
+        f.runtime.hooks['build_after'] = cancel
+        error = refused(lambda: f.factory.build_strict_owned(f.state), 'model_build')
+        assert type(error.__cause__) is KeyboardInterrupt and not f.capability._active
+
+
+@case('failure_phase_does_not_copy_injected_error_message')
+def _():
+    with fixture() as f:
+        marker = 'INERT_PRIVATE_FAILURE_' * 100
+        def private(model): raise RuntimeError(marker)
+        f.runtime.hooks['build_after'] = private
+        error = refused(lambda: f.factory.build_strict_owned(f.state), 'model_build')
+        assert marker not in str(error) and len(str(error)) < 100
+
+
+@case('factory_registration_rejects_mismatched_bootstrap_digest_rows')
+def _():
+    with fixture() as f:
+        rows = list(f.binding.tensor_digests)
+        name, shape, digest = rows[0]; rows[0] = (name, shape, b'x' * 32)
+        f.capability._state_binding = dataclasses.replace(f.binding, tensor_digests=tuple(rows))
+        error = refused(lambda: f.factory.build_strict_owned(f.state), 'model_registration')
+        assert type(error.__cause__) is registry_module.ModelBindingRefusal
+        assert str(error.__cause__) == 'verified_state_binding_mismatch'
+        assert not f.capability._active and f.registry._lease is None
+        assert 'vad_parent_after_owned_guard' not in f.runtime.events
+
+
+@case('product_weak_reference_failure_revokes_before_publication')
+def _():
+    with fixture() as f:
+        original = weakref.ref
+        def checked_ref(value):
+            if type(value) is FakeVoiceActivitySegmentation:
+                raise RuntimeError('inert product weak-reference failure')
+            return original(value)
+        with patched(weakref, 'ref', checked_ref):
+            refused(lambda: f.factory.build_strict_owned(f.state), 'vad_instantiate')
+        assert f.factory._completed is None and f.factory._retired is None
+        assert not f.registry._lease._active and f.registry._lease._model is None
+
+
+@case('generation_revocation_at_publication_boundary_refuses_transfer')
+def _():
+    with fixture() as f:
+        original = registry_module._ModelRegistrationLease.publication
+        @contextmanager
+        def revoked_publication(self, factory, model):
+            f.registry.revoke_generation(f.bootstrap)
+            with original(self, factory, model):
+                yield
+        with patched(registry_module._ModelRegistrationLease, 'publication', revoked_publication):
+            error = refused(lambda: f.factory.build_strict_owned(f.state), 'vad_instantiate')
+        assert type(error.__cause__) is registry_module.ModelBindingRefusal
+        assert str(error.__cause__) == 'worker_generation_revoked'
+        assert f.factory._completed is None and f.factory._retired is None
+        assert not f.registry._lease._active and f.registry._lease._model is None
+
+
+@case('expired_retired_product_does_not_authorize_none')
+def _():
+    with fixture() as f:
+        product = f.factory.build_strict_owned(f.state)
+        retired = weakref.ref(product)
+        f.factory.release_product(product)
+        del product
+        gc.collect()  # Inert Python objects only; not native reclamation evidence.
+        assert retired() is None and f.factory._retired() is None
+        refused(lambda: f.factory.release_product(None), 'foreign_product')
+
+
+START = time.monotonic()
+assert [name for name, _ in CASES] == EXPECTED['cases']
+assert len(CASES) == len({name for name, _ in CASES}) == EXPECTED['case_count']
+results = []
+for name, fn in CASES:
+    try:
+        assert time.monotonic() - START < 120, 'Total synthetic deadline exceeded'
+        fn()
+        results.append({'name': name, 'status': 'passed'})
+    except BaseException as error:
+        results.append({'name': name, 'status': 'failed', 'error_type': type(error).__name__,
+                        'message': str(error)[:200]})
+failed = sum(item['status'] != 'passed' for item in results)
+guard_fields = {
+    'metadata_wrappers_intact': all(getattr(os, name) is wrapper for name, wrapper in INSTALLED_METADATA),
+    'realpath_wrapper_intact': os.path.realpath is wrapped_realpath,
+    'content_access_closed': READS_OPEN is False,
+    'reader_real_profile_closed': reader.REAL_PROFILE is None,
+    'real_profile_attributes_absent': all('REAL_PROFILE' not in vars(module)
+                                        for module in (bridge, cpu, factory_module, registry_module)),
+    'owned_runtime_closed_after_cases': guard._RUNTIME is None,
+    'implementation_methods_intact': all(vars(cls).get(name) is method for cls, name, method in METHODS),
+    'implementation_helpers_intact': factory_module._FactoryOwner is ORIGINAL_OWNER
+         and factory_module.open_real_factory_port is ORIGINAL_FACTORY_ENTRY
+         and registry_module.open_real_model_registry is ORIGINAL_REGISTRY_ENTRY
+         and guard.require_owned_runtime is ORIGINAL_REQUIRE and weakref.ref is ORIGINAL_WEAKREF,
+    'native_packages_absent': not [name for name in sys.modules if name.split('.')[0] in HEAVY],
+    'environment_restored': os.environ.get('TORCH_DEVICE_BACKEND_AUTOLOAD') == '0'
+                            and os.environ.get('PYANNOTE_METRICS_ENABLED') == '0',
+}
+guard_integrity = all(guard_fields.values())
+report = {'scope': 'exact_factory_registry_and_owned_guard_with_fake_torch_only',
+          'passed': len(results)-failed, 'failed': failed, 'skipped': 0, 'cases': results,
+          'elapsed_seconds': time.monotonic()-START,
+          'qualification_exit': 1 if failed or EVENTS or not guard_integrity else 0,
+          'startup_binding': True, 'guard_integrity': guard_integrity, 'guard_fields': guard_fields,
+          'audit_denials': EVENTS,
+          'source_sha256': {name: hashlib.sha256(RAW[name]).hexdigest() for name in NAMES[:-1]},
+          'native_qualified': False, 'release_approved': False,
+          'limitations': 'Generated fake state only. Worker-local identity lifecycle, not real bootstrap/IPC, native cancellation/quiescence, model accuracy or OS reclamation.'}
+output = json.dumps(report, sort_keys=True, indent=2)
+assert len(output.encode('utf-8')) <= 65536
+print(output)
+raise SystemExit(report['qualification_exit'])

@@ -1,0 +1,86 @@
+{
+  "scope": "static source preparation only",
+  "candidate_imports": false,
+  "executed_cases": 0,
+  "expected_case_ids": [
+    "generated_unit_cases.OwnerContracts.test_01_actual_factory_publication_keeps_registry_identity",
+    "generated_unit_cases.OwnerContracts.test_02_foreign_vad_and_namespace_refused",
+    "generated_unit_cases.OwnerContracts.test_03_foreign_pcm_and_sample_rate_refused",
+    "generated_unit_cases.OwnerContracts.test_04_replaced_mutated_and_expired_pcm_refused",
+    "generated_unit_cases.OwnerContracts.test_05_overlapping_operation_and_release_refused",
+    "generated_unit_cases.OwnerContracts.test_06_revocation_blocks_publication_and_retains_owners",
+    "generated_unit_cases.OwnerContracts.test_07_real_constructor_pcm_and_filter_routes_remain_closed"
+  ],
+  "same_fake_pyannet_ast": true,
+  "all_nine_source_copies_unchanged": true,
+  "future_verified_module_order": [
+    "plain_state_reader.py",
+    "state_bridge.py",
+    "owned_cpu_tensor_port.py",
+    "model_binding_registry.py",
+    "owned_factory_port.py",
+    "owned_guard.py",
+    "fake_torch_support.py",
+    "fixed_schema_helpers.py",
+    "worker_runtime_owner.py",
+    "generated_factory_fixture.py",
+    "generated_unit_cases.py"
+  ],
+  "module_inputs": [
+    {
+      "path": "plain_state_reader.py",
+      "bytes": 10629,
+      "sha256": "3962d355cffe928f78b741d2d920cc9c727a9fbd10305e20462b60f4cef9990c"
+    },
+    {
+      "path": "state_bridge.py",
+      "bytes": 11316,
+      "sha256": "b3ff126f29942e7daaf51e463ca9f35c4c423b6c638dbc38e5246946a8b7a6b2"
+    },
+    {
+      "path": "owned_cpu_tensor_port.py",
+      "bytes": 11768,
+      "sha256": "ac9eb28194723ffaf2d98bb2cd691a7b27b0a1638694fdfd8cb198c3084e8964"
+    },
+    {
+      "path": "model_binding_registry.py",
+      "bytes": 8732,
+      "sha256": "48567add0f0ac2ac9140e9aa86b06f077454c98e2f0773100da5ba070f7b3deb"
+    },
+    {
+      "path": "owned_factory_port.py",
+      "bytes": 15463,
+      "sha256": "2569853c7634b795e3d2cf717129ec3dbc4e11d96ddb347098dcc4fbc532f0d4"
+    },
+    {
+      "path": "owned_guard.py",
+      "bytes": 2109,
+      "sha256": "7672f614d81cf0be5e7bd408f8f856af328fe34e6ca7ee707c9d0db838e56d1f"
+    },
+    {
+      "path": "fake_torch_support.py",
+      "bytes": 5204,
+      "sha256": "5e1381eac70634292945422dfaf70786bb5fb96cbab7ea14a3fcc08fa29a185b"
+    },
+    {
+      "path": "fixed_schema_helpers.py",
+      "bytes": 2837,
+      "sha256": "d61e9a48ecfa906862fedb5b91415f1d2a0b71adc27d3e43ef245842c9e5b188"
+    },
+    {
+      "path": "worker_runtime_owner.py",
+      "bytes": 12838,
+      "sha256": "98e6e6f7bf856e47e2b9e7dae0fc7849b5691aca5634c39197a87114f4aa566e"
+    },
+    {
+      "path": "generated_factory_fixture.py",
+      "bytes": 7539,
+      "sha256": "1c60507a82c238116b630f146c44e7a81fdc57eb74f05841489c3128f150eb6f"
+    },
+    {
+      "path": "generated_unit_cases.py",
+      "bytes": 10578,
+      "sha256": "800f969a70c3ac15015618f962baec848c82be07c5076019da8866237b613576"
+    }
+  ]
+}

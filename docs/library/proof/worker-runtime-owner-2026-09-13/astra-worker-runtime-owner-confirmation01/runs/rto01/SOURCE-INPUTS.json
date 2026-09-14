@@ -1,0 +1,57 @@
+{
+  "scope": "runtime-owner-generated-11-only",
+  "sources": {
+    "plain_state_reader.py": {
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-worker-runtime-owner-confirmation01\\plain_state_reader.py",
+      "sha256": "3962d355cffe928f78b741d2d920cc9c727a9fbd10305e20462b60f4cef9990c"
+    },
+    "state_bridge.py": {
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-worker-runtime-owner-confirmation01\\state_bridge.py",
+      "sha256": "b3ff126f29942e7daaf51e463ca9f35c4c423b6c638dbc38e5246946a8b7a6b2"
+    },
+    "owned_cpu_tensor_port.py": {
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-worker-runtime-owner-confirmation01\\owned_cpu_tensor_port.py",
+      "sha256": "ac9eb28194723ffaf2d98bb2cd691a7b27b0a1638694fdfd8cb198c3084e8964"
+    },
+    "model_binding_registry.py": {
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-worker-runtime-owner-confirmation01\\model_binding_registry.py",
+      "sha256": "48567add0f0ac2ac9140e9aa86b06f077454c98e2f0773100da5ba070f7b3deb"
+    },
+    "owned_factory_port.py": {
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-worker-runtime-owner-confirmation01\\owned_factory_port.py",
+      "sha256": "2569853c7634b795e3d2cf717129ec3dbc4e11d96ddb347098dcc4fbc532f0d4"
+    },
+    "owned_guard.py": {
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-worker-runtime-owner-confirmation01\\owned_guard.py",
+      "sha256": "7672f614d81cf0be5e7bd408f8f856af328fe34e6ca7ee707c9d0db838e56d1f"
+    },
+    "fake_torch_support.py": {
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-worker-runtime-owner-confirmation01\\fake_torch_support.py",
+      "sha256": "5e1381eac70634292945422dfaf70786bb5fb96cbab7ea14a3fcc08fa29a185b"
+    },
+    "fixed_schema_helpers.py": {
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-worker-runtime-owner-confirmation01\\fixed_schema_helpers.py",
+      "sha256": "d61e9a48ecfa906862fedb5b91415f1d2a0b71adc27d3e43ef245842c9e5b188"
+    },
+    "worker_runtime_owner.py": {
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-worker-runtime-owner-confirmation01\\worker_runtime_owner.py",
+      "sha256": "5647023ed03c5acfd8b1aa981a56171dd92228ccc0972f12546bb0b3d411ce87"
+    },
+    "generated_factory_fixture.py": {
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-worker-runtime-owner-confirmation01\\generated_factory_fixture.py",
+      "sha256": "1c60507a82c238116b630f146c44e7a81fdc57eb74f05841489c3128f150eb6f"
+    },
+    "generated_unit_cases.py": {
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-worker-runtime-owner-confirmation01\\generated_unit_cases.py",
+      "sha256": "58ce1ba84b4baa457c3973cea5745ad3be94caa4ce627da732d67e9c8e148979"
+    },
+    "qualify_owner.py": {
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-worker-runtime-owner-confirmation01\\qualify_owner.py",
+      "sha256": "e08653d576dd3ca8367efde9e9438f485de5835f3831e0f7a1f8571fefa6acc1"
+    },
+    "EXPECTED-CASES.json": {
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-worker-runtime-owner-confirmation01\\EXPECTED-CASES.json",
+      "sha256": "954ca4783d70c2dc654e19a110aee6b7c453cd1e6f00098c46bd1b84a4738ba3"
+    }
+  }
+}

@@ -1,0 +1,12 @@
+--- before/worker_runtime_owner.py
++++ worker_runtime_owner.py
+@@ -259,6 +259,9 @@
+         with self._lock:
+             _require(self._entry_locked(('use',)) is token, 'operation_token_identity')
+             self._pcm_locked(pcm, 16000)
++            product = self._product
++            _require(product is not None, 'vad_product_required_at_publication')
++            self._vad_locked(product.vad)
+             _require(type(text) is str and len(text) <= 256, 'generated_result_bound')
+             return text
+ 

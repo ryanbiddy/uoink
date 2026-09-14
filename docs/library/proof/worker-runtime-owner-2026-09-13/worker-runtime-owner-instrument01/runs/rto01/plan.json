@@ -1,0 +1,103 @@
+{
+  "label": "rto01",
+  "inputs": [
+    {
+      "name": "plain_state_reader.py",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\worker-runtime-owner-proposal02\\plain_state_reader.py",
+      "sha256": "3962d355cffe928f78b741d2d920cc9c727a9fbd10305e20462b60f4cef9990c"
+    },
+    {
+      "name": "state_bridge.py",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\worker-runtime-owner-proposal02\\state_bridge.py",
+      "sha256": "b3ff126f29942e7daaf51e463ca9f35c4c423b6c638dbc38e5246946a8b7a6b2"
+    },
+    {
+      "name": "owned_cpu_tensor_port.py",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\worker-runtime-owner-proposal02\\owned_cpu_tensor_port.py",
+      "sha256": "ac9eb28194723ffaf2d98bb2cd691a7b27b0a1638694fdfd8cb198c3084e8964"
+    },
+    {
+      "name": "model_binding_registry.py",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\worker-runtime-owner-proposal02\\model_binding_registry.py",
+      "sha256": "48567add0f0ac2ac9140e9aa86b06f077454c98e2f0773100da5ba070f7b3deb"
+    },
+    {
+      "name": "owned_factory_port.py",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\worker-runtime-owner-proposal02\\owned_factory_port.py",
+      "sha256": "2569853c7634b795e3d2cf717129ec3dbc4e11d96ddb347098dcc4fbc532f0d4"
+    },
+    {
+      "name": "owned_guard.py",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\worker-runtime-owner-proposal02\\owned_guard.py",
+      "sha256": "7672f614d81cf0be5e7bd408f8f856af328fe34e6ca7ee707c9d0db838e56d1f"
+    },
+    {
+      "name": "fake_torch_support.py",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\worker-runtime-owner-proposal02\\fake_torch_support.py",
+      "sha256": "5e1381eac70634292945422dfaf70786bb5fb96cbab7ea14a3fcc08fa29a185b"
+    },
+    {
+      "name": "fixed_schema_helpers.py",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\worker-runtime-owner-proposal02\\fixed_schema_helpers.py",
+      "sha256": "d61e9a48ecfa906862fedb5b91415f1d2a0b71adc27d3e43ef245842c9e5b188"
+    },
+    {
+      "name": "worker_runtime_owner.py",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\worker-runtime-owner-proposal02\\worker_runtime_owner.py",
+      "sha256": "5647023ed03c5acfd8b1aa981a56171dd92228ccc0972f12546bb0b3d411ce87"
+    },
+    {
+      "name": "generated_factory_fixture.py",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\worker-runtime-owner-proposal02\\generated_factory_fixture.py",
+      "sha256": "1c60507a82c238116b630f146c44e7a81fdc57eb74f05841489c3128f150eb6f"
+    },
+    {
+      "name": "generated_unit_cases.py",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\worker-runtime-owner-proposal02\\generated_unit_cases.py",
+      "sha256": "58ce1ba84b4baa457c3973cea5745ad3be94caa4ce627da732d67e9c8e148979"
+    },
+    {
+      "name": "qualify_owner.py",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\worker-runtime-owner-instrument01\\qualify_owner.py",
+      "sha256": "e08653d576dd3ca8367efde9e9438f485de5835f3831e0f7a1f8571fefa6acc1"
+    },
+    {
+      "name": "EXPECTED-CASES.json",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\worker-runtime-owner-instrument01\\EXPECTED-CASES.json",
+      "sha256": "954ca4783d70c2dc654e19a110aee6b7c453cd1e6f00098c46bd1b84a4738ba3"
+    },
+    {
+      "name": "SOURCE-INPUTS.json",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\worker-runtime-owner-instrument01\\SOURCE-INPUTS.json",
+      "sha256": "e336118c32a465a1c07a8c497ea9b6cae9335e7ce34b9de98d021a9ed04670ef"
+    },
+    {
+      "name": "run_owner01.ps1",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\worker-runtime-owner-instrument01\\run_owner01.ps1",
+      "sha256": "36d3b09eeec3f2d69b1b6b16019fd52ed2dd6e27189e64b431499971035a21be"
+    }
+  ],
+  "interpreter": "C:\\Python314\\python.exe",
+  "arguments": [
+    "-I",
+    "-S",
+    "-B",
+    "qualify_owner.py"
+  ],
+  "scope": "11 generated fake factory and owner cases only",
+  "no_native_or_model_activity": true,
+  "planned_cases": [
+    "generated_unit_cases.OwnerContracts.test_01_actual_factory_publication_keeps_registry_identity",
+    "generated_unit_cases.OwnerContracts.test_02_foreign_vad_and_namespace_refused",
+    "generated_unit_cases.OwnerContracts.test_03_foreign_pcm_and_sample_rate_refused",
+    "generated_unit_cases.OwnerContracts.test_04_replaced_mutated_and_expired_pcm_refused",
+    "generated_unit_cases.OwnerContracts.test_05_overlapping_operation_and_release_refused",
+    "generated_unit_cases.OwnerContracts.test_06_revocation_blocks_publication_and_retains_owners",
+    "generated_unit_cases.OwnerContracts.test_07_real_constructor_pcm_and_filter_routes_remain_closed",
+    "generated_unit_cases.OwnerContracts.test_08_vad_only_retirement_blocks_publication",
+    "generated_unit_cases.OwnerContracts.test_09_replaced_completed_product_blocks_publication",
+    "generated_unit_cases.OwnerContracts.test_10_replaced_runtime_module_blocks_publication",
+    "generated_unit_cases.OwnerContracts.test_11_revoked_model_lease_blocks_publication"
+  ],
+  "startup_binding_set": true
+}

@@ -1,0 +1,762 @@
+[
+  {
+    "path": ".gitattributes",
+    "bytes": 8,
+    "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+  },
+  {
+    "path": "ASTRA-VERDICT.md",
+    "bytes": 2189,
+    "sha256": "e23d8b823b249fc1d4bc4d77ab9dddbfb4f1417f7bbc3e8220a862ac02576081"
+  },
+  {
+    "path": "astra-worker-runtime-owner-confirmation01/.gitattributes",
+    "bytes": 8,
+    "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+  },
+  {
+    "path": "astra-worker-runtime-owner-confirmation01/COPY-BINDINGS.json",
+    "bytes": 9214,
+    "sha256": "e38f736ca291adbba0a15e5c59d69bfeff9e83c05f1d6fb5b7a5575e926e6696"
+  },
+  {
+    "path": "astra-worker-runtime-owner-confirmation01/EXPECTED-CASES.json",
+    "bytes": 1130,
+    "sha256": "954ca4783d70c2dc654e19a110aee6b7c453cd1e6f00098c46bd1b84a4738ba3"
+  },
+  {
+    "path": "astra-worker-runtime-owner-confirmation01/fake_torch_support.py",
+    "bytes": 5204,
+    "sha256": "5e1381eac70634292945422dfaf70786bb5fb96cbab7ea14a3fcc08fa29a185b"
+  },
+  {
+    "path": "astra-worker-runtime-owner-confirmation01/fixed_schema_helpers.py",
+    "bytes": 2837,
+    "sha256": "d61e9a48ecfa906862fedb5b91415f1d2a0b71adc27d3e43ef245842c9e5b188"
+  },
+  {
+    "path": "astra-worker-runtime-owner-confirmation01/generated_factory_fixture.py",
+    "bytes": 7539,
+    "sha256": "1c60507a82c238116b630f146c44e7a81fdc57eb74f05841489c3128f150eb6f"
+  },
+  {
+    "path": "astra-worker-runtime-owner-confirmation01/generated_unit_cases.py",
+    "bytes": 13846,
+    "sha256": "58ce1ba84b4baa457c3973cea5745ad3be94caa4ce627da732d67e9c8e148979"
+  },
+  {
+    "path": "astra-worker-runtime-owner-confirmation01/model_binding_registry.py",
+    "bytes": 8732,
+    "sha256": "48567add0f0ac2ac9140e9aa86b06f077454c98e2f0773100da5ba070f7b3deb"
+  },
+  {
+    "path": "astra-worker-runtime-owner-confirmation01/owned_cpu_tensor_port.py",
+    "bytes": 11768,
+    "sha256": "ac9eb28194723ffaf2d98bb2cd691a7b27b0a1638694fdfd8cb198c3084e8964"
+  },
+  {
+    "path": "astra-worker-runtime-owner-confirmation01/owned_factory_port.py",
+    "bytes": 15463,
+    "sha256": "2569853c7634b795e3d2cf717129ec3dbc4e11d96ddb347098dcc4fbc532f0d4"
+  },
+  {
+    "path": "astra-worker-runtime-owner-confirmation01/owned_guard.py",
+    "bytes": 2109,
+    "sha256": "7672f614d81cf0be5e7bd408f8f856af328fe34e6ca7ee707c9d0db838e56d1f"
+  },
+  {
+    "path": "astra-worker-runtime-owner-confirmation01/plain_state_reader.py",
+    "bytes": 10629,
+    "sha256": "3962d355cffe928f78b741d2d920cc9c727a9fbd10305e20462b60f4cef9990c"
+  },
+  {
+    "path": "astra-worker-runtime-owner-confirmation01/PROTOCOL.md",
+    "bytes": 3224,
+    "sha256": "240825feb821f06b2c86255469f1e6cf6b95c463b2f593cdcec7f62cb75eb157"
+  },
+  {
+    "path": "astra-worker-runtime-owner-confirmation01/qualify_owner.py",
+    "bytes": 13632,
+    "sha256": "e08653d576dd3ca8367efde9e9438f485de5835f3831e0f7a1f8571fefa6acc1"
+  },
+  {
+    "path": "astra-worker-runtime-owner-confirmation01/ROOT-ADMISSION.json",
+    "bytes": 2941,
+    "sha256": "e2fa21ee2eb54c1ae9c0e579f36b7b8f83276982c86a2c31866d36420737befa"
+  },
+  {
+    "path": "astra-worker-runtime-owner-confirmation01/ROOT-ADMISSION.template.json",
+    "bytes": 2811,
+    "sha256": "37ebb3c5b28a35ff88a869f5c6915a772e30814ccbcb69a9bb82fb8446a99deb"
+  },
+  {
+    "path": "astra-worker-runtime-owner-confirmation01/run_owner01.ps1",
+    "bytes": 12912,
+    "sha256": "c74a9a14e808203beba38dc74f43ba7a42c60986b8138d7856d8d31dd4ed5a2a"
+  },
+  {
+    "path": "astra-worker-runtime-owner-confirmation01/runs/rto01/after.json",
+    "bytes": 5242,
+    "sha256": "200ca1d7d2745adb12b475331152add07a3f609565cb34530faa22af9068e7b6"
+  },
+  {
+    "path": "astra-worker-runtime-owner-confirmation01/runs/rto01/exit.json",
+    "bytes": 217,
+    "sha256": "facaf113499c988b9cf55e42ba6f6ce2e7fe8a1fe896efe1804c4e05b883a10f"
+  },
+  {
+    "path": "astra-worker-runtime-owner-confirmation01/runs/rto01/EXPECTED-CASES.json",
+    "bytes": 1130,
+    "sha256": "954ca4783d70c2dc654e19a110aee6b7c453cd1e6f00098c46bd1b84a4738ba3"
+  },
+  {
+    "path": "astra-worker-runtime-owner-confirmation01/runs/rto01/fake_torch_support.py",
+    "bytes": 5204,
+    "sha256": "5e1381eac70634292945422dfaf70786bb5fb96cbab7ea14a3fcc08fa29a185b"
+  },
+  {
+    "path": "astra-worker-runtime-owner-confirmation01/runs/rto01/fixed_schema_helpers.py",
+    "bytes": 2837,
+    "sha256": "d61e9a48ecfa906862fedb5b91415f1d2a0b71adc27d3e43ef245842c9e5b188"
+  },
+  {
+    "path": "astra-worker-runtime-owner-confirmation01/runs/rto01/generated_factory_fixture.py",
+    "bytes": 7539,
+    "sha256": "1c60507a82c238116b630f146c44e7a81fdc57eb74f05841489c3128f150eb6f"
+  },
+  {
+    "path": "astra-worker-runtime-owner-confirmation01/runs/rto01/generated_unit_cases.py",
+    "bytes": 13846,
+    "sha256": "58ce1ba84b4baa457c3973cea5745ad3be94caa4ce627da732d67e9c8e148979"
+  },
+  {
+    "path": "astra-worker-runtime-owner-confirmation01/runs/rto01/model_binding_registry.py",
+    "bytes": 8732,
+    "sha256": "48567add0f0ac2ac9140e9aa86b06f077454c98e2f0773100da5ba070f7b3deb"
+  },
+  {
+    "path": "astra-worker-runtime-owner-confirmation01/runs/rto01/native-exit.json",
+    "bytes": 71,
+    "sha256": "c06d0922ffd181268bb4c6f173e1a81b4d24baa3fd0e2c0e64e7a8b63665b8aa"
+  },
+  {
+    "path": "astra-worker-runtime-owner-confirmation01/runs/rto01/owned_cpu_tensor_port.py",
+    "bytes": 11768,
+    "sha256": "ac9eb28194723ffaf2d98bb2cd691a7b27b0a1638694fdfd8cb198c3084e8964"
+  },
+  {
+    "path": "astra-worker-runtime-owner-confirmation01/runs/rto01/owned_factory_port.py",
+    "bytes": 15463,
+    "sha256": "2569853c7634b795e3d2cf717129ec3dbc4e11d96ddb347098dcc4fbc532f0d4"
+  },
+  {
+    "path": "astra-worker-runtime-owner-confirmation01/runs/rto01/owned_guard.py",
+    "bytes": 2109,
+    "sha256": "7672f614d81cf0be5e7bd408f8f856af328fe34e6ca7ee707c9d0db838e56d1f"
+  },
+  {
+    "path": "astra-worker-runtime-owner-confirmation01/runs/rto01/plain_state_reader.py",
+    "bytes": 10629,
+    "sha256": "3962d355cffe928f78b741d2d920cc9c727a9fbd10305e20462b60f4cef9990c"
+  },
+  {
+    "path": "astra-worker-runtime-owner-confirmation01/runs/rto01/plan.json",
+    "bytes": 5637,
+    "sha256": "4ae27dc577865894eeefb8b44625717ea14d98916db9673d1161887236ac6f89"
+  },
+  {
+    "path": "astra-worker-runtime-owner-confirmation01/runs/rto01/qualify_owner.py",
+    "bytes": 13632,
+    "sha256": "e08653d576dd3ca8367efde9e9438f485de5835f3831e0f7a1f8571fefa6acc1"
+  },
+  {
+    "path": "astra-worker-runtime-owner-confirmation01/runs/rto01/ROOT-ADMISSION.json",
+    "bytes": 2941,
+    "sha256": "e2fa21ee2eb54c1ae9c0e579f36b7b8f83276982c86a2c31866d36420737befa"
+  },
+  {
+    "path": "astra-worker-runtime-owner-confirmation01/runs/rto01/run_owner01.ps1",
+    "bytes": 12912,
+    "sha256": "c74a9a14e808203beba38dc74f43ba7a42c60986b8138d7856d8d31dd4ed5a2a"
+  },
+  {
+    "path": "astra-worker-runtime-owner-confirmation01/runs/rto01/SOURCE-INPUTS.json",
+    "bytes": 3500,
+    "sha256": "d2d4bc31384a41496455ca87e96fd0a1b8957ede79cd4b5a1a2a76532bc98e7e"
+  },
+  {
+    "path": "astra-worker-runtime-owner-confirmation01/runs/rto01/state_bridge.py",
+    "bytes": 11316,
+    "sha256": "b3ff126f29942e7daaf51e463ca9f35c4c423b6c638dbc38e5246946a8b7a6b2"
+  },
+  {
+    "path": "astra-worker-runtime-owner-confirmation01/runs/rto01/stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "astra-worker-runtime-owner-confirmation01/runs/rto01/stdout.json",
+    "bytes": 5359,
+    "sha256": "8b589448c4b8dc6e35d72285703698077ec1bbbe584a6caa0c46a600e4652a94"
+  },
+  {
+    "path": "astra-worker-runtime-owner-confirmation01/runs/rto01/worker_runtime_owner.py",
+    "bytes": 12997,
+    "sha256": "5647023ed03c5acfd8b1aa981a56171dd92228ccc0972f12546bb0b3d411ce87"
+  },
+  {
+    "path": "astra-worker-runtime-owner-confirmation01/SOURCE-INPUTS.json",
+    "bytes": 3500,
+    "sha256": "d2d4bc31384a41496455ca87e96fd0a1b8957ede79cd4b5a1a2a76532bc98e7e"
+  },
+  {
+    "path": "astra-worker-runtime-owner-confirmation01/state_bridge.py",
+    "bytes": 11316,
+    "sha256": "b3ff126f29942e7daaf51e463ca9f35c4c423b6c638dbc38e5246946a8b7a6b2"
+  },
+  {
+    "path": "astra-worker-runtime-owner-confirmation01/worker_runtime_owner.py",
+    "bytes": 12997,
+    "sha256": "5647023ed03c5acfd8b1aa981a56171dd92228ccc0972f12546bb0b3d411ce87"
+  },
+  {
+    "path": "FIXED-COPY-LIST.json",
+    "bytes": 51479,
+    "sha256": "0b8811541ee5c662fb45290b0c79e0c15c6ebf5f1277369689d5096fcd88d92a"
+  },
+  {
+    "path": "RUNTIME-OWNER-ADMISSION01-ACTUAL.json",
+    "bytes": 361,
+    "sha256": "774a1ef7fc9ced8080f8dcb6283258bc715389fd102ca399d4f5dfc653221059"
+  },
+  {
+    "path": "RUNTIME-OWNER-ADMISSION02-ACTUAL.json",
+    "bytes": 363,
+    "sha256": "fcfa8f8592bff7ca6e785550bc0def0510aa69affbf68fd0256e20fd0e669d49"
+  },
+  {
+    "path": "runtime-owner-archive-list01/VERDICT.md",
+    "bytes": 2539,
+    "sha256": "7f38cf7a519ea4115abb6c3548f250909d493ad213b166f5c1d62fc3c2c3f754"
+  },
+  {
+    "path": "runtime-owner-archive-list01/write_list.py",
+    "bytes": 3338,
+    "sha256": "9acb62be299c206433bc3d3382fd6245eeae41b142551aab6cc9339841375f5d"
+  },
+  {
+    "path": "RUNTIME-OWNER-AUTHOR01-FINAL-ACTUAL.json",
+    "bytes": 124,
+    "sha256": "1583c46e2fc531b7f7f1a08ada473f3765a9a8a8c6516375ecb3b3cb3d694986"
+  },
+  {
+    "path": "RUNTIME-OWNER-AUTHOR01-INITIAL-ACTUAL.json",
+    "bytes": 130,
+    "sha256": "60f353c31a0f656ffbba9b1b01f513f1c6a7535bbc8ca32377fe0aaa4c3d4fa5"
+  },
+  {
+    "path": "RUNTIME-OWNER-INDEPENDENT-ADMISSION-ACTUAL.json",
+    "bytes": 369,
+    "sha256": "bef3bc3006729eaabeedfe5f2eb79a3ca46ee5caf8e0bd7e598feafd56f41685"
+  },
+  {
+    "path": "RUNTIME-OWNER-INDEPENDENT01-FINAL-ACTUAL.json",
+    "bytes": 124,
+    "sha256": "ddcd6cf5eac29b8650a1aa7ce46e391ca64f9b7c427c78e1ca8b58d67eab3568"
+  },
+  {
+    "path": "RUNTIME-OWNER-INDEPENDENT01-INITIAL-ACTUAL.json",
+    "bytes": 130,
+    "sha256": "c34296e17d1ea461a00fd9c25358111293e5f3f9dad2cd30bdcc68a4687b20ad"
+  },
+  {
+    "path": "worker-runtime-owner-confirmation-preparation01/.gitattributes",
+    "bytes": 8,
+    "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+  },
+  {
+    "path": "worker-runtime-owner-confirmation-preparation01/ACTUAL-PREPARATION-TOOL.json",
+    "bytes": 571,
+    "sha256": "c02e6fc4389a57b0c49237c8e769031f812667e2c1fd822411665b1950e38f81"
+  },
+  {
+    "path": "worker-runtime-owner-confirmation-preparation01/before/run_owner01.ps1",
+    "bytes": 12778,
+    "sha256": "36d3b09eeec3f2d69b1b6b16019fd52ed2dd6e27189e64b431499971035a21be"
+  },
+  {
+    "path": "worker-runtime-owner-confirmation-preparation01/before/SOURCE-INPUTS.json",
+    "bytes": 3374,
+    "sha256": "e336118c32a465a1c07a8c497ea9b6cae9335e7ce34b9de98d021a9ed04670ef"
+  },
+  {
+    "path": "worker-runtime-owner-confirmation-preparation01/BRIEF.md",
+    "bytes": 1393,
+    "sha256": "016dddafc9dedc83cecaa5097ca717028b0521ec7b319b9272b142e9ff694d9e"
+  },
+  {
+    "path": "worker-runtime-owner-confirmation-preparation01/PREPARATION-RESULT.json",
+    "bytes": 443,
+    "sha256": "43b34ae0dbf5b3749d60bb9b93bbf861923f4473a6a9625ec0c0874f629f03f7"
+  },
+  {
+    "path": "worker-runtime-owner-confirmation-preparation01/prepare_copy.py",
+    "bytes": 5481,
+    "sha256": "87740d13b29a861e87ca72856b89be0eeb3cd9224722e64b1eedf8d28cdb51e2"
+  },
+  {
+    "path": "worker-runtime-owner-confirmation-preparation01/run_owner01.ps1.diff",
+    "bytes": 4880,
+    "sha256": "d7db08f639f89da1558005b16f67fc0cead968b47c45206cef33184cfeec456a"
+  },
+  {
+    "path": "worker-runtime-owner-confirmation-preparation01/STATIC-PREP-NOTE.md",
+    "bytes": 1218,
+    "sha256": "cdff265dcc460420c1a71e5a8cc917521454845f8c889ca9070ef68fc9c34af9"
+  },
+  {
+    "path": "worker-runtime-owner-instrument01/.gitattributes",
+    "bytes": 8,
+    "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+  },
+  {
+    "path": "worker-runtime-owner-instrument01/before/qualify_namespace.py",
+    "bytes": 11079,
+    "sha256": "ce4b149a4b5920c370c45d0ea31bf96ec65fb1ddf714cde63ae012d4298125d9"
+  },
+  {
+    "path": "worker-runtime-owner-instrument01/before/run_namespace01.ps1",
+    "bytes": 8985,
+    "sha256": "9bf9e632508df3e3d90a8a8d070b43d3efbcf5ccc58f155d2a169a5576f1fe4f"
+  },
+  {
+    "path": "worker-runtime-owner-instrument01/BRIEF.md",
+    "bytes": 2042,
+    "sha256": "4be165c9aa7642f17fc02f14a1ab08d39ca278cbc054cf02b2c2a3c7865fb57f"
+  },
+  {
+    "path": "worker-runtime-owner-instrument01/EXPECTED-CASES.json",
+    "bytes": 1130,
+    "sha256": "954ca4783d70c2dc654e19a110aee6b7c453cd1e6f00098c46bd1b84a4738ba3"
+  },
+  {
+    "path": "worker-runtime-owner-instrument01/GUARD-PREPARATION.json",
+    "bytes": 430,
+    "sha256": "5ad6fb692b56596b473b9a8126815cbc5cfdeed5d52f912ac254a35572d95d8b"
+  },
+  {
+    "path": "worker-runtime-owner-instrument01/prepare_guard.py",
+    "bytes": 8038,
+    "sha256": "57cd575fd71f62f13e4d62a8b7648b70d1fb346ee15b81171579b5e6b88f5da6"
+  },
+  {
+    "path": "worker-runtime-owner-instrument01/prepare_launcher.py",
+    "bytes": 6234,
+    "sha256": "bf08a005d3274920ba2194032192ac5860a2780b3219be387bd582756e0d3fe7"
+  },
+  {
+    "path": "worker-runtime-owner-instrument01/PROTOCOL.md",
+    "bytes": 4036,
+    "sha256": "73929abdb180bbcaadca968c32a7617dcb5c52c5e0e973a243e13e8bb67f38f7"
+  },
+  {
+    "path": "worker-runtime-owner-instrument01/qualify_owner.py",
+    "bytes": 13632,
+    "sha256": "e08653d576dd3ca8367efde9e9438f485de5835f3831e0f7a1f8571fefa6acc1"
+  },
+  {
+    "path": "worker-runtime-owner-instrument01/qualify_owner.py.diff",
+    "bytes": 13409,
+    "sha256": "289870151424388991113dd34b7f501da28672d3f5849225e2a1eb84147c74d7"
+  },
+  {
+    "path": "worker-runtime-owner-instrument01/ROOT-ADMISSION-WRITER-REPAIR.md",
+    "bytes": 681,
+    "sha256": "e1141cff4d671152ecfd1358b2c6ac0031258dfce4aac6436c4f600585f29861"
+  },
+  {
+    "path": "worker-runtime-owner-instrument01/ROOT-ADMISSION.json",
+    "bytes": 2962,
+    "sha256": "6947fb2cda180fefd17b8fb5cdcc64216bc45569cf96a46238236256b8921f44"
+  },
+  {
+    "path": "worker-runtime-owner-instrument01/ROOT-ADMISSION.template.json",
+    "bytes": 2718,
+    "sha256": "ae0995022f9a38047828b7d50e54d07fe12d1cd0a2eebabf6840e08836a6d199"
+  },
+  {
+    "path": "worker-runtime-owner-instrument01/run_owner01.ps1",
+    "bytes": 12778,
+    "sha256": "36d3b09eeec3f2d69b1b6b16019fd52ed2dd6e27189e64b431499971035a21be"
+  },
+  {
+    "path": "worker-runtime-owner-instrument01/run_owner01.ps1.diff",
+    "bytes": 13363,
+    "sha256": "0427cd8438a41057f6e8e63df8ec596969c94ba30442c0409146524b11687fc6"
+  },
+  {
+    "path": "worker-runtime-owner-instrument01/runs/rto01/after.json",
+    "bytes": 5242,
+    "sha256": "e0ad909042058bdd719fc45d0941996858340235d2536efcdbcb5617f3120bbe"
+  },
+  {
+    "path": "worker-runtime-owner-instrument01/runs/rto01/exit.json",
+    "bytes": 217,
+    "sha256": "facaf113499c988b9cf55e42ba6f6ce2e7fe8a1fe896efe1804c4e05b883a10f"
+  },
+  {
+    "path": "worker-runtime-owner-instrument01/runs/rto01/EXPECTED-CASES.json",
+    "bytes": 1130,
+    "sha256": "954ca4783d70c2dc654e19a110aee6b7c453cd1e6f00098c46bd1b84a4738ba3"
+  },
+  {
+    "path": "worker-runtime-owner-instrument01/runs/rto01/fake_torch_support.py",
+    "bytes": 5204,
+    "sha256": "5e1381eac70634292945422dfaf70786bb5fb96cbab7ea14a3fcc08fa29a185b"
+  },
+  {
+    "path": "worker-runtime-owner-instrument01/runs/rto01/fixed_schema_helpers.py",
+    "bytes": 2837,
+    "sha256": "d61e9a48ecfa906862fedb5b91415f1d2a0b71adc27d3e43ef245842c9e5b188"
+  },
+  {
+    "path": "worker-runtime-owner-instrument01/runs/rto01/generated_factory_fixture.py",
+    "bytes": 7539,
+    "sha256": "1c60507a82c238116b630f146c44e7a81fdc57eb74f05841489c3128f150eb6f"
+  },
+  {
+    "path": "worker-runtime-owner-instrument01/runs/rto01/generated_unit_cases.py",
+    "bytes": 13846,
+    "sha256": "58ce1ba84b4baa457c3973cea5745ad3be94caa4ce627da732d67e9c8e148979"
+  },
+  {
+    "path": "worker-runtime-owner-instrument01/runs/rto01/model_binding_registry.py",
+    "bytes": 8732,
+    "sha256": "48567add0f0ac2ac9140e9aa86b06f077454c98e2f0773100da5ba070f7b3deb"
+  },
+  {
+    "path": "worker-runtime-owner-instrument01/runs/rto01/native-exit.json",
+    "bytes": 71,
+    "sha256": "c06d0922ffd181268bb4c6f173e1a81b4d24baa3fd0e2c0e64e7a8b63665b8aa"
+  },
+  {
+    "path": "worker-runtime-owner-instrument01/runs/rto01/owned_cpu_tensor_port.py",
+    "bytes": 11768,
+    "sha256": "ac9eb28194723ffaf2d98bb2cd691a7b27b0a1638694fdfd8cb198c3084e8964"
+  },
+  {
+    "path": "worker-runtime-owner-instrument01/runs/rto01/owned_factory_port.py",
+    "bytes": 15463,
+    "sha256": "2569853c7634b795e3d2cf717129ec3dbc4e11d96ddb347098dcc4fbc532f0d4"
+  },
+  {
+    "path": "worker-runtime-owner-instrument01/runs/rto01/owned_guard.py",
+    "bytes": 2109,
+    "sha256": "7672f614d81cf0be5e7bd408f8f856af328fe34e6ca7ee707c9d0db838e56d1f"
+  },
+  {
+    "path": "worker-runtime-owner-instrument01/runs/rto01/plain_state_reader.py",
+    "bytes": 10629,
+    "sha256": "3962d355cffe928f78b741d2d920cc9c727a9fbd10305e20462b60f4cef9990c"
+  },
+  {
+    "path": "worker-runtime-owner-instrument01/runs/rto01/plan.json",
+    "bytes": 5495,
+    "sha256": "b6ae847cc3de04b50d765ec004243409b4e009b95405b66736b7bff2adaa94c4"
+  },
+  {
+    "path": "worker-runtime-owner-instrument01/runs/rto01/qualify_owner.py",
+    "bytes": 13632,
+    "sha256": "e08653d576dd3ca8367efde9e9438f485de5835f3831e0f7a1f8571fefa6acc1"
+  },
+  {
+    "path": "worker-runtime-owner-instrument01/runs/rto01/ROOT-ADMISSION.json",
+    "bytes": 2962,
+    "sha256": "6947fb2cda180fefd17b8fb5cdcc64216bc45569cf96a46238236256b8921f44"
+  },
+  {
+    "path": "worker-runtime-owner-instrument01/runs/rto01/run_owner01.ps1",
+    "bytes": 12778,
+    "sha256": "36d3b09eeec3f2d69b1b6b16019fd52ed2dd6e27189e64b431499971035a21be"
+  },
+  {
+    "path": "worker-runtime-owner-instrument01/runs/rto01/SOURCE-INPUTS.json",
+    "bytes": 3374,
+    "sha256": "e336118c32a465a1c07a8c497ea9b6cae9335e7ce34b9de98d021a9ed04670ef"
+  },
+  {
+    "path": "worker-runtime-owner-instrument01/runs/rto01/state_bridge.py",
+    "bytes": 11316,
+    "sha256": "b3ff126f29942e7daaf51e463ca9f35c4c423b6c638dbc38e5246946a8b7a6b2"
+  },
+  {
+    "path": "worker-runtime-owner-instrument01/runs/rto01/stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "worker-runtime-owner-instrument01/runs/rto01/stdout.json",
+    "bytes": 5359,
+    "sha256": "ad78afd30ec1724c1ed87e8c923665aa566220bb51cb0da851691b3b217e53ab"
+  },
+  {
+    "path": "worker-runtime-owner-instrument01/runs/rto01/worker_runtime_owner.py",
+    "bytes": 12997,
+    "sha256": "5647023ed03c5acfd8b1aa981a56171dd92228ccc0972f12546bb0b3d411ce87"
+  },
+  {
+    "path": "worker-runtime-owner-instrument01/SOURCE-INPUTS.json",
+    "bytes": 3374,
+    "sha256": "e336118c32a465a1c07a8c497ea9b6cae9335e7ce34b9de98d021a9ed04670ef"
+  },
+  {
+    "path": "worker-runtime-owner-proposal01/.gitattributes",
+    "bytes": 8,
+    "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+  },
+  {
+    "path": "worker-runtime-owner-proposal01/before/BRIEF.initial.md",
+    "bytes": 1968,
+    "sha256": "0234de8c5288b4555bce479214477912be937603a9ddf93a4f1b2bbbd5b66cac"
+  },
+  {
+    "path": "worker-runtime-owner-proposal01/before/worker_runtime_owner.initial.py",
+    "bytes": 12344,
+    "sha256": "a838e724fc6edd0c2dd4e78426e445cfa30ec70a49f00c9de833d774db7aa206"
+  },
+  {
+    "path": "worker-runtime-owner-proposal01/BRIEF.md",
+    "bytes": 2037,
+    "sha256": "fa29554af4d276c8e7f83237c5a86aac128af3481c6e58227167c5ec71439f7e"
+  },
+  {
+    "path": "worker-runtime-owner-proposal01/fake_torch_support.py",
+    "bytes": 5204,
+    "sha256": "5e1381eac70634292945422dfaf70786bb5fb96cbab7ea14a3fcc08fa29a185b"
+  },
+  {
+    "path": "worker-runtime-owner-proposal01/fixed_schema_helpers.py",
+    "bytes": 2837,
+    "sha256": "d61e9a48ecfa906862fedb5b91415f1d2a0b71adc27d3e43ef245842c9e5b188"
+  },
+  {
+    "path": "worker-runtime-owner-proposal01/fixed-factory.proposal.txt",
+    "bytes": 7589,
+    "sha256": "69136c1f7d5cd7bf283e3634dff730c9fd951a314a80b0fa134208f3d1c1820b"
+  },
+  {
+    "path": "worker-runtime-owner-proposal01/FIXTURE-ADAPTATION.md",
+    "bytes": 4161,
+    "sha256": "dd29f6482c13dbaf69bf79460d8c6652cf5d3bebeba4fd473913bc5fdb25892c"
+  },
+  {
+    "path": "worker-runtime-owner-proposal01/FIXTURE-SETUP.diff",
+    "bytes": 3180,
+    "sha256": "5273c286d3f62c9964ae86e4b3349f13ffab40d9fc0912d99d93879ba023ca39"
+  },
+  {
+    "path": "worker-runtime-owner-proposal01/generated_factory_fixture.py",
+    "bytes": 7539,
+    "sha256": "1c60507a82c238116b630f146c44e7a81fdc57eb74f05841489c3128f150eb6f"
+  },
+  {
+    "path": "worker-runtime-owner-proposal01/generated_unit_cases.py",
+    "bytes": 10578,
+    "sha256": "800f969a70c3ac15015618f962baec848c82be07c5076019da8866237b613576"
+  },
+  {
+    "path": "worker-runtime-owner-proposal01/INPUT-COPY-MAP.json",
+    "bytes": 2927,
+    "sha256": "2aa734e2fb579192aee3a333cd7c67117c51a802abab436806f2af84c1fa6bc4"
+  },
+  {
+    "path": "worker-runtime-owner-proposal01/MIGRATION.md",
+    "bytes": 3810,
+    "sha256": "c0aa3e078e10c453b9e341c37ab15b1e9598a695e01dcce69f6530f6e0d34059"
+  },
+  {
+    "path": "worker-runtime-owner-proposal01/model_binding_registry.py",
+    "bytes": 8732,
+    "sha256": "48567add0f0ac2ac9140e9aa86b06f077454c98e2f0773100da5ba070f7b3deb"
+  },
+  {
+    "path": "worker-runtime-owner-proposal01/original-qualify_factory.py",
+    "bytes": 39513,
+    "sha256": "162b7a297b0a94ef579a3ba0590406417bd91b4882bd0747e70f9a4365ebf1c7"
+  },
+  {
+    "path": "worker-runtime-owner-proposal01/owned_cpu_tensor_port.py",
+    "bytes": 11768,
+    "sha256": "ac9eb28194723ffaf2d98bb2cd691a7b27b0a1638694fdfd8cb198c3084e8964"
+  },
+  {
+    "path": "worker-runtime-owner-proposal01/owned_factory_port.py",
+    "bytes": 15463,
+    "sha256": "2569853c7634b795e3d2cf717129ec3dbc4e11d96ddb347098dcc4fbc532f0d4"
+  },
+  {
+    "path": "worker-runtime-owner-proposal01/owned_guard.py",
+    "bytes": 2109,
+    "sha256": "7672f614d81cf0be5e7bd408f8f856af328fe34e6ca7ee707c9d0db838e56d1f"
+  },
+  {
+    "path": "worker-runtime-owner-proposal01/plain_state_reader.py",
+    "bytes": 10629,
+    "sha256": "3962d355cffe928f78b741d2d920cc9c727a9fbd10305e20462b60f4cef9990c"
+  },
+  {
+    "path": "worker-runtime-owner-proposal01/prepare_inputs.py",
+    "bytes": 7264,
+    "sha256": "d5d19bfcb55ff9a39dd6f0f3cb03dd9ea8209936fe70a662d81f272f7d2f2170"
+  },
+  {
+    "path": "worker-runtime-owner-proposal01/PREQUALIFICATION-REVIEW01.md",
+    "bytes": 1830,
+    "sha256": "e17d680969be7cddefa95345cd136fb1198c7afff2585d68ac0a44e355d21d66"
+  },
+  {
+    "path": "worker-runtime-owner-proposal01/SOURCE-REVIEW01.diff",
+    "bytes": 3418,
+    "sha256": "8f7183170c6857f1f4d9674b2fdd003a7b44903047a2e4a4cdce383ac6ae071e"
+  },
+  {
+    "path": "worker-runtime-owner-proposal01/state_bridge.py",
+    "bytes": 11316,
+    "sha256": "b3ff126f29942e7daaf51e463ca9f35c4c423b6c638dbc38e5246946a8b7a6b2"
+  },
+  {
+    "path": "worker-runtime-owner-proposal01/STATIC-REVIEW.json",
+    "bytes": 2990,
+    "sha256": "34edac63064c00cc55faa3fb081a3d912d804776517eb10502419e27d2c535de"
+  },
+  {
+    "path": "worker-runtime-owner-proposal01/worker_runtime_owner.py",
+    "bytes": 12838,
+    "sha256": "98e6e6f7bf856e47e2b9e7dae0fc7849b5691aca5634c39197a87114f4aa566e"
+  },
+  {
+    "path": "worker-runtime-owner-proposal02/.gitattributes",
+    "bytes": 8,
+    "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+  },
+  {
+    "path": "worker-runtime-owner-proposal02/BEFORE-INPUTS.json",
+    "bytes": 4854,
+    "sha256": "240da4aad49e462e73b4522e97bd83f66c2727c69b81875ef5d507c502883292"
+  },
+  {
+    "path": "worker-runtime-owner-proposal02/before/generated_unit_cases.py",
+    "bytes": 10578,
+    "sha256": "800f969a70c3ac15015618f962baec848c82be07c5076019da8866237b613576"
+  },
+  {
+    "path": "worker-runtime-owner-proposal02/before/worker_runtime_owner.py",
+    "bytes": 12838,
+    "sha256": "98e6e6f7bf856e47e2b9e7dae0fc7849b5691aca5634c39197a87114f4aa566e"
+  },
+  {
+    "path": "worker-runtime-owner-proposal02/BRIEF.md",
+    "bytes": 1150,
+    "sha256": "4f654d2975361786cef03800625d9eae767a4abeb680eee101dd0d4fb34ecca7"
+  },
+  {
+    "path": "worker-runtime-owner-proposal02/fake_torch_support.py",
+    "bytes": 5204,
+    "sha256": "5e1381eac70634292945422dfaf70786bb5fb96cbab7ea14a3fcc08fa29a185b"
+  },
+  {
+    "path": "worker-runtime-owner-proposal02/fixed_schema_helpers.py",
+    "bytes": 2837,
+    "sha256": "d61e9a48ecfa906862fedb5b91415f1d2a0b71adc27d3e43ef245842c9e5b188"
+  },
+  {
+    "path": "worker-runtime-owner-proposal02/fixed-factory.proposal.txt",
+    "bytes": 7589,
+    "sha256": "69136c1f7d5cd7bf283e3634dff730c9fd951a314a80b0fa134208f3d1c1820b"
+  },
+  {
+    "path": "worker-runtime-owner-proposal02/FIXTURE-ADAPTATION.md",
+    "bytes": 4161,
+    "sha256": "dd29f6482c13dbaf69bf79460d8c6652cf5d3bebeba4fd473913bc5fdb25892c"
+  },
+  {
+    "path": "worker-runtime-owner-proposal02/generated_factory_fixture.py",
+    "bytes": 7539,
+    "sha256": "1c60507a82c238116b630f146c44e7a81fdc57eb74f05841489c3128f150eb6f"
+  },
+  {
+    "path": "worker-runtime-owner-proposal02/generated_unit_cases.py",
+    "bytes": 13846,
+    "sha256": "58ce1ba84b4baa457c3973cea5745ad3be94caa4ce627da732d67e9c8e148979"
+  },
+  {
+    "path": "worker-runtime-owner-proposal02/generated_unit_cases.py.diff",
+    "bytes": 4234,
+    "sha256": "52be7f63a005228ff215e9cf3a9bddb967c66155efe705d5828ebc5c0e84080c"
+  },
+  {
+    "path": "worker-runtime-owner-proposal02/INPUT-COPY-MAP.json",
+    "bytes": 2927,
+    "sha256": "2aa734e2fb579192aee3a333cd7c67117c51a802abab436806f2af84c1fa6bc4"
+  },
+  {
+    "path": "worker-runtime-owner-proposal02/MIGRATION.md",
+    "bytes": 3810,
+    "sha256": "c0aa3e078e10c453b9e341c37ab15b1e9598a695e01dcce69f6530f6e0d34059"
+  },
+  {
+    "path": "worker-runtime-owner-proposal02/model_binding_registry.py",
+    "bytes": 8732,
+    "sha256": "48567add0f0ac2ac9140e9aa86b06f077454c98e2f0773100da5ba070f7b3deb"
+  },
+  {
+    "path": "worker-runtime-owner-proposal02/original-qualify_factory.py",
+    "bytes": 39513,
+    "sha256": "162b7a297b0a94ef579a3ba0590406417bd91b4882bd0747e70f9a4365ebf1c7"
+  },
+  {
+    "path": "worker-runtime-owner-proposal02/owned_cpu_tensor_port.py",
+    "bytes": 11768,
+    "sha256": "ac9eb28194723ffaf2d98bb2cd691a7b27b0a1638694fdfd8cb198c3084e8964"
+  },
+  {
+    "path": "worker-runtime-owner-proposal02/owned_factory_port.py",
+    "bytes": 15463,
+    "sha256": "2569853c7634b795e3d2cf717129ec3dbc4e11d96ddb347098dcc4fbc532f0d4"
+  },
+  {
+    "path": "worker-runtime-owner-proposal02/owned_guard.py",
+    "bytes": 2109,
+    "sha256": "7672f614d81cf0be5e7bd408f8f856af328fe34e6ca7ee707c9d0db838e56d1f"
+  },
+  {
+    "path": "worker-runtime-owner-proposal02/PATCH-STATIC.json",
+    "bytes": 1500,
+    "sha256": "7094e211daa6fd84bf873c1f57f3c46cfcc9050729aa706a0982a868b7ea7acf"
+  },
+  {
+    "path": "worker-runtime-owner-proposal02/plain_state_reader.py",
+    "bytes": 10629,
+    "sha256": "3962d355cffe928f78b741d2d920cc9c727a9fbd10305e20462b60f4cef9990c"
+  },
+  {
+    "path": "worker-runtime-owner-proposal02/PUBLICATION-REPAIR.md",
+    "bytes": 1588,
+    "sha256": "3cd57ab0313e3c1038930b8ac3119a3aaf6cd0f449eb74b9b8a58ac4d94399b8"
+  },
+  {
+    "path": "worker-runtime-owner-proposal02/state_bridge.py",
+    "bytes": 11316,
+    "sha256": "b3ff126f29942e7daaf51e463ca9f35c4c423b6c638dbc38e5246946a8b7a6b2"
+  },
+  {
+    "path": "worker-runtime-owner-proposal02/worker_runtime_owner.py",
+    "bytes": 12997,
+    "sha256": "5647023ed03c5acfd8b1aa981a56171dd92228ccc0972f12546bb0b3d411ce87"
+  },
+  {
+    "path": "worker-runtime-owner-proposal02/worker_runtime_owner.py.diff",
+    "bytes": 517,
+    "sha256": "f843662ca1bf6b5eca37060e8be08fd42e6f0de2b5c2075a68d5d32ef9537ea8"
+  }
+]
