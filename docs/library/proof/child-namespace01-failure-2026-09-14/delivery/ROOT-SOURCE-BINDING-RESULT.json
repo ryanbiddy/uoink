@@ -1,0 +1,31 @@
+{
+  "scope": "Passive source bindings only; source review failed separately; no subject execution",
+  "frozen_files": 26,
+  "frozen_bytes": 553800,
+  "derivatives": 7,
+  "original_and_copied_inputs": 11,
+  "worker_hash_rows": 25,
+  "proposed_case_declarations": [
+    "test_01_admitted_issued_success_five_member",
+    "test_02_foreign_or_copied_startup_session_permit_refusal",
+    "test_03_changed_release_or_profile_after_consumption_refusal",
+    "test_04_substituted_worker_read_set_source_creation_time_refusal",
+    "test_05_independent_channel_or_key_refusal",
+    "test_06_changed_envelope_selection_or_profile_refusal",
+    "test_07_missing_or_extra_envelope_members_refusal",
+    "test_08_aliased_inherited_handles_refusal",
+    "test_09_physical_identity_or_inheritance_mismatch_refusal",
+    "test_10_materialization_before_begin_refusal",
+    "test_11_initial_cancel_without_buffers",
+    "test_12_begin_cancel_replay_refusal",
+    "test_13_copied_lease_or_namespace_refusal",
+    "test_14_short_read_or_hash_failure_retains_partial_custody",
+    "test_15_revocation_before_publication_retains_returned_custody",
+    "test_16_cleanup_failure_preserves_original_exception",
+    "test_17_admitted_issued_success_four_member"
+  ],
+  "tests_executed": false,
+  "control_room_status": "completed",
+  "event_count": 1042,
+  "command_coverage": "unverified; original provider previews may be shortened"
+}

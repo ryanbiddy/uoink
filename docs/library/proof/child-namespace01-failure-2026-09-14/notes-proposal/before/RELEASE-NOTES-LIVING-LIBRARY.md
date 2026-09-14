@@ -143,22 +143,8 @@ The completion-language extension passes **59 cases and 29 subtests in each
 independent copy**, with zero failures or skips. All46 existing lifecycle cases
 are preserved. The new checks cover session-bound metadata, closure, revocation
 and failure handling with inert ports. An authenticated backend response and
-connection to the issued controller startup record are still required. Real
-transcription and release remain unqualified. See [the metadata verdict](ASTRA-COMPLETION-FAKE59-VERDICT-2026-09-14.md).
-
-Controller startup authority is qualified at `9c87ec2`: both independent copies
-pass **81 cases with zero failures or skips, plus 48 passing subtests**. The
-original 65 cases remain unchanged; 16 new cases exercise controller parsing,
-admission and binding with inert services. The real worker startup path remains
-closed. These results add no native/model, installation or release credit.
-See [the startup authority verdict](ASTRA-STARTUP81-RESULT-VERDICT-2026-09-14.md).
-
-The source-only Gemini delivery `05a3bf93`, under brief `8611e31`, is complete
-but failed source review. The immutable delivery contains 26 files and 553,800
-bytes, frozen in observation `47c823`; its 17 proposed tests remain unexecuted.
-Source repair is required. This delivery adds no accepted implementation or
-qualification. Fixed backend construction and the worker connection remain
-unqualified. See [the child namespace brief](REAL-CHILD-NAMESPACE-IMPLEMENTATION-BRIEF-2026-09-14.md).
+real controller registry are still required; this is not a real transcription
+or release measurement. See [the metadata verdict](ASTRA-COMPLETION-FAKE59-VERDICT-2026-09-14.md).
 
 Ryan's approved D1 static checkpoint inspection is recorded at `4b38948`. One
 guarded invocation verified the fixed hash, ZIP inventory and version bytes,
@@ -198,7 +184,7 @@ The combined tokenizer and Hub-argument derivative now builds identically under
 Python 3.13 and 3.14; it remains uninstalled. The fixed VAD factory and schema
 are reviewed proposals. D2 local conversion is complete as recorded above;
 reader/model integration and runtime qualification remain open.
-The latest completed authorized branch-only backup is verified at `ea1b9ba`.
+The latest completed authorized branch-only backup is verified at `7f142e8`.
 Later commits require a separate verified backup; no candidate-branch push,
 main merge or publication follows.
 
@@ -700,8 +686,7 @@ See [final verification](FINAL-RELEASE-VALIDATION-2026-09-09.md).
 - D1 inspection and D2 local conversion are complete only within their recorded
   approvals. D3 fetching and D4 stack/native execution remain unapproved. The
   exact migration patch, artifact/loader policy and quality protocol still need
-  review and Ryan's decision; no target stack is approved. The complete model
-  notice and CPU/int8 profile binding remain unresolved.
+  review and Ryan's decision; no target stack is approved.
 - The latest production source change is `71d3e70`. After runtime integration, a fresh committed
   full tree, rebuilt/resealed package, installed notice inventory and client
   checks are still required. Tree `56d9d4c` predates both later production repairs;

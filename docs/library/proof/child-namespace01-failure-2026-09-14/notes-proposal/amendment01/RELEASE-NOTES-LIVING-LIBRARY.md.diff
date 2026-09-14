@@ -1,0 +1,12 @@
+--- before/RELEASE-NOTES-LIVING-LIBRARY.md
++++ proposed/RELEASE-NOTES-LIVING-LIBRARY.md
+@@ -156,4 +156,5 @@
+-Authenticated child namespace work is active in the source-only Gemini run
+-`05a3bf93`, from the committed brief at `8611e31`. No completed implementation
+-or new qualification is claimed. Fixed backend construction and the worker
+-connection remain open. See [the child namespace brief](REAL-CHILD-NAMESPACE-IMPLEMENTATION-BRIEF-2026-09-14.md).
++The source-only Gemini delivery `05a3bf93`, under brief `8611e31`, is complete
++and awaits source review. The immutable delivery contains 26 files and 553,800
++bytes, frozen in observation `47c823`; its 17 proposed tests remain unexecuted.
++No source acceptance or new qualification follows. Fixed backend construction
++and the worker connection remain unqualified. See [the child namespace brief](REAL-CHILD-NAMESPACE-IMPLEMENTATION-BRIEF-2026-09-14.md).

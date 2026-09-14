@@ -1,0 +1,75 @@
+{
+  "schema": 1,
+  "description": "Proposed 17-control test suite for dormant controller-to-child namespace connection",
+  "total_controls": 17,
+  "controls": [
+    {
+      "id": "test_01_admitted_issued_success_five_member",
+      "scope": "Pre/post-stage success for 5-member model (large/large-v3-turbo) including preprocessor_config.json and vocabulary.json"
+    },
+    {
+      "id": "test_02_foreign_or_copied_startup_session_permit_refusal",
+      "scope": "Refusal when foreign or copied startup/session/permit is supplied to stage validation"
+    },
+    {
+      "id": "test_03_changed_release_or_profile_after_consumption_refusal",
+      "scope": "Refusal when release authority or runtime profile changes after startup consumption"
+    },
+    {
+      "id": "test_04_substituted_worker_read_set_source_creation_time_refusal",
+      "scope": "Refusal when worker read set, child source sha256, or creation time is substituted or altered"
+    },
+    {
+      "id": "test_05_independent_channel_or_key_refusal",
+      "scope": "Refusal when channel is independently constructed or master key is forged"
+    },
+    {
+      "id": "test_06_changed_envelope_selection_or_profile_refusal",
+      "scope": "Refusal when admitted envelope selection or profile does not match release or manifest"
+    },
+    {
+      "id": "test_07_missing_or_extra_envelope_members_refusal",
+      "scope": "Refusal when envelope contains missing or extra member entries"
+    },
+    {
+      "id": "test_08_aliased_inherited_handles_refusal",
+      "scope": "Refusal when envelope member handles are aliased across distinct files"
+    },
+    {
+      "id": "test_09_physical_identity_or_inheritance_mismatch_refusal",
+      "scope": "Refusal when physical identity (volume serial, file id) collides or is duplicated"
+    },
+    {
+      "id": "test_10_materialization_before_begin_refusal",
+      "scope": "Refusal when child adoption attempts buffer materialization before begin is accepted"
+    },
+    {
+      "id": "test_11_initial_cancel_without_buffers",
+      "scope": "Initial cancel releases unread adoption, sends closed frame, and completes without buffers materialized"
+    },
+    {
+      "id": "test_12_begin_cancel_replay_refusal",
+      "scope": "Refusal when begin/cancel operations are replayed or submitted out of order"
+    },
+    {
+      "id": "test_13_copied_lease_or_namespace_refusal",
+      "scope": "Refusal when an arbitrary, constructed, or copied lease or namespace attempts validation"
+    },
+    {
+      "id": "test_14_short_read_or_hash_failure_retains_partial_custody",
+      "scope": "Short read or digest mismatch retains partial chunks and preserves materialization exception"
+    },
+    {
+      "id": "test_15_revocation_before_publication_retains_returned_custody",
+      "scope": "Revocation prior to lease publication retains materialized custody and raises publication revoked"
+    },
+    {
+      "id": "test_16_cleanup_failure_preserves_original_exception",
+      "scope": "Preservation of original failure exception when subsequent cleanup operations raise errors"
+    },
+    {
+      "id": "test_17_admitted_issued_success_four_member",
+      "scope": "Pre/post-stage success for 4-member model (tiny/base/small/medium with vocabulary.txt, no preprocessor_config.json)"
+    }
+  ]
+}

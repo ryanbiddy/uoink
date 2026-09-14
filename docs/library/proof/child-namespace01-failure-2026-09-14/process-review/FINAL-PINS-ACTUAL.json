@@ -1,0 +1,7 @@
+{
+  "chunk_id": "ec0f2d",
+  "wall_time_seconds": 0.2020561,
+  "exit_code": 0,
+  "original_token_count": 146,
+  "output": "\r\nname                       bytes sha256\r\n----                       ----- ------\r\nVERDICT.md                  8013 e8604af508981a78facabc46dc4890f52f1e7fc44be935cb3a85295a1119a275\r\nVIEW-COVERAGE.json          3828 7f2de8b986650255ad824c25e54a08693fe8256dcb5f90e649dacec4611675ba\r\nBINDINGS-RESULT.json        5105 daa51322b7e3bf5250f1ce507b7dd6c7aaf80916bbde2489d3bb71e51bdc3926\r\nBINDINGS-CHECK-ACTUAL.json  5684 afe847d022ff2bd4941a79f4126e93e2925798735cdc786928d899513dd692c3\r\ncheck_bindings.mjs          4708 95337c7b4d99f313466bbb700f54a301d9507a224746c15469b9b1de1f31192d\r\n\r\n"
+}

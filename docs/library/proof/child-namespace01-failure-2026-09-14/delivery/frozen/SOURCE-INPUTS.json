@@ -1,0 +1,142 @@
+{
+  "schema": 1,
+  "scope": "Derivative and input bindings for dormant controller-to-child namespace implementation",
+  "provenance": {
+    "brief": "docs/library/REAL-CHILD-NAMESPACE-IMPLEMENTATION-BRIEF-2026-09-14.md",
+    "plan": "docs/library/proof/real-child-namespace-plan-2026-09-14/plan/BRIEF.md",
+    "member_correction": "docs/library/proof/real-child-namespace-plan-2026-09-14/plan/MEMBER-SCOPE-CORRECTION.md",
+    "controller_qualification_commit": "9c87ec216768fcd7b86cc97c9c8779f1fdafa49a",
+    "controller_proof": "docs/library/proof/startup-authority-fake81-2026-09-14",
+    "candidate_execution": false
+  },
+  "derivatives": [
+    {
+      "path": "asr_loading_adapter.py",
+      "bytes": 33710,
+      "sha256": "65a0715e028cca76be46ad6555393d493807630071cf9c6f14e08eaf8236d0f3",
+      "diff": "asr_loading_adapter.diff",
+      "role": "Change 1: separate post-consumption validator preserving pre-worker contract"
+    },
+    {
+      "path": "admitted_namespace_flow.py",
+      "bytes": 13951,
+      "sha256": "8fbb280fbfbdd0de95f3e6c47d4f6862478bdd15fe8b77dc394dd66d55cb3da9",
+      "diff": null,
+      "role": "Change 2: coordinator module for controller port and child admitted flow"
+    },
+    {
+      "path": "inherited_readset.py",
+      "bytes": 26548,
+      "sha256": "c17a51b3c3ee28e9d4f0dd581c68a575410179401993ca57cadf3427764ed312",
+      "diff": "inherited_readset.diff",
+      "role": "Change 3: admitted-selection envelope, 4/5-member scope, and adoption"
+    },
+    {
+      "path": "owned_generation_protocol.py",
+      "bytes": 32527,
+      "sha256": "9e560210aa2aca01cab69e29e9a4212a0f338ddcecca26cd9bc8dcb2f757c25a",
+      "diff": "owned_generation_protocol.diff",
+      "role": "Change 4: child-local lease issuance, envelope binding, and begin/cancel boundary"
+    },
+    {
+      "path": "pinned_buffer_namespace.py",
+      "bytes": 8482,
+      "sha256": "d17acd5b16871ddc704fdcec92cbb8df9d247c545bcb0a722dbe6ac54798607a",
+      "diff": "pinned_buffer_namespace.diff",
+      "role": "Change 5: retained materialization attempt, partial chunks, and completed buffers"
+    },
+    {
+      "path": "admitted_namespace_fixture.py",
+      "bytes": 11428,
+      "sha256": "2e5de2de2f498252a4f4de0c6c15c15859feefc8b572ea93ce75003b04777dff",
+      "diff": null,
+      "role": "Inert test fixture providing in-memory lower services and mock channels"
+    },
+    {
+      "path": "test_admitted_child_namespace.py",
+      "bytes": 21626,
+      "sha256": "4a7b2bf158829213d0b93b27b43f468390b11ae3a9db718775e28cc31d4876bd",
+      "diff": null,
+      "role": "Proposed 17-control test suite through actual new sequence and inert lower services"
+    }
+  ],
+  "inputs": [
+    {
+      "source_path": "_scratch/real-startup-authority-repair01/asr_loading_adapter.py",
+      "local_path": "before/asr_loading_adapter.py",
+      "bytes": 28922,
+      "sha256": "6482b782c545adbcd524a68ae85ba2abb3f081683379a9d53ada66d03a5ddb51",
+      "role": "base: pre-worker controller adapter"
+    },
+    {
+      "source_path": "_scratch/protected-engine-ownership-repair02/owned_generation_protocol.py",
+      "local_path": "before/owned_generation_protocol.py",
+      "bytes": 25890,
+      "sha256": "86977e0d953a9e25dbefb23d4559f06f90b8fb7f9dc61b2d6e8726cffcff9c20",
+      "role": "base: worker bootstrap and generation protocol"
+    },
+    {
+      "source_path": "_scratch/windows-interrupted-owner-native-proposal02/inherited_readset.py",
+      "local_path": "before/inherited_readset.py",
+      "bytes": 12391,
+      "sha256": "02be8e04f4bea3030faf0882ae48ead40716c5782f95e2790e1a9897c5be76e3",
+      "role": "base: readset adoption routes"
+    },
+    {
+      "source_path": "_scratch/windows-interrupted-owner-native-proposal02/pinned_buffer_namespace.py",
+      "local_path": "before/pinned_buffer_namespace.py",
+      "bytes": 7893,
+      "sha256": "2cc25a7a254f35d802336ef121cc860887a4301b3257588438dddec392fe0b7b",
+      "role": "base: pinned buffer namespace"
+    },
+    {
+      "source_path": "_scratch/windows-interrupted-owner-native-proposal02/generated_worker_flow.py",
+      "local_path": "inputs/generated_worker_flow.py",
+      "bytes": 22853,
+      "sha256": "1ab240d60ceaca130ac85f5d2e908ef5895da5297f35d78a1caba1c62e622238",
+      "role": "reference: controller lifecycle and handshake sequence"
+    },
+    {
+      "source_path": "_scratch/windows-interrupted-owner-native-proposal02/win32_private_pipe.py",
+      "local_path": "inputs/win32_private_pipe.py",
+      "bytes": 18613,
+      "sha256": "73a1109a55f2bc807594655c71b24a3e35eb88d7f744497df2cc328dc224cae7",
+      "role": "reference: fixed private pipe ownership and endpoint retirement"
+    },
+    {
+      "source_path": "_scratch/windows-interrupted-owner-native-proposal02/win32_worker_connection.py",
+      "local_path": "inputs/win32_worker_connection.py",
+      "bytes": 29660,
+      "sha256": "60d22036d6827205be5d0657af8e4693aa534605bdfb1b501878eb2a889fe25f",
+      "role": "reference: readset and native handle ownership"
+    },
+    {
+      "source_path": "_scratch/windows-interrupted-owner-native-proposal02/generated_adapter_flow.py",
+      "local_path": "inputs/generated_adapter_flow.py",
+      "bytes": 90105,
+      "sha256": "24844bf419e4d34adaf0d5c5a2678de33a4796de86dad0f83b7e386f1785f961",
+      "role": "reference: child ordering and cleanup mechanics"
+    },
+    {
+      "source_path": "_scratch/windows-interrupted-owner-native-proposal02/generated_worker_runtime_bridge.py",
+      "local_path": "inputs/generated_worker_runtime_bridge.py",
+      "bytes": 12096,
+      "sha256": "11eff72f6d96b5c4248987635b5373672da706e1ac0fac53188aac7a3a253716",
+      "role": "reference: child ownership boundary"
+    },
+    {
+      "source_path": "_scratch/real-startup-authority-repair01/startup_authority_fixture.py",
+      "local_path": "inputs/startup_authority_fixture.py",
+      "bytes": 8556,
+      "sha256": "fe82ffe16117a9a74b3194e607c86c69b4411076337965ccb5d78c8a9cec897a",
+      "role": "reference: isolated inert fixture"
+    },
+    {
+      "source_path": "_scratch/windows-interrupted-owner-native-proposal02/trusted_asr_resolver.py",
+      "local_path": "inputs/trusted_asr_resolver.py",
+      "bytes": 13373,
+      "sha256": "16a5a1245f649a3eb04d077b661835503f08bef0ff8822dcb545176f0cc30833",
+      "role": "supplemental: exact 4/5-member model schema from MODEL_SPECS"
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "chunk_id": "72e8b2",
+  "wall_time_seconds": 4.1736774,
+  "exit_code": 0,
+  "original_token_count": 53,
+  "output": "{\"proof\": \"docs/library/proof/real-child-namespace-plan-2026-09-14\", \"payloads_matching_disk_and_git\": 52, \"bytes\": 598931, \"manifest_sha256\": \"6bb671fa20947bcb79ecca984f8ccdc683f90028759d3d01d321e38fabd62299\"}\r\n"
+}

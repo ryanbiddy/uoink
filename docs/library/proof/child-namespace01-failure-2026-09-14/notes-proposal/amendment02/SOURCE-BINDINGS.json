@@ -1,0 +1,46 @@
+{
+  "scope": "Final superseding prose amendment; no source/candidate execution.",
+  "prior_amendment_inputs": [
+    {
+      "path": "_scratch/release-progress-startup81-20260914/amendment01/proposed/RELEASE-NOTES-LIVING-LIBRARY.md",
+      "bytes": 52919,
+      "sha256": "d001a39cec31c38097ab44d40203d85c85b88c23fe09686ab24031315f9046f2"
+    },
+    {
+      "path": "_scratch/release-progress-startup81-20260914/amendment01/SOURCE-BINDINGS.json",
+      "bytes": 1440,
+      "sha256": "6020c0cc46f13d6a00aec24f9bc8651702348bd180df0755478aadeb3b3d5223"
+    },
+    {
+      "path": "_scratch/release-progress-startup81-20260914/amendment01/RELEASE-NOTES-LIVING-LIBRARY.md.diff",
+      "bytes": 912,
+      "sha256": "ac3471567bc9e9b2e81fe2ddb7cd8bb680df8b55fc849e66846543670086a5f8"
+    },
+    {
+      "path": "_scratch/release-progress-startup81-20260914/amendment01/prepare_and_check.ps1",
+      "bytes": 5533,
+      "sha256": "e7c699b9f30ac63ea2dfc23c7a01b8d20c030d36fdabc29f74e4f230ab65b523"
+    },
+    {
+      "path": "_scratch/release-progress-startup81-20260914/amendment01/reads/AMENDMENT-CHECK02-ACTUAL.json",
+      "bytes": 1191,
+      "sha256": "71bb90cef2d3915c447968a6f7c5919e699a8c7a77d8d708e61856e0f40ca452"
+    }
+  ],
+  "root_report": {
+    "status": "SOURCE REVIEW FAILED",
+    "source": "Root task message superseding pending-review status during this amendment preparation.",
+    "source_repair_required": true,
+    "proposed_tests": 17,
+    "tests_executed": false,
+    "delivery_files": 26,
+    "delivery_bytes": 553800,
+    "freeze_observation": "47c823",
+    "run": "05a3bf93",
+    "brief_commit": "8611e31",
+    "acceptance": false,
+    "final_tool": "7481e5/exit0; output truncated",
+    "original_events_exported": 1042,
+    "limit": "Root-reported retained observations. This amendment did not inspect the delivery, rerun a subject, or create an independent source verdict. The canonical failure verdict is being prepared by root."
+  }
+}

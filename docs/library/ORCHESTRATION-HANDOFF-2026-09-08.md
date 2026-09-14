@@ -126,7 +126,8 @@ establish safe installation isolation, and verify/correct resulting findings.
 | Completion language metadata | Both scoped fake59 copies pass59/0/0 plus29 subtests; original46 preserved | Author577e68 and confirmation8fd760 return0. Root993295 and peera39b40 verify identical full cases/five hashes, ten guards, unchanged nine inputs/three controls and17 outputs each | Connect authenticated backend completion and controller registry, then migrate WhisperX caller. Engine fake39 is qualified below; real/runtime/production gates remain closed |
 | Control Room command audit | Adapter fix committed atc3607c3 on feat/desktop-control-room | Same16 focused replay cases pass in isolated and checkout copies; TypeScript check passes. All24 proof payloads match Git/disk | A new process loads the preview warning. Existing server not restarted or observed with it; no real-provider or complete-command attestation |
 | Controller startup authority | Source6482b782/map23591b4c passes both guarded81 copies; original65 preserved | Author28a03e and confirmation9a8704 return0, each81/0/0 plus48 passing subtests. Root151c60 and peere49d09 verify complete cases,23 hashes,ten guards,27 inputs/three controls and35 outputs each. All256 payloads match Git/disk | Continue authenticated child namespace/fixed constructor connection. The real-worker seam remains closed; no native/model or release clearance |
-| Release notes | Current progress and remaining gates committed at 376eb47 | All seven proof payloads match Git/disk; 57 table lines and historical package/review-kit sections remain unchanged. D1/D2 completion and generated cancellation/recovery are explicit | Continue runtime qualification. No production source, package, installation, public draft or website changed |
+| Authenticated child namespace | Gemini05a3bf93 source review FAILED; all17 proposed tests unexecuted | Outer7481e5/0 completed with truncated output. Freeze47c823 retains26 files/553800B and1042 original events; root14eaa9 verifies all pins and input pairs. Controller and child contract/ownership findings require repair | Follow CONTROLLER-WORKER-STAGE-REPAIR-BRIEF-2026-09-14.md for a fresh stage-only derivative from accepted6482b782. No source, runtime or release acceptance from this delivery |
+| Release notes | Startup81 progress, child-source failure and remaining gates updated for this integration | Root68f856 verifies three declared edits plus final status amendment, seven input bindings and all57 unchanged table lines. Frozen original drafts/amendments preserve status changes | Continue runtime qualification. Production remains71d3e70; no package, installation, public draft or website changed |
 | Integration | Reliability repair at e8d058f and notice packaging at 71d3e70 after tree09 | Reliability:53 focused cases plus13 subtests per root. Notices:20 Python/10 block cases per root. Tree09 at 56d9d4c remains2,796 passed/1 failed/3 skipped across2,800 cases plus13 subtests; it predates both repairs | Finish runtime work, then run a new committed complete tree and rebuild/reseal. Package08 and website/marketing remain held. No current-source package or installation credit |
 | Desktop incident | Isolation failed in package-07 attempt; corrected at `e10ba3a` | Ordinary Uoink and filesystem connectors launched; earlier live-index/5179 effects unknown. Owned job cleaned | No further override launch; only guarded Uoink dashboard observed for package 08 |
 
@@ -311,17 +312,24 @@ case objects,23 hashes,ten guards,27 inputs/three controls and35 outputs each.
 The instrument source verdict06f077ce and root verdict correct one frozen protocol
 claim: early setup failures rely on the outer actual, not launch-failure.json.
 Do not repeat these scoped observations. Control Room source-only run
-05a3bf93-0b6c-47f0-bdd3-80b14e46b1d3 is active under
-REAL-CHILD-NAMESPACE-IMPLEMENTATION-BRIEF-2026-09-14.md. Gemini3.8-flash-high/high
-uses the existing Antigravity subscription, frozen base8611e31. Session21582 is
-open; worker6a96a2d8 runs in the05a3bf93-0b6/gemini worktree. Initialactualefc889
-and status9eb678 are saved. Wait for delivery, preserve actuals and independently
-review complete source/diffs before any qualification admission. Its frozen plan and
+05a3bf93-0b6c-47f0-bdd3-80b14e46b1d3 completed with7481e5/0; session21582 is
+closed. SOURCE REVIEW FAILED. Read ASTRA-CHILD-NAMESPACE01-SOURCE-FAILURE-2026-09-14.md.
+Gemini3.8-flash-high/high used the existing Antigravity subscription from base8611e31.
+Freeze47c823 preserves26 delivered texts/553800B and1042 original events. Root14eaa9
+verifies all frozen pins, seven derivatives, eleven original/copy pairs and17
+declared tests; none ran. The final outer output and several command previews
+are truncated; complete command coverage remains unverified.
+Next follow CONTROLLER-WORKER-STAGE-REPAIR-BRIEF-2026-09-14.md. Astra's source
+author works only in _scratch/controller-worker-stage-repair01 from accepted6482b782,
+preserving its entire byte prefix and the existing81/39 tests. Review the complete
+stage-only source and actual isolated fixture before separate qualification.
+Native read-set/pipe/source authentication remains in the later connection unit.
+The original failed namespace delivery is retained; its frozen plan and
 mandatory member-scope correction are archived under
 proof/real-child-namespace-plan-2026-09-14. All52 documentary payloads match
 Git/disk at72e8b2, seal6bb671fa. The selected18 source inputs total306,861 bytes.
-The unit has17 proposed control scenarios; no implementation or execution pass
-exists yet. Real-worker startup and model authority remain closed.
+The failed delivery has17 proposed controls; no implementation or execution pass
+exists for it. Real-worker startup and model authority remain closed.
 Source archive9593bc/index9cc34c preserves145 payloads, seald207df4b. Result
 archivea26abf/index7b246b preserves256 payloads, seal34b8e9f7; raw diff/apply8811ba succeeds.
 Control Room's independent
@@ -6974,3 +6982,45 @@ C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\05a3bf93-0
 Initialactualefc889 yielded session21582; poll988e20 and status9eb678 show running.
 No subject execution is admitted. Preserve each actual/poll, source delivery and
 command-coverage limits, then review before qualifying or integrating source.
+
+### 2026-09-14 — Source dispatch backed up
+
+Push5bdda1/0 and remote219e1b/0 verify origin/cc/living-library at
+ea1b9baf2bc70985950fa278857af0a139e2e956, including the child namespace brief and
+active-run record. No other branch was pushed. Worker05a3bf93 remains source-only;
+pollce2d23 yielded the existing session21582 after its source reads. No completed
+implementation result or new qualification is claimed.
+
+### 2026-09-14 — Child namespace delivery rejected; smaller stage repair underway
+
+Control Room05a3bf93 completed with outer7481e5/0; session21582 is closed.
+Freeze47c823 preserves26 texts/553,800 bytes and1,042 original database events.
+Root14eaa9 verifies the delivery map and all17 declared tests, which remain
+unexecuted. Root and independent controllerb63b1523/process e8604af5 reviews
+reject mismatched APIs, missing durable startup, weak stage/lease bindings,
+absent begin ownership, unsafe unread-release claims and fictitious fixtures.
+Read ASTRA-CHILD-NAMESPACE01-SOURCE-FAILURE-2026-09-14.md. The provider's
+completion is not an implementation pass. Full command coverage is unverified:
+seven command steps have fourteen records, several with shortened previews.
+
+The next unit follows CONTROLLER-WORKER-STAGE-REPAIR-BRIEF-2026-09-14.md.
+It appends local post-resume stage checks to accepted6482b782 and uses actual
+isolated lease/session/factory transitions. No native ownership or child
+transport authority is inferred from those local records. All existing81/39
+tests and real-entry refusals remain unchanged. No source execution is admitted.
+
+Living notes now record startup81, the failed delivery, backup ea1b9ba and
+unresolved model-notice/CPU-int8 binding. Root68f856 verifies all three original
+edit groups plus the final status amendment and57 unchanged table lines.
+Original proposal, pending-review amendment and final failure amendment remain
+frozen. Notes staging798ce0 failed before writing because of checkout newlines;
+diagnosisd1e7d0 and separate helper02 preserve and repair that preparation error.
+
+Archiveef6117 preserves162 payloads,3,130,750 bytes, seal
+176da0ab98689a21dc2bb689790daffea269a5b574d9cf687f1c9e58738153bf.
+Raw worktree diff/apply86ffba transports3,271,573 bytes at
+0eb52c897fe535c246bd2e9a7483356c71d194749e30ac43628c7bc48d5ba2ba.
+All156 transport differences were proven UTF-8 newline-only before restoration
+0d9095. Failed source, peer findings, draft notes and prior plan/backup receipts
+are retained. Production remains71d3e70; no package rebuild or release follows.
+Index620af9/0 verifies all162 payloads against both Git and disk.

@@ -1,0 +1,83 @@
+--- before/asr_loading_adapter.py
++++ asr_loading_adapter.py
+@@ -463,6 +463,80 @@
+     return startup
+ 
+ 
++def _validate_controller_stage_locked(custody, startup, permit, session, worker=None):
++    manager, record, token = custody.manager, custody.record, custody.token
++    _require(custody.active and custody.startup is startup
++             and _CONTROLLER_STARTUPS.get(id(startup)) is custody,
++             "Exact live issued controller startup required")
++    _require(custody.consumed_by is session,
++             "Exact consumed controller session required")
++    _startup_selection_current(custody)
++    current = _startup_references(custody)
++    _require(len(current) == len(custody.references)
++             and all(a is b for a, b in zip(current, custody.references))
++             and _startup_values(custody) == custody.values,
++             "Retained startup selection changed")
++    _require(custody.admission.manifest == custody.manifest
++             and custody.admission.manifest.approval is custody.release.manifest_approval
++             and custody.selected is next(model for model in custody.admission.manifest.models
++                 if model.choice == custody.admission.choice)
++             and custody.selected == next(model for model in custody.manifest.models
++                 if model.choice == custody.admission.choice),
++             "Admission model differs from approved selection")
++    _require((startup.release is custody.release and startup.approval is custody.release.manifest_approval
++              and startup.manifest is custody.manifest and startup.admission is custody.admission
++              and startup.selected is custody.selected and startup.policy is custody.profile
++              and startup.usage == custody.usage and startup.binding is custody.binding
++              and startup.permit is custody.permit), "Startup record was replaced or changed")
++    _require(type(permit) is _NativePermit and permit is custody.permit
++             and permit.manager is manager and permit.record is record
++             and record.key is custody.key
++             and manager._records.get(record.key) is record and record.permit is permit.identity
++             and record.protection is custody.protection
++             and record.phase in (Phase.NATIVE_RESERVED, Phase.NATIVE_RUNNING)
++             and not custody.lease.inner._exited and not custody.lease._finalization_started,
++             "Current startup lease permit required")
++    _require(type(token) is Reservation and custody.lease.token is token
++             and manager._tokens.get(record.key) is token
++             and token.service is manager._reservations
++             and token.service._live.get(token.gate) is token
++             and token.phase in ("RESERVED", "WORKER_BOUND") and token.pending is None
++             and token.persistence_failure is None and token.revoked is False,
++             "Current durable startup reservation required")
++    _require(record.key.store_root == custody.admission.private_root
++             and record.key.choice == custody.admission.choice == custody.selected.choice
++             and record.key.revision == custody.selected.revision
++             and token.physical is custody.lease.binding[0]
++             and token.semantic is custody.lease.binding[1]
++             and token.generation == custody.lease.binding[2], "Exact reserved startup selection required")
++    _require(token.semantic.choice == custody.selected.choice
++             and token.semantic.revision == custody.selected.revision
++             and token.semantic.manifest == custody.release.manifest_approval.manifest_sha256,
++             "Durable selection differs from approved startup")
++    _require(type(session) is OwnedSession and record.owner is session
++             and session._record is record and session._manager is manager
++             and not session._revoked and not session._closing
++             and session._active == 0 and not session._closed_verified,
++             "Exact live consumed session required")
++    if worker is not None:
++        if token.worker is not None:
++            _require(token.worker is worker, "Durable reservation worker mismatch")
++        if session._worker is not None:
++            _require(session._worker is worker, "Session worker mismatch")
++
++
++def _validate_controller_stage(startup, permit, session, worker=None):
++    _require(type(startup) is _ControllerASRStart, "Issued controller startup required")
++    _require(type(session) is OwnedSession, "Exact session required for stage validation")
++    custody = _CONTROLLER_STARTUPS.get(id(startup))
++    _require(type(custody) is _StartupCustody and custody.startup is startup,
++             "Copied controller startup has no issuance authority")
++    with custody.manager._lock:
++        with custody.token._lock:
++            _validate_controller_stage_locked(custody, startup, permit, session, worker)
++    return startup
++
++
+ def _fixed_real_worker_start(startup, permit, session):
+     _validate_controller_startup(startup, permit, session)
+     raise AdapterUnavailable("Authenticated child transport, runtime state and fixed real bootstrap are unavailable")

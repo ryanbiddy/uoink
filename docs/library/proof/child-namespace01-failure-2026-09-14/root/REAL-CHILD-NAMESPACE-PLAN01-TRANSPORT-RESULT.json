@@ -1,0 +1,360 @@
+{
+  "scope": "Documented Git newline transport restoration; no subject rerun",
+  "proof": "docs/library/proof/real-child-namespace-plan-2026-09-14",
+  "payloads": 52,
+  "bytes": 598931,
+  "manifest_sha256": "6bb671fa20947bcb79ecca984f8ccdc683f90028759d3d01d321e38fabd62299",
+  "restored": [
+    {
+      "path": ".gitattributes",
+      "before_bytes": 9,
+      "before_sha256": "8b9c3028d6467ff3be7c793141927841d70f47f52d0590677438f488ca154992",
+      "after_bytes": 8,
+      "after_sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+    },
+    {
+      "path": "bound-inputs/_scratch/protected-engine-ownership-repair02/owned_generation_protocol.py",
+      "before_bytes": 26423,
+      "before_sha256": "48a548b7c593f235a65b1f17d3a62c5c9dd4bdd6df187bf337743d104703e725",
+      "after_bytes": 25890,
+      "after_sha256": "86977e0d953a9e25dbefb23d4559f06f90b8fb7f9dc61b2d6e8726cffcff9c20"
+    },
+    {
+      "path": "bound-inputs/_scratch/real-startup-authority-repair01/asr_loading_adapter.py",
+      "before_bytes": 29466,
+      "before_sha256": "f9f161ec5d983789f9da24687a2ec9ac7c321cb67ce7048734623ceb8b2578ca",
+      "after_bytes": 28922,
+      "after_sha256": "6482b782c545adbcd524a68ae85ba2abb3f081683379a9d53ada66d03a5ddb51"
+    },
+    {
+      "path": "bound-inputs/_scratch/real-startup-authority-repair01/FIXTURE-LOADER-CONTRACT.md",
+      "before_bytes": 2406,
+      "before_sha256": "9e3c720fb57b03d64810f7193fa4ea05e73ceaf17e6a6125a7ac40f5e11f1527",
+      "after_bytes": 2397,
+      "after_sha256": "8e59a89853faeb21c4ce8694fe7613856e44baed3feabe5c891174044b9952c4"
+    },
+    {
+      "path": "bound-inputs/_scratch/real-startup-authority-repair01/startup_authority_fixture.py",
+      "before_bytes": 8729,
+      "before_sha256": "98db37f66761270daaa1d3889a6a95fd7309c5ec5b81ffcd714087246e76c269",
+      "after_bytes": 8556,
+      "after_sha256": "fe82ffe16117a9a74b3194e607c86c69b4411076337965ccb5d78c8a9cec897a"
+    },
+    {
+      "path": "bound-inputs/_scratch/windows-interrupted-owner-native-proposal02/generated_adapter_flow.py",
+      "before_bytes": 91516,
+      "before_sha256": "062ed9f7ad62bd60436397ad69d068818080874cca25ec7816553e4bdfd4cd7e",
+      "after_bytes": 90105,
+      "after_sha256": "24844bf419e4d34adaf0d5c5a2678de33a4796de86dad0f83b7e386f1785f961"
+    },
+    {
+      "path": "bound-inputs/_scratch/windows-interrupted-owner-native-proposal02/generated_worker_flow.py",
+      "before_bytes": 23224,
+      "before_sha256": "0caa6420ce2dca4a31f29378299a8547205f5f38eb8cbda7cbe93ed3928bf65b",
+      "after_bytes": 22853,
+      "after_sha256": "1ab240d60ceaca130ac85f5d2e908ef5895da5297f35d78a1caba1c62e622238"
+    },
+    {
+      "path": "bound-inputs/_scratch/windows-interrupted-owner-native-proposal02/generated_worker_runtime_bridge.py",
+      "before_bytes": 12328,
+      "before_sha256": "460c8362cbda34b01e5926db5f4a3e300b4e944760fd2151344dd3c784ecabc6",
+      "after_bytes": 12096,
+      "after_sha256": "11eff72f6d96b5c4248987635b5373672da706e1ac0fac53188aac7a3a253716"
+    },
+    {
+      "path": "bound-inputs/_scratch/windows-interrupted-owner-native-proposal02/inherited_readset.py",
+      "before_bytes": 12613,
+      "before_sha256": "21f51dbf15a46b0eba6ca449c2c4e539d4f88d787a8ca537f87d6ac46c4f5ee7",
+      "after_bytes": 12391,
+      "after_sha256": "02be8e04f4bea3030faf0882ae48ead40716c5782f95e2790e1a9897c5be76e3"
+    },
+    {
+      "path": "bound-inputs/_scratch/windows-interrupted-owner-native-proposal02/pinned_buffer_namespace.py",
+      "before_bytes": 8047,
+      "before_sha256": "707fc2ec3b4b5d823ed6f5caa8b8f671bfed420f3cc38a39cd844b1f948dd41a",
+      "after_bytes": 7893,
+      "after_sha256": "2cc25a7a254f35d802336ef121cc860887a4301b3257588438dddec392fe0b7b"
+    },
+    {
+      "path": "bound-inputs/_scratch/windows-interrupted-owner-native-proposal02/trusted_asr_resolver.py",
+      "before_bytes": 13665,
+      "before_sha256": "eb9f3d3f2fa9a5f6b9fb5505e1cc080ee02e6e47c322db027be3c27e46f7570e",
+      "after_bytes": 13373,
+      "after_sha256": "16a5a1245f649a3eb04d077b661835503f08bef0ff8822dcb545176f0cc30833"
+    },
+    {
+      "path": "bound-inputs/_scratch/windows-interrupted-owner-native-proposal02/win32_private_pipe.py",
+      "before_bytes": 19003,
+      "before_sha256": "a5aa652aa4417f482ff7f149fe82bb89d72a6e98f5742b903fc7e84598c075cf",
+      "after_bytes": 18613,
+      "after_sha256": "73a1109a55f2bc807594655c71b24a3e35eb88d7f744497df2cc328dc224cae7"
+    },
+    {
+      "path": "bound-inputs/_scratch/windows-interrupted-owner-native-proposal02/win32_worker_connection.py",
+      "before_bytes": 30248,
+      "before_sha256": "5d27e609d3644b8eb01026fb262cea7c5630d9c8cb7b7a1f9ce28a69b35a9833",
+      "after_bytes": 29660,
+      "after_sha256": "60d22036d6827205be5d0657af8e4693aa534605bdfb1b501878eb2a889fe25f"
+    },
+    {
+      "path": "bound-inputs/docs/library/ASTRA-REAL-ENGINE-CONNECTION01-FAILURE-2026-09-14.md",
+      "before_bytes": 3190,
+      "before_sha256": "31b4bd89b392347d9b229f5619925512388565c84e61d226d59d704c54c1c8cc",
+      "after_bytes": 3173,
+      "after_sha256": "744df4e3b4434c5972d34a24550b073403cc3e2a4c5972cb2b9c61756fa08406"
+    },
+    {
+      "path": "bound-inputs/docs/library/proof/real-engine-connection-plan-2026-09-14/plan/BRIEF.md",
+      "before_bytes": 7763,
+      "before_sha256": "50b9b59b487470e91c63c2b7d92521e142e6f809c9bae3f4377e4d7d902edf6b",
+      "after_bytes": 7744,
+      "after_sha256": "140c4db6c85f7f606533324fa1f3b7d4f8e9922ba6b2c8189c380cd8e8086558"
+    },
+    {
+      "path": "bound-inputs/docs/library/REAL-ENGINE-CONNECTION-BRIEF-2026-09-14.md",
+      "before_bytes": 4357,
+      "before_sha256": "ed3e8ca3a9020fc0cc5429ac909320e89938f48e5eb390b49c0b52c7f3af7937",
+      "after_bytes": 4293,
+      "after_sha256": "fca0f5d69f150e196a5d3f7884737eb2c90b016f4fa81cc7f3068ac7e8c1a5b2"
+    },
+    {
+      "path": "bound-inputs/docs/library/REAL-STARTUP-AUTHORITY-REPAIR-BRIEF-2026-09-14.md",
+      "before_bytes": 3525,
+      "before_sha256": "e94b2ae4a8a74262a63ddc09f1bcd6a08f69d2d0f388f65ca4874165809e301b",
+      "after_bytes": 3508,
+      "after_sha256": "b37fa72210b41ec16fbc5c3ae45b090a89938740201f8c49e1edcb8cc1af8bb4"
+    },
+    {
+      "path": "contracts/REAL-CHILD-NAMESPACE-IMPLEMENTATION-BRIEF-2026-09-14.md",
+      "before_bytes": 3762,
+      "before_sha256": "e3c4c352373abceefa35a871104d1bb81b51e57eab27a10800b5f903c2d4d318",
+      "after_bytes": 3751,
+      "after_sha256": "3907ced0ec41f01976a9b7d624592286db21dbc4219d2f4f958724f8c7e1cd28"
+    },
+    {
+      "path": "plan/actuals/BINDING-CHECK01-ACTUAL.json",
+      "before_bytes": 450,
+      "before_sha256": "6f230336e6a655d3b1877141c516bafc7ad5c715b0b78bbcdee8b015660cf6e8",
+      "after_bytes": 443,
+      "after_sha256": "a282a338e70445526c9734692aa7cd180dea4c7115d845019b15cd4d12253f9e"
+    },
+    {
+      "path": "plan/actuals/CONTEXT-READ-ACTUAL.json",
+      "before_bytes": 19471,
+      "before_sha256": "76c205d9685813834e3daa336da625a34a686977fd2c235ae8fc83fe4b749e6a",
+      "after_bytes": 19464,
+      "after_sha256": "2197a06d90b448168e6e4235fe5ce49e40d8413f310a28fd3f3a551d94e80838"
+    },
+    {
+      "path": "plan/actuals/FINAL-BINDING-ACTUAL.json",
+      "before_bytes": 1033,
+      "before_sha256": "f985d0ffad3173727b5647447437932f132d4b09c9c47810a07963a6b7e17e64",
+      "after_bytes": 1026,
+      "after_sha256": "c27854a1e9228bb89519973c7ab2efcf9dd3d9c51ff78f04fb9d77948f4f36ba"
+    },
+    {
+      "path": "plan/actuals/FINAL-SIGNATURES-ACTUAL.json",
+      "before_bytes": 14509,
+      "before_sha256": "9887b8c87bc7178232900a5fbafce8db928ae8bdd6a99e3f6a42d837996bd1e4",
+      "after_bytes": 14502,
+      "after_sha256": "07fffffa80512f2d73baaad4156434161e9c44fe29d159c970b93db33d61b496"
+    },
+    {
+      "path": "plan/actuals/INVENTORY-ACTUAL.json",
+      "before_bytes": 17465,
+      "before_sha256": "d2197d401abb9e5a0a04ce8252de491f1621aa28f6465922cdd63c9c748bbe7b",
+      "after_bytes": 17458,
+      "after_sha256": "853ccac18721829561a60e5a6e822c224c6e2da3f4778e5ed97b7b9e27096192"
+    },
+    {
+      "path": "plan/actuals/MAP-SCHEMA-ACTUAL.json",
+      "before_bytes": 726,
+      "before_sha256": "fff053ef4df3f313091686098e02c7eaac1c68ef0d36a698d2ad14a9e596ed48",
+      "after_bytes": 719,
+      "after_sha256": "efc38ef3030a54b72ffb8a34cbe515c9aae983bae5f69bb212fbef12625c2a2e"
+    },
+    {
+      "path": "plan/actuals/NAMESPACE-READ-ACTUAL.json",
+      "before_bytes": 23671,
+      "before_sha256": "e2b067e7845ecc126d349ca9374efb19c3708a3a084a3c291af11a2203ab9f86",
+      "after_bytes": 23664,
+      "after_sha256": "c1f80adf8e2a0888c1c8e6c0db250f4546b0d46343df8cd0afadaf70edd10c4e"
+    },
+    {
+      "path": "plan/actuals/OWNERSHIP-READ-ACTUAL.json",
+      "before_bytes": 9672,
+      "before_sha256": "6bf379cb6e2ddfe5b367f6cc071ef8d9e9c28e991d861d08d62dfa5d48c57f37",
+      "after_bytes": 9665,
+      "after_sha256": "2d1249d4b3962e2c69b1f46e24e8bdcc7a25d9c36a58d0b60fe20d2bdca8fc12"
+    },
+    {
+      "path": "plan/actuals/STAGE-READ-ACTUAL.json",
+      "before_bytes": 21782,
+      "before_sha256": "d8044656730e6bbf72d5cb231f90baf644283f1bae4f3f4e52cd514778122dbf",
+      "after_bytes": 21775,
+      "after_sha256": "bfae9464dc138c2ffc88aeb056d9149f01b84bd72a563b5444f8ecd3dce50e7f"
+    },
+    {
+      "path": "plan/actuals/TRANSPORT-READ-ACTUAL.json",
+      "before_bytes": 27822,
+      "before_sha256": "75866a73f9deaa5daf199452fa35bd927d61afb7fb9877bd4eedee07d4279b55",
+      "after_bytes": 27815,
+      "after_sha256": "edd68b083b32c9d5e28b87e0869bbc212ae93f3b51e80e0319f658cf31ec9278"
+    },
+    {
+      "path": "plan/BRIEF.md",
+      "before_bytes": 6812,
+      "before_sha256": "2d9125fffa8c90cc49b46d44aa74da6e9b19fd267df45df48a73a0c5e3c02730",
+      "after_bytes": 6791,
+      "after_sha256": "86d66542bfcac53d74499bf8808edc2855406b026610452d9f42363615a668e6"
+    },
+    {
+      "path": "plan/MEMBER-SCOPE-CORRECTION.md",
+      "before_bytes": 1949,
+      "before_sha256": "a11c0068fe8f402d072a4b3557f621e9703ba1e59262736c7a4efdf80f8ddd5c",
+      "after_bytes": 1938,
+      "after_sha256": "50c711e6f54ba4d6729cc4887dd1a276966a7b7725b365cf707a5f8f92257a18"
+    },
+    {
+      "path": "plan/SUPPLEMENTAL-SOURCE.json",
+      "before_bytes": 849,
+      "before_sha256": "883f4cdeba64be4bd9dba3bf3ab0c5ece3b21e81c034d5310cb27883fb69f7b8",
+      "after_bytes": 828,
+      "after_sha256": "cb37362a90e09b64f6b5ca2f5771e46dd30afdc6558a34c6e0b26cdaaf3f63e6"
+    },
+    {
+      "path": "root/archive-real-child-namespace-plan01.mjs",
+      "before_bytes": 3763,
+      "before_sha256": "6b1d1cd3f7c97ecff758a229a91ea86915ba6d4d4e19bab7dd27ec2fb11ea37a",
+      "after_bytes": 3750,
+      "after_sha256": "0a57222f715bdc3ffa009203eae8e0f6893e05152368822a0199b86a8be93130"
+    },
+    {
+      "path": "root/BACKUP-PUSH-9C87EC2-ACTUAL.json",
+      "before_bytes": 414,
+      "before_sha256": "1d1a29e41c5b04cf8447bf7982624fffee1362dbb45f28b08bc7571760074032",
+      "after_bytes": 407,
+      "after_sha256": "6735b4ba3e408095b7b1a8b60f65cfa82c9ffbf3ff588a44f363b63cba50dca8"
+    },
+    {
+      "path": "root/BACKUP-PUSH-9C87EC2-REMOTE-ACTUAL.json",
+      "before_bytes": 206,
+      "before_sha256": "0023238d41c36fb25260f8c75f13ed7a38c83c14a51a1233ac17ea23074ca502",
+      "after_bytes": 199,
+      "after_sha256": "b5e48ad0222ca28af1cbfad5c19f20e1acfdb9c97dd4a6f17f92d0748cfa36cc"
+    },
+    {
+      "path": "root/check-real-child-namespace-plan01.mjs",
+      "before_bytes": 1616,
+      "before_sha256": "e5399edd237555ae9d3b182a8676583914ff8ce58a23cae3706ebaa74a15f4fb",
+      "after_bytes": 1610,
+      "after_sha256": "c2cb6b682ebbdd692d6daa7ca6b13e5ca6318073181e51c8f41853f468854c9b"
+    },
+    {
+      "path": "root/REAL-CHILD-NAMESPACE-PLAN01-MEMBER-SCOPE-READ-ACTUAL.json",
+      "before_bytes": 4247,
+      "before_sha256": "d431e2f1457c66ac54e60af6248d69ff4fbbff73e7bc65b0686e5eae9e92048f",
+      "after_bytes": 4240,
+      "after_sha256": "052a0de59a09d217b598def9ffc987661547b211fdbe90cde3fff1add1922d97"
+    },
+    {
+      "path": "root/REAL-CHILD-NAMESPACE-PLAN01-ROOT-ADDENDUM-READ-ACTUAL.json",
+      "before_bytes": 2995,
+      "before_sha256": "cdec43c5481c9248bfa05a4ef0bf6fdee0389e46a75bd4ff07fe4acf5d85cb3b",
+      "after_bytes": 2988,
+      "after_sha256": "4329312c1ab6f23b6a2118b4c221262451a09e9c392f9fadeb67602c99229857"
+    },
+    {
+      "path": "root/REAL-CHILD-NAMESPACE-PLAN01-ROOT-BRIEF-READ-ACTUAL.json",
+      "before_bytes": 6950,
+      "before_sha256": "74ead379bf90400bfab17b17a5e753c3a0896e106224baef6e5189489fff180a",
+      "after_bytes": 6943,
+      "after_sha256": "7f386500e6af5b2339a8cdb0247c426c64761584695cd1f613e310cf5233d446"
+    },
+    {
+      "path": "root/REAL-CHILD-NAMESPACE-PLAN01-ROOT-CHECK-ACTUAL.json",
+      "before_bytes": 699,
+      "before_sha256": "f08f38204d2a047704ed0c2f693842ac28a7f1cb888e2367a92fc6f3547b25bf",
+      "after_bytes": 692,
+      "after_sha256": "c565d8cd98954e1b69edd295063e4361bee5d01e38977d68f42a6d84513d9127"
+    },
+    {
+      "path": "root/REAL-CHILD-NAMESPACE-PLAN01-ROOT-CONTRACTS-READ-ACTUAL.json",
+      "before_bytes": 25312,
+      "before_sha256": "06924d80d1fb89ee66e966a4abb010189c8a9fe51e450ac8de385130b8bf1263",
+      "after_bytes": 25305,
+      "after_sha256": "adf765b2bc3b4c1d5bc04b8b8279ec00ca0acc363aed719e97dc2675525d9bff"
+    },
+    {
+      "path": "root/REAL-CHILD-NAMESPACE-PLAN01-ROOT-MAP-READ-ACTUAL.json",
+      "before_bytes": 7403,
+      "before_sha256": "2d90533746b1a6ae9476802b6024c32a00b976c216184e85d1829c4a1943e411",
+      "after_bytes": 7396,
+      "after_sha256": "73d1423f976553ef1b6905fb74f1744a58ecac50fa9c9da02bcb262b813979ff"
+    },
+    {
+      "path": "root/REAL-CHILD-NAMESPACE-PLAN01-ROOT-SYMBOLS-ACTUAL.json",
+      "before_bytes": 1623,
+      "before_sha256": "d0cb5d525e5bc2193bffd3edbdcdbd81e08fc1f4134c210335b8608471a73f7f",
+      "after_bytes": 1616,
+      "after_sha256": "1cc03d51a280f9590b5a8aeda3ef1e550d097bac1655b556ef20d9bcc4dd7049"
+    },
+    {
+      "path": "root/STARTUP81-RESULTS-ARCHIVE-ACTUAL.json",
+      "before_bytes": 404,
+      "before_sha256": "8adbdd08f28774e13d2cdcb57600cb6cb49cbd47e823dfbc5c5e56ef1fde5edd",
+      "after_bytes": 397,
+      "after_sha256": "3129d9b1a691a210b83649e12417107cf83dadad59de334e1905063e106f1e4f"
+    },
+    {
+      "path": "root/STARTUP81-RESULTS-COMMIT-ACTUAL.json",
+      "before_bytes": 767,
+      "before_sha256": "5187d45cd2c33ce5415b34e76c400fc36910c223d5c282032116dc928f3870b2",
+      "after_bytes": 760,
+      "after_sha256": "8e602aa92aa9fd1fa1446e46e8ffd9c15b7c2f8ead6184e1e339cf3bdfcd15ba"
+    },
+    {
+      "path": "root/STARTUP81-RESULTS-INDEX-ACTUAL.json",
+      "before_bytes": 137,
+      "before_sha256": "1febf36c65cc5ee099edb03f9a86931b47615f84e87e0697c6cc69bd3eb9825c",
+      "after_bytes": 130,
+      "after_sha256": "b97d3e31264dc5dd9a3109c2fac755ab72086d9890f39b46dedaa46b5975c492"
+    },
+    {
+      "path": "root/STARTUP81-RESULTS-INDEX-POLL01-ACTUAL.json",
+      "before_bytes": 359,
+      "before_sha256": "a81e2e06a936d063c0396c94539e5d946a4c98cf54b06f85e31a20e7daa3e540",
+      "after_bytes": 352,
+      "after_sha256": "671d0f41ae6caf04404a13c4407fc07d41972468ae2ab02193c12550cbb362bb"
+    },
+    {
+      "path": "root/STARTUP81-RESULTS-INTEGRATION-ACTUAL.json",
+      "before_bytes": 367,
+      "before_sha256": "75057e8f175e8588d527d02f7f009e0dc582941d5f53df53c9844470f7d3fbe5",
+      "after_bytes": 360,
+      "after_sha256": "fd6906a5d3f161231f26a3a1bafff1e8628620f30b90da9531730d0fa20e72c9"
+    },
+    {
+      "path": "root/STARTUP81-RESULTS-TRANSPORT-ACTUAL.json",
+      "before_bytes": 336,
+      "before_sha256": "08ee45c7a76931bde350cd985e002d78ee036ed4a1faeb7bf3b1341f0d567f98",
+      "after_bytes": 329,
+      "after_sha256": "094a4250bb4a3e9bd970edc2aa1988f75b8ba4611ce012ca175b0cdc63dfda45"
+    },
+    {
+      "path": "root/STARTUP81-RESULTS-TRANSPORT-RESULT.json",
+      "before_bytes": 79802,
+      "before_sha256": "206aafbc2c1dc3b0bf11696c78f49b1d51891b4af3df429211259c3384415854",
+      "after_bytes": 78147,
+      "after_sha256": "d763ab430dff17910a9fffe6fc7ad1db557ea3520537a7d9d8c0a2aa302c5567"
+    },
+    {
+      "path": "SHA256.json",
+      "before_bytes": 10442,
+      "before_sha256": "ff10e767f23579f336579b59344e005288d82f445eed1e760230729f5e558787",
+      "after_bytes": 10176,
+      "after_sha256": "6bb671fa20947bcb79ecca984f8ccdc683f90028759d3d01d321e38fabd62299"
+    }
+  ],
+  "all_raw_payloads_and_seal_equal_donor": true
+}

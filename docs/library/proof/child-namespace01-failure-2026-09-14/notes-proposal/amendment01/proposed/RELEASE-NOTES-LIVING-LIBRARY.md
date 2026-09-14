@@ -154,11 +154,10 @@ closed. These results add no native/model, installation or release credit.
 See [the startup authority verdict](ASTRA-STARTUP81-RESULT-VERDICT-2026-09-14.md).
 
 The source-only Gemini delivery `05a3bf93`, under brief `8611e31`, is complete
-but failed source review. The immutable delivery contains 26 files and 553,800
+and awaits source review. The immutable delivery contains 26 files and 553,800
 bytes, frozen in observation `47c823`; its 17 proposed tests remain unexecuted.
-Source repair is required. This delivery adds no accepted implementation or
-qualification. Fixed backend construction and the worker connection remain
-unqualified. See [the child namespace brief](REAL-CHILD-NAMESPACE-IMPLEMENTATION-BRIEF-2026-09-14.md).
+No source acceptance or new qualification follows. Fixed backend construction
+and the worker connection remain unqualified. See [the child namespace brief](REAL-CHILD-NAMESPACE-IMPLEMENTATION-BRIEF-2026-09-14.md).
 
 Ryan's approved D1 static checkpoint inspection is recorded at `4b38948`. One
 guarded invocation verified the fixed hash, ZIP inventory and version bytes,
