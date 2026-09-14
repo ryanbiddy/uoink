@@ -99,7 +99,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | Security | NLTK wheel at 52d9f7d, binding at 07084fe; graph f22456c and security scope 14aa0df reviewed; cache guard b96dbd0 accepted | Cache guard: 144 passed plus 13 subtests in each independent root; all 117 proof payloads match Git and disk. Candidate advisory count remains one entry / one group; graph still fails five caps. Default VAD remains open; Gemini cache review integrated at 9d25eda. B2 derivative preparation at f0181f8 passes ten synthetic cases independently; actual B2 builds at 576cd07/d9f2208 reproduce identically under Python 3.14/3.13, remain uninstalled; optional Hub keyword repair qualified at 25b0a63, remains an inert proposal | B3 packaging qualifies at 7be52ef with 68/68 in both roots and identical actual builds. Pipeline generator contracts qualify at 2f8464a: 23 passing cases in each root; native stack remains unaccepted. Fixed converter synthetic qualification is archived at 57abc97: 82 passed in each independent run, real profile absent. Buffer consistency comparator qualified at 9859a8a with 37 cases in each root. Concrete D1 adapter qualified at381985c: 54 synthetic passes in each root, 53 sealed payloads; actual inspection and interpretation basis remain owner decisions. ASR manifest resolver qualified as an inert proposal at e6a2394 with 87 passes in each root and 138 sealed payloads. Plain-state reader qualified at e826407 with 82 synthetic passes in each root and 187 sealed payloads; original setup and75/1 failures retained. Real reader authority remains absent. Finish runtime adapter, D1 invocation and compatibility proposals. Static inventory and fixed-loader proposal archived at 01163e1; runs03/04 completed after retained refusals. Symbolic run01 refused a reference cycle (4a3644a); cycle diagnostic ccb44ce retains refusal; selected projection at ba8d2c8 provides 54 symbolic tensor descriptors while strict refusal remains. Fixed factory/schema mapped and independently reviewed at de07dfe: 54 declarations, 23 storages; bridge unapproved. Public upstream identity is verified at 191cbf1; byte order and applicable model notice remain open. No model execution. No runtime or installed clearance |
 | Runtime source review | Gemini loader council and Torch source comparison integrated at a2e6e7c | Gemini found no new actionable defect within the three components' synthetic scope; Astra accepts with timestamp, path and native-open corrections. Torch collector passed 40 cases in each root; 23 admitted HTTP body pairs verified. All 38 council, 199 source and seven root-verification payloads match Git/disk | Repair dormant D1 and ASR qualification exit-recording gaps, qualify fake-port orchestration, implement tensor bridge and real runtime ports. No native, installed or release clearance |
 | Signing | Gemini review and repaired path integrated at 0b3629d | 48 focused passes; 77 proof payloads match Git. Real Inno direct callback refuses missing certificate and keeps a durable error. No successful signing credit | Full combined candidate tree after runtime work settles; actual certificate/service choice remains Ryan's |
-| Dormant D1 runner | Repaired wrapper and source review integrated at f0602f8 | Author and Astra each 12 passed / 0 failed plus four separate controls; 102 sealed payloads match Git/disk, with 460 source files and 370 archived case members verified | Actual static inspection remains disabled for the separate D1 decision. No model, conversion, installed or release credit |
+| D1 static inspection | Ryan's exact static approval and observed result integrated at 4b38948 | One invocation b29f6c returns outer/child0 with valid guards; exact checkpoint hash and131-member inventory match;1,002 interpreted bytes/version330a; little-endian maximum2ULP. All61 evidence payloads match Git/disk | D1 inspection is complete. Writer/other-storage validation and D2 conversion/D3 acquisition/D4 native execution remain separate; no model or release credit |
 | State bridge | Synthetic orchestration integrated at 2b9068a | Author and Astra each 61 passed / 0 failed / 0 skipped, exact cases and valid guards. All 59 proof payloads match Git/disk and map 83 logical files | CPU port now qualified with fake APIs at 3801cee; implement the concrete factory service and qualify native independence separately. Real entry points remain closed |
 | CPU tensor port | Concrete method bodies qualified with fake storage at 3801cee | Author and Astra each 60 passed / 0 failed / 0 skipped, exact ordered cases and ten valid final guards. All 45 proof payloads match Git/disk and map 67 logical files | Implement factory ownership and actual runtime services. Native allocation, float conversion, storage/view behavior and cleanup remain untested; no market clearance |
 | VAD factory registry | Concrete factory and worker-local model registration integrated at 803df4b | Author and Astra each 59 passed / 0 failed / 0 skipped; all ten guards valid and 65 proof payloads match Git/disk, preserving 119 logical files | Gemini component review accepted at 488a7fd for tested scope; actual runtime bootstrap, native semantics and numerical behavior remain open |
@@ -179,7 +179,11 @@ force-adding its unchanged sealed bytes repaired that failure. All19 payloads
 match Git/disk. Continue the concrete D1 adapter, ASR trusted-manifest resolver
 and VAD-PLAIN-STATE-READER-PROPOSAL-BRIEF-2026-09-13.md. D1 adapter is accepted
 as preparation at381985c: author/root54-case synthetic checks pass, all53 proof
-payloads match Git/disk; real inspection remains an owner decision. ASR resolver
+payloads match Git/disk. Ryan's subsequent static-only approval and exact result
+are archived at4b38948; read ASTRA-D1-STATIC-RESULT-2026-09-13.md. One invocation
+completed within scope, with61 sealed text payloads and no conversion or model
+execution. Do not repeat the artifact inspection for documentary checks. D2/D3/D4
+remain unapproved. ASR resolver
 qualification is archived at e6a2394: author/root each87/0, exact case membership,
 all138 proof payloads matching Git/disk. Its original64/9 failure and40-file
 Windows identity diagnostic remain preserved. The repair keeps complete path
@@ -1064,7 +1068,8 @@ core.longpaths true` must stay set (worktree checkouts fail without it).
   only" and the exact admitted invocation b29f6c completed with outer/child0,
   valid guards and 1,002 interpreted bytes. The fixed checkpoint hash,131-member
   inventory and version330a matched; little-endian matched the fixed eight-ULP
-  basis with maximum2ULP. The evidence archive is being prepared. This does not
+  basis with maximum2ULP. Evidence is integrated at4b38948; read
+  ASTRA-D1-STATIC-RESULT-2026-09-13.md. This does not
   authenticate the writer, validate other storage encodings or approve D2
   conversion, D3 fetching or D4 stack/native execution. Those remain separate.
 - Actual release signing requires Ryan's publisher certificate and timestamp
@@ -5511,3 +5516,27 @@ c27355 failed before writes/invocation because PSObject.Properties.Count did not
 materialize the collection. Repair @(properties).Count passed atddbdf1; both
 actuals and the repair are retained. D1 evidence integration follows. Do not
 reopen the checkpoint for documentary verification or infer D2/D3/D4 approval.
+
+### 2026-09-13 - D1 static result accepted within its approved scope
+
+Commit4b38948 preserves the one approved static inspection b29f6c. Actual outer,
+wrapper and child exits are0. The exact17,719,103-byte hash,131-member inventory
+and CRC checks match; version is330a. The only1,002 interpreted bytes are the two
+500-byte buffers and version. Little-endian matches all250 words at maximum2ULP
+under the fixed8ULP basis; big-endian fails125 words in each buffer. Retained
+status is static_inspection_complete_unqualified, not writer authentication,
+other-storage validation, conversion or model acceptance.
+
+All61 proof payloads/250,927 bytes match Git/disk in198809; seal
+e57a89ebfdd7e888fb13532674c484fcda593cf1a679e1f4347e248ec0dfeadd.
+Receipt754ca6dea6aed81de072940b35ad4c283f270b5770a88236ef55fd0a09d46e75 is1,984B.
+One artifact open, one receipt open and one invocation; all guards valid,
+25registry traps and zero denials/heavy imports/conversion calls. Temporary
+approval reset and REAL_PROFILE stayedNone. Source and documentary verification
+afterward read text only and did not reopen the checkpoint. D2/D3/D4 remain
+unapproved. Existing instructions calling D1 pending are historical and superseded.
+
+The creation-transfer proposal's new70-case union has now passed both generated
+observations e2d449/7b3900, with35 passing nested subtests, exact case objects,
+unchanged29 inputs, valid guards and outer/native0. Evidence integration follows;
+no native normal-drain has run yet. Production remains71d3e70 and release is held.

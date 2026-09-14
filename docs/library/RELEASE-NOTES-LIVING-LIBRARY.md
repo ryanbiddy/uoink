@@ -44,6 +44,13 @@ qualified at `bbe10d6`: both copies pass the same 17 cases, including six new
 construction, registration, retirement and failure controls. Native inference,
 decoder/filter authority and the actual VAD-to-model link remain unqualified.
 
+Ryan's approved static checkpoint inspection is recorded at `4b38948`. One
+guarded invocation verified the fixed hash, ZIP inventory and version bytes,
+and found little-endian consistency in the two selected buffers. Only 1,002
+payload bytes were interpreted; no pickle evaluation, conversion, model or
+download ran. This resolves the inspection step. It does not authenticate the
+writer, qualify other storage values or approve model/runtime execution.
+
 Package 08 remains the latest built and installed review artifact. It includes
 the native note and saved-media repairs at `d2caac5` and `60d203f`; its source
 is `b8e44fb`. Its recorded installation, browser, CLI and native Uoink checks
