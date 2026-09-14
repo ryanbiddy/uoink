@@ -1,0 +1,151 @@
+{
+  "inputs": [
+    {
+      "name": "snapshot_lifecycle.py",
+      "original": {
+        "bytes": 27096,
+        "sha256": "22b662938178d1898eb287348d0b4556c6579b5d0ce79f2782d49a4748ed1509"
+      },
+      "copy": {
+        "bytes": 27096,
+        "sha256": "22b662938178d1898eb287348d0b4556c6579b5d0ce79f2782d49a4748ed1509"
+      },
+      "unchanged": true
+    },
+    {
+      "name": "lifecycle46_cases.py",
+      "original": {
+        "bytes": 19127,
+        "sha256": "fd9d79c34f14edb7614e96da6952195a01ff4896974403d90ea5bfe1db70740c"
+      },
+      "copy": {
+        "bytes": 19127,
+        "sha256": "fd9d79c34f14edb7614e96da6952195a01ff4896974403d90ea5bfe1db70740c"
+      },
+      "unchanged": true
+    },
+    {
+      "name": "test_completion_info.py",
+      "original": {
+        "bytes": 15709,
+        "sha256": "29d3a327d9b507f1a16b147a7be68887fb2233536823f76da3e65d1e45b57549"
+      },
+      "copy": {
+        "bytes": 15709,
+        "sha256": "29d3a327d9b507f1a16b147a7be68887fb2233536823f76da3e65d1e45b57549"
+      },
+      "unchanged": true
+    },
+    {
+      "name": "qualify_completion_info.py",
+      "original": {
+        "bytes": 10354,
+        "sha256": "c5bc4605fbae77f859711c46a12e114edbe6b02b66b3fdd68595d3f3aab146aa"
+      },
+      "copy": {
+        "bytes": 10354,
+        "sha256": "c5bc4605fbae77f859711c46a12e114edbe6b02b66b3fdd68595d3f3aab146aa"
+      },
+      "unchanged": true
+    },
+    {
+      "name": "EXPECTED-CASES.json",
+      "original": {
+        "bytes": 3823,
+        "sha256": "82bf46e9b64600a465bd7433cf902c75d1ede518ab349749bc7bbafa58c8b528"
+      },
+      "copy": {
+        "bytes": 3823,
+        "sha256": "82bf46e9b64600a465bd7433cf902c75d1ede518ab349749bc7bbafa58c8b528"
+      },
+      "unchanged": true
+    },
+    {
+      "name": "run_fake59_01.ps1",
+      "original": {
+        "bytes": 9085,
+        "sha256": "4b278898495300af55cb5b187dc694ae3e9912af49cbfcbc62ebdd02982bf239"
+      },
+      "copy": {
+        "bytes": 9085,
+        "sha256": "4b278898495300af55cb5b187dc694ae3e9912af49cbfcbc62ebdd02982bf239"
+      },
+      "unchanged": true
+    },
+    {
+      "name": "QUALIFICATION-PROTOCOL.md",
+      "original": {
+        "bytes": 2551,
+        "sha256": "762bdbcaedc77d14cab8039163899469a26398613ab3e55eea9dd10fb49e3b15"
+      },
+      "copy": {
+        "bytes": 2551,
+        "sha256": "762bdbcaedc77d14cab8039163899469a26398613ab3e55eea9dd10fb49e3b15"
+      },
+      "unchanged": true
+    },
+    {
+      "name": "BRIEF.md",
+      "original": {
+        "bytes": 1908,
+        "sha256": "193b23d58f2b74afd7441db6206bca340b45959040e7c86e54cb5daa94fa0e81"
+      },
+      "copy": {
+        "bytes": 1908,
+        "sha256": "193b23d58f2b74afd7441db6206bca340b45959040e7c86e54cb5daa94fa0e81"
+      },
+      "unchanged": true
+    },
+    {
+      "name": "SOURCE-INPUTS.json",
+      "original": {
+        "bytes": 2471,
+        "sha256": "32c3280a4ba6bed0c9b7a74c520f4739da558826ee796a0865178dc1be20c601"
+      },
+      "copy": {
+        "bytes": 2471,
+        "sha256": "32c3280a4ba6bed0c9b7a74c520f4739da558826ee796a0865178dc1be20c601"
+      },
+      "unchanged": true
+    }
+  ],
+  "controls": [
+    {
+      "name": "PINS.json",
+      "original": {
+        "bytes": 1953,
+        "sha256": "3ab4293cfd48e9652029bd7c2de42269b57499c7c46d95cfd9f659db4a6099f1"
+      },
+      "copy": {
+        "bytes": 1953,
+        "sha256": "3ab4293cfd48e9652029bd7c2de42269b57499c7c46d95cfd9f659db4a6099f1"
+      },
+      "unchanged": true
+    },
+    {
+      "name": "ROOT-ADMISSION.json",
+      "original": {
+        "bytes": 332,
+        "sha256": "ea124da8939029e716f0e2873c3605fd06c7cc0a9330e25d72143ae2394fa2d8"
+      },
+      "copy": {
+        "bytes": 332,
+        "sha256": "ea124da8939029e716f0e2873c3605fd06c7cc0a9330e25d72143ae2394fa2d8"
+      },
+      "unchanged": true
+    },
+    {
+      "name": "run_fake59_01.ps1",
+      "original": {
+        "bytes": 9085,
+        "sha256": "4b278898495300af55cb5b187dc694ae3e9912af49cbfcbc62ebdd02982bf239"
+      },
+      "copy": {
+        "bytes": 9085,
+        "sha256": "4b278898495300af55cb5b187dc694ae3e9912af49cbfcbc62ebdd02982bf239"
+      },
+      "unchanged": true
+    }
+  ],
+  "inputs_unchanged": true
+}

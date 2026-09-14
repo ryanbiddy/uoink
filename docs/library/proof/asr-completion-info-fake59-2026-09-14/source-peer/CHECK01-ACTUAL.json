@@ -1,0 +1,7 @@
+{
+  "chunk_id": "fde474",
+  "wall_time_seconds": 0.2731539,
+  "exit_code": 0,
+  "original_token_count": 232,
+  "output": "{\r\n  \"scope\": \"Passive text only\",\r\n  \"pins_verified\": 18,\r\n  \"baseline_bindings_verified\": 7,\r\n  \"hunks\": 4,\r\n  \"insertions\": 91,\r\n  \"original_lines\": 517,\r\n  \"derivative_lines\": 608,\r\n  \"all_original_lines_unchanged\": true,\r\n  \"complete_LF_reconstruction\": true,\r\n  \"exact13_case_order\": true,\r\n  \"candidate_executed\": false\r\n}\r\n88:class TranscriptionInfo:\n96:def _validate_transcription_info(info, permit, cursor):\n351:    def _call(self, method, *args):\n373:    def close_and_join(self):\n452:        self._completed = False\n453:        self._info_closed = False\n483:                self._completed = True\n522:    def completion_info(self):\n533:            if self._info_closed:\n535:            if not self._completed:\n561:                if self._info_closed:\n572:                if self._info_closed:\n580:                        or not self._completed):\n590:    def close(self):\n593:            self._info_closed = True\n"
+}

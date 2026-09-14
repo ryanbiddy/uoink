@@ -1,0 +1,15 @@
+{
+  "scope": "passive source text only; no source/test execution",
+  "baseline_sha256": "a80514aac6b1e75b9b872052852fa993a23cd5273b6bed4ffb4eef7404cb69dd",
+  "derivative_sha256": "22b662938178d1898eb287348d0b4556c6579b5d0ce79f2782d49a4748ed1509",
+  "diff_sha256": "b7ddb5aa83ad5f70b1457f927c52e62ea47eeaee065656f1ceda431ec49fbdff",
+  "baseline_lines": 517,
+  "derivative_lines": 608,
+  "inserted_lines": 91,
+  "hunks": 4,
+  "forward_exact": true,
+  "reverse_exact": true,
+  "proposed_cases": 13,
+  "tests_sha256": "a5cc1fcd6fe3ea30b1a3d285d7dc45ea6f4c97fc3d619cd4432fb75c6fc86497",
+  "provenance": "Derived from saved actual43b78f; source text reconstruction, not candidate execution"
+}

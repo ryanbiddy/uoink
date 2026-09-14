@@ -1,0 +1,58 @@
+{
+  "scope": "Source text only; no execution authority",
+  "corrected_source_pins_sha256": "4c89cb364c3879a37cafdc06abb6ac5087ec8922bc63de95f61f954074a04288",
+  "copied_sources": [
+    {
+      "path": "snapshot_lifecycle.py",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-completion-info-proposal02\\snapshot_lifecycle.py",
+      "bytes": 27096,
+      "sha256": "22b662938178d1898eb287348d0b4556c6579b5d0ce79f2782d49a4748ed1509",
+      "copy_sha256": "22b662938178d1898eb287348d0b4556c6579b5d0ce79f2782d49a4748ed1509"
+    },
+    {
+      "path": "test_completion_info.py",
+      "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-completion-info-proposal02\\test_completion_info.py",
+      "bytes": 15709,
+      "sha256": "29d3a327d9b507f1a16b147a7be68887fb2233536823f76da3e65d1e45b57549",
+      "copy_sha256": "29d3a327d9b507f1a16b147a7be68887fb2233536823f76da3e65d1e45b57549"
+    }
+  ],
+  "historical_cases": {
+    "path": "lifecycle46_cases.py",
+    "bytes": 19127,
+    "sha256": "fd9d79c34f14edb7614e96da6952195a01ff4896974403d90ea5bfe1db70740c",
+    "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-windows-lifecycle-proposal02\\qualify_lifecycle.py",
+    "source_sha256": "563539d579a6584029f6596d6cba5de375976b6ada02535108cc195cb4fc3de7",
+    "extraction": "Exact source block from class TestInterrupt(BaseException): up to results = []; only module docstring/dataclasses/M imports added",
+    "case_count": 46
+  },
+  "before_bindings": [
+    {
+      "path": "before/qualify_lifecycle46.py",
+      "bytes": 26872,
+      "sha256": "563539d579a6584029f6596d6cba5de375976b6ada02535108cc195cb4fc3de7"
+    },
+    {
+      "path": "before/LIFECYCLE46-EXPECTED.json",
+      "bytes": 2562,
+      "sha256": "a03a8da9270ec47ec796e19a3b6795f9861cea65b6e577fc21a617bffe8d6228"
+    },
+    {
+      "path": "before/qualify_reliability.py",
+      "bytes": 9979,
+      "sha256": "045aaa73b69f5b93afda44785d84053c2835b5bd5094a9b6264752876fbb8f7f"
+    },
+    {
+      "path": "before/run_fake11_01.ps1",
+      "bytes": 9111,
+      "sha256": "2ae106d2e6eddb33fb065840612becec0b6b600662cd1c1bb094a9a8db037126"
+    },
+    {
+      "path": "before/COMPLETION13-EXPECTED.json",
+      "bytes": 1451,
+      "sha256": "a3869c885d622f4f7f248878213af44f2fd3315106ebdd661a00f6318def06f9"
+    }
+  ],
+  "new_case_count": 13,
+  "combined_case_count": 59
+}

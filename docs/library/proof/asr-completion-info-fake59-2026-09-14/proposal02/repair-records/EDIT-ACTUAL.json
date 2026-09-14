@@ -1,0 +1,7 @@
+{
+  "chunk_id": "af291a",
+  "wall_time_seconds": 0.2361749,
+  "exit_code": 0,
+  "original_token_count": 315,
+  "output": "{\r\n  \"scope\": \"Passive source-only fixture correction\",\r\n  \"before_sha256\": \"a5cc1fcd6fe3ea30b1a3d285d7dc45ea6f4c97fc3d619cd4432fb75c6fc86497\",\r\n  \"after_sha256\": \"29d3a327d9b507f1a16b147a7be68887fb2233536823f76da3e65d1e45b57549\",\r\n  \"diff_sha256\": \"d8be0fb6e0de58356aa83fe04876742eb14f5198c77de77ec23ebd9fd2a37e1e\",\r\n  \"exact_one_block_replaced\": true,\r\n  \"reverse_exact\": true,\r\n  \"line_endings_preserved\": true,\r\n  \"candidate_executed\": false\r\n}\r\n--- before/test_completion_info.before-registry-lock02.py\r\n+++ test_completion_info.py\r\n@@ -58,8 +58,10 @@\r\n         if self.values:\r\n             return self.values.pop(0)\r\n         # The fixed fake backend result is independent of request.language.\r\n-        self.info = lifecycle.TranscriptionInfo(self.permit, self.cursor, self.backend_language)\r\n-        self.issued = (self.worker, self.permit, self.cursor, self.generation, self.info)\r\n+        with self.manager._lock:\r\n+            assert self.manager._lock._is_owned()\r\n+            self.info = lifecycle.TranscriptionInfo(self.permit, self.cursor, self.backend_language)\r\n+            self.issued = (self.worker, self.permit, self.cursor, self.generation, self.info)\r\n         return None\r\n \r\n     def get_transcription_info(self, worker, cursor):\r\n"
+}

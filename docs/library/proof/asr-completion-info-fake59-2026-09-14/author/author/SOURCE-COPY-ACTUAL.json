@@ -1,0 +1,7 @@
+{
+  "chunk_id": "b3fd09",
+  "wall_time_seconds": 0.2438763,
+  "exit_code": 0,
+  "original_token_count": 269,
+  "output": "{\r\n  \"scope\": \"Text-only exact source copies and fixed membership\",\r\n  \"sources\": [\r\n    {\r\n      \"path\": \"snapshot_lifecycle.py\",\r\n      \"source\": \"E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\_scratch\\\\asr-completion-info-proposal02\\\\snapshot_lifecycle.py\",\r\n      \"bytes\": 27096,\r\n      \"sha256\": \"22b662938178d1898eb287348d0b4556c6579b5d0ce79f2782d49a4748ed1509\",\r\n      \"copy_sha256\": \"22b662938178d1898eb287348d0b4556c6579b5d0ce79f2782d49a4748ed1509\"\r\n    },\r\n    {\r\n      \"path\": \"test_completion_info.py\",\r\n      \"source\": \"E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\_scratch\\\\asr-completion-info-proposal02\\\\test_completion_info.py\",\r\n      \"bytes\": 15709,\r\n      \"sha256\": \"29d3a327d9b507f1a16b147a7be68887fb2233536823f76da3e65d1e45b57549\",\r\n      \"copy_sha256\": \"29d3a327d9b507f1a16b147a7be68887fb2233536823f76da3e65d1e45b57549\"\r\n    }\r\n  ],\r\n  \"combined_case_count\": 59,\r\n  \"expected_sha256\": \"82bf46e9b64600a465bd7433cf902c75d1ede518ab349749bc7bbafa58c8b528\",\r\n  \"map_sha256\": \"32c3280a4ba6bed0c9b7a74c520f4739da558826ee796a0865178dc1be20c601\"\r\n}\r\n"
+}

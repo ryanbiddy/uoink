@@ -1,0 +1,7 @@
+{
+  "chunk_id": "993295",
+  "wall_time_seconds": 0.1872331,
+  "exit_code": 0,
+  "original_token_count": 132,
+  "output": "{\"runs\":[{\"source\":\"asr-completion-info-fake59-author01\",\"label\":\"asr-completion-info-fake59-01\",\"outer\":\"577e68\",\"passed\":59,\"failed\":0,\"skipped\":0,\"subtests\":29,\"source_inputs\":9,\"controls\":3},{\"source\":\"asr-completion-info-fake59-independent01\",\"label\":\"asr-completion-info-confirmation59-01\",\"outer\":\"8fd760\",\"passed\":59,\"failed\":0,\"skipped\":0,\"subtests\":29,\"source_inputs\":9,\"controls\":3}],\"original46_preserved\":true,\"identical_case_objects\":true,\"identical5_child_hashes\":true,\"ten_guards_each\":true,\"outputs_each\":17}\n"
+}

@@ -1,0 +1,7 @@
+{
+  "chunk_id": "dc765d",
+  "wall_time_seconds": 0.5001341,
+  "exit_code": 0,
+  "original_token_count": 75,
+  "output": "{\r\n  \"copied_payloads\": 18,\r\n  \"origin_pins\": \"7a7592dcb72c0b1768b9bb61766000b1afa1b0557691e02dea18119ebbd87fc4\",\r\n  \"originals_unchanged\": true,\r\n  \"fresh_destination\": \"E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\_scratch\\\\asr-completion-info-proposal02\",\r\n  \"candidate_executed\": false\r\n}\r\n"
+}

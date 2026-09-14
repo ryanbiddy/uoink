@@ -122,6 +122,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | Interrupted owned-worker retirement | Native02 accepted at99ce3c9; Native01 remains FAILED at7f142e8 | Actual9753fb returns outer/controller0; root4b342d and peerf633ad agree on10 write observations,15 retirement events, primaryexit1/job0 and5 journal frames. All160 native/integration payloads match Git/disk. Fake30 atc8e7a44 remains30/0/0 plus62 per root | Do not repeat native02. The subsequent constructor source review FAILED; bounded ownership repair and caller work continue without production or release authority |
 | Protected ASR constructor | Gemini e6133b1f source review FAILED at22949dc; 13 proposed tests unexecuted | Ownership scope/retention, namespace authority, fallback, fixture and provenance defects block admission. All42 documentary payloads match Git/disk at4faa90 | Follow PROTECTED-ENGINE-OWNERSHIP-REPAIR-BRIEF-2026-09-14.md. Bounded generated ownership repair is written; review before qualification. Real constructor/media/runtime remain closed |
 | Reliability request/stream caller | Both scoped fake11 copies pass11/0/0 plus15 subtests | Author121f97 and confirmationff51d7 return0. Roota05d87 and peer88b1f3 verify identical cases/nine hashes, ten guards, unchanged13 inputs/three controls and21 outputs each | Production unchanged. Resolve actual ticket issuance, CPU/int8 profile binding and two prospective legacy test contracts before migration; continue constructor and completion-info work |
+| Completion language metadata | Both scoped fake59 copies pass59/0/0 plus29 subtests; original46 preserved | Author577e68 and confirmation8fd760 return0. Root993295 and peera39b40 verify identical full cases/five hashes, ten guards, unchanged nine inputs/three controls and17 outputs each | Connect authenticated backend completion and controller registry, then migrate WhisperX caller. Engine fake39 source is frozen for review; real/runtime/production gates remain closed |
 | Release notes | Current progress and remaining gates committed at 376eb47 | All seven proof payloads match Git/disk; 57 table lines and historical package/review-kit sections remain unchanged. D1/D2 completion and generated cancellation/recovery are explicit | Continue runtime qualification. No production source, package, installation, public draft or website changed |
 | Integration | Reliability repair at e8d058f and notice packaging at 71d3e70 after tree09 | Reliability:53 focused cases plus13 subtests per root. Notices:20 Python/10 block cases per root. Tree09 at 56d9d4c remains2,796 passed/1 failed/3 skipped across2,800 cases plus13 subtests; it predates both repairs | Finish runtime work, then run a new committed complete tree and rebuild/reseal. Package08 and website/marketing remain held. No current-source package or installation credit |
 | Desktop incident | Isolation failed in package-07 attempt; corrected at `e10ba3a` | Ordinary Uoink and filesystem connectors launched; earlier live-index/5179 effects unknown. Owned job cleaned | No further override launch; only guarded Uoink dashboard observed for package 08 |
@@ -266,12 +267,21 @@ nine child hashes, ten guards, unchanged13 inputs/three controls and21 output
 files each. Read ASTRA-RELIABILITY-FAKE11-VERDICT-2026-09-14.md; do not repeat.
 The150 documentary payloads are sealed at5924bb90. Real media issuance and exact
 CPU/int8 binding remain absent; two unchanged test contracts are owner decisions.
-Completion-info source in_scratch/asr-completion-info-proposal02 preserves
-lifecycle22b66293 and all13 case bodies. Its new fixture29d3a327 now acquires the
-publication lock for metadata issuance; original01 and correction-required
-peer verdictaf448cd9 remain preserved. A combined original46 plus new13 guarded
-instrument is being prepared without execution. Review its exact source before
-admission. Production and accepted tests remain unchanged.
+Completion-info source22b66293 and corrected new fixture29d3a327 now pass the
+combined original46/new13 set in both copies: author577e68 and confirmation8fd760
+each59/0/0 plus29 passing subtests. Root993295 and peera39b40 agree on complete
+case objects, five child hashes, ten guards, nine inputs/three controls and17
+outputs each. Read ASTRA-COMPLETION-FAKE59-VERDICT-2026-09-14.md; do not repeat.
+The193 payloads are sealed at06f73199. Original01, its correction-required review,
+and root/peer passive parser failures remain preserved. These give no backend
+language or real registry credit. Production and accepted tests remain unchanged.
+Next review the frozen generated engine fake39 preparation at
+_scratch/protected-engine-ownership-fake39-author01, PINS7309394f. Its core source
+passed peer reviewee2104ee; the instrument preserves original33 plus six new
+cases and has38 child texts/40 parent inputs. Final source review/admission is
+still required; no execution result exists. Then implement authenticated real
+namespace and fixed constructor binding, backend cursor/metadata connection,
+PCM/filter authority and the WhisperX caller migration before D3/D4 qualification.
 Keep these source tasks separate from real PCM/filter and D3/D4 qualification.
 The frozen broader plan is archived in30 payloads under
 proof/runtime-next-source-plan-2026-09-14, index8ef211; no implementation pass is
@@ -6634,3 +6644,35 @@ registry lock correction and the two prospective reliability test conflicts
 are recorded in INTEGRATOR-CONTRACT-CONFLICTS-2026-09-08.md. The engine ownership
 repair's independent source review is next; no constructor or backend gate is
 opened by either proposal.
+
+### 2026-09-14 — Complete lifecycle/metadata pair accepted
+
+Admissions46320de and605c8c0 bind the author577e68 and independent8fd760 runs.
+Each returns outer/native0 with59/0/0 and29 passing subtests. Root993295 and
+independent peera39b40 verify identical full case objects and five source hashes,
+the unchanged original46 order, all ten guards and exact17-file outputs. No
+subject rerun occurred. The fixture-lock repair preserves all13 new case bodies.
+Root's historical-list parser failuree37b46 and peer's two passive parser failures
+remain preserved with their narrow corrections; none is a subject test failure.
+
+Archive2c06f2 freezes193 payloads/1,288,609 bytes, including the previous caller
+integration/backup records. Raw worktree diff/application11fde4 returns0:
+patch1,432,834 bytes SHA256
+0aa936064606d3fa25ca9e2c22342c160541a0274f9852c9a8bbe0e867f8b607.
+All151 transport differences were proven newline-only before raw restoration.
+Initial8c37f3 yielded session72271; finalcc862a/0 verifies every payload and
+seal06f7319979f2d892617af0f9eaa75053b8fe0849767440898049dfad3db65df1
+against Git/disk. No production or package rebuild is justified by this archive.
+
+Engine core source25e57481/86977e0d and six generated cases pass source review
+ee2104ee. Their fake39 preparation preserves the original33 prefix and guard,
+with a fixed generated-object module; review final map7309394f before admission.
+No claim covers all constructor boundaries or actual backend safety.
+
+The next WhisperX caller migration must also address import-time behavior:
+current whisper_runner.py inspects the packaged decoder directory and probes
+WhisperX while importing the module, before transcribe_audio. Root read the
+complete source at1d3724. Do not import it under a closed source-only qualifier
+or bypass the guards to test a new helper. Preserve readiness/consent contracts,
+make that bootstrap change explicit, and keep diarization unexecuted. Production
+remains71d3e70; real model/media/metadata and release gates stay open.

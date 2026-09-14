@@ -1,0 +1,16 @@
+{
+  "scope": "Independent passive pair comparison; no subject execution",
+  "author_actual": "577e68",
+  "independent_actual": "8fd760",
+  "each_passed": 59,
+  "each_failed": 0,
+  "each_skipped": 0,
+  "each_subtests_passed": 29,
+  "all_ordered_case_objects_equal": true,
+  "case_objects_serialization": "PowerShell ConvertTo-Json -Depth20 -Compress in retained property order",
+  "case_objects_sha256": "9edc364b02351c0cfaa309a26a72bfb60d673d5ba2c2eb11b1b1e2e12326d5eb",
+  "five_child_hashes_equal": true,
+  "each_complete_check": "9 inputs, 3 controls, 17 outputs, 10 guards, 12 metadata and 25 registry traps",
+  "independent_pair_pending": false,
+  "subject_rerun": false
+}

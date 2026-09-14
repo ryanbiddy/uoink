@@ -1,0 +1,7 @@
+{
+  "chunk_id": "a39b40",
+  "wall_time_seconds": 0.2066775,
+  "exit_code": 0,
+  "original_token_count": 174,
+  "output": "{\r\n  \"scope\": \"Independent passive pair comparison; no subject execution\",\r\n  \"author_actual\": \"577e68\",\r\n  \"independent_actual\": \"8fd760\",\r\n  \"each_passed\": 59,\r\n  \"each_failed\": 0,\r\n  \"each_skipped\": 0,\r\n  \"each_subtests_passed\": 29,\r\n  \"all_ordered_case_objects_equal\": true,\r\n  \"case_objects_serialization\": \"PowerShell ConvertTo-Json -Depth20 -Compress in retained property order\",\r\n  \"case_objects_sha256\": \"9edc364b02351c0cfaa309a26a72bfb60d673d5ba2c2eb11b1b1e2e12326d5eb\",\r\n  \"five_child_hashes_equal\": true,\r\n  \"each_complete_check\": \"9 inputs, 3 controls, 17 outputs, 10 guards, 12 metadata and 25 registry traps\",\r\n  \"independent_pair_pending\": false,\r\n  \"subject_rerun\": false\r\n}\r\n"
+}

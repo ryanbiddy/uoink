@@ -1,0 +1,33 @@
+{
+  "scope": "Independent passive saved-receipt review only",
+  "source_root": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-completion-info-fake59-author01",
+  "run_name": "asr-completion-info-fake59-01",
+  "actual_chunk": "577e68",
+  "actual_exit": 0,
+  "actual_seconds": 0.9033364,
+  "native_exit": 0,
+  "native_seconds": 0.3110804,
+  "launcher_seconds": 0.3496752,
+  "case_seconds": 0.004998499993234873,
+  "passed": 59,
+  "failed": 0,
+  "skipped": 0,
+  "subtests_passed": 29,
+  "original46_order": true,
+  "new13_order": true,
+  "child_hashes": 5,
+  "inputs": 9,
+  "controls": 3,
+  "output_files": 17,
+  "guards": 10,
+  "metadata_traps": 12,
+  "registry_traps": 25,
+  "stderr_bytes": 0,
+  "stdout": {
+    "bytes": 21874,
+    "sha256": "a703f95d3c26fdea2e37d6942ce4dbc5052b8799d5c927dfd317212a769b4aef"
+  },
+  "inputs_unchanged_during_review": true,
+  "subject_rerun": false,
+  "independent_pair_pending": true
+}

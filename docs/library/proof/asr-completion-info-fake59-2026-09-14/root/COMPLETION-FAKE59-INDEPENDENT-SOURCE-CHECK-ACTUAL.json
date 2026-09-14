@@ -1,0 +1,7 @@
+{
+  "chunk_id": "37bb92",
+  "wall_time_seconds": 0.1747987,
+  "exit_code": 0,
+  "original_token_count": 73,
+  "output": "{\"scope\":\"Root confirmation binding; no candidate execution\",\"author\":\"577e68\",\"author_passed\":59,\"author_subtests\":29,\"unchanged_payloads\":8,\"launcher_label_changes\":5,\"unchanged_children\":5,\"independent_pins\":\"a1e3abec72c9a65b52d86f78c9f275c9e259fbd53f001231b6c87c6ffc14d1c8\",\"fresh\":true}\n"
+}

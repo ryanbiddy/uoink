@@ -1,0 +1,9 @@
+This source-only derivative corrects the new fixture's registry issuance. Proposal01 and its correction-required peer verdict remain unchanged. No candidate has been run for this repair.
+
+`InfoPort.next_segment` now acquires `self.manager._lock` and asserts ownership before constructing the fixed backend `TranscriptionInfo` and installing its exact-object registry entry. Those two assignments previously ran outside the lock because the real lifecycle invokes the port through `_call` with its lock released. The repair makes issuance follow the existing `PORT-CONTRACT.md`; retrieval remains outside the lock and the issuance predicate remains under the lifecycle publication lock.
+
+The one-hunk `test_completion_info.diff` changes only that fixture block. All 13 case bodies and their assertions, their ordered ID list, and `snapshot_lifecycle.py` are unchanged. The new lock assertion is in fixture preparation, not an alteration to an accepted case. The original fixture is preserved at `before/test_completion_info.before-registry-lock02.py`.
+
+The 18 proposal01 payloads were copied and verified before the repair. `ORIGIN-PINS.json` retains their original manifest; `COPY-BINDINGS.json` records the exact copy boundary. The unchanged inherited BRIEF, SOURCE-PRESERVATION, SOURCE-CORRECTIONS and seven reads remain historical proposal01 records. `FIXTURE-PRESERVATION02.json`, this note and the new `PINS.json` describe proposal02. The inherited lifecycle diff still reconstructs the same lifecycle derivative.
+
+Passive source checks verify the exact reversible fixture replacement, preserved line endings and unchanged case/source bytes. They are not Python execution or passing test measurements. The future authenticated backend result and real controller registry remain closed dependencies. Root must review this correction and any qualification instrumentation before a candidate run; this directory contains no admission or runner.

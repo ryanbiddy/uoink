@@ -1,0 +1,16 @@
+{
+  "scope": "Independent source-only completion-info review; no candidate execution",
+  "proposal": "_scratch/asr-completion-info-proposal01",
+  "pins_sha256": "7a7592dcb72c0b1768b9bb61766000b1afa1b0557691e02dea18119ebbd87fc4",
+  "reads": [
+    {"actual": "VIEW01-ACTUAL.json", "tool": "a9ee72", "exit": 0, "coverage": "Scoped proposal inventory"},
+    {"actual": "VIEW02-ACTUAL.json", "tool": "7175f1", "exit": 0, "coverage": "Complete BRIEF, PORT-CONTRACT, four-hunk lifecycle diff, SOURCE-INPUTS, SOURCE-PRESERVATION, SOURCE-CORRECTIONS and PINS"},
+    {"actual": "TESTS-VIEW-ACTUAL.json", "tool": "0a8c4f", "exit": 0, "coverage": "Complete 344-line test module: inert fixture and all 13 case bodies"},
+    {"actual": "CHECK01-ACTUAL.json", "tool": "fde474", "exit": 0, "coverage": "Passive hashes for all 18 payloads/seven bound baseline texts, complete diff reconstruction, original-line preservation, exact ordered 13 IDs and relevant lifecycle line positions"}
+  ],
+  "baseline_scope": "Previously read lifecycle semantics; exact full-text reconstruction verifies all 517 baseline lines are unchanged. No broader source re-review or native-port implementation is claimed.",
+  "finding": {"file": "test_completion_info.py", "first_line": 61, "last_line": 62, "reason": "Completion-info registry issuance is outside the manager publication lock required by PORT-CONTRACT."},
+  "candidate_execution": false,
+  "admission": false,
+  "frozen_input_mutations": false
+}

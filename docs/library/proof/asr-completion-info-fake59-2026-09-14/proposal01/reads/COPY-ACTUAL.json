@@ -1,0 +1,7 @@
+{
+  "chunk_id": "ae220a",
+  "wall_time_seconds": 0.1795269,
+  "exit_code": 0,
+  "original_token_count": 152,
+  "output": "[\r\n  {\r\n    \"path\": \"_scratch\\\\windows-interrupted-owner-native-proposal02\\\\owned_generation_protocol.py\",\r\n    \"bytes\": 24403,\r\n    \"sha256\": \"bd5204ef0d3fc2a459df19bc5f02fd7b6d78041e2306b4031ab888387aa362c0\"\r\n  },\r\n  {\r\n    \"path\": \"_scratch\\\\asr-windows-lifecycle-proposal02\\\\qualify_lifecycle.py\",\r\n    \"bytes\": 26872,\r\n    \"sha256\": \"563539d579a6584029f6596d6cba5de375976b6ada02535108cc195cb4fc3de7\"\r\n  },\r\n  {\r\n    \"path\": \"_scratch\\\\asr-windows-lifecycle-proposal02\\\\EXPECTED-CASES.json\",\r\n    \"bytes\": 2562,\r\n    \"sha256\": \"a03a8da9270ec47ec796e19a3b6795f9861cea65b6e577fc21a617bffe8d6228\"\r\n  }\r\n]\r\n"
+}

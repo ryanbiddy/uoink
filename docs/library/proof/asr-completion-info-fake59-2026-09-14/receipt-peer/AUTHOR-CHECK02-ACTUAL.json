@@ -1,0 +1,7 @@
+{
+  "chunk_id": "a2d652",
+  "wall_time_seconds": 0.390742,
+  "exit_code": 1,
+  "original_token_count": 80,
+  "output": "Exception: E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-completion-info-fake59-peer01\\check_receipts.ps1:3\r\nLine |\r\n   3 |  …  Need($value, [string]$reason) { if (-not $value) { throw $reason } }\r\n     |                                                        ~~~~~~~~~~~~~\r\n     | original46 exact order\r\n"
+}

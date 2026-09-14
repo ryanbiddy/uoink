@@ -1,0 +1,14 @@
+The future trusted control port supplies two fixed methods:
+
+| Method | Required behavior |
+| --- | --- |
+| `get_transcription_info(worker, cursor)` | Return a `TranscriptionInfo` issued from the completed backend result for this exact cursor. The lifecycle calls this outside its manager lock, after natural EOF. It may perform bounded authenticated worker I/O. It must preserve the retained worker/result if retrieval fails. |
+| `is_issued_transcription_info(worker, permit_identity, cursor, info)` | Return exactly True only for the exact issued object in the port's private controller-side registry, bound to the current worker, permit, cursor and authenticated generation. This is a local non-I/O lookup called while the lifecycle manager publication lock is held. Registry issuance, replacement and revocation must use that same lock. Comparing fields alone is insufficient. |
+
+The lifecycle manager's active record binds the exact session to that worker and permit. Final checks bind the stream's captured cursor and media contract to that same record. The registry supplies the generation check; a new string or public dataclass field would not establish it. A substituted or retired generation must invalidate every info object it issued. If a future implementation cannot provide the local atomic check, it must leave these methods unavailable rather than treating a stale remote answer as authority.
+
+`TranscriptionInfo` has only `permit_identity`, `cursor_identity` and `language`. Language must be a nonempty lowercase ASCII code of at most 32 characters. This is a syntax bound, not a supported-language catalog. The port must derive it from the actual backend response: WhisperX's returned `language`, or the companion's retained transcription-info result. It must not copy TranscribeRequest.language, infer it from media naming, or substitute English when absent. A missing/invalid result is an error even for an empty transcript.
+
+Future whisper_runner use is ordered as follows: obtain the existing adapter context and privately admitted media ticket; submit an unchanged TranscribeRequest; consume the returned SegmentStream; read `stream.completion_info().language` while the context and stream remain open; then perform the existing context cleanup. Do not close the stream before the info call, and do not save a deferred metadata accessor to use after context exit. Cancellation does not produce completion metadata.
+
+No existing generated begin/segment/eof/closed frame gains a field. No fake info method is installed on the native port. Authentication, bounded transport, actual backend completion and controller registry installation remain source work for the worker connection. This proposal is usable with the new inert test port only until that work is reviewed and qualified.

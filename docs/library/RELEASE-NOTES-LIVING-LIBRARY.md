@@ -129,8 +129,14 @@ The dormant reliability caller now passes **11 cases and 15 subtests in each
 independent copy**, with zero failures or skips. The results cover request
 options, word normalization, context lifetime and cleanup with inert services.
 Real media issuance, compute-policy binding and two legacy test contracts remain
-open. Production is unchanged. The language-metadata proposal is still awaiting
-qualification. See [the caller verdict](ASTRA-RELIABILITY-FAKE11-VERDICT-2026-09-14.md).
+open. Production is unchanged. See [the caller verdict](ASTRA-RELIABILITY-FAKE11-VERDICT-2026-09-14.md).
+
+The completion-language extension passes **59 cases and 29 subtests in each
+independent copy**, with zero failures or skips. All46 existing lifecycle cases
+are preserved. The new checks cover session-bound metadata, closure, revocation
+and failure handling with inert ports. An authenticated backend response and
+real controller registry are still required; this is not a real transcription
+or release measurement. See [the metadata verdict](ASTRA-COMPLETION-FAKE59-VERDICT-2026-09-14.md).
 
 Ryan's approved D1 static checkpoint inspection is recorded at `4b38948`. One
 guarded invocation verified the fixed hash, ZIP inventory and version bytes,

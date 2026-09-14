@@ -1,0 +1,102 @@
+{
+  "scope": "Source text copies only; no candidate execution",
+  "origin": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-completion-info-proposal01",
+  "origin_pins_sha256": "7a7592dcb72c0b1768b9bb61766000b1afa1b0557691e02dea18119ebbd87fc4",
+  "files": [
+    {
+      "path": "before/metadata-publication-draft01.py",
+      "bytes": 26484,
+      "before": "cbba4d35f1e8185d2e59d6f34a13b88209934a474164401d278c0edab579933d"
+    },
+    {
+      "path": "before/snapshot_lifecycle.py",
+      "bytes": 22138,
+      "before": "a80514aac6b1e75b9b872052852fa993a23cd5273b6bed4ffb4eef7404cb69dd"
+    },
+    {
+      "path": "BRIEF.md",
+      "bytes": 3306,
+      "before": "2309e000fe50f07546b2232af07a3bedf5c92c012045db74a3bb0a7bb746884b"
+    },
+    {
+      "path": "EXPECTED-CASES.json",
+      "bytes": 1451,
+      "before": "a3869c885d622f4f7f248878213af44f2fd3315106ebdd661a00f6318def06f9"
+    },
+    {
+      "path": "PORT-CONTRACT.md",
+      "bytes": 2807,
+      "before": "bd32b99256788c59faaa9b929a531b0f4a83606f3444ad870130da25b43ad072"
+    },
+    {
+      "path": "reads/BASELINE-READ-ACTUAL.json",
+      "bytes": 27677,
+      "before": "31c13aa1353f7be936ac73404b72e7173e3c4d8d70c813ffc8ad3a1a192249a2"
+    },
+    {
+      "path": "reads/COPY-ACTUAL.json",
+      "bytes": 809,
+      "before": "07b8ae5dd4714d5510bbe514500051a2b379e0a310660dc8e7af3d1c8bc20101"
+    },
+    {
+      "path": "reads/DELTA-AND-RETURN-SHAPE-READ-ACTUAL.json",
+      "bytes": 8747,
+      "before": "d6d4ccdeb22678fe747debc9ea833f22ba24dc88fb0cc099fe1cc876be7ea8c4"
+    },
+    {
+      "path": "reads/DRAFT-SOURCE-READ-ACTUAL.json",
+      "bytes": 27380,
+      "before": "c32c89b4df2eb606354cc970cad4771aabb84ccc417c938a16b15b26a44ec094"
+    },
+    {
+      "path": "reads/INPUT-CHECK-ACTUAL.json",
+      "bytes": 592,
+      "before": "0e1a98f754c7d9f3105a755a2c0f7381cf98596c37d545da850e5f5a0d8417bb"
+    },
+    {
+      "path": "reads/PLAN-AND-HASH-READ-ACTUAL.json",
+      "bytes": 9079,
+      "before": "63e2e742064f5762e7798bf5af256d7ab94f2c88c4abd94ad0c2ee8fca1532fd"
+    },
+    {
+      "path": "reads/PRESERVATION-ACTUAL.json",
+      "bytes": 785,
+      "before": "b29d224957b3b5e4eef802bf2716dc9f29f4aed8e3def124c575e95e3c84abf7"
+    },
+    {
+      "path": "snapshot_lifecycle.diff",
+      "bytes": 6152,
+      "before": "b7ddb5aa83ad5f70b1457f927c52e62ea47eeaee065656f1ceda431ec49fbdff"
+    },
+    {
+      "path": "snapshot_lifecycle.py",
+      "bytes": 27096,
+      "before": "22b662938178d1898eb287348d0b4556c6579b5d0ce79f2782d49a4748ed1509"
+    },
+    {
+      "path": "SOURCE-CORRECTIONS.md",
+      "bytes": 678,
+      "before": "6d08ee50474ab4e992c53a161f4a9bede254354b3287b2d281e3a311a2722d1c"
+    },
+    {
+      "path": "SOURCE-INPUTS.json",
+      "bytes": 2347,
+      "before": "b731d07e8d734a9d077f775ad756ce8732400bdd28bfc57c0ef7c00d0a00e4cc"
+    },
+    {
+      "path": "SOURCE-PRESERVATION.json",
+      "bytes": 701,
+      "before": "46ce05c391a1d806257e33c5144e9aceb7c607c3d8e3ef174293e918a5be5d7b"
+    },
+    {
+      "path": "test_completion_info.py",
+      "bytes": 15618,
+      "before": "a5cc1fcd6fe3ea30b1a3d285d7dc45ea6f4c97fc3d619cd4432fb75c6fc86497"
+    }
+  ],
+  "copied_payloads": 18,
+  "original_pins_copy": "ORIGIN-PINS.json",
+  "before_test_copy": "before/test_completion_info.before-registry-lock02.py",
+  "all_originals_unchanged": true,
+  "all_copies_identical_before_repair": true
+}

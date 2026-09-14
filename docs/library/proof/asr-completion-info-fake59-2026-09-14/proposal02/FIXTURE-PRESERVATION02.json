@@ -1,0 +1,10 @@
+{
+  "scope": "Passive source-only fixture correction",
+  "before_sha256": "a5cc1fcd6fe3ea30b1a3d285d7dc45ea6f4c97fc3d619cd4432fb75c6fc86497",
+  "after_sha256": "29d3a327d9b507f1a16b147a7be68887fb2233536823f76da3e65d1e45b57549",
+  "diff_sha256": "d8be0fb6e0de58356aa83fe04876742eb14f5198c77de77ec23ebd9fd2a37e1e",
+  "exact_one_block_replaced": true,
+  "reverse_exact": true,
+  "line_endings_preserved": true,
+  "candidate_executed": false
+}

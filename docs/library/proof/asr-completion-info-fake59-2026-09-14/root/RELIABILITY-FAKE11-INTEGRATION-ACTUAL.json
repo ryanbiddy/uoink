@@ -1,0 +1,7 @@
+{
+  "chunk_id": "386233",
+  "wall_time_seconds": 1.1876997,
+  "exit_code": 0,
+  "original_token_count": 56,
+  "output": "{\"patch\":\"E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\_scratch\\\\reliability-request-stream-fake11.patch\",\"bytes\":1522943,\"sha256\":\"277287df107b186799e752a73cfd0a07b9a73a0a12079ba9be8e99b5f41db47a\",\"apply_exit\":0}\r\n"
+}

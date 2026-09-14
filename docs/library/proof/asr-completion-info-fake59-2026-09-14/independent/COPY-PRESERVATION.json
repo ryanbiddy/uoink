@@ -1,0 +1,217 @@
+{
+  "scope": "Source byte copy only; no candidate execution or admission",
+  "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-completion-info-fake59-author01",
+  "destination": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\asr-completion-info-fake59-independent01",
+  "author_pins": {
+    "bytes": 1953,
+    "sha256": "3ab4293cfd48e9652029bd7c2de42269b57499c7c46d95cfd9f659db4a6099f1"
+  },
+  "label_before": "asr-completion-info-fake59-01",
+  "label_after": "asr-completion-info-confirmation59-01",
+  "label_substitutions": 5,
+  "inverse_launcher_text_exact": true,
+  "payload_count": 9,
+  "unchanged_payload_count": 8,
+  "child_count": 5,
+  "ordered_cases": 59,
+  "child_payloads": [
+    {
+      "path": "snapshot_lifecycle.py",
+      "bytes": 27096,
+      "sha256": "22b662938178d1898eb287348d0b4556c6579b5d0ce79f2782d49a4748ed1509",
+      "status": "frozen_source_preparation"
+    },
+    {
+      "path": "lifecycle46_cases.py",
+      "bytes": 19127,
+      "sha256": "fd9d79c34f14edb7614e96da6952195a01ff4896974403d90ea5bfe1db70740c",
+      "status": "frozen_source_preparation"
+    },
+    {
+      "path": "test_completion_info.py",
+      "bytes": 15709,
+      "sha256": "29d3a327d9b507f1a16b147a7be68887fb2233536823f76da3e65d1e45b57549",
+      "status": "frozen_source_preparation"
+    },
+    {
+      "path": "qualify_completion_info.py",
+      "bytes": 10354,
+      "sha256": "c5bc4605fbae77f859711c46a12e114edbe6b02b66b3fdd68595d3f3aab146aa",
+      "status": "frozen_source_preparation"
+    },
+    {
+      "path": "EXPECTED-CASES.json",
+      "bytes": 3823,
+      "sha256": "82bf46e9b64600a465bd7433cf902c75d1ede518ab349749bc7bbafa58c8b528",
+      "status": "frozen_source_preparation"
+    }
+  ],
+  "before": [
+    {
+      "path": "snapshot_lifecycle.py",
+      "bytes": 27096,
+      "sha256": "22b662938178d1898eb287348d0b4556c6579b5d0ce79f2782d49a4748ed1509"
+    },
+    {
+      "path": "lifecycle46_cases.py",
+      "bytes": 19127,
+      "sha256": "fd9d79c34f14edb7614e96da6952195a01ff4896974403d90ea5bfe1db70740c"
+    },
+    {
+      "path": "test_completion_info.py",
+      "bytes": 15709,
+      "sha256": "29d3a327d9b507f1a16b147a7be68887fb2233536823f76da3e65d1e45b57549"
+    },
+    {
+      "path": "qualify_completion_info.py",
+      "bytes": 10354,
+      "sha256": "c5bc4605fbae77f859711c46a12e114edbe6b02b66b3fdd68595d3f3aab146aa"
+    },
+    {
+      "path": "EXPECTED-CASES.json",
+      "bytes": 3823,
+      "sha256": "82bf46e9b64600a465bd7433cf902c75d1ede518ab349749bc7bbafa58c8b528"
+    },
+    {
+      "path": "run_fake59_01.ps1",
+      "bytes": 9085,
+      "sha256": "4b278898495300af55cb5b187dc694ae3e9912af49cbfcbc62ebdd02982bf239"
+    },
+    {
+      "path": "QUALIFICATION-PROTOCOL.md",
+      "bytes": 2551,
+      "sha256": "762bdbcaedc77d14cab8039163899469a26398613ab3e55eea9dd10fb49e3b15"
+    },
+    {
+      "path": "BRIEF.md",
+      "bytes": 1908,
+      "sha256": "193b23d58f2b74afd7441db6206bca340b45959040e7c86e54cb5daa94fa0e81"
+    },
+    {
+      "path": "SOURCE-INPUTS.json",
+      "bytes": 2471,
+      "sha256": "32c3280a4ba6bed0c9b7a74c520f4739da558826ee796a0865178dc1be20c601"
+    }
+  ],
+  "before_copy_after": [
+    {
+      "path": "snapshot_lifecycle.py",
+      "source": {
+        "bytes": 27096,
+        "sha256": "22b662938178d1898eb287348d0b4556c6579b5d0ce79f2782d49a4748ed1509"
+      },
+      "copy": {
+        "bytes": 27096,
+        "sha256": "22b662938178d1898eb287348d0b4556c6579b5d0ce79f2782d49a4748ed1509"
+      },
+      "identical": true
+    },
+    {
+      "path": "lifecycle46_cases.py",
+      "source": {
+        "bytes": 19127,
+        "sha256": "fd9d79c34f14edb7614e96da6952195a01ff4896974403d90ea5bfe1db70740c"
+      },
+      "copy": {
+        "bytes": 19127,
+        "sha256": "fd9d79c34f14edb7614e96da6952195a01ff4896974403d90ea5bfe1db70740c"
+      },
+      "identical": true
+    },
+    {
+      "path": "test_completion_info.py",
+      "source": {
+        "bytes": 15709,
+        "sha256": "29d3a327d9b507f1a16b147a7be68887fb2233536823f76da3e65d1e45b57549"
+      },
+      "copy": {
+        "bytes": 15709,
+        "sha256": "29d3a327d9b507f1a16b147a7be68887fb2233536823f76da3e65d1e45b57549"
+      },
+      "identical": true
+    },
+    {
+      "path": "qualify_completion_info.py",
+      "source": {
+        "bytes": 10354,
+        "sha256": "c5bc4605fbae77f859711c46a12e114edbe6b02b66b3fdd68595d3f3aab146aa"
+      },
+      "copy": {
+        "bytes": 10354,
+        "sha256": "c5bc4605fbae77f859711c46a12e114edbe6b02b66b3fdd68595d3f3aab146aa"
+      },
+      "identical": true
+    },
+    {
+      "path": "EXPECTED-CASES.json",
+      "source": {
+        "bytes": 3823,
+        "sha256": "82bf46e9b64600a465bd7433cf902c75d1ede518ab349749bc7bbafa58c8b528"
+      },
+      "copy": {
+        "bytes": 3823,
+        "sha256": "82bf46e9b64600a465bd7433cf902c75d1ede518ab349749bc7bbafa58c8b528"
+      },
+      "identical": true
+    },
+    {
+      "path": "run_fake59_01.ps1",
+      "source": {
+        "bytes": 9085,
+        "sha256": "4b278898495300af55cb5b187dc694ae3e9912af49cbfcbc62ebdd02982bf239"
+      },
+      "copy": {
+        "bytes": 9125,
+        "sha256": "6ef692dda46cfbb62aac56235147b58cdf7370d119e066a8fedd554cc260a7df"
+      },
+      "identical": false
+    },
+    {
+      "path": "QUALIFICATION-PROTOCOL.md",
+      "source": {
+        "bytes": 2551,
+        "sha256": "762bdbcaedc77d14cab8039163899469a26398613ab3e55eea9dd10fb49e3b15"
+      },
+      "copy": {
+        "bytes": 2551,
+        "sha256": "762bdbcaedc77d14cab8039163899469a26398613ab3e55eea9dd10fb49e3b15"
+      },
+      "identical": true
+    },
+    {
+      "path": "BRIEF.md",
+      "source": {
+        "bytes": 1908,
+        "sha256": "193b23d58f2b74afd7441db6206bca340b45959040e7c86e54cb5daa94fa0e81"
+      },
+      "copy": {
+        "bytes": 1908,
+        "sha256": "193b23d58f2b74afd7441db6206bca340b45959040e7c86e54cb5daa94fa0e81"
+      },
+      "identical": true
+    },
+    {
+      "path": "SOURCE-INPUTS.json",
+      "source": {
+        "bytes": 2471,
+        "sha256": "32c3280a4ba6bed0c9b7a74c520f4739da558826ee796a0865178dc1be20c601"
+      },
+      "copy": {
+        "bytes": 2471,
+        "sha256": "32c3280a4ba6bed0c9b7a74c520f4739da558826ee796a0865178dc1be20c601"
+      },
+      "identical": true
+    }
+  ],
+  "pins": {
+    "bytes": 1953,
+    "sha256": "a1e3abec72c9a65b52d86f78c9f275c9e259fbd53f001231b6c87c6ffc14d1c8"
+  },
+  "false_template": {
+    "bytes": 333,
+    "sha256": "ccce9afcd83d727784b8d7e9fc460b97654491c69bdb94ff5f21ac5c89418c91"
+  },
+  "actual_admission_absent": true,
+  "run_absent": true,
+  "inherited_documents": "BRIEF, protocol and origin map are exact author context; only the copied launcher and new template choose the confirmation label."
+}

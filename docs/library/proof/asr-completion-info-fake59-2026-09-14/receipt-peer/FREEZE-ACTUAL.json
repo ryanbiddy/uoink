@@ -1,0 +1,7 @@
+{
+  "chunk_id": "022582",
+  "wall_time_seconds": 0.1868061,
+  "exit_code": 0,
+  "original_token_count": 146,
+  "output": "[\r\n  {\r\n    \"path\": \"VERDICT.md\",\r\n    \"bytes\": 2270,\r\n    \"sha256\": \"bfefbbe8f93c01d5c4bda159854e49cf88bbc41b8c4f305880ca330391f08744\"\r\n  },\r\n  {\r\n    \"path\": \"check_receipts.ps1\",\r\n    \"bytes\": 9170,\r\n    \"sha256\": \"c019811a9ab0182b1110f6bfb1977a88254f1def7070cdfb721c6c63eb86e8c5\"\r\n  },\r\n  {\r\n    \"path\": \"check_pair.ps1\",\r\n    \"bytes\": 2684,\r\n    \"sha256\": \"4965d2d4559c058b0485a37b1f98d4e6185f36edcfe0a42109e0156ee380b951\"\r\n  },\r\n  {\r\n    \"path\": \"PAIR-RESULT.json\",\r\n    \"bytes\": 692,\r\n    \"sha256\": \"72c8ff3cd1ec76b7f980678b057931c2cbd9686d4dd8934c343904ecabeef6e1\"\r\n  }\r\n]\r\n"
+}

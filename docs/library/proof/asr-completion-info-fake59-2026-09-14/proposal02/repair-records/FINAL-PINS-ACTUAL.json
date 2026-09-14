@@ -1,0 +1,7 @@
+{
+  "chunk_id": "e04761",
+  "wall_time_seconds": 0.2335692,
+  "exit_code": 0,
+  "original_token_count": 196,
+  "output": "{\r\n  \"payloads\": 27,\r\n  \"bytes\": 211921.0,\r\n  \"all_payloads_verified\": true,\r\n  \"candidate_executed\": false,\r\n  \"files\": [\r\n    {\r\n      \"path\": \"test_completion_info.py\",\r\n      \"bytes\": 15709,\r\n      \"sha256\": \"29d3a327d9b507f1a16b147a7be68887fb2233536823f76da3e65d1e45b57549\"\r\n    },\r\n    {\r\n      \"path\": \"test_completion_info.diff\",\r\n      \"bytes\": 795,\r\n      \"sha256\": \"d8be0fb6e0de58356aa83fe04876742eb14f5198c77de77ec23ebd9fd2a37e1e\"\r\n    },\r\n    {\r\n      \"path\": \"FIXTURE-REGISTRY-LOCK-REPAIR02.md\",\r\n      \"bytes\": 1947,\r\n      \"sha256\": \"986d230ef133bdcd85b9065c7ebaafb3d6d432f0ebcb0f05e3317aba14d6ffd8\"\r\n    },\r\n    {\r\n      \"path\": \"PINS.json\",\r\n      \"bytes\": 4817,\r\n      \"sha256\": \"4c89cb364c3879a37cafdc06abb6ac5087ec8922bc63de95f61f954074a04288\"\r\n    }\r\n  ]\r\n}\r\n"
+}
