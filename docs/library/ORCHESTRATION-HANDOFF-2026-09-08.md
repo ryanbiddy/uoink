@@ -555,8 +555,10 @@ The authorized backup push of 01e22fb completed. Session 35629 closed at
 8d94c9 with push and remote-check exit 0; origin/cc/living-library matched
 01e22fb. The receipt is build/Uoink-Living-Library-branch-backup-2026-09-13-02.json,
 SHA3d8f033bb80e8cfb9a0fbcd0ef403879275671052bee48e9979b4796842c3dc7.
-The latest authorized branch-only backup is verified at
+The earlier authorized branch-only backup is verified at
 6730c8eeb99df3ea97135c96dea8c70212f8cd1f (push d0c897, remote 9caca9).
+The latest verified backup is 41d01e024a8becc1f87fa721c9401e8cd7d2c1ae
+(September 14; push 58f295 / exit 0, remote f7faf5 / exit 0).
 The previous 5ad7c174 push also completed. Sessions 84911 and 5313 are closed;
 do not poll or recreate them. The latter was cancelled at Git's account picker,
 then retried with the already authenticated GitHub CLI helper in per-process
@@ -6265,3 +6267,19 @@ in separate author scopes, preserving the rejected proposal and accepted 33/22
 tests. Review them and the fake instrument before admission. No new Python,
 native/model, complete-tree, package, installed-client or release outcome is
 claimed. D1/D2 stay complete, and website/marketing remain paused.
+
+### 2026-09-14 — Authorized backup verified; package-08 runbook scope clarified
+
+The existing branch advanced by checked fast-forward from 6730c8e to 41d01e0.
+Push 58f295 and remote check f7faf5 both returned 0; origin/cc/living-library
+matches 41d01e024a8becc1f87fa721c9401e8cd7d2c1ae. The per-process GitHub CLI
+credential helper reused the existing sign-in; trace variables were removed
+before launch. No global credential setting, main merge or publication changed.
+Actual objects are saved as BACKUP-PUSH-41D01E0-ACTUAL.json and its REMOTE
+counterpart under _scratch. Later commits need their own verified backup.
+
+The installed-receipt runbook now labels its command blocks as the historical
+package-08 procedure. Its old source/tree and artifact hashes remain intact;
+the latest production repair 71d3e70 has no replacement package or installed
+credit. Rebind the procedure after the fresh committed tree and build. Do not
+reuse package-08 observations as current-source release acceptance.

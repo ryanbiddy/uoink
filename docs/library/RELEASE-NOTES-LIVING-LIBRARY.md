@@ -127,7 +127,7 @@ The combined tokenizer and Hub-argument derivative now builds identically under
 Python 3.13 and 3.14; it remains uninstalled. The fixed VAD factory and schema
 are reviewed proposals. D2 local conversion is complete as recorded above;
 reader/model integration and runtime qualification remain open.
-The latest completed authorized branch-only backup is verified at `6730c8e`.
+The latest completed authorized branch-only backup is verified at `41d01e0`.
 Later commits require a separate verified backup; no candidate-branch push,
 main merge or publication follows.
 

@@ -1,5 +1,11 @@
 # Living Library: one installed receipt session
 
+Updated September 14: the command blocks below preserve the package-08 receipt
+procedure. Current production source includes later repairs through `71d3e70`.
+Finish runtime integration and a fresh committed complete tree, then build and
+rebind the installer, source and kit hashes before using a replacement procedure.
+There is no current-source package or installed acceptance yet.
+
 Ryan delegated the installation check to Astra. Package 08 has actual same-account
 Setup/reinstall, 32,497 matching installed files, 11 C22 passes and independent
 browser review. The original P4 collector retains 15 passed, one blocked,
@@ -22,8 +28,9 @@ try guessed flags. The CLI commands below are for Claude Code only. A future
 Desktop workflow needs its own supported setup and human sign-in before GUI checks.
 See [the incident](NATIVE-CLIENT-ISOLATION-INCIDENT-2026-09-12.md).
 
-Build and complete-tree source are `b8e44fbc0a16950a22b29ead66951fcb80b2d6e8`: 2,579 passed,
-one historical failure and two skips. No packaged source changed afterward.
+The recorded package-08 build and complete-tree source are
+`b8e44fbc0a16950a22b29ead66951fcb80b2d6e8`: 2,579 passed,
+one historical failure and two skips. Its installer and evidence remain unchanged.
 This procedure does not approve an ordinary upgrade, main merge or publication.
 Every new observation gets fresh paths; the throwaway account needs existing
 write access to the receipt directory. A refusal is retained, not bypassed by
