@@ -1,0 +1,3 @@
+The peer found that the new child route could replace a bridge-constructor failure with a later standalone channel-revoke failure. This branch occurs after channel creation but before assigning a returned bridge. The draft adapter e6d76c92 and its appended text are retained under before/peer-final-revoke01.
+
+The repair records the original exception and adds any final channel-revoke failure as a note. With no earlier exception, revoke still propagates its own failure. A focused generated control will exercise both failures and exact primary identity. This changes only the new child route; the recovery prefix, original17 cases and qualified owner/factory/registry remain unchanged. Nothing has run.

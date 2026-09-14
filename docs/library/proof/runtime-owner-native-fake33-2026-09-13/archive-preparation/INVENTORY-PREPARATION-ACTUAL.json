@@ -1,0 +1,7 @@
+{
+  "chunk_id": "41fdfc",
+  "wall_time_seconds": 0.308666,
+  "exit_code": 0,
+  "original_token_count": 82,
+  "output": "{\"scope\":\"Inventory preparation only; archive copier not invoked\",\"selected_files\":271,\"selected_bytes\":3381627,\"author95_verified\":true,\"independent41_verified\":true,\"original_preparation18_verified\":true,\"run_input_files_per_root\":39,\"run_raw_receipts_per_root\":6,\"peer_files\":5,\"deduplicated_files\":0,\"target_absent\":true}\r\n"
+}

@@ -1,0 +1,478 @@
+"""Source-only protocol proposal. No pipe, process, model or registry API I/O.
+
+Transport must be exact private inherited pipe handles owned by the reviewed
+controller/bootstrap. Knowing a wire generation string is not a local permit.
+"""
+from dataclasses import dataclass
+from contextlib import contextmanager
+import hashlib
+import hmac
+import json
+import math
+import struct
+from threading import RLock
+from snapshot_lifecycle import Phase
+from worker_runtime_owner import _WorkerRuntimeOwnerProposal
+from owned_factory_port import _OwnedFactoryPortProposal
+
+MAGIC = b"UOINKGP1"
+HEADER = struct.Struct("!8sBQI")
+BOOTSTRAP = struct.Struct("!8s32s32s32s32s32sQ")
+BOOTSTRAP_MAGIC = b"UOINKBP1"
+MAX_BODY = 262144
+MAX_DEPTH = 10
+MAX_SEQUENCE = (1 << 63) - 1
+MAX_FRAMES = 200010
+HEX = frozenset("0123456789abcdef")
+
+
+class ProtocolRefusal(RuntimeError):
+    pass
+
+
+def _require(value, message):
+    if not value:
+        raise ProtocolRefusal(message)
+
+
+def _hex(value):
+    return type(value) is str and len(value) == 64 and all(char in HEX for char in value)
+
+
+def _outbound_bound(value):
+    # Conservative JSON encoding budget before json.dumps. Exact built-in types
+    # avoid user-controlled encoders, iteration methods and scalar coercions.
+    pending = [(value, 0)]
+    nodes, budget = 0, 0
+    while pending:
+        item, depth = pending.pop()
+        nodes += 1
+        _require(nodes <= 8192 and depth <= MAX_DEPTH, "outbound_structure_bound")
+        if type(item) is str:
+            _require(len(item) <= 65536, "outbound_string_bound")
+            budget += 2
+            for char in item:
+                code = ord(char)
+                budget += 12 if code > 65535 else 6 if code > 127 or code < 32 else 2 if char in ('"', "\\") else 1
+                _require(budget <= MAX_BODY, "outbound_encoding_bound")
+        elif item is None or type(item) is bool:
+            budget += 5
+        elif type(item) is int:
+            _require(-(1 << 63) <= item < 1 << 64, "outbound_integer_bound")
+            budget += 21
+        elif type(item) is float:
+            _require(math.isfinite(item), "outbound_float_bound")
+            budget += 32
+        elif type(item) is dict:
+            _require(len(item) <= 1024 and all(type(key) is str for key in item), "outbound_object_bound")
+            budget += 2 + 2 * len(item)
+            for key, child in item.items():
+                pending.append((key, depth + 1))
+                pending.append((child, depth + 1))
+        elif type(item) is list:
+            _require(len(item) <= 2048, "outbound_array_bound")
+            budget += 2 + len(item)
+            pending.extend((child, depth + 1) for child in item)
+        else:
+            raise ProtocolRefusal("outbound_nonpassive_type")
+        _require(budget <= MAX_BODY and len(pending) <= 8192, "outbound_encoding_bound")
+
+
+def _bounded_json(raw):
+    _require(type(raw) is bytes and 0 < len(raw) <= MAX_BODY, "frame_body_bound")
+    depth, quoted, escaped = 0, False, False
+    for byte in raw:
+        if quoted:
+            if escaped:
+                escaped = False
+            elif byte == 92:
+                escaped = True
+            elif byte == 34:
+                quoted = False
+        elif byte == 34:
+            quoted = True
+        elif byte in (91, 123):
+            depth += 1
+            _require(depth <= MAX_DEPTH, "frame_json_depth")
+        elif byte in (93, 125):
+            depth -= 1
+            _require(depth >= 0, "frame_json_depth")
+    _require(depth == 0 and not quoted, "frame_json_shape")
+    def pairs(items):
+        result = {}
+        for key, value in items:
+            _require(key not in result, "duplicate_json_key")
+            result[key] = value
+        return result
+    def reject_constant(value):
+        raise ProtocolRefusal("nonfinite_json_constant")
+    try:
+        value = json.loads(raw, object_pairs_hook=pairs, parse_constant=reject_constant)
+    except (ValueError, UnicodeError, RecursionError) as exc:
+        raise ProtocolRefusal("malformed_frame_json") from exc
+    _require(type(value) is dict, "frame_json_object")
+    # json.loads permits finite syntax whose exponent overflows to infinity.
+    # Apply the same exact-type, numeric, node and encoded-size bounds inbound.
+    _outbound_bound(value)
+    return value
+
+
+@dataclass(frozen=True)
+class GenerationBinding:
+    generation_hex: str
+    manifest_sha256: str
+    namespace_sha256: str
+    bootstrap_source_sha256: str
+    process_creation_time: int
+
+    def encoded(self):
+        for value in (self.generation_hex, self.manifest_sha256, self.namespace_sha256, self.bootstrap_source_sha256):
+            _require(_hex(value), "generation_binding_digest")
+        _require(type(self.process_creation_time) is int and 0 < self.process_creation_time < 1 << 64,
+                 "process_creation_binding")
+        return bytes.fromhex(self.generation_hex + self.manifest_sha256 + self.namespace_sha256
+                             + self.bootstrap_source_sha256) + self.process_creation_time.to_bytes(8, "big")
+
+
+def encode_private_bootstrap(binding, master_key):
+    # This packet is only for the controller-created, inherited private pipe.
+    # It must not be logged, placed on a command line, or accepted from a file.
+    _require(type(binding) is GenerationBinding and type(master_key) is bytes and len(master_key) == 32,
+             "private_bootstrap_material")
+    binding.encoded()
+    return BOOTSTRAP.pack(BOOTSTRAP_MAGIC, master_key, bytes.fromhex(binding.generation_hex),
+                          bytes.fromhex(binding.manifest_sha256), bytes.fromhex(binding.namespace_sha256),
+                          bytes.fromhex(binding.bootstrap_source_sha256), binding.process_creation_time)
+
+
+def decode_private_bootstrap(packet):
+    _require(type(packet) is bytes and len(packet) == BOOTSTRAP.size, "private_bootstrap_packet_bound")
+    magic, key, generation, manifest, namespace, source, creation = BOOTSTRAP.unpack(packet)
+    _require(magic == BOOTSTRAP_MAGIC, "private_bootstrap_magic")
+    binding = GenerationBinding(generation.hex(), manifest.hex(), namespace.hex(), source.hex(), creation)
+    binding.encoded()
+    return binding, key
+
+
+class GenerationChannel:
+    """One direction each; private transport/bootstrap remain platform duties.
+
+    master_key is an ephemeral bootstrap secret, never a provider credential or
+    command-line argument. It must arrive only through the exact inherited
+    private bootstrap pipe. This class does not authenticate its provenance.
+    """
+
+    def __init__(self, binding, master_key, role):
+        _require(type(binding) is GenerationBinding and type(master_key) is bytes and len(master_key) == 32,
+                 "private_bootstrap_material")
+        _require(role in ("controller", "worker"), "channel_role")
+        self.binding = binding
+        self._context = binding.encoded()
+        self._send_direction = 0 if role == "controller" else 1
+        self._receive_direction = 1 - self._send_direction
+        self._key = hmac.digest(master_key, b"uoink-generation-v1\x00" + self._context, "sha256")
+        self._send_sequence = 0
+        self._receive_sequence = 0
+        self._revoked = False
+        self._lock = RLock()
+        self._active = False
+
+    @contextmanager
+    def _operation(self):
+        # Keep the lock through sequence/MAC/result construction. A concurrent
+        # revoke waits for an already-entered operation to complete; a passive
+        # frame committed first may arrive at its caller after a later revoke.
+        # Reentrant encode/decode refuses rather than interleaving sequences.
+        with self._lock:
+            self._live()
+            _require(not self._active, "channel_operation_already_active")
+            self._active = True
+            try:
+                yield
+            finally:
+                self._active = False
+
+    def revoke(self):
+        # Revocation prevents further use; Python bytes are not securely erased.
+        with self._lock:
+            self._revoked = True
+            self._key = None
+
+    def _live(self):
+        _require(not self._revoked, "generation_channel_revoked")
+
+    def encode(self, operation, payload):
+        with self._operation():
+            return self._encode(operation, payload)
+
+    def _encode(self, operation, payload):
+        self._live()
+        _require(type(operation) is str and operation in {"challenge", "ready", "begin", "next", "segment", "done", "cancel", "closed", "error", "adopt_readset", "readset_ready", "readset_rejected"},
+                 "wire_operation")
+        _require(type(payload) is dict, "wire_payload")
+        _require(self._send_sequence < min(MAX_SEQUENCE, MAX_FRAMES), "send_sequence_limit")
+        envelope = {"op": operation, "payload": payload}
+        _outbound_bound(envelope)
+        try:
+            body = json.dumps(envelope, sort_keys=True,
+                              separators=(",", ":"), ensure_ascii=True, allow_nan=False).encode("ascii")
+        except (ValueError, TypeError, RecursionError) as exc:
+            raise ProtocolRefusal("outbound_payload_not_passive_json") from exc
+        _bounded_json(body)
+        header = HEADER.pack(MAGIC, self._send_direction, self._send_sequence, len(body))
+        mac = hmac.digest(self._key, self._context + header + body, "sha256")
+        self._send_sequence += 1
+        return header + body + mac
+
+    def decode(self, frame):
+        with self._operation():
+            return self._decode(frame)
+
+    def _decode(self, frame):
+        self._live()
+        try:
+            _require(type(frame) is bytes and HEADER.size + 32 < len(frame) <= HEADER.size + MAX_BODY + 32,
+                     "wire_frame_bound")
+            magic, direction, sequence, length = HEADER.unpack(frame[:HEADER.size])
+            _require(magic == MAGIC and direction == self._receive_direction, "wire_direction_or_magic")
+            _require(sequence == self._receive_sequence and sequence < min(MAX_SEQUENCE, MAX_FRAMES), "wire_sequence")
+            _require(0 < length <= MAX_BODY and len(frame) == HEADER.size + length + 32, "wire_length")
+            body, mac = frame[HEADER.size:-32], frame[-32:]
+            expected = hmac.digest(self._key, self._context + frame[:-32], "sha256")
+            _require(hmac.compare_digest(expected, mac), "wire_authentication")
+            decoded = _bounded_json(body)
+            _require(set(decoded) == {"op", "payload"} and type(decoded["op"]) is str
+                     and type(decoded["payload"]) is dict, "wire_envelope")
+            _require(decoded["op"] in {"challenge", "ready", "begin", "next", "segment", "done", "cancel", "closed", "error", "adopt_readset", "readset_ready", "readset_rejected"},
+                     "wire_operation")
+            self._receive_sequence += 1
+            return decoded["op"], decoded["payload"]
+        except BaseException:
+            self.revoke()
+            raise
+
+
+class WorkerBootstrap:
+    """Fixed worker-local owner connection; real worker activation stays closed.
+
+    Type identities come from fixed source-bound imports, never an IPC frame.
+    The generated input helpers are not real namespace/PCM issuance. Guard
+    installation and native quiescence still belong to the admitted bootstrap.
+    """
+
+    def __init__(self, channel, registry_type, factory_type):
+        _require(type(channel) is GenerationChannel and channel._send_direction == 1, "worker_channel_required")
+        _require(registry_type is _WorkerRuntimeOwnerProposal
+                 and factory_type is _OwnedFactoryPortProposal, "fixed_owner_and_factory_types")
+        self._channel, self._registry_type, self._factory_type = channel, registry_type, factory_type
+        self._permit = None
+        self.registry = None
+        self._ready = False
+        self._started = False
+        self._closed = False
+        self._quarantined = False
+        self._factory_attempted = False
+        self._factory_inputs = None
+        self._factory = None
+        self._product = None
+        self._runtime_module = None
+        self._generated_namespace = None
+        self._generated_pcm = None
+
+    def accept_challenge(self, frame):
+        _require(not self._ready and not self._closed, "bootstrap_single_use")
+        try:
+            operation, payload = self._channel.decode(frame)
+            _require(operation == "challenge" and set(payload) == {"generation", "namespace_sha256"}, "bootstrap_challenge_shape")
+            _require(payload["generation"] == self._channel.binding.generation_hex
+                     and payload["namespace_sha256"] == self._channel.binding.namespace_sha256, "bootstrap_challenge_binding")
+            self._permit = object()  # Worker-local identity; never serialized.
+            self.registry = self._registry_type(self._permit, self._factory_type)
+            self.registry.assert_active()
+            response = self._channel.encode("ready", {"generation": self._channel.binding.generation_hex,
+                                                      "namespace_sha256": self._channel.binding.namespace_sha256})
+            self._ready = True
+            return response
+        except BaseException as original:
+            self.close_preserving(original)
+            raise
+
+    @contextmanager
+    def _owner_operation(self, phase):
+        # This is the only work admission mechanism. No independent factory
+        # mutex can allow use/release to overlap a constructor or lazy step.
+        try:
+            owner = self.registry
+            _require(type(owner) is _WorkerRuntimeOwnerProposal, "worker_owner_identity")
+            with owner.operation(self._permit, phase) as token:
+                _require(self._ready and self._started and not self._closed,
+                         "worker_generation_not_started")
+                self._channel._live()
+                yield token
+                with owner._lock:
+                    owner._live_locked()
+                    _require(not self._closed and self.registry is owner, "worker_publication_revoked")
+        except BaseException as original:
+            self.close_preserving(original)
+            raise
+
+    def issue_generated_inputs(self, pieces, media_identity, raw_f32le):
+        # Fixed generated qualification only. Nothing here attests a decoder,
+        # authenticated ReadSet, absolute model path or native ndarray storage.
+        with self._owner_operation("issue"):
+            self._generated_namespace = self.registry.issue_generated_namespace(self._permit, pieces)
+            self._generated_pcm = self.registry.issue_generated_pcm(self._permit, media_identity, raw_f32le)
+            return {"issued_generated_inputs": True}
+
+    def build_factory_product(self, fixed_factory, tensor_port, owned_runtime_module,
+                              state, state_binding, fixed_recipe_sha256):
+        # Worker-side fixed inputs only. No model/factory object enters IPC.
+        with self._owner_operation("factory"):
+            _require(not self._factory_attempted, "factory_already_attempted")
+            _require(getattr(owned_runtime_module, "_RUNTIME", None) is self.registry,
+                     "owned_runtime_registry_binding_required")
+            self.registry.assert_generated_namespace_binding(self._generated_namespace)
+            self._factory_attempted = True
+            self._runtime_module = owned_runtime_module
+            # Retain inputs before constructor entry, including failures before
+            # a returned factory can be assigned. No close path clears them.
+            self._factory_inputs = (fixed_factory, tensor_port, state, state_binding)
+            factory = self._factory_type(fixed_factory, tensor_port, owned_runtime_module)
+            self._factory = factory
+            capability = self.registry._issue_for_bootstrap(self._permit, factory, state_binding, fixed_recipe_sha256)
+            factory._bind_model_capability(capability)
+            self._product = factory.build_strict_owned(state)
+            self.registry.register_vad_product_for_bootstrap(
+                self._permit, factory, self._product, owned_runtime_module)
+            # Register the actual completed model/product/lease before any
+            # passive success is returned. The real inference link is unproved.
+            with self.registry._lock:
+                self.registry.assert_vad_binding(self._product)
+                _require(not self._closed, "factory_publication_revoked")
+                return {"built": True}
+
+    @contextmanager
+    def use_operation(self):
+        # A fixed future dispatcher keeps each native/lazy cursor step inside
+        # this scope. The token stays local and conveys no model authority.
+        with self._owner_operation("use") as token:
+            self.registry.assert_vad_binding(self._product)
+            yield token
+            self.registry.assert_vad_binding(self._product)
+
+    def encode_generated_text(self, text):
+        with self.use_operation() as token:
+            # Commit passive output under the same owner state lock as revoke.
+            # A frame committed first may reach its caller after a later close;
+            # controller lifecycle/publication checks still govern consumption.
+            with self.registry._lock:
+                _require(not self._closed, "worker_publication_revoked")
+                self.registry.assert_waveform_binding(self._generated_pcm, sample_rate=16000)
+                value = self.registry.publish_generated_text(token, self._generated_pcm, text)
+                return self._channel.encode("done", {"generated_text": value})
+
+    def release_factory_product(self):
+        with self._owner_operation("release"):
+            _require(self._factory is not None and self._product is not None, "owned_factory_product_absent")
+            # The owner marks the exact VAD inactive, calls the actual factory
+            # release, and retains its record if release raises or revoke wins.
+            self.registry.retire_vad_product_for_bootstrap(self._permit, self._factory, self._product)
+            with self.registry._lock:
+                self.registry._live_locked()
+                _require(not self._closed, "factory_retirement_revoked")
+                self._product = None
+                return {"retired_by_factory": True}
+
+    def accept_begin(self, frame):
+        _require(self._ready and not self._started and not self._closed, "begin_order")
+        try:
+            operation, payload = self._channel.decode(frame)
+            _require(operation == "begin" and payload == {"manifest_sha256": self._channel.binding.manifest_sha256},
+                     "begin_manifest_binding")
+            self.registry.assert_active()
+            self._started = True
+        except BaseException as original:
+            self.close_preserving(original)
+            raise
+
+    def close_preserving(self, original=None):
+        # Retain inputs/factory/product/PCM. This is logical revocation, not a
+        # native cancel/join, destructor call or durable recovery observation.
+        self._closed = True
+        self._ready = False
+        self._started = False
+        if original is not None:
+            self._quarantined = True
+        first = original
+        failures = []
+        # Each revocation is attempted even if the other raises. Preserve the
+        # first exception identity; notes never replace the original failure.
+        for operation in (self._revoke_owner, self._channel.revoke):
+            try:
+                operation()
+            except BaseException as error:
+                self._quarantined = True
+                failures.append(type(error).__name__)
+                if first is None:
+                    first = error
+                else:
+                    BaseException.add_note(first, "Worker revocation remains unconfirmed: " + type(error).__name__)
+        if original is None and first is not None:
+            raise first
+
+    def _revoke_owner(self):
+        if self.registry is not None:
+            self.registry.revoke_generation(self._permit)
+
+
+class ControllerHandshake:
+    def __init__(self, channel, local_session, local_permit, primitives, native_worker):
+        _require(type(channel) is GenerationChannel and channel._send_direction == 0, "controller_channel_required")
+        # These references stay in the controller. Fixed lifecycle code must
+        # compare the actual record/permit identity and live state at each call.
+        self._channel, self._session, self._permit = channel, local_session, local_permit
+        self._primitives, self._worker = primitives, native_worker
+        self._sent = False
+        self._ready = False
+        self._begun = False
+
+    def _owned_phase(self, startup):
+        with self._session._manager._lock:
+            record = self._session._record
+            _require(self._session._manager._records.get(record.key) is record and record.owner is self._session,
+                     "controller_owner_identity")
+            _require(record.permit is self._permit and not self._session._revoked and not self._session._closing,
+                     "controller_permit_identity")
+            _require(record.phase is (Phase.NATIVE_RESERVED if startup else Phase.NATIVE_RUNNING), "controller_phase")
+            _require(any(worker is self._worker for worker in self._primitives.workers)
+                     and self._worker.read_set is record.protection and self._worker.assigned
+                     and not self._worker.unconfirmed and not self._worker.shutdown_started
+                     and self._worker.creation_time == self._channel.binding.process_creation_time,
+                     "owned_process_generation_binding")
+
+    def challenge(self):
+        self._owned_phase(True)
+        _require(not self._sent, "challenge_single_use")
+        self._sent = True
+        return self._channel.encode("challenge", {"generation": self._channel.binding.generation_hex,
+                                                   "namespace_sha256": self._channel.binding.namespace_sha256})
+
+    def accept_ready(self, frame):
+        self._owned_phase(True)
+        _require(self._sent and not self._ready, "ready_order")
+        operation, payload = self._channel.decode(frame)
+        _require(operation == "ready" and payload == {"generation": self._channel.binding.generation_hex,
+                 "namespace_sha256": self._channel.binding.namespace_sha256}, "worker_ready_binding")
+        self._owned_phase(True)
+        self._ready = True
+
+    def begin(self):
+        self._owned_phase(False)
+        _require(self._ready and not self._begun, "controller_worker_not_ready_or_already_begun")
+        frame = self._channel.encode("begin", {"manifest_sha256": self._channel.binding.manifest_sha256})
+        self._begun = True
+        return frame
+
+
+def activate_real_worker(*args, **kwargs):
+    raise ProtocolRefusal("existing_model_migration_and_native_reader_authority_absent")

@@ -1,0 +1,7 @@
+{
+  "chunk_id": "78e51b",
+  "wall_time_seconds": 0.2807302,
+  "exit_code": 0,
+  "original_token_count": 93,
+  "output": "{\r\n  \"admission\": \"E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\_scratch\\\\astra-runtime-owner-native-confirmation01\\\\ROOT-ADMISSION.json\",\r\n  \"bytes\": 7452,\r\n  \"sha256\": \"1d43141daaf63be421b9e2daf23fd96ead234df7800955b9a4efc6ecdc8b030e\",\r\n  \"fixed_input_bindings\": 38,\r\n  \"expected_cases\": 33,\r\n  \"false_template_unchanged\": true,\r\n  \"candidate_executed\": false\r\n}\r\n"
+}

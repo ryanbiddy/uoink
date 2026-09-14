@@ -1,0 +1,38 @@
+{
+  "scope": "Exact retained tool results from source-only preparation; none is a candidate or test observation.",
+  "qualifier_generation": {
+    "chunk_id": "b013d5",
+    "wall_time_seconds": 0.2457839,
+    "exit_code": 0,
+    "original_token_count": 65,
+    "output": "{\r\n  \"prepared_sources\": 34,\r\n  \"planned_cases\": 33,\r\n  \"qualifier_sha256\": \"b1771412162632a9e9f98a0321bb5b030372546a7e9cf932318d10b34d53b02b\",\r\n  \"expected_sha256\": \"2c1fadce72b41ed443fcbcd2be88758db9f1cb55e530c7a33010377c598d164e\",\r\n  \"executed\": false\r\n}\r\n"
+  },
+  "launcher_generation": {
+    "chunk_id": "a08ded",
+    "wall_time_seconds": 0.359135,
+    "exit_code": 0,
+    "original_token_count": 74,
+    "output": "{\r\n  \"child_text_inputs\": 36,\r\n  \"root_input_controls\": 38,\r\n  \"launcher_sha256\": \"2ebd5b28355e9002a264959a582431ade64778d008aaefa616fb9b3b4061fb78\",\r\n  \"source_map_sha256\": \"91ef05ed659e54fefeeb798ad128a18d1f6cc74723fce0a2d5e04578b180e663\",\r\n  \"root_reviewed\": false,\r\n  \"executed\": false\r\n}\r\n"
+  },
+  "source_preservation": {
+    "chunk_id": "80894d",
+    "wall_time_seconds": 0.3323335,
+    "exit_code": 0,
+    "original_token_count": 67,
+    "output": "{\r\n  \"preservation\": \"MATCH\",\r\n  \"unchanged_native_dependencies\": 15,\r\n  \"original17_sources_unchanged\": true,\r\n  \"protocol_original_bytes_restored_by_exact_delta_removal\": true,\r\n  \"recovery_prefix_bytes\": 50135,\r\n  \"cases\": 33,\r\n  \"candidate_executed\": false\r\n}\r\n"
+  },
+  "decoded_map_paths": {
+    "chunk_id": "e07e1a",
+    "wall_time_seconds": 0.4401175,
+    "exit_code": 0,
+    "original_token_count": 103,
+    "output": "{\r\n  \"map_sha256\": \"91ef05ed659e54fefeeb798ad128a18d1f6cc74723fce0a2d5e04578b180e663\",\r\n  \"count\": 36,\r\n  \"all_equal\": true,\r\n  \"double_separator_count\": 0,\r\n  \"first\": {\r\n    \"name\": \"plain_state_reader.py\",\r\n    \"decoded_equals_literal\": true,\r\n    \"decoded_has_double_separator\": false,\r\n    \"prefix_char_codes\": [\r\n      69,\r\n      58,\r\n      92,\r\n      65,\r\n      73,\r\n      92,\r\n      112\r\n    ]\r\n  }\r\n}\r\n"
+  },
+  "source_diffs": {
+    "chunk_id": "24de47",
+    "wall_time_seconds": 0.4669234,
+    "exit_code": 0,
+    "original_token_count": 837,
+    "output": "warning: in the working copy of 'E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\runtime-owner-native-connection-proposal01\\before\\bootstrap\\owned_generation_protocol.py', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\runtime-owner-native-connection-proposal01\\owned_generation_protocol.py', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\runtime-owner-native-connection-proposal01\\before\\recovery\\generated_adapter_flow.py', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\runtime-owner-native-connection-proposal01\\generated_adapter_flow.py', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\runtime-owner-native-connection-proposal01\\before\\bootstrap\\generated_bootstrap_fixture.py', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\runtime-owner-native-connection-proposal01\\generated_worker_factory_inputs.py', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\runtime-owner-native-connection-proposal01\\before\\bootstrap\\qualify_owner.py', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\runtime-owner-native-connection-proposal01\\qualify_owner.py', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\runtime-owner-native-connection-proposal01\\before\\bootstrap\\run_bootstrap01.ps1', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\runtime-owner-native-connection-proposal01\\run_fake33_01.ps1', LF will be replaced by CRLF the next time Git touches it\n{\r\n  \"scope\": \"Text-only diff rendering; no candidate execution or Git index/worktree mutation outside proposal\",\r\n  \"diffs\": [\r\n    {\r\n      \"file\": \"owned_generation_protocol.diff\",\r\n      \"git_no_index_exit\": 1,\r\n      \"bytes\": 2623,\r\n      \"sha256\": \"ee03668466d5ae38c79800445d2b3222eff861fd69a83ca8831d63cb76eb1820\"\r\n    },\r\n    {\r\n      \"file\": \"generated_adapter_flow.diff\",\r\n      \"git_no_index_exit\": 1,\r\n      \"bytes\": 6955,\r\n      \"sha256\": \"84f4de8c9c5f5acb14a224ba77d70609f05c363ca3f9d5ab91a87b0dccab3c1c\"\r\n    },\r\n    {\r\n      \"file\": \"generated_worker_factory_inputs.diff\",\r\n      \"git_no_index_exit\": 1,\r\n      \"bytes\": 13957,\r\n      \"sha256\": \"ba797c6ff52bf26215bfa45997629c3314688dc725569ee671bdaa8fc39757cd\"\r\n    },\r\n    {\r\n      \"file\": \"qualify_owner.diff\",\r\n      \"git_no_index_exit\": 1,\r\n      \"bytes\": 22051,\r\n      \"sha256\": \"ca7dc774721d215d5844663ae96e7dc1cbb75c519ca422f6a849ea4563319f66\"\r\n    },\r\n    {\r\n      \"file\": \"run_fake33_01.diff\",\r\n      \"git_no_index_exit\": 1,\r\n      \"bytes\": 19451,\r\n      \"sha256\": \"c172bf86b7386e8bbb86f2cd5353c9f3d191045929b76211076250586c9915dd\"\r\n    }\r\n  ]\r\n}\r\n"
+  }
+}

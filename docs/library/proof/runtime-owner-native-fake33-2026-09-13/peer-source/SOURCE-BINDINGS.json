@@ -1,0 +1,137 @@
+{
+  "schema": "uoink.runtime-owner-connection.source-review-bindings.v1",
+  "scope": "Fixed text source and test review only. No candidate, test, native, model, checkpoint, converted output or support access. Qualifier/launcher not reviewed by this verdict.",
+  "files": [
+    {
+      "path": "_scratch/runtime-owner-native-connection-proposal01/generated_worker_runtime_bridge.py",
+      "bytes": 12096,
+      "sha256": "11eff72f6d96b5c4248987635b5373672da706e1ac0fac53188aac7a3a253716"
+    },
+    {
+      "path": "_scratch/runtime-owner-native-connection-proposal01/generated_worker_factory_inputs.py",
+      "bytes": 6415,
+      "sha256": "dbf5f1859fbe6f90d0f892e5a8dc7652f7336b32f51bf1dec0278f5fecfca046"
+    },
+    {
+      "path": "_scratch/runtime-owner-native-connection-proposal01/owned_generation_protocol.py",
+      "bytes": 24403,
+      "sha256": "bd5204ef0d3fc2a459df19bc5f02fd7b6d78041e2306b4031ab888387aa362c0"
+    },
+    {
+      "path": "_scratch/runtime-owner-native-connection-proposal01/generated_adapter_flow.py",
+      "bytes": 56180,
+      "sha256": "4d1bc0ac6e25733b13cc2d16c327be23d90c68d22b1402736ff8147b302a0e8c"
+    },
+    {
+      "path": "_scratch/runtime-owner-native-connection-proposal01/native_owner_cases.py",
+      "bytes": 16273,
+      "sha256": "2a2ec0245524532e383472e737b60a9dea125c27118b75c16ec00ade634e851d"
+    },
+    {
+      "path": "_scratch/runtime-owner-native-connection-proposal01/generated_native_owner_fixture.py",
+      "bytes": 6888,
+      "sha256": "a86b143a11f4abb8683f859ff7fd9f04b374aa591a6f478b724a4866fab51beb"
+    },
+    {
+      "path": "_scratch/runtime-owner-native-connection-proposal01/worker_runtime_owner.py",
+      "bytes": 12997,
+      "sha256": "5647023ed03c5acfd8b1aa981a56171dd92228ccc0972f12546bb0b3d411ce87"
+    },
+    {
+      "path": "_scratch/runtime-owner-native-connection-proposal01/owned_factory_port.py",
+      "bytes": 15463,
+      "sha256": "2569853c7634b795e3d2cf717129ec3dbc4e11d96ddb347098dcc4fbc532f0d4"
+    },
+    {
+      "path": "_scratch/runtime-owner-native-connection-proposal01/model_binding_registry.py",
+      "bytes": 8732,
+      "sha256": "48567add0f0ac2ac9140e9aa86b06f077454c98e2f0773100da5ba070f7b3deb"
+    },
+    {
+      "path": "_scratch/runtime-owner-native-connection-proposal01/owned_guard.py",
+      "bytes": 2109,
+      "sha256": "7672f614d81cf0be5e7bd408f8f856af328fe34e6ca7ee707c9d0db838e56d1f"
+    },
+    {
+      "path": "_scratch/runtime-owner-native-connection-proposal01/owned_cpu_tensor_port.py",
+      "bytes": 11768,
+      "sha256": "ac9eb28194723ffaf2d98bb2cd691a7b27b0a1638694fdfd8cb198c3084e8964"
+    },
+    {
+      "path": "_scratch/runtime-owner-native-connection-proposal01/state_bridge.py",
+      "bytes": 11316,
+      "sha256": "b3ff126f29942e7daaf51e463ca9f35c4c423b6c638dbc38e5246946a8b7a6b2"
+    },
+    {
+      "path": "_scratch/runtime-owner-native-connection-proposal01/fake_torch_support.py",
+      "bytes": 5204,
+      "sha256": "5e1381eac70634292945422dfaf70786bb5fb96cbab7ea14a3fcc08fa29a185b"
+    },
+    {
+      "path": "_scratch/runtime-owner-native-connection-proposal01/fixed_schema_helpers.py",
+      "bytes": 2837,
+      "sha256": "d61e9a48ecfa906862fedb5b91415f1d2a0b71adc27d3e43ef245842c9e5b188"
+    },
+    {
+      "path": "_scratch/runtime-owner-native-connection-proposal01/plain_state_reader.py",
+      "bytes": 10629,
+      "sha256": "3962d355cffe928f78b741d2d920cc9c727a9fbd10305e20462b60f4cef9990c"
+    },
+    {
+      "path": "_scratch/runtime-owner-native-connection-proposal01/generated_unit_cases.py",
+      "bytes": 13846,
+      "sha256": "58ce1ba84b4baa457c3973cea5745ad3be94caa4ce627da732d67e9c8e148979"
+    },
+    {
+      "path": "_scratch/runtime-owner-native-connection-proposal01/connection_cases.py",
+      "bytes": 10526,
+      "sha256": "2e598f26c7edd2e60b06495a62a350411ceb0a60ed6fd3486c1a1294d04cbea6"
+    },
+    {
+      "path": "_scratch/runtime-owner-native-connection-proposal01/generated_bootstrap_fixture.py",
+      "bytes": 7205,
+      "sha256": "6ea5e4e7cebff54380193b1ad0cc1b1cf08e4a7f34a8162d2f0f6ce73371d469"
+    },
+    {
+      "path": "_scratch/runtime-owner-native-connection-proposal01/generated_factory_fixture.py",
+      "bytes": 7539,
+      "sha256": "1c60507a82c238116b630f146c44e7a81fdc57eb74f05841489c3128f150eb6f"
+    },
+    {
+      "path": "_scratch/runtime-owner-native-connection-proposal01/PEER-FINAL-REVOKE-REPAIR01.md",
+      "bytes": 706,
+      "sha256": "0e148682ce84349f2f8174814433d243f466b73ab36741a5c9771c067757d725"
+    },
+    {
+      "path": "_scratch/runtime-owner-native-connection-proposal01/CASE-PREPARATION01.md",
+      "bytes": 390,
+      "sha256": "d15ccd13e1eb43d2e7fdd7d7ec7a89bcfb62a4e1db955606f4e66c81b03edb6e"
+    },
+    {
+      "path": "_scratch/runtime-owner-native-connection-proposal01/before/peer-final-revoke01/generated_adapter_flow.py",
+      "bytes": 55873,
+      "sha256": "e6d76c9218709abc7047844ef19a734f542bdcb57e57c9ac7f8c30c1f0f29a3c"
+    },
+    {
+      "path": "_scratch/runtime-owner-native-connection-proposal01/before/case-preparation01/native_owner_cases.py",
+      "bytes": 16237,
+      "sha256": "cf3c40446680e4daf4ea55da2544262fc3a2ef8f6dfc6bd2ba6b47a23fd52276"
+    },
+    {
+      "path": "docs/library/RUNTIME-OWNER-NATIVE-CONNECTION-BRIEF-2026-09-13.md",
+      "bytes": 7161,
+      "sha256": "78311a84a5f54e3b1e1660496f07647f0978d8f27bd13e5a0829c3121e310d4e"
+    },
+    {
+      "path": "docs/library/ASTRA-RUNTIME-OWNER-CONNECTION-DIRECTION-2026-09-13.md",
+      "bytes": 1949,
+      "sha256": "9bba4c00d633e40edf0255509d38c871c85ec740dbe92117ed629c4fc6b938eb"
+    },
+    {
+      "path": "docs/library/proof/runtime-owner-native-connection-brief-2026-09-13/SOURCE-BINDINGS.json",
+      "bytes": 10926,
+      "sha256": "a95374737f5a49a97fedd8e689b5a1890e31c21c1e9997997dced792c0537659"
+    }
+  ]
+}
+

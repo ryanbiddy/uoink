@@ -1,0 +1,7 @@
+{
+  "chunk_id": "15509e",
+  "wall_time_seconds": 0.8840132,
+  "exit_code": 0,
+  "original_token_count": 60,
+  "output": "{\r\n  \"copied_files\": 42,\r\n  \"copied_bytes\": 569125,\r\n  \"destination\": \"E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\_scratch\\\\astra-runtime-owner-native-confirmation01\",\r\n  \"subject_executed\": false,\r\n  \"admission_issued\": false\r\n}\r\n"
+}

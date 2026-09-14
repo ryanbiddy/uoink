@@ -1,0 +1,8 @@
+{
+  "chunk_id": "179824",
+  "wall_time_seconds": 0.1962508,
+  "exit_code": 0,
+  "original_token_count": 63,
+  "output": "{\r\n  \"protocol_other_text_unchanged_after_crlf_normalization\": true,\r\n  \"old_adapter_prefix_bytes\": 50135,\r\n  \"old_adapter_prefix_exact\": true,\r\n  \"new_case_count_from_read\": 16,\r\n  \"old_case_count_from_read\": 17,\r\n  \"candidate_executed\": false\r\n}\r\n"
+}
+

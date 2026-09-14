@@ -1,0 +1,7 @@
+{
+  "chunk_id": "b88ace",
+  "wall_time_seconds": 0.3128917,
+  "exit_code": 0,
+  "original_token_count": 193,
+  "output": "{\r\n  \"scope\": \"Passive source/text comparison only; copy script and candidate not executed\",\r\n  \"map_exact_path_only\": true,\r\n  \"map_path_occurrences\": 36,\r\n  \"launcher_exact_path_only\": true,\r\n  \"launcher_path_occurrences\": 37,\r\n  \"template_only_two_control_hashes_changed\": true,\r\n  \"root_reviewed_remains_false\": true,\r\n  \"source_pins_unchanged\": true,\r\n  \"all_41_selected_author_inputs_unchanged\": true,\r\n  \"all_42_planned_copy_sources_match\": true,\r\n  \"planned_copy_bytes\": 569125,\r\n  \"all_five_before_copies_exact\": true,\r\n  \"all_33_expected_ids_unchanged\": true,\r\n  \"independent_destination_absent\": true,\r\n  \"script_not_executed\": true,\r\n  \"candidate_not_executed\": true,\r\n  \"copier_sha256\": \"e948c0c64c126544da1b7a4141add98819f2c5d18ccdea0cb516527a85434eab\"\r\n}\r\n"
+}
