@@ -1,0 +1,164 @@
+--- before/dummy_bootstrap.py
++++ dummy_bootstrap.py
+@@ -51,7 +51,7 @@
+ PROCESS_ABORT = os._exit  # Retained current-process failure exit; never an IPC operation.
+ 
+ FORBIDDEN = r"C:\Users\hello\AppData\Local\Uoink\index.db"
++FIXED_RUNS = {'drain': 'E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\windows-interrupted-owner-retirement01'}
+-FIXED_RUNS = {'cancel': 'E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\runtime-owner-native-connection01'}
+ LOCATION = os.path.normcase(os.path.dirname(os.path.abspath(__file__)))
+ MODE = next((mode for mode, path in FIXED_RUNS.items() if os.path.normcase(path) == LOCATION), None)
+ assert MODE is not None, "fixed_fresh_generated_operation_directory"
+@@ -198,7 +198,7 @@
+ 
+ source_map = json.loads(read_bounded(os.path.join(EXPECTED_RUN, "SOURCE-INPUTS.json"), 65536))
+ admission = json.loads(read_bounded(os.path.join(EXPECTED_RUN, "ROOT-ADMISSION.json"), 65536))
++assert admission["root_reviewed"] is True and admission["scope"] == "generated-windows-interrupted-owner-retirement-only"
+-assert admission["root_reviewed"] is True and admission["scope"] == "generated-windows-runtime-owner-cancel-only"
+ assert admission["case"] == CASE and admission["operation_mode"] == MODE and admission["run_path"] == EXPECTED_RUN
+ assert admission["source_inputs_sha256"] == hashlib.sha256(read_bounded(os.path.join(EXPECTED_RUN, "SOURCE-INPUTS.json"), 65536)).hexdigest()
+ assert source_map["native_bindings"] == {path: {"bytes": size, "sha256": sha} for path, (size, sha) in NATIVE.items()}
+@@ -427,7 +427,78 @@
+         self.asset_io = {name: {"seeks": 0, "reads": 0, "bytes": 0} for name in GENERATED_NAMES}
+         self.journal_setup = None
+         self.contender = self.contender_observation = None
++        self.interrupted_port = None
++        self.interrupted_events = []
+ 
++    def _interrupted_call(self, name, args):
++        # Passive instrument-local identities; no new call, target or authority.
++        port = self.interrupted_port
++        if ROLE != "controller" or port is None or port._interrupted_probe is None:
++            return None
++        native = port._interrupted_probe.native
++        if native is None or not args:
++            return None
++        assert type(native) is FLOW._InterruptedNativeBinding and native.port is port
++        named = (("server", native.server), ("client", native.client),
++                 ("process", native.process), ("thread", native.thread), ("job", native.job))
++        named += tuple(("member" + str(i), handle) for i, handle in enumerate(native.members))
++        matches = [(label, handle) for label, handle in named
++                   if handle is not None and not handle.closed and handle.value == args[0]]
++        relevant = {"TerminateJobObject": "job", "WaitForSingleObject": "process",
++                    "GetProcessTimes": "process", "GetExitCodeProcess": "process",
++                    "QueryInformationJobObject": "job"}
++        if name not in relevant and name != "CloseHandle":
++            return None
++        if not matches or (name in relevant and matches[0][0] != relevant[name]):
++            return None
++        assert len(matches) == 1 and len(self.interrupted_events) < 64
++        label, handle = matches[0]
++        assert not handle.unconfirmed and any(h is handle for h in native.primitives.handles)
++        attempt = port.lifecycle._interrupted_retirements.get(port.key)
++        active = attempt is not None
++        if active:
++            assert type(attempt) is FLOW._InterruptedRetirement and attempt.native is native
++            assert attempt.manager is port.lifecycle and attempt.delegate is port
++            port.lifecycle._check_interrupted_attempt(attempt, "retiring")
++        return {"api": name, "owner": label, "call_index": len(self.calls),
++                "manager_attempt_active_at_call": active}
++
++    def interrupted_completion(self, port):
++        # The manager has already removed its active attempt. Revalidate the
++        # retained witness using the explicit released-stage predicate only.
++        assert port is self.interrupted_port and type(port) is FLOW.GeneratedLifecyclePort
++        probe, witness = port._interrupted_probe, port._interrupted_witness
++        assert type(probe) is FLOW._InterruptedOperationProbe
++        assert type(witness) is FLOW._InterruptedRetirementWitness
++        attempt, native = witness.attempt, witness.native
++        assert attempt.probe is probe and native is probe.native and probe.manager_attempt is attempt
++        port.lifecycle._check_interrupted_attempt(attempt, "released")
++        FLOW._require_interrupted_witness(attempt, witness)
++        assert port.key not in port.lifecycle._interrupted_retirements
++        assert native.pair.forced_stop_attempted is True
++        assert witness.child_native_exit == 1 and witness.job_active_processes == 0
++        return {"retained_witness_current_at_completion": True,
++                "active_manager_attempt_absent_at_completion": True,
++                "same_manager_owner_token_permit_delegate": True,
++                "aggregate_quarantine_history_retained": True,
++                "all_individual_handles_confirmed_closed": True,
++                "retained_handle_count": len(native.handle_states),
++                "owner_closed_and_revoked": probe.owner._closed_verified and probe.owner._revoked,
++                "token_still_revoked": probe.token.revoked,
++                "post_quarantine_revision": probe.quarantine_revision,
++                "pre_interruption_revision": probe.revision,
++                "token_revision_at_completion": probe.token.revision,
++                "quarantine_head": probe.quarantine_head,
++                "quarantine_sha256": hashlib.sha256(probe.quarantine_raw).hexdigest(),
++                "close_head": probe.close_head,
++                "primary_stop_latch_consumed": native.pair.forced_stop_attempted,
++                "primary_process_wait_observed": witness.process_wait_observed,
++                "primary_native_exit": witness.child_native_exit,
++                "primary_job_active_processes": witness.job_active_processes,
++                "native_events": list(self.interrupted_events),
++                "ordinary_parent_guard_claim_available": False,
++                "final_child_guard_or_clean_owner_claim": False}
++
+     def _cleanup_scope(self, name, args, now):
+         if self.cleanup_started is None:
+             self.cleanup_started = now
+@@ -557,14 +628,18 @@
+             else:
+                 self.journal_setup.before_process(name)
+             if name == "CloseHandle":
++                self.journal_setup.before_interrupted_close(args)
+-                self.journal_setup.before_close(args)
+         asset_name = None if is_journal else self._asset_scope(name, args)
++        interrupted_event = self._interrupted_call(name, args)
+         self.calls.append(name)  # Never record buffers, secrets or API arguments.
+         if name == "InitializeProcThreadAttributeList" and args[0] is not None:
+             assert dispatch.attribute_buffer is None, "one_attribute_buffer"
+         if name == "DeleteProcThreadAttributeList":
+             assert args[0] is dispatch.attribute_buffer, "exact_attribute_buffer_retirement"
+         result = dispatch.call(name, *args)
++        if interrupted_event is not None:
++            interrupted_event["native_result"] = int(result)
++            self.interrupted_events.append(interrupted_event)
+         if ROLE == "controller" and self.journal_setup is not None:
+             self.journal_setup.observe(name, args, result, is_journal)
+         if asset_name is not None and result:
+@@ -592,6 +667,7 @@
+     port = None
+     started = time.perf_counter()
+     outcome, error_type, code = None, None, 1
++    quarantine_error_type = None
+     directory_refusal = None
+     try:
+         if ROLE == "contender":
+@@ -626,14 +702,22 @@
+             journal_setup.connect(port)
+             monitor.contender = EXCLUSION.OwnedContender(primitives, monitor, journal_setup, __file__)
+             port._bind_contender(monitor.contender)
++            monitor.interrupted_port = port
++            interrupted_probe = FLOW._InterruptedOperationProbe(port, journal_setup)
++            port._bind_interrupted_probe(interrupted_probe)
++            outcome = FLOW.controller_interrupted_recovery_flow(port)
++            outcome["interrupted_retirement_observation"] = monitor.interrupted_completion(port)
++            outcome["durable_journal"] = journal_setup.complete_interrupted_recovery()
+-            outcome = FLOW.controller_cancel_flow(port)
+-            outcome["durable_journal"] = journal_setup.complete()
+             code = 0
+     except BaseException as error:
+         error_type = type(error).__name__
+         directory_refusal = JOURNAL_PORT.directory_refusal_diagnostic(error)
+         if port is not None:
++            try:
++                port.quarantine(port.key, port.read_set, port.permit, "dummy bootstrap failure")
++            except BaseException as secondary:
++                quarantine_error_type = type(secondary).__name__
++                BaseException.add_note(error, "Bootstrap quarantine also failed: " + quarantine_error_type)
+-            port.quarantine(port.key, port.read_set, port.permit, "dummy bootstrap failure")
+     elapsed = time.perf_counter() - started
+     registry_expected = dict(REGISTRY_NAMESPACE)
+     for name, original in REGISTRY_TRAPS:
+@@ -669,7 +753,8 @@
+              and not HEAVY.intersection(name.split(".")[0] for name in sys.modules))
+     if not guard:
+         code = 1
++    receipt = {"schema": "uoink.generated-windows-interrupted-owner-retirement.v1", "role": ROLE, "case": CASE, "operation_mode": MODE, "result": outcome, "error_type": error_type,
++               "quarantine_error_type": quarantine_error_type, "interrupted_native_events": monitor.interrupted_events,
+-    receipt = {"schema": "uoink.generated-windows-runtime-owner-cancel.v1", "role": ROLE, "case": CASE, "operation_mode": MODE, "result": outcome, "error_type": error_type,
+                "directory_refusal": directory_refusal,
+                "writer_exclusion": monitor.contender.receipt() if monitor.contender is not None else None,
+                "owner_state": owner_state, "retained_runtime_owner": retained_runtime_owner,
+

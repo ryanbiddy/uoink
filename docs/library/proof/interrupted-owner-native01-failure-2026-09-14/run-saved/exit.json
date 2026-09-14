@@ -1,0 +1,15 @@
+{
+  "case": "positive",
+  "controller_native_exit": 0,
+  "expected_primary_retained_exit": 1,
+  "outer_exit": 1,
+  "inputs_unchanged": true,
+  "receipt_valid": false,
+  "receipt_error_type": null,
+  "stdout_bytes": 0,
+  "stderr_bytes": 0,
+  "operation_mode": "drain",
+  "scope": "Generated interrupted owner; retained parent retirement only",
+  "final_child_state_claimed": false,
+  "ordinary_parent_guard_claim_available": false
+}

@@ -1,0 +1,85 @@
+{
+  "schema": "uoink.interrupted-native-run01-source-diagnosis.v1",
+  "scope": "Source and retained JSON only; no subject execution",
+  "files": [
+    {
+      "source": "_scratch/windows-interrupted-owner-native-proposal01/generated_adapter_flow.py",
+      "run_copy": "_scratch/windows-interrupted-owner-retirement01/generated_adapter_flow.py",
+      "bytes": 89924,
+      "sha256": "6a008136802d614ead53297f030dda3da01767ca8a63d313421f142c4d8a160b",
+      "run_copy_identical": true
+    },
+    {
+      "source": "_scratch/windows-interrupted-owner-native-proposal01/generated_worker_flow.py",
+      "run_copy": "_scratch/windows-interrupted-owner-retirement01/generated_worker_flow.py",
+      "bytes": 22853,
+      "sha256": "1ab240d60ceaca130ac85f5d2e908ef5895da5297f35d78a1caba1c62e622238",
+      "run_copy_identical": true
+    },
+    {
+      "source": "_scratch/windows-interrupted-owner-native-proposal01/win32_worker_connection.py",
+      "run_copy": "_scratch/windows-interrupted-owner-retirement01/win32_worker_connection.py",
+      "bytes": 29660,
+      "sha256": "60d22036d6827205be5d0657af8e4693aa534605bdfb1b501878eb2a889fe25f",
+      "run_copy_identical": true
+    },
+    {
+      "source": "_scratch/windows-interrupted-owner-native-proposal01/dummy_bootstrap.py",
+      "run_copy": "_scratch/windows-interrupted-owner-retirement01/dummy_bootstrap.py",
+      "bytes": 44629,
+      "sha256": "e2e3ce6c18d143490998a3930459da3e356ef68dcdd24238f89dada769adfaaf",
+      "run_copy_identical": true
+    },
+    {
+      "source": "_scratch/windows-interrupted-owner-native-proposal01/run_interrupted_owner01.ps1",
+      "run_copy": "_scratch/windows-interrupted-owner-retirement01/run_interrupted_owner01.ps1",
+      "bytes": 41718,
+      "sha256": "902699e2d05fedc2b850dc952e3d14fc063ee62b5276e9724cfe876e5ac71ac6",
+      "run_copy_identical": true
+    },
+    {
+      "source": "_scratch/windows-interrupted-owner-native-proposal01/SOURCE-INPUTS.json",
+      "run_copy": "_scratch/windows-interrupted-owner-retirement01/SOURCE-INPUTS.json",
+      "bytes": 9261,
+      "sha256": "5aba36e453cbd692b4e997e44d071f4f4e6c98a1b8ab941e29f6090544ff594d",
+      "run_copy_identical": true
+    },
+    {
+      "source": "_scratch/windows-interrupted-owner-retirement01/controller-result.json",
+      "bytes": 383524,
+      "sha256": "50cc1361dd58f2e75bc65a045221d2b62fd4cc37a969e1773259818a9d67ee4b"
+    },
+    {
+      "source": "_scratch/windows-interrupted-owner-retirement01/exit.json",
+      "bytes": 447,
+      "sha256": "b79017e08ce442e4e9716ab0d042728d56f998dfe89ef9bab77903cbc9740dd3"
+    },
+    {
+      "source": "_scratch/windows-interrupted-owner-retirement01/native-exit.json",
+      "bytes": 71,
+      "sha256": "c06d0922ffd181268bb4c6f173e1a81b4d24baa3fd0e2c0e64e7a8b63665b8aa"
+    },
+    {
+      "source": "_scratch/windows-interrupted-owner-retirement01/after.json",
+      "bytes": 15266,
+      "sha256": "59df2854aac7c8ec81c85a9e2293210c128aa153e483171552c1ec53f6400931"
+    },
+    {
+      "source": "docs/library/INTERRUPTED-OWNER-NATIVE-SOURCE-BRIEF-2026-09-14.md",
+      "bytes": 4926,
+      "sha256": "299db90e042b490bc5f81d03f15d0acc22193d007a8655d776801d52da7e4f93"
+    },
+    {
+      "source": "_scratch/interrupted-owner-retirement-repair02/test_interrupted_owner_retirement.py",
+      "bytes": 27790,
+      "sha256": "c833cf67e5534c8a0c57e27ae6fec5cb8f6d2c68e8db6844ef7b47075998a2d0"
+    }
+  ],
+  "patch": {
+    "path": "PROPOSED-REPAIR.UNAPPLIED.patch.txt",
+    "before_sha256": "6a008136802d614ead53297f030dda3da01767ca8a63d313421f142c4d8a160b",
+    "proposed_text_sha256": "a9e5984ad0aa6bd232fad933ceae7d4228826f69d2fd87a4132385f595e8ec20",
+    "sha256": "e8ca6752054697b643c4cc59bd18d53c25c4cd551008ac86a9cbb58c2859ceac",
+    "applied": false
+  }
+}

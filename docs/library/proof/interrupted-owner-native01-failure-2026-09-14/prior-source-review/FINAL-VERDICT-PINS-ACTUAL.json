@@ -1,0 +1,7 @@
+{
+  "chunk_id": "594241",
+  "wall_time_seconds": 0.1908258,
+  "exit_code": 0,
+  "original_token_count": 61,
+  "output": "{\"name\":\"VERDICT.md\",\"bytes\":4656,\"sha256\":\"24a6ee1e0653317941b603906b2bba738d04ab28c8dcf689303bd714e5c17fbf\"}\r\n{\"name\":\"LAUNCHER-VIEW-COVERAGE.json\",\"bytes\":1684,\"sha256\":\"022640d9554aec3a38fa1f88bd8e419c6ebc9d51fbab47c52cca42f58d774bb0\"}\r\n"
+}

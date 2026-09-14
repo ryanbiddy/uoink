@@ -1,0 +1,7 @@
+{
+  "chunk_id": "87db37",
+  "wall_time_seconds": 0.3279319,
+  "exit_code": 0,
+  "original_token_count": 163,
+  "output": "{\r\n  \"scope\": \"Passive preparation text bindings only\",\r\n  \"files\": 86,\r\n  \"bytes\": 1359071,\r\n  \"source_count\": 29,\r\n  \"source_bytes\": 528972,\r\n  \"support_metadata_only\": 9,\r\n  \"map_sha256\": \"5aba36e453cbd692b4e997e44d071f4f4e6c98a1b8ab941e29f6090544ff594d\",\r\n  \"launcher_sha256\": \"902699e2d05fedc2b850dc952e3d14fc063ee62b5276e9724cfe876e5ac71ac6\",\r\n  \"false_template_sha256\": \"317d1b370cbbf9c1c66b6d9ffdb602d90d0caab8d1d3dd4c365c2cbb22f27d0a\",\r\n  \"pins_sha256\": \"2ce447ecc0145d5a14a0fc8ea57cf5cd2b9134ff0293aab33b5b2e9bc2a2f223\",\r\n  \"pins_bytes\": 15321,\r\n  \"actual_admission_absent\": true,\r\n  \"run_absent\": true,\r\n  \"candidate_execution\": false\r\n}\r\n"
+}

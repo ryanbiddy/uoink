@@ -1,0 +1,81 @@
+$taskValid=$false
+$taskReceiptError=$null
+$taskExpectedChildExit=1
+function Assert-True($x){if($x -isnot [bool] -or $x -cne $true){throw 'Required true observation'}}
+function Assert-False($x){if($x -isnot [bool] -or $x -cne $false){throw 'Required false observation'}}
+function Assert-Strings($a,$e){
+    if(@($a).Count -ne @($e).Count){throw 'String membership'}
+    for($i=0;$i -lt @($e).Count;$i++){if($a[$i] -isnot [string] -or $a[$i] -cne $e[$i]){throw 'String order'}}
+}
+try{
+    $taskControllerPath=Join-Path $taskRun 'controller-result.json'
+    $taskContenderPath=Join-Path $taskRun 'contender-result.json'
+    $taskChildPath=Join-Path $taskRun 'child-result.json'
+    $taskPartial=[ordered]@{present=$false;bytes=$null;sha256=$null;final_guard_or_clean_owner_credit=$false}
+    if(Test-Path -LiteralPath $taskChildPath){
+        $taskChildFile=Get-Item -LiteralPath $taskChildPath
+        if($taskChildFile.PSIsContainer -or $taskChildFile.Length -gt 1048576){throw 'Partial receipt bound'}
+        $taskPartial.present=$true;$taskPartial.bytes=$taskChildFile.Length
+        $taskPartial.sha256=(Get-FileHash -LiteralPath $taskChildPath -Algorithm SHA256).Hash.ToLowerInvariant()
+    }
+    $taskPartial | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $taskRun 'child-receipt-observation.json') -Encoding utf8
+    if((Get-Item -LiteralPath $taskControllerPath).Length -gt 1048576 -or (Get-Item -LiteralPath $taskContenderPath).Length -gt 1048576){throw 'Receipt size bound'}
+    $taskController=Get-Content -LiteralPath $taskControllerPath -Raw | ConvertFrom-Json
+    $taskContender=Get-Content -LiteralPath $taskContenderPath -Raw | ConvertFrom-Json
+    $taskValid=$true
+__GUARDS__
+    if($taskController.role -cne 'controller' -or $taskContender.role -cne 'contender' -or $taskNativeExit -ne 0 -or $taskController.native_exit_planned -ne 0 -or $taskContender.native_exit_planned -ne 0){throw 'Complete process outcomes'}
+    foreach($receipt in @($taskController,$taskContender)){if($null -ne $receipt.quarantine_error_type){throw 'Fallback quarantine failed'}}
+    $taskResult=$taskController.result
+    $taskExclusion=$taskController.writer_exclusion
+    $taskRefusal=$taskContender.result
+__CONTENDER__
+    if(@($taskController.native_api_calls | Where-Object {$_ -ceq 'CreateProcessW'}).Count -ne 2 -or @($taskController.native_api_calls | Where-Object {$_ -ceq 'ResumeThread'}).Count -ne 2){throw 'Two create/resume pairs'}
+    if(@($taskController.native_api_calls | Where-Object {$_ -ceq 'TerminateJobObject'}).Count -ne 1 -or @($taskController.native_api_calls | Where-Object {$_ -ceq 'TerminateProcess'}).Count -ne 0){throw 'Primary one-stop latch'}
+    if($taskResult.lifecycle_phase -ne 8 -or $taskResult.read_set_released -cne $true -or $taskResult.pipe_retired -cne $true -or $taskResult.adoption_case -cne 'positive' -or $taskResult.model_calls -ne 0){throw 'Released parent state'}
+    Assert-False $taskResult.parent_guards_held_through_exit
+    if($taskResult.exit_observation.child_native_exit -ne 1 -or $taskResult.exit_observation.process_wait_observed -cne $true -or $taskResult.exit_observation.job_active_processes -ne 0){throw 'Retained primary exit/job'}
+__WRITE_PROBES__
+    $taskManifest=$taskResult.authenticated_manifest
+__MANIFEST__
+    $taskActions=@('admit_generated_media','begin_generated_transcription','next_generated_segment','next_generated_segment')
+    Assert-Strings $taskResult.operation_events $taskActions
+    if($taskResult.operation_mode -cne 'drain' -or $taskResult.cursor_state -cne 'active' -or @($taskResult.segments).Count -ne 1){throw 'Interrupted segment counts'}
+    $taskSegment=$taskResult.segments[0]
+    if(@($taskSegment.PSObject.Properties).Count -ne 4 -or $taskSegment.start -ne 0.0 -or $taskSegment.end -ne 0.5 -or $taskSegment.text -cne 'Uoink generated adoption fixture: config.json. No model data.' -or @($taskSegment.words).Count -ne 0){throw 'First fixed segment'}
+    if(@($taskResult.cursor_start.PSObject.Properties).Count -ne 3 -or $taskResult.cursor_start.cursor_id -cne 'generated-cursor-01' -or $taskResult.cursor_start.started -cne $true -or $taskResult.cursor_start.produced_segments -ne 0){throw 'Cursor start'}
+__ADAPTER__
+    foreach($taskName in @('adapter_context_unwound_before_explicit_cleanup','explicit_interrupted_owner_cleanup','retained_facade_and_stream_refused','controller_handshake_begun')){Assert-True $taskResult.$taskName}
+__POLICY__
+__OWNER_GUARDS__
+    foreach($receipt in @($taskController,$taskContender)){if($null -ne $receipt.retained_runtime_owner){throw 'Parent retained child bridge'}}
+    foreach($asset in $taskController.generated_asset_io.PSObject.Properties){if($asset.Value.seeks -ne 0 -or $asset.Value.reads -ne 0 -or $asset.Value.bytes -ne 0){throw 'Parent content read'}}
+    $taskRecovery=$taskResult.interrupted_owner_recovery
+    if($taskRecovery.interruption_type -cne 'KeyboardInterrupt' -or $taskRecovery.stage -cne 'after_second_segment_exchange'){throw 'Fixed interruption'}
+    foreach($name in @('interruption_identity_match','ordinary_completion_refused','ordinary_reconciliation_refused','manager_reconciliation_confirmed','owner_still_revoked','token_still_revoked','same_owner_and_record','journal_open_until_recovery_clear')){Assert-True $taskRecovery.$name}
+    Assert-False $taskRecovery.native_interrupt_crash_or_restart_claim
+    $taskObserved=$taskResult.interrupted_retirement_observation
+    foreach($name in @('retained_witness_current_at_completion','active_manager_attempt_absent_at_completion','same_manager_owner_token_permit_delegate','aggregate_quarantine_history_retained','all_individual_handles_confirmed_closed','owner_closed_and_revoked','token_still_revoked','primary_stop_latch_consumed','primary_process_wait_observed')){Assert-True $taskObserved.$name}
+    Assert-False $taskObserved.ordinary_parent_guard_claim_available
+    Assert-False $taskObserved.final_child_guard_or_clean_owner_claim
+    if($taskObserved.retained_handle_count -ne 16 -or $taskObserved.primary_native_exit -ne 1 -or $taskObserved.primary_job_active_processes -ne 0 -or $taskObserved.pre_interruption_revision -lt 0 -or $taskObserved.post_quarantine_revision -le $taskObserved.pre_interruption_revision -or $taskObserved.token_revision_at_completion -ne $taskObserved.post_quarantine_revision){throw 'Witness/revision result'}
+    $taskEvents=@($taskObserved.native_events)
+    if(($taskEvents | ConvertTo-Json -Depth 6 -Compress) -cne (@($taskController.interrupted_native_events) | ConvertTo-Json -Depth 6 -Compress)){throw 'Retained call observations changed'}
+    $taskExpectedEvents=@(@('TerminateJobObject','job',$false,1),@('WaitForSingleObject','process',$false,0),@('GetProcessTimes','process',$true,1),@('WaitForSingleObject','process',$true,0),@('GetExitCodeProcess','process',$true,1),@('QueryInformationJobObject','job',$true,1),@('CloseHandle','server',$true,1),@('CloseHandle','thread',$true,1),@('CloseHandle','process',$true,1),@('CloseHandle','job',$true,1),@('CloseHandle','member4',$true,1),@('CloseHandle','member3',$true,1),@('CloseHandle','member2',$true,1),@('CloseHandle','member1',$true,1),@('CloseHandle','member0',$true,1))
+    if($taskEvents.Count -ne $taskExpectedEvents.Count){throw 'Retained call membership'}
+    $last=-1
+    for($i=0;$i -lt $taskEvents.Count;$i++){
+        $event=$taskEvents[$i];$expected=$taskExpectedEvents[$i]
+        if(@($event.PSObject.Properties).Count -ne 5 -or $event.api -cne $expected[0] -or $event.owner -cne $expected[1] -or $event.manager_attempt_active_at_call -isnot [bool] -or $event.manager_attempt_active_at_call -cne $expected[2] -or $event.native_result -ne $expected[3] -or $event.call_index -le $last -or $event.call_index -ge @($taskController.native_api_calls).Count -or $taskController.native_api_calls[$event.call_index] -cne $event.api){throw 'Retained call identity/order/result'}
+        $last=$event.call_index
+    }
+__JOURNAL__
+__DECODE__
+    if($taskEvents[-1].call_index -ge $taskFlushes[4].call_index -or $taskFlushes[3].call_index -ge $taskEvents[2].call_index){throw 'Retirement must follow quarantine and precede clear'}
+}catch{$taskValid=$false;$taskReceiptError=$_.Exception.GetType().Name}
+$taskStdoutBytes=(Get-Item -LiteralPath $taskStdout).Length
+$taskStderrBytes=(Get-Item -LiteralPath $taskStderr).Length
+$taskOuterExit=$taskNativeExit
+if(-not $taskUnchanged -or -not $taskValid -or $taskStdoutBytes -ne 0 -or $taskStderrBytes -ne 0){if($taskOuterExit -eq 0){$taskOuterExit=1}}
+[ordered]@{case=$taskCase;controller_native_exit=$taskNativeExit;expected_primary_retained_exit=1;outer_exit=$taskOuterExit;inputs_unchanged=$taskUnchanged;receipt_valid=$taskValid;receipt_error_type=$taskReceiptError;stdout_bytes=$taskStdoutBytes;stderr_bytes=$taskStderrBytes;operation_mode=$taskMode;scope='Generated interrupted owner; retained parent retirement only';final_child_state_claimed=$false;ordinary_parent_guard_claim_available=$false} | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $taskRun 'exit.json') -Encoding utf8
+exit $taskOuterExit

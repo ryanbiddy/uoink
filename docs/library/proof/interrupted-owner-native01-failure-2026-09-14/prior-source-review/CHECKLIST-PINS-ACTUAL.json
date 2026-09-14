@@ -1,0 +1,7 @@
+{
+  "chunk_id": "b4d8e8",
+  "wall_time_seconds": 0.1607426,
+  "exit_code": 0,
+  "original_token_count": 52,
+  "output": "{\r\n  \"file\": \"CHECKLIST.md\",\r\n  \"bytes\": 5669,\r\n  \"sha256\": \"e00040bb257992a5512fef91e19101f22a07e03274646de220d265c63694bafd\",\r\n  \"review_scope\": \"fixed source text only; new native proposal not read\"\r\n}\r\n"
+}

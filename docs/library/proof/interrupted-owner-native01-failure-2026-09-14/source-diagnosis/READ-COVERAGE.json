@@ -1,0 +1,35 @@
+{
+  "schema": "uoink.interrupted-native-run01-diagnosis-coverage.v1",
+  "scope": "Source and saved JSON; no candidate execution",
+  "actual_reads": [
+    {
+      "actual": "READ01-INVENTORY-ACTUAL.json",
+      "scope": "Run top-level names/sizes only; exact-source rg hits. No registry or fixture content."
+    },
+    {
+      "actual": "READ02-SOURCE-ACTUAL.json",
+      "scope": "Probe337-403, ordinary driver850-901, retired driver1014-1054, interrupted driver1167-1270, helper31-61, bootstrap688-718."
+    },
+    {
+      "actual": "READ03-RECEIPT-ACTUAL.json",
+      "scope": "Bounded controller JSON parsed; selected results and native API name counts displayed; full exit/native-exit JSON; source/test rg hits."
+    },
+    {
+      "actual": "READ04-CONTEXT-ACTUAL.json",
+      "scope": "Read-set and helper/controller/test context plus exact launcher139-147. Tool output was truncated in the middle; no complete read of the omitted portion is claimed."
+    },
+    {
+      "actual": "BINDING-PATCH-ACTUAL.json",
+      "scope": "Six fixed source/run-copy hashes, four receipt text hashes, brief/test hashes; after.json binding comparisons; unique textual two-line insertion proposal without applying a derivative."
+    },
+    {
+      "actual": "ROOT-DIRECTION-READ-ACTUAL.json",
+      "scope": "Complete d04652a root repair brief; SHA2561cc639e1fdf252326b1fa8bd97bae217237301b46aec2cce945ad13c20066c47."
+    }
+  ],
+  "not_claimed": [
+    "No full re-verification of every launcher predicate.",
+    "No fresh native observation, physical journal read or support/artifact access.",
+    "No success credit from the controller's successful return or other partial records."
+  ]
+}

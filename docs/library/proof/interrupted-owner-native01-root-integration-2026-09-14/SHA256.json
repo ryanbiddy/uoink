@@ -1,0 +1,61 @@
+{
+  "schema": "documentary-proof-v1",
+  "scope": "Raw Git diff/application, anticipated newline-only transport restoration and completed raw Git-index verification for FAILED native01 archive. No subject rerun.",
+  "files": [
+    {
+      "path": ".gitattributes",
+      "bytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+    },
+    {
+      "path": "archive-interrupted-native01-integration.mjs",
+      "bytes": 2117,
+      "sha256": "f5660eb3923d05912376c84b34578de7dea2b143c7de76dcf52b21ef482b8873"
+    },
+    {
+      "path": "integrate-interrupted-native01-failure.ps1",
+      "bytes": 1285,
+      "sha256": "1becd3ca1d2d1dec667356a695a6f8ec8a22591ee0f6235f8507c90adfcb25a4"
+    },
+    {
+      "path": "interrupted-native01-apply.stderr.log",
+      "bytes": 7995,
+      "sha256": "ae3a219b178bf7492c80e2b59a011c6038cc07545cdcc6802982d635e3038a10"
+    },
+    {
+      "path": "interrupted-native01-apply.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "INTERRUPTED-NATIVE01-ARCHIVE-COPY-ACTUAL.json",
+      "bytes": 331,
+      "sha256": "904ac0767dbdd134cf6334dfba88fba3b4e320ee8376d3234d8f3748c7e0c2bf"
+    },
+    {
+      "path": "INTERRUPTED-NATIVE01-INDEX-POLL01-ACTUAL.json",
+      "bytes": 362,
+      "sha256": "ac44d8d71a2ec786023f5517aa4a7befe745a74ad61de2e727e0e1f67692c051"
+    },
+    {
+      "path": "INTERRUPTED-NATIVE01-INTEGRATION-ACTUAL.json",
+      "bytes": 493,
+      "sha256": "cff26c0908cf2d8c7367efb574f3f4a7f25dbdf5e6614851124190a49622d452"
+    },
+    {
+      "path": "INTERRUPTED-NATIVE01-TRANSPORT-INDEX-ACTUAL.json",
+      "bytes": 333,
+      "sha256": "8ba7548caad623a2f91f0d7c78dd5de48221356a391417b7aba34a80e9369d3c"
+    },
+    {
+      "path": "INTERRUPTED-NATIVE01-TRANSPORT-RESULT.json",
+      "bytes": 57853,
+      "sha256": "c8a27d45dc9f6ed147853b48d307c82058887308031505e33cb5dd21d7a48390"
+    },
+    {
+      "path": "restore-interrupted-native01-transport.mjs",
+      "bytes": 2098,
+      "sha256": "6480cf9dda925dd93cb92ab001ed47e661d525118d52aa7cf9edebb21bf7fc2a"
+    }
+  ]
+}

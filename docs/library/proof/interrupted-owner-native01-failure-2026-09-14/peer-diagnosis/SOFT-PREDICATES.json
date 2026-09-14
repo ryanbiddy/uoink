@@ -1,0 +1,664 @@
+{
+  "scope": "Passive JSON-only diagnosis of every direct soft-failure predicate in frozen launcher902699e2",
+  "recorded_source_count": 29,
+  "predicate_instances": 116,
+  "failed_instances": 6,
+  "checks": [
+    {
+      "launcher_line": 117,
+      "id": "controller:complete_guard",
+      "failed": false
+    },
+    {
+      "launcher_line": 118,
+      "id": "controller:budget",
+      "failed": false
+    },
+    {
+      "launcher_line": 122,
+      "id": "controller:dispatch",
+      "failed": false
+    },
+    {
+      "launcher_line": 123,
+      "id": "controller:source:plain_state_reader.py",
+      "failed": false
+    },
+    {
+      "launcher_line": 123,
+      "id": "controller:source:state_bridge.py",
+      "failed": false
+    },
+    {
+      "launcher_line": 123,
+      "id": "controller:source:owned_cpu_tensor_port.py",
+      "failed": false
+    },
+    {
+      "launcher_line": 123,
+      "id": "controller:source:model_binding_registry.py",
+      "failed": false
+    },
+    {
+      "launcher_line": 123,
+      "id": "controller:source:owned_factory_port.py",
+      "failed": false
+    },
+    {
+      "launcher_line": 123,
+      "id": "controller:source:owned_guard.py",
+      "failed": false
+    },
+    {
+      "launcher_line": 123,
+      "id": "controller:source:fake_torch_support.py",
+      "failed": false
+    },
+    {
+      "launcher_line": 123,
+      "id": "controller:source:fixed_schema_helpers.py",
+      "failed": false
+    },
+    {
+      "launcher_line": 123,
+      "id": "controller:source:worker_runtime_owner.py",
+      "failed": false
+    },
+    {
+      "launcher_line": 123,
+      "id": "controller:source:reservation_file_port.py",
+      "failed": false
+    },
+    {
+      "launcher_line": 123,
+      "id": "controller:source:snapshot_reservations.py",
+      "failed": false
+    },
+    {
+      "launcher_line": 123,
+      "id": "controller:source:snapshot_lifecycle.py",
+      "failed": false
+    },
+    {
+      "launcher_line": 123,
+      "id": "controller:source:durable_lifecycle.py",
+      "failed": false
+    },
+    {
+      "launcher_line": 123,
+      "id": "controller:source:win32_worker_connection.py",
+      "failed": false
+    },
+    {
+      "launcher_line": 123,
+      "id": "controller:source:windows_reservation_port.py",
+      "failed": false
+    },
+    {
+      "launcher_line": 123,
+      "id": "controller:source:owned_generation_protocol.py",
+      "failed": false
+    },
+    {
+      "launcher_line": 123,
+      "id": "controller:source:win32_private_pipe.py",
+      "failed": false
+    },
+    {
+      "launcher_line": 123,
+      "id": "controller:source:pinned_buffer_namespace.py",
+      "failed": false
+    },
+    {
+      "launcher_line": 123,
+      "id": "controller:source:inherited_readset.py",
+      "failed": false
+    },
+    {
+      "launcher_line": 123,
+      "id": "controller:source:generated_worker_flow.py",
+      "failed": false
+    },
+    {
+      "launcher_line": 123,
+      "id": "controller:source:generated_operation_flow.py",
+      "failed": false
+    },
+    {
+      "launcher_line": 123,
+      "id": "controller:source:trusted_asr_resolver.py",
+      "failed": false
+    },
+    {
+      "launcher_line": 123,
+      "id": "controller:source:asr_loading_adapter.py",
+      "failed": false
+    },
+    {
+      "launcher_line": 123,
+      "id": "controller:source:generated_journal_setup.py",
+      "failed": false
+    },
+    {
+      "launcher_line": 123,
+      "id": "controller:source:generated_writer_exclusion.py",
+      "failed": false
+    },
+    {
+      "launcher_line": 123,
+      "id": "controller:source:generated_worker_factory_inputs.py",
+      "failed": false
+    },
+    {
+      "launcher_line": 123,
+      "id": "controller:source:generated_worker_runtime_bridge.py",
+      "failed": false
+    },
+    {
+      "launcher_line": 123,
+      "id": "controller:source:generated_adapter_flow.py",
+      "failed": false
+    },
+    {
+      "launcher_line": 123,
+      "id": "controller:source:dummy_bootstrap.py",
+      "failed": false
+    },
+    {
+      "launcher_line": 170,
+      "id": "controller:adapter_state_count",
+      "failed": false
+    },
+    {
+      "launcher_line": 171,
+      "id": "controller:adapter:real_approval_none",
+      "failed": false
+    },
+    {
+      "launcher_line": 171,
+      "id": "controller:adapter:real_functions_unchanged",
+      "failed": false
+    },
+    {
+      "launcher_line": 171,
+      "id": "controller:adapter:private_release_restored",
+      "failed": false
+    },
+    {
+      "launcher_line": 171,
+      "id": "controller:adapter:services_unconfigured",
+      "failed": false
+    },
+    {
+      "launcher_line": 171,
+      "id": "controller:adapter:resolver_module_restored",
+      "failed": false
+    },
+    {
+      "launcher_line": 117,
+      "id": "contender:complete_guard",
+      "failed": false
+    },
+    {
+      "launcher_line": 118,
+      "id": "contender:budget",
+      "failed": false
+    },
+    {
+      "launcher_line": 122,
+      "id": "contender:dispatch",
+      "failed": false
+    },
+    {
+      "launcher_line": 123,
+      "id": "contender:source:plain_state_reader.py",
+      "failed": false
+    },
+    {
+      "launcher_line": 123,
+      "id": "contender:source:state_bridge.py",
+      "failed": false
+    },
+    {
+      "launcher_line": 123,
+      "id": "contender:source:owned_cpu_tensor_port.py",
+      "failed": false
+    },
+    {
+      "launcher_line": 123,
+      "id": "contender:source:model_binding_registry.py",
+      "failed": false
+    },
+    {
+      "launcher_line": 123,
+      "id": "contender:source:owned_factory_port.py",
+      "failed": false
+    },
+    {
+      "launcher_line": 123,
+      "id": "contender:source:owned_guard.py",
+      "failed": false
+    },
+    {
+      "launcher_line": 123,
+      "id": "contender:source:fake_torch_support.py",
+      "failed": false
+    },
+    {
+      "launcher_line": 123,
+      "id": "contender:source:fixed_schema_helpers.py",
+      "failed": false
+    },
+    {
+      "launcher_line": 123,
+      "id": "contender:source:worker_runtime_owner.py",
+      "failed": false
+    },
+    {
+      "launcher_line": 123,
+      "id": "contender:source:reservation_file_port.py",
+      "failed": false
+    },
+    {
+      "launcher_line": 123,
+      "id": "contender:source:snapshot_reservations.py",
+      "failed": false
+    },
+    {
+      "launcher_line": 123,
+      "id": "contender:source:snapshot_lifecycle.py",
+      "failed": false
+    },
+    {
+      "launcher_line": 123,
+      "id": "contender:source:durable_lifecycle.py",
+      "failed": false
+    },
+    {
+      "launcher_line": 123,
+      "id": "contender:source:win32_worker_connection.py",
+      "failed": false
+    },
+    {
+      "launcher_line": 123,
+      "id": "contender:source:windows_reservation_port.py",
+      "failed": false
+    },
+    {
+      "launcher_line": 123,
+      "id": "contender:source:owned_generation_protocol.py",
+      "failed": false
+    },
+    {
+      "launcher_line": 123,
+      "id": "contender:source:win32_private_pipe.py",
+      "failed": false
+    },
+    {
+      "launcher_line": 123,
+      "id": "contender:source:pinned_buffer_namespace.py",
+      "failed": false
+    },
+    {
+      "launcher_line": 123,
+      "id": "contender:source:inherited_readset.py",
+      "failed": false
+    },
+    {
+      "launcher_line": 123,
+      "id": "contender:source:generated_worker_flow.py",
+      "failed": false
+    },
+    {
+      "launcher_line": 123,
+      "id": "contender:source:generated_operation_flow.py",
+      "failed": false
+    },
+    {
+      "launcher_line": 123,
+      "id": "contender:source:trusted_asr_resolver.py",
+      "failed": false
+    },
+    {
+      "launcher_line": 123,
+      "id": "contender:source:asr_loading_adapter.py",
+      "failed": false
+    },
+    {
+      "launcher_line": 123,
+      "id": "contender:source:generated_journal_setup.py",
+      "failed": false
+    },
+    {
+      "launcher_line": 123,
+      "id": "contender:source:generated_writer_exclusion.py",
+      "failed": false
+    },
+    {
+      "launcher_line": 123,
+      "id": "contender:source:generated_worker_factory_inputs.py",
+      "failed": false
+    },
+    {
+      "launcher_line": 123,
+      "id": "contender:source:generated_worker_runtime_bridge.py",
+      "failed": false
+    },
+    {
+      "launcher_line": 123,
+      "id": "contender:source:generated_adapter_flow.py",
+      "failed": false
+    },
+    {
+      "launcher_line": 123,
+      "id": "contender:source:dummy_bootstrap.py",
+      "failed": false
+    },
+    {
+      "launcher_line": 170,
+      "id": "contender:adapter_state_count",
+      "failed": false
+    },
+    {
+      "launcher_line": 171,
+      "id": "contender:adapter:real_approval_none",
+      "failed": false
+    },
+    {
+      "launcher_line": 171,
+      "id": "contender:adapter:real_functions_unchanged",
+      "failed": false
+    },
+    {
+      "launcher_line": 171,
+      "id": "contender:adapter:private_release_restored",
+      "failed": false
+    },
+    {
+      "launcher_line": 171,
+      "id": "contender:adapter:services_unconfigured",
+      "failed": false
+    },
+    {
+      "launcher_line": 171,
+      "id": "contender:adapter:resolver_module_restored",
+      "failed": false
+    },
+    {
+      "launcher_line": 142,
+      "id": "write_probe_count",
+      "failed": true
+    },
+    {
+      "launcher_line": 146,
+      "id": "write_probe_pair:0",
+      "failed": true
+    },
+    {
+      "launcher_line": 146,
+      "id": "write_probe_pair:1",
+      "failed": true
+    },
+    {
+      "launcher_line": 146,
+      "id": "write_probe_pair:2",
+      "failed": true
+    },
+    {
+      "launcher_line": 146,
+      "id": "write_probe_pair:3",
+      "failed": true
+    },
+    {
+      "launcher_line": 146,
+      "id": "write_probe_pair:4",
+      "failed": true
+    },
+    {
+      "launcher_line": 149,
+      "id": "manifest_membership",
+      "failed": false
+    },
+    {
+      "launcher_line": 154,
+      "id": "manifest_member:0",
+      "failed": false
+    },
+    {
+      "launcher_line": 154,
+      "id": "manifest_member:1",
+      "failed": false
+    },
+    {
+      "launcher_line": 154,
+      "id": "manifest_member:2",
+      "failed": false
+    },
+    {
+      "launcher_line": 154,
+      "id": "manifest_member:3",
+      "failed": false
+    },
+    {
+      "launcher_line": 154,
+      "id": "manifest_member:4",
+      "failed": false
+    },
+    {
+      "launcher_line": 160,
+      "id": "manifest_hash",
+      "failed": false
+    },
+    {
+      "launcher_line": 174,
+      "id": "authority_count",
+      "failed": false
+    },
+    {
+      "launcher_line": 175,
+      "id": "authority_event:0",
+      "failed": false
+    },
+    {
+      "launcher_line": 175,
+      "id": "authority_event:1",
+      "failed": false
+    },
+    {
+      "launcher_line": 175,
+      "id": "authority_event:2",
+      "failed": false
+    },
+    {
+      "launcher_line": 175,
+      "id": "authority_event:3",
+      "failed": false
+    },
+    {
+      "launcher_line": 175,
+      "id": "authority_event:4",
+      "failed": false
+    },
+    {
+      "launcher_line": 176,
+      "id": "actual_adapter_binding",
+      "failed": false
+    },
+    {
+      "launcher_line": 178,
+      "id": "adapter_result:adapter_globals_restored",
+      "failed": false
+    },
+    {
+      "launcher_line": 178,
+      "id": "adapter_result:real_resolver_approval_unchanged_none",
+      "failed": false
+    },
+    {
+      "launcher_line": 178,
+      "id": "adapter_result:actual_factory_and_permit",
+      "failed": false
+    },
+    {
+      "launcher_line": 190,
+      "id": "policy_count",
+      "failed": false
+    },
+    {
+      "launcher_line": 194,
+      "id": "policy:action",
+      "failed": false
+    },
+    {
+      "launcher_line": 194,
+      "id": "policy:choice",
+      "failed": false
+    },
+    {
+      "launcher_line": 194,
+      "id": "policy:compute_type",
+      "failed": false
+    },
+    {
+      "launcher_line": 194,
+      "id": "policy:constructor_called",
+      "failed": false
+    },
+    {
+      "launcher_line": 194,
+      "id": "policy:device",
+      "failed": false
+    },
+    {
+      "launcher_line": 194,
+      "id": "policy:generated_only",
+      "failed": false
+    },
+    {
+      "launcher_line": 194,
+      "id": "policy:generated_root",
+      "failed": false
+    },
+    {
+      "launcher_line": 194,
+      "id": "policy:inherited_manifest_sha256",
+      "failed": false
+    },
+    {
+      "launcher_line": 194,
+      "id": "policy:local_files_only",
+      "failed": false
+    },
+    {
+      "launcher_line": 194,
+      "id": "policy:namespace_sha256",
+      "failed": false
+    },
+    {
+      "launcher_line": 194,
+      "id": "policy:profile_id",
+      "failed": false
+    },
+    {
+      "launcher_line": 194,
+      "id": "policy:real_runtime_approved",
+      "failed": false
+    },
+    {
+      "launcher_line": 194,
+      "id": "policy:recipe_sha256",
+      "failed": false
+    },
+    {
+      "launcher_line": 194,
+      "id": "policy:revision",
+      "failed": false
+    },
+    {
+      "launcher_line": 194,
+      "id": "policy:usage",
+      "failed": false
+    },
+    {
+      "launcher_line": 197,
+      "id": "policy_ack",
+      "failed": false
+    }
+  ],
+  "probe_details": [
+    {
+      "index": 0,
+      "locked_row": {
+        "write_open_succeeded": true,
+        "bytes_written": 0
+      },
+      "post_index": 5,
+      "post_row": null,
+      "locked_refused_condition": false,
+      "locked_error32_condition": false,
+      "post_success_condition": false,
+      "post_zero_write_condition": false
+    },
+    {
+      "index": 1,
+      "locked_row": {
+        "write_open_succeeded": true,
+        "bytes_written": 0
+      },
+      "post_index": 6,
+      "post_row": null,
+      "locked_refused_condition": false,
+      "locked_error32_condition": false,
+      "post_success_condition": false,
+      "post_zero_write_condition": false
+    },
+    {
+      "index": 2,
+      "locked_row": {
+        "write_open_succeeded": true,
+        "bytes_written": 0
+      },
+      "post_index": 7,
+      "post_row": null,
+      "locked_refused_condition": false,
+      "locked_error32_condition": false,
+      "post_success_condition": false,
+      "post_zero_write_condition": false
+    },
+    {
+      "index": 3,
+      "locked_row": {
+        "write_open_succeeded": true,
+        "bytes_written": 0
+      },
+      "post_index": 8,
+      "post_row": null,
+      "locked_refused_condition": false,
+      "locked_error32_condition": false,
+      "post_success_condition": false,
+      "post_zero_write_condition": false
+    },
+    {
+      "index": 4,
+      "locked_row": {
+        "write_open_succeeded": true,
+        "bytes_written": 0
+      },
+      "post_index": 9,
+      "post_row": null,
+      "locked_refused_condition": false,
+      "locked_error32_condition": false,
+      "post_success_condition": false,
+      "post_zero_write_condition": false
+    }
+  ],
+  "input_sha256": {
+    "contender-result.json": "f2468ab42f02d5442178829b5ef1dec0f042902f52061e05483d997980f5a3f5",
+    "before.json": "629f886ed5751619d33ddbe57224e02d6243e1f2529e88e8e15af02c822cb2df",
+    "controller-result.json": "50cc1361dd58f2e75bc65a045221d2b62fd4cc37a969e1773259818a9d67ee4b"
+  },
+  "inputs_unchanged": true,
+  "subject_execution": false,
+  "native_execution": false,
+  "fixture_or_physical_journal_access": false
+}

@@ -1,0 +1,12 @@
+{
+  "root_reviewed": true,
+  "scope": "generated-windows-interrupted-owner-retirement-only",
+  "case": "positive",
+  "operation_mode": "drain",
+  "run_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\windows-interrupted-owner-retirement01",
+  "source_inputs_sha256": "5aba36e453cbd692b4e997e44d071f4f4e6c98a1b8ab941e29f6090544ff594d",
+  "launcher_sha256": "902699e2d05fedc2b850dc952e3d14fc063ee62b5276e9724cfe876e5ac71ac6",
+  "admission_commit": "3fc4cf7ad844a97be85f95d6de4eeabac5bd31ba",
+  "preparation_sha256": "2ce447ecc0145d5a14a0fc8ea57cf5cd2b9134ff0293aab33b5b2e9bc2a2f223",
+  "reason": "One generated Windows interrupted-owner observation after root and independent source review. Exact primary exit1 is intentional termination; controller/contender require0. No final child state, real models, D1/D2 repeat, D3/D4, production or release authority."
+}

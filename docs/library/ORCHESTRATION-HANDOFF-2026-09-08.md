@@ -119,7 +119,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | Actual adapter cancellation | Generated qualification integrated at60b3bb5 | Author and independent copies each89 passed/0 failed/0 skipped,86 passing subtests; all216 proof payloads match Git/disk | Native cancellation integrated ata25b34b: all100 proof payloads match Git/disk. Final-clear recovery is recorded at 5671b51; interrupted-owner retirement, crash/restart, real models and release remain unqualified |
 | Retired-owner final-clear recovery | Fake22 at a83ae1a; generated native recovery at5671b51 | Both fake copies22/0/0 plus21 passing subtests. Nativee97a44/exit0, root5214fa and peer503717 verify exact retirement, four confirmed phases/flushes and still-revoked owner/token. All91 newest proof payloads match Git/disk | The generated runtime-owner connection is recorded at 3661608 and 3b8f9e0. Continue interrupted-owner retirement; no OS-interruption, active-worker recovery, crash/restart or model credit |
 | Worker runtime owner and bootstrap | Connected fake33 at 3661608; generated native cancellation at 3b8f9e0 | Both fake copies 33/0/0. Native a9321b/exit 0, root dd7190 and peer 4984ac agree on 32 unchanged pairs, valid guards, one segment, closed owner, child/contender exit 0 with empty jobs, and four journal frames. All 127 native proof payloads match Git/disk | Interrupted-owner retirement direction is committed at 77dc339. Real inference, protected loader/PCM/filter routes, crash/restart and release remain open |
-| Interrupted owned-worker retirement | Gemini source remains FAILED at0a1a211; corrected fake28 integrated atfeee2f7 | Both copies28/0/0 plus57 subtests;421 evidence payloads match Git/disk. Native instrument root/peer source review is clear; finaldc38bd binds86 dormant preparation payloads | One generated native observation is admitted by ASTRA-NATIVE-INTERRUPTED-OWNER01-ADMISSION-2026-09-14.md. Run once and review actual receipts before acceptance. No real-model, production or release authority |
+| Interrupted owned-worker retirement | Gemini source remains FAILED at0a1a211; fake28 integrated atfeee2f7; native run01 FAILED at source3fc4cf7 | Actual3c41aa returns outer1/controller0, unchanged inputs, invalid receipt. Both passive diagnoses find six failed comparisons caused by five omitted locked-write observations; 215 failure/integration payloads match Git/disk | Two-line driver repair24844bf4 passes source review under d04652a. Review its two new inert boundary controls and fresh fake/native bindings. Do not repeat run01 or weaken assertions. No real-model, production or release authority |
 | Release notes | Current progress and remaining gates committed at 376eb47 | All seven proof payloads match Git/disk; 57 table lines and historical package/review-kit sections remain unchanged. D1/D2 completion and generated cancellation/recovery are explicit | Continue runtime qualification. No production source, package, installation, public draft or website changed |
 | Integration | Reliability repair at e8d058f and notice packaging at 71d3e70 after tree09 | Reliability:53 focused cases plus13 subtests per root. Notices:20 Python/10 block cases per root. Tree09 at 56d9d4c remains2,796 passed/1 failed/3 skipped across2,800 cases plus13 subtests; it predates both repairs | Finish runtime work, then run a new committed complete tree and rebuild/reseal. Package08 and website/marketing remain held. No current-source package or installation credit |
 | Desktop incident | Isolation failed in package-07 attempt; corrected at `e10ba3a` | Ordinary Uoink and filesystem connectors launched; earlier live-index/5179 effects unknown. Owned job cleaned | No further override launch; only guarded Uoink dashboard observed for package 08 |
@@ -219,10 +219,18 @@ Do not repeat these runs for documentation. Both actual results and repair
 records are integrated at feee2f7: b2099f verifies404 qualification payloads and c8fa06 verifies17
 root integration payloads in Git/disk. Native source preparation under abbc4de
 uses a distinct forced-termination contract and retained parent process/job
-evidence. Root and peer source reviews are clear; dc38bd binds86 payloads and
-confirms no prior admission/output. Follow ASTRA-NATIVE-INTERRUPTED-OWNER01-ADMISSION-2026-09-14.md
-for one generated invocation, then review actual receipts. No outcome is yet
-accepted. The first
+evidence. The invocation admitted at3fc4cf7 is now FAILED: actual3c41aa returns
+outer1/controller0, unchanged inputs and receipt_valid=false. The driver omitted
+five locked-write observations required by the unchanged ten-row launcher checks.
+Passive diagnoses c38329 and604084 each find six failing comparisons, all from
+that omission; no native rerun occurred. Follow repair briefd04652a and
+ASTRA-INTERRUPTED-NATIVE01-FAILURE-2026-09-14.md. Preserve the first run, add the
+missing probes and focused inert coverage, and review fresh qualification inputs.
+The failed observation is archived in204 payloads;11 root transport records
+preserve raw Git integration and newline-only restoration. Index checks18c81b
+and841604 verify all215 payloads in Git/disk. Two-line driver24844bf4 passes
+root/peer source review; new controller-boundary controls remain unexecuted.
+The first
 positive case still requires an idle pipe, no retained I/O and confirmed exact
 handles; aggregate quarantine history and all ordinary refusals remain. Preserve
 the failed source and review the repair before any later qualification.
@@ -6348,3 +6356,36 @@ _scratch/windows-interrupted-owner-native-proposal01, with a separate peer
 review. No new native run is admitted. D2 remains completed atd13534f and must
 not be repeated; real-runtime decisions and the later full-tree/build/install
 gates remain open. Later commits need a separate verified backup.
+
+### 2026-09-14 — Native interrupted-worker run01 fails for omitted write probes
+
+The later admission3fc4cf7 authorized one invocation. Actual3c41aa returned
+outer1 in3.6848278 seconds; controller0 and unchanged inputs do not make this a
+pass. The saved result contains five post-retirement successful write opens,
+each writing zero bytes, but none of the five required earlier sharing refusals.
+The launcher's count and five pair checks correctly fail. Diagnoses c38329 and
+604084 each evaluate116 non-throwing comparisons: six fail for this omission,
+110 match. These are passive comparisons, not new qualification cases.
+
+Root and peer preflight reviews missed a generated-driver omission. Keep their
+old verdicts, the fake28 results and the failed native record unchanged. Saved
+retirement and journal observations remain partial evidence; they cannot supply
+the missing lock checks or final child state. No physical journal or support
+file was reopened for diagnosis. Source repair briefd04652a adds the existing
+locked-file probe loop and focused inert boundary coverage. All existing
+behavior assertions remain. A new native observation needs the repaired source,
+fresh fake qualifications, a new label and exact root admission.
+
+Read ASTRA-INTERRUPTED-NATIVE01-FAILURE-2026-09-14.md. D1/D2 remain complete;
+real-runtime qualification and the later full-tree/build/install gates stay
+open. Website and marketing remain paused.
+
+The failed native archive contains204 payloads/3,024,723 bytes, seal
+a239c8e604d304dcbb216c070bcb5d565c3d67e510b77a5dca47e3dcd28cce2a.
+Copy728a27 and raw worktree diff/applicationff275a return0. The previously
+documented Git newline behavior affected186 files; the transport step required
+every difference to be newline-only before restoring exact donor bytes, with
+the original seal unchanged. Completed index18c81b verifies every payload and
+seal against Git. Eleven root integration records/72,875 bytes, seal
+768469023a953168133c09985ff0b87f5870315f8c592725da63a8f91c9fb210,
+pass raw index check841604. No native rerun was used for archival.

@@ -1,0 +1,1 @@
+Passive diagnosis of native run01's saved text/JSON receipts against the frozen launcher. The failed run and proposal remain unchanged. No launcher, bootstrap, core, native operation, support file, physical journal, model or checkpoint is executed or accessed. Receipt validity remains failed unless a separately reviewed repair and new observation establish otherwise.

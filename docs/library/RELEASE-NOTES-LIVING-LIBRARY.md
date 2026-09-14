@@ -98,6 +98,13 @@ committed at `e2801a5`. The original Gemini source proposal remains rejected at
 the real runtime, production migration and release remain unqualified. See
 [the qualification verdict](ASTRA-INTERRUPTED-OWNER-FAKE28-VERDICT-2026-09-14.md).
 
+The subsequent generated Windows interruption observation at source `3fc4cf7`
+failed: outer exit 1, controller exit 0 and unchanged inputs. Its driver omitted
+five required write-refusal checks while files were locked. The existing
+ten-observation assertion remains unchanged. Repair brief `d04652a` adds the
+missing checks and focused coverage; this result supplies no new acceptance.
+See [the failure review](ASTRA-INTERRUPTED-NATIVE01-FAILURE-2026-09-14.md).
+
 Ryan's approved D1 static checkpoint inspection is recorded at `4b38948`. One
 guarded invocation verified the fixed hash, ZIP inventory and version bytes,
 and found little-endian consistency in the two selected buffers. Only 1,002

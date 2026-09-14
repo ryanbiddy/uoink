@@ -232,3 +232,18 @@ proof/windows-reservation02-2026-09-13; read the one-page
 ASTRA-WINDOWS-RESERVATION02-VERDICT-2026-09-13.md. This is the focused generated
 unit, not a replacement complete-tree result. A fresh committed full tree remains
 required after runtime source work; the historical63/2 result is unchanged.
+
+## 2026-09-14 — omitted generated observations; assertions retained
+
+Native interrupted-worker run01 at source3fc4cf7 returned outer1/controller0.
+The driver omitted five locked-write probes and produced only the five
+post-retirement successes. The launcher's ten-row/five-pair checks correctly
+failed. This does not justify changing the assertion or interpreting successful
+opens after retirement as earlier sharing refusals.
+
+Repair briefd04652a requires the existing refusal helper inside the protected
+adapter context before media operations. All old tests, fixtures and assertions
+remain unchanged. The derivative and exact diff will be preserved separately;
+no fixture correction is being requested or inferred from Ryan's earlier
+approvals. Read ASTRA-INTERRUPTED-NATIVE01-FAILURE-2026-09-14.md. The failed
+result remains failed, and the eventual full corrected tree is still required.

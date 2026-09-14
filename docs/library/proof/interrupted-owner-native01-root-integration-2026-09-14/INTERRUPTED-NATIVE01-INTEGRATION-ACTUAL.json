@@ -1,0 +1,7 @@
+{
+  "chunk_id": "ff275a",
+  "wall_time_seconds": 1.2252345,
+  "exit_code": 0,
+  "original_token_count": 83,
+  "output": "{\"patch\":\"E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\_scratch\\\\interrupted-native01-failure.patch\",\"bytes\":3200548,\"sha256\":\"15a04b0a094f2ac2e6b4f91e49ec9ea52b98f44e0e0b9edc43db8b1468b71188\",\"apply_exit\":0,\"stdout\":\"_scratch/interrupted-native01-apply.stdout.log\",\"stderr\":\"_scratch/interrupted-native01-apply.stderr.log\"}\r\n"
+}

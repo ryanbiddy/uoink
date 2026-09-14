@@ -1,0 +1,21 @@
+{
+  "scope": "Frozen native launcher/control source review; no execution",
+  "launcher_sha256": "902699e2d05fedc2b850dc952e3d14fc063ee62b5276e9724cfe876e5ac71ac6",
+  "views": [
+    {"actual": "LAUNCHER-VIEW01-ACTUAL.json", "tool": "8e4564", "path": "_scratch/windows-interrupted-owner-native-proposal01/run_interrupted_owner01.ps1", "first": 1, "last": 175, "additional": "launcher/diff/map hashes"},
+    {"actual": "LAUNCHER-VIEW02-ACTUAL.json", "tool": "c3f9c4", "path": "_scratch/windows-interrupted-owner-native-proposal01/run_interrupted_owner01.ps1", "first": 176, "last": 346},
+    {"actual": "LAUNCHER-VIEW03-ACTUAL.json", "tool": "10491f", "coverage": "complete SOURCE-INPUTS.json, NATIVE-PROTOCOL.md, ROOT-ADMISSION-TEMPLATE.json; diff headers and hunk structure"},
+    {"actual": "LAUNCHER-VIEW04-ACTUAL.json", "tool": "0851d4", "files": [
+      {"name": "win32_private_pipe.py", "first": 146, "last": 169},
+      {"name": "win32_worker_connection.py", "first": 481, "last": 505},
+      {"name": "generated_journal_setup.py", "first": 255, "last": 277},
+      {"name": "snapshot_reservations.py", "coverage": "matching format, encoder, decoder and quarantine symbol lines only"}
+    ]},
+    {"actual": "LAUNCHER-BINDING-CHECK-ACTUAL.json", "tool": "37086b", "coverage": "exact complete replacement-diff reconstruction; all29 fixed source hashes; nine metadata-only support rows; false template; win32_worker_connection.py504–524"}
+  ],
+  "prior_complete_text_coverage": "VIEW06-ACTUAL.json and VIEW07-ACTUAL.json cover all342 baseline launcher lines",
+  "candidate_execution": false,
+  "native_execution": false,
+  "support_dereference": false,
+  "git_mutation": false
+}

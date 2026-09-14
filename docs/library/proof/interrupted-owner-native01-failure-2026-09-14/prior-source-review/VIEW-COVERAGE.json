@@ -1,0 +1,118 @@
+{
+  "scope": "fixed source-preparation review; no new native proposal read before freeze",
+  "views": [
+    {
+      "actual": "VIEW01-ACTUAL.json",
+      "tool": "b0e02c",
+      "files": [
+        {
+          "path": "docs/library/INTERRUPTED-OWNER-NATIVE-SOURCE-BRIEF-2026-09-14.md",
+          "coverage": "complete"
+        },
+        {
+          "path": "_scratch/interrupted-owner-native-plan01",
+          "coverage": "directory inventory only"
+        }
+      ]
+    },
+    {
+      "actual": "VIEW02-ACTUAL.json",
+      "tool": "2f2ccd",
+      "files": [
+        {
+          "path": "_scratch/interrupted-owner-native-plan01/BRIEF.md",
+          "coverage": "complete"
+        },
+        {
+          "path": "_scratch/interrupted-owner-native-plan01/SOURCE-MAP.json",
+          "coverage": "complete; support rows metadata only"
+        }
+      ]
+    },
+    {
+      "actual": "VIEW03-ACTUAL.json",
+      "tool": "20312a",
+      "path": "_scratch/runtime-owner-native-connection-native-proposal01/dummy_bootstrap.py",
+      "first": 1,
+      "last": 240
+    },
+    {
+      "actual": "VIEW04-ACTUAL.json",
+      "tool": "71332f",
+      "path": "_scratch/runtime-owner-native-connection-native-proposal01/dummy_bootstrap.py",
+      "first": 241,
+      "last": 501
+    },
+    {
+      "actual": "VIEW05-ACTUAL.json",
+      "tool": "efa2f6",
+      "path": "_scratch/runtime-owner-native-connection-native-proposal01/dummy_bootstrap.py",
+      "first": 502,
+      "last": 702
+    },
+    {
+      "actual": "VIEW06-ACTUAL.json",
+      "tool": "a674da",
+      "path": "_scratch/runtime-owner-native-connection-native-proposal01/run_native_owner_cancel01.ps1",
+      "first": 1,
+      "last": 170
+    },
+    {
+      "actual": "VIEW07-ACTUAL.json",
+      "tool": "709c59",
+      "path": "_scratch/runtime-owner-native-connection-native-proposal01/run_native_owner_cancel01.ps1",
+      "first": 171,
+      "last": 342
+    },
+    {
+      "actual": "VIEW08-ACTUAL.json",
+      "tool": "6e402d",
+      "files": [
+        {
+          "path": "_scratch/runtime-owner-native-connection-native-proposal01/NATIVE-PROTOCOL.md",
+          "coverage": "complete"
+        },
+        {
+          "path": "_scratch/interrupted-owner-retirement-repair02/generated_adapter_flow.py",
+          "coverage": "matching retirement/receipt symbol lines only"
+        },
+        {
+          "path": "_scratch/interrupted-owner-retirement-repair02/generated_journal_setup.py",
+          "coverage": "matching interrupted observer/receipt symbol lines only"
+        }
+      ]
+    },
+    {
+      "actual": "VIEW09-ACTUAL.json",
+      "tool": "c6f30f",
+      "files": [
+        {
+          "path": "_scratch/interrupted-owner-retirement-repair02/generated_adapter_flow.py",
+          "ranges": [
+            {
+              "first": 660,
+              "last": 737
+            },
+            {
+              "first": 1167,
+              "last": 1281
+            }
+          ]
+        },
+        {
+          "path": "_scratch/interrupted-owner-retirement-repair02/generated_journal_setup.py",
+          "ranges": [
+            {
+              "first": 186,
+              "last": 261
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "candidate_execution": false,
+  "native_execution": false,
+  "support_dereference": false,
+  "git_mutation": false
+}

@@ -1,0 +1,7 @@
+{
+  "chunk_id": "42cc46",
+  "wall_time_seconds": 0.2498245,
+  "exit_code": 0,
+  "original_token_count": 163,
+  "output": "{\r\n  \"source_only\": true,\r\n  \"hunks\": 7,\r\n  \"old_lines\": 702,\r\n  \"new_lines\": 787,\r\n  \"complete_diff_matches\": true,\r\n  \"one_terminal_empty_separator\": true,\r\n  \"bootstrap_sha256\": \"e2e3ce6c18d143490998a3930459da3e356ef68dcdd24238f89dada769adfaaf\",\r\n  \"selected_core_hashes\": {\r\n    \"durable_lifecycle.py\": \"3c8963eaa02bbc1d810ee2632d0363303bfe05ec6ceeef73771ca8005a00ece3\",\r\n    \"generated_adapter_flow.py\": \"6a008136802d614ead53297f030dda3da01767ca8a63d313421f142c4d8a160b\",\r\n    \"generated_journal_setup.py\": \"44bdaeeb7ba95b202d7fa0bfd202c8e95f3c5bbae4173786a71aa58071184c9c\"\r\n  },\r\n  \"candidate_execution\": false,\r\n  \"native_execution\": false\r\n}\r\n"
+}
