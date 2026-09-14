@@ -39,8 +39,10 @@ at `58335df` stays failed. Native journal and recovery qualification remain open
 The later retained-handle transfer at `2f4311f` passes70 cases and35 nested
 subtests in both copies. It preserves all corrected65 cases and adds five
 ownership/failure controls. These use fake services; actual Windows journal
-and crash-recovery behavior still require separate observations. Gemini's
-worker/journal council is running against the frozen brief at `d996dba`.
+normal drain is now observed at `67887c3`: child exit0, empty job, four confirmed
+phases/flushes and exact closed journal bytes. Crash/recovery and real models
+remain unqualified. Gemini's worker/journal report from brief `d996dba` requires
+accuracy corrections before acceptance; it does not change the test outcomes.
 
 The worker runtime owner at `1f200eb` passes the same 11 generated cases in both
 copies. It refuses result publication after VAD retirement, product/module

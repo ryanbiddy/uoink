@@ -112,8 +112,8 @@ establish safe installation isolation, and verify/correct resulting findings.
 | Local wheel graph and notices | Graph at 616f670; cached wheels at 95a7f29; source notices at d887f8a; council at ca61046; installer source fix at 71d3e70 | Notice author and actual checkout each pass20 Python cases and10 inert build-block cases. All128 proof payloads and four product notice files match Git/disk. Metadata graph passes144pins/287edges; conflict remains explicit | Verify fresh inventory and installed notice bytes in the eventual candidate. Native compatibility and release security remain open |
 | Latest component council | Original partial report870fa00 supplemented at2339a09 | Gemini ca1e1356 records views of all39 omitted paths; Astra accepts three component verdicts with corrections and the explicit Inno1–150 boundary. Root verified all69 input bytes in both checkouts and all17 supplement payloads in Git/disk | Continue concrete runtime work. Full-line claims remain worker-reported; no overall release acceptance |
 | Generated reservation recovery | Component and evidence integrated at f9ab6fe | Author70b48e and independentfd86f5 each pass42 cases, with20 passing nested subtests and all10 guards valid. All123 proof payloads match Git/disk | Connect retained Windows gate/journal handles and split create/resume/startup. Native recovery and runtime acceptance remain open |
-| Windows reservation connection | Approved correction at 8fc3219; retained creation transfer at 2f4311f; original failure at 58335df | New union passes70/0/0 plus35 passing subtests in both copies; exact case objects, valid guards and unchanged29 inputs. All161 transfer proof payloads match Git/disk | Execute the exact reviewed generated native normal-drain, then the remaining native recovery observations. No real model/runtime credit |
-| Worker/journal council | Brief frozen at d996dba; Gemini cede76cb running through Control Room | Three source-only groups;70 text inputs/700,114B and three manifests verified against Git/disk. No suites requested or overall release acceptance | Review actual findings and coverage, integrate worker diff with three-way apply, then record root verdict. Execution session84611 remains active |
+| Windows reservation connection | Correction8fc3219; transfer2f4311f; native generated drain67887c3 | Unit70/0/0 plus35 subtests in both copies. Native d3d56f returns outer/controller/child0, valid guards, child0/job0, four confirmed phases/flushes and exact2,118B closed journal. All87 native proof payloads match Git/disk | Qualify remaining native exclusion/interruption/persistence/restart/reconciliation. Actual runtime-owner connection and real models remain open |
+| Worker/journal council | Briefd996dba; Gemini cede76cb completed; root accuracy review is FAILED | All70 paths have completed view metadata; canonical inputs and three manifests match. Two prose-only CRLF differences recorded. Report misquotes the approved patch and source symbols/locks; source test results remain valid | Preserve original report and record a source-specific correction brief before any new council run. Session84611 closed707094/exit0; process completion is not acceptance |
 | Worker runtime owner and bootstrap | Owner at 1f200eb; actual bootstrap connection at bbe10d6 | Both copies pass17/0/0: eleven retained owner cases plus six bootstrap cases. Exact case objects, valid guards, unchanged19 inputs plus admission. All144 newest proof payloads match Git/disk | Connect exact ownership through native services. Real inference, PCM/filter, VAD-to-model binding and protected constructor routes remain open |
 | Integration | Reliability repair at e8d058f and notice packaging at 71d3e70 after tree09 | Reliability:53 focused cases plus13 subtests per root. Notices:20 Python/10 block cases per root. Tree09 at 56d9d4c remains2,796 passed/1 failed/3 skipped across2,800 cases plus13 subtests; it predates both repairs | Finish runtime work, then run a new committed complete tree and rebuild/reseal. Package08 and website/marketing remain held. No current-source package or installation credit |
 | Desktop incident | Isolation failed in package-07 attempt; corrected at `e10ba3a` | Ordinary Uoink and filesystem connectors launched; earlier live-index/5179 effects unknown. Owned job cleaned | No further override launch; only guarded Uoink dashboard observed for package 08 |
@@ -343,7 +343,10 @@ failure remains failed. Next qualify the shared create-to-acquire handle
 transfer in the unchanged corrected65 plus five new controls: now accepted at
 2f4311f, both70/0/0 plus35 passing subtests and all161 proof payloads matching
 Git/disk. Read ASTRA-CREATION-TRANSFER-VERDICT-2026-09-13.md. Review and execute
-the exact generated native normal-drain proposal. Other native recovery
+the exact generated native normal-drain proposal: now accepted at67887c3,
+actuald3d56f outer/controller/child0 and exact closed journal/retirement checks.
+Read ASTRA-NATIVE-JOURNAL-DRAIN-VERDICT-2026-09-13.md; all87 payloads match
+Git/disk. Other native recovery
 observations and the actual runtime-owner native connection remain open.
 The worker runtime owner is qualified at1f200eb; read
 ASTRA-WORKER-RUNTIME-OWNER-VERDICT-2026-09-13.md. Both root-executed copies pass
@@ -354,12 +357,16 @@ independent6dad03 each pass17/0/0, with the same case objects and valid guards.
 All144 new proof payloads match Git/disk. Read ASTRA-WORKER-BOOTSTRAP-VERDICT-
 2026-09-13.md. Continue the actual native connection; real loader, inference,
 PCM, filter and VAD-to-model binding remain closed or unqualified.
-Current Gemini review cede76cb is running against frozen brief commitd996dba,
+Current Gemini review cede76cb completed against frozen brief commitd996dba,
 proof/worker-journal-adapter-council-brief-2026-09-13/BRIEF.md. Its three groups
 are runtime owner/bootstrap, Windows journal/recovery, and durable startup/adapter.
 Seventy selected text inputs plus three manifests are bound; no suites are named.
-It excludes creation-transfer70, D1 and the unfinished native observation. Review
-the completed actual diff and coverage before integrating; session84611 is active.
+It excludes creation-transfer70, D1 and the newer native observation. Root rejects
+the original report's accuracy: it misquotes the exact approved patch and invents
+several method/exception/lock descriptions. Preserve it unchanged with that
+verdict, then use a concrete source-correction brief. All70 selected paths have
+completed view metadata; full rendered-line coverage is still worker-reported.
+Session84611 closed707094 with exit0, which does not make the report accepted.
 The next Gemini source review is frozen in
 proof/notices-operations-adapter-council-brief-2026-09-13/BRIEF.md,
 SHA1a5b1be80e7f4443cd7096026b75ad32ea992e702cb5af8763773be01776d149.
@@ -5574,3 +5581,34 @@ Root has read complete native normal-drain bootstrap/setup/launcher/map and
 finite API/bounds protocol. Independent source review continues before exact
 admission. Support binaries and generated files have not been reopened for this
 new observation yet. Production remains71d3e70; no rebuild or website work.
+
+### 2026-09-13 - Native journal drain accepted; council accuracy held
+
+Commit67887c3 retains actuald3d56f: one generated native normal-drain, outer,
+controller and child exits0, child process wait observed and job active0 before
+release. Four journal phases and four successful flushes occur in required order;
+exact milestones are4360/6202/8175. The same created handle transfers without
+reopen, closes after retired lifetime, and ancestor guards retire last. The
+exclusive post-exit read equals the2,118 confirmed journal bytes, SHA
+b6b59a4bf7845eb45bc0039874388b175b98d2d3fe2c39daa009cb8d9f170cc9.
+
+Controller8203 calls/8238 matching dispatch-audit events; child252/286. Both guards
+valid, no denials/pendingI/O/exhausted budget, all20source-control and14support-
+fixture comparisons unchanged. All87 proof payloads/1,318,960 bytes match Git/disk
+in52b443; seal382863877e772996f38b9a4a58f9cbbadd2b73bce2e505693b3d6287f0eb1d44.
+No actual model or new production source ran. Writer exclusion and the remaining
+interruption/persistence/recovery observations still need qualification.
+
+Gemini cede76cb completed at02:00:20.843Z; session84611 closed707094/exit0. Root
+read the full36,931B report (SHA50a65888706d2a329318c73702b6f468c713d07f7e2bd4c48e423228f6fdda58)
+and rejects its accuracy pending correction. It reproduces an invented variant
+of the approved patch, uses nonexistent stream/method/exception names and
+misidentifies a replay validator as the transition lock. No new product defect
+is established by those statements. Keep the original report and test results.
+
+Root952a91 verified70canonical inputs/three manifests and completed view metadata
+for all70paths. Two top-level prose verdicts differ only by checkoutCRLF; the
+first raw comparison559926 failed there before output/patch and its comparator
+repair is documented. All proof sources/tests/receipts require exact raw bytes.
+Metadata does not independently prove displayed line coverage. A bounded council
+correction brief is being prepared; no duplicate or blind rerun is authorized.
