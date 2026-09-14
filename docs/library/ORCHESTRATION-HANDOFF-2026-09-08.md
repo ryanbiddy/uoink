@@ -116,6 +116,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | Windows reservation connection | Correction8fc3219; transfer2f4311f; native generated drain67887c3 | Unit70/0/0 plus35 subtests in both copies. Native d3d56f returns outer/controller/child0, valid guards, child0/job0, four confirmed phases/flushes and exact2,118B closed journal. All87 native proof payloads match Git/disk | Qualify remaining native exclusion/interruption/persistence/restart/reconciliation. Actual runtime-owner connection and real models remain open |
 | Worker/journal council | Scoped source review completed at1c6ac4c with mandatory Astra addendum; original244cca5 remains accuracy FAILED | All24 correction proof payloads match Git/disk. Gemini correction alone remains partial; Astra corrects remaining handshake/locking/private-caller claims. Existing17/65 outcomes unchanged | Continue native/runtime engineering. Session42118 closed482e42/exit0; no new council loop or broader acceptance |
 | Native writer exclusion | Stable-directory repair atd317a88; generated native04 pass atf630264; failed02/03 preserved | Both copies pass81 cases+72 subtests. All200 unit and93 native proof payloads match Git/disk. Native0eeb20 returns0, both exact childrenexit0/job0, four phases/flushes and matching closed journal | Scoped Gemini source review, then cancellation through the actual adapter and journal. Interruption/restart/reconciliation and real runtime remain open |
+| Actual adapter cancellation | Generated qualification integrated at60b3bb5 | Author and independent copies each89 passed/0 failed/0 skipped,86 passing subtests; all216 proof payloads match Git/disk | Admit the separate generated native cancellation observation. Crash/restart, real models and release remain unqualified |
 | Worker runtime owner and bootstrap | Owner at 1f200eb; actual bootstrap connection at bbe10d6 | Both copies pass17/0/0: eleven retained owner cases plus six bootstrap cases. Exact case objects, valid guards, unchanged19 inputs plus admission. All144 newest proof payloads match Git/disk | Connect exact ownership through native services. Real inference, PCM/filter, VAD-to-model binding and protected constructor routes remain open |
 | Integration | Reliability repair at e8d058f and notice packaging at 71d3e70 after tree09 | Reliability:53 focused cases plus13 subtests per root. Notices:20 Python/10 block cases per root. Tree09 at 56d9d4c remains2,796 passed/1 failed/3 skipped across2,800 cases plus13 subtests; it predates both repairs | Finish runtime work, then run a new committed complete tree and rebuild/reseal. Package08 and website/marketing remain held. No current-source package or installation credit |
 | Desktop incident | Isolation failed in package-07 attempt; corrected at `e10ba3a` | Ordinary Uoink and filesystem connectors launched; earlier live-index/5179 effects unknown. Owned job cleaned | No further override launch; only guarded Uoink dashboard observed for package 08 |
@@ -168,10 +169,11 @@ Ryan's renewed goal is to continue fixing the product until it is ready for
 release, website/GitHub updates and marketing. The earlier review-kit delivery
 is complete but is not this goal's completion. Current queue:
 
-Latest execution order: archive the completed cancellation89 qualification,
-then review/admit its distinct native observation through the actual adapter and
+Latest execution order: cancellation89 qualification is archived at60b3bb5;
+review/admit its distinct native observation through the actual adapter and
 retained journal. Author05ca07 and independentfbff79 both pass89 cases/86 subtests;
-root2d4ad6 confirms exact cases, valid guards and unchanged inputs. The original81
+root2d4ad6 confirms exact cases, valid guards and unchanged inputs. Rootfe42d4
+verifies all216 sealed payloads against Git/disk. The original81
 cases remain unchanged. D2 is complete and archived atd13534f; no repeat access.
 Gemini2b39a17c completed from brief74d209c, but its review accuracy is FAILED:
 root99288b finds45 wrong hash/size pairs,29 wrong paths and eight nonexistent
@@ -5890,3 +5892,13 @@ Root99288b verifies all48 actual selected inputs still match in both roots;
 are absent from source. No product measurement changes. Preserve the raw report
 and precise rejection before a smaller correction brief; no council acceptance
 or repeated measurement is justified by that completed engine status.
+
+### 2026-09-13 — Cancellation qualification committed
+
+Commit60b3bb5 preserves both 89-case observations and the unchanged original81
+cases. Documentary copier48bc7a returned0; rootfe42d4 verifies216 payloads,
+2,518,617 bytes, against Git/disk. Seal635ae8077f66006140df1bcee544bbd2ca086cfc121a909d53f4d18206a8dc5f.
+The copy inventory's initial boolean-argument failure and corrected preparation
+remain in the evidence. No product measurement was repeated. The next distinct
+observation is native cancellation through the actual adapter and retained
+journal. It requires its own source-bound admission and fresh output directory.
