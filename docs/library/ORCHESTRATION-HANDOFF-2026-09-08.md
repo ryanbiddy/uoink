@@ -115,7 +115,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | Generated reservation recovery | Component and evidence integrated at f9ab6fe | Author70b48e and independentfd86f5 each pass42 cases, with20 passing nested subtests and all10 guards valid. All123 proof payloads match Git/disk | Connect retained Windows gate/journal handles and split create/resume/startup. Native recovery and runtime acceptance remain open |
 | Windows reservation connection | Correction8fc3219; transfer2f4311f; native generated drain67887c3 | Unit70/0/0 plus35 subtests in both copies. Native d3d56f returns outer/controller/child0, valid guards, child0/job0, four confirmed phases/flushes and exact2,118B closed journal. All87 native proof payloads match Git/disk | Qualify remaining native exclusion/interruption/persistence/restart/reconciliation. Actual runtime-owner connection and real models remain open |
 | Worker/journal council | Scoped source review completed at1c6ac4c with mandatory Astra addendum; original244cca5 remains accuracy FAILED | All24 correction proof payloads match Git/disk. Gemini correction alone remains partial; Astra corrects remaining handshake/locking/private-caller claims. Existing17/65 outcomes unchanged | Continue native/runtime engineering. Session42118 closed482e42/exit0; no new council loop or broader acceptance |
-| Native writer exclusion | Stable-directory repair atd317a88; native04 atf630264; Group A council correction ata74e178 | Both copies81 cases/72 subtests; native0eeb20 passed. Group A source accepted only with mandatory Astra corrections; all24 new proof payloads match Git/disk. Original failed reviews preserved | Group B dispatched from223a31d in session90502. Interruption/restart/reconciliation and real runtime remain open |
+| Native writer exclusion | Stable-directory repair atd317a88; native04 atf630264; council corrections ata74e178 and f32f0ca | Both copies81 cases/72 subtests; native0eeb20 passed. Group A and B source conclusions require their mandatory Astra corrections. Group B has23 proof payloads matching Git/disk. Original failed review preserved | Retired-owner recovery preparation is frozen with a loader setup repair; qualify its22 cases before separate native admission. Restart and real runtime remain open |
 | Actual adapter cancellation | Generated qualification integrated at60b3bb5 | Author and independent copies each89 passed/0 failed/0 skipped,86 passing subtests; all216 proof payloads match Git/disk | Native cancellation integrated ata25b34b: all100 proof payloads match Git/disk. Connect interrupted final-clear recovery; crash/restart, real models and release remain unqualified |
 | Worker runtime owner and bootstrap | Owner at 1f200eb; actual bootstrap connection at bbe10d6 | Both copies pass17/0/0: eleven retained owner cases plus six bootstrap cases. Exact case objects, valid guards, unchanged19 inputs plus admission. All144 newest proof payloads match Git/disk | Connect exact ownership through native services. Real inference, PCM/filter, VAD-to-model binding and protected constructor routes remain open |
 | Integration | Reliability repair at e8d058f and notice packaging at 71d3e70 after tree09 | Reliability:53 focused cases plus13 subtests per root. Notices:20 Python/10 block cases per root. Tree09 at 56d9d4c remains2,796 passed/1 failed/3 skipped across2,800 cases plus13 subtests; it predates both repairs | Finish runtime work, then run a new committed complete tree and rebuild/reseal. Package08 and website/marketing remain held. No current-source package or installation credit |
@@ -175,12 +175,17 @@ verified payloads and mandatory Astra corrections for journal size and selected
 ctypes declarations. Its viewing trace remains unverified; the prior failed
 48-input review stays failed at89c1579. No product measurement was repeated.
 
-Group B brief223a31d is running in Control Room session90502, dispatched by
-622495 with Gemini/Antigravity. Review its completed five-input source critique
-and integrate only with a precise root verdict. The retired-owner interrupted-final-clear proposal
-is being implemented under _scratch/windows-retired-owner-recovery-proposal01;
-review its exact changes and frozen focused controls before qualification.
-Neither tests nor native execution for that derivative are admitted yet.
+Group B completed as bf2f65/exit0 and is integrated at f32f0ca with23 verified
+payloads. Its source conclusion requires the mandatory root/peer corrections:
+record versus journal phase, observation provenance, conditional failure flags,
+budget references and generated fixture setup. No execution credit follows.
+The retired-owner interrupted-final-clear proposal is frozen under
+_scratch/windows-retired-owner-recovery-proposal01. Source review found and
+repaired a speculative-import path in the selected-case loader before execution.
+Read PREQUALIFICATION-LOADER-REPAIR02.md; preserve the earlier frozen inputs.
+New qualifier8a5e3b23 and26-input mapf7c3b964 need final peer checks, then22
+focused cases and independent confirmation before separate native admission.
+No tests or native execution for that derivative have run yet.
 D2 remains complete atd13534f; no repeat checkpoint/output access for documentation.
 No model, complete-tree, package, installed-client, website or marketing clearance.
 
@@ -5966,3 +5971,20 @@ Antigravity subscription, frozen base223a31d. The critique is limited to600 word
 and source requirements; no execution receipts or external lifecycle/Win32
 implementations are selected. Preserve those limits when integrating its output.
 The retired-owner proposal continues independently without test/native admission.
+
+### 2026-09-13 — Group B correction integrated; recovery loader repaired before execution
+
+Commit f32f0ca preserves the unchanged Gemini report with mandatory Astra and
+peer corrections. Copier2cf23a returned0; root74923d verifies23 payloads and
+85,315 bytes against Git/disk, seal04d3f923532daf400ada2bbecbb6fdf9b7c6f23bd108a41ce72f7497d0c72344.
+Completion output bf2f65 was truncated as returned and remains so. The raw apply
+object was not saved; the observed4c0acd application and exact-byte restoration
+51d750 are distinguished. No missing tool object or viewing trace is invented.
+
+The recovery peer found unittest's speculative full-name import path could hit
+the qualifier's closed guards before any case ran. The unexecuted repair passes
+each unchanged class.method suffix with its already loaded module. All22 IDs,
+assertions and guards remain unchanged. Preserve both frozen versions and the
+dated repair. Source review also repaired a stale-confirmation check before
+clear I/O; both changes preceded measurement. Native recovery, model, full-tree,
+package, installed-client and market acceptance remain open.
