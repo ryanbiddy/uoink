@@ -153,6 +153,13 @@ admission and binding with inert services. The real worker startup path remains
 closed. These results add no native/model, installation or release credit.
 See [the startup authority verdict](ASTRA-STARTUP81-RESULT-VERDICT-2026-09-14.md).
 
+Controller worker-stage checks at source checkpoint `851bcdd` pass 95 cases
+in each guarded copy, with zero failures or skips and 95 passing subtests.
+The original 81 cases remain unchanged; 14 new cases cover worker identity,
+startup state, revocation and cleanup through the local factory. Real native
+startup and the final publication selection check remain open. See
+[the stage result verdict](ASTRA-CONTROLLER95-RESULT-VERDICT-2026-09-14.md).
+
 The source-only Gemini delivery `05a3bf93`, under brief `8611e31`, is complete
 but failed source review. The immutable delivery contains 26 files and 553,800
 bytes, frozen in observation `47c823`; its 17 proposed tests remain unexecuted.
@@ -198,7 +205,7 @@ The combined tokenizer and Hub-argument derivative now builds identically under
 Python 3.13 and 3.14; it remains uninstalled. The fixed VAD factory and schema
 are reviewed proposals. D2 local conversion is complete as recorded above;
 reader/model integration and runtime qualification remain open.
-The latest completed authorized branch-only backup is verified at `ea1b9ba`.
+The latest completed authorized branch-only backup is verified at `a152cbf`.
 Later commits require a separate verified backup; no candidate-branch push,
 main merge or publication follows.
 

@@ -1,0 +1,26 @@
+{
+  "scope": "Complete observed fake95 result pair; no native/model/runtime acceptance",
+  "source_commit": "851bcdd2688fa7728aa801ca042e4cb20b270cac",
+  "author_actual": "02dc46/0",
+  "confirmation_actual": "8a6166/0",
+  "each": {
+    "passed": 95,
+    "failed": 0,
+    "skipped": 0,
+    "passing_subtests": 95,
+    "child_hashes": 25,
+    "guards": 10,
+    "unchanged_inputs": 29,
+    "unchanged_controls": 3,
+    "output_files": 37
+  },
+  "partition": {
+    "original_cases": 81,
+    "original_subtests": 48,
+    "stage_cases": 14,
+    "stage_subtests": 47
+  },
+  "identical_complete_cases": true,
+  "identical_child_hashes": true,
+  "identical_guards": true
+}

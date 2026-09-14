@@ -1,0 +1,8 @@
+{
+  "approved": false,
+  "label": "startup-authority-fake01",
+  "pins_sha256": "47af697a62dcead062f8c2771aad550ebd194392665f85a9a9f3face60551fb8",
+  "scope": "generated_bytes_and_fake_ports_only",
+  "case_count": 81,
+  "source_review_only": true
+}

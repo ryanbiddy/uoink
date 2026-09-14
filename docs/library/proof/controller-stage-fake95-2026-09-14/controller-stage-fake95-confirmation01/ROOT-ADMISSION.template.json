@@ -1,0 +1,7 @@
+{
+  "approved": false,
+  "label": "controller-stage-confirmation01",
+  "pins_sha256": "6fdc1188f323541aaff93a3fb5205f54e395b13d5b20ebf8a95bd69420e864cb",
+  "scope": "generated_bytes_and_fake_ports_only",
+  "case_count": 95
+}

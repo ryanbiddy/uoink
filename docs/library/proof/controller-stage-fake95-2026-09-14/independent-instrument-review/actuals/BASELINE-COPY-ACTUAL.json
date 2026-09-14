@@ -1,0 +1,7 @@
+{
+  "chunk_id": "99329a",
+  "wall_time_seconds": 0.2365877,
+  "exit_code": 0,
+  "original_token_count": 154,
+  "output": "[{\"name\":\"qualify_windows_reservations.py\",\"bytes\":13317,\"sha256\":\"4c057e438073ae5dd063b396e7aeb1a69e963f20250f366233bb9e9ffc5e6e1b\"},{\"name\":\"run_preflight01.ps1\",\"bytes\":8879,\"sha256\":\"00b0dab512def37602f8d9e3791d2fd7612684ce03d678f486e92d3ae2fd9ae9\"},{\"name\":\"PINS.json\",\"bytes\":4401,\"sha256\":\"47af697a62dcead062f8c2771aad550ebd194392665f85a9a9f3face60551fb8\"},{\"name\":\"EXPECTED-CASES.json\",\"bytes\":8581,\"sha256\":\"2dc0ec32738188ece925603d823ae04767f8255ae67b68038014cb65b244c0f2\"},{\"name\":\"ROOT-ADMISSION.template.json\",\"bytes\":248,\"sha256\":\"0da30aefe86a4a71bbcfd4fbe2b89f81ac220d8f80c4621a823d09cce2c98744\"}]\r\n"
+}

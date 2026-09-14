@@ -1,0 +1,7 @@
+{
+  "approved": false,
+  "label": "controller-stage-fake01",
+  "pins_sha256": "b831bf6c864d8a7bef24355e5868dfa7480e6bba6ff1381cbc3ac9db07388606",
+  "scope": "generated_bytes_and_fake_ports_only",
+  "case_count": 95
+}

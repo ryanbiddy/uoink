@@ -1,0 +1,7 @@
+{
+  "chunk_id": "bc63ee",
+  "wall_time_seconds": 0.3936566,
+  "exit_code": 0,
+  "original_token_count": 74,
+  "output": "{\"admitted\":true,\"label\":\"controller-stage-fake01\",\"pins_sha256\":\"b831bf6c864d8a7bef24355e5868dfa7480e6bba6ff1381cbc3ac9db07388606\",\"root_verdict_sha256\":\"6f4f6794af4085d6bdf20b6760c5f33a58bc2e41d4242d57e4b35ffc7e283045\",\"source_commit\":\"851bcdd2688fa7728aa801ca042e4cb20b270cac\",\"attempts\":1}\r\n"
+}

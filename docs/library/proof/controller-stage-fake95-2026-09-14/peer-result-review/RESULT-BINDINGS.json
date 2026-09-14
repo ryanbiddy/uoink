@@ -1,0 +1,138 @@
+{
+  "scope": "Existing result/admission JSON and logs only",
+  "source_checkpoint_reported_by_root": "851bcdd",
+  "files": [
+    {
+      "role": "author",
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\CONTROLLER95-AUTHOR-RUN-ACTUAL.json",
+      "bytes": 207,
+      "sha256": "76c74d062636d78f6bbfe97a12b02f14ecdf9e7b5002c47a5b0acd94b387d953"
+    },
+    {
+      "role": "author",
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\controller-stage-fake95-author01\\PINS.json",
+      "bytes": 4727,
+      "sha256": "b831bf6c864d8a7bef24355e5868dfa7480e6bba6ff1381cbc3ac9db07388606"
+    },
+    {
+      "role": "author",
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\controller-stage-fake95-author01\\ROOT-ADMISSION.json",
+      "bytes": 652,
+      "sha256": "c8d9227b22d08348cd8f43f434185f85c18a5e22b8e3019e0e22172c1d543f24"
+    },
+    {
+      "role": "author",
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\controller-stage-fake95-author01\\controller-stage-fake01\\PINS.json",
+      "bytes": 4727,
+      "sha256": "b831bf6c864d8a7bef24355e5868dfa7480e6bba6ff1381cbc3ac9db07388606"
+    },
+    {
+      "role": "author",
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\controller-stage-fake95-author01\\controller-stage-fake01\\ROOT-ADMISSION.json",
+      "bytes": 652,
+      "sha256": "c8d9227b22d08348cd8f43f434185f85c18a5e22b8e3019e0e22172c1d543f24"
+    },
+    {
+      "role": "author",
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\controller-stage-fake95-author01\\controller-stage-fake01\\plan.json",
+      "bytes": 5907,
+      "sha256": "a25b4d3b7d44db9d1d8dbeaf560a340398f52836d063110fce978c05bd709aee"
+    },
+    {
+      "role": "author",
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\controller-stage-fake95-author01\\controller-stage-fake01\\stdout.json",
+      "bytes": 55441,
+      "sha256": "5f05220b422446e6a7b78f224c4fc0abef856eba3236802087c107fdc5e548c3"
+    },
+    {
+      "role": "author",
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\controller-stage-fake95-author01\\controller-stage-fake01\\stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "role": "author",
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\controller-stage-fake95-author01\\controller-stage-fake01\\native-exit.json",
+      "bytes": 114,
+      "sha256": "4b5638c7e819d6e330f0d9c9db2299dd9d006109ed1c9ae7739f345d0305ce39"
+    },
+    {
+      "role": "author",
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\controller-stage-fake95-author01\\controller-stage-fake01\\input-check.json",
+      "bytes": 11634,
+      "sha256": "e0d1dfd95145f53768dce2593972d1f80a1928fe1a66e364fe7ea423b1c6fa73"
+    },
+    {
+      "role": "author",
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\controller-stage-fake95-author01\\controller-stage-fake01\\exit.json",
+      "bytes": 341,
+      "sha256": "dc88fe4acced1068558c7a1957d5531c18128c0c945aef0088abc1b0d7363d48"
+    },
+    {
+      "role": "confirmation",
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\CONTROLLER95-CONFIRMATION-RUN-ACTUAL.json",
+      "bytes": 215,
+      "sha256": "024d9c4aff008b9841289eb3df1ab3973def25d54ad4c8d9698e715999e5e732"
+    },
+    {
+      "role": "confirmation",
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\controller-stage-fake95-confirmation01\\PINS.json",
+      "bytes": 4727,
+      "sha256": "6fdc1188f323541aaff93a3fb5205f54e395b13d5b20ebf8a95bd69420e864cb"
+    },
+    {
+      "role": "confirmation",
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\controller-stage-fake95-confirmation01\\ROOT-ADMISSION.json",
+      "bytes": 730,
+      "sha256": "065200ab30088f3d9b5628beeabd85177becadc119159c390b0b3d9187ddf673"
+    },
+    {
+      "role": "confirmation",
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\controller-stage-fake95-confirmation01\\controller-stage-confirmation01\\PINS.json",
+      "bytes": 4727,
+      "sha256": "6fdc1188f323541aaff93a3fb5205f54e395b13d5b20ebf8a95bd69420e864cb"
+    },
+    {
+      "role": "confirmation",
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\controller-stage-fake95-confirmation01\\controller-stage-confirmation01\\ROOT-ADMISSION.json",
+      "bytes": 730,
+      "sha256": "065200ab30088f3d9b5628beeabd85177becadc119159c390b0b3d9187ddf673"
+    },
+    {
+      "role": "confirmation",
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\controller-stage-fake95-confirmation01\\controller-stage-confirmation01\\plan.json",
+      "bytes": 5929,
+      "sha256": "9dad3a14a7b489b5b3310f240465971099b553686c35b124885e97574a0f8cc0"
+    },
+    {
+      "role": "confirmation",
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\controller-stage-fake95-confirmation01\\controller-stage-confirmation01\\stdout.json",
+      "bytes": 55441,
+      "sha256": "047883d1e5c0311e6a880050b0681022fe8123b80d5dd271f9a343790f35fe62"
+    },
+    {
+      "role": "confirmation",
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\controller-stage-fake95-confirmation01\\controller-stage-confirmation01\\stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "role": "confirmation",
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\controller-stage-fake95-confirmation01\\controller-stage-confirmation01\\native-exit.json",
+      "bytes": 114,
+      "sha256": "5c01985791ede81f5e2d1850af216c7406250f1abc277199c52fbe1ecc5fb3ab"
+    },
+    {
+      "role": "confirmation",
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\controller-stage-fake95-confirmation01\\controller-stage-confirmation01\\input-check.json",
+      "bytes": 11634,
+      "sha256": "1df8501581afbaf3183a88c9153d8cf6d7e0236a4a34de3804dc98589f96359d"
+    },
+    {
+      "role": "confirmation",
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\controller-stage-fake95-confirmation01\\controller-stage-confirmation01\\exit.json",
+      "bytes": 341,
+      "sha256": "34ed9c98857486ee2c0c3b8aa27e71a25c985bef84bbebf5f2f973a2826cbb98"
+    }
+  ]
+}

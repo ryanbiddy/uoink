@@ -1,0 +1,7 @@
+{
+  "chunk_id": "8e5115",
+  "wall_time_seconds": 0.5733733,
+  "exit_code": 1,
+  "original_token_count": 81,
+  "output": "Exception: E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\controller-stage-instrument-peer01\\check_instrument.ps1:7\r\nLine |\r\n   7 |  … unction Assert-Task([bool]$ok,[string]$why){if(-not $ok){throw $why}}\r\n     |                                                             ~~~~~~~~~~\r\n     | 38 captured functions\r\n"
+}

@@ -126,7 +126,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | Completion language metadata | Both scoped fake59 copies pass59/0/0 plus29 subtests; original46 preserved | Author577e68 and confirmation8fd760 return0. Root993295 and peera39b40 verify identical full cases/five hashes, ten guards, unchanged nine inputs/three controls and17 outputs each | Connect authenticated backend completion and controller registry, then migrate WhisperX caller. Engine fake39 is qualified below; real/runtime/production gates remain closed |
 | Control Room command audit | Adapter fix committed atc3607c3 on feat/desktop-control-room | Same16 focused replay cases pass in isolated and checkout copies; TypeScript check passes. All24 proof payloads match Git/disk | A new process loads the preview warning. Existing server not restarted or observed with it; no real-provider or complete-command attestation |
 | Controller startup authority | Source6482b782/map23591b4c passes both guarded81 copies; original65 preserved | Author28a03e and confirmation9a8704 return0, each81/0/0 plus48 passing subtests. Root151c60 and peere49d09 verify complete cases,23 hashes,ten guards,27 inputs/three controls and35 outputs each. All256 payloads match Git/disk | Continue authenticated child namespace/fixed constructor connection. The real-worker seam remains closed; no native/model or release clearance |
-| Controller worker stages | Source2f12cbf5/map0fd7fe35 ready for guarded qualification;14 proposed controls unexecuted | Root972e31 and peerde9767 verify16 original/copy pairs,11 derivatives, unchanged28922-byte prefix and all14 ordered IDs. Peer5411dcf6 finds no blocking source issue | Follow CONTROLLER-STAGE-QUALIFICATION-BRIEF-2026-09-14.md; review the complete95-case instrument and both exact copies before separate admission. Local lifecycle relation only; native connection still open |
+| Controller worker stages | Source2f12cbf5 qualified at checkpoint851bcdd: each guarded copy95 passed/0 failed/0 skipped plus95 passing subtests | Author02dc46 and confirmation8a6166 exit0; rootdc197f and peerfdc459 verify complete identical case/subtest objects,25 child hashes,29 inputs+3 controls,10 guards and37 output files. Original81 cases and fixtures unchanged | Read ASTRA-CONTROLLER95-RESULT-VERDICT-2026-09-14.md. Continue fixed pre-resume/final-publication checks and then native controller/child connection. Local lifecycle relation only; no real model or release clearance |
 | Authenticated child namespace | Gemini05a3bf93 source review FAILED; all17 proposed tests unexecuted | Outer7481e5/0 completed with truncated output. Freeze47c823 retains26 files/553800B and1042 original events; root14eaa9 verifies all pins and input pairs. Controller and child contract/ownership findings require repair | Smaller stage source is reviewed above. Preserve failed delivery; native transport/adoption/namespace repairs remain. No source, runtime or release acceptance from this delivery |
 | Release notes | Startup81 progress, child-source failure and remaining gates updated for this integration | Root68f856 verifies three declared edits plus final status amendment, seven input bindings and all57 unchanged table lines. Frozen original drafts/amendments preserve status changes | Continue runtime qualification. Production remains71d3e70; no package, installation, public draft or website changed |
 | Integration | Reliability repair at e8d058f and notice packaging at 71d3e70 after tree09 | Reliability:53 focused cases plus13 subtests per root. Notices:20 Python/10 block cases per root. Tree09 at 56d9d4c remains2,796 passed/1 failed/3 skipped across2,800 cases plus13 subtests; it predates both repairs | Finish runtime work, then run a new committed complete tree and rebuild/reseal. Package08 and website/marketing remain held. No current-source package or installation credit |
@@ -329,8 +329,16 @@ Stage source2f12cbf5/map0fd7fe35 now has root and independent5411dcf6 source
 acceptance for guarded qualification preparation. Read
 ASTRA-CONTROLLER-WORKER-STAGE-SOURCE-VERDICT-2026-09-14.md and
 CONTROLLER-STAGE-QUALIFICATION-BRIEF-2026-09-14.md. The fresh95-case instrument
-preserves original81 and adds14 frozen IDs. No execution admission or result
-exists yet; inspect the final instrument and exact two copies first.
+preserves original81 and adds14 frozen IDs. Instrument review66b1654c and the
+root verdict accept the exact author/confirmation copies. Separate admitted
+runs02dc46/0 and8a6166/0 each pass95/0/0 plus95 subtests. Rootdc197f/0 and
+peerfdc459/0 verify identical full cases/subtests,25 child hashes,29 inputs,
+three controls,ten guards and37 output files. Read the controller95 result
+verdict. Do not repeat these observations for documentation. Next narrow the
+fixed pre-resume and actual final-publication selection checks using the
+reviewed contract plan20574f45/mapb31f4633; preserve generated routing and
+all accepted tests. Native bootstrap/transport and child adoption remain later
+units. Keep real startup and model entry refusals closed.
 The original failed namespace delivery is retained; its frozen plan and
 mandatory member-scope correction are archived under
 proof/real-child-namespace-plan-2026-09-14. All52 documentary payloads match
@@ -7064,3 +7072,38 @@ them. The archive also retains the prior failed-source integration and a152cbf
 backup receipts. The separate95-case instrument is being reviewed; no native,
 model, complete-tree, package or installation observation was repeated.
 Index0cf2b8/0 verifies all87 payloads against both Git and disk.
+
+### 2026-09-14 — Controller stage95 qualifies; native connection remains open
+
+At source checkpoint851bcdd, author02dc46/0 and confirmation8a6166/0 each
+pass95 cases with zero failures/skips and95 passing subtests. Original81
+cases/48 subtests and their fixtures remain unchanged; the new14 stage cases
+add47 subtests. Rootca213f/b86bd8 and pairdc197f verify all full ordered objects,
+25 child hashes,29 inputs,three controls,ten guards and37 output files per run.
+Peerfdc459/0 agrees. Instrument peer66b1654c is independent of its author;
+result peer0aacd549 authored the instrument and discloses that role. Root
+independently reviewed both. No qualification was repeated for documentation.
+
+Archive864ce7 contains317 payloads/3,624,570 bytes, seal
+fffc3164d749b7f5386f75413b5cbacb5944e66ab79660c9870315ce94960c3f.
+Raw worktree diff/apply4b64a6 succeeds with3,912,102 bytes, SHA
+a4f5eec047fa563969fbb12181e4aec8aedf6eaaf3c36437e8e58d752249e0bb.
+All296 transport differences were proven UTF-8 newline-only before11b32c
+restored them. Saved proof includes both actual runs/admissions, complete
+instrument/before files, source and copy checks, peer preparation corrections,
+root read diagnostics and the preceding source-integration receipts.
+Index5957b7/0 verifies all317 payloads against both Git and disk.
+
+The next-controller contract plan20574f45/mapb31f4633 is preserved with this
+proof; rootde7867 verifies its13 source texts/398,522 bytes. The durable delegate
+receives raw permit.identity while adapter stage APIs receive the full permit.
+Actual resume happens before finish_start; the current final factory publication
+checks phase/revocation but lacks the selection check. A finish_start check alone
+does not close that later window. The next brief narrows fixed pre-resume and
+final-publication checks, preserving generated routing and original fixtures.
+Do not substitute fake authority, a generic callback or a generated launcher
+for the missing real bootstrap and authenticated child connection.
+
+Production remains71d3e70. No D1/D2 artifact access, native/model invocation,
+complete-tree rerun, candidate rebuild, install, website or marketing run follows
+from this result. D2 conversion stays completed atd13534f; release remains held.

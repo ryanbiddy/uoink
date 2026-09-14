@@ -1,0 +1,29 @@
+{
+  "scope": "root passive instrument review; no Python startup or subject execution",
+  "pins_sha256": "b831bf6c864d8a7bef24355e5868dfa7480e6bba6ff1381cbc3ac9db07388606",
+  "parent_inputs": 29,
+  "bytes": 481412,
+  "child_inputs": 25,
+  "modules": 23,
+  "before_copies": 8,
+  "original_cases": 81,
+  "new_cases": 14,
+  "ordered_cases": 95,
+  "accepted_tests_unchanged": true,
+  "adapter_prefix_bytes": 28922,
+  "deltas": [
+    {
+      "file": "qualify_windows_reservations.py",
+      "edits": 8,
+      "forward": true,
+      "reverse": true
+    },
+    {
+      "file": "run_preflight01.ps1",
+      "edits": 8,
+      "forward": true,
+      "reverse": true
+    }
+  ],
+  "false_templates": true
+}

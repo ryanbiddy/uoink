@@ -1,0 +1,7 @@
+{
+  "chunk_id": "720cc3",
+  "wall_time_seconds": 0.1706814,
+  "exit_code": 0,
+  "original_token_count": 161,
+  "output": "{\"path\":\"VERDICT.md\",\"bytes\":3610,\"sha256\":\"66b1654cba5576ad0d09680913713eaaee88d32cc55d4ab7ff69a171b90d63aa\"}\r\n{\"path\":\"SOURCE-VIEW-COVERAGE.json\",\"bytes\":2111,\"sha256\":\"d1b6d9528177186e6ccde559119d8f7f67e95181e6f87a0a10afe0eabf1eb651\"}\r\n{\"path\":\"PREPARATION-CORRECTIONS.md\",\"bytes\":1260,\"sha256\":\"b9251b97e997fc26b98a77fd1cc29a0b3e90e91688eed7e2e65f74f75674be11\"}\r\n{\"path\":\"actuals\\\\CHECK02-ACTUAL.json\",\"bytes\":3583,\"sha256\":\"393e9d8de1fb251ce09be4004037eaf7f5b4205d9842ac9dc6e2f0f59f5049a3\"}\r\n{\"path\":\"actuals\\\\COPY-CHECK-ACTUAL.json\",\"bytes\":3375,\"sha256\":\"447b0c032256da8d26764d3749f7c1baed5cfdd626acd6efd0aab58864b6e617\"}\r\n{\"files\":33}\r\n"
+}

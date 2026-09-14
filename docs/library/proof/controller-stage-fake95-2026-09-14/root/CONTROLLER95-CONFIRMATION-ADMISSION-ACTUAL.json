@@ -1,0 +1,7 @@
+{
+  "chunk_id": "e9dceb",
+  "wall_time_seconds": 0.3092298,
+  "exit_code": 0,
+  "original_token_count": 69,
+  "output": "{\"admitted\":true,\"label\":\"controller-stage-confirmation01\",\"pins_sha256\":\"6fdc1188f323541aaff93a3fb5205f54e395b13d5b20ebf8a95bd69420e864cb\",\"author_actual\":\"02dc46/0\",\"author_result_check\":\"ca213f/0\",\"source_commit\":\"851bcdd2688fa7728aa801ca042e4cb20b270cac\",\"attempts\":1}\r\n"
+}

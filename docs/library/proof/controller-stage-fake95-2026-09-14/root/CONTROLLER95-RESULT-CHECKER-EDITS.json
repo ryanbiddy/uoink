@@ -1,0 +1,66 @@
+{
+  "scope": "Passive result checker preparation only; no subject or fixture changes",
+  "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\check-startup81-result01.mjs",
+  "edits": [
+    {
+      "before": "startup-authority-fake81-",
+      "after": "controller-stage-fake95-",
+      "count": 1
+    },
+    {
+      "before": "startup-authority-fake01",
+      "after": "controller-stage-fake01",
+      "count": 1
+    },
+    {
+      "before": "startup-authority-confirmation01",
+      "after": "controller-stage-confirmation01",
+      "count": 1
+    },
+    {
+      "before": "47af697a62dcead062f8c2771aad550ebd194392665f85a9a9f3face60551fb8",
+      "after": "b831bf6c864d8a7bef24355e5868dfa7480e6bba6ff1381cbc3ac9db07388606",
+      "count": 1
+    },
+    {
+      "before": "963d1a5fbdc2cb89e14df155575767e1b9eeb2a28003a701c25d1b5b60781f31",
+      "after": "6fdc1188f323541aaff93a3fb5205f54e395b13d5b20ebf8a95bd69420e864cb",
+      "count": 1
+    },
+    {
+      "before": "===27",
+      "after": "===29",
+      "count": 2
+    },
+    {
+      "before": "===23",
+      "after": "===25",
+      "count": 1
+    },
+    {
+      "before": "===81",
+      "after": "===95",
+      "count": 2
+    },
+    {
+      "before": "passed:81",
+      "after": "passed:95",
+      "count": 1
+    },
+    {
+      "before": "child_hashes:23",
+      "after": "child_hashes:25",
+      "count": 1
+    },
+    {
+      "before": "unchanged_inputs:27",
+      "after": "unchanged_inputs:29",
+      "count": 1
+    },
+    {
+      "before": "STARTUP81-",
+      "after": "CONTROLLER95-",
+      "count": 1
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "approved": false,
+  "label": "controller-stage-confirmation01",
+  "pins_sha256": null,
+  "scope": "generated_bytes_and_fake_ports_only",
+  "case_count": 95,
+  "status": "Requires separate independent copy and reviewed control hashes; no admission"
+}

@@ -1,0 +1,73 @@
+--- before/qualify_windows_reservations.py
++++ qualify_windows_reservations.py
+@@ -49,7 +49,7 @@
+ STARTUP_BOUND = os.environ.get("IG_FORBIDDEN_LIVE") == r"C:\Users\hello\AppData\Local\Uoink\index.db"
+ assert STARTUP_BOUND
+ HERE = os.path.dirname(os.path.abspath(__file__))
+-MODULES = ("reservation_file_port", "snapshot_reservations", "snapshot_lifecycle", "durable_lifecycle", "win32_worker_connection", "windows_reservation_port", "trusted_asr_resolver", "asr_loading_adapter", "pinned_buffer_namespace", "owned_generation_protocol", "inherited_readset", "generated_worker_flow", "generated_operation_flow", "generated_adapter_flow", "win32_private_pipe", "startup_fixture_resolver", "startup_fixture_adapter", "test_reservations", "test_windows_reservations", "startup_authority_fixture", "test_startup_authority")
++MODULES = ("reservation_file_port", "snapshot_reservations", "snapshot_lifecycle", "durable_lifecycle", "win32_worker_connection", "windows_reservation_port", "trusted_asr_resolver", "asr_loading_adapter", "pinned_buffer_namespace", "owned_generation_protocol", "inherited_readset", "generated_worker_flow", "generated_operation_flow", "generated_adapter_flow", "win32_private_pipe", "startup_fixture_resolver", "startup_fixture_adapter", "test_reservations", "test_windows_reservations", "startup_authority_fixture", "test_startup_authority", "worker_stage_fixture", "test_controller_worker_stage")
+ INPUTS = tuple(name + ".py" for name in MODULES) + ("qualify_windows_reservations.py", "EXPECTED-CASES.json")
+ READS = {os.path.normcase(os.path.join(HERE, name)) for name in INPUTS}
+ HEAVY = {"torch", "torchaudio", "torchvision", "torchcodec", "whisperx", "faster_whisper", "ctranslate2",
+@@ -83,7 +83,7 @@
+ CONTENT_OPEN = False
+ HASHES = {name: hashlib.sha256(raw).hexdigest() for name, raw in RAW.items()}
+ EXPECTED = json.loads(RAW["EXPECTED-CASES.json"])
+-assert type(EXPECTED) is list and len(EXPECTED) == 81 and len(set(EXPECTED)) == 81
++assert type(EXPECTED) is list and len(EXPECTED) == 95 and len(set(EXPECTED)) == 95
+ 
+ def deny_metadata(*args, **kwargs):
+     DENIALS.append("metadata")
+@@ -133,6 +133,7 @@
+ STARTUP_VALIDATOR = startup_pair_valid
+ STARTUP_ENTRY_VALID = False
+ STARTUP_FUNCTIONS = ()
++STARTUP_KERNEL_TYPE = None
+ for name in MODULES:
+     module = types.ModuleType(name)
+     module.__file__ = os.path.join(HERE, name + ".py")
+@@ -151,13 +152,15 @@
+             # before any test definitions are loaded.
+             STARTUP_ENTRY_VALID = startup_pair_valid()
+             assert STARTUP_ENTRY_VALID
++            STARTUP_KERNEL_TYPE = LOADED["durable_lifecycle"]._DurableKernel
++            assert LOADED["startup_fixture_adapter"]._DurableKernel is STARTUP_KERNEL_TYPE
+             STARTUP_FUNCTIONS = tuple(
+                 (LOADED[module_name], method, getattr(LOADED[module_name], method))
+                 for module_name, methods in (
+                     ("trusted_asr_resolver", ("load_manifest", "admit_snapshot", "bind_for_constructor")),
+                     ("startup_fixture_resolver", ("load_manifest", "admit_snapshot", "bind_for_constructor")),
+                     ("asr_loading_adapter", ("_require", "policy_status", "_release", "_plan", "_leased_admission", "ensure_assets", "_runtime_profile", "_model_session", "whisperx_session", "faster_whisper_session")),
+-                    ("startup_fixture_adapter", ("_require", "policy_status", "_release", "_plan", "_leased_admission", "ensure_assets", "_runtime_profile", "_model_session", "whisperx_session", "faster_whisper_session", "_startup_configuration", "_startup_authority_snapshot", "_startup_selection_current", "_startup_values", "_startup_references", "_validate_startup_locked", "_validate_controller_startup", "_consume_controller_startup", "_fixed_real_worker_start", "_controller_startup_scope")),
++                    ("startup_fixture_adapter", ("_require", "policy_status", "_release", "_plan", "_leased_admission", "ensure_assets", "_runtime_profile", "_model_session", "whisperx_session", "faster_whisper_session", "_startup_configuration", "_startup_authority_snapshot", "_startup_selection_current", "_startup_values", "_startup_references", "_validate_startup_locked", "_validate_controller_startup", "_consume_controller_startup", "_fixed_real_worker_start", "_controller_startup_scope", "_validate_controller_worker_stage", "_validate_controller_worker_stage_locked")),
+                 ) for method in methods)
+         exec(compile(RAW[name + ".py"], module.__file__, "exec"), module.__dict__)
+     LOADED[name] = module
+@@ -222,21 +225,23 @@
+         and LOADED["trusted_asr_resolver"].REAL_APPROVAL is None
+         and all(getattr(LOADED["asr_loading_adapter"], name) is None for name in ("RELEASE_AUTHORITY", "RUNTIME_PROFILE", "SNAPSHOT_LIFECYCLE", "RUNTIME_FACTORY", "ACQUISITION_SERVICE"))
+         and STARTUP_ENTRY_VALID and startup_pair_valid is STARTUP_VALIDATOR and startup_pair_valid()
+-        and len(STARTUP_FUNCTIONS) == 36
+-        and all(getattr(module, name) is function for module, name, function in STARTUP_FUNCTIONS),
++        and len(STARTUP_FUNCTIONS) == 38
++        and all(getattr(module, name) is function for module, name, function in STARTUP_FUNCTIONS)
++        and LOADED["durable_lifecycle"]._DurableKernel is STARTUP_KERNEL_TYPE
++        and LOADED["startup_fixture_adapter"]._DurableKernel is STARTUP_KERNEL_TYPE,
+ }
+ membership = [row["id"] for row in cases] == EXPECTED and result.testsRun == len(EXPECTED)
+ passed = sum(row["passed"] for row in cases)
+ skipped = sum(row["skipped"] for row in cases)
+ valid = membership and all(guards.values()) and not DENIALS and not REGISTRY_DENIALS and not heavy
+-code = 0 if valid and passed == 81 and skipped == 0 else 1
++code = 0 if valid and passed == 95 and skipped == 0 else 1
+ payload = json.dumps({"schema": "uoink.windows-reservation-fake-preflight.v1", "cases": cases,
+     "passed": passed, "failed": len(cases) - passed - skipped, "skipped": skipped,
+     "count": len(cases), "expected_cases": EXPECTED, "membership_valid": membership,
+     "guards": guards, "guard_valid": valid, "guard_denials": DENIALS, "registry_denials": REGISTRY_DENIALS,
+     "heavy_roots_loaded": heavy, "metadata_trap_count": len(TRAPS), "registry_trap_count": len(REGISTRY_TRAPS),
+     "input_sha256": HASHES, "elapsed_seconds": elapsed, "qualification_exit": code,
+-    "scope": "Original65 plus16 controller startup cases; isolated synthetic authority and fake services only; real worker remains closed"}, indent=2)
++    "scope": "Original81 plus14 controller worker-stage cases; isolated synthetic authority and fake services only; real worker remains closed"}, indent=2)
+ assert len(payload.encode("utf-8")) <= 262144
+ OUTPUT.write(payload + "\n")
+ OUTPUT.flush()

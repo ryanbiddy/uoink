@@ -1,0 +1,7 @@
+{
+  "chunk_id": "ca6376",
+  "wall_time_seconds": 0.2705433,
+  "exit_code": 0,
+  "original_token_count": 77,
+  "output": "{\"proof\":\"docs/library/proof/controller-worker-stage-source-2026-09-14\",\"payloads\":87,\"bytes\":1026190,\"manifest_sha256\":\"4fc8c860335f5d7ab56730386a5ed0cba41760de72921e81b1d811a1d449be73\",\"proposed_tests_unexecuted\":14,\"source_verdict\":\"ready for guarded qualification preparation\",\"subject_execution\":false}\n"
+}

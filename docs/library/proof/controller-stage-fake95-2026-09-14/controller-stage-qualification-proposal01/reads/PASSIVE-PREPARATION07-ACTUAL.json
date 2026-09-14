@@ -1,0 +1,7 @@
+{
+  "chunk_id": "810ca0",
+  "wall_time_seconds": 0.6817371,
+  "exit_code": 0,
+  "original_token_count": 259,
+  "output": "{\r\n  \"scope\": \"Passive source/text proof only; no Python, imports, compilation or subject invocation\",\r\n  \"parent_inputs\": 29,\r\n  \"parent_bytes\": 481412,\r\n  \"module_count\": 23,\r\n  \"child_texts\": 25,\r\n  \"before_copies\": 8,\r\n  \"old_case_prefix\": 81,\r\n  \"new_source_order_cases\": 14,\r\n  \"total_expected\": 95,\r\n  \"original_test_and_fixture_bytes_unchanged\": true,\r\n  \"accepted_adapter_prefix_bytes\": 28922,\r\n  \"original_function_captures\": 36,\r\n  \"new_stage_function_captures\": 2,\r\n  \"fixed_kernel_type_capture\": true,\r\n  \"preloads_unchanged\": true,\r\n  \"declared_diffs\": [\r\n    {\r\n      \"file\": \"qualify_windows_reservations.py\",\r\n      \"declared_edits\": 8,\r\n      \"hunks\": 5,\r\n      \"forward\": true,\r\n      \"reverse\": true\r\n    },\r\n    {\r\n      \"file\": \"run_preflight01.ps1\",\r\n      \"declared_edits\": 8,\r\n      \"hunks\": 6,\r\n      \"forward\": true,\r\n      \"reverse\": true\r\n    }\r\n  ],\r\n  \"false_templates\": true,\r\n  \"actual_admission_or_run\": false,\r\n  \"pins_sha256\": \"b831bf6c864d8a7bef24355e5868dfa7480e6bba6ff1381cbc3ac9db07388606\"\r\n}\r\n"
+}

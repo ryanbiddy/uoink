@@ -1,0 +1,7 @@
+{
+  "chunk_id": "a6f93c",
+  "wall_time_seconds": 0.2945788,
+  "exit_code": 0,
+  "original_token_count": 122,
+  "output": "\r\nname                        bytes sha256\r\n----                        ----- ------\r\nPLAN.md                     11727 20574f4516c1443347b8eb2f948379628a432b7ae51ba04cb437a7dea64ffad5\r\nSOURCE-BINDINGS.json         6465 b31f4633f45da3d56fbba43255bb3db91d2350eda19ddb807017cde0b112b1e7\r\nSOURCE-BINDINGS-ACTUAL.json  2553 a491b1cacded0a17600ff5b03a07df677fd671f8dc3513dfe534529c30d65328\r\nbind_sources.mjs             4839 df1064a01642090a63bcc3f9dadec3bb7767a4629847b205e91fa0594e3b0a4e\r\n\r\n"
+}
