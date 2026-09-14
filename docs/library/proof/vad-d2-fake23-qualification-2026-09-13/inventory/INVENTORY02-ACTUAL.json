@@ -1,0 +1,7 @@
+{
+  "chunk_id": "678d17",
+  "wall_time_seconds": 1.1401398,
+  "exit_code": 0,
+  "original_token_count": 299,
+  "output": "{\r\n  \"files\": 110,\r\n  \"bytes\": 515253,\r\n  \"maximum_file_bytes\": 20225,\r\n  \"groups\": [\r\n    {\r\n      \"source_root\": \"_scratch/vad-d2-dormant-invocation-proposal01\",\r\n      \"destination_root\": \"proposal01\",\r\n      \"files\": 18,\r\n      \"bytes\": 138560\r\n    },\r\n    {\r\n      \"source_root\": \"_scratch/vad-d2-dormant-invocation-proposal02\",\r\n      \"destination_root\": \"proposal02\",\r\n      \"files\": 58,\r\n      \"bytes\": 245068\r\n    },\r\n    {\r\n      \"source_root\": \"_scratch/astra-d2-fake23-confirmation01\",\r\n      \"destination_root\": \"independent01\",\r\n      \"files\": 19,\r\n      \"bytes\": 78496\r\n    },\r\n    {\r\n      \"source_root\": \"_scratch/vad-d2-dormant-source-review01\",\r\n      \"destination_root\": \"source-review01\",\r\n      \"files\": 5,\r\n      \"bytes\": 16709\r\n    },\r\n    {\r\n      \"source_root\": \"_scratch/vad-d2-readiness-review01\",\r\n      \"destination_root\": \"readiness01\",\r\n      \"files\": 2,\r\n      \"bytes\": 10053\r\n    },\r\n    {\r\n      \"source_root\": \"_scratch (eight exact named files)\",\r\n      \"destination_root\": \"root\",\r\n      \"files\": 8,\r\n      \"bytes\": 26367\r\n    }\r\n  ],\r\n  \"none_pin_leaves\": 10,\r\n  \"inventory_sha256\": \"0973778d6a518387cd071b7f58f87f816546d259ad340010d7bb96c28d44f29e\"\r\n}\r\n"
+}

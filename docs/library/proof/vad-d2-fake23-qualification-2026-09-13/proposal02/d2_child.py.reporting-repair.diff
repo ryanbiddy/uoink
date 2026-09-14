@@ -1,0 +1,66 @@
+diff --git "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-d2-dormant-invocation-proposal02\\before-reporting-repair\\d2_child.py" "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-d2-dormant-invocation-proposal02\\d2_child.py"
+index ca972b0..1b4c446 100644
+--- "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-d2-dormant-invocation-proposal02\\before-reporting-repair\\d2_child.py"
++++ "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-d2-dormant-invocation-proposal02\\d2_child.py"
+@@ -126,8 +126,9 @@ def main():
+             if parent == current:
+                 break
+             current = parent
+-    events, trapped = [], []
++    events = []
+     access = {'active': False, 'artifact_opens': 0, 'output_opens': 0, 'invocations': 0}
++    operation = {'file_conversion_calls': 0, 'file_conversion_returns': 0}
+     preloaded = sorted(name for name in sys.modules if name.split('.')[0] in HEAVY)
+     require(not preloaded, 'Model/pickle module already loaded')
+     allowed_imports = set(sys.modules) | set(MODULES)
+@@ -186,6 +187,7 @@ def main():
+     os.path.realpath = realpath
+     sys.addaudithook(audit)
+     raw, adapter, archive, result, failure, code = {}, None, None, None, None, 1
++    conversion_wrapper = None
+     try:
+         raw = {name: bounded(here/name) for name in READ_NAMES}
+         require(sha(raw['RYAN-D2-DECISION.json']) == OWNER_DECISION_SHA256, 'Owner decision hash mismatch')
+@@ -220,6 +222,15 @@ def main():
+         adapter._admission(raw['ROOT-ADMISSION.json'], OWNER_DECISION_SHA256)
+         adapter._evidence(raw['D2-PROFILE.json'], raw['D1-RESULT.json'],
+                           raw['known-inventory.json'], raw['fixed-plan.json'])
++        original_conversion = archive.convert_reviewed_real_file
++        def count_conversion(*args, **kwargs):
++            operation['file_conversion_calls'] += 1
++            require(operation['file_conversion_calls'] == 1, 'Repeated file conversion refused')
++            returned = original_conversion(*args, **kwargs)
++            operation['file_conversion_returns'] += 1
++            return returned
++        conversion_wrapper = count_conversion
++        archive.convert_reviewed_real_file = conversion_wrapper
+         access['active'] = True
+         access['invocations'] += 1
+         result = adapter.run_once(archive, profile_raw=raw['D2-PROFILE.json'],
+@@ -251,19 +262,23 @@ def main():
+             and all(getattr(BASELINE_WINREG, name, None) is installed_trap
+                     for name, original, installed_trap in REGISTRY_TRAPS),
+     }
+-    valid = (not events and not trapped and not heavy_after and unchanged and installed
++    call_wrapper_intact = (archive is None or (conversion_wrapper is not None
++                           and archive.convert_reviewed_real_file is conversion_wrapper))
++    valid = (not events and not heavy_after and unchanged and installed and call_wrapper_intact
+              and all(registry_guards.values()) and not REGISTRY_DENIALS)
+     if not valid:
+         code = 1
+     print(json.dumps({'scope': SCOPE, 'actual_child_exit': code, 'conversion_result': result,
+         'failure': failure, 'guard': {'valid': valid, 'unexpected_events': events,
+-            'forbidden_calls': trapped, 'heavy_preloaded': preloaded, 'heavy_after': heavy_after,
++            'heavy_preloaded': preloaded, 'heavy_after': heavy_after,
+             'inputs_unchanged': unchanged, 'metadata_wrappers_installed': installed,
++            'conversion_call_wrapper_intact': call_wrapper_intact,
+             'registry_denials': REGISTRY_DENIALS, 'registry_trap_count': len(REGISTRY_TRAPS),
+             **registry_guards, **access},
++        'conversion_operation': operation,
+         'owner_decision_sha256': OWNER_DECISION_SHA256,
+         'input_sha256': {name: sha(value) for name, value in raw.items()},
+-        'conversion_profile_activated': archive is not None and archive.REAL_PROFILE is not None,
++        'conversion_profile_active_at_exit': archive is not None and archive.REAL_PROFILE is not None,
+         'adapter_owner_pin_unchanged': adapter is None or adapter.OWNER_DECISION_SHA256 == OWNER_DECISION_SHA256,
+         'runtime_or_release_approved': False}, indent=2))
+     return code

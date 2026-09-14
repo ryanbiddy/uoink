@@ -1,0 +1,39 @@
+diff --git "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-d2-dormant-invocation-proposal02\\before-reporting-repair\\launch_d2.py" "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-d2-dormant-invocation-proposal02\\launch_d2.py"
+index 535ed37..316f97e 100644
+--- "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-d2-dormant-invocation-proposal02\\before-reporting-repair\\launch_d2.py"
++++ "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-d2-dormant-invocation-proposal02\\launch_d2.py"
+@@ -144,18 +144,24 @@ def main():
+     require(report['actual_child_exit'] == child.returncode, 'Child/report exit mismatch')
+     guard = report['guard']
+     require(guard['valid'] and guard['inputs_unchanged'] and not guard['unexpected_events']
+-            and not guard['forbidden_calls'] and not guard['heavy_after']
++            and not guard['heavy_after'] and guard['conversion_call_wrapper_intact']
+             and guard['metadata_wrappers_installed'] and guard['baseline_winreg_identity_unchanged']
+             and guard['registry_namespace_unchanged'] and guard['registry_traps_installed']
+             and not guard['registry_denials'], 'Invalid D2 child guard')
+-    require(not report['conversion_profile_activated'] and report['adapter_owner_pin_unchanged'],
++    require(not report['conversion_profile_active_at_exit'] and report['adapter_owner_pin_unchanged'],
+             'D2 profile/pin state changed')
+     require(guard['invocations'] <= 1 and guard['artifact_opens'] <= 1 and guard['output_opens'] <= 1,
+             'D2 one-shot/open count mismatch')
++    operation = report['conversion_operation']
++    require(type(operation['file_conversion_calls']) is int
++            and type(operation['file_conversion_returns']) is int
++            and 0 <= operation['file_conversion_returns'] <= operation['file_conversion_calls'] <= 1,
++            'D2 conversion attempt/return count mismatch')
+     result = report['conversion_result']
+     output_identity_verified = False
+     if child.returncode == 0:
+         require(guard['invocations'] == guard['artifact_opens'] == guard['output_opens'] == 1
++                and operation['file_conversion_calls'] == operation['file_conversion_returns'] == 1
+                 and result['status'] == 'conversion_bytes_produced_unqualified', 'Incomplete conversion outcome')
+         output = bounded(no_links(OUTPUT_ROOT / OUTPUT_NAME), 6 * 1024 * 1024)
+         require(len(output) == result['output_bytes'] and sha(output) == result['output_sha256'],
+@@ -165,6 +171,7 @@ def main():
+         require(result is None, 'Failed child cannot publish a conversion result')
+     save(run / 'checked-result.json', {'actual_child_exit': child.returncode, 'guard_valid': True,
+          'inputs_unchanged': True, 'conversion_result': result,
++         'conversion_operation': operation,
+          'output_identity_verified': output_identity_verified, 'runtime_or_release_approved': False})
+     print(json.dumps({'actual_child_exit': child.returncode, 'guard_valid': True,
+         'conversion_result': result, 'output_identity_verified': output_identity_verified,

@@ -1,0 +1,19 @@
+{
+  "actual_native_exit": 0,
+  "qualification_exit": 0,
+  "counts": {
+    "passed": 23,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0,
+    "subtests": 0,
+    "tests_run": 23
+  },
+  "exact_ordered_membership": true,
+  "inputs_unchanged": true,
+  "manifest_unchanged": true,
+  "admission_unchanged": true,
+  "guard_valid": true,
+  "fake23_passed": true,
+  "real_conversion_authorized": false
+}

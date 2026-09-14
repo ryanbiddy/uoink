@@ -1,0 +1,11 @@
+# D2 readiness for the owner question
+
+2026-09-13. Ready to ask Ryan for the exact one-time local D2 conversion. I found no concrete material source defect or additional qualification that must precede that question. This is not execution approval, conversion acceptance or market readiness.
+
+The parent, child, adapter, wrapper, converter and ZIP helper still match the source hashes fully reviewed in vad-d2-dormant-source-review01; the new text-only check was d19350, exit 0. Parent 39b9fa62, child 09146650, adapter 36546634 and wrapper b5ae9ca0 retain the corrected authority-file checks, owner gates before artifact/converter access, fixed evidence binding, temporary-profile cleanup, one-attempt/output rules and actual-exit accounting. Converter b31915b2 and helper bfe582cb are unchanged. No source, artifact, support binary or candidate was executed or edited during this decision.
+
+Root reports the same 23 fake cases passing in two runs. Those are 23 distinct adapter cases observed twice. They do not qualify the real parent/child guard, filesystem wrapper, output persistence or timeout behavior. That evidence limit alone is not a discovered defect requiring another speculative test layer. The separately approved local conversion would supply its own real outcome; failure, partial output, timeout or invalid receipt must remain unaccepted.
+
+Ryan's question must state the actual remaining assumptions: uniform little-endian IEEE754-binary32 interpretation across the fixed 23 storages, the dense 54-range output and omitted legacy metadata, and local conversion with the model notice still unresolved. The scope is one fixed input and one fresh Safetensors output. D1's completed observation is not authentication of the writer or approval of the remaining storage values. Private quiescent paths, cooperative limits and stdlib/audit guards remain documented limits, not an OS sandbox guarantee.
+
+D1 must not repeat. D2 stays closed until Ryan records that decision and root binds the resulting owner digest and refreshed source map in a separate exact admission. No reader activation, model/native inference, network, redistribution, release or website/marketing authority follows from this question.

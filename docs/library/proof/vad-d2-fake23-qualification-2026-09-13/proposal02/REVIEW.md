@@ -1,0 +1,11 @@
+# Dormant D2 preparation, 2026-09-13
+
+The source correction is complete. The child reports converter-file calls, normal returns, the validated result and profile state at exit separately. The unsupported empty forbidden-call claim is removed. The parent and fake launcher now recheck original authority bytes after the child; prior controls and exact diffs remain preserved. The adapter, frozen converter, plan and all 23 test bodies are unchanged.
+
+Final SOURCE-BINDINGS.json is `2f0c2956fc6e9ee22f16c9ee7e6edfdb28fdf8220b2d54c67d2d1622c0095e9f`; it binds 11 real-path and nine fake-qualification entries. QUALIFICATION-INPUTS.json is `c6e83710882f413547b671f058b9190c06940291b34d882df6c25f0ed774bcad`. The three real owner pins and frozen REAL_PROFILE remain None. The profile and false real-decision templates grant no authority.
+
+The independent source verdict is `_scratch/vad-d2-dormant-source-review01/VERDICT.md`, SHA-256 `dc44b740ad7c540ffe767d32b3106873cf21ce12cb142cb8ab6d6328f4323d76`. It reports no remaining source blocker and independently checked all 23 bodies, five committed text copies, final maps and controls. This subagent performed no candidate or test execution.
+
+Two final documentary checks stopped before writing a success record. The first used the wrong qualification-map nesting; the second encountered the root's concurrent fake-only admission. Their actual tool outcomes and explanations are retained. Neither is a D2 test outcome. Root subsequently reported author fake23 at tool a23605: 23 passed, zero failures/errors/skips, all nine guards true and unchanged inputs, manifest and admission. That is a parent-reported outcome here; this note does not replace its raw receipt review or the pending independent run.
+
+The 23 cases cover the adapter through private validators and fake ports. They do not qualify real parent/child execution, file persistence, timeout termination, conversion, plain-state reading or native runtime. Actual D2 still needs its separate owner decision and exact activation review. Uniform storage encoding, IEEE-754 interpretation, dense fixed ranges and local-only conversion with unresolved model notice remain explicit prerequisites. D1's two-buffer consistency result does not authenticate the writer or other storage contents.

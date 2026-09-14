@@ -1,0 +1,15 @@
+{
+  "scope": "D2_FAKE23_ONLY_NO_REAL_CONVERSION",
+  "expected_cases": 23,
+  "files": {
+    "d2_adapter.py": "36546634d8ca42ee8e29280cd463cc829d994e67f2841f932110aba40fb805f0",
+    "test_d2_boundaries.py": "a106a62d095d77331c6ebb0ded07e588a9d80c632930325c033c4d185e2b7fd8",
+    "D2-PROFILE.json": "f0c60e2fa349b945108b4d15dccc8fe2d68ca4cab8588e8c0ff7f2e8762f75d3",
+    "D1-RESULT.json": "754ca6dea6aed81de072940b35ad4c283f270b5770a88236ef55fd0a09d46e75",
+    "known-inventory.json": "73ef1afe29719273272b4c27e0139a6d00393408455ec68f659bc53608c3fdcc",
+    "fixed-plan.json": "37af25ab777ca7c322e00bec20dfffc1b6959d32c5bbd1a8c678bfc4126c91bf",
+    "EXPECTED-CASES.json": "567f539d6242e102448047f7c29c708539aac863a58468baffb8d3c00d6502ae",
+    "qualify_d2.py": "dcd22e82c49dbc26c230ec8ff4b21ce7b5418923a0f0af7295d7803d98f216ee",
+    "run_fake23_01.ps1": "1bb8c66bdc4234adaad653a6c5da094504660e5c03f85447019bc5ae093549ec"
+  }
+}

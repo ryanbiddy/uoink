@@ -1,0 +1,7 @@
+{
+  "chunk_id": "badfc7",
+  "wall_time_seconds": 0.3007305,
+  "exit_code": 0,
+  "original_token_count": 238,
+  "output": "{\"distinct_cases\": 23, \"passes_per_copy\": 23, \"failures_errors_skips\": 0, \"same_ordered_case_objects\": true, \"real_D2_approved\": false, \"records\": [{\"root\": \"_scratch/vad-d2-dormant-invocation-proposal02\", \"counts\": {\"passed\": 23, \"failed\": 0, \"errors\": 0, \"skipped\": 0, \"subtests\": 0, \"tests_run\": 23}, \"elapsed_case_seconds\": 0.009656400012318045, \"stdout_bytes\": 4585, \"stdout_sha256\": \"ac69e6c492abcf8f3d28843c74f1737b8b883b309606acaace8b7249a77e59be\", \"guards\": 9, \"registry_traps\": 25, \"actual_exit\": 0, \"sources_and_controls_unchanged\": true}, {\"root\": \"_scratch/astra-d2-fake23-confirmation01\", \"counts\": {\"passed\": 23, \"failed\": 0, \"errors\": 0, \"skipped\": 0, \"subtests\": 0, \"tests_run\": 23}, \"elapsed_case_seconds\": 0.009904400008963421, \"stdout_bytes\": 4585, \"stdout_sha256\": \"b8bb787b69480557862fe735b3450ef12d7caae4e8fbdeaf016be1af9011e09d\", \"guards\": 9, \"registry_traps\": 25, \"actual_exit\": 0, \"sources_and_controls_unchanged\": true}]}\r\n"
+}
