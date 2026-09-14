@@ -119,7 +119,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | Actual adapter cancellation | Generated qualification integrated at60b3bb5 | Author and independent copies each89 passed/0 failed/0 skipped,86 passing subtests; all216 proof payloads match Git/disk | Native cancellation integrated ata25b34b: all100 proof payloads match Git/disk. Connect interrupted final-clear recovery; crash/restart, real models and release remain unqualified |
 | Retired-owner final-clear recovery | Fake22 at a83ae1a; generated native recovery at5671b51 | Both fake copies22/0/0 plus21 passing subtests. Nativee97a44/exit0, root5214fa and peer503717 verify exact retirement, four confirmed phases/flushes and still-revoked owner/token. All91 newest proof payloads match Git/disk | Connect the qualified runtime owner to the native child. No OS-interruption, active-worker, crash/restart or model credit |
 | Worker runtime owner and bootstrap | Connected fake33 at 3661608; generated native cancellation at 3b8f9e0 | Both fake copies 33/0/0. Native a9321b/exit 0, root dd7190 and peer 4984ac agree on 32 unchanged pairs, valid guards, one segment, closed owner, child/contender exit 0 with empty jobs, and four journal frames. All 127 native proof payloads match Git/disk | Interrupted-owner retirement direction is committed at 77dc339. Real inference, protected loader/PCM/filter routes, crash/restart and release remain open |
-| Interrupted owned-worker retirement | Corrected source-only brief and review committed at 77dc339 | Root fc41f6 verifies 16 committed texts/356,810 bytes; all 23 direction proof payloads match Git/disk. First positive refuses retained I/O and uncertain handles, preserves aggregate quarantine and uses separate retirement/journal witnesses | Dispatch bounded Gemini source-only implementation, then review derivatives before preparing qualification. Six cases are proposed, none run |
+| Interrupted owned-worker retirement | Corrected brief at 77dc339; Gemini run 31e8890c-ab80-44d0-8062-3347942bc6cf is active | Root fc41f6 verifies 16 committed texts/356,810 bytes; all 23 direction proof payloads match Git/disk. Worker uses frozen base b1d7ed5 and the existing Antigravity subscription | Wait for completed source output, then review derivatives before qualification. Six cases are proposed, none run; no native/model execution admitted |
 | Release notes | Current progress and remaining gates committed at 376eb47 | All seven proof payloads match Git/disk; 57 table lines and historical package/review-kit sections remain unchanged. D1/D2 completion and generated cancellation/recovery are explicit | Continue runtime qualification. No production source, package, installation, public draft or website changed |
 | Integration | Reliability repair at e8d058f and notice packaging at 71d3e70 after tree09 | Reliability:53 focused cases plus13 subtests per root. Notices:20 Python/10 block cases per root. Tree09 at 56d9d4c remains2,796 passed/1 failed/3 skipped across2,800 cases plus13 subtests; it predates both repairs | Finish runtime work, then run a new committed complete tree and rebuild/reseal. Package08 and website/marketing remain held. No current-source package or installation credit |
 | Desktop incident | Isolation failed in package-07 attempt; corrected at `e10ba3a` | Ordinary Uoink and filesystem connectors launched; earlier live-index/5179 effects unknown. Owned job cleaned | No further override launch; only guarded Uoink dashboard observed for package 08 |
@@ -196,10 +196,11 @@ brief is at 47d30c and its independent fake33 qualification is at 3661608.
 Both copies pass the same original 17 and new 16 cases. The separately admitted
 native cancellation is accepted at 3b8f9e0 after root dd7190 and peer 4984ac
 receipt review. All 127 proof payloads match Git/disk. Do not repeat the run.
-Next, dispatch Gemini from the committed
-INTERRUPTED-OWNED-SESSION-RETIREMENT-BRIEF-2026-09-13.md at 77dc339, with its
-fixed map under proof/interrupted-owner-retirement-direction-2026-09-13/corrected.
-Use the saved gemini-3.8-flash-high/high Antigravity subscription configuration.
+Gemini run 31e8890c-ab80-44d0-8062-3347942bc6cf is active from the committed
+INTERRUPTED-OWNED-SESSION-RETIREMENT-BRIEF-2026-09-13.md, frozen base b1d7ed5.
+Its fixed map is under proof/interrupted-owner-retirement-direction-2026-09-13/corrected.
+It uses gemini-3.8-flash-high/high through the existing Antigravity subscription.
+Root exec session 31004 retains the live CLI; do not dispatch a duplicate.
 The worker writes derivatives and six proposed cases only. No candidate import,
 compile, test or native execution is admitted. The first positive case requires
 an idle pipe, no retained I/O and confirmed exact handles; aggregate quarantine
@@ -6189,3 +6190,19 @@ Root ca0158 also rejected win32 filenames because its regex omitted digits;
 separate passive checker fc41f6 corrects that gate. These are preparation/checker
 errors, not candidate failures. Do not relabel any of them as a test pass.
 Dispatch the saved Gemini subscription configuration through Control Room next.
+
+### 2026-09-14 — Interrupted-owner source implementation dispatched
+
+Dispatch d76561 starts Control Room run 31e8890c-ab80-44d0-8062-3347942bc6cf,
+Gemini 3.8-flash-high/high through the existing Antigravity subscription. Frozen
+base is b1d7ed5d955e73271cafa2517ebbb0d5bf90441a; preflight reports 41 verified
+references. Its worktree is C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/
+uoink-library/31e8890c-ab8/gemini. Source-only output belongs under that worktree's
+_scratch/interrupted-owned-session-retirement-implementation01.
+
+Exec session 31004 remains active; initial d76561 and polls 114320/28c582 are
+saved separately. Status 588895 confirms the exact running task. No code, test,
+native or production acceptance follows from dispatch. Wait for the actual
+terminal outcome, inspect the complete output/diff, preserve any partial result,
+and review before preparing qualification. Do not retry without a repair brief.
+D1/D2 artifacts, real activation, website and marketing remain untouched.
