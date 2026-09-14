@@ -310,8 +310,13 @@ subtests. Original65 preserved. Root151c60 and peere49d09 verify all complete
 case objects,23 hashes,ten guards,27 inputs/three controls and35 outputs each.
 The instrument source verdict06f077ce and root verdict correct one frozen protocol
 claim: early setup failures rely on the outer actual, not launch-failure.json.
-Do not repeat these scoped observations. Next dispatch
-REAL-CHILD-NAMESPACE-IMPLEMENTATION-BRIEF-2026-09-14.md. Its frozen plan and
+Do not repeat these scoped observations. Control Room source-only run
+05a3bf93-0b6c-47f0-bdd3-80b14e46b1d3 is active under
+REAL-CHILD-NAMESPACE-IMPLEMENTATION-BRIEF-2026-09-14.md. Gemini3.8-flash-high/high
+uses the existing Antigravity subscription, frozen base8611e31. Session21582 is
+open; worker6a96a2d8 runs in the05a3bf93-0b6/gemini worktree. Initialactualefc889
+and status9eb678 are saved. Wait for delivery, preserve actuals and independently
+review complete source/diffs before any qualification admission. Its frozen plan and
 mandatory member-scope correction are archived under
 proof/real-child-namespace-plan-2026-09-14. All52 documentary payloads match
 Git/disk at72e8b2, seal6bb671fa. The selected18 source inputs total306,861 bytes.
@@ -6957,3 +6962,15 @@ receipts. Raw diff/applyb7670d/0 transports643,400 bytes at
 3766cf74d2114048236a72cb11be4b8ff6c5d7745fab45a28b870ef45fabb895.
 All50 transport differences were proven newline-only; index72e8b2/0 verifies
 all52 raw payloads against Git and disk. Dispatch source implementation next.
+
+### 2026-09-14 — Gemini child namespace source implementation dispatched
+
+Plan and member correction are committed at8611e31. Control Room run
+05a3bf93-0b6c-47f0-bdd3-80b14e46b1d3 started2026-09-14T12:52:56.546Z,
+Gemini3.8-flash-high/high through the existing Antigravity subscription. Base
+8611e31 is frozen; worker6a96a2d8-a652-4239-b5e3-2d8abc6199f8 writes only its own
+_scratch/real-child-namespace-implementation01 under worktree
+C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\05a3bf93-0b6\gemini.
+Initialactualefc889 yielded session21582; poll988e20 and status9eb678 show running.
+No subject execution is admitted. Preserve each actual/poll, source delivery and
+command-coverage limits, then review before qualifying or integrating source.
