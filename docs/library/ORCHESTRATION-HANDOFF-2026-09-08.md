@@ -119,7 +119,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | Actual adapter cancellation | Generated qualification integrated at60b3bb5 | Author and independent copies each89 passed/0 failed/0 skipped,86 passing subtests; all216 proof payloads match Git/disk | Native cancellation integrated ata25b34b: all100 proof payloads match Git/disk. Final-clear recovery is recorded at 5671b51; interrupted-owner retirement, crash/restart, real models and release remain unqualified |
 | Retired-owner final-clear recovery | Fake22 at a83ae1a; generated native recovery at5671b51 | Both fake copies22/0/0 plus21 passing subtests. Nativee97a44/exit0, root5214fa and peer503717 verify exact retirement, four confirmed phases/flushes and still-revoked owner/token. All91 newest proof payloads match Git/disk | The generated runtime-owner connection is recorded at 3661608 and 3b8f9e0. Continue interrupted-owner retirement; no OS-interruption, active-worker recovery, crash/restart or model credit |
 | Worker runtime owner and bootstrap | Connected fake33 at 3661608; generated native cancellation at 3b8f9e0 | Both fake copies 33/0/0. Native a9321b/exit 0, root dd7190 and peer 4984ac agree on 32 unchanged pairs, valid guards, one segment, closed owner, child/contender exit 0 with empty jobs, and four journal frames. All 127 native proof payloads match Git/disk | Interrupted-owner retirement direction is committed at 77dc339. Real inference, protected loader/PCM/filter routes, crash/restart and release remain open |
-| Interrupted owned-worker retirement | Gemini source review FAILED; original proposal and reviews preserved at 0a1a211 | All 56 failure-proof payloads match Git/disk after documented newline transport repair. CLI exit 0 is not qualification; six proposed cases remain unexecuted | Astra source repair is active under brief 81635ab with 31 bound text inputs. Review the three derivatives, six replacement controls and guarded qualification instrument before execution; no new native/model or release acceptance |
+| Interrupted owned-worker retirement | Gemini source review FAILED at 0a1a211; corrected source under 81635ab has cleared bounded review | All 56 failure-proof payloads remain preserved. Peer core verdict 514550c6 finds no remaining blocker; root c10a0a verifies 38 frozen inputs and original22-plus-six selection. No measured behavior yet | Run the separately admitted fake28 author package, then its checked independent copy only after a pass. See ASTRA-INTERRUPTED-OWNER-FAKE28-ADMISSION-2026-09-14.md; no native/model or release acceptance |
 | Release notes | Current progress and remaining gates committed at 376eb47 | All seven proof payloads match Git/disk; 57 table lines and historical package/review-kit sections remain unchanged. D1/D2 completion and generated cancellation/recovery are explicit | Continue runtime qualification. No production source, package, installation, public draft or website changed |
 | Integration | Reliability repair at e8d058f and notice packaging at 71d3e70 after tree09 | Reliability:53 focused cases plus13 subtests per root. Notices:20 Python/10 block cases per root. Tree09 at 56d9d4c remains2,796 passed/1 failed/3 skipped across2,800 cases plus13 subtests; it predates both repairs | Finish runtime work, then run a new committed complete tree and rebuild/reseal. Package08 and website/marketing remain held. No current-source package or installation credit |
 | Desktop incident | Isolation failed in package-07 attempt; corrected at `e10ba3a` | Ordinary Uoink and filesystem connectors launched; earlier live-index/5179 effects unknown. Owned job cleaned | No further override launch; only guarded Uoink dashboard observed for package 08 |
@@ -208,10 +208,14 @@ defects require bounded source repair. The formal disposition is committed at
 proof payloads. Astra's source repair is active under brief 81635ab in
 _scratch/interrupted-owner-retirement-repair02. Its input map binds 31 texts,
 618,872 bytes, SHA256 51b2fb644c69d496b935d84f84b46fa4a421745449c19a3a8160d57f42b7f63e.
-Core and test authors have separate files; a guarded fake-qualification instrument
-is being prepared without execution or fabricated final-source hashes.
-No new behavior is accepted.
-No candidate import, compile, test or native execution is admitted. The first
+Core and test authors have frozen their separate files; the independent core
+verdict 514550c6 finds no remaining blocker within its scope. Root c10a0a/exit0
+checks all 38 author payloads, 35 child inputs and unchanged original22 selection.
+The exact author map eb108b71 is admitted only for the fixed fake28 qualification
+under INTERRUPTED-OWNER-FAKE28-QUALIFICATION-BRIEF-2026-09-14.md and its Astra
+admission verdict. Run it once, then review/admit the independent copy only if it
+passes. No new behavior is accepted before observed results. Native execution
+remains closed. The first
 positive case still requires an idle pipe, no retained I/O and confirmed exact
 handles; aggregate quarantine history and all ordinary refusals remain. Preserve
 the failed source and review the repair before any later qualification.
