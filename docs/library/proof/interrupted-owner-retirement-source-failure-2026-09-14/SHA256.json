@@ -1,0 +1,286 @@
+{
+  "schema": "documentary-proof-v1",
+  "scope": "Rejected source-only proposal and actual review/provenance records; no candidate qualification.",
+  "files": [
+    {
+      "path": ".gitattributes",
+      "bytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+    },
+    {
+      "path": "ASTRA-VERDICT.md",
+      "bytes": 3948,
+      "sha256": "3784fded49ba3f86470920b99365cd7c47a8ed3e5c67021ac431a0782c2aebfc"
+    },
+    {
+      "path": "owner-review/BINDING-CHECK-ACTUAL.json",
+      "bytes": 3914,
+      "sha256": "43f4cbdb97962c4e7aee7fedf8d32dcf6cd0cd0ecef59e5fb3f1f0c5e483ed23"
+    },
+    {
+      "path": "owner-review/FINAL-TEXT-CHECK-ACTUAL.json",
+      "bytes": 848,
+      "sha256": "803750cc7702315d6401f272dd2028fdcc087c7ed1f162f97f1308d84fdaecce"
+    },
+    {
+      "path": "owner-review/READ-COVERAGE.json",
+      "bytes": 7653,
+      "sha256": "d5259306f5159f5128598a791c4ea8dc8ba4a6c39dc8e26a8b995a2367fd2469"
+    },
+    {
+      "path": "owner-review/READ01-ACTUAL.json",
+      "bytes": 2063,
+      "sha256": "6f1af86227ad8e63a8782639d283ad567affd78df105de7aee72fb97242e8b72"
+    },
+    {
+      "path": "owner-review/READ02-ACTUAL.json",
+      "bytes": 26325,
+      "sha256": "9fad20a419425acd758a91485540a02eef1fe0bb2ab1a1a431822bef5f1c098e"
+    },
+    {
+      "path": "owner-review/READ03-ACTUAL.json",
+      "bytes": 15841,
+      "sha256": "59fba368b707b219815615371feeb3e5497e6472d26a28dc2fb2170c6a781adb"
+    },
+    {
+      "path": "owner-review/READ04-ACTUAL.json",
+      "bytes": 16758,
+      "sha256": "ec100125f99bebe6dd8c70880476aeb215850aa901a9e1d2f49d0fffd82619f2"
+    },
+    {
+      "path": "owner-review/READ05-ACTUAL.json",
+      "bytes": 25838,
+      "sha256": "1f39b55f97481ac9a98336f04a4d9679aba7631f8d9bcd59231adbe181f0dbae"
+    },
+    {
+      "path": "owner-review/READ06-ACTUAL.json",
+      "bytes": 18847,
+      "sha256": "107eecfe02bcf967d3447446e9c0f1d712a24803b99aa5fbbaeb682fcd0afa3a"
+    },
+    {
+      "path": "owner-review/READ07-ACTUAL.json",
+      "bytes": 34788,
+      "sha256": "b2116b6a1500456bd4f96d338791a2dea2f4ff5f94bfce80db8a2c58873e5387"
+    },
+    {
+      "path": "owner-review/READ08-ACTUAL.json",
+      "bytes": 8218,
+      "sha256": "87d2a7e3aea91aa4045a90e7fbe0faa212f9dd1a80ae53c8631cee0a1fb9b42f"
+    },
+    {
+      "path": "owner-review/READ09-ACTUAL.json",
+      "bytes": 29660,
+      "sha256": "50f1c4e9e77678da055d038042004c0dfd3d4cb97752a259f6a6bc6b416f2830"
+    },
+    {
+      "path": "owner-review/READ10-ACTUAL.json",
+      "bytes": 21084,
+      "sha256": "2caa103198aaa22d372b66a0ddcb2f84fd8bedbd09581fb09f4045c22188195c"
+    },
+    {
+      "path": "owner-review/READ11-ACTUAL.json",
+      "bytes": 2544,
+      "sha256": "f632884ba60bffb8684024088a5f498d0fa76fb30af0e8efcc632d49f40a4700"
+    },
+    {
+      "path": "owner-review/REVIEW-OBSERVATION-NOTE.md",
+      "bytes": 1370,
+      "sha256": "7352b630629453098b8ca0f4376b65776fe572333fd4fd7de2c05d4141403681"
+    },
+    {
+      "path": "owner-review/SOURCE-BINDINGS.json",
+      "bytes": 10157,
+      "sha256": "77f56856c0603e16711775fac11410c0433aaf71db1910275431e95da804cdc0"
+    },
+    {
+      "path": "owner-review/VERDICT.md",
+      "bytes": 5565,
+      "sha256": "44a902b41ba0b460fe76ece47a3e25e540808b9fb69b21118cd3a32726db0204"
+    },
+    {
+      "path": "process-review/BINDING-CHECK-ACTUAL.json",
+      "bytes": 7991,
+      "sha256": "abf0028f9d684348a455e04430c35e21191643e572d3a423e16cb71e8a2082ba"
+    },
+    {
+      "path": "process-review/PRESERVATION-CHECK-ACTUAL.json",
+      "bytes": 1505,
+      "sha256": "ba9a5e484c06d9249955a996632049158e906fac034277776c85d3186077970b"
+    },
+    {
+      "path": "process-review/VERDICT.md",
+      "bytes": 7106,
+      "sha256": "a494365364e83a056ad0716c8c1d821ec992723aa1f2248195048eb28cf24b74"
+    },
+    {
+      "path": "process-review/VIEW-COVERAGE.json",
+      "bytes": 5623,
+      "sha256": "b5b94c154271a69e19693a01c1e5ec761ead9b3677dac8c55cd0936ffc39fec8"
+    },
+    {
+      "path": "process-review/VIEW01-ACTUAL.json",
+      "bytes": 9692,
+      "sha256": "1e1d3a3efb920656ab8d3c4480e31230d9e32e1abb9eb4510a6528e9f7f12fcf"
+    },
+    {
+      "path": "process-review/VIEW02-ACTUAL.json",
+      "bytes": 25839,
+      "sha256": "7f491d2d0231cc9eee6395573fd1138305f828c59351dce4e306537d44cca2ed"
+    },
+    {
+      "path": "process-review/VIEW03-ACTUAL.json",
+      "bytes": 15915,
+      "sha256": "26979205b44aa1398b11de967e111aaf0764d315761c5f892d20bf2f2433424d"
+    },
+    {
+      "path": "process-review/VIEW04-ACTUAL.json",
+      "bytes": 21568,
+      "sha256": "78e3b98837970cd2523caa22d9b8ae480e2040dd359fb4cda1a66f90698f2bc3"
+    },
+    {
+      "path": "process-review/VIEW05-ACTUAL.json",
+      "bytes": 31932,
+      "sha256": "ffe5a01a03d20f231d78fd731c89de2d9a81b750cf40320be6b710489db621fe"
+    },
+    {
+      "path": "process-review/VIEW06-ACTUAL.json",
+      "bytes": 10773,
+      "sha256": "0a7c132006a0d295bfca0cfc59231021301ddf2ea005b530f2b3168ce6ead77e"
+    },
+    {
+      "path": "process-review/VIEW07-ACTUAL.json",
+      "bytes": 25257,
+      "sha256": "8263133103ce1a022f43c976a82c5b7cdfb596a3138f656d507d71f9cba712f8"
+    },
+    {
+      "path": "process-review/VIEW08-ACTUAL.json",
+      "bytes": 20389,
+      "sha256": "6893875a3c5580712e361ddde8e20aaae05e9ea36d14d01ca1a2c3c5f8583ab5"
+    },
+    {
+      "path": "process-review/VIEW09-ACTUAL.json",
+      "bytes": 25532,
+      "sha256": "1b21ab8096db225d536257b50ce219555e5f2407445dab0390f494a507c61c46"
+    },
+    {
+      "path": "rejected-proposal/durable_lifecycle.patch",
+      "bytes": 10301,
+      "sha256": "431c7b3ebbe34460ef1092ec16c2e7d630a0139808afd7c88b956a1699fea748"
+    },
+    {
+      "path": "rejected-proposal/durable_lifecycle.py",
+      "bytes": 28033,
+      "sha256": "ef075da57b276ec1f5c8a6a474a42734a7a207b28d6aa3e5e8c21738d8b6c7ee"
+    },
+    {
+      "path": "rejected-proposal/generated_adapter_flow.patch",
+      "bytes": 25022,
+      "sha256": "9e2ff020e437c3bda4cd50bdd784d16a56a0b183cb5bf61da38004fa4022cb1b"
+    },
+    {
+      "path": "rejected-proposal/generated_adapter_flow.py",
+      "bytes": 77872,
+      "sha256": "1ebc9878fb2fde330a240f6927a422a5e851494844a7284e99fa0d71ff1f34fb"
+    },
+    {
+      "path": "rejected-proposal/generated_journal_setup.patch",
+      "bytes": 4967,
+      "sha256": "1caa038f8359da97a6e68925961b37a1ad97a5a02c57adfa4c3b24ab675340d6"
+    },
+    {
+      "path": "rejected-proposal/generated_journal_setup.py",
+      "bytes": 19089,
+      "sha256": "47d17300152ff019ff9c18b4d8b616262e660612461e9f700520ee656d28f7a3"
+    },
+    {
+      "path": "rejected-proposal/read_coverage.json",
+      "bytes": 3634,
+      "sha256": "16d359137b65e33cf507cdf0e5d036e66c5bb267422e4a541197c758c603ed43"
+    },
+    {
+      "path": "rejected-proposal/REPORT.md",
+      "bytes": 10097,
+      "sha256": "e3e968834bcd29acb235e63d228790c7496d426bf8436a5565b9b563ed2b4915"
+    },
+    {
+      "path": "rejected-proposal/test_interrupted_owner_retirement.py",
+      "bytes": 20770,
+      "sha256": "39f66d42d3a12e25546633b08e79af1bff6c25de4fcf59fa0b903eeae8e11625"
+    },
+    {
+      "path": "root-provenance/COMMAND-EVENTS.json",
+      "bytes": 1091,
+      "sha256": "bc228a8b12e7e55c129affdc5c3e46a3ef47ed97da14ca116f88bbce623a3474"
+    },
+    {
+      "path": "root-provenance/CONTROL-ROOM-EVENTS.json",
+      "bytes": 287108,
+      "sha256": "cc7b6fc65e642dbffab4cf83bf2f7fa154f0a370280eab761cf9735114e6e181"
+    },
+    {
+      "path": "root-provenance/CONTROL-ROOM-RUN.json",
+      "bytes": 24960,
+      "sha256": "7c358e8934d4a11178ea7aa8840e80614b5ca04ef7baffee9d57d5c1c98dedca"
+    },
+    {
+      "path": "root-provenance/SOURCE-BINDINGS.json",
+      "bytes": 8758,
+      "sha256": "ba09f625d05a5850017eb8720ac072313341fa8cc7a5c757a1f2e50ed24e0335"
+    },
+    {
+      "path": "root-provenance/TOOL-EVENTS.json",
+      "bytes": 118984,
+      "sha256": "213321f513633d1127338c1781a5072e79a69b9aea2a46840bb97e114ae3dcf2"
+    },
+    {
+      "path": "root/inspect-interrupted-retirement-source01.mjs",
+      "bytes": 2985,
+      "sha256": "53ada0c644bfcef02cfa64386aa36de9d54471bc5ff7918dd3744fa22cf6c57d"
+    },
+    {
+      "path": "root/INTERRUPTED-RETIREMENT-CONTROL-ROOM-FINAL-STATUS-ACTUAL.json",
+      "bytes": 20363,
+      "sha256": "09378c689d2c5fb617ed0c3d8fb77618b5ed7dd080deb83adcd111eb836b5e3d"
+    },
+    {
+      "path": "root/INTERRUPTED-RETIREMENT-CONTROL-ROOM-INITIAL-ACTUAL.json",
+      "bytes": 1818,
+      "sha256": "35dedc0fda3249c05eae59acda27a9ae1762fcb30f962e0fef9d967619c1df6b"
+    },
+    {
+      "path": "root/INTERRUPTED-RETIREMENT-CONTROL-ROOM-POLL01-ACTUAL.json",
+      "bytes": 405,
+      "sha256": "5e21b450df69c88c2c6f126a9c1cf2620013d9e1c70ad098ed95a5932f7d1711"
+    },
+    {
+      "path": "root/INTERRUPTED-RETIREMENT-CONTROL-ROOM-POLL02-ACTUAL.json",
+      "bytes": 1103,
+      "sha256": "7e6b120f9c0d814f8192f83f1de902deea9ea1f485a582f573cd6314dba9b44e"
+    },
+    {
+      "path": "root/INTERRUPTED-RETIREMENT-CONTROL-ROOM-POLL03-ACTUAL.json",
+      "bytes": 14484,
+      "sha256": "09ebbba73dee535d84673920db484066803ce920ada7cc52601b90e880ea6835"
+    },
+    {
+      "path": "root/INTERRUPTED-RETIREMENT-CONTROL-ROOM-STATUS01-ACTUAL.json",
+      "bytes": 1709,
+      "sha256": "16eeef9b99f1036bedea8c05a27611c8636c58a2fc748603a1b7c7cd2bb66c9f"
+    },
+    {
+      "path": "root/INTERRUPTED-RETIREMENT-PATCH-PARSE-ACTUAL.json",
+      "bytes": 818,
+      "sha256": "a7ca48aeae19bd0b5bdcebd43c8c6600790dc278781c591c453549dd8c53ecc5"
+    },
+    {
+      "path": "root/INTERRUPTED-RETIREMENT-ROOT-PROVENANCE-ACTUAL.json",
+      "bytes": 3370,
+      "sha256": "92b7a533544c4cf5761f882a88ea88ae248c9fc4fd6cb4923230c27ba1438b1f"
+    },
+    {
+      "path": "root/INTERRUPTED-RETIREMENT-ROOT-VIEW-METADATA-ACTUAL.json",
+      "bytes": 20465,
+      "sha256": "cf96f8eb8fb18de7246aa6cf177130f3fc9edc48a8748aa781bf468faf097bf4"
+    }
+  ]
+}

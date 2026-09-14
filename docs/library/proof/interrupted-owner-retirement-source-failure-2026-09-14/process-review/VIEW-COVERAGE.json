@@ -1,0 +1,260 @@
+{
+  "schema": "bounded-independent-source-view-coverage-v1",
+  "scope": "Current process review only. Whole-file hashes/counts do not imply whole-file content review. No independently verified worker coverage is inferred from read_coverage.json.",
+  "proposal_root": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/31e8890c-ab8/gemini/_scratch/interrupted-owned-session-retirement-implementation01",
+  "baseline_map": "docs/library/proof/interrupted-owner-retirement-direction-2026-09-13/corrected/INPUTS.json",
+  "actual_views": [
+    {
+      "receipt": "VIEW01-ACTUAL.json",
+      "tool": "13d3e4",
+      "views": [
+        "Nine-file output inventory",
+        "Complete brief02 INPUTS.json"
+      ]
+    },
+    {
+      "receipt": "VIEW02-ACTUAL.json",
+      "tool": "acef6b",
+      "views": [
+        {
+          "file": "generated_adapter_flow.patch",
+          "range": [
+            1,
+            416
+          ],
+          "complete": true
+        }
+      ]
+    },
+    {
+      "receipt": "VIEW03-ACTUAL.json",
+      "tool": "404130",
+      "views": [
+        {
+          "file": "generated_journal_setup.patch",
+          "range": [
+            1,
+            72
+          ],
+          "complete": true
+        },
+        {
+          "file": "durable_lifecycle.patch",
+          "range": [
+            1,
+            172
+          ],
+          "complete": true
+        }
+      ]
+    },
+    {
+      "receipt": "VIEW04-ACTUAL.json",
+      "tool": "e0be04",
+      "views": [
+        {
+          "file": "test_interrupted_owner_retirement.py",
+          "range": [
+            1,
+            397
+          ],
+          "complete": true
+        }
+      ]
+    },
+    {
+      "receipt": "VIEW05-ACTUAL.json",
+      "tool": "ecc080",
+      "views": [
+        {
+          "file": "generated_adapter_flow.py",
+          "ranges": [
+            [
+              1,
+              34
+            ],
+            [
+              174,
+              283
+            ],
+            [
+              462,
+              536
+            ]
+          ]
+        },
+        {
+          "file": "durable_lifecycle.py",
+          "range": [
+            286,
+            320
+          ]
+        },
+        {
+          "baseline": "S10",
+          "range": [
+            380,
+            425
+          ]
+        },
+        {
+          "baseline": "S06",
+          "range": [
+            248,
+            270
+          ]
+        },
+        {
+          "baseline": "S15",
+          "range": [
+            1,
+            180
+          ]
+        }
+      ]
+    },
+    {
+      "receipt": "VIEW06-ACTUAL.json",
+      "tool": "223dac",
+      "views": [
+        {
+          "file": "generated_adapter_flow.py",
+          "ranges": [
+            [
+              393,
+              413
+            ],
+            [
+              1120,
+              1225
+            ]
+          ]
+        },
+        "Reported exact rg matching lines only for CleanupUnconfirmed/declare_exit_call/controller/observer symbols; search is not whole-file content review"
+      ]
+    },
+    {
+      "receipt": "VIEW07-ACTUAL.json",
+      "tool": "e61538",
+      "views": [
+        {
+          "file": "generated_adapter_flow.py",
+          "ranges": [
+            [
+              531,
+              562
+            ],
+            [
+              940,
+              1074
+            ]
+          ]
+        },
+        {
+          "file": "REPORT.md",
+          "range": [
+            1,
+            93
+          ],
+          "complete": true
+        },
+        {
+          "file": "read_coverage.json",
+          "range": [
+            1,
+            117
+          ],
+          "complete": true
+        }
+      ]
+    },
+    {
+      "receipt": "VIEW08-ACTUAL.json",
+      "tool": "ec7df8",
+      "views": [
+        {
+          "baseline": "S07",
+          "ranges": [
+            [
+              10,
+              114
+            ],
+            [
+              149,
+              218
+            ]
+          ]
+        },
+        {
+          "baseline": "S08",
+          "ranges": [
+            [
+              297,
+              309
+            ],
+            [
+              504,
+              588
+            ]
+          ]
+        },
+        {
+          "baseline": "S01",
+          "range": [
+            326,
+            389
+          ]
+        },
+        {
+          "baseline": "S03",
+          "range": [
+            211,
+            239
+          ]
+        }
+      ]
+    },
+    {
+      "receipt": "VIEW09-ACTUAL.json",
+      "tool": "3ac209",
+      "views": [
+        {
+          "file": "generated_journal_setup.py",
+          "range": [
+            1,
+            308
+          ],
+          "complete": true
+        },
+        {
+          "file": "durable_lifecycle.py",
+          "range": [
+            190,
+            224
+          ]
+        },
+        "Test method/injection symbol line search only"
+      ]
+    }
+  ],
+  "checks": [
+    {
+      "receipt": "BINDING-CHECK-ACTUAL.json",
+      "tool": "9da91c",
+      "exit": 0,
+      "scope": "All 16 baseline hashes/bytes matched. Nine outputs hashed; line counts only."
+    },
+    {
+      "receipt": "PRESERVATION-CHECK-ACTUAL.json",
+      "tool": "929fe2",
+      "exit": 0,
+      "scope": "Eight named ordinary methods compare equal with CRLF normalization and terminal whitespace excluded; no parsing/import/execution."
+    }
+  ],
+  "not_claimed": [
+    "Complete current reread of all 16 baseline files",
+    "Independent validation of Gemini full-range view claims",
+    "Candidate compilation/import/tests/native execution",
+    "Independent reproduction of root Git/provenance checks"
+  ]
+}

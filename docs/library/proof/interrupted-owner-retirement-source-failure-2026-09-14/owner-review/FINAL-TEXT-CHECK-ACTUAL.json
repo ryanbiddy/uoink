@@ -1,0 +1,7 @@
+{
+  "chunk_id": "e52016",
+  "wall_time_seconds": 0.4829436,
+  "exit_code": 0,
+  "original_token_count": 160,
+  "output": "[\r\n  {\r\n    \"name\": \"VERDICT.md\",\r\n    \"bytes\": 5565,\r\n    \"sha256\": \"44a902b41ba0b460fe76ece47a3e25e540808b9fb69b21118cd3a32726db0204\"\r\n  },\r\n  {\r\n    \"name\": \"READ-COVERAGE.json\",\r\n    \"bytes\": 7653,\r\n    \"sha256\": \"d5259306f5159f5128598a791c4ea8dc8ba4a6c39dc8e26a8b995a2367fd2469\"\r\n  },\r\n  {\r\n    \"name\": \"SOURCE-BINDINGS.json\",\r\n    \"bytes\": 10157,\r\n    \"sha256\": \"77f56856c0603e16711775fac11410c0433aaf71db1910275431e95da804cdc0\"\r\n  },\r\n  {\r\n    \"name\": \"REVIEW-OBSERVATION-NOTE.md\",\r\n    \"bytes\": 1370,\r\n    \"sha256\": \"7352b630629453098b8ca0f4376b65776fe572333fd4fd7de2c05d4141403681\"\r\n  }\r\n]\r\nSaved actual read/check objects: 12\r\n"
+}

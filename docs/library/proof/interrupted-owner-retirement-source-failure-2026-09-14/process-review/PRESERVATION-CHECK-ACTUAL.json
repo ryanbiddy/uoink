@@ -1,0 +1,7 @@
+{
+  "chunk_id": "929fe2",
+  "wall_time_seconds": 0.4139755,
+  "exit_code": 0,
+  "original_token_count": 301,
+  "output": "{\r\n  \"scope\": \"Passive named-method text comparison; CRLF normalized and terminal whitespace excluded; no parser/import/execution\",\r\n  \"results\": [\r\n    {\r\n      \"file\": \"generated_adapter_flow.py\",\r\n      \"method\": \"_retired\",\r\n      \"same_normalized_text\": true\r\n    },\r\n    {\r\n      \"file\": \"generated_adapter_flow.py\",\r\n      \"method\": \"_never_started\",\r\n      \"same_normalized_text\": true\r\n    },\r\n    {\r\n      \"file\": \"generated_adapter_flow.py\",\r\n      \"method\": \"completion_evidence\",\r\n      \"same_normalized_text\": true\r\n    },\r\n    {\r\n      \"file\": \"generated_adapter_flow.py\",\r\n      \"method\": \"confirm_teardown\",\r\n      \"same_normalized_text\": true\r\n    },\r\n    {\r\n      \"file\": \"generated_journal_setup.py\",\r\n      \"method\": \"before_close\",\r\n      \"same_normalized_text\": true\r\n    },\r\n    {\r\n      \"file\": \"generated_journal_setup.py\",\r\n      \"method\": \"before_recovery_close\",\r\n      \"same_normalized_text\": true\r\n    },\r\n    {\r\n      \"file\": \"generated_journal_setup.py\",\r\n      \"method\": \"complete_recovery\",\r\n      \"same_normalized_text\": true\r\n    },\r\n    {\r\n      \"file\": \"generated_journal_setup.py\",\r\n      \"method\": \"complete\",\r\n      \"same_normalized_text\": true\r\n    }\r\n  ]\r\n}\r\n"
+}

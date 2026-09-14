@@ -1,0 +1,117 @@
+{
+  "schema": "interrupted-owner-retirement-read-coverage-v1",
+  "coverage": [
+    {
+      "id": "S01",
+      "path": "docs/library/proof/runtime-owner-native-cancel-2026-09-13/native-preparation/snapshot_lifecycle.py",
+      "start_line": 1,
+      "end_line": 518,
+      "total_lines": 518
+    },
+    {
+      "id": "S02",
+      "path": "docs/library/proof/runtime-owner-native-cancel-2026-09-13/native-preparation/durable_lifecycle.py",
+      "start_line": 1,
+      "end_line": 374,
+      "total_lines": 374
+    },
+    {
+      "id": "S03",
+      "path": "docs/library/proof/runtime-owner-native-cancel-2026-09-13/native-preparation/asr_loading_adapter.py",
+      "start_line": 1,
+      "end_line": 249,
+      "total_lines": 249
+    },
+    {
+      "id": "S04",
+      "path": "docs/library/proof/runtime-owner-native-cancel-2026-09-13/native-preparation/generated_adapter_flow.py",
+      "start_line": 1,
+      "end_line": 869,
+      "total_lines": 869
+    },
+    {
+      "id": "S05",
+      "path": "docs/library/proof/runtime-owner-native-cancel-2026-09-13/native-preparation/generated_operation_flow.py",
+      "start_line": 1,
+      "end_line": 367,
+      "total_lines": 367
+    },
+    {
+      "id": "S06",
+      "path": "docs/library/proof/runtime-owner-native-cancel-2026-09-13/native-preparation/generated_worker_flow.py",
+      "start_line": 1,
+      "end_line": 372,
+      "total_lines": 372
+    },
+    {
+      "id": "S07",
+      "path": "docs/library/proof/runtime-owner-native-cancel-2026-09-13/native-preparation/win32_private_pipe.py",
+      "start_line": 1,
+      "end_line": 391,
+      "total_lines": 391
+    },
+    {
+      "id": "S08",
+      "path": "docs/library/proof/runtime-owner-native-cancel-2026-09-13/native-preparation/win32_worker_connection.py",
+      "start_line": 1,
+      "end_line": 589,
+      "total_lines": 589
+    },
+    {
+      "id": "S09",
+      "path": "docs/library/proof/runtime-owner-native-cancel-2026-09-13/native-preparation/generated_journal_setup.py",
+      "start_line": 1,
+      "end_line": 253,
+      "total_lines": 253
+    },
+    {
+      "id": "S10",
+      "path": "docs/library/proof/runtime-owner-native-cancel-2026-09-13/native-preparation/snapshot_reservations.py",
+      "start_line": 1,
+      "end_line": 488,
+      "total_lines": 488
+    },
+    {
+      "id": "S11",
+      "path": "docs/library/proof/runtime-owner-native-cancel-2026-09-13/native-preparation/windows_reservation_port.py",
+      "start_line": 1,
+      "end_line": 392,
+      "total_lines": 392
+    },
+    {
+      "id": "S12",
+      "path": "docs/library/proof/runtime-owner-native-cancel-2026-09-13/native-preparation/reservation_file_port.py",
+      "start_line": 1,
+      "end_line": 107,
+      "total_lines": 107
+    },
+    {
+      "id": "S13",
+      "path": "docs/library/proof/runtime-owner-native-cancel-2026-09-13/native-preparation/inherited_readset.py",
+      "start_line": 1,
+      "end_line": 223,
+      "total_lines": 223
+    },
+    {
+      "id": "S14",
+      "path": "docs/library/proof/retired-owner-recovery-qualification-2026-09-13/proposal/test_retired_owner_recovery.py",
+      "start_line": 1,
+      "end_line": 287,
+      "total_lines": 287
+    },
+    {
+      "id": "S15",
+      "path": "docs/library/proof/retired-owner-recovery-qualification-2026-09-13/proposal/test_windows_reservations.py",
+      "start_line": 1,
+      "end_line": 553,
+      "total_lines": 553
+    },
+    {
+      "id": "S16",
+      "path": "docs/library/proof/retired-owner-recovery-qualification-2026-09-13/proposal/test_reservations.py",
+      "start_line": 1,
+      "end_line": 794,
+      "total_lines": 794
+    }
+  ]
+}

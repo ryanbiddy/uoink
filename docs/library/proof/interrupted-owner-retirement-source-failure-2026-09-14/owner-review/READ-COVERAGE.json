@@ -1,0 +1,218 @@
+{
+  "scope": "Independent source review only. Hash reads are not semantic full-file review. No candidate imports, compilation, tests, native execution, model/support/fixture/checkpoint/output reads, network or Git mutations.",
+  "run_id": "31e8890c-ab80-44d0-8062-3347942bc6cf",
+  "reviewed": [
+    {
+      "path": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/31e8890c-ab8/gemini/_scratch/interrupted-owned-session-retirement-implementation01/durable_lifecycle.py",
+      "ranges": [
+        [
+          1,
+          517
+        ]
+      ],
+      "actual": [
+        "READ03-ACTUAL.json",
+        "READ04-ACTUAL.json"
+      ]
+    },
+    {
+      "path": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/31e8890c-ab8/gemini/_scratch/interrupted-owned-session-retirement-implementation01/durable_lifecycle.patch",
+      "complete": true,
+      "actual": [
+        "READ07-ACTUAL.json"
+      ]
+    },
+    {
+      "path": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/31e8890c-ab8/gemini/_scratch/interrupted-owned-session-retirement-implementation01/generated_adapter_flow.py",
+      "ranges": [
+        [
+          1,
+          50
+        ],
+        [
+          285,
+          570
+        ],
+        [
+          935,
+          1083
+        ]
+      ],
+      "exact_file_searches": [
+        "CleanupUnconfirmed",
+        "class InterruptedCleanup|def controller_interrupted"
+      ],
+      "actual": [
+        "READ06-ACTUAL.json",
+        "READ08-ACTUAL.json",
+        "READ09-ACTUAL.json"
+      ]
+    },
+    {
+      "path": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/31e8890c-ab8/gemini/_scratch/interrupted-owned-session-retirement-implementation01/generated_adapter_flow.patch",
+      "complete": true,
+      "actual": [
+        "READ05-ACTUAL.json"
+      ]
+    },
+    {
+      "path": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/31e8890c-ab8/gemini/_scratch/interrupted-owned-session-retirement-implementation01/generated_journal_setup.py",
+      "exact_file_searches": [
+        "interrupted|def complete|def before"
+      ],
+      "actual": [
+        "READ10-ACTUAL.json"
+      ]
+    },
+    {
+      "path": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/31e8890c-ab8/gemini/_scratch/interrupted-owned-session-retirement-implementation01/generated_journal_setup.patch",
+      "complete": true,
+      "actual": [
+        "READ10-ACTUAL.json"
+      ]
+    },
+    {
+      "path": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/31e8890c-ab8/gemini/_scratch/interrupted-owned-session-retirement-implementation01/test_interrupted_owner_retirement.py",
+      "ranges": [
+        [
+          1,
+          397
+        ]
+      ],
+      "actual": [
+        "READ07-ACTUAL.json"
+      ]
+    },
+    {
+      "path": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/31e8890c-ab8/gemini/_scratch/interrupted-owned-session-retirement-implementation01/REPORT.md",
+      "complete": true,
+      "actual": [
+        "READ02-ACTUAL.json"
+      ]
+    },
+    {
+      "path": "E:/AI/projects/uoink/checkouts/Yoink-library/docs/library/proof/interrupted-owner-retirement-direction-2026-09-13/corrected/BRIEF.md",
+      "complete": true,
+      "actual": [
+        "READ02-ACTUAL.json"
+      ]
+    },
+    {
+      "path": "E:/AI/projects/uoink/checkouts/Yoink-library/docs/library/proof/interrupted-owner-retirement-direction-2026-09-13/corrected/INPUTS.json",
+      "complete": true,
+      "actual": [
+        "READ02-ACTUAL.json"
+      ]
+    },
+    {
+      "path": "E:/AI/projects/uoink/checkouts/Yoink-library/docs/library/proof/runtime-owner-native-cancel-2026-09-13/native-preparation/snapshot_lifecycle.py",
+      "ranges": [
+        [
+          145,
+          181
+        ],
+        [
+          210,
+          309
+        ],
+        [
+          315,
+          410
+        ]
+      ],
+      "actual": [
+        "READ09-ACTUAL.json",
+        "READ10-ACTUAL.json"
+      ]
+    },
+    {
+      "path": "E:/AI/projects/uoink/checkouts/Yoink-library/docs/library/proof/runtime-owner-native-cancel-2026-09-13/native-preparation/generated_worker_flow.py",
+      "ranges": [
+        [
+          220,
+          274
+        ]
+      ],
+      "actual": [
+        "READ09-ACTUAL.json"
+      ]
+    },
+    {
+      "path": "E:/AI/projects/uoink/checkouts/Yoink-library/docs/library/proof/runtime-owner-native-cancel-2026-09-13/native-preparation/win32_private_pipe.py",
+      "ranges": [
+        [
+          140,
+          172
+        ]
+      ],
+      "actual": [
+        "READ09-ACTUAL.json"
+      ]
+    },
+    {
+      "path": "E:/AI/projects/uoink/checkouts/Yoink-library/docs/library/proof/runtime-owner-native-cancel-2026-09-13/native-preparation/snapshot_reservations.py",
+      "ranges": [
+        [
+          388,
+          487
+        ]
+      ],
+      "actual": [
+        "READ09-ACTUAL.json"
+      ]
+    },
+    {
+      "path": "E:/AI/projects/uoink/checkouts/Yoink-library/docs/library/proof/retired-owner-recovery-qualification-2026-09-13/proposal/test_windows_reservations.py",
+      "ranges": [
+        [
+          1,
+          180
+        ]
+      ],
+      "actual": [
+        "READ10-ACTUAL.json"
+      ]
+    }
+  ],
+  "search_only_baselines": [
+    {
+      "path": "E:/AI/projects/uoink/checkouts/Yoink-library/docs/library/proof/runtime-owner-native-cancel-2026-09-13/native-preparation/snapshot_lifecycle.py",
+      "actual": "READ08-ACTUAL.json"
+    },
+    {
+      "path": "E:/AI/projects/uoink/checkouts/Yoink-library/docs/library/proof/runtime-owner-native-cancel-2026-09-13/native-preparation/generated_operation_flow.py",
+      "actual": "READ08-ACTUAL.json"
+    },
+    {
+      "path": "E:/AI/projects/uoink/checkouts/Yoink-library/docs/library/proof/runtime-owner-native-cancel-2026-09-13/native-preparation/generated_worker_flow.py",
+      "actual": "READ08-ACTUAL.json"
+    },
+    {
+      "path": "E:/AI/projects/uoink/checkouts/Yoink-library/docs/library/proof/runtime-owner-native-cancel-2026-09-13/native-preparation/win32_private_pipe.py",
+      "actual": "READ08-ACTUAL.json"
+    },
+    {
+      "path": "E:/AI/projects/uoink/checkouts/Yoink-library/docs/library/proof/runtime-owner-native-cancel-2026-09-13/native-preparation/win32_worker_connection.py",
+      "actual": "READ08-ACTUAL.json"
+    },
+    {
+      "path": "E:/AI/projects/uoink/checkouts/Yoink-library/docs/library/proof/runtime-owner-native-cancel-2026-09-13/native-preparation/snapshot_reservations.py",
+      "actual": "READ08-ACTUAL.json"
+    }
+  ],
+  "binding_check": {
+    "actual": "BINDING-CHECK-ACTUAL.json",
+    "source_bindings": "SOURCE-BINDINGS.json",
+    "baseline_files_checked": 16,
+    "expected_map_bytes": 356810,
+    "proposal_files_hashed": 9,
+    "raw_summary_bytes": null,
+    "note": "The raw summary's baseline_bytes is null because Measure-Object did not project the ordered-dictionary rows. Every row's exact size and SHA256 was independently compared to INPUTS; no aggregate measurement is claimed from that null field."
+  },
+  "residuals": [
+    "Baseline files outside the listed ranges were not semantically read in this review, even when hashed.",
+    "Adapter full unchanged portions and journal full derivative were not semantically reviewed; their complete supplied patches were read. Known patch/derivative inconsistencies are blockers.",
+    "Worker read_coverage.json was hashed, not accepted or independently trace-verified.",
+    "Root Control Room provenance review and peer native/journal review are separate; this verdict does not invent their raw records."
+  ]
+}
