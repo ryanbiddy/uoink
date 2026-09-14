@@ -115,8 +115,9 @@ establish safe installation isolation, and verify/correct resulting findings.
 | Generated reservation recovery | Component and evidence integrated at f9ab6fe | Author70b48e and independentfd86f5 each pass42 cases, with20 passing nested subtests and all10 guards valid. All123 proof payloads match Git/disk | Connect retained Windows gate/journal handles and split create/resume/startup. Native recovery and runtime acceptance remain open |
 | Windows reservation connection | Correction8fc3219; transfer2f4311f; native generated drain67887c3 | Unit70/0/0 plus35 subtests in both copies. Native d3d56f returns outer/controller/child0, valid guards, child0/job0, four confirmed phases/flushes and exact2,118B closed journal. All87 native proof payloads match Git/disk | Qualify remaining native exclusion/interruption/persistence/restart/reconciliation. Actual runtime-owner connection and real models remain open |
 | Worker/journal council | Scoped source review completed at1c6ac4c with mandatory Astra addendum; original244cca5 remains accuracy FAILED | All24 correction proof payloads match Git/disk. Gemini correction alone remains partial; Astra corrects remaining handshake/locking/private-caller claims. Existing17/65 outcomes unchanged | Continue native/runtime engineering. Session42118 closed482e42/exit0; no new council loop or broader acceptance |
-| Native writer exclusion | Stable-directory repair atd317a88; native04 atf630264; council corrections ata74e178 and f32f0ca | Both copies81 cases/72 subtests; native0eeb20 passed. Group A and B source conclusions require their mandatory Astra corrections. Group B has23 proof payloads matching Git/disk. Original failed review preserved | Retired-owner recovery preparation is frozen with a loader setup repair; qualify its22 cases before separate native admission. Restart and real runtime remain open |
+| Native writer exclusion | Stable-directory repair atd317a88; native04 atf630264; council corrections ata74e178 and f32f0ca | Both copies81 cases/72 subtests; native0eeb20 passed. Group A and B source conclusions require their mandatory Astra corrections. Group B has23 proof payloads matching Git/disk. Original failed review preserved | Retired-owner fake22 qualifies at a83ae1a. Separate native admission is next; restart and real runtime remain open |
 | Actual adapter cancellation | Generated qualification integrated at60b3bb5 | Author and independent copies each89 passed/0 failed/0 skipped,86 passing subtests; all216 proof payloads match Git/disk | Native cancellation integrated ata25b34b: all100 proof payloads match Git/disk. Connect interrupted final-clear recovery; crash/restart, real models and release remain unqualified |
+| Retired-owner final-clear recovery | Focused qualification committed at a83ae1a | Author72692c and independentd1e164 each22 passed/0 failed/0 skipped plus21 passing subtests. Rootd3c2a4 verifies exact case objects, guards and26 inputs/3 controls. All204 proof payloads match Git/disk | Native source review found no blocker at map9d988684/launcher75a9baea. Review the separate admission writer, then one generated Windows observation; no model or restart credit |
 | Worker runtime owner and bootstrap | Owner at 1f200eb; actual bootstrap connection at bbe10d6 | Both copies pass17/0/0: eleven retained owner cases plus six bootstrap cases. Exact case objects, valid guards, unchanged19 inputs plus admission. All144 newest proof payloads match Git/disk | Connect exact ownership through native services. Real inference, PCM/filter, VAD-to-model binding and protected constructor routes remain open |
 | Integration | Reliability repair at e8d058f and notice packaging at 71d3e70 after tree09 | Reliability:53 focused cases plus13 subtests per root. Notices:20 Python/10 block cases per root. Tree09 at 56d9d4c remains2,796 passed/1 failed/3 skipped across2,800 cases plus13 subtests; it predates both repairs | Finish runtime work, then run a new committed complete tree and rebuild/reseal. Package08 and website/marketing remain held. No current-source package or installation credit |
 | Desktop incident | Isolation failed in package-07 attempt; corrected at `e10ba3a` | Ordinary Uoink and filesystem connectors launched; earlier live-index/5179 effects unknown. Owned job cleaned | No further override launch; only guarded Uoink dashboard observed for package 08 |
@@ -183,9 +184,13 @@ The retired-owner interrupted-final-clear proposal is frozen under
 _scratch/windows-retired-owner-recovery-proposal01. Source review found and
 repaired a speculative-import path in the selected-case loader before execution.
 Read PREQUALIFICATION-LOADER-REPAIR02.md; preserve the earlier frozen inputs.
-New qualifier8a5e3b23 and26-input mapf7c3b964 need final peer checks, then22
-focused cases and independent confirmation before separate native admission.
-No tests or native execution for that derivative have run yet.
+Qualifier8a5e3b23 and26-input mapf7c3b964 now pass22/0/0 plus21 subtests in
+both independent copies, with identical case objects and all guards valid.
+Qualification is committed at a83ae1a with204 verified payloads. Native source
+review8bdcb55f found no blocker in the distinct fixed-interruption driver.
+Next review/invoke its separate admission writer, then one generated Windows
+observation. No native recovery execution has occurred yet. The next child-side
+runtime-owner connection brief is being prepared without model execution.
 D2 remains complete atd13534f; no repeat checkpoint/output access for documentation.
 No model, complete-tree, package, installed-client, website or marketing clearance.
 
@@ -5988,3 +5993,19 @@ assertions and guards remain unchanged. Preserve both frozen versions and the
 dated repair. Source review also repaired a stale-confirmation check before
 clear I/O; both changes preceded measurement. Native recovery, model, full-tree,
 package, installed-client and market acceptance remain open.
+
+### 2026-09-13 — Retired-owner fake22 qualification committed
+
+Commit a83ae1a preserves author72692c and independentd1e164: each22 cases and
+21 subtests pass, with no failures/skips. Rootd3c2a4 verifies exact case objects,
+ten guards,12 metadata traps,25 registry traps and unchanged26 inputs/3 controls.
+The selected set is12 historical plus10 new cases; other historical cases were
+not rerun. No full controller or native recovery was exercised by these tests.
+
+Documentary copier573f7e returned0; root6d55d8 verifies204 payloads/2,555,713B
+against Git/disk, seal9265dee370be5b1b5c9801f4fc1f18e0727a26f929fc3fa07de14fa151885250.
+The archive preserves both pre-execution repairs and preparation/checker errors.
+Native source review811131 returned0 after its own preserved filename-regex
+checker failure; it grants no execution result. Read the separate8bdcb55f
+verdict and proposed native admission before proceeding. D2 remains complete;
+no checkpoint or converted-output access was repeated.
