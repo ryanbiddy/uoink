@@ -1,0 +1,42 @@
+diff --git "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-d1-activated-invocation01\\before\\launch_d1.py" "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-d1-activated-invocation01\\launch_d1.py"
+index 2ae6c01..010c506 100644
+--- "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-d1-activated-invocation01\\before\\launch_d1.py"
++++ "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-d1-activated-invocation01\\launch_d1.py"
+@@ -1,4 +1,4 @@
+-"""Dormant one-shot D1 launcher. No owner pin or real artifact approval exists."""
++"""Activated one-shot D1 static launcher; exact root source admission still required."""
+ from datetime import datetime, timezone
+ import hashlib
+ import json
+@@ -9,7 +9,7 @@ import stat
+ import subprocess
+ import sys
+ 
+-OWNER_DECISION_SHA256 = None  # Future activation must be a separately reviewed patch.
++OWNER_DECISION_SHA256 = '3b395b5ab39d711502c69ce9c5f87ecb1587f1a9e619f713ddc3ac808c8390d2'  # Exact recorded Ryan D1-only decision.
+ FORBIDDEN = r'C:\Users\hello\AppData\Local\Uoink\index.db'
+ PYTHON = r'C:\Python314\python.exe'
+ CHECKOUT = Path(r'E:\AI\projects\uoink\checkouts\Yoink-library')
+@@ -75,7 +75,10 @@ def main():
+     require(sha(raw_decision) == OWNER_DECISION_SHA256, 'Recorded Ryan decision differs from reviewed pin')
+     decision = json.loads(raw_decision.decode('utf-8-sig'))
+     require(decision.get('owner') == 'Ryan' and decision.get('approved') is True
+-            and decision.get('scope') == SCOPE and decision.get('source_message_id'), 'No recorded Ryan approval')
++            and decision.get('scope') == SCOPE and decision.get('source_message_id') is None
++            and decision.get('decision_text') == 'Approve D1 static inspection only'
++            and decision.get('source_note_sha256') == '9f136312e41a9a72be804499d79d4a0e00c429ef0bc18551e604edde12c5f422',
++            'No exact note-backed Ryan approval')
+     require(decision.get('artifact_sha256') == '0b5b3216d60a2d32fc086b47ea8c67589aaeb26b7e07fcbe620d6d0b83e209ea'
+             and decision.get('artifact_bytes') == 17719103 and decision.get('interpreted_payload_bytes') == 1002
+             and decision.get('conversion_authorized') is False
+@@ -137,7 +140,9 @@ def main():
+     require(report['actual_child_exit'] == child.returncode, 'Child/report exit mismatch')
+     guard = report['guard']
+     require(guard['valid'] and not guard['unexpected_events'] and not guard['forbidden_conversion_calls']
+-            and guard['inputs_unchanged'] and guard['metadata_wrappers_installed'], 'Invalid D1 guard')
++            and guard['inputs_unchanged'] and guard['metadata_wrappers_installed']
++            and guard['baseline_winreg_identity_unchanged'] and guard['registry_namespace_unchanged']
++            and guard['registry_traps_installed'] and not guard['registry_denials'], 'Invalid D1 guard')
+     require(guard['invocations'] == 1 and guard['artifact_opens'] <= 1 and guard['receipt_opens'] <= 1,
+             'D1 invocation/open count mismatch')
+     require(not report['conversion_profile_activated'] and report['adapter_owner_gate_reset'], 'Gate state changed')

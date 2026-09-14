@@ -1,0 +1,46 @@
+{
+  "scope": "D1_STATIC_VERSION_AND_BUFFERS_ONLY",
+  "actual_child_exit": 0,
+  "inspection_result": {
+    "inspection_exit": 0,
+    "receipt_bytes": 1984,
+    "receipt_sha256": "754ca6dea6aed81de072940b35ad4c283f270b5770a88236ef55fd0a09d46e75",
+    "whole_file_elapsed_seconds": 0.032515,
+    "conversion_profile_activated": false,
+    "release_approved": false
+  },
+  "failure": null,
+  "guard": {
+    "valid": true,
+    "unexpected_events": [],
+    "forbidden_conversion_calls": [],
+    "heavy_preloaded": [],
+    "heavy_after": [],
+    "inputs_unchanged": true,
+    "metadata_wrappers_installed": true,
+    "registry_denials": [],
+    "registry_trap_count": 25,
+    "baseline_winreg_identity_unchanged": true,
+    "registry_namespace_unchanged": true,
+    "registry_traps_installed": true,
+    "active": false,
+    "artifact_opens": 1,
+    "receipt_opens": 1,
+    "invocations": 1
+  },
+  "owner_decision_sha256": "3b395b5ab39d711502c69ce9c5f87ecb1587f1a9e619f713ddc3ac808c8390d2",
+  "input_sha256": {
+    "d1_child.py": "fd31534dbed5d0b5fa809aab25159dee7d25cb453063b067e87833c444a7f483",
+    "zip_bounds.py": "bfe582cb2caa69a344a8147870c4ca161aa14d5202683c2e26e3f9ab040690c6",
+    "fixed_converter.py": "b31915b2e6d78a29ec05699952e5e0bfa01d234fec31ed37481c21665cfba54b",
+    "buffer_basis.py": "bfbb83800d127f031008c31fa669b093dca3d945ae2543db1b834f93c1d51373",
+    "inspect_adapter.py": "533c8abee9a9eea503e444166edf8acca07fc9d5c01b34626b44f957969c6649",
+    "known-inventory.json": "73ef1afe29719273272b4c27e0139a6d00393408455ec68f659bc53608c3fdcc",
+    "INPUTS.json": "7bb533e94042aad527aca723c3bde812fba6f8d128a2d9a6e058289390b84103",
+    "ROOT-ADMISSION.json": "6ca80d379598eaf94955f6a28a3fe92a54ab38eef2de36d1bb62627ff358d4be",
+    "RYAN-D1-DECISION.json": "3b395b5ab39d711502c69ce9c5f87ecb1587f1a9e619f713ddc3ac808c8390d2"
+  },
+  "conversion_profile_activated": false,
+  "adapter_owner_gate_reset": true,
+  "runtime_or_release_approved": false
+}

@@ -1,0 +1,14 @@
+{
+  "actual_child_exit": 0,
+  "guard_valid": true,
+  "input_bytes_unchanged": true,
+  "inspection_result": {
+    "inspection_exit": 0,
+    "receipt_bytes": 1984,
+    "receipt_sha256": "754ca6dea6aed81de072940b35ad4c283f270b5770a88236ef55fd0a09d46e75",
+    "whole_file_elapsed_seconds": 0.032515,
+    "conversion_profile_activated": false,
+    "release_approved": false
+  },
+  "conversion_runtime_or_release_accepted": false
+}

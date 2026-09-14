@@ -1,0 +1,11 @@
+{
+  "child_files": {
+    "d1_child.py": "fd31534dbed5d0b5fa809aab25159dee7d25cb453063b067e87833c444a7f483",
+    "zip_bounds.py": "bfe582cb2caa69a344a8147870c4ca161aa14d5202683c2e26e3f9ab040690c6",
+    "fixed_converter.py": "b31915b2e6d78a29ec05699952e5e0bfa01d234fec31ed37481c21665cfba54b",
+    "buffer_basis.py": "bfbb83800d127f031008c31fa669b093dca3d945ae2543db1b834f93c1d51373",
+    "inspect_adapter.py": "533c8abee9a9eea503e444166edf8acca07fc9d5c01b34626b44f957969c6649",
+    "known-inventory.json": "73ef1afe29719273272b4c27e0139a6d00393408455ec68f659bc53608c3fdcc"
+  },
+  "scope": "Activated D1 static-only source; execution requires exact root admission"
+}

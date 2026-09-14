@@ -1,0 +1,7 @@
+{
+  "chunk_id": "c27355",
+  "wall_time_seconds": 0.3871297,
+  "exit_code": 1,
+  "original_token_count": 56,
+  "output": "Exception: \r\nLine |\r\n  19 |  … ect.Properties.Count -ne 9) { throw 'Admission membership mismatch' }\r\n     |                                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\r\n     | Admission membership mismatch\r\n"
+}

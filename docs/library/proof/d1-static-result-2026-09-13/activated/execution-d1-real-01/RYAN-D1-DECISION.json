@@ -1,0 +1,35 @@
+{
+  "owner": "Ryan",
+  "approved": true,
+  "source_message_id": null,
+  "decision_text": "Approve D1 static inspection only",
+  "approved_utc": null,
+  "scope": "D1_STATIC_VERSION_AND_BUFFERS_ONLY",
+  "artifact_sha256": "0b5b3216d60a2d32fc086b47ea8c67589aaeb26b7e07fcbe620d6d0b83e209ea",
+  "artifact_bytes": 17719103,
+  "interpreted_payload_bytes": 1002,
+  "selected_members": [
+    [
+      "archive/version",
+      2
+    ],
+    [
+      "archive/data/4",
+      500
+    ],
+    [
+      "archive/data/5",
+      500
+    ]
+  ],
+  "basis": "Fixed eight-ULP consistency for 250 words; exactly one common orientation; not writer authentication",
+  "version_expectation_hex": "330a",
+  "actual_version_observed": false,
+  "conversion_authorized": false,
+  "model_execution_authorized": false,
+  "network_authorized": false,
+  "source_note_sha256": "9f136312e41a9a72be804499d79d4a0e00c429ef0bc18551e604edde12c5f422",
+  "source_note_kind": "Astra transcript note; not a raw tool receipt",
+  "source_note_path": "_scratch/RYAN-D1-STATIC-APPROVAL-2026-09-13.md",
+  "record_prepared_utc": "2026-09-14T01:23:11.4475631+00:00"
+}

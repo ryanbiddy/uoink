@@ -1,0 +1,25 @@
+diff --git "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-d1-activated-invocation01\\before\\run-root.repaired.ps1" "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-d1-activated-invocation01\\run-root.ps1"
+index 79d74ab..fffa30b 100644
+--- "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-d1-activated-invocation01\\before\\run-root.repaired.ps1"
++++ "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-d1-activated-invocation01\\run-root.ps1"
+@@ -14,7 +14,7 @@ $arguments = @('-I','-S','-B',(Join-Path $taskRoot 'launch_d1.py'))
+ [ordered]@{executable='C:\Python314\python.exe';arguments=$arguments;forbidden_live_binding_set=$true;provider_environment_scrubbed=$true;removed_variable_names=$providerNames} | ConvertTo-Json -Depth 5 |
+     Set-Content -LiteralPath (Join-Path $outerRoot 'command.json') -Encoding utf8
+ & 'C:\Python314\python.exe' @arguments 1> (Join-Path $outerRoot 'stdout.log') 2> (Join-Path $outerRoot 'stderr.log')
+-$rawExit = $LASTEXITCODE
++$rawExit = $global:LASTEXITCODE
+ # Persist the observed native exit before JSON formatting or log postchecks.
+ $rawExitBytes = [System.Text.Encoding]::ASCII.GetBytes(([string]$rawExit) + "`n")
+ $rawExitStream = [System.IO.FileStream]::new(
+@@ -27,6 +27,11 @@ try {
+ } finally {
+     $rawExitStream.Dispose()
+ }
++if ($null -eq $rawExit -or ($rawExit -isnot [int] -and $rawExit -isnot [long])) {
++    [ordered]@{instrumentation_valid=$false;reason='Native exit missing or noninteger';raw_observation_persisted=$true} | ConvertTo-Json |
++        Set-Content -LiteralPath (Join-Path $outerRoot 'instrumentation-failure.json') -Encoding utf8
++    throw 'Native exit missing or noninteger; raw observation retained'
++}
+ [ordered]@{actual_outer_exit=$rawExit;finished_utc=[DateTime]::UtcNow.ToString('o')} | ConvertTo-Json |
+     Set-Content -LiteralPath (Join-Path $outerRoot 'actual-exit.json') -Encoding utf8
+ Get-Content -LiteralPath (Join-Path $outerRoot 'stdout.log')

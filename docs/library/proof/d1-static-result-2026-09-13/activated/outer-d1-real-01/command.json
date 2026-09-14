@@ -1,0 +1,12 @@
+{
+  "executable": "C:\\Python314\\python.exe",
+  "arguments": [
+    "-I",
+    "-S",
+    "-B",
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-d1-activated-invocation01\\launch_d1.py"
+  ],
+  "forbidden_live_binding_set": true,
+  "provider_environment_scrubbed": true,
+  "removed_variable_names": []
+}

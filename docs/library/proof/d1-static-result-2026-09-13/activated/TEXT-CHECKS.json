@@ -1,0 +1,11 @@
+{
+  "review_kind": "Text and JSON only; no candidate execution",
+  "operative_pins_checked": 9,
+  "before_pins_checked": 4,
+  "unchanged_helpers": 5,
+  "source_note_sha256": "9f136312e41a9a72be804499d79d4a0e00c429ef0bc18551e604edde12c5f422",
+  "owner_sha256": "3b395b5ab39d711502c69ce9c5f87ecb1587f1a9e619f713ddc3ac808c8390d2",
+  "actual_root_admission_absent": true,
+  "checkpoint_operations": 0,
+  "source_checks_tool": "Preparation validation; not model or guard qualification"
+}

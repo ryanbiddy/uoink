@@ -1,0 +1,41 @@
+{
+  "command": [
+    "C:\\Python314\\python.exe",
+    "-I",
+    "-S",
+    "-B",
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-d1-activated-invocation01\\execution-d1-real-01\\d1_child.py"
+  ],
+  "cwd": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-d1-activated-invocation01\\execution-d1-real-01",
+  "environment_variable_names": [
+    "APPDATA",
+    "HF_DATASETS_OFFLINE",
+    "HF_HUB_OFFLINE",
+    "HOME",
+    "IG_FORBIDDEN_LIVE",
+    "LOCALAPPDATA",
+    "PYANNOTE_METRICS_ENABLED",
+    "PYTHONDONTWRITEBYTECODE",
+    "PYTHONIOENCODING",
+    "PYTHONUTF8",
+    "SYSTEMROOT",
+    "TEMP",
+    "TMP",
+    "TRANSFORMERS_OFFLINE",
+    "USERPROFILE",
+    "WINDIR"
+  ],
+  "source_hashes": {
+    "d1_child.py": "fd31534dbed5d0b5fa809aab25159dee7d25cb453063b067e87833c444a7f483",
+    "zip_bounds.py": "bfe582cb2caa69a344a8147870c4ca161aa14d5202683c2e26e3f9ab040690c6",
+    "fixed_converter.py": "b31915b2e6d78a29ec05699952e5e0bfa01d234fec31ed37481c21665cfba54b",
+    "buffer_basis.py": "bfbb83800d127f031008c31fa669b093dca3d945ae2543db1b834f93c1d51373",
+    "inspect_adapter.py": "533c8abee9a9eea503e444166edf8acca07fc9d5c01b34626b44f957969c6649",
+    "known-inventory.json": "73ef1afe29719273272b4c27e0139a6d00393408455ec68f659bc53608c3fdcc",
+    "INPUTS.json": "7bb533e94042aad527aca723c3bde812fba6f8d128a2d9a6e058289390b84103",
+    "launch_d1.py": "f9a46bb9cf5a2cdb6b80608fc2bf1ddb946df7b1a2115aedc18b806b08e0fd32",
+    "run-root.ps1": "0b1efed7ef92674f32aafdacce9829c1d5718ddbb88c9afb9d68d57540526888"
+  },
+  "owner_decision_sha256": "3b395b5ab39d711502c69ce9c5f87ecb1587f1a9e619f713ddc3ac808c8390d2",
+  "external_timeout_seconds": 60
+}

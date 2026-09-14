@@ -1,0 +1,7 @@
+{
+  "chunk_id": "b29f6c",
+  "wall_time_seconds": 1.0231541,
+  "exit_code": 0,
+  "original_token_count": 89,
+  "output": "{\"actual_child_exit\": 0, \"guard_valid\": true, \"inspection_result\": {\"inspection_exit\": 0, \"receipt_bytes\": 1984, \"receipt_sha256\": \"754ca6dea6aed81de072940b35ad4c283f270b5770a88236ef55fd0a09d46e75\", \"whole_file_elapsed_seconds\": 0.032515, \"conversion_profile_activated\": false, \"release_approved\": false}, \"conversion_runtime_or_release_accepted\": false}\r\n"
+}

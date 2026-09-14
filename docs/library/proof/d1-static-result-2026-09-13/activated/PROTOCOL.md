@@ -1,0 +1,25 @@
+# D1 activated invocation: root execution protocol
+
+Prepared only. No D1 program, helper or checkpoint has been invoked by this preparation. Root must read the complete activated sources and diffs, verify SOURCE-BINDINGS.json, then create its own ROOT-ADMISSION.json from the false template. The nine exact source hashes and owner record must match. The documentary source note is bound transitively through the hashed owner record; it is not a tenth runtime source read.
+
+Ryan's exact decision is "Approve D1 static inspection only". RYAN-D1-DECISION.json pins the transcript note, selected members, artifact identity and static-only limits. source_message_id and approved_utc remain null. record_prepared_utc records this preparation's timestamp, not the approval time. Root must compare that record to the actual conversation note before setting root_reviewed. The original dormant and repaired-wrapper sources remain unchanged in their prior directories and are preserved here under before/.
+
+After root's exact admission, the proposed one-shot outer command is:
+
+```powershell
+$env:IG_FORBIDDEN_LIVE = 'C:\Users\hello\AppData\Local\Uoink\index.db'
+& 'C:\Users\hello\.cache\codex-runtimes\codex-primary-runtime\dependencies\native\powershell\pwsh.exe' -NoProfile -File 'E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\vad-d1-activated-invocation01\run-root.ps1'
+exit $global:LASTEXITCODE
+```
+
+Do not invoke that command during preparation. Root saves the actual outer tool object separately. The wrapper disables native-error promotion, scrubs credential names without printing values, sets the lexical live-path binding and offline flags, then invokes C:\Python314\python.exe with -I -S -B. Its explicit global exit value is written exclusively and flushed before type checks, JSON formatting or log reads. A null/noninteger remains an instrumentation failure with its raw observation retained.
+
+The Python parent checks the exact owner record, root admission, fixed helpers and nine sources before exclusive creation of execution-d1-real-01. The wrapper separately claims outer-d1-real-01. Existing output directories refuse; no deletion, overwrite or retry is part of this protocol. The fixed adapter output is _scratch/vad-buffer-version-approved-output/d1-buffer-version-01.json; its parent must be fresh. Source and receipt paths must remain private and quiescent. This preparation does not establish that runtime filesystem condition.
+
+Only the child performs the approved artifact operation. Its early built-in-winreg traps come from the previously qualified fixed guard; absence or replacement of that baseline refuses. After source/decision/admission validation, it loads the same four exact helpers. One read-only open obtains the bounded immutable checkpoint snapshot. Whole-input hashing and stored-ZIP integrity checks traverse opaque bytes. Only archive/version (2 bytes) and archive/data/4 plus archive/data/5 at 500 bytes each are interpreted. No pickle, other-storage interpretation, conversion, tensor/model construction or network is permitted. The adapter's temporary D1 approval resets afterward; fixed_converter.REAL_PROFILE stays None.
+
+Expect one inspection invocation, at most one artifact and one exclusive receipt open, and exact unchanged input records. Parent requires empty stderr and valid content/metadata, model/pickle, conversion and registry guards. The registry receipt must show unchanged baseline identity, namespace and traps with no denials. Parent reads the bounded result JSON and output receipt, not the checkpoint again. It requests a 60-second child timeout; the unchanged adapter's 30-second budget is cooperative. Neither is a hard real-time guarantee.
+
+Preserve raw-exit.txt, actual-exit.json, command/stdout/stderr files, the exclusive attempt claim, copied source/decision/admission files, launch plan, actual-child-exit.json and every partial or completed receipt. checked-result.json exists only if parent validation reaches that point. Exit 0 means static_inspection_complete_unqualified only; it requires 1002 interpreted bytes and version_actual_hex=330a. Version/orientation/inventory refusal remains exit 2; error or invalid instrumentation remains 1. Timeout has no invented numeric child exit. No later-looking receipt erases a nonzero result or validation failure. Stop after the one attempt; root reviews any failure before another brief or invocation.
+
+The unchanged analytic comparison can support one consistent byte orientation under its fixed eight-ULP basis. It does not authenticate the writer, prove the other storage encodings or approve conversion. Python guards and ancestor checks do not provide an OS sandbox or race-proof handle authorization. D2, native model execution, stack migration, installation, speaker work and release remain outside Ryan's D1 approval.
