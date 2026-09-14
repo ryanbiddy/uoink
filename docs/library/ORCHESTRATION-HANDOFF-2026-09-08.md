@@ -335,8 +335,10 @@ runs02dc46/0 and8a6166/0 each pass95/0/0 plus95 subtests. Rootdc197f/0 and
 peerfdc459/0 verify identical full cases/subtests,25 child hashes,29 inputs,
 three controls,ten guards and37 output files. Read the controller95 result
 verdict. Results are committed atfc17b67; do not repeat these observations for
-documentation. Next dispatch CONTROLLER-RESUME-PUBLICATION-IMPLEMENTATION-BRIEF-2026-09-14.md
-to Gemini for source-only work in its fresh worktree. Frozen plan2dfb90f8/map00c3e86b
+documentation. Control Room run19ac6c2d-eaa3-428a-829c-5dc2a2289a40 is active
+from CONTROLLER-RESUME-PUBLICATION-IMPLEMENTATION-BRIEF-2026-09-14.md at frozen
+basee0bbbd6. Gemini3.8-flash-high/high uses the existing Antigravity subscription
+for source-only work in its fresh worktree. Frozen plan2dfb90f8/map00c3e86b
 binds eight sources/227,073 bytes and narrows fixed classification, pre-resume
 and actual final-publication checks. Preserve generated routing and all accepted
 tests. Native bootstrap/transport and child adoption remain later units. Keep
@@ -7132,3 +7134,17 @@ Raw diff/apply25984f succeeds; a501e4 restores28 proven newline-only differences
 The archive retains stage95 integration and branch-backup receipts. This new
 source-only repair has no execution result yet; frozen planning read diagnostics
 remain preserved. No Ryan-only decision is required for this bounded source work.
+
+### 2026-09-14 — Gemini fixed-boundary implementation active
+
+The brief and plan are committed ate0bbbd694b4fb082a5b1c2b15370e2a7391ef3da.
+Pusha1be67/0 and fresh remote4e5e57/0 verify the authorized branch-only backup.
+Dispatch28f02a starts run19ac6c2d-eaa3-428a-829c-5dc2a2289a40 with frozen
+basee0bbbd6. Worker0f5b2a05-d653-4d6a-8dca-c45b6eb35f4b is Gemini3.8-flash-high
+at high effort through Antigravity; actual5e2511 confirms its subscription route.
+Status791f45 records the running worker in
+`C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\19ac6c2d-eaa\gemini`.
+Root preserves the command, initial actual and every poll. PTY session46268 is
+still active at this entry; no source or execution pass is claimed. Wait for
+delivery, freeze its exact text/Control Room record, then review the complete
+diff and proposed canonical-family fixture before any qualification.
