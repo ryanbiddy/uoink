@@ -1,0 +1,7 @@
+{
+  "chunk_id": "1a6810",
+  "wall_time_seconds": 0.9005625,
+  "exit_code": 0,
+  "original_token_count": 150,
+  "output": "{\r\n  \"selected_inputs\": 48,\r\n  \"selected_bytes\": 480562,\r\n  \"map_sha256\": \"3053c328e65636d895f8caa1545425638492f9cb816fc0ac8bdff4fe19baa51d\",\r\n  \"materialized\": 2,\r\n  \"controller_preserved_fields\": 31,\r\n  \"controller_omitted_call_rows\": 8230,\r\n  \"original_controller_sha256\": \"3e74a30295288c4892f6545fe71dc23516e1fcd5198653196692f0e2f47651f3\",\r\n  \"all_selected_bindings_verified\": true,\r\n  \"no_source_or_native_execution\": true,\r\n  \"model_or_checkpoint_access\": false,\r\n  \"dispatch_occurred\": false,\r\n  \"approved_brief_sha256\": \"cc17f702e9d1eeea1fa0c5d59bb2725043aff5f02846ed4d74ebc3d17de48b40\"\r\n}\r\n"
+}

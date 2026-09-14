@@ -1,0 +1,61 @@
+{
+  "scope": "Root-reviewed source-only Gemini brief and prepared evidence catalog",
+  "files": {
+    ".gitattributes": {
+      "bytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+    },
+    "COMPACT-MAP-ACTUAL.json": {
+      "bytes": 1968,
+      "sha256": "1c658efc63fdad9569563e52fc373bb12d7c5cff8dc7a11578da50a9e60c3b12"
+    },
+    "COMPACT-MAP-FAILED-ACTUAL.json": {
+      "bytes": 537,
+      "sha256": "563ffb256016a08ac7766eec7c095f98cdc9c80ce7792899f4a50ea47a408e76"
+    },
+    "controller-selected-fields.json": {
+      "bytes": 26029,
+      "sha256": "e35bbf7338ba599bfa2bcfcf940edc58adb8044ec15b25d7c14aec717f617568"
+    },
+    "extract-controller.ps1": {
+      "bytes": 3348,
+      "sha256": "08ba62c552f397e1381db2036d78a28c583219cfcb7b6da844ce3a48f7431b1c"
+    },
+    "EXTRACTION-ACTUAL.json": {
+      "bytes": 629,
+      "sha256": "3a92be55ff4c2ec7eab4404bc15e968b8316c938ef56ea3e05898ca453126a87"
+    },
+    "EXTRACTION.md": {
+      "bytes": 1319,
+      "sha256": "2d2197c5bf5c4b6de7520a45c4dfcfa1f9d88739db9d56e7abbf6804ff6cb2f2"
+    },
+    "INPUT-SELECTION.json": {
+      "bytes": 28196,
+      "sha256": "3053c328e65636d895f8caa1545425638492f9cb816fc0ac8bdff4fe19baa51d"
+    },
+    "MAP-PREPARATION-REPAIR.md": {
+      "bytes": 711,
+      "sha256": "7aeb492462be8531a119033d454f1afffd19ee736f0d83c2d794339b4df020f5"
+    },
+    "PREPARED-BRIEF.md": {
+      "bytes": 6180,
+      "sha256": "ca5fafb6a9ddafc9d344d16d7f2f94c62208347281fc010333d297fec9b0784f"
+    },
+    "ROOT-HANDOFF.md": {
+      "bytes": 1995,
+      "sha256": "5931acfced191e9ec647039923dc5fa123963bac24c156d5240c00622ce1bc4d"
+    },
+    "ROOT-MATERIALIZATION-ACTUAL.json": {
+      "bytes": 783,
+      "sha256": "86e0d0ac3b6d37947a0a4f69648c2dfcdaaa9bbf9f55676e4baf9929f6a11170"
+    },
+    "ROOT-MATERIALIZATION.json": {
+      "bytes": 598,
+      "sha256": "b6ea50e5a5d020fe3601f2491ad4a5062b9428fe0ef5acf8b340e06179554661"
+    },
+    "root-materialize.ps1": {
+      "bytes": 5968,
+      "sha256": "f3c69b14376c65a8dd2a267bd0633d62e68ae97940f182143524faaec4bcff51"
+    }
+  }
+}
