@@ -1,0 +1,7 @@
+{
+  "chunk_id": "86ffba",
+  "wall_time_seconds": 1.0482844,
+  "exit_code": 0,
+  "original_token_count": 88,
+  "output": "warning: in the working copy of 'docs/library/RELEASE-NOTES-LIVING-LIBRARY.md', LF will be replaced by CRLF the next time Git touches it\n{\"patch\":\"E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\_scratch\\\\child-namespace01-failure.patch\",\"bytes\":3271573,\"sha256\":\"0eb52c897fe535c246bd2e9a7483356c71d194749e30ac43628c7bc48d5ba2ba\",\"apply_exit\":0}\r\n"
+}

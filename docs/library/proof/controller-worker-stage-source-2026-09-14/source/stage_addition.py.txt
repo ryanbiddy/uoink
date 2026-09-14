@@ -1,0 +1,98 @@
+
+
+# Local post-resume lifecycle checks only. No native/pipe/namespace authority.
+from durable_lifecycle import _DurableKernel
+
+
+def _validate_controller_worker_stage_locked(custody, startup, permit, session, worker, stage):
+    manager, record, token = custody.manager, custody.record, custody.token
+    _require(custody.active and custody.startup is startup
+             and _CONTROLLER_STARTUPS.get(id(startup)) is custody
+             and custody.consumed_by is session, "Exact consumed controller startup required")
+    # These captured helpers inspect the already retained scalar records only.
+    # No delegate, journal, worker callback or native service is called here.
+    _startup_selection_current(custody)
+    current = _startup_references(custody)
+    _require(len(current) == len(custody.references)
+             and all(a is b for a, b in zip(current, custody.references))
+             and _startup_values(custody) == custody.values,
+             "Retained startup selection changed")
+    _require(custody.admission.manifest == custody.manifest
+             and custody.admission.manifest.approval is custody.release.manifest_approval
+             and custody.selected is next(model for model in custody.admission.manifest.models
+                 if model.choice == custody.admission.choice)
+             and custody.selected == next(model for model in custody.manifest.models
+                 if model.choice == custody.admission.choice),
+             "Admission model differs from approved selection")
+    _require(startup.release is custody.release
+             and startup.approval is custody.release.manifest_approval
+             and startup.manifest is custody.manifest
+             and startup.admission is custody.admission
+             and startup.selected is custody.selected and startup.policy is custody.profile
+             and startup.usage == custody.usage and startup.binding is custody.binding
+             and startup.permit is custody.permit, "Startup record was replaced or changed")
+    _require(type(manager) is DurableSnapshotLifecycle
+             and type(permit) is _NativePermit and permit is custody.permit
+             and permit.manager is manager and permit.record is record
+             and record.key is custody.key and manager._records.get(record.key) is record
+             and record.permit is permit.identity and record.protection is custody.protection
+             and type(custody.lease) is _DurableLease and custody.lease.manager is manager
+             and not custody.lease.inner._exited and not custody.lease._finalization_started,
+             "Current startup lease permit required")
+    _require(type(token) is Reservation and custody.lease.token is token
+             and manager._tokens.get(record.key) is token
+             and token.service is manager._reservations
+             and token.service._live.get(token.gate) is token
+             and token.phase == "WORKER_BOUND" and token.pending is None
+             and token.persistence_failure is None and token.revoked is False
+             and token.resume_attempted is True,
+             "Current post-resume reservation required")
+    _require(record.key.store_root == custody.admission.private_root
+             and record.key.choice == custody.admission.choice == custody.selected.choice
+             and record.key.revision == custody.selected.revision
+             and token.physical is custody.lease.binding[0]
+             and token.semantic is custody.lease.binding[1]
+             and token.generation == custody.lease.binding[2],
+             "Exact reserved startup selection required")
+    _require(token.semantic.choice == custody.selected.choice
+             and token.semantic.revision == custody.selected.revision
+             and token.semantic.manifest == custody.release.manifest_approval.manifest_sha256,
+             "Durable selection differs from approved startup")
+    _require(type(session) is OwnedSession and record.owner is session
+             and session._record is record and session._manager is manager
+             and not session._revoked and not session._closing
+             and session._active == 0 and not session._closed_verified,
+             "Exact live consumed session required")
+    kernel = manager._kernel
+    _require(type(kernel) is _DurableKernel and kernel.manager is manager
+             and worker is not None and token.worker is worker
+             and kernel._starts.get(permit.identity) is worker,
+             "Exact retained durable worker required")
+    if stage == "finish_start":
+        _require(record.phase is Phase.NATIVE_RESERVED and session._worker is None,
+                 "Finish-start stage requires unpublished reserved session")
+    else:
+        _require(stage == "published" and record.phase is Phase.NATIVE_RUNNING
+                 and session._worker is worker,
+                 "Published stage requires the exact running session worker")
+
+
+def _validate_controller_worker_stage(startup, permit, session, worker, stage):
+    """Validate one of two local post-resume stages; never mint a worker witness.
+
+    All five arguments are mandatory. Success reports the current locked local
+    relation only, not observed native resume, assigned-job/read-set ownership,
+    pipe provenance, completed child startup or permission to construct.
+    """
+    _require(type(stage) is str and stage in ("finish_start", "published"),
+             "Explicit supported controller worker stage required")
+    _require(type(startup) is _ControllerASRStart and type(session) is OwnedSession
+             and worker is not None, "Exact startup, session and non-None worker required")
+    custody = _CONTROLLER_STARTUPS.get(id(startup))
+    _require(type(custody) is _StartupCustody and custody.startup is startup,
+             "Copied controller startup has no issuance authority")
+    with custody.manager._lock:
+        with custody.token._lock:
+            _validate_controller_worker_stage_locked(custody, startup, permit, session, worker, stage)
+    return startup
+

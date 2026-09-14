@@ -1,0 +1,255 @@
+{
+  "scope": "Qualification plan only. No new instrument, admission or candidate invocation.",
+  "brief": {
+    "path": "E:/AI/projects/uoink/checkouts/Yoink-library/docs/library/CONTROLLER-WORKER-STAGE-REPAIR-BRIEF-2026-09-14.md",
+    "bytes": 4345,
+    "sha256": "84fbdc2ba514b65b9cd7004213fcc5fc6f1760f0bc646cad00f7b37ff989dffb"
+  },
+  "read_inputs": [
+    {
+      "path": "E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/startup-authority-qualification-proposal01/qualify_windows_reservations.py",
+      "bytes": 13317,
+      "sha256": "4c057e438073ae5dd063b396e7aeb1a69e963f20250f366233bb9e9ffc5e6e1b"
+    },
+    {
+      "path": "E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/startup-authority-qualification-proposal01/run_preflight01.ps1",
+      "bytes": 8879,
+      "sha256": "00b0dab512def37602f8d9e3791d2fd7612684ce03d678f486e92d3ae2fd9ae9"
+    },
+    {
+      "path": "E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/startup-authority-qualification-proposal01/QUALIFICATION-PROTOCOL.md",
+      "bytes": 3103,
+      "sha256": "36daa5629e1e0736538150b8e32f9f92b376526e711c52e28316c65b37ae16c0"
+    },
+    {
+      "path": "E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/startup-authority-qualification-proposal01/ROOT-ADMISSION.template.json",
+      "bytes": 248,
+      "sha256": "0da30aefe86a4a71bbcfd4fbe2b89f81ac220d8f80c4621a823d09cce2c98744"
+    },
+    {
+      "path": "E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/startup-authority-qualification-proposal01/CONFIRMATION-ADMISSION.template.json",
+      "bytes": 267,
+      "sha256": "dc660b7bb1e970df80a1eb0d5f143df6d78009b7a2f0587fcd15b1ce7a9c7077"
+    },
+    {
+      "path": "E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/startup-authority-qualification-proposal01/SOURCE-INPUTS.json",
+      "bytes": 9815,
+      "sha256": "fde7f1797a2873860e1547257cd94a0676821c271004f4c5a7b82d7dc9ebbcd8"
+    },
+    {
+      "path": "E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/startup-authority-qualification-proposal01/PINS.json",
+      "bytes": 4401,
+      "sha256": "47af697a62dcead062f8c2771aad550ebd194392665f85a9a9f3face60551fb8"
+    },
+    {
+      "path": "E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/startup-authority-qualification-proposal01/EXPECTED-CASES.json",
+      "bytes": 8581,
+      "sha256": "2dc0ec32738188ece925603d823ae04767f8255ae67b68038014cb65b244c0f2"
+    }
+  ],
+  "baseline": {
+    "modules": 21,
+    "child_texts": 23,
+    "parent_inputs": 27,
+    "ordered_case_count": 81,
+    "old_case_ids_source": "EXPECTED-CASES.json",
+    "old_case_ids_sha256": "2dc0ec32738188ece925603d823ae04767f8255ae67b68038014cb65b244c0f2",
+    "parent_rows": [
+      {
+        "path": "reservation_file_port.py",
+        "bytes": 4694,
+        "sha256": "708554378ab8a8e6c4477e637c999256665cbd2855b94c6fa3c2d04a19d3a224"
+      },
+      {
+        "path": "snapshot_reservations.py",
+        "bytes": 23634,
+        "sha256": "e80ae881fa4af9cc7d1a3e4a06624f5b19abe4de09aec3844e8a541449335b98"
+      },
+      {
+        "path": "snapshot_lifecycle.py",
+        "bytes": 22138,
+        "sha256": "a80514aac6b1e75b9b872052852fa993a23cd5273b6bed4ffb4eef7404cb69dd"
+      },
+      {
+        "path": "durable_lifecycle.py",
+        "bytes": 32833,
+        "sha256": "3c8963eaa02bbc1d810ee2632d0363303bfe05ec6ceeef73771ca8005a00ece3"
+      },
+      {
+        "path": "win32_worker_connection.py",
+        "bytes": 28730,
+        "sha256": "b39a29cea1f3d60e4416111fd87417b21458b1f6f23dcb7700d522050b0b0b45"
+      },
+      {
+        "path": "windows_reservation_port.py",
+        "bytes": 14455,
+        "sha256": "910aa472888303d29655dacc355349f7a2876c97fb593f7f0dc6f148a9ca9dc6"
+      },
+      {
+        "path": "trusted_asr_resolver.py",
+        "bytes": 13373,
+        "sha256": "16a5a1245f649a3eb04d077b661835503f08bef0ff8822dcb545176f0cc30833"
+      },
+      {
+        "path": "asr_loading_adapter.py",
+        "bytes": 12113,
+        "sha256": "635d2c22db75d12ffe6965fb656fdca47450ccbbaeb4d8cc8aaff9fcc79dd243"
+      },
+      {
+        "path": "pinned_buffer_namespace.py",
+        "bytes": 7893,
+        "sha256": "2cc25a7a254f35d802336ef121cc860887a4301b3257588438dddec392fe0b7b"
+      },
+      {
+        "path": "owned_generation_protocol.py",
+        "bytes": 19570,
+        "sha256": "437e0880e10c91555df61b3c07c8be665430098c54c7d6ef687a99a0aa4a79d9"
+      },
+      {
+        "path": "inherited_readset.py",
+        "bytes": 12391,
+        "sha256": "02be8e04f4bea3030faf0882ae48ead40716c5782f95e2790e1a9897c5be76e3"
+      },
+      {
+        "path": "generated_worker_flow.py",
+        "bytes": 22853,
+        "sha256": "1ab240d60ceaca130ac85f5d2e908ef5895da5297f35d78a1caba1c62e622238"
+      },
+      {
+        "path": "generated_operation_flow.py",
+        "bytes": 21274,
+        "sha256": "6f09b4e6490b2078e792e49559a9dd0db95a895a778c31294a3577eeabdc98ed"
+      },
+      {
+        "path": "generated_adapter_flow.py",
+        "bytes": 25562,
+        "sha256": "b43ce2335da60f7879305903b5a89bf70352acd47dc5f336bc90757f6d7873bd"
+      },
+      {
+        "path": "win32_private_pipe.py",
+        "bytes": 18613,
+        "sha256": "73a1109a55f2bc807594655c71b24a3e35eb88d7f744497df2cc328dc224cae7"
+      },
+      {
+        "path": "test_reservations.py",
+        "bytes": 37737,
+        "sha256": "604a295d5e925b9a9d7f55750bfeb1ddcda3e6a9873d6d8d7f9e98c84d9b4b9e"
+      },
+      {
+        "path": "test_windows_reservations.py",
+        "bytes": 27701,
+        "sha256": "91b0de71eb55d088ee2fdbcd11ff3e6a074f18f713dfcd5b384814a1dc78300c"
+      },
+      {
+        "path": "startup_fixture_resolver.py",
+        "bytes": 13373,
+        "sha256": "16a5a1245f649a3eb04d077b661835503f08bef0ff8822dcb545176f0cc30833"
+      },
+      {
+        "path": "startup_fixture_adapter.py",
+        "bytes": 28922,
+        "sha256": "6482b782c545adbcd524a68ae85ba2abb3f081683379a9d53ada66d03a5ddb51"
+      },
+      {
+        "path": "startup_authority_fixture.py",
+        "bytes": 8556,
+        "sha256": "fe82ffe16117a9a74b3194e607c86c69b4411076337965ccb5d78c8a9cec897a"
+      },
+      {
+        "path": "test_startup_authority.py",
+        "bytes": 13756,
+        "sha256": "083b5bf73b089d088c9d0b44a185682f03f55d33d8d020f9cf15d0ffc2c6ae22"
+      },
+      {
+        "path": "qualify_windows_reservations.py",
+        "bytes": 13317,
+        "sha256": "4c057e438073ae5dd063b396e7aeb1a69e963f20250f366233bb9e9ffc5e6e1b"
+      },
+      {
+        "path": "EXPECTED-CASES.json",
+        "bytes": 8581,
+        "sha256": "2dc0ec32738188ece925603d823ae04767f8255ae67b68038014cb65b244c0f2"
+      },
+      {
+        "path": "run_preflight01.ps1",
+        "bytes": 8879,
+        "sha256": "00b0dab512def37602f8d9e3791d2fd7612684ce03d678f486e92d3ae2fd9ae9"
+      },
+      {
+        "path": "BRIEF.md",
+        "bytes": 1910,
+        "sha256": "d3f124b1906e56f84f759bbaa1f3ea12cc8f4759ff4a5c9dd7b98cd7455efda5"
+      },
+      {
+        "path": "QUALIFICATION-PROTOCOL.md",
+        "bytes": 3103,
+        "sha256": "36daa5629e1e0736538150b8e32f9f92b376526e711c52e28316c65b37ae16c0"
+      },
+      {
+        "path": "SOURCE-INPUTS.json",
+        "bytes": 9815,
+        "sha256": "fde7f1797a2873860e1547257cd94a0676821c271004f4c5a7b82d7dc9ebbcd8"
+      }
+    ],
+    "all_rows_passively_checked": true
+  },
+  "pending_source": {
+    "root": "E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/controller-worker-stage-repair01",
+    "adapter": {
+      "file": "asr_loading_adapter.py",
+      "loaded_as": "startup_fixture_adapter",
+      "sha256": null,
+      "required_prefix_bytes": 28922,
+      "required_prefix_sha256": "6482b782c545adbcd524a68ae85ba2abb3f081683379a9d53ada66d03a5ddb51"
+    },
+    "new_modules": [
+      {
+        "file": "worker_stage_fixture.py",
+        "imports": [
+          "contextlib.contextmanager",
+          "startup_authority_fixture"
+        ],
+        "sha256": null
+      },
+      {
+        "file": "test_controller_worker_stage.py",
+        "class": "ControllerWorkerStageContracts",
+        "imports": [
+          "dataclasses.replace",
+          "unittest",
+          "startup_authority_fixture",
+          "worker_stage_fixture",
+          "snapshot_lifecycle"
+        ],
+        "sha256": null
+      }
+    ],
+    "append_import": "durable_lifecycle._DurableKernel; existing canonical module is already loaded before startup_fixture_adapter",
+    "new_case_ids": null,
+    "new_case_count": null,
+    "total_case_count": null,
+    "final_child_count": null,
+    "final_parent_count": null,
+    "additional_function_capture_names": null,
+    "status": "Author-reported current draft module/import contract; source not yet frozen or reviewed by this planner."
+  },
+  "proposed_labels": {
+    "author": "controller-stage-fake01",
+    "confirmation": "controller-stage-confirmation01",
+    "actual_admission": false
+  },
+  "receipt_limits": {
+    "per_input_bytes": 1048576,
+    "capture_characters_each": 8192,
+    "subtests_per_case": 64,
+    "result_utf8_bytes": 262144,
+    "guard_count": 10,
+    "metadata_traps": 12,
+    "registry": "Retain installed built-in baseline and all captured traps; accepted baseline observed25; retain existing1..64 admission bound.",
+    "setup_receipt": "Admission/copy/setup before try has no guaranteed launch-failure.json. Retain actual outer tool exit; only exceptions inside inherited try produce that file."
+  },
+  "read_notes": [
+    "Full brief, qualifier, launcher, protocol/templates, map/PINS and ordered81 list read as text. The combined display was truncated; the intact saved objects were separately displayed to finish all inputs.",
+    "Passive BASELINE-RELATION04 checks all27 file pins and23 map rows. Its unused aggregate parent_bytes field is null; no aggregate-byte claim is based on that field."
+  ]
+}

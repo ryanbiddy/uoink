@@ -1,0 +1,7 @@
+{
+  "chunk_id": "ef6117",
+  "wall_time_seconds": 0.360789,
+  "exit_code": 0,
+  "original_token_count": 72,
+  "output": "{\"proof\":\"docs/library/proof/child-namespace01-failure-2026-09-14\",\"payloads\":162,\"bytes\":3130750,\"manifest_sha256\":\"176da0ab98689a21dc2bb689790daffea269a5b574d9cf687f1c9e58738153bf\",\"delivery_files\":26,\"proposed_tests_unexecuted\":17,\"source_verdict\":\"FAIL\",\"subject_execution\":false}\n"
+}

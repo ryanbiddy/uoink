@@ -1,0 +1,72 @@
+{
+  "scope": "Complete new append, fixture and14 proposed cases; directly called retained lifecycle/authority contracts. No execution.",
+  "subject_map": {
+    "path": "_scratch/controller-worker-stage-repair01/SOURCE-INPUTS.json",
+    "sha256": "0fd7fe35f9936d1a102f5c1b70962b7df6ae022d34f7fb4c6ffb9959484e2835"
+  },
+  "views": [
+    {
+      "actual": "BRIEF-READ-ACTUAL.json",
+      "chunk": "93ce65",
+      "scope": "Complete canonical brief; fixed file inventory"
+    },
+    {
+      "actual": "APPEND-FIXTURE-MAP-READ-ACTUAL.json",
+      "chunk": "76f986",
+      "scope": "Complete 98-line append/diff and49-line fixture; previous startup81 input map"
+    },
+    {
+      "actual": "TESTS-READ-ACTUAL.json",
+      "chunk": "6e32bc",
+      "scope": "Complete new250-line test module/all14 case bodies; durable method index"
+    },
+    {
+      "actual": "DURABLE-READ-ACTUAL.json",
+      "chunk": "c41c8c",
+      "scope": "Qualified durable51–78,353–591; reservation signature search"
+    },
+    {
+      "actual": "STARTUP-FIXTURE-READ-ACTUAL.json",
+      "chunk": "717447",
+      "scope": "Accepted startup259–544 and complete173-line fixture; combined displayed output clipped part of startup helpers, supplemented by e13db0"
+    },
+    {
+      "actual": "HELPERS-RESERVATIONS-READ-ACTUAL.json",
+      "chunk": "e13db0",
+      "scope": "Accepted startup245–408; reservation210–287,345–403; inherited fixture/base signatures"
+    },
+    {
+      "actual": "BASE-FIXTURE-LIFETIME-READ-ACTUAL.json",
+      "chunk": "d81a8e",
+      "scope": "Inherited fixture1–123,534–589,703–744; base lease177–293 and OwnedSession311–413"
+    },
+    {
+      "actual": "NATIVE-REFERENCE-READ-ACTUAL.json",
+      "chunk": "e2f002",
+      "scope": "Native reference delegate120–229 only; source signature searches; expected14 full list; accepted release98–131"
+    },
+    {
+      "actual": "PROFILE-PRIMITIVE-REFERENCE-READ-ACTUAL.json",
+      "chunk": "0fa084",
+      "scope": "Pure runtime profile173–194; native reference primitive388–402,516–537"
+    },
+    {
+      "actual": "FINAL-MAP-REPORT-READ-ACTUAL.json",
+      "chunk": "e855be",
+      "scope": "Complete final source map/report/fixture diff; new-test diff header"
+    },
+    {
+      "actual": "CHECK-ACTUAL.json",
+      "chunk": "de9767",
+      "scope": "Own passive16pair/11derivative/complete3diff/14ID/45text before-after check"
+    }
+  ],
+  "limitations": [
+    "Diff reconstruction compares complete LF-normalized text; exact raw bytes independently hashed.",
+    "Method IDs are textual source checks, not Python imports or execution.",
+    "Fourteen proposed cases remain unexecuted.",
+    "Native delegate source is reference context only.",
+    "The prior frozen failed childnamespace review directory was not changed."
+  ],
+  "review_result": "No blocking source issue found; root qualification and execution authority separate."
+}

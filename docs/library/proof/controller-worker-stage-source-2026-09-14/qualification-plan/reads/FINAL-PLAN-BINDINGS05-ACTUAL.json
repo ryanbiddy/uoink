@@ -1,0 +1,7 @@
+{
+  "chunk_id": "a49f5e",
+  "wall_time_seconds": 0.1908064,
+  "exit_code": 0,
+  "original_token_count": 103,
+  "output": "{\r\n  \"scope\": \"Plan/documentary metadata only\",\r\n  \"new_bindings_pending\": true,\r\n  \"files\": [\r\n    {\r\n      \"path\": \"PLAN.md\",\r\n      \"bytes\": 3418,\r\n      \"sha256\": \"653da1ac7d54a8d6e2f9fca02471d7d96233d587fe66dda0e8170346675063e2\"\r\n    },\r\n    {\r\n      \"path\": \"SOURCE-BINDINGS.json\",\r\n      \"bytes\": 9786,\r\n      \"sha256\": \"00112dad7a383e9a57dd5396c5ccc27d4291b2185a828d2b77e4c57976abea77\"\r\n    }\r\n  ]\r\n}\r\n"
+}

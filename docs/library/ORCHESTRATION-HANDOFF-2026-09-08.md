@@ -126,7 +126,8 @@ establish safe installation isolation, and verify/correct resulting findings.
 | Completion language metadata | Both scoped fake59 copies pass59/0/0 plus29 subtests; original46 preserved | Author577e68 and confirmation8fd760 return0. Root993295 and peera39b40 verify identical full cases/five hashes, ten guards, unchanged nine inputs/three controls and17 outputs each | Connect authenticated backend completion and controller registry, then migrate WhisperX caller. Engine fake39 is qualified below; real/runtime/production gates remain closed |
 | Control Room command audit | Adapter fix committed atc3607c3 on feat/desktop-control-room | Same16 focused replay cases pass in isolated and checkout copies; TypeScript check passes. All24 proof payloads match Git/disk | A new process loads the preview warning. Existing server not restarted or observed with it; no real-provider or complete-command attestation |
 | Controller startup authority | Source6482b782/map23591b4c passes both guarded81 copies; original65 preserved | Author28a03e and confirmation9a8704 return0, each81/0/0 plus48 passing subtests. Root151c60 and peere49d09 verify complete cases,23 hashes,ten guards,27 inputs/three controls and35 outputs each. All256 payloads match Git/disk | Continue authenticated child namespace/fixed constructor connection. The real-worker seam remains closed; no native/model or release clearance |
-| Authenticated child namespace | Gemini05a3bf93 source review FAILED; all17 proposed tests unexecuted | Outer7481e5/0 completed with truncated output. Freeze47c823 retains26 files/553800B and1042 original events; root14eaa9 verifies all pins and input pairs. Controller and child contract/ownership findings require repair | Follow CONTROLLER-WORKER-STAGE-REPAIR-BRIEF-2026-09-14.md for a fresh stage-only derivative from accepted6482b782. No source, runtime or release acceptance from this delivery |
+| Controller worker stages | Source2f12cbf5/map0fd7fe35 ready for guarded qualification;14 proposed controls unexecuted | Root972e31 and peerde9767 verify16 original/copy pairs,11 derivatives, unchanged28922-byte prefix and all14 ordered IDs. Peer5411dcf6 finds no blocking source issue | Follow CONTROLLER-STAGE-QUALIFICATION-BRIEF-2026-09-14.md; review the complete95-case instrument and both exact copies before separate admission. Local lifecycle relation only; native connection still open |
+| Authenticated child namespace | Gemini05a3bf93 source review FAILED; all17 proposed tests unexecuted | Outer7481e5/0 completed with truncated output. Freeze47c823 retains26 files/553800B and1042 original events; root14eaa9 verifies all pins and input pairs. Controller and child contract/ownership findings require repair | Smaller stage source is reviewed above. Preserve failed delivery; native transport/adoption/namespace repairs remain. No source, runtime or release acceptance from this delivery |
 | Release notes | Startup81 progress, child-source failure and remaining gates updated for this integration | Root68f856 verifies three declared edits plus final status amendment, seven input bindings and all57 unchanged table lines. Frozen original drafts/amendments preserve status changes | Continue runtime qualification. Production remains71d3e70; no package, installation, public draft or website changed |
 | Integration | Reliability repair at e8d058f and notice packaging at 71d3e70 after tree09 | Reliability:53 focused cases plus13 subtests per root. Notices:20 Python/10 block cases per root. Tree09 at 56d9d4c remains2,796 passed/1 failed/3 skipped across2,800 cases plus13 subtests; it predates both repairs | Finish runtime work, then run a new committed complete tree and rebuild/reseal. Package08 and website/marketing remain held. No current-source package or installation credit |
 | Desktop incident | Isolation failed in package-07 attempt; corrected at `e10ba3a` | Ordinary Uoink and filesystem connectors launched; earlier live-index/5179 effects unknown. Owned job cleaned | No further override launch; only guarded Uoink dashboard observed for package 08 |
@@ -324,6 +325,12 @@ author works only in _scratch/controller-worker-stage-repair01 from accepted6482
 preserving its entire byte prefix and the existing81/39 tests. Review the complete
 stage-only source and actual isolated fixture before separate qualification.
 Native read-set/pipe/source authentication remains in the later connection unit.
+Stage source2f12cbf5/map0fd7fe35 now has root and independent5411dcf6 source
+acceptance for guarded qualification preparation. Read
+ASTRA-CONTROLLER-WORKER-STAGE-SOURCE-VERDICT-2026-09-14.md and
+CONTROLLER-STAGE-QUALIFICATION-BRIEF-2026-09-14.md. The fresh95-case instrument
+preserves original81 and adds14 frozen IDs. No execution admission or result
+exists yet; inspect the final instrument and exact two copies first.
 The original failed namespace delivery is retained; its frozen plan and
 mandatory member-scope correction are archived under
 proof/real-child-namespace-plan-2026-09-14. All52 documentary payloads match
@@ -7024,3 +7031,36 @@ All156 transport differences were proven UTF-8 newline-only before restoration
 0d9095. Failed source, peer findings, draft notes and prior plan/backup receipts
 are retained. Production remains71d3e70; no package rebuild or release follows.
 Index620af9/0 verifies all162 payloads against both Git and disk.
+
+### 2026-09-14 — Failed delivery disposition backed up; stage source reviewed
+
+Disposition, updated notes and smaller repair brief are committed ata152cbf.
+Push43ab69/0 and remoteb2203c/0 verify origin/cc/living-library at
+a152cbfde3e2df23451ca8d04793209a55acaaba. Candidate cleanliness, old local/remote
+ea1b9ba, ancestry and CAS fast-forward were checked first. No other branch push.
+
+The stage-only author froze adapter2f12cbf5/map0fd7fe35 with14 proposed controls.
+Root31e4aa reads the complete append, fixture and tests; root972e31 verifies16
+original/copy pairs,11 derivatives and the unchanged28,922-byte accepted prefix.
+No executable draft correction or test invocation occurred. Independent source
+review is finishing; separate instrument preparation preserves the original81
+cases and appends the14 frozen IDs. No95-case result is claimed yet.
+
+### 2026-09-14 — Stage source accepted for guarded qualification preparation
+
+Independent source verdict5411dcf6 and passivede9767/0 agree with root972e31:
+all16 original/copy pairs and11 derivatives match, accepted28922-byte prefix
+is intact, and all14 proposed controls follow actual isolated lifecycle paths.
+Roota80fc1 reads the complete peer verdict. The stage checks return existing
+startup authority and observe the local relation under locks; they do not hold
+those locks across a later effect or prove native ownership. No tests ran.
+
+Archiveca6376 preserves87 payloads,1,026,190 bytes, seal
+4fc8c860335f5d7ab56730386a5ed0cba41760de72921e81b1d811a1d449be73.
+Raw worktree diff/apply381ac0 transports1,094,871 bytes at
+a133b61a87f2b381a00b148bd65de5db01b96624a32f6c0805acb9ce1687ef12.
+All85 transport differences were proven UTF-8 newline-only before15d692 restores
+them. The archive also retains the prior failed-source integration and a152cbf
+backup receipts. The separate95-case instrument is being reviewed; no native,
+model, complete-tree, package or installation observation was repeated.
+Index0cf2b8/0 verifies all87 payloads against both Git and disk.
