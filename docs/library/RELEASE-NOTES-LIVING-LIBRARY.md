@@ -51,8 +51,11 @@ That failure is sealed at `c5e72a2` with 130 verified proof payloads. A separate
 diagnostic at `cc6bb7c` also failed and identified mutable directory size in the identity
 comparison. The repair is qualified at `d317a88`: both copies pass81 cases and72
 nested subtests, with regular-file size checks and all original assertions
-unchanged. A separately admitted generated native run also completed; its
-evidence is being sealed. Restart, real runtime and release remain unqualified.
+unchanged. Generated native writer exclusion and normal drain are accepted at
+`f630264`: both exact processes exit0 with empty jobs, all four journal phases
+and flushes complete, and the closed journal matches. All93 native proof
+payloads match Git/disk. Cancellation through this combined path, restart,
+real runtime and release remain unqualified.
 
 The worker runtime owner at `1f200eb` passes the same 11 generated cases in both
 copies. It refuses result publication after VAD retirement, product/module
