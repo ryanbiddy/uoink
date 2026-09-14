@@ -1,0 +1,7 @@
+{
+  "chunk_id": "66f202",
+  "wall_time_seconds": 0.1773198,
+  "exit_code": 0,
+  "original_token_count": 134,
+  "output": "{\n  \"scope\": \"passive source text binding only; no candidate execution\",\n  \"original_copy_pairs\": 9,\n  \"derivatives\": 12,\n  \"context_inputs\": 7,\n  \"qualified_prefix_bytes\": 12113,\n  \"exact_addition\": true,\n  \"proposed_cases\": 16,\n  \"ordered_membership\": true,\n  \"map_sha256\": \"23591b4c9fd6d18ee9856c5abb9329ce926ab49553c72bb20b1eaaf8a549d775\",\n  \"adapter_sha256\": \"6482b782c545adbcd524a68ae85ba2abb3f081683379a9d53ada66d03a5ddb51\",\n  \"independent_verdict_sha256\": \"a0983469817d0c994f115ca43d0b9576c7c38ba44b1afaac1875b9247300ac5d\"\n}\n"
+}

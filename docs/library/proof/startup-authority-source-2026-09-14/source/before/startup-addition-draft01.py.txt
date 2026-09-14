@@ -1,0 +1,241 @@
+
+
+# Private controller-only admission custody. No child or constructor authority.
+from snapshot_lifecycle import _NativePermit, Phase
+from durable_lifecycle import DurableSnapshotLifecycle, _DurableLease
+from snapshot_reservations import Reservation
+
+
+_STARTUP_RESOLVER = resolver
+_STARTUP_LOAD = resolver.load_manifest
+_STARTUP_ADMIT = resolver.admit_snapshot
+_STARTUP_BIND = resolver.bind_for_constructor
+_STARTUP_RELEASE = _release
+_STARTUP_PROFILE = _runtime_profile
+_CONTROLLER_STARTUPS = {}
+
+
+@dataclass(frozen=True, eq=False)
+class _ControllerASRStart:
+    release: ReleaseAuthority
+    approval: resolver.ManifestApproval
+    manifest: resolver.TrustedManifest
+    admission: resolver.Admission
+    selected: resolver.Model
+    policy: RuntimeProfile
+    usage: str
+    binding: resolver.LocalBinding
+    permit: _NativePermit
+
+
+class _StartupCustody:
+    def __init__(self, release, manifest, selected, profile, usage, manager, factory):
+        self.release, self.manifest, self.selected = release, manifest, selected
+        self.profile, self.usage, self.manager, self.factory = profile, usage, manager, factory
+        self.lease = self.admission = self.binding = self.permit = self.startup = None
+        self.record = self.protection = self.token = None
+        self.active = True
+        self.consumed_by = None
+        self.primary_error = None
+        self.references = self.values = None
+
+
+def _startup_configuration():
+    # Verify the configured trust root before using even the pure resolver.
+    _require(resolver is _STARTUP_RESOLVER
+             and resolver.load_manifest is _STARTUP_LOAD
+             and resolver.admit_snapshot is _STARTUP_ADMIT
+             and resolver.bind_for_constructor is _STARTUP_BIND,
+             "Fixed startup resolver required")
+    authority = RELEASE_AUTHORITY
+    _require(type(authority) is ReleaseAuthority
+             and type(resolver.REAL_APPROVAL) is resolver.ManifestApproval
+             and authority.manifest_approval is resolver.REAL_APPROVAL
+             and resolver.REAL_APPROVAL.purpose == "real",
+             "Accepted real startup approval is unavailable")
+    return authority
+
+
+def _startup_values(custody):
+    # Bounded immutable scalar snapshots detect mutation of retained records;
+    # matching these values alone never registers another startup object.
+    a, m, d, p, b = (custody.release, custody.manifest, custody.admission,
+                     custody.profile, custody.binding)
+    manifest_values = tuple((model.choice, model.repo, model.revision,
+        tuple((asset.name, asset.size, asset.sha256) for asset in model.assets))
+        for model in m.models)
+    return (a.manifest_bytes, a.data_root, a.runtime_profile_id,
+        a.manifest_approval.purpose, a.manifest_approval.manifest_sha256,
+        m.raw, manifest_values, d.manifest.raw,
+        tuple((model.choice, model.repo, model.revision,
+            tuple((asset.name, asset.size, asset.sha256) for asset in model.assets))
+            for model in d.manifest.models),
+        d.choice, d.private_root, d.snapshot, d.directory_identity,
+        tuple((f.name, f.size, f.sha256, f.identity, f.handle_identity) for f in d.files),
+        p.profile_id, p.device, p.compute_type, p.whisperx_fixed_vad_contract,
+        p.capture_vad_contract, custody.usage,
+        b.model_path, b.choice, b.revision, b.manifest_sha256, b.files,
+        b.local_files_only, b.constructor_called, b.real_runtime_approved)
+
+
+def _startup_references(custody):
+    a, m, d = custody.release, custody.manifest, custody.admission
+    return (a, a.manifest_approval, a.manifest_bytes, m, m.models,
+        *m.models, *(asset for model in m.models for asset in model.assets),
+        custody.selected, d, d.manifest, d.manifest.models, *d.manifest.models,
+        *(asset for model in d.manifest.models for asset in model.assets),
+        d.files, *d.files, custody.profile, custody.binding,
+        custody.permit, custody.record, custody.protection, custody.token)
+
+
+def _validate_startup_locked(custody, startup, permit, session):
+    manager, record, token = custody.manager, custody.record, custody.token
+    _require(custody.active and custody.startup is startup
+             and _CONTROLLER_STARTUPS.get(id(startup)) is custody,
+             "Exact live issued controller startup required")
+    _require(_startup_configuration() is custody.release
+             and RUNTIME_PROFILE is custody.profile
+             and SNAPSHOT_LIFECYCLE is manager and RUNTIME_FACTORY is custody.factory
+             and custody.factory.manager is manager,
+             "Configured startup authority changed")
+    _require(_STARTUP_PROFILE(custody.release, custody.usage) is custody.profile,
+             "Current startup policy required")
+    current = _startup_references(custody)
+    _require(len(current) == len(custody.references)
+             and all(a is b for a, b in zip(current, custody.references))
+             and _startup_values(custody) == custody.values,
+             "Retained startup selection changed")
+    _require((startup.release is custody.release and startup.approval is custody.release.manifest_approval
+              and startup.manifest is custody.manifest and startup.admission is custody.admission
+              and startup.selected is custody.selected and startup.policy is custody.profile
+              and startup.usage == custody.usage and startup.binding is custody.binding
+              and startup.permit is custody.permit), "Startup record was replaced or changed")
+    _require(type(permit) is _NativePermit and permit is custody.permit
+             and permit.manager is manager and permit.record is record
+             and manager._records.get(record.key) is record and record.permit is permit.identity
+             and record.protection is custody.protection
+             and record.phase is Phase.NATIVE_RESERVED
+             and not custody.lease.inner._exited and not custody.lease._finalization_started,
+             "Current startup lease permit required")
+    _require(type(token) is Reservation and custody.lease.token is token
+             and manager._tokens.get(record.key) is token
+             and token.service is manager._reservations
+             and token.service._live.get(token.gate) is token
+             and token.phase == "RESERVED" and token.pending is None
+             and token.persistence_failure is None and token.revoked is False
+             and token.worker is None and not token.resume_attempted,
+             "Current unused durable startup reservation required")
+    _require(token.semantic.choice == custody.selected.choice
+             and token.semantic.revision == custody.selected.revision
+             and token.semantic.manifest_sha256 == custody.release.manifest_approval.manifest_sha256,
+             "Durable selection differs from approved startup")
+    if session is None:
+        _require(record.owner is None and custody.consumed_by is None,
+                 "Unconsumed pre-worker startup required")
+    else:
+        _require(type(session) is OwnedSession and record.owner is session
+                 and session._record is record and session._manager is manager
+                 and session._worker is None and not session._revoked and not session._closing
+                 and session._active == 0 and not session._closed_verified,
+                 "Exact live pre-worker session required")
+
+
+def _validate_controller_startup(startup, permit, session=None):
+    _require(type(startup) is _ControllerASRStart, "Issued controller startup required")
+    custody = _CONTROLLER_STARTUPS.get(id(startup))
+    _require(type(custody) is _StartupCustody and custody.startup is startup,
+             "Copied controller startup has no issuance authority")
+    with custody.manager._lock:
+        with custody.token._lock:
+            _validate_startup_locked(custody, startup, permit, session)
+    return startup
+
+
+def _consume_controller_startup(startup, permit, session):
+    # Fixed future worker infrastructure may take this controller record once.
+    # It is not an IPC witness, child-local lease or permission to construct.
+    _require(type(startup) is _ControllerASRStart, "Issued controller startup required")
+    custody = _CONTROLLER_STARTUPS.get(id(startup))
+    _require(type(custody) is _StartupCustody and custody.startup is startup,
+             "Copied controller startup has no issuance authority")
+    with custody.manager._lock:
+        with custody.token._lock:
+            _validate_startup_locked(custody, startup, permit, session)
+            _require(custody.consumed_by is None, "Controller startup was already consumed")
+            custody.consumed_by = session
+    return startup
+
+
+def _fixed_real_worker_start(startup, permit, session):
+    _validate_controller_startup(startup, permit, session)
+    raise AdapterUnavailable("Authenticated child transport, runtime state and fixed real bootstrap are unavailable")
+
+
+@contextmanager
+def _controller_startup_scope(choice, caller_root, *, usage, root_kind):
+    """Retain accepted controller input before the still-closed worker seam.
+
+    No acquisition, worker start or model constructor is called here. Once a
+    native permit is reserved, an unfinished scope remains quarantined under
+    the existing exception-aware lifecycle; it never invents no-worker cleanup.
+    """
+    configured = _startup_configuration()
+    authority, trusted, selected, store, snapshot = _STARTUP_RELEASE(choice, caller_root, root_kind=root_kind)
+    _require(authority is configured, "Startup release changed during selection")
+    profile = _STARTUP_PROFILE(authority, usage)
+    manager, factory = SNAPSHOT_LIFECYCLE, RUNTIME_FACTORY
+    _require(type(manager) is DurableSnapshotLifecycle and type(factory) is DurableOwnedRuntimeFactory
+             and factory.manager is manager, "Exact durable startup lifecycle and factory required")
+    custody = _StartupCustody(authority, trusted, selected, profile, usage, manager, factory)
+    try:
+        # Retain the lease wrapper before entry can reserve protection.
+        custody.lease = manager.read_lease(str(store), choice, selected.revision)
+        _require(type(custody.lease) is _DurableLease and custody.lease.manager is manager,
+                 "Exact issued durable lease required")
+        with custody.lease:
+            custody.admission = _STARTUP_ADMIT(trusted, choice, store, snapshot)
+            admitted = custody.admission
+            _require(type(admitted) is resolver.Admission and type(admitted.manifest) is resolver.TrustedManifest
+                     and admitted.manifest == trusted and admitted.manifest.approval is authority.manifest_approval
+                     and admitted.choice == choice and admitted.snapshot == str(snapshot)
+                     and admitted.private_root == str(store), "Exact successful selected admission required")
+            # Admission reparses the manifest; retain its exact selected object,
+            # while retaining the initial approved manifest separately.
+            custody.selected = next(model for model in admitted.manifest.models if model.choice == choice)
+            _require(custody.selected == selected, "Admission selected a different model")
+            _require(_startup_configuration() is authority and RUNTIME_PROFILE is profile
+                     and _STARTUP_PROFILE(authority, usage) is profile
+                     and SNAPSHOT_LIFECYCLE is manager and RUNTIME_FACTORY is factory,
+                     "Startup authority changed during admission")
+            custody.permit = custody.lease.begin_native_session()
+            custody.record = custody.permit.record
+            custody.protection = custody.record.protection
+            custody.token = custody.lease.token
+            custody.binding = _STARTUP_BIND(admitted)
+            b = custody.binding
+            _require(type(b) is resolver.LocalBinding and b.choice == choice
+                     and b.revision == custody.selected.revision
+                     and b.manifest_sha256 == authority.manifest_approval.manifest_sha256
+                     and b.model_path == admitted.snapshot and b.files == admitted.files
+                     and b.local_files_only is True and b.constructor_called is False
+                     and b.real_runtime_approved is False, "Exact rechecked local startup binding required")
+            startup = _ControllerASRStart(authority, authority.manifest_approval, trusted,
+                admitted, custody.selected, profile, usage, b, custody.permit)
+            custody.startup = startup
+            custody.references, custody.values = _startup_references(custody), _startup_values(custody)
+            _CONTROLLER_STARTUPS[id(startup)] = custody
+            _validate_controller_startup(startup, custody.permit)
+            try:
+                yield startup
+            finally:
+                with manager._lock:
+                    custody.active = False
+    except BaseException as original:
+        custody.primary_error = original
+        raise
+    finally:
+        custody.active = False
+        # A failed/reserved attempt remains retained. It is never converted to
+        # completion by removing Python references or by a recorded digest.
+        if custody.startup is not None and custody.record.phase is Phase.RELEASED:
+            _CONTROLLER_STARTUPS.pop(id(custody.startup), None)

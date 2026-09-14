@@ -1,0 +1,7 @@
+{
+  "chunk_id": "005b46",
+  "wall_time_seconds": 0.1971741,
+  "exit_code": 0,
+  "original_token_count": 69,
+  "output": "{\r\n  \"baseline_bytes\": 12113,\r\n  \"current_bytes\": 28576,\r\n  \"baseline_sha256\": \"635d2c22db75d12ffe6965fb656fdca47450ccbbaeb4d8cc8aaff9fcc79dd243\",\r\n  \"current_sha256\": \"e92ee8711e618bc477f4527bad47febae2c941e183926b56dc2aebce56959166\",\r\n  \"exact_baseline_prefix\": true\r\n}\r\n"
+}

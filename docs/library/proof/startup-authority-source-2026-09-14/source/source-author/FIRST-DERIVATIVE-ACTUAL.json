@@ -1,0 +1,7 @@
+{
+  "chunk_id": "a9df20",
+  "wall_time_seconds": 0.2447868,
+  "exit_code": 0,
+  "original_token_count": 127,
+  "output": "[\r\n  {\r\n    \"path\": \"E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\_scratch\\\\real-startup-authority-repair01\\\\before\\\\asr_loading_adapter.py\",\r\n    \"bytes\": 12113,\r\n    \"sha256\": \"635d2c22db75d12ffe6965fb656fdca47450ccbbaeb4d8cc8aaff9fcc79dd243\"\r\n  },\r\n  {\r\n    \"path\": \"E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\_scratch\\\\real-startup-authority-repair01\\\\asr_loading_adapter.py\",\r\n    \"bytes\": 28476,\r\n    \"sha256\": \"6082c916bb486b1fdbab441e98a2a191d144fb82fa206ae3298a38e96b2d68f8\"\r\n  }\r\n]\r\n"
+}

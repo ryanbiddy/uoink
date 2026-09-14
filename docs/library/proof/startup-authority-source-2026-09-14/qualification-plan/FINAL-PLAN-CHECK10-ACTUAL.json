@@ -1,0 +1,7 @@
+{
+  "chunk_id": "d4aa9a",
+  "wall_time_seconds": 0.2002827,
+  "exit_code": 0,
+  "original_token_count": 211,
+  "output": "{\r\n  \"scope\": \"Passive plan binding only\",\r\n  \"original65_ordered_ids_exact\": true,\r\n  \"draft16_not_frozen\": true,\r\n  \"instrument_created\": false,\r\n  \"candidate_executed\": false,\r\n  \"files\": [\r\n    {\r\n      \"name\": \"PLAN.md\",\r\n      \"bytes\": 5004,\r\n      \"sha256\": \"2538e5d895bd9fff166b2c57527aaa4004e0471276c7fa184fa0e0b21b982680\"\r\n    },\r\n    {\r\n      \"name\": \"BASELINE-AND-DRAFT-INPUTS.json\",\r\n      \"bytes\": 12956,\r\n      \"sha256\": \"b39865cbacfbdbf081ec55f26db88a80234c185dc78cec24ab8c939f8e517c1f\"\r\n    },\r\n    {\r\n      \"name\": \"CURRENT-BASE-RELATION.json\",\r\n      \"bytes\": 3080,\r\n      \"sha256\": \"d7d08dfd77d64de1520fcd008193c4394887faff733f88832fa5511528b27ebc\"\r\n    },\r\n    {\r\n      \"name\": \"PREPARATION-NOTES.md\",\r\n      \"bytes\": 771,\r\n      \"sha256\": \"67cba59c8c4983fe8542e3fd7bcbd3fb0bf0445494ec9599036b515d21bef2db\"\r\n    }\r\n  ]\r\n}\r\n"
+}

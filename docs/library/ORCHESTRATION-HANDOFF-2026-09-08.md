@@ -125,6 +125,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | Reliability request/stream caller | Both scoped fake11 copies pass11/0/0 plus15 subtests | Author121f97 and confirmationff51d7 return0. Roota05d87 and peer88b1f3 verify identical cases/nine hashes, ten guards, unchanged13 inputs/three controls and21 outputs each | Production unchanged. Resolve actual ticket issuance, CPU/int8 profile binding and two prospective legacy test contracts before migration; continue constructor and completion-info work |
 | Completion language metadata | Both scoped fake59 copies pass59/0/0 plus29 subtests; original46 preserved | Author577e68 and confirmation8fd760 return0. Root993295 and peera39b40 verify identical full cases/five hashes, ten guards, unchanged nine inputs/three controls and17 outputs each | Connect authenticated backend completion and controller registry, then migrate WhisperX caller. Engine fake39 is qualified below; real/runtime/production gates remain closed |
 | Control Room command audit | Adapter fix committed atc3607c3 on feat/desktop-control-room | Same16 focused replay cases pass in isolated and checkout copies; TypeScript check passes. All24 proof payloads match Git/disk | A new process loads the preview warning. Existing server not restarted or observed with it; no real-provider or complete-command attestation |
+| Controller startup authority | Source6482b782/map23591b4c accepted for guarded qualification | Root66f202 and peer5676f6 verify bindings and the unchanged12,113-byte adapter prefix; both source reviews accept the scoped repair. All16 proposed cases remain unexecuted | Prepare and review the corrected65-plus16 instrument before exact execution admission. Real worker remains closed; child namespace and fixed constructors follow |
 | Release notes | Current progress and remaining gates committed at 376eb47 | All seven proof payloads match Git/disk; 57 table lines and historical package/review-kit sections remain unchanged. D1/D2 completion and generated cancellation/recovery are explicit | Continue runtime qualification. No production source, package, installation, public draft or website changed |
 | Integration | Reliability repair at e8d058f and notice packaging at 71d3e70 after tree09 | Reliability:53 focused cases plus13 subtests per root. Notices:20 Python/10 block cases per root. Tree09 at 56d9d4c remains2,796 passed/1 failed/3 skipped across2,800 cases plus13 subtests; it predates both repairs | Finish runtime work, then run a new committed complete tree and rebuild/reseal. Package08 and website/marketing remain held. No current-source package or installation credit |
 | Desktop incident | Isolation failed in package-07 attempt; corrected at `e10ba3a` | Ordinary Uoink and filesystem connectors launched; earlier live-index/5179 effects unknown. Owned job cleaned | No further override launch; only guarded Uoink dashboard observed for package 08 |
@@ -302,8 +303,14 @@ coverage is unverified. Preserve both failed constructor proposals.
 Next follow REAL-STARTUP-AUTHORITY-REPAIR-BRIEF-2026-09-14.md: retain controller
 manifest/admission/profile/permit authority before the child namespace and fixed
 constructor work. This smaller unit must keep absent real authority closed.
-Astra's source author is active under _scratch/real-startup-authority-repair01;
-no execution admission or source acceptance exists. Control Room's independent
+Controller source6482b782/map23591b4c is accepted for guarded qualification;
+read ASTRA-STARTUP-AUTHORITY-SOURCE-VERDICT-2026-09-14.md. Root66f202 and
+peer5676f6 pass passive binding checks; all16 new tests remain unexecuted.
+Next follow STARTUP-AUTHORITY-QUALIFICATION-BRIEF-2026-09-14.md. Preparation
+reuses the corrected65 instrument, preserves its old cases and adds the16 controls
+with isolated module authority. Review the instrument before exact author and
+confirmation admissions. Source archive9593bc and index9cc34c verify145 payloads,
+seal d207df4b; raw diff/applycaeace succeeds. Control Room's independent
 command-preview fix is committed atc3607c3 with16/0/0 in both copies and a passing
 TypeScript check. It needs no Uoink subject rerun; existing server was not restarted.
 Keep these source tasks separate from real PCM/filter and D3/D4 qualification.
@@ -6819,3 +6826,53 @@ Uoink's rejected constructor archive and smaller repair brief are committed at
 startup authority unit under _scratch/real-startup-authority-repair01. It has no
 execution admission. Preserve the original generated adapter route and its tests;
 child transport, namespace, constructor and runtime qualification remain separate.
+
+### 2026-09-14 — Branch backup advanced; controller draft checks continue
+
+Pushc69e01/0 and remoted6e049/0 verify origin/cc/living-library at
+39542584162bef452f60ba2f11ad1a9dd14e9445. Candidate cleanliness, old local/remote
+969ac9b, ancestry and CAS update were checked first. No other branch was pushed.
+Later source work is still local and needs its own completed backup.
+
+Before any startup qualification, root caught an optional-None consumer that
+returned without marking one-time consumption. The derivative now requires an
+exact pre-worker OwnedSession. A separate reviewer found that read_lease calls
+its binding lookup before lease entry; configuration must be rechecked after
+that callback, before journal/read-guard work. Both are unexecuted draft findings.
+The proposed hash-failure test must preserve resolver's established outward
+AdmissionRefusal and underlying RuntimeError cause, not expect a raw RuntimeError.
+Keep before copies and correction reasons. Real approvals remain absent; fixture
+authority belongs only to separately loaded test modules. No new test count is
+accepted yet. Continue the scoped source review and exact guarded qualification.
+
+### 2026-09-14 — Controller source review closes; qualification preparation follows
+
+Root accepts adapter6482b782/map23591b4c for guarded qualification. Complete final
+addition5dc2fe and fixture/tests a789e8 were read; source check66f202/0 verifies
+nine original/copy pairs, twelve derivatives, seven context bindings and the exact
+12,113-byte prefix/addition. Peer verdicta0983469 and passive5676f6/0 agree on the
+controller custody and lock-order scope. All16 cases remain unexecuted. Preserve
+the None-consumption, pre-lease configuration and fixture draft corrections.
+The combined8f0608 read was truncated; complete final reads are separate.
+
+STARTUP-AUTHORITY-QUALIFICATION-BRIEF-2026-09-14.md freezes the next preparation:
+reuse corrected65, preserve its cases and guards, append the16 exact controls,
+and isolate synthetic module authority. No subject admission exists yet. Real
+worker startup remains closed. The two rejected constructor proposals stay failed.
+
+Saved parent source resolves one next-constructor uncertainty. Pyannote's captured
+VAD parent passes the same registered model through get_model and Inference;
+Inference retains it as .model. Pipeline stores the inference through its existing
+registry-backed attribute path. Read REAL-VAD-PARENT-LINK-2026-09-14.md and the
+saved b08863/5cfda9 source observations. This supports a conditional exact link
+check in the next fixed constructor; it gives no runtime/import/native clearance.
+The earlier frozen checklist's missing-parent observation remains preserved.
+
+Archive9593bc/0 preserves145 payloads,1,638,412 bytes, seal
+d207df4b7fff5677963e53d0af4abcd35075c071916b6d4d026be09ff111bf0d.
+Raw worktree diff/applycaeace/0 transports a1,747,895-byte patch at
+6e2fe682ccfcaa3c1bfbb02020391534776e638598e1327bc1179268881af364.
+All136 transport differences were proven UTF-8 newline-only before restoration.
+Index9cc34c/0 verifies every sealed payload against Git and disk. The archive also
+retains the prior failed-constructor integration receipts, backup3954258 and
+Control Room c3607c3 integration receipts. No subject test was repeated.

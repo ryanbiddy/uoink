@@ -1,0 +1,7 @@
+{
+  "chunk_id": "f0a7ad",
+  "wall_time_seconds": 0.1556989,
+  "exit_code": 0,
+  "original_token_count": 90,
+  "output": "{\n  \"chunk_id\": \"721b77\",\n  \"wall_time_seconds\": 0.2536925,\n  \"exit_code\": 1,\n  \"original_token_count\": 55,\n  \"output\": \"Exception: \\r\\nLine |\\r\\n  17 |  … tart -or $end -ge $lines.Length){throw 'Invalid complete-line range'}\\r\\n     |                                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\\r\\n     | Invalid complete-line range\\r\\n\"\n}\n\r\n"
+}

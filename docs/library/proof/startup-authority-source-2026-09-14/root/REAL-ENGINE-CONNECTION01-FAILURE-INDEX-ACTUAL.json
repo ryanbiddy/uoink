@@ -1,0 +1,7 @@
+{
+  "chunk_id": "9716d4",
+  "wall_time_seconds": 7.4523681,
+  "exit_code": 0,
+  "original_token_count": 103,
+  "output": "{\"payloads\":94,\"bytes\":1412386,\"manifest_sha256\":\"c06462bce30f654edb0f81295f4a7d9d2a14892cadf3c60f22072b8ff83d2df5\",\"newline_only_restored\":93,\"all_raw_payloads_and_seal_equal_donor\":true}\n{\"proof\": \"docs/library/proof/real-engine-connection01-failure-2026-09-14\", \"payloads_matching_disk_and_git\": 94, \"bytes\": 1412386, \"manifest_sha256\": \"c06462bce30f654edb0f81295f4a7d9d2a14892cadf3c60f22072b8ff83d2df5\"}\r\n"
+}

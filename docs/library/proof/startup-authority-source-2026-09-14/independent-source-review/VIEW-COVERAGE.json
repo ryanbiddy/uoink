@@ -1,0 +1,42 @@
+{
+  "status": "source review complete; no remaining blocker in assigned core scope",
+  "source": "_scratch/real-startup-authority-repair01/asr_loading_adapter.py",
+  "sha256": "6482b782c545adbcd524a68ae85ba2abb3f081683379a9d53ada66d03a5ddb51",
+  "bytes": 28922,
+  "map": {
+    "path": "_scratch/real-startup-authority-repair01/SOURCE-INPUTS.json",
+    "sha256": "23591b4c9fd6d18ee9856c5abb9329ce926ab49553c72bb20b1eaaf8a549d775"
+  },
+  "prior_coverage": "DRAFT-VIEW-COVERAGE.json",
+  "final_reads": [
+    {
+      "actual": "FINAL-READ-ACTUAL.json",
+      "tool_chunk": "d5f3d6",
+      "view": "complete review-corrections.diff and final adapter lines 337-544; combined rendering clipped part of map"
+    },
+    {
+      "actual": "FINAL-MAP-READ-ACTUAL.json",
+      "tool_chunk": "4b84dd",
+      "view": "complete final map and SOURCE-CORRECTIONS.md"
+    }
+  ],
+  "independent_passive_check": {
+    "actual": "FINAL-CHECK-ACTUAL.json",
+    "tool_chunk": "5676f6",
+    "exit_code": 0,
+    "original_copy_pairs": 9,
+    "derivative_rows": 12,
+    "complete_patch_reconstructions": [
+      "asr_loading_adapter.diff",
+      "review-corrections.diff"
+    ],
+    "patch_comparison": "complete LF-normalized text forward and reverse",
+    "qualified_prefix": "12113 exact bytes",
+    "addition": "exact bytes"
+  },
+  "limitations": [
+    "Proposed tests and their first-error controls are root's independent review scope; this reviewer hashed but did not review their full final bodies.",
+    "No candidate code imported, compiled or executed. No Python startup, native/model/support/journal access, network or Git mutation.",
+    "No native physical-directory, authenticated child, constructor or runtime acceptance is established."
+  ]
+}

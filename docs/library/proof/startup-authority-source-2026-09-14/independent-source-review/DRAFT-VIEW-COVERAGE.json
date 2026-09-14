@@ -1,0 +1,118 @@
+{
+  "scope": "source-only draft review; no candidate import, compile, test, native, model or support execution",
+  "status": "awaiting final author freeze",
+  "brief": {
+    "path": "docs/library/REAL-STARTUP-AUTHORITY-REPAIR-BRIEF-2026-09-14.md",
+    "sha256": "b37fa72210b41ec16fbc5c3ae45b090a89938740201f8c49e1edcb8cc1af8bb4",
+    "read": "complete",
+    "actual": "DRAFT-READ-ACTUAL.json"
+  },
+  "sources": [
+    {
+      "path": "_scratch/real-startup-authority-repair01/asr_loading_adapter.py",
+      "sha256": "6082c916bb486b1fdbab441e98a2a191d144fb82fa206ae3298a38e96b2d68f8",
+      "ranges": [
+        [
+          1,
+          538
+        ]
+      ],
+      "actual": "DRAFT-READ-ACTUAL.json"
+    },
+    {
+      "path": "_scratch/real-startup-authority-repair01/asr_loading_adapter.py",
+      "sha256": "e92ee8711e618bc477f4527bad47febae2c941e183926b56dc2aebce56959166",
+      "ranges": [
+        [
+          293,
+          434
+        ],
+        [
+          435,
+          539
+        ]
+      ],
+      "actuals": [
+        "RESOLVER-CONTRACTS-ACTUAL.json",
+        "REMAINING-READ02-ACTUAL.json"
+      ],
+      "baseline_prefix_check": "PREFIX-CHECK-ACTUAL.json"
+    },
+    {
+      "path": "_scratch/windows-interrupted-owner-native-proposal02/snapshot_lifecycle.py",
+      "sha256": "a80514aac6b1e75b9b872052852fa993a23cd5273b6bed4ffb4eef7404cb69dd",
+      "ranges": [
+        [
+          123,
+          323
+        ]
+      ],
+      "actual": "CALLED-CONTRACTS-ACTUAL.json"
+    },
+    {
+      "path": "_scratch/windows-interrupted-owner-native-proposal02/durable_lifecycle.py",
+      "sha256": "3c8963eaa02bbc1d810ee2632d0363303bfe05ec6ceeef73771ca8005a00ece3",
+      "ranges": [
+        [
+          51,
+          78
+        ],
+        [
+          316,
+          530
+        ],
+        [
+          520,
+          590
+        ]
+      ],
+      "actuals": [
+        "CALLED-CONTRACTS-ACTUAL.json",
+        "REMAINING-READ02-ACTUAL.json"
+      ]
+    },
+    {
+      "path": "_scratch/windows-interrupted-owner-native-proposal02/snapshot_reservations.py",
+      "sha256": "e80ae881fa4af9cc7d1a3e4a06624f5b19abe4de09aec3844e8a541449335b98",
+      "ranges": [
+        [
+          1,
+          213
+        ],
+        [
+          213,
+          298
+        ],
+        [
+          345,
+          429
+        ]
+      ],
+      "actuals": [
+        "REMAINING-READ01-ACTUAL.json",
+        "CALLED-CONTRACTS-ACTUAL.json"
+      ]
+    },
+    {
+      "path": "_scratch/windows-interrupted-owner-native-proposal02/trusted_asr_resolver.py",
+      "sha256": "16a5a1245f649a3eb04d077b661835503f08bef0ff8822dcb545176f0cc30833",
+      "ranges": [
+        [
+          1,
+          110
+        ],
+        [
+          220,
+          292
+        ]
+      ],
+      "actual": "RESOLVER-CONTRACTS-ACTUAL.json"
+    }
+  ],
+  "limitations": [
+    "Root reviews the complete proposed tests and first-error path.",
+    "Contract inventory output was truncated; it is an inventory, not full source coverage.",
+    "The first remaining-contract reader failed in its PowerShell range loop. The missing ranges were read by a corrected passive command.",
+    "Physical gate/handle and child namespace authority are not established by this text review."
+  ]
+}

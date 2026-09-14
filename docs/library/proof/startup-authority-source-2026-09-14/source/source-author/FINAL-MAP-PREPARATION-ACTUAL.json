@@ -1,0 +1,7 @@
+{
+  "chunk_id": "7ee3dd",
+  "wall_time_seconds": 0.5226527,
+  "exit_code": 0,
+  "original_token_count": 269,
+  "output": "{\r\n  \"status\": \"SOURCE_TEXT_BINDINGS_PREPARED\",\r\n  \"adapter\": {\r\n    \"bytes\": 28922,\r\n    \"sha256\": \"6482b782c545adbcd524a68ae85ba2abb3f081683379a9d53ada66d03a5ddb51\"\r\n  },\r\n  \"map\": {\r\n    \"bytes\": 7487,\r\n    \"sha256\": \"23591b4c9fd6d18ee9856c5abb9329ce926ab49553c72bb20b1eaaf8a549d775\"\r\n  },\r\n  \"original_inputs\": 9,\r\n  \"derivatives\": 12,\r\n  \"cases\": 16,\r\n  \"patches\": [\r\n    {\r\n      \"path\": \"asr_loading_adapter.diff\",\r\n      \"forward\": true,\r\n      \"reverse\": true,\r\n      \"old_count\": 3,\r\n      \"new_count\": 299\r\n    },\r\n    {\r\n      \"path\": \"review-corrections.diff\",\r\n      \"forward\": true,\r\n      \"reverse\": true,\r\n      \"old_count\": 140,\r\n      \"new_count\": 146\r\n    },\r\n    {\r\n      \"path\": \"startup_authority_fixture.diff\",\r\n      \"forward\": true,\r\n      \"reverse\": true,\r\n      \"old_count\": 129,\r\n      \"new_count\": 147\r\n    },\r\n    {\r\n      \"path\": \"test_startup_authority.diff\",\r\n      \"forward\": true,\r\n      \"reverse\": true,\r\n      \"old_count\": 191,\r\n      \"new_count\": 234\r\n    }\r\n  ],\r\n  \"original_prefix_bytes\": 12113,\r\n  \"candidate_executed\": false\r\n}\r\n"
+}

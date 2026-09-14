@@ -1,0 +1,7 @@
+{
+  "chunk_id": "365451",
+  "wall_time_seconds": 0.8118765,
+  "exit_code": 0,
+  "original_token_count": 55,
+  "output": "{\"patch\":\"E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\_scratch\\\\real-engine-connection01-failure.patch\",\"bytes\":1493318,\"sha256\":\"dbd4ba7f4528558c430d0b1ace85d703ccda68f6bc86f7c90c3e369b066a2e85\",\"apply_exit\":0}\r\n"
+}

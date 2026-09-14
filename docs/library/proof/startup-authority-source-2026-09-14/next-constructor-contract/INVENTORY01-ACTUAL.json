@@ -1,0 +1,7 @@
+{
+  "chunk_id": "8f0977",
+  "wall_time_seconds": 0.1987855,
+  "exit_code": 0,
+  "original_token_count": 228,
+  "output": "docs/library\\REAL-STARTUP-AUTHORITY-REPAIR-BRIEF-2026-09-14.md\ndocs/library\\proof\\real-engine-connection01-failure-2026-09-14\\root\\REAL-ENGINE-PLAN01-TRANSPORT-RESULT.json\ndocs/library\\proof\\real-engine-connection01-failure-2026-09-14\\root\\REAL-ENGINE-PLAN01-INTEGRATION-ACTUAL.json\ndocs/library\\proof\\real-engine-connection01-failure-2026-09-14\\root\\REAL-ENGINE-PLAN01-INDEX-ACTUAL.json\ndocs/library\\proof\\real-engine-connection01-failure-2026-09-14\\root\\REAL-ENGINE-PLAN01-COMMIT-ACTUAL.json\ndocs/library\\proof\\real-engine-connection01-failure-2026-09-14\\root\\REAL-ENGINE-PLAN01-ARCHIVE-ACTUAL.json\ndocs/library\\proof\\real-engine-connection01-failure-2026-09-14\\contracts\\REAL-STARTUP-AUTHORITY-REPAIR-BRIEF-2026-09-14.md\n71:class TranscriptionOptions:\r\n112:    def __init__(\r\n620:class WhisperModel:\r\n621:    def __init__(\r\n735:    def _get_feature_kwargs(self, model_path, preprocessor_bytes=None) -> dict:\r\n"
+}
