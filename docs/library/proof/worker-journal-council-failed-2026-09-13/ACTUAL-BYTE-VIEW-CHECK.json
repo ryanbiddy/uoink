@@ -1,0 +1,7 @@
+{
+  "chunk_id": "952a91",
+  "wall_time_seconds": 3.4404499,
+  "exit_code": 0,
+  "original_token_count": 63,
+  "output": "{\"matched_canonical_inputs\": 70, \"matched_manifests\": 3, \"prose_crlf_differences\": 2, \"selected_paths_with_completed_view\": 70, \"missing\": [], \"report_bytes\": 36931, \"report_sha256\": \"50a65888706d2a329318c73702b6f468c713d07f7e2bd4c48e423228f6fdda58\"}\r\n"
+}

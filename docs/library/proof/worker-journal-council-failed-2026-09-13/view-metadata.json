@@ -1,0 +1,1298 @@
+{
+  "tool_counts": {
+    "view_file": 184,
+    "find_by_name": 2,
+    "write_to_file": 4,
+    "list_dir": 12
+  },
+  "views": [
+    {
+      "event": 52205,
+      "state": "ACTIVE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/worker-journal-adapter-council-brief-2026-09-13/BRIEF.md"
+      }
+    },
+    {
+      "event": 52206,
+      "state": "DONE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/worker-journal-adapter-council-brief-2026-09-13/BRIEF.md"
+      }
+    },
+    {
+      "event": 52207,
+      "state": "ACTIVE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/worker-journal-adapter-council-brief-2026-09-13/READ-COVERAGE.md"
+      }
+    },
+    {
+      "event": 52208,
+      "state": "DONE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/worker-journal-adapter-council-brief-2026-09-13/READ-COVERAGE.md"
+      }
+    },
+    {
+      "event": 52209,
+      "state": "ACTIVE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/worker-journal-adapter-council-brief-2026-09-13/SELECTED-INPUTS.json"
+      }
+    },
+    {
+      "event": 52210,
+      "state": "DONE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/worker-journal-adapter-council-brief-2026-09-13/SELECTED-INPUTS.json"
+      }
+    },
+    {
+      "event": 52211,
+      "state": "ACTIVE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/worker-journal-adapter-council-brief-2026-09-13/SELECTED-INPUTS.json"
+      }
+    },
+    {
+      "event": 52212,
+      "state": "DONE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/worker-journal-adapter-council-brief-2026-09-13/SELECTED-INPUTS.json"
+      }
+    },
+    {
+      "event": 52213,
+      "state": "ACTIVE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/worker-journal-adapter-council-brief-2026-09-13/SELECTED-INPUTS.json"
+      }
+    },
+    {
+      "event": 52214,
+      "state": "DONE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/worker-journal-adapter-council-brief-2026-09-13/SELECTED-INPUTS.json"
+      }
+    },
+    {
+      "event": 52215,
+      "state": "ACTIVE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/ASTRA-WORKER-BOOTSTRAP-VERDICT-2026-09-13.md"
+      }
+    },
+    {
+      "event": 52216,
+      "state": "DONE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/ASTRA-WORKER-BOOTSTRAP-VERDICT-2026-09-13.md"
+      }
+    },
+    {
+      "event": 52217,
+      "state": "ACTIVE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/ASTRA-WINDOWS-RESERVATION02-VERDICT-2026-09-13.md"
+      }
+    },
+    {
+      "event": 52218,
+      "state": "DONE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/ASTRA-WINDOWS-RESERVATION02-VERDICT-2026-09-13.md"
+      }
+    },
+    {
+      "event": 52221,
+      "state": "ACTIVE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/ASTRA-WORKER-JOURNAL-COUNCIL-BRIEF-REVIEW-2026-09-13.md"
+      }
+    },
+    {
+      "event": 52222,
+      "state": "DONE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/ASTRA-WORKER-JOURNAL-COUNCIL-BRIEF-REVIEW-2026-09-13.md"
+      }
+    },
+    {
+      "event": 52223,
+      "state": "ACTIVE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/GEMINI-WINDOWS-ADAPTER-GRAPH-COUNCIL-REVIEW-2026-09-13.md"
+      }
+    },
+    {
+      "event": 52224,
+      "state": "DONE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/GEMINI-WINDOWS-ADAPTER-GRAPH-COUNCIL-REVIEW-2026-09-13.md"
+      }
+    },
+    {
+      "event": 52225,
+      "state": "ACTIVE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/GEMINI-WORKER-JOURNAL-ADAPTER-COUNCIL-2026-09-13.md"
+      }
+    },
+    {
+      "event": 52226,
+      "state": "ERROR",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/GEMINI-WORKER-JOURNAL-ADAPTER-COUNCIL-2026-09-13.md"
+      }
+    },
+    {
+      "event": 52229,
+      "state": "ACTIVE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/worker-bootstrap-owner-2026-09-13/worker-bootstrap-owner-instrument01/runs/wbo01/plain_state_reader.py"
+      }
+    },
+    {
+      "event": 52230,
+      "state": "DONE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/worker-bootstrap-owner-2026-09-13/worker-bootstrap-owner-instrument01/runs/wbo01/plain_state_reader.py"
+      }
+    },
+    {
+      "event": 52231,
+      "state": "ACTIVE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/worker-bootstrap-owner-2026-09-13/worker-bootstrap-owner-instrument01/runs/wbo01/state_bridge.py"
+      }
+    },
+    {
+      "event": 52232,
+      "state": "DONE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/worker-bootstrap-owner-2026-09-13/worker-bootstrap-owner-instrument01/runs/wbo01/state_bridge.py"
+      }
+    },
+    {
+      "event": 52233,
+      "state": "ACTIVE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/worker-bootstrap-owner-2026-09-13/worker-bootstrap-owner-instrument01/runs/wbo01/owned_cpu_tensor_port.py"
+      }
+    },
+    {
+      "event": 52234,
+      "state": "DONE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/worker-bootstrap-owner-2026-09-13/worker-bootstrap-owner-instrument01/runs/wbo01/owned_cpu_tensor_port.py"
+      }
+    },
+    {
+      "event": 52235,
+      "state": "ACTIVE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/worker-bootstrap-owner-2026-09-13/worker-bootstrap-owner-instrument01/runs/wbo01/model_binding_registry.py"
+      }
+    },
+    {
+      "event": 52236,
+      "state": "DONE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/worker-bootstrap-owner-2026-09-13/worker-bootstrap-owner-instrument01/runs/wbo01/model_binding_registry.py"
+      }
+    },
+    {
+      "event": 52237,
+      "state": "ACTIVE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/worker-bootstrap-owner-2026-09-13/worker-bootstrap-owner-instrument01/runs/wbo01/owned_factory_port.py"
+      }
+    },
+    {
+      "event": 52238,
+      "state": "DONE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/worker-bootstrap-owner-2026-09-13/worker-bootstrap-owner-instrument01/runs/wbo01/owned_factory_port.py"
+      }
+    },
+    {
+      "event": 52239,
+      "state": "ACTIVE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/worker-bootstrap-owner-2026-09-13/worker-bootstrap-owner-instrument01/runs/wbo01/owned_guard.py"
+      }
+    },
+    {
+      "event": 52240,
+      "state": "DONE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/worker-bootstrap-owner-2026-09-13/worker-bootstrap-owner-instrument01/runs/wbo01/owned_guard.py"
+      }
+    },
+    {
+      "event": 52241,
+      "state": "ACTIVE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/worker-bootstrap-owner-2026-09-13/worker-bootstrap-owner-instrument01/runs/wbo01/fake_torch_support.py"
+      }
+    },
+    {
+      "event": 52242,
+      "state": "DONE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/worker-bootstrap-owner-2026-09-13/worker-bootstrap-owner-instrument01/runs/wbo01/fake_torch_support.py"
+      }
+    },
+    {
+      "event": 52243,
+      "state": "ACTIVE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/worker-bootstrap-owner-2026-09-13/worker-bootstrap-owner-instrument01/runs/wbo01/fixed_schema_helpers.py"
+      }
+    },
+    {
+      "event": 52244,
+      "state": "DONE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/worker-bootstrap-owner-2026-09-13/worker-bootstrap-owner-instrument01/runs/wbo01/fixed_schema_helpers.py"
+      }
+    },
+    {
+      "event": 52245,
+      "state": "ACTIVE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/worker-bootstrap-owner-2026-09-13/worker-bootstrap-owner-instrument01/runs/wbo01/worker_runtime_owner.py"
+      }
+    },
+    {
+      "event": 52246,
+      "state": "DONE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/worker-bootstrap-owner-2026-09-13/worker-bootstrap-owner-instrument01/runs/wbo01/worker_runtime_owner.py"
+      }
+    },
+    {
+      "event": 52247,
+      "state": "ACTIVE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/worker-bootstrap-owner-2026-09-13/worker-bootstrap-owner-instrument01/runs/wbo01/generated_factory_fixture.py"
+      }
+    },
+    {
+      "event": 52248,
+      "state": "DONE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/worker-bootstrap-owner-2026-09-13/worker-bootstrap-owner-instrument01/runs/wbo01/generated_factory_fixture.py"
+      }
+    },
+    {
+      "event": 52249,
+      "state": "ACTIVE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/worker-bootstrap-owner-2026-09-13/worker-bootstrap-owner-instrument01/runs/wbo01/generated_unit_cases.py"
+      }
+    },
+    {
+      "event": 52250,
+      "state": "DONE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/worker-bootstrap-owner-2026-09-13/worker-bootstrap-owner-instrument01/runs/wbo01/generated_unit_cases.py"
+      }
+    },
+    {
+      "event": 52251,
+      "state": "ACTIVE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/worker-bootstrap-owner-2026-09-13/worker-bootstrap-owner-instrument01/runs/wbo01/owned_generation_protocol.py"
+      }
+    },
+    {
+      "event": 52252,
+      "state": "DONE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/worker-bootstrap-owner-2026-09-13/worker-bootstrap-owner-instrument01/runs/wbo01/owned_generation_protocol.py"
+      }
+    },
+    {
+      "event": 52253,
+      "state": "ACTIVE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/worker-bootstrap-owner-2026-09-13/worker-bootstrap-owner-instrument01/runs/wbo01/generated_bootstrap_fixture.py"
+      }
+    },
+    {
+      "event": 52254,
+      "state": "DONE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/worker-bootstrap-owner-2026-09-13/worker-bootstrap-owner-instrument01/runs/wbo01/generated_bootstrap_fixture.py"
+      }
+    },
+    {
+      "event": 52255,
+      "state": "ACTIVE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/worker-bootstrap-owner-2026-09-13/worker-bootstrap-owner-instrument01/runs/wbo01/connection_cases.py"
+      }
+    },
+    {
+      "event": 52256,
+      "state": "DONE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/worker-bootstrap-owner-2026-09-13/worker-bootstrap-owner-instrument01/runs/wbo01/connection_cases.py"
+      }
+    },
+    {
+      "event": 52257,
+      "state": "ACTIVE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/worker-bootstrap-owner-2026-09-13/worker-bootstrap-owner-instrument01/runs/wbo01/qualify_owner.py"
+      }
+    },
+    {
+      "event": 52258,
+      "state": "DONE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/worker-bootstrap-owner-2026-09-13/worker-bootstrap-owner-instrument01/runs/wbo01/qualify_owner.py"
+      }
+    },
+    {
+      "event": 52259,
+      "state": "ACTIVE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/worker-bootstrap-owner-2026-09-13/worker-bootstrap-owner-instrument01/runs/wbo01/snapshot_lifecycle.py"
+      }
+    },
+    {
+      "event": 52260,
+      "state": "DONE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/worker-bootstrap-owner-2026-09-13/worker-bootstrap-owner-instrument01/runs/wbo01/snapshot_lifecycle.py"
+      }
+    },
+    {
+      "event": 52261,
+      "state": "ACTIVE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/worker-bootstrap-owner-2026-09-13/worker-bootstrap-owner-instrument01/runs/wbo01/EXPECTED-CASES.json"
+      }
+    },
+    {
+      "event": 52262,
+      "state": "DONE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/worker-bootstrap-owner-2026-09-13/worker-bootstrap-owner-instrument01/runs/wbo01/EXPECTED-CASES.json"
+      }
+    },
+    {
+      "event": 52263,
+      "state": "ACTIVE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/worker-bootstrap-owner-2026-09-13/worker-bootstrap-owner-instrument01/runs/wbo01/SOURCE-INPUTS.json"
+      }
+    },
+    {
+      "event": 52264,
+      "state": "DONE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/worker-bootstrap-owner-2026-09-13/worker-bootstrap-owner-instrument01/runs/wbo01/SOURCE-INPUTS.json"
+      }
+    },
+    {
+      "event": 52265,
+      "state": "ACTIVE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/worker-bootstrap-owner-2026-09-13/worker-bootstrap-owner-instrument01/runs/wbo01/run_bootstrap01.ps1"
+      }
+    },
+    {
+      "event": 52266,
+      "state": "DONE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/worker-bootstrap-owner-2026-09-13/worker-bootstrap-owner-instrument01/runs/wbo01/run_bootstrap01.ps1"
+      }
+    },
+    {
+      "event": 52267,
+      "state": "ACTIVE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/worker-bootstrap-owner-2026-09-13/worker-bootstrap-owner-instrument01/runs/wbo01/stdout.json"
+      }
+    },
+    {
+      "event": 52268,
+      "state": "DONE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/worker-bootstrap-owner-2026-09-13/worker-bootstrap-owner-instrument01/runs/wbo01/stdout.json"
+      }
+    },
+    {
+      "event": 52269,
+      "state": "ACTIVE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/worker-bootstrap-owner-2026-09-13/worker-bootstrap-owner-instrument01/runs/wbo01/exit.json"
+      }
+    },
+    {
+      "event": 52270,
+      "state": "DONE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/worker-bootstrap-owner-2026-09-13/worker-bootstrap-owner-instrument01/runs/wbo01/exit.json"
+      }
+    },
+    {
+      "event": 52271,
+      "state": "ACTIVE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/worker-bootstrap-owner-2026-09-13/worker-bootstrap-owner-instrument01/runs/wbo01/native-exit.json"
+      }
+    },
+    {
+      "event": 52272,
+      "state": "DONE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/worker-bootstrap-owner-2026-09-13/worker-bootstrap-owner-instrument01/runs/wbo01/native-exit.json"
+      }
+    },
+    {
+      "event": 52273,
+      "state": "ACTIVE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/worker-bootstrap-owner-2026-09-13/worker-bootstrap-owner-instrument01/runs/wbo01/after.json"
+      }
+    },
+    {
+      "event": 52274,
+      "state": "DONE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/worker-bootstrap-owner-2026-09-13/worker-bootstrap-owner-instrument01/runs/wbo01/after.json"
+      }
+    },
+    {
+      "event": 52275,
+      "state": "ACTIVE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/worker-bootstrap-owner-2026-09-13/astra-worker-bootstrap-owner-confirmation01/runs/wbo01/stdout.json"
+      }
+    },
+    {
+      "event": 52276,
+      "state": "DONE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/worker-bootstrap-owner-2026-09-13/astra-worker-bootstrap-owner-confirmation01/runs/wbo01/stdout.json"
+      }
+    },
+    {
+      "event": 52277,
+      "state": "ACTIVE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/worker-bootstrap-owner-2026-09-13/astra-worker-bootstrap-owner-confirmation01/runs/wbo01/exit.json"
+      }
+    },
+    {
+      "event": 52278,
+      "state": "DONE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/worker-bootstrap-owner-2026-09-13/astra-worker-bootstrap-owner-confirmation01/runs/wbo01/exit.json"
+      }
+    },
+    {
+      "event": 52279,
+      "state": "ACTIVE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/worker-bootstrap-owner-2026-09-13/astra-worker-bootstrap-owner-confirmation01/runs/wbo01/native-exit.json"
+      }
+    },
+    {
+      "event": 52280,
+      "state": "DONE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/worker-bootstrap-owner-2026-09-13/astra-worker-bootstrap-owner-confirmation01/runs/wbo01/native-exit.json"
+      }
+    },
+    {
+      "event": 52281,
+      "state": "ACTIVE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/worker-bootstrap-owner-2026-09-13/astra-worker-bootstrap-owner-confirmation01/runs/wbo01/after.json"
+      }
+    },
+    {
+      "event": 52282,
+      "state": "DONE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/worker-bootstrap-owner-2026-09-13/astra-worker-bootstrap-owner-confirmation01/runs/wbo01/after.json"
+      }
+    },
+    {
+      "event": 52283,
+      "state": "ACTIVE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/worker-bootstrap-owner-2026-09-13/WORKER-BOOTSTRAP01-AUTHOR-FINAL-ACTUAL.json"
+      }
+    },
+    {
+      "event": 52284,
+      "state": "DONE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/worker-bootstrap-owner-2026-09-13/WORKER-BOOTSTRAP01-AUTHOR-FINAL-ACTUAL.json"
+      }
+    },
+    {
+      "event": 52285,
+      "state": "ACTIVE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/worker-bootstrap-owner-2026-09-13/WORKER-BOOTSTRAP01-INDEPENDENT-FINAL-ACTUAL.json"
+      }
+    },
+    {
+      "event": 52286,
+      "state": "DONE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/worker-bootstrap-owner-2026-09-13/WORKER-BOOTSTRAP01-INDEPENDENT-FINAL-ACTUAL.json"
+      }
+    },
+    {
+      "event": 52287,
+      "state": "ACTIVE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/worker-bootstrap-owner-2026-09-13/SHA256.json"
+      }
+    },
+    {
+      "event": 52288,
+      "state": "DONE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/worker-bootstrap-owner-2026-09-13/SHA256.json"
+      }
+    },
+    {
+      "event": 52289,
+      "state": "ACTIVE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/windows-reservation02-2026-09-13/author/windows_reservation_port.py"
+      }
+    },
+    {
+      "event": 52290,
+      "state": "DONE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/windows-reservation02-2026-09-13/author/windows_reservation_port.py"
+      }
+    },
+    {
+      "event": 52291,
+      "state": "ACTIVE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/windows-reservation02-2026-09-13/author/snapshot_reservations.py"
+      }
+    },
+    {
+      "event": 52292,
+      "state": "DONE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/windows-reservation02-2026-09-13/author/snapshot_reservations.py"
+      }
+    },
+    {
+      "event": 52293,
+      "state": "ACTIVE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/windows-reservation02-2026-09-13/author/reservation_file_port.py"
+      }
+    },
+    {
+      "event": 52294,
+      "state": "DONE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/windows-reservation02-2026-09-13/author/reservation_file_port.py"
+      }
+    },
+    {
+      "event": 52295,
+      "state": "ACTIVE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/windows-reservation02-2026-09-13/author/win32_worker_connection.py"
+      }
+    },
+    {
+      "event": 52296,
+      "state": "DONE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/windows-reservation02-2026-09-13/author/win32_worker_connection.py"
+      }
+    },
+    {
+      "event": 52297,
+      "state": "ACTIVE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/windows-reservation02-2026-09-13/author/test_reservations.py"
+      }
+    },
+    {
+      "event": 52298,
+      "state": "DONE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/windows-reservation02-2026-09-13/author/test_reservations.py"
+      }
+    },
+    {
+      "event": 52299,
+      "state": "ACTIVE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/windows-reservation02-2026-09-13/author/API-AND-INTEGRATION.md"
+      }
+    },
+    {
+      "event": 52300,
+      "state": "DONE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/windows-reservation02-2026-09-13/author/API-AND-INTEGRATION.md"
+      }
+    },
+    {
+      "event": 52301,
+      "state": "ACTIVE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/windows-reservation02-2026-09-13/author/PEER-REVIEW03-POISONING.md"
+      }
+    },
+    {
+      "event": 52302,
+      "state": "DONE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/windows-reservation02-2026-09-13/author/PEER-REVIEW03-POISONING.md"
+      }
+    },
+    {
+      "event": 52303,
+      "state": "ACTIVE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/windows-reservation-failed-2026-09-13/proposal/windows-reservation01/stdout.json"
+      }
+    },
+    {
+      "event": 52304,
+      "state": "DONE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/windows-reservation-failed-2026-09-13/proposal/windows-reservation01/stdout.json"
+      }
+    },
+    {
+      "event": 52305,
+      "state": "ACTIVE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/windows-reservation-failed-2026-09-13/proposal/windows-reservation01/exit.json"
+      }
+    },
+    {
+      "event": 52306,
+      "state": "DONE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/windows-reservation-failed-2026-09-13/proposal/windows-reservation01/exit.json"
+      }
+    },
+    {
+      "event": 52307,
+      "state": "ACTIVE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/windows-reservation-failed-2026-09-13/proposal/windows-reservation01/native-exit.json"
+      }
+    },
+    {
+      "event": 52308,
+      "state": "DONE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/windows-reservation-failed-2026-09-13/proposal/windows-reservation01/native-exit.json"
+      }
+    },
+    {
+      "event": 52309,
+      "state": "ACTIVE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/windows-reservation-failed-2026-09-13/preparation/fixture-correction.UNAPPLIED.patch.txt"
+      }
+    },
+    {
+      "event": 52310,
+      "state": "DONE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/windows-reservation-failed-2026-09-13/preparation/fixture-correction.UNAPPLIED.patch.txt"
+      }
+    },
+    {
+      "event": 52311,
+      "state": "ACTIVE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/windows-reservation-failed-2026-09-13/review/PEER-FAILED01-FOLLOWUP.md"
+      }
+    },
+    {
+      "event": 52312,
+      "state": "DONE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/windows-reservation-failed-2026-09-13/review/PEER-FAILED01-FOLLOWUP.md"
+      }
+    },
+    {
+      "event": 52313,
+      "state": "ACTIVE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/windows-reservation-failed-2026-09-13/actual/WINDOWS-RESERVATION01-ACTUAL.json"
+      }
+    },
+    {
+      "event": 52314,
+      "state": "DONE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/windows-reservation-failed-2026-09-13/actual/WINDOWS-RESERVATION01-ACTUAL.json"
+      }
+    },
+    {
+      "event": 52315,
+      "state": "ACTIVE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/windows-reservation02-2026-09-13/author/test_windows_reservations.py"
+      }
+    },
+    {
+      "event": 52316,
+      "state": "DONE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/windows-reservation02-2026-09-13/author/test_windows_reservations.py"
+      }
+    },
+    {
+      "event": 52317,
+      "state": "ACTIVE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/windows-reservation02-2026-09-13/author/qualify_windows_reservations.py"
+      }
+    },
+    {
+      "event": 52318,
+      "state": "DONE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/windows-reservation02-2026-09-13/author/qualify_windows_reservations.py"
+      }
+    },
+    {
+      "event": 52319,
+      "state": "ACTIVE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/windows-reservation02-2026-09-13/author/run_preflight01.ps1"
+      }
+    },
+    {
+      "event": 52320,
+      "state": "DONE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/windows-reservation02-2026-09-13/author/run_preflight01.ps1"
+      }
+    },
+    {
+      "event": 52321,
+      "state": "ACTIVE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/windows-reservation02-2026-09-13/author/EXPECTED-CASES.json"
+      }
+    },
+    {
+      "event": 52322,
+      "state": "DONE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/windows-reservation02-2026-09-13/author/EXPECTED-CASES.json"
+      }
+    },
+    {
+      "event": 52323,
+      "state": "ACTIVE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/windows-reservation02-2026-09-13/author/QUALIFICATION-PROTOCOL.md"
+      }
+    },
+    {
+      "event": 52324,
+      "state": "DONE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/windows-reservation02-2026-09-13/author/QUALIFICATION-PROTOCOL.md"
+      }
+    },
+    {
+      "event": 52325,
+      "state": "ACTIVE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/windows-reservation02-2026-09-13/author/PINS.json"
+      }
+    },
+    {
+      "event": 52326,
+      "state": "DONE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/windows-reservation02-2026-09-13/author/PINS.json"
+      }
+    },
+    {
+      "event": 52327,
+      "state": "ACTIVE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/windows-reservation02-2026-09-13/author/windows-reservation02/stdout.json"
+      }
+    },
+    {
+      "event": 52328,
+      "state": "DONE",
+      "parameters": {
+        "AbsolutePath": "C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/cede76cb-7ca/gemini/docs/library/proof/windows-reservation02-2026-09-13/author/windows-reservation02/stdout.json"
+      }
+    },
+    {
+      "event": 52329,
+      "state": "ACTIVE",
+      "parameters": {
+        "AbsolutePath": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\cede76cb-7ca\\gemini\\docs\\library\\proof\\windows-reservation02-2026-09-13\\author\\exit.json"
+      }
+    },
+    {
+      "event": 52330,
+      "state": "ERROR",
+      "parameters": {
+        "AbsolutePath": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\cede76cb-7ca\\gemini\\docs\\library\\proof\\windows-reservation02-2026-09-13\\author\\exit.json"
+      }
+    },
+    {
+      "event": 52343,
+      "state": "ACTIVE",
+      "parameters": {
+        "AbsolutePath": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\cede76cb-7ca\\gemini\\docs\\library\\proof\\worker-journal-adapter-council-brief-2026-09-13\\BRIEF.md"
+      }
+    },
+    {
+      "event": 52344,
+      "state": "DONE",
+      "parameters": {
+        "AbsolutePath": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\cede76cb-7ca\\gemini\\docs\\library\\proof\\worker-journal-adapter-council-brief-2026-09-13\\BRIEF.md"
+      }
+    },
+    {
+      "event": 52345,
+      "state": "ACTIVE",
+      "parameters": {
+        "AbsolutePath": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\cede76cb-7ca\\gemini\\docs\\library\\proof\\worker-journal-adapter-council-brief-2026-09-13\\BRIEF.md"
+      }
+    },
+    {
+      "event": 52346,
+      "state": "DONE",
+      "parameters": {
+        "AbsolutePath": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\cede76cb-7ca\\gemini\\docs\\library\\proof\\worker-journal-adapter-council-brief-2026-09-13\\BRIEF.md"
+      }
+    },
+    {
+      "event": 52347,
+      "state": "ACTIVE",
+      "parameters": {
+        "AbsolutePath": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\cede76cb-7ca\\gemini\\docs\\library\\proof\\worker-journal-adapter-council-brief-2026-09-13\\READ-COVERAGE.md"
+      }
+    },
+    {
+      "event": 52348,
+      "state": "DONE",
+      "parameters": {
+        "AbsolutePath": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\cede76cb-7ca\\gemini\\docs\\library\\proof\\worker-journal-adapter-council-brief-2026-09-13\\READ-COVERAGE.md"
+      }
+    },
+    {
+      "event": 52349,
+      "state": "ACTIVE",
+      "parameters": {
+        "AbsolutePath": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\cede76cb-7ca\\gemini\\docs\\library\\proof\\worker-journal-adapter-council-brief-2026-09-13\\SELECTED-INPUTS.json"
+      }
+    },
+    {
+      "event": 52350,
+      "state": "DONE",
+      "parameters": {
+        "AbsolutePath": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\cede76cb-7ca\\gemini\\docs\\library\\proof\\worker-journal-adapter-council-brief-2026-09-13\\SELECTED-INPUTS.json"
+      }
+    },
+    {
+      "event": 52351,
+      "state": "ACTIVE",
+      "parameters": {
+        "AbsolutePath": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\cede76cb-7ca\\gemini\\docs\\library\\proof\\worker-journal-adapter-council-brief-2026-09-13\\SELECTED-INPUTS.json"
+      }
+    },
+    {
+      "event": 52352,
+      "state": "DONE",
+      "parameters": {
+        "AbsolutePath": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\cede76cb-7ca\\gemini\\docs\\library\\proof\\worker-journal-adapter-council-brief-2026-09-13\\SELECTED-INPUTS.json"
+      }
+    },
+    {
+      "event": 52353,
+      "state": "ACTIVE",
+      "parameters": {
+        "AbsolutePath": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\cede76cb-7ca\\gemini\\docs\\library\\proof\\worker-journal-adapter-council-brief-2026-09-13\\SELECTED-INPUTS.json"
+      }
+    },
+    {
+      "event": 52354,
+      "state": "DONE",
+      "parameters": {
+        "AbsolutePath": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\cede76cb-7ca\\gemini\\docs\\library\\proof\\worker-journal-adapter-council-brief-2026-09-13\\SELECTED-INPUTS.json"
+      }
+    },
+    {
+      "event": 52355,
+      "state": "ACTIVE",
+      "parameters": {
+        "AbsolutePath": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\cede76cb-7ca\\gemini\\docs\\library\\proof\\windows-reservation02-2026-09-13\\author\\windows-reservation02\\exit.json"
+      }
+    },
+    {
+      "event": 52356,
+      "state": "DONE",
+      "parameters": {
+        "AbsolutePath": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\cede76cb-7ca\\gemini\\docs\\library\\proof\\windows-reservation02-2026-09-13\\author\\windows-reservation02\\exit.json"
+      }
+    },
+    {
+      "event": 52357,
+      "state": "ACTIVE",
+      "parameters": {
+        "AbsolutePath": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\cede76cb-7ca\\gemini\\docs\\library\\proof\\windows-reservation02-2026-09-13\\author\\windows-reservation02\\exit.json"
+      }
+    },
+    {
+      "event": 52358,
+      "state": "DONE",
+      "parameters": {
+        "AbsolutePath": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\cede76cb-7ca\\gemini\\docs\\library\\proof\\windows-reservation02-2026-09-13\\author\\windows-reservation02\\exit.json"
+      }
+    },
+    {
+      "event": 52359,
+      "state": "ACTIVE",
+      "parameters": {
+        "AbsolutePath": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\cede76cb-7ca\\gemini\\docs\\library\\proof\\windows-reservation02-2026-09-13\\author\\windows-reservation02\\native-exit.json"
+      }
+    },
+    {
+      "event": 52360,
+      "state": "DONE",
+      "parameters": {
+        "AbsolutePath": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\cede76cb-7ca\\gemini\\docs\\library\\proof\\windows-reservation02-2026-09-13\\author\\windows-reservation02\\native-exit.json"
+      }
+    },
+    {
+      "event": 52361,
+      "state": "ACTIVE",
+      "parameters": {
+        "AbsolutePath": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\cede76cb-7ca\\gemini\\docs\\library\\proof\\windows-reservation02-2026-09-13\\author\\windows-reservation02\\input-check.json"
+      }
+    },
+    {
+      "event": 52362,
+      "state": "DONE",
+      "parameters": {
+        "AbsolutePath": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\cede76cb-7ca\\gemini\\docs\\library\\proof\\windows-reservation02-2026-09-13\\author\\windows-reservation02\\input-check.json"
+      }
+    },
+    {
+      "event": 52363,
+      "state": "ACTIVE",
+      "parameters": {
+        "AbsolutePath": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\cede76cb-7ca\\gemini\\docs\\library\\proof\\windows-reservation02-2026-09-13\\independent\\windows-reservation02\\stdout.json"
+      }
+    },
+    {
+      "event": 52364,
+      "state": "DONE",
+      "parameters": {
+        "AbsolutePath": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\cede76cb-7ca\\gemini\\docs\\library\\proof\\windows-reservation02-2026-09-13\\independent\\windows-reservation02\\stdout.json"
+      }
+    },
+    {
+      "event": 52365,
+      "state": "ACTIVE",
+      "parameters": {
+        "AbsolutePath": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\cede76cb-7ca\\gemini\\docs\\library\\proof\\windows-reservation02-2026-09-13\\independent\\windows-reservation02\\exit.json"
+      }
+    },
+    {
+      "event": 52366,
+      "state": "DONE",
+      "parameters": {
+        "AbsolutePath": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\cede76cb-7ca\\gemini\\docs\\library\\proof\\windows-reservation02-2026-09-13\\independent\\windows-reservation02\\exit.json"
+      }
+    },
+    {
+      "event": 52367,
+      "state": "ACTIVE",
+      "parameters": {
+        "AbsolutePath": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\cede76cb-7ca\\gemini\\docs\\library\\proof\\windows-reservation02-2026-09-13\\independent\\windows-reservation02\\native-exit.json"
+      }
+    },
+    {
+      "event": 52368,
+      "state": "DONE",
+      "parameters": {
+        "AbsolutePath": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\cede76cb-7ca\\gemini\\docs\\library\\proof\\windows-reservation02-2026-09-13\\independent\\windows-reservation02\\native-exit.json"
+      }
+    },
+    {
+      "event": 52369,
+      "state": "ACTIVE",
+      "parameters": {
+        "AbsolutePath": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\cede76cb-7ca\\gemini\\docs\\library\\proof\\windows-reservation02-2026-09-13\\independent\\windows-reservation02\\input-check.json"
+      }
+    },
+    {
+      "event": 52370,
+      "state": "DONE",
+      "parameters": {
+        "AbsolutePath": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\cede76cb-7ca\\gemini\\docs\\library\\proof\\windows-reservation02-2026-09-13\\independent\\windows-reservation02\\input-check.json"
+      }
+    },
+    {
+      "event": 52371,
+      "state": "ACTIVE",
+      "parameters": {
+        "AbsolutePath": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\cede76cb-7ca\\gemini\\docs\\library\\proof\\windows-reservation02-2026-09-13\\actual\\WINDOWS-RESERVATION02-AUTHOR-ACTUAL.json"
+      }
+    },
+    {
+      "event": 52372,
+      "state": "DONE",
+      "parameters": {
+        "AbsolutePath": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\cede76cb-7ca\\gemini\\docs\\library\\proof\\windows-reservation02-2026-09-13\\actual\\WINDOWS-RESERVATION02-AUTHOR-ACTUAL.json"
+      }
+    },
+    {
+      "event": 52373,
+      "state": "ACTIVE",
+      "parameters": {
+        "AbsolutePath": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\cede76cb-7ca\\gemini\\docs\\library\\proof\\windows-reservation02-2026-09-13\\actual\\WINDOWS-RESERVATION02-INDEPENDENT-ACTUAL.json"
+      }
+    },
+    {
+      "event": 52374,
+      "state": "DONE",
+      "parameters": {
+        "AbsolutePath": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\cede76cb-7ca\\gemini\\docs\\library\\proof\\windows-reservation02-2026-09-13\\actual\\WINDOWS-RESERVATION02-INDEPENDENT-ACTUAL.json"
+      }
+    },
+    {
+      "event": 52375,
+      "state": "ACTIVE",
+      "parameters": {
+        "AbsolutePath": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\cede76cb-7ca\\gemini\\docs\\library\\proof\\windows-reservation02-2026-09-13\\author\\durable_lifecycle.py"
+      }
+    },
+    {
+      "event": 52376,
+      "state": "DONE",
+      "parameters": {
+        "AbsolutePath": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\cede76cb-7ca\\gemini\\docs\\library\\proof\\windows-reservation02-2026-09-13\\author\\durable_lifecycle.py"
+      }
+    },
+    {
+      "event": 52377,
+      "state": "ACTIVE",
+      "parameters": {
+        "AbsolutePath": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\cede76cb-7ca\\gemini\\docs\\library\\proof\\windows-reservation02-2026-09-13\\author\\asr_loading_adapter.py"
+      }
+    },
+    {
+      "event": 52378,
+      "state": "DONE",
+      "parameters": {
+        "AbsolutePath": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\cede76cb-7ca\\gemini\\docs\\library\\proof\\windows-reservation02-2026-09-13\\author\\asr_loading_adapter.py"
+      }
+    },
+    {
+      "event": 52379,
+      "state": "ACTIVE",
+      "parameters": {
+        "AbsolutePath": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\cede76cb-7ca\\gemini\\docs\\library\\proof\\windows-reservation02-2026-09-13\\author\\trusted_asr_resolver.py"
+      }
+    },
+    {
+      "event": 52380,
+      "state": "DONE",
+      "parameters": {
+        "AbsolutePath": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\cede76cb-7ca\\gemini\\docs\\library\\proof\\windows-reservation02-2026-09-13\\author\\trusted_asr_resolver.py"
+      }
+    },
+    {
+      "event": 52381,
+      "state": "ACTIVE",
+      "parameters": {
+        "AbsolutePath": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\cede76cb-7ca\\gemini\\docs\\library\\proof\\windows-reservation02-2026-09-13\\author\\generated_adapter_flow.py"
+      }
+    },
+    {
+      "event": 52382,
+      "state": "DONE",
+      "parameters": {
+        "AbsolutePath": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\cede76cb-7ca\\gemini\\docs\\library\\proof\\windows-reservation02-2026-09-13\\author\\generated_adapter_flow.py"
+      }
+    },
+    {
+      "event": 52383,
+      "state": "ACTIVE",
+      "parameters": {
+        "AbsolutePath": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\cede76cb-7ca\\gemini\\docs\\library\\proof\\windows-reservation02-2026-09-13\\author\\generated_worker_flow.py"
+      }
+    },
+    {
+      "event": 52384,
+      "state": "DONE",
+      "parameters": {
+        "AbsolutePath": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\cede76cb-7ca\\gemini\\docs\\library\\proof\\windows-reservation02-2026-09-13\\author\\generated_worker_flow.py"
+      }
+    },
+    {
+      "event": 52385,
+      "state": "ACTIVE",
+      "parameters": {
+        "AbsolutePath": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\cede76cb-7ca\\gemini\\docs\\library\\proof\\windows-reservation02-2026-09-13\\author\\generated_operation_flow.py"
+      }
+    },
+    {
+      "event": 52386,
+      "state": "DONE",
+      "parameters": {
+        "AbsolutePath": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\cede76cb-7ca\\gemini\\docs\\library\\proof\\windows-reservation02-2026-09-13\\author\\generated_operation_flow.py"
+      }
+    },
+    {
+      "event": 52387,
+      "state": "ACTIVE",
+      "parameters": {
+        "AbsolutePath": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\cede76cb-7ca\\gemini\\docs\\library\\proof\\windows-reservation02-2026-09-13\\author\\owned_generation_protocol.py"
+      }
+    },
+    {
+      "event": 52388,
+      "state": "DONE",
+      "parameters": {
+        "AbsolutePath": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\cede76cb-7ca\\gemini\\docs\\library\\proof\\windows-reservation02-2026-09-13\\author\\owned_generation_protocol.py"
+      }
+    },
+    {
+      "event": 52389,
+      "state": "ACTIVE",
+      "parameters": {
+        "AbsolutePath": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\cede76cb-7ca\\gemini\\docs\\library\\proof\\windows-reservation02-2026-09-13\\author\\inherited_readset.py"
+      }
+    },
+    {
+      "event": 52390,
+      "state": "DONE",
+      "parameters": {
+        "AbsolutePath": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\cede76cb-7ca\\gemini\\docs\\library\\proof\\windows-reservation02-2026-09-13\\author\\inherited_readset.py"
+      }
+    },
+    {
+      "event": 52391,
+      "state": "ACTIVE",
+      "parameters": {
+        "AbsolutePath": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\cede76cb-7ca\\gemini\\docs\\library\\proof\\windows-reservation02-2026-09-13\\author\\pinned_buffer_namespace.py"
+      }
+    },
+    {
+      "event": 52392,
+      "state": "DONE",
+      "parameters": {
+        "AbsolutePath": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\cede76cb-7ca\\gemini\\docs\\library\\proof\\windows-reservation02-2026-09-13\\author\\pinned_buffer_namespace.py"
+      }
+    },
+    {
+      "event": 52393,
+      "state": "ACTIVE",
+      "parameters": {
+        "AbsolutePath": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\cede76cb-7ca\\gemini\\docs\\library\\proof\\windows-reservation02-2026-09-13\\author\\win32_private_pipe.py"
+      }
+    },
+    {
+      "event": 52394,
+      "state": "DONE",
+      "parameters": {
+        "AbsolutePath": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\cede76cb-7ca\\gemini\\docs\\library\\proof\\windows-reservation02-2026-09-13\\author\\win32_private_pipe.py"
+      }
+    },
+    {
+      "event": 52395,
+      "state": "ACTIVE",
+      "parameters": {
+        "AbsolutePath": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\cede76cb-7ca\\gemini\\docs\\library\\proof\\windows-reservation-failed-2026-09-13\\SHA256.json"
+      }
+    },
+    {
+      "event": 52396,
+      "state": "DONE",
+      "parameters": {
+        "AbsolutePath": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\cede76cb-7ca\\gemini\\docs\\library\\proof\\windows-reservation-failed-2026-09-13\\SHA256.json"
+      }
+    },
+    {
+      "event": 52397,
+      "state": "ACTIVE",
+      "parameters": {
+        "AbsolutePath": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\cede76cb-7ca\\gemini\\docs\\library\\proof\\windows-reservation02-2026-09-13\\SHA256.json"
+      }
+    },
+    {
+      "event": 52398,
+      "state": "DONE",
+      "parameters": {
+        "AbsolutePath": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\cede76cb-7ca\\gemini\\docs\\library\\proof\\windows-reservation02-2026-09-13\\SHA256.json"
+      }
+    },
+    {
+      "event": 52399,
+      "state": "ACTIVE",
+      "parameters": {
+        "AbsolutePath": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\cede76cb-7ca\\gemini\\docs\\library\\GEMINI-WORKER-JOURNAL-ADAPTER-COUNCIL-2026-09-13.md"
+      }
+    },
+    {
+      "event": 52400,
+      "state": "DONE",
+      "parameters": {
+        "AbsolutePath": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\cede76cb-7ca\\gemini\\docs\\library\\GEMINI-WORKER-JOURNAL-ADAPTER-COUNCIL-2026-09-13.md"
+      }
+    },
+    {
+      "event": 52403,
+      "state": "ACTIVE",
+      "parameters": {
+        "AbsolutePath": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\cede76cb-7ca\\gemini\\docs\\library\\GEMINI-WORKER-JOURNAL-ADAPTER-COUNCIL-2026-09-13.md"
+      }
+    },
+    {
+      "event": 52404,
+      "state": "DONE",
+      "parameters": {
+        "AbsolutePath": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\cede76cb-7ca\\gemini\\docs\\library\\GEMINI-WORKER-JOURNAL-ADAPTER-COUNCIL-2026-09-13.md"
+      }
+    },
+    {
+      "event": 52405,
+      "state": "ACTIVE",
+      "parameters": {
+        "AbsolutePath": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\cede76cb-7ca\\gemini\\docs\\library\\GEMINI-WORKER-JOURNAL-ADAPTER-COUNCIL-2026-09-13.md"
+      }
+    },
+    {
+      "event": 52406,
+      "state": "DONE",
+      "parameters": {
+        "AbsolutePath": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\cede76cb-7ca\\gemini\\docs\\library\\GEMINI-WORKER-JOURNAL-ADAPTER-COUNCIL-2026-09-13.md"
+      }
+    }
+  ]
+}
