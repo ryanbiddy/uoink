@@ -115,7 +115,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | Generated reservation recovery | Component and evidence integrated at f9ab6fe | Author70b48e and independentfd86f5 each pass42 cases, with20 passing nested subtests and all10 guards valid. All123 proof payloads match Git/disk | Connect retained Windows gate/journal handles and split create/resume/startup. Native recovery and runtime acceptance remain open |
 | Windows reservation connection | Correction8fc3219; transfer2f4311f; native generated drain67887c3 | Unit70/0/0 plus35 subtests in both copies. Native d3d56f returns outer/controller/child0, valid guards, child0/job0, four confirmed phases/flushes and exact2,118B closed journal. All87 native proof payloads match Git/disk | Qualify remaining native exclusion/interruption/persistence/restart/reconciliation. Actual runtime-owner connection and real models remain open |
 | Worker/journal council | Scoped source review completed at1c6ac4c with mandatory Astra addendum; original244cca5 remains accuracy FAILED | All24 correction proof payloads match Git/disk. Gemini correction alone remains partial; Astra corrects remaining handshake/locking/private-caller claims. Existing17/65 outcomes unchanged | Continue native/runtime engineering. Session42118 closed482e42/exit0; no new council loop or broader acceptance |
-| Native writer exclusion | Stable-directory repair atd317a88; native04 atf630264; Group A council correction ata74e178 | Both copies81 cases/72 subtests; native0eeb20 passed. Group A source accepted only with mandatory Astra corrections; all24 new proof payloads match Git/disk. Original failed reviews preserved | Dispatch separate Group B source review. Interruption/restart/reconciliation and real runtime remain open |
+| Native writer exclusion | Stable-directory repair atd317a88; native04 atf630264; Group A council correction ata74e178 | Both copies81 cases/72 subtests; native0eeb20 passed. Group A source accepted only with mandatory Astra corrections; all24 new proof payloads match Git/disk. Original failed reviews preserved | Group B dispatched from223a31d in session90502. Interruption/restart/reconciliation and real runtime remain open |
 | Actual adapter cancellation | Generated qualification integrated at60b3bb5 | Author and independent copies each89 passed/0 failed/0 skipped,86 passing subtests; all216 proof payloads match Git/disk | Native cancellation integrated ata25b34b: all100 proof payloads match Git/disk. Connect interrupted final-clear recovery; crash/restart, real models and release remain unqualified |
 | Worker runtime owner and bootstrap | Owner at 1f200eb; actual bootstrap connection at bbe10d6 | Both copies pass17/0/0: eleven retained owner cases plus six bootstrap cases. Exact case objects, valid guards, unchanged19 inputs plus admission. All144 newest proof payloads match Git/disk | Connect exact ownership through native services. Real inference, PCM/filter, VAD-to-model binding and protected constructor routes remain open |
 | Integration | Reliability repair at e8d058f and notice packaging at 71d3e70 after tree09 | Reliability:53 focused cases plus13 subtests per root. Notices:20 Python/10 block cases per root. Tree09 at 56d9d4c remains2,796 passed/1 failed/3 skipped across2,800 cases plus13 subtests; it predates both repairs | Finish runtime work, then run a new committed complete tree and rebuild/reseal. Package08 and website/marketing remain held. No current-source package or installation credit |
@@ -175,8 +175,9 @@ verified payloads and mandatory Astra corrections for journal size and selected
 ctypes declarations. Its viewing trace remains unverified; the prior failed
 48-input review stays failed at89c1579. No product measurement was repeated.
 
-Commit and dispatch the separate five-input Group B source brief, then review
-and integrate its results. The retired-owner interrupted-final-clear proposal
+Group B brief223a31d is running in Control Room session90502, dispatched by
+622495 with Gemini/Antigravity. Review its completed five-input source critique
+and integrate only with a precise root verdict. The retired-owner interrupted-final-clear proposal
 is being implemented under _scratch/windows-retired-owner-recovery-proposal01;
 review its exact changes and frozen focused controls before qualification.
 Neither tests nor native execution for that derivative are admitted yet.
@@ -5955,3 +5956,13 @@ are selected, although actual supplied modules/DLL/runtime remain unreviewed.
 The comparator's file-ID equality is not an independent16-byte-length validator.
 Coverage endpoints include terminal empty catalog slots; actual worker viewing
 trace remains unverified. Original48-input review remains failed. Group B is next.
+### 2026-09-13 — Separate Group B source review dispatched
+
+Brief223a31d selects five existing source texts/120,375 bytes. Documentary
+copyfb04da returned0; roote882a0 verifies seven payloads/13,105 bytes against
+Git/disk, seal2fa9a5b8fb532bd10a603aeb254a07b446fba2fa54c072ac6ebd18911036330b.
+Dispatch622495 starts session90502 with Gemini3.8-flash-high through the existing
+Antigravity subscription, frozen base223a31d. The critique is limited to600 words
+and source requirements; no execution receipts or external lifecycle/Win32
+implementations are selected. Preserve those limits when integrating its output.
+The retired-owner proposal continues independently without test/native admission.
