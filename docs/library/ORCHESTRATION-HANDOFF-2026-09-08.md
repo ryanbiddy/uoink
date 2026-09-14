@@ -119,7 +119,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | Actual adapter cancellation | Generated qualification integrated at60b3bb5 | Author and independent copies each89 passed/0 failed/0 skipped,86 passing subtests; all216 proof payloads match Git/disk | Native cancellation integrated ata25b34b: all100 proof payloads match Git/disk. Final-clear recovery is recorded at 5671b51; interrupted-owner retirement, crash/restart, real models and release remain unqualified |
 | Retired-owner final-clear recovery | Fake22 at a83ae1a; generated native recovery at5671b51 | Both fake copies22/0/0 plus21 passing subtests. Nativee97a44/exit0, root5214fa and peer503717 verify exact retirement, four confirmed phases/flushes and still-revoked owner/token. All91 newest proof payloads match Git/disk | The generated runtime-owner connection is recorded at 3661608 and 3b8f9e0. Continue interrupted-owner retirement; no OS-interruption, active-worker recovery, crash/restart or model credit |
 | Worker runtime owner and bootstrap | Connected fake33 at 3661608; generated native cancellation at 3b8f9e0 | Both fake copies 33/0/0. Native a9321b/exit 0, root dd7190 and peer 4984ac agree on 32 unchanged pairs, valid guards, one segment, closed owner, child/contender exit 0 with empty jobs, and four journal frames. All 127 native proof payloads match Git/disk | Interrupted-owner retirement direction is committed at 77dc339. Real inference, protected loader/PCM/filter routes, crash/restart and release remain open |
-| Interrupted owned-worker retirement | Native01 remains FAILED at7f142e8; repaired driver qualifies under admission7316e53 | Both copies30/0/0 plus62 subtests; root50475b and peer10a40c verify identical cases/36 child hashes and valid guards. All329 qualification/integration payloads match Git/disk. Original28/57 and assertions remain intact | Prepare native02 under6dc7b8b and review its exact source/control bindings before a separate admission. No real-model, production or release authority |
+| Interrupted owned-worker retirement | Native01 remains FAILED at7f142e8; repaired driver and fake30 qualification integrated atc8e7a44 | Both copies30/0/0 plus62 subtests; root50475b and peer10a40c verify identical cases/36 child hashes and valid guards. All329 qualification/integration payloads match Git/disk. Original28/57 and assertions remain intact | Native02 source review is clear; one generated Windows invocation is admitted by ASTRA-NATIVE-INTERRUPTED-OWNER02-ADMISSION-2026-09-14.md. Review its actual result before acceptance. No real-model, production or release authority |
 | Release notes | Current progress and remaining gates committed at 376eb47 | All seven proof payloads match Git/disk; 57 table lines and historical package/review-kit sections remain unchanged. D1/D2 completion and generated cancellation/recovery are explicit | Continue runtime qualification. No production source, package, installation, public draft or website changed |
 | Integration | Reliability repair at e8d058f and notice packaging at 71d3e70 after tree09 | Reliability:53 focused cases plus13 subtests per root. Notices:20 Python/10 block cases per root. Tree09 at 56d9d4c remains2,796 passed/1 failed/3 skipped across2,800 cases plus13 subtests; it predates both repairs | Finish runtime work, then run a new committed complete tree and rebuild/reseal. Package08 and website/marketing remain held. No current-source package or installation credit |
 | Desktop incident | Isolation failed in package-07 attempt; corrected at `e10ba3a` | Ordinary Uoink and filesystem connectors launched; earlier live-index/5179 effects unknown. Owned job cleaned | No further override launch; only guarded Uoink dashboard observed for package 08 |
@@ -235,8 +235,11 @@ identical complete case objects/36 child hashes, all ten guards, unchanged
 39 inputs/three controls and47 output files per run. Do not repeat them.
 Independent10a40c confirms both outcomes. The316 qualification payloads and13
 root integration payloads pass Git/disk verification1fb9c3 and06a064.
-Native02 source preparation follows6dc7b8b, with all original Windows receipt
-predicates retained. It needs separate exact root admission before execution.
+Qualification is integrated atc8e7a44. Native02 source preparation follows
+6dc7b8b, with all original Windows receipt predicates retained. Root3a72ef
+and peerb3bd1d76 verify the frozen bindings and narrow deltas. Follow the exact
+ASTRA-NATIVE-INTERRUPTED-OWNER02-ADMISSION-2026-09-14.md for one generated
+invocation and review its actual saved result. No new native outcome is yet claimed.
 The first
 positive case still requires an idle pipe, no retained I/O and confirmed exact
 handles; aggregate quarantine history and all ordinary refusals remain. Preserve
@@ -6445,3 +6448,19 @@ Thirteen root integration records/109,239 bytes, seal
 pass index06a064. Independent receipt review10a40c agrees with the observed
 30/0/0 plus62 in each copy; its own path-literal checker failure and repair are
 retained. No subject was rerun to prepare or verify these archives.
+
+### 2026-09-14 — Fake30 integrated; native02 source review complete
+
+Commitc8e7a443c8f54545ca3b9f688ee0b8dd264d6706 contains the qualified repair,
+both fake30 results and329 verified evidence payloads. Native02 preparation
+binds56 payloads/835,488 bytes,29 sources/529,153 bytes and nine unchanged
+support metadata rows. Root3a72ef and peer checks1f860c/9929f9/4d9758 find no
+source/control blocker; peer verdictb3bd1d76 is frozen. All three corrected
+diffs reconstruct forward and reverse. The malformed draft headers and null
+preparation sum display remain preserved; neither was a candidate outcome.
+
+The native02 admission binds the repaired driver, one bootstrap label change
+and four launcher path/filename substitutions. Every receipt predicate remains,
+including the five locked plus five post-retirement probes missing from run01.
+One generated Windows observation is admitted separately; preserve its actual
+status and all partial evidence. Do not infer a pass or repeat it automatically.
