@@ -120,11 +120,17 @@ remain open. Native01 stays failed.
 See [the focused qualification](ASTRA-PRELOCK30-QUALIFICATION-VERDICT-2026-09-14.md).
 See [the native02 verdict](ASTRA-INTERRUPTED-NATIVE02-VERDICT-2026-09-14.md).
 
-The following protected-constructor proposal failed source review. Ownership
-scope and retention, namespace authority, fallback and test-setup defects remain
-repair work. Its 13 proposed checks were not executed. Independent caller and
-language-metadata proposals are under review; neither changes production or
-qualifies the runtime. See [the constructor review](ASTRA-PROTECTED-CONSTRUCTOR01-FAILURE-2026-09-14.md).
+The following protected-constructor proposal failed source review at `22949dc`.
+Ownership scope and retention, namespace authority, fallback and test-setup
+defects remain repair work. Its 13 proposed checks were not executed. See
+[the constructor review](ASTRA-PROTECTED-CONSTRUCTOR01-FAILURE-2026-09-14.md).
+
+The dormant reliability caller now passes **11 cases and 15 subtests in each
+independent copy**, with zero failures or skips. The results cover request
+options, word normalization, context lifetime and cleanup with inert services.
+Real media issuance, compute-policy binding and two legacy test contracts remain
+open. Production is unchanged. The language-metadata proposal is still awaiting
+qualification. See [the caller verdict](ASTRA-RELIABILITY-FAKE11-VERDICT-2026-09-14.md).
 
 Ryan's approved D1 static checkpoint inspection is recorded at `4b38948`. One
 guarded invocation verified the fixed hash, ZIP inventory and version bytes,

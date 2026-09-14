@@ -1,0 +1,77 @@
+{
+  "qualifier": [
+    {
+      "before": "\"\"\"Fixed generated reservation cases; reviewed source only, no native ports.\"\"\"",
+      "after": "\"\"\"Eleven reliability caller cases with actual facade and inert session ports.\"\"\""
+    },
+    {
+      "before": "MODULES = (\"plain_state_reader\", \"state_bridge\", \"owned_cpu_tensor_port\", \"model_binding_registry\", \"owned_factory_port\", \"owned_guard\", \"fake_torch_support\", \"fixed_schema_helpers\", \"worker_runtime_owner\", \"reservation_file_port\", \"snapshot_reservations\", \"snapshot_lifecycle\", \"durable_lifecycle\", \"win32_worker_connection\", \"windows_reservation_port\", \"owned_generation_protocol\", \"win32_private_pipe\", \"pinned_buffer_namespace\", \"inherited_readset\", \"generated_worker_flow\", \"generated_operation_flow\", \"trusted_asr_resolver\", \"asr_loading_adapter\", \"generated_journal_setup\", \"generated_writer_exclusion\", \"generated_worker_factory_inputs\", \"generated_worker_runtime_bridge\", \"generated_adapter_flow\", \"test_reservations\", \"test_windows_reservations\", \"test_journal_cancel\", \"test_retired_owner_recovery\", \"test_interrupted_owner_retirement\", \"test_interrupted_owner_prelock\")",
+      "after": "MODULES = (\"snapshot_lifecycle\", \"snapshot_reservations\", \"durable_lifecycle\", \"trusted_asr_resolver\", \"asr_loading_adapter\", \"uoink_reliability\", \"test_reliability_request_stream\")"
+    },
+    {
+      "before": "\"qualify_windows_reservations.py\"",
+      "after": "\"qualify_reliability.py\""
+    },
+    {
+      "before": "len(EXPECTED) == 30 and len(set(EXPECTED)) == 30",
+      "after": "len(EXPECTED) == 11 and len(set(EXPECTED)) == 11"
+    },
+    {
+      "before": "REAL_ENTRIES = ((LOADED[\"reservation_file_port\"], \"real_journal_port\", LOADED[\"reservation_file_port\"].real_journal_port),\n                (LOADED[\"snapshot_reservations\"], \"real_reservation_service\", LOADED[\"snapshot_reservations\"].real_reservation_service),\n                (LOADED[\"windows_reservation_port\"], \"real_windows_reservation_service\", LOADED[\"windows_reservation_port\"].real_windows_reservation_service),\n                (LOADED[\"win32_worker_connection\"], \"real_kernel_port\", LOADED[\"win32_worker_connection\"].real_kernel_port))",
+      "after": "REAL_ENTRIES = tuple((LOADED[module], name, getattr(LOADED[module], name))\n    for module, names in (\n        (\"snapshot_reservations\", (\"real_reservation_service\",)),\n        (\"trusted_asr_resolver\", (\"load_manifest\", \"admit_snapshot\", \"bind_for_constructor\")),\n        (\"asr_loading_adapter\", (\"ensure_assets\", \"whisperx_session\", \"faster_whisper_session\")),\n        (\"uoink_reliability\", (\"_import_faster_whisper\", \"_load_model\", \"ensure_model\",\n            \"transcribe_media\", \"_words_from_segments\", \"_request_reliability_words\",\n            \"_require_reliability_media_tickets\", \"detect_unreliable_spans\", \"Path\")),\n    ) for name in names)"
+    },
+    {
+      "before": "        and LOADED[\"trusted_asr_resolver\"].REAL_APPROVAL is None",
+      "after": "        and LOADED[\"trusted_asr_resolver\"].REAL_APPROVAL is None\n        and LOADED[\"uoink_reliability\"]._RELIABILITY_MEDIA_TICKETS is None"
+    },
+    {
+      "before": "passed == 30 and skipped",
+      "after": "passed == 11 and skipped"
+    },
+    {
+      "before": "\"uoink.windows-reservation-fake-preflight.v1\"",
+      "after": "\"uoink.reliability-request-stream-fake-preflight.v1\""
+    },
+    {
+      "before": "Original28 plus two controller prelock cases; fake Windows services only; native interruption, restart and model behavior unmeasured",
+      "after": "Eleven actual reliability caller/facade cases with inert session services; durable admission, decoder, native cleanup and models unmeasured"
+    }
+  ],
+  "launcher": [
+    {
+      "before": "interrupted-owner-prelock-fake03",
+      "after": "reliability-request-stream-fake01",
+      "occurrences": 5
+    },
+    {
+      "before": "qualify_windows_reservations.py",
+      "after": "qualify_reliability.py",
+      "occurrences": 2
+    },
+    {
+      "before": "run_preflight01.ps1",
+      "after": "run_fake11_01.ps1",
+      "occurrences": 1
+    },
+    {
+      "before": "39",
+      "after": "13",
+      "occurrences": 3
+    },
+    {
+      "before": "-eq 30",
+      "after": "-eq 11",
+      "occurrences": 3
+    },
+    {
+      "before": ": 30 passed",
+      "after": ": 11 passed",
+      "occurrences": 1
+    },
+    {
+      "before": "uoink.windows-reservation-fake-launch.v1",
+      "after": "uoink.reliability-request-stream-fake-launch.v1",
+      "occurrences": 1
+    }
+  ]
+}

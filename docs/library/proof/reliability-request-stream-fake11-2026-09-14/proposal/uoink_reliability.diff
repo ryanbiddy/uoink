@@ -1,0 +1,129 @@
+--- a/uoink_reliability.py
++++ b/uoink_reliability.py
+@@ -407,34 +407,98 @@
+     return [_span_from_cluster(cluster, threshold) for cluster in clusters]
+ 
+ 
+-def detect_unreliable_spans(transcript_text: str, audio_path: str | Path,
+-                            threshold: float = DEFAULT_THRESHOLD,
+-                            *,
+-                            model_name: str = DEFAULT_MODEL,
+-                            model_root: str | Path | None = None,
+-                            _transcribe=None) -> list[Span]:
+-    """Return clustered low-confidence word spans for an audio file.
+-
+-    ``transcript_text`` is accepted for the public interface and future
+-    alignment work; the confidence source is faster-whisper's per-word
+-    probability over the ASR stream. Ordinary execution is local-only;
+-    ``ensure_model`` remains the explicit download path. ``_transcribe`` is
+-    a test seam: a callable (audio_path) -> iterable of segments, so the
+-    clustering can be exercised without the model.
+-    """
+-    _ = transcript_text  # reserved for future YouTube-vs-ASR alignment
+-    threshold = max(0.05, min(0.95, float(threshold)))
+-    audio = Path(audio_path)
+-    if not audio.is_file():
+-        raise FileNotFoundError(f"audio file not found: {audio}")
+-
+-    if _transcribe is not None:
+-        segments = _transcribe(str(audio))
+-    else:
+-        model = _load_model(model_name, model_root, local_files_only=True)
+-        segments, _info = model.transcribe(
+-            str(audio), language="en", word_timestamps=True,
+-            beam_size=1, best_of=1)
++# Private reviewed-bootstrap dependency, deliberately absent. It may only look
++# up a decoder-issued ticket already registered to the exact live facade/session.
++# It must not grant media authority from a filename, inspect a model cache, fetch,
++# or release worker-owned media on return. The worker/session owns that lifetime.
++# There is no public setter, caller-supplied ticket, or real implementation here.
++_RELIABILITY_MEDIA_TICKETS = None
++
++
++def _require_reliability_media_tickets():
++    source = _RELIABILITY_MEDIA_TICKETS
++    if source is None:
++        raise ReliabilityUnavailableError(
++            "Owned reliability media admission is unavailable")
++    return source
++
++
++def _request_reliability_words(audio: Path, model_name: str,
++                               model_root: str | Path | None, *,
++                               local_files_only: bool = True):
++    """Consume passive words inside the owned adapter and cursor lifetimes.
++
++    The private ticket source must bind its result to the supplied exact facade.
++    The existing operation port separately validates issuance and its permit.
++    This helper neither decodes a file nor issues a media ticket itself.
++    """
++    if local_files_only is not True:
++        raise ReliabilityUnavailableError(
++            "Reliability requests cannot authorize model acquisition")
++    ticket_source = _require_reliability_media_tickets()
++    import asr_loading_adapter
++    from snapshot_lifecycle import OperationFacade, SegmentStream, TranscribeRequest
++
++    with asr_loading_adapter.faster_whisper_session(
++            model_name, model_root=model_root, usage="reliability") as operations:
++        if type(operations) is not OperationFacade:
++            raise ReliabilityUnavailableError("Exact owned operation facade required")
++        ticket = ticket_source.ticket_for_session(operations, str(audio))
++        if ticket is None or isinstance(ticket, (str, bytes, bytearray, Path)):
++            raise ReliabilityUnavailableError("Decoder-issued media ticket required")
++        request = TranscribeRequest(
++            media_ticket=ticket, language="en", word_timestamps=True,
++            vad_filter=False, beam_size=1, best_of=1)
++        stream = operations.transcribe(request)
++        if (type(stream) is not SegmentStream
++                or stream._session is not operations._session):
++            raise ReliabilityUnavailableError("Exact session-bound segment stream required")
++        primary_error = None
++        try:
++            return _words_from_segments(stream)
++        except BaseException as error:
++            primary_error = error
++            raise
++        finally:
++            try:
++                stream.close()
++            except BaseException as cleanup_error:
++                if primary_error is None:
++                    raise
++                BaseException.add_note(
++                    primary_error, "Owned reliability stream cleanup remains unconfirmed: "
++                    + type(cleanup_error).__name__)
++
++
++def detect_unreliable_spans(transcript_text: str, audio_path: str | Path,
++                            threshold: float = DEFAULT_THRESHOLD,
++                            *,
++                            model_name: str = DEFAULT_MODEL,
++                            model_root: str | Path | None = None,
++                            _transcribe=None) -> list[Span]:
++    """Return clustered low-confidence word spans for an audio file.
++
++    ``transcript_text`` is accepted for the public interface and future
++    alignment work; the confidence source is faster-whisper's per-word
++    probability over the ASR stream. Ordinary execution is local-only;
++    ``ensure_model`` remains the explicit download path. ``_transcribe`` is
++    a test seam: a callable (audio_path) -> iterable of segments, so the
++    clustering can be exercised without the model.
++    """
++    _ = transcript_text  # reserved for future YouTube-vs-ASR alignment
++    threshold = max(0.05, min(0.95, float(threshold)))
++    if _transcribe is None:
++        _require_reliability_media_tickets()
++    audio = Path(audio_path)
++    if not audio.is_file():
++        raise FileNotFoundError(f"audio file not found: {audio}")
++
++    if _transcribe is not None:
++        segments = _transcribe(str(audio))
++    else:
++        word_rows = _request_reliability_words(
++            audio, model_name, model_root, local_files_only=True)
++        return _cluster_low_words(word_rows, threshold)
+ 
+     word_rows = _words_from_segments(segments)
+     return _cluster_low_words(word_rows, threshold)

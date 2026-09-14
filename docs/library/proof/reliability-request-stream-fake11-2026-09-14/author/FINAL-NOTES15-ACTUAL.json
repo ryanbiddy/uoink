@@ -1,0 +1,7 @@
+{
+  "chunk_id": "a93cc1",
+  "wall_time_seconds": 0.2283937,
+  "exit_code": 0,
+  "original_token_count": 111,
+  "output": "[\r\n  {\r\n    \"path\": \"PREPARATION-VERDICT.md\",\r\n    \"bytes\": 2368,\r\n    \"sha256\": \"065ad74cf46ea5eba4a29233a285079439bb6c108bf837549413991e855605b4\"\r\n  },\r\n  {\r\n    \"path\": \"READ-COVERAGE.json\",\r\n    \"bytes\": 1585,\r\n    \"sha256\": \"acdbb813c6212b20d735a97808d5bdeb0c62c4e3354efe175c9ed5cfba4012c8\"\r\n  },\r\n  {\r\n    \"path\": \"PINS.json\",\r\n    \"bytes\": 2807,\r\n    \"sha256\": \"f8685dc37bfc8be1b2021e243d08546e45c2270c619dd6aca4cea8ffeb2f440a\"\r\n  }\r\n]\r\n"
+}

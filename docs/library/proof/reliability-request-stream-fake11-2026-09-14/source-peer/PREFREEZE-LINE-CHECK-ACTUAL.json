@@ -1,0 +1,7 @@
+{
+  "chunk_id": "504e5e",
+  "wall_time_seconds": 0.191512,
+  "exit_code": 0,
+  "original_token_count": 275,
+  "output": "418:def _require_reliability_media_tickets():\r\n426:def _request_reliability_words(audio: Path, model_name: str,\r\n438:    ticket_source = _require_reliability_media_tickets()\r\n462:        finally:\r\n464:                stream.close()\r\n473:def detect_unreliable_spans(transcript_text: str, audio_path: str | Path,\r\n489:    threshold = max(0.05, min(0.95, float(threshold)))\r\n491:        _require_reliability_media_tickets()\r\n\r\nAlgorithm : SHA256\r\nHash      : 6D835260CBB583FA60A338276EB64DDD812835E3208B6BADF1BBF198A01B823E\r\nPath      : E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\reliability-request-stream-peer01\\VERDICT.md\r\n\r\nAlgorithm : SHA256\r\nHash      : C00EA7047A140B7A628733276C926FD25721BC789A9DA53ACAC8FCA1CE5BDFB4\r\nPath      : E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\reliability-request-stream-peer01\\PASSIVE-CHECK-ACTUA\r\n            L.json\r\n\r\nAlgorithm : SHA256\r\nHash      : AF5D251544B5D55CF4A6E13A977895C82021A16EFDFC3C809A0119C4DE8A3276\r\nPath      : E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\reliability-request-stream-peer01\\READ-COVERAGE.json\r\n\r\n"
+}

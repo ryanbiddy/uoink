@@ -1,0 +1,29 @@
+{
+  "scope": "Independent source review; no subject execution",
+  "full_reads": [
+    "proposal01/uoink_reliability.diff",
+    "proposal01/test_reliability_request_stream.py:1-364",
+    "proposal01/REPORT.md",
+    "proposal01/TEST-PREPARATION-CORRECTIONS.md",
+    "proposal01/SOURCE-INPUTS.json",
+    "proposal01/PROPOSAL-PINS.json",
+    "fake11-author01/qualify_reliability.diff",
+    "fake11-author01/run_fake11_01.diff",
+    "fake11-author01/qualify_reliability.py:1-211",
+    "fake11-author01/run_fake11_01.ps1:1-135",
+    "fake11-author01/BRIEF.md",
+    "fake11-author01/QUALIFICATION-PROTOCOL.md",
+    "fake11-author01/PINS.json",
+    "fake11-author01/ROOT-ADMISSION.template.json",
+    "fake11-author01/INSTRUMENT-EDITS.json",
+    "fake11-author01/asr_loading_adapter.py:1-248",
+    "tests/test_reliability_local_only_load.py:1-127"
+  ],
+  "context": [
+    "uoink_reliability.py full numbered text was returned by7f80b1; changed portion also read in full exact diff; unaffected normalization/capture/loader source inspected",
+    "snapshot_lifecycle.py current hash matches the exact native02 source fully read for prior completion-info work; no new lifecycle edit",
+    "snapshot_reservations.py, durable_lifecycle.py, trusted_asr_resolver.py import/constant inventories plus exact hash binding; no claim of new full review"
+  ],
+  "passive_relation": "12c203: all bound rows, declared byte substitutions, three forward/reverse diffs and exact11 IDs",
+  "output_handling": "Initial combined displays were truncated by the orchestration output budget. Complete actual objects were retained; qualifier and adapter portions were re-emitted for reading. No missing tool receipt was reconstructed."
+}

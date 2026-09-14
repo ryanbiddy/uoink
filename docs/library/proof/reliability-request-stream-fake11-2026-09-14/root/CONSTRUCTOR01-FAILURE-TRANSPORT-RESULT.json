@@ -1,0 +1,311 @@
+{
+  "scope": "Documented Git newline transport restoration; no subject rerun",
+  "proof": "docs/library/proof/protected-constructor01-failed-2026-09-14",
+  "payloads": 42,
+  "bytes": 741143,
+  "manifest_sha256": "db20a2538a01a777b7d4ef8423dc762549a9a4c4125ba52435a262c0d44f774c",
+  "restored": [
+    {
+      "path": ".gitattributes",
+      "before_bytes": 9,
+      "before_sha256": "8b9c3028d6467ff3be7c793141927841d70f47f52d0590677438f488ca154992",
+      "after_bytes": 8,
+      "after_sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+    },
+    {
+      "path": "actuals/DIFF-CHECK-ACTUAL.json",
+      "before_bytes": 2165,
+      "before_sha256": "be784b4bc233cd59d286a2bc5e13b8442c1a0ddb2207248e99991df3916e2ee0",
+      "after_bytes": 2158,
+      "after_sha256": "1507d91776c43394a22ef0d99ca74ec576f7240fb553f321a91db736b8f4cef0"
+    },
+    {
+      "path": "actuals/DISPATCH-ACTUAL.json",
+      "before_bytes": 1201,
+      "before_sha256": "1310e7fdcf5f63377a43e24cdb32263f8db7fde96d8c455e5dc3465ae136e807",
+      "after_bytes": 1194,
+      "after_sha256": "9822dfef924976c7bcca288c218a7f378fcc17ab8357197a163663cfdca778d0"
+    },
+    {
+      "path": "actuals/FREEZE-AUDIT-ACTUAL.json",
+      "before_bytes": 1271,
+      "before_sha256": "a015fbe6063561592e588d873161eb5c7207b9ec319e2c786bd0e2d3d72c9760",
+      "after_bytes": 1264,
+      "after_sha256": "6fee6e76748e5cde08e483fe784498ab190a7cc4f97b7fe1d81c8961f35c976c"
+    },
+    {
+      "path": "actuals/POLL01-ACTUAL.json",
+      "before_bytes": 805,
+      "before_sha256": "da0eac0e6098e2254fdb23cd2a3e8acba6564ca20ef73bdc4ff10d5a475fcdf1",
+      "after_bytes": 798,
+      "after_sha256": "4ae8242c258223b343467c1c53e5208a2a5d8584db0c0c3c0d413e2014df23e6"
+    },
+    {
+      "path": "actuals/POLL02-ACTUAL.json",
+      "before_bytes": 1780,
+      "before_sha256": "4c343e146f72cb8a8fa85c897bae015a122447bd3c831e57ea362f46e3f13d19",
+      "after_bytes": 1773,
+      "after_sha256": "23fff4af40410802c513bcaaf57e399147f3988b0487895de53d00c25e8fc181"
+    },
+    {
+      "path": "actuals/POLL03-ACTUAL.json",
+      "before_bytes": 804,
+      "before_sha256": "6c17f1721aa5fdb90d1b202d3e4146d873a3db7d7fb2cee264fdefdf75deb979",
+      "after_bytes": 797,
+      "after_sha256": "b77c62e4428b4fcc7e8e7c38fb5c3c0c7d311b75301be12fe1076236756bda79"
+    },
+    {
+      "path": "actuals/POLL04-ACTUAL.json",
+      "before_bytes": 9197,
+      "before_sha256": "751e16f45560b3fc98a06c5cc5307eb863d150f6edd9aff5a05ffc6ce00674b5",
+      "after_bytes": 9190,
+      "after_sha256": "a6ce38ebbb62243d56749966afcb240f30999d83546c160bb6b230d0923c4d4f"
+    },
+    {
+      "path": "actuals/STATUS01-ACTUAL.json",
+      "before_bytes": 645,
+      "before_sha256": "39cda186adc674a7752c1b5cc69eec4d4439df6b029ed2704bde05163d253a94",
+      "after_bytes": 638,
+      "after_sha256": "cc7b9d5648e3fa157086bf90128de5f4a0968ad67d0dce7a39a81a6dcfe5cc48"
+    },
+    {
+      "path": "contracts/ASTRA-PROTECTED-CONSTRUCTOR01-FAILURE-2026-09-14.md",
+      "before_bytes": 4094,
+      "before_sha256": "f79611ba4cdfb948e289e024dbb083bddd7c629814193bf6b95d97e707537ce5",
+      "after_bytes": 4058,
+      "after_sha256": "4e1aa310dbc29a49c1db163f52586a9d2a2f19b70b7aff7c990c381b84719fde"
+    },
+    {
+      "path": "contracts/PROTECTED-ASR-CONSTRUCTOR-BRIEF-2026-09-14.md",
+      "before_bytes": 5563,
+      "before_sha256": "398e136f24ca51fc91e372ca573252dbf978c97093b8242766c7f9463e249f28",
+      "after_bytes": 5481,
+      "after_sha256": "5eb442498e4c5f01ef644e29a1eb3a8fc0e02707a30e017481509106c3a2d5c1"
+    },
+    {
+      "path": "contracts/PROTECTED-ENGINE-OWNERSHIP-REPAIR-BRIEF-2026-09-14.md",
+      "before_bytes": 3658,
+      "before_sha256": "f7d33c46ac3963c85e5c540a612ebb44dfc332af4e80b99b6ba833afd918199b",
+      "after_bytes": 3605,
+      "after_sha256": "4a5137db7a9f91653e35b4a4c969d9553eb40f12a9c17a65e8c3eaedb6f967c6"
+    },
+    {
+      "path": "frozen/_uoink_owned.diff",
+      "before_bytes": 719,
+      "before_sha256": "104874c33c321b4fc0dc1f644ee1125eb14f1ab0194d8153b7f343edfea59d0a",
+      "after_bytes": 700,
+      "after_sha256": "d1eb4f599d65e132f6adc47d727bf451e1baca5dc81a0cd629168e23af4a81c2"
+    },
+    {
+      "path": "frozen/after/whisperx/_uoink_owned.py",
+      "before_bytes": 2549,
+      "before_sha256": "dbec8c8ee13f085b65e10d4c07b4c90613c408db649ccb5617a8bc05dfcf484b",
+      "after_bytes": 2486,
+      "after_sha256": "9ec39fafbb5dc8500abf76d8ffdd9441d6e6ca4fd1994bdd08d6eb3565a6bbc3"
+    },
+    {
+      "path": "frozen/after/whisperx/asr.py",
+      "before_bytes": 22637,
+      "before_sha256": "44c50597fae521120574b66b9b04cf88134f46f1b1916b33c4678c8a452b8116",
+      "after_bytes": 22076,
+      "after_sha256": "4ea96ed4aceacf496690ea113b72fd2fab24dcc3c3078b2c01129e94451be582"
+    },
+    {
+      "path": "frozen/asr.diff",
+      "before_bytes": 5030,
+      "before_sha256": "1d320e496bcc0675ccfe41d02b8a57750eabef8efc61df2511b0f4219cec4ff8",
+      "after_bytes": 4895,
+      "after_sha256": "bcf21570b18c1c193accfec7cec1babb6191dafd817c8378af4a3db4188c103d"
+    },
+    {
+      "path": "frozen/before/after/whisperx/_uoink_owned.py",
+      "before_bytes": 2162,
+      "before_sha256": "280ff7af3ba3dfa34a99021c84bcd9d55a74dbe662a44f5ed6d2ad9961f4d7bd",
+      "after_bytes": 2109,
+      "after_sha256": "7672f614d81cf0be5e7bd408f8f856af328fe34e6ca7ee707c9d0db838e56d1f"
+    },
+    {
+      "path": "frozen/before/after/whisperx/asr.py",
+      "before_bytes": 18046,
+      "before_sha256": "d48f855f6a800ac4f242ef9ee757a6884b79290819e53d932eb57dc8008e824e",
+      "after_bytes": 17608,
+      "after_sha256": "723bfba5775cb4a610368e1ad706fc55131bc9a2e8ea2f1e1a2b55cd6e8b5d42"
+    },
+    {
+      "path": "frozen/before/inherited_readset.py",
+      "before_bytes": 12613,
+      "before_sha256": "21f51dbf15a46b0eba6ca449c2c4e539d4f88d787a8ca537f87d6ac46c4f5ee7",
+      "after_bytes": 12391,
+      "after_sha256": "02be8e04f4bea3030faf0882ae48ead40716c5782f95e2790e1a9897c5be76e3"
+    },
+    {
+      "path": "frozen/before/owned_generation_protocol.py",
+      "before_bytes": 24909,
+      "before_sha256": "4abcc4351fa1f576250b2e091ed008192325b0bded71ec7fa707e7eae08e0949",
+      "after_bytes": 24403,
+      "after_sha256": "bd5204ef0d3fc2a459df19bc5f02fd7b6d78041e2306b4031ab888387aa362c0"
+    },
+    {
+      "path": "frozen/before/pinned_buffer_namespace.py",
+      "before_bytes": 8047,
+      "before_sha256": "707fc2ec3b4b5d823ed6f5caa8b8f671bfed420f3cc38a39cd844b1f948dd41a",
+      "after_bytes": 7893,
+      "after_sha256": "2cc25a7a254f35d802336ef121cc860887a4301b3257588438dddec392fe0b7b"
+    },
+    {
+      "path": "frozen/before/worker_runtime_owner.py",
+      "before_bytes": 13289,
+      "before_sha256": "192b5a4a791818f11b9c4192bedc904658f00a0977f803b24218c268e1b91490",
+      "after_bytes": 12997,
+      "after_sha256": "5647023ed03c5acfd8b1aa981a56171dd92228ccc0972f12546bb0b3d411ce87"
+    },
+    {
+      "path": "frozen/inherited_readset.diff",
+      "before_bytes": 2072,
+      "before_sha256": "f3251e47256c3f6405e665eebb1f6e97f925b3611d31e11532237a99439d3f15",
+      "after_bytes": 2038,
+      "after_sha256": "00676f72774ffd9d4f4eee6bb9771c7e6c156c4650faeaf4407e921ee3b62561"
+    },
+    {
+      "path": "frozen/inherited_readset.py",
+      "before_bytes": 13616,
+      "before_sha256": "b4663eb941dcab2c0d01d1e497eabb256624c416fd04634615f31811b4b01357",
+      "after_bytes": 13377,
+      "after_sha256": "6bac68f40d0b1138e93f7272577097035073a15c6957e13a436d90d33a420dda"
+    },
+    {
+      "path": "frozen/owned_asr_engine.py",
+      "before_bytes": 9806,
+      "before_sha256": "6c1e842bfae338be83f6d2c29470cf6b7bdd5908a2ca5aefa87540b351332aee",
+      "after_bytes": 9580,
+      "after_sha256": "dc06b5fff1c3fccd80f8afe65f9070adb7da4d0c1aa3d16070bb05b4337f5af0"
+    },
+    {
+      "path": "frozen/owned_generation_protocol.diff",
+      "before_bytes": 3650,
+      "before_sha256": "331a4e9d6f37a006f7948455a63c94c1b38fad6005b74715c9ea82e4ccc4cf90",
+      "after_bytes": 3582,
+      "after_sha256": "b744783778f97695ee39474128c1df6604b47d577682f0dcf7038f9e0cfb5cda"
+    },
+    {
+      "path": "frozen/owned_generation_protocol.py",
+      "before_bytes": 26510,
+      "before_sha256": "8303140a10e34f60bea288c95a74ccfff0ab959bcd29718cec19ed193ff86116",
+      "after_bytes": 25977,
+      "after_sha256": "e518cb468f4340a1599acb50fc059145fb27f290d969e440762d35dda5f5e8c5"
+    },
+    {
+      "path": "frozen/pinned_buffer_namespace.diff",
+      "before_bytes": 1513,
+      "before_sha256": "7d5d6e7ece76712122b128518d0254aaf19c073c31463daf2a1bf1328961b9d3",
+      "after_bytes": 1470,
+      "after_sha256": "7e61e57edbf05a4b47f300784b1206d081699f6f508bab78335e64f191ad61e4"
+    },
+    {
+      "path": "frozen/pinned_buffer_namespace.py",
+      "before_bytes": 9020,
+      "before_sha256": "f599aa8dc18c48d66d635bc36948723760eed14f78a624efcdb61fbd90887199",
+      "after_bytes": 8839,
+      "after_sha256": "c753b13739ab339b60924ea040eb9b313624a3b60af2ff68b5883efee5e817af"
+    },
+    {
+      "path": "frozen/REPORT.md",
+      "before_bytes": 7753,
+      "before_sha256": "e29b42da83593030436b52809b7909a290e9816654d4a2c8e0c27716821bcd18",
+      "after_bytes": 7670,
+      "after_sha256": "85d87317a7f35e6fe6dadb85e6ae5dc8d79367a76b0657054055bb88527384de"
+    },
+    {
+      "path": "frozen/SOURCE-INPUTS.json",
+      "before_bytes": 10140,
+      "before_sha256": "3e6150753502e831095b243ff11578633a809c42e2f28b72041d45df981c81d7",
+      "after_bytes": 9931,
+      "after_sha256": "46e56661cfa0abc69b6ff81a2a4afc863bd7ece0aecfe02b0ad0318760da8692"
+    },
+    {
+      "path": "frozen/test_protected_asr_constructor.py",
+      "before_bytes": 24070,
+      "before_sha256": "3d6b1b91cc53ad8ea22931af3d74232be6098b0957044ac0d2424c95178b47ae",
+      "after_bytes": 23493,
+      "after_sha256": "a304eb44d0ab9428e1771176cce9ebfd9f09f2df7f21348ec13bf951043efda0"
+    },
+    {
+      "path": "frozen/worker_runtime_owner.diff",
+      "before_bytes": 10399,
+      "before_sha256": "4668e9a38120e40174ef5083977344f2080e3c3e39f4e547a524f4766beb1403",
+      "after_bytes": 10181,
+      "after_sha256": "b5aaafc80a1adccf928c3ddc0db3adc2cdf27a8f1f1dba1289f26ff9c650ba41"
+    },
+    {
+      "path": "frozen/worker_runtime_owner.py",
+      "before_bytes": 19725,
+      "before_sha256": "a95d41b01ec691ba56ec05de5071f17abf1b7bb0dc631b69ccf708187e2af872",
+      "after_bytes": 19297,
+      "after_sha256": "95c7aefbc735cca2ad30135d5dd966eea1857c142d06b052063c678c86dd33a9"
+    },
+    {
+      "path": "review/archive-protected-constructor01-failure.mjs",
+      "before_bytes": 2848,
+      "before_sha256": "e409affc7dd7f19abfb9d8d5e52041a7c04df2cdae047eda41744a4a4cd47e3f",
+      "after_bytes": 2820,
+      "after_sha256": "4ffc2489a157ad2c0dc3faa1da82913f6017bb88fe1c5239fa9cdb3ff2f39a45"
+    },
+    {
+      "path": "review/check-constructor01-diff-headers.mjs",
+      "before_bytes": 1549,
+      "before_sha256": "bc131738d9cfc386ef5575e30a06fd50875d17176310f478db0b18b50680f261",
+      "after_bytes": 1542,
+      "after_sha256": "48756d556e7dda45ddce798c28ca6ca095192b889f20f0fcded0d4113904f9c3"
+    },
+    {
+      "path": "review/COMMAND-EVENTS.json",
+      "before_bytes": 25746,
+      "before_sha256": "d9dc68df4832d9e3169475c3d52e51ac003e0ec8cab7594ae4dcbc305e67c379",
+      "after_bytes": 25632,
+      "after_sha256": "ed41580a40aa73a470628ce19f0b37559af5b183464908a17fa33cd7dc918487"
+    },
+    {
+      "path": "review/CONTROL-ROOM-RECORD.json",
+      "before_bytes": 416158,
+      "before_sha256": "ababd09e55ae3a8271fa33546dfa31db8c50f2d1fbb2e74ace0b060b4bfb8f75",
+      "after_bytes": 410856,
+      "after_sha256": "32ae295fc69fbd5ea5acd858c87165004768bd7976c3d6ed93ff6fdbad0acb66"
+    },
+    {
+      "path": "review/DIFF-HEADER-CHECK.json",
+      "before_bytes": 4214,
+      "before_sha256": "1bcf8436b0d914da06eb5442527f0d5f4b8899b06462f71eac83d130242b8d4d",
+      "after_bytes": 4021,
+      "after_sha256": "5344e2b7c22148c97b6aebc9a4766ae888fc62c279b31f0bccf5bb7fa087e72b"
+    },
+    {
+      "path": "review/freeze-constructor01-review.mjs",
+      "before_bytes": 3458,
+      "before_sha256": "1bc2f029ea236899217ee269e31d3b86104bb42c2402ca17bee10f1af4f4e96a",
+      "after_bytes": 3424,
+      "after_sha256": "88a5aef9cc5b909b0089be9d75f755daf456c4198480394dbf00e7143b6aa815"
+    },
+    {
+      "path": "review/FROZEN-SOURCE-PINS.json",
+      "before_bytes": 3814,
+      "before_sha256": "885911f47639f28b44f420d2ed013aded234d3aceec78199576fa9212c4d36c8",
+      "after_bytes": 3700,
+      "after_sha256": "bdab54c6683b16ccb83461b92aacc8f59159afe2ff04987f208e586838c71ed8"
+    },
+    {
+      "path": "review/INPUT-MAP-CHECK.json",
+      "before_bytes": 15661,
+      "before_sha256": "986701ebf16d6d9136c8f00a26a5460ead780d285367718ffabb939997a1f5e2",
+      "after_bytes": 15191,
+      "after_sha256": "07688c606e4871ed83d6d10302784f6da72b1d2c27311345d9375b071a825b12"
+    },
+    {
+      "path": "SHA256.json",
+      "before_bytes": 7516,
+      "before_sha256": "64d05a32c8fa1aafb7f0e6bebe0711bd54510c28e8924fbdef45748f7b163826",
+      "after_bytes": 7300,
+      "after_sha256": "db20a2538a01a777b7d4ef8423dc762549a9a4c4125ba52435a262c0d44f774c"
+    }
+  ],
+  "all_raw_payloads_and_seal_equal_donor": true
+}

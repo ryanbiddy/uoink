@@ -1,0 +1,82 @@
+{
+  "scope": "Fixed source origins; no execution authority",
+  "files": [
+    {
+      "path": "uoink_reliability.py",
+      "bytes": 17162,
+      "sha256": "81a6d68fcd5c4fa9b66b752f9f7ebcaff2d76ccb1026f889a055525a5c1acad6",
+      "role": "reliability/capture caller derivative",
+      "read_scope": "83-144,287-317,410-446; symbol inventory"
+    },
+    {
+      "path": "_scratch/windows-interrupted-owner-native-proposal02/snapshot_lifecycle.py",
+      "bytes": 22138,
+      "sha256": "a80514aac6b1e75b9b872052852fa993a23cd5273b6bed4ffb4eef7404cb69dd",
+      "role": "request/stream and passive result contract",
+      "read_scope": "40-122,386-512"
+    },
+    {
+      "path": "_scratch/windows-interrupted-owner-native-proposal02/asr_loading_adapter.py",
+      "bytes": 12113,
+      "sha256": "635d2c22db75d12ffe6965fb656fdca47450ccbbaeb4d8cc8aaff9fcc79dd243",
+      "role": "current exact facade adapter",
+      "read_scope": "full"
+    },
+    {
+      "path": "_scratch/windows-interrupted-owner-native-proposal02/durable_lifecycle.py",
+      "bytes": 32833,
+      "sha256": "3c8963eaa02bbc1d810ee2632d0363303bfe05ec6ceeef73771ca8005a00ece3",
+      "role": "unchanged durable ownership dependency",
+      "read_scope": "hash binding; prior accepted source context"
+    },
+    {
+      "path": "_scratch/asr-production-adapter-proposal01/CALL-SITE-SPLICES.md",
+      "bytes": 6470,
+      "sha256": "44548ba86da4f8a5d1be868d47f65b01c227b80589f55b306504cd8e9f8aa3a4",
+      "role": "obsolete caller shapes to replace",
+      "read_scope": "full"
+    },
+    {
+      "path": "tests/test_whisper_cache_consent.py",
+      "bytes": 8774,
+      "sha256": "2595fee1b281d77856918ddfd1fb8ef17e432313b6e1ea1e73c44db3d63f9ea3",
+      "role": "unchanged product regression input",
+      "read_scope": "selected symbol/name inventory"
+    },
+    {
+      "path": "tests/test_reliability_local_only_load.py",
+      "bytes": 4995,
+      "sha256": "787b300bc7e170e1f4b55eb771b9c1625f4bd492117a568dc169c9beac2a01be",
+      "role": "unchanged product regression input",
+      "read_scope": "selected symbol/name inventory"
+    },
+    {
+      "path": "tests/test_c02_reliability_faster_whisper.py",
+      "bytes": 6289,
+      "sha256": "c0af159e45879fe68ab3333d94dfc05320052942d01ef2a6924cbb873033ed97",
+      "role": "unchanged product regression input",
+      "read_scope": "selected symbol/name inventory"
+    },
+    {
+      "path": "tests/test_cm11_asr_fallback.py",
+      "bytes": 12946,
+      "sha256": "2e30006826ee7ece274c7150bcc1a4969368eef449279d8500fb944e1d3408da",
+      "role": "unchanged product regression input",
+      "read_scope": "137-187; symbol inventory"
+    },
+    {
+      "path": "tests/test_reliability_model_readiness.py",
+      "bytes": 9079,
+      "sha256": "c00ff20cfccaa9b4c84e73d86328d3b4531e09d556c89dc6c4703bf8b6885ec9",
+      "role": "unchanged product regression input",
+      "read_scope": "selected symbol/name inventory"
+    },
+    {
+      "path": "tests/test_reliability_review_boundaries.py",
+      "bytes": 1668,
+      "sha256": "40ae59f1340adf3f7048a167a2315a4a3b5cc0d217243dca08fe149e8ff5c641",
+      "role": "unchanged product regression input",
+      "read_scope": "selected symbol/name inventory"
+    }
+  ]
+}

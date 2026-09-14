@@ -1,0 +1,7 @@
+{
+  "chunk_id": "e6b898",
+  "wall_time_seconds": 0.1986989,
+  "exit_code": 0,
+  "original_token_count": 46,
+  "output": "{\r\n  \"before_sha256\": \"fcdf7d3a9ed1e0975bba2c464594b2fe472761f1c09a40393fa3c2fedc075742\",\r\n  \"source_sha256\": \"9f4e1c5d38f0a4cefe376eae47d5ff70340b10c614200c6c7768a00a0294321d\"\r\n}\r\n"
+}

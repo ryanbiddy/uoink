@@ -1,0 +1,9 @@
+{
+  "approved": true,
+  "label": "reliability-request-stream-fake01",
+  "pins_sha256": "f8685dc37bfc8be1b2021e243d08546e45c2270c619dd6aca4cea8ffeb2f440a",
+  "scope": "generated_bytes_and_fake_ports_only",
+  "admission_commit": "32a0b5acee310a7f825cf7e24dc0a1abf20ce9ab",
+  "root_source_check": "61901c",
+  "review": "ca17c27ac237b1cad73d69aea9a743f6b352c1b35b98ea925028892eced2c80d"
+}

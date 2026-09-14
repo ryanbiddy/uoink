@@ -1,0 +1,84 @@
+{
+  "schema": "uoink.reliability-request-stream-fake11-pins.v1",
+  "finalized": true,
+  "files": [
+    {
+      "path": "snapshot_lifecycle.py",
+      "bytes": 22138,
+      "sha256": "a80514aac6b1e75b9b872052852fa993a23cd5273b6bed4ffb4eef7404cb69dd",
+      "status": "frozen_source_preparation"
+    },
+    {
+      "path": "snapshot_reservations.py",
+      "bytes": 23634,
+      "sha256": "e80ae881fa4af9cc7d1a3e4a06624f5b19abe4de09aec3844e8a541449335b98",
+      "status": "frozen_source_preparation"
+    },
+    {
+      "path": "durable_lifecycle.py",
+      "bytes": 32833,
+      "sha256": "3c8963eaa02bbc1d810ee2632d0363303bfe05ec6ceeef73771ca8005a00ece3",
+      "status": "frozen_source_preparation"
+    },
+    {
+      "path": "trusted_asr_resolver.py",
+      "bytes": 13373,
+      "sha256": "16a5a1245f649a3eb04d077b661835503f08bef0ff8822dcb545176f0cc30833",
+      "status": "frozen_source_preparation"
+    },
+    {
+      "path": "asr_loading_adapter.py",
+      "bytes": 12113,
+      "sha256": "635d2c22db75d12ffe6965fb656fdca47450ccbbaeb4d8cc8aaff9fcc79dd243",
+      "status": "frozen_source_preparation"
+    },
+    {
+      "path": "uoink_reliability.py",
+      "bytes": 20238,
+      "sha256": "0165e56ad55303ac2f95d5035e7c90dd292fd3aa8aa30b172d75bf4ff9948f07",
+      "status": "frozen_source_preparation"
+    },
+    {
+      "path": "test_reliability_request_stream.py",
+      "bytes": 15762,
+      "sha256": "55f987046713859659ffbe6d1938c3cc70c7aa00c02e83104ea31a1d62d4ce6f",
+      "status": "frozen_source_preparation"
+    },
+    {
+      "path": "qualify_reliability.py",
+      "bytes": 9979,
+      "sha256": "045aaa73b69f5b93afda44785d84053c2835b5bd5094a9b6264752876fbb8f7f",
+      "status": "frozen_source_preparation"
+    },
+    {
+      "path": "EXPECTED-CASES.json",
+      "bytes": 1475,
+      "sha256": "b100543d9abd2efa7b1bf1d498a57973ecc76ca87ea1c4238da73001ce2c2bf1",
+      "status": "frozen_source_preparation"
+    },
+    {
+      "path": "run_fake11_01.ps1",
+      "bytes": 9151,
+      "sha256": "f5989dc2fcc3ada2e31531868cdd8a151d6c154fdbef6b5fb7a6f7be24518a21",
+      "status": "frozen_source_preparation"
+    },
+    {
+      "path": "QUALIFICATION-PROTOCOL.md",
+      "bytes": 2993,
+      "sha256": "dd6f21084ba7013ccf0015557bb5c17c7b3c623eb7163275ac773160883ce11e",
+      "status": "frozen_source_preparation"
+    },
+    {
+      "path": "BRIEF.md",
+      "bytes": 1920,
+      "sha256": "0a42e9d2e9f4106f144b4acfb0b23697447256623db9b0008e578e53a0068b87",
+      "status": "frozen_source_preparation"
+    },
+    {
+      "path": "SOURCE-INPUTS.json",
+      "bytes": 4065,
+      "sha256": "cb340376f445986f3da71600dd67f4a8570972dd8211a0e543dae3cb407070f3",
+      "status": "frozen_source_preparation"
+    }
+  ]
+}

@@ -1,0 +1,65 @@
+{
+  "scope": "Source proposal and inert test definitions; no execution authority",
+  "files": [
+    {
+      "path": "before/uoink_reliability.py",
+      "bytes": 17162,
+      "sha256": "81a6d68fcd5c4fa9b66b752f9f7ebcaff2d76ccb1026f889a055525a5c1acad6"
+    },
+    {
+      "path": "uoink_reliability.py",
+      "bytes": 20238,
+      "sha256": "0165e56ad55303ac2f95d5035e7c90dd292fd3aa8aa30b172d75bf4ff9948f07"
+    },
+    {
+      "path": "reliability_helper.addition.py.txt",
+      "bytes": 2985,
+      "sha256": "ac9223ed7ba470fc8d648618973ae9f1bc1793efd26908989ca540865a783100"
+    },
+    {
+      "path": "test_reliability_request_stream.py",
+      "bytes": 15762,
+      "sha256": "55f987046713859659ffbe6d1938c3cc70c7aa00c02e83104ea31a1d62d4ce6f"
+    },
+    {
+      "path": "before/test_reliability_request_stream.pre-metadata-review01.py",
+      "bytes": 15245,
+      "sha256": "49b1b8ff1089da9949960ed30f0df0b3dae3960dc090503bf99d0174ac2b9bb1"
+    },
+    {
+      "path": "before/test_reliability_request_stream.pre-import-review02.py",
+      "bytes": 15563,
+      "sha256": "fcdf7d3a9ed1e0975bba2c464594b2fe472761f1c09a40393fa3c2fedc075742"
+    },
+    {
+      "path": "uoink_reliability.diff",
+      "bytes": 6198,
+      "sha256": "729a8c5a36c97d3e14934f7233d58849f8221453821c837a07360fb8e5ee6e4a"
+    },
+    {
+      "path": "NEW-CASE-IDS.json",
+      "bytes": 1475,
+      "sha256": "b100543d9abd2efa7b1bf1d498a57973ecc76ca87ea1c4238da73001ce2c2bf1"
+    },
+    {
+      "path": "SOURCE-INPUTS.json",
+      "bytes": 3314,
+      "sha256": "960f7fe1559b2339d3bd43a82d613f006391c49b14e97618273ce84c9d38c21d"
+    },
+    {
+      "path": "REPORT.md",
+      "bytes": 5538,
+      "sha256": "27f8ee5e54b666913c3d24d6aa07d768102874362f0ae364a2483983c29bbd50"
+    },
+    {
+      "path": "TEST-PREPARATION-CORRECTIONS.md",
+      "bytes": 1649,
+      "sha256": "d4895bba49fd8015d5a240f411f825128025860de5c6e2ad926d9be59f11ed85"
+    },
+    {
+      "path": "VIEW-COVERAGE.json",
+      "bytes": 1919,
+      "sha256": "d2ea1117786e9f7e247766b895a4b9ee0e423dab81ee6ac551161889302e3aef"
+    }
+  ]
+}

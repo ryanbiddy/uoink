@@ -1,0 +1,7 @@
+{
+  "chunk_id": "689e67",
+  "wall_time_seconds": 0.2150354,
+  "exit_code": 0,
+  "original_token_count": 110,
+  "output": "[\r\n  {\r\n    \"name\": \"REPORT.md\",\r\n    \"bytes\": 5538,\r\n    \"sha256\": \"27f8ee5e54b666913c3d24d6aa07d768102874362f0ae364a2483983c29bbd50\"\r\n  },\r\n  {\r\n    \"name\": \"VIEW-COVERAGE.json\",\r\n    \"bytes\": 1919,\r\n    \"sha256\": \"d2ea1117786e9f7e247766b895a4b9ee0e423dab81ee6ac551161889302e3aef\"\r\n  },\r\n  {\r\n    \"name\": \"PROPOSAL-PINS.json\",\r\n    \"bytes\": 2144,\r\n    \"sha256\": \"cdfb1c7927c2fa65a89cdec726b8535b3a17798e0158e1619e731f72a38bb1a0\"\r\n  }\r\n]\r\n"
+}

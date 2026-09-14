@@ -120,7 +120,8 @@ establish safe installation isolation, and verify/correct resulting findings.
 | Retired-owner final-clear recovery | Fake22 at a83ae1a; generated native recovery at5671b51 | Both fake copies22/0/0 plus21 passing subtests. Nativee97a44/exit0, root5214fa and peer503717 verify exact retirement, four confirmed phases/flushes and still-revoked owner/token. All91 newest proof payloads match Git/disk | The generated runtime-owner connection is recorded at 3661608 and 3b8f9e0. Continue interrupted-owner retirement; no OS-interruption, active-worker recovery, crash/restart or model credit |
 | Worker runtime owner and bootstrap | Connected fake33 at 3661608; generated native cancellation at 3b8f9e0 | Both fake copies 33/0/0. Native a9321b/exit 0, root dd7190 and peer 4984ac agree on 32 unchanged pairs, valid guards, one segment, closed owner, child/contender exit 0 with empty jobs, and four journal frames. All 127 native proof payloads match Git/disk | Interrupted-owner retirement direction is committed at 77dc339. Real inference, protected loader/PCM/filter routes, crash/restart and release remain open |
 | Interrupted owned-worker retirement | Native02 accepted at99ce3c9; Native01 remains FAILED at7f142e8 | Actual9753fb returns outer/controller0; root4b342d and peerf633ad agree on10 write observations,15 retirement events, primaryexit1/job0 and5 journal frames. All160 native/integration payloads match Git/disk. Fake30 atc8e7a44 remains30/0/0 plus62 per root | Do not repeat native02. The subsequent constructor source review FAILED; bounded ownership repair and caller work continue without production or release authority |
-| Protected ASR constructor | Gemini e6133b1f source review FAILED; 13 proposed tests unexecuted | Ownership scope/retention, namespace authority, fallback, fixture and provenance defects block admission. All42 documentary payloads match Git/disk at4faa90 | Follow PROTECTED-ENGINE-OWNERSHIP-REPAIR-BRIEF-2026-09-14.md; independently qualify the frozen reliability caller after root admission. Real constructor/media/runtime remain closed |
+| Protected ASR constructor | Gemini e6133b1f source review FAILED at22949dc; 13 proposed tests unexecuted | Ownership scope/retention, namespace authority, fallback, fixture and provenance defects block admission. All42 documentary payloads match Git/disk at4faa90 | Follow PROTECTED-ENGINE-OWNERSHIP-REPAIR-BRIEF-2026-09-14.md. Bounded generated ownership repair is written; review before qualification. Real constructor/media/runtime remain closed |
+| Reliability request/stream caller | Both scoped fake11 copies pass11/0/0 plus15 subtests | Author121f97 and confirmationff51d7 return0. Roota05d87 and peer88b1f3 verify identical cases/nine hashes, ten guards, unchanged13 inputs/three controls and21 outputs each | Production unchanged. Resolve actual ticket issuance, CPU/int8 profile binding and two prospective legacy test contracts before migration; continue constructor and completion-info work |
 | Release notes | Current progress and remaining gates committed at 376eb47 | All seven proof payloads match Git/disk; 57 table lines and historical package/review-kit sections remain unchanged. D1/D2 completion and generated cancellation/recovery are explicit | Continue runtime qualification. No production source, package, installation, public draft or website changed |
 | Integration | Reliability repair at e8d058f and notice packaging at 71d3e70 after tree09 | Reliability:53 focused cases plus13 subtests per root. Notices:20 Python/10 block cases per root. Tree09 at 56d9d4c remains2,796 passed/1 failed/3 skipped across2,800 cases plus13 subtests; it predates both repairs | Finish runtime work, then run a new committed complete tree and rebuild/reseal. Package08 and website/marketing remain held. No current-source package or installation credit |
 | Desktop incident | Isolation failed in package-07 attempt; corrected at `e10ba3a` | Ordinary Uoink and filesystem connectors launched; earlier live-index/5179 effects unknown. Owned job cleaned | No further override launch; only guarded Uoink dashboard observed for package 08 |
@@ -258,14 +259,19 @@ The final outer output is preserved truncated, with a separate original database
 export. No proposed tests ran. Follow the smaller ownership repair brief in
 _scratch/protected-engine-ownership-repair02, preserving generated behavior and
 real-entry refusals. No active Control Room run remains.
-The independent English reliability request/stream derivative is frozen in
-_scratch/reliability-request-stream-proposal01; its fake11 preparation has
-PINSf8685dc3, qualifier045aaa73 and launcher2ae106d2. Root and peer source
-review permit a separate exact admission; no execution result exists yet.
-Completion-info source in_scratch/asr-completion-info-proposal01 adds13 proposed
-controls. Its fake registry issuance needs the publication lock before admission;
-preserve01 and review a narrow02 fixture correction. Lifecycle source is unchanged
-by that proposed fixture repair. Production and accepted tests remain unchanged.
+The independent English reliability request/stream derivative is qualified with
+inert services: author121f97 and confirmationff51d7 each return0 with11/0/0 and15
+passing subtests. Roota05d87 and peer88b1f3 verify full identical case objects,
+nine child hashes, ten guards, unchanged13 inputs/three controls and21 output
+files each. Read ASTRA-RELIABILITY-FAKE11-VERDICT-2026-09-14.md; do not repeat.
+The150 documentary payloads are sealed at5924bb90. Real media issuance and exact
+CPU/int8 binding remain absent; two unchanged test contracts are owner decisions.
+Completion-info source in_scratch/asr-completion-info-proposal02 preserves
+lifecycle22b66293 and all13 case bodies. Its new fixture29d3a327 now acquires the
+publication lock for metadata issuance; original01 and correction-required
+peer verdictaf448cd9 remain preserved. A combined original46 plus new13 guarded
+instrument is being prepared without execution. Review its exact source before
+admission. Production and accepted tests remain unchanged.
 Keep these source tasks separate from real PCM/filter and D3/D4 qualification.
 The frozen broader plan is archived in30 payloads under
 proof/runtime-next-source-plan-2026-09-14, index8ef211; no implementation pass is
@@ -6588,3 +6594,29 @@ root admission and actual outcomes remain next. Completion-info source review
 found a fake registry write outside its declared publication lock; fix that new
 fixture in a preserved derivative before execution. No production, complete-tree,
 package, installed-client or market acceptance changes.
+
+### 2026-09-14 — Reliability caller passes both guarded copies
+
+Admissions32a0b5a and64b6de7 bind distinct author and confirmation invocations.
+Actual121f97 andff51d7 each return outer/native0 with11/0/0 and15 passing
+subtests. Roota05d87 and peer88b1f3 compare complete case objects, all nine child
+hashes, ten guards, twelve metadata/twenty-five registry traps and exact21-file
+outputs. Thirteen inputs and three controls remain unchanged per root. The
+caller uses actual request/stream/normalization code with inert session/media
+services. No durable/native/model qualification or production migration follows.
+
+Archivec21db9 freezes150 payloads/1,401,378 bytes with seal
+5924bb90464ea3f1eb64a9741d1ab2ba8572da73a15114f1ac5f6fbdf3826dbb.
+Raw worktree diff/application386233 returns0; patch1,522,943 bytes SHA256
+277287df107b186799e752a73cfd0a07b9a73a0a12079ba9be8e99b5f41db47a.
+All115 changed transported files were proven newline-only before restoring raw
+donor bytes. Initial index call325689 yielded session93913; finalbf6a55/0
+verifies every payload and seal against Git. No subject rerun occurred.
+
+The completion-info fixture correction is reviewed in its separate02 derivative:
+two issuance assignments now hold the publication lock, with all13 case bodies
+and lifecycle22b66293 unchanged. Original01 and its required-correction verdict
+remain preserved. Prepare the combined original46/new13 instrument next. The
+bounded generated engine-ownership transaction is written and awaits source
+review. Production remains71d3e70; D1/D2, full-tree/package/install and market
+gates keep their existing dispositions.
