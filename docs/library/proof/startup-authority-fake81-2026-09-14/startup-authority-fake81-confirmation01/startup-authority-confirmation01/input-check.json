@@ -1,0 +1,367 @@
+{
+  "inputs": [
+    {
+      "name": "reservation_file_port.py",
+      "original": {
+        "bytes": 4694,
+        "sha256": "708554378ab8a8e6c4477e637c999256665cbd2855b94c6fa3c2d04a19d3a224"
+      },
+      "copy": {
+        "bytes": 4694,
+        "sha256": "708554378ab8a8e6c4477e637c999256665cbd2855b94c6fa3c2d04a19d3a224"
+      },
+      "unchanged": true
+    },
+    {
+      "name": "snapshot_reservations.py",
+      "original": {
+        "bytes": 23634,
+        "sha256": "e80ae881fa4af9cc7d1a3e4a06624f5b19abe4de09aec3844e8a541449335b98"
+      },
+      "copy": {
+        "bytes": 23634,
+        "sha256": "e80ae881fa4af9cc7d1a3e4a06624f5b19abe4de09aec3844e8a541449335b98"
+      },
+      "unchanged": true
+    },
+    {
+      "name": "snapshot_lifecycle.py",
+      "original": {
+        "bytes": 22138,
+        "sha256": "a80514aac6b1e75b9b872052852fa993a23cd5273b6bed4ffb4eef7404cb69dd"
+      },
+      "copy": {
+        "bytes": 22138,
+        "sha256": "a80514aac6b1e75b9b872052852fa993a23cd5273b6bed4ffb4eef7404cb69dd"
+      },
+      "unchanged": true
+    },
+    {
+      "name": "durable_lifecycle.py",
+      "original": {
+        "bytes": 32833,
+        "sha256": "3c8963eaa02bbc1d810ee2632d0363303bfe05ec6ceeef73771ca8005a00ece3"
+      },
+      "copy": {
+        "bytes": 32833,
+        "sha256": "3c8963eaa02bbc1d810ee2632d0363303bfe05ec6ceeef73771ca8005a00ece3"
+      },
+      "unchanged": true
+    },
+    {
+      "name": "win32_worker_connection.py",
+      "original": {
+        "bytes": 28730,
+        "sha256": "b39a29cea1f3d60e4416111fd87417b21458b1f6f23dcb7700d522050b0b0b45"
+      },
+      "copy": {
+        "bytes": 28730,
+        "sha256": "b39a29cea1f3d60e4416111fd87417b21458b1f6f23dcb7700d522050b0b0b45"
+      },
+      "unchanged": true
+    },
+    {
+      "name": "windows_reservation_port.py",
+      "original": {
+        "bytes": 14455,
+        "sha256": "910aa472888303d29655dacc355349f7a2876c97fb593f7f0dc6f148a9ca9dc6"
+      },
+      "copy": {
+        "bytes": 14455,
+        "sha256": "910aa472888303d29655dacc355349f7a2876c97fb593f7f0dc6f148a9ca9dc6"
+      },
+      "unchanged": true
+    },
+    {
+      "name": "trusted_asr_resolver.py",
+      "original": {
+        "bytes": 13373,
+        "sha256": "16a5a1245f649a3eb04d077b661835503f08bef0ff8822dcb545176f0cc30833"
+      },
+      "copy": {
+        "bytes": 13373,
+        "sha256": "16a5a1245f649a3eb04d077b661835503f08bef0ff8822dcb545176f0cc30833"
+      },
+      "unchanged": true
+    },
+    {
+      "name": "asr_loading_adapter.py",
+      "original": {
+        "bytes": 12113,
+        "sha256": "635d2c22db75d12ffe6965fb656fdca47450ccbbaeb4d8cc8aaff9fcc79dd243"
+      },
+      "copy": {
+        "bytes": 12113,
+        "sha256": "635d2c22db75d12ffe6965fb656fdca47450ccbbaeb4d8cc8aaff9fcc79dd243"
+      },
+      "unchanged": true
+    },
+    {
+      "name": "pinned_buffer_namespace.py",
+      "original": {
+        "bytes": 7893,
+        "sha256": "2cc25a7a254f35d802336ef121cc860887a4301b3257588438dddec392fe0b7b"
+      },
+      "copy": {
+        "bytes": 7893,
+        "sha256": "2cc25a7a254f35d802336ef121cc860887a4301b3257588438dddec392fe0b7b"
+      },
+      "unchanged": true
+    },
+    {
+      "name": "owned_generation_protocol.py",
+      "original": {
+        "bytes": 19570,
+        "sha256": "437e0880e10c91555df61b3c07c8be665430098c54c7d6ef687a99a0aa4a79d9"
+      },
+      "copy": {
+        "bytes": 19570,
+        "sha256": "437e0880e10c91555df61b3c07c8be665430098c54c7d6ef687a99a0aa4a79d9"
+      },
+      "unchanged": true
+    },
+    {
+      "name": "inherited_readset.py",
+      "original": {
+        "bytes": 12391,
+        "sha256": "02be8e04f4bea3030faf0882ae48ead40716c5782f95e2790e1a9897c5be76e3"
+      },
+      "copy": {
+        "bytes": 12391,
+        "sha256": "02be8e04f4bea3030faf0882ae48ead40716c5782f95e2790e1a9897c5be76e3"
+      },
+      "unchanged": true
+    },
+    {
+      "name": "generated_worker_flow.py",
+      "original": {
+        "bytes": 22853,
+        "sha256": "1ab240d60ceaca130ac85f5d2e908ef5895da5297f35d78a1caba1c62e622238"
+      },
+      "copy": {
+        "bytes": 22853,
+        "sha256": "1ab240d60ceaca130ac85f5d2e908ef5895da5297f35d78a1caba1c62e622238"
+      },
+      "unchanged": true
+    },
+    {
+      "name": "generated_operation_flow.py",
+      "original": {
+        "bytes": 21274,
+        "sha256": "6f09b4e6490b2078e792e49559a9dd0db95a895a778c31294a3577eeabdc98ed"
+      },
+      "copy": {
+        "bytes": 21274,
+        "sha256": "6f09b4e6490b2078e792e49559a9dd0db95a895a778c31294a3577eeabdc98ed"
+      },
+      "unchanged": true
+    },
+    {
+      "name": "generated_adapter_flow.py",
+      "original": {
+        "bytes": 25562,
+        "sha256": "b43ce2335da60f7879305903b5a89bf70352acd47dc5f336bc90757f6d7873bd"
+      },
+      "copy": {
+        "bytes": 25562,
+        "sha256": "b43ce2335da60f7879305903b5a89bf70352acd47dc5f336bc90757f6d7873bd"
+      },
+      "unchanged": true
+    },
+    {
+      "name": "win32_private_pipe.py",
+      "original": {
+        "bytes": 18613,
+        "sha256": "73a1109a55f2bc807594655c71b24a3e35eb88d7f744497df2cc328dc224cae7"
+      },
+      "copy": {
+        "bytes": 18613,
+        "sha256": "73a1109a55f2bc807594655c71b24a3e35eb88d7f744497df2cc328dc224cae7"
+      },
+      "unchanged": true
+    },
+    {
+      "name": "test_reservations.py",
+      "original": {
+        "bytes": 37737,
+        "sha256": "604a295d5e925b9a9d7f55750bfeb1ddcda3e6a9873d6d8d7f9e98c84d9b4b9e"
+      },
+      "copy": {
+        "bytes": 37737,
+        "sha256": "604a295d5e925b9a9d7f55750bfeb1ddcda3e6a9873d6d8d7f9e98c84d9b4b9e"
+      },
+      "unchanged": true
+    },
+    {
+      "name": "test_windows_reservations.py",
+      "original": {
+        "bytes": 27701,
+        "sha256": "91b0de71eb55d088ee2fdbcd11ff3e6a074f18f713dfcd5b384814a1dc78300c"
+      },
+      "copy": {
+        "bytes": 27701,
+        "sha256": "91b0de71eb55d088ee2fdbcd11ff3e6a074f18f713dfcd5b384814a1dc78300c"
+      },
+      "unchanged": true
+    },
+    {
+      "name": "startup_fixture_resolver.py",
+      "original": {
+        "bytes": 13373,
+        "sha256": "16a5a1245f649a3eb04d077b661835503f08bef0ff8822dcb545176f0cc30833"
+      },
+      "copy": {
+        "bytes": 13373,
+        "sha256": "16a5a1245f649a3eb04d077b661835503f08bef0ff8822dcb545176f0cc30833"
+      },
+      "unchanged": true
+    },
+    {
+      "name": "startup_fixture_adapter.py",
+      "original": {
+        "bytes": 28922,
+        "sha256": "6482b782c545adbcd524a68ae85ba2abb3f081683379a9d53ada66d03a5ddb51"
+      },
+      "copy": {
+        "bytes": 28922,
+        "sha256": "6482b782c545adbcd524a68ae85ba2abb3f081683379a9d53ada66d03a5ddb51"
+      },
+      "unchanged": true
+    },
+    {
+      "name": "startup_authority_fixture.py",
+      "original": {
+        "bytes": 8556,
+        "sha256": "fe82ffe16117a9a74b3194e607c86c69b4411076337965ccb5d78c8a9cec897a"
+      },
+      "copy": {
+        "bytes": 8556,
+        "sha256": "fe82ffe16117a9a74b3194e607c86c69b4411076337965ccb5d78c8a9cec897a"
+      },
+      "unchanged": true
+    },
+    {
+      "name": "test_startup_authority.py",
+      "original": {
+        "bytes": 13756,
+        "sha256": "083b5bf73b089d088c9d0b44a185682f03f55d33d8d020f9cf15d0ffc2c6ae22"
+      },
+      "copy": {
+        "bytes": 13756,
+        "sha256": "083b5bf73b089d088c9d0b44a185682f03f55d33d8d020f9cf15d0ffc2c6ae22"
+      },
+      "unchanged": true
+    },
+    {
+      "name": "qualify_windows_reservations.py",
+      "original": {
+        "bytes": 13317,
+        "sha256": "4c057e438073ae5dd063b396e7aeb1a69e963f20250f366233bb9e9ffc5e6e1b"
+      },
+      "copy": {
+        "bytes": 13317,
+        "sha256": "4c057e438073ae5dd063b396e7aeb1a69e963f20250f366233bb9e9ffc5e6e1b"
+      },
+      "unchanged": true
+    },
+    {
+      "name": "EXPECTED-CASES.json",
+      "original": {
+        "bytes": 8581,
+        "sha256": "2dc0ec32738188ece925603d823ae04767f8255ae67b68038014cb65b244c0f2"
+      },
+      "copy": {
+        "bytes": 8581,
+        "sha256": "2dc0ec32738188ece925603d823ae04767f8255ae67b68038014cb65b244c0f2"
+      },
+      "unchanged": true
+    },
+    {
+      "name": "run_preflight01.ps1",
+      "original": {
+        "bytes": 8919,
+        "sha256": "d336877b181d05db7530112b5fbb0f59743ecf8c7d9de2f52c4a605e60b2df8e"
+      },
+      "copy": {
+        "bytes": 8919,
+        "sha256": "d336877b181d05db7530112b5fbb0f59743ecf8c7d9de2f52c4a605e60b2df8e"
+      },
+      "unchanged": true
+    },
+    {
+      "name": "BRIEF.md",
+      "original": {
+        "bytes": 1910,
+        "sha256": "d3f124b1906e56f84f759bbaa1f3ea12cc8f4759ff4a5c9dd7b98cd7455efda5"
+      },
+      "copy": {
+        "bytes": 1910,
+        "sha256": "d3f124b1906e56f84f759bbaa1f3ea12cc8f4759ff4a5c9dd7b98cd7455efda5"
+      },
+      "unchanged": true
+    },
+    {
+      "name": "QUALIFICATION-PROTOCOL.md",
+      "original": {
+        "bytes": 3103,
+        "sha256": "36daa5629e1e0736538150b8e32f9f92b376526e711c52e28316c65b37ae16c0"
+      },
+      "copy": {
+        "bytes": 3103,
+        "sha256": "36daa5629e1e0736538150b8e32f9f92b376526e711c52e28316c65b37ae16c0"
+      },
+      "unchanged": true
+    },
+    {
+      "name": "SOURCE-INPUTS.json",
+      "original": {
+        "bytes": 9815,
+        "sha256": "fde7f1797a2873860e1547257cd94a0676821c271004f4c5a7b82d7dc9ebbcd8"
+      },
+      "copy": {
+        "bytes": 9815,
+        "sha256": "fde7f1797a2873860e1547257cd94a0676821c271004f4c5a7b82d7dc9ebbcd8"
+      },
+      "unchanged": true
+    }
+  ],
+  "controls": [
+    {
+      "name": "PINS.json",
+      "original": {
+        "bytes": 4401,
+        "sha256": "963d1a5fbdc2cb89e14df155575767e1b9eeb2a28003a701c25d1b5b60781f31"
+      },
+      "copy": {
+        "bytes": 4401,
+        "sha256": "963d1a5fbdc2cb89e14df155575767e1b9eeb2a28003a701c25d1b5b60781f31"
+      },
+      "unchanged": true
+    },
+    {
+      "name": "ROOT-ADMISSION.json",
+      "original": {
+        "bytes": 731,
+        "sha256": "a45cacbb6b5069e64dda1b7885db84dc6ed608474227bfcc8cd2bf6b05299d76"
+      },
+      "copy": {
+        "bytes": 731,
+        "sha256": "a45cacbb6b5069e64dda1b7885db84dc6ed608474227bfcc8cd2bf6b05299d76"
+      },
+      "unchanged": true
+    },
+    {
+      "name": "run_preflight01.ps1",
+      "original": {
+        "bytes": 8919,
+        "sha256": "d336877b181d05db7530112b5fbb0f59743ecf8c7d9de2f52c4a605e60b2df8e"
+      },
+      "copy": {
+        "bytes": 8919,
+        "sha256": "d336877b181d05db7530112b5fbb0f59743ecf8c7d9de2f52c4a605e60b2df8e"
+      },
+      "unchanged": true
+    }
+  ],
+  "inputs_unchanged": true
+}

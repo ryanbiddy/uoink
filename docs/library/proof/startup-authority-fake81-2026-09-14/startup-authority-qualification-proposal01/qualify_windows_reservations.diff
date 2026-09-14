@@ -1,0 +1,109 @@
+--- before/qualify_windows_reservations.py
++++ qualify_windows_reservations.py
+@@ -49,7 +49,7 @@
+ STARTUP_BOUND = os.environ.get("IG_FORBIDDEN_LIVE") == r"C:\Users\hello\AppData\Local\Uoink\index.db"
+ assert STARTUP_BOUND
+ HERE = os.path.dirname(os.path.abspath(__file__))
++MODULES = ("reservation_file_port", "snapshot_reservations", "snapshot_lifecycle", "durable_lifecycle", "win32_worker_connection", "windows_reservation_port", "trusted_asr_resolver", "asr_loading_adapter", "pinned_buffer_namespace", "owned_generation_protocol", "inherited_readset", "generated_worker_flow", "generated_operation_flow", "generated_adapter_flow", "win32_private_pipe", "startup_fixture_resolver", "startup_fixture_adapter", "test_reservations", "test_windows_reservations", "startup_authority_fixture", "test_startup_authority")
+-MODULES = ("reservation_file_port", "snapshot_reservations", "snapshot_lifecycle", "durable_lifecycle", "win32_worker_connection", "windows_reservation_port", "trusted_asr_resolver", "asr_loading_adapter", "pinned_buffer_namespace", "owned_generation_protocol", "inherited_readset", "generated_worker_flow", "generated_operation_flow", "generated_adapter_flow", "win32_private_pipe", "test_reservations", "test_windows_reservations")
+ INPUTS = tuple(name + ".py" for name in MODULES) + ("qualify_windows_reservations.py", "EXPECTED-CASES.json")
+ READS = {os.path.normcase(os.path.join(HERE, name)) for name in INPUTS}
+ HEAVY = {"torch", "torchaudio", "torchvision", "torchcodec", "whisperx", "faster_whisper", "ctranslate2",
+@@ -83,7 +83,7 @@
+ CONTENT_OPEN = False
+ HASHES = {name: hashlib.sha256(raw).hexdigest() for name, raw in RAW.items()}
+ EXPECTED = json.loads(RAW["EXPECTED-CASES.json"])
++assert type(EXPECTED) is list and len(EXPECTED) == 81 and len(set(EXPECTED)) == 81
+-assert type(EXPECTED) is list and len(EXPECTED) == 65 and len(set(EXPECTED)) == 65
+ 
+ def deny_metadata(*args, **kwargs):
+     DENIALS.append("metadata")
+@@ -115,11 +115,51 @@
+ CAPTURE_OUT, CAPTURE_ERR = BoundedCapture(), BoundedCapture()
+ sys.stdout, sys.stderr = CAPTURE_OUT, CAPTURE_ERR
+ LOADED = {}
++AUTHORITY_NAMES = ("RELEASE_AUTHORITY", "RUNTIME_PROFILE", "SNAPSHOT_LIFECYCLE", "RUNTIME_FACTORY", "ACQUISITION_SERVICE")
++
++def startup_pair_valid():
++    canonical_resolver = LOADED["trusted_asr_resolver"]
++    canonical_adapter = LOADED["asr_loading_adapter"]
++    fixture_resolver = LOADED["startup_fixture_resolver"]
++    fixture_adapter = LOADED["startup_fixture_adapter"]
++    return (canonical_resolver is not fixture_resolver and canonical_adapter is not fixture_adapter
++        and all(sys.modules.get(name) is LOADED[name] for name in
++                ("trusted_asr_resolver", "asr_loading_adapter", "startup_fixture_resolver", "startup_fixture_adapter"))
++        and canonical_adapter.resolver is canonical_resolver
++        and fixture_adapter.resolver is fixture_resolver and fixture_adapter._STARTUP_RESOLVER is fixture_resolver
++        and canonical_resolver.REAL_APPROVAL is None and fixture_resolver.REAL_APPROVAL is None
++        and all(getattr(module, name) is None for module in (canonical_adapter, fixture_adapter) for name in AUTHORITY_NAMES))
++
++STARTUP_VALIDATOR = startup_pair_valid
++STARTUP_ENTRY_VALID = False
++STARTUP_FUNCTIONS = ()
+ for name in MODULES:
+     module = types.ModuleType(name)
+     module.__file__ = os.path.join(HERE, name + ".py")
+     sys.modules[name] = module
++    if name == "startup_fixture_adapter":
++        canonical_resolver = LOADED["trusted_asr_resolver"]
++        assert sys.modules["trusted_asr_resolver"] is canonical_resolver
++        sys.modules["trusted_asr_resolver"] = LOADED["startup_fixture_resolver"]
++        try:
++            exec(compile(RAW[name + ".py"], module.__file__, "exec"), module.__dict__)
++        finally:
++            sys.modules["trusted_asr_resolver"] = canonical_resolver
++    else:
++        if name == "test_reservations":
++            # Both pairs are closed and the one resolver alias is restored
++            # before any test definitions are loaded.
++            STARTUP_ENTRY_VALID = startup_pair_valid()
++            assert STARTUP_ENTRY_VALID
++            STARTUP_FUNCTIONS = tuple(
++                (LOADED[module_name], method, getattr(LOADED[module_name], method))
++                for module_name, methods in (
++                    ("trusted_asr_resolver", ("load_manifest", "admit_snapshot", "bind_for_constructor")),
++                    ("startup_fixture_resolver", ("load_manifest", "admit_snapshot", "bind_for_constructor")),
++                    ("asr_loading_adapter", ("_require", "policy_status", "_release", "_plan", "_leased_admission", "ensure_assets", "_runtime_profile", "_model_session", "whisperx_session", "faster_whisper_session")),
++                    ("startup_fixture_adapter", ("_require", "policy_status", "_release", "_plan", "_leased_admission", "ensure_assets", "_runtime_profile", "_model_session", "whisperx_session", "faster_whisper_session", "_startup_configuration", "_startup_authority_snapshot", "_startup_selection_current", "_startup_values", "_startup_references", "_validate_startup_locked", "_validate_controller_startup", "_consume_controller_startup", "_fixed_real_worker_start", "_controller_startup_scope")),
++                ) for method in methods)
++        exec(compile(RAW[name + ".py"], module.__file__, "exec"), module.__dict__)
+-    exec(compile(RAW[name + ".py"], module.__file__, "exec"), module.__dict__)
+     LOADED[name] = module
+ REAL_ENTRIES = ((LOADED["reservation_file_port"], "real_journal_port", LOADED["reservation_file_port"].real_journal_port),
+                 (LOADED["snapshot_reservations"], "real_reservation_service", LOADED["snapshot_reservations"].real_reservation_service),
+@@ -155,7 +195,7 @@
+         if err is not None:
+             self.addFailure(test, err)
+ 
++suite = unittest.TestSuite(unittest.defaultTestLoader.loadTestsFromName(name.split(".", 1)[1], LOADED[name.split(".", 1)[0]]) for name in EXPECTED)
+-suite = unittest.TestSuite(unittest.defaultTestLoader.loadTestsFromModule(LOADED[name]) for name in ("test_reservations", "test_windows_reservations"))
+ result = Results()
+ started = time.perf_counter()
+ suite.run(result)
+@@ -180,20 +220,23 @@
+     "capture_valid": not CAPTURE_OUT.overflow and not CAPTURE_ERR.overflow and CAPTURE_OUT.count == CAPTURE_ERR.count == 0,
+     "real_entrypoints_unchanged": all(getattr(module, name) is function for module, name, function in REAL_ENTRIES)
+         and LOADED["trusted_asr_resolver"].REAL_APPROVAL is None
++        and all(getattr(LOADED["asr_loading_adapter"], name) is None for name in ("RELEASE_AUTHORITY", "RUNTIME_PROFILE", "SNAPSHOT_LIFECYCLE", "RUNTIME_FACTORY", "ACQUISITION_SERVICE"))
++        and STARTUP_ENTRY_VALID and startup_pair_valid is STARTUP_VALIDATOR and startup_pair_valid()
++        and len(STARTUP_FUNCTIONS) == 36
++        and all(getattr(module, name) is function for module, name, function in STARTUP_FUNCTIONS),
+-        and all(getattr(LOADED["asr_loading_adapter"], name) is None for name in ("RELEASE_AUTHORITY", "RUNTIME_PROFILE", "SNAPSHOT_LIFECYCLE", "RUNTIME_FACTORY", "ACQUISITION_SERVICE")),
+ }
+ membership = [row["id"] for row in cases] == EXPECTED and result.testsRun == len(EXPECTED)
+ passed = sum(row["passed"] for row in cases)
+ skipped = sum(row["skipped"] for row in cases)
+ valid = membership and all(guards.values()) and not DENIALS and not REGISTRY_DENIALS and not heavy
++code = 0 if valid and passed == 81 and skipped == 0 else 1
+-code = 0 if valid and passed == 65 and skipped == 0 else 1
+ payload = json.dumps({"schema": "uoink.windows-reservation-fake-preflight.v1", "cases": cases,
+     "passed": passed, "failed": len(cases) - passed - skipped, "skipped": skipped,
+     "count": len(cases), "expected_cases": EXPECTED, "membership_valid": membership,
+     "guards": guards, "guard_valid": valid, "guard_denials": DENIALS, "registry_denials": REGISTRY_DENIALS,
+     "heavy_roots_loaded": heavy, "metadata_trap_count": len(TRAPS), "registry_trap_count": len(REGISTRY_TRAPS),
+     "input_sha256": HASHES, "elapsed_seconds": elapsed, "qualification_exit": code,
++    "scope": "Original65 plus16 controller startup cases; isolated synthetic authority and fake services only; real worker remains closed"}, indent=2)
+-    "scope": "Generated bytes and fake Windows services; actual source paths exercised, native behavior unmeasured"}, indent=2)
+ assert len(payload.encode("utf-8")) <= 262144
+ OUTPUT.write(payload + "\n")
+ OUTPUT.flush()

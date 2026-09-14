@@ -1,0 +1,3 @@
+The first passive checker stopped at "Explicit module order" in PASSIVE-CHECK07-ACTUAL.json. Its module-name extraction used [a-z_]+, which omitted the digits in win32 module names. Earlier source-copy, full delta reconstruction and ordered-case checks had completed; the overall passive process remained failed.
+
+check_preparation.ps1 and its actual result stay unchanged. check_preparation02.ps1 changes only that extraction class to [a-z0-9_]+. No qualifier, launcher, candidate, test, source map or PINS byte changed. This is a documentary checker correction, not an observed qualification failure or retry.

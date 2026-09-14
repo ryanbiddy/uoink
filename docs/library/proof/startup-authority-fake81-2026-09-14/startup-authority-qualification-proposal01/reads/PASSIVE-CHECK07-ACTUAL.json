@@ -1,0 +1,7 @@
+{
+  "chunk_id": "786844",
+  "wall_time_seconds": 0.5403464,
+  "exit_code": 1,
+  "original_token_count": 84,
+  "output": "Exception: E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\startup-authority-qualification-proposal01\\check_preparation.ps1:4\r\nLine |\r\n   4 |  … ask($condition,[string]$message){if(-not $condition){throw $message}}\r\n     |                                                         ~~~~~~~~~~~~~~\r\n     | Explicit module order\r\n"
+}

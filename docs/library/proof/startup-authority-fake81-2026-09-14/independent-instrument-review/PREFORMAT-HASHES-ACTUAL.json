@@ -1,0 +1,7 @@
+{
+  "chunk_id": "d11cea",
+  "wall_time_seconds": 0.1657185,
+  "exit_code": 0,
+  "original_token_count": 122,
+  "output": "{\"path\":\"VERDICT.md\",\"bytes\":3584,\"sha256\":\"d44ae1e9298736c12e59a0c2caaff8f7182238b47c0fcf9ad89539f655c1efbe\"}\r\n{\"path\":\"VIEW-COVERAGE.json\",\"bytes\":3397,\"sha256\":\"50f15ea90b31d0fd753ab39c051ef4c30d04c1fc71add2d9ccd4d7aea7539f22\"}\r\n{\"path\":\"BINDING-CHECK02-ACTUAL.json\",\"bytes\":1030,\"sha256\":\"527c0c672788869924030c2152d81fa21447f652e84b191e233755b0863a4778\"}\r\n{\"path\":\"COPY-CHECK-ACTUAL.json\",\"bytes\":1048,\"sha256\":\"bec5cbd6298837d59b18c19a931c456934e2e8816eac06e2ad43936b510286d3\"}\r\n"
+}

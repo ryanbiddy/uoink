@@ -1,0 +1,15 @@
+{
+  "approved": true,
+  "label": "startup-authority-fake01",
+  "pins_sha256": "47af697a62dcead062f8c2771aad550ebd194392665f85a9a9f3face60551fb8",
+  "scope": "generated_bytes_and_fake_ports_only",
+  "admitted_by": "Astra root",
+  "source_commit": "d7c86f902cd120553a9ddda5300fb4867d9d279f",
+  "root_verdict_sha256": "0799579599fa0936d570ec2a9df16ef8f7e2be9d494323941b0cac009e42b22f",
+  "peer_verdict_sha256": "06f077ce460117870b7544cb3d434c47752313f66bede84615e939c1ff032cb2",
+  "expected_cases": 81,
+  "new_cases": 16,
+  "timestamp_utc": "2026-09-14T12:30:29.6686192+00:00",
+  "attempts": 1,
+  "model_or_native_service_authority": false
+}

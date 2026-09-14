@@ -125,7 +125,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | Reliability request/stream caller | Both scoped fake11 copies pass11/0/0 plus15 subtests | Author121f97 and confirmationff51d7 return0. Roota05d87 and peer88b1f3 verify identical cases/nine hashes, ten guards, unchanged13 inputs/three controls and21 outputs each | Production unchanged. Resolve actual ticket issuance, CPU/int8 profile binding and two prospective legacy test contracts before migration; continue constructor and completion-info work |
 | Completion language metadata | Both scoped fake59 copies pass59/0/0 plus29 subtests; original46 preserved | Author577e68 and confirmation8fd760 return0. Root993295 and peera39b40 verify identical full cases/five hashes, ten guards, unchanged nine inputs/three controls and17 outputs each | Connect authenticated backend completion and controller registry, then migrate WhisperX caller. Engine fake39 is qualified below; real/runtime/production gates remain closed |
 | Control Room command audit | Adapter fix committed atc3607c3 on feat/desktop-control-room | Same16 focused replay cases pass in isolated and checkout copies; TypeScript check passes. All24 proof payloads match Git/disk | A new process loads the preview warning. Existing server not restarted or observed with it; no real-provider or complete-command attestation |
-| Controller startup authority | Source6482b782/map23591b4c accepted for guarded qualification | Root66f202 and peer5676f6 verify bindings and the unchanged12,113-byte adapter prefix; both source reviews accept the scoped repair. All16 proposed cases remain unexecuted | Prepare and review the corrected65-plus16 instrument before exact execution admission. Real worker remains closed; child namespace and fixed constructors follow |
+| Controller startup authority | Source6482b782/map23591b4c passes both guarded81 copies; original65 preserved | Author28a03e and confirmation9a8704 return0, each81/0/0 plus48 passing subtests. Root151c60 and peere49d09 verify complete cases,23 hashes,ten guards,27 inputs/three controls and35 outputs each. All256 payloads match Git/disk | Continue authenticated child namespace/fixed constructor connection. The real-worker seam remains closed; no native/model or release clearance |
 | Release notes | Current progress and remaining gates committed at 376eb47 | All seven proof payloads match Git/disk; 57 table lines and historical package/review-kit sections remain unchanged. D1/D2 completion and generated cancellation/recovery are explicit | Continue runtime qualification. No production source, package, installation, public draft or website changed |
 | Integration | Reliability repair at e8d058f and notice packaging at 71d3e70 after tree09 | Reliability:53 focused cases plus13 subtests per root. Notices:20 Python/10 block cases per root. Tree09 at 56d9d4c remains2,796 passed/1 failed/3 skipped across2,800 cases plus13 subtests; it predates both repairs | Finish runtime work, then run a new committed complete tree and rebuild/reseal. Package08 and website/marketing remain held. No current-source package or installation credit |
 | Desktop incident | Isolation failed in package-07 attempt; corrected at `e10ba3a` | Ordinary Uoink and filesystem connectors launched; earlier live-index/5179 effects unknown. Owned job cleaned | No further override launch; only guarded Uoink dashboard observed for package 08 |
@@ -303,14 +303,19 @@ coverage is unverified. Preserve both failed constructor proposals.
 Next follow REAL-STARTUP-AUTHORITY-REPAIR-BRIEF-2026-09-14.md: retain controller
 manifest/admission/profile/permit authority before the child namespace and fixed
 constructor work. This smaller unit must keep absent real authority closed.
-Controller source6482b782/map23591b4c is accepted for guarded qualification;
-read ASTRA-STARTUP-AUTHORITY-SOURCE-VERDICT-2026-09-14.md. Root66f202 and
-peer5676f6 pass passive binding checks; all16 new tests remain unexecuted.
-Next follow STARTUP-AUTHORITY-QUALIFICATION-BRIEF-2026-09-14.md. Preparation
-reuses the corrected65 instrument, preserves its old cases and adds the16 controls
-with isolated module authority. Review the instrument before exact author and
-confirmation admissions. Source archive9593bc and index9cc34c verify145 payloads,
-seal d207df4b; raw diff/applycaeace succeeds. Control Room's independent
+Controller source6482b782/map23591b4c now passes both guarded81 copies. Read
+ASTRA-STARTUP81-RESULT-VERDICT-2026-09-14.md. Author28a03e and confirmation9a8704
+return outer/native0 under admissions0940bc and8cd940; each81/0/0 plus48 passing
+subtests. Original65 preserved. Root151c60 and peere49d09 verify all complete
+case objects,23 hashes,ten guards,27 inputs/three controls and35 outputs each.
+The instrument source verdict06f077ce and root verdict correct one frozen protocol
+claim: early setup failures rely on the outer actual, not launch-failure.json.
+Do not repeat these scoped observations. Next review the bounded child namespace
+repair brief being prepared under _scratch/real-child-namespace-plan01, then
+dispatch its implementation. Real-worker startup and model authority remain closed.
+Source archive9593bc/index9cc34c preserves145 payloads, seald207df4b. Result
+archivea26abf/index7b246b preserves256 payloads, seal34b8e9f7; raw diff/apply8811ba succeeds.
+Control Room's independent
 command-preview fix is committed atc3607c3 with16/0/0 in both copies and a passing
 TypeScript check. It needs no Uoink subject rerun; existing server was not restarted.
 Keep these source tasks separate from real PCM/filter and D3/D4 qualification.
@@ -6876,3 +6881,37 @@ All136 transport differences were proven UTF-8 newline-only before restoration.
 Index9cc34c/0 verifies every sealed payload against Git and disk. The archive also
 retains the prior failed-constructor integration receipts, backup3954258 and
 Control Room c3607c3 integration receipts. No subject test was repeated.
+
+Source acceptance and qualification brief are committed atd7c86f9. Push8cc81f/0
+and remoteeb85a7/0 verify origin/cc/living-library at
+d7c86f902cd120553a9ddda5300fb4867d9d279f after clean-candidate, ancestry and CAS
+checks. No other branch was pushed. Instrument preparation remains unadmitted.
+
+### 2026-09-14 — Controller startup81 passes both guarded copies
+
+Author28a03e/0 and confirmation9a8704/0 each pass81 cases with zero failures/skips
+and48 passing subtests. The original65 cases contain33 of those subtests; the
+new16 contain15. All original test bytes and the qualified canonical adapter
+remain unchanged. The derivative runs only in the separate fixture module pair.
+Real-worker startup remains a refusal.
+
+Root instrumente89695/0 and peer63d8f3/0 verify the fixed loader and27-input map;
+peer446dd3/0 verifies the exact copies. Author admission0940bc and confirmation
+admission8cd940 authorize one fake-service run each. Root22d01f/656c7b and pair
+151c60 validate full case/subtest objects,23 child hashes,ten guards,27 inputs,
+three controls and35 output files per run. Independent result reviewe49d09/0
+agrees. Read ASTRA-STARTUP81-RESULT-VERDICT-2026-09-14.md; no rerun is needed.
+
+Preserve the passive checker mistakes786844 andc15651 with their corrections;
+neither was a subject failure. Keep the frozen protocol and mandatory root/peer
+addendum: setup before the launcher's try block can fail without launch-failure.json,
+so exact outer tool records are required. Both actual subject records are saved.
+
+Archivea26abf/0 preserves256 payloads,2,979,016 bytes, seal
+34b8e9f7ce12dcfd048c83b8e75dac6d0ee94577c9f2ee7ac28edc02df8fe899.
+Raw diff/apply8811ba/0 transports a3,217,925-byte patch at
+2adbe984d8a6602b831eb9e15e673cc90a7c1a30943b9060b345cd6a75fd6401.
+All235 transport differences were proven UTF-8 newline-only before restoration.
+Production remains71d3e70. The next repair is the authenticated child namespace;
+constructor, backend metadata, PCM/filter, caller and native qualification remain.
+Index7b246b/0 verifies all256 payloads against both Git and disk.

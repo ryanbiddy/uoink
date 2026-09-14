@@ -1,0 +1,7 @@
+{
+  "chunk_id": "8cd940",
+  "wall_time_seconds": 0.2267176,
+  "exit_code": 0,
+  "original_token_count": 71,
+  "output": "{\"label\":\"startup-authority-confirmation01\",\"admission_bytes\":731,\"admission_sha256\":\"a45cacbb6b5069e64dda1b7885db84dc6ed608474227bfcc8cd2bf6b05299d76\",\"pins_sha256\":\"963d1a5fbdc2cb89e14df155575767e1b9eeb2a28003a701c25d1b5b60781f31\",\"scope\":\"generated_bytes_and_fake_ports_only\"}\r\n"
+}

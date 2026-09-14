@@ -1,0 +1,7 @@
+Instrument preparation is frozen for root and independent source review. PINS.json binds 27 parent inputs (455,776 bytes), including 23 child texts and exactly 81 selected IDs: the original 65 plus the reviewed 16 in source order. No actual admission or run directory exists.
+
+The complete corrected65 qualifier/launcher and protocol were read before derivation. Final changes are limited to the declared seven qualifier edits and eight launcher edits, with separate full unified diffs. The passive checker reconstructs both directions and verifies only those declared changes, the five before copies, every child source/copy binding, old test bytes, old case order, the new source order, the 12,113-byte adapter prefix, unchanged preload block and all 36 captured method names. The alias is restored before any test definitions load. The intended durable source replacement is explicit in SOURCE-INPUTS.json.
+
+The original passive checker failed on its digits-omitting module regex. Its full source and actual object remain; the separately corrected checker passed. This was a preparation check, not a qualification run. Both source verdicts were read, and the required final root/peer review remains a prerequisite for actual admission.
+
+The author template is false and bound to these PINS. The confirmation template is false with a distinct label and no invented future digest. No real approval, child transport, constructor, native behavior, model access or release acceptance is granted.

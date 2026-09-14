@@ -1,0 +1,7 @@
+{
+  "chunk_id": "8f0620",
+  "wall_time_seconds": 0.1806031,
+  "exit_code": 0,
+  "original_token_count": 180,
+  "output": "{\"path\":\"VERDICT.md\",\"bytes\":2291,\"sha256\":\"e78ed57ff1eaf1b592b5d09d5896aa2b91d20739c02028ac368d985e847583ac\"}\r\n{\"path\":\"RESULT.json\",\"bytes\":2276,\"sha256\":\"dea2a2fe8bba666e8719f63a27a15e28527b4f140d95644bd9f809e610a510f1\"}\r\n{\"path\":\"CHECK-ACTUAL.json\",\"bytes\":2612,\"sha256\":\"1f06b9a32b1c39bb53eb6e12a69f2a137e2b5279d13f29cb43ec77e364015b50\"}\r\n{\"path\":\"verify_receipts.mjs\",\"bytes\":9662,\"sha256\":\"007989c617dcf45d4ed7e0e63e51a72be1d62171cdc44910e973b721bc57084c\"}\r\n{\"path\":\"AUTHOR-RUN-ACTUAL.json\",\"bytes\":208,\"sha256\":\"dca4e241d71cb47314e76a1f058541f56a9b6e5cba2bf66b1266512769a8f9f2\"}\r\n{\"path\":\"CONFIRMATION-RUN-ACTUAL.json\",\"bytes\":216,\"sha256\":\"fcb47c2d49cdd7c59ac27e24b33f383d6bffd61173d92fece53bd225d27d54dc\"}\r\n"
+}

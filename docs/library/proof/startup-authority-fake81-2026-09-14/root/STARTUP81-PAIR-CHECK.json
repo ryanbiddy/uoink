@@ -1,0 +1,19 @@
+{
+  "scope": "Complete observed fake81 result pair; no native/model/runtime acceptance",
+  "author_actual": "28a03e/0",
+  "confirmation_actual": "9a8704/0",
+  "each": {
+    "passed": 81,
+    "failed": 0,
+    "skipped": 0,
+    "passing_subtests": 48,
+    "child_hashes": 23,
+    "guards": 10,
+    "unchanged_inputs": 27,
+    "unchanged_controls": 3,
+    "output_files": 35
+  },
+  "identical_complete_cases": true,
+  "identical_child_hashes": true,
+  "identical_guards": true
+}

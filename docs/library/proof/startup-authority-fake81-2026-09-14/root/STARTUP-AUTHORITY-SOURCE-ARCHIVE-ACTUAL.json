@@ -1,0 +1,7 @@
+{
+  "chunk_id": "9593bc",
+  "wall_time_seconds": 0.320196,
+  "exit_code": 0,
+  "original_token_count": 92,
+  "output": "{\"proof\":\"docs/library/proof/startup-authority-source-2026-09-14\",\"payloads\":145,\"bytes\":1638412,\"manifest_sha256\":\"d207df4b7fff5677963e53d0af4abcd35075c071916b6d4d026be09ff111bf0d\",\"source_map_sha256\":\"23591b4c9fd6d18ee9856c5abb9329ce926ab49553c72bb20b1eaaf8a549d775\",\"proposed_tests\":16,\"qualification\":\"not executed\",\"source_review\":\"accepted for qualification\"}\n"
+}
