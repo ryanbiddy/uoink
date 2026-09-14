@@ -115,7 +115,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | Generated reservation recovery | Component and evidence integrated at f9ab6fe | Author70b48e and independentfd86f5 each pass42 cases, with20 passing nested subtests and all10 guards valid. All123 proof payloads match Git/disk | Connect retained Windows gate/journal handles and split create/resume/startup. Native recovery and runtime acceptance remain open |
 | Windows reservation connection | Correction8fc3219; transfer2f4311f; native generated drain67887c3 | Unit70/0/0 plus35 subtests in both copies. Native d3d56f returns outer/controller/child0, valid guards, child0/job0, four confirmed phases/flushes and exact2,118B closed journal. All87 native proof payloads match Git/disk | Qualify remaining native exclusion/interruption/persistence/restart/reconciliation. Actual runtime-owner connection and real models remain open |
 | Worker/journal council | Scoped source review completed at1c6ac4c with mandatory Astra addendum; original244cca5 remains accuracy FAILED | All24 correction proof payloads match Git/disk. Gemini correction alone remains partial; Astra corrects remaining handshake/locking/private-caller claims. Existing17/65 outcomes unchanged | Continue native/runtime engineering. Session42118 closed482e42/exit0; no new council loop or broader acceptance |
-| Native writer exclusion | Stable-directory repair atd317a88; generated native04 pass atf630264; failed02/03 preserved | Both copies pass81 cases+72 subtests. All200 unit and93 native proof payloads match Git/disk. Native0eeb20 returns0, both exact childrenexit0/job0, four phases/flushes and matching closed journal | Scoped Gemini source review, then cancellation through the actual adapter and journal. Interruption/restart/reconciliation and real runtime remain open |
+| Native writer exclusion | Stable-directory repair atd317a88; generated native04 pass atf630264; failed02/03 preserved | Both copies pass81 cases+72 subtests. All200 unit and93 native proof payloads match Git/disk. Native0eeb20 returns0, both exact childrenexit0/job0, four phases/flushes and matching closed journal | Gemini review preserved as accuracy FAILED at89c1579; smaller correction brief next. Cancellation qualification at60b3bb5; native observation next. Interruption/restart/reconciliation and real runtime remain open |
 | Actual adapter cancellation | Generated qualification integrated at60b3bb5 | Author and independent copies each89 passed/0 failed/0 skipped,86 passing subtests; all216 proof payloads match Git/disk | Admit the separate generated native cancellation observation. Crash/restart, real models and release remain unqualified |
 | Worker runtime owner and bootstrap | Owner at 1f200eb; actual bootstrap connection at bbe10d6 | Both copies pass17/0/0: eleven retained owner cases plus six bootstrap cases. Exact case objects, valid guards, unchanged19 inputs plus admission. All144 newest proof payloads match Git/disk | Connect exact ownership through native services. Real inference, PCM/filter, VAD-to-model binding and protected constructor routes remain open |
 | Integration | Reliability repair at e8d058f and notice packaging at 71d3e70 after tree09 | Reliability:53 focused cases plus13 subtests per root. Notices:20 Python/10 block cases per root. Tree09 at 56d9d4c remains2,796 passed/1 failed/3 skipped across2,800 cases plus13 subtests; it predates both repairs | Finish runtime work, then run a new committed complete tree and rebuild/reseal. Package08 and website/marketing remain held. No current-source package or installation credit |
@@ -177,7 +177,8 @@ verifies all216 sealed payloads against Git/disk. The original81
 cases remain unchanged. D2 is complete and archived atd13534f; no repeat access.
 Gemini2b39a17c completed from brief74d209c, but its review accuracy is FAILED:
 root99288b finds45 wrong hash/size pairs,29 wrong paths and eight nonexistent
-test names. Preserve the report and root verdict, then use a documented smaller
+test names. Report and rejection are archived at89c1579, with24 payloads matching
+Git/disk. Use a documented smaller
 correction brief before another council run. Existing component measurements
 remain valid within their scopes. No model, complete-tree, package, installation,
 website or marketing clearance follows.
@@ -5902,3 +5903,13 @@ The copy inventory's initial boolean-argument failure and corrected preparation
 remain in the evidence. No product measurement was repeated. The next distinct
 observation is native cancellation through the actual adapter and retained
 journal. It requires its own source-bound admission and fresh output directory.
+### 2026-09-13 — Failed council review preserved
+
+Commit89c1579 preserves the original completed Gemini report, its coverage,
+raw worktree patch and root/peer rejection. Copier aabd59 returned0; root97a65f
+verifies24 payloads/298,540 bytes against Git/disk, sealb6d3624f1fa4569b12568b3336512ad29228c7beda5e0e12d24eadbbec4bb804.
+The original tool-output truncation remains explicit. Completed engine status
+is not review acceptance. The smaller Group A correction will select only two
+implementation files, their diffs and eleven new test bodies. Group B needs a
+separate bounded review. No product suite or native observation was repeated.
+Backup pollab55c9 remains pending account selection; no successful push receipt.
