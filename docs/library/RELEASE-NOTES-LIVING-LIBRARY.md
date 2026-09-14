@@ -47,6 +47,10 @@ at `1c6ac4c` with an Astra addendum correcting the remaining claims in Gemini's
 partial correction. The underlying test outcomes remain unchanged. A later
 writer-exclusion observation failed overall with PersistenceUnconfirmed during
 drain; its partial sharing-refusal result does not qualify recovery or release.
+That failure is sealed at `c5e72a2` with 130 verified proof payloads. A separate
+diagnostic also failed and identified mutable directory size in the identity
+comparison. A product repair is in progress; regular-file size checks and the
+original acceptance assertions remain required.
 
 The worker runtime owner at `1f200eb` passes the same 11 generated cases in both
 copies. It refuses result publication after VAD retirement, product/module
