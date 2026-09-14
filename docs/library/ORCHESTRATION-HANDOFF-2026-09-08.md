@@ -118,7 +118,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | Native writer exclusion | Stable-directory repair atd317a88; native04 atf630264; council corrections ata74e178 and f32f0ca | Both copies81 cases/72 subtests; native0eeb20 passed. Group A and B source conclusions require their mandatory Astra corrections. Group B has23 proof payloads matching Git/disk. Original failed review preserved | Retired-owner recovery is observed at5671b51. Runtime-owner connection follows47d30c; restart and real runtime remain open |
 | Actual adapter cancellation | Generated qualification integrated at60b3bb5 | Author and independent copies each89 passed/0 failed/0 skipped,86 passing subtests; all216 proof payloads match Git/disk | Native cancellation integrated ata25b34b: all100 proof payloads match Git/disk. Connect interrupted final-clear recovery; crash/restart, real models and release remain unqualified |
 | Retired-owner final-clear recovery | Fake22 at a83ae1a; generated native recovery at5671b51 | Both fake copies22/0/0 plus21 passing subtests. Nativee97a44/exit0, root5214fa and peer503717 verify exact retirement, four confirmed phases/flushes and still-revoked owner/token. All91 newest proof payloads match Git/disk | Connect the qualified runtime owner to the native child. No OS-interruption, active-worker, crash/restart or model credit |
-| Worker runtime owner and bootstrap | Owner at 1f200eb; bootstrap at bbe10d6; connected fake33 qualification at 3661608 | Author and independent copies each 33 passed / 0 failed / 0 skipped. Root da4a3b verifies identical cases/inputs and valid guards; all 275 proof payloads match Git/disk | Native generated cancellation a9321b returned exit 0; finish separate root/peer receipt review and archive before accepting that scope. Real inference, protected loader/PCM/filter routes and release remain open |
+| Worker runtime owner and bootstrap | Connected fake33 at 3661608; generated native cancellation at 3b8f9e0 | Both fake copies 33/0/0. Native a9321b/exit 0, root dd7190 and peer 4984ac agree on 32 unchanged pairs, valid guards, one segment, closed owner, child/contender exit 0 with empty jobs, and four journal frames. All 127 native proof payloads match Git/disk | Review the interrupted-owned-session retirement brief before implementation. Real inference, protected loader/PCM/filter routes, crash/restart and release remain open |
 | Release notes | Current progress and remaining gates committed at 376eb47 | All seven proof payloads match Git/disk; 57 table lines and historical package/review-kit sections remain unchanged. D1/D2 completion and generated cancellation/recovery are explicit | Continue runtime qualification. No production source, package, installation, public draft or website changed |
 | Integration | Reliability repair at e8d058f and notice packaging at 71d3e70 after tree09 | Reliability:53 focused cases plus13 subtests per root. Notices:20 Python/10 block cases per root. Tree09 at 56d9d4c remains2,796 passed/1 failed/3 skipped across2,800 cases plus13 subtests; it predates both repairs | Finish runtime work, then run a new committed complete tree and rebuild/reseal. Package08 and website/marketing remain held. No current-source package or installation credit |
 | Desktop incident | Isolation failed in package-07 attempt; corrected at `e10ba3a` | Ordinary Uoink and filesystem connectors launched; earlier live-index/5179 effects unknown. Owned job cleaned | No further override launch; only guarded Uoink dashboard observed for package 08 |
@@ -193,8 +193,12 @@ root5214fa and independent passive503717 agree on the one generated observation.
 Do not repeat it for documentation. The child-side runtime-owner connection
 brief is at 47d30c and its independent fake33 qualification is at 3661608.
 Both copies pass the same original 17 and new 16 cases. The separately admitted
-native cancellation a9321b returned exit 0; root/peer receipt review and archival
-are next. Do not repeat the native run to obtain its documentation.
+native cancellation is accepted at 3b8f9e0 after root dd7190 and peer 4984ac
+receipt review. All 127 proof payloads match Git/disk. Do not repeat the run.
+Next, review _scratch/interrupted-owned-session-retirement-brief01 before any
+implementation. The first positive case must retain confirmed native handle
+ownership; actual handle uncertainty stays quarantined. No new execution is
+admitted by that source-only brief.
 D2 remains complete atd13534f; no repeat checkpoint/output access for documentation.
 No model, complete-tree, package, installed-client, website or marketing clearance.
 
@@ -538,12 +542,12 @@ The authorized backup push of 01e22fb completed. Session 35629 closed at
 8d94c9 with push and remote-check exit 0; origin/cc/living-library matched
 01e22fb. The receipt is build/Uoink-Living-Library-branch-backup-2026-09-13-02.json,
 SHA3d8f033bb80e8cfb9a0fbcd0ef403879275671052bee48e9979b4796842c3dc7.
-The next authorized branch-only backup targets5ad7c174, advanced locally by
-fast-forward compare-and-swap from01e22fb. Session84911 is waiting at GitHub's
-Select an account window; no successful push or remote receipt exists yet.
-Ryan has been asked to select his existing account because native UI control
-is unavailable in this session. Do not duplicate the active push. Newer work
-remains local. No
+The next authorized branch-only backup completed at 5ad7c174. Session 84911
+closed as c29af6/exit 0; passive remote verification afdff6 confirms the full
+5ad7c174fca197581dc73b5f2410d7c2d54985bc commit. Its account-selection blocker
+is resolved. Do not poll the closed session or recreate that push. Newer work
+will be backed up after integration using another fast-forward compare-and-swap.
+No
 candidate branch or main push, main merge or public release occurred.
 
 1. Signing review e922b3bf and local repairs are integrated at 0b3629d. Read
@@ -6103,3 +6107,35 @@ the single generated native observation a9321b, which returned exit 0 in
 2.3488006 seconds with blank output. Initial receipt read 4eae22 shows valid
 guards and closed owner state; independent receipt review is still pending.
 No checkpoint, D2 output or physical journal was reopened for this update.
+
+### 2026-09-13 — Generated native runtime-owner cancellation accepted
+
+Commit 3b8f9e0 preserves the single a9321b/exit 0 observation. Root dd7190 and
+peer 4984ac verify 32 source/control pairs, all three guarded role receipts,
+child and contender exit 0 with empty jobs, one segment/four actions, and the
+closed retained owner. Four journal frames/flushes end at 2,118 bytes, SHA
+ee70c6bcddcd9b90f0988d5ea49e19cef6c976895804fc4ef012ec6a60e3fa4a.
+Neither receipt reviewer reopened the physical journal or reran the subject.
+
+Copier 261aca returned 0; root 2266ec verifies 127 payloads/1,849,948 bytes
+against Git/disk, seal 20cea1419a8ef651d28d7309a3761f470fa753ee49b340c9d9f870a75d436e66.
+The prior fake33 archive is referenced. Physical fixtures, journal, support,
+checkpoint and D2 output are excluded. The additional prepared passive checker
+remains unexecuted and grants no extra result.
+
+Root checker df6c0c rejected the intentional ROOT-ADMISSION-cancel.json to
+ROOT-ADMISSION.json alias; its separately named correction passed dd7190.
+Peer checker c7baa8 compared property order in two JSON maps; its exact scalar
+key/type/value correction passed 4984ac. Both failures and original checkers
+remain. These were reviewer errors, not failed candidate observations.
+
+The next concrete gap is retirement after an interrupted admitted operation:
+ordinary owner close correctly refuses quarantine, while existing reconciliation
+requires already verified retirement. A bounded source brief is under review;
+uncertain native handles must remain quarantined. No restart or model credit.
+
+Backup session 84911 finally completed as c29af6/exit 0. Remote check afdff6
+confirms origin/cc/living-library at 5ad7c174fca197581dc73b5f2410d7c2d54985bc.
+Its previous account-selection entries are historical; newer completed work is
+next for the same authorized branch-only backup. D1/D2 remain complete, and
+real runtime, full-tree, package, installation and market acceptance stay open.
