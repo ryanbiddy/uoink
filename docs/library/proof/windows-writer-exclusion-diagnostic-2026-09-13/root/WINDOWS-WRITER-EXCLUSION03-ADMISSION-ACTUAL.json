@@ -1,0 +1,7 @@
+{
+  "chunk_id": "e5226b",
+  "wall_time_seconds": 0.4523711,
+  "exit_code": 0,
+  "original_token_count": 58,
+  "output": "{\"sources_verified\":18,\"support_metadata_unchanged\":9,\"root_review_sha256\":\"865f6a7b5da671747ab21d712a78ec3f80c998068a3d6aa052508f26a32436c3\",\"admission_sha256\":\"31e131e1f33f656c272fd94297bb533ad6b382d90206ed0aed1a9da030ca9dbf\"}\r\n"
+}

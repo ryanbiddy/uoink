@@ -1,0 +1,13 @@
+{
+  "case": "positive",
+  "controller_native_exit": 1,
+  "expected_child_native_exit": 0,
+  "outer_exit": 1,
+  "inputs_unchanged": true,
+  "receipt_valid": false,
+  "receipt_error_type": "RuntimeException",
+  "stdout_bytes": 0,
+  "stderr_bytes": 0,
+  "operation_mode": "drain",
+  "scope": "Actual ASR adapter with generated data only; no model acceptance"
+}

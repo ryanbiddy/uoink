@@ -1,0 +1,11 @@
+# Failed writer03 diagnostic copy inventory
+
+Overall result remains **FAILED**: actual 1ad784 and the controller/outer receipts record exit 1, receipt_valid=false and PersistenceUnconfirmed. The retained diagnostic reports a directory-size change from 4,096 to 8,192 bytes; its other five identity/path fields match. Valid guards and useful diagnosis do not establish successful journal retirement.
+
+COPY-INVENTORY.json contains 80 fixed payloads, 1,148,652 bytes: 37 proposal03 files including its admission, source-preservation records and earlier drafts; 36 complete run files; 3 source-review files; and 4 root review/admission/execution/diagnostic files. The largest payload is 227,951 bytes. Every selected ancestor/member was checked for reparse points, every file was bounded to 1 MiB, and its source hash was rechecked after reading. This was a data-only inventory, not another native observation.
+
+The ordinary payloads are UTF-8 source/receipt text without NUL bytes. The only model.bin is the exact 60-byte generated ASCII fixture, SHA-256 e0a9fc9e76fc24578e81900fcb506dc23fa39c17dcb7313e83c382d731ed1f27. The only journal is the generated 1,566-byte file ending 4e6c2100000001000000000000000000.journal, SHA-256 92ef3f55dcf540bdef17e44d5f06a87736f628614a9f3d5478a3c612f0b6dfa2. It was hashed opaquely; no new durability or decoded-journal claim is made.
+
+For a copier adaptation, use a fresh script and proof folder, such as docs/library/proof/windows-writer-exclusion03-diagnostic-2026-09-13. Replace only the fixed 80-row inventory, its three exact source roots/four standalone files, and the two generated-file exceptions in the reviewed copy pattern. Bind this inventory directory's four files separately. Require exact source membership and size/hash before copying, exclusive destination creation, exact destination membership, and source/copy/after hash equality. Generate the root * -text and SHA256.json only after those checks. Preserve partial outputs if any check fails. These path checks are not a race-proof handle lease.
+
+The writer02/D2 archiver and all its inputs were left unchanged. No proof copying, staging, candidate execution, support-binary access or real model access occurred. Proposal02 keeps its original failed outcome and unmeasured field; proposal03's observed size mismatch supplies separate evidence for a later repair.

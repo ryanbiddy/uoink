@@ -1,0 +1,162 @@
+[
+  {
+    "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\windows-reservation-writer-exclusion-proposal02\\API-AND-BOUNDS.md",
+    "bytes": 3326,
+    "sha256": "c7c1b7caeac8c20f9c885f70e9a7e62fb1d7f720a6604180aec30b5e6841f5b3"
+  },
+  {
+    "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\windows-reservation-writer-exclusion-proposal02\\asr_loading_adapter.py",
+    "bytes": 12113,
+    "sha256": "635d2c22db75d12ffe6965fb656fdca47450ccbbaeb4d8cc8aaff9fcc79dd243"
+  },
+  {
+    "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\windows-reservation-writer-exclusion-proposal02\\BRIEF.md",
+    "bytes": 2899,
+    "sha256": "d6845eb84e01400c02539b194365ea11f25b20b91e8dbdd7a3e6b280fd53c286"
+  },
+  {
+    "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\windows-reservation-writer-exclusion-proposal02\\dummy_bootstrap.py",
+    "bytes": 35607,
+    "sha256": "86a2f0263d2decd3cb9a00517f40fd5afd61e2bbf7cba4968f7273c6214c0b07"
+  },
+  {
+    "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\windows-reservation-writer-exclusion-proposal02\\dummy_bootstrap.py.diff",
+    "bytes": 3376,
+    "sha256": "21203d039e72988dae80d4d9219e863c86da76a5e19cc548371c89a9e0dd1fa2"
+  },
+  {
+    "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\windows-reservation-writer-exclusion-proposal02\\durable_lifecycle.py",
+    "bytes": 13075,
+    "sha256": "f95cc8f2c61fd1953b642669ee4027a968660e39b97d9e84782fb83ac62abacb"
+  },
+  {
+    "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\windows-reservation-writer-exclusion-proposal02\\generated_adapter_flow.py",
+    "bytes": 26951,
+    "sha256": "ca4676060382e189953f56b830f2c08227c1079280cd09b2b36fb6770ce6e4ce"
+  },
+  {
+    "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\windows-reservation-writer-exclusion-proposal02\\generated_adapter_flow.py.diff",
+    "bytes": 3332,
+    "sha256": "22380976ec14f30baec8d68c2abd261871830b1a724bd7e6b2b125668e37a591"
+  },
+  {
+    "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\windows-reservation-writer-exclusion-proposal02\\generated_journal_setup.py",
+    "bytes": 11954,
+    "sha256": "df7ed56cdcbd23352b3e69a6f6790a012182b294491f38f8ed19610f000b485d"
+  },
+  {
+    "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\windows-reservation-writer-exclusion-proposal02\\generated_operation_flow.py",
+    "bytes": 21274,
+    "sha256": "6f09b4e6490b2078e792e49559a9dd0db95a895a778c31294a3577eeabdc98ed"
+  },
+  {
+    "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\windows-reservation-writer-exclusion-proposal02\\generated_worker_flow.py",
+    "bytes": 22853,
+    "sha256": "1ab240d60ceaca130ac85f5d2e908ef5895da5297f35d78a1caba1c62e622238"
+  },
+  {
+    "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\windows-reservation-writer-exclusion-proposal02\\generated_writer_exclusion.py",
+    "bytes": 11647,
+    "sha256": "8173d7394f4a893c14d2979283a0c17ed273e25f196e14560590be3a0f22058b"
+  },
+  {
+    "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\windows-reservation-writer-exclusion-proposal02\\generated_writer_exclusion.py.diff",
+    "bytes": 3978,
+    "sha256": "338fb8522ba1ddc55fd2819987d624b6d63a049c1e8a4021f176ea286fc56f92"
+  },
+  {
+    "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\windows-reservation-writer-exclusion-proposal02\\inherited_readset.py",
+    "bytes": 12391,
+    "sha256": "02be8e04f4bea3030faf0882ae48ead40716c5782f95e2790e1a9897c5be76e3"
+  },
+  {
+    "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\windows-reservation-writer-exclusion-proposal02\\NATIVE-PROTOCOL.md",
+    "bytes": 4323,
+    "sha256": "0d19063668978981b5b8d9247a7a2a5ce1c81707b8916f4f3700ffe4a09b74e9"
+  },
+  {
+    "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\windows-reservation-writer-exclusion-proposal02\\ORIGINAL-PROPOSAL01-MEMBERS.json",
+    "bytes": 9572,
+    "sha256": "a0605bc5ecd7a0eef655999c0522a65ea8260ccba936aa306ac1e48d20f3dab3"
+  },
+  {
+    "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\windows-reservation-writer-exclusion-proposal02\\owned_generation_protocol.py",
+    "bytes": 19570,
+    "sha256": "437e0880e10c91555df61b3c07c8be665430098c54c7d6ef687a99a0aa4a79d9"
+  },
+  {
+    "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\windows-reservation-writer-exclusion-proposal02\\pinned_buffer_namespace.py",
+    "bytes": 7893,
+    "sha256": "2cc25a7a254f35d802336ef121cc860887a4301b3257588438dddec392fe0b7b"
+  },
+  {
+    "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\windows-reservation-writer-exclusion-proposal02\\REPAIR-BRIEF.md",
+    "bytes": 2174,
+    "sha256": "df5049d45cf3008688bb367e21613d28d75a1bf7a1abdf5629de0b35c54aafe7"
+  },
+  {
+    "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\windows-reservation-writer-exclusion-proposal02\\reservation_file_port.py",
+    "bytes": 4694,
+    "sha256": "708554378ab8a8e6c4477e637c999256665cbd2855b94c6fa3c2d04a19d3a224"
+  },
+  {
+    "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\windows-reservation-writer-exclusion-proposal02\\ROOT-ADMISSION-drain.json",
+    "bytes": 827,
+    "sha256": "188163a6fbdeb1c5a400248b965a2ec879227a599103ae600d3a27b33bf9e7a1"
+  },
+  {
+    "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\windows-reservation-writer-exclusion-proposal02\\ROOT-ADMISSION-TEMPLATE.json",
+    "bytes": 637,
+    "sha256": "d1e0c4e0c865c0a255f2d6609085552ef3b5bd85a845da4c3d4e1ec28b9a2285"
+  },
+  {
+    "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\windows-reservation-writer-exclusion-proposal02\\run_writer_exclusion02.ps1",
+    "bytes": 34055,
+    "sha256": "815829b672d835875d5b62e6cf4e09d6d50c356920614524ecdc3cc33f83d103"
+  },
+  {
+    "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\windows-reservation-writer-exclusion-proposal02\\run_writer_exclusion02.ps1.diff",
+    "bytes": 2231,
+    "sha256": "9933703146f5cf53f05451dd5da5f42722c69b6c45ac88a346f1c1866953aca8"
+  },
+  {
+    "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\windows-reservation-writer-exclusion-proposal02\\snapshot_lifecycle.py",
+    "bytes": 22138,
+    "sha256": "a80514aac6b1e75b9b872052852fa993a23cd5273b6bed4ffb4eef7404cb69dd"
+  },
+  {
+    "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\windows-reservation-writer-exclusion-proposal02\\snapshot_reservations.py",
+    "bytes": 23634,
+    "sha256": "e80ae881fa4af9cc7d1a3e4a06624f5b19abe4de09aec3844e8a541449335b98"
+  },
+  {
+    "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\windows-reservation-writer-exclusion-proposal02\\SOURCE-INPUTS.json",
+    "bytes": 6412,
+    "sha256": "91a6b8228bc364d8c15be4287b291724946c4b6eab49388e900a1ad1ce3fc69a"
+  },
+  {
+    "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\windows-reservation-writer-exclusion-proposal02\\SOURCE-PRESERVATION.json",
+    "bytes": 5420,
+    "sha256": "dd22c6d154690c6e42ae9256b63afdc650647e3db37edc294d4d88e2f5ef5f2f"
+  },
+  {
+    "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\windows-reservation-writer-exclusion-proposal02\\trusted_asr_resolver.py",
+    "bytes": 13373,
+    "sha256": "16a5a1245f649a3eb04d077b661835503f08bef0ff8822dcb545176f0cc30833"
+  },
+  {
+    "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\windows-reservation-writer-exclusion-proposal02\\win32_private_pipe.py",
+    "bytes": 18613,
+    "sha256": "73a1109a55f2bc807594655c71b24a3e35eb88d7f744497df2cc328dc224cae7"
+  },
+  {
+    "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\windows-reservation-writer-exclusion-proposal02\\win32_worker_connection.py",
+    "bytes": 28730,
+    "sha256": "b39a29cea1f3d60e4416111fd87417b21458b1f6f23dcb7700d522050b0b0b45"
+  },
+  {
+    "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\windows-reservation-writer-exclusion-proposal02\\windows_reservation_port.py",
+    "bytes": 16028,
+    "sha256": "dd33becb60e4302152179c4a41e4a2bf04d7d1a82bc3371461283688f3105a2e"
+  }
+]

@@ -1,0 +1,11 @@
+{
+  "root_reviewed": true,
+  "scope": "generated-windows-journal-writer-exclusion-only",
+  "case": "positive",
+  "operation_mode": "drain",
+  "run_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\windows-reservation-writer-exclusion03",
+  "source_inputs_sha256": "8e01dd5beeb93cc9c5ebb660a3491db3342c6a2317e6c88f1bd3d634e3798c6e",
+  "launcher_sha256": "3ab5163d33230ac2d91085ce9707bee0a5c13ddbec41104549dc690ca2fe413f",
+  "native_execution_admitted": true,
+  "note": "One generated diagnostic03 under existing Windows observation authority. Root review SHA256 865f6a7b5da671747ab21d712a78ec3f80c998068a3d6aa052508f26a32436c3; independent verdict 1c0583b6ace23fc7d0551770c7904fd243d25d34a0204020797203f73d92a9d6. Original02 remains FAILED. No checkpoint/model/conversion authority."
+}
