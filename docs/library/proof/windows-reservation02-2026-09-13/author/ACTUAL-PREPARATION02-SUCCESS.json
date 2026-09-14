@@ -1,0 +1,7 @@
+{
+  "chunk_id": "860a6b",
+  "wall_time_seconds": 0.3321978,
+  "exit_code": 0,
+  "original_token_count": 202,
+  "output": "{\"candidate_execution\": false, \"files\": 28, \"case_ids\": 65, \"original_case_bodies\": 42, \"changed_input_names\": [\"BRIEF.md\", \"QUALIFICATION-PROTOCOL.md\", \"run_preflight01.ps1\", \"test_windows_reservations.py\"], \"label_substitutions\": {\"QUALIFICATION-PROTOCOL.md\": 2, \"run_preflight01.ps1\": 5}, \"test_sha256\": \"91b0de71eb55d088ee2fdbcd11ff3e6a074f18f713dfcd5b384814a1dc78300c\", \"launcher_sha256\": \"d49d1e15969e09b006594af643be057b64002c9952bcc03b00fd76a2738d34a2\", \"protocol_sha256\": \"4cb74ad7324f6de59dc90fa7d4ea87e8be5bb78f7746dbcaad4eddf60e3e7a21\", \"pins_sha256\": \"1f21c3951e4efa67309a31fa3acb42dafd0a5d3b3ea8020035206d33827a7d9f\", \"template_sha256\": \"631ed25227d75fce7a94a42149e31d3c1ea8d2e1723de541212e80172279b38f\", \"bindings_sha256\": \"6dbb076fcaffc2e67420e764a04c41ad80c5b6320a90cee8b750fe2ce354f2c7\"}\r\n"
+}

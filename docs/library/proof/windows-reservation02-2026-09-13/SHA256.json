@@ -1,0 +1,972 @@
+[
+  {
+    "path": ".gitattributes",
+    "bytes": 8,
+    "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+  },
+  {
+    "path": "actual/WINDOWS-RESERVATION02-ADMISSION-ACTUAL.json",
+    "bytes": 303,
+    "sha256": "efa216f5a5634c2ab6270046ad05d4339ceadee4cee25ba14b20ca9551c359ff"
+  },
+  {
+    "path": "actual/WINDOWS-RESERVATION02-AUTHOR-ACTUAL.json",
+    "bytes": 205,
+    "sha256": "d55eb35e0d93a73056c69ac0759d5bc56a2c444aa4c9a1cb07f1f30ef055d629"
+  },
+  {
+    "path": "actual/WINDOWS-RESERVATION02-INDEPENDENT-ACTUAL.json",
+    "bytes": 205,
+    "sha256": "7763392b432510fdcc8048f0a7d514d2ba49783bf33080b6f5dc0031ae7b9720"
+  },
+  {
+    "path": "actual/WINDOWS-RESERVATION02-INDEPENDENT-PREPARATION-ACTUAL.json",
+    "bytes": 389,
+    "sha256": "108b2ca55b78a8a29a7e47fa3071244629d26da9e5f9aa181d715d3000ee4b17"
+  },
+  {
+    "path": "author/.gitattributes",
+    "bytes": 8,
+    "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+  },
+  {
+    "path": "author/ACTUAL-PREPARATION01-FAILURE.json",
+    "bytes": 590,
+    "sha256": "7d42bf2f6be0253631706377b909d951b9a850143f6691c105cfbb1496293225"
+  },
+  {
+    "path": "author/ACTUAL-PREPARATION02-SUCCESS.json",
+    "bytes": 983,
+    "sha256": "51f1322b41698deafca9d661a5e961cd2cc9acacbc905fe99bf29b29730683ee"
+  },
+  {
+    "path": "author/API-AND-INTEGRATION.md",
+    "bytes": 5232,
+    "sha256": "18610e7e049079a69375fc1e184fa13e55048f278ba899df227509cadde739b5"
+  },
+  {
+    "path": "author/BRIEF.md",
+    "bytes": 2224,
+    "sha256": "8141bbfe80dd964db6af773c1b76731d1c2aabc450fe62410f6906772e00721e"
+  },
+  {
+    "path": "author/CORRECTION-BINDINGS.json",
+    "bytes": 9847,
+    "sha256": "6dbb076fcaffc2e67420e764a04c41ad80c5b6320a90cee8b750fe2ce354f2c7"
+  },
+  {
+    "path": "author/EXPECTED-CASES.json",
+    "bytes": 6740,
+    "sha256": "11a7731e6436f6ce7828f80e6873d733399c5d43f577000ae6647d1c0fde3165"
+  },
+  {
+    "path": "author/NO-WORKER-REVIEW04.md",
+    "bytes": 1652,
+    "sha256": "ccfb1655205a6f9d33516de7b1c1194a0c95b55d14b8b910f4d609ee788e5327"
+  },
+  {
+    "path": "author/PEER-REVIEW03-POISONING.md",
+    "bytes": 715,
+    "sha256": "5d12be330dcfda6e4508d2f1c96d54c7fca531c9be709fee4d64c8a3c7c7bf41"
+  },
+  {
+    "path": "author/PINS.json",
+    "bytes": 4528,
+    "sha256": "1f21c3951e4efa67309a31fa3acb42dafd0a5d3b3ea8020035206d33827a7d9f"
+  },
+  {
+    "path": "author/PREPARATION-COMPARISON-REPAIR01.md",
+    "bytes": 1424,
+    "sha256": "b3c025fda79d7ea7cac9e4dbcf2aac97a34a8e5fcd64193dbf8a6d620ca9b937"
+  },
+  {
+    "path": "author/PREPARATION-VERDICT.md",
+    "bytes": 2218,
+    "sha256": "67a36efb452d756e70cb7063a450ed1f46670dae3c3b090cbd9c0a021a1d3649"
+  },
+  {
+    "path": "author/PREPARER-REPAIR-BINDINGS.json",
+    "bytes": 292,
+    "sha256": "597b7f0464a3cd980765bc4c95e3da38da17c5faa914ee9756dff1c47aa1c97d"
+  },
+  {
+    "path": "author/QUALIFICATION-PROTOCOL.md",
+    "bytes": 3898,
+    "sha256": "4cb74ad7324f6de59dc90fa7d4ea87e8be5bb78f7746dbcaad4eddf60e3e7a21"
+  },
+  {
+    "path": "author/QUALIFICATION-PROTOCOL.md.diff",
+    "bytes": 900,
+    "sha256": "db5f7b9480fabf9706ad131b6a58b2478a6212c3d78f9e39c287e5a9d272b73c"
+  },
+  {
+    "path": "author/RELEASE-LOCK-REFINEMENT01.md",
+    "bytes": 995,
+    "sha256": "f85cb76b98488aa27272a7f4341abb7b76ba67803fb5c1a034e71b6cce29098d"
+  },
+  {
+    "path": "author/ROOT-ADMISSION-TEMPLATE.json",
+    "bytes": 195,
+    "sha256": "631ed25227d75fce7a94a42149e31d3c1ea8d2e1723de541212e80172279b38f"
+  },
+  {
+    "path": "author/ROOT-ADMISSION.json",
+    "bytes": 194,
+    "sha256": "411d0e958916ce8ca367470592f0a7ee7c0b3b8c1bff5a8973fd8a1c01bee768"
+  },
+  {
+    "path": "author/RYAN-APPROVED.patch.txt",
+    "bytes": 1409,
+    "sha256": "ab91127a9fc3826d2fbb6d0c83be7c6bd905e2a181f01dd3beb36be6fc4ccd73"
+  },
+  {
+    "path": "author/STARTUP-SPLIT.md",
+    "bytes": 1697,
+    "sha256": "1dbfa2157eaab9778815faf05c2ac94acb393cd4db864e8d9bd3d36e12a0e083"
+  },
+  {
+    "path": "author/STOP-REFINEMENT02.md",
+    "bytes": 593,
+    "sha256": "3c79c9232c3b1cf0bbf0698006ebfd539425f2032745ac8516d327ddb7415e8d"
+  },
+  {
+    "path": "author/asr_loading_adapter.py",
+    "bytes": 12113,
+    "sha256": "635d2c22db75d12ffe6965fb656fdca47450ccbbaeb4d8cc8aaff9fcc79dd243"
+  },
+  {
+    "path": "author/before-preparation-repair01/prepare_correction.py",
+    "bytes": 9098,
+    "sha256": "17a6e15d74f533104817d4a603da3e884d170cec562590fcf0dc9908c74a8e0f"
+  },
+  {
+    "path": "author/before/API-AND-INTEGRATION.md",
+    "bytes": 5232,
+    "sha256": "18610e7e049079a69375fc1e184fa13e55048f278ba899df227509cadde739b5"
+  },
+  {
+    "path": "author/before/BRIEF.md",
+    "bytes": 1842,
+    "sha256": "c2c9fd6c3e863622a5160d6c659e5cf0884a167624a9a1919c708fcecddcd67e"
+  },
+  {
+    "path": "author/before/EXPECTED-CASES.json",
+    "bytes": 6740,
+    "sha256": "11a7731e6436f6ce7828f80e6873d733399c5d43f577000ae6647d1c0fde3165"
+  },
+  {
+    "path": "author/before/NO-WORKER-REVIEW04.md",
+    "bytes": 1652,
+    "sha256": "ccfb1655205a6f9d33516de7b1c1194a0c95b55d14b8b910f4d609ee788e5327"
+  },
+  {
+    "path": "author/before/PEER-REVIEW03-POISONING.md",
+    "bytes": 715,
+    "sha256": "5d12be330dcfda6e4508d2f1c96d54c7fca531c9be709fee4d64c8a3c7c7bf41"
+  },
+  {
+    "path": "author/before/PINS.json",
+    "bytes": 4673,
+    "sha256": "4f5cd502c563f7dc23b3be81bffd93429eea8c30434e56da96b4d49f5cc42ee7"
+  },
+  {
+    "path": "author/before/QUALIFICATION-PROTOCOL.md",
+    "bytes": 3898,
+    "sha256": "70187c38e890c363a50ece89ab7e576dc4780ceb8c4451eb3ff2dfea2da295eb"
+  },
+  {
+    "path": "author/before/RELEASE-LOCK-REFINEMENT01.md",
+    "bytes": 995,
+    "sha256": "f85cb76b98488aa27272a7f4341abb7b76ba67803fb5c1a034e71b6cce29098d"
+  },
+  {
+    "path": "author/before/ROOT-ADMISSION-TEMPLATE.json",
+    "bytes": 200,
+    "sha256": "f954163eb5ff34d081ac16aee6da4049ad927e755f7320b992758ff351435d8c"
+  },
+  {
+    "path": "author/before/STARTUP-SPLIT.md",
+    "bytes": 1697,
+    "sha256": "1dbfa2157eaab9778815faf05c2ac94acb393cd4db864e8d9bd3d36e12a0e083"
+  },
+  {
+    "path": "author/before/STOP-REFINEMENT02.md",
+    "bytes": 593,
+    "sha256": "3c79c9232c3b1cf0bbf0698006ebfd539425f2032745ac8516d327ddb7415e8d"
+  },
+  {
+    "path": "author/before/asr_loading_adapter.py",
+    "bytes": 12113,
+    "sha256": "635d2c22db75d12ffe6965fb656fdca47450ccbbaeb4d8cc8aaff9fcc79dd243"
+  },
+  {
+    "path": "author/before/durable_lifecycle.py",
+    "bytes": 13075,
+    "sha256": "f95cc8f2c61fd1953b642669ee4027a968660e39b97d9e84782fb83ac62abacb"
+  },
+  {
+    "path": "author/before/generated_adapter_flow.py",
+    "bytes": 25562,
+    "sha256": "b43ce2335da60f7879305903b5a89bf70352acd47dc5f336bc90757f6d7873bd"
+  },
+  {
+    "path": "author/before/generated_operation_flow.py",
+    "bytes": 21274,
+    "sha256": "6f09b4e6490b2078e792e49559a9dd0db95a895a778c31294a3577eeabdc98ed"
+  },
+  {
+    "path": "author/before/generated_worker_flow.py",
+    "bytes": 22853,
+    "sha256": "1ab240d60ceaca130ac85f5d2e908ef5895da5297f35d78a1caba1c62e622238"
+  },
+  {
+    "path": "author/before/inherited_readset.py",
+    "bytes": 12391,
+    "sha256": "02be8e04f4bea3030faf0882ae48ead40716c5782f95e2790e1a9897c5be76e3"
+  },
+  {
+    "path": "author/before/owned_generation_protocol.py",
+    "bytes": 19570,
+    "sha256": "437e0880e10c91555df61b3c07c8be665430098c54c7d6ef687a99a0aa4a79d9"
+  },
+  {
+    "path": "author/before/pinned_buffer_namespace.py",
+    "bytes": 7893,
+    "sha256": "2cc25a7a254f35d802336ef121cc860887a4301b3257588438dddec392fe0b7b"
+  },
+  {
+    "path": "author/before/qualify_windows_reservations.py",
+    "bytes": 9931,
+    "sha256": "8581cdfda702991777392f00bd91882db97c5d339023f6418de8b918fe1e22d5"
+  },
+  {
+    "path": "author/before/reservation_file_port.py",
+    "bytes": 4694,
+    "sha256": "708554378ab8a8e6c4477e637c999256665cbd2855b94c6fa3c2d04a19d3a224"
+  },
+  {
+    "path": "author/before/run_preflight01.ps1",
+    "bytes": 8864,
+    "sha256": "7a5b5b23c7dc3d8efd9d016b478d79e508ebc043de00e8a866de16490baa6094"
+  },
+  {
+    "path": "author/before/snapshot_lifecycle.py",
+    "bytes": 22138,
+    "sha256": "a80514aac6b1e75b9b872052852fa993a23cd5273b6bed4ffb4eef7404cb69dd"
+  },
+  {
+    "path": "author/before/snapshot_reservations.py",
+    "bytes": 23634,
+    "sha256": "e80ae881fa4af9cc7d1a3e4a06624f5b19abe4de09aec3844e8a541449335b98"
+  },
+  {
+    "path": "author/before/test_reservations.py",
+    "bytes": 37737,
+    "sha256": "604a295d5e925b9a9d7f55750bfeb1ddcda3e6a9873d6d8d7f9e98c84d9b4b9e"
+  },
+  {
+    "path": "author/before/test_windows_reservations.py",
+    "bytes": 27613,
+    "sha256": "f94d286c85075e3832d7c84ae4e3487339a132d364cd7acff4c7285c95a83c38"
+  },
+  {
+    "path": "author/before/trusted_asr_resolver.py",
+    "bytes": 13373,
+    "sha256": "16a5a1245f649a3eb04d077b661835503f08bef0ff8822dcb545176f0cc30833"
+  },
+  {
+    "path": "author/before/win32_private_pipe.py",
+    "bytes": 18613,
+    "sha256": "73a1109a55f2bc807594655c71b24a3e35eb88d7f744497df2cc328dc224cae7"
+  },
+  {
+    "path": "author/before/win32_worker_connection.py",
+    "bytes": 28730,
+    "sha256": "b39a29cea1f3d60e4416111fd87417b21458b1f6f23dcb7700d522050b0b0b45"
+  },
+  {
+    "path": "author/before/windows_reservation_port.py",
+    "bytes": 14455,
+    "sha256": "910aa472888303d29655dacc355349f7a2876c97fb593f7f0dc6f148a9ca9dc6"
+  },
+  {
+    "path": "author/durable_lifecycle.py",
+    "bytes": 13075,
+    "sha256": "f95cc8f2c61fd1953b642669ee4027a968660e39b97d9e84782fb83ac62abacb"
+  },
+  {
+    "path": "author/generated_adapter_flow.py",
+    "bytes": 25562,
+    "sha256": "b43ce2335da60f7879305903b5a89bf70352acd47dc5f336bc90757f6d7873bd"
+  },
+  {
+    "path": "author/generated_operation_flow.py",
+    "bytes": 21274,
+    "sha256": "6f09b4e6490b2078e792e49559a9dd0db95a895a778c31294a3577eeabdc98ed"
+  },
+  {
+    "path": "author/generated_worker_flow.py",
+    "bytes": 22853,
+    "sha256": "1ab240d60ceaca130ac85f5d2e908ef5895da5297f35d78a1caba1c62e622238"
+  },
+  {
+    "path": "author/inherited_readset.py",
+    "bytes": 12391,
+    "sha256": "02be8e04f4bea3030faf0882ae48ead40716c5782f95e2790e1a9897c5be76e3"
+  },
+  {
+    "path": "author/owned_generation_protocol.py",
+    "bytes": 19570,
+    "sha256": "437e0880e10c91555df61b3c07c8be665430098c54c7d6ef687a99a0aa4a79d9"
+  },
+  {
+    "path": "author/pinned_buffer_namespace.py",
+    "bytes": 7893,
+    "sha256": "2cc25a7a254f35d802336ef121cc860887a4301b3257588438dddec392fe0b7b"
+  },
+  {
+    "path": "author/prepare_correction.py",
+    "bytes": 9218,
+    "sha256": "9610ec05ff68a0bb1686b0f4af4b2b938f8be577a2503c673332663738928398"
+  },
+  {
+    "path": "author/qualify_windows_reservations.py",
+    "bytes": 9931,
+    "sha256": "8581cdfda702991777392f00bd91882db97c5d339023f6418de8b918fe1e22d5"
+  },
+  {
+    "path": "author/reservation_file_port.py",
+    "bytes": 4694,
+    "sha256": "708554378ab8a8e6c4477e637c999256665cbd2855b94c6fa3c2d04a19d3a224"
+  },
+  {
+    "path": "author/run_preflight01.ps1",
+    "bytes": 8864,
+    "sha256": "d49d1e15969e09b006594af643be057b64002c9952bcc03b00fd76a2738d34a2"
+  },
+  {
+    "path": "author/run_preflight01.ps1.diff",
+    "bytes": 2620,
+    "sha256": "33ea4871115e3c9e22db9ad2e2491b3559198efc6ac413a03377aaf7e7b44400"
+  },
+  {
+    "path": "author/snapshot_lifecycle.py",
+    "bytes": 22138,
+    "sha256": "a80514aac6b1e75b9b872052852fa993a23cd5273b6bed4ffb4eef7404cb69dd"
+  },
+  {
+    "path": "author/snapshot_reservations.py",
+    "bytes": 23634,
+    "sha256": "e80ae881fa4af9cc7d1a3e4a06624f5b19abe4de09aec3844e8a541449335b98"
+  },
+  {
+    "path": "author/test_reservations.py",
+    "bytes": 37737,
+    "sha256": "604a295d5e925b9a9d7f55750bfeb1ddcda3e6a9873d6d8d7f9e98c84d9b4b9e"
+  },
+  {
+    "path": "author/test_windows_reservations.py",
+    "bytes": 27701,
+    "sha256": "91b0de71eb55d088ee2fdbcd11ff3e6a074f18f713dfcd5b384814a1dc78300c"
+  },
+  {
+    "path": "author/test_windows_reservations.py.diff",
+    "bytes": 1296,
+    "sha256": "835d0f0456cc344e101a4967d76abe6babbc50f506568ee4b3c2dd6e24ffb15b"
+  },
+  {
+    "path": "author/trusted_asr_resolver.py",
+    "bytes": 13373,
+    "sha256": "16a5a1245f649a3eb04d077b661835503f08bef0ff8822dcb545176f0cc30833"
+  },
+  {
+    "path": "author/win32_private_pipe.py",
+    "bytes": 18613,
+    "sha256": "73a1109a55f2bc807594655c71b24a3e35eb88d7f744497df2cc328dc224cae7"
+  },
+  {
+    "path": "author/win32_worker_connection.py",
+    "bytes": 28730,
+    "sha256": "b39a29cea1f3d60e4416111fd87417b21458b1f6f23dcb7700d522050b0b0b45"
+  },
+  {
+    "path": "author/windows-reservation02/API-AND-INTEGRATION.md",
+    "bytes": 5232,
+    "sha256": "18610e7e049079a69375fc1e184fa13e55048f278ba899df227509cadde739b5"
+  },
+  {
+    "path": "author/windows-reservation02/BRIEF.md",
+    "bytes": 2224,
+    "sha256": "8141bbfe80dd964db6af773c1b76731d1c2aabc450fe62410f6906772e00721e"
+  },
+  {
+    "path": "author/windows-reservation02/EXPECTED-CASES.json",
+    "bytes": 6740,
+    "sha256": "11a7731e6436f6ce7828f80e6873d733399c5d43f577000ae6647d1c0fde3165"
+  },
+  {
+    "path": "author/windows-reservation02/NO-WORKER-REVIEW04.md",
+    "bytes": 1652,
+    "sha256": "ccfb1655205a6f9d33516de7b1c1194a0c95b55d14b8b910f4d609ee788e5327"
+  },
+  {
+    "path": "author/windows-reservation02/PEER-REVIEW03-POISONING.md",
+    "bytes": 715,
+    "sha256": "5d12be330dcfda6e4508d2f1c96d54c7fca531c9be709fee4d64c8a3c7c7bf41"
+  },
+  {
+    "path": "author/windows-reservation02/PINS.json",
+    "bytes": 4528,
+    "sha256": "1f21c3951e4efa67309a31fa3acb42dafd0a5d3b3ea8020035206d33827a7d9f"
+  },
+  {
+    "path": "author/windows-reservation02/QUALIFICATION-PROTOCOL.md",
+    "bytes": 3898,
+    "sha256": "4cb74ad7324f6de59dc90fa7d4ea87e8be5bb78f7746dbcaad4eddf60e3e7a21"
+  },
+  {
+    "path": "author/windows-reservation02/RELEASE-LOCK-REFINEMENT01.md",
+    "bytes": 995,
+    "sha256": "f85cb76b98488aa27272a7f4341abb7b76ba67803fb5c1a034e71b6cce29098d"
+  },
+  {
+    "path": "author/windows-reservation02/ROOT-ADMISSION.json",
+    "bytes": 194,
+    "sha256": "411d0e958916ce8ca367470592f0a7ee7c0b3b8c1bff5a8973fd8a1c01bee768"
+  },
+  {
+    "path": "author/windows-reservation02/STARTUP-SPLIT.md",
+    "bytes": 1697,
+    "sha256": "1dbfa2157eaab9778815faf05c2ac94acb393cd4db864e8d9bd3d36e12a0e083"
+  },
+  {
+    "path": "author/windows-reservation02/STOP-REFINEMENT02.md",
+    "bytes": 593,
+    "sha256": "3c79c9232c3b1cf0bbf0698006ebfd539425f2032745ac8516d327ddb7415e8d"
+  },
+  {
+    "path": "author/windows-reservation02/asr_loading_adapter.py",
+    "bytes": 12113,
+    "sha256": "635d2c22db75d12ffe6965fb656fdca47450ccbbaeb4d8cc8aaff9fcc79dd243"
+  },
+  {
+    "path": "author/windows-reservation02/durable_lifecycle.py",
+    "bytes": 13075,
+    "sha256": "f95cc8f2c61fd1953b642669ee4027a968660e39b97d9e84782fb83ac62abacb"
+  },
+  {
+    "path": "author/windows-reservation02/exit.json",
+    "bytes": 341,
+    "sha256": "c8c8ff7bdc75094ed3f77ba550f76a22dbddf2091730110e1b4eed9ac478232a"
+  },
+  {
+    "path": "author/windows-reservation02/generated_adapter_flow.py",
+    "bytes": 25562,
+    "sha256": "b43ce2335da60f7879305903b5a89bf70352acd47dc5f336bc90757f6d7873bd"
+  },
+  {
+    "path": "author/windows-reservation02/generated_operation_flow.py",
+    "bytes": 21274,
+    "sha256": "6f09b4e6490b2078e792e49559a9dd0db95a895a778c31294a3577eeabdc98ed"
+  },
+  {
+    "path": "author/windows-reservation02/generated_worker_flow.py",
+    "bytes": 22853,
+    "sha256": "1ab240d60ceaca130ac85f5d2e908ef5895da5297f35d78a1caba1c62e622238"
+  },
+  {
+    "path": "author/windows-reservation02/inherited_readset.py",
+    "bytes": 12391,
+    "sha256": "02be8e04f4bea3030faf0882ae48ead40716c5782f95e2790e1a9897c5be76e3"
+  },
+  {
+    "path": "author/windows-reservation02/input-check.json",
+    "bytes": 11232,
+    "sha256": "a395b0e142f4f467def3ebb2df87cf0438b38b1c6d6b41db80e3f137fde2915d"
+  },
+  {
+    "path": "author/windows-reservation02/native-exit.json",
+    "bytes": 114,
+    "sha256": "4b330cbb2410b6ae8475fbe25a44c9b8808d48254262223940eeb70ddfe5cbb8"
+  },
+  {
+    "path": "author/windows-reservation02/owned_generation_protocol.py",
+    "bytes": 19570,
+    "sha256": "437e0880e10c91555df61b3c07c8be665430098c54c7d6ef687a99a0aa4a79d9"
+  },
+  {
+    "path": "author/windows-reservation02/pinned_buffer_namespace.py",
+    "bytes": 7893,
+    "sha256": "2cc25a7a254f35d802336ef121cc860887a4301b3257588438dddec392fe0b7b"
+  },
+  {
+    "path": "author/windows-reservation02/plan.json",
+    "bytes": 5721,
+    "sha256": "39a4b1bfdcd54a179f333ea42fda03a5dc3d949cc1a164c4a4bae23057ca3fca"
+  },
+  {
+    "path": "author/windows-reservation02/qualify_windows_reservations.py",
+    "bytes": 9931,
+    "sha256": "8581cdfda702991777392f00bd91882db97c5d339023f6418de8b918fe1e22d5"
+  },
+  {
+    "path": "author/windows-reservation02/reservation_file_port.py",
+    "bytes": 4694,
+    "sha256": "708554378ab8a8e6c4477e637c999256665cbd2855b94c6fa3c2d04a19d3a224"
+  },
+  {
+    "path": "author/windows-reservation02/run_preflight01.ps1",
+    "bytes": 8864,
+    "sha256": "d49d1e15969e09b006594af643be057b64002c9952bcc03b00fd76a2738d34a2"
+  },
+  {
+    "path": "author/windows-reservation02/snapshot_lifecycle.py",
+    "bytes": 22138,
+    "sha256": "a80514aac6b1e75b9b872052852fa993a23cd5273b6bed4ffb4eef7404cb69dd"
+  },
+  {
+    "path": "author/windows-reservation02/snapshot_reservations.py",
+    "bytes": 23634,
+    "sha256": "e80ae881fa4af9cc7d1a3e4a06624f5b19abe4de09aec3844e8a541449335b98"
+  },
+  {
+    "path": "author/windows-reservation02/stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "author/windows-reservation02/stdout.json",
+    "bytes": 30685,
+    "sha256": "14638d17466302ee3ad2cfce66c8bfdc71adc0fc636d149fad025067d794189c"
+  },
+  {
+    "path": "author/windows-reservation02/test_reservations.py",
+    "bytes": 37737,
+    "sha256": "604a295d5e925b9a9d7f55750bfeb1ddcda3e6a9873d6d8d7f9e98c84d9b4b9e"
+  },
+  {
+    "path": "author/windows-reservation02/test_windows_reservations.py",
+    "bytes": 27701,
+    "sha256": "91b0de71eb55d088ee2fdbcd11ff3e6a074f18f713dfcd5b384814a1dc78300c"
+  },
+  {
+    "path": "author/windows-reservation02/trusted_asr_resolver.py",
+    "bytes": 13373,
+    "sha256": "16a5a1245f649a3eb04d077b661835503f08bef0ff8822dcb545176f0cc30833"
+  },
+  {
+    "path": "author/windows-reservation02/win32_private_pipe.py",
+    "bytes": 18613,
+    "sha256": "73a1109a55f2bc807594655c71b24a3e35eb88d7f744497df2cc328dc224cae7"
+  },
+  {
+    "path": "author/windows-reservation02/win32_worker_connection.py",
+    "bytes": 28730,
+    "sha256": "b39a29cea1f3d60e4416111fd87417b21458b1f6f23dcb7700d522050b0b0b45"
+  },
+  {
+    "path": "author/windows-reservation02/windows_reservation_port.py",
+    "bytes": 14455,
+    "sha256": "910aa472888303d29655dacc355349f7a2876c97fb593f7f0dc6f148a9ca9dc6"
+  },
+  {
+    "path": "author/windows_reservation_port.py",
+    "bytes": 14455,
+    "sha256": "910aa472888303d29655dacc355349f7a2876c97fb593f7f0dc6f148a9ca9dc6"
+  },
+  {
+    "path": "independent/API-AND-INTEGRATION.md",
+    "bytes": 5232,
+    "sha256": "18610e7e049079a69375fc1e184fa13e55048f278ba899df227509cadde739b5"
+  },
+  {
+    "path": "independent/BRIEF.md",
+    "bytes": 2224,
+    "sha256": "8141bbfe80dd964db6af773c1b76731d1c2aabc450fe62410f6906772e00721e"
+  },
+  {
+    "path": "independent/COPY-BINDINGS.json",
+    "bytes": 13058,
+    "sha256": "799558594f363696f86994d64ebee21b54db944532e1a8b6125561ae735bff11"
+  },
+  {
+    "path": "independent/EXPECTED-CASES.json",
+    "bytes": 6740,
+    "sha256": "11a7731e6436f6ce7828f80e6873d733399c5d43f577000ae6647d1c0fde3165"
+  },
+  {
+    "path": "independent/NO-WORKER-REVIEW04.md",
+    "bytes": 1652,
+    "sha256": "ccfb1655205a6f9d33516de7b1c1194a0c95b55d14b8b910f4d609ee788e5327"
+  },
+  {
+    "path": "independent/PEER-REVIEW03-POISONING.md",
+    "bytes": 715,
+    "sha256": "5d12be330dcfda6e4508d2f1c96d54c7fca531c9be709fee4d64c8a3c7c7bf41"
+  },
+  {
+    "path": "independent/PINS.json",
+    "bytes": 4528,
+    "sha256": "1f21c3951e4efa67309a31fa3acb42dafd0a5d3b3ea8020035206d33827a7d9f"
+  },
+  {
+    "path": "independent/QUALIFICATION-PROTOCOL.md",
+    "bytes": 3898,
+    "sha256": "4cb74ad7324f6de59dc90fa7d4ea87e8be5bb78f7746dbcaad4eddf60e3e7a21"
+  },
+  {
+    "path": "independent/RELEASE-LOCK-REFINEMENT01.md",
+    "bytes": 995,
+    "sha256": "f85cb76b98488aa27272a7f4341abb7b76ba67803fb5c1a034e71b6cce29098d"
+  },
+  {
+    "path": "independent/ROOT-ADMISSION.json",
+    "bytes": 199,
+    "sha256": "a1c6f3381178e6c0e847ee74011a4f61e1c5fdc89381f8de0e8006002d8c78d9"
+  },
+  {
+    "path": "independent/STARTUP-SPLIT.md",
+    "bytes": 1697,
+    "sha256": "1dbfa2157eaab9778815faf05c2ac94acb393cd4db864e8d9bd3d36e12a0e083"
+  },
+  {
+    "path": "independent/STOP-REFINEMENT02.md",
+    "bytes": 593,
+    "sha256": "3c79c9232c3b1cf0bbf0698006ebfd539425f2032745ac8516d327ddb7415e8d"
+  },
+  {
+    "path": "independent/asr_loading_adapter.py",
+    "bytes": 12113,
+    "sha256": "635d2c22db75d12ffe6965fb656fdca47450ccbbaeb4d8cc8aaff9fcc79dd243"
+  },
+  {
+    "path": "independent/durable_lifecycle.py",
+    "bytes": 13075,
+    "sha256": "f95cc8f2c61fd1953b642669ee4027a968660e39b97d9e84782fb83ac62abacb"
+  },
+  {
+    "path": "independent/generated_adapter_flow.py",
+    "bytes": 25562,
+    "sha256": "b43ce2335da60f7879305903b5a89bf70352acd47dc5f336bc90757f6d7873bd"
+  },
+  {
+    "path": "independent/generated_operation_flow.py",
+    "bytes": 21274,
+    "sha256": "6f09b4e6490b2078e792e49559a9dd0db95a895a778c31294a3577eeabdc98ed"
+  },
+  {
+    "path": "independent/generated_worker_flow.py",
+    "bytes": 22853,
+    "sha256": "1ab240d60ceaca130ac85f5d2e908ef5895da5297f35d78a1caba1c62e622238"
+  },
+  {
+    "path": "independent/inherited_readset.py",
+    "bytes": 12391,
+    "sha256": "02be8e04f4bea3030faf0882ae48ead40716c5782f95e2790e1a9897c5be76e3"
+  },
+  {
+    "path": "independent/owned_generation_protocol.py",
+    "bytes": 19570,
+    "sha256": "437e0880e10c91555df61b3c07c8be665430098c54c7d6ef687a99a0aa4a79d9"
+  },
+  {
+    "path": "independent/pinned_buffer_namespace.py",
+    "bytes": 7893,
+    "sha256": "2cc25a7a254f35d802336ef121cc860887a4301b3257588438dddec392fe0b7b"
+  },
+  {
+    "path": "independent/qualify_windows_reservations.py",
+    "bytes": 9931,
+    "sha256": "8581cdfda702991777392f00bd91882db97c5d339023f6418de8b918fe1e22d5"
+  },
+  {
+    "path": "independent/reservation_file_port.py",
+    "bytes": 4694,
+    "sha256": "708554378ab8a8e6c4477e637c999256665cbd2855b94c6fa3c2d04a19d3a224"
+  },
+  {
+    "path": "independent/run_preflight01.ps1",
+    "bytes": 8864,
+    "sha256": "d49d1e15969e09b006594af643be057b64002c9952bcc03b00fd76a2738d34a2"
+  },
+  {
+    "path": "independent/snapshot_lifecycle.py",
+    "bytes": 22138,
+    "sha256": "a80514aac6b1e75b9b872052852fa993a23cd5273b6bed4ffb4eef7404cb69dd"
+  },
+  {
+    "path": "independent/snapshot_reservations.py",
+    "bytes": 23634,
+    "sha256": "e80ae881fa4af9cc7d1a3e4a06624f5b19abe4de09aec3844e8a541449335b98"
+  },
+  {
+    "path": "independent/test_reservations.py",
+    "bytes": 37737,
+    "sha256": "604a295d5e925b9a9d7f55750bfeb1ddcda3e6a9873d6d8d7f9e98c84d9b4b9e"
+  },
+  {
+    "path": "independent/test_windows_reservations.py",
+    "bytes": 27701,
+    "sha256": "91b0de71eb55d088ee2fdbcd11ff3e6a074f18f713dfcd5b384814a1dc78300c"
+  },
+  {
+    "path": "independent/trusted_asr_resolver.py",
+    "bytes": 13373,
+    "sha256": "16a5a1245f649a3eb04d077b661835503f08bef0ff8822dcb545176f0cc30833"
+  },
+  {
+    "path": "independent/win32_private_pipe.py",
+    "bytes": 18613,
+    "sha256": "73a1109a55f2bc807594655c71b24a3e35eb88d7f744497df2cc328dc224cae7"
+  },
+  {
+    "path": "independent/win32_worker_connection.py",
+    "bytes": 28730,
+    "sha256": "b39a29cea1f3d60e4416111fd87417b21458b1f6f23dcb7700d522050b0b0b45"
+  },
+  {
+    "path": "independent/windows-reservation02/API-AND-INTEGRATION.md",
+    "bytes": 5232,
+    "sha256": "18610e7e049079a69375fc1e184fa13e55048f278ba899df227509cadde739b5"
+  },
+  {
+    "path": "independent/windows-reservation02/BRIEF.md",
+    "bytes": 2224,
+    "sha256": "8141bbfe80dd964db6af773c1b76731d1c2aabc450fe62410f6906772e00721e"
+  },
+  {
+    "path": "independent/windows-reservation02/EXPECTED-CASES.json",
+    "bytes": 6740,
+    "sha256": "11a7731e6436f6ce7828f80e6873d733399c5d43f577000ae6647d1c0fde3165"
+  },
+  {
+    "path": "independent/windows-reservation02/NO-WORKER-REVIEW04.md",
+    "bytes": 1652,
+    "sha256": "ccfb1655205a6f9d33516de7b1c1194a0c95b55d14b8b910f4d609ee788e5327"
+  },
+  {
+    "path": "independent/windows-reservation02/PEER-REVIEW03-POISONING.md",
+    "bytes": 715,
+    "sha256": "5d12be330dcfda6e4508d2f1c96d54c7fca531c9be709fee4d64c8a3c7c7bf41"
+  },
+  {
+    "path": "independent/windows-reservation02/PINS.json",
+    "bytes": 4528,
+    "sha256": "1f21c3951e4efa67309a31fa3acb42dafd0a5d3b3ea8020035206d33827a7d9f"
+  },
+  {
+    "path": "independent/windows-reservation02/QUALIFICATION-PROTOCOL.md",
+    "bytes": 3898,
+    "sha256": "4cb74ad7324f6de59dc90fa7d4ea87e8be5bb78f7746dbcaad4eddf60e3e7a21"
+  },
+  {
+    "path": "independent/windows-reservation02/RELEASE-LOCK-REFINEMENT01.md",
+    "bytes": 995,
+    "sha256": "f85cb76b98488aa27272a7f4341abb7b76ba67803fb5c1a034e71b6cce29098d"
+  },
+  {
+    "path": "independent/windows-reservation02/ROOT-ADMISSION.json",
+    "bytes": 199,
+    "sha256": "a1c6f3381178e6c0e847ee74011a4f61e1c5fdc89381f8de0e8006002d8c78d9"
+  },
+  {
+    "path": "independent/windows-reservation02/STARTUP-SPLIT.md",
+    "bytes": 1697,
+    "sha256": "1dbfa2157eaab9778815faf05c2ac94acb393cd4db864e8d9bd3d36e12a0e083"
+  },
+  {
+    "path": "independent/windows-reservation02/STOP-REFINEMENT02.md",
+    "bytes": 593,
+    "sha256": "3c79c9232c3b1cf0bbf0698006ebfd539425f2032745ac8516d327ddb7415e8d"
+  },
+  {
+    "path": "independent/windows-reservation02/asr_loading_adapter.py",
+    "bytes": 12113,
+    "sha256": "635d2c22db75d12ffe6965fb656fdca47450ccbbaeb4d8cc8aaff9fcc79dd243"
+  },
+  {
+    "path": "independent/windows-reservation02/durable_lifecycle.py",
+    "bytes": 13075,
+    "sha256": "f95cc8f2c61fd1953b642669ee4027a968660e39b97d9e84782fb83ac62abacb"
+  },
+  {
+    "path": "independent/windows-reservation02/exit.json",
+    "bytes": 341,
+    "sha256": "6e632a17e98eafbc70bdc8436d583d604e80ed6f56cd6090dd3c4afaeeffd2ae"
+  },
+  {
+    "path": "independent/windows-reservation02/generated_adapter_flow.py",
+    "bytes": 25562,
+    "sha256": "b43ce2335da60f7879305903b5a89bf70352acd47dc5f336bc90757f6d7873bd"
+  },
+  {
+    "path": "independent/windows-reservation02/generated_operation_flow.py",
+    "bytes": 21274,
+    "sha256": "6f09b4e6490b2078e792e49559a9dd0db95a895a778c31294a3577eeabdc98ed"
+  },
+  {
+    "path": "independent/windows-reservation02/generated_worker_flow.py",
+    "bytes": 22853,
+    "sha256": "1ab240d60ceaca130ac85f5d2e908ef5895da5297f35d78a1caba1c62e622238"
+  },
+  {
+    "path": "independent/windows-reservation02/inherited_readset.py",
+    "bytes": 12391,
+    "sha256": "02be8e04f4bea3030faf0882ae48ead40716c5782f95e2790e1a9897c5be76e3"
+  },
+  {
+    "path": "independent/windows-reservation02/input-check.json",
+    "bytes": 11232,
+    "sha256": "159ebaa43ef06854c628cd2d4f33f0bc3e9e8aee9038fdf29c239ac638cca64a"
+  },
+  {
+    "path": "independent/windows-reservation02/native-exit.json",
+    "bytes": 113,
+    "sha256": "7272f4c6b166867b57331cc02dbb3c2343375be264cb7fd67962cb8028360dbf"
+  },
+  {
+    "path": "independent/windows-reservation02/owned_generation_protocol.py",
+    "bytes": 19570,
+    "sha256": "437e0880e10c91555df61b3c07c8be665430098c54c7d6ef687a99a0aa4a79d9"
+  },
+  {
+    "path": "independent/windows-reservation02/pinned_buffer_namespace.py",
+    "bytes": 7893,
+    "sha256": "2cc25a7a254f35d802336ef121cc860887a4301b3257588438dddec392fe0b7b"
+  },
+  {
+    "path": "independent/windows-reservation02/plan.json",
+    "bytes": 5716,
+    "sha256": "c047d694f2b3a8cfcc720557787b48559dd7cc01e68fb01bcec8fcaa54396e87"
+  },
+  {
+    "path": "independent/windows-reservation02/qualify_windows_reservations.py",
+    "bytes": 9931,
+    "sha256": "8581cdfda702991777392f00bd91882db97c5d339023f6418de8b918fe1e22d5"
+  },
+  {
+    "path": "independent/windows-reservation02/reservation_file_port.py",
+    "bytes": 4694,
+    "sha256": "708554378ab8a8e6c4477e637c999256665cbd2855b94c6fa3c2d04a19d3a224"
+  },
+  {
+    "path": "independent/windows-reservation02/run_preflight01.ps1",
+    "bytes": 8864,
+    "sha256": "d49d1e15969e09b006594af643be057b64002c9952bcc03b00fd76a2738d34a2"
+  },
+  {
+    "path": "independent/windows-reservation02/snapshot_lifecycle.py",
+    "bytes": 22138,
+    "sha256": "a80514aac6b1e75b9b872052852fa993a23cd5273b6bed4ffb4eef7404cb69dd"
+  },
+  {
+    "path": "independent/windows-reservation02/snapshot_reservations.py",
+    "bytes": 23634,
+    "sha256": "e80ae881fa4af9cc7d1a3e4a06624f5b19abe4de09aec3844e8a541449335b98"
+  },
+  {
+    "path": "independent/windows-reservation02/stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "independent/windows-reservation02/stdout.json",
+    "bytes": 30686,
+    "sha256": "e890e5d2ab07b6c0aa99f8fbf631b479ae2bc040ed7f5c485e7fd06b555d4b88"
+  },
+  {
+    "path": "independent/windows-reservation02/test_reservations.py",
+    "bytes": 37737,
+    "sha256": "604a295d5e925b9a9d7f55750bfeb1ddcda3e6a9873d6d8d7f9e98c84d9b4b9e"
+  },
+  {
+    "path": "independent/windows-reservation02/test_windows_reservations.py",
+    "bytes": 27701,
+    "sha256": "91b0de71eb55d088ee2fdbcd11ff3e6a074f18f713dfcd5b384814a1dc78300c"
+  },
+  {
+    "path": "independent/windows-reservation02/trusted_asr_resolver.py",
+    "bytes": 13373,
+    "sha256": "16a5a1245f649a3eb04d077b661835503f08bef0ff8822dcb545176f0cc30833"
+  },
+  {
+    "path": "independent/windows-reservation02/win32_private_pipe.py",
+    "bytes": 18613,
+    "sha256": "73a1109a55f2bc807594655c71b24a3e35eb88d7f744497df2cc328dc224cae7"
+  },
+  {
+    "path": "independent/windows-reservation02/win32_worker_connection.py",
+    "bytes": 28730,
+    "sha256": "b39a29cea1f3d60e4416111fd87417b21458b1f6f23dcb7700d522050b0b0b45"
+  },
+  {
+    "path": "independent/windows-reservation02/windows_reservation_port.py",
+    "bytes": 14455,
+    "sha256": "910aa472888303d29655dacc355349f7a2876c97fb593f7f0dc6f148a9ca9dc6"
+  },
+  {
+    "path": "independent/windows_reservation_port.py",
+    "bytes": 14455,
+    "sha256": "910aa472888303d29655dacc355349f7a2876c97fb593f7f0dc6f148a9ca9dc6"
+  },
+  {
+    "path": "prior-58335df/ASTRA-VERDICT.md",
+    "bytes": 2294,
+    "sha256": "4a835aabb715248bd11113609228a8ca1534741721b68ee3883c32bbae483a92"
+  },
+  {
+    "path": "prior-58335df/ASTRA-WINDOWS-RESERVATION-FAILED-VERDICT-2026-09-13.md",
+    "bytes": 2294,
+    "sha256": "4a835aabb715248bd11113609228a8ca1534741721b68ee3883c32bbae483a92"
+  },
+  {
+    "path": "prior-58335df/FIXED-COPY-LIST.json",
+    "bytes": 41182,
+    "sha256": "aa67ac5a402cbce78b0362e2361b48ea101f3f42fd681785cd260bd956df31fd"
+  },
+  {
+    "path": "prior-58335df/SHA256.json",
+    "bytes": 20530,
+    "sha256": "cfad3e45d1bc6dfdc8ceb9915857b68574ed5cb84595c1a41cb80358159e0880"
+  },
+  {
+    "path": "review/CORRECTION02-SOURCE-VERDICT.md",
+    "bytes": 2114,
+    "sha256": "6f46d20685dabacce6069b127689eb93b016a5999937fa474066bb875a528650"
+  },
+  {
+    "path": "review/RECEIPT-COMPARISON.json",
+    "bytes": 3042,
+    "sha256": "86f4027392c0cf571b4bfeda5b2db4bf66266247518e5b5d5149298850af1fe3"
+  },
+  {
+    "path": "review/ROOT-REVIEW.md",
+    "bytes": 1638,
+    "sha256": "a75760f558e9a61cf9dc93c3a21890c7f28fdd5d8fe2c99f6a908fe7eb9eaa07"
+  },
+  {
+    "path": "review/VERDICT.md",
+    "bytes": 2404,
+    "sha256": "97f6447c7f38d295a5d84bff3a9cfbd0bf53e5f68f446e3f6af03403147137cc"
+  },
+  {
+    "path": "review/write_fixed_list.py",
+    "bytes": 11707,
+    "sha256": "be2e2e5f6e7d5c594634883b3a2f9f6a3efa0a994101595161d8ef328a5c18c6"
+  },
+  {
+    "path": "FIXED-COPY-LIST.json",
+    "bytes": 65638,
+    "sha256": "ebe7379f7458c34a92c4a568c744135046d4bff3b7123cd1461d5b527dca79ca"
+  },
+  {
+    "path": "actual/ACTUAL-LIST-TOOL.json",
+    "bytes": 660,
+    "sha256": "7237dfff37352513478e2ea11abf451629bed090aa0dab4bb72720de961623e8"
+  },
+  {
+    "path": "ASTRA-VERDICT.md",
+    "bytes": 2044,
+    "sha256": "db8e3fd53a4b903ad33de2fa14239dbcc06dad30ac82096d7f8f3f7b426b07a9"
+  }
+]

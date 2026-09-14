@@ -1,0 +1,6 @@
+{
+  "approved": true,
+  "label": "windows-reservation02",
+  "scope": "generated_bytes_and_fake_ports_only",
+  "pins_sha256": "1f21c3951e4efa67309a31fa3acb42dafd0a5d3b3ea8020035206d33827a7d9f"
+}

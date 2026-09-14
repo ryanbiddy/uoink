@@ -1,0 +1,85 @@
+{
+  "review_scope": "Read-only completed text receipts and byte comparisons; no test execution",
+  "exact_case_objects_equal": true,
+  "distinct_top_level_cases": 65,
+  "observations": [
+    {
+      "root": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\windows-reservation-implementation-proposal02",
+      "actual_tool": "WINDOWS-RESERVATION02-AUTHOR-ACTUAL.json",
+      "chunk_id": "f480a2",
+      "outer_exit": 0,
+      "native_exit": 0,
+      "passed": 65,
+      "failed": 0,
+      "skipped": 0,
+      "nested_subtests": 33,
+      "all_nested_passed": true,
+      "case_elapsed_seconds": 0.0743584000156261,
+      "launcher_elapsed_seconds": 0.5505172,
+      "outer_elapsed_seconds": 0.9468553,
+      "stdout": {
+        "bytes": 30685,
+        "sha256": "14638d17466302ee3ad2cfce66c8bfdc71adc0fc636d149fad025067d794189c"
+      },
+      "stderr_bytes": 0,
+      "input_comparisons": 28,
+      "control_comparisons": 3,
+      "all_current_bytes_match_receipts": true,
+      "all_ten_guards_true": true
+    },
+    {
+      "root": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\astra-windows-reservation-confirmation02",
+      "actual_tool": "WINDOWS-RESERVATION02-INDEPENDENT-ACTUAL.json",
+      "chunk_id": "503555",
+      "outer_exit": 0,
+      "native_exit": 0,
+      "passed": 65,
+      "failed": 0,
+      "skipped": 0,
+      "nested_subtests": 33,
+      "all_nested_passed": true,
+      "case_elapsed_seconds": 0.07247280000592582,
+      "launcher_elapsed_seconds": 0.5160142,
+      "outer_elapsed_seconds": 0.9084892,
+      "stdout": {
+        "bytes": 30686,
+        "sha256": "e890e5d2ab07b6c0aa99f8fbf631b479ae2bc040ed7f5c485e7fd06b555d4b88"
+      },
+      "stderr_bytes": 0,
+      "input_comparisons": 28,
+      "control_comparisons": 3,
+      "all_current_bytes_match_receipts": true,
+      "all_ten_guards_true": true
+    }
+  ],
+  "original_failure_status": "63 passed / 2 failed, unchanged",
+  "only_approved_two_test_expressions_changed": true,
+  "original_42_bodies_unchanged": true,
+  "independent_launcher_changes": 0,
+  "original_proof_references": [
+    {
+      "commit": "58335df",
+      "path": "docs/library/proof/windows-reservation-failed-2026-09-13/SHA256.json",
+      "bytes": 20530,
+      "sha256": "cfad3e45d1bc6dfdc8ceb9915857b68574ed5cb84595c1a41cb80358159e0880"
+    },
+    {
+      "commit": "58335df",
+      "path": "docs/library/proof/windows-reservation-failed-2026-09-13/FIXED-COPY-LIST.json",
+      "bytes": 41182,
+      "sha256": "aa67ac5a402cbce78b0362e2361b48ea101f3f42fd681785cd260bd956df31fd"
+    },
+    {
+      "commit": "58335df",
+      "path": "docs/library/proof/windows-reservation-failed-2026-09-13/ASTRA-VERDICT.md",
+      "bytes": 2294,
+      "sha256": "4a835aabb715248bd11113609228a8ca1534741721b68ee3883c32bbae483a92"
+    },
+    {
+      "commit": "58335df",
+      "path": "docs/library/ASTRA-WINDOWS-RESERVATION-FAILED-VERDICT-2026-09-13.md",
+      "bytes": 2294,
+      "sha256": "4a835aabb715248bd11113609228a8ca1534741721b68ee3883c32bbae483a92"
+    }
+  ]
+}

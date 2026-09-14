@@ -1,0 +1,7 @@
+{
+  "chunk_id": "bd742c",
+  "wall_time_seconds": 0.5846091,
+  "exit_code": 1,
+  "original_token_count": 109,
+  "output": "Traceback (most recent call last):\r\n  File \"E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\windows-reservation-implementation-proposal02\\prepare_correction.py\", line 84, in <module>\r\n    assert exact_diff.replace('\\r\\n', '\\n').rstrip('\\n') == patch_raw.decode().replace('\\r\\n', '\\n').rstrip('\\n')\r\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\r\nAssertionError\r\n"
+}

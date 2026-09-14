@@ -1,0 +1,7 @@
+2026-09-13. Data-only preparation bd742c exited 1 in 0.5846091 seconds at the diff-text comparison. It had verified both frozen 28-input copies and constructed the two-line correction in memory. It stopped before making before/ copies or writing any of the corrected 28 inputs. No candidate, qualifier, test, launcher or native operation executed.
+
+The archived patch appends `class ActualAdapterNoWorkerContracts(unittest.TestCase):` to both unified-diff hunk headers. Python difflib emits the same numeric hunk ranges without that optional function-context suffix. The original comparison incorrectly required that presentation suffix to match.
+
+Preserve the first preparer and its actual failure. Change only the comparison to remove text after the closing `@@` of a hunk header on both sides. Numeric hunk ranges, all context/payload lines, path headers and the two removed/added expectation expressions still compare exactly. This does not normalize or alter any test content. The complete AST comparison must also restore only those two exception expressions to recover the original AST.
+
+A fresh data-only preparation may then finish the authorized copy if all unchanged input, exact patch and binding checks pass. It is not a rerun of windows-reservation01 or a corrected case observation. The original 63-pass/2-fail outcome remains failed. Root must review the resulting pins before any windows-reservation02 run.

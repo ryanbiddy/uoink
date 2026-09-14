@@ -1,0 +1,5 @@
+{
+  "before_sha256": "17a6e15d74f533104817d4a603da3e884d170cec562590fcf0dc9908c74a8e0f",
+  "after_sha256": "9610ec05ff68a0bb1686b0f4af4b2b938f8be577a2503c673332663738928398",
+  "repair": "Normalize only optional unified-diff hunk-header context for comparison; no test content change"
+}
