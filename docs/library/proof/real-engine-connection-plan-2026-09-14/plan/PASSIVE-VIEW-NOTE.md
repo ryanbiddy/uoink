@@ -1,0 +1,7 @@
+This directory contains planning text and exact passive tool outputs. No candidate was imported, compiled, tested or executed.
+
+The original-plan view (08addf) returned exit 1 because an additional symbol search named a nonexistent `worker_protocol.py`. The plan and its map were read successfully. The owner view (3e6d67) also records a missing `generated_authority_seams.py` search target; later PowerShell statements completed and its outer exit is 0. Neither missing path is an input to this brief. The targeted adapter read in ebbf4e supplies the actual `RuntimeProfile` and `_OwnedASRStart` definitions. These search mistakes did not change any source or supply authority.
+
+Queue bytes in QUEUE-VIEW-ACTUAL.json are a historical planning observation. The handoff is mutable and is not a future admission pin. Repaired core full reads and source disposition are retained in `_scratch/protected-engine-ownership-peer02`; this task reread the specific transaction and bootstrap seams and makes no claim to have repeated that complete review. No fake39 result is inferred from root's concurrent qualification work.
+
+The fixed input-binding command 09fba6 verified all 23 source hashes and wrote their numeric byte counts in SOURCE-INPUTS.json. Its optional `source_bytes` display is null because Measure-Object was applied to ordered dictionary rows; it is not a computed aggregate and is not used as a binding claim. The final map read sums the serialized numeric rows directly.

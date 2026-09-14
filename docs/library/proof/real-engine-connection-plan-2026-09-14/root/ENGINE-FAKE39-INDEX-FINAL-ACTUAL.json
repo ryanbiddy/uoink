@@ -1,0 +1,7 @@
+{
+  "chunk_id": "8b2456",
+  "wall_time_seconds": 0.0000023,
+  "exit_code": 0,
+  "original_token_count": 53,
+  "output": "{\"proof\": \"docs/library/proof/protected-engine-fake39-2026-09-14\", \"payloads_matching_disk_and_git\": 347, \"bytes\": 4177708, \"manifest_sha256\": \"84cd382619806478842058885886cb6ac5971d387743ca479f05bfb6f4ac7818\"}\r\n"
+}

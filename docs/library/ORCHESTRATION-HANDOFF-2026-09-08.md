@@ -121,7 +121,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | Worker runtime owner and bootstrap | Connected fake33 at 3661608; generated native cancellation at 3b8f9e0 | Both fake copies 33/0/0. Native a9321b/exit 0, root dd7190 and peer 4984ac agree on 32 unchanged pairs, valid guards, one segment, closed owner, child/contender exit 0 with empty jobs, and four journal frames. All 127 native proof payloads match Git/disk | Interrupted-owner retirement direction is committed at 77dc339. Real inference, protected loader/PCM/filter routes, crash/restart and release remain open |
 | Interrupted owned-worker retirement | Native02 accepted at99ce3c9; Native01 remains FAILED at7f142e8 | Actual9753fb returns outer/controller0; root4b342d and peerf633ad agree on10 write observations,15 retirement events, primaryexit1/job0 and5 journal frames. All160 native/integration payloads match Git/disk. Fake30 atc8e7a44 remains30/0/0 plus62 per root | Do not repeat native02. The subsequent constructor source review FAILED; bounded ownership repair and caller work continue without production or release authority |
 | Protected ASR constructor | Gemini e6133b1f source review FAILED at22949dc; 13 proposed tests unexecuted | Original ownership, namespace, fallback, fixture and provenance failures remain preserved. All42 documentary payloads match Git/disk at4faa90; the smaller generated repair is recorded below | Implement authenticated real namespace and fixed constructor binding; real constructor/media/runtime remain closed |
-| Generated engine ownership | Both scoped fake39 copies pass39/0/0; original33 preserved | Author09d91a and confirmationf5c18c return0. Root0c050f verifies identical full cases/38 hashes, ten guards, unchanged40 inputs/one admission and47 outputs each. No separate subtest count | Bind authenticated five-file model namespace and fixed constructors, including direct failure/return-after-revoke controls. No real model or production credit |
+| Generated engine ownership | Qualified at9e3a77d: both scoped fake39 copies pass39/0/0; original33 preserved | Author09d91a and confirmationf5c18c return0. Root0c050f and peeraa242c verify identical full cases/38 hashes, ten guards, unchanged40 inputs/one admission and47 outputs each. All347 payloads match Git/disk; no separate subtest count | Follow REAL-ENGINE-CONNECTION-BRIEF-2026-09-14.md for authenticated five-file namespace and fixed constructors. Its26 planning/transport payloads match Git/disk; no real model or production credit |
 | Reliability request/stream caller | Both scoped fake11 copies pass11/0/0 plus15 subtests | Author121f97 and confirmationff51d7 return0. Roota05d87 and peer88b1f3 verify identical cases/nine hashes, ten guards, unchanged13 inputs/three controls and21 outputs each | Production unchanged. Resolve actual ticket issuance, CPU/int8 profile binding and two prospective legacy test contracts before migration; continue constructor and completion-info work |
 | Completion language metadata | Both scoped fake59 copies pass59/0/0 plus29 subtests; original46 preserved | Author577e68 and confirmation8fd760 return0. Root993295 and peera39b40 verify identical full cases/five hashes, ten guards, unchanged nine inputs/three controls and17 outputs each | Connect authenticated backend completion and controller registry, then migrate WhisperX caller. Engine fake39 is qualified below; real/runtime/production gates remain closed |
 | Release notes | Current progress and remaining gates committed at 376eb47 | All seven proof payloads match Git/disk; 57 table lines and historical package/review-kit sections remain unchanged. D1/D2 completion and generated cancellation/recovery are explicit | Continue runtime qualification. No production source, package, installation, public draft or website changed |
@@ -285,6 +285,12 @@ repeat these observations. Core map a7c9b53b and instrument7309394f have indepen
 source verdicts ee2104ee and2764f60d. Next implement authenticated real namespace
 and fixed constructor binding, backend cursor/metadata connection, PCM/filter
 authority and the WhisperX caller migration before D3/D4 qualification.
+The next source-only implementation brief is REAL-ENGINE-CONNECTION-BRIEF-2026-09-14.md.
+Its frozen plan140c4db6 and23-source map89caa88f are preserved in
+proof/real-engine-connection-plan-2026-09-14. Rootc52eb7 checks all392,766 input
+bytes; index5ec770 verifies26 documentary payloads, seal59bfc255. This supplies
+no source implementation result. Dispatch the brief through Control Room Gemini,
+existing Antigravity subscription only, with no Python/tests/model/native access.
 Keep these source tasks separate from real PCM/filter and D3/D4 qualification.
 The frozen broader plan is archived in30 payloads under
 proof/runtime-next-source-plan-2026-09-14, index8ef211; no implementation pass is
@@ -6712,3 +6718,20 @@ fallback closed. Then connect backend cursor/metadata, PCM/filter and the
 WhisperX caller before D3/D4 qualification. No approved real manifest/profile
 exists yet. Production remains71d3e70; full tree, new package/install, website
 and marketing remain open. No model or checkpoint/D2-output access occurred.
+
+### 2026-09-14 — Next fixed constructor brief frozen
+
+Generated ownership qualification is committed at9e3a77d. The next source-only
+brief binds the existing23 texts and narrows the connection to five-file model
+namespaces; four-file/preprocessor fallback stays closed. The controller permit
+must remain local, and channel authentication alone cannot supply trust-root
+provenance. No new Ryan decision is needed to author this source. Complete real
+manifest/profile, model-state and runtime authority remain required before use.
+
+Rootc52eb7 verifies all23 current source bindings,392,766 bytes. The frozen plan
+and original passive review records plus the prior engine integration records
+are archived in26 payloads,337,326 bytes, seal59bfc25524cb76ddb42f117c2cffed590e1023462075675bbc754c56b5e8a11e.
+Raw worktree diff/apply978113 succeeds;26 newline-only differences were verified
+before raw restoration. Index5ec770 confirms exact Git/disk. No subject was
+repeated for this archive. Dispatch REAL-ENGINE-CONNECTION-BRIEF-2026-09-14.md
+next; preserve incomplete implementations as partial rather than passing them.
