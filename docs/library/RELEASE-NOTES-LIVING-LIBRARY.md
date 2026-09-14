@@ -30,6 +30,12 @@ recovery and real model qualification remain open. Gemini's partial report at
 `870fa00` is supplemented at `2339a09`. Astra accepts the three component verdicts
 with documented source and scope corrections; this is not market acceptance.
 
+The worker runtime owner at `1f200eb` passes the same 11 generated cases in both
+copies. It refuses result publication after VAD retirement, product/module
+replacement or model-lease revocation. The actual factory method uses fake tensor
+and model classes in these checks; native inference and the worker-bootstrap
+connection still need qualification.
+
 Package 08 remains the latest built and installed review artifact. It includes
 the native note and saved-media repairs at `d2caac5` and `60d203f`; its source
 is `b8e44fb`. Its recorded installation, browser, CLI and native Uoink checks

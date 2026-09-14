@@ -112,6 +112,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | Local wheel graph and notices | Graph at 616f670; cached wheels at 95a7f29; source notices at d887f8a; council at ca61046; installer source fix at 71d3e70 | Notice author and actual checkout each pass20 Python cases and10 inert build-block cases. All128 proof payloads and four product notice files match Git/disk. Metadata graph passes144pins/287edges; conflict remains explicit | Verify fresh inventory and installed notice bytes in the eventual candidate. Native compatibility and release security remain open |
 | Latest component council | Original partial report870fa00 supplemented at2339a09 | Gemini ca1e1356 records views of all39 omitted paths; Astra accepts three component verdicts with corrections and the explicit Inno1–150 boundary. Root verified all69 input bytes in both checkouts and all17 supplement payloads in Git/disk | Continue concrete runtime work. Full-line claims remain worker-reported; no overall release acceptance |
 | Generated reservation recovery | Component and evidence integrated at f9ab6fe | Author70b48e and independentfd86f5 each pass42 cases, with20 passing nested subtests and all10 guards valid. All123 proof payloads match Git/disk | Connect retained Windows gate/journal handles and split create/resume/startup. Native recovery and runtime acceptance remain open |
+| Worker runtime owner | Generated component and publication repair integrated at1f200eb | Author9889ba and independentc636d0 each pass11 cases, with zero failures/skips, exact case objects and valid guards. All152 proof payloads match Git/disk | Connect exact owner to the worker bootstrap and completed VAD registration. Real inference, PCM/filter and protected constructor routes remain open |
 | Integration | Reliability repair at e8d058f and notice packaging at 71d3e70 after tree09 | Reliability:53 focused cases plus13 subtests per root. Notices:20 Python/10 block cases per root. Tree09 at 56d9d4c remains2,796 passed/1 failed/3 skipped across2,800 cases plus13 subtests; it predates both repairs | Finish runtime work, then run a new committed complete tree and rebuild/reseal. Package08 and website/marketing remain held. No current-source package or installation credit |
 | Desktop incident | Isolation failed in package-07 attempt; corrected at `e10ba3a` | Ordinary Uoink and filesystem connectors launched; earlier live-index/5179 effects unknown. Owned job cleaned | No further override launch; only guarded Uoink dashboard observed for package 08 |
 
@@ -323,6 +324,12 @@ fd86f5 each pass42 cases with20 nested subtests, zero failures/skips and valid
 guards. All123 proof payloads match Git/disk. Implement the Windows retained
 journal/gate port, split create/resume/finish_start and exact durable adapter
 migration next; these native connections have no execution credit yet.
+The worker runtime owner is qualified at1f200eb; read
+ASTRA-WORKER-RUNTIME-OWNER-VERDICT-2026-09-13.md. Both root-executed copies pass
+the same11 generated cases. Publication now checks active VAD/product/model
+lease under its lock. All152 proof payloads match Git/disk. Connect the owner
+to the existing WorkerBootstrap with its exact registry identity and operation
+phases next; real loader, inference, PCM and filter authority remain closed.
 The next Gemini source review is frozen in
 proof/notices-operations-adapter-council-brief-2026-09-13/BRIEF.md,
 SHA1a5b1be80e7f4443cd7096026b75ad32ea992e702cb5af8763773be01776d149.
@@ -5396,3 +5403,26 @@ Concrete Windows journal and startup integration source is being reviewed.
 The runtime-owner publication repair adds four negatives, for11 planned cases;
 none has executed yet. Backup session35629 still yields no output in9df01e;
 no duplicate push was started. Website and marketing remain paused.
+
+### 2026-09-13 - Worker ownership and final publication qualified
+
+Commit1f200eb retains the source repair and two root-executed11-case runs.
+Author9889ba and independentc636d0 each pass11/0/0 with exact ordered case
+objects, unchanged15 inputs plus admission, valid guards,5359 stdout bytes,
+zero stderr and native/outer0. Their case times are14.782957000017632s and
+17.942464499996277s. All152 proof payloads/1,043,551 bytes match disk/Git in
+b0d34e, seal99153bee88d765670d08ba976f470fc5461cd999c808562ce89b80ba86c806cd.
+No native model or decoder ran. The next source unit connects the exact owner
+to WorkerBootstrap and the unchanged factory's completed VAD registration.
+
+Root admission preparation6f04e8 failed before creating admission or running
+cases. PowerShell PSObject.Properties.Count enumerated per-property counts;
+@(object.PSObject.Properties).Count is the actual collection count. Diagnostic
+50435a and repair008739 are documented; no test rerun followed that failure.
+
+Windows source review found stale clean-confirmation reuse after an unlatched
+native identity/result failure, and no-worker asset-check cleanup requiring a
+worker. Both have source repairs and focused controls in preparation; none has
+executed. The fixed reservation transition path excludes concurrent journal
+writes during final confirmation/release; do not infer general thread safety
+for arbitrary direct stream callers. Website and marketing remain paused.
