@@ -1,0 +1,3 @@
+The final passive checker exited 1 in actual 35cf70 before its first comparison. PowerShell resolved `H` to the built-in `Get-History` alias instead of the proposed hash function. The successful copy observation e677f0 is unchanged; no candidate or copier ran again.
+
+The original checker and actual failure are retained. `check_confirmation04.ps1` replaces only that helper name and its calls with `GetTaskSha256`, plus the checker filename in its own output metadata. The new checker performs the same read-only byte, JSON and diff comparisons. It does not modify either source preparation or independent copy.

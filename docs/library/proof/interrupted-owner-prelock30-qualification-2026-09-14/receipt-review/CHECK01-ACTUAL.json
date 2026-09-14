@@ -1,0 +1,7 @@
+{
+  "chunk_id": "3de2aa",
+  "wall_time_seconds": 0.5069051,
+  "exit_code": 1,
+  "original_token_count": 84,
+  "output": "Exception: E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\interrupted-owner-prelock-fake30-receipt-peer03\\check_receipts.ps1:5\r\nLine |\r\n   5 |  … ondition, [string]$reason) { if (-not $condition) { throw $reason } }\r\n     |                                                        ~~~~~~~~~~~~~\r\n     | Plan scope and startup\r\n"
+}

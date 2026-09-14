@@ -1,0 +1,3 @@
+The first text-only preparation command, 80ebd1, exited 1 at its reverse-insertion check before writing any source, diff or preservation map. It had created only the new directory and empty before/ directory.
+
+The check used $taskNewText.Replace($taskInsertion,'') against the entire module. That removed the identical existing loops in ordinary controllers as well as the proposed addition, so the check correctly refused its own overbroad comparison. The correction reverses the insertion only within the selected controller_interrupted_recovery_flow body and then reconstructs the full original prefix/body/suffix for exact comparison. The proposed source insertion and all existing assertions are unchanged. No candidate, Python, native call or probe ran.

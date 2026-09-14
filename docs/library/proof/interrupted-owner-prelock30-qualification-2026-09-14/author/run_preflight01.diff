@@ -1,0 +1,69 @@
+--- a/run_preflight01.ps1
++++ b/run_preflight01.ps1
+@@ -1,6 +1,6 @@
+ $ErrorActionPreference = 'Stop'
+ $taskSource = $PSScriptRoot
+-$taskRun = Join-Path $taskSource 'interrupted-retirement-fake01'
++$taskRun = Join-Path $taskSource 'interrupted-owner-prelock-fake03'
+ $taskPython = 'C:\Python314\python.exe'
+ $taskNative = $null
+ $taskRunStarted = [DateTimeOffset]::UtcNow.ToString('o')
+@@ -17,7 +17,7 @@
+     return [ordered]@{ bytes = $taskItem.Length; sha256 = (Get-FileHash -Algorithm SHA256 -LiteralPath $taskPath).Hash.ToLowerInvariant() }
+ }
+ 
+-if (Test-Path -LiteralPath $taskRun) { throw 'Fresh interrupted-retirement-fake01 output required' }
++if (Test-Path -LiteralPath $taskRun) { throw 'Fresh interrupted-owner-prelock-fake03 output required' }
+ $taskPinsPath = Join-Path $taskSource 'PINS.json'
+ $taskAdmissionPath = Join-Path $taskSource 'ROOT-ADMISSION.json'
+ $taskPinsBinding = Get-TaskBinding $taskPinsPath
+@@ -25,14 +25,14 @@
+ $taskLauncherBinding = Get-TaskBinding $PSCommandPath
+ $taskPins = Get-Content -LiteralPath $taskPinsPath -Raw | ConvertFrom-Json
+ $taskAdmission = Get-Content -LiteralPath $taskAdmissionPath -Raw | ConvertFrom-Json
+-if ($taskAdmission.approved -cne $true -or $taskAdmission.label -cne 'interrupted-retirement-fake01' -or
++if ($taskAdmission.approved -cne $true -or $taskAdmission.label -cne 'interrupted-owner-prelock-fake03' -or
+     $taskAdmission.pins_sha256 -cne $taskPinsBinding.sha256 -or
+     $taskAdmission.scope -cne 'generated_bytes_and_fake_ports_only') { throw 'Exact root admission required' }
+ if ($taskPins.finalized -cne $true -or @($taskPins.files | Where-Object { $_.status -ceq 'pending_author_freeze' }).Count -ne 0) {
+     throw 'Source preparation remains pending; no launch admitted'
+ }
+ $taskRows = @($taskPins.files)
+-if ($taskRows.Count -ne 38 -or @($taskRows.path | Sort-Object -Unique).Count -ne 38) { throw 'Exact 38-entry input map required' }
++if ($taskRows.Count -ne 39 -or @($taskRows.path | Sort-Object -Unique).Count -ne 39) { throw 'Exact 39-entry input map required' }
+ $taskBefore = @()
+ foreach ($taskRow in $taskRows) {
+     if ($taskRow.path -cnotmatch '^[A-Za-z0-9_.-]+$') { throw 'Flat input name required' }
+@@ -67,7 +67,7 @@
+ }
+ $env:IG_FORBIDDEN_LIVE = 'C:\Users\hello\AppData\Local\Uoink\index.db'
+ Write-TaskJson (Join-Path $taskRun 'plan.json') ([ordered]@{
+-    schema='uoink.windows-reservation-fake-launch.v1'; label='interrupted-retirement-fake01'; python=$taskPython;
++    schema='uoink.windows-reservation-fake-launch.v1'; label='interrupted-owner-prelock-fake03'; python=$taskPython;
+     arguments=@('-I','-S','-B',(Join-Path $taskRun 'qualify_windows_reservations.py'));
+     started_utc=$taskRunStarted; before=$taskBefore; controls=$taskControls;
+     removed_environment_names=$taskRemovedNames; startup_binding_set=$true;
+@@ -107,12 +107,12 @@
+     $taskResult = Get-Content -LiteralPath $taskStdout.FullName -Raw | ConvertFrom-Json
+     $taskExpected = @(Get-Content -LiteralPath (Join-Path $taskRun 'EXPECTED-CASES.json') -Raw | ConvertFrom-Json)
+     $taskCaseIds = @($taskResult.cases | ForEach-Object { $_.id })
+-    $taskMembership = ($taskCaseIds.Count -eq 28 -and $taskExpected.Count -eq 28 -and
++    $taskMembership = ($taskCaseIds.Count -eq 30 -and $taskExpected.Count -eq 30 -and
+         (($taskCaseIds | ConvertTo-Json -Compress) -ceq ($taskExpected | ConvertTo-Json -Compress)))
+     $taskGuardsOkay = @($taskResult.guards.PSObject.Properties).Count -eq 10 -and
+         @($taskResult.guards.PSObject.Properties | Where-Object { $_.Value -cne $true }).Count -eq 0
+     $taskValid = ($taskNative -is [int] -and $taskNative -eq 0 -and $taskResult.qualification_exit -eq 0 -and
+-        $taskResult.passed -eq 28 -and $taskResult.failed -eq 0 -and $taskResult.skipped -eq 0 -and
++        $taskResult.passed -eq 30 -and $taskResult.failed -eq 0 -and $taskResult.skipped -eq 0 -and
+         $taskMembership -and $taskGuardsOkay -and $taskResult.guard_valid -ceq $true -and
+         $taskResult.membership_valid -ceq $true -and $taskInputsOkay -and $taskStderr.Length -eq 0 -and
+         @($taskResult.guard_denials).Count -eq 0 -and @($taskResult.registry_denials).Count -eq 0)
+@@ -124,7 +124,7 @@
+         finished_utc=[DateTimeOffset]::UtcNow.ToString('o'); elapsed_seconds=$taskClock.Elapsed.TotalSeconds
+     })
+     if (-not $taskValid) { exit 1 }
+-    Write-Output 'interrupted-retirement-fake01: 28 passed, 0 failed, 0 skipped; generated scope only.'
++    Write-Output 'interrupted-owner-prelock-fake03: 30 passed, 0 failed, 0 skipped; generated scope only.'
+     exit 0
+ } catch {
+     Write-TaskJson (Join-Path $taskRun 'launch-failure.json') ([ordered]@{

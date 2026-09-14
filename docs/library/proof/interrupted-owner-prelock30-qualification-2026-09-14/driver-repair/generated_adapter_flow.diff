@@ -1,0 +1,13 @@
+--- a/generated_adapter_flow.py
++++ b/generated_adapter_flow.py
+@@ -1181,8 +1181,10 @@
+                 _assert(record.protection is port.read_set and record.permit is port.permit
+                         and record.owner is session and port.adapter_startup.policy is port.adapter_profile
+                         and port.adapter_startup.binding is port.generated_binding and port.adapter_start_ack is not None,
+                         "actual_start_permit_and_worker_ack")
++                for path, expected in port.expectations:
++                    port.observations.append(operation_flow.adoption_flow._write_access_probe(port.primitives, path, True))
+                 ticket = port.issue_generated_media_ticket(session)
+                 request = TranscribeRequest(ticket, language="en")
+                 stream = facade.transcribe(request)
+                 _assert(port._next_index == 0 and port.operation_events == ["admit_generated_media", "begin_generated_transcription"],

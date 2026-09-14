@@ -119,7 +119,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | Actual adapter cancellation | Generated qualification integrated at60b3bb5 | Author and independent copies each89 passed/0 failed/0 skipped,86 passing subtests; all216 proof payloads match Git/disk | Native cancellation integrated ata25b34b: all100 proof payloads match Git/disk. Final-clear recovery is recorded at 5671b51; interrupted-owner retirement, crash/restart, real models and release remain unqualified |
 | Retired-owner final-clear recovery | Fake22 at a83ae1a; generated native recovery at5671b51 | Both fake copies22/0/0 plus21 passing subtests. Nativee97a44/exit0, root5214fa and peer503717 verify exact retirement, four confirmed phases/flushes and still-revoked owner/token. All91 newest proof payloads match Git/disk | The generated runtime-owner connection is recorded at 3661608 and 3b8f9e0. Continue interrupted-owner retirement; no OS-interruption, active-worker recovery, crash/restart or model credit |
 | Worker runtime owner and bootstrap | Connected fake33 at 3661608; generated native cancellation at 3b8f9e0 | Both fake copies 33/0/0. Native a9321b/exit 0, root dd7190 and peer 4984ac agree on 32 unchanged pairs, valid guards, one segment, closed owner, child/contender exit 0 with empty jobs, and four journal frames. All 127 native proof payloads match Git/disk | Interrupted-owner retirement direction is committed at 77dc339. Real inference, protected loader/PCM/filter routes, crash/restart and release remain open |
-| Interrupted owned-worker retirement | Gemini source remains FAILED at0a1a211; fake28 integrated atfeee2f7; native run01 FAILED at source3fc4cf7 | Actual3c41aa returns outer1/controller0, unchanged inputs, invalid receipt. Both passive diagnoses find six failed comparisons caused by five omitted locked-write observations; 215 failure/integration payloads match Git/disk | Two-line driver repair24844bf4 passes source review under d04652a. Review its two new inert boundary controls and fresh fake/native bindings. Do not repeat run01 or weaken assertions. No real-model, production or release authority |
+| Interrupted owned-worker retirement | Native01 remains FAILED at7f142e8; repaired driver qualifies under admission7316e53 | Both copies30/0/0 plus62 subtests; root50475b and peer10a40c verify identical cases/36 child hashes and valid guards. All329 qualification/integration payloads match Git/disk. Original28/57 and assertions remain intact | Prepare native02 under6dc7b8b and review its exact source/control bindings before a separate admission. No real-model, production or release authority |
 | Release notes | Current progress and remaining gates committed at 376eb47 | All seven proof payloads match Git/disk; 57 table lines and historical package/review-kit sections remain unchanged. D1/D2 completion and generated cancellation/recovery are explicit | Continue runtime qualification. No production source, package, installation, public draft or website changed |
 | Integration | Reliability repair at e8d058f and notice packaging at 71d3e70 after tree09 | Reliability:53 focused cases plus13 subtests per root. Notices:20 Python/10 block cases per root. Tree09 at 56d9d4c remains2,796 passed/1 failed/3 skipped across2,800 cases plus13 subtests; it predates both repairs | Finish runtime work, then run a new committed complete tree and rebuild/reseal. Package08 and website/marketing remain held. No current-source package or installation credit |
 | Desktop incident | Isolation failed in package-07 attempt; corrected at `e10ba3a` | Ordinary Uoink and filesystem connectors launched; earlier live-index/5179 effects unknown. Owned job cleaned | No further override launch; only guarded Uoink dashboard observed for package 08 |
@@ -228,8 +228,15 @@ ASTRA-INTERRUPTED-NATIVE01-FAILURE-2026-09-14.md. Preserve the first run, add th
 missing probes and focused inert coverage, and review fresh qualification inputs.
 The failed observation is archived in204 payloads;11 root transport records
 preserve raw Git integration and newline-only restoration. Index checks18c81b
-and841604 verify all215 payloads in Git/disk. Two-line driver24844bf4 passes
-root/peer source review; new controller-boundary controls remain unexecuted.
+and841604 verify all215 payloads in Git/disk. Two-line driver24844bf4 and new
+controller controls6370a484 now qualify under7316e53: authorc3d9f3 and
+independent01d8d4 each30/0/0 plus62 passing subtests. Root50475b verifies
+identical complete case objects/36 child hashes, all ten guards, unchanged
+39 inputs/three controls and47 output files per run. Do not repeat them.
+Independent10a40c confirms both outcomes. The316 qualification payloads and13
+root integration payloads pass Git/disk verification1fb9c3 and06a064.
+Native02 source preparation follows6dc7b8b, with all original Windows receipt
+predicates retained. It needs separate exact root admission before execution.
 The first
 positive case still requires an idle pipe, no retained I/O and confirmed exact
 handles; aggregate quarantine history and all ordinary refusals remain. Preserve
@@ -6404,3 +6411,37 @@ root/peer source review. Two new controller-boundary controls6370a484 preserve
 the original28 cases and57 subtests. Their proposed five failure-position
 subtests and30-case total remain unmeasured. Review the complete fresh fake
 instrument before execution; the prior native01 result stays failed.
+
+### 2026-09-14 — Repaired complete controller passes both fake copies
+
+Admission7316e53 bound the two-line driver repair, two new actual-controller
+controls and guarded fake30 instrument. Authorc3d9f3 and independent01d8d4
+each return0 with30 passed,0 failed,0 skipped and62 passing subtests. Root
+50475b verifies identical complete case/subtest objects and36 child hashes,
+all ten guards,12 metadata/25 registry traps, empty stderr, unchanged39 source
+inputs/three controls and exact47-file outputs. Original28 case objects and
+57 subtests remain unchanged. These are inert checks, not a full candidate tree.
+
+Preparation failures remain visible: root's wrong template filename and masked
+shell status, the peer's digit-excluding module parser, and the copier review's
+PowerShell H alias collision. Each is a documentary checker defect with its
+repair recorded; none ran the subject. Root fully reviewed the instrument before
+execution. Later independent source verdict81c24891 records no blocker; it
+retains its prospective wording rather than retroactively claiming the runs.
+
+Read ASTRA-PRELOCK30-QUALIFICATION-VERDICT-2026-09-14.md. Native02 preparation
+under6dc7b8b changes only fixed labels and exact source/control bindings for the
+qualified driver. Keep native01 failed, keep all Windows assertions, and admit
+the new invocation separately after source review. D1/D2 and release gates are
+unchanged; website and marketing stay paused.
+
+The fake30 qualification archive has316 payloads/3,965,415 bytes, seal
+c1b6ff2d66dfe0be9a7643cfea742f212d0756777aeed7bc22c3acffb5d67771.
+Copy415710 and raw worktree diff/application19a067 return0. The transport step
+verified282 newline-only differences before restoring exact donor bytes;
+completed index1fb9c3 verifies the unchanged seal and all payloads in Git/disk.
+Thirteen root integration records/109,239 bytes, seal
+0aabf6668fc3ce350bc2266a1a411067071b42080a69416ba10df38332ee25cf,
+pass index06a064. Independent receipt review10a40c agrees with the observed
+30/0/0 plus62 in each copy; its own path-literal checker failure and repair are
+retained. No subject was rerun to prepare or verify these archives.

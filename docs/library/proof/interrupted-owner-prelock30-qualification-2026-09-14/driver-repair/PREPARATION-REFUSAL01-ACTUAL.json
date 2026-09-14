@@ -1,0 +1,7 @@
+{
+  "chunk_id": "80ebd1",
+  "wall_time_seconds": 0.2650266,
+  "exit_code": 1,
+  "original_token_count": 57,
+  "output": "Exception: \r\nLine |\r\n  22 |  … tion,'') -cne $taskText){throw 'Only the two added lines may differ'}\r\n     |                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\r\n     | Only the two added lines may differ\r\n"
+}

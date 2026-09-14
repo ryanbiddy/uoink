@@ -1,0 +1,7 @@
+{
+  "chunk_id": "87a010",
+  "wall_time_seconds": 0.1860737,
+  "exit_code": 0,
+  "original_token_count": 138,
+  "output": "{\"scope\":\"Passive saved fake30 receipts and exact source/control comparison; no subject execution\",\"copies\":[{\"directory\":\"interrupted-owner-prelock-fake30-author03\",\"label\":\"interrupted-owner-prelock-fake03\",\"actual\":\"c3d9f3\",\"outer_exit\":0,\"passed\":30,\"failed\":0,\"skipped\":0,\"passing_subtests\":62,\"case_elapsed_seconds\":0.3696066999982577,\"payloads_unchanged\":39,\"controls_unchanged\":3,\"child_hashes\":36,\"output_files\":47,\"pins_sha256\":\"f70f8f0ad7f1ad634939d91f04096996852cfe700c41829a492b00df883c1851\"}],\"identical_cases_and_child_hashes\":false}\n"
+}

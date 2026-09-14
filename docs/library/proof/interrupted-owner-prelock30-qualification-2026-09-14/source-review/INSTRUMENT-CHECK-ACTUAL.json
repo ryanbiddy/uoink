@@ -1,0 +1,7 @@
+{
+  "chunk_id": "0341f5",
+  "wall_time_seconds": 0.3040156,
+  "exit_code": 1,
+  "original_token_count": 54,
+  "output": "Exception: \r\nLine |\r\n   3 |  … _interrupted_owner_prelock'){throw 'Explicit new module last'};$child …\r\n     |                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\r\n     | Explicit new module last\r\n"
+}

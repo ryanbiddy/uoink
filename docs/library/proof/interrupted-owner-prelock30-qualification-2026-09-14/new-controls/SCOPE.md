@@ -1,0 +1,1 @@
+Source-only preparation of focused controls for the actual interrupted controller's pre-lock observation loop. Existing 28 cases, 57 subtests, fixtures and assertions remain unchanged. No Python startup, candidate execution, native call, model/support access or admission is part of this preparation.

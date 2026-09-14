@@ -1,0 +1,7 @@
+{
+  "chunk_id": "0aaefd",
+  "wall_time_seconds": 0.1961873,
+  "exit_code": 0,
+  "original_token_count": 74,
+  "output": "{\r\n  \"source\": \"check_confirmation03.ps1\",\r\n  \"derivative\": \"check_confirmation04.ps1\",\r\n  \"change\": \"Rename H helper and exact calls to GetTaskSha256; update checker self-metadata filename\",\r\n  \"bytes\": 6573,\r\n  \"sha256\": \"62d0ff5154bb5b47923c0d6bc27b703fa6c6c5da9c561b754d813ab6470b5aa4\"\r\n}\r\n"
+}

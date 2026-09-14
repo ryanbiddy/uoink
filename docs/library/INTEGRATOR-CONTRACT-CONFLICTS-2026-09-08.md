@@ -247,3 +247,12 @@ remain unchanged. The derivative and exact diff will be preserved separately;
 no fixture correction is being requested or inferred from Ryan's earlier
 approvals. Read ASTRA-INTERRUPTED-NATIVE01-FAILURE-2026-09-14.md. The failed
 result remains failed, and the eventual full corrected tree is still required.
+
+The chosen derivative24844bf4 adds exactly two lines before ticket issuance.
+Its complete diff is preserved in
+proof/interrupted-owner-prelock30-qualification-2026-09-14/driver-repair/generated_adapter_flow.diff.
+The new test module is separate; no old fixture or assertion changed. Under
+admission7316e53, both copies pass30/0/0 plus62 subtests, preserving all original
+28 case objects and57 subtests. Root50475b verifies the receipts; the one-page
+review is ASTRA-PRELOCK30-QUALIFICATION-VERDICT-2026-09-14.md. Native01 remains
+failed. A fresh full candidate tree is still required after runtime source work.

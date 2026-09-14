@@ -1,0 +1,7 @@
+{
+  "chunk_id": "35cf70",
+  "wall_time_seconds": 0.2591784,
+  "exit_code": 1,
+  "original_token_count": 163,
+  "output": "Get-History: E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\interrupted-owner-prelock-confirmation-copy03\\check_confirmation03.ps1:11\r\nLine |\r\n  11 |  Require ((H $authorPins) -ceq 'f70f8f0ad7f1ad634939d91f04096996852cfe …\r\n     |              ~~~~~~~~~~~\r\n     | Cannot bind parameter 'Id'. Cannot convert value\r\n     | \"E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\interrupted-owner-prelock-fake30-author03\\PINS.json\" to\r\n     | type \"System.Int64\". Error: \"The input string\r\n     | 'E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\interrupted-owner-prelock-fake30-author03\\PINS.json' was\r\n     | not in a correct format.\"\r\n"
+}

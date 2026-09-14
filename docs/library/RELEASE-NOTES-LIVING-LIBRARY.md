@@ -105,6 +105,13 @@ ten-observation assertion remains unchanged. Repair brief `d04652a` adds the
 missing checks and focused coverage; this result supplies no new acceptance.
 See [the failure review](ASTRA-INTERRUPTED-NATIVE01-FAILURE-2026-09-14.md).
 
+The repaired complete controller now passes **30 cases and 62 nested subtests
+in each independent fake run**, with zero failures or skips. Admission `7316e53`
+binds both inputs; root `50475b` verifies identical results and source hashes.
+The two added cases cover probe ordering and each refusal position. Native02
+preparation is under `6dc7b8b`; an actual Windows result is still required.
+See [the focused qualification](ASTRA-PRELOCK30-QUALIFICATION-VERDICT-2026-09-14.md).
+
 Ryan's approved D1 static checkpoint inspection is recorded at `4b38948`. One
 guarded invocation verified the fixed hash, ZIP inventory and version bytes,
 and found little-endian consistency in the two selected buffers. Only 1,002

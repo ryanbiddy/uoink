@@ -1,0 +1,7 @@
+{
+  "chunk_id": "1e1993",
+  "wall_time_seconds": 0.1739694,
+  "exit_code": 0,
+  "original_token_count": 137,
+  "output": "{\r\n  \"source_sha256\": \"6370a4846e3f5f43688ede53c6665988771db53ddf309065fbc92e5965288bb4\",\r\n  \"source_ids\": [\r\n    \"test_interrupted_owner_prelock.InterruptedOwnerPrelockContracts.test_actual_controller_probes_before_media_and_after_retirement\",\r\n    \"test_interrupted_owner_prelock.InterruptedOwnerPrelockContracts.test_refusal_error_stops_media_and_reaches_context_cleanup\"\r\n  ],\r\n  \"expected_order_matches\": true,\r\n  \"top_level_cases\": 2,\r\n  \"negative_subtests_source_bound\": 5,\r\n  \"candidate_execution\": false,\r\n  \"native_execution\": false\r\n}\r\n"
+}

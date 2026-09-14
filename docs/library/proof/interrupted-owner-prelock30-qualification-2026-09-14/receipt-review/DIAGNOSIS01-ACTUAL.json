@@ -1,0 +1,7 @@
+{
+  "chunk_id": "319fb7",
+  "wall_time_seconds": 0.1958551,
+  "exit_code": 0,
+  "original_token_count": 290,
+  "output": "    Demand ($plan.schema -ceq 'uoink.windows-reservation-fake-launch.v1' -and $plan.label -ceq $spec.label -and $plan.python -ceq 'C:\\\\Python314\\\\python.exe' -and $plan.startup_binding_set -eq $true -and $plan.scope -ceq 'generated_bytes_and_fake_ports_only') 'Plan scope and startup'\r\n    Demand ($plan.arguments.Count -eq 4 -and (Equal-Names @($plan.arguments[0..2]) @('-I','-S','-B')) -and $plan.arguments[3] -ceq ((Join-Path $run 'qualify_windows_reservations.py').Replace('\\','\\\\'))) 'Exact recorded isolated child arguments'\r\n{\r\n  \"schema\": \"uoink.windows-reservation-fake-launch.v1\",\r\n  \"label\": \"interrupted-owner-prelock-fake03\",\r\n  \"startup\": true,\r\n  \"scope\": \"generated_bytes_and_fake_ports_only\",\r\n  \"python\": \"C:\\\\Python314\\\\python.exe\",\r\n  \"python_char_codes\": [\r\n    67,\r\n    58,\r\n    92,\r\n    80,\r\n    121,\r\n    116,\r\n    104,\r\n    111,\r\n    110,\r\n    51,\r\n    49,\r\n    52,\r\n    92,\r\n    112,\r\n    121,\r\n    116,\r\n    104,\r\n    111,\r\n    110,\r\n    46,\r\n    101,\r\n    120,\r\n    101\r\n  ],\r\n  \"path_char_codes\": [\r\n    69,\r\n    58,\r\n    92,\r\n    65,\r\n    73,\r\n    92,\r\n    112,\r\n    114,\r\n    111,\r\n    106\r\n  ],\r\n  \"result_exists\": false\r\n}\r\n"
+}
