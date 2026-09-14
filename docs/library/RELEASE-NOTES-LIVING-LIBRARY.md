@@ -30,6 +30,12 @@ recovery and real model qualification remain open. Gemini's partial report at
 `870fa00` is supplemented at `2339a09`. Astra accepts the three component verdicts
 with documented source and scope corrections; this is not market acceptance.
 
+The Windows reservation connection at `58335df` remains failed: 63 passed,
+two failed and zero skipped, with six failed nested subtests. Two new tests
+expect a different exception class from the unchanged implementation. The
+proposed correction is unapplied pending Ryan's ruling; their later retention
+assertions remain unverified. Native Windows qualification is still open.
+
 The worker runtime owner at `1f200eb` passes the same 11 generated cases in both
 copies. It refuses result publication after VAD retirement, product/module
 replacement or model-lease revocation. The actual factory method uses fake tensor

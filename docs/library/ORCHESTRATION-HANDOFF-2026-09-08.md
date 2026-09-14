@@ -112,6 +112,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | Local wheel graph and notices | Graph at 616f670; cached wheels at 95a7f29; source notices at d887f8a; council at ca61046; installer source fix at 71d3e70 | Notice author and actual checkout each pass20 Python cases and10 inert build-block cases. All128 proof payloads and four product notice files match Git/disk. Metadata graph passes144pins/287edges; conflict remains explicit | Verify fresh inventory and installed notice bytes in the eventual candidate. Native compatibility and release security remain open |
 | Latest component council | Original partial report870fa00 supplemented at2339a09 | Gemini ca1e1356 records views of all39 omitted paths; Astra accepts three component verdicts with corrections and the explicit Inno1–150 boundary. Root verified all69 input bytes in both checkouts and all17 supplement payloads in Git/disk | Continue concrete runtime work. Full-line claims remain worker-reported; no overall release acceptance |
 | Generated reservation recovery | Component and evidence integrated at f9ab6fe | Author70b48e and independentfd86f5 each pass42 cases, with20 passing nested subtests and all10 guards valid. All123 proof payloads match Git/disk | Connect retained Windows gate/journal handles and split create/resume/startup. Native recovery and runtime acceptance remain open |
+| Windows reservation connection | First generated unit retained at 58335df | 63 passed / 2 failed / 0 skipped; 33 nested subtests, six failed. All ten guards and inputs valid. All 120 proof payloads match Git/disk | Two new exception expectations conflict with unchanged KernelUnconfirmed behavior. Proposed two-line correction awaits Ryan; no rerun. Continue separate native source preparation |
 | Worker runtime owner | Generated component and publication repair integrated at1f200eb | Author9889ba and independentc636d0 each pass11 cases, with zero failures/skips, exact case objects and valid guards. All152 proof payloads match Git/disk | Connect exact owner to the worker bootstrap and completed VAD registration. Real inference, PCM/filter and protected constructor routes remain open |
 | Integration | Reliability repair at e8d058f and notice packaging at 71d3e70 after tree09 | Reliability:53 focused cases plus13 subtests per root. Notices:20 Python/10 block cases per root. Tree09 at 56d9d4c remains2,796 passed/1 failed/3 skipped across2,800 cases plus13 subtests; it predates both repairs | Finish runtime work, then run a new committed complete tree and rebuild/reseal. Package08 and website/marketing remain held. No current-source package or installation credit |
 | Desktop incident | Isolation failed in package-07 attempt; corrected at `e10ba3a` | Ordinary Uoink and filesystem connectors launched; earlier live-index/5179 effects unknown. Owned job cleaned | No further override launch; only guarded Uoink dashboard observed for package 08 |
@@ -323,7 +324,13 @@ ASTRA-GENERATED-RESERVATION-VERDICT-2026-09-13.md. Author70b48e and independent
 fd86f5 each pass42 cases with20 nested subtests, zero failures/skips and valid
 guards. All123 proof payloads match Git/disk. Implement the Windows retained
 journal/gate port, split create/resume/finish_start and exact durable adapter
-migration next; these native connections have no execution credit yet.
+migration are now prepared. Their first fake-service unit is FAILED at 58335df:
+63/2/0 across 65 cases, plus 33 subtests with six failures. Read
+ASTRA-WINDOWS-RESERVATION-FAILED-VERDICT-2026-09-13.md. Two new controls expect
+AssertionError where the inherited helper raises KernelUnconfirmed. Later
+retention assertions in those branches remain unverified. No product or test
+change and no rerun is authorized by that diagnosis. The unapplied two-line
+correction is under Blockers for Ryan; native source preparation continues.
 The worker runtime owner is qualified at1f200eb; read
 ASTRA-WORKER-RUNTIME-OWNER-VERDICT-2026-09-13.md. Both root-executed copies pass
 the same11 generated cases. Publication now checks active VAD/product/model
@@ -399,9 +406,12 @@ returns0; all22 main and2 integrator payloads match Git/disk. The new archive
 requires the existing4827288 archive for415 referenced objects. The earlier
 full graph remains FAIL in its unchanged historical receipt.
 
-The authorized backup push of 01e22fb is waiting at Git's account selector;
-exec session 35629 remains pending. The local backup ref was fast-forwarded,
-but no successful remote result is recorded. Do not issue a duplicate push.
+The authorized backup push of 01e22fb completed. Session 35629 closed at
+8d94c9 with push and remote-check exit 0; origin/cc/living-library matched
+01e22fb. The receipt is build/Uoink-Living-Library-branch-backup-2026-09-13-02.json,
+SHA3d8f033bb80e8cfb9a0fbcd0ef403879275671052bee48e9979b4796842c3dc7.
+Newer work remains local until the next authorized branch-only backup. No
+candidate branch or main push, main merge or public release occurred.
 
 1. Signing review e922b3bf and local repairs are integrated at 0b3629d. Read
    ASTRA-SIGNING-REVIEW-02-2026-09-12.md before the retained Gemini report.
@@ -1040,6 +1050,14 @@ core.longpaths true` must stay set (worktree checkouts fail without it).
 
 ## Blockers for Ryan
 
+- Decide the unapplied two-line correction in
+  proof/windows-reservation-failed-2026-09-13/preparation/fixture-correction.UNAPPLIED.patch.txt
+  (58335df). It changes only two new tests to expect the existing
+  KernelUnconfirmed class instead of AssertionError. All message, fault and
+  retention assertions stay unchanged. The first run remains 63/2/0, with
+  six failed subtests; no retry has occurred. Your standing assertion rule
+  and five named September 9 corrections do not cover this new expectation
+  change. Review ASTRA-WINDOWS-RESERVATION-FAILED-VERDICT-2026-09-13.md.
 - D1 is now a concrete optional static inspection decision: read
   ASTRA-D1-INVOCATION-REVIEW-2026-09-13.md (f0602f8) and the earlier
   ASTRA-VAD-D1-ADAPTER-VERDICT-2026-09-13.md (381985c). The reviewed adapter
@@ -5426,3 +5444,25 @@ worker. Both have source repairs and focused controls in preparation; none has
 executed. The fixed reservation transition path excludes concurrent journal
 writes during final confirmation/release; do not infer general thread safety
 for arbitrary direct stream callers. Website and marketing remain paused.
+
+### 2026-09-13 - Windows unit failure preserved; backup completed
+
+Commit 58335df preserves first run 5275b2: 63 passed, two failed, zero skipped,
+with 33 nested subtests and six failures. Native/qualification/outer exits are
+all 1; ten guards, source bindings and membership are valid. Both failures
+select AssertionError instead of the unchanged KernelUnconfirmed contract.
+The post-refusal retention assertions did not finish. Root and peer missed
+that expectation mismatch in source review; their original verdicts remain
+alongside the correction. Do not change product exceptions to satisfy it.
+
+Index check 15198d verifies all 120 payloads / 1,404,905 bytes, seal
+cfad3e45d1bc6dfdc8ceb9915857b68574ed5cb84595c1a41cb80358159e0880.
+Root copy command 8a0f40 printed a null aggregate from Measure-Object over
+ordered dictionaries; the manifest rows were intact. The independent index
+verifier supplies the actual byte total above. No copy or test was rerun.
+The concrete two-line test correction remains unapplied for Ryan's ruling.
+
+Backup session 35629 completed at 8d94c9. Push and remote check both return 0,
+and origin/cc/living-library matches 01e22fb. Earlier waiting entries are
+historical. Newer work remains local. The separate WorkerBootstrap connection
+has now passed both 17-case generated runs; its evidence integration follows.
