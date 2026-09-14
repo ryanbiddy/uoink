@@ -113,7 +113,7 @@ establish safe installation isolation, and verify/correct resulting findings.
 | Latest component council | Original partial report870fa00 supplemented at2339a09 | Gemini ca1e1356 records views of all39 omitted paths; Astra accepts three component verdicts with corrections and the explicit Inno1–150 boundary. Root verified all69 input bytes in both checkouts and all17 supplement payloads in Git/disk | Continue concrete runtime work. Full-line claims remain worker-reported; no overall release acceptance |
 | Generated reservation recovery | Component and evidence integrated at f9ab6fe | Author70b48e and independentfd86f5 each pass42 cases, with20 passing nested subtests and all10 guards valid. All123 proof payloads match Git/disk | Connect retained Windows gate/journal handles and split create/resume/startup. Native recovery and runtime acceptance remain open |
 | Windows reservation connection | Correction8fc3219; transfer2f4311f; native generated drain67887c3 | Unit70/0/0 plus35 subtests in both copies. Native d3d56f returns outer/controller/child0, valid guards, child0/job0, four confirmed phases/flushes and exact2,118B closed journal. All87 native proof payloads match Git/disk | Qualify remaining native exclusion/interruption/persistence/restart/reconciliation. Actual runtime-owner connection and real models remain open |
-| Worker/journal council | Briefd996dba; Gemini cede76cb completed; root accuracy review is FAILED | All70 paths have completed view metadata; canonical inputs and three manifests match. Two prose-only CRLF differences recorded. Report misquotes the approved patch and source symbols/locks; source test results remain valid | Preserve original report and record a source-specific correction brief before any new council run. Session84611 closed707094/exit0; process completion is not acceptance |
+| Worker/journal council | Briefd996dba; Gemini cede76cb original preserved at244cca5; root accuracy review FAILED | All70 paths have completed view metadata; canonical inputs and three manifests match. All19 failed-review proof payloads match Git/disk. Report misquotes the patch and conflates protocol/lock details; test results remain valid | Complete and freeze the three-group source-correction brief, then dispatch once. Session84611 closed707094/exit0; process completion is not acceptance |
 | Worker runtime owner and bootstrap | Owner at 1f200eb; actual bootstrap connection at bbe10d6 | Both copies pass17/0/0: eleven retained owner cases plus six bootstrap cases. Exact case objects, valid guards, unchanged19 inputs plus admission. All144 newest proof payloads match Git/disk | Connect exact ownership through native services. Real inference, PCM/filter, VAD-to-model binding and protected constructor routes remain open |
 | Integration | Reliability repair at e8d058f and notice packaging at 71d3e70 after tree09 | Reliability:53 focused cases plus13 subtests per root. Notices:20 Python/10 block cases per root. Tree09 at 56d9d4c remains2,796 passed/1 failed/3 skipped across2,800 cases plus13 subtests; it predates both repairs | Finish runtime work, then run a new committed complete tree and rebuild/reseal. Package08 and website/marketing remain held. No current-source package or installation credit |
 | Desktop incident | Isolation failed in package-07 attempt; corrected at `e10ba3a` | Ordinary Uoink and filesystem connectors launched; earlier live-index/5179 effects unknown. Owned job cleaned | No further override launch; only guarded Uoink dashboard observed for package 08 |
@@ -362,9 +362,11 @@ proof/worker-journal-adapter-council-brief-2026-09-13/BRIEF.md. Its three groups
 are runtime owner/bootstrap, Windows journal/recovery, and durable startup/adapter.
 Seventy selected text inputs plus three manifests are bound; no suites are named.
 It excludes creation-transfer70, D1 and the newer native observation. Root rejects
-the original report's accuracy: it misquotes the exact approved patch and invents
-several method/exception/lock descriptions. Preserve it unchanged with that
-verdict, then use a concrete source-correction brief. All70 selected paths have
+the original report's accuracy: it misquotes the exact approved patch and
+conflates protocol/exception/lock descriptions. Original and root verdict are
+preserved at244cca5; read ASTRA-WORKER-JOURNAL-COUNCIL-FAILED-VERDICT-2026-09-13.md.
+All19 proof payloads match Git/disk. Use a concrete source-correction brief.
+All70 selected paths have
 completed view metadata; full rendered-line coverage is still worker-reported.
 Session84611 closed707094 with exit0, which does not make the report accepted.
 The next Gemini source review is frozen in
@@ -5612,3 +5614,19 @@ first raw comparison559926 failed there before output/patch and its comparator
 repair is documented. All proof sources/tests/receipts require exact raw bytes.
 Metadata does not independently prove displayed line coverage. A bounded council
 correction brief is being prepared; no duplicate or blind rerun is authorized.
+
+### 2026-09-13 - Original council accuracy failure preserved
+
+Commit244cca5 retains the unchanged Gemini report and root rejected-accuracy
+verdict. All19 proof payloads/388,612 bytes match Git/disk in a9d1b1; seal
+847641622352ea5439fd8cba5fe1429eea0a51410102f6b8a749843220d63eab.
+The requested git apply --3way used direct application for the new report file;
+normalized text matched and exact worker bytes were restored after EOL conversion.
+No suite was named or rerun. Source tests and native observations stay separate.
+
+The report's Group1 factory-operation anchors actually belong to the older Group3
+protocol, confirming a protocol conflation. Other case names, failure types and
+fixture excerpts also need source-specific correction. The bounded follow-up
+brief is being prepared from exact selected sources; no blind rerun or new
+product/test changes. Completed view metadata covers all70 paths, while displayed
+line coverage remains unverified independently. Website and marketing stay paused.
