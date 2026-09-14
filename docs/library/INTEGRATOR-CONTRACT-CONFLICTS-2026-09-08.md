@@ -223,3 +223,12 @@ question tied to commit58335df. The exact proposed patch is now authorized.
 Fresh label02 and a repair brief will preserve the unchanged implementation,
 all65 case IDs and every other assertion. This approval does not change the
 original failed result or authorize further fixture corrections.
+
+The exact correction is now qualified at 8fc3219. Author f480a2 and independent
+503555 each pass65/0/0 plus33 passing nested subtests, including the previously
+unreached retention checks. All194 proof payloads match Git/disk. The exact diff,
+reason, fresh brief, source reviews and raw results are retained in
+proof/windows-reservation02-2026-09-13; read the one-page
+ASTRA-WINDOWS-RESERVATION02-VERDICT-2026-09-13.md. This is the focused generated
+unit, not a replacement complete-tree result. A fresh committed full tree remains
+required after runtime source work; the historical63/2 result is unchanged.

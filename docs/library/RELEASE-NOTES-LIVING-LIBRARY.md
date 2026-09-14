@@ -30,12 +30,11 @@ recovery and real model qualification remain open. Gemini's partial report at
 `870fa00` is supplemented at `2339a09`. Astra accepts the three component verdicts
 with documented source and scope corrections; this is not market acceptance.
 
-The Windows reservation connection at `58335df` remains failed: 63 passed,
-two failed and zero skipped, with six failed nested subtests. Two new tests
-expect a different exception class from the unchanged implementation. The
-exact two-line correction is now approved by Ryan and awaiting a fresh run;
-their later retention assertions remain unverified. Native Windows qualification
-is still open.
+The approved Windows test correction is qualified at `8fc3219`: both fresh
+copies pass 65 cases and 33 nested subtests, with zero failures or skips.
+Only the two exception expectations Ryan approved changed. Every retention
+assertion now executes successfully. The original 63-pass/2-fail observation
+at `58335df` stays failed. Native journal and recovery qualification remain open.
 
 The worker runtime owner at `1f200eb` passes the same 11 generated cases in both
 copies. It refuses result publication after VAD retirement, product/module
@@ -63,10 +62,9 @@ at `b96dbd0`. These changes are covered by the latest complete source tree.
 The combined tokenizer and Hub-argument derivative now builds identically under
 Python 3.13 and 3.14; it remains uninstalled. The fixed VAD factory and schema
 are reviewed proposals; conversion and runtime qualification remain open.
-The last completed branch backup is `901964c`, verified on September 13;
-later source and documentary commits remain local. The authorized backup of
-`01e22fb` is still waiting at Git's account selector; no successful result has
-been recorded for it.
+The last completed branch backup is `01e22fb`, verified on September 13 with
+push and remote-check exits 0. Later commits remain local until the next
+authorized branch backup.
 
 The ASR manifest resolver and plain-state reader now pass 87 and 82 synthetic
 cases respectively in both author and independent runs (`e6a2394`, `e826407`).
