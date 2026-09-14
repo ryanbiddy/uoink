@@ -25,8 +25,8 @@ checks; see [the notice verdict](ASTRA-NOTICE-INTEGRATION-VERDICT-2026-09-13.md)
 Generated reservation recovery at `f9ab6fe` passes 42 cases in each independent
 copy, with zero failures or skips and 20 passing nested subtests. The component
 retains uncertain ownership and requires explicit reconciliation before reuse.
-These checks use fake workers and journals; they provide no qualification of
-Windows handles, native recovery or real models. Gemini's partial report at
+These checks use fake workers and journals. Retained Windows handles, native
+recovery and real model qualification remain open. Gemini's partial report at
 `870fa00` is supplemented at `2339a09`. Astra accepts the three component verdicts
 with documented source and scope corrections; this is not market acceptance.
 
@@ -34,16 +34,14 @@ The approved Windows test correction is qualified at `8fc3219`: both fresh
 copies pass 65 cases and 33 nested subtests, with zero failures or skips.
 Only the two exception expectations Ryan approved changed. Every retention
 assertion now executes successfully. The original 63-pass/2-fail observation
-at `58335df` stays failed. These fake checks provide no native journal or
-recovery qualification.
+at `58335df` stays failed. Native journal and recovery qualification remain open.
 
 The later retained-handle transfer at `2f4311f` passes70 cases and35 nested
 subtests in both copies. It preserves all corrected65 cases and adds five
 ownership/failure controls. These use fake services; actual Windows journal
 normal drain is now observed at `67887c3`: child exit0, empty job, four confirmed
-phases/flushes and exact closed journal bytes. That observation does not qualify
-crash/restart recovery or real models. Gemini's worker/journal report from brief
-`d996dba` is preserved
+phases/flushes and exact closed journal bytes. Crash/recovery and real models
+remain unqualified. Gemini's worker/journal report from brief `d996dba` is preserved
 with a failed accuracy verdict at `244cca5`. Scoped source review is completed
 at `1c6ac4c` with an Astra addendum correcting the remaining claims in Gemini's
 partial correction. The underlying test outcomes remain unchanged. A later
@@ -56,40 +54,18 @@ nested subtests, with regular-file size checks and all original assertions
 unchanged. Generated native writer exclusion and normal drain are accepted at
 `f630264`: both exact processes exit0 with empty jobs, all four journal phases
 and flushes complete, and the closed journal matches. All93 native proof
-payloads match Git/disk. The two earlier writer observations remain failed.
-
-Cancellation is now qualified in generated checks: `60b3bb5` passes the same
-89 cases and 86 nested subtests in each root. Native observation `a25b34b`
-produces one generated segment, acknowledges cancellation while the journal
-remains WORKER_BOUND, then completes verified child/job retirement and all four
-journal phases and flushes.
-
-Retired-owner recovery at `a83ae1a` passes the same 22 cases and 21 nested subtests
-in each root, with zero failures or skips. The separate native result at
-`5671b51` accepts one fixed Python interruption after verified worker retirement
-and before journal clear I/O. Explicit manager reconciliation completes CLEARED,
-closes the journal and releases the gate; the old owner and token stay revoked.
-It does not qualify recovery of an active uncertain worker, OS interruption,
-crash/restart, power loss or real models. See [the native recovery verdict](ASTRA-NATIVE-RETIRED-OWNER-RECOVERY01-VERDICT-2026-09-13.md).
-
-The later inaccurate council report remains failed at `89c1579`. The scoped
-directory review at `a74e178` and writer review at `f32f0ca` are accepted only
-with their mandatory [directory addendum](ASTRA-GEMINI-DIRECTORY-CORRECTION02-VERDICT-2026-09-13.md)
-and [writer addendum](ASTRA-GEMINI-WRITER-CORRECTION02-VERDICT-2026-09-13.md).
-These are limited source reviews; they add no execution or market clearance.
+payloads match Git/disk. Cancellation through this combined path, restart,
+real runtime and release remain unqualified.
 
 The worker runtime owner at `1f200eb` passes the same 11 generated cases in both
 copies. It refuses result publication after VAD retirement, product/module
 replacement or model-lease revocation. The actual factory method uses fake tensor
 and model classes in these checks. Its actual worker-bootstrap connection is
 qualified at `bbe10d6`: both copies pass the same 17 cases, including six new
-construction, registration, retirement and failure controls. Connecting this
-owner to the generated native child is proposed at `47d30c`; that connection
-has no native qualification yet. Native inference, protected model loading,
+construction, registration, retirement and failure controls. Native inference,
 decoder/filter authority and the actual VAD-to-model link remain unqualified.
-No production runtime migration is accepted.
 
-Ryan's approved D1 static checkpoint inspection is recorded at `4b38948`. One
+Ryan's approved static checkpoint inspection is recorded at `4b38948`. One
 guarded invocation verified the fixed hash, ZIP inventory and version bytes,
 and found little-endian consistency in the two selected buffers. Only 1,002
 payload bytes were interpreted; no pickle evaluation, conversion, model or
@@ -104,9 +80,9 @@ conversion: actual2827f8 returned outer/parent/child0, with valid guards and one
 checkpoint read. It produced54 ranges from23 storages in a5,896,708-byte file;
 the parent verified output SHA8c15e718b6d502e7e351761f6cfee1a6917450e03c9a4c5318bc0d41d3fdd8c4.
 Root948c0d confirms the receipts and unchanged inputs. Evidence atd13534f has64
-payloads matching Git/disk. D2 local conversion is complete within Ryan's approved
-scope. No model/reader activation, fetching or redistribution occurred. Native
-model compatibility and release suitability remain unqualified.
+payloads matching Git/disk. No
+model/reader activation, fetching or redistribution occurred. Native model
+compatibility and release suitability remain unqualified.
 
 Package 08 remains the latest built and installed review artifact. It includes
 the native note and saved-media repairs at `d2caac5` and `60d203f`; its source
@@ -125,8 +101,7 @@ owner/process repairs at `ff67b84` and `747fb6b`, and the ASR cache-consent guar
 at `b96dbd0`. These changes are covered by the latest complete source tree.
 The combined tokenizer and Hub-argument derivative now builds identically under
 Python 3.13 and 3.14; it remains uninstalled. The fixed VAD factory and schema
-are reviewed proposals. D2 local conversion is complete as recorded above;
-reader/model integration and runtime qualification remain open.
+are reviewed proposals; conversion and runtime qualification remain open.
 The last completed branch backup is `01e22fb`, verified on September 13 with
 push and remote-check exits 0. Later commits remain local until the next
 authorized branch backup.
@@ -136,7 +111,7 @@ cases respectively in both author and independent runs (`e6a2394`, `e826407`).
 Their real asset/runtime paths remain disabled. Gemini's three-component source
 review and Astra's qualified acceptance are archived at `a2e6e7c`; that review
 adds no native model or installation result. The same commit records the Torch
-source comparison and required pre-import controls. Real reader/model integration,
+source comparison and required pre-import controls. Real model conversion,
 owned runtime services and numerical qualification still need to be completed.
 
 The proposed ASR adapter and tensor bridge now pass 58 and 61 distinct cases
@@ -144,8 +119,8 @@ respectively in both author and independent runs. These use simulated services
 and generated bytes; they do not exercise real model loading. The dormant D1
 runner repair is qualified at `f0602f8`, and bridge evidence is committed at
 `2b9068a`. The ASR runner's earlier null exit record remains failed, with its
-diagnosed repair and fresh results retained. Protected real-model loading and
-integration of owned runtime services with the WhisperX derivative remain open.
+diagnosed repair and fresh results retained. Real Windows snapshot protection,
+owned runtime services and the WhisperX derivative are still being implemented.
 Gemini's follow-up source council is integrated at `cf5614d`; Astra accepts
 its three limited-scope verdicts with documented corrections. It adds no native
 execution, package, installation or market-readiness result.
@@ -154,23 +129,21 @@ The concrete CPU tensor port at `3801cee` passes 60 simulated cases in each
 independent run, with all ten final guards intact. Its proof and
 [Astra verdict](ASTRA-VAD-CPU-PORT-VERDICT-2026-09-13.md) preserve exact source
 and outcomes. Native Torch behavior and factory independence remain untested;
-the real entry point stays closed. These CPU-port checks do not qualify the
-Windows worker or owned WhisperX runtime integration.
+the real entry point stays closed. The Windows worker and owned WhisperX
+derivative are still being implemented and reviewed.
 
 Owned WhisperX and lifecycle contracts are now integrated at `1935012`.
 Each independent run passes the same 50 WhisperX and 46 lifecycle cases;
 the original failed setup attempts remain preserved. Their 217- and 98-payload
 proofs match Git and disk. These simulated checks cover ownership, output and
-cleanup behavior. Later generated Windows observations are separate; real-model
-compatibility and installation remain open. This does not approve release or
-website/marketing work.
+cleanup behavior. Real Windows protection, model compatibility and installation
+remain open; this does not approve release or website/marketing work.
 
 The exact owned WhisperX text wheel is built and independently byte-verified
 at `93f4996`: 134,793 bytes, 22 members, both native build/verification exits
 zero. Its [packaging verdict](ASTRA-OWNED-WHISPERX-BUILD-VERDICT-2026-09-13.md)
 preserves the actual receipts. It has not been imported or installed and adds
-no native-model acceptance. The later combined compatibility graph is recorded
-below.
+no native-model acceptance. The combined compatibility graph is next.
 
 The concrete VAD factory and model registry at `803df4b` pass 59 simulated
 cases independently in both roots. Registration now precedes the owned VAD
@@ -185,9 +158,8 @@ not approval of the unfinished runtime, installation or market release.
 Windows protocol and pipe contracts are accepted at `9c40271`: 54 simulated
 cases pass independently in each root. The fourth actual Windows worker test
 passes its generated-data communication, inherited file protection and shutdown
-checks. Three earlier setup failures remain retained; those successful checks
-do not qualify failure cleanup or actual model behavior. Exact local NLTK metadata
-is accepted
+checks. Three earlier setup failures remain retained; failure cleanup and actual
+model behavior still need qualification. Exact local NLTK metadata is accepted
 at `e5b1ddd`. These observations do not clear the current installer or release.
 
 The later timeout repair at `0d93186` retires confirmed broken-pipe I/O while
@@ -197,9 +169,8 @@ cases per root. Two Windows observations at `7fba83a` then verify generated
 stream completion and cancellation, with actual child exit before guard release.
 They use a sentinel profile. A further observation at `7ced134` enters the
 proposed adapter's actual session and cleanup methods through generated authority
-seams and passes its Windows stream check. Later generated retired-owner recovery
-is recorded above; crash/restart recovery and real transcription remain open.
-No production runtime authority was enabled.
+seams and passes its Windows stream check. Durable recovery and real
+transcription remain open; no production runtime authority was enabled.
 
 The repaired metadata checker rejects the earlier upgrade proposal: five
 WhisperX conflicts, two missing dependencies and three wheel failures, including
@@ -366,10 +337,9 @@ native compatibility remain open. See [the projection verdict](ASTRA-VAD-SELECTE
 
 The subsequent fixed-factory proposal at `de07dfe` maps all 54 declarations
 across 23 storage groups and explicitly records its proposed version bridge.
-Independent review found no schema mismatch. That proposal has not loaded model
-data. The later D1 inspection and D2 local conversion above complete only their
-approved steps; native factory integration and numerical qualification remain
-open. See [the factory verdict](ASTRA-VAD-FIXED-FACTORY-VERDICT-2026-09-13.md).
+Independent review found no schema mismatch. It has not loaded model data;
+provenance, storage format, non-pickle conversion and numerical qualification
+are still required. See [the factory verdict](ASTRA-VAD-FIXED-FACTORY-VERDICT-2026-09-13.md).
 
 Package 08 contains Pillow 12.3.0, MCP 1.28.1, cryptography 50.0.1 and NLTK 3.10.3.
 The September 11 exact-version OSV observation of all 140 top-level pins retains
@@ -626,17 +596,6 @@ See [final verification](FINAL-RELEASE-VALIDATION-2026-09-09.md).
 
 - Ryan's disposition of the missing historical AT6 exit and retained dependency
   advisories; neither is presented as a pass or clean security clearance.
-- D1 inspection and D2 local conversion are complete only within their recorded
-  approvals. D3 fetching and D4 stack/native execution remain unapproved. The
-  exact migration patch, artifact/loader policy and quality protocol still need
-  review and Ryan's decision; no target stack is approved.
-- The latest production source change is `71d3e70`. After runtime integration, a fresh committed
-  full tree, rebuilt/resealed package, installed notice inventory and client
-  checks are still required. Tree `56d9d4c` predates both later production repairs;
-  package 08 remains `b8e44fb`, with no current-source package/install credit.
-- Publisher certificate/identity and HTTPS timestamp service remain Ryan's
-  choices. A clean standard Windows account or VM and normal Claude Desktop
-  sign-in are still required; the failed profile override cannot be reused.
 - Package-08 installation and bounded CLI observations are complete. Native Uoink dashboard checks are separate. Desktop citation/brief/chapter acceptance remains blocked by the documented isolation failure; positive Recall injection and per-session combined prompt/template completeness are not claimed.
 - No speaker-attribution claims; speaker material stays blocked. Phase 5 Part B
   is deferred. The failed shelf-quality and dashboard-size measurements remain.

@@ -1,0 +1,131 @@
+{
+  "scope": "Passive comparison of saved proposal text only; no patch applied to tracked source and no product/test/native execution",
+  "saved_text_matches_prepared_text": true,
+  "patch_roundtrip_exact": true,
+  "hunks": 12,
+  "table_lines_unchanged": 57,
+  "headings_unchanged": true,
+  "unchanged_sections": [
+    "## Package and verification",
+    "## What the phases deliver",
+    "## Current package-08 installed observations",
+    "## Desktop isolation incident and acceptance boundary",
+    "## Historical package-07 installed observations",
+    "## Historical package-06 installed observations",
+    "## Full-tree results and retained history",
+    "## Package-08 review kit",
+    "## Historical review kit (package-07)",
+    "## Previous review kit (package-06)"
+  ],
+  "changed_sections": [
+    "## Security review and repairs",
+    "## Open release decisions and limits"
+  ],
+  "all_review_kits_unchanged": true,
+  "required_history_and_identities_present": [
+    "`01e22fb`",
+    "`71d3e70`",
+    "`56d9d4c`",
+    "`b8e44fb`",
+    "`58335df`",
+    "`c5e72a2`",
+    "`cc6bb7c`",
+    "`244cca5`",
+    "2,796 passed, one failed",
+    "and three skipped cases, plus 13 passing subtests",
+    "8c15e718b6d502e7e351761f6cfee1a6917450e03c9a4c5318bc0d41d3fdd8c4",
+    "Only 1,002\npayload bytes were interpreted"
+  ],
+  "delta": {
+    "hunks": 12,
+    "added": 69,
+    "removed": 28
+  },
+  "read_tool": {
+    "chunk_id": "f457a4",
+    "exit_code": 0,
+    "wall_time_seconds": 0.3338082
+  },
+  "all_ten_text_inputs_unchanged": true,
+  "source_checks": [
+    {
+      "path": "docs/library/RELEASE-NOTES-LIVING-LIBRARY.md",
+      "unchanged": true
+    },
+    {
+      "path": "docs/library/RELEASE-OWNER-DECISIONS-2026-09-12.md",
+      "unchanged": true
+    },
+    {
+      "path": "docs/library/ORCHESTRATION-HANDOFF-2026-09-08.md",
+      "unchanged": true
+    },
+    {
+      "path": "docs/library/ASTRA-JOURNAL-CANCEL-FAKE89-VERDICT-2026-09-13.md",
+      "unchanged": true
+    },
+    {
+      "path": "docs/library/ASTRA-NATIVE-JOURNAL-CANCEL01-VERDICT-2026-09-13.md",
+      "unchanged": true
+    },
+    {
+      "path": "docs/library/ASTRA-RETIRED-OWNER-FAKE22-VERDICT-2026-09-13.md",
+      "unchanged": true
+    },
+    {
+      "path": "docs/library/ASTRA-NATIVE-RETIRED-OWNER-RECOVERY01-VERDICT-2026-09-13.md",
+      "unchanged": true
+    },
+    {
+      "path": "docs/library/ASTRA-GEMINI-DIRECTORY-CORRECTION02-VERDICT-2026-09-13.md",
+      "unchanged": true
+    },
+    {
+      "path": "docs/library/ASTRA-GEMINI-WRITER-CORRECTION02-VERDICT-2026-09-13.md",
+      "unchanged": true
+    },
+    {
+      "path": "docs/library/RUNTIME-OWNER-NATIVE-CONNECTION-BRIEF-2026-09-13.md",
+      "unchanged": true
+    }
+  ],
+  "proposal_files": [
+    {
+      "path": "BEFORE.md",
+      "bytes": 44781,
+      "sha256": "6d122e9e95173f752f87ed7927f69cb4e79a85540aae2b84b45df6b8c067b601"
+    },
+    {
+      "path": "AFTER.md",
+      "bytes": 47531,
+      "sha256": "d587ed1726fd1d6eef2084a8e1340df193b6c50c462a3a103064b80e64d2d87a"
+    },
+    {
+      "path": "RELEASE-NOTES.patch",
+      "bytes": 13850,
+      "sha256": "f747e7a26357d3265f4a7489385ad845acb80fa3d077435b2a275c286ef5386b"
+    },
+    {
+      "path": "REASON.md",
+      "bytes": 2484,
+      "sha256": "b871006d5b89b15294eb1ed5fbcdbf20362159197e4312e0ac463e5e41c02a7e"
+    },
+    {
+      "path": "INPUT-BINDINGS.json",
+      "bytes": 2577,
+      "sha256": "a568a68de4f393de4909da57f8d23e093b009abb88c337285043febcf2455b8b"
+    },
+    {
+      "path": ".gitattributes",
+      "bytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+    }
+  ],
+  "pre_wording_passive_check": {
+    "chunk_id": "3443fc",
+    "exit_code": 0,
+    "wall_time_seconds": 0.176681
+  },
+  "wording_correction": "The latest production source change is `71d3e70`.",
+  "root_review": "Root reported full diff/reason/map review de9056 and requested only the production-source-versus-documentary-HEAD wording correction; no raw root tool object is claimed here."
+}
