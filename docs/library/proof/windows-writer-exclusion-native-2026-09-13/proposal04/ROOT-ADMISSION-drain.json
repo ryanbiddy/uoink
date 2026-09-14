@@ -1,0 +1,11 @@
+{
+  "root_reviewed": true,
+  "scope": "generated-windows-journal-writer-exclusion-only",
+  "case": "positive",
+  "operation_mode": "drain",
+  "run_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\windows-reservation-writer-exclusion04",
+  "source_inputs_sha256": "7a18d5a7d49942d611d4e5a3a7a80144e081a89d05f58e34baa16aff5b4a0059",
+  "launcher_sha256": "8212531968abdc9fbf55f4d9607768d1cf14198b62f8443b670715ce0da07c26",
+  "native_execution_admitted": true,
+  "note": "One generated writer04 under existing Windows observation authority after81x2 fake checks. Root review 34adf77a311835ebd87f85fe2d7250f182f23d7dbd6407a05bab4057c81c77e3; peerf025b52923f439b7c5a2807e92385576c4b21b0d053b9d53c2d665520a54c97e. Failed02/03 retained. No checkpoint/model/conversion scope."
+}

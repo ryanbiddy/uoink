@@ -1,0 +1,8 @@
+{
+  "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\windows-reservation-writer-exclusion04\\registry\\4640b95540b94d05-fa6f2100000002000000000000000000.journal",
+  "bytes": 2118,
+  "sha256": "02bca5b9c70324f1fe227bb111b9db36a93803a19ac79be873f38a21c4721867",
+  "matches_controller_confirmed_bytes": true,
+  "exclusive_postexit_read_closed": true,
+  "power_loss_or_restart_proven": false
+}

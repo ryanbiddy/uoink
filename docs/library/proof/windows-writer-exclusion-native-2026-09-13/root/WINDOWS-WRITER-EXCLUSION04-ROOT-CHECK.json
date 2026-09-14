@@ -1,0 +1,20 @@
+{
+  "status": "PASSED_GENERATED_EXCLUSION_AND_NORMAL_DRAIN_ONLY",
+  "outer_native_exit": 0,
+  "controller_native_exit": 0,
+  "both_exact_children_exit0_job0": true,
+  "all_three_guards_valid": true,
+  "primary_phase_count": 4,
+  "flush_successes": 4,
+  "closed_journal_bytes": 2118,
+  "closed_journal_sha256": "02bca5b9c70324f1fe227bb111b9db36a93803a19ac79be873f38a21c4721867",
+  "controller_native_calls": 8230,
+  "controller_dispatch": 8266,
+  "contender_native_calls": 103,
+  "contender_dispatch": 137,
+  "controller_seconds": 0.3430434000038076,
+  "source_controls_unchanged": 21,
+  "support_fixture_records_unchanged": 14,
+  "model_calls": 0,
+  "power_loss_or_restart_proven": false
+}

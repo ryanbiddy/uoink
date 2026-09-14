@@ -1,0 +1,13 @@
+diff --git "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\windows-reservation-writer-exclusion-proposal03\\dummy_bootstrap.py" "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\windows-reservation-writer-exclusion-proposal04\\dummy_bootstrap.py"
+index fb02098..4412d0c 100644
+--- "a/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\windows-reservation-writer-exclusion-proposal03\\dummy_bootstrap.py"
++++ "b/E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\windows-reservation-writer-exclusion-proposal04\\dummy_bootstrap.py"
+@@ -47,7 +47,7 @@ import warnings
+ PROCESS_ABORT = os._exit  # Retained current-process failure exit; never an IPC operation.
+ 
+ FORBIDDEN = r"C:\Users\hello\AppData\Local\Uoink\index.db"
+-FIXED_RUNS = {'drain': 'E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\windows-reservation-writer-exclusion03'}
++FIXED_RUNS = {'drain': 'E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\windows-reservation-writer-exclusion04'}
+ LOCATION = os.path.normcase(os.path.dirname(os.path.abspath(__file__)))
+ MODE = next((mode for mode, path in FIXED_RUNS.items() if os.path.normcase(path) == LOCATION), None)
+ assert MODE is not None, "fixed_fresh_generated_operation_directory"
