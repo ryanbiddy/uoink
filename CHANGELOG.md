@@ -26,7 +26,7 @@ Nothing yet.
   settlement, and podcast items record `seek_kind: "none"` until a player
   path exists.
 - **Living Library reach, activity and standing capture (Phases 3 to 5).** The
-  MCP server exposed 31 tools over stdio (25 → 31: `search_library`,
+  stdio surface grew from 25 to 31 at this point (`search_library`,
   `get_library_item`, `read_library_resource`, `get_library_activity`, and the
   client-run brief pair `get_library_brief_input` / `publish_library_brief`,
   the latter a local write under `reach/briefs`), five `uoink://library/v1/`
@@ -438,7 +438,7 @@ The "YouTube layer for any AI agent" release. Three adoption funnels: Chrome ext
 - **`LOCALAPPDATA` output fallback.** The helper automatically falls back to writing outputs to `%LOCALAPPDATA%\Yoink\output` if `DESKTOP_ROOT` is read-only or unwritable.
 - **`pending_yoinks` schema (migration 0005).** Adds a new table in `index.db` to track rate-limited yoinks, attempts, and errors.
 
-- **MCP server** with 25 tools. The current curated surface includes the original video/library tools plus clip search, evidence cards, podcast feed, episode, local transcription, and corpus-publishing operations. Stdio transport is officially tested with Claude Desktop and Cursor. Local HTTP JSON-RPC transport is available and marked experimental.
+- **MCP server** with 32 tools. The current curated surface includes the original video/library tools plus clip search, evidence cards, library search, activity, briefs, cited-range export, podcast feed, episode, local transcription, and corpus-publishing operations. Stdio transport is officially tested with Claude Desktop and Cursor. Local HTTP JSON-RPC transport is available and marked experimental.
 - **Library Index (SQLite FTS5).** `%LOCALAPPDATA%\Yoink\index.db` replaces scan-based search/recent/get-taxonomy code paths where indexed consumers need fast library access. First boot backfills existing corpora; subsequent yoinks update incrementally.
 - **Migration framework.** `schema_version` table plus numbered `migrations/NNNN_*.sql` scripts for future schema changes.
 - **Yoink Memory page.** New corpus gallery at `chrome-extension://<id>/yoink-memory.html`, opened from the popup's "View all yoinks" link. Filters by search text, channel, topic, Hook Type, and date range, with pagination at 50 results/page.
