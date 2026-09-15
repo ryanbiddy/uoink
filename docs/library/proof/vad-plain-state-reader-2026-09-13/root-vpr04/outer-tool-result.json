@@ -1,7 +1,0 @@
-{
-  "actual_outer_tool_exit": 0,
-  "chunk_id": "e381a1",
-  "reported_wall_seconds": 1.0986873,
-  "source": "exec_command actual result",
-  "reported_output": "{\"label\": \"vpr04\", \"case_count\": 82, \"passed\": 82, \"failed\": 0, \"actual_child_exit\": 0, \"guard_valid\": true}"
-}

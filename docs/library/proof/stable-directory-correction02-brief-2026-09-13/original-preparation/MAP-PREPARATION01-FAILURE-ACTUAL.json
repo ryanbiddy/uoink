@@ -1,7 +1,0 @@
-{
-  "chunk_id": "f0aa4a",
-  "wall_time_seconds": 0.3143937,
-  "exit_code": 1,
-  "original_token_count": 55,
-  "output": "Exception: \r\nLine |\r\n   2 |  …  $lines -ne $r.lines) {throw ('selected input changed: '+$id)}; $rows …\r\n     |                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\r\n     | selected input changed: A-01\r\n"
-}

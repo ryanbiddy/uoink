@@ -1,7 +1,0 @@
-{
-  "chunk_id": "a75a44",
-  "wall_time_seconds": 0.3302937,
-  "exit_code": 0,
-  "original_token_count": 342,
-  "output": "node:fs:1710\r\n  const stats = binding.lstat(\r\n                        ^\r\n\r\nError: ENOENT: no such file or directory, lstat 'E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\interrupted-owner-prelock-fake30-author03\\ROOT-ADMISSION-TEMPLATE.json'\r\n    at Object.lstatSync (node:fs:1710:25)\r\n    at read (file:///E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/check-prelock30-inputs-root.mjs:10:29)\r\n    at inspect (file:///E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/check-prelock30-inputs-root.mjs:26:28)\r\n    at file:///E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/check-prelock30-inputs-root.mjs:31:16\r\n    at ModuleJob.run (node:internal/modules/esm/module_job:439:25)\r\n    at async node:internal/modules/esm/loader:643:26\r\n    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5) {\r\n  errno: -4058,\r\n  code: 'ENOENT',\r\n  syscall: 'lstat',\r\n  path: 'E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\_scratch\\\\interrupted-owner-prelock-fake30-author03\\\\ROOT-ADMISSION-TEMPLATE.json'\r\n}\r\n\r\nNode.js v24.18.0\r\n\r\nName                              Length\r\n----                              ------\r\nOLD28-PRESERVATION.json             5306\r\nPINS.json                           8005\r\nqualify_windows_reservations.diff   4025\r\nROOT-ADMISSION.template.json         332\r\nrun_preflight01.diff                4681\r\n\r\n"
-}

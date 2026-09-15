@@ -1,7 +1,0 @@
-{
-  "chunk_id": "9420d6",
-  "wall_time_seconds": 0.3476833,
-  "exit_code": 0,
-  "original_token_count": 60,
-  "output": "{\r\n  \"exact_copies\": 28,\r\n  \"launcher_changes\": 0,\r\n  \"admission_sha256\": \"a1c6f3381178e6c0e847ee74011a4f61e1c5fdc89381f8de0e8006002d8c78d9\",\r\n  \"copy_bindings_sha256\": \"799558594f363696f86994d64ebee21b54db944532e1a8b6125561ae735bff11\"\r\n}\r\n"
-}

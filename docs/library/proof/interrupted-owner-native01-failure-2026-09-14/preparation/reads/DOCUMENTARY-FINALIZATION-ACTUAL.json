@@ -1,7 +1,0 @@
-{
-  "chunk_id": "b8c2ed",
-  "wall_time_seconds": 0.2068765,
-  "exit_code": 0,
-  "original_token_count": 116,
-  "output": "[\r\n  {\r\n    \"name\": \"ROOT-ADMISSION-TEMPLATE.json\",\r\n    \"bytes\": 704,\r\n    \"sha256\": \"317d1b370cbbf9c1c66b6d9ffdb602d90d0caab8d1d3dd4c365c2cbb22f27d0a\"\r\n  },\r\n  {\r\n    \"name\": \"READ-COVERAGE.json\",\r\n    \"bytes\": 6786,\r\n    \"sha256\": \"33abbe998ae9dbdbd773e02a9d03b660ac0a169060e992dc4aa30062a22f253a\"\r\n  },\r\n  {\r\n    \"name\": \"SOURCE-PREPARATION.md\",\r\n    \"bytes\": 3220,\r\n    \"sha256\": \"af334088b3c0af6039fe78fdbbce61237413665b8b02a2a3eafcffc637992b0e\"\r\n  }\r\n]\r\n"
-}

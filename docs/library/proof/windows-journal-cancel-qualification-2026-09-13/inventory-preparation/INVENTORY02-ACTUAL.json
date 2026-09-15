@@ -1,7 +1,0 @@
-{
-  "chunk_id": "0654c9",
-  "wall_time_seconds": 2.3623384,
-  "exit_code": 0,
-  "original_token_count": 312,
-  "output": "{\r\n  \"payload_count\": 206,\r\n  \"total_payload_bytes\": 2370626,\r\n  \"largest_payload_bytes\": 49786,\r\n  \"groups\": [\r\n    {\r\n      \"source_root\": \"_scratch/windows-journal-cancel-fake-proposal01\",\r\n      \"destination_root\": \"author\",\r\n      \"payload_count\": 112,\r\n      \"payload_bytes\": 1367713\r\n    },\r\n    {\r\n      \"source_root\": \"_scratch/astra-journal-cancel-confirmation01\",\r\n      \"destination_root\": \"independent\",\r\n      \"payload_count\": 77,\r\n      \"payload_bytes\": 967416\r\n    },\r\n    {\r\n      \"source_root\": \"_scratch/windows-journal-cancel-source-review01\",\r\n      \"destination_root\": \"source-review\",\r\n      \"payload_count\": 2,\r\n      \"payload_bytes\": 6328\r\n    },\r\n    {\r\n      \"source_root\": \"_scratch/windows-journal-cancel-complementary-review01\",\r\n      \"destination_root\": \"complementary-review\",\r\n      \"payload_count\": 2,\r\n      \"payload_bytes\": 3717\r\n    },\r\n    {\r\n      \"source_root\": \"_scratch/windows-journal-cancel-author-result-review01\",\r\n      \"destination_root\": \"author-result-review\",\r\n      \"payload_count\": 2,\r\n      \"payload_bytes\": 2530\r\n    }\r\n  ],\r\n  \"map_sha256\": \"1c015a72a1ee6874795fef0f9a3691bd5d845d74674b135a544661c7da244fe6\",\r\n  \"copies\": 0,\r\n  \"tests_rerun\": 0,\r\n  \"native_cancellation_executed\": false\r\n}\r\n"
-}

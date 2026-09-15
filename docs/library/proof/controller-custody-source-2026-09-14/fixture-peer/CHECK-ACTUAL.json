@@ -1,7 +1,0 @@
-{
-  "chunk_id": "e38ac5",
-  "wall_time_seconds": 0.2018854,
-  "exit_code": 0,
-  "original_token_count": 78,
-  "output": "{\n  \"scope\": \"independent text/hash/diff review only\",\n  \"bindings\": 10,\n  \"full_diff_pairs\": 4,\n  \"ordered_cases\": 10,\n  \"proposed_subtests\": 104,\n  \"source_hashes_unchanged\": true,\n  \"source_bindings_sha256\": \"2f2f5621dae10a443be7e1e7c3ddef64b5732a330e1dffdb204ddd95fccb3d58\",\n  \"candidate_executed\": false\n}\n"
-}

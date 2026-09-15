@@ -1,7 +1,0 @@
-{
-  "chunk_id": "14b18a",
-  "wall_time_seconds": 0.1781816,
-  "exit_code": 0,
-  "original_token_count": 205,
-  "output": "[\r\n  {\r\n    \"path\": \"VERDICT.md\",\r\n    \"bytes\": 3007,\r\n    \"sha256\": \"57326fb09beb0404942bdd152d32069121e8b23eac6969dc1d962452442c5acc\"\r\n  },\r\n  {\r\n    \"path\": \"RESULT-CHECK.json\",\r\n    \"bytes\": 18043,\r\n    \"sha256\": \"9a7b478a90713586e7d2a448314d3d81454a743fb8e4219be13d5c4cb0235cd4\"\r\n  },\r\n  {\r\n    \"path\": \"check_receipts.ps1\",\r\n    \"bytes\": 21998,\r\n    \"sha256\": \"63f64241d650836315b014ef7d051ace8cd7d5e758e7082099e649be6bb1ad03\"\r\n  },\r\n  {\r\n    \"path\": \"CHECK04-ACTUAL.json\",\r\n    \"bytes\": 20932,\r\n    \"sha256\": \"1cdc5232a5f1b99435048d6dfd24b40c66cfc24bd9dc72f011b1f026147a5eb9\"\r\n  }\r\n]\r\n{\r\n  \"root_actual_path\": \"E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\_scratch\\\\INTERRUPTED-NATIVE-RUN02-ACTUAL.json\",\r\n  \"bytes\": 124,\r\n  \"sha256\": \"8e71a0ff2f6585855811b94f6dcbc695d9ae2cb5d55a2853264871f140062f55\"\r\n}\r\n"
-}

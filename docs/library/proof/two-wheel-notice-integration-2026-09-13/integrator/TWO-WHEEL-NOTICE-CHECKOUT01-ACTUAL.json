@@ -1,7 +1,0 @@
-{
-  "chunk_id": "3a56e1",
-  "wall_time_seconds": 1.5749455,
-  "exit_code": 0,
-  "original_token_count": 93,
-  "output": "{\r\n  \"label\": \"notice01\",\r\n  \"qualification_exit\": 0,\r\n  \"elapsed_seconds\": 1.1448935,\r\n  \"inputs_unchanged\": true,\r\n  \"failure\": null,\r\n  \"full_build_or_models_executed\": false,\r\n  \"source_inputs_sha256\": \"88e277a9e58f98c639fea115d2a59fe0bc8f739b5ff1adb984b77ebdf8605f24\",\r\n  \"admission_sha256\": \"2f5056679537effc2f43572ffa2055d6684a569406c22d74b7e2e02b66ba6817\"\r\n}\n\r\n"
-}

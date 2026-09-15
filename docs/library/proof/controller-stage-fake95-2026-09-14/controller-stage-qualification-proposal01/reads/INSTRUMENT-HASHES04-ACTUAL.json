@@ -1,7 +1,0 @@
-{
-  "chunk_id": "5bb1aa",
-  "wall_time_seconds": 0.1748387,
-  "exit_code": 0,
-  "original_token_count": 270,
-  "output": "[\r\n  {\r\n    \"name\": \"qualify_windows_reservations.py\",\r\n    \"bytes\": 13816,\r\n    \"sha256\": \"6eafdbd476026a3b01750d6abfb6c4d429078eea766410fc9a2803f7f9c3c846\"\r\n  },\r\n  {\r\n    \"name\": \"EXPECTED-CASES.json\",\r\n    \"bytes\": 10270,\r\n    \"sha256\": \"26a4c08c339ccc65d58b5141b406ca2967e8f3c61115074a9f1004b7745c74b0\"\r\n  },\r\n  {\r\n    \"name\": \"run_preflight01.ps1\",\r\n    \"bytes\": 8874,\r\n    \"sha256\": \"b71b436882df599c0650220383ed338f745345e19ca4217c9be1fe18eacf8930\"\r\n  },\r\n  {\r\n    \"name\": \"BRIEF.md\",\r\n    \"bytes\": 2018,\r\n    \"sha256\": \"42b7f5b21b115860f33937d507882cb7d349ddc5360e5e64d892a59f680a9a65\"\r\n  },\r\n  {\r\n    \"name\": \"QUALIFICATION-PROTOCOL.md\",\r\n    \"bytes\": 2774,\r\n    \"sha256\": \"b54afd01414e3a3411c5a0f2641765cec4f271b8d154a8a81fb43b98e6303551\"\r\n  },\r\n  {\r\n    \"name\": \"qualify_windows_reservations.py.diff\",\r\n    \"bytes\": 6778,\r\n    \"sha256\": \"3f9592d3838cdbb587b31c5563d6ae07e272bfb478be2bb31b27af9d62f8e233\"\r\n  },\r\n  {\r\n    \"name\": \"run_preflight01.ps1.diff\",\r\n    \"bytes\": 4411,\r\n    \"sha256\": \"0e22a19a2dbe941545996f5a2145e0393d4f1dfd3b64f2f1aa9a6059bdf94a55\"\r\n  }\r\n]\r\n"
-}

@@ -1,7 +1,0 @@
-{
-  "chunk_id": "4ea139",
-  "wall_time_seconds": 0.271325,
-  "exit_code": 0,
-  "original_token_count": 209,
-  "output": "{\r\n  \"verification\": \"PASS\",\r\n  \"method\": \"Independent .NET ZIP/member and RECORD hashing; no extraction or code execution\",\r\n  \"wheels\": [\r\n    {\r\n      \"package\": \"antlr4-python3-runtime\",\r\n      \"bytes\": 144613,\r\n      \"sha256\": \"d50ab331bff062b5e7f74e19fb16a2e891a47e893d805bcdbff8e6e6beb09c37\",\r\n      \"members\": 61,\r\n      \"record_rows\": 61,\r\n      \"expanded_bytes\": 479266,\r\n      \"missing_dist_info_license_text\": true\r\n    },\r\n    {\r\n      \"package\": \"proxy-tools\",\r\n      \"bytes\": 2943,\r\n      \"sha256\": \"a049f8570f5ce89b723ba282b90291ac3aa1fdcbd7d7100426ff659447400c68\",\r\n      \"members\": 5,\r\n      \"record_rows\": 5,\r\n      \"expanded_bytes\": 7432,\r\n      \"missing_dist_info_license_text\": true\r\n    }\r\n  ],\r\n  \"preparation_inputs\": 28,\r\n  \"script_execution_or_installation\": false,\r\n  \"license_notices_still_open\": true\r\n}\r\n"
-}

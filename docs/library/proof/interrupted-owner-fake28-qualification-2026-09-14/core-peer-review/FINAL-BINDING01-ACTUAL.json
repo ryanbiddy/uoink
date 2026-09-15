@@ -1,7 +1,0 @@
-{
-  "chunk_id": "e202b2",
-  "wall_time_seconds": 0.2039754,
-  "exit_code": 0,
-  "original_token_count": 79,
-  "output": "{\"name\":\"VERDICT.md\",\"bytes\":3905,\"sha256\":\"514550c65d2af2ed1ada598476a2310680a98b97fb7c0f8752153596fc9535e2\"}\r\n{\"name\":\"VIEW-COVERAGE.json\",\"bytes\":3964,\"sha256\":\"241d22796a971264920d47dbcd966d994d61efbc9d5e4869f8dddcb2d931206a\"}\r\nAll three final source hashes match the author freeze and initial peer inventory.\r\n"
-}

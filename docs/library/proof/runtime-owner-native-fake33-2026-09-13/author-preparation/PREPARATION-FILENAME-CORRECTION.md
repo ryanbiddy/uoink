@@ -1,5 +1,0 @@
-The initial data-only source copier stopped at an absent historical `run_owner01.ps1` (tool06b5b3, exit1). It had already copied the selected source texts and the historical qualifier. No code under review ran.
-
-A fixed-directory inventory (660235) identified the actual historical name `run_bootstrap01.ps1`. Only the remaining text copies were then made. ORIGINS.json records current hash equality of every retained before file and initial source copy. The observed tool facts here are not a reconstructed raw tool object.
-
-A later inline newline-count display (ae8a82) had an invalid PowerShell pipe after foreach and stopped at parsing. The corrected data-only display (ed66c5) ran; source preservation then passed in80894d. No subject code was involved. Root's apparent doubled map separators were a nested JSON-display concern: e07e1a decoded all36 paths, found zero doubled separators and matched every literal path. Root withdrew the proposed normalization; the correct map remained unchanged.

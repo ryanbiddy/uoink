@@ -1,7 +1,0 @@
-{
-  "chunk_id": "d27c8b",
-  "wall_time_seconds": 0.3000357,
-  "exit_code": 1,
-  "original_token_count": 55,
-  "output": "Exception: \r\nLine |\r\n  10 |  … ry.Name -cnotmatch '^[a-z_]+\\.py$'){throw 'Unexpected source member'}\r\n     |                                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\r\n     | Unexpected source member\r\n"
-}

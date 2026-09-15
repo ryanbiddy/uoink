@@ -1,7 +1,0 @@
-{
-  "chunk_id": "18c81b",
-  "wall_time_seconds": 0.0000019,
-  "exit_code": 0,
-  "original_token_count": 56,
-  "output": "{\"proof\": \"docs/library/proof/interrupted-owner-native01-failure-2026-09-14\", \"payloads_matching_disk_and_git\": 204, \"bytes\": 3024723, \"manifest_sha256\": \"a239c8e604d304dcbb216c070bcb5d565c3d67e510b77a5dca47e3dcd28cce2a\"}\r\n"
-}

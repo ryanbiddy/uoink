@@ -1,7 +1,0 @@
-{
-  "chunk_id": "09fba6",
-  "wall_time_seconds": 0.2135323,
-  "exit_code": 0,
-  "original_token_count": 69,
-  "output": "{\r\n  \"verified\": true,\r\n  \"inputs\": 23,\r\n  \"source_bytes\": null,\r\n  \"map_sha256\": \"89caa88f3e88e08f0051326321fea9610192df2acf9ff1d8a4c8ea742a233d97\",\r\n  \"brief_sha256\": \"c8a35833182912ea13312356a4a76bb85fccc0a03277dec9ef286b048d2f6301\",\r\n  \"execution_authority\": false\r\n}\r\n"
-}

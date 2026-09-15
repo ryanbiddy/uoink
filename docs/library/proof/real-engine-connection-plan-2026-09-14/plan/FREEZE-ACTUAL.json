@@ -1,7 +1,0 @@
-{
-  "chunk_id": "0635d2",
-  "wall_time_seconds": 0.1690442,
-  "exit_code": 0,
-  "original_token_count": 319,
-  "output": "[\r\n  {\r\n    \"name\": \"BRIEF.md\",\r\n    \"bytes\": 7744,\r\n    \"sha256\": \"140c4db6c85f7f606533324fa1f3b7d4f8e9922ba6b2c8189c380cd8e8086558\"\r\n  },\r\n  {\r\n    \"name\": \"SOURCE-INPUTS.json\",\r\n    \"bytes\": 7907,\r\n    \"sha256\": \"89caa88f3e88e08f0051326321fea9610192df2acf9ff1d8a4c8ea742a233d97\"\r\n  },\r\n  {\r\n    \"name\": \"PASSIVE-VIEW-NOTE.md\",\r\n    \"bytes\": 1482,\r\n    \"sha256\": \"dc7ee0a4c04510cda896b2543313263a59aebaf1f163478b77826eb58b46c527\"\r\n  }\r\n]\r\n2. Derive R/worker_runtime_owner.py and R/owned_generation_protocol.py. Add private issuance of an exact owner-held namespace lease after successful selected-member readback. Bind its read set, immutable buffers, manifest/model, profile and generation by identity. Add a separate fixed factory entry requiring that lease before any factory activity; preserve the existing generated entry's unconditional namespace check. Reuse N/owned_factory_port.py and N/model_binding_registry.py for the exact factory/product/model lease, requiring the current owned module's `_RUNTIME` to be this registry. Missing real state/recipe/tensor authority remains a refusal. Never call `issue_generated_inputs` to authorize real buffers. Register the actual VAD product before engine construction, and keep its exact lease live through publication.\r\n"
-}

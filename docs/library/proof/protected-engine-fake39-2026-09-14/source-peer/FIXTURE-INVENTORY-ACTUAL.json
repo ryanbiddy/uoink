@@ -1,7 +1,0 @@
-{
-  "chunk_id": "970621",
-  "wall_time_seconds": 0.1766606,
-  "exit_code": 0,
-  "original_token_count": 147,
-  "output": "[\r\n  {\r\n    \"Name\": \"connection_cases.py\",\r\n    \"Length\": 10526\r\n  },\r\n  {\r\n    \"Name\": \"EXPECTED-CASES.json\",\r\n    \"Length\": 3293\r\n  },\r\n  {\r\n    \"Name\": \"fake_torch_support.py\",\r\n    \"Length\": 5204\r\n  },\r\n  {\r\n    \"Name\": \"generated_bootstrap_fixture.py\",\r\n    \"Length\": 7205\r\n  },\r\n  {\r\n    \"Name\": \"generated_factory_fixture.py\",\r\n    \"Length\": 7539\r\n  },\r\n  {\r\n    \"Name\": \"generated_native_owner_fixture.py\",\r\n    \"Length\": 6888\r\n  },\r\n  {\r\n    \"Name\": \"generated_unit_cases.py\",\r\n    \"Length\": 13846\r\n  },\r\n  {\r\n    \"Name\": \"native_owner_cases.py\",\r\n    \"Length\": 16273\r\n  }\r\n]\r\n"
-}

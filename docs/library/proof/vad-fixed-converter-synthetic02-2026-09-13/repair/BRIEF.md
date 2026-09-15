@@ -1,7 +1,0 @@
-# Documentary seal repair: include the complete original file set
-
-2026-09-13. Root rejected the first converter proof before committing it. Its 75 recorded payloads and manifest hash matched, but the sealer wrote VERIFICATION.json after SHA256.json and omitted it from the manifest records. This is a proof packaging defect. The converter results remain author 82/0 and root 82/0; no test, source, profile or measurement changes are needed.
-
-Preserve `_scratch/vad-fixed-converter-final-proof01` and the rejected root copy unchanged. Create fresh proof02 enclosing all 77 files in proof01: the 75 recorded payloads, the original manifest and the omitted verification file. Add this repair brief, the new sealer and a short scope note. The outer manifest must cover every file except itself, including the original manifest and verification. Do not write another unrecorded verification file after sealing.
-
-Before creating the new outer manifest, verify all original 75 records and the original manifest digest f2993a14b2fb47737b77e1d5444a664cdd52b15631a20400a5c21e06d70b3b30. Copy every original file byte-for-byte; include the rejected packaging outcome explicitly in the scope note. After writing the outer manifest, require exact equality between actual files and the recorded set plus SHA256.json, then recheck every payload size and digest. Report the new count and manifest hash outside the sealed directory. No converter execution or actual artifact access.

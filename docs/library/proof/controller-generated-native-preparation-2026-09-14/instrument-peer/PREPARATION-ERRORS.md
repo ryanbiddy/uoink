@@ -1,3 +1,0 @@
-The passive check 289cfb exited 1 while comparing the module list. Its `[a-z_]+` parser omitted the digits in the two existing `win32` module names. The source list itself was correct. `check_source01.mjs` and `CHECK-ACTUAL.json` preserve the failure. The separately named `check_source02.mjs` changes only that parser to `[a-z0-9_]+`; no candidate source, predicate, control or admission changed. No subject ran.
-
-The initial combined donor metadata read (02ff86/0) was not initially displayed in full because of context truncation. Its complete saved output was subsequently displayed and read. The complete bootstrap and launcher were read in separate numbered ranges.

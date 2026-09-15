@@ -1,1 +1,0 @@
-The first unsealed copy-list draft retained correct per-file byte fields but wrote a null aggregate from Measure-Object over ordered dictionaries. Preserve that draft. Sum the existing explicit per-file byte integers directly; no source, raw run or measurement changes. This is documentary metadata preparation, not a test rerun.

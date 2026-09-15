@@ -1,1 +1,0 @@
-Before execution, the new passive journal observer is tightened to require a non-None gate and explicit held-key membership as well as identity equality. This avoids treating missing-key/None equality as a held gate in a malformed state. The original unexecuted adapter-cancel draft is preserved; no runtime or native result prompted this refinement.

@@ -1,7 +1,0 @@
-{
-  "approved": false,
-  "label": "journal-cancel-fake01",
-  "pins_sha256": "e60aa77cdd2dd4477960f44f24770f22f7a1e1ff3c334b8985047acb8e8f1a79",
-  "scope": "generated_bytes_and_fake_ports_only",
-  "note": "Unexecuted fixed cancel-driver and observer proposal; distinct root admission required."
-}

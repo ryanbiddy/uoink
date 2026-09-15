@@ -1,7 +1,0 @@
-{
-  "approved": false,
-  "label": "interrupted-retirement-fake01",
-  "pins_sha256": "d5099f5b81644ebf0cd3e0c91ba6233c664a2c062722f0219a115a6046ca5961",
-  "scope": "generated_bytes_and_fake_ports_only",
-  "note": "Pending four author texts; root review and separate admission required. This is not ROOT-ADMISSION.json."
-}

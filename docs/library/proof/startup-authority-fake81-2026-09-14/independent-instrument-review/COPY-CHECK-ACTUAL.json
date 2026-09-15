@@ -1,7 +1,0 @@
-{
-  "chunk_id": "446dd3",
-  "wall_time_seconds": 0.1929621,
-  "exit_code": 0,
-  "original_token_count": 211,
-  "output": "{\n  \"scope\": \"passive fixed source copies only\",\n  \"status\": \"PASS\",\n  \"copies\": [\n    {\n      \"role\": \"author\",\n      \"pins_sha256\": \"47af697a62dcead062f8c2771aad550ebd194392665f85a9a9f3face60551fb8\",\n      \"inputs\": 27,\n      \"child_texts_unchanged\": 23,\n      \"launcher_sha256\": \"00b0dab512def37602f8d9e3791d2fd7612684ce03d678f486e92d3ae2fd9ae9\",\n      \"label_replacements\": 0,\n      \"template_false\": true,\n      \"admission_and_run_absent\": true\n    },\n    {\n      \"role\": \"confirmation\",\n      \"pins_sha256\": \"963d1a5fbdc2cb89e14df155575767e1b9eeb2a28003a701c25d1b5b60781f31\",\n      \"inputs\": 27,\n      \"child_texts_unchanged\": 23,\n      \"launcher_sha256\": \"d336877b181d05db7530112b5fbb0f59743ecf8c7d9de2f52c4a605e60b2df8e\",\n      \"label_replacements\": 5,\n      \"template_false\": true,\n      \"admission_and_run_absent\": true\n    }\n  ]\n}\n"
-}

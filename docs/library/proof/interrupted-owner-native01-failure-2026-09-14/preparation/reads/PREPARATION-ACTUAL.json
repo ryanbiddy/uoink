@@ -1,7 +1,0 @@
-{
-  "chunk_id": "a6322a",
-  "wall_time_seconds": 0.2101725,
-  "exit_code": 0,
-  "original_token_count": 42,
-  "output": "{\r\n  \"copied_source_texts\": 29,\r\n  \"original_instruments_preserved\": 5,\r\n  \"source_only\": true,\r\n  \"actual_admission_copied\": false,\r\n  \"support_accessed\": false\r\n}\r\n"
-}

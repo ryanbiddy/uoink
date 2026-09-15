@@ -1,7 +1,0 @@
-{
-  "chunk_id": "c10a0a",
-  "wall_time_seconds": 0.2157263,
-  "exit_code": 0,
-  "original_token_count": 96,
-  "output": "{\"pins_sha256\":\"eb108b71b9f2a7d10db57efb2aa92b7b8df20a25bf44923ca273f456ab753bc1\",\"payload_count\":38,\"bytes\":631659,\"source_copies\":33,\"child_inputs\":35,\"original22_unchanged\":true,\"old_test_modules\":[\"test_reservations.py\",\"test_windows_reservations.py\",\"test_journal_cancel.py\",\"test_retired_owner_recovery.py\"],\"exact28_selection\":true,\"actual_admission\":false,\"execution\":false}\n"
-}

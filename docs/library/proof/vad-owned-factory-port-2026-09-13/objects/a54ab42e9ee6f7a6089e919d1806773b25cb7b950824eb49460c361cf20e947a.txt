@@ -1,7 +1,0 @@
-{
-  "chunk_id": "affefb",
-  "wall_time_seconds": 10.0021911,
-  "session_id": 71904,
-  "original_token_count": 0,
-  "output": ""
-}

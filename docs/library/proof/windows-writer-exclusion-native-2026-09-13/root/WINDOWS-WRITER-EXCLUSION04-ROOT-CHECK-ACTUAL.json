@@ -1,7 +1,0 @@
-{
-  "chunk_id": "0f54a5",
-  "wall_time_seconds": 0.1718712,
-  "exit_code": 0,
-  "original_token_count": 178,
-  "output": "{\r\n  \"status\": \"PASSED_GENERATED_EXCLUSION_AND_NORMAL_DRAIN_ONLY\",\r\n  \"outer_native_exit\": 0,\r\n  \"controller_native_exit\": 0,\r\n  \"both_exact_children_exit0_job0\": true,\r\n  \"all_three_guards_valid\": true,\r\n  \"primary_phase_count\": 4,\r\n  \"flush_successes\": 4,\r\n  \"closed_journal_bytes\": 2118,\r\n  \"closed_journal_sha256\": \"02bca5b9c70324f1fe227bb111b9db36a93803a19ac79be873f38a21c4721867\",\r\n  \"controller_native_calls\": 8230,\r\n  \"controller_dispatch\": 8266,\r\n  \"contender_native_calls\": 103,\r\n  \"contender_dispatch\": 137,\r\n  \"controller_seconds\": 0.3430434000038076,\r\n  \"source_controls_unchanged\": 21,\r\n  \"support_fixture_records_unchanged\": 14,\r\n  \"model_calls\": 0,\r\n  \"power_loss_or_restart_proven\": false\r\n}\r\n"
-}

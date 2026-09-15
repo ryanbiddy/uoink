@@ -1,8 +1,0 @@
-{
-  "chunk_id": "41f338",
-  "wall_time_seconds": 0.3788613,
-  "exit_code": 0,
-  "original_token_count": 82,
-  "output": "{\"scope\": \"Independent fake23 only; no real D2 approval\", \"source_count\": 9, \"identical_source_count\": 7, \"qualification_root_substitutions\": 2, \"input_manifest_sha256\": \"f290f240d65931de0a8c9ba9c898a1e2f4bc57e8229e5a781ba24b69845e4c29\", \"admission_sha256\": \"62627e748cfdb86a0a416110b8394ee92f52f88a5bd3af58f7ed487edf9da1d8\"}\r\n"
-}
-

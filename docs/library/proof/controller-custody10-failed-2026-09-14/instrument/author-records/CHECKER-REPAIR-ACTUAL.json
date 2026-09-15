@@ -1,8 +1,0 @@
-{
-  "chunk_id": "546a93",
-  "wall_time_seconds": 0.1958818,
-  "exit_code": 0,
-  "original_token_count": 56,
-  "output": "{\r\n  \"scope\": \"passive_checker_source_correction\",\r\n  \"file\": \"check_text_inputs02.mjs\",\r\n  \"bytes\": 7484,\r\n  \"sha256\": \"cd5421432961e795f4f6e0a204f6e544f498a7893d7051887b437b84d318566d\",\r\n  \"candidate_execution\": false\r\n}\r\n"
-}
-

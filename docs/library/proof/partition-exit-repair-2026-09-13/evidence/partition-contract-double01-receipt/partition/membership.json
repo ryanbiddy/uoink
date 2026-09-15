@@ -1,4 +1,0 @@
-[
-  "_scratch/test_phase4_partition_double_failure_smoke.py::test_ordinary_pass_is_retained",
-  "_scratch/test_phase4_partition_double_failure_smoke.py::test_call_and_teardown_failures_are_both_retained"
-]

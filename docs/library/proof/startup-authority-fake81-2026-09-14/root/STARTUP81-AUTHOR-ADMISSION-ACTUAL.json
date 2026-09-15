@@ -1,7 +1,0 @@
-{
-  "chunk_id": "0940bc",
-  "wall_time_seconds": 0.2397287,
-  "exit_code": 0,
-  "original_token_count": 69,
-  "output": "{\"label\":\"startup-authority-fake01\",\"admission_bytes\":653,\"admission_sha256\":\"698923f8f1b37db49678f28e4f573b8891d4ac03089d8220d651809696a8bdaf\",\"pins_sha256\":\"47af697a62dcead062f8c2771aad550ebd194392665f85a9a9f3face60551fb8\",\"scope\":\"generated_bytes_and_fake_ports_only\"}\r\n"
-}

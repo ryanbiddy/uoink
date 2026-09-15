@@ -1,9 +1,0 @@
-{
-  "prior_final_payloads_verified": 80,
-  "preserved_utc": "2026-09-13T12:45:30.4530174Z",
-  "prior_final_manifest_sha256": "60e3f77ba1244e2044b29f1c67facb917b24cc769f6fb4cb08c18c2f4415ee46",
-  "checkpoint_reopened": false,
-  "approved_reader_sha256": "f27b91e610284e26975038ff6826f2190758b1d4c53a402db3c2d0386cc4d40d",
-  "prior_final_proof_path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\vad-static-inventory-final-proof01",
-  "existing_results_superseded": false
-}

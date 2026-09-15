@@ -1,7 +1,0 @@
-{
-  "chunk_id": "bfbef5",
-  "wall_time_seconds": 5.0140302,
-  "session_id": 42728,
-  "original_token_count": 271,
-  "output": "gemini  warning The source project has uncommitted changes; the worktree starts from frozen base d8caad91002ab10d2494960d3ceecafc0a2a086f and does not include them.\ngemini  status  starting gemini-3.8-flash-high via Antigravity at high effort (isolated worktree write enabled)\ngemini  tool    view_file\ngemini  tool    view_file\ngemini  tool    run_command\ngemini  tool    run_command\ngemini  tool    view_file\ngemini  tool    view_file\ngemini  message I have launched the git command to check the commit hash and am awaiting its completion. \ngemini  tool    manage_task\ngemini  tool    manage_task\ngemini  tool    view_file\ngemini  tool    view_file\ngemini  tool    view_file\ngemini  tool    view_file\ngemini  tool    view_file\ngemini  tool    view_file\ngemini  tool    view_file\ngemini  tool    view_file\ngemini  tool    view_file\ngemini  tool    view_file\ngemini  tool    view_file\ngemini  tool    view_file\ngemini  tool    view_file\ngemini  tool    view_file\ngemini  tool    write_to_file\ngemini  tool    write_to_file\ngemini  tool    write_to_file\ngemini  tool    write_to_file\n"
-}

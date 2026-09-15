@@ -1,7 +1,0 @@
-{
-  "chunk_id": "8367bf",
-  "wall_time_seconds": 0.2591047,
-  "exit_code": 1,
-  "original_token_count": 54,
-  "output": "Exception: \r\nLine |\r\n   2 |  … k]; if($line.Length -eq 0){throw 'Unexpected empty diff line'}; $pref …\r\n     |                               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\r\n     | Unexpected empty diff line\r\n"
-}

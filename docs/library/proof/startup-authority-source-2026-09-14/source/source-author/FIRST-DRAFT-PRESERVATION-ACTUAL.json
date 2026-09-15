@@ -1,7 +1,0 @@
-{
-  "chunk_id": "3d7856",
-  "wall_time_seconds": 0.1939426,
-  "exit_code": 0,
-  "original_token_count": 290,
-  "output": "31: @dataclass(frozen=True)\r\n32: class PhysicalSnapshot:\r\n33:     volume: int\r\n34:     file_id: str\r\n35: \r\n36:     def wire(self):\r\n37:         _require(type(self.volume) is int and 0 <= self.volume < 1 << 64 and _hex(self.file_id, 32), \"physical_snapshot_identity\")\r\n38:         return [self.volume, self.file_id]\r\n39: \r\n40: \r\n41: @dataclass(frozen=True)\r\n42: class SnapshotSemantics:\r\n43:     store_volume: int\r\n44:     store_file_id: str\r\n45:     choice: str\r\n46:     revision: str\r\n47:     manifest: str\r\n48: \r\n49:     def wire(self):\r\n50:         _require(type(self.store_volume) is int and 0 <= self.store_volume < 1 << 64, \"store_volume\")\r\n51:         _require(_hex(self.store_file_id, 32) and _hex(self.manifest), \"store_and_manifest_identity\")\r\n52:         _require(all(type(v) is str and 0 < len(v) <= 128 and all(32 <= ord(c) < 127 for c in v)\r\n53:                      for v in (self.choice, self.revision)), \"snapshot_semantics\")\r\n54:         return [self.store_volume, self.store_file_id, self.choice, self.revision, self.manifest]\r\n55: \r\n56: \r\n57: def _shape(row):\r\n58:     _require(type(row) is dict and set(row) == FIELDS, \"journal_fields\")\r\n"
-}

@@ -1,5 +1,0 @@
-2026-09-13. Prepare an independent copy of the exact author nsp01 fake-API measurement for root review. Do not execute the copy helper or candidate until root admits the action.
-
-The author result is 54 passed, 0 failed, 0 skipped in 0.017906299995956942 seconds. Actual outer tool 0a8066 exited 0 in 0.6375469 seconds. Child and recorded launcher exits are 0; all nine source/copy inputs remained unchanged. The guard reported 12 metadata traps, 25 registry traps, closed content reads, zero prohibited imports/denials and empty stderr. This is generated-memory qualification only. ControllerHandshake's lifecycle/permit methods, real kernel behavior and model loading were not exercised.
-
-The helper verifies the original 37-payload preparation seal and exact author receipts, then makes nine copies into a fresh root. Only the launcher's literal absolute proposal path changes. It records both source and destination hashes and creates a false admission template with the exact 54 ordered names. Root must review the changed launcher and create its own ROOT-ADMISSION.json. The actual independent run is a separate measurement, not 54 additional distinct cases.

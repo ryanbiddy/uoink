@@ -1,9 +1,0 @@
-{
-  "source": "9dd0cfbb8390290f85a19529a22e4f0dedc0d0af",
-  "scope": "Complete tree in two test processes, plus read-only collection. Only S21 absent; --runxfail executes the repaired SEC-06 assertions normally. No existing test or guard edited.",
-  "media_partition": [
-    "tests/test_long_video_v324.py::test_screenshot_phase_end_to_end",
-    "tests/test_screenshot_extraction_cm10.py::test_limited_range_15_second_fixture_produces_eight_jpegs"
-  ],
-  "started_utc": "2026-09-13T09:38:24.520110+00:00"
-}

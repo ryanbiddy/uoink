@@ -1,7 +1,0 @@
-{
-  "chunk_id": "c53250",
-  "wall_time_seconds": 0.1564447,
-  "exit_code": 0,
-  "original_token_count": 132,
-  "output": "[\r\n  {\r\n    \"path\": \"docs/library/PROTECTED-ENGINE-OWNERSHIP-REPAIR-BRIEF-2026-09-14.md\",\r\n    \"bytes\": 3605,\r\n    \"sha256\": \"4a5137db7a9f91653e35b4a4c969d9553eb40f12a9c17a65e8c3eaedb6f967c6\",\r\n    \"read_scope\": \"full\",\r\n    \"role\": \"repair contract\"\r\n  },\r\n  {\r\n    \"path\": \"docs/library/ASTRA-PROTECTED-CONSTRUCTOR01-FAILURE-2026-09-14.md\",\r\n    \"bytes\": 4058,\r\n    \"sha256\": \"4e1aa310dbc29a49c1db163f52586a9d2a2f19b70b7aff7c990c381b84719fde\",\r\n    \"read_scope\": \"full\",\r\n    \"role\": \"rejected source disposition\"\r\n  }\r\n]\r\n"
-}

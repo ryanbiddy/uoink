@@ -1,7 +1,0 @@
-{
-  "chunk_id": "cce7c5",
-  "wall_time_seconds": 0.1838635,
-  "exit_code": 0,
-  "original_token_count": 292,
-  "output": "{\r\n  \"name\": \"plain_state_reader.py\",\r\n  \"path\": \"E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\_scratch\\\\windows-interrupted-owner-native-proposal02\\\\plain_state_reader.py\",\r\n  \"sha256\": \"3962d355cffe928f78b741d2d920cc9c727a9fbd10305e20462b60f4cef9990c\"\r\n}\r\n{\r\n  \"name\": \"plain_state_reader.py\",\r\n  \"before_sha256\": \"3962d355cffe928f78b741d2d920cc9c727a9fbd10305e20462b60f4cef9990c\",\r\n  \"source_after_sha256\": \"3962d355cffe928f78b741d2d920cc9c727a9fbd10305e20462b60f4cef9990c\",\r\n  \"copy_after_sha256\": \"3962d355cffe928f78b741d2d920cc9c727a9fbd10305e20462b60f4cef9990c\"\r\n}\r\n{\r\n  \"name\": \"ROOT-ADMISSION.json\",\r\n  \"path\": \"E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\_scratch\\\\windows-interrupted-owner-native-proposal02\\\\ROOT-ADMISSION-drain.json\",\r\n  \"sha256\": \"1dee3ab5239853a5da759be860e2141e89cb0a67f9148a6987bc635ecf2f71ad\"\r\n}\r\n{\r\n  \"name\": \"ROOT-ADMISSION.json\",\r\n  \"before_sha256\": \"1dee3ab5239853a5da759be860e2141e89cb0a67f9148a6987bc635ecf2f71ad\",\r\n  \"source_after_sha256\": \"1dee3ab5239853a5da759be860e2141e89cb0a67f9148a6987bc635ecf2f71ad\",\r\n  \"copy_after_sha256\": \"1dee3ab5239853a5da759be860e2141e89cb0a67f9148a6987bc635ecf2f71ad\"\r\n}\r\n32\r\n1\r\n"
-}

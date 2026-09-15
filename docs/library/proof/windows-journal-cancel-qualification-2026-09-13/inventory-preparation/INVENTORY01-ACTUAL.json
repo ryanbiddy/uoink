@@ -1,7 +1,0 @@
-{
-  "chunk_id": "8672d7",
-  "wall_time_seconds": 2.2446038,
-  "exit_code": 1,
-  "original_token_count": 99,
-  "output": "false: \r\nLine |\r\n   2 |  … _nested_per_observation=86;native_cancellation_executed=false;runtime …\r\n     |                                                            ~~~~~\r\n     | The term 'false' is not recognized as a name of a cmdlet, function, script file, or executable program.\r\nCheck the spelling of the name, or if a path was included, verify that the path is correct and try again.\r\n"
-}

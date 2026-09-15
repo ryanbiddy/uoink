@@ -1,6 +1,0 @@
-{
-  "actual_exit": 0,
-  "invocation": "python.exe -I -S -B qualify_parser.py static-preflight02",
-  "label": "static-preflight02",
-  "actual_checkpoint_invoked": false
-}

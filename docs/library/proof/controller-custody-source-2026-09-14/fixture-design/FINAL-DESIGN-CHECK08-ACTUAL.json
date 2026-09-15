@@ -1,7 +1,0 @@
-{
-  "chunk_id": "d84714",
-  "wall_time_seconds": 0.1870511,
-  "exit_code": 0,
-  "original_token_count": 222,
-  "output": "{\r\n  \"scope\": \"Passive documentary check only\",\r\n  \"controller_planned_modules\": 9,\r\n  \"generated_existing_modules\": 28,\r\n  \"generated_source_bytes\": 484524,\r\n  \"source_implementation_written\": false,\r\n  \"subject_executions\": 0,\r\n  \"files\": [\r\n    {\r\n      \"path\": \"DESIGN.md\",\r\n      \"bytes\": 6545,\r\n      \"sha256\": \"a0073171eb722bb5861ca71c2f1a3bdeffff07b0892972afbd92c4e9fa262d51\"\r\n    },\r\n    {\r\n      \"path\": \"GENERATED-COMPATIBILITY.md\",\r\n      \"bytes\": 2977,\r\n      \"sha256\": \"b08194718284cf683fee8710744526758c6cd5b1411a2044031f9f3a30d99ac8\"\r\n    },\r\n    {\r\n      \"path\": \"SOURCE-BINDINGS.json\",\r\n      \"bytes\": 6416,\r\n      \"sha256\": \"1d30b6941edd57ead817650fc1ddf9b449446a2fd053ad3c998be620bde8c676\"\r\n    },\r\n    {\r\n      \"path\": \"GENERATED-FAMILY.json\",\r\n      \"bytes\": 18221,\r\n      \"sha256\": \"f8164c86e1269290d303b16f0569ecd7395c36110e7311f822ddda80586a1154\"\r\n    }\r\n  ]\r\n}\r\n"
-}

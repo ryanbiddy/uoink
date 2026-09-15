@@ -1,5 +1,0 @@
-# Documentary command correction
-
-The first source-map/diff preparation command was rejected by the PowerShell parser before any statement ran: observed tool chunk `3285f7`, exit 1, 0.1455039 seconds, `An empty pipe element is not allowed`. It had placed a pipeline directly after a `foreach` statement. This was not a candidate test, bootstrap invocation, fixture creation, native API observation or source failure.
-
-The fresh documentary command collects final hash rows into an explicit array before piping them to JSON. It otherwise only reads proposal text and the retained native04 source-map JSON, writes the new source-map and false admission template, and asks `git diff --no-index` to write review diffs. No installed support-file bytes are read by this preparation.

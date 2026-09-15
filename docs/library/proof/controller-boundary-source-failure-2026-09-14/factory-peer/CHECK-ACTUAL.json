@@ -1,7 +1,0 @@
-{
-  "chunk_id": "8a07a3",
-  "wall_time_seconds": 0.1905746,
-  "exit_code": 1,
-  "original_token_count": 281,
-  "output": "{\n  \"frozen_count\": 13,\n  \"frozen_bytes\": 227359,\n  \"origin_count\": 8,\n  \"origin_bytes\": 227073,\n  \"adapter_prefix_byte_identical\": true,\n  \"diffs\": [\n    {\n      \"name\": \"durable_lifecycle\",\n      \"before_sha256\": \"3c8963eaa02bbc1d810ee2632d0363303bfe05ec6ceeef73771ca8005a00ece3\",\n      \"after_sha256\": \"4eeeade5384ca8172c3724a3ee2a6574ca6801e3af3408f177e586c9cd9a4dc3\",\n      \"patch_sha256\": \"bf1e477feb591e448f54266a7699d9d3d033fed665e7d7465d62f9c4a05713a9\",\n      \"normalization\": \"CRLF to LF only\",\n      \"hunks\": 1,\n      \"forward\": true,\n      \"reverse\": true\n    },\n    {\n      \"name\": \"asr_loading_adapter\",\n      \"before_sha256\": \"2f12cbf5a5f1142f892aa34df7d23af77107148b448fb4294329532e36be63ee\",\n      \"after_sha256\": \"94e522e622b8de3304ef48c97258a91692e70f22c3112dd6afabd6b493438611\",\n      \"patch_sha256\": \"360be788a6673b4f50cb21c490b0f4e62d8a7b262fa8b5486eda8250b2ef6e91\",\n      \"normalization\": \"CRLF to LF only\",\n      \"forward\": false,\n      \"reverse\": false,\n      \"failure\": \"invalid unified body marker at patch line 9: \\\"\\\"\"\n    }\n  ],\n  \"all_sources_unchanged\": true,\n  \"candidate_executed\": false\n}\n"
-}

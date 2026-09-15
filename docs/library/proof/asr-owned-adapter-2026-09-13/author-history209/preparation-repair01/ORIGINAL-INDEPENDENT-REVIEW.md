@@ -1,7 +1,0 @@
-2026-09-13. Preservation of the independent source-review verdict sent to root before this repair. This document records that review now; it is not an earlier execution receipt.
-
-The reviewed runner run_preflight01.ps1, SHA-256 e019886953150a95e51e0d8d0f07eb2558a85f8e0214a2440524d9225d54301d, stores the returned native exit only in a variable at line 49. Throwing hash, read and write operations at lines 52–82 precede the first persisted exit receipt at line 85. A missing or unreadable post-run input, or an after.json write failure, can therefore lose the completed child's actual exit. Persist a minimal native-exit receipt immediately after capture and before postchecks. This was a qualification blocker.
-
-The reviewed qualify_adapter.py, SHA-256 995199bc8b25129749f4558858cdb52d7d366ea602a4bb7e391a930344dbfa55, does not check at its final guard calculation that metadata traps remain installed. This was a nonblocking guard-verification limitation.
-
-No adapter defect was found within the stated fake-port contracts. The reviewed asr_loading_adapter.py is 03294344c0806b98b6d861c17371c1038c76dc0b874b9f756bf034187e849900. The dummy resolver's authority does not modify the real resolver's REAL_APPROVAL=None. Acquisition, lazy consumption, cleanup and quarantine ordering are consistent with the delegated lease/runtime contracts. Real lifecycle and runtime safety remain unproved. That review performed no execution, edits, model or artifact access.

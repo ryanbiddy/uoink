@@ -1,7 +1,0 @@
-{
-  "chunk_id": "ce4d10",
-  "wall_time_seconds": 3.417138,
-  "exit_code": 0,
-  "original_token_count": 43,
-  "output": "{\"selected_inputs_matching_disk_and_git\": 70, \"proof_manifests_matching_disk_and_git\": 3, \"selected_bytes\": 700114, \"head\": \"98a7e064e073020d8f55563c513dc74035871f52\"}\r\n"
-}

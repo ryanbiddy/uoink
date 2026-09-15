@@ -1,7 +1,0 @@
-2026-09-13. Independent source review of bootstrap 20dd5a24 found two preflight issues before any native execution. The original draft is retained.
-
-The audit policy now permits the exact zero-argument ctypes.get_last_error event. The primitive and pipe methods use it to interpret API return values. This permission only reads ctypes' thread-local bookkeeping; it does not open a file, load a DLL, inspect a model or query the registry. No generic ctypes event allowance is added. Other events remain individually listed or refused.
-
-Exhausting the ordinary 60-second/2,048-call work budget now closes work admission while reserving at most 64 cleanup calls over 10 seconds. This separate path accepts only exact retained process/job termination, waits on exact process/event owners, cancellation/result queries for owned pipe handles and closure of owned completed events. It cannot create a process, open a path, resume work or mark release safe. The existing pipe cleanup still retains uncertain buffers and flags. The reserved budget can also be exhausted; that remains an unconfirmed cleanup result rather than successful quiescence.
-
-The explicit _ctypes ExtensionFileLoader spec now declares that its origin is a file, so the bootstrap's exact __file__ check is represented in the spec. Neither this source change nor the reviewed x64 declarations is a native execution result. The eight hashes bind quiescent installed files and relevant source; they are not recursive DLL attestation.

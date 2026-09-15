@@ -1,7 +1,0 @@
-{
-  "chunk_id": "b7670d",
-  "wall_time_seconds": 0.6347201,
-  "exit_code": 0,
-  "original_token_count": 54,
-  "output": "{\"patch\":\"E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\_scratch\\\\real-child-namespace-plan01.patch\",\"bytes\":643400,\"sha256\":\"3766cf74d2114048236a72cb11be4b8ff6c5d7745fab45a28b870ef45fabb895\",\"apply_exit\":0}\r\n"
-}

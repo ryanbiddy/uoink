@@ -1,7 +1,0 @@
-{
-  "chunk_id": "2c06f2",
-  "wall_time_seconds": 0.3345053,
-  "exit_code": 0,
-  "original_token_count": 47,
-  "output": "{\"proof\":\"docs/library/proof/asr-completion-info-fake59-2026-09-14\",\"payloads\":193,\"bytes\":1288609,\"manifest_sha256\":\"06f7319979f2d892617af0f9eaa75053b8fe0849767440898049dfad3db65df1\"}\n"
-}

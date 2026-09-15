@@ -1,7 +1,0 @@
-{
-  "chunk_id": "3e5c7a",
-  "wall_time_seconds": 0.2413877,
-  "exit_code": 1,
-  "original_token_count": 98,
-  "output": "Exception: E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\windows-interrupted-owner-native-proposal01\\launcher-author\\check_launcher_text01.ps1:14\r\nLine |\r\n  14 |  … _cleanup')){throw 'Unfilled placeholder or forbidden final-child clai …\r\n     |                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\r\n     | Unfilled placeholder or forbidden final-child claim\r\n"
-}

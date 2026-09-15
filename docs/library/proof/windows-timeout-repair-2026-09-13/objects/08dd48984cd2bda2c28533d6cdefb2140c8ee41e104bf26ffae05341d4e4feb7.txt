@@ -1,7 +1,0 @@
-{
-  "chunk_id": "2624a3",
-  "wall_time_seconds": 0.9977747,
-  "exit_code": 0,
-  "original_token_count": 0,
-  "output": ""
-}

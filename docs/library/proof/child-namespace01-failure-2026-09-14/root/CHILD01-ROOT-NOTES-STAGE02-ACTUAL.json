@@ -1,7 +1,0 @@
-{
-  "chunk_id": "68f856",
-  "wall_time_seconds": 0.185894,
-  "exit_code": 0,
-  "original_token_count": 86,
-  "output": "{\"scope\":\"Documentation only; staged in completed worker checkout for raw diff/apply\",\"canonical_unchanged\":true,\"documentary_inputs\":7,\"original_edits\":3,\"final_status_amendment\":1,\"unchanged_table_lines\":57,\"proposed_bytes\":52959,\"proposed_sha256\":\"fee337c8fdcf31124f355587cc41ce98bf1bc1f0fb06a0261c36ee0787852138\",\"subject_execution\":false}\n"
-}

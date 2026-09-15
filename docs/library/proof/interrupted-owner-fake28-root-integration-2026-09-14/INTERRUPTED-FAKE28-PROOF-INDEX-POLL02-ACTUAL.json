@@ -1,7 +1,0 @@
-{
-  "chunk_id": "b2099f",
-  "wall_time_seconds": 0.0000021,
-  "exit_code": 0,
-  "original_token_count": 57,
-  "output": "{\"proof\": \"docs/library/proof/interrupted-owner-fake28-qualification-2026-09-14\", \"payloads_matching_disk_and_git\": 404, \"bytes\": 5257972, \"manifest_sha256\": \"40ec76a51c897fe317ff09a03be31f0ade01653aa152b7bc401733f2f10720ce\"}\r\n"
-}

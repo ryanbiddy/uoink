@@ -1,8 +1,0 @@
-{
-  "candidate_and_two_wrapper_blocks_identical": true,
-  "all_original_postchecks_identical": true,
-  "harness_adapter_child_guard_bytes_unchanged": true,
-  "new_native_block_sha256": "bd907f9bf3cc1fe58057d71f66325871c95b57e09588006ca17b333c8a4893a9",
-  "new_postchecks_sha256": "06cd4e2ade1aea7e9575f5deb6e520507d1b96865f8bc40d1ef8c8a938c95195",
-  "diagnostic_or_qualification_executed": false
-}

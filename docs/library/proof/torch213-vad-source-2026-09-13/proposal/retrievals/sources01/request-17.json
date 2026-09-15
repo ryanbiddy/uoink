@@ -1,9 +1,0 @@
-{
-  "body_file": "body-17.txt",
-  "kind": "source",
-  "limit": 65536,
-  "ordinal": 17,
-  "started_utc": "2026-09-13T16:48:30.670238+00:00",
-  "status": "not_completed",
-  "url": "https://raw.githubusercontent.com/pytorch/pytorch/cf30153c4c131c8164ee7798e5022d810682e2cb/torch/nn/modules/container.py"
-}

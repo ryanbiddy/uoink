@@ -1,7 +1,0 @@
-{
-  "chunk_id": "9dc50f",
-  "wall_time_seconds": 0.1806035,
-  "exit_code": 0,
-  "original_token_count": 102,
-  "output": "{\r\n  \"independent_root\": \"E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\_scratch\\\\astra-controller-handshake-contracts02\",\r\n  \"unchanged_source_files\": 5,\r\n  \"launcher_change\": \"Single literal proposal directory only\",\r\n  \"launcher_sha256\": \"bfafb91d9457b7ff383f1b8616897751c7d98cb4fb8227bfc355ab983bdf2955\",\r\n  \"admission_sha256\": \"397109e9f3cd7d3fb1628319b109a4f3b65461408ce5bcbd38e14ab11639854d\"\r\n}\r\n"
-}

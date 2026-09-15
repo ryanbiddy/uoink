@@ -1,3 +1,0 @@
-File.Replace backup argument: $null -> [NullString]::Value
-Certificate lookup: explicit Microsoft.PowerShell.Security import when Cert drive absent.
-Later addition: capture native SignTool diagnostics and exit in callback receipts.

@@ -1,8 +1,0 @@
-{
-  "child_files": {
-    "plain_state_reader.py": "296dec43cf7fbdefec54ae1ae321c48e98351152d723cc8f5849c6b6972bfef6",
-    "qualify_reader.py": "167324ea21bf811b1fdd43e41300e75bf62fa62041d65dd4c819b424426648b7",
-    "fixed-plan.json": "37af25ab777ca7c322e00bec20dfffc1b6959d32c5bbd1a8c678bfc4126c91bf"
-  },
-  "scope": "Only locally generated synthetic bytes under separately reviewed harness authority"
-}

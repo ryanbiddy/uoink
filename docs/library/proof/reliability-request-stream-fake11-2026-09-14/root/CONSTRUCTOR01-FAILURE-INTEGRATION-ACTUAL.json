@@ -1,7 +1,0 @@
-{
-  "chunk_id": "7a3d99",
-  "wall_time_seconds": 0.9669234,
-  "exit_code": 0,
-  "original_token_count": 55,
-  "output": "{\"patch\":\"E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\_scratch\\\\protected-constructor01-failed.patch\",\"bytes\":779608,\"sha256\":\"327a05867438c46d08e632ca231d21f168eda3c1c902ee6f8175a4a5779350bb\",\"apply_exit\":0}\r\n"
-}

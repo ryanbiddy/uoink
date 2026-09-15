@@ -1,7 +1,0 @@
-{
-  "chunk_id": "9de532",
-  "wall_time_seconds": 10.007752,
-  "session_id": 83308,
-  "original_token_count": 0,
-  "output": ""
-}

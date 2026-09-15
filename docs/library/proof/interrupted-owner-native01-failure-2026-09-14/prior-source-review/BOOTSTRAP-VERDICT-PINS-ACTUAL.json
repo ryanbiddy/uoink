@@ -1,7 +1,0 @@
-{
-  "chunk_id": "411a07",
-  "wall_time_seconds": 0.1495177,
-  "exit_code": 0,
-  "original_token_count": 63,
-  "output": "{\"name\":\"BOOTSTRAP-VERDICT.md\",\"bytes\":3901,\"sha256\":\"90e36e896b27b13f3ab1636389b4f8605bf9518ddb765698db24b178884fb5a8\"}\r\n{\"name\":\"BOOTSTRAP-VIEW-COVERAGE.json\",\"bytes\":1394,\"sha256\":\"0d01b67fa7f32ec62240fe22f6edfa90d9ef52b94ef17dd1d0596b63b69ac73b\"}\r\n"
-}

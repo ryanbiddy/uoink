@@ -1,8 +1,0 @@
-{
-  "chunk_id": "e89711",
-  "wall_time_seconds": 1.217119,
-  "exit_code": 0,
-  "original_token_count": 55,
-  "output": "{\"status\": \"FIXED_TEXT_INPUTS_MATCH_GIT_AND_DISK\", \"selected_count\": 33, \"selected_bytes\": 440045, \"minimum_required_lines\": 6422, \"destination\": \"docs/library/proof/worker-journal-council-correction-brief-2026-09-13\"}\r\n"
-}
-

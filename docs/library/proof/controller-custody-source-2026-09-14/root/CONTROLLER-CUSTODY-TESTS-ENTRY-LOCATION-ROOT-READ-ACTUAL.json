@@ -1,7 +1,0 @@
-{
-  "chunk_id": "61e6de",
-  "wall_time_seconds": 0.147078,
-  "exit_code": 0,
-  "original_token_count": 112,
-  "output": "156:        for helper in FIXED_ADAPTER_HELPERS + (\"_require_factory_start\",):\n157:            with self.subTest(before_open_helper=helper):\n159:                calls = []\n168:                            with changed(module, helper, trap):\n268:            for helper in FIXED_ADAPTER_HELPERS + (\"_require_factory_start\",):\n271:                    calls = []\n277:                        fixture.stack.enter_context(changed(module, helper, trap))\n"
-}

@@ -1,7 +1,0 @@
-{
-  "chunk_id": "1bbfd2",
-  "wall_time_seconds": 0.241156,
-  "exit_code": 0,
-  "original_token_count": 79,
-  "output": "{\r\n  \"inputs\": 35,\r\n  \"input_bytes\": 974786,\r\n  \"source_map_sha256\": \"6671ae07b89f5312c9e22a17d2126291d3bfbd86bdbd89c32c63a4c67fdf53ce\",\r\n  \"brief_sha256\": \"d3f08d4918dac131a92ad541cd826d3e7e5b550de4a56b2deeb75fcf48573e32\",\r\n  \"brief_bytes\": 8414,\r\n  \"bindings_rechecked\": true,\r\n  \"candidate_executed\": false\r\n}\r\n"
-}

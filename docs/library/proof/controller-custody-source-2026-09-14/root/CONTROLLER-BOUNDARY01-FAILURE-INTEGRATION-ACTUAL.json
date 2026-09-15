@@ -1,7 +1,0 @@
-{
-  "chunk_id": "b498fc",
-  "wall_time_seconds": 1.2928055,
-  "exit_code": 0,
-  "original_token_count": 77,
-  "output": "{\"proof\":\"docs/library/proof/controller-boundary-source-failure-2026-09-14\",\"patch\":\"E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\_scratch\\\\controller-boundary-source-failure-2026-09-14.patch\",\"bytes\":2281015,\"sha256\":\"0775f26070829a7f0ce56a1e250af63603213b32deeae1a9ae05ff1c45d501f3\",\"apply_exit\":0}\r\n"
-}

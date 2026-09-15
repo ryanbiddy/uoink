@@ -1,7 +1,0 @@
-{
-  "chunk_id": "b808b4",
-  "wall_time_seconds": 0.1961656,
-  "exit_code": 1,
-  "original_token_count": 54,
-  "output": "ParserError: \r\nLine |\r\n   9 |  if(Test-Path -LiteralPath $p){rg -n 'def.*load|MODULES|LOADED|__impor …\r\n     |                               ~\r\n     | Missing closing '}' in statement block or type definition.\r\n"
-}

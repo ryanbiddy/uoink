@@ -1,5 +1,0 @@
-{
-  "cmd": "$env:IG_FORBIDDEN_LIVE='C:\\Users\\hello\\AppData\\Local\\Uoink\\index.db'; & 'C:\\Users\\hello\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe' -NoProfile -File '_scratch\\controller-stage-fake95-author01\\run_preflight01.ps1'; exit $global:LASTEXITCODE",
-  "cwd": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library",
-  "scope": "one admitted fake-service invocation; no model or native services"
-}

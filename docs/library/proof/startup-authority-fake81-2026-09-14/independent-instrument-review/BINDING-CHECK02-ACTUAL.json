@@ -1,7 +1,0 @@
-{
-  "chunk_id": "63d8f3",
-  "wall_time_seconds": 0.2496439,
-  "exit_code": 0,
-  "original_token_count": 203,
-  "output": "{\n  \"scope\": \"passive source/data only\",\n  \"status\": \"PASS\",\n  \"pins_sha256\": \"47af697a62dcead062f8c2771aad550ebd194392665f85a9a9f3face60551fb8\",\n  \"map_sha256\": \"fde7f1797a2873860e1547257cd94a0676821c271004f4c5a7b82d7dc9ebbcd8\",\n  \"parent_inputs\": 27,\n  \"parent_bytes\": 455776,\n  \"module_count\": 21,\n  \"child_count\": 23,\n  \"unchanged_original_modules\": 16,\n  \"old_cases\": 65,\n  \"new_cases\": 16,\n  \"ordered_total\": 81,\n  \"false_templates\": true,\n  \"patches\": [\n    {\n      \"file\": \"qualify_windows_reservations.diff\",\n      \"hunks\": 5,\n      \"forward\": true,\n      \"reverse\": true,\n      \"comparison\": \"complete LF-normalized text\"\n    },\n    {\n      \"file\": \"run_preflight01.diff\",\n      \"hunks\": 6,\n      \"forward\": true,\n      \"reverse\": true,\n      \"comparison\": \"complete LF-normalized text\"\n    }\n  ]\n}\n"
-}

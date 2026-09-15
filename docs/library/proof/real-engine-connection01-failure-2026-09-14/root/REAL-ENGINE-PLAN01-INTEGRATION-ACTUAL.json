@@ -1,7 +1,0 @@
-{
-  "chunk_id": "978113",
-  "wall_time_seconds": 0.5867312,
-  "exit_code": 0,
-  "original_token_count": 52,
-  "output": "{\"patch\":\"E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\_scratch\\\\real-engine-plan01.patch\",\"bytes\":356388,\"sha256\":\"cf4b2f220485369480d4b3a4a55a6981e46c3ac6fe7751f23f5f8138f6823dc2\",\"apply_exit\":0}\r\n"
-}

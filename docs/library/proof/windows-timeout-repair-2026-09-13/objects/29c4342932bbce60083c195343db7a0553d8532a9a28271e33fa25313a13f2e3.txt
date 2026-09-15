@@ -1,9 +1,0 @@
-# Pending-I/O exit survives receipt failure
-
-Root's source review found that the pending-I/O branch called `write_receipt` before its immediate process exit. Serialization, the output cap, file creation, writing or flushing could raise and skip that exit, allowing normal Python teardown while unconfirmed native buffers remained. No candidate has run. The previous bootstrap, diff, source map and false admission template are preserved under `before/pre-receipt-finally-*`.
-
-Root then identified that failure-facts or receipt construction could raise before the narrower pending-I/O branch was reached. That intermediate unexecuted draft and this note are also retained under `before/pre-outer-finalization-*`.
-
-The complete candidate flow and reporting now run inside one outer `try/finally` after the pipe controller exists. The finalizer inspects the already-retained controller pipe pairs; if any operations remain, it calls the retained, startup-bound `PROCESS_ABORT(1)`. There is no assertion or mutable `os._exit` lookup before that call. This covers flow handling, failure-facts construction, receipt construction, serialization, writing and flushing. The no-pending branch still uses the same normal receipt write and `SystemExit`. It does not relax a release condition or grant native execution.
-
-If the write fails, a complete durable controller receipt is not promised. The immediate exit remains failure code 1, and the outer launcher preserves the actual native exit and any available output or partial record. A missing/partial receipt fails outer validation. No success or persistence claim may be inferred from this fallback.

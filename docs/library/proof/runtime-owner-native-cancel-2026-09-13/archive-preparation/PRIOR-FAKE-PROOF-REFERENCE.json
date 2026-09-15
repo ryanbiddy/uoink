@@ -1,6 +1,0 @@
-{
-  "commit": "3661608",
-  "manifest": "docs/library/proof/runtime-owner-native-fake33-2026-09-13/SHA256.json",
-  "sha256": "51dc8098baca8995af23fadc41d2a0289f032ed6be8fdbce9cba663379f677bf",
-  "scope": "Both fake33 observations and their source/history are already committed; this native archive references that proof and does not duplicate its 275 payloads"
-}

@@ -1,7 +1,0 @@
-{
-  "chunk_id": "f18586",
-  "wall_time_seconds": 0.1682026,
-  "exit_code": 1,
-  "original_token_count": 67,
-  "output": "warning: in the working copy of 'before/test_controller_resume_publication.py', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'test_controller_resume_publication.py', LF will be replaced by CRLF the next time Git touches it\n"
-}

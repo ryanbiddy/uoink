@@ -1,3 +1,0 @@
-Read-only preparation history: BASELINE-SELECTION03-ACTUAL.json retains a guessed qualify_preflight.py lookup that failed; the actual filename is qualify_windows_reservations.py, then read completely. DRAFT-IMPORTS-READ02-ACTUAL.json includes a filename-filtered scratch inventory that was larger than needed; subsequent inspection stayed on the selected fixed directories. Neither event was a candidate failure. Actual source reads and comparisons are retained unchanged.
-
-The author's loader contract and message bind the intended current native02 durable_lifecycle.py, not the older corrected65 implementation. The new fixture/test hashes in this plan were observed while author freeze was still pending. No final new input pins or qualification outcome are asserted.

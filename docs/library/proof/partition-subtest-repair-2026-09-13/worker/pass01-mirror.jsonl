@@ -1,2 +1,0 @@
-{"event": "observer_started", "schema": 1, "include_stacks": false, "outcome_policy": "pytest outcomes are unchanged; observer errors invalidate this diagnostic receipt"}
-{"event": "observer_finished", "pytest_exitstatus": 0, "pytest_tests_collected": 3, "pytest_tests_failed": 0, "observation_attempts": 0, "observer_errors": 0, "diagnostic_complete": true}

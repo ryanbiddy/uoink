@@ -1,7 +1,0 @@
-{
-  "chunk_id": "17e055",
-  "wall_time_seconds": 2.4109349,
-  "exit_code": 0,
-  "original_token_count": 146,
-  "output": "warning: in the working copy of 'src/agents/gemini.ts', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'test/gemini-command-provenance.test.mjs', LF will be replaced by CRLF the next time Git touches it\n{\"payloads_matching_disk_index_seal\":24,\"seal_sha256\":\"a814a154066b5ed35618a1e1b4bcd3c15477ee4cadf1383448e2a900b1a798fa\",\"source_files_only_newline_normalization\":2,\"staged_files\":27}\n test/gemini-command-provenance.test.mjs            | 141 +++++++++++++++\r\n 27 files changed, 1001 insertions(+)\r\nc3607c363c55f5a100b4d8c07a08979a620e876e\n"
-}

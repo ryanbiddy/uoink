@@ -1,3 +1,0 @@
-The first unexecuted metadata draft checked issuance outside the final publication lock. Source review identified a gap: generation revocation could win between that lookup and publication. The draft is preserved in `before/metadata-publication-draft01.py`.
-
-The final source makes the trusted issuance predicate an explicitly local, non-I/O private-registry lookup inside the publication lock. Registry revocation must share that lock. Getter I/O remains outside it. The source rechecks session/close state after the predicate as well as exact captured identities, and includes the current kernel identity. No existing assertion or protocol was changed. No draft was executed.

@@ -1,9 +1,0 @@
-# Actual adapter native drain preparation, 2026-09-13
-
-Prepare one separately admitted generated drain observation through the unchanged ASR adapter and reviewed generated bridge. Derive the bootstrap/launcher from `generated-operation-native-proposal01`; add only the pinned resolver, adapter and bridge in dependency order. The new source count is twelve. The 32 native functions, nine support bindings, audit/FFI/metadata/registry guards, native monitor and both-endpoint pending-I/O finalizer remain unchanged.
-
-Use one fresh run path, `_scratch/generated-actual-adapter-drain01`, and a distinct `generated-actual-asr-adapter-only` admission. Preserve the old bootstrap, launcher and map. The launcher retains the original drain/OS/fixture checks, then compares both exact generated startup policies and acknowledgements, ordered authority events, binding count and restoration state. No candidate, bootstrap, worker, model or native API may be invoked during this preparation.
-
-The source reread confirmed the superclass contract: `acquire_read` stores the same `SnapshotKey` used by the actual adapter lease; generated admission runs in `PROTECTED`; binding runs in `NATIVE_RESERVED` before an owner exists; the actual factory installs the owner before calling `start_owned_worker`; inherited startup and the new policy acknowledgement stay reserved; the factory switches to running only after the override returns. The actual adapter's cleanup confirms stopped→closed before the lease releases. The bridge's generated root/key checks supplement the superclass's exact record/permit checks.
-
-The generated release/admission seams are explicit test scope. Real resolver approval and functions, release authority and acquisition remain unchanged/absent. A supported model-choice label selects the adapter branch, but the only fixture content is five generated ASCII files. This observation grants no model, audio decoder, VAD, migration or release authority.

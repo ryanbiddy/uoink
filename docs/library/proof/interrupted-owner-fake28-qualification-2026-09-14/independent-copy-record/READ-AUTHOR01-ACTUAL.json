@@ -1,7 +1,0 @@
-{
-  "chunk_id": "223f74",
-  "wall_time_seconds": 0.2698538,
-  "exit_code": 1,
-  "original_token_count": 92,
-  "output": "\r\nGet-Content: \r\nLine |\r\n   2 |  … .md') -Raw; Get-Content -LiteralPath (Join-Path $taskAuthor 'SOURCE-R …\r\n     |                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\r\n     | Cannot find path 'E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\interrupted-retirement-fake28-author01\\SOURCE-ROWS.pending.json' because it does not exist.\r\n"
-}

@@ -1,7 +1,0 @@
-{
-  "chunk_id": "b3c892",
-  "wall_time_seconds": 0.4309241,
-  "exit_code": 0,
-  "original_token_count": 31,
-  "output": "{\r\n  \"copied\": 42,\r\n  \"child_texts\": 38,\r\n  \"before_controls\": 4,\r\n  \"unchanged\": true,\r\n  \"subject_executed\": false\r\n}\r\n"
-}

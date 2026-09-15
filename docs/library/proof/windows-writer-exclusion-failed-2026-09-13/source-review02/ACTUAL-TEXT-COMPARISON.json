@@ -1,7 +1,0 @@
-{
-  "chunk_id": "7e0076",
-  "wall_time_seconds": 0.3465588,
-  "exit_code": 0,
-  "original_token_count": 43,
-  "output": "{\"sources\":18,\"unchanged\":15,\"adapter_original_lines\":405,\"launcher_paths_only\":true,\"binding_sha256\":\"94586583df101d58d48511e23d5c0bf6ceaf079dca76f6f3dacc9b6ad6e3fe74\"}\r\n"
-}

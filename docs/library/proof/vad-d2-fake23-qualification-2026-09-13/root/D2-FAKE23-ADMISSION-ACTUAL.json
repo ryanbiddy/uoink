@@ -1,8 +1,0 @@
-{
-  "chunk_id": "43b41d",
-  "wall_time_seconds": 0.2922851,
-  "exit_code": 0,
-  "original_token_count": 88,
-  "output": "{\"scope\":\"D2_FAKE23_ONLY_NO_REAL_CONVERSION\",\"source_inputs\":9,\"manifest_sha256\":\"c6e83710882f413547b671f058b9190c06940291b34d882df6c25f0ed774bcad\",\"admission_sha256\":\"5640d9efb108e8a78dc358bd726ea0d6f82d23400b6efee6299978e1dd83ff42\",\"root_review_sha256\":\"d4ef542f65882938dce5aadb40c932aac983cf23b1924eb62297269682f1526f\",\"real_D2_approved\":false}\r\n"
-}
-

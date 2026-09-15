@@ -1,7 +1,0 @@
-{
-  "chunk_id": "25984f",
-  "wall_time_seconds": 0.6005498,
-  "exit_code": 0,
-  "original_token_count": 72,
-  "output": "{\"proof\":\"docs/library/proof/controller-boundary-plan-2026-09-14\",\"patch\":\"E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\_scratch\\\\controller-boundary-plan-2026-09-14.patch\",\"bytes\":273986,\"sha256\":\"a0573d09dfe69a6a7d2d8e27b3d23b60ce730528ee324083a05ffe7fdfcd71e3\",\"apply_exit\":0}\r\n"
-}

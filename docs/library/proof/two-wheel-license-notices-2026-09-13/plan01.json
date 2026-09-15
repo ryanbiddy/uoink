@@ -1,5 +1,0 @@
-[
- {"id":"antlr-tag","url":"https://api.github.com/repos/antlr/antlr4/git/ref/tags/4.9.3"},
- {"id":"proxy-tags","url":"https://api.github.com/repos/jtushman/proxy_tools/tags?per_page=100"},
- {"id":"proxy-commits","url":"https://api.github.com/repos/jtushman/proxy_tools/commits?per_page=100"}
-]

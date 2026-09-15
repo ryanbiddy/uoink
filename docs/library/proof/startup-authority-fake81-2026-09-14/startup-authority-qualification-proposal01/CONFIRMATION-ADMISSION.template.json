@@ -1,8 +1,0 @@
-{
-  "approved": false,
-  "label": "startup-authority-confirmation01",
-  "pins_sha256": null,
-  "scope": "generated_bytes_and_fake_ports_only",
-  "case_count": 81,
-  "status": "Requires separately prepared and reviewed independent launcher/input pins; no admission"
-}

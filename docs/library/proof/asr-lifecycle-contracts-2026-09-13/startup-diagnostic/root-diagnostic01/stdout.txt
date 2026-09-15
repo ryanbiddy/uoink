@@ -1,1 +1,0 @@
-{'schema': 'uoink.lifecycle-startup-names.v1', 'initial_heavy_roots': ['winreg'], 'stages': [], 'attempted_heavy_imports': [], 'lifecycle_cases_executed': 0}

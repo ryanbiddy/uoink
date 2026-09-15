@@ -1,7 +1,0 @@
-{
-  "chunk_id": "98056d",
-  "wall_time_seconds": 0.1678631,
-  "exit_code": 0,
-  "original_token_count": 124,
-  "output": "{\"name\":\"VERDICT.md\",\"bytes\":2895,\"sha256\":\"4a04c4ca02cd219ee0d36c3f28d3a44da7944bbf77f621ce929d41b93106be37\"}\r\n{\"name\":\"DIAGNOSTICS.json\",\"bytes\":23931,\"sha256\":\"61ce92a2a13f509cce0d2d0fa94632255d3a8d7bbde9360fd9c190e6fe6cd3a1\"}\r\n{\"name\":\"compare_saved_predicates01.ps1\",\"bytes\":8314,\"sha256\":\"4bfe662236e6628d67659b4a1c88edef912b6d46960391fe22977c6d05a989b8\"}\r\n{\"name\":\"PREDICATE-CHECK01-ACTUAL.json\",\"bytes\":28722,\"sha256\":\"3a3509564ef03b9a9a92f9e46a69f35a09c0b550c801664c996ec6684e2bd5a2\"}\r\n"
-}

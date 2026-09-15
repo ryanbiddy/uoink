@@ -1,7 +1,0 @@
-{
-  "chunk_id": "d66897",
-  "wall_time_seconds": 30.0010184,
-  "session_id": 19744,
-  "original_token_count": 223,
-  "output": "gemini  tool    run_command\ngemini  tool    run_command\ngemini  tool    write_to_file\ngemini  tool    write_to_file\ngemini  tool    view_file\ngemini  tool    view_file\ngemini  tool    view_file\ngemini  tool    view_file\ngemini  tool    view_file\ngemini  tool    view_file\ngemini  tool    view_file\ngemini  tool    view_file\ngemini  tool    run_command\ngemini  tool    run_command\ngemini  tool    manage_task\ngemini  tool    manage_task\ngemini  tool    manage_task\ngemini  tool    manage_task\ngemini  tool    view_file\ngemini  tool    view_file\ngemini  tool    replace_file_content\ngemini  tool    replace_file_content\ngemini  tool    run_command\ngemini  tool    run_command\ngemini  tool    run_command\ngemini  tool    run_command\ngemini  tool    view_file\ngemini  tool    view_file\ngemini  tool    manage_task\ngemini  tool    manage_task\ngemini  tool    view_file\ngemini  tool    view_file\n"
-}

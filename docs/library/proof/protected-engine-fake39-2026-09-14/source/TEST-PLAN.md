@@ -1,9 +1,0 @@
-The proposed test module is test_engine_ownership.py with six ordered IDs in NEW-CASE-IDS.json. It is not an executable qualification instrument. Root will adapt an existing accepted guarded loader only after source review.
-
-Load generated_engine_objects before worker_runtime_owner and owned_generation_protocol. Reuse the accepted state bridge/CPU port/registry/factory/owned guard/fake tensor/schema modules, snapshot_lifecycle, generated_bootstrap_fixture and unchanged connection_cases helpers. Tests start from the actual challenge/begin sequence, issue the generated namespace/PCM and build/register the actual fixed factory VAD. No _FactoryOwner fields, capability or namespace authority is seeded as a success shortcut.
-
-The original owner eleven, bootstrap six, native-owner sixteen and their combined33-ID file remain unchanged references in SOURCE-INPUTS.json. They are not retroactively passes against this derivative. Root determines the later bounded union using the existing guard/result machinery; this preparation adds no harness or admission.
-
-New tests have six methods and ten lexical subTest iterations (five omitted/forged issuance, three constructor/preparation failures, two revoke/link changes). Separate contexts within test03 cover attempt and operation ordering. All work is inert bytearray/object bookkeeping. Existing fixture teardown occurs after assertions and remains explicitly generated-only.
-
-Acceptance must preserve exact original test bytes and ordinary real refusals, run the new IDs in supplied order, capture actual outer/native exits and all guard/custody results, and stop on any failure. Nothing in this preparation admits that execution. No installed support, checkpoint/D2 output, physical fixture, native API, model, network or production path was accessed.

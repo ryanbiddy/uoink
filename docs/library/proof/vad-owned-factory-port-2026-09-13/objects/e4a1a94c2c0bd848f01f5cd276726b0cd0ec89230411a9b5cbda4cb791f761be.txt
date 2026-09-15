@@ -1,7 +1,0 @@
-{
-  "chunk_id": "6ad9a7",
-  "wall_time_seconds": 0.2808612,
-  "exit_code": 0,
-  "original_token_count": 107,
-  "output": "{\r\n  \"files_copied\": 31,\r\n  \"launcher_byte_identical\": true,\r\n  \"admission_sha256\": \"7572c61d525ece445064d109fd43134c644d5045e1e31d27f0595cbbfb2d140e\",\r\n  \"author_outer\": {\r\n    \"chunk_id\": \"09a9aa\",\r\n    \"wall_time_seconds\": 2.0017328,\r\n    \"exit_code\": 0,\r\n    \"original_token_count\": 0,\r\n    \"output\": \"\"\r\n  },\r\n  \"root\": \"E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\_scratch\\\\astra-owned-factory-qualification01\"\r\n}\r\n"
-}

@@ -1,7 +1,0 @@
-{
-  "chunk_id": "fa439f",
-  "wall_time_seconds": 0.220835,
-  "exit_code": 0,
-  "original_token_count": 203,
-  "output": "warning: in the working copy of 'THIRD-PARTY-NOTICES.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'build.ps1', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'installer/uoink.iss', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'scripts/gen_third_party_notices.py', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'tests/test_notice_integration.py', LF will be replaced by CRLF the next time Git touches it\n{\r\n  \"exact_after_files\": 8,\r\n  \"normalized_text_unchanged\": true,\r\n  \"new_test_added\": true,\r\n  \"test_sha256\": \"0ba6b8c53f991d5373eaf86a54aff10bc3840d7855b187b02719ecdc31a28a3c\",\r\n  \"original_apply_failure_preserved\": true\r\n}\r\n"
-}

@@ -1,7 +1,0 @@
-{
-  "chunk_id": "6c6cbb",
-  "wall_time_seconds": 0.3564244,
-  "exit_code": 0,
-  "original_token_count": 125,
-  "output": "{\r\n  \"scope\": \"Two-field documentary inventory correction only\",\r\n  \"payload_count\": 54,\r\n  \"total_payload_bytes\": 223710,\r\n  \"maximum_payload_bytes\": 20225,\r\n  \"source_rows_unchanged\": true,\r\n  \"draft_bytes\": 15809,\r\n  \"draft_sha256\": \"e52a3d8e0c1bc071352e58cf595325b3bf01272dd3bdcbe615aa86328a9a2b62\",\r\n  \"map_bytes\": 15812,\r\n  \"map_sha256\": \"e86143a2f27f3966157de56aa5c17a3cc9ce45efd3dc3ace043dbfe8d69f9f41\",\r\n  \"archive_or_candidate_executed\": false,\r\n  \"artifact_or_output_accessed\": false\r\n}\r\n"
-}

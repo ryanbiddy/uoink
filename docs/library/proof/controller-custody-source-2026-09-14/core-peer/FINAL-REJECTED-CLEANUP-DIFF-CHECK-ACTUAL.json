@@ -1,7 +1,0 @@
-{
-  "chunk_id": "f9e0d8",
-  "wall_time_seconds": 0.4162093,
-  "exit_code": 0,
-  "original_token_count": 274,
-  "output": "{\r\n  \"scope\": \"Passive rejected-origin and cleanup diff checks only\",\r\n  \"result\": \"PASS\",\r\n  \"pairs\": [\r\n    {\r\n      \"before\": \"before\\\\rejected-asr_loading_adapter.py\",\r\n      \"after\": \"asr_loading_adapter.py\",\r\n      \"diff\": \"asr_loading_adapter.from-rejected.final03.diff\",\r\n      \"sha256\": \"4bd6c76a6f5b28366a8e3c8fa7595ec4792eef625993d5de5143a93b8eecbd64\",\r\n      \"hunks\": 1,\r\n      \"forward\": true,\r\n      \"reverse\": true\r\n    },\r\n    {\r\n      \"before\": \"before\\\\rejected-durable_lifecycle.py\",\r\n      \"after\": \"durable_lifecycle.py\",\r\n      \"diff\": \"durable_lifecycle.from-rejected.final03.diff\",\r\n      \"sha256\": \"9785a68028390d0a8e3306a667f39be1be43daa2029d6934f252ae4a600e537d\",\r\n      \"hunks\": 1,\r\n      \"forward\": true,\r\n      \"reverse\": true\r\n    },\r\n    {\r\n      \"before\": \"before\\\\pre-review-cleanup03-durable_lifecycle.py\",\r\n      \"after\": \"durable_lifecycle.py\",\r\n      \"diff\": \"CLEANUP-ERROR-REPAIR03.diff\",\r\n      \"sha256\": \"7fd4dfa743ffadaa2be5140d11375e20ef7a8581e7f3acfb5a220dbcfc5ebd65\",\r\n      \"hunks\": 1,\r\n      \"forward\": true,\r\n      \"reverse\": true\r\n    }\r\n  ]\r\n}\r\n"
-}

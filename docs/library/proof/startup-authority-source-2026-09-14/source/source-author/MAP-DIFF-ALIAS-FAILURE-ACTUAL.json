@@ -1,7 +1,0 @@
-{
-  "chunk_id": "55d5ce",
-  "wall_time_seconds": 0.3115584,
-  "exit_code": 1,
-  "original_token_count": 124,
-  "output": "Compare-Object: E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\real-startup-authority-repair01\\prepare_text_bindings.ps1:68\r\nLine |\r\n  68 |      (Diff $before $current (Join-Path $proposal 'asr_loading_adapter. …\r\n     |       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\r\n     | A positional parameter cannot be found that accepts argument\r\n     | 'E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\real-startup-authority-repair01\\asr_loading_adapter.diff'.\r\n"
-}

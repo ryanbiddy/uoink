@@ -1,7 +1,0 @@
-{
-  "chunk_id": "4bd36d",
-  "wall_time_seconds": 0.1185795,
-  "exit_code": 0,
-  "original_token_count": 41,
-  "output": "{\r\n  \"scope\": \"generated-operation-facade-only\",\r\n  \"mode\": \"cancel\",\r\n  \"admission_sha256\": \"bde7ea9755aaac67456ffcc3d977d0bce73f7c636274a2f08c4cf83ca14c2a53\"\r\n}\r\n"
-}

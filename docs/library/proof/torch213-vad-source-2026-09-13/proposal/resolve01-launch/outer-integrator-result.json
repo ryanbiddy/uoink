@@ -1,9 +1,0 @@
-{
-  "evidence_kind": "Actual outer tool fields reported by the executing integrator /root",
-  "scope": "resolve01 only",
-  "chunk_id": "d5e16b",
-  "exit_code": 0,
-  "wall_time_seconds": 0.7730771,
-  "raw_console_output": null,
-  "note": "The executing integrator supplied these actual fields in its task message. Console bytes were not supplied; this is not a fabricated full tool-result capture. Native and collected HTTP outcomes remain in their original receipts."
-}

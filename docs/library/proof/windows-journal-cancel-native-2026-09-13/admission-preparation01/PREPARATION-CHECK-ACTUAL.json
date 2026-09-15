@@ -1,7 +1,0 @@
-{
-  "chunk_id": "f9b77c",
-  "wall_time_seconds": 0.2924987,
-  "exit_code": 0,
-  "original_token_count": 106,
-  "output": "{\r\n  \"scope\": \"Syntax and fixed text hash checks only; no admission script invocation\",\r\n  \"syntax_errors\": 0,\r\n  \"text_inputs\": 44,\r\n  \"source_bindings\": 18,\r\n  \"unchanged_writer04_sources\": 16,\r\n  \"run_absent\": true,\r\n  \"admission_absent\": true,\r\n  \"support_files_inspected\": false,\r\n  \"admission_script_bytes\": 9093,\r\n  \"admission_script_sha256\": \"b7613053f46e7a7340f008c5ef6fbc671df08ecf3b8659fcdcdca37c3ff4524f\"\r\n}\r\n"
-}

@@ -1,7 +1,0 @@
-{
-  "chunk_id": "ddbdf1",
-  "wall_time_seconds": 0.3124477,
-  "exit_code": 0,
-  "original_token_count": 88,
-  "output": "{\r\n  \"verified_sources\": 9,\r\n  \"verified_preserved_references\": 4,\r\n  \"owner_record_verified\": true,\r\n  \"transcript_note_verified\": true,\r\n  \"review_sha256\": \"03300e45c728f3c7e1b5b3b450cc2645b5128b07606cfcd5a9913f26d74e0efb\",\r\n  \"admission_sha256\": \"6ca80d379598eaf94955f6a28a3fe92a54ab38eef2de36d1bb62627ff358d4be\",\r\n  \"checkpoint_touched\": false\r\n}\r\n"
-}

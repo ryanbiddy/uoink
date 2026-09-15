@@ -1,7 +1,0 @@
-{
-  "chunk_id": "6edd74",
-  "wall_time_seconds": 0.1685168,
-  "exit_code": 0,
-  "original_token_count": 131,
-  "output": "{\"status\": \"ROOT_BYTE_VERIFIED\", \"byte_verification\": {\"sha256\": \"0c23ec175b663eaafe9955ff93b1ccc6e93ed66a61665951baac5799a75c92d4\", \"bytes\": 134793, \"members\": 22, \"record_rows\": 22, \"all_payloads_verified\": true, \"complete_byte_layout_verified\": true}, \"source_files_rechecked\": 46, \"instruments_rechecked\": 5, \"runtime_identity_rows_compared\": 34, \"runtime_files_read_by_root\": 0, \"bound_files_unchanged\": 64, \"actual_outer_exit\": 0, \"native_phases\": 2, \"wheel_imported_or_installed\": false, \"model_executed\": false}\r\n"
-}

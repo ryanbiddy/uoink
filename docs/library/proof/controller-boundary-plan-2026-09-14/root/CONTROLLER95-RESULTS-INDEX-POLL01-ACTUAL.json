@@ -1,7 +1,0 @@
-{
-  "chunk_id": "5957b7",
-  "wall_time_seconds": 0.0000019,
-  "exit_code": 0,
-  "original_token_count": 53,
-  "output": "{\"proof\": \"docs/library/proof/controller-stage-fake95-2026-09-14\", \"payloads_matching_disk_and_git\": 317, \"bytes\": 3624570, \"manifest_sha256\": \"fffc3164d749b7f5386f75413b5cbacb5944e66ab79660c9870315ce94960c3f\"}\r\n"
-}

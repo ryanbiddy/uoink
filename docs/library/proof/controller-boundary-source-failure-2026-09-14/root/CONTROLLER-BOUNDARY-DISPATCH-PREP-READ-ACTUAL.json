@@ -1,7 +1,0 @@
-{
-  "chunk_id": "f7a04d",
-  "wall_time_seconds": 2.0260022,
-  "exit_code": 0,
-  "original_token_count": 72,
-  "output": "_scratch\\CHILD01-ROOT-COMMAND-PREVIEWS-ACTUAL.json\n_scratch\\REAL-CHILD-NAMESPACE01-DISPATCH-COMMAND.json\n_scratch\\REAL-CHILD-NAMESPACE01-DISPATCH-ACTUAL.json\n_scratch\\REAL-CHILD-NAMESPACE01-DISPATCH-NOTES-COMMIT-ACTUAL.json\nc3607c3 fix(gemini): flag uncertain command preview coverage\n"
-}

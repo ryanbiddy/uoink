@@ -1,7 +1,0 @@
-{
-  "chunk_id": "604084",
-  "wall_time_seconds": 0.3470467,
-  "exit_code": 0,
-  "original_token_count": 222,
-  "output": "{\r\n  \"predicate_instances\": 116,\r\n  \"failed_instances\": 6,\r\n  \"failed\": [\r\n    {\r\n      \"launcher_line\": 142,\r\n      \"id\": \"write_probe_count\",\r\n      \"failed\": true\r\n    },\r\n    {\r\n      \"launcher_line\": 146,\r\n      \"id\": \"write_probe_pair:0\",\r\n      \"failed\": true\r\n    },\r\n    {\r\n      \"launcher_line\": 146,\r\n      \"id\": \"write_probe_pair:1\",\r\n      \"failed\": true\r\n    },\r\n    {\r\n      \"launcher_line\": 146,\r\n      \"id\": \"write_probe_pair:2\",\r\n      \"failed\": true\r\n    },\r\n    {\r\n      \"launcher_line\": 146,\r\n      \"id\": \"write_probe_pair:3\",\r\n      \"failed\": true\r\n    },\r\n    {\r\n      \"launcher_line\": 146,\r\n      \"id\": \"write_probe_pair:4\",\r\n      \"failed\": true\r\n    }\r\n  ],\r\n  \"output\": \"E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\_scratch\\\\interrupted-native-run01-peer-diagnosis01\\\\SOFT-PREDICATES.json\",\r\n  \"inputs_unchanged\": true,\r\n  \"subject_execution\": false\r\n}\r\n"
-}

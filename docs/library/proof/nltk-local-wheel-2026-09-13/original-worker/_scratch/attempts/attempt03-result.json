@@ -1,5 +1,0 @@
-{
-  "exit": 0,
-  "stdout": "NLTK Pathsec Local Wheel Packaging Successful!\n  Output Wheel:  nltk-3.10.3+uoink.pathsec1-py3-none-any.whl\n  SHA-256:       11c885646a44e22fe515b1e487d74b87f82922a580b96d7c3b2a6bc5ead1ccb0\n  Size:          1799214 bytes\n  Members:       512\n  Destination:   _scratch\\build_clean01\n",
-  "stderr": ""
-}

@@ -1,1 +1,0 @@
-{"label": "baseline01", "tests_run": 6, "passed": 1, "failed": 5, "errors": 0, "skipped": 0, "exit": 1, "guard": {"preloaded_heavy": [], "postloaded_heavy": [], "blocked_imports": [], "blocked_audit_events": [], "finder_installed_at_finish": true, "valid": true}}

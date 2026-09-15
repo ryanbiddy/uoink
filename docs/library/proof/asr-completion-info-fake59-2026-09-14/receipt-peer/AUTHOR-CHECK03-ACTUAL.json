@@ -1,7 +1,0 @@
-{
-  "chunk_id": "5181e9",
-  "wall_time_seconds": 0.385433,
-  "exit_code": 0,
-  "original_token_count": 243,
-  "output": "{\r\n  \"scope\": \"Independent passive saved-receipt review only\",\r\n  \"source_root\": \"E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\_scratch\\\\asr-completion-info-fake59-author01\",\r\n  \"run_name\": \"asr-completion-info-fake59-01\",\r\n  \"actual_chunk\": \"577e68\",\r\n  \"actual_exit\": 0,\r\n  \"actual_seconds\": 0.9033364,\r\n  \"native_exit\": 0,\r\n  \"native_seconds\": 0.3110804,\r\n  \"launcher_seconds\": 0.3496752,\r\n  \"case_seconds\": 0.004998499993234873,\r\n  \"passed\": 59,\r\n  \"failed\": 0,\r\n  \"skipped\": 0,\r\n  \"subtests_passed\": 29,\r\n  \"original46_order\": true,\r\n  \"new13_order\": true,\r\n  \"child_hashes\": 5,\r\n  \"inputs\": 9,\r\n  \"controls\": 3,\r\n  \"output_files\": 17,\r\n  \"guards\": 10,\r\n  \"metadata_traps\": 12,\r\n  \"registry_traps\": 25,\r\n  \"stderr_bytes\": 0,\r\n  \"stdout\": {\r\n    \"bytes\": 21874,\r\n    \"sha256\": \"a703f95d3c26fdea2e37d6942ce4dbc5052b8799d5c927dfd317212a769b4aef\"\r\n  },\r\n  \"inputs_unchanged_during_review\": true,\r\n  \"subject_rerun\": false,\r\n  \"independent_pair_pending\": true\r\n}\r\n"
-}

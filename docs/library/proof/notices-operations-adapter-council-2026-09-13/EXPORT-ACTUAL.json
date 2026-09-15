@@ -1,7 +1,0 @@
-{
-  "chunk_id": "7ef500",
-  "wall_time_seconds": 0.5980605,
-  "exit_code": 0,
-  "original_token_count": 116,
-  "output": "warning: in the working copy of 'docs/library/GEMINI-NOTICES-OPERATIONS-ADAPTER-COUNCIL-REVIEW-2026-09-13.md', LF will be replaced by CRLF the next time Git touches it\n{\r\n  \"selected_files_both_roots\": 69,\r\n  \"bytes_each\": 716129,\r\n  \"worker_manifests\": 3,\r\n  \"report_bytes\": 35210,\r\n  \"report_sha256\": \"c5c881b43db388b04800c27b8f51e232101b3992124eab974010f68bf3707485\",\r\n  \"patch_sha256\": \"e3fef3e5d390d948e8a4758c90c2cd0fd54375ca36181b794934dc1c85f65c1c\"\r\n}\r\n"
-}

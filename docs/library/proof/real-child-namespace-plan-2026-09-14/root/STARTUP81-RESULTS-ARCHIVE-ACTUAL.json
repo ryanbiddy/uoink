@@ -1,7 +1,0 @@
-{
-  "chunk_id": "a26abf",
-  "wall_time_seconds": 0.3778159,
-  "exit_code": 0,
-  "original_token_count": 63,
-  "output": "{\"proof\":\"docs/library/proof/startup-authority-fake81-2026-09-14\",\"payloads\":256,\"bytes\":2979016,\"manifest_sha256\":\"34b8e9f7ce12dcfd048c83b8e75dac6d0ee94577c9f2ee7ac28edc02df8fe899\",\"each\":{\"passed\":81,\"failed\":0,\"skipped\":0,\"passing_subtests\":48}}\n"
-}

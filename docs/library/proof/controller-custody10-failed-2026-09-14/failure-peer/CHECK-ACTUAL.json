@@ -1,7 +1,0 @@
-{
-  "chunk_id": "6606ae",
-  "wall_time_seconds": 0.1867112,
-  "exit_code": 0,
-  "original_token_count": 128,
-  "output": "{\n  \"review_checks\": \"PASS\",\n  \"observed_subject\": \"FAILED\",\n  \"actual\": \"6ba3f1\",\n  \"outer_exit\": 1,\n  \"native_exit\": 1,\n  \"qualification_exit\": 1,\n  \"case_counts\": [\n    8,\n    2,\n    0\n  ],\n  \"subtest_counts\": [\n    102,\n    2\n  ],\n  \"input_count\": 15,\n  \"controls\": 3,\n  \"child_hashes\": 11,\n  \"guards\": 10,\n  \"output_files\": 23,\n  \"confirmation_uninvoked\": true,\n  \"inputs_unchanged\": true,\n  \"result_sha256\": \"befd0434202e021bfce7cb47d610e773d5a5a5baa2229cf5c138fe9bd3f67552\",\n  \"candidate_rerun\": false\n}\n"
-}

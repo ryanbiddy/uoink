@@ -1,7 +1,0 @@
-{
-  "chunk_id": "762532",
-  "wall_time_seconds": 0.1513551,
-  "exit_code": 0,
-  "original_token_count": 64,
-  "output": "{\r\n  \"path\": \"VERDICT.md\",\r\n  \"bytes\": 2513,\r\n  \"sha256\": \"b3bd1d764beccd702034ca6440db843c7bd71bde5ed54abf8c7a4bd6ab61f1d2\",\r\n  \"draft_note\": \"Clarified source access versus prohibited invocation in final scope sentence; no finding or source change\"\r\n}\r\n"
-}

@@ -1,7 +1,0 @@
-# Documentary seal of Python 3.13 package reproduction
-
-2026-09-13. Create fresh scratch evidence only. Read and verify the exact 28-payload preparation seal, then preserve it and its manifest unchanged under preparation28. Copy only the named JSON/log receipts from the actual copy and build, the root decision and a reference copy of the first-build 132-payload manifest. Include the artifact's JSON provenance; do not read or copy wheels, runtime binaries, model files, authentication material or unrelated scratch content.
-
-Review the copier/launcher, guarded child, builder, adaptation diff, prior failed text preparation and actual receipts as source/data. Do not execute any of those programs, run tests, install B2, access the live index or port 5179, or change tracked files. PowerShell operations in this sealing instrument are limited to documentary reads, fresh copies/writes and SHA256 checks.
-
-Verify every original preparation payload against its manifest and every copied source before/after copying. Retain a complete copy binding record, a separate first-seal reference, this instrument, a one-page verdict and verification counts. Apply * -text to the fresh proof and generate a root SHA256 manifest. The first 132-payload seal is a referenced historical seal, not a newly rerun package check. Any discrepancy must stop sealing and remain recorded; no failed measurement is promoted to success.

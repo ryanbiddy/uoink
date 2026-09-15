@@ -1,7 +1,0 @@
-{
-  "chunk_id": "9cc34c",
-  "wall_time_seconds": 0.0000022,
-  "exit_code": 0,
-  "original_token_count": 54,
-  "output": "{\"proof\": \"docs/library/proof/startup-authority-source-2026-09-14\", \"payloads_matching_disk_and_git\": 145, \"bytes\": 1638412, \"manifest_sha256\": \"d207df4b7fff5677963e53d0af4abcd35075c071916b6d4d026be09ff111bf0d\"}\r\n"
-}

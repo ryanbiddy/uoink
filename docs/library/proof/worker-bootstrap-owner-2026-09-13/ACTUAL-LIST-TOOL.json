@@ -1,7 +1,0 @@
-{
-  "chunk_id": "1ff323",
-  "wall_time_seconds": 0.2797269,
-  "exit_code": 0,
-  "original_token_count": 74,
-  "output": "{\"files\": 140, \"bytes\": 1098361, \"sha256\": \"1431a623777de7cedd7ff145687d7bd9d092aab862dac3138bbedc52149a9e89\", \"verdict_sha256\": \"d278789bac88cb8ff8830f690e41e3ef15aed6fa372c1e7903759cba490b832d\", \"receipt_comparison_sha256\": \"22c03ff0bd71c43080b698f1458dd6c739989f3c5fcb3b9029ca229acf160117\"}\r\n"
-}

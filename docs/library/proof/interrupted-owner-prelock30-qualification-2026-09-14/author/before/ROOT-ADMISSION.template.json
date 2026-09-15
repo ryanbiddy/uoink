@@ -1,7 +1,0 @@
-{
-  "approved": false,
-  "label": "interrupted-retirement-fake01",
-  "pins_sha256": "eb108b71b9f2a7d10db57efb2aa92b7b8df20a25bf44923ca273f456ab753bc1",
-  "scope": "generated_bytes_and_fake_ports_only",
-  "note": "Finalized sources only; actual root admission is still absent."
-}

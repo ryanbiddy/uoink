@@ -1,7 +1,0 @@
-{
-  "chunk_id": "ea606c",
-  "wall_time_seconds": 0.947212,
-  "exit_code": 0,
-  "original_token_count": 141,
-  "output": "warning: in the working copy of 'docs/library/ORCHESTRATION-HANDOFF-2026-09-08.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/library/ASTRA-CONTROLLER-BOUNDARY01-SOURCE-FAILURE-2026-09-14.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/library/CONTROLLER-BOUNDARY-CUSTODY-REPAIR-BRIEF-2026-09-14.md', LF will be replaced by CRLF the next time Git touches it\n{\"commit\":\"fa27d47b8676b9866caac19cebee57410492ae36\",\"files\":131,\"proof_payloads\":127,\"status\":[]}\r\n"
-}

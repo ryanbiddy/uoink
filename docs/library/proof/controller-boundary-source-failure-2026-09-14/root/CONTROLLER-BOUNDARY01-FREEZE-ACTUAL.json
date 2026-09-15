@@ -1,7 +1,0 @@
-{
-  "chunk_id": "7fefb4",
-  "wall_time_seconds": 0.2203576,
-  "exit_code": 0,
-  "original_token_count": 93,
-  "output": "{\"run\":\"19ac6c2d-eaa3-428a-829c-5dc2a2289a40\",\"worktree\":\"C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/19ac6c2d-eaa/gemini\",\"files\":13,\"bytes\":227359,\"pins_sha256\":\"1679fc8f78e08f6585232f9400cc12e3d2b2c15bcadb0d22bda31d50d149a438\",\"events\":746,\"command_event_records\":40,\"source_review\":\"pending\",\"candidate_tests\":\"not executed by integrator\"}\n"
-}

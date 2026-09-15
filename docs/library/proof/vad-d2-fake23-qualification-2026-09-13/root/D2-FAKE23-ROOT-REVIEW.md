@@ -1,9 +1,0 @@
-# Root review for the D2 adapter's generated controls
-
-Admit one fake23-01 qualification of the new adapter contracts after exact input checks. Root read the complete adapter,23 test bodies, qualifier, launcher, profile, test plan, protocol and independent source verdict. The real parent/child/converter are excluded from this execution. D1 remains completed at4b38948; no checkpoint access or conversion is admitted.
-
-The nine fixed inputs plus manifest are read as bounded text. After that phase closes, only adapter and test definitions are compiled. Tests use generated in-memory decisions and a record-only FakeConverter, with all real owner pins unchanged. They check absent authority before converter attributes/evidence, exact scope/prerequisites, refusals, argument delivery, error identity, temporary profile reset and result claims. The write/deadline controls inject exceptions; they are not observed filesystem writes or real deadline tests.
-
-The qualifier denies external imports, native/model/converter modules, content writes, non-allowlisted reads, registry calls and network/process operations. It retains metadata-wrapper, registry-namespace, source and owner-pin checks. The launcher binds the admission bytes it parses and checks the original admission after the child, in addition to source/manifest comparisons. Actual native exit is saved before postchecks. The finite in-memory suite has no hard process timeout; no OS sandbox claim is made.
-
-Success requires the exact23 ordered names,23 passed, zero failures/errors/skips/subtests, valid guards, unchanged controls and matching exits0. Preserve every failed/partial result; no automatic rerun or assertion change. These results cannot qualify actual output persistence, the real child/parent, conversion, reader, native model or release. A separately reviewed independent copy may repeat the same cases with only fixed qualification-root substitutions and fresh control bindings.

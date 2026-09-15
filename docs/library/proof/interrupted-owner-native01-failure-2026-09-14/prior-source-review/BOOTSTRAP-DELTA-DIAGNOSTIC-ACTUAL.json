@@ -1,7 +1,0 @@
-{
-  "chunk_id": "66d2bb",
-  "wall_time_seconds": 0.1670298,
-  "exit_code": 0,
-  "original_token_count": 139,
-  "output": "{\r\n  \"line_count\": 164,\r\n  \"empty_lines\": [\r\n    164\r\n  ],\r\n  \"tail\": [\r\n    {\r\n      \"line\": 161,\r\n      \"text\": \"                \\\"directory_refusal\\\": directory_refusal,\"\r\n    },\r\n    {\r\n      \"line\": 162,\r\n      \"text\": \"                \\\"writer_exclusion\\\": monitor.contender.receipt() if monitor.contender is not None else None,\"\r\n    },\r\n    {\r\n      \"line\": 163,\r\n      \"text\": \"                \\\"owner_state\\\": owner_state, \\\"retained_runtime_owner\\\": retained_runtime_owner,\"\r\n    },\r\n    {\r\n      \"line\": 164,\r\n      \"text\": \"\"\r\n    }\r\n  ]\r\n}\r\n"
-}

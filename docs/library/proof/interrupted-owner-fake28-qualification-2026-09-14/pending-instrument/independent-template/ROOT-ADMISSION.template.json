@@ -1,7 +1,0 @@
-{
-  "approved": false,
-  "label": "interrupted-retirement-confirmation01",
-  "pins_sha256": "5ba95686da78ba46121216b9c04f28e295d3c570aa975b6f4164444ed4740429",
-  "scope": "generated_bytes_and_fake_ports_only",
-  "note": "Independent inputs unmaterialized and four sources pending; not an admission."
-}

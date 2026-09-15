@@ -1,7 +1,0 @@
-{
-  "chunk_id": "dac2bc",
-  "wall_time_seconds": 0.2739861,
-  "exit_code": 1,
-  "original_token_count": 161,
-  "output": "Get-Content: \r\nLine |\r\n   2 |  Get-Content -LiteralPath '_scratch/controller-boundary-custody-repair …\r\n     |  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\r\n     | Cannot find path '_scratch/controller-boundary-custody-repair01/repair_initial_helper_selection01.mjs' because it does not exist.\r\nGet-Content: \r\nLine |\r\n   3 |  Get-Content -LiteralPath '_scratch/controller-boundary-custody-repair …\r\n     |  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\r\n     | Cannot find path '_scratch/controller-boundary-custody-repair01/INITIAL-HELPER-REPAIR01-ACTUAL.json' because it does not exist.\r\n"
-}

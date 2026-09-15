@@ -1,7 +1,0 @@
-{
-  "chunk_id": "778039",
-  "wall_time_seconds": 0.1626986,
-  "exit_code": 0,
-  "original_token_count": 243,
-  "output": "[\r\n  {\r\n    \"path\": \"E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/controller-boundary-custody-design01/DESIGN.md\",\r\n    \"bytes\": 9923,\r\n    \"sha256\": \"f65ab5d9bff0a4fddfec6363ce6074198e3b989d271c3cb5d02d20f681e0f2b3\"\r\n  },\r\n  {\r\n    \"path\": \"E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/controller-boundary-custody-design01/SOURCE-BINDINGS.json\",\r\n    \"bytes\": 2437,\r\n    \"sha256\": \"8e8536d5f388e769600b76d3c298cb0120b7e31685d4fde0eaf7ae2854e1e35a\"\r\n  },\r\n  {\r\n    \"path\": \"E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/windows-reservation-implementation-proposal02/test_windows_reservations.py\",\r\n    \"bytes\": 27701,\r\n    \"sha256\": \"91b0de71eb55d088ee2fdbcd11ff3e6a074f18f713dfcd5b384814a1dc78300c\"\r\n  },\r\n  {\r\n    \"path\": \"E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/controller-stage-qualification-proposal01/PINS.json\",\r\n    \"bytes\": 4727,\r\n    \"sha256\": \"b831bf6c864d8a7bef24355e5868dfa7480e6bba6ff1381cbc3ac9db07388606\"\r\n  }\r\n]\r\n"
-}

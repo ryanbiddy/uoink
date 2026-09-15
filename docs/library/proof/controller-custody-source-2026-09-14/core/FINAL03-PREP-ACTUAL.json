@@ -1,7 +1,0 @@
-{
-  "chunk_id": "ad7a8d",
-  "wall_time_seconds": 0.1722696,
-  "exit_code": 0,
-  "original_token_count": 25,
-  "output": "{\"prepared\":[\"write_and_check_diffs03.mjs\",\"bind_final_sources03.mjs\"],\"candidate_executed\":false}\n"
-}

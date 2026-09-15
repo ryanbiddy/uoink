@@ -1,3 +1,0 @@
-2026-09-13. Peer review of the unexecuted ebc31f50 launcher found that its after-check covered sources, native inputs and the fixture but omitted the admission, input-map and launcher bytes. The prior launcher and admission template are preserved.
-
-The revised launcher records all three control hashes, copies them exactly before startup, verifies those copies and includes both original/copy after hashes in inputs_unchanged. This is a documentary integrity correction within the same generated-only scope. It adds no native API, test or permission. The updated template remains false; no native observation has run.

@@ -1,7 +1,0 @@
-{
-  "chunk_id": "cb26c0",
-  "wall_time_seconds": 0.195355,
-  "exit_code": 0,
-  "original_token_count": 31,
-  "output": "{\r\n  \"direct_nested_count\": 29,\r\n  \"direct_legacy_nested_count\": 0,\r\n  \"array_projection_count\": 1,\r\n  \"case_count\": 59\r\n}\r\n"
-}

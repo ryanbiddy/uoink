@@ -1,7 +1,0 @@
-{
-  "approved": false,
-  "label": "interrupted-owner-prelock-fake03",
-  "pins_sha256": "f70f8f0ad7f1ad634939d91f04096996852cfe700c41829a492b00df883c1851",
-  "scope": "generated_bytes_and_fake_ports_only",
-  "note": "Finalized source preparation only. Separate exact root admission is required before any child invocation."
-}

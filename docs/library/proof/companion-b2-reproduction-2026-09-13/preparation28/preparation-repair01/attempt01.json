@@ -1,8 +1,0 @@
-{
-  "command": ["C:\\Python314\\python.exe", "-I", "-S", "-B", "_scratch/b2-python313-reproduction-preparation01/prepare-text-inputs.py"],
-  "actual_exit": 1,
-  "error": "SyntaxError: (unicode error) 'unicodeescape' codec can't decode bytes in position 100-101: truncated \\uXXXX escape",
-  "source_line": 41,
-  "script_body_executed": false,
-  "runtime_or_wheel_accessed": false
-}

@@ -1,7 +1,0 @@
-{
-  "chunk_id": "040556",
-  "wall_time_seconds": 0.1521348,
-  "exit_code": 0,
-  "original_token_count": 125,
-  "output": "[\r\n  {\r\n    \"path\": \"E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/real-startup-authority-repair01/inputs/snapshot_reservations.py\",\r\n    \"bytes\": 23634,\r\n    \"sha256\": \"e80ae881fa4af9cc7d1a3e4a06624f5b19abe4de09aec3844e8a541449335b98\"\r\n  },\r\n  {\r\n    \"path\": \"E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/real-startup-authority-repair01/inputs/reservation_file_port.py\",\r\n    \"bytes\": 4694,\r\n    \"sha256\": \"708554378ab8a8e6c4477e637c999256665cbd2855b94c6fa3c2d04a19d3a224\"\r\n  }\r\n]\r\n"
-}

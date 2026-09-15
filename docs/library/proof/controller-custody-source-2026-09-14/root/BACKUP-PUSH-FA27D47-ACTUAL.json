@@ -1,7 +1,0 @@
-{
-  "chunk_id": "ecda4a",
-  "wall_time_seconds": 4.4180862,
-  "exit_code": 0,
-  "original_token_count": 67,
-  "output": "To https://github.com/ryanbiddy/uoink.git\n   e0bbbd6..fa27d47  cc/living-library -> cc/living-library\n{\"old\":\"e0bbbd694b4fb082a5b1c2b15370e2a7391ef3da\",\"new\":\"fa27d47b8676b9866caac19cebee57410492ae36\",\"branch\":\"cc/living-library\",\"force\":false,\"main_merge\":false}\r\n"
-}

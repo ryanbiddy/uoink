@@ -1,7 +1,0 @@
-{
-  "chunk_id": "b02fdd",
-  "wall_time_seconds": 0.2414137,
-  "exit_code": 0,
-  "original_token_count": 40,
-  "output": "{\r\n  \"verified_inputs\": 28,\r\n  \"exact_approved_test_delta\": true,\r\n  \"admission_sha256\": \"411d0e958916ce8ca367470592f0a7ee7c0b3b8c1bff5a8973fd8a1c01bee768\"\r\n}\r\n"
-}

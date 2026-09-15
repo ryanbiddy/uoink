@@ -1,8 +1,0 @@
-{
-  "approved": true,
-  "label": "prelock-retirement-confirmation03",
-  "pins_sha256": "8cd78502de3f77aa5ce22e0060a19d7a7911881f63f2f389487c077ea6055e30",
-  "scope": "generated_bytes_and_fake_ports_only",
-  "admission_commit": "7316e53a32fd217021d4ba05607ae471f928358b",
-  "author_review": "87a010: exact30 cases and62 subtests pass with valid guards and unchanged inputs"
-}

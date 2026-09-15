@@ -1,7 +1,0 @@
-{
-  "chunk_id": "d0441f",
-  "wall_time_seconds": 0.1733588,
-  "exit_code": 0,
-  "original_token_count": 166,
-  "output": "\r\nName                                Length\r\n----                                ------\r\nadapter_binding.fragment.txt          7203\r\nasr_loading_adapter.py               47660\r\ncompose_sources.mjs                   5561\r\ndurable_boundary.fragment.txt        10271\r\ndurable_lifecycle.py                 39412\r\nFACTORY-HELPER-REPAIR01-ACTUAL.json    452\r\nINITIAL-COMPOSITION-ACTUAL.json       3081\r\nINITIAL-SOURCE-PINS.json              2636\r\nREAD-FAILURE-VERDICT-ACTUAL.json      4321\r\nREAD-PEER-AND-IMPORTS-ACTUAL.json     8661\r\nREAD-REPAIR-BRIEF-ACTUAL.json        11751\r\nrepair_factory_helper01.mjs           2869\r\ncontroller_boundary_fixture.py       12943\r\n\r\n"
-}

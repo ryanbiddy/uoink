@@ -1,7 +1,0 @@
-{
-  "chunk_id": "387195",
-  "wall_time_seconds": 0.2192826,
-  "exit_code": 0,
-  "original_token_count": 321,
-  "output": "{\n  \"scope\": \"passive exact qualification copies only; no admission or execution\",\n  \"origin_pins_sha256\": \"b831bf6c864d8a7bef24355e5868dfa7480e6bba6ff1381cbc3ac9db07388606\",\n  \"copies\": [\n    {\n      \"role\": \"author\",\n      \"path\": \"E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\_scratch\\\\controller-stage-fake95-author01\",\n      \"label\": \"controller-stage-fake01\",\n      \"pins_sha256\": \"b831bf6c864d8a7bef24355e5868dfa7480e6bba6ff1381cbc3ac9db07388606\",\n      \"inputs\": 29,\n      \"child_inputs_unchanged\": 25,\n      \"launcher_bytes\": 8874,\n      \"launcher_sha256\": \"b71b436882df599c0650220383ed338f745345e19ca4217c9be1fe18eacf8930\",\n      \"only_change\": \"none\",\n      \"admitted\": false\n    },\n    {\n      \"role\": \"confirmation\",\n      \"path\": \"E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\_scratch\\\\controller-stage-fake95-confirmation01\",\n      \"label\": \"controller-stage-confirmation01\",\n      \"pins_sha256\": \"6fdc1188f323541aaff93a3fb5205f54e395b13d5b20ebf8a95bd69420e864cb\",\n      \"inputs\": 29,\n      \"child_inputs_unchanged\": 25,\n      \"launcher_bytes\": 8914,\n      \"launcher_sha256\": \"acf6025208f28439da704cd70ec682471c7344012af6f61fa639ccc3583a9b8f\",\n      \"only_change\": \"five fixed launcher labels and resulting PINS row\",\n      \"admitted\": false\n    }\n  ]\n}\n"
-}

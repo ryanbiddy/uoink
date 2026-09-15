@@ -1,7 +1,0 @@
-{
-  "chunk_id": "4bc4c9",
-  "wall_time_seconds": 0.7343813,
-  "exit_code": 0,
-  "original_token_count": 127,
-  "output": "warning: in the working copy of 'src/agents/gemini.ts', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'test/gemini-command-provenance.test.mjs', LF will be replaced by CRLF the next time Git touches it\n{\r\n  \"base\": \"8d7cc1a18669e5d462a88bd878853ec3a6a5ceac\",\r\n  \"worktree\": \"E:\\\\AI\\\\projects\\\\agent-control-room-review-20260914\",\r\n  \"patch_bytes\": 9217,\r\n  \"patch_sha256\": \"70631794f7780c07f824a65b2a167af7442b807a2dad72220c824b1fb33af961\",\r\n  \"apply_exit\": 0\r\n}\r\n"
-}

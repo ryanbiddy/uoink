@@ -1,7 +1,0 @@
-{
-  "chunk_id": "370e1d",
-  "wall_time_seconds": 0.3129872,
-  "exit_code": 0,
-  "original_token_count": 81,
-  "output": "warning: in the working copy of 'docs/library/GEMINI-WRITER-EXCLUSION-CORRECTION02-2026-09-13.coverage.json', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/library/GEMINI-WRITER-EXCLUSION-CORRECTION02-2026-09-13.md', LF will be replaced by CRLF the next time Git touches it\n"
-}

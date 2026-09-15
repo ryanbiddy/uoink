@@ -1,8 +1,0 @@
-{
-  "candidate_execution": false,
-  "expected_cases": 11,
-  "qualifier_sha256": "e08653d576dd3ca8367efde9e9438f485de5835f3831e0f7a1f8571fefa6acc1",
-  "source_map_sha256": "e336118c32a465a1c07a8c497ea9b6cae9335e7ce34b9de98d021a9ed04670ef",
-  "expected_cases_sha256": "954ca4783d70c2dc654e19a110aee6b7c453cd1e6f00098c46bd1b84a4738ba3",
-  "original_guard_sha256": "ce4b149a4b5920c370c45d0ea31bf96ec65fb1ddf714cde63ae012d4298125d9"
-}

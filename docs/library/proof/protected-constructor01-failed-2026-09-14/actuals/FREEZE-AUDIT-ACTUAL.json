@@ -1,7 +1,0 @@
-{
-  "chunk_id": "e13803",
-  "wall_time_seconds": 0.2123129,
-  "exit_code": 0,
-  "original_token_count": 263,
-  "output": "{\"run_id\":\"e6133b1f-fc8e-4f78-b252-1fae0659ef5e\",\"status\":\"completed\",\"started_at\":\"2026-09-14T09:45:22.206Z\",\"finished_at\":\"2026-09-14T09:57:36.825Z\",\"source_files\":22,\"map_rows\":32,\"map_mismatches\":[{\"group\":\"inputs\",\"path\":\"_scratch/windows-interrupted-owner-native-proposal02/model_binding_registry.py\",\"actual\":{\"bytes\":8732,\"sha256\":\"48567add0f0ac2ac9140e9aa86b06f077454c98e2f0773100da5ba070f7b3deb\"}},{\"group\":\"inputs\",\"path\":\"_scratch/windows-interrupted-owner-native-proposal02/owned_factory_port.py\",\"actual\":{\"bytes\":15463,\"sha256\":\"2569853c7634b795e3d2cf717129ec3dbc4e11d96ddb347098dcc4fbc532f0d4\"}},{\"group\":\"inputs\",\"path\":\"_scratch/b3-offline-wheel-cleanroom-2026-09-08/recipe/B2.py.txt\",\"actual\":null},{\"group\":\"inputs\",\"path\":\"_scratch/runtime-migration-faster-whisper-fixtures-2026-09-12/fixtures/upstream-text/faster_whisper/feature_extractor.py.txt\",\"actual\":null},{\"group\":\"inputs\",\"path\":\"_scratch/runtime-owner-native-fake33-2026-09-13/author-preparation/EXPECTED-CASES.json\",\"actual\":null}],\"events\":754,\"command_events\":16}\n"
-}

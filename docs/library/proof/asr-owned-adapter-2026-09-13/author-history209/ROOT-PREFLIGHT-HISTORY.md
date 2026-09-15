@@ -1,5 +1,0 @@
-2026-09-13. Root's ASR-SCOPE-ROOT-PREFLIGHT-REPAIR01.md reports that preparation verifier attempt 2d8c38 exited 1 in 0.2046689 seconds before any diagnostic execution. Its generic index verifier accepted only docs/library/proof paths and rejected the scratch preparation path.
-
-The brief describes the corrected PowerShell preflight: verify the reviewed manifest hash, all 55 listed payload hashes/lengths, exact preparation membership and total bytes in the known scratch directory. Root subsequently identified that repaired preflight as d5669f0, exit 0 in 0.1708886 seconds, and proceeded to the separately admitted diagnostic. This archive preserves the brief as written. No separately saved raw structured tool objects for those two preflight calls were supplied to this agent; these facts are explicitly root-reported history, not invented raw receipts.
-
-The actual diagnostic outer tool object dd7aab was supplied and is preserved separately. The initial failed wrapper has its own actual d3d1b0 tool object. The d9d929 checker and 68b58c raw-read outcomes remain explicitly root-reported in FAILED-OUTCOME01.md, as in the prior failure preservation.

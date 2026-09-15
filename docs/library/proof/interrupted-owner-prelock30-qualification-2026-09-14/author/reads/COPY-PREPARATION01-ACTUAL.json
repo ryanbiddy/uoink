@@ -1,7 +1,0 @@
-{
-  "chunk_id": "5032ce",
-  "wall_time_seconds": 0.2771038,
-  "exit_code": 0,
-  "original_token_count": 106,
-  "output": "{\r\n  \"scope\": \"Source copy only\",\r\n  \"verified_old_rows\": 38,\r\n  \"unchanged_modules\": 32,\r\n  \"repaired_driver\": 1,\r\n  \"before_files\": 8,\r\n  \"old_map_sha256\": \"eb108b71b9f2a7d10db57efb2aa92b7b8df20a25bf44923ca273f456ab753bc1\",\r\n  \"origin_sha256\": \"e98a9c5a325516b012e90c3620cf4b382ef8dfb66fe7aa59e0cbd48965b72d4c\",\r\n  \"actual_admission_copied\": false,\r\n  \"candidate_execution\": false,\r\n  \"new_case_freeze_pending\": true\r\n}\r\n"
-}

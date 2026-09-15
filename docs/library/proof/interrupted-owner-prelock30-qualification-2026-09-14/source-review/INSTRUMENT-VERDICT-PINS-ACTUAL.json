@@ -1,7 +1,0 @@
-{
-  "chunk_id": "76fc62",
-  "wall_time_seconds": 0.1893543,
-  "exit_code": 0,
-  "original_token_count": 197,
-  "output": "[\r\n  {\r\n    \"name\": \"INSTRUMENT-VERDICT.md\",\r\n    \"bytes\": 3430,\r\n    \"sha256\": \"81c248912324f26fa9e2e5595d0c56fb500dcc25a77c2a4c0f2244509d2f023c\"\r\n  },\r\n  {\r\n    \"name\": \"INSTRUMENT-VIEW-COVERAGE.json\",\r\n    \"bytes\": 1685,\r\n    \"sha256\": \"f374f49f49c1c5f78b57e4e1bdd1dfa4ceee79e8e7000904283849f0ba4c09db\"\r\n  },\r\n  {\r\n    \"name\": \"check_instrument02.ps1\",\r\n    \"bytes\": 8444,\r\n    \"sha256\": \"5771847391938df478ef684d47d18b4f43fe55e30948db4577d48dfd3f3cd167\"\r\n  },\r\n  {\r\n    \"name\": \"INSTRUMENT-CHECK02-ACTUAL.json\",\r\n    \"bytes\": 2571,\r\n    \"sha256\": \"6ce2a96d4b9d545336178ef4a9d30cc0233b0e172ecf7353e52bacd38c532146\"\r\n  },\r\n  {\r\n    \"name\": \"INSTRUMENT-CHECKER-REPAIR02.md\",\r\n    \"bytes\": 696,\r\n    \"sha256\": \"1d4e8c9b2b9e4b8da8525641293a4ca4417186de2486a48fdb4184ba23fe1368\"\r\n  }\r\n]\r\n"
-}

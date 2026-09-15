@@ -1,7 +1,0 @@
-{
-  "chunk_id": "051c94",
-  "wall_time_seconds": 0.1868528,
-  "exit_code": 0,
-  "original_token_count": 72,
-  "output": "{\"scope\":\"Passive independent-copy binding and author prerequisite\",\"author_outer\":\"121f97\",\"author\":[11,0,0],\"author_subtests\":15,\"unchanged_parent_inputs\":12,\"launcher_label_changes\":5,\"independent_pins\":\"c784392df7dc910d47656ff32bb13ecbee179431070eade5adf0951679b87a66\",\"fresh\":true}\n"
-}

@@ -1,5 +1,0 @@
-Traceback (most recent call last):
-  File "E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\asr-dummy-worker-native01\dummy_bootstrap.py", line 218, in <module>
-  File "E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\asr-dummy-worker-native01\win32_worker_connection.py", line 65, in declare_bindings
-  File "E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\asr-dummy-worker-native01\dummy_bootstrap.py", line 121, in audit
-RuntimeError: Fixed dummy boundary refused import

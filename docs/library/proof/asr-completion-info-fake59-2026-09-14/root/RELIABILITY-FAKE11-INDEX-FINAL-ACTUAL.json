@@ -1,7 +1,0 @@
-{
-  "chunk_id": "bf6a55",
-  "wall_time_seconds": 0.000002,
-  "exit_code": 0,
-  "original_token_count": 56,
-  "output": "{\"proof\": \"docs/library/proof/reliability-request-stream-fake11-2026-09-14\", \"payloads_matching_disk_and_git\": 150, \"bytes\": 1401378, \"manifest_sha256\": \"5924bb90464ea3f1eb64a9741d1ab2ba8572da73a15114f1ac5f6fbdf3826dbb\"}\r\n"
-}

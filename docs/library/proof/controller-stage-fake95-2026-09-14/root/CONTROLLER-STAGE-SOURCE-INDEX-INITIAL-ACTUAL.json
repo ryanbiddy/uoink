@@ -1,7 +1,0 @@
-{
-  "chunk_id": "0cf2b8",
-  "wall_time_seconds": 6.6354819,
-  "exit_code": 0,
-  "original_token_count": 55,
-  "output": "{\"proof\": \"docs/library/proof/controller-worker-stage-source-2026-09-14\", \"payloads_matching_disk_and_git\": 87, \"bytes\": 1026190, \"manifest_sha256\": \"4fc8c860335f5d7ab56730386a5ed0cba41760de72921e81b1d811a1d449be73\"}\r\n"
-}

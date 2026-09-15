@@ -1,7 +1,0 @@
-{
-  "chunk_id": "4431c9",
-  "wall_time_seconds": 0.1594716,
-  "exit_code": 0,
-  "original_token_count": 51,
-  "output": "{\"correction\":\"Reverse only the exact spans recorded during forward declared replacements; preserve unrelated existing -eq 10 guard. Existing snapshots compared unchanged.\",\"candidate_executed\":false}\n"
-}

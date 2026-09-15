@@ -1,9 +1,0 @@
-{
-  "label": "notice01",
-  "source_inputs_sha256": "53be52365a965736f335003843c4c53542c57289646aa829c75f476b9f7c5e82",
-  "source_tests_and_inert_blocks_approved": true,
-  "full_build_or_models_approved": false,
-  "reviewer": "Astra integrator",
-  "review_date": "2026-09-13",
-  "scope": "The fixed 20 source tests and 10 extracted PowerShell block controls reviewed at candidate b77bc567. Existing assertions remain unchanged. No package installation, embedded interpreter, native ML, model, live index, network, or full build. Stop after any failure."
-}

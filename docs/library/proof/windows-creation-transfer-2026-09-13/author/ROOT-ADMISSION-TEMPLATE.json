@@ -1,7 +1,0 @@
-{
-  "approved": false,
-  "label": "creation-transfer01",
-  "pins_sha256": "8ea1128704f3a943de3aab3b26e84c5f1a3d637af8cb5c532f736d23c9e9b7cc",
-  "scope": "generated_bytes_and_fake_ports_only",
-  "note": "No admission. Root review of exact 70-case source, launcher and protocol is required."
-}

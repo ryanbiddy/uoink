@@ -1,7 +1,0 @@
-{
-  "chunk_id": "32c1d4",
-  "wall_time_seconds": 0.1209342,
-  "exit_code": 0,
-  "original_token_count": 57,
-  "output": "{\r\n  \"Hash\": \"CF5D99E60A85F24F25AF2EE35CE2ECC6F9714AB6A94056B7300064A8FF016561\",\r\n  \"Path\": \"E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\_scratch\\\\asr-dummy-worker-timeout-proposal02\\\\synthetic\\\\ROOT-ADMISSION.json\"\r\n}\r\n"
-}

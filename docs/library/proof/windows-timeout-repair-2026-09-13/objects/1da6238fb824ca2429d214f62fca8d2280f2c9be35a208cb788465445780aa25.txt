@@ -1,7 +1,0 @@
-{
-  "root_reviewed": false,
-  "scope": "generated-file-one-owned-dummy-timeout-only",
-  "source_inputs_sha256": "c009339ec8bc9375025068a8e9c579e78dc9fa3efce9370490500f8ccb60f75a",
-  "launcher_sha256": "de53edfebe283802d081a168a595a1b2ed517d8f1795bdc77c33ed0c440125bb",
-  "status": "Template only; no native or test execution admitted"
-}

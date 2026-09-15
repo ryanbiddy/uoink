@@ -1,7 +1,0 @@
-{
-  "approved": false,
-  "label": "retired-recovery-fake01",
-  "pins_sha256": "13ef8f2e30fe133a23d7516cdfc7a42b80677faa969f25ec93d601f88c66dd94",
-  "scope": "generated_bytes_and_fake_ports_only",
-  "note": "Dormant proposal. Root must read source, controls and exact22 membership before creating separate ROOT-ADMISSION.json."
-}

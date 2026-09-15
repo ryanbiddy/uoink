@@ -1,4 +1,0 @@
-[
-  "test_interrupted_owner_prelock.InterruptedOwnerPrelockContracts.test_actual_controller_probes_before_media_and_after_retirement",
-  "test_interrupted_owner_prelock.InterruptedOwnerPrelockContracts.test_refusal_error_stops_media_and_reaches_context_cleanup"
-]

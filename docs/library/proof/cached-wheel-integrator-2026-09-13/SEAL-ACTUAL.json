@@ -1,7 +1,0 @@
-{
-  "chunk_id": "68cbaa",
-  "wall_time_seconds": 2.1472147,
-  "exit_code": 0,
-  "original_token_count": 87,
-  "output": "{\r\n  \"proof\": \"E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\_scratch\\\\two-wheel-inspection-proof01\",\r\n  \"payloads\": 88,\r\n  \"original_files\": 72,\r\n  \"manifest_sha256\": \"8a6a252489696a873db21e45c5abcfa2d1b5dae14548591ca7be58e7370c69c2\",\r\n  \"verification\": \"All copied hashes and exact membership verified\",\r\n  \"artifact_reads_or_reruns\": 0\r\n}\r\n"
-}

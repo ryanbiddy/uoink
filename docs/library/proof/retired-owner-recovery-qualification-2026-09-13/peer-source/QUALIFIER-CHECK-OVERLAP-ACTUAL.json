@@ -1,7 +1,0 @@
-{
-  "chunk_id": "7ac67e",
-  "wall_time_seconds": 0.3602276,
-  "exit_code": 1,
-  "original_token_count": 59,
-  "output": "Exception: \r\nLine |\r\n   2 |  … $item.Length -ne $row.bytes){throw ('Changed pin '+$row.path)}; $rows …\r\n     |                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\r\n     | Changed pin qualify_windows_reservations.py\r\n"
-}

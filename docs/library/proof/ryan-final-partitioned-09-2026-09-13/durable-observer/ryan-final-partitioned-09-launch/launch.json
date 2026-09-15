@@ -1,7 +1,0 @@
-{
-  "supervisor_pid": 13208,
-  "source": "56d9d4cf11f20ff4448b21db172dbf217d02c6d6",
-  "returned_utc": "2026-09-13T12:33:03.8600284Z",
-  "child_exit": null,
-  "note": "Launch only; durable supervisor records actual child completion"
-}

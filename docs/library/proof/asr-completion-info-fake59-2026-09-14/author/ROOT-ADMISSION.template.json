@@ -1,7 +1,0 @@
-{
-  "approved": false,
-  "label": "asr-completion-info-fake59-01",
-  "pins_sha256": "3ab4293cfd48e9652029bd7c2de42269b57499c7c46d95cfd9f659db4a6099f1",
-  "scope": "generated_bytes_and_fake_ports_only",
-  "note": "Frozen source preparation only; separate exact root admission is required before any child invocation."
-}

@@ -1,7 +1,0 @@
-{
-  "chunk_id": "dc197f",
-  "wall_time_seconds": 0.1935651,
-  "exit_code": 0,
-  "original_token_count": 166,
-  "output": "{\n  \"scope\": \"Complete observed fake95 result pair; no native/model/runtime acceptance\",\n  \"source_commit\": \"851bcdd2688fa7728aa801ca042e4cb20b270cac\",\n  \"author_actual\": \"02dc46/0\",\n  \"confirmation_actual\": \"8a6166/0\",\n  \"each\": {\n    \"passed\": 95,\n    \"failed\": 0,\n    \"skipped\": 0,\n    \"passing_subtests\": 95,\n    \"child_hashes\": 25,\n    \"guards\": 10,\n    \"unchanged_inputs\": 29,\n    \"unchanged_controls\": 3,\n    \"output_files\": 37\n  },\n  \"partition\": {\n    \"original_cases\": 81,\n    \"original_subtests\": 48,\n    \"stage_cases\": 14,\n    \"stage_subtests\": 47\n  },\n  \"identical_complete_cases\": true,\n  \"identical_child_hashes\": true,\n  \"identical_guards\": true\n}\n"
-}

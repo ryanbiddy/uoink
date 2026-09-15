@@ -1,7 +1,0 @@
-{
-  "chunk_id": "151c60",
-  "wall_time_seconds": 0.1846543,
-  "exit_code": 0,
-  "original_token_count": 119,
-  "output": "{\n  \"scope\": \"Complete observed fake81 result pair; no native/model/runtime acceptance\",\n  \"author_actual\": \"28a03e/0\",\n  \"confirmation_actual\": \"9a8704/0\",\n  \"each\": {\n    \"passed\": 81,\n    \"failed\": 0,\n    \"skipped\": 0,\n    \"passing_subtests\": 48,\n    \"child_hashes\": 23,\n    \"guards\": 10,\n    \"unchanged_inputs\": 27,\n    \"unchanged_controls\": 3,\n    \"output_files\": 35\n  },\n  \"identical_complete_cases\": true,\n  \"identical_child_hashes\": true,\n  \"identical_guards\": true\n}\n"
-}

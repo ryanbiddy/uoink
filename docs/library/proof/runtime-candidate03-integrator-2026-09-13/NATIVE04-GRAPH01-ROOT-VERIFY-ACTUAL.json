@@ -1,7 +1,0 @@
-{
-  "chunk_id": "a58725",
-  "wall_time_seconds": 0.1915326,
-  "exit_code": 0,
-  "original_token_count": 87,
-  "output": "{\"documentary_verification\": \"PASS\", \"native04\": {\"sources\": 6, \"controls\": 3, \"installed_support\": 9, \"fixture_bytes\": 64, \"actual_native_result\": \"PASS\"}, \"graph01\": {\"inputs\": 36, \"captures\": 313, \"selection_count\": 144, \"active_edges\": 287, \"actual_graph_result\": \"FAIL\", \"missing_wheels\": 2, \"conflicts\": 0}, \"executed_archived_code\": false}\r\n"
-}

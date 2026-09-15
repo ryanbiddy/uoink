@@ -1,7 +1,0 @@
-{
-  "chunk_id": "1d1c98",
-  "wall_time_seconds": 0.1941428,
-  "exit_code": 0,
-  "original_token_count": 182,
-  "output": "[{\"Name\":\".gitattributes\",\"Length\":8},{\"Name\":\"durable_lifecycle.py\",\"Length\":32833},{\"Name\":\"generated_adapter_flow.py\",\"Length\":89924},{\"Name\":\"generated_journal_setup.py\",\"Length\":19100},{\"Name\":\"INPUTS.json\",\"Length\":13831},{\"Name\":\"test_interrupted_owner_retirement.py\",\"Length\":27790},{\"Name\":\"TEST-CORRECTIONS.md\",\"Length\":4800},{\"Name\":\"TEST-VIEW-COVERAGE.json\",\"Length\":4219}]\r\n{\"name\":\"durable_lifecycle.py\",\"sha256\":\"3c8963eaa02bbc1d810ee2632d0363303bfe05ec6ceeef73771ca8005a00ece3\"}\r\n{\"name\":\"generated_adapter_flow.py\",\"sha256\":\"6a008136802d614ead53297f030dda3da01767ca8a63d313421f142c4d8a160b\"}\r\n{\"name\":\"generated_journal_setup.py\",\"sha256\":\"44bdaeeb7ba95b202d7fa0bfd202c8e95f3c5bbae4173786a71aa58071184c9c\"}\r\n"
-}

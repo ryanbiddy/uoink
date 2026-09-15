@@ -1,7 +1,0 @@
-{
-  "chunk_id": "b7b59d",
-  "wall_time_seconds": 0.1825947,
-  "exit_code": 1,
-  "original_token_count": 353,
-  "output": "file:///E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/check-controller-custody-instrument.mjs:2\r\nconst root='E:/AI/projects/uoink/checkouts/Yoink-library',dir=path.join(root,'_scratch/controller-custody-qualification-proposal01'),donor=path.join(root,'_scratch/controller-stage-qualification-proposal01'),sha=b=>crypto.createHash('sha256').update(b).digest('hex'),read=p=>fs.readFileSync(p),json=p=>JSON.parse(read(p)),lf=b=>b.toString('utf8').replaceAll('\\r\\n','\\n'),assert=(v,m)=>{if(!v)throw Error(m);};\r\n                                                                                                                                                                                                                                                                                                                                                                                                              ^\r\n\r\nError: Reverse count\r\n    at assert (file:///E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/check-controller-custody-instrument.mjs:2:399)\r\n    at file:///E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/check-controller-custody-instrument.mjs:10:579\r\n    at ModuleJob.run (node:internal/modules/esm/module_job:439:25)\r\n    at async node:internal/modules/esm/loader:643:26\r\n    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)\r\n\r\nNode.js v24.18.0\r\n"
-}

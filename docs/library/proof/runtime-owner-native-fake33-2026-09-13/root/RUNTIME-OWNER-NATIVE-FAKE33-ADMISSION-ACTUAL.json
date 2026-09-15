@@ -1,7 +1,0 @@
-{
-  "chunk_id": "ef7e6f",
-  "wall_time_seconds": 0.360191,
-  "exit_code": 0,
-  "original_token_count": 132,
-  "output": "{\r\n  \"admission\": \"E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\_scratch\\\\runtime-owner-native-connection-proposal01\\\\ROOT-ADMISSION.json\",\r\n  \"bytes\": 7406,\r\n  \"sha256\": \"2692534aef872cd61c65b8f2e535304c754e91475ad405200015543b92bdd769\",\r\n  \"fixed_input_bindings\": 38,\r\n  \"expected_cases\": 33,\r\n  \"false_template_sha256\": \"d3486473912498645e0c2a1eaaf1d08516604b5c8ec5da6f4c98ce5215aca2db\",\r\n  \"root_review_sha256\": \"41ae1ce8391661ca294dc3a855fb292894f36a028bdf3f5a2f98faefcb3d19d4\",\r\n  \"candidate_executed\": false\r\n}\r\n"
-}

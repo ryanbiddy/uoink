@@ -1,8 +1,0 @@
-{
-  "chunk_id": "e0927a",
-  "wall_time_seconds": 0.212363,
-  "exit_code": 1,
-  "original_token_count": 189,
-  "output": "file:///E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/controller-custody-qualification-proposal01/check_text_inputs01.mjs:5\r\nfunction ok(v,m){if(!v)throw Error(m);}\r\n                             ^\r\n\r\nError: reverse edit count\r\n    at ok (file:///E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/controller-custody-qualification-proposal01/check_text_inputs01.mjs:5:30)\r\n    at file:///E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/controller-custody-qualification-proposal01/check_text_inputs01.mjs:19:356\r\n    at ModuleJob.run (node:internal/modules/esm/module_job:439:25)\r\n    at async node:internal/modules/esm/loader:643:26\r\n    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)\r\n\r\nNode.js v24.18.0\r\n"
-}
-

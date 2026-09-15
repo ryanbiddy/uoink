@@ -1,3 +1,0 @@
-2026-09-13. The first documentary sealer returned exit 1 with "Unexpected preparation payload membership" and created no manifest. Inspection showed ROOT-ADMISSION.md, added by root during sealing preparation, was the sole file outside the fixed list. No qualifier, fixture, D1 program or helper ran.
-
-Preserve the sealer under drafts/seal_preparation.before-root-admission.ps1 and its actual tool outcome in seal-preparation01-tool-result.json. Include root's admission and these sealing records in the fresh preparation manifest. The five reviewed executable inputs, final launcher and qualification protocol remain unchanged. This repairs the documentary payload list; it does not rerun or relabel a qualification result.

@@ -1,8 +1,0 @@
-{
-  "chunk_id": "2564ca",
-  "wall_time_seconds": 0.2000073,
-  "exit_code": 0,
-  "original_token_count": 357,
-  "output": "{\r\n  \"kind\": \"passive_plan_data_check\",\r\n  \"candidate_execution\": false,\r\n  \"expected_membership_valid\": true,\r\n  \"files\": [\r\n    {\r\n      \"name\": \"BINDING-CHECK-ACTUAL.json\",\r\n      \"bytes\": 15277,\r\n      \"sha256\": \"16a3405f0b7c4a59a421dc7ba961d8052823393994a3342d6787a2b4eace2469\"\r\n    },\r\n    {\r\n      \"name\": \"CAPTURE-READ-ACTUAL.json\",\r\n      \"bytes\": 22758,\r\n      \"sha256\": \"e6f08253ca07042fa624122f1bc928aeb53b69a45a32a6ddf3de999477d36fc0\"\r\n    },\r\n    {\r\n      \"name\": \"FIXTURE-READ-ACTUAL.json\",\r\n      \"bytes\": 26675,\r\n      \"sha256\": \"917691e17971e8e8cf57808f12fe9c136a89442e94dc017ca42ef8e7983147f1\"\r\n    },\r\n    {\r\n      \"name\": \"LAUNCHER-READ-ACTUAL.json\",\r\n      \"bytes\": 20305,\r\n      \"sha256\": \"99b68682a483d6eb5ba459496992a396cf10f3a25602af74954274c6efb4d883\"\r\n    },\r\n    {\r\n      \"name\": \"PLAN.md\",\r\n      \"bytes\": 5684,\r\n      \"sha256\": \"e186a153f73c6dec7f75ea130b59cf652784ac7087d4063f7270a348ed771aa6\"\r\n    },\r\n    {\r\n      \"name\": \"QUALIFIER-READ-ACTUAL.json\",\r\n      \"bytes\": 19773,\r\n      \"sha256\": \"ef2a61fb0789f9fd5fcfbb024501edf9684631a66cd2961c909146e57490e6a6\"\r\n    },\r\n    {\r\n      \"name\": \"READ-COVERAGE.json\",\r\n      \"bytes\": 2705,\r\n      \"sha256\": \"f3896057fcb9416cbdff578ca0ad8475e1dbb283d347078353ae7468d923ec6a\"\r\n    },\r\n    {\r\n      \"name\": \"SOURCE-INPUTS.json\",\r\n      \"bytes\": 14727,\r\n      \"sha256\": \"79c4db91184884b00aaccdc881b68e888714082460d77d4036a51f079c60ef07\"\r\n    }\r\n  ]\r\n}\r\n"
-}
-

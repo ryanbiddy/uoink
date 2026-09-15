@@ -1,7 +1,0 @@
-# Protect the first build context check
-
-Root found a source defect before any factory test: draft 3a5b3264399f2be313b8ed3f4d3dcb584314c495ca8e2799714f3633f95a7b23 marked the attempt consumed, then checked current import/dtype flags outside its cleanup transaction. A changed flag or raised check could leave the issued capability active after a failed attempt. Preserve that exact draft under drafts/owned_factory_port-before-context-cleanup.py.
-
-Move the first capability/runtime check, clock creation, current-context check and owner construction inside the protected transaction after the one-attempt marker. Allow the owner to be absent during cleanup so a context/owner-creation failure still revokes the issued capability. The second-build refusal remains outside: it must not revoke a successfully returned product merely because an invalid second build was requested. No tests or native operations have run, and no assertion changes are involved.
-
-Generation revocation is an authority event, not native cancellation. A build admitted before revocation may finish an already-started constructor, verification or native call. It must fail the subsequent binding/publication checks. The final publication lock decides ordering with revocation, but cannot preempt work that already entered native code. The worker supervisor still owns cancellation, close/join, independent quiescence confirmation and quarantine when any of those fail. The registry's local flags never authorize snapshot release or substitute for that supervisor receipt.

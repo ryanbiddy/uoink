@@ -1,7 +1,0 @@
-{
-  "chunk_id": "6491d5",
-  "wall_time_seconds": 0.9335746,
-  "exit_code": 0,
-  "original_token_count": 175,
-  "output": "warning: in the working copy of 'docs/library/ORCHESTRATION-HANDOFF-2026-09-08.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/library/RELEASE-NOTES-LIVING-LIBRARY.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/library/RELEASE-OWNER-DECISIONS-2026-09-12.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/library/CONTROLLER-RESUME-PUBLICATION-IMPLEMENTATION-BRIEF-2026-09-14.md', LF will be replaced by CRLF the next time Git touches it\n{\"commit\":\"e0bbbd694b4fb082a5b1c2b15370e2a7391ef3da\",\"files\":33,\"proof_payloads\":28,\"tracked_clean\":true}\r\n"
-}

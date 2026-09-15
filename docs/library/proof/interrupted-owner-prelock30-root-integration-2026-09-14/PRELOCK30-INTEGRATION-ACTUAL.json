@@ -1,7 +1,0 @@
-{
-  "chunk_id": "19a067",
-  "wall_time_seconds": 1.4107096000000001,
-  "exit_code": 0,
-  "original_token_count": 77,
-  "output": "{\"patch\":\"E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\_scratch\\\\prelock30-qualification.patch\",\"bytes\":4251063,\"sha256\":\"d6b6c53a46c85afa1e1a147f7158fe7969bb9c09bfd4ad3ff8db406b4ffe5d44\",\"apply_exit\":0,\"stdout\":\"_scratch/prelock30-apply.stdout.log\",\"stderr\":\"_scratch/prelock30-apply.stderr.log\"}\r\n"
-}

@@ -1,7 +1,0 @@
-{
-  "chunk_id": "d43185",
-  "wall_time_seconds": 0.6126135,
-  "exit_code": 0,
-  "original_token_count": 65,
-  "output": "{\r\n  \"path\": \"E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\_scratch\\\\lifecycle-combined-proof01\",\r\n  \"count\": 98,\r\n  \"bytes\": 622502,\r\n  \"manifest_sha256\": \"74129bbd376def3ae9451ef98025748c527539e94490d551dd01fa7c3761ffcf\",\r\n  \"tests_executed\": 0\r\n}\r\n"
-}

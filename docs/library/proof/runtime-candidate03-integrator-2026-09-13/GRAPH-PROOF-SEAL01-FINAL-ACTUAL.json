@@ -1,7 +1,0 @@
-{
-  "chunk_id": "5ce1df",
-  "wall_time_seconds": 0.000002,
-  "exit_code": 0,
-  "original_token_count": 185,
-  "output": "{\r\n  \"verification\": \"PASS\",\r\n  \"proof\": \"E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\_scratch\\\\runtime-candidate03-graph-proof01\",\r\n  \"root_payloads\": 26,\r\n  \"mapped_source_paths\": 2266,\r\n  \"zip_members\": 532,\r\n  \"expanded_bytes\": 127451131,\r\n  \"original_manifests\": 8,\r\n  \"original313\": 313,\r\n  \"extracted_or_executed_files\": 0,\r\n  \"manifest_sha256\": \"793a1c4826eabc278b795d0d2fbc06c642dfb2ca1cdf42d73cc4bb8e4fb941ec\"\r\n}\r\n{\r\n  \"proof\": \"E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\_scratch\\\\runtime-candidate03-graph-proof01\",\r\n  \"payload_files\": 26,\r\n  \"source_paths\": 2266,\r\n  \"unique_members\": 532,\r\n  \"zip_bytes\": 22796343,\r\n  \"manifest_sha256\": \"793a1c4826eabc278b795d0d2fbc06c642dfb2ca1cdf42d73cc4bb8e4fb941ec\"\r\n}\r\n"
-}

@@ -1,7 +1,0 @@
-{
-  "chunk_id": "ac31ed",
-  "wall_time_seconds": 0.1821818,
-  "exit_code": 0,
-  "original_token_count": 113,
-  "output": "[\r\n  {\r\n    \"path\": \"VERDICT.md\",\r\n    \"bytes\": 1831,\r\n    \"sha256\": \"016b5855af197aacaa5a40be1a2b72858ed3e59feed09a3e5df123f6b82264eb\"\r\n  },\r\n  {\r\n    \"path\": \"FINAL-METADATA.json\",\r\n    \"bytes\": 2583,\r\n    \"sha256\": \"edb874f3c3de5d5190b3a9c9e372c0ccd4aed66e4ef61822c346abc3dd368147\"\r\n  },\r\n  {\r\n    \"path\": \"FINAL-CHECK04-ACTUAL.json\",\r\n    \"bytes\": 3123,\r\n    \"sha256\": \"caed64050f123688ffc5e3b87891b532cb95b2ec99634b6cd6010115279536e7\"\r\n  }\r\n]\r\n"
-}

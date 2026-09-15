@@ -1,7 +1,0 @@
-{
-  "chunk_id": "c3d9f3",
-  "wall_time_seconds": 1.6663326,
-  "exit_code": 0,
-  "original_token_count": 23,
-  "output": "interrupted-owner-prelock-fake03: 30 passed, 0 failed, 0 skipped; generated scope only.\r\n"
-}

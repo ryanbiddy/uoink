@@ -1,5 +1,0 @@
-2026-09-13. Root caught a false claim in the unsealed FINAL-EVIDENCE-SUMMARY.md: it said the original collector timestamps used `-07:00`. The exact draft is preserved as FINAL-EVIDENCE-SUMMARY.timestamp-draft.md, SHA-256 `ddf2325611f251ec37f545d310421ced372cc9e2c51291dec6e035ef5519f4ec`.
-
-The raw JSON text uses `+00:00`. Resolve01 starts at `2026-09-13T16:43:37.567031+00:00` and finishes at `2026-09-13T16:43:38.023840+00:00`. Sources01 starts at `2026-09-13T16:48:26.715068+00:00` and finishes at `2026-09-13T16:48:31.828553+00:00`. The unchanged collector's utc() at lines 69–70 calls datetime.now(timezone.utc).isoformat(timespec="microseconds").
-
-The earlier reporting tool parsed JSON with PowerShell ConvertFrom-Json and serialized it again; automatic date conversion produced a local-offset display. That derived display was mistakenly attributed to the original bytes. Correct the final prose to reflect the raw strings and retain this distinction. A fresh raw-text timestamp verification uses string matches without ConvertFrom-Json date coercion. No collector, request, response, test, source or measured timestamp is changed; no rerun or network request is needed.

@@ -1,7 +1,0 @@
-{
-  "chunk_id": "ab88db",
-  "wall_time_seconds": 0.2907312,
-  "exit_code": 0,
-  "original_token_count": 245,
-  "output": "{\r\n  \"selected_count\": 5,\r\n  \"bytes\": 65576,\r\n  \"catalog_line_slots\": 1286,\r\n  \"selected_files_match_original\": true,\r\n  \"new_test_method_count\": 11,\r\n  \"map_sha256\": \"874b686d4a078d37385cac6b5a860a21aebeec08781d2ec150cd3f2e0491b277\",\r\n  \"method_names\": [\r\n    \"test_growth_at_each_ancestor_allows_confirmed_clear_and_release\",\r\n    \"test_other_directory_fields_refuse_before_journal_open\",\r\n    \"test_other_field_change_after_clean_poisons_and_retains_gate\",\r\n    \"test_invalid_directory_size_observations_still_refuse\",\r\n    \"test_directory_pin_accepts_growth_and_retains_current_observation\",\r\n    \"test_directory_pin_keeps_other_fields_strict\",\r\n    \"test_regular_file_size_change_refuses_and_retains_handle\",\r\n    \"test_regular_file_exact_identity_still_pins\",\r\n    \"test_native_identity_reparse_pending_and_negative_checks_remain\",\r\n    \"test_dataclass_equality_and_refusal_diagnostic_keep_both_sizes\",\r\n    \"test_growth_does_not_grant_release_after_flush_failure\"\r\n  ]\r\n}\r\n"
-}

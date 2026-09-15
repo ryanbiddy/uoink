@@ -1,8 +1,0 @@
-[
-  "exact_lease_permit_and_usage_reach_owned_startup",
-  "retained_facade_refuses_after_context_close",
-  "lazy_segments_require_live_owned_lease",
-  "foreign_factory_refused_before_native_reservation",
-  "binding_or_start_failure_preserves_original_and_quarantine",
-  "unconfirmed_close_keeps_snapshot_quarantined"
-]

@@ -1,9 +1,0 @@
-# Pre-execution lifetime and timeout-observation repair
-
-The initial unexecuted timeout draft could take normal `SystemExit` while an unconfirmed OVERLAPPED operation still held a buffer. Python interpreter teardown is not a native completion proof: destructors could free that storage before operating-system process teardown cancels the operation. The peer identified this from source. The draft is preserved as `before/pre-finalization-repair-*`.
-
-After writing and flushing its failed controller receipt, the revised bootstrap uses its identity-bound `os._exit(1)` only when pending native operations remain. This terminates this fixed current controller without Python finalizers. It is a failure exit, never a clean-release credit. Parent process death is then observed by the outer launcher. Existing exact-job stop attempts and recorded retained-process/job observations remain unchanged; no uncertainty flag is cleared. This is a generated-probe finalization rule, not a production recovery service. Root must review it before execution.
-
-The frozen pipe reports the same `overlapped_completion_not_observed` message for any non-signalled wait result. The new monitor records bounded scalar wait/cancellation/termination outcomes and the flow requires the first pending-read event wait to return the actual `WAIT_TIMEOUT` value 258. A `WAIT_FAILED` value cannot qualify as the intended timeout. Recorded last-error values are contextual and may be stale when a call succeeded; the return value and call-specific contract determine their relevance. No buffer, secret, path or raw API argument is recorded. The launcher checks the requested wait bound and records elapsed time without imposing an unsupported exact lower wall-clock guarantee.
-
-No native run or test occurred. Existing native04 sources, dispatcher scope and old measurements remain unchanged.

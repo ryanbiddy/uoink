@@ -1,7 +1,0 @@
-{
-  "chunk_id": "4faa90",
-  "wall_time_seconds": 3.3448512,
-  "exit_code": 0,
-  "original_token_count": 55,
-  "output": "{\"proof\": \"docs/library/proof/protected-constructor01-failed-2026-09-14\", \"payloads_matching_disk_and_git\": 42, \"bytes\": 741143, \"manifest_sha256\": \"db20a2538a01a777b7d4ef8423dc762549a9a4c4125ba52435a262c0d44f774c\"}\r\n"
-}

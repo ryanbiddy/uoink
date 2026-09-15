@@ -1,7 +1,0 @@
-{
-  "chunk_id": "4d4089",
-  "wall_time_seconds": 0.2124935,
-  "exit_code": 0,
-  "original_token_count": 91,
-  "output": "{\"name\":\"VERDICT.md\",\"bytes\":2891,\"sha256\":\"9adc5ea8951317ee1737a7d2846ae2cf2c99e505788f1b9ee5f8e8239f5a6926\"}\r\n{\"name\":\"AUTHOR-RUN-ACTUAL.json\",\"bytes\":213,\"sha256\":\"943ea622926bf87f4dff057e90dafd35199b88d7ab73c6e46d079a2f52d7a3f8\"}\r\n{\"name\":\"INDEPENDENT-RUN-ACTUAL.json\",\"bytes\":220,\"sha256\":\"5cc2a5303878d6a9a5d4fd567f76f32535642af1dcd0d4420bfebe437eccff0b\"}\r\n"
-}

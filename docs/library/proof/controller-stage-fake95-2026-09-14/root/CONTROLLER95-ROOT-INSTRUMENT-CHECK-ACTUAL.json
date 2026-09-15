@@ -1,7 +1,0 @@
-{
-  "chunk_id": "243efd",
-  "wall_time_seconds": 0.1976988,
-  "exit_code": 0,
-  "original_token_count": 174,
-  "output": "{\n  \"scope\": \"root passive instrument review; no Python startup or subject execution\",\n  \"pins_sha256\": \"b831bf6c864d8a7bef24355e5868dfa7480e6bba6ff1381cbc3ac9db07388606\",\n  \"parent_inputs\": 29,\n  \"bytes\": 481412,\n  \"child_inputs\": 25,\n  \"modules\": 23,\n  \"before_copies\": 8,\n  \"original_cases\": 81,\n  \"new_cases\": 14,\n  \"ordered_cases\": 95,\n  \"accepted_tests_unchanged\": true,\n  \"adapter_prefix_bytes\": 28922,\n  \"deltas\": [\n    {\n      \"file\": \"qualify_windows_reservations.py\",\n      \"edits\": 8,\n      \"forward\": true,\n      \"reverse\": true\n    },\n    {\n      \"file\": \"run_preflight01.ps1\",\n      \"edits\": 8,\n      \"forward\": true,\n      \"reverse\": true\n    }\n  ],\n  \"false_templates\": true\n}\n"
-}

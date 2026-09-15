@@ -1,7 +1,0 @@
-{
-  "chunk_id": "caca11",
-  "wall_time_seconds": 0.2607514,
-  "exit_code": 0,
-  "original_token_count": 117,
-  "output": "{\r\n  \"scope\": \"Passive text only\",\r\n  \"unchanged_origin_payloads\": 18,\r\n  \"unchanged_copied_payloads\": 17,\r\n  \"lifecycle_sha256\": \"22b662938178d1898eb287348d0b4556c6579b5d0ce79f2782d49a4748ed1509\",\r\n  \"test_sha256\": \"29d3a327d9b507f1a16b147a7be68887fb2233536823f76da3e65d1e45b57549\",\r\n  \"case_bodies_unchanged\": true,\r\n  \"ordered_case_ids\": 13,\r\n  \"full_diff_reconstruction\": true,\r\n  \"diff_hunks\": 1,\r\n  \"candidate_executed\": false,\r\n  \"admission_created\": false\r\n}\r\n"
-}

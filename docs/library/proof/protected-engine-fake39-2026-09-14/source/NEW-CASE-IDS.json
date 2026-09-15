@@ -1,8 +1,0 @@
-[
-  "test_engine_ownership.EngineOwnershipContracts.test_01_actual_generated_sequence_retains_before_preparation",
-  "test_engine_ownership.EngineOwnershipContracts.test_02_missing_or_forged_issuance_refuses_before_constructor",
-  "test_engine_ownership.EngineOwnershipContracts.test_03_operation_attempt_and_step_order_are_bound",
-  "test_engine_ownership.EngineOwnershipContracts.test_04_each_construction_failure_retains_returned_objects",
-  "test_engine_ownership.EngineOwnershipContracts.test_05_reentrant_revoke_or_changed_vad_blocks_publication",
-  "test_engine_ownership.EngineOwnershipContracts.test_06_secondary_cleanup_failure_preserves_first_error"
-]

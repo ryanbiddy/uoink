@@ -1,7 +1,0 @@
-# Root admission for the first retired-owner fake qualification
-
-Root and peer source review found no remaining blocker in the frozen 22-case preparation. Root read the complete qualifier, launcher, expected list, connected diffs and repair notes. The isolated qualifier uses already loaded modules to resolve exact case suffixes; this avoids the speculative import found before execution. No case or assertion changed.
-
-Admit the first generated/fake-only run at the author preparation and one identical independent confirmation. PINS SHA-256 is f7c3b964ed77a681ed71d9b03fee934cf402721bc232d869e5ee42c9f564e3a1; qualifier is 8a5e3b234167f3b2e23e3faec4a7a8a7a176b46f5719f07f956aaaae9f3610b9. Root95342d verifies all26 bindings; author5e0062 and peer3f0b39 verify preservation and corrected selection. The earlier qualifier, pins, false template and passive observations remain preserved.
-
-The scope is 12 unchanged historical controls plus ten new fake controls, with all ten final guards and the existing closed native/model/import/file/registry boundaries. Each run requires a fresh directory, C:\Python314\python.exe -I -S -B, lexical live-index binding before startup, actual native exit and full case/subtest records. Failure stays failed and requires a repair brief before another label. No native or real-model execution is admitted. The independently reviewed native derivative requires a separate decision after these results.

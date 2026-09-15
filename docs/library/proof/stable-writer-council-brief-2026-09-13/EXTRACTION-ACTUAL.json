@@ -1,7 +1,0 @@
-{
-  "chunk_id": "802993",
-  "wall_time_seconds": 0.3637453,
-  "exit_code": 0,
-  "original_token_count": 110,
-  "output": "{\r\n  \"path\": \"E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\_scratch\\\\gemini-stable-writer-council-proposal02\\\\controller-selected-fields.json\",\r\n  \"bytes\": 26029,\r\n  \"lines\": 636,\r\n  \"sha256\": \"e35bbf7338ba599bfa2bcfcf940edc58adb8044ec15b25d7c14aec717f617568\",\r\n  \"preserved_fields\": 31,\r\n  \"omitted_arrays\": 1,\r\n  \"omitted_array_items\": 8230,\r\n  \"original_unchanged\": true,\r\n  \"candidate_execution\": false,\r\n  \"dispatch\": false\r\n}\r\n"
-}

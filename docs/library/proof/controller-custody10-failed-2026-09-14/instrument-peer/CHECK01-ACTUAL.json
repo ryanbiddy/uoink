@@ -1,7 +1,0 @@
-{
-  "chunk_id": "0b19a0",
-  "wall_time_seconds": 0.1874876,
-  "exit_code": 1,
-  "original_token_count": 165,
-  "output": "file:///E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/controller-custody-instrument-peer01/check_final_instruments.mjs:45\r\n if(forward!==after||reverse!==before)throw Error('declared reconstruction');\r\n                                            ^\r\n\r\nError: declared reconstruction\r\n    at file:///E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/controller-custody-instrument-peer01/check_final_instruments.mjs:45:45\r\n    at ModuleJob.run (node:internal/modules/esm/module_job:439:25)\r\n    at async node:internal/modules/esm/loader:643:26\r\n    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)\r\n\r\nNode.js v24.18.0\r\n"
-}

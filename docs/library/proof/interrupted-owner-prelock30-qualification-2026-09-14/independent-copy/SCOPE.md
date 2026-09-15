@@ -1,1 +1,0 @@
-Prepare the independent fake30 copy only from the author's final frozen map. Preserve exact child source/qualifier/expected bytes and the false admission template. Only the required confirmation label/path changes are permitted. No actual admission, run directory, Python startup, candidate/test/native execution or physical artifact access is part of this task.

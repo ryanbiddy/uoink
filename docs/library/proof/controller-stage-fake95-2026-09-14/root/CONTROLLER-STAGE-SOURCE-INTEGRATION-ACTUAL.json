@@ -1,7 +1,0 @@
-{
-  "chunk_id": "381ac0",
-  "wall_time_seconds": 0.9347957,
-  "exit_code": 0,
-  "original_token_count": 75,
-  "output": "{\"proof\":\"docs/library/proof/controller-worker-stage-source-2026-09-14\",\"patch\":\"E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\_scratch\\\\controller-worker-stage-source-2026-09-14.patch\",\"bytes\":1094871,\"sha256\":\"a133b61a87f2b381a00b148bd65de5db01b96624a32f6c0805acb9ce1687ef12\",\"apply_exit\":0}\r\n"
-}

@@ -1,7 +1,0 @@
-# Documentary receipt binding correction before execution
-
-The initial unexecuted builder expected the unused copy recipe's inputs/copied_input_count fields. Root had already made its independent copy with a different, preserved COPY-BINDINGS.json schema: exactly 13 rows under files. The final builder now validates that actual schema, including exact row membership, bytes and hashes. No root evidence, source, test or outcome changes.
-
-The original builder SHA-256 fed5aea440b7dc838df4a983e25c792ac95159ae234a016d78a823089d90fbf0 was recorded before the change. Its bytes are retained as drafts/build_verify-before-root-receipt-binding.py. They were recovered by reversing only the schema edit and checked against that previously observed full hash; this is exact byte preservation, not a claim that a separate copy was made before editing.
-
-The unused prepare_root_copy.ps1 is proposal text and was never run by the author. The builder includes the actual root preparation tool receipt and actual qualification outer object through its full documentary tree collection. Neither copy preparation nor qualification repeats. This note and the original builder draft are included before the outer seal.

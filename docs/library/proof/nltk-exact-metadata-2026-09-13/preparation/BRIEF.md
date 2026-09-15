@@ -1,9 +1,0 @@
-# Exact local NLTK METADATA read proposal — 2026-09-13
-
-Read only the already accepted stored NLTK wheel to bind its exact local METADATA to the graph proposal. Root has authorized preparation and will review the source before one invocation. This is local packaging evidence; it does not acquire a model, install NLTK or alter the separate VAD/D1 gates.
-
-The one artifact is `docs/library/proof/nltk-local-wheel-2026-09-13/final-artifact/nltk-3.10.3+uoink.pathsec1-py3-none-any.whl`: 6,597,605 bytes, SHA256 `969f623541344ade83ea267130e016d6cb8a223ecaaf28fb3d7a663c7e3c60d8`. The reader requires that exact identity before parsing ZIP structure. It interprets only archive headers and the exact METADATA/RECORD text; the rest is hashed as opaque whole-file bytes. No wheel member is imported or extracted as source.
-
-Use stdlib only. Require 512 unique regular stored entries, canonical member paths, bounded local/central extents, no encryption/ZIP64/comment/overlap, exact selected entry CRCs and complete unique RECORD membership. Verify the METADATA hash/length from RECORD; record that other payload RECORD digests were not recomputed in this invocation. Compare Name, local Version, Requires-Python and Requires-Dist against the captured public upstream METADATA and the exact builder Version-header transformation. Keep the built local artifact identity distinct from upstream public provenance.
-
-Only exact selected METADATA text and JSON receipt may be written under fresh `results/read01`. Pin reader, launcher and source/provenance text. Bind the forbidden live path string before native Python startup; scrub providers and disable backend autoload. The launcher preserves actual native exit before postchecks. Preserve any partial output and failure, with no automatic rerun. This preparation does not read the wheel or execute Python.

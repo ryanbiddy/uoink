@@ -1,6 +1,0 @@
-{"nodeid": "_scratch/test_phase4_partition_double_failure_smoke.py::test_ordinary_pass_is_retained", "when": "setup", "outcome": "passed", "duration": 0.00010710000060498714, "wasxfail": null}
-{"nodeid": "_scratch/test_phase4_partition_double_failure_smoke.py::test_ordinary_pass_is_retained", "when": "call", "outcome": "passed", "duration": 8.699999307282269e-05, "wasxfail": null}
-{"nodeid": "_scratch/test_phase4_partition_double_failure_smoke.py::test_ordinary_pass_is_retained", "when": "teardown", "outcome": "passed", "duration": 0.00010050000855699182, "wasxfail": null}
-{"nodeid": "_scratch/test_phase4_partition_double_failure_smoke.py::test_call_and_teardown_failures_are_both_retained", "when": "setup", "outcome": "passed", "duration": 0.00011810001160483807, "wasxfail": null}
-{"nodeid": "_scratch/test_phase4_partition_double_failure_smoke.py::test_call_and_teardown_failures_are_both_retained", "when": "call", "outcome": "failed", "duration": 0.00011929999163839966, "wasxfail": null}
-{"nodeid": "_scratch/test_phase4_partition_double_failure_smoke.py::test_call_and_teardown_failures_are_both_retained", "when": "teardown", "outcome": "failed", "duration": 0.0001078000059351325, "wasxfail": null}

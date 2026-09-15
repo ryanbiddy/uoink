@@ -1,6 +1,0 @@
-{
-  "reviewed_utc": "2026-09-13T15:13:12.3450565Z",
-  "source_manifest_sha256": "d37beab5e30cdef7680e0aab19538cef93007ea0f3cad445da06fd54d0503ea2",
-  "verified_input_count": 13,
-  "decision": "Reviewed selected AST bodies, fakes, unchanged assertions, runner and launcher. Execute same synthetic contracts once in fresh independent copy. Direct empty-list diagnostic remains outside accepted cases; no package/model/native execution or runtime acceptance."
-}

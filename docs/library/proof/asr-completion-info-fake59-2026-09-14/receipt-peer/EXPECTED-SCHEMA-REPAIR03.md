@@ -1,3 +1,0 @@
-The second passive author check stopped at `original46 exact order` (a2d652/exit1). The checker treated the original expected-case document as a bare array. Complete retained read 7ecee6/exit0 shows its actual schema: `uoink.lifecycle-expected-cases.v1`, `count: 46`, and the `ordered_cases` array. The new13 document is a bare array.
-
-The corrected checker requires that exact historical schema/count and compares its `ordered_cases` against the first 46 actual IDs. It preserves all original hash, case and result requirements. The second draft is retained as `check_receipts.before-expected-schema02.ps1`. Both failures belong to the passive reviewer, not the saved candidate runs; no subject/source file was changed or rerun.

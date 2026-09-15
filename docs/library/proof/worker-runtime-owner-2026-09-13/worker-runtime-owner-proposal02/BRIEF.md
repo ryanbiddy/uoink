@@ -1,5 +1,0 @@
-2026-09-13. Repair final publication ownership before the first qualification. The peer/root review found that publish_generated_text checked only the active operation and PCM, allowing text after VAD-only retirement or replacement of the completed product/module. This is an ownership defect found by source review, not an executed test result.
-
-Preserve proposal01 and its source 98e6e6f7, fixture 1c60507a and seven cases 800f969a unchanged. In this fresh derivative, recheck the exact active issued VAD product/model lease inside the existing publication lock before returning text. Add focused publication negatives; preserve all original seven case bodies. Keep generated-only namespace/PCM, the actual unchanged factory build with fake tensor APIs, and every closed real route.
-
-After the source delta is reviewed, prepare a narrow adaptation of the existing qualified inert guard/launcher. Preserve its original input bytes and document changes. No execution is authorized now: no cases, model/native/package imports, artifacts, runtime activation, acquisition, network, production/acceptance/dependency edits or durable-reservation changes.

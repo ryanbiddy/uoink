@@ -1,7 +1,0 @@
-{
-  "chunk_id": "cc862a",
-  "wall_time_seconds": 0.0000021,
-  "exit_code": 0,
-  "original_token_count": 54,
-  "output": "{\"proof\": \"docs/library/proof/asr-completion-info-fake59-2026-09-14\", \"payloads_matching_disk_and_git\": 193, \"bytes\": 1288609, \"manifest_sha256\": \"06f7319979f2d892617af0f9eaa75053b8fe0849767440898049dfad3db65df1\"}\r\n"
-}

@@ -1,5 +1,0 @@
---- original-preparation/BRIEF.md
-+++ CANONICAL-BRIEF.md
-@@ -3,1 +3,1 @@
--Review the stable-directory identity repair using only the five files in `docs/library/proof/stable-directory-correction02-brief-2026-09-13/INPUT-SELECTION.json`. Write a source critique of **at most 600 words**. This is a smaller correction of the failed Gemini review from Control Room run `2b39a17c-9418-4cfe-85d8-ecc07d7cdde2`; it does not repeat or supersede that measurement.
-+Review the stable-directory identity repair using only the five files in `docs/library/proof/stable-directory-correction02-brief-2026-09-13/INPUT-SELECTION.json`. Write a source critique of **at most 600 words**. This is a smaller correction of the failed Gemini review from Control Room run `2b39a17c-9418-4cfe-85d8-ecc07d7cdde2`. The earlier review remains failed; no product measurement is repeated.

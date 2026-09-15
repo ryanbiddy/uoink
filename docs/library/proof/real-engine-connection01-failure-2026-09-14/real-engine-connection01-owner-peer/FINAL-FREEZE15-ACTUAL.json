@@ -1,7 +1,0 @@
-{
-  "chunk_id": "eaf747",
-  "wall_time_seconds": 0.1809694,
-  "exit_code": 0,
-  "original_token_count": 190,
-  "output": "[\r\n  {\r\n    \"path\": \"VERDICT.md\",\r\n    \"bytes\": 5764,\r\n    \"sha256\": \"f09c48244c785f00d8298a99a4b467a3958e2ebc51037235919b5bc9393ac937\"\r\n  },\r\n  {\r\n    \"path\": \"READ-COVERAGE.json\",\r\n    \"bytes\": 3837,\r\n    \"sha256\": \"03ad8b92308792f681e887493639c34ee850766e4cf73ea9997a5ab18e3b8298\"\r\n  },\r\n  {\r\n    \"path\": \"SOURCE-DIFF-BINDINGS.json\",\r\n    \"bytes\": 6700,\r\n    \"sha256\": \"6c1d3276be571289626fc025407beffa44ab5ee8adbf87136fd97c1d9405957c\"\r\n  },\r\n  {\r\n    \"path\": \"check_source_bytes.ps1\",\r\n    \"bytes\": 5897,\r\n    \"sha256\": \"0f90c727b40852d764a7376e97dd0bf3997fb684032cd9643b56a2bc8a4f142f\"\r\n  },\r\n  {\r\n    \"path\": \"SOURCE-BYTE-CHECK14-ACTUAL.json\",\r\n    \"bytes\": 334,\r\n    \"sha256\": \"de956d83a27bfc60482a6c6a32c393ee6b72cd53ffb8dc844ab185c867db69b3\"\r\n  }\r\n]\r\n"
-}

@@ -1,7 +1,0 @@
-{
-  "chunk_id": "656c7b",
-  "wall_time_seconds": 0.1846483,
-  "exit_code": 0,
-  "original_token_count": 98,
-  "output": "{\n  \"scope\": \"scoped generated controller qualification only\",\n  \"role\": \"confirmation\",\n  \"label\": \"startup-authority-confirmation01\",\n  \"passed\": 81,\n  \"failed\": 0,\n  \"skipped\": 0,\n  \"passing_subtests\": 48,\n  \"guards\": 10,\n  \"child_hashes\": 23,\n  \"unchanged_inputs\": 27,\n  \"unchanged_controls\": 3,\n  \"output_files\": 35,\n  \"registry_traps\": 25,\n  \"elapsed_seconds\": 0.11613989999750629\n}\n"
-}

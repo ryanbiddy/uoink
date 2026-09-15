@@ -1,9 +1,0 @@
-{
-  "approved": true,
-  "label": "asr-completion-info-fake59-01",
-  "pins_sha256": "3ab4293cfd48e9652029bd7c2de42269b57499c7c46d95cfd9f659db4a6099f1",
-  "scope": "generated_bytes_and_fake_ports_only",
-  "admission_commit": "46320deeed03290621d599326120ca3f97df7613",
-  "root_source_check": "78a6da",
-  "root_final_pins": "adaef0"
-}

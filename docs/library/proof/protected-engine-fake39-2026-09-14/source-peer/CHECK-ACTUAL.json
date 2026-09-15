@@ -1,7 +1,0 @@
-{
-  "chunk_id": "0d45f2",
-  "wall_time_seconds": 0.2783063,
-  "exit_code": 0,
-  "original_token_count": 175,
-  "output": "{\r\n  \"scope\": \"Passive text/hash/diff only\",\r\n  \"pins_verified\": 15,\r\n  \"source_bindings_verified\": 29,\r\n  \"ordered_new_cases\": 6,\r\n  \"diffs\": [\r\n    {\r\n      \"file\": \"worker_runtime_owner\",\r\n      \"hunks\": 5,\r\n      \"before_lines\": 292,\r\n      \"after_lines\": 405,\r\n      \"full_forward_reverse\": true\r\n    },\r\n    {\r\n      \"file\": \"owned_generation_protocol\",\r\n      \"hunks\": 2,\r\n      \"before_lines\": 506,\r\n      \"after_lines\": 533,\r\n      \"full_forward_reverse\": true\r\n    }\r\n  ],\r\n  \"before_owner_matches_accepted\": true,\r\n  \"before_protocol_matches_accepted\": true,\r\n  \"factory_registry_and_reused_fixtures_match_bound_originals\": true,\r\n  \"candidate_executed\": false,\r\n  \"admission\": false\r\n}\r\n"
-}

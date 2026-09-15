@@ -1,7 +1,0 @@
-{
-  "chunk_id": "36af0d",
-  "wall_time_seconds": 0.1968531,
-  "exit_code": 1,
-  "original_token_count": 66,
-  "output": "Set-Content: \r\nLine |\r\n  10 |  … Path $taskPrep 'ROOT-ADMISSION-drain.json') -Encoding utf8 -NoClobber\r\n     |                                                               ~~~~~~~~~~\r\n     | A parameter cannot be found that matches parameter name 'NoClobber'.\r\n"
-}

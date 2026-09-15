@@ -1,7 +1,0 @@
-{
-  "approved": true,
-  "label": "creation-transfer01",
-  "pins_sha256": "8ea1128704f3a943de3aab3b26e84c5f1a3d637af8cb5c532f736d23c9e9b7cc",
-  "scope": "generated_bytes_and_fake_ports_only",
-  "note": "Root reviewed complete changed source, runner, launcher and peer verdict; _scratch/CREATION-TRANSFER01-ROOT-REVIEW.md. One generated qualification only."
-}

@@ -1,7 +1,0 @@
-{
-  "chunk_id": "a51acf",
-  "wall_time_seconds": 0.1814753,
-  "exit_code": 0,
-  "original_token_count": 158,
-  "output": "[\r\n  {\r\n    \"path\": \"worker_runtime_owner.py\",\r\n    \"bytes\": 18545,\r\n    \"sha256\": \"25e57481197e07c8731d54a5313c822e482624f3bc106717870e15890c3362fe\"\r\n  },\r\n  {\r\n    \"path\": \"owned_generation_protocol.py\",\r\n    \"bytes\": 25890,\r\n    \"sha256\": \"86977e0d953a9e25dbefb23d4559f06f90b8fb7f9dc61b2d6e8726cffcff9c20\"\r\n  },\r\n  {\r\n    \"path\": \"generated_engine_objects.py\",\r\n    \"bytes\": 1062,\r\n    \"sha256\": \"dfb41c43267ece83cbb0f21faeb1a1900fa166bdb6ec45827a741950362af42e\"\r\n  },\r\n  {\r\n    \"path\": \"test_engine_ownership.py\",\r\n    \"bytes\": 16349,\r\n    \"sha256\": \"de1ab3cfc1b45a2680d0e8a2e7b7e8b283d8c5d31c781a4554902c902181e209\"\r\n  }\r\n]\r\n"
-}

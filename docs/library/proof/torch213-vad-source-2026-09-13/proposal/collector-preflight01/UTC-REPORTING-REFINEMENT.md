@@ -1,3 +1,0 @@
-2026-09-13. The integrator requested explicit wall-clock evidence before qualification. Preserve the current unexecuted collector as drafts/collect_torch_text.pre-utc.py. Add request started_utc before opening the URL and finished_utc in its final receipt path, using UTC with microsecond precision. Also record the collection's UTC interval. Status, URL, actual/advertised byte counts and SHA-256 remain in the same request record; the monotonic deadline remains unchanged.
-
-Required datetime/codec imports occur before import closure. No request, model, package, artifact or test has run in this task. This is a reporting addition before the first synthetic qualification.

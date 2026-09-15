@@ -1,7 +1,0 @@
-{
-  "chunk_id": "11ed1d",
-  "wall_time_seconds": 0.3019814,
-  "exit_code": 0,
-  "original_token_count": 106,
-  "output": "{\r\n  \"inputs\": 7,\r\n  \"fixed_expected_input_pins_valid\": true,\r\n  \"before_exact_native02\": true,\r\n  \"source_inputs_sha256\": \"b731d07e8d734a9d077f775ad756ce8732400bdd28bfc57c0ef7c00d0a00e4cc\",\r\n  \"derivative_sha256\": \"22b662938178d1898eb287348d0b4556c6579b5d0ce79f2782d49a4748ed1509\",\r\n  \"tests_sha256\": \"a5cc1fcd6fe3ea30b1a3d285d7dc45ea6f4c97fc3d619cd4432fb75c6fc86497\",\r\n  \"proposed_methods\": 13,\r\n  \"executed_cases\": 0\r\n}\r\n"
-}

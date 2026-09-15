@@ -1,7 +1,0 @@
-{
-  "chunk_id": "81d180",
-  "wall_time_seconds": 0.140606,
-  "exit_code": 0,
-  "original_token_count": 58,
-  "output": "{\r\n  \"Hash\": \"919D385745824B7D626B0227965B5974AC888C7227868A100BA9CB529B0620E2\",\r\n  \"Path\": \"E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\_scratch\\\\child-readset-adoption-proposal02\\\\ROOT-ADMISSION-wrong_identity.json\"\r\n}\r\n"
-}

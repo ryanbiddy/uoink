@@ -1,9 +1,0 @@
-.....F                                                                   [100%]
-================================== FAILURES ===================================
-_________ test_probe_process_times_failure_bypasses_start_time_check __________
-tests\test_gemini_synthetic_process_authority.py:184: in test_probe_process_times_failure_bypasses_start_time_check
-    class ActiveDWORD(wintypes.DWORD):
-E   TypeError: __class__ set to <class 'test_gemini_synthetic_process_authority.test_probe_process_times_failure_bypasses_start_time_check.<locals>.ActiveDWORD'> defining 'ActiveDWORD' as <class 'test_gemini_synthetic_process_authority.test_probe_process_times_failure_bypasses_start_time_check.<locals>.ActiveDWORD'>
-=========================== short test summary info ===========================
-FAILED tests/test_gemini_synthetic_process_authority.py::test_probe_process_times_failure_bypasses_start_time_check
-1 failed, 5 passed in 0.26s

@@ -1,7 +1,0 @@
-{
-  "chunk_id": "4f95f6",
-  "wall_time_seconds": 1.3407006,
-  "exit_code": 0,
-  "original_token_count": 73,
-  "output": "{\"proof\":\"docs/library/proof/controller-custody-source-2026-09-14\",\"patch\":\"E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\_scratch\\\\controller-custody-source-2026-09-14.patch\",\"bytes\":3351659,\"sha256\":\"7dbaf9d2ddf77abf55d9a37bad603d455e784b45152877ae585b5dbfd12c824d\",\"apply_exit\":0}\r\n"
-}

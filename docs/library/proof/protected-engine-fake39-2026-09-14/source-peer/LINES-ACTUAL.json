@@ -1,7 +1,0 @@
-{
-  "chunk_id": "12655a",
-  "wall_time_seconds": 0.1468797,
-  "exit_code": 0,
-  "original_token_count": 203,
-  "output": "298:        except BaseException as original:\n317:        except BaseException as original:\n356:    def _build_generated_engine(self):\n366:                model = _GeneratedEngineModel(attempt.namespace, attempt.product.vad)\n367:                owner._retain_generated_engine_model(attempt, model)\n369:                owner._check_generated_engine_model_ready(attempt)\n370:                pipeline = _GeneratedEnginePipeline(model, attempt.product.vad)\n371:                owner._retain_generated_engine_pipeline(attempt, pipeline)\n373:                return owner._publish_generated_engine(attempt)\n374:        except BaseException as original:\n377:                    owner._fail_generated_engine(attempt, original)\n437:        except BaseException as original:\n449:        except BaseException as original:\n"
-}

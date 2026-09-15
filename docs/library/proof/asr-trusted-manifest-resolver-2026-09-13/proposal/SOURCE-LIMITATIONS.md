@@ -1,3 +1,0 @@
-2026-09-13. Root reviewed resolver source dab721bde82923010c47bc6ea9242b41a3befc7dd094bab2fb92b3cc1f13f407 and found no blocking issue within this inert scope. The source remains unchanged before qualification.
-
-Path.resolve must produce exactly the supplied path string. On Windows this can conservatively refuse a spelling whose case differs from the physical path, even where Windows would open the same object. This refusal is intentional in the proposal and is not being relaxed. Accepted real root policy, native constructor integration, private-directory lifecycle and a race-proof handle design remain outside this implementation. The closed real approval gate is not a substitute for those future decisions.

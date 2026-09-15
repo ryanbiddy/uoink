@@ -1,7 +1,0 @@
-{
-  "chunk_id": "8274c2",
-  "wall_time_seconds": 0.1757281,
-  "exit_code": 0,
-  "original_token_count": 111,
-  "output": "[\r\n  {\r\n    \"path\": \"VERDICT.md\",\r\n    \"bytes\": 2952,\r\n    \"sha256\": \"af448cd9c637afed3898116fad10aa08fd8cebe6bb53a863e6214c252d278492\"\r\n  },\r\n  {\r\n    \"path\": \"VIEW-COVERAGE.json\",\r\n    \"bytes\": 1471,\r\n    \"sha256\": \"944329e719c9b25d28c47a2f88c5710efb5e075a3fbe086fffe3829369123fc9\"\r\n  },\r\n  {\r\n    \"path\": \"CHECK01-ACTUAL.json\",\r\n    \"bytes\": 1116,\r\n    \"sha256\": \"2215a6b591eb6674a8f5edbe9d44b30c379add283d0864acf5cc82bae3824572\"\r\n  }\r\n]\r\n"
-}

@@ -1,7 +1,0 @@
-{
-  "chunk_id": "9ffd85",
-  "wall_time_seconds": 0.2299978,
-  "exit_code": 0,
-  "original_token_count": 69,
-  "output": "{\"proof\":\"docs/library/proof/real-child-namespace-plan-2026-09-14\",\"payloads\":52,\"bytes\":598931,\"manifest_sha256\":\"6bb671fa20947bcb79ecca984f8ccdc683f90028759d3d01d321e38fabd62299\",\"bound_inputs\":18,\"input_bytes\":306861,\"new_control_scenarios\":17,\"candidate_execution\":false}\n"
-}

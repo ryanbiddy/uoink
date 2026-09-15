@@ -1,7 +1,0 @@
-{
-  "chunk_id": "567f81",
-  "wall_time_seconds": 0.132777,
-  "exit_code": 0,
-  "original_token_count": 41,
-  "output": "{\"source_count\": 6, \"native_bindings\": 9, \"source_inputs_sha256\": \"d4fcd5ec3b6d309d5731bae0835be4adb93cce0d84c8459d297b4951789a2b7c\", \"candidate_executed\": false}\r\n"
-}

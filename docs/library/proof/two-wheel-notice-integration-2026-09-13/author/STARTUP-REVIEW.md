@@ -1,7 +1,0 @@
-# Pre-execution startup correction
-
-2026-09-13. Root correctly identified that the existing integrator runner launches its child through enabled site processing and PYTHONPATH. The initial proposal described that behavior accurately, but it did not meet the requested isolated startup for this small source check. The original brief and unused validator remain in `before-startup-review/`; no qualification ran against them.
-
-The replacement bootstrap starts directly under C:\Python314\python.exe -I -S -B. It installs the same audit policy before pytest, loads the unchanged heavy-import blocker before pytest, then calls pytest.main with the fixed four test selectors. Only the exact overlay and the existing C:\Users\hello\AppData\Roaming\Python\Python314\site-packages support directory are added. That directory has pytest 9.1.1 and its existing support packages; no ambient path discovery, site initialization, or installation is used. Captured output is noninteractive and color is disabled.
-
-The old partition exit validator expects a subprocess command containing -m pytest, which this bootstrap does not use. The small replacement validator therefore checks the unchanged observer's actual ordinary TestReport rows, fixed membership, session/JUnit counts, heavy guard and direct native/bootstrap exits. It records the real pytest.main entry rather than inventing a subprocess command. The old runner and validator are retained as references, not executed instruments. This does not change any existing test assertion or proposed product file.

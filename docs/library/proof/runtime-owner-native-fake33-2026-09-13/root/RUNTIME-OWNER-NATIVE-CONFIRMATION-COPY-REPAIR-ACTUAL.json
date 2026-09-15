@@ -1,7 +1,0 @@
-{
-  "chunk_id": "8ba171",
-  "wall_time_seconds": 0.3150844,
-  "exit_code": 0,
-  "original_token_count": 139,
-  "output": "{\r\n  \"original_copier_sha256\": \"e948c0c64c126544da1b7a4141add98819f2c5d18ccdea0cb516527a85434eab\",\r\n  \"derivative\": \"E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\_scratch\\\\copy-runtime-owner-native-confirmation02.ps1\",\r\n  \"derivative_bytes\": 7319,\r\n  \"derivative_sha256\": \"a86f562388d6816b9905a79d66c0d77cfd1dbeac81efe55e58e3ee30f421ebb1\",\r\n  \"inventory_sha256\": \"e29554fed94a2e3ec79ba0010e3e57a2a5cfbc27edfd0ee107c59e5ee68348bd\",\r\n  \"changed_lines\": 2,\r\n  \"original_unchanged\": true,\r\n  \"copier_executed\": false,\r\n  \"subject_executed\": false\r\n}\r\n"
-}

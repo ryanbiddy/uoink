@@ -1,9 +1,0 @@
-{
-  "admitted": true,
-  "scope": "generated-bytes-and-fake-torch-storage-only",
-  "label": "cpu-port-preflight01",
-  "pins_sha256": "7b68ee7c7c4febf6a8e089443358688e2ed40786c01663b573c17426dfd727f9",
-  "reviewed_utc": "2026-09-13T18:34:49.4980556Z",
-  "reviewer": "Astra root",
-  "review": "Full source, 60-case harness, contracts, fixed case membership, pins and launcher read. One author run only. Preserve all outcomes and actual outer tool result. No native import, model, factory, network, product or release admission."
-}

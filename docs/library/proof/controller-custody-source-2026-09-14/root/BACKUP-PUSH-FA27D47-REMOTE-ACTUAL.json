@@ -1,7 +1,0 @@
-{
-  "chunk_id": "54d25a",
-  "wall_time_seconds": 0.9185466,
-  "exit_code": 0,
-  "original_token_count": 39,
-  "output": "{\"verified_remote\":\"fa27d47b8676b9866caac19cebee57410492ae36\",\"verified_local\":\"fa27d47b8676b9866caac19cebee57410492ae36\",\"branch\":\"cc/living-library\"}\r\n"
-}

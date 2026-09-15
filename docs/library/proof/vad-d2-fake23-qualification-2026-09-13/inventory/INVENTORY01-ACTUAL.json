@@ -1,7 +1,0 @@
-{
-  "chunk_id": "079190",
-  "wall_time_seconds": 1.7562280000000001,
-  "exit_code": 1,
-  "original_token_count": 56,
-  "output": "Exception: \r\nLine |\r\n  65 |  … istry_trap_count -ne 25) { throw 'Unexpected recorded fake outcome' }\r\n     |                               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\r\n     | Unexpected recorded fake outcome\r\n"
-}

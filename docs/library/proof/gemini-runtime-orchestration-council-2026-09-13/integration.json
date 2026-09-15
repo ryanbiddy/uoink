@@ -1,5 +1,0 @@
-{
-  "actual_git_apply_exit": 0,
-  "method": "git apply --3way",
-  "source_patch_sha256": "fcd88cfc55419fdae1744e3d53ccf106df99900e8ac70701ede2b3f0146bb7bb"
-}

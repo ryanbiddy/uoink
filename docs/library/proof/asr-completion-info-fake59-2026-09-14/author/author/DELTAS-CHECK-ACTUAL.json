@@ -1,7 +1,0 @@
-{
-  "chunk_id": "d11da0",
-  "wall_time_seconds": 1.2291972,
-  "exit_code": 0,
-  "original_token_count": 197,
-  "output": "{\r\n  \"scope\": \"Passive source-only diff and unchanged guard comparison\",\r\n  \"deltas\": [\r\n    {\r\n      \"diff\": \"qualify_completion_info.diff\",\r\n      \"sha256\": \"06f8a5c5d3cdc4b8fc1baceb58897cd84ad5727196f6955a0ce5d2223f78f2b5\",\r\n      \"forward_reverse_text_exact\": true\r\n    },\r\n    {\r\n      \"diff\": \"run_fake59_01.diff\",\r\n      \"sha256\": \"6c1c04e049cc43bf7372a62e35f265d02195fc921e7e9ff98b9bb5afc4ed9e0a\",\r\n      \"forward_reverse_text_exact\": true\r\n    },\r\n    {\r\n      \"diff\": \"lifecycle46_cases.diff\",\r\n      \"sha256\": \"5751e6ad73db1c9d2d388cbbc025464689b4610c60f5bbf805dd686c3797f66c\",\r\n      \"forward_reverse_text_exact\": true\r\n    }\r\n  ],\r\n  \"preloads_unchanged\": true,\r\n  \"audit_metadata_capture_loader_unchanged_except_case_count\": true,\r\n  \"result_recorder_unchanged\": true\r\n}\r\n"
-}

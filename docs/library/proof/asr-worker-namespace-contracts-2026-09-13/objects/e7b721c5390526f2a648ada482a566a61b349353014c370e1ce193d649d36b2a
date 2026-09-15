@@ -1,7 +1,0 @@
-{
-  "chunk_id": "8c0396",
-  "wall_time_seconds": 0.1303602,
-  "exit_code": 0,
-  "original_token_count": 64,
-  "output": "{\"destination\": \"E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\_scratch\\\\astra-worker-namespace-qualification01\", \"copied_inputs\": 9, \"candidate_executed\": false, \"launcher_sha256\": \"bcf0be60e49d130122983006e3f9cde8340490fd54e0ae1f374095823202f651\"}\r\n"
-}

@@ -1,7 +1,0 @@
-{
-  "chunk_id": "6eb2d3",
-  "wall_time_seconds": 0.19477,
-  "exit_code": 0,
-  "original_token_count": 130,
-  "output": "{\r\n  \"passive_text_check\": true,\r\n  \"subject_execution\": false,\r\n  \"source_bindings_unchanged\": 11,\r\n  \"original_plan_payloads_unchanged\": 5,\r\n  \"outputs\": [\r\n    {\r\n      \"name\": \"ALTERNATIVE.md\",\r\n      \"bytes\": 7026,\r\n      \"sha256\": \"9cb47841cd36f06ca147047e1ac599f95d46982d3b7ae0d1d2f96902fd98a7f2\"\r\n    },\r\n    {\r\n      \"name\": \"SOURCE-BINDINGS.json\",\r\n      \"bytes\": 4855,\r\n      \"sha256\": \"1436d9f51b97a71300cea9956c2f7f6514e51c295d49bba6624e23998e96d7b0\"\r\n    }\r\n  ],\r\n  \"support_or_artifact_access\": false\r\n}\r\n"
-}

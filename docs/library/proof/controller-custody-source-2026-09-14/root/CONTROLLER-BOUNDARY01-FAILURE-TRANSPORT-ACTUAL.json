@@ -1,7 +1,0 @@
-{
-  "chunk_id": "56839c",
-  "wall_time_seconds": 0.4038703,
-  "exit_code": 0,
-  "original_token_count": 67,
-  "output": "{\"proof\":\"docs/library/proof/controller-boundary-source-failure-2026-09-14\",\"payloads\":127,\"bytes\":2174831,\"manifest_sha256\":\"5ce72a88a0ff5e9d54edaa3298461c4795c2b53b502d9a02ad9af8c2f2232f38\",\"newline_only_restored\":128,\"all_raw_payloads_and_seal_equal_donor\":true}\n"
-}

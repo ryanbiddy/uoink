@@ -1,7 +1,0 @@
-{
-  "chunk_id": "b12844",
-  "wall_time_seconds": 0.1882583,
-  "exit_code": 0,
-  "original_token_count": 155,
-  "output": "{\r\n  \"native_exit\": 0,\r\n  \"outer_exit\": 0,\r\n  \"inputs_unchanged\": true,\r\n  \"receipt_valid\": true,\r\n  \"receipt_parse_error_type\": null,\r\n  \"stdout_bytes\": 14929,\r\n  \"stderr_bytes\": 0,\r\n  \"startup_binding_set\": true\r\n}\r\n\r\n{\"schema\":\"uoink.native-exit.v1\",\"child_returned\":true,\"native_exit\":0}\r\n{\r\n  \"passed\": 39,\r\n  \"failed\": 0,\r\n  \"skipped\": 0,\r\n  \"count\": 39,\r\n  \"elapsed_seconds\": 45.74523439997574,\r\n  \"guard_valid\": true,\r\n  \"native_exit\": 0,\r\n  \"guard_denials\": [],\r\n  \"heavy_roots_loaded\": [],\r\n  \"metadata_trap_count\": 12,\r\n  \"registry_trap_count\": 25,\r\n  \"stdout_capture\": \"\",\r\n  \"stderr_capture\": \"\"\r\n}\r\n47\r\n"
-}

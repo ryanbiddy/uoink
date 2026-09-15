@@ -1,7 +1,0 @@
-# Documentary copy protocol — 2026-09-13
-
-Root reviews the pinned source plan and `seal.ps1` before execution. The script copies only the complete two inspection preparation/result trees and ten named standalone admission, actual-tool, diagnostic and independent-verification records. No wheel/archive is copied or reopened. All source files are text and remain unchanged.
-
-The plan maps each original path to a relative proof path with exact size/SHA256. The sealer checks source tree membership and hashes, verifies every current or archived preparation manifest against preserved exact payloads, copies to fresh `_scratch/two-wheel-inspection-proof01`, then rechecks original and copied hashes. It preserves all inputs and failures. The two retained historical install reports are left readable even though their bytes duplicate; the complete proof remains only a few megabytes and needs no additional archive format.
-
-The root `.gitattributes` is `* -text`. A root SHA256 manifest covers every proof payload except itself, with exact membership and independent copied-file rehashing. The preparation and its original hashes also enter the proof. The script never invokes a test, checker, package, interpreter, model or network. Root may invoke the reviewed script once with `-ExpectedPreparationSha256 <exact hash>` and preserve its actual tool object outside the sealed output. A failure leaves partial output for diagnosis; do not overwrite or rerun automatically.

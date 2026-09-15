@@ -1,7 +1,0 @@
-{
-  "chunk_id": "c1f98e",
-  "wall_time_seconds": 0.2178616,
-  "exit_code": 0,
-  "original_token_count": 306,
-  "output": "[\r\n  {\r\n    \"path\": \"qualify_windows_reservations.py\",\r\n    \"sha256\": \"8a5e3b234167f3b2e23e3faec4a7a8a7a176b46f5719f07f956aaaae9f3610b9\",\r\n    \"bytes\": 10038\r\n  },\r\n  {\r\n    \"path\": \"PINS.json\",\r\n    \"sha256\": \"f7c3b964ed77a681ed71d9b03fee934cf402721bc232d869e5ee42c9f564e3a1\",\r\n    \"bytes\": 4297\r\n  },\r\n  {\r\n    \"path\": \"QUALIFICATION-ADMISSION-TEMPLATE.json\",\r\n    \"sha256\": \"e02ee83e447a42dd1f1db62ccc37ba03a0a45f4804f40442b9c9f56819e66bd4\",\r\n    \"bytes\": 335\r\n  },\r\n  {\r\n    \"path\": \"EXPECTED-CASES.json\",\r\n    \"sha256\": \"caf804d796524c52d95481b9c1c84aae60b34e82cd656f278e21559fbf1242cd\",\r\n    \"bytes\": 2500\r\n  },\r\n  {\r\n    \"path\": \"run_preflight01.ps1\",\r\n    \"sha256\": \"6aca0b469c27656bb9ac9a7213b1c3f6f99b02284edb718846a113c4f6fbd1af\",\r\n    \"bytes\": 8874\r\n  },\r\n  {\r\n    \"path\": \"SOURCE-INPUTS.json\",\r\n    \"sha256\": \"9d988684ca8dfe487521f7d711ec67855393922d53ffe3cce3e13a2c660e34c3\",\r\n    \"bytes\": 6303\r\n  },\r\n  {\r\n    \"path\": \"dummy_bootstrap.py\",\r\n    \"sha256\": \"93de35cdcaeac944c12cb7760ceafda48f4719cc545a701bf20da177e509e725\",\r\n    \"bytes\": 35927\r\n  },\r\n  {\r\n    \"path\": \"run_retired_recovery01.ps1\",\r\n    \"sha256\": \"75a9baea9307658a99217816f7653adfdbb9d0df44286a5b244ea5d3cad43444\",\r\n    \"bytes\": 36996\r\n  }\r\n]\r\n"
-}

@@ -1,6 +1,0 @@
-{
-  "approved": false,
-  "label": "controller-custody-confirmation01",
-  "pins_sha256": "df339faa9011e91671c5c56541a7a015e0ed5c787278d422e11d7ebee799d087",
-  "scope": "generated_bytes_and_fake_ports_only"
-}

@@ -1,7 +1,0 @@
-2026-09-13. Source review before any candidate execution.
-
-The first connected source checks identities internally but would omit the actual checked identity rows and authenticated inherited-handle map from the final receipts. Counts alone make the native observation harder to review. Preserve the first adoption and flow sources, then include those passive values in the results. The map contains local routing handles and generated file identities, not the ephemeral channel key. The negative receipt retains the one observed actual identity and the deliberately different expected file ID; it does not claim a match.
-
-This is a prequalification evidence improvement. No candidate cases or native measurements have run. Existing identity, readback, failure and release assertions remain unchanged. The outer verifier will compare all identity fields, allowing only the deliberately different first file ID in the negative case, and bind the manifest digest separately. The current pipe input remains the qualified 4a0cccc8 source; timeout repair73a1109a is a separate unaccepted input until root directs an update.
-
-The data-only preparation commands so far parsed three candidate sources (b40591, exit0) and generated the bootstrap text (86bf6f, exit0). No proposal code was imported. A source lookup332189 returned1 because an old guessed scratch directory did not exist; the same read found the retained SetFilePointerEx SDK excerpt in the already bound namespace proposal. It performed no candidate operation.

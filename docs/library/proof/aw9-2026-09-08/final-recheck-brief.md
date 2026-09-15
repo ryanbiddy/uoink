@@ -1,1 +1,0 @@
-After B4 finishes, freeze its final source hash before rerunning the unchanged two draft diagnostics. Retain the original two failures (0.96 s). This confirms the findings on final bytes before freezing acceptance cases or briefing repair; no old observation is relabelled. Run only the named scratch file through the guarded integrator runner with a fresh label.

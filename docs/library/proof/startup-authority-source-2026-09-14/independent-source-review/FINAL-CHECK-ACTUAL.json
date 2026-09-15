@@ -1,7 +1,0 @@
-{
-  "chunk_id": "5676f6",
-  "wall_time_seconds": 0.1837691,
-  "exit_code": 0,
-  "original_token_count": 180,
-  "output": "{\n  \"scope\": \"passive text only\",\n  \"status\": \"PASS\",\n  \"source_sha256\": \"6482b782c545adbcd524a68ae85ba2abb3f081683379a9d53ada66d03a5ddb51\",\n  \"source_bytes\": 28922,\n  \"map_sha256\": \"23591b4c9fd6d18ee9856c5abb9329ce926ab49553c72bb20b1eaaf8a549d775\",\n  \"original_copy_pairs\": 9,\n  \"derivative_rows\": 12,\n  \"exact_prefix_bytes\": 12113,\n  \"addition_exact\": true,\n  \"patches\": [\n    {\n      \"diff\": \"asr_loading_adapter.diff\",\n      \"hunks\": 1,\n      \"forward\": true,\n      \"reverse\": true,\n      \"comparison\": \"complete LF-normalized text\"\n    },\n    {\n      \"diff\": \"review-corrections.diff\",\n      \"hunks\": 1,\n      \"forward\": true,\n      \"reverse\": true,\n      \"comparison\": \"complete LF-normalized text\"\n    }\n  ]\n}\n"
-}

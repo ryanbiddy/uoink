@@ -1,7 +1,0 @@
-{
-  "chunk_id": "951379",
-  "wall_time_seconds": 0.25921,
-  "exit_code": 0,
-  "original_token_count": 72,
-  "output": "{\"proof\":\"docs/library/proof/real-engine-connection01-failure-2026-09-14\",\"payloads\":94,\"bytes\":1412386,\"manifest_sha256\":\"c06462bce30f654edb0f81295f4a7d9d2a14892cadf3c60f22072b8ff83d2df5\",\"frozen_sources\":25,\"proposed_tests\":15,\"qualification\":\"not executed\",\"source_review\":\"failed\"}\n"
-}

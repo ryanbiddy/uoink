@@ -1,7 +1,0 @@
-{
-  "chunk_id": "8811ba",
-  "wall_time_seconds": 0.9988048,
-  "exit_code": 0,
-  "original_token_count": 52,
-  "output": "{\"patch\":\"E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\_scratch\\\\startup81-results01.patch\",\"bytes\":3217925,\"sha256\":\"2adbe984d8a6602b831eb9e15e673cc90a7c1a30943b9060b345cd6a75fd6401\",\"apply_exit\":0}\r\n"
-}

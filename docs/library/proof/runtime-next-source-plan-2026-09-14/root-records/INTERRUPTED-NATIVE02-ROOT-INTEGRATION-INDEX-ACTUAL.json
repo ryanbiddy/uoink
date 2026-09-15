@@ -1,7 +1,0 @@
-{
-  "chunk_id": "4f96ad",
-  "wall_time_seconds": 1.3451870000000001,
-  "exit_code": 0,
-  "original_token_count": 107,
-  "output": "{\"proof\":\"docs/library/proof/interrupted-owner-native02-root-integration-2026-09-14\",\"payloads\":11,\"bytes\":53450,\"manifest_sha256\":\"e7d5c95dc1247c3de7834b193e158a868c648d061c599677191467a437eed281\"}\n{\"proof\": \"docs/library/proof/interrupted-owner-native02-root-integration-2026-09-14\", \"payloads_matching_disk_and_git\": 11, \"bytes\": 53450, \"manifest_sha256\": \"e7d5c95dc1247c3de7834b193e158a868c648d061c599677191467a437eed281\"}\r\n"
-}

@@ -1,7 +1,0 @@
-{
-  "chunk_id": "da305c",
-  "wall_time_seconds": 0.291732,
-  "exit_code": 0,
-  "original_token_count": 55,
-  "output": "{\r\n  \"exact_child_inputs\": 13,\r\n  \"total_pinned_inputs\": 15,\r\n  \"launcher_only_path_changes\": true,\r\n  \"admitted_cases\": 11,\r\n  \"admission_sha256\": \"e2fa21ee2eb54c1ae9c0e579f36b7b8f83276982c86a2c31866d36420737befa\"\r\n}\r\n"
-}

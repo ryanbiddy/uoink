@@ -1,7 +1,0 @@
-{
-  "chunk_id": "aeb806",
-  "wall_time_seconds": 0.1657629,
-  "exit_code": 0,
-  "original_token_count": 162,
-  "output": "{\r\n  \"source\": \"E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\_scratch\\\\INTERRUPTED-NATIVE-RUN01-ACTUAL.json\",\r\n  \"copy\": \"E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\_scratch\\\\interrupted-native-run01-peer-diagnosis01\\\\SUBJECT-RUN01-ACTUAL.json\",\r\n  \"sha256\": \"989e9acaee0dc7f1a6c4c31b4e678e445508e9576678a1a0dca9921dc03afd67\",\r\n  \"exact_bytes\": true,\r\n  \"reconstructed\": false\r\n}\r\n{\"file\":\"check_soft_predicates.ps1\",\"bytes\":7508,\"sha256\":\"ea65c2e1a68fa49a2d37aaf2517e17199a59230c3d7c9604d25219259265237c\"}\r\n{\"file\":\"SOFT-PREDICATES.json\",\"bytes\":15946,\"sha256\":\"2343e6865fb6be2d1198750e8300828fe9d886b24ad7d79b995cd86d58de18a1\"}\r\n"
-}

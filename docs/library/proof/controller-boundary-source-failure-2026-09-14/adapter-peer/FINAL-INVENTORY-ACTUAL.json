@@ -1,7 +1,0 @@
-{
-  "chunk_id": "e09f71",
-  "wall_time_seconds": 0.1785802,
-  "exit_code": 0,
-  "original_token_count": 240,
-  "output": "[\r\n  {\r\n    \"path\": \"asr_loading_adapter.diff\",\r\n    \"bytes\": 8321\r\n  },\r\n  {\r\n    \"path\": \"asr_loading_adapter.py\",\r\n    \"bytes\": 42939\r\n  },\r\n  {\r\n    \"path\": \"controller_boundary_fixture.py\",\r\n    \"bytes\": 9592\r\n  },\r\n  {\r\n    \"path\": \"controller_boundary_fixture.py.diff\",\r\n    \"bytes\": 9853\r\n  },\r\n  {\r\n    \"path\": \"durable_lifecycle.diff\",\r\n    \"bytes\": 9173\r\n  },\r\n  {\r\n    \"path\": \"durable_lifecycle.py\",\r\n    \"bytes\": 34002\r\n  },\r\n  {\r\n    \"path\": \"EXPECTED-CASES.json\",\r\n    \"bytes\": 1412\r\n  },\r\n  {\r\n    \"path\": \"REPORT.md\",\r\n    \"bytes\": 15157\r\n  },\r\n  {\r\n    \"path\": \"SOURCE-INPUTS.json\",\r\n    \"bytes\": 5449\r\n  },\r\n  {\r\n    \"path\": \"test_controller_resume_publication.py\",\r\n    \"bytes\": 11682\r\n  },\r\n  {\r\n    \"path\": \"test_controller_resume_publication.py.diff\",\r\n    \"bytes\": 11978\r\n  },\r\n  {\r\n    \"path\": \"before\\\\asr_loading_adapter.py\",\r\n    \"bytes\": 34968\r\n  },\r\n  {\r\n    \"path\": \"before\\\\durable_lifecycle.py\",\r\n    \"bytes\": 32833\r\n  }\r\n]\r\n"
-}

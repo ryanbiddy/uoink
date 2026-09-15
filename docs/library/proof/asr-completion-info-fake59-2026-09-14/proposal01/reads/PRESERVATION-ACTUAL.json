@@ -1,7 +1,0 @@
-{
-  "chunk_id": "43b78f",
-  "wall_time_seconds": 0.3042146,
-  "exit_code": 0,
-  "original_token_count": 150,
-  "output": "{\r\n  \"scope\": \"passive source text only; no source/test execution\",\r\n  \"baseline_sha256\": \"a80514aac6b1e75b9b872052852fa993a23cd5273b6bed4ffb4eef7404cb69dd\",\r\n  \"derivative_sha256\": \"22b662938178d1898eb287348d0b4556c6579b5d0ce79f2782d49a4748ed1509\",\r\n  \"diff_sha256\": \"b7ddb5aa83ad5f70b1457f927c52e62ea47eeaee065656f1ceda431ec49fbdff\",\r\n  \"baseline_lines\": 517,\r\n  \"derivative_lines\": 608,\r\n  \"inserted_lines\": 91,\r\n  \"hunks\": 4,\r\n  \"forward_exact\": true,\r\n  \"reverse_exact\": true,\r\n  \"proposed_cases\": 13,\r\n  \"tests_sha256\": \"a5cc1fcd6fe3ea30b1a3d285d7dc45ea6f4c97fc3d619cd4432fb75c6fc86497\"\r\n}\r\n"
-}

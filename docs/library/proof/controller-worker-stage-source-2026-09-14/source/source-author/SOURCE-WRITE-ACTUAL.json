@@ -1,7 +1,0 @@
-{
-  "chunk_id": "d90a5a",
-  "wall_time_seconds": 0.2786246,
-  "exit_code": 0,
-  "original_token_count": 47,
-  "output": "{\"source_bytes\":34968,\"source_sha256\":\"2f12cbf5a5f1142f892aa34df7d23af77107148b448fb4294329532e36be63ee\",\"prefix_bytes\":28922,\"verified_original_inputs\":9,\"candidate_execution\":false}\r\n"
-}

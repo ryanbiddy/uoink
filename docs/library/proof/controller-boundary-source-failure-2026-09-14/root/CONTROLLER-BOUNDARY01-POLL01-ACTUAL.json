@@ -1,7 +1,0 @@
-{
-  "chunk_id": "5e2511",
-  "wall_time_seconds": 5.0151798,
-  "session_id": 46268,
-  "original_token_count": 143,
-  "output": "gemini  status  starting gemini-3.8-flash-high via Antigravity at high effort (isolated worktree write enabled)\ngemini  tool    view_file\ngemini  tool    view_file\ngemini  tool    view_file\ngemini  tool    view_file\ngemini  tool    view_file\ngemini  tool    view_file\ngemini  tool    list_dir\ngemini  tool    list_dir\ngemini  tool    list_dir\ngemini  tool    list_dir\ngemini  tool    list_dir\ngemini  tool    list_dir\ngemini  tool    list_dir\ngemini  tool    list_dir\ngemini  tool    view_file\ngemini  tool    view_file\ngemini  tool    view_file\ngemini  tool    view_file\n"
-}

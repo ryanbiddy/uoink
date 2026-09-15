@@ -1,7 +1,0 @@
-{
-  "chunk_id": "6e3fa5",
-  "wall_time_seconds": 0.2008626,
-  "exit_code": 0,
-  "original_token_count": 132,
-  "output": "\r\nname               bytes sha256\r\n----               ----- ------\r\nVERDICT.md          4281 5411dcf6497de2323aee124b642855f49500315cd1e529189292fbac4705e128\r\nVIEW-COVERAGE.json  2918 3803243fac18bd7c173b0254e146d64f2e91650a8554ddc03bc393e75d1649ab\r\nCHECK-RESULT.json   2852 63530d1967da6459bc5437d18dbebf0183da386daf8d819ece7c7a8ddde84c04\r\nCHECK-ACTUAL.json   3138 a213e539ed19a6c7708013f4c69ac73f3038518278261099e35db77ff8cf8469\r\ncheck_source.mjs    4426 de505d6d4847974ac4f2fc2fecce070a43f981ce031da0d58d566bf961c6bcb4\r\n\r\n"
-}

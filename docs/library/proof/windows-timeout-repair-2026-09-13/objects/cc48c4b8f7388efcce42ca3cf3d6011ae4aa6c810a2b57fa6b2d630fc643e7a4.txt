@@ -1,7 +1,0 @@
-{
-  "chunk_id": "543cbf",
-  "wall_time_seconds": 0.1202425,
-  "exit_code": 0,
-  "original_token_count": 39,
-  "output": "{\r\n  \"scope\": \"generated-file-one-owned-dummy-timeout-only\",\r\n  \"admission_sha256\": \"72c9e218995c091b3590316957e5fcb1498bb6f0de14ad6bcf33be50b6cd885b\"\r\n}\r\n"
-}

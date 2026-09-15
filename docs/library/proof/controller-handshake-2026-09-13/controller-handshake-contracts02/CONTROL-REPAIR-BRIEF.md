@@ -1,5 +1,0 @@
-2026-09-13. Preserve the first handshake proposal unchanged. Peer review found that its launcher read and copied ROOT-ADMISSION.json without including that control file in the before/copy/after byte checks. No handshake case has executed.
-
-Prepare a fresh second proposal. Capture the admission file's SHA256 before parsing it. After validating the six existing input pins, append this seventh documentary control to the same copy-and-after records used for the source inputs. Its copied bytes must match before child startup, and its original and copy hashes must remain equal after return. Remove the separate unchecked copy. The admission cannot hash itself inside its own input map; the captured external record closes that gap without a recursive hash.
-
-Keep all eight case bodies, both source modules, the harness and ordered case list byte-identical. Change only the launcher's proposal path and admission-control records, plus the corresponding false-template launcher pin. These are quiescent path checks, not atomic filesystem protection. No execution is admitted by this document; root reviews the final launcher before qualification.

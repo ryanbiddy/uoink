@@ -1,7 +1,0 @@
-{
-  "chunk_id": "5ec770",
-  "wall_time_seconds": 2.3819513,
-  "exit_code": 0,
-  "original_token_count": 101,
-  "output": "{\"payloads\":26,\"bytes\":337326,\"manifest_sha256\":\"59bfc25524cb76ddb42f117c2cffed590e1023462075675bbc754c56b5e8a11e\",\"newline_only_restored\":26,\"all_raw_payloads_and_seal_equal_donor\":true}\n{\"proof\": \"docs/library/proof/real-engine-connection-plan-2026-09-14\", \"payloads_matching_disk_and_git\": 26, \"bytes\": 337326, \"manifest_sha256\": \"59bfc25524cb76ddb42f117c2cffed590e1023462075675bbc754c56b5e8a11e\"}\r\n"
-}

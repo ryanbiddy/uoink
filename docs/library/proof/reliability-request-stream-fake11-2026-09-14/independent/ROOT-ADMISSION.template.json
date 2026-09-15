@@ -1,7 +1,0 @@
-{
-  "approved": false,
-  "label": "reliability-request-stream-confirmation01",
-  "pins_sha256": "c784392df7dc910d47656ff32bb13ecbee179431070eade5adf0951679b87a66",
-  "scope": "generated_bytes_and_fake_ports_only",
-  "note": "Frozen source preparation only; separate exact root admission is required before any child invocation."
-}

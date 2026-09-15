@@ -1,7 +1,0 @@
-{
-  "chunk_id": "5c4566",
-  "wall_time_seconds": 0.2253756,
-  "exit_code": 0,
-  "original_token_count": 246,
-  "output": "{\"output\":\"E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\_scratch\\\\interrupted-retirement-fake28-author01\",\"payloads\":38,\"bytes\":631659,\"pins_sha256\":\"eb108b71b9f2a7d10db57efb2aa92b7b8df20a25bf44923ca273f456ab753bc1\",\"repaired_inputs\":[{\"path\":\"durable_lifecycle.py\",\"bytes\":32833,\"sha256\":\"3c8963eaa02bbc1d810ee2632d0363303bfe05ec6ceeef73771ca8005a00ece3\"},{\"path\":\"generated_adapter_flow.py\",\"bytes\":89924,\"sha256\":\"6a008136802d614ead53297f030dda3da01767ca8a63d313421f142c4d8a160b\"},{\"path\":\"generated_journal_setup.py\",\"bytes\":19100,\"sha256\":\"44bdaeeb7ba95b202d7fa0bfd202c8e95f3c5bbae4173786a71aa58071184c9c\"},{\"path\":\"test_interrupted_owner_retirement.py\",\"bytes\":27790,\"sha256\":\"c833cf67e5534c8a0c57e27ae6fec5cb8f6d2c68e8db6844ef7b47075998a2d0\"}],\"launcher_sha256\":\"3c64742ef1eb47f82ba0158808aa07c48fe05947628e69aff98da76b782508c4\",\"qualifier_sha256\":\"f37060a5269d154b28faa04cacd6ca882de800e258a15e9c76433b8879c3eb4d\",\"actual_admission\":false,\"candidate_execution\":false}\n"
-}

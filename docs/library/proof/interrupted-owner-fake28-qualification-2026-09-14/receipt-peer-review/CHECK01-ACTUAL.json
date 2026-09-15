@@ -1,7 +1,0 @@
-{
-  "chunk_id": "4bc27f",
-  "wall_time_seconds": 0.769652,
-  "exit_code": 0,
-  "original_token_count": 33,
-  "output": "PASS: both28/0/0; 57 passing subtests each; exact cases,35 child hashes,38 payloads,3 controls,46 run files; passive text only.\r\n"
-}

@@ -1,7 +1,0 @@
-{
-  "chunk_id": "5eb8e4",
-  "wall_time_seconds": 0.2978077,
-  "exit_code": 0,
-  "original_token_count": 49,
-  "output": "{\"proof\":\"docs/library/proof/interrupted-owner-native02-accepted-2026-09-14\",\"payloads\":149,\"bytes\":2286271,\"manifest_sha256\":\"cd495a7146653fc9de7776d3eeb1d27c4a292f4976535322800c63285a90bc75\"}\n"
-}

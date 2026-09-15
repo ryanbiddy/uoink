@@ -1,7 +1,0 @@
-{
-  "chunk_id": "1e61c5",
-  "wall_time_seconds": 0.1875408,
-  "exit_code": 1,
-  "original_token_count": 281,
-  "output": "file:///E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/check-fake28-transport01.mjs:10\r\nfor(const r of [...rows,{path:'SHA256.json',bytes:m.length,sha256:sha(m)}]){if(r.path.includes('..')||path.isAbsolute(r.path))throw Error('relative');const a=fs.readFileSync(path.join(work,rel,r.path)),b=fs.readFileSync(path.join(root,rel,r.path));if(a.length!==r.bytes||sha(a)!==r.sha256||!a.equals(b))throw Error('raw transport '+r.path);}\r\n                                                                                                                                                                                                                                                                                                                     ^\r\n\r\nError: raw transport .gitattributes\r\n    at file:///E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/check-fake28-transport01.mjs:10:310\r\n    at ModuleJob.run (node:internal/modules/esm/module_job:439:25)\r\n    at async node:internal/modules/esm/loader:643:26\r\n    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)\r\n\r\nNode.js v24.18.0\r\n"
-}

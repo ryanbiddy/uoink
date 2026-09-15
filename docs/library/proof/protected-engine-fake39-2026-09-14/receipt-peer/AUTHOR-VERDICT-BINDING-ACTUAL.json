@@ -1,7 +1,0 @@
-{
-  "chunk_id": "fb077c",
-  "wall_time_seconds": 0.1464975,
-  "exit_code": 0,
-  "original_token_count": 102,
-  "output": "[\r\n  {\r\n    \"path\": \"_scratch/protected-engine-ownership-receipt-peer01/AUTHOR-VERDICT.md\",\r\n    \"bytes\": 2008,\r\n    \"sha256\": \"f086bd89dff2175e9aacb70ec20f672c49088d1ffaa2d15ca251085a5bf059af\"\r\n  },\r\n  {\r\n    \"path\": \"_scratch/protected-engine-ownership-receipt-peer01/AUTHOR-CHECK-ACTUAL.json\",\r\n    \"bytes\": 1729,\r\n    \"sha256\": \"7d593fea8719a9bf2bb866a51a71e4b948b951c12d4d982e04b8ac10d9082f08\"\r\n  }\r\n]\r\n"
-}

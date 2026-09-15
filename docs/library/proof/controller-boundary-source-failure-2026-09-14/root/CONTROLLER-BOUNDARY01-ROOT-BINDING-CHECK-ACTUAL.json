@@ -1,7 +1,0 @@
-{
-  "chunk_id": "cf4fb8",
-  "wall_time_seconds": 0.2071096,
-  "exit_code": 0,
-  "original_token_count": 112,
-  "output": "{\n  \"scope\": \"Root passive final delivery bindings, not source acceptance or execution\",\n  \"frozen_files\": 13,\n  \"frozen_bytes\": 227359,\n  \"originals\": 8,\n  \"original_bytes\": 227073,\n  \"derivatives\": 11,\n  \"before_copies\": 2,\n  \"unchanged_adapter_prefix\": 34968,\n  \"ordered_unexecuted_cases\": 10,\n  \"original_events\": 746,\n  \"command_records\": 40,\n  \"command_steps\": 20,\n  \"truncated_command_previews\": 11,\n  \"complete_command_coverage\": false\n}\n"
-}

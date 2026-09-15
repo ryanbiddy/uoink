@@ -1,8 +1,0 @@
-{
-  "chunk_id": "f84039",
-  "wall_time_seconds": 0.2445083,
-  "exit_code": 0,
-  "original_token_count": 190,
-  "output": "{\"selected_paths_with_done_metadata\":33,\"completed_view_calls\":63,\"rendered_ranges_independently_verified\":false,\"tool_status_is_not_coverage\":true,\"missing_selected\":[],\"git_status_task_kill_error\":\"Preserved: worker attempted kill after its git-status task was already DONE; no product execution.\"}\r\n[{\"Name\":\".gitattributes\",\"Length\":8},{\"Name\":\"ACTUAL-INVENTORY01-FAILURE.json\",\"Length\":353},{\"Name\":\"ACTUAL-INVENTORY02-SUCCESS.json\",\"Length\":298},{\"Name\":\"DATA-PREPARATION-REPAIR01.md\",\"Length\":540},{\"Name\":\"TEXT-BINDINGS.json\",\"Length\":6565},{\"Name\":\"VERDICT.md\",\"Length\":5212}]\r\n[{\"Name\":\".gitattributes\",\"Length\":8},{\"Name\":\"ACTUAL-TEXT-COMPARISON.json\",\"Length\":310},{\"Name\":\"TEXT-BINDINGS.json\",\"Length\":5678},{\"Name\":\"VERDICT.md\",\"Length\":3627}]\r\n"
-}
-

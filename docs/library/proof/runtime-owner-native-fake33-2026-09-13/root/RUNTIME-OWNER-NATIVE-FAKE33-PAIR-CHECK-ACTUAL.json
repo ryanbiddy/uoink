@@ -1,7 +1,0 @@
-{
-  "chunk_id": "da4a3b",
-  "wall_time_seconds": 0.2365953,
-  "exit_code": 0,
-  "original_token_count": 301,
-  "output": "{\r\n  \"scope\": \"Passive existing text receipts; no subject rerun\",\r\n  \"frozen_author_files_matching\": 95,\r\n  \"exact_case_objects_match\": true,\r\n  \"all_36_child_input_hashes_match\": true,\r\n  \"observations\": [\r\n    {\r\n      \"root\": \"runtime-owner-native-connection-proposal01\",\r\n      \"passed\": 33,\r\n      \"failed\": 0,\r\n      \"skipped\": 0,\r\n      \"elapsed_seconds\": 38.393804200022714,\r\n      \"valid_guard_fields\": 10,\r\n      \"metadata_traps\": 12,\r\n      \"registry_traps\": 25,\r\n      \"unchanged_input_and_admission_pairs\": 39,\r\n      \"stdout_bytes\": 13068,\r\n      \"stdout_sha256\": \"83571badc0654cbc7bb16fc59780873dd32d3fdce8fd8f3016a92bc5c0adf555\",\r\n      \"native_exit\": 0,\r\n      \"outer_exit\": 0\r\n    },\r\n    {\r\n      \"root\": \"astra-runtime-owner-native-confirmation01\",\r\n      \"passed\": 33,\r\n      \"failed\": 0,\r\n      \"skipped\": 0,\r\n      \"elapsed_seconds\": 37.224434700008715,\r\n      \"valid_guard_fields\": 10,\r\n      \"metadata_traps\": 12,\r\n      \"registry_traps\": 25,\r\n      \"unchanged_input_and_admission_pairs\": 39,\r\n      \"stdout_bytes\": 13068,\r\n      \"stdout_sha256\": \"abb265db055f6f468174ff14f4f72adc07745d88c887f159f489b2bde132e3d2\",\r\n      \"native_exit\": 0,\r\n      \"outer_exit\": 0\r\n    }\r\n  ]\r\n}\r\n"
-}

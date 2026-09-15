@@ -1,7 +1,0 @@
-{
-  "chunk_id": "c99ba4",
-  "wall_time_seconds": 0.5765809,
-  "exit_code": 0,
-  "original_token_count": 214,
-  "output": "{\r\n  \"files\": 86,\r\n  \"bytes\": 1267116,\r\n  \"maximum_file_bytes\": 309037,\r\n  \"groups\": [\r\n    {\r\n      \"source_root\": \"_scratch/windows-reservation-writer-exclusion-proposal04\",\r\n      \"destination_root\": \"proposal04\",\r\n      \"files\": 40,\r\n      \"bytes\": 528421\r\n    },\r\n    {\r\n      \"source_root\": \"_scratch/windows-reservation-writer-exclusion04\",\r\n      \"destination_root\": \"run04\",\r\n      \"files\": 37,\r\n      \"bytes\": 722418\r\n    },\r\n    {\r\n      \"source_root\": \"_scratch/windows-reservation-writer-source-review04\",\r\n      \"destination_root\": \"source-review04\",\r\n      \"files\": 3,\r\n      \"bytes\": 8970\r\n    },\r\n    {\r\n      \"source_root\": \"six exact named root files\",\r\n      \"destination_root\": \"root\",\r\n      \"files\": 6,\r\n      \"bytes\": 7307\r\n    }\r\n  ],\r\n  \"inventory_sha256\": \"6b2956d16c2d4d19f31155602363640b47cc6f39c76045944444a66139948b0c\"\r\n}\r\n"
-}

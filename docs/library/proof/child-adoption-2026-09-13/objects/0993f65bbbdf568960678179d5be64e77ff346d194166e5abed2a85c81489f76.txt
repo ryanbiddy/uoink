@@ -1,7 +1,0 @@
-{
-  "chunk_id": "dc1de7",
-  "wall_time_seconds": 0.1555033,
-  "exit_code": 0,
-  "original_token_count": 56,
-  "output": "{\r\n  \"Hash\": \"00B23AF6F9BF4553BFD7202C5997061719CBC7805426CABBD5A0A634D3A3CEEC\",\r\n  \"Path\": \"E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\_scratch\\\\child-readset-adoption-proposal02\\\\ROOT-ADMISSION-positive.json\"\r\n}\r\n"
-}

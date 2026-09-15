@@ -1,7 +1,0 @@
-{
-  "chunk_id": "1f0c30",
-  "wall_time_seconds": 0.4759471,
-  "exit_code": 0,
-  "original_token_count": 160,
-  "output": "{\r\n  \"source_count\": 8,\r\n  \"source_bytes\": null,\r\n  \"all_expected_pins_match\": true,\r\n  \"all_sources_unchanged\": true,\r\n  \"candidate_executed\": false,\r\n  \"outputs\": [\r\n    {\r\n      \"name\": \"BRIEF.md\",\r\n      \"bytes\": 10585,\r\n      \"sha256\": \"2dfb90f807e83dc6124a3cadadd9ebd07badbec7896b266168669396d0aa865f\"\r\n    },\r\n    {\r\n      \"name\": \"SOURCE-BINDINGS.json\",\r\n      \"bytes\": 3405,\r\n      \"sha256\": \"00c3e86b6ba90b41e9077c5efd14e666b1ed8654e1763e1eb3a04304bfe7e72b\"\r\n    },\r\n    {\r\n      \"name\": \"bind_sources.ps1\",\r\n      \"bytes\": 4055,\r\n      \"sha256\": \"0ed87b2b5cfeb1d2184ef9cac89a2f21d9167c365249925ff380454c1cc4a0bc\"\r\n    }\r\n  ]\r\n}\r\n"
-}

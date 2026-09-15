@@ -1,1 +1,0 @@
-The first review draft is retained as `REVIEW01.md`. A final numbered-source check corrected the GETTER, VADPIPE and METRICS citation ranges and extended the INFERENCE range through its final call. The findings and proposed loader behavior did not change. No copied source or inventory receipt was changed.

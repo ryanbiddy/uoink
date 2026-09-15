@@ -1,7 +1,0 @@
-{
-  "chunk_id": "f1a2e7",
-  "wall_time_seconds": 0.2779599,
-  "exit_code": 0,
-  "original_token_count": 145,
-  "output": "{\r\n  \"count\": 9,\r\n  \"bytes\": 189589,\r\n  \"unchanged\": true,\r\n  \"candidate_executed\": false,\r\n  \"outputs\": [\r\n    {\r\n      \"name\": \"DESIGN.md\",\r\n      \"bytes\": 9923,\r\n      \"sha256\": \"f65ab5d9bff0a4fddfec6363ce6074198e3b989d271c3cb5d02d20f681e0f2b3\"\r\n    },\r\n    {\r\n      \"name\": \"SOURCE-BINDINGS.json\",\r\n      \"bytes\": 2437,\r\n      \"sha256\": \"8e8536d5f388e769600b76d3c298cb0120b7e31685d4fde0eaf7ae2854e1e35a\"\r\n    },\r\n    {\r\n      \"name\": \"bind_sources.ps1\",\r\n      \"bytes\": 3280,\r\n      \"sha256\": \"c2d1793ce08a0c11b01ab79f98d4d61aa03deac73654adf3243249229cf363cd\"\r\n    }\r\n  ]\r\n}\r\n"
-}

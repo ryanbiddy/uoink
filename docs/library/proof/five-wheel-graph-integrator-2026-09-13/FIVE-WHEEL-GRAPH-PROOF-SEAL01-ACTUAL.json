@@ -1,7 +1,0 @@
-{
-  "chunk_id": "6b3ee1",
-  "wall_time_seconds": 9.9606451,
-  "exit_code": 0,
-  "original_token_count": 136,
-  "output": "{\r\n  \"proof_files\": 22,\r\n  \"source_paths\": 1050,\r\n  \"new_members\": 63,\r\n  \"referenced_members\": 415,\r\n  \"current_manifest_rows\": 797,\r\n  \"verified_payloads\": 478,\r\n  \"archive_required\": \"4827288\",\r\n  \"archived_code_executed\": false,\r\n  \"valid\": true\r\n}\r\n{\r\n  \"proof\": \"E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\_scratch\\\\five-wheel-graph-proof01\",\r\n  \"payload_files\": 22,\r\n  \"new_zip_members\": 63,\r\n  \"external_members\": 415,\r\n  \"zip_bytes\": 408968,\r\n  \"sha256\": \"080551135a2d18de7217a39acf5e3c444efeaa5a662136eb9c52b9fed75cb617\"\r\n}\r\n"
-}

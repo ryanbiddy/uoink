@@ -1,7 +1,0 @@
-{
-  "chunk_id": "6d023d",
-  "wall_time_seconds": 0.2539543,
-  "exit_code": 0,
-  "original_token_count": 186,
-  "output": "{\r\n  \"source_count\": 8,\r\n  \"source_bytes\": 227073,\r\n  \"prior_summary_source_bytes_null\": \"PowerShell Measure-Object did not enumerate ordered-dictionary bytes; exact per-row positive byte counts were preserved\",\r\n  \"candidate_executed\": false,\r\n  \"frozen\": [\r\n    {\r\n      \"name\": \"BRIEF.md\",\r\n      \"bytes\": 10585,\r\n      \"sha256\": \"2dfb90f807e83dc6124a3cadadd9ebd07badbec7896b266168669396d0aa865f\"\r\n    },\r\n    {\r\n      \"name\": \"SOURCE-BINDINGS.json\",\r\n      \"bytes\": 3405,\r\n      \"sha256\": \"00c3e86b6ba90b41e9077c5efd14e666b1ed8654e1763e1eb3a04304bfe7e72b\"\r\n    },\r\n    {\r\n      \"name\": \"SOURCE-BINDINGS-ACTUAL.json\",\r\n      \"bytes\": 856,\r\n      \"sha256\": \"d36d161e4f2d655bb198f77196d2d35eb8c356852d98c1f7ef28e70a3b3fe1e6\"\r\n    }\r\n  ]\r\n}\r\n"
-}

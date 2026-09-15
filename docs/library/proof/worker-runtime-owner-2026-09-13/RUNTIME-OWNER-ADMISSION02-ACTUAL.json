@@ -1,7 +1,0 @@
-{
-  "chunk_id": "008739",
-  "wall_time_seconds": 0.1823295,
-  "exit_code": 0,
-  "original_token_count": 53,
-  "output": "{\r\n  \"root_reviewed\": true,\r\n  \"inputs\": 15,\r\n  \"planned_cases\": 11,\r\n  \"scope\": \"runtime-owner-generated-11-only\",\r\n  \"admission_sha256\": \"6947fb2cda180fefd17b8fb5cdcc64216bc45569cf96a46238236256b8921f44\"\r\n}\r\n"
-}

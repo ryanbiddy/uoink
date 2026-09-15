@@ -1,8 +1,0 @@
-{
-  "chunk_id": "34051b",
-  "wall_time_seconds": 0.367281,
-  "exit_code": 0,
-  "original_token_count": 132,
-  "output": "{\"admission_path\":\"E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\_scratch\\\\windows-reservation-writer-exclusion-proposal02\\\\ROOT-ADMISSION-drain.json\",\"admission_sha256\":\"188163a6fbdeb1c5a400248b965a2ec879227a599103ae600d3a27b33bf9e7a1\",\"source_count\":18,\"unchanged_support_metadata\":9,\"root_review_sha256\":\"8818242a36f5a611dfbd24b0373a950d4b161a1ebce93176f9724cd03760edec\",\"peer_review_sha256\":\"bb30c006711668ab056efa8cf5cdd718ba83674bf936fe033e76be64ec63c9e0\",\"support_paths_accessed\":false,\"candidate_executed\":false}\r\n"
-}
-

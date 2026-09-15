@@ -1,7 +1,0 @@
-{
-  "chunk_id": "9cdc98",
-  "wall_time_seconds": 0.205954,
-  "exit_code": 0,
-  "original_token_count": 117,
-  "output": "{\"author\":{\"label\":\"interrupted-retirement-fake01\",\"outer_chunk\":\"70e7f4\",\"passed\":28,\"failed\":0,\"skipped\":0,\"subtests\":57,\"guard_count\":10,\"child_inputs\":35,\"run_files\":46},\"independent\":{\"label\":\"interrupted-retirement-confirmation01\",\"outer_chunk\":\"dd5dc7\",\"passed\":28,\"failed\":0,\"skipped\":0,\"subtests\":57,\"guard_count\":10,\"child_inputs\":35,\"run_files\":46},\"exact_case_objects\":true,\"exact35_child_hashes\":true,\"source_relations\":{\"identical\":37,\"label_only\":1}}\n"
-}

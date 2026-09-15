@@ -1,7 +1,0 @@
-{
-  "chunk_id": "0c050f",
-  "wall_time_seconds": 0.1845149,
-  "exit_code": 0,
-  "original_token_count": 144,
-  "output": "{\"pair\":true,\"rows\":[{\"source\":\"protected-engine-ownership-fake39-author01\",\"label\":\"protected-engine-fake01\",\"outer\":\"09d91a\",\"passed\":39,\"failed\":0,\"skipped\":0,\"elapsed_seconds\":45.74523439997574,\"guards\":10,\"parent_inputs\":40,\"admission_controls\":1,\"output_files\":47},{\"source\":\"protected-engine-ownership-fake39-independent01\",\"label\":\"protected-engine-confirmation01\",\"outer\":\"f5c18c\",\"passed\":39,\"failed\":0,\"skipped\":0,\"elapsed_seconds\":45.750931499991566,\"guards\":10,\"parent_inputs\":40,\"admission_controls\":1,\"output_files\":47}],\"separate_subtest_count_claimed\":false}\n"
-}

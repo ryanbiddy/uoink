@@ -1,7 +1,0 @@
-import fs from 'node:fs';
-const root='_scratch/protected-asr-constructor01-root-review/frozen';
-const names=['pinned_buffer_namespace.diff','inherited_readset.diff','worker_runtime_owner.diff','owned_generation_protocol.diff','asr.diff','_uoink_owned.diff'];
-const results=[];
-for(const name of names){const lines=fs.readFileSync(root+'/'+name,'utf8').replaceAll('\r\n','\n').split('\n');let hunks=[];for(let i=0;i<lines.length;i++){const m=/^@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@/.exec(lines[i]);if(!m)continue;const oldCount=m[2]===undefined?1:+m[2],newCount=m[4]===undefined?1:+m[4];let oldActual=0,newActual=0;for(let j=i+1;j<lines.length&&!lines[j].startsWith('@@')&&!lines[j].startsWith('diff --git');j++){const row=lines[j];if(row.startsWith(' ')){oldActual++;newActual++;}else if(row.startsWith('-'))oldActual++;else if(row.startsWith('+'))newActual++;else if(row==='\\ No newline at end of file'){}else if(row==='')break;else break;}hunks.push({line:i+1,oldCount,newCount,oldActual,newActual,match:oldCount===oldActual&&newCount===newActual});}results.push({file:name,hunks,valid_hunk_counts:hunks.length>0&&hunks.every(h=>h.match)});}
-fs.writeFileSync('_scratch/protected-asr-constructor01-root-review/DIFF-HEADER-CHECK.json',JSON.stringify({scope:'Passive hunk-count check only; no application or subject execution',results},null,2)+'\n',{flag:'wx'});
-console.log(JSON.stringify({patches:results.length,valid_hunk_count_patches:results.filter(r=>r.valid_hunk_counts).length,invalid:results.filter(r=>!r.valid_hunk_counts)}));

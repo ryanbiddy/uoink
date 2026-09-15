@@ -1,7 +1,0 @@
-{
-  "chunk_id": "6f04e8",
-  "wall_time_seconds": 0.1875226,
-  "exit_code": 1,
-  "original_token_count": 57,
-  "output": "Exception: \r\nLine |\r\n   7 |  … t.Properties.Count -ne 15){throw 'Admission template shape mismatch'}\r\n     |                               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\r\n     | Admission template shape mismatch\r\n"
-}

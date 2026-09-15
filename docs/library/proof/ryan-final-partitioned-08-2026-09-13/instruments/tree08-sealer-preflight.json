@@ -1,6 +1,0 @@
-{
-  "reason": "Source review found the actual durable supervisor uses child_exited, not finished. Correct the unused reader before execution and require its exact aggregate-summary hash. No measurement or failed sealer run occurred.",
-  "before_sha256": "15c122758a7b548e5de30df3e3561cb6f8124ab11c761d6407324916380fbee1",
-  "after_sha256": "ee145aed768fcec6b93c152cef34399085d9eb4ba822bf2670118fc19937f00b",
-  "executed_sealer": false
-}

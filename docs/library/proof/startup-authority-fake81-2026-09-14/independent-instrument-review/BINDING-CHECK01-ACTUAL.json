@@ -1,7 +1,0 @@
-{
-  "chunk_id": "c15651",
-  "wall_time_seconds": 0.1684563,
-  "exit_code": 1,
-  "original_token_count": 173,
-  "output": "file:///E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/startup81-instrument-peer01/check_bindings.mjs:9\r\nconst need=(v,m)=>{if(!v)throw Error(m)};\r\n                               ^\r\n\r\nError: case counts\r\n    at need (file:///E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/startup81-instrument-peer01/check_bindings.mjs:9:32)\r\n    at file:///E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/startup81-instrument-peer01/check_bindings.mjs:42:1\r\n    at ModuleJob.run (node:internal/modules/esm/module_job:439:25)\r\n    at async node:internal/modules/esm/loader:643:26\r\n    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)\r\n\r\nNode.js v24.18.0\r\n"
-}

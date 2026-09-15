@@ -1,9 +1,0 @@
-{
-  "scope": "Root documentary read diagnostics only; neither qualification was rerun or changed",
-  "observations": [
-    {"actual": "d8abdb/0", "detail": "An optional release-note read selected an absent dated filename with errors suppressed. The following repository inventory identified RELEASE-NOTES-LIVING-LIBRARY.md; f15dce and ab674b read the actual file."},
-    {"actual": "8ef148/1", "detail": "Root requested a peer verdict and next-brief directory before their authors had finished writing them. The raw binding file that existed was read. No subject invocation occurred."},
-    {"actual": "3cdecf/0", "detail": "The final peer verdict was read completely and hashed, but its actual receipt was incorrectly sought in reads/. Exact filename discovery and complete receipt read 368b6c/0 located CHECK01-ACTUAL.json directly in the peer directory."}
-  ],
-  "preservation": "Every actual object above is retained as observed; missing outputs are not reconstructed and these diagnostics are not test results."
-}

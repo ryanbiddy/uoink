@@ -1,7 +1,0 @@
-{
-  "chunk_id": "1e69b3",
-  "wall_time_seconds": 0.2025598,
-  "exit_code": 0,
-  "original_token_count": 107,
-  "output": "{\"run_id\":\"56af690a-060b-453d-bb64-d9621a5553c9\",\"status\":\"completed\",\"started_at\":\"2026-09-14T11:08:47.225Z\",\"finished_at\":\"2026-09-14T11:27:25.277Z\",\"source_files\":25,\"source_bytes\":301499,\"events\":645,\"command_records\":42,\"pins\":\"860ac15701fe82f0960867b9f9058e67792b3f2ca73d4ecef7a9799deb611371\",\"scope\":\"Frozen source and original CR records; no reconstruction of truncated outer/parameter data and no candidate execution\"}\n"
-}

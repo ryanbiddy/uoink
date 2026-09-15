@@ -1,7 +1,0 @@
-{
-  "chunk_id": "68a871",
-  "wall_time_seconds": 0.7412487,
-  "exit_code": 1,
-  "original_token_count": 156,
-  "output": "[\r\n  {\r\n    \"name\": \"durable_lifecycle\",\r\n    \"exit\": 128,\r\n    \"output\": \"error: corrupt patch at _scratch/interrupted-owned-session-retirement-implementation01/durable_lifecycle.patch:45\\r\\n\"\r\n  },\r\n  {\r\n    \"name\": \"generated_adapter_flow\",\r\n    \"exit\": 128,\r\n    \"output\": \"error: corrupt patch at _scratch/interrupted-owned-session-retirement-implementation01/generated_adapter_flow.patch:142\\r\\n\"\r\n  },\r\n  {\r\n    \"name\": \"generated_journal_setup\",\r\n    \"exit\": 128,\r\n    \"output\": \"error: corrupt patch at _scratch/interrupted-owned-session-retirement-implementation01/generated_journal_setup.patch:73\\r\\n\"\r\n  }\r\n]\r\n"
-}

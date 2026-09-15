@@ -1,7 +1,0 @@
-{
-  "chunk_id": "1b7f6d",
-  "wall_time_seconds": 0.3380182,
-  "exit_code": 0,
-  "original_token_count": 82,
-  "output": "{\"scope\":\"Root passive source/document bindings; no subject invocation\",\"sources\":8,\"bytes\":227073,\"brief_sha256\":\"2dfb90f807e83dc6124a3cadadd9ebd07badbec7896b266168669396d0aa865f\",\"map_sha256\":\"00c3e86b6ba90b41e9077c5efd14e666b1ed8654e1763e1eb3a04304bfe7e72b\",\"source_checkpoint\":\"fc17b6702f4ce8cdfda295f695dbbe02820ac191\"}\r\n"
-}

@@ -1,9 +1,0 @@
-# Expired retirement identity repair — 2026-09-13
-
-Independent source review found that `release_product(None)` could be accepted after a released VAD was collected: the old weak reference then returns None, so the existing identity comparison matched a value that was never a product. Preserve the unexecuted factory at SHA-256 `028a3c1ebd92e0ce7e4fefb5c37bd8d895496341d252b89acaa4b1281cfcbbcf` and 58-case harness at `378c8fd19677ee18ad2bcb32043d460ffc32d1bb15b85b4c561055da1a1e2f66` in `drafts/` before the change.
-
-Require a non-None product before comparing a retired referent. Live repeated release still confirms prior retirement; an expired referent grants no identity. Add a generated fake-product case that releases the VAD, drops its last strong reference, collects inert objects, confirms expiration and requires `foreign_product` for None. No factory or harness has run; this is a source defect repaired before first qualification.
-
-Also make the existing trusted single-caller scope explicit: factory construction, binding, build and release calls must be serialized. The `_attempted` flag is not a concurrent-entry lock. Generation revocation may race a serialized factory operation through the registry's own lock; that revocation prevents later publication or bound use but does not cancel already entered native calls. A future bootstrap must enforce this contract and supervise native termination independently.
-
-Keep registry source, fixed recipe, CPU port, original factory text and all prior qualified evidence unchanged. This note grants no native or synthetic execution admission; root reviews the final source and harness before the fresh first run.

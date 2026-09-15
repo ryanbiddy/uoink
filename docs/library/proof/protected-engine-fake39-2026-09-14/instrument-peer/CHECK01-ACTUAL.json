@@ -1,7 +1,0 @@
-{
-  "chunk_id": "67c966",
-  "wall_time_seconds": 0.4529051,
-  "exit_code": 1,
-  "original_token_count": 84,
-  "output": "Exception: E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\protected-engine-ownership-instrument-peer01\\check_source.ps1:12\r\nLine |\r\n  12 |  … pth 30) -cne ($b|ConvertTo-Json -Compress -Depth 30)){throw $reason}}\r\n     |                                                          ~~~~~~~~~~~~~\r\n     | Admission input membership\r\n"
-}

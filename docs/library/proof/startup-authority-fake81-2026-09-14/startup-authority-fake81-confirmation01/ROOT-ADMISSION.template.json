@@ -1,6 +1,0 @@
-{
-  "approved": false,
-  "label": "startup-authority-confirmation01",
-  "pins_sha256": "963d1a5fbdc2cb89e14df155575767e1b9eeb2a28003a701c25d1b5b60781f31",
-  "scope": "generated_bytes_and_fake_ports_only"
-}

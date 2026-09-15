@@ -1,9 +1,0 @@
-{
-  "command": ["C:\\Python314\\python.exe", "-I", "-S", "-B", "_scratch/vad-plain-state-reader-proposal02/prepare_derivative.py"],
-  "actual_exit": 1,
-  "error_type": "AssertionError",
-  "error_line": "assert before.count(old) == 1",
-  "reader_or_harness_executed": false,
-  "observed_source_crlf_count": 0,
-  "observed_source_lf_count": 379
-}

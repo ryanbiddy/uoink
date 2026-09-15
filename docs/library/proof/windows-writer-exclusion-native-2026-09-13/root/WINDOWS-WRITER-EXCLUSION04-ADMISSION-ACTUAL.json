@@ -1,7 +1,0 @@
-{
-  "chunk_id": "d30ba2",
-  "wall_time_seconds": 0.1678198,
-  "exit_code": 0,
-  "original_token_count": 69,
-  "output": "{\"sources_verified\":18,\"support_metadata_unchanged\":9,\"qualified_sources_match_both_copies\":true,\"root_review_sha256\":\"34adf77a311835ebd87f85fe2d7250f182f23d7dbd6407a05bab4057c81c77e3\",\"admission_sha256\":\"ca647cc785d0a7284738720b3fb3f9440165d3a20b2b9d3c650ebab21ff60a47\"}\r\n"
-}

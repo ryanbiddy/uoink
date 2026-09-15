@@ -1,9 +1,0 @@
-# Owned CPU tensor-port synthetic proof
-
-This archive preserves the author and independent root executions of the same 60 fixed cases against source ac9eb28194723ffaf2d98bb2cd691a7b27b0a1638694fdfd8cb198c3084e8964. Both raw results, immediate Python returns, actual outer tool objects, streams, admissions, inputs and guard fields are included. RUN-COMPARISON.json derives exact counts, ordered membership, timings and source bindings from those raw records; the builder refuses to seal without both complete 60/0 results.
-
-The implementation allocates, inspects, copies, reads and retires ordinary Tensor-shaped handles supplied by fake Torch/storage APIs. The case set checks all 54 fixed shapes, bounded finite bit copies, signed zero/subnormals, retained original storage, partial registry failures, substituted storage, staging aliases and cleanup failures. The initial unexecuted bookkeeping draft and its correction remain historical evidence. The current source was not changed to rerun a failed measurement.
-
-The fake module never appears as an imported Torch package. All ten final guard conditions and source/control hashes are verified. These Python controls constrain the exercised source and content access; they are not a complete OS sandbox. Native allocation, float conversion, storage/view semantics, actual assets, factory behavior and OS memory reclamation remain unqualified. The real reader/bridge/port entries remain closed.
-
-SOURCE-TREE.json maps every original logical file to its exact content object. Unchanged duplicates share an object, while original names and source paths remain reconstructable. Every physical payload, including all comparison/copy verification receipts and nested input manifests, is covered by SHA256.json. Only the outer manifest excludes itself. The separately frozen earlier bridge proof remains unchanged.

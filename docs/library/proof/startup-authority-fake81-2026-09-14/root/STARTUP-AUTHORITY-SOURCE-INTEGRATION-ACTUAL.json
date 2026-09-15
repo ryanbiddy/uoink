@@ -1,7 +1,0 @@
-{
-  "chunk_id": "caeace",
-  "wall_time_seconds": 0.9723316,
-  "exit_code": 0,
-  "original_token_count": 54,
-  "output": "{\"patch\":\"E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\_scratch\\\\startup-authority-source01.patch\",\"bytes\":1747895,\"sha256\":\"6e2fe682ccfcaa3c1bfbb02020391534776e638598e1327bc1179268881af364\",\"apply_exit\":0}\r\n"
-}

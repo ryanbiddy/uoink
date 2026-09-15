@@ -1,3 +1,0 @@
-The first passive binding check, actual a75a44, failed before admission because the root checker assumed ROOT-ADMISSION-TEMPLATE.json. The frozen instrument uses ROOT-ADMISSION.template.json, as shown by the same call's inventory. The outer shell returned zero after the trailing inventory, so that outer status is not evidence of a successful Node check. Preserve the actual error output.
-
-Repair only this documentary checker's exact template filename in a fresh check-prelock30-inputs-root02.mjs. No subject source, payload, assertion or input map changes. The next call propagates Node's native status immediately. No candidate or qualification ran during the failed check.

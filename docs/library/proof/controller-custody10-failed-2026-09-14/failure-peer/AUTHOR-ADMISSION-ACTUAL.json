@@ -1,7 +1,0 @@
-{
-  "chunk_id": "405207",
-  "wall_time_seconds": 0.1705351,
-  "exit_code": 0,
-  "original_token_count": 48,
-  "output": "{\"role\":\"author\",\"label\":\"controller-custody-fake01\",\"pins_sha256\":\"25f302701d5ae62e481c0217338a84ff6eaef3febff54ca1458ea9ee28283d2a\",\"root_admission_created\":true,\"subject_invoked\":false}\n"
-}

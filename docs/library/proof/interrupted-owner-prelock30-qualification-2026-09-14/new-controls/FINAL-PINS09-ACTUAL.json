@@ -1,7 +1,0 @@
-{
-  "chunk_id": "6e5139",
-  "wall_time_seconds": 0.1621915,
-  "exit_code": 0,
-  "original_token_count": 156,
-  "output": "{\"name\":\"test_interrupted_owner_prelock.py\",\"bytes\":10297,\"sha256\":\"6370a4846e3f5f43688ede53c6665988771db53ddf309065fbc92e5965288bb4\"}\r\n{\"name\":\"PLAN-AND-SOURCE-VERDICT.md\",\"bytes\":2901,\"sha256\":\"a52442a59982070277ccb29062927edd7cb67fc8ef6f76aa58a71351fffcebf7\"}\r\n{\"name\":\"NEW-CASE-IDS.json\",\"bytes\":264,\"sha256\":\"b4b1c8a7b7f66871f87f810ec978735657d71e75dee7b05bc079cdcb0adeec6e\"}\r\n{\"name\":\"SOURCE-BINDINGS.json\",\"bytes\":7072,\"sha256\":\"c5e20e218780bfc11538715f8b25472547c78a7e8e4f074b7afec023e53e11ff\"}\r\n{\"name\":\"READ-COVERAGE.json\",\"bytes\":3459,\"sha256\":\"b0a118ed84b8e51822bbf82e357e0a59ee95b63a9aea5c2aa402c9f8578da8b1\"}\r\n"
-}

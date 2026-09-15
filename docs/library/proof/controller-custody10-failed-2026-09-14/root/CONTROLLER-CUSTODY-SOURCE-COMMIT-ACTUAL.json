@@ -1,7 +1,0 @@
-{
-  "chunk_id": "2eca09",
-  "wall_time_seconds": 0.9023136,
-  "exit_code": 0,
-  "original_token_count": 190,
-  "output": "warning: in the working copy of 'docs/library/ORCHESTRATION-HANDOFF-2026-09-08.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/library/RELEASE-OWNER-DECISIONS-2026-09-12.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/library/ASTRA-CONTROLLER-CUSTODY-SOURCE-VERDICT-2026-09-14.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/library/CONTROLLER-CUSTODY-QUALIFICATION-BRIEF-2026-09-14.md', LF will be replaced by CRLF the next time Git touches it\n71df9d34327357be32510758ffe0cbada11ede95 docs(library): review controller custody repair and qualification brief [Astra]\nExact280FilesCommitted;CheckoutClean\r\n"
-}

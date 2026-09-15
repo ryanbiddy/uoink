@@ -1,7 +1,0 @@
-{
-  "chunk_id": "930221",
-  "wall_time_seconds": 0.284329,
-  "exit_code": 1,
-  "original_token_count": 42,
-  "output": "Exception: \r\nLine |\r\n  24 |  if($modules.Count -ne 21){throw '21 fixed modules'}\r\n     |                            ~~~~~~~~~~~~~~~~~~~~~~~~\r\n     | 21 fixed modules\r\n"
-}

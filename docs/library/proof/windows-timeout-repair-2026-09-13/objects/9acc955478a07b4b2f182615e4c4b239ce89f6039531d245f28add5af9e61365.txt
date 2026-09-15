@@ -1,7 +1,0 @@
-{
-  "root_reviewed": true,
-  "scope": "generated-file-one-owned-dummy-timeout-only",
-  "source_inputs_sha256": "009624c4af18062c7d93424ddee1065f2903c7c74dab04aa0d483e0f1d7ac134",
-  "launcher_sha256": "3bdb511a2f91e2caad2f522fafe7a0b887758dacaf76c5db52d06f26b45ae925",
-  "status": "Astra native timeout02 admission: exact observed109 repair73a1109a, unchanged flow6f60a4ec, bootstrap path-only b8472e09, six-file launcher3bdb511a. Both67-case source suites valid0 (030e68 and6b62a5). Source review368388/637824/083349/e040b7/8b4f0a. One owned generated-file child and31 fixed API dispatch functions only; no model/assets/installation/network. Original timeout01 remains FAIL; logical quarantine and original operation failure must remain."
-}

@@ -1,9 +1,0 @@
-{
-  "admitted": true,
-  "scope": "generated-bytes-and-fake-torch-storage-only",
-  "label": "cpu-port-preflight01",
-  "pins_sha256": "7b68ee7c7c4febf6a8e089443358688e2ed40786c01663b573c17426dfd727f9",
-  "reviewed_utc": "2026-09-13T18:37:53.0535431Z",
-  "reviewer": "Astra root",
-  "review": "Independent repeat of the exact 60 author cases in a fresh root copy after full source/harness/launcher review and author raw-result inspection. No source, assertion or launcher changes. No native import, model, factory, network, product or release admission."
-}

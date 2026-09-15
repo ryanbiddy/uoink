@@ -1,8 +1,0 @@
-{
-  "finished_utc": "2026-09-13T18:00:35.9347017Z",
-  "native_exit": 0,
-  "inputs_unchanged": true,
-  "capture_size_bound_met": true,
-  "startup_binding_set": true,
-  "native_or_factory_execution_approved": false
-}

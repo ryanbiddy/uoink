@@ -1,7 +1,0 @@
-{
-  "chunk_id": "c511b4",
-  "wall_time_seconds": 0.3833238,
-  "exit_code": 0,
-  "original_token_count": 50,
-  "output": "{\r\n  \"payload_count\": 17,\r\n  \"total_payload_bytes\": 49473,\r\n  \"largest_payload_bytes\": 12406,\r\n  \"map_sha256\": \"e5d4fa3fd3691bdc61289030a5477045b3a810bd245f379fce70cc3b57feac15\",\r\n  \"copies\": 0\r\n}\r\n"
-}

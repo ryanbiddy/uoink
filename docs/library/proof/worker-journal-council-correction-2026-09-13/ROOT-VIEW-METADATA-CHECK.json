@@ -1,8 +1,0 @@
-{
-  "selected_paths_with_done_metadata": 33,
-  "completed_view_calls": 63,
-  "rendered_ranges_independently_verified": false,
-  "tool_status_is_not_coverage": true,
-  "missing_selected": [],
-  "git_status_task_kill_error": "Preserved: worker attempted kill after its git-status task was already DONE; no product execution."
-}

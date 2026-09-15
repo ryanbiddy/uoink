@@ -1,7 +1,0 @@
-{
-  "chunk_id": "b3a06e",
-  "wall_time_seconds": 0.1653697,
-  "exit_code": 0,
-  "original_token_count": 50,
-  "output": "{\"verified_inputs\":30,\"root_review_sha256\":\"1508fa08014e764d25a64300799b24bd75a60be5b6f9c74ad9d9cdb7b16fdf89\",\"admission_sha256\":\"d2e66a666a0d7aa3cf000eb2748c5aaa5f8e93a92e68058a304a4b40ad6c6122\"}\r\n"
-}

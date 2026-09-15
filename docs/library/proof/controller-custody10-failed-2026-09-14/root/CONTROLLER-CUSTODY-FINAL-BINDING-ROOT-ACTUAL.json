@@ -1,7 +1,0 @@
-{
-  "chunk_id": "8a68c0",
-  "wall_time_seconds": 0.2487002,
-  "exit_code": 0,
-  "original_token_count": 76,
-  "output": "{\"status\":\"PASS_PASSIVE_BINDING_ONLY\",\"core_inputs\":15,\"original_copy_pairs\":6,\"derivatives\":76,\"core_modules\":7,\"fixture_modules\":9,\"context_sources\":6,\"source_ordered_cases\":10,\"proposed_subtests\":104,\"old95_parent_inputs_unchanged\":29,\"accepted_adapter_prefix_bytes\":34968,\"candidate_executions\":0}\n"
-}

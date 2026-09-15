@@ -1,7 +1,0 @@
-{
-  "chunk_id": "adaef0",
-  "wall_time_seconds": 0.1817087,
-  "exit_code": 0,
-  "original_token_count": 49,
-  "output": "{\"scope\":\"Final root binding only\",\"pins_sha256\":\"3ab4293cfd48e9652029bd7c2de42269b57499c7c46d95cfd9f659db4a6099f1\",\"inputs\":9,\"bytes\":92124,\"finalized\":true,\"template_false\":true,\"fresh\":true}\n"
-}

@@ -1,7 +1,0 @@
-{
-  "chunk_id": "0b4cdc",
-  "wall_time_seconds": 0.5893682,
-  "exit_code": 0,
-  "original_token_count": 246,
-  "output": "{\r\n  \"scope\": \"Passive text-only amendment; no subject invocation\",\r\n  \"exact_one_paragraph_change\": true,\r\n  \"forward_reconstruction_exact\": true,\r\n  \"reverse_reconstruction_exact\": true,\r\n  \"original_nine_frozen_outputs_unchanged\": true,\r\n  \"prior_amendment_inputs_unchanged\": true,\r\n  \"canonical_notes_unchanged\": true,\r\n  \"outputs\": [\r\n    {\r\n      \"role\": \"before\",\r\n      \"path\": \"E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\_scratch\\\\release-progress-startup81-20260914\\\\amendment02\\\\before\\\\RELEASE-NOTES-LIVING-LIBRARY.md\",\r\n      \"bytes\": 52919,\r\n      \"sha256\": \"d001a39cec31c38097ab44d40203d85c85b88c23fe09686ab24031315f9046f2\"\r\n    },\r\n    {\r\n      \"role\": \"proposed\",\r\n      \"path\": \"E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\_scratch\\\\release-progress-startup81-20260914\\\\amendment02\\\\proposed\\\\RELEASE-NOTES-LIVING-LIBRARY.md\",\r\n      \"bytes\": 52959,\r\n      \"sha256\": \"fee337c8fdcf31124f355587cc41ce98bf1bc1f0fb06a0261c36ee0787852138\"\r\n    }\r\n  ]\r\n}\r\n"
-}

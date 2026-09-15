@@ -1,7 +1,0 @@
-{
-  "chunk_id": "865917",
-  "wall_time_seconds": 0.2321517,
-  "exit_code": 0,
-  "original_token_count": 104,
-  "output": "{\r\n  \"scope\": \"Source-only draft, final source/test freeze still pending\",\r\n  \"qualifier_bytes\": 10354,\r\n  \"qualifier_sha256\": \"c5bc4605fbae77f859711c46a12e114edbe6b02b66b3fdd68595d3f3aab146aa\",\r\n  \"launcher_bytes\": 9085,\r\n  \"launcher_sha256\": \"4b278898495300af55cb5b187dc694ae3e9912af49cbfcbc62ebdd02982bf239\",\r\n  \"original46_cases_module\": \"fd9d79c34f14edb7614e96da6952195a01ff4896974403d90ea5bfe1db70740c\"\r\n}\r\n"
-}

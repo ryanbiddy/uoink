@@ -1,5 +1,0 @@
-{
-  "native_exit": 0,
-  "newline_only_restored": 1,
-  "command": "node --import tsx --test --test-reporter=tap test/gemini-completion.test.mjs test/gemini-command-provenance.test.mjs"
-}

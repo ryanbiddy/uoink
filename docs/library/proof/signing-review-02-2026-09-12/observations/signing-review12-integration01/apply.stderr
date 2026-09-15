@@ -1,8 +1,0 @@
-E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/signing-review12-integration01/worker.patch:9: trailing whitespace.
-**Date**: 2026-09-12  
-E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/signing-review12-integration01/worker.patch:10: trailing whitespace.
-**Reviewer**: Gemini (worktree worker `gemini`)  
-E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/signing-review12-integration01/worker.patch:11: trailing whitespace.
-**Commit Reviewed**: `d24cc33` ("feat(build): verify optional installer signing [Astra]")  
-Falling back to direct application...
-warning: 3 lines add whitespace errors.

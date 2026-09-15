@@ -1,7 +1,0 @@
-{
-  "chunk_id": "22bb3a",
-  "wall_time_seconds": 0.1864496,
-  "exit_code": 0,
-  "original_token_count": 90,
-  "output": "{\"scope\":\"PASSIVE FINAL TEXT PIN RECONCILIATION\",\"subject_executed\":false,\"support_access\":false,\"pins_sha256\":\"f8ee47b3977da4d562850ccf616855e02d5a74df8e3bebf6dd7f4714172c0824\",\"payload_count\":91,\"payload_bytes\":1569239,\"exact_folder_files\":93,\"prior_bound_payloads_unchanged\":73,\"false_template\":true,\"actual_admission_absent\":true,\"new_run_absent\":true}\n"
-}

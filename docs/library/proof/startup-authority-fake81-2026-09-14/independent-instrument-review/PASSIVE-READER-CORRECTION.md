@@ -1,3 +1,0 @@
-The first independent passive check, c15651 (exit 1), reached its case-count assertion after validating the input pins and module copies. It incorrectly treated the new16 source EXPECTED-CASES.json as an array. The actual retained format is an object with count=16 and a cases array; the subject's combined81 file is an array.
-
-The original check_bindings.mjs and BINDING-CHECK01-ACTUAL.json remain unchanged. check_bindings02.mjs reads only the source object's .cases field at that one expression. The exact expected IDs, all source/instrument bytes and assertions are unchanged. This is a passive reader correction, not a candidate failure or retry.

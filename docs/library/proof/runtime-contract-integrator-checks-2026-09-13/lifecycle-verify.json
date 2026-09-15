@@ -1,7 +1,0 @@
-{
-  "chunk_id": "221eaf",
-  "wall_time_seconds": 0.1829425,
-  "exit_code": 0,
-  "original_token_count": 72,
-  "output": "{\r\n  \"verified_payloads\": 98,\r\n  \"bytes\": 622502,\r\n  \"same_46_cases_passed_in_two_roots\": true,\r\n  \"failed_startup_preserved\": true,\r\n  \"diagnostic_cases\": 0,\r\n  \"tests_executed_by_verifier\": 0,\r\n  \"manifest_sha256\": \"74129bbd376def3ae9451ef98025748c527539e94490d551dd01fa7c3761ffcf\"\r\n}\r\n"
-}

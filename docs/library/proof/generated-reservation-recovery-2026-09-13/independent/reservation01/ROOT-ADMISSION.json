@@ -1,8 +1,0 @@
-{
-  "approved": true,
-  "label": "reservation01",
-  "scope": "generated_bytes_and_fake_ports_only",
-  "pins_sha256": "e7efffb823d3af09b22133909e2ff58f85ff4c62305c00d9106c3789356da0bf",
-  "review": "Astra independent repeat of unchanged 42 cases in a separate source root after passing author70b48e; no new behavior or native scope",
-  "rerun_authorized": false
-}

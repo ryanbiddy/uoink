@@ -1,7 +1,0 @@
-{
-  "chunk_id": "8aa5a4",
-  "wall_time_seconds": 0.5096916,
-  "exit_code": 0,
-  "original_token_count": 73,
-  "output": "{\"proof\": \"E:\\\\AI\\\\projects\\\\uoink\\\\checkouts\\\\Yoink-library\\\\_scratch\\\\timeout-repair-proof01\", \"payload_count\": 117, \"logical_members\": 184, \"distinct_objects\": 108, \"manifest_sha256\": \"25ff14f8ee5b75a65caa3d711f8f22ee171dabd510454441a5b39f26797c895d\", \"tests_or_native_runs_executed\": 0}\r\n"
-}

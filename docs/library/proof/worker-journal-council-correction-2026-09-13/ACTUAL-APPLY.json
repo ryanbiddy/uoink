@@ -1,8 +1,0 @@
-{
-  "chunk_id": "674cc5",
-  "wall_time_seconds": 0.3636174,
-  "exit_code": 0,
-  "original_token_count": 75,
-  "output": "Falling back to direct application...\n{\"normalized_apply_text_match\":true,\"applied_raw_sha256\":\"324610a36d2c220a4adb66c0431fa1fdf90ac88c5f7e293558339347018b5354\",\"restored_exact_worker_sha256\":\"f17d009e5daaeb397ec655598f269fa67cc0e634e7c77ae28cf7756de00102cb\",\"source_suites_named\":0,\"test_runs\":0}\r\n"
-}
-

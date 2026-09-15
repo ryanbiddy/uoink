@@ -1,6 +1,0 @@
-{
-  "actual_outer_exit": 1,
-  "chunk_id": "7aa8d5",
-  "failure": "D1 historical seal uses records, not files; stopped before Git intent-to-add",
-  "qualification_run": false
-}

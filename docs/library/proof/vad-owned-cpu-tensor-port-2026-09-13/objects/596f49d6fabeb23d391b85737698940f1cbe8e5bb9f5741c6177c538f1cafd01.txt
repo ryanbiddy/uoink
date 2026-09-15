@@ -1,1 +1,0 @@
-{"chunk_id":"ce83a2","wall_time_seconds":0.2129174,"exit_code":0,"original_token_count":57,"output":"{\r\n  \"copied\": 13,\r\n  \"pins_sha256\": \"7b68ee7c7c4febf6a8e089443358688e2ed40786c01663b573c17426dfd727f9\",\r\n  \"admission_sha256\": \"d0850d144b185a51660e988ed551c9fdc6b92afb447c6c2fe8eae0ae89612034\",\r\n  \"native_approved\": false\r\n}\r\n"}

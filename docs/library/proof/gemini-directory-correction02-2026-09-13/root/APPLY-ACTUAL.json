@@ -1,7 +1,0 @@
-{
-  "chunk_id": "de419b",
-  "wall_time_seconds": 0.3792033,
-  "exit_code": 0,
-  "original_token_count": 79,
-  "output": "Falling back to direct application...\nFalling back to direct application...\n{\r\n  \"applied\": true,\r\n  \"outputs\": [\r\n    \"docs/library/GEMINI-STABLE-DIRECTORY-CORRECTION02-2026-09-13.md\",\r\n    \"docs/library/GEMINI-STABLE-DIRECTORY-CORRECTION02-2026-09-13.coverage.json\"\r\n  ],\r\n  \"raw_worker_bytes_restored\": true\r\n}\r\n"
-}

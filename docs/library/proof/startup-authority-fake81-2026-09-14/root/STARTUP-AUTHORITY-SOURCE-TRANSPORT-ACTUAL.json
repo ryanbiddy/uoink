@@ -1,7 +1,0 @@
-{
-  "chunk_id": "c4873f",
-  "wall_time_seconds": 0.5416397,
-  "exit_code": 0,
-  "original_token_count": 48,
-  "output": "{\"payloads\":145,\"bytes\":1638412,\"manifest_sha256\":\"d207df4b7fff5677963e53d0af4abcd35075c071916b6d4d026be09ff111bf0d\",\"newline_only_restored\":136,\"all_raw_payloads_and_seal_equal_donor\":true}\n"
-}

@@ -1,4 +1,0 @@
-..........................s...........                                   [100%]
-=========================== short test summary info ===========================
-SKIPPED [1] tests\test_nltk_pathsec_backport.py:701: Symlink creation not permitted in this environment ([WinError 1314] A required privilege is not held by the client: 'C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\ecbf6acd-847\\gemini\\_scratch\\nltk12-astra-worker01-0\\t23\\outside' -> 'C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\ecbf6acd-847\\gemini\\_scratch\\nltk12-astra-worker01-0\\t23\\sandbox\\link_to_outside'); boundary recorded: symlink escape testing requires symlink creation privileges.
-37 passed, 1 skipped in 101.49s (0:01:41)

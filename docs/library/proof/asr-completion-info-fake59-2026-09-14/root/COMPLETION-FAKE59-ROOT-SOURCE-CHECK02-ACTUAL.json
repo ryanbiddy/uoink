@@ -1,7 +1,0 @@
-{
-  "chunk_id": "78a6da",
-  "wall_time_seconds": 0.1794691,
-  "exit_code": 0,
-  "original_token_count": 255,
-  "output": "{\"scope\":\"Root passive preparation relation, no subject execution\",\"historical_source_sha256\":\"563539d579a6584029f6596d6cba5de375976b6ada02535108cc195cb4fc3de7\",\"historical_body_exact\":true,\"expected59_sha256\":\"82bf46e9b64600a465bd7433cf902c75d1ede518ab349749bc7bbafa58c8b528\",\"source_inputs_checked\":7,\"full_deltas\":[{\"diff\":\"qualify_completion_info.diff\",\"hunks\":6,\"sha256\":\"06f8a5c5d3cdc4b8fc1baceb58897cd84ad5727196f6955a0ce5d2223f78f2b5\"},{\"diff\":\"run_fake59_01.diff\",\"hunks\":8,\"sha256\":\"6c1c04e049cc43bf7372a62e35f265d02195fc921e7e9ff98b9bb5afc4ed9e0a\"},{\"diff\":\"lifecycle46_cases.diff\",\"hunks\":2,\"sha256\":\"5751e6ad73db1c9d2d388cbbc025464689b4610c60f5bbf805dd686c3797f66c\"}],\"source_sha256\":\"22b662938178d1898eb287348d0b4556c6579b5d0ce79f2782d49a4748ed1509\",\"tests_sha256\":\"29d3a327d9b507f1a16b147a7be68887fb2233536823f76da3e65d1e45b57549\",\"qualifier_sha256\":\"c5bc4605fbae77f859711c46a12e114edbe6b02b66b3fdd68595d3f3aab146aa\",\"launcher_sha256\":\"4b278898495300af55cb5b187dc694ae3e9912af49cbfcbc62ebdd02982bf239\"}\n"
-}

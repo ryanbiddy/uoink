@@ -1,7 +1,0 @@
-{
-  "chunk_id": "a05d87",
-  "wall_time_seconds": 0.1986199,
-  "exit_code": 0,
-  "original_token_count": 131,
-  "output": "{\"runs\":[{\"source\":\"reliability-request-stream-fake11-author01\",\"label\":\"reliability-request-stream-fake01\",\"outer\":\"121f97\",\"passed\":11,\"failed\":0,\"skipped\":0,\"subtests\":15,\"source_inputs\":13,\"controls\":3},{\"source\":\"reliability-request-stream-fake11-independent01\",\"label\":\"reliability-request-stream-confirmation01\",\"outer\":\"ff51d7\",\"passed\":11,\"failed\":0,\"skipped\":0,\"subtests\":15,\"source_inputs\":13,\"controls\":3}],\"identical_case_objects\":true,\"identical9_child_hashes\":true,\"ten_guards_each\":true,\"outputs_each\":21}\n"
-}

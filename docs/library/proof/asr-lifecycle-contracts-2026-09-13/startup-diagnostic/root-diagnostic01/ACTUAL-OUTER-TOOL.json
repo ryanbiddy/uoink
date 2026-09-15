@@ -1,1 +1,0 @@
-{"chunk_id":"7ff173","wall_time_seconds":0.1674713,"exit_code":0,"original_token_count":40,"output":"{'schema': 'uoink.lifecycle-startup-names.v1', 'initial_heavy_roots': ['winreg'], 'stages': [], 'attempted_heavy_imports': [], 'lifecycle_cases_executed': 0}\r\n"}
