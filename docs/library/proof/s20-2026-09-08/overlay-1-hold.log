@@ -1,0 +1,184 @@
+whisperx unavailable: ModuleNotFoundError: WhisperX disabled for the S21 availability probe
+2026-09-08 13:52:36,898 INFO applying index migration 0001 (0001_initial_schema.sql)
+2026-09-08 13:52:36,903 INFO applying index migration 0002 (0002_entity_graph.sql)
+2026-09-08 13:52:36,905 INFO applying index migration 0003 (0003_taxonomy_corrections.sql)
+2026-09-08 13:52:36,907 INFO applying index migration 0004 (0004_memory_indexes.sql)
+2026-09-08 13:52:36,909 INFO applying index migration 0005 (0005_pending_yoinks.sql)
+2026-09-08 13:52:36,911 INFO applying index migration 0006 (0006_v2_schema.sql)
+2026-09-08 13:52:36,914 INFO applying index migration 0007 (0007_p4_workspaces.sql)
+2026-09-08 13:52:36,915 INFO applying index migration 0008 (0008_a2_claims.sql)
+2026-09-08 13:52:36,917 INFO applying index migration 0009 (0009_p5_scripts.sql)
+2026-09-08 13:52:36,919 INFO applying index migration 0010 (0010_podcast_feeds.sql)
+2026-09-08 13:52:36,921 INFO applying index migration 0011 (0011_podcast_audio.sql)
+2026-09-08 13:52:36,924 INFO applying index migration 0012 (0012_whisper_transcripts.sql)
+2026-09-08 13:52:36,926 INFO applying index migration 0013 (0013_monitored_playlists.sql)
+2026-09-08 13:52:36,929 INFO applying index migration 0014 (0014_writing_studio.sql)
+2026-09-08 13:52:36,931 INFO applying index migration 0015 (0015_universal_site.sql)
+2026-09-08 13:52:36,933 INFO applying index migration 0016 (0016_default_style_anchors.sql)
+2026-09-08 13:52:36,935 INFO applying index migration 0017 (0017_pending_long_video_mode.sql)
+2026-09-08 13:52:36,937 INFO applying index migration 0018 (0018_writing_drafts.sql)
+2026-09-08 13:52:36,939 INFO applying index migration 0019 (0019_auto_uoink.sql)
+2026-09-08 13:52:36,941 INFO applying index migration 0020 (0020_platform_author.sql)
+2026-09-08 13:52:36,943 INFO applying index migration 0021 (0021_suite_engagement.sql)
+2026-09-08 13:52:36,946 INFO applying index migration 0022 (0022_podcast_corpus.sql)
+2026-09-08 13:52:36,949 INFO applying index migration 0023 (0023_podcast_watch.sql)
+2026-09-08 13:52:36,951 INFO applying index migration 0024 (0024_clips.sql)
+2026-09-08 13:52:36,953 INFO applying index migration 0025 (0025_source_type_backfill.sql)
+2026-09-08 13:52:36,956 INFO applying index migration 0026 (0026_provenance_precedence.sql)
+2026-09-08 13:52:36,958 INFO applying index migration 0027 (0027_library_substrate.sql)
+2026-09-08 13:52:36,961 INFO applying index migration 0028 (0028_source_subscriptions.sql)
+2026-09-08 13:52:36,963 INFO applying index migration 0030 (0030_media_depth.sql)
+S20 dashboard: http://127.0.0.1:50515/dashboard
+S20 control: http://127.0.0.1:50516/ctl
+S20 feed: http://127.0.0.1:50514/feed.xml
+2026-09-08 13:52:54,666 INFO GET /health from 127.0.0.1 -> ok
+2026-09-08 13:52:54,741 INFO auth: rejected GET /favicon.ico (token mismatch)
+2026-09-08 13:52:54,778 WARNING topics.json missing at E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\s21-1vamcf6a\helper\topics.json — falling back to 'Uncategorized'
+2026-09-08 13:53:04,911 INFO GET /health from 127.0.0.1 -> ok
+2026-09-08 13:53:14,908 INFO GET /health from 127.0.0.1 -> ok
+2026-09-08 13:53:24,908 INFO GET /health from 127.0.0.1 -> ok
+2026-09-08 13:53:34,908 INFO GET /health from 127.0.0.1 -> ok
+2026-09-08 13:53:44,912 INFO GET /health from 127.0.0.1 -> ok
+2026-09-08 13:53:54,907 INFO GET /health from 127.0.0.1 -> ok
+2026-09-08 13:54:04,907 INFO GET /health from 127.0.0.1 -> ok
+2026-09-08 13:54:14,912 INFO GET /health from 127.0.0.1 -> ok
+2026-09-08 13:54:24,910 INFO GET /health from 127.0.0.1 -> ok
+2026-09-08 13:54:34,920 INFO GET /health from 127.0.0.1 -> ok
+2026-09-08 13:54:44,915 INFO GET /health from 127.0.0.1 -> ok
+2026-09-08 13:54:54,904 INFO GET /health from 127.0.0.1 -> ok
+2026-09-08 13:55:04,910 INFO GET /health from 127.0.0.1 -> ok
+2026-09-08 13:55:14,918 INFO GET /health from 127.0.0.1 -> ok
+2026-09-08 13:55:24,908 INFO GET /health from 127.0.0.1 -> ok
+2026-09-08 13:55:34,918 INFO GET /health from 127.0.0.1 -> ok
+----------------------------------------
+Exception occurred during processing of request from ('127.0.0.1', 60140)
+Traceback (most recent call last):
+  File "C:\Python314\Lib\socketserver.py", line 697, in process_request_thread
+    self.finish_request(request, client_address)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python314\Lib\socketserver.py", line 362, in finish_request
+    self.RequestHandlerClass(request, client_address, self)
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python314\Lib\socketserver.py", line 766, in __init__
+    self.handle()
+    ~~~~~~~~~~~^^
+  File "C:\Python314\Lib\http\server.py", line 496, in handle
+    self.handle_one_request()
+    ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Python314\Lib\http\server.py", line 484, in handle_one_request
+    method()
+    ~~~~~~^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\tests\library_work_astra\s20_matrix_launcher.py", line 363, in do_GET
+    self.send_header('Content-Length', str(len(body))); self.end_headers(); self.wfile.write(body)
+                                                        ~~~~~~~~~~~~~~~~^^
+  File "C:\Python314\Lib\http\server.py", line 598, in end_headers
+    self.flush_headers()
+    ~~~~~~~~~~~~~~~~~~^^
+  File "C:\Python314\Lib\http\server.py", line 602, in flush_headers
+    self.wfile.write(b"".join(self._headers_buffer))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python314\Lib\socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+ConnectionResetError: [WinError 10054] An existing connection was forcibly closed by the remote host
+----------------------------------------
+2026-09-08 13:55:39,485 INFO standing capture st_ea4ccabd77047875e2773c3ca8ebdeb8 settled: succeeded
+2026-09-08 13:55:44,918 INFO GET /health from 127.0.0.1 -> ok
+2026-09-08 13:55:54,911 INFO GET /health from 127.0.0.1 -> ok
+2026-09-08 13:56:04,904 INFO GET /health from 127.0.0.1 -> ok
+2026-09-08 13:56:14,918 INFO GET /health from 127.0.0.1 -> ok
+2026-09-08 13:57:02,567 INFO GET /health from 127.0.0.1 -> ok
+2026-09-08 13:57:04,912 INFO GET /health from 127.0.0.1 -> ok
+2026-09-08 13:57:14,906 INFO GET /health from 127.0.0.1 -> ok
+2026-09-08 13:57:24,906 INFO GET /health from 127.0.0.1 -> ok
+2026-09-08 13:57:34,904 INFO GET /health from 127.0.0.1 -> ok
+2026-09-08 13:57:44,917 INFO GET /health from 127.0.0.1 -> ok
+2026-09-08 13:57:54,912 INFO GET /health from 127.0.0.1 -> ok
+2026-09-08 13:58:04,911 INFO GET /health from 127.0.0.1 -> ok
+2026-09-08 13:58:14,908 INFO GET /health from 127.0.0.1 -> ok
+2026-09-08 13:58:24,914 INFO GET /health from 127.0.0.1 -> ok
+2026-09-08 13:58:34,915 INFO GET /health from 127.0.0.1 -> ok
+2026-09-08 13:58:44,913 INFO GET /health from 127.0.0.1 -> ok
+2026-09-08 13:58:54,908 INFO GET /health from 127.0.0.1 -> ok
+2026-09-08 13:59:04,911 INFO GET /health from 127.0.0.1 -> ok
+2026-09-08 13:59:14,904 INFO GET /health from 127.0.0.1 -> ok
+2026-09-08 13:59:24,911 INFO GET /health from 127.0.0.1 -> ok
+2026-09-08 13:59:26,525 INFO GET /token rejected (missing X-Uoink-Client)
+2026-09-08 13:59:26,579 INFO auth: rejected GET /sources/status (token mismatch)
+2026-09-08 14:00:13,910 INFO GET /health from 127.0.0.1 -> ok
+2026-09-08 14:01:13,912 INFO GET /health from 127.0.0.1 -> ok
+2026-09-08 14:02:13,917 INFO GET /health from 127.0.0.1 -> ok
+2026-09-08 14:02:14,852 INFO GET /health from 127.0.0.1 -> ok
+2026-09-08 14:02:24,912 INFO GET /health from 127.0.0.1 -> ok
+----------------------------------------
+Exception occurred during processing of request from ('127.0.0.1', 64569)
+Traceback (most recent call last):
+  File "C:\Python314\Lib\socketserver.py", line 697, in process_request_thread
+    self.finish_request(request, client_address)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python314\Lib\socketserver.py", line 362, in finish_request
+    self.RequestHandlerClass(request, client_address, self)
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python314\Lib\socketserver.py", line 766, in __init__
+    self.handle()
+    ~~~~~~~~~~~^^
+  File "C:\Python314\Lib\http\server.py", line 496, in handle
+    self.handle_one_request()
+    ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Python314\Lib\http\server.py", line 484, in handle_one_request
+    method()
+    ~~~~~~^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\tests\library_work_astra\s20_matrix_launcher.py", line 345, in do_GET
+    new = server._YoinkHTTPServer(('127.0.0.1', server.PORT), server.Handler)
+  File "C:\Python314\Lib\socketserver.py", line 457, in __init__
+    self.server_bind()
+    ~~~~~~~~~~~~~~~~^^
+  File "C:\Python314\Lib\http\server.py", line 148, in server_bind
+    socketserver.TCPServer.server_bind(self)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Python314\Lib\socketserver.py", line 478, in server_bind
+    self.socket.bind(self.server_address)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\tests\library_work_astra\s20_matrix_launcher.py", line 74, in bind
+    denied()
+    ~~~~~~^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\tests\library_work_astra\s20_matrix_launcher.py", line 60, in denied
+    raise AssertionError('S21 forbids child processes and non-fixture networking')
+AssertionError: S21 forbids child processes and non-fixture networking
+----------------------------------------
+----------------------------------------
+Exception occurred during processing of request from ('127.0.0.1', 64570)
+Traceback (most recent call last):
+  File "C:\Python314\Lib\socketserver.py", line 697, in process_request_thread
+    self.finish_request(request, client_address)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python314\Lib\socketserver.py", line 362, in finish_request
+    self.RequestHandlerClass(request, client_address, self)
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python314\Lib\socketserver.py", line 766, in __init__
+    self.handle()
+    ~~~~~~~~~~~^^
+  File "C:\Python314\Lib\http\server.py", line 496, in handle
+    self.handle_one_request()
+    ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Python314\Lib\http\server.py", line 484, in handle_one_request
+    method()
+    ~~~~~~^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\tests\library_work_astra\s20_matrix_launcher.py", line 345, in do_GET
+    new = server._YoinkHTTPServer(('127.0.0.1', server.PORT), server.Handler)
+  File "C:\Python314\Lib\socketserver.py", line 457, in __init__
+    self.server_bind()
+    ~~~~~~~~~~~~~~~~^^
+  File "C:\Python314\Lib\http\server.py", line 148, in server_bind
+    socketserver.TCPServer.server_bind(self)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Python314\Lib\socketserver.py", line 478, in server_bind
+    self.socket.bind(self.server_address)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\tests\library_work_astra\s20_matrix_launcher.py", line 74, in bind
+    denied()
+    ~~~~~~^^
+  File "E:\AI\projects\uoink\checkouts\Yoink-library\tests\library_work_astra\s20_matrix_launcher.py", line 60, in denied
+    raise AssertionError('S21 forbids child processes and non-fixture networking')
+AssertionError: S21 forbids child processes and non-fixture networking
+----------------------------------------

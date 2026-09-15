@@ -1,0 +1,1589 @@
+{
+  "schema_version": 1,
+  "freeze_status": "frozen",
+  "archived_receipts_sha256": "2b4e824ea9f93999de6c5108406e60a5c81f108de0b279c52fee2e96d622469c",
+  "source_sha256": "2765cc359805fb12f7a90aecd3dd0b34d884aa8cb3015785011bf400da3b4dfc",
+  "source_manifest_sha256": "7d5212dfce0bf005bfda693537a4fe2dcd5ac1915d2fd08326bdb386b5cc3056",
+  "kind": "induction-manifest",
+  "version": "induction-v1-2026-09-05",
+  "selection": "Last reasoning attempt per archived target; terminal outcome equals unmapped; video_id ascending",
+  "target_count": 225,
+  "old_holdout_overlap_count": 23,
+  "items": [
+    {
+      "video_id": "1840739354819350528",
+      "source_revision": "029c55f627f294f4fa972395552241657946c7b3a77c045f39c0c99f1bdeae31",
+      "card_hash": "cff9e00666d0508b0d4212bcd3215d3dbe38853cc8307791e73f055ff7010ea7",
+      "stratum": "timed_evidence",
+      "old_holdout": false
+    },
+    {
+      "video_id": "1851588159403884544",
+      "source_revision": "edc8438485bc1ef6d500efd652025d44119beec317792d09c0512c98e8bc1f8a",
+      "card_hash": "345e933fa7330c826a675f74049da099fe2e0f557d8e6ad407f8b9cbb77a1b04",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "1889178327400820738",
+      "source_revision": "9c898273922f9880cef8766c7876f697ae603278da9bd22c2d6aae718af6b830",
+      "card_hash": "a508c21c545eaca789643b36863d598a732a5129658a35f61ce8335618a4e669",
+      "stratum": "timed_evidence",
+      "old_holdout": true
+    },
+    {
+      "video_id": "1969830523657666560",
+      "source_revision": "dae23c09a67c0c503d2942bbeea6f36803d7ed72fcbc034953a7c79bd5389585",
+      "card_hash": "31d36391dd5ea2bc0d197565424fe939e96767fa22ee64fdd09f884eaf8e4493",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2020740688166735872",
+      "source_revision": "39d4c60be0aa47c7397208aa8415c0a1b179a62a817c59d4b60b9bfbbdee0ced",
+      "card_hash": "cd4b7045ce4d9a8a31cefc7d8a0975571b3825e495763f287ea5f1b7f8059470",
+      "stratum": "timed_evidence",
+      "old_holdout": true
+    },
+    {
+      "video_id": "2077640475075358720",
+      "source_revision": "5946f41f4779074e53c690ec445f31c34fed9b046876ea1ac75c967073b39122",
+      "card_hash": "aa7d2d8267f69d374dee00e210bb119e0c2e9b868e0e8b239118cf6e17bd045a",
+      "stratum": "timed_evidence",
+      "old_holdout": true
+    },
+    {
+      "video_id": "2077870396075094016",
+      "source_revision": "916db312f0dac72b6ceb0ce75cf73883ce7ef37e92df2c375b6369076b79bdd4",
+      "card_hash": "b16c08a0a2c6bb099400c85f3d342c121bd52c4c52d4e67c0bac4ab50eb42636",
+      "stratum": "timed_evidence",
+      "old_holdout": true
+    },
+    {
+      "video_id": "2077931160538329088",
+      "source_revision": "f7067fdb48d9a758096d93caa39f901901e7ff4ddf5fa883951382f760c5f08c",
+      "card_hash": "d4f2fe1766c43bcce032c0ff1bfe261868f9635fed116bd3c67e2ba8f820f4eb",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2078287651535273984",
+      "source_revision": "bf8eb842b087cd892a6f1f15c47da10911c1e6e71ffdca7df0d0fc4b9346a122",
+      "card_hash": "79519ef7ae40f65fbb80d6de4a255d2bd422c4ee9b9f0821017b0498e73df3ea",
+      "stratum": "timed_evidence",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2078443305495388160",
+      "source_revision": "6a3ebfffac94ce06401ce59e36c388dac7c7231e3bfb27131a8fb25d4a8eab73",
+      "card_hash": "26278cb609c413a60416743a6a454ebc9ee93e985579a6001544b636b1bf2c38",
+      "stratum": "timed_evidence",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2078450309794263040",
+      "source_revision": "1c9d1f7791a40962e02e177d5f7091efffc53d0b9555554b5da4b44b301bcb79",
+      "card_hash": "955f1a8297e6ca579478a857299000380b868208f96d8837d88c1e783729fbb0",
+      "stratum": "timed_evidence",
+      "old_holdout": true
+    },
+    {
+      "video_id": "2078513431548727297",
+      "source_revision": "446b4a231f724b6bb874cd0937ba5e07ca2e74b6a00c29eba7bfc77f977ed533",
+      "card_hash": "56d929ead09b623eecfb97a1a5a1f888ee3dd239332c975fba4ee4763a3a4187",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2078557465042419712",
+      "source_revision": "0d7dad931ac46a75a9350b3820e34ad65d3d295a4b679ceb5bb8af363229b248",
+      "card_hash": "fc788eff3805624c392a8705d9ce865ac6e6198790ac00c93f95740715e0cb4a",
+      "stratum": "timed_evidence",
+      "old_holdout": true
+    },
+    {
+      "video_id": "2078557763337154560",
+      "source_revision": "6abca6a84fc8a3e76633cb74751c4ba0bd9d615e49bda212127d45f22c1497c5",
+      "card_hash": "11b0e6c742622f36ca8f4355659931e4c394aea977051e914c067af23e163724",
+      "stratum": "timed_evidence",
+      "old_holdout": true
+    },
+    {
+      "video_id": "2078619453164748801",
+      "source_revision": "fc9a5204ede852c2ac5c3f46aaea08fba8afb086c55568d4ac37670eceba3d6f",
+      "card_hash": "b92265803a877182249c5bd8cb832ff7a4dc1d71c13a62c728f4dfdb2e8ba344",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2078621895058915328",
+      "source_revision": "aa3c83677fa8e490ce8e6c7054f26ce2e2f43a32a3f8981f35acefca07ffaec1",
+      "card_hash": "d36d566c34dd28affd6c04fcf9f8ba6bd5ff657738a93d0e2b8a558125e1c377",
+      "stratum": "timed_evidence",
+      "old_holdout": true
+    },
+    {
+      "video_id": "2078627651103993856",
+      "source_revision": "705d2f0efea9fe457b5a65724ff21c85d7c115476f013e2795dd8610043daaa6",
+      "card_hash": "68d251f749794bd60dff60cccdd98713d1691329a50fbe90f8fb1f6c9ffe5630",
+      "stratum": "timed_evidence",
+      "old_holdout": true
+    },
+    {
+      "video_id": "2078643519162298368",
+      "source_revision": "4d8389abd9806e5d8a2f73bf88e2dea9d50dd4922b4e0b1fa7952166471a9d5e",
+      "card_hash": "ff5f10f8cbeb702cc20c17cb17b9e861027b7b455d1aa16f20a2b9854c6b0f2b",
+      "stratum": "timed_evidence",
+      "old_holdout": true
+    },
+    {
+      "video_id": "2078650714293739521",
+      "source_revision": "497ce18e7bcc95ead8c0840747a7fc239b20e83f8d3bf63b16de4ddd7613194e",
+      "card_hash": "e4d73233aab2810b98e65ae2afbd84539cbca274a3c248d6db2d3b86d5d38526",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2078656827990978560",
+      "source_revision": "05f5d7521b83dbc1def6a534c6bed5e7bd917230eaee94126c251a364ef7b75d",
+      "card_hash": "65d552b6f75f731191921a3d0d18bf6627d573a2140d12c298d85a292224b0b8",
+      "stratum": "timed_evidence",
+      "old_holdout": true
+    },
+    {
+      "video_id": "2078684046708572163",
+      "source_revision": "e91499c190e9a71bb5a00f4263c1764c224ee33e70321d1ad8ac51c90c6e140b",
+      "card_hash": "717600e7674c0291feaa1d4c05d8505fbe51f9136fa03971035b96408ae09619",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2078973268732555264",
+      "source_revision": "887a9f4937b7f8bd7ddcbf38818fa465be5116bb4496d07f172c354accc92756",
+      "card_hash": "33d78d698bdbdb3d33a0c2298c5c367c485e6d306867d4638a683498255c4d69",
+      "stratum": "timed_evidence",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2078988415048278016",
+      "source_revision": "f4e5c8dac8a1b3a99665a98f4c2bddc45bc40b4c405ab884083cec8ec20a0a8a",
+      "card_hash": "8892a63d289842f1b4bf5b312f0a24e9c79b24234539b3baa88da759a920cbf4",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2079140311779971072",
+      "source_revision": "3b5d92996a3391616d4fcd80b389ed5e095c54bc09dc6cfd46e21707b969e3cf",
+      "card_hash": "f4623329ab941d96b7b35e78ac50dfeba099a8172f1b7a4d971e909c2c736a75",
+      "stratum": "text_only",
+      "old_holdout": true
+    },
+    {
+      "video_id": "2079190532681543680",
+      "source_revision": "302e089520a3d0d9216058c86bb7a0b783bfebf1a4caa81feb0225f8a270a544",
+      "card_hash": "01e128455e17949c29ec5896941303d574956555ad1099eae490e892aa18f703",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2079192729997959168",
+      "source_revision": "fff3c2c2295a7dc3aa41262fb77c908dadb13f0bdf2959a2554875259d8d10a9",
+      "card_hash": "857aa29cf41d6b94a6863d67dac091a6c90a7b53a66830a6d3ed9be8cd7eaa97",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2079238984417366016",
+      "source_revision": "42d094e341a7078ef15fc3ce0cba8ab26c21973e3ed1b15015a66f6d72b6e653",
+      "card_hash": "2b04f75108967b32eee67071adac2841dfaaf484c954c210d15ffbf7279d040c",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2079481448843649024",
+      "source_revision": "25276408bc0a0ff537177ce4a50b416eaf053ab7be1c86fa09d8c5674af251a9",
+      "card_hash": "d2bbaeeec38f010fc7c3e0df7b60f53cdb4bffd5b9e9dec818caf3c62b7a8139",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2079486420972937216",
+      "source_revision": "2c8e6351e8a0b5a4ede6bdba164c99ae1165c0addae1ac7c2beee497a490bb2f",
+      "card_hash": "66e3b831c55be608ec9208993bc2d259f42c904285be8102c007df8768d9c844",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2079595357273464930",
+      "source_revision": "b92f15b1288c9ab9fb0d3b6583847dc36cf295c13f348eec7aa4e197643e8517",
+      "card_hash": "480483196b2e419137fab026e883be3b8f5c4e2a640b7a8a62fe37839a52a46a",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2079635204994379776",
+      "source_revision": "11528dec2a3149511c24047010e0db6f9d68f1789e6d437341ee7b10d2deafc2",
+      "card_hash": "c573ce564e721865158fb79bdb76336499512360798c6f19965069b0b045725a",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2079662821449609217",
+      "source_revision": "6e61eae6999b70a4d0b7a5f3be8372a68d0ddb213c8b2de67dde249a84b03904",
+      "card_hash": "d6d345ebea26d11f23dcc3a4630303e0c4ed3f1924819cc3cf05009376c3129d",
+      "stratum": "timed_evidence",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2079818487246262272",
+      "source_revision": "f7d030ce15e85eed55b3193565aaf90e1f7575f950a8a2eb6740adb685092eca",
+      "card_hash": "f5fcd69c86caa98167fdb5591e2e18fe4f11f7e9e55047762e02e466509e210e",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2079973875807301633",
+      "source_revision": "6328f7c8f01c37102d8d50bda9563f971f6e9e5c90f22195bca498792e121a74",
+      "card_hash": "791ddf6b024102ae13e7a3c1fe4976a7e68d34ef8f6af35b74b0fb33239a2a2d",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2079981074323574784",
+      "source_revision": "5760f2c7eafbaa796011f182db3f45331797d416f83604234edc238bbd23b809",
+      "card_hash": "8d70631926659daa117823fa2ff411e26a7de830f74c0eb24f41712c3d3bc3d0",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2080006256354369536",
+      "source_revision": "60b2d5837ba1e3284cd7ec384bdc045e027edc906e59b273125d46f564f125b4",
+      "card_hash": "7e84770c6a823fe288983f04697a9ecab28c4c4c8de35acfcc446aa8e0332e1e",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2080091059644964864",
+      "source_revision": "02276a30b2282f0dbfa24eb80324d51424a783c81db411aea34495caf7b72e5a",
+      "card_hash": "e705c1c3ff96da5bf6ecb034d0dc0ab04c1ab548688b3e05aa12b7a010dc0b0b",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2080348432774856704",
+      "source_revision": "3866d89269cbb4433f156180c8d264f11465ae8f7cd01b6d36c08046a8bdfddc",
+      "card_hash": "6bf162244dae4e657be610f2f7332d0dc651d6627b7335e1cdc60dae653e6f40",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2080366248735522816",
+      "source_revision": "2c343ec4075020bb56e9dd051efa61d833c43901a3227fd39da296ebfc03a78c",
+      "card_hash": "34f45f4ada190c82abc73ee857b77d2f5e51d2df4df3bcf7072ff5ec73885918",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2080377021914656768",
+      "source_revision": "0edc10324785b777b98e9bbb273876d71cdab8e1ab7d14428be9682ba6a73194",
+      "card_hash": "7cc632e3447a651cc5df3e0f25d54dcce7aede28068de718042bbf17b712a27d",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2080431302835044352",
+      "source_revision": "65a21c6989f1b5f6499b237f6f863f7eddf9b21479acecea15137921c0ea4501",
+      "card_hash": "cf77fd8efd6e3e6d7ed1014238df6bdb7bf0e398f70ff85de1b4b424891cd0f0",
+      "stratum": "timed_evidence",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2080435155756544000",
+      "source_revision": "3fce2521bf7a9953432bf0f1e0a6f0abfb575b735c76109f5c2228e125f5d390",
+      "card_hash": "33567aa2e8fc1830656b693fe2a7c52e46e4a575cd13eacc56c117ab68e0b5d6",
+      "stratum": "timed_evidence",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2080454622179979264",
+      "source_revision": "b172b40a60b56cfd59f5a311bc179c72056d21143444e0616f300a260e626bd3",
+      "card_hash": "b43327ebf4ec5ec826ee096ed1883120a93fdcec7ec1dce545464e47634d13b2",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2080678700157140992",
+      "source_revision": "e54fd975f0c88437fc4ca530fbf9e1d82473e52fef668312a1f8af7dc978726d",
+      "card_hash": "58ec37f03b31f52cadac9ddf4ec356f5c60a64923770043cab952ddd166603d1",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2080714082626293760",
+      "source_revision": "a6910452b09ec82d5affe1357cecfe156c6c226828b90a3c05e8c78b0a4af353",
+      "card_hash": "956cea6b679009117179e18920eed4ad51dbd4f5b5c45017a1e0615915b35c07",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2080788116747476992",
+      "source_revision": "2667415363bdc4a4fac62811724f616796a691a420ec9a532ae4eded949c0cea",
+      "card_hash": "8d802e5df3c0692747e6bec6b4e755e774b1567a7965acb8da9a3024f06429df",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2080812408759865344",
+      "source_revision": "e530586bdce6f96476ba220d8d0f65e87670a50054eac8515d898faefcd2aa3a",
+      "card_hash": "9f59cd3dd7ffeeb6bb57c2c37a94f2e60f85ee3ae2cdfe544ee00be844863f56",
+      "stratum": "timed_evidence",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2080841892582035456",
+      "source_revision": "7f5715e550fcda71d3fad04d60c476e187b6c70ea27b4b2294c807aad51f7b17",
+      "card_hash": "f3a6e397a4202770c9fa0b728a4f15c516048e4bb1e43fb6ba0f0ae5126adc7a",
+      "stratum": "timed_evidence",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2081000627354681344",
+      "source_revision": "ef37ccf506e6896f01960ec0f45cc80b540b04d28704decf0fefd87bf4b7fd36",
+      "card_hash": "f63de3066c71c3a6ae0c1b54dbf40421e9ef07a738e44f723692fd2460b8212b",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2081023025714188288",
+      "source_revision": "28f7ca02f966eedeb20759ce07db651ca2e45b6039df64a0955157ce3ad956fa",
+      "card_hash": "9dbd09043b74d6030453cbe31c2caa48dbc678ef0b598f7c4f48732c511abe11",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2081066532071759872",
+      "source_revision": "37bf344a14658a2927b379458dbf8ff6da9b6eca23daf60ee7414e364b716130",
+      "card_hash": "de0c0df798cda2913f86ebc8cbaf64c2bcea5f85d4329e67ca0c0f81703b9c63",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2081123013227945985",
+      "source_revision": "d8a98117afbd1bfd454f89b8c73a2e29bd198e4d5a941ad49fe2603f266edf30",
+      "card_hash": "7acaa8300b494d600bb2cbfa92c91981f578ec2f27bf3d3b82671aea2a636638",
+      "stratum": "timed_evidence",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2081234873290031104",
+      "source_revision": "39f55322c7a76acf20cc54a1b00c429f498803257e043faa6a5678e0b3f8db5a",
+      "card_hash": "a1895a36d6c43ecd58d5d8fc3d389f1d636b792ddde7f86ec09f4d483a5f9b38",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2081681247781130240",
+      "source_revision": "f211b841ec792b4d90a83c4a5ad1191f453e09651a09ceed66a08f4b744d307f",
+      "card_hash": "69494a4baac90d816e1d67a0724eb12a0002e43f8ae0957dd870d47aa84eba78",
+      "stratum": "timed_evidence",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2081817087295516673",
+      "source_revision": "2b8f6f15b86fbbe9cf561caefcb3df675d0dfa931b0a54d7cc812f72fedd0964",
+      "card_hash": "1e31293eb50b1a6888c3cb5b981d9bdf5c0a543c1b0c40175afe115fafe11021",
+      "stratum": "timed_evidence",
+      "old_holdout": true
+    },
+    {
+      "video_id": "2081892838229573632",
+      "source_revision": "40ec7fe8f431f291dccd17d00bc3cfad725ea7f022ae04426503bedf12490f1d",
+      "card_hash": "e5ce36ab2e5c46b2d2284df9af1918d6c0376ba2dbde8f7ebcf09a40d5a80c76",
+      "stratum": "timed_evidence",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2082487466129522688",
+      "source_revision": "24378c98d60d2d36f6af6333a77eec3b42dac1156997f87e30f7b8b4c72659b3",
+      "card_hash": "96fee268a77e7a698b6e21509f323aca0e86b59feae4f6c8716fdaf82cd0e936",
+      "stratum": "timed_evidence",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2082506081365008384",
+      "source_revision": "d1d8481a434aef66ec0621c098c6183e126127a83d6cc76836ba906f5e1c283a",
+      "card_hash": "d8f9fc8caa3267f6cfc6cfd18536b6bff59f89f772e1f78ae84d724b4779c8e4",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2082514369477476352",
+      "source_revision": "de76943efdff63ca9645c11627623a14230d725dac5b9484ef276e69cef3d51c",
+      "card_hash": "92182b645abc9d90acff844af899df7fff6621a8eae06e87e825ff3a7abf6f4d",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2082518119344459776",
+      "source_revision": "5e7f1d475d63d5a738d34964f9fe2414fdabf5936f16c2021a0446eb531e0f58",
+      "card_hash": "c1d8d34d7b8b5d40441be6cd699502644c5d64523eb04d74e627b6ad35ef7a56",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2082527680109621249",
+      "source_revision": "ea6766954df86e6f185d730defd91f3bc152f251360626f9c3ab3951eeba7408",
+      "card_hash": "8f9e8ac7612eb0c5d7a8d330c123b46a2acf47c49368cdd0d33912f472265c2b",
+      "stratum": "text_only",
+      "old_holdout": true
+    },
+    {
+      "video_id": "2082613460446113792",
+      "source_revision": "d13538809725ff12db08f0cf036ea79961e1eff352913a76659e28f489184e6a",
+      "card_hash": "de5e4a18bdc1cdf0dbb3afb34feea41248178fee74f7e4fd67aec7181b98b41a",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2082793149890514944",
+      "source_revision": "69f49f58e5428f1e747de02a157ea93bdffd36af7fea9c1eeffb7ff39808db2b",
+      "card_hash": "34f6bf8ac01e071a06b6bf461521ac028da1190a5dc1be10e96eb220fd32d053",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2082842696650043392",
+      "source_revision": "fd5a8ca515b5a1eb307b9ab5d60b843371c882599aca0608af71dfec674d0b26",
+      "card_hash": "84f3facb4018bc86b2031bf26457264494b7925d46b79fe160152fe250546d9a",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2082873830264258561",
+      "source_revision": "fa214125403b6e78a56630cf8178a557e0d140e38e1b1d83ce191ecd8dc5242e",
+      "card_hash": "20f8ada2fde6896b249bbe5a5bc68fc5139cc1ac21fb178a6ca0f2ebec295ebe",
+      "stratum": "timed_evidence",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2082889185078185986",
+      "source_revision": "39730f0ed62071845793601f588ea9b749183dc5b0dabb7c7d2b0ff5290642ce",
+      "card_hash": "ece4c3ffb1f4802d53a26763f5e3a878e82bbdb09d3d7ce66fb6db53447f5b40",
+      "stratum": "timed_evidence",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2082926453524398080",
+      "source_revision": "e47bb694de03aa32a8888124be6fb5ae94c0081a27af0dfd9643b8629f907452",
+      "card_hash": "1e4934824722125da6c9722073658fbad3292a46589253848149007523179353",
+      "stratum": "timed_evidence",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2083053861829275648",
+      "source_revision": "def8a62f67c6927d3c7450d90422b9ae201ca41f25ec8e27ae20829c0859a211",
+      "card_hash": "e03d8938754ceaa92f929bb30caa28196ccbb4487112a740d1a1df0cbd0ecf03",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2083066957230915584",
+      "source_revision": "915dc8c63c86f40c54218f4ed83a380591cd573c128f65e8cd99104a148920b1",
+      "card_hash": "278bc3fa8f86276ce2e5045c778037498d256b137b987dfb2b6f9af4af1a9f54",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2083169868891684864",
+      "source_revision": "0b1b680c7b4529f391e7e2352a66ba5f221453de4fa9d3c9143b5e55f6124d1f",
+      "card_hash": "9a184492288d448cf58730f25709def9eafea85228e7638aba29b015cda38520",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2083221587818659840",
+      "source_revision": "13301391c2c9c31b0bb7ba43ae26c6dc366c47da0e843f8aa17f8898a5e596be",
+      "card_hash": "8102ced4648f5f25a77f297105b1493449c888b8657d6527d131ce68d69393f0",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2083521358282067968",
+      "source_revision": "8660d27fa62ca66e59fe6c33f61b9f5fb3453b783a68a59ee1455769621eb104",
+      "card_hash": "4336089a11455e7737963108ffdf1ab08bd331c7799cfa2a31f930033b9adca7",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2083595539132919809",
+      "source_revision": "47353ed41f6f3401f6977405d1b3653a2ecb00eda100c807e67d3317d8e7fa7d",
+      "card_hash": "eedf496a69229617a5de7bd54fb712f29f11984889b34b0be77d03c08fbd7938",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2083607643910987776",
+      "source_revision": "916b6893eb7cf24c164ba09bf22b730e8fd482d9f0498ca6f7df9cac4ee5825d",
+      "card_hash": "79c2da86f9ebb203c03b9f689e808fde8bdc1b562b291482aadd5b3243375aeb",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2083637374479642624",
+      "source_revision": "a3e25b29e2dbfb2496ec11f1253502abb1c3f3a040e1ec063a68c1502674a0f8",
+      "card_hash": "b9edb8bf78cb4b1f96c1f3e8c3d24aa178b13c902b6a923987e4f77ccdfa17eb",
+      "stratum": "timed_evidence",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2083895018537074689",
+      "source_revision": "0951eb81d8c68a81c5d38e5bae04fac0788b694b1f1ed5e99972afc24fc92b06",
+      "card_hash": "fd78822976ba7c8720a48d61a51b3cf9aa2e9f1862e7bc624f0b01578d0028de",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2083941649282105344",
+      "source_revision": "95e586a9b3b5b3e42ac78f288c75a4fce6abdbd65c4adaae4cf82dc9c4144795",
+      "card_hash": "b3c0435bb6af7d30ca16c99c99e5f5a82a39451fab0a3c6674bf5a84b9ddea4c",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2083953406482219008",
+      "source_revision": "3de54f6eb1e95dad675a7fb4e748f2d8cd29121c657b2c83327ea4884fdc65b5",
+      "card_hash": "e67fd4786e6ff23a6652b270ed67441bdfcfdf8153ca7e9cdbc417b1ad2db505",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2084001626679869440",
+      "source_revision": "7de2952c9c493b695ebe0ab6a0466cdd16e661cbf942cf6539f0d430f40b5e75",
+      "card_hash": "daa36d4885d8ac284327a4fb8014abe759b80e8123fb838389e610c187f95cd4",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2084245813782585345",
+      "source_revision": "cb616c7202f96475660046416314aaaca45ecd39a8f47f79d8da4decad98fe52",
+      "card_hash": "35d597a088f9e08f951b6e82c251bdbf6755d3f8230e57b9e4e11bc896962bc1",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2084311728884420608",
+      "source_revision": "cd24efd1cb51d11aff3b719aeb3edc3038b3d82e8cc94a85b6af31b504d02385",
+      "card_hash": "008a4aee0b4184f492ca01c9b1d35f1cc9b297554b839de2b37ccdd6260bd255",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2084354263174479872",
+      "source_revision": "dfaf83e7e1236099c7eb64db56541f3ca1d927123c532b7ad4fb847e09ba0b48",
+      "card_hash": "e63402dc34d1d49f584b29bea769442f8043f56fa7a85be60ef24477ba5b4560",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2084536348820537344",
+      "source_revision": "595fca04328ea5deee291b2fdf8a96ea2a39d6fa1aec0c0bf4a6b8f48e951bd9",
+      "card_hash": "cbedfc892a1e2fc54b606a3b4eecfb5512de5e2192b91ff62910b7c25fadab2b",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2084623086427721728",
+      "source_revision": "803888c68f52afe6b8d037c4be1501b11e10e9d60c6011ab7d609db3b2733e02",
+      "card_hash": "92f609e15c331fa21ae96d1bf14ac285b53057cf1ff234bac6b0132c942ff66d",
+      "stratum": "timed_evidence",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2084663739400249344",
+      "source_revision": "f2c124b81751a266b886d726151907e80c29379079ff4a8f907a3b1a37b31757",
+      "card_hash": "ea33881541f7580c80996dec01cc556a440905fe3c2b271e35ff68e87ae70eb6",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2084799311314128896",
+      "source_revision": "90f7a7f0a7474c15dc7e9e819a6707800c900ba34334f0ffd3dedb5c54fb0c55",
+      "card_hash": "4a64b2f5e0b458a9e5738b096dca5ea0bffd442960c14422787cfaac4de2c7ce",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2084984808216657921",
+      "source_revision": "7c412b2b497127db204113f7c9475be561c0408232b8d11f30fde3130cd4b278",
+      "card_hash": "2d23fc02c8283426ed552531a5abb091d9acae472a22fb2f202ce4906e2e2813",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2085010685562626048",
+      "source_revision": "5feae371722596ed4d9af2bc2322bb462f6cd7014ce8264f2ab91eb06aa21ae1",
+      "card_hash": "be1c03f3c0cf2576cc9f28d1fb4aa19bb094e6105745695ad3646018b5a1d291",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2085046911103270913",
+      "source_revision": "a5dc701d7bfdfed2ab6b8e79ea5103ed7a70c4a4041422f5ad2d3473ae75adad",
+      "card_hash": "271242eaf23e9144ad8192dadf8cabfb929ccf4981559637d7b7da67011b15d8",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2085054678329421824",
+      "source_revision": "9541c285a01f2c35bce076c3a741fa03bec9dd14063bc1550e8673a1cbd1b4e7",
+      "card_hash": "174e18b191ba0623c2da785e506d14c0f101cf80ac133fe39030187943f750ac",
+      "stratum": "timed_evidence",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2085067072858734593",
+      "source_revision": "4a0bf9c9145e3c15935408d3cd7056212bee6b53bd6b34d91f8888a9f5fe5738",
+      "card_hash": "550c1c12fd3852e907257a53834bcbfbf9c5639a9558662dbd8eec2696011859",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2085118888220475392",
+      "source_revision": "cb593cb93481f0dbcdb655956b37197aaf5e4ee5a5cc0f3f7595910b3571106b",
+      "card_hash": "72993c7a2f0f1f7523c3a1eb19660fc8c4e226ef632a92adfb95ef0600ff1d82",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2085178322451836928",
+      "source_revision": "36c6585844fd0bac4548250f3e7f97438a91e6eee152e588c22c1637cad994b3",
+      "card_hash": "c2c2a04c4af8f9e5839442a7c1bd39706a5c50de6b407245d53a4a7497ee84c3",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2085348301776494592",
+      "source_revision": "e849b4f5a42aa29b9c8423d7f593fd4802ce31e8bd48d9708a3bcf9f235fe48c",
+      "card_hash": "b19e84735c19bc38a63150b3c59183d306e296756dd36503c3561beb7fac2e2b",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2085414600552628224",
+      "source_revision": "619c41967e677357229be0e6d1fc3d72e21abded584958b0571b04b76fbd148b",
+      "card_hash": "c6fde7a0b2e16d4088a8e7deea183c74393c2b158f976730cd381f826c39c904",
+      "stratum": "timed_evidence",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2085417600264093696",
+      "source_revision": "68bfb0c3a9e1f470f87ac9a4b02ba5d9dfc32f0cb8e54004bd31ef07043fddbf",
+      "card_hash": "a7fb442c1096c31f08b3452b48a8df59ef831fb27b9cbd9d66ca4b55ac18f8e3",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2085659012348198912",
+      "source_revision": "3606fdf6f6bbe3847ca3cf23e49025665e74331110ff5e0384e3b84c1d461971",
+      "card_hash": "4c8ddf930f362c19dad19f9a246a4e3fc840dc93712528ad00b661541255a86f",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2085717998187278336",
+      "source_revision": "b720bed8e3edb7fd167d89d2f8b697b51b4c866a3df1830209d6656f8d653bc8",
+      "card_hash": "35ce7a5b7fb1bff54ba84ba1948e224cab4085a42bdcd21e89600bfdba4c93cd",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2085731765587435520",
+      "source_revision": "490db4ec986eb54c3da4b3eacfdc6e18e1b6a4d10e849c941061a84a3ad74b80",
+      "card_hash": "e68294733d6d1c0055e2cac06665b4775c7e3e94deab565c817a348f78bf7952",
+      "stratum": "timed_evidence",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2085875838202032128",
+      "source_revision": "d1a389db75ff47f6df19967367287ed73c848d53b88111d5fcc6cd33875d3eab",
+      "card_hash": "4c62ce6b4422bd4cd42cca609660eb623fff48316818690517a55b530703e6e9",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2085903679304179712",
+      "source_revision": "359938718ddbe8459e6642330b87d876e807ac7ae9f920afbb644ba1b0756d7b",
+      "card_hash": "496cc60a192cf26e90ce6b91a06519a3f57d22011af4507a89e7ecdf2a995998",
+      "stratum": "timed_evidence",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2085967657271275520",
+      "source_revision": "1b3b85f8a9f7086fdf9b707f5557c9676eed7d74f45b36a3d4d0d6ece4641e6e",
+      "card_hash": "a9a2321534421cbd1d5539d9d0ed55b029138ea7594b1a79cebe18a0331f3ed6",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2086167837358321664",
+      "source_revision": "e0fc80945e3811448059818ba5969064174994a8ff9145ff98e847402d2db11d",
+      "card_hash": "20a92edae93b5d76e67901086a8cbd5827b3583c7bbb4a906c7f68cde5c2b1d1",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2086214505797931008",
+      "source_revision": "71b38afb5e435ebf12d0851ec7a7ddd719553ec50d41f8d56dc45dc840d997d6",
+      "card_hash": "e0a7c678e142349669739fda2836a16b32a7b75f8df461f5e14c5200b687ebc1",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2086231258393112578",
+      "source_revision": "2c97eb8d0057a9ca8e3892a7e1993597ef400092fe65966024be19532ab1fae9",
+      "card_hash": "12a46bfcf033f4c6a768539d5896020ba3b4b4bb513e2b2b385cb49f8a025800",
+      "stratum": "timed_evidence",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2086844879347634176",
+      "source_revision": "780ec7526a826503825c5f4922b7f51f98eec8dede3439e3ea4eed941082b7cc",
+      "card_hash": "d4956fcbcdd7ae0a300cb3d396f831573c3726736fa8c0bae26817b912b7a47e",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2086886182776868865",
+      "source_revision": "5884ea529275806ff99b3a0119609e1450185337736961f70630f229488d2a24",
+      "card_hash": "65fa23f662999901f45144cf3a4d246baa080e62c3651bd440239526ed873191",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2086894292539424768",
+      "source_revision": "d526a6f940a9520931b7ca94b19c26fe8592a8e3b99330999c8933984d85ee17",
+      "card_hash": "e8dfe394c660a7d3e4d8a3cac26511b8882c593ed3597eed713ac23fa528abe4",
+      "stratum": "timed_evidence",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2087194180972118016",
+      "source_revision": "69957a77704fc683a9b799e52d222cb35f0a499bb58f1a6055042ff08ec227b2",
+      "card_hash": "d72bafd393b9ce26fffe55a0b61b553ffbc2d1887500f7af5c4c3fc269662a3a",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2087221157787525120",
+      "source_revision": "4d168fd2db2248e6617a9b53aab1f1abfad477c187a3714288f686e9cfc80158",
+      "card_hash": "5fe67813b388ad2c358b9eeabb26bb522db2b190a8e048420862e43586109c17",
+      "stratum": "timed_evidence",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2087297832189403136",
+      "source_revision": "4f4225636c1f10aa43572630a9df38303c38fa53523df8201121b18450bcf75a",
+      "card_hash": "88a1415750f852157f465e92a6b79ca179ff71157410ca694b8c7f8e49aa0e84",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2087384476661735493",
+      "source_revision": "2c8581bd154c189f36f2443acc5e6dbcb30e0672fb44e65e3e1482b4676a21c9",
+      "card_hash": "889011c07ed2fa15225a92bac5ce1f8b41d921f46ddd7ebfcd2daae445107e4e",
+      "stratum": "timed_evidence",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2087489577129013248",
+      "source_revision": "df514ef77e29ab5dfd2ee5342063268a10380b9bd882c34e5689dcb7835483ca",
+      "card_hash": "34eab37f83fdcfd8d75bd671e89a1acb1c891e9375e55f61c1af6937b026555c",
+      "stratum": "timed_evidence",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2088044934536585216",
+      "source_revision": "5d7259d09ac1b94a2494dddf47e036e77a0d5799524566750768b04f74b23ede",
+      "card_hash": "1f02cb45289fd308612ac8ae18544dc77741d322b65fdf58ac80c8c2f0d12991",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2088049182883954688",
+      "source_revision": "f37b47e778940c8228d64d80e6bdfa623b5e34cc75a7de91b9ccbc421b34c444",
+      "card_hash": "7a705ed868894d6f0c6105ba4167f783e03171d0cc6d0aa92982c5296e211f48",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2088306674813775872",
+      "source_revision": "de77314ad87c901361a63fbc1852241659b282121d2b1e90632670b5ad48040e",
+      "card_hash": "c512a42bbbf7e36e206157bf7ad5055f1c14990aeac16c8097c6d1c5b22561d9",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2088366674667773952",
+      "source_revision": "933e8046a21ff31aac591fb15efd8030c84890989b96dece21548adcdfcb83a7",
+      "card_hash": "859b6f071b438fde0bca619874022b69e4ff61e5a4223ba6292c2aa0c311448b",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2088372080949739520",
+      "source_revision": "6fa6649d36d758ed5d1931b99ef37df435ee167c0ac78226844d2eb706363940",
+      "card_hash": "642eeea2d461b78b010fbc9cb927bd8e575f0f3c3ad6fd983a586ca4587c2cfe",
+      "stratum": "timed_evidence",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2088401835384057857",
+      "source_revision": "7d8f8421e24ea86a145d78a9e3162ba408dd6e02b799fa5aac4f06fbed7f7728",
+      "card_hash": "470b9d30b27aca46ac3f5dece73410f3611582c8eddd7f061dd1e489c14c009a",
+      "stratum": "timed_evidence",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2088583787274014720",
+      "source_revision": "3ef8421e23ab8b9c629e97dc524cda7c55ebf39c1f58344ac6bb4405c7c92ea3",
+      "card_hash": "c8e1f9f46b3ed35f0fc51cac774993ab9066be98482f659b3b304410336b92db",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2088636695600087040",
+      "source_revision": "dd67f342dbc947d5095dc9495c209cb4c582e0ba9b874f1b722c1a6367677af7",
+      "card_hash": "205221f14dc401d2e7eabb548a3e2c9b0586f17452814256a7e650555749a62b",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2088646008439795712",
+      "source_revision": "410f49eae6ec7cc1f55e56ef46ff0c857a5785cf412cfe02800bd7c9531a7598",
+      "card_hash": "2a0e24558ccef99bc85aaa67ca0c74f790e2bfc8e6c6edec8749855fe6689bca",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2088654448436629505",
+      "source_revision": "cc0a6aa726a5413720a39e065f0c3731d12fc34b12e68db0c24a538c9d3fb853",
+      "card_hash": "fdf469b87eeb30ec1ddc3dc57b7895cbccc18290775422b18ad18455bc728120",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2088664969847959552",
+      "source_revision": "b75b72c2934804f414f2262058994f83267169d45655b846b8475eb5c592b118",
+      "card_hash": "0967d4b17977d4d0f6a7b57e6e0309fff852d20147c7ed0ad5fbae845b07522d",
+      "stratum": "timed_evidence",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2089066624339034112",
+      "source_revision": "c0ad4ceb3533a65036a0ceb9860fbe220781f6d0ba81d4c2341e8c37027fa73e",
+      "card_hash": "0be6fd29462c9f73f145981ccd3eadc6c70f0e531c6081d9fffd8d92ceda0958",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2089069071929368576",
+      "source_revision": "5b37fa54e430427bbf64cb10e2cb88d82404f6c49fc0add20fcfc4f9c441ae8a",
+      "card_hash": "19099084c5d7ec3e460cf6fdbced50a9f8f1b92fe78f98360ddb1389a14fbb00",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2089332588963856384",
+      "source_revision": "83d1a39c9137f5504f9b57e28a93de0fa406b02f527d2b8af879098ff6e39032",
+      "card_hash": "9866e77575af12fc492da12a0190f1d0163fe2d158850756e5e769a595ed6e20",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2089358742852947968",
+      "source_revision": "c2f6f9b1835ce2bbbf7c88e37458104b9b034ef275f960a1cf41d1b246dc3a8c",
+      "card_hash": "417fd743b9a46d0c03cb6fa7e4a15d363f509f5583fc4a49af74ec2d915ebbc5",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2089380922604789760",
+      "source_revision": "f229dd486e937cdc88e18614a7963d0e1cc0a7907e462ad5fb16c59a68dd2c95",
+      "card_hash": "57a75ce5670a69a2cdc02590154e83d7f3c0659f028973f13444f04459bda792",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2089391264878002260",
+      "source_revision": "277de02691d3b97bb2a283e5884f0795e5ea0d1fbf7f5050e148d46bf01f4df8",
+      "card_hash": "888b6e10e7f2a2c8c7cfacd1a8ca87aa675d4edb7ab136ea0dc72aa2c0dff68f",
+      "stratum": "timed_evidence",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2089651201738485760",
+      "source_revision": "7d091d61f41ffc831b469af88950fb749f3988e9c43ac836a569ab7a53402a5e",
+      "card_hash": "fa5ff35450c031b79277dc00f88b3a184a3019db8575a95fa8a5128b0b4cfaeb",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2089691023404388353",
+      "source_revision": "1e0b704252555140d416e8632b1ca276dd7deec3e32352c4ef749133e10c27fe",
+      "card_hash": "3942c5ce7b41cf313a9d44f19be5579d55f6761b5971622689622f93b07bd84b",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2089726155008204800",
+      "source_revision": "08b5d76df923bf3407d7da8d1aea074a13c7350d25df3643747a3f80caddb517",
+      "card_hash": "251ed9e24673f3f03cf4f9714e270792fd56493daa641450ef428e0a5bb2ceaa",
+      "stratum": "timed_evidence",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2089757319974559744",
+      "source_revision": "150e202647fa5fdd39d51d65a2241da4724766de78a432d0d6c5d77580a498a7",
+      "card_hash": "0647cb4880c4ac2b941902b58fd3bc6ea92e919b018ba63530370c3609dc2689",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2089839233309773824",
+      "source_revision": "440a57f801199d622e5dae548d8c9d6bcbca358ad8666ad177e0c05cdbbb0eae",
+      "card_hash": "3cb26e8b836fbc36af11445e969ea84cf80ec257a9b805172af4040279c8112c",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2089870032771919873",
+      "source_revision": "3ab57f46ca2a290ccbd086e6553b3124a825087e850e7b4b7a92171dea80f5cd",
+      "card_hash": "64ae6baca3a4721b60b20301750b519fa7099d23230783e89bc649d37544c170",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2089976684019933200",
+      "source_revision": "b12889f7c1ce34b6845c88d947ba0203ec2f83410b40eb5a0157115ceb68cdfd",
+      "card_hash": "46b19e03cc698fd7744fd996740d0c75085d76b9436014c700c65cd126787819",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2090002365835341825",
+      "source_revision": "fe874580f800b1b59b241c988988afebb7fec6d237ccda993e147d9d3cdb21c9",
+      "card_hash": "fe5cdacca77fb7959078227c748a355c938c4a455a47025787fa468f46913c43",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2090230875883786240",
+      "source_revision": "ea412b6bc5f5621f7c4bbea79341690f977c5b582eac1a3da51cc15c8d023d2b",
+      "card_hash": "3f1010f54c8eee0eba3037ecb19e0b67a253d8a9da483aac264cde2fa114696f",
+      "stratum": "timed_evidence",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2090430819865165824",
+      "source_revision": "ba9e3bf8ca177989988516238a444cb76a5752aa57fd9336218bfc3944c76cd3",
+      "card_hash": "50f5bfc5992d797b0c5f7952a712c94c7f8ae723b9f49666df02cc2773e06aa3",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2090488277426171904",
+      "source_revision": "08b1bd64d68b4bbc8d41dfbf000c3330e26fbeb6f45b6a31c84a4b35210491e3",
+      "card_hash": "f652ba70980451a42258f112039633eef9cdb9ecdef7d33e8bbf69b1e62553bb",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2090496604902129664",
+      "source_revision": "7bb80e30758afed744b1c8f73229b7edc40d4af4e1bc83bb90b571ea753aa5a2",
+      "card_hash": "bb080ad7095c124b8518deeeb27372a716cdeab510ab143a38b5c7553706a38d",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2090523526595854336",
+      "source_revision": "31523d5a855c2b662281bf3619ba6e6e0b42e5bf87befd619421fe4d44ad9dc1",
+      "card_hash": "7c474a779e79d611cf69d00f13b04ccc22e6fc948ea1501de94124e69417370a",
+      "stratum": "timed_evidence",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2090544926706876416",
+      "source_revision": "841b95db57cd50946693bbf8d2bdcb895e3b7718232e36051669017992674a15",
+      "card_hash": "8d7e37128c22a259783a570a5832460bcd6f6bc2c0d207e75a8bdb2a01f9c165",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2090566181854048256",
+      "source_revision": "5f9970e48b78b1e80203b422f6b51dae899d0a5de390deda299f8f316cee1d10",
+      "card_hash": "ddc5958e89a8786e1606c773aa9006515747bc3f94aeabf90db32fbd26bbee70",
+      "stratum": "timed_evidence",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2090624277900886016",
+      "source_revision": "94db391a912aa0345d4e54452846c5c2b45f58b09eaeef842197e8b4b561000c",
+      "card_hash": "c56324fd41c718d6d66dc60780edc161f463fdda14121cbd419130523b13f8da",
+      "stratum": "timed_evidence",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2090817187900780961",
+      "source_revision": "c41c25a7547e2eaadd151e3cb11090789e225c96490be39cabe924f4fe4b51a5",
+      "card_hash": "0f14140ef9acb38be5b239187e596db5aacfcc827af8081a3094e19fedf45293",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2090832390952525824",
+      "source_revision": "bb0c7db828b5adcafed8a639a1f15e56d3915300ae2f249324ec59955166aabb",
+      "card_hash": "ff2c1a11a6b6bae2483af8c68c1d082696d104a02ffc9c0d101f29cfc29da5df",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2090832812081577984",
+      "source_revision": "8d3375a7e9e3180ef9c8f94e86ba0e5800a6706b862284e96b00683264fa39b0",
+      "card_hash": "44698dfcf9c666e3d3628bbd6849577ba4c5e0dee263262013998a2a1bf9bbab",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2090849386284863488",
+      "source_revision": "734a579fb1c550ef11621e425181d05cec6fd37ab36661a0764432959ca115e5",
+      "card_hash": "a0b317ff753327be1b02075a5e53d05dce470f4a71803a212fa3e6677658caf4",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2090858975751217152",
+      "source_revision": "ee8d0f9aa871204b0506e608fd626064f7a78552249ed48632d37912a5a98e31",
+      "card_hash": "2e3451c897947a67f1d0f8a86573612fe2306524d184dead129028dbba97bf02",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2090883364936986624",
+      "source_revision": "eace62ed1fa6c0762ecb5ae0d63a21cb090b28c7a408c5c78583902e178bfd2b",
+      "card_hash": "30829130f9f339dd196eeaafaa8532d3563ec1fdfbd72815394b5ac297535c55",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2090904591261130752",
+      "source_revision": "a5d458a579a1c68796ce0420118625f0d3a7f3794eb1b6f225ee5f85c624575e",
+      "card_hash": "2b2c25dc58ee5991e68dc8ba375acd6b43c61d70466a770438b8a95d8f3c03d5",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2091116328803332096",
+      "source_revision": "aa2b6699f2082fdec457e015e593e58511f73518ca1d9681430fdacffe1e5718",
+      "card_hash": "9aa588d774cb44112e74506ef039399162cf9dec45deca543cc9532ca0bcab5f",
+      "stratum": "timed_evidence",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2091245754484449280",
+      "source_revision": "620269e344b0be0bfd1a47128d341643325fa4f222cdd0e77686e99e12f14ebd",
+      "card_hash": "9ed29598ceb2004c44277e78d8a74e4d15446e2f004f0897ab49eb3ea5bacbaa",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2091312890653327360",
+      "source_revision": "8e177aab41715b6f7082c80e6f5da4f6100f0b0335e0239302bf6bf9cb479af7",
+      "card_hash": "dff887704cd52a624626fa1e043f5f3d2e76574d99309e99135908b86f8b41c3",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2091538222203424768",
+      "source_revision": "d30d1e24ed7d43c25ecfeeb1b159bbc2284fd07d58469684db119e3e2619d54f",
+      "card_hash": "644e743ba92cc688cb2b7ca57a76d61d07372d064d20a91ff7ba1dd80a87b8ec",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2091567513461309440",
+      "source_revision": "e628f17250ac64f2351a08d04b6034fd8a44e3c1e79e91c217b9f0039cc4e937",
+      "card_hash": "3e952136719c42abd8ea48d228446c6ec79ca4af57fa4eea6d4fd03a40a0bc8d",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2091814080160129024",
+      "source_revision": "aa2aaa00a3bc6432db584a9730e2c98db3aba7efd3de4970f843ed928e60821b",
+      "card_hash": "c9a6938daccef8b93633f307f422e2d718244592ffd58e0fa2c3b0a00a11e6a2",
+      "stratum": "timed_evidence",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2091977971426820096",
+      "source_revision": "ddbd6d47d21d10a40354bf18cdb219596fa98a850b4c00db4de14309f8bcf0e6",
+      "card_hash": "202b96be651a59b79dcbd9771151d89c035e01f705ab2cae5853282b87fd77ec",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2091998463688888320",
+      "source_revision": "93cb00fa967e4f3067b30236c43fd345e2d23ea81c7a8ce02bee6ea907c01048",
+      "card_hash": "5cfd1d80a1a7e55045424d5eee1ca92fdbcf1621bc3af7eacdf076a983410a95",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2092006565285175296",
+      "source_revision": "1236706a36f3e6a5d04fd76ac45e7747bf0f4be962183cde28a219a2aad2358b",
+      "card_hash": "405d5c3aeac35852ecb824fdb89174f47af98af053716af339399640d574eae1",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2092158830365052928",
+      "source_revision": "4f87023ed87b2a5ddba256546af7706ae91f6a4fe51153f5ae48c26a5ec236ea",
+      "card_hash": "938a4b595de7ef179613211f8093060fc8392dd12b3a3a6712b651e831e754a8",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2092204804218957824",
+      "source_revision": "682ff80c60312e7d76647f1dd76d11caad673e5f75f1936fd052012ca5fbd170",
+      "card_hash": "808e6868d567574d12a207e99bf2aca16408117c50ea6857b2654813c2ec8259",
+      "stratum": "timed_evidence",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2092246969918144513",
+      "source_revision": "b20d26a9f856eba338fcbbb716f70c202ebe1dd8db387067196a04d9d8f9f274",
+      "card_hash": "b6774e0fe8864004a4ad612753fa5ce1ca7caca99df0df66b93a51b7ed110303",
+      "stratum": "timed_evidence",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2092254012456271872",
+      "source_revision": "f4cf5247b9315ef264a956067a4efadd0a31c09fb192b9b25e28e52ebcf51c98",
+      "card_hash": "e84555e58a3b968cca72cb1fdf6208f052e926741c686a6ddadaa2f617002525",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2092387281457893378",
+      "source_revision": "d57f7b90d20c59299a04b541f3c52c2f5e4dfa09f9c1eb976d0bfaa88176c27e",
+      "card_hash": "ae5223b1f521ec1c8a33f77d7b034f083a75e63e7f312db606b8571f1bcf9f6c",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2092625875468529664",
+      "source_revision": "14421074ebb7116eec5bc77e3beddc11f0dd45f2678895200587dc58125dbb0b",
+      "card_hash": "64f3e37c5abc850d7373d97bf235fa6bea2fb1b3aba59aaed4fe0626545bee4a",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2092682844812500992",
+      "source_revision": "c8210280e7c757e9ef0796508164fe65e644c593795894e26ebaf91a1ecbe182",
+      "card_hash": "48bdda0921b539e7ad46ce689af599100b1d2b80d67f79a94b5a5130ba1a60f9",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2092687038189350912",
+      "source_revision": "42dd6ff68fbeb2177553a137cbb1b7a4f65cdcfbf25107614dee2de5e15a3741",
+      "card_hash": "95d687be69a0d703c4160a77e142abc0905ae2960e66b177d54f3cdefd85c8df",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2092745356274446336",
+      "source_revision": "f3029a5833559ae67431fd4b04c60f90fc7421fe33d07d51a12b991f65009fda",
+      "card_hash": "3f604c128a2a9d445fd6b0d91b7f5c627c82df9ce7df0a707cddbc82e822fb13",
+      "stratum": "timed_evidence",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2092906890497839104",
+      "source_revision": "1a127f7d7a4ca19755603839dde5c17b6572f34aaccaf62e8e34fe1ba1435e25",
+      "card_hash": "be0b7b9bdb84a8952c0f8b38ad7960378310201f413858e6108dc1b846156d49",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2092974877279969280",
+      "source_revision": "4e49b5c218d220aed6e416281dcc9e04a08a8d11d481d05baaf2cf6466e1cfb1",
+      "card_hash": "a252124cb615a5dfd9c02bda3c4b0b6161d1cacde68370f09840b88fbceaf781",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2093001292591632384",
+      "source_revision": "70483878d4c47d88f938f94e15fe211c3106e3b0a590177a067ee66b9e0fadff",
+      "card_hash": "549aab30ef7306ec9e3246db06dc117011bef5a22ad08bb202e8a04e144d0ada",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2093043429278458326",
+      "source_revision": "a3a0fa6037bd70d0c48e915b743abcb4ab2de062331635bb25ea5b7682ee9837",
+      "card_hash": "501e0278780921d1b7dab8211f1b93e0bfe226b59d85f15db1f546ee5212a3d5",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2093065400393105408",
+      "source_revision": "4e3bc56a827713527b8d296ecdec27d431f054ebc057bb223f3a4b4323e0f7df",
+      "card_hash": "600d401844a576c9a47b596c714a20c4dcac39fe48ae2af0640dac2299414584",
+      "stratum": "timed_evidence",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2093098700612517888",
+      "source_revision": "27e9af48155d4e01df103295a105edfb71091bc7a657749531cb5b92e6a2b355",
+      "card_hash": "3a684953ebf52855d3f40ecfe9a364d551999e44dab3f8d1465da171c93f90bd",
+      "stratum": "timed_evidence",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2093246582913171456",
+      "source_revision": "de76f64a7287faa0e5c91a84e5e50ac64b4ac04e33828ca4535f1867705b9687",
+      "card_hash": "c738d5516446ded757fe231257779dac071634f97a4430be84cdcac57a5b2295",
+      "stratum": "timed_evidence",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2093372696302153728",
+      "source_revision": "06b8b8d105360fae05088646034e8a50f313e64495e990ac16526e98c88b8cdf",
+      "card_hash": "d29c380309dd9107fd9fc9c224c18961d2c003fd7394e7de866476f90c8e35e4",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2093489422624804893",
+      "source_revision": "558287d0b407c8efa9633ef6ec53e86838c0974535bea9da3fad4a3811cbad08",
+      "card_hash": "30e130d69f8e74d34222c11ec4dc69c18f008c2ff333062c30806227a50d0caf",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2093534714439110656",
+      "source_revision": "60c217c06f0f314c6b3ac28d87a23b79ebe0955abaaf04875b3d0acce387469c",
+      "card_hash": "f31755d6cae87adc3114a0a2839fd15130c17145ca86d0239452d7338867d5ac",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2093591840171941888",
+      "source_revision": "e6c5583b88a67ddb8664eeb7b3e9298a600dd932bc0901a47f0f396c0670a8b7",
+      "card_hash": "07e5f15d0345fc5b7d85dbcde78ed1832dee3240b1b2dab3f2aab02536055ccb",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2093756517485101056",
+      "source_revision": "5ccbc6686c95c3d82d52b5442a0f5c468f21962a154715df045a7ad8c855f355",
+      "card_hash": "dac6b8509ce85fa25c8d8ba42f26e183c973711e8497409c8c2fde2edacfbabd",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2093840118318501888",
+      "source_revision": "3f43a7c4bb20b4826021ba76d287bca93f760af7bb41aa4dda51bed8f4a2b686",
+      "card_hash": "9eb487ab7f7f0a51a6def6f3ef08e4aea44c8d49642efa8393afaba191441b81",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2093996615065612288",
+      "source_revision": "f583025b6a02bdb0eb48806e20e11ed414990490a423eba2908b72984decbbc1",
+      "card_hash": "b4f9804d787c4bd546e02066fd6119346fc1d641d3030791f729839736a2e417",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2094122120032710656",
+      "source_revision": "3cda959837a94ebd906cc6b6fd4840afc13b20b689945891726dd59743621a48",
+      "card_hash": "ecbdebe36dbd12fb7109411b72e7ea90b2de5e878476d59b3a277173b28182ad",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2094123174367473665",
+      "source_revision": "82ab85125aa850d0b3351aaa8edc96bc373ec0efa55929af8ce9c469d0d71bef",
+      "card_hash": "5b8f62022cab92e2e21a5610ab9f3960c832e44a8da039a66ab48d25474d5db9",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2094153795198398769",
+      "source_revision": "ac040e46ccfd4d569db5f17cee6e287ad91e04446ffe2fa48ba42b9d860c181e",
+      "card_hash": "0ba4dea907f2819e5d05d74c279c6426a62ea3d831fc339a5ea868760bc50290",
+      "stratum": "timed_evidence",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2094226099517452289",
+      "source_revision": "1de70dc0f4bc959443ac53a21ab148d5ed8862d57574c63d228ffbcb4cdf750f",
+      "card_hash": "c94396c84de2670507af4243d4c0020ea3b22305e2d278f43c9b847f5e472eed",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2094286060456914944",
+      "source_revision": "299ac3313adfeadcb0433fd494b52da0be526d5881c0cee7ac481a287b4228c6",
+      "card_hash": "82641c93eb596f50d3479908fc3175a368c9427d25681deaa0775fd9b8213d9e",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2094452350132051968",
+      "source_revision": "69e96723b252509a108573a9333527bdc4f5d5573d5b5b86914bd26a0cd81de0",
+      "card_hash": "927c572f0a7b23be487d743cede49952a0665466a9eda6ab8f441b74a11c8288",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2094517730636390400",
+      "source_revision": "32a400599bd2f032b00ca10026b59c7e28da045fdc0d84cded2549ba3ec9f50c",
+      "card_hash": "d03f6a684054dba0924e37ad52d4ce4927deadb04bfef06fd0ad6c93c25f5673",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2094524881493016576",
+      "source_revision": "ed621f59cd55f2f0b439b25b38df35b3c60687d50aabc8d8a7016799210a9ac5",
+      "card_hash": "08b7d736d68be00ee67078937f508ea25da83953c9b67c557385fc498e978b4d",
+      "stratum": "timed_evidence",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2094532931670958414",
+      "source_revision": "a101ba3b4bbad7193ca69249c3d90233a8fc4f1cd8bc108abc9e33079ad5c5fa",
+      "card_hash": "3a8fd5bc6dc2e9ce508eea534bc20b597059c31d88b27015baaf1d2384c0de69",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2094679188800524288",
+      "source_revision": "36f3d920925aa4727d62a50778095869c6b68ec02f45b780cf67c40273ffce77",
+      "card_hash": "2794bace4f6525ad3f0e4c9a223cd02a3e5d6a0a9c21b42200f3ab25d80f489d",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2094761457007157248",
+      "source_revision": "11df6958801bf5df65e0a3a16099a6d4605ed6a6205827c5cdaf5780dfd8d910",
+      "card_hash": "7706dda601a4813249c25b71ff6d48bd9c680da2d83e9a581ac51079d655cec2",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2094872636996165632",
+      "source_revision": "e843e02d38cf7547e00992fb62bea4adb94c626d7cd163b9b66399d6de0f3c70",
+      "card_hash": "afc64d5b0c1cc6d75671f39e926ff88a57235ef4f4d3ef2b8d1270c30d7ae10b",
+      "stratum": "timed_evidence",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2094906875976232960",
+      "source_revision": "8dae30056d1c65ed1aeb883a95e4996436ced0339f138bf8ec51918277d85665",
+      "card_hash": "20f1fb1a6e3018f84ce9ec91e2fdc0747d22128a712c9f4130a86384d2863db7",
+      "stratum": "timed_evidence",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2094908776167948288",
+      "source_revision": "e89327961fd25a72ccd778e8013bfe114a557e4d49da3ec9e7fab74de844cd6f",
+      "card_hash": "dd19ba9f8b2f3a3f939b9a4065c2f956f6e6a46f4afbb718db4f0d1136eeb1e2",
+      "stratum": "timed_evidence",
+      "old_holdout": false
+    },
+    {
+      "video_id": "2094915663961661513",
+      "source_revision": "9037db63f8d5f12ea9189cee87995a0e72b1e99e3b5937fe408154493cb5cd46",
+      "card_hash": "bf28321b3978ee7e0741957544db94b202c9584120e36f2b63b67109bc0c9221",
+      "stratum": "timed_evidence",
+      "old_holdout": false
+    },
+    {
+      "video_id": "4OmEbeR3BtI",
+      "source_revision": "51d24779d52b75025e22d393789f7c9b5e573efeee39efe598539c163929aa26",
+      "card_hash": "f0408b18213c30302e9728a011fc267af9cee85d4d1475be68eac23baea8ec76",
+      "stratum": "timed_evidence",
+      "old_holdout": false
+    },
+    {
+      "video_id": "D4fkiQfzw_I",
+      "source_revision": "de2771dc015b237c38781356de805a65ad3b19f870bb78632e95549e8cf3a7c8",
+      "card_hash": "6e7394f38a883dd0cb4dfd220dfcf8a18a23af1ffd91cdbbacc9023a34261150",
+      "stratum": "timed_evidence",
+      "old_holdout": true
+    },
+    {
+      "video_id": "F97xOWNph5A",
+      "source_revision": "2c880b210c2584b8aa1aa6e326ceea7637cad384452b66605cbdc1530b0e3e93",
+      "card_hash": "62c9fa6eefdd854337411009b3b9d5ff3da74b5c9f443bc87135b4c2c0969a48",
+      "stratum": "timed_evidence",
+      "old_holdout": false
+    },
+    {
+      "video_id": "FHMXO_VikdA",
+      "source_revision": "924437038d4df9bb82816c07aa7778a6aca891f84dfeb889f93a9ed8508a860a",
+      "card_hash": "6c4cedc70d402fa91fda31c1e87273e647832034a6bfb3fcb683dd0815897364",
+      "stratum": "timed_evidence",
+      "old_holdout": false
+    },
+    {
+      "video_id": "GL-ZoNhUFmc",
+      "source_revision": "114fa287f8525dd2575d53a78085a2f9784f9732170fa15a97ba768e7dedd874",
+      "card_hash": "ed8259badfaae1a369c3d8b0b91454d22276156dc81c334f8d8169aea9f7bcbb",
+      "stratum": "timed_evidence",
+      "old_holdout": false
+    },
+    {
+      "video_id": "HIj8wU_rGIU",
+      "source_revision": "fda303104a09e5b755183e0d00ea575c4e9f164b64c8b31d0859f12931397234",
+      "card_hash": "433728f24f5d7d0f64e48ecef3d936b15ade0c14d6c85106f4bf532c8aaa9980",
+      "stratum": "timed_evidence",
+      "old_holdout": true
+    },
+    {
+      "video_id": "KjToqo-ACnc",
+      "source_revision": "3cd427596dd8392d97882c0505653595dd95c26f28495e9d916c307871ca379f",
+      "card_hash": "7fe42914f5bdd634d9cc9f46d9a452ec3cdde8002c1adaa84a3f3b64f0c3f3ee",
+      "stratum": "text_only",
+      "old_holdout": true
+    },
+    {
+      "video_id": "MJmoSxSPeRY",
+      "source_revision": "fedc3b2bda5af1243768e00a3c2cccdf271949cb6cc48999836b5ae2acd0f48d",
+      "card_hash": "1d9c474c3bcf512d912ffbf3a6002db79369b71d3b07d80b5920423b85082f5b",
+      "stratum": "timed_evidence",
+      "old_holdout": true
+    },
+    {
+      "video_id": "Oi-1Ev1fI74",
+      "source_revision": "809c55ba7c740acdc6a92870492173dcd455b377ef01e85c8611305e257a2e59",
+      "card_hash": "cdef365dba8c8b28e33c07e8d122d90e982c37b769fe0f3289830bc7c838b5fe",
+      "stratum": "timed_evidence",
+      "old_holdout": false
+    },
+    {
+      "video_id": "R6w5MBk1PsM",
+      "source_revision": "6213fdf02bbe12e2701a45ae27aa9289094176c90239d3109eb7d8b25ed31139",
+      "card_hash": "b57fab1d58138e2c2920d5f9849988ae5877a3ac0879da6e9842961f70c62a60",
+      "stratum": "timed_evidence",
+      "old_holdout": false
+    },
+    {
+      "video_id": "_KNjASionIo",
+      "source_revision": "1878e89cad2f73714ed9b3fb6f62b8e1f6d9e68b295082fd04bf924e32d16c3a",
+      "card_hash": "cd669a7bef8c767824345d811f60bb5dce1a3855072b56d89a31a148235dc07b",
+      "stratum": "timed_evidence",
+      "old_holdout": false
+    },
+    {
+      "video_id": "aqz-KE-bpKQ",
+      "source_revision": "0ade8cfeb824d7d30f6e57aea58fee0cc826b46e5bfe73909dada231f98f9ada",
+      "card_hash": "e97c811aaa90d553043e3692a6cc49936d95e16d97c39e8e7f38184ee7103a7c",
+      "stratum": "text_only",
+      "old_holdout": true
+    },
+    {
+      "video_id": "episode_ee13d34d83c",
+      "source_revision": "c346179664933cbcfeb986746f8019556125e3449c5cea733dc4b43bac4e1277",
+      "card_hash": "dda2f996b1d2c8b1d4b87490870f330f51dbd3c8111a383921c48dacafe42037",
+      "stratum": "timed_evidence",
+      "old_holdout": true
+    },
+    {
+      "video_id": "h6YLDi2gnMM",
+      "source_revision": "29cccb9300985c7f3243d2d066216294d58003e1abfaedbf80f102309df1e6da",
+      "card_hash": "3723a4317c31e47b546a53ab9f0e0afc9127b0d4f90973004963efd501123635",
+      "stratum": "text_only",
+      "old_holdout": true
+    },
+    {
+      "video_id": "iyVXw-SoUrY",
+      "source_revision": "6eaecd288e6fa0ade559771d9ba3fc9e74fbf79076c62cd095d4c845fa83b84e",
+      "card_hash": "5db49c64c1ebf72cee1a947ca364b9bc061f73dfe4c4465ac4142ded9b7b629e",
+      "stratum": "timed_evidence",
+      "old_holdout": true
+    },
+    {
+      "video_id": "jNQXAC9IVRw",
+      "source_revision": "c1d5f7d020e336f9385534c4ef82a5fe21141c57ba6225a49f3008ed355b8c04",
+      "card_hash": "5816465f8a532b934ecda30c8aaed32b94a420ae35d799576550cbdcac904d06",
+      "stratum": "timed_evidence",
+      "old_holdout": false
+    },
+    {
+      "video_id": "mL8umz2yvfQ",
+      "source_revision": "7e8bd216f28d2884d7942e48730a3eec4bea72d67051768c3ab919e49d817a72",
+      "card_hash": "5f5b568420945801e30276080c9e3f894ad5c55d1d8dccdc167f551950eb1760",
+      "stratum": "timed_evidence",
+      "old_holdout": false
+    },
+    {
+      "video_id": "pBF05PNBmJA",
+      "source_revision": "78691a903a2f24773f7aa798ca7f38ac08643870926c014ddd6ada45e4a79a22",
+      "card_hash": "5df198efd5977afd2486c1cacc1b5629b6da56de8d8fabde28e73facc1898cd2",
+      "stratum": "timed_evidence",
+      "old_holdout": false
+    },
+    {
+      "video_id": "x_21fc0a19511",
+      "source_revision": "1137e56505ce6ef9c5916d796b755490e062434e4670486d0196a5428f705d88",
+      "card_hash": "ee4294da75ef6ee80a887f0ef9f5acf00c1a7dba30b144f0791425e3fc5f73f8",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "x_2b864c9e9ff",
+      "source_revision": "d3df221263b2ba80f7804564888aa20aa093df2212775a62bd00a361c38bd6fc",
+      "card_hash": "591e05061701dcb90a7ebc3fc076c3fa8dd9c4184af70a9796a40157d897f1f9",
+      "stratum": "text_only",
+      "old_holdout": true
+    },
+    {
+      "video_id": "x_811cef5397c",
+      "source_revision": "8c7a004deea85e4d4cd711ec917c5a7a5c9214cc65c768b7065a635331cc23e2",
+      "card_hash": "7dfed919d3d265eb7946cfb61bdd80b4b16044429974d59309f89b1c5f46592d",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "x_880f13e46c6",
+      "source_revision": "40e69039960fa2ff2ff99f39ba92f77a063918383c3c521f488d578375954d80",
+      "card_hash": "1f9faf479829ed4257200e0e8ae8a1846d871e4ea9ee5886bc2875f66769e4d2",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "x_916a6278802",
+      "source_revision": "c0d7a723fa34faa9de27a2f89932023e1809a3540a194942147dee94fec04f95",
+      "card_hash": "9fc0e1707ea088c5552ca39afaff271f767fb3349ff8fd8294ccfd66805b7000",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "x_ada27fa979b",
+      "source_revision": "b52f5932c3c66302610067135c0088a8e6b3334ce3cc9f45b35d5c4594a99c10",
+      "card_hash": "1d2b5a536b72006ea2e95435107a7d88e7eaa30e172e14f461f54799ae952e5d",
+      "stratum": "text_only",
+      "old_holdout": false
+    },
+    {
+      "video_id": "x_d7a63c68734",
+      "source_revision": "3ea9fe590ac77446e7f69701dd797919ff4a5009d55216a7408b71dabfd727a3",
+      "card_hash": "6ed94bf4b746507edb69972e5d914ac7dc61ea83eef25e215699ea21546c0a30",
+      "stratum": "text_only",
+      "old_holdout": false
+    }
+  ]
+}

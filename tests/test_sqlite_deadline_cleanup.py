@@ -1,0 +1,215 @@
+"""tests/test_sqlite_deadline_cleanup.py - Regressions for SQLite deadline cleanup.
+
+Verifies that:
+1. A completed reader disarms its SQLite progress handler so subsequent SQL
+   statements are not interrupted after the former deadline has elapsed.
+2. Exceptional exits from reader operations also clear the progress callback.
+3. An active request still interrupts SQL execution after its deadline passes.
+4. An active reader maps SQLite interrupts to deadline_exceeded.
+5. Cross-consumer Phase 6 export_cited_range succeeds after a Phase 4 reader
+   operation when the reader's former deadline has elapsed (reproducing the
+   installed diagnosis sequence: resources/list, wait 2.1s, export_cited_range).
+"""
+from __future__ import annotations
+
+import sqlite3
+from pathlib import Path
+from types import SimpleNamespace
+
+import pytest
+
+import index
+import library_resources
+from tests.test_phase6_evaluation import (
+    Clock,
+    _fixture,
+    _seed,
+    _success,
+    media,
+)
+
+
+class DeterministicClock:
+    """Controllable monotonic clock for deterministic deadline verification."""
+
+    def __init__(self, initial: float = 1000.0):
+        self._now = initial
+
+    def __call__(self) -> float:
+        return self._now
+
+    def monotonic(self) -> float:
+        return self._now
+
+    def advance(self, seconds: float) -> None:
+        self._now += float(seconds)
+
+
+def _make_test_index(tmp_path: Path, name: str = "test.db") -> index.Index:
+    db_path = tmp_path / name
+    return index.Index.open(db_path)
+
+
+def test_completed_reader_disarms_sqlite_deadline_subsequent_sql_succeeds(tmp_path):
+    """A completed reader must clear its progress handler so subsequent SQL
+    statements on the shared connection are not interrupted after the former
+    deadline has elapsed."""
+    idx = _make_test_index(tmp_path, "completed.db")
+    try:
+        clock = DeterministicClock(1000.0)
+        reader = library_resources.LibraryReader(
+            idx, data_root=tmp_path, clock=clock, deadline_s=2.0
+        )
+
+        # Admitted operation runs and completes normally
+        with reader._operation() as op:
+            with reader._lock(op):
+                idx._conn.execute("SELECT 1").fetchall()
+
+        # Advance clock past former deadline (admitted at 1000.0, deadline was 1002.0)
+        clock.advance(5.0)
+        assert clock() > 1002.0
+
+        # Run query with enough instructions to trip progress handler (every 64 instructions)
+        # if the callback remained registered.
+        rows = idx._conn.execute(
+            "WITH RECURSIVE cnt(x) AS (SELECT 1 UNION ALL SELECT x+1 FROM cnt WHERE x < 500) "
+            "SELECT count(*) FROM cnt"
+        ).fetchall()
+        assert rows[0][0] == 500
+    finally:
+        idx.close()
+
+
+def test_exceptional_exit_clears_sqlite_progress_handler(tmp_path):
+    """An operation that exits with an unhandled exception must still clear the
+    progress handler so subsequent queries on the connection are not interrupted."""
+    idx = _make_test_index(tmp_path, "exceptional.db")
+    try:
+        clock = DeterministicClock(1000.0)
+        reader = library_resources.LibraryReader(
+            idx, data_root=tmp_path, clock=clock, deadline_s=2.0
+        )
+
+        # Raise exception inside the locked operation
+        with pytest.raises(RuntimeError, match="simulated failure"):
+            with reader._operation() as op:
+                with reader._lock(op):
+                    idx._conn.execute("SELECT 1").fetchall()
+                    raise RuntimeError("simulated failure")
+
+        # Advance clock past the former deadline
+        clock.advance(5.0)
+
+        # Subsequent SQL on the shared connection executes without interruption
+        rows = idx._conn.execute(
+            "WITH RECURSIVE cnt(x) AS (SELECT 1 UNION ALL SELECT x+1 FROM cnt WHERE x < 500) "
+            "SELECT count(*) FROM cnt"
+        ).fetchall()
+        assert rows[0][0] == 500
+    finally:
+        idx.close()
+
+
+def test_active_request_interrupts_work_after_deadline(tmp_path):
+    """An active request whose deadline expires while work is executing must
+    still be interrupted by SQLite."""
+    idx = _make_test_index(tmp_path, "active_interrupt.db")
+    try:
+        clock = DeterministicClock(1000.0)
+        reader = library_resources.LibraryReader(
+            idx, data_root=tmp_path, clock=clock, deadline_s=2.0
+        )
+
+        op = library_resources._Operation(reader, clock() + 2.0)
+        with reader._lock(op):
+            # Advance clock past the active deadline (deadline was 1002.0)
+            clock.advance(3.0)
+            assert clock() > op.deadline_at
+
+            # Running a query now trips progress handler returning 1, raising SQLITE_INTERRUPT
+            with pytest.raises(sqlite3.OperationalError, match="interrupt"):
+                idx._conn.execute(
+                    "WITH RECURSIVE cnt(x) AS (SELECT 1 UNION ALL SELECT x+1 FROM cnt WHERE x < 500) "
+                    "SELECT count(*) FROM cnt"
+                ).fetchall()
+
+        # After lock exits, the progress handler was cleared, so subsequent SQL succeeds
+        rows = idx._conn.execute(
+            "WITH RECURSIVE cnt(x) AS (SELECT 1 UNION ALL SELECT x+1 FROM cnt WHERE x < 500) "
+            "SELECT count(*) FROM cnt"
+        ).fetchall()
+        assert rows[0][0] == 500
+    finally:
+        idx.close()
+
+
+def test_active_reader_storage_maps_interrupt_to_deadline_exceeded(tmp_path):
+    """LibraryReader._storage maps SQLite interruption during an active request
+    to ResourceError('deadline_exceeded')."""
+    idx = _make_test_index(tmp_path, "storage_deadline.db")
+    try:
+        clock = DeterministicClock(1000.0)
+        reader = library_resources.LibraryReader(
+            idx, data_root=tmp_path, clock=clock, deadline_s=2.0
+        )
+
+        op = library_resources._Operation(reader, clock() + 2.0)
+        with reader._lock(op):
+            clock.advance(3.0)
+            with pytest.raises(library_resources.ResourceError) as exc_info:
+                reader._storage(
+                    lambda: idx._conn.execute(
+                        "WITH RECURSIVE cnt(x) AS (SELECT 1 UNION ALL SELECT x+1 FROM cnt WHERE x < 500) "
+                        "SELECT count(*) FROM cnt"
+                    ).fetchall()
+                )
+            assert exc_info.value.code == "deadline_exceeded"
+    finally:
+        idx.close()
+
+
+def test_cross_consumer_media_export_regression(tmp_path):
+    """Cross-consumer regression: reproducing the installed diagnostic sequence
+    (resources/list, wait 2.1s, export_cited_range).
+
+    On old code, resources/list left an expired progress handler on the shared
+    connection because conn.set_progress_handler(None) raised TypeError. When
+    export_cited_range queried the connection 2.1s later, SQLite interrupted the
+    query, causing export_cited_range to return library_unavailable/storage_error.
+    With the fix, export_cited_range succeeds cleanly.
+    """
+    root = tmp_path / "cross_consumer"
+    root.mkdir()
+    clock = Clock()
+    env = SimpleNamespace(root=root, clock=clock)
+
+    idx = index.Index.open(root / "cross_index.db")
+    try:
+        # Seed a valid published source with media_depth using existing helpers
+        f = _fixture(env, number=1, key="cross-pub-01")
+        _seed(idx._conn, f)
+
+        reader = library_resources.LibraryReader(
+            idx, data_root=root, clock=env.clock, deadline_s=2.0
+        )
+
+        # 1. First operation: resources/list
+        res_list = reader.list_resources()
+        assert len(res_list) >= 1
+
+        # 2. Wait 2.1 seconds (elapsed past the 2.0s deadline)
+        env.clock.advance(2.1)
+
+        # 3. Second operation: Phase 6 export_cited_range on the same connection
+        exported = media.export_cited_range(
+            idx._conn,
+            {"video_id": f.item["video_id"], "start": 0.0, "end": 48.0},
+            clock=env.clock,
+        )
+        _success(exported)
+        assert exported["item"]["video_id"] == "cross-pub-01"
+        assert len(exported["units"]) == 2
+        assert exported["citation"]["source_deep_link"] is not None
+    finally:
+        idx.close()

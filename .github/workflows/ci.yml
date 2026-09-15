@@ -191,4 +191,9 @@ jobs:
         # separate ticket.
         run: pip install pytest Pillow "mcp<2"
       - name: Run tests
+        # The Living Library tests import top-level modules (index, server,
+        # library_*) directly, so the checkout root must be on PYTHONPATH.
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+          PYTHONDONTWRITEBYTECODE: "1"
         run: pytest tests/

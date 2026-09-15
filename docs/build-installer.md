@@ -11,6 +11,22 @@ The script downloads and caches the pinned runtime dependency set under
 `build\cache\`, stages the install layout, and compiles
 `build\Uoink-Setup-<VERSION>.exe`.
 
+The Living Library candidate also uses the committed local wheel
+`vendor/nltk-pathsec/dist/nltk-3.10.3+uoink.pathsec1-py3-none-any.whl`.
+Before dependency installation, the build verifies SHA256
+`969f623541344ade83ea267130e016d6cb8a223ecaaf28fb3d7a663c7e3c60d8`
+and passes that file explicitly to pip under the matching lock constraint.
+It does not substitute upstream NLTK if this artifact is absent or changed.
+Read [the wheel review](library/NLTK-LOCAL-WHEEL-REVIEW-2026-09-12.md) for the
+512-member comparison, retained licence, source patch and qualification limits.
+The reviewed input wheel came from the captured PyPI files.pythonhosted.org URL,
+SHA256 `ff9598a8e20518ee0d557745890cc4435b9578489e2dcbc69c4f81fa060caf7c`.
+The source patch is fixed at
+`56d70eece6711a52d0082b066f79ff1388c1cbe6db19d3eb09bf98b5ae11f71b`.
+The offline builder uses ZIP_STORED with fixed metadata and preserves its working
+files for review. The labelled wheel is build input; installed qualification is
+recorded separately from source preparation.
+
 To wipe everything and rebuild from scratch:
 
 ```powershell
@@ -65,8 +81,9 @@ changes.
 The installer lays out `%LOCALAPPDATA%\Uoink\`:
 
 ```
-python\           Python 3.11 embeddable + the pinned runtime packages listed below
+python\           Python 3.13 embeddable + the pinned runtime packages listed below
 bin\              ffmpeg.exe, ffprobe.exe (PATH-prepended by server.py)
+bin\torchcodec\   seven LGPL FFmpeg 7.1.5 shared libraries for TorchCodec 0.7
 server.py         The local HTTP helper
 uoink_mcp.py      MCP stdio entry point for agent clients
 uoink_mcp_tools.py Shared MCP tool registry
@@ -90,9 +107,9 @@ The helper runs under `pythonw.exe`, so there's no console window. `server.py` w
 
 ## Where dependencies come from
 
-- **Python embeddable** — `https://www.python.org/ftp/python/3.11.9/python-3.11.9-embed-amd64.zip`. Update the `$PYTHON_VERSION` constant in `build.ps1` to bump.
-- **ffmpeg** — BtbN `n7.1` Windows static win64 LGPL build:
-  `https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2025-01-31-12-58/ffmpeg-n7.1-184-gdc07f98934-win64-lgpl-7.1.zip`.
+- **Python embeddable** — `https://www.python.org/ftp/python/3.13.15/python-3.13.15-embed-amd64.zip`. Update the `$PYTHON_VERSION` constant in `build.ps1` to bump.
+- **ffmpeg** — BtbN `n8.1.2` Windows static win64 LGPL build:
+  `https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2026-08-31-13-27/ffmpeg-n8.1.2-50-g1a748fe2cd-win64-lgpl-8.1.zip`.
   The build script extracts only `ffmpeg.exe` and `ffprobe.exe`; the rest of
   the archive is discarded.
 - **get-pip.py** — PyPA `get-pip` commit
@@ -109,11 +126,12 @@ installed into the embeddable Python with the exact pip versions below.
 
 | Component | Version | SHA256 | Notes |
 |---|---|---|---|
-| Python embeddable | 3.11.9 (amd64) | Locked in `build.ps1` | Current embedded runtime; any bump requires a clean installer build and smoke test. |
-| ffmpeg | n7.1 BtbN win64 LGPL | Locked in `build.ps1` | Pinned to one versioned BtbN archive and SHA256. |
+| Python embeddable | 3.13.15 (amd64) | Locked in `build.ps1` | Current embedded runtime; any bump requires a clean installer build and smoke test. |
+| ffmpeg | n8.1.2 BtbN win64 LGPL | Locked in `build.ps1` | Pinned to one versioned BtbN archive and SHA256. |
+| FFmpeg shared runtime | n7.1.5 BtbN win64 LGPL shared | Locked in `build.ps1` | Seven DLLs in `bin/torchcodec`; required by TorchCodec 0.7's FFmpeg 7 ABI. |
 | yt-dlp | 2026.07.04 | (pip) | Pinned via `pip install yt-dlp==2026.07.04`. Bump after compatibility-testing a new release. |
-| Pillow | 10.4.0 | (pip) | Drives the multimodal paste-corpus generator (resize + JPEG-recompress + base64-encode screenshots for clipboard embedding). Pinned via `pip install Pillow==10.4.0`. |
-| MCP Python SDK | 1.27.1 | (pip) | Official Model Context Protocol Python SDK. Powers the stdio MCP server. Pinned via `pip install mcp==1.27.1` and `requirements.txt`. |
+| Pillow | 12.3.0 | (pip) | Drives the multimodal paste-corpus generator (resize + JPEG-recompress + base64-encode screenshots for clipboard embedding). Pinned via `pip install Pillow==12.3.0`. |
+| MCP Python SDK | 1.28.1 | (pip) | Official Model Context Protocol Python SDK. Powers the stdio MCP server. Pinned via `pip install mcp==1.28.1` and `requirements.txt`. |
 | keyring | 25.7.0 | (pip) | Stores the BYO Anthropic API key in Windows Credential Manager. Pinned via `pip install keyring==25.7.0` and `requirements.txt`. |
 | pystray | 0.19.5 | (pip) | Windows tray integration. |
 | pywebview | 5.4 | (pip) | Local desktop shell. |
@@ -142,7 +160,7 @@ When bumping a directly-downloaded component:
 
 The direct pip dependencies (`yt-dlp`, `Pillow`, `mcp`, `keyring`, `pystray`,
 `pywebview`, `pythonnet`, `faster-whisper`, and `whisperx`) and their complete
-Windows/CPython 3.11 transitive graph are exact-version constrained by
+Windows/CPython 3.13 transitive graph are exact-version constrained by
 `requirements-installer-lock.txt`. After build-only tooling is removed,
 `scripts/verify_installer_lock.py` compares the final installed inventory to
 that lock and fails on a missing, unexpected, or changed package. Distribution
@@ -182,6 +200,14 @@ if _BIN_DIR.is_dir():
 
 In dev mode (running from the repo) `bin\` doesn't exist and the line is a no-op — `ffmpeg` resolves via the user's existing PATH like before.
 
+`whisper_runner.py` registers the app-relative `bin/torchcodec` directory with
+`os.add_dll_directory` before any lazy WhisperX import and retains its handle.
+It rejects redirected directories and missing or redirected DLLs. This shared
+runtime is pinned separately from the standalone CLI; updating it requires
+keeping TorchCodec's supported ABI and checking real audio decoding. The retained
+archive URL and SHA256 are `$FFMPEG_SHARED_URL` and `$FFMPEG_SHARED_SHA256` in
+`build.ps1`. No model download is needed for the generated-WAV decoder check.
+
 yt-dlp is invoked as `[sys.executable, "-m", "yt_dlp"]`, so the right interpreter (the embeddable) drives the right `yt_dlp` package automatically.
 
 ### Dev mode output root override
@@ -206,11 +232,46 @@ If the env var is missing, points at a non-existent path, or is not writable, Uo
 software may warn, block, or quarantine an unsigned candidate; behavior varies
 by machine, policy, reputation, and scanner.
 
-There is no signing step in `build.ps1` today. Any release-signing change needs
-an explicit release-owner decision, secure certificate/key handling,
-timestamping, and verification of the installer and shipped executables. Do
-not promise that a certificate will suppress every warning. Test the exact
-candidate on the supported Windows matrix and record what happened.
+`build.ps1 -ReleaseSigned` adds an optional signing path. It requires three
+explicit parameters: `-SigningCertificateThumbprint` (40 hex characters),
+`-TimestampUrl` (an HTTPS RFC 3161 service), and `-SignToolPath` (the absolute
+Windows SDK signtool.exe path). Ryan must choose the publisher certificate and
+service before an actual signed build. No certificate is created or purchased
+by this workflow, and actual signing has not yet been observed.
+
+The selected certificate must already exist in CurrentUser/My, have an available
+private key, be within its validity dates, include code-signing usage and pass
+Windows certificate trust-chain verification. The
+build passes its thumbprint, never a private key or password. Preflight failure
+stops before downloads or staging. Signing arguments without `-ReleaseSigned`
+are rejected, so a misspelled mode cannot silently produce an unsigned release.
+
+Inno signs Setup and its uninstaller through a fixed callback and uses a fresh
+uninstaller cache for each signed build. The callback requests SHA256 for both
+file and timestamp, rejects every nonzero SignTool result, and verifies the
+signature, timestamp and selected publisher. Before compilation, the build saves
+the previous installer and receipt in a fresh `build/signing-attempts/<id>/`
+directory and atomically marks the current receipt pending and unverified.
+Each callback saves its verification or error there, even when Inno hides its
+console output. Failed compilation records failure; unsigned success remains
+unverified. A signed build reverifies Setup and every fresh cached uninstaller,
+requires matching callback hashes, and records both in
+`build/Uoink-Setup-<VERSION>.exe.signature.json`. Keep the attempt directory with
+the release evidence. A pending or failed receipt never approves an artifact.
+Signing does not clear dependency or acceptance failures; the receipt therefore
+retains `release_ready=false`. Bundled third-party executables still require
+their separate provenance and security review.
+
+The callback uses Windows PowerShell even when the build starts in PowerShell 7.
+Digest algorithms are explicit signing arguments. The verifier checks Windows
+trust, publisher, timestamps and artifact hashes; it does not use a certificate's
+own signature algorithm as evidence of the executable's digest algorithm.
+
+These commands follow [Microsoft's SignTool reference](https://learn.microsoft.com/en-us/windows/win32/seccrypto/signtool)
+and Inno's [SignTool](https://jrsoftware.org/ishelp/topic_setup_signtool.htm) and
+[SignedUninstaller](https://jrsoftware.org/ishelp/topic_setup_signeduninstaller.htm)
+options. A certificate does not guarantee that every security warning disappears.
+Test the exact candidate on the supported Windows matrix and record the result.
 
 ### Pip bootstrap pulls files we don't ship
 
@@ -241,7 +302,13 @@ this guide does not promise a portable editor for a specific release.
 
 Before updating the extension's download button for a new release:
 
-1. **Build a release artifact:** `.\build.ps1` → produces `build\Uoink-Setup-<VERSION>.exe`.
+1. **Build the approved signed artifact:** set `$signingThumbprint`, `$timestampUrl`
+   and `$signToolPath` to the certificate/service/tool chosen for this release,
+   then run `.\build.ps1 -ReleaseSigned -SigningCertificateThumbprint $signingThumbprint -TimestampUrl $timestampUrl -SignToolPath $signToolPath`.
+   Require exit zero and verify the resulting `.exe.signature.json` names the
+   exact installer hash and has `signature_verified=true`. The separate security,
+   acceptance and owner release gates still apply. Plain `.\build.ps1` produces
+   an unsigned review artifact.
 2. **Smoke-test on a clean Windows VM** (see Testing matrix below).
 3. **Set the approved version from the repository:** in PowerShell, run
    `$version = (Get-Content VERSION -Raw).Trim()` and confirm the approved

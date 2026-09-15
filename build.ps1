@@ -25,13 +25,24 @@
 
 [CmdletBinding()]
 param(
-    [switch]$Clean
+    [switch]$Clean,
+    [switch]$StageSourceOnly,
+    [string]$SourceStagePath,
+    [switch]$ReleaseSigned,
+    [string]$SigningCertificateThumbprint,
+    [string]$TimestampUrl,
+    [string]$SignToolPath
 )
 
 $ErrorActionPreference = 'Stop'
 # Suppress Invoke-WebRequest's progress UI -- on PS 5.1 it slows large
 # downloads to a crawl due to a known performance bug.
 $ProgressPreference = 'SilentlyContinue'
+# The embeddable Python enables `import site`, which would also expose the
+# building user's %APPDATA%\Python\Python313 site-packages to pip and to the
+# dependency-inventory check. Keep the build blind to it so the staged
+# inventory depends only on the lock file, whoever runs the build.
+$env:PYTHONNOUSERSITE = '1'
 
 # ---- Paths --------------------------------------------------------------
 $RepoRoot     = $PSScriptRoot
@@ -43,6 +54,23 @@ $TemplatesDir = Join-Path $InstallerDir 'templates'
 $IconSrc      = Join-Path $InstallerDir 'uoink.ico'
 $InstallerLock = Join-Path $RepoRoot 'requirements-installer-lock.txt'
 $verifyInstallerLock = Join-Path $RepoRoot 'scripts\verify_installer_lock.py'
+$NltkPathsecWheel = Join-Path $RepoRoot 'vendor\nltk-pathsec\dist\nltk-3.10.3+uoink.pathsec1-py3-none-any.whl'
+$NLTK_PATHSEC_SHA256 = '969f623541344ade83ea267130e016d6cb8a223ecaaf28fb3d7a663c7e3c60d8'
+
+$signingArgs = @()
+. (Join-Path $RepoRoot 'scripts\installer_signing.ps1')
+if ($ReleaseSigned) {
+    if ($StageSourceOnly) { throw 'ReleaseSigned requires a complete installer build' }
+    Assert-UoinkSigningConfiguration $SigningCertificateThumbprint $TimestampUrl $SignToolPath
+    Assert-UoinkSigningCertificate $SigningCertificateThumbprint
+    $signingArgs = @('/DReleaseSigning=1', (Get-UoinkInnoSignCommand `
+        -PowerShellPath (Get-UoinkSigningPowerShellPath) `
+        -CallbackPath (Join-Path $RepoRoot 'scripts\sign_installer.ps1') `
+        -CertificateThumbprint $SigningCertificateThumbprint `
+        -TimestampUrl $TimestampUrl -SignToolPath $SignToolPath))
+} elseif ($SigningCertificateThumbprint -or $TimestampUrl -or $SignToolPath) {
+    throw 'Signing parameters require -ReleaseSigned; refusing an accidental unsigned build'
+}
 
 # ---- Versions (pinned for v2 ship) --------------------------------------
 $VersionSourceFile = Join-Path $RepoRoot 'helper\_version.py'
@@ -76,9 +104,9 @@ if ($ManifestVersion -ne $VERSION) {
     throw "helper\_version.py ($VERSION) does not match extension\manifest.json version ($ManifestVersion). Update helper\_version.py first, then mirror it into the manifest."
 }
 
-# Python 3.11.9 is the last 3.11.x with binary installers; later 3.11 are
-# source-only security releases. v2 accepts this; v2.1 plan: move to 3.12.
-$PYTHON_VERSION = '3.11.9'
+# Official Windows binary with current 3.13 security fixes. The reviewed
+# Python 3.13 graph retains package versions and removes three old backports.
+$PYTHON_VERSION = '3.13.15'
 $PYTHON_URL     = "https://www.python.org/ftp/python/$PYTHON_VERSION/python-$PYTHON_VERSION-embed-amd64.zip"
 $GETPIP_COMMIT  = '5e84c8360eaf92009551b3eec69d734137f31cec'
 $GETPIP_URL     = "https://raw.githubusercontent.com/pypa/get-pip/$GETPIP_COMMIT/public/get-pip.py"
@@ -98,22 +126,26 @@ $PACKAGING_VERSION  = '26.2'
 # feature-sufficient. Versioned release tag (not "latest") so the hash pin
 # below stays meaningful. THIRD-PARTY-NOTICES.md records the LGPL text +
 # where to get ffmpeg's source.
-$FFMPEG_VERSION = 'n7.1'
+$FFMPEG_VERSION = 'n8.1.2'
 # BtbN publishes dated release tags; the end-of-month builds are retained
 # long-term (daily builds get pruned), so we pin to a monthly snapshot. The
 # asset name carries the exact git revision, so this URL is fully pinned --
 # it never moves. "win64-lgpl" is the static LGPL variant (no GPL encoders,
 # single self-contained ffmpeg.exe -- no DLLs to ship).
-$FFMPEG_URL     = "https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2025-01-31-12-58/ffmpeg-n7.1-184-gdc07f98934-win64-lgpl-7.1.zip"
+$FFMPEG_URL     = "https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2026-08-31-13-27/ffmpeg-n8.1.2-50-g1a748fe2cd-win64-lgpl-8.1.zip"
+# TorchCodec 0.7 loads the FFmpeg 7 ABI; the static CLI above has no shared DLLs.
+$FFMPEG_SHARED_VERSION = 'n7.1.5'
+$FFMPEG_SHARED_URL = 'https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2026-07-31-14-10/ffmpeg-n7.1.5-12-g1fdbca85aa-win64-lgpl-shared-7.1.zip'
+$FFMPEG_SHARED_SHA256 = '0f376f96fb38554ccefb1b2ae9c7c6a7b351f0e60a372b38262c320e8392c5d0'
 # yt-dlp pip pin -- bump after compatibility-testing a new release.
 $YTDLP_VERSION  = '2026.07.04'
 # Pillow is used for the multimodal paste-corpus generator (resize +
 # JPEG-recompress + base64-encode the embedded screenshots). Pinned to
 # a recent stable; bump at release-prep time after testing.
-$PILLOW_VERSION = '10.4.0'
+$PILLOW_VERSION = '12.3.0'
 # Official Model Context Protocol Python SDK for the stdio MCP server.
 # Also pinned in requirements.txt for dev installs and docs.
-$MCP_VERSION    = '1.27.1'
+$MCP_VERSION    = '1.28.1'
 # Windows Credential Manager wrapper for Anthropic API key storage.
 # Also pinned in requirements.txt for dev installs and docs.
 $KEYRING_VERSION = '25.7.0'
@@ -143,8 +175,8 @@ $WHISPERX_VERSION = '3.8.6'
 # paste the new hash here, and rebuild. Subsequent builds fail with
 # "SHA256 mismatch" if anything changes; Confirm-Hash deletes the bad cached
 # file so a re-run pulls fresh.
-$PYTHON_SHA256 = "009d6bf7e3b2ddca3d784fa09f90fe54336d5b60f0e0f305c37f400bf83cfd3b"
-$FFMPEG_SHA256 = "1475187ddaf367c6702856fe37bb00e8b3ce69963e9b453a9de78396846ff38c"
+$PYTHON_SHA256 = "d1f04d990aee1253d8569e8e5104e30fa9f5fa830899f14843448872d936a2cf"
+$FFMPEG_SHA256 = "f6274bbd9c247f9e90c1bbed066b03ed4a3907cece2fb91be6dd352393936365"
 $GETPIP_SHA256 = "a341e1a43e38001c551a1508a73ff23636a11970b61d901d9a1cad2a18f57055"
 
 # ---- Helpers ------------------------------------------------------------
@@ -182,7 +214,7 @@ function Get-CachedFile($url, $dest) {
 }
 
 function Confirm-Hash($path, $expected, $label) {
-    $actual = (Get-FileHash -Path $path -Algorithm SHA256).Hash.ToLower()
+    $actual = Get-UoinkFileSha256 $path
     if (-not $expected) {
         Write-Warning "    $label has no locked SHA256. Computed: $actual"
         Write-Warning "    Lock it by setting the matching `$..._SHA256 in build.ps1, then rebuild."
@@ -227,6 +259,20 @@ function Get-PackageTimestampUtc {
     }
 }
 
+# Source-only staging exercises the production copy list without downloads,
+# embedded Python, Inno Setup, task registration or an installed helper.
+if ($StageSourceOnly) {
+    if ($Clean) { throw 'StageSourceOnly cannot be combined with Clean' }
+    if (-not $SourceStagePath) { $SourceStagePath = Join-Path $InstallerDir 'staging-source' }
+    $StagingDir = [IO.Path]::GetFullPath($SourceStagePath)
+    $allowedRoot = [IO.Path]::GetFullPath($RepoRoot).TrimEnd('\') + '\'
+    if (-not $StagingDir.StartsWith($allowedRoot, [StringComparison]::OrdinalIgnoreCase)) {
+        throw 'SourceStagePath must be inside this worktree'
+    }
+    if (Test-Path -LiteralPath $StagingDir) { throw 'SourceStagePath must be a new directory' }
+    New-Item -ItemType Directory -Path $StagingDir | Out-Null
+}
+if (-not $StageSourceOnly) {
 # ---- Optional clean -----------------------------------------------------
 if ($Clean) {
     Write-Step 'Cleaning build/ and staging/'
@@ -261,6 +307,7 @@ foreach ($f in @(
     'server.py',
     'index.py',
     '_platform.py',
+    'uoink_install_isolation.py',
     'migrate_install.py',
     'channels.py',
     'workspaces.py',
@@ -279,6 +326,23 @@ foreach ($f in @(
     'whisper_runner.py',
     'source_manifest.py',
     'openapi_bridge.py',
+    # Living Library Phase 2 substrate service (Astra). uoink_mcp_tools.py
+    # imports it lazily through one seam; without it every library tool
+    # answers service_unavailable, so a build must fail loudly if it is
+    # missing rather than ship that state.
+    'library_work.py',
+    # Living Library Phase 3 standing capture (contract phase3-v1-2026-09-07):
+    # subscriptions, consent, detection, start ledger. server.py and
+    # uoink_mcp_tools.py import it; migration 0028 ships with the others.
+    'source_subscriptions.py',
+    'library_analysis.py',
+    'library_resources.py',
+    'library_prompts.py',
+    'library_briefs.py',
+    'library_mirror.py',
+    'library_mirror_vault_io.py',
+    'library_media.py',
+    'library_faithfulness.py',
     'reddit_extractor.py',
     'x_extractor.py',
     'x_article_extractor.py',
@@ -316,14 +380,18 @@ if (-not $migrationFiles -or $migrationFiles.Count -eq 0) {
 
 # ---- 1. Download dependencies ------------------------------------------
 Write-Step 'Fetching dependencies'
+Confirm-Hash $NltkPathsecWheel $NLTK_PATHSEC_SHA256 'NLTK local path-policy wheel'
 $pythonZip = Join-Path $CacheDir "python-$PYTHON_VERSION-embed-amd64.zip"
-$ffmpegZip = Join-Path $CacheDir 'ffmpeg-win64-lgpl.zip'
+$ffmpegZip = Join-Path $CacheDir "ffmpeg-$FFMPEG_VERSION-win64-lgpl.zip"
+$ffmpegSharedZip = Join-Path $CacheDir "ffmpeg-$FFMPEG_SHARED_VERSION-win64-lgpl-shared.zip"
 $getPipPy  = Join-Path $CacheDir 'get-pip.py'
 
 Get-CachedFile $PYTHON_URL $pythonZip
 Confirm-Hash $pythonZip $PYTHON_SHA256 'Python embeddable'
 Get-CachedFile $FFMPEG_URL $ffmpegZip
 Confirm-Hash $ffmpegZip $FFMPEG_SHA256 'ffmpeg'
+Get-CachedFile $FFMPEG_SHARED_URL $ffmpegSharedZip
+Confirm-Hash $ffmpegSharedZip $FFMPEG_SHARED_SHA256 'ffmpeg shared runtime'
 Get-CachedFile $GETPIP_URL $getPipPy
 Confirm-Hash $getPipPy $GETPIP_SHA256 'get-pip.py'
 
@@ -356,7 +424,7 @@ $embedPython = "$StagingDir\python\python.exe"
 if ($LASTEXITCODE -ne 0) { throw 'pip bootstrap failed' }
 
 # 2d. Install the direct runtime dependencies while constraining the complete
-#     transitive graph to the reviewed Windows/CPython 3.11 lock. Artifact
+#     transitive graph to the reviewed Windows/CPython 3.13 lock. Artifact
 #     hashes remain a separate release control. Pillow drives the multimodal
 #     paste-corpus generator
 #     (resize / re-encode / base64 screenshots for clipboard embedding).
@@ -366,35 +434,62 @@ Write-Host "    installing yt-dlp==$YTDLP_VERSION + Pillow==$PILLOW_VERSION + mc
 & $embedPython -m pip install --no-warn-script-location --no-compile --no-cache-dir `
     --no-build-isolation `
     --constraint $InstallerLock `
+    $NltkPathsecWheel `
     "yt-dlp==$YTDLP_VERSION" "Pillow==$PILLOW_VERSION" "mcp==$MCP_VERSION" "keyring==$KEYRING_VERSION" "pystray==$PYSTRAY_VERSION" "pywebview==$PYWEBVIEW_VERSION" "pythonnet==$PYTHONNET_VERSION" "faster-whisper==$FASTER_WHISPER_VERSION" "whisperx==$WHISPERX_VERSION"
 if ($LASTEXITCODE -ne 0) { throw 'pip install (yt-dlp + Pillow + MCP + keyring + pystray + faster-whisper + whisperx) failed' }
 
 # C-02: regenerate THIRD-PARTY-NOTICES.md from the bundle we just built, so
 # the shipped notices match the shipped dependency tree exactly. pip-licenses
-# reads the embeddable Python's installed metadata. Best-effort: a missing
-# pip-licenses (offline dev build) warns but doesn't fail the build; the
-# committed file is the fallback.
+# reads the embeddable Python's installed metadata. The generator's
+# importlib.metadata fallback works without pip-licenses; generation failure
+# is fatal so an old index cannot stand in for this build's inventory.
 Write-Step 'Generating THIRD-PARTY-NOTICES.md'
-& $embedPython -m pip install --no-warn-script-location --no-compile --no-cache-dir `
-    --no-build-isolation `
-    --constraint $InstallerLock "pip-licenses==5.0.0" 2>$null
-if ($LASTEXITCODE -eq 0) {
+$noticePriorNativePreference = $PSNativeCommandUseErrorActionPreference
+try {
+    $PSNativeCommandUseErrorActionPreference = $false
+    # Windows PowerShell 5.1 turns a native command's stderr into a terminating
+    # error when that stream is redirected under ErrorActionPreference=Stop.
+    # pip prints resolver warnings to stderr, so relax the preference around the
+    # two pip calls below; their exit codes are checked explicitly.
+    $noticePriorErrorPreference = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    & $embedPython -m pip install --no-warn-script-location --no-compile --no-cache-dir `
+        --no-build-isolation `
+        --constraint $InstallerLock "pip-licenses==5.0.0" 2>$null
+    $noticeToolInstallExit = $global:LASTEXITCODE
+    $ErrorActionPreference = $noticePriorErrorPreference
+    if ($noticeToolInstallExit -ne 0) {
+        Write-Warning 'pip-licenses unavailable; generator will use importlib.metadata if needed.'
+    }
     $noticesPath = Join-Path $RepoRoot 'THIRD-PARTY-NOTICES.md'
     # Stamp the notices from the same source-bound epoch used to normalize
     # installer input mtimes, so regenerating from unchanged source produces an
     # identical file instead of dirtying the tree on every build.
     $priorSourceDateEpoch = $env:SOURCE_DATE_EPOCH
-    $env:SOURCE_DATE_EPOCH = [string][DateTimeOffset]::new(
-        (Get-PackageTimestampUtc), [TimeSpan]::Zero).ToUnixTimeSeconds()
-    & $embedPython (Join-Path $RepoRoot 'scripts\gen_third_party_notices.py') $noticesPath
-    $env:SOURCE_DATE_EPOCH = $priorSourceDateEpoch
-    if ($LASTEXITCODE -ne 0) { Write-Warning 'THIRD-PARTY-NOTICES generation failed; committed file kept.' }
+    $noticeGenerationExit = $null
+    try {
+        $env:SOURCE_DATE_EPOCH = [string][DateTimeOffset]::new(
+            (Get-PackageTimestampUtc), [TimeSpan]::Zero).ToUnixTimeSeconds()
+        & $embedPython (Join-Path $RepoRoot 'scripts\gen_third_party_notices.py') $noticesPath
+        $noticeGenerationExit = $global:LASTEXITCODE
+    } finally {
+        $env:SOURCE_DATE_EPOCH = $priorSourceDateEpoch
+    }
     # pip-licenses is a build-time tool, not a runtime dep -- strip it back out.
     # Remove the tool and its tool-only dependencies. tomli is not required by
-    # the runtime graph on Python 3.11; wcwidth arrives only through prettytable.
+    # the runtime graph on Python 3.13; wcwidth arrives only through prettytable.
+    $ErrorActionPreference = 'Continue'
     & $embedPython -m pip uninstall -y pip-licenses prettytable tomli wcwidth 2>$null
-} else {
-    Write-Warning 'pip-licenses unavailable; THIRD-PARTY-NOTICES.md not regenerated.'
+    $noticeCleanupExit = $global:LASTEXITCODE
+    $ErrorActionPreference = $noticePriorErrorPreference
+    if ($noticeGenerationExit -isnot [int] -or $noticeGenerationExit -ne 0) {
+        throw "THIRD-PARTY-NOTICES generation failed (exit $noticeGenerationExit); refusing stale attribution"
+    }
+    if ($noticeCleanupExit -isnot [int] -or $noticeCleanupExit -ne 0) {
+        throw "Notice build-tool cleanup failed (exit $noticeCleanupExit)"
+    }
+} finally {
+    $PSNativeCommandUseErrorActionPreference = $noticePriorNativePreference
 }
 
 # 2d-bis. Regenerate installer\uoink.ico from assets\logo-mark-color.png. Uses
@@ -405,17 +500,11 @@ Write-Step 'Generating uoink.ico'
 & $embedPython (Join-Path $InstallerDir 'generate_icon.py')
 if ($LASTEXITCODE -ne 0) { throw 'uoink.ico generation failed' }
 
-# 2e. Trim dev-only and build-time files we don't need at runtime.
-# distutils-precedence.pth is dropped by setuptools and tries to import
-# `_distutils_hack` at every Python startup. We strip setuptools above, so
-# the .pth file would print a noisy ModuleNotFoundError warning on every
-# server launch -- delete it too.
+# 2e. Trim build-only tools. Torch and CTranslate2 require setuptools at runtime.
+# Keep its package, metadata, distutils shim and startup .pth together.
 Write-Host '    trimming embeddable...'
 $stripGlobs = @(
     "$StagingDir\python\Lib\site-packages\pip*",
-    "$StagingDir\python\Lib\site-packages\setuptools*",
-    "$StagingDir\python\Lib\site-packages\_distutils*",
-    "$StagingDir\python\Lib\site-packages\distutils-precedence.pth",
     "$StagingDir\python\Lib\site-packages\wheel*",
     "$StagingDir\python\Lib\site-packages\__pycache__"
 )
@@ -469,8 +558,61 @@ if ($ffprobeExe) {
 }
 Remove-Item -Recurse -Force $ffmpegTmp
 
+# Read only the seven pinned shared-runtime members; do not extract arbitrary
+# paths or replace the separately pinned CLI executables. Inno recurses bin/.
+$sharedBin = Join-Path $StagingDir 'bin\torchcodec'
+New-Item -ItemType Directory -Path $sharedBin | Out-Null
+Add-Type -AssemblyName System.IO.Compression.FileSystem
+$sharedArchive = [IO.Compression.ZipFile]::OpenRead($ffmpegSharedZip)
+try {
+    $sharedPrefix = 'ffmpeg-n7.1.5-12-g1fdbca85aa-win64-lgpl-shared-7.1/bin/'
+    $sharedNames = @('avcodec-61.dll','avdevice-61.dll','avfilter-10.dll',
+        'avformat-61.dll','avutil-59.dll','swresample-5.dll','swscale-8.dll')
+    foreach ($sharedName in $sharedNames) {
+        $members = @($sharedArchive.Entries | Where-Object { $_.FullName -ceq ($sharedPrefix + $sharedName) })
+        if ($members.Count -ne 1) { throw "Expected one shared decoder member: $sharedName" }
+        [IO.Compression.ZipFileExtensions]::ExtractToFile($members[0], (Join-Path $sharedBin $sharedName), $false)
+    }
+} finally {
+    $sharedArchive.Dispose()
+}
+
 # 2g. Server source + helpers + icon
 Write-Host '    copying server source + templates...'
+}
+
+# Ship the attribution index and exact supplemental upstream texts.
+# Confirm-Hash deletes a mismatched cache file, so do not use it on source notices.
+$noticeRoot = Join-Path $RepoRoot 'third-party-notices'
+$noticePins = @{
+    'antlr4-python3-runtime-4.9.3-LICENSE.txt' = 'b1b379fcaf3219593a4c433feb1b35c780bed23fafaae440b1ae2771a9521e3a'
+    'proxy-tools-0.1.0-UPSTREAM-LICENSE.txt' = 'a428fb8a2e762af3eb0a6edbbb88e9b42ccfee80fd9b423958bcacf9b9abbfe4'
+}
+$noticeLock = @(Get-Content -LiteralPath $InstallerLock | ForEach-Object { $_.Trim() })
+foreach ($noticePin in @('antlr4-python3-runtime==4.9.3', 'proxy_tools==0.1.0')) {
+    if (@($noticeLock | Where-Object { $_ -ceq $noticePin }).Count -ne 1) {
+        throw "Supplemental notice version requires review: $noticePin"
+    }
+}
+foreach ($noticeName in $noticePins.Keys) {
+    if ((Get-FileHash -LiteralPath (Join-Path $noticeRoot $noticeName) -Algorithm SHA256).Hash.ToLowerInvariant() -cne $noticePins[$noticeName]) {
+        throw "Upstream notice bytes differ: $noticeName"
+    }
+}
+New-Item -ItemType Directory -Force -Path (Join-Path $StagingDir 'third-party-notices') | Out-Null
+foreach ($noticeRelative in @('THIRD-PARTY-NOTICES.md', 'third-party-notices\README.md',
+        'third-party-notices\antlr4-python3-runtime-4.9.3-LICENSE.txt',
+        'third-party-notices\proxy-tools-0.1.0-UPSTREAM-LICENSE.txt')) {
+    $noticeSource = Join-Path $RepoRoot $noticeRelative
+    $noticeTarget = Join-Path $StagingDir $noticeRelative
+    $noticeHash = (Get-FileHash -LiteralPath $noticeSource -Algorithm SHA256).Hash
+    Copy-Item -LiteralPath $noticeSource -Destination $noticeTarget -Force
+    if ((Get-FileHash -LiteralPath $noticeSource -Algorithm SHA256).Hash -cne $noticeHash -or
+        (Get-FileHash -LiteralPath $noticeTarget -Algorithm SHA256).Hash -cne $noticeHash) {
+        throw "Staged notice bytes differ: $noticeRelative"
+    }
+}
+
 Copy-Item (Join-Path $RepoRoot 'server.py')      $StagingDir -Force
 # System-tray module (Tier 1 v2.1.1). Imported by server.py at boot on
 # installed builds; optional at runtime (degrades if pystray is unavailable).
@@ -481,10 +623,34 @@ Copy-Item (Join-Path $RepoRoot 'uoink_tray.py')  $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'uoink_splash.py')    $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'uoink_dashboard.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'index.py')       $StagingDir -Force
+Copy-Item (Join-Path $RepoRoot 'clips.py')       $StagingDir -Force
+Copy-Item (Join-Path $RepoRoot 'provenance.py')  $StagingDir -Force
+Copy-Item (Join-Path $RepoRoot 'library_cards.py') $StagingDir -Force
+# Living Library Phase 2: the work-queue service behind the six library
+# registry tools (leases, submissions, previews, apply/undo, pins, recovery).
+# Installed imports must work without a checkout (gate P2-0).
+Copy-Item (Join-Path $RepoRoot 'library_work.py')  $StagingDir -Force
+# Living Library Phase 3: standing capture service (consent, detection, start ledger).
+Copy-Item (Join-Path $RepoRoot 'source_subscriptions.py') $StagingDir -Force
+Copy-Item (Join-Path $RepoRoot 'library_analysis.py') $StagingDir -Force
+Copy-Item (Join-Path $RepoRoot 'library_resources.py') $StagingDir -Force
+Copy-Item (Join-Path $RepoRoot 'library_prompts.py') $StagingDir -Force
+Copy-Item (Join-Path $RepoRoot 'library_briefs.py') $StagingDir -Force
+Copy-Item (Join-Path $RepoRoot 'library_mirror.py') $StagingDir -Force
+Copy-Item (Join-Path $RepoRoot 'library_mirror_vault_io.py') $StagingDir -Force
+Copy-Item (Join-Path $RepoRoot 'library_media.py') $StagingDir -Force
+Copy-Item (Join-Path $RepoRoot 'library_faithfulness.py') $StagingDir -Force
+Copy-Item (Join-Path $RepoRoot 'usage_meter.py')   $StagingDir -Force
+Copy-Item (Join-Path $RepoRoot 'uoink.cmd')      $StagingDir -Force
+Copy-Item (Join-Path $RepoRoot 'uoink')          $StagingDir -Force
+New-Item -ItemType Directory -Force -Path (Join-Path $StagingDir 'scripts') | Out-Null
+Copy-Item (Join-Path $RepoRoot 'scripts\install-watchdog.ps1') (Join-Path $StagingDir 'scripts') -Force
+Copy-Item (Join-Path $RepoRoot 'scripts\recall_hook.py') (Join-Path $StagingDir 'scripts') -Force
 # Cross-platform path/OS helpers (added Sprint 19.5). server.py and
 # migrate_install.py `import _platform` at module top -- omitting it ships a
 # helper that crashes with ModuleNotFoundError before binding the port.
 Copy-Item (Join-Path $RepoRoot '_platform.py')   $StagingDir -Force
+Copy-Item (Join-Path $RepoRoot 'uoink_install_isolation.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'migrate_install.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'channels.py')    $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'workspaces.py')  $StagingDir -Force
@@ -536,7 +702,9 @@ Copy-Item (Join-Path $InstallerDir 'verify_install.ps1') $StagingDir -Force
 Copy-Item (Join-Path $InstallerDir 'upgrade_prep.ps1') $StagingDir -Force
 Copy-Item (Join-Path $TemplatesDir 'stop-server.bat') $StagingDir -Force
 Copy-Item (Join-Path $TemplatesDir 'stop-server.ps1') $StagingDir -Force
-Copy-Item $IconSrc (Join-Path $StagingDir 'uoink.ico') -Force
+if (-not $StageSourceOnly -or (Test-Path -LiteralPath $IconSrc)) {
+    Copy-Item $IconSrc (Join-Path $StagingDir 'uoink.ico') -Force
+}
 # Sprint 21: the uoink_core/ package holds modules split out of server.py.
 # server.py imports it at module top, so it must ship or the helper crashes
 # with ModuleNotFoundError before binding the port (cf. _platform.py).
@@ -569,6 +737,11 @@ Copy-Item (Join-Path $RepoRoot 'migrations') (Join-Path $StagingDir 'migrations'
 # this release exists to remove).
 Copy-Item (Join-Path $RepoRoot 'defaults') (Join-Path $StagingDir 'defaults') -Recurse -Force
 
+if ($StageSourceOnly) {
+    Write-Host "Source staging complete: $StagingDir"
+    return
+}
+
 # ---- 2h. Staged smoke (Sprint 19.6 / Fix 1) -----------------------------
 # Verifies the staged tree is actually runnable BEFORE ISCC packages it,
 # so the works-in-repo-breaks-in-installer drift class is caught here
@@ -577,7 +750,7 @@ Write-Step 'Staged smoke'
 Push-Location $StagingDir
 try {
     & '.\python\python.exe' -m py_compile `
-        server.py index.py migrate_install.py channels.py workspaces.py claims.py scripts.py voice_dna.py writing_studio.py corpus_contract.py corpus_provider.py corpus_intelligence.py page_extractor.py writer_peer.py engagement_contract.py media_handoff.py suite_service.py source_manifest.py openapi_bridge.py reddit_extractor.py x_extractor.py x_article_extractor.py notes.py images.py taste_scoring.py memory_layer.py podcasts.py mobile_playlists.py whisper_runner.py uoink_mcp.py uoink_mcp_tools.py uoink_reliability.py yoink_mcp.py yt_extract.py helper\_version.py
+        server.py index.py clips.py provenance.py library_cards.py usage_meter.py migrate_install.py uoink_install_isolation.py channels.py workspaces.py claims.py scripts.py voice_dna.py writing_studio.py corpus_contract.py corpus_provider.py corpus_intelligence.py page_extractor.py writer_peer.py engagement_contract.py media_handoff.py suite_service.py source_manifest.py openapi_bridge.py reddit_extractor.py x_extractor.py x_article_extractor.py notes.py images.py taste_scoring.py memory_layer.py podcasts.py mobile_playlists.py whisper_runner.py uoink_mcp.py uoink_mcp_tools.py uoink_reliability.py yoink_mcp.py yt_extract.py helper\_version.py
     if ($LASTEXITCODE -ne 0) {
         throw 'staged smoke: py_compile of staged Python files failed'
     }
@@ -684,6 +857,17 @@ Write-Host "    normalized package timestamps to $($packageTimestampUtc.ToString
 Write-Step 'Compiling installer'
 $iscc = Find-Iscc
 Write-Host "    using $iscc"
+$exe = Join-Path $BuildDir "Uoink-Setup-$VERSION.exe"
+$buildAttempt = New-UoinkBuildAttempt $exe
+if ($ReleaseSigned) {
+    # A fresh cache forces this build's uninstaller through the exact signer;
+    # Inno must not reuse a cached signature from another publisher or build.
+    $signedUninstallerDir = Join-Path $BuildDir ('signed-uninstallers\' + [Guid]::NewGuid().ToString('N'))
+    Assert-UoinkSigningToken $signedUninstallerDir 'SignedUninstallerDir'
+    New-Item -ItemType Directory -Path $signedUninstallerDir -ErrorAction Stop | Out-Null
+    $signingArgs += "/DReleaseSigningDir=$signedUninstallerDir"
+    $signingArgs[1] += (' -ReceiptDirectory $q{0}$q' -f $buildAttempt.callbacks)
+}
 $issTemplate = Join-Path $InstallerDir 'uoink.iss'
 $issGenerated = Join-Path $InstallerDir 'uoink.generated.iss'
 $issText = Get-Content -Raw $issTemplate
@@ -697,14 +881,24 @@ $issText = $issText -replace '(?m)^#define\s+AppVersion\s+".*"\r?$', "#define Ap
 $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
 [System.IO.File]::WriteAllText($issGenerated, $issText, $utf8NoBom)
 try {
-    & $iscc /Q $issGenerated
+    & $iscc /Q @signingArgs $issGenerated
     if ($LASTEXITCODE -ne 0) { throw 'ISCC compilation failed' }
+    if (-not (Test-Path -LiteralPath $exe)) { throw "ISCC reported success but $exe is missing" }
+    if ($ReleaseSigned) {
+        $signatureDetails = Get-UoinkVerifiedBuildSignatures $buildAttempt $signedUninstallerDir $SigningCertificateThumbprint $SignToolPath
+        Set-UoinkBuildAttemptReceipt $buildAttempt 'verified' $signatureDetails
+        Write-Host '    installer and uninstaller signatures verified; other release gates still apply'
+    } else {
+        Set-UoinkBuildAttemptReceipt $buildAttempt 'unsigned' @{sha256=(Get-UoinkFileSha256 $exe)}
+        Write-Host '    UNSIGNED REVIEW BUILD: not approved for public release' -ForegroundColor Yellow
+    }
+} catch {
+    Set-UoinkBuildAttemptReceipt $buildAttempt 'failed' @{error=$_.Exception.Message}
+    Write-Host "    compile/signing diagnostics: $($buildAttempt.directory)"
+    throw
 } finally {
     Remove-Item -Force -ErrorAction SilentlyContinue $issGenerated
 }
-
-$exe = Join-Path $BuildDir "Uoink-Setup-$VERSION.exe"
-if (-not (Test-Path $exe)) { throw "ISCC reported success but $exe is missing" }
 
 $sizeMb = (Get-Item $exe).Length / 1MB
 Write-Host ''

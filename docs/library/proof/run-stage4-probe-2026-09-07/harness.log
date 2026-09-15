@@ -1,0 +1,15 @@
+whisperx unavailable: ModuleNotFoundError: No module named 'whisperx'
+2026-09-07 22:42:31,241 INFO migration[run]: no_legacy -- E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\proof\run-stage4-probe-2026-09-07-c5894a8e\local\Yoink does not exist
+2026-09-07 22:42:31,241 INFO migration[run]: legacy_run_key -- skipped: dev layout
+2026-09-07 22:42:31,241 INFO install migration: no_legacy
+2026-09-07 22:42:31,274 INFO sources: imported 3 feed(s) and 0 playlist(s); 0 conflict(s)
+2026-09-07 22:42:31,590 INFO Restored 212 job record(s) from the library index
+2026-09-07 22:42:31,591 INFO backfill complete: scanned 0 folder(s), indexed 0 new
+2026-09-07 22:42:31,597 INFO Uoink server v3.8.0 running on http://127.0.0.1:5180
+2026-09-07 22:42:31,598 INFO Ready to uoink. Click any YouTube video's Uoink button.
+2026-09-07 22:42:31,598 INFO Output: E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\proof\run-stage4-probe-2026-09-07-c5894a8e\output
+2026-09-07 22:42:31,598 INFO Log file: E:\AI\projects\uoink\checkouts\Yoink-library\server.log
+2026-09-07 22:42:31,841 INFO GET /health from 127.0.0.1 -> ok
+[proof] model call done: call-0001-08452e in 93375 ms, exit 0, stdout 9796 B
+[proof] model call done: call-0001-520965 in 95970 ms, exit 0, stdout 8622 B
+Product proof run complete. Receipts written to: E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\proof\run-stage4-probe-2026-09-07\receipts.json

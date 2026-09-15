@@ -2,7 +2,7 @@
   "manifest_version": "0.4",
   "name": "uoink",
   "display_name": "Uoink",
-  "version": "3.7.0",
+  "version": "3.8.0",
   "description": "Hand your AI a cited local corpus. Uoink saves the YouTube videos, X posts, podcasts, and articles you study to your own disk, then exposes them to Claude Desktop as MCP tools.",
   "long_description": "Uoink keeps the videos, podcasts, and articles you study on your own disk, then hands them to Claude as a cited corpus. This bundle connects Claude Desktop to your already-installed Uoink helper's local MCP server (stdio). Install the Uoink helper from https://uoink.app/install first, then install this bundle. Core capture is local and needs no API key; optional AI features use your own Anthropic key.",
   "author": {
@@ -77,6 +77,14 @@
       "description": "Keyword search across saved Uoink markdown corpora."
     },
     {
+      "name": "search_clips",
+      "description": "Full-text search over transcript windows from saved uoinks, each hit with a deep link to the moment."
+    },
+    {
+      "name": "get_evidence_card",
+      "description": "Return an evidence card for one saved uoink: metadata, source URL, summary hint, and its most quotable clips with deep links."
+    },
+    {
       "name": "get_uoink_corpus",
       "description": "Return the full markdown corpus for a saved uoink by slug."
     },
@@ -107,6 +115,70 @@
     {
       "name": "get_transcript_reliability",
       "description": "Return stored transcript reliability spans for a saved uoink."
+    },
+    {
+      "name": "add_podcast_feed",
+      "description": "Register a podcast RSS or Atom feed for metadata watching, with optional per-feed Auto-ingest."
+    },
+    {
+      "name": "list_podcast_feeds",
+      "description": "List registered podcast feeds."
+    },
+    {
+      "name": "remove_podcast_feed",
+      "description": "Remove a podcast feed and its tracked episode rows."
+    },
+    {
+      "name": "poll_podcast_feed",
+      "description": "Fetch one podcast feed now and retain newly discovered episodes."
+    },
+    {
+      "name": "list_podcast_episodes",
+      "description": "List tracked podcast episodes with optional feed and status filters."
+    },
+    {
+      "name": "download_podcast_episode",
+      "description": "Download one episode's MP3 locally with yt-dlp and ffmpeg."
+    },
+    {
+      "name": "get_whisperx_status",
+      "description": "Report local WhisperX availability and supported models."
+    },
+    {
+      "name": "transcribe_podcast_episode",
+      "description": "Queue one local podcast transcription and return its durable job id."
+    },
+    {
+      "name": "episode_to_corpus",
+      "description": "Publish a completed podcast transcript into the local corpus."
+    },
+    {
+      "name": "get_library_activity",
+      "description": "Report deterministic library activity, shelf churn, and source observations."
+    },
+    {
+      "name": "search_library",
+      "description": "Bounded clip-first search of the saved library with revision-bound follow-up URIs."
+    },
+    {
+      "name": "get_library_item",
+      "description": "Resolve one saved item and return its Librarian card plus canonical resource URIs."
+    },
+    {
+      "name": "read_library_resource",
+      "description": "Read one uoink://library/v1/ resource URI with the same contents and refusals as resources/read."
+    },
+    {
+      "name": "get_library_brief_input",
+      "description": "Prepare bounded, hashed input for a client-run daily brief (read only; no lease, no mutation)."
+    },
+    {
+      "name": "publish_library_brief",
+      "description": "Local write: validate and persist one client-produced brief under reach/briefs; idempotent on submission_key."
+    },
+    {
+      "name": "export_cited_range",
+      "description": "Read-only cited export of one stored transcript range or excerpt with speaker labels, provenance, chapters and revision pins."
     }
   ],
   "compatibility": {

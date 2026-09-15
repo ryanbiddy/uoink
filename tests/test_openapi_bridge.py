@@ -131,6 +131,7 @@ def test_http_bridge():
         return spec.handler(args or {})
     fake.call_tool = _call_tool
 
+    original_tools_module = server._mcp_tools_module
     server._mcp_tools_module = lambda: fake  # type: ignore
 
     httpd = ThreadingHTTPServer(("127.0.0.1", PORT), server.Handler)
@@ -197,6 +198,9 @@ def test_http_bridge():
         print("ok  HTTP bridge: public spec + well-known, /tools/<name> 403/200/404")
     finally:
         httpd.shutdown()
+        # Restore the real resolver: leaving the fake in place broke every
+        # later test that drives the real HTTP handler (run M acceptance).
+        server._mcp_tools_module = original_tools_module  # type: ignore
 
 
 def test_no_version_tags_in_catalog():

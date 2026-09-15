@@ -29,6 +29,11 @@ def test_documented_transport_counts_match_both_live_registries() -> None:
     assert _documented_count("Local HTTP/OpenAPI registry") == len(
         uoink_mcp_tools.TOOL_REGISTRY
     )
+    # 71 + the six Living Library work-queue tools (Phase 2 stage 1) + the four
+    # Phase 3 source-subscription tools (run AM) + get_library_activity (Phase 5 Part A)
+    # + three Phase 4 read tools (run AV-1) + two Phase 4 brief tools (run AV-2)
+    # + the Phase 6 cited export tool (run BC-2).
+    assert len(uoink_mcp_tools.TOOL_REGISTRY) == 88
 
 
 def test_documented_ping_keys_match_the_real_handler(monkeypatch) -> None:
@@ -46,6 +51,11 @@ def test_documented_ping_keys_match_the_real_handler(monkeypatch) -> None:
     )
     monkeypatch.setattr(server, "_index_recovering", False)
     monkeypatch.setattr(server, "_OUTPUT_ROOT_FALLBACK", False)
+    monkeypatch.setattr(server, "_active_migration_version", 25)
+    monkeypatch.setattr(server.index, "latest_schema_version", lambda: 25)
+    monkeypatch.setattr(
+        server, "_last_successful_tick_at", "2026-09-04T16:30:00Z"
+    )
 
     class Probe:
         path = "/ping"

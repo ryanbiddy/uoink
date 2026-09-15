@@ -55,6 +55,8 @@ CANONICAL_STDIO_TOOLS = {
     "cancel_job",
     "list_recent_uoinks",
     "search_uoinks",
+    "search_clips",          # run E (2026-09-04): Phase 1 clip tools on stdio
+    "get_evidence_card",
     "get_uoink_corpus",
     "analyze_comments",
     "classify_hook",
@@ -63,6 +65,25 @@ CANONICAL_STDIO_TOOLS = {
     "get_uoink_health",
     "find_mentions",
     "get_transcript_reliability",
+    "add_podcast_feed",
+    "list_podcast_feeds",
+    "remove_podcast_feed",
+    "poll_podcast_feed",
+    "list_podcast_episodes",
+    "download_podcast_episode",
+    "get_whisperx_status",
+    "transcribe_podcast_episode",
+    "episode_to_corpus",
+    "get_library_activity",
+    # Phase 4 run AV-1 (contract phase4-v1-2026-09-08): bounded library reads.
+    "search_library",
+    "get_library_item",
+    "read_library_resource",
+    # Phase 4 run AV-2: client-run daily briefs (input is a read; publish is a local write).
+    "get_library_brief_input",
+    "publish_library_brief",
+    # Phase 6 run BC-2 (contract phase6-v1): read-only cited range export.
+    "export_cited_range",
 }
 
 REMOVED_STDIO_ALIASES = {
@@ -188,7 +209,7 @@ def test_stdio_handshake_under_embeddable_path_rules():
                     f"extra={sorted(set(names) - CANONICAL_STDIO_TOOLS)}")
             _assert(not REMOVED_STDIO_ALIASES.intersection(names),
                     f"removed aliases returned by tools/list: {names}")
-            print("ok  tools/list returns exactly 14 canonical tools")
+            print("ok  tools/list returns exactly 25 canonical tools")
 
             client.send({"jsonrpc": "2.0", "id": 3, "method": "tools/call",
                          "params": {"name": "list_recent_uoinks",
@@ -243,7 +264,7 @@ def test_removed_aliases_are_rejected_and_manifest_matches():
             "MCPB manifest tool inventory drift: "
             f"missing={sorted(CANONICAL_STDIO_TOOLS - manifest_names)}, "
             f"extra={sorted(manifest_names - CANONICAL_STDIO_TOOLS)}")
-    print("ok  removed aliases reject and MCPB lists the same 14 tools")
+    print("ok  removed aliases reject and MCPB lists the same 25 tools")
 
 
 def main():

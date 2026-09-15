@@ -1,0 +1,1126 @@
+{
+  "schema_version": 1,
+  "kind": "holdout-v2-labels",
+  "labeller": "GPT-6 Astra (adjudicator)",
+  "candidate": "revision decision 5 (nodes identical to packet 12)",
+  "adjudicated_from": [
+    "holdout-v2-labels-12-gemini-2026-09-06.json",
+    "holdout-v2-labels-12-grok-2026-09-06.json"
+  ],
+  "holdout_version": "holdout-v2-2026-09-05",
+  "packet_sha256": "e571d4d82a5e80b67adef14d4fa336693bce41d2da724a92d0ac4ddfead926e0",
+  "taxonomy_version_id": "taxonomy-v2-2026-09-05",
+  "blind": true,
+  "files_opened": [
+    "docs/library/HOLDOUT-V2-ADJUDICATION-12-BRIEF-2026-09-06.md",
+    "docs/library/proof/holdout-v2-labelling-packet-12-2026-09-06.json",
+    "docs/library/proof/labels/holdout-v2-labels-12-gemini-2026-09-06.json",
+    "docs/library/proof/labels/holdout-v2-labels-12-grok-2026-09-06.json",
+    "docs/library/proof/labels/holdout-v2-agreement-12-2026-09-06.json"
+  ],
+  "notes": "Apply coding-specific cues to the task, not merely to harness/model names; 2083664004506145276 is overturned to the parent. Teaching agent primitives, NMS or deployment supports Education; comparative accuracy/speed supports Frontier Models. Classifier safety overhead stays Security. Original X prose can establish business or benchmark substance even in memes. The AI-career song remains unmappable. Thin timed evidence at 2083438553493843968 and 2087232179613077504 needs eligible X prose; video summary hints were excluded. Taalas throughput lacks an inference-hardware child. Packet metadata says revision decision 3; the brief identifies these exact nodes as decision 5.",
+  "items": [
+    {
+      "video_id": "2079930744781070336",
+      "stratum": "timed_evidence",
+      "outcome": "assigned",
+      "shelf_id": "ai-and-ml",
+      "shelf_path": [
+        "AI and ML"
+      ],
+      "secondary_shelf_ids": [],
+      "confidence": 0.74,
+      "evidence": {
+        "excerpt_id": "a0c7117e4554ef16854490378e696174760867a7b0bfce7f82d14b73cbc65b4d",
+        "quote": "robotics is very real. It scales across a wide variety of environments"
+      },
+      "rationale": "Robotics across environments fits AI and ML. The original X prose identifies an AI-chip robot; no child shelf covers the demonstrated subject.",
+      "adjudication": "agreed"
+    },
+    {
+      "video_id": "2080061661197570048",
+      "stratum": "timed_evidence",
+      "outcome": "assigned",
+      "shelf_id": "generative-media",
+      "shelf_path": [
+        "AI and ML",
+        "Generative Media"
+      ],
+      "secondary_shelf_ids": [],
+      "confidence": 0.86,
+      "evidence": {
+        "excerpt_id": "33189a1eb25d33d3e882a656bb0ded4f218fb4f8b378152c73f28fe42a921b47",
+        "quote": "Joe, look at me. Not the corner...me I am looking at you"
+      },
+      "rationale": "Original X prose frames the dialogue as an AI-generated acting scene with audio synced to video; the finished creative output is central.",
+      "adjudication": "agreed"
+    },
+    {
+      "video_id": "2080447768397787137",
+      "stratum": "timed_evidence",
+      "outcome": "assigned",
+      "shelf_id": "developer-tools",
+      "shelf_path": [
+        "AI and ML",
+        "Developer Tools"
+      ],
+      "secondary_shelf_ids": [],
+      "confidence": 0.93,
+      "evidence": {
+        "excerpt_id": "b0b69e16d68461b066508af7b574161df8cf5f86285b0ece476502b9403539e1",
+        "quote": "when the installer can't fetch Release metadata from GitHub It now tells the user what happened"
+      },
+      "rationale": "The assistant explains changes to installer behavior and GitHub release handling, a concrete software-engineering task.",
+      "adjudication": "agreed"
+    },
+    {
+      "video_id": "2080736332205436952",
+      "stratum": "timed_evidence",
+      "outcome": "assigned",
+      "shelf_id": "developer-tools",
+      "shelf_path": [
+        "AI and ML",
+        "Developer Tools"
+      ],
+      "secondary_shelf_ids": [],
+      "confidence": 0.95,
+      "evidence": {
+        "excerpt_id": "641de1b9b77070ef8306380a68df5f609bcd5d57e672d8f9f67956f29d16a4ce",
+        "quote": "Grok 4.5 didn't just dump code into chat And pray Through grock build Unity project path Built a macOS app"
+      },
+      "rationale": "The excerpts describe an agent building a Unity project and macOS app through an edit/compile/build loop.",
+      "adjudication": "agreed"
+    },
+    {
+      "video_id": "2081117060013473792",
+      "stratum": "timed_evidence",
+      "outcome": "assigned",
+      "shelf_id": "ai-industry-and-business",
+      "shelf_path": [
+        "AI and ML",
+        "AI Industry and Business"
+      ],
+      "secondary_shelf_ids": [],
+      "confidence": 0.92,
+      "evidence": {
+        "excerpt_id": "98994e8cfd9f7ddf93bc94453723b256038e7af9e5fb01dc5374d22af6d756bb",
+        "quote": "We were way behind Claude Code, and it seemed like a kind of crazy kamikaze mission to try to beat them"
+      },
+      "rationale": "The speaker describes trying to beat Claude Code with a competing coding app; company rivalry is the subject.",
+      "adjudication": "agreed"
+    },
+    {
+      "video_id": "2081133656869920768",
+      "stratum": "text_only",
+      "outcome": "assigned",
+      "shelf_id": "generative-media",
+      "shelf_path": [
+        "AI and ML",
+        "Generative Media"
+      ],
+      "secondary_shelf_ids": [],
+      "confidence": 0.9,
+      "evidence": {
+        "excerpt_id": "dad7d6efd4bcaa22e36a06272b29f80120d885734200711579d3c4e8fd8d0a36",
+        "quote": "Claude Opus 5 made this beautiful painterly world in a single HTML file, everything made procedurally"
+      },
+      "rationale": "The post showcases a generated painterly world and grass simulation, rather than explaining a coding workflow.",
+      "adjudication": "agreed"
+    },
+    {
+      "video_id": "2082501832442814465",
+      "stratum": "timed_evidence",
+      "outcome": "assigned",
+      "shelf_id": "frontier-models",
+      "shelf_path": [
+        "AI and ML",
+        "Frontier Models"
+      ],
+      "secondary_shelf_ids": [],
+      "confidence": 0.95,
+      "evidence": {
+        "excerpt_id": "ee2925297fda63debb60db546f243e5ecd2e678e7bc016a93635f9a096d8a8c5",
+        "quote": "In five different sizes across four different architectures"
+      },
+      "rationale": "The excerpts describe Gemma 4's multimodal model family, sizes, architectures and vision encoders.",
+      "adjudication": "agreed"
+    },
+    {
+      "video_id": "2083262686318444544",
+      "stratum": "text_only",
+      "outcome": "assigned",
+      "shelf_id": "education",
+      "shelf_path": [
+        "AI and ML",
+        "Education"
+      ],
+      "secondary_shelf_ids": [],
+      "confidence": 0.9,
+      "evidence": {
+        "excerpt_id": "88bc2095a32ecaa382b6f14d7f15cb1cb9d44b64c7eef929ab6f9de707c9a8a2",
+        "quote": "a 1-hour course on Graph Engineering: from agents to full automation"
+      },
+      "rationale": "Original X prose supplies a course outline teaching agent memory, loops and MCP construction.",
+      "adjudication": "agreed"
+    },
+    {
+      "video_id": "2083438553493843968",
+      "stratum": "timed_evidence",
+      "outcome": "assigned",
+      "shelf_id": "ai-and-ml",
+      "shelf_path": [
+        "AI and ML"
+      ],
+      "secondary_shelf_ids": [],
+      "confidence": 0.64,
+      "evidence": {
+        "excerpt_id": "b10a0655898b825eb717223b822b9774476310dfda633d2e3b6d74b93cd63256",
+        "quote": "Yeah, it works! It's alive. Awesome!"
+      },
+      "rationale": "The timed excerpt is generic; original X prose establishes a small AI model running locally on an ESP32-S3. No child is clearly justified.",
+      "adjudication": "agreed"
+    },
+    {
+      "video_id": "2083664004506145276",
+      "stratum": "timed_evidence",
+      "outcome": "assigned",
+      "shelf_id": "ai-and-ml",
+      "shelf_path": [
+        "AI and ML"
+      ],
+      "secondary_shelf_ids": [],
+      "confidence": 0.74,
+      "evidence": {
+        "excerpt_id": "2abad6e67d6816b92b5c1faad263f9eff47807400fa5d0976239fff7b16a7a88",
+        "quote": "there are different models that are good for different parts of these tasks"
+      },
+      "rationale": "The excerpt concerns model task-fit and reasoning effort; original prose adds harness coupling but no coding task, SDK or IDE.",
+      "adjudication": "overturned:Both labellers infer coding from generic harness/model coupling; no coding task, SDK or IDE is evidenced, so only the AI and ML parent is justified."
+    },
+    {
+      "video_id": "2084046660087525376",
+      "stratum": "text_only",
+      "outcome": "assigned",
+      "shelf_id": "frontier-models",
+      "shelf_path": [
+        "AI and ML",
+        "Frontier Models"
+      ],
+      "secondary_shelf_ids": [
+        "developer-tools"
+      ],
+      "confidence": 0.88,
+      "evidence": {
+        "excerpt_id": "289f07502a94355fdb52c85de05dbcfb415557241341883fadda6a913b41b45d",
+        "quote": "We shrank a frontier model to 102GB.  DeepSeek V4 Flash 0731 now runs on a 128GB Mac."
+      },
+      "rationale": "The post centers on shrinking DeepSeek V4 Flash for local use, with a code-generation example supporting the model claim.",
+      "adjudication": "agreed"
+    },
+    {
+      "video_id": "2084093069323104256",
+      "stratum": "text_only",
+      "outcome": "assigned",
+      "shelf_id": "frontier-models",
+      "shelf_path": [
+        "AI and ML",
+        "Frontier Models"
+      ],
+      "secondary_shelf_ids": [],
+      "confidence": 0.7,
+      "evidence": {
+        "excerpt_id": "40195de095037e8dd0410d347530a9119993a9996b6afd200267b82d2f3ed07a",
+        "quote": "Meet Qwen3.8-Max: A New Bar for Coding and Cowork."
+      },
+      "rationale": "Original post prose announces Qwen3.8-Max with a capability slogan. It supplies no benchmark detail or demonstrated coding workflow.",
+      "adjudication": "agreed"
+    },
+    {
+      "video_id": "2084309519715139584",
+      "stratum": "timed_evidence",
+      "outcome": "assigned",
+      "shelf_id": "developer-tools",
+      "shelf_path": [
+        "AI and ML",
+        "Developer Tools"
+      ],
+      "secondary_shelf_ids": [
+        "security"
+      ],
+      "confidence": 0.85,
+      "evidence": {
+        "excerpt_id": "47a94bb51c6e40675a8c78b64eada8bd0b89769252fd9937d698561222f50756",
+        "quote": "Where's The Code Base And How Do I Get Access To It"
+      },
+      "rationale": "Excerpts describe using an assistant for codebase access and engineering work; a separate passage covers prompt-injection training.",
+      "adjudication": "agreed"
+    },
+    {
+      "video_id": "2084333713937068032",
+      "stratum": "timed_evidence",
+      "outcome": "assigned",
+      "shelf_id": "education",
+      "shelf_path": [
+        "AI and ML",
+        "Education"
+      ],
+      "secondary_shelf_ids": [
+        "developer-tools"
+      ],
+      "confidence": 0.94,
+      "evidence": {
+        "excerpt_id": "85a49a7c49a89fb02feb25af508aa8852edb0b418e57e51f6e63b2f65a7d75c9",
+        "quote": "In addition To giving The Description Of the Task You're Also Giving A few Examples"
+      },
+      "rationale": "The excerpts teach few-shot learning, fine-tuning, reasoning and training, with explicit class and course context.",
+      "adjudication": "agreed"
+    },
+    {
+      "video_id": "2084671000906735616",
+      "stratum": "timed_evidence",
+      "outcome": "assigned",
+      "shelf_id": "developer-tools",
+      "shelf_path": [
+        "AI and ML",
+        "Developer Tools"
+      ],
+      "secondary_shelf_ids": [],
+      "confidence": 0.87,
+      "evidence": {
+        "excerpt_id": "e4e6faef415690a4214729a49b0502eab6fc6727c77dd0ad7a3f61726e2405aa",
+        "quote": "Lets you integrate with more than just mcp It's really been a great cross harness productivity win"
+      },
+      "rationale": "Executor is presented as a tool gateway connecting agent harnesses to services and MCP integrations.",
+      "adjudication": "agreed"
+    },
+    {
+      "video_id": "2085710761423437824",
+      "stratum": "text_only",
+      "outcome": "assigned",
+      "shelf_id": "education",
+      "shelf_path": [
+        "AI and ML",
+        "Education"
+      ],
+      "secondary_shelf_ids": [],
+      "confidence": 0.93,
+      "evidence": {
+        "excerpt_id": "9a1c0284402adb829afe197ebb6190d756bb5a638499572827ad6758f61556fd",
+        "quote": "dropped a 2 hour course on how he personally uses LLMs daily."
+      },
+      "rationale": "The post describes an LLM course with a timestamped syllabus on concepts and practical use.",
+      "adjudication": "agreed"
+    },
+    {
+      "video_id": "2086120621734326272",
+      "stratum": "timed_evidence",
+      "outcome": "assigned",
+      "shelf_id": "education",
+      "shelf_path": [
+        "AI and ML",
+        "Education"
+      ],
+      "secondary_shelf_ids": [],
+      "confidence": 0.96,
+      "evidence": {
+        "excerpt_id": "4aca5d7410434edf756e1362574e752af7293c45a74cb3346c0cc42c414a03b6",
+        "quote": "Welcome to this NeurIPS tutorial on application development using LLMs."
+      },
+      "rationale": "The NeurIPS tutorial teaches LLM application development, structured output, retrieval and fine-tuning choices.",
+      "adjudication": "agreed"
+    },
+    {
+      "video_id": "2086167440203923456",
+      "stratum": "timed_evidence",
+      "outcome": "assigned",
+      "shelf_id": "education",
+      "shelf_path": [
+        "AI and ML",
+        "Education"
+      ],
+      "secondary_shelf_ids": [],
+      "confidence": 0.91,
+      "evidence": {
+        "excerpt_id": "adc3105012ed44d1e1078df40ad4e3254221fd8e922b7cb4ccbaf2bbc8f39a26",
+        "quote": "So You Have A Fast Draft Model Where You Don't Need The Full Sophistication Of Much Larger Mod"
+      },
+      "rationale": "Excerpts explain sequence-model constraints, teacher-model signals and fast draft models in a pedagogical sequence.",
+      "adjudication": "agreed"
+    },
+    {
+      "video_id": "2086219750065967512",
+      "stratum": "timed_evidence",
+      "outcome": "assigned",
+      "shelf_id": "generative-media",
+      "shelf_path": [
+        "AI and ML",
+        "Generative Media"
+      ],
+      "secondary_shelf_ids": [
+        "frontier-models"
+      ],
+      "confidence": 0.9,
+      "evidence": {
+        "excerpt_id": "eeed6e03e4e921963be851452651acbcf5c569081d1b0017faff95604a063544",
+        "quote": "It's pouring, watch this. Okay no umbrella Hair gone Makeup perfect"
+      },
+      "rationale": "Original X prose compares the realism of finished Seedance-generated shots; the dialogue belongs to that showcased output.",
+      "adjudication": "agreed"
+    },
+    {
+      "video_id": "2086663463162830848",
+      "stratum": "text_only",
+      "outcome": "assigned",
+      "shelf_id": "developer-tools",
+      "shelf_path": [
+        "AI and ML",
+        "Developer Tools"
+      ],
+      "secondary_shelf_ids": [],
+      "confidence": 0.87,
+      "evidence": {
+        "excerpt_id": "e57d7765137eb3bc51340d6be3c64c01687f3332136fa6cb61ffba90c35ecc39",
+        "quote": "turn your favorite agent harness multimodal-native"
+      },
+      "rationale": "Qwen-MM-Plugins extends an agent harness with multimodal tools. The subject is the integration package, with no end-to-end user task shown.",
+      "adjudication": "agreed"
+    },
+    {
+      "video_id": "2087232179613077504",
+      "stratum": "timed_evidence",
+      "outcome": "assigned",
+      "shelf_id": "frontier-models",
+      "shelf_path": [
+        "AI and ML",
+        "Frontier Models"
+      ],
+      "secondary_shelf_ids": [],
+      "confidence": 0.65,
+      "evidence": {
+        "excerpt_id": "4d9796c07227357f29591ffc4e759d2502a6243a03e14c81958aae09946396f2",
+        "quote": "🎵"
+      },
+      "rationale": "Original X prose announces a classification model and comparative cost claim. The timed excerpt contains only music, so confidence is limited.",
+      "adjudication": "agreed"
+    },
+    {
+      "video_id": "2087945138823741440",
+      "stratum": "text_only",
+      "outcome": "assigned",
+      "shelf_id": "frontier-models",
+      "shelf_path": [
+        "AI and ML",
+        "Frontier Models"
+      ],
+      "secondary_shelf_ids": [],
+      "confidence": 0.92,
+      "evidence": {
+        "excerpt_id": "d4ef41d576edda83de87805645c7a848975cb1b55e91d035d2ca82ded7ab06a1",
+        "quote": "introducing Gemini 3.7 Flash: our most intelligent workhorse model yet"
+      },
+      "rationale": "Original post prose introduces a named model release and describes algorithmic improvements, without a shown application workflow.",
+      "adjudication": "agreed"
+    },
+    {
+      "video_id": "2087982002381221888",
+      "stratum": "timed_evidence",
+      "outcome": "assigned",
+      "shelf_id": "developer-tools",
+      "shelf_path": [
+        "AI and ML",
+        "Developer Tools"
+      ],
+      "secondary_shelf_ids": [],
+      "confidence": 0.94,
+      "evidence": {
+        "excerpt_id": "9f8e6f65d501d8e52ad81a7ea949668b5e92f9fc4084836596af8d2343f3ac7e",
+        "quote": "We Have A Diff Viewer As Well Where You Can Stage Changes"
+      },
+      "rationale": "The agent GUI provides workspaces, branches, a diff viewer and staging changes, establishing a software-engineering tool.",
+      "adjudication": "agreed"
+    },
+    {
+      "video_id": "2089011298621399260",
+      "stratum": "timed_evidence",
+      "outcome": "assigned",
+      "shelf_id": "education",
+      "shelf_path": [
+        "AI and ML",
+        "Education"
+      ],
+      "secondary_shelf_ids": [],
+      "confidence": 0.91,
+      "evidence": {
+        "excerpt_id": "4d8b0e5d0e83ccb81e02c017149c7db7d6cae56d3695eab35cf22b6033f7a998",
+        "quote": "The Graph Which Saves A Snapshot Of The Entire State At Every Super Step"
+      },
+      "rationale": "The excerpts explain loop versus graph orchestration, state snapshots, review and memory through examples.",
+      "adjudication": "agreed"
+    },
+    {
+      "video_id": "2090872209241976832",
+      "stratum": "timed_evidence",
+      "outcome": "assigned",
+      "shelf_id": "frontier-models",
+      "shelf_path": [
+        "AI and ML",
+        "Frontier Models"
+      ],
+      "secondary_shelf_ids": [
+        "security"
+      ],
+      "confidence": 0.84,
+      "evidence": {
+        "excerpt_id": "ee54395c5cbb27cea557ce3f6fb0c2696ae77cf8b0b5ec32525df28fb02c04a6",
+        "quote": "Okay, new chat GLM 5.3, is Taiwan part of China?"
+      },
+      "rationale": "The session tests a named model across bias, guardrails, web search and reasoning. Safety probes form one part of the broader evaluation.",
+      "adjudication": "resolved:Broad GLM capability testing includes safety probes; the guardrail test is a secondary thread, not the whole evaluation."
+    },
+    {
+      "video_id": "2090888779125116928",
+      "stratum": "timed_evidence",
+      "outcome": "unmappable",
+      "shelf_id": null,
+      "shelf_path": [
+        "AI and ML",
+        "Culture and Memes"
+      ],
+      "secondary_shelf_ids": [],
+      "confidence": 0.84,
+      "evidence": {
+        "excerpt_id": "6cd1b2129a3b20487cee126bdc9376f3ce307de2d43cb32438d604b966fcc802",
+        "quote": "For what is a man What has he got"
+      },
+      "rationale": "Original X prose frames song lyrics as an AI-engineering career joke; no approved shelf covers this cultural meme.",
+      "adjudication": "resolved:Both identify an unmappable AI-career meme; normalize the proposed path to AI and ML / Culture and Memes."
+    },
+    {
+      "video_id": "2091205272920358912",
+      "stratum": "text_only",
+      "outcome": "assigned",
+      "shelf_id": "developer-tools",
+      "shelf_path": [
+        "AI and ML",
+        "Developer Tools"
+      ],
+      "secondary_shelf_ids": [],
+      "confidence": 0.95,
+      "evidence": {
+        "excerpt_id": "6e3f4005588c6bf14c5ad0bb5dbfc14f8647026ae8d77b9d80dee85c07cef650",
+        "quote": "I asked Codex to design its own CPU and then write a Space Invaders-style game for it in assembly"
+      },
+      "rationale": "The excerpt explicitly asks a coding assistant to design a CPU and write an assembly game.",
+      "adjudication": "agreed"
+    },
+    {
+      "video_id": "2091208884786520487",
+      "stratum": "timed_evidence",
+      "outcome": "assigned",
+      "shelf_id": "education",
+      "shelf_path": [
+        "AI and ML",
+        "Education"
+      ],
+      "secondary_shelf_ids": [
+        "developer-tools"
+      ],
+      "confidence": 0.92,
+      "evidence": {
+        "excerpt_id": "51b6dc4c13dc349ca2725a17bf9682cbd9974441ee427929077498454446866f",
+        "quote": "So you can see how these primitives compose our agent one piece at a time"
+      },
+      "rationale": "The session teaches agent construction piece by piece from an incomplete file, then tests the assembled agent on an incident.",
+      "adjudication": "resolved:Step-by-step teaching of agent primitives and a test run makes Education primary; developer tooling is secondary."
+    },
+    {
+      "video_id": "2091230104793858048",
+      "stratum": "timed_evidence",
+      "outcome": "assigned",
+      "shelf_id": "education",
+      "shelf_path": [
+        "AI and ML",
+        "Education"
+      ],
+      "secondary_shelf_ids": [],
+      "confidence": 0.96,
+      "evidence": {
+        "excerpt_id": "b2762e97a8ce604bdbf0dfaba817951e70769562a7dbc54dd8e556c637f16661",
+        "quote": "you try to minimize this function over the parameter theta"
+      },
+      "rationale": "The excerpts teach tokenization, nonlinear parameters, loss minimization and optimization.",
+      "adjudication": "agreed"
+    },
+    {
+      "video_id": "2091248592774369280",
+      "stratum": "timed_evidence",
+      "outcome": "assigned",
+      "shelf_id": "ai-industry-and-business",
+      "shelf_path": [
+        "AI and ML",
+        "AI Industry and Business"
+      ],
+      "secondary_shelf_ids": [],
+      "confidence": 0.91,
+      "evidence": {
+        "excerpt_id": "76880377e70258f82f0f7aa3382123955bc9b3f01ca98743391bc60602098dd6",
+        "quote": "one in five firms in the US report using AI to some extent"
+      },
+      "rationale": "The discussion centers on enterprise AI adoption, labor, task economics and economic growth.",
+      "adjudication": "agreed"
+    },
+    {
+      "video_id": "2091297765133578240",
+      "stratum": "text_only",
+      "outcome": "assigned",
+      "shelf_id": "generative-media",
+      "shelf_path": [
+        "AI and ML",
+        "Generative Media"
+      ],
+      "secondary_shelf_ids": [],
+      "confidence": 0.94,
+      "evidence": {
+        "excerpt_id": "b3a8239bb19eabe5a6f16d11e1a574d0cc5efbbcde3fae57ebfa29c4b1a2404e",
+        "quote": "Ox Alpha vs. Fable 5 in cartoon animation.  Outputs made with Seedance 2.5."
+      },
+      "rationale": "The post showcases cartoon animation outputs made with Seedance, invoking the finished-artifact precedence cue.",
+      "adjudication": "agreed"
+    },
+    {
+      "video_id": "2091537085874520064",
+      "stratum": "timed_evidence",
+      "outcome": "assigned",
+      "shelf_id": "ai-agents-and-automation",
+      "shelf_path": [
+        "AI and ML",
+        "AI Agents and Automation"
+      ],
+      "secondary_shelf_ids": [],
+      "confidence": 0.77,
+      "evidence": {
+        "excerpt_id": "cbc9731bddee8146353101241205c26a3b0f7f077b95492790c502de737da6fd",
+        "quote": "So, images will have the thing highlighted whatever that I highlighted. So AI will know exactly what I'm talking about"
+      },
+      "rationale": "Original X prose describes speech and circled-screen input for personal agent assistance; neither excerpt establishes a coding workflow.",
+      "adjudication": "resolved:Speech and screen context support personal agent assistance; no excerpt establishes the coding workflow claimed for Developer Tools."
+    },
+    {
+      "video_id": "2091998648997441536",
+      "stratum": "timed_evidence",
+      "outcome": "assigned",
+      "shelf_id": "developer-tools",
+      "shelf_path": [
+        "AI and ML",
+        "Developer Tools"
+      ],
+      "secondary_shelf_ids": [],
+      "confidence": 0.94,
+      "evidence": {
+        "excerpt_id": "c18b0e19ccaad483c9d932adea3a22fbedc839c1c9c40529d3855eefff97f949",
+        "quote": "my Grok bots literally just go and ship software for me"
+      },
+      "rationale": "The excerpts describe bots shipping software, deploying to Vercel and using coding tools.",
+      "adjudication": "agreed"
+    },
+    {
+      "video_id": "2092244803295571968",
+      "stratum": "text_only",
+      "outcome": "assigned",
+      "shelf_id": "developer-tools",
+      "shelf_path": [
+        "AI and ML",
+        "Developer Tools"
+      ],
+      "secondary_shelf_ids": [],
+      "confidence": 0.75,
+      "evidence": {
+        "excerpt_id": "3af7930d86873ff0281e0a7fed55c2dbb96c562a9aa7d98747edff1fc94a3b74",
+        "quote": "LOS ESTUDIANTES PUEDEN CONSEGUIR 1 AÑO DE CURSOR PRO GRATIS."
+      },
+      "rationale": "The original post promotes access to Cursor Pro with included AI models; it concerns the tool, with no course or technical walkthrough.",
+      "adjudication": "agreed"
+    },
+    {
+      "video_id": "2092270658524745728",
+      "stratum": "timed_evidence",
+      "outcome": "assigned",
+      "shelf_id": "ai-industry-and-business",
+      "shelf_path": [
+        "AI and ML",
+        "AI Industry and Business"
+      ],
+      "secondary_shelf_ids": [],
+      "confidence": 0.95,
+      "evidence": {
+        "excerpt_id": "899084656dd7b173c80c0f0c81e350300a727883b755415c357093e0e64c243f",
+        "quote": "Anthropic started turning a profit in Q2."
+      },
+      "rationale": "The excerpts discuss AI-provider profits, pricing, value capture and data-center investment.",
+      "adjudication": "agreed"
+    },
+    {
+      "video_id": "2092364350317281280",
+      "stratum": "timed_evidence",
+      "outcome": "assigned",
+      "shelf_id": "ai-industry-and-business",
+      "shelf_path": [
+        "AI and ML",
+        "AI Industry and Business"
+      ],
+      "secondary_shelf_ids": [],
+      "confidence": 0.72,
+      "evidence": {
+        "excerpt_id": "6128f9b07c42669fe79a6e6d9f882b5bc10ede633acea42a51dc4308233ab6e5",
+        "quote": "Mr. Sandman, bring me a dream"
+      },
+      "rationale": "Original X prose makes a competitive business claim: Nvidia's customer is building its own chips. The song is the meme's presentation.",
+      "adjudication": "resolved:Eligible original X prose makes a chip-customer competition claim; the musical meme format does not erase its business subject."
+    },
+    {
+      "video_id": "2092369226262786048",
+      "stratum": "timed_evidence",
+      "outcome": "assigned",
+      "shelf_id": "developer-tools",
+      "shelf_path": [
+        "AI and ML",
+        "Developer Tools"
+      ],
+      "secondary_shelf_ids": [],
+      "confidence": 0.94,
+      "evidence": {
+        "excerpt_id": "31b80f0b415216f219594c9a29225a85f9260687b771d9268d4f3a21aae35f11",
+        "quote": "when the code base can't solve the problem and the lint rules in CI also can't"
+      },
+      "rationale": "The excerpts discuss agent instructions, codebase structure, lint rules, CI and skills in a software-engineering workflow.",
+      "adjudication": "agreed"
+    },
+    {
+      "video_id": "2093296474498990080",
+      "stratum": "timed_evidence",
+      "outcome": "assigned",
+      "shelf_id": "education",
+      "shelf_path": [
+        "AI and ML",
+        "Education"
+      ],
+      "secondary_shelf_ids": [],
+      "confidence": 0.93,
+      "evidence": {
+        "excerpt_id": "29a1bf9cc6039c18093d1dd07309de9737589b2d30c7273630d8c8a6b0e92bd5",
+        "quote": "we are going to have a whole lot of papers covered in this course"
+      },
+      "rationale": "The excerpts teach scaling, sampling and agentic workflows and explicitly situate the material in a course.",
+      "adjudication": "agreed"
+    },
+    {
+      "video_id": "2093359694366572544",
+      "stratum": "timed_evidence",
+      "outcome": "assigned",
+      "shelf_id": "ai-agents-and-automation",
+      "shelf_path": [
+        "AI and ML",
+        "AI Agents and Automation"
+      ],
+      "secondary_shelf_ids": [
+        "developer-tools"
+      ],
+      "confidence": 0.89,
+      "evidence": {
+        "excerpt_id": "26bc194e72edba3cc33562715b6d25eabec65fb9775b5aa4c686210e2a8df9e9",
+        "quote": "go get that information off of Twitter for each of my followers"
+      },
+      "rationale": "The agent gathers Twitter-profile information into Notion, a multi-step non-engineering task; Cursor builds are a separate coding component.",
+      "adjudication": "agreed"
+    },
+    {
+      "video_id": "2093462510389354496",
+      "stratum": "timed_evidence",
+      "outcome": "assigned",
+      "shelf_id": "security",
+      "shelf_path": [
+        "AI and ML",
+        "Security"
+      ],
+      "secondary_shelf_ids": [],
+      "confidence": 0.89,
+      "evidence": {
+        "excerpt_id": "ef5e09ac16c1412b2e00e53d625113ddb4b59ca9ba46e85c6f97a4ba9cc5a67d",
+        "quote": "the agents were really attacking the hugging face model"
+      },
+      "rationale": "The excerpts analyze agent attacks, information leakage and deceptive coordination as AI-safety problems.",
+      "adjudication": "agreed"
+    },
+    {
+      "video_id": "2093678734708801536",
+      "stratum": "text_only",
+      "outcome": "assigned",
+      "shelf_id": "frontier-models",
+      "shelf_path": [
+        "AI and ML",
+        "Frontier Models"
+      ],
+      "secondary_shelf_ids": [],
+      "confidence": 0.89,
+      "evidence": {
+        "excerpt_id": "a9451b1be0b0c8700bf35c2bc6f0ecd7ea321d7d86d9f4be2371cf4eff658ed3",
+        "quote": "Real-time object detection using frontier object detection models."
+      },
+      "rationale": "The post describes a SAM3-based detector and reports COCO benchmark performance in eligible original prose.",
+      "adjudication": "agreed"
+    },
+    {
+      "video_id": "2093727982317936640",
+      "stratum": "timed_evidence",
+      "outcome": "assigned",
+      "shelf_id": "developer-tools",
+      "shelf_path": [
+        "AI and ML",
+        "Developer Tools"
+      ],
+      "secondary_shelf_ids": [],
+      "confidence": 0.82,
+      "evidence": {
+        "excerpt_id": "a9d209f039ddd91aee71f1c3f336d0ecadfbf473ffd7f571e5e38a41f4e88d54",
+        "quote": "programmers are worse than non-programmers at agentification?"
+      },
+      "rationale": "Original X prose explicitly concerns AI coding and implementation; the excerpt asks about programmers using agents.",
+      "adjudication": "agreed"
+    },
+    {
+      "video_id": "2093860831595499892",
+      "stratum": "timed_evidence",
+      "outcome": "assigned",
+      "shelf_id": "ai-industry-and-business",
+      "shelf_path": [
+        "AI and ML",
+        "AI Industry and Business"
+      ],
+      "secondary_shelf_ids": [
+        "developer-tools"
+      ],
+      "confidence": 0.88,
+      "evidence": {
+        "excerpt_id": "b1b3034b7a94713a393d8fcf0a64f9128b88b3b96340a1d7d11a25381a3fe6c4",
+        "quote": "they're basically winning on both sides of the curve. So both fast tokens and cheap tokens"
+      },
+      "rationale": "The excerpt centers on winning the fast/cheap token competition. Original X prose separately discusses AI-generated kernel code.",
+      "adjudication": "agreed"
+    },
+    {
+      "video_id": "2094184640873373696",
+      "stratum": "text_only",
+      "outcome": "assigned",
+      "shelf_id": "ai-industry-and-business",
+      "shelf_path": [
+        "AI and ML",
+        "AI Industry and Business"
+      ],
+      "secondary_shelf_ids": [],
+      "confidence": 0.78,
+      "evidence": {
+        "excerpt_id": "ec23180ee2eefc219a7d50152a6dd6c84df8ea9bd1ab892bf7674171dc501000",
+        "quote": "OpenAI Jalapeño: Better Than Nvidia Blackwell (Accelerators)"
+      },
+      "rationale": "Original X prose compares AI accelerators and discusses implications for Nvidia, supporting the agreed competitive-business reading.",
+      "adjudication": "agreed"
+    },
+    {
+      "video_id": "2094227178032599040",
+      "stratum": "timed_evidence",
+      "outcome": "assigned",
+      "shelf_id": "ai-and-ml",
+      "shelf_path": [
+        "AI and ML"
+      ],
+      "secondary_shelf_ids": [],
+      "confidence": 0.77,
+      "evidence": {
+        "excerpt_id": "cbce73e54257a94fe8d487dcb3c74ef295d41dae4074c4b2cb10726b8aabcc8b",
+        "quote": "you use your ChatGPT right? And you wait a little while"
+      },
+      "rationale": "Original X prose centers on hardware-enabled token throughput. The excerpts establish neither foundation-model evaluation nor a business analysis.",
+      "adjudication": "resolved:The central claim is hardware-enabled inference speed, not foundation-model evaluation or company economics; the taxonomy has no inference-hardware child."
+    },
+    {
+      "video_id": "2094477244164947968",
+      "stratum": "timed_evidence",
+      "outcome": "assigned",
+      "shelf_id": "developer-tools",
+      "shelf_path": [
+        "AI and ML",
+        "Developer Tools"
+      ],
+      "secondary_shelf_ids": [],
+      "confidence": 0.93,
+      "evidence": {
+        "excerpt_id": "9f5e07db97a1abab10d0e53174beaed8251d1aa5fa020af92705036f68bd0435",
+        "quote": "they can go and pick it up and solve the problem and give us back a PR"
+      },
+      "rationale": "The excerpts describe agents taking bug reports through verification and pull requests, including possible automatic merging.",
+      "adjudication": "agreed"
+    },
+    {
+      "video_id": "2094718226601218048",
+      "stratum": "timed_evidence",
+      "outcome": "assigned",
+      "shelf_id": "security",
+      "shelf_path": [
+        "AI and ML",
+        "Security"
+      ],
+      "secondary_shelf_ids": [],
+      "confidence": 0.95,
+      "evidence": {
+        "excerpt_id": "bbeef6ed0a1120f6c12d7a420ca191a5764e9acdcaf0bf798ef214d33ba93bf1",
+        "quote": "this is a real vulnerability exploitation against a third party."
+      },
+      "rationale": "The excerpts concern reward hacking, cyberattack evaluations, refusals and hardening evaluation environments.",
+      "adjudication": "agreed"
+    },
+    {
+      "video_id": "2095070893944832003",
+      "stratum": "timed_evidence",
+      "outcome": "assigned",
+      "shelf_id": "frontier-models",
+      "shelf_path": [
+        "AI and ML",
+        "Frontier Models"
+      ],
+      "secondary_shelf_ids": [],
+      "confidence": 0.89,
+      "evidence": {
+        "excerpt_id": "ab1b328cb23bff81765b6236e36ada118c501487dee04236d13e0603dfb45981",
+        "quote": "what can 2.5 predict beyond visually plausible next frames?"
+      },
+      "rationale": "The discussion examines world-model prediction, multimodal quality metrics and inference constraints; no finished artifact is central.",
+      "adjudication": "agreed"
+    },
+    {
+      "video_id": "2095624765327458304",
+      "stratum": "text_only",
+      "outcome": "assigned",
+      "shelf_id": "frontier-models",
+      "shelf_path": [
+        "AI and ML",
+        "Frontier Models"
+      ],
+      "secondary_shelf_ids": [],
+      "confidence": 0.82,
+      "evidence": {
+        "excerpt_id": "eab39d10bd05b9158421b24012dcab594e53a1bbdbb395f946f7369ba2f7b5b4",
+        "quote": "GPT-6 Astra absolutely crushes Tiny Computer Bench™️, by finally hacking in to this dumb little toy computer"
+      },
+      "rationale": "The post claims a named model completed a concrete toy-computer benchmark task. Humorous wording alone does not negate that capability evidence.",
+      "adjudication": "resolved:The original post claims a named model succeeded at a concrete toy-computer benchmark; humor alone does not make it unmappable."
+    },
+    {
+      "video_id": "2095783502306545664",
+      "stratum": "timed_evidence",
+      "outcome": "assigned",
+      "shelf_id": "frontier-models",
+      "shelf_path": [
+        "AI and ML",
+        "Frontier Models"
+      ],
+      "secondary_shelf_ids": [
+        "ai-industry-and-business"
+      ],
+      "confidence": 0.88,
+      "evidence": {
+        "excerpt_id": "3a622ff5ba7a09bdc2a1de57d5ba7361ba860a363d83a9f475080f02b3c046a0",
+        "quote": "we had figured out a new kind of post-training where we could get the models to do like a good job with instruction"
+      },
+      "rationale": "The excerpts emphasize model scaling, instruction post-training, training pipelines and new capabilities, alongside token economics.",
+      "adjudication": "resolved:Scaling, post-training, training pipelines and model capabilities dominate the excerpts; startup/token economics is secondary."
+    },
+    {
+      "video_id": "5LqC6qdVAwU",
+      "stratum": "timed_evidence",
+      "outcome": "assigned",
+      "shelf_id": "security",
+      "shelf_path": [
+        "AI and ML",
+        "Security"
+      ],
+      "secondary_shelf_ids": [
+        "developer-tools"
+      ],
+      "confidence": 0.89,
+      "evidence": {
+        "excerpt_id": "40b5a999320627f97a012a2e626eaa60f2e7b9a8c3106494d03b539a93f6f542",
+        "quote": "doing a great job of cutting down jailbreaks even further, ended up increasing the compute needed for requests"
+      },
+      "rationale": "The detailed passages explain jailbreak classifiers, dangerous-output blocking and their compute overhead; safety mechanisms are central.",
+      "adjudication": "resolved:Jailbreak classifiers and dangerous-output blocking explain the cost overhead; technical safety controls take precedence over business framing."
+    },
+    {
+      "video_id": "8GRmLR__OGQ",
+      "stratum": "timed_evidence",
+      "outcome": "assigned",
+      "shelf_id": "developer-tools",
+      "shelf_path": [
+        "AI and ML",
+        "Developer Tools"
+      ],
+      "secondary_shelf_ids": [],
+      "confidence": 0.91,
+      "evidence": {
+        "excerpt_id": "39df6e874e95bde3261f0b9260b05f04c456bf333ac88f5c1b54792b75eb50dc",
+        "quote": "testing is hard and the cursor adapter is not as reliable"
+      },
+      "rationale": "The excerpts discuss coding-agent configuration, testing, Cursor integration and shipping changes to main and staging.",
+      "adjudication": "agreed"
+    },
+    {
+      "video_id": "FLcrvMfHUJM",
+      "stratum": "timed_evidence",
+      "outcome": "assigned",
+      "shelf_id": "security",
+      "shelf_path": [
+        "AI and ML",
+        "Security"
+      ],
+      "secondary_shelf_ids": [],
+      "confidence": 0.82,
+      "evidence": {
+        "excerpt_id": "a10feb60262e0fbf90365db222890cead840da70ae40466d6e17a4e40905c799",
+        "quote": "AI scientists warn that a few companies are on track to literally end life on Earth."
+      },
+      "rationale": "The excerpt centers on catastrophic AI-safety outcomes, covered by the Security definition's AI-safety scope.",
+      "adjudication": "agreed"
+    },
+    {
+      "video_id": "LNwODJXcvt4",
+      "stratum": "timed_evidence",
+      "outcome": "assigned",
+      "shelf_id": "education",
+      "shelf_path": [
+        "AI and ML",
+        "Education"
+      ],
+      "secondary_shelf_ids": [],
+      "confidence": 0.96,
+      "evidence": {
+        "excerpt_id": "d8df9c35790515cb80226bf6436f0d2fe889203f907ddb28565446d7e180b1fd",
+        "quote": "can train a custom object detection model with\\h\\h YOLOv8 from Ultralytics"
+      },
+      "rationale": "The excerpts teach setup, data preparation and custom YOLO training in Colab.",
+      "adjudication": "agreed"
+    },
+    {
+      "video_id": "MgbP5szEBDo",
+      "stratum": "timed_evidence",
+      "outcome": "assigned",
+      "shelf_id": "frontier-models",
+      "shelf_path": [
+        "AI and ML",
+        "Frontier Models"
+      ],
+      "secondary_shelf_ids": [],
+      "confidence": 0.91,
+      "evidence": {
+        "excerpt_id": "9ed35d5b8a9645b9ab199c5e1226e5f75f5ae0d8b50d2d689c6b872a068066a4",
+        "quote": "the one is better for the small devices, and the other one is better for accuracy."
+      },
+      "rationale": "The excerpts compare detector accuracy, speed, model sizes and output precision; comparative model evaluation is central.",
+      "adjudication": "resolved:Accuracy, speed and precision comparisons establish model evaluation; explaining a comparison is not itself a step-by-step tutorial."
+    },
+    {
+      "video_id": "YtKX2wbCpVQ",
+      "stratum": "timed_evidence",
+      "outcome": "assigned",
+      "shelf_id": "frontier-models",
+      "shelf_path": [
+        "AI and ML",
+        "Frontier Models"
+      ],
+      "secondary_shelf_ids": [
+        "ai-industry-and-business"
+      ],
+      "confidence": 0.84,
+      "evidence": {
+        "excerpt_id": "bc16ae0db085b561808b5fcf300ac2d27a26da3cebf2dc7890543e6a6351cccc",
+        "quote": "building out these general systems out of multimodal data, internet scale multimodal data"
+      },
+      "rationale": "The excerpts describe multimodal systems trained on internet-scale data for robotics; deployment economics is secondary.",
+      "adjudication": "agreed"
+    },
+    {
+      "video_id": "r0RspiLG260",
+      "stratum": "timed_evidence",
+      "outcome": "assigned",
+      "shelf_id": "education",
+      "shelf_path": [
+        "AI and ML",
+        "Education"
+      ],
+      "secondary_shelf_ids": [],
+      "confidence": 0.97,
+      "evidence": {
+        "excerpt_id": "7c37a600544c581ecb82437acc3ae78e3a28963681622faa49490f616a796c8c",
+        "quote": "training a YOLO model inside Google Colab"
+      },
+      "rationale": "The excerpts walk through dataset labeling, YOLO training in Colab and running the result locally.",
+      "adjudication": "agreed"
+    },
+    {
+      "video_id": "tOC2N0B9lio",
+      "stratum": "timed_evidence",
+      "outcome": "assigned",
+      "shelf_id": "ai-agents-and-automation",
+      "shelf_path": [
+        "AI and ML",
+        "AI Agents and Automation"
+      ],
+      "secondary_shelf_ids": [
+        "developer-tools"
+      ],
+      "confidence": 0.86,
+      "evidence": {
+        "excerpt_id": "4e855fe5e196763fcfa96f8512b46bffc9d91e7a1071d6bd5ca310daade46dda",
+        "quote": "Every day at 11:00 a.m., I want you to go through the programmer humor subreddit and find the top posts"
+      },
+      "rationale": "The excerpts describe an organizational assistant and a scheduled Reddit-to-Twitter task; code generation is also evidenced.",
+      "adjudication": "resolved:The organizational assistant and scheduled social-content task establish non-engineering assistance; code generation remains secondary."
+    },
+    {
+      "video_id": "ub2xbSlay7g",
+      "stratum": "timed_evidence",
+      "outcome": "assigned",
+      "shelf_id": "education",
+      "shelf_path": [
+        "AI and ML",
+        "Education"
+      ],
+      "secondary_shelf_ids": [
+        "frontier-models"
+      ],
+      "confidence": 0.88,
+      "evidence": {
+        "excerpt_id": "5b56dc7fa7feb8e27305784295a36b36c3254295c0966485f7bde671321a4b45",
+        "quote": "You run inference on an image. We get lots of boxes and we need to run what's called NMS non-maximum suppression."
+      },
+      "rationale": "The excerpts explain inference, NMS and text embeddings, then give model-choice and API-use guidance; teaching outweighs brief performance claims.",
+      "adjudication": "resolved:Inference, NMS and embedding explanations plus usage guidance establish pedagogy; brief model-performance claims are secondary."
+    },
+    {
+      "video_id": "z70ZrSZNi-8",
+      "stratum": "timed_evidence",
+      "outcome": "assigned",
+      "shelf_id": "education",
+      "shelf_path": [
+        "AI and ML",
+        "Education"
+      ],
+      "secondary_shelf_ids": [],
+      "confidence": 0.97,
+      "evidence": {
+        "excerpt_id": "a5a8a6150b41b50381886b5b6d7ebfb83470d9f38f0234942d0d90db6fc3a521",
+        "quote": "we'll walk through the process of setting up the Raspberry Pi to run YOLO object detection models"
+      },
+      "rationale": "The excerpts walk through Raspberry Pi setup, environments, model selection and executing a YOLO detection script.",
+      "adjudication": "agreed"
+    }
+  ]
+}

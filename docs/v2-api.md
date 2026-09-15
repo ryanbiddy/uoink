@@ -47,6 +47,24 @@ Single-video `/extract` still writes the complete screenshot set to disk. The cl
 
 The setting is returned by `GET /settings` and accepted by `POST /settings`. Setting it to `0` produces a text-only clipboard corpus while keeping all screenshots on disk.
 
+## Background model calls (D-17)
+
+The helper performs no model reasoning on the user's behalf except through
+named, default-off, metered feature flags. Three background jobs exist and
+each has its own boolean in `GET /settings` / `POST /settings`:
+
+| Flag | Job | Default |
+|---|---|---|
+| `comment_intelligence_enabled` | Comment Intelligence after a capture with comments | `false` |
+| `hook_type_enabled` | Hook Type classification after a capture | `false` |
+| `entity_extraction_enabled` | Entity extraction off the transcript after a capture (added 2026-09-04) | `false` |
+
+A saved Anthropic key alone never starts any of them; the spawn gate reads
+the flag. Existing installs that predate `entity_extraction_enabled` resolve
+it to `false` (no grandfathering). User-initiated MCP tools (`analyze_comments`,
+`classify_hook`) require only a valid key. The `usage` block of every response
+is metered; see `GET /settings/pricing` → `actual`.
+
 ## Endpoint reference
 
 ### GET /health and GET /ping
@@ -63,6 +81,21 @@ Success response: HTTP 200
 {
   "ok": true,
   "version": "<current version>",
+  "migration_version": 25,
+  "migration_pending": false,
+  "last_successful_tick_at": "2026-09-04T16:30:00Z",
+  "heartbeat": {
+    "last_tick_completed_at": "2026-09-04T16:30:00Z",
+    "last_successful_tick_at": "2026-09-04T16:30:00Z",
+    "last_successful_poll_at": "2026-09-04T16:29:58Z",
+    "last_failed_poll_at": null,
+    "last_poll_error": null,
+    "last_ingest_completed_at": null,
+    "last_tick": {"ok": true, "polls": 1, "failed_polls": 0},
+    "counts": {"ticks": 12, "polls_ok": 3, "polls_failed": 0, "ingests": 0},
+    "tick_interval_sec": 30,
+    "freshness": {"state": "fresh", "age_sec": 4.0, "stale_after_sec": 300}
+  },
   "whisperx_available": false,
   "whisper_model": "base",
   "whisperx_model_loaded": false,
@@ -72,6 +105,17 @@ Success response: HTTP 200
     "ok": true,
     "checked": 0,
     "missing": 0
+  },
+  "library": {
+    "status": "idle",
+    "waiting_for_client": false,
+    "ready": 0,
+    "leased": 0,
+    "run_revision": null,
+    "recovery_state": null,
+    "error_code": null,
+    "apply_enabled": false,
+    "contract_version": "phase2-v1-2026-09-04"
   }
 }
 ```
@@ -82,12 +126,17 @@ Fields:
 |---|---:|---|
 | `ok` | boolean | Always `true` for a healthy helper. |
 | `version` | string | Helper version from the top-level `VERSION` file. |
+| `migration_version` | integer | Newest SQLite schema migration opened by this helper process. |
+| `migration_pending` | boolean | `true` if the checkout contains a newer migration than the running helper opened. |
+| `last_successful_tick_at` | string or null | RFC 3339 UTC time of the last source-scheduler pass in which no feed poll failed; `null` before the first such pass. |
+| `heartbeat` | object | Scheduler heartbeat with separate stamps: `last_tick_completed_at` (a pass finished, any outcome), `last_successful_tick_at` (zero failed polls), `last_successful_poll_at`, `last_failed_poll_at` + `last_poll_error` (a failed poll never advances a success stamp), `last_ingest_completed_at` (an episode was published into the corpus by the watch pipeline), `last_tick` and `counts` tallies, `tick_interval_sec`, and `freshness` (`state` is `never` / `fresh` / `stale`, with `age_sec` since the last completed pass and the `stale_after_sec` bound). `uoink doctor` reports the same block and fails on `stale`. |
 | `whisperx_available` | boolean | Whether the Whisper transcription runtime can be imported. |
 | `whisper_model` | string | Normalized model selected in settings. |
 | `whisperx_model_loaded` | boolean | Whether the selected model is already present locally. |
 | `index_recovering` | boolean | `true` while a corrupt `index.db` has been quarantined and the replacement database is being backfilled from disk. |
 | `output_root_fallback` | boolean | `true` if the helper fell back to writing outputs to `%LOCALAPPDATA%\Uoink\output` because the primary `DESKTOP_ROOT` was unwritable. |
 | `path_integrity` | object | Aggregate `ok`, `checked`, and `missing` values for indexed corpus paths. Missing files add a generic `hint`; a failed scan adds the generic `error` value `index unavailable; see server.log`. |
+| `library` | object | Living Library work-queue status (Phase 2 contract `phase2-v1-2026-09-04`). `status` is `waiting_for_client` (staged Librarian work and no connected client holds a lease; the helper never runs the Librarian itself), `collecting`, `idle`, `recovery_pending`, `unavailable` (the `library_work` service is not installed), `unknown` (index not opened yet) or `error`. `waiting_for_client` repeats the first case as a boolean. `ready` / `leased` are work-row counts, `run_revision` the current run's revision or `null`, `recovery_state` the journal replay state or `null`, `error_code` the service error code when `status` is `error`, `apply_enabled` the default-off `librarian_apply_enabled` setting. Counts only, never item titles or evidence text. |
 
 ### GET /index/backfill-status
 
@@ -149,7 +198,7 @@ Error responses:
 
 ### GET /settings/pricing
 
-Return the local cost-estimator constants used by setup.html for optional BYO Anthropic features. This endpoint does not call Anthropic and does not inspect the saved API key.
+Return the local cost-estimator constants used by setup.html for optional BYO Anthropic features, plus the measured usage for the current UTC month (D-17 "metered", 2026-09-04). This endpoint does not call Anthropic and does not inspect the saved API key.
 
 Auth: `X-Uoink-Token` required.
 
@@ -165,6 +214,8 @@ Success response: HTTP 200
     "display_model": "Claude Haiku 4.5",
     "input_per_million": 1.0,
     "output_per_million": 5.0,
+    "cache_read_per_million": 0.1,
+    "cache_create_per_million": 1.25,
     "est_tokens": {
       "ci": { "input": 5000, "output": 500 },
       "hook": { "input": 1200, "output": 80 }
@@ -174,11 +225,62 @@ Success response: HTTP 200
       "hook": 0.0016,
       "both": 0.0091
     },
+    "actual": {
+      "month": "2026-09",
+      "by_feature": {
+        "hook_type": {
+          "calls": 41, "unavailable_calls": 1,
+          "input_tokens": 48200, "output_tokens": 3100,
+          "cache_read": 1000, "cache_create": 0, "usd": 0.0638,
+          "models": ["claude-haiku-4-5-20251001"]
+        }
+      },
+      "total_usd": 0.0638,
+      "unavailable_calls": 1,
+      "estimate": true,
+      "rates": {
+        "input_per_million": 1.0, "output_per_million": 5.0,
+        "cache_read_per_million": 0.1, "cache_create_per_million": 1.25,
+        "source": "https://docs.claude.com/en/docs/about-claude/pricing",
+        "source_checked": "2026-09-04"
+      },
+      "status": {
+        "ok": true, "write_failures": 0, "last_error": null,
+        "last_failure_at": null, "last_failed_feature": null
+      }
+    },
     "source": "https://docs.claude.com/en/docs/about-claude/pricing",
-    "source_checked": "2026-05-12"
+    "source_checked": "2026-09-04"
   }
 }
 ```
+
+`est_per_video` is an estimate from hardcoded token guesses and list prices.
+`actual` is the meter: the `usage` block of every Comment Intelligence, Hook
+Type, and entity-extraction response is accumulated into the local index
+(`memory_layer` rows keyed `usage.anthropic.<feature>.<model>.<YYYY-MM>`), one
+row per feature, model, and month. The 4-token key probe in
+`POST /settings/test-key` is excluded on purpose.
+
+The meter hides nothing (run F acceptance, case 3, 2026-09-04):
+
+- `usd` and `total_usd` are estimates (`estimate: true`): list price applied to
+  the reported counters, including cache reads and cache writes, never an
+  invoice. `rates` is the table used, with the page it was read from and the
+  date it was checked; the same record is stored next to every bucket's
+  `est_usd`. Cache writes are priced at the 5-minute-TTL rate because the
+  response counter does not distinguish the 1-hour TTL.
+- `unavailable_calls` (per feature, and the month total) counts successful
+  responses whose `usage` block was missing, malformed, or all-zero. Those
+  calls happened and are not in `calls`, `usd`, or the token counters.
+- `status` reports meter writes that failed since the helper started
+  (`write_failures`, the last error type, time, and feature). `ok` is `false`
+  as soon as one write was lost, so an empty meter cannot be read as
+  "nothing was spent". Successful inference and meter failure are reported
+  separately: the call's own result is never affected.
+- When the index itself cannot be read, `by_feature` is empty,
+  `unavailable_calls` is `null` (unknown, not zero), `status` is still
+  present, and `error` is `usage unavailable`.
 
 ### GET /reliability/model/status
 
@@ -214,7 +316,8 @@ Optional request body:
 }
 ```
 
-`model` may be `tiny`, `base`, `small`, `medium`, or `large`. When it is
+`model` may be `tiny`, `base`, `small`, `medium`, `large`, or
+`large-v3-turbo`. When it is
 omitted, Uoink uses the model selected in Settings.
 
 Success response: HTTP 200
@@ -730,11 +833,11 @@ Query params:
 
 | Field | Type | Required | Notes |
 |---|---:|---:|---|
-| `kind` | string | no | Optional filter: `playlist` or `single`. Omit to return both. |
+| `kind` | string | no | Optional filter: `playlist`, `single`, or `podcast_transcribe`. Omit to return all kinds. |
 
 Request body: none.
 
-Persistence: jobs persist across helper restarts via `%LOCALAPPDATA%\Uoink\index.db` on Windows. Legacy `%LOCALAPPDATA%\Uoink\jobs.json` is imported once on first Sprint 15 boot, then renamed to `jobs.json.migrated`. In-flight jobs from a previous helper process are restored as records with `state: "failed"` and `error: "server restarted"`; users restart them manually. Jobs are returned sorted by `updated_at` descending. Single-video job records keep only paths and small metadata so `/jobs` stays small; full corpus text and base64 clipboard payloads are never persisted in the index job row.
+Persistence: jobs persist across helper restarts via `%LOCALAPPDATA%\Uoink\index.db` on Windows. Legacy `%LOCALAPPDATA%\Uoink\jobs.json` is imported once on first Sprint 15 boot, then renamed to `jobs.json.migrated`. Interrupted playlist and single-video records become failed because those workers cannot resume. Interrupted `podcast_transcribe` jobs return to `queued` and start again from their local MP3. Jobs are returned sorted by `updated_at` descending. Job records keep only paths and small metadata; full corpus text and base64 clipboard payloads are never persisted in the index row.
 
 Success response: HTTP 200
 
@@ -1277,6 +1380,68 @@ Error responses:
 | 403 | `missing or invalid token` | `X-Uoink-Token` missing or stale. |
 | 404 | `skill system prompt not found` | Skill files are missing from the install layout. |
 
+### Podcast feed and episode endpoints
+
+All podcast routes require `X-Uoink-Token`. The helper checks for due feeds
+every 30 seconds and polls each enabled feed when its `poll_interval_min` has
+elapsed. Registration authorizes metadata polling only. Audio download,
+transcription, and corpus publishing stay off unless that feed's `auto_ingest`
+flag is explicitly enabled. A first-time Whisper model download still needs
+separate consent.
+
+| Method | Route | Purpose |
+|---|---|---|
+| GET | `/podcasts/feeds` | List registered feeds. |
+| POST | `/podcasts/feeds` | Register `{feed_url, poll_interval_min?, auto_ingest?}`; `auto_ingest` defaults to `false`. |
+| POST | `/podcasts/feeds/remove` | Remove `{feed_id}` and tracked episodes. |
+| POST | `/podcasts/feeds/set-enabled` | Set `{feed_id, enabled}`. |
+| POST | `/podcasts/feeds/set-auto-ingest` | Set `{feed_id, auto_ingest}` for episodes discovered after opt-in. |
+| POST | `/podcasts/feeds/poll` | Fetch one feed now with `{feed_id}`. |
+| GET | `/podcasts/episodes` | List episodes; accepts `feed_id`, `status`, and `limit`. |
+| POST | `/podcasts/episodes/set-status` | Set `{episode_id, status}`. |
+| POST | `/podcasts/episodes/download` | Download one episode MP3 synchronously. |
+| POST | `/podcasts/episodes/transcribe` | Queue local transcription and return HTTP 202. |
+| POST | `/podcasts/episodes/to-corpus` | Publish a completed transcript into the corpus. |
+| GET | `/transcribe/status` | Read WhisperX/model/diarization availability. |
+
+Transcription request:
+
+```json
+{
+  "episode_id": 42,
+  "model": "base",
+  "language": "en",
+  "diarize": false,
+  "consent_given": false
+}
+```
+
+The accepted response contains `job_id` and a durable job snapshot. Use
+`GET /jobs/<job_id>` for progress. One below-normal-priority worker processes
+podcast transcription jobs sequentially on Windows; CPU inference uses int8.
+If the selected model is absent, the endpoint returns HTTP 412 with
+`consent_required: true` until the caller explicitly authorizes the download.
+
+Publishing request:
+
+```json
+{ "episode_id": 42 }
+```
+
+The success response contains the stable `episode_<hash>` ID, slug, Markdown
+and sidecar paths, source URL, citation count, segment count, and any speaker
+labels. The publisher writes a per-episode folder while leaving the MP3 flat in
+the feed folder. Repeating the operation is idempotent and repairs a prior
+partial write. Podcast citations use the retained episode page URL with
+`#t=<seconds>`; an opaque GUID is never turned into a fabricated URL.
+
+When Auto-ingest is on, the watch tick advances one durable episode candidate
+per due feed poll. It downloads the MP3, queues the same serialized
+transcription worker, and publishes the finished transcript. Remaining marked
+episodes wait for later polls, so subscribing to a large archive cannot start
+dozens of media jobs at once. Turning Auto-ingest on does not sweep episode
+rows that were discovered before the opt-in.
+
 ### MCP HTTP JSON-RPC helper endpoints
 
 Uoink v2 Sprint 4 adds MCP over stdio plus an experimental local HTTP JSON-RPC helper. Stdio clients launch `uoink_mcp.py` and are the officially supported MCP transport for launch. HTTP clients can use the existing helper server under `/mcp/v1` for direct JSON-RPC POST calls, but this is not a spec-complete SSE or Streamable HTTP implementation.
@@ -1387,6 +1552,8 @@ Tools currently exposed:
 - `cancel_job`
 - `list_recent_uoinks`
 - `search_uoinks`
+- `search_clips`
+- `get_evidence_card`
 - `get_uoink_corpus`
 - `analyze_comments`
 - `classify_hook`
@@ -1395,6 +1562,74 @@ Tools currently exposed:
 - `get_uoink_health`
 - `find_mentions`
 - `get_transcript_reliability`
+
+The full HTTP/OpenAPI registry is generated from `TOOL_REGISTRY` and contains
+88 tools (the two Phase 4 brief tools, `get_library_brief_input` and the
+local-write `publish_library_brief`, joined it on 2026-09-08, run AV-2; the
+read-only Phase 6 cited export `export_cited_range` joined it on 2026-09-08,
+run BC-2, and is also on stdio).
+`search_clips` and `get_evidence_card` were Phase 1 registry-only
+additions; since 2026-09-04 (run E) they are also part of the stdio
+set, sharing the same handlers.
+
+The six Living Library work-queue tools added on 2026-09-04 (Phase 2 stage 1,
+contract `phase2-v1-2026-09-04`) are registry-only and not on stdio:
+`list_library_work`, `claim_library_work`, `submit_library_result`,
+`apply_reshelving`, `pin_shelf` and `undo_library_apply`. Their input schemas
+are the frozen `docs/library/phase2-contract/tool-schemas.json` (JSON Schema
+2020-12 with `$defs`, `$ref`, `oneOf` and `const`), embedded verbatim in
+`uoink_mcp_tools.py`. Every response carries `schema_version: 1`; errors use
+`{"ok": false, "schema_version": 1, "error": {"code", "message", "retryable",
+"details"}}` rather than the plain string `error` the older tools return.
+Requests on `/tools/<name>` and `/mcp/v1` are decoded strictly (NaN, Infinity
+and duplicate object keys are HTTP 400), then checked against the frozen
+schema before the `library_work` service is asked anything; a malformed
+request gets the same `invalid_request` envelope on every transport (HTTP 400
+on `/tools/<name>`, inside the JSON-RPC result on `/mcp/v1`). When the
+`library_work` module is not installed the tools answer
+`service_unavailable`; `apply_reshelving` with `mode: "apply"` answers
+`apply_disabled` while the default-off `librarian_apply_enabled` setting is
+off. `pin_shelf` and `undo_library_apply` also need a `user_intent_token`
+from `POST /library/intent` (below); no registry tool can mint one.
+
+### POST /library/intent
+
+Mint a five-minute `user_intent_token` for exactly one pin/move/unpin or undo
+(Phase 2 contract, "Pins and authoritative recovery"). The dashboard calls
+this from the confirmation control of a displayed delta; the token binds the
+canonical operation, the expected projection revision and the dashboard
+session, and the service consumes it atomically with the operation.
+
+Auth: `X-Uoink-Token`, plus an origin gate: `Origin`, when present, must be a
+loopback `http` origin on the helper's own port, and `Sec-Fetch-Site`, when
+present, must be `same-origin` or `none`. Extension and web origins are
+refused even with a valid token. Bodies are decoded strictly (no NaN,
+Infinity or duplicate keys). Rate limit: 30 per minute.
+
+Request body: `kind` is `pin` or `undo`; `operation` is the `pin_shelf` or
+`undo_library_apply` request without its `user_intent_token`; `confirmed` must
+be the JSON boolean `true`.
+
+```json
+{
+  "kind": "pin",
+  "operation": {
+    "video_id": "dQw4w9WgXcQ",
+    "shelf_id": "shelf-ai-agents",
+    "action": "pin",
+    "expected_projection_revision": 4,
+    "operation_key": "pin-2026-09-04T16:30:00Z-1"
+  },
+  "confirmed": true
+}
+```
+
+Success response: HTTP 200 with `{"ok": true, "schema_version": 1,
+"user_intent_token": "<43-128 url-safe chars>", "expires_ms": <server epoch
+ms>, "kind": "pin", "request_hash": "<sha256 hex>"}` as returned by the
+service. A malformed body is HTTP 400 with the `invalid_request` envelope,
+a wrong origin HTTP 403, a throttled caller HTTP 429, and a helper without
+the `library_work` service HTTP 200 with `service_unavailable`.
 
 Full schemas and return shapes live in `docs/v2-mcp.md`.
 
@@ -1777,7 +2012,9 @@ Every job object returned by `/playlist/start`, `/jobs/<id>`, `/jobs/<id>/cancel
 Field rules:
 
 - `state` is always one of `queued`, `running`, `completed`, `cancelled`, `failed`.
-- `kind` is `playlist` for async playlist jobs and `single` for synchronous `/extract` side-effect records.
+- `kind` is `playlist` for async playlist jobs, `single` for synchronous
+  `/extract` side-effect records, and `podcast_transcribe` for queued local
+  episode transcription.
 - `title` is populated for `single` jobs; `playlist_title` is populated for `playlist` jobs.
 - `session_folder` is the absolute path to the output folder on disk. Playlist jobs populate it from `queued` onwards; single jobs populate it when a folder is known.
 - `videos_total` is the number of videos selected for processing after the 10-video cap for playlists, or `1` for single jobs.

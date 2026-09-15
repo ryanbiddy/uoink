@@ -1,0 +1,24 @@
+# Notice integration verdict
+
+2026-09-13. The notice change passed its focused author and independent checkout checks. No remaining defect was found in this scope. This supports integrating the eight product files and the new generator test file; it is not an installed-inventory or release verdict.
+
+| Run | Python cases | PowerShell block cases | Native / qualification / tool exit | Python / block time |
+| --- | --- | --- | --- | --- |
+| Author, tool 832b52 | 20 passed, 0 failed, 0 skipped | 10 passed, 0 failed | 0 / 0 / 0 | 0.2473495 / 0.3306099 s |
+| Actual checkout, tool 3a56e1 | 20 passed, 0 failed, 0 skipped | 10 passed, 0 failed | 0 / 0 / 0 | 0.3215298 / 0.2047144 s |
+
+Both raw Python collections have the same 20 ordered IDs and 60 passed setup/call/teardown reports. No outcome changed across observer hooks; no xfail or subtest report is present. The heavy-import guard remained installed and recorded zero attempts. Both native receipt validators returned 0. Both block runs have the same ten passing IDs, and their inputs remained unchanged. These are repeated checks of the same cases, not 60 distinct new product tests.
+
+Thirteen cases are unchanged tests in test_runtime_setuptools_notices.py, test_installer_dependency_lock.py and test_c02_reliability_faster_whisper.py. Seven new parameterized cases in test_notice_integration.py verify normalized names, preservation of the proxy-tools metadata conflict, injected importlib fallback, refusal of either unreviewed version before overwriting an old index, exact upstream bytes/links and agreement with the committed supplemental notice block.
+
+The six generation-block controls verify normal success, a failed pip-licenses attempt followed by generation, generator exit 2 remaining fatal after cleanup 0, fatal cleanup exit 2, exception cleanup and restoration of an absent timestamp. The four staging controls verify the exact four text copies and refusal of a missing license, altered license or changed lock version without deleting source text. Generation ran through a fixed inert function; these cases did not install or invoke pip. Staging used new temporary text directories, not installer/staging or an installed dependency tree.
+
+The product change makes normal notice generation mandatory even when pip-licenses is unavailable, retains the existing importlib fallback, captures the generator exit before cleanup, restores SOURCE_DATE_EPOCH/native preference and refuses stale attribution on failure. StageSourceOnly remains a source-copy path and does not claim a freshly generated installed inventory. The build and Inno source now include the notice index, supplemental README and both exact upstream license texts.
+
+ANTLR's retained text is 2,699 bytes, SHA-256 b1b379fcaf3219593a4c433feb1b35c780bed23fafaae440b1ae2771a9521e3a. The proxy-tools text is 1,436 bytes, SHA-256 a428fb8a2e762af3eb0a6edbbb88e9b42ccfee80fd9b423958bcacf9b9abbfe4. Both remain unchanged. The proxy-tools MIT metadata versus BSD-style source/license conflict, placeholder and malformed trailing text remain visible. The ANTLR notice's JavaScript-specific MIT section is preserved without claiming those files ship in the Python wheel. This work makes no legal-clearance claim.
+
+Integration tool 9788ef returned 1 after git apply --3way succeeded: its exact-byte postcheck failed because core.autocrlf expanded LF lines in the mixed-ending proposal. The retained repair brief records root's read-only diagnostic fe96ea: all four modified sources were equal after CRLF-to-LF normalization. No raw fe96ea tool object has been supplied here, and none is reconstructed. Tool fa439f then returned 0 after restoring all eight exact qualified after-files and adding the unchanged new test. Checkout qualification 3a56e1 followed that repair. The original failed postcheck remains failed; no test was relabeled.
+
+Pre-execution drafts retain the initially optional generator/build proposal, enabled-site startup plan, old unused validator and null-to-empty PowerShell fixture correction. Their notes distinguish unexecuted drafts from subsequent passing observations. Current source bindings show the actual checkout's 23 source/test/text/guard files equal the qualified author overlay. The eight product paths are build.ps1, scripts/gen_third_party_notices.py, THIRD-PARTY-NOTICES.md, installer/uoink.iss and the four files under third-party-notices. The new test file has SHA-256 0ba6b8c53f991d5373eaf86a54aff10bc3840d7855b187b02719ecdc31a28a3c.
+
+This review read saved source and receipts only. No new tests, full build, package installation, cached wheel/model read, decoder, native model, network or live database operation occurred while preparing this verdict. The exact installed dependency inventory, installer execution and release checks remain separate work.

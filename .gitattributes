@@ -9,3 +9,184 @@
 # Cross-repository contract fixtures are hashed byte-for-byte. Keep their
 # materialized bytes identical on Windows, macOS, and Linux.
 tests/fixtures/suite_integration_v1/*.json text eol=lf
+
+# Living Library stage 2: execution archives and freeze artifacts are hashed
+# byte-for-byte by tests/validate_proof_receipts.py. No EOL conversion anywhere.
+docs/library/proof/induction-run-*/** -text
+docs/library/proof/induction-attempts/** -text
+docs/library/proof/run-stage2-*/** -text
+docs/library/proof/labels/** -text
+docs/library/proof/holdout-v2-labelling-packet-*.json -text
+docs/library/proof/manifest-stage2-*.json -text
+docs/library/taxonomy-v2-*.json -text
+docs/library/proof/taxonomy-v2-*.json -text
+docs/library/proof/audit-*-measurements-*.json -text
+docs/library/taxonomy-v3-*.json -text
+docs/library/proof/taxonomy-v3-*.json -text
+docs/library/proof/holdout-v3-*.json -text
+docs/library/proof/taxonomy-v3-candidate-*.json -text
+docs/library/proof/manifest-stage3-*.json -text
+docs/library/proof/run-stage3-*/** -text
+docs/library/proof/run-stage*/** -text
+docs/library/proof/card-contract-v2-*.json -text
+docs/library/proof/manifest-stage4-*.json -text
+docs/library/proof/run-stage4-*/** -text
+docs/library/proof/stage4-schema-probe-*.json -text
+docs/library/proof/s21-*/** -text
+docs/library/proof/aw-*/** -text
+docs/library/proof/procrec-*/** -text
+docs/library/proof/s20-*/** -text
+docs/library/proof/bd-study-*/** -text
+docs/library/proof/bd-player-*/** -text
+docs/library/proof/aw8-*/** -text
+docs/library/proof/az5g2-*/** -text
+docs/library/PHASE5-AZ-MEASUREMENTS-2026-09-08.md -text
+docs/library/PHASE5-AZ5G2-GROK-2026-09-08.md -text
+scripts/measure_phase5_az5g2.py -text
+scripts/run_phase5_az5g2_union.py -text
+docs/library/PHASE5-AZ5G2-INTEGRATOR-2026-09-08.md -text
+docs/library/proof/aw9-*/** -text
+docs/library/proof/full-ba4-*/** -text
+docs/library/patches/av5m4b4-grok-rejected-2026-09-08.patch -text
+docs/library/proof/aw10-*/** -text
+docs/library/patches/av5m4b5-grok-rejected-2026-09-08.patch -text
+docs/library/proof/sdk-source-preflight-*/** -text
+docs/library/proof/aw11-*/** -text
+docs/library/patches/av5m4b6-grok-rejected-2026-09-08.patch -text
+docs/library/proof/client-capacity-*/** -text
+docs/library/proof/aw12-*/** -text
+docs/library/patches/av5m4b7-grok-original-2026-09-08.patch -text
+docs/library/proof/aw4-final-*/** -text
+docs/library/proof/aw-client-01-*/** -text
+docs/library/proof/aw-client-02-*/** -text
+docs/library/proof/candidate-full-*/** -text
+docs/library/proof/candidate-package-*/** -text
+docs/library/patches/ryan-fixture-corrections-2026-09-09.patch -text
+docs/library/proof/ryan-corrected-*/** -text
+docs/library/proof/p3-original-checks-*/** -text
+docs/library/proof/ryan-phase4-lifecycle-*/** -text
+docs/library/proof/ryan-phase*-integration-*/** -text
+docs/library/patches/ryan-proposed-io-fixture-boundary-2026-09-09.patch -text
+docs/library/proof/ryan-install-review-*/** -text
+docs/library/patches/ryan-c22-kit-original-2026-09-09.patch -text
+docs/library/proof/ryan-startup-anchor-*/** -text
+docs/library/patches/ryan-phase4-kit-original-2026-09-09.patch -text
+docs/library/proof/ryan-p4-kit-review-*/** -text
+docs/library/proof/ryan-verification-runtime-*/** -text
+docs/library/proof/ryan-integrated-tree-*/** -text
+docs/library/proof/ryan-install-review-02-2026-09-09/** -text
+docs/library/proof/ryan-c22-review-02-2026-09-09/** -text
+docs/library/proof/ryan-preview-read-2026-09-09/** -text
+docs/library/proof/ryan-p4-kit-review-02-2026-09-09/** -text
+docs/library/proof/ryan-inno-final-2026-09-09/** -text
+docs/library/proof/ryan-integrated-tree-02-2026-09-09/** -text
+docs/library/proof/ryan-read-order-2026-09-09/** -text
+docs/library/patches/ryan-proposed-read-fixture-2026-09-09.patch -text
+
+docs/library/proof/candidate-package-02-2026-09-09/** -text
+docs/library/proof/ryan-p4-kit-review-03-2026-09-09/** -text
+
+docs/library/proof/ryan-bundled-runtime-03-2026-09-09/** -text
+docs/library/proof/ryan-c22-review-03-input-2026-09-09/** -text
+
+docs/library/proof/ryan-c22-review-03-verify-2026-09-09/** -text
+
+docs/library/proof/ryan-operator-ui-repro-2026-09-09/** -text
+
+docs/library/proof/ryan-p4-kit-review-04-2026-09-09/** -text
+
+docs/library/proof/ryan-p4-operator-integration-2026-09-09/** -text
+
+docs/library/proof/ryan-p4-bundled-01-2026-09-09/** -text
+
+docs/library/proof/ryan-p4-collection-repair-2026-09-09/** -text
+
+docs/library/proof/ryan-p4-bundled-02-2026-09-09/** -text
+
+docs/library/proof/ryan-c22-review-04-input-2026-09-09/** -text
+
+docs/library/proof/ryan-c22-review-04-verify-2026-09-09/** -text
+
+docs/library/proof/ryan-c22-supplement-01-2026-09-09/** -text
+
+docs/library/proof/ryan-c22-final-integration-2026-09-09/** -text
+docs/library/proof/ryan-c22-final-oracle-2026-09-09/** -text
+
+docs/library/proof/ryan-c22-bundled-01-2026-09-09/** -text
+
+docs/library/proof/ryan-c22-bundled-compatibility-2026-09-09/** -text
+
+docs/library/proof/ryan-c22-provenance-02-2026-09-09/** -text
+
+docs/library/proof/ryan-startup-backfill-integration-2026-09-09/** -text
+
+docs/library/proof/ryan-c22-version-query-2026-09-09/** -text
+
+docs/library/proof/candidate-package-03-2026-09-09/** -text
+
+docs/library/proof/ryan-package03-binding-2026-09-09/** -text
+
+docs/library/proof/ryan-c22-bundled-02-2026-09-09/** -text
+
+docs/library/proof/ryan-p4-bundled-03-2026-09-09/** -text
+
+docs/library/proof/ryan-portable-operator-2026-09-09/** -text
+
+docs/library/proof/ryan-final-kit-tree-01-2026-09-09/** -text
+
+docs/library/proof/ryan-final-receipt-bundle-2026-09-09/** -text
+
+docs/library/proof/ryan-approved-fixtures-2026-09-09/** -text
+
+docs/library/proof/ryan-security-council-ab-2026-09-09/** -text
+
+docs/library/proof/ryan-installer-advisories-2026-09-09/** -text
+docs/library/proof/ryan-isolated-credentials-2026-09-09/** -text
+docs/library/proof/ryan-dependency-security-2026-09-09/** -text
+docs/library/proof/ryan-agent-installation-review-2026-09-09/** -text
+docs/library/proof/ryan-receipt-correction-2026-09-09/** -text
+docs/library/proof/ryan-agent-receipt-path-review-2026-09-09/** -text
+docs/library/proof/ryan-security-final-tree-01-2026-09-09/** -text
+docs/library/proof/ryan-installed-payload-repair-2026-09-09/** -text
+docs/library/proof/candidate-package-04-2026-09-09/** -text
+docs/library/proof/ryan-security-final-tree-02-2026-09-09/** -text
+docs/library/proof/ryan-native-guard-review-2026-09-09/** -text
+docs/library/proof/ryan-ffmpeg-pin-repair-2026-09-09/** -text
+docs/library/proof/ryan-python313-qualification-2026-09-09/** -text
+docs/library/proof/ryan-torchcodec-repair-2026-09-09/** -text
+docs/library/proof/candidate-package-05-2026-09-09/** -text
+docs/library/proof/ryan-final-partitioned-01-2026-09-09/** -text
+
+docs/library/proof/ryan-p4-embedded-probe-2026-09-10/** -text
+
+docs/library/proof/ryan-final-partitioned-02-2026-09-10/** -text
+
+docs/library/proof/ryan-agent-installed-05-2026-09-09/** -text
+
+docs/library/proof/product-suite-review-2026-09-10/** -text
+
+docs/library/proof/ryan-proof-byte-transport-2026-09-10/** -text
+
+docs/library/proof/ryan-review-bundle-05-2026-09-10/** -text
+
+docs/library/proof/security-repair-gemini-2026-09-12/** -text
+
+docs/library/proof/security12-astra-review-2026-09-12/** -text
+
+docs/library/proof/native-gui-package07-2026-09-12/** -text
+docs/library/proof/signing-repair-01-2026-09-12/** -text
+docs/library/proof/signing-review-02-2026-09-12/** -text
+vendor/nltk-pathsec/** -text
+docs/library/proof/nltk-pathsec-review-2026-09-12/** -text
+
+docs/library/proof/runtime-graph-01-2026-09-12/** -text
+
+docs/library/proof/runtime-graph-review-2026-09-12/** -text
+
+docs/library/proof/runtime-graph-astra-review-2026-09-12/** -text
+
+docs/library/proof/runtime-graph-integrator-2026-09-12/** -text
+
+docs/library/proof/nltk-local-wheel-2026-09-13/** -text
+
+docs/library/proof/nltk-installer-binding-2026-09-13/** -text

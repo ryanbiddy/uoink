@@ -6,14 +6,9 @@ endpoints with CORS allowed for youtube.com.
 
 ## Dependencies
 
-Pure Python stdlib — **no fastapi/flask/uvicorn install required**.
-
-The optional `win11toast` package is used for a friendly startup toast; if
-it's missing, the server still runs (silently).
-
-```
-pip install win11toast      # optional
-```
+Pure Python stdlib — **no fastapi/flask/uvicorn install required**. Windows
+desktop notifications use the built-in PowerShell/NotifyIcon path; no optional
+toast package is required.
 
 You also still need the same external tools as the GUI:
 
@@ -43,14 +38,41 @@ Verify it's alive at `http://127.0.0.1:5179/ping`. A live helper returns HTTP
 
 Logs are written to `server.log` next to `server.py`.
 
-## Auto-start at login
+## Command line
 
-1. Press <kbd>Win</kbd>+<kbd>R</kbd>, type `shell:startup`, press Enter.
-2. Drop a shortcut to `start_server.bat` into that folder.
+The repository includes a small `uoink` wrapper. On Windows, replace `uoink`
+below with `.\uoink.cmd`; on macOS or Linux, use `./uoink`.
 
-The server launches with `pythonw`, so it sits silently in the background — no
-console window. Stop it via Task Manager (kill the `pythonw.exe` process) or by
-running the GUI's launcher and then closing it; cleaner: leave it running.
+```text
+uoink doctor
+uoink rebuild-index
+uoink search <query>
+uoink clips <query>
+```
+
+`doctor` prints helper health, schema-migration state, and the existing
+diagnostics as JSON. `rebuild-index` runs the existing on-disk rebuild and
+accepts an optional corpus root. `search` and `clips` send the query to the
+running helper's authenticated HTTP tool registry and print its JSON response.
+
+## Install the Windows watchdog
+
+From the repository or installed Uoink directory, run:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\install-watchdog.ps1
+```
+
+The script creates or updates the current user's `Uoink Helper` Scheduled Task.
+It starts the helper at logon and, if the process fails, retries three times at
+one-minute intervals. Re-run the same command after moving the install folder.
+Use `-WhatIf` to inspect the intended registration without changing the task.
+
+Desktop notifications default on. Turn off **Show desktop notifications** in
+Dashboard → Settings → Local app to keep background work invisible. Suppressed
+events remain in Activity, and Uoink suppresses balloons automatically while a
+foreground window covers its monitor. The authenticated settings equivalent is
+`POST /settings` with `{"notifications_enabled": false}`; no restart is needed.
 
 ## Endpoints
 
@@ -63,6 +85,21 @@ models, output-root recovery, and corpus state. The response shape is:
 {
   "ok": true,
   "version": "<current version>",
+  "migration_version": 25,
+  "migration_pending": false,
+  "last_successful_tick_at": "2026-09-04T16:30:00Z",
+  "heartbeat": {
+    "last_tick_completed_at": "2026-09-04T16:30:00Z",
+    "last_successful_tick_at": "2026-09-04T16:30:00Z",
+    "last_successful_poll_at": "2026-09-04T16:29:58Z",
+    "last_failed_poll_at": null,
+    "last_poll_error": null,
+    "last_ingest_completed_at": null,
+    "last_tick": {"ok": true, "polls": 1, "failed_polls": 0},
+    "counts": {"ticks": 12, "polls_ok": 3, "polls_failed": 0, "ingests": 0},
+    "tick_interval_sec": 30,
+    "freshness": {"state": "fresh", "age_sec": 4.0, "stale_after_sec": 300}
+  },
   "whisperx_available": false,
   "whisper_model": "base",
   "whisperx_model_loaded": false,
@@ -72,6 +109,17 @@ models, output-root recovery, and corpus state. The response shape is:
     "ok": true,
     "checked": 0,
     "missing": 0
+  },
+  "library": {
+    "status": "idle",
+    "waiting_for_client": false,
+    "ready": 0,
+    "leased": 0,
+    "run_revision": null,
+    "recovery_state": null,
+    "error_code": null,
+    "apply_enabled": false,
+    "contract_version": "phase2-v1-2026-09-04"
   }
 }
 ```
@@ -79,6 +127,36 @@ models, output-root recovery, and corpus state. The response shape is:
 `path_integrity` always contains `ok`, `checked`, and `missing`. When indexed
 files are missing it also contains a human-readable `hint`; if the index scan
 itself fails it instead contains an `error` string.
+
+`library` is the Living Library work-queue status (Phase 2 contract
+`phase2-v1-2026-09-04`). `status` is one of `waiting_for_client` (staged
+Librarian work exists and no connected client holds a lease; the helper never
+runs the Librarian itself), `collecting` (a client holds leases), `idle` (no
+staged work), `recovery_pending` (the authoritative journal must be replayed
+before the queue mutates again), `unavailable` (the `library_work` service is
+not installed in this build), `unknown` (the index has not been opened yet) or
+`error` (the status read failed; see `server.log`). `ready` and `leased` are
+work-row counts, `run_revision` is the current run's revision or `null`, and
+`apply_enabled` mirrors the default-off `librarian_apply_enabled` setting.
+Counts only; no item titles or evidence text are disclosed.
+
+`migration_version` is the newest schema migration opened by this helper.
+`migration_pending` becomes `true` if newer migration files appear while it is
+running. `last_successful_tick_at` is an RFC 3339 UTC timestamp; it is `null`
+until the background source scheduler completes a pass in which no feed poll
+failed.
+
+`heartbeat` separates four things the old single timestamp conflated:
+`last_tick_completed_at` (the scheduler loop finished a pass, any outcome),
+`last_successful_tick_at` (a pass with zero failed polls),
+`last_successful_poll_at` (one feed poll returned ok) and
+`last_ingest_completed_at` (one episode was published into the corpus by the
+watch pipeline). A failed poll stamps `last_failed_poll_at` and
+`last_poll_error` and never advances a success stamp. `freshness.state` is
+`never` before the first completed pass, `fresh` while the last pass completed
+within `stale_after_sec`, and `stale` otherwise; `stale` means the scheduler
+thread is dead or hung even though the HTTP process still answers.
+`uoink doctor` reports the same block under `heartbeat` and fails on `stale`.
 
 ### `POST /extract`
 
@@ -100,8 +178,8 @@ Response on success:
 }
 ```
 
-The server also calls `os.startfile(folder)` on success so File Explorer pops
-open at the result folder automatically.
+The result folder remains available from the dashboard and tray menu; a
+background capture does not pop File Explorer open.
 
 Response on failure:
 

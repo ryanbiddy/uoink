@@ -10,6 +10,41 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+Nothing yet.
+
+## [3.8.0] - 2026-09-15
+
+### Added
+
+- **Living Library media depth (Phase 6, contract `phase6-v1`).**
+  The MCP server now exposes 32 tools over stdio (31 → 32: the read-only
+  `export_cited_range`, which quotes stored cues with speaker labels,
+  provenance, chapters and revision pins after validating every original
+  artifact by bytes); the HTTP/OpenAPI registry grows to 88. Publication is
+  fenced by a per-item ownership ledger, commits one coherent snapshot with
+  Phase 2 invalidation, prunes obsolete owned `.media-inputs` artifacts after
+  settlement, and podcast items record `seek_kind: "none"` until a player
+  path exists.
+- **Living Library reach, activity and standing capture (Phases 3 to 5).** The
+  stdio surface grew from 25 to 31 at this point (`search_library`,
+  `get_library_item`, `read_library_resource`, `get_library_activity`, and the
+  client-run brief pair `get_library_brief_input` / `publish_library_brief`,
+  the latter a local write under `reach/briefs`), five `uoink://library/v1/`
+  resource templates and four prompts; the HTTP/OpenAPI registry grows to 87
+  with the four source-subscription tools and the same additions.
+  Contracts `phase3-v1`, `phase4-v1` and `phase5-v1` under `docs/library/`.
+- **`search_clips` and `get_evidence_card` on stdio.** The two Phase 1 clip
+  tools join the curated stdio MCP surface (23 → 25 tools); they call the
+  same handlers as the HTTP/OpenAPI registry and return the same shapes.
+- **Real model-usage meter.** Every Anthropic response's `usage` block is
+  now accumulated per feature, model, and month into the local index
+  (`usage.anthropic.<feature>.<model>.<YYYY-MM>`); `GET /settings/pricing`
+  gains an `actual` block beside the estimate (D-17 "metered").
+- **Scheduler heartbeat.** `/health` and `uoink doctor` gain a `heartbeat`
+  block that separates tick completion, last successful poll, last ingest
+  completion, and freshness. A failed feed poll no longer advances the
+  success timestamp; a stale scheduler fails `doctor`.
+
 ### Changed
 
 - **Captures notify instead of opening Explorer.** Finishing a uoink (and
@@ -17,6 +52,68 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   folder instead of popping a File Explorer window per capture — batch grabs
   no longer bury the desktop in open folders. Opening the folder stays one
   click away via the tray menu, the Recent list, and the dashboard.
+
+- **Entity extraction is now opt-in (D-17).** The background entity
+  extraction call gets a named `entity_extraction_enabled` setting, default
+  off, beside Comment Intelligence and Hook Type. A saved Anthropic key alone
+  no longer starts it; turn it on under Settings → Entity extraction.
+  Existing installs start with it off.
+
+### Security
+
+- **Recall hook hardening (SEC-02).** `scripts/recall_hook.py` now wraps
+  library text in an explicit untrusted-data boundary with a
+  data-not-instructions preface, strips control characters, neutralises
+  fence-breaking markup, bounds its output, opens the index read-only with a
+  1 s timeout under a 1.5 s wall-clock budget, de-duplicates hits per
+  session, honours `UOINK_RECALL_DISABLED=1`, and never prints file paths.
+
+
+Podcast subscriptions can now keep themselves current and publish selected
+episodes into the local corpus. The helper also gained controls for keeping
+background work quiet without losing its history.
+
+### Added
+
+- **Podcast episodes can enter the shared corpus.** After an on-demand local
+  transcription completes, `episode_to_corpus` writes deterministic Markdown
+  and a sidecar, indexes the transcript for search, adds source-aware timestamp
+  citations, and links the episode to its stable `episode_<hash>` corpus ID.
+- **Podcast transcription now runs as durable background work.** One local
+  worker processes jobs sequentially at below-normal priority on Windows;
+  `get_job_status` reports progress, and interrupted jobs queue again when the
+  helper restarts. Model downloads still require explicit consent.
+- **Podcast feeds update automatically.** A lightweight scheduler checks due
+  RSS and Atom subscriptions for new episode metadata. Audio stays off by
+  default; each feed has a separate Auto-ingest switch for downloading,
+  transcribing, and publishing one new episode at a time.
+- **Desktop notifications can be silenced.** A Local app setting disables
+  balloons without discarding the event from Activity. Uoink also suppresses
+  notifications while a foreground window covers its monitor, including
+  borderless and exclusive-fullscreen apps.
+
+### Changed
+
+- **The stdio MCP surface now has 23 tools.** Podcast feed, episode, WhisperX,
+  transcription-job, and corpus-publishing operations join the curated stdio
+  surface. The full HTTP/OpenAPI registry now has 65 tools.
+- **Citations are source-aware.** Podcast citations use the retained episode
+  page URL with `#t=<seconds>` instead of inventing YouTube watch URLs. Legacy
+  YouTube citation fields remain available for compatibility.
+- **Podcast state survives helper restarts.** Feed polling, downloads,
+  transcription progress, and corpus links are committed as state changes
+  happen. Interrupted transcription jobs return to the queue, and completed
+  transcripts are reused instead of running again.
+- **Background captures stay in the background.** Successful unattended work
+  remains available from the dashboard and tray menu instead of opening File
+  Explorer.
+
+### Fixed
+
+- **Interrupted podcast publishing can be repaired without retranscription.**
+  Startup recovery finishes pending corpus publication, `--doctor` reports
+  incomplete episode links, and `--reconcile-podcast-corpus` repairs them
+  through the deterministic bridge.
 
 ## [3.7.0] - 2026-07-24
 
@@ -341,7 +438,7 @@ The "YouTube layer for any AI agent" release. Three adoption funnels: Chrome ext
 - **`LOCALAPPDATA` output fallback.** The helper automatically falls back to writing outputs to `%LOCALAPPDATA%\Yoink\output` if `DESKTOP_ROOT` is read-only or unwritable.
 - **`pending_yoinks` schema (migration 0005).** Adds a new table in `index.db` to track rate-limited yoinks, attempts, and errors.
 
-- **MCP server** with 14 tools (`uoink_video`, `uoink_playlist`, `get_job_status`, `cancel_job`, `list_recent_uoinks`, `search_uoinks`, `get_uoink_corpus`, `analyze_comments`, `classify_hook`, `get_taxonomy`, `get_citation_map`, `get_uoink_health`, `find_mentions`, `get_transcript_reliability`). Stdio transport officially tested with Claude Desktop and Cursor. Local HTTP JSON-RPC transport available, marked experimental.
+- **MCP server** with 32 tools. The current curated surface includes the original video/library tools plus clip search, evidence cards, library search, activity, briefs, cited-range export, podcast feed, episode, local transcription, and corpus-publishing operations. Stdio transport is officially tested with Claude Desktop and Cursor. Local HTTP JSON-RPC transport is available and marked experimental.
 - **Library Index (SQLite FTS5).** `%LOCALAPPDATA%\Yoink\index.db` replaces scan-based search/recent/get-taxonomy code paths where indexed consumers need fast library access. First boot backfills existing corpora; subsequent yoinks update incrementally.
 - **Migration framework.** `schema_version` table plus numbered `migrations/NNNN_*.sql` scripts for future schema changes.
 - **Yoink Memory page.** New corpus gallery at `chrome-extension://<id>/yoink-memory.html`, opened from the popup's "View all yoinks" link. Filters by search text, channel, topic, Hook Type, and date range, with pagination at 50 results/page.
