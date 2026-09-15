@@ -4924,7 +4924,7 @@ def _build_yoink_md(metadata: dict, url: str, entries: list, shots: list,
 # Extraction core (shared by /extract and /session/add)
 # ---------------------------------------------------------------------------
 def _run_extraction(url: str, interval: int, output_folder: Path,
-                    *, open_explorer: bool = True,
+                    *, notify: bool = True,
                     metadata: dict | None = None,
                     topic: str | None = None,
                     source_type: str | None = None,
@@ -5551,11 +5551,14 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
     if phase_callback:
         phase_callback("done")
 
-    if open_explorer:
+    # One capture = one transient toast. Popping Explorer here piled up a
+    # window per capture during batch grabs; the folder stays reachable from
+    # the tray menu, the Recent list, and the dashboard.
+    if notify:
         try:
-            _platform.open_in_os(output_folder)
+            maybe_toast("Uoinked", f"{title}\nSaved to {output_folder.name}")
         except Exception as e:
-            log.warning("startfile failed: %s", e)
+            log.warning("capture toast failed: %s", e)
 
     return {
         "ok": True,
@@ -8506,7 +8509,7 @@ class _ServerCaptureBackend(source_subscriptions.CaptureBackend):
                                     "publication; nothing written", start_id)
                         return
                     result = _run_extraction(url, 30, folder, metadata=metadata, topic=topic,
-                                             open_explorer=False)
+                                             notify=False)
                 _record_single_extract_job(url, _now_iso(), result=result)
                 published = (metadata.get("id") or video_id)
                 # AS-02: publication is fenced by the owner token, the ledger
@@ -10002,7 +10005,7 @@ def _playlist_worker(job_id: str):
                             v["url"],
                             interval,
                             target,
-                            open_explorer=False,
+                            notify=False,
                             metadata=metadata,
                             topic="Playlist",
                             generate_paste=False,
@@ -17073,7 +17076,7 @@ class Handler(BaseHTTPRequestHandler):
                     # so skip the per-video paste-corpus generation -- it would
                     # just inflate the runtime message payload for nothing.
                     result = _run_extraction(url, interval, target,
-                                              open_explorer=False,
+                                              notify=False,
                                               metadata=metadata, topic=topic,
                                               generate_paste=False)
             except BaseException as e:
@@ -17129,10 +17132,15 @@ class Handler(BaseHTTPRequestHandler):
             _write_session(session_id, session)
 
         sess_folder = _session_folder(session_id)
+        # Same rule as single captures: notify, don't pop Explorer. The
+        # /session/open endpoint and the tray menu open the folder on demand.
         try:
-            _platform.open_in_os(sess_folder)
+            maybe_toast(
+                "Session closed",
+                f"{len(session.get('videos', []))} videos saved to {sess_folder.name}",
+            )
         except Exception as e:
-            log.warning("startfile failed: %s", e)
+            log.warning("session toast failed: %s", e)
 
         total_captions = sum(v.get("caption_count", 0) for v in session.get("videos", []))
         log.info("POST /session/close -> ok (%d videos, %d chars)",

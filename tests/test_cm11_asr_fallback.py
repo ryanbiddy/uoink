@@ -265,7 +265,7 @@ def test_captionless_x_capture_persists_asr_and_provenance(
         }
         folder = root / "AI" / "captionless-x-clip"
         result = server._run_extraction(
-            url, 30, folder, open_explorer=False, metadata=metadata,
+            url, 30, folder, notify=False, metadata=metadata,
             generate_paste=False)
 
         sidecar = json.loads(

@@ -94,7 +94,7 @@ def test_lite_extraction_path(tmp: Path):
             "https://www.youtube.com/watch?v=longsource1",
             30,  # a dense interval the user might have set; lite overrides it
             tmp,
-            open_explorer=False,
+            notify=False,
             metadata={
                 "id": "longsource1",
                 "title": "Two hour talk",

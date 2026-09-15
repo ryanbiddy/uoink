@@ -87,7 +87,7 @@ def _run_mocked_extraction(monkeypatch, *, settings: dict,
 
         folder = root / "AI" / "keep-media-case"
         result = server._run_extraction(
-            url, 30, folder, open_explorer=False, metadata=metadata,
+            url, 30, folder, notify=False, metadata=metadata,
             source_type=source_type, generate_paste=False)
         _assert(result["ok"] is True, f"extraction failed: {result}")
 

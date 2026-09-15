@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+Nothing yet.
+
+## [3.8.0] - 2026-09-15
+
 ### Added
 
 - **Living Library media depth (Phase 6, contract `phase6-v1`).**
@@ -43,6 +47,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Changed
 
+- **Captures notify instead of opening Explorer.** Finishing a uoink (and
+  closing a session) now shows a branded toast with the title and destination
+  folder instead of popping a File Explorer window per capture — batch grabs
+  no longer bury the desktop in open folders. Opening the folder stays one
+  click away via the tray menu, the Recent list, and the dashboard.
+
 - **Entity extraction is now opt-in (D-17).** The background entity
   extraction call gets a named `entity_extraction_enabled` setting, default
   off, beside Comment Intelligence and Hook Type. A saved Anthropic key alone
@@ -58,7 +68,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   1 s timeout under a 1.5 s wall-clock budget, de-duplicates hits per
   session, honours `UOINK_RECALL_DISABLED=1`, and never prints file paths.
 
-## [3.8.0] - 2026-08-02
 
 Podcast subscriptions can now keep themselves current and publish selected
 episodes into the local corpus. The helper also gained controls for keeping
