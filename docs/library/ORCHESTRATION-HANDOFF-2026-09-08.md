@@ -86,7 +86,25 @@ establish safe installation isolation, and verify/correct resulting findings.
   Always `PYTHONDONTWRITEBYTECODE=1`, `PYTHONPATH=<checkout>`; Phase 3 needs
   `PHASE3_REQUIRE_IMPLEMENTATION=1`; unset `ANTHROPIC_API_KEY`.
 
-## State at handoff (updated 2026-09-14; release fixes continue after package 08)
+## State at handoff (updated 2026-09-15; Ryan's release scope governs)
+
+Ryan ended the model migration and synthetic runtime program for 3.8.0 on
+2026-09-15. Every runtime-owner, journal, state-machine, fake-stack and generated
+native continuation below is archived, including the uninvoked native preparation
+at `1ca39c0`. Those historical rows retain their measured results but their Next
+cells no longer authorize work. No D3/D4 or production migration is permitted.
+
+| Current release item | State | Next |
+|---|---|---|
+| AT6 historical exit receipt | Ryan accepts the unrecoverable historical receipt gap; not a release blocker | Add strict xfail to the one named audit; preserve its assertion and original failure |
+| Controller10 | Exact two-line SessionClosed patch `f1c8950d` approved | Apply to a fresh derivative, rerun once, then freeze regardless of result |
+| Signing | `SigningCertificateThumbprint=none`; unsigned 3.8.0 approved | Skip signing using the supported build path; retain signing repair for 3.9 |
+| Claude Desktop | Ryan will create a local standard account and sign in | If absent at packaging, say "tested with Claude Code" and Desktop unverified |
+| Model stack | Retain Torch 2.8.0 / WhisperX 3.8.6 | Disclose the existing loader in docs/security.md; archive synthetic work |
+| Final candidate | Latest source repairs postdate complete tree09 and package08 | Complete current-source test/build/receipt work under this reduced scope |
+
+The table below is the historical phase and engineering record. The current
+release table and Queue supersede all conflicting continuation instructions.
 
 | Phase | State | Astra's latest ruling | Next |
 |---|---|---|---|
@@ -174,9 +192,25 @@ I/O binding for subsequent fixtures. No corrected full-tree run had occurred
 at that checkpoint; the authorized correction and new result are above.
 See `CANDIDATE-MIRROR-ORDER-BRIEF-2026-09-09.md`; this result stays failed.
 
-## Queue (in order; updated after explicit correction/install approval)
+## Queue (in order; superseded by Ryan's 2026-09-15 release decisions)
 
-### Active follow-up from Ryan, 2026-09-12
+1. Record the five decisions under Blockers for Ryan and in
+   RELEASE-OWNER-DECISIONS-2026-09-12.md. Preserve historical evidence.
+2. Apply the one AT6 strict-xfail marker and the exact approved Controller10
+   exception patch. Record diff/reason and review. Run Controller10 once only;
+   no confirmation run, further repairs or generated native continuation.
+3. Freeze the controller track and archive all synthetic runtime-owner,
+   journal and state-machine work. No D3/D4, model migration or new fetch.
+4. Update security and release notes for Torch 2.8.0 / WhisperX 3.8.6,
+   unsigned 3.8.0, the AT6 gap and the Claude Code/Desktop support distinction.
+5. Qualify the production candidate, rebuild only for production changes and
+   record matching package/inventory/installed receipts. Desktop is optional
+   under Ryan's fallback; signing moves to 3.9. Keep website and marketing held
+   until the council and integrator accept the final product. No main merge.
+
+### Archived queue (2026-09-12 through 2026-09-14; do not execute)
+
+### Historical follow-up from Ryan, 2026-09-12
 
 Ryan's renewed goal is to continue fixing the product until it is ready for
 release, website/GitHub updates and marketing. The earlier review-kit delivery
@@ -1383,6 +1417,29 @@ required committed input (never write `_scratch/` in backticks). `git config --g
 core.longpaths true` must stay set (worktree checkouts fail without it).
 
 ## Blockers for Ryan
+
+### Release decisions recorded 2026-09-15 (supersede the historical list)
+
+- AT6 is an unrecoverable historical receipt gap, disclosed and not a release
+  blocker. Ryan authorizes `xfail(strict=True)` only on
+  `test_as7_c21_at6_receipt_records_process_exit_status`; retain its body.
+- Controller10: Ryan approves exact two-line SessionClosed patch `f1c8950d`.
+  Apply, rerun once and freeze. The original 8/2 result remains failed.
+- Signing: no certificate for 3.8.0; `SigningCertificateThumbprint=none`.
+  Skip signing, retain the repaired path and defer signing to 3.9.
+- Claude Desktop: Ryan will create a local standard Windows account and sign
+  in. If absent at packaging, ship with "tested with Claude Code" and Desktop
+  listed as unverified. The failed profile-override method stays retired.
+- Model stack: retain Torch 2.8.0 / WhisperX 3.8.6 and disclose the loader in
+  docs/security.md. All synthetic runtime-owner, journal and state-machine work
+  is archived. No further D3/D4 or migration for 3.8.0.
+
+These decisions need no repeat approval. Final publication/main merge remains
+Ryan's; the technical release checks still need current-source evidence.
+The restrictions on the live index, port 5179, paid API, speaker runs, new fetch,
+apply=false and Phase 5 Part B remain in force.
+
+### Historical blockers and resolved decisions (not the active queue)
 
 - Controller10's first run at source71df9d3 is8/2/0 with102/104 passing subtests.
   Two new expected-exception arguments omit the existing SessionClosed contract:

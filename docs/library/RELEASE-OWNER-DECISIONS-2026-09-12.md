@@ -1,4 +1,32 @@
-# Decisions still needed for the Living Library release
+# Living Library release owner decisions
+
+## Ryan's decisions, 2026-09-15 — current authority
+
+These rulings supersede every conflicting pending decision and runtime
+continuation below. They do not turn earlier failures into passes.
+
+| Item | Ryan's decision | Execution disposition |
+|---|---|---|
+| AT6 | Disclose an unrecoverable historical receipt gap; not a release blocker | Mark only test_as7_c21_at6_receipt_records_process_exit_status xfail(strict=True), with that reason. Keep its body and old failure. |
+| Controller10 | Approve exact two-line SessionClosed expectation patch f1c8950d | Apply, rerun once, then freeze the controller track. No confirmation run. |
+| Signing | No certificate for 3.8.0; SigningCertificateThumbprint=none | Skip signing through the supported unsigned build path. Retain the repaired signing code; signing is a 3.9 item. |
+| Claude Desktop | Ryan will create a local standard Windows account and sign in | If absent at packaging, ship with "tested with Claude Code" and Desktop listed as unverified. |
+| Model stack | No migration for 3.8.0; ship Torch 2.8.0 / WhisperX 3.8.6 | Disclose the existing loader in docs/security.md. Archive all synthetic runtime-owner, journal and state-machine work. No further D3/D4. |
+
+The one approved Controller10 rerun is the sole remaining synthetic execution.
+After it, stop that track regardless of result. Native preparation at 1ca39c0
+remains uninvoked. D1/D2 are completed historical observations; do not reaccess
+their artifacts. Final source tests, packaging and installed receipts remain
+separate from these scope decisions. Publication/main merge still requires
+Ryan's final decision; branch backup alone does not publish a release.
+
+Live-index and port 5179 prohibitions, no paid API, no new fetch or speaker runs,
+0.90 with librarian_apply_enabled=false, and deferred Phase 5 Part B continue.
+
+## Historical decision record through 2026-09-14
+
+The following text is retained as history. Its pending choices and proposed
+runtime protocol are superseded by the September 15 table above.
 
 The installed review build works for the recorded native Uoink and Claude Code
 flows. It is not ready for an ordinary upgrade or public download. Independent
