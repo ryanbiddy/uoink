@@ -38,6 +38,11 @@ $ErrorActionPreference = 'Stop'
 # Suppress Invoke-WebRequest's progress UI -- on PS 5.1 it slows large
 # downloads to a crawl due to a known performance bug.
 $ProgressPreference = 'SilentlyContinue'
+# The embeddable Python enables `import site`, which would also expose the
+# building user's %APPDATA%\Python\Python313 site-packages to pip and to the
+# dependency-inventory check. Keep the build blind to it so the staged
+# inventory depends only on the lock file, whoever runs the build.
+$env:PYTHONNOUSERSITE = '1'
 
 # ---- Paths --------------------------------------------------------------
 $RepoRoot     = $PSScriptRoot
