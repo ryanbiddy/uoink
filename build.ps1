@@ -442,10 +442,17 @@ Write-Step 'Generating THIRD-PARTY-NOTICES.md'
 $noticePriorNativePreference = $PSNativeCommandUseErrorActionPreference
 try {
     $PSNativeCommandUseErrorActionPreference = $false
+    # Windows PowerShell 5.1 turns a native command's stderr into a terminating
+    # error when that stream is redirected under ErrorActionPreference=Stop.
+    # pip prints resolver warnings to stderr, so relax the preference around the
+    # two pip calls below; their exit codes are checked explicitly.
+    $noticePriorErrorPreference = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
     & $embedPython -m pip install --no-warn-script-location --no-compile --no-cache-dir `
         --no-build-isolation `
         --constraint $InstallerLock "pip-licenses==5.0.0" 2>$null
     $noticeToolInstallExit = $global:LASTEXITCODE
+    $ErrorActionPreference = $noticePriorErrorPreference
     if ($noticeToolInstallExit -ne 0) {
         Write-Warning 'pip-licenses unavailable; generator will use importlib.metadata if needed.'
     }
@@ -466,8 +473,10 @@ try {
     # pip-licenses is a build-time tool, not a runtime dep -- strip it back out.
     # Remove the tool and its tool-only dependencies. tomli is not required by
     # the runtime graph on Python 3.13; wcwidth arrives only through prettytable.
+    $ErrorActionPreference = 'Continue'
     & $embedPython -m pip uninstall -y pip-licenses prettytable tomli wcwidth 2>$null
     $noticeCleanupExit = $global:LASTEXITCODE
+    $ErrorActionPreference = $noticePriorErrorPreference
     if ($noticeGenerationExit -isnot [int] -or $noticeGenerationExit -ne 0) {
         throw "THIRD-PARTY-NOTICES generation failed (exit $noticeGenerationExit); refusing stale attribution"
     }
