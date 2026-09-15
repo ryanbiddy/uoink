@@ -1,0 +1,115 @@
+{
+  "schema": "uoink.windows-reservation-fake-launch.v1",
+  "label": "controller-custody-final02",
+  "python": "C:\\Python314\\python.exe",
+  "arguments": [
+    "-I",
+    "-S",
+    "-B",
+    "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\controller-custody-final02\\controller-custody-final02\\qualify_windows_reservations.py"
+  ],
+  "started_utc": "2026-09-15T18:18:21.2088852+00:00",
+  "before": [
+    {
+      "name": "trusted_asr_resolver.py",
+      "bytes": 13373,
+      "sha256": "16a5a1245f649a3eb04d077b661835503f08bef0ff8822dcb545176f0cc30833"
+    },
+    {
+      "name": "snapshot_lifecycle.py",
+      "bytes": 22138,
+      "sha256": "a80514aac6b1e75b9b872052852fa993a23cd5273b6bed4ffb4eef7404cb69dd"
+    },
+    {
+      "name": "snapshot_reservations.py",
+      "bytes": 23634,
+      "sha256": "e80ae881fa4af9cc7d1a3e4a06624f5b19abe4de09aec3844e8a541449335b98"
+    },
+    {
+      "name": "reservation_file_port.py",
+      "bytes": 4694,
+      "sha256": "708554378ab8a8e6c4477e637c999256665cbd2855b94c6fa3c2d04a19d3a224"
+    },
+    {
+      "name": "durable_lifecycle.py",
+      "bytes": 40180,
+      "sha256": "ce69903d93daf41ae3717008f8d0dbd0b3ead7b11662b674eddf43828567b222"
+    },
+    {
+      "name": "asr_loading_adapter.py",
+      "bytes": 47660,
+      "sha256": "227395c4e1f25f75f13dc950e3b2e222af4a4d8b307a36091908229b58ed0c0f"
+    },
+    {
+      "name": "test_reservations.py",
+      "bytes": 37737,
+      "sha256": "604a295d5e925b9a9d7f55750bfeb1ddcda3e6a9873d6d8d7f9e98c84d9b4b9e"
+    },
+    {
+      "name": "controller_boundary_fixture.py",
+      "bytes": 12943,
+      "sha256": "63642115cf53a21911ea8fd1e31af91ff20c2807639e39dab5ec23fce94c06f7"
+    },
+    {
+      "name": "test_controller_resume_publication.py",
+      "bytes": 26562,
+      "sha256": "d54dc156a30d41608b349eaec6c9c56f242ff2d65db895ab828745a3e6cf830a"
+    },
+    {
+      "name": "qualify_windows_reservations.py",
+      "bytes": 15911,
+      "sha256": "c0a51539cbb3aa7f89e48fb9711827fc7965c8326aed55d63875a69b1d75cac0"
+    },
+    {
+      "name": "EXPECTED-CASES.json",
+      "bytes": 1357,
+      "sha256": "5f102d0240c20b8cc2662b1c135f420bdc357dabcd912af4cec0e74404a074b7"
+    },
+    {
+      "name": "run_preflight01.ps1",
+      "bytes": 8889,
+      "sha256": "7ddef055fb2d09287ed236f54c61f04634065cf84c4f384782a1eced5e47a3a1"
+    },
+    {
+      "name": "BRIEF.md",
+      "bytes": 1160,
+      "sha256": "96e0e9d2c525fbdbac7dc7929694323f56f10b1dd58e48c0f8807e24129d5758"
+    },
+    {
+      "name": "QUALIFICATION-PROTOCOL.md",
+      "bytes": 1838,
+      "sha256": "b458bcdbf0fc24bb504392c913b8ff59add4af0e173d260edcde9055a1efd3bd"
+    },
+    {
+      "name": "SOURCE-INPUTS.json",
+      "bytes": 13661,
+      "sha256": "a0f3a0cc33b027beb319fb0babcbd6ccf608cc6e03ccaf14f48f339a6b31fc73"
+    }
+  ],
+  "controls": [
+    {
+      "name": "PINS.json",
+      "binding": {
+        "bytes": 2482,
+        "sha256": "488a1a4223e7885fe108a3bb375512306291681fcb45018c0e0e8a658940e39b"
+      }
+    },
+    {
+      "name": "ROOT-ADMISSION.json",
+      "binding": {
+        "bytes": 327,
+        "sha256": "f7e07f4f8fc197bf93d4e3a000bc38204e5347f46af3ee3839494927cf347a5c"
+      }
+    },
+    {
+      "name": "run_preflight01.ps1",
+      "binding": {
+        "bytes": 8889,
+        "sha256": "7ddef055fb2d09287ed236f54c61f04634065cf84c4f384782a1eced5e47a3a1"
+      }
+    }
+  ],
+  "removed_environment_names": [],
+  "startup_binding_set": true,
+  "scope": "generated_bytes_and_fake_ports_only"
+}

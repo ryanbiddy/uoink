@@ -96,8 +96,8 @@ cells no longer authorize work. No D3/D4 or production migration is permitted.
 
 | Current release item | State | Next |
 |---|---|---|
-| AT6 historical exit receipt | Ryan accepts the unrecoverable historical receipt gap; not a release blocker | Add strict xfail to the one named audit; preserve its assertion and original failure |
-| Controller10 | Exact two-line SessionClosed patch `f1c8950d` approved | Apply to a fresh derivative, rerun once, then freeze regardless of result |
+| AT6 historical exit receipt | Ryan accepts the unrecoverable historical receipt gap; strict xfail applied to the one named audit | Body and original failure preserved; not a release blocker |
+| Controller10 | Exact patch `f1c8950d` applied; final02 actual3ac275 returns10/0/0 plus104 passing subtests | Frozen. Root24cbdb verifies ten guards,11 child hashes,15 inputs/3 controls and23 output files; no rerun |
 | Signing | `SigningCertificateThumbprint=none`; unsigned 3.8.0 approved | Skip signing using the supported build path; retain signing repair for 3.9 |
 | Claude Desktop | Ryan will create a local standard account and sign in | If absent at packaging, say "tested with Claude Code" and Desktop unverified |
 | Model stack | Retain Torch 2.8.0 / WhisperX 3.8.6 | Disclose the existing loader in docs/security.md; archive synthetic work |
@@ -194,16 +194,15 @@ See `CANDIDATE-MIRROR-ORDER-BRIEF-2026-09-09.md`; this result stays failed.
 
 ## Queue (in order; superseded by Ryan's 2026-09-15 release decisions)
 
-1. Record the five decisions under Blockers for Ryan and in
-   RELEASE-OWNER-DECISIONS-2026-09-12.md. Preserve historical evidence.
-2. Apply the one AT6 strict-xfail marker and the exact approved Controller10
-   exception patch. Record diff/reason and review. Run Controller10 once only;
-   no confirmation run, further repairs or generated native continuation.
-3. Freeze the controller track and archive all synthetic runtime-owner,
-   journal and state-machine work. No D3/D4, model migration or new fetch.
-4. Update security and release notes for Torch 2.8.0 / WhisperX 3.8.6,
-   unsigned 3.8.0, the AT6 gap and the Claude Code/Desktop support distinction.
-5. Qualify the production candidate, rebuild only for production changes and
+1. Completed: decisions recorded at d7d8c1c; AT6 strict marker applied and
+   reviewed. Controller10 exact correction ran once as3ac275:10/0/0 plus104
+   passing subtests. Root24cbdb verifies the full receipt. No confirmation run.
+2. Completed: controller and all synthetic runtime-owner, journal, state-machine
+   and fake-stack tracks frozen. See RUNTIME-WORK-ARCHIVE-2026-09-15.md.
+   Generated native preparation stays uninvoked. No D3/D4, migration or new fetch.
+3. Completed: security and release notes disclose the retained stack, unsigned
+   package, AT6 gap and Claude Code/Desktop support distinction.
+4. Qualify the production candidate, rebuild only for production changes and
    record matching package/inventory/installed receipts. Desktop is optional
    under Ryan's fallback; signing moves to 3.9. Keep website and marketing held
    until the council and integrator accept the final product. No main merge.
@@ -7363,3 +7362,47 @@ preparation. Archive db1a56 and index b0e79a retain150 payloads/2,113,360 bytes
 under proof/controller-generated-native-preparation-2026-09-14, seal bcd4398b.
 Raw diff/apply428c80 succeeds; de5911 restores145 verified newline-only changes.
 Every raw payload and seal matches the worktree, and150 payloads match Git/disk.
+
+### 2026-09-15 — release scope settled; synthetic program stopped
+
+Ryan's five decisions are committed at d7d8c1c and supersede the old queue.
+AT6 has the one authorized strict expected-failure marker, with its original
+assertion intact. Static review bb6bce confirms the exact marker-only delta.
+Do not report an observed xfail until a fresh production tree has run. The old
+tree09 launcher includes --runxfail; the next reviewed production brief must
+honor this named disposition without silently excusing other failures.
+
+The exact Controller10 patch f1c8950d was applied to a fresh final02 copy.
+Admission f8f18b follows passive source/pin checks. Actual3ac275 returns0 with
+10 passed,0 failed,0 skipped and104 passing subtests. Root24cbdb verifies all
+ten guards,11 child hashes,15 inputs/3 controls and23 output files. The initial
+passive admission comparison3cee2c refused Git's added hunk-heading function
+context; its one normalization repair occurred before any subject run. Preserve
+that failure and the original8/2 test result. Only one corrected suite ran.
+
+Controller10 is frozen. Runtime-owner, journal, state-machine and fake-stack
+work is archived; no native preparation was admitted or invoked. No D3/D4 or
+model migration for3.8.0. See RUNTIME-WORK-ARCHIVE-2026-09-15.md.
+
+Production pins already specify Torch2.8.0 / WhisperX3.8.6. Security.md now
+discloses the direct loader, separate VAD pickle path and unauthenticated cache
+contents. Synthetic reviews provide no clean production-runtime claim.
+SigningCertificateThumbprint=none means omit signing switches in build.ps1;
+literal "none" would fail its repaired validation. Signing is a3.9 item.
+Claude Desktop is unverified unless Ryan completes the standard-account session
+before packaging; the supported release wording is "tested with Claude Code".
+
+Current-source full-tree verification, unsigned packaging and matching installed
+receipts remain release work. Do not reopen the retired runtime queue to do them.
+
+Final closure proof is archived at
+proof/release-decisions-controller-final-2026-09-15:59 payloads/628,367 bytes,
+seal790928d2. Raw worktree diff/apply304b11 succeeds; fa8214 restores54 verified
+newline-only transport differences. Indexa16760 verifies all59 payloads match
+Git and disk. No subject test was repeated during transport verification.
+
+Integrator note: raw proof preserves CRLF and original trailing newlines under
+its -text attributes. An all-files whitespace check rejected those retained
+bytes before commit. Apply whitespace checks to edited source/docs; verify raw
+proof by its hashes. Do not trim or normalize sealed evidence to satisfy a style
+check. The initial commit-helper refusal remains in the scratch actual record.

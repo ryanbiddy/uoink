@@ -1,8 +1,8 @@
 # uoink 3.8: Living Library
 
-Private release draft. The candidate remains on hold. Publish only after the
-final installer, client support and release decisions are recorded. The public
-release is still [uoink 3.7.0](https://github.com/ryanbiddy/uoink/releases/tag/v3.7.0).
+Private release draft, updated September 15. Publish after the final installer
+and matching verification receipts are recorded. The release scope is decided;
+packaging and final verification remain unfinished.
 
 Living Library helps you return to what you saved. Find a note or source, inspect
 the evidence behind an answer, and open a brief with citations back to your library.
@@ -33,14 +33,21 @@ resources and using external clients can involve network services; this is not a
 promise that every workflow runs offline. uoink is MIT-licensed, and bundled
 dependencies have their own licences in the third-party notices.
 
-The candidate's native Uoink window and Claude Code integration have been
-exercised on isolated test data. Claude Desktop acceptance is still pending and
-must not be advertised as tested. Some X links remain blocked with HTTP 403.
+The candidate's native Uoink window has been exercised on isolated test data;
+client coverage is **tested with Claude Code**. Claude Desktop is **unverified**
+unless a separate receipt is completed before packaging. Some X links remain blocked with HTTP 403.
 Speaker attribution and Phase 5 Part B are deferred. Shelf-quality and dashboard
 response-size targets retain their recorded misses.
 
-Before this draft can become release notes, attach the approved Windows installer
-and its hash/signing result, matching MCP bundle and extension assets, supported
-client versions, upgrade and rollback instructions, and a support link. Retained
-dependency findings and the missing historical receipt require explicit release
-dispositions. No installer or public announcement is approved by this draft.
+3.8.0 keeps Torch 2.8.0 / WhisperX 3.8.6. The existing model-loader path and
+retained security limitations are described in [security.md](../security.md).
+The Windows installer is unsigned; publisher signing is planned for 3.9.
+An old AT6 receipt lacks its original process exit status. That unrecoverable
+historical gap is disclosed and does not block this release.
+
+Shelf proposals remain reviewable suggestions. The 0.90 threshold for autonomous
+filing is unchanged and `librarian_apply_enabled` stays false.
+
+Before publishing, attach the final Windows installer and SHA256, matching MCP
+bundle and extension assets, tested client versions, upgrade and rollback steps,
+and a support link. This draft does not publish or approve a download.

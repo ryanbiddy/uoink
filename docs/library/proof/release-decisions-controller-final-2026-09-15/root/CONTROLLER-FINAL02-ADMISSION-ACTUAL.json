@@ -1,0 +1,7 @@
+{
+  "chunk_id": "3cee2c",
+  "wall_time_seconds": 0.0966945,
+  "exit_code": 1,
+  "original_token_count": 206,
+  "output": "file:///E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/admit-controller-final02.mjs:3\r\nconst read=p=>fs.readFileSync(p),sha=b=>crypto.createHash('sha256').update(b).digest('hex'),assert=(v,m)=>{if(!v)throw Error(m)};\r\n                                                                                                                       ^\r\n\r\nError: Exact approved hunks\r\n    at assert (file:///E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/admit-controller-final02.mjs:3:120)\r\n    at file:///E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/admit-controller-final02.mjs:12:1\r\n    at ModuleJob.run (node:internal/modules/esm/module_job:439:25)\r\n    at async node:internal/modules/esm/loader:643:26\r\n    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)\r\n\r\nNode.js v24.18.0\r\n"
+}

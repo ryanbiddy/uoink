@@ -1,0 +1,34 @@
+{
+  "approved_patch_sha256": "f1c8950dfbe84ddbeb5838cdc518a25a2c5eaed2011802ea8dab7e1c25aa4e8a",
+  "source": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\controller-custody-fake10-author01",
+  "destination": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\controller-custody-final02",
+  "changes": [
+    {
+      "path": "test_controller_resume_publication.py",
+      "before": "061b7eb77db2ee834b54d790012fe280b1e1ac82e82dfb289681e926adbbec8d",
+      "after": "d54dc156a30d41608b349eaec6c9c56f242ff2d65db895ab828745a3e6cf830a"
+    },
+    {
+      "path": "run_preflight01.ps1",
+      "before": "668cf992f7336d451ef892cc68afd63ce1b3a929dfb57565e48170e914bb44a1",
+      "after": "7ddef055fb2d09287ed236f54c61f04634065cf84c4f384782a1eced5e47a3a1"
+    },
+    {
+      "path": "BRIEF.md",
+      "before": "1358fe5538cf98e76d4010a378fe51582428b7db110e1cde77dded49f9425285",
+      "after": "96e0e9d2c525fbdbac7dc7929694323f56f10b1dd58e48c0f8807e24129d5758"
+    },
+    {
+      "path": "QUALIFICATION-PROTOCOL.md",
+      "before": "00aa2ee2e10aca9333ee88242eb75c1e91e82911421969691ce63bf97b223fec",
+      "after": "b458bcdbf0fc24bb504392c913b8ff59add4af0e173d260edcde9055a1efd3bd"
+    },
+    {
+      "path": "SOURCE-INPUTS.json",
+      "before": "403d9c9f6aa36d8bffd94220424c37beb486c9da49aef813e1c1d8edf7153039",
+      "after": "a0f3a0cc33b027beb319fb0babcbd6ccf608cc6e03ccaf14f48f339a6b31fc73"
+    }
+  ],
+  "pins_sha256": "488a1a4223e7885fe108a3bb375512306291681fcb45018c0e0e8a658940e39b",
+  "subject_invoked": false
+}

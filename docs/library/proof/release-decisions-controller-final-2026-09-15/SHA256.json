@@ -1,0 +1,301 @@
+{
+  "schema": "documentary-proof-v1",
+  "scope": "Ryan 2026-09-15 decisions: exact Controller10 correction, one final02 result10/0/0 plus104 passing subtests, frozen track; AT6 static marker-only review. Earlier test and passive admission failures retained. No native/model/D3/D4 execution.",
+  "files": [
+    {
+      "path": ".gitattributes",
+      "bytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+    },
+    {
+      "path": "approved/EXACT-APPROVED-PATCH.txt",
+      "bytes": 1009,
+      "sha256": "f1c8950dfbe84ddbeb5838cdc518a25a2c5eaed2011802ea8dab7e1c25aa4e8a"
+    },
+    {
+      "path": "final02/asr_loading_adapter.py",
+      "bytes": 47660,
+      "sha256": "227395c4e1f25f75f13dc950e3b2e222af4a4d8b307a36091908229b58ed0c0f"
+    },
+    {
+      "path": "final02/BRIEF.md",
+      "bytes": 1160,
+      "sha256": "96e0e9d2c525fbdbac7dc7929694323f56f10b1dd58e48c0f8807e24129d5758"
+    },
+    {
+      "path": "final02/controller_boundary_fixture.py",
+      "bytes": 12943,
+      "sha256": "63642115cf53a21911ea8fd1e31af91ff20c2807639e39dab5ec23fce94c06f7"
+    },
+    {
+      "path": "final02/controller-custody-final02/asr_loading_adapter.py",
+      "bytes": 47660,
+      "sha256": "227395c4e1f25f75f13dc950e3b2e222af4a4d8b307a36091908229b58ed0c0f"
+    },
+    {
+      "path": "final02/controller-custody-final02/BRIEF.md",
+      "bytes": 1160,
+      "sha256": "96e0e9d2c525fbdbac7dc7929694323f56f10b1dd58e48c0f8807e24129d5758"
+    },
+    {
+      "path": "final02/controller-custody-final02/controller_boundary_fixture.py",
+      "bytes": 12943,
+      "sha256": "63642115cf53a21911ea8fd1e31af91ff20c2807639e39dab5ec23fce94c06f7"
+    },
+    {
+      "path": "final02/controller-custody-final02/durable_lifecycle.py",
+      "bytes": 40180,
+      "sha256": "ce69903d93daf41ae3717008f8d0dbd0b3ead7b11662b674eddf43828567b222"
+    },
+    {
+      "path": "final02/controller-custody-final02/exit.json",
+      "bytes": 341,
+      "sha256": "52aa17332a8d75f5b29545d78aad3ab4259bc343ab0d26f6e4c1a35ea66ef24f"
+    },
+    {
+      "path": "final02/controller-custody-final02/EXPECTED-CASES.json",
+      "bytes": 1357,
+      "sha256": "5f102d0240c20b8cc2662b1c135f420bdc357dabcd912af4cec0e74404a074b7"
+    },
+    {
+      "path": "final02/controller-custody-final02/input-check.json",
+      "bytes": 6547,
+      "sha256": "25860996e57830d62b1747f43bf80ad9bc15c6b5422a1a0c02f1105e6aa73d4f"
+    },
+    {
+      "path": "final02/controller-custody-final02/native-exit.json",
+      "bytes": 114,
+      "sha256": "61cd958c4f41ceeac42c5107e233e3c52a6783ce36dedf655e790d2aea30d94f"
+    },
+    {
+      "path": "final02/controller-custody-final02/PINS.json",
+      "bytes": 2482,
+      "sha256": "488a1a4223e7885fe108a3bb375512306291681fcb45018c0e0e8a658940e39b"
+    },
+    {
+      "path": "final02/controller-custody-final02/plan.json",
+      "bytes": 3590,
+      "sha256": "2b3038e95a6bea45dc85324f612d62760fe73f601a32f4b4bbdae9ae2e8f46a0"
+    },
+    {
+      "path": "final02/controller-custody-final02/QUALIFICATION-PROTOCOL.md",
+      "bytes": 1838,
+      "sha256": "b458bcdbf0fc24bb504392c913b8ff59add4af0e173d260edcde9055a1efd3bd"
+    },
+    {
+      "path": "final02/controller-custody-final02/qualify_windows_reservations.py",
+      "bytes": 15911,
+      "sha256": "c0a51539cbb3aa7f89e48fb9711827fc7965c8326aed55d63875a69b1d75cac0"
+    },
+    {
+      "path": "final02/controller-custody-final02/reservation_file_port.py",
+      "bytes": 4694,
+      "sha256": "708554378ab8a8e6c4477e637c999256665cbd2855b94c6fa3c2d04a19d3a224"
+    },
+    {
+      "path": "final02/controller-custody-final02/ROOT-ADMISSION.json",
+      "bytes": 327,
+      "sha256": "f7e07f4f8fc197bf93d4e3a000bc38204e5347f46af3ee3839494927cf347a5c"
+    },
+    {
+      "path": "final02/controller-custody-final02/run_preflight01.ps1",
+      "bytes": 8889,
+      "sha256": "7ddef055fb2d09287ed236f54c61f04634065cf84c4f384782a1eced5e47a3a1"
+    },
+    {
+      "path": "final02/controller-custody-final02/snapshot_lifecycle.py",
+      "bytes": 22138,
+      "sha256": "a80514aac6b1e75b9b872052852fa993a23cd5273b6bed4ffb4eef7404cb69dd"
+    },
+    {
+      "path": "final02/controller-custody-final02/snapshot_reservations.py",
+      "bytes": 23634,
+      "sha256": "e80ae881fa4af9cc7d1a3e4a06624f5b19abe4de09aec3844e8a541449335b98"
+    },
+    {
+      "path": "final02/controller-custody-final02/SOURCE-INPUTS.json",
+      "bytes": 13661,
+      "sha256": "a0f3a0cc33b027beb319fb0babcbd6ccf608cc6e03ccaf14f48f339a6b31fc73"
+    },
+    {
+      "path": "final02/controller-custody-final02/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "final02/controller-custody-final02/stdout.json",
+      "bytes": 31942,
+      "sha256": "18b315ef4fb03b1b4f07e7dfa7c1ee02560cb1b3c4b94e17b38b60472da5094c"
+    },
+    {
+      "path": "final02/controller-custody-final02/test_controller_resume_publication.py",
+      "bytes": 26562,
+      "sha256": "d54dc156a30d41608b349eaec6c9c56f242ff2d65db895ab828745a3e6cf830a"
+    },
+    {
+      "path": "final02/controller-custody-final02/test_reservations.py",
+      "bytes": 37737,
+      "sha256": "604a295d5e925b9a9d7f55750bfeb1ddcda3e6a9873d6d8d7f9e98c84d9b4b9e"
+    },
+    {
+      "path": "final02/controller-custody-final02/trusted_asr_resolver.py",
+      "bytes": 13373,
+      "sha256": "16a5a1245f649a3eb04d077b661835503f08bef0ff8822dcb545176f0cc30833"
+    },
+    {
+      "path": "final02/durable_lifecycle.py",
+      "bytes": 40180,
+      "sha256": "ce69903d93daf41ae3717008f8d0dbd0b3ead7b11662b674eddf43828567b222"
+    },
+    {
+      "path": "final02/EXPECTED-CASES.json",
+      "bytes": 1357,
+      "sha256": "5f102d0240c20b8cc2662b1c135f420bdc357dabcd912af4cec0e74404a074b7"
+    },
+    {
+      "path": "final02/PINS.json",
+      "bytes": 2482,
+      "sha256": "488a1a4223e7885fe108a3bb375512306291681fcb45018c0e0e8a658940e39b"
+    },
+    {
+      "path": "final02/PREPARATION.json",
+      "bytes": 1541,
+      "sha256": "86691b3965b5d5bfdc66c87fb4c813569ab3ddb8b65eeff785a1fd94f840f9a7"
+    },
+    {
+      "path": "final02/QUALIFICATION-PROTOCOL.md",
+      "bytes": 1838,
+      "sha256": "b458bcdbf0fc24bb504392c913b8ff59add4af0e173d260edcde9055a1efd3bd"
+    },
+    {
+      "path": "final02/qualify_windows_reservations.py",
+      "bytes": 15911,
+      "sha256": "c0a51539cbb3aa7f89e48fb9711827fc7965c8326aed55d63875a69b1d75cac0"
+    },
+    {
+      "path": "final02/reservation_file_port.py",
+      "bytes": 4694,
+      "sha256": "708554378ab8a8e6c4477e637c999256665cbd2855b94c6fa3c2d04a19d3a224"
+    },
+    {
+      "path": "final02/ROOT-ADMISSION.json",
+      "bytes": 327,
+      "sha256": "f7e07f4f8fc197bf93d4e3a000bc38204e5347f46af3ee3839494927cf347a5c"
+    },
+    {
+      "path": "final02/run_preflight01.ps1",
+      "bytes": 8889,
+      "sha256": "7ddef055fb2d09287ed236f54c61f04634065cf84c4f384782a1eced5e47a3a1"
+    },
+    {
+      "path": "final02/snapshot_lifecycle.py",
+      "bytes": 22138,
+      "sha256": "a80514aac6b1e75b9b872052852fa993a23cd5273b6bed4ffb4eef7404cb69dd"
+    },
+    {
+      "path": "final02/snapshot_reservations.py",
+      "bytes": 23634,
+      "sha256": "e80ae881fa4af9cc7d1a3e4a06624f5b19abe4de09aec3844e8a541449335b98"
+    },
+    {
+      "path": "final02/SOURCE-INPUTS.json",
+      "bytes": 13661,
+      "sha256": "a0f3a0cc33b027beb319fb0babcbd6ccf608cc6e03ccaf14f48f339a6b31fc73"
+    },
+    {
+      "path": "final02/test_controller_resume_publication.py",
+      "bytes": 26562,
+      "sha256": "d54dc156a30d41608b349eaec6c9c56f242ff2d65db895ab828745a3e6cf830a"
+    },
+    {
+      "path": "final02/test_reservations.py",
+      "bytes": 37737,
+      "sha256": "604a295d5e925b9a9d7f55750bfeb1ddcda3e6a9873d6d8d7f9e98c84d9b4b9e"
+    },
+    {
+      "path": "final02/trusted_asr_resolver.py",
+      "bytes": 13373,
+      "sha256": "16a5a1245f649a3eb04d077b661835503f08bef0ff8822dcb545176f0cc30833"
+    },
+    {
+      "path": "root/admit-controller-final02-before-hunk-context.mjs",
+      "bytes": 2518,
+      "sha256": "0343107a90b0e694ae61bfbc7c2a48887a4e474e2973440b26aaa4eae9ba74ae"
+    },
+    {
+      "path": "root/admit-controller-final02.mjs",
+      "bytes": 2567,
+      "sha256": "a5f2eee5b3bd8465e1bdb171617eb34ec99722a2fd85f43635fb00158f2b6ceb"
+    },
+    {
+      "path": "root/archive-release-decisions-final02.mjs",
+      "bytes": 3163,
+      "sha256": "01113c694d764c35e9ceda7370f7360b4106f5a7bfb6d5ace2eb424556062c12"
+    },
+    {
+      "path": "root/check-controller-final02.mjs",
+      "bytes": 4668,
+      "sha256": "790fb2efdb201d285eeea323847fc16becbd24b011f15919fa8708751f5d1ae8"
+    },
+    {
+      "path": "root/check-release-decisions-static.mjs",
+      "bytes": 1456,
+      "sha256": "c83aa066f16ca8c0f3a173a8f4534a22459028cd6f2d4d1fcff0c73563a13749"
+    },
+    {
+      "path": "root/CONTROLLER-FINAL02-ADMISSION-ACTUAL.json",
+      "bytes": 973,
+      "sha256": "50d9467fcaf9c1988a232038d4758a7dd5ad63d24afb5de1f42f95d3e4302337"
+    },
+    {
+      "path": "root/CONTROLLER-FINAL02-ADMISSION-CORRECTED-ACTUAL.json",
+      "bytes": 692,
+      "sha256": "90b45bdf570f2bf00f20bd63190471f12b56f51f38d078399f89c4f8e8041627"
+    },
+    {
+      "path": "root/CONTROLLER-FINAL02-EXACT-DIFF-ACTUAL.json",
+      "bytes": 1898,
+      "sha256": "d627fe7bbe280abbf78c5f10b50b4511e024a952322d73b1e1d0c68d5752b284"
+    },
+    {
+      "path": "root/CONTROLLER-FINAL02-RESULT-CHECK-ACTUAL.json",
+      "bytes": 433,
+      "sha256": "b98d54e0dabe5e2f152ac4fadff006ba5e78f70b1b7038ebe4d59edc8eab395e"
+    },
+    {
+      "path": "root/CONTROLLER-FINAL02-RESULT-CHECK.json",
+      "bytes": 3820,
+      "sha256": "6e77eb8bf86e9996fb12ec4585f04077f760c9e2dc100c65f53cf007a4e10644"
+    },
+    {
+      "path": "root/CONTROLLER-FINAL02-RUN-ACTUAL.json",
+      "bytes": 210,
+      "sha256": "a96edf4c3ac0d493627645e2ffa8913a442bd51d61646eb83a8454870e41a52c"
+    },
+    {
+      "path": "root/prepare-controller-final02.mjs",
+      "bytes": 5396,
+      "sha256": "6a3a747bba9144fabc305767ae17c9068052dcf63e1297277c361093fda6d985"
+    },
+    {
+      "path": "root/RELEASE-DECISIONS-STATIC-CHECK-ACTUAL.json",
+      "bytes": 1431,
+      "sha256": "df25b7301167bad20e8ba69166119e78d0edbdb784d0538649611d987dde4847"
+    },
+    {
+      "path": "root/RELEASE-DECISIONS-STATIC-CHECK.json",
+      "bytes": 338,
+      "sha256": "b3515b37e2f53a398e523005c96f55c88fca4a745bf4fe533c447ab97beb1fe9"
+    },
+    {
+      "path": "verdicts/ASTRA-RELEASE-DECISIONS-REVIEW-2026-09-15.md",
+      "bytes": 2302,
+      "sha256": "34d717f84fde0df19ba80696d0b33a15177e7ac54e751b3fb2c7eb8f1d8e26b4"
+    },
+    {
+      "path": "verdicts/RUNTIME-WORK-ARCHIVE-2026-09-15.md",
+      "bytes": 2318,
+      "sha256": "afe5033a58f1d6acf337cbd11ef5fb3d32594abff51ae2f64d82ea23e499b0d6"
+    }
+  ]
+}

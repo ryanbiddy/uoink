@@ -1,0 +1,359 @@
+{
+  "schema": "controller-custody-qualification-source-inputs.v1",
+  "checkpoint": "Ryan-approved final Controller10 closure, 2026-09-15",
+  "scope": "generated_bytes_and_fake_ports_only",
+  "modules": [
+    {
+      "order": 1,
+      "module": "trusted_asr_resolver",
+      "path": "E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/windows-interrupted-owner-native-proposal02/trusted_asr_resolver.py",
+      "bytes": 13373,
+      "sha256": "16a5a1245f649a3eb04d077b661835503f08bef0ff8822dcb545176f0cc30833"
+    },
+    {
+      "order": 2,
+      "module": "snapshot_lifecycle",
+      "path": "E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/windows-interrupted-owner-native-proposal02/snapshot_lifecycle.py",
+      "bytes": 22138,
+      "sha256": "a80514aac6b1e75b9b872052852fa993a23cd5273b6bed4ffb4eef7404cb69dd"
+    },
+    {
+      "order": 3,
+      "module": "snapshot_reservations",
+      "path": "E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/windows-interrupted-owner-native-proposal02/snapshot_reservations.py",
+      "bytes": 23634,
+      "sha256": "e80ae881fa4af9cc7d1a3e4a06624f5b19abe4de09aec3844e8a541449335b98"
+    },
+    {
+      "order": 4,
+      "module": "reservation_file_port",
+      "path": "E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/windows-interrupted-owner-native-proposal02/reservation_file_port.py",
+      "bytes": 4694,
+      "sha256": "708554378ab8a8e6c4477e637c999256665cbd2855b94c6fa3c2d04a19d3a224"
+    },
+    {
+      "order": 5,
+      "module": "durable_lifecycle",
+      "path": "E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/controller-boundary-custody-repair01/durable_lifecycle.py",
+      "bytes": 40180,
+      "sha256": "ce69903d93daf41ae3717008f8d0dbd0b3ead7b11662b674eddf43828567b222"
+    },
+    {
+      "order": 6,
+      "module": "asr_loading_adapter",
+      "path": "E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/controller-boundary-custody-repair01/asr_loading_adapter.py",
+      "bytes": 47660,
+      "sha256": "227395c4e1f25f75f13dc950e3b2e222af4a4d8b307a36091908229b58ed0c0f"
+    },
+    {
+      "order": 7,
+      "module": "test_reservations",
+      "path": "E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/windows-reservation-implementation-proposal02/test_reservations.py",
+      "bytes": 37737,
+      "sha256": "604a295d5e925b9a9d7f55750bfeb1ddcda3e6a9873d6d8d7f9e98c84d9b4b9e"
+    },
+    {
+      "order": 8,
+      "module": "controller_boundary_fixture",
+      "path": "E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/controller-boundary-fixture-repair01/controller_boundary_fixture.py",
+      "bytes": 12943,
+      "sha256": "63642115cf53a21911ea8fd1e31af91ff20c2807639e39dab5ec23fce94c06f7"
+    },
+    {
+      "order": 9,
+      "module": "test_controller_resume_publication",
+      "path": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\controller-custody-final02\\test_controller_resume_publication.py",
+      "bytes": 26562,
+      "sha256": "d54dc156a30d41608b349eaec6c9c56f242ff2d65db895ab828745a3e6cf830a"
+    }
+  ],
+  "expected": {
+    "path": "_scratch/controller-boundary-fixture-repair01/EXPECTED-CASES.json",
+    "bytes": 1357,
+    "sha256": "5f102d0240c20b8cc2662b1c135f420bdc357dabcd912af4cec0e74404a074b7",
+    "cases": [
+      {
+        "id": "test_controller_resume_publication.ControllerBoundaryContracts.test_actual_canonical_factory_issuance_binding_publication_and_close",
+        "proposed_subtest_iterations": 0
+      },
+      {
+        "id": "test_controller_resume_publication.ControllerBoundaryContracts.test_foreign_unissued_direct_and_reentrant_entries_refuse_before_create",
+        "proposed_subtest_iterations": 26
+      },
+      {
+        "id": "test_controller_resume_publication.ControllerBoundaryContracts.test_post_bind_identity_mutation_reaches_new_pre_resume_boundary",
+        "proposed_subtest_iterations": 4
+      },
+      {
+        "id": "test_controller_resume_publication.ControllerBoundaryContracts.test_after_finish_mutation_refuses_actual_factory_publication",
+        "proposed_subtest_iterations": 4
+      },
+      {
+        "id": "test_controller_resume_publication.ControllerBoundaryContracts.test_original_custody_attempt_and_fixed_helpers_cannot_be_replaced",
+        "proposed_subtest_iterations": 48
+      },
+      {
+        "id": "test_controller_resume_publication.ControllerBoundaryContracts.test_resume_latch_pending_phase_and_active_owner_refuse_without_reset",
+        "proposed_subtest_iterations": 4
+      },
+      {
+        "id": "test_controller_resume_publication.ControllerBoundaryContracts.test_actual_revocation_at_both_boundaries_retains_cleanup_uncertainty",
+        "proposed_subtest_iterations": 4
+      },
+      {
+        "id": "test_controller_resume_publication.ControllerBoundaryContracts.test_actual_lease_exit_runs_once_and_preserves_its_first_error",
+        "proposed_subtest_iterations": 4
+      },
+      {
+        "id": "test_controller_resume_publication.ControllerBoundaryContracts.test_known_early_or_late_error_survives_secondary_cleanup_failure",
+        "proposed_subtest_iterations": 8
+      },
+      {
+        "id": "test_controller_resume_publication.ControllerBoundaryContracts.test_assertion_failure_attempts_close_and_preserves_uncertain_custody",
+        "proposed_subtest_iterations": 2
+      }
+    ],
+    "proposed_total": 104,
+    "proposed_max_per_case": 48
+  },
+  "donor": [
+    {
+      "path": "_scratch/controller-stage-qualification-proposal01/qualify_windows_reservations.py",
+      "bytes": 13816,
+      "sha256": "6eafdbd476026a3b01750d6abfb6c4d429078eea766410fc9a2803f7f9c3c846"
+    },
+    {
+      "path": "_scratch/controller-stage-qualification-proposal01/run_preflight01.ps1",
+      "bytes": 8874,
+      "sha256": "b71b436882df599c0650220383ed338f745345e19ca4217c9be1fe18eacf8930"
+    },
+    {
+      "path": "_scratch/controller-stage-qualification-proposal01/QUALIFICATION-PROTOCOL.md",
+      "bytes": 2774,
+      "sha256": "b54afd01414e3a3411c5a0f2641765cec4f271b8d154a8a81fb43b98e6303551"
+    },
+    {
+      "path": "_scratch/controller-stage-qualification-proposal01/PINS.json",
+      "bytes": 4727,
+      "sha256": "b831bf6c864d8a7bef24355e5868dfa7480e6bba6ff1381cbc3ac9db07388606"
+    }
+  ],
+  "capture_plan": {
+    "timing": "Capture after the six canonical subjects load, immediately before test_reservations definitions; compare after all cases. No fixture helper supplies or recaptures expected values.",
+    "canonical_module_identity": "Every sys.modules entry must still equal its original LOADED object; adapter.resolver and adapter._STARTUP_RESOLVER must be the canonical resolver.",
+    "resolver_functions": [
+      "load_manifest",
+      "admit_snapshot",
+      "bind_for_constructor",
+      "_checked_chain",
+      "_inventory",
+      "_hash_asset"
+    ],
+    "adapter_functions": [
+      "_require",
+      "policy_status",
+      "_release",
+      "_plan",
+      "_leased_admission",
+      "ensure_assets",
+      "_runtime_profile",
+      "_model_session",
+      "whisperx_session",
+      "faster_whisper_session",
+      "_startup_configuration",
+      "_startup_authority_snapshot",
+      "_startup_selection_current",
+      "_startup_values",
+      "_startup_references",
+      "_validate_startup_locked",
+      "_validate_controller_startup",
+      "_consume_controller_startup",
+      "_fixed_real_worker_start",
+      "_controller_startup_scope",
+      "_validate_controller_worker_stage",
+      "_validate_controller_worker_stage_locked",
+      "_validate_controller_pre_resume",
+      "_validate_controller_pre_resume_locked",
+      "_capture_controller_boundary",
+      "_check_controller_entry",
+      "_check_controller_boundary",
+      "_require_fixed_controller_functions",
+      "_classify_controller_custody",
+      "_require_controller_binding",
+      "_STARTUP_PROFILE"
+    ],
+    "adapter_anchor_relations": {
+      "_STARTUP_LOAD": "trusted_asr_resolver.load_manifest",
+      "_STARTUP_ADMIT": "trusted_asr_resolver.admit_snapshot",
+      "_STARTUP_BIND": "trusted_asr_resolver.bind_for_constructor",
+      "_STARTUP_RELEASE": "asr_loading_adapter._release",
+      "_STARTUP_PROFILE": "asr_loading_adapter._runtime_profile"
+    },
+    "controller_tuple": {
+      "name": "_CONTROLLER_BOUNDARY_FUNCTIONS",
+      "exact_type": "tuple",
+      "count": 19,
+      "retain_original_tuple_identity": true,
+      "names": [
+        "_capture_controller_boundary",
+        "_check_controller_entry",
+        "_check_controller_boundary",
+        "_require_fixed_controller_functions",
+        "_classify_controller_custody",
+        "_require_controller_binding",
+        "_validate_controller_pre_resume",
+        "_validate_controller_pre_resume_locked",
+        "_validate_controller_worker_stage",
+        "_validate_controller_worker_stage_locked",
+        "_validate_controller_startup",
+        "_validate_startup_locked",
+        "_startup_selection_current",
+        "_startup_references",
+        "_startup_values",
+        "_startup_authority_snapshot",
+        "_startup_configuration",
+        "_require",
+        "_STARTUP_PROFILE"
+      ]
+    },
+    "durable_functions": [
+      "_require_factory_start"
+    ],
+    "durable_anchor_relation": "_FIXED_FACTORY_START_CHECK is the originally captured _require_factory_start",
+    "class_identities": {
+      "asr_loading_adapter": [
+        "_ControllerASRStart",
+        "_StartupCustody",
+        "_ControllerBoundary"
+      ],
+      "durable_lifecycle": [
+        "_FactoryStartAttempt",
+        "DurableOwnedRuntimeFactory",
+        "DurableSnapshotLifecycle",
+        "_DurableKernel",
+        "_DurableLease"
+      ],
+      "snapshot_lifecycle": [
+        "OwnedSession",
+        "_NativePermit",
+        "Phase"
+      ],
+      "snapshot_reservations": [
+        "Reservation"
+      ]
+    },
+    "imported_type_relations": [
+      "adapter.DurableOwnedRuntimeFactory is durable.DurableOwnedRuntimeFactory",
+      "adapter.DurableSnapshotLifecycle is durable.DurableSnapshotLifecycle",
+      "adapter._DurableKernel is durable._DurableKernel",
+      "adapter._DurableLease is durable._DurableLease",
+      "adapter.OwnedSession is snapshot_lifecycle.OwnedSession",
+      "adapter._NativePermit is snapshot_lifecycle._NativePermit",
+      "adapter.Phase is snapshot_lifecycle.Phase",
+      "adapter.Reservation is snapshot_reservations.Reservation"
+    ],
+    "durable_method_identities": [
+      "DurableOwnedRuntimeFactory.__init__",
+      "DurableOwnedRuntimeFactory.open_owned_session",
+      "_DurableKernel.__init__",
+      "_DurableKernel.start_owned_worker",
+      "_DurableKernel.stop_unpublished",
+      "DurableSnapshotLifecycle._flush_quarantine"
+    ],
+    "remaining_real_entrypoints": [
+      "reservation_file_port.real_journal_port",
+      "snapshot_reservations.real_reservation_service"
+    ],
+    "authority_absence": {
+      "resolver": [
+        "REAL_APPROVAL"
+      ],
+      "adapter": [
+        "RELEASE_AUTHORITY",
+        "RUNTIME_PROFILE",
+        "SNAPSHOT_LIFECYCLE",
+        "RUNTIME_FACTORY",
+        "ACQUISITION_SERVICE"
+      ]
+    },
+    "retained_state_limit": "Do not require empty custody/attempt registries or clear failed inert custody. The fixture temporarily changes metadata/lower services and generated approval; fixed references and absent configured authority are checked outside that active context."
+  },
+  "guard_names": [
+    "startup_bound",
+    "content_reads_closed",
+    "audit_identity_unchanged",
+    "metadata_traps_installed",
+    "baseline_winreg_identity_unchanged",
+    "registry_namespace_unchanged",
+    "registry_traps_installed",
+    "captures_installed",
+    "capture_valid",
+    "real_entrypoints_unchanged"
+  ],
+  "child_names": [
+    "trusted_asr_resolver.py",
+    "snapshot_lifecycle.py",
+    "snapshot_reservations.py",
+    "reservation_file_port.py",
+    "durable_lifecycle.py",
+    "asr_loading_adapter.py",
+    "test_reservations.py",
+    "controller_boundary_fixture.py",
+    "test_controller_resume_publication.py",
+    "qualify_windows_reservations.py",
+    "EXPECTED-CASES.json"
+  ],
+  "parent_names": [
+    "trusted_asr_resolver.py",
+    "snapshot_lifecycle.py",
+    "snapshot_reservations.py",
+    "reservation_file_port.py",
+    "durable_lifecycle.py",
+    "asr_loading_adapter.py",
+    "test_reservations.py",
+    "controller_boundary_fixture.py",
+    "test_controller_resume_publication.py",
+    "qualify_windows_reservations.py",
+    "EXPECTED-CASES.json",
+    "run_preflight01.ps1",
+    "BRIEF.md",
+    "QUALIFICATION-PROTOCOL.md",
+    "SOURCE-INPUTS.json"
+  ],
+  "successful_output_names": [
+    "trusted_asr_resolver.py",
+    "snapshot_lifecycle.py",
+    "snapshot_reservations.py",
+    "reservation_file_port.py",
+    "durable_lifecycle.py",
+    "asr_loading_adapter.py",
+    "test_reservations.py",
+    "controller_boundary_fixture.py",
+    "test_controller_resume_publication.py",
+    "qualify_windows_reservations.py",
+    "EXPECTED-CASES.json",
+    "run_preflight01.ps1",
+    "BRIEF.md",
+    "QUALIFICATION-PROTOCOL.md",
+    "SOURCE-INPUTS.json",
+    "PINS.json",
+    "ROOT-ADMISSION.json",
+    "plan.json",
+    "stdout.json",
+    "stderr.log",
+    "native-exit.json",
+    "input-check.json",
+    "exit.json"
+  ],
+  "labels": {
+    "author": "controller-custody-fake01",
+    "confirmation": "controller-custody-confirmation01"
+  },
+  "final_closure": {
+    "approved_patch_sha256": "f1c8950dfbe84ddbeb5838cdc518a25a2c5eaed2011802ea8dab7e1c25aa4e8a",
+    "original_pins_sha256": "25f302701d5ae62e481c0217338a84ff6eaef3febff54ca1458ea9ee28283d2a",
+    "run_label": "controller-custody-final02",
+    "invocations": 1,
+    "freeze_after": true
+  }
+}

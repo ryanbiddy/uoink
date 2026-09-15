@@ -2,6 +2,46 @@
 
 Status: launch-facing for the current helper and extension
 
+## 3.8.0 model-loading and signing disclosure
+
+Ryan's September 15 release decision retains **Torch 2.8.0 / WhisperX 3.8.6**.
+These are the production installer pins in `requirements-installer-lock.txt`;
+the experimental dependency graph and runtime-owner prototypes are archived.
+They are not shipped protections. No model-stack migration, D3 download or D4
+native-model qualification is part of 3.8.0.
+
+The production path in `whisper_runner.py` checks the local ASR snapshot, then
+calls `whisperx.load_model(..., local_files_only=True)`. Missing ASR resources
+require explicit download consent. The cache checks establish a directory
+shape and nonempty `model.bin`, `config.json` and `tokenizer.json`; they do not
+authenticate model contents or prevent replacement between a check and a load.
+
+WhisperX's default Pyannote VAD is a separate loader path. The retained upstream
+source uses `assets/pytorch_model.bin`; Pyannote loads the checkpoint with
+`weights_only=False` and selects a class from checkpoint metadata. This permits
+pickle deserialization and does not provide safe loading of untrusted model
+files. The ASR `local_files_only` argument does not make that VAD loader safe,
+authenticate its checkpoint or isolate its execution. Treat model files as
+trusted executable inputs and do not substitute untrusted checkpoints.
+The source basis is the retained [WhisperX VAD loader](library/proof/vad-fixed-loader-proposal-2026-09-13/original-proposal/source/whisperx/vads/pyannote.py)
+and [Pyannote checkpoint loader](library/proof/vad-fixed-loader-proposal-2026-09-13/original-proposal/source/pyannote/audio/core/model.py).
+
+Optional alignment and diarization calls do not receive the same local-only
+argument. Speaker attribution remains outside the 3.8.0 release claims; no
+speaker qualification or diarization run was authorized for this release work.
+The recorded dependency findings remain disclosed. Neither the completed D1/D2
+observations nor synthetic tests establish a clean native-runtime security audit.
+
+The 3.8.0 Windows installer will be **unsigned**, by Ryan's decision. No
+certificate is selected (`SigningCertificateThumbprint=none` in the owner
+record). The supported build invocation omits `-ReleaseSigned` and all signing
+parameters; passing the string `none` as a thumbprint would fail validation.
+The repaired signing implementation is retained for 3.9. Unsigned artifacts
+provide no verified publisher identity; publish their hashes with the download.
+
+See [the release decisions](library/RELEASE-OWNER-DECISIONS-2026-09-12.md) and
+[the archived runtime work](library/RUNTIME-WORK-ARCHIVE-2026-09-15.md).
+
 The Living Library candidate build selects a verified local NLTK path-policy
 backport, `3.10.3+uoink.pathsec1`. The fixed wheel, original source, patch and
 provenance are retained under vendor/nltk-pathsec. At this source checkpoint,

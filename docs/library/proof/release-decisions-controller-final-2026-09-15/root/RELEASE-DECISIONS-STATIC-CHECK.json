@@ -1,0 +1,10 @@
+{
+  "scope": "static exact-diff and production source-pin review; no pytest or runtime invocation",
+  "at6_marker_only": true,
+  "strict": true,
+  "body_unchanged": true,
+  "receipt_unchanged_by_patch": true,
+  "torch": "2.8.0",
+  "whisperx": "3.8.6",
+  "test_sha256": "6ae50f1161ee96caec754681db5fbe5b504a1e1fd70690a7beb4e3d241c48e2c"
+}

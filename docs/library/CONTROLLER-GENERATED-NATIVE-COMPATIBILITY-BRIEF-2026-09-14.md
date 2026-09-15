@@ -1,5 +1,11 @@
 # Generated Windows startup compatibility — source preparation
 
+**Archived 2026-09-15 by Ryan's release decision. Do not execute this brief.**
+The prepared native observation remains uninvoked. Controller10 received one
+final corrected rerun and is frozen; all runtime-owner/journal/state-machine
+and fake-stack work is archived. No D3/D4 or model migration for 3.8.0 follows.
+The remaining text is historical preparation, not an active instruction.
+
 Prepare source for one fresh generated Windows observation of the repaired
 core. This preparation may proceed while the controller10 expectation decision
 is pending; invocation must wait until both corrected controller10 copies qualify.

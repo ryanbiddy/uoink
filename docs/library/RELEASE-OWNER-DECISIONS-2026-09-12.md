@@ -13,6 +13,16 @@ continuation below. They do not turn earlier failures into passes.
 | Claude Desktop | Ryan will create a local standard Windows account and sign in | If absent at packaging, ship with "tested with Claude Code" and Desktop listed as unverified. |
 | Model stack | No migration for 3.8.0; ship Torch 2.8.0 / WhisperX 3.8.6 | Disclose the existing loader in docs/security.md. Archive all synthetic runtime-owner, journal and state-machine work. No further D3/D4. |
 
+Execution recorded September 15: the AT6 strict marker is applied with its
+body unchanged. Controller10 final02 ran once as3ac275:10 passed,0 failed,0
+skipped,104 passing subtests, outer/child0. Root24cbdb verifies the complete
+receipt. The controller track is frozen; native preparation remains uninvoked.
+Security and both release-note documents now disclose the chosen scope.
+
+For builds, `SigningCertificateThumbprint=none` means omit `-ReleaseSigned`,
+`-SigningCertificateThumbprint`, `-TimestampUrl` and `-SignToolPath`. Passing the
+literal `none` would trip the repaired validation. No signing code changes.
+
 The one approved Controller10 rerun is the sole remaining synthetic execution.
 After it, stop that track regardless of result. Native preparation at 1ca39c0
 remains uninvoked. D1/D2 are completed historical observations; do not reaccess

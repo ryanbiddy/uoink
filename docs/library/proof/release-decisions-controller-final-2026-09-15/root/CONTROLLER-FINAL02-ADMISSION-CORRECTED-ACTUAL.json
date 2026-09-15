@@ -1,0 +1,7 @@
+{
+  "chunk_id": "f8f18b",
+  "wall_time_seconds": 0.0910048,
+  "exit_code": 0,
+  "original_token_count": 129,
+  "output": "{\n  \"admitted\": true,\n  \"approved\": true,\n  \"label\": \"controller-custody-final02\",\n  \"pins_sha256\": \"488a1a4223e7885fe108a3bb375512306291681fcb45018c0e0e8a658940e39b\",\n  \"scope\": \"generated_bytes_and_fake_ports_only\",\n  \"authority\": \"Ryan 2026-09-15; decisions d7d8c1c; exact approved patch f1c8950d\",\n  \"invocations\": 1,\n  \"freeze_after\": true,\n  \"changed\": [\n    \"test_controller_resume_publication.py\",\n    \"run_preflight01.ps1\",\n    \"BRIEF.md\",\n    \"QUALIFICATION-PROTOCOL.md\",\n    \"SOURCE-INPUTS.json\"\n  ]\n}\n"
+}

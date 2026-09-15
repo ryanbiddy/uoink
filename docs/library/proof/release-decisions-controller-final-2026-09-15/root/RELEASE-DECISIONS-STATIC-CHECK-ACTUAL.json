@@ -1,0 +1,7 @@
+{
+  "chunk_id": "bb6bce",
+  "wall_time_seconds": 0.1447804,
+  "exit_code": 0,
+  "original_token_count": 314,
+  "output": "{\n  \"scope\": \"static exact-diff and production source-pin review; no pytest or runtime invocation\",\n  \"at6_marker_only\": true,\n  \"strict\": true,\n  \"body_unchanged\": true,\n  \"receipt_unchanged_by_patch\": true,\n  \"torch\": \"2.8.0\",\n  \"whisperx\": \"3.8.6\",\n  \"test_sha256\": \"6ae50f1161ee96caec754681db5fbe5b504a1e1fd70690a7beb4e3d241c48e2c\"\n}\nwarning: in the working copy of 'tests/library_work_astra/test_phase3_acceptance7.py', LF will be replaced by CRLF the next time Git touches it\ndiff --git a/tests/library_work_astra/test_phase3_acceptance7.py b/tests/library_work_astra/test_phase3_acceptance7.py\nindex 02a454a..73fd9d0 100644\n--- a/tests/library_work_astra/test_phase3_acceptance7.py\n+++ b/tests/library_work_astra/test_phase3_acceptance7.py\n@@ -76,6 +76,10 @@ def test_as7_c21_executed_launcher_bytes_are_retained():\n     assert expected in hashes, f'No retained bytes match executed launcher SHA256 {expected}'\n \n \n+@pytest.mark.xfail(\n+    strict=True,\n+    reason='Unrecoverable historical receipt gap disclosed by Ryan on 2026-09-15; not a release blocker.',\n+)\n def test_as7_c21_at6_receipt_records_process_exit_status():\n     receipt = read_json(AT6)\n     exits = {key: receipt[key] for key in ('exit_code', 'returncode', 'process_exit_code')\n"
+}

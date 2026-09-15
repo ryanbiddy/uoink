@@ -1,0 +1,447 @@
+"""Ten proposed controller-only groups. No generated-start compatibility credit.
+
+These definitions await a separately reviewed guarded invocation. Faults act on
+fresh generated state after actual issuance; no positive custody is seeded.
+"""
+from dataclasses import replace
+import unittest
+
+import asr_loading_adapter as adapter
+import trusted_asr_resolver as resolver
+import durable_lifecycle as durable
+import snapshot_lifecycle as lifecycle
+from snapshot_lifecycle import Phase, SessionClosed, LifecycleUnavailable, CleanupUnconfirmed
+from controller_boundary_fixture import ControllerBoundaryFixture, changed
+
+
+REFUSALS = (adapter.AdapterUnavailable, LifecycleUnavailable)
+FIXED_ADAPTER_HELPERS = (
+    "_capture_controller_boundary", "_check_controller_entry", "_check_controller_boundary",
+    "_require_fixed_controller_functions", "_classify_controller_custody",
+    "_require_controller_binding", "_validate_controller_pre_resume",
+    "_validate_controller_pre_resume_locked", "_validate_controller_worker_stage",
+    "_validate_controller_worker_stage_locked", "_validate_controller_startup",
+    "_validate_startup_locked", "_startup_selection_current", "_startup_references",
+    "_startup_values", "_startup_authority_snapshot", "_startup_configuration",
+    "_require", "_STARTUP_PROFILE",
+)
+
+
+class ControllerBoundaryContracts(unittest.TestCase):
+    def names(self, fixture):
+        return [row["name"] for row in fixture.trace]
+
+    def fail_start(self, fixture, expected=REFUSALS):
+        with self.assertRaises(expected) as caught:
+            with fixture:
+                with fixture.scope() as startup:
+                    fixture.factory.open_owned_session(startup, startup.permit)
+        return caught.exception
+
+    def assert_retained(self, fixture, *, worker=True):
+        attempt = fixture.attempt
+        self.assertIs(type(attempt), durable._FactoryStartAttempt)
+        self.assertIs(fixture.factory._start_attempts[attempt.permit_identity], attempt)
+        self.assertIs(attempt.controller.custody, fixture.custody)
+        self.assertIs(attempt.owner, fixture.session)
+        self.assertIs(attempt.token, fixture.token)
+        self.assertIs(attempt.record, fixture.record)
+        self.assertIsNone(fixture.session._worker)
+        self.assertIs(fixture.record.phase, Phase.QUARANTINED)
+        self.assertIn(fixture.token.physical, fixture.f.gates._held)
+        self.assertNotIn("release_guards", fixture.f.events)
+        if worker:
+            self.assertIs(fixture.returned_worker, fixture.f.worker)
+        else:
+            self.assertIsNone(fixture.returned_worker)
+            self.assertNotIn(attempt.permit_identity, fixture.manager._kernel._starts)
+
+    def test_actual_canonical_factory_issuance_binding_publication_and_close(self):
+        f = ControllerBoundaryFixture()
+        with f:
+            with f.published() as (startup, session, worker):
+                attempt = f.attempt
+                self.assertIs(type(startup), adapter._ControllerASRStart)
+                self.assertIs(type(session), lifecycle.OwnedSession)
+                self.assertIs(adapter.resolver, resolver)
+                self.assertIs(type(attempt), durable._FactoryStartAttempt)
+                self.assertIs(attempt.factory, f.factory)
+                self.assertIs(attempt.manager, f.manager)
+                self.assertIs(attempt.kernel, f.manager._kernel)
+                self.assertIs(attempt.delegate, f.kernel)
+                self.assertIs(attempt.profile, startup)
+                self.assertIs(attempt.permit, startup.permit)
+                self.assertIs(attempt.permit_identity, startup.permit.identity)
+                self.assertIs(attempt.record, f.record)
+                self.assertIs(attempt.owner, session)
+                self.assertIs(attempt.protection, f.record.protection)
+                self.assertIs(attempt.token, f.token)
+                self.assertIs(attempt.adapter, adapter)
+                self.assertIs(attempt.capture, adapter._capture_controller_boundary)
+                self.assertIs(attempt.entry_check, adapter._check_controller_entry)
+                self.assertIs(attempt.boundary_check, adapter._check_controller_boundary)
+                self.assertIs(attempt.factory_check, durable._require_factory_start)
+                self.assertIs(attempt.functions, adapter._CONTROLLER_BOUNDARY_FUNCTIONS)
+                self.assertEqual(len(attempt.functions), len(FIXED_ADAPTER_HELPERS))
+                self.assertTrue(all(a is getattr(adapter, name)
+                    for a, name in zip(attempt.functions, FIXED_ADAPTER_HELPERS)))
+                self.assertIs(f.factory._start_attempts[startup.permit.identity], attempt)
+                slot = f.manager._kernel._factory_starts[startup.permit.identity]
+                self.assertIs(slot[0], attempt)
+                self.assertIs(slot[1], True)
+                binding = attempt.controller
+                self.assertIs(type(binding), adapter._ControllerBoundary)
+                self.assertIs(binding.custody, f.custody)
+                self.assertIs(binding.references, f.custody.references)
+                self.assertIs(binding.values, f.custody.values)
+                self.assertIs(binding.initial_references, f.custody.initial_references)
+                self.assertIs(binding.initial_values, f.custody.initial_values)
+                self.assertIs(f.custody.consumed_by, session)
+                self.assertIs(session._worker, worker)
+                self.assertIs(f.token.worker, worker)
+                self.assertEqual(f.token.phase, "WORKER_BOUND")
+                self.assertIsNone(f.token.pending)
+                self.assertTrue(f.token.resume_attempted)
+                self.assertIs(f.record.phase, Phase.NATIVE_RUNNING)
+                self.assertEqual(self.names(f), ["create_enter", "consumed", "create_return",
+                    "bind_return", "resume_enter", "finish_enter", "finish_return", "factory_return"])
+                for row in f.trace:
+                    expected_locked = row["name"] == "resume_enter"
+                    self.assertEqual(row["manager_locked"], expected_locked)
+                    self.assertEqual(row["token_locked"], expected_locked)
+                self.assertEqual(f.f.events.count("create"), 1)
+                self.assertEqual(f.f.events.count("resume"), 1)
+            self.assertEqual(f.cleanup_attempts, 1)
+            self.assertEqual(f.close_workers, [worker])
+            self.assertIs(f.record.phase, Phase.RELEASED)
+            self.assertNotIn(id(startup), adapter._CONTROLLER_STARTUPS)
+            self.assertNotIn(id(f.custody), adapter._CONTROLLER_STARTUP_ATTEMPTS)
+            self.assertNotIn(f.token.physical, f.f.gates._held)
+        self.assertIsNone(resolver.REAL_APPROVAL)
+        self.assertIsNone(adapter.RUNTIME_FACTORY)
+
+    def test_foreign_unissued_direct_and_reentrant_entries_refuse_before_create(self):
+        for fault in ("foreign_profile", "unissued_copy", "subclass", "wrong_permit",
+                      "direct_kernel", "closed_real_entry"):
+            with self.subTest(fault=fault):
+                f = ControllerBoundaryFixture()
+                with self.assertRaises(SessionClosed if fault == "wrong_permit" else REFUSALS) as caught:
+                    with f:
+                        with f.scope() as startup:
+                            profile, permit = startup, startup.permit
+                            if fault == "foreign_profile":
+                                profile = {"controller": True}
+                            elif fault == "unissued_copy":
+                                profile = replace(startup)
+                            elif fault == "subclass":
+                                class OtherController(adapter._ControllerASRStart):
+                                    pass
+                                profile = OtherController(**startup.__dict__)
+                            elif fault == "wrong_permit":
+                                permit = replace(permit, identity=object())
+                            elif fault == "direct_kernel":
+                                f.manager._kernel.start_owned_worker(f.record.protection, permit.identity, startup)
+                                self.fail("Direct kernel entry unexpectedly returned")
+                            elif fault == "closed_real_entry":
+                                adapter._fixed_real_worker_start(startup, permit, None)
+                                self.fail("Real worker entry unexpectedly returned")
+                            f.factory.open_owned_session(profile, permit)
+                self.assertEqual(f.trace, [])
+                self.assertIsNone(f.record.owner)
+                self.assertEqual(f.manager._kernel._factory_starts, {})
+                self.assertEqual(f.factory._start_attempts, {})
+                if fault == "closed_real_entry":
+                    self.assertIn("child transport", str(caught.exception))
+                self.assertIsNone(resolver.REAL_APPROVAL)
+        for helper in FIXED_ADAPTER_HELPERS + ("_require_factory_start",):
+            with self.subTest(before_open_helper=helper):
+                f = ControllerBoundaryFixture()
+                calls = []
+                def trap(*args, **kwargs):
+                    calls.append((args, kwargs))
+                    raise AssertionError("Replaced entry helper was invoked")
+                with self.assertRaises(REFUSALS):
+                    with f:
+                        with f.scope() as startup:
+                            # Actual issuance precedes this negative replacement.
+                            module = durable if helper == "_require_factory_start" else adapter
+                            with changed(module, helper, trap):
+                                f.factory.open_owned_session(startup, startup.permit)
+                self.assertEqual(calls, [])
+                self.assertEqual(f.trace, [])
+                self.assertIsNone(f.record.owner)
+                self.assertEqual(f.factory._start_attempts, {})
+                self.assertEqual(f.manager._kernel._factory_starts, {})
+        f = ControllerBoundaryFixture()
+        refusals = []
+        def reenter(fixture, startup):
+            with self.assertRaises(LifecycleUnavailable) as caught:
+                fixture.manager._kernel.start_owned_worker(
+                    fixture.record.protection, startup.permit.identity, startup)
+            refusals.append(caught.exception)
+        f.before_create = reenter
+        with f:
+            with f.published():
+                self.assertEqual(len(refusals), 1)
+                self.assertEqual(f.f.events.count("create"), 1)
+                self.assertEqual(self.names(f).count("create_enter"), 1)
+
+    def mutate_relation(self, f, fault):
+        if fault == "selection":
+            adapter.RUNTIME_PROFILE = replace(f.profile, profile_id="changed-generated-profile")
+        elif fault == "retained_worker":
+            f.manager._kernel._starts[f.startup.permit.identity] = object()
+        elif fault == "token_worker":
+            f.token.worker = object()
+        elif fault == "record_owner":
+            f.record.owner = object()
+        else:
+            raise AssertionError("Unknown fixed relation fault")
+
+    def test_post_bind_identity_mutation_reaches_new_pre_resume_boundary(self):
+        for fault in ("selection", "retained_worker", "token_worker", "record_owner"):
+            with self.subTest(fault=fault):
+                f = ControllerBoundaryFixture()
+                f.after_bind = lambda fixture, worker: self.mutate_relation(fixture, fault)
+                original = self.fail_start(f)
+                self.assert_retained(f)
+                self.assertIn("bind_return", self.names(f))
+                self.assertNotIn("resume_enter", self.names(f))
+                self.assertFalse(f.token.resume_attempted)
+                self.assertIs(f.custody.primary_error, original)
+                self.assertEqual(len(f.stop_workers), 0 if fault == "retained_worker" else 1)
+                if fault == "retained_worker":
+                    self.assertIs(f.token.worker, f.returned_worker)
+                    self.assertIn("Exact worker stop raised: LifecycleUnavailable", original.__notes__)
+                else:
+                    self.assertIs(f.manager._kernel._starts[f.startup.permit.identity], f.returned_worker)
+                    self.assertIs(f.stop_workers[0], f.returned_worker)
+
+    def test_after_finish_mutation_refuses_actual_factory_publication(self):
+        for fault in ("selection", "retained_worker", "token_worker", "record_owner"):
+            with self.subTest(fault=fault):
+                f = ControllerBoundaryFixture()
+                f.after_finish = lambda fixture, worker: self.mutate_relation(fixture, fault)
+                original = self.fail_start(f)
+                self.assert_retained(f)
+                self.assertEqual(self.names(f).count("resume_enter"), 1)
+                self.assertEqual(self.names(f).count("finish_return"), 1)
+                self.assertNotIn("factory_return", self.names(f))
+                self.assertTrue(f.token.resume_attempted)
+                self.assertIs(f.custody.primary_error, original)
+                self.assertEqual(len(f.stop_workers), 0 if fault == "retained_worker" else 1)
+                if fault == "retained_worker":
+                    self.assertIs(f.token.worker, f.returned_worker)
+
+    def test_original_custody_attempt_and_fixed_helpers_cannot_be_replaced(self):
+        faults = ("missing_custody", "same_field_custody", "snapshot_tuple", "attempt_copy")
+        for boundary in ("after_bind", "after_finish"):
+            for fault in faults:
+                with self.subTest(boundary=boundary, fault=fault):
+                    f = ControllerBoundaryFixture()
+                    def mutate(fixture, worker):
+                        custody = fixture.custody
+                        if fault == "missing_custody":
+                            del adapter._CONTROLLER_STARTUPS[id(fixture.startup)]
+                        elif fault == "same_field_custody":
+                            # Unauthorized copy is negative evidence only.
+                            copied = object.__new__(type(custody))
+                            copied.__dict__.update(custody.__dict__)
+                            self.assertIsNot(copied, custody)
+                            adapter._CONTROLLER_STARTUPS[id(fixture.startup)] = copied
+                            del adapter._CONTROLLER_STARTUP_ATTEMPTS[id(custody)]
+                            adapter._CONTROLLER_STARTUP_ATTEMPTS[id(copied)] = copied
+                        elif fault == "snapshot_tuple":
+                            copied = tuple(list(custody.references))
+                            self.assertEqual(copied, custody.references)
+                            self.assertIsNot(copied, custody.references)
+                            custody.references = copied
+                        else:
+                            copied = replace(fixture.attempt)
+                            fixture.manager._kernel._factory_starts[fixture.startup.permit.identity] = (copied, True)
+                    setattr(f, boundary, mutate)
+                    self.fail_start(f)
+                    self.assert_retained(f)
+                    self.assertEqual(len(f.stop_workers), 1)
+                    self.assertEqual(self.names(f).count("resume_enter"), int(boundary == "after_finish"))
+                    self.assertNotIn("factory_return", self.names(f))
+            for helper in FIXED_ADAPTER_HELPERS + ("_require_factory_start",):
+                with self.subTest(boundary=boundary, helper=helper):
+                    f = ControllerBoundaryFixture()
+                    calls = []
+                    def trap(*args, **kwargs):
+                        calls.append((args, kwargs))
+                        raise AssertionError("Replaced authority helper was invoked")
+                    def replace_helper(fixture, worker):
+                        module = durable if helper == "_require_factory_start" else adapter
+                        fixture.stack.enter_context(changed(module, helper, trap))
+                    setattr(f, boundary, replace_helper)
+                    self.fail_start(f)
+                    self.assert_retained(f)
+                    self.assertEqual(calls, [])
+                    self.assertEqual(len(f.stop_workers), 1)
+                    self.assertEqual(self.names(f).count("resume_enter"), int(boundary == "after_finish"))
+
+    def test_resume_latch_pending_phase_and_active_owner_refuse_without_reset(self):
+        for fault in ("attempted", "pending", "phase", "active"):
+            with self.subTest(fault=fault):
+                f = ControllerBoundaryFixture()
+                blocker = object()
+                def mutate(fixture, worker):
+                    if fault == "attempted":
+                        fixture.token.resume_attempted = True
+                    elif fault == "pending":
+                        fixture.token.pending = blocker
+                    elif fault == "phase":
+                        fixture.token.phase = "RESERVED"
+                    else:
+                        fixture.session._active = 1
+                f.after_bind = mutate
+                self.fail_start(f, SessionClosed if fault == "active" else REFUSALS)
+                self.assert_retained(f)
+                self.assertNotIn("resume_enter", self.names(f))
+                self.assertEqual(len(f.stop_workers), 1)
+                if fault == "attempted":
+                    self.assertTrue(f.token.resume_attempted)
+                if fault == "pending":
+                    self.assertIs(f.token.pending, blocker)
+                if fault == "active":
+                    self.assertEqual(f.session._active, 1)
+
+    def test_actual_revocation_at_both_boundaries_retains_cleanup_uncertainty(self):
+        for boundary in ("after_bind", "after_finish"):
+            for fail_stop in (False, True):
+                with self.subTest(boundary=boundary, fail_stop=fail_stop):
+                    f = ControllerBoundaryFixture()
+                    secondary = OSError("generated stop uncertainty")
+                    def revoke(fixture, worker):
+                        fixture.manager._reservations.revoke_local(fixture.token)
+                        fixture.event("actual_revocation")
+                        if fail_stop:
+                            fixture.stop_error = secondary
+                    setattr(f, boundary, revoke)
+                    original = self.fail_start(f)
+                    self.assert_retained(f)
+                    self.assertTrue(f.token.revoked)
+                    self.assertIn("actual_revocation", self.names(f))
+                    self.assertIs(f.custody.primary_error, original)
+                    self.assertEqual(f.stop_workers, [f.returned_worker])
+                    self.assertEqual(self.names(f).count("resume_enter"), int(boundary == "after_finish"))
+                    if fail_stop:
+                        self.assertNotIn("stop_return", self.names(f))
+                        self.assertIn("Exact worker stop raised: OSError", original.__notes__)
+
+    def test_actual_lease_exit_runs_once_and_preserves_its_first_error(self):
+        for boundary in ("after_bind", "after_finish"):
+            for fail_sync in (False, True):
+                with self.subTest(boundary=boundary, fail_sync=fail_sync):
+                    f = ControllerBoundaryFixture()
+                    secondary = OSError("generated finalization sync failure")
+                    def leave(fixture, worker):
+                        if fail_sync:
+                            fixture.arm_sync_failure(secondary)
+                        fixture.close_scope_early()
+                    setattr(f, boundary, leave)
+                    original = self.fail_start(f, CleanupUnconfirmed)
+                    self.assert_retained(f)
+                    self.assertEqual(f.scope_exit_calls, 1)
+                    self.assertIs(f.scope_exit_error, original)
+                    self.assertIs(f.custody.primary_error, original)
+                    self.assertTrue(f.custody.lease.inner._exited)
+                    self.assertTrue(f.custody.lease._finalization_started)
+                    self.assertFalse(f.custody.active)
+                    self.assertEqual(f.stop_workers, [f.returned_worker])
+                    self.assertEqual(self.names(f).count("resume_enter"), int(boundary == "after_finish"))
+                    if fail_sync:
+                        self.assertEqual(f.sync_fault_calls, 1)
+                        self.assertTrue(any("quarantine" in note.lower() for note in original.__notes__))
+
+    def test_known_early_or_late_error_survives_secondary_cleanup_failure(self):
+        for boundary in ("before_create", "after_bind", "after_finish"):
+            for fail_cleanup in (False, True):
+                with self.subTest(boundary=boundary, fail_cleanup=fail_cleanup):
+                    f = ControllerBoundaryFixture()
+                    original = RuntimeError("fixed primary lower-service failure")
+                    secondary = OSError("fixed secondary cleanup failure")
+                    def fail(fixture, value):
+                        fixture.event("primary_error_selected")
+                        if fail_cleanup:
+                            fixture.stop_error = secondary
+                            fixture.arm_sync_failure(secondary)
+                        raise original
+                    setattr(f, boundary, fail)
+                    caught = self.fail_start(f, RuntimeError)
+                    self.assertIs(caught, original)
+                    self.assertIs(f.custody.primary_error, original)
+                    self.assert_retained(f, worker=boundary != "before_create")
+                    self.assertEqual(len(f.stop_workers), int(boundary != "before_create"))
+                    self.assertEqual(self.names(f).count("resume_enter"), int(boundary == "after_finish"))
+                    if boundary == "before_create":
+                        self.assertNotIn("consumed", self.names(f))
+                        self.assertIsNone(f.custody.consumed_by)
+                    if fail_cleanup:
+                        self.assertEqual(f.sync_fault_calls, 1)
+                        self.assertTrue(any("quarantine" in note.lower() for note in original.__notes__))
+                        if boundary != "before_create":
+                            self.assertIn("Exact worker stop raised: OSError", original.__notes__)
+
+        for boundary in ("after_bind", "after_finish"):
+            with self.subTest(boundary=boundary, missing_token_after_primary=True):
+                f = ControllerBoundaryFixture()
+                original = RuntimeError("fixed primary after token registry removal")
+                def remove_token_and_fail(fixture, worker):
+                    self.assertIs(fixture.manager._tokens[fixture.record.key], fixture.token)
+                    del fixture.manager._tokens[fixture.record.key]
+                    fixture.event("token_removed_primary_selected", worker)
+                    raise original
+                setattr(f, boundary, remove_token_and_fail)
+                caught = self.fail_start(f, RuntimeError)
+                self.assertIs(caught, original)
+                self.assertIs(f.custody.primary_error, original)
+                self.assert_retained(f)
+                self.assertNotIn(f.record.key, f.manager._tokens)
+                self.assertIs(f.attempt.token, f.token)
+                self.assertIs(f.manager._reservations._live[f.token.gate], f.token)
+                self.assertIs(f.token.worker, f.returned_worker)
+                self.assertIs(f.manager._kernel._starts[f.startup.permit.identity], f.returned_worker)
+                self.assertIs(f.manager._kernel._factory_starts[f.startup.permit.identity][0], f.attempt)
+                self.assertEqual(f.stop_workers, [f.returned_worker])
+                self.assertEqual(self.names(f).count("token_removed_primary_selected"), 1)
+                self.assertEqual(self.names(f).count("resume_enter"), int(boundary == "after_finish"))
+                self.assertNotIn("factory_return", self.names(f))
+                self.assertIn("Durable quarantine remains unconfirmed: LifecycleUnavailable", original.__notes__)
+
+    def test_assertion_failure_attempts_close_and_preserves_uncertain_custody(self):
+        for fail_close in (False, True):
+            with self.subTest(fail_close=fail_close):
+                f = ControllerBoundaryFixture()
+                original = AssertionError("fixed assertion in published body")
+                secondary = OSError("fixed published cleanup failure")
+                with self.assertRaises(AssertionError) as caught:
+                    with f:
+                        with f.published():
+                            if fail_close:
+                                f.close_error = secondary
+                            raise original
+                self.assertIs(caught.exception, original)
+                self.assertEqual(f.cleanup_attempts, 1)
+                self.assertEqual(f.close_workers, [f.returned_worker])
+                self.assertEqual(self.names(f).count("close_enter"), 1)
+                if fail_close:
+                    self.assertIs(f.cleanup_errors[0], secondary)
+                    self.assertIs(f.record.phase, Phase.QUARANTINED)
+                    self.assertIn(f.token.physical, f.f.gates._held)
+                    self.assertIs(f.custody.primary_error, original)
+                    self.assertIs(f.factory._start_attempts[f.startup.permit.identity].owner, f.session)
+                    self.assertIn("Generated fixture cleanup raised: OSError", original.__notes__)
+                    self.assertNotIn("native_close_confirmed", self.names(f))
+                else:
+                    self.assertEqual(f.cleanup_errors, [])
+                    self.assertIs(f.record.phase, Phase.RELEASED)
+                    self.assertIn("native_close_confirmed", self.names(f))
+                    self.assertNotIn(f.token.physical, f.f.gates._held)
+                self.assertIsNone(resolver.REAL_APPROVAL)
+                self.assertIsNone(adapter.RELEASE_AUTHORITY)
+                self.assertIsNone(adapter.RUNTIME_PROFILE)
+                self.assertIsNone(adapter.SNAPSHOT_LIFECYCLE)
+                self.assertIsNone(adapter.RUNTIME_FACTORY)

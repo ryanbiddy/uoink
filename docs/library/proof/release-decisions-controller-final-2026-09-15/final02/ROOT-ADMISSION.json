@@ -1,0 +1,9 @@
+{
+  "approved": true,
+  "label": "controller-custody-final02",
+  "pins_sha256": "488a1a4223e7885fe108a3bb375512306291681fcb45018c0e0e8a658940e39b",
+  "scope": "generated_bytes_and_fake_ports_only",
+  "authority": "Ryan 2026-09-15; decisions d7d8c1c; exact approved patch f1c8950d",
+  "invocations": 1,
+  "freeze_after": true
+}

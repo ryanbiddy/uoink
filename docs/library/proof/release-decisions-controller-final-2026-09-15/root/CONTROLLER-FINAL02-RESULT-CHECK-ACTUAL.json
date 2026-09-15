@@ -1,0 +1,7 @@
+{
+  "chunk_id": "24cbdb",
+  "wall_time_seconds": 0.1026628,
+  "exit_code": 0,
+  "original_token_count": 67,
+  "output": "{\n  \"status\": \"passed; controller track frozen\",\n  \"passed\": 10,\n  \"failed\": 0,\n  \"skipped\": 0,\n  \"passing_subtests\": 104,\n  \"guards\": 10,\n  \"child_hashes\": 11,\n  \"unchanged_inputs\": 15,\n  \"unchanged_controls\": 3,\n  \"outer_exit\": 0,\n  \"child_exit\": 0,\n  \"files\": 23\n}\n"
+}

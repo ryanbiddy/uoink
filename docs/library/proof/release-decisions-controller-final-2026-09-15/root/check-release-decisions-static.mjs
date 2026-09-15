@@ -1,0 +1,10 @@
+import fs from 'node:fs';import cp from 'node:child_process';import crypto from 'node:crypto';
+const root='E:/AI/projects/uoink/checkouts/Yoink-library',file='tests/library_work_astra/test_phase3_acceptance7.py';
+const before=cp.execFileSync('git',['show','HEAD:'+file],{cwd:root,encoding:'utf8'}).replaceAll('\r\n','\n');
+const after=fs.readFileSync(root+'/'+file,'utf8').replaceAll('\r\n','\n');
+const marker="@pytest.mark.xfail(\n    strict=True,\n    reason='Unrecoverable historical receipt gap disclosed by Ryan on 2026-09-15; not a release blocker.',\n)\n";
+const target='def test_as7_c21_at6_receipt_records_process_exit_status():';
+if(before.split(target).length!==2||after!==before.replace(target,marker+target))throw Error('AT6 exact marker-only change required');
+const lock=fs.readFileSync(root+'/requirements-installer-lock.txt','utf8');for(const pin of ['torch==2.8.0','whisperx==3.8.6'])if(!lock.split(/\r?\n/).includes(pin))throw Error('Production pin '+pin);
+const result={scope:'static exact-diff and production source-pin review; no pytest or runtime invocation',at6_marker_only:true,strict:true,body_unchanged:true,receipt_unchanged_by_patch:true,torch:'2.8.0',whisperx:'3.8.6',test_sha256:crypto.createHash('sha256').update(fs.readFileSync(root+'/'+file)).digest('hex')};
+fs.writeFileSync(root+'/_scratch/RELEASE-DECISIONS-STATIC-CHECK.json',JSON.stringify(result,null,2)+'\n',{flag:'wx'});console.log(JSON.stringify(result,null,2));

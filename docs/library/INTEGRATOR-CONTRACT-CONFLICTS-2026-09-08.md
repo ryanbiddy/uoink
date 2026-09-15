@@ -310,3 +310,45 @@ expectations. This new assertion correction remains pending. No test or fixture
 has changed and no rerun/confirmation is authorized. Preserve the failed record;
 after approval, a fresh repair brief and separately reviewed copies are required.
 The eventual committed complete-tree qualification remains outstanding.
+
+## 2026-09-15 — Ryan's final AT6 and Controller10 dispositions
+
+Ryan explicitly approved the following changes. See the one-page
+ASTRA-RELEASE-DECISIONS-REVIEW-2026-09-15.md verdict. No other assertion or
+fixture change follows from this decision.
+
+AT6 adds only this decorator to the named historical-receipt audit:
+
+```python
+@pytest.mark.xfail(
+    strict=True,
+    reason='Unrecoverable historical receipt gap disclosed by Ryan on 2026-09-15; not a release blocker.',
+)
+```
+
+Reason: the missing original process exit cannot be recreated. Ryan accepts
+disclosure and removes this historical gap as a release blocker. The function
+body and receipt remain unchanged; an unexpected pass still fails strictly.
+Static exact-diff review bb6bce confirms the marker is the only source change.
+This is not a newly observed pytest xfail or a corrected full-tree result.
+
+Controller10 applies the exact patch f1c8950dfbe84ddbeb5838cdc518a25a2c5eaed2011802ea8dab7e1c25aa4e8a:
+
+```diff
+-                with self.assertRaises(REFUSALS) as caught:
++                with self.assertRaises(SessionClosed if fault == "wrong_permit" else REFUSALS) as caught:
+-                self.fail_start(f)
++                self.fail_start(f, SessionClosed if fault == "active" else REFUSALS)
+```
+
+Reason: those two faults correctly throw the existing SessionClosed class.
+Global REFUSALS and every later behavioral assertion stay unchanged. The fresh
+test is d54dc156a30d41608b349eaec6c9c56f242ff2d65db895ab828745a3e6cf830a.
+The full context diff is retained in the final02 proof. Actual3ac275 is the
+single approved rerun:10 passed,0 failed,0 skipped,104 passing subtests and
+outer/child0. Root24cbdb verifies the complete result. Original6ba3f1 remains
+8/2/0 with102/104 passing subtests. No confirmation run occurs.
+
+Controller, runtime-owner, journal, state-machine, fake-stack and generated
+native tracks are now frozen for 3.8.0. The prospective reliability caller
+conflicts above are archived with the canceled migration; do not edit them.

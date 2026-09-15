@@ -1,7 +1,33 @@
 # Living Library 3.8.0 release candidate
 
-Updated 2026-09-14. Release remains held. Website work and marketing are paused
-until the council and integrator accept the product for market.
+Updated 2026-09-15. Ryan has settled the 3.8.0 release scope. Current-source
+verification and packaging remain unfinished; website work and marketing stay
+paused until the council and integrator accept the product for market.
+
+3.8.0 retains Torch 2.8.0 / WhisperX 3.8.6 with the existing loader and its
+limitations disclosed in [security.md](../security.md). All synthetic
+runtime-owner, journal and state-machine proposals are archived, with no
+production migration or further D3/D4. Controller10's final approved correction
+passes **10 cases and 104 subtests**, with zero failures or skips; the track is
+frozen. Its original 8/2 failure is preserved.
+
+The installer will be unsigned: `SigningCertificateThumbprint=none` is Ryan's
+decision; the actual build omits the signing switches. The repaired signing
+path stays available for 3.9. The historical AT6 exit-receipt gap is disclosed
+and no longer blocks release. Its one audit now has a strict expected-failure
+marker with the original assertion intact.
+
+Use "tested with Claude Code" for the recorded client coverage. Claude Desktop
+is unverified unless Ryan completes the standard-account sign-in and a matching
+receipt is obtained before packaging. Desktop is not a 3.8.0 release blocker.
+Package08 and the older full-tree result below retain their original identities;
+this scope decision is not evidence that the new installer has been tested.
+
+### Engineering history through 2026-09-14 (archived scope)
+
+The following runtime and migration records retain their original outcomes.
+Any directions to continue synthetic work, obtain signing or require Desktop
+are superseded by the September 15 decisions above.
 
 The latest complete source tree at `56d9d4c` records **2,796 passed, one failed
 and three skipped cases, plus 13 passing subtests**. All 50 mirror regressions
@@ -702,20 +728,19 @@ See [final verification](FINAL-RELEASE-VALIDATION-2026-09-09.md).
 
 ## Open release decisions and limits
 
-- Ryan's disposition of the missing historical AT6 exit and retained dependency
-  advisories; neither is presented as a pass or clean security clearance.
-- D1 inspection and D2 local conversion are complete only within their recorded
-  approvals. D3 fetching and D4 stack/native execution remain unapproved. The
-  exact migration patch, artifact/loader policy and quality protocol still need
-  review and Ryan's decision; no target stack is approved. The complete model
-  notice and CPU/int8 profile binding remain unresolved.
-- The latest production source change is `71d3e70`. After runtime integration, a fresh committed
+- AT6 is a disclosed unrecoverable historical receipt gap and not a release
+  blocker. The retained model stack and loader limitations are disclosed in
+  security.md; this is not a clean security-audit claim.
+- D1/D2 remain completed historical observations. Runtime-owner, journal,
+  state-machine and fake-stack work is archived; D3/D4 and migration are canceled
+  for 3.8.0. Do not reaccess converted artifacts or revive synthetic proposals.
+- The latest executable production change is `71d3e70`. A fresh committed
   full tree, rebuilt/resealed package, installed notice inventory and client
   checks are still required. Tree `56d9d4c` predates both later production repairs;
   package 08 remains `b8e44fb`, with no current-source package/install credit.
-- Publisher certificate/identity and HTTPS timestamp service remain Ryan's
-  choices. A clean standard Windows account or VM and normal Claude Desktop
-  sign-in are still required; the failed profile override cannot be reused.
+- Signing is deferred to 3.9; the 3.8.0 package will be unsigned. Ryan will set
+  up a standard Windows account for Claude Desktop. If no receipt is available
+  at packaging, list Desktop as unverified; the failed profile override stays retired.
 - Package-08 installation and bounded CLI observations are complete. Native Uoink dashboard checks are separate. Desktop citation/brief/chapter acceptance remains blocked by the documented isolation failure; positive Recall injection and per-session combined prompt/template completeness are not claimed.
 - No speaker-attribution claims; speaker material stays blocked. Phase 5 Part B
   is deferred. The failed shelf-quality and dashboard-size measurements remain.

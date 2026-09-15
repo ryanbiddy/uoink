@@ -1,0 +1,5 @@
+Controller10 final closure, 2026-09-15. Ryan approves only patch f1c8950dfbe84ddbeb5838cdc518a25a2c5eaed2011802ea8dab7e1c25aa4e8a. Original run6ba3f1 remains 8 passed, 2 failed, 0 skipped, with102/104 passing subtests. The two selected faults correctly raise SessionClosed; all fault inputs and subsequent assertions remain unchanged.
+
+Apply the exact two-line exception correction, then invoke this fresh copy once using its unchanged qualifier and ten ordered cases. Expected104 subtests are source expectations until observed. All eight other modules and EXPECTED-CASES remain byte-identical. Launcher changes only its five output/admission labels. The source map updates the changed test binding and records this derivative.
+
+Root must verify these deltas and PINS before admitting. Use C:\Python314\python.exe -I -S -B with IG_FORBIDDEN_LIVE set before outer startup. Preserve immediate child/outer exits, input checks, complete cases and guards. No retry or confirmation run. Freeze after the result, including failure. No native, runtime-owner, journal, model, D3/D4 or fake-stack continuation. No production migration or release qualification follows.

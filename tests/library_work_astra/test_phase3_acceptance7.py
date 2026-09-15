@@ -76,6 +76,10 @@ def test_as7_c21_executed_launcher_bytes_are_retained():
     assert expected in hashes, f'No retained bytes match executed launcher SHA256 {expected}'
 
 
+@pytest.mark.xfail(
+    strict=True,
+    reason='Unrecoverable historical receipt gap disclosed by Ryan on 2026-09-15; not a release blocker.',
+)
 def test_as7_c21_at6_receipt_records_process_exit_status():
     receipt = read_json(AT6)
     exits = {key: receipt[key] for key in ('exit_code', 'returncode', 'process_exit_code')
