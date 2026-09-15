@@ -204,7 +204,7 @@ def _capture_with(monkeypatch, *, settings: dict) -> tuple[dict, list]:
 
         folder = root / "AI" / "d17-case"
         result = server._run_extraction(
-            _URL, 30, folder, open_explorer=False, metadata=_METADATA,
+            _URL, 30, folder, notify=False, metadata=_METADATA,
             source_type=None, generate_paste=False)
         assert result["ok"] is True, result
         # Let any background thread that *did* spawn run to completion.
