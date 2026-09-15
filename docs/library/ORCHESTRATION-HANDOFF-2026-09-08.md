@@ -1384,86 +1384,51 @@ core.longpaths true` must stay set (worktree checkouts fail without it).
 
 ## Blockers for Ryan
 
-- Controller10's first run at source71df9d3 is8/2/0 with102/104 passing subtests.
-  Two new expected-exception arguments omit the existing SessionClosed contract:
-  wrong_permit at test_controller_resume_publication.py:128 and active at300.
-  The proposed two-line correction selects SessionClosed only for those faults;
-  all later behavior assertions stay unchanged and remain unverified in those
-  branches. This exact edit awaits Ryan; approval58335df was for older tests only.
-  Preserve actual6ba3f1/1 and do not rerun or admit confirmation meanwhile.
+Ryan resolved the release choices on 2026-09-15 at 09:30 PDT, relayed by Fable.
+The decisions below supersede earlier pending approvals and runtime queues in
+this handoff. Items 1-5 are Codex's finite task; publication is Fable's item 6.
 
-- The dormant reliability caller changes the ordinary route from a raw model
-  constructor to an owned request/stream. Two unchanged tests at
-  tests/test_reliability_local_only_load.py:55–68 and101–113 expect the raw
-  constructor to be called. These are prospective contract conflicts, not
-  measured failures; production and tests remain unchanged. A concrete test
-  adaptation will need review and Ryan's authorization before production
-  migration. Do not weaken the local-only/no-download behavior assertions.
+1. AT6 is an unrecoverable historical receipt gap and is not a release blocker.
+   Mark `test_as7_c21_at6_receipt_records_process_exit_status` in
+   `tests/library_work_astra/test_phase3_acceptance7.py` as `xfail(strict=True)`.
+   Preserve the original assertion and evidence; the missing exit stays unknown.
+2. Controller10's exact two-line `SessionClosed` expectation correction is
+   approved in `proof/controller-custody10-failed-2026-09-14/author/test_controller_resume_publication.py`:
+   line 128 selects `SessionClosed if fault == "wrong_permit" else REFUSALS`;
+   line 300 uses `self.fail_start(f, SessionClosed if fault == "active" else REFUSALS)`.
+   Run that file once, then freeze the controller track. The original `6ba3f1`
+   result remains 8 passed, 2 failed, 0 skipped and 102/104 passing subtests.
+3. No signing certificate for 3.8.0: `SigningCertificateThumbprint=none`.
+   Skip signing, retain the repaired path, and defer signing to 3.9.
+4. Ryan will create a local standard Windows account and sign in to Claude
+   Desktop himself. If setup and Desktop verification are not complete by
+   packaging, 3.8.0 ships with "tested with Claude Code" and Desktop unverified.
+   No Desktop launch is authorized for Codex. The failed profile override
+   remains unusable; the prior incident's effects remain unknown.
+5. No model-stack migration for 3.8.0: ship Torch 2.8.0 / WhisperX 3.8.6.
+   [Security notes](../security.md) disclose default VAD loading through
+   PyAnnote's checkpoint loader with `weights_only=False`, the same path as
+   3.7.0, mitigated by local-only model files. Migration is planned for 3.9.
+   All synthetic runtime-owner, journal, controller and state-machine work is
+   archived in place and frozen; see the
+   [archive index](ARCHIVED-RUNTIME-TRACK-2026-09-15.md). No further D3/D4.
 
-- D2 local conversion is resolved: Ryan approved the exact question at017b559,
-  including its four interpretation/migration/notice assumptions. Actual2827f8
-  returned outer/parent/child0 with valid guards; root948c0d confirms one artifact
-  read, one output and54 ranges/23 storages. The5,896,708-byte output identity is
-  verified by the parent. No model, reader, network, redistribution or release
-  authority follows; the complete model notice remains unresolved. Text evidence
-  is committed atd13534f with64 verified payloads. This decision need not be asked again.
-- D1 static inspection is resolved: Ryan answered "Approve D1 static inspection
-  only" and the exact admitted invocation b29f6c completed with outer/child0,
-  valid guards and 1,002 interpreted bytes. The fixed checkpoint hash,131-member
-  inventory and version330a matched; little-endian matched the fixed eight-ULP
-  basis with maximum2ULP. Evidence is integrated at4b38948; read
-  ASTRA-D1-STATIC-RESULT-2026-09-13.md. This does not
-  authenticate the writer, validate other storage encodings or approve D2
-  conversion, D3 fetching or D4 stack/native execution. Those remain separate.
-- Actual release signing requires Ryan's publisher certificate and timestamp
-  service selection. The implementation is now 0b3629d; it has no successful
-  Uoink signing credit. Standard personal stores returned no code-signing
-  certificate. SignTool is absent from PATH but exists in Windows SDK
-  10.0.26100.0/x64; its Microsoft signature verifies with unchanged bytes.
-  Do not buy a service or change Windows trust.
-- This host is Windows 11 Home build 26200; WindowsSandbox.exe and vmconnect.exe
-  are absent. Routine sign-in is now authorized by Ryan's AGENTS instructions,
-  but the failed Desktop override remains forbidden. A separately verified clean
-  account/VM is still needed before further Desktop acceptance. No new account,
-  VM, ordinary connector or live library was opened in this inspection.
+Fable owns publication on `release/3.8.0`: remove proof bulk from the public
+tree, squash the product diff onto main, build Package 09 and tag `v3.8.0`.
+Codex leaves an uncommitted diff for integration into `cc/living-library-candidate`.
+Speaker attribution and autonomous filing claims remain withheld; Desktop
+claims depend on item 4. Phase 5 Part B remains deferred, and X remains blocked.
 
-- The historical AT6 child exit cannot be reconstructed. Its audit outcome stays
-  failed; any release disposition of missing evidence belongs to Ryan.
-- The historical dependency audit retains 19 entries / 15 distinct issues in four
-  packages. The later proposed candidate metadata has one entry / one group,
-  with runtime compatibility still unqualified. Preserve both scopes and Astra's
-  reachability findings; neither supplies a clean release security verdict.
-- Phase 6 speaker attribution remains blocked by Ryan's explicit ruling. No
-  diarization runs; chapters and cited ranges are the release scope.
-- Desktop-client citation/brief/chapter GUI acceptance remains unobserved.
-  The package-07 configuration-isolation claim is withdrawn: ordinary connectors
-  launched, and their earlier live-index/5179 effects are unknown. No live-state
-  probe is permitted. A supported isolation method must be verified before any
-  further Desktop launch, or Ryan must provide/authorize a clean separate Windows
-  account/VM and perform its interactive sign-in. No such environment is prepared.
-  Historical Sky automation supplied package-08 Uoink dashboard checks at
-  49e2b31; those provide no Desktop acceptance. The current computer-use runtime
-  exposes browser control only and disables native app APIs. Do not infer current
-  native GUI capability from the historical receipt.
-- A dependency migration conflicts with the immutable Torch 2.8.0 / WhisperX
-  3.8.6 assertions and requires checkpoint/model qualification prohibited by the
-  current scope. Ryan must authorize the exact compatibility-test update and
-  isolated model protocol before that migration can be qualified. Read
-  ASTRA-SECURITY-BACKPORT-REVIEW-2026-09-12.md; do not adopt the worker's
-  unverified version list, advisory suppression or unsafe loader claims.
-- Main merge/publication and new fetch scope remain unauthorized. Phase 5 Part B
-  is deferred. Standing program decisions: ORCHESTRATION-V1 signature, watchdog
-  installation, PR strategy and adapter allow-list.
+D1 (`4b38948`) and D2 (`d13534f`) retain their original approvals and historical
+results. They do not permit further runtime work. The retained dependency audit
+is not a clean security clearance. The dormant caller's raw-constructor test
+conflicts are deferred with migration; no compatibility-test change is needed
+for 3.8.0. The failed shelf-quality and dashboard-size observations remain.
 
-Fixture approvals and Phase 2 option 3 are resolved. The reviewed mirror/read
-corrections and all three receipt corrections are applied and verified. The X
-HTTP 403 stays blocked. Astra completed the authorized same-account installation and evidence
-work under Ryan's delegation; this is not a pending installation permission.
-Use the dedicated installation-receipts directory outside the checkout because
-installed provenance correctly rejects source-checkout module paths. Record the
-actual same-account mode. Client sign-in and usage-credit confirmation are complete;
-reuse that isolated namespace by reference and never copy ordinary secrets.
-Any new product defect remains repair work rather than a Ryan blocker.
+The live index and port 5179 remain prohibited. No API key, Control Room run,
+Desktop launch or new review loop is part of Codex's task. See
+[release owner decisions](RELEASE-OWNER-DECISIONS-2026-09-12.md) and
+[the result](RYAN-DECISIONS-2026-09-15-RESULT.md) for the final handoff.
 
 ## Integrator log
 

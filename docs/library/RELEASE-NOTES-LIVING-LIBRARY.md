@@ -702,32 +702,45 @@ See [final verification](FINAL-RELEASE-VALIDATION-2026-09-09.md).
 
 ## Open release decisions and limits
 
-- Ryan's disposition of the missing historical AT6 exit and retained dependency
-  advisories; neither is presented as a pass or clean security clearance.
-- D1 inspection and D2 local conversion are complete only within their recorded
-  approvals. D3 fetching and D4 stack/native execution remain unapproved. The
-  exact migration patch, artifact/loader policy and quality protocol still need
-  review and Ryan's decision; no target stack is approved. The complete model
-  notice and CPU/int8 profile binding remain unresolved.
-- The latest production source change is `71d3e70`. After runtime integration, a fresh committed
-  full tree, rebuilt/resealed package, installed notice inventory and client
-  checks are still required. Tree `56d9d4c` predates both later production repairs;
-  package 08 remains `b8e44fb`, with no current-source package/install credit.
-- Publisher certificate/identity and HTTPS timestamp service remain Ryan's
-  choices. A clean standard Windows account or VM and normal Claude Desktop
-  sign-in are still required; the failed profile override cannot be reused.
-- Package-08 installation and bounded CLI observations are complete. Native Uoink dashboard checks are separate. Desktop citation/brief/chapter acceptance remains blocked by the documented isolation failure; positive Recall injection and per-session combined prompt/template completeness are not claimed.
-- No speaker-attribution claims; speaker material stays blocked. Phase 5 Part B
-  is deferred. The failed shelf-quality and dashboard-size measurements remain.
-- Main merge and publication require Ryan's decision. Only the authorized
-  `origin/cc/living-library` backup is pushed; no candidate-branch push or main
-  merge is included.
+Ryan resolved the 3.8.0 release choices on 2026-09-15 at 09:30 PDT, relayed by
+Fable. These decisions supersede the earlier runtime-integration prerequisites.
 
-The live index and resident port remain prohibited. The earlier Desktop attempt
-violated the intended connector boundary; its prior effects are unknown as stated
-above. No paid API, live label application, X access repair or new source-media
-fetch is authorized by these instructions. The [handoff](ORCHESTRATION-HANDOFF-2026-09-08.md) retains each integration,
-failed/partial observation and remaining action.
+- AT6 is disclosed as an unrecoverable historical receipt gap, with its audit
+  test marked `xfail(strict=True)`. It is not a release blocker; the original
+  missing exit status remains unknown.
+- Controller10's exact two-line `SessionClosed` expectation change is approved.
+  Run the corrected file once, then freeze all controller work. The original
+  failed result stays historical; this gives no model or Desktop acceptance.
+- 3.8.0 ships unsigned with `SigningCertificateThumbprint=none`. Keep the
+  repaired signing path and defer signing to 3.9.
+- Ryan will create a local standard Windows account and sign in to Claude
+  Desktop himself. If setup and Desktop verification are not complete by
+  packaging, ship with "tested with Claude Code" and Desktop listed as
+  unverified. Codex must not launch Desktop; the failed profile override remains
+  unusable and its prior effects remain unknown.
+- Keep Torch 2.8.0 / WhisperX 3.8.6 for 3.8.0. Default VAD loading uses
+  PyAnnote's checkpoint loader with `weights_only=False`, as in 3.7.0; the
+  mitigation is local-only model files. See [security notes](../security.md).
+  Migration is planned for 3.9. The synthetic runtime-owner, journal, controller
+  and state-machine track is [archived in place and frozen](ARCHIVED-RUNTIME-TRACK-2026-09-15.md).
+  No further D3/D4. D1/D2 results and retained dependency findings remain
+  historical and do not establish a clean security clearance.
+- Fable owns publication on `release/3.8.0`: remove proof bulk from the public
+  tree, squash the product diff onto main, build Package 09 and tag `v3.8.0`.
+  Codex supplies only the uncommitted items 1-5 diff for integration into
+  `cc/living-library-candidate`. Package 08 remains `b8e44fb`; tree `56d9d4c`
+  predates production repairs `e8d058f` and `71d3e70`. Package 09 has no build
+  or installation result in this handoff.
+- Speaker attribution and autonomous filing claims are withheld. Desktop claims
+  depend on Ryan's verification. Phase 5 Part B is deferred. The failed
+  shelf-quality and dashboard-size measurements remain. Positive Recall
+  injection and per-session combined prompt/template completeness are not claimed.
+
+The live index and port 5179 remain prohibited. No API key, live label
+application, X access repair or new source-media fetch is authorized here.
+[Release owner decisions](RELEASE-OWNER-DECISIONS-2026-09-12.md) records the
+release scope; [Ryan decisions result](RYAN-DECISIONS-2026-09-15-RESULT.md)
+records the focused test outcomes.
 
 ## Package-08 review kit
 

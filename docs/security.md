@@ -251,7 +251,15 @@ uses cached files only and never authorizes a download; `ensure_model` is the
 explicit user-triggered download path. On Windows the selected model is cached
 under `%LOCALAPPDATA%\Uoink\models\whisper` and is never uploaded.
 
-The installer is unsigned for launch unless a code-signing certificate is added. Windows SmartScreen warnings are expected for unsigned builds.
+Uoink 3.8.0 keeps Torch 2.8.0 and WhisperX 3.8.6. Default voice activity
+detection (VAD) loads through PyAnnote's checkpoint loader with
+`weights_only=False`, the same path used in 3.7.0. This permits checkpoint code
+to run during loading; the mitigation for this release is local-only model
+files. Migration to a safer loading path is planned for 3.9.
+
+Uoink 3.8.0 ships unsigned: `SigningCertificateThumbprint=none`. Signing is
+skipped for this release, and the repaired signing path is retained for 3.9.
+Windows SmartScreen warnings are expected for unsigned builds.
 
 ## macOS status
 
