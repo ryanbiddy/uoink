@@ -1,16 +1,7 @@
 # Third-Party Notices
 
 Uoink is MIT-licensed. It bundles the third-party components below.
-This file is generated from the installed dependency tree (source: pip-licenses) on 2026-09-12; regenerate with `python scripts/gen_third_party_notices.py`.
-
-The NLTK row is updated for the next candidate build's reviewed local wheel;
-replacement staging and installed qualification are pending. The local patch
-retains NLTK's Apache 2.0 licence. Its source, original files and provenance are
-in vendor/nltk-pathsec. The existing package-08 notices remain in its sealed kit.
-
-SPDX expressions below fill the generator's UNKNOWN fields only where the
-exact packaged wheel declares License-Expression. This September 12 review
-does not infer missing metadata or replace the packaged license files.
+This file is generated from the installed dependency tree (source: pip-licenses) on 2026-09-17; regenerate with `python scripts/gen_third_party_notices.py`.
 
 | Package | Version | License | Project |
 |---|---|---|---|
@@ -155,6 +146,8 @@ does not infer missing metadata or replace the packaged license files.
 | yarl | 1.24.5 | Apache-2.0 | https://github.com/aio-libs/yarl |
 | yt-dlp | 2026.7.4 | Unlicense | https://github.com/yt-dlp/yt-dlp |
 
+NLTK 3.10.3+uoink.pathsec1 is a local path-policy backport of upstream 3.10.3. Its Apache 2.0 licence is retained. The exact patch, original source and build provenance are in vendor/nltk-pathsec in the source repository. This modification does not qualify model loading or clear unrelated dependency advisories.
+
 ## Supplemental upstream notices
 
 The two cached wheels below omit license-text members. Their exact upstream
@@ -170,6 +163,7 @@ texts, source bindings and recorded metadata conflict are listed in
   header and repository license say BSD. Both declarations are retained here.
   The upstream text is unchanged, including its placeholder and trailing text.
   This notice does not resolve that conflict or grant legal clearance.
+
 
 ## ffmpeg (bundled binary, not a Python package)
 
