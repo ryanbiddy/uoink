@@ -112,6 +112,33 @@ def _classifier_license(meta) -> str:
     return "UNKNOWN"
 
 
+def _fill_license_expressions(rows: list[dict]) -> list[dict]:
+    """Recover PEP 639 ``License-Expression`` where a row has no licence.
+
+    Newer wheels (anyio, click, cryptography, ...) declare their licence only
+    as an SPDX ``License-Expression``; pip-licenses 5.0 and the legacy
+    ``License`` field both report UNKNOWN for them. Read the exact installed
+    metadata for those rows only; declared values are never overridden.
+    """
+    import importlib.metadata as md
+    normalize = lambda name: re.sub(r"[-_.]+", "-", name).lower()
+    expressions: dict[str, str] = {}
+    for dist in md.distributions():
+        meta = dist.metadata
+        name = meta.get("Name")
+        expression = (meta.get("License-Expression") or "").strip()
+        if name and expression:
+            expressions.setdefault(normalize(name), expression)
+    for row in rows:
+        current = (row.get("License") or "").strip()
+        if current and current.upper() != "UNKNOWN":
+            continue
+        expression = expressions.get(normalize(row.get("Name") or ""))
+        if expression:
+            row["License"] = expression
+    return rows
+
+
 def _dedupe(rows: list[dict]) -> list[dict]:
     seen = {}
     for row in rows:
@@ -158,7 +185,7 @@ def main() -> int:
     if rows is None:
         rows = _from_importlib()
         source = "importlib.metadata (pip-licenses unavailable)"
-    rows = _dedupe(_runtime_rows(rows))
+    rows = _fill_license_expressions(_dedupe(_runtime_rows(rows)))
     supplemental = _supplemental_notices(rows)
 
     stamp = _stamp_date()
