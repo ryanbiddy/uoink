@@ -16,6 +16,8 @@ ROOT = Path(__file__).resolve().parents[1]
 CHECK_SCRIPT = ROOT / "scripts" / "check_runtime_graph.py"
 LOCK = ROOT / "docs/library/proof/runtime-graph-astra-review-2026-09-12/input-lock-02e06db.txt"
 PROOF_DIR = ROOT / "docs" / "library" / "proof" / "runtime-graph-01-2026-09-12"
+_needs_proof_dir = pytest.mark.skipif(
+    not PROOF_DIR.is_dir(), reason="proof archive removed from public tree (e576ec9)")
 
 spec = importlib.util.spec_from_file_location("check_runtime_graph", CHECK_SCRIPT)
 assert spec is not None and spec.loader is not None
@@ -671,6 +673,7 @@ def test_successful_synthetic_graph_closure(tmp_path: Path) -> None:
     assert len(res["wheel_details"]) == 2
 
 
+@_needs_proof_dir
 def test_proof_directory_has_complete_evidence_for_all_140_packages() -> None:
     assert PROOF_DIR.is_dir(), f"Proof directory missing: {PROOF_DIR}"
     locked = crg.parse_lock(LOCK)
@@ -688,6 +691,7 @@ def test_proof_directory_has_complete_evidence_for_all_140_packages() -> None:
         assert cand1.is_file() or cand2.is_file() or cand3.is_file(), f"Missing PyPI JSON for {cname}"
 
 
+@_needs_proof_dir
 def test_runtime_graph_on_installer_lock_truthfully_reports_status() -> None:
     locked = crg.parse_lock(LOCK)
     res = crg.check_runtime_graph(locked, PROOF_DIR)
@@ -717,6 +721,7 @@ def test_runtime_graph_on_installer_lock_truthfully_reports_status() -> None:
     assert res["passed"] is False
 
 
+@_needs_proof_dir
 def test_proposed_upgrades_conflict_with_whisperx_constraints() -> None:
     locked = crg.parse_lock(LOCK)
 

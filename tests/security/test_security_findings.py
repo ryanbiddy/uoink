@@ -168,12 +168,8 @@ def test_sec_04_entity_extraction_unmetered_and_unflagged(
     assert t is None, "entity extraction thread spawned without explicit opt-in flag"
 
 
-@pytest.mark.xfail(
-    reason="SEC-06: _fts_query strips all non-ASCII unicode characters, blinding search for non-English queries",
-    strict=True,
-)
 def test_sec_06_fts_query_non_ascii_dropped() -> None:
-    """Demonstrate SEC-06: Non-ASCII characters are stripped by _FTS_TERM_RE."""
+    """SEC-06 regression: non-ASCII query terms survive _fts_query (fixed; was a strict xfail)."""
     # A search query in Japanese or Spanish with accents
     jp_query = "日本語"
     es_query = "canción"

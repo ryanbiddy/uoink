@@ -23,6 +23,8 @@ def rehash_card(card):
 @pytest.fixture(scope="module")
 def candidate():
     """Replay every archived card's identity; fabricate no source/label conclusions."""
+    if not v.STAGE2_ARCHIVE.is_file():
+        pytest.skip("proof archive removed from public tree (e576ec9): " + str(v.STAGE2_ARCHIVE.relative_to(v.ROOT)))
     old = v.read_json(v.MANIFEST)
     original = v.read_json(v.HOLDOUT_V3)
     heads = v.archived_stage1_heads()

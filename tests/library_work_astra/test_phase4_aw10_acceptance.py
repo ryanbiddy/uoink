@@ -2,11 +2,14 @@
 import json
 import os
 from pathlib import Path
+import shutil
 import subprocess
 import sys
 
 import library_mirror as m
 from tests.library_work_astra.test_phase4_aw_acceptance import env
+
+PWSH = shutil.which("pwsh") or shutil.which("powershell") or "powershell.exe"
 
 
 def test_junction_alias_refuses_competing_session_before_first_lease(env):
@@ -15,7 +18,7 @@ def test_junction_alias_refuses_competing_session_before_first_lease(env):
     child_env = os.environ.copy()
     child_env.update(AW_ALIAS_LINK=alias, AW_ALIAS_TARGET=original)
     made = subprocess.run(
-        ["pwsh", "-NoProfile", "-Command",
+        [PWSH, "-NoProfile", "-Command",
          "New-Item -ItemType Junction -Path $env:AW_ALIAS_LINK -Target $env:AW_ALIAS_TARGET | Out-Null"],
         env=child_env, capture_output=True, text=True, timeout=8,
     )

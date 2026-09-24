@@ -280,6 +280,8 @@ def test_original_route_does_not_use_fake_child(tmp_path: Path):
     assert "fake_mcp_child.py" not in joined
 
 
+@pytest.mark.skipif(not provision.ARCHIVED_ISOLATION_PATCH.is_file(),
+                    reason="proof archive removed from public tree (e576ec9)")
 def test_source_runtime_original_route_against_isolation_scratch(tmp_path: Path):
     """Complete original-route checks against a disposable isolation overlay.
 

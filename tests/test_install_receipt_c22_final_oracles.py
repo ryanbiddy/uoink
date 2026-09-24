@@ -25,6 +25,7 @@ sys.path.insert(0, str(SCRIPTS))
 
 from install_receipt.cli import operator_commands  # noqa: E402
 from install_receipt.constants import (  # noqa: E402
+    CANDIDATE_PACKAGE_02_DIR,
     CAPTURE_PROFILE_NAMES,
     FORBIDDEN_PORT,
     LIBRARY_META_SCHEMA_DEFAULTS,
@@ -186,6 +187,8 @@ def test_final_parse_provenance_json_roundtrip():
     assert parse_provenance_json("module server ERROR ImportError") is None
 
 
+@pytest.mark.skipif(not (CANDIDATE_PACKAGE_02_DIR / "package-manifest.json").is_file(),
+                    reason="proof archive removed from public tree (e576ec9)")
 def test_final_candidate_package_02_seal_is_consumed_not_invented():
     sealed = load_candidate_package_02()
     assert sealed["invented"] is False

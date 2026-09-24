@@ -733,6 +733,8 @@ _STAGE4_TAXONOMY = ROOT / "docs" / "library" / "taxonomy-v3-2026-09-07.json"
 _STAGE4_MANIFEST = ROOT / "docs" / "library" / "proof" / "manifest-stage4-2026-09-07.json"
 _STAGE4_MAPPING = ROOT / "docs" / "library" / "proof" / "labels" / "holdout-v3-stage4-mapping-2026-09-07.json"
 _STAGE4_RECEIPTS = ROOT / "docs" / "library" / "proof" / "run-stage4-2026-09-08-run2" / "receipts.json"
+_needs_stage4_receipts = pytest.mark.skipif(
+    not _STAGE4_RECEIPTS.is_file(), reason="proof archive removed from public tree (e576ec9)")
 
 
 def _stage4_binding_inputs():
@@ -740,6 +742,7 @@ def _stage4_binding_inputs():
     return load(_STAGE4_TAXONOMY), load(_STAGE4_MANIFEST), load(_STAGE4_RECEIPTS), load(_STAGE4_MAPPING)
 
 
+@_needs_stage4_receipts
 def test_ax1_scorer_binds_the_approved_taxonomy_to_the_frozen_manifest():
     tax, manifest, receipts, mapping = _stage4_binding_inputs()
     revision = proof_score.bind_taxonomy(tax, _STAGE4_TAXONOMY, manifest, receipts, mapping)
@@ -748,6 +751,7 @@ def test_ax1_scorer_binds_the_approved_taxonomy_to_the_frozen_manifest():
     assert proof_score.taxonomy_revision(tax) == revision
 
 
+@_needs_stage4_receipts
 def test_ax1_scorer_refuses_a_taxonomy_without_a_revision():
     """Astra's AX negative fixture: revision fields removed, foreign version id, one
     definition changed, shelf paths retained. Before AX-1 the CLI scored it."""
@@ -762,6 +766,7 @@ def test_ax1_scorer_refuses_a_taxonomy_without_a_revision():
     assert proof_score.taxonomy_revision(foreign) != tax["revision_hash"]
 
 
+@_needs_stage4_receipts
 def test_ax1_scorer_refuses_altered_content_under_the_approved_revision():
     tax, manifest, receipts, mapping = _stage4_binding_inputs()
     altered = copy.deepcopy(tax)
@@ -770,6 +775,7 @@ def test_ax1_scorer_refuses_altered_content_under_the_approved_revision():
         proof_score.bind_taxonomy(altered, _STAGE4_TAXONOMY, manifest, receipts, mapping)
 
 
+@_needs_stage4_receipts
 def test_ax1_scorer_refuses_a_wrong_revision_hash():
     tax, manifest, receipts, mapping = _stage4_binding_inputs()
     wrong = copy.deepcopy(tax)
@@ -778,6 +784,7 @@ def test_ax1_scorer_refuses_a_wrong_revision_hash():
         proof_score.bind_taxonomy(wrong, _STAGE4_TAXONOMY, manifest, receipts, mapping)
 
 
+@_needs_stage4_receipts
 def test_ax1_scorer_refuses_a_manifest_or_mapping_or_receipt_that_names_another_revision(tmp_path):
     tax, manifest, receipts, mapping = _stage4_binding_inputs()
     other = copy.deepcopy(manifest)

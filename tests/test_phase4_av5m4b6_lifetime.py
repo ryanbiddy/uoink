@@ -11,6 +11,7 @@ from __future__ import annotations
 import json
 import os
 from pathlib import Path
+import shutil
 import subprocess
 import sys
 import threading
@@ -22,12 +23,14 @@ import library_mirror as mirror
 from tests.library_work_astra.test_phase4_aw_acceptance import env
 from tests.test_phase4_av5m4b5_lifetime import _competitor_mutex
 
+PWSH = shutil.which("pwsh") or shutil.which("powershell") or "powershell.exe"
+
 
 def _make_junction(target: str, alias: str) -> None:
     child_env = os.environ.copy()
     child_env.update(B6_ALIAS_LINK=alias, B6_ALIAS_TARGET=target)
     made = subprocess.run(
-        ["pwsh", "-NoProfile", "-Command",
+        [PWSH, "-NoProfile", "-Command",
          "New-Item -ItemType Junction -Path $env:B6_ALIAS_LINK -Target $env:B6_ALIAS_TARGET | Out-Null"],
         env=child_env, capture_output=True, text=True, timeout=8,
     )

@@ -73,6 +73,13 @@ def staging_available():
     """Ensure staging NLTK source is present, else stated skip."""
     if not STAGING_NLTK.is_dir():
         pytest.skip(f"Staging NLTK source not found at {STAGING_NLTK}")
+    version_file = STAGING_NLTK / "VERSION"
+    version = version_file.read_text(encoding="utf-8").strip() if version_file.is_file() else "<missing>"
+    if version != "3.10.3":
+        pytest.skip(
+            f"Staging NLTK at {STAGING_NLTK} is version {version!r}, not upstream '3.10.3' "
+            "(the installer staging is already patched); set UOINK_NLTK_BASE_SOURCE to a "
+            "preserved upstream 3.10.3 nltk tree to run these checks")
     return STAGING_NLTK
 
 

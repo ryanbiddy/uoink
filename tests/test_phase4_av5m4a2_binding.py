@@ -9,6 +9,7 @@ import base64
 import hashlib
 import json
 import os
+import shutil
 import subprocess
 import sys
 import uuid
@@ -19,6 +20,8 @@ import pytest
 
 import library_mirror as mirror
 from tests.library_work_astra.test_phase4_aw_acceptance import env, export
+
+PWSH = shutil.which("pwsh") or shutil.which("powershell") or "powershell.exe"
 
 
 def test_failed_initial_binding_write_leaves_no_usable_authority(env, monkeypatch):
@@ -127,7 +130,7 @@ def test_staged_vault_worker_writes_without_source_tree():
     assert stage.resolve().is_relative_to(root)
     assert not stage.exists()
     staged = subprocess.run(
-        ["pwsh", "-NoProfile", "-File", str(root / "build.ps1"),
+        [PWSH, "-NoProfile", "-File", str(root / "build.ps1"),
          "-StageSourceOnly", "-SourceStagePath", str(stage)],
         cwd=root, capture_output=True, text=True, timeout=60,
     )

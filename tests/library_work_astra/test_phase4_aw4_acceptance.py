@@ -1,6 +1,7 @@
 """AW-4 ownership and packaging counterexamples, using disposable fixtures."""
 import hashlib
 from pathlib import Path
+import shutil
 import subprocess
 import uuid
 
@@ -8,6 +9,8 @@ import pytest
 
 import library_mirror as mirror
 from tests.library_work_astra.test_phase4_aw_acceptance import env, export, item_file
+
+PWSH = shutil.which("pwsh") or shutil.which("powershell") or "powershell.exe"
 
 
 def test_aw4_missing_binding_does_not_readopt_an_empty_replacement_vault(env):
@@ -71,7 +74,7 @@ def test_aw4_source_stage_contains_the_isolated_vault_writer():
     assert stage.resolve().is_relative_to(root)
     assert not stage.exists()
     result = subprocess.run(
-        ["pwsh", "-NoProfile", "-File", str(root / "build.ps1"),
+        [PWSH, "-NoProfile", "-File", str(root / "build.ps1"),
          "-StageSourceOnly", "-SourceStagePath", str(stage)],
         cwd=root, capture_output=True, text=True, timeout=60,
     )
