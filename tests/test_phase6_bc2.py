@@ -880,7 +880,9 @@ def test_bc2_export_adapter_admits_once_binds_existing_storage_and_bounds_the_lo
     # Registry adapter: the tool is in TOOL_REGISTRY with read-only hints
     # and answers the domain envelope through the same path.
     spec = uoink_mcp_tools.TOOL_REGISTRY["export_cited_range"]
-    assert spec.annotations == {"readOnlyHint": True, "idempotentHint": True}
+    # 3.8.1: every tool states all four hints explicitly (docs/mcp-tool-annotations.md).
+    assert spec.annotations == {"readOnlyHint": True, "destructiveHint": False,
+                                "idempotentHint": True, "openWorldHint": False}
     assert spec.input_schema["additionalProperties"] is False
     assert set(spec.input_schema["properties"]) == {"video_id", "start", "end", "excerpt_id", "source_revision",
                                                     "media_revision"}
