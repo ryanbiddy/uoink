@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>Incomplete Podcast
+    <link>https://example.com/broken
+    <description>This feed is cut off abruptly in the middle of an item
+    <item>
+      <title>Truncated Episode
+      <guid>trunc-1
+      <enclosure url="https://example.com/audio/trunc.mp3"

@@ -1,0 +1,80 @@
+{
+  "schema_version": 2,
+  "video_id": "episode_25f460e5817",
+  "slug": "s21-controlled-capture-25f460e5817",
+  "source_type": "episode",
+  "platform": "podcast",
+  "url": "http://127.0.0.1:59403/episode",
+  "source_url": "http://127.0.0.1:59403/episode",
+  "feed_url": "http://127.0.0.1:59403/feed.xml",
+  "guid": "s21-entry-1",
+  "capture_key": "podcast:83bb36a4bdad2a4c5fe0f99e3335c91736edb6091fd972f2aa35379a5d8565c8",
+  "podcast_title": "Untitled podcast",
+  "episode_title": "S21 controlled capture",
+  "title": "S21 controlled capture",
+  "channel": "Untitled podcast",
+  "author": "Untitled podcast",
+  "host": null,
+  "duration_seconds": null,
+  "published_at": "Mon, 07 Sep 2026 12:00:00 GMT",
+  "upload_date": "Mon, 07 Sep 2026 12:00:00 GMT",
+  "yoinked_at": "2026-09-08T22:16:00Z",
+  "transcript_model": "base",
+  "language": "en",
+  "diarization_ran": false,
+  "speakers": [],
+  "transcript": [
+    {
+      "start": 12.5,
+      "end": 21.75,
+      "text": "S21 fixture: durable capture waits for complete publication.",
+      "speaker": null,
+      "speaker_provenance": null,
+      "source_url": "http://127.0.0.1:59403/episode",
+      "source_deep_link": "http://127.0.0.1:59403/episode#t=12",
+      "youtube_deep_link": null
+    }
+  ],
+  "media_depth": {
+    "schema_version": 1,
+    "contract_version": "phase6-v1",
+    "video_id": "episode_25f460e5817",
+    "source_revision": "f347619272fa786e1bf6cefb184e550abbb5a55dd08b7c191ed070fbed1b7e13",
+    "cue_revision": "bcaa7a3fa4fc007a228cb0948b301ea5c99b91fad52cf8cf1e97c10bdc82fc14",
+    "media_revision": "30da78c66263ce2e6fe5ed7eaa7dddbf756e0fadb7abfc99fa3a73d033704577",
+    "chapter_state": "unsupported",
+    "speaker_state": "absent",
+    "diarization_state": "not_requested",
+    "provenance": {
+      "chapter_source": null,
+      "transcript_source": {
+        "kind": "local_asr",
+        "artifact_sha256": "93034f25b169019e84bbd2b17007caf745966843c15e9ce45a5865d2da3d8bc7",
+        "provider": "whisperx",
+        "model": "synthetic-S21",
+        "language": "en"
+      },
+      "active_diarization_run_id": null,
+      "absence_reason": {
+        "chapters": "adapter_unsupported",
+        "speakers": "diarization_off"
+      },
+      "corpus_revision": "6f6831b3f336f7144290a378d5497fae17dc8a4b34fb4ef4bb3b11e51557db8c"
+    },
+    "playback": {
+      "source_url": "http://127.0.0.1:59403/episode",
+      "seek_url": null,
+      "seek_kind": "none"
+    },
+    "chapters": [],
+    "runs": [],
+    "cues": [
+      {
+        "seq": 0,
+        "cue_hash": "2797f7e28f1d740d14f707a22a0aeb13c7f07e1f1bbea0f96b9b60b3fa4ab1b6",
+        "speaker": null,
+        "speaker_provenance": null
+      }
+    ]
+  }
+}

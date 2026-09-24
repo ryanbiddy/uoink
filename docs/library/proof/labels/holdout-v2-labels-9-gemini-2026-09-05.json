@@ -1,0 +1,1121 @@
+{
+  "schema_version": 1,
+  "kind": "holdout-v2-labels",
+  "labeller": "gemini",
+  "holdout_version": "holdout-v2-2026-09-05",
+  "packet_sha256": "c96c19001a5ee262df47da6b1cb2dec69000293e3c782c374ec45e447cbe5d35",
+  "taxonomy_version_id": "taxonomy-v2-2026-09-05",
+  "blind": true,
+  "files_opened": [
+    "docs/library/INDUCTION-REPAIR-BRIEF-2026-09-05.md",
+    "docs/library/proof/holdout-v2-labelling-packet-9-2026-09-05.json"
+  ],
+  "notes": "Blind relabelling of holdout-v2 packet 9 against candidate taxonomy-v2-2026-09-05 (attempt 9).",
+  "items": [
+    {
+      "video_id": "2079930744781070336",
+      "stratum": "timed_evidence",
+      "outcome": "assigned",
+      "shelf_id": "ai-and-ml",
+      "shelf_path": [
+        "AI and ML"
+      ],
+      "secondary_shelf_ids": [],
+      "confidence": 0.85,
+      "evidence": {
+        "excerpt_id": "a0c7117e4554ef16854490378e696174760867a7b0bfce7f82d14b73cbc65b4d",
+        "quote": "robotics is very real. It scales across a wide variety of environments"
+      },
+      "rationale": "Live demonstration of an AI-powered robotics system running on specialized Qualcomm silicon."
+    },
+    {
+      "video_id": "2080061661197570048",
+      "stratum": "timed_evidence",
+      "outcome": "assigned",
+      "shelf_id": "ai-generative-media",
+      "shelf_path": [
+        "AI and ML",
+        "AI Generative Media"
+      ],
+      "secondary_shelf_ids": [],
+      "confidence": 0.9,
+      "evidence": {
+        "excerpt_id": "33189a1eb25d33d3e882a656bb0ded4f218fb4f8b378152c73f28fe42a921b47",
+        "quote": "Joe, look at me. Not the corner...me I am looking at you"
+      },
+      "rationale": "Pipeline generating dialogue and AI video for acting performances with synchronized audio."
+    },
+    {
+      "video_id": "2080447768397787137",
+      "stratum": "timed_evidence",
+      "outcome": "assigned",
+      "shelf_id": "developer-tools",
+      "shelf_path": [
+        "AI and ML",
+        "Developer Tools"
+      ],
+      "secondary_shelf_ids": [],
+      "confidence": 0.95,
+      "evidence": {
+        "excerpt_id": "b0b69e16d68461b066508af7b574161df8cf5f86285b0ece476502b9403539e1",
+        "quote": "Hey, could you help me understand the changes in this file?"
+      },
+      "rationale": "Using an AI coding assistant to explain code changes and GitHub installer release metadata."
+    },
+    {
+      "video_id": "2080736332205436952",
+      "stratum": "timed_evidence",
+      "outcome": "assigned",
+      "shelf_id": "developer-tools",
+      "shelf_path": [
+        "AI and ML",
+        "Developer Tools"
+      ],
+      "secondary_shelf_ids": [
+        "frontier-models"
+      ],
+      "confidence": 0.95,
+      "evidence": {
+        "excerpt_id": "80080df03650a10ed82e71761771fad83e5e3ed198fa0a97c7cb278e2a5d0d77",
+        "quote": "I talked to Grok 4.5 inside grok build The agent harnes"
+      },
+      "rationale": "Building and compiling a complete Unity combat game using Grok 4.5 and the grok build agent harness."
+    },
+    {
+      "video_id": "2081117060013473792",
+      "stratum": "timed_evidence",
+      "outcome": "assigned",
+      "shelf_id": "ai-industry-and-business",
+      "shelf_path": [
+        "AI and ML",
+        "AI Industry and Business"
+      ],
+      "secondary_shelf_ids": [
+        "developer-tools"
+      ],
+      "confidence": 0.9,
+      "evidence": {
+        "excerpt_id": "98994e8cfd9f7ddf93bc94453723b256038e7af9e5fb01dc5374d22af6d756bb",
+        "quote": "We were way behind Claude Code, and it seemed like a kind of crazy kamikaze mission to try to beat them"
+      },
+      "rationale": "Sam Altman discussing OpenAI's corporate strategy and market competition against Anthropic's Claude Code."
+    },
+    {
+      "video_id": "2081133656869920768",
+      "stratum": "text_only",
+      "outcome": "assigned",
+      "shelf_id": "ai-generative-media",
+      "shelf_path": [
+        "AI and ML",
+        "AI Generative Media"
+      ],
+      "secondary_shelf_ids": [
+        "developer-tools"
+      ],
+      "confidence": 0.9,
+      "evidence": {
+        "excerpt_id": "dad7d6efd4bcaa22e36a06272b29f80120d885734200711579d3c4e8fd8d0a36",
+        "quote": "Claude Opus 5 made this beautiful painterly world in a single HTML file, everything made procedurally"
+      },
+      "rationale": "Procedural generation of a painterly 3D visual world and interactive simulation using Claude Opus 5."
+    },
+    {
+      "video_id": "2082501832442814465",
+      "stratum": "timed_evidence",
+      "outcome": "assigned",
+      "shelf_id": "frontier-models",
+      "shelf_path": [
+        "AI and ML",
+        "Frontier Models"
+      ],
+      "secondary_shelf_ids": [],
+      "confidence": 0.95,
+      "evidence": {
+        "excerpt_id": "ee2925297fda63debb60db546f243e5ecd2e678e7bc016a93635f9a096d8a8c5",
+        "quote": "Gemma 4 is a family of multimodal, open large language models that come In five different sizes"
+      },
+      "rationale": "Technical overview of Google's Gemma 4 family of multimodal open foundation models across multiple architectures."
+    },
+    {
+      "video_id": "2083262686318444544",
+      "stratum": "text_only",
+      "outcome": "assigned",
+      "shelf_id": "education",
+      "shelf_path": [
+        "AI and ML",
+        "Education"
+      ],
+      "secondary_shelf_ids": [
+        "ai-agents-and-automation"
+      ],
+      "confidence": 0.95,
+      "evidence": {
+        "excerpt_id": "88bc2095a32ecaa382b6f14d7f15cb1cb9d44b64c7eef929ab6f9de707c9a8a2",
+        "quote": "Google just dropped a 1-hour course on Graph Engineering: from agents to full automation"
+      },
+      "rationale": "Structured pedagogical course curriculum covering graph engineering, agent memory, and automation loops."
+    },
+    {
+      "video_id": "2083438553493843968",
+      "stratum": "timed_evidence",
+      "outcome": "assigned",
+      "shelf_id": "ai-and-ml",
+      "shelf_path": [
+        "AI and ML"
+      ],
+      "secondary_shelf_ids": [],
+      "confidence": 0.85,
+      "evidence": {
+        "excerpt_id": "b10a0655898b825eb717223b822b9774476310dfda633d2e3b6d74b93cd63256",
+        "quote": "Yeah, it works! It's alive. Awesome!"
+      },
+      "rationale": "Demonstration of running an open-source 28.9M parameter AI language model locally on an ESP32-S3 microcontroller."
+    },
+    {
+      "video_id": "2083664004506145276",
+      "stratum": "timed_evidence",
+      "outcome": "assigned",
+      "shelf_id": "developer-tools",
+      "shelf_path": [
+        "AI and ML",
+        "Developer Tools"
+      ],
+      "secondary_shelf_ids": [
+        "frontier-models"
+      ],
+      "confidence": 0.9,
+      "evidence": {
+        "excerpt_id": "2abad6e67d6816b92b5c1faad263f9eff47807400fa5d0976239fff7b16a7a88",
+        "quote": "there are different models that are good for different parts of these tasks, right?"
+      },
+      "rationale": "Engineering interview on agent harnesses and model routing for complex software engineering tasks."
+    },
+    {
+      "video_id": "2084046660087525376",
+      "stratum": "text_only",
+      "outcome": "assigned",
+      "shelf_id": "frontier-models",
+      "shelf_path": [
+        "AI and ML",
+        "Frontier Models"
+      ],
+      "secondary_shelf_ids": [
+        "developer-tools"
+      ],
+      "confidence": 0.95,
+      "evidence": {
+        "excerpt_id": "289f07502a94355fdb52c85de05dbcfb415557241341883fadda6a913b41b45d",
+        "quote": "We shrank a frontier model to 102GB."
+      },
+      "rationale": "Compression and quantization of the DeepSeek V4 Flash frontier foundation model to run locally."
+    },
+    {
+      "video_id": "2084093069323104256",
+      "stratum": "text_only",
+      "outcome": "assigned",
+      "shelf_id": "frontier-models",
+      "shelf_path": [
+        "AI and ML",
+        "Frontier Models"
+      ],
+      "secondary_shelf_ids": [
+        "developer-tools"
+      ],
+      "confidence": 0.95,
+      "evidence": {
+        "excerpt_id": "40195de095037e8dd0410d347530a9119993a9996b6afd200267b82d2f3ed07a",
+        "quote": "Meet Qwen3.8-Max: A New Bar for Coding and Cowork."
+      },
+      "rationale": "Official release announcement of the Qwen3.8-Max flagship frontier foundation model."
+    },
+    {
+      "video_id": "2084309519715139584",
+      "stratum": "timed_evidence",
+      "outcome": "assigned",
+      "shelf_id": "developer-tools",
+      "shelf_path": [
+        "AI and ML",
+        "Developer Tools"
+      ],
+      "secondary_shelf_ids": [
+        "ai-industry-and-business"
+      ],
+      "confidence": 0.95,
+      "evidence": {
+        "excerpt_id": "47a94bb51c6e40675a8c78b64eada8bd0b89769252fd9937d698561222f50756",
+        "quote": "Typically If Worker At Anthropic You Ask Quad If Have A Question Like Where's The Code Base"
+      },
+      "rationale": "Head of Claude Code discussing developer productivity tooling and codebase search tools at Anthropic."
+    },
+    {
+      "video_id": "2084333713937068032",
+      "stratum": "timed_evidence",
+      "outcome": "assigned",
+      "shelf_id": "education",
+      "shelf_path": [
+        "AI and ML",
+        "Education"
+      ],
+      "secondary_shelf_ids": [
+        "ai-agents-and-automation"
+      ],
+      "confidence": 0.95,
+      "evidence": {
+        "excerpt_id": "798a33408b57f539004b119fc0b045629584ef22ea5db1c402e3d4060fdaba36",
+        "quote": "Let's Move To Course Logistics But Before That Do We Have Any Questions"
+      },
+      "rationale": "University course lecture explaining foundational machine learning concepts, chain of thought, and agents."
+    },
+    {
+      "video_id": "2084671000906735616",
+      "stratum": "timed_evidence",
+      "outcome": "assigned",
+      "shelf_id": "developer-tools",
+      "shelf_path": [
+        "AI and ML",
+        "Developer Tools"
+      ],
+      "secondary_shelf_ids": [
+        "career-and-entrepreneurship"
+      ],
+      "confidence": 0.95,
+      "evidence": {
+        "excerpt_id": "e4e6faef415690a4214729a49b0502eab6fc6727c77dd0ad7a3f61726e2405aa",
+        "quote": "Lets you integrate with more than just mcp It's really been a great cross harness productivity win"
+      },
+      "rationale": "Developer tool launch walkthrough for Executor, enabling tool gateways and integrations across agent harnesses."
+    },
+    {
+      "video_id": "2085710761423437824",
+      "stratum": "text_only",
+      "outcome": "assigned",
+      "shelf_id": "education",
+      "shelf_path": [
+        "AI and ML",
+        "Education"
+      ],
+      "secondary_shelf_ids": [],
+      "confidence": 0.95,
+      "evidence": {
+        "excerpt_id": "9a1c0284402adb829afe197ebb6190d756bb5a638499572827ad6758f61556fd",
+        "quote": "Andrej Karpathy, the godfather of AI, dropped a 2 hour course on how he personally uses LLMs daily."
+      },
+      "rationale": "Pedagogical curriculum and course breakdown by Andrej Karpathy on mastering LLM workflows."
+    },
+    {
+      "video_id": "2086120621734326272",
+      "stratum": "timed_evidence",
+      "outcome": "assigned",
+      "shelf_id": "education",
+      "shelf_path": [
+        "AI and ML",
+        "Education"
+      ],
+      "secondary_shelf_ids": [
+        "developer-tools"
+      ],
+      "confidence": 0.95,
+      "evidence": {
+        "excerpt_id": "4aca5d7410434edf756e1362574e752af7293c45a74cb3346c0cc42c414a03b6",
+        "quote": "Welcome to this NeurIPS tutorial on application development using LLMs."
+      },
+      "rationale": "NeurIPS educational tutorial by Andrew Ng teaching LLM application development and system architecture."
+    },
+    {
+      "video_id": "2086167440203923456",
+      "stratum": "timed_evidence",
+      "outcome": "assigned",
+      "shelf_id": "education",
+      "shelf_path": [
+        "AI and ML",
+        "Education"
+      ],
+      "secondary_shelf_ids": [
+        "frontier-models"
+      ],
+      "confidence": 0.95,
+      "evidence": {
+        "excerpt_id": "8e833afa69329c7b70f15655855c5a784a9de9db8c67266a74b81bf2233a5e36",
+        "quote": "That State Being Ready Before You Can Go On To Update The Next Word So It's Not Very Parallelizable"
+      },
+      "rationale": "Technical lecture explaining transformer sequence processing, parallelization, and language model mechanics."
+    },
+    {
+      "video_id": "2086219750065967512",
+      "stratum": "timed_evidence",
+      "outcome": "assigned",
+      "shelf_id": "ai-generative-media",
+      "shelf_path": [
+        "AI and ML",
+        "AI Generative Media"
+      ],
+      "secondary_shelf_ids": [],
+      "confidence": 0.9,
+      "evidence": {
+        "excerpt_id": "eeed6e03e4e921963be851452651acbcf5c569081d1b0017faff95604a063544",
+        "quote": "It's pouring, watch this. Okay no umbrella Hair gone Makeup perfect"
+      },
+      "rationale": "Demonstrating video generation fidelity improvements between Seedance 2.0 and Seedance 2.5 generative video models."
+    },
+    {
+      "video_id": "2086663463162830848",
+      "stratum": "text_only",
+      "outcome": "assigned",
+      "shelf_id": "developer-tools",
+      "shelf_path": [
+        "AI and ML",
+        "Developer Tools"
+      ],
+      "secondary_shelf_ids": [
+        "frontier-models"
+      ],
+      "confidence": 0.95,
+      "evidence": {
+        "excerpt_id": "e57d7765137eb3bc51340d6be3c64c01687f3332136fa6cb61ffba90c35ecc39",
+        "quote": "With Qwen-MM-Plugins, turn your favorite agent harness multimodal-native"
+      },
+      "rationale": "Software developer tooling plugins providing multimodal capabilities for AI agent harnesses."
+    },
+    {
+      "video_id": "2087232179613077504",
+      "stratum": "timed_evidence",
+      "outcome": "assigned",
+      "shelf_id": "frontier-models",
+      "shelf_path": [
+        "AI and ML",
+        "Frontier Models"
+      ],
+      "secondary_shelf_ids": [
+        "developer-tools"
+      ],
+      "confidence": 0.85,
+      "evidence": {
+        "excerpt_id": "4d9796c07227357f29591ffc4e759d2502a6243a03e14c81958aae09946396f2",
+        "quote": "🎵"
+      },
+      "rationale": "Announcement and release of rd-signal-2, a frontier classification foundation model and hosting API."
+    },
+    {
+      "video_id": "2087945138823741440",
+      "stratum": "text_only",
+      "outcome": "assigned",
+      "shelf_id": "frontier-models",
+      "shelf_path": [
+        "AI and ML",
+        "Frontier Models"
+      ],
+      "secondary_shelf_ids": [
+        "developer-tools"
+      ],
+      "confidence": 0.95,
+      "evidence": {
+        "excerpt_id": "d4ef41d576edda83de87805645c7a848975cb1b55e91d035d2ca82ded7ab06a1",
+        "quote": "introducing Gemini 3.7 Flash: our most intelligent workhorse model yet for coding and agents"
+      },
+      "rationale": "Google foundation model release announcing Gemini 3.7 Flash optimized for coding and agent reasoning."
+    },
+    {
+      "video_id": "2087982002381221888",
+      "stratum": "timed_evidence",
+      "outcome": "assigned",
+      "shelf_id": "developer-tools",
+      "shelf_path": [
+        "AI and ML",
+        "Developer Tools"
+      ],
+      "secondary_shelf_ids": [
+        "ai-agents-and-automation"
+      ],
+      "confidence": 0.95,
+      "evidence": {
+        "excerpt_id": "022c5f1be13a87decefec5527d2663478e11cb627a41111a75ebfa4ee75d5c27",
+        "quote": "this is GUI Pi And it's a gui for pi family of agents"
+      },
+      "rationale": "Developer tool GUI for managing agent sessions, branch workspaces, Git diffs, and multi-agent coordination."
+    },
+    {
+      "video_id": "2089011298621399260",
+      "stratum": "timed_evidence",
+      "outcome": "assigned",
+      "shelf_id": "education",
+      "shelf_path": [
+        "AI and ML",
+        "Education"
+      ],
+      "secondary_shelf_ids": [
+        "ai-agents-and-automation"
+      ],
+      "confidence": 0.95,
+      "evidence": {
+        "excerpt_id": "4d8b0e5d0e83ccb81e02c017149c7db7d6cae56d3695eab35cf22b6033f7a998",
+        "quote": "The Graph Which Saves A Snapshot Of The Entire State At Every Super Step This Brings 4 Capabilities"
+      },
+      "rationale": "Explanatory tutorial comparing graph engineering concepts versus iterative loops for agent architectures."
+    },
+    {
+      "video_id": "2090872209241976832",
+      "stratum": "timed_evidence",
+      "outcome": "assigned",
+      "shelf_id": "frontier-models",
+      "shelf_path": [
+        "AI and ML",
+        "Frontier Models"
+      ],
+      "secondary_shelf_ids": [
+        "security"
+      ],
+      "confidence": 0.9,
+      "evidence": {
+        "excerpt_id": "3cb2e2da6ceb28279d1aef5d6586a3bfff7f900e58df34ed793eddb7da2285ad",
+        "quote": "There's no way it's a flash model If that's a flash model then holy shit"
+      },
+      "rationale": "Evaluation and performance analysis of GLM 5.3 stealth frontier language model release."
+    },
+    {
+      "video_id": "2090888779125116928",
+      "stratum": "timed_evidence",
+      "outcome": "unmappable",
+      "shelf_id": null,
+      "shelf_path": [
+        "AI and ML",
+        "Humor and Memes"
+      ],
+      "secondary_shelf_ids": [],
+      "confidence": 0.95,
+      "evidence": {
+        "excerpt_id": "6cd1b2129a3b20487cee126bdc9376f3ce307de2d43cb32438d604b966fcc802",
+        "quote": "For what is a man What has he got If not himself Then he has not"
+      },
+      "rationale": "Internet humor/meme video playing Frank Sinatra lyrics; lacks technical or pedagogical AI substance."
+    },
+    {
+      "video_id": "2091205272920358912",
+      "stratum": "text_only",
+      "outcome": "assigned",
+      "shelf_id": "developer-tools",
+      "shelf_path": [
+        "AI and ML",
+        "Developer Tools"
+      ],
+      "secondary_shelf_ids": [
+        "frontier-models"
+      ],
+      "confidence": 0.95,
+      "evidence": {
+        "excerpt_id": "6e3f4005588c6bf14c5ad0bb5dbfc14f8647026ae8d77b9d80dee85c07cef650",
+        "quote": "I asked Codex to design its own CPU and then write a Space Invaders-style game for it in assembly"
+      },
+      "rationale": "Using the Codex coding assistant to synthesize a CPU design and write assembly game software."
+    },
+    {
+      "video_id": "2091208884786520487",
+      "stratum": "timed_evidence",
+      "outcome": "assigned",
+      "shelf_id": "developer-tools",
+      "shelf_path": [
+        "AI and ML",
+        "Developer Tools"
+      ],
+      "secondary_shelf_ids": [
+        "ai-agents-and-automation"
+      ],
+      "confidence": 0.95,
+      "evidence": {
+        "excerpt_id": "5e522c2551d2987f7ce159db688e471d438cc40bda42bbd6ecdaf73c69a0dc28",
+        "quote": "shipping your first manage agent Let's go ahead and get started"
+      },
+      "rationale": "Hands-on developer guide and walkthrough for building and deploying Claude managed agents."
+    },
+    {
+      "video_id": "2091230104793858048",
+      "stratum": "timed_evidence",
+      "outcome": "assigned",
+      "shelf_id": "education",
+      "shelf_path": [
+        "AI and ML",
+        "Education"
+      ],
+      "secondary_shelf_ids": [],
+      "confidence": 0.95,
+      "evidence": {
+        "excerpt_id": "b2762e97a8ce604bdbf0dfaba817951e70769562a7dbc54dd8e556c637f16661",
+        "quote": "average loss which is something like one over n times the sum of all the losses"
+      },
+      "rationale": "University lecture mathematically explaining loss functions, parameter regression, and stochastic optimization."
+    },
+    {
+      "video_id": "2091248592774369280",
+      "stratum": "timed_evidence",
+      "outcome": "assigned",
+      "shelf_id": "ai-industry-and-business",
+      "shelf_path": [
+        "AI and ML",
+        "AI Industry and Business"
+      ],
+      "secondary_shelf_ids": [],
+      "confidence": 0.95,
+      "evidence": {
+        "excerpt_id": "76880377e70258f82f0f7aa3382123955bc9b3f01ca98743391bc60602098dd6",
+        "quote": "diffusion within the economy I think it's like one in five firms in the US report using AI"
+      },
+      "rationale": "Economic research and industry data on enterprise AI adoption rates and macroeconomic impacts."
+    },
+    {
+      "video_id": "2091297765133578240",
+      "stratum": "text_only",
+      "outcome": "assigned",
+      "shelf_id": "ai-generative-media",
+      "shelf_path": [
+        "AI and ML",
+        "AI Generative Media"
+      ],
+      "secondary_shelf_ids": [],
+      "confidence": 0.95,
+      "evidence": {
+        "excerpt_id": "b3a8239bb19eabe5a6f16d11e1a574d0cc5efbbcde3fae57ebfa29c4b1a2404e",
+        "quote": "Outputs made with Seedance 2.5."
+      },
+      "rationale": "Creative media synthesis comparison showcasing cartoon animation generated with Seedance 2.5."
+    },
+    {
+      "video_id": "2091537085874520064",
+      "stratum": "timed_evidence",
+      "outcome": "assigned",
+      "shelf_id": "developer-tools",
+      "shelf_path": [
+        "AI and ML",
+        "Developer Tools"
+      ],
+      "secondary_shelf_ids": [
+        "ai-agents-and-automation"
+      ],
+      "confidence": 0.95,
+      "evidence": {
+        "excerpt_id": "cbc9731bddee8146353101241205c26a3b0f7f077b95492790c502de737da6fd",
+        "quote": "images will have the thing highlighted whatever that I highlighted. So AI will know exactly what I'm talking about"
+      },
+      "rationale": "Open-source developer utility integrating voice commands and visual context into AI coding agents."
+    },
+    {
+      "video_id": "2091998648997441536",
+      "stratum": "timed_evidence",
+      "outcome": "assigned",
+      "shelf_id": "developer-tools",
+      "shelf_path": [
+        "AI and ML",
+        "Developer Tools"
+      ],
+      "secondary_shelf_ids": [
+        "ai-agents-and-automation"
+      ],
+      "confidence": 0.95,
+      "evidence": {
+        "excerpt_id": "c18b0e19ccaad483c9d932adea3a22fbedc839c1c9c40529d3855eefff97f949",
+        "quote": "my Grok bots literally just go and ship software for me"
+      },
+      "rationale": "Software engineering workflow using Grok bots and Cursor to rapidly build and ship code to Vercel."
+    },
+    {
+      "video_id": "2092244803295571968",
+      "stratum": "text_only",
+      "outcome": "assigned",
+      "shelf_id": "developer-tools",
+      "shelf_path": [
+        "AI and ML",
+        "Developer Tools"
+      ],
+      "secondary_shelf_ids": [
+        "education"
+      ],
+      "confidence": 0.95,
+      "evidence": {
+        "excerpt_id": "3af7930d86873ff0281e0a7fed55c2dbb96c562a9aa7d98747edff1fc94a3b74",
+        "quote": "LOS ESTUDIANTES PUEDEN CONSEGUIR 1 AÑO DE CURSOR PRO GRATIS."
+      },
+      "rationale": "Informational guide for students on accessing the Cursor Pro AI coding environment for free."
+    },
+    {
+      "video_id": "2092270658524745728",
+      "stratum": "timed_evidence",
+      "outcome": "assigned",
+      "shelf_id": "ai-industry-and-business",
+      "shelf_path": [
+        "AI and ML",
+        "AI Industry and Business"
+      ],
+      "secondary_shelf_ids": [],
+      "confidence": 0.95,
+      "evidence": {
+        "excerpt_id": "899084656dd7b173c80c0f0c81e350300a727883b755415c357093e0e64c243f",
+        "quote": "Anthropic started turning a profit in Q2. It’s believed at some point in Q3, OpenAI could start turning a profit"
+      },
+      "rationale": "Business interview analyzing profitability, data center investments, and unit economics of AI labs."
+    },
+    {
+      "video_id": "2092364350317281280",
+      "stratum": "timed_evidence",
+      "outcome": "unmappable",
+      "shelf_id": null,
+      "shelf_path": [
+        "AI and ML",
+        "Humor and Memes"
+      ],
+      "secondary_shelf_ids": [],
+      "confidence": 0.95,
+      "evidence": {
+        "excerpt_id": "6128f9b07c42669fe79a6e6d9f882b5bc10ede633acea42a51dc4308233ab6e5",
+        "quote": "Mr. Sandman, bring me a dream"
+      },
+      "rationale": "Internet meme video featuring the song Mr. Sandman; joke format without technical or industry analysis."
+    },
+    {
+      "video_id": "2092369226262786048",
+      "stratum": "timed_evidence",
+      "outcome": "assigned",
+      "shelf_id": "developer-tools",
+      "shelf_path": [
+        "AI and ML",
+        "Developer Tools"
+      ],
+      "secondary_shelf_ids": [
+        "ai-agents-and-automation"
+      ],
+      "confidence": 0.95,
+      "evidence": {
+        "excerpt_id": "31b80f0b415216f219594c9a29225a85f9260687b771d9268d4f3a21aae35f11",
+        "quote": "Skills should be a fallback that you fall into when the code base can't solve the problem"
+      },
+      "rationale": "Software engineering practices for coding agent architectures, AGENTS.md definitions, and developer skills."
+    },
+    {
+      "video_id": "2093296474498990080",
+      "stratum": "timed_evidence",
+      "outcome": "assigned",
+      "shelf_id": "education",
+      "shelf_path": [
+        "AI and ML",
+        "Education"
+      ],
+      "secondary_shelf_ids": [
+        "ai-agents-and-automation"
+      ],
+      "confidence": 0.95,
+      "evidence": {
+        "excerpt_id": "29a1bf9cc6039c18093d1dd07309de9737589b2d30c7273630d8c8a6b0e92bd5",
+        "quote": "we are going to have a whole lot of papers covered in this course"
+      },
+      "rationale": "Stanford academic lecture explaining foundation model research papers and agent systems."
+    },
+    {
+      "video_id": "2093359694366572544",
+      "stratum": "timed_evidence",
+      "outcome": "assigned",
+      "shelf_id": "developer-tools",
+      "shelf_path": [
+        "AI and ML",
+        "Developer Tools"
+      ],
+      "secondary_shelf_ids": [
+        "ai-agents-and-automation"
+      ],
+      "confidence": 0.95,
+      "evidence": {
+        "excerpt_id": "8a6982d6abec1ec90b9a747a262f33d62c1a36db666597edec63be0da51abf01",
+        "quote": "approved the build From there, it actually started a build in cursor which if we take a look at cursor cloud"
+      },
+      "rationale": "Technical guide demonstrating Grok Bot orchestrating automated software builds inside Cursor Cloud."
+    },
+    {
+      "video_id": "2093462510389354496",
+      "stratum": "timed_evidence",
+      "outcome": "assigned",
+      "shelf_id": "security",
+      "shelf_path": [
+        "AI and ML",
+        "Security"
+      ],
+      "secondary_shelf_ids": [
+        "ai-agents-and-automation"
+      ],
+      "confidence": 0.95,
+      "evidence": {
+        "excerpt_id": "ef5e09ac16c1412b2e00e53d625113ddb4b59ca9ba46e85c6f97a4ba9cc5a67d",
+        "quote": "the same time that the agents were really attacking the hugging face model"
+      },
+      "rationale": "Investigation into emergent red-teaming behavior and vulnerabilities in AI agent swarm evaluations."
+    },
+    {
+      "video_id": "2093678734708801536",
+      "stratum": "text_only",
+      "outcome": "assigned",
+      "shelf_id": "frontier-models",
+      "shelf_path": [
+        "AI and ML",
+        "Frontier Models"
+      ],
+      "secondary_shelf_ids": [
+        "ai-and-ml"
+      ],
+      "confidence": 0.95,
+      "evidence": {
+        "excerpt_id": "a9451b1be0b0c8700bf35c2bc6f0ecd7ea321d7d86d9f4be2371cf4eff658ed3",
+        "quote": "Real-time object detection using frontier object detection models."
+      },
+      "rationale": "Technical framework (DART) transforming frontier model SAM3 into a real-time object detector."
+    },
+    {
+      "video_id": "2093727982317936640",
+      "stratum": "timed_evidence",
+      "outcome": "assigned",
+      "shelf_id": "developer-tools",
+      "shelf_path": [
+        "AI and ML",
+        "Developer Tools"
+      ],
+      "secondary_shelf_ids": [
+        "career-and-entrepreneurship"
+      ],
+      "confidence": 0.9,
+      "evidence": {
+        "excerpt_id": "a9d209f039ddd91aee71f1c3f336d0ecadfbf473ffd7f571e5e38a41f4e88d54",
+        "quote": "problems for which programmers are worse than non-programmers at agentification?"
+      },
+      "rationale": "DHH discussing developer workflow changes and programmer adaptation to AI agent tools."
+    },
+    {
+      "video_id": "2093860831595499892",
+      "stratum": "timed_evidence",
+      "outcome": "assigned",
+      "shelf_id": "ai-industry-and-business",
+      "shelf_path": [
+        "AI and ML",
+        "AI Industry and Business"
+      ],
+      "secondary_shelf_ids": [
+        "frontier-models"
+      ],
+      "confidence": 0.95,
+      "evidence": {
+        "excerpt_id": "b1b3034b7a94713a393d8fcf0a64f9128b88b3b96340a1d7d11a25381a3fe6c4",
+        "quote": "they're basically winning on both sides of the curve. So both fast tokens and cheap tokens,"
+      },
+      "rationale": "SemiAnalysis market analysis on AI inference economics, token pricing curves, and lab competitiveness."
+    },
+    {
+      "video_id": "2094184640873373696",
+      "stratum": "text_only",
+      "outcome": "assigned",
+      "shelf_id": "ai-industry-and-business",
+      "shelf_path": [
+        "AI and ML",
+        "AI Industry and Business"
+      ],
+      "secondary_shelf_ids": [
+        "ai-and-ml"
+      ],
+      "confidence": 0.95,
+      "evidence": {
+        "excerpt_id": "ec23180ee2eefc219a7d50152a6dd6c84df8ea9bd1ab892bf7674171dc501000",
+        "quote": "Ep. 027 - OpenAI Jalapeño: Better Than Nvidia Blackwell (Accelerators)"
+      },
+      "rationale": "Analysis of OpenAI's custom hardware accelerator architecture competing with Nvidia Blackwell in the market."
+    },
+    {
+      "video_id": "2094227178032599040",
+      "stratum": "timed_evidence",
+      "outcome": "assigned",
+      "shelf_id": "ai-industry-and-business",
+      "shelf_path": [
+        "AI and ML",
+        "AI Industry and Business"
+      ],
+      "secondary_shelf_ids": [
+        "ai-and-ml"
+      ],
+      "confidence": 0.95,
+      "evidence": {
+        "excerpt_id": "cbce73e54257a94fe8d487dcb3c74ef295d41dae4074c4b2cb10726b8aabcc8b",
+        "quote": "There's a company called Talos that was just bought by AMD."
+      },
+      "rationale": "Reporting on AMD's corporate acquisition of Taalas to scale ultra-fast AI hardware inference."
+    },
+    {
+      "video_id": "2094477244164947968",
+      "stratum": "timed_evidence",
+      "outcome": "assigned",
+      "shelf_id": "developer-tools",
+      "shelf_path": [
+        "AI and ML",
+        "Developer Tools"
+      ],
+      "secondary_shelf_ids": [
+        "ai-agents-and-automation"
+      ],
+      "confidence": 0.95,
+      "evidence": {
+        "excerpt_id": "9f5e07db97a1abab10d0e53174beaed8251d1aa5fa020af92705036f68bd0435",
+        "quote": "they can go and pick it up and solve the problem and give us back a PR"
+      },
+      "rationale": "Interview on engineering autonomous coding agents that triage bugs, write code, and submit PRs."
+    },
+    {
+      "video_id": "2094718226601218048",
+      "stratum": "timed_evidence",
+      "outcome": "assigned",
+      "shelf_id": "security",
+      "shelf_path": [
+        "AI and ML",
+        "Security"
+      ],
+      "secondary_shelf_ids": [],
+      "confidence": 0.95,
+      "evidence": {
+        "excerpt_id": "42d8192e258796e73d8d07347bd1133c48c14cd270e5ab0a4787cd72e2c7c3c4",
+        "quote": "they immediately paused all of the cyber evals they were doing for pre-release models"
+      },
+      "rationale": "Incident postmortem analyzing pre-release red-teaming cyber evaluations and security vulnerabilities."
+    },
+    {
+      "video_id": "2095070893944832003",
+      "stratum": "timed_evidence",
+      "outcome": "assigned",
+      "shelf_id": "ai-generative-media",
+      "shelf_path": [
+        "AI and ML",
+        "AI Generative Media"
+      ],
+      "secondary_shelf_ids": [
+        "frontier-models"
+      ],
+      "confidence": 0.95,
+      "evidence": {
+        "excerpt_id": "ab1b328cb23bff81765b6236e36ada118c501487dee04236d13e0603dfb45981",
+        "quote": "While the LTX 2 technical report said the system has no explicit Or world modeling capabilities"
+      },
+      "rationale": "Technical interview examining video generation models, LTX 2 world modeling, and visual benchmarking."
+    },
+    {
+      "video_id": "2095624765327458304",
+      "stratum": "text_only",
+      "outcome": "unmappable",
+      "shelf_id": null,
+      "shelf_path": [
+        "AI and ML",
+        "Humor and Memes"
+      ],
+      "secondary_shelf_ids": [],
+      "confidence": 0.95,
+      "evidence": {
+        "excerpt_id": "eab39d10bd05b9158421b24012dcab594e53a1bbdbb395f946f7369ba2f7b5b4",
+        "quote": "by finally hacking in to this dumb little toy computer I bought off Amazon"
+      },
+      "rationale": "Parody benchmark evaluating a toy computer bought from Amazon; satire and internet comedy."
+    },
+    {
+      "video_id": "2095783502306545664",
+      "stratum": "timed_evidence",
+      "outcome": "assigned",
+      "shelf_id": "career-and-entrepreneurship",
+      "shelf_path": [
+        "Career and Entrepreneurship"
+      ],
+      "secondary_shelf_ids": [
+        "ai-industry-and-business"
+      ],
+      "confidence": 0.95,
+      "evidence": {
+        "excerpt_id": "5b6d7866d4e87351bf9d6f83a9e311ddaa26d4216e7c360064e3408161fa8fa0",
+        "quote": "you can do what a hundred person incredibly great engineering team would do as a startup"
+      },
+      "rationale": "Advice for tech founders and startup builders on leveraging AI to replace large engineering teams."
+    },
+    {
+      "video_id": "5LqC6qdVAwU",
+      "stratum": "timed_evidence",
+      "outcome": "assigned",
+      "shelf_id": "security",
+      "shelf_path": [
+        "AI and ML",
+        "Security"
+      ],
+      "secondary_shelf_ids": [
+        "frontier-models"
+      ],
+      "confidence": 0.95,
+      "evidence": {
+        "excerpt_id": "40b5a999320627f97a012a2e626eaa60f2e7b9a8c3106494d03b539a93f6f542",
+        "quote": "cutting down jailbreaks even further, ended up increasing the compute needed for requests by over 50%"
+      },
+      "rationale": "Analysis of AI safety classifiers, jailbreak mitigation overhead, and defense compute costs."
+    },
+    {
+      "video_id": "8GRmLR__OGQ",
+      "stratum": "timed_evidence",
+      "outcome": "assigned",
+      "shelf_id": "developer-tools",
+      "shelf_path": [
+        "AI and ML",
+        "Developer Tools"
+      ],
+      "secondary_shelf_ids": [
+        "ai-agents-and-automation"
+      ],
+      "confidence": 0.95,
+      "evidence": {
+        "excerpt_id": "39df6e874e95bde3261f0b9260b05f04c456bf333ac88f5c1b54792b75eb50dc",
+        "quote": "the cursor adapter is not as reliable as we want it to be."
+      },
+      "rationale": "Practical guide on configuring Fable 5 and Cursor adapters for developer coding workflows."
+    },
+    {
+      "video_id": "FLcrvMfHUJM",
+      "stratum": "timed_evidence",
+      "outcome": "assigned",
+      "shelf_id": "security",
+      "shelf_path": [
+        "AI and ML",
+        "Security"
+      ],
+      "secondary_shelf_ids": [],
+      "confidence": 0.95,
+      "evidence": {
+        "excerpt_id": "a10feb60262e0fbf90365db222890cead840da70ae40466d6e17a4e40905c799",
+        "quote": "AI scientists warn that a few companies are on track to literally end life on Earth."
+      },
+      "rationale": "Video examining catastrophic scenarios, existential risk, and AI alignment research from MIT."
+    },
+    {
+      "video_id": "LNwODJXcvt4",
+      "stratum": "timed_evidence",
+      "outcome": "assigned",
+      "shelf_id": "education",
+      "shelf_path": [
+        "AI and ML",
+        "Education"
+      ],
+      "secondary_shelf_ids": [
+        "developer-tools"
+      ],
+      "confidence": 0.95,
+      "evidence": {
+        "excerpt_id": "d8df9c35790515cb80226bf6436f0d2fe889203f907ddb28565446d7e180b1fd",
+        "quote": "can train a custom object detection model with"
+      },
+      "rationale": "Instructional video tutorial teaching how to train custom YOLOv8 models in Google Colab."
+    },
+    {
+      "video_id": "MgbP5szEBDo",
+      "stratum": "timed_evidence",
+      "outcome": "assigned",
+      "shelf_id": "frontier-models",
+      "shelf_path": [
+        "AI and ML",
+        "Frontier Models"
+      ],
+      "secondary_shelf_ids": [
+        "education"
+      ],
+      "confidence": 0.95,
+      "evidence": {
+        "excerpt_id": "08039ac23c653abc4b0ae4e1036a2e5983afc670d724097033610118d62551d3",
+        "quote": "YOLO version 26 and RFDet, which one is the best, which one to choose for your project?"
+      },
+      "rationale": "Technical benchmark comparison and architecture evaluation of YOLO26 versus RF-DETR vision models."
+    },
+    {
+      "video_id": "YtKX2wbCpVQ",
+      "stratum": "timed_evidence",
+      "outcome": "assigned",
+      "shelf_id": "ai-industry-and-business",
+      "shelf_path": [
+        "AI and ML",
+        "AI Industry and Business"
+      ],
+      "secondary_shelf_ids": [
+        "frontier-models"
+      ],
+      "confidence": 0.9,
+      "evidence": {
+        "excerpt_id": "f307200de5187cf1ee8c0ffa0437f7fcbc6123c15864d5a6dae662969641405d",
+        "quote": "solving generalization in robotics. Joining us now, CEO Amit Jain."
+      },
+      "rationale": "Executive interview with Luma CEO Amit Jain on business partnerships and physical AI development."
+    },
+    {
+      "video_id": "r0RspiLG260",
+      "stratum": "timed_evidence",
+      "outcome": "assigned",
+      "shelf_id": "education",
+      "shelf_path": [
+        "AI and ML",
+        "Education"
+      ],
+      "secondary_shelf_ids": [
+        "developer-tools"
+      ],
+      "confidence": 0.95,
+      "evidence": {
+        "excerpt_id": "7c37a600544c581ecb82437acc3ae78e3a28963681622faa49490f616a796c8c",
+        "quote": "training a YOLO model inside Google Colab."
+      },
+      "rationale": "Comprehensive pedagogical guide and tutorial on training YOLO object detection models in Colab."
+    },
+    {
+      "video_id": "tOC2N0B9lio",
+      "stratum": "timed_evidence",
+      "outcome": "assigned",
+      "shelf_id": "ai-agents-and-automation",
+      "shelf_path": [
+        "AI and ML",
+        "AI Agents and Automation"
+      ],
+      "secondary_shelf_ids": [
+        "developer-tools"
+      ],
+      "confidence": 0.95,
+      "evidence": {
+        "excerpt_id": "ffc4487fd792d8d9af183e076d16197aab4559cf5aa49ec0028ebc24d1a6c79e",
+        "quote": "This is a new paradigm for interacting with Claude that is significantly more in line with all the other human activity org wide."
+      },
+      "rationale": "Exploring org-wide autonomous agent workflows and Slack bot orchestration with Claude Tag."
+    },
+    {
+      "video_id": "ub2xbSlay7g",
+      "stratum": "timed_evidence",
+      "outcome": "assigned",
+      "shelf_id": "frontier-models",
+      "shelf_path": [
+        "AI and ML",
+        "Frontier Models"
+      ],
+      "secondary_shelf_ids": [
+        "developer-tools"
+      ],
+      "confidence": 0.95,
+      "evidence": {
+        "excerpt_id": "b36af614f980aa27a01e0128ce3d96b57c8e889a7329ac6f4bf5b7641373e6a1",
+        "quote": "I would start with YOLO 26. Uh, it's got the best performance,"
+      },
+      "rationale": "Live stream presentation benchmarking the new YOLO26 vision foundation model architecture."
+    },
+    {
+      "video_id": "z70ZrSZNi-8",
+      "stratum": "timed_evidence",
+      "outcome": "assigned",
+      "shelf_id": "education",
+      "shelf_path": [
+        "AI and ML",
+        "Education"
+      ],
+      "secondary_shelf_ids": [
+        "developer-tools"
+      ],
+      "confidence": 0.95,
+      "evidence": {
+        "excerpt_id": "a5a8a6150b41b50381886b5b6d7ebfb83470d9f38f0234942d0d90db6fc3a521",
+        "quote": "in this video we'll walk through the process of setting up the Raspberry Pi to run YOLO object detection models"
+      },
+      "rationale": "Step-by-step tutorial on configuring and deploying YOLO models onto Raspberry Pi hardware."
+    }
+  ]
+}

@@ -3368,10 +3368,459 @@
       }
     }
 
-    @media (max-width: 420px) {
-      .screenshot-picker {
-        grid-template-columns: minmax(0, 1fr);
-      }
+    /* Standing subscriptions (Phase 3) */
+    .standing-subscriptions {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .standing-header {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .standing-header h2 {
+      margin: 0;
+      color: var(--cream);
+      font-size: 22px;
+      line-height: 1.2;
+    }
+    .standing-summary-bar {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)) auto;
+      gap: 12px;
+      align-items: center;
+      padding: 14px 18px;
+      background: rgba(21, 17, 13, 0.85);
+      border: 1px solid var(--border);
+      border-radius: var(--card-radius);
+      box-shadow: var(--shadow-soft);
+    }
+    .standing-stat {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .standing-stat-value {
+      font-family: var(--font-mono);
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--cream);
+    }
+    .standing-stat-label {
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .standing-stat-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .standing-add-bar {
+      padding: 12px 14px;
+      background: rgba(13, 10, 8, 0.6);
+      border: 1px solid var(--border);
+      border-radius: var(--control-radius);
+    }
+    .standing-add-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .standing-add-row select {
+      min-width: 140px;
+    }
+    .standing-add-row input[type="url"] {
+      flex: 1;
+      min-width: 220px;
+    }
+    .subscription-card-list {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .subscription-card {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      padding: 16px 18px;
+      background: rgba(21, 17, 13, 0.92);
+      border: 1px solid var(--border);
+      border-radius: var(--card-radius);
+      box-shadow: var(--shadow-soft);
+      transition: border-color 0.15s ease;
+    }
+    .subscription-card:hover {
+      border-color: rgba(249, 115, 22, 0.35);
+    }
+    .subscription-card-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .subscription-title-wrap {
+      min-width: 0;
+      flex: 1;
+    }
+    .subscription-card-head h3 {
+      margin: 0 0 4px;
+      color: var(--cream);
+      font-size: 16px;
+      line-height: 1.3;
+      word-break: break-word;
+    }
+    .subscription-meta-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--muted);
+      flex-wrap: wrap;
+    }
+    .subscription-badges {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+    .source-kind-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 8px;
+      border-radius: var(--pill-radius);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      background: rgba(255, 244, 236, 0.08);
+      color: var(--muted);
+      border: 1px solid rgba(255, 244, 236, 0.12);
+    }
+    .health-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 2px 8px;
+      border-radius: var(--pill-radius);
+      font-size: 11px;
+      font-weight: 500;
+      font-family: var(--font-mono);
+    }
+    .health-pill.healthy {
+      background: rgba(0, 200, 83, 0.15);
+      color: var(--ok);
+      border: 1px solid rgba(0, 200, 83, 0.3);
+    }
+    .health-pill.polling {
+      background: rgba(56, 189, 248, 0.15);
+      color: #38bdf8;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      animation: pulse 1.6s infinite;
+    }
+    .health-pill.degraded {
+      background: rgba(255, 210, 63, 0.15);
+      color: var(--acid);
+      border: 1px solid rgba(255, 210, 63, 0.3);
+    }
+    .health-pill.error {
+      background: rgba(255, 61, 0, 0.15);
+      color: var(--vermillion);
+      border: 1px solid rgba(255, 61, 0, 0.3);
+    }
+    .capture-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 2px 8px;
+      border-radius: var(--pill-radius);
+      font-size: 11px;
+      font-weight: 500;
+      font-family: var(--font-mono);
+    }
+    .capture-pill.ready,
+    .capture-pill.idle {
+      background: rgba(0, 200, 83, 0.15);
+      color: var(--ok);
+      border: 1px solid rgba(0, 200, 83, 0.3);
+    }
+    .capture-pill.in-flight {
+      background: rgba(56, 189, 248, 0.15);
+      color: #38bdf8;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+    }
+    .capture-pill.draining,
+    .capture-pill.uncertain,
+    .capture-pill.exhausted {
+      background: rgba(255, 210, 63, 0.15);
+      color: var(--acid);
+      border: 1px solid rgba(255, 210, 63, 0.3);
+    }
+    .capture-pill.failed {
+      background: rgba(255, 61, 0, 0.15);
+      color: var(--vermillion);
+      border: 1px solid rgba(255, 61, 0, 0.3);
+    }
+    .capture-pill.off {
+      background: rgba(143, 123, 110, 0.16);
+      color: var(--muted);
+      border: 1px solid rgba(143, 123, 110, 0.3);
+    }
+    .consent-revision-pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 7px;
+      border-radius: var(--pill-radius);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--muted);
+      background: rgba(255, 244, 236, 0.06);
+      border: 1px solid rgba(255, 244, 236, 0.14);
+    }
+    .subscription-consent-group {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 14px;
+      background: rgba(10, 10, 10, 0.6);
+      border: 1px solid var(--border);
+      border-radius: var(--control-radius);
+      flex-wrap: wrap;
+    }
+    .consent-status-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .consent-pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 3px 10px;
+      border-radius: var(--pill-radius);
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .consent-pill.off {
+      background: rgba(143, 123, 110, 0.16);
+      color: var(--muted);
+      border: 1px solid rgba(143, 123, 110, 0.3);
+    }
+    .consent-pill.on {
+      background: rgba(0, 200, 83, 0.18);
+      color: var(--ok);
+      border: 1px solid rgba(0, 200, 83, 0.35);
+    }
+    .consent-pill.draining {
+      background: rgba(255, 210, 63, 0.18);
+      color: var(--acid);
+      border: 1px solid rgba(255, 210, 63, 0.4);
+    }
+    .consent-desc {
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .enrollment-allowance-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 12px;
+    }
+    .enrollment-box,
+    .allowance-box {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding: 10px 14px;
+      background: rgba(10, 10, 10, 0.4);
+      border: 1px solid var(--border);
+      border-radius: var(--control-radius);
+    }
+    .meter-label-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+    }
+    .meter-title {
+      font-weight: 600;
+      color: var(--cream);
+    }
+    .meter-value {
+      font-family: var(--font-mono);
+      color: var(--muted);
+    }
+    .meter-progress {
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 244, 236, 0.1);
+      border-radius: var(--pill-radius);
+      overflow: hidden;
+    }
+    .meter-progress-bar {
+      height: 100%;
+      background: var(--rust-bright);
+      border-radius: var(--pill-radius);
+      transition: width 0.3s ease;
+    }
+    .meter-progress-bar.exhausted {
+      background: var(--vermillion);
+    }
+    .meter-note {
+      font-size: 11px;
+      color: var(--dim);
+    }
+    .allowance-box.exhausted {
+      border-color: rgba(255, 210, 63, 0.5);
+      background: rgba(42, 34, 15, 0.4);
+    }
+    .allowance-box.exhausted .meter-note {
+      color: var(--acid);
+    }
+    .in-flight-box {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 10px 14px;
+      background: rgba(15, 28, 48, 0.4);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      border-radius: var(--control-radius);
+    }
+    .in-flight-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+      font-weight: 600;
+      color: #38bdf8;
+    }
+    .in-flight-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--cream);
+    }
+    .in-flight-phase {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--acid);
+    }
+    .captured-items-box {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding: 8px 14px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: var(--control-radius);
+    }
+    .captured-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--cream);
+    }
+    .classification-pill {
+      display: inline-flex;
+      align-items: center;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      padding: 1px 6px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      color: var(--cream);
+    }
+    .classification-pill.waiting_for_client { border-color: #38bdf8; color: #38bdf8; }
+    .classification-pill.accepted { border-color: #4ade80; color: #4ade80; }
+    .classification-pill.blocked, .classification-pill.unsupported, .classification-pill.unmapped { border-color: var(--vermillion); color: var(--vermillion); }
+    .source-error-strip {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 14px;
+      background: var(--danger-bg);
+      border: 1px solid var(--danger-border);
+      border-radius: var(--control-radius);
+      font-size: 12px;
+      color: #fca5a5;
+    }
+    .source-recovery-box {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding: 10px 14px;
+      background: rgba(58, 31, 31, 0.4);
+      border: 1px solid rgba(255, 61, 0, 0.3);
+      border-radius: var(--control-radius);
+    }
+    .source-recovery-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+      font-weight: 600;
+      color: #fca5a5;
+    }
+    .source-recovery-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--cream);
+    }
+    .source-recovery-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      color: var(--muted);
+      font-family: var(--font-mono);
+    }
+    .source-recovery-reason {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: #fca5a5;
+    }
+    .standing-empty-state {
+      padding: 32px 24px;
+      text-align: center;
+      background: rgba(21, 17, 13, 0.5);
+      border: 1px dashed var(--border);
+      border-radius: var(--card-radius);
+    }
+    .draining-banner {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      background: rgba(255, 210, 63, 0.12);
+      border: 1px solid rgba(255, 210, 63, 0.35);
+      border-radius: var(--control-radius);
+      font-size: 12px;
+      color: var(--acid);
+    }
+    .display-summary-box {
+      padding: 10px 12px;
+      background: rgba(255, 244, 236, 0.06);
+      border: 1px solid var(--border);
+      border-radius: var(--control-radius);
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 10px;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
     }
   </style>
 </head>
@@ -3929,6 +4378,211 @@
             <a href="https://uoink.app/features/faceted-classification" target="_blank" rel="noreferrer">Learn: Facets</a>
           </div>
 
+          <!-- Phase 5 Part A: Read-Only Library Activity Panel -->
+          <div class="library-activity-panel" id="libraryActivityPanel" role="region" aria-label="Library activity" style="margin-bottom:20px;padding:14px;background:var(--bg-panel, #1e1e1e);border:1px solid #333;border-radius:8px;">
+            <div class="activity-head">
+              <div class="inline-row" style="justify-content:space-between;align-items:center;">
+                <h2 class="activity-title" style="margin:0;font-size:1.25rem;">Library activity</h2>
+                <div class="inline-row" style="gap:8px;align-items:center;">
+                  <span class="activity-as-of" id="libraryActivityAsOf" style="font-size:0.85rem;color:var(--text-muted, #888);">As of ...</span>
+                  <span class="activity-badge" id="libraryActivityBadge" style="font-size:0.75rem;padding:2px 8px;border-radius:4px;background:var(--bg-card, #222);">Live</span>
+                  <button class="button ghost small" type="button" id="libraryActivityRefreshBtn">Refresh</button>
+                </div>
+              </div>
+              <p class="activity-empty-state hidden" id="libraryActivityEmpty" role="status" style="margin:8px 0 0;font-size:0.9rem;color:var(--text-muted, #888);">Library activity appears here after your first few captures.</p>
+              <div class="activity-controls inline-row" id="activityControls" style="margin-top:10px;gap:12px;flex-wrap:wrap;align-items:center;">
+                <div class="activity-presets inline-row" role="group" aria-label="Interval presets" style="gap:4px;">
+                  <button class="button ghost small" type="button" id="activityPreset1d" data-preset="1">1d</button>
+                  <button class="button ghost small active" type="button" id="activityPreset7d" data-preset="7">7d</button>
+                  <button class="button ghost small" type="button" id="activityPreset30d" data-preset="30">30d</button>
+                </div>
+                <div class="activity-custom-interval inline-row" style="gap:4px;align-items:center;">
+                  <input class="control small" id="activityStartInput" type="text" placeholder="YYYY-MM-DDTHH:MM:SSZ" aria-label="Interval start (UTC)" style="width:170px;font-size:0.8rem;">
+                  <span>to</span>
+                  <input class="control small" id="activityEndInput" type="text" placeholder="YYYY-MM-DDTHH:MM:SSZ" aria-label="Interval end (UTC)" style="width:170px;font-size:0.8rem;">
+                  <button class="button ghost small" type="button" id="activityApplyCustomBtn">Apply</button>
+                </div>
+                <div class="activity-basis inline-row" style="gap:6px;align-items:center;">
+                  <label for="activityDateBasis" style="font-size:0.85rem;">Basis:</label>
+                  <select class="control small" id="activityDateBasis" aria-label="Activity date basis" style="font-size:0.85rem;">
+                    <option value="capture_time">Capture time (default)</option>
+                    <option value="publication_time">Publication time</option>
+                  </select>
+                </div>
+              </div>
+              <div id="activityCustomError" class="field-error hidden" role="status" aria-live="polite" style="margin-top:6px;font-size:0.85rem;color:var(--error, #e55);"></div>
+            </div>
+
+            <div class="activity-coverage-block" id="activityCoverageBlock" style="margin-top:12px;padding:8px 12px;border-radius:6px;background:var(--bg-card, #1a1a1a);font-size:0.85rem;">
+              <div class="inline-row" style="justify-content:space-between;flex-wrap:wrap;gap:8px;">
+                <div><strong>UTC Interval:</strong> <span id="activityUtcInterval">-</span></div>
+                <div><strong>Coverage:</strong> <span id="activityCoverageStatus">-</span></div>
+                <div><strong>Exclusions:</strong> <span id="activityExclusions">0</span></div>
+              </div>
+              <div id="activityWarnings" class="activity-warnings hidden" style="color:#d97706;margin-top:4px;font-size:0.8rem;"></div>
+            </div>
+
+            <div class="activity-metrics-grid" id="activityMetricsGrid" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));gap:12px;margin-top:14px;">
+              <div class="activity-stat-card" style="padding:10px;border-radius:6px;background:var(--bg-card, #222);">
+                <div style="font-size:0.8rem;color:var(--text-muted, #888);">Selected Items</div>
+                <div style="font-size:1.4rem;font-weight:600;margin-top:4px;">
+                  <button class="link-button activity-evidence-trigger" type="button" id="activityTotalItems" data-metric-id="items.total" style="background:none;border:none;padding:0;font-size:inherit;font-weight:inherit;color:inherit;cursor:pointer;text-decoration:underline;">0</button>
+                </div>
+                <div style="font-size:0.75rem;color:var(--text-muted, #888);margin-top:2px;">Live in interval</div>
+              </div>
+              <div class="activity-stat-card" style="padding:10px;border-radius:6px;background:var(--bg-card, #222);">
+                <div style="font-size:0.8rem;color:var(--text-muted, #888);">Assigned Items</div>
+                <div style="font-size:1.4rem;font-weight:600;margin-top:4px;">
+                  <button class="link-button activity-evidence-trigger" type="button" id="activityAssignedItems" data-metric-id="shelf_activity.current_assigned_items" style="background:none;border:none;padding:0;font-size:inherit;font-weight:inherit;color:inherit;cursor:pointer;text-decoration:underline;">0</button>
+                </div>
+                <div style="font-size:0.75rem;color:var(--text-muted, #888);margin-top:2px;">Current direct members</div>
+              </div>
+              <div class="activity-stat-card" style="padding:10px;border-radius:6px;background:var(--bg-card, #222);">
+                <div style="font-size:0.8rem;color:var(--text-muted, #888);">Applied Operations</div>
+                <div style="font-size:1.4rem;font-weight:600;margin-top:4px;">
+                  <button class="link-button activity-evidence-trigger" type="button" id="activityAppliedOps" data-metric-id="shelf_activity.applied_operations" style="background:none;border:none;padding:0;font-size:inherit;font-weight:inherit;color:inherit;cursor:pointer;text-decoration:underline;">0</button>
+                </div>
+                <div style="font-size:0.75rem;color:var(--text-muted, #888);margin-top:2px;">In interval</div>
+              </div>
+              <div class="activity-stat-card" style="padding:10px;border-radius:6px;background:var(--bg-card, #222);">
+                <div style="font-size:0.8rem;color:var(--text-muted, #888);">Interval Churn</div>
+                <div style="font-size:1.4rem;font-weight:600;margin-top:4px;">
+                  <button class="link-button activity-evidence-trigger" type="button" id="activityChurn" data-metric-id="shelf_activity.churn" style="background:none;border:none;padding:0;font-size:inherit;font-weight:inherit;color:inherit;cursor:pointer;text-decoration:underline;">Unavailable</button>
+                </div>
+                <div id="activityChurnSub" style="font-size:0.75rem;color:var(--text-muted, #888);margin-top:2px;">Proved baseline</div>
+              </div>
+            </div>
+
+            <div class="activity-sections" id="activitySections" style="margin-top:16px;display:flex;flex-direction:column;gap:16px;">
+              <details class="activity-sub-card" id="activityDailyCard" open style="padding:8px 12px;background:var(--bg-card, #1c1c1c);border-radius:6px;">
+                <summary style="cursor:pointer;font-weight:600;font-size:0.95rem;">Daily Activity (<span id="activityDailyCount">0</span> buckets)</summary>
+                <div class="activity-table-wrapper" style="overflow-x:auto;margin-top:8px;">
+                  <table class="activity-table" style="width:100%;font-size:0.85rem;border-collapse:collapse;" aria-label="Daily activity table">
+                    <thead>
+                      <tr style="text-align:left;border-bottom:1px solid #333;">
+                        <th style="padding:4px 8px;">Date (UTC)</th>
+                        <th style="padding:4px 8px;">Count</th>
+                        <th style="padding:4px 8px;">Share</th>
+                      </tr>
+                    </thead>
+                    <tbody id="activityDailyBody"></tbody>
+                  </table>
+                </div>
+              </details>
+
+              <details class="activity-sub-card" id="activityHintsCard" style="padding:8px 12px;background:var(--bg-card, #1c1c1c);border-radius:6px;">
+                <summary style="cursor:pointer;font-weight:600;font-size:0.95rem;">Creator Hint Breakdowns (<span id="activityHintsCount">0</span> hints)</summary>
+                <div class="activity-table-wrapper" style="overflow-x:auto;margin-top:8px;">
+                  <table class="activity-table" style="width:100%;font-size:0.85rem;border-collapse:collapse;" aria-label="Creator hints table">
+                    <thead>
+                      <tr style="text-align:left;border-bottom:1px solid #333;">
+                        <th style="padding:4px 8px;">Platform</th>
+                        <th style="padding:4px 8px;">Field</th>
+                        <th style="padding:4px 8px;">Hint</th>
+                        <th style="padding:4px 8px;">Count</th>
+                        <th style="padding:4px 8px;">Share</th>
+                      </tr>
+                    </thead>
+                    <tbody id="activityHintsBody"></tbody>
+                  </table>
+                </div>
+                <div class="inline-row" style="justify-content:space-between;align-items:center;margin-top:8px;">
+                  <button class="button ghost small" type="button" id="activityHintsPrevBtn" disabled>Previous</button>
+                  <span id="activityHintsPageInfo" style="font-size:0.8rem;">Page 1</span>
+                  <button class="button ghost small" type="button" id="activityHintsNextBtn" disabled>Next</button>
+                </div>
+              </details>
+
+              <details class="activity-sub-card" id="activityShelvesCard" style="padding:8px 12px;background:var(--bg-card, #1c1c1c);border-radius:6px;">
+                <summary style="cursor:pointer;font-weight:600;font-size:0.95rem;">Shelves &amp; Churn (<span id="activityShelvesCount">0</span> shelves)</summary>
+                <div class="activity-table-wrapper" style="overflow-x:auto;margin-top:8px;">
+                  <table class="activity-table" style="width:100%;font-size:0.85rem;border-collapse:collapse;" aria-label="Shelves and churn table">
+                    <thead>
+                      <tr style="text-align:left;border-bottom:1px solid #333;">
+                        <th style="padding:4px 8px;">Shelf ID</th>
+                        <th style="padding:4px 8px;">Current</th>
+                        <th style="padding:4px 8px;">Start</th>
+                        <th style="padding:4px 8px;">End</th>
+                        <th style="padding:4px 8px;">Added</th>
+                        <th style="padding:4px 8px;">Removed</th>
+                        <th style="padding:4px 8px;">Net</th>
+                        <th style="padding:4px 8px;">Churn</th>
+                      </tr>
+                    </thead>
+                    <tbody id="activityShelvesBody"></tbody>
+                  </table>
+                </div>
+                <div class="inline-row" style="justify-content:space-between;align-items:center;margin-top:8px;">
+                  <button class="button ghost small" type="button" id="activityShelvesPrevBtn" disabled>Previous</button>
+                  <span id="activityShelvesPageInfo" style="font-size:0.8rem;">Page 1</span>
+                  <button class="button ghost small" type="button" id="activityShelvesNextBtn" disabled>Next</button>
+                </div>
+              </details>
+
+              <details class="activity-sub-card" id="activitySourcesCard" style="padding:8px 12px;background:var(--bg-card, #1c1c1c);border-radius:6px;">
+                <summary style="cursor:pointer;font-weight:600;font-size:0.95rem;">Active Sources (<span id="activitySourcesCount">0</span> sources)</summary>
+                <div class="activity-table-wrapper" style="overflow-x:auto;margin-top:8px;">
+                  <table class="activity-table" style="width:100%;font-size:0.85rem;border-collapse:collapse;" aria-label="Active sources table">
+                    <thead>
+                      <tr style="text-align:left;border-bottom:1px solid #333;">
+                        <th style="padding:4px 8px;">Source</th>
+                        <th style="padding:4px 8px;">Kind</th>
+                        <th style="padding:4px 8px;">Captures</th>
+                        <th style="padding:4px 8px;">New Obs</th>
+                        <th style="padding:4px 8px;">Observation Window</th>
+                      </tr>
+                    </thead>
+                    <tbody id="activitySourcesBody"></tbody>
+                  </table>
+                </div>
+                <div class="inline-row" style="justify-content:space-between;align-items:center;margin-top:8px;">
+                  <button class="button ghost small" type="button" id="activitySourcesPrevBtn" disabled>Previous</button>
+                  <span id="activitySourcesPageInfo" style="font-size:0.8rem;">Page 1</span>
+                  <button class="button ghost small" type="button" id="activitySourcesNextBtn" disabled>Next</button>
+                </div>
+              </details>
+
+              <details class="activity-sub-card" id="activityEventsCard" open style="padding:8px 12px;background:var(--bg-card, #1c1c1c);border-radius:6px;">
+                <summary style="cursor:pointer;font-weight:600;font-size:0.95rem;">Combined Events (<button class="link-button activity-evidence-trigger" type="button" id="activityEventsCount" data-metric-id="events.total" style="background:none;border:none;padding:0;font:inherit;color:inherit;cursor:pointer;text-decoration:underline;">0</button> events)</summary>
+                <div class="activity-table-wrapper" style="overflow-x:auto;margin-top:8px;">
+                  <table class="activity-table" style="width:100%;font-size:0.85rem;border-collapse:collapse;" aria-label="Combined events table">
+                    <thead>
+                      <tr style="text-align:left;border-bottom:1px solid #333;">
+                        <th style="padding:4px 8px;">Time (UTC)</th>
+                        <th style="padding:4px 8px;">Kind</th>
+                        <th style="padding:4px 8px;">Identifier</th>
+                        <th style="padding:4px 8px;">Details</th>
+                      </tr>
+                    </thead>
+                    <tbody id="activityEventsBody"></tbody>
+                  </table>
+                </div>
+                <div class="inline-row" style="justify-content:space-between;align-items:center;margin-top:8px;">
+                  <button class="button ghost small" type="button" id="activityEventsPrevBtn" disabled>Previous</button>
+                  <span id="activityEventsPageInfo" style="font-size:0.8rem;">Page 1</span>
+                  <button class="button ghost small" type="button" id="activityEventsNextBtn" disabled>Next</button>
+                </div>
+              </details>
+            </div>
+
+            <!-- Evidence Modal -->
+            <div class="activity-evidence-modal hidden" id="activityEvidenceModal" role="dialog" aria-modal="true" aria-label="Metric Evidence" tabindex="-1" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;z-index:10000;">
+              <div class="modal-content" style="background:var(--bg-main, #181818);border:1px solid #444;border-radius:8px;width:90%;max-width:720px;max-height:85vh;display:flex;flex-direction:column;padding:16px;">
+                <div class="inline-row" style="justify-content:space-between;align-items:center;border-bottom:1px solid #333;padding-bottom:8px;">
+                  <h3 style="margin:0;font-size:1.1rem;" id="evidenceModalTitle">Evidence: <span id="evidenceMetricIdLabel"></span></h3>
+                  <button class="button ghost small" type="button" id="closeEvidenceBtn" aria-label="Close evidence modal">Close</button>
+                </div>
+                <div style="font-size:0.8rem;color:var(--text-muted, #888);margin:8px 0;" id="evidenceScopeInfo"></div>
+                <div id="evidenceRowsContainer" style="flex:1;overflow-y:auto;margin:8px 0;display:flex;flex-direction:column;gap:8px;" tabindex="0" aria-label="Evidence rows list"></div>
+                <div class="inline-row" style="justify-content:space-between;align-items:center;border-top:1px solid #333;padding-top:8px;">
+                  <button class="button ghost small" type="button" id="evidencePrevPageBtn" disabled>Previous</button>
+                  <span style="font-size:0.85rem;" id="evidencePageInfo">Page 1</span>
+                  <button class="button ghost small" type="button" id="evidenceNextPageBtn" disabled>Next</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div class="control-grid">
             <input class="control" id="searchInput" type="search" placeholder="search transcripts, titles, comments" aria-label="Search Library">
             <select class="control" id="platformFilter" aria-label="Filter by platform"><option value="">All platforms</option></select>
@@ -4011,6 +4665,52 @@
             <a href="https://uoink.app/twitter" target="_blank" rel="noreferrer">Learn: X Video</a>
             <a href="https://uoink.app/features/podcast-feeds" target="_blank" rel="noreferrer">Learn: Podcast Feeds</a>
           </div>
+          <!-- Phase 3: Standing subscriptions panel -->
+          <section class="standing-subscriptions" id="standingSubscriptions" aria-label="Standing subscriptions">
+            <div class="standing-header">
+              <div class="eyebrow">Standing capture</div>
+              <h2>Standing subscriptions</h2>
+              <p class="universal-lede">Watch podcast RSS feeds and YouTube channels/playlists. Detection is independent from capture: sources stay off by default until you explicitly opt in, capped at 25 back-catalog items and 10 starts per UTC day.</p>
+            </div>
+            <div class="standing-summary-bar" id="standingSummaryBar">
+              <div class="standing-stat">
+                <span class="standing-stat-value" id="standingTotalSources">0</span>
+                <span class="standing-stat-label">Total sources</span>
+              </div>
+              <div class="standing-stat">
+                <span class="standing-stat-value" id="standingActiveSources">0</span>
+                <span class="standing-stat-label">Capture active</span>
+              </div>
+              <div class="standing-stat">
+                <span class="standing-stat-value" id="standingDailyStarts">0 / 10</span>
+                <span class="standing-stat-label">Daily starts used today (UTC)</span>
+              </div>
+              <div class="standing-stat">
+                <span class="standing-stat-value" id="standingNextTick">30s</span>
+                <span class="standing-stat-label">Next scheduler tick</span>
+              </div>
+              <div class="standing-stat-actions">
+                <button class="button ghost" type="button" id="refreshStandingSources">Refresh</button>
+              </div>
+            </div>
+            <div class="standing-add-bar" id="standingAddBar">
+              <div class="standing-add-row">
+                <select class="field" id="standingAddKind" aria-label="Source kind">
+                  <option value="podcast_rss">Podcast RSS</option>
+                  <option value="youtube_channel">YouTube Channel</option>
+                  <option value="youtube_playlist">YouTube Playlist</option>
+                </select>
+                <input class="field" id="standingAddUrl" type="url" inputmode="url" autocomplete="off" spellcheck="false" placeholder="Feed URL or YouTube channel/playlist link" aria-label="New source URL">
+                <input class="field" id="standingAddDisplayName" type="text" autocomplete="off" placeholder="Display name (optional)" aria-label="Display name (optional)">
+                <button class="button primary" type="button" id="standingAddButton">Subscribe</button>
+              </div>
+            </div>
+            <div class="subscription-card-list" id="standingSubscriptionList" role="list" aria-label="Subscribed sources"></div>
+            <div class="standing-empty-state" id="standingEmptyState">
+              <div class="panel-title">No standing subscriptions yet</div>
+              <p class="setting-copy">Paste an RSS feed URL or YouTube channel/playlist link above. Automatic capture is always <strong>off by default</strong> until you explicitly opt in; detection tracks metadata without downloading audio or spending compute.</p>
+            </div>
+          </section>
           <div class="universal-capture" id="universalCapture">
             <div class="eyebrow">Paste a URL</div>
             <h2>Uoink anything</h2>
@@ -4195,6 +4895,8 @@
                 <button class="button danger" type="button" id="stopHelperSettings">Stop Uoink</button>
                 <label class="inline-row"><input id="autostartToggle" type="checkbox" checked> Autostart on login</label>
               </div>
+              <label class="inline-row"><input id="notificationsEnabled" type="checkbox" checked> Show desktop notifications</label>
+              <p class="setting-copy">When off, updates stay in Activity without opening a balloon. Fullscreen apps also receive this courtesy automatically.</p>
             </div>
 
             <div class="setting-block">
@@ -4243,6 +4945,8 @@
                 <input class="field" style="flex:1;min-width:240px" id="podcastFeedUrl" type="url" placeholder="RSS feed URL" aria-label="Podcast RSS feed URL">
                 <button class="button" type="button" id="addPodcastFeed">Add</button>
               </div>
+              <label class="inline-row"><input id="podcastAutoIngest" type="checkbox"> Auto-ingest new episodes: download, transcribe, and publish locally</label>
+              <p class="setting-copy">Feed watching saves metadata only by default. Auto-ingest uses the selected local transcription model; a first-time model download still needs approval.</p>
             </div>
 
             <div class="setting-block">
@@ -4273,6 +4977,29 @@
                 <input class="field" id="outputFolder" type="text" value="Loading..." aria-label="Output folder path">
                 <button class="button ghost" type="button" id="saveOutput">Save path</button>
               </details>
+            </div>
+
+            <div class="setting-block" id="library-mirror">
+              <h2>Library Mirror</h2>
+              <p class="setting-copy">Optional one-way export of evidence cards, shelf pages, and accepted briefs into <code>&lt;vault&gt;/Uoink/</code>. Off by default. Enabling or broadening scope needs a preview and a confirmation from this page.</p>
+              <p class="setting-copy" id="libraryMirrorIndexingNotice">Other software with access to that vault can index its contents. Uoink does not register the vault with Basic Memory/Hermes, start another indexer, edit its configuration, turn on sync, or infer consent from an installed application. Existing third-party indexing is outside Uoink's deletion control.</p>
+              <p class="setting-copy" id="libraryMirrorStatus">Checking library mirror...</p>
+              <p class="setting-copy" id="libraryMirrorCounts"></p>
+              <div class="inline-row">
+                <input class="field" style="flex:1;min-width:240px" id="libraryMirrorDestination" type="text" placeholder="Vault folder path" aria-label="Library mirror destination">
+                <select class="field" id="libraryMirrorScope" aria-label="Library mirror scope">
+                  <option value="all_current_and_future_items">All current and future items</option>
+                  <option value="allowlist">Allowlist only</option>
+                </select>
+              </div>
+              <input class="field" id="libraryMirrorAllowlist" type="text" placeholder="Item IDs, comma-separated" aria-label="Library mirror allowlist">
+              <div class="inline-row">
+                <button class="button" type="button" id="libraryMirrorPreview">Preview</button>
+                <button class="button" type="button" id="libraryMirrorEnable">Enable</button>
+                <button class="button ghost" type="button" id="libraryMirrorDisable">Disable</button>
+                <button class="button ghost" type="button" id="libraryMirrorResync">Resync</button>
+              </div>
+              <p class="setting-copy" id="libraryMirrorPreviewOut"></p>
             </div>
 
             <div class="setting-block">
@@ -4323,6 +5050,12 @@
               <h2>Claim verification</h2>
               <p class="setting-copy">When on, every uoink's transcript is scanned for checkable factual claims. Evidence is shown for your judgment. Uoink never auto-asserts truth.</p>
               <label class="inline-row"><input id="claimVerificationToggle" type="checkbox"> Scan new uoinks for claims worth verifying</label>
+            </div>
+
+            <div class="setting-block" id="entity-extraction">
+              <h2>Entity extraction</h2>
+              <p class="setting-copy">Pull people, tools, products and companies off each transcript into the library graph. Uses your Anthropic key (~2,500 output tokens per item). Off by default; a saved key alone never starts it.</p>
+              <label class="inline-row"><input id="entityExtractionToggle" type="checkbox"> Extract entities from new uoinks</label>
             </div>
 
             <div class="setting-block">
@@ -4416,6 +5149,7 @@
               <h2>Runtime</h2>
               <p class="setting-copy" id="aboutVersion">Version: checking...</p>
               <p class="setting-copy">Dashboard, capture, and agent tools are running on this computer.</p>
+              <p class="setting-copy" id="librarianStatus" data-library-status="unknown">Librarian: checking...</p>
               <details>
                 <summary>Advanced: local address</summary>
                 <p class="setting-copy" id="aboutPort">Local address loading...</p>
@@ -4504,11 +5238,42 @@
     </div>
     <div class="handoff-shot-list" id="writingHandoffShots"></div>
   </div>
+  <!-- Phase 3: Source Consent Confirmation Modal -->
+  <div class="modal-backdrop hidden" id="sourceConsentModal" role="dialog" aria-modal="true" aria-labelledby="sourceConsentModalTitle">
+    <div class="modal-card" style="width:min(520px, calc(100vw - 48px));">
+      <div class="panel-head">
+        <div>
+          <div class="soft-note" id="sourceConsentModalEyebrow">Standing capture consent</div>
+          <div class="panel-title" id="sourceConsentModalTitle">Enable standing capture?</div>
+        </div>
+        <button class="button ghost" type="button" id="closeSourceConsentModal">Close</button>
+      </div>
+      <div class="modal-body" id="sourceConsentModalBody">
+        <div id="sourceConsentModalDetails" class="setting-copy">
+          <p id="sourceConsentModalPrompt"></p>
+          <ul id="sourceConsentModalPolicyList">
+            <li><strong>Back-catalog policy:</strong> Up to 25 most recent items will be enrolled on the first valid snapshot. Older items remain metadata-only.</li>
+            <li><strong>Daily allowance:</strong> Up to 10 starts per UTC day across this source. Unused capacity resets at 00:00 UTC.</li>
+            <li><strong>Standing ingest:</strong> Audio/media download and local transcription begin on the next scheduler tick; unfiled captures land in your Library.</li>
+          </ul>
+          <div id="sourceConsentModalSummary" class="display-summary-box hidden"></div>
+          <div id="sourceConsentModalWarning" class="alert-strip hidden" style="margin-top:12px;"></div>
+        </div>
+      </div>
+      <div class="inline-row" style="justify-content:flex-end; gap:8px; margin-top:16px;">
+        <button class="button ghost" type="button" id="cancelSourceConsent">Cancel</button>
+        <button class="button primary" type="button" id="confirmSourceConsent">Confirm &amp; Enable</button>
+      </div>
+    </div>
+  </div>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <script>
     const state = {
       token: "",
+      standingSources: [],
+      standingPendingIntent: null,
+      standingSourcesLoading: false,
       library: [],
       jobs: [],
       jobsLoaded: false,
@@ -4555,6 +5320,7 @@
       selectedEvidenceTitle: "",
       claims: [],
       selectedYoink: null,
+      selectedYoinkRequest: 0,
       selectedYoinkSidecar: null,
       selectedYoinkSidecarError: "",
       selectedYoinkMarkdown: "",
@@ -4620,7 +5386,7 @@
       ["mixed", "Mixed"],
     ];
 
-    const FALLBACK_WHISPER_MODELS = ["tiny", "base", "small", "medium", "large"];
+    const FALLBACK_WHISPER_MODELS = ["tiny", "base", "small", "medium", "large", "large-v3-turbo"];
 
     const SCRIPT_LENGTH_PRESETS = [
       [30, "30 sec"],
@@ -4638,7 +5404,7 @@
       ["Capture", "mobile-playlist-bridge", "Mobile playlist bridge", "Save on mobile, let the local app pick it up.", "https://uoink.app/features/mobile-playlist-bridge"],
       ["Capture", "universal-page-uoink", "Universal page uoink", "Turn an allowed web page into local markdown and metadata.", "https://uoink.app/features/universal-page-uoink"],
       ["Capture", "twitter-video", "Twitter video", "Capture X videos with creator credit kept close.", "https://uoink.app/twitter"],
-      ["Capture", "podcast-feeds", "Podcast feeds", "Watch RSS feeds and transcribe episodes locally.", "https://uoink.app/features/podcast-feeds"],
+      ["Capture", "podcast-feeds", "Podcast feeds", "Watch RSS feeds for new episodes. Per-feed Auto-ingest can download, transcribe, and publish locally.", "https://uoink.app/features/podcast-feeds"],
       ["Library", "memory-search", "Memory search", "Search transcripts, comments, topics, and saved context.", "https://uoink.app/features/memory-search"],
       ["Library", "faceted-classification", "Faceted classification", "Filter by channel, hook, topic, format, performance, and length.", "https://uoink.app/features/faceted-classification"],
       ["Library", "your-channel", "Your Channel", "Mark your own channel and compare against your corpus.", "https://uoink.app/features/your-channel"],
@@ -4661,7 +5427,7 @@
     const SOURCE_CAPABILITIES = [
       ["YouTube video", "shipped", "In-page button, right-click link, playlist bridge", "Transcript, screenshots, comments, facets, hooks", "Library cards, drafts, scripts, and evidence notes"],
       ["X video", "shipped", "Right-click or paste supported X links", "Creator handle, media metadata, transcript when available", "Writing attribution, Library search, source credit in exports"],
-      ["Podcasts / RSS", "shipped", "Feed monitor or one-off episode URL", "Local transcript, speakers, waveform preview, episode facts", "Research packets, scripts, and long-form source memory"],
+      ["Podcasts / RSS", "shipped", "Saved RSS feed with automatic metadata polling; optional per-feed Auto-ingest", "Local transcript, speakers, waveform preview, episode facts", "Cited Library item, research packets, scripts, and long-form source memory"],
       ["Substack", "planned", "Universal page uoink from allowed site", "Article text, author, publication URL, highlights", "Writing citations, quote bank, topic memory"],
       ["LinkedIn videos", "planned", "Universal page uoink once enabled", "Video metadata, creator, transcript where exposed", "B2B source memory and creator attribution"],
       ["Reddit threads", "shipped", "Paste or right-click a Reddit thread URL", "Post, top comments, community, score signals", "Audience questions and research objections"],
@@ -4689,6 +5455,30 @@
     }));
 
     const els = {
+      standingSubscriptions: document.getElementById("standingSubscriptions"),
+      standingSummaryBar: document.getElementById("standingSummaryBar"),
+      standingTotalSources: document.getElementById("standingTotalSources"),
+      standingActiveSources: document.getElementById("standingActiveSources"),
+      standingDailyStarts: document.getElementById("standingDailyStarts"),
+      standingNextTick: document.getElementById("standingNextTick"),
+      refreshStandingSources: document.getElementById("refreshStandingSources"),
+      standingAddBar: document.getElementById("standingAddBar"),
+      standingAddKind: document.getElementById("standingAddKind"),
+      standingAddUrl: document.getElementById("standingAddUrl"),
+      standingAddDisplayName: document.getElementById("standingAddDisplayName"),
+      standingAddButton: document.getElementById("standingAddButton"),
+      standingSubscriptionList: document.getElementById("standingSubscriptionList"),
+      standingEmptyState: document.getElementById("standingEmptyState"),
+      sourceConsentModal: document.getElementById("sourceConsentModal"),
+      sourceConsentModalEyebrow: document.getElementById("sourceConsentModalEyebrow"),
+      sourceConsentModalTitle: document.getElementById("sourceConsentModalTitle"),
+      sourceConsentModalPrompt: document.getElementById("sourceConsentModalPrompt"),
+      sourceConsentModalPolicyList: document.getElementById("sourceConsentModalPolicyList"),
+      sourceConsentModalSummary: document.getElementById("sourceConsentModalSummary"),
+      sourceConsentModalWarning: document.getElementById("sourceConsentModalWarning"),
+      closeSourceConsentModal: document.getElementById("closeSourceConsentModal"),
+      cancelSourceConsent: document.getElementById("cancelSourceConsent"),
+      confirmSourceConsent: document.getElementById("confirmSourceConsent"),
       toast: document.getElementById("toast"),
       resumeCard: document.getElementById("resumeCard"),
       forYouNavCount: document.getElementById("forYouNavCount"),
@@ -4795,9 +5585,21 @@
       evidenceContext: document.getElementById("evidenceContext"),
       claimList: document.getElementById("claimList"),
       claimVerificationToggle: document.getElementById("claimVerificationToggle"),
+      entityExtractionToggle: document.getElementById("entityExtractionToggle"),
       autoUoinkToggle: document.getElementById("autoUoinkToggle"),
       autoUoinkStatus: document.getElementById("autoUoinkStatus"),
       autoUoinkScan: document.getElementById("autoUoinkScan"),
+      libraryMirrorStatus: document.getElementById("libraryMirrorStatus"),
+      libraryMirrorCounts: document.getElementById("libraryMirrorCounts"),
+      libraryMirrorDestination: document.getElementById("libraryMirrorDestination"),
+      libraryMirrorScope: document.getElementById("libraryMirrorScope"),
+      libraryMirrorAllowlist: document.getElementById("libraryMirrorAllowlist"),
+      libraryMirrorPreview: document.getElementById("libraryMirrorPreview"),
+      libraryMirrorEnable: document.getElementById("libraryMirrorEnable"),
+      libraryMirrorDisable: document.getElementById("libraryMirrorDisable"),
+      libraryMirrorResync: document.getElementById("libraryMirrorResync"),
+      libraryMirrorPreviewOut: document.getElementById("libraryMirrorPreviewOut"),
+      libraryMirrorIndexingNotice: document.getElementById("libraryMirrorIndexingNotice"),
       runEvidenceClaims: document.getElementById("runEvidenceClaims"),
       yoinkHeading: document.getElementById("yoinkHeading"),
       yoinkSubhead: document.getElementById("yoinkSubhead"),
@@ -4867,6 +5669,7 @@
       topicUndoText: document.getElementById("topicUndoText"),
       undoTopicRemove: document.getElementById("undoTopicRemove"),
       autostartToggle: document.getElementById("autostartToggle"),
+      notificationsEnabled: document.getElementById("notificationsEnabled"),
       screenshotCount: document.getElementById("screenshotCount"),
       rolePicker: document.getElementById("rolePicker"),
       channelsStatus: document.getElementById("channelsStatus"),
@@ -4878,6 +5681,7 @@
       podcastFeedStatus: document.getElementById("podcastFeedStatus"),
       podcastFeedList: document.getElementById("podcastFeedList"),
       podcastFeedUrl: document.getElementById("podcastFeedUrl"),
+      podcastAutoIngest: document.getElementById("podcastAutoIngest"),
       allowedSitesStatus: document.getElementById("allowedSitesStatus"),
       defaultSitesList: document.getElementById("defaultSitesList"),
       allowedSitesList: document.getElementById("allowedSitesList"),
@@ -4898,6 +5702,7 @@
       aboutStatus: document.getElementById("aboutStatus"),
       aboutVersion: document.getElementById("aboutVersion"),
       aboutPort: document.getElementById("aboutPort"),
+      librarianStatus: document.getElementById("librarianStatus"),
       sourcesNavCount: document.getElementById("sourcesNavCount"),
       sourceMap: document.getElementById("sourceMap"),
       universalCapture: document.getElementById("universalCapture"),
@@ -5495,17 +6300,6 @@
       })[key] || humanLabel(key);
     }
 
-    function transcriptModelLabel(value) {
-      const key = String(value || "base").toLowerCase();
-      return ({
-        tiny: "Tiny, fastest",
-        base: "Base, balanced",
-        small: "Small, more careful",
-        medium: "Medium, slower",
-        large: "Large, slowest",
-      })[key] || humanLabel(key);
-    }
-
     function folderPathOf(row) {
       return String(row && (row.folder || row.session_folder || "") || "");
     }
@@ -5593,6 +6387,17 @@
       return Boolean(row && row.is_live) || Boolean(sidecar.is_live) || values.includes("live");
     }
 
+    function isNoteContent(row, sidecar = {}) {
+      const meta = metadataOf(row);
+      const st = String(firstValue(
+        row && row.source_type,
+        sidecar.source_type,
+        meta.source_type,
+      ) || "").toLowerCase();
+      const pf = platformOf(row, sidecar);
+      return st === "note" || pf === "note";
+    }
+
     function durationOf(row, sidecar = {}) {
       const meta = metadataOf(row);
       return Number(firstValue(row && row.duration_seconds, sidecar.duration_seconds, meta.duration_seconds, meta.duration));
@@ -5602,10 +6407,10 @@
       const out = new Set();
       const rawSpeakers = sidecar.speakers || (sidecar.diarization && sidecar.diarization.speakers);
       if (Array.isArray(rawSpeakers)) {
-        rawSpeakers.forEach((speaker, index) => {
+        rawSpeakers.forEach((speaker) => {
           const label = typeof speaker === "string"
             ? speaker
-            : firstValue(speaker.name, speaker.label, speaker.id, `Speaker ${index + 1}`);
+            : speaker && firstValue(speaker.name, speaker.label, speaker.id);
           if (label) out.add(String(label));
         });
       } else if (rawSpeakers && typeof rawSpeakers === "object") {
@@ -5621,24 +6426,32 @@
     function transcriptSegments(sidecar = {}) {
       const raw = sidecar.transcript || sidecar.segments || (sidecar.diarization && sidecar.diarization.segments) || [];
       if (typeof raw === "string") {
-        return raw.split(/\n+/).filter(Boolean).slice(0, 12).map((text, index) => ({ start: index * 30, text }));
+        return raw.split(/\n+/).filter(Boolean).slice(0, 12).map((text) => ({ text }));
       }
-      return Array.isArray(raw) ? raw.filter(Boolean) : [];
+      return Array.isArray(raw)
+        ? raw.filter((segment) => typeof segment === "string" || (segment && typeof segment === "object" && !Array.isArray(segment)))
+          .map((segment) => typeof segment === "string" ? { text: segment } : segment)
+        : [];
+    }
+
+    function storedTime(...values) {
+      for (const value of values) {
+        if (typeof value !== "number" && typeof value !== "string") continue;
+        if (typeof value === "string" && !value.trim()) continue;
+        const seconds = Number(value);
+        if (Number.isFinite(seconds) && seconds >= 0) return seconds;
+      }
+      return null;
     }
 
     function diarizationSegments(sidecar = {}) {
       return transcriptSegments(sidecar)
-        .map((segment, index) => {
-          const speaker = firstValue(segment.speaker, segment.speaker_label, segment.speaker_id);
-          const start = Number(firstValue(segment.start, segment.start_seconds, index * 30));
-          const end = Number(firstValue(segment.end, segment.end_seconds, start + 20));
-          return {
-            speaker,
-            start: Number.isFinite(start) ? Math.max(0, start) : index * 30,
-            end: Number.isFinite(end) && end > start ? end : start + 20,
-          };
-        })
-        .filter((segment) => segment.speaker);
+        .map((segment) => ({
+          speaker: firstValue(segment.speaker, segment.speaker_label, segment.speaker_id),
+          start: storedTime(segment.start, segment.start_seconds),
+          end: storedTime(segment.end, segment.end_seconds),
+        }))
+        .filter((segment) => segment.speaker && segment.start !== null && segment.end !== null && segment.end > segment.start);
     }
 
     function shouldShowDiarization(row, sidecar = {}) {
@@ -5704,7 +6517,21 @@
     function mediaLabelFor(row, sidecar = {}) {
       if (isPodcastContent(row, sidecar)) return "podcast";
       if (isLiveContent(row, sidecar)) return "live stream";
+      const meta = metadataOf(row);
+      const st = String(firstValue(
+        row && row.source_type,
+        sidecar.source_type,
+        meta.source_type,
+      ) || "").toLowerCase();
+      if (st === "note") return "note";
+      if (st === "image") return "image";
+      if (st === "page") return "page";
+      if (st === "x_article") return "article";
+      if (st === "x_thread") return "post";
+      if (st === "reddit_thread") return "thread";
       const platform = platformOf(row, sidecar);
+      if (platform === "note") return "note";
+      if (platform === "image") return "image";
       return platform === "youtube" ? "video" : `${platform} video`;
     }
 
@@ -5817,7 +6644,8 @@
         <div class="transcript-preview">
           ${segments.map((segment) => {
             const speaker = firstValue(segment.speaker, segment.speaker_label, segment.speaker_id);
-            const label = [fmtTimestamp(segment.start), speaker].filter(Boolean).join(" | ");
+            const start = storedTime(segment.start, segment.start_seconds);
+            const label = [start === null ? "time not stored" : fmtTimestamp(start), speaker].filter(Boolean).join(" | ");
             return `<div class="transcript-segment"><b>${htmlEscape(label)}</b><div class="job-sub">${htmlEscape(segment.text || segment.content || "")}</div></div>`;
           }).join("")}
         </div>
@@ -5847,9 +6675,17 @@
       `;
     }
 
+    function noteReadinessLabel() {
+      if (state.selectedYoinkMarkdown) return "ready";
+      if (state.selectedYoinkMarkdownState === "loading") return "checking";
+      if (state.selectedYoinkMarkdownState === "empty") return "empty";
+      return state.selectedYoinkMarkdownError || "unavailable";
+    }
+
     function yoinkFactsHtml(row, sidecar = {}) {
+      const isNote = isNoteContent(row, sidecar);
       const speakers = speakerNames(sidecar);
-      const markdownState = state.selectedYoinkMarkdown
+      const markdownState = isNote ? noteReadinessLabel() : state.selectedYoinkMarkdown
         ? "ready"
         : state.selectedYoinkMarkdownState === "no_markdown"
           ? "needs re-capture"
@@ -5858,16 +6694,24 @@
             : (state.selectedYoinkMarkdownError || "not loaded");
       const facts = [
         ["Platform", platformOf(row, sidecar)],
-        ["Duration", fmtDuration(durationOf(row, sidecar))],
-        ["Channel/host", firstValue(sidecar.host, sidecar.author, sidecar.channel, row && row.channel, "unknown")],
-        ["Topic", firstValue(row && row.topic, "Uncategorized")],
-        ["Speakers", speakers.length ? `${speakers.length}` : "not labeled yet"],
-        ["Transcript checker", transcriptModelLabel(firstValue(state.settings && state.settings.whisper_model, "base"))],
-        ["Re-transcription", state.retranscribeStatus || "ready"],
-        ["Transcript file", markdownState],
-        ["Source", sourceUrlOf(row, sidecar) || "not stored"],
       ];
-      if (state.selectedYoinkSidecarError) {
+      if (!isNote) {
+        facts.push(["Duration", fmtDuration(durationOf(row, sidecar))]);
+      }
+      facts.push(
+        ["Channel/host", firstValue(sidecar.host, sidecar.author, sidecar.channel, row && row.channel, "unknown")],
+        ["Topic", firstValue(row && row.topic, "Uncategorized")]
+      );
+      if (!isNote) {
+        facts.push(["Speakers", speakers.length ? `${speakers.length}` : "not labeled yet"]);
+        facts.push(["Transcript checker", transcriptModelLabel(firstValue(state.settings && state.settings.whisper_model, "base"))]);
+        facts.push(["Re-transcription", state.retranscribeStatus || "ready"]);
+      }
+      facts.push([isNote ? "Note file" : "Transcript file", markdownState]);
+      facts.push(["Source", sourceUrlOf(row, sidecar) || "not stored"]);
+      if (isNote) {
+        facts.push(["Saved details", noteReadinessLabel()]);
+      } else if (state.selectedYoinkSidecarError) {
         facts.push(["Saved details", state.selectedYoinkSidecarError]);
       } else {
         facts.push(["Saved details", state.selectedYoinkSidecar ? "ready" : "checking"]);
@@ -5884,15 +6728,17 @@
       const row = state.selectedYoink;
       const sidecar = state.selectedYoinkSidecar || {};
       const hasRow = Boolean(row);
+      const isNote = isNoteContent(row, sidecar);
       const sourceUrl = sourceUrlOf(row, sidecar);
       els.yoinkOpenFolder.disabled = !hasRow || !folderPathOf(row);
       els.yoinkOpenMarkdown.disabled = !hasRow || !videoIdOf(row);
-      els.yoinkRetryCapture.disabled = !hasRow || !videoIdOf(row);
+      els.yoinkRetryCapture.disabled = !hasRow || !videoIdOf(row) || isNote;
       els.yoinkEvidence.disabled = !hasRow || !evidenceVideoIdOf(row, sidecar);
       els.yoinkWriteFrom.disabled = !hasRow || !videoIdOf(row);
-      els.yoinkRetranscribe.disabled = !hasRow || !videoIdOf(row) || state.retranscribing;
+      els.yoinkRetranscribe.disabled = !hasRow || !videoIdOf(row) || state.retranscribing || isNote;
       els.yoinkRetranscribe.textContent = state.retranscribing ? "Queuing..." : "Re-transcribe";
-      els.yoinkRetryCapture.title = sourceUrl ? "Queue a fresh capture for this source." : "No source link is stored for this uoink.";
+      els.yoinkRetranscribe.title = isNote ? "Re-transcription is not applicable for notes." : "";
+      els.yoinkRetryCapture.title = isNote ? "Re-capture is not applicable for notes." : (sourceUrl ? "Queue a fresh capture for this source." : "No source link is stored for this uoink.");
       if (!hasRow) {
         els.yoinkHeading.innerHTML = "Pick a uoink <em>to inspect.</em>";
         els.yoinkSubhead.textContent = "Podcast episodes, interviews, and regular videos share one saved-source view.";
@@ -5915,7 +6761,9 @@
         firstValue(sidecar.podcast_title, sidecar.host, sidecar.channel, row.channel),
         fmtDuration(durationOf(row, sidecar)),
       ].filter((value) => value && value !== "--:--").join(" | ") || "saved source";
-      els.yoinkFactMeta.textContent = state.selectedYoinkSidecar ? "ready" : "checking saved files";
+      els.yoinkFactMeta.textContent = isNote
+        ? noteReadinessLabel()
+        : (state.selectedYoinkSidecar ? "ready" : (state.selectedYoinkSidecarError || "checking saved files"));
       const speakerHtml = speakers.length
         ? `<div class="speaker-row">${speakers.map((speaker) => `<span class="speaker-chip">${htmlEscape(speaker)}</span>`).join("")}</div>`
         : `<div class="job-sub">${podcast ? "No speaker labels stored for this episode yet." : "No speaker labels stored for this uoink."}</div>`;
@@ -5924,17 +6772,19 @@
           ${waveformHtml(row, sidecar)}
           ${speakerHtml}
         `
-        : screenshotGridHtml(row, sidecar);
+        : isNote
+          ? ""
+          : screenshotGridHtml(row, sidecar);
       els.yoinkDetail.innerHTML = `
-        <div class="yoink-hero ${podcast ? "podcast" : ""}">
+        <div class="yoink-hero ${podcast ? "podcast" : isNote ? "note" : ""}">
           ${mediaChipsHtml(row, sidecar)}
           ${mediaBody}
         </div>
         ${diarizationTimelineHtml(row, sidecar)}
         <div class="yoink-section">
           <div class="yoink-section-head">
-            <div class="panel-title">${podcast ? "Episode transcript" : "Transcript preview"}</div>
-            <div class="localhost">${htmlEscape(transcriptSegments(sidecar).length)} segments</div>
+            <div class="panel-title">${podcast ? "Episode transcript" : isNote ? "Note" : "Transcript preview"}</div>
+            <div class="localhost">${isNote ? "saved note" : `${htmlEscape(transcriptSegments(sidecar).length)} segments`}</div>
           </div>
           ${transcriptPreviewHtml(sidecar, podcast)}
         </div>
@@ -5950,6 +6800,11 @@
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       return JSON.parse(await res.text());
+    }
+
+    async function loadYoinkDetails(videoId) {
+      const data = await authFetch(`/yoinks/${encodeURIComponent(videoId)}/details`);
+      return data.details || data;
     }
 
     async function loadYoinkMarkdown(videoId) {
@@ -5993,6 +6848,7 @@
     }
 
     async function openYoinkDetail(row) {
+      const request = ++state.selectedYoinkRequest;
       state.selectedYoink = row || null;
       state.selectedYoinkSidecar = null;
       state.selectedYoinkSidecarError = "";
@@ -6003,30 +6859,44 @@
       state.retranscribing = false;
       renderYoinkDetail();
       switchTab("yoink");
-      const sidecarPath = sidecarPathForRow(row);
+      const isNote = isNoteContent(row);
       const videoId = videoIdOf(row);
       const tasks = [];
-      if (sidecarPath) {
-        tasks.push(loadJsonFile(sidecarPath)
-          .then((data) => { state.selectedYoinkSidecar = data; })
-          .catch(() => { state.selectedYoinkSidecarError = "saved details need another moment"; }));
+      if (!isNote && videoId) {
+        tasks.push(loadYoinkDetails(videoId)
+          .then((data) => {
+            if (state.selectedYoinkRequest !== request) return;
+            state.selectedYoinkSidecar = data;
+          })
+          .catch((err) => {
+            if (state.selectedYoinkRequest !== request) return;
+            state.selectedYoinkSidecar = null;
+            state.selectedYoinkSidecarError = (err && (err.message || (err.data && err.data.error))) || "unavailable";
+          }));
       }
       if (videoId) {
         tasks.push(loadYoinkMarkdown(videoId)
           .then((markdown) => {
+            if (state.selectedYoinkRequest !== request) return;
             state.selectedYoinkMarkdown = markdown;
             state.selectedYoinkMarkdownState = markdown ? "ready" : "empty";
           })
           .catch((err) => {
+            if (state.selectedYoinkRequest !== request) return;
             state.selectedYoinkMarkdown = "";
             state.selectedYoinkMarkdownState = (err.data && err.data.state) || "unavailable";
             state.selectedYoinkMarkdownError = err.message;
           }));
       } else {
         state.selectedYoinkMarkdownState = "unavailable";
+        if (!isNote) {
+          state.selectedYoinkSidecarError = "unavailable";
+        }
       }
       if (tasks.length) await Promise.all(tasks);
-      renderYoinkDetail();
+      if (state.selectedYoinkRequest === request) {
+        renderYoinkDetail();
+      }
     }
 
     async function requestRetranscription() {
@@ -6360,6 +7230,1616 @@
           <span class="source-status planned">${htmlEscape(sourceStatusLabel(source.status))}</span>
         </article>
       `).join("");
+      loadStandingSubscriptions();
+    }
+
+    /* ==========================================================================
+       Phase 3: Standing Subscriptions & Real Consent Management
+       ========================================================================== */
+
+    async function callRegistryTool(name, args) {
+      try {
+        return await callMcpTool(name, args);
+      } catch (err) {
+        const res = await authFetch(`/tools/${encodeURIComponent(name)}`, {
+          method: "POST",
+          body: JSON.stringify(args || {}),
+        });
+        if (res && res.ok === false) {
+          const msg = (res.error && res.error.message) || res.error || `${name} failed`;
+          throw new Error(msg);
+        }
+        return res;
+      }
+    }
+
+    /* ==========================================================================
+       Phase 5 Part A: Living Library Activity & Provenance Reporting
+       ========================================================================== */
+
+    const libraryActivityState = {
+      days: 7,
+      interval: null,
+      date_basis: "capture_time",
+      packet: null,
+      stale: false,
+      loading: false,
+      error: null,
+      loadGeneration: 0,
+      evidenceGeneration: 0,
+      evidenceRequestSeq: 0,
+      evidenceMetricId: null,
+      evidenceOffset: 0,
+      evidenceLimit: 20,
+      evidenceRows: [],
+      evidenceTotal: 0,
+      evidenceNext: null,
+      collectionOffsets: { creator_hints: 0, shelves: 0, sources: 0, events: 0 },
+      collectionTotals: { creator_hints: 0, shelves: 0, sources: 0, events: 0 },
+      collectionNext: { creator_hints: null, shelves: null, sources: null, events: null },
+      collectionRequestSeq: { creator_hints: 0, shelves: 0, sources: 0, events: 0 },
+    };
+
+    let libraryActivityTimer = null;
+    let activityEvidenceFocusRestore = null;
+
+    function getRollingUtcInterval(days) {
+      const now = new Date();
+      const end = now.toISOString();
+      const startDate = new Date(now.getTime() - days * 86400000);
+      const start = startDate.toISOString();
+      return { start, end };
+    }
+
+    function escapeHtmlActivity(str) {
+      if (str == null) return "";
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function sanitizeHttpUrl(url) {
+      if (!url || typeof url !== "string") return null;
+      try {
+        const parsed = new URL(url);
+        if (parsed.protocol === "http:" || parsed.protocol === "https:") {
+          return parsed.href;
+        }
+      } catch (e) {}
+      return null;
+    }
+
+    function activityScalar(value) {
+      if (value == null) return null;
+      if (typeof value === "object" && "value" in value) {
+        return value.value == null ? null : value.value;
+      }
+      return value;
+    }
+
+    function formatActivityCount(value) {
+      const n = activityScalar(value);
+      return n == null ? "Unavailable" : String(n);
+    }
+
+    function activityMetricId(metric, fallback) {
+      if (metric && typeof metric === "object" && metric.metric_id) return metric.metric_id;
+      return fallback || "";
+    }
+
+    function activityEvidenceButton(label, metricId) {
+      const text = escapeHtmlActivity(label);
+      if (!metricId) return text;
+      return `<button class="link-button activity-evidence-trigger" type="button" data-metric-id="${escapeHtmlActivity(metricId)}" style="background:none;border:none;padding:0;color:inherit;cursor:pointer;text-decoration:underline;">${text}</button>`;
+    }
+
+    function disableEvidencePaging() {
+      const prevBtn = document.getElementById("evidencePrevPageBtn");
+      const nextBtn = document.getElementById("evidenceNextPageBtn");
+      if (prevBtn) prevBtn.disabled = true;
+      if (nextBtn) nextBtn.disabled = true;
+    }
+
+    function disableCollectionPagers() {
+      ["activityHints", "activityShelves", "activitySources", "activityEvents"].forEach((prefix) => {
+        const prev = document.getElementById(prefix + "PrevBtn");
+        const next = document.getElementById(prefix + "NextBtn");
+        if (prev) prev.disabled = true;
+        if (next) next.disabled = true;
+      });
+    }
+
+    function invalidateActivityEvidence() {
+      libraryActivityState.evidenceGeneration = (libraryActivityState.evidenceGeneration || 0) + 1;
+      libraryActivityState.evidenceRequestSeq = (libraryActivityState.evidenceRequestSeq || 0) + 1;
+      libraryActivityState.evidenceMetricId = null;
+      libraryActivityState.evidenceOffset = 0;
+      libraryActivityState.evidenceRows = [];
+      libraryActivityState.evidenceTotal = 0;
+      libraryActivityState.evidenceNext = null;
+      libraryActivityState.collectionOffsets = { creator_hints: 0, shelves: 0, sources: 0, events: 0 };
+      libraryActivityState.collectionNext = { creator_hints: null, shelves: null, sources: null, events: null };
+      const collSeq = libraryActivityState.collectionRequestSeq || {};
+      libraryActivityState.collectionRequestSeq = {
+        creator_hints: (collSeq.creator_hints || 0) + 1,
+        shelves: (collSeq.shelves || 0) + 1,
+        sources: (collSeq.sources || 0) + 1,
+        events: (collSeq.events || 0) + 1,
+      };
+      disableEvidencePaging();
+      disableCollectionPagers();
+    }
+
+    function activityReplyIsCurrent(generation, requestSeq, kind) {
+      if (generation !== libraryActivityState.evidenceGeneration) return false;
+      if (kind === "evidence") {
+        return requestSeq === libraryActivityState.evidenceRequestSeq;
+      }
+      const seqs = libraryActivityState.collectionRequestSeq || {};
+      return requestSeq === seqs[kind];
+    }
+
+    function continuationOffset(next) {
+      if (next && typeof next.offset === "number") return next.offset;
+      return null;
+    }
+
+    function activityEvidenceCallable() {
+      return Boolean(
+        libraryActivityState.packet &&
+        libraryActivityState.packet.report_revision &&
+        !libraryActivityState.stale &&
+        !libraryActivityState.error &&
+        !libraryActivityState.loading
+      );
+    }
+
+    function libraryActivitySummaryArgs() {
+      const interval = libraryActivityState.interval || (libraryActivityState.packet && libraryActivityState.packet.interval);
+      return {
+        interval,
+        date_basis: libraryActivityState.date_basis,
+      };
+    }
+
+    function applyLibraryActivityFailure(errCode, errMsg) {
+      libraryActivityState.error = { code: errCode, message: errMsg };
+      libraryActivityState.stale = true;
+      invalidateActivityEvidence();
+      renderLibraryActivityError();
+    }
+
+    async function refreshLibraryActivitySummary() {
+      const generation = libraryActivityState.loadGeneration;
+      const res = await callRegistryTool("get_library_activity", libraryActivitySummaryArgs());
+      if (generation !== libraryActivityState.loadGeneration) return res;
+      if (res && res.ok) {
+        libraryActivityState.packet = res;
+        libraryActivityState.stale = false;
+        libraryActivityState.error = null;
+        renderLibraryActivityUI();
+        disableEvidencePaging();
+        return res;
+      }
+      const errCode = (res && res.error && res.error.code) || "error";
+      const errMsg = (res && res.error && res.error.message) || "Activity fetch failed";
+      applyLibraryActivityFailure(errCode, errMsg);
+      return res;
+    }
+
+    function markLibraryActivityMutated() {
+      libraryActivityState.stale = true;
+      invalidateActivityEvidence();
+      updateLibraryActivityBadge("Stale - Refresh", false, true);
+      loadLibraryActivity(true);
+    }
+
+    function captureActivityEvidenceFocus() {
+      const modal = document.getElementById("activityEvidenceModal");
+      if (!modal) return;
+      const alreadyOpen = modal.classList && typeof modal.classList.contains === "function" && !modal.classList.contains("hidden");
+      if (!alreadyOpen) {
+        activityEvidenceFocusRestore = document.activeElement;
+      }
+      if (modal.classList && typeof modal.classList.remove === "function") {
+        modal.classList.remove("hidden");
+      }
+    }
+
+    function focusActivityEvidenceModal() {
+      const closeBtn = document.getElementById("closeEvidenceBtn");
+      if (closeBtn && typeof closeBtn.focus === "function") {
+        closeBtn.focus();
+        return;
+      }
+      const container = document.getElementById("evidenceRowsContainer");
+      if (container && typeof container.focus === "function") container.focus();
+    }
+
+    function closeActivityEvidenceModal() {
+      const modal = document.getElementById("activityEvidenceModal");
+      if (modal && modal.classList && typeof modal.classList.add === "function") {
+        modal.classList.add("hidden");
+      }
+      const restore = activityEvidenceFocusRestore;
+      activityEvidenceFocusRestore = null;
+      if (restore && typeof restore.focus === "function") restore.focus();
+    }
+
+    function activityEvidenceFocusables() {
+      const seen = [];
+      const add = (el) => {
+        if (el && !el.disabled && seen.indexOf(el) === -1) seen.push(el);
+      };
+      const take = (root, selector) => {
+        if (!root || typeof root.querySelectorAll !== "function") return;
+        const nodes = root.querySelectorAll(selector);
+        const len = nodes && nodes.length ? nodes.length : 0;
+        for (let i = 0; i < len; i += 1) add(nodes[i]);
+      };
+      const modal = document.getElementById("activityEvidenceModal");
+      take(modal, "button, [href], input, select, textarea, [tabindex]:not([tabindex='-1'])");
+      take(document.getElementById("evidenceRowsContainer"), "button, [href], [tabindex]:not([tabindex='-1'])");
+      if (!seen.length) {
+        ["closeEvidenceBtn", "evidenceRowsContainer", "evidencePrevPageBtn", "evidenceNextPageBtn"].forEach((id) => {
+          add(document.getElementById(id));
+        });
+      }
+      return seen;
+    }
+
+    function trapActivityEvidenceKeys(event) {
+      const modal = document.getElementById("activityEvidenceModal");
+      if (!modal || !modal.classList || modal.classList.contains("hidden")) return;
+      if (event.key === "Escape") {
+        if (event.preventDefault) event.preventDefault();
+        closeActivityEvidenceModal();
+        return;
+      }
+      if (event.key !== "Tab") return;
+      const focusables = activityEvidenceFocusables();
+      if (!focusables.length) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        if (event.preventDefault) event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        if (event.preventDefault) event.preventDefault();
+        first.focus();
+      }
+    }
+
+    function libraryActivityPanelVisible() {
+      if (document.hidden) return false;
+      const panel = document.getElementById("tab-library");
+      if (!panel || !panel.classList) return true;
+      return panel.classList.contains("active");
+    }
+
+    async function loadLibraryActivity(force = false) {
+      const panel = document.getElementById("libraryActivityPanel");
+      if (!panel) return;
+      if (!force && document.hidden) return;
+
+      if (libraryActivityState.days) {
+        libraryActivityState.interval = getRollingUtcInterval(libraryActivityState.days);
+      }
+
+      const generation = ++libraryActivityState.loadGeneration;
+      invalidateActivityEvidence();
+      libraryActivityState.loading = true;
+      libraryActivityState.error = null;
+      updateLibraryActivityBadge("Loading...");
+
+      try {
+        const res = await callRegistryTool("get_library_activity", libraryActivitySummaryArgs());
+        if (generation !== libraryActivityState.loadGeneration) return;
+        if (res && res.ok) {
+          libraryActivityState.packet = res;
+          libraryActivityState.stale = false;
+          libraryActivityState.error = null;
+          renderLibraryActivityUI();
+        } else {
+          const errCode = (res && res.error && res.error.code) || "error";
+          const errMsg = (res && res.error && res.error.message) || "Activity fetch failed";
+          applyLibraryActivityFailure(errCode, errMsg);
+        }
+      } catch (err) {
+        if (generation !== libraryActivityState.loadGeneration) return;
+        applyLibraryActivityFailure("storage_unavailable", err.message || "Failed to reach reader");
+      } finally {
+        if (generation === libraryActivityState.loadGeneration) {
+          libraryActivityState.loading = false;
+        }
+      }
+    }
+
+    function updateLibraryActivityBadge(text, isError = false, isStale = false) {
+      const badge = document.getElementById("libraryActivityBadge");
+      if (!badge) return;
+      badge.textContent = text;
+      if (isError) {
+        badge.style.background = "var(--error, #991b1b)";
+      } else if (isStale) {
+        badge.style.background = "#d97706";
+      } else {
+        badge.style.background = "var(--bg-card, #222)";
+      }
+    }
+
+    // Parts of the activity panel that collapse into one friendly line while the
+    // library has no history at all (fresh install, nothing captured yet).
+    const LIBRARY_ACTIVITY_EMPTY_HIDE_IDS = [
+      "libraryActivityAsOf",
+      "libraryActivityBadge",
+      "activityControls",
+      "activityCustomError",
+      "activityCoverageBlock",
+      "activityMetricsGrid",
+      "activitySections",
+    ];
+
+    function libraryActivityHasNoHistory(p) {
+      // Only for rolling presets (interval ends now): no_history there means nothing
+      // was ever captured. A custom interval keeps the full panel and its controls.
+      if (!p || !libraryActivityState.days) return false;
+      const cov = p.coverage || {};
+      const captureStatus = cov.cov_capture && cov.cov_capture.coverage_status;
+      if (captureStatus !== "no_history") return false;
+      const shelfStatus = cov.cov_shelf_activity && cov.cov_shelf_activity.coverage_status;
+      if (shelfStatus && shelfStatus !== "no_history") return false;
+      return activityScalar(p.items && p.items.total) == null;
+    }
+
+    function setLibraryActivityEmptyState(empty) {
+      const panel = document.getElementById("libraryActivityPanel");
+      if (panel && panel.dataset) panel.dataset.activityEmpty = empty ? "true" : "false";
+      const message = document.getElementById("libraryActivityEmpty");
+      if (message && message.classList) {
+        if (empty) message.classList.remove("hidden");
+        else message.classList.add("hidden");
+      }
+      LIBRARY_ACTIVITY_EMPTY_HIDE_IDS.forEach((id) => {
+        const el = document.getElementById(id);
+        if (!el || !el.classList) return;
+        if (empty) {
+          if (!el.classList.contains("hidden")) {
+            el.classList.add("hidden");
+            if (el.dataset) el.dataset.activityEmptyHidden = "true";
+          }
+        } else if (el.dataset && el.dataset.activityEmptyHidden === "true") {
+          // Only restore what the empty state hid; activityCustomError manages its own visibility.
+          el.classList.remove("hidden");
+          delete el.dataset.activityEmptyHidden;
+        }
+      });
+    }
+
+    function renderLibraryActivityError() {
+      setLibraryActivityEmptyState(false);
+      const err = libraryActivityState.error || { message: "Unknown error" };
+      updateLibraryActivityBadge(err.code === "storage_unavailable" ? "Unavailable" : "Error", true);
+      const asOf = document.getElementById("libraryActivityAsOf");
+      if (asOf) asOf.textContent = "Unavailable";
+
+      const totalItems = document.getElementById("activityTotalItems");
+      if (totalItems) totalItems.textContent = "Unavailable";
+      const assigned = document.getElementById("activityAssignedItems");
+      if (assigned) assigned.textContent = "Unavailable";
+      const ops = document.getElementById("activityAppliedOps");
+      if (ops) ops.textContent = "Unavailable";
+      const churn = document.getElementById("activityChurn");
+      if (churn) churn.textContent = "Unavailable";
+
+      const statusEl = document.getElementById("activityCoverageStatus");
+      if (statusEl) statusEl.textContent = `Unavailable (${err.message || "unknown"})`;
+      disableEvidencePaging();
+    }
+
+    function renderLibraryActivityUI() {
+      const p = libraryActivityState.packet;
+      if (!p) return;
+
+      setLibraryActivityEmptyState(libraryActivityHasNoHistory(p));
+
+      const asOfEl = document.getElementById("libraryActivityAsOf");
+      if (asOfEl) asOfEl.textContent = `As of ${p.as_of || ""}`;
+
+      updateLibraryActivityBadge(libraryActivityState.stale ? "Stale - Refresh" : "Live", false, libraryActivityState.stale);
+
+      // Interval & Coverage
+      const intervalEl = document.getElementById("activityUtcInterval");
+      if (intervalEl && p.interval) {
+        intervalEl.textContent = `[${p.interval.start} to ${p.interval.end})`;
+      }
+      const covEl = document.getElementById("activityCoverageStatus");
+      if (covEl && p.coverage) {
+        const primaryCov = p.coverage[p.items?.coverage_ref] || {};
+        covEl.textContent = primaryCov.coverage_status || "retained_records";
+      }
+      const exclEl = document.getElementById("activityExclusions");
+      if (exclEl && p.items) {
+        const basis = libraryActivityState.date_basis || p.date_basis || "capture_time";
+        const clockUnavailRaw = basis === "publication_time"
+          ? p.items.publication_time_unavailable
+          : p.items.capture_time_unavailable;
+        const clockUnavailFallback = basis === "publication_time"
+          ? "items.publication_time_unavailable"
+          : "items.capture_time_unavailable";
+        const excludedRaw = p.items.deleted_items_excluded;
+        const unavail = clockUnavailRaw === undefined ? 0 : activityScalar(clockUnavailRaw);
+        const excluded = excludedRaw === undefined ? 0 : activityScalar(excludedRaw);
+        const unavailText = unavail == null ? "Unavailable" : String(unavail);
+        const excludedText = excluded == null ? "Unavailable" : String(excluded);
+        const unavailId = activityMetricId(clockUnavailRaw, clockUnavailFallback);
+        const excludedId = activityMetricId(excludedRaw, "items.deleted_items_excluded");
+        exclEl.innerHTML = `${activityEvidenceButton(unavailText, unavailId)} unavail, ${activityEvidenceButton(excludedText, excludedId)} tombstones excluded`;
+      }
+
+      // Warnings
+      const warnEl = document.getElementById("activityWarnings");
+      if (warnEl) {
+        if (p.warnings && p.warnings.length > 0) {
+          warnEl.textContent = `Notice: ${p.warnings.join(", ")}`;
+          warnEl.classList.remove("hidden");
+        } else {
+          warnEl.classList.add("hidden");
+        }
+      }
+
+      // Stat Cards
+      const totalItems = document.getElementById("activityTotalItems");
+      if (totalItems) {
+        totalItems.textContent = formatActivityCount(p.items && p.items.total);
+        const totalId = activityMetricId(p.items && p.items.total, "items.total");
+        if (totalItems.dataset) totalItems.dataset.metricId = totalId;
+      }
+
+      const assignedItems = document.getElementById("activityAssignedItems");
+      if (assignedItems) {
+        assignedItems.textContent = formatActivityCount(p.shelf_activity && p.shelf_activity.current_assigned_items);
+        const assignedId = activityMetricId(p.shelf_activity && p.shelf_activity.current_assigned_items, "shelf_activity.current_assigned_items");
+        if (assignedItems.dataset) assignedItems.dataset.metricId = assignedId;
+      }
+
+      const appliedOps = document.getElementById("activityAppliedOps");
+      if (appliedOps) {
+        appliedOps.textContent = formatActivityCount(p.shelf_activity && p.shelf_activity.applied_operations);
+        const opsId = activityMetricId(p.shelf_activity && p.shelf_activity.applied_operations, "shelf_activity.applied_operations");
+        if (appliedOps.dataset) appliedOps.dataset.metricId = opsId;
+      }
+
+      const churnEl = document.getElementById("activityChurn");
+      const churnSub = document.getElementById("activityChurnSub");
+      if (churnEl) {
+        const ch = p.shelf_activity?.churn;
+        if (ch && ch.value !== null && ch.percent !== null) {
+          churnEl.textContent = `${ch.percent}% (${ch.numerator}/${ch.denominator})`;
+          if (churnSub) churnSub.textContent = ch.initial_filing ? "Initial filing" : "Survivor baseline";
+        } else {
+          churnEl.textContent = "Unavailable";
+          if (churnSub) churnSub.textContent = (ch && ch.reason) ? ch.reason : "No baseline";
+        }
+      }
+
+      renderActivityDaily(p.items && p.items.daily_buckets);
+      renderActivityHints((p.items && p.items.by_creator_hint) || []);
+      renderActivityShelves((p.shelf_activity && p.shelf_activity.shelves) || []);
+      renderActivitySources((p.sources && p.sources.details) || []);
+      renderActivityEvents((p.events && p.events.rows) || [], p.events && p.events.total);
+
+      const pag = p.pagination || {};
+      seedCollectionPager("creator_hints", (p.items && p.items.by_creator_hint) || [], pag.creator_hints);
+      seedCollectionPager("shelves", (p.shelf_activity && p.shelf_activity.shelves) || [], pag.shelves);
+      seedCollectionPager("sources", (p.sources && p.sources.details) || [], pag.sources);
+      seedCollectionPager("events", (p.events && p.events.rows) || [], pag.events || p.events);
+    }
+
+    function collectionContinuationOffset(kind) {
+      const next = libraryActivityState.collectionNext && libraryActivityState.collectionNext[kind];
+      if (next && typeof next.offset === "number") return next.offset;
+      return null;
+    }
+
+    function seedCollectionPager(kind, rows, pageMeta) {
+      const offset = (pageMeta && pageMeta.offset != null) ? pageMeta.offset : 0;
+      const total = (pageMeta && pageMeta.total_rows != null)
+        ? pageMeta.total_rows
+        : (activityScalar(pageMeta && pageMeta.total) != null ? activityScalar(pageMeta.total) : (rows ? rows.length : 0));
+      libraryActivityState.collectionOffsets[kind] = offset;
+      libraryActivityState.collectionTotals[kind] = total || 0;
+      libraryActivityState.collectionNext[kind] = (pageMeta && pageMeta.next) || null;
+      updateCollectionPager(kind, offset, total || 0);
+    }
+
+    function updateCollectionPager(kind, offset, total) {
+      const prefix = {
+        creator_hints: "activityHints",
+        shelves: "activityShelves",
+        sources: "activitySources",
+        events: "activityEvents",
+      }[kind];
+      if (!prefix) return;
+      const prev = document.getElementById(prefix + "PrevBtn");
+      const next = document.getElementById(prefix + "NextBtn");
+      const info = document.getElementById(prefix + "PageInfo");
+      const limit = libraryActivityState.evidenceLimit;
+      const totalPages = Math.max(1, Math.ceil((total || 0) / limit));
+      const curPage = Math.floor((offset || 0) / limit) + 1;
+      if (info) info.textContent = `Page ${curPage} of ${totalPages}`;
+      if (prev) prev.disabled = !offset;
+      const hasNext = collectionContinuationOffset(kind) != null || ((offset || 0) + limit < (total || 0));
+      if (next) next.disabled = !hasNext;
+    }
+
+    function renderActivityDaily(buckets) {
+      const dailyBody = document.getElementById("activityDailyBody");
+      const dailyCount = document.getElementById("activityDailyCount");
+      if (!dailyBody) return;
+      const rows = buckets || [];
+      if (dailyCount) dailyCount.textContent = String(rows.length);
+      dailyBody.innerHTML = rows.map((b) => {
+        const s = (b.bucket_start || "").split("T")[0];
+        const cnt = formatActivityCount(b.count);
+        const pct = b.share && b.share.percent != null ? `${b.share.percent}%` : "-";
+        const mId = activityMetricId(b.count, "");
+        const shareId = activityMetricId(b.share, "");
+        return `<tr style="border-bottom:1px solid #282828;">
+            <td style="padding:4px 8px;">${escapeHtmlActivity(s)}</td>
+            <td style="padding:4px 8px;">${activityEvidenceButton(cnt, mId)}</td>
+            <td style="padding:4px 8px;">${activityEvidenceButton(pct, shareId)}</td>
+          </tr>`;
+      }).join("");
+    }
+
+    function renderActivityHints(rows) {
+      const hintsBody = document.getElementById("activityHintsBody");
+      const hintsCount = document.getElementById("activityHintsCount");
+      if (!hintsBody) return;
+      const list = rows || [];
+      if (hintsCount) hintsCount.textContent = String(list.length);
+      hintsBody.innerHTML = list.map((h) => {
+        const cnt = formatActivityCount(h.count);
+        const pct = h.share && h.share.percent != null ? `${h.share.percent}%` : "-";
+        const mId = activityMetricId(h.count, "");
+        const shareId = activityMetricId(h.share, "");
+        return `<tr style="border-bottom:1px solid #282828;">
+            <td style="padding:4px 8px;">${escapeHtmlActivity(h.platform)}</td>
+            <td style="padding:4px 8px;">${escapeHtmlActivity(h.field)}</td>
+            <td style="padding:4px 8px;">${escapeHtmlActivity(h.hint)}</td>
+            <td style="padding:4px 8px;">${activityEvidenceButton(cnt, mId)}</td>
+            <td style="padding:4px 8px;">${activityEvidenceButton(pct, shareId)}</td>
+          </tr>`;
+      }).join("");
+    }
+
+    function signedActivityDelta(value, sign) {
+      const n = activityScalar(value);
+      if (n == null) return "Unavailable";
+      if (sign === "+") return n >= 0 ? `+${n}` : String(n);
+      if (sign === "-") return n > 0 ? `-${n}` : String(n);
+      return n >= 0 ? `+${n}` : String(n);
+    }
+
+    function renderActivityShelves(rows) {
+      const shelvesBody = document.getElementById("activityShelvesBody");
+      const shelvesCount = document.getElementById("activityShelvesCount");
+      if (!shelvesBody) return;
+      const list = rows || [];
+      if (shelvesCount) shelvesCount.textContent = String(list.length);
+      shelvesBody.innerHTML = list.map((s) => {
+        const cSize = formatActivityCount(s.current_size);
+        const sStart = formatActivityCount(s.start_size);
+        const sEnd = formatActivityCount(s.end_size);
+        const chPct = s.churn && s.churn.percent != null ? `${s.churn.percent}%` : ((s.churn && s.churn.reason) || "Unavailable");
+        const mId = activityMetricId(s.current_size, "");
+        const startId = activityMetricId(s.start_size, "");
+        const endId = activityMetricId(s.end_size, "");
+        const addedId = activityMetricId(s.added, "");
+        const removedId = activityMetricId(s.removed, "");
+        const netId = activityMetricId(s.net, "");
+        const churnId = activityMetricId(s.churn, "");
+        return `<tr style="border-bottom:1px solid #282828;">
+            <td style="padding:4px 8px;">${escapeHtmlActivity(s.shelf_id)}</td>
+            <td style="padding:4px 8px;">${activityEvidenceButton(cSize, mId)}</td>
+            <td style="padding:4px 8px;">${activityEvidenceButton(sStart, startId)}</td>
+            <td style="padding:4px 8px;">${activityEvidenceButton(sEnd, endId)}</td>
+            <td style="padding:4px 8px;">${activityEvidenceButton(signedActivityDelta(s.added, "+"), addedId)}</td>
+            <td style="padding:4px 8px;">${activityEvidenceButton(signedActivityDelta(s.removed, "-"), removedId)}</td>
+            <td style="padding:4px 8px;">${activityEvidenceButton(signedActivityDelta(s.net, "+"), netId)}</td>
+            <td style="padding:4px 8px;">${activityEvidenceButton(chPct, churnId)}</td>
+          </tr>`;
+      }).join("");
+    }
+
+    function renderActivitySources(rows) {
+      const sourcesBody = document.getElementById("activitySourcesBody");
+      const sourcesCount = document.getElementById("activitySourcesCount");
+      if (!sourcesBody) return;
+      const list = rows || [];
+      if (sourcesCount) sourcesCount.textContent = String(list.length);
+      sourcesBody.innerHTML = list.map((src) => {
+        const caps = formatActivityCount(src.captures_in_interval);
+        const newObs = formatActivityCount(src.new_observations);
+        const w = src.observation_window || {};
+        const safeUrl = sanitizeHttpUrl(src.canonical_url);
+        const nameLink = safeUrl ? `<a href="${safeUrl}" target="_blank" rel="noreferrer" style="color:inherit;text-decoration:underline;">${escapeHtmlActivity(src.display_name)}</a>` : escapeHtmlActivity(src.display_name);
+        const capId = activityMetricId(src.captures_in_interval, "");
+        const obsId = activityMetricId(src.new_observations, "");
+        return `<tr style="border-bottom:1px solid #282828;">
+            <td style="padding:4px 8px;">${nameLink}</td>
+            <td style="padding:4px 8px;">${escapeHtmlActivity(src.kind)}</td>
+            <td style="padding:4px 8px;">${activityEvidenceButton(caps, capId)}</td>
+            <td style="padding:4px 8px;">${activityEvidenceButton(newObs, obsId)}</td>
+            <td style="padding:4px 8px;font-size:0.75rem;">${escapeHtmlActivity(w.first_observed_at || "None")} to ${escapeHtmlActivity(w.last_item_seen_at || "None")}</td>
+          </tr>`;
+      }).join("");
+    }
+
+    function renderActivityEvents(rows, total) {
+      const eventsBody = document.getElementById("activityEventsBody");
+      const eventsCount = document.getElementById("activityEventsCount");
+      if (!eventsBody) return;
+      const list = rows || [];
+      if (eventsCount) {
+        eventsCount.textContent = formatActivityCount(total != null ? total : list.length);
+        const evId = activityMetricId(total, "events.total");
+        if (eventsCount.dataset) eventsCount.dataset.metricId = evId;
+      }
+      eventsBody.innerHTML = list.map((ev) => {
+        const d = ev.details || {};
+        const dText = Object.entries(d).map(([k, v]) => `${k}: ${v}`).join(", ");
+        return `<tr style="border-bottom:1px solid #282828;">
+            <td style="padding:4px 8px;">${escapeHtmlActivity(ev.time)}</td>
+            <td style="padding:4px 8px;">${escapeHtmlActivity(ev.kind)}</td>
+            <td style="padding:4px 8px;font-family:monospace;font-size:0.8rem;">${escapeHtmlActivity(ev.event_id)}</td>
+            <td style="padding:4px 8px;font-size:0.8rem;">${escapeHtmlActivity(dText)}</td>
+          </tr>`;
+      }).join("");
+    }
+
+    async function fetchActivityEvidence(metricId, offset = 0) {
+      if (!activityEvidenceCallable()) {
+        disableEvidencePaging();
+        return;
+      }
+
+      const p = libraryActivityState.packet;
+      const generation = libraryActivityState.evidenceGeneration;
+      const requestSeq = ++libraryActivityState.evidenceRequestSeq;
+      libraryActivityState.evidenceMetricId = metricId;
+      libraryActivityState.evidenceOffset = offset;
+      libraryActivityState.evidenceNext = null;
+
+      const titleLabel = document.getElementById("evidenceMetricIdLabel");
+      const container = document.getElementById("evidenceRowsContainer");
+      const scopeInfo = document.getElementById("evidenceScopeInfo");
+      const pageInfo = document.getElementById("evidencePageInfo");
+      const prevBtn = document.getElementById("evidencePrevPageBtn");
+      const nextBtn = document.getElementById("evidenceNextPageBtn");
+
+      captureActivityEvidenceFocus();
+      if (titleLabel) titleLabel.textContent = metricId;
+      if (container) container.innerHTML = `<div style="padding:16px;text-align:center;">Loading evidence...</div>`;
+      if (prevBtn) prevBtn.disabled = true;
+      if (nextBtn) nextBtn.disabled = true;
+
+      const args = {
+        interval: p.interval,
+        date_basis: libraryActivityState.date_basis,
+        detail: "evidence",
+        metric_id: metricId,
+        expected_revision: p.report_revision,
+        offset: offset,
+        limit: libraryActivityState.evidenceLimit,
+      };
+
+      try {
+        const res = await callRegistryTool("get_library_activity", args);
+        if (!activityReplyIsCurrent(generation, requestSeq, "evidence")) return;
+        if (!activityEvidenceCallable()) {
+          disableEvidencePaging();
+          return;
+        }
+        if (res && res.ok) {
+          const rows = Array.isArray(res.rows) ? res.rows : [];
+          libraryActivityState.evidenceRows = rows;
+          libraryActivityState.evidenceTotal = res.total_rows || 0;
+          libraryActivityState.evidenceOffset = offset;
+          libraryActivityState.evidenceNext = res.next || null;
+          if (scopeInfo) {
+            const rev = res.report_revision ? String(res.report_revision).slice(0, 16) : "";
+            scopeInfo.textContent = `Revision: ${rev}... | Total evidence rows: ${res.total_rows || 0}`;
+          }
+          renderEvidenceRows(container);
+
+          const curPage = Math.floor(offset / libraryActivityState.evidenceLimit) + 1;
+          const totalPages = Math.max(1, Math.ceil((res.total_rows || 0) / libraryActivityState.evidenceLimit));
+          if (pageInfo) pageInfo.textContent = `Page ${curPage} of ${totalPages}`;
+          const hasNext = continuationOffset(res.next) != null || (offset + rows.length < (res.total_rows || 0));
+          if (prevBtn) prevBtn.disabled = offset === 0;
+          if (nextBtn) nextBtn.disabled = !hasNext;
+        } else if (res && res.error && res.error.code === "stale_report") {
+          libraryActivityState.stale = true;
+          invalidateActivityEvidence();
+          updateLibraryActivityBadge("Stale - Refresh", false, true);
+          if (container) {
+            container.innerHTML = `<div style="padding:16px;color:#d97706;">Report is stale. A new summary is loading; old evidence pages are disabled.</div>`;
+          }
+          disableEvidencePaging();
+          await refreshLibraryActivitySummary();
+          disableEvidencePaging();
+        } else {
+          const msg = escapeHtmlActivity((res && res.error && res.error.message) || "unknown");
+          if (container) container.innerHTML = `<div style="padding:16px;color:var(--error, #e55);">Failed to load evidence: ${msg}</div>`;
+          disableEvidencePaging();
+        }
+      } catch (err) {
+        if (!activityReplyIsCurrent(generation, requestSeq, "evidence")) return;
+        if (container) container.innerHTML = `<div style="padding:16px;color:var(--error, #e55);">Error loading evidence: ${escapeHtmlActivity(err.message)}</div>`;
+        disableEvidencePaging();
+      }
+      if (activityReplyIsCurrent(generation, requestSeq, "evidence")) {
+        focusActivityEvidenceModal();
+      }
+    }
+
+    async function fetchActivityCollection(detail, offset) {
+      if (!activityEvidenceCallable()) {
+        disableCollectionPagers();
+        return;
+      }
+      const p = libraryActivityState.packet;
+      const generation = libraryActivityState.evidenceGeneration;
+      if (!libraryActivityState.collectionRequestSeq) {
+        libraryActivityState.collectionRequestSeq = { creator_hints: 0, shelves: 0, sources: 0, events: 0 };
+      }
+      if (libraryActivityState.collectionRequestSeq[detail] == null) {
+        libraryActivityState.collectionRequestSeq[detail] = 0;
+      }
+      const requestSeq = ++libraryActivityState.collectionRequestSeq[detail];
+      const args = {
+        interval: p.interval,
+        date_basis: libraryActivityState.date_basis,
+        detail,
+        expected_revision: p.report_revision,
+        offset,
+        limit: libraryActivityState.evidenceLimit,
+      };
+      try {
+        const res = await callRegistryTool("get_library_activity", args);
+        if (!activityReplyIsCurrent(generation, requestSeq, detail)) return;
+        if (!activityEvidenceCallable()) {
+          disableCollectionPagers();
+          return;
+        }
+        if (res && res.ok) {
+          const rows = Array.isArray(res.rows) ? res.rows : [];
+          const total = res.total_rows || 0;
+          libraryActivityState.collectionOffsets[detail] = offset;
+          libraryActivityState.collectionTotals[detail] = total;
+          libraryActivityState.collectionNext[detail] = res.next || null;
+          if (detail === "creator_hints") renderActivityHints(rows);
+          else if (detail === "shelves") renderActivityShelves(rows);
+          else if (detail === "sources") renderActivitySources(rows);
+          else if (detail === "events") renderActivityEvents(rows, total);
+          updateCollectionPager(detail, offset, total);
+        } else if (res && res.error && res.error.code === "stale_report") {
+          libraryActivityState.stale = true;
+          invalidateActivityEvidence();
+          updateLibraryActivityBadge("Stale - Refresh", false, true);
+          await refreshLibraryActivitySummary();
+        }
+      } catch (err) {
+        if (!activityReplyIsCurrent(generation, requestSeq, detail)) return;
+        disableCollectionPagers();
+      }
+    }
+
+    function renderEvidenceRows(container) {
+      if (!container) return;
+      const rows = libraryActivityState.evidenceRows || [];
+      if (rows.length === 0) {
+        container.innerHTML = `<div style="padding:16px;text-align:center;color:var(--text-muted, #888);">No evidence rows.</div>`;
+        return;
+      }
+      container.innerHTML = rows.map((r, idx) => {
+        const d = r.details || {};
+        const vid = d.video_id;
+        const openBtn = vid ? `<button class="button ghost small" type="button" data-open-yoink="${escapeHtmlActivity(vid)}" style="margin-left:auto;">View Item</button>` : "";
+        return `<div class="evidence-row" tabindex="0" role="article" aria-label="Evidence row ${idx + 1}" style="padding:8px 12px;background:var(--bg-card, #222);border-radius:6px;display:flex;flex-direction:column;gap:4px;">
+          <div class="inline-row" style="justify-content:space-between;align-items:center;">
+            <strong>${escapeHtmlActivity(r.source_table)}:${escapeHtmlActivity(r.source_key)}</strong>
+            <span style="font-size:0.75rem;color:var(--text-muted, #888);">${escapeHtmlActivity(r.event_time)}</span>
+            ${openBtn}
+          </div>
+          <div style="font-size:0.8rem;color:var(--text-muted, #aaa);font-family:monospace;">Hash: ${escapeHtmlActivity(r.observation_hash || "")}</div>
+          <div style="font-size:0.85rem;">${escapeHtmlActivity(JSON.stringify(d))}</div>
+        </div>`;
+      }).join("");
+    }
+
+    function startLibraryActivityTimer() {
+      stopLibraryActivityTimer();
+      if (document.hidden) return;
+      libraryActivityTimer = setInterval(() => {
+        if (libraryActivityPanelVisible()) {
+          loadLibraryActivity(false);
+        }
+      }, 60000);
+    }
+
+    function stopLibraryActivityTimer() {
+      if (libraryActivityTimer) {
+        clearInterval(libraryActivityTimer);
+        libraryActivityTimer = null;
+      }
+    }
+
+    function wireActivityCollectionPager(kind, prefix) {
+      const prev = document.getElementById(prefix + "PrevBtn");
+      const next = document.getElementById(prefix + "NextBtn");
+      if (prev) {
+        prev.addEventListener("click", () => {
+          const off = libraryActivityState.collectionOffsets[kind] || 0;
+          const nextOff = Math.max(0, off - libraryActivityState.evidenceLimit);
+          if (nextOff !== off) fetchActivityCollection(kind, nextOff);
+        });
+      }
+      if (next) {
+        next.addEventListener("click", () => {
+          const contOff = collectionContinuationOffset(kind);
+          if (contOff != null) {
+            fetchActivityCollection(kind, contOff);
+            return;
+          }
+          const off = libraryActivityState.collectionOffsets[kind] || 0;
+          const total = libraryActivityState.collectionTotals[kind] || 0;
+          const nextOff = off + libraryActivityState.evidenceLimit;
+          if (nextOff < total) fetchActivityCollection(kind, nextOff);
+        });
+      }
+    }
+
+    function wireLibraryActivityEvents() {
+      const refreshBtn = document.getElementById("libraryActivityRefreshBtn");
+      if (refreshBtn) {
+        refreshBtn.addEventListener("click", () => loadLibraryActivity(true));
+      }
+
+      document.querySelectorAll("[data-preset]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          document.querySelectorAll("[data-preset]").forEach((b) => b.classList.remove("active"));
+          btn.classList.add("active");
+          const days = parseInt(btn.dataset.preset, 10);
+          libraryActivityState.days = days;
+          libraryActivityState.interval = null;
+          const sInput = document.getElementById("activityStartInput");
+          const eInput = document.getElementById("activityEndInput");
+          if (sInput) sInput.value = "";
+          if (eInput) eInput.value = "";
+          const errEl = document.getElementById("activityCustomError");
+          if (errEl) errEl.classList.add("hidden");
+          loadLibraryActivity(true);
+        });
+      });
+
+      const applyCustomBtn = document.getElementById("activityApplyCustomBtn");
+      if (applyCustomBtn) {
+        applyCustomBtn.addEventListener("click", () => {
+          const sInput = document.getElementById("activityStartInput");
+          const eInput = document.getElementById("activityEndInput");
+          const errEl = document.getElementById("activityCustomError");
+          const startVal = (sInput?.value || "").trim();
+          const endVal = (eInput?.value || "").trim();
+          if (!startVal || !endVal) {
+            if (errEl) {
+              errEl.textContent = "Start and end timestamps are required";
+              errEl.classList.remove("hidden");
+            }
+            return;
+          }
+          if (!startVal.endsWith("Z") || !endVal.endsWith("Z")) {
+            if (errEl) {
+              errEl.textContent = "Timestamps must be UTC ISO strings ending in Z";
+              errEl.classList.remove("hidden");
+            }
+            return;
+          }
+          if (errEl) errEl.classList.add("hidden");
+          document.querySelectorAll("[data-preset]").forEach((b) => b.classList.remove("active"));
+          libraryActivityState.days = null;
+          libraryActivityState.interval = { start: startVal, end: endVal };
+          loadLibraryActivity(false);
+        });
+      }
+
+      const basisSel = document.getElementById("activityDateBasis");
+      if (basisSel) {
+        basisSel.addEventListener("change", () => {
+          libraryActivityState.date_basis = basisSel.value;
+          loadLibraryActivity(false);
+        });
+      }
+
+      // Evidence click delegation
+      document.addEventListener("click", (e) => {
+        const trigger = e.target.closest(".activity-evidence-trigger");
+        if (trigger && trigger.dataset.metricId) {
+          fetchActivityEvidence(trigger.dataset.metricId, 0);
+          return;
+        }
+        const openYoinkBtn = e.target.closest("[data-open-yoink]");
+        if (openYoinkBtn && openYoinkBtn.dataset.openYoink) {
+          const vid = openYoinkBtn.dataset.openYoink;
+          const modal = document.getElementById("activityEvidenceModal");
+          if (modal) modal.classList.add("hidden");
+          if (typeof showYoinkDetail === "function") {
+            showYoinkDetail(vid);
+          }
+          return;
+        }
+      });
+
+      const closeEvBtn = document.getElementById("closeEvidenceBtn");
+      if (closeEvBtn) {
+        closeEvBtn.addEventListener("click", () => closeActivityEvidenceModal());
+      }
+
+      const prevEvBtn = document.getElementById("evidencePrevPageBtn");
+      if (prevEvBtn) {
+        prevEvBtn.addEventListener("click", () => {
+          if (!activityEvidenceCallable() || !libraryActivityState.evidenceMetricId) return;
+          if (libraryActivityState.evidenceOffset > 0) {
+            const nextOff = Math.max(0, libraryActivityState.evidenceOffset - libraryActivityState.evidenceLimit);
+            fetchActivityEvidence(libraryActivityState.evidenceMetricId, nextOff);
+          }
+        });
+      }
+
+      const nextEvBtn = document.getElementById("evidenceNextPageBtn");
+      if (nextEvBtn) {
+        nextEvBtn.addEventListener("click", () => {
+          if (!activityEvidenceCallable() || !libraryActivityState.evidenceMetricId) return;
+          const cont = libraryActivityState.evidenceNext;
+          const contOff = continuationOffset(cont);
+          if (contOff != null) {
+            const metricId = (cont && cont.metric_id) || libraryActivityState.evidenceMetricId;
+            fetchActivityEvidence(metricId, contOff);
+            return;
+          }
+          const nextOff = libraryActivityState.evidenceOffset + libraryActivityState.evidenceLimit;
+          if (nextOff < libraryActivityState.evidenceTotal) {
+            fetchActivityEvidence(libraryActivityState.evidenceMetricId, nextOff);
+          }
+        });
+      }
+
+      wireActivityCollectionPager("creator_hints", "activityHints");
+      wireActivityCollectionPager("shelves", "activityShelves");
+      wireActivityCollectionPager("sources", "activitySources");
+      wireActivityCollectionPager("events", "activityEvents");
+
+      window.addEventListener("keydown", (e) => trapActivityEvidenceKeys(e));
+
+      window.addEventListener("focus", () => {
+        if (libraryActivityPanelVisible()) {
+          loadLibraryActivity(false);
+        }
+      });
+
+      document.addEventListener("visibilitychange", () => {
+        if (document.hidden) {
+          stopLibraryActivityTimer();
+        } else if (libraryActivityPanelVisible()) {
+          loadLibraryActivity(false);
+          startLibraryActivityTimer();
+        }
+      });
+
+      window.addEventListener("library-activity-mutation", () => markLibraryActivityMutated());
+    }
+
+    async function loadStandingSubscriptions() {
+      if (!els.standingSubscriptionList) return;
+      state.standingSourcesLoading = true;
+      try {
+        const res = await callRegistryTool("list_sources", { limit: 100, include_archived: false });
+        state.standingSources = (res && res.sources) ? res.sources : [];
+      } catch (err) {
+        state.standingSources = [];
+      } finally {
+        state.standingSourcesLoading = false;
+        renderStandingSubscriptions();
+      }
+    }
+
+    function renderStandingSubscriptions() {
+      if (!els.standingSubscriptionList || !els.standingSummaryBar) return;
+      const sources = state.standingSources || [];
+      const total = sources.length;
+      const active = sources.filter((s) => s.consent_state === "on").length;
+      const dailyStarts = sources.reduce((acc, s) => {
+        const a = s.allowance || {};
+        return acc + Number(a.charged || 0) + Number(a.reserved || 0);
+      }, 0);
+
+      if (els.standingTotalSources) els.standingTotalSources.textContent = String(total);
+      if (els.standingActiveSources) els.standingActiveSources.textContent = String(active);
+      if (els.standingDailyStarts) els.standingDailyStarts.textContent = `${dailyStarts} / 10`;
+      if (els.standingNextTick) els.standingNextTick.textContent = "30s";
+
+      if (!total) {
+        if (els.standingEmptyState) els.standingEmptyState.style.display = "";
+        els.standingSubscriptionList.innerHTML = "";
+        return;
+      }
+
+      if (els.standingEmptyState) els.standingEmptyState.style.display = "none";
+      els.standingSubscriptionList.innerHTML = sources.map((source) => {
+        const id = source.source_id;
+        const title = source.display_name || source.canonical_url || "Untitled source";
+        const kind = source.kind || "podcast_rss";
+        const kindLabel = kind === "podcast_rss" ? "Podcast RSS" : kind === "youtube_channel" ? "YouTube Channel" : "YouTube Playlist";
+
+        // Detection & Health
+        const det = source.detection || {};
+        // C20 (2026-09-08): the registry projects consecutive_failures and error{code,message}
+        // (contract phase3-v1 source_status); the older error_count/last_error names never
+        // arrived, so refresh errors were rendered as "healthy".
+        const errorCount = Number(det.consecutive_failures ?? det.error_count ?? 0);
+        const lastError = det.error && typeof det.error === "object"
+          ? `${det.error.code || "error"}${det.error.message ? ": " + det.error.message : ""}`
+          : (det.last_error || "");
+        let healthClass = "healthy";
+        let healthLabel = "healthy";
+        if (lastError || errorCount > 0) {
+          if (errorCount >= 3) {
+            healthClass = "error";
+            healthLabel = "Feed unreachable" + ` (${errorCount} failures)`;
+          } else {
+            healthClass = "degraded";
+            healthLabel = `degraded: ${lastError || "poll failed"}`;
+          }
+        }
+        const lastPollStr = det.last_poll_success_ms
+          ? new Date(det.last_poll_success_ms).toLocaleTimeString()
+          : "pending first poll";
+
+        // Consent state & In-flight
+        const inFlight = Array.isArray(source.in_flight) ? source.in_flight : [];
+        const isDraining = source.consent_state === "off" && inFlight.length > 0;
+        // C21 (2026-09-08): per-item classification state (waiting_for_client, pending,
+        // leased, accepted, blocked, unmapped, unsupported) comes from source_status and is
+        // shown on demand under the row; the summary only carries counts by capture state.
+        const capturedCount = Number((source.item_counts || {}).committed || 0);
+        const itemsView = (state.standingItemsBySource || {})[id];
+        let consentPillClass = source.consent_state === "on" ? "on" : "off";
+        let consentPillLabel = source.consent_state === "on" ? "On (Standing capture)" : "Off (Metadata only)";
+        if (isDraining) {
+          consentPillClass = "draining";
+          consentPillLabel = "Draining in-flight work";
+        }
+
+        // Recorded consent revision
+        const consentRevision = Number(source.revision != null ? source.revision : 0);
+
+        // Daily Allowance
+        const allow = source.allowance || {};
+        const cap = Number(allow.cap || 10);
+        const charged = Number(allow.charged || 0);
+        const reserved = Number(allow.reserved || 0);
+        const used = charged + reserved;
+        const remaining = Math.max(0, Number(allow.remaining != null ? allow.remaining : cap - used));
+        const isExhausted = remaining === 0 || used >= cap;
+        const percent = Math.min(100, Math.round((used / cap) * 100));
+
+        // Capture outcome & current item recovery (repair brief 2026-09-10)
+        const capOutcome = source.capture_outcome || source.capture_status || "unknown";
+        const currentItem = source.current_item || null;
+        const recoveryReason = source.recovery_reason || (currentItem && currentItem.recovery_reason) || null;
+        let capturePillClass = "idle";
+        let capturePillLabel = "idle";
+
+        if (capOutcome === "archived") {
+          capturePillClass = "off";
+          capturePillLabel = "archived";
+        } else if (source.consent_state === "off") {
+          capturePillClass = inFlight.length ? "draining" : "off";
+          capturePillLabel = inFlight.some((item) => item.state === "uncertain")
+            ? "draining; outcome uncertain" : (inFlight.length ? "draining" : "off");
+        } else if (capOutcome === "uncertain") {
+          capturePillClass = "uncertain";
+          capturePillLabel = "uncertain";
+        } else if (capOutcome === "in_flight") {
+          capturePillClass = "in-flight";
+          capturePillLabel = "in-flight";
+        } else if (capOutcome === "settled_failed") {
+          capturePillClass = "failed";
+          capturePillLabel = recoveryReason ? `settled failed (${recoveryReason})` : "settled failed";
+        } else if (capOutcome === "succeeded") {
+          capturePillClass = "ready";
+          capturePillLabel = "completed";
+        } else if (capOutcome === "blocked") {
+          capturePillClass = "uncertain";
+          capturePillLabel = "waiting";
+        } else if (capOutcome === "allowance_exhausted" || isExhausted) {
+          capturePillClass = "exhausted";
+          capturePillLabel = "allowance reached";
+        } else if (capOutcome === "released") {
+          capturePillLabel = "reservation released";
+        } else if (capOutcome === "ready") {
+          capturePillClass = "ready";
+          capturePillLabel = "ready";
+        } else if (capOutcome !== "idle") {
+          capturePillLabel = "waiting";
+        }
+
+        const showRecovery = Boolean(
+          recoveryReason || (currentItem && (currentItem.recovery_reason || currentItem.blocked_reason || currentItem.start_state === "failed" || (currentItem.state === "eligible" && Number(currentItem.actual_starts || 0) > 0)))
+        );
+
+        // Back catalog enrollment
+        const enroll = source.enrollment || {};
+        let enrollmentCopy = "";
+        if (enroll.pending) {
+          enrollmentCopy = "Enrollment pending (up to 25 items)";
+        } else if (source.consent_state === "off" && !enroll.initial_completed) {
+          enrollmentCopy = "Back catalog: 0 / 25 enrolled (idle)";
+        } else {
+          const enrolledCount = Number(enroll.enrolled || 0);
+          const candidateCount = Number(enroll.known_candidates || 0);
+          const excluded = candidateCount > enrolledCount ? `${candidateCount - enrolledCount} older items excluded by cap.` : "";
+          enrollmentCopy = `Back catalog: ${enrolledCount} / 25 items enrolled. ${excluded}`.trim();
+        }
+
+        let resetCopy = "Resets at 00:00 UTC";
+        if (allow.resets_at_ms) {
+          const msLeft = Math.max(0, allow.resets_at_ms - Date.now());
+          const hrs = Math.floor(msLeft / 3600000);
+          const mins = Math.floor((msLeft % 3600000) / 60000);
+          resetCopy = `Resets at 00:00 UTC (in ${hrs}h ${mins}m)`;
+        }
+
+        const isHeld = Boolean(allow.hold_reason || (allow.hold_until_ms && allow.hold_until_ms > Date.now()));
+
+        return `
+          <article class="subscription-card" data-source-id="${htmlEscape(id)}">
+            <div class="subscription-card-head">
+              <div class="subscription-title-wrap">
+                <h3>${htmlEscape(title)}</h3>
+                <div class="subscription-meta-row">
+                  <span class="source-url" title="${htmlEscape(source.canonical_url || "")}">${htmlEscape(source.canonical_url || "")}</span>
+                  <span>&bull;</span>
+                  <span class="source-revision">rev ${consentRevision}</span>
+                  <span>&bull;</span>
+                  <span>poll every ${Number(source.poll_interval_min || 60)}m</span>
+                  <span>&bull;</span>
+                  <span>last poll: ${htmlEscape(lastPollStr)}</span>
+                  <span>&bull;</span>
+                  <span>observed: ${Number(det.observed_count || 0)}</span>
+                </div>
+              </div>
+              <div class="subscription-badges">
+                <span class="source-kind-badge">${htmlEscape(kindLabel)}</span>
+                <span class="health-pill ${healthClass}" title="Feed detection health">Detection: ${htmlEscape(healthLabel)}</span>
+                <span class="capture-pill ${capturePillClass}" title="Capture outcome">Capture: ${htmlEscape(capturePillLabel)}</span>
+              </div>
+            </div>
+
+            <div class="subscription-consent-group">
+              <div class="consent-status-wrap">
+                <span class="consent-pill ${consentPillClass}">${htmlEscape(consentPillLabel)}</span>
+                <span class="consent-revision-pill">rev ${consentRevision}</span>
+                <span class="consent-desc">
+                  ${source.consent_state === "on"
+                    ? "Automatic capture active up to allowance limits."
+                    : "Metadata only; zero audio downloads or compute spend."}
+                </span>
+              </div>
+              <button class="button ${source.consent_state === "on" ? "ghost" : "primary"} toggle-consent-btn"
+                type="button"
+                data-source-id="${htmlEscape(id)}"
+                data-action="${source.consent_state === "on" ? "off" : "on"}">
+                ${source.consent_state === "on" ? "Turn Off Standing Capture" : "Turn On Standing Capture"}
+              </button>
+            </div>
+
+            ${isDraining ? `
+              <div class="draining-banner">
+                <span>&#9888;</span>
+                <span><strong>Draining in-flight work:</strong> Standing capture turned off. No new downloads will start. ${inFlight.length} active item${inFlight.length === 1 ? "" : "s"} will finish cleanly.</span>
+              </div>
+            ` : ""}
+
+            <div class="enrollment-allowance-grid">
+              <div class="enrollment-box">
+                <div class="meter-label-row">
+                  <span class="meter-title">Back-Catalog Enrollment</span>
+                  <span class="meter-value">${Number(enroll.enrolled || 0)} / 25 max</span>
+                </div>
+                <div class="meter-note">${htmlEscape(enrollmentCopy)}</div>
+              </div>
+
+              <div class="allowance-box ${isExhausted ? "exhausted" : ""}">
+                <div class="meter-label-row">
+                  <span class="meter-title">Daily Ingest Allowance</span>
+                  <span class="meter-value">${used} / ${cap} starts used</span>
+                </div>
+                <div class="meter-progress">
+                  <div class="meter-progress-bar ${isExhausted ? "exhausted" : ""}" style="width: ${percent}%;"></div>
+                </div>
+                <div class="meter-note">
+                  ${isHeld ? `<strong style="color:var(--acid);">Legacy accounting hold active.</strong> ` : ""}
+                  ${isExhausted ? `<strong style="color:var(--vermillion);">Daily allowance reached.</strong> Starts paused until next UTC day.` : `${remaining} start${remaining === 1 ? "" : "s"} remaining today.`} ${htmlEscape(resetCopy)}
+                </div>
+              </div>
+            </div>
+
+            ${inFlight.length ? `
+              <div class="in-flight-box">
+                <div class="in-flight-head">
+                  <span>In-flight capture (${inFlight.length} active)</span>
+                  <a href="#tab-activity" style="color:#38bdf8; text-decoration:underline;">View in Activity &rarr;</a>
+                </div>
+                ${inFlight.map((item) => `
+                  <div class="in-flight-item">
+                    <span style="font-weight:500;">${htmlEscape(item.title || item.entry_id || "Active item")}</span>
+                    <span class="in-flight-phase">
+                      ${htmlEscape(item.state || "started")} (attempt ${Number(item.actual_starts || 1)}/3)
+                    </span>
+                  </div>
+                `).join("")}
+              </div>
+            ` : ""}
+
+            ${capturedCount ? `
+              <div class="captured-items-box">
+                <div class="in-flight-head" style="color:var(--cream);">
+                  <span>Captured items (${capturedCount})</span>
+                  <button class="button ghost captured-items-btn" type="button" data-source-id="${htmlEscape(id)}">${itemsView && itemsView.open ? "Hide" : "Show classification state"}</button>
+                </div>
+                ${itemsView && itemsView.open ? renderCapturedItems(itemsView) : ""}
+              </div>
+            ` : ""}
+
+            ${showRecovery ? `
+              <div class="source-recovery-box">
+                <div class="source-recovery-head">
+                  <span>Capture recovery</span>
+                  <span class="classification-pill" style="border-color:var(--acid); color:var(--acid);">${htmlEscape((currentItem && currentItem.state === "eligible" ? "eligible for retry" : (currentItem && currentItem.state)) || "recovery")}</span>
+                </div>
+                <div class="source-recovery-item">
+                  <span style="font-weight:500;">${htmlEscape((currentItem && (currentItem.title || currentItem.entry_id)) || "Current item")}</span>
+                  <span class="source-recovery-reason">Recovery reason: <strong style="color:var(--vermillion);">${htmlEscape(String(recoveryReason || (currentItem && currentItem.blocked_reason) || "unknown"))}</strong></span>
+                </div>
+                <div class="source-recovery-meta">
+                  <span>attempt ${Number((currentItem && currentItem.actual_starts) || 0)}/3</span>
+                  ${(currentItem && currentItem.start_state) ? `<span>&bull;</span><span>start: ${htmlEscape(currentItem.start_state)}</span>` : ""}
+                  ${(currentItem && currentItem.retry_at_ms) ? `<span>&bull;</span><span>retry scheduled</span>` : ""}
+                </div>
+              </div>
+            ` : ""}
+
+            ${(det.last_error || errorCount > 0) ? `
+              <div class="source-error-strip">
+                <div>
+                  <strong>Fetch notice:</strong> ${htmlEscape(String((det.last_error && det.last_error.message) || (det.error && det.error.code ? `${det.error.code}: ${det.error.message || ""}` : "") || det.last_error || "Poll attempt failed").slice(0, 512))}
+                  <span class="soft-note" style="margin-left:6px;">(${errorCount} consecutive failure${errorCount === 1 ? "" : "s"})</span>
+                </div>
+                <button class="button ghost retry-poll-btn" type="button" data-source-id="${htmlEscape(id)}">Retry poll now</button>
+              </div>
+            ` : ""}
+          </article>
+        `;
+      }).join("");
+
+      els.standingSubscriptionList.querySelectorAll(".toggle-consent-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const sourceId = btn.dataset.sourceId;
+          const action = btn.dataset.action;
+          startConsentFlow(sourceId, action);
+        });
+      });
+
+      els.standingSubscriptionList.querySelectorAll(".retry-poll-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const sourceId = btn.dataset.sourceId;
+          retrySourcePoll(sourceId);
+        });
+      });
+      els.standingSubscriptionList.querySelectorAll(".captured-items-btn").forEach((btn) => {
+        btn.addEventListener("click", () => toggleCapturedItems(btn.dataset.sourceId));
+      });
+      els.standingSubscriptionList.querySelectorAll(".captured-items-more-btn").forEach((btn) => {
+        btn.addEventListener("click", () => loadMoreCapturedItems(btn.dataset.sourceId));
+      });
+    }
+
+    const CLASSIFICATION_LABELS = {
+      waiting_for_client: "Waiting for client (unfiled)",
+      pending: "Classification pending",
+      waiting_configuration: "Waiting for configuration",
+      leased: "Classifying",
+      // Contract phase3-v1 (AS7-UI-02): "accepted" describes staging by the client, not an
+      // applied shelf membership; applied filing is only claimed from membership evidence.
+      accepted: "Classification accepted (staged)",
+      unmapped: "Unmapped",
+      unsupported: "Unsupported",
+      blocked: "Blocked",
+      cancelled: "Cancelled",
+      not_requested: "Linked capture (no work)",
+      not_captured: "Not captured",
+    };
+
+    const CAPTURED_ITEMS_PAGE = 25;
+    const CAPTURED_ITEMS_AUTO_PAGES = 8; // up to 200 rows walked automatically per open
+
+    function renderCapturedItems(view) {
+      if (view.error) return `<div class="soft-note">Could not load items: ${htmlEscape(view.error)}</div>`;
+      const items = (view.items || []).filter((it) => it.capture_state === "committed");
+      const rows = items.map((it) => {
+        const cls = (it.classification && it.classification.state) || "pending";
+        const label = CLASSIFICATION_LABELS[cls] || cls;
+        return `
+          <div class="captured-item">
+            <span style="font-weight:500;">${htmlEscape(it.title || it.entry_id || "Captured item")}</span>
+            <span class="classification-pill ${htmlEscape(cls)}" title="${htmlEscape(cls)}">${htmlEscape(label)}</span>
+          </div>`;
+      }).join("");
+      const walked = Number(view.pages_loaded || 0) * CAPTURED_ITEMS_PAGE;
+      let footer = "";
+      if (view.loading) {
+        footer = `<div class="soft-note">Loading items&hellip;</div>`;
+      } else if (view.next_item_cursor) {
+        // AS7-UI-01: a captured item can sit after older uncommitted rows; the pager keeps
+        // every page reachable through the supported source_status cursor.
+        footer = `<div class="captured-items-more"><span class="soft-note">${walked} of the source's items checked.</span> <button class="button ghost captured-items-more-btn" type="button" data-source-id="${htmlEscape(view.source_id || "")}">Load more items</button></div>`;
+      } else if (!items.length) {
+        footer = `<div class="soft-note">No captured items in this source's ${walked || CAPTURED_ITEMS_PAGE} items.</div>`;
+      }
+      return rows + footer;
+    }
+
+    async function loadCapturedItemsPage(sourceId, view) {
+      const args = { source_id: sourceId, item_limit: CAPTURED_ITEMS_PAGE };
+      if (view.next_item_cursor) args.item_cursor = view.next_item_cursor;
+      const res = await callRegistryTool("source_status", args);
+      const page = (res && res.items) || [];
+      return {
+        ...view, loading: false, items: (view.items || []).concat(page),
+        next_item_cursor: (res && res.next_item_cursor) || null,
+        pages_loaded: Number(view.pages_loaded || 0) + 1,
+        committed_expected: res && res.source && res.source.item_counts ? Number(res.source.item_counts.committed || 0) : view.committed_expected,
+      };
+    }
+
+    async function loadCapturedItems(sourceId, view, { more = false } = {}) {
+      state.standingItemsBySource[sourceId] = { ...view, open: true, loading: true, source_id: sourceId };
+      renderStandingSubscriptions();
+      try {
+        let next = state.standingItemsBySource[sourceId];
+        const budget = more ? 1 : CAPTURED_ITEMS_AUTO_PAGES;
+        for (let n = 0; n < budget; n += 1) {
+          next = await loadCapturedItemsPage(sourceId, next);
+          const committed = next.items.filter((it) => it.capture_state === "committed").length;
+          const expected = next.committed_expected;
+          // Stop early once every captured item the summary counts has been reached.
+          if (!next.next_item_cursor || (expected != null && committed >= expected && !more)) break;
+        }
+        state.standingItemsBySource[sourceId] = { ...next, open: true, loading: false, source_id: sourceId };
+      } catch (err) {
+        state.standingItemsBySource[sourceId] = { open: true, loading: false, error: consentErrorMessage(err), source_id: sourceId };
+      }
+      renderStandingSubscriptions();
+    }
+
+    async function toggleCapturedItems(sourceId) {
+      if (!sourceId) return;
+      state.standingItemsBySource = state.standingItemsBySource || {};
+      const current = state.standingItemsBySource[sourceId];
+      if (current && current.open) {
+        state.standingItemsBySource[sourceId] = { ...current, open: false };
+        renderStandingSubscriptions();
+        return;
+      }
+      await loadCapturedItems(sourceId, { items: [], next_item_cursor: null, pages_loaded: 0 });
+    }
+
+    async function loadMoreCapturedItems(sourceId) {
+      state.standingItemsBySource = state.standingItemsBySource || {};
+      const current = state.standingItemsBySource[sourceId];
+      if (!current || !current.open || current.loading || !current.next_item_cursor) return;
+      await loadCapturedItems(sourceId, current, { more: true });
+    }
+
+    async function startConsentFlow(sourceId, targetConsent) {
+      // Bind the operation to the latest persisted revisions: a stale row would be refused
+      // with stale_revision / stale_cursor at confirmation, so refresh before opening.
+      try {
+        await loadStandingSubscriptions();
+      } catch (_) {
+        // The modal still opens on the last known row; confirmation re-validates.
+      }
+      const source = (state.standingSources || []).find((s) => s.source_id === sourceId);
+      if (!source) return showToast("Source is no longer listed. Refreshed with latest state.");
+      // C20 (2026-09-08): the intent route requires confirmed:true, which is the user's
+      // click on the modal, so nothing is minted before the modal is confirmed. The
+      // operation is bound to the revisions displayed at the moment the modal opened.
+      const opKey = `op_${Date.now()}_${Math.random().toString(16).slice(2, 10)}`;
+      state.standingPendingIntent = {
+        source_id: source.source_id,
+        consent_state: targetConsent,
+        expected_revision: Number(source.revision || 0),
+        expected_cursor_revision: targetConsent === "on"
+          ? Number((source.detection && (source.detection.cursor_revision ?? source.detection.revision)) || 0)
+          : undefined,
+        operation_key: opKey,
+        user_intent_token: null,
+        expires_ms: null,
+      };
+      openConsentModal(source, targetConsent, null);
+    }
+
+    function consentErrorMessage(err) {
+      const data = err && err.data;
+      const inner = data && data.error;
+      if (inner && typeof inner === "object" && inner.message) return `${inner.code ? inner.code + ": " : ""}${inner.message}`;
+      if (typeof inner === "string") return inner;
+      return (err && err.message) || "unknown error";
+    }
+
+    function openConsentModal(source, targetConsent, displaySummary) {
+      if (!els.sourceConsentModal) return;
+      const title = source.display_name || source.canonical_url || "this source";
+      const isEnabling = targetConsent === "on";
+
+      if (els.sourceConsentModalTitle) {
+        els.sourceConsentModalTitle.textContent = isEnabling
+          ? `Enable standing capture for ${title}?`
+          : `Turn off standing capture for ${title}?`;
+      }
+      if (els.sourceConsentModalPrompt) {
+        els.sourceConsentModalPrompt.textContent = isEnabling
+          ? `Uoink will automatically discover and ingest newly published and back-catalog items from this source.`
+          : `Automatic downloads will stop. Metadata detection continues in background.`;
+      }
+      if (els.sourceConsentModalPolicyList) {
+        els.sourceConsentModalPolicyList.style.display = isEnabling ? "" : "none";
+      }
+      if (els.confirmSourceConsent) {
+        els.confirmSourceConsent.textContent = isEnabling ? "Confirm & Enable" : "Confirm & Turn Off";
+        els.confirmSourceConsent.className = `button ${isEnabling ? "primary" : "danger"}`;
+      }
+
+      const inFlight = Array.isArray(source.in_flight) ? source.in_flight : [];
+      if (els.sourceConsentModalWarning) {
+        if (!isEnabling && inFlight.length > 0) {
+          els.sourceConsentModalWarning.classList.remove("hidden");
+          els.sourceConsentModalWarning.innerHTML = `<strong>Draining in-flight work:</strong> ${inFlight.length} active download/transcription in progress will finish cleanly. Unstarted reservations will be released.`;
+        } else {
+          els.sourceConsentModalWarning.classList.add("hidden");
+          els.sourceConsentModalWarning.innerHTML = "";
+        }
+      }
+
+      if (els.sourceConsentModalSummary) {
+        if (displaySummary) {
+          els.sourceConsentModalSummary.classList.remove("hidden");
+          els.sourceConsentModalSummary.textContent = String(displaySummary);
+        } else {
+          els.sourceConsentModalSummary.classList.add("hidden");
+        }
+      }
+
+      els.sourceConsentModal.classList.remove("hidden");
+      if (els.confirmSourceConsent) els.confirmSourceConsent.focus();
+    }
+
+    function closeConsentModal() {
+      if (!els.sourceConsentModal) return;
+      els.sourceConsentModal.classList.add("hidden");
+      state.standingPendingIntent = null;
+    }
+
+    async function confirmConsentMutation() {
+      const intent = state.standingPendingIntent;
+      if (!intent) return closeConsentModal();
+
+      if (els.confirmSourceConsent) {
+        els.confirmSourceConsent.disabled = true;
+        els.confirmSourceConsent.textContent = "Updating...";
+      }
+
+      const operation = {
+        source_id: intent.source_id,
+        consent_state: intent.consent_state,
+        expected_revision: intent.expected_revision,
+        operation_key: intent.operation_key,
+      };
+      if (intent.consent_state === "on" && intent.expected_cursor_revision != null) {
+        operation.expected_cursor_revision = intent.expected_cursor_revision;
+      }
+
+      try {
+        // Mint the user-intent capability now, as the confirmed click (C20).
+        const intentRes = await authFetch("/sources/consent-intent", {
+          method: "POST",
+          body: JSON.stringify({ operation, confirmed: true }),
+        });
+        if (!intentRes || !intentRes.user_intent_token) {
+          throw new Error((intentRes && intentRes.error && intentRes.error.message) || "Failed to mint consent intent token");
+        }
+        const args = { ...operation, user_intent_token: intentRes.user_intent_token };
+        await callRegistryTool("set_source_consent", args);
+        closeConsentModal();
+        showToast(intent.consent_state === "on"
+          ? "Standing capture enabled. Back-catalog enrollment in progress."
+          : "Standing capture turned off.");
+      } catch (err) {
+        closeConsentModal();
+        const detail = consentErrorMessage(err);
+        if (detail.includes("stale_revision") || detail.includes("stale_cursor")) {
+          showToast("Source was modified concurrently. Refreshed with latest server state.");
+        } else {
+          showToast(`Consent update failed: ${detail}`);
+        }
+      } finally {
+        if (els.confirmSourceConsent) els.confirmSourceConsent.disabled = false;
+        await loadStandingSubscriptions();
+      }
+    }
+
+    async function registerStandingSource() {
+      if (!els.standingAddUrl) return;
+      const url = els.standingAddUrl.value.trim();
+      if (!url) return showToast("Paste a feed or channel URL first.");
+      if (!url.startsWith("http://") && !url.startsWith("https://")) {
+        return showToast("Source URL must begin with http:// or https://");
+      }
+      const kind = els.standingAddKind ? els.standingAddKind.value : "podcast_rss";
+      const displayName = els.standingAddDisplayName ? els.standingAddDisplayName.value.trim() : "";
+
+      if (els.standingAddButton) {
+        els.standingAddButton.disabled = true;
+        els.standingAddButton.textContent = "Subscribing...";
+      }
+
+      try {
+        const payload = {
+          kind,
+          url,
+          display_name: displayName || undefined,
+        };
+        const res = await callRegistryTool("register_source", payload);
+        if (els.standingAddUrl) els.standingAddUrl.value = "";
+        if (els.standingAddDisplayName) els.standingAddDisplayName.value = "";
+        showToast(res && res.created === false
+          ? "Source already registered. Current settings retained."
+          : "Source subscribed. Capture is off by default; detection watches metadata.");
+        await loadStandingSubscriptions();
+      } catch (err) {
+        showToast(`Could not register source: ${err.message}`);
+      } finally {
+        if (els.standingAddButton) {
+          els.standingAddButton.disabled = false;
+          els.standingAddButton.textContent = "Subscribe";
+        }
+      }
+    }
+
+    async function retrySourcePoll(sourceId) {
+      showToast("Checking source status...");
+      try {
+        await callRegistryTool("source_status", { source_id: sourceId });
+        await loadStandingSubscriptions();
+      } catch (err) {
+        showToast(`Status check: ${err.message}`);
+      }
     }
 
     // V-2a: universal "paste any URL" capture. Detection is server-owned
@@ -6469,7 +8949,7 @@
           body: JSON.stringify(body),
         });
         if (universalState.source === "podcast_feed") {
-          showToast("Podcast feed added. New episodes transcribe locally.");
+          showToast("Podcast feed saved. Uoink will watch for new episodes; audio stays off by default.");
         } else {
           showToast(`Uoinking that ${label.toLowerCase()}. Track it in Activity.`);
         }
@@ -8484,6 +10964,40 @@
       return Number.isFinite(n) ? n : fallback;
     }
 
+    // Living Library Phase 2 (2026-09-04): the `library` block of /health.
+    // "Waiting for a client" is the honest state when staged Librarian work
+    // exists and no subscribed client holds a lease -- uoink never runs the
+    // Librarian itself, so the dashboard says so instead of spinning.
+    function librarianStatusText(library) {
+      if (!library || typeof library !== "object") return "Librarian: status unavailable.";
+      const ready = countValue(library.ready, 0);
+      const leased = countValue(library.leased, 0);
+      const applyNote = library.apply_enabled ? "" : " Applying labels is off.";
+      switch (library.status) {
+        case "waiting_for_client":
+          return `Librarian: ${ready} item${ready === 1 ? "" : "s"} staged, waiting for a connected client to claim them.${applyNote}`;
+        case "collecting":
+          return `Librarian: a client is working (${leased} leased, ${ready} still waiting).${applyNote}`;
+        case "idle":
+          return `Librarian: no staged work.${applyNote}`;
+        case "recovery_pending":
+          return "Librarian: recovery pending; the queue is paused until the journal is replayed.";
+        case "unavailable":
+          return "Librarian: not installed in this build.";
+        case "error":
+          return "Librarian: status could not be read; see the helper log.";
+        default:
+          return "Librarian: status unknown.";
+      }
+    }
+
+    function renderLibrarianStatus(library) {
+      if (!els.librarianStatus) return;
+      els.librarianStatus.textContent = librarianStatusText(library);
+      els.librarianStatus.dataset.libraryStatus = (library && library.status) || "unknown";
+      els.librarianStatus.dataset.waitingForClient = library && library.waiting_for_client ? "true" : "false";
+    }
+
     async function refreshHealth() {
       try {
         const res = await fetch("/health");
@@ -8498,11 +11012,13 @@
         els.aboutStatus.querySelector("span:last-child").textContent = ok ? "Uoink ready" : "Uoink offline";
         els.aboutVersion.textContent = `Version: ${data.version || "unknown"}`;
         els.aboutPort.textContent = `http://127.0.0.1:${data.port || 5179}`;
+        renderLibrarianStatus(data.library);
       } catch (_) {
         els.runningPill.classList.add("offline");
         els.runningPill.querySelector("span:last-child").textContent = "Uoink is offline";
         els.aboutStatus.classList.add("offline");
         els.aboutStatus.querySelector("span:last-child").textContent = "Uoink offline";
+        renderLibrarianStatus(null);
       }
     }
 
@@ -8721,6 +11237,7 @@
         : "";
       const liteRetry = failed && shouldOfferChunkedRetry(rawError, phase);
       const cookieRetry = failed && shouldOfferCookieRetry(rawError);
+      const notificationBody = job.kind === "notification" ? (job.message || "") : "";
       const sub = [
         job.kind || "job",
         stateValue,
@@ -8733,6 +11250,7 @@
             <div>
               <div class="job-title">${htmlEscape(title)}</div>
               <div class="job-sub">${htmlEscape(sub)}</div>
+              ${notificationBody ? `<div class="job-sub">${htmlEscape(notificationBody)}</div>` : ""}
               ${sourceChip}
             </div>
             <div class="inline-row">
@@ -8808,6 +11326,18 @@
         : "New captures save here.";
     }
 
+    // Conservative rounded decimal MB of advertised Hub file totals captured
+    // 2026-09-13 (model/config/tokenizer/vocabulary/preprocessor logical bytes,
+    // not observed transfers or an approved model manifest).
+    const TRANSCRIPT_MODEL_DOWNLOAD_MB = {
+      tiny: 80,
+      base: 150,
+      small: 490,
+      medium: 1540,
+      large: 3100,
+      "large-v3-turbo": 1630,
+    };
+
     function transcriptModelLabel(model) {
       const labels = {
         tiny: "Fast",
@@ -8815,8 +11345,70 @@
         small: "Careful",
         medium: "Deep",
         large: "Max accuracy",
+        "large-v3-turbo": "Turbo",
       };
-      return labels[String(model || "").toLowerCase()] || "Balanced";
+      const key = String(model || "").toLowerCase();
+      return labels[key] || humanLabel(key) || "Balanced";
+    }
+
+    function transcriptModelDownloadMb(model) {
+      const key = String(model || "").toLowerCase();
+      if (Object.prototype.hasOwnProperty.call(TRANSCRIPT_MODEL_DOWNLOAD_MB, key)) {
+        return TRANSCRIPT_MODEL_DOWNLOAD_MB[key];
+      }
+      return null;
+    }
+
+    function transcriptModelSizeCopy(model, serverMb) {
+      const mb = transcriptModelDownloadMb(model);
+      if (typeof mb === "number") return `~${mb} MB`;
+      if (typeof serverMb === "number") return `~${serverMb} MB`;
+      return "size unknown";
+    }
+
+    function transcriptModelConfirmMessage(model) {
+      const modelLabel = transcriptModelLabel(model);
+      const mb = transcriptModelDownloadMb(model);
+      const sizeBit = typeof mb === "number"
+        ? `It's about ${mb} MB and stays on this machine.`
+        : "The download size is unknown. It stays on this machine.";
+      return `Download the ${modelLabel} transcript checker now? ${sizeBit}`;
+    }
+
+    function reliabilityStatusText(selectedModel, relModel) {
+      const selected = String(selectedModel || "").toLowerCase();
+      const info = relModel && typeof relModel === "object" ? relModel : {};
+      const saved = String(info.model || "").toLowerCase();
+      const modelLabel = transcriptModelLabel(selected || saved);
+      const selectedIsSaved = Boolean(selected) && selected === saved;
+      const cached = selectedIsSaved && Boolean(info.cached);
+      if (cached) {
+        return `${modelLabel} checker model is ready on this device.`;
+      }
+      const sizeCopy = transcriptModelSizeCopy(selected || saved, selectedIsSaved ? info.estimated_download_mb : null);
+      return `${modelLabel} checker model is not downloaded yet (${sizeCopy}).`;
+    }
+
+    async function downloadSelectedReliabilityModel() {
+      const selectedModel = els.whisperModel.value;
+      const modelLabel = transcriptModelLabel(selectedModel);
+      if (!confirm(transcriptModelConfirmMessage(selectedModel))) return;
+      els.downloadReliabilityModel.disabled = true;
+      els.reliabilityStatus.textContent = `Downloading the ${modelLabel} checker model...`;
+      try {
+        const data = await authFetch("/reliability/model/download", {
+          method: "POST",
+          body: JSON.stringify({ model: els.whisperModel.value }),
+        });
+        if (!data.ok) throw new Error(data.error || "download failed");
+        showToast("Transcript checker model downloaded.");
+        refreshSettings();
+      } catch (err) {
+        els.reliabilityStatus.textContent = "Model download failed.";
+        showToast("Couldn't download model.");
+      } finally {
+        els.downloadReliabilityModel.disabled = false;
+      }
     }
 
     async function refreshSettings() {
@@ -8828,8 +11420,10 @@
           : "No key saved yet. Local capture still works; optional AI features stay off.";
         renderOutputFolder(outputFolderPathFromSettings(), Boolean(state.settings.output_dir_pending_restart));
         els.autostartToggle.checked = Boolean(state.settings.autostart);
+        els.notificationsEnabled.checked = state.settings.notifications_enabled !== false;
         els.screenshotCount.value = String(state.settings.screenshot_count ?? state.settings.clipboard_screenshot_cap ?? 4);
         els.claimVerificationToggle.checked = Boolean(state.settings.claim_verification_enabled);
+        if (els.entityExtractionToggle) els.entityExtractionToggle.checked = Boolean(state.settings.entity_extraction_enabled);
         els.reliabilityAutoCheck.checked = Boolean(state.settings.transcript_reliability_auto_check);
         els.asrFallbackEnabled.checked = state.settings.asr_fallback_enabled !== false;
         els.voiceWarningsEnabled.checked = state.settings.voice_dna_warnings_enabled !== false;
@@ -8837,6 +11431,7 @@
         els.writingScreenshotPickerToggle.checked = state.settings.writing_show_screenshot_picker !== false;
         if (els.autoUoinkToggle) els.autoUoinkToggle.checked = Boolean(state.settings.auto_uoink_enabled);
         renderAutoUoinkStatus();
+        renderLibraryMirrorFromSettings();
         els.writingShowWarnings.checked = els.voiceWarningsEnabled.checked;
         els.scriptVoiceWarnings.checked = els.voiceWarningsEnabled.checked;
         renderWritingScreenshots();
@@ -8844,10 +11439,10 @@
         renderRolePicker(state.settings.role || "mixed");
         syncWhisperModelOptions();
         const relModel = state.settings.transcript_reliability_model || {};
-        const modelLabel = transcriptModelLabel(relModel.model || state.settings.whisper_model);
-        els.reliabilityStatus.textContent = relModel.cached
-          ? `${modelLabel} checker model is ready on this device.`
-          : `${modelLabel} checker model is not downloaded yet (~${relModel.estimated_download_mb || 150} MB).`;
+        els.reliabilityStatus.textContent = reliabilityStatusText(
+          els.whisperModel.value || relModel.model || state.settings.whisper_model,
+          relModel
+        );
       } catch (err) {
         els.keyStatus.textContent = "Settings need another moment.";
         renderRolePicker("mixed");
@@ -10504,15 +13099,34 @@
       if (!rows.length) {
         els.podcastFeedList.innerHTML = emptyPanelRow(
           "No podcast feeds yet.",
-          "Paste an RSS feed URL to track new episodes locally."
+          "Paste an RSS feed URL to watch for new episodes. Audio stays off by default."
         );
         return;
       }
-      els.podcastFeedList.innerHTML = rows.map((row) => settingsListRow(
-        row,
-        ["title", "podcast_title", "feed_url", "url"],
-        ["episode_count", "last_polled_at", "last_episode_title"]
-      )).join("");
+      els.podcastFeedList.innerHTML = rows.map((row) => {
+        const title = firstValue(row.title, row.podcast_title, row.feed_url, row.url, "Untitled feed");
+        const episodeCount = Number(row.episode_count || 0);
+        const autoIngest = Number(row.auto_ingest || 0) === 1;
+        const meta = [
+          `${episodeCount} episode${episodeCount === 1 ? "" : "s"}`,
+          `poll every ${Number(row.poll_interval_min || 60)} min`,
+          row.last_polled_at || "waiting for first poll",
+        ].join(" | ");
+        return `
+          <div class="settings-list-row">
+            <div style="min-width:0">
+              <strong>${htmlEscape(title)}</strong>
+              <div class="job-sub">${htmlEscape(meta)}</div>
+            </div>
+            <span class="phase-chip">${autoIngest ? "Auto-ingest on" : "Metadata only"}</span>
+            <button class="button ghost" type="button"
+              data-toggle-podcast-auto-ingest="${htmlEscape(String(row.id))}"
+              data-auto-ingest="${autoIngest ? "true" : "false"}">
+              ${autoIngest ? "Turn off" : "Turn on"}
+            </button>
+          </div>
+        `;
+      }).join("");
     }
 
     async function loadPlaylistSettings() {
@@ -10558,16 +13172,36 @@
     async function addPodcastFeed() {
       const feedUrl = els.podcastFeedUrl.value.trim();
       if (!feedUrl) return showToast("Paste an RSS feed URL first.");
+      const autoIngest = Boolean(els.podcastAutoIngest && els.podcastAutoIngest.checked);
       try {
         await authFetch("/podcasts/feeds", {
           method: "POST",
-          body: JSON.stringify({ feed_url: feedUrl }),
+          body: JSON.stringify({ feed_url: feedUrl, auto_ingest: autoIngest }),
         });
         els.podcastFeedUrl.value = "";
-        showToast("Podcast feed added.");
+        if (els.podcastAutoIngest) els.podcastAutoIngest.checked = false;
+        showToast(autoIngest
+          ? "Podcast feed saved. Auto-ingest is on for newly discovered episodes."
+          : "Podcast feed saved. Uoink will watch metadata; audio stays off.");
         loadPodcastFeedSettings();
       } catch (err) {
         showToast("Couldn't add that feed.");
+      }
+    }
+
+    async function setPodcastAutoIngest(feedId, currentValue) {
+      const nextValue = !currentValue;
+      try {
+        await authFetch("/podcasts/feeds/set-auto-ingest", {
+          method: "POST",
+          body: JSON.stringify({ feed_id: Number(feedId), auto_ingest: nextValue }),
+        });
+        showToast(nextValue
+          ? "Auto-ingest is on for episodes discovered from now on."
+          : "Auto-ingest is off. Feed metadata will keep updating.");
+        await loadPodcastFeedSettings();
+      } catch (err) {
+        showToast("Couldn't change Auto-ingest for that feed.");
       }
     }
 
@@ -10649,6 +13283,129 @@
       } finally {
         els.autoUoinkScan.textContent = original;
         renderAutoUoinkStatus();
+      }
+    }
+
+    function libraryMirrorArgs() {
+      const destination = ((els.libraryMirrorDestination && els.libraryMirrorDestination.value) || "").trim();
+      const scope = (els.libraryMirrorScope && els.libraryMirrorScope.value) || "all_current_and_future_items";
+      const raw = ((els.libraryMirrorAllowlist && els.libraryMirrorAllowlist.value) || "").trim();
+      const allowlist = raw ? raw.split(",").map((s) => s.trim()).filter(Boolean) : [];
+      return { destination, scope, allowlist };
+    }
+
+    function renderLibraryMirrorFromSettings() {
+      if (!els.libraryMirrorStatus) return;
+      const settings = state.settings || {};
+      const enabled = Boolean(settings.library_mirror_enabled);
+      const consent = settings.library_mirror_consent || null;
+      if (consent && els.libraryMirrorDestination && !els.libraryMirrorDestination.value) {
+        els.libraryMirrorDestination.value = consent.destination || "";
+      }
+      if (consent && els.libraryMirrorScope) {
+        els.libraryMirrorScope.value = consent.scope || "all_current_and_future_items";
+      }
+      if (consent && els.libraryMirrorAllowlist && Array.isArray(consent.allowlist) && !els.libraryMirrorAllowlist.value) {
+        els.libraryMirrorAllowlist.value = consent.allowlist.join(", ");
+      }
+      els.libraryMirrorStatus.textContent = enabled
+        ? `On. Destination ${consent && consent.destination ? consent.destination : "(set)"}; scope ${consent && consent.scope ? consent.scope : "all current and future items"}.`
+        : "Off. Preview a vault folder, then enable. A destination change turns the mirror off until you select scope again.";
+      if (els.libraryMirrorDisable) els.libraryMirrorDisable.disabled = !enabled;
+      if (els.libraryMirrorResync) els.libraryMirrorResync.disabled = !enabled;
+      if (enabled) refreshLibraryMirrorStatus();
+      else if (els.libraryMirrorCounts) els.libraryMirrorCounts.textContent = "";
+    }
+
+    async function refreshLibraryMirrorStatus() {
+      if (!els.libraryMirrorCounts) return;
+      try {
+        const data = await authFetch("/library/mirror", { method: "POST", body: JSON.stringify({ op: "status" }) });
+        const pending = data.pending ?? 0;
+        const synced = data.synced ?? 0;
+        const stale = data.stale ?? 0;
+        const deletionPending = data.deletion_pending ?? 0;
+        els.libraryMirrorCounts.textContent = `Pending ${pending} · synced ${synced} · stale ${stale} · deletion pending ${deletionPending}.`;
+        if (data.destination && els.libraryMirrorDestination && !els.libraryMirrorDestination.value) {
+          els.libraryMirrorDestination.value = data.destination;
+        }
+        if (data.notice && els.libraryMirrorIndexingNotice) {
+          els.libraryMirrorIndexingNotice.textContent = data.notice;
+        }
+      } catch (_) {
+        els.libraryMirrorCounts.textContent = "Mirror status needs another moment.";
+      }
+    }
+
+    async function previewLibraryMirror() {
+      const args = libraryMirrorArgs();
+      if (!args.destination) return showToast("Choose a vault folder first.");
+      try {
+        const data = await authFetch("/library/mirror", {
+          method: "POST",
+          body: JSON.stringify({ op: "preview", ...args }),
+        });
+        state.libraryMirrorPreview = data;
+        const counts = data.counts || {};
+        const notice = data.notice || data.third_party_indexing || "";
+        if (els.libraryMirrorPreviewOut) {
+          els.libraryMirrorPreviewOut.textContent = `Preview: ${counts.items || 0} items, ${counts.shelves || 0} shelves, ${counts.briefs || 0} briefs. ${notice}`;
+        }
+        showToast("Mirror preview ready. Enable to confirm.");
+      } catch (err) {
+        showToast((err && err.data && (err.data.error || (err.data.error && err.data.error.message))) || "Couldn't preview that vault.");
+      }
+    }
+
+    async function enableLibraryMirror() {
+      const args = libraryMirrorArgs();
+      if (!args.destination) return showToast("Choose a vault folder first.");
+      try {
+        if (!state.libraryMirrorPreview) {
+          await previewLibraryMirror();
+        }
+        const intentRes = await authFetch("/library/mirror-intent", {
+          method: "POST",
+          body: JSON.stringify({ operation: args, confirmed: true }),
+        });
+        if (!intentRes || !intentRes.user_intent_token) {
+          throw new Error("Couldn't mint a confirmation token.");
+        }
+        const data = await authFetch("/library/mirror", {
+          method: "POST",
+          body: JSON.stringify({
+            op: "enable",
+            ...args,
+            user_intent_token: intentRes.user_intent_token,
+          }),
+        });
+        state.settings = data.settings || state.settings || {};
+        showToast("Library mirror is on.");
+        renderLibraryMirrorFromSettings();
+      } catch (err) {
+        const msg = (err && err.data && (typeof err.data.error === "string" ? err.data.error : err.message)) || "Couldn't enable the library mirror.";
+        showToast(msg);
+      }
+    }
+
+    async function disableLibraryMirror() {
+      try {
+        const data = await authFetch("/library/mirror", { method: "POST", body: JSON.stringify({ op: "disable" }) });
+        state.settings = data.settings || state.settings || {};
+        showToast("Library mirror is off. Pending deletions stay recorded.");
+        renderLibraryMirrorFromSettings();
+      } catch (err) {
+        showToast("Couldn't disable the library mirror.");
+      }
+    }
+
+    async function resyncLibraryMirror() {
+      try {
+        await authFetch("/library/mirror", { method: "POST", body: JSON.stringify({ op: "resync" }) });
+        showToast("Mirror resync finished.");
+        refreshLibraryMirrorStatus();
+      } catch (err) {
+        showToast("Couldn't resync the library mirror.");
       }
     }
 
@@ -10826,6 +13583,12 @@
       const navTab = NAV_OWNER[tab] || tab;
       document.querySelectorAll("[data-tab-button]").forEach((btn) => btn.classList.toggle("active", btn.dataset.tabButton === navTab));
       document.querySelectorAll("[data-tab-panel]").forEach((panel) => panel.classList.toggle("active", panel.dataset.tabPanel === tab));
+      if (tab === "library") {
+        loadLibraryActivity(false);
+        startLibraryActivityTimer();
+      } else {
+        stopLibraryActivityTimer();
+      }
       if (tab === "for-you") loadForYou();
       if (tab === "writing") loadWriting();
       if (tab === "evidence") loadEvidence();
@@ -11094,6 +13857,12 @@
         openYoinkDetail(rowFromCard(card));
       });
       els.autostartToggle.addEventListener("change", () => saveSettingsPatch({ autostart: els.autostartToggle.checked }, "Autostart updated."));
+      els.notificationsEnabled.addEventListener("change", () => saveSettingsPatch(
+        { notifications_enabled: els.notificationsEnabled.checked },
+        els.notificationsEnabled.checked
+          ? "Desktop notifications are on."
+          : "Desktop notifications are off; updates stay in Activity.",
+      ));
       els.rolePicker.addEventListener("change", (event) => {
         const input = event.target.closest('input[name="role"]');
         if (input) saveSettingsPatch({ role: input.value }, "Role updated.");
@@ -11123,30 +13892,30 @@
       els.saveWhisperModel.addEventListener("click", () => {
         saveSettingsPatch({ whisper_model: els.whisperModel.value }, "Transcript checker choice saved.");
       });
+      els.whisperModel.addEventListener("change", () => {
+        const relModel = (state.settings && state.settings.transcript_reliability_model) || {};
+        els.reliabilityStatus.textContent = reliabilityStatusText(els.whisperModel.value, relModel);
+      });
       els.claimVerificationToggle.addEventListener("change", () => saveSettingsPatch({ claim_verification_enabled: els.claimVerificationToggle.checked }, "Claim verification setting updated."));
+      if (els.entityExtractionToggle) {
+        els.entityExtractionToggle.addEventListener("change", () => saveSettingsPatch(
+          { entity_extraction_enabled: els.entityExtractionToggle.checked },
+          els.entityExtractionToggle.checked
+            ? "Entity extraction is on for new uoinks (uses your Anthropic key)."
+            : "Entity extraction is off.",
+        ));
+      }
       if (els.autoUoinkToggle) {
         els.autoUoinkToggle.addEventListener("change", () => saveSettingsPatch({ auto_uoink_enabled: els.autoUoinkToggle.checked }, els.autoUoinkToggle.checked ? "Taste-aware auto-uoink is on." : "Taste-aware auto-uoink is off."));
       }
       if (els.autoUoinkScan) els.autoUoinkScan.addEventListener("click", runAutoUoinkScan);
+      if (els.libraryMirrorPreview) els.libraryMirrorPreview.addEventListener("click", previewLibraryMirror);
+      if (els.libraryMirrorEnable) els.libraryMirrorEnable.addEventListener("click", enableLibraryMirror);
+      if (els.libraryMirrorDisable) els.libraryMirrorDisable.addEventListener("click", disableLibraryMirror);
+      if (els.libraryMirrorResync) els.libraryMirrorResync.addEventListener("click", resyncLibraryMirror);
       els.reliabilityAutoCheck.addEventListener("change", () => saveSettingsPatch({ transcript_reliability_auto_check: els.reliabilityAutoCheck.checked }, "Transcript reliability setting updated."));
       els.asrFallbackEnabled.addEventListener("change", () => saveSettingsPatch({ asr_fallback_enabled: els.asrFallbackEnabled.checked }, els.asrFallbackEnabled.checked ? "Caption-less video transcription is on." : "Caption-less video transcription is off."));
-      els.downloadReliabilityModel.addEventListener("click", async () => {
-        const modelLabel = transcriptModelLabel(els.whisperModel.value);
-        if (!confirm(`Download the ${modelLabel} transcript checker now? It's about 150 MB and stays on this machine.`)) return;
-        els.downloadReliabilityModel.disabled = true;
-        els.reliabilityStatus.textContent = `Downloading the ${modelLabel} checker model...`;
-        try {
-          const data = await authFetch("/reliability/model/download", { method: "POST", body: JSON.stringify({ model: els.whisperModel.value }) });
-          if (!data.ok) throw new Error(data.error || "download failed");
-          showToast("Transcript checker model downloaded.");
-          refreshSettings();
-        } catch (err) {
-          els.reliabilityStatus.textContent = "Model download failed.";
-          showToast("Couldn't download model.");
-        } finally {
-          els.downloadReliabilityModel.disabled = false;
-        }
-      });
+      els.downloadReliabilityModel.addEventListener("click", downloadSelectedReliabilityModel);
       document.getElementById("saveOutput").addEventListener("click", saveOutputFolder);
       els.pickOutputFolder.addEventListener("click", pickOutputFolder);
       document.getElementById("saveScreenshotCount").addEventListener("click", () => {
@@ -11454,6 +14223,12 @@
         if (removeChannelButton) removeChannel(removeChannelButton.dataset.removeChannel);
         const removeAllowedSiteButton = event.target.closest("[data-remove-allowed-site]");
         if (removeAllowedSiteButton) removeAllowedSite(removeAllowedSiteButton.dataset.removeAllowedSite);
+        const podcastAutoIngestButton = event.target.closest("[data-toggle-podcast-auto-ingest]");
+        if (podcastAutoIngestButton) {
+          setPodcastAutoIngest(
+            podcastAutoIngestButton.dataset.togglePodcastAutoIngest,
+            podcastAutoIngestButton.dataset.autoIngest === "true");
+        }
         const cancel = event.target.closest("[data-cancel]");
         if (cancel) postHelper("/queue/cancel", { pending_id: cancel.dataset.cancel });
         const cancelJob = event.target.closest("[data-cancel-job]");
@@ -11495,6 +14270,20 @@
           setTimeout(() => renderWritingHandoff(selectedWritingScreenshots()), 80);
         }
       });
+      // Phase 3: Standing subscriptions & consent modal events
+      if (els.refreshStandingSources) els.refreshStandingSources.addEventListener("click", loadStandingSubscriptions);
+      if (els.standingAddButton) els.standingAddButton.addEventListener("click", registerStandingSource);
+      if (els.closeSourceConsentModal) els.closeSourceConsentModal.addEventListener("click", closeConsentModal);
+      if (els.cancelSourceConsent) els.cancelSourceConsent.addEventListener("click", closeConsentModal);
+      if (els.confirmSourceConsent) els.confirmSourceConsent.addEventListener("click", confirmConsentMutation);
+      if (els.sourceConsentModal) {
+        els.sourceConsentModal.addEventListener("click", (event) => {
+          if (event.target === els.sourceConsentModal) closeConsentModal();
+        });
+        els.sourceConsentModal.addEventListener("keydown", (event) => {
+          trapModalFocus(event, els.sourceConsentModal, closeConsentModal);
+        });
+      }
       window.addEventListener("beforeunload", revokeThumbs);
     }
 
@@ -11567,6 +14356,7 @@
       hydrateMarks();
       syncSidebarControlsDensity();
       wireEvents();
+      wireLibraryActivityEvents();
       applyHashRoute();
       window.addEventListener("resize", syncSidebarControlsDensity);
       window.addEventListener("hashchange", applyHashRoute);
@@ -11574,6 +14364,8 @@
       await loadLibraryFacets();
       await refreshJobs();
       await loadLibrary({ reset: true });
+      await loadLibraryActivity(false);
+      startLibraryActivityTimer();
       await loadResume();
       await loadForYou();
       await loadWriting();

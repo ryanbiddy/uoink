@@ -192,6 +192,10 @@ def _write_corpus_folder(root: Path, topic: str, slug: str, video_id: str):
         "channel": "TestChannel", "topic": topic, "hook_type": "demo",
         "yoinked_at": "2026-06-15T10:00:00",
         "url": f"https://youtube.com/watch?v={video_id}",
+        "transcript": [{
+            "start": 0.0, "end": 60.0,
+            "text": f"{slug} transcript sentinel.",
+        }],
     }), encoding="utf-8")
 
 
@@ -223,6 +227,8 @@ def test_rebuild_from_sidecars_plus_export():
             _assert(report["rows_before"] == 0 and report["rows_after"] == 3,
                     f"3 sidecar folders must index: {report}")
             _assert(report["indexed"] == 3, f"indexed count: {report}")
+            _assert(report["clips"]["clip_count"] == 3,
+                    f"clip index must rebuild from sidecars: {report}")
             row = idx.get_yoink("vidrbaaaaa1")
             _assert(row and row["topic"] == "AI and ML"
                     and Path(row["corpus_path"]).exists(),

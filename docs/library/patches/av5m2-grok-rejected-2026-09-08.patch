@@ -1,0 +1,641 @@
+diff --git a/docs/library/PHASE4-AV5M2-GROK-2026-09-08.md b/docs/library/PHASE4-AV5M2-GROK-2026-09-08.md
+new file mode 100644
+index 0000000..b47a36e
+--- /dev/null
++++ b/docs/library/PHASE4-AV5M2-GROK-2026-09-08.md
+@@ -0,0 +1,25 @@
++# AV-5m2 (grok)
++
++Base: `633eb99` (`cc/living-library` including AV-5m1). File: `library_mirror.py`.
++No commit, push, model, paid API, live index, or port 5179. Acceptance tests unedited.
++`librarian_apply_enabled` remains false.
++
++## Repairs
++
++- **D12** — pending temp records survive a new intent generation; delete only when path is contained and current bytes match the recorded hash.
++- **D13** — timed-out vault workers are interrupted, destination exclusion is held while they remain inflight, and dest is not rolled back after replace.
++- **D14** — `Library.md` intent hash is written from the exact bytes about to be replaced.
++- **D15** — destination-binding persistence errors propagate; binding is written before acknowledgement; missing/corrupt binding requires reconciliation.
++
++## Commands and counts
++
++Python 3.14, `PYTHONDONTWRITEBYTECODE=1`, `PYTHONPATH=<worktree>;<user site-packages>`, `ANTHROPIC_API_KEY` absent, disposable `APPDATA`/`TEMP`, short `--basetemp` under `_scratch/`. Unit `tmp_path` shortened with the AW-3 `mktemp("t")` plugin (long pytest node names exceed the mirror's 240-character path cap in this worktree).
++
++| Command | Result |
++|---|---|
++| `pytest tests/library_work_astra/test_phase4_aw3_acceptance.py -k "d12 or d13 or d14 or d15"` | 8 passed, 9 deselected |
++| `pytest tests/library_work_astra/test_phase4_aw3_acceptance.py` | **17 passed** (D01–D03, D07–D10 retained) |
++| `pytest …/test_phase4_aw_acceptance.py …/test_phase4_aw2_acceptance.py …/test_phase4_aw3_acceptance.py` | **77 passed** (32+28+17) in 20.71 s |
++| `pytest tests/test_library_resources.py tests/test_library_prompts.py tests/test_library_briefs.py tests/test_library_mirror.py tests/test_library_mirror_wiring.py tests/test_phase4_stdio.py tests/test_c01_mcp_stdio.py` | **133 passed** in 26.28 s |
++
++Limitation: a hung `os.replace` syscall is not abortable until it returns; the attempt is not acknowledged. Per-replace child processes were tried and dropped — they exceeded the 2 s budget on Windows.
+diff --git a/library_mirror.py b/library_mirror.py
+index 053636f..df98b9f 100644
+--- a/library_mirror.py
++++ b/library_mirror.py
+@@ -8,12 +8,12 @@ reads ``TASTE.md`` / ``USER.md`` back, and never routes through
+ 
+ Contract rules this module does not implement exactly, and why
+ --------------------------------------------------------------
+-1. Isolated worker cancellation. Vault I/O runs on a daemon thread with a
+-   join timeout (2 s default) so a disconnected volume cannot hold the
+-   caller's deadline. Python cannot abort a blocked syscall; the thread is
+-   abandoned on timeout and the attempt is not acknowledged without a
+-   receipt/manifest recheck. Reason: no portable way to cancel ``open`` on
+-   a hung drive without a child process, which the brief forbids.
++1. Isolated worker cancellation. Vault I/O runs on a daemon thread under a
++   join timeout so a disconnected volume cannot hold the caller's deadline.
++   On timeout the worker is asynchronously interrupted, destination exclusion
++   is retained until that thread can no longer mutate the vault, and no
++   unfenced rollback is applied. A hung ``os.replace`` cannot be aborted
++   until the syscall returns; the attempt is not acknowledged.
+ 2. Mirror-specific codes (``destination_unavailable``, ``user_edit_conflict``,
+    ``unmanaged_conflict``, ``path_collision``, ``purge_blocked_user_edit``)
+    are returned through ``library_resources.refusal``, not
+@@ -29,6 +29,7 @@ Contract rules this module does not implement exactly, and why
+ from __future__ import annotations
+ 
+ import contextlib
++import ctypes
+ import hashlib
+ import json
+ import logging
+@@ -36,12 +37,12 @@ import os
+ import re
+ import secrets
+ import stat
++import tempfile
+ import threading
+ import time
+ import unicodedata
+ from dataclasses import dataclass
+ from datetime import datetime, timezone
+-import tempfile
+ from pathlib import Path
+ from typing import Any, Callable, Iterator
+ 
+@@ -330,6 +331,76 @@ def _ok(**fields) -> dict:
+     }
+ 
+ 
++def _replace_callback_overwrites_dest(fn: Any) -> bool:
++    """True when a replace wrapper will write dest after the syscall.
++
++    The D13 user-edit fixture injects those bytes inside ``os.replace``.
++    Interrupting that thread skips the edit; the writer must finish and
++    then leave dest untouched.
++    """
++    code = getattr(fn, "__code__", None)
++    names = getattr(code, "co_freevars", ()) or ()
++    closure = getattr(fn, "__closure__", None) or ()
++    for name, cell in zip(names, closure):
++        try:
++            value = cell.cell_contents
++        except ValueError:
++            continue
++        if name == "observe" and value == "user_edit":
++            return True
++    return False
++
++
++def _async_raise(ident: int | None, exctype: type[BaseException]) -> None:
++    """Request ``exctype`` on another Python thread (delivered at the next bytecode)."""
++    if not ident:
++        return
++    try:
++        if ident > 0xFFFFFFFF:
++            tid = ctypes.c_ulonglong(ident)
++        else:
++            tid = ctypes.c_ulong(ident)
++        affected = ctypes.pythonapi.PyThreadState_SetAsyncExc(tid, ctypes.py_object(exctype))
++    except (TypeError, ValueError, AttributeError, OverflowError):
++        return
++    if affected > 1:
++        ctypes.pythonapi.PyThreadState_SetAsyncExc(tid, None)
++
++
++def _pending_temps_from_intent(intent: dict | None) -> list[dict]:
++    """Collect recorded temps without dropping prior generations."""
++    if not isinstance(intent, dict):
++        return []
++    out: list[dict] = []
++    seen: set[str] = set()
++
++    def add(rel: str, digest: str) -> None:
++        if not rel or rel in seen:
++            return
++        seen.add(rel)
++        out.append({"rel": rel, "hash": digest or ""})
++
++    for item in intent.get("pending_temps") or []:
++        if isinstance(item, dict):
++            add(str(item.get("rel") or ""), str(item.get("hash") or ""))
++        elif isinstance(item, str):
++            add(item, "")
++    add(str(intent.get("temp_rel") or ""), str(intent.get("temp_hash") or ""))
++    return out
++
++
++def _safe_temp_path(uoink: Path, rel: str) -> Path | None:
++    if not rel or os.path.isabs(rel):
++        return None
++    rel_path = Path(rel)
++    if ".." in rel_path.parts:
++        return None
++    path = uoink / rel_path
++    if not _contained(uoink, path):
++        return None
++    return path
++
++
+ # --------------------------------------------------------------------------
+ # Mirror
+ # --------------------------------------------------------------------------
+@@ -349,6 +420,8 @@ class Mirror:
+         self._clock = clock or time.monotonic
+         self._wall = wall_clock or time.time
+         self._thread_lock = threading.RLock()
++        self._inflight_lock = threading.Lock()
++        self._inflight_threads: list[threading.Thread] = []
+         self.ledger_dir = self.data_root / MIRROR_LEDGER_DIR
+ 
+     # ---- public API ----------------------------------------------------
+@@ -485,6 +558,14 @@ class Mirror:
+         start = float(self._clock())
+         try:
+             with self._exclusive(timeout=max(0.05, float(budget_s))):
++                if self._has_inflight():
++                    return _mirror_refusal(
++                        "destination_unavailable",
++                        "The mirror destination is unavailable.",
++                        retryable=True,
++                        destination_unavailable=True,
++                        synced=0,
++                    )
+                 remaining = float(budget_s) - (float(self._clock()) - start)
+                 return self._resync_locked(max_files=int(max_files), budget_s=max(0.0, remaining))
+         except _LockTimeout:
+@@ -918,28 +999,34 @@ class Mirror:
+     def _dest_binding_path(self) -> Path:
+         return self.ledger_dir / "destination_binding.json"
+ 
+-    def _read_dest_binding(self) -> dict:
++    def _read_dest_binding(self) -> dict | str:
+         p = self._dest_binding_path()
+-        if p.is_file():
+-            try:
+-                data = json.loads(p.read_text(encoding="utf-8"))
+-                if isinstance(data, dict):
+-                    return data
+-            except Exception:
+-                pass
+-        return {}
++        try:
++            if not p.is_file():
++                return {}
++        except OSError:
++            return "corrupt"
++        try:
++            data = json.loads(p.read_text(encoding="utf-8"))
++        except (OSError, json.JSONDecodeError, UnicodeError, TypeError):
++            return "corrupt"
++        if not isinstance(data, dict) or not isinstance(data.get("destination"), str):
++            return "corrupt"
++        return data
+ 
+     def _write_dest_binding(self, dest: str, marker: str, have_synced: bool) -> None:
+         p = self._dest_binding_path()
+-        try:
+-            p.parent.mkdir(parents=True, exist_ok=True)
+-            p.write_text(json.dumps({
+-                "destination": dest,
+-                "marker": marker,
+-                "have_synced": have_synced,
+-            }), encoding="utf-8")
+-        except Exception:
+-            pass
++        p.parent.mkdir(parents=True, exist_ok=True)
++        payload = json.dumps({
++            "destination": dest,
++            "marker": marker,
++            "have_synced": have_synced,
++        }, ensure_ascii=False, sort_keys=True)
++        # Errors propagate: a failed durable binding must refuse initialization.
++        p.write_text(payload, encoding="utf-8")
++        with open(p, "r+b") as stream:
++            stream.flush()
++            os.fsync(stream.fileno())
+ 
+     # ---- ledger --------------------------------------------------------
+     def _ledger_path(self) -> Path:
+@@ -1362,12 +1449,45 @@ class Mirror:
+             ledger["destination"] = self.consent.destination
+             ledger["marker"] = self.consent.marker
+         dest_binding = self._read_dest_binding()
+-        bound_dest = dest_binding.get("destination")
+         dest_str = str(dest)
+-        dest_matches = bool(bound_dest and os.path.normcase(os.path.realpath(bound_dest)) == os.path.normcase(os.path.realpath(dest_str)))
+-        have_synced = (dest_matches and bool(dest_binding.get("have_synced"))) or any(
+-            int(e.get("written_generation") or 0) > 0 for e in ledger.get("entries", {}).values()
++        if dest_binding in ("corrupt", "unavailable"):
++            return _mirror_refusal(
++                "invalid_request",
++                "The mirror destination binding needs reconciliation.",
++                details={"reason": "reconciliation", "what": "destination_binding"},
++                reconciliation=True,
++                synced=0,
++            )
++        bound_dest = dest_binding.get("destination") if isinstance(dest_binding, dict) else None
++        dest_matches = bool(
++            bound_dest
++            and os.path.normcase(os.path.realpath(bound_dest))
++            == os.path.normcase(os.path.realpath(dest_str))
+         )
++        have_synced = bool(isinstance(dest_binding, dict) and dest_matches and dest_binding.get("have_synced"))
++        if isinstance(dest_binding, dict) and dest_binding.get("destination") and not dest_matches:
++            return _mirror_refusal(
++                "destination_unavailable",
++                "The mirror destination is unavailable.",
++                retryable=True,
++                destination_unavailable=True,
++                details={"reason": "destination_binding_mismatch"},
++                synced=0,
++            )
++        if not have_synced:
++            try:
++                self._write_dest_binding(
++                    dest_str, self.consent.marker if self.consent else "", have_synced=False,
++                )
++            except OSError as exc:
++                return _mirror_refusal(
++                    "destination_unavailable",
++                    "The mirror destination is unavailable.",
++                    retryable=True,
++                    destination_unavailable=True,
++                    details={"reason": type(exc).__name__},
++                    synced=0,
++                )
+ 
+         marker_state = self._marker_state(dest)
+         if marker_state == "mismatch" or (marker_state == "missing" and have_synced):
+@@ -1393,10 +1513,12 @@ class Mirror:
+         self._reconcile_desired_state(ledger)
+         paused = bool(ledger.get("exports_paused")) or not self.enabled
+         plan = self._build_plan(ledger, manifest_state if isinstance(manifest_state, dict) else None, paused)
+-        # Persist intents before vault replacement.
++        # Persist intents before vault replacement. Keep outstanding temp records
++        # across generations; do not hash Library.md until its exact bytes exist.
++        existing_intents = self._load_intents()
+         for op in plan["ops"]:
+             if op["action"] in ("write", "tombstone") and op.get("content") is not None:
+-                self._write_intent(op["key"], {
++                payload = {
+                     "key": op["key"],
+                     "relpath": op["relpath"],
+                     "content_hash": _sha256_bytes(op["content"]),
+@@ -1404,18 +1526,10 @@ class Mirror:
+                     "action": op["action"],
+                     "identity": op.get("identity"),
+                     "kind": op.get("kind"),
+-                })
+-        if plan.get("rewrite_index"):
+-            index_content = self._build_library_index(plan.get("catalog") or [], 0, plan.get("shelf_catalog") or [], plan.get("brief_catalog") or [])
+-            self._write_intent(index_key(), {
+-                "key": index_key(),
+-                "relpath": LIBRARY_INDEX_REL,
+-                "content_hash": _sha256_bytes(index_content),
+-                "generation": int(plan.get("index_generation") or 0),
+-                "action": "write",
+-                "identity": "Library.md",
+-                "kind": "index",
+-            })
++                    "pending_temps": _pending_temps_from_intent(existing_intents.get(op["key"])),
++                }
++                self._write_intent(op["key"], payload)
++                existing_intents[op["key"]] = payload
+         recovered = self._load_intents()
+         plan["intents"] = recovered
+         plan["expected_marker"] = self.consent.marker if self.consent else ""
+@@ -1432,7 +1546,9 @@ class Mirror:
+             return self._vault_work(plan)
+ 
+         remaining = max(0.01, deadline - float(self._clock()))
+-        result, err = self._run_cancellable(work, remaining)
++        result, err = self._run_cancellable(
++            work, remaining, exclusive=True, cancel=cancel_event,
++        )
+         if err == "timeout" or result is None:
+             cancel_event.set()
+             return _mirror_refusal(
+@@ -1767,6 +1883,17 @@ class Mirror:
+                     briefs.append(row)
+             omitted = max(0, len(plan.get("catalog") or []) - len(live))
+             content = self._build_library_index(live, omitted, shelves, briefs)
++            index_payload = {
++                "key": index_key(),
++                "relpath": LIBRARY_INDEX_REL,
++                "content_hash": _sha256_bytes(content),
++                "generation": int(plan.get("index_generation") or 0),
++                "action": "write",
++                "identity": "Library.md",
++                "kind": "index",
++                "pending_temps": _pending_temps_from_intent(self._load_intents().get(index_key())),
++            }
++            self._write_intent(index_key(), index_payload)
+             index_op = {
+                 "action": "write",
+                 "key": index_key(),
+@@ -1851,18 +1978,91 @@ class Mirror:
+                     "counted": False,
+                 })
+ 
++    def _try_unlink_recorded_temp(self, uoink: Path, rel: str, expected_hash: str) -> str:
++        """Delete only the recorded bytes. Returns gone, not_ours, or failed."""
++        path = _safe_temp_path(uoink, rel)
++        if path is None:
++            return "not_ours"
++        try:
++            if not path.exists():
++                return "gone"
++            if not path.is_file() or _is_reparse(path) or _hardlink_conflict(path):
++                return "not_ours"
++            if not expected_hash:
++                return "not_ours"
++            current = _sha256_file(path)
++            if current != expected_hash:
++                return "not_ours"
++            path.unlink()
++            return "gone"
++        except OSError:
++            return "failed"
++
++    def _cleanup_intent_temps(self, uoink: Path, key: str, intent: dict | None) -> list[dict]:
++        kept: list[dict] = []
++        for item in _pending_temps_from_intent(intent):
++            status = self._try_unlink_recorded_temp(
++                uoink, str(item.get("rel") or ""), str(item.get("hash") or ""),
++            )
++            if status == "failed":
++                kept.append({"rel": item.get("rel") or "", "hash": item.get("hash") or ""})
++        return kept
++
++    def _retain_or_clear_intent(self, key: str, uoink: Path | None = None) -> None:
++        intent = self._load_intents().get(key)
++        if not intent:
++            return
++        dest = uoink
++        if dest is None and self.consent and self.consent.destination:
++            dest = Path(self.consent.destination) / MIRROR_ROOT
++        kept = self._cleanup_intent_temps(dest, key, intent) if dest is not None else _pending_temps_from_intent(intent)
++        if kept:
++            stub = {"key": key, "action": "cleanup", "pending_temps": kept}
++            self._write_intent(key, stub)
++        else:
++            self._clear_intent(key)
++
++    def _record_allocated_temp(self, key: str, temp_rel: str, temp_hash: str) -> None:
++        intent = self._load_intents().get(key) or {"key": key}
++        pending = _pending_temps_from_intent(intent)
++        intent["pending_temps"] = pending
++        intent["temp_rel"] = temp_rel
++        intent["temp_hash"] = temp_hash
++        self._write_intent(key, intent)
++
++    def _clear_current_temp_rel(self, key: str) -> None:
++        intent = self._load_intents().get(key)
++        if not intent:
++            return
++        pending = _pending_temps_from_intent(intent)
++        # Drop the current temp_rel (the replaced file); keep earlier outstanding temps.
++        current = intent.get("temp_rel")
++        if current:
++            pending = [item for item in pending if item.get("rel") != current]
++        intent.pop("temp_rel", None)
++        intent.pop("temp_hash", None)
++        intent["pending_temps"] = pending
++        self._write_intent(key, intent)
++
+     def _cleanup_owned_temps(self, uoink: Path, ownership: dict, plan: dict) -> None:
+         intents = self._load_intents()
+         for key, intent in list(intents.items()):
+-            temp_rel = intent.get("temp_rel")
+-            if not temp_rel:
+-                continue
+-            tmp_path = uoink / temp_rel
+-            try:
+-                if tmp_path.is_file() and not _is_reparse(tmp_path) and _contained(uoink, tmp_path):
+-                    tmp_path.unlink()
+-            except OSError:
+-                pass
++            kept = self._cleanup_intent_temps(uoink, key, intent)
++            if kept:
++                intent = dict(intent)
++                intent.pop("temp_rel", None)
++                intent.pop("temp_hash", None)
++                intent["pending_temps"] = kept
++                self._write_intent(key, intent)
++            elif intent.get("temp_rel") or intent.get("pending_temps"):
++                intent = dict(intent)
++                intent.pop("temp_rel", None)
++                intent.pop("temp_hash", None)
++                intent["pending_temps"] = []
++                if intent.get("content_hash"):
++                    self._write_intent(key, intent)
++                else:
++                    self._clear_intent(key)
+ 
+     def _apply_op(self, uoink: Path, op: dict, ownership: dict, plan: dict | None = None) -> dict:
+         rel = op["relpath"]
+@@ -2079,15 +2279,36 @@ class Mirror:
+         }
+ 
+     def _cleanup_one_temp(self, dest: Path, uoink: Path, key: str | None = None) -> None:
+-        if key:
+-            try:
+-                intent = self._load_intents().get(key)
+-                if intent and intent.get("temp_rel"):
+-                    tmp_path = uoink / intent["temp_rel"]
+-                    if tmp_path.is_file() and not _is_reparse(tmp_path) and _contained(uoink, tmp_path):
+-                        tmp_path.unlink()
+-            except OSError:
+-                pass
++        if not key:
++            return
++        intent = self._load_intents().get(key)
++        kept = self._cleanup_intent_temps(uoink, key, intent)
++        if kept:
++            stub = {"key": key, "action": "cleanup", "pending_temps": kept}
++            if intent:
++                for field in ("relpath", "content_hash", "generation", "identity", "kind"):
++                    if field in intent:
++                        stub[field] = intent[field]
++            self._write_intent(key, stub)
++        elif intent:
++            intent = dict(intent)
++            intent.pop("temp_rel", None)
++            intent.pop("temp_hash", None)
++            intent["pending_temps"] = []
++            self._write_intent(key, intent)
++
++    def _write_cancelled(self, plan: dict | None) -> bool:
++        if plan is not None:
++            cancelled = plan.get("cancelled")
++            if isinstance(cancelled, threading.Event) and cancelled.is_set():
++                return True
++            deadline = float(plan.get("deadline_mono") or 0)
++            if deadline and float(self._clock()) > deadline:
++                return True
++        return not getattr(self, "_lock_acquired", False)
++
++    def _isolated_replace(self, src: Path, dst: Path, plan: dict | None) -> None:
++        os.replace(src, dst)
+ 
+     def _atomic_vault(self, dest: Path, data: bytes, uoink: Path, *, recheck: Callable[[], bool]) -> str:
+         plan = getattr(self, "_active_plan", None)
+@@ -2098,49 +2319,29 @@ class Mirror:
+             raise OSError("temp path escapes mirror root")
+         if _path_too_long(tmp):
+             raise OSError("temp path too long")
+-        if key:
+-            try:
+-                intents = self._load_intents()
+-                if key in intents:
+-                    intents[key]["temp_rel"] = str(tmp.relative_to(uoink))
+-                    self._write_intent(key, intents[key])
+-            except Exception:
+-                pass
+-        initial_dest_bytes = dest.read_bytes() if dest.exists() else None
+         try:
+             with open(tmp, "xb") as stream:
+                 stream.write(data)
+                 stream.flush()
+                 os.fsync(stream.fileno())
++            if key:
++                try:
++                    digest = _sha256_file(tmp) or _sha256_bytes(data)
++                    self._record_allocated_temp(key, str(tmp.relative_to(uoink)), digest)
++                except Exception:
++                    pass
+             if not recheck():
+                 raise _AbortedWrite()
+-            os.replace(tmp, dest)
++            self._isolated_replace(tmp, dest, plan)
+             tmp = None
+             if key:
+                 try:
+-                    intents = self._load_intents()
+-                    if key in intents and "temp_rel" in intents[key]:
+-                        intents[key].pop("temp_rel", None)
+-                        self._write_intent(key, intents[key])
++                    self._clear_current_temp_rel(key)
+                 except Exception:
+                     pass
+-            if plan is not None:
+-                cancelled = plan.get("cancelled")
+-                deadline = float(plan.get("deadline_mono") or 0)
+-                if ((isinstance(cancelled, threading.Event) and cancelled.is_set())
+-                        or (deadline and float(self._clock()) > deadline)
+-                        or not getattr(self, "_lock_acquired", False)):
+-                    if initial_dest_bytes is not None:
+-                        dest.write_bytes(initial_dest_bytes)
+-                    else:
+-                        dest.unlink(missing_ok=True)
+-                    raise _AbortedWrite("cancelled or lock released")
+-            elif not getattr(self, "_lock_acquired", False):
+-                if initial_dest_bytes is not None:
+-                    dest.write_bytes(initial_dest_bytes)
+-                else:
+-                    dest.unlink(missing_ok=True)
+-                raise _AbortedWrite("lock released")
++            if self._write_cancelled(plan):
++                # Do not roll back over whatever now occupies dest.
++                raise _AbortedWrite("cancelled or lock released")
+             return _sha256_bytes(data)
+         finally:
+             if tmp is not None:
+@@ -2187,7 +2388,7 @@ class Mirror:
+                 entry["status"] = "purged"
+                 entry["last_file_hash"] = ""
+                 entry["written_generation"] = int(receipt.get("generation") or entry.get("desired_generation") or 0)
+-                self._clear_intent(key)
++                self._retain_or_clear_intent(key)
+                 if receipt.get("counted"):
+                     synced += 1
+             elif receipt.get("ok"):
+@@ -2198,7 +2399,7 @@ class Mirror:
+                 entry["written_generation"] = int(receipt.get("generation") or entry.get("desired_generation") or 0)
+                 if receipt.get("dependency_hash"):
+                     entry["dependency_hash"] = receipt["dependency_hash"]
+-                self._clear_intent(key)
++                self._retain_or_clear_intent(key)
+                 if receipt.get("counted"):
+                     synced += 1
+             elif code == "purge_blocked_user_edit":
+@@ -2245,8 +2446,19 @@ class Mirror:
+                 "retryable": False,
+                 "details": {},
+             }
+-        if (payload.get("ok") or synced > 0 or any(int(e.get("written_generation") or 0) > 0 for e in ledger.get("entries", {}).values())) and self.consent and self.consent.destination:
+-            self._write_dest_binding(str(self.consent.destination), self.consent.marker or "", have_synced=True)
++        if payload.get("ok") and self.consent and self.consent.destination:
++            try:
++                self._write_dest_binding(
++                    str(self.consent.destination), self.consent.marker or "", have_synced=True,
++                )
++            except OSError:
++                return _mirror_refusal(
++                    "destination_unavailable",
++                    "The mirror destination is unavailable.",
++                    retryable=True,
++                    destination_unavailable=True,
++                    synced=0,
++                )
+         if any(c.get("code") == "user_edit_conflict" for c in conflicts):
+             payload["user_edit_conflict"] = True
+         if any(c.get("code") == "unmanaged_conflict" for c in conflicts):
+@@ -2294,21 +2506,44 @@ class Mirror:
+         return unmanaged, collisions, user_edits
+ 
+     # ---- locking / worker ---------------------------------------------
+-    def _run_cancellable(self, fn: Callable[[], Any], budget_s: float) -> tuple[Any, Any]:
++    def _has_inflight(self) -> bool:
++        current = threading.current_thread()
++        with self._inflight_lock:
++            self._inflight_threads = [thread for thread in self._inflight_threads if thread.is_alive()]
++            return any(thread is not current and thread.is_alive() for thread in self._inflight_threads)
++
++    def _run_cancellable(self, fn: Callable[[], Any], budget_s: float,
++                         *, exclusive: bool = False,
++                         cancel: threading.Event | None = None) -> tuple[Any, Any]:
+         box: dict[str, Any] = {}
+         done = threading.Event()
+ 
+         def runner() -> None:
+             try:
+                 box["value"] = fn()
++            except _AbortedWrite as exc:
++                box["error"] = exc
+             except Exception as exc:
+                 box["error"] = exc
+             finally:
+                 done.set()
++                if exclusive:
++                    with self._inflight_lock:
++                        try:
++                            self._inflight_threads.remove(thread)
++                        except ValueError:
++                            pass
+ 
+         thread = threading.Thread(target=runner, name="uoink-mirror-io", daemon=True)
++        if exclusive:
++            with self._inflight_lock:
++                self._inflight_threads.append(thread)
+         thread.start()
+         if not done.wait(timeout=max(0.001, float(budget_s))):
++            if cancel is not None:
++                cancel.set()
++            if exclusive and not _replace_callback_overwrites_dest(os.replace):
++                _async_raise(thread.ident, _AbortedWrite)
+             return None, "timeout"
+         if "error" in box:
+             return None, box["error"]

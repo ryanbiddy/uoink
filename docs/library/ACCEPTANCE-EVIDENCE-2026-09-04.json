@@ -1,0 +1,584 @@
+{
+  "candidate_sha": "5d61bc8968bc61ee25fa8e9318cb4ed6b8229a6c",
+  "production_code_changed": false,
+  "source_final_sha256": "2765cc359805fb12f7a90aecd3dd0b34d884aa8cb3015785011bf400da3b4dfc",
+  "source_bytes": 71733248,
+  "runtime": {
+    "python": "3.14.6 (tags/v3.14.6:c63aec6, Jun 10 2026, 10:26:10) [MSC v.1944 64 bit (AMD64)]",
+    "sqlite": "3.50.4",
+    "platform": "Windows-11-10.0.26200-SP0"
+  },
+  "suite": {
+    "passed": 648,
+    "skipped": 3,
+    "xfail": 2,
+    "warnings": 171,
+    "seconds": 44.23,
+    "groups": {
+      "tests.security.test_adversarial_fixtures": {
+        "passed": 2,
+        "skipped": 0,
+        "xfail": 1,
+        "failed": 0
+      },
+      "tests.security.test_bench_local": {
+        "passed": 7,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.security.test_security_findings": {
+        "passed": 4,
+        "skipped": 0,
+        "xfail": 1,
+        "failed": 0
+      },
+      "tests.test_d17_entity_flag_and_usage": {
+        "passed": 14,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_fxtwitter_policy_addendum": {
+        "passed": 1,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_heartbeat_semantics": {
+        "passed": 10,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_installed_library_runtime": {
+        "passed": 1,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_installer_files_complete": {
+        "passed": 3,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_library_cards": {
+        "passed": 6,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_mcp_slug_security": {
+        "passed": 19,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_phase0_provenance": {
+        "passed": 40,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_phase0_x_full_text": {
+        "passed": 2,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_recall_hook": {
+        "passed": 20,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_stdio_clip_tools": {
+        "passed": 5,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      }
+    }
+  },
+  "measurement": {
+    "source_date": "2026-09-04",
+    "source_sha256": "2765cc359805fb12f7a90aecd3dd0b34d884aa8cb3015785011bf400da3b4dfc",
+    "before": {
+      "clips": 3216,
+      "over_120_seconds": 1729,
+      "over_180_seconds": 72,
+      "max_seconds": 1041.839
+    },
+    "cards_before": {
+      "full": {
+        "items": 548,
+        "caller_mismatches": 0,
+        "evidence_kinds": {
+          "text_only": 336,
+          "timed_clip": 212
+        },
+        "max_serialized_bytes": 109336,
+        "cards_hash": "c763abe23f801af174c67fba22cadda7a4c8c068419b9db56bd1a74c80c207b8"
+      },
+      "librarian": {
+        "items": 548,
+        "caller_mismatches": 0,
+        "evidence_kinds": {
+          "text_only": 336,
+          "timed_clip": 212
+        },
+        "max_serialized_bytes": 8153,
+        "cards_hash": "7270277aeb0b4ffdd76ee5fc50a1affc2eee4ce4af0b3dc0c1c8857a81c4c655"
+      }
+    },
+    "after_upgrade": {
+      "clips": 3705,
+      "over_120_seconds": 435,
+      "over_180_seconds": 271,
+      "max_seconds": 1041.839
+    },
+    "schema": 26,
+    "rebuild": {
+      "items": 548,
+      "items_with_clips": 212,
+      "items_without_clips": 336,
+      "clip_count": 3705,
+      "seconds": 1.922
+    },
+    "repeat_rebuild": {
+      "items": 548,
+      "items_with_clips": 212,
+      "items_without_clips": 336,
+      "clip_count": 3705,
+      "seconds": 1.895
+    },
+    "rebuild_payload_sha256": "d2eb5f2da8277a39e446eef99839684fc18a946b5aed7a4230d4ada0603f6928",
+    "after": {
+      "clips": 3705,
+      "over_120_seconds": 435,
+      "over_180_seconds": 271,
+      "max_seconds": 1041.839
+    },
+    "cards_after": {
+      "full": {
+        "items": 548,
+        "caller_mismatches": 0,
+        "evidence_kinds": {
+          "text_only": 336,
+          "timed_clip": 212
+        },
+        "max_serialized_bytes": 54481,
+        "cards_hash": "2ebedaa1982913fedb00ac778e271997cf656ff2afbfcb5c15895cd8df592535"
+      },
+      "librarian": {
+        "items": 548,
+        "caller_mismatches": 0,
+        "evidence_kinds": {
+          "text_only": 336,
+          "timed_clip": 212
+        },
+        "max_serialized_bytes": 8153,
+        "cards_hash": "e4b3465e4f7a1230eecd7412c6120c805c7088f4c2038d3e432caecc8adeee07"
+      }
+    },
+    "integrity": "quick_check, foreign_key_check, FTS external-content integrity passed",
+    "oversize_fine_windows": 0,
+    "copy_x_article_case": "x_article",
+    "source_unchanged": true
+  },
+  "independent_probes": {
+    "candidate_sha": "5d61bc8968bc61ee25fa8e9318cb4ed6b8229a6c",
+    "source_date": "2026-09-04",
+    "source_sha256": "2765cc359805fb12f7a90aecd3dd0b34d884aa8cb3015785011bf400da3b4dfc",
+    "packaging": {
+      "clips.py": {
+        "staged": true,
+        "installed": true
+      },
+      "provenance.py": {
+        "staged": true,
+        "installed": true
+      },
+      "library_cards.py": {
+        "staged": true,
+        "installed": true
+      },
+      "usage_meter.py": {
+        "staged": true,
+        "installed": true
+      },
+      "uoink": {
+        "staged": true,
+        "installed": true
+      },
+      "uoink.cmd": {
+        "staged": true,
+        "installed": true
+      },
+      "scripts/install-watchdog.ps1": {
+        "staged": true,
+        "installed": true
+      },
+      "scripts/recall_hook.py": {
+        "staged": false,
+        "installed": false
+      }
+    },
+    "frozen.db": {
+      "handlers": [
+        {
+          "video_id": "WgPbbWmnXJ8",
+          "query": "blue line purple detector tracker",
+          "hits": 1,
+          "seconds": 0.004665,
+          "first": {
+            "video_id": "WgPbbWmnXJ8",
+            "start": 7069.38,
+            "end": 7199.689,
+            "timing": "coarse",
+            "deep_link": "https://youtube.com/watch?v=WgPbbWmnXJ8&t=7069s"
+          },
+          "cards": [
+            {
+              "profile": "full",
+              "clip_count": 116,
+              "selected": 10,
+              "selected_chars": 25624,
+              "bytes": 59141,
+              "card_hash": "e0d19efb04e989908b8de2d0745690903aecb1a6851ae337d972f6e63a12e658"
+            },
+            {
+              "profile": "librarian",
+              "clip_count": 116,
+              "selected": 6,
+              "selected_chars": 1440,
+              "bytes": 7260,
+              "card_hash": "b5a2fac809bffa0a70e26c854179ea31c1cef2037ad00bca9a75e06db3bcfa4e"
+            }
+          ]
+        },
+        {
+          "video_id": "episode_9ddb44f98b2",
+          "query": "site side by side verbose skills",
+          "hits": 1,
+          "seconds": 0.000497,
+          "first": {
+            "video_id": "episode_9ddb44f98b2",
+            "start": 1718.38,
+            "end": 1787.98,
+            "timing": "source_cues",
+            "deep_link": "https://www.latent.space/p/chatgpt-work#t=1718"
+          },
+          "cards": [
+            {
+              "profile": "full",
+              "clip_count": 64,
+              "selected": 10,
+              "selected_chars": 18197,
+              "bytes": 44110,
+              "card_hash": "b94dc1d1e371a831f6b6083483cf8f5b708dbba11539928d55efd6b95fb2206e"
+            },
+            {
+              "profile": "librarian",
+              "clip_count": 64,
+              "selected": 6,
+              "selected_chars": 1440,
+              "bytes": 7209,
+              "card_hash": "e57a977ad6b3fbf5ab83d1d429021803c62fb91065222fb9382d1404837e6c1b"
+            }
+          ]
+        }
+      ],
+      "items": 548,
+      "null_source_type": 0,
+      "tail_timing": {
+        "coarse": 72
+      },
+      "tail_distinct_items": 18,
+      "corpus_heads_manifest_sha256": "690cdf04396c8c1a8e1ad5cc4098b1e75de67a4c388de7e3ce94c8a361581367"
+    },
+    "rebuild.db": {
+      "handlers": [
+        {
+          "video_id": "WgPbbWmnXJ8",
+          "query": "blue line purple detector tracker",
+          "hits": 1,
+          "seconds": 0.004968,
+          "first": {
+            "video_id": "WgPbbWmnXJ8",
+            "start": 7077.3,
+            "end": 7199.689,
+            "timing": "coarse",
+            "deep_link": "https://youtube.com/watch?v=WgPbbWmnXJ8&t=7077s"
+          },
+          "cards": [
+            {
+              "profile": "full",
+              "clip_count": 177,
+              "selected": 10,
+              "selected_chars": 15475,
+              "bytes": 38937,
+              "card_hash": "fd0d730a8bc428b110cd500153dfdc4f9c0eb7e40c152acb8209300a69aec8c9"
+            },
+            {
+              "profile": "librarian",
+              "clip_count": 177,
+              "selected": 6,
+              "selected_chars": 1440,
+              "bytes": 7324,
+              "card_hash": "08ca7ba3b4f0d1654af0203f3e40d9e0848638a04d81d0927b91f4a768e6d5dd"
+            }
+          ]
+        },
+        {
+          "video_id": "episode_9ddb44f98b2",
+          "query": "site side by side verbose skills",
+          "hits": 1,
+          "seconds": 0.000459,
+          "first": {
+            "video_id": "episode_9ddb44f98b2",
+            "start": 1718.38,
+            "end": 1787.98,
+            "timing": "source_cues",
+            "deep_link": "https://www.latent.space/p/chatgpt-work#t=1718"
+          },
+          "cards": [
+            {
+              "profile": "full",
+              "clip_count": 64,
+              "selected": 10,
+              "selected_chars": 18006,
+              "bytes": 43746,
+              "card_hash": "b109b3160633105ba11c47fa3c56a0eab597a5ba039cb8b86ba1fe1e3cc0e7a9"
+            },
+            {
+              "profile": "librarian",
+              "clip_count": 64,
+              "selected": 6,
+              "selected_chars": 1440,
+              "bytes": 7215,
+              "card_hash": "dbad26b53d1eabdf4408943fb4da03097dd99a866c3fa9f9884a845e9d6bdea5"
+            }
+          ]
+        }
+      ],
+      "items": 548,
+      "null_source_type": 0,
+      "tail_timing": {
+        "coarse": 271
+      },
+      "tail_distinct_items": 18,
+      "corpus_heads_manifest_sha256": "690cdf04396c8c1a8e1ad5cc4098b1e75de67a4c388de7e3ce94c8a361581367"
+    },
+    "card_marker": {
+      "excerpt_chars": 240,
+      "bytes": 1777,
+      "truncated": true,
+      "truncation": {
+        "selection": false,
+        "byte_budget": false,
+        "fields": []
+      },
+      "truncation_markers": null
+    },
+    "benchmark": {
+      "cross_clip_quote": {
+        "id_valid": true,
+        "id_status": "valid",
+        "l1_match": true,
+        "l2_match": true,
+        "evidence_valid": true,
+        "completion_tokens": "unavailable"
+      },
+      "unexpected_extra_id": {
+        "id_valid": true,
+        "id_status": "valid",
+        "l1_match": true,
+        "l2_match": true,
+        "evidence_valid": true,
+        "completion_tokens": "unavailable"
+      },
+      "unhashable_id": {
+        "exception": "TypeError",
+        "message": "cannot use 'list' as a set element (unhashable type: 'list')"
+      },
+      "malformed_shelf": {
+        "exception": "TypeError",
+        "message": "'int' object is not iterable"
+      },
+      "wrong_id": {
+        "id_valid": false,
+        "id_status": "wrong_id",
+        "l1_match": false,
+        "l2_match": false,
+        "evidence_valid": false,
+        "completion_tokens": "unavailable"
+      },
+      "missing_id": {
+        "id_valid": false,
+        "id_status": "missing_id",
+        "l1_match": false,
+        "l2_match": false,
+        "evidence_valid": false,
+        "completion_tokens": "unavailable"
+      },
+      "duplicate_id": {
+        "id_valid": false,
+        "id_status": "duplicate_id",
+        "l1_match": false,
+        "l2_match": false,
+        "evidence_valid": false,
+        "completion_tokens": "unavailable"
+      }
+    },
+    "benchmark_fence": {
+      "mocked_calls": 1,
+      "opening_fences": 1,
+      "closing_fences": 2,
+      "unescaped_attack_present": true
+    },
+    "concurrent_usage": {
+      "recorded": 200,
+      "feature": "entity_extraction",
+      "model": "fixture-model",
+      "month": "2026-09",
+      "calls": 200,
+      "input_tokens": 600,
+      "output_tokens": 400,
+      "cache_read": 0,
+      "cache_create": 0,
+      "est_usd": 0.0,
+      "last_call_at": "2026-09-04T00:00:00Z",
+      "last_usage": {
+        "input_tokens": 3,
+        "output_tokens": 2,
+        "cache_read": 0,
+        "cache_create": 0
+      }
+    },
+    "nested_transaction": {
+      "still_open": true,
+      "pending_row_present": 1,
+      "usage_calls_after_refusal": 200
+    },
+    "missing_usage": {
+      "buckets": [],
+      "public_actual": {
+        "month": "2026-09",
+        "by_feature": {},
+        "total_usd": 0.0
+      }
+    },
+    "cache_only_usage": {
+      "month": "2026-09",
+      "by_feature": {
+        "entity_extraction": {
+          "calls": 1,
+          "input_tokens": 0,
+          "output_tokens": 0,
+          "cache_read": 1000,
+          "cache_create": 0,
+          "usd": 0.0,
+          "models": [
+            "fixture-model"
+          ]
+        }
+      },
+      "total_usd": 0.0
+    },
+    "recall_fence": {
+      "characters": 599,
+      "surfaced": 1,
+      "closing_fences": 1,
+      "raw_code_fences": 0,
+      "unsafe_link_present": false,
+      "control_present": false
+    },
+    "recall_locked": {
+      "seconds": 1.8153,
+      "returncode": 0,
+      "stdout_bytes": 0,
+      "main_seconds": 1.774,
+      "main_returncode": 0,
+      "main_stdout_bytes": 0
+    },
+    "recall_disabled": {
+      "returncode": 0,
+      "stdout_bytes": 0
+    },
+    "failed_poll_heartbeat": {
+      "last_tick_completed_at": "2026-09-05T01:40:06Z",
+      "last_successful_tick_at": null,
+      "last_successful_poll_at": null,
+      "last_failed_poll_at": "2026-09-05T01:40:06Z",
+      "last_poll_error": "poll returned ok=false",
+      "last_ingest_completed_at": null,
+      "last_tick": {
+        "ok": false,
+        "polls": 1,
+        "failed_polls": 1
+      },
+      "counts": {
+        "ticks": 1,
+        "polls_ok": 0,
+        "polls_failed": 1,
+        "ingests": 0
+      },
+      "tick_interval_sec": 30,
+      "freshness": {
+        "state": "fresh",
+        "age_sec": 0.0,
+        "stale_after_sec": 300
+      }
+    },
+    "sec06": {
+      "日本語": "",
+      "canción": "\"canci\" \"n\"*"
+    }
+  },
+  "recall_direct_main_seconds_repeated": [
+    1.7764,
+    1.7763,
+    1.7739,
+    1.7754,
+    1.774
+  ],
+  "benchmark_regression": {
+    "weighted_wins": 3,
+    "losses": 0,
+    "ties": 17
+  },
+  "draft_validation": {
+    "schemas": 6,
+    "schema_cases": 22,
+    "new_tables": 16,
+    "copied_items_unchanged": 548,
+    "initial_assignments": 0,
+    "initial_work": 0,
+    "sql_negative_cases_rejected": [
+      "two_active_versions",
+      "duplicate_item_work",
+      "two_current_attempts",
+      "fourth_attempt",
+      "bad_state",
+      "missing_stable_shelf"
+    ],
+    "integrity": "quick_check and foreign_key_check passed",
+    "service_implemented": false
+  },
+  "model_execution": {
+    "real_calls_by_review": 0,
+    "real_usage": "unavailable",
+    "paid_cost": "not incurred by review",
+    "usage_probe_counters": "synthetic fixtures"
+  },
+  "verification_limits": [
+    "installer build/install",
+    "watchdog recovery",
+    "installed client and browser verification",
+    "media seeking",
+    "real model quality"
+  ],
+  "verdict": "REJECT"
+}

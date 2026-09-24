@@ -55,6 +55,8 @@ CANONICAL_STDIO_TOOLS = {
     "cancel_job",
     "list_recent_uoinks",
     "search_uoinks",
+    "search_clips",          # run E (2026-09-04): Phase 1 clip tools on stdio
+    "get_evidence_card",
     "get_uoink_corpus",
     "analyze_comments",
     "classify_hook",
@@ -63,6 +65,25 @@ CANONICAL_STDIO_TOOLS = {
     "get_uoink_health",
     "find_mentions",
     "get_transcript_reliability",
+    "add_podcast_feed",
+    "list_podcast_feeds",
+    "remove_podcast_feed",
+    "poll_podcast_feed",
+    "list_podcast_episodes",
+    "download_podcast_episode",
+    "get_whisperx_status",
+    "transcribe_podcast_episode",
+    "episode_to_corpus",
+    "get_library_activity",
+    # Phase 4 run AV-1 (contract phase4-v1-2026-09-08): bounded library reads.
+    "search_library",
+    "get_library_item",
+    "read_library_resource",
+    # Phase 4 run AV-2: client-run daily briefs (input is a read; publish is a local write).
+    "get_library_brief_input",
+    "publish_library_brief",
+    # Phase 6 run BC-2 (contract phase6-v1): read-only cited range export.
+    "export_cited_range",
 }
 
 REMOVED_STDIO_ALIASES = {
@@ -143,10 +164,49 @@ class _StdioClient:
 
 def _isolated_env(tmp):
     env = dict(os.environ)
+    # The parent pytest invocation needs the worktree on PYTHONPATH. The
+    # embeddable-path regression must not let that rescue the child import.
+    env.pop("PYTHONPATH", None)
     env["LOCALAPPDATA"] = tmp                      # Windows data root
     env["XDG_DATA_HOME"] = os.path.join(tmp, "xdg")  # Linux/mac data root
     env["UOINK_OUTPUT_DIR"] = os.path.join(tmp, "out")
     return env
+
+
+def _assert_tool_metadata(tools):
+    """Check the real wire response, including low-level list overrides."""
+    import uoink_mcp_tools
+
+    hints = ("readOnlyHint", "destructiveHint", "idempotentHint", "openWorldHint")
+    registry = {tool["name"]: tool for tool in uoink_mcp_tools.list_tools()}
+    documented = {}
+    for line in (ROOT / "docs" / "mcp-tool-annotations.md").read_text(
+            encoding="utf-8").splitlines():
+        if line.startswith("| `"):
+            cells = [cell.strip() for cell in line.strip("|").split("|")]
+            documented[cells[0].strip("`")] = (
+                cells[1], dict(zip(hints, (v == "true" for v in cells[2:6]))))
+    _assert(set(documented) == CANONICAL_STDIO_TOOLS,
+            "annotation table must cover every stdio tool")
+    _assert(len(tools) == len(CANONICAL_STDIO_TOOLS),
+            "tools/list must not duplicate tools")
+    for tool in tools:
+        name = tool["name"]
+        _assert(isinstance(tool.get("title"), str) and tool["title"].strip(),
+                f"{name}: missing human title")
+        annotations = tool.get("annotations") or {}
+        for hint in hints:
+            _assert(type(annotations.get(hint)) is bool,
+                    f"{name}: {hint} must be explicitly set")
+        expected_title, expected_hints = documented[name]
+        _assert(tool["title"] == expected_title, f"{name}: title differs from audit")
+        _assert({key: annotations[key] for key in hints} == expected_hints,
+                f"{name}: wire hints differ from audit: {annotations}")
+        _assert(registry[name]["title"] == tool["title"],
+                f"{name}: HTTP title differs from stdio")
+        _assert(registry[name]["annotations"] == expected_hints,
+                f"{name}: HTTP hints differ from stdio")
+    print(f"ok  {len(tools)} live stdio titles and all four hints match HTTP and audit")
 
 
 def test_stdio_handshake_under_embeddable_path_rules():
@@ -188,7 +248,8 @@ def test_stdio_handshake_under_embeddable_path_rules():
                     f"extra={sorted(set(names) - CANONICAL_STDIO_TOOLS)}")
             _assert(not REMOVED_STDIO_ALIASES.intersection(names),
                     f"removed aliases returned by tools/list: {names}")
-            print("ok  tools/list returns exactly 14 canonical tools")
+            _assert_tool_metadata(tools["result"]["tools"])
+            print(f"ok  tools/list returns exactly {len(names)} canonical tools")
 
             client.send({"jsonrpc": "2.0", "id": 3, "method": "tools/call",
                          "params": {"name": "list_recent_uoinks",
@@ -243,7 +304,14 @@ def test_removed_aliases_are_rejected_and_manifest_matches():
             "MCPB manifest tool inventory drift: "
             f"missing={sorted(CANONICAL_STDIO_TOOLS - manifest_names)}, "
             f"extra={sorted(manifest_names - CANONICAL_STDIO_TOOLS)}")
-    print("ok  removed aliases reject and MCPB lists the same 14 tools")
+    _assert(manifest["privacy_policies"] == ["https://uoink.app/privacy"],
+            "MCPB must publish the privacy-policy link")
+    # MCPB 0.4 uses a strict name/description tool schema: a title here would
+    # invalidate the bundle. Live MCP titles are verified over stdio above.
+    _assert(manifest["manifest_version"] == "0.4", "review the tool schema on upgrade")
+    _assert(all(set(tool) == {"name", "description"} for tool in manifest["tools"]),
+            "MCPB 0.4 tool entries must use only name and description")
+    print(f"ok  removed aliases reject and MCPB lists the same {len(manifest_names)} tools")
 
 
 def main():

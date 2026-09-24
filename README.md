@@ -8,10 +8,10 @@
 
 **Uoink keeps the videos, podcasts, and articles creators and AI developers study on their own disk, then hands them to Claude, ChatGPT, Cursor, or a local MCP agent as a cited corpus.**
 
-Free, open source (MIT), and local-first: no account, no Uoink cloud, no required telemetry. One click saves a source — full transcript, timestamped screenshots, comments, and metadata — as a structured Markdown corpus on *your* machine, then makes it available to your AI three ways: the clipboard, a local MCP server, and an OpenAPI bridge.
+Free, open source (MIT), and local-first: no account, no Uoink cloud, no required telemetry. Uoink saves supported sources as structured Markdown on *your* machine, then makes the corpus available to your AI through the clipboard, a local MCP server, and an OpenAPI bridge. YouTube capture includes the transcript, timestamped screenshots, comments, and metadata; other source types keep the material their publishers expose.
 
 - **Website:** https://uoink.app · **Install:** https://uoink.app/install · **Developers:** https://uoink.app/developers
-- **Status:** Windows 10/11 today; Mac build queued after Windows stabilizes. Chrome Web Store listing pending — for now the extension sideloads from the release.
+- **Status:** Windows 10/11 only. There is no Mac build. The extension sideloads from the release — it is not on the Chrome Web Store. The installer is unsigned, so Windows SmartScreen will warn on first run.
 
 ## Why Uoink
 
@@ -27,19 +27,19 @@ The corpus compounds. Every source you save lands in one local library your AI c
 |---|---|
 | **YouTube** (flagship) | Timestamped transcript, screenshots, top comments, channel context, full metadata, JSON sidecar |
 | **X / Twitter video + text** | Video transcript and post text, author credit, thread context |
-| **Podcasts** | RSS feeds and episodes, local Whisper transcription, speaker diarization |
+| **Podcasts** | Automatic RSS/Atom metadata watching; optional per-feed Auto-ingest for local MP3 download, WhisperX transcription, and corpus publishing |
 | **Web pages / articles** | Readable text extraction into the same corpus format |
 | **Reddit** | Thread + top comments as Markdown |
 
-Everything files into one local library, auto-sorted into topic folders under your Uoink output folder (default `Desktop\Uoink\`).
+Published sources are indexed in one local library. Podcast audio and transcripts stay under Uoink's local data folder; publishing an episode adds its Markdown and sidecar to that same searchable index.
 
 ## Three ways your AI reads the corpus
 
 **1. Clipboard (the creator path)** — Click Uoink, paste into Claude / ChatGPT. Transcript plus a paste-safe subset of screenshots inlined as images so the model sees text *and* frames in one paste.
 
-**2. MCP server (the agent path)** — A local Model Context Protocol server exposing 14 tools over stdio (the curated everyday set), tested with **Claude Desktop and Cursor**. Cline and Continue are standard-stdio compatibility paths, not individually smoke-tested. Two surfaces, on purpose:
-- **stdio** exposes the curated everyday set most agents need (`uoink_video`, `uoink_playlist`, `list_recent_uoinks`, `search_uoinks`, `get_uoink_corpus`, `analyze_comments`, `classify_hook`, `get_citation_map`, `get_uoink_health`, `find_mentions`, and more).
-- **HTTP JSON-RPC** at `/mcp/v1` exposes the full local tool registry (Writing Studio, workspaces, podcasts, monitored playlists, taste/engagement memory, source capture) — the same handlers, same auth token.
+**2. MCP server (the agent path)** — A local Model Context Protocol server exposing 32 tools over stdio (the curated everyday set, plus five library resource templates, four prompts, the two client-run brief tools since the Living Library Phase 4 increments and the read-only Phase 6 cited export), tested with **Claude Desktop and Cursor**. Cline and Continue are standard-stdio compatibility paths, not individually smoke-tested. Two surfaces, on purpose:
+- **stdio** exposes the curated everyday set most agents need, including video capture, podcast feed/episode operations, local transcription jobs, corpus publishing, search, clip search and evidence cards, citation maps, and analysis.
+- **HTTP JSON-RPC** at `/mcp/v1` exposes the 88-tool local registry (Writing Studio, workspaces, podcasts, monitored playlists, taste/engagement memory, source capture, clip search, evidence cards, the six Living Library work-queue tools, the four Phase 3 source-subscription tools, the Phase 5 activity report, the three Phase 4 bounded read tools, the two Phase 4 brief tools and the Phase 6 cited export) — the same handlers, same auth token. `search_clips` and `get_evidence_card` were registry-only in Phase 1; since 2026-09-04 they are also on stdio (23 → 25 tools). The Living Library tools stay registry-only.
 
 **3. OpenAPI bridge (for local agents that don't speak MCP)** — Local OpenAPI-capable agents and scripts can drive the same tools over an OpenAPI 3.1 surface at `/openapi/v1/spec.json` + `POST /tools/<name>`.
 
@@ -70,11 +70,25 @@ Uoink ships a portable Skill at `skills/uoink/SKILL.md` (installed to `%LOCALAPP
 
 ## Install
 
-1. **Download the installer.** Download `Uoink-Setup-3.7.0.exe` from the [published v3.7.0 release](https://github.com/ryanbiddy/uoink/releases/tag/v3.7.0). Windows 10/11 is available now; the Mac `.dmg` is queued after Windows stabilizes.
+1. **Download the installer.** Download `Uoink-Setup-3.8.0.exe` from the [v3.8.0 release](https://github.com/ryanbiddy/uoink/releases/tag/v3.8.0). Windows 10/11 only — there is no Mac build today. The installer is unsigned: if SmartScreen shows "Windows protected your PC", choose **More info → Run anyway**, and check the file against the SHA-256 listed on the release page.
 2. **Run it.** Defaults install to `%LOCALAPPDATA%\Uoink\` (no admin required). The finish page can launch the helper immediately, and an autostart entry runs it on each login.
 3. **Load the bundled extension.** On first launch, Uoink shows a one-time setup splash. Use it to open your browser's extensions page and copy the installed extension path; then enable Developer mode, click **Load unpacked**, and select that folder. (The Chrome Web Store listing is pending; sideload is the current path.)
 
 For developers running from source, see [REQUIREMENTS.md](./REQUIREMENTS.md). Build the installer locally with `./build.ps1` (see [docs/build-installer.md](./docs/build-installer.md)).
+
+### Quiet desktop notifications
+
+Desktop notifications are on by default. To keep background feed watches and
+captures invisible, open **Dashboard → Settings → Local app** and turn off
+**Show desktop notifications**. Uoink keeps suppressed updates in the
+dashboard's **Activity** view, so silence does not discard the event. Uoink
+also applies the same courtesy automatically while a foreground app covers its
+monitor, including borderless and exclusive-fullscreen games.
+
+The persisted setting is `notifications_enabled` in `settings.json`. Local
+clients can read it through `GET /settings` or update it with an authenticated
+`POST /settings` body such as `{"notifications_enabled": false}`. Restart is
+not required.
 
 ## How it works
 
@@ -82,9 +96,24 @@ For developers running from source, see [REQUIREMENTS.md](./REQUIREMENTS.md). Bu
 
 **Agent flow (MCP):** your agent has the Uoink tools after setup → ask *"uoink this video and decode the hook"* → the agent calls `uoink_video` → `classify_hook` → analysis, no clipboard step.
 
-## Optional AI features and privacy
+## Privacy
 
-Core capture works with **no API key**. Comment Intelligence, Hook Type classification, Entity Extraction, and the agent-callable `analyze_comments` / `classify_hook` tools call the Anthropic API and are **off by default**. When you enable them you supply your own Anthropic API key on the setup page; it's stored in the OS credential store (encrypted at rest) and used only for those calls. Uoink itself collects nothing — the core extraction stays local except the source fetch. Revoke the key any time via the setup page.
+Your saved corpora, screenshots, podcast audio, transcripts, library index and
+diagnostic logs stay on your computer. Uoink has no account, cloud library or
+telemetry.
+
+Capture fetches the source you ask for. Podcast watches poll feeds you enable;
+Auto-ingest can also download new episodes. Truncated X posts may use the
+FxTwitter fallback to retrieve full text. Transcription can download models with
+your consent, and **Check now** contacts GitHub for release information.
+
+Optional AI features send relevant source text to Anthropic only with your own
+API key. Comment Intelligence, Hook Type classification and entity extraction
+are off by default; agent-requested analysis also requires your key. The key is
+stored in the OS credential store. Content you pass to an AI client is handled
+under that client's policy.
+
+Read the [Uoink privacy policy](https://uoink.app/privacy).
 
 ## Disclaimer & Terms of Use
 
@@ -100,4 +129,4 @@ See [CHANGELOG.md](./CHANGELOG.md) for version history and [ROADMAP.md](./ROADMA
 
 ---
 
-*Uoink is part of the [ReplayRyan](https://replayryan.com) family of tools.*
+*Built by [Ryan Biddy](https://github.com/ryanbiddy).*

@@ -84,7 +84,10 @@ New-Item -ItemType Directory -Path $BuildDir -Force | Out-Null
 # Stamp the derived version into the staged manifest (string replace keeps the
 # original formatting; only the top-level "version" value changes).
 $stagedJson = $json -replace '"version"\s*:\s*"[^"]*"', ('"version": "' + $version + '"')
-Set-Content -Path (Join-Path $BuildDir "manifest.json") -Value $stagedJson -Encoding utf8
+# Write UTF-8 WITHOUT a BOM: Windows PowerShell 5.1's `Set-Content -Encoding utf8`
+# prepends EF BB BF, and the official `mcpb validate` (JSON.parse) rejects the
+# bundled manifest with "Unexpected token" when it starts with a BOM.
+[IO.File]::WriteAllText((Join-Path $BuildDir "manifest.json"), $stagedJson, [Text.UTF8Encoding]::new($false))
 
 # Reference copies so entry_point resolves inside the bundle. The RUNTIME uses
 # the installed copy (via user_config.uoink_dir) because that is where the

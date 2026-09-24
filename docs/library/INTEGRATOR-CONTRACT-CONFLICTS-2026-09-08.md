@@ -1,0 +1,312 @@
+# Acceptance fixture conflicts found during integration
+
+Current authority: Ryan authorized the original five fixture corrections and
+later explicitly approved the two reviewed mirror/read proposals and continued
+receipt corrections. Those older pending-approval entries below are historical.
+The behavior assertions and original failures remain; corrections do not waive
+the separate historical AT6 evidence gap.
+
+The latest receipt integration corrects supported Inno switch expectations and
+the isolated settings path. One C22 scenario provisions the existing production
+source-runtime fixture with synthetic acquisition so its original child and
+provenance oracles can run. Its 17 assertion syntax trees are unchanged against
+c7a8426, as are the Phase 4 apply-false and sentinel requirements. The copier
+excludes build archives. Only those three files are in the final receipt patch.
+Exact diff and all original, failed and aborted attempts:
+proof/ryan-receipt-correction-2026-09-09/SHA256.json. Review:
+ASTRA-RECEIPT-CORRECTION-VERDICT-2026-09-09.md. The independent 14-file union has
+172 passes in both roots. These are instrument results, not installed credit.
+
+Reviewer: Astra, 2026-09-08. Checkout: `dad34eb`. This is a source-inspection
+finding, not a passing runtime receipt. Preserve the existing acceptance files.
+The implementation work continues; these conflicts grant no waiver for unsafe
+publication, cancellation, or test-specific production behavior.
+
+## Phase 4: D13's two observation cases
+
+In `tests/library_work_astra/test_phase4_aw3_acceptance.py:245`, both cases
+install the same `blocked_replace` wrapper. It signals entry, waits until the
+caller has returned a timeout, performs the actual replacement, and appends
+the resulting source bytes to `published`. Only then does the `user_edit`
+case write its personal bytes. The visibility case requires `published` to
+remain empty; the user-edit case requires those later personal bytes to exist.
+
+A publisher that prevents the post-timeout replacement also prevents this
+wrapper from creating the personal bytes. An implementation cannot distinguish
+these cases before that replacement through its public inputs. Inspecting the
+fixture's closure, branch names, or test identity is not an acceptable repair.
+The AV-5m2 draft does inspect the `observe == "user_edit"` closure; that code
+will not be integrated. Asynchronous Python exceptions also do not establish
+cancellation of a blocked operating-system replacement.
+
+The product obligations remain: prevent abandoned work from mutating a
+destination after timeout, retain destination exclusion until termination,
+and preserve independent user edits. A revised fixture should arrange the
+user edit independently of the forbidden replacement and exercise the actual
+cancellable I/O boundary. Ryan must authorize that acceptance-fixture revision
+or give another explicit ruling. Neither existing case is relabelled passed.
+
+## Phase 6: required build-time ticket versus legacy helper calls
+
+BD-01 and the BC-3a2 brief require both raw and Index publication entry points
+to reject absent build-time ownership. However,
+`tests/test_phase6_evaluation.py:1228` calls the raw publisher without a ticket
+for successful publication/recovery scenarios. The BD reproduction itself uses
+that helper to publish its newer setup snapshot. Several successful Index
+replacement/retry calls in `tests/test_phase6_bc2.py` also omit tickets.
+
+An unconditional ticket requirement therefore refuses some fixture setup
+before the behavior under review can run. Allowing ticketless empty snapshots
+is unsafe: an old empty build can erase a newer publication just as an old
+nonempty build can replace it. An exception described as support for the
+frozen evaluation helper is not a production contract.
+
+Keep the boundary fail-closed and carry tickets from build start in production
+callers. Ryan must authorize updating legacy acceptance setup to acquire and
+carry the ticket before building, while preserving every behavioral assertion,
+or make another explicit contract ruling. Worker edits to these acceptance
+files are not integrated under the current instruction. Runtime counts must
+identify any fixture-setup refusals separately from implementation failures;
+neither becomes a pass by this inspection.
+
+## Integration disposition
+
+These are additional Ryan decisions under the instruction never to edit
+acceptance tests. They do not move the unfinished implementation work into
+Ryan's queue. Finish and independently verify the general repairs, retain all
+failed observations, and review the resulting safety behavior before proposing
+any candidate as blocked only on the fixture rulings and other owner gates.
+# Additional fixture conflict: Phase 5 final-wire deadline probe
+
+AZ-5d (Grok `e739a5ec`) is rejected despite 393 passes and four measurement
+failures. Its adapter traverses a callback closure to bypass incompatible test
+wrappers. Production must call its reader normally.
+
+`test_phase5_acceptance3.py:391` installs a unary `read(args)` wrapper. The
+shared `stdio_result` at `test_phase5_acceptance.py:427-431` then invokes that
+wrapper with `clock=NOW`. Python raises TypeError before the final-wire probe
+runs. Ryan must authorize compatible fixture setup, preserving the deadline
+assertion, or provide a ruling. Existing tests remain unchanged. AZ-5d2 removes
+the production workaround and adds an independent actual-handler test; it must
+report the frozen setup failure separately.
+
+## Phase 4: D15 intercepts the removed direct binding write
+
+AV-5m4a2 removes `Path.write_text` from binding persistence as required by
+AW-4. `test_d15_failed_destination_binding_persistence_does_not_allow_readoption`
+patches that removed method on the binding pathname. Its injected failure is
+never reached, so the assertion that no binding exists fails. The binding is
+now written through `_atomic_local`; the independent initial-failure and
+witness-failure tests cover that actual boundary and pass. Preserve this
+ninth frozen setup failure. Ryan must authorize moving its failure injection
+to the real persistence boundary without weakening its authority assertions,
+or give another ruling. Do not restore the direct write to satisfy the test.
+
+## Ryan's authorized fixture corrections, 2026-09-09
+
+Base: `ee1293f20e95e330516467f0ce4d093142391031`, on
+`cc/living-library-candidate`. The [complete six-file diff](patches/ryan-fixture-corrections-2026-09-09.patch)
+is 23,425 bytes, SHA-256
+`4e6689d0bf434bea8a83694c7c4c1ea2b2dd5a60074ab852032fd8688f552718`.
+It is the authoritative diff for every change described here.
+
+| Authorized change | Exact diff and reason |
+|---|---|
+| AW-11 teardown | In `test_phase4_aw11_foreign_helper_acceptance.py`, add `env.mirror._stop_vault_io(session)` before the existing death assertion; remove direct assignment of `_vault_io = None`. Production stop/forget clears the originating binding after death. The original termination assertion and foreign-thread assertions remain. |
+| D13 user-edit ordering | In `test_phase4_aw3_acceptance.py`, move the conditional personal-file write out of the blocked replace callback and after the timeout assertion, before releasing the callback. Create its parent if needed. The user edit no longer depends on the forbidden publication occurring. Visibility, timeout and personal-byte assertions are unchanged. |
+| D15 atomic persistence | In the same file, intercept the instance's `_atomic_local` instead of `Path.write_text`, at the identical binding path with the identical injected PermissionError. Keep the failed-initialization branch and all subsequent ownership assertions. |
+| Phase 5 unary clock probe | In `test_phase5_acceptance3.py`, change the local wrapper to `read(args, *, clock=NOW)` and forward that clock to the real reader. The shared caller's frozen clock now reaches the probe. The simulated three-second cost and final deadline assertion are unchanged. |
+| Phase 6 build-time tickets | In `test_phase6_evaluation.py`, add an explicit optional publication connection to the synthetic builder. It mints a ticket before copying inputs or constructing cues/artifacts, and stores that ticket on the fixture. `_publish` only forwards it; it never mints one. Correct successful legacy callers there, in `test_phase6_bc2.py` and `test_phase6_bd_acceptance.py`. Initial Index setup gets its ticket before fixture construction; each crash scenario constructs its replacement under its own ticket and retries reuse that exact ticket. The malformed-sidecar probe gets its ticket before the mutation is built. Intentionally omitted/foreign/malformed ticket cases retain their inputs and assertions. |
+
+Scope review: 690 assertion syntax trees across the six files are identical to
+the base, in the same traversal order. No expected values, thresholds, parameter
+cases, skips or xfails changed. No product source changed. The existing parent-
+process syscall interceptors are outside this authorization and remain unchanged.
+Some old refusal-code expectations may still fail; do not mint a fresh ticket
+for stale input or change an assertion to avoid that result.
+
+See the [one-page review verdict](FIXTURE-CORRECTIONS-REVIEW-2026-09-09.md).
+The corrected full tree ran on `4a3531642692736d4aaa4098077ab8fde464aeb4`,
+with only S21 excluded: **2,174 passed, 20 failed, three skipped, one xfailed**,
+183 warnings, 607.27 seconds. Every remaining failure is assigned in
+[the product repair brief](CORRECTED-TREE-PRODUCT-REPAIR-BRIEF-2026-09-09.md).
+The [sealed complete result](proof/ryan-corrected-01-2026-09-09/SHA256.json)
+retains the command, log, XML, comparison and assertion audit. No further
+fixture correction or product source edit followed that run.
+
+## Proposed read-opening setup correction, not authorized or applied
+
+Full tree 8fc6a40 fails Astra's new read-promotion test because the earlier
+unchanged test_discovery_route.py leaves server._get_index replaced by its
+fixture lambda. Ordered reproduction pre-o1 has three passed / one failed,
+1.25 s. This is not an observed production getter failure: that getter is
+not invoked. The same production checks passed focused verification.
+Exact proposed two-line setup diff: patches/ryan-proposed-read-fixture-2026-09-09.patch,
+649 bytes, SHA-256 32ecbcce8d4040308324cc739914eb56106535e91e780991d7cc02683659a0f5.
+Capture the original production getter during collection and bind it for the
+new test with monkeypatch; keep every assertion and the older fixture unchanged.
+All 13 assertion trees match. Review: RYAN-READ-FIXTURE-PROPOSAL-REVIEW-2026-09-09.md.
+No correction has been applied. Ryan's further-fixture freeze remains in force.
+
+## Final receipt-test conflicts, 2026-09-09: unchanged and unresolved
+
+The final 12ce8a5 tree adds 178 cases and preserves all earlier membership.
+Its 13 failures comprise the prior ten and three frozen receipt-test conflicts.
+The [bounded disposition brief](RYAN-FINAL-RECEIPT-CONTRACT-DISPOSITION-BRIEF-2026-09-09.md)
+records the exact test locations, original assertions, current contract and
+permitted next action. No test, fixture, threshold, marker or parameter changed.
+The actual original bundled routes are separate evidence, not a waiver of these
+failed tests. Ryan's narrow five-correction authorization does not authorize
+changing the obsolete flags, extending the old stub, or changing the nested path.
+
+
+## Approved mirror/read corrections applied, 2026-09-09
+
+Ryan explicitly answered yes to the two prepared corrections and continued fixes.
+The exact previously linked patches are applied, with 163 unchanged assertion
+syntax trees across four files. Mirror callbacks move from parent os.replace /
+Path.unlink to the real instance dispatch methods; the read test binds the
+production getter instead of an earlier fixture's leftover lambda. Raw diff and
+before/after hashes: proof/ryan-approved-fixtures-2026-09-09/SHA256.json.
+One-page verdict: RYAN-APPROVED-FIXTURE-INTEGRATION-REVIEW-2026-09-09.md.
+Focused results: 180 mirror passes, 125.43 seconds; 74 ordered read/resource/prompt
+passes, 13.53 seconds. No product source or intended behavior assertion changed.
+The three receipt-contract corrections are under independent Gemini review.
+The original AT6 exit remains missing; no acceptance waiver is inferred.
+# 2026-09-09 — exact dependency-version unit assertions
+
+RYAN-DEPENDENCY-REPAIR-BRIEF-2026-09-09.md records the security upgrade scope.
+In tests/test_installer_dependency_lock.py, the two exact equality values change
+from pillow 10.4.0 to 12.3.0 and mcp 1.27.1 to 1.28.1. No equality operator,
+inventory assertion or case changes. The raw full diff is sealed as
+proof/ryan-dependency-security-2026-09-09/dependency-integrated.patch.
+Reason: the unit test must enforce the new reviewed exact security pins; retaining
+the vulnerable old version literals would contradict the authorized upgrade.
+Independent four-suite union: 23 passed in the worker and checkout. This is not
+the final full-tree or packaged-runtime observation. See the one-page dependency
+verdict for resolution results and the remaining four affected packages.
+
+
+## 2026-09-12 — new media regression preparation, no accepted fixture change
+
+The new, unaccepted test_media_detail_boundaries.py fixture omitted three
+schema-required fields: slug, yoinked_at and corpus_path. Three recorded setup
+attempts each had six setup errors and four actual UI failures. Each correction
+only supplied its missing field; all behavior assertions stayed unchanged. The
+next attempt reached all ten bodies and failed all ten against the worker patch.
+Exact before/after diffs and reasons are in proof/media-detail12-astra-review-
+2026-09-12/transport/boundary-setup*.diff and corresponding diagnosis JSON files.
+The earlier generator syntax error and no-file pytest result are also preserved.
+No existing accepted fixture or test was modified. Read ASTRA-MEDIA-DETAIL-
+REVIEW-2026-09-12.md for the one-page verdict, repairs and final 58/58 counts.
+
+## 2026-09-13 — two new Windows exception expectations, decision pending
+
+The first generated Windows reservation unit failed 63/2/0 across 65 cases,
+with six failed nested subtests. Both new controls expected AssertionError;
+the unchanged inherited helper raises KernelUnconfirmed(RuntimeError).
+Subsequent retention assertions in those branches remain unverified. Root,
+author and independent reviewer found no justified product exception change.
+
+The unapplied two-line diff is retained in
+proof/windows-reservation-failed-2026-09-13/preparation/fixture-correction.UNAPPLIED.patch.txt.
+It selects the existing exact exception class through the imported module chain,
+with no import, message, fault-input, retention-assertion or product change.
+All 42 original case bodies stay unchanged. This proposed assertion correction
+is outside Ryan's named September 9 fixture scope and awaits his ruling.
+Read ASTRA-WINDOWS-RESERVATION-FAILED-VERDICT-2026-09-13.md. The failed result,
+earlier source-review oversight and exact source inputs remain preserved; no
+rerun or independent confirmation has occurred.
+
+Ryan subsequently answered "Approve the two-line correction" to the explicit
+question tied to commit58335df. The exact proposed patch is now authorized.
+Fresh label02 and a repair brief will preserve the unchanged implementation,
+all65 case IDs and every other assertion. This approval does not change the
+original failed result or authorize further fixture corrections.
+
+The exact correction is now qualified at 8fc3219. Author f480a2 and independent
+503555 each pass65/0/0 plus33 passing nested subtests, including the previously
+unreached retention checks. All194 proof payloads match Git/disk. The exact diff,
+reason, fresh brief, source reviews and raw results are retained in
+proof/windows-reservation02-2026-09-13; read the one-page
+ASTRA-WINDOWS-RESERVATION02-VERDICT-2026-09-13.md. This is the focused generated
+unit, not a replacement complete-tree result. A fresh committed full tree remains
+required after runtime source work; the historical63/2 result is unchanged.
+
+## 2026-09-14 — omitted generated observations; assertions retained
+
+Native interrupted-worker run01 at source3fc4cf7 returned outer1/controller0.
+The driver omitted five locked-write probes and produced only the five
+post-retirement successes. The launcher's ten-row/five-pair checks correctly
+failed. This does not justify changing the assertion or interpreting successful
+opens after retirement as earlier sharing refusals.
+
+Repair briefd04652a requires the existing refusal helper inside the protected
+adapter context before media operations. All old tests, fixtures and assertions
+remain unchanged. The derivative and exact diff will be preserved separately;
+no fixture correction is being requested or inferred from Ryan's earlier
+approvals. Read ASTRA-INTERRUPTED-NATIVE01-FAILURE-2026-09-14.md. The failed
+result remains failed, and the eventual full corrected tree is still required.
+
+The chosen derivative24844bf4 adds exactly two lines before ticket issuance.
+Its complete diff is preserved in
+proof/interrupted-owner-prelock30-qualification-2026-09-14/driver-repair/generated_adapter_flow.diff.
+The new test module is separate; no old fixture or assertion changed. Under
+admission7316e53, both copies pass30/0/0 plus62 subtests, preserving all original
+28 case objects and57 subtests. Root50475b verifies the receipts; the one-page
+review is ASTRA-PRELOCK30-QUALIFICATION-VERDICT-2026-09-14.md. Native01 remains
+failed. A fresh full candidate tree is still required after runtime source work.
+
+## 2026-09-14 — new metadata fixture correction before first execution
+
+Independent source review of the unexecuted completion-info proposal01 found
+that its fake port issued metadata outside the publication lock required by
+PORT-CONTRACT.md. The new fixture now takes `self.manager._lock` and asserts
+ownership before its two registry assignments. Exact one-hunk diff:
+_scratch/asr-completion-info-proposal02/test_completion_info.diff, SHA256
+d8be0fb6e0de58356aa83fe04876742eb14f5198c77de77ec23ebd9fd2a37e1e.
+The original file and correction-required verdictaf448cd9 remain preserved.
+
+This changes newly authored fixture preparation before its first execution;
+no accepted test or behavior assertion changes. All13 proposed case bodies,
+the original46 lifecycle controls and lifecycle source22b66293 are unchanged.
+Passivecaca11 verifies the exact replacement; no measured failure is converted
+to a pass. The combined59-case instrument subsequently qualified at1e2167a:
+both copies pass59/0/0 plus29 subtests, with original46 case bodies unchanged.
+The repair reason and scope are in FIXTURE-REGISTRY-LOCK-REPAIR02.md beside the
+diff. A later full candidate tree remains required after production migration.
+
+## 2026-09-14 — prospective reliability caller test conflicts
+
+The qualified dormant reliability source0165e56a routes ordinary detection
+through a privately admitted media ticket, TranscribeRequest and SegmentStream.
+The two existing raw-loader fixtures at test_reliability_local_only_load.py
+lines55–68 and101–113 expect a raw constructor call. Its exact caller delta is
+preserved in proof/reliability-request-stream-fake11-2026-09-14/proposal/uoink_reliability.diff.
+Both fake11 copies pass the new caller controls at4a01ef2, while production and
+the existing tests remain unchanged. This is a prospective integration conflict,
+not an observed full-tree failure. Do not patch tests or route around mocks;
+prepare an exact reviewed adaptation for Ryan before production migration.
+
+## 2026-09-14 — controller10 expected exceptions, decision pending
+
+The new controller10 test at source71df9d3 fails8/2/0, with102 of104 subtests
+passing. Actual6ba3f1 records outer and child exits1; all ten guards remain valid.
+The wrong_permit and active_owner faults correctly throw SessionClosed. Their
+assertRaises/fail_start arguments accept only AdapterUnavailable or
+LifecycleUnavailable, which are different classes. The source review missed this.
+
+The proposed exact two-line diff selects SessionClosed only for wrong_permit at
+test_controller_resume_publication.py:128 and active at300. Global REFUSALS,
+all fault inputs, messages, case IDs and later assertions remain unchanged.
+Assertions149–155 and301–309 were not reached and remain unverified for those
+inputs. The exact unapplied patch/reason are retained in the controller10 failure
+proof at test-contract-diagnosis/PROPOSED-EXPECTATIONS.UNAPPLIED.patch.txt,
+SHA256f1c8950dfbe84ddbeb5838cdc518a25a2c5eaed2011802ea8dab7e1c25aa4e8a.
+Read ASTRA-CONTROLLER-CUSTODY10-FAILED-VERDICT-2026-09-14.md.
+
+Ryan's previous58335df approval applied only to the two older KernelUnconfirmed
+expectations. This new assertion correction remains pending. No test or fixture
+has changed and no rerun/confirmation is authorized. Preserve the failed record;
+after approval, a fresh repair brief and separately reviewed copies are required.
+The eventual committed complete-tree qualification remains outstanding.

@@ -21,8 +21,8 @@ def test_installer_lock_is_complete_and_exact() -> None:
 
     assert len(locked) >= 100
     assert locked["yt-dlp"] == "2026.7.4"
-    assert locked["pillow"] == "10.4.0"
-    assert locked["mcp"] == "1.27.1"
+    assert locked["pillow"] == "12.3.0"
+    assert locked["mcp"] == "1.28.1"
     assert locked["faster-whisper"] == "1.2.1"
     assert locked["whisperx"] == "3.8.6"
     assert locked["torch"] == "2.8.0"

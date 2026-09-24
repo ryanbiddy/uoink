@@ -15,7 +15,10 @@ only.
 
 from __future__ import annotations
 
+import base64
 import json
+import logging
+import math
 import re
 import threading
 import time
@@ -70,6 +73,8 @@ class ToolSpec:
     input_schema: dict[str, Any]
     handler: Callable[[dict[str, Any]], dict[str, Any]]
     rate_limiter: _RateLimiter | None = None
+    annotations: dict[str, Any] | None = None
+    title: str | None = None
 
 
 def _ok(**fields) -> dict[str, Any]:
@@ -379,7 +384,21 @@ def get_uoink_corpus(args: dict[str, Any]) -> dict[str, Any]:
     video_id = sidecar.get("video_id")
     if not isinstance(video_id, str) or not video_id.strip():
         video_id = None
-    video_url = f"https://www.youtube.com/watch?v={video_id}" if video_id else None
+    source_url = sidecar.get("source_url") or sidecar.get("url")
+    platform = sidecar.get("platform")
+    source_type = sidecar.get("source_type")
+    source_lower = source_url.lower() if isinstance(source_url, str) else ""
+    is_youtube = (
+        platform == "youtube"
+        or "youtube.com/" in source_lower
+        or "youtu.be/" in source_lower
+        or (platform is None and source_type in (None, "video"))
+    )
+    video_url = (
+        f"https://www.youtube.com/watch?v={video_id}"
+        if video_id and is_youtube
+        else None
+    )
     # Sprint 15: include the citation map alongside the markdown. Optional
     # field -- markdown-only consumers are unaffected.
     citations: list[dict[str, Any]] = []
@@ -414,6 +433,7 @@ def get_uoink_corpus(args: dict[str, Any]) -> dict[str, Any]:
         folder=str(folder),
         video_id=video_id,
         video_url=video_url,
+        source_url=source_url,
         citations=citations,
         **extra,
     )
@@ -421,7 +441,7 @@ def get_uoink_corpus(args: dict[str, Any]) -> dict[str, Any]:
 
 def get_citation_map(args: dict[str, Any]) -> dict[str, Any]:
     """Return the transcript + screenshot citation map for a saved yoink,
-    each entry carrying a timestamped YouTube deep link."""
+    each entry carrying a source-aware timestamp link."""
     slug = args.get("slug")
     folder, corpus = _find_yoink(slug)
     if not folder or not corpus:
@@ -437,7 +457,9 @@ def get_citation_map(args: dict[str, Any]) -> dict[str, Any]:
                 "seq": r.get("seq"),
                 "timestamp": r.get("timestamp_start"),
                 "file_path": r.get("file_path"),
-                "deep_link": r.get("youtube_deep_link"),
+                "source_url": r.get("source_url"),
+                "deep_link": (r.get("source_deep_link")
+                              or r.get("youtube_deep_link")),
             })
         else:
             transcript.append({
@@ -445,13 +467,90 @@ def get_citation_map(args: dict[str, Any]) -> dict[str, Any]:
                 "timestamp_start": r.get("timestamp_start"),
                 "timestamp_end": r.get("timestamp_end"),
                 "text": r.get("text"),
-                "deep_link": r.get("youtube_deep_link"),
+                "source_url": r.get("source_url"),
+                "deep_link": (r.get("source_deep_link")
+                              or r.get("youtube_deep_link")),
             })
     return _ok(
         video_id=video_id,
         transcript_citations=transcript,
         screenshot_citations=screenshots,
     )
+
+
+# ---- living library phase 1: clips + evidence cards ------------------------
+# Both tools read only from the index (clips.py derives clips from the
+# citation map) and, like corpus-read contract v1, never expose a filesystem
+# path: no corpus_path, sidecar_path, folder, or file_path in any response.
+
+_SLUG_RE = re.compile(r"^[A-Za-z0-9_-]{1,160}$")
+from library_cards import build_card, read_corpus_head
+
+
+def _clean_text(value: Any) -> str | None:
+    return value.strip() if isinstance(value, str) and value.strip() else None
+
+
+def search_clips(args: dict[str, Any]) -> dict[str, Any]:
+    """Full-text search over transcript windows with source timing and links."""
+    query = args.get("query")
+    if not isinstance(query, str) or not query.strip():
+        return _err("query required")
+    limit = _limit_int(args.get("limit"), default=20, low=1, high=50)
+    video_id = _clean_text(args.get("video_id"))
+    channel = _clean_text(args.get("channel"))
+    rows = _b()._get_index().search_clips(
+        query, limit, video_id=video_id, channel=channel)
+    results = []
+    for r in rows:
+        score = r.get("_score")
+        results.append({
+            "video_id": r.get("video_id"),
+            "slug": r.get("slug"),
+            "title": r.get("title"),
+            "channel": r.get("channel"),
+            "start": r.get("start"),
+            "end": r.get("end"),
+            "text": r.get("text"),
+            "deep_link": r.get("source_deep_link"),
+            "timing": r.get("timing", "unknown"),
+            # bm25 is lower-is-better; negate so higher means better, the
+            # same direction search_uoinks reports.
+            "score": round(-score, 4) if isinstance(score, (int, float)) else 0.0,
+        })
+    return _ok(results=results)
+
+
+def get_evidence_card(args: dict[str, Any]) -> dict[str, Any]:
+    """One item's identity plus its most quotable clips, spread across the
+    timeline, ready to cite. Resolves by slug or video_id."""
+    slug = args.get("slug")
+    video_id = args.get("video_id")
+    if not slug and not video_id:
+        return _err("slug or video_id required")
+    idx = _b()._get_index()
+    row = None
+    # Same identifier grammar as _find_yoink: anything else never reaches
+    # the index. get_by_slug already excludes soft-deleted rows.
+    if isinstance(slug, str) and _SLUG_RE.match(slug):
+        row = idx.get_by_slug(slug)
+    if row is None and isinstance(video_id, str) and video_id.strip():
+        candidate = idx.get_yoink(video_id.strip())
+        if candidate and candidate.get("deleted_at") is None:
+            row = candidate
+    if not row:
+        return _err("uoink not found")
+    profile = args.get("profile", "full")
+    n_clips = args.get("n_clips")
+    if n_clips is not None:
+        n_clips = _limit_int(n_clips, default=10, low=1, high=20)
+    try:
+        card = build_card(row, idx.get_clips(row["video_id"]),
+                          corpus_text=read_corpus_head(row.get("corpus_path")),
+                          profile=profile, n_clips=n_clips)
+    except ValueError as exc:
+        return _err(str(exc))
+    return _ok(**card)
 
 
 def get_uoink_health(args: dict[str, Any]) -> dict[str, Any]:
@@ -651,17 +750,21 @@ def check_live_status(args: dict[str, Any]) -> dict[str, Any]:
 def add_podcast_feed(args: dict[str, Any]) -> dict[str, Any]:
     """v3.1 podcast: register an RSS feed URL. Idempotent -- existing
     URL returns the same row. Default poll interval 60 min, range
-    15-1440."""
+    15-1440. Audio auto-ingest is a separate opt-in and defaults off."""
     server = _b()
     import podcasts as _pod
     feed_url = args.get("feed_url")
     if not isinstance(feed_url, str) or not feed_url.strip():
         return _err("feed_url (string) is required")
     interval = args.get("poll_interval_min") or 60
+    auto_ingest = args.get("auto_ingest", False)
+    if not isinstance(auto_ingest, bool):
+        return _err("auto_ingest must be a boolean when provided")
     try:
         return _ok(feed=_pod.add_feed(server._get_index(),
                                         feed_url.strip(),
-                                        poll_interval_min=int(interval)))
+                                        poll_interval_min=int(interval),
+                                        auto_ingest=auto_ingest))
     except ValueError as e:
         return _err(str(e))
     except Exception as e:
@@ -697,18 +800,14 @@ def remove_podcast_feed(args: dict[str, Any]) -> dict[str, Any]:
 
 
 def poll_podcast_feed(args: dict[str, Any]) -> dict[str, Any]:
-    """v3.1 podcast: trigger one feed poll. Returns the parsed result.
-
-    This is the on-demand path; a background poller would call the same
-    function on a schedule (left for a follow-up that needs a thread)."""
+    """Trigger the same feed-poll path used by the 30-second scheduler."""
     server = _b()
-    import podcasts as _pod
     try:
         feed_id = int(args.get("feed_id"))
     except (TypeError, ValueError):
         return _err("feed_id (integer) is required")
     try:
-        return _pod.poll_feed(server._get_index(), feed_id)
+        return server._poll_podcast_feed_for_watch(feed_id)
     except Exception as e:
         return _err(f"poll_podcast_feed failed: {e}")
 
@@ -743,8 +842,8 @@ def download_podcast_episode(args: dict[str, Any]) -> dict[str, Any]:
     Synchronous. Returns when the file lands at
     <data_root>/Podcasts/<feed-slug>/<episode-slug>.mp3 or yt-dlp
     errors. Idempotent -- skips re-download when the canonical path
-    already has a non-zero file. The transcription pipeline (next
-    PR in CC's queue) reads audio_local_path to feed WhisperX."""
+    already has a non-zero file. The live transcription pipeline reads
+    audio_local_path to feed WhisperX."""
     server = _b()
     import podcasts as _pod
     try:
@@ -776,33 +875,13 @@ def get_whisperx_status(_args: dict[str, Any]) -> dict[str, Any]:
 
 
 def transcribe_podcast_episode(args: dict[str, Any]) -> dict[str, Any]:
-    """v3.1 podcast: run WhisperX on a downloaded podcast episode.
-
-    Synchronous. The audio at episode.audio_local_path is the input;
-    transcript JSON lands next to it. Returns the structured
-    transcript metadata or:
-      - 'whisperx runtime not installed' err when the runtime isn't
-        importable.
-      - consent_required=True when the user hasn't agreed to the
-        first-time model download yet (200 MB - 2 GB). Re-issue with
-        consent_given=True after the dashboard prompt records the
-        opt-in."""
+    """Queue local WhisperX work and return a durable job id."""
     server = _b()
     import whisper_runner as _wr
-    import podcasts as _pod
     try:
         episode_id = int(args.get("episode_id"))
     except (TypeError, ValueError):
         return _err("episode_id (integer) is required")
-    episode = _pod.get_episode(server._get_index(), episode_id)
-    if episode is None:
-        return _err("episode not found")
-    if not episode.get("audio_local_path"):
-        return _err("episode has no audio_local_path -- "
-                     "download_podcast_episode first")
-    if not _wr.is_whisperx_available():
-        return _err("whisperx runtime not installed; "
-                     "use the Setup page to install (consent-gated dep).")
     settings = server._read_settings() or {}
     model = _wr.normalize_model(
         args.get("model") or settings.get("whisper_model"))
@@ -811,40 +890,32 @@ def transcribe_podcast_episode(args: dict[str, Any]) -> dict[str, Any]:
                      else settings.get("diarization_default"))
     consent_given = bool(args.get("consent_given"))
     language = args.get("language")
-    _wr.update_episode_transcript_state(
-        server._get_index(), episode_id,
-        status=_wr.STATUS_RUNNING, model_used=model)
-    from pathlib import Path as _P
+    result, _status = server._queue_podcast_transcription(
+        episode_id, model=model, language=language, diarize=diarize,
+        consent_given=consent_given)
+    return result
+
+
+def episode_to_corpus(args: dict[str, Any]) -> dict[str, Any]:
+    """Publish a completed podcast transcript into the shared corpus."""
+    server = _b()
+    import podcasts as _pod
     try:
-        transcript = _wr.transcribe_audio(
-            _P(episode["audio_local_path"]),
-            data_root=server.DATA_ROOT,
-            model_size=model, language=language,
-            diarize=diarize, consent_given=consent_given)
-    except PermissionError as e:
-        _wr.update_episode_transcript_state(
-            server._get_index(), episode_id,
-            status=_wr.STATUS_QUEUED, error=str(e))
-        return {"ok": False, "consent_required": True,
-                "model": model, "error": str(e)}
-    except Exception as e:
-        _wr.update_episode_transcript_state(
-            server._get_index(), episode_id,
-            status=_wr.STATUS_FAILED, error=str(e))
-        return _err(f"transcribe failed: {e}")
-    out_path = _wr.write_transcript(
-        transcript, audio_path=_P(episode["audio_local_path"]))
-    _wr.update_episode_transcript_state(
-        server._get_index(), episode_id,
-        status=_wr.STATUS_DONE, transcript_path=out_path,
-        model_used=model,
-        diarization_ran=transcript.get("diarization_ran", False))
-    return _ok(episode_id=episode_id,
-                transcript_path=str(out_path),
-                model=transcript["model"],
-                language=transcript["language"],
-                segments=len(transcript["segments"]),
-                diarization_ran=transcript["diarization_ran"])
+        episode_id = int(args.get("episode_id"))
+    except (TypeError, ValueError):
+        return _err("episode_id (integer) is required")
+    try:
+        result = _pod.episode_to_corpus(
+            server._get_index(), episode_id, data_root=server.DATA_ROOT)
+        episode = _pod.get_episode(server._get_index(), episode_id) or {}
+        server.maybe_toast(
+            "Podcast added to Uoink",
+            f"{episode.get('title') or 'The episode'} is ready in your library.")
+        return result
+    except (LookupError, FileNotFoundError, ValueError) as exc:
+        return _err(str(exc))
+    except Exception as exc:
+        return _err(f"episode_to_corpus failed: {exc}")
 
 
 # ---- v3.1 mobile playlist monitor ------------------------------------
@@ -916,9 +987,13 @@ def poll_monitored_playlist(args: dict[str, Any]) -> dict[str, Any]:
             return None
         return server._normalize_youtube_url(
             f"https://www.youtube.com/watch?v={vid}")
+    # Phase 3: subscription-linked playlists poll through the service's
+    # due-time/lease gate and never enqueue from detection.
+    refresh = getattr(server, "_refresh_source_via_service", None)
     try:
         return _mp.poll_playlist(server._get_index(), playlist_id,
-                                    normalize_video_to_canonical_url=_vid_to_url)
+                                    normalize_video_to_canonical_url=_vid_to_url,
+                                    refresh=refresh if callable(refresh) else None)
     except Exception as e:
         return _err(f"poll_monitored_playlist failed: {e}")
 
@@ -1531,6 +1606,155 @@ def remove_style_anchor(args: dict[str, Any]) -> dict[str, Any]:
     return _ok(removed=removed, id=anchor_id)
 
 
+# ---- registry-only capture parity ------------------------------------
+def uoink_url(args: dict[str, Any]) -> dict[str, Any]:
+    """Capture any URL through the helper's existing /extract/any logic."""
+    server = _b()
+    raw_url = args.get("url")
+    if not isinstance(raw_url, str) or not raw_url.strip():
+        return _err("url (string) is required")
+
+    class RegistryCaptureHandler(server.Handler):
+        def __init__(self):
+            self.status = None
+            self.payload = None
+
+        def _send_json(self, status: int, payload: dict) -> dict:
+            self.status = status
+            self.payload = payload
+            return payload
+
+    probe = RegistryCaptureHandler()
+    try:
+        server.Handler._handle_extract_any(probe, dict(args))
+    except Exception as exc:
+        return _err(f"uoink_url failed: {exc}")
+    if isinstance(probe.payload, dict):
+        return probe.payload
+    return _err("uoink_url returned no result")
+
+
+def uoink_note(args: dict[str, Any]) -> dict[str, Any]:
+    """Persist a text note through the same builders as POST /notes."""
+    server = _b()
+    import notes as _notes  # noqa: WPS433
+
+    note = _notes.build_note(
+        text=args.get("text"), title=args.get("title"), author=args.get("author")
+    )
+    if not note.get("ok"):
+        return note
+    try:
+        video_id = _notes.persist_note(
+            server._get_index(),
+            note,
+            data_root=server.DESKTOP_ROOT,
+            topic_classifier=server._classify_topic,
+        )
+    except Exception as exc:
+        return _err(f"uoink_note failed: {exc}")
+    if not video_id:
+        return _err("couldn't save the note")
+    return _ok(
+        video_id=video_id,
+        slug=note["slug"],
+        title=note["title"],
+        author=note["author"],
+        source_type=_notes.SOURCE_TYPE,
+        platform=_notes.PLATFORM,
+    )
+
+
+def uoink_image(args: dict[str, Any]) -> dict[str, Any]:
+    """Persist a base64 PNG, JPEG, or WebP through POST /images logic."""
+    server = _b()
+    import images as _images  # noqa: WPS433
+
+    encoded = args.get("image_base64")
+    if not isinstance(encoded, str) or not encoded.strip():
+        return _err("image_base64 (string) is required")
+    encoded = encoded.strip()
+    if encoded.lower().startswith("data:") and "," in encoded:
+        encoded = encoded.split(",", 1)[1]
+    try:
+        image_bytes = base64.b64decode(encoded, validate=True)
+    except (ValueError, TypeError) as exc:
+        return _err(f"image_base64 is invalid: {exc}")
+    built = _images.build_image(
+        image_bytes,
+        mime=args.get("mime"),
+        filename=args.get("filename"),
+        caption=args.get("caption"),
+        source_url=args.get("source_url"),
+        author=args.get("author"),
+    )
+    if not built.get("ok"):
+        return built
+    try:
+        video_id = _images.persist_image(
+            server._get_index(),
+            built,
+            image_bytes,
+            data_root=server.DESKTOP_ROOT,
+            topic_classifier=server._classify_topic,
+        )
+    except Exception as exc:
+        return _err(f"uoink_image failed: {exc}")
+    if not video_id:
+        return _err("couldn't save the image")
+    return _ok(
+        video_id=video_id,
+        slug=built["slug"],
+        title=built["title"],
+        author=built["author"],
+        source_type=_images.SOURCE_TYPE,
+        platform=_images.PLATFORM,
+    )
+
+
+def uoink_x(args: dict[str, Any]) -> dict[str, Any]:
+    """Capture an X post through the same extractor as POST /extract/x."""
+    server = _b()
+    import page_extractor as _pages  # noqa: WPS433
+    import x_extractor as _x  # noqa: WPS433
+
+    if not (server._read_settings() or {}).get("x_text_capture_enabled"):
+        return {
+            "ok": False,
+            "code": "disabled",
+            "error": (
+                "X text capture is off. Set x_text_capture_enabled to true "
+                "in settings to try it."
+            ),
+        }
+    raw_url = args.get("url")
+    if not isinstance(raw_url, str) or not raw_url.strip():
+        return _err("url (string) is required")
+    result = _x.extract_x_thread(raw_url.strip())
+    if not result.get("ok"):
+        return result
+    try:
+        video_id = _pages.persist_page_yoink(
+            server._get_index(),
+            result,
+            data_root=server.DESKTOP_ROOT,
+            source_type=_x.SOURCE_TYPE,
+            subfolder="X",
+            slug_prefix="x",
+            topic_classifier=server._classify_topic,
+        )
+    except Exception as exc:
+        return _err(f"uoink_x failed: {exc}")
+    if not video_id:
+        return _err("couldn't save the X post")
+    return _ok(
+        video_id=video_id,
+        title=result["title"],
+        tweets_captured=result.get("tweets_captured", 0),
+        metadata=result.get("metadata", {}),
+    )
+
+
 # ---- v3.2 Universal Site Uoinking ------------------------------------
 def uoink_page(args: dict[str, Any]) -> dict[str, Any]:
     """v3.2 Universal Site Uoinking: capture an allowed page as a yoink.
@@ -2138,6 +2362,1168 @@ def get_taxonomy(args: dict[str, Any]) -> dict[str, Any]:
     )
 
 
+# ===========================================================================
+# Living Library, Phase 2 stage 1 (run J, 2026-09-04): the six registry
+# adapters for the Librarian work queue.
+#
+# Contract: docs/library/PHASE2-CONTRACT-2026-09-04.md (phase2-v1-2026-09-04).
+# Frozen input schemas: docs/library/phase2-contract/tool-schemas.json. The
+# schemas below ARE that file, embedded so an installed helper needs no
+# checkout; tests/test_library_adapters.py fails the moment the two drift.
+#
+# Division of labour (contract, "Lease and submission semantics"):
+#   * library_work.py (Astra) owns domain validation and every state
+#     transition. It is reached through ONE seam, _library_service(), so the
+#     adapters build and test against an injected stand-in until that module
+#     lands, and so an installed helper without it answers an explicit
+#     `service_unavailable` error instead of raising ImportError.
+#   * These adapters check arguments against the frozen JSON Schema (the
+#     input contract, identical on every transport), attach the trusted
+#     request context (index handle, server clock, librarian_apply_enabled)
+#     and return the service's result in the contract envelope. They add no
+#     alternate domain validation and never call a model or the network.
+#   * HTTP registry only. Nothing here is on stdio this stage: the brief
+#     permits stdio only for the read-only pair that includes
+#     `get_library_status`, and the frozen schema set does not define it.
+# ===========================================================================
+
+_library_log = logging.getLogger("uoink.library")
+
+LIBRARY_CONTRACT_VERSION = "phase2-v1-2026-09-04"
+LIBRARY_SCHEMA_VERSION = 1
+LIBRARY_JSON_SCHEMA_DIALECT = "https://json-schema.org/draft/2020-12/schema"
+# User-intent capabilities minted by the dashboard confirmation route live
+# five minutes (contract, "Pins and authoritative recovery").
+LIBRARY_INTENT_TTL_MS = 5 * 60 * 1000
+LIBRARY_TOOL_NAMES = (
+    "list_library_work",
+    "claim_library_work",
+    "submit_library_result",
+    "apply_reshelving",
+    "pin_shelf",
+    "undo_library_apply",
+)
+# Service method behind each (tool, discriminator). The claim tool's `action`
+# and the apply tool's `mode` pick the method (contract, "Service surface and
+# adapter returns"); the other four map one-to-one.
+LIBRARY_SERVICE_METHODS: dict[tuple[str, str | None], str] = {
+    ("list_library_work", None): "list_work",
+    ("claim_library_work", "claim"): "claim_work",
+    ("claim_library_work", "renew"): "renew_attempt",
+    ("claim_library_work", "release"): "release_attempt",
+    ("claim_library_work", "cancel"): "cancel_attempt",
+    ("submit_library_result", None): "submit_result",
+    ("apply_reshelving", "preview"): "preview_apply",
+    ("apply_reshelving", "apply"): "apply_preview",
+    ("pin_shelf", None): "pin_shelf",
+    ("undo_library_apply", None): "undo_apply",
+}
+# The dashboard confirmation route asks the service to mint and store the
+# user-intent capability (library_user_intents is a substrate table, and the
+# service is its only writer). Not in the contract's function table; named
+# here so the seam has exactly one place to adapt if Astra names it otherwise.
+LIBRARY_INTENT_METHOD = "mint_user_intent"
+
+# The `$defs` block is byte-identical in all six frozen schemas; one copy.
+_LIBRARY_DEFS: dict[str, Any] = {
+    "id": {"type": "string", "minLength": 1, "maxLength": 200},
+    "client": {"type": "string", "minLength": 1, "maxLength": 64},
+    "key": {"type": "string", "minLength": 1, "maxLength": 200},
+    "hash": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "token": {"type": "string", "pattern": "^[A-Za-z0-9_-]{43,128}$"},
+    "revision": {"type": "integer", "minimum": 0, "maximum": 2147483647},
+    "confidence": {"type": "number", "minimum": 0, "maximum": 1},
+    "evidence": {
+        "type": "object",
+        "properties": {
+            "basis": {"type": "string", "enum": ["packet", "fetched_full"]},
+            "kind": {"type": "string", "enum": ["timed_clip", "text_only"]},
+            "excerpt_id": {"$ref": "#/$defs/hash"},
+            "card_hash": {"$ref": "#/$defs/hash"},
+            "quote": {"type": "string", "minLength": 1, "maxLength": 1000},
+        },
+        "required": ["basis", "kind", "excerpt_id", "card_hash", "quote"],
+        "additionalProperties": False,
+    },
+    "membership": {
+        "type": "object",
+        "properties": {
+            "shelf_id": {"$ref": "#/$defs/id"},
+            "shelf_path": {
+                "type": "array",
+                "items": {"type": "string", "minLength": 1, "maxLength": 100},
+                "minItems": 1,
+                "maxItems": 3,
+            },
+            "confidence": {"$ref": "#/$defs/confidence"},
+            "evidence": {"$ref": "#/$defs/evidence"},
+        },
+        "required": ["shelf_id", "shelf_path", "confidence", "evidence"],
+        "additionalProperties": False,
+    },
+    "result": {
+        "oneOf": [
+            {
+                "type": "object",
+                "properties": {
+                    "outcome": {"const": "assigned"},
+                    "memberships": {
+                        "type": "array",
+                        "items": {"$ref": "#/$defs/membership"},
+                        "minItems": 1,
+                        "maxItems": 3,
+                    },
+                },
+                "required": ["outcome", "memberships"],
+                "additionalProperties": False,
+            },
+            {
+                "type": "object",
+                "properties": {
+                    "outcome": {
+                        "type": "string",
+                        "enum": ["unmapped", "unsupported", "error"],
+                    },
+                    "reason": {"type": "string", "minLength": 1, "maxLength": 500},
+                },
+                "required": ["outcome", "reason"],
+                "additionalProperties": False,
+            },
+        ]
+    },
+    "usage": {
+        "oneOf": [
+            {
+                "type": "object",
+                "properties": {
+                    "status": {"const": "reported"},
+                    "model": {"type": "string", "minLength": 1, "maxLength": 200},
+                    "input_tokens": {"type": "integer", "minimum": 0, "maximum": 2147483647},
+                    "output_tokens": {"type": "integer", "minimum": 0, "maximum": 2147483647},
+                    "cache_read_tokens": {"type": "integer", "minimum": 0, "maximum": 2147483647},
+                    "cache_create_tokens": {"type": "integer", "minimum": 0, "maximum": 2147483647},
+                    "wall_time_ms": {"type": "integer", "minimum": 0, "maximum": 2147483647},
+                },
+                "required": ["status", "model", "input_tokens", "output_tokens", "wall_time_ms"],
+                "additionalProperties": False,
+            },
+            {
+                "type": "object",
+                "properties": {
+                    "status": {"const": "unavailable"},
+                    "model": {"type": "string", "minLength": 1, "maxLength": 200},
+                    "reason": {"type": "string", "minLength": 1, "maxLength": 500},
+                    "wall_time_ms": {"type": "integer", "minimum": 0, "maximum": 2147483647},
+                },
+                "required": ["status", "reason"],
+                "additionalProperties": False,
+            },
+        ]
+    },
+}
+
+
+def _library_schema(body: dict[str, Any]) -> dict[str, Any]:
+    return {"$schema": LIBRARY_JSON_SCHEMA_DIALECT, "$defs": _LIBRARY_DEFS, **body}
+
+
+LIBRARY_TOOL_SCHEMAS: dict[str, dict[str, Any]] = {
+    "list_library_work": _library_schema({
+        "type": "object",
+        "properties": {
+            "run_id": {"$ref": "#/$defs/id"},
+            "state": {
+                "type": "string",
+                "enum": ["all", "ready", "leased", "accepted", "unmapped",
+                         "unsupported", "blocked", "cancelled"],
+            },
+            "limit": {"type": "integer", "minimum": 1, "maximum": 100, "default": 25},
+            "cursor": {"type": "string", "minLength": 1, "maxLength": 500},
+        },
+        "required": [],
+        "additionalProperties": False,
+    }),
+    "claim_library_work": _library_schema({
+        "oneOf": [
+            {
+                "type": "object",
+                "properties": {
+                    "action": {"const": "claim"},
+                    "run_id": {"$ref": "#/$defs/id"},
+                    "client_id": {"$ref": "#/$defs/client"},
+                    "max_items": {"type": "integer", "minimum": 1, "maximum": 12, "default": 12},
+                    "lease_seconds": {"type": "integer", "minimum": 60, "maximum": 900, "default": 900},
+                },
+                "required": ["action", "run_id", "client_id"],
+                "additionalProperties": False,
+            },
+            {
+                "type": "object",
+                "properties": {
+                    "action": {"const": "renew"},
+                    "work_id": {"$ref": "#/$defs/id"},
+                    "client_id": {"$ref": "#/$defs/client"},
+                    "attempt_token": {"$ref": "#/$defs/token"},
+                    "lease_seconds": {"type": "integer", "minimum": 60, "maximum": 900},
+                },
+                "required": ["action", "work_id", "client_id", "attempt_token", "lease_seconds"],
+                "additionalProperties": False,
+            },
+            {
+                "type": "object",
+                "properties": {
+                    "action": {"type": "string", "enum": ["release", "cancel"]},
+                    "work_id": {"$ref": "#/$defs/id"},
+                    "client_id": {"$ref": "#/$defs/client"},
+                    "attempt_token": {"$ref": "#/$defs/token"},
+                    "reason": {"type": "string", "minLength": 1, "maxLength": 500},
+                },
+                "required": ["action", "work_id", "client_id", "attempt_token", "reason"],
+                "additionalProperties": False,
+            },
+        ]
+    }),
+    "submit_library_result": _library_schema({
+        "type": "object",
+        "properties": {
+            "work_id": {"$ref": "#/$defs/id"},
+            "client_id": {"$ref": "#/$defs/client"},
+            "attempt_token": {"$ref": "#/$defs/token"},
+            "submission_key": {"$ref": "#/$defs/key"},
+            "schema_version": {"const": 1},
+            "video_id": {"$ref": "#/$defs/id"},
+            "source_revision": {"$ref": "#/$defs/hash"},
+            "taxonomy_revision": {"$ref": "#/$defs/hash"},
+            "packet_hash": {"$ref": "#/$defs/hash"},
+            "result": {"$ref": "#/$defs/result"},
+            "usage": {"$ref": "#/$defs/usage"},
+        },
+        "required": ["work_id", "client_id", "attempt_token", "submission_key",
+                     "schema_version", "video_id", "source_revision",
+                     "taxonomy_revision", "packet_hash", "result", "usage"],
+        "additionalProperties": False,
+    }),
+    "apply_reshelving": _library_schema({
+        "oneOf": [
+            {
+                "type": "object",
+                "properties": {
+                    "mode": {"const": "preview", "default": "preview"},
+                    "run_id": {"$ref": "#/$defs/id"},
+                    "expected_projection_revision": {"$ref": "#/$defs/revision"},
+                    "activate_version": {"type": "boolean", "default": False},
+                },
+                "required": ["run_id", "expected_projection_revision"],
+                "additionalProperties": False,
+            },
+            {
+                "type": "object",
+                "properties": {
+                    "mode": {"const": "apply"},
+                    "preview_id": {"$ref": "#/$defs/id"},
+                    "expected_projection_revision": {"$ref": "#/$defs/revision"},
+                    "delta_hash": {"$ref": "#/$defs/hash"},
+                    "operation_key": {"$ref": "#/$defs/key"},
+                },
+                "required": ["mode", "preview_id", "expected_projection_revision",
+                             "delta_hash", "operation_key"],
+                "additionalProperties": False,
+            },
+        ]
+    }),
+    "pin_shelf": _library_schema({
+        "type": "object",
+        "properties": {
+            "video_id": {"$ref": "#/$defs/id"},
+            "shelf_id": {"$ref": "#/$defs/id"},
+            "action": {"type": "string", "enum": ["pin", "unpin", "move"]},
+            "expected_projection_revision": {"$ref": "#/$defs/revision"},
+            "operation_key": {"$ref": "#/$defs/key"},
+            "user_intent_token": {"$ref": "#/$defs/token"},
+            "reason": {"type": "string", "minLength": 1, "maxLength": 500},
+        },
+        "required": ["video_id", "shelf_id", "action", "expected_projection_revision",
+                     "operation_key", "user_intent_token"],
+        "additionalProperties": False,
+    }),
+    "undo_library_apply": _library_schema({
+        "type": "object",
+        "properties": {
+            "apply_id": {"$ref": "#/$defs/id"},
+            "expected_projection_revision": {"$ref": "#/$defs/revision"},
+            "operation_key": {"$ref": "#/$defs/key"},
+            "user_intent_token": {"$ref": "#/$defs/token"},
+        },
+        "required": ["apply_id", "expected_projection_revision", "operation_key",
+                     "user_intent_token"],
+        "additionalProperties": False,
+    }),
+}
+
+
+# ---- Frozen-schema validation (the input contract) --------------------------
+# openapi_bridge.validate_arguments covers the small subset the older tools
+# use and silently skips `$ref`, `oneOf`, `const`, `pattern`, `minLength` and
+# `minItems`, all of which the frozen library schemas rely on. This validator
+# executes exactly that subset -- nothing more general -- so every transport
+# rejects the same malformed input with the same envelope before the service
+# is asked anything. Booleans never satisfy integer/number, non-finite numbers
+# never satisfy anything, and unknown fields are refused (contract, "Lease and
+# submission semantics"). The service still validates recursively.
+
+class LibrarySchemaError(ValueError):
+    def __init__(self, field: str, reason: str):
+        self.field = field or "request"
+        self.reason = reason
+        super().__init__(f"{self.field}: {reason}")
+
+
+_LIBRARY_TYPE_LABELS = {
+    "object": "an object",
+    "array": "an array",
+    "string": "a string",
+    "integer": "an integer",
+    "number": "a number",
+    "boolean": "a boolean",
+    "null": "null",
+}
+
+
+def _library_type_ok(value: Any, expected: str) -> bool:
+    if expected == "object":
+        return isinstance(value, dict)
+    if expected == "array":
+        return isinstance(value, list)
+    if expected == "string":
+        return isinstance(value, str)
+    if expected == "boolean":
+        return isinstance(value, bool)
+    if expected == "integer":
+        return isinstance(value, int) and not isinstance(value, bool)
+    if expected == "number":
+        return isinstance(value, (int, float)) and not isinstance(value, bool)
+    if expected == "null":
+        return value is None
+    return False
+
+
+def _library_json_equal(a: Any, b: Any) -> bool:
+    """JSON equality: 1 != True, 1 == 1.0, otherwise same type and value."""
+    if isinstance(a, bool) or isinstance(b, bool):
+        return isinstance(a, bool) and isinstance(b, bool) and a == b
+    if isinstance(a, (int, float)) and isinstance(b, (int, float)):
+        return a == b
+    return type(a) is type(b) and a == b
+
+
+def _library_resolve(schema: dict[str, Any], root: dict[str, Any]) -> dict[str, Any]:
+    ref = schema.get("$ref")
+    if not isinstance(ref, str):
+        return schema
+    prefix = "#/$defs/"
+    target = (root.get("$defs") or {}).get(ref[len(prefix):]) if ref.startswith(prefix) else None
+    if not isinstance(target, dict):
+        raise LibrarySchemaError("", f"unresolvable schema reference {ref}")
+    return _library_resolve(target, root)
+
+
+def _library_join(path: str, key: str) -> str:
+    return f"{path}.{key}" if path else key
+
+
+def _library_branch_error(value: Any, branches: list, errors: list,
+                          root: dict[str, Any], label: str) -> LibrarySchemaError:
+    """When no oneOf branch matches, report the branch whose fixed
+    discriminator (`action`, `mode`, `outcome`, `status`) the input selected,
+    so the message names the field that is actually wrong. An input that
+    omits the discriminator selects the branch whose discriminator has a
+    default (apply_reshelving's preview branch)."""
+    if isinstance(value, dict):
+        defaulted: LibrarySchemaError | None = None
+        for branch, error in zip(branches, errors):
+            properties = _library_resolve(branch, root).get("properties") or {}
+            for name, prop in properties.items():
+                prop = _library_resolve(prop, root)
+                if not ("const" in prop or "enum" in prop):
+                    continue
+                if name not in value:
+                    if "default" in prop and defaulted is None:
+                        defaulted = error
+                    continue
+                allowed = [prop["const"]] if "const" in prop else list(prop["enum"])
+                if any(_library_json_equal(value[name], item) for item in allowed):
+                    return error
+        if defaulted is not None:
+            return defaulted
+    return LibrarySchemaError(label, "does not match any allowed shape")
+
+
+def _library_validate(value: Any, schema: dict[str, Any], root: dict[str, Any], path: str) -> None:
+    schema = _library_resolve(schema, root)
+    label = path or "request"
+    branches = schema.get("oneOf")
+    if isinstance(branches, list):
+        errors: list[LibrarySchemaError] = []
+        matched = 0
+        for branch in branches:
+            try:
+                _library_validate(value, branch, root, path)
+            except LibrarySchemaError as exc:
+                errors.append(exc)
+            else:
+                matched += 1
+        if matched == 1:
+            return
+        if matched > 1:
+            raise LibrarySchemaError(label, "matches more than one allowed shape")
+        raise _library_branch_error(value, branches, errors, root, label)
+
+    expected = schema.get("type")
+    if isinstance(expected, str) and not _library_type_ok(value, expected):
+        raise LibrarySchemaError(label, f"must be {_LIBRARY_TYPE_LABELS.get(expected, expected)}")
+    if isinstance(value, float) and not math.isfinite(value):
+        raise LibrarySchemaError(label, "must be a finite number")
+    if "const" in schema and not _library_json_equal(value, schema["const"]):
+        raise LibrarySchemaError(label, f"must be {json.dumps(schema['const'])}")
+    enum = schema.get("enum")
+    if isinstance(enum, list) and not any(_library_json_equal(value, item) for item in enum):
+        raise LibrarySchemaError(label, "must be one of: " + ", ".join(json.dumps(item) for item in enum))
+
+    if isinstance(value, (int, float)) and not isinstance(value, bool):
+        minimum = schema.get("minimum")
+        maximum = schema.get("maximum")
+        if isinstance(minimum, (int, float)) and value < minimum:
+            raise LibrarySchemaError(label, f"must be at least {minimum}")
+        if isinstance(maximum, (int, float)) and value > maximum:
+            raise LibrarySchemaError(label, f"must be at most {maximum}")
+
+    if isinstance(value, str):
+        min_length = schema.get("minLength")
+        max_length = schema.get("maxLength")
+        if isinstance(min_length, int) and len(value) < min_length:
+            raise LibrarySchemaError(label, f"must be at least {min_length} characters")
+        if isinstance(max_length, int) and len(value) > max_length:
+            raise LibrarySchemaError(label, f"must be at most {max_length} characters")
+        pattern = schema.get("pattern")
+        if isinstance(pattern, str) and re.search(pattern, value) is None:
+            raise LibrarySchemaError(label, f"must match {pattern}")
+
+    if isinstance(value, list):
+        min_items = schema.get("minItems")
+        max_items = schema.get("maxItems")
+        if isinstance(min_items, int) and len(value) < min_items:
+            raise LibrarySchemaError(label, f"must contain at least {min_items} items")
+        if isinstance(max_items, int) and len(value) > max_items:
+            raise LibrarySchemaError(label, f"must contain at most {max_items} items")
+        item_schema = schema.get("items")
+        if isinstance(item_schema, dict):
+            for index, item in enumerate(value):
+                _library_validate(item, item_schema, root, f"{label}[{index}]")
+
+    if isinstance(value, dict):
+        properties = schema.get("properties")
+        properties = properties if isinstance(properties, dict) else {}
+        required = schema.get("required")
+        if isinstance(required, list):
+            for name in required:
+                if name not in value:
+                    raise LibrarySchemaError(_library_join(path, name), "is required")
+        if schema.get("additionalProperties") is False:
+            for name in value:
+                if name not in properties:
+                    raise LibrarySchemaError(_library_join(path, str(name)), "is not an allowed field")
+        for name, item in value.items():
+            prop = properties.get(name)
+            if isinstance(prop, dict):
+                _library_validate(item, prop, root, _library_join(path, name))
+
+
+def library_validate_arguments(tool_name: str, arguments: Any) -> LibrarySchemaError | None:
+    """First input-contract violation of `arguments` against the frozen
+    schema of one library tool, or None. Every transport routes through
+    this before the service is called."""
+    schema = LIBRARY_TOOL_SCHEMAS[tool_name]
+    if not isinstance(arguments, dict):
+        return LibrarySchemaError("", "must be an object")
+    try:
+        _library_validate(arguments, schema, schema, "")
+    except LibrarySchemaError as exc:
+        return exc
+    return None
+
+
+# ---- Envelope ---------------------------------------------------------------
+
+def _library_ok(**fields: Any) -> dict[str, Any]:
+    return {"ok": True, "schema_version": LIBRARY_SCHEMA_VERSION, **fields}
+
+
+def _library_error(code: str, message: str, *, retryable: bool = False,
+                   details: dict[str, Any] | None = None) -> dict[str, Any]:
+    return {
+        "ok": False,
+        "schema_version": LIBRARY_SCHEMA_VERSION,
+        "error": {
+            "code": code,
+            "message": message,
+            "retryable": bool(retryable),
+            "details": dict(details) if isinstance(details, dict) else {},
+        },
+    }
+
+
+def library_invalid_request(error: LibrarySchemaError) -> dict[str, Any]:
+    return _library_error("invalid_request", str(error),
+                          details={"field": error.field, "reason": error.reason})
+
+
+def _library_service_unavailable(reason: str = "not_installed") -> dict[str, Any]:
+    return _library_error(
+        "service_unavailable",
+        "The Librarian service (library_work) is not available in this helper "
+        "build; no work was read or changed.",
+        details={"module": "library_work", "reason": reason},
+    )
+
+
+def _library_normalize(result: Any, tool_name: str) -> dict[str, Any]:
+    """Coerce a service return value into the contract envelope without
+    rewriting its content. A malformed return is an internal error, never a
+    fabricated success."""
+    if not isinstance(result, dict) or not isinstance(result.get("ok"), bool):
+        _library_log.error("library %s: service returned a malformed response", tool_name)
+        return _library_error("internal_error",
+                              "The Librarian service returned a malformed response.",
+                              details={"tool": tool_name})
+    out = dict(result)
+    out.setdefault("schema_version", LIBRARY_SCHEMA_VERSION)
+    if out["ok"] is False:
+        error = out.get("error")
+        if isinstance(error, dict) and isinstance(error.get("code"), str):
+            error = dict(error)
+            error.setdefault("message", error["code"])
+            error["retryable"] = bool(error.get("retryable", False))
+            error["details"] = error["details"] if isinstance(error.get("details"), dict) else {}
+        else:
+            error = {
+                "code": "service_error",
+                "message": error if isinstance(error, str) else "The Librarian service refused the request.",
+                "retryable": False,
+                "details": {},
+            }
+        out["error"] = error
+    return out
+
+
+# ---- The seam ---------------------------------------------------------------
+
+_LIBRARY_SERVICE_MISSING = object()
+_LIBRARY_SERVICE_BROKEN = object()
+_library_service_lock = threading.Lock()
+_library_service_override: Any = None
+_library_service_resolved: Any = None
+
+
+def set_library_service(service: Any) -> None:
+    """Inject the object the adapters call (tests use a deterministic
+    in-memory stand-in; an integrator may wrap the real module). Passing
+    None clears the override and forgets any cached import result."""
+    global _library_service_override, _library_service_resolved
+    with _library_service_lock:
+        _library_service_override = service
+        _library_service_resolved = None
+        _library_status_cache.clear()
+
+
+def _library_service() -> Any:
+    """The one import seam for library_work.py. Returns the injected stand-in
+    when set, else the module, else None when it is not installed (or its
+    import failed, which is logged once)."""
+    global _library_service_resolved
+    with _library_service_lock:
+        if _library_service_override is not None:
+            return _library_service_override
+        if _library_service_resolved is None:
+            try:
+                import library_work  # Astra's module; absent until integration.
+            except ImportError:
+                _library_service_resolved = _LIBRARY_SERVICE_MISSING
+            except Exception:
+                _library_log.exception("library_work import failed")
+                _library_service_resolved = _LIBRARY_SERVICE_BROKEN
+            else:
+                _library_service_resolved = library_work
+        if _library_service_resolved in (_LIBRARY_SERVICE_MISSING, _LIBRARY_SERVICE_BROKEN):
+            return None
+        return _library_service_resolved
+
+
+def _library_service_reason() -> str:
+    return "import_failed" if _library_service_resolved is _LIBRARY_SERVICE_BROKEN else "not_installed"
+
+
+def _library_apply_enabled(backend: Any) -> bool:
+    """librarian_apply_enabled from the helper's settings; default off, and
+    off whenever the settings cannot be read."""
+    reader = getattr(backend, "_read_settings", None)
+    try:
+        settings = reader() if callable(reader) else {}
+    except Exception:
+        _library_log.exception("library: settings unreadable; apply stays off")
+        settings = {}
+    return isinstance(settings, dict) and settings.get("librarian_apply_enabled") is True
+
+
+def _library_context(transport: str, **extra: Any) -> dict[str, Any]:
+    """The trusted request context the service receives beside the JSON
+    arguments. Registry callers carry no user authority: only a
+    user_intent_token minted by the dashboard route can grant it."""
+    backend = _b()
+    context: dict[str, Any] = {
+        "contract_version": LIBRARY_CONTRACT_VERSION,
+        "schema_version": LIBRARY_SCHEMA_VERSION,
+        "transport": transport,
+        "actor": "registry",
+        "now_ms": int(time.time() * 1000),
+        "apply_enabled": _library_apply_enabled(backend),
+        "index": backend._get_index(),
+        # Run N acceptance N-1: every transport authenticates with the same
+        # per-install helper token, so the trusted session a dashboard-minted
+        # capability binds to is the same session a tool call consumes it
+        # under. Derived here from the backend, never from tool JSON.
+        "session_hash": _library_trusted_session(backend),
+    }
+    context.update(extra)
+    return context
+
+
+def _library_trusted_session(backend: Any) -> str | None:
+    """The helper's trusted session hash (server._library_session_hash), or
+    None for a backend that has no token-derived session (test doubles)."""
+    derive = getattr(backend, "_library_session_hash", None)
+    if not callable(derive):
+        return None
+    try:
+        value = derive()
+    except Exception:
+        _library_log.exception("library: trusted session unavailable")
+        return None
+    return value if isinstance(value, str) and value else None
+
+
+def _library_context_or_none(transport: str, **extra: Any) -> dict[str, Any] | None:
+    """_library_context, with an unopenable index logged and reported as None
+    so no exception text (which can carry a local path) reaches a client."""
+    try:
+        return _library_context(transport, **extra)
+    except Exception:
+        _library_log.exception("library (%s): request context unavailable", transport)
+        return None
+
+
+_LIBRARY_RATE_LIMITERS: dict[str, _RateLimiter] = {
+    # A claim/submit loop over a 548-item copy in batches of 12 submits in
+    # bursts; the ceilings leave headroom for that while still bounding an
+    # agent stuck in a retry loop. Preview/apply/pin/undo are human-paced.
+    "list_library_work": _RateLimiter(60),
+    "claim_library_work": _RateLimiter(60),
+    "submit_library_result": _RateLimiter(120),
+    "apply_reshelving": _RateLimiter(30),
+    "pin_shelf": _RateLimiter(30),
+    "undo_library_apply": _RateLimiter(30),
+    "library_intent": _RateLimiter(30),
+}
+
+
+def _library_discriminator(tool_name: str, args: dict[str, Any]) -> str | None:
+    if tool_name == "claim_library_work":
+        return args.get("action")
+    if tool_name == "apply_reshelving":
+        return args.get("mode", "preview")
+    return None
+
+
+def _library_is_real_module(service: Any) -> bool:
+    """True for Astra's library_work module (frozen surface: module-level
+    ``fn(index, RequestContext, args)`` delegating to
+    ``index.library_service()``); False for an injected stand-in, which keeps
+    the test-only ``fn(args, context_dict)`` shape."""
+    return hasattr(service, "RequestContext") and hasattr(service, "LibraryWorkService")
+
+
+def _library_dispatch(service: Any, fn: Any, args: dict[str, Any],
+                      context: dict[str, Any]) -> Any:
+    """Run F/M acceptance M-1: the adapters were built against a stand-in
+    whose methods took ``(arguments, context)``; the real module exports
+    ``fn(index, context, args)`` and its endpoints require a
+    ``library_work.RequestContext``. Translate the adapter's trusted dict
+    context into that object and route the apply setting through the same
+    service instance the endpoint will use."""
+    if not _library_is_real_module(service):
+        return fn(dict(args), context)
+    index = context["index"]
+    actor = context.get("actor", "registry")
+    request_context = service.RequestContext(
+        authenticated=True,
+        client_id=args.get("client_id") if isinstance(args.get("client_id"), str) else None,
+        session_id=context.get("session_hash") or f"{context.get('transport', 'registry')}",
+        operator=(actor == "server"),
+        local_user_confirmed=(actor == "user"),
+    )
+    # librarian_apply_enabled lives in the helper's settings; the service
+    # instance re-checks it on its own transaction boundary, so keep the two
+    # in step on every call rather than only at construction.
+    index.library_service().librarian_apply_enabled = bool(context.get("apply_enabled"))
+    return fn(index, request_context, dict(args))
+
+
+def _library_invoke(method: str, args: dict[str, Any], context: dict[str, Any],
+                    tool_name: str) -> dict[str, Any]:
+    service = _library_service()
+    if service is None:
+        return _library_service_unavailable(_library_service_reason())
+    fn = getattr(service, method, None)
+    if not callable(fn):
+        _library_log.error("library %s: service lacks %s", tool_name, method)
+        return _library_error("service_unavailable",
+                              f"The Librarian service does not implement {method}.",
+                              details={"module": "library_work", "method": method})
+    try:
+        result = _library_dispatch(service, fn, args, context)
+    except Exception:
+        # Never echo the exception: it may carry SQL text or local paths.
+        _library_log.exception("library %s (%s) raised", tool_name, method)
+        return _library_error("internal_error",
+                              "The Librarian service raised an unexpected error; "
+                              "see the helper log.",
+                              details={"tool": tool_name, "method": method})
+    return _library_normalize(result, tool_name)
+
+
+def _library_call(tool_name: str, args: dict[str, Any], *, transport: str = "registry") -> dict[str, Any]:
+    """Common adapter path for the six tools on every transport: rate limit,
+    frozen-schema check, default-off apply gate, trusted context, service."""
+    try:
+        _LIBRARY_RATE_LIMITERS[tool_name].check()
+    except RateLimitExceeded as exc:
+        return _library_error("rate_limited", str(exc), retryable=True,
+                              details={"tool": tool_name})
+    error = library_validate_arguments(tool_name, args)
+    if error is not None:
+        return library_invalid_request(error)
+    method = LIBRARY_SERVICE_METHODS[(tool_name, _library_discriminator(tool_name, args))]
+    if _library_service() is None:
+        # Resolve the seam before touching the index: an unavailable service
+        # must not open the database as a side effect of reporting itself.
+        return _library_service_unavailable(_library_service_reason())
+    context = _library_context_or_none(transport)
+    if context is None:
+        return _library_error("internal_error",
+                              "The helper's index is unavailable; see the helper log.",
+                              retryable=True, details={"tool": tool_name})
+    if method == "apply_preview" and not context["apply_enabled"]:
+        # Brief reservation 10 / contract "Preview, apply and churn":
+        # librarian_apply_enabled=false is the shipping default and no client
+        # field can lift it. Preview stays available. The service re-checks
+        # context["apply_enabled"] on its own transaction boundary.
+        return _library_error(
+            "apply_disabled",
+            "Applying labels is disabled on this helper "
+            "(librarian_apply_enabled=false); preview remains available.",
+            details={"setting": "librarian_apply_enabled"},
+        )
+    return _library_invoke(method, args, context, tool_name)
+
+
+def list_library_work(args: dict[str, Any]) -> dict[str, Any]:
+    return _library_call("list_library_work", args)
+
+
+def claim_library_work(args: dict[str, Any]) -> dict[str, Any]:
+    return _library_call("claim_library_work", args)
+
+
+def submit_library_result(args: dict[str, Any]) -> dict[str, Any]:
+    return _library_call("submit_library_result", args)
+
+
+def apply_reshelving(args: dict[str, Any]) -> dict[str, Any]:
+    return _library_call("apply_reshelving", args)
+
+
+def pin_shelf(args: dict[str, Any]) -> dict[str, Any]:
+    return _library_call("pin_shelf", args)
+
+
+def undo_library_apply(args: dict[str, Any]) -> dict[str, Any]:
+    return _library_call("undo_library_apply", args)
+
+
+# ---- Dashboard user-intent confirmation -------------------------------------
+
+def _library_intent_operation_schema(kind: str) -> dict[str, Any]:
+    """The pin_shelf / undo_library_apply input schema minus the token the
+    route is about to mint: the canonical operation the capability binds."""
+    source = LIBRARY_TOOL_SCHEMAS["pin_shelf" if kind == "pin" else "undo_library_apply"]
+    properties = {k: v for k, v in source["properties"].items() if k != "user_intent_token"}
+    return _library_schema({
+        "type": "object",
+        "properties": properties,
+        "required": [name for name in source["required"] if name != "user_intent_token"],
+        "additionalProperties": False,
+    })
+
+
+LIBRARY_INTENT_REQUEST_SCHEMA: dict[str, Any] = _library_schema({
+    "type": "object",
+    "properties": {
+        "kind": {"type": "string", "enum": ["pin", "undo"]},
+        "operation": {"type": "object"},
+        # The dashboard sends this only from the confirmation control of a
+        # displayed delta; it is a product confirmation, not a generic ack.
+        "confirmed": {"const": True},
+    },
+    "required": ["kind", "operation", "confirmed"],
+    "additionalProperties": False,
+})
+
+
+def library_mint_user_intent(body: Any, *, session_hash: str) -> dict[str, Any]:
+    """Behind POST /library/intent (server.py owns auth, origin and rate
+    limit). Validates the confirmation body and the canonical operation
+    against the frozen schemas, then asks the service to mint, store and
+    return the short-lived capability bound to that operation, the expected
+    revision and the dashboard session."""
+    try:
+        _LIBRARY_RATE_LIMITERS["library_intent"].check()
+    except RateLimitExceeded as exc:
+        return _library_error("rate_limited", str(exc), retryable=True,
+                              details={"route": "/library/intent"})
+    if not isinstance(body, dict):
+        return library_invalid_request(LibrarySchemaError("", "must be an object"))
+    try:
+        _library_validate(body, LIBRARY_INTENT_REQUEST_SCHEMA, LIBRARY_INTENT_REQUEST_SCHEMA, "")
+        operation_schema = _library_intent_operation_schema(body["kind"])
+        _library_validate(body["operation"], operation_schema, operation_schema, "operation")
+    except LibrarySchemaError as exc:
+        return library_invalid_request(exc)
+    if not isinstance(session_hash, str) or len(session_hash) != 64:
+        return _library_error("internal_error", "The dashboard session could not be identified.")
+    if _library_service() is None:
+        return _library_service_unavailable(_library_service_reason())
+    context = _library_context_or_none(
+        "dashboard",
+        actor="user",
+        session_hash=session_hash,
+        intent_ttl_ms=LIBRARY_INTENT_TTL_MS,
+    )
+    if context is None:
+        return _library_error("internal_error",
+                              "The helper's index is unavailable; see the helper log.",
+                              retryable=True, details={"route": "/library/intent"})
+    request = {"kind": body["kind"], "operation": dict(body["operation"])}
+    return _library_invoke(LIBRARY_INTENT_METHOD, request, context, "library_intent")
+
+
+# ---- /health and dashboard status -------------------------------------------
+
+_LIBRARY_STATUS_TTL_SEC = 5.0
+_library_status_cache: dict[str, Any] = {}
+
+
+def _library_count(counts: Any, key: str) -> int:
+    """Counts by work state may arrive flat or nested under `work`; either
+    way a missing state is zero."""
+    if isinstance(counts, dict):
+        value = counts.get(key)
+        if value is None and isinstance(counts.get("work"), dict):
+            value = counts["work"].get(key)
+        if isinstance(value, int) and not isinstance(value, bool):
+            return value
+    return 0
+
+
+def _library_status_from_list(result: Any) -> dict[str, Any]:
+    if not isinstance(result, dict) or result.get("ok") is not True:
+        code = None
+        if isinstance(result, dict) and isinstance(result.get("error"), dict):
+            code = result["error"].get("code")
+        return {"status": "error", "waiting_for_client": False, "ready": 0, "leased": 0,
+                "run_revision": None, "recovery_state": None, "error_code": code}
+    counts = result.get("counts")
+    waiting = result.get("waiting_for_client") is True
+    ready = _library_count(counts, "ready")
+    leased = _library_count(counts, "leased")
+    recovery = result.get("recovery_state")
+    if recovery in ("pending", "conflict"):
+        status = "recovery_pending"
+    elif waiting:
+        status = "waiting_for_client"
+    elif leased:
+        status = "collecting"
+    else:
+        status = "idle"
+    revision = result.get("run_revision")
+    return {
+        "status": status,
+        "waiting_for_client": waiting,
+        "ready": ready,
+        "leased": leased,
+        "run_revision": revision if isinstance(revision, int) and not isinstance(revision, bool) else None,
+        "recovery_state": recovery if isinstance(recovery, str) else None,
+        "error_code": None,
+    }
+
+
+def library_status(index: Any, *, apply_enabled: bool, now: float | None = None) -> dict[str, Any]:
+    """The `library` block of /health: whether staged work is waiting for a
+    subscribed client (contract, "Dispatch boundaries"). Read-only, cached
+    for a few seconds because /health is polled, and it never raises. The
+    caller passes an already-open index handle; this function opens nothing."""
+    now = time.monotonic() if now is None else now
+    cached = _library_status_cache.get("payload")
+    if cached is not None and now - _library_status_cache.get("at", -1e9) < _LIBRARY_STATUS_TTL_SEC:
+        payload = dict(cached)
+    else:
+        service = _library_service()
+        if service is None:
+            payload = {"status": "unavailable", "waiting_for_client": False, "ready": 0,
+                       "leased": 0, "run_revision": None, "recovery_state": None,
+                       "error_code": None}
+        else:
+            context = {
+                "contract_version": LIBRARY_CONTRACT_VERSION,
+                "schema_version": LIBRARY_SCHEMA_VERSION,
+                "transport": "health",
+                "actor": "server",
+                "now_ms": int(time.time() * 1000),
+                "apply_enabled": bool(apply_enabled),
+                "index": index,
+                "session_hash": _library_trusted_session(_b()),
+            }
+            fn = getattr(service, "list_work", None)
+            try:
+                result = (_library_dispatch(service, fn, {"limit": 1}, context)
+                          if callable(fn) else None)
+            except Exception:
+                _library_log.exception("library status: list_work raised")
+                result = None
+            payload = _library_status_from_list(result)
+        _library_status_cache["payload"] = dict(payload)
+        _library_status_cache["at"] = now
+    payload["apply_enabled"] = bool(apply_enabled)
+    payload["contract_version"] = LIBRARY_CONTRACT_VERSION
+    return payload
+
+
+# ===========================================================================
+# Living Library, Phase 3 (run AM, 2026-09-07): the four standing-source
+# registry adapters and the dashboard consent-intent seam.
+#
+# Contract: docs/library/PHASE3-CONTRACT-2026-09-07.md (phase3-v1-2026-09-07),
+# "Registry and dashboard contract". The frozen input schemas live in
+# source_subscriptions.TOOL_SCHEMAS (one copy, embedded so an installed helper
+# needs no checkout); the adapters here only attach the trusted transport
+# context and rate limits. Both HTTP (server.py /sources/*) and MCP call
+# sources_call, so the same service, capability check and receipt apply.
+#
+# Capability check: set_source_consent carries a user_intent_token minted only
+# by POST /sources/consent-intent (dashboard, origin-gated). Registry callers
+# never mint tokens and never supply an actor string; the session a token
+# binds to is the helper's trusted session hash (server._library_session_hash),
+# derived here from the backend, never from tool JSON.
+# ===========================================================================
+
+SOURCES_CONTRACT_VERSION = "phase3-v1-2026-09-07"
+SOURCES_TOOL_NAMES = ("list_sources", "register_source", "source_status", "set_source_consent")
+_SOURCES_RATE_LIMITERS: dict[str, _RateLimiter] = {
+    "list_sources": _RateLimiter(60),
+    "register_source": _RateLimiter(30),
+    "source_status": _RateLimiter(60),
+    "set_source_consent": _RateLimiter(30),
+    "sources_intent": _RateLimiter(30),
+    "sources_route": _RateLimiter(30),
+}
+_sources_service_override: Any = None
+
+
+def set_sources_service(service: Any) -> None:
+    """Inject a service double for adapter tests; None restores the helper's."""
+    global _sources_service_override
+    _sources_service_override = service
+
+
+def _sources_module() -> Any:
+    import source_subscriptions  # noqa: WPS433
+    return source_subscriptions
+
+
+def _sources_service() -> Any:
+    if _sources_service_override is not None:
+        return _sources_service_override
+    backend = _b()
+    factory = getattr(backend, "_source_service", None)
+    if not callable(factory):
+        return None
+    return factory()
+
+
+def _sources_unavailable() -> dict[str, Any]:
+    return _sources_module().error_envelope(
+        "service_unavailable",
+        "The standing-source service is not available in this helper build; "
+        "no source was read or changed.", retryable=False)
+
+
+def _sources_context(transport: str, *, actor: str = "registry",
+                     session_hash: str | None = None) -> Any:
+    """Trusted request context. Registry callers carry no user authority; the
+    dashboard confirmation route alone sets local_user_confirmed."""
+    mod = _sources_module()
+    if session_hash is None:
+        try:
+            session_hash = _library_trusted_session(_b())
+        except RuntimeError:
+            session_hash = None  # no backend bound (adapter tests with a double)
+    return mod.RequestContext(
+        authenticated=True,
+        session_id=session_hash or transport,
+        operator=(actor == "server"),
+        local_user_confirmed=(actor == "user"),
+        transport=transport,
+    )
+
+
+def _sources_normalize(result: Any, tool_name: str) -> dict[str, Any]:
+    mod = _sources_module()
+    if not isinstance(result, dict) or not isinstance(result.get("ok"), bool):
+        _library_log.error("sources %s: service returned a malformed response", tool_name)
+        return mod.error_envelope("internal_error", "The source service returned a malformed response.",
+                                  details={"tool": tool_name})
+    out = dict(result)
+    out.setdefault("schema_version", mod.SCHEMA_VERSION)
+    out.setdefault("contract_version", mod.CONTRACT_VERSION)
+    return out
+
+
+def sources_call(tool_name: str, args: Any, *, transport: str = "registry") -> dict[str, Any]:
+    """Common adapter path for the four tools on every transport: rate limit,
+    trusted context, service (which performs the strict schema validation and
+    the capability check), contract envelope."""
+    mod = _sources_module()
+    if tool_name not in SOURCES_TOOL_NAMES:
+        return mod.error_envelope("not_found", "Unknown source tool", details={"tool": tool_name})
+    try:
+        _SOURCES_RATE_LIMITERS[tool_name].check()
+    except RateLimitExceeded as exc:
+        return mod.error_envelope("rate_limited", str(exc), retryable=True, details={"tool": tool_name})
+    if not isinstance(args, dict):
+        return mod.error_envelope("validation_error", "Arguments must be an object")
+    for forbidden in ("actor", "cap", "daily_cap", "back_catalog_cap", "adapter", "path", "now_ms"):
+        if forbidden in args:
+            # Contract: no client supplies caps, actor privileges, adapter
+            # commands, source paths or clock values. Unknown fields are also
+            # rejected by the schema; name the attempt explicitly.
+            return mod.error_envelope("validation_error", "Unknown fields",
+                                      details={"field": forbidden, "unknown": [forbidden]})
+    service = _sources_service()
+    if service is None:
+        return _sources_unavailable()
+    fn = getattr(service, tool_name, None)
+    if not callable(fn):
+        return _sources_unavailable()
+    try:
+        result = fn(_sources_context(transport), dict(args))
+    except Exception:
+        _library_log.exception("sources %s raised", tool_name)
+        return mod.error_envelope("internal_error", "The source service raised; see the helper log.",
+                                  details={"tool": tool_name})
+    return _sources_normalize(result, tool_name)
+
+
+def list_sources(args: dict[str, Any]) -> dict[str, Any]:
+    return sources_call("list_sources", args)
+
+
+def register_source(args: dict[str, Any]) -> dict[str, Any]:
+    return sources_call("register_source", args)
+
+
+def source_status(args: dict[str, Any]) -> dict[str, Any]:
+    return sources_call("source_status", args)
+
+
+def set_source_consent(args: dict[str, Any]) -> dict[str, Any]:
+    return sources_call("set_source_consent", args)
+
+
+def sources_mint_consent_intent(body: Any, *, session_hash: str) -> dict[str, Any]:
+    """Behind POST /sources/consent-intent (server.py owns auth, origin and
+    the strict decoder). Body: {"operation": <set_source_consent arguments
+    without user_intent_token>}. The service validates the operation against
+    the same schema minus the token, binds the request hash, source and
+    cursor revisions and the session, and returns the token, expiry and a
+    display summary."""
+    mod = _sources_module()
+    try:
+        _SOURCES_RATE_LIMITERS["sources_intent"].check()
+    except RateLimitExceeded as exc:
+        return mod.error_envelope("rate_limited", str(exc), retryable=True,
+                                  details={"route": "/sources/consent-intent"})
+    if not isinstance(body, dict) or set(body) - {"operation", "confirmed"}:
+        return mod.error_envelope("validation_error", "Expected {operation, confirmed}")
+    if body.get("confirmed") is not True:
+        # The dashboard sends this only from the source opt-in confirmation.
+        return mod.error_envelope("user_intent_required", "Local confirmation is required")
+    if not isinstance(session_hash, str) or len(session_hash) != 64:
+        return mod.error_envelope("internal_error", "The dashboard session could not be identified.")
+    service = _sources_service()
+    if service is None:
+        return _sources_unavailable()
+    try:
+        result = service.mint_consent_intent(
+            _sources_context("dashboard", actor="user", session_hash=session_hash),
+            {"operation": body.get("operation")})
+    except Exception:
+        _library_log.exception("sources consent intent raised")
+        return mod.error_envelope("internal_error", "Consent intent minting failed; see the helper log.")
+    return _sources_normalize(result, "sources_intent")
+
+
+def sources_service_route(method: str, body: Any, *, session_hash: str) -> dict[str, Any]:
+    """Existing-style dashboard routes (refresh, archive) on the same service.
+    They carry local dashboard authority, not a registry tool's."""
+    mod = _sources_module()
+    if method not in ("refresh_source", "archive_source"):
+        return mod.error_envelope("not_found", "Unknown source route", details={"method": method})
+    try:
+        _SOURCES_RATE_LIMITERS["sources_route"].check()
+    except RateLimitExceeded as exc:
+        return mod.error_envelope("rate_limited", str(exc), retryable=True, details={"route": method})
+    if not isinstance(body, dict):
+        return mod.error_envelope("validation_error", "Arguments must be an object")
+    service = _sources_service()
+    if service is None:
+        return _sources_unavailable()
+    try:
+        result = getattr(service, method)(
+            _sources_context("dashboard", actor="user", session_hash=session_hash), dict(body))
+    except Exception:
+        _library_log.exception("sources route %s raised", method)
+        return mod.error_envelope("internal_error", "The source service raised; see the helper log.")
+    return _sources_normalize(result, method)
+
+
+def _sources_tool_schema(name: str) -> dict[str, Any]:
+    """The frozen schema (contract JSON) for one registry tool. A helper build
+    without source_subscriptions.py (packaging is run AN) still imports; the
+    tool then answers service_unavailable."""
+    try:
+        return _sources_module().TOOL_SCHEMAS[name]
+    except ImportError:  # pragma: no cover -- unpackaged build
+        return {"type": "object", "additionalProperties": False}
+
+
 def _schema(properties: dict[str, Any], required: list[str] | None = None) -> dict[str, Any]:
     return {
         "type": "object",
@@ -2147,9 +3533,77 @@ def _schema(properties: dict[str, Any], required: list[str] | None = None) -> di
     }
 
 
+def get_library_activity(args: dict[str, Any]) -> dict[str, Any]:
+    import library_analysis
+    return library_analysis.handle_get_library_activity(args)
+
+def _library_resources_call(name: str, args: dict[str, Any]) -> dict[str, Any]:
+    """Phase 4 read tools (contract phase4-v1-2026-09-08, run AV-1). The
+    shared reader lives in library_resources.py; a helper build without it
+    still imports this registry and answers a domain refusal. Each call binds
+    a request-scoped reader on the process guard; the reader never writes."""
+    try:
+        import library_resources as _lr  # noqa: WPS433 -- optional module
+    except ImportError:
+        return {
+            "ok": False, "schema_version": 1, "contract_version": "phase4-v1-2026-09-08",
+            "error": {"code": "feature_unavailable",
+                      "message": "This feature is not available in this build.",
+                      "retryable": False, "details": {"module": "library_resources"}},
+        }
+    return _lr.dispatch_tool(name, args, _b())
+
+
+def _library_media_export(args: dict[str, Any]) -> dict[str, Any]:
+    """Phase 6 export tool (contract phase6-v1, run BC-2). The read-only
+    domain operation lives in library_media.py; exact input rejection runs
+    before any storage access, admission and the 2 s deadline reuse the
+    Phase 4 process guard, and only an existing index is ever bound."""
+    try:
+        import library_media as _lm  # noqa: WPS433 -- optional module
+    except ImportError:
+        return {
+            "ok": False, "schema_version": 1, "contract_version": "phase6-v1",
+            "error": {"code": "feature_unavailable",
+                      "message": "This feature is not available in this build.",
+                      "retryable": False, "details": {"module": "library_media"}},
+        }
+    return _lm.export_cited_range_tool(args, _b())
+
+
+EXPORT_CITED_RANGE_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "properties": {
+        "video_id": {"type": "string", "description": "Stable item id."},
+        "start": {"type": "number", "minimum": 0,
+                  "description": "Range start in seconds; must equal the first selected cue's start (with end)."},
+        "end": {"type": "number", "minimum": 0,
+                "description": "Range end in seconds; must equal the last selected cue's end (with start)."},
+        "excerpt_id": {"type": "string", "description": "A current excerpt id (instead of start/end)."},
+        "source_revision": {"type": "string", "description": "Optional pin; refuses revision_unavailable on change."},
+        "media_revision": {"type": "string", "description": "Optional pin; refuses revision_unavailable on change."},
+    },
+    "required": ["video_id"],
+    "additionalProperties": False,
+}
+EXPORT_CITED_RANGE_DESCRIPTION = (
+    "Read-only cited export of one stored transcript range (exact cue-aligned "
+    "start/end, at most 120 s and 200 cues) or one current excerpt id from a "
+    "saved item: verbatim stored text, per-cue speaker labels with provenance, "
+    "overlapping chapters, safe source and seek links, source/media revisions "
+    "and evidence refs. Nothing is fetched, transcribed or saved; refusals "
+    "carry a next_step."
+)
+
+
 TOOL_REGISTRY: dict[str, ToolSpec] = {
     "uoink_video": ToolSpec(
         name="uoink_video",
+        title="Capture video",
+        annotations={
+            "readOnlyHint": False, "destructiveHint": False,
+            "idempotentHint": False, "openWorldHint": True,
+        },
         description=(
             "Extract a single YouTube video into a Uoink corpus. Returns the "
             "saved folder, markdown corpus, and screenshot paths."
@@ -2169,6 +3623,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "uoink_playlist": ToolSpec(
         name="uoink_playlist",
+        title="Capture playlist",
+        annotations={
+            "readOnlyHint": False, "destructiveHint": False,
+            "idempotentHint": False, "openWorldHint": True,
+        },
         description="Start asynchronous extraction for a YouTube playlist.",
         input_schema=_schema({
             "url": {"type": "string", "description": "YouTube playlist URL."},
@@ -2185,6 +3644,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "get_job_status": ToolSpec(
         name="get_job_status",
+        title="Get job status",
+        annotations={
+            "readOnlyHint": True, "destructiveHint": False,
+            "idempotentHint": True, "openWorldHint": False,
+        },
         description="Return the full status object for an async Uoink job.",
         input_schema=_schema({
             "job_id": {"type": "string", "description": "Job ID from uoink_playlist."},
@@ -2193,6 +3657,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "cancel_job": ToolSpec(
         name="cancel_job",
+        title="Cancel job",
+        annotations={
+            "readOnlyHint": False, "destructiveHint": True,
+            "idempotentHint": True, "openWorldHint": False,
+        },
         description="Cancel an async Uoink job and leave partial outputs on disk.",
         input_schema=_schema({
             "job_id": {"type": "string", "description": "Job ID to cancel."},
@@ -2201,6 +3670,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "list_recent_uoinks": ToolSpec(
         name="list_recent_uoinks",
+        title="List recent captures",
+        annotations={
+            "readOnlyHint": True, "destructiveHint": False,
+            "idempotentHint": True, "openWorldHint": False,
+        },
         description="List recent saved Uoink corpora.",
         input_schema=_schema({
             "limit": {"type": "integer", "minimum": 1, "maximum": 100, "default": 20},
@@ -2212,6 +3686,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "search_uoinks": ToolSpec(
         name="search_uoinks",
+        title="Search captures",
+        annotations={
+            "readOnlyHint": True, "destructiveHint": False,
+            "idempotentHint": True, "openWorldHint": False,
+        },
         description="Full-text search across saved Uoink corpora.",
         input_schema=_schema({
             "query": {"type": "string"},
@@ -2230,8 +3709,184 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
         # loop can't hammer it.
         rate_limiter=_RateLimiter(30),
     ),
+    "search_clips": ToolSpec(
+        name="search_clips",
+        title="Search transcript clips",
+        annotations={
+            "readOnlyHint": True, "destructiveHint": False,
+            "idempotentHint": True, "openWorldHint": False,
+        },
+        description=(
+            "Full-text search over transcript windows from saved uoinks. "
+            "Long source cues retain coarse timing and link to the cue start "
+            "in the source. Use this to find the exact quotable passage; use "
+            "search_uoinks to find whole items."
+        ),
+        input_schema=_schema({
+            "query": {"type": "string"},
+            "limit": {"type": "integer", "minimum": 1, "maximum": 50, "default": 20},
+            "video_id": {
+                "type": "string",
+                "description": "Restrict results to one item by video_id. Optional.",
+            },
+            "channel": {
+                "type": "string",
+                "description": "Filter results to one channel. Optional.",
+            },
+        }, ["query"]),
+        handler=search_clips,
+        rate_limiter=_RateLimiter(30),
+    ),
+    "get_evidence_card": ToolSpec(
+        name="get_evidence_card",
+        title="Get evidence card",
+        annotations={
+            "readOnlyHint": True, "destructiveHint": False,
+            "idempotentHint": True, "openWorldHint": False,
+        },
+        description=(
+            "Return an evidence card for one saved uoink: title, channel, "
+            "platform, topic, source URL, a short summary hint, and its most "
+            "quotable clips spread across the timeline, each with a deep "
+            "link. Resolve by slug or video_id."
+        ),
+        input_schema=_schema({
+            "slug": {"type": "string", "description": "Folder slug of the saved uoink."},
+            "video_id": {"type": "string", "description": "Alternative to slug."},
+            "profile": {"type": "string", "enum": ["full", "librarian"], "default": "full"},
+            "n_clips": {"type": "integer", "minimum": 1, "maximum": 20},
+        }),
+        handler=get_evidence_card,
+        rate_limiter=_RateLimiter(30),
+    ),
+    # ---- Living Library work queue (Phase 2 stage 1; HTTP registry only) ----
+    # Rate limits live inside _library_call so a throttled caller still gets
+    # the contract's error envelope rather than the plain string one.
+    "list_library_work": ToolSpec(
+        name="list_library_work",
+        description=(
+            "List Librarian assignment work for a run: counts by work state "
+            "and manifest disposition, the run revision, one cursor page of "
+            "items, and whether staged work is waiting for a subscribed "
+            "client. Read-only; the server never runs the Librarian itself."
+        ),
+        input_schema=LIBRARY_TOOL_SCHEMAS["list_library_work"],
+        handler=list_library_work,
+    ),
+    "claim_library_work": ToolSpec(
+        name="claim_library_work",
+        description=(
+            "Lease Librarian work for a client (action=claim returns up to "
+            "twelve single-item packets, each with one evidence card and an "
+            "attempt token), or renew, release or cancel the client's own "
+            "current attempt. Leases run 60-900 seconds and never past one "
+            "hour after the first claim; a row is exhausted after three."
+        ),
+        input_schema=LIBRARY_TOOL_SCHEMAS["claim_library_work"],
+        handler=claim_library_work,
+    ),
+    "submit_library_result": ToolSpec(
+        name="submit_library_result",
+        description=(
+            "Submit one Librarian result for one leased work row: an "
+            "assignment of one to three shelf memberships with quoted "
+            "evidence, or an explicit unmapped, unsupported or error outcome. "
+            "Validated and stored; nothing is applied to current labels. An "
+            "identical retry under the same submission_key returns the "
+            "recorded response."
+        ),
+        input_schema=LIBRARY_TOOL_SCHEMAS["submit_library_result"],
+        handler=submit_library_result,
+    ),
+    "apply_reshelving": ToolSpec(
+        name="apply_reshelving",
+        description=(
+            "Preview the exact reshelving delta for a run (mode=preview, the "
+            "default), or apply a locally approved, unexpired preview by its "
+            "delta hash and operation key (mode=apply). Apply is refused "
+            "while librarian_apply_enabled is off, which is the shipping "
+            "default, and stops at 15 percent churn without a trusted human "
+            "approval."
+        ),
+        input_schema=LIBRARY_TOOL_SCHEMAS["apply_reshelving"],
+        handler=apply_reshelving,
+    ),
+    "pin_shelf": ToolSpec(
+        name="pin_shelf",
+        description=(
+            "Pin, unpin or move one item on a shelf as a user decision that "
+            "the Librarian may not override. Requires a user_intent_token "
+            "minted by the dashboard confirmation route; no client actor "
+            "string grants that authority."
+        ),
+        input_schema=LIBRARY_TOOL_SCHEMAS["pin_shelf"],
+        handler=pin_shelf,
+    ),
+    "undo_library_apply": ToolSpec(
+        name="undo_library_apply",
+        description=(
+            "Undo one recorded library apply by replaying its stored inverse "
+            "as a new, itself reversible, journal operation. Only the apply "
+            "that produced the current projection revision can be undone, "
+            "and a user_intent_token from the dashboard is required."
+        ),
+        input_schema=LIBRARY_TOOL_SCHEMAS["undo_library_apply"],
+        handler=undo_library_apply,
+    ),
+    # ---- Living Library standing sources (Phase 3, run AM) ----
+    # Rate limits and the capability check live inside sources_call so every
+    # transport returns the contract's error envelope.
+    "list_sources": ToolSpec(
+        name="list_sources",
+        description=(
+            "List standing sources (podcast RSS feeds, YouTube channels and "
+            "playlists) with consent state, enrollment, today's UTC start "
+            "allowance and detection health. Read-only; keyset pagination."
+        ),
+        input_schema=_sources_tool_schema("list_sources"),
+        handler=list_sources,
+    ),
+    "register_source": ToolSpec(
+        name="register_source",
+        description=(
+            "Register a standing source for metadata detection only. Creates "
+            "the source with capture off and a due detection cursor; no "
+            "network call, no capture. A duplicate returns the existing source "
+            "unchanged (created=false)."
+        ),
+        input_schema=_sources_tool_schema("register_source"),
+        handler=register_source,
+    ),
+    "source_status": ToolSpec(
+        name="source_status",
+        description=(
+            "One source's current summary, one page of observed items with "
+            "capture and classification state, and every in-flight "
+            "reservation. Read-only: never enrolls, polls or starts work."
+        ),
+        input_schema=_sources_tool_schema("source_status"),
+        handler=source_status,
+    ),
+    "set_source_consent": ToolSpec(
+        name="set_source_consent",
+        description=(
+            "Turn standing capture on or off for one source. Requires the "
+            "expected source revision (and cursor revision when enabling), an "
+            "operation key and a user_intent_token minted by the local "
+            "dashboard confirmation; the stored receipt is returned on an "
+            "identical retry. On: at most 25 back-catalog items once, then new "
+            "items, 10 starts per UTC day. Off: releases unstarted reservations."
+        ),
+        input_schema=_sources_tool_schema("set_source_consent"),
+        handler=set_source_consent,
+    ),
     "get_uoink_corpus": ToolSpec(
         name="get_uoink_corpus",
+        title="Get saved corpus",
+        annotations={
+            "readOnlyHint": True, "destructiveHint": False,
+            "idempotentHint": True, "openWorldHint": False,
+        },
         description="Return the full markdown corpus for a saved uoink by slug.",
         input_schema=_schema({
             "slug": {"type": "string", "description": "Folder slug of the saved uoink."},
@@ -2240,6 +3895,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "analyze_comments": ToolSpec(
         name="analyze_comments",
+        title="Analyze comments",
+        annotations={
+            "readOnlyHint": False, "destructiveHint": True,
+            "idempotentHint": False, "openWorldHint": True,
+        },
         description=(
             "Run Comment Intelligence on an existing uoink and return themes, "
             "mentioned products/tools, and disagreements."
@@ -2252,6 +3912,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "classify_hook": ToolSpec(
         name="classify_hook",
+        title="Classify hook",
+        annotations={
+            "readOnlyHint": False, "destructiveHint": True,
+            "idempotentHint": False, "openWorldHint": True,
+        },
         description="Classify the hook type for an existing uoink.",
         input_schema=_schema({
             "slug": {"type": "string", "description": "Folder slug of the saved uoink."},
@@ -2261,6 +3926,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "get_taxonomy": ToolSpec(
         name="get_taxonomy",
+        title="Get hook taxonomy",
+        annotations={
+            "readOnlyHint": True, "destructiveHint": False,
+            "idempotentHint": True, "openWorldHint": False,
+        },
         description=(
             "Return captured Hook Type taxonomy rows, optionally filtered by "
             "channel and hook_type."
@@ -2296,6 +3966,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "get_citation_map": ToolSpec(
         name="get_citation_map",
+        title="Get citation map",
+        annotations={
+            "readOnlyHint": True, "destructiveHint": False,
+            "idempotentHint": True, "openWorldHint": False,
+        },
         description=(
             "Return the transcript + screenshot citation map for a saved "
             "uoink, each entry with a timestamped YouTube deep link."
@@ -2308,6 +3983,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "get_uoink_health": ToolSpec(
         name="get_uoink_health",
+        title="Get capture health",
+        annotations={
+            "readOnlyHint": True, "destructiveHint": False,
+            "idempotentHint": True, "openWorldHint": False,
+        },
         description="Return the per-section extraction health score for a saved uoink.",
         input_schema=_schema({
             "slug": {"type": "string", "description": "Folder slug of the saved uoink."},
@@ -2317,6 +3997,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "find_mentions": ToolSpec(
         name="find_mentions",
+        title="Find entity mentions",
+        annotations={
+            "readOnlyHint": True, "destructiveHint": False,
+            "idempotentHint": True, "openWorldHint": False,
+        },
         description=(
             "Find every place an entity (person, tool, product, company, "
             "or topic) is mentioned across saved uoinks, newest first, each "
@@ -2425,22 +4110,34 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "add_podcast_feed": ToolSpec(
         name="add_podcast_feed",
+        title="Add podcast feed",
+        annotations={
+            "readOnlyHint": False, "destructiveHint": False,
+            "idempotentHint": True, "openWorldHint": True,
+        },
         description=(
             "Register an RSS feed URL. Idempotent -- "
             "existing URL returns the same row. poll_interval_min "
-            "default 60, range 15-1440."
+            "default 60, range 15-1440. Metadata is watched automatically; "
+            "auto_ingest is an explicit per-feed opt-in and defaults false."
         ),
         input_schema=_schema({
             "feed_url": {"type": "string"},
             "poll_interval_min": {"type": "integer",
                                     "minimum": 15, "maximum": 1440,
                                     "default": 60},
+            "auto_ingest": {"type": "boolean", "default": False},
         }, ["feed_url"]),
         handler=add_podcast_feed,
         rate_limiter=_RateLimiter(30),
     ),
     "list_podcast_feeds": ToolSpec(
         name="list_podcast_feeds",
+        title="List podcast feeds",
+        annotations={
+            "readOnlyHint": True, "destructiveHint": False,
+            "idempotentHint": True, "openWorldHint": False,
+        },
         description="List registered RSS feeds newest-first.",
         input_schema=_schema({
             "enabled_only": {"type": "boolean", "default": False},
@@ -2450,6 +4147,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "remove_podcast_feed": ToolSpec(
         name="remove_podcast_feed",
+        title="Remove podcast feed",
+        annotations={
+            "readOnlyHint": False, "destructiveHint": True,
+            "idempotentHint": True, "openWorldHint": False,
+        },
         description=(
             "Delete a feed + cascade its episodes."
         ),
@@ -2461,6 +4163,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "poll_podcast_feed": ToolSpec(
         name="poll_podcast_feed",
+        title="Poll podcast feed",
+        annotations={
+            "readOnlyHint": False, "destructiveHint": False,
+            "idempotentHint": False, "openWorldHint": True,
+        },
         description=(
             "Trigger one feed poll (HTTP GET + RSS/Atom "
             "parse + upsert episodes). Conditional GET via ETag/"
@@ -2475,6 +4182,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "list_podcast_episodes": ToolSpec(
         name="list_podcast_episodes",
+        title="List podcast episodes",
+        annotations={
+            "readOnlyHint": True, "destructiveHint": False,
+            "idempotentHint": True, "openWorldHint": False,
+        },
         description=(
             "List episodes. Optional feed_id + status "
             "filters (new | queued | downloaded | transcribed | "
@@ -2493,6 +4205,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "download_podcast_episode": ToolSpec(
         name="download_podcast_episode",
+        title="Download podcast audio",
+        annotations={
+            "readOnlyHint": False, "destructiveHint": False,
+            "idempotentHint": True, "openWorldHint": True,
+        },
         description=(
             "Download an episode's MP3 via yt-dlp + "
             "ffmpeg. Synchronous. Returns when the file lands at "
@@ -2508,6 +4225,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "get_whisperx_status": ToolSpec(
         name="get_whisperx_status",
+        title="Get transcription status",
+        annotations={
+            "readOnlyHint": True, "destructiveHint": False,
+            "idempotentHint": True, "openWorldHint": False,
+        },
         description=(
             "Report whether the WhisperX runtime is importable + "
             "the currently-selected model size + the diarization "
@@ -2520,11 +4242,16 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "transcribe_podcast_episode": ToolSpec(
         name="transcribe_podcast_episode",
+        title="Transcribe podcast episode",
+        annotations={
+            "readOnlyHint": False, "destructiveHint": True,
+            "idempotentHint": False, "openWorldHint": True,
+        },
         description=(
-            "Run WhisperX on a downloaded episode. "
-            "Synchronous. Reads audio_local_path; writes the JSON "
-            "transcript next to the MP3. Returns the structured "
-            "transcript metadata, OR consent_required=True when the "
+            "Queue WhisperX for a downloaded episode. A single "
+            "below-normal-priority worker writes the JSON transcript next "
+            "to the MP3; get_job_status reports durable progress. Returns "
+            "consent_required=True when the "
             "first-time model download (200 MB - 2 GB) needs the user "
             "to opt in (re-issue with consent_given=True after the "
             "dashboard prompt records the opt-in), OR a runtime-not-"
@@ -2533,13 +4260,33 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
         input_schema=_schema({
             "episode_id": {"type": "integer"},
             "model": {"type": "string",
-                       "enum": ["tiny", "base", "small", "medium", "large"]},
+                       "enum": ["tiny", "base", "small", "medium", "large",
+                                "large-v3-turbo"]},
             "language": {"type": "string"},
             "diarize": {"type": "boolean"},
             "consent_given": {"type": "boolean"},
         }, ["episode_id"]),
         handler=transcribe_podcast_episode,
         rate_limiter=_RateLimiter(5),
+    ),
+    "episode_to_corpus": ToolSpec(
+        name="episode_to_corpus",
+        title="Publish podcast corpus",
+        annotations={
+            "readOnlyHint": False, "destructiveHint": True,
+            "idempotentHint": True, "openWorldHint": False,
+        },
+        description=(
+            "Publish a completed podcast transcript into the local Uoink "
+            "corpus. Writes deterministic Markdown and sidecar files, "
+            "indexes full text and source-aware citations, and safely "
+            "repairs partial prior attempts."
+        ),
+        input_schema=_schema({
+            "episode_id": {"type": "integer"},
+        }, ["episode_id"]),
+        handler=episode_to_corpus,
+        rate_limiter=_RateLimiter(30),
     ),
     "add_monitored_playlist": ToolSpec(
         name="add_monitored_playlist",
@@ -2726,6 +4473,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "get_transcript_reliability": ToolSpec(
         name="get_transcript_reliability",
+        title="Get transcript reliability",
+        annotations={
+            "readOnlyHint": True, "destructiveHint": False,
+            "idempotentHint": True, "openWorldHint": False,
+        },
         description=(
             "Return stored transcript reliability spans for a saved uoink by "
             "YouTube video_id. Read-only; computation is triggered by the "
@@ -3136,6 +4888,63 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
         handler=remove_style_anchor,
         rate_limiter=_RateLimiter(30),
     ),
+    # Phase 0 registry-only capture parity (4 tools)
+    "uoink_url": ToolSpec(
+        name="uoink_url",
+        description=(
+            "Capture any http(s) URL through the helper's universal extractor. "
+            "Known video platforms use the full media pipeline; other sites "
+            "use the metadata and transcript fallback."
+        ),
+        input_schema=_schema({
+            "url": {"type": "string"},
+            "interval": {"type": "integer", "minimum": 5, "maximum": 300,
+                         "default": 30},
+            "long_video_mode": {"type": "string", "enum": ["full", "lite"]},
+        }, ["url"]),
+        handler=uoink_url,
+        rate_limiter=_RateLimiter(5),
+    ),
+    "uoink_note": ToolSpec(
+        name="uoink_note",
+        description="Save a text note as a first-class local corpus item.",
+        input_schema=_schema({
+            "text": {"type": "string"},
+            "title": {"type": "string"},
+            "author": {"type": "string"},
+        }, ["text"]),
+        handler=uoink_note,
+        rate_limiter=_RateLimiter(30),
+    ),
+    "uoink_image": ToolSpec(
+        name="uoink_image",
+        description=(
+            "Save a base64 PNG, JPEG, or WebP as a local image corpus item. "
+            "No cloud OCR or vision service runs."
+        ),
+        input_schema=_schema({
+            "image_base64": {"type": "string"},
+            "mime": {"type": "string"},
+            "filename": {"type": "string"},
+            "caption": {"type": "string"},
+            "source_url": {"type": "string"},
+            "author": {"type": "string"},
+        }, ["image_base64"]),
+        handler=uoink_image,
+        rate_limiter=_RateLimiter(10),
+    ),
+    "uoink_x": ToolSpec(
+        name="uoink_x",
+        description=(
+            "Capture an X post and the author's earlier chain as a local corpus "
+            "item. Requires the default-off x_text_capture_enabled setting."
+        ),
+        input_schema=_schema({
+            "url": {"type": "string"},
+        }, ["url"]),
+        handler=uoink_x,
+        rate_limiter=_RateLimiter(10),
+    ),
     # v3.2 Universal Site Uoinking (4 tools)
     "uoink_page": ToolSpec(
         name="uoink_page",
@@ -3224,18 +5033,220 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
         handler=remove_allowed_site,
         rate_limiter=_RateLimiter(30),
     ),
+    "get_library_activity": ToolSpec(
+        name="get_library_activity",
+        title="Get library activity",
+        annotations={
+            "readOnlyHint": True, "destructiveHint": False,
+            "idempotentHint": True, "openWorldHint": False,
+        },
+        description="Report deterministic library activity, shelf churn, and source observations.",
+        input_schema=_schema({
+            "interval": {
+                "type": "object",
+                "properties": {
+                    "start": {"type": "string", "description": "Gregorian UTC timestamp YYYY-MM-DDTHH:MM:SSZ or YYYY-MM-DDTHH:MM:SS.sssZ"},
+                    "end": {"type": "string", "description": "Gregorian UTC timestamp YYYY-MM-DDTHH:MM:SSZ or YYYY-MM-DDTHH:MM:SS.sssZ"},
+                },
+                "required": ["start", "end"],
+                "additionalProperties": False,
+                "description": "Half-open [start, end) query interval.",
+            },
+            "date_basis": {
+                "type": "string",
+                "enum": ["capture_time", "publication_time"],
+                "default": "capture_time",
+                "description": "Clock basis for item report.",
+            },
+            "detail": {
+                "type": "string",
+                "enum": ["creator_hints", "type_creator_hints", "shelves", "sources", "events", "evidence"],
+                "description": "Optional detail collection selector.",
+            },
+            "metric_id": {
+                "type": "string",
+                "maxLength": 512,
+                "description": "Stable metric ID (required for detail:evidence).",
+            },
+            "offset": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 1000000,
+                "description": "Pagination offset.",
+            },
+            "limit": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 20,
+                "description": "Pagination limit.",
+            },
+            "expected_revision": {
+                "type": "string",
+                "description": "Summary report_revision (required for detail requests).",
+            },
+        }, ["interval"]),
+        handler=get_library_activity,
+        rate_limiter=None,
+    ),
+    # ---- Living Library Phase 4 bounded read tools (run AV-1) ----
+    # Strictness, the 2 s deadline, the 60/minute and 2-active guard and every
+    # refusal envelope live in library_resources.py (shared with stdio
+    # resources and prompts); no registry rate limiter so a throttled caller
+    # still receives the contract's `rate_limited` envelope.
+    "search_library": ToolSpec(
+        name="search_library",
+        title="Search library",
+        annotations={
+            "readOnlyHint": True, "destructiveHint": False,
+            "idempotentHint": True, "openWorldHint": False,
+        },
+        description=(
+            "Bounded clip-first search of the saved library (default 5, at "
+            "most 20 hits) with an item-text fallback for items without "
+            "clips. Each hit carries the item id, source revision, safe title "
+            "and link, evidence kind and timing, a 240-character preview and "
+            "revision-bound card and excerpt URIs for read_library_resource. "
+            "Results are bounded, not exhaustive; follow next_step when more "
+            "retrieval is needed."
+        ),
+        input_schema=_schema({
+            "query": {"type": "string", "description": "Search text, at most 512 characters."},
+            "limit": {"type": "integer", "minimum": 1, "maximum": 20, "default": 5,
+                      "description": "Maximum hits, 1-20 (default 5)."},
+        }, ["query"]),
+        handler=lambda args: _library_resources_call("search_library", args),
+    ),
+    "get_library_item": ToolSpec(
+        name="get_library_item",
+        title="Get library item",
+        annotations={
+            "readOnlyHint": True, "destructiveHint": False,
+            "idempotentHint": True, "openWorldHint": False,
+        },
+        description=(
+            "Resolve one saved item by video_id or slug (exactly one) and "
+            "return its default Librarian evidence card unchanged plus "
+            "canonical card, excerpt and initial corpus-chunk URIs. Bounded; "
+            "use before quoting."
+        ),
+        input_schema=_schema({
+            "video_id": {"type": "string", "description": "Stable item id (exactly one selector)."},
+            "slug": {"type": "string", "description": "Discovery alias (exactly one selector)."},
+        }),
+        handler=lambda args: _library_resources_call("get_library_item", args),
+    ),
+    "read_library_resource": ToolSpec(
+        name="read_library_resource",
+        title="Read library resource",
+        annotations={
+            "readOnlyHint": True, "destructiveHint": False,
+            "idempotentHint": True, "openWorldHint": False,
+        },
+        description=(
+            "Read one uoink://library/v1/ resource URI (card, excerpt, corpus "
+            "chunk, shelf page or brief) with the same validation, contents "
+            "and refusals as resources/read. Fallback for clients without "
+            "native resource reads; identical text, one renderer."
+        ),
+        input_schema=_schema({
+            "uri": {"type": "string", "description": "A uoink://library/v1/... resource URI."},
+        }, ["uri"]),
+        handler=lambda args: _library_resources_call("read_library_resource", args),
+    ),
+    # ---- Living Library Phase 4 brief tools (run AV-2) ----
+    # Brief generation belongs to the client: get_library_brief_input is a
+    # read (no lease, no mutation); publish_library_brief is a LOCAL WRITE
+    # under DATA_ROOT/reach/briefs (immutable artifact plus receipt). Both
+    # live in library_briefs.py behind library_resources.dispatch_tool.
+    "get_library_brief_input": ToolSpec(
+        name="get_library_brief_input",
+        title="Prepare library brief input",
+        annotations={
+            "readOnlyHint": True, "destructiveHint": False,
+            "idempotentHint": True, "openWorldHint": False,
+        },
+        description=(
+            "Prepare bounded input for a client-run daily brief: for a UTC "
+            "date and a Phase 2 run id, return job_key, input_hash, bound "
+            "queue/run/projection revisions, capture and event counts, "
+            "coverage, up to 20 work-status rows and up to 5 default "
+            "Librarian cards (at most 24,576 bytes). Read only: no lease, no "
+            "mutation. The client tracks its own report job."
+        ),
+        input_schema=_schema({
+            "date": {"type": "string", "description": "UTC day, YYYY-MM-DD; not in the future."},
+            "run_id": {"type": "string", "description": "Phase 2 run id (1-200 characters)."},
+        }, ["date", "run_id"]),
+        handler=lambda args: _library_resources_call("get_library_brief_input", args),
+    ),
+    "publish_library_brief": ToolSpec(
+        name="publish_library_brief",
+        title="Publish library brief",
+        annotations={
+            "readOnlyHint": False, "destructiveHint": False,
+            "idempotentHint": True, "openWorldHint": False,
+        },
+        description=(
+            "Local write: persist one client-produced brief for a job "
+            "prepared by get_library_brief_input. Validates the packet "
+            "against current library data (stale_brief on change), binds "
+            "every citation to supplied evidence, is idempotent on "
+            "submission_key, and stores an immutable artifact under the "
+            "local reach/briefs directory. Cannot apply labels or alter the "
+            "assignment queue. Invoke only as part of the user's requested "
+            "brief job."
+        ),
+        input_schema=_schema({
+            "job_key": {"type": "string", "description": "job_key returned by get_library_brief_input."},
+            "input_hash": {"type": "string", "description": "input_hash returned by get_library_brief_input."},
+            "input_packet": {"type": "object",
+                             "description": "The exact packet returned by get_library_brief_input."},
+            "submission_key": {"type": "string",
+                               "description": "Client idempotency key (1-200 characters, no whitespace)."},
+            "document": {"type": "string", "description": "The brief, at most 8,192 UTF-8 bytes."},
+            "citations": {
+                "type": "array", "maxItems": 20, "items": {"type": "object"},
+                "description": ("At most 20 citations: item_id, source_revision, card_hash, "
+                                "excerpt_id, quote (1-500 code points), evidence_kind, start, end."),
+            },
+            "usage": {"type": ["object", "null"],
+                      "description": "Client-reported usage, or null when unavailable (never zero)."},
+        }, ["job_key", "input_hash", "input_packet", "submission_key", "document", "citations"]),
+        handler=lambda args: _library_resources_call("publish_library_brief", args),
+    ),
+    # ---- Living Library Phase 6 cited export (run BC-2) ----
+    # Read only: creates no evidence basis, acquisition permission or save
+    # action. Strictness, the shared 2 s deadline/admission guard and every
+    # refusal envelope live in library_media.py; no registry rate limiter so
+    # a throttled caller still receives the contract's `rate_limited` envelope.
+    "export_cited_range": ToolSpec(
+        name="export_cited_range",
+        title="Export cited transcript range",
+        annotations={
+            "readOnlyHint": True, "destructiveHint": False,
+            "idempotentHint": True, "openWorldHint": False,
+        },
+        description=EXPORT_CITED_RANGE_DESCRIPTION,
+        input_schema=EXPORT_CITED_RANGE_SCHEMA,
+        handler=_library_media_export,
+    ),
 }
 
 
 def list_tools() -> list[dict[str, Any]]:
-    return [
-        {
+    tools = []
+    for spec in TOOL_REGISTRY.values():
+        item: dict[str, Any] = {
             "name": spec.name,
             "description": spec.description,
             "inputSchema": spec.input_schema,
         }
-        for spec in TOOL_REGISTRY.values()
-    ]
+        if spec.annotations is not None:
+            item["annotations"] = spec.annotations
+        if spec.title is not None:
+            item["title"] = spec.title
+        tools.append(item)
+    return tools
 
 
 def call_tool(name: str, arguments: dict[str, Any] | None = None) -> dict[str, Any]:

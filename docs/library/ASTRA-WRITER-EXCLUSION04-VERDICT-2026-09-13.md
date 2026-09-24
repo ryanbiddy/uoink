@@ -1,0 +1,15 @@
+# Generated Windows writer exclusion and drain pass
+
+The repaired writer-exclusion04 observation PASSED its generated scope. Actual tool0eeb20 returned outer exit0. The controller and both exact child processes exited0, both owned jobs were empty, all three guards were valid, and the launcher accepted the complete receipts with unchanged inputs. Root check0f54a5 confirms these records and the current source/control hashes.
+
+The independent contender attempted the same physical journal once. Its exclusive open returned error32 with no valid journal handle, no content read and no write. The controller observed that contender's process exit and empty job before retiring its handles and separate read guard. Primary journal ownership remained held throughout. The contender used103 monitored native calls and137 dispatch/audit calls.
+
+The primary worker then completed the existing generated handshake, adoption and normal drain. Its process exit0 and empty job preceded read-set, pipe and journal retirement. The adapter owned cleanup and restored its globals. The journal recorded INITIALIZED, RESERVED, WORKER_BOUND and CLEARED with four confirmed flushes. The original creation handle transferred without closing/reopening it; final journal closure followed confirmation, with directory guards retired afterward.
+
+The2,118-byte closed journal matches the controller's confirmed bytes and SHA25602bca5b9c70324f1fe227bb111b9db36a93803a19ac79be873f38a21c4721867. The outer exclusive postexit read closed successfully. Primary creation/resume/journal-close milestones are4387,6229 and8202; contender creation/resume are4348 and4354 under the same confirmed RESERVED head.
+
+The controller records8,230 monitored native calls and8,266 dispatch/audit calls, two attribute-buffer casts,0.3430434000038076 seconds elapsed, no pending pipe operation, no work-budget closure and no emergency cleanup call. There were zero model imports or calls. All21 source/control records and14 support/fixture records remained unchanged. Only the previously admitted nine support inputs and generated fixtures were used; model.bin is the60-byte ASCII fixture.
+
+The source repair first passed81 cases and72 nested subtests in both generated copies. It accepts mutable directory size while preserving all other directory identity fields, regular-file size checks and every original assertion. Native04's two product sources exactly match those qualified copies; the remaining bootstrap/launcher changes are fixed-path substitutions. The source and exact one-run admission were reviewed separately.
+
+Failed02 and diagnostic03 stay failed atc5e72a2 andcc6bb7c. Native04 does not independently record a directory-size transition; the deterministic growth regression is in the generated suite. This result qualifies competing access while the owner is live and complete normal drain. Power loss, interruption, restarted ownership/reconciliation, production namespace and real model execution remain unqualified. No current package, installation or release approval follows.

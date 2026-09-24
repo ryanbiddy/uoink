@@ -1,0 +1,8 @@
+47a48,50
+>     # DIAGNOSTIC COPY (Fable, 2026-09-08): pre-import whisper_runner so its import-time
+>     # whisperx availability probe is not counted as a model call by the guard below.
+>     import whisper_runner  # noqa: F401
+198,200d200
+<             assert approved['ok'], approved
+<             configured = service.configure_classification_policy(
+<                 ss.RequestContext(authenticated=True, operator=True),

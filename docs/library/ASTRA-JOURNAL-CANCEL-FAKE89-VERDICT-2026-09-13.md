@@ -1,0 +1,11 @@
+# Generated cancellation qualification, 2026-09-13
+
+Both fresh copies pass the same 89 cases with zero failures or skips and 86 passing nested subtests. Author actual05ca07 and independent actualfbff79 each returned outer/native/qualification exit0. Root2d4ad6 confirms identical ordered case objects, all ten final guards,25 registry traps, empty stderr and unchanged33 source/three control bindings in both originals and run copies. These are two observations of89 distinct cases.
+
+The original81 cases and all four test-file bytes are preserved. Eight added cases exercise the exact constructor and new cancellation driver/observer: one segment then acknowledged close, refusal of missing acknowledgement or further result/wire activity, preservation of the original close exception, and retained confirmed journal state. The observer's negative controls include a missing gate entry with None values, uncertain handles and poisoned bytes/revision. The14 added nested subtests join the original72. Existing assertions were not edited.
+
+Root reviewed the adapter and runner deltas, all eight new test bodies, guarded launcher and both independent source verdicts. PINS e60aa77cdd2dd4477960f44f24770f22f7a1e1ff3c334b8985047acb8e8f1a79 binds33 inputs. Author admissionb89b25 produced5c7f14ba; independent preparation592edc copied the same33 inputs and unchanged PINS, then issued a distinct admission. The dynamic launcher required no source change. The root source review is55776969; the adapter iscc0b7ff4.
+
+Each stdout is49,786 bytes. Author SHA2d01721ee94455cd0e4822591414efc80cf84bba79e38c654c51afc3583ac2b1 records0.14585950001492165 seconds of case execution; independent SHA2e9e565180339fa5b778b33e4be51d43122157000299d2c098c046f3a4767c4f records0.20260300001245923 seconds. Timing is observational. No native Windows cancellation, model, decoder, checkpoint, runtime or installer was executed in these checks.
+
+Accept the new generated driver and passive observer within this scope. The complete actual-adapter plus retained-journal cancellation still needs its separately reviewed native admission and observation. Successful fake controls do not establish shutdown races, forced-stop/crash recovery, restart reconciliation, power-loss durability, hard latency or market readiness.

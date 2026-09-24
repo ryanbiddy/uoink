@@ -137,6 +137,7 @@ const cases = [
     source: "podcast_feed",
     endpoint: "/podcasts/feeds",
     action: "podcast",
+    noteIncludes: "Audio stays off by default",
   },
   {
     name: "Article / web page",
@@ -175,6 +176,9 @@ for (const c of cases) {
   }
   if (c.canonical && got.canonical !== c.canonical) {
     checks.push(`canonical ${got.canonical} != ${c.canonical}`);
+  }
+  if (c.noteIncludes && !(got.note || "").includes(c.noteIncludes)) {
+    checks.push(`note ${got.note} does not include ${c.noteIncludes}`);
   }
   if (checks.length) {
     failures++;

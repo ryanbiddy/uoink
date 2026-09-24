@@ -1,9 +1,10 @@
 """OpenAPI 3.1 bridge for the Uoink helper (V3.3-SOURCE-EXPANSION-SPEC.md).
 
-Turns the MCP TOOL_REGISTRY into an OpenAPI spec so any HTTP-capable AI that
-can't speak MCP (Gemini, Grok, Perplexity, custom agents) can still call the
-same tools over plain HTTP. The transport is a thin wrapper around
-uoink_mcp_tools.call_tool, so MCP and HTTP share one dispatch path, one rate
+Turns the full TOOL_REGISTRY into an OpenAPI spec so any HTTP-capable AI that
+can't speak MCP (Gemini, Grok, Perplexity, custom agents) can call the local
+tools over plain HTTP. The full registry includes HTTP/OpenAPI-only tools such
+as search_clips and get_evidence_card; it is deliberately broader than the
+23-tool stdio set. Both transports share uoink_mcp_tools.call_tool, one rate
 limiter, and one auth gate.
 
 Pure data assembly. server.py owns the routes (GET /openapi/v1/spec.json,
@@ -204,8 +205,9 @@ def build_spec(base_url: str, *, tool_registry: dict, version: str) -> dict:
             "title": "Uoink local helper",
             "version": version,
             "description": (
-                "The same tools the Uoink MCP server exposes, over plain HTTP, "
-                "so any OpenAPI-capable agent can call your local corpus. "
+                "Uoink's full local tool registry over plain HTTP, including "
+                "clip search and evidence cards, so any OpenAPI-capable agent "
+                "can call your local corpus. "
                 "Local-first: the helper runs on your machine and requests "
                 "never leave it. Authenticate with the X-Uoink-Token header "
                 "(the helper prints it; the dashboard copies it)."
