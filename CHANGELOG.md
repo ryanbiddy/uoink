@@ -28,6 +28,9 @@ Nothing yet.
 - On a fresh install the dashboard's Library activity panel collapses to one
   line ("Library activity appears here after your first few captures.")
   instead of a wall of "Unavailable" tiles; with history it is unchanged.
+- The `.mcpb` packer writes the bundled manifest without a UTF-8 BOM. Windows
+  PowerShell 5.1 added one, and the official `mcpb validate` rejected the
+  bundle as invalid JSON (the 3.8.0 bundle is affected).
 - Windows-only process-authority tests are skipped on other platforms before
   they can change `os.name` and break pytest's path handling.
 - Model-readiness fixtures resolve temporary paths, including Windows runner
