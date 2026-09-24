@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import subprocess
 import sys
 from datetime import datetime, timezone
@@ -25,21 +26,55 @@ FFMPEG_BLOCK = """\
 ## ffmpeg (bundled binary, not a Python package)
 
 - **Component:** ffmpeg / ffprobe, BtbN `win64-lgpl` build (see build.ps1
-  `$FFMPEG_URL`).
+  `$FFMPEG_URL`), plus the LGPL shared FFmpeg 7.1.5 runtime in
+  `bin/torchcodec` (see `$FFMPEG_SHARED_URL`). TorchCodec 0.7 requires this
+  separate FFmpeg 7 ABI; the standalone CLI remains FFmpeg 8.1.2.
 - **License:** LGPL v2.1+ (this build is compiled without the GPL-only
   encoders such as libx264/libx265).
 - **Source:** https://ffmpeg.org/download.html and
   https://github.com/BtbN/FFmpeg-Builds . Uoink uses ffmpeg only to decode
-  and extract audio for transcription.
+  and extract audio and video frames for transcription and cited evidence.
+- **Pinned shared build and source recipe:**
+  https://github.com/BtbN/FFmpeg-Builds/releases/tag/autobuild-2026-07-31-14-10 .
+  Shared libraries may be replaced with compatible LGPL FFmpeg 7 libraries
+  in `bin/torchcodec`; Uoink does not statically link them into its own code.
 - LGPL text: https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
 """
+
+
+SUPPLEMENTAL_NOTICE_BLOCK = """\
+## Supplemental upstream notices
+
+The two cached wheels below omit license-text members. Their exact upstream
+texts, source bindings and recorded metadata conflict are listed in
+[the supplemental notice index](third-party-notices/README.md).
+
+- antlr4-python3-runtime 4.9.3: [full upstream license](third-party-notices/antlr4-python3-runtime-4.9.3-LICENSE.txt).
+  The reviewed Python source header identifies the BSD 3-clause notice. The file
+  also retains an MIT section scoped to two JavaScript files; their presence in
+  that notice does not establish that they ship in this Python wheel.
+- proxy-tools 0.1.0: [full upstream license](third-party-notices/proxy-tools-0.1.0-UPSTREAM-LICENSE.txt).
+  Wheel/PyPI metadata and historical setup.py say MIT; the matching source
+  header and repository license say BSD. Both declarations are retained here.
+  The upstream text is unchanged, including its placeholder and trailing text.
+  This notice does not resolve that conflict or grant legal clearance.
+"""
+
+
+def _supplemental_notices(rows: list[dict]) -> str:
+    versions = {re.sub(r"[-_.]+", "-", row.get("Name", "")).lower():
+                row.get("Version", "") for row in rows}
+    for name, version in (("antlr4-python3-runtime", "4.9.3"), ("proxy-tools", "0.1.0")):
+        if versions.get(name) != version:
+            raise RuntimeError(f"Supplemental notice requires review: {name}=={versions.get(name)}")
+    return SUPPLEMENTAL_NOTICE_BLOCK
 
 
 def _from_pip_licenses() -> list[dict] | None:
     try:
         out = subprocess.check_output(
             [sys.executable, "-m", "piplicenses", "--format=json",
-             "--with-urls", "--with-license-file", "--no-license-path"],
+             "--with-system", "--with-urls", "--with-license-file", "--no-license-path"],
             text=True, stderr=subprocess.DEVNULL)
         return json.loads(out)
     except Exception:
@@ -47,7 +82,7 @@ def _from_pip_licenses() -> list[dict] | None:
     try:
         out = subprocess.check_output(
             [sys.executable, "-m", "pip_licenses", "--format=json",
-             "--with-urls"], text=True, stderr=subprocess.DEVNULL)
+             "--with-system", "--with-urls"], text=True, stderr=subprocess.DEVNULL)
         return json.loads(out)
     except Exception:
         return None
@@ -77,6 +112,33 @@ def _classifier_license(meta) -> str:
     return "UNKNOWN"
 
 
+def _fill_license_expressions(rows: list[dict]) -> list[dict]:
+    """Recover PEP 639 ``License-Expression`` where a row has no licence.
+
+    Newer wheels (anyio, click, cryptography, ...) declare their licence only
+    as an SPDX ``License-Expression``; pip-licenses 5.0 and the legacy
+    ``License`` field both report UNKNOWN for them. Read the exact installed
+    metadata for those rows only; declared values are never overridden.
+    """
+    import importlib.metadata as md
+    normalize = lambda name: re.sub(r"[-_.]+", "-", name).lower()
+    expressions: dict[str, str] = {}
+    for dist in md.distributions():
+        meta = dist.metadata
+        name = meta.get("Name")
+        expression = (meta.get("License-Expression") or "").strip()
+        if name and expression:
+            expressions.setdefault(normalize(name), expression)
+    for row in rows:
+        current = (row.get("License") or "").strip()
+        if current and current.upper() != "UNKNOWN":
+            continue
+        expression = expressions.get(normalize(row.get("Name") or ""))
+        if expression:
+            row["License"] = expression
+    return rows
+
+
 def _dedupe(rows: list[dict]) -> list[dict]:
     seen = {}
     for row in rows:
@@ -84,6 +146,20 @@ def _dedupe(rows: list[dict]) -> list[dict]:
         if key and key not in seen:
             seen[key] = row
     return sorted(seen.values(), key=lambda r: (r.get("Name") or "").lower())
+
+
+def _runtime_rows(rows: list[dict]) -> list[dict]:
+    """Include required system packages while omitting build-only tooling."""
+    lock = Path(__file__).resolve().parents[1] / "requirements-installer-lock.txt"
+    normalize = lambda name: re.sub(r"[-_.]+", "-", name).lower()
+    required = {normalize(line.split("==", 1)[0]) for line in
+                lock.read_text(encoding="utf8").splitlines()
+                if line.strip() and not line.lstrip().startswith("#")}
+    runtime = [row for row in rows if normalize(row.get("Name") or "") in required]
+    missing = required - {normalize(row["Name"]) for row in runtime}
+    if missing:
+        raise RuntimeError("Missing runtime notices: " + ", ".join(sorted(missing)))
+    return runtime
 
 
 def _stamp_date() -> str:
@@ -109,7 +185,8 @@ def main() -> int:
     if rows is None:
         rows = _from_importlib()
         source = "importlib.metadata (pip-licenses unavailable)"
-    rows = _dedupe(rows)
+    rows = _fill_license_expressions(_dedupe(_runtime_rows(rows)))
+    supplemental = _supplemental_notices(rows)
 
     stamp = _stamp_date()
     lines = [
@@ -127,9 +204,18 @@ def main() -> int:
         name = row.get("Name", "")
         version = row.get("Version", "")
         lic = (row.get("License") or "UNKNOWN").replace("|", "/")
+        if re.sub(r"[-_.]+", "-", name).lower() == "proxy-tools" and version == "0.1.0":
+            lic += " (metadata; see upstream conflict below)"
         url = row.get("URL") or row.get("Home-page") or ""
         lines.append(f"| {name} | {version} | {lic} | {url} |")
-    lines += ["", FFMPEG_BLOCK, ""]
+    if any(row.get("Name", "").lower() == "nltk" and
+           row.get("Version") == "3.10.3+uoink.pathsec1" for row in rows):
+        lines += ["", "NLTK 3.10.3+uoink.pathsec1 is a local path-policy backport of upstream "
+                  "3.10.3. Its Apache 2.0 licence is retained. The exact patch, original "
+                  "source and build provenance are in vendor/nltk-pathsec in the source "
+                  "repository. This modification does not qualify model loading or "
+                  "clear unrelated dependency advisories."]
+    lines += ["", supplemental, "", FFMPEG_BLOCK, ""]
     output.write_text("\n".join(lines), encoding="utf-8")
     print(f"wrote {output} ({len(rows)} python packages, source: {source})")
     return 0

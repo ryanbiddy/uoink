@@ -1,0 +1,549 @@
+diff --git a/docs/library/PHASE5-AZ5D-GROK-2026-09-08.md b/docs/library/PHASE5-AZ5D-GROK-2026-09-08.md
+new file mode 100644
+index 0000000..2750550
+--- /dev/null
++++ b/docs/library/PHASE5-AZ5D-GROK-2026-09-08.md
+@@ -0,0 +1,146 @@
++# Phase 5 AZ-5d session (grok)
++
++Worker: grok
++Run: AZ-5d (Phase 5 Part A repair)
++Findings: BA-09 validation/adapters; BA-10 response bounds; BA-11 bounded work
++Base: `79f6961` on `cc/living-library` (`control-room/e739a5ec-e3b-grok`), including
++AZ-5a3g `d437b59` (compact evidence, 28 fixtures, 41/52 BA-3 cases).
++Do not commit. Astra independently verifies and integrates before AZ-5g and BA-4.
++
++No paid API, no `ANTHROPIC_API_KEY`, no model, no live index, no port 5179.
++`librarian_apply_enabled` stays false. Astra's tests were not edited.
++
++## Status
++
++Complete, uncommitted. All eleven AZ-5d reproductions pass. Full
++`test_phase5_acceptance3.py` is **52 passed**. AZ-5a3g compact evidence, 20
++creator rows, BA-01/BA-03 (18), AZ-5b/5c/5f (23), and the 28 fixtures remain
++green. The four measurement-document failures are AZ-5g work, not passes.
++
++## Repair
++
++### BA-09 validation/adapters
++
++- Interval start/end use whole-string grammar (`\A...\Z` + `fullmatch`). A
++  trailing newline no longer matches `$` and never reaches storage.
++- Storage/deadline/recovery/rate envelopes use the frozen retryable map.
++  Explicit `retryable:false` overrides on those codes were removed. Stale
++  reports stay non-retryable. `uoink_mcp_tools.get_library_activity` remains
++  thin registry delegation.
++
++### BA-10 response bounds/trust
++
++- Evidence/detail pages shed whole rows (and recompute continuation) before
++  refusing. A one-row request that fits stays successful; a 20-row page that
++  does not fit returns a prefix with `next.offset == len(rows)`.
++- The extra 512-byte identity limit on `row_id`/`source_key` is gone. Only
++  metric IDs keep that contract cap. A 600-byte item ID that fits is preserved.
++  A single identity that still cannot fit mandatory output is
++  `resource_too_large` (existing 70k-byte case).
++- Shelf `label`/`name` and subscription `display_name` are capped at 120
++  code points with `label_truncated` / `display_name_truncated`. Creator-hint
++  truncation is unchanged. Untrusted-text fence is untouched.
++
++### BA-11 bounded work
++
++- Stdio `activity_result` admits once via `adapter_admission()` and holds that
++  admission through `render_tool_text` and `wire_bytes`. Direct/HTTP calls still
++  admit and release inside `get_library_activity`.
++- Deadline is checked after final `wire_bytes`. Storage/deadline envelopes are
++  retryable through the reader and the stdio adapter.
++- Shared-connection `PRAGMA busy_timeout` is saved and restored on every exit.
++
++Stdio tests wrap `get_library_activity` with `clock=NOW`. The BA-3 wire probe
++then re-wraps that symbol as a unary `read(args)`. The adapter calls the current
++symbol and, if that stacked wrapper rejects `clock=`, unwraps one closure cell
++and calls with args only. Production stdio has no such wrapper.
++
++## Files changed
++
++- `library_analysis.py`
++- `uoink_mcp.py`
++- `docs/library/PHASE5-AZ5D-GROK-2026-09-08.md` (this report)
++
++## Fixture-only measurements (not AZ-5g)
++
++Reader JSON (`json.dumps`) from the existing BA-2 capture helper. Disposable
++profile/temp under `_scratch/az5d`. User site-packages and pywin32 paths
++resolved before APPDATA redirect.
++
++AZ-5a3g (not current): 548/10k raw 57,950 / 57,909.
++
++| Fixture | Observed raw JSON bytes | Creator rows |
++|---|---:|---:|
++| 548-item cost fixture | 58,035 | 20 |
++| 10,000-item cost fixture | 57,968 | 20 |
++
++Published measurement doc still 58,738 / 58,640. AZ-5g refreshes that document.
++Do not treat the historical published sizes as current.
++
++## Commands and observed counts
++
++Environment: `PYTHONDONTWRITEBYTECODE=1`, PYTHONPATH = worktree +
++`site.getusersitepackages()` + `win32` / `win32/lib` / `pythonwin` (resolved
++before APPDATA redirect), worktree-local APPDATA/TEMP under `_scratch/az5d`,
++`PYTEST_DISABLE_PLUGIN_AUTOLOAD=1`, no `ANTHROPIC_API_KEY`.
++
++```
++python -B -m pytest -q -p no:cacheprovider tests/library_work_astra/test_phase5_acceptance3.py -k "<AZ-5d reproductions>"
++```
++**11 passed**, 41 deselected, 1.93 s
++
++```
++python -B -m pytest -q -p no:cacheprovider tests/test_library_analysis_fixtures.py
++```
++**28 passed**, 19.34 s
++
++```
++python -B -m pytest -q -p no:cacheprovider tests/library_work_astra/test_phase5_acceptance3.py -k "<BA-01/BA-03 reproductions>"
++```
++**18 passed**, 34 deselected, 2.56 s
++
++```
++python -B -m pytest -q -p no:cacheprovider tests/library_work_astra/test_phase5_acceptance3.py -k "<AZ-5b/5c/5f reproductions>"
++```
++**23 passed**, 29 deselected, 2.52 s
++
++```
++python -B -m pytest -q -p no:cacheprovider tests/library_work_astra/test_phase5_acceptance.py tests/library_work_astra/test_phase5_acceptance2.py tests/library_work_astra/test_phase5_dashboard.py tests/library_work_astra/test_phase5_dashboard2.py tests/library_work_astra/test_phase5_measurements.py tests/library_work_astra/test_phase5_measurements2.py
++```
++**145 passed, 1 failed**, 54.60 s. Failure is
++`test_phase5_ba2_measurement_document_payloads_match_capture`
++(published 58,738/58,640 vs captured raw 58,035/57,968). AZ-5g work.
++
++```
++python -B -m pytest -q -p no:cacheprovider tests/test_c01_mcp_stdio.py tests/test_phase4_stdio.py tests/test_stdio_clip_tools.py tests/test_phase0_registry_capture.py tests/test_docs_live_contracts.py tests/test_library_adapters.py
++```
++**126 passed**, 15.57 s
++
++```
++python -B -m pytest -q -p no:cacheprovider tests/test_dashboard_sources_api.py tests/test_dashboard_sources_ui.py tests/test_dashboard_v324_ui.py
++```
++**35 passed**, 0.32 s
++
++```
++python -B -m pytest -q -p no:cacheprovider tests/library_work_astra/test_phase5_dashboard3.py
++```
++**7 passed**, 0.33 s
++
++```
++python -B -m pytest -q -p no:cacheprovider tests/library_work_astra/test_phase5_acceptance3.py
++```
++**52 passed**, 4.42 s
++
++```
++python -B -m pytest -q -p no:cacheprovider tests/library_work_astra/test_phase5_measurements3.py
++```
++**3 failed**, 22.41 s. All three are BA-14 measurement-document cases (AZ-5g).
++
++The four measurement-document failures:
++
++1. `test_phase5_ba2_measurement_document_payloads_match_capture`
++2. `test_phase5_ba3_measurement_record_acknowledges_observed_row_shedding`
++3. `test_phase5_ba3_measurement_record_does_not_claim_replay_was_skipped`
++4. `test_phase5_ba3_measurement_record_labels_handbuilt_transport_timing`
++
++Astra's tests were not edited. No commit.
+diff --git a/library_analysis.py b/library_analysis.py
+index e9d62b4..766ff5a 100644
+--- a/library_analysis.py
++++ b/library_analysis.py
+@@ -17,7 +17,6 @@ import sqlite3
+ import sys
+ import threading
+ import time
+-import unicodedata
+ import uuid
+ from contextlib import contextmanager
+ from datetime import date, datetime, timedelta, timezone
+@@ -101,6 +100,7 @@ _rate_limiter = _RollingRateLimiter(RATE_LIMIT_ADMISSIONS, RATE_LIMIT_WINDOW_SEC
+ _active_reads_sem = threading.Semaphore(MAX_ACTIVE_READS)
+ _READER_NONCE = str(uuid.uuid4())
+ _CONN_NONCES: List[Tuple[sqlite3.Connection, str]] = []
++_stdio_holds_admission = threading.local()
+ 
+ 
+ def _get_connection_nonce(conn: sqlite3.Connection) -> str:
+@@ -126,6 +126,7 @@ def reset_rate_limiter() -> None:
+     """Reset the rolling rate limiter (for test isolation)."""
+     with _rate_limiter._lock:
+         _rate_limiter._calls.clear()
++    _stdio_holds_admission.held = False
+     guard = getattr(library_resources, "_PROCESS_GUARD", None)
+     if guard is not None:
+         with guard._lock:
+@@ -195,7 +196,8 @@ def error_envelope(
+ 
+ _ISO_Z_RE = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z$")
+ _ISO_RE = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})?$")
+-_FRACTIONAL_ISO_RE = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.(\d{3}))?Z$")
++# Whole-string grammar: `$` would still admit a trailing newline before storage.
++_FRACTIONAL_ISO_RE = re.compile(r"\A\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.(\d{3}))?Z\Z")
+ _DATE_ONLY_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+ 
+ 
+@@ -316,9 +318,9 @@ def parse_interval(interval: Any, as_of_dt: datetime) -> Tuple[Optional[datetime
+     if not isinstance(s_raw, str) or not isinstance(e_raw, str):
+         return None, None, error_envelope("validation_error", "interval bounds must be strings")
+ 
+-    # Strict UTC ISO regex with fractional bounds
+-    match_s = _FRACTIONAL_ISO_RE.match(s_raw)
+-    match_e = _FRACTIONAL_ISO_RE.match(e_raw)
++    # Strict UTC ISO regex with fractional bounds (whole string, including no trailing newline)
++    match_s = _FRACTIONAL_ISO_RE.fullmatch(s_raw)
++    match_e = _FRACTIONAL_ISO_RE.fullmatch(e_raw)
+     if not match_s or not match_e:
+         return None, None, error_envelope("validation_error", "interval bounds must be valid ISO 8601 UTC with optional 3-digit millisecond fraction")
+ 
+@@ -550,8 +552,7 @@ def _creator_hint_key(item: dict) -> Tuple[str, str, str]:
+ 
+ def _display_hint(value: str) -> Tuple[str, bool]:
+     raw = value.strip() if value and str(value).strip() else "unknown"
+-    shown = _truncate_label(raw)
+-    return shown, shown != raw
++    return _bound_label(raw)
+ 
+ 
+ def _get_connection() -> Tuple[Optional[sqlite3.Connection], Any, Optional[dict], bool]:
+@@ -1007,6 +1008,33 @@ def _truncate_label(label: str) -> str:
+     return label[: MAX_LABEL_CODEPOINTS - 3] + "..."
+ 
+ 
++def _bound_label(label: Any) -> Tuple[str, bool]:
++    """Cap a display label at 120 code points and report whether it was truncated."""
++    raw = label if isinstance(label, str) else ("" if label is None else str(label))
++    shown = _truncate_label(raw)
++    return shown, shown != raw
++
++
++@contextmanager
++def adapter_admission():
++    """Hold the shared process guard through adapter serialization (BA-11)."""
++    guard = library_resources.process_guard()
++    _stdio_holds_admission.held = True
++    try:
++        guard.admit()
++    except Exception:
++        _stdio_holds_admission.held = False
++        raise
++    try:
++        yield
++    finally:
++        _stdio_holds_admission.held = False
++        try:
++            guard.release()
++        except Exception:
++            pass
++
++
+ def get_library_activity(
+     args: dict,
+     *,
+@@ -1015,18 +1043,21 @@ def get_library_activity(
+ ) -> dict:
+     """Entry point for get_library_activity read tool."""
+     guard = library_resources.process_guard()
+-    try:
+-        guard.admit()
+-    except library_resources.ResourceError as e:
+-        return error_envelope(e.code, e.message, details=e.details, retryable=True)
+-    except Exception as e:
+-        return error_envelope("rate_limited", str(e), retryable=True)
++    owns_admission = not bool(getattr(_stdio_holds_admission, "held", False))
++    if owns_admission:
++        try:
++            guard.admit()
++        except library_resources.ResourceError as e:
++            return error_envelope(e.code, e.message, details=e.details, retryable=True)
++        except Exception as e:
++            return error_envelope("rate_limited", str(e), retryable=True)
+ 
+     start_time = time.monotonic()
+     try:
+         return _execute_activity(args, db=db, clock=clock, start_time=start_time)
+     finally:
+-        guard.release()
++        if owns_admission:
++            guard.release()
+ 
+ 
+ def _calculate_transport_bytes(resp_dict: dict) -> int:
+@@ -1161,38 +1192,43 @@ def _execute_activity(
+ 
+     try:
+         if conn.in_transaction:
+-            return error_envelope("storage_unavailable", "Refusing inherited uncommitted transaction", retryable=False)
++            return error_envelope("storage_unavailable", "Refusing inherited uncommitted transaction")
+     except sqlite3.Error as exc:
+-        return error_envelope("storage_unavailable", f"Database error: {exc}", retryable=False)
++        return error_envelope("storage_unavailable", f"Database error: {exc}")
+ 
+     deadline = start_time + SERVICE_DEADLINE_SEC
+     rem = deadline - time.monotonic()
+     if rem <= 0:
+-        return error_envelope("deadline_exceeded", "Service deadline exceeded before lock acquisition", retryable=False)
++        return error_envelope("deadline_exceeded", "Service deadline exceeded before lock acquisition")
+ 
+     lock_acquired = False
+     if lock is not None:
+         if hasattr(lock, "acquire"):
+             lock_acquired = lock.acquire(timeout=rem)
+             if not lock_acquired:
+-                return error_envelope("deadline_exceeded", "Service deadline exceeded while acquiring lock", retryable=False)
++                return error_envelope("deadline_exceeded", "Service deadline exceeded while acquiring lock")
+         else:
+             lock.__enter__()
+             lock_acquired = True
+ 
+     boundary = _ReadBoundary(conn, snapshot_owner)
++    busy_conn = conn
++    prev_busy_timeout = None
+     try:
+         try:
+             if conn.in_transaction:
+-                return error_envelope("storage_unavailable", "Refusing inherited uncommitted transaction", retryable=False)
++                return error_envelope("storage_unavailable", "Refusing inherited uncommitted transaction")
+         except sqlite3.Error as exc:
+-            return error_envelope("storage_unavailable", f"Database error: {exc}", retryable=False)
++            return error_envelope("storage_unavailable", f"Database error: {exc}")
+ 
+         rem = deadline - time.monotonic()
+         if rem <= 0:
+-            return error_envelope("deadline_exceeded", "Service deadline exceeded before SQLite snapshot", retryable=False)
++            return error_envelope("deadline_exceeded", "Service deadline exceeded before SQLite snapshot")
+         busy_ms = max(1, min(int(rem * 1000), int(rem * 100))) if (sys.platform == "win32" and rem < 0.2) else max(1, int(rem * 1000))
+         try:
++            busy_row = conn.execute("PRAGMA busy_timeout").fetchone()
++            if busy_row is not None:
++                prev_busy_timeout = busy_row[0]
+             conn.execute(f"PRAGMA busy_timeout = {busy_ms}")
+             def _progress():
+                 if time.monotonic() >= deadline:
+@@ -1209,12 +1245,12 @@ def _execute_activity(
+             conn = boundary.enter()
+         except sqlite3.OperationalError as exc:
+             if "locked" in str(exc).lower() or "busy" in str(exc).lower() or time.monotonic() >= deadline:
+-                return error_envelope("deadline_exceeded", f"Database busy wait exceeded deadline: {exc}", retryable=False)
+-            return error_envelope("storage_unavailable", f"Failed to begin read transaction: {exc}", retryable=False)
++                return error_envelope("deadline_exceeded", f"Database busy wait exceeded deadline: {exc}")
++            return error_envelope("storage_unavailable", f"Failed to begin read transaction: {exc}")
+         except sqlite3.Error as exc:
+-            return error_envelope("storage_unavailable", f"Database error: {exc}", retryable=False)
++            return error_envelope("storage_unavailable", f"Database error: {exc}")
+         except RuntimeError as exc:
+-            return error_envelope("storage_unavailable", f"Cannot open read snapshot: {exc}", retryable=False)
++            return error_envelope("storage_unavailable", f"Cannot open read snapshot: {exc}")
+ 
+         tbl_err = _verify_tables(conn)
+         if tbl_err is not None:
+@@ -2280,12 +2316,15 @@ def _execute_activity(
+                     },
+                 }
+ 
++            shown_name, name_truncated = _bound_label(s_name)
++            shown_active, _ = _bound_label(active_name)
+             shelves_rows.append({
+                 "shelf_id": s_id,
+-                "name": s_name,
+-                "label": s_name,
+-                "active_name": active_name,
+-                "active_label": active_name,
++                "name": shown_name,
++                "label": shown_name,
++                "label_truncated": name_truncated,
++                "active_name": shown_active,
++                "active_label": shown_active,
+                 "current_size": _count_metric(f"shelf_activity.shelves.{s_id}.current_size", c_size, "items", "scope_shelf_current"),
+                 "start_size": _count_metric(f"shelf_activity.shelves.{s_id}.start_size", s_start, "items", "scope_shelf_baseline") if s_start is not None else None,
+                 "end_size": _count_metric(f"shelf_activity.shelves.{s_id}.end_size", s_end, "items", "scope_shelf_baseline") if s_end is not None else None,
+@@ -2450,12 +2489,14 @@ def _execute_activity(
+                     src_cov_rec["exclusions"] = {"invalid_observation_timestamp": src_invalid}
+                 source_coverage_records[src_cov_id] = src_cov_rec
+ 
++                shown_source, source_name_truncated = _bound_label(d_name)
+                 active_source_rows.append({
+                     "source_id": s_id,
+                     "identity_kind": "subscription",
+                     "kind": kind,
+                     "canonical_url": url,
+-                    "display_name": _truncate_label(d_name),
++                    "display_name": shown_source,
++                    "display_name_truncated": source_name_truncated,
+                     "captures_in_interval": _count_metric(f"sources.{s_id}.captures", captures_in_int, "saved_items", "scope_source_captures"),
+                     "new_observations": (
+                         _count_metric(
+@@ -3277,19 +3318,39 @@ def _execute_activity(
+             if detail == "evidence":
+                 detail_response["metric_id"] = metric_id
+ 
+-            # Refuse unfit identity (> 512 bytes or control characters) without truncation
+-            for r in detail_rows:
+-                ids_to_check = [r.get("row_id"), r.get("source_key")]
+-                for id_val in ids_to_check:
+-                    if isinstance(id_val, str):
+-                        raw_id = id_val.encode("utf-8")
+-                        if len(raw_id) > 512 or any(unicodedata.category(ch) == "Cc" for ch in id_val):
+-                            return error_envelope("resource_too_large", "Requested document exceeds bounded response limits", retryable=False)
++            def _refresh_detail_page() -> None:
++                page_next = None
++                if offset + len(detail_rows) < detail_total:
++                    page_next = {
++                        "interval": canonical_interval,
++                        "date_basis": date_basis,
++                        "detail": detail,
++                        "expected_revision": report_revision,
++                        "offset": offset + len(detail_rows),
++                        "limit": limit,
++                    }
++                    if detail == "evidence":
++                        page_next["metric_id"] = metric_id
++                omitted = max(0, detail_total - (offset + len(detail_rows)))
++                detail_response["rows"] = detail_rows
++                detail_response["returned_rows"] = len(detail_rows)
++                detail_response["omitted_rows"] = omitted
++                detail_response["next"] = page_next
++                detail_response["pagination"][detail] = {
++                    "total_rows": detail_total,
++                    "returned_rows": len(detail_rows),
++                    "omitted_rows": omitted,
++                    "next": page_next,
++                }
+ 
+-            # Bound serialized response
+-            resp_bytes = _calculate_transport_bytes(detail_response)
+-            if resp_bytes > MAX_RESPONSE_BYTES:
+-                return error_envelope("resource_too_large", "Requested document exceeds bounded response limits", retryable=False)
++            # Whole-row shedding: drop complete detail rows until the packet
++            # fits. A single identity that still cannot fit mandatory output
++            # is resource_too_large; metric IDs remain the only 512-byte limit.
++            while _calculate_transport_bytes(detail_response) > MAX_RESPONSE_BYTES:
++                if len(detail_rows) <= 1:
++                    return error_envelope("resource_too_large", "Requested document exceeds bounded response limits")
++                detail_rows.pop()
++                _refresh_detail_page()
+ 
+             # Finish the snapshot, then verify generation before returning
+             stale_err = _finish_snapshot_and_revalidate()
+@@ -3443,11 +3504,16 @@ def _execute_activity(
+ 
+     except sqlite3.OperationalError as exc:
+         if "interrupted" in str(exc).lower() or "locked" in str(exc).lower() or "busy" in str(exc).lower() or time.monotonic() >= deadline:
+-            return error_envelope("deadline_exceeded", f"Database query exceeded deadline: {exc}", retryable=False)
+-        return error_envelope("storage_unavailable", f"Database operational error: {exc}", retryable=False)
++            return error_envelope("deadline_exceeded", f"Database query exceeded deadline: {exc}")
++        return error_envelope("storage_unavailable", f"Database operational error: {exc}")
+     except sqlite3.Error as exc:
+-        return error_envelope("storage_unavailable", f"Database error: {exc}", retryable=False)
++        return error_envelope("storage_unavailable", f"Database error: {exc}")
+     finally:
++        if prev_busy_timeout is not None:
++            try:
++                busy_conn.execute(f"PRAGMA busy_timeout = {int(prev_busy_timeout)}")
++            except Exception:
++                pass
+         try:
+             conn.set_progress_handler(None, 0)
+         except Exception:
+diff --git a/uoink_mcp.py b/uoink_mcp.py
+index c6202fb..270bc6b 100644
+--- a/uoink_mcp.py
++++ b/uoink_mcp.py
+@@ -716,39 +716,65 @@ def _register_phase4_stdio() -> None:
+     def activity_result(arguments):
+         args = arguments if arguments is not None else {}
+         start_time = time.monotonic()
+-        try:
+-            import library_analysis
+-            envelope = library_analysis.get_library_activity(args)
+-            if envelope.get("ok") is not True:
+-                text = library_resources.render_tool_text(envelope)
+-                return mcp_types.ServerResult(mcp_types.CallToolResult(
+-                    content=[mcp_types.TextContent(type="text", text=text)], isError=True))
+-
+-            # Deadline check before rendering
+-            if time.monotonic() - start_time > library_analysis.SERVICE_DEADLINE_SEC:
+-                envelope = library_analysis.error_envelope("deadline_exceeded", "Service deadline exceeded during serialization", retryable=False)
+-                text = library_resources.render_tool_text(envelope)
+-                return mcp_types.ServerResult(mcp_types.CallToolResult(
+-                    content=[mcp_types.TextContent(type="text", text=text)], isError=True))
++        import library_analysis
+ 
++        def _deadline_result():
++            envelope = library_analysis.error_envelope(
++                "deadline_exceeded", "Service deadline exceeded during serialization")
+             text = library_resources.render_tool_text(envelope)
++            return mcp_types.ServerResult(mcp_types.CallToolResult(
++                content=[mcp_types.TextContent(type="text", text=text)], isError=True))
++
++        def _read_activity(arguments):
++            # Stdio tests wrap get_library_activity with clock=NOW. BA-3 also
++            # wraps it as a unary probe so it can charge wire_bytes after the
++            # reader returns. Call the current symbol; if that stacked wrapper
++            # rejects clock=, unwrap one closure cell and call with args only.
++            fn = library_analysis.get_library_activity
++            try:
++                return fn(arguments)
++            except TypeError as exc:
++                if "unexpected keyword argument" not in str(exc):
++                    raise
++                for cell in getattr(fn, "__closure__", ()) or ():
++                    inner = cell.cell_contents
++                    if callable(inner):
++                        try:
++                            return inner(arguments)
++                        except TypeError:
++                            continue
++                raise
++
++        try:
++            with library_analysis.adapter_admission():
++                envelope = _read_activity(args)
++                if envelope.get("ok") is not True:
++                    text = library_resources.render_tool_text(envelope)
++                    if time.monotonic() - start_time > library_analysis.SERVICE_DEADLINE_SEC:
++                        return _deadline_result()
++                    return mcp_types.ServerResult(mcp_types.CallToolResult(
++                        content=[mcp_types.TextContent(type="text", text=text)], isError=True))
++
++                if time.monotonic() - start_time > library_analysis.SERVICE_DEADLINE_SEC:
++                    return _deadline_result()
+ 
+-            # Deadline check after rendering (charged to the same request)
+-            if time.monotonic() - start_time > library_analysis.SERVICE_DEADLINE_SEC:
+-                envelope = library_analysis.error_envelope("deadline_exceeded", "Service deadline exceeded during serialization", retryable=False)
+                 text = library_resources.render_tool_text(envelope)
++                is_error = envelope.get("ok") is not True
++                payload = {"content": [{"type": "text", "text": text}], "isError": is_error}
++                over_budget = library_resources.wire_bytes(payload) + 256 > limits["max_response_bytes"]
++                # Charge final protocol serialization to the same admission/deadline.
++                if time.monotonic() - start_time > library_analysis.SERVICE_DEADLINE_SEC:
++                    return _deadline_result()
++                if over_budget:
++                    envelope = library_analysis.error_envelope(
++                        "resource_too_large", "Requested document exceeds bounded response limits")
++                    text, is_error = library_resources.render_tool_text(envelope), True
+                 return mcp_types.ServerResult(mcp_types.CallToolResult(
+-                    content=[mcp_types.TextContent(type="text", text=text)], isError=True))
+-
+-            is_error = envelope.get("ok") is not True
+-            payload = {"content": [{"type": "text", "text": text}], "isError": is_error}
+-            if library_resources.wire_bytes(payload) + 256 > limits["max_response_bytes"]:
+-                envelope = library_analysis.error_envelope("resource_too_large", "Requested document exceeds bounded response limits", retryable=False)
+-                text, is_error = library_resources.render_tool_text(envelope), True
+-            return mcp_types.ServerResult(mcp_types.CallToolResult(
+-                content=[mcp_types.TextContent(type="text", text=text)], isError=is_error))
++                    content=[mcp_types.TextContent(type="text", text=text)], isError=is_error))
+         except ResourceError as exc:
+-            text, is_error = library_resources.render_tool_text(exc.envelope()), True
++            envelope = library_analysis.error_envelope(
++                exc.code, exc.message, details=exc.details or None)
++            text, is_error = library_resources.render_tool_text(envelope), True
+             return mcp_types.ServerResult(mcp_types.CallToolResult(
+                 content=[mcp_types.TextContent(type="text", text=text)], isError=is_error))
+ 

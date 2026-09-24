@@ -1,0 +1,163 @@
+# Gemini Native Binary Security Report (2026-09-09)
+
+Council review on candidate `7109182` / package-04 build `86bfede784318228591c3c1e345befa2ef6b8883`.
+Inspection date: 2026-09-09.
+Scope: Read-only verification of bundled native binaries, public upstream security metadata, primary release checksums, and package-04 proof receipts. No product or test edits; no binary executions or exploit reproduction attempts.
+
+---
+
+## 1. FFmpeg: Current Pin, Vulnerabilities, and Update Options
+
+### 1.1 Existing Configuration
+- **Build script pin (`build.ps1` lines 103–109, 149):**
+  - Upstream tag: `autobuild-2025-01-31-12-58`
+  - Asset name: `ffmpeg-n7.1-184-gdc07f98934-win64-lgpl-7.1.zip`
+  - Download URL: `https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2025-01-31-12-58/ffmpeg-n7.1-184-gdc07f98934-win64-lgpl-7.1.zip`
+  - Locked archive SHA256: `1475187ddaf367c6702856fe37bb00e8b3ce69963e9b453a9de78396846ff38c`
+- **Extracted binary state (`staged-inventory.json` / `final-native-media-environment.json`):**
+  - `bin/ffmpeg.exe`: 98,318,848 bytes, SHA256 `64287d8d82972025fa91946dd62e7948270ed9e27563da582c43feb63381a134`
+  - `bin/ffprobe.exe`: 98,181,632 bytes, SHA256 `77dfa5394eb6b3c931b643d64ab75d22c33782ad75cd65a81796a9ef0f74f681`
+  - Variant: Static LGPL build from the `release/7.1` branch at commit `dc07f98934` (built 2025-01-31). It deliberately omits GPL-only encoders (`libx264`, `libx265`) to meet shipping licensing boundaries.
+
+### 1.2 Upstream Vulnerability Scope
+Official advisories published at `https://ffmpeg.org/security.html` confirm that the dated snapshot `n7.1-184-gdc07f98934` predates multiple security fixes backported to subsequent point releases:
+
+- **Fixed in FFmpeg 7.1.1 (6 CVEs):**
+  - CVE-2023-6602, CVE-2023-6604, CVE-2023-6605
+  - CVE-2025-0518
+  - CVE-2025-1816
+  - CVE-2025-22919
+- **Fixed in FFmpeg 7.1.2 (6 CVEs):**
+  - CVE-2025-1594
+  - CVE-2025-9951
+  - CVE-2025-59728
+  - CVE-2025-59731
+  - CVE-2025-59732
+  - CVE-2025-59733
+- **Fixed in later releases (8.0.x / 8.1.x / git master):**
+  - Additional advisories including CVE-2025-63757, CVE-2025-67306, CVE-2025-69693, CVE-2026-8461, CVE-2026-30754, and CVE-2026-30999.
+
+**Vulnerability Applicability vs. Unknowns:**
+- *Confirmed fixed upstream:* 12 distinct CVEs were resolved in 7.1.1 and 7.1.2 after the 2025-01-31 build.
+- *Unknown applicability:* Most advisories target specific demuxers, decoders, or parser edge cases. Uoink uses `ffmpeg` for extracting audio streams and extracting video frames (`-f lavfi` or `-ss ... -frames:v 1`). While a malicious media file processed during extraction could potentially trigger unpatched decoder routines, actual exploitability against Uoink's restricted command invocation shapes has not been tested and cannot be asserted without fuzzing. The old pin must not be assumed security-current.
+
+### 1.3 Verified Primary-Source Update Choices
+From BtbN's official monthly retained release archives (inspected via GitHub Releases API and official `checksums.sha256` files):
+
+#### Option A: Supported 7.1 Stable Branch Update (Recommended Modest Upgrade)
+Preserves 7.1 command-line interface behavior while resolving the 7.1.1 and 7.1.2 CVEs:
+- **Monthly Tag:** `autobuild-2026-07-31-14-10`
+  - **Shipping LGPL Package:**
+    - Archive: `ffmpeg-n7.1.5-12-g1fdbca85aa-win64-lgpl-7.1.zip`
+    - URL: `https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2026-07-31-14-10/ffmpeg-n7.1.5-12-g1fdbca85aa-win64-lgpl-7.1.zip`
+    - Official SHA256: `b7c1c846dacca68ee4ebf5c390742c973b3d5d14a6d44b061f500d8e4ac74fc0`
+  - **Matching Test-Only GPL Package (Private PATH):**
+    - Archive: `ffmpeg-n7.1.5-12-g1fdbca85aa-win64-gpl-7.1.zip`
+    - URL: `https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2026-07-31-14-10/ffmpeg-n7.1.5-12-g1fdbca85aa-win64-gpl-7.1.zip`
+    - Official SHA256: `c067a1ca58f4fc4449f4bab0890fbcd65cbb3e5f46e066cf9c768e06c0c1d4d9`
+
+*(Alternative 7.1 baseline from 2025-10-31 month-end: `autobuild-2025-10-31-13-40`)*
+- Shipping LGPL: `ffmpeg-n7.1.2-7-g24c44c34dc-win64-lgpl-7.1.zip` (SHA256: `74445fc16d863e511cc95c6b1172ef04a69dc48030c65951c047b58bc90aef6c`)
+- Test GPL: `ffmpeg-n7.1.2-7-g24c44c34dc-win64-gpl-7.1.zip` (SHA256: `9a906986a93e0ebc534ba2d53bb046d86cc74886e1b2ca054469982367ff75a5`)
+
+#### Option B: Major 8.1 Release Branch Update
+Incorporates 8.x fixes (such as CVE-2026-8461 and CVE-2026-30999), but introduces major-version changes:
+- **Monthly Tag:** `autobuild-2026-08-31-13-27`
+  - **Shipping LGPL Package:**
+    - Archive: `ffmpeg-n8.1.2-50-g1a748fe2cd-win64-lgpl-8.1.zip`
+    - URL: `https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2026-08-31-13-27/ffmpeg-n8.1.2-50-g1a748fe2cd-win64-lgpl-8.1.zip`
+    - Official SHA256: `f6274bbd9c247f9e90c1bbed066b03ed4a3907cece2fb91be6dd352393936365`
+  - **Matching Test-Only GPL Package (Private PATH):**
+    - Archive: `ffmpeg-n8.1.2-50-g1a748fe2cd-win64-gpl-8.1.zip`
+    - URL: `https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2026-08-31-13-27/ffmpeg-n8.1.2-50-g1a748fe2cd-win64-gpl-8.1.zip`
+    - Official SHA256: `273abb45f3f9f76c303e35ff39f5bb6c23c163ae65f6244a32b7d4a7f6cf0616`
+
+### 1.4 Test Failure Diagnosis (`tests/test_long_video_v324.py`)
+- **Root Cause:** `test_screenshot_phase_end_to_end` lines 316–321 synthesizes a 2-hour video using:
+  ```python
+  subprocess.run(["ffmpeg", "-y", "-f", "lavfi", "-i", "testsrc=...", "-c:v", "libx264", ...])
+  ```
+- BtbN's LGPL build explicitly excludes `libx264`. Running this command against the bundled LGPL binary fails with `Unknown encoder 'libx264'`.
+- **Test Invariant & Boundary:** The test must not be modified or skipped in the product repository, and fixture generation must not be falsely claimed as passing on LGPL.
+- **Recommendation:** Astra should provide the hash-verified GPL binary (`ffmpeg-n7.1.5-12-g1fdbca85aa-win64-gpl-7.1.zip` or `ffmpeg-n8.1.2-50-g1a748fe2cd-win64-gpl-8.1.zip`) on an isolated, private test PATH to satisfy test fixture synthesis, while ensuring the shipping installer stages only the LGPL archive.
+
+---
+
+## 2. Embedded Runtime: CPython 3.11.9 Lifecycle and Wheel Pin Constraints
+
+### 2.1 CPython Support Status and Windows Binary Availability
+- **Current Runtime:** CPython 3.11.9 (`python-3.11.9-embed-amd64.zip`, SHA256 `009d6bf7e3b2ddca3d784fa09f90fe54336d5b60f0e0f305c37f400bf83cfd3b`).
+- **Official Status (PEP 664 & devguide.python.org/versions):**
+  - Python 3.11 is in its security-only maintenance phase (scheduled through October 2027 under Release Manager Pablo Galindo Salgado).
+  - Under Python Software Foundation policy (PEP 602), official binary installers and embeddable zip packages are produced **only** during the initial 18-month bugfix phase.
+  - Python 3.11.9 (released April 2, 2024) was the **final release of the 3.11 branch with official Windows binary packages**.
+  - Subsequent 3.11 releases (3.11.10, 3.11.11, etc.) are strictly **source-only**. There is no official `python-3.11.10-embed-amd64.zip` on `python.org/ftp/python/`. Proposing an official 3.11.10 embeddable binary is factually invalid.
+
+### 2.2 Constraints of Minor Version Upgrades
+Moving to an actively supported binary branch (Python 3.12 or 3.13) would eliminate the binary staleness issue, but imposes severe architectural friction:
+- **142 Windows Wheel Pins:** `runtime-distributions.json` locks 142 distribution packages, including multiple native C/C++ compiled wheels bound to Python 3.11 ABI (`cp311-win_amd64`):
+  - Machine Learning & Audio: `torch` 2.8.0, `torchaudio` 2.8.0, `torchvision` 0.23.0, `torchcodec` 0.7.0, `ctranslate2` 4.8.1, `onnxruntime` 1.27.0, `tokenizers` 0.22.2, `safetensors` 0.8.0.
+  - Media & Numerical: `av` 18.0.0 (PyAV), `numpy` 2.4.6, `scipy` 1.17.1, `scikit-learn` 1.9.0, `pandas` 3.0.5, `Pillow` 12.3.0.
+  - Runtime Interop: `pythonnet` 3.0.5, `pywin32` 312, `cffi` 2.1.0, `greenlet` 3.5.4, `pydantic_core` 2.46.4, `grpcio` 1.82.1.
+- Minor version upgrades break C-extension ABI compatibility, requiring complete wheel re-resolution, testing of PyTorch/TorchAudio on the target minor version, and auditing deprecated standard library removals (e.g., removal of `distutils` in 3.12).
+- **Security Audit Reality:** 3.11.9 is not audited for all modern CVEs (upstream has patched standard library issues in `tarfile`, `email`, and `zipfile` in later source releases). However, because Uoink executes local application scripts and trusted packages rather than exposing an arbitrary code-execution sandbox to untrusted network input, the exposure is bounded. Upgrading Python minor versions should be planned for a dedicated cycle rather than rushed into candidate 7109182.
+
+---
+
+## 3. Candidate-Package-04 Inventory and Integrity Evaluation
+
+### 3.1 Review of Verification Mechanisms
+Candidate package-04 (`docs/library/proof/candidate-package-04-2026-09-09/`) establishes thorough compile-time and post-install checks:
+1. **Download Verification (`build.ps1`):** `Confirm-Hash` enforces exact SHA256 matches for Python, FFmpeg, and get-pip archives prior to staging.
+2. **Lockfile Enforcement:** `scripts/verify_installer_lock.py` validates the complete 142-package transitive graph against `requirements-installer-lock.txt`.
+3. **Staged Compiler Inventory:** `staged-inventory.json` records SHA256 hashes and byte lengths for all 25,781 compiler inputs.
+4. **Source Equivalence:** `source-bindings.json` validates that staged Python files match git commit blobs.
+5. **Post-Install Verification:** `check_installed_package_inputs.py` compares every installed file against the sealed compiler inputs.
+6. **Local Antivirus Scan:** `scan.json` records Windows Defender (`MpCmdRun.exe`) scanning `Uoink-Setup-3.8.0.exe` (341,085,750 bytes, SHA256 `677aa6f2fef56e8a4449bcc746741497e1af69d32dddfd0a274d2baa098124c1`) with exit code 0.
+
+### 3.2 What Integrity Establishes vs. What It Does Not
+- **What Integrity Establishes:**
+  - *Cryptographic Delivery:* Proves that staged and installed artifacts match the exact bits compiled by the builder without corruption, in-flight modification, or unauthorized file additions.
+  - *Deterministic Packaging:* Confirms that no unpinned or unrecorded files entered the Inno Setup container.
+  - *Absence of Known Signatures:* Confirms that current Defender signatures do not detect known malicious payloads in the compiled installer.
+- **What Integrity Does NOT Establish:**
+  - *Vulnerability Freedom:* Cryptographic integrity guarantees artifact authenticity, not software safety. An authentic binary can contain unpatched memory-safety bugs, logic errors, or known CVEs.
+  - *Code Execution Immunity:* Does not prove that processing crafted multimedia files through FFmpeg or PyAV cannot cause memory corruption or denial of service.
+  - *Authenticode Trust:* `scan.json` notes `signature: "NotSigned"`. The installer lacks a digital signature, meaning standard Windows clients will trigger SmartScreen warnings regardless of internal hash integrity.
+
+---
+
+## 4. Recommendations for Next Candidate and Release Decisions
+
+1. **FFmpeg Shipping Pin Upgrade:**
+   - Update `build.ps1` to pin BtbN's stable `autobuild-2026-07-31-14-10` LGPL archive:
+     - URL: `https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2026-07-31-14-10/ffmpeg-n7.1.5-12-g1fdbca85aa-win64-lgpl-7.1.zip`
+     - SHA256: `b7c1c846dacca68ee4ebf5c390742c973b3d5d14a6d44b061f500d8e4ac74fc0`
+   - This resolves the 12 confirmed 7.1.1/7.1.2 CVEs while staying on the low-risk 7.1 release branch.
+2. **Test Environment Provisioning (Astra):**
+   - Provide the matching GPL build (`ffmpeg-n7.1.5-12-g1fdbca85aa-win64-gpl-7.1.zip`, SHA256 `c067a1ca58f4fc4449f4bab0890fbcd65cbb3e5f46e066cf9c768e06c0c1d4d9`) on Astra's test harness PATH to allow `test_screenshot_phase_end_to_end` to encode via `libx264` without touching product test files or polluting the shipping LGPL bundle.
+3. **CPython Lifecycle Strategy:**
+   - Retain CPython 3.11.9 for the immediate candidate release. Document in release notes that official Windows embeddable updates for 3.11 have ended due to PSF security-only policy.
+   - Schedule Python 3.12 wheel qualification and lockfile regeneration as a post-v3.8 initiative.
+4. **Installer Code Signing:**
+   - Address the unsigned installer status before public distribution to ensure installation integrity without triggering user-facing Windows SmartScreen execution blocks.
+
+---
+
+## 5. Inspected Sources and Metadata
+- Local project repository files:
+  - `build.ps1`
+  - `tests/test_long_video_v324.py`
+  - `docs/library/proof/candidate-package-04-2026-09-09/*` (`build-receipt.json`, `post-build-review.json`, `runtime-distributions.json`, `staged-inventory.json`, `final-native-media-environment.json`, `package_decoder_probe.py`, `check_installed_package_inputs.py`, `scan.json`, `SHA256.json`)
+  - `E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\NATIVE-BINARY-SECURITY-BRIEF-2026-09-09.md`
+- Primary upstream documentation & release metadata:
+  - FFmpeg Security Advisories: `https://ffmpeg.org/security.html`
+  - BtbN FFmpeg Builds Releases API & Checksums:
+    - `https://api.github.com/repos/BtbN/FFmpeg-Builds/releases`
+    - `https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2026-07-31-14-10/checksums.sha256`
+    - `https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2026-08-31-13-27/checksums.sha256`
+    - `https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2025-10-31-13-40/checksums.sha256`
+  - Python Lifecycle & Devguide:
+    - `https://devguide.python.org/versions/`
+    - `https://www.python.org/downloads/windows/`
+    - Python Enhancement Proposals PEP 664 & PEP 602

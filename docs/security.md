@@ -2,6 +2,14 @@
 
 Status: launch-facing for the current helper and extension
 
+The Living Library candidate build selects a verified local NLTK path-policy
+backport, `3.10.3+uoink.pathsec1`. The fixed wheel, original source, patch and
+provenance are retained under vendor/nltk-pathsec. At this source checkpoint,
+replacement staging and installation are still pending; package 08 contains
+upstream 3.10.3. Keep the original advisory observation alongside any later
+installed backport disposition. This patch does not qualify model loading or
+resolve the retained Torch and Transformers findings.
+
 > Compatibility note: the canonical auth header is `X-Uoink-Token` and the
 > `/token` gate is `X-Uoink-Client: uoink-extension`. The shipped extension
 > still has compatibility paths that emit `X-Yoink-Token` or
@@ -25,7 +33,7 @@ The helper never binds to a public network interface. The main security boundary
 | Local malware reads files or calls localhost | No | Malware already running as the user can read local files, call local ports, and modify output. Uoink does not try to sandbox against same-user malware. |
 | Another installed browser extension calls `/token` | Not fully | v2 accepts `chrome-extension://*` origins so Chromium forks and dev installs work. Published Chrome Web Store extension ID pinning is deferred until the final ID is known and stable. |
 | Network attacker | Mostly not applicable | The helper listens only on `127.0.0.1`, not LAN/public interfaces. |
-| Anthropic API key disclosure through settings | Mitigated | The key is stored in the OS credential store via `keyring` (service `Uoink`; the v2.1 install migration moves it from the legacy `Yoink` service), not in `settings.json`, and is never returned by `GET /settings`. |
+| Anthropic API key disclosure through settings | Mitigated | The key is stored in the OS credential store via `keyring` (service `Uoink` in normal mode; deterministic profile-derived `Uoink-isolated-<hash>` in isolated mode; the v2.1 install migration moves normal entries from legacy `Yoink`), not in `settings.json`, and is never returned by `GET /settings`. |
 | Dependency compromise | Partially | Direct downloads are SHA256-checked in `build.ps1`; the full installer pip graph is exact-version locked and inventory-verified, but distribution artifacts are not hash-locked. |
 
 ## Public endpoints
@@ -47,8 +55,18 @@ These do not require `X-Uoink-Token`:
 page, and YouTube button need to detect whether the helper is running before
 auth/token refresh completes. Their response includes the selected Whisper
 model and availability/load state, index recovery, output-root fallback,
-aggregate path-integrity counts, and a generic path-integrity hint or error.
-It does not include the helper token or raw exception text.
+aggregate path-integrity counts, a generic path-integrity hint or error, and
+the scheduler `heartbeat` block (UTC timestamps of the last completed pass,
+last successful and failed feed poll, last corpus ingest, tallies, and a
+freshness state; the last poll failure is reported as an exception class name
+or a fixed phrase only). Since 2026-09-04 it also includes the Living Library
+`library` block: a coarse work-queue status (`waiting_for_client`,
+`collecting`, `idle`, `recovery_pending`, `unavailable`, `unknown` or
+`error`), ready/leased work-row counts, the run revision, the journal recovery
+state, a service error code and whether the default-off
+`librarian_apply_enabled` setting is on. Counts and states only: no item
+titles, shelf names, evidence text or paths. It does not include the helper
+token or raw exception text.
 
 `/diagnose` is a broader bounded recovery report used by the popup and splash.
 The manifest, OpenAPI, well-known, and suite-discovery routes expose product
@@ -76,6 +94,9 @@ All other helper endpoints require `X-Uoink-Token` (legacy `X-Yoink-Token` accep
 - Settings, AI key testing, and local cost estimates: `GET /settings`, `GET /settings/pricing`, `POST /settings`, `POST /settings/test-key`
 - Local files, folders, Skill prompt, and hook taxonomy: `GET /file`, `GET /skill/system-prompt`, `GET /taxonomy`, `GET /recent`, `GET /open-folder`, `GET /open-index`, `GET /open-prompts`
 - MCP HTTP JSON-RPC helper: `GET /mcp/v1/config`, `GET /mcp/v1/sse`, `POST /mcp/v1`, `POST /mcp/v1/initialize`, `POST /mcp/v1/tools/list`, `POST /mcp/v1/tools/call`
+- Living Library user-intent confirmation: `POST /library/intent`. Mints the five-minute `user_intent_token` that `pin_shelf` and `undo_library_apply` require. Beyond the token it enforces an origin gate (`Origin`, when present, must be a loopback `http` origin on the helper's own port; `Sec-Fetch-Site`, when present, must be `same-origin` or `none`; extension and web origins are refused), strict JSON decoding (no NaN, Infinity or duplicate keys) and a 30 requests/minute limit. No registry tool, MCP client or client-supplied actor string can mint this token; it exists so a pin or undo is a user's own confirmation of a displayed delta.
+
+Requests to `POST /tools/<name>`, `POST /mcp/v1*` and `POST /library/intent` are decoded strictly: NaN, Infinity and duplicate object keys are rejected with HTTP 400 before any argument is used. The six Living Library tools additionally validate every request against their frozen JSON Schema on every transport and return only the contract's error envelope, never raw database exceptions or local paths.
 
 The token is accepted only in the `X-Uoink-Token` header (or the legacy
 `X-Yoink-Token` compatibility header). Query-string token auth is intentionally
@@ -155,20 +176,31 @@ Comment Intelligence, Hook Type, and Entity Extraction are optional BYO-key feat
 
 Starting in v2.0, the key is stored through Python `keyring`:
 
-- Service: `Uoink` (renamed from `Yoink` in v2.1; the first-run install migration copies the entry and deletes the legacy one)
+- Service (normal mode): `Uoink` (renamed from `Yoink` in v2.1; the first-run install migration copies the entry and deletes the legacy one)
+- Service (isolated mode): `Uoink-isolated-<hash>` where `<hash>` is a deterministic 32-character hex digest of the canonical validated profile path (`hashlib.sha256(canonical.encode("utf-8")).hexdigest()[:32]`). This separates profile credentials even when sharing loopback ports and preserves credential identity across port changes. Path resolution errors do not select an alternate credential namespace.
 - Username: `anthropic_key`
 - Windows backend: Windows Credential Manager
 - macOS backend: macOS Keychain
 
 `settings.json` stores only public booleans and key status flags. `GET /settings` returns `anthropic_key_set: true|false`, never the key itself.
 
+Isolated mode credential semantics:
+
+- Read, write, and delete operations in isolated mode operate strictly on the profile's isolated service namespace (`Uoink-isolated-<hash>`).
+- Isolated reads fail closed when no key is present: they never fall back to the ordinary `Uoink` service or legacy `Yoink` service.
+- Two profiles sharing a loopback port do not share credentials.
+- A profile that changes ports retains its credential identity because the namespace is derived solely from the canonical profile path.
+- In isolated mode, plaintext `anthropic_key` migration from the isolated `settings.json` writes exclusively to the isolated service namespace.
+- Destructive operations such as Anthropic 401 invalid-key resets clear only the isolated profile's credential entry, never mutating or clearing ordinary `Uoink` credentials.
+- Normal (non-isolated) mode retains existing `Uoink` storage with `Yoink` read fallback and one-time install migration.
+
 Migration behavior:
 
-1. On helper startup, if legacy `%LOCALAPPDATA%\Uoink\settings.json` (or a pre-rename `\Yoink\settings.json` migrated into it) contains plaintext `anthropic_key`, Uoink attempts to move it into keyring.
+1. On helper startup, if legacy `%LOCALAPPDATA%\Uoink\settings.json` (or an isolated profile's `settings.json`) contains plaintext `anthropic_key`, Uoink attempts to move it into keyring.
 2. On successful migration, the plaintext field is removed from `settings.json`.
 3. If keyring is unavailable, migration is skipped and logged; Uoink does not silently create a new plaintext fallback.
 
-Anthropic 401 responses destructively clear the saved key from keyring and mark `anthropic_key_set` false until the user saves a key again.
+Anthropic 401 responses destructively clear the saved key from keyring (scoped to the active service namespace) and mark `anthropic_key_set` false until the user saves a key again.
 
 ## Persistence files
 
@@ -219,7 +251,15 @@ uses cached files only and never authorizes a download; `ensure_model` is the
 explicit user-triggered download path. On Windows the selected model is cached
 under `%LOCALAPPDATA%\Uoink\models\whisper` and is never uploaded.
 
-The installer is unsigned for launch unless a code-signing certificate is added. Windows SmartScreen warnings are expected for unsigned builds.
+Uoink 3.8.0 keeps Torch 2.8.0 and WhisperX 3.8.6. Default voice activity
+detection (VAD) loads through PyAnnote's checkpoint loader with
+`weights_only=False`, the same path used in 3.7.0. This permits checkpoint code
+to run during loading; the mitigation for this release is local-only model
+files. Migration to a safer loading path is planned for 3.9.
+
+Uoink 3.8.0 ships unsigned: `SigningCertificateThumbprint=none`. Signing is
+skipped for this release, and the repaired signing path is retained for 3.9.
+Windows SmartScreen warnings are expected for unsigned builds.
 
 ## macOS status
 

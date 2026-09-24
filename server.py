@@ -15,14 +15,18 @@ Endpoints:
     GET  /dashboard          helper-served local dashboard
 """
 
+import contextlib
+import hashlib
 import json
 import logging
 import math
 import os
 import queue
+import random
 import re
 import secrets
 import shutil
+import socket
 import subprocess
 import sys
 import tempfile
@@ -48,6 +52,10 @@ else:
 # --- Import helpers from the existing CLI script ---------------------------
 HERE = Path(__file__).parent.resolve()
 sys.path.insert(0, str(HERE))
+
+# Isolation must be validated before any later import can open default data.
+import uoink_install_isolation as _install_isolation  # noqa: E402
+_install_isolation.apply_from_process()
 
 
 def _read_version() -> str:
@@ -84,11 +92,13 @@ import workspaces  # noqa: E402  -- v3 P4 build-workspace state + assembler
 import claims  # noqa: E402  -- v3 A2 claim extraction + verification (Loki-inspired)
 import scripts as p5_scripts  # noqa: E402  -- v3 P5 script studio backend
 import memory_layer  # noqa: E402  -- v2.5 S4 markdown taste/user memory
+import usage_meter  # noqa: E402  -- D-17 real model-usage meter (KV rollup)
 import corpus_contract  # noqa: E402  -- versioned read boundary for consumers
 import corpus_provider  # noqa: E402  -- Uoink provider for corpus contract v1
 import podcasts  # noqa: E402  -- v3.1 podcast RSS feed registry + polling
 import whisper_runner  # noqa: E402  -- v3.1 WhisperX transcription (lazy)
 import mobile_playlists  # noqa: E402  -- v3.1 mobile->desktop playlist bridge
+import source_subscriptions  # noqa: E402  -- Phase 3 standing capture (run AM)
 import taste_scoring  # noqa: E402  -- V-3 taste-aware auto-uoink scoring
 import voice_dna  # noqa: E402  -- v3.2 voice DNA banned-phrase guard
 import writing_studio  # noqa: E402  -- v3.2 Writing Studio (tweet/blog)
@@ -138,7 +148,7 @@ from uoink_core.storage import (  # noqa: E402
 
 # --- Constants -------------------------------------------------------------
 HOST = "127.0.0.1"
-PORT = 5179
+PORT = _install_isolation.listen_port(5179)
 VERSION = _read_version()
 DASHBOARD_PATH = HERE / "assets" / "dashboard" / "index.html"
 
@@ -364,6 +374,7 @@ MAX_BODY_BYTES = 64 * 1024            # 64KB POST body cap
 MAX_SCREENSHOTS = 200                  # cap per video
 PLAYLIST_VIDEO_CAP = 10                # v2 Playlist Mode first-ship cap
 MAX_SERVED_FILE_BYTES = 10 * 1024 * 1024
+MAX_SIDECAR_BYTES = 2 * 1024 * 1024           # 2MB saved-metadata sidecar cap
 LONG_VIDEO_SECONDS = 2 * 60 * 60       # 2 hours -- log warning above this
 LONG_VIDEO_MODE_FULL = "full"
 LONG_VIDEO_MODE_CHUNKED = "chunked"
@@ -430,10 +441,14 @@ PLAYLIST_RATE_LIMIT_BACKOFF_MAX_SEC = 5 * 60.0
 # this via /token (gated by chrome-extension:// origin) on first launch
 # and includes it in X-Uoink-Token on every subsequent request. The legacy
 # X-Yoink-Token header is still accepted through the v2.x alias window.
-TOKEN_PATH = HERE / "token.txt"
+_ISOLATION = _install_isolation.current_binding()
+TOKEN_PATH = (
+    _ISOLATION.token_path if _ISOLATION is not None else HERE / "token.txt"
+)
 # Sprint 19.5 Stage 1: DATA_ROOT is now resolved by _platform.user_data_dir
 # so the same helper runs on Windows + macOS without per-call branches.
-DATA_ROOT = _platform.user_data_dir()
+# Isolated installs substitute the declared profile instead of the normal root.
+DATA_ROOT = _install_isolation.data_root(_platform.user_data_dir())
 RELIABILITY_MODEL_ROOT = DATA_ROOT / "models" / "whisper"
 SETTINGS_PATH = DATA_ROOT / "settings.json"
 JOBS_PATH = DATA_ROOT / "jobs.json"
@@ -445,13 +460,60 @@ KEYRING_SERVICE = "Uoink"
 # fallback read can reference one source of truth.
 KEYRING_SERVICE_LEGACY = "Yoink"
 KEYRING_ANTHROPIC_USERNAME = "anthropic_key"
+
+
+def _isolated_binding() -> _install_isolation.IsolationBinding | None:
+    return _install_isolation.current_binding() or _ISOLATION
+
+
+def _isolated_keyring_service(profile: Path | str) -> str:
+    resolved = Path(profile).resolve()
+    canonical = os.path.normcase(os.path.normpath(str(resolved)))
+    digest = hashlib.sha256(canonical.encode("utf-8")).hexdigest()[:32]
+    return f"Uoink-isolated-{digest}"
+
+
+def _keyring_service_name() -> str:
+    binding = _isolated_binding()
+    if binding is not None:
+        return _isolated_keyring_service(binding.profile)
+    return KEYRING_SERVICE
+
+
+def _settings_path() -> Path:
+    binding = _isolated_binding()
+    if binding is not None:
+        return binding.profile / "settings.json"
+    return SETTINGS_PATH
 ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages"
 ANTHROPIC_MODEL = "claude-haiku-4-5-20251001"
 ANTHROPIC_VERSION = "2023-06-01"
-# Pricing source: Anthropic Claude pricing docs, verified 2026-05-12:
+# Pricing source: Anthropic Claude pricing docs, re-verified 2026-09-04:
 # https://docs.claude.com/en/docs/about-claude/pricing
+# (canonical table: https://platform.claude.com/docs/en/about-claude/pricing)
+# Claude Haiku 4.5 is still $1 / $5 per MTok; batch 50%; cache read 0.1×.
 ANTHROPIC_PRICING_INPUT_PER_MILLION = 1.00
 ANTHROPIC_PRICING_OUTPUT_PER_MILLION = 5.00
+# Prompt-caching rates from the same page and date, as multiples of the
+# input rate: a cache read is 0.1×; a cache write is 1.25× for the 5-minute
+# TTL and 2× for the 1-hour TTL. The response's cache_creation_input_tokens
+# counter does not say which TTL wrote it, so the meter prices every cache
+# write at the 5-minute rate and labels the total an estimate (run F
+# acceptance, case 3: cache-only usage used to price to $0.0).
+ANTHROPIC_PRICING_CACHE_READ_PER_MILLION = 0.10
+ANTHROPIC_PRICING_CACHE_CREATE_PER_MILLION = 1.25
+ANTHROPIC_PRICING_SOURCE = "https://docs.claude.com/en/docs/about-claude/pricing"
+ANTHROPIC_PRICING_SOURCE_CHECKED = "2026-09-04"
+# The rate table the meter stores next to every estimate (usage_meter
+# ``rates``): the four per-million prices and where/when they were read.
+ANTHROPIC_RATES = {
+    "input_per_million": ANTHROPIC_PRICING_INPUT_PER_MILLION,
+    "output_per_million": ANTHROPIC_PRICING_OUTPUT_PER_MILLION,
+    "cache_read_per_million": ANTHROPIC_PRICING_CACHE_READ_PER_MILLION,
+    "cache_create_per_million": ANTHROPIC_PRICING_CACHE_CREATE_PER_MILLION,
+    "source": ANTHROPIC_PRICING_SOURCE,
+    "source_checked": ANTHROPIC_PRICING_SOURCE_CHECKED,
+}
 ANTHROPIC_CI_EST_INPUT_TOKENS = 5_000
 ANTHROPIC_CI_EST_OUTPUT_TOKENS = 500
 ANTHROPIC_HOOK_EST_INPUT_TOKENS = 1_200
@@ -557,6 +619,84 @@ def _check_memory_search_rate_limit() -> bool:
         kept.append(now)
         _memory_search_request_times[:] = kept
     return True
+
+
+# ---- Strict JSON decoding (Living Library Phase 2, 2026-09-04) -------------
+# Python's json module accepts NaN, Infinity and duplicate object keys (the
+# last duplicate silently wins). The Phase 2 contract requires all three to be
+# rejected before any library argument is used as an SQL value or hash key;
+# Handler._read_json_body(strict=True) installs these hooks on the tool
+# transports (/tools/<name>, /mcp/v1*) and the intent route.
+_STRICT_JSON_ROUTE_PREFIXES = ("/tools/", "/mcp/v1", "/sources")
+LIBRARY_INTENT_ROUTE = "/library/intent"
+# Phase 3 (run AM): dashboard-only capability route for source consent
+# (contract phase3-v1-2026-09-07, "Registry and dashboard contract").
+SOURCES_INTENT_ROUTE = "/sources/consent-intent"
+# Phase 4 (AV-2s): dashboard-only capability for the opt-in corpus mirror.
+LIBRARY_MIRROR_INTENT_ROUTE = "/library/mirror-intent"
+LIBRARY_MIRROR_ROUTE = "/library/mirror"
+LIBRARY_MIRROR_SCOPE_ALL = "all_current_and_future_items"
+LIBRARY_MIRROR_SCOPE_ALLOWLIST = "allowlist"
+LIBRARY_MIRROR_SCOPES = frozenset({
+    LIBRARY_MIRROR_SCOPE_ALL, LIBRARY_MIRROR_SCOPE_ALLOWLIST,
+})
+LIBRARY_MIRROR_INTENT_TTL_MS = 5 * 60 * 1000
+LIBRARY_MIRROR_PREVIEW_TTL_MS = 30 * 60 * 1000
+LIBRARY_MIRROR_INDEXING_NOTICE = (
+    "Other software with access to this vault can index its contents. "
+    "Uoink does not register the vault with Basic Memory/Hermes, start "
+    "another indexer, edit its configuration, turn on sync, or infer "
+    "consent from an installed application. Existing third-party indexing "
+    "is outside Uoink's deletion control."
+)
+# Named event seams that call _mirror_event (kinds in parentheses):
+#   capture_commit (capture)  - _index_yoink after upsert
+#   source_refresh            - _refresh_source_via_service /
+#                               Handler._handle_sources_service_route
+#   restore                   - Handler._handle_memory_restore
+#   soft_delete               - Handler._handle_memory_delete
+#   hard_purge                - _purge_trash after delete_yoink
+#   apply / undo / pin        - library_work.LibraryWorkService via event_hook
+LIBRARY_MIRROR_SEAMS = (
+    "capture_commit",
+    "source_refresh",
+    "restore",
+    "soft_delete",
+    "hard_purge",
+    "apply",
+    "undo",
+    "pin",
+)
+
+
+def _reject_json_constant(name: str):
+    raise ValueError(f"{name} is not valid JSON")
+
+
+def _reject_duplicate_json_keys(pairs):
+    out: dict = {}
+    for key, value in pairs:
+        if key in out:
+            raise ValueError(f"duplicate object key: {key!r}")
+        out[key] = value
+    return out
+
+
+def _strict_json_route(bare: str) -> bool:
+    return (
+        bare == LIBRARY_INTENT_ROUTE
+        or bare == LIBRARY_MIRROR_INTENT_ROUTE
+        or bare == LIBRARY_MIRROR_ROUTE
+        or bare.startswith(_STRICT_JSON_ROUTE_PREFIXES)
+    )
+
+
+def _library_session_hash() -> str:
+    """The dashboard session a user-intent capability binds to. The dashboard
+    has no session of its own beyond holding the per-install token, so the
+    session is that token: rotating it (a reinstall, a token reset) orphans
+    every unconsumed intent. Only a hash ever leaves this process."""
+    return hashlib.sha256(("uoink-dashboard-intent:" + TOKEN).encode("utf-8")).hexdigest()
 
 
 # /queue/* rate limits (Sprint 19 / C4). /queue/status is poll-friendly
@@ -677,7 +817,9 @@ _LIVE_STATES = (
 LIVE_BEHAVIOR_WAIT = "wait_for_end"
 LIVE_BEHAVIOR_NOW = "extract_when_recorded"
 _LIVE_BEHAVIORS = (LIVE_BEHAVIOR_WAIT, LIVE_BEHAVIOR_NOW)
-_WHISPER_MODELS = ("tiny", "base", "small", "medium", "large")
+_WHISPER_MODELS = (
+    "tiny", "base", "small", "medium", "large", "large-v3-turbo",
+)
 
 # How long to wait between live-stream retry attempts. Conservative -- a
 # 2-hour broadcast doesn't need a 1-minute poll. Lined up with the
@@ -726,6 +868,11 @@ def _default_settings() -> dict:
     return {
         "comment_intelligence_enabled": False,
         "hook_type_enabled": False,
+        # D-17 (2026-09-04): entity extraction is the third background model
+        # call and gets the same named, default-off flag as its siblings.
+        # Clean default-off, no grandfathering: an existing settings.json
+        # without this key resolves to False on the next helper start.
+        "entity_extraction_enabled": False,
         "smart_screenshot_picker_enabled": False,
         "clipboard_screenshot_cap": CLIPBOARD_SCREENSHOT_CAP_DEFAULT,
         "transcript_reliability_auto_check": False,
@@ -776,6 +923,10 @@ def _default_settings() -> dict:
         # path as a manual save. Reversible: turn it off any time; captured
         # uoinks are ordinary uoinks you can delete.
         "auto_uoink_enabled": False,
+        # Desktop balloons are useful when explicitly wanted, but background
+        # feed work must be able to stay invisible. Suppressed notifications
+        # remain available in the dashboard Activity stream.
+        "notifications_enabled": True,
         "anthropic_key_invalid": False,
         # v2.1 rename: set True after the one-time post-migration
         # post-migration toast has fired, so it never repeats.
@@ -792,8 +943,114 @@ def _default_settings() -> dict:
         # source_type='short_video' ONLY; long-form captures always delete
         # their media regardless of this flag.
         "keep_media": False,
+        # Living Library Phase 2 (2026-09-04, brief reservation 10): whether
+        # apply_reshelving(mode=apply) may write labels. Shipping default OFF
+        # and deliberately absent from the /settings POST field list: turning
+        # it on requires the completed preview, quality and recovery gates
+        # with the evidence recorded, so it is an operator edit of
+        # settings.json, not a dashboard toggle. Preview, claim and submit
+        # work regardless. Clean default-off, no grandfathering.
+        "librarian_apply_enabled": False,
+        # Phase 4 opt-in corpus mirror. Separate from obsidian_vault_path
+        # (taste TASTE.md/USER.md only). Default off; enabling or broadening
+        # scope requires a preview plus a dashboard-minted user intent.
+        "library_mirror_enabled": False,
+        "library_mirror_consent": None,
         "updated_at": None,
     }
+
+
+def _normalize_mirror_consent(value) -> dict | None:
+    """Canonical consent record or None. Invalid shapes become None."""
+    if value is None or value == "":
+        return None
+    if not isinstance(value, dict):
+        return None
+    dest = value.get("destination")
+    if not isinstance(dest, str) or not dest.strip():
+        return None
+    scope = value.get("scope")
+    if scope not in LIBRARY_MIRROR_SCOPES:
+        return None
+    raw_allow = value.get("allowlist")
+    if raw_allow is None:
+        raw_allow = []
+    if not isinstance(raw_allow, (list, tuple)):
+        return None
+    allowlist = []
+    for item in raw_allow:
+        if not isinstance(item, str) or not item:
+            return None
+        if len(item.encode("utf-8")) > 512 or any(ord(ch) < 32 for ch in item):
+            return None
+        allowlist.append(item)
+    if scope == LIBRARY_MIRROR_SCOPE_ALLOWLIST and not allowlist:
+        return None
+    if scope == LIBRARY_MIRROR_SCOPE_ALL:
+        allowlist = []
+    try:
+        consented_at_ms = int(value.get("consented_at_ms") or 0)
+    except (TypeError, ValueError):
+        consented_at_ms = 0
+    if consented_at_ms < 0:
+        consented_at_ms = 0
+    marker = value.get("marker")
+    if marker is None:
+        marker = ""
+    if not isinstance(marker, str):
+        return None
+    return {
+        "destination": dest.strip(),
+        "scope": scope,
+        "allowlist": allowlist,
+        "consented_at_ms": consented_at_ms,
+        "marker": marker,
+    }
+
+
+def _canonical_mirror_destination(value: str) -> str:
+    cand = Path(value).expanduser()
+    try:
+        if cand.exists():
+            return str(cand.resolve())
+    except OSError:
+        pass
+    return str(cand)
+
+
+def _destinations_differ(left: str | None, right: str | None) -> bool:
+    if not left or not right:
+        return bool(left or right)
+    return os.path.normcase(_canonical_mirror_destination(left)) != os.path.normcase(
+        _canonical_mirror_destination(right))
+
+
+def _mirror_scope_broadens(old: dict | None, new: dict | None) -> bool:
+    """True when new consent covers items old consent did not."""
+    if new is None:
+        return False
+    if old is None:
+        return True
+    if old.get("scope") == LIBRARY_MIRROR_SCOPE_ALL:
+        return False
+    if new.get("scope") == LIBRARY_MIRROR_SCOPE_ALL:
+        return True
+    return not set(new.get("allowlist") or ()).issubset(set(old.get("allowlist") or ()))
+
+
+def _validate_mirror_destination_path(value) -> tuple[str | None, str | None]:
+    """Obsidian-style vault path check: existing writable directory."""
+    if not isinstance(value, str) or not value.strip():
+        return None, "library_mirror destination must be a non-empty string"
+    try:
+        cand = Path(value).expanduser()
+        if not cand.exists() or not cand.is_dir():
+            raise OSError("vault path missing or not a directory")
+        if not _is_writable_dir(cand):
+            raise OSError("vault path not writable")
+        return str(cand.resolve()), None
+    except OSError as e:
+        return None, f"library_mirror destination invalid: {e}"
 
 
 def _normalize_settings(data: dict) -> dict:
@@ -801,10 +1058,15 @@ def _normalize_settings(data: dict) -> dict:
     if isinstance(data, dict):
         clean.update(data)
     clean.pop("anthropic_key", None)
+    # Only the JSON boolean true enables apply; "true", 1 or "yes" stay off.
+    clean["librarian_apply_enabled"] = clean.get("librarian_apply_enabled") is True
     clean["comment_intelligence_enabled"] = bool(
         clean.get("comment_intelligence_enabled")
     )
     clean["hook_type_enabled"] = bool(clean.get("hook_type_enabled"))
+    clean["entity_extraction_enabled"] = bool(
+        clean.get("entity_extraction_enabled")
+    )
     clean["smart_screenshot_picker_enabled"] = bool(
         clean.get("smart_screenshot_picker_enabled")
     )
@@ -827,6 +1089,9 @@ def _normalize_settings(data: dict) -> dict:
         clean.get("writing_default_attach_all_screenshots", False)
     )
     clean["auto_uoink_enabled"] = bool(clean.get("auto_uoink_enabled"))
+    clean["notifications_enabled"] = bool(
+        clean.get("notifications_enabled", True)
+    )
     try:
         cap = int(clean.get("clipboard_screenshot_cap"))
     except (TypeError, ValueError):
@@ -845,15 +1110,22 @@ def _normalize_settings(data: dict) -> dict:
     clean["keep_media"] = bool(clean.get("keep_media"))
     model = str(clean.get("whisper_model") or "base").strip().lower()
     clean["whisper_model"] = model if model in _WHISPER_MODELS else "base"
+    # Strict JSON true only; "true"/1 stay off, matching librarian_apply.
+    clean["library_mirror_enabled"] = clean.get("library_mirror_enabled") is True
+    clean["library_mirror_consent"] = _normalize_mirror_consent(
+        clean.get("library_mirror_consent"))
+    if clean["library_mirror_consent"] is None:
+        clean["library_mirror_enabled"] = False
     return clean
 
 
 def _read_settings() -> dict:
     with _settings_lock:
         data: dict = {}
-        if SETTINGS_PATH.exists():
+        settings_file = _settings_path()
+        if settings_file.exists():
             try:
-                raw = json.loads(SETTINGS_PATH.read_text(encoding="utf-8"))
+                raw = json.loads(settings_file.read_text(encoding="utf-8"))
                 if isinstance(raw, dict):
                     data = raw
             except (OSError, json.JSONDecodeError) as e:
@@ -863,13 +1135,14 @@ def _read_settings() -> dict:
 
 def _write_settings(data: dict) -> None:
     with _settings_lock:
-        SETTINGS_PATH.parent.mkdir(parents=True, exist_ok=True)
+        settings_file = _settings_path()
+        settings_file.parent.mkdir(parents=True, exist_ok=True)
         clean = _normalize_settings(data)
-        tmp = SETTINGS_PATH.with_suffix(".json.tmp")
+        tmp = settings_file.with_suffix(".json.tmp")
         tmp.write_text(json.dumps(clean, indent=2), encoding="utf-8")
-        tmp.replace(SETTINGS_PATH)
+        tmp.replace(settings_file)
         try:
-            os.chmod(SETTINGS_PATH, 0o600)
+            os.chmod(settings_file, 0o600)
         except OSError:
             pass
 
@@ -981,6 +1254,11 @@ def _get_saved_anthropic_key() -> str:
         log.debug("%s", err)
         return ""
     try:
+        binding = _isolated_binding()
+        if binding is not None:
+            service = _isolated_keyring_service(binding.profile)
+            key = _keyring.get_password(service, KEYRING_ANTHROPIC_USERNAME)
+            return key or ""
         key = _keyring.get_password(KEYRING_SERVICE, KEYRING_ANTHROPIC_USERNAME)
         if key:
             return key
@@ -1006,16 +1284,17 @@ def _store_saved_anthropic_key(key: str) -> None:
             raise err
         return
     try:
+        service = _keyring_service_name()
         if key:
             _keyring.set_password(
-                KEYRING_SERVICE,
+                service,
                 KEYRING_ANTHROPIC_USERNAME,
                 key,
             )
         else:
             try:
                 _keyring.delete_password(
-                    KEYRING_SERVICE,
+                    service,
                     KEYRING_ANTHROPIC_USERNAME,
                 )
             except Exception:
@@ -1028,10 +1307,11 @@ def _store_saved_anthropic_key(key: str) -> None:
 
 def _migrate_plaintext_anthropic_key() -> None:
     """Move legacy settings.json anthropic_key into the OS credential store."""
-    if not SETTINGS_PATH.exists():
+    settings_file = _settings_path()
+    if not settings_file.exists():
         return
     try:
-        raw = json.loads(SETTINGS_PATH.read_text(encoding="utf-8"))
+        raw = json.loads(settings_file.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as e:
         log.warning("settings migration skipped: read failed (%s)", e)
         return
@@ -1064,6 +1344,9 @@ def _public_settings(data: dict | None = None) -> dict:
     return {
         "comment_intelligence_enabled": bool(data.get("comment_intelligence_enabled")),
         "hook_type_enabled": bool(data.get("hook_type_enabled")),
+        "entity_extraction_enabled": bool(
+            data.get("entity_extraction_enabled")
+        ),
         "smart_screenshot_picker_enabled": bool(
             data.get("smart_screenshot_picker_enabled")
         ),
@@ -1128,10 +1411,196 @@ def _public_settings(data: dict | None = None) -> dict:
         # the Settings + digest copy can state the bar honestly.
         "auto_uoink_enabled": bool(data.get("auto_uoink_enabled")),
         "auto_uoink_threshold": taste_scoring.DEFAULT_THRESHOLD,
+        "notifications_enabled": bool(
+            data.get("notifications_enabled", True)
+        ),
         # E-1 (Zing enabler): opt-in short-video media retention, default
         # OFF. Backend setting only for now -- no dashboard control yet.
         "keep_media": bool(data.get("keep_media")),
+        # Living Library Phase 2: read-only here; see _default_settings.
+        "librarian_apply_enabled": data.get("librarian_apply_enabled") is True,
+        # Phase 4 opt-in corpus mirror (separate from obsidian_vault_path).
+        "library_mirror_enabled": data.get("library_mirror_enabled") is True,
+        "library_mirror_consent": _normalize_mirror_consent(
+            data.get("library_mirror_consent")),
     }
+
+
+_mirror_intents_lock = threading.Lock()
+_mirror_intents: dict[str, dict] = {}
+_mirror_previews_lock = threading.Lock()
+_mirror_previews: dict[str, dict] = {}
+
+
+def _mirror_now_ms() -> int:
+    return int(time.time() * 1000)
+
+
+def _mirror_token_hash(token: str) -> str:
+    return hashlib.sha256(token.encode("utf-8")).hexdigest()
+
+
+def _mirror_op_payload(destination: str, scope: str, allowlist) -> dict:
+    return {
+        "destination": _canonical_mirror_destination(destination),
+        "scope": scope,
+        "allowlist": list(allowlist or []),
+    }
+
+
+def _mirror_op_hash(payload: dict) -> str:
+    blob = json.dumps(
+        {
+            "destination": payload.get("destination") or "",
+            "scope": payload.get("scope") or "",
+            "allowlist": list(payload.get("allowlist") or []),
+        },
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    )
+    return hashlib.sha256(blob.encode("utf-8")).hexdigest()
+
+
+def _remember_mirror_preview(payload: dict) -> None:
+    record = {
+        "op_hash": _mirror_op_hash(payload),
+        "expires_ms": _mirror_now_ms() + LIBRARY_MIRROR_PREVIEW_TTL_MS,
+        "session_hash": _library_session_hash(),
+        "payload": payload,
+    }
+    with _mirror_previews_lock:
+        _mirror_previews[record["op_hash"]] = record
+
+
+def _mirror_preview_matches(payload: dict) -> bool:
+    op_hash = _mirror_op_hash(payload)
+    now = _mirror_now_ms()
+    session = _library_session_hash()
+    with _mirror_previews_lock:
+        record = _mirror_previews.get(op_hash)
+        if record is None:
+            return False
+        if now >= int(record.get("expires_ms") or 0):
+            _mirror_previews.pop(op_hash, None)
+            return False
+        return record.get("session_hash") == session
+
+
+def _purge_expired_mirror_intents(now: int | None = None) -> None:
+    now = _mirror_now_ms() if now is None else now
+    stale = [key for key, rec in _mirror_intents.items()
+             if int(rec.get("expires_ms") or 0) <= now and rec.get("consumed_by") is None]
+    for key in stale:
+        _mirror_intents.pop(key, None)
+
+
+def _consent_to_dataclass(consent: dict | None):
+    if not consent:
+        return None
+    try:
+        import library_mirror
+    except ImportError:
+        return None
+    return library_mirror.MirrorConsent(
+        destination=str(consent["destination"]),
+        scope=str(consent["scope"]),
+        allowlist=tuple(consent.get("allowlist") or ()),
+        consented_at_ms=int(consent.get("consented_at_ms") or 0),
+        marker=str(consent.get("marker") or ""),
+    )
+
+
+def _library_mirror(*, enabled: bool | None = None, consent: dict | None = None):
+    """Construct library_mirror.Mirror from current settings. None if missing."""
+    try:
+        import library_mirror
+        from library_resources import LibraryReader
+    except ImportError:
+        return None
+    settings = _read_settings()
+    if enabled is None:
+        enabled = settings.get("library_mirror_enabled") is True
+    if consent is None:
+        consent = _normalize_mirror_consent(settings.get("library_mirror_consent"))
+    try:
+        idx = _get_index()
+    except Exception:
+        return None
+    reader = LibraryReader(idx, data_root=DATA_ROOT)
+    brief_store = None
+    try:
+        import library_briefs
+        brief_store = library_briefs.BriefStore(
+            idx, idx.library_service(), data_root=DATA_ROOT)
+    except Exception:
+        brief_store = None
+    return library_mirror.Mirror(
+        idx,
+        reader,
+        brief_store,
+        data_root=DATA_ROOT,
+        consent=_consent_to_dataclass(consent),
+        enabled=bool(enabled),
+    )
+
+
+def _mirror_event(kind, *, video_id=None, shelf_id=None, brief_hash=None):
+    """Guarded corpus-mirror ledger update.
+
+    No-op when the mirror is disabled or library_mirror.py cannot be imported.
+    Named seams: capture_commit, source_refresh, restore, soft_delete,
+    hard_purge (server.py); apply, undo, pin (library_work.py event_hook).
+    """
+    try:
+        settings = _read_settings()
+        enabled = settings.get("library_mirror_enabled") is True
+        if not enabled and kind not in ("soft_delete", "hard_purge"):
+            return
+        mirror = _library_mirror()
+        if mirror is None:
+            return
+        mirror.on_committed_event(
+            kind, video_id=video_id, shelf_id=shelf_id, brief_hash=brief_hash)
+    except Exception:
+        log.debug("library mirror event ignored", exc_info=True)
+
+
+def _read_volume_marker(destination: str) -> str:
+    dest = Path(destination)
+    for path in (dest / ".uoink-volume-marker", dest / "Uoink" / ".uoink-volume-marker"):
+        try:
+            if path.is_file():
+                text = path.read_text(encoding="utf-8").strip()
+                if text:
+                    return text
+        except OSError:
+            continue
+    return "uoink-vol-" + secrets.token_hex(12)
+
+
+def _parse_mirror_scope_args(body: dict) -> tuple[dict | None, str | None]:
+    destination = body.get("destination")
+    scope = body.get("scope")
+    allowlist = body.get("allowlist")
+    if destination is not None and not isinstance(destination, str):
+        return None, "destination must be a string"
+    if scope is not None and scope not in LIBRARY_MIRROR_SCOPES:
+        return None, "scope must be all_current_and_future_items or allowlist"
+    if allowlist is None:
+        allowlist = []
+    if not isinstance(allowlist, list) or any(not isinstance(x, str) for x in allowlist):
+        return None, "allowlist must be an array of strings"
+    if scope == LIBRARY_MIRROR_SCOPE_ALLOWLIST and not allowlist:
+        return None, "allowlist scope requires a non-empty allowlist"
+    if scope == LIBRARY_MIRROR_SCOPE_ALL:
+        allowlist = []
+    payload = {
+        "destination": (destination or "").strip(),
+        "scope": scope or LIBRARY_MIRROR_SCOPE_ALL,
+        "allowlist": allowlist,
+    }
+    return payload, None
 
 
 def _anthropic_estimated_cost(input_tokens: int, output_tokens: int) -> float:
@@ -1140,6 +1609,55 @@ def _anthropic_estimated_cost(input_tokens: int, output_tokens: int) -> float:
         + (output_tokens / 1_000_000) * ANTHROPIC_PRICING_OUTPUT_PER_MILLION,
         6,
     )
+
+
+def _record_anthropic_usage(feature: str, resp: dict) -> None:
+    """D-17 meter: accumulate the real ``usage`` block of one Messages
+    response into the KV rollup (``usage_meter``). Best-effort -- metering
+    must never fail a call that already succeeded -- but never silent: a
+    response without usage is counted as an unavailable call, and a write
+    that cannot happen (no index, locked index) lands in the meter status
+    the pricing payload shows. Call sites: Comment Intelligence, Hook
+    Type, entity extraction (the 4-token key probe is excluded on purpose;
+    it is noise in the meter)."""
+    try:
+        idx = _get_index()
+    except Exception as exc:
+        usage_meter.note_write_failure(feature, exc)
+        log.warning("usage meter: %s not recorded, index unavailable (%s)",
+                    feature, type(exc).__name__)
+        return
+    try:
+        usage_meter.record_usage(
+            idx, feature, resp,
+            default_model=ANTHROPIC_MODEL,
+            rates=ANTHROPIC_RATES,
+        )
+    except Exception as exc:  # record_usage never raises; belt and braces
+        usage_meter.note_write_failure(feature, exc)
+        log.warning("usage meter: %s not recorded (%s)",
+                    feature, type(exc).__name__)
+
+
+def _anthropic_actual_usage_payload() -> dict:
+    """The ``actual`` block of the pricing payload: this month's metered
+    usage per feature, priced as an estimate with ``ANTHROPIC_RATES`` (rate
+    provenance included), plus ``unavailable_calls`` (responses whose usage
+    could not be read) and the meter write-failure ``status``. Never
+    raises: when the index cannot be read, ``error`` says so and
+    ``unavailable_calls`` is None rather than a reassuring 0."""
+    try:
+        return usage_meter.month_summary(
+            _get_index(), rates=ANTHROPIC_RATES)
+    except Exception as exc:
+        log.warning("usage meter: summary unavailable (%s)",
+                    type(exc).__name__)
+        return {"month": usage_meter.month_of(), "by_feature": {},
+                "total_usd": 0.0, "unavailable_calls": None,
+                "estimate": True,
+                "rates": usage_meter.rates_record(ANTHROPIC_RATES),
+                "status": usage_meter.meter_status(),
+                "error": "usage unavailable"}
 
 
 def _anthropic_pricing_payload() -> dict:
@@ -1156,6 +1674,8 @@ def _anthropic_pricing_payload() -> dict:
         "display_model": "Claude Haiku 4.5",
         "input_per_million": ANTHROPIC_PRICING_INPUT_PER_MILLION,
         "output_per_million": ANTHROPIC_PRICING_OUTPUT_PER_MILLION,
+        "cache_read_per_million": ANTHROPIC_PRICING_CACHE_READ_PER_MILLION,
+        "cache_create_per_million": ANTHROPIC_PRICING_CACHE_CREATE_PER_MILLION,
         "est_tokens": {
             "ci": {
                 "input": ANTHROPIC_CI_EST_INPUT_TOKENS,
@@ -1171,8 +1691,13 @@ def _anthropic_pricing_payload() -> dict:
             "hook": hook,
             "both": round(ci + hook, 6),
         },
-        "source": "https://docs.claude.com/en/docs/about-claude/pricing",
-        "source_checked": "2026-05-12",
+        # D-17 "metered": what calls *did* use this month, from the real
+        # usage blocks, priced as an estimate with ANTHROPIC_RATES (all
+        # four counters, provenance attached). Missing usage and lost
+        # writes are visible inside it, not folded into a zero.
+        "actual": _anthropic_actual_usage_payload(),
+        "source": ANTHROPIC_PRICING_SOURCE,
+        "source_checked": ANTHROPIC_PRICING_SOURCE_CHECKED,
     }
 
 
@@ -1396,6 +1921,9 @@ def _get_output_root() -> Path:
     A second fallback, _LOCALAPPDATA_OUTPUT, kicks in at startup if even
     the Desktop path turns out to be unwritable -- see
     _apply_output_root_fallback (Sprint 19, Wave 1 Fix 4 carryover)."""
+    isolated = _install_isolation.current_binding()
+    if isolated is not None:
+        return isolated.output_dir
     override = (os.environ.get("UOINK_OUTPUT_DIR")
                 or os.environ.get("YOINK_OUTPUT_DIR") or "").strip()
     if override:
@@ -1453,6 +1981,15 @@ def _apply_output_root_fallback() -> None:
     so /health and /diagnose can warn. /file accepts both candidates
     either way, so legacy yoinks still on the Desktop remain readable."""
     global DESKTOP_ROOT, SESSIONS_ROOT, _OUTPUT_ROOT_FALLBACK
+    isolated = _install_isolation.current_binding()
+    if isolated is not None:
+        DESKTOP_ROOT = isolated.output_dir
+        SESSIONS_ROOT = DESKTOP_ROOT / "_sessions"
+        try:
+            DESKTOP_ROOT.mkdir(parents=True, exist_ok=True)
+        except OSError as e:
+            log.warning("isolated output root: cannot create %s -- %s", DESKTOP_ROOT, e)
+        return
     try:
         DESKTOP_ROOT.mkdir(parents=True, exist_ok=True)
     except OSError as e:
@@ -1486,6 +2023,15 @@ def _allowed_roots() -> set[Path]:
     the user opts in to move their Desktop corpus, they may still have
     uoinks under Desktop\\Uoink OR legacy yoinks under Desktop\\Yoink whose
     thumbnails the Memory page needs to render."""
+    isolated = _install_isolation.current_binding()
+    if isolated is not None:
+        roots: set[Path] = set()
+        for candidate in (isolated.output_dir, isolated.profile):
+            try:
+                roots.add(candidate.resolve())
+            except OSError:
+                pass
+        return roots
     roots: set[Path] = set()
     desktop = _get_desktop_dir()
     for candidate in (DESKTOP_ROOT, desktop / "Uoink", desktop / "Yoink",
@@ -1498,7 +2044,9 @@ def _allowed_roots() -> set[Path]:
 
 
 # --- Logging ---------------------------------------------------------------
-LOG_PATH = HERE / "server.log"
+LOG_PATH = (
+    _ISOLATION.log_path if _ISOLATION is not None else HERE / "server.log"
+)
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s %(levelname)s %(message)s",
@@ -1520,6 +2068,18 @@ _session_lock = threading.Lock()
 _jobs: dict[str, dict] = {}
 _jobs_lock = threading.Lock()
 _JOB_TERMINAL_STATES = {"completed", "cancelled", "failed"}
+
+# Podcast transcription is intentionally serialized: one local WhisperX job
+# at a time, on a below-normal-priority worker thread. Queue state is mirrored
+# into the durable jobs table through the ordinary job helpers below.
+_podcast_transcription_queue: queue.Queue[str] = queue.Queue()
+_podcast_transcription_worker_lock = threading.Lock()
+_podcast_transcription_worker_thread: threading.Thread | None = None
+# Feed HTTP polls are short compared with media work, but a manual refresh can
+# overlap the 30-second watch tick. Serialize the fetch/upsert boundary so the
+# same feed is never polled twice at once.
+_podcast_feed_poll_lock = threading.Lock()
+_PODCAST_FEED_TICK_SEC = 30
 
 # ---- /jobs/stream SSE (Tier 2) -------------------------------------------
 # Live job/queue push for the dashboard Activity tab + the extension popup
@@ -1552,6 +2112,47 @@ _index_open_lock = threading.Lock()
 # True from an index.db corruption-recovery (open_or_recover) until the
 # rebuilding backfill scan finishes. Surfaced in /health as index_recovering.
 _index_recovering = False
+# The process only starts serving after _get_index() applies every migration.
+# Initialising from the shipped files keeps direct Handler tests side-effect
+# free; main() replaces it with the version actually opened on disk.
+_active_migration_version = index.latest_schema_version()
+
+# Updated only after the podcast/watch scheduler completes a whole pass in
+# which no feed poll failed (heartbeat semantics, Astra finding 6,
+# 2026-09-04: a pass whose every poll raised used to advance this stamp). A
+# null value means no clean pass has happened since this process started.
+_last_successful_tick_at: str | None = None
+
+# Heartbeat: four separate stamps, because "the loop finished" is not "the
+# feeds were polled" is not "an episode landed in the corpus".
+#   last_tick_completed_at    the scheduler loop finished a pass (any outcome)
+#   last_successful_tick_at   (above) a pass finished with zero failed polls
+#   last_successful_poll_at   one feed poll returned ok=True
+#   last_failed_poll_at       one feed poll returned ok=False or raised
+#   last_ingest_completed_at  one episode was published into the corpus
+# Freshness is derived from last_tick_completed_at against the tick interval
+# so a dead or hung scheduler thread shows up as "stale" while the HTTP
+# process keeps answering /health. Guarded by _heartbeat_lock; every writer
+# is a background thread.
+_heartbeat_lock = threading.Lock()
+_heartbeat: dict = {
+    "last_tick_completed_at": None,
+    "last_tick_ok": None,
+    "last_tick_polls": 0,
+    "last_tick_failed_polls": 0,
+    "last_successful_poll_at": None,
+    "last_failed_poll_at": None,
+    "last_poll_error": None,
+    "last_ingest_completed_at": None,
+    "ticks_completed": 0,
+    "polls_ok": 0,
+    "polls_failed": 0,
+    "ingests_completed": 0,
+}
+# A pass that has not completed within this many seconds means the scheduler
+# thread is dead, hung, or starved. Three tick intervals would be 90 s, which a
+# slow feed set can legitimately exceed; five minutes is the operational bound.
+_HEARTBEAT_STALE_AFTER_SEC = 300
 
 # Backfill scan progress, polled via GET /index/backfill-status.
 _backfill_state = {"state": "idle", "current": 0, "total": 0}
@@ -1570,7 +2171,76 @@ def _get_index() -> "index.Index":
             _index_singleton = idx
             if recovered:
                 _index_recovering = True
+        elif getattr(_index_singleton, "_existing_read_only", False):
+            _index_singleton.initialize_for_write()
         return _index_singleton
+
+
+def _get_existing_index(timeout_s: float | None = None) -> "index.Index":
+    """Phase 4 bounded reads (``library_resources.make_reader``; AV-1r ruling
+    D7, 2026-09-08): bind to storage that already exists. Returns the open
+    process handle when there is one; otherwise opens INDEX_PATH only when it
+    already is a regular file. Never creates a database, never quarantines
+    or recovers one, never switches installations: a missing, corrupt or
+    unreadable index.db raises (FileNotFoundError / sqlite3.DatabaseError /
+    OSError) for the reader to refuse ``library_unavailable``, and the file is
+    left exactly as found. Legacy callers keep ``_get_index`` and its
+    open_or_recover behaviour. Nothing else in the process changes.
+
+    ``timeout_s`` is the remaining request deadline (AW-D01). The wait on
+    ``_index_open_lock`` is bounded by it; an expired or failed acquisition
+    raises ``TimeoutError`` so the reader can refuse ``deadline_exceeded``
+    by the deadline instead of after the lock holder finishes. Omit it for
+    a blocking wait (legacy callers)."""
+    global _index_singleton
+    if timeout_s is None:
+        acquired = _index_open_lock.acquire()
+    else:
+        remaining = max(0.0, float(timeout_s))
+        if remaining <= 0:
+            raise TimeoutError("index_open_deadline")
+        acquired = _index_open_lock.acquire(timeout=remaining)
+    if not acquired:
+        raise TimeoutError("index_open_deadline")
+    try:
+        if _index_singleton is None:
+            if not INDEX_PATH.is_file():
+                raise FileNotFoundError(str(INDEX_PATH))
+            _index_singleton = index.Index.open_existing(INDEX_PATH)
+        return _index_singleton
+    finally:
+        _index_open_lock.release()
+
+
+def _library_health_payload() -> dict:
+    """The `library` block of /health (Phase 2 contract, "Dispatch
+    boundaries": no subscribed client running means a visible
+    `waiting_for_client`). Public and polled, so it is cheap and side-effect
+    free: it reads the already-open index handle and never opens one --
+    before main() has opened the index (and in direct Handler tests) it
+    reports `unknown`. It never raises."""
+    settings = _read_settings() or {}
+    apply_enabled = settings.get("librarian_apply_enabled") is True
+    base = {
+        "status": "unknown",
+        "waiting_for_client": False,
+        "ready": 0,
+        "leased": 0,
+        "run_revision": None,
+        "recovery_state": None,
+        "error_code": None,
+        "apply_enabled": apply_enabled,
+        "contract_version": None,
+    }
+    try:
+        tools = _mcp_tools_module()
+        base["contract_version"] = tools.LIBRARY_CONTRACT_VERSION
+        if _index_singleton is None:
+            return base
+        return {**base, **tools.library_status(_index_singleton, apply_enabled=apply_enabled)}
+    except Exception:
+        log.exception("health: library status unavailable")
+        return {**base, "status": "error"}
 
 
 def _as_float(value) -> float | None:
@@ -1606,12 +2276,26 @@ def _youtube_deep_link(video_id: str, seconds) -> str:
     return f"https://youtube.com/watch?v={vid}&t={t}s"
 
 
+def _source_deep_link(source_url: str, seconds) -> str:
+    """A generic timestamp fragment for sources without a native URL form."""
+    try:
+        t = max(0, int(float(seconds)))
+    except (TypeError, ValueError):
+        t = 0
+    return f"{source_url.split('#', 1)[0]}#t={t}"
+
+
 def compute_health(sidecar: dict) -> dict:
-    """A per-video extraction health snapshot (A5), computed at extraction
+    """A per-source extraction health snapshot (A5), computed at extraction
     time. Stored on the sidecar under `health` and in the index. The
     comments / hook / comment-intelligence background workers finish *after*
     this snapshot, so those fields report in-progress status, not the final
     result."""
+    source_type = str(sidecar.get("source_type") or "").strip().lower()
+    platform = str(sidecar.get("platform") or "").strip().lower()
+    if source_type == "note" or platform == "note":
+        return notes.compute_note_health(sidecar)
+
     comments = sidecar.get("comments")
     comments_status = sidecar.get("comments_status") or "unknown"
     if isinstance(comments, list) and len(comments) >= 5:
@@ -1645,14 +2329,9 @@ def _reliability_model_status(model_name: object | None = None) -> dict:
     selected_model = _normalize_reliability_model(
         model_name if model_name is not None else _selected_reliability_model()
     )
-    model_file = RELIABILITY_MODEL_ROOT / f"{selected_model}.pt"
-    cached = model_file.exists()
-    return {
-        "model": selected_model,
-        "model_root": str(RELIABILITY_MODEL_ROOT),
-        "cached": bool(cached),
-        "estimated_download_mb": 150,
-    }
+    return uoink_reliability.reliability_model_status(
+        selected_model, RELIABILITY_MODEL_ROOT,
+    )
 
 
 def _asr_duration_expectation(duration_seconds: object) -> dict:
@@ -1948,16 +2627,65 @@ def _compute_transcript_reliability(
     return {"ok": True, "reliability": reliability, "cached": False}
 
 
+def _sidecar_link_builder(sidecar: dict):
+    """The one link convention for a capture's transcript rows: returns
+    ``links(timestamp) -> (youtube_deep_link, source_url, source_deep_link)``
+    so the sidecar writer and the reconstruction reader derive identical
+    values (Phase 6 BC-2: new writers persist these actual values)."""
+    video_id = (sidecar.get("video_id") or "").strip()
+    source_url = sidecar.get("source_url") or sidecar.get("url")
+    is_youtube = page_extractor.platform_for(
+        sidecar.get("source_type"), source_url or ""
+    ) == page_extractor.PLATFORM_YOUTUBE
+
+    def links(timestamp):
+        if is_youtube:
+            deep = _youtube_deep_link(video_id, timestamp)
+            base = (
+                source_url if isinstance(source_url, str)
+                and source_url.startswith(("http://", "https://"))
+                else f"https://youtube.com/watch?v={video_id}"
+            )
+            return deep, base, deep
+        if isinstance(source_url, str) and source_url.startswith(("http://", "https://")):
+            return None, source_url, _source_deep_link(source_url, timestamp)
+        return None, None, None
+
+    return links
+
+
+def _transcript_entries_with_links(sidecar: dict, entries) -> list[dict]:
+    """Sidecar transcript entries carrying their actual stored link values
+    (``source_url``, ``source_deep_link`` and the compatibility
+    ``youtube_deep_link``, null when the source is not YouTube)."""
+    links = _sidecar_link_builder(sidecar)
+    out = []
+    for s, e, t in entries:
+        youtube_link, citation_source, deep_link = links(s)
+        out.append({"start": s, "end": e, "text": t, "source_url": citation_source,
+                    "source_deep_link": deep_link, "youtube_deep_link": youtube_link})
+    return out
+
+
 def _citations_from_sidecar(sidecar: dict, folder: Path) -> list[dict]:
     """Build the citation map (A4) from a parsed sidecar: one row per
-    transcript chunk and one per screenshot, each with a timestamped
-    YouTube deep link."""
-    video_id = (sidecar.get("video_id") or "").strip()
+    transcript chunk and one per screenshot, each linked to its real source."""
+    links = _sidecar_link_builder(sidecar)
+
     out: list[dict] = []
     for i, seg in enumerate(sidecar.get("transcript") or []):
         if not isinstance(seg, dict):
             continue
         start = _as_float(seg.get("start"))
+        youtube_link, citation_source, deep_link = links(start)
+        # Phase 6 (phase6-v1): a sidecar written by a Phase 6 publisher
+        # carries explicit link fields and the cue's local label with its
+        # provenance object; both survive reconstruction. A label without a
+        # provenance object is never stored as attributed evidence. BC-2:
+        # an explicit field is the stored value even when it is null; only a
+        # missing field falls back to the generated convention.
+        provenance = seg.get("speaker_provenance")
+        speaker = seg.get("speaker") if isinstance(provenance, dict) else None
         out.append({
             "kind": "transcript_chunk",
             "seq": i,
@@ -1965,13 +2693,20 @@ def _citations_from_sidecar(sidecar: dict, folder: Path) -> list[dict]:
             "timestamp_end": _as_float(seg.get("end")),
             "text": seg.get("text"),
             "file_path": None,
-            "youtube_deep_link": _youtube_deep_link(video_id, start),
+            "youtube_deep_link": (
+                seg.get("youtube_deep_link") if "youtube_deep_link" in seg
+                else youtube_link),
+            "source_url": seg["source_url"] if "source_url" in seg else citation_source,
+            "source_deep_link": seg["source_deep_link"] if "source_deep_link" in seg else deep_link,
+            "speaker": speaker if isinstance(speaker, str) else None,
+            "speaker_provenance": provenance if isinstance(provenance, dict) else None,
         })
     for i, shot in enumerate(sidecar.get("screenshots") or []):
         if not isinstance(shot, dict):
             continue
         ts = _parse_hms(shot.get("timestamp"))
         rel = shot.get("path") or shot.get("filename") or ""
+        youtube_link, citation_source, deep_link = links(ts)
         out.append({
             "kind": "screenshot",
             "seq": i,
@@ -1979,16 +2714,149 @@ def _citations_from_sidecar(sidecar: dict, folder: Path) -> list[dict]:
             "timestamp_end": None,
             "text": None,
             "file_path": str(folder / rel) if rel else None,
-            "youtube_deep_link": _youtube_deep_link(video_id, ts),
+            "youtube_deep_link": youtube_link,
+            "source_url": citation_source,
+            "source_deep_link": deep_link,
         })
     return out
+
+
+def _capture_media_plan(sidecar: dict, folder: Path, *, item: dict | None = None,
+                        chapter_rows: list[dict] | None = None):
+    """Phase 6 (BC-2) shared snapshot builder for a helper capture: the
+    caption cues (with their stored links) and the already-held YouTube
+    chapter metadata (``yt_extract.chapters_from_metadata`` over the
+    sidecar's ``source_chapters``) become one archived capture artifact and
+    a sealed, provisional media block. Returns None when the sidecar was not
+    written by a Phase 6 capture (no ``source_chapters`` key and no explicit
+    link fields). A Phase 6 writer with neither cues nor chapters still
+    returns an explicit empty snapshot so replacement publication can
+    remove old transcript citations and chapters (BD-09). Offline: nothing
+    is fetched, transcribed or written here."""
+    import library_media  # noqa: WPS433 -- optional module; lazy keeps the helper importable
+    import library_resources  # noqa: WPS433
+    import yt_extract  # noqa: WPS433
+    video_id = (sidecar.get("video_id") or "").strip()
+    if not video_id:
+        return None
+    entries = [e for e in (sidecar.get("transcript") or []) if isinstance(e, dict)]
+    phase6_writer = "source_chapters" in sidecar or (
+        entries and all("source_url" in e and "source_deep_link" in e for e in entries))
+    if not phase6_writer:
+        return None
+    cues = [c for c in _citations_from_sidecar(sidecar, folder) if c["kind"] == "transcript_chunk"]
+    raw_chapters = sidecar.get("source_chapters")
+    raw_chapters = raw_chapters if isinstance(raw_chapters, list) else []
+    if chapter_rows is None:
+        chapter_rows = yt_extract.chapters_from_metadata({"chapters": raw_chapters})
+    url = sidecar.get("source_url") or sidecar.get("url")
+    safe_source = library_resources.safe_url(url)
+    is_youtube = page_extractor.platform_for(
+        sidecar.get("source_type"), url or "") == page_extractor.PLATFORM_YOUTUBE
+    if is_youtube and safe_source and library_media._youtube_video_id(safe_source) == video_id:
+        playback = {"source_url": safe_source, "seek_url": safe_source, "seek_kind": "youtube"}
+    else:
+        playback = {"source_url": safe_source, "seek_url": None, "seek_kind": "none"}
+    record = {
+        "video_id": video_id, "url": url if isinstance(url, str) else None,
+        "captured_at": sidecar.get("yoinked_at"),
+        "duration_seconds": sidecar.get("duration_seconds"),
+        "chapters": raw_chapters,
+        "transcript": [{"start": c["timestamp_start"], "end": c["timestamp_end"], "text": c["text"]}
+                       for c in cues],
+    }
+    artifact = library_media.canonical_json(record).encode("utf-8")
+    provider = sidecar.get("transcript_source")
+    provider = provider if isinstance(provider, str) and provider.strip() else "youtube_captions"
+    kind = "local_asr" if provider.lower().startswith("asr") else "captions"
+    block, digest = library_media.capture_snapshot(
+        video_id=video_id, source_revision="0" * 64, cues=cues, artifact_bytes=artifact,
+        corpus_revision="0" * 64, playback=playback, transcript_kind=kind, transcript_provider=provider,
+        chapter_rows=chapter_rows, recorded_at=sidecar.get("yoinked_at"), item=item)
+    return {"cues": cues, "artifact": artifact, "digest": digest, "chapter_rows": chapter_rows,
+            "playback": playback, "block": block, "transcript_kind": kind, "transcript_provider": provider,
+            "markdown": library_media.render_markdown(
+                {"video_id": video_id}, cues, chapters=block["chapters"], annotations=block)}
+
+
+def _publish_capture_media(idx, folder: Path, sidecar: dict, corpus_path: Path,
+                           sidecar_path: Path, plan: dict | None = None) -> bool:
+    """Phase 6 (BC-2/BC-3e/BC-3f): publish the helper capture through the shared
+    media publisher. The consumed sidecar binding is frozen, then the
+    ownership ticket is minted carrying that original binding. Every input
+    the plan consumes (cue links, speaker/provenance, transcript kind/provider,
+    source/playback identity, chapters and artifact metadata) is checked
+    against disk after mint and again at the publication boundary; a newer
+    owner's file refuses ``revision_unavailable`` instead of rebuilding
+    already-read inputs under that newer base. The same binding is carried
+    into ``publish_media_snapshot`` so a late edit at publisher entry or
+    the final sidecar replacement is also refused. A caller-supplied plan
+    is kept only when those consumed inputs still match (sealed study
+    artifact bytes may differ). The indexed row and corpus bytes on disk
+    are the source revision's inputs; the sealed block, artifact and
+    complete sidecar are replaced by the fenced operation."""
+    import library_cards  # noqa: WPS433
+    import library_media  # noqa: WPS433
+    import clips as _clips  # noqa: WPS433
+    video_id = (sidecar.get("video_id") or "").strip()
+    consumed_binding = library_media.capture_sidecar_inputs(sidecar)
+    ticket = idx.begin_media_publication(
+        video_id, folder=folder, capture_binding=consumed_binding)
+    library_media.require_capture_binding(sidecar_path, consumed_binding)
+    row = idx.get_yoink(video_id)
+    if row is None:
+        raise library_media.MediaError("resource_not_found")
+    owned_plan = _capture_media_plan(sidecar, folder, item=row)
+    if owned_plan is None:
+        raise library_media.MediaError(
+            "revision_unavailable", details={"reason": "publication_input_changed"})
+    if plan is None:
+        plan = owned_plan
+    elif not library_media.capture_plan_matches(plan, owned_plan):
+        raise library_media.MediaError(
+            "revision_unavailable", details={"reason": "publication_input_changed"})
+    corpus_bytes = corpus_path.read_bytes()
+    media_item = library_media._merge_item(row)
+    head = corpus_bytes[:library_cards.CORPUS_READ_BYTES].decode("utf-8", "replace")
+    source_revision = library_cards.build_card(
+        media_item, _clips.merge_cues(plan["cues"], media_item), corpus_text=head)["source_revision"]
+    block, digest = library_media.capture_snapshot(
+        video_id=video_id, source_revision=source_revision, cues=plan["cues"],
+        artifact_bytes=plan["artifact"], corpus_revision=hashlib.sha256(corpus_bytes).hexdigest(),
+        playback=plan["playback"], transcript_kind=plan["transcript_kind"],
+        transcript_provider=plan["transcript_provider"],
+        chapter_rows=plan["chapter_rows"], recorded_at=sidecar.get("yoinked_at"), item=row)
+    # Publication boundary: a file check after mint is not a lock. Re-read
+    # disk and rebuild the owned plan from those bytes before the publisher
+    # writes. Sealed artifact overrides remain allowed only while this
+    # consumed-input binding still holds.
+    library_media.require_capture_binding(sidecar_path, consumed_binding)
+    disk_side = library_media.read_owned_sidecar(sidecar_path, fallback=None)
+    if disk_side is not None:
+        disk_plan = _capture_media_plan(disk_side, folder, item=row)
+        if disk_plan is None or not library_media.capture_plan_matches(plan, disk_plan):
+            raise library_media.MediaError(
+                "revision_unavailable", details={"reason": "publication_input_changed"})
+    published = dict(sidecar, media_depth=block)
+    idx.publish_media_snapshot(
+        video_id, cues=plan["cues"], media_block=block,
+        artifacts={
+            str(folder / library_media.MEDIA_INPUTS_DIR / (digest + ".json")): plan["artifact"],
+            str(sidecar_path): json.dumps(published, ensure_ascii=False, indent=2).encode("utf-8"),
+        },
+        ticket=ticket)
+    sidecar["media_depth"] = block
+    return True
 
 
 def _index_yoink(folder: Path, sidecar: dict, corpus_path: Path | None,
                  sidecar_path: Path) -> bool:
     """Upsert one yoink + its citations into the library index. Best-effort
     and idempotent: callers (extraction hook, backfill) must treat a failure
-    as non-fatal. Returns True if the row was indexed."""
+    as non-fatal. Returns True if the row was indexed. A Phase 6 publication
+    refusal of ``library_unavailable`` is propagated so the owner can retry
+    (BD-08); other publication refusals leave the existing snapshot and
+    still return True after the row is present."""
     video_id = (sidecar.get("video_id") or "").strip()
     if not video_id:
         # video_id is the yoinks primary key + citations FK -- can't index.
@@ -2044,7 +2912,49 @@ def _index_yoink(folder: Path, sidecar: dict, corpus_path: Path | None,
     }
     idx = _get_index()
     idx.upsert_yoink(record, content=content)
-    idx.insert_citations(video_id, _citations_from_sidecar(sidecar, folder))
+    # Phase 6 (BC-2/BD-08/BC-3e): a Phase 6 capture publishes through the
+    # shared fenced publisher. The plan is not built until the ticket is
+    # held and every consumed sidecar input still matches disk; a newer
+    # owner inserted before mint is refused rather than overwritten with
+    # already-read cues, links, provenance or artifact metadata.
+    # ``library_unavailable`` is propagated. Other refusals are logged and
+    # leave the existing snapshot (the row-indexed True return does not
+    # certify that new media was published). Legacy sidecars keep the
+    # legacy citation write. An empty Phase 6 replacement publishes
+    # through the complete operation (BD-09).
+    published = None
+    if corpus_path is not None and corpus_path.exists():
+        try:
+            import library_media  # noqa: WPS433 -- optional module
+            if library_media.schema_ready(idx._conn):
+                entries = [e for e in (sidecar.get("transcript") or []) if isinstance(e, dict)]
+                phase6_writer = "source_chapters" in sidecar or (
+                    entries and all("source_url" in e and "source_deep_link" in e for e in entries))
+                if phase6_writer:
+                    published = _publish_capture_media(
+                        idx, folder, sidecar, corpus_path, sidecar_path)
+        except ImportError:
+            published = None
+        except Exception as exc:
+            code = getattr(exc, "code", None)
+            if not isinstance(code, str):
+                raise
+            if code == "library_unavailable":
+                raise
+            log.warning("media publication refused for %s: %s", video_id, code)
+            published = False
+    citations = _citations_from_sidecar(sidecar, folder)
+    if published is None:
+        idx.insert_citations(video_id, citations)
+    elif published:
+        screenshots = [c for c in citations if c.get("kind") != "transcript_chunk"]
+        if screenshots:
+            idx.insert_citations(video_id, screenshots)
+        elif not citations:
+            # BD-09: explicit empty replacement also drops leftover kinds
+            # (screenshots) the fenced transcript write does not own.
+            idx.insert_citations(video_id, [])
+    _mirror_event("capture", video_id=video_id)  # seam: capture_commit
     return True
 
 
@@ -2142,26 +3052,29 @@ def _run_phase2_author_backfill_once() -> None:
     """Run the Phase 2 sidecar author backfill a single time per install.
     The SQL migration (0020) already set platform + the YouTube author; this
     recovers the real X / Reddit author from the sidecars and corrects the
-    hostname `channel` values (Bug 3)."""
+    hostname `channel` values (Bug 3).
+
+    Flag lookup and persistence go through Index's lock/transaction boundary
+    so a source-watch snapshot or write on the shared connection is not
+    committed or entered. A failed flag write does not record completion.
+    """
     idx = _get_index()
-    try:
-        row = idx._conn.execute(
-            "SELECT value FROM memory_layer WHERE key=?",
-            (_PHASE2_BACKFILL_KEY,)).fetchone()
-    except Exception:
-        row = None
+    with idx.read_snapshot() as conn:
+        try:
+            row = conn.execute(
+                "SELECT value FROM memory_layer WHERE key=?",
+                (_PHASE2_BACKFILL_KEY,)).fetchone()
+        except Exception:
+            row = None
     if row is not None:
         return  # already run on this install
     stats = page_extractor.backfill_platform_author(idx)
     log.info("phase 2 author backfill: %s", stats)
-    try:
-        idx._conn.execute(
+    with idx.write_transaction() as conn:
+        conn.execute(
             "INSERT OR REPLACE INTO memory_layer (key, value, updated_at) "
             "VALUES (?, ?, ?)",
             (_PHASE2_BACKFILL_KEY, json.dumps(stats), _now_iso()))
-        idx._conn.commit()
-    except Exception:
-        log.warning("could not record phase 2 backfill completion flag")
 
 
 # Markers in yoink.md so the comments section can be replaced after the
@@ -2488,27 +3401,64 @@ def _run_subprocess(cmd: list[str], *, cancel_event: threading.Event | None = No
     the active yt-dlp/ffmpeg process instead of waiting for a long timeout.
     """
     _raise_if_cancelled(cancel_event)
-    proc = subprocess.Popen(
-        cmd,
-        stdout=stdout,
-        stderr=stderr,
-        text=text,
-        encoding=encoding,
-        errors=errors,
-        **SUBPROCESS_KW,
-    )
+    # AS-02: persist an unresolved child-launch intent BEFORE spawning so a
+    # crash or record-write failure between launch and registration is never
+    # evidence of no children. Write errors propagate (they are not swallowed).
+    capture = source_subscriptions.current_capture_context()
+    if capture is not None:
+        source_subscriptions.record_child_launch_intent(
+            DATA_ROOT, capture["start_id"], capture.get("instance"))
+    try:
+        proc = subprocess.Popen(
+            cmd,
+            stdout=stdout,
+            stderr=stderr,
+            text=text,
+            encoding=encoding,
+            errors=errors,
+            **SUBPROCESS_KW,
+        )
+    except BaseException as exc:
+        # AS-02a: clear the launch intent only on affirmative evidence that
+        # no OS child was created (executable missing, not a directory, or
+        # invalid Popen arguments). An interruption after OS child creation
+        # but before Popen returns is not that evidence; the intent stays
+        # unresolved and the probe stays unknown.
+        if capture is not None and isinstance(
+                exc, (FileNotFoundError, NotADirectoryError, ValueError)):
+            try:
+                source_subscriptions.resolve_child_launch_intent(
+                    DATA_ROOT, capture["start_id"])
+            except Exception:
+                log.exception("could not resolve the child-launch intent of %s",
+                              capture["start_id"])
+        raise
+    if capture is not None:
+        # AS-02: resolve the launch intent by recording the live child.
+        # Record-write errors must not be swallowed; the unresolved intent
+        # remains if this write fails, so absence is never inferred.
+        source_subscriptions.record_child_start(
+            DATA_ROOT, capture["start_id"], proc.pid, capture.get("instance"))
     started = time.monotonic()
-    while True:
-        if cancel_event is not None and cancel_event.is_set():
-            _terminate_process(proc)
-            raise PlaylistJobCancelled("playlist job cancelled")
-        try:
-            out, err = proc.communicate(timeout=0.2)
-            break
-        except subprocess.TimeoutExpired:
-            if timeout is not None and (time.monotonic() - started) >= timeout:
+    try:
+        while True:
+            if cancel_event is not None and cancel_event.is_set():
                 _terminate_process(proc)
-                raise subprocess.TimeoutExpired(cmd, timeout)
+                raise PlaylistJobCancelled("playlist job cancelled")
+            try:
+                out, err = proc.communicate(timeout=0.2)
+                break
+            except subprocess.TimeoutExpired:
+                if timeout is not None and (time.monotonic() - started) >= timeout:
+                    _terminate_process(proc)
+                    raise subprocess.TimeoutExpired(cmd, timeout)
+    finally:
+        if capture is not None and proc.poll() is not None:
+            try:
+                source_subscriptions.record_child_end(DATA_ROOT, capture["start_id"], proc.pid)
+            except Exception:
+                log.exception("could not record the child exit of standing capture %s",
+                              capture["start_id"])
 
     cp = subprocess.CompletedProcess(cmd, proc.returncode, out, err)
     if check and proc.returncode:
@@ -2936,6 +3886,7 @@ def analyze_comments(comments: list[dict], *, api_key: str | None = None) -> dic
     )
     try:
         resp = _anthropic_messages(key, system=system, user=user, max_tokens=1200)
+        _record_anthropic_usage("comment_intelligence", resp)
         return _normalize_comment_analysis(
             _extract_json_object(_anthropic_text(resp), label="Comment Intelligence")
         )
@@ -3114,6 +4065,7 @@ def analyze_hook_type(context: dict, *, api_key: str | None = None) -> dict:
     )
     try:
         resp = _anthropic_messages(key, system=system, user=user, max_tokens=400)
+        _record_anthropic_usage("hook_type", resp)
         text = _anthropic_text(resp)
         analysis = _normalize_hook_analysis(
             _extract_json_object(text, label="Hook Type")
@@ -3650,6 +4602,7 @@ def extract_entities(transcript: str, *, title: str = "", channel: str = "",
     )
     try:
         resp = _anthropic_messages(key, system=system, user=user, max_tokens=2500)
+        _record_anthropic_usage("entity_extraction", resp)
         data = _extract_json_object(_anthropic_text(resp), label="Entity extraction")
     except AnthropicAPIError as e:
         if e.status == 401:
@@ -3712,10 +4665,14 @@ def _extract_entities(output_folder: Path, video_id: str, sidecar: dict) -> None
 def _start_entity_extraction_thread(output_folder: Path,
                                     video_id: str | None,
                                     sidecar: dict) -> threading.Thread | None:
-    """Spawn the entity extraction worker. Returns None (skips silently) when
-    no Anthropic key is configured or the video has no id -- mirrors the
-    Hook Type / Comment Intelligence skip pattern."""
-    if not _saved_anthropic_key() or not (video_id or "").strip():
+    """Spawn the entity extraction worker. Returns None (skips silently)
+    unless ``entity_extraction_enabled`` is on AND a valid Anthropic key is
+    saved AND the video has an id -- the same gate Hook Type / Comment
+    Intelligence use. D-17: the flag belongs on the *spawn*, which is what
+    makes the work automatic; ``extract_entities`` itself stays key-gated so
+    a user-initiated tool call can still run it."""
+    if (not _anthropic_key_for_feature("entity_extraction_enabled")
+            or not (video_id or "").strip()):
         return None
     t = threading.Thread(
         target=_extract_entities,
@@ -3824,9 +4781,13 @@ def _build_yoink_md(metadata: dict, url: str, entries: list, shots: list,
                     interval: int, channel_ctx: dict,
                     yoinked_at: str, topic: str,
                     cap_warning: str | None = None,
-                    shot_times: list[int] | None = None) -> str:
+                    shot_times: list[int] | None = None,
+                    media_sections: str | None = None) -> str:
     """Produce the v1 corpus markdown. Comments section is a placeholder
     that the background worker rewrites once the fetch completes.
+    ``media_sections`` (Phase 6 BC-2) is the shared media renderer's
+    ``## Chapters`` + ``## Transcript`` output for the held cues and chapter
+    metadata; when supplied it replaces the legacy transcript rendering.
     """
     title = metadata.get("title") or "Untitled"
     channel = metadata.get("channel") or metadata.get("uploader") or "—"
@@ -3877,12 +4838,17 @@ def _build_yoink_md(metadata: dict, url: str, entries: list, shots: list,
     parts.append("")
 
     # Transcript
-    parts.append("## Transcript")
-    parts.append("")
-    if not entries:
+    if media_sections:
+        parts.append(media_sections.rstrip("\n"))
+        parts.append("")
+    elif not entries:
+        parts.append("## Transcript")
+        parts.append("")
         parts.append("*No captions available for this video.*")
         parts.append("")
     else:
+        parts.append("## Transcript")
+        parts.append("")
         if chapters:
             # Group entries by chapter ranges. Chapters have start_time/end_time.
             for ch in chapters:
@@ -4321,13 +5287,39 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
                    or "")
     channel_ctx = _fetch_channel_context(channel_url)
 
+    # Phase 6 (BC-2): the transcript rows persist their actual link values,
+    # the already-held chapter metadata travels with the capture, and the
+    # shared media snapshot builder/renderer produce the corpus transcript
+    # section (chapters and cues) from that held data. Nothing is fetched.
+    yoinked_at = _now_iso()
+    held_chapters = metadata.get("chapters") if isinstance(metadata.get("chapters"), list) else []
+    capture_seed = {
+        "video_id": metadata.get("id"), "url": url, "source_type": source_type,
+        "transcript": [], "source_chapters": held_chapters,
+        "transcript_source": transcript_source,
+        "duration_seconds": duration, "yoinked_at": yoinked_at,
+    }
+    capture_seed["transcript"] = _transcript_entries_with_links(capture_seed, entries)
+    media_sections = None
+    try:
+        import yt_extract as _yt_extract  # noqa: WPS433
+        media_plan = _capture_media_plan(
+            capture_seed, output_folder,
+            item={"metadata_json": json.dumps({"duration_seconds": duration})},
+            chapter_rows=_yt_extract.chapters_from_metadata(metadata))
+        if media_plan is not None:
+            media_sections = media_plan["markdown"]
+    except Exception as e:
+        log.warning("media snapshot build skipped for %s: %s", output_folder, e)
+
     # Build the corpus markdown.
     yoink_md = _build_yoink_md(
         metadata=metadata, url=url, entries=entries, shots=shots,
         interval=interval, channel_ctx=channel_ctx,
-        yoinked_at=_now_iso(), topic=topic,
+        yoinked_at=yoinked_at, topic=topic,
         cap_warning=cap_warning,
         shot_times=shot_times,
+        media_sections=media_sections,
     )
     # Filename matches the folder's slug -- "kapathy-talk/kapathy-talk.md"
     # rather than "kapathy-talk/yoink.md" -- so the file is identifiable
@@ -4373,7 +5365,7 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
             "source_type": source_type,
             "title": title,
             "topic": topic,
-            "yoinked_at": _now_iso(),
+            "yoinked_at": yoinked_at,
             "interval_seconds": interval,
             "requested_interval_seconds": requested_interval,
             "screenshot_cap_warning": cap_warning,
@@ -4392,9 +5384,11 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
             "view_count": metadata.get("view_count"),
             "like_count": metadata.get("like_count"),
             "video_id": metadata.get("id"),
-            "transcript": [
-                {"start": s, "end": e, "text": t} for s, e, t in entries
-            ],
+            # Phase 6 (BC-2): every transcript row carries its actual stored
+            # link values, and the held chapter metadata travels with the
+            # capture so reconstruction never re-derives either.
+            "transcript": capture_seed["transcript"],
+            "source_chapters": held_chapters,
             # CM-11: provenance is explicit whenever transcript rows exist.
             # A null source means the capture honestly remains caption-less;
             # asr_fallback carries the reason (disabled, model absent, failed,
@@ -4437,10 +5431,13 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
             "comment_intelligence_status": "not_run",
             "comment_intelligence_error": None,
             # Sprint 16: entity extraction runs in the background once the
-            # row is indexed. "pending" when a key is set, "skipped"
+            # row is indexed. D-17: "pending" only when the flag is on and
+            # a key is set (the same gate the spawn reads), "skipped"
             # otherwise; the worker flips it to completed / failed.
             "entity_extraction_status": (
-                "pending" if _saved_anthropic_key() else "skipped"
+                "pending"
+                if _anthropic_key_for_feature("entity_extraction_enabled")
+                else "skipped"
             ),
             "entity_extraction_error": None,
         }
@@ -5189,7 +6186,8 @@ _CAPTURE_SOURCES = {
         "label": "Podcast feed",
         "endpoint": "/podcasts/feeds",
         "payload_key": "feed_url",
-        "note": "Adds the RSS feed so new episodes transcribe locally.",
+        "note": ("Adds the RSS feed and watches for new episode metadata. "
+                 "Audio processing stays off until Auto-ingest is enabled."),
     },
     "web_page": {
         "label": "Article / web page",
@@ -6188,7 +7186,7 @@ def _public_job(job: dict) -> dict:
     result = job.get("result")
     if kind == "single":
         result = _sanitize_single_job_result(result)
-    return {
+    public = {
         "id": job.get("id"),
         "kind": kind,
         "state": job.get("state") or "failed",
@@ -6216,6 +7214,22 @@ def _public_job(job: dict) -> dict:
         "retry_exhausted": bool(job.get("retry_exhausted")),
         "attempt_count": job.get("attempt_count"),
     }
+    if kind == "podcast_transcribe":
+        public.update({
+            "episode_id": job.get("episode_id"),
+            "model": job.get("model"),
+            "language": job.get("language"),
+            "diarize": job.get("diarize"),
+            "consent_given": job.get("consent_given"),
+            "audio_path": job.get("audio_path"),
+            "progress": job.get("progress"),
+            "priority": job.get("priority"),
+            "publish_to_corpus": bool(job.get("publish_to_corpus")),
+            # Phase 3: the standing capture start this job completes. The owner
+            # token never enters the public projection or the jobs table.
+            "source_start_id": job.get("source_start_id"),
+        })
+    return public
 
 
 def _index_job_row(job: dict) -> dict:
@@ -6266,13 +7280,31 @@ def _validate_persisted_job(raw: dict) -> dict | None:
     state = raw.get("state")
     if not isinstance(job_id, str) or not job_id:
         return None
-    if kind not in ("playlist", "single"):
+    if kind not in (
+        "playlist",
+        "single",
+        "podcast_transcribe",
+        "notification",
+    ):
         return None
     if state not in ("queued", "running", "completed", "cancelled", "failed"):
         return None
 
     job = _public_job(raw)
-    if job["state"] not in _JOB_TERMINAL_STATES:
+    if job["state"] not in _JOB_TERMINAL_STATES and kind == "podcast_transcribe":
+        now = _now_iso()
+        job.update({
+            "state": "queued",
+            "current_video_phase": "queued",
+            "completed_at": None,
+            "updated_at": now,
+            "error": None,
+            "error_detail": None,
+            "result": None,
+            "progress": 0,
+            "message": "Queued again after the Uoink helper restarted.",
+        })
+    elif job["state"] not in _JOB_TERMINAL_STATES:
         now = _now_iso()
         job.update({
             "state": "failed",
@@ -6297,8 +7329,8 @@ def _start_fresh_jobs(reason: str) -> None:
 
 def _restore_jobs_from_disk() -> None:
     """Hydrate the in-memory _jobs dict from the library index at startup.
-    Non-terminal jobs are flipped to failed (their worker thread did not
-    survive the restart) and the corrected state is written back.
+    Non-terminal playlist/single jobs become failed because their workers did
+    not survive. Podcast transcription jobs return to the durable queue.
 
     Named for historical continuity; the source is now index.db, not
     jobs.json (which _migrate_jobs_json_to_index folds in once)."""
@@ -6322,8 +7354,8 @@ def _restore_jobs_from_disk() -> None:
     with _jobs_lock:
         _jobs.clear()
         _jobs.update(restored)
-        # _validate_persisted_job flipped non-terminal jobs to failed; write
-        # those corrected states back so the index matches memory.
+        # _validate_persisted_job reconciled non-terminal states; write those
+        # corrected snapshots back so the index matches memory.
         _persist_jobs_locked()
     log.info("Restored %d job record(s) from the library index", len(restored))
 
@@ -6389,6 +7421,39 @@ def _add_job_record(job: dict) -> dict:
                 job.get("source_url") or "", job["id"])
         _persist_jobs_locked(job)
         return _public_job(job)
+
+
+def _queue_dashboard_notification(
+        title: str, body: str, *, reason: str) -> dict:
+    """Persist a suppressed desktop balloon into dashboard Activity."""
+    now = _now_iso()
+    safe_title = str(title or "Uoink notification").strip()[:160]
+    safe_body = str(body or "").strip()[:1000]
+    job = {
+        "id": _make_job_id(),
+        "kind": "notification",
+        "state": "completed",
+        "source_url": None,
+        "title": safe_title,
+        "playlist_title": None,
+        "session_folder": None,
+        "videos_total": 0,
+        "videos_done": 0,
+        "videos_failed": 0,
+        "current_video": None,
+        "current_video_phase": None,
+        "started_at": now,
+        "updated_at": now,
+        "completed_at": now,
+        "error": None,
+        "error_detail": None,
+        "result": {"suppressed_reason": str(reason)},
+        "warnings": [],
+        "message": safe_body,
+        "retry_exhausted": False,
+        "attempt_count": None,
+    }
+    return _add_job_record(job)
 
 
 def _record_single_extract_job(url: str, started_at: str, *,
@@ -6483,6 +7548,1505 @@ def _update_job(job_id: str, **updates) -> dict | None:
         job["updated_at"] = _now_iso()
         _persist_jobs_locked(job)
         return _public_job(job)
+
+
+def _podcast_transcription_worker() -> None:
+    """Process podcast transcription jobs sequentially for this process."""
+    priority_lowered = whisper_runner.set_current_thread_below_normal()
+    priority = "below_normal" if priority_lowered else "default"
+    while True:
+        job_id = _podcast_transcription_queue.get()
+        manual_lock = None
+        try:
+            with _jobs_lock:
+                job = dict(_jobs.get(job_id) or {})
+            if not job or job.get("state") in _JOB_TERMINAL_STATES:
+                continue
+            episode_id = int(job["episode_id"])
+            if not job.get("source_start_id"):
+                # AS-03: a manual job shares the cross-process capture-identity
+                # lock with the standing dispatcher for the whole pipeline, so a
+                # standing start for the same episode waits without a charge.
+                # A failed acquisition (OS error or an exhausted bounded wait)
+                # is unavailable ownership: the job fails retryably and never
+                # proceeds under the process queue alone.
+                key = _podcast_capture_key(episode_id)
+                if key:
+                    unavailable = None
+                    try:
+                        manual_lock = source_subscriptions.CaptureLock.acquire(
+                            DATA_ROOT, key,
+                            timeout=source_subscriptions.MANUAL_CAPTURE_LOCK_TIMEOUT_S)
+                    except OSError as exc:
+                        log.exception("capture identity lock unavailable for podcast job %s",
+                                      job_id)
+                        unavailable = f"capture identity lock unavailable ({type(exc).__name__})"
+                    if manual_lock is None and unavailable is None:
+                        unavailable = ("another capture of this episode is still running; "
+                                       "queue it again later")
+                    if unavailable:
+                        _fail_podcast_job_retryable(job_id, episode_id, job, unavailable)
+                        continue
+            elif not _ensure_standing_podcast_ownership(job_id, job, episode_id):
+                # AS-02/AS-03: a standing job (including one restored from
+                # disk) resumes only as the verified owner of its start.
+                continue
+            model = whisper_runner.normalize_model(job.get("model"))
+            audio_path = Path(job["audio_path"])
+            reusable = None
+            try:
+                reusable = podcasts.load_completed_episode_transcript(
+                    _get_index(), episode_id)
+            except (FileNotFoundError, ValueError) as exc:
+                log.warning(
+                    "podcast job %s could not reuse its DONE transcript; "
+                    "transcribing again: %s", job_id, exc)
+            transcript_reused = reusable is not None
+            if reusable is not None:
+                transcript = reusable["transcript"]
+                out_path = reusable["path"]
+                _update_job(
+                    job_id, state="running", current_video_phase="writing",
+                    progress=90, priority=priority, started_at=_now_iso(),
+                    message="Reusing the completed transcript on disk.")
+            else:
+                _update_job(
+                    job_id, state="running",
+                    current_video_phase="transcribing", progress=10,
+                    priority=priority, started_at=_now_iso(),
+                    message="Transcribing the episode locally.")
+                whisper_runner.update_episode_transcript_state(
+                    _get_index(), episode_id,
+                    status=whisper_runner.STATUS_RUNNING, model_used=model)
+                # AS-02 (run AT-4): children spawned for a standing start are
+                # recorded against it (see _run_subprocess).
+                standing_start = job.get("source_start_id")
+                with (source_subscriptions.capture_context(
+                        standing_start, source_subscriptions.process_incarnation(DATA_ROOT))
+                        if standing_start else contextlib.nullcontext()):
+                    transcript = whisper_runner.transcribe_audio(
+                        audio_path, data_root=DATA_ROOT, model_size=model,
+                        language=job.get("language"),
+                        diarize=bool(job.get("diarize")),
+                        consent_given=bool(job.get("consent_given")))
+                _update_job(
+                    job_id, current_video_phase="writing", progress=90,
+                    message="Writing the transcript to disk.")
+                out_path = whisper_runner.write_transcript(
+                    transcript, audio_path=audio_path)
+                whisper_runner.update_episode_transcript_state(
+                    _get_index(), episode_id,
+                    status=whisper_runner.STATUS_DONE,
+                    transcript_path=out_path, model_used=model,
+                    diarization_ran=transcript.get(
+                        "diarization_ran", False))
+            podcasts.set_episode_status(
+                _get_index(), episode_id, podcasts.EPISODE_STATUS_TRANSCRIBED)
+            corpus_result = None
+            corpus_error = None
+            if job.get("publish_to_corpus"):
+                _update_job(
+                    job_id, current_video_phase="publishing", progress=95,
+                    message="Publishing the episode to your local corpus.")
+                try:
+                    # AS-02 (run AT-4): before the publisher writes, a
+                    # standing job must still hold its start's execution
+                    # claim; the ledger fence at settlement is not enough.
+                    if job.get("source_start_id"):
+                        fence = _source_service().claim_execution(
+                            job["source_start_id"], backend_id=job["source_start_id"])
+                        if fence.get("outcome") != "active" or not _source_service().backend.holds_execution(
+                                {"start_id": job["source_start_id"],
+                                 "owner_token": fence.get("owner_token")}):
+                            raise source_subscriptions.CaptureOwnershipUnavailable(
+                                "standing start no longer executed by this process")
+                    corpus_result = podcasts.episode_to_corpus(
+                        _get_index(), episode_id, data_root=DATA_ROOT)
+                    _heartbeat_note_ingest()
+                    maybe_toast(
+                        "Podcast added to Uoink",
+                        f"{job.get('title') or 'A new episode'} is ready in your library.")
+                except Exception as exc:
+                    # The transcript is complete and durable. Leave it done so
+                    # the next feed tick retries only the idempotent publisher,
+                    # not an expensive transcription that already succeeded.
+                    corpus_error = str(exc)
+                    log.warning(
+                        "podcast watch: deferred corpus publish for episode "
+                        "%d after error: %s", episode_id, exc)
+            now = _now_iso()
+            _update_job(
+                job_id, state="completed", current_video_phase=None,
+                current_video=None, progress=100, completed_at=now,
+                videos_done=1, error=None,
+                result={
+                    "episode_id": episode_id,
+                    "transcript_path": str(out_path),
+                    "model": transcript.get("model"),
+                    "language": transcript.get("language"),
+                    "segments": len(transcript.get("segments") or []),
+                    "diarization_ran": bool(transcript.get("diarization_ran")),
+                    "transcript_reused": transcript_reused,
+                    "corpus": corpus_result,
+                    "corpus_error": corpus_error,
+                }, message=(
+                    "Podcast episode published to the local corpus."
+                    if corpus_result else
+                    "Podcast transcription complete; corpus publish will retry."
+                    if corpus_error else
+                    "Podcast transcription complete."))
+            # Phase 3: a standing capture completes its ledger row only after
+            # publication committed; a deferred publish is a failed attempt
+            # (the charge stays; the item may retry under its counters).
+            _settle_source_capture(
+                job_id, video_id=(corpus_result or {}).get("video_id"),
+                failure_code=None if corpus_result else (
+                    "publish_failed" if corpus_error else "publish_not_requested"))
+        except BaseException as exc:  # keep the one long-lived worker alive
+            log.exception("podcast transcription job %s failed", job_id)
+            episode_id = job.get("episode_id") if isinstance(job, dict) else None
+            if episode_id is not None:
+                try:
+                    whisper_runner.update_episode_transcript_state(
+                        _get_index(), int(episode_id),
+                        status=whisper_runner.STATUS_FAILED,
+                        model_used=(job or {}).get("model"), error=str(exc))
+                except Exception:
+                    log.exception("podcast transcript failure state write failed")
+            _update_job(
+                job_id, state="failed", current_video_phase=None,
+                current_video=None, videos_failed=1,
+                completed_at=_now_iso(), error=str(exc),
+                error_detail=f"{type(exc).__name__}: {exc}",
+                message="Podcast transcription failed.")
+            _settle_source_capture(job_id, video_id=None, failure_code="transcription_failed")
+        finally:
+            if manual_lock is not None:
+                manual_lock.release()
+            _podcast_transcription_queue.task_done()
+
+
+def _podcast_capture_key(episode_id: int) -> str | None:
+    """Canonical capture identity of a podcast episode (normalized feed URL
+    plus GUID), the key both dispatchers lock on (AS-03)."""
+    try:
+        row = podcasts.get_episode_with_feed(_get_index(), int(episode_id))
+    except Exception:
+        return None
+    if not row or not row.get("feed_url") or not row.get("guid"):
+        return None
+    try:
+        feed_key = source_subscriptions.normalize_podcast_feed_url(row["feed_url"])
+    except Exception:
+        feed_key = str(row["feed_url"]).strip()
+    return source_subscriptions.capture_key_for("podcast_rss", feed_key, str(row["guid"]))
+
+
+def _fail_podcast_job_retryable(job_id: str, episode_id: int, job: dict, reason: str) -> None:
+    """AS-03: a manual podcast job that could not take the shared capture
+    lock fails without running anything; the user may queue it again."""
+    try:
+        whisper_runner.update_episode_transcript_state(
+            _get_index(), int(episode_id), status=whisper_runner.STATUS_FAILED,
+            model_used=(job or {}).get("model"), error=reason)
+    except Exception:
+        log.exception("podcast transcript failure state write failed")
+    _update_job(
+        job_id, state="failed", current_video_phase=None, current_video=None,
+        videos_failed=1, completed_at=_now_iso(), error=reason,
+        error_detail=f"capture ownership unavailable: {reason}",
+        message="Podcast transcription did not start; try again in a moment.")
+
+
+def _ensure_standing_podcast_ownership(job_id: str, job: dict, episode_id: int) -> bool:
+    """AS-02/AS-03: a standing capture's transcription job runs only as the
+    verified owner of its ledger start. A job dispatched in this process
+    already holds the capture-identity lock its start acquired and carries
+    the in-memory owner token. A job restored from disk (or one whose lease
+    is gone) must re-establish that ownership before it resumes: the ledger
+    row is re-read through its persisted backend binding, the shared lock is
+    taken within the manual bound, the row is re-read again after the wait,
+    and only then does the job adopt the owner token it must honor on
+    publication. Anything else settles the job without running it."""
+    start_id = job.get("source_start_id")
+    service = _source_service()
+    backend = service.backend
+    current = service.claim_execution(start_id, backend_id=start_id)
+    if current.get("outcome") != "active":
+        _update_job(job_id, state="cancelled", current_video_phase=None, current_video=None,
+                    completed_at=_now_iso(),
+                    message="Standing capture was already settled; nothing to resume.")
+        return False
+    key = current["start"]["capture_key"]
+    with _jobs_lock:
+        token = (_jobs.get(job_id) or {}).get("_source_owner_token")
+    lock_start = {"start_id": start_id, "owner_token": current["owner_token"],
+                  "capture_key": key, "source_id": current["start"]["source_id"],
+                  "item_id": current["start"]["item_id"]}
+    if token == current["owner_token"] and backend.owns(key) and backend.holds_execution(lock_start):
+        return True
+    deadline = time.monotonic() + source_subscriptions.MANUAL_CAPTURE_LOCK_TIMEOUT_S
+    while True:
+        try:
+            busy = backend.acquire(lock_start, {"legacy_episode_id": episode_id},
+                                   {"kind": "podcast_rss"})
+        except Exception:
+            log.exception("standing capture %s: lock acquisition raised", start_id)
+            busy = source_subscriptions.CaptureOutcome("busy", code="lock_error")
+        if busy is None:
+            break
+        if time.monotonic() >= deadline:
+            _update_job(job_id, state="failed", current_video_phase=None, current_video=None,
+                        videos_failed=1, completed_at=_now_iso(),
+                        error=f"capture ownership unavailable ({busy.code or 'busy'})",
+                        message="Standing capture could not take its capture lock.")
+            _settle_source_capture(job_id, video_id=None,
+                                   failure_code="capture_ownership_unavailable")
+            return False
+        time.sleep(1.0)
+    # Recheck after waiting for the lock: the row may have been settled.
+    current = service.claim_execution(start_id, backend_id=start_id)
+    if current.get("outcome") != "active":
+        backend.release(lock_start)
+        _update_job(job_id, state="cancelled", current_video_phase=None, current_video=None,
+                    completed_at=_now_iso(),
+                    message="Standing capture was settled while waiting; nothing to resume.")
+        return False
+    # AS-02 (run AT-4): after the lock wait, the persisted execution claim.
+    # A resumed job continues its own charged start by adopting the claim of
+    # a verifiably dead predecessor; a claim held by a live or unknown
+    # executor means this job must not run under that start.
+    lock_start["owner_token"] = current["owner_token"]
+    adopted = backend.adopt_execution(lock_start)
+    if adopted.get("outcome") != "claimed":
+        backend.release(lock_start)
+        # The start stays with its executor: detach this job from it so its
+        # terminal state is never read as that executor having stopped.
+        _update_job(job_id, state="failed", current_video_phase=None, current_video=None,
+                    videos_failed=1, completed_at=_now_iso(), source_start_id=None,
+                    error=f"execution claim {adopted.get('outcome') or 'unavailable'}",
+                    message="Standing capture is owned by another executor; not resumed here.")
+        return False
+    with _jobs_lock:
+        if job_id in _jobs:
+            _jobs[job_id]["_source_owner_token"] = current["owner_token"]
+    return True
+
+
+def _manual_capture_key(url: str) -> str:
+    """Capture identity a manual extraction locks on: the standing key for a
+    YouTube watch URL, otherwise a URL-derived key that never collides with a
+    standing source (AS-03)."""
+    video_id = source_subscriptions.SourceSubscriptionService._youtube_id_from_url(url)
+    if video_id:
+        return source_subscriptions.capture_key_for("youtube_channel", "", video_id)
+    return "url:" + source_subscriptions.sha256_text(str(url).strip())
+
+
+class _ManualOwnership:
+    """What a manual dispatcher holds while it extracts (AS-03). ``error`` is
+    set when the shared capture-identity lock could not be taken; the caller
+    must then return a retryable failure instead of extracting.
+
+    AS-03 (run AT-4): the post-lock completeness/identity recheck is a
+    result the dispatcher consumes, never a log line. ``already_captured`` is
+    the live corpus id found for this identity after the lock was acquired;
+    ``completed_while_waiting`` says that row appeared only while this
+    request waited for the lock (a capture it queued behind finished), so
+    ``reused`` carries that capture's completed result and the caller must
+    return it without fetching or acquiring anything. ``conflict`` names a
+    row at this identity whose persisted provenance is another video; the
+    caller must block before any overwrite. A row that already existed
+    before the wait is a deliberate manual re-extraction, the one explicit
+    refresh semantic the manual paths have; it is never inferred from
+    having waited. AS-03c: reuse applies the common completeness/identity
+    checks before returning success; a partial publication or damaged
+    sidecar is never ``reused=True``."""
+    __slots__ = ("lock", "error", "already_captured", "completed_while_waiting",
+                 "conflict", "reused")
+
+    def __init__(self):
+        self.lock = None
+        self.error = None
+        self.already_captured = None
+        self.completed_while_waiting = False
+        self.conflict = None
+        self.reused = None
+
+    @property
+    def ok(self) -> bool:
+        return self.error is None
+
+    def raise_if_unavailable(self) -> None:
+        if self.error is not None:
+            raise source_subscriptions.CaptureOwnershipUnavailable(self.error)
+
+    @staticmethod
+    def corpus_row(video_id):
+        """The live corpus row for a YouTube identity, or ``None``."""
+        if not video_id:
+            return None
+        try:
+            row = _get_index().get_yoink(video_id)
+        except Exception:
+            return None
+        if not row or row.get("deleted_at"):
+            return None
+        return row
+
+    def recheck(self, video_id, row, *, existed_before: bool) -> None:
+        """Consume the post-lock corpus state for ``video_id``."""
+        if row is None:
+            return
+        self.already_captured = video_id
+        try:
+            meta = json.loads(row.get("metadata_json") or "{}")
+        except (TypeError, ValueError):
+            meta = {}
+        if type(meta) is not dict:
+            meta = {}
+        persisted = source_subscriptions.SourceSubscriptionService._youtube_id_from_url(meta.get("url"))
+        if persisted is not None and persisted != video_id:
+            self.conflict = (f"the library row for {video_id} records another video "
+                             f"({persisted}); refusing to overwrite it")
+            return
+        if existed_before:
+            log.info("manual extraction of %s: corpus already held this video before the "
+                     "request; the request re-extracts it deliberately", video_id)
+            return
+        # AS-03c: apply the common completeness/identity checks before
+        # returning success. A partial publication or damaged sidecar is
+        # recovery or an explicit failure, never reused=True.
+        evidence = None
+        try:
+            evidence = _source_service().publication_evidence_for_reuse(video_id)
+        except Exception:
+            evidence = None
+        if evidence is None or not evidence.complete:
+            if evidence is not None and evidence.conflict:
+                self.conflict = (f"the library row for {video_id} records another identity "
+                                 f"({evidence.reason}); refusing to overwrite it")
+            return
+        self.completed_while_waiting = True
+        screenshots = 0
+        try:
+            with _get_index()._lock:
+                screenshots = int(_get_index()._conn.execute(
+                    "SELECT COUNT(*) FROM citations WHERE video_id=? AND kind='screenshot'",
+                    (video_id,)).fetchone()[0])
+        except Exception:
+            screenshots = 0
+        import os as _os  # local: this class body also runs in a bare test namespace
+        corpus_path = row.get("corpus_path") or ""
+        folder = _os.path.dirname(corpus_path) if corpus_path else None
+        self.reused = {
+            "ok": True, "reused": True, "reason": "captured_while_waiting",
+            "video_id": video_id, "title": row.get("title"), "folder": folder,
+            "corpus_path": corpus_path or None, "sidecar_path": row.get("sidecar_path"),
+            "screenshot_count": screenshots, "captured_at": row.get("yoinked_at"),
+            "topic": row.get("topic"),
+        }
+        log.info("manual extraction of %s: a capture it waited behind completed; "
+                 "reusing that result without a second acquisition", video_id)
+
+
+@contextlib.contextmanager
+def _manual_extraction_ownership(url: str):
+    """The common dispatcher lock for manual extraction: the process-local
+    extraction lock plus the cross-process capture-identity file lock, held
+    through extraction and publication (AS-03). A standing start for the
+    same identity finds it busy and waits without a charge.
+
+    AS-03 (run AT-3): the wait for the shared lock is bounded and a failed
+    acquisition (OS error or an exhausted wait) is unavailable ownership,
+    reported through ``ownership.error``; the process lock is never used as
+    a substitute. Run AT-4/AT-5: prior corpus state is read before the first
+    ``_extract_lock`` wait as well as after both waits. A capture this
+    request waited behind (either lock) is reused; a conflicting row blocks;
+    a row that existed before the request is a deliberate re-extraction."""
+    ownership = _ManualOwnership()
+    key = _manual_capture_key(url)
+    video_id = source_subscriptions.SourceSubscriptionService._youtube_id_from_url(url)
+    # AS-03: establish the request's prior corpus state before either lock
+    # wait (process lock, then capture-identity lock). Completion during
+    # either wait is reused; a row that already existed is a deliberate refresh.
+    existed_before = ownership.corpus_row(video_id) is not None
+    with _extract_lock:
+        try:
+            ownership.lock = source_subscriptions.CaptureLock.acquire(
+                DATA_ROOT, key, timeout=source_subscriptions.MANUAL_CAPTURE_LOCK_TIMEOUT_S)
+        except OSError as exc:
+            log.exception("capture identity lock unavailable for manual extraction")
+            ownership.error = (f"capture ownership unavailable ({type(exc).__name__}); "
+                               "try again in a moment")
+        if ownership.lock is None and ownership.error is None:
+            ownership.error = ("another capture of this video is still running; "
+                               "try again in a moment")
+        if ownership.lock is not None and video_id:
+            ownership.recheck(video_id, ownership.corpus_row(video_id),
+                              existed_before=existed_before)
+        try:
+            yield ownership
+        finally:
+            if ownership.lock is not None:
+                ownership.lock.release()
+
+
+def _settle_source_capture(job_id: str, *, video_id: str | None,
+                           failure_code: str | None) -> None:
+    """Complete or fail the standing capture ledger row bound to a podcast job.
+    Fenced by the in-memory owner token; a job without a binding is a manual
+    capture and touches no ledger row."""
+    with _jobs_lock:
+        job = _jobs.get(job_id) or {}
+        start_id = job.get("source_start_id")
+        owner_token = job.get("_source_owner_token")
+    if not start_id:
+        return
+    outcome = None
+    try:
+        service = _source_service()
+        backend = service.backend
+        # AS-02: the job record is terminal by now; the proof is verified
+        # against that state, not inferred from the owner token.
+        proof = source_subscriptions.CompletionProof(
+            start_id, owner_token or "", backend.kind, "job_terminal")
+        if not owner_token:
+            # A job resumed from disk after a restart has no in-memory token:
+            # reconcile the row from its durable artifacts instead.
+            outcome = service.reconcile_start(start_id)
+        elif video_id and not failure_code:
+            outcome = service.complete_capture(start_id, owner_token, video_id, proof=proof)
+        else:
+            outcome = service.fail_capture(start_id, owner_token, failure_code or "failed",
+                                           proof=proof)
+        log.info("standing capture %s settled: %s", start_id, outcome.get("outcome"))
+    except Exception:
+        log.exception("standing capture settle failed for %s", start_id)
+        outcome = None
+    finally:
+        # AS-03a: consume the verified settlement result. Retain the capture
+        # lock while child termination remains uncertain; exceptions and
+        # stale callbacks keep it too.
+        if source_subscriptions.settlement_releases_dispatcher_locks(outcome):
+            try:
+                with _get_index()._lock:
+                    row = _get_index()._conn.execute(
+                        "SELECT capture_key FROM source_capture_starts WHERE start_id=?",
+                        (start_id,)).fetchone()
+                if row is not None and hasattr(_source_service().backend, "release"):
+                    _source_service().backend.release(
+                        {"start_id": start_id, "capture_key": row[0]})
+            except Exception:
+                log.exception("standing capture lock release failed for %s", start_id)
+
+
+def _ensure_podcast_transcription_worker() -> threading.Thread:
+    global _podcast_transcription_worker_thread
+    with _podcast_transcription_worker_lock:
+        thread = _podcast_transcription_worker_thread
+        if thread is None or not thread.is_alive():
+            thread = threading.Thread(
+                target=_podcast_transcription_worker,
+                name="uoink-podcast-transcription", daemon=True)
+            _podcast_transcription_worker_thread = thread
+            thread.start()
+        return thread
+
+
+def _queue_podcast_transcription(
+        episode_id: int, *, model: str | None = None,
+        language: str | None = None, diarize: bool = False,
+        consent_given: bool = False,
+        publish_to_corpus: bool = False,
+        source_start_id: str | None = None,
+        source_owner_token: str | None = None) -> tuple[dict, int]:
+    """Validate, persist, and enqueue one local podcast transcription.
+
+    ``source_start_id``/``source_owner_token`` bind the job to a standing
+    capture ledger row; the worker completes or fails that row with the owner
+    token when the job ends (Phase 3, "Atomic starts": the start id is the
+    job's idempotency identity)."""
+    episode = podcasts.get_episode(_get_index(), episode_id)
+    if episode is None:
+        return {"ok": False, "error": "episode not found"}, 404
+    audio_path_raw = episode.get("audio_local_path")
+    if not audio_path_raw:
+        return {
+            "ok": False,
+            "error": ("episode has no audio_local_path -- run "
+                      "/podcasts/episodes/download first"),
+        }, 400
+    audio_path = Path(audio_path_raw)
+    if not audio_path.is_file():
+        return {"ok": False, "error": f"audio file missing: {audio_path}"}, 404
+    with _jobs_lock:
+        existing = next((
+            _public_job(job) for job in _jobs.values()
+            if job.get("kind") == "podcast_transcribe"
+            and job.get("episode_id") == episode_id
+            and job.get("state") not in _JOB_TERMINAL_STATES
+        ), None)
+    if existing:
+        if publish_to_corpus and not existing.get("publish_to_corpus"):
+            existing = _update_job(
+                existing["id"], publish_to_corpus=True,
+                message="Podcast transcription queued for corpus publish.")
+        if source_start_id and not existing.get("source_start_id"):
+            # A manual job already owns this episode: the standing start adopts
+            # it (one pipeline per canonical item) and is completed by it.
+            existing = _update_job(
+                existing["id"], source_start_id=source_start_id,
+                publish_to_corpus=True)
+            with _jobs_lock:
+                if existing and existing["id"] in _jobs:
+                    _jobs[existing["id"]]["_source_owner_token"] = source_owner_token
+        return {
+            "ok": True, "job_id": existing["id"], "job": existing,
+            "reused_existing": True,
+        }, 202
+    if not whisper_runner.is_whisperx_available():
+        return {
+            "ok": False, "whisperx_available": False,
+            "error": "whisperx runtime is unavailable or damaged",
+        }, 503
+    selected_model = whisper_runner.normalize_model(model)
+    if (not whisper_runner.is_model_downloaded(DATA_ROOT, selected_model)
+            and not consent_given):
+        return {
+            "ok": False, "consent_required": True, "model": selected_model,
+            "error": (f"Whisper model '{selected_model}' has not been "
+                      "downloaded; explicit consent is required."),
+        }, 412
+    if language is not None and not isinstance(language, str):
+        return {"ok": False, "error": "language must be text when provided"}, 400
+
+    now = _now_iso()
+    # Phase 3: a standing capture's job id derives from its start id so a
+    # replayed dispatch cannot create a second job for the same start.
+    job_id = (f"job_src_{source_start_id[3:]}" if source_start_id
+              else _make_job_id())
+    if source_start_id:
+        with _jobs_lock:
+            if job_id in _jobs:
+                _jobs[job_id]["_source_owner_token"] = source_owner_token
+                return {"ok": True, "job_id": job_id, "job": _public_job(_jobs[job_id]),
+                        "reused_existing": True}, 202
+    job = {
+        "id": job_id, "kind": "podcast_transcribe", "state": "queued",
+        "source_url": episode.get("episode_page_url"),
+        "title": episode.get("title") or "Untitled episode",
+        "playlist_title": None, "session_folder": None,
+        "videos_total": 1, "videos_done": 0, "videos_failed": 0,
+        "current_video": episode.get("title"),
+        "current_video_phase": "queued", "started_at": None,
+        "updated_at": now, "completed_at": None, "error": None,
+        "error_detail": None, "result": None, "warnings": [],
+        "message": "Podcast transcription queued.",
+        "episode_id": episode_id, "model": selected_model,
+        "language": language, "diarize": bool(diarize),
+        "consent_given": bool(consent_given), "audio_path": str(audio_path),
+        "progress": 0, "priority": "pending",
+        "publish_to_corpus": bool(publish_to_corpus),
+        "source_start_id": source_start_id,
+        "_source_owner_token": source_owner_token,
+    }
+    whisper_runner.update_episode_transcript_state(
+        _get_index(), episode_id, status=whisper_runner.STATUS_QUEUED,
+        model_used=selected_model)
+    public = _add_job_record(job)
+    _podcast_transcription_queue.put(job_id)
+    _ensure_podcast_transcription_worker()
+    return {"ok": True, "job_id": job_id, "job": public}, 202
+
+
+def _resume_podcast_transcription_jobs() -> int:
+    """Requeue durable non-terminal podcast jobs after process restart."""
+    with _jobs_lock:
+        job_ids = [
+            job_id for job_id, job in _jobs.items()
+            if job.get("kind") == "podcast_transcribe"
+            and job.get("state") == "queued"
+        ]
+    for job_id in job_ids:
+        _podcast_transcription_queue.put(job_id)
+    if job_ids:
+        _ensure_podcast_transcription_worker()
+    return len(job_ids)
+
+
+# ---------------------------------------------------------------------------
+# Phase 3 standing capture (run AM, contract phase3-v1-2026-09-07)
+# ---------------------------------------------------------------------------
+# source_subscriptions.py owns every durable decision (consent, detection
+# cursor, atomic start ledger, outbox). This block wires it to the helper:
+# one service instance bound to the shared index, a capture backend that runs
+# the existing yt-dlp / podcast pipelines only after a ``started`` row has
+# committed, and the two scheduler passes (detection, capture) the 30-second
+# tick runs independently. Nothing here captures from detection.
+_source_service_lock = threading.Lock()
+_source_service_instance: "source_subscriptions.SourceSubscriptionService | None" = None
+_source_capture_threads: dict[str, threading.Thread] = {}
+_source_capture_threads_lock = threading.Lock()
+
+
+def _source_instance_id() -> str:
+    """Owner identity for ledger rows: one persisted process incarnation per
+    helper process and data root (AS-02). Hostname plus data root only named
+    the install, so a restarted helper could not tell its own dead predecessor
+    from a surviving one; the incarnation token and its persisted pid can."""
+    return source_subscriptions.process_incarnation(DATA_ROOT).identity
+
+
+def _source_operator_context() -> "source_subscriptions.RequestContext":
+    return source_subscriptions.RequestContext(
+        authenticated=True, operator=True, transport="server",
+        session_id=_library_session_hash())
+
+
+class _ServerCaptureBackend(source_subscriptions.CaptureBackend):
+    """Runs a started standing capture through the existing pipelines.
+
+    YouTube: the caption-first yt-dlp extraction (_fetch_metadata +
+    _run_extraction) on a dedicated daemon thread; the ledger is completed or
+    failed with the owner token when it ends. Podcast: bounded enclosure
+    download, then the transcription job (publish_to_corpus=True) whose worker
+    completes the ledger. Neither path enqueues into pending_yoinks: the
+    reservation itself is the durable dispatch intent and the start id is the
+    job identity (contract, "Atomic starts", queue paragraph)."""
+    kind = "server_capture"
+
+    def __init__(self):
+        # AS-03b: capture_key -> (CaptureLock, holds_extract_lock, start_id).
+        # Guarded by _source_capture_threads_lock so the class needs no lock
+        # of its own. Release is bound to the owning start.
+        self._leases: dict = {}
+        # AS-02 (run AT-4): start_id -> the observed ``run`` invocation in
+        # this process: owner token, incarnation, whether it returned and
+        # what it returned. ``executor_returned`` proofs verify against this
+        # record, never against an empty registry.
+        self._invocations: dict = {}
+
+    # ---- execution claim (AS-02, run AT-4) ---------------------------------
+    def claim_execution(self, start, instance_id):
+        """The one execution of a started row, claimed atomically across every
+        service instance and helper process on this data root (an O_EXCL file
+        under ``DATA_ROOT/source_claims`` naming this incarnation, its pid
+        and the owner token hash). ``unavailable`` is never ownership."""
+        return source_subscriptions.claim_execution_record(
+            DATA_ROOT, start, source_subscriptions.process_incarnation(DATA_ROOT))
+
+    def execution_claim(self, start):
+        return source_subscriptions.read_execution_claim(DATA_ROOT, start["start_id"])
+
+    def adopt_execution(self, start):
+        """A durable podcast job resumed after a helper restart continues the
+        same charged start: take the claim when none exists or its holder is
+        verifiably dead with no surviving child; never displace a live or
+        unknown holder (AS-02, run AT-4)."""
+        return source_subscriptions.adopt_execution_record(
+            DATA_ROOT, start, source_subscriptions.process_incarnation(DATA_ROOT))
+
+    def release_execution(self, start):
+        source_subscriptions.release_execution_claim(DATA_ROOT, start["start_id"])
+
+    def holds_execution(self, start) -> bool:
+        """AS-02: whether this incarnation holds the persisted execution claim
+        for ``start`` under its current owner token; checked after every lock
+        wait and before any acquisition or publisher write."""
+        return source_subscriptions.execution_claim_holder(
+            self.execution_claim(start), start,
+            source_subscriptions.process_incarnation(DATA_ROOT))
+
+    # ---- execution ownership (AS-03) ------------------------------------
+    def acquire(self, start, item, source):
+        """Take the dispatcher ownership a standing start needs before its
+        started transition: for YouTube the process-local extraction lock the
+        manual dispatchers hold through extraction, plus for every kind the
+        cross-process file lock keyed by canonical capture identity. A busy
+        owner returns ``busy`` so the reservation is released without a
+        charge and the observation stays eligible."""
+        key = start["capture_key"]
+        holds_extract = False
+        if source["kind"] == "podcast_rss":
+            episode_id = item.get("legacy_episode_id")
+            with _jobs_lock:
+                busy_job = episode_id is not None and any(
+                    job.get("kind") == "podcast_transcribe"
+                    and job.get("episode_id") == int(episode_id)
+                    and job.get("state") not in _JOB_TERMINAL_STATES
+                    and job.get("source_start_id") != start["start_id"]
+                    for job in _jobs.values())
+            if busy_job:
+                return source_subscriptions.CaptureOutcome(
+                    "busy", code="manual_transcription_in_progress")
+        else:
+            if not _extract_lock.acquire(blocking=False):
+                return source_subscriptions.CaptureOutcome(
+                    "busy", code="manual_capture_in_progress")
+            holds_extract = True
+        try:
+            lock = source_subscriptions.CaptureLock.try_acquire(DATA_ROOT, key)
+            code = "capture_identity_locked"
+        except OSError:
+            # AS-03: a failed shared-lock acquisition is unavailable ownership,
+            # never process-local ownership. The reservation is released
+            # without a charge and the observation stays eligible.
+            log.exception("capture identity lock unavailable for %s", start["start_id"])
+            lock, code = None, "capture_lock_unavailable"
+        if lock is None:
+            if holds_extract:
+                _extract_lock.release()
+            return source_subscriptions.CaptureOutcome("busy", code=code)
+        with _source_capture_threads_lock:
+            self._leases[key] = (lock, holds_extract, start["start_id"])
+        return None
+
+    def owns(self, capture_key) -> bool:
+        """Whether this backend currently holds the capture-identity lock
+        (a lease taken by ``acquire``/``_ensure_ownership`` in this process).
+        AS-03b: reconciliation reuses this retained ownership."""
+        with _source_capture_threads_lock:
+            lease = self._leases.get(capture_key)
+        return lease is not None and lease[0] is not None and lease[0].held
+
+    def release(self, start):
+        # AS-03b: idempotent and bound to the owning start; a release for
+        # another start on this capture key leaves the lease in place.
+        key = start["capture_key"]
+        with _source_capture_threads_lock:
+            lease = self._leases.get(key)
+            if lease is None:
+                return
+            owner = lease[2] if len(lease) > 2 else None
+            if owner is not None and owner != start.get("start_id"):
+                return
+            lease = self._leases.pop(key, None)
+        if lease is None:
+            return
+        lock, holds_extract = lease[0], lease[1]
+        if lock is not None:
+            lock.release()
+        if holds_extract:
+            try:
+                _extract_lock.release()
+            except RuntimeError:
+                pass
+
+    def _ensure_ownership(self, start):
+        """A worker reached without ``acquire`` (direct ``execute_started``)
+        still runs under the shared dispatcher lock: wait for it within the
+        manual bound. AS-03: an OS-lock error or an exhausted wait is
+        unavailable ownership (``CaptureOwnershipUnavailable``); the process
+        lock is never substituted for the shared lock. AS-03b: ownership
+        already retained for this identity is reused and rebound to the
+        live start."""
+        with _source_capture_threads_lock:
+            current = self._leases.get(start["capture_key"])
+            if current is not None:
+                self._leases[start["capture_key"]] = (
+                    current[0], current[1], start["start_id"])
+                return
+        _extract_lock.acquire()
+        try:
+            lock = source_subscriptions.CaptureLock.acquire(
+                DATA_ROOT, start["capture_key"],
+                timeout=source_subscriptions.MANUAL_CAPTURE_LOCK_TIMEOUT_S)
+        except OSError as exc:
+            _extract_lock.release()
+            log.exception("capture identity lock unavailable for %s", start["start_id"])
+            raise source_subscriptions.CaptureOwnershipUnavailable(
+                f"capture identity lock unavailable: {type(exc).__name__}") from exc
+        if lock is None:
+            _extract_lock.release()
+            raise source_subscriptions.CaptureOwnershipUnavailable(
+                "capture identity lock held by another dispatcher")
+        with _source_capture_threads_lock:
+            self._leases[start["capture_key"]] = (lock, True, start["start_id"])
+
+    def preflight(self, item, source):
+        if source["kind"] == "podcast_rss":
+            if item.get("legacy_episode_id") is None:
+                return source_subscriptions.CaptureOutcome(
+                    "preflight_failed", code="missing_episode_row")
+            meta = json.loads(item.get("metadata_json") or "{}")
+            if not podcasts._is_http_url(meta.get("audio_url")):
+                return source_subscriptions.CaptureOutcome(
+                    "preflight_failed", code="no_audio_url", terminal=True)
+            if not whisper_runner.is_whisperx_available():
+                return source_subscriptions.CaptureOutcome(
+                    "preflight_failed", code="missing_transcription_setup")
+            model = whisper_runner.normalize_model(
+                (_read_settings() or {}).get("whisper_model"))
+            if not whisper_runner.is_model_downloaded(DATA_ROOT, model):
+                # Standing capture never authorizes a first model download.
+                return source_subscriptions.CaptureOutcome(
+                    "preflight_failed", code="missing_transcription_setup")
+            return None
+        if not source_subscriptions._VIDEO_ID_RE.match(item.get("entry_id") or ""):
+            return source_subscriptions.CaptureOutcome(
+                "preflight_failed", code="invalid_identity", terminal=True)
+        return None
+
+    def bind(self, conn, start, item, source):
+        # The in-process pipeline has no separate durable queue row; the ledger
+        # row is the durable intent and the start id its idempotency identity.
+        return start["start_id"]
+
+    def run(self, start, item, source):
+        # AS-02 (run AT-4): the invocation is observed here, bound to the
+        # start, its owner token and this incarnation, and its return is
+        # recorded; ``verify_proof`` checks ``executor_returned`` against it.
+        record = {"owner_token": start["owner_token"], "instance": _source_instance_id(),
+                  "returned": False, "status": None}
+        with _source_capture_threads_lock:
+            self._invocations[start["start_id"]] = record
+        try:
+            if source["kind"] == "podcast_rss":
+                outcome = self._run_podcast(start, item, source)
+            else:
+                outcome = self._run_youtube(start, item, source)
+        except BaseException:
+            record["status"], record["returned"] = "raised", True
+            raise
+        record["status"], record["returned"] = outcome.status, True
+        return outcome
+
+    def _run_podcast(self, start, item, source):
+        episode_id = int(item["legacy_episode_id"])
+        start_id = start["start_id"]
+        # AS-02: the bounded enclosure download runs on this thread with no
+        # job row yet; register it so a probe sees a surviving execution.
+        with _source_capture_threads_lock:
+            _source_capture_threads[start_id] = threading.current_thread()
+        try:
+            # AS-02 (run AT-4): before acquisition, this process must hold
+            # the persisted execution claim for the start; otherwise the
+            # attempt belongs to another executor and is left to it.
+            if not self.holds_execution(start):
+                log.warning("standing capture %s: execution claim not held here; not run",
+                            start_id)
+                return source_subscriptions.CaptureOutcome("uncertain")
+            with source_subscriptions.capture_context(
+                    start_id, source_subscriptions.process_incarnation(DATA_ROOT)):
+                downloaded = podcasts.download_episode_audio(
+                    _get_index(), episode_id, data_root=DATA_ROOT)
+            if not downloaded.get("ok"):
+                code = "download_failed"
+                if downloaded.get("error") == "timeout":
+                    code = "download_timeout"
+                return source_subscriptions.CaptureOutcome("failed", code=code)
+            settings = _read_settings() or {}
+            queued, status = _queue_podcast_transcription(
+                episode_id,
+                model=whisper_runner.normalize_model(settings.get("whisper_model")),
+                diarize=bool(settings.get("diarization_default")),
+                consent_given=False, publish_to_corpus=True,
+                source_start_id=start_id, source_owner_token=start["owner_token"])
+            if status == 412:
+                return source_subscriptions.CaptureOutcome(
+                    "failed", code="missing_transcription_setup")
+            if not queued.get("ok"):
+                return source_subscriptions.CaptureOutcome("failed", code="transcription_unavailable")
+            # The queued job now owns the capture-identity lock (released by
+            # _settle_source_capture when the job ends).
+            return source_subscriptions.CaptureOutcome("in_flight")
+        finally:
+            with _source_capture_threads_lock:
+                _source_capture_threads.pop(start_id, None)
+
+    def _run_youtube(self, start, item, source):
+        video_id = item["entry_id"]
+        url = source_subscriptions.video_watch_url(video_id)
+        start_id = start["start_id"]
+        owner_token = start["owner_token"]
+        # AS-02: the callback carries an explicit proof the backend verifies
+        # against this registered worker thread.
+        proof = source_subscriptions.CompletionProof(
+            start_id, owner_token, self.kind, "worker_finished")
+
+        def _worker():
+            release_locks = False
+            try:
+                # AS-03: acquire() already holds the dispatcher lock and the
+                # capture-identity lock through publication; a worker reached
+                # without acquire() waits for them here (bounded) and never
+                # runs without them.
+                try:
+                    self._ensure_ownership(start)
+                except source_subscriptions.CaptureOwnershipUnavailable as exc:
+                    log.warning("standing capture %s: %s", start_id, exc)
+                    outcome = _source_service().fail_capture(
+                        start_id, owner_token, "capture_ownership_unavailable",
+                        terminal=False, proof=proof)
+                    release_locks = source_subscriptions.settlement_releases_dispatcher_locks(
+                        outcome)
+                    return
+                # AS-02: re-read ownership and state after waiting for the
+                # lock; an attempt that was failed, replaced or settled while
+                # this worker waited fetches and publishes nothing. Run AT-4:
+                # this process must also hold the persisted execution claim
+                # (checked before acquisition and again before publisher
+                # writes); the final ledger fence alone is not enough.
+                current = _source_service().claim_execution(start_id, owner_token=owner_token)
+                if current.get("outcome") != "active" or not self.holds_execution(start):
+                    log.warning("standing capture %s no longer owns its start (%s); not run",
+                                start_id, current.get("outcome"))
+                    # AS-03a: a stale callback releases only if this start is
+                    # already terminal; otherwise retain the locks.
+                    release_locks = current.get("state") in (
+                        "succeeded", "failed", "released")
+                    return
+                incarnation = source_subscriptions.process_incarnation(DATA_ROOT)
+                with source_subscriptions.capture_context(start_id, incarnation):
+                    metadata = _fetch_metadata(url)
+                    title = metadata.get("title") or "Untitled"
+                    topic = _classify_topic(metadata)
+                    folder = (DESKTOP_ROOT / _topic_folder_name(topic)
+                              / (slugify(title) or "video"))
+                    if not self.holds_execution(start):
+                        log.warning("standing capture %s lost its execution claim before "
+                                    "publication; nothing written", start_id)
+                        return
+                    result = _run_extraction(url, 30, folder, metadata=metadata, topic=topic,
+                                             notify=False)
+                _record_single_extract_job(url, _now_iso(), result=result)
+                published = (metadata.get("id") or video_id)
+                # AS-02: publication is fenced by the owner token, the ledger
+                # state and this proof (verified against this very thread).
+                outcome = _source_service().complete_capture(
+                    start_id, owner_token, published, proof=proof)
+                release_locks = source_subscriptions.settlement_releases_dispatcher_locks(
+                    outcome)
+                if outcome.get("outcome") == "succeeded":
+                    _heartbeat_note_ingest()
+                    maybe_toast("Source capture added to Uoink",
+                                f"{title} is ready in your library.")
+            except BaseException as exc:
+                # Rate limits and download errors are transient for the ledger
+                # (three actual starts, then blocked); identity errors were
+                # rejected at preflight before any charge. AS-03a: exceptions
+                # retain the capture lock and the process lock unless
+                # fail_capture verified a terminal commit.
+                code = "youtube_rate_limit" if _is_youtube_rate_limit(exc) else "download_failed"
+                try:
+                    outcome = _source_service().fail_capture(
+                        start_id, owner_token, code, terminal=False, proof=proof)
+                    release_locks = source_subscriptions.settlement_releases_dispatcher_locks(
+                        outcome)
+                except Exception:
+                    log.exception("standing capture: fail_capture raised for %s", start_id)
+                log.warning("standing capture %s failed: %s", start_id, _sanitize_error(str(exc)))
+            finally:
+                with _source_capture_threads_lock:
+                    _source_capture_threads.pop(start_id, None)
+                if release_locks:
+                    self.release(start)
+
+        thread = threading.Thread(target=_worker, name=f"source-capture-{start_id[-8:]}",
+                                  daemon=True)
+        with _source_capture_threads_lock:
+            _source_capture_threads[start_id] = thread
+        thread.start()
+        return source_subscriptions.CaptureOutcome("in_flight")
+
+    # ---- worker state (AS-02) ---------------------------------------------
+    def probe(self, start):
+        """``running`` for a live worker thread, an in-process download, a
+        queued/running podcast job, or (run AT-4) a recorded child process
+        of the start that still runs; ``stopped`` only when child status
+        permits terminal settlement and a terminal job, an observed
+        synchronous return of this incarnation's own invocation, or an
+        executing incarnation whose persisted process is verifiably dead
+        is also observed. AS-02: child status is a common prerequisite for
+        every terminal probe branch. A live child is ``running``; unknown
+        child state is never ``stopped``. An empty thread registry is
+        never death evidence. The executing incarnation is the persisted
+        execution claim's holder when one exists, else the row's
+        ``owner_instance``."""
+        start_id = start["start_id"]
+        with _source_capture_threads_lock:
+            thread = _source_capture_threads.get(start_id)
+            invocation = self._invocations.get(start_id)
+        if thread is not None and thread.is_alive():
+            return "running"
+        children = source_subscriptions.child_ownership_liveness(DATA_ROOT, start_id)
+        if children == "alive":
+            # A dead parent or a terminal job is not a stopped capture while
+            # yt-dlp/ffmpeg lives.
+            return "running"
+        job = _find_job_for_start(start_id)
+        if job is not None and job.get("state") not in _JOB_TERMINAL_STATES:
+            return "running"
+        # AS-02: missing/dead children may settle; damaged or unresolved
+        # child records keep ownership uncertain.
+        if children not in ("none", "dead"):
+            return "unknown"
+        if job is not None and job.get("state") in _JOB_TERMINAL_STATES:
+            return "stopped"
+        claim = self.execution_claim(start)
+        executor = claim.get("instance") if claim else start.get("owner_instance")
+        liveness = source_subscriptions.instance_liveness(executor, DATA_ROOT)
+        if liveness == "dead":
+            return "stopped"
+        if liveness == "current" and claim is not None and invocation is not None \
+                and invocation.get("returned") and invocation.get("status") != "in_flight" \
+                and invocation.get("owner_token") == start.get("owner_token"):
+            # This incarnation's own invocation returned synchronously and
+            # left no thread, job or surviving child behind.
+            return "stopped"
+        return "unknown"
+
+    def verify_proof(self, start, proof):
+        """AS-02: a callback proof is checked against the executor itself, not
+        taken on the strength of the owner token: the proof must bind this
+        backend kind, start and owner token; the start must belong to this
+        process incarnation (thread and job registries are per process); and
+        the named terminal evidence must be observable here. Child status is
+        a common prerequisite for every terminal proof branch
+        (``worker_finished``, ``job_terminal``, ``executor_returned``): a
+        live child or unknown child state never verifies. An absent thread
+        or an empty registry is never death evidence, so an unverifiable
+        proof leaves the decision to ``probe``."""
+        if not proof.binds(start, self.kind):
+            return False
+        if start.get("owner_instance") != _source_instance_id():
+            return False
+        start_id = start["start_id"]
+        # AS-02: a live or unknown child prevents every terminal proof.
+        if not source_subscriptions.child_termination_established(DATA_ROOT, start_id):
+            return False
+        with _source_capture_threads_lock:
+            thread = _source_capture_threads.get(start_id)
+            invocation = self._invocations.get(start_id)
+        current = getattr(threading, "current_thread", None)
+        on_worker = (thread is not None and current is not None and thread is current())
+        if proof.evidence == "worker_finished":
+            # Only the registered worker itself, reporting from its own thread
+            # on the way out, can vouch that it finished.
+            return on_worker
+        if proof.evidence == "job_terminal":
+            job = _find_job_for_start(start_id)
+            return (job is not None and job.get("source_start_id") == start_id
+                    and job.get("state") in _JOB_TERMINAL_STATES)
+        if proof.evidence == "executor_returned":
+            # Run AT-4: the label alone proves nothing. This process must have
+            # observed the ``run`` invocation for this start, bound to the
+            # proof's owner token and this incarnation, and observed it
+            # return a synchronous (non in-flight) outcome; and nothing else
+            # may still execute for the start here (no other live worker
+            # thread, no queued or running job). Child termination is the
+            # common prerequisite above; unknown child state does not verify.
+            if invocation is None or not invocation.get("returned"):
+                return False
+            if invocation.get("owner_token") != proof.owner_token \
+                    or invocation.get("instance") != _source_instance_id():
+                return False
+            if invocation.get("status") == "in_flight":
+                return False
+            if thread is not None and thread.is_alive() and not on_worker:
+                return False
+            job = _find_job_for_start(start_id)
+            if job is not None and job.get("state") not in _JOB_TERMINAL_STATES:
+                return False
+            return True
+        return False
+
+    # ---- durable publication inspection and recovery (AS-01) --------------
+    def published_video_id(self, conn, item, source):
+        video_id = self._expected_corpus_id(item, source)
+        return self.inspect_publication(conn, None, item, source, video_id)
+
+    @staticmethod
+    def _expected_corpus_id(item, source):
+        if source["kind"] == "podcast_rss":
+            return source_subscriptions.podcast_corpus_id(source["source_key"], item["entry_id"])
+        return item["entry_id"]
+
+    def inspect_publication(self, conn, start, item, source, video_id):
+        """The publisher's own completion record. Podcast: the episode row is
+        linked to this corpus id (``_link_episode_to_yoink`` is the last
+        durable step of ``episode_to_corpus``). YouTube: ``_index_yoink`` ends
+        with the citation write projected from the sidecar. AS-01 (run AT-4):
+        for both, the record is the citation set that IS the publisher's
+        projection of the sidecar's evidence arrays, compared by contents
+        (per kind: same rows, seq, timing and text) through the shared
+        ``source_subscriptions.citation_projection_defect``, never by counts.
+        A sidecar without evidence arrays has no projection; then the
+        citation write itself is the only completion step there is. The
+        service separately validates files, identity, timing and clips."""
+        try:
+            row = conn.execute(
+                "SELECT deleted_at, sidecar_path FROM yoinks WHERE video_id=?",
+                (video_id,)).fetchone()
+            if row is None or row["deleted_at"]:
+                return None
+            if source["kind"] == "podcast_rss":
+                linked = conn.execute(
+                    "SELECT 1 FROM podcast_episodes WHERE yoink_video_id=? "
+                    "AND transcript_status='done' LIMIT 1", (video_id,)).fetchone()
+                if linked is None:
+                    return None
+            sidecar = self._read_sidecar(row["sidecar_path"])
+            if sidecar is None:
+                return None
+            citations = [dict(r) for r in conn.execute(
+                "SELECT kind, seq, timestamp_start, timestamp_end, text FROM citations "
+                "WHERE video_id=? ORDER BY kind, seq", (video_id,)).fetchall()]
+            projection = source_subscriptions.sidecar_evidence_projection(sidecar)
+            if projection is None:
+                return video_id if citations else None
+            if source_subscriptions.citation_projection_defect(citations, projection):
+                return None
+            return video_id
+        except Exception:  # a missing table is "no completion record", not a crash
+            return None
+
+    @staticmethod
+    def _read_sidecar(path):
+        if not isinstance(path, str) or not path:
+            return None
+        try:
+            with open(path, "r", encoding="utf-8") as handle:
+                sidecar = json.load(handle)
+        except (OSError, ValueError):
+            return None
+        return sidecar if isinstance(sidecar, dict) else None
+
+    def recover_publication(self, start, item, source):
+        """Once the owner is verifiably stopped and the service holds the
+        capture lock, finish valid local publication under the original
+        attempt from the stages that already exist on disk (AS-01): a
+        podcast's completed transcript through the idempotent publisher, or
+        a YouTube folder whose corpus and sidecar were written before the
+        index step through ``_index_yoink``. Nothing here acquires media;
+        a renewed capture needs a new reservation."""
+        if source["kind"] != "podcast_rss":
+            return self._recover_youtube_publication(start, item)
+        if item.get("legacy_episode_id") is None:
+            return False
+        episode_id = int(item["legacy_episode_id"])
+        episode = podcasts.get_episode(_get_index(), episode_id)
+        if not episode or episode.get("transcript_status") != "done" \
+                or not episode.get("transcript_local_path"):
+            return False
+        try:
+            podcasts.episode_to_corpus(_get_index(), episode_id, data_root=DATA_ROOT)
+        except podcasts.CorpusIdentityConflict as exc:
+            log.warning("standing capture %s: publication identity conflict: %s",
+                        start["start_id"], exc)
+            return False
+        except Exception as exc:
+            log.warning("standing capture %s: publication recovery failed: %s",
+                        start["start_id"], _sanitize_error(str(exc)))
+            return False
+        return True
+
+    def _recover_youtube_publication(self, start, item):
+        """AS-01: the extraction writes the corpus folder and sidecar before
+        ``_index_yoink``; a crash between them leaves a recoverable local
+        stage with no corpus row. Find that folder by the sidecar's video id
+        (the same walk the startup backfill performs) and run the idempotent
+        index step. Returns True when the publisher ran."""
+        video_id = item.get("entry_id")
+        if not isinstance(video_id, str) or not video_id:
+            return False
+        try:
+            for folder, corpus in _iter_corpus_folders():
+                sidecar_path = folder / f"{folder.name}.json"
+                sidecar = self._read_sidecar(str(sidecar_path))
+                if sidecar is None or (sidecar.get("video_id") or "").strip() != video_id:
+                    continue
+                return bool(_index_yoink(folder, sidecar, corpus, sidecar_path))
+        except Exception as exc:
+            log.warning("standing capture %s: local publication recovery failed: %s",
+                        start["start_id"], _sanitize_error(str(exc)))
+        return False
+
+
+def _find_job_for_start(start_id: str) -> dict | None:
+    with _jobs_lock:
+        for job in _jobs.values():
+            if job.get("source_start_id") == start_id:
+                return dict(job)
+    return None
+
+
+def _source_service() -> "source_subscriptions.SourceSubscriptionService":
+    """The one service instance behind HTTP, MCP, the dashboard and the tick."""
+    global _source_service_instance
+    with _source_service_lock:
+        if _source_service_instance is None:
+            _source_service_instance = source_subscriptions.SourceSubscriptionService(
+                index=_get_index(), backend=_ServerCaptureBackend(),
+                instance_id=_source_instance_id(),
+                jitter=lambda: random.randint(0, 30_000))
+        return _source_service_instance
+
+
+def _source_startup_reconciliation() -> dict:
+    """Idempotent legacy import, then restart reconciliation, before any
+    scheduler or pending worker can launch (contract, migration section)."""
+    service = _source_service()
+    imported = service.import_legacy_registries()
+    reconciled = service.reconcile_on_startup()
+    if imported.get("feeds_imported") or imported.get("playlists_imported"):
+        log.info("sources: imported %d feed(s) and %d playlist(s); %d conflict(s)",
+                 imported.get("feeds_imported", 0), imported.get("playlists_imported", 0),
+                 len(imported.get("conflicts") or []))
+    if any(reconciled.get(k) for k in ("released", "succeeded", "failed", "uncertain",
+                                        "outbox_repaired")):
+        log.info("sources: restart reconciliation %s", reconciled)
+    return {"imported": imported, "reconciled": reconciled}
+
+
+def _standing_due_polls() -> list[dict]:
+    """Seam for the tick and its tests: the due candidates this pass will run.
+
+    AS-04: bounded poll-lease reconciliation runs first, so an owner that
+    died mid-fetch loses its lease with ``poll_timeout`` and backoff instead
+    of being excluded from every later due query. AS-05: candidates are not
+    claimed here; ``_poll_source_for_watch`` claims each lease immediately
+    before its fetch, and the group is bounded so a large due set cannot
+    starve the capture and outbox passes."""
+    service = _source_service()
+    service.expire_poll_leases()
+    return [{"source_id": source_id, "claimed": False}
+            for source_id in service.due_poll_ids(limit=source_subscriptions.STANDING_POLLS_PER_TICK)]
+
+
+def _poll_source_for_watch(claim: dict) -> dict:
+    """Claim the lease now, fetch outside the database, commit under the
+    owner token. A candidate that is no longer due (claimed by another
+    dispatcher, disabled, or backed off) is skipped, not counted as a poll."""
+    service = _source_service()
+    if not claim.get("owner_token"):
+        claim = service.claim_poll(claim["source_id"])
+        if claim is None:
+            return {"ok": True, "outcome": "not_claimed", "skipped": True}
+    result = service.run_claimed_poll(claim)
+    inserted = int(result.get("inserted") or 0)
+    if result.get("ok") and inserted and result.get("enrollment"):
+        maybe_toast("New source items",
+                    f"{inserted} new item(s) discovered from a watched source.")
+    return result
+
+
+def _standing_capture_pass() -> list[dict]:
+    """Advance eligible capture work independently of detection."""
+    outcomes = _source_service().capture_pass(limit=1)
+    for outcome in outcomes:
+        if outcome.get("outcome") == "succeeded":
+            _heartbeat_note_ingest()
+    return outcomes
+
+
+def _auto_ingest_podcast_feed(feed_id: int) -> list[dict]:
+    """Compatibility entry point: advance the legacy feed's standing source
+    through the atomic reservation (never through the old episode marker)."""
+    idx = _get_index()
+    with idx._lock:
+        source_id = source_subscriptions.legacy_source_id(idx._conn, feed_id=int(feed_id))
+    if source_id is None:
+        return [{"ok": False, "feed_id": feed_id, "error": "managed_by_subscription",
+                 "detail": "feed has no standing source; register it first"}]
+    outcome = _source_service().advance_source(source_id)
+    if outcome.get("outcome") == "succeeded":
+        _heartbeat_note_ingest()
+    return [{"ok": outcome.get("outcome") in ("succeeded", "in_flight", "started", "linked"),
+             "feed_id": feed_id, "source_id": source_id, **outcome}]
+
+
+def _refresh_source_via_service(source_id: str) -> dict:
+    result = _source_service().refresh_source(
+        _source_operator_context(), {"source_id": source_id})
+    if isinstance(result, dict) and result.get("ok") is True:
+        _mirror_event("source_refresh")  # seam: source_refresh
+    return result
+
+
+def _poll_podcast_feed_for_watch(feed_id: int) -> dict:
+    """Manual poll of one feed through the subscription due-time/lease gate.
+    Detection never captures; the capture pass advances eligible work."""
+    with _podcast_feed_poll_lock:
+        result = podcasts.poll_feed(_get_index(), feed_id, refresh=_refresh_source_via_service)
+    return result
+
+
+def _heartbeat_note_poll(ok: bool, *, error: str | None = None) -> None:
+    """One feed poll finished. A failure never advances the success stamp.
+    ``error`` is a short *kind* (an exception class name or a fixed
+    phrase), never raw exception text: /health is public and the security
+    model promises raw detail stays in server.log."""
+    now = suite_service.utc_now()
+    with _heartbeat_lock:
+        if ok:
+            _heartbeat["last_successful_poll_at"] = now
+            _heartbeat["polls_ok"] += 1
+        else:
+            _heartbeat["last_failed_poll_at"] = now
+            _heartbeat["last_poll_error"] = re.sub(
+                r"[^A-Za-z0-9_ =.-]", "", str(error or "poll failed"))[:80]
+            _heartbeat["polls_failed"] += 1
+
+
+def _heartbeat_note_ingest() -> None:
+    """One episode was published into the corpus (auto or manual)."""
+    now = suite_service.utc_now()
+    with _heartbeat_lock:
+        _heartbeat["last_ingest_completed_at"] = now
+        _heartbeat["ingests_completed"] += 1
+
+
+def _heartbeat_note_tick(polls: int, failed_polls: int) -> str:
+    """The scheduler finished one pass. Only a pass with zero failed polls
+    advances ``_last_successful_tick_at``; every pass advances
+    ``last_tick_completed_at`` (that is the liveness signal)."""
+    global _last_successful_tick_at
+    now = suite_service.utc_now()
+    with _heartbeat_lock:
+        _heartbeat["last_tick_completed_at"] = now
+        _heartbeat["last_tick_ok"] = failed_polls == 0
+        _heartbeat["last_tick_polls"] = int(polls)
+        _heartbeat["last_tick_failed_polls"] = int(failed_polls)
+        _heartbeat["ticks_completed"] += 1
+        if failed_polls == 0:
+            _last_successful_tick_at = now
+    return now
+
+
+def _parse_utc_stamp(value) -> datetime | None:
+    if not value:
+        return None
+    text = str(value).strip()
+    if text.endswith("Z"):
+        text = text[:-1] + "+00:00"
+    try:
+        parsed = datetime.fromisoformat(text)
+    except ValueError:
+        return None
+    if parsed.tzinfo is None:
+        from datetime import timezone as _tz
+        parsed = parsed.replace(tzinfo=_tz.utc)
+    return parsed
+
+
+def _heartbeat_payload(now: str | None = None) -> dict:
+    """The ``heartbeat`` block of /health (and of ``--doctor``, which reads
+    the same fields off the helper). ``freshness.state`` is ``never`` before
+    the first completed pass, ``fresh`` while the last pass completed within
+    ``stale_after_sec``, and ``stale`` otherwise -- a stale scheduler in a
+    process that still answers /health is exactly the failure the old
+    single timestamp hid."""
+    with _heartbeat_lock:
+        snapshot = dict(_heartbeat)
+    last = _parse_utc_stamp(snapshot["last_tick_completed_at"])
+    current = _parse_utc_stamp(now or suite_service.utc_now())
+    if last is None or current is None:
+        age: float | None = None
+        state = "never"
+    else:
+        age = max(0.0, (current - last).total_seconds())
+        state = "fresh" if age <= _HEARTBEAT_STALE_AFTER_SEC else "stale"
+    return {
+        "last_tick_completed_at": snapshot["last_tick_completed_at"],
+        "last_successful_tick_at": _last_successful_tick_at,
+        "last_successful_poll_at": snapshot["last_successful_poll_at"],
+        "last_failed_poll_at": snapshot["last_failed_poll_at"],
+        "last_poll_error": snapshot["last_poll_error"],
+        "last_ingest_completed_at": snapshot["last_ingest_completed_at"],
+        "last_tick": {
+            "ok": snapshot["last_tick_ok"],
+            "polls": snapshot["last_tick_polls"],
+            "failed_polls": snapshot["last_tick_failed_polls"],
+        },
+        "counts": {
+            "ticks": snapshot["ticks_completed"],
+            "polls_ok": snapshot["polls_ok"],
+            "polls_failed": snapshot["polls_failed"],
+            "ingests": snapshot["ingests_completed"],
+        },
+        "tick_interval_sec": _PODCAST_FEED_TICK_SEC,
+        "freshness": {
+            "state": state,
+            "age_sec": age,
+            "stale_after_sec": _HEARTBEAT_STALE_AFTER_SEC,
+        },
+    }
+
+
+def _podcast_feed_scheduler_tick() -> list[dict]:
+    """One scheduler pass: a detection pass over every due standing source,
+    then an independent capture pass, then the classification outbox.
+
+    Contract phase3-v1-2026-09-07, "Scheduler and adapter boundaries": each
+    tick performs bounded local reconciliation, claims due detection work and
+    advances eligible capture work independently. An exhausted allowance does
+    not stop detection; a poll failure does not erase eligible work.
+
+    Heartbeat semantics (unchanged): every completed pass stamps
+    ``last_tick_completed_at``; ``_last_successful_tick_at`` moves only when no
+    poll in the pass failed; each poll stamps its own success / failure time;
+    ingest completion is its own stamp. A pass with zero due sources is a
+    clean pass (a heartbeat, not a successful poll or ingest)."""
+    results: list[dict] = []
+    failed = 0
+    try:
+        due = _standing_due_polls()
+    except Exception as exc:
+        # AS-04: a claiming/reconciliation error is a failed pass, never a
+        # skipped heartbeat: the tick still completes and stamps itself.
+        log.exception("source watch tick could not select due polls")
+        due = []
+        failed += 1
+        results.append({"ok": False, "error": str(exc), "stage": "due_selection"})
+        _heartbeat_note_poll(False, error=type(exc).__name__)
+    for claim in due:
+        source_id = claim.get("source_id")
+        kind = None
+        try:
+            result = _poll_source_for_watch(claim)
+        except Exception as exc:
+            log.exception("source watch tick failed for %s", source_id)
+            result = {"ok": False, "source_id": source_id, "error": str(exc)}
+            kind = type(exc).__name__
+        if isinstance(result, dict) and result.get("skipped"):
+            continue  # not claimed: no fetch happened, so not a poll
+        results.append(result)
+        ok = bool(isinstance(result, dict) and result.get("ok"))
+        if ok:
+            _heartbeat_note_poll(True)
+        else:
+            failed += 1
+            _heartbeat_note_poll(False, error=kind or "poll returned ok=false")
+    try:
+        _standing_capture_pass()
+    except Exception:
+        log.exception("standing capture pass crashed")
+    try:
+        _source_service().dispatch_classification_outbox()
+    except Exception:
+        log.exception("classification outbox dispatch crashed")
+    _heartbeat_note_tick(polls=len(results), failed_polls=failed)
+    return results
+
+
+def _start_podcast_feed_scheduler_thread() -> threading.Thread:
+    """Run the standing-source scheduler every 30 seconds on a daemon thread.
+    The tick only scans due rows; outbound polls follow each source's own
+    due time (default 60 minutes, minimum 15)."""
+    def _runner():
+        while True:
+            try:
+                _podcast_feed_scheduler_tick()
+            except Exception:
+                log.exception("source watch tick crashed")
+            time.sleep(_PODCAST_FEED_TICK_SEC)
+
+    thread = threading.Thread(
+        target=_runner, name="source-watch", daemon=True)
+    thread.start()
+    return thread
 
 
 def _job_cancel_event(job_id: str) -> threading.Event | None:
@@ -7421,19 +9985,33 @@ def _playlist_worker(job_id: str):
                     current_phase = phase
                     _update_job(_job_id, current_video_phase=phase)
 
-                with _extract_lock:
+                with _manual_extraction_ownership(v["url"]) as ownership:  # AS-03 shared dispatcher lock
+                    ownership.raise_if_unavailable()  # AS-03: this video fails retryably
                     _raise_if_cancelled(cancel_event)
-                    result = _run_extraction(
-                        v["url"],
-                        interval,
-                        target,
-                        notify=False,
-                        metadata=metadata,
-                        topic="Playlist",
-                        generate_paste=False,
-                        cancel_event=cancel_event,
-                        phase_callback=phase_cb,
-                    )
+                    if ownership.conflict:
+                        # AS-03 (run AT-4): block before any overwrite.
+                        raise RuntimeError(ownership.conflict)
+                    if ownership.completed_while_waiting and ownership.reused:
+                        # AS-03 (run AT-4): the capture this video waited
+                        # behind completed; reuse its folder, acquire nothing.
+                        source_folder = Path(ownership.reused["folder"]) \
+                            if ownership.reused.get("folder") else None
+                        if source_folder is None or not source_folder.is_dir():
+                            raise FileNotFoundError("completed capture folder is missing")
+                        shutil.copytree(source_folder, target, dirs_exist_ok=True)
+                        result = dict(ownership.reused, title=title, folder=str(target))
+                    else:
+                        result = _run_extraction(
+                            v["url"],
+                            interval,
+                            target,
+                            notify=False,
+                            metadata=metadata,
+                            topic="Playlist",
+                            generate_paste=False,
+                            cancel_event=cancel_event,
+                            phase_callback=phase_cb,
+                        )
 
                 corpus_path = _resolve_corpus_path(target)
                 item = {
@@ -7606,6 +10184,69 @@ def _trash_folder_for(row: dict) -> Path:
 _TRASH_PURGE_INTERVAL_SEC = 24 * 60 * 60
 
 
+# Pending incomplete brief cleanup tracking across passes and restarts (AW-D08)
+_pending_brief_purges_lock = threading.Lock()
+
+
+def _pending_brief_purges_file() -> Path | None:
+    if DATA_ROOT is None:
+        return None
+    return Path(DATA_ROOT) / "reach" / "briefs" / ".pending_purges.json"
+
+
+def _get_pending_brief_purges() -> set[str]:
+    with _pending_brief_purges_lock:
+        purges: set[str] = set()
+        p = _pending_brief_purges_file()
+        if p is not None and p.is_file():
+            try:
+                data = json.loads(p.read_text(encoding="utf-8"))
+                if isinstance(data, list):
+                    purges.update(str(x) for x in data)
+            except Exception:
+                pass
+        return purges
+
+
+def _add_pending_brief_purge(video_id: str) -> None:
+    with _pending_brief_purges_lock:
+        p = _pending_brief_purges_file()
+        if p is None:
+            return
+        purges: set[str] = set()
+        if p.is_file():
+            try:
+                data = json.loads(p.read_text(encoding="utf-8"))
+                if isinstance(data, list):
+                    purges.update(str(x) for x in data)
+            except Exception:
+                pass
+        purges.add(video_id)
+        try:
+            p.parent.mkdir(parents=True, exist_ok=True)
+            p.write_text(json.dumps(sorted(purges)), encoding="utf-8")
+        except Exception:
+            pass
+
+
+def _remove_pending_brief_purge(video_id: str) -> None:
+    with _pending_brief_purges_lock:
+        p = _pending_brief_purges_file()
+        if p is None or not p.is_file():
+            return
+        try:
+            data = json.loads(p.read_text(encoding="utf-8"))
+            if isinstance(data, list):
+                purges = set(str(x) for x in data)
+                purges.discard(video_id)
+                if purges:
+                    p.write_text(json.dumps(sorted(purges)), encoding="utf-8")
+                else:
+                    p.unlink(missing_ok=True)
+        except Exception:
+            pass
+
+
 def _purge_trash() -> int:
     """One trash-purge pass: hard-delete every soft-deleted yoink past the
     30-day retention window -- both its _yoink-trash/ folder and its index
@@ -7617,6 +10258,25 @@ def _purge_trash() -> int:
     except Exception as e:
         log.warning("trash purge: could not query the index: %s", e)
         return 0
+
+    brief_store = None
+    try:
+        import library_briefs
+        svc = idx.library_service() if hasattr(idx, "library_service") else None
+        brief_store = library_briefs.BriefStore(idx, svc, data_root=DATA_ROOT)
+    except Exception as e:
+        log.warning("trash purge: could not initialize BriefStore: %s", e)
+        brief_store = None
+
+    # Retry any previously incomplete brief cleanups independently of mirror consent/availability (AW-D08)
+    if brief_store is not None:
+        for vid in _get_pending_brief_purges():
+            try:
+                brief_store.purge_dependents(vid)
+                _remove_pending_brief_purge(vid)
+            except Exception:
+                log.warning("trash purge: retry brief cleanup failed for %s", vid)
+
     purged = 0
     for video_id in stale:
         row = idx.get_yoink(video_id)
@@ -7626,7 +10286,16 @@ def _purge_trash() -> int:
             trash = _trash_folder_for(row)
             if trash.exists():
                 shutil.rmtree(trash, ignore_errors=True)
+            _add_pending_brief_purge(video_id)
             idx.delete_yoink(video_id)
+            # Local brief cleanup independent of mirror consent/availability (AW-D08)
+            if brief_store is not None:
+                try:
+                    brief_store.purge_dependents(video_id)
+                    _remove_pending_brief_purge(video_id)
+                except Exception:
+                    log.warning("trash purge: brief cleanup failed for %s, scheduled retry", video_id)
+            _mirror_event("hard_purge", video_id=video_id)  # seam: hard_purge
             purged += 1
         except Exception:
             log.exception("trash purge: failed to purge %s", video_id)
@@ -7720,22 +10389,54 @@ def _retry_pending_one() -> bool:
     title = None
     folder = None
     current_phase = "metadata"
-    with _extract_lock:
+    with _manual_extraction_ownership(url) as ownership:  # AS-03 shared dispatcher lock
+        if not ownership.ok:
+            # AS-03: unavailable ownership is a retryable failure; re-queue
+            # with backoff, never extract under the process lock alone.
+            attempts = attempts_before + 1
+            delay = min(_RETRY_INITIAL_BACKOFF_SEC * (2 ** attempts), _RETRY_MAX_BACKOFF_SEC)
+            retry_at = (datetime.now() + timedelta(seconds=delay)).strftime(
+                "%Y-%m-%dT%H:%M:%S")
+            try:
+                idx.mark_pending_failed(pending_id, "capture_ownership_unavailable", retry_at)
+            except Exception:
+                log.exception("retry worker: mark_pending_failed failed")
+            log.warning("retry worker: pending #%d could not take the capture lock (%s); "
+                        "retry at %s", pending_id, ownership.error, retry_at)
+            return True
+        if ownership.conflict:
+            # AS-03 (run AT-4): an identity conflict blocks before overwrite;
+            # the queue row goes terminal with the reason.
+            try:
+                idx.mark_pending_failed(pending_id, _sanitize_error(ownership.conflict),
+                                        _now_iso(), force_final=True)
+            except Exception:
+                log.exception("retry worker: mark_pending_failed failed")
+            _record_single_extract_job(url, started_at, error=ownership.conflict,
+                                       failure_phase="metadata",
+                                       long_video_mode=long_video_mode)
+            _pending_long_video_mode(pending_id, remove=True)
+            return True
+        # AS-03 (run AT-4): the capture this row waited behind completed;
+        # reuse it, no fetch, no second acquisition.
+        result = ownership.reused if (ownership.completed_while_waiting
+                                      and ownership.reused) else None
         try:
-            metadata = _fetch_metadata(url)
-            title = metadata.get("title") or "Untitled"
-            topic = _classify_topic(metadata)
-            folder = (DESKTOP_ROOT / _topic_folder_name(topic)
-                      / (slugify(title) or "video"))
+            if result is None:
+                metadata = _fetch_metadata(url)
+                title = metadata.get("title") or "Untitled"
+                topic = _classify_topic(metadata)
+                folder = (DESKTOP_ROOT / _topic_folder_name(topic)
+                          / (slugify(title) or "video"))
 
-            def phase_cb(phase: str):
-                nonlocal current_phase
-                current_phase = phase
+                def phase_cb(phase: str):
+                    nonlocal current_phase
+                    current_phase = phase
 
-            result = _run_extraction(url, interval, folder,
-                                     metadata=metadata, topic=topic,
-                                     long_video_mode=long_video_mode,
-                                     phase_callback=phase_cb)
+                result = _run_extraction(url, interval, folder,
+                                         metadata=metadata, topic=topic,
+                                         long_video_mode=long_video_mode,
+                                         phase_callback=phase_cb)
         except BaseException as e:
             if _is_youtube_rate_limit(e):
                 attempts = attempts_before + 1
@@ -8051,6 +10752,10 @@ def _enrich_yoink_rows(idx, rows: list[dict]) -> list[dict]:
         if sidecar_path and Path(sidecar_path).exists():
             try:
                 live = json.loads(Path(sidecar_path).read_text(encoding="utf-8"))
+                if not live.get("source_type") and r.get("source_type"):
+                    live["source_type"] = r.get("source_type")
+                if not live.get("platform") and r.get("platform"):
+                    live["platform"] = r.get("platform")
                 health = compute_health(live)
             except (OSError, json.JSONDecodeError):
                 pass
@@ -8683,12 +11388,18 @@ class Handler(BaseHTTPRequestHandler):
             self.status = status
             self.message = message
 
-    def _read_json_body(self) -> dict:
+    def _read_json_body(self, *, strict: bool = False) -> dict:
         # P1-3: bound everything we trust from the network. Without these
         # checks Content-Length was unbounded (memory exhaustion via large
         # POST), Content-Type was unchecked (HTML form posts could trigger
         # mutations), and a JSON array body would blow up later code that
         # called body.get(...).
+        #
+        # strict=True (the tool transports and the library intent route)
+        # additionally refuses NaN/Infinity and duplicate object keys, which
+        # Python's decoder otherwise accepts although RFC 8259 does not. The
+        # Phase 2 contract requires this for every library request; applying
+        # it to the whole tool surface keeps one decoder per transport.
         ctype = (self.headers.get("Content-Type") or "").split(";", 1)[0].strip().lower()
         if ctype != "application/json":
             raise Handler._BodyError(415, "Content-Type must be application/json")
@@ -8702,8 +11413,14 @@ class Handler(BaseHTTPRequestHandler):
             raise Handler._BodyError(413, f"Body too large (>{MAX_BODY_BYTES} bytes)")
         raw = self.rfile.read(length) if length else b"{}"
         try:
-            parsed = json.loads(raw.decode("utf-8") or "{}")
-        except (UnicodeDecodeError, json.JSONDecodeError) as e:
+            text = raw.decode("utf-8") or "{}"
+            if strict:
+                parsed = json.loads(text, parse_constant=_reject_json_constant,
+                                    object_pairs_hook=_reject_duplicate_json_keys)
+            else:
+                parsed = json.loads(text)
+        except (UnicodeDecodeError, ValueError) as e:
+            # json.JSONDecodeError is a ValueError; so are the strict hooks'.
             raise Handler._BodyError(400, f"Bad JSON: {e}")
         if not isinstance(parsed, dict):
             raise Handler._BodyError(400, "Top-level JSON must be an object")
@@ -8737,9 +11454,20 @@ class Handler(BaseHTTPRequestHandler):
             settings = _read_settings() or {}
             whisper_model = whisper_runner.normalize_model(
                 settings.get("whisper_model"))
+            latest_migration = index.latest_schema_version()
             return self._send_json(200, {
                 "ok": True,
                 "version": VERSION,
+                "migration_version": _active_migration_version,
+                "migration_pending": (
+                    _active_migration_version < latest_migration
+                ),
+                "last_successful_tick_at": _last_successful_tick_at,
+                # Heartbeat semantics (2026-09-04): tick completion, last
+                # successful poll, last ingest completion and freshness
+                # are separate fields; a failed poll never advances the
+                # success stamp. `--doctor` reads the same block.
+                "heartbeat": _heartbeat_payload(),
                 "whisperx_available": whisper_runner.is_whisperx_available(),
                 "whisper_model": whisper_model,
                 "whisperx_model_loaded": whisper_runner.is_model_downloaded(
@@ -8754,6 +11482,12 @@ class Handler(BaseHTTPRequestHandler):
                 # corpus_path (cached ~60s). "ok": true above means the
                 # process answers; a healthy install also needs this ok.
                 "path_integrity": _path_integrity_status(),
+                # Living Library Phase 2: {status, waiting_for_client, ready,
+                # leased, run_revision, recovery_state, error_code,
+                # apply_enabled, contract_version}. `waiting_for_client`
+                # means staged Librarian work exists and no client holds a
+                # lease; the server never runs the Librarian itself.
+                "library": _library_health_payload(),
             })
         if bare == "/index/backfill-status":
             # Public, read-only progress counts (same posture as /health) so
@@ -8836,6 +11570,12 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_podcasts_feeds_list()
         if bare == "/podcasts/episodes":
             return self._handle_podcasts_episodes_list()
+        if bare == "/sources":
+            return self._handle_sources_list()
+        if bare == "/sources/status":
+            return self._handle_sources_status()
+        if bare == "/sources/schema":
+            return self._send_json(200, {"ok": True, **source_subscriptions.tool_manifest()})
         if bare == "/transcribe/status":
             return self._handle_transcribe_status_get()
         if bare == "/playlists/monitored":
@@ -8942,6 +11682,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_yoink_open_markdown(bare)
         if bare.startswith("/yoinks/") and bare.endswith("/markdown"):
             return self._handle_yoink_markdown(bare)
+        if bare.startswith("/yoinks/") and bare.endswith("/details"):
+            return self._handle_yoink_details(bare)
         if bare == "/agents/detect":
             return self._handle_agents_detect()
         if bare == "/open-folder":
@@ -10124,11 +12866,9 @@ class Handler(BaseHTTPRequestHandler):
             "idle_days": self._RESURFACE_TODAY_IDLE_DAYS})
 
     # ---- v3.1 podcast RSS feeds ---------------------------------------
-    # Feed registry + polling. Episode rows materialise as metadata-only
-    # rows when a feed is polled; the audio download + WhisperX
-    # transcription pipelines land in subsequent PRs (CC's queue track B
-    # step 2 + step 3). User opts in to download per-episode by moving
-    # the row from 'new' -> 'queued' via /podcasts/episodes/set-status.
+    # Feed registration authorizes automatic metadata polling. Audio download,
+    # local transcription, and corpus publishing require the separate
+    # per-feed auto_ingest flag, which defaults off.
 
     def _parse_feed_id(self, body):
         try:
@@ -10156,9 +12896,14 @@ class Handler(BaseHTTPRequestHandler):
                                           "error": "json object required"})
         feed_url = (body.get("feed_url") or "").strip()
         interval = body.get("poll_interval_min") or 60
+        auto_ingest = body.get("auto_ingest", False)
+        if not isinstance(auto_ingest, bool):
+            return self._send_json(400, {
+                "ok": False, "error": "auto_ingest (boolean) required"})
         try:
             row = podcasts.add_feed(_get_index(), feed_url,
-                                       poll_interval_min=int(interval))
+                                       poll_interval_min=int(interval),
+                                       auto_ingest=auto_ingest)
         except ValueError as e:
             return self._send_json(400, {"ok": False, "error": str(e)})
         except Exception as e:
@@ -10200,10 +12945,36 @@ class Handler(BaseHTTPRequestHandler):
         return self._send_json(200, {"ok": True, "changed": changed,
                                       "enabled": enabled})
 
+    def _handle_podcasts_feed_set_auto_ingest(self, body):
+        if not isinstance(body, dict):
+            return self._send_json(400, {"ok": False,
+                                          "error": "json object required"})
+        feed_id, err = self._parse_feed_id(body)
+        if err:
+            return self._send_json(400, {"ok": False, "error": err})
+        auto_ingest = body.get("auto_ingest")
+        if not isinstance(auto_ingest, bool):
+            return self._send_json(400, {"ok": False,
+                "error": "auto_ingest (boolean) required"})
+        try:
+            changed = podcasts.set_feed_auto_ingest(
+                _get_index(), feed_id, auto_ingest)
+        except podcasts.ManagedBySubscription as exc:
+            # Phase 3: the boolean cannot grant or revoke standing capture;
+            # the dashboard must run the confirmed consent operation.
+            return self._send_json(409, {
+                "ok": False, "error": "managed_by_subscription",
+                "source_id": exc.source_id,
+                "consent_route": SOURCES_INTENT_ROUTE,
+                "message": str(exc)})
+        except Exception as exc:
+            log.exception("/podcasts/feeds/set-auto-ingest failed")
+            return self._send_json(500, {"ok": False, "error": str(exc)})
+        return self._send_json(200, {
+            "ok": True, "changed": changed, "auto_ingest": auto_ingest})
+
     def _handle_podcasts_feed_poll(self, body):
-        """Manual poll. Body: {feed_id}. Returns the structured
-        per-feed result -- used by the dashboard's "refresh" button +
-        the future background poller can call the same function."""
+        """Manual poll. Body: {feed_id}. Uses the same path as watch mode."""
         if not isinstance(body, dict):
             return self._send_json(400, {"ok": False,
                                           "error": "json object required"})
@@ -10211,7 +12982,7 @@ class Handler(BaseHTTPRequestHandler):
         if err:
             return self._send_json(400, {"ok": False, "error": err})
         try:
-            result = podcasts.poll_feed(_get_index(), feed_id)
+            result = _poll_podcast_feed_for_watch(feed_id)
         except Exception as e:
             log.exception("/podcasts/feeds/poll failed")
             return self._send_json(500, {"ok": False, "error": str(e)})
@@ -10307,8 +13078,8 @@ class Handler(BaseHTTPRequestHandler):
         """POST /podcasts/episodes/transcribe {episode_id, model?,
         diarize?, consent_given?, language?}.
 
-        Synchronous. Runs WhisperX (lazy) on the downloaded MP3, writes
-        the transcript JSON next to it, persists the per-episode state.
+        Queues one durable background job. The single below-normal-priority
+        worker runs WhisperX on the downloaded MP3 and persists progress.
         Returns 503 with install hints when whisperx isn't importable.
         Returns 412 when first-time model download needs consent."""
         if not isinstance(body, dict):
@@ -10320,84 +13091,54 @@ class Handler(BaseHTTPRequestHandler):
             return self._send_json(400, {
                 "ok": False, "error": "episode_id (integer) required"})
 
-        episode = podcasts.get_episode(_get_index(), episode_id)
-        if episode is None:
-            return self._send_json(404, {"ok": False,
-                                          "error": "episode not found"})
-        if not episode.get("audio_local_path"):
-            return self._send_json(400, {
-                "ok": False,
-                "error": ("episode has no audio_local_path -- run "
-                          "/podcasts/episodes/download first")})
-        if not whisper_runner.is_whisperx_available():
-            return self._send_json(503, {
-                "ok": False,
-                "whisperx_available": False,
-                "error": ("whisperx runtime not installed. Install via "
-                          "the Setup page (consent-gated dependency; "
-                          "not bundled with the helper to keep the "
-                          "install footprint small).")})
-
         settings = _read_settings() or {}
         model = whisper_runner.normalize_model(
             body.get("model") or settings.get("whisper_model"))
-        diarize = bool(body.get("diarize")
-                         if body.get("diarize") is not None
-                         else settings.get("diarization_default"))
+        # Phase 6 (phase6-v1): an explicit ``diarize`` must be a JSON boolean
+        # (null, 0/1 and strings are refused); a missing key uses the saved
+        # default, which is False when the setting is absent.
+        if "diarize" in body:
+            if type(body["diarize"]) is not bool:
+                return self._send_json(400, {
+                    "ok": False,
+                    "error": "diarize must be a boolean when provided"})
+            diarize = body["diarize"]
+        else:
+            diarize = bool(settings.get("diarization_default"))
         consent_given = bool(body.get("consent_given"))
         language = body.get("language")
+        result, status = _queue_podcast_transcription(
+            episode_id, model=model, language=language, diarize=diarize,
+            consent_given=consent_given)
+        return self._send_json(status, result)
 
-        # Flip the row state so the dashboard's Activity tab shows the
-        # transcription as in-flight while we work.
-        whisper_runner.update_episode_transcript_state(
-            _get_index(), episode_id,
-            status=whisper_runner.STATUS_RUNNING,
-            model_used=model)
-
-        from pathlib import Path as _P
-        audio_path = _P(episode["audio_local_path"])
+    def _handle_podcasts_episode_to_corpus(self, body):
+        """POST /podcasts/episodes/to-corpus {episode_id}."""
+        if not isinstance(body, dict):
+            return self._send_json(400, {"ok": False,
+                                          "error": "json object required"})
         try:
-            transcript = whisper_runner.transcribe_audio(
-                audio_path, data_root=DATA_ROOT,
-                model_size=model, language=language,
-                diarize=diarize, consent_given=consent_given)
-        except PermissionError as e:
-            whisper_runner.update_episode_transcript_state(
-                _get_index(), episode_id,
-                status=whisper_runner.STATUS_QUEUED,  # awaiting consent
-                error=str(e))
-            return self._send_json(412, {
-                "ok": False, "consent_required": True,
-                "model": model, "error": str(e)})
-        except RuntimeError as e:
-            whisper_runner.update_episode_transcript_state(
-                _get_index(), episode_id,
-                status=whisper_runner.STATUS_FAILED,
-                error=str(e))
-            return self._send_json(500, {"ok": False, "error": str(e)})
-        except FileNotFoundError as e:
-            whisper_runner.update_episode_transcript_state(
-                _get_index(), episode_id,
-                status=whisper_runner.STATUS_FAILED,
-                error=str(e))
-            return self._send_json(404, {"ok": False, "error": str(e)})
-
-        out_path = whisper_runner.write_transcript(
-            transcript, audio_path=audio_path)
-        whisper_runner.update_episode_transcript_state(
-            _get_index(), episode_id,
-            status=whisper_runner.STATUS_DONE,
-            transcript_path=out_path,
-            model_used=model,
-            diarization_ran=transcript.get("diarization_ran", False))
-        return self._send_json(200, {
-            "ok": True, "episode_id": episode_id,
-            "transcript_path": str(out_path),
-            "model": transcript["model"],
-            "language": transcript["language"],
-            "segments": len(transcript["segments"]),
-            "diarization_ran": transcript["diarization_ran"],
-        })
+            episode_id = int(body.get("episode_id"))
+        except (TypeError, ValueError):
+            return self._send_json(400, {
+                "ok": False, "error": "episode_id (integer) required"})
+        try:
+            result = podcasts.episode_to_corpus(
+                _get_index(), episode_id, data_root=DATA_ROOT)
+        except LookupError as exc:
+            return self._send_json(404, {"ok": False, "error": str(exc)})
+        except FileNotFoundError as exc:
+            return self._send_json(409, {"ok": False, "error": str(exc)})
+        except ValueError as exc:
+            return self._send_json(422, {"ok": False, "error": str(exc)})
+        except Exception as exc:
+            log.exception("/podcasts/episodes/to-corpus failed")
+            return self._send_json(500, {"ok": False, "error": str(exc)})
+        episode = podcasts.get_episode(_get_index(), episode_id) or {}
+        maybe_toast(
+            "Podcast added to Uoink",
+            f"{episode.get('title') or 'The episode'} is ready in your library.")
+        return self._send_json(200, result)
 
     # ---- v3.1 mobile playlist monitor --------------------------------
     # Track C from the v3.1 build plan. User maintains a YouTube
@@ -10504,9 +13245,12 @@ class Handler(BaseHTTPRequestHandler):
                 return None
             return _normalize_youtube_url(f"https://www.youtube.com/watch?v={vid}")
         try:
+            # Phase 3: a subscription-linked playlist is detected through the
+            # service's Atom pull and due-time gate; detection never enqueues.
             result = mobile_playlists.poll_playlist(
                 _get_index(), playlist_id,
-                normalize_video_to_canonical_url=_vid_to_url)
+                normalize_video_to_canonical_url=_vid_to_url,
+                refresh=_refresh_source_via_service)
         except Exception as e:
             log.exception("/playlists/monitored/poll failed")
             return self._send_json(500, {"ok": False, "error": str(e)})
@@ -10613,10 +13357,14 @@ class Handler(BaseHTTPRequestHandler):
         source_results: list[dict] = []
         for pl in sources:
             try:
+                # Phase 3: taste scoring still runs on unlinked playlists but
+                # can no longer enqueue capture; subscription-linked playlists
+                # delegate detection and capture eligibility to the service.
                 result = mobile_playlists.poll_playlist(
                     idx, pl["id"],
                     normalize_video_to_canonical_url=_vid_to_url,
-                    taste_filter=taste_filter)
+                    taste_filter=taste_filter,
+                    refresh=_refresh_source_via_service)
             except Exception as e:
                 log.warning("/auto-uoink/scan poll failed (%s): %s",
                             pl.get("id"), e)
@@ -11253,6 +14001,9 @@ class Handler(BaseHTTPRequestHandler):
         boolean_fields = (
             "comment_intelligence_enabled",
             "hook_type_enabled",
+            "entity_extraction_enabled",   # D-17 -- third background model
+                                            # call; default OFF, key alone
+                                            # never spawns the worker
             "smart_screenshot_picker_enabled",
             "transcript_reliability_auto_check",
             "asr_fallback_enabled",          # CM-11 caption-less video ASR
@@ -11266,6 +14017,7 @@ class Handler(BaseHTTPRequestHandler):
             "writing_show_screenshot_picker",  # v3.3 D-20
             "writing_default_attach_all_screenshots",  # v3.3 D-20
             "auto_uoink_enabled",           # V-3 taste-aware auto-uoink
+            "notifications_enabled",        # Desktop balloons; default ON
             "keep_media",                   # E-1 Zing enabler -- keep
                                             # short-video media after
                                             # extraction (default OFF)
@@ -11275,7 +14027,9 @@ class Handler(BaseHTTPRequestHandler):
                          "obsidian_vault_path",   # Tier 2 + v2.5 S4
                          "role",                  # v3.1 P2
                          "live_stream_behavior",  # v3.1 live
-                         "whisper_model")         # v3.1 A1/podcast
+                         "whisper_model",         # v3.1 A1/podcast
+                         "library_mirror_enabled",
+                         "library_mirror_consent")
         if (
             not any(f in body for f in boolean_fields)
             and not any(f in body for f in integer_fields)
@@ -11375,6 +14129,63 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send_json(400, {
                     "ok": False,
                     "error": "obsidian_vault_path must be a string or null"})
+        if "library_mirror_consent" in body:
+            val = body.get("library_mirror_consent")
+            if val is None:
+                data["library_mirror_consent"] = None
+                data["library_mirror_enabled"] = False
+            elif isinstance(val, dict):
+                parsed = _normalize_mirror_consent(val)
+                if parsed is None:
+                    return self._send_json(400, {
+                        "ok": False,
+                        "error": "library_mirror_consent is invalid",
+                    })
+                dest, dest_err = _validate_mirror_destination_path(
+                    parsed["destination"])
+                if dest_err or dest is None:
+                    return self._send_json(400, {
+                        "ok": False,
+                        "error": dest_err,
+                    })
+                parsed["destination"] = dest
+                old = _normalize_mirror_consent(data.get("library_mirror_consent"))
+                if old and _destinations_differ(old.get("destination"), dest):
+                    # Destination change disables until scope is reselected.
+                    data["library_mirror_enabled"] = False
+                if (data.get("library_mirror_enabled") is True
+                        and _mirror_scope_broadens(old, parsed)):
+                    return self._send_json(400, {
+                        "ok": False,
+                        "error": ("library_mirror enable or broader scope "
+                                  "requires /library/mirror with a dashboard intent"),
+                    })
+                data["library_mirror_consent"] = parsed
+            else:
+                return self._send_json(400, {
+                    "ok": False,
+                    "error": "library_mirror_consent must be an object or null",
+                })
+        if "library_mirror_enabled" in body:
+            val = body.get("library_mirror_enabled")
+            if not isinstance(val, bool):
+                return self._send_json(400, {
+                    "ok": False,
+                    "error": "library_mirror_enabled must be boolean",
+                })
+            if val is True:
+                current_on = data.get("library_mirror_enabled") is True
+                consent = _normalize_mirror_consent(
+                    data.get("library_mirror_consent"))
+                if not current_on or consent is None:
+                    return self._send_json(400, {
+                        "ok": False,
+                        "error": ("library_mirror enable or broader scope "
+                                  "requires /library/mirror with a dashboard intent"),
+                    })
+                data["library_mirror_enabled"] = True
+            else:
+                data["library_mirror_enabled"] = False
         if "role" in body:
             raw_role = body.get("role")
             if raw_role is None or raw_role == "":
@@ -12075,11 +14886,24 @@ class Handler(BaseHTTPRequestHandler):
         if name not in tools.TOOL_REGISTRY:
             return self._send_json(404, {"ok": False,
                                          "error": "tool not found"})
-        validation_error = openapi_bridge.validate_arguments(
-            body, tools.TOOL_REGISTRY[name].input_schema)
-        if validation_error:
-            return self._send_json(400, {"ok": False,
-                                         "error": validation_error})
+        # getattr: test doubles for the tools module predate the library
+        # tools and expose only TOOL_REGISTRY (tests/test_openapi_bridge.py).
+        if name in getattr(tools, "LIBRARY_TOOL_NAMES", ()):
+            # Living Library Phase 2: the frozen schemas use $ref/oneOf/
+            # const/pattern, which openapi_bridge.validate_arguments skips.
+            # The adapters' validator is the common input contract on every
+            # transport; run it here so the HTTP 400 body is the same
+            # contract envelope /mcp/v1 and the registry return (there at
+            # HTTP 200 inside the JSON-RPC result).
+            schema_error = tools.library_validate_arguments(name, body)
+            if schema_error is not None:
+                return self._send_json(400, tools.library_invalid_request(schema_error))
+        else:
+            validation_error = openapi_bridge.validate_arguments(
+                body, tools.TOOL_REGISTRY[name].input_schema)
+            if validation_error:
+                return self._send_json(400, {"ok": False,
+                                             "error": validation_error})
         try:
             result = tools.call_tool(name, body if isinstance(body, dict) else {})
         except Exception:
@@ -12091,6 +14915,423 @@ class Handler(BaseHTTPRequestHandler):
         if isinstance(result, dict) and result.get("ok") is False:
             return self._send_json(200, result)
         return self._send_json(200, {"ok": True, "result": result})
+
+    # ---- Living Library: user-intent confirmation (Phase 2, 2026-09-04) ----
+    def _is_dashboard_origin(self) -> bool:
+        """CSRF/origin gate for dashboard confirmation routes. The request
+        must come from the helper's own page: Origin, when present, must be
+        a loopback http origin on the bound port, and Sec-Fetch-Site, when
+        present, must be same-origin or none. Extension and web origins are
+        refused even with a valid token -- a pin or undo is a user's own
+        decision made on a displayed delta, not something a page script or
+        an agent may confirm on the user's behalf. Absent Origin is accepted
+        (same-process WebView fetches), behind the Host and token gates."""
+        origin = (self.headers.get("Origin") or "").strip()
+        if origin:
+            try:
+                parsed = urlparse(origin.lower())
+                hostname = parsed.hostname
+                port = parsed.port
+            except ValueError:
+                return False
+            if parsed.scheme != "http" or hostname not in ALLOWED_HOST_NAMES:
+                return False
+            try:
+                bound_port = self.server.server_address[1]
+            except Exception:
+                bound_port = PORT
+            if (port or 80) != bound_port:
+                return False
+        site = (self.headers.get("Sec-Fetch-Site") or "").strip().lower()
+        if site and site not in ("same-origin", "none"):
+            return False
+        return True
+
+    def _handle_library_intent(self, body: dict):
+        """POST /library/intent -- mint a user_intent_token for one pin/move/
+        unpin or undo (Phase 2 contract, "Pins and authoritative recovery";
+        brief reservation 8). Token gate already cleared by do_POST; this adds
+        the origin gate and a rate limit, then hands the confirmation body to
+        uoink_mcp_tools.library_mint_user_intent, which validates the canonical
+        operation against the frozen tool schema and asks the service to mint,
+        store and return the five-minute capability bound to that operation,
+        the expected revision and this dashboard session. No registry tool
+        can reach this route's authority."""
+        if not self._is_dashboard_origin():
+            log.info("POST %s rejected (origin=%r, sec-fetch-site=%r)",
+                     LIBRARY_INTENT_ROUTE, self.headers.get("Origin"),
+                     self.headers.get("Sec-Fetch-Site"))
+            return self._send_json(403, {"ok": False, "error": "forbidden"})
+        tools = _mcp_tools_module()
+        try:
+            result = tools.library_mint_user_intent(
+                body, session_hash=_library_session_hash())
+        except Exception:
+            log.exception("%s failed", LIBRARY_INTENT_ROUTE)
+            return self._send_json(500, {"ok": False, "error": "intent minting failed"})
+        code = (result.get("error") or {}).get("code") if result.get("ok") is False else None
+        if code == "invalid_request":
+            return self._send_json(400, result)
+        if code == "rate_limited":
+            return self._send_json(429, result)
+        return self._send_json(200, result)
+
+    # ---- Phase 3 standing sources (run AM) --------------------------------
+    # Every route below calls the same service the MCP registry tools call
+    # (uoink_mcp_tools.sources_call), with the contract envelope; HTTP status
+    # mirrors the envelope's error code. Reads never enroll, poll or mutate.
+
+    @staticmethod
+    def _sources_http_status(result: dict) -> int:
+        if result.get("ok") is True:
+            return 200
+        code = (result.get("error") or {}).get("code")
+        return {
+            "validation_error": 400, "invalid_request": 400, "invalid_cursor": 400,
+            "unsupported_source": 400, "not_found": 404, "source_archived": 409,
+            "stale_revision": 409, "stale_cursor": 409, "idempotency_conflict": 409,
+            "user_intent_required": 403, "invalid_user_intent": 403,
+            "rate_limited": 429, "storage_busy": 503, "service_unavailable": 503,
+        }.get(code, 500)
+
+    def _handle_sources_tool(self, tool_name: str, body):
+        tools = _mcp_tools_module()
+        try:
+            result = tools.sources_call(tool_name, body, transport="dashboard")
+        except Exception:
+            log.exception("/sources %s failed", tool_name)
+            return self._send_json(500, source_subscriptions.error_envelope(
+                "internal_error", "The source registry raised; see the helper log."))
+        return self._send_json(self._sources_http_status(result), result)
+
+    def _handle_sources_list(self):
+        qs = parse_qs(urlparse(self.path).query)
+        args: dict = {}
+        for key in ("kind", "consent_state", "cursor"):
+            if qs.get(key):
+                args[key] = qs[key][0]
+        if qs.get("include_archived"):
+            args["include_archived"] = qs["include_archived"][0] in ("1", "true")
+        if qs.get("limit"):
+            try:
+                args["limit"] = int(qs["limit"][0])
+            except ValueError:
+                args["limit"] = qs["limit"][0]
+        return self._handle_sources_tool("list_sources", args)
+
+    def _handle_sources_status(self):
+        qs = parse_qs(urlparse(self.path).query)
+        args: dict = {}
+        for key in ("source_id", "item_cursor"):
+            if qs.get(key):
+                args[key] = qs[key][0]
+        if qs.get("item_limit"):
+            try:
+                args["item_limit"] = int(qs["item_limit"][0])
+            except ValueError:
+                args["item_limit"] = qs["item_limit"][0]
+        return self._handle_sources_tool("source_status", args)
+
+    def _handle_sources_service_route(self, method: str, body):
+        """Existing-style refresh/archive UI routes, on the same service and
+        the same due-time/lease gate (contract, registry section)."""
+        if not self._is_dashboard_origin():
+            return self._send_json(403, {"ok": False, "error": "forbidden"})
+        tools = _mcp_tools_module()
+        try:
+            result = tools.sources_service_route(
+                method, body, session_hash=_library_session_hash())
+        except Exception:
+            log.exception("/sources %s failed", method)
+            return self._send_json(500, source_subscriptions.error_envelope(
+                "internal_error", "The source registry raised; see the helper log."))
+        if method == "refresh_source" and isinstance(result, dict) and result.get("ok") is True:
+            _mirror_event("source_refresh")  # seam: source_refresh
+        return self._send_json(self._sources_http_status(result), result)
+
+    def _handle_sources_consent_intent(self, body: dict):
+        """POST /sources/consent-intent -- the dashboard's source opt-in
+        confirmation mints a five-minute, single-operation capability bound
+        to the canonical set_source_consent operation, the displayed source
+        and cursor revisions, and this dashboard session. Same posture as
+        /library/intent: origin/CSRF gate here, schema and binding in the
+        service; no registry tool can reach this route's authority."""
+        if not self._is_dashboard_origin():
+            log.info("POST %s rejected (origin=%r, sec-fetch-site=%r)",
+                     SOURCES_INTENT_ROUTE, self.headers.get("Origin"),
+                     self.headers.get("Sec-Fetch-Site"))
+            return self._send_json(403, {"ok": False, "error": "forbidden"})
+        tools = _mcp_tools_module()
+        try:
+            result = tools.sources_mint_consent_intent(
+                body, session_hash=_library_session_hash())
+        except Exception:
+            log.exception("%s failed", SOURCES_INTENT_ROUTE)
+            return self._send_json(500, source_subscriptions.error_envelope(
+                "internal_error", "Consent intent minting failed; see the helper log."))
+        return self._send_json(self._sources_http_status(result), result)
+
+    def _handle_library_mirror_intent(self, body: dict):
+        """POST /library/mirror-intent -- dashboard opt-in confirmation mints
+        a five-minute, single-operation capability bound to destination,
+        scope, allowlist, and this dashboard session. Same posture as
+        /sources/consent-intent: origin/CSRF gate here; no registry tool
+        can reach this route's authority."""
+        if not self._is_dashboard_origin():
+            log.info("POST %s rejected (origin=%r, sec-fetch-site=%r)",
+                     LIBRARY_MIRROR_INTENT_ROUTE, self.headers.get("Origin"),
+                     self.headers.get("Sec-Fetch-Site"))
+            return self._send_json(403, {"ok": False, "error": "forbidden"})
+        if not isinstance(body, dict) or set(body) - {"operation", "confirmed"}:
+            return self._send_json(400, {
+                "ok": False,
+                "error": "Expected {operation, confirmed}",
+            })
+        if body.get("confirmed") is not True:
+            return self._send_json(403, {
+                "ok": False,
+                "error": "Local confirmation is required",
+            })
+        operation = body.get("operation")
+        if not isinstance(operation, dict):
+            return self._send_json(400, {
+                "ok": False,
+                "error": "operation must be an object",
+            })
+        if "user_intent_token" in operation:
+            return self._send_json(400, {
+                "ok": False,
+                "error": "Operation must exclude its capability token",
+            })
+        parsed, err = _parse_mirror_scope_args(operation)
+        if err or parsed is None:
+            return self._send_json(400, {"ok": False, "error": err})
+        if not parsed["destination"]:
+            return self._send_json(400, {
+                "ok": False, "error": "destination required"})
+        dest, dest_err = _validate_mirror_destination_path(parsed["destination"])
+        if dest_err or dest is None:
+            return self._send_json(400, {"ok": False, "error": dest_err})
+        parsed["destination"] = dest
+        payload = _mirror_op_payload(
+            parsed["destination"], parsed["scope"], parsed["allowlist"])
+        now = _mirror_now_ms()
+        token = secrets.token_urlsafe(32)
+        expires = now + LIBRARY_MIRROR_INTENT_TTL_MS
+        record = {
+            "token_hash": _mirror_token_hash(token),
+            "op_hash": _mirror_op_hash(payload),
+            "session_hash": _library_session_hash(),
+            "payload": payload,
+            "expires_ms": expires,
+            "consumed_by": None,
+            "response": None,
+        }
+        with _mirror_intents_lock:
+            _purge_expired_mirror_intents(now)
+            _mirror_intents[record["token_hash"]] = record
+        return self._send_json(200, {
+            "ok": True,
+            "user_intent_token": token,
+            "expires_ms": expires,
+            "operation": payload,
+            "notice": LIBRARY_MIRROR_INDEXING_NOTICE,
+        })
+
+    def _handle_library_mirror(self, body: dict):
+        """POST /library/mirror {op: preview|enable|disable|resync|status, ...}.
+        Token-gated by do_POST. Enable/broaden consume a dashboard-minted
+        user_intent_token and require a matching preview."""
+        if not isinstance(body, dict):
+            return self._send_json(400, {
+                "ok": False, "error": "arguments must be an object"})
+        op = body.get("op")
+        if op not in ("preview", "enable", "disable", "resync", "status"):
+            return self._send_json(400, {
+                "ok": False,
+                "error": "op must be preview, enable, disable, resync, or status",
+            })
+        if op == "preview":
+            return self._library_mirror_preview(body)
+        if op == "status":
+            return self._library_mirror_status()
+        if op == "resync":
+            return self._library_mirror_resync()
+        if op == "disable":
+            return self._library_mirror_disable()
+        return self._library_mirror_enable(body)
+
+    def _library_mirror_preview(self, body: dict):
+        parsed, err = _parse_mirror_scope_args(body)
+        if err or parsed is None:
+            return self._send_json(400, {"ok": False, "error": err})
+        if not parsed["destination"]:
+            return self._send_json(400, {
+                "ok": False, "error": "destination required"})
+        payload = _mirror_op_payload(
+            parsed["destination"], parsed["scope"], parsed["allowlist"])
+        mirror = _library_mirror(enabled=False, consent=None)
+        if mirror is None:
+            return self._send_json(200, {
+                "ok": False,
+                "error": "library mirror is unavailable",
+                "notice": LIBRARY_MIRROR_INDEXING_NOTICE,
+            })
+        result = mirror.preview(
+            payload["destination"], payload["scope"], payload["allowlist"])
+        if isinstance(result, dict) and result.get("ok") is True:
+            _remember_mirror_preview(payload)
+            result.setdefault("notice", LIBRARY_MIRROR_INDEXING_NOTICE)
+            result.setdefault("third_party_indexing", LIBRARY_MIRROR_INDEXING_NOTICE)
+        return self._send_json(200, result if isinstance(result, dict) else {
+            "ok": False, "error": "preview failed",
+        })
+
+    def _library_mirror_status(self):
+        settings = _read_settings()
+        consent = _normalize_mirror_consent(settings.get("library_mirror_consent"))
+        enabled = settings.get("library_mirror_enabled") is True
+        mirror = _library_mirror()
+        if mirror is None:
+            return self._send_json(200, {
+                "ok": True,
+                "enabled": enabled,
+                "consent": consent,
+                "pending": 0,
+                "synced": 0,
+                "stale": 0,
+                "conflicts": {},
+                "deletion_pending": 0,
+                "destination": (consent or {}).get("destination"),
+                "scope": (consent or {}).get("scope"),
+                "notice": LIBRARY_MIRROR_INDEXING_NOTICE,
+                "state": "disabled" if not enabled else "unavailable",
+            })
+        result = mirror.status()
+        if not isinstance(result, dict):
+            result = {"ok": False, "error": "status failed"}
+        result.setdefault("consent", consent)
+        result.setdefault("notice", LIBRARY_MIRROR_INDEXING_NOTICE)
+        if consent:
+            result.setdefault("destination", consent.get("destination"))
+            result.setdefault("scope", consent.get("scope"))
+        return self._send_json(200, result)
+
+    def _library_mirror_resync(self):
+        mirror = _library_mirror()
+        if mirror is None:
+            return self._send_json(200, {
+                "ok": True, "enabled": False, "synced": 0, "state": "disabled",
+            })
+        result = mirror.resync()
+        return self._send_json(200, result if isinstance(result, dict) else {
+            "ok": False, "error": "resync failed",
+        })
+
+    def _library_mirror_disable(self):
+        data = _read_settings()
+        data["library_mirror_enabled"] = False
+        data["updated_at"] = _now_iso()
+        try:
+            _write_settings(data)
+        except OSError as e:
+            log.warning("library mirror disable write failed: %s", e)
+            return self._send_json(200, {
+                "ok": False, "error": "settings write failed"})
+        return self._send_json(200, {
+            "ok": True,
+            "enabled": False,
+            "consent": _normalize_mirror_consent(data.get("library_mirror_consent")),
+            "notice": LIBRARY_MIRROR_INDEXING_NOTICE,
+            "settings": _public_settings(data),
+        })
+
+    def _library_mirror_enable(self, body: dict):
+        token = body.get("user_intent_token")
+        if not isinstance(token, str) or not token:
+            return self._send_json(403, {
+                "ok": False, "error": "user_intent_token required"})
+        parsed, err = _parse_mirror_scope_args(body)
+        if err or parsed is None:
+            return self._send_json(400, {"ok": False, "error": err})
+        if not parsed["destination"]:
+            return self._send_json(400, {
+                "ok": False, "error": "destination required"})
+        dest, dest_err = _validate_mirror_destination_path(parsed["destination"])
+        if dest_err or dest is None:
+            return self._send_json(400, {"ok": False, "error": dest_err})
+        parsed["destination"] = dest
+        payload = _mirror_op_payload(
+            parsed["destination"], parsed["scope"], parsed["allowlist"])
+        if not _mirror_preview_matches(payload):
+            return self._send_json(400, {
+                "ok": False,
+                "error": "preview required before enabling the library mirror",
+            })
+        now = _mirror_now_ms()
+        op_hash = _mirror_op_hash(payload)
+        session = _library_session_hash()
+        token_hash = _mirror_token_hash(token)
+        with _mirror_intents_lock:
+            _purge_expired_mirror_intents(now)
+            record = _mirror_intents.get(token_hash)
+            if record is None:
+                return self._send_json(403, {
+                    "ok": False, "error": "invalid_user_intent"})
+            if record.get("session_hash") != session or record.get("op_hash") != op_hash:
+                return self._send_json(403, {
+                    "ok": False, "error": "invalid_user_intent"})
+            if record.get("consumed_by") is not None:
+                if record.get("response"):
+                    return self._send_json(200, record["response"])
+                return self._send_json(403, {
+                    "ok": False, "error": "invalid_user_intent"})
+            if now >= int(record.get("expires_ms") or 0):
+                return self._send_json(403, {
+                    "ok": False, "error": "invalid_user_intent"})
+            data = _read_settings()
+            old = _normalize_mirror_consent(data.get("library_mirror_consent"))
+            if old and _destinations_differ(old.get("destination"), dest):
+                data["library_mirror_enabled"] = False
+            marker = (old or {}).get("marker") if old and not _destinations_differ(
+                (old or {}).get("destination"), dest) else ""
+            if not marker:
+                marker = _read_volume_marker(dest)
+            consent = {
+                "destination": dest,
+                "scope": payload["scope"],
+                "allowlist": list(payload["allowlist"]),
+                "consented_at_ms": now,
+                "marker": marker,
+            }
+            data["library_mirror_consent"] = consent
+            data["library_mirror_enabled"] = True
+            data["updated_at"] = _now_iso()
+            try:
+                _write_settings(data)
+            except OSError as e:
+                log.warning("library mirror enable write failed: %s", e)
+                return self._send_json(200, {
+                    "ok": False, "error": "settings write failed"})
+            record["consumed_by"] = op_hash
+            status = {"ok": True, "enabled": True}
+            mirror = _library_mirror()
+            if mirror is not None:
+                try:
+                    status = mirror.status()
+                except Exception:
+                    log.debug("library mirror status after enable failed",
+                              exc_info=True)
+            response = {
+                "ok": True,
+                "enabled": True,
+                "consent": consent,
+                "status": status,
+                "notice": LIBRARY_MIRROR_INDEXING_NOTICE,
+                "settings": _public_settings(data),
+            }
+            record["response"] = response
+        return self._send_json(200, response)
 
     def _handle_sources_manifest(self):
         return self._send_json(
@@ -12364,6 +15605,215 @@ class Handler(BaseHTTPRequestHandler):
         log.info("GET /yoinks/%s/open-markdown -> %s", video_id, path)
         return self._send_json(200, {"ok": True, "path": str(path)})
 
+    def _handle_yoink_details(self, bare: str):
+        """GET /yoinks/<id>/details -- bounded authenticated saved-media-detail read path.
+        Resolves the item's registered sidecar path from the index, sandboxed to
+        DESKTOP_ROOT, rejecting escapes and symlinks, and bounds the JSON read.
+        Returns only saved fields needed by the dashboard."""
+        from urllib.parse import unquote
+        video_id = unquote(
+            bare[len("/yoinks/"):-len("/details")]).strip("/")
+        if not video_id:
+            return self._send_json(400, {"ok": False,
+                                         "error": "video_id required"})
+        row = _get_index().get_yoink(video_id)
+        if row is None:
+            return self._send_json(404, {"ok": False,
+                                         "error": "uoink not found"})
+        sidecar_raw = (row.get("sidecar_path") or "").strip()
+        if not sidecar_raw:
+            return self._send_json(404, {
+                "ok": False,
+                "error": "This uoink has no saved details on disk yet.",
+                "state": "no_sidecar"})
+        if _path_has_parent_ref(sidecar_raw):
+            return self._send_json(400, {"ok": False,
+                                         "error": "sidecar path escapes Uoink root"})
+        try:
+            p = Path(sidecar_raw)
+            if not p.is_absolute():
+                return self._send_json(400, {"ok": False,
+                                             "error": "sidecar path escapes Uoink root"})
+            # Lexical containment must precede metadata probes on this path.
+            p.relative_to(DESKTOP_ROOT.absolute())
+            cur = p
+            while True:
+                if cur.is_symlink():
+                    return self._send_json(400, {"ok": False,
+                                                 "error": "symlink sidecar rejected"})
+                try:
+                    if getattr(cur.lstat(), "st_file_attributes", 0) & 0x400:
+                        return self._send_json(400, {"ok": False,
+                                                     "error": "symlink sidecar rejected"})
+                except OSError:
+                    pass
+                if cur == cur.parent:
+                    break
+                cur = cur.parent
+
+            root = DESKTOP_ROOT.resolve()
+            resolved = p.resolve()
+            if any(part == ".." for part in resolved.parts):
+                return self._send_json(400, {"ok": False,
+                                             "error": "sidecar path escapes Uoink root"})
+            resolved.relative_to(root)
+        except (ValueError, OSError):
+            return self._send_json(400, {"ok": False,
+                                         "error": "sidecar path escapes Uoink root"})
+
+        if not resolved.exists() or not resolved.is_file():
+            return self._send_json(404, {"ok": False,
+                                         "error": "sidecar file not found"})
+
+        try:
+            if resolved.stat().st_size > MAX_SIDECAR_BYTES:
+                return self._send_json(400, {"ok": False,
+                                             "error": "sidecar file too large"})
+            with open(resolved, "rb") as f:
+                content = f.read(MAX_SIDECAR_BYTES + 1)
+            if len(content) > MAX_SIDECAR_BYTES:
+                return self._send_json(400, {"ok": False,
+                                             "error": "sidecar file too large"})
+        except UnicodeDecodeError:
+            return self._send_json(400, {"ok": False,
+                                         "error": "malformed sidecar JSON"})
+        except OSError as e:
+            log.warning("/yoinks/%s/details read failed: %s", video_id, e)
+            return self._send_json(500, {"ok": False,
+                                         "error": "could not read sidecar"})
+
+        def finite_float(value):
+            number = float(value)
+            if not math.isfinite(number):
+                raise ValueError("non-finite JSON number")
+            return number
+
+        def reject_constant(value):
+            raise ValueError("non-finite JSON constant")
+
+        try:
+            data = json.loads(content.decode("utf-8"), parse_float=finite_float,
+                              parse_constant=reject_constant)
+            # Enforce an explicit bound independent of the process recursion limit.
+            pending = [(data, 0)]
+            while pending:
+                value, depth = pending.pop()
+                if isinstance(value, (dict, list)):
+                    if depth >= 64:
+                        raise ValueError("sidecar JSON too deeply nested")
+                    children = value.values() if isinstance(value, dict) else value
+                    pending.extend((child, depth + 1) for child in children)
+        except (ValueError, TypeError, RecursionError):
+            return self._send_json(400, {"ok": False,
+                                         "error": "malformed sidecar JSON"})
+
+        if not isinstance(data, dict):
+            return self._send_json(400, {"ok": False,
+                                         "error": "sidecar JSON must be an object"})
+
+        # Return only saved fields needed by the dashboard
+        allowed_scalar_keys = (
+            "video_id", "youtube_id", "url", "source_url", "platform",
+            "source_platform", "media_type", "content_type", "kind",
+            "format", "source_type", "title", "episode_title", "podcast_title",
+            "feed_url", "channel", "author", "host", "duration_seconds",
+            "is_podcast", "is_live", "live_status",
+        )
+        filtered = {}
+        for key in allowed_scalar_keys:
+            if key in data:
+                val = data[key]
+                if isinstance(val, (str, int, float, bool)) or val is None:
+                    filtered[key] = val
+
+        raw_shots = data.get("screenshots")
+        if isinstance(raw_shots, list):
+            clean_shots = []
+            for shot in raw_shots:
+                if isinstance(shot, dict):
+                    clean_shot = {}
+                    for k in ("path", "filename", "timestamp", "timestamp_seconds",
+                              "start", "time", "absolute_path", "file_path", "index",
+                              "width", "height"):
+                        if k in shot and isinstance(shot[k], (str, int, float, bool)):
+                            clean_shot[k] = shot[k]
+                    clean_shots.append(clean_shot)
+            filtered["screenshots"] = clean_shots
+
+        raw_transcript = data.get("transcript")
+        if isinstance(raw_transcript, str):
+            filtered["transcript"] = raw_transcript
+        elif isinstance(raw_transcript, list):
+            clean_segments = []
+            for seg in raw_transcript:
+                if isinstance(seg, dict):
+                    clean_seg = {}
+                    for k in ("start", "start_seconds", "end", "end_seconds", "text", "content", "speaker",
+                              "speaker_label", "speaker_id"):
+                        if k in seg and isinstance(seg[k], (str, int, float, bool)):
+                            clean_seg[k] = seg[k]
+                    clean_segments.append(clean_seg)
+                elif isinstance(seg, str):
+                    clean_segments.append(seg)
+            filtered["transcript"] = clean_segments
+
+        raw_segments = data.get("segments")
+        if isinstance(raw_segments, list):
+            clean_segments = []
+            for seg in raw_segments:
+                if isinstance(seg, dict):
+                    clean_seg = {}
+                    for k in ("start", "start_seconds", "end", "end_seconds",
+                              "text", "content", "speaker", "speaker_label",
+                              "speaker_id"):
+                        if k in seg and isinstance(seg[k], (str, int, float, bool)):
+                            clean_seg[k] = seg[k]
+                    clean_segments.append(clean_seg)
+                elif isinstance(seg, str):
+                    clean_segments.append(seg)
+            filtered["segments"] = clean_segments
+
+        def clean_speakers(raw):
+            def label_fields(speaker):
+                return {key: speaker[key] for key in ("name", "label", "id")
+                        if isinstance(speaker.get(key), str) and speaker[key].strip()}
+            if isinstance(raw, list):
+                return [clean for speaker in raw
+                        if (clean := speaker if isinstance(speaker, str)
+                            else label_fields(speaker) if isinstance(speaker, dict)
+                            else None)]
+            if isinstance(raw, dict):
+                # Map keys are the saved labels; arbitrary map values are private.
+                return {key: label_fields(value) if isinstance(value, dict) else {}
+                        for key, value in raw.items() if key.strip()}
+            return []
+
+        if isinstance(data.get("speakers"), (list, dict)):
+            filtered["speakers"] = clean_speakers(data["speakers"])
+
+        raw_diar = data.get("diarization")
+        if isinstance(raw_diar, dict):
+            clean_diar = {}
+            if isinstance(raw_diar.get("speakers"), (list, dict)):
+                clean_diar["speakers"] = clean_speakers(raw_diar["speakers"])
+            if "segments" in raw_diar and isinstance(raw_diar["segments"], list):
+                clean_diar_segs = []
+                for s in raw_diar["segments"]:
+                    if isinstance(s, dict):
+                        clean_diar_segs.append({
+                            k: s[k] for k in ("start", "start_seconds", "end", "end_seconds", "speaker",
+                                             "speaker_label", "speaker_id")
+                            if k in s and isinstance(s[k], (str, int, float))
+                        })
+                clean_diar["segments"] = clean_diar_segs
+            filtered["diarization"] = clean_diar
+
+        return self._send_json(200, {
+            "ok": True,
+            "video_id": video_id,
+            "details": filtered,
+        })
+
     def do_DELETE(self):
         # C-04 Host allowlist first, then token, same as do_POST.
         if self._reject_bad_host():
@@ -12394,12 +15844,28 @@ class Handler(BaseHTTPRequestHandler):
         # the raw body itself.
         if self.path.split("?", 1)[0] == "/images":
             return self._handle_create_image()
+        bare = self.path.split("?", 1)[0]
         try:
-            body = self._read_json_body()
+            body = self._read_json_body(strict=_strict_json_route(bare))
         except Handler._BodyError as e:
             return self._send_json(e.status, {"ok": False, "error": e.message})
 
-        bare = self.path.split("?", 1)[0]
+        if bare == LIBRARY_INTENT_ROUTE:
+            return self._handle_library_intent(body)
+        if bare == LIBRARY_MIRROR_INTENT_ROUTE:
+            return self._handle_library_mirror_intent(body)
+        if bare == LIBRARY_MIRROR_ROUTE:
+            return self._handle_library_mirror(body)
+        if bare == SOURCES_INTENT_ROUTE:
+            return self._handle_sources_consent_intent(body)
+        if bare == "/sources":
+            return self._handle_sources_tool("register_source", body)
+        if bare == "/sources/consent":
+            return self._handle_sources_tool("set_source_consent", body)
+        if bare == "/sources/refresh":
+            return self._handle_sources_service_route("refresh_source", body)
+        if bare == "/sources/archive":
+            return self._handle_sources_service_route("archive_source", body)
         if bare == "/settings":
             return self._handle_settings_post(body)
         if bare == "/settings/output-folder/pick":
@@ -12526,12 +15992,16 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_podcasts_feed_poll(body)
         if bare == "/podcasts/feeds/set-enabled":
             return self._handle_podcasts_feed_set_enabled(body)
+        if bare == "/podcasts/feeds/set-auto-ingest":
+            return self._handle_podcasts_feed_set_auto_ingest(body)
         if bare == "/podcasts/episodes/set-status":
             return self._handle_podcasts_episode_set_status(body)
         if bare == "/podcasts/episodes/download":
             return self._handle_podcasts_episode_download(body)
         if bare == "/podcasts/episodes/transcribe":
             return self._handle_podcasts_episode_transcribe(body)
+        if bare == "/podcasts/episodes/to-corpus":
+            return self._handle_podcasts_episode_to_corpus(body)
         if bare == "/playlists/monitored":
             return self._handle_monitored_playlist_add(body)
         if bare == "/playlists/monitored/remove":
@@ -12706,10 +16176,20 @@ class Handler(BaseHTTPRequestHandler):
     def _handle_jobs_list(self):
         qs = parse_qs(urlparse(self.path).query)
         kind = (qs.get("kind") or [None])[0]
-        if kind not in (None, "", "playlist", "single"):
+        if kind not in (
+            None,
+            "",
+            "playlist",
+            "single",
+            "podcast_transcribe",
+            "notification",
+        ):
             return self._send_json(400, {
                 "ok": False,
-                "error": "kind must be playlist or single",
+                "error": (
+                    "kind must be playlist, single, podcast_transcribe, "
+                    "or notification"
+                ),
             })
         self._send_json(200, {
             "ok": True,
@@ -12961,6 +16441,14 @@ class Handler(BaseHTTPRequestHandler):
             return self._send_json(
                 500, {"ok": False, "error": "could not move folder to trash"})
         log.info("memory delete: %s -> %s", video_id, dst)
+        # Phase 3: corpus deletion marks every matching standing observation
+        # deleted so automatic rediscovery cannot resurrect the item; the
+        # successful capture-key record stays as a tombstone (contract).
+        try:
+            _source_service().note_corpus_deleted([video_id])
+        except Exception:
+            log.exception("standing capture: deletion tombstone failed for %s", video_id)
+        _mirror_event("soft_delete", video_id=video_id)  # seam: soft_delete
         self._send_json(200, {
             "ok": True,
             "restored_at": None,
@@ -12998,6 +16486,7 @@ class Handler(BaseHTTPRequestHandler):
                 500, {"ok": False, "error": "could not restore folder"})
         idx.restore_yoink(video_id)
         log.info("memory restore: %s <- %s", video_id, trash)
+        _mirror_event("restore", video_id=video_id)  # seam: restore
         self._send_json(200, {"ok": True, "restored_at": _now_iso()})
 
     # ---- /queue/status ----
@@ -13382,7 +16871,23 @@ class Handler(BaseHTTPRequestHandler):
         title = None
         folder = None
         current_phase = "metadata"
-        with _extract_lock:
+        with _manual_extraction_ownership(url) as ownership:  # AS-03 shared dispatcher lock
+            if not ownership.ok:
+                # AS-03: unavailable ownership is a retryable failure.
+                log.info("POST /extract -> 503 (%s)", ownership.error)
+                return self._send_json(503, {"ok": False, "error": ownership.error,
+                                             "retryable": True})
+            # AS-03 (run AT-4): consume the post-lock recheck. A conflicting
+            # row blocks before any overwrite; a capture this request waited
+            # behind is reused as-is (no metadata fetch, no acquisition).
+            if ownership.conflict:
+                log.info("POST /extract -> 409 (%s)", ownership.conflict)
+                return self._send_json(409, {"ok": False, "error": ownership.conflict,
+                                             "identity_conflict": True})
+            if ownership.completed_while_waiting and ownership.reused:
+                _record_single_extract_job(url, started_at, result=ownership.reused)
+                log.info("POST /extract -> ok (reused capture of %s)", ownership.already_captured)
+                return self._send_json(200, ownership.reused)
             try:
                 # One metadata fetch up front — used both to derive the folder
                 # slug here and re-used by _run_extraction (avoids a 2nd call).
@@ -13525,26 +17030,55 @@ class Handler(BaseHTTPRequestHandler):
         sess_folder = _session_folder(session_id)
         # Disambiguate the per-video subfolder by title — fetch metadata once
         # and re-use it inside _run_extraction.
-        with _extract_lock:
+        with _manual_extraction_ownership(url) as ownership:  # AS-03 shared dispatcher lock
+            if not ownership.ok:
+                # AS-03: unavailable ownership is a retryable failure.
+                log.info("POST /session/add -> 503 (%s)", ownership.error)
+                return self._send_json(503, {"ok": False, "error": ownership.error,
+                                             "retryable": True})
+            if ownership.conflict:
+                # AS-03 (run AT-4): an identity conflict blocks before overwrite.
+                log.info("POST /session/add -> 409 (%s)", ownership.conflict)
+                return self._send_json(409, {"ok": False, "error": ownership.conflict,
+                                             "identity_conflict": True,
+                                             "session_id": session_id})
             try:
-                metadata = _fetch_metadata(url)
-                title = metadata.get("title") or "Untitled"
-                topic = _classify_topic(metadata)
-                video_slug = slugify(title) or "video"
-                target = sess_folder / video_slug
-                # Disambiguate if same-named video already added.
-                if target.exists():
-                    video_slug = f"{video_slug}_{uuid.uuid4().hex[:6]}"
+                if ownership.completed_while_waiting and ownership.reused:
+                    # AS-03 (run AT-4): the capture this request waited behind
+                    # completed; reuse its folder in the session, no fetch,
+                    # no second acquisition.
+                    reused = ownership.reused
+                    title = reused.get("title") or "Untitled"
+                    video_slug = slugify(title) or "video"
                     target = sess_folder / video_slug
+                    if target.exists():
+                        video_slug = f"{video_slug}_{uuid.uuid4().hex[:6]}"
+                        target = sess_folder / video_slug
+                    source_folder = Path(reused["folder"]) if reused.get("folder") else None
+                    if source_folder is None or not source_folder.is_dir():
+                        raise FileNotFoundError("completed capture folder is missing")
+                    shutil.copytree(source_folder, target)
+                    result = dict(reused, title=title, video_slug=video_slug,
+                                  folder=str(target), caption_count=0)
+                else:
+                    metadata = _fetch_metadata(url)
+                    title = metadata.get("title") or "Untitled"
+                    topic = _classify_topic(metadata)
+                    video_slug = slugify(title) or "video"
+                    target = sess_folder / video_slug
+                    # Disambiguate if same-named video already added.
+                    if target.exists():
+                        video_slug = f"{video_slug}_{uuid.uuid4().hex[:6]}"
+                        target = sess_folder / video_slug
 
-                # Session adds don't go to the clipboard one-by-one (the
-                # whole session is concatenated and copied at /session/close),
-                # so skip the per-video paste-corpus generation -- it would
-                # just inflate the runtime message payload for nothing.
-                result = _run_extraction(url, interval, target,
-                                          notify=False,
-                                          metadata=metadata, topic=topic,
-                                          generate_paste=False)
+                    # Session adds don't go to the clipboard one-by-one (the
+                    # whole session is concatenated and copied at /session/close),
+                    # so skip the per-video paste-corpus generation -- it would
+                    # just inflate the runtime message payload for nothing.
+                    result = _run_extraction(url, interval, target,
+                                              notify=False,
+                                              metadata=metadata, topic=topic,
+                                              generate_paste=False)
             except BaseException as e:
                 msg = friendly_error(e)
                 detail = machine_error_detail(e)
@@ -13706,8 +17240,8 @@ def _bundled_icon_path() -> str | None:
     return str(candidate) if candidate.is_file() else None
 
 
-def maybe_toast(title: str, body: str, icon_path: str | None = None):
-    """Best-effort transient notification when the helper finishes booting.
+def maybe_toast(title: str, body: str, icon_path: str | None = None) -> bool:
+    """Show a courteous desktop notification or queue it in Activity.
 
     Sprint 19.5 Stage 1: now delegated to _platform.show_toast. Windows
     uses System.Windows.Forms.NotifyIcon via PowerShell, macOS uses
@@ -13717,10 +17251,34 @@ def maybe_toast(title: str, body: str, icon_path: str | None = None):
 
     v2.1: ``icon_path`` (Windows only) points the balloon at the bundled
     uoink.ico so the notification carries the brand mark; defaults to the
-    bundled icon when one is present."""
+    bundled icon when one is present.
+
+    Desktop notifications default on, but the persisted setting can disable
+    them. A foreground fullscreen window also suppresses them for that moment.
+    Suppression is never data loss: the same title/body becomes a completed
+    ``notification`` record in the dashboard Activity stream.
+    """
+    settings = _read_settings()
+    suppressed_reason = None
+    if not settings.get("notifications_enabled", True):
+        suppressed_reason = "notifications disabled"
+    elif _platform.is_foreground_fullscreen():
+        suppressed_reason = "foreground fullscreen"
+    if suppressed_reason:
+        try:
+            _queue_dashboard_notification(
+                title,
+                body,
+                reason=suppressed_reason,
+            )
+        except Exception as exc:
+            log.warning("notification could not be queued: %s", exc)
+        log.info("desktop notification queued: %s", suppressed_reason)
+        return False
     if icon_path is None:
         icon_path = _bundled_icon_path()
     _platform.show_toast(title, body, icon_path=icon_path)
+    return True
 
 
 def _maybe_post_migration_toast() -> bool:
@@ -13808,10 +17366,13 @@ def _spawn_dashboard_window(*, reason: str) -> bool:
         if script.exists():
             exe = _bundled_interpreter(gui=True) or Path(sys.executable)
             creationflags = 0x08000000 if sys.platform == "win32" else 0
+            env = os.environ.copy()
+            env.update(_install_isolation.child_environ())
             subprocess.Popen(
-                [str(exe), str(script)],
+                [str(exe), str(script), *_install_isolation.child_argv()],
                 cwd=str(HERE),
                 creationflags=creationflags,
+                env=env,
             )
             log.info("dashboard: spawned (%s)", reason)
             return True
@@ -13819,7 +17380,7 @@ def _spawn_dashboard_window(*, reason: str) -> bool:
         log.warning("dashboard: window spawn failed (%s): %s", reason, e)
 
     try:
-        webbrowser.open(f"http://{HOST}:{PORT}/dashboard")
+        webbrowser.open(_install_isolation.helper_url("/dashboard"))
         log.info("dashboard: opened browser fallback (%s)", reason)
         return True
     except Exception as e:
@@ -13834,8 +17395,16 @@ class _YoinkHTTPServer(ThreadingHTTPServer):
     so Ctrl+C still exits promptly."""
     request_queue_size = 16
 
+    def server_bind(self):
+        if _install_isolation.current_binding() is not None:
+            self.allow_reuse_address = False
+            if hasattr(socket, "SO_EXCLUSIVEADDRUSE"):
+                self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_EXCLUSIVEADDRUSE, 1)
+        super().server_bind()
+
 
 def main(*, show_dashboard: bool = False):
+    global _active_migration_version
     # Output directories are created lazily by the write paths themselves
     # (_run_extraction, _atomic_write_text, and the jobs/taxonomy/settings
     # writers all mkdir(parents=True, exist_ok=True) their own parents).
@@ -13856,11 +17425,15 @@ def main(*, show_dashboard: bool = False):
     # idempotent, so this is a near-no-op on every boot after the first. Runs
     # before _get_index() so the copied index.db / settings are in place under
     # the new \Uoink\ DATA_ROOT before anything reads them. Never fatal.
-    try:
-        _mig = migrate_install.run_migration(app_dir=HERE)
-        log.info("install migration: %s", _mig.get("outcome"))
-    except Exception as e:
-        log.warning("install migration raised (non-fatal): %s", e)
+    # Isolated installs must not copy the ordinary Yoink/Uoink library.
+    if _install_isolation.current_binding() is None:
+        try:
+            _mig = migrate_install.run_migration(app_dir=HERE)
+            log.info("install migration: %s", _mig.get("outcome"))
+        except Exception as e:
+            log.warning("install migration raised (non-fatal): %s", e)
+    else:
+        log.info("install migration: skipped_isolated_install")
 
     # Sprint 19 / Wave 1 Fix 4: if Desktop\Yoink isn't writable, swap the
     # active output root to %LOCALAPPDATA%\Uoink\output before the first
@@ -13874,15 +17447,25 @@ def main(*, show_dashboard: bool = False):
         server = _YoinkHTTPServer((HOST, PORT), Handler)
     except OSError as e:
         # Port held by something we couldn't probe via /health (different
-        # app, half-open socket, etc). Exit 0 so the Windows autostart
-        # mechanism doesn't surface an error dialog to the user.
-        log.error("Failed to bind %s:%d -- %s", HOST, PORT, e)
-        sys.exit(0)
+        # app, half-open socket, etc). A non-zero exit lets Task Scheduler's
+        # restart-on-failure policy recover or surface the outage.
+        # Isolated mode never falls back to production port 5179.
+        if _install_isolation.current_binding() is not None:
+            log.error("isolated-port-occupied: failed to bind %s:%d -- %s", HOST, PORT, e)
+        else:
+            log.error("Failed to bind %s:%d -- %s", HOST, PORT, e)
+        sys.exit(1)
 
     _migrate_plaintext_anthropic_key()
     # Sprint 15: open the library index (quarantining + rebuilding a corrupt
     # index.db if needed) before anything reads from or migrates into it.
-    _get_index()
+    _active_migration_version = _get_index().schema_version()
+    podcast_repair = podcasts.repair_stranded_auto_ingest(_get_index())
+    if podcast_repair["marked_eligible"]:
+        log.info(
+            "podcast watch: repaired %d stranded episode eligibility marker(s)",
+            podcast_repair["marked_eligible"],
+        )
     # One-time: fold any pre-index jobs.json / taxonomy.json into index.db.
     _migrate_jobs_json_to_index()
     _migrate_taxonomy_json_to_index()
@@ -13894,8 +17477,20 @@ def main(*, show_dashboard: bool = False):
     # renamed/moved library heals on launch instead of failing action by
     # action while /health smiles.
     _heal_stale_corpus_paths_at_boot()
-    # Hydrate the in-memory job dict from the index.
+    # Hydrate the in-memory job dict from the index (no worker starts here).
     _restore_jobs_from_disk()
+    # Phase 3 (run AM): import the legacy registries once and reconcile the
+    # capture ledger before any scheduler or pending worker can launch
+    # (contract, "Migration 0028 schema" and the restart list). AS-02: this
+    # runs after the durable job records are back in memory, so a started
+    # podcast row whose job survived on disk probes as running, not lost.
+    try:
+        _source_startup_reconciliation()
+    except Exception:
+        log.exception("standing capture startup reconciliation failed")
+    resumed_podcast_jobs = _resume_podcast_transcription_jobs()
+    if resumed_podcast_jobs:
+        log.info("Resumed %d podcast transcription job(s)", resumed_podcast_jobs)
     # Backfill the index from disk in the background so a missing index
     # never delays the bind or /health.
     _start_backfill_thread()
@@ -13913,15 +17508,37 @@ def main(*, show_dashboard: bool = False):
     except Exception as e:
         log.warning("retry worker: reset_running_pending failed: %s", e)
     _start_retry_pending_thread()
+    # Podcast watch mode: registration polls metadata automatically; the
+    # per-feed auto_ingest flag separately controls media work.
+    _start_podcast_feed_scheduler_thread()
 
     # Bind succeeded -- now safe to claim the PID file.
-    pid_file = HERE / "server.pid"
+    isolated = _install_isolation.current_binding()
+    pid_file = isolated.pid_path if isolated is not None else HERE / "server.pid"
     try:
         pid_file.write_text(str(os.getpid()), encoding="utf-8")
     except OSError:
         pass
     import atexit
     atexit.register(lambda: pid_file.unlink(missing_ok=True))
+    if isolated is not None:
+        try:
+            owned_image = (
+                _install_isolation.current_process_executable() or sys.executable
+            )
+            _install_isolation.write_runtime_identity(
+                isolated,
+                pid=os.getpid(),
+                executable=owned_image,
+                script=str(HERE / "server.py"),
+                created_ms=_install_isolation.current_process_created_ms(),
+                nonce=secrets.token_hex(8),
+            )
+        except (OSError, _install_isolation.IsolationError) as e:
+            log.error("isolated identity write failed: %s", e)
+            server.server_close()
+            sys.exit(1)
+        atexit.register(lambda binding=isolated: binding.identity_path.unlink(missing_ok=True))
 
     # S6: advertise only the resident address and bounded capabilities.
     # The lease is deliberately token-free and non-executable; credentials
@@ -13986,8 +17603,13 @@ def main(*, show_dashboard: bool = False):
                 _splash_script = str(HERE / "uoink_splash.py")
                 _splash_pyw = str(_bundled_interpreter(gui=True) or sys.executable)
                 _splash_flags = 0x08000000 if sys.platform == "win32" else 0  # CREATE_NO_WINDOW
-                subprocess.Popen([_splash_pyw, _splash_script],
-                                 creationflags=_splash_flags)
+                _splash_env = os.environ.copy()
+                _splash_env.update(_install_isolation.child_environ())
+                subprocess.Popen(
+                    [_splash_pyw, _splash_script, *_install_isolation.child_argv()],
+                    creationflags=_splash_flags,
+                    env=_splash_env,
+                )
                 splash_spawned = True
                 log.info("splash: spawned (version %s)", VERSION)
         except Exception as e:
@@ -14286,6 +17908,7 @@ def rebuild_index_from_disk(*, root: Path | None = None) -> dict:
     idx = _get_index()
     before = idx.count_corpus()
     _run_backfill(scan_root)
+    clips = idx.rebuild_clips()
     after = idx.count_corpus()
     restored = None
     exports_dir = scan_root / EXPORTS_DIRNAME
@@ -14296,7 +17919,129 @@ def rebuild_index_from_disk(*, root: Path | None = None) -> dict:
             restored = import_corpus_data(newest)
     return {"ok": True, "scanned_root": str(scan_root),
             "rows_before": before, "rows_after": after,
-            "indexed": after - before, "restored": restored}
+            "indexed": after - before, "clips": clips,
+            "restored": restored}
+
+
+def _podcast_corpus_reconciliation_status(*, repair: bool = False) -> dict:
+    """Return the podcast bridge crash-window check without crashing doctor."""
+    try:
+        return podcasts.reconcile_episode_corpus_links(
+            _get_index(), data_root=DATA_ROOT, repair=repair)
+    except Exception as exc:
+        log.exception("podcast corpus reconciliation check failed")
+        return {
+            "ok": False,
+            "checked": 0,
+            "orphaned": None,
+            "repairable": 0,
+            "repaired": 0,
+            "remaining": None,
+            "repair_command": "python server.py --reconcile-podcast-corpus",
+            "items": [],
+            "error": f"{type(exc).__name__}: {exc}",
+        }
+
+
+def _helper_health_status() -> dict:
+    """Probe the resident helper instead of assuming this CLI is the helper."""
+    url = f"http://{HOST}:{PORT}/health"
+    try:
+        with urllib.request.urlopen(url, timeout=1.0) as response:
+            status = int(response.status)
+            payload = json.loads(response.read().decode("utf-8"))
+    except Exception as exc:
+        return {
+            "ok": False,
+            "url": url,
+            "error": f"{type(exc).__name__}: {exc}",
+        }
+
+    if not isinstance(payload, dict):
+        return {
+            "ok": False,
+            "url": url,
+            "status": status,
+            "error": "health response was not a JSON object",
+        }
+    return {
+        "ok": status == 200 and payload.get("ok") is True,
+        "url": url,
+        "status": status,
+        "payload": payload,
+    }
+
+
+def _call_http_registry_tool(name: str, arguments: dict,
+                             *, timeout: float = 30.0) -> dict:
+    """Call one tool on the resident helper's authenticated HTTP registry."""
+    url = f"http://{HOST}:{PORT}/tools/{name}"
+    request = urllib.request.Request(
+        url,
+        data=json.dumps(arguments).encode("utf-8"),
+        headers={
+            "Content-Type": "application/json",
+            "X-Uoink-Token": TOKEN,
+        },
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=timeout) as response:
+            status = int(response.status)
+            raw = response.read().decode("utf-8", errors="replace")
+    except urllib.error.HTTPError as exc:
+        status = int(exc.code)
+        raw = exc.read().decode("utf-8", errors="replace")
+        try:
+            payload = json.loads(raw)
+        except json.JSONDecodeError:
+            payload = None
+        if isinstance(payload, dict):
+            payload.setdefault("status", status)
+            return payload
+        return {
+            "ok": False,
+            "status": status,
+            "error": f"helper returned HTTP {status}",
+        }
+    except (urllib.error.URLError, TimeoutError, OSError) as exc:
+        return {
+            "ok": False,
+            "error": f"could not reach the Uoink helper at {url}: {exc}",
+        }
+
+    try:
+        payload = json.loads(raw)
+    except json.JSONDecodeError:
+        return {
+            "ok": False,
+            "status": status,
+            "error": "helper returned invalid JSON",
+        }
+    if not isinstance(payload, dict):
+        return {
+            "ok": False,
+            "status": status,
+            "error": "helper response was not a JSON object",
+        }
+    return payload
+
+
+def _doctor_heartbeat(helper_health: dict) -> dict:
+    """Lift the resident helper's ``heartbeat`` block out of its /health
+    payload for ``uoink doctor``. Same fields, plus ``stale`` (bool) so the
+    doctor's ``ok`` can fail on a dead scheduler thread. ``available`` is
+    False when the helper did not answer or predates the block."""
+    payload = helper_health.get("payload") if isinstance(helper_health, dict) else None
+    block = payload.get("heartbeat") if isinstance(payload, dict) else None
+    if not isinstance(block, dict):
+        return {"available": False, "stale": False}
+    freshness = block.get("freshness") if isinstance(block.get("freshness"), dict) else {}
+    return {
+        "available": True,
+        "stale": freshness.get("state") == "stale",
+        **block,
+    }
 
 
 def doctor_payload() -> dict:
@@ -14306,21 +18051,44 @@ def doctor_payload() -> dict:
     months while every other check reported green) and C-05 added
     path_integrity (a green doctor while every content action 404s was the
     exact failure mode on the machine that motivated the fix)."""
-    return {
+    helper_health = _helper_health_status()
+    schema_migration = index.schema_migration_status(INDEX_PATH)
+    # Heartbeat semantics (2026-09-04): the doctor reads the same
+    # `heartbeat` block /health serves, and a helper whose scheduler has
+    # not completed a pass within the freshness bound is not healthy even
+    # though its HTTP listener still answers.
+    heartbeat = _doctor_heartbeat(helper_health)
+    payload = {
+        "ok": bool(
+            helper_health.get("ok")
+            and not schema_migration.get("pending")
+            and not schema_migration.get("error")
+            and not heartbeat.get("stale")
+        ),
+        "helper_health": helper_health,
+        "heartbeat": heartbeat,
+        "schema_migration": schema_migration,
         "diagnose": _diagnose_payload(),
         "migration": migrate_install.migration_status(),
         "mcp_stdio": _mcp_stdio_selfcheck(),
         "path_integrity": _path_integrity_status(force=True),
+        "podcast_corpus": _podcast_corpus_reconciliation_status(),
     }
+    return payload
 
 
 def run_cli(argv: list[str]) -> int:
     """Tiny CLI dispatcher for the helper. Returns a process exit code.
 
+    - --isolated-stop / --isolated-upgrade-check : owned isolated identity
+      commands. They never probe port 5179 or kill by name/prefix.
     - --migrate-dry-run : print exactly what the Yoink->Uoink migration would
       copy / move / delete and the keyring entry it'd rewrite, changing
       nothing. De-risks the clean-VM upgrade test.
-    - --doctor          : print the /diagnose payload + migration status.
+    - doctor / --doctor: print the /diagnose payload + migration status.
+    - rebuild-index     : rebuild from the on-disk corpus; optional root.
+    - search <query>    : call search_uoinks on the running HTTP helper.
+    - clips <query>     : call search_clips on the running HTTP helper.
     - --heal-paths      : relink index rows whose saved files moved with
       the output folder (C-05); prints the relink report.
     - --export-corpus   : write engagement/tags/taste/drafts/workspaces/
@@ -14328,12 +18096,33 @@ def run_cli(argv: list[str]) -> int:
     - --import-corpus <file> : restore an export (conservative merge).
     - --rebuild-index [root] : re-index every on-disk sidecar folder, then
       restore the newest export found under <root>/_exports (C-03).
+    - --reconcile-podcast-corpus : re-run the idempotent episode bridge for
+      podcast corpus rows whose episode completion link is missing.
     - --backfill-authors [--dry-run] : Phase 2 sidecar backfill -- fill the
       `author` column + correct hostname `channel` values for X / Reddit / web
       rows from their sidecars. Idempotent; prints before/after counts.
     - --show-dashboard  : run the server, then open the dashboard window.
     (no flag)           : run the server.
     """
+    if _install_isolation.CLI_STOP in argv or _install_isolation.CLI_UPGRADE_CHECK in argv:
+        return _install_isolation.cli(argv)
+    argv = _install_isolation.strip_cli(argv)
+    if argv and argv[0] == "doctor":
+        argv = ["--doctor", *argv[1:]]
+    elif argv and argv[0] == "rebuild-index":
+        argv = ["--rebuild-index", *argv[1:]]
+    elif argv and argv[0] in {"search", "clips"}:
+        command = argv[0]
+        query = " ".join(argv[1:]).strip()
+        if not query:
+            _print_json({"ok": False,
+                         "error": f"{command} needs a query"})
+            return 1
+        tool_name = "search_uoinks" if command == "search" else "search_clips"
+        payload = _call_http_registry_tool(tool_name, {"query": query})
+        _print_json(payload)
+        return 0 if payload.get("ok") else 1
+
     if "--backfill-authors" in argv:
         # Phase 2 (categorization): the SQL migration set platform + YouTube
         # author; this reads each non-YouTube sidecar for the real author and
@@ -14346,9 +18135,14 @@ def run_cli(argv: list[str]) -> int:
     if "--migrate-dry-run" in argv:
         _print_json(migrate_install.run_migration(dry_run=True, app_dir=HERE))
         return 0
+    if "--reconcile-podcast-corpus" in argv:
+        result = _podcast_corpus_reconciliation_status(repair=True)
+        _print_json(result)
+        return 0 if result.get("ok") else 1
     if "--doctor" in argv:
-        _print_json(doctor_payload())
-        return 0
+        payload = doctor_payload()
+        _print_json(payload)
+        return 0 if payload.get("ok") else 1
     if "--heal-paths" in argv:
         # C-05: relink index rows whose files moved with the output folder.
         # An optional path argument searches a different root, for a corpus

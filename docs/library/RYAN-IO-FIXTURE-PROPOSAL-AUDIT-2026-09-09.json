@@ -1,0 +1,34 @@
+{
+  "status": "proposal only; not applied or executed",
+  "files": {
+    "tests/library_work_astra/test_phase4_aw2_acceptance.py": {
+      "original_raw_sha256": "3a52a8091fbe1abf3f5774f975070a0cdc1aa77745b0808803e73cd0d0b19f06",
+      "proposed_lf_sha256": "5c7986bcb3f51f6eb0f5fcb52aef445c982230cfb113b9c42d2bb5544e39c575",
+      "unchanged_assertions": 45,
+      "functions": [
+        "test_d13_replace_syscall_cannot_complete_after_timeout"
+      ]
+    },
+    "tests/library_work_astra/test_phase4_aw3_acceptance.py": {
+      "original_raw_sha256": "27b8be47fa1f0009c8ec39c1d884dfa0911b7d688aa035307cd7bbdf3b42d861",
+      "proposed_lf_sha256": "de7c27456e494ac149ab8e737b9ad1a91ef75f881235e190154e4fb3eec8b905",
+      "unchanged_assertions": 45,
+      "functions": [
+        "interrupted_item_temp",
+        "test_d13_timeout_never_publishes_or_rolls_back_over_user_bytes",
+        "test_d13_timed_out_writer_cannot_erase_a_later_successful_sync"
+      ]
+    },
+    "tests/library_work_astra/test_phase4_aw_acceptance.py": {
+      "original_raw_sha256": "1d61b7dce1c0f1aa71bd7537a3423dbd3f87461b4e3d581e313d013c6becf556",
+      "proposed_lf_sha256": "25c6a9d4add8af0f6a7a281651320e4e7bece107093785480500f0c4ab3a842f",
+      "unchanged_assertions": 60,
+      "functions": [
+        "test_purge_removes_intent_owned_actual_temp_name"
+      ]
+    }
+  },
+  "behavior_assertions_unchanged": true,
+  "patch_sha256": "d64bde5d71b4349cb498bf267e6dda9b73a67f1f673b85889e9ac0c32e256929",
+  "patch_bytes": 4298
+}

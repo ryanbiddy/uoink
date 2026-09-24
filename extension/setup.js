@@ -1077,11 +1077,15 @@ uoinkSuggestedBtn.addEventListener("click", async () => {
 
 if (openInstallFolderBtn) {
   openInstallFolderBtn.addEventListener("click", () => {
-    let path = installFolderPath;
+    const path = installFolderPath;
     if (!path) {
-      path = currentPlatform() === "mac"
-        ? "~/Library/Application Support/Uoink"
-        : "C:\\Users\\hello\\AppData\\Local\\Uoink";
+      // We only know the real install folder once the helper reports it.
+      // Never guess: a hardcoded per-user path (`C:\Users\<someone>\...` or an
+      // unexpanded `~/`) resolves to the wrong folder -- or nothing at all --
+      // on every machine but the one it was written on. The page already shows
+      // `%LOCALAPPDATA%\Uoink` as the hint, which expands in Explorer.
+      console.warn("Install folder unknown (helper has not reported a path yet)");
+      return;
     }
     const fileUrl = "file:///" + path.replace(/\\/g, "/");
     try {

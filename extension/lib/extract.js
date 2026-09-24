@@ -887,7 +887,7 @@
     },
     podcast_feed: {
       label: "podcast", endpoint: "/podcasts/feeds", action: "podcast",
-      note: "Adds the RSS feed so new episodes transcribe locally.",
+      note: "Adds the RSS feed and watches new episode metadata. Audio stays off by default.",
     },
     web_page: {
       label: "page", endpoint: "/extract/page", action: "page", note: "",

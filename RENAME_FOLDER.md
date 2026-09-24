@@ -9,7 +9,7 @@ If for any reason that fails, you can rename manually:
 2. In a fresh PowerShell window, run:
 
    ```
-   cd C:\Users\hello\OneDrive\Desktop
+   cd C:\Users\<you>\OneDrive\Desktop
    Rename-Item -Path "yt-extractor" -NewName "Uoink"
    ```
 
@@ -17,7 +17,7 @@ If for any reason that fails, you can rename manually:
 
 4. Restart the Uoink server from the new location:
    ```
-   cd C:\Users\hello\OneDrive\Desktop\Uoink
+   cd C:\Users\<you>\OneDrive\Desktop\Uoink
    .\start_server.bat
    ```
 

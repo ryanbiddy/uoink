@@ -1,0 +1,384 @@
+diff --git a/tests/library_work_astra/test_phase4_aw11_foreign_helper_acceptance.py b/tests/library_work_astra/test_phase4_aw11_foreign_helper_acceptance.py
+index f9d5742..a5ddb00 100644
+--- a/tests/library_work_astra/test_phase4_aw11_foreign_helper_acceptance.py
++++ b/tests/library_work_astra/test_phase4_aw11_foreign_helper_acceptance.py
+@@ -44,6 +44,6 @@ def test_foreign_thread_cannot_adopt_current_mirror_session(env, operation):
+         print(json.dumps(observations, sort_keys=True))
+         assert after == original, observations
+     finally:
++        env.mirror._stop_vault_io(session)
+         assert session.terminate(), "task-owned writer death was not confirmed"
+         thread.join(3)
+-        env.mirror._vault_io = None
+diff --git a/tests/library_work_astra/test_phase4_aw3_acceptance.py b/tests/library_work_astra/test_phase4_aw3_acceptance.py
+index 757534a..1025752 100644
+--- a/tests/library_work_astra/test_phase4_aw3_acceptance.py
++++ b/tests/library_work_astra/test_phase4_aw3_acceptance.py
+@@ -256,8 +256,6 @@ def test_d13_timeout_never_publishes_or_rolls_back_over_user_bytes(env, monkeypa
+             assert release.wait(3)
+             original_replace(src, dst)
+             published.append(target.read_bytes())
+-            if observe == "user_edit":
+-                target.write_bytes(personal)
+             return
+         return original_replace(src, dst)
+ 
+@@ -272,6 +270,9 @@ def test_d13_timeout_never_publishes_or_rolls_back_over_user_bytes(env, monkeypa
+     try:
+         result = env.mirror.resync(budget_s=0.1)
+         assert entered.is_set() and not result["ok"]
++        if observe == "user_edit":
++            target.parent.mkdir(parents=True, exist_ok=True)
++            target.write_bytes(personal)
+     finally:
+         release.set()
+         assert finished.wait(3)
+@@ -345,7 +346,7 @@ def test_d13_timed_out_writer_cannot_erase_a_later_successful_sync(env, monkeypa
+ 
+ def test_d15_failed_destination_binding_persistence_does_not_allow_readoption(env, monkeypatch):
+     binding = env.mirror._dest_binding_path()
+-    original = Path.write_text
++    original = env.mirror._atomic_local
+ 
+     def unavailable(path, *args, **kwargs):
+         if path == binding:
+@@ -353,7 +354,7 @@ def test_d15_failed_destination_binding_persistence_does_not_allow_readoption(en
+         return original(path, *args, **kwargs)
+ 
+     with monkeypatch.context() as blocked:
+-        blocked.setattr(Path, "write_text", unavailable)
++        blocked.setattr(env.mirror, "_atomic_local", unavailable)
+         first = env.mirror.resync()
+     if not first["ok"]:
+         return  # A failed durable binding must refuse initialization.
+diff --git a/tests/library_work_astra/test_phase5_acceptance3.py b/tests/library_work_astra/test_phase5_acceptance3.py
+index 04ef688..3d22629 100644
+--- a/tests/library_work_astra/test_phase5_acceptance3.py
++++ b/tests/library_work_astra/test_phase5_acceptance3.py
+@@ -397,8 +397,8 @@ def test_phase5_ba3_final_wire_serialization_is_inside_deadline(db, monkeypatch)
+     monotonic = time.monotonic
+     finished = [False]
+     elapsed = [0.0]
+-    def read(args):
+-        packet = real_read(args)
++    def read(args, *, clock=NOW):
++        packet = real_read(args, clock=clock)
+         finished[0] = True
+         return packet
+     def wire(payload):
+diff --git a/tests/library_work_astra/test_phase6_bd_acceptance.py b/tests/library_work_astra/test_phase6_bd_acceptance.py
+index 6bac5eb..e0d4211 100644
+--- a/tests/library_work_astra/test_phase6_bd_acceptance.py
++++ b/tests/library_work_astra/test_phase6_bd_acceptance.py
+@@ -28,14 +28,14 @@ def test_bd01_never_published_stale_snapshot_requires_original_ticket(sandbox, e
+     idx = _open_index(env) if entry == "index" else None
+     conn = idx._conn if idx else _db(env)
+     try:
+-        base = _fixture(env, key="bd01", origin="none")
++        base = _fixture(env, key="bd01", origin="none", publication_conn=conn if idx else None)
+         (_seed_index(idx, base) if idx else _seed(conn, base))
+         raw_a = copy.deepcopy(RAW_FIXTURES[1])
+         raw_b = copy.deepcopy(raw_a)
+         raw_a[0] = (0.0, 22.0, "A was built against the original source.", None)
+         raw_b[0] = (0.0, 22.0, "B is the newer published source.", None)
+         stale = _fixture(env, key="bd01", raw=raw_a, origin="none")
+-        newer = _fixture(env, key="bd01", raw=raw_b, origin="none")
++        newer = _fixture(env, key="bd01", raw=raw_b, origin="none", publication_conn=conn)
+         _published(_publish(conn, newer))
+         before = _snapshot(conn, newer)
+         try:
+@@ -92,7 +92,7 @@ def test_bd03_stale_sidecar_reconstruction_cannot_roll_back_media(sandbox):
+     conn = _db(sandbox)
+     old = _fixture(sandbox, key="bd03")
+     _seed(conn, old)
+-    newer = _fixture(sandbox, key="bd03", origin="none")
++    newer = _fixture(sandbox, key="bd03", origin="none", publication_conn=conn)
+     _published(_publish(conn, newer))
+     before = _snapshot(conn, newer)
+     try:
+diff --git a/tests/test_phase6_bc2.py b/tests/test_phase6_bc2.py
+index 3355621..f078581 100644
+--- a/tests/test_phase6_bc2.py
++++ b/tests/test_phase6_bc2.py
+@@ -109,7 +109,7 @@ def _seed_index(idx, f):
+     _write_files(f)
+     idx.upsert_yoink({k: v for k, v in f.item.items() if k != "url"}, content=f.corpus)
+     return idx.publish_media_snapshot(f.item["video_id"], cues=f.cues, media_block=f.block,
+-                                      artifacts=f.files)
++                                      artifacts=f.files, ticket=f.publication_ticket)
+ 
+ 
+ def _work_rows(idx, video_id):
+@@ -157,9 +157,8 @@ def test_bc2_publication_fence_refuses_every_stale_publisher(sandbox):
+     assert ticket_a.base == (0, a.block["media_revision"])
+     assert _ledger(a) is None
+ 
+-    # B: annotation-only change (same cues, diarization off). A raw call
+-    # with no ticket mints its base at entry and is a fresh publication.
+-    b = _fixture(env, key="fence-item", origin="none")
++    # B: annotation-only change, with its ticket acquired before building.
++    b = _fixture(env, key="fence-item", origin="none", publication_conn=conn)
+     assert b.block["cue_revision"] == a.block["cue_revision"]
+     assert b.block["media_revision"] != a.block["media_revision"]
+     _published(_publish(conn, b))
+@@ -188,7 +187,7 @@ def test_bc2_publication_fence_refuses_every_stale_publisher(sandbox):
+     assert _snapshot(conn, b) == committed
+ 
+     # C: source-provided labels on the same cues; then B and A stay refused.
+-    c = _fixture(env, key="fence-item", origin="source")
++    c = _fixture(env, key="fence-item", origin="source", publication_conn=conn)
+     _published(_publish(conn, c))
+     assert _ledger(c)["generation"] == 2
+     assert _ledger(c)["history"] == [a.block["media_revision"], b.block["media_revision"]]
+@@ -204,7 +203,7 @@ def test_bc2_publication_fence_refuses_every_stale_publisher(sandbox):
+     assert d.block["runs"] and d.block["runs"][0]["run_id"] not in {
+         r["run_id"] for r in _rows(conn, "diarization_runs", d.item["video_id"])}
+     e = _fixture(env, key="fence-item", raw=RAW_FIXTURES[1][:3], chapters=[],
+-                 corpus="# Fifth capture\n\nAnother publisher won.\n")
++                 corpus="# Fifth capture\n\nAnother publisher won.\n", publication_conn=conn)
+     _published(_publish(conn, e))
+     with pytest.raises(media.MediaError) as caught:
+         media.publish_transcript(conn, d.item["video_id"], cues=d.cues, media_block=d.block,
+@@ -240,11 +239,11 @@ def test_bc2_publication_fence_refuses_every_stale_publisher(sandbox):
+ def test_bc2_fenced_retry_recovers_from_each_boundary_and_a_corrupt_ledger_refuses(sandbox):
+     env = sandbox
+     old = _fixture(env, key="fence-retry")
+-    new = _fixture(env, key="fence-retry", raw=RAW_FIXTURES[1][:4], chapters=[],
+-                   corpus="# New capture\n\nNew complete source bytes.\n")
+     trace = _db(env, "trace")
+     _seed(trace, old)
+-    ticket = media.begin_publication(trace, new.item["video_id"])
++    new = _fixture(env, key="fence-retry", raw=RAW_FIXTURES[1][:4], chapters=[],
++                   corpus="# New capture\n\nNew complete source bytes.\n", publication_conn=trace)
++    ticket = new.publication_ticket
+     destinations = []
+     real_replace = os.replace
+     with env.patch.context() as patch:
+@@ -264,7 +263,9 @@ def test_bc2_fenced_retry_recovers_from_each_boundary_and_a_corrupt_ledger_refus
+         folder = Path(old.item["corpus_path"]).parent
+         shutil.rmtree(folder)
+         _seed(db, old)
+-        ticket = media.begin_publication(db, new.item["video_id"])
++        new = _fixture(env, key="fence-retry", raw=RAW_FIXTURES[1][:4], chapters=[],
++                       corpus="# New capture\n\nNew complete source bytes.\n", publication_conn=db)
++        ticket = new.publication_ticket
+         calls = []
+ 
+         def crash_replace(src, dst, *args, **kwargs):
+@@ -312,7 +313,7 @@ def test_bc2_index_publication_commits_one_snapshot_and_invalidates_phase2_work(
+     env = sandbox
+     idx = _open_index(env)
+     try:
+-        f = _fixture(env, key="invalidate-item")
++        f = _fixture(env, key="invalidate-item", publication_conn=idx._conn)
+         result = _seed_index(idx, f)
+         _published(result)
+         vid = f.item["video_id"]
+@@ -324,10 +325,10 @@ def test_bc2_index_publication_commits_one_snapshot_and_invalidates_phase2_work(
+ 
+         # A media-only republication (same cues, same corpus) is not a new
+         # source revision: the shared card decision leaves the work intact.
+-        labels_off = _fixture(env, key="invalidate-item", origin="none")
++        labels_off = _fixture(env, key="invalidate-item", origin="none", publication_conn=idx._conn)
+         assert labels_off.block["source_revision"] == f.block["source_revision"]
+         _published(idx.publish_media_snapshot(vid, cues=labels_off.cues, media_block=labels_off.block,
+-                                              artifacts=labels_off.files))
++                                              artifacts=labels_off.files, ticket=labels_off.publication_ticket))
+         work, manifest = _work_rows(idx, vid)
+         assert work[0]["state"] == "ready" and manifest[0]["disposition"] == "waiting"
+         assert _rows(idx._conn, "media_depth", vid)[0]["media_revision"] == labels_off.block["media_revision"]
+@@ -335,9 +336,9 @@ def test_bc2_index_publication_commits_one_snapshot_and_invalidates_phase2_work(
+         # A shorter replacement with new corpus bytes changes the source
+         # revision: the coherent commit lands and the work is invalidated.
+         shorter = _fixture(env, key="invalidate-item", raw=RAW_FIXTURES[1][:2], chapters=[],
+-                           corpus="# Revised capture\n\nShorter transcript.\n")
++                           corpus="# Revised capture\n\nShorter transcript.\n", publication_conn=idx._conn)
+         _published(idx.publish_media_snapshot(vid, cues=shorter.cues, media_block=shorter.block,
+-                                              artifacts=shorter.files))
++                                              artifacts=shorter.files, ticket=shorter.publication_ticket))
+         work, manifest = _work_rows(idx, vid)
+         assert work[0]["state"] == "blocked"
+         assert manifest[0]["disposition"] == "changed"
+@@ -349,8 +350,9 @@ def test_bc2_index_publication_commits_one_snapshot_and_invalidates_phase2_work(
+ 
+         # An empty replacement is a complete publication too.
+         empty = _fixture(env, key="invalidate-item", raw=[], chapters=[], origin="none",
+-                         corpus="# Empty replacement\n")
+-        _published(idx.publish_media_snapshot(vid, cues=empty.cues, media_block=empty.block, artifacts=empty.files))
++                         corpus="# Empty replacement\n", publication_conn=idx._conn)
++        _published(idx.publish_media_snapshot(vid, cues=empty.cues, media_block=empty.block,
++                                              artifacts=empty.files, ticket=empty.publication_ticket))
+         assert _rows(idx._conn, "clips", vid) == [] and _rows(idx._conn, "citations", vid) == []
+         assert _rows(idx._conn, "media_depth", vid)[0]["media_revision"] == empty.block["media_revision"]
+ 
+@@ -358,18 +360,20 @@ def test_bc2_index_publication_commits_one_snapshot_and_invalidates_phase2_work(
+         # committed, replayable publication; the retry completes it.
+         _seed_phase2_work(idx, vid, _snapshot_source_revision(idx, vid), run_id="run-bc2-second")
+         again = _fixture(env, key="invalidate-item", raw=RAW_FIXTURES[1][:3], chapters=[],
+-                         corpus="# Third capture\n\nThree cues.\n")
++                         corpus="# Third capture\n\nThree cues.\n", publication_conn=idx._conn)
+         broken = lambda: (_ for _ in ()).throw(RuntimeError("phase 2 service down"))  # noqa: E731
+         with env.patch.context() as patch:
+             patch.setattr(idx, "library_service", broken)
+             with pytest.raises(media.MediaError) as caught:
+-                idx.publish_media_snapshot(vid, cues=again.cues, media_block=again.block, artifacts=again.files)
++                idx.publish_media_snapshot(vid, cues=again.cues, media_block=again.block,
++                                           artifacts=again.files, ticket=again.publication_ticket)
+         assert caught.value.code == "library_unavailable" and caught.value.retryable is True
+         assert caught.value.details["reason"] == "invalidation_failed"
+         assert _rows(idx._conn, "media_depth", vid)[0]["media_revision"] == again.block["media_revision"]
+         work, _ = _work_rows(idx, vid)
+         assert {w["run_id"]: w["state"] for w in work}["run-bc2-second"] == "ready"
+-        _published(idx.publish_media_snapshot(vid, cues=again.cues, media_block=again.block, artifacts=again.files))
++        _published(idx.publish_media_snapshot(vid, cues=again.cues, media_block=again.block,
++                                              artifacts=again.files, ticket=again.publication_ticket))
+         work, _ = _work_rows(idx, vid)
+         assert {w["run_id"]: w["state"] for w in work}["run-bc2-second"] == "blocked"
+ 
+@@ -410,7 +414,7 @@ def test_bc2_clip_build_refuses_instead_of_replacing_a_materialized_snapshot(san
+     assert _snapshot(conn, f)["rows"]["clips"] == before["rows"]["clips"]  # same identity-free rows
+     idx = _open_index(env)
+     try:
+-        g = _fixture(env, key="clip-refusal-index")
++        g = _fixture(env, key="clip-refusal-index", publication_conn=idx._conn)
+         _seed_index(idx, g)
+         kept = _rows(idx._conn, "clips", g.item["video_id"])
+         idx._conn.execute("UPDATE media_depth SET provenance_json='{\"broken\":true}' WHERE video_id=?",
+@@ -442,7 +446,7 @@ def test_bc2_retention_prunes_obsolete_owned_inputs_after_settlement(sandbox):
+     original_corpus = Path(a.item["corpus_path"]).read_bytes()
+ 
+     b = _fixture(env, key="retention", raw=RAW_FIXTURES[1][:5], chapters=[], origin="none",
+-                 corpus="# Second capture\n\nNo run.\n")
++                 corpus="# Second capture\n\nNo run.\n", publication_conn=conn)
+     result = _publish(conn, b)
+     _published(result)
+     names = _inputs(b)
+@@ -452,7 +456,7 @@ def test_bc2_retention_prunes_obsolete_owned_inputs_after_settlement(sandbox):
+     assert Path(b.item["corpus_path"]).read_bytes() != original_corpus
+ 
+     c = _fixture(env, key="retention", raw=RAW_FIXTURES[1][:3], chapters=[], origin="none",
+-                 corpus="# Third capture\n\nStill no run.\n")
++                 corpus="# Third capture\n\nStill no run.\n", publication_conn=conn)
+     result = _publish(conn, c)
+     _published(result)
+     assert result["pruned_artifacts"] == 1 and result["cleanup_pending"] is False
+@@ -495,7 +499,7 @@ def test_bc2_retention_prunes_obsolete_owned_inputs_after_settlement(sandbox):
+ 
+     # An in-flight authorized publication keeps its inputs until settlement.
+     d = _fixture(env, key="retention", raw=RAW_FIXTURES[1][:2], chapters=[], origin="none",
+-                 corpus="# Fourth capture\n\nInterrupted.\n")
++                 corpus="# Fourth capture\n\nInterrupted.\n", publication_conn=conn)
+     real_replace = os.replace
+     seen = []
+ 
+@@ -1209,6 +1213,7 @@ def test_bc2_sidecar_link_fields_are_stored_values_and_legacy_recovery_is_exact(
+     assert all(r["youtube_deep_link"] is None for r in _rows(conn, "citations", vid))
+     # Explicit fields that contradict the bound cues are refused, never
+     # silently replaced by a recovered legacy convention.
++    changed_ticket = media.begin_publication(conn, vid)
+     changed = copy.deepcopy(explicit)
+     for entry in changed["transcript"]:
+         entry["source_url"] = "https://elsewhere.example/episode"
+@@ -1222,7 +1227,8 @@ def test_bc2_sidecar_link_fields_are_stored_values_and_legacy_recovery_is_exact(
+     assert _snapshot(conn, f) == before
+     with pytest.raises(media.MediaError) as caught:
+         media.publish_transcript(conn, vid, cues=f.cues, media_block=f.block,
+-                                 artifacts=dict(f.files, **{f.item["sidecar_path"]: _json(changed).encode("utf-8")}))
++                                 artifacts=dict(f.files, **{f.item["sidecar_path"]: _json(changed).encode("utf-8")}),
++                                 ticket=changed_ticket)
+     assert caught.value.code == "invalid_source_data"
+     assert _snapshot(conn, f) == before
+     # Mixed entries (some explicit, some not) are malformed.
+diff --git a/tests/test_phase6_evaluation.py b/tests/test_phase6_evaluation.py
+index 582efdb..dcdf91d 100644
+--- a/tests/test_phase6_evaluation.py
++++ b/tests/test_phase6_evaluation.py
+@@ -308,11 +308,14 @@ WINDOWS = {
+ 
+ 
+ def _fixture(env, number=1, *, key=None, raw=None, chapters=None, origin="run",
+-             state=None, corpus=None, playback=None, source_type=None, duration="default"):
++             state=None, corpus=None, playback=None, source_type=None, duration="default",
++             publication_conn=None):
+     key = key or {1: "pod-phase6-001", 2: "yt-phase6-002", 3: "pod-phase6-003"}[number]
++    folder = env.root / _sha(key.encode("utf-8"))[:20]
++    publication_ticket = (media.begin_publication(publication_conn, key, folder=folder)
++                          if publication_conn is not None else None)
+     raw = copy.deepcopy(RAW_FIXTURES[number] if raw is None else raw)
+     chapter_rows = copy.deepcopy(CHAPTER_FIXTURES[number] if chapters is None else chapters)
+-    folder = env.root / _sha(key.encode("utf-8"))[:20]
+     folder.mkdir(exist_ok=True)
+     corpus = "# Synthetic media fixture\n\nStored source introduction.\n" if corpus is None else corpus
+     url = "https://systems.example.fm/episodes/42#transcript"
+@@ -406,7 +409,8 @@ def _fixture(env, number=1, *, key=None, raw=None, chapters=None, origin="run",
+     files = {str(input_path): original_bytes, item["corpus_path"]: corpus.encode("utf-8"),
+              item["sidecar_path"]: _json(sidecar).encode("utf-8")}
+     return SimpleNamespace(item=item, cues=cues, block=block, sidecar=sidecar, files=files,
+-                           card=card, corpus=corpus, old_clips=old_clips, raw=raw)
++                           card=card, corpus=corpus, old_clips=old_clips, raw=raw,
++                           publication_ticket=publication_ticket)
+ 
+ 
+ def _write_files(f):
+@@ -1227,7 +1231,8 @@ def _operation_refusal(call, code):
+ 
+ def _publish(conn, f):
+     return media.publish_transcript(conn, f.item["video_id"], cues=f.cues,
+-                                    media_block=f.block, artifacts=f.files)
++                                    media_block=f.block, artifacts=f.files,
++                                    ticket=f.publication_ticket)
+ 
+ 
+ def test_phase6_rebuild_and_publication_recovery(sandbox):
+@@ -1249,7 +1254,8 @@ def test_phase6_rebuild_and_publication_recovery(sandbox):
+                                     timestamp_start=12.0, text="screenshot caption", youtube_deep_link=""))
+     conn.commit()
+     screenshots = [r for r in _rows(conn, "citations", f.item["video_id"]) if r["kind"] == "screenshot"]
+-    shorter = _fixture(env, raw=RAW_FIXTURES[1][:2], chapters=[], corpus="# Revised capture\n\nShorter transcript.\n")
++    shorter = _fixture(env, raw=RAW_FIXTURES[1][:2], chapters=[], corpus="# Revised capture\n\nShorter transcript.\n",
++                       publication_conn=conn)
+     _published(_publish(conn, shorter))
+     assert [r["text"] for r in _rows(conn, "citations", f.item["video_id"]) if r["kind"] == "transcript_chunk"] == [r[2] for r in RAW_FIXTURES[1][:2]]
+     assert [r for r in _rows(conn, "citations", f.item["video_id"]) if r["kind"] == "screenshot"] == screenshots
+@@ -1264,7 +1270,8 @@ def test_phase6_rebuild_and_publication_recovery(sandbox):
+     _operation_refusal(lambda: _publish(conn, shorter), "revision_unavailable")
+     assert Path(shorter.item["corpus_path"]).read_text() == "User-edited corpus; preserve me.\n"
+     _write_files(shorter)
+-    empty = _fixture(env, raw=[], chapters=[], origin="none", corpus="# Empty replacement\n")
++    empty = _fixture(env, raw=[], chapters=[], origin="none", corpus="# Empty replacement\n",
++                     publication_conn=conn)
+     _published(_publish(conn, empty))
+     assert _rows(conn, "clips", f.item["video_id"]) == []
+     assert [r for r in _rows(conn, "citations", f.item["video_id"]) if r["kind"] == "transcript_chunk"] == []
+@@ -1273,10 +1280,10 @@ def test_phase6_rebuild_and_publication_recovery(sandbox):
+     # First record the real publication's replacement boundaries, then replay
+     # each with an injected stop. No artificial crash hook is required in media.
+     old = _fixture(env, key="crash-publication")
+-    new = _fixture(env, key="crash-publication", raw=RAW_FIXTURES[1][:4], chapters=[],
+-                   corpus="# New capture\n\nNew complete source bytes.\n")
+     trace_conn = _db(env, "trace")
+     _seed(trace_conn, old)
++    new = _fixture(env, key="crash-publication", raw=RAW_FIXTURES[1][:4], chapters=[],
++                   corpus="# New capture\n\nNew complete source bytes.\n", publication_conn=trace_conn)
+     destinations = []
+     real_replace = os.replace
+ 
+@@ -1300,6 +1307,8 @@ def test_phase6_rebuild_and_publication_recovery(sandbox):
+         assert folder.is_relative_to(env.root) and folder != env.root
+         shutil.rmtree(folder)
+         _seed(db, old)
++        new = _fixture(env, key="crash-publication", raw=RAW_FIXTURES[1][:4], chapters=[],
++                       corpus="# New capture\n\nNew complete source bytes.\n", publication_conn=db)
+         calls = []
+ 
+         def crash_replace(src, dst, *args, **kwargs):
+@@ -1384,7 +1393,8 @@ def test_phase6_stale_citation_and_delete_refusals(sandbox):
+     old_id = f.card["excerpts"][1]["excerpt_id"]
+     raw = copy.deepcopy(RAW_FIXTURES[1])
+     raw[3] = (60.0, 95.0, "New evidence at the old sequence number.", "SPEAKER_01")
+-    replacement = _fixture(env, key=f.item["video_id"], raw=raw, corpus="# New source\n\nReplacement.\n")
++    replacement = _fixture(env, key=f.item["video_id"], raw=raw, corpus="# New source\n\nReplacement.\n",
++                           publication_conn=conn)
+     _published(_publish(conn, replacement))
+     _refusal(_export(env, conn, replacement, excerpt_id=old_id), "revision_unavailable")
+     other = _fixture(env, key="other-item")

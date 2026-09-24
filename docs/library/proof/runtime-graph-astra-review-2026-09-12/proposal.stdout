@@ -1,0 +1,22 @@
+=== RUNTIME GRAPH COMPATIBILITY REPORT: FAIL ===
+Target Environment: Windows x86-64 CPython 3.13 (AMD64)
+Selected Packages: 140
+Active Edges Evaluated: 275
+
+[!] WHEEL REJECTIONS (3):
+  - antlr4-python3-runtime==4.9.3 [NO_WHEELS]: No wheel distributions found for antlr4-python3-runtime==4.9.3 in release files
+  - proxy-tools==0.1.0 [NO_WHEELS]: No wheel distributions found for proxy-tools==0.1.0 in release files
+  - transformers==5.10.0 [YANKED]: All available matching wheels for transformers==5.10.0 are yanked: We pushed from a week old main branch. It does include the latest model but uncertain its gonna be working properly and mostly it is missing a bunch of fixes!
+
+[!] MISSING ACTIVE PACKAGES (2):
+  - huggingface-hub requires hf-xet (<2.0.0,>=1.2.0) but hf-xet is not in selection
+  - huggingface-hub requires typer () but typer is not in selection
+
+[!] CONFLICTING CONSTRAINTS (5):
+  - whisperx requires 'huggingface-hub<1.0.0', but selected version is 1.5.0
+  - whisperx requires 'torch~=2.8.0', but selected version is 2.10.0
+  - whisperx requires 'torchaudio~=2.8.0', but selected version is 2.10.0
+  - whisperx requires 'torchvision~=0.23.0', but selected version is 0.25.0
+  - whisperx requires 'torchcodec<0.8.0,>=0.6.0', but selected version is 0.9.0
+
+Scope: Graph compatibility verifies PEP 508 constraints and wheel metadata only. A local SHA256 manifest proves retained-byte integrity, not authenticity on its own. Advisory disposition, binary import compatibility, model safety, and inference quality are separate gates and are not qualified by this check.
