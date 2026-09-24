@@ -11,7 +11,7 @@
 Free, open source (MIT), and local-first: no account, no Uoink cloud, no required telemetry. Uoink saves supported sources as structured Markdown on *your* machine, then makes the corpus available to your AI through the clipboard, a local MCP server, and an OpenAPI bridge. YouTube capture includes the transcript, timestamped screenshots, comments, and metadata; other source types keep the material their publishers expose.
 
 - **Website:** https://uoink.app · **Install:** https://uoink.app/install · **Developers:** https://uoink.app/developers
-- **Status:** Windows 10/11 today; Mac build queued after Windows stabilizes. Chrome Web Store listing pending — for now the extension sideloads from the release.
+- **Status:** Windows 10/11 only. There is no Mac build. The extension sideloads from the release — it is not on the Chrome Web Store. The installer is unsigned, so Windows SmartScreen will warn on first run.
 
 ## Why Uoink
 
@@ -39,7 +39,7 @@ Published sources are indexed in one local library. Podcast audio and transcript
 
 **2. MCP server (the agent path)** — A local Model Context Protocol server exposing 32 tools over stdio (the curated everyday set, plus five library resource templates, four prompts, the two client-run brief tools since the Living Library Phase 4 increments and the read-only Phase 6 cited export), tested with **Claude Desktop and Cursor**. Cline and Continue are standard-stdio compatibility paths, not individually smoke-tested. Two surfaces, on purpose:
 - **stdio** exposes the curated everyday set most agents need, including video capture, podcast feed/episode operations, local transcription jobs, corpus publishing, search, clip search and evidence cards, citation maps, and analysis.
-- **HTTP JSON-RPC** at `/mcp/v1` exposes the 85-tool local registry (Writing Studio, workspaces, podcasts, monitored playlists, taste/engagement memory, source capture, clip search, evidence cards, the six Living Library work-queue tools, the four Phase 3 source-subscription tools, the Phase 5 activity report and the three Phase 4 bounded read tools) — the same handlers, same auth token. `search_clips` and `get_evidence_card` were registry-only in Phase 1; since 2026-09-04 they are also on stdio (23 → 25 tools). The Living Library tools stay registry-only.
+- **HTTP JSON-RPC** at `/mcp/v1` exposes the 88-tool local registry (Writing Studio, workspaces, podcasts, monitored playlists, taste/engagement memory, source capture, clip search, evidence cards, the six Living Library work-queue tools, the four Phase 3 source-subscription tools, the Phase 5 activity report, the three Phase 4 bounded read tools, the two Phase 4 brief tools and the Phase 6 cited export) — the same handlers, same auth token. `search_clips` and `get_evidence_card` were registry-only in Phase 1; since 2026-09-04 they are also on stdio (23 → 25 tools). The Living Library tools stay registry-only.
 
 **3. OpenAPI bridge (for local agents that don't speak MCP)** — Local OpenAPI-capable agents and scripts can drive the same tools over an OpenAPI 3.1 surface at `/openapi/v1/spec.json` + `POST /tools/<name>`.
 
@@ -70,7 +70,7 @@ Uoink ships a portable Skill at `skills/uoink/SKILL.md` (installed to `%LOCALAPP
 
 ## Install
 
-1. **Download the installer.** Download `Uoink-Setup-3.7.0.exe` from the [published v3.7.0 release](https://github.com/ryanbiddy/uoink/releases/tag/v3.7.0). Windows 10/11 is available now; the Mac `.dmg` is queued after Windows stabilizes.
+1. **Download the installer.** Download `Uoink-Setup-3.8.0.exe` from the [v3.8.0 release](https://github.com/ryanbiddy/uoink/releases/tag/v3.8.0). Windows 10/11 only — there is no Mac build today. The installer is unsigned: if SmartScreen shows "Windows protected your PC", choose **More info → Run anyway**, and check the file against the SHA-256 listed on the release page.
 2. **Run it.** Defaults install to `%LOCALAPPDATA%\Uoink\` (no admin required). The finish page can launch the helper immediately, and an autostart entry runs it on each login.
 3. **Load the bundled extension.** On first launch, Uoink shows a one-time setup splash. Use it to open your browser's extensions page and copy the installed extension path; then enable Developer mode, click **Load unpacked**, and select that folder. (The Chrome Web Store listing is pending; sideload is the current path.)
 
@@ -114,4 +114,4 @@ See [CHANGELOG.md](./CHANGELOG.md) for version history and [ROADMAP.md](./ROADMA
 
 ---
 
-*Uoink is part of the [ReplayRyan](https://replayryan.com) family of tools.*
+*Built by [Ryan Biddy](https://github.com/ryanbiddy).*
