@@ -25,6 +25,9 @@ Nothing yet.
 
 ### Fixed
 
+- On a fresh install the dashboard's Library activity panel collapses to one
+  line ("Library activity appears here after your first few captures.")
+  instead of a wall of "Unavailable" tiles; with history it is unchanged.
 - Windows-only process-authority tests are skipped on other platforms before
   they can change `os.name` and break pytest's path handling.
 - Model-readiness fixtures resolve temporary paths, including Windows runner

@@ -4389,7 +4389,8 @@
                   <button class="button ghost small" type="button" id="libraryActivityRefreshBtn">Refresh</button>
                 </div>
               </div>
-              <div class="activity-controls inline-row" style="margin-top:10px;gap:12px;flex-wrap:wrap;align-items:center;">
+              <p class="activity-empty-state hidden" id="libraryActivityEmpty" role="status" style="margin:8px 0 0;font-size:0.9rem;color:var(--text-muted, #888);">Library activity appears here after your first few captures.</p>
+              <div class="activity-controls inline-row" id="activityControls" style="margin-top:10px;gap:12px;flex-wrap:wrap;align-items:center;">
                 <div class="activity-presets inline-row" role="group" aria-label="Interval presets" style="gap:4px;">
                   <button class="button ghost small" type="button" id="activityPreset1d" data-preset="1">1d</button>
                   <button class="button ghost small active" type="button" id="activityPreset7d" data-preset="7">7d</button>
@@ -4421,7 +4422,7 @@
               <div id="activityWarnings" class="activity-warnings hidden" style="color:#d97706;margin-top:4px;font-size:0.8rem;"></div>
             </div>
 
-            <div class="activity-metrics-grid" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));gap:12px;margin-top:14px;">
+            <div class="activity-metrics-grid" id="activityMetricsGrid" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));gap:12px;margin-top:14px;">
               <div class="activity-stat-card" style="padding:10px;border-radius:6px;background:var(--bg-card, #222);">
                 <div style="font-size:0.8rem;color:var(--text-muted, #888);">Selected Items</div>
                 <div style="font-size:1.4rem;font-weight:600;margin-top:4px;">
@@ -4452,7 +4453,7 @@
               </div>
             </div>
 
-            <div class="activity-sections" style="margin-top:16px;display:flex;flex-direction:column;gap:16px;">
+            <div class="activity-sections" id="activitySections" style="margin-top:16px;display:flex;flex-direction:column;gap:16px;">
               <details class="activity-sub-card" id="activityDailyCard" open style="padding:8px 12px;background:var(--bg-card, #1c1c1c);border-radius:6px;">
                 <summary style="cursor:pointer;font-weight:600;font-size:0.95rem;">Daily Activity (<span id="activityDailyCount">0</span> buckets)</summary>
                 <div class="activity-table-wrapper" style="overflow-x:auto;margin-top:8px;">
@@ -7570,7 +7571,56 @@
       }
     }
 
+    // Parts of the activity panel that collapse into one friendly line while the
+    // library has no history at all (fresh install, nothing captured yet).
+    const LIBRARY_ACTIVITY_EMPTY_HIDE_IDS = [
+      "libraryActivityAsOf",
+      "libraryActivityBadge",
+      "activityControls",
+      "activityCustomError",
+      "activityCoverageBlock",
+      "activityMetricsGrid",
+      "activitySections",
+    ];
+
+    function libraryActivityHasNoHistory(p) {
+      // Only for rolling presets (interval ends now): no_history there means nothing
+      // was ever captured. A custom interval keeps the full panel and its controls.
+      if (!p || !libraryActivityState.days) return false;
+      const cov = p.coverage || {};
+      const captureStatus = cov.cov_capture && cov.cov_capture.coverage_status;
+      if (captureStatus !== "no_history") return false;
+      const shelfStatus = cov.cov_shelf_activity && cov.cov_shelf_activity.coverage_status;
+      if (shelfStatus && shelfStatus !== "no_history") return false;
+      return activityScalar(p.items && p.items.total) == null;
+    }
+
+    function setLibraryActivityEmptyState(empty) {
+      const panel = document.getElementById("libraryActivityPanel");
+      if (panel && panel.dataset) panel.dataset.activityEmpty = empty ? "true" : "false";
+      const message = document.getElementById("libraryActivityEmpty");
+      if (message && message.classList) {
+        if (empty) message.classList.remove("hidden");
+        else message.classList.add("hidden");
+      }
+      LIBRARY_ACTIVITY_EMPTY_HIDE_IDS.forEach((id) => {
+        const el = document.getElementById(id);
+        if (!el || !el.classList) return;
+        if (empty) {
+          if (!el.classList.contains("hidden")) {
+            el.classList.add("hidden");
+            if (el.dataset) el.dataset.activityEmptyHidden = "true";
+          }
+        } else if (el.dataset && el.dataset.activityEmptyHidden === "true") {
+          // Only restore what the empty state hid; activityCustomError manages its own visibility.
+          el.classList.remove("hidden");
+          delete el.dataset.activityEmptyHidden;
+        }
+      });
+    }
+
     function renderLibraryActivityError() {
+      setLibraryActivityEmptyState(false);
       const err = libraryActivityState.error || { message: "Unknown error" };
       updateLibraryActivityBadge(err.code === "storage_unavailable" ? "Unavailable" : "Error", true);
       const asOf = document.getElementById("libraryActivityAsOf");
@@ -7593,6 +7643,8 @@
     function renderLibraryActivityUI() {
       const p = libraryActivityState.packet;
       if (!p) return;
+
+      setLibraryActivityEmptyState(libraryActivityHasNoHistory(p));
 
       const asOfEl = document.getElementById("libraryActivityAsOf");
       if (asOfEl) asOfEl.textContent = `As of ${p.as_of || ""}`;

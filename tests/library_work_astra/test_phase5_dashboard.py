@@ -106,6 +106,77 @@ def test_phase5_dashboard_unknown_historical_total_is_not_rendered_zero():
     assert value["total"] == "Unavailable"
 
 
+EMPTY_STATE_HARNESS = """
+  const tracked = ['libraryActivityPanel', 'libraryActivityEmpty', 'libraryActivityAsOf', 'libraryActivityBadge',
+    'activityControls', 'activityCustomError', 'activityCoverageBlock', 'activityMetricsGrid', 'activitySections'];
+  for (const id of tracked) {
+    const initial = (id === 'libraryActivityEmpty' || id === 'activityCustomError') ? ['hidden'] : [];
+    const set = new Set(initial);
+    document.getElementById(id).classList = {
+      add(c) {set.add(c);}, remove(c) {set.delete(c);}, contains(c) {return set.has(c);}
+    };
+  }
+  const hidden = id => document.getElementById(id).classList.contains('hidden');
+  const snapshot = () => ({
+    empty: document.getElementById('libraryActivityPanel').dataset.activityEmpty,
+    message: !hidden('libraryActivityEmpty'),
+    grid: !hidden('activityMetricsGrid'),
+    sections: !hidden('activitySections'),
+    coverage: !hidden('activityCoverageBlock'),
+    controls: !hidden('activityControls'),
+    customError: !hidden('activityCustomError'),
+    total: document.getElementById('activityTotalItems').textContent,
+  });
+  // Shape returned by library_analysis.get_library_activity on an empty index.
+  const freshPacket = JSON.parse(JSON.stringify(packet));
+  freshPacket.items.total = {metric_id:'items.total', value:null, recorded_count:0};
+  freshPacket.coverage = {
+    cov_capture:{coverage_status:'no_history'}, cov_publication:{coverage_status:'no_history'},
+    cov_shelf_activity:{coverage_status:'no_history'}, cov_shelf_current:{coverage_status:'retained_records'},
+    cov_sources:{coverage_status:'no_history'}, cov_revisions:{coverage_status:'no_history'}
+  };
+  freshPacket.shelf_activity = {churn:{value:null, percent:null, reason:'baseline_unavailable'}};
+  context.freshPacket = freshPacket;
+"""
+
+
+def test_phase5_dashboard_fresh_install_collapses_to_friendly_empty_state():
+    value = execute(EMPTY_STATE_HARNESS + """
+      run('libraryActivityState.days = 7; libraryActivityState.packet = freshPacket; renderLibraryActivityUI()');
+      console.log(JSON.stringify(snapshot()));
+    """)
+    assert value["empty"] == "true", value
+    assert value["message"] is True
+    assert not any(value[k] for k in ("grid", "sections", "coverage", "controls", "customError")), value
+
+
+def test_phase5_dashboard_panel_with_history_is_unchanged_and_restores_after_empty():
+    value = execute(EMPTY_STATE_HARNESS + """
+      run('libraryActivityState.days = 7; renderLibraryActivityUI()');
+      const withData = snapshot();
+      run('libraryActivityState.packet = freshPacket; renderLibraryActivityUI()');
+      run('libraryActivityState.packet = fixturePacket; renderLibraryActivityUI()');
+      console.log(JSON.stringify({withData, restored: snapshot()}));
+    """)
+    for state in (value["withData"], value["restored"]):
+        assert state["empty"] == "false", value
+        assert state["message"] is False
+        assert all(state[k] for k in ("grid", "sections", "coverage", "controls")), value
+        assert state["customError"] is False  # never un-hidden by the empty-state toggle
+        assert state["total"] == "1"
+
+
+def test_phase5_dashboard_custom_interval_without_history_keeps_full_panel():
+    value = execute(EMPTY_STATE_HARNESS + """
+      run('libraryActivityState.days = null; libraryActivityState.packet = freshPacket; renderLibraryActivityUI()');
+      console.log(JSON.stringify(snapshot()));
+    """)
+    assert value["empty"] == "false", value
+    assert value["message"] is False
+    assert value["controls"] is True and value["grid"] is True
+    assert value["total"] == "Unavailable"
+
+
 def test_phase5_dashboard_escapes_evidence_error_text():
     value = execute("""
       replies = [{ok:false,error:{code:'invalid_source_data',message:'<img src=x onerror=alert(1)>'}}];
