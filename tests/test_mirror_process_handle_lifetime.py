@@ -8,12 +8,18 @@ closed and never open, assign, wait on, or terminate a real process.
 from __future__ import annotations
 
 import os
+import sys
 from types import SimpleNamespace
 
 import pytest
 
 import library_mirror as mirror
 from _mirror_stable_native_fixture import stable_native_authority
+
+pytestmark = pytest.mark.skipif(
+    sys.platform != "win32",
+    reason="Windows process handles; patching os.name breaks POSIX pathlib",
+)
 
 
 class FailClosedKernel:

@@ -74,6 +74,7 @@ class ToolSpec:
     handler: Callable[[dict[str, Any]], dict[str, Any]]
     rate_limiter: _RateLimiter | None = None
     annotations: dict[str, Any] | None = None
+    title: str | None = None
 
 
 def _ok(**fields) -> dict[str, Any]:
@@ -3598,6 +3599,11 @@ EXPORT_CITED_RANGE_DESCRIPTION = (
 TOOL_REGISTRY: dict[str, ToolSpec] = {
     "uoink_video": ToolSpec(
         name="uoink_video",
+        title="Capture video",
+        annotations={
+            "readOnlyHint": False, "destructiveHint": False,
+            "idempotentHint": False, "openWorldHint": True,
+        },
         description=(
             "Extract a single YouTube video into a Uoink corpus. Returns the "
             "saved folder, markdown corpus, and screenshot paths."
@@ -3617,6 +3623,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "uoink_playlist": ToolSpec(
         name="uoink_playlist",
+        title="Capture playlist",
+        annotations={
+            "readOnlyHint": False, "destructiveHint": False,
+            "idempotentHint": False, "openWorldHint": True,
+        },
         description="Start asynchronous extraction for a YouTube playlist.",
         input_schema=_schema({
             "url": {"type": "string", "description": "YouTube playlist URL."},
@@ -3633,6 +3644,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "get_job_status": ToolSpec(
         name="get_job_status",
+        title="Get job status",
+        annotations={
+            "readOnlyHint": True, "destructiveHint": False,
+            "idempotentHint": True, "openWorldHint": False,
+        },
         description="Return the full status object for an async Uoink job.",
         input_schema=_schema({
             "job_id": {"type": "string", "description": "Job ID from uoink_playlist."},
@@ -3641,6 +3657,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "cancel_job": ToolSpec(
         name="cancel_job",
+        title="Cancel job",
+        annotations={
+            "readOnlyHint": False, "destructiveHint": True,
+            "idempotentHint": True, "openWorldHint": False,
+        },
         description="Cancel an async Uoink job and leave partial outputs on disk.",
         input_schema=_schema({
             "job_id": {"type": "string", "description": "Job ID to cancel."},
@@ -3649,6 +3670,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "list_recent_uoinks": ToolSpec(
         name="list_recent_uoinks",
+        title="List recent captures",
+        annotations={
+            "readOnlyHint": True, "destructiveHint": False,
+            "idempotentHint": True, "openWorldHint": False,
+        },
         description="List recent saved Uoink corpora.",
         input_schema=_schema({
             "limit": {"type": "integer", "minimum": 1, "maximum": 100, "default": 20},
@@ -3660,6 +3686,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "search_uoinks": ToolSpec(
         name="search_uoinks",
+        title="Search captures",
+        annotations={
+            "readOnlyHint": True, "destructiveHint": False,
+            "idempotentHint": True, "openWorldHint": False,
+        },
         description="Full-text search across saved Uoink corpora.",
         input_schema=_schema({
             "query": {"type": "string"},
@@ -3680,6 +3711,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "search_clips": ToolSpec(
         name="search_clips",
+        title="Search transcript clips",
+        annotations={
+            "readOnlyHint": True, "destructiveHint": False,
+            "idempotentHint": True, "openWorldHint": False,
+        },
         description=(
             "Full-text search over transcript windows from saved uoinks. "
             "Long source cues retain coarse timing and link to the cue start "
@@ -3703,6 +3739,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "get_evidence_card": ToolSpec(
         name="get_evidence_card",
+        title="Get evidence card",
+        annotations={
+            "readOnlyHint": True, "destructiveHint": False,
+            "idempotentHint": True, "openWorldHint": False,
+        },
         description=(
             "Return an evidence card for one saved uoink: title, channel, "
             "platform, topic, source URL, a short summary hint, and its most "
@@ -3841,6 +3882,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "get_uoink_corpus": ToolSpec(
         name="get_uoink_corpus",
+        title="Get saved corpus",
+        annotations={
+            "readOnlyHint": True, "destructiveHint": False,
+            "idempotentHint": True, "openWorldHint": False,
+        },
         description="Return the full markdown corpus for a saved uoink by slug.",
         input_schema=_schema({
             "slug": {"type": "string", "description": "Folder slug of the saved uoink."},
@@ -3849,6 +3895,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "analyze_comments": ToolSpec(
         name="analyze_comments",
+        title="Analyze comments",
+        annotations={
+            "readOnlyHint": False, "destructiveHint": True,
+            "idempotentHint": False, "openWorldHint": True,
+        },
         description=(
             "Run Comment Intelligence on an existing uoink and return themes, "
             "mentioned products/tools, and disagreements."
@@ -3861,6 +3912,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "classify_hook": ToolSpec(
         name="classify_hook",
+        title="Classify hook",
+        annotations={
+            "readOnlyHint": False, "destructiveHint": True,
+            "idempotentHint": False, "openWorldHint": True,
+        },
         description="Classify the hook type for an existing uoink.",
         input_schema=_schema({
             "slug": {"type": "string", "description": "Folder slug of the saved uoink."},
@@ -3870,6 +3926,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "get_taxonomy": ToolSpec(
         name="get_taxonomy",
+        title="Get hook taxonomy",
+        annotations={
+            "readOnlyHint": True, "destructiveHint": False,
+            "idempotentHint": True, "openWorldHint": False,
+        },
         description=(
             "Return captured Hook Type taxonomy rows, optionally filtered by "
             "channel and hook_type."
@@ -3905,6 +3966,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "get_citation_map": ToolSpec(
         name="get_citation_map",
+        title="Get citation map",
+        annotations={
+            "readOnlyHint": True, "destructiveHint": False,
+            "idempotentHint": True, "openWorldHint": False,
+        },
         description=(
             "Return the transcript + screenshot citation map for a saved "
             "uoink, each entry with a timestamped YouTube deep link."
@@ -3917,6 +3983,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "get_uoink_health": ToolSpec(
         name="get_uoink_health",
+        title="Get capture health",
+        annotations={
+            "readOnlyHint": True, "destructiveHint": False,
+            "idempotentHint": True, "openWorldHint": False,
+        },
         description="Return the per-section extraction health score for a saved uoink.",
         input_schema=_schema({
             "slug": {"type": "string", "description": "Folder slug of the saved uoink."},
@@ -3926,6 +3997,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "find_mentions": ToolSpec(
         name="find_mentions",
+        title="Find entity mentions",
+        annotations={
+            "readOnlyHint": True, "destructiveHint": False,
+            "idempotentHint": True, "openWorldHint": False,
+        },
         description=(
             "Find every place an entity (person, tool, product, company, "
             "or topic) is mentioned across saved uoinks, newest first, each "
@@ -4034,6 +4110,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "add_podcast_feed": ToolSpec(
         name="add_podcast_feed",
+        title="Add podcast feed",
+        annotations={
+            "readOnlyHint": False, "destructiveHint": False,
+            "idempotentHint": True, "openWorldHint": True,
+        },
         description=(
             "Register an RSS feed URL. Idempotent -- "
             "existing URL returns the same row. poll_interval_min "
@@ -4052,6 +4133,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "list_podcast_feeds": ToolSpec(
         name="list_podcast_feeds",
+        title="List podcast feeds",
+        annotations={
+            "readOnlyHint": True, "destructiveHint": False,
+            "idempotentHint": True, "openWorldHint": False,
+        },
         description="List registered RSS feeds newest-first.",
         input_schema=_schema({
             "enabled_only": {"type": "boolean", "default": False},
@@ -4061,6 +4147,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "remove_podcast_feed": ToolSpec(
         name="remove_podcast_feed",
+        title="Remove podcast feed",
+        annotations={
+            "readOnlyHint": False, "destructiveHint": True,
+            "idempotentHint": True, "openWorldHint": False,
+        },
         description=(
             "Delete a feed + cascade its episodes."
         ),
@@ -4072,6 +4163,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "poll_podcast_feed": ToolSpec(
         name="poll_podcast_feed",
+        title="Poll podcast feed",
+        annotations={
+            "readOnlyHint": False, "destructiveHint": False,
+            "idempotentHint": False, "openWorldHint": True,
+        },
         description=(
             "Trigger one feed poll (HTTP GET + RSS/Atom "
             "parse + upsert episodes). Conditional GET via ETag/"
@@ -4086,6 +4182,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "list_podcast_episodes": ToolSpec(
         name="list_podcast_episodes",
+        title="List podcast episodes",
+        annotations={
+            "readOnlyHint": True, "destructiveHint": False,
+            "idempotentHint": True, "openWorldHint": False,
+        },
         description=(
             "List episodes. Optional feed_id + status "
             "filters (new | queued | downloaded | transcribed | "
@@ -4104,6 +4205,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "download_podcast_episode": ToolSpec(
         name="download_podcast_episode",
+        title="Download podcast audio",
+        annotations={
+            "readOnlyHint": False, "destructiveHint": False,
+            "idempotentHint": True, "openWorldHint": True,
+        },
         description=(
             "Download an episode's MP3 via yt-dlp + "
             "ffmpeg. Synchronous. Returns when the file lands at "
@@ -4119,6 +4225,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "get_whisperx_status": ToolSpec(
         name="get_whisperx_status",
+        title="Get transcription status",
+        annotations={
+            "readOnlyHint": True, "destructiveHint": False,
+            "idempotentHint": True, "openWorldHint": False,
+        },
         description=(
             "Report whether the WhisperX runtime is importable + "
             "the currently-selected model size + the diarization "
@@ -4131,6 +4242,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "transcribe_podcast_episode": ToolSpec(
         name="transcribe_podcast_episode",
+        title="Transcribe podcast episode",
+        annotations={
+            "readOnlyHint": False, "destructiveHint": True,
+            "idempotentHint": False, "openWorldHint": True,
+        },
         description=(
             "Queue WhisperX for a downloaded episode. A single "
             "below-normal-priority worker writes the JSON transcript next "
@@ -4155,6 +4271,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "episode_to_corpus": ToolSpec(
         name="episode_to_corpus",
+        title="Publish podcast corpus",
+        annotations={
+            "readOnlyHint": False, "destructiveHint": True,
+            "idempotentHint": True, "openWorldHint": False,
+        },
         description=(
             "Publish a completed podcast transcript into the local Uoink "
             "corpus. Writes deterministic Markdown and sidecar files, "
@@ -4352,6 +4473,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "get_transcript_reliability": ToolSpec(
         name="get_transcript_reliability",
+        title="Get transcript reliability",
+        annotations={
+            "readOnlyHint": True, "destructiveHint": False,
+            "idempotentHint": True, "openWorldHint": False,
+        },
         description=(
             "Return stored transcript reliability spans for a saved uoink by "
             "YouTube video_id. Read-only; computation is triggered by the "
@@ -4909,6 +5035,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "get_library_activity": ToolSpec(
         name="get_library_activity",
+        title="Get library activity",
+        annotations={
+            "readOnlyHint": True, "destructiveHint": False,
+            "idempotentHint": True, "openWorldHint": False,
+        },
         description="Report deterministic library activity, shelf churn, and source observations.",
         input_schema=_schema({
             "interval": {
@@ -4956,7 +5087,6 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
         }, ["interval"]),
         handler=get_library_activity,
         rate_limiter=None,
-        annotations={"readOnlyHint": True, "idempotentHint": True},
     ),
     # ---- Living Library Phase 4 bounded read tools (run AV-1) ----
     # Strictness, the 2 s deadline, the 60/minute and 2-active guard and every
@@ -4965,6 +5095,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     # still receives the contract's `rate_limited` envelope.
     "search_library": ToolSpec(
         name="search_library",
+        title="Search library",
+        annotations={
+            "readOnlyHint": True, "destructiveHint": False,
+            "idempotentHint": True, "openWorldHint": False,
+        },
         description=(
             "Bounded clip-first search of the saved library (default 5, at "
             "most 20 hits) with an item-text fallback for items without "
@@ -4983,6 +5118,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "get_library_item": ToolSpec(
         name="get_library_item",
+        title="Get library item",
+        annotations={
+            "readOnlyHint": True, "destructiveHint": False,
+            "idempotentHint": True, "openWorldHint": False,
+        },
         description=(
             "Resolve one saved item by video_id or slug (exactly one) and "
             "return its default Librarian evidence card unchanged plus "
@@ -4997,6 +5137,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "read_library_resource": ToolSpec(
         name="read_library_resource",
+        title="Read library resource",
+        annotations={
+            "readOnlyHint": True, "destructiveHint": False,
+            "idempotentHint": True, "openWorldHint": False,
+        },
         description=(
             "Read one uoink://library/v1/ resource URI (card, excerpt, corpus "
             "chunk, shelf page or brief) with the same validation, contents "
@@ -5015,6 +5160,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     # live in library_briefs.py behind library_resources.dispatch_tool.
     "get_library_brief_input": ToolSpec(
         name="get_library_brief_input",
+        title="Prepare library brief input",
+        annotations={
+            "readOnlyHint": True, "destructiveHint": False,
+            "idempotentHint": True, "openWorldHint": False,
+        },
         description=(
             "Prepare bounded input for a client-run daily brief: for a UTC "
             "date and a Phase 2 run id, return job_key, input_hash, bound "
@@ -5031,6 +5181,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "publish_library_brief": ToolSpec(
         name="publish_library_brief",
+        title="Publish library brief",
+        annotations={
+            "readOnlyHint": False, "destructiveHint": False,
+            "idempotentHint": True, "openWorldHint": False,
+        },
         description=(
             "Local write: persist one client-produced brief for a job "
             "prepared by get_library_brief_input. Validates the packet "
@@ -5066,10 +5221,14 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     # a throttled caller still receives the contract's `rate_limited` envelope.
     "export_cited_range": ToolSpec(
         name="export_cited_range",
+        title="Export cited transcript range",
+        annotations={
+            "readOnlyHint": True, "destructiveHint": False,
+            "idempotentHint": True, "openWorldHint": False,
+        },
         description=EXPORT_CITED_RANGE_DESCRIPTION,
         input_schema=EXPORT_CITED_RANGE_SCHEMA,
         handler=_library_media_export,
-        annotations={"readOnlyHint": True, "idempotentHint": True},
     ),
 }
 
@@ -5084,6 +5243,8 @@ def list_tools() -> list[dict[str, Any]]:
         }
         if spec.annotations is not None:
             item["annotations"] = spec.annotations
+        if spec.title is not None:
+            item["title"] = spec.title
         tools.append(item)
     return tools
 

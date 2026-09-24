@@ -96,9 +96,24 @@ not required.
 
 **Agent flow (MCP):** your agent has the Uoink tools after setup → ask *"uoink this video and decode the hook"* → the agent calls `uoink_video` → `classify_hook` → analysis, no clipboard step.
 
-## Optional AI features and privacy
+## Privacy
 
-Core capture works with **no API key**. Comment Intelligence, Hook Type classification, Entity Extraction, and the agent-callable `analyze_comments` / `classify_hook` tools call the Anthropic API and are **off by default**. When you enable them you supply your own Anthropic API key on the setup page; it's stored in the OS credential store (encrypted at rest) and used only for those calls. Uoink itself collects nothing — the core extraction stays local except the source fetch. Revoke the key any time via the setup page.
+Your saved corpora, screenshots, podcast audio, transcripts, library index and
+diagnostic logs stay on your computer. Uoink has no account, cloud library or
+telemetry.
+
+Capture fetches the source you ask for. Podcast watches poll feeds you enable;
+Auto-ingest can also download new episodes. Truncated X posts may use the
+FxTwitter fallback to retrieve full text. Transcription can download models with
+your consent, and **Check now** contacts GitHub for release information.
+
+Optional AI features send relevant source text to Anthropic only with your own
+API key. Comment Intelligence, Hook Type classification and entity extraction
+are off by default; agent-requested analysis also requires your key. The key is
+stored in the OS credential store. Content you pass to an AI client is handled
+under that client's policy.
+
+Read the [Uoink privacy policy](https://uoink.app/privacy).
 
 ## Disclaimer & Terms of Use
 

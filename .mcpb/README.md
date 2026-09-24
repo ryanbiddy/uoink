@@ -21,7 +21,7 @@ does not prove Claude Code installation or any current CLI capability.
    Settings → Extensions**).
 3. When prompted for the **Uoink install directory**, accept the default
    (`%LOCALAPPDATA%\Uoink`) unless you installed Uoink somewhere else.
-4. Restart Claude Desktop. The 29 stdio tools, five library resource
+4. Restart Claude Desktop. The 32 stdio tools, five library resource
    templates, and four prompts below appear from the launched child.
 
 ## What this bundle is (and isn't)
@@ -76,7 +76,7 @@ its `@` picker. Claude Code CLI 2.1.261 has no native resource reader; that
 client uses `read_library_resource(uri)` instead
 ([docs/claude-code-mcp.md](../docs/claude-code-mcp.md)).
 
-### 29 tools
+### 32 tools
 
 **Legacy (25)**
 
@@ -115,6 +115,14 @@ client uses `read_library_resource(uri)` instead
 | `search_library` | Bounded clip-first search (default 5, at most 20 hits) with revision-bound follow-up URIs. |
 | `get_library_item` | Resolve one saved item (`video_id` or `slug`) and return its Librarian card plus canonical resource URIs. |
 | `read_library_resource` | Read one `uoink://library/v1/` URI with the same contents and refusals as `resources/read`. |
+
+**Client-run briefs and cited export (3)**
+
+| Tool | Role |
+|---|---|
+| `get_library_brief_input` | Prepare bounded input for a client-run brief without changing the library. |
+| `publish_library_brief` | Persist an immutable local brief; deduplicate retries by submission key. |
+| `export_cited_range` | Read stored transcript cues with citations, speakers and revision pins. |
 
 **Phase 5 (1)** — contract `phase5-v1`
 
@@ -173,6 +181,21 @@ section 4. They are not a Claude Code CLI acceptance claim.
   and `runtimes.python` `>=3.10,<4`
   ([protocol-limits note](../docs/library/PHASE4-PROTOCOL-LIMITS-2026-09-08.md)
   §4.2). That Desktop range is not Claude Code CLI acceptance.
+
+## Privacy
+
+Corpora, screenshots, podcast audio, transcripts, the library index and logs
+stay on your computer. Capture fetches the source you request; enabled podcast
+watches poll feeds and Auto-ingest can download episodes. Truncated X posts may
+use FxTwitter to retrieve full text. Transcription can download models with
+consent; **Check now** contacts GitHub.
+
+Optional Anthropic features require your own key and send relevant source text.
+Comment Intelligence, Hook Type classification and entity extraction are off by
+default. Agent-requested analysis also requires your key. Content returned to
+Claude is handled under Claude's policy.
+
+Read the [Uoink privacy policy](https://uoink.app/privacy).
 
 ## Rebuilding
 

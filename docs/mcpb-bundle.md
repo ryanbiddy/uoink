@@ -37,7 +37,7 @@ Uoink's container matches the protocol note's layout
 ([protocol-limits note](library/PHASE4-PROTOCOL-LIMITS-2026-09-08.md) §4.1):
 
 ```text
-uoink-3.8.0.mcpb (ZIP archive)
+uoink-3.8.1.mcpb (ZIP archive)
 ├── manifest.json       (manifest_version 0.4)
 ├── README.md           (bundle documentation)
 ├── icon.png            (display icon)
@@ -63,7 +63,7 @@ already uses these fields.
 | `manifest_version` | `"0.4"` (string, required) | `"0.4"` |
 | `name` | Package identifier matching `^[a-z0-9-_]+$` | `"uoink"` |
 | `display_name` | Display string | `"Uoink"` |
-| `version` | Valid SemVer matching repository `VERSION` | `"3.8.0"` |
+| `version` | Valid SemVer matching repository `VERSION` | `"3.8.1"` |
 | `description` | Single-line summary | present |
 | `long_description` | Extended description for marketplace views | present |
 | `author` | `{ "name": "...", "url": "..." }` | Ryan Biddy / https://uoink.app |

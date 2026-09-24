@@ -1,4 +1,4 @@
-"""Cross-file source-build version contract for v3.8.0.
+"""Cross-file source-build version contract for v3.8.1.
 
 Run: python -m pytest tests/test_release_version_v380.py
 
@@ -13,7 +13,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parent.parent
-EXPECTED = "3.8.0"
+EXPECTED = "3.8.1"
 
 
 def match(path: str, pattern: str) -> str:

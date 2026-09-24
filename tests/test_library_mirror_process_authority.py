@@ -7,6 +7,7 @@ No real processes are opened, assigned, suspended, or terminated.
 from __future__ import annotations
 
 import os
+import sys
 from types import SimpleNamespace
 from unittest.mock import MagicMock
 
@@ -14,6 +15,11 @@ import pytest
 
 import library_mirror as mirror
 from _mirror_stable_native_fixture import stable_native_authority
+
+pytestmark = pytest.mark.skipif(
+    sys.platform != "win32",
+    reason="Windows process authority; patching os.name breaks POSIX pathlib",
+)
 
 
 class EffectRecorder:

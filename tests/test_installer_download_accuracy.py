@@ -33,11 +33,11 @@ def _tracked_docs() -> list[Path]:
 # The in-product download link (extension/setup.js) must only ever name an
 # installer that is already published, so it lags one release behind until
 # the owner publishes and bumps it.
-PUBLISHED_VERSION = "3.7.0"
-# The release docs (README, REQUIREMENTS) are cut with the release itself and
-# name the version being released: the source VERSION.
+PUBLISHED_VERSION = "3.8.0"
+# Install instructions must also point at an available installer while the
+# source VERSION advances to an unpublished release.
 RELEASE_VERSION = (ROOT / "VERSION").read_text(encoding="utf-8").strip()
-RELEASE_ASSET = f"Uoink-Setup-{RELEASE_VERSION}.exe"
+PUBLISHED_ASSET = f"Uoink-Setup-{PUBLISHED_VERSION}.exe"
 
 
 def test_setup_page_points_to_the_verified_published_installer() -> None:
@@ -67,12 +67,12 @@ def test_current_install_docs_name_the_published_asset() -> None:
         ROOT / "docs" / "surface-maps" / "mcpb-bundle.md"
     ).read_text(encoding="utf-8")
 
-    assert f"Download `{RELEASE_ASSET}`" in readme
+    assert f"Download `{PUBLISHED_ASSET}`" in readme
     assert (
-        f"https://github.com/ryanbiddy/uoink/releases/tag/v{RELEASE_VERSION}"
+        f"https://github.com/ryanbiddy/uoink/releases/tag/v{PUBLISHED_VERSION}"
     ) in readme
     if RELEASE_VERSION != PUBLISHED_VERSION:
-        assert f"Download `Uoink-Setup-{PUBLISHED_VERSION}.exe`" not in readme
+        assert f"Download `Uoink-Setup-{RELEASE_VERSION}.exe`" not in readme
     assert "Uoink-Setup-3.6.0.exe" not in readme
     assert "dist/uoink-3.3.0.mcpb" not in bundle_doc
     assert "currently 3.3.0" not in bundle_map
@@ -85,7 +85,7 @@ def test_manual_setup_is_a_current_source_install_path() -> None:
     build = (ROOT / "build.ps1").read_text(encoding="utf-8")
     match = re.search(r"\$YTDLP_VERSION\s*=\s*'([^']+)'", build)
 
-    assert f"published v{RELEASE_VERSION} installer" in manual
+    assert f"published v{PUBLISHED_VERSION} installer" in manual
     assert "python -m pip install -r requirements.txt" in manual
     assert match is not None
     assert f'python -m pip install "yt-dlp=={match.group(1)}"' in manual

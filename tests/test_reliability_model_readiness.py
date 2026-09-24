@@ -2,6 +2,9 @@
 
 Uses temporary placeholder files only. Does not import server, whisper_runner,
 or a model package. Run: python tests/test_reliability_model_readiness.py
+
+Canonicalize temporary roots: Windows runners can return a RUNNER~1 alias,
+while production cache validation deliberately refuses redirected paths.
 """
 from __future__ import annotations
 
@@ -51,7 +54,7 @@ def _seed_ready(root: Path, model="tiny"):
 
 def test_readiness_does_not_create_a_cache():
     with tempfile.TemporaryDirectory() as raw:
-        root = Path(raw) / "models"
+        root = Path(raw).resolve() / "models"
         _assert(not rel.is_model_ready("tiny", root), "missing cache must be unready")
         _assert(not root.exists(), "readiness must not create the download root")
     print("ok  readiness is read-only")
@@ -59,7 +62,7 @@ def test_readiness_does_not_create_a_cache():
 
 def test_marker_alone_is_not_ready():
     with tempfile.TemporaryDirectory() as raw:
-        root = Path(raw)
+        root = Path(raw).resolve()
         _seed_marker(root)
         status = rel.reliability_model_status("tiny", root)
         _assert(status["cached"] is False, f"marker-only must be unready: {status}")
@@ -69,7 +72,7 @@ def test_marker_alone_is_not_ready():
 
 def test_snapshot_alone_is_not_ready():
     with tempfile.TemporaryDirectory() as raw:
-        root = Path(raw)
+        root = Path(raw).resolve()
         _seed_snapshot(root)
         _assert(not rel.is_model_ready("tiny", root),
                 "snapshot without consent marker must be unready")
@@ -78,7 +81,7 @@ def test_snapshot_alone_is_not_ready():
 
 def test_complete_marker_and_snapshot_is_ready():
     with tempfile.TemporaryDirectory() as raw:
-        root = Path(raw)
+        root = Path(raw).resolve()
         _seed_ready(root)
         status = rel.reliability_model_status("tiny", root)
         _assert(status["cached"] is True, status)
@@ -90,7 +93,7 @@ def test_complete_marker_and_snapshot_is_ready():
 def test_each_missing_required_file_is_unready():
     for name in rel._RELIABILITY_CACHE_FILES:
         with tempfile.TemporaryDirectory() as raw:
-            root = Path(raw)
+            root = Path(raw).resolve()
             _seed_marker(root)
             _seed_snapshot(root, missing=(name,))
             _assert(not rel.is_model_ready("tiny", root),
@@ -100,7 +103,7 @@ def test_each_missing_required_file_is_unready():
 
 def test_empty_tokenizer_is_not_ready():
     with tempfile.TemporaryDirectory() as raw:
-        root = Path(raw)
+        root = Path(raw).resolve()
         _seed_marker(root)
         _seed_snapshot(root, empty=("tokenizer.json",))
         _assert(not rel.is_model_ready("tiny", root),
@@ -110,7 +113,7 @@ def test_empty_tokenizer_is_not_ready():
 
 def test_wrong_repository_is_not_ready():
     with tempfile.TemporaryDirectory() as raw:
-        root = Path(raw)
+        root = Path(raw).resolve()
         _seed_marker(root, "tiny")
         _seed_snapshot(root, "tiny", repo_id="Systran/faster-whisper-base")
         _assert(not rel.is_model_ready("tiny", root),
@@ -120,7 +123,7 @@ def test_wrong_repository_is_not_ready():
 
 def test_unknown_or_path_shaped_reference_is_not_ready():
     with tempfile.TemporaryDirectory() as raw:
-        root = Path(raw)
+        root = Path(raw).resolve()
         snapshot = _seed_snapshot(root)
         _seed_marker(root)
         reference = snapshot.parent.parent / "refs" / "main"
@@ -133,14 +136,17 @@ def test_unknown_or_path_shaped_reference_is_not_ready():
 
 def test_resolved_blob_inside_repo_is_allowed_but_outside_file_is_not():
     with tempfile.TemporaryDirectory() as raw:
-        root = Path(raw)
+        # Windows CI can spell TEMP with RUNNER~1. Resolve the fixture before
+        # mocking resolve so synthetic link targets use the same long path
+        # as the production containment check.
+        root = Path(raw).resolve()
         snapshot = _seed_snapshot(root)
         _seed_marker(root)
         repo = snapshot.parent.parent
         blob = repo / "blobs" / "synthetic-tokenizer"
         blob.parent.mkdir()
         blob.write_bytes(b"synthetic blob")
-        outside = Path(raw) / "outside-tokenizer.json"
+        outside = root / "outside-tokenizer.json"
         outside.write_bytes(b"synthetic outside")
         actual_resolve = Path.resolve
         resolved_target = blob
@@ -193,7 +199,7 @@ def test_all_six_models_have_sizes_and_can_be_ready():
             == "mobiuslabsgmbh/faster-whisper-large-v3-turbo",
             "production turbo mapping must not switch providers")
     with tempfile.TemporaryDirectory() as raw:
-        root = Path(raw)
+        root = Path(raw).resolve()
         for model, size in expected.items():
             _seed_ready(root, model)
             status = rel.reliability_model_status(model, root)

@@ -12,6 +12,26 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 Nothing yet.
 
+## [3.8.1] - Unreleased
+
+### Added
+
+- Titles and explicit read-only, destructive, idempotent and open-world hints
+  for all 32 stdio tools, with matching HTTP metadata and a documented
+  per-tool audit. The real stdio handshake test verifies the advertised hints.
+- The privacy-policy link in the MCPB manifest and a README Privacy section
+  covering local storage, source fetches, feed polling, FxTwitter and optional
+  Anthropic calls.
+
+### Fixed
+
+- Windows-only process-authority tests are skipped on other platforms before
+  they can change `os.name` and break pytest's path handling.
+- Model-readiness fixtures resolve temporary paths, including Windows runner
+  paths using `RUNNER~1`, before testing cache containment.
+- Source version fields advance to 3.8.1; the setup page and install instructions
+  point to the published 3.8.0 installer.
+
 ## [3.8.0] - 2026-09-15
 
 ### Added

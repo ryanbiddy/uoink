@@ -122,6 +122,11 @@ except AttributeError:
 # --------------------------------------------------------------------------
 @mcp.tool(
     name="uoink_video",
+    title="Capture video",
+    annotations=mcp_types.ToolAnnotations(
+        readOnlyHint=False, destructiveHint=False,
+        idempotentHint=False, openWorldHint=True,
+    ),
     description="Extract a single YouTube video into a Uoink corpus.",
 )
 def uoink_video(url: str, interval: int = 30) -> dict:
@@ -130,6 +135,11 @@ def uoink_video(url: str, interval: int = 30) -> dict:
 
 @mcp.tool(
     name="uoink_playlist",
+    title="Capture playlist",
+    annotations=mcp_types.ToolAnnotations(
+        readOnlyHint=False, destructiveHint=False,
+        idempotentHint=False, openWorldHint=True,
+    ),
     description="Start asynchronous extraction for a YouTube playlist.",
 )
 def uoink_playlist(url: str, interval: int = 30) -> dict:
@@ -138,6 +148,11 @@ def uoink_playlist(url: str, interval: int = 30) -> dict:
 
 @mcp.tool(
     name="get_job_status",
+    title="Get job status",
+    annotations=mcp_types.ToolAnnotations(
+        readOnlyHint=True, destructiveHint=False,
+        idempotentHint=True, openWorldHint=False,
+    ),
     description="Return the full status object for an async Uoink job.",
 )
 def get_job_status(job_id: str) -> dict:
@@ -146,19 +161,37 @@ def get_job_status(job_id: str) -> dict:
 
 @mcp.tool(
     name="cancel_job",
+    title="Cancel job",
+    annotations=mcp_types.ToolAnnotations(
+        readOnlyHint=False, destructiveHint=True,
+        idempotentHint=True, openWorldHint=False,
+    ),
     description="Cancel an async Uoink job and leave partial outputs on disk.",
 )
 def cancel_job(job_id: str) -> dict:
     return uoink_mcp_tools.call_tool("cancel_job", {"job_id": job_id})
 
 
-@mcp.tool(name="list_recent_uoinks", description="List recent saved Uoink corpora.")
+@mcp.tool(
+    name="list_recent_uoinks",
+    title="List recent captures",
+    annotations=mcp_types.ToolAnnotations(
+        readOnlyHint=True, destructiveHint=False,
+        idempotentHint=True, openWorldHint=False,
+    ),
+    description="List recent saved Uoink corpora.",
+)
 def list_recent_uoinks(limit: int = 20) -> dict:
     return uoink_mcp_tools.call_tool("list_recent_uoinks", {"limit": limit})
 
 
 @mcp.tool(
     name="search_uoinks",
+    title="Search captures",
+    annotations=mcp_types.ToolAnnotations(
+        readOnlyHint=True, destructiveHint=False,
+        idempotentHint=True, openWorldHint=False,
+    ),
     description="Keyword search across saved Uoink markdown corpora.",
 )
 def search_uoinks(query: str, limit: int = 10) -> dict:
@@ -167,6 +200,11 @@ def search_uoinks(query: str, limit: int = 10) -> dict:
 
 @mcp.tool(
     name="search_clips",
+    title="Search transcript clips",
+    annotations=mcp_types.ToolAnnotations(
+        readOnlyHint=True, destructiveHint=False,
+        idempotentHint=True, openWorldHint=False,
+    ),
     description=(
         "Full-text search over transcript windows from saved uoinks; each hit "
         "carries a deep link to the moment. Use this to find the exact "
@@ -189,6 +227,11 @@ def search_clips(
 
 @mcp.tool(
     name="get_evidence_card",
+    title="Get evidence card",
+    annotations=mcp_types.ToolAnnotations(
+        readOnlyHint=True, destructiveHint=False,
+        idempotentHint=True, openWorldHint=False,
+    ),
     description=(
         "Return an evidence card for one saved uoink: metadata, source URL, "
         "a short summary hint, and its most quotable clips spread across the "
@@ -214,6 +257,11 @@ def get_evidence_card(
 
 @mcp.tool(
     name="get_uoink_corpus",
+    title="Get saved corpus",
+    annotations=mcp_types.ToolAnnotations(
+        readOnlyHint=True, destructiveHint=False,
+        idempotentHint=True, openWorldHint=False,
+    ),
     description="Return the full markdown corpus for a saved uoink by slug.",
 )
 def get_uoink_corpus(slug: str) -> dict:
@@ -222,6 +270,11 @@ def get_uoink_corpus(slug: str) -> dict:
 
 @mcp.tool(
     name="analyze_comments",
+    title="Analyze comments",
+    annotations=mcp_types.ToolAnnotations(
+        readOnlyHint=False, destructiveHint=True,
+        idempotentHint=False, openWorldHint=True,
+    ),
     description=(
         "Run Comment Intelligence on an existing uoink using the configured "
         "Anthropic key."
@@ -233,6 +286,11 @@ def analyze_comments(slug: str) -> dict:
 
 @mcp.tool(
     name="classify_hook",
+    title="Classify hook",
+    annotations=mcp_types.ToolAnnotations(
+        readOnlyHint=False, destructiveHint=True,
+        idempotentHint=False, openWorldHint=True,
+    ),
     description="Classify the hook type for an existing uoink.",
 )
 def classify_hook(slug: str) -> dict:
@@ -241,6 +299,11 @@ def classify_hook(slug: str) -> dict:
 
 @mcp.tool(
     name="get_taxonomy",
+    title="Get hook taxonomy",
+    annotations=mcp_types.ToolAnnotations(
+        readOnlyHint=True, destructiveHint=False,
+        idempotentHint=True, openWorldHint=False,
+    ),
     description=(
         "Return captured Hook Type taxonomy rows, optionally "
         "filtered by channel and hook_type."
@@ -259,6 +322,11 @@ def get_taxonomy(
 
 @mcp.tool(
     name="get_citation_map",
+    title="Get citation map",
+    annotations=mcp_types.ToolAnnotations(
+        readOnlyHint=True, destructiveHint=False,
+        idempotentHint=True, openWorldHint=False,
+    ),
     description=(
         "Return the transcript + screenshot citation map for a saved "
         "uoink, each entry with a source-aware timestamp link."
@@ -270,6 +338,11 @@ def get_citation_map(slug: str) -> dict:
 
 @mcp.tool(
     name="get_uoink_health",
+    title="Get capture health",
+    annotations=mcp_types.ToolAnnotations(
+        readOnlyHint=True, destructiveHint=False,
+        idempotentHint=True, openWorldHint=False,
+    ),
     description="Return the per-section extraction health score for a saved uoink.",
 )
 def get_uoink_health(slug: str) -> dict:
@@ -278,6 +351,11 @@ def get_uoink_health(slug: str) -> dict:
 
 @mcp.tool(
     name="find_mentions",
+    title="Find entity mentions",
+    annotations=mcp_types.ToolAnnotations(
+        readOnlyHint=True, destructiveHint=False,
+        idempotentHint=True, openWorldHint=False,
+    ),
     description=(
         "Find every mention of an entity (person, tool, product, company, "
         "or topic) across saved uoinks, each with a source-aware timestamp "
@@ -292,6 +370,11 @@ def find_mentions(entity: str, limit: int = 50) -> dict:
 
 @mcp.tool(
     name="get_transcript_reliability",
+    title="Get transcript reliability",
+    annotations=mcp_types.ToolAnnotations(
+        readOnlyHint=True, destructiveHint=False,
+        idempotentHint=True, openWorldHint=False,
+    ),
     description="Return stored transcript reliability spans for a saved uoink.",
 )
 def get_transcript_reliability(video_id: str) -> dict:
@@ -302,6 +385,11 @@ def get_transcript_reliability(video_id: str) -> dict:
 
 @mcp.tool(
     name="add_podcast_feed",
+    title="Add podcast feed",
+    annotations=mcp_types.ToolAnnotations(
+        readOnlyHint=False, destructiveHint=False,
+        idempotentHint=True, openWorldHint=True,
+    ),
     description=("Register a podcast RSS or Atom feed for metadata watching, "
                  "with optional per-feed Auto-ingest."),
 )
@@ -317,7 +405,15 @@ def add_podcast_feed(
     )
 
 
-@mcp.tool(name="list_podcast_feeds", description="List registered podcast feeds.")
+@mcp.tool(
+    name="list_podcast_feeds",
+    title="List podcast feeds",
+    annotations=mcp_types.ToolAnnotations(
+        readOnlyHint=True, destructiveHint=False,
+        idempotentHint=True, openWorldHint=False,
+    ),
+    description="List registered podcast feeds.",
+)
 def list_podcast_feeds(enabled_only: bool = False) -> dict:
     return uoink_mcp_tools.call_tool(
         "list_podcast_feeds", {"enabled_only": enabled_only}
@@ -326,6 +422,11 @@ def list_podcast_feeds(enabled_only: bool = False) -> dict:
 
 @mcp.tool(
     name="remove_podcast_feed",
+    title="Remove podcast feed",
+    annotations=mcp_types.ToolAnnotations(
+        readOnlyHint=False, destructiveHint=True,
+        idempotentHint=True, openWorldHint=False,
+    ),
     description="Remove a podcast feed and its tracked episode rows.",
 )
 def remove_podcast_feed(feed_id: int) -> dict:
@@ -334,6 +435,11 @@ def remove_podcast_feed(feed_id: int) -> dict:
 
 @mcp.tool(
     name="poll_podcast_feed",
+    title="Poll podcast feed",
+    annotations=mcp_types.ToolAnnotations(
+        readOnlyHint=False, destructiveHint=False,
+        idempotentHint=False, openWorldHint=True,
+    ),
     description="Fetch one podcast feed now and retain newly discovered episodes.",
 )
 def poll_podcast_feed(feed_id: int) -> dict:
@@ -342,6 +448,11 @@ def poll_podcast_feed(feed_id: int) -> dict:
 
 @mcp.tool(
     name="list_podcast_episodes",
+    title="List podcast episodes",
+    annotations=mcp_types.ToolAnnotations(
+        readOnlyHint=True, destructiveHint=False,
+        idempotentHint=True, openWorldHint=False,
+    ),
     description="List tracked podcast episodes with optional feed and status filters.",
 )
 def list_podcast_episodes(
@@ -357,6 +468,11 @@ def list_podcast_episodes(
 
 @mcp.tool(
     name="download_podcast_episode",
+    title="Download podcast audio",
+    annotations=mcp_types.ToolAnnotations(
+        readOnlyHint=False, destructiveHint=False,
+        idempotentHint=True, openWorldHint=True,
+    ),
     description="Download one episode's MP3 locally with yt-dlp and ffmpeg.",
 )
 def download_podcast_episode(episode_id: int) -> dict:
@@ -367,6 +483,11 @@ def download_podcast_episode(episode_id: int) -> dict:
 
 @mcp.tool(
     name="get_whisperx_status",
+    title="Get transcription status",
+    annotations=mcp_types.ToolAnnotations(
+        readOnlyHint=True, destructiveHint=False,
+        idempotentHint=True, openWorldHint=False,
+    ),
     description="Report local WhisperX availability and supported models.",
 )
 def get_whisperx_status() -> dict:
@@ -375,6 +496,11 @@ def get_whisperx_status() -> dict:
 
 @mcp.tool(
     name="transcribe_podcast_episode",
+    title="Transcribe podcast episode",
+    annotations=mcp_types.ToolAnnotations(
+        readOnlyHint=False, destructiveHint=True,
+        idempotentHint=False, openWorldHint=True,
+    ),
     description="Queue one local podcast transcription and return its durable job id.",
 )
 def transcribe_podcast_episode(
@@ -398,6 +524,11 @@ def transcribe_podcast_episode(
 
 @mcp.tool(
     name="episode_to_corpus",
+    title="Publish podcast corpus",
+    annotations=mcp_types.ToolAnnotations(
+        readOnlyHint=False, destructiveHint=True,
+        idempotentHint=True, openWorldHint=False,
+    ),
     description="Publish a completed podcast transcript into the local corpus.",
 )
 def episode_to_corpus(episode_id: int) -> dict:
@@ -408,8 +539,12 @@ def episode_to_corpus(episode_id: int) -> dict:
 
 @mcp.tool(
     name="get_library_activity",
+    title="Get library activity",
+    annotations=mcp_types.ToolAnnotations(
+        readOnlyHint=True, destructiveHint=False,
+        idempotentHint=True, openWorldHint=False,
+    ),
     description="Report deterministic library activity, shelf churn, and source observations.",
-    annotations=mcp_types.ToolAnnotations(readOnlyHint=True, idempotentHint=True),
 )
 def get_library_activity(
     interval: dict,
@@ -457,6 +592,11 @@ def get_library_activity(
 # --------------------------------------------------------------------------
 @mcp.tool(
     name="search_library",
+    title="Search library",
+    annotations=mcp_types.ToolAnnotations(
+        readOnlyHint=True, destructiveHint=False,
+        idempotentHint=True, openWorldHint=False,
+    ),
     description=(
         "Bounded clip-first search of the saved library (default 5, at most "
         "20 hits) with an item-text fallback for items without clips. Each "
@@ -473,6 +613,11 @@ def search_library(query: str, limit: int = 5):
 
 @mcp.tool(
     name="get_library_item",
+    title="Get library item",
+    annotations=mcp_types.ToolAnnotations(
+        readOnlyHint=True, destructiveHint=False,
+        idempotentHint=True, openWorldHint=False,
+    ),
     description=(
         "Resolve one saved item by video_id or slug (exactly one) and return "
         "its default Librarian evidence card unchanged plus canonical card, "
@@ -490,6 +635,11 @@ def get_library_item(video_id: str | None = None, slug: str | None = None):
 
 @mcp.tool(
     name="read_library_resource",
+    title="Read library resource",
+    annotations=mcp_types.ToolAnnotations(
+        readOnlyHint=True, destructiveHint=False,
+        idempotentHint=True, openWorldHint=False,
+    ),
     description=(
         "Read one uoink://library/v1/ resource URI (card, excerpt, corpus "
         "chunk, shelf page or brief) with the same validation, contents and "
@@ -507,6 +657,11 @@ def read_library_resource(uri: str):
 # tools, so the domain envelope is the tool text.
 @mcp.tool(
     name="get_library_brief_input",
+    title="Prepare library brief input",
+    annotations=mcp_types.ToolAnnotations(
+        readOnlyHint=True, destructiveHint=False,
+        idempotentHint=True, openWorldHint=False,
+    ),
     description=(
         "Prepare bounded input for a client-run daily brief: for a UTC date "
         "and a Phase 2 run id, return job_key, input_hash, bound "
@@ -522,6 +677,11 @@ def get_library_brief_input(date: str, run_id: str):
 
 @mcp.tool(
     name="publish_library_brief",
+    title="Publish library brief",
+    annotations=mcp_types.ToolAnnotations(
+        readOnlyHint=False, destructiveHint=False,
+        idempotentHint=True, openWorldHint=False,
+    ),
     description=(
         "Local write: persist one client-produced brief for a job prepared by "
         "get_library_brief_input. Validates the packet against current "
@@ -555,6 +715,11 @@ def publish_library_brief(
 # storage access. Intercepted below like the Phase 4 tools.
 @mcp.tool(
     name="export_cited_range",
+    title="Export cited transcript range",
+    annotations=mcp_types.ToolAnnotations(
+        readOnlyHint=True, destructiveHint=False,
+        idempotentHint=True, openWorldHint=False,
+    ),
     description=(
         "Read-only cited export of one stored transcript range (exact "
         "cue-aligned start/end, at most 120 s and 200 cues) or one current "
@@ -850,7 +1015,6 @@ def _register_phase4_stdio() -> None:
                             reg_spec = uoink_mcp_tools.TOOL_REGISTRY[tool.name]
                             tool.inputSchema = reg_spec.input_schema
                             tool.description = reg_spec.description
-                        tool.annotations = mcp_types.ToolAnnotations(readOnlyHint=True, idempotentHint=True)
             except (AttributeError, TypeError, ValueError):  # pragma: no cover
                 pass
             return result
