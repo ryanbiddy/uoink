@@ -73,7 +73,7 @@ def extraction(monkeypatch, tmp_path):
 
     state.asr = Mock(side_effect=fake_asr)
     state.comments = Mock()
-    state.index = Mock(spec=["enqueue_pending"])
+    state.index = Mock(spec=["enqueue_pending", "set_pending_error"])
     monkeypatch.setattr(server, "DESKTOP_ROOT", tmp_path)
     monkeypatch.setattr(server, "_run_subprocess", fake_run)
     monkeypatch.setattr(server, "_fetch_metadata", Mock(return_value=metadata))
@@ -453,6 +453,12 @@ def test_media_429_still_enqueues_capture(
     assert earliest_retry.replace(microsecond=0) <= retry_after <= latest_retry
     extraction.index.enqueue_pending.assert_called_once_with(
         URL, 30, result["retry_after"], mode)
+    # The pending row keeps the reason code plus the real yt-dlp line.
+    extraction.index.set_pending_error.assert_called_once()
+    pending_id, stored = extraction.index.set_pending_error.call_args.args
+    assert pending_id == 42
+    assert stored.startswith("youtube_rate_limit: ERROR:")
+    assert "HTTP Error 429" in stored
     assert server._pending_long_video_mode(42) == mode
     assert len(extraction.calls) == 1
     extraction.asr.assert_not_called()

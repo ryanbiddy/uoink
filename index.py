@@ -1698,6 +1698,16 @@ class Index:
             ).fetchone()
         return dict(row) if row else None
 
+    def set_pending_error(self, pending_id: int, error: str) -> None:
+        """Store the initial refusal without counting it as a retry."""
+        with self._lock:
+            self._conn.execute(
+                "UPDATE pending_yoinks SET last_error=? "
+                "WHERE pending_id=? AND status='pending' AND attempt_count=0",
+                (error, pending_id),
+            )
+            self._conn.commit()
+
     def mark_pending_running(self, pending_id: int) -> None:
         """Mark a pending row in flight. The retry worker calls this before
         the actual extract so a parallel call to next_pending won't pick the

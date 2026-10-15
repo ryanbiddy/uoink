@@ -5848,6 +5848,16 @@ def _subprocess_output(e: subprocess.CalledProcessError) -> str:
     return "\n".join(part for part in (stderr, stdout) if part).strip()
 
 
+def _youtube_rate_limit_detail(e: BaseException) -> str:
+    """Keep the reason code and the last sanitized yt-dlp error line."""
+    if not isinstance(e, subprocess.CalledProcessError):
+        return "youtube_rate_limit"
+    for line in reversed(_subprocess_output(e).splitlines()):
+        if line.startswith("ERROR:"):
+            return "youtube_rate_limit: " + _sanitize_error(line)
+    return "youtube_rate_limit"
+
+
 def machine_error_detail(e: BaseException) -> str:
     """Raw-ish diagnostic detail for dashboard disclosures, not primary UI."""
     if isinstance(e, subprocess.CalledProcessError):
@@ -10704,6 +10714,7 @@ def _retry_pending_one() -> bool:
                                          phase_callback=phase_cb)
         except BaseException as e:
             if _is_youtube_rate_limit(e):
+                detail = _youtube_rate_limit_detail(e)
                 attempts = attempts_before + 1
                 if attempts >= index._PENDING_MAX_ATTEMPTS:
                     # Final strike (G-43 / E2E D4 + D5): the row goes
@@ -10716,12 +10727,13 @@ def _retry_pending_one() -> bool:
                         f"after {attempts} attempts and won't retry it on "
                         f"its own.")
                     final_detail = (
+                        f"{detail}\n"
                         f"YouTube answered HTTP 429 (too busy) on all "
                         f"{attempts} attempts. The automatic retry budget "
                         f"is used up, so Uoink stopped.")
                     try:
                         idx.mark_pending_failed(
-                            pending_id, _sanitize_error(final_msg),
+                            pending_id, f"{detail}\n{final_msg}",
                             _now_iso())
                     except Exception:
                         log.exception(
@@ -10747,7 +10759,7 @@ def _retry_pending_one() -> bool:
                     "%Y-%m-%dT%H:%M:%S")
                 try:
                     idx.mark_pending_failed(
-                        pending_id, "youtube_rate_limit", retry_at)
+                        pending_id, detail, retry_at)
                 except Exception:
                     log.exception("retry worker: mark_pending_failed failed")
                 log.info(
@@ -17195,6 +17207,13 @@ class Handler(BaseHTTPRequestHandler):
                         log.warning("POST /extract -> could not enqueue "
                                     "rate-limited URL: %s", enqueue_err)
                     else:
+                        try:
+                            _get_index().set_pending_error(
+                                pending_id, _youtube_rate_limit_detail(e))
+                        except Exception as detail_err:
+                            log.warning("POST /extract -> could not store "
+                                        "rate-limit detail: %s",
+                                        _sanitize_error(str(detail_err)))
                         _remember_pending_long_video_mode(
                             pending_id, long_video_mode)
                         log.info(
@@ -17212,7 +17231,8 @@ class Handler(BaseHTTPRequestHandler):
                             "long_video_mode": long_video_mode,
                         })
                 msg = friendly_error(e)
-                detail = machine_error_detail(e)
+                detail = (_youtube_rate_limit_detail(e) if _is_youtube_rate_limit(e)
+                          else machine_error_detail(e))
                 failure_phase = _failure_phase(e, current_phase)
                 log.error("POST /extract -> error: %s", msg)
                 _record_single_extract_job(

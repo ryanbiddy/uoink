@@ -149,15 +149,17 @@ def main():
                 f"job error says no more retries: {job['error']}")
         _assert(job["message"] == "Uoink stopped after 3 attempts.",
                 f"job message: {job['message']}")
-        # The shipped dashboard prioritises error_detail when translating;
-        # the detail must not contain any string its rate-limit matcher
-        # turns into "Uoink needs a minute. Retrying..." (documented for
-        # the frontend agent in the PR body).
-        detail = (job["error_detail"] or "").lower()
-        for needle in ("too many requests", "http error 429",
-                       "rate-limit", "rate limit"):
-            _assert(needle not in detail,
-                    f"detail would re-trigger Retrying... copy: {detail}")
+        # The detail keeps the machine reason and the real, sanitized yt-dlp
+        # ERROR line so the dashboard can say which step YouTube refused.
+        # It no longer has to avoid rate-limit words: the dashboard answers
+        # retry_exhausted before translating any text ("Uoink gave up after
+        # N attempts") and terminal rows never promise "Retrying..." (G-43
+        # in assets/dashboard/index.html).
+        detail = job["error_detail"] or ""
+        _assert(detail.startswith("youtube_rate_limit"),
+                f"detail keeps the machine-readable reason: {detail}")
+        _assert("http error 429" in detail.lower(),
+                f"detail keeps the real yt-dlp error line: {detail}")
         print("ok  final attempt -> honest terminal queue row + job, "
               "no phantom retry")
 

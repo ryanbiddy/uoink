@@ -1863,7 +1863,7 @@ Success response: HTTP 200
       "retry_after": "2026-05-19T23:52:00Z",
       "attempt_count": 1,
       "status": "pending",
-      "last_error": "youtube_rate_limit",
+      "last_error": "youtube_rate_limit: ERROR: [youtube] dQw4w9WgXcQ: HTTP Error 429: Too Many Requests",
       "succeeded_job_id": null
     }
   ]
@@ -1876,6 +1876,7 @@ Fields:
 |---|---:|---|
 | `ok` | boolean | `true` if the query succeeded. |
 | `queue` | array | List of pending yoink queue rows. |
+| `queue[].last_error` | string or null | For a YouTube rate limit, `youtube_rate_limit: ` followed by the last sanitized yt-dlp `ERROR:` line. Match on the reason code before the first colon, not on the whole string. |
 
 ### POST /queue/cancel
 
