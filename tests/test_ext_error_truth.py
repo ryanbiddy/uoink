@@ -24,6 +24,10 @@ node:vm and drives them through failing captures:
         only when the /health ping fails too, with platform-aware copy; only
         offline opens the setup tab.
 
+Since E1 the popup's video, Reddit and page captures run in background.js's
+queue (tests/test_ext_popup_queue.py), so the popup group loads both and
+checks the reason in the SW notification and in the open popup's toast.
+
 No network: fetch and chrome.* are stubs inside the harness.
 """
 import subprocess

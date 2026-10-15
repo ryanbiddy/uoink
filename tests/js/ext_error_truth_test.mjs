@@ -8,8 +8,12 @@
 //   content_reddit    -- content-reddit.js failure path (E6)
 //   content_x_article -- content-x-article.js failure path (E6)
 //   background        -- SW proxy handlers + context-menu job notifications
-//   popup             -- popup.js handleCorpusCapture / runPopupUoinkCurrent /
-//                        captureXPost / captureXArticle
+//   popup             -- popup.js runPopupUoinkCurrent / captureXPost /
+//                        captureXArticle / runAllowSiteAndRetry; since E1 the
+//                        video, Reddit and page captures (and the X Article
+//                        /extract/page fallback) run in background.js's
+//                        queue, so its notification and the open popup's
+//                        toast or alert (refreshQueue) both carry the reason
 //   retry             -- popup Recent failures Retry -> the opened page
 //                        (content.js / content-reddit.js / content-x-article.js)
 //                        actually starts the capture, and only then is the
@@ -699,19 +703,33 @@ function popupSlice(from, to) {
   return src.slice(start, end);
 }
 
+const POPUP_SENDER = {
+  id: "test-extension-id", url: "chrome-extension://test-extension-id/popup.html",
+};
+
 // routes: extra helper endpoints by path (e.g. "/extract/x").
+// E1: the popup hands /extract, /extract/reddit and /extract/page captures to
+// the SW queue, so a real background.js (env.worker) shares the popup's
+// chrome.storage and answers its runtime messages. env.tick() is one beat of
+// the open popup's refreshQueue() poll after the SW has run the job.
 async function popupEnv({ extract, health, platform, routes = {} }) {
+  const helper = (url) => {
+    const path = new URL(url).pathname;
+    if (path === "/token") return jsonResponse({ token: "test-token" });
+    if (routes[path]) return routes[path]();
+    if (path === "/extract" && extract) return extract();
+    if (path === "/health" && health) return health();
+    throw new TypeError("Failed to fetch");
+  };
+  const store = { local: {}, sync: {}, session: {} };
+  const worker = makeEnv({ platform, store, fetch: helper, onSend: () => undefined });
+  worker.load("background.js");
+  await settle();
   const env = makeEnv({
-    platform,
-    fetch: (url) => {
-      const path = new URL(url).pathname;
-      if (path === "/token") return jsonResponse({ token: "test-token" });
-      if (routes[path]) return routes[path]();
-      if (path === "/extract" && extract) return extract();
-      if (path === "/health" && health) return health();
-      throw new TypeError("Failed to fetch");
-    },
+    platform, store, fetch: helper,
+    onSend: (msg) => worker.dispatch(msg, POPUP_SENDER),
   });
+  env.worker = worker;
   env.load("lib/x-article.js");
   env.load("lib/extract.js");
   // The popup's real capture functions, run against stubbed popup state.
@@ -727,15 +745,29 @@ async function popupEnv({ extract, health, platform, routes = {} }) {
     loadRecentUoinks: () => {},
     serverQueuePendingCount: async () => 0,
     offerAllowRetry: () => {},
+    pendingAllowCapture: null,
+    shortLabel: (u) => String(u || ""),
     CLAUDE_URL: "https://claude.ai/new",
     serverOnline: true,
     currentSource: { source: "youtube_video", action: "video", canonical: YT_URL },
     uoinkCurrentBtn: { disabled: false, textContent: "Uoink this video" },
+    currentEl: env.document.createElement("div"),
+    queueEl: env.document.createElement("div"),
+    clearBtn: env.document.createElement("button"),
   });
-  // captureXPost, messageActiveTab, captureXArticle
+  // The real constants the hand-off code reads.
+  env.runSource(popupSlice("const POPUP_CAPTURE_RESULTS_KEY", "\nlet serverOnline"), "popup.js");
+  env.runSource(popupSlice("const SOURCE_BUTTON_LABELS", "\nfunction setSourceNote("), "popup.js");
+  // captureXPost, messageActiveTab, captureXArticle, showXArticleFallbackResult
   env.runSource(popupSlice("async function captureXPost(", "\n// ---- Interval setting"), "popup.js");
-  // handleCorpusCapture, runPopupUoinkCurrent
-  env.runSource(popupSlice("async function handleCorpusCapture(", "\nfunction offerAllowRetry("), "popup.js");
+  // the SW hand-off helpers, runPopupUoinkCurrent
+  env.runSource(popupSlice("const popupCaptureHandoffs", "\nfunction offerAllowRetry("), "popup.js");
+  // refreshQueue: the open popup's 1 s poll of the SW queue state
+  env.runSource(popupSlice("async function refreshQueue(", "\nclearBtn.addEventListener("), "popup.js");
+  env.tick = async () => {
+    await settle();
+    await env.ctx.refreshQueue();
+  };
   return env;
 }
 
@@ -746,6 +778,9 @@ async function popup() {
   await scenario("E3 popup toast {ok:false}", async () => {
     const env = await popupEnv({ extract: () => jsonResponse(YT_FAILURE) });
     await env.ctx.runPopupUoinkCurrent();
+    await env.tick();
+    checkYtFailure(lastOf(env.worker.notifications).message,
+      "E3: popup capture notification (from the SW queue)");
     checkYtFailure(lastOf(env.toasts), "E3: popup toast");
   });
 
@@ -767,17 +802,25 @@ async function popup() {
     });
     env.runSource(popupSlice("async function runAllowSiteAndRetry(", "\nasync function runAddPodcastFeed("), "popup.js");
     await env.ctx.runAllowSiteAndRetry();
+    await env.tick();
     const toast = String(lastOf(env.toasts));
     check(/Activity/.test(toast) && !/aborted/i.test(toast),
       "E7: a timed-out capture after allowing a site says still working, check Activity", toast);
+    const note = lastOf(env.worker.notifications);
+    check(note.title === "Uoink still working" && /Activity/.test(note.message || ""),
+      "E7: the SW queue's notification for it says still working too", note);
   });
 
   await scenario("E7 popup timeout", async () => {
     const env = await popupEnv({ extract: () => { throw abortError(); } });
     await env.ctx.runPopupUoinkCurrent();
+    await env.tick();
     const toast = String(lastOf(env.toasts));
     check(/Activity/.test(toast) && !/aborted/i.test(toast),
       "E7: a timed-out popup capture says still working, check Activity", toast);
+    const note = lastOf(env.worker.notifications);
+    check(note.title === "Uoink still working" && /Activity/.test(note.message || ""),
+      "E7: the SW queue's notification says still working, not offline", note);
   });
 
   await scenario("E7 popup offline (Linux)", async () => {
@@ -785,9 +828,14 @@ async function popup() {
       platform: "Linux x86_64", extract: () => { throw new TypeError("Failed to fetch"); },
     });
     await env.ctx.runPopupUoinkCurrent();
+    await env.tick();
     const toast = String(lastOf(env.toasts));
     check(/Terminal/.test(toast) && !/Failed to fetch/.test(toast),
       "E7: an unreachable helper (health ping failed too) gets platform-aware copy", toast);
+    const note = lastOf(env.worker.notifications);
+    check(note.title === "Uoink Helper offline" && /Terminal/.test(note.message || "")
+      && !/Start Menu/.test(note.message || ""),
+      "E7: the SW queue's offline notification is platform-aware", note);
   });
 
   await scenario("E7 popup lost", async () => {
@@ -796,8 +844,11 @@ async function popup() {
       health: () => jsonResponse({ ok: true }),
     });
     await env.ctx.runPopupUoinkCurrent();
+    await env.tick();
     const toast = String(lastOf(env.toasts));
     check(/Library/.test(toast), "E7: a failed request while /health answers is lost track", toast);
+    check(lastOf(env.worker.notifications).title === "Uoink lost track",
+      "E7: the SW queue's notification says lost track", lastOf(env.worker.notifications));
   });
 
   await scenario("E3 popup captureXPost video {ok:false}", async () => {
@@ -806,9 +857,12 @@ async function popup() {
       extract: () => jsonResponse(YT_FAILURE),
     });
     await env.ctx.captureXPost(X_POST_URL, 30);
+    await env.tick();
     const toast = String(lastOf(env.toasts));
     check(/^Saved 2 posts\./.test(toast), "E3: captureXPost keeps the saved-post status", toast);
     checkYtFailure(toast, "E3: captureXPost video failure toast");
+    checkYtFailure(lastOf(env.worker.notifications).message,
+      "E3: captureXPost video failure notification (from the SW queue)");
   });
 
   await scenario("E7 popup captureXPost video timeout", async () => {
@@ -817,6 +871,7 @@ async function popup() {
       extract: () => { throw abortError(); },
     });
     await env.ctx.captureXPost(X_POST_URL, 30);
+    await env.tick();
     const toast = String(lastOf(env.toasts));
     check(/^Saved 2 posts\./.test(toast) && /Activity/.test(toast)
       && !/Couldn't queue the video/.test(toast),
@@ -830,6 +885,7 @@ async function popup() {
       extract: () => { throw new TypeError("Failed to fetch"); },
     });
     await env.ctx.captureXPost(X_POST_URL, 30);
+    await env.tick();
     const toast = String(lastOf(env.toasts));
     check(/^Saved 2 posts\./.test(toast) && /Applications/.test(toast) && !/Start Menu/.test(toast),
       "E7: an unreachable helper on the video step gets platform-aware offline copy", toast);
@@ -852,8 +908,11 @@ async function popup() {
     check(/X wouldn't hand this post over/.test(toast) && /fetch step/.test(toast)
       && /429/.test(toast) && !TUCKED.test(toast),
       "E3: a refused X post toast names the phase and the detail", toast);
-    check(!env.fetches.some((u) => new URL(u).pathname === "/extract"),
-      "a refused X post queues nothing", env.fetches);
+    await env.tick();
+    check(!env.fetches.some((u) => new URL(u).pathname === "/extract")
+      && !env.worker.fetches.some((u) => new URL(u).pathname === "/extract")
+      && !env.sent.some((m) => m.type === "popupCapture"),
+      "a refused X post queues nothing", [env.fetches, env.worker.fetches, env.sent]);
   });
 
   await scenario("E3 popup captureXArticle fallback {ok:false}", async () => {
@@ -866,10 +925,16 @@ async function popup() {
       },
     });
     await env.ctx.captureXArticle(ARTICLE_URL);
+    // E1: the fallback runs in the SW queue; the open popup shows its outcome.
+    await env.tick();
     const alert = String(lastOf(env.toasts));
     check(/Couldn't read that page/.test(alert) && /fetch step/.test(alert)
       && /503/.test(alert) && !TUCKED.test(alert),
       "E3: the X Article fallback alert names the phase and the detail", alert);
+    const note = lastOf(env.worker.notifications);
+    check(note.title === "Uoink failed" && /503/.test(note.message || "")
+      && !TUCKED.test(note.message || ""),
+      "E3: the SW queue's notification for the X Article fallback names the detail too", note);
   });
 }
 

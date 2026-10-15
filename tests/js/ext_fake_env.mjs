@@ -161,34 +161,50 @@ function withFallback(obj) {
   });
 }
 
-function storageArea(data) {
+// delay(request) -> undefined to answer at once, or a promise the answer waits
+// on. request: {op: "get"|"set"|"remove", keys: [names] (null: everything)}.
+// The request itself is served when it's made (a get reads storage then, a
+// set writes then); only its answer is late, the way a slow storage round
+// trip looks to the script.
+function storageArea(data, delay = () => undefined) {
+  const answer = (request, value) => {
+    const wait = delay(request);
+    return wait ? Promise.resolve(wait).then(() => value) : Promise.resolve(value);
+  };
   return {
     get(keys, cb) {
       let out = {};
+      let names = null;
       if (keys && typeof keys === "object" && !Array.isArray(keys)) {
         for (const [k, d] of Object.entries(keys)) out[k] = k in data ? clone(data[k]) : d;
+        names = Object.keys(keys);
       } else if (typeof keys === "string") {
         if (keys in data) out[keys] = clone(data[keys]);
+        names = [keys];
       } else if (Array.isArray(keys)) {
         for (const k of keys) if (k in data) out[k] = clone(data[k]);
+        names = keys.slice();
       } else {
         out = clone(data);
       }
+      const ready = answer({ op: "get", keys: names }, out);
       if (typeof cb === "function") {
-        Promise.resolve().then(() => cb(out));
+        ready.then((v) => cb(v));
         return undefined;
       }
-      return Promise.resolve(out);
+      return ready;
     },
     set(items, cb) {
       for (const [k, v] of Object.entries(items || {})) data[k] = clone(v);
-      if (typeof cb === "function") Promise.resolve().then(() => cb());
-      return Promise.resolve();
+      const ready = answer({ op: "set", keys: Object.keys(items || {}) });
+      if (typeof cb === "function") ready.then(() => cb());
+      return ready;
     },
     remove(keys, cb) {
       for (const k of [].concat(keys)) delete data[k];
-      if (typeof cb === "function") Promise.resolve().then(() => cb());
-      return Promise.resolve();
+      const ready = answer({ op: "remove", keys: [].concat(keys) });
+      if (typeof cb === "function") ready.then(() => cb());
+      return ready;
     },
   };
 }
@@ -219,6 +235,12 @@ export function abortError() {
 //                Return {__reject: "msg"} to simulate a closed port
 //                (promise rejects / callback sees runtime.lastError).
 //   fetch     -- (url, init) => Response (or throw) -- the ONLY network.
+//   store     -- {local, sync, session} objects to back chrome.storage with;
+//                pass the same one to two envs (popup + background.js) to
+//                share storage the way real extension contexts do.
+// env.storageDelay -- {local, sync, session}: set an area's entry to a
+//                storageArea delay function (any time) to make this env's
+//                answers from that area arrive late. Unset: answers at once.
 export function makeEnv(opts = {}) {
   const env = {
     sent: [],
@@ -227,14 +249,19 @@ export function makeEnv(opts = {}) {
     fetches: [],
     toasts: [],
     logs: [],
-    store: { local: {}, sync: {}, session: {} },
+    store: opts.store || { local: {}, sync: {}, session: {} },
     messageListeners: [],
     observers: [],
     windowClosed: false,
     timeouts: new Map(),
     intervals: new Map(),
+    // id -> the period the script asked for (intervals never fire on their own)
+    intervalDelays: new Map(),
     nextTimer: 1,
+    storageDelay: {},
   };
+  const delayFor = (area) => (request) => (
+    env.storageDelay[area] ? env.storageDelay[area](request) : undefined);
   const onSend = opts.onSend || (() => ({ ok: true }));
   const fetchImpl = opts.fetch || (() => { throw new TypeError("Failed to fetch"); });
 
@@ -266,9 +293,9 @@ export function makeEnv(opts = {}) {
   const chrome = withFallback({
     runtime: withFallback(runtime),
     storage: withFallback({
-      local: storageArea(env.store.local),
-      sync: storageArea(env.store.sync),
-      session: storageArea(env.store.session),
+      local: storageArea(env.store.local, delayFor("local")),
+      sync: storageArea(env.store.sync, delayFor("sync")),
+      session: storageArea(env.store.session, delayFor("session")),
       onChanged: { addListener() {} },
     }),
     notifications: withFallback({
@@ -325,8 +352,13 @@ export function makeEnv(opts = {}) {
     },
     setTimeout: (fn) => { const id = env.nextTimer++; env.timeouts.set(id, fn); return id; },
     clearTimeout: (id) => { env.timeouts.delete(id); },
-    setInterval: (fn) => { const id = env.nextTimer++; env.intervals.set(id, fn); return id; },
-    clearInterval: (id) => { env.intervals.delete(id); },
+    setInterval: (fn, ms) => {
+      const id = env.nextTimer++;
+      env.intervals.set(id, fn);
+      env.intervalDelays.set(id, Number(ms) || 0);
+      return id;
+    },
+    clearInterval: (id) => { env.intervals.delete(id); env.intervalDelays.delete(id); },
   };
   ctx.window = ctx;
   ctx.self = ctx;
@@ -353,10 +385,11 @@ export function makeEnv(opts = {}) {
   };
   // Dispatch a runtime message to the listeners the loaded scripts
   // registered (background.js handlers) and resolve with the response.
-  env.dispatch = (msg) => new Promise((resolve) => {
+  // sender: the MessageSender the listener sees ({} by default).
+  env.dispatch = (msg, sender = {}) => new Promise((resolve) => {
     for (const fn of env.messageListeners) {
       let answered = false;
-      const keep = fn(msg, {}, (resp) => { answered = true; resolve(clone(resp)); });
+      const keep = fn(clone(msg), sender, (resp) => { answered = true; resolve(clone(resp)); });
       if (keep === true || answered) return;
     }
     resolve(undefined);

@@ -834,6 +834,28 @@
     });
   }
 
+  // E1: which helper capture a background.js queue job runs (runExtractJob's
+  // branches): "video" (/extract), "any" (/extract/any), "reddit" or "page".
+  // A session add isn't a capture: null. The SW matches duplicate popup
+  // captures on it, and the popup's button only follows its own route.
+  function queueJobRoute(job) {
+    if (!job || job.kind !== "extract") return null;
+    if (job.usePage) return "page";
+    if (job.useExtractAny) return "any";
+    if (job.useReddit) return "reddit";
+    return "video";
+  }
+
+  // E1: the form of a queue job's URL that duplicate matching compares (the
+  // SW's sameCapture, the popup's "Uoinking..." button). The context menu
+  // queues the tab's raw URL, #fragment and all, while the popup classifies
+  // the same tab without it, and the helper drops the fragment anyway
+  // (normalizeAnyUrl mirrors it), so https://example.com/post#section and
+  // https://example.com/post are one capture.
+  function queueUrlKey(url) {
+    return normalizeAnyUrl(url) || String(url || "");
+  }
+
   // Shared "uoinked!" notification builder. Called from both the in-page
   // YouTube button success path (content.js) and the SW-driven queue path
   // (background.js) so the first-uoink CTA fires no matter which path the
@@ -1311,6 +1333,8 @@
     describeCaptureError,
     rememberFailure,
     forgetFailure,
+    queueJobRoute,
+    queueUrlKey,
     playlistPreview,
     playlistStart,
     jobStatus,
