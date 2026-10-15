@@ -5121,7 +5121,7 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
     """Yoink a single video into output_folder.
 
     Steps:
-      1. Fetch full metadata (cached as metadata.json) — already done if the
+      1. Fetch metadata (cached without format/caption tables) — already done if the
          caller passed `metadata` (avoids a second yt-dlp call).
       2. Download highest-res thumbnail to thumbnail.jpg.
       3. Download video + subs, run ffmpeg screenshots, parse the SRT.
@@ -5218,10 +5218,14 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
         log.warning(notes[-1])
         interval = new_interval
 
-    # Persist the raw metadata blob for debugging without re-downloading.
+    # Keep bulky format/caption tables in memory, not in the metadata cache.
     try:
+        cached_metadata = {
+            key: value for key, value in metadata.items()
+            if key not in ("formats", "requested_formats", "automatic_captions", "subtitles")
+        }
         (output_folder / "metadata.json").write_text(
-            json.dumps(metadata, indent=2, ensure_ascii=False),
+            json.dumps(cached_metadata, indent=2, ensure_ascii=False),
             encoding="utf-8",
         )
     except OSError as e:
