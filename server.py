@@ -5796,15 +5796,14 @@ def _is_youtube_rate_limit(e: BaseException) -> bool:
     refusals. Drives the rate-limit queue (Sprint 19):
     the extract handler enqueues for retry instead of returning the
     pre-Sprint-19 friendly_error string, and the retry worker uses the
-    same predicate to decide between exponential backoff and immediate
+    same predicate to decide between scheduled retries and immediate
     terminal failure."""
     return "media" in _youtube_429_endpoints(e)
 
 
-# How long the /extract handler asks the user to wait before the first
-# retry of a rate-limited URL. The retry worker's exponential backoff
-# (60s * 2^attempts, capped at 15 minutes) takes over after that.
-_RATE_LIMIT_INITIAL_BACKOFF_SEC = 60
+# Waits before media-429 retries 1, 2 and 3, measured from the last failure.
+_RATE_LIMIT_BACKOFF_SEC = (5 * 60, 20 * 60, 60 * 60)
+_RATE_LIMIT_INITIAL_BACKOFF_SEC = _RATE_LIMIT_BACKOFF_SEC[0]
 
 
 def _legacy_friendly_error_unused(e: BaseException) -> str:
@@ -10590,7 +10589,7 @@ def _start_trash_purge_thread() -> None:
 # Poll the queue this often. The retry_after column is the real gate -- this
 # is just how soon the worker notices a row that becomes eligible.
 _RETRY_POLL_INTERVAL_SEC = 30
-# Exponential backoff base; doubled on each strike, capped at the max.
+# Capture-lock backoff; media 429s use _RATE_LIMIT_BACKOFF_SEC instead.
 _RETRY_INITIAL_BACKOFF_SEC = 60
 _RETRY_MAX_BACKOFF_SEC = 15 * 60
 _pending_long_video_modes: dict[int, str] = {}
@@ -10741,12 +10740,9 @@ def _retry_pending_one() -> bool:
                         "retries are scheduled.",
                         pending_id, attempts)
                     return True
-                # Still under the strike cap: back off exponentially and
+                # Still under the strike cap: wait for the next media retry and
                 # re-queue (mark_pending_failed re-queues below the cap).
-                delay = min(
-                    _RETRY_INITIAL_BACKOFF_SEC * (2 ** attempts),
-                    _RETRY_MAX_BACKOFF_SEC,
-                )
+                delay = _RATE_LIMIT_BACKOFF_SEC[attempts]
                 retry_at = (datetime.now() + timedelta(seconds=delay)).strftime(
                     "%Y-%m-%dT%H:%M:%S")
                 try:
@@ -10756,8 +10752,8 @@ def _retry_pending_one() -> bool:
                     log.exception("retry worker: mark_pending_failed failed")
                 log.info(
                     "retry worker: pending #%d still rate-limited; "
-                    "retry at %s (backoff %ds, attempt %d of %d)",
-                    pending_id, retry_at, delay, attempts,
+                    "retry at %s (in %d minutes, retry %d of %d)",
+                    pending_id, retry_at, delay // 60, attempts + 1,
                     index._PENDING_MAX_ATTEMPTS)
                 return True
             # Non-recoverable error -- jump straight to terminal failure.
@@ -17202,8 +17198,11 @@ class Handler(BaseHTTPRequestHandler):
                         _remember_pending_long_video_mode(
                             pending_id, long_video_mode)
                         log.info(
-                            "POST /extract -> queued (rate-limit) pending_id=%d",
-                            pending_id)
+                            "POST /extract -> queued (rate-limit) pending_id=%d; "
+                            "retry at %s (in %d minutes, retry 1 of %d)",
+                            pending_id, retry_after,
+                            _RATE_LIMIT_INITIAL_BACKOFF_SEC // 60,
+                            index._PENDING_MAX_ATTEMPTS)
                         return self._send_json(200, {
                             "ok": True,
                             "queued": True,
