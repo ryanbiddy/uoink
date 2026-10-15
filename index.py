@@ -29,6 +29,7 @@ import json
 import logging
 import re
 import sqlite3
+import tempfile
 import threading
 import time
 import unicodedata
@@ -522,8 +523,11 @@ class Index:
 
     @classmethod
     def open_or_recover(cls, path) -> tuple["Index", bool]:
-        """Like ``open``, but if the file is a corrupt SQLite database, rename
-        it aside (``index.db.corrupt-<ts>``) and start fresh.
+        """Like ``open``, but quarantine verified corruption and start fresh.
+
+        The database and its WAL/SHM are moved into a unique sibling directory
+        named ``index.db.corrupt-<ts>-<random>``. Operational errors and failed
+        quarantine moves propagate without deleting any files.
 
         Returns ``(index, recovered)`` where ``recovered`` is True if the old
         file had to be quarantined -- the caller should then trigger a full
@@ -531,29 +535,59 @@ class Index:
         path = Path(path)
         try:
             return cls.open(path), False
-        except sqlite3.DatabaseError:
-            log.error("index.db is corrupt or unreadable -- quarantining and "
-                      "rebuilding from disk")
-            if path.exists():
-                quarantine = path.with_name(
-                    f"{path.name}.corrupt-{time.strftime('%Y%m%d-%H%M%S')}"
-                )
-                try:
-                    path.replace(quarantine)
-                    log.error("corrupt index quarantined at %s", quarantine)
-                except OSError:
-                    log.exception("could not rename corrupt index; deleting")
-                    try:
-                        path.unlink(missing_ok=True)
-                    except OSError:
-                        log.exception("could not delete corrupt index either")
-            # WAL/shm siblings of the corrupt file would poison the new DB.
+        except sqlite3.DatabaseError as exc:
+            # Busy/locked, full disks, I/O failures and SQL errors are not
+            # evidence of corruption. Prefer SQLite's code (including extended
+            # codes); older Python versions may only supply the message.
+            if isinstance(exc, sqlite3.OperationalError):
+                raise
+            code = getattr(exc, "sqlite_errorcode", None)
+            if code is not None:
+                corrupt = (code & 0xff) in (sqlite3.SQLITE_CORRUPT,
+                                           sqlite3.SQLITE_NOTADB)
+            else:
+                corrupt = str(exc).lower() in (
+                    "file is not a database", "database disk image is malformed")
+            if not corrupt:
+                raise
+
+            # Stat explicitly: permission/I/O errors must not be mistaken for
+            # missing files. Move the database last so it stays at its original
+            # path if a sidecar cannot be quarantined.
+            path.stat()
+            sources = []
             for suffix in ("-wal", "-shm"):
                 sibling = path.with_name(path.name + suffix)
                 try:
-                    sibling.unlink(missing_ok=True)
-                except OSError:
-                    pass
+                    sibling.stat()
+                except FileNotFoundError:
+                    continue
+                sources.append(sibling)
+            sources.append(path)
+            quarantine = Path(tempfile.mkdtemp(
+                prefix=f"{path.name}.corrupt-{time.strftime('%Y%m%d-%H%M%S')}-",
+                dir=path.parent))
+            moved = []
+            try:
+                for source in sources:
+                    saved = quarantine / source.name
+                    source.rename(saved)
+                    moved.append((source, saved))
+            except OSError:
+                # A hard link restores the original name without ever replacing
+                # a file that appeared there meanwhile. Keep the saved copy even
+                # if restoration fails; never delete on a quarantine failure.
+                for source, saved in reversed(moved):
+                    try:
+                        source.hardlink_to(saved)
+                    except OSError:
+                        log.exception("could not restore %s; preserved at %s",
+                                      source, saved)
+                log.exception("index quarantine failed; files preserved at %s "
+                              "and %s", path.parent, quarantine)
+                raise
+            log.error("corrupt index and sidecars quarantined at %s; "
+                      "rebuilding from disk", quarantine)
             return cls.open(path), True
 
     def close(self) -> None:
