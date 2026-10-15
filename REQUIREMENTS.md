@@ -28,7 +28,7 @@ Use this path when developing Uoink or testing the current source checkout.
 3. Install the pinned Python runtime dependencies:
    ```
    python -m pip install -r requirements.txt
-   python -m pip install "yt-dlp==2026.07.04"
+   python -m pip install "yt-dlp==2026.08.19"
    ```
    The second pin matches the version bundled by `build.ps1`.
 

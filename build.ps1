@@ -138,7 +138,7 @@ $FFMPEG_SHARED_VERSION = 'n7.1.5'
 $FFMPEG_SHARED_URL = 'https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2026-07-31-14-10/ffmpeg-n7.1.5-12-g1fdbca85aa-win64-lgpl-shared-7.1.zip'
 $FFMPEG_SHARED_SHA256 = '0f376f96fb38554ccefb1b2ae9c7c6a7b351f0e60a372b38262c320e8392c5d0'
 # yt-dlp pip pin -- bump after compatibility-testing a new release.
-$YTDLP_VERSION  = '2026.07.04'
+$YTDLP_VERSION  = '2026.08.19'
 # Pillow is used for the multimodal paste-corpus generator (resize +
 # JPEG-recompress + base64-encode the embedded screenshots). Pinned to
 # a recent stable; bump at release-prep time after testing.

@@ -144,7 +144,7 @@ This file is generated from the installed dependency tree (source: pip-licenses)
 | uvicorn | 0.51.0 | BSD-3-Clause | https://uvicorn.dev/ |
 | whisperx | 3.8.6 | BSD-2-Clause | https://github.com/m-bain/whisperx |
 | yarl | 1.24.5 | Apache-2.0 | https://github.com/aio-libs/yarl |
-| yt-dlp | 2026.7.4 | Unlicense | https://github.com/yt-dlp/yt-dlp |
+| yt-dlp | 2026.8.19 | Unlicense | https://github.com/yt-dlp/yt-dlp |
 
 NLTK 3.10.3+uoink.pathsec1 is a local path-policy backport of upstream 3.10.3. Its Apache 2.0 licence is retained. The exact patch, original source and build provenance are in vendor/nltk-pathsec in the source repository. This modification does not qualify model loading or clear unrelated dependency advisories.
 

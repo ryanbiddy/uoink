@@ -25,6 +25,7 @@ Nothing yet.
 
 ### Fixed
 
+- Updated bundled yt-dlp from 2026.07.04 to 2026.08.19.
 - On a fresh install the dashboard's Library activity panel collapses to one
   line ("Library activity appears here after your first few captures.")
   instead of a wall of "Unavailable" tiles; with history it is unchanged.

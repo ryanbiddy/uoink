@@ -5,7 +5,7 @@ import re
 
 
 ROOT = Path(__file__).resolve().parents[1]
-EXPECTED = "2026.07.04"
+EXPECTED = "2026.08.19"
 
 
 def _required_match(path: Path, pattern: str) -> str:
