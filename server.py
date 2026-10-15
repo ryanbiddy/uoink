@@ -3893,7 +3893,8 @@ def _update_sidecar_comments(output_folder: Path, comments: list | None,
             log.warning("sidecar comments update: write failed (%s)", e)
 
 
-def _extract_json_object(text: str, *, label: str = "AI response") -> dict:
+def _extract_json_object(text: str, *, label: str = "AI response",
+                         repair_trailing_commas: bool = False) -> dict:
     cleaned = (text or "").strip()
     if cleaned.startswith("```"):
         cleaned = re.sub(r"^```(?:json)?\s*", "", cleaned)
@@ -3902,8 +3903,16 @@ def _extract_json_object(text: str, *, label: str = "AI response") -> dict:
     end = cleaned.rfind("}")
     if start == -1 or end == -1 or end <= start:
         raise AnthropicAPIError(None, f"{label} returned no JSON object")
+    candidate = cleaned[start:end + 1]
+    if repair_trailing_commas:
+        # Preserve quoted strings, including escaped quotes and literal commas.
+        candidate = re.sub(
+            r'"(?:\\.|[^"\\])*"|,\s*(?=[}\]])',
+            lambda m: "" if m.group(0).startswith(",") else m.group(0),
+            candidate,
+        )
     try:
-        parsed = json.loads(cleaned[start:end + 1])
+        parsed = json.loads(candidate)
     except json.JSONDecodeError as e:
         raise AnthropicAPIError(None, f"{label} returned invalid JSON: {e}") from None
     if not isinstance(parsed, dict):
@@ -4036,9 +4045,25 @@ def analyze_comments(comments: list[dict], *, api_key: str | None = None) -> dic
     try:
         resp = _anthropic_messages(key, system=system, user=user, max_tokens=1200)
         _record_anthropic_usage("comment_intelligence", resp)
-        return _normalize_comment_analysis(
-            _extract_json_object(_anthropic_text(resp), label="Comment Intelligence")
-        )
+        try:
+            data = _extract_json_object(
+                _anthropic_text(resp), label="Comment Intelligence",
+                repair_trailing_commas=True,
+            )
+        except AnthropicAPIError:
+            resp = _anthropic_messages(
+                key, system=system,
+                user=user + "\n\nThe previous response was invalid JSON. Return only "
+                "one valid JSON object in the requested shape, with double-quoted "
+                "keys and strings, no trailing commas, and no markdown.",
+                max_tokens=1200,
+            )
+            _record_anthropic_usage("comment_intelligence", resp)
+            data = _extract_json_object(
+                _anthropic_text(resp), label="Comment Intelligence",
+                repair_trailing_commas=True,
+            )
+        return _normalize_comment_analysis(data)
     except AnthropicAPIError as e:
         if e.status == 401:
             _mark_anthropic_key_invalid()
