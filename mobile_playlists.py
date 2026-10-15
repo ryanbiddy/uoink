@@ -159,7 +159,7 @@ def _shape_row(row: dict) -> dict:
 
 # ---- poll a single playlist --------------------------------------------
 def _fetch_playlist_video_ids(playlist_url: str, *,
-                                ytdlp_cmd: list[str]) -> list[dict]:
+                                ytdlp_cmd: list[str], run_subprocess=None) -> list[dict]:
     """yt-dlp --flat-playlist returns one JSON line per entry. We only
     need (id, title). --skip-download is a no-op for --flat-playlist
     but we set it explicitly so a future yt-dlp doesn't change its
@@ -173,8 +173,9 @@ def _fetch_playlist_video_ids(playlist_url: str, *,
         "--skip-download",
         playlist_url,
     ]
-    cp = subprocess.run(
-        args, capture_output=True, text=True,
+    run = run_subprocess if run_subprocess is not None else subprocess.run
+    cp = run(
+        args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
         timeout=_PLAYLIST_LIST_TIMEOUT_SEC, check=False,
         encoding="utf-8", errors="replace",
     )

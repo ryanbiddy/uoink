@@ -3419,6 +3419,113 @@ def _failure_phase(e: BaseException, fallback: str | None = None) -> str | None:
     return phase if isinstance(phase, str) and phase else fallback
 
 
+class _YouTubeCallLimiter:
+    """One YouTube child at a time, with a cooldown after each child exits."""
+
+    def __init__(self, *, jitter=None, clock=None):
+        self._jitter = jitter if jitter is not None else lambda: random.uniform(2.0, 5.0)
+        self._clock = clock if clock is not None else time.monotonic
+        self._condition = threading.Condition()
+        self._waiting = []
+        self._active = False
+        self._next_call = 0.0
+
+    @contextlib.contextmanager
+    def slot(self, cancel_event, *, ready=None):
+        ticket = object()
+        with self._condition:
+            self._waiting.append(ticket)
+            try:
+                while True:
+                    _raise_if_cancelled(cancel_event)
+                    remaining = self._next_call - self._clock()
+                    if (self._waiting[0] is ticket and not self._active
+                            and remaining <= 0):
+                        if ready is None or ready():
+                            self._active = True
+                            break
+                        # A capture whose process slot is busy must not hold
+                        # up comments, discovery, or the current process owner.
+                        self._waiting.append(self._waiting.pop(0))
+                    # Condition.wait releases the limiter mutex while waiting.
+                    self._condition.wait(timeout=min(0.1, remaining)
+                                         if remaining > 0 else 0.1)
+            finally:
+                self._waiting.remove(ticket)
+                self._condition.notify_all()
+        try:
+            yield
+        finally:
+            with self._condition:
+                self._next_call = self._clock() + self._jitter()
+                self._active = False
+                self._condition.notify_all()
+
+
+_youtube_call_limiter = _YouTubeCallLimiter()
+
+
+def _is_youtube_ytdlp_call(cmd: list[str]) -> bool:
+    if cmd[:len(YTDLP_CMD)] != YTDLP_CMD:
+        return False
+    for arg in cmd[len(YTDLP_CMD):]:
+        if not isinstance(arg, str) or not arg.lower().startswith(("http://", "https://")):
+            continue
+        try:
+            host = (urlparse(arg).hostname or "").lower().rstrip(".")
+        except ValueError:
+            continue
+        if host in {"youtube.com", "www.youtube.com", "youtu.be",
+                    "m.youtube.com", "music.youtube.com"}:
+            return True
+    return False
+
+
+@contextlib.contextmanager
+def _youtube_network_slot(cancel_event):
+    # Keep capture-identity ownership, but yield the process-wide extraction
+    # slot while queued. No child exists yet, so cancellation needs no reacquire.
+    manual = getattr(_ManualOwnership._pacing, "owner", None)
+    standing = getattr(_ServerCaptureBackend._pacing, "owner", None)
+    resume = None
+    if manual is not None and manual.process_lock_held:
+        manual.process_lock_held = False
+        _extract_lock.release()
+
+        def resume():
+            if not _extract_lock.acquire(blocking=False):
+                return False
+            manual.process_lock_held = True
+            return True
+
+    elif standing is not None:
+        backend, start = standing
+        key = start["capture_key"]
+        with _source_capture_threads_lock:
+            lease = backend._leases.get(key)
+            if lease is None or lease[2] != start["start_id"]:
+                raise source_subscriptions.CaptureOwnershipUnavailable(
+                    "standing capture lost its process slot")
+            if lease[1]:
+                backend._leases[key] = (lease[0], False, lease[2])
+                _extract_lock.release()
+
+        def resume():
+            with _source_capture_threads_lock:
+                current = backend._leases.get(key)
+                if current is None or current[0] is not lease[0] or current[2] != lease[2]:
+                    raise source_subscriptions.CaptureOwnershipUnavailable(
+                        "standing capture lost its process slot while waiting")
+                if not _extract_lock.acquire(blocking=False):
+                    return False
+                backend._leases[key] = (lease[0], True, lease[2])
+                return True
+
+    with _youtube_call_limiter.slot(cancel_event, ready=resume):
+        _raise_if_cancelled(cancel_event)
+        yield
+
+
 def _run_subprocess(cmd: list[str], *, cancel_event: threading.Event | None = None,
                     timeout: int | float | None = None, check: bool = True,
                     stdout=None, stderr=None, text: bool = False,
@@ -3430,72 +3537,78 @@ def _run_subprocess(cmd: list[str], *, cancel_event: threading.Event | None = No
     playlist jobs pass a per-job Event so `/jobs/<id>/cancel` can terminate
     the active yt-dlp/ffmpeg process instead of waiting for a long timeout.
     """
-    _raise_if_cancelled(cancel_event)
-    # AS-02: persist an unresolved child-launch intent BEFORE spawning so a
-    # crash or record-write failure between launch and registration is never
-    # evidence of no children. Write errors propagate (they are not swallowed).
-    capture = source_subscriptions.current_capture_context()
-    if capture is not None:
-        source_subscriptions.record_child_launch_intent(
-            DATA_ROOT, capture["start_id"], capture.get("instance"))
-    try:
-        proc = subprocess.Popen(
-            cmd,
-            stdout=stdout,
-            stderr=stderr,
-            text=text,
-            encoding=encoding,
-            errors=errors,
-            **SUBPROCESS_KW,
-        )
-    except BaseException as exc:
-        # AS-02a: clear the launch intent only on affirmative evidence that
-        # no OS child was created (executable missing, not a directory, or
-        # invalid Popen arguments). An interruption after OS child creation
-        # but before Popen returns is not that evidence; the intent stays
-        # unresolved and the probe stays unknown.
-        if capture is not None and isinstance(
-                exc, (FileNotFoundError, NotADirectoryError, ValueError)):
-            try:
-                source_subscriptions.resolve_child_launch_intent(
-                    DATA_ROOT, capture["start_id"])
-            except Exception:
-                log.exception("could not resolve the child-launch intent of %s",
-                              capture["start_id"])
-        raise
-    if capture is not None:
-        # AS-02: resolve the launch intent by recording the live child.
-        # Record-write errors must not be swallowed; the unresolved intent
-        # remains if this write fails, so absence is never inferred.
-        source_subscriptions.record_child_start(
-            DATA_ROOT, capture["start_id"], proc.pid, capture.get("instance"))
-    started = time.monotonic()
-    try:
-        while True:
-            if cancel_event is not None and cancel_event.is_set():
-                _terminate_process(proc)
-                raise PlaylistJobCancelled("playlist job cancelled")
-            try:
-                out, err = proc.communicate(timeout=0.2)
-                break
-            except subprocess.TimeoutExpired:
-                if timeout is not None and (time.monotonic() - started) >= timeout:
+    def run():
+        _raise_if_cancelled(cancel_event)
+        # AS-02: persist an unresolved child-launch intent BEFORE spawning so a
+        # crash or record-write failure between launch and registration is never
+        # evidence of no children. Write errors propagate (they are not swallowed).
+        capture = source_subscriptions.current_capture_context()
+        if capture is not None:
+            source_subscriptions.record_child_launch_intent(
+                DATA_ROOT, capture["start_id"], capture.get("instance"))
+        try:
+            proc = subprocess.Popen(
+                cmd,
+                stdout=stdout,
+                stderr=stderr,
+                text=text,
+                encoding=encoding,
+                errors=errors,
+                **SUBPROCESS_KW,
+            )
+        except BaseException as exc:
+            # AS-02a: clear the launch intent only on affirmative evidence that
+            # no OS child was created (executable missing, not a directory, or
+            # invalid Popen arguments). An interruption after OS child creation
+            # but before Popen returns is not that evidence; the intent stays
+            # unresolved and the probe stays unknown.
+            if capture is not None and isinstance(
+                    exc, (FileNotFoundError, NotADirectoryError, ValueError)):
+                try:
+                    source_subscriptions.resolve_child_launch_intent(
+                        DATA_ROOT, capture["start_id"])
+                except Exception:
+                    log.exception("could not resolve the child-launch intent of %s",
+                                  capture["start_id"])
+            raise
+        if capture is not None:
+            # AS-02: resolve the launch intent by recording the live child.
+            # Record-write errors must not be swallowed; the unresolved intent
+            # remains if this write fails, so absence is never inferred.
+            source_subscriptions.record_child_start(
+                DATA_ROOT, capture["start_id"], proc.pid, capture.get("instance"))
+        started = time.monotonic()
+        try:
+            while True:
+                if cancel_event is not None and cancel_event.is_set():
                     _terminate_process(proc)
-                    raise subprocess.TimeoutExpired(cmd, timeout)
-    finally:
-        if capture is not None and proc.poll() is not None:
-            try:
-                source_subscriptions.record_child_end(DATA_ROOT, capture["start_id"], proc.pid)
-            except Exception:
-                log.exception("could not record the child exit of standing capture %s",
-                              capture["start_id"])
+                    raise PlaylistJobCancelled("playlist job cancelled")
+                try:
+                    out, err = proc.communicate(timeout=0.2)
+                    break
+                except subprocess.TimeoutExpired:
+                    if timeout is not None and (time.monotonic() - started) >= timeout:
+                        _terminate_process(proc)
+                        raise subprocess.TimeoutExpired(cmd, timeout)
+        finally:
+            if capture is not None and proc.poll() is not None:
+                try:
+                    source_subscriptions.record_child_end(DATA_ROOT, capture["start_id"], proc.pid)
+                except Exception:
+                    log.exception("could not record the child exit of standing capture %s",
+                                  capture["start_id"])
 
-    cp = subprocess.CompletedProcess(cmd, proc.returncode, out, err)
-    if check and proc.returncode:
-        raise subprocess.CalledProcessError(
-            proc.returncode, cmd, output=out, stderr=err
-        )
-    return cp
+        cp = subprocess.CompletedProcess(cmd, proc.returncode, out, err)
+        if check and proc.returncode:
+            raise subprocess.CalledProcessError(
+                proc.returncode, cmd, output=out, stderr=err
+            )
+        return cp
+
+    if cmd[1:3] == ["-m", "yt_dlp"] and _is_youtube_ytdlp_call(cmd):
+        with _youtube_network_slot(cancel_event):
+            return run()
+    return run()
 
 
 _RATE_LIMIT_PATTERNS = (
@@ -3638,7 +3751,8 @@ def _download_thumbnail(metadata: dict, output_folder: Path, *,
     return jpg_path if jpg_path.exists() else None
 
 
-def _fetch_channel_context(channel_url: str) -> dict:
+def _fetch_channel_context(channel_url: str, *,
+                           cancel_event: threading.Event | None = None) -> dict:
     """Best-effort fetch of channel description + last 5 video stubs.
     Returns {'description': str, 'recent_videos': [{title, view_count,
     upload_date}, ...]}. Empty dict-shape on failure.
@@ -3653,18 +3767,23 @@ def _fetch_channel_context(channel_url: str) -> dict:
         target = target + "/videos"
 
     try:
-        raw = subprocess.check_output(
+        cp = _run_subprocess(
             [*YTDLP_CMD, "--dump-single-json", "--flat-playlist",
              "--playlist-end", "5", target],
+            cancel_event=cancel_event, stdout=subprocess.PIPE,
             text=True, stderr=subprocess.PIPE, encoding="utf-8", errors="replace",
-            **SUBPROCESS_KW,
+            # It holds the single YouTube slot: a hung child must not block
+            # every other YouTube call in the process.
+            timeout=COMMENTS_TIMEOUT_SEC,
         )
+    except (PlaylistJobCancelled, source_subscriptions.CaptureOwnershipUnavailable):
+        raise
     except Exception as e:
         log.warning("channel context fetch failed: %s", e)
         return empty
 
     try:
-        data = json.loads(raw)
+        data = json.loads(cp.stdout)
     except json.JSONDecodeError as e:
         log.warning("channel context parse failed: %s", e)
         return empty
@@ -4734,7 +4853,9 @@ def _comments_worker(url: str, output_folder: Path, yoink_path: Path,
 
     try:
         info_template = output_folder / "%(id)s_yoink_comments.%(ext)s"
-        subprocess.run(
+        # Cached JSON cannot restore yt-dlp's lazy comment extractor. Keep
+        # this separate extraction on the shared YouTube limiter.
+        _run_subprocess(
             [*YTDLP_CMD,
              "--write-info-json",
              "--write-comments",
@@ -4745,7 +4866,6 @@ def _comments_worker(url: str, output_folder: Path, yoink_path: Path,
              url],
             check=True, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE,
             timeout=COMMENTS_TIMEOUT_SEC,
-            **SUBPROCESS_KW,
         )
         info_files = list(output_folder.glob("*_yoink_comments.info.json"))
         if not info_files:
@@ -5339,7 +5459,7 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
     channel_url = (metadata.get("channel_url")
                    or metadata.get("uploader_url")
                    or "")
-    channel_ctx = _fetch_channel_context(channel_url)
+    channel_ctx = _fetch_channel_context(channel_url, cancel_event=cancel_event)
 
     # Phase 6 (BC-2): the transcript rows persist their actual link values,
     # the already-held chapter metadata travels with the capture, and the
@@ -7189,6 +7309,13 @@ def _video_url_from_flat_entry(e: dict) -> str | None:
     return None
 
 
+def _fetch_monitored_playlist_entries(playlist_url: str) -> list[dict]:
+    """Use the shared YouTube pacing for legacy playlist discovery too."""
+    return mobile_playlists._fetch_playlist_video_ids(
+        playlist_url, ytdlp_cmd=YTDLP_CMD, run_subprocess=_run_subprocess,
+    )
+
+
 def _fetch_playlist_preview(url: str) -> tuple[dict | None, str | None, int]:
     """Return (playlist, error, status_code) for a validated playlist URL."""
     normalized = _normalize_playlist_url(url)
@@ -7941,7 +8068,9 @@ class _ManualOwnership:
     checks before returning success; a partial publication or damaged
     sidecar is never ``reused=True``."""
     __slots__ = ("lock", "error", "already_captured", "completed_while_waiting",
-                 "conflict", "reused")
+                 "conflict", "reused", "process_lock_held")
+    from threading import local as _thread_local
+    _pacing = _thread_local()
 
     def __init__(self):
         self.lock = None
@@ -7950,6 +8079,21 @@ class _ManualOwnership:
         self.completed_while_waiting = False
         self.conflict = None
         self.reused = None
+        self.process_lock_held = False
+
+    @contextlib.contextmanager
+    def process_slot(self):
+        _extract_lock.__enter__()
+        self.process_lock_held = True
+        previous = getattr(self._pacing, "owner", None)
+        self._pacing.owner = self
+        try:
+            yield
+        finally:
+            self._pacing.owner = previous
+            if self.process_lock_held:
+                self.process_lock_held = False
+                _extract_lock.__exit__(None, None, None)
 
     @property
     def ok(self) -> bool:
@@ -8031,11 +8175,12 @@ class _ManualOwnership:
 @contextlib.contextmanager
 def _manual_extraction_ownership(url: str):
     """The common dispatcher lock for manual extraction: the process-local
-    extraction lock plus the cross-process capture-identity file lock, held
-    through extraction and publication (AS-03). A standing start for the
+    extraction lock plus the cross-process capture-identity file lock. The
+    identity lock stays held through extraction and publication (AS-03).
+    YouTube pacing temporarily releases the process lock. A standing start for the
     same identity finds it busy and waits without a charge.
 
-    AS-03 (run AT-3): the wait for the shared lock is bounded and a failed
+    AS-03 (run AT-3): external shared-lock owners have a bounded wait. A failed
     acquisition (OS error or an exhausted wait) is unavailable ownership,
     reported through ``ownership.error``; the process lock is never used as
     a substitute. Run AT-4/AT-5: prior corpus state is read before the first
@@ -8046,28 +8191,29 @@ def _manual_extraction_ownership(url: str):
     key = _manual_capture_key(url)
     video_id = source_subscriptions.SourceSubscriptionService._youtube_id_from_url(url)
     # AS-03: establish the request's prior corpus state before either lock
-    # wait (process lock, then capture-identity lock). Completion during
+    # wait (capture-identity lock, then process lock). Completion during
     # either wait is reused; a row that already existed is a deliberate refresh.
     existed_before = ownership.corpus_row(video_id) is not None
-    with _extract_lock:
-        try:
-            ownership.lock = source_subscriptions.CaptureLock.acquire(
-                DATA_ROOT, key, timeout=source_subscriptions.MANUAL_CAPTURE_LOCK_TIMEOUT_S)
-        except OSError as exc:
-            log.exception("capture identity lock unavailable for manual extraction")
-            ownership.error = (f"capture ownership unavailable ({type(exc).__name__}); "
-                               "try again in a moment")
-        if ownership.lock is None and ownership.error is None:
-            ownership.error = ("another capture of this video is still running; "
-                               "try again in a moment")
-        if ownership.lock is not None and video_id:
-            ownership.recheck(video_id, ownership.corpus_row(video_id),
-                              existed_before=existed_before)
-        try:
+    # Never wait on an identity while holding the process slot: its owner may
+    # be queued for YouTube and need that slot back to finish publication.
+    try:
+        ownership.lock = _ServerCaptureBackend.acquire_identity(key)
+    except OSError as exc:
+        log.exception("capture identity lock unavailable for manual extraction")
+        ownership.error = (f"capture ownership unavailable ({type(exc).__name__}); "
+                           "try again in a moment")
+    if ownership.lock is None and ownership.error is None:
+        ownership.error = ("another capture of this video is still running; "
+                           "try again in a moment")
+    try:
+        with ownership.process_slot():
+            if ownership.lock is not None and video_id:
+                ownership.recheck(video_id, ownership.corpus_row(video_id),
+                                  existed_before=existed_before)
             yield ownership
-        finally:
-            if ownership.lock is not None:
-                ownership.lock.release()
+    finally:
+        if ownership.lock is not None:
+            _ServerCaptureBackend.release_identity(key, ownership.lock)
 
 
 def _settle_source_capture(job_id: str, *, video_id: str | None,
@@ -8293,11 +8439,48 @@ class _ServerCaptureBackend(source_subscriptions.CaptureBackend):
     reservation itself is the durable dispatch intent and the start id is the
     job identity (contract, "Atomic starts", queue paragraph)."""
     kind = "server_capture"
+    from threading import local as _thread_local
+    from threading import Condition as _Condition
+    _pacing = _thread_local()
+    _identity_condition = _Condition()
+    _local_identities = {}
+
+    @classmethod
+    def acquire_identity(cls, key):
+        # Local owners used to keep waiters on _extract_lock without a timeout.
+        # Preserve that wait/recheck while pacing lets other captures proceed.
+        while True:
+            with cls._identity_condition:
+                while key in cls._local_identities:
+                    cls._identity_condition.wait()
+            lock = source_subscriptions.CaptureLock.acquire(
+                DATA_ROOT, key, timeout=source_subscriptions.MANUAL_CAPTURE_LOCK_TIMEOUT_S)
+            if lock is not None:
+                cls.register_identity(key, lock)
+                return lock
+            with cls._identity_condition:
+                # A local capture may have acquired the identity after our
+                # initial check. Only external ownership exhausts the bound.
+                if key not in cls._local_identities:
+                    return None
+
+    @classmethod
+    def register_identity(cls, key, lock):
+        with cls._identity_condition:
+            cls._local_identities[key] = lock
+
+    @classmethod
+    def release_identity(cls, key, lock):
+        with cls._identity_condition:
+            lock.release()
+            if cls._local_identities.get(key) is lock:
+                del cls._local_identities[key]
+            cls._identity_condition.notify_all()
 
     def __init__(self):
         # AS-03b: capture_key -> (CaptureLock, holds_extract_lock, start_id).
-        # Guarded by _source_capture_threads_lock so the class needs no lock
-        # of its own. Release is bound to the owning start.
+        # Lease updates are guarded by _source_capture_threads_lock.
+        # Release is bound to the owning start.
         self._leases: dict = {}
         # AS-02 (run AT-4): start_id -> the observed ``run`` invocation in
         # this process: owner token, incarnation, whether it returned and
@@ -8376,6 +8559,7 @@ class _ServerCaptureBackend(source_subscriptions.CaptureBackend):
             if holds_extract:
                 _extract_lock.release()
             return source_subscriptions.CaptureOutcome("busy", code=code)
+        self.register_identity(key, lock)
         with _source_capture_threads_lock:
             self._leases[key] = (lock, holds_extract, start["start_id"])
         return None
@@ -8404,7 +8588,7 @@ class _ServerCaptureBackend(source_subscriptions.CaptureBackend):
             return
         lock, holds_extract = lease[0], lease[1]
         if lock is not None:
-            lock.release()
+            self.release_identity(key, lock)
         if holds_extract:
             try:
                 _extract_lock.release()
@@ -8413,9 +8597,10 @@ class _ServerCaptureBackend(source_subscriptions.CaptureBackend):
 
     def _ensure_ownership(self, start):
         """A worker reached without ``acquire`` (direct ``execute_started``)
-        still runs under the shared dispatcher lock: wait for it within the
-        manual bound. AS-03: an OS-lock error or an exhausted wait is
-        unavailable ownership (``CaptureOwnershipUnavailable``); the process
+        still runs under the shared dispatcher lock: local owners may finish,
+        while external owners have the manual bound. AS-03: an OS-lock error
+        or an exhausted wait is unavailable ownership
+        (``CaptureOwnershipUnavailable``); the process
         lock is never substituted for the shared lock. AS-03b: ownership
         already retained for this identity is reused and rebound to the
         live start."""
@@ -8425,20 +8610,20 @@ class _ServerCaptureBackend(source_subscriptions.CaptureBackend):
                 self._leases[start["capture_key"]] = (
                     current[0], current[1], start["start_id"])
                 return
-        _extract_lock.acquire()
         try:
-            lock = source_subscriptions.CaptureLock.acquire(
-                DATA_ROOT, start["capture_key"],
-                timeout=source_subscriptions.MANUAL_CAPTURE_LOCK_TIMEOUT_S)
+            lock = self.acquire_identity(start["capture_key"])
         except OSError as exc:
-            _extract_lock.release()
             log.exception("capture identity lock unavailable for %s", start["start_id"])
             raise source_subscriptions.CaptureOwnershipUnavailable(
                 f"capture identity lock unavailable: {type(exc).__name__}") from exc
         if lock is None:
-            _extract_lock.release()
             raise source_subscriptions.CaptureOwnershipUnavailable(
                 "capture identity lock held by another dispatcher")
+        try:
+            _extract_lock.acquire()
+        except BaseException:
+            self.release_identity(start["capture_key"], lock)
+            raise
         with _source_capture_threads_lock:
             self._leases[start["capture_key"]] = (lock, True, start["start_id"])
 
@@ -8545,6 +8730,7 @@ class _ServerCaptureBackend(source_subscriptions.CaptureBackend):
 
         def _worker():
             release_locks = False
+            previous_pacing = getattr(self._pacing, "owner", None)
             try:
                 # AS-03: acquire() already holds the dispatcher lock and the
                 # capture-identity lock through publication; a worker reached
@@ -8576,6 +8762,7 @@ class _ServerCaptureBackend(source_subscriptions.CaptureBackend):
                         "succeeded", "failed", "released")
                     return
                 incarnation = source_subscriptions.process_incarnation(DATA_ROOT)
+                self._pacing.owner = (self, start)
                 with source_subscriptions.capture_context(start_id, incarnation):
                     metadata = _fetch_metadata(url)
                     title = metadata.get("title") or "Untitled"
@@ -8616,6 +8803,7 @@ class _ServerCaptureBackend(source_subscriptions.CaptureBackend):
                     log.exception("standing capture: fail_capture raised for %s", start_id)
                 log.warning("standing capture %s failed: %s", start_id, _sanitize_error(str(exc)))
             finally:
+                self._pacing.owner = previous_pacing
                 with _source_capture_threads_lock:
                     _source_capture_threads.pop(start_id, None)
                 if release_locks:
@@ -13328,6 +13516,7 @@ class Handler(BaseHTTPRequestHandler):
             result = mobile_playlists.poll_playlist(
                 _get_index(), playlist_id,
                 normalize_video_to_canonical_url=_vid_to_url,
+                fetch_entries=_fetch_monitored_playlist_entries,
                 refresh=_refresh_source_via_service)
         except Exception as e:
             log.exception("/playlists/monitored/poll failed")
@@ -13442,6 +13631,7 @@ class Handler(BaseHTTPRequestHandler):
                     idx, pl["id"],
                     normalize_video_to_canonical_url=_vid_to_url,
                     taste_filter=taste_filter,
+                    fetch_entries=_fetch_monitored_playlist_entries,
                     refresh=_refresh_source_via_service)
             except Exception as e:
                 log.warning("/auto-uoink/scan poll failed (%s): %s",
@@ -16697,20 +16887,20 @@ class Handler(BaseHTTPRequestHandler):
         # so the user gets a useful message rather than a generic 500.
         log.info("POST /extract/any (generic) url=%s -> running", canonical)
         DESKTOP_ROOT.mkdir(parents=True, exist_ok=True)
-        with _extract_lock:
-            try:
+        try:
+            with _ManualOwnership().process_slot():
                 metadata = _fetch_metadata(canonical)
-            except subprocess.CalledProcessError as e:
-                detail = friendly_error(e) if callable(globals().get(
-                    "friendly_error")) else str(e)
-                return self._send_json(400, {
-                    "ok": False, "error": f"yt-dlp could not extract: {detail}",
-                    "url": canonical, "platform": platform})
-            except Exception as e:
-                log.exception("/extract/any (generic) metadata failed")
-                return self._send_json(500, {
-                    "ok": False, "error": str(e),
-                    "url": canonical, "platform": platform})
+        except subprocess.CalledProcessError as e:
+            detail = friendly_error(e) if callable(globals().get(
+                "friendly_error")) else str(e)
+            return self._send_json(400, {
+                "ok": False, "error": f"yt-dlp could not extract: {detail}",
+                "url": canonical, "platform": platform})
+        except Exception as e:
+            log.exception("/extract/any (generic) metadata failed")
+            return self._send_json(500, {
+                "ok": False, "error": str(e),
+                "url": canonical, "platform": platform})
 
         title = metadata.get("title") or "Untitled"
         topic = _classify_topic(metadata)

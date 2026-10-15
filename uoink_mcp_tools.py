@@ -242,24 +242,33 @@ def uoink_video(args: dict[str, Any]) -> dict[str, Any]:
     title = None
     folder = None
     current_phase = "metadata"
-    with b._extract_lock:
+    with b._manual_extraction_ownership(url) as ownership:
         try:
-            metadata = b._fetch_metadata(url)
-            title = metadata.get("title") or "Untitled"
-            topic = b._classify_topic(metadata)
-            folder = (
-                b.DESKTOP_ROOT
-                / b._topic_folder_name(topic)
-                / (b.slugify(title) or "video")
-            )
+            ownership.raise_if_unavailable()
+            if ownership.conflict:
+                raise RuntimeError(ownership.conflict)
+            if ownership.completed_while_waiting and ownership.reused:
+                result = dict(ownership.reused)
+                corpus_path = result.get("corpus_path")
+                result["yoink_md"] = (
+                    Path(corpus_path).read_text(encoding="utf-8") if corpus_path else "")
+            else:
+                metadata = b._fetch_metadata(url)
+                title = metadata.get("title") or "Untitled"
+                topic = b._classify_topic(metadata)
+                folder = (
+                    b.DESKTOP_ROOT
+                    / b._topic_folder_name(topic)
+                    / (b.slugify(title) or "video")
+                )
 
-            def phase_cb(phase):
-                nonlocal current_phase
-                current_phase = phase
+                def phase_cb(phase):
+                    nonlocal current_phase
+                    current_phase = phase
 
-            result = b._run_extraction(
-                url, interval, folder, metadata=metadata, topic=topic,
-                phase_callback=phase_cb)
+                result = b._run_extraction(
+                    url, interval, folder, metadata=metadata, topic=topic,
+                    phase_callback=phase_cb)
         except BaseException as e:
             msg = b.friendly_error(e)
             detail = b.machine_error_detail(e)
@@ -275,7 +284,11 @@ def uoink_video(args: dict[str, Any]) -> dict[str, Any]:
             )
             return _err(msg)
 
-    folder_path = Path(result["folder"])
+    folder_value = result.get("folder") or (
+        str(Path(result["corpus_path"]).parent) if result.get("corpus_path") else None)
+    if not folder_value:
+        return _err("Uoink reused an earlier capture of this video but could not find its folder.")
+    folder_path = Path(folder_value)
     b._record_single_extract_job(url, started_at, result=result)
     screenshots = [
         str(p) for p in sorted((folder_path / "screenshots").glob("shot_*.jpg"))
@@ -993,6 +1006,7 @@ def poll_monitored_playlist(args: dict[str, Any]) -> dict[str, Any]:
     try:
         return _mp.poll_playlist(server._get_index(), playlist_id,
                                     normalize_video_to_canonical_url=_vid_to_url,
+                                    fetch_entries=server._fetch_monitored_playlist_entries,
                                     refresh=refresh if callable(refresh) else None)
     except Exception as e:
         return _err(f"poll_monitored_playlist failed: {e}")
