@@ -4923,6 +4923,35 @@ def _build_yoink_md(metadata: dict, url: str, entries: list, shots: list,
 # ---------------------------------------------------------------------------
 # Extraction core (shared by /extract and /session/add)
 # ---------------------------------------------------------------------------
+def _fetch_video_subtitles(url: str, output_folder: Path, *,
+                           long_video_mode: str,
+                           cancel_event: threading.Event | None = None) -> None:
+    """Fetch optional captions without failing an otherwise usable capture."""
+    try:
+        _run_subprocess(
+            [
+                *YTDLP_CMD,
+                "--skip-download",
+                "--write-auto-subs",
+                "--write-subs",
+                "--sub-lang", "en.*,en",
+                "--convert-subs", "srt",
+                "-o", str(output_folder / "video.%(ext)s"),
+                url,
+            ],
+            cancel_event=cancel_event,
+            check=True,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.PIPE,
+            timeout=COMMENTS_TIMEOUT_SEC,
+        )
+    except PlaylistJobCancelled:
+        raise
+    except (OSError, subprocess.CalledProcessError,
+            subprocess.TimeoutExpired) as e:
+        log.warning("%s subtitle fetch unavailable: %s", long_video_mode, e)
+
+
 def _run_extraction(url: str, interval: int, output_folder: Path,
                     *, notify: bool = True,
                     metadata: dict | None = None,
@@ -5057,9 +5086,9 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
             if stale.is_file():
                 stale.unlink(missing_ok=True)
 
-    # Full mode downloads one low-res media file plus subtitles. Chunked mode
-    # downloads representative media sections with yt-dlp's section support,
-    # then fetches the full available subtitle track separately.
+    # Full mode downloads one low-res media file; chunked mode downloads
+    # representative sections. Both fetch optional subtitles separately so
+    # a caption failure cannot prevent the media download.
     download_timeout = _ytdlp_timeout_for(processed_media_seconds or duration)
     media_cmd = [
         *YTDLP_CMD,
@@ -5084,10 +5113,6 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
             # intentionally omits this source-level check because the selected
             # sections already bound the downloaded media work.
             "--max-filesize", str(YTDLP_MAX_FILESIZE_BYTES),
-            "--write-auto-subs",
-            "--write-subs",
-            "--sub-lang", "en.*,en",
-            "--convert-subs", "srt",
             "-o", str(output_folder / "video.%(ext)s"),
             url,
         ])
@@ -5122,34 +5147,13 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
             "video."
         )
 
-    if effective_long_video_mode == LONG_VIDEO_MODE_CHUNKED:
-        if phase_callback:
-            phase_callback("transcript")
-        try:
-            _run_subprocess(
-                [
-                    *YTDLP_CMD,
-                    "--skip-download",
-                    "--write-auto-subs",
-                    "--write-subs",
-                    "--sub-lang", "en.*,en",
-                    "--convert-subs", "srt",
-                    "-o", str(output_folder / "video.%(ext)s"),
-                    url,
-                ],
-                cancel_event=cancel_event,
-                check=True,
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.PIPE,
-                timeout=COMMENTS_TIMEOUT_SEC,
-            )
-        except PlaylistJobCancelled:
-            raise
-        except (OSError, subprocess.CalledProcessError,
-                subprocess.TimeoutExpired) as e:
-            # Captions are optional throughout the existing pipeline. Chunked
-            # media should still succeed when the source exposes none.
-            log.warning("chunked subtitle fetch unavailable: %s", e)
+    if phase_callback:
+        phase_callback("transcript")
+    _fetch_video_subtitles(
+        url, output_folder,
+        long_video_mode=effective_long_video_mode,
+        cancel_event=cancel_event,
+    )
 
     media_glob = (
         "video-chunk-*.*"
