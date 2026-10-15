@@ -6,6 +6,7 @@ import subprocess
 import sys
 import threading
 from contextlib import nullcontext
+from datetime import datetime, timedelta
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import Mock
@@ -21,6 +22,7 @@ CAPTION_429 = (
     "ERROR: Unable to download video subtitles for 'en': "
     "HTTP Error 429: Too Many Requests"
 )
+MEDIA_429 = "ERROR: [youtube] xyz: HTTP Error 429: Too Many Requests"
 SUBTITLE_FLAGS = {
     "--write-auto-subs", "--write-subs", "--sub-lang", "--convert-subs",
 }
@@ -376,3 +378,82 @@ def test_media_failure_still_propagates(extraction):
     assert raised.value is error
     assert len(extraction.calls) == 1
     extraction.asr.assert_not_called()
+
+
+@pytest.mark.parametrize("as_bytes", [False, True], ids=["text", "bytes"])
+@pytest.mark.parametrize("stderr, media_refused, captions_refused", [
+    (CAPTION_429, False, True),
+    ("ERROR: https://www.youtube.com/api/timedtext: "
+     "HTTP Error 429: Too Many Requests", False, True),
+    ("WARNING: Subtitles request failed with status 429", False, True),
+    ("[info] xyz: Downloading 1 format(s): 18\n" + CAPTION_429, False, True),
+    (MEDIA_429, True, False),
+    ("ERROR: unable to download video data: HTTP Error 429", True, False),
+    ("ERROR: HTTP Error 429: Too Many Requests", True, False),
+    (CAPTION_429 + "\n" + MEDIA_429, True, True),
+    (MEDIA_429 + "\n" + CAPTION_429, True, True),
+    ("[info] xyz: Downloading subtitles: en\n" + MEDIA_429, True, False),
+    ("ERROR: Unable to download video subtitles: HTTP Error 403\n" + MEDIA_429,
+     True, False),
+    ("ERROR: Unable to download video subtitles: HTTP Error 403", False, False),
+    ("ERROR: HTTP Error 403: Forbidden", False, False),
+    ("", False, False),
+], ids=[
+    "subtitles", "timedtext", "subtitle-status", "captions-with-media-info",
+    "media-info", "media-data", "generic-429", "captions-then-media",
+    "media-then-captions", "subtitle-info-with-media-429",
+    "subtitle-403-with-media-429", "subtitle-403", "media-403", "empty",
+])
+def test_youtube_429_classification_by_endpoint(
+        stderr, media_refused, captions_refused, as_bytes):
+    if as_bytes:
+        stderr = stderr.encode("utf-8")
+    error = subprocess.CalledProcessError(1, ["yt-dlp"], stderr=stderr)
+
+    assert server._is_youtube_rate_limit(error) is media_refused
+    assert server._is_youtube_captions_refusal(error) is captions_refused
+
+
+@pytest.mark.parametrize("error", [
+    RuntimeError(MEDIA_429),
+    OSError(CAPTION_429),
+    subprocess.TimeoutExpired(["yt-dlp"], 30, stderr=CAPTION_429),
+    subprocess.CalledProcessError(1, ["yt-dlp"]),
+    subprocess.CalledProcessError(1, ["yt-dlp"], output=MEDIA_429),
+], ids=["runtime", "os-error", "timeout", "no-stderr", "stdout-only"])
+def test_youtube_429_classification_requires_subprocess_stderr(error):
+    assert server._is_youtube_rate_limit(error) is False
+    assert server._is_youtube_captions_refusal(error) is False
+
+
+@pytest.mark.parametrize("mode", ["full", "chunked"])
+@pytest.mark.parametrize("stderr", [
+    MEDIA_429, CAPTION_429 + "\n" + MEDIA_429,
+], ids=["media-only", "mixed"])
+def test_media_429_still_enqueues_capture(
+        extraction, extract_handler, monkeypatch, mode, stderr):
+    extraction.media_error = subprocess.CalledProcessError(
+        1, ["yt-dlp"], stderr=stderr)
+    extraction.index.enqueue_pending.return_value = 42
+    monkeypatch.setattr(server, "_pending_long_video_modes", {})
+    earliest_retry = datetime.now() + timedelta(
+        seconds=server._RATE_LIMIT_INITIAL_BACKOFF_SEC)
+
+    status, result = extract_handler(mode)
+
+    latest_retry = datetime.now() + timedelta(
+        seconds=server._RATE_LIMIT_INITIAL_BACKOFF_SEC)
+    assert status == 200
+    assert result == {
+        "ok": True, "queued": True, "pending_id": 42,
+        "retry_after": result["retry_after"], "reason": "youtube_rate_limit",
+        "long_video_mode": mode,
+    }
+    retry_after = datetime.fromisoformat(result["retry_after"])
+    assert earliest_retry.replace(microsecond=0) <= retry_after <= latest_retry
+    extraction.index.enqueue_pending.assert_called_once_with(
+        URL, 30, result["retry_after"], mode)
+    assert server._pending_long_video_mode(42) == mode
+    assert len(extraction.calls) == 1
+    extraction.asr.assert_not_called()
+    extraction.comments.assert_not_called()

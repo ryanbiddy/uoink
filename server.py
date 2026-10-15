@@ -4984,7 +4984,8 @@ def _fetch_video_subtitles(url: str, output_folder: Path, *,
             subprocess.TimeoutExpired) as e:
         log.warning("%s subtitle fetch unavailable: %s", long_video_mode, e)
         return (_detect_platform_from_url(url) == PLATFORM_YOUTUBE
-                and _is_youtube_rate_limit(e))
+                and (_is_youtube_captions_refusal(e)
+                     or _is_youtube_rate_limit(e)))
     return False
 
 
@@ -5647,18 +5648,37 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
 INSTALL_HELP_URL = "https://uoink.app/install"
 
 
+def _youtube_429_endpoints(e: BaseException) -> set[str]:
+    """Classify each diagnostic so caption warnings cannot hide media 429s."""
+    if not isinstance(e, subprocess.CalledProcessError):
+        return set()
+    stderr = (e.stderr.decode("utf-8", errors="ignore")
+              if isinstance(e.stderr, bytes) else (e.stderr or ""))
+    endpoints = set()
+    for line in stderr.splitlines():
+        if not re.search(r"\b429\b", line):
+            continue
+        if re.search(r"\b(?:subtitles?|captions?|timedtext)\b", line, re.IGNORECASE):
+            endpoints.add("captions")
+        elif "HTTP Error 429" in line:
+            endpoints.add("media")
+    return endpoints
+
+
+def _is_youtube_captions_refusal(e: BaseException) -> bool:
+    """True when yt-dlp reports a captions/timedtext HTTP 429."""
+    return "captions" in _youtube_429_endpoints(e)
+
+
 def _is_youtube_rate_limit(e: BaseException) -> bool:
     """True when an exception thrown out of _run_extraction is yt-dlp
-    surfacing a YouTube HTTP 429. Drives the rate-limit queue (Sprint 19):
+    surfacing a YouTube media/info HTTP 429, excluding captions-only
+    refusals. Drives the rate-limit queue (Sprint 19):
     the extract handler enqueues for retry instead of returning the
     pre-Sprint-19 friendly_error string, and the retry worker uses the
     same predicate to decide between exponential backoff and immediate
     terminal failure."""
-    if not isinstance(e, subprocess.CalledProcessError):
-        return False
-    stderr = (e.stderr.decode("utf-8", errors="ignore")
-              if isinstance(e.stderr, bytes) else (e.stderr or ""))
-    return "HTTP Error 429" in stderr
+    return "media" in _youtube_429_endpoints(e)
 
 
 # How long the /extract handler asks the user to wait before the first
