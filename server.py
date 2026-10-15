@@ -2365,39 +2365,66 @@ def _resolve_video_transcript(
         duration_seconds: object,
         *,
         settings: dict | None = None,
+        captions_refused: bool = False,
+        media_chunks: list[tuple[Path, float, float]] | None = None,
+        cancel_event: threading.Event | None = None,
 ) -> tuple[list[tuple[float, float, str]], str | None, dict]:
     """Prefer platform captions, then try cache-only local ASR.
 
     The returned source is ``captions`` or ``asr`` only when transcript rows
     exist. Fallback skips and failures are structured separately so a
     caption-less capture still succeeds without pretending it has words.
+    Chunk inputs carry source offsets and durations; ASR covers only those
+    downloaded sections.
     """
+    _raise_if_cancelled(cancel_event)
     if caption_entries:
         return list(caption_entries), "captions", {"status": "not_needed"}
 
+    reason = "captions_refused" if captions_refused else "captions_unavailable"
     current_settings = settings if settings is not None else _read_settings()
     if not bool(current_settings.get("asr_fallback_enabled", True)):
-        return [], None, {"status": "disabled"}
+        return [], None, {"status": "disabled", "reason": reason}
 
     model_name = _selected_reliability_model(current_settings)
-    expectation = _asr_duration_expectation(duration_seconds)
+    expectation = _asr_duration_expectation(
+        sum(length for _path, _start, length in media_chunks)
+        if media_chunks else duration_seconds)
     if not _reliability_model_status(model_name).get("cached"):
         return [], None, {
             "status": "model_not_downloaded",
+            "reason": reason,
             "model": model_name,
             **expectation,
         }
 
     try:
-        entries = uoink_reliability.transcribe_media(
-            media_path,
-            model_name=model_name,
-            model_root=RELIABILITY_MODEL_ROOT,
-        )
+        entries = []
+        for path, offset, length in (media_chunks or [(media_path, 0.0, None)]):
+            _raise_if_cancelled(cancel_event)
+            local_entries = uoink_reliability.transcribe_media(
+                path,
+                model_name=model_name,
+                model_root=RELIABILITY_MODEL_ROOT,
+            )
+            _raise_if_cancelled(cancel_event)
+            if media_chunks:
+                # ASR timestamps are local to each sampled section. Bound
+                # them to that section before linking to the source video.
+                entries.extend(
+                    (offset + max(0.0, start), offset + min(end, length), text)
+                    for start, end, text in local_entries
+                    if min(end, length) > max(0.0, start)
+                )
+            else:
+                entries.extend(local_entries)
+    except PlaylistJobCancelled:
+        raise
     except Exception as e:
         log.warning("local ASR fallback failed: %s", e)
         return [], None, {
             "status": "failed",
+            "reason": reason,
             "model": model_name,
             "error": _sanitize_error(str(e)),
             **expectation,
@@ -2405,11 +2432,14 @@ def _resolve_video_transcript(
 
     completed = {
         "status": "completed",
+        "reason": reason,
         "model": model_name,
         "segment_count": len(entries),
         "generated_at": _now_iso(),
         **expectation,
     }
+    if media_chunks:
+        completed["coverage"] = "sampled_sections"
     return entries, ("asr" if entries else None), completed
 
 
@@ -4782,7 +4812,8 @@ def _build_yoink_md(metadata: dict, url: str, entries: list, shots: list,
                     yoinked_at: str, topic: str,
                     cap_warning: str | None = None,
                     shot_times: list[int] | None = None,
-                    media_sections: str | None = None) -> str:
+                    media_sections: str | None = None,
+                    transcript_note: str | None = None) -> str:
     """Produce the v1 corpus markdown. Comments section is a placeholder
     that the background worker rewrites once the fetch completes.
     ``media_sections`` (Phase 6 BC-2) is the shared media renderer's
@@ -4813,6 +4844,8 @@ def _build_yoink_md(metadata: dict, url: str, entries: list, shots: list,
     parts.append(f"**Topic:** {topic}")
     if cap_warning:
         parts.append(f"**Note:** {cap_warning}")
+    if transcript_note:
+        parts.append(f"**Transcript:** {transcript_note}")
     parts.append("")
     parts.append("---")
     parts.append("")
@@ -4844,7 +4877,7 @@ def _build_yoink_md(metadata: dict, url: str, entries: list, shots: list,
     elif not entries:
         parts.append("## Transcript")
         parts.append("")
-        parts.append("*No captions available for this video.*")
+        parts.append(f"*{transcript_note or 'No captions available for this video.'}*")
         parts.append("")
     else:
         parts.append("## Transcript")
@@ -4925,8 +4958,8 @@ def _build_yoink_md(metadata: dict, url: str, entries: list, shots: list,
 # ---------------------------------------------------------------------------
 def _fetch_video_subtitles(url: str, output_folder: Path, *,
                            long_video_mode: str,
-                           cancel_event: threading.Event | None = None) -> None:
-    """Fetch optional captions without failing an otherwise usable capture."""
+                           cancel_event: threading.Event | None = None) -> bool:
+    """Fetch optional captions; return whether YouTube refused them with 429."""
     try:
         _run_subprocess(
             [
@@ -4950,6 +4983,9 @@ def _fetch_video_subtitles(url: str, output_folder: Path, *,
     except (OSError, subprocess.CalledProcessError,
             subprocess.TimeoutExpired) as e:
         log.warning("%s subtitle fetch unavailable: %s", long_video_mode, e)
+        return (_detect_platform_from_url(url) == PLATFORM_YOUTUBE
+                and _is_youtube_rate_limit(e))
+    return False
 
 
 def _run_extraction(url: str, interval: int, output_folder: Path,
@@ -5030,13 +5066,8 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
             f"{SCREENSHOT_SAMPLE_TARGET} frames."
         )
         interval = clamped_interval
-    if effective_long_video_mode == LONG_VIDEO_MODE_CHUNKED:
-        notes.append(
-            f"Chunked mode sampled {len(long_video_chunks)} media sections "
-            f"({processed_media_seconds // 60}m of {int(duration) // 60}m) "
-            "while retaining the full available subtitle track."
-        )
-    elif requested_long_video_mode == LONG_VIDEO_MODE_CHUNKED:
+    if (requested_long_video_mode == LONG_VIDEO_MODE_CHUNKED
+            and effective_long_video_mode != LONG_VIDEO_MODE_CHUNKED):
         notes.append(
             "Chunked mode was requested, but the source duration was unknown; "
             "Uoink used the full-media path."
@@ -5065,7 +5096,6 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
         )
         log.warning(notes[-1])
         interval = new_interval
-    cap_warning = " ".join(notes) or None
 
     # Persist the raw metadata blob for debugging without re-downloading.
     try:
@@ -5149,7 +5179,7 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
 
     if phase_callback:
         phase_callback("transcript")
-    _fetch_video_subtitles(
+    captions_refused = _fetch_video_subtitles(
         url, output_folder,
         long_video_mode=effective_long_video_mode,
         cancel_event=cancel_event,
@@ -5258,25 +5288,44 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
 
     entries = list(parse_srt(srt_files[0])) if srt_files else []
     platform_caption_count = len(entries)
-    transcript_source: str | None
-    asr_fallback: dict
-    if not entries and effective_long_video_mode == LONG_VIDEO_MODE_CHUNKED:
-        # Chunked media contains representative windows, not the full source.
-        # Calling the result a transcript would be misleading, so retain the
-        # caption-less capture and record why ASR did not run.
-        transcript_source = None
-        asr_fallback = {
-            "status": "skipped_chunked_mode",
-            **_asr_duration_expectation(duration),
-        }
-    else:
-        if not entries and phase_callback:
-            phase_callback("transcript")
-        entries, transcript_source, asr_fallback = _resolve_video_transcript(
-            entries,
-            video_files[0],
-            duration,
+    if not entries and phase_callback:
+        phase_callback("transcript")
+    entries, transcript_source, asr_fallback = _resolve_video_transcript(
+        entries,
+        video_files[0],
+        duration,
+        captions_refused=captions_refused,
+        media_chunks=[
+            (path, chunk["start_seconds"], chunk["duration_seconds"])
+            for path, chunk in zip(video_files, long_video_chunks)
+        ] if effective_long_video_mode == LONG_VIDEO_MODE_CHUNKED else None,
+        cancel_event=cancel_event,
+    )
+    if effective_long_video_mode == LONG_VIDEO_MODE_CHUNKED:
+        caption_coverage = (
+            " while retaining the full available subtitle track"
+            if transcript_source == "captions" else ""
         )
+        notes.append(
+            f"Chunked mode sampled {len(long_video_chunks)} media sections "
+            f"({processed_media_seconds // 60}m of {int(duration) // 60}m)"
+            f"{caption_coverage}."
+        )
+    cap_warning = " ".join(notes) or None
+    transcript_note = None
+    if transcript_source != "captions":
+        if captions_refused:
+            caption_note = "YouTube refused captions"
+        elif _detect_platform_from_url(url) == PLATFORM_YOUTUBE:
+            caption_note = "YouTube captions unavailable"
+        else:
+            caption_note = "captions unavailable"
+        if transcript_source == "asr":
+            coverage = (" of sampled sections"
+                        if effective_long_video_mode == LONG_VIDEO_MODE_CHUNKED else "")
+            transcript_note = f"Local Whisper transcript{coverage}: {caption_note}"
+        else:
+            transcript_note = f"No transcript: {caption_note}"
 
     if entries:
         plain = "\n".join(text for _, _, text in entries)
@@ -5301,6 +5350,8 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
         "video_id": metadata.get("id"), "url": url, "source_type": source_type,
         "transcript": [], "source_chapters": held_chapters,
         "transcript_source": transcript_source,
+        "asr_fallback": asr_fallback,
+        "transcript_note": transcript_note,
         "duration_seconds": duration, "yoinked_at": yoinked_at,
     }
     capture_seed["transcript"] = _transcript_entries_with_links(capture_seed, entries)
@@ -5324,6 +5375,7 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
         cap_warning=cap_warning,
         shot_times=shot_times,
         media_sections=media_sections,
+        transcript_note=transcript_note,
     )
     # Filename matches the folder's slug -- "kapathy-talk/kapathy-talk.md"
     # rather than "kapathy-talk/yoink.md" -- so the file is identifiable
@@ -5395,10 +5447,10 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
             "source_chapters": held_chapters,
             # CM-11: provenance is explicit whenever transcript rows exist.
             # A null source means the capture honestly remains caption-less;
-            # asr_fallback carries the reason (disabled, model absent, failed,
-            # or chunked media that cannot represent the complete source).
+            # asr_fallback carries the caption reason and local ASR status.
             "transcript_source": transcript_source,
             "asr_fallback": asr_fallback,
+            "transcript_note": transcript_note,
             # Structured shape: timestamp + relative path + bare filename so
             # consumers don't have to parse paths or recompute timestamps.
             "screenshots": [
@@ -5581,6 +5633,8 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
         "caption_count": platform_caption_count,
         "transcript_segment_count": len(entries),
         "transcript_source": transcript_source,
+        "asr_fallback": asr_fallback,
+        "transcript_note": transcript_note,
         "topic": topic,
         "requested_long_video_mode": requested_long_video_mode,
         "long_video_mode": effective_long_video_mode,

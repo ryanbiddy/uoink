@@ -28,11 +28,16 @@ SUBTITLE_FLAGS = {
 
 @pytest.fixture
 def extraction(monkeypatch, tmp_path):
-    state = SimpleNamespace(caption_error=None, media_error=None, calls=[])
+    state = SimpleNamespace(
+        caption_error=None, media_error=None, captions_available=True,
+        settings=server._default_settings(), model_cached=True, calls=[],
+    )
     metadata = {
         "id": "abcdef12345", "title": "Caption test", "duration": 60,
         "channel": "Example",
     }
+    state.metadata = metadata
+    state.folder = tmp_path / "capture"
 
     def fake_run(cmd, **kwargs):
         state.calls.append((list(cmd), kwargs))
@@ -43,10 +48,11 @@ def extraction(monkeypatch, tmp_path):
                 raise state.caption_error
             folder = Path(cmd[cmd.index("-o") + 1]).parent
             assert list(folder.glob("*.mp4")), "media must precede captions"
-            (folder / "video.en.srt").write_text(
-                "1\n00:00:00,000 --> 00:00:02,000\nPlatform captions.\n",
-                encoding="utf-8",
-            )
+            if state.captions_available:
+                (folder / "video.en.srt").write_text(
+                    "1\n00:00:00,000 --> 00:00:02,000\nPlatform captions.\n",
+                    encoding="utf-8",
+                )
         else:
             if state.media_error is not None:
                 raise state.media_error
@@ -64,23 +70,25 @@ def extraction(monkeypatch, tmp_path):
         return [(0.0, 2.0, "Local transcript.")]
 
     state.asr = Mock(side_effect=fake_asr)
+    state.comments = Mock()
     state.index = Mock(spec=["enqueue_pending"])
     monkeypatch.setattr(server, "DESKTOP_ROOT", tmp_path)
     monkeypatch.setattr(server, "_run_subprocess", fake_run)
     monkeypatch.setattr(server, "_fetch_metadata", Mock(return_value=metadata))
     monkeypatch.setattr(server, "_classify_topic", Mock(return_value="Test"))
     monkeypatch.setattr(server, "_get_index", Mock(return_value=state.index))
-    monkeypatch.setattr(server, "_read_settings", Mock(return_value={}))
+    monkeypatch.setattr(server, "_read_settings", lambda: state.settings)
     monkeypatch.setattr(server, "_reliability_model_status",
-                        Mock(return_value={"cached": True}))
+                        lambda _model: {"cached": state.model_cached})
     monkeypatch.setattr(server.uoink_reliability, "transcribe_media", state.asr)
     monkeypatch.setattr(server, "_should_start_hook_type", Mock(return_value=False))
     monkeypatch.setattr(server, "_anthropic_key_for_feature", Mock(return_value=None))
     monkeypatch.setattr(server, "_fetch_channel_context", Mock(return_value={}))
     monkeypatch.setattr(server, "_capture_media_plan", Mock(return_value=None))
+    monkeypatch.setattr(server, "_start_comments_thread", state.comments)
     for name in (
         "_download_thumbnail", "_incremental_index_update", "_index_yoink",
-        "_start_entity_extraction_thread", "_start_comments_thread",
+        "_start_entity_extraction_thread",
         "_generate_paste_corpus", "_record_single_extract_job", "maybe_toast",
     ):
         monkeypatch.setattr(server, name, Mock(return_value=None))
@@ -93,7 +101,7 @@ def extraction(monkeypatch, tmp_path):
 
     def run(mode="full", cancel_event=None):
         return server._run_extraction(
-            URL, 30, tmp_path / "capture", notify=False, metadata=metadata,
+            URL, 30, state.folder, notify=False, metadata=metadata,
             topic="Test", generate_paste=False, long_video_mode=mode,
             cancel_event=cancel_event,
         )
@@ -103,10 +111,8 @@ def extraction(monkeypatch, tmp_path):
     unexpected_io.assert_not_called()
 
 
-def test_full_mode_caption_429_completes_without_retry(
-        extraction, monkeypatch, caplog):
-    extraction.caption_error = subprocess.CalledProcessError(
-        1, ["yt-dlp"], stderr=CAPTION_429)
+@pytest.fixture
+def extract_handler(monkeypatch):
     ownership = SimpleNamespace(
         ok=True, conflict=None, completed_while_waiting=False, reused=None,
     )
@@ -121,8 +127,20 @@ def test_full_mode_caption_429_completes_without_retry(
             self.response = (status, payload)
 
     handler = FakeHandler()
-    handler._handle_extract({"url": URL, "interval": 30, "long_video_mode": "full"})
-    status, result = handler.response
+
+    def run(mode):
+        handler._handle_extract({"url": URL, "interval": 30, "long_video_mode": mode})
+        return handler.response
+
+    return run
+
+
+@pytest.mark.parametrize("mode", ["full", "chunked"])
+def test_full_mode_caption_429_completes_without_retry(
+        extraction, extract_handler, caplog, mode):
+    extraction.caption_error = subprocess.CalledProcessError(
+        1, ["yt-dlp"], stderr=CAPTION_429)
+    status, result = extract_handler(mode)
 
     assert status == 200
     assert result["ok"] is True
@@ -131,12 +149,66 @@ def test_full_mode_caption_429_completes_without_retry(
     assert result["screenshot_count"] == 1
     assert result["caption_count"] == 0
     assert result["transcript_source"] == "asr"
+    assert result["asr_fallback"]["reason"] == "captions_refused"
     extraction.asr.assert_called_once()
+    assert extraction.asr.call_args.kwargs == {
+        "model_name": "base", "model_root": server.RELIABILITY_MODEL_ROOT,
+    }
     folder = Path(result["folder"])
     sidecar = json.loads((folder / f"{folder.name}.json").read_text(encoding="utf-8"))
     assert sidecar["transcript_source"] == "asr"
+    assert sidecar["asr_fallback"]["status"] == "completed"
+    assert sidecar["asr_fallback"]["reason"] == "captions_refused"
+    assert "Local Whisper transcript" in sidecar["transcript_note"]
+    assert "YouTube refused captions" in result["yoink_md"]
+    assert sidecar["transcript_note"] in (folder / f"{folder.name}.md").read_text(
+        encoding="utf-8")
     assert (folder / "transcript.txt").read_text(encoding="utf-8") == "Local transcript."
-    assert "full subtitle fetch unavailable" in caplog.text
+    assert f"{mode} subtitle fetch unavailable" in caplog.text
+
+
+@pytest.mark.parametrize("mode", ["full", "chunked"])
+@pytest.mark.parametrize("asr_status", ["disabled", "model_not_downloaded"])
+@pytest.mark.parametrize("refused", [True, False], ids=["refused", "unavailable"])
+def test_captionless_capture_saved_without_asr_or_retry(
+        extraction, extract_handler, mode, asr_status, refused):
+    extraction.captions_available = False
+    if refused:
+        extraction.caption_error = subprocess.CalledProcessError(
+            1, ["yt-dlp"], stderr=CAPTION_429.encode("utf-8"))
+    if asr_status == "disabled":
+        extraction.settings["asr_fallback_enabled"] = False
+    else:
+        extraction.model_cached = False
+
+    status, result = extract_handler(mode)
+
+    assert status == 200
+    assert result["ok"] is True
+    assert not result.get("queued")
+    extraction.index.enqueue_pending.assert_not_called()
+    extraction.asr.assert_not_called()
+    extraction.comments.assert_called_once()
+    assert result["screenshot_count"] == 1
+    assert result["caption_count"] == 0
+    assert result["transcript_segment_count"] == 0
+    assert result["transcript_source"] is None
+    folder = Path(result["folder"])
+    sidecar = json.loads((folder / f"{folder.name}.json").read_text(encoding="utf-8"))
+    reason = "captions_refused" if refused else "captions_unavailable"
+    note = ("No transcript: YouTube refused captions" if refused
+            else "No transcript: YouTube captions unavailable")
+    assert sidecar["asr_fallback"]["status"] == asr_status
+    assert sidecar["asr_fallback"]["reason"] == reason
+    assert sidecar["transcript_source"] is None
+    assert sidecar["transcript"] == []
+    assert sidecar["transcript_note"] == note
+    assert result["transcript_note"] == note
+    assert note in result["yoink_md"]
+    assert note in (folder / f"{folder.name}.md").read_text(encoding="utf-8")
+    assert (folder / "metadata.json").is_file()
+    assert (folder / "screenshots" / "shot_0001.jpg").is_file()
+    assert not (folder / "transcript.txt").exists()
 
 
 def test_full_mode_media_command_has_no_subtitle_flags(extraction):
@@ -159,6 +231,8 @@ def test_full_mode_media_command_has_no_subtitle_flags(extraction):
     assert result["ok"] is True
     assert result["caption_count"] == 1
     assert result["transcript_source"] == "captions"
+    assert result["asr_fallback"] == {"status": "not_needed"}
+    assert result["transcript_note"] is None
     extraction.asr.assert_not_called()
 
 
@@ -177,10 +251,100 @@ def test_caption_failures_are_optional(extraction, caplog, mode, error):
     assert result["caption_count"] == 0
     assert f"{mode} subtitle fetch unavailable" in caplog.text
     assert any("--skip-download" in cmd for cmd, _kwargs in extraction.calls)
-    if mode == "full":
-        extraction.asr.assert_called_once()
-    else:
-        extraction.asr.assert_not_called()
+    extraction.asr.assert_called_once()
+    assert result["transcript_source"] == "asr"
+    assert result["asr_fallback"]["reason"] == (
+        "captions_refused" if isinstance(error, subprocess.CalledProcessError)
+        else "captions_unavailable"
+    )
+
+
+@pytest.mark.parametrize("mode", ["full", "chunked"])
+def test_absent_captions_reach_asr(extraction, mode):
+    extraction.captions_available = False
+    result = extraction.run(mode)
+
+    assert result["ok"] is True
+    assert result["transcript_source"] == "asr"
+    assert result["asr_fallback"]["reason"] == "captions_unavailable"
+    assert "YouTube captions unavailable" in result["yoink_md"]
+    extraction.asr.assert_called_once()
+
+
+def test_chunked_asr_uses_source_timestamps_and_discloses_sampled_coverage(extraction):
+    extraction.caption_error = subprocess.CalledProcessError(
+        1, ["yt-dlp"], stderr=CAPTION_429)
+    extraction.metadata["duration"] = 7200
+    result = extraction.run("chunked")
+
+    chunks = result["long_video_chunks"]
+    assert len(chunks) > 1
+    assert chunks[1]["start_seconds"] > chunks[0]["end_seconds"]
+    assert extraction.asr.call_count == len(chunks)
+    assert [call.args[0].name for call in extraction.asr.call_args_list] == [
+        f"video-chunk-{number:03d}.mp4" for number in range(1, len(chunks) + 1)
+    ]
+    folder = Path(result["folder"])
+    sidecar = json.loads((folder / f"{folder.name}.json").read_text(encoding="utf-8"))
+    assert sidecar["transcript_source"] == "asr"
+    assert sidecar["asr_fallback"]["reason"] == "captions_refused"
+    assert sidecar["asr_fallback"]["coverage"] == "sampled_sections"
+    assert sidecar["asr_fallback"]["duration_seconds"] == result["processed_media_seconds"]
+    assert [(row["start"], row["end"]) for row in sidecar["transcript"]] == [
+        (chunk["start_seconds"], chunk["start_seconds"] + 2.0) for chunk in chunks
+    ]
+    assert "Local Whisper transcript of sampled sections" in result["yoink_md"]
+    assert "retaining the full available subtitle track" not in result["yoink_md"]
+    assert "retaining the full available subtitle track" not in sidecar["screenshot_cap_warning"]
+
+
+@pytest.mark.parametrize("duration", [60, 7200])
+def test_chunked_captions_retain_full_subtitle_coverage_note(extraction, duration):
+    extraction.metadata["duration"] = duration
+    result = extraction.run("chunked")
+
+    assert result["ok"] is True
+    assert result["transcript_source"] == "captions"
+    extraction.asr.assert_not_called()
+    folder = Path(result["folder"])
+    sidecar = json.loads((folder / f"{folder.name}.json").read_text(encoding="utf-8"))
+    note = (
+        f"Chunked mode sampled {len(result['long_video_chunks'])} media sections "
+        f"({result['processed_media_seconds'] // 60}m of {duration // 60}m) "
+        "while retaining the full available subtitle track."
+    )
+    assert note in sidecar["screenshot_cap_warning"]
+    assert f"**Note:** {sidecar['screenshot_cap_warning']}" in result["yoink_md"]
+    assert note in (folder / f"{folder.name}.md").read_text(encoding="utf-8")
+
+
+@pytest.mark.parametrize("mode, cancel_after", [
+    ("chunked", 1), ("chunked", server.LONG_VIDEO_MAX_CHUNKS), ("full", 1),
+], ids=["first-chunk", "last-chunk", "full-media"])
+def test_cancellation_during_asr_prevents_publication(extraction, mode, cancel_after):
+    extraction.caption_error = subprocess.CalledProcessError(
+        1, ["yt-dlp"], stderr=CAPTION_429)
+    extraction.metadata["duration"] = 7200
+    cancel_event = threading.Event()
+
+    def cancel_during_asr(_path, **_kwargs):
+        if extraction.asr.call_count == cancel_after:
+            cancel_event.set()
+        return [(0.0, 2.0, "Local transcript.")]
+
+    extraction.asr.side_effect = cancel_during_asr
+
+    with pytest.raises(server.PlaylistJobCancelled):
+        extraction.run(mode, cancel_event=cancel_event)
+
+    assert cancel_event.is_set()
+    assert extraction.asr.call_count == cancel_after
+    extraction.comments.assert_not_called()
+    extraction.index.enqueue_pending.assert_not_called()
+    folder = extraction.folder
+    assert not (folder / "transcript.txt").exists()
+    assert not (folder / f"{folder.name}.md").exists()
+    assert not (folder / f"{folder.name}.json").exists()
 
 
 @pytest.mark.parametrize("mode", ["full", "chunked"])
