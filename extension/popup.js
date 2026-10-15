@@ -2323,9 +2323,16 @@ async function loadRecentUoinks() {
           copyMDBtn.textContent = "Copying...";
           
           try {
-            const res = await STC._postJson("/mcp/v1/tools/call", {
-              name: "get_uoink_corpus",
-              arguments: { slug: last.slug }
+            // /recent rows carry no slug; the slug is the uoink's folder name
+            // (the same derivation the pairwise card passes to fetchHookText).
+            const slug = last.folder ? last.folder.split(/[\\/]/).pop() : null;
+            const res = await globalThis.UoinkUI.authedJson("/mcp/v1/tools/call", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                name: "get_uoink_corpus",
+                arguments: { slug }
+              })
             });
             const data = res && res.result && res.result.structuredContent;
             if (data && data.ok && data.corpus_md) {
