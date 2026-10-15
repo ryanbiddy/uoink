@@ -177,6 +177,7 @@
       setServerStatus("offline");
     } finally {
       statusInflight = false;
+      maybeRunRetry();
     }
   }
 
@@ -208,7 +209,60 @@
     }
   }
 
-  async function handleClick(btn) {
+  function notify(title, message) {
+    try {
+      chrome.runtime.sendMessage({ type: "notify", title, message });
+    } catch (e) {
+      console.warn("[Uoink] notify failed", e);
+    }
+  }
+
+  // E6: same failure path as the YouTube button (content.js): the reason
+  // goes in the button title, a notification, and the popup's remembered
+  // failures. This script loads without lib/extract.js, so the SW words the
+  // failure (response.failure / response.failureMessage) and records it.
+  const LOST_TRACK_FAILURE = {
+    kind: "lost", title: "Uoink lost track", label: "Lost track",
+    message: "Uoink lost track of this capture. It may still have finished, so check your Library before trying again.",
+  };
+
+  // page: {url, title} of the article the capture started on, taken before
+  // dispatch -- X is a SPA, so by the time the helper answers the tab may
+  // show another article. replaces: the popup Retry record this failure
+  // replaces (see claimRetry).
+  function rememberFailure(page, error, replaces) {
+    try {
+      chrome.runtime.sendMessage({
+        type: "rememberFailure",
+        url: page.url,
+        title: page.title,
+        error,
+        replaces: replaces || null,
+      });
+    } catch (e) {
+      console.warn("[Uoink] rememberFailure failed", e);
+    }
+  }
+
+  // A retried capture that went through drops the popup Retry record.
+  function forgetFailure(id) {
+    if (!id) return;
+    try {
+      chrome.runtime.sendMessage({ type: "forgetFailure", id });
+    } catch (e) {
+      console.warn("[Uoink] forgetFailure failed", e);
+    }
+  }
+
+  function showFailure(btn, label, title, message) {
+    setButtonState(btn, "error", label);
+    btn.title = message;
+    notify(title, message);
+    setTimeout(() => setButtonState(btn, "default", defaultLabel()), 5000);
+  }
+
+  // retryOf: the popup Retry record this capture retries (see claimRetry).
+  async function handleClick(btn, retryOf) {
     if (serverStatus === "offline") {
       openSetupOffline();
       return;
@@ -216,11 +270,13 @@
     if (serverStatus !== "online") return;
 
     setButtonState(btn, "working", "Uoinking...");
+    const page = { url: window.location.href, title: document.title || "" };
     const parsed = parseArticle();
     if (!parsed || !parsed.ok) {
       console.warn("[Uoink] X Article parse failed:", parsed && parsed.error);
-      setButtonState(btn, "error", "Couldn't read it");
-      setTimeout(() => setButtonState(btn, "default", defaultLabel()), 3500);
+      const msg = (parsed && parsed.error) || "Couldn't read this article.";
+      rememberFailure(page, msg, retryOf);
+      showFailure(btn, "Couldn't read it", "Uoink failed", msg);
       return;
     }
 
@@ -228,28 +284,96 @@
       chrome.runtime.sendMessage(
         { type: "stcExtractXArticle", article: parsed },
         (response) => {
-          if (chrome.runtime.lastError || !response || response.networkError) {
-            const detail = (response && response.networkError) || "Helper unreachable.";
+          const lastError = chrome.runtime.lastError;
+          if (lastError || !response || response.networkError) {
+            const detail = (response && response.networkError)
+              || (lastError && lastError.message) || "Helper unreachable.";
             console.error("[Uoink] X Article capture failed:", detail);
-            setButtonState(btn, "error", "Failed!");
-            setTimeout(() => setButtonState(btn, "default", defaultLabel()), 3000);
+            // No response at all means the SW port went away mid-request.
+            const failure = (response && response.failure) || LOST_TRACK_FAILURE;
+            rememberFailure(page, failure.message, retryOf);
+            showFailure(btn, failure.label, failure.title, failure.message);
+            if (failure.kind === "offline") openSetupOffline();
             return;
           }
           const data = response.data;
           if (!data || !data.ok) {
             console.error("[Uoink] X Article server error:", data && data.error);
-            setButtonState(btn, "error", "Failed!");
-            setTimeout(() => setButtonState(btn, "default", defaultLabel()), 3000);
+            const msg = response.failureMessage
+              || (data && data.error) || "Couldn't save this article.";
+            rememberFailure(page, msg, retryOf);
+            showFailure(btn, "Failed!", "Uoink failed", msg);
             return;
           }
+          forgetFailure(retryOf);
           setButtonState(btn, "success", "Uoinked!");
           setTimeout(() => setButtonState(btn, "default", defaultLabel()), 3000);
         });
     } catch (e) {
       console.error("[Uoink] X Article dispatch failed", e);
-      setButtonState(btn, "error", "Failed!");
-      setTimeout(() => setButtonState(btn, "default", defaultLabel()), 3000);
+      showFailure(btn, LOST_TRACK_FAILURE.label, LOST_TRACK_FAILURE.title,
+                  LOST_TRACK_FAILURE.message);
     }
+  }
+
+  // ---- Retry handoff from the popup ---------------------------------------
+  // The popup's Recent failures Retry writes {auto_yoink: {url, failure_id,
+  // ts}} and opens the article. Claim it once on the matching article. X
+  // renders the article after the page loads, so the capture starts once the
+  // helper status is known and the article parses (or the wait runs out, and
+  // the parse failure is reported like a click would).
+  const AUTO_UOINK_TTL_MS = 60_000;
+  const AUTO_UOINK_PARSE_WAIT_MS = 20_000;
+  let pendingRetry = null;
+
+  function articleId(url) {
+    const canonical = globalThis.XArticle && XArticle.normalizeXArticleUrl(url || "");
+    return canonical ? canonical.slice(canonical.lastIndexOf("/") + 1) : null;
+  }
+
+  async function claimRetry() {
+    const stored = await new Promise((r) => {
+      try {
+        chrome.storage.local.get({ auto_yoink: null }, (i) => r(i && i.auto_yoink));
+      } catch { r(null); }
+    });
+    if (!stored || !stored.url) return;
+    if (Date.now() - (stored.ts || 0) > AUTO_UOINK_TTL_MS) {
+      try { chrome.storage.local.remove("auto_yoink"); } catch { /* ignore */ }
+      return;
+    }
+    const target = articleId(stored.url);
+    if (!target || target !== articleId(window.location.href)) return;
+    // Clear before starting so a refresh or another tab can't re-fire it.
+    await new Promise((r) => {
+      try { chrome.storage.local.remove("auto_yoink", r); } catch { r(); }
+    });
+    pendingRetry = {
+      target,
+      failureId: stored.failure_id || null,
+      waitUntil: Date.now() + AUTO_UOINK_PARSE_WAIT_MS,
+    };
+    maybeRunRetry();
+  }
+
+  function maybeRunRetry() {
+    if (!pendingRetry) return;
+    // The tab left the retried article before the retry ran: drop it so it
+    // never captures another page; the record stays for another Retry.
+    if (articleId(window.location.href) !== pendingRetry.target) {
+      pendingRetry = null;
+      return;
+    }
+    if (serverStatus === "checking") return;
+    const btn = document.getElementById(BTN_ID);
+    if (!btn) return;
+    if (serverStatus === "online" && Date.now() < pendingRetry.waitUntil) {
+      const parsed = parseArticle();
+      if (!parsed || !parsed.ok) return; // not rendered yet; DOM churn re-checks
+    }
+    const { failureId } = pendingRetry;
+    pendingRetry = null;
+    handleClick(btn, failureId);
   }
 
   function injectButton() {
@@ -274,6 +398,7 @@
       handleClick(btn);
     });
     document.body.appendChild(btn);
+    maybeRunRetry();
   }
 
   // Popup-driven parse. The popup messages this script; we parse the live DOM
@@ -290,12 +415,16 @@
 
   // X is a SPA: re-check on DOM churn so the button appears after a client
   // navigation into an article and disappears when leaving one.
-  const observer = new MutationObserver(() => injectButton());
+  const observer = new MutationObserver(() => {
+    injectButton();
+    maybeRunRetry();
+  });
   if (document.body) {
     observer.observe(document.body, { childList: true, subtree: true });
   }
   injectButton();
   startStatusPolling();
+  claimRetry().catch((e) => console.warn("[Uoink] auto_yoink failed", e));
 
   window.addEventListener("beforeunload", () => {
     if (statusTimer) clearInterval(statusTimer);

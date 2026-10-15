@@ -232,6 +232,7 @@
       setServerStatus("offline");
     } finally {
       statusInflight = false;
+      maybeRunRetry();
     }
   }
 
@@ -256,7 +257,25 @@
     }
   }
 
-  async function handleUoinkClick(btn) {
+  function notify(title, message) {
+    try {
+      chrome.runtime.sendMessage({ type: "notify", title, message });
+    } catch (e) {
+      console.warn("[Uoink] notify failed", e);
+    }
+  }
+
+  // E6: same failure path as the YouTube button (content.js): the reason
+  // goes in the button title and a notification, not just the console.
+  function showFailure(btn, label, title, message) {
+    setButtonState(btn, "error", label);
+    btn.title = message;
+    notify(title, message);
+    setTimeout(() => setButtonState(btn, "default", defaultLabel()), 5000);
+  }
+
+  // retryOf: the popup Retry record this capture retries (see claimRetry).
+  async function handleUoinkClick(btn, retryOf) {
     if (serverStatus === "offline") {
       openSetupOffline();
       return;
@@ -265,35 +284,85 @@
 
     setButtonState(btn, "working", "Uoinking...");
 
+    // Taken before the request: new Reddit is a SPA, so the tab may show
+    // another thread by the time the helper answers.
     const url = window.location.href;
+    const title = document.title || "";
     const interval = 30; // default interval
 
+    let data;
     try {
-      chrome.runtime.sendMessage({ type: "stcExtract", url, interval }, async (response) => {
-        if (chrome.runtime.lastError || !response || response.networkError) {
-          const detail = response && response.networkError || "Helper unreachable.";
-          console.error("[Uoink] capture failed:", detail);
-          setButtonState(btn, "error", "Failed!");
-          setTimeout(() => setButtonState(btn, "default", defaultLabel()), 3000);
-          return;
-        }
-
-        const data = response.data;
-        if (!data || !data.ok) {
-          console.error("[Uoink] server error:", data && data.error);
-          setButtonState(btn, "error", "Failed!");
-          setTimeout(() => setButtonState(btn, "default", defaultLabel()), 3000);
-          return;
-        }
-
-        setButtonState(btn, "success", "Uoinked!");
-        setTimeout(() => setButtonState(btn, "default", defaultLabel()), 3000);
-      });
+      data = await STC.postExtractViaBg(url, interval);
     } catch (e) {
-      console.error("[Uoink] dispatch failed", e);
-      setButtonState(btn, "error", "Failed!");
-      setTimeout(() => setButtonState(btn, "default", defaultLabel()), 3000);
+      console.error("[Uoink] capture failed:", e);
+      const failure = await STC.describeCaptureError(e);
+      STC.rememberFailure(url, failure.message, { title }, retryOf);
+      showFailure(btn, failure.label, failure.title, failure.message);
+      if (failure.kind === "offline") openSetupOffline();
+      return;
     }
+
+    if (!data || !data.ok) {
+      console.error("[Uoink] server error:", data && data.error);
+      const msg = STC.describeFailure(data);
+      if (/queue full/i.test(msg)) {
+        showFailure(btn, "Queue full", "Uoink queue full",
+                    "Give it a few minutes, then try again.");
+        return;
+      }
+      STC.rememberFailure(url, msg, { title }, retryOf);
+      showFailure(btn, "Failed!", "Uoink failed", msg);
+      return;
+    }
+    STC.forgetFailure(retryOf);
+
+    setButtonState(btn, "success", "Uoinked!");
+    setTimeout(() => setButtonState(btn, "default", defaultLabel()), 3000);
+  }
+
+  // ---- Retry handoff from the popup ---------------------------------------
+  // The popup's Recent failures Retry writes {auto_yoink: {url, failure_id,
+  // ts}} and opens the thread (content.js takes the {videoId} form). Claim
+  // it once on the matching thread and start the capture as soon as the
+  // button is in and the helper status is known.
+  const AUTO_UOINK_TTL_MS = 60_000;
+  let pendingRetry = null;
+
+  async function claimRetry() {
+    const stored = await new Promise((r) => {
+      try {
+        chrome.storage.local.get({ auto_yoink: null }, (i) => r(i && i.auto_yoink));
+      } catch { r(null); }
+    });
+    if (!stored || !stored.url) return;
+    if (Date.now() - (stored.ts || 0) > AUTO_UOINK_TTL_MS) {
+      try { chrome.storage.local.remove("auto_yoink"); } catch { /* ignore */ }
+      return;
+    }
+    const target = STC.normalizeRedditUrl(stored.url);
+    if (!target || target !== STC.normalizeRedditUrl(window.location.href)) return;
+    // Clear before starting so a refresh or another tab can't re-fire it.
+    await new Promise((r) => {
+      try { chrome.storage.local.remove("auto_yoink", r); } catch { r(); }
+    });
+    pendingRetry = { target, failureId: stored.failure_id || null };
+    maybeRunRetry();
+  }
+
+  function maybeRunRetry() {
+    if (!pendingRetry) return;
+    // The tab left the retried thread before the retry ran: drop it so it
+    // never captures another page; the record stays for another Retry.
+    if (STC.normalizeRedditUrl(window.location.href) !== pendingRetry.target) {
+      pendingRetry = null;
+      return;
+    }
+    if (serverStatus === "checking") return;
+    const btn = document.getElementById(BTN_ID);
+    if (!btn) return;
+    const { failureId } = pendingRetry;
+    pendingRetry = null;
+    handleUoinkClick(btn, failureId);
   }
 
   function injectButton() {
@@ -327,6 +396,7 @@
     } else {
       anchor.element.appendChild(btn);
     }
+    maybeRunRetry();
   }
 
   // Monitor DOM to ensure button stays injected across single page transitions.
@@ -337,6 +407,7 @@
   observer.observe(document.body, { childList: true, subtree: true });
   injectButton();
   startStatusPolling();
+  claimRetry().catch((e) => console.warn("[Uoink] auto_yoink failed", e));
 
   window.addEventListener("beforeunload", () => {
     stopStatusPolling();

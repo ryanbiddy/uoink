@@ -536,7 +536,7 @@ async function captureXPost(url, interval) {
   // X refused the fetch (404 / 429 / tombstone / block page). The server's
   // copy already says which; show it and stop -- no queue, no broken uoink.
   if (!textData.ok) {
-    showToast(STC.friendlyError(textData.error)
+    showToast(STC.describeFailure(textData)
       || "X wouldn't hand over this post. Try again in a minute.");
     return;
   }
@@ -550,10 +550,14 @@ async function captureXPost(url, interval) {
         showToast(`Saved ${posts} + queued the video.`);
         pollQueueStatus();
       } else {
-        showToast(`Saved ${posts}. Couldn't queue the video -- try again.`);
+        // E3: say why the video didn't queue, not just that it didn't.
+        showToast(`Saved ${posts}. Couldn't queue the video: ${STC.describeFailure(vid)}`);
       }
-    } catch {
-      showToast(`Saved ${posts}. Couldn't queue the video -- try again.`);
+    } catch (e) {
+      // E7: a timeout means the helper may still be on it; offline only
+      // when /health fails too.
+      const failure = await STC.describeCaptureError(e);
+      showToast(`Saved ${posts}. Video: ${failure.message}`);
     }
     loadRecentUoinks();
     return;
@@ -613,7 +617,7 @@ async function captureXArticle(url) {
       loadRecentUoinks();
       return;
     }
-    showToast(STC.friendlyError(data && data.error)
+    showToast(STC.describeFailure(data)
       || "Read the article but couldn't save it. Try again.");
     return;
   }
@@ -636,7 +640,7 @@ async function captureXArticle(url) {
     return;
   }
   if (!pageData || !pageData.ok) {
-    showSourceAlert(STC.friendlyError(pageData && pageData.error)
+    showSourceAlert(STC.describeFailure(pageData)
       || "X didn't serve this article to Uoink. Open the article and click "
         + "the in-page \"Uoink this article\" button while you're logged in. "
         + "Nothing was saved.");
@@ -1061,13 +1065,19 @@ function renderFailureRow(failure) {
     ev.stopPropagation();
     const isReddit = failure.url && STC.normalizeRedditUrl(failure.url);
     const isTwitter = failure.url && STC.normalizeTwitterUrl(failure.url);
+    // E6: the X Article button now records failures too.
+    const isXArticle = failure.url && STC.isXArticleUrl(failure.url);
     const videoId = failure.videoId || (failure.url && STC.extractVideoId(failure.url));
-    if (!videoId && !isReddit && !isTwitter) {
+    if (!videoId && !isReddit && !isTwitter && !isXArticle) {
       showToast("Can't retry: the URL is missing or invalid.");
       return;
     }
-    await removeRecentFailure(failure.id);
-    const autoYoinkObj = videoId ? { videoId, ts: Date.now() } : { url: failure.url, ts: Date.now() };
+    // The page's content script claims this handoff and starts the capture;
+    // the record stays until that capture goes through (or is replaced by
+    // its new failure), so a Retry that never starts loses nothing.
+    const autoYoinkObj = videoId
+      ? { videoId, failure_id: failure.id, ts: Date.now() }
+      : { url: failure.url, failure_id: failure.id, ts: Date.now() };
     chrome.storage.local.set({ auto_yoink: autoYoinkObj }, () => {
       chrome.tabs.create({
         url: failure.url || (videoId ? `https://www.youtube.com/watch?v=${videoId}` : ""),
@@ -1628,7 +1638,7 @@ async function handleCorpusCapture(data) {
     return true;
   }
   if (!data || !data.ok) {
-    showToast(STC.friendlyError(data && data.error));
+    showToast(STC.describeFailure(data));
     return false;
   }
   const clipboardText = data.corpus_md_paste || data.yoink_md || "";
@@ -1723,7 +1733,9 @@ async function runPopupUoinkCurrent() {
       return;
     }
   } catch (e) {
-    showToast(`Uoink failed: ${e && e.message || e}`);
+    // E7: timed out / lost track / offline (only when /health fails too).
+    const failure = await STC.describeCaptureError(e);
+    showToast(failure.message);
   } finally {
     uoinkCurrentBtn.disabled = !serverOnline || !currentSource;
     uoinkCurrentBtn.textContent = old;
@@ -1772,7 +1784,9 @@ async function runAllowSiteAndRetry() {
     }
     await handleCorpusCapture(data);
   } catch (e) {
-    showToast(`Uoink failed: ${e && e.message || e}`);
+    // E7: timed out / lost track / offline, same as the main capture button.
+    const failure = await STC.describeCaptureError(e);
+    showToast(failure.message);
   } finally {
     uoinkAllowRetryBtn.textContent = old;
     if (!uoinkAllowRetryBtn.classList.contains("hidden")) {

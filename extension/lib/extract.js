@@ -293,7 +293,7 @@
         body: JSON.stringify({ url }),
         signal: controller.signal,
       });
-      return await res.json();
+      return withHttpStatus(await res.json(), res);
     } finally {
       clearTimeout(timer);
     }
@@ -314,8 +314,8 @@
         body: JSON.stringify(article || {}),
         signal: controller.signal,
       });
-      return await res.json().catch(() => ({
-        ok: false, error: "Server returned a non-JSON response." }));
+      return withHttpStatus(await res.json().catch(() => ({
+        ok: false, error: "Server returned a non-JSON response." })), res);
     } finally {
       clearTimeout(timer);
     }
@@ -352,10 +352,10 @@
         console.error("[Uoink] HTTP", res.status, "body:", text);
       }
       try {
-        return JSON.parse(text);
+        return withHttpStatus(JSON.parse(text), res);
       } catch {
         console.error("[Uoink] JSON parse error, raw text:", text);
-        return { ok: false, error: "Server returned a non-JSON response." };
+        return withHttpStatus({ ok: false, error: "Server returned a non-JSON response." }, res);
       }
     } finally {
       clearTimeout(timer);
@@ -390,10 +390,10 @@
         console.error("[Uoink] HTTP", res.status, "body:", text);
       }
       try {
-        return JSON.parse(text);
+        return withHttpStatus(JSON.parse(text), res);
       } catch {
         console.error("[Uoink] JSON parse error, raw text:", text);
-        return { ok: false, error: "Server returned a non-JSON response." };
+        return withHttpStatus({ ok: false, error: "Server returned a non-JSON response." }, res);
       }
     } finally {
       clearTimeout(timer);
@@ -427,9 +427,9 @@
         body: JSON.stringify(body || {}),
         signal: controller.signal,
       });
-      return await res.json().catch(() => ({
+      return withHttpStatus(await res.json().catch(() => ({
         ok: false, error: "Server returned a non-JSON response.",
-      }));
+      })), res);
     } finally {
       clearTimeout(timer);
     }
@@ -596,7 +596,13 @@
       throw new TypeError(`Background SW unreachable: ${e && e.message || e}`);
     }
     if (!res) throw new TypeError("No response from background service worker.");
-    if (res.networkError) throw new TypeError(res.networkError);
+    if (res.networkError) {
+      const err = new TypeError(res.networkError);
+      // E7: the SW classified the failure where it was thrown (it still had
+      // the AbortError name and could ping /health). Keep that verdict.
+      if (res.failure && res.failure.kind) err.uoinkKind = res.failure.kind;
+      throw err;
+    }
     return res.data;
   }
 
@@ -613,19 +619,219 @@
   // Translate raw server errors into copy a non-technical user can act
   // on. By the time this runs the built-in 403-retry has already
   // refreshed the token once and still got rejected, so surfacing
-  // "missing or invalid token" verbatim only confuses the user. Map
-  // anything that smells like an auth failure to a recovery instruction.
-  // Translate raw server errors into copy a non-technical user can act
-  // on. By the time this runs the built-in 403-retry has already
-  // refreshed the token once and still got rejected, so surfacing
-  // "missing or invalid token" verbatim only confuses the user. Map
-  // anything that smells like an auth failure to a recovery instruction.
-  function friendlyError(rawMsg) {
+  // "missing or invalid token" verbatim only confuses the user.
+  // E4: only a real auth rejection maps to the recovery instruction: an
+  // HTTP 403 (when the caller knows the status) or the server's exact
+  // token-mismatch body. Matching any "token"/"forbidden" substring turned
+  // yt-dlp's "PO token" and "HTTP Error 403: Forbidden" failures into a
+  // bogus authorization message.
+  // E3: the extension has no details disclosure, so the server's "Details
+  // are tucked below." pointer is dropped instead of pointing at nothing.
+  const AUTH_REJECTED_ERROR = "missing or invalid token";
+
+  // Capture helpers relay the helper's JSON body; keep its HTTP status with
+  // it so describeFailure can tell a rejected token from an ordinary error.
+  function withHttpStatus(body, res) {
+    if (res && !res.ok && body && typeof body === "object" && body.http_status === undefined) {
+      body.http_status = res.status;
+    }
+    return body;
+  }
+  function friendlyError(rawMsg, httpStatus) {
     const msg = String(rawMsg || "Uoink hit an unknown error.");
-    if (/token/i.test(msg) || /\bforbidden\b/i.test(msg)) {
+    if (httpStatus === 403 || msg.trim() === AUTH_REJECTED_ERROR) {
       return "Uoink helper authorization changed. Try reloading the extension or restarting the Uoink helper from your Start Menu.";
     }
-    return msg;
+    return msg.replace(/\s*Details are tucked below\.?/gi, "").trim()
+      || "Uoink couldn't finish this one.";
+  }
+
+  // E3: one line of the server's raw error_detail: the last yt-dlp
+  // "ERROR:" line, else the last line that isn't machine_error_detail's
+  // Command:/Exit code: header.
+  const DETAIL_EXCERPT_MAX = 180;
+  function errorDetailLine(detail) {
+    const lines = String(detail || "").split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter(Boolean);
+    let pick = "";
+    for (let i = lines.length - 1; i >= 0; i--) {
+      if (/^ERROR:/.test(lines[i])) { pick = lines[i]; break; }
+    }
+    if (!pick) {
+      pick = lines.filter((line) => !/^(Command|Exit code):/i.test(line)).pop() || "";
+    }
+    return pick.replace(/^ERROR:\s*/, "").replace(/\s+/g, " ").trim();
+  }
+
+  // The same line, trimmed so it fits a notification.
+  function errorDetailExcerpt(detail) {
+    const line = errorDetailLine(detail);
+    if (line.length <= DETAIL_EXCERPT_MAX) return line;
+    return line.slice(0, DETAIL_EXCERPT_MAX - 3).trimEnd() + "...";
+  }
+
+  // E3: the user-facing reason for an {ok: false} capture response: the
+  // friendly error plus the failing phase and an error_detail excerpt,
+  // which every extension surface used to drop.
+  function describeFailure(data, httpStatus) {
+    const d = data || {};
+    // A 403 is an authorization change unless the helper says the page's
+    // host just isn't allowlisted (that 403 carries its own wording).
+    const status = httpStatus === undefined ? d.http_status : httpStatus;
+    const base = friendlyError(d.error,
+      status === 403 && d.code !== "host_not_allowed" ? 403 : undefined);
+    const phase = String(d.failure_phase || "").replace(/[_-]+/g, " ").trim();
+    // A phase error's detail repeats the error itself. Compare the whole
+    // line, not the trimmed excerpt, so a long one isn't shown twice.
+    const squash = (s) => s.replace(/\s+/g, " ").toLowerCase();
+    const line = errorDetailLine(d.error_detail);
+    const excerpt = line && !squash(base).includes(squash(line))
+      ? errorDetailExcerpt(d.error_detail)
+      : "";
+    if (phase && excerpt) return `${base} Failed at the ${phase} step: ${excerpt}`;
+    if (phase) return `${base} Failed at the ${phase} step.`;
+    if (excerpt) return `${base} Detail: ${excerpt}`;
+    return base;
+  }
+
+  // E7: platform-aware "start the helper" copy (mirrors setup.js
+  // helperOfflineDetail). Content scripts can't call getPlatformInfo, so
+  // read navigator, which every extension context has.
+  function _platform(os) {
+    let raw = os;
+    if (!raw) {
+      try {
+        const nav = global.navigator || {};
+        raw = (nav.userAgentData && nav.userAgentData.platform)
+          || nav.platform || nav.userAgent || "";
+      } catch { raw = ""; }
+    }
+    const value = String(raw || "").toLowerCase();
+    if (value.includes("mac") || value === "darwin") return "mac";
+    if (value.includes("linux") || value.includes("cros")
+        || value.includes("chrome os") || value === "openbsd") return "linux";
+    return "win";
+  }
+
+  function helperOfflineHint(os) {
+    const platform = _platform(os);
+    if (platform === "mac") {
+      return "Open Uoink from Applications, or run uoink-helper from Terminal, then try again.";
+    }
+    if (platform === "linux") {
+      return "Run uoink-helper from Terminal, then try again.";
+    }
+    return "Start Uoink from the Start Menu, then try again.";
+  }
+
+  // E7: a thrown capture request is not proof the helper is down.
+  //   timeout -- our AbortController gave up waiting; the helper may still
+  //              be working on it.
+  //   lost    -- the SW port / extension context went away mid-request.
+  //   network -- the fetch itself failed; a /health ping decides between
+  //              offline (ping fails too) and lost (helper is up).
+  //   error   -- anything else; show its message.
+  const LOST_TRACK_RE = /extension context invalidated|message port closed|receiving end does not exist|could not establish connection|background sw unreachable|no response from background/i;
+  function captureErrorKind(e) {
+    if (e && typeof e.uoinkKind === "string" && e.uoinkKind) return e.uoinkKind;
+    const name = (e && e.name) || "";
+    const message = String((e && e.message) || e || "");
+    if (name === "AbortError" || name === "TimeoutError") return "timeout";
+    // A relayed abort arrives as a plain message ("signal is aborted
+    // without reason"); every abort in this file is a request timeout.
+    if (/\baborted\b/i.test(message)) return "timeout";
+    if (LOST_TRACK_RE.test(message)) return "lost";
+    if (name === "TypeError") return "network";
+    return "error";
+  }
+
+  function captureFailureCopy(kind, e, os) {
+    if (kind === "timeout") {
+      return {
+        kind, title: "Uoink still working", label: "Still working",
+        message: "Uoink stopped waiting, but the helper may still be finishing this one. Check Activity in the Uoink dashboard before trying again.",
+      };
+    }
+    if (kind === "lost") {
+      return {
+        kind, title: "Uoink lost track", label: "Lost track",
+        message: "Uoink lost track of this capture. It may still have finished, so check your Library before trying again.",
+      };
+    }
+    if (kind === "offline") {
+      return {
+        kind, title: "Uoink Helper offline", label: "Uoink Helper offline",
+        message: helperOfflineHint(os),
+      };
+    }
+    return {
+      kind: "error", title: "Uoink failed", label: "Uoink failed",
+      message: `Uoink failed: ${(e && e.message) || e || "unknown error"}`,
+    };
+  }
+
+  // Returns {kind, title, label, message} for an error thrown by a capture
+  // request. options.ping overrides the /health probe; options.os forces a
+  // platform. Content scripts rarely reach the ping: the SW classifies
+  // network failures before relaying them (see _proxy).
+  async function describeCaptureError(e, options) {
+    const opts = options || {};
+    let kind = captureErrorKind(e);
+    if (kind === "network") {
+      let health = null;
+      try { health = await (opts.ping || ping)(); } catch { health = null; }
+      kind = health && health.ok ? "lost" : "offline";
+    }
+    return captureFailureCopy(kind, e, opts.os);
+  }
+
+  // Recent-failure memory shared by the in-page buttons (content.js,
+  // content-reddit.js, and content-x-article.js via the SW). The popup's
+  // Recent panel renders these rows; newest first, one per URL, five max.
+  // replacesId: the record a popup Retry came from; this failure replaces it.
+  const RECENT_FAILURES_KEY = "yoink_recent_failures";
+  function rememberFailure(url, error, extra, replacesId) {
+    const videoId = extractVideoId(url);
+    const entry = Object.assign({
+      id: `${Date.now()}-${videoId || "video"}`,
+      url,
+      videoId,
+      title: "",
+      error,
+      failed_at: new Date().toISOString(),
+    }, extra || {});
+    return new Promise((resolve) => {
+      try {
+        chrome.storage.local.get({ [RECENT_FAILURES_KEY]: [] }, (items) => {
+          const failures = Array.isArray(items && items[RECENT_FAILURES_KEY])
+            ? items[RECENT_FAILURES_KEY]
+            : [];
+          const kept = failures.filter((f) => f.url !== url
+            && !(replacesId && f.id === replacesId));
+          const next = [entry].concat(kept).slice(0, 5);
+          chrome.storage.local.set({ [RECENT_FAILURES_KEY]: next }, () => resolve());
+        });
+      } catch { resolve(); }
+    });
+  }
+
+  // E6: a popup Retry keeps its record until the retried capture has gone
+  // through; then the page drops it here. No id, nothing to drop.
+  function forgetFailure(id) {
+    if (!id) return Promise.resolve();
+    return new Promise((resolve) => {
+      try {
+        chrome.storage.local.get({ [RECENT_FAILURES_KEY]: [] }, (items) => {
+          const failures = Array.isArray(items && items[RECENT_FAILURES_KEY])
+            ? items[RECENT_FAILURES_KEY]
+            : [];
+          const next = failures.filter((f) => !f || f.id !== id);
+          if (next.length === failures.length) return resolve();
+          chrome.storage.local.set({ [RECENT_FAILURES_KEY]: next }, () => resolve());
+        });
+      } catch { resolve(); }
+    });
   }
 
   // Shared "uoinked!" notification builder. Called from both the in-page
@@ -980,9 +1186,9 @@
       console.error("[Uoink] HTTP", res.status, "body:", text);
     }
     try {
-      return JSON.parse(text);
+      return withHttpStatus(JSON.parse(text), res);
     } catch {
-      return { ok: false, error: "Server returned a non-JSON response." };
+      return withHttpStatus({ ok: false, error: "Server returned a non-JSON response." }, res);
     }
   }
 
@@ -1040,10 +1246,10 @@
         console.error("[Uoink] HTTP", res.status, "body:", text);
       }
       try {
-        return JSON.parse(text);
+        return withHttpStatus(JSON.parse(text), res);
       } catch {
         console.error("[Uoink] JSON parse error, raw text:", text);
-        return { ok: false, error: "Server returned a non-JSON response." };
+        return withHttpStatus({ ok: false, error: "Server returned a non-JSON response." }, res);
       }
     } finally {
       clearTimeout(timer);
@@ -1098,6 +1304,13 @@
     buildYoinkedMessage: buildUoinkedMessage,
     getToken,
     friendlyError,
+    errorDetailExcerpt,
+    describeFailure,
+    helperOfflineHint,
+    captureErrorKind,
+    describeCaptureError,
+    rememberFailure,
+    forgetFailure,
     playlistPreview,
     playlistStart,
     jobStatus,

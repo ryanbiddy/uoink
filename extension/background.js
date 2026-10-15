@@ -433,7 +433,10 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
         if (data && data.ok) tryOpenPopup();
       } catch (e) {
         console.error("[stc] proxied extract failed", e);
-        sendResponse({ networkError: String(e && e.message || e) });
+        sendResponse({
+          networkError: String(e && e.message || e),
+          failure: await STC.describeCaptureError(e),
+        });
       }
     })();
     return true;
@@ -446,13 +449,35 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
     (async () => {
       try {
         const data = await STC.postExtractXArticle(msg.article);
-        sendResponse({ data });
+        // content-x-article.js loads without lib/extract.js, so word its
+        // failure here with the same helper the other in-page buttons use.
+        sendResponse({
+          data,
+          failureMessage: (data && data.ok) ? null : STC.describeFailure(data),
+        });
         if (data && data.ok) tryOpenPopup();
       } catch (e) {
         console.error("[stc] proxied x-article extract failed", e);
-        sendResponse({ networkError: String(e && e.message || e) });
+        sendResponse({
+          networkError: String(e && e.message || e),
+          failure: await STC.describeCaptureError(e),
+        });
       }
     })();
+    return true;
+  }
+  // E6: remembered failure for content-x-article.js (no STC there). Same
+  // record content.js and content-reddit.js write via STC.rememberFailure.
+  // msg.replaces / forgetFailure: the popup Retry record a retried capture
+  // replaces (on failure) or drops (on success).
+  if (msg.type === "rememberFailure" && typeof msg.url === "string") {
+    STC.rememberFailure(msg.url, String(msg.error || ""), {
+      title: String(msg.title || ""),
+    }, msg.replaces).then(() => sendResponse({ ok: true }));
+    return true;
+  }
+  if (msg.type === "forgetFailure" && typeof msg.id === "string") {
+    STC.forgetFailure(msg.id).then(() => sendResponse({ ok: true }));
     return true;
   }
   if (msg.type === "stcSessionAdd" && msg.session_id && msg.url) {
@@ -463,7 +488,10 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
         if (data && data.ok) tryOpenPopup();
       } catch (e) {
         console.error("[stc] proxied session add failed", e);
-        sendResponse({ networkError: String(e && e.message || e) });
+        sendResponse({
+          networkError: String(e && e.message || e),
+          failure: await STC.describeCaptureError(e),
+        });
       }
     })();
     return true;
@@ -817,13 +845,12 @@ async function runExtractJob(job) {
       data = await STC.postExtract(job.url, job.interval);
     }
   } catch (e) {
-    console.error("[Uoink] server unreachable", e);
+    console.error("[Uoink] extract request failed", e);
     // No tab open here -- setup.html only opens from direct user actions
     // (the in-page YouTube button or the popup help link), never from
     // background-queued jobs. Keeps unrelated context-menu work from
     // surprising the user with new tabs.
-    notify("Uoink Helper offline",
-           "Start Uoink from the Start Menu, then try again.");
+    await notifyThrownCaptureError(e);
     return;
   }
   if (!data || !data.ok) {
@@ -834,7 +861,7 @@ async function runExtractJob(job) {
       await notifyWalledXArticle();
       return;
     }
-    notify("Uoink failed", STC.friendlyError(data && data.error),
+    notify("Uoink failed", STC.describeFailure(data),
            { requireInteraction: true });
     return;
   }
@@ -880,6 +907,14 @@ async function runExtractJob(job) {
   notify("Uoinked ★", message);
 }
 
+// E7: a thrown capture request is not proof the helper is down. Say what it
+// means: still working (we stopped waiting), lost track, or offline (only
+// when the /health ping fails too, with platform-aware start copy).
+async function notifyThrownCaptureError(e, extraOptions) {
+  const failure = await STC.describeCaptureError(e);
+  return notify(failure.title, failure.message, extraOptions);
+}
+
 // A2: the one honest, persistent "X walled it" message. requireInteraction
 // keeps the Chrome notification on screen until the user dismisses it, so the
 // walled capture is never a silent no-op. Copy is plain (no em/en dashes,
@@ -923,9 +958,7 @@ async function captureXArticleFromTab(tabId, pageUrl) {
       data = await STC.postExtractXArticle(parsed);
     } catch (e) {
       console.error("[stc] context-menu x-article capture failed", e);
-      notify("Uoink Helper offline",
-             "Start Uoink from the Start Menu, then try again.",
-             { requireInteraction: true });
+      await notifyThrownCaptureError(e, { requireInteraction: true });
       return;
     }
     if (data && data.ok) {
@@ -936,7 +969,7 @@ async function captureXArticleFromTab(tabId, pageUrl) {
       return;
     }
     notify("Uoink failed",
-           STC.friendlyError(data && data.error)
+           STC.describeFailure(data)
              || "Read the article but couldn't save it. Try again.",
            { requireInteraction: true });
     return;
@@ -948,9 +981,7 @@ async function captureXArticleFromTab(tabId, pageUrl) {
     pageData = await STC.postExtractPage(pageUrl);
   } catch (e) {
     console.error("[stc] context-menu x-article page fallback failed", e);
-    notify("Uoink Helper offline",
-           "Start Uoink from the Start Menu, then try again.",
-           { requireInteraction: true });
+    await notifyThrownCaptureError(e, { requireInteraction: true });
     return;
   }
   if (pageData && pageData.code === "x_login_wall") {
@@ -965,7 +996,7 @@ async function captureXArticleFromTab(tabId, pageUrl) {
   }
   if (!pageData || !pageData.ok) {
     notify("Uoink failed",
-           STC.friendlyError(pageData && pageData.error)
+           STC.describeFailure(pageData)
              || "X didn't serve this article to Uoink. Open it and use the "
                + "in-page \"Uoink this article\" button while logged in.",
            { requireInteraction: true });
@@ -1003,13 +1034,12 @@ async function runSessionAddJob(job) {
   try {
     data = await STC.addToSession(job.session_id, job.url, job.interval);
   } catch (e) {
-    console.error("[Uoink] server unreachable", e);
-    notify("Uoink Helper offline",
-           "Start Uoink from the Start Menu, then try again.");
+    console.error("[Uoink] session add request failed", e);
+    await notifyThrownCaptureError(e);
     return;
   }
   if (!data || !data.ok) {
-    notify("Uoink failed", STC.friendlyError(data && data.error));
+    notify("Uoink failed", STC.describeFailure(data));
     return;
   }
 
