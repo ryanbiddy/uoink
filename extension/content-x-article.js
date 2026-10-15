@@ -187,6 +187,11 @@
     statusTimer = setInterval(pollStatus, STATUS_POLL_MS);
   }
 
+  function stopStatusPolling() {
+    if (statusTimer) clearInterval(statusTimer);
+    statusTimer = null;
+  }
+
   function openSetupOffline() {
     try {
       chrome.runtime.sendMessage({
@@ -413,17 +418,37 @@
     });
   } catch { /* messaging unavailable in some contexts */ }
 
-  // X is a SPA: re-check on DOM churn so the button appears after a client
-  // navigation into an article and disappears when leaving one.
-  const observer = new MutationObserver(() => {
+  // E2: X is a SPA, so the manifest loads this script on every X page (Chrome
+  // only injects declared scripts on a real page load) and it self-gates on
+  // the URL: the button and the /health polling only run on an article.
+  let lastHref = null;
+  let onArticle = false;
+  // Returns true when the URL changed since the last check.
+  function syncToUrl() {
+    const href = window.location.href;
+    if (href === lastHref) return false;
+    lastHref = href;
+    onArticle = isArticlePage();
+    if (!onArticle) stopStatusPolling();
+    else if (!statusTimer) startStatusPolling();
+    return true;
+  }
+
+  // Re-check on DOM churn and back/forward so the button appears after a
+  // client navigation into an article and disappears when leaving one. Off
+  // an article, churn costs a string compare until the URL changes.
+  function onPageChange() {
+    if (!syncToUrl() && !onArticle) return;
     injectButton();
     maybeRunRetry();
-  });
+  }
+  const observer = new MutationObserver(onPageChange);
   if (document.body) {
     observer.observe(document.body, { childList: true, subtree: true });
   }
+  window.addEventListener("popstate", onPageChange);
   injectButton();
-  startStatusPolling();
+  syncToUrl();
   claimRetry().catch((e) => console.warn("[Uoink] auto_yoink failed", e));
 
   window.addEventListener("beforeunload", () => {

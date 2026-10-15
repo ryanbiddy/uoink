@@ -1292,17 +1292,40 @@ function notifyWalledXArticle() {
     { requireInteraction: true });
 }
 
-// Message a tab and resolve the response (or null if the content script isn't
-// there / errors). Mirrors the popup's messageActiveTab.
+// Chrome's lastError when nothing in the tab listens for the message.
+const NO_RECEIVER_RE = /Receiving end does not exist|Could not establish connection/i;
+
+// Message a tab and resolve {resp, noReceiver}: resp is the response (or null
+// if the content script errors / doesn't answer), noReceiver is true when the
+// content script isn't in the tab at all. Mirrors the popup's messageActiveTab.
 function messageTab(tabId, payload) {
   return new Promise((resolve) => {
     try {
       chrome.tabs.sendMessage(tabId, payload, (resp) => {
-        void chrome.runtime.lastError; // no listener -> lastError; treat as null
-        resolve(resp || null);
+        const err = chrome.runtime.lastError;
+        resolve({
+          resp: resp || null,
+          noReceiver: !!err && NO_RECEIVER_RE.test(String(err.message || "")),
+        });
       });
-    } catch { resolve(null); }
+    } catch { resolve({ resp: null, noReceiver: false }); }
   });
+}
+
+// E2: a tab open since before the extension was installed or updated never
+// got the declared content scripts. Inject the article parser and its
+// content script (host permission + "scripting"); true if they ran.
+async function injectXArticleScripts(tabId) {
+  try {
+    await chrome.scripting.executeScript({
+      target: { tabId },
+      files: ["lib/x-article.js", "content-x-article.js"],
+    });
+    return true;
+  } catch (e) {
+    console.warn("[stc] x-article script injection failed", e);
+    return false;
+  }
 }
 
 // A1: capture an X Article from the context menu the same way the in-page
@@ -1311,8 +1334,14 @@ function messageTab(tabId, payload) {
 // to the best-effort /extract/page fetch when the in-page parser isn't
 // available. A walled fallback reports honestly (A2) instead of saving junk.
 async function captureXArticleFromTab(tabId, pageUrl) {
-  // 1) PRIMARY — in-page DOM parse via content-x-article.js.
-  const resp = await messageTab(tabId, { type: "uoinkParseXArticle" });
+  // 1) PRIMARY — in-page DOM parse via content-x-article.js. E2: with no
+  // receiver in the tab, inject the script and ask once more.
+  const ask = { type: "uoinkParseXArticle" };
+  let reply = await messageTab(tabId, ask);
+  if (reply.noReceiver && await injectXArticleScripts(tabId)) {
+    reply = await messageTab(tabId, ask);
+  }
+  const resp = reply.resp;
   const parsed = (resp && resp.ok && resp.article && resp.article.ok)
     ? resp.article : null;
   if (parsed) {

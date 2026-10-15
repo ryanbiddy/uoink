@@ -321,7 +321,7 @@
   document.addEventListener("visibilitychange", () => {
     if (document.hidden) {
       stopStatusPolling();
-    } else {
+    } else if (isSupportedVideoPage()) {
       // Fire an immediate check on resume so a server we missed coming back
       // online doesn't make the user wait the full 10s.
       startStatusPolling();
@@ -736,6 +736,8 @@
   }
 
   function tryInjectWithRetries() {
+    // Off a video page there is no button to wait for.
+    if (!isSupportedVideoPage()) return;
     let tries = 0;
     const maxTries = 20;
     const interval = setInterval(() => {
@@ -744,11 +746,40 @@
     }, 500);
   }
 
+  // E2: the manifest loads this script on every YouTube page, because
+  // YouTube moves between pages with the History API and Chrome only injects
+  // declared scripts on a real page load. So the button and the /health
+  // polling self-gate on the URL, re-checked on yt-navigate-finish, popstate
+  // and DOM churn (a string compare until the URL actually changes).
+  let lastHref = null;
+  let onVideoPage = false;
+  // Returns true when the URL changed since the last check.
+  function syncToUrl() {
+    const href = window.location.href;
+    if (href === lastHref) return false;
+    lastHref = href;
+    onVideoPage = isSupportedVideoPage();
+    if (!onVideoPage) {
+      stopStatusPolling();
+      injectButton(); // tears down a lingering floating Shorts button
+    } else if (!statusTimer && !document.hidden) {
+      startStatusPolling();
+    }
+    return true;
+  }
+
   window.addEventListener("yt-navigate-finish", () => {
+    syncToUrl();
     setTimeout(tryInjectWithRetries, 250);
   });
 
+  window.addEventListener("popstate", () => {
+    if (syncToUrl()) setTimeout(tryInjectWithRetries, 250);
+  });
+
   const observer = new MutationObserver(() => {
+    syncToUrl();
+    if (!onVideoPage) return;
     const btn = document.getElementById(BTN_ID);
     if (!btn) {
       injectButton();
@@ -783,7 +814,8 @@
   });
 
   tryInjectWithRetries();
-  // Kick off /health polling so the button has a real status before the
-  // user has time to click. Pause/resume is wired via visibilitychange.
-  startStatusPolling();
+  // Kick off /health polling on a video page so the button has a real status
+  // before the user has time to click. Pause/resume is wired via
+  // visibilitychange.
+  syncToUrl();
 })();
