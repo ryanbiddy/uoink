@@ -3422,7 +3422,7 @@ document.addEventListener("visibilitychange", () => {
     // Sprint 9: aria-label tells screen readers what the link does AND
     // that activation opens a new tab — a11y polish deferred from Sprint 6.
     link.setAttribute("aria-label", "Opens setup guide in a new tab");
-    link.style.color = "#ffd9d9";
+    link.style.color = "var(--fail)";
     link.style.textDecoration = "underline";
     link.style.cursor = "pointer";
     link.addEventListener("click", (ev) => {

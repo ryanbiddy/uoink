@@ -4,35 +4,21 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Set up Uoink</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="brand/tokens.css">
   <style>
     :root {
-      --rust: #C2410C;
-      --vermillion: #FF3D00;
-      --ink: #0A0A0A;
-      --ink-warm: #15110D;
-      --cream: #FFF4EC;
-      --border: #2C2621;
-      --border-soft: #38302A;
-      --uoink-accent: var(--rust);
-      --uoink-accent-soft: rgba(194, 65, 12, 0.15);
-      --uoink-black: var(--ink);
-      --uoink-white: var(--cream);
-      --bg-card: var(--ink-warm);
-      --bg-inset: var(--ink);
-      --text-dim: #C8B19F;
-      --text-mute: #8F7B6E;
-      --ok: #00C853;
-      --warn: #FFD23F;
+      --border-soft: var(--line-strong);
+      --uoink-accent: var(--action);
+      --uoink-accent-soft: color-mix(in srgb, var(--action) 15%, transparent);
+      --uoink-black: var(--bg);
+      --uoink-white: var(--text);
+      --bg-card: var(--surface);
+      --bg-inset: var(--bg);
+      --text-dim: var(--text-2);
+      --text-mute: var(--text-2);
       --r-card: 12px;
       --r-pill: 9999px;
       --r-corpus: 8px;
-      --font-sans: 'Inter', -apple-system, sans-serif;
-      --font-mono: 'JetBrains Mono', monospace;
-      --font-display: 'Bungee', sans-serif;
     }
     * { box-sizing: border-box; }
     html, body { margin: 0; padding: 0; }
@@ -58,14 +44,14 @@
     .brand uoink-mark {
       width: 40px;
       height: 40px;
-      color: var(--cream);
+      color: var(--text);
     }
     .brand-name {
       font-family: var(--font-display);
       font-size: 18px;
       font-weight: 700;
       letter-spacing: -0.01em;
-      color: var(--rust);
+      color: var(--action);
     }
     h1 {
       font-size: 30px;
@@ -107,7 +93,7 @@
       font-weight: 700;
     }
     .step.is-current .step-num,
-    .step.is-done .step-num { background: var(--uoink-accent); color: var(--uoink-black); }
+    .step.is-done .step-num { background: var(--uoink-accent); color: var(--on-action); }
     .step.is-done .step-num::before { content: "✓"; }
     .step.is-done .step-num-text { display: none; }
     h2 {
@@ -115,14 +101,14 @@
       margin: 0;
       font-weight: 600;
     }
-    .step p { margin: 0 0 14px; color: #cfcfcf; }
+    .step p { margin: 0 0 14px; color: var(--text); }
     .step p.sub { color: var(--text-mute); font-size: 13px; }
     .button {
       display: inline-flex;
       align-items: center;
       gap: 8px;
       background: var(--uoink-accent);
-      color: var(--uoink-white);
+      color: var(--on-action);
       font-weight: 700;
       font-size: 14px;
       padding: 11px 20px;
@@ -133,16 +119,16 @@
       font-family: inherit;
       transition: background-color 0.15s ease, color 0.15s ease, transform 0.12s ease;
     }
-    .button:hover { background: var(--vermillion); color: var(--uoink-black); }
+    .button:hover { background: color-mix(in srgb, var(--action) 85%, var(--text)); color: var(--on-action); }
     .button:active { transform: translateY(1px) scale(0.97); }
-    .button:focus-visible { outline: 2px solid var(--vermillion); outline-offset: 2px; }
+    .button:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
     .button.ghost {
       background: transparent;
       color: var(--uoink-white);
-      border: 1px solid var(--border);
+      border: 1px solid var(--line-strong);
       font-weight: 500;
     }
-    .button.ghost:hover { background: var(--vermillion); color: var(--uoink-black); border-color: var(--vermillion); }
+    .button.ghost:hover { background: var(--action); color: var(--on-action); border-color: var(--action); }
     .button.disabled,
     .button[disabled] { opacity: 0.5; cursor: not-allowed; pointer-events: none; }
     .button-row {
@@ -183,15 +169,15 @@
       width: 56px;
       height: 56px;
       flex-shrink: 0;
-      background: linear-gradient(135deg, var(--uoink-accent), #c2410c);
+      background: linear-gradient(135deg, var(--uoink-accent), var(--action));
       border-radius: 10px;
-      color: var(--uoink-white);
+      color: var(--on-action);
       font-weight: 800;
       font-size: 30px;
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 4px 12px rgba(234,88,12,0.25);
+      box-shadow: 0 4px 12px color-mix(in srgb, var(--action) 25%, transparent);
     }
     .installer-mock .filename {
       font-family: "SF Mono", "Consolas", monospace;
@@ -228,11 +214,11 @@
     }
     .status-block.is-running .status-dot {
       background: var(--ok);
-      box-shadow: 0 0 8px rgba(87,217,131,0.6);
+      box-shadow: 0 0 8px color-mix(in srgb, var(--ok) 60%, transparent);
     }
     .status-block.is-down .status-dot {
       background: var(--warn);
-      box-shadow: 0 0 8px rgba(245,158,11,0.6);
+      box-shadow: 0 0 8px color-mix(in srgb, var(--warn) 60%, transparent);
     }
     @keyframes pulse {
       0%, 100% { opacity: 1; }
@@ -245,7 +231,7 @@
     /* Start menu mockup */
     .startmenu-mock {
       max-width: 320px;
-      background: #1c1c1c;
+      background: var(--surface-sel);
       border: 1px solid var(--border);
       border-radius: 8px;
       padding: 12px;
@@ -257,7 +243,7 @@
       align-items: center;
       gap: 8px;
       padding: 8px 10px;
-      background: #0f0f0f;
+      background: var(--bg);
       border: 1px solid var(--border);
       border-radius: 4px;
       margin-bottom: 10px;
@@ -289,7 +275,7 @@
       height: 22px;
       border-radius: 4px;
       background: var(--uoink-accent);
-      color: var(--uoink-black);
+      color: var(--on-action);
       font-weight: 800;
       font-size: 14px;
       display: flex;
@@ -307,11 +293,11 @@
     .instructions {
       margin: 14px 0 0;
       padding-left: 22px;
-      color: #cfcfcf;
+      color: var(--text);
     }
     .instructions li { margin-bottom: 6px; }
     .instructions code {
-      background: #2a2a2a;
+      background: var(--surface-sel);
       padding: 2px 6px;
       border-radius: 3px;
       font-size: 12px;
@@ -334,7 +320,7 @@
       flex-shrink: 0;
       border-radius: 6px;
       object-fit: cover;
-      background: #2a2a2a;
+      background: var(--surface-sel);
     }
     .video-meta { flex: 1; min-width: 0; }
     .video-title {
@@ -381,7 +367,7 @@
       width: 100%;
       padding: 11px 12px;
       border-radius: var(--r-corpus);
-      border: 1px solid var(--border);
+      border: 1px solid var(--line-strong);
       background: var(--bg-inset);
       color: var(--uoink-white);
       font-family: var(--font-mono);
@@ -389,21 +375,21 @@
     }
     .input:focus {
       outline: none;
-      border-color: var(--vermillion);
-      box-shadow: 0 0 0 3px rgba(255, 61, 0, 0.15);
+      border-color: var(--action);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--action) 15%, transparent);
     }
     .settings-status {
       color: var(--text-mute);
       font-size: 13px;
       min-height: 20px;
     }
-    .settings-status.ok { color: var(--ok); }
+    .settings-status.ok { color: var(--ok-bright); }
     .settings-status.warn { color: var(--warn); }
     .cost-estimate {
       padding: 10px 12px;
       border-radius: var(--r-corpus);
-      border: 1px solid rgba(194, 65, 12, 0.25);
-      background: rgba(194, 65, 12, 0.08);
+      border: 1px solid color-mix(in srgb, var(--action) 25%, transparent);
+      background: color-mix(in srgb, var(--action) 8%, transparent);
       color: var(--uoink-white);
       font-size: 13px;
       line-height: 1.45;
@@ -439,9 +425,9 @@
       font-weight: 800;
       text-align: center;
     }
-    .diagnose-icon.ok { color: var(--ok); }
+    .diagnose-icon.ok { color: var(--ok-bright); }
     .diagnose-icon.warn { color: var(--warn); }
-    .diagnose-icon.error { color: #f87171; }
+    .diagnose-icon.error { color: var(--vermillion); }
     .diagnose-name {
       color: var(--uoink-white);
       font-size: 13px;
@@ -498,7 +484,7 @@
       text-align: left;
       cursor: pointer;
     }
-    button.correction-title:hover { color: var(--uoink-accent); }
+    button.correction-title:hover { color: var(--vermillion); }
     .correction-types {
       color: var(--text-dim);
       font-size: 12px;
@@ -540,7 +526,7 @@
       font-size: 12px;
       color: var(--text-dim);
       word-break: break-all;
-      background: #0a0a0a;
+      background: var(--bg);
       border: 1px solid var(--border-soft);
       border-radius: 6px;
       padding: 8px;
@@ -552,8 +538,8 @@
       margin: 0;
       font-family: "SF Mono", "Consolas", monospace;
       font-size: 11px;
-      color: #e5e5e5;
-      background: #0a0a0a;
+      color: var(--text);
+      background: var(--bg);
       border: 1px solid var(--border-soft);
       border-radius: 6px;
       padding: 10px;
@@ -583,7 +569,7 @@
       align-items: center;
       gap: 6px;
       background: var(--bg-inset);
-      border: 1px solid var(--border);
+      border: 1px solid var(--line-strong);
       padding: 6px 12px;
       border-radius: var(--r-pill);
       font-size: 13px;
@@ -611,7 +597,7 @@
     .tc-rate-btn {
       background: transparent;
       color: var(--text-mute);
-      border: 1px solid var(--border);
+      border: 1px solid var(--line-strong);
       padding: 6px 14px;
       border-radius: var(--r-pill);
       cursor: pointer;
@@ -619,13 +605,13 @@
       transition: all 0.15s ease;
     }
     .tc-rate-btn:hover {
-      border-color: var(--rust-bright);
-      color: var(--cream);
+      border-color: var(--action);
+      color: var(--text);
     }
     .tc-rate-btn.active {
-      background: var(--rust);
-      border-color: var(--rust);
-      color: var(--cream);
+      background: var(--action);
+      border-color: var(--action);
+      color: var(--on-action);
     }
 
     /* Mobile */
@@ -652,7 +638,7 @@
     <p class="lede" id="page-lede">Two minutes. Then you'll be turning sources into a local corpus your AI can read.</p>
 
     <!-- Settings will sync banner -->
-    <div id="settings-pending-banner" class="cost-estimate hidden" style="margin-bottom:20px; border-color:var(--rust-bright); background:rgba(249, 115, 22, 0.08); color:var(--rust-bright); font-weight:600;">
+    <div id="settings-pending-banner" class="cost-estimate hidden" style="margin-bottom:20px; border-color:var(--action); background:color-mix(in srgb, var(--action) 6%, var(--surface)); color:var(--action); font-weight:600;">
       ⚠️ Settings will sync once helper updates (currently stored locally).
     </div>
 
@@ -774,7 +760,7 @@
             </div>
           </div>
           <div class="result">
-            <div class="result-icon" style="background:#3a3a3a;color:#aaa">📁</div>
+            <div class="result-icon" style="background:var(--line-strong);color:var(--text-2)">📁</div>
             <div>
               <div>Uoink install folder</div>
               <div style="font-size:11px;color:var(--text-mute)">Folder</div>
@@ -914,7 +900,7 @@
       </div>
 
       <div id="tc-status" class="settings-status" style="margin-top:14px; min-height:20px; font-weight:600;"></div>
-      <div id="tc-pending-note" class="cost-estimate hidden" style="margin-top:12px; border-color:var(--rust-bright); background:rgba(249, 115, 22, 0.08); color:var(--rust-bright); font-weight:600;">
+      <div id="tc-pending-note" class="cost-estimate hidden" style="margin-top:12px; border-color:var(--action); background:color-mix(in srgb, var(--action) 6%, var(--surface)); color:var(--action); font-weight:600;">
         Will sync to your helper after v2.5 lands
       </div>
 
@@ -975,7 +961,7 @@
         </div>
       </div>
       <div id="ta-status" class="settings-status" style="margin-top:14px; min-height:20px; font-weight:600;"></div>
-      <div id="ta-pending-note" class="cost-estimate hidden" style="margin-top:12px; border-color:var(--rust-bright); background:rgba(249, 115, 22, 0.08); color:var(--rust-bright); font-weight:600;">
+      <div id="ta-pending-note" class="cost-estimate hidden" style="margin-top:12px; border-color:var(--action); background:color-mix(in srgb, var(--action) 6%, var(--surface)); color:var(--action); font-weight:600;">
         Will sync to your helper after v2.5 lands
       </div>
     </section>

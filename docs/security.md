@@ -47,7 +47,9 @@ These do not require `X-Uoink-Token`:
   `GET /openapi/v1/spec.json`, and `GET /.well-known/uoink-mcp.json`
 - Suite discovery: `GET /.well-known/suite-service.json` and
   `GET /api/suite/v1/health`
-- Local UI shells: `GET /dashboard` and `GET /splash`
+- Local UI shells: `GET /dashboard` and `GET /splash`, plus the dashboard's
+  bundled fonts at `GET /brand/fonts/<file>` (only the four shipped WOFF
+  files; anything else is a 404)
 - Credential bootstrap: `GET /token`, with the separate custom-header and
   origin checks described below
 

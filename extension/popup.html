@@ -3,24 +3,13 @@
 <head>
   <meta charset="utf-8">
   <title>Uoink</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="brand/tokens.css">
   <style>
+    /* Colours and fonts come from brand/tokens.css and follow the theme. */
     :root {
-      --rust: #C2410C;
-      --vermillion: #FF3D00;
-      --ink: #0A0A0A;
-      --ink-warm: #15110D;
-      --cream: #FFF4EC;
-      --border: #2C2621;
       --r-card: 12px;
       --r-pill: 9999px;
       --r-corpus: 8px;
-      --font-sans: 'Inter', -apple-system, sans-serif;
-      --font-mono: 'JetBrains Mono', monospace;
-      --font-display: 'Bungee', sans-serif;
     }
     body {
       font-family: var(--font-sans);
@@ -87,13 +76,13 @@
       width: 10px;
       height: 10px;
       border-radius: 50%;
-      background: #888;
+      background: var(--text-2);
       flex-shrink: 0;
     }
-    .dot.up { background: #00C853; box-shadow: 0 0 6px rgba(0,200,83,0.6); }
+    .dot.up { background: var(--ok); box-shadow: 0 0 6px rgba(0,200,83,0.6); }
     .dot.down { background: var(--rust); box-shadow: 0 0 6px rgba(194,65,12,0.6); }
     .dot.live {
-      background: #00C853;
+      background: var(--ok);
       box-shadow: 0 0 6px rgba(0,200,83,0.6);
       animation: pulse 1.6s ease-in-out infinite;
     }
@@ -105,7 +94,7 @@
       display: block;
       margin-top: 12px;
       margin-bottom: 4px;
-      color: #b0b0b0;
+      color: var(--text-2);
       font-weight: 500;
     }
     input[type="number"], input[type="text"] {
@@ -125,13 +114,13 @@
       border-color: var(--rust);
     }
     .hint {
-      color: #888;
+      color: var(--text-2);
       font-size: 11px;
       margin-top: 6px;
       line-height: 1.4;
     }
     .saved {
-      color: #00C853;
+      color: var(--ok-bright);
       font-size: 11px;
       margin-top: 6px;
       opacity: 0;
@@ -142,7 +131,7 @@
       margin-top: 18px;
       padding-top: 12px;
       border-top: 1px solid var(--border);
-      color: #888;
+      color: var(--text-2);
       font-size: 11px;
       line-height: 1.4;
     }
@@ -164,7 +153,7 @@
     .panel.session-active { border-color: var(--rust); background: var(--ink-warm); }
     .panel-title {
       font-size: 11px;
-      color: #888;
+      color: var(--text-2);
       text-transform: uppercase;
       font-weight: 700;
       letter-spacing: 0.05em;
@@ -180,14 +169,14 @@
       text-overflow: ellipsis;
       white-space: nowrap;
     }
-    .panel-muted { color: #888; }
+    .panel-muted { color: var(--text-2); }
     .session-name {
       font-size: 13px;
       font-weight: 700;
       color: var(--cream);
       margin: 4px 0;
     }
-    .session-meta { font-size: 11px; color: #aaa; margin-bottom: 6px; }
+    .session-meta { font-size: 11px; color: var(--text-2); margin-bottom: 6px; }
     button.primary, button.secondary, button.danger, button.dest {
       width: 100%;
       padding: 8px 12px;
@@ -199,20 +188,20 @@
       box-sizing: border-box;
       transition: background-color 0.15s ease, color 0.15s ease, transform 0.12s ease;
     }
-    button.primary { background: var(--rust); color: var(--cream); }
-    button.primary:hover { background: var(--vermillion); color: var(--ink); }
+    button.primary { background: var(--rust); color: var(--on-action); }
+    button.primary:hover { background: var(--action); color: var(--on-action); }
     button.primary:focus-visible, button.secondary:focus-visible, button.danger:focus-visible, button.dest:focus-visible {
       outline: 1px solid var(--cream);
       outline-offset: 1px;
     }
     button.secondary { background: var(--ink); color: var(--cream); border: 1px solid var(--border); }
-    button.secondary:hover { background: var(--vermillion); color: var(--ink); border-color: var(--vermillion); }
+    button.secondary:hover { background: var(--action); color: var(--on-action); border-color: var(--action); }
     button.dest { background: var(--ink); color: var(--cream); border: 1px solid var(--border); }
-    button.dest:hover { background: var(--vermillion); color: var(--ink); border-color: var(--vermillion); }
+    button.dest:hover { background: var(--action); color: var(--on-action); border-color: var(--action); }
     button.dest.chatgpt { background: var(--ink); color: var(--cream); border: 1px solid var(--border); }
-    button.dest.chatgpt:hover { background: var(--vermillion); color: var(--ink); border-color: var(--vermillion); }
-    button.danger { background: #3A1F1F; color: #ffd9d9; }
-    button.danger:hover { background: var(--vermillion); color: var(--ink); }
+    button.dest.chatgpt:hover { background: var(--action); color: var(--on-action); border-color: var(--action); }
+    button.danger { background: var(--danger-bg); color: var(--fail); }
+    button.danger:hover { background: var(--action); color: var(--on-action); }
     button.primary:active, button.secondary:active, button.danger:active, button.dest:active {
       transform: translateY(1px) scale(0.97);
     }
@@ -230,7 +219,7 @@
     }
     .edit-prompts-link {
       font-size: 11px;
-      color: #888;
+      color: var(--text-2);
       text-decoration: none;
       cursor: pointer;
     }
@@ -241,7 +230,7 @@
       left: 50%;
       transform: translateX(-50%);
       background: var(--rust);
-      color: var(--cream);
+      color: var(--on-action);
       padding: 8px 14px;
       border-radius: var(--r-pill);
       font-size: 12px;
@@ -323,9 +312,9 @@
       background: var(--ink-warm);
     }
     .queue-banner.error {
-      background: #3a1f1f;
-      border-color: #6a3a3a;
-      color: #ffd9c9;
+      background: var(--danger-bg);
+      border-color: var(--danger-border);
+      color: var(--fail);
     }
     .queue-banner-main {
       display: flex;
@@ -343,13 +332,16 @@
     }
     .queue-banner-toggle {
       color: var(--rust);
-      opacity: 0.85;
       text-decoration: none;
       flex-shrink: 0;
       font-weight: 600;
     }
     .queue-banner-toggle:hover {
       color: var(--vermillion);
+    }
+    .queue-banner.error .queue-banner-toggle,
+    .queue-banner.error .queue-banner-toggle:hover {
+      color: var(--fail);
     }
     .queue-banner-actions {
       display: flex;
@@ -369,9 +361,9 @@
       transition: all 0.15s ease;
     }
     .queue-banner-actions button:hover {
-      background: var(--vermillion);
-      color: var(--ink);
-      border-color: var(--vermillion);
+      background: var(--action);
+      color: var(--on-action);
+      border-color: var(--action);
     }
     .queue-details {
       border-top: 1px solid var(--border);
@@ -404,9 +396,9 @@
       cursor: pointer;
     }
     .queue-row-actions button:hover {
-      background: var(--vermillion);
-      color: var(--ink);
-      border-color: var(--vermillion);
+      background: var(--action);
+      color: var(--on-action);
+      border-color: var(--action);
     }
     .first-uoink-panel {
       border-color: var(--rust);
@@ -424,14 +416,14 @@
       border: 1px solid var(--border);
       border-radius: var(--r-corpus);
       background: var(--ink);
-      color: #cfcfcf;
+      color: var(--text);
       font-size: 11px;
       line-height: 1.35;
       overflow-wrap: anywhere;
     }
     .budget-preview {
       margin-top: 6px;
-      color: #9f9fa6;
+      color: var(--text-2);
       font-size: 11px;
       line-height: 1.35;
     }
@@ -439,7 +431,7 @@
     details.more-options { margin-top: 12px; }
     details.more-options > summary {
       padding: 6px 0;
-      color: #cfcfcf;
+      color: var(--text);
       font-weight: 600;
     }
     .recent {
@@ -449,7 +441,7 @@
     }
     .recent-item {
       font-size: 11px;
-      color: #b0b0b0;
+      color: var(--text-2);
       padding: 5px 8px;
       border-radius: var(--r-corpus);
       cursor: pointer;
@@ -461,8 +453,8 @@
       margin-bottom: 4px;
       border: 1px solid var(--border);
     }
-    .recent-item:hover { background: var(--rust); color: var(--cream); }
-    .recent-item .meta { color: #888; font-size: 10px; margin-left: 4px; }
+    .recent-item:hover { background: var(--surface-sel); border-color: var(--line-strong); }
+    .recent-item .meta { color: var(--text-2); font-size: 10px; margin-left: 4px; }
     .recent-item-main {
       display: flex;
       align-items: center;
@@ -492,22 +484,22 @@
     .platform-chip.youtube {
       background: rgba(255, 61, 0, 0.15);
       border-color: rgba(255, 61, 0, 0.3);
-      color: #ffb399;
+      color: var(--text);
     }
     .platform-chip.twitter {
-      background: rgba(255, 255, 255, 0.08);
-      border-color: rgba(255, 255, 255, 0.2);
-      color: #ffffff;
+      background: color-mix(in srgb, var(--text) 8%, transparent);
+      border-color: color-mix(in srgb, var(--text) 20%, transparent);
+      color: var(--text);
     }
     .platform-chip.reddit {
       background: rgba(255, 87, 0, 0.15);
       border-color: rgba(255, 87, 0, 0.3);
-      color: #ffaa80;
+      color: var(--text);
     }
     .platform-chip.generic {
       background: rgba(200, 177, 159, 0.15);
       border-color: rgba(200, 177, 159, 0.35);
-      color: #e5d5c8;
+      color: var(--text);
     }
     .health-row {
       display: inline-flex;
@@ -521,18 +513,18 @@
       width: 7px;
       height: 7px;
       border-radius: 50%;
-      background: #6b6b70;
+      background: var(--text-2);
       box-shadow: inset 0 0 0 1px rgba(255,255,255,0.15);
     }
     .health-dot.ok {
-      background: #00C853;
+      background: var(--ok);
       box-shadow: 0 0 5px rgba(0,200,83,0.45);
     }
     .health-dot.missing {
       background: var(--rust);
       box-shadow: 0 0 5px rgba(194,65,12,0.35);
     }
-    .health-dot.skipped { background: #68686d; }
+    .health-dot.skipped { background: var(--text-2); }
     .entity-indicator {
       display: inline-flex;
       align-items: center;
@@ -540,7 +532,7 @@
       gap: 3px;
       max-width: 78px;
       flex-shrink: 0;
-      color: #c9b6ff;
+      color: var(--text-2);
       font-size: 10px;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -563,7 +555,7 @@
       border-radius: 999px;
       background: rgba(0,200,83,0.1);
       border: 1px solid rgba(0,200,83,0.25);
-      color: #d6ffe2;
+      color: var(--text);
       font-size: 10px;
       line-height: 1.3;
       overflow: hidden;
@@ -572,17 +564,17 @@
     .hook-chip.warning {
       background: rgba(194,65,12,0.13);
       border-color: rgba(194,65,12,0.35);
-      color: #ffe3a3;
+      color: var(--warn);
     }
     .hook-muted {
-      color: #85858a;
+      color: var(--text-2);
       font-size: 10px;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
     }
     .hook-correction-link {
-      color: #a7a7ad;
+      color: var(--text-2);
       font-size: 10px;
       cursor: pointer;
       text-decoration: underline;
@@ -596,29 +588,29 @@
       border-radius: 4px;
       border: 1px solid var(--border);
       background: var(--ink);
-      color: #f1f1f1;
+      color: var(--text);
       font-size: 10px;
       font-family: inherit;
     }
     .hook-correction-message,
     .hook-correction-error {
-      color: #8fe3aa;
+      color: var(--ok-bright);
       font-size: 10px;
       line-height: 1.3;
       white-space: normal;
     }
-    .hook-correction-error { color: #ffbda3; }
+    .hook-correction-error { color: var(--vermillion); }
     .recent-failure {
       margin: 4px 0 6px;
       padding: 8px;
-      background: #3A1F1F;
-      border: 1px solid #6A3A3A;
+      background: var(--danger-bg);
+      border: 1px solid var(--danger-border);
       border-radius: var(--r-card);
-      color: #ffd9c9;
+      color: var(--fail);
       font-size: 11px;
     }
     .recent-failure-title {
-      color: #fff1e8;
+      color: var(--text);
       font-weight: 600;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -626,7 +618,7 @@
     }
     .recent-failure-error {
       margin-top: 3px;
-      color: #ffbda3;
+      color: var(--vermillion);
       line-height: 1.3;
       white-space: normal;
     }
@@ -640,18 +632,18 @@
       padding: 6px;
       border-radius: var(--r-pill);
       border: none;
-      background: #6A3A3A;
-      color: #ffe6d9;
+      background: var(--danger-border);
+      color: var(--text);
       font-size: 11px;
       font-weight: 600;
       cursor: pointer;
       transition: background-color 0.15s ease;
     }
-    .recent-failure-actions button:hover { background: var(--vermillion); color: var(--ink); }
+    .recent-failure-actions button:hover { background: var(--action); color: var(--on-action); }
     details > summary {
       cursor: pointer;
       list-style: none;
-      color: #b0b0b0;
+      color: var(--text-2);
       font-size: 11px;
       font-weight: 600;
     }
@@ -668,7 +660,7 @@
     .prompt-label {
       flex: 1;
       font-size: 12px;
-      color: #d0d0d0;
+      color: var(--text);
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
@@ -685,8 +677,8 @@
       cursor: pointer;
       transition: all 0.15s ease;
     }
-    .copy-btn:hover { background: var(--vermillion); color: var(--ink); border-color: var(--vermillion); }
-    .copy-btn.copied { background: #00C853; border-color: #00C853; color: var(--ink); }
+    .copy-btn:hover { background: var(--action); color: var(--on-action); border-color: var(--action); }
+    .copy-btn.copied { background: var(--ok); border-color: var(--ok); color: var(--on-action); }
     .warn {
       margin-top: 8px;
       padding: 8px 10px;
@@ -713,7 +705,7 @@
       flex: 1;
       padding: 6px 10px;
       background: transparent;
-      color: #b0b0b0;
+      color: var(--text-2);
       border: none;
       border-radius: 8px;
       font-size: 11px;
@@ -728,7 +720,7 @@
     }
     .mode-btn.active {
       background: var(--rust);
-      color: var(--cream);
+      color: var(--on-action);
       cursor: default;
     }
     .mode-btn[disabled] {
@@ -778,7 +770,7 @@
     }
     .pl-duration {
       font-size: 10px;
-      color: #888;
+      color: var(--text-2);
       margin-top: 2px;
     }
     .pl-progress-bar {
@@ -814,7 +806,7 @@
       flex: 1;
       padding: 4px;
       background: var(--ink);
-      color: #888;
+      color: var(--text-2);
       border: 1px solid var(--border);
       border-radius: 6px;
       font-size: 10px;
@@ -824,21 +816,21 @@
     }
     .pl-phase-chip.active {
       background: var(--rust);
-      color: var(--cream);
+      color: var(--on-action);
       border-color: var(--rust);
     }
     .pl-phase-chip.done {
-      background: #1f2b22;
-      color: #00C853;
-      border-color: #1f2b22;
+      background: color-mix(in srgb, var(--ok) 16%, transparent);
+      color: var(--text);
+      border-color: var(--ok);
     }
     .pl-done-icon {
       display: inline-block;
       width: 14px;
       height: 14px;
       border-radius: 50%;
-      background: #00C853;
-      color: #1f2b22;
+      background: var(--ok);
+      color: var(--on-action);
       text-align: center;
       line-height: 14px;
       font-size: 11px;
@@ -849,9 +841,9 @@
     .pl-error {
       margin-top: 8px;
       padding: 8px 10px;
-      background: #3A1F1F;
-      color: #ffd9d9;
-      border: 1px solid #6A3A3A;
+      background: var(--danger-bg);
+      color: var(--fail);
+      border: 1px solid var(--danger-border);
       border-radius: var(--r-card);
       font-size: 11px;
     }
@@ -868,7 +860,7 @@
     .pl-message {
       margin-top: 4px;
       font-size: 11px;
-      color: #b0b0b0;
+      color: var(--text-2);
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
@@ -885,7 +877,7 @@
     }
     .pl-subtitle {
       font-size: 11px;
-      color: #888;
+      color: var(--text-2);
       margin-top: 2px;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -895,23 +887,23 @@
       margin-top: 8px;
       max-height: 120px;
       overflow-y: auto;
-      border: 1px solid #6A3A3A;
+      border: 1px solid var(--danger-border);
       border-radius: var(--r-corpus);
-      background: #3A1F1F;
+      background: var(--danger-bg);
     }
     .pl-failed-item {
       padding: 6px 10px;
       border-bottom: 1px solid #6A3A3A;
       font-size: 11px;
-      color: #ffd9d9;
+      color: var(--vermillion);
     }
     .pl-failed-item:last-child { border-bottom: none; }
     .pl-failed-title {
-      color: #ffe6c9;
+      color: var(--vermillion);
       font-weight: 600;
     }
     .pl-failed-error {
-      color: #b0a09a;
+      color: var(--text-2);
       margin-top: 2px;
     }
     .pl-failed-icon {
@@ -919,7 +911,7 @@
       width: 12px;
       text-align: center;
       margin-right: 4px;
-      color: #ff9090;
+      color: var(--vermillion);
     }
 
     /* ---- v6 active-playlist pill -------------------------------------- */
@@ -937,7 +929,7 @@
       cursor: pointer;
       transition: background 0.15s;
     }
-    .active-playlist-pill:hover { background: var(--rust); }
+    .active-playlist-pill:hover { background: var(--surface-sel); }
     .active-playlist-pill .dot.live { width: 8px; height: 8px; }
     .active-playlist-pill .pill-label {
       flex: 1;
@@ -972,14 +964,14 @@
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
-      color: #b0b0b0;
+      color: var(--text-2);
     }
     .pl-last-uoink-label .pl-last-uoink-title {
       color: var(--cream);
       font-weight: 600;
     }
     .pl-last-uoink-label .pl-last-uoink-suffix {
-      color: #888;
+      color: var(--text-2);
       margin-left: 4px;
     }
     .pl-last-uoink-btn {
@@ -994,12 +986,12 @@
       cursor: pointer;
       transition: all 0.15s ease;
     }
-    .pl-last-uoink-btn:hover { background: var(--vermillion); color: var(--ink); border-color: var(--vermillion); }
+    .pl-last-uoink-btn:hover { background: var(--action); color: var(--on-action); border-color: var(--action); }
 
     /* ---- v3 Smart Screenshot Picker ------------------------------- */
     .picker-header {
       font-size: 11px;
-      color: #888;
+      color: var(--text-2);
       text-transform: uppercase;
       font-weight: 700;
       letter-spacing: 0.05em;
@@ -1016,7 +1008,7 @@
     }
     .picker-source-meta {
       font-size: 11px;
-      color: #888;
+      color: var(--text-2);
       margin: 0 0 8px;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -1027,7 +1019,7 @@
       justify-content: space-between;
       align-items: center;
       font-size: 11px;
-      color: #888;
+      color: var(--text-2);
       margin-bottom: 8px;
     }
     .picker-toggle {
@@ -1057,7 +1049,7 @@
       aspect-ratio: 16 / 9;
       transition: border-color 0.15s ease;
     }
-    .picker-thumb.selected { border-color: #00C853; }
+    .picker-thumb.selected { border-color: var(--ok); }
     .picker-thumb img {
       width: 100%;
       height: 100%;
@@ -1071,16 +1063,16 @@
       background:
         repeating-linear-gradient(
           135deg,
-          #15110d 0px, #15110d 8px,
-          #2c2621 8px, #2c2621 16px
+          var(--surface) 0px, var(--surface) 8px,
+          var(--surface-sel) 8px, var(--surface-sel) 16px
         );
     }
     .picker-thumb-index {
       position: absolute;
       top: 4px;
       left: 4px;
-      background: rgba(0, 0, 0, 0.75);
-      color: var(--cream);
+      background: var(--scrim);
+      color: var(--on-scrim);
       border-radius: 4px;
       padding: 2px 6px;
       font-size: 10px;
@@ -1094,8 +1086,8 @@
       width: 16px;
       height: 16px;
       border-radius: 50%;
-      background: rgba(0,0,0,0.6);
-      color: #888;
+      background: var(--scrim);
+      color: var(--on-scrim);
       text-align: center;
       line-height: 16px;
       font-size: 10px;
@@ -1103,20 +1095,20 @@
       border: 1px solid var(--border);
     }
     .picker-thumb.selected .picker-thumb-check {
-      background: #00C853;
-      color: var(--ink);
-      border-color: #00C853;
+      background: var(--ok);
+      color: var(--on-action);
+      border-color: var(--ok);
     }
     .picker-empty {
-      color: #888;
+      color: var(--text-2);
       font-size: 11px;
       text-align: center;
       padding: 24px 8px;
     }
     .picker-error {
-      color: #ffd9d9;
-      background: #3a1f1f;
-      border: 1px solid #6a3a3a;
+      color: var(--fail);
+      background: var(--danger-bg);
+      border: 1px solid var(--danger-border);
       border-radius: var(--r-card);
       padding: 6px 10px;
       font-size: 10.5px;
@@ -1146,7 +1138,7 @@
     }
     .resurface-meta {
       font-size: 10px;
-      color: #888;
+      color: var(--text-2);
       margin-top: 1px;
     }
     .resurface-score-chip {
@@ -1154,7 +1146,7 @@
       padding: 1px 4px;
       border-radius: 4px;
       background: rgba(249, 115, 22, 0.15);
-      color: var(--rust-bright);
+      color: var(--text);
       font-weight: 600;
       font-size: 9.5px;
     }
@@ -1172,7 +1164,7 @@
     </div>
     <div style="display:flex;align-items:center;gap:6px;">
       <span id="dot" class="dot"></span>
-      <span id="status" style="font-size:10px;color:#888;">Checking...</span>
+      <span id="status" style="font-size:10px;color:var(--text-2);">Checking...</span>
     </div>
   </div>
 
@@ -1181,14 +1173,14 @@
   <!-- Helper Offline warning card -->
   <div id="helper-down-card" class="panel hidden" style="border:3px solid var(--rust);background:var(--ink-warm);padding:12px;margin-bottom:12px;">
     <div style="font-weight:700;font-size:13px;color:var(--cream);margin-bottom:4px;">Uoink Server Offline</div>
-    <div style="font-size:11px;color:#aaa;margin-bottom:10px;line-height:1.45;">Start the local helper service to enable transcript & screenshot extraction.</div>
+    <div style="font-size:11px;color:var(--text-2);margin-bottom:10px;line-height:1.45;">Start the local helper service to enable transcript & screenshot extraction.</div>
     <button id="troubleshoot-setup-btn" class="primary">Troubleshoot & Setup</button>
   </div>
 
   <!-- One-time migration success banner -->
   <div id="migration-success-banner" class="panel hidden" style="border:1px solid var(--rust);background:var(--ink-warm);padding:10px;margin-bottom:10px;">
     <div style="font-weight:600;color:var(--cream);margin-bottom:4px;">You've been migrated</div>
-    <div style="font-size:11px;color:#aaa;margin-bottom:8px;">Saved API key + library moved successfully.</div>
+    <div style="font-size:11px;color:var(--text-2);margin-bottom:8px;">Saved API key + library moved successfully.</div>
     <button id="migration-dismiss-btn" class="secondary" style="margin:0;padding:4px 8px;width:auto;">Got it</button>
   </div>
 
@@ -1265,16 +1257,16 @@
     <div class="first-uoink-title">Quick Start Guide</div>
     <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; font-size: 12px;">
       <div style="display: flex; gap: 8px; align-items: flex-start; line-height: 1.4;">
-        <span style="display: inline-block; background: var(--rust); color: var(--cream); width: 18px; height: 18px; border-radius: 50%; text-align: center; line-height: 18px; font-size: 10px; font-weight: bold; flex-shrink: 0;">1</span>
+        <span style="display: inline-block; background: var(--rust); color: var(--on-action); width: 18px; height: 18px; border-radius: 50%; text-align: center; line-height: 18px; font-size: 10px; font-weight: bold; flex-shrink: 0;">1</span>
         <span>Open a YouTube video.</span>
       </div>
       <div style="display: flex; gap: 8px; align-items: flex-start; line-height: 1.4;">
-        <span style="display: inline-block; background: var(--rust); color: var(--cream); width: 18px; height: 18px; border-radius: 50%; text-align: center; line-height: 18px; font-size: 10px; font-weight: bold; flex-shrink: 0;">2</span>
-        <span>Click the <b>Uoink</b> button under the player or press <kbd style="background:#222; border:1px solid #444; padding:0 3px; border-radius:3px; font-family:var(--font-mono);">Alt+U</kbd>.</span>
+        <span style="display: inline-block; background: var(--rust); color: var(--on-action); width: 18px; height: 18px; border-radius: 50%; text-align: center; line-height: 18px; font-size: 10px; font-weight: bold; flex-shrink: 0;">2</span>
+        <span>Click the <b>Uoink</b> button under the player or press <kbd style="background: var(--surface-sel); border:1px solid var(--line-strong); padding:0 3px; border-radius:3px; font-family:var(--font-mono);">Alt+U</kbd>.</span>
       </div>
       <div style="display: flex; gap: 8px; align-items: flex-start; line-height: 1.4;">
-        <span style="display: inline-block; background: var(--rust); color: var(--cream); width: 18px; height: 18px; border-radius: 50%; text-align: center; line-height: 18px; font-size: 10px; font-weight: bold; flex-shrink: 0;">3</span>
-        <span>Paste (<kbd style="background:#222; border:1px solid #444; padding:0 3px; border-radius:3px; font-family:var(--font-mono);">Ctrl+V</kbd>) into Claude or ChatGPT!</span>
+        <span style="display: inline-block; background: var(--rust); color: var(--on-action); width: 18px; height: 18px; border-radius: 50%; text-align: center; line-height: 18px; font-size: 10px; font-weight: bold; flex-shrink: 0;">3</span>
+        <span>Paste (<kbd style="background: var(--surface-sel); border:1px solid var(--line-strong); padding:0 3px; border-radius:3px; font-family:var(--font-mono);">Ctrl+V</kbd>) into Claude or ChatGPT!</span>
       </div>
     </div>
   </div>
@@ -1298,10 +1290,10 @@
   </div>
 
   <!-- Highlighted Last Uoink active card -->
-  <div id="active-uoink-card" class="panel hidden" style="border: 1px solid var(--rust-bright); background: var(--ink-warm); border-radius: var(--r-card); padding: 12px; margin-bottom: 12px;">
+  <div id="active-uoink-card" class="panel hidden" style="border: 1px solid var(--action); background: var(--ink-warm); border-radius: var(--r-card); padding: 12px; margin-bottom: 12px;">
     <div style="font-size: 11px; color: var(--rust-bright); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; margin-bottom: 6px;">Last Uoinked Video</div>
     <div id="active-uoink-title" style="font-size: 13px; font-weight: 600; color: var(--cream); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-bottom: 2px;">-</div>
-    <div style="font-size: 11px; color: #888; margin-bottom: 8px;">
+    <div style="font-size: 11px; color: var(--text-2); margin-bottom: 8px;">
       <span id="active-uoink-channel">-</span> &nbsp;&middot;&nbsp; <span id="active-uoink-duration">-</span>
     </div>
     <!-- Hook classification chip & rating anchors -->
@@ -1313,8 +1305,8 @@
   </div>
 
   <!-- Pairwise Hook Calibration Card (Sprint 3) -->
-  <div id="pairwise-calibration-card" class="panel hidden" style="border: 1px solid var(--rust-bright); background: var(--ink-warm); padding: 12px; margin-bottom: 12px; position: relative;">
-    <button id="pairwise-dismiss-btn" style="position: absolute; top: 6px; right: 8px; background: transparent; border: none; color: #888; cursor: pointer; font-size: 12px;" type="button">✕</button>
+  <div id="pairwise-calibration-card" class="panel hidden" style="border: 1px solid var(--action); background: var(--ink-warm); padding: 12px; margin-bottom: 12px; position: relative;">
+    <button id="pairwise-dismiss-btn" style="position: absolute; top: 6px; right: 8px; background: transparent; border: none; color: var(--text-2); cursor: pointer; font-size: 12px;" type="button">✕</button>
     <div style="font-size: 11px; color: var(--rust-bright); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; margin-bottom: 8px;">Refine your taste</div>
     <div style="font-size: 12px; margin-bottom: 10px; color: var(--cream);">Which works better for you?</div>
     
@@ -1350,8 +1342,8 @@
   </div>
 
   <!-- Resurface card -->
-  <div id="resurface-card" class="panel hidden" style="border: 1px solid var(--rust-bright); background: var(--ink-warm); border-radius: var(--r-card); padding: 12px; margin-bottom: 12px; position: relative;">
-    <button id="resurface-dismiss-btn" style="position: absolute; top: 6px; right: 8px; background: transparent; border: none; color: #888; cursor: pointer; font-size: 12px;" type="button">✕</button>
+  <div id="resurface-card" class="panel hidden" style="border: 1px solid var(--action); background: var(--ink-warm); border-radius: var(--r-card); padding: 12px; margin-bottom: 12px; position: relative;">
+    <button id="resurface-dismiss-btn" style="position: absolute; top: 6px; right: 8px; background: transparent; border: none; color: var(--text-2); cursor: pointer; font-size: 12px;" type="button">✕</button>
     <div style="font-size: 11px; color: var(--rust-bright); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; margin-bottom: 8px;">Worth revisiting today</div>
     <div id="resurface-list" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px;"></div>
     <div style="text-align: right;">
@@ -1531,7 +1523,7 @@
 
   <div class="footer">
     <div style="display:flex;align-items:center;justify-content:space-between;">
-      <div id="popup-version" style="font-weight:600;color:#555;">v3.3.1</div>
+      <div id="popup-version" style="font-weight:600;color:var(--text-2);">v3.3.1</div>
       <div style="display:flex;gap:8px;">
         <a id="open-settings" role="button" tabindex="0" class="copy-btn" style="text-decoration:none;padding:4px 8px;font-size:11px;" title="Open settings">⚙ Settings</a>
         <a id="open-mcp-setup" role="button" tabindex="0" class="copy-btn" style="text-decoration:none;padding:4px 8px;font-size:11px;" title="Agent MCP Setup">🤖 Agent MCP</a>

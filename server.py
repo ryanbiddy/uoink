@@ -151,6 +151,10 @@ HOST = "127.0.0.1"
 PORT = _install_isolation.listen_port(5179)
 VERSION = _read_version()
 DASHBOARD_PATH = HERE / "assets" / "dashboard" / "index.html"
+# The dashboard's @font-face rules load these (SIL OFL, shipped with the
+# app). Only these exact files are served, without a token.
+BRAND_FONTS_DIR = HERE / "assets" / "brand" / "fonts"
+BRAND_FONT_FILES = frozenset({"inter.woff", "inter-italic.woff", "bungee.woff", "jetbrains-mono.woff"})
 
 # v2.5: per-file sidecar data-shape version. v2.5+ writers stamp every new
 # sidecar with this; older sidecars (v2.1.x) have no field and are treated as
@@ -11541,6 +11545,10 @@ class Handler(BaseHTTPRequestHandler):
             # opening folders, so the route can stay unauthenticated while the
             # user-data APIs remain token-gated.
             return self._handle_dashboard()
+        if bare.startswith("/brand/fonts/"):
+            # Public, like /dashboard: the bundled fonts the dashboard loads.
+            # Static product files, no user data; anything else is a 404.
+            return self._handle_brand_font(bare)
         if bare == "/splash" or bare == "/splash/":
             # Public local UI shell, same posture as /dashboard. The splash JS
             # performs the /token handshake before reading any token-gated
@@ -11748,6 +11756,12 @@ class Handler(BaseHTTPRequestHandler):
             DASHBOARD_PATH,
             "text/html; charset=utf-8",
         )
+
+    def _handle_brand_font(self, bare: str):
+        name = bare[len("/brand/fonts/"):]
+        if name not in BRAND_FONT_FILES:
+            return self._send_json(404, {"ok": False, "error": "file not found"})
+        return self._send_file(BRAND_FONTS_DIR / name, "font/woff")
 
     def _handle_splash(self):
         return self._send_file(

@@ -15,4 +15,11 @@ These two cached Python wheels contain no license-text member. The files beside 
 - Official pre-upload commit `f82ae43524fd6d9917b0e9490c7d0394dff8d155` declares 0.1.0; the package module matches the retained wheel member. The captured official tag list was empty. This does not establish an exact release commit or publisher-signed artifact.
 - Sources: [historical license](https://github.com/jtushman/proxy_tools/blob/f82ae43524fd6d9917b0e9490c7d0394dff8d155/LICENSE.txt), [matching source header](https://github.com/jtushman/proxy_tools/blob/f82ae43524fd6d9917b0e9490c7d0394dff8d155/proxy_tools/__init__.py), [conflicting setup metadata](https://github.com/jtushman/proxy_tools/blob/f82ae43524fd6d9917b0e9490c7d0394dff8d155/setup.py).
 
+**Bundled fonts.** The dashboard and the Chrome extension ship Inter (https://github.com/rsms/inter), Bungee (https://github.com/djrrb/Bungee) and JetBrains Mono (https://github.com/JetBrains/JetBrainsMono), each under the SIL Open Font License 1.1. They are the uoink.app site's own WOFF files, copied unchanged. The font files and their licence texts (`inter-OFL.txt`, `bungee-OFL.txt`, `jetbrains-mono-OFL.txt`, each carrying that font's copyright line) sit together in `assets/brand/fonts/` and `extension/brand/fonts/`, which ship with the app and the extension. They are not Python packages, so the generated package table in THIRD-PARTY-NOTICES.md does not list them.
+
+- `inter.woff`: 86,012 bytes, SHA-256 `3e5339ed054085f4a3976404b16c45fcb7616c0dd8da81a7f0020d7c8d65326b`.
+- `inter-italic.woff`: 94,488 bytes, SHA-256 `91679ac4996660266cf71e0a915155d8caae95879cfd27600d1dc14c503c8ee6`.
+- `bungee.woff`: 18,468 bytes, SHA-256 `95bcdf653c9b80cf0738a09fd7ac4f774490f654b947d1567cc23770c8153c0e`.
+- `jetbrains-mono.woff`: 47,508 bytes, SHA-256 `e39ab79c56896dfac8152394810671984a9c1aa020c79f2126cbac1b127a2e22`.
+
 These notices do not establish legal clearance, authenticate every package member, or qualify package installation, script execution or model behavior.

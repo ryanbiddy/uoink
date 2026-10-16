@@ -20,6 +20,12 @@ const SUGGESTED_VIDEO = {
 };
 
 
+// Scripted smooth scrolling is motion: honour prefers-reduced-motion the way
+// brand/tokens.css does.
+function scrollBehavior() {
+  return window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
+}
+
 // ---- Constants -----------------------------------------------------------
 const SERVER = "http://127.0.0.1:5179";
 // /health is the canonical liveness probe (added as an alias for /ping in v1).
@@ -183,7 +189,7 @@ function applySource() {
       const target = requestedHash
         ? document.getElementById(requestedHash.replace(/^#/, ""))
         : firstSettingsSection;
-      if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
+      if (target) target.scrollIntoView({ behavior: scrollBehavior(), block: "start" });
     });
   } else {
     markCurrent(step1);
@@ -235,14 +241,14 @@ function markDone(stepEl) {
 getStartedBtn.addEventListener("click", () => {
   markDone(step1);
   markCurrent(step2);
-  step2.scrollIntoView({ behavior: "smooth", block: "start" });
+  step2.scrollIntoView({ behavior: scrollBehavior(), block: "start" });
 });
 
 skipInstall.addEventListener("click", (ev) => {
   ev.preventDefault();
   markDone(step2);
   markCurrent(step3);
-  step3.scrollIntoView({ behavior: "smooth", block: "start" });
+  step3.scrollIntoView({ behavior: scrollBehavior(), block: "start" });
 });
 
 // ---- Step 3: live server polling ----------------------------------------
@@ -313,7 +319,7 @@ function diagnoseAction(check) {
       label: startHelperLabel(),
       run: () => {
         statusInstructions.classList.remove("hidden");
-        statusInstructions.scrollIntoView({ behavior: "smooth", block: "start" });
+        statusInstructions.scrollIntoView({ behavior: scrollBehavior(), block: "start" });
       },
     };
   }
@@ -333,7 +339,7 @@ function diagnoseAction(check) {
       label: /401|invalid/.test(haystack) ? "Update key" : "Add key",
       run: () => {
         const target = document.getElementById("comment-intelligence");
-        if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
+        if (target) target.scrollIntoView({ behavior: scrollBehavior(), block: "start" });
         if (ciKeyInput) ciKeyInput.focus();
       },
     };
@@ -432,7 +438,7 @@ async function loadDiagnose() {
     btn.textContent = startHelperLabel();
     btn.addEventListener("click", () => {
       statusInstructions.classList.remove("hidden");
-      statusInstructions.scrollIntoView({ behavior: "smooth", block: "start" });
+      statusInstructions.scrollIntoView({ behavior: scrollBehavior(), block: "start" });
     });
     row.appendChild(icon);
     row.appendChild(text);
@@ -496,7 +502,7 @@ function onServerUp() {
     markCurrent(step4);
     // Defer scroll so the layout settles before we move the viewport.
     requestAnimationFrame(() => {
-      step4.scrollIntoView({ behavior: "smooth", block: "start" });
+      step4.scrollIntoView({ behavior: scrollBehavior(), block: "start" });
     });
   } else {
     markCurrent(step4);
@@ -1227,7 +1233,7 @@ function scrollToRequestedAnchor() {
   const target = document.getElementById(requestedHash.replace(/^#/, ""));
   if (!target) return;
   requestAnimationFrame(() => {
-    target.scrollIntoView({ behavior: "smooth", block: "start" });
+    target.scrollIntoView({ behavior: scrollBehavior(), block: "start" });
   });
 }
 
@@ -1524,7 +1530,7 @@ if (tcSaveBtn) {
       const target = document.getElementById("hook-type-settings");
       if (target) {
         setTimeout(() => {
-          target.scrollIntoView({ behavior: "smooth", block: "start" });
+          target.scrollIntoView({ behavior: scrollBehavior(), block: "start" });
         }, 800);
       }
     };
@@ -1573,7 +1579,7 @@ if (tcSkipBtn) {
     tcStatus.textContent = "Taste calibration skipped.";
     tcStatus.className = "settings-status warn";
     const target = document.getElementById("hook-type-settings");
-    if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
+    if (target) target.scrollIntoView({ behavior: scrollBehavior(), block: "start" });
   });
 }
 
