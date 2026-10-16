@@ -1,0 +1,12 @@
+{
+  "fixture_note": "Synthetic normalized discovery snapshot for offline T2 tests; no vendor API request or response.",
+  "ok": true,
+  "run_id": "fixture-run",
+  "provider": "scrapecreators",
+  "endpoint": "/v1/youtube/channel/videos",
+  "fetched_at": "2026-10-14T12:00:00Z",
+  "candidates": [
+    {"key": "candidate-a", "url": "https://www.youtube.com/watch?v=discovery-a", "platform": "youtube", "video_id": "discovery-a", "author_handle": "fixture", "caption": "Saved discovery A", "published_at": "2026-09-01T00:00:00Z", "metrics": {"views": 100, "likes": 10, "comments": null, "shares": null}},
+    {"key": "candidate-b", "url": "https://www.youtube.com/watch?v=discovery-b", "platform": "youtube", "video_id": "discovery-b", "author_handle": "fixture", "caption": "Saved discovery B", "published_at": "2026-09-02T00:00:00Z", "metrics": {"views": 500, "likes": 20, "comments": 2, "shares": null}}
+  ]
+}

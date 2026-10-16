@@ -85,6 +85,12 @@ def test_cli_and_watchdog_assets_are_in_both_lists():
     assert required <= installed_sources()
 
 
+def test_playbook_core_is_staged_and_installed_before_mcp_registration():
+    # T2 must ship the module even before T3 makes it reachable from MCP.
+    assert "research_playbooks.py" in staged_sources()
+    assert "research_playbooks.py" in installed_sources()
+
+
 if __name__ == "__main__":
     test_every_server_import_is_in_installer_and_staging()
     test_cli_and_watchdog_assets_are_in_both_lists()

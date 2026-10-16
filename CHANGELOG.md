@@ -12,6 +12,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- Local research packet builders for outlier posts, transcript intelligence,
+  comment mining, creator teardowns and repurposing, with deterministic metrics,
+  citation checks and bounded reads of saved discovery snapshots. Adapted
+  ScrapeCreators documentation carries its MIT attribution and license.
+  Mixed-platform reports exclude X from metrics, topic selection keeps search
+  relevance order, and author matching accepts Unicode joiners. Unsafe comment
+  and clip text is omitted and counted in packet coverage.
+  The installer includes the playbook module and the MIT license linked from
+  the generated notices.
 - Video captures now retain comment and follower counts in their sidecars and
   index metadata. Generic captures also index views, likes and upload dates;
   shaped comments retain yt-dlp IDs and timestamps.
