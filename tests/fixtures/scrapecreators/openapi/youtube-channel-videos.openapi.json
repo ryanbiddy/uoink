@@ -1,0 +1,74 @@
+{
+  "kind": "openapi-example",
+  "source_url": "https://docs.scrapecreators.com/v1/youtube/channel-videos/openapi.json",
+  "fetched_at": "2026-10-16T16:12:24Z",
+  "source_sha256": "7eba7bfc3fae5e69aa373c808a84d01180f021e4d8a2d1973b253e1b9af58cba",
+  "method": "GET",
+  "path": "/v1/youtube/channel-videos",
+  "summary": "Channel Videos",
+  "parameters": [
+    {
+      "name": "channelId",
+      "in": "query",
+      "required": false,
+      "type": "string"
+    },
+    {
+      "name": "handle",
+      "in": "query",
+      "required": false,
+      "type": "string"
+    },
+    {
+      "name": "sort",
+      "in": "query",
+      "required": false,
+      "type": "string"
+    },
+    {
+      "name": "continuationToken",
+      "in": "query",
+      "required": false,
+      "type": "string"
+    },
+    {
+      "name": "is_paid_promotions",
+      "in": "query",
+      "required": false,
+      "type": "string"
+    },
+    {
+      "name": "includeExtras",
+      "in": "query",
+      "required": false,
+      "type": "string"
+    }
+  ],
+  "example_200": {
+    "success": true,
+    "credits_remaining": 1000000,
+    "credits_charged": 1,
+    "videos": [
+      {
+        "type": "video",
+        "id": "5EWaxmWgQMI",
+        "url": "https://www.youtube.com/watch?v=5EWaxmWgQMI",
+        "title": "Russell Wilson Hopes To Finish Career As A Steeler, Reflects On NFL Career With Pat McAfee",
+        "description": "Welcome to The Pat McAfee Show LIVE from Noon-3PM EST Mon-Fri. You can also find us live on ESPN, ESPN+, & TikTok!\n\nBecome a #McAfeeMafia member! https://www.youtube.com/channel/UCxcTeAKWJca6XyJ37_...",
+        "thumbnail": "https://i.ytimg.com/vi/5EWaxmWgQMI/hqdefault.jpg?sqp=-oaymwEnCNACELwBSFryq4qpAxkIARUAAIhCGAHYAQHiAQoIGBACGAY4AUAB&rs=AOn4CLBZIBEJGcYDrduIZJpaSmYHcIHJ6g",
+        "channel": {
+          "title": "",
+          "thumbnail": null
+        },
+        "viewCountText": "110,447 views",
+        "viewCountInt": 110447,
+        "publishedTimeText": "9 days ago",
+        "publishedTime": "2025-01-23T22:48:53.914Z",
+        "lengthText": "37:25",
+        "lengthSeconds": 2245,
+        "badges": []
+      }
+    ],
+    "continuationToken": "4qmFsgLlFhIYV...."
+  }
+}

@@ -460,6 +460,7 @@ KEYRING_SERVICE = "Uoink"
 # fallback read can reference one source of truth.
 KEYRING_SERVICE_LEGACY = "Yoink"
 KEYRING_ANTHROPIC_USERNAME = "anthropic_key"
+KEYRING_SCRAPECREATORS_USERNAME = "scrapecreators_key"
 
 
 def _isolated_binding() -> _install_isolation.IsolationBinding | None:
@@ -629,6 +630,7 @@ def _check_memory_search_rate_limit() -> bool:
 # transports (/tools/<name>, /mcp/v1*) and the intent route.
 _STRICT_JSON_ROUTE_PREFIXES = ("/tools/", "/mcp/v1", "/sources")
 LIBRARY_INTENT_ROUTE = "/library/intent"
+DISCOVERY_INTENT_ROUTE = "/discovery/intent"
 # Phase 3 (run AM): dashboard-only capability route for source consent
 # (contract phase3-v1-2026-09-07, "Registry and dashboard contract").
 SOURCES_INTENT_ROUTE = "/sources/consent-intent"
@@ -685,6 +687,7 @@ def _reject_duplicate_json_keys(pairs):
 def _strict_json_route(bare: str) -> bool:
     return (
         bare == LIBRARY_INTENT_ROUTE
+        or bare.startswith("/discovery/")
         or bare == "/playbooks/run"
         or bare == LIBRARY_MIRROR_INTENT_ROUTE
         or bare == LIBRARY_MIRROR_ROUTE
@@ -929,6 +932,10 @@ def _default_settings() -> dict:
         # remain available in the dashboard Activity stream.
         "notifications_enabled": True,
         "anthropic_key_invalid": False,
+        "scrapecreators_enabled": False,
+        "scrapecreators_agent_calls_enabled": False,
+        "scrapecreators_daily_credit_cap": 25,
+        "scrapecreators_key_invalid": False,
         # v2.1 rename: set True after the one-time post-migration
         # post-migration toast has fired, so it never repeats.
         "post_migration_toast_shown": False,
@@ -1059,6 +1066,13 @@ def _normalize_settings(data: dict) -> dict:
     if isinstance(data, dict):
         clean.update(data)
     clean.pop("anthropic_key", None)
+    clean.pop("scrapecreators_key", None)
+    for field in ("scrapecreators_enabled", "scrapecreators_agent_calls_enabled",
+                  "scrapecreators_key_invalid"):
+        clean[field] = clean.get(field) is True
+    discovery_cap = clean.get("scrapecreators_daily_credit_cap")
+    clean["scrapecreators_daily_credit_cap"] = (
+        discovery_cap if type(discovery_cap) is int and 1 <= discovery_cap <= 500 else 25)
     # Only the JSON boolean true enables apply; "true", 1 or "yes" stay off.
     clean["librarian_apply_enabled"] = clean.get("librarian_apply_enabled") is True
     clean["comment_intelligence_enabled"] = bool(
@@ -1306,6 +1320,51 @@ def _store_saved_anthropic_key(key: str) -> None:
         raise CredentialStoreError(f"credential write failed: {e}") from e
 
 
+def _get_saved_scrapecreators_key() -> str:
+    """Read only this profile's namespace. No legacy or environment fallback."""
+    if _keyring is None:
+        return ""
+    try:
+        value = _keyring.get_password(_keyring_service_name(), KEYRING_SCRAPECREATORS_USERNAME)
+        return value if isinstance(value, str) else ""
+    except Exception:
+        # Credential backends can include the secret in their exception text.
+        return ""
+
+
+def _store_saved_scrapecreators_key(key: str) -> None:
+    if _keyring is None:
+        raise CredentialStoreError("ScrapeCreators credential store unavailable")
+    try:
+        service = _keyring_service_name()
+        if key:
+            _keyring.set_password(service, KEYRING_SCRAPECREATORS_USERNAME, key)
+        elif _keyring.get_password(service, KEYRING_SCRAPECREATORS_USERNAME) is not None:
+            _keyring.delete_password(service, KEYRING_SCRAPECREATORS_USERNAME)
+    except Exception:
+        raise CredentialStoreError("ScrapeCreators credential store unavailable") from None
+
+
+def _mark_scrapecreators_key_invalid(invalid: bool = True) -> None:
+    # A 401/403 preserves the saved key for the user to replace or clear.
+    data = _read_settings()
+    data["scrapecreators_key_invalid"] = invalid
+    _write_settings(data)
+
+
+_discovery_service = None
+_discovery_service_lock = threading.Lock()
+
+
+def _get_discovery_service():
+    global _discovery_service
+    import discovery_scrapecreators
+    with _discovery_service_lock:
+        if _discovery_service is None:
+            _discovery_service = discovery_scrapecreators.DiscoveryService(sys.modules[__name__])
+        return _discovery_service
+
+
 def _migrate_plaintext_anthropic_key() -> None:
     """Move legacy settings.json anthropic_key into the OS credential store."""
     settings_file = _settings_path()
@@ -1368,6 +1427,11 @@ def _public_settings(data: dict | None = None) -> dict:
         "claim_verification_enabled": bool(
             data.get("claim_verification_enabled")),
         "anthropic_key_set": bool(key and not data.get("anthropic_key_invalid")),
+        "scrapecreators_enabled": data.get("scrapecreators_enabled") is True,
+        "scrapecreators_agent_calls_enabled": data.get("scrapecreators_agent_calls_enabled") is True,
+        "scrapecreators_daily_credit_cap": _normalize_settings(data)["scrapecreators_daily_credit_cap"],
+        "scrapecreators_key_set": bool(_get_saved_scrapecreators_key()),
+        "scrapecreators_key_invalid": data.get("scrapecreators_key_invalid") is True,
         # Tier 2 dashboard Settings tab additions:
         "anthropic_key_masked": _mask_anthropic_key(key),
         "output_dir": str(DESKTOP_ROOT),
@@ -10703,6 +10767,11 @@ def _start_trash_purge_thread() -> None:
     def _runner():
         while True:
             try:
+                import discovery_scrapecreators
+                discovery_scrapecreators.purge_expired_runs(DATA_ROOT)
+            except Exception:
+                log.warning("discovery run purge failed")
+            try:
                 _purge_trash()
             except Exception:
                 log.exception("trash purge pass crashed")
@@ -14454,6 +14523,8 @@ class Handler(BaseHTTPRequestHandler):
 
     def _handle_settings_post(self, body: dict):
         boolean_fields = (
+            "scrapecreators_enabled",
+            "scrapecreators_agent_calls_enabled",
             "comment_intelligence_enabled",
             "hook_type_enabled",
             "entity_extraction_enabled",   # D-17 -- third background model
@@ -14477,7 +14548,7 @@ class Handler(BaseHTTPRequestHandler):
                                             # short-video media after
                                             # extraction (default OFF)
         )
-        integer_fields = ("clipboard_screenshot_cap",)
+        integer_fields = ("clipboard_screenshot_cap", "scrapecreators_daily_credit_cap")
         extra_fields = ("output_dir", "autostart", "topics",
                          "obsidian_vault_path",   # Tier 2 + v2.5 S4
                          "role",                  # v3.1 P2
@@ -14489,6 +14560,7 @@ class Handler(BaseHTTPRequestHandler):
             not any(f in body for f in boolean_fields)
             and not any(f in body for f in integer_fields)
             and "anthropic_key" not in body
+            and "scrapecreators_key" not in body
             and not any(f in body for f in extra_fields)
         ):
             return self._send_json(400, {
@@ -14525,7 +14597,26 @@ class Handler(BaseHTTPRequestHandler):
                     "error": "anthropic_key is too long",
                 })
 
+        if "scrapecreators_daily_credit_cap" in body:
+            cap = body["scrapecreators_daily_credit_cap"]
+            if type(cap) is not int or not 1 <= cap <= 500:
+                return self._send_json(400, {
+                    "ok": False, "error": "scrapecreators_daily_credit_cap must be an integer from 1 to 500"})
+        if "scrapecreators_key" in body:
+            value = body["scrapecreators_key"]
+            if value is not None and (not isinstance(value, str) or len(value) > 4096):
+                return self._send_json(400, {
+                    "ok": False, "error": "scrapecreators_key must be a string of at most 4096 characters or null"})
+
         data = _read_settings()
+        if "scrapecreators_daily_credit_cap" in body:
+            data["scrapecreators_daily_credit_cap"] = body["scrapecreators_daily_credit_cap"]
+        if "scrapecreators_key" in body:
+            try:
+                _store_saved_scrapecreators_key((body["scrapecreators_key"] or "").strip())
+            except CredentialStoreError:
+                return self._send_json(200, {"ok": False, "error": "credential store unavailable"})
+            data["scrapecreators_key_invalid"] = False
         for field in boolean_fields:
             if field in body:
                 data[field] = body[field]
@@ -15431,6 +15522,34 @@ class Handler(BaseHTTPRequestHandler):
             return self._send_json(429, result)
         return self._send_json(200, result)
 
+    def _discovery_origin(self) -> str:
+        """Canonical origin for an intent, including same-process WebView calls."""
+        return (self.headers.get("Origin") or "http://" + self.headers.get("Host", "")).strip().lower()
+
+    def _handle_discovery_intent(self, body: dict):
+        if not self._is_dashboard_origin():
+            return self._send_json(403, {"ok": False, "error": "forbidden"})
+        import library_resources
+        try:
+            result = _get_discovery_service().mint_intent(
+                body, origin=self._discovery_origin(), session_hash=_library_session_hash())
+        except Exception:
+            result = library_resources.ResourceError("internal_error").envelope()
+        code = (result.get("error") or {}).get("code")
+        status = 200 if result.get("ok") else {"invalid_request": 400, "rate_limited": 429}.get(code, 500)
+        return self._send_json(status, result)
+
+    def _handle_discovery_test_key(self, body: dict):
+        if not self._is_dashboard_origin():
+            return self._send_json(403, {"ok": False, "error": "forbidden"})
+        import library_resources
+        try:
+            result = _get_discovery_service().test_key(
+                body, origin=self._discovery_origin(), session_hash=_library_session_hash())
+        except Exception:
+            result = library_resources.ResourceError("internal_error").envelope()
+        return self._send_json(200, result)
+
     # ---- Phase 3 standing sources (run AM) --------------------------------
     # Every route below calls the same service the MCP registry tools call
     # (uoink_mcp_tools.sources_call), with the contract envelope; HTTP status
@@ -16307,6 +16426,10 @@ class Handler(BaseHTTPRequestHandler):
 
         if bare == LIBRARY_INTENT_ROUTE:
             return self._handle_library_intent(body)
+        if bare == DISCOVERY_INTENT_ROUTE:
+            return self._handle_discovery_intent(body)
+        if bare == "/discovery/test-key":
+            return self._handle_discovery_test_key(body)
         if bare == LIBRARY_MIRROR_INTENT_ROUTE:
             return self._handle_library_mirror_intent(body)
         if bare == LIBRARY_MIRROR_ROUTE:

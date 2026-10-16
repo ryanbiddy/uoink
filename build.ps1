@@ -339,6 +339,7 @@ foreach ($f in @(
     'library_resources.py',
     'library_prompts.py',
     'research_playbooks.py',
+    'discovery_scrapecreators.py',
     'library_briefs.py',
     'library_mirror.py',
     'library_mirror_vault_io.py',
@@ -639,6 +640,7 @@ Copy-Item (Join-Path $RepoRoot 'library_analysis.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'library_resources.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'library_prompts.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'research_playbooks.py') $StagingDir -Force
+Copy-Item (Join-Path $RepoRoot 'discovery_scrapecreators.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'library_briefs.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'library_mirror.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'library_mirror_vault_io.py') $StagingDir -Force

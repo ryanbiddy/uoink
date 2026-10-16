@@ -12,6 +12,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- ScrapeCreators discovery adapter with default-off settings, profile-scoped
+  keyring storage, five-minute dashboard intents, a 25-credit daily default cap,
+  and a UTC credit ledger. Requests use a pinned host, refuse redirects, and
+  stop on errors without retrying. Normalized runs retain at most 60 candidates
+  and expire after 90 days. The installer stages and includes the adapter.
+  Endpoint paths and fields are pinned to the OpenAPI examples fetched October 16,
+  including `/v1/youtube/channel-videos` and `/v1/credit-balance` (`creditCount`).
+  Run records and filenames identify the requested mode, platform and target.
+  TikTok picks use the row's video ID, correcting URLs that point to another post.
+  The bounded reader filters by target before its 24-file limit. Playbook packets
+  do not yet use this reader.
 - Token-gated `POST /playbooks/run` for explicit research generation with a
   saved Anthropic key, metered per playbook, with citation warnings and refs.
   Reports save through the existing draft route. Privacy and security docs
