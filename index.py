@@ -79,6 +79,13 @@ def _valid_rowid(value) -> bool:
 # tracked by the schema_version *table*).
 CURRENT_YOINK_SCHEMA = 2
 
+# Capture-time snapshots used by local research playbooks. No schema change:
+# both new captures and the bounded legacy backfill store them in metadata_json.
+ENGAGEMENT_METADATA_FIELDS = (
+    "view_count", "like_count", "upload_date", "comment_count",
+    "channel_follower_count",
+)
+
 _YOINK_COLUMNS = (
     "video_id", "slug", "channel", "title", "topic", "hook_type",
     "yoinked_at", "corpus_path", "sidecar_path", "health_score_json",
@@ -908,6 +915,49 @@ class Index:
                 (corpus_path, sidecar_path, video_id),
             )
             self._conn.commit()
+
+    def engagement_backfill_batch(self, after_video_id: str = "") -> list[dict]:
+        """At most 25 live rows, keyset-paged without retaining the library."""
+        with self.read_snapshot() as conn:
+            rows = conn.execute(
+                "SELECT video_id, sidecar_path, yoinked_at, metadata_json "
+                "FROM yoinks WHERE deleted_at IS NULL AND video_id > ? "
+                "AND sidecar_path IS NOT NULL AND sidecar_path != '' "
+                "ORDER BY video_id LIMIT 25", (after_video_id,)).fetchall()
+        return [dict(row) for row in rows]
+
+    def backfill_engagement_metadata(self, snapshot: dict, values: dict) -> bool:
+        """Fill missing metrics only; preserve concurrent edits and all other data.
+
+        The file read happens outside the index lock. Recheck the capture's
+        identity and deletion state here so an old file cannot fill a newer
+        capture. This deliberately avoids upsert_yoink's FTS/media side effects.
+        """
+        with self.write_transaction() as conn:
+            row = conn.execute(
+                "SELECT metadata_json FROM yoinks WHERE video_id=? "
+                "AND deleted_at IS NULL AND sidecar_path IS ? AND yoinked_at IS ?",
+                (snapshot["video_id"], snapshot["sidecar_path"],
+                 snapshot["yoinked_at"])).fetchone()
+            if row is None:
+                return False
+            try:
+                metadata = json.loads(row["metadata_json"] or "{}")
+            except (TypeError, ValueError, RecursionError):
+                return False
+            if not isinstance(metadata, dict):
+                return False
+            additions = {
+                key: values[key] for key in ENGAGEMENT_METADATA_FIELDS
+                if metadata.get(key) is None and values.get(key) is not None
+            }
+            if not additions:
+                return False
+            metadata.update(additions)
+            conn.execute(
+                "UPDATE yoinks SET metadata_json=? WHERE video_id=?",
+                (json.dumps(metadata, ensure_ascii=False), snapshot["video_id"]))
+        return True
 
     # ---- Phase 2 taxonomy backfill (migration 0020) --------------------
     def rows_for_taxonomy_backfill(self) -> list[dict]:

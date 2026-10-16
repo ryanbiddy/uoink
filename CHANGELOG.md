@@ -10,7 +10,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
-Nothing yet.
+### Added
+
+- Video captures now retain comment and follower counts in their sidecars and
+  index metadata. Generic captures also index views, likes and upload dates;
+  shaped comments retain yt-dlp IDs and timestamps.
+- Existing captures gain missing engagement fields from local sidecars and
+  cached metadata in batches of up to 25 rows and 32 MB per tick. The backfill
+  updates only index metadata and preserves existing values and source files.
 
 ## [3.8.1] - Unreleased
 

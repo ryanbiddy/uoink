@@ -2937,6 +2937,8 @@ def _index_yoink(folder: Path, sidecar: dict, corpus_path: Path | None,
             "duration_seconds": sidecar.get("duration_seconds"),
             "view_count": sidecar.get("view_count"),
             "like_count": sidecar.get("like_count"),
+            "comment_count": sidecar.get("comment_count"),
+            "channel_follower_count": sidecar.get("channel_follower_count"),
             "upload_date": sidecar.get("upload_date"),
         }, ensure_ascii=False),
     }
@@ -3071,11 +3073,93 @@ def _start_backfill_thread() -> None:
             _run_phase2_author_backfill_once()
         except Exception:
             log.exception("phase 2 author backfill crashed")
+        # Promote legacy metric snapshots in bounded ticks. The cursor is
+        # process-local: the only durable writes are yoinks.metadata_json.
+        after_video_id = ""
+        while not _backfill_cancel.is_set():
+            try:
+                result = _run_engagement_backfill_tick(after_video_id)
+            except Exception:
+                log.exception("engagement backfill tick crashed")
+                return
+            if result["complete"]:
+                return
+            after_video_id = result["after_video_id"]
+            if _backfill_cancel.wait(_ENGAGEMENT_BACKFILL_TICK_SEC):
+                return
 
     threading.Thread(target=_runner, name="index-backfill", daemon=True).start()
 
 
 _PHASE2_BACKFILL_KEY = "phase2_author_backfill_done"
+
+_ENGAGEMENT_BACKFILL_MAX_BYTES = 32 * 1024 * 1024
+_ENGAGEMENT_BACKFILL_TICK_SEC = 30
+
+
+def _run_engagement_backfill_tick(after_video_id: str = "") -> dict:
+    """Promote local metric snapshots, at most 25 rows / 32 MB per tick.
+
+    Sidecar values take precedence over the legacy yt-dlp metadata.json.
+    Missing or unusable files are skipped; no source files are rewritten.
+    A process-local keyset cursor lets later rows progress even when an old
+    capture has no metrics. Restarting safely repeats the additive scan.
+    """
+    idx = _get_index()
+    rows = idx.engagement_backfill_batch(after_video_id)
+    result = {"after_video_id": after_video_id, "scanned": 0, "updated": 0,
+              "bytes_read": 0, "complete": not rows}
+    for row in rows:
+        if _backfill_cancel.is_set():
+            return result
+        try:
+            metadata = json.loads(row["metadata_json"] or "{}")
+        except (TypeError, ValueError, RecursionError):
+            metadata = None
+        if isinstance(metadata, dict) and any(
+                metadata.get(key) is None for key in index.ENGAGEMENT_METADATA_FIELDS):
+            values = {}
+            row_start_bytes = result["bytes_read"]
+            sidecar_path = Path(row["sidecar_path"])
+            for path in (sidecar_path, sidecar_path.parent / "metadata.json"):
+                try:
+                    if not path.is_file():
+                        continue
+                    size = path.stat().st_size
+                    if size > _ENGAGEMENT_BACKFILL_MAX_BYTES:
+                        continue
+                    remaining = _ENGAGEMENT_BACKFILL_MAX_BYTES - result["bytes_read"]
+                    if size > remaining:
+                        # Retry this row with a fresh budget next tick. If
+                        # this row alone is too large, keep what fits and
+                        # advance rather than starving the rest of the scan.
+                        if row_start_bytes:
+                            return result
+                        continue
+                    with path.open("rb") as stream:
+                        raw = stream.read(remaining)
+                        result["bytes_read"] += len(raw)
+                        if os.fstat(stream.fileno()).st_size > len(raw):
+                            continue  # grew beyond the budget while reading
+                    source = json.loads(raw)
+                except (OSError, ValueError, RecursionError):
+                    continue
+                if not isinstance(source, dict):
+                    continue
+                source_id = source.get("video_id" if path == sidecar_path else "id")
+                if source_id is not None and str(source_id) != row["video_id"]:
+                    continue
+                for key in index.ENGAGEMENT_METADATA_FIELDS:
+                    if metadata.get(key) is None and source.get(key) is not None:
+                        values.setdefault(key, source[key])
+                if all(metadata.get(key) is not None or key in values
+                       for key in index.ENGAGEMENT_METADATA_FIELDS):
+                    break
+            if values and idx.backfill_engagement_metadata(row, values):
+                result["updated"] += 1
+        result["scanned"] += 1
+        result["after_video_id"] = row["video_id"]
+    return result
 
 
 def _run_phase2_author_backfill_once() -> None:
@@ -3856,6 +3940,8 @@ def _shape_comment_for_sidecar(c: dict) -> dict:
     comment objects carry a lot of internal cruft (parent ids, author
     channel ids, thumbnails) that bloats the sidecar without value."""
     return {
+        "id": c.get("id"),
+        "timestamp": c.get("timestamp"),
         "author": c.get("author"),
         "text": c.get("text"),
         "like_count": c.get("like_count") or 0,
@@ -5589,6 +5675,8 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
             "upload_date": metadata.get("upload_date"),
             "view_count": metadata.get("view_count"),
             "like_count": metadata.get("like_count"),
+            "comment_count": metadata.get("comment_count"),
+            "channel_follower_count": metadata.get("channel_follower_count"),
             "video_id": metadata.get("id"),
             # Phase 6 (BC-2): every transcript row carries its actual stored
             # link values, and the held chapter metadata travels with the
@@ -16966,6 +17054,7 @@ class Handler(BaseHTTPRequestHandler):
                                or metadata.get("uploader_url")),
             "upload_date": metadata.get("upload_date"),
             "view_count": metadata.get("view_count"),
+            "like_count": metadata.get("like_count"),
             "video_id": metadata.get("id"),
             "transcript": transcript_entries,
             # Comments/screenshots/hook are explicit nulls so the
@@ -17036,6 +17125,9 @@ class Handler(BaseHTTPRequestHandler):
                     "author": _auth,
                     "duration_seconds": sidecar["duration_seconds"],
                     "host": sidecar["host"],
+                    "view_count": sidecar["view_count"],
+                    "like_count": sidecar["like_count"],
+                    "upload_date": sidecar["upload_date"],
                 }),
             }, content=("\n".join(corpus_lines)[:65000]))
         except Exception as e:
