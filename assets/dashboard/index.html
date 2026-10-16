@@ -5800,7 +5800,9 @@
       let data = null;
       try { data = text ? JSON.parse(text) : null; } catch (_) { data = { ok: false, error: text || "invalid JSON" }; }
       if (!res.ok || (data && data.ok === false)) {
-        const err = new Error((data && data.error) || `HTTP ${res.status}`);
+        // Contract envelopes carry error as {code, message}; never show "[object Object]".
+        const detail = data && data.error;
+        const err = new Error((detail && typeof detail === "object" ? detail.message : detail) || `HTTP ${res.status}`);
         err.status = res.status;
         err.data = data || {};
         throw err;
@@ -7239,20 +7241,46 @@
        Phase 3: Standing Subscriptions & Real Consent Management
        ========================================================================== */
 
+    // Returns the tool's reply, ok:false included: a refused or failed tool call
+    // is never re-sent (register_source / set_source_consent would run twice).
+    // Only a request that never reached a tool -- no response, or a helper
+    // without the MCP route (404) -- is retried once over /tools/<name>.
     async function callRegistryTool(name, args) {
+      let data;
       try {
-        return await callMcpTool(name, args);
-      } catch (err) {
-        const res = await authFetch(`/tools/${encodeURIComponent(name)}`, {
+        data = await authFetch("/mcp/v1/tools/call", {
           method: "POST",
-          body: JSON.stringify(args || {}),
+          body: JSON.stringify({
+            jsonrpc: "2.0",
+            id: `dashboard-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+            method: "tools/call",
+            params: { name, arguments: args || {} },
+          }),
         });
-        if (res && res.ok === false) {
-          const msg = (res.error && res.error.message) || res.error || `${name} failed`;
-          throw new Error(msg);
+      } catch (err) {
+        if (err && err.status != null && err.status !== 404) throw err;
+        let res;
+        try {
+          res = await authFetch(`/tools/${encodeURIComponent(name)}`, {
+            method: "POST",
+            body: JSON.stringify(args || {}),
+          });
+        } catch (httpErr) {
+          // /tools/ answers a tool refusal as ok:false at 200 (schema refusals at 400).
+          const body = httpErr && httpErr.data;
+          if (body && body.ok === false && (httpErr.status === 200 || httpErr.status === 400)) return body;
+          throw httpErr;
         }
-        return res;
+        // /tools/ wraps a tool's reply as {ok:true, result}; hand back the MCP shape.
+        return res && res.result && typeof res.result === "object" ? res.result : res;
       }
+      return unpackMcpToolPayload(data);
+    }
+
+    function registryToolError(name, res) {
+      const err = new Error(registryErrorText(res) || `${name} failed`);
+      err.data = res || {};
+      return err;
     }
 
     /* ==========================================================================
@@ -7407,6 +7435,13 @@
       };
     }
 
+    // A tool reply's error is a {code, message} envelope or a plain string.
+    function registryErrorText(res) {
+      const detail = res && res.error;
+      if (typeof detail === "string") return detail;
+      return (detail && typeof detail.message === "string" && detail.message) || "";
+    }
+
     function applyLibraryActivityFailure(errCode, errMsg) {
       libraryActivityState.error = { code: errCode, message: errMsg };
       libraryActivityState.stale = true;
@@ -7416,7 +7451,15 @@
 
     async function refreshLibraryActivitySummary() {
       const generation = libraryActivityState.loadGeneration;
-      const res = await callRegistryTool("get_library_activity", libraryActivitySummaryArgs());
+      let res;
+      try {
+        res = await callRegistryTool("get_library_activity", libraryActivitySummaryArgs());
+      } catch (err) {
+        if (generation === libraryActivityState.loadGeneration) {
+          applyLibraryActivityFailure("storage_unavailable", err.message || "Failed to reach reader");
+        }
+        return null;
+      }
       if (generation !== libraryActivityState.loadGeneration) return res;
       if (res && res.ok) {
         libraryActivityState.packet = res;
@@ -7427,7 +7470,7 @@
         return res;
       }
       const errCode = (res && res.error && res.error.code) || "error";
-      const errMsg = (res && res.error && res.error.message) || "Activity fetch failed";
+      const errMsg = registryErrorText(res) || "Activity fetch failed";
       applyLibraryActivityFailure(errCode, errMsg);
       return res;
     }
@@ -7547,7 +7590,7 @@
           renderLibraryActivityUI();
         } else {
           const errCode = (res && res.error && res.error.code) || "error";
-          const errMsg = (res && res.error && res.error.message) || "Activity fetch failed";
+          const errMsg = registryErrorText(res) || "Activity fetch failed";
           applyLibraryActivityFailure(errCode, errMsg);
         }
       } catch (err) {
@@ -7973,10 +8016,11 @@
             container.innerHTML = `<div style="padding:16px;color:#d97706;">Report is stale. A new summary is loading; old evidence pages are disabled.</div>`;
           }
           disableEvidencePaging();
+          // The reload disables paging itself while it is current; once a newer
+          // load has superseded it, the pagers belong to that load.
           await refreshLibraryActivitySummary();
-          disableEvidencePaging();
         } else {
-          const msg = escapeHtmlActivity((res && res.error && res.error.message) || "unknown");
+          const msg = escapeHtmlActivity(registryErrorText(res) || "unknown");
           if (container) container.innerHTML = `<div style="padding:16px;color:var(--error, #e55);">Failed to load evidence: ${msg}</div>`;
           disableEvidencePaging();
         }
@@ -8035,6 +8079,8 @@
           invalidateActivityEvidence();
           updateLibraryActivityBadge("Stale - Refresh", false, true);
           await refreshLibraryActivitySummary();
+        } else {
+          disableCollectionPagers();
         }
       } catch (err) {
         if (!activityReplyIsCurrent(generation, requestSeq, detail)) return;
@@ -8611,6 +8657,7 @@
       const args = { source_id: sourceId, item_limit: CAPTURED_ITEMS_PAGE };
       if (view.next_item_cursor) args.item_cursor = view.next_item_cursor;
       const res = await callRegistryTool("source_status", args);
+      if (res && res.ok === false) throw registryToolError("source_status", res);
       const page = (res && res.items) || [];
       return {
         ...view, loading: false, items: (view.items || []).concat(page),
@@ -8777,7 +8824,8 @@
           throw new Error((intentRes && intentRes.error && intentRes.error.message) || "Failed to mint consent intent token");
         }
         const args = { ...operation, user_intent_token: intentRes.user_intent_token };
-        await callRegistryTool("set_source_consent", args);
+        const res = await callRegistryTool("set_source_consent", args);
+        if (res && res.ok === false) throw registryToolError("set_source_consent", res);
         closeConsentModal();
         showToast(intent.consent_state === "on"
           ? "Standing capture enabled. Back-catalog enrollment in progress."
@@ -8818,6 +8866,7 @@
           display_name: displayName || undefined,
         };
         const res = await callRegistryTool("register_source", payload);
+        if (res && res.ok === false) throw registryToolError("register_source", res);
         if (els.standingAddUrl) els.standingAddUrl.value = "";
         if (els.standingAddDisplayName) els.standingAddDisplayName.value = "";
         showToast(res && res.created === false
@@ -8837,7 +8886,8 @@
     async function retrySourcePoll(sourceId) {
       showToast("Checking source status...");
       try {
-        await callRegistryTool("source_status", { source_id: sourceId });
+        const res = await callRegistryTool("source_status", { source_id: sourceId });
+        if (res && res.ok === false) throw registryToolError("source_status", res);
         await loadStandingSubscriptions();
       } catch (err) {
         showToast(`Status check: ${err.message}`);
