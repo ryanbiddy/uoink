@@ -313,6 +313,10 @@ def _validate_facets(body: dict) -> tuple[dict, str | None]:
 # first boot for each installed version (gated by
 # %LOCALAPPDATA%\Uoink\.first-run-done containing VERSION).
 SPLASH_PATH = HERE / "assets" / "splash" / "index.html"
+# Capture and routine health checks use the service worker, but content.js
+# still reads /settings directly for the screenshot picker, and its shared
+# capture-error fallback probes /health. Move those callers before removing
+# these page origins; public diagnostics must not expose paths or key state.
 ALLOWED_ORIGINS = {
     "https://www.youtube.com",
     "https://m.youtube.com",
@@ -10876,9 +10880,21 @@ def _probe_command(cmd: list[str]) -> tuple[str, str | None]:
 
 
 def _diagnose_payload() -> dict:
-    """Structured self-check (Sprint 19 / C3). Public, no-auth -- the popup
-    polls this when the helper looks unhealthy to surface a specific
-    recovery hint rather than a generic 'helper offline'."""
+    """Detailed self-check for the local console doctor, never an HTTP route."""
+    return _build_diagnose_payload(public=False)
+
+
+def _public_diagnose_payload(*, local_ui: bool = False) -> dict:
+    """HTTP self-check, redacted by default.
+
+    Only the HTTP handler's local-UI bootstrap proof may enable local_ui,
+    which adds the splash's key-ready boolean without paths or key checks.
+    """
+    return _build_diagnose_payload(public=True, local_ui=local_ui)
+
+
+def _build_diagnose_payload(*, public: bool, local_ui: bool = False) -> dict:
+    """Shared probes with separate HTTP and console disclosure policies."""
     checks: list[dict] = []
     warnings: list[str] = []
 
@@ -10895,12 +10911,15 @@ def _diagnose_payload() -> dict:
 
     # 3. output_root_writable
     if _is_writable_dir(DESKTOP_ROOT):
-        add("output_root_writable", "ok", str(DESKTOP_ROOT))
+        add("output_root_writable", "ok",
+            "Output folder is writable" if public else str(DESKTOP_ROOT))
     else:
         add("output_root_writable", "error",
+            "Output folder is not writable" if public else
             f"{DESKTOP_ROOT} is not writable")
         warnings.append(
-            f"Uoink can't write to {DESKTOP_ROOT}. Check folder "
+            ("Uoink can't write to the output folder. Check folder " if public else
+             f"Uoink can't write to {DESKTOP_ROOT}. Check folder ") +
             "permissions, or set the UOINK_OUTPUT_DIR environment variable.")
 
     # 3b. path_integrity (C-05): a moved output folder used to leave every
@@ -10918,102 +10937,129 @@ def _diagnose_payload() -> dict:
             "Restart Uoink to relink them automatically, or run "
             "python server.py --heal-paths.")
 
-    # 4. anthropic_key_set + 5. anthropic_key_valid
-    try:
-        settings_data = _read_settings()
-    except Exception:
-        settings_data = {}
-    key_invalid = bool(settings_data.get("anthropic_key_invalid"))
-    try:
-        key = (_get_saved_anthropic_key() or "").strip()
-    except Exception:
-        key = ""
+    # Do not inspect saved-key state for public page/extension/CLI HTTP reads.
     anthropic_key_valid = "skipped"
-    if key_invalid:
-        add("anthropic_key_set", "warning", "saved key failed verification")
-        add("anthropic_key_valid", "error", "Your Anthropic key isn't working.")
-        anthropic_key_valid = False
-        warnings.append("Your Anthropic key isn't working. Update it in Settings.")
-    elif key:
-        add("anthropic_key_set", "ok", None)
-        add("anthropic_key_valid", "ok", "saved key present")
-        anthropic_key_valid = True
-    else:
-        add("anthropic_key_set", "warning", "no key configured")
-        add("anthropic_key_valid", "skipped", "no key entered")
-        anthropic_key_valid = "skipped"
-        warnings.append(
-            "Anthropic API key not configured. Open setup to add one if you "
-            "want Comment Intelligence, Hook Type, or entity extraction "
-            "(everything else still works without it).")
+    key = ""
+    if not public or local_ui:
+        try:
+            settings_data = _read_settings()
+        except Exception:
+            settings_data = {}
+        key_invalid = bool(settings_data.get("anthropic_key_invalid"))
+        try:
+            key = (_get_saved_anthropic_key() or "").strip()
+        except Exception:
+            key = ""
+        if key_invalid:
+            anthropic_key_valid = False
+            if not public:
+                add("anthropic_key_set", "warning", "saved key failed verification")
+                add("anthropic_key_valid", "error", "Your Anthropic key isn't working.")
+                warnings.append("Your Anthropic key isn't working. Update it in Settings.")
+        elif key:
+            anthropic_key_valid = True
+            if not public:
+                add("anthropic_key_set", "ok", None)
+                add("anthropic_key_valid", "ok", "saved key present")
+        elif not public:
+            add("anthropic_key_set", "warning", "no key configured")
+            add("anthropic_key_valid", "skipped", "no key entered")
+            warnings.append(
+                "Anthropic API key not configured. Open setup to add one if you "
+                "want Comment Intelligence, Hook Type, or entity extraction "
+                "(everything else still works without it).")
 
-    # 6. index_db_writable
-    if _is_writable_dir(INDEX_PATH.parent):
-        add("index_db_writable", "ok", str(INDEX_PATH))
-    else:
-        add("index_db_writable", "error",
-            f"{INDEX_PATH.parent} is not writable")
+    # 4. index_db_writable
+    index_writable = _is_writable_dir(INDEX_PATH.parent)
+    index_check = {"name": "index_db_writable", "status": "ok" if index_writable else "error"}
+    if not public:
+        index_check["detail"] = (
+            str(INDEX_PATH) if index_writable else f"{INDEX_PATH.parent} is not writable")
+    # setup.js treats any nonempty detail as an installation folder path.
+    # Public responses must omit it, including generic diagnostic sentences.
+    checks.append(index_check)
+    if not index_writable:
         warnings.append(
-            f"Index database is not writable at {INDEX_PATH}. Search, the "
+            ("Index database is not writable. Search, the " if public else
+             f"Index database is not writable at {INDEX_PATH}. Search, the ") +
             "Memory page, and the rate-limit queue will fail.")
 
-    # 7. yt_dlp_available
+    # 5. yt_dlp_available. Even successful version output can contain local
+    # build paths; only the console doctor gets subprocess stdout/stderr.
     status, detail = _probe_command([*YTDLP_CMD, "--version"])
     if status == "ok":
-        add("yt_dlp_available", "ok", f"yt-dlp {detail}")
+        add("yt_dlp_available", "ok",
+            "yt-dlp is available" if public else f"yt-dlp {detail}")
     else:
-        add("yt_dlp_available", "error", detail)
+        log.warning("diagnose: yt-dlp probe failed: %s", detail)
+        add("yt_dlp_available", "error",
+            "yt-dlp is unavailable; details are in the Uoink log" if public else detail)
         warnings.append(
             "yt-dlp is missing or broken. Reinstall with "
             "`python -m pip install -U yt-dlp`.")
 
-    # 8. keyring_available
+    # 6. keyring_available reports backend availability, never key presence.
     err = _credential_store_error()
     if err is None:
         add("keyring_available", "ok", _keyring_display_name())
     else:
-        add("keyring_available", "warning", str(err))
+        log.warning("diagnose: credential store unavailable: %s", err)
+        add("keyring_available", "warning",
+            "Credential store unavailable; details are in the Uoink log" if public else str(err))
         warnings.append(
             "OS credential store is unreachable -- the Anthropic API key "
             "cannot be saved between sessions.")
 
-    # 9. ffmpeg_available
+    # 7. ffmpeg_available
     status, detail = _probe_command(["ffmpeg", "-version"])
     if status == "ok":
-        add("ffmpeg_available", "ok", detail)
+        add("ffmpeg_available", "ok", "ffmpeg is available" if public else detail)
     else:
-        add("ffmpeg_available", "error", detail)
+        log.warning("diagnose: ffmpeg probe failed: %s", detail)
+        add("ffmpeg_available", "error",
+            "ffmpeg is unavailable; details are in the Uoink log" if public else detail)
         warnings.append(
             "ffmpeg is missing or broken. Screenshot extraction will fail.")
 
     if _OUTPUT_ROOT_FALLBACK:
         warnings.append(
-            f"Output folder fallback in effect: uoinks are being saved to "
-            f"{DESKTOP_ROOT} because the Desktop folder was not writable. The "
+            ("Output folder fallback in effect because the Desktop folder "
+             "was not writable. Check Settings for the active output folder. The " if public else
+             f"Output folder fallback in effect: uoinks are being saved to "
+             f"{DESKTOP_ROOT} because the Desktop folder was not writable. The ") +
             "extension's /file sandbox still serves both locations.")
-    # v2.1 migration signal. The extension popup polls /diagnose to decide
-    # whether to offer the opt-in "Move your saved uoinks to Desktop\Uoink\?"
-    # prompt (the Desktop-corpus move is user-confirmed, never automatic).
-    # Also flags a failed keyring migration so the user is told to re-enter
-    # their Anthropic key rather than hitting a silent empty key (design Q4 A).
+    # Keep migration readiness booleans, but explicitly project the public
+    # fields: migration_status also contains local roots and legacy-key state.
     try:
-        migration = migrate_install.migration_status()
-    except Exception as e:
-        migration = {"error": str(e)}
-    if migration.get("keyring_legacy_present") and not key:
+        status = migrate_install.migration_status()
+        migration = {
+            section: {flag: status.get(section, {}).get(flag) is True for flag in flags}
+            for section, flags in (
+                ("app_data", ("old_exists", "new_exists", "complete", "migrated_marker")),
+                ("desktop_corpus", ("legacy_present", "new_present")),
+            )
+        } if public else status
+    except Exception as exc:
+        log.exception("diagnose: migration status unavailable")
+        migration = {"error": "migration status unavailable; details are in the Uoink log" if public else str(exc)}
+    if not public and migration.get("keyring_legacy_present") and not key:
         warnings.append(
             "Your Anthropic key didn't carry over from the previous install. "
             "Re-enter it on the setup page to restore Comment Intelligence, "
             "Hook Type, and entity extraction.")
-    return {
+    payload = {
         "ok": True,
         "version": VERSION,
         "output_root_fallback": _OUTPUT_ROOT_FALLBACK,
         "migration": migration,
-        "anthropic_key_valid": anthropic_key_valid,
         "checks": checks,
         "warnings": warnings,
     }
+    if not public or (local_ui and isinstance(anthropic_key_valid, bool)):
+        # Omit the field for a missing key in the splash: its existing UI
+        # distinguishes absent (setup needed) from false (saved key invalid).
+        payload["anthropic_key_valid"] = anthropic_key_valid
+    return payload
 
 
 def _enrich_yoink_rows(idx, rows: list[dict]) -> list[dict]:
@@ -11665,6 +11711,9 @@ class Handler(BaseHTTPRequestHandler):
         self.send_header("Content-Type", mime)
         self.send_header("Content-Length", str(len(body)))
         self.send_header("Cache-Control", "private, max-age=300")
+        if mime.split(";", 1)[0].strip().lower() == "text/html":
+            self.send_header("Content-Security-Policy", "frame-ancestors 'none'")
+            self.send_header("X-Frame-Options", "DENY")
         self._send_cors(self._cors_origin())
         self.end_headers()
         self.wfile.write(body)
@@ -11789,7 +11838,11 @@ class Handler(BaseHTTPRequestHandler):
             # Public, no-auth (same posture as /health). Sprint 19 / C3:
             # structured self-check the popup uses to surface a specific
             # recovery hint instead of a generic "helper offline".
-            return self._send_json(200, _diagnose_payload())
+            # Only the absent-Origin branch of the existing token-bootstrap
+            # proof may see splash readiness. Even pinned extensions get the
+            # public projection; request parameters cannot select CLI details.
+            local_ui = self.headers.get("Origin") is None and self._is_extension_origin()
+            return self._send_json(200, _public_diagnose_payload(local_ui=local_ui))
         if bare == "/sources/manifest":
             # Public product metadata (no user data) so the static site can
             # bake it at build time and the dashboard Sources tab can read it

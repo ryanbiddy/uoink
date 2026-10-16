@@ -68,11 +68,54 @@ state, a service error code and whether the default-off
 titles, shelf names, evidence text or paths. It does not include the helper
 token or raw exception text.
 
-`/diagnose` is a broader bounded recovery report used by the popup and splash.
+`/diagnose` reports writability, tool availability, path-integrity counts,
+output-folder fallback and migration readiness. Every HTTP response omits
+local filesystem paths, key-dependent checks and warnings, and legacy-key
+flags. Page origins, extension origins and clients without local browser
+proof also receive no saved-key presence or validity fields. Migration exposes
+only the existing `app_data` and `desktop_corpus` readiness booleans. Tool checks report
+availability instead of raw version output; probe, credential-store and
+migration failures use generic messages, with details in `server.log`.
+`/health` and `/ping` retain their existing counts and readiness fields;
+neither returns local paths or key-presence flags.
+
+The first-run splash receives one additional field, `anthropic_key_valid`,
+only when `/diagnose` passes the existing local-UI bootstrap proof: no
+`Origin` header, `Sec-Fetch-Site: same-origin` or `none`, and a present loopback
+`Host` allowed on the helper's port. The field is `true` for a saved key not
+marked invalid, `false` for a key marked invalid, and absent when no key is
+saved. This preserves the splash's ready, update-key and add-key states
+without making an Anthropic request. Even pinned extension origins receive
+no such field; a curl-style request without fetch metadata does not qualify.
+
+Use authenticated Settings to inspect the output folder or Anthropic key
+status. The extension setup page's public Helper status panel no longer lists
+key checks or key-migration warnings. Its Installation folder row keeps the
+static `%LOCALAPPDATA%\Uoink` hint instead of showing the resolved folder.
+The Open folder button no longer opens that folder; it logs a console warning
+because public diagnostics no longer supply a path. The tray no longer shows
+Degraded solely because a saved key is invalid; other diagnostic errors still
+affect it. The dashboard's Settings > Local app status line no longer counts
+Anthropic key checks; key status still appears in the dashboard's own key
+section, which reads authenticated `/settings`.
+
+The local `uoink doctor` / `--doctor` console report keeps its detailed
+diagnostics: output and index paths, tool versions, probe and credential-store
+errors, migration details and Anthropic key status. HTTP callers always get
+the redacted form, including callers with a token or query parameters asking
+for console details.
+
 The manifest, OpenAPI, well-known, and suite-discovery routes expose product
 and protocol metadata, not corpus content or credentials. `/dashboard` and
-`/splash` serve local UI shells; their user-data requests still complete the
-normal token handshake.
+`/splash` serve local UI shells. The dashboard completes the normal token
+handshake before requesting user data; the splash readiness check uses the
+local-UI proof above.
+
+Both HTML shells, including their trailing-slash and query-string forms,
+send `Content-Security-Policy: frame-ancestors 'none'` and
+`X-Frame-Options: DENY`. Browsers refuse to embed them in frames, including
+frames on the helper's own origin. Open them as top-level pages or native
+windows.
 
 `/index/backfill-status` is intentionally public for the same UI bootstrapping reason. It exposes only `state`, `current`, and `total` counts, not corpus content or file paths.
 
@@ -132,11 +175,20 @@ Access-Control-Allow-Headers: Content-Type, X-Uoink-Token, X-Uoink-Client, X-Yoi
 Access-Control-Allow-Private-Network: true
 ```
 
-Allowed web origins are YouTube pages used by the content script:
+The following YouTube page origins remain allowed because shipped content
+scripts still need direct helper reads:
 
 - `https://www.youtube.com`
 - `https://m.youtube.com`
 - `https://youtube.com`
+
+Capture, session-add requests and routine health polling use the extension
+service worker. However, `content.js` still calls `STC.getSettings()` directly
+to choose the screenshot picker after capture. The shared capture-error
+fallback also calls `/health` directly when the service worker cannot classify
+the error. Removing page-origin CORS/PNA permission requires moving those
+remaining calls to the service worker first. Public diagnostic redaction
+applies to these origins too.
 
 Extension CORS uses the same ID allowlist as `/token`, for both
 `chrome-extension://<id>` and `moz-extension://<id>`. Unlisted or malformed
@@ -301,9 +353,9 @@ autostart value from `Yoink` to `Uoink`. The legacy folder is left intact for a
 7-day grace period and only hard-deleted after a verified, healthy `\Uoink\`.
 No data leaves the machine; the registry/keyring writes are gated to the
 installed layout so a dev run from the repo never mutates the real machine. A
-failed keyring step is non-fatal and surfaced in `/diagnose` as "re-enter your
-Anthropic key" rather than a silent empty key. The Desktop corpus
-(`Desktop\Yoink\`) is migrated only on explicit user opt-in via the extension
+failed keyring step is non-fatal; check authenticated Settings for key status.
+Public `/diagnose` does not report whether a legacy key exists or migrated.
+The Desktop corpus (`Desktop\Yoink\`) is migrated only on explicit user opt-in via the extension
 popup (`POST /migration/move-desktop-corpus`), never automatically.
 
 ## What Uoink does not collect
