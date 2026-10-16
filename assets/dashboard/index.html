@@ -5282,6 +5282,8 @@
       offset: 0,
       limit: 24,
       loading: false,
+      libraryRequest: 0,
+      libraryResetPending: false,
       hasMore: false,
       libraryState: "loading",
       libraryErrorDetail: "",
@@ -10268,14 +10270,22 @@
     }
 
     async function loadLibrary({ reset = false } = {}) {
-      if (state.loading) return;
+      // D1: every load runs, even while an older one is in flight, and only
+      // the newest one's answer (or error) is shown, so typing "ai agents"
+      // after "ai" never leaves the "ai" results under the new search.
+      const request = ++state.libraryRequest;
       const dateMessage = libraryDateRangeMessage();
       if (dateMessage) {
+        state.loading = false;
         renderLibraryInvalidRange(dateMessage);
         return;
       }
+      // A filter edit since the shown rows were loaded: Load more starts the
+      // new search from its first page instead of appending to the old rows.
+      if (state.libraryResetPending) reset = true;
       state.loading = true;
       if (reset) {
+        state.libraryResetPending = false;
         state.offset = 0;
         state.library = [];
         state.libraryState = "loading";
@@ -10290,8 +10300,10 @@
       els.resultSummary.textContent = "Loading library...";
       try {
         if (!state.jobsLoaded || reset) await refreshJobs();
+        if (request !== state.libraryRequest) return;
         const params = paramsFromFilters();
         const data = await authFetch(`/memory/search?${params.toString()}`);
+        if (request !== state.libraryRequest) return;
         const rows = Array.isArray(data.results) ? data.results : [];
         state.total = Number(data.total) || 0;
         state.corpusTotal = Number.isFinite(Number(data.corpus_total)) ? Number(data.corpus_total) : (hasLibraryFilters() ? state.corpusTotal : state.total);
@@ -10303,6 +10315,7 @@
         renderLibrary();
         populateFilterOptions(rows);
       } catch (err) {
+        if (request !== state.libraryRequest) return;
         if (reset) state.library = [];
         if (isInvalidRangeError(err)) {
           renderLibraryInvalidRange("Start date has to be before end date.");
@@ -10310,8 +10323,10 @@
           renderLibraryUnavailable(err.message);
         }
       } finally {
-        state.loading = false;
-        syncWritingSourceOptions();
+        if (request === state.libraryRequest) {
+          state.loading = false;
+          syncWritingSourceOptions();
+        }
       }
     }
 
@@ -13620,6 +13635,14 @@
         btn.addEventListener("click", () => switchTab(btn.dataset.tabButton));
       });
       const reload = debounce(() => {
+        loadLibrary({ reset: true });
+      }, 260);
+      // D1: an edit takes effect straight away, not 260 ms later when the
+      // debounced search starts. The filters follow the controls, any Library
+      // answer still in flight is stale, and the next load (a note or image
+      // refresh, or Load more) starts from the first page of the new search,
+      // so nothing from the old search shows under the new search box.
+      const invalidateAndReload = () => {
         state.filters.q = els.searchInput.value;
         state.filters.platform = els.platformFilter.value;
         state.filters.source_type = els.sourceTypeFilter.value;
@@ -13633,10 +13656,12 @@
         state.filters.date_to = els.dateTo.value;
         state.filters.sort = els.sortFilter.value;
         updateVideoFacetVisibility();
-        loadLibrary({ reset: true });
-      }, 260);
+        state.libraryRequest++;
+        state.libraryResetPending = true;
+        reload();
+      };
       [els.searchInput, els.platformFilter, els.sourceTypeFilter, els.channelFilter, els.topicFilter, els.hookFilter, els.formatFilter, els.performanceFilter, els.lengthFilter, els.dateFrom, els.dateTo, els.sortFilter].forEach((el) => {
-        el.addEventListener(el.tagName === "INPUT" ? "input" : "change", reload);
+        el.addEventListener(el.tagName === "INPUT" ? "input" : "change", invalidateAndReload);
       });
       document.getElementById("clearFilters").addEventListener("click", resetLibraryFilters);
       document.getElementById("refreshForYou").addEventListener("click", loadForYou);
