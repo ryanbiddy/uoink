@@ -10,7 +10,24 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
-Nothing yet.
+### Security
+
+- Pin the extension's Chromium ID to `bkcapfidedhfcjpmjabeopfbcjcbmdmi` with a
+  public manifest key. The helper now grants extension token bootstrap and CORS
+  only to this ID and IDs explicitly added through `UOINK_EXTENSION_IDS` or
+  `settings.extension_ids`. Both configuration sources remain additive.
+- Require `Sec-Fetch-Site: same-origin` or `none` and a loopback Host when
+  `/token` is requested without Origin, preserving the dashboard/WebView path.
+  Requests with neither Origin nor fetch metadata now receive HTTP 403.
+- Drop extension runtime messages whose sender ID differs from Uoink's own ID.
+
+### Changed
+
+- Existing unpacked-extension users must reload the extension once after this
+  update. If the old ID differs from `bkcapfidedhfcjpmjabeopfbcjcbmdmi`, extension
+  storage starts fresh under the new ID: reapply extension preferences as needed;
+  the helper token is fetched again. The helper's library and captures stay in
+  place. See [the security model](docs/security.md) for additional trusted IDs.
 
 ## [3.8.1] - Unreleased
 

@@ -133,11 +133,17 @@ def test_token_extension_id_pin():
             "Origin": "chrome-extension://abcdefghijklmnopabcdefghijklmnop",
             "X-Uoink-Client": "uoink-extension",
         }
-        # Default: no pin configured -> any extension origin mints the token.
-        status, body = _raw_request("GET", "/token", dict(ext_headers))
+        # Default: only the pinned Uoink extension ID mints the token, so an
+        # unlisted extension origin is refused.
+        status, _body = _raw_request("GET", "/token", dict(ext_headers))
+        _assert(status == 403,
+                f"unlisted extension origin must 403 by default: {status}")
+        pinned = dict(ext_headers,
+                      Origin="chrome-extension://bkcapfidedhfcjpmjabeopfbcjcbmdmi")
+        status, body = _raw_request("GET", "/token", pinned)
         _assert(status == 200 and json.loads(body).get("token"),
-                f"unpinned extension origin gets the token: {status} {body}")
-        print("ok  /token unpinned accepts any extension origin")
+                f"the pinned Uoink extension gets the token: {status} {body}")
+        print("ok  /token accepts only the pinned extension ID by default")
 
         # Pin to a DIFFERENT id -> this extension is refused.
         original = server._allowed_extension_ids

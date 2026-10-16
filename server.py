@@ -332,26 +332,25 @@ ALLOWED_HOST_NAMES = frozenset({
 })
 
 
-# C-04: optional extension-ID pin for /token. Empty by default (load-unpacked
-# gives every dev a different id, and no Chrome Web Store id is published
-# yet). Once the CWS id is known, set UOINK_EXTENSION_IDS=<id>[,<id>] (or the
-# extension_ids settings key) and /token only mints the token for those
-# extension origins. Until then any chrome-/moz-extension origin is accepted,
-# exactly as before -- the Host allowlist above is the load-bearing rebind
-# defense; this is defense-in-depth for after launch.
+# Derived from the public key in extension/manifest.json. Configuration adds
+# trusted Edge/dev IDs; it cannot remove this pin or allow arbitrary origins.
+PINNED_EXTENSION_ID = "bkcapfidedhfcjpmjabeopfbcjcbmdmi"
+
+
 def _allowed_extension_ids() -> set[str]:
-    raw = (os.environ.get("UOINK_EXTENSION_IDS") or "").strip()
-    if not raw:
-        try:
-            settings = _read_settings() or {}
-        except Exception:
-            settings = {}
-        value = settings.get("extension_ids")
-        if isinstance(value, (list, tuple)):
-            raw = ",".join(str(v) for v in value)
-        elif isinstance(value, str):
-            raw = value
-    return {part.strip() for part in raw.split(",") if part.strip()}
+    ids = {PINNED_EXTENSION_ID}
+    extra = (os.environ.get("UOINK_EXTENSION_IDS") or "").split(",")
+    try:
+        settings = _read_settings() or {}
+    except Exception:
+        settings = {}
+    value = settings.get("extension_ids") if isinstance(settings, dict) else None
+    if isinstance(value, str):
+        extra.extend(value.split(","))
+    elif isinstance(value, (list, tuple)):
+        extra.extend(value)
+    ids.update(part.strip() for part in extra if isinstance(part, str) and part.strip())
+    return ids
 
 CREATE_NO_WINDOW = 0x08000000 if sys.platform == "win32" else 0
 SUBPROCESS_KW = {"creationflags": CREATE_NO_WINDOW} if sys.platform == "win32" else {}
@@ -11511,9 +11510,7 @@ class Handler(BaseHTTPRequestHandler):
             return None
         if origin in ALLOWED_ORIGINS:
             return origin
-        # Some Chromium builds send the extension origin instead of the page
-        # origin for content-script fetches.
-        if origin.startswith("chrome-extension://"):
+        if self._is_allowed_extension_origin(origin):
             return origin
         return None
 
@@ -11600,40 +11597,30 @@ class Handler(BaseHTTPRequestHandler):
             pass
         return True
 
+    def _is_allowed_extension_origin(self, origin: str) -> bool:
+        """Match a complete extension origin, never a URL or an ID prefix."""
+        match = re.fullmatch(r"(?:chrome|moz)-extension://([a-z0-9_-]+)", origin)
+        return bool(match and match.group(1) in _allowed_extension_ids())
+
     def _is_extension_origin(self) -> bool:
-        """True if Origin looks like a browser extension OR is absent.
-        Some Chromium forks (Comet, observed in v1 testing) issue
-        same-process service-worker fetches with no Origin header at all,
-        so a strict allowlist locks them out. Browser-side CSRF defense
-        moves to the X-Uoink-Client header gate + the existing CORS ACAO
-        allowlist; see docs/security.md.
+        """Allow pinned/configured extensions or the local UI bootstrap.
 
-        C-04: the absent-Origin path is now only reachable after the Host
-        allowlist has passed (a rebind carries the attacker's Host and is
-        already rejected), so trusting a missing Origin here no longer
-        widens the rebind surface -- it only serves the genuine
-        same-process service-worker case.
-
-        C-04: when UOINK_EXTENSION_IDS / settings.extension_ids is set, a
-        present extension Origin must additionally match one of those ids.
-        Empty (today) accepts any extension origin, unchanged."""
-        origin = (self.headers.get("Origin", "") or "")
-        if not origin:
-            return True
-        if not (origin.startswith("chrome-extension://")
-                or origin.startswith("moz-extension://")):
-            return False
-        allowed = _allowed_extension_ids()
-        if not allowed:
-            return True
-        ext_id = origin.split("://", 1)[1].split("/", 1)[0].strip()
-        return ext_id in allowed
+        A missing Origin is only trusted with explicit same-origin/none fetch
+        metadata and a present, allowed loopback Host (dashboard/WebView).
+        Empty and null Origin headers do not qualify for that exception.
+        """
+        origin = self.headers.get("Origin")
+        if origin is None:
+            site = (self.headers.get("Sec-Fetch-Site") or "").strip().lower()
+            return (site in ("same-origin", "none")
+                    and bool(self.headers.get("Host")) and self._host_allowed())
+        return self._is_allowed_extension_origin(origin)
 
     def _has_yoink_client_header(self) -> bool:
         """Defense-in-depth header that the extension sets on /token. A
         webpage can't set custom request headers cross-origin without
         triggering a CORS preflight, and our preflight only echoes ACAO
-        for chrome-extension://* + the YouTube allowlist -- so the actual
+        for allowlisted extension origins + the YouTube allowlist -- so the actual
         request from a malicious origin is blocked by the browser before
         it even runs the GET.
 
@@ -12023,10 +12010,10 @@ class Handler(BaseHTTPRequestHandler):
     #      X-Yoink-Client/"yoink-extension" still accepted). A drive-by
     #      browser request from a random site can't set this without a
     #      CORS preflight, and our preflight refuses ACAO for any origin
-    #      outside the youtube + chrome-extension allowlist.
-    #   2. Origin (if present) must be a browser-extension origin.
-    #      Absent Origin is allowed -- some Chromium forks (Comet) issue
-    #      service-worker fetches with no Origin header.
+    #      outside the YouTube + pinned/configured extension allowlist.
+    #   2. Origin must exactly match an allowlisted extension. Missing Origin
+    #      requires same-origin/none fetch metadata and a loopback Host for
+    #      the dashboard/WebView bootstrap.
     #   3. Per-install rate limit (10/min) so a noisy attacker can't
     #      poll the endpoint indefinitely.
     # Local processes (curl, malicious scripts on the same machine) CAN

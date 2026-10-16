@@ -22,7 +22,7 @@ Uoink is local-first software with two pieces:
 - A browser extension that injects UI on YouTube and talks to a local helper.
 - A Python helper bound to `127.0.0.1:5179` that downloads public YouTube data, writes local corpus files, serves local thumbnails, and exposes optional MCP tools.
 
-The helper never binds to a public network interface. The main security boundary is therefore local-machine trust: browser pages should not be able to drive the helper without the extension token, but software or browser extensions already running with the user's privileges are treated as trusted local code.
+The helper never binds to a public network interface. Browser pages cannot use token-gated routes without the helper token. The token bootstrap trusts the pinned Uoink extension, explicitly configured extension IDs, and the local dashboard/WebView path described below. Software running with the user's filesystem privileges remains outside this browser security boundary.
 
 ## Threat model
 
@@ -31,7 +31,7 @@ The helper never binds to a public network interface. The main security boundary
 | Malicious webpage tries to call `127.0.0.1:5179` | Yes | Token-gated endpoints require `X-Uoink-Token` (legacy `X-Yoink-Token` accepted); `/token` requires a custom `X-Uoink-Client` header (legacy `X-Yoink-Client` accepted) and browser CORS/PNA preflight blocks normal webpages from setting it cross-origin. |
 | Malicious webpage probes whether Uoink is running | Not treated as secret | `/health` and `/ping` are public liveness probes. They disclose the helper version and coarse readiness: Whisper model availability/load state, index recovery, output-root fallback, aggregate path-integrity counts, and a generic path-integrity hint or error. Raw exception details stay in `server.log`. |
 | Local malware reads files or calls localhost | No | Malware already running as the user can read local files, call local ports, and modify output. Uoink does not try to sandbox against same-user malware. |
-| Another installed browser extension calls `/token` | Not fully | v2 accepts `chrome-extension://*` origins so Chromium forks and dev installs work. Published Chrome Web Store extension ID pinning is deferred until the final ID is known and stable. |
+| Another installed browser extension calls `/token` | Yes, for unlisted extension origins | `/token` and extension CORS require an exact allowlisted extension origin. The default ID is `bkcapfidedhfcjpmjabeopfbcjcbmdmi`; local configuration can add trusted IDs. Residual risk: an extension that has host access to `http://127.0.0.1:5179` (for example `<all_urls>`) can run script in the dashboard's own origin and read `/token` same-origin; the pin stops extensions without host access to the helper. A launch-scoped dashboard bootstrap would close this later. |
 | Network attacker | Mostly not applicable | The helper listens only on `127.0.0.1`, not LAN/public interfaces. |
 | Anthropic API key disclosure through settings | Mitigated | The key is stored in the OS credential store via `keyring` (service `Uoink` in normal mode; deterministic profile-derived `Uoink-isolated-<hash>` in isolated mode; the v2.1 install migration moves normal entries from legacy `Yoink`), not in `settings.json`, and is never returned by `GET /settings`. |
 | Dependency compromise | Partially | Direct downloads are SHA256-checked in `build.ps1`; the full installer pip graph is exact-version locked and inventory-verified, but distribution artifacts are not hash-locked. |
@@ -79,10 +79,28 @@ normal token handshake.
 `/token` returns the per-install helper token and is guarded by:
 
 - `X-Uoink-Client: uoink-extension` (legacy `X-Yoink-Client: yoink-extension` remains accepted for shipped-extension compatibility)
-- `Origin` that is empty or `chrome-extension://*`
+- An exact `chrome-extension://<id>` or `moz-extension://<id>` origin whose ID is allowlisted. Missing `Origin` is accepted only with `Sec-Fetch-Site: same-origin` or `Sec-Fetch-Site: none` and a present loopback `Host` that passes the helper's Host/port check.
 - A server-wide 10 requests/minute rate limit
 
-The empty-Origin allowance is deliberate. Some Chromium service-worker fetches observed during Comet testing omit `Origin`. The custom-header+CORS preflight gate is the load-bearing browser CSRF defense.
+The extension's public manifest `key` fixes its Chromium ID at
+`bkcapfidedhfcjpmjabeopfbcjcbmdmi`. This ID is always in the helper's allowlist.
+For Edge or development builds with another ID, add trusted IDs through the
+comma-separated `UOINK_EXTENSION_IDS` environment variable or the
+`extension_ids` setting (a list or comma-separated string). Both sources add
+to the pinned ID and to each other; an empty setting cannot disable the pin.
+
+After updating an existing unpacked installation, reload the extension once
+from the browser's extensions page. If its previous ID differs, extension
+storage starts fresh under the pinned ID, including saved extension preferences
+and its cached helper token. Reapply those preferences as needed; the extension
+fetches the helper token again. The helper's library and captures are unchanged.
+
+The missing-Origin exception supports the local dashboard and WebView. Clients
+that omit both `Origin` and `Sec-Fetch-Site` now receive HTTP 403, even with the
+client header. An explicitly empty or `null` Origin is also refused. The
+service worker silently drops runtime messages unless `sender.id` matches
+`chrome.runtime.id`; messages from Uoink's own popup and content scripts continue
+to work.
 
 ## Token-gated endpoints
 
@@ -120,7 +138,10 @@ Allowed web origins are YouTube pages used by the content script:
 - `https://m.youtube.com`
 - `https://youtube.com`
 
-Extension origins are accepted as `chrome-extension://*`. This is broad by design for v2 dev/fork compatibility; extension ID pinning should be revisited after Chrome Web Store publication.
+Extension CORS uses the same ID allowlist as `/token`, for both
+`chrome-extension://<id>` and `moz-extension://<id>`. Unlisted or malformed
+extension origins receive no CORS or Private Network Access permission. Origins
+with paths, ports, credentials, query strings or fragments are refused.
 
 `Access-Control-Allow-Private-Network: true` is required by Chromium's Private Network Access rules when a public HTTPS origin preflights a request to loopback.
 
