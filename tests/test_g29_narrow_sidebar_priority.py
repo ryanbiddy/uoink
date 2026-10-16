@@ -1,4 +1,6 @@
-"""G-29 narrow screens should tuck dangerous app controls behind a disclosure.
+"""G-29 narrow screens should not put dangerous app controls in the sidebar.
+
+Since the UI re-haul, Stop Uoink lives in Settings > App, not the sidebar.
 
 Run: python tests/test_g29_narrow_sidebar_priority.py
 """
@@ -17,15 +19,18 @@ def require(condition: bool, message: str) -> None:
 
 
 def main() -> int:
-    require('id="sidebarControls" open' in DASHBOARD, "sidebar control disclosure missing")
-    require("More controls" in DASHBOARD, "compact sidebar disclosure label missing")
-    require('id="stopHelper">Stop Uoink</button>' in DASHBOARD, "stop control missing")
-    require('class="sidebar-more-actions"' in DASHBOARD, "sidebar secondary action group missing")
-    require("function syncSidebarControlsDensity()" in DASHBOARD, "sidebar density sync missing")
-    require('window.addEventListener("resize", syncSidebarControlsDensity)' in DASHBOARD, "resize sync missing")
-    require("const compact = window.matchMedia(\"(max-width: 1080px)\").matches;" in DASHBOARD, "compact breakpoint missing")
-    require('if (compact) controls.removeAttribute("open");' in DASHBOARD, "compact sidebar should start closed")
-    print("ok  narrow sidebar puts Stop Uoink behind More controls")
+    # UI re-haul (SPEC "Dashboard IA"): the dangerous app control left the
+    # sidebar altogether. Stop Uoink lives in Settings > App, behind its
+    # confirm, so no narrow-screen disclosure is needed to tuck it away.
+    sidebar = DASHBOARD.split('<aside class="sidebar"', 1)[1].split("</aside>", 1)[0]
+    require("Stop Uoink" not in sidebar, "Stop Uoink must not sit in the sidebar")
+    require('id="sidebarControls"' not in DASHBOARD, "the More controls disclosure should be gone")
+    app = DASHBOARD.split('id="settings-app"', 1)[1].split("</section>", 1)[0]
+    require('id="stopHelperSettings">Stop Uoink</button>' in app, "stop control missing from Settings > App")
+    require('getElementById("stopHelperSettings").addEventListener("click", stopHelperWithConfirm)' in DASHBOARD,
+            "Stop Uoink must keep its confirm")
+    require('id="stopHelperConfirm" role="dialog"' in DASHBOARD, "stop confirm dialog missing")
+    print("ok  Stop Uoink lives in Settings > App behind its confirm")
     return 0
 
 

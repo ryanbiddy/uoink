@@ -51,11 +51,15 @@ def test_recheck_stale_copy_removed() -> None:
 
 
 def test_advanced_details_are_disclosed() -> None:
+    # UI re-haul: the sidebar status reads "Running on this PC" (this Mac /
+    # this computer elsewhere), and the hidden Features tab that carried
+    # "Advanced: page detail" is gone (SPEC "Dashboard IA").
+    require('data-tab-panel="features"' not in DASHBOARD,
+            "the hidden Features tab must be gone")
     for marker in (
-        "Ready on this device",
+        "Running on this PC",
         "Advanced: local address",
         "Advanced: connection JSON",
-        "Advanced: page detail",
         "Saved work and recent signals",
         "signals, not verdicts",
         "Transcript checker",

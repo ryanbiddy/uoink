@@ -287,12 +287,17 @@
       gap: 8px;
     }
 
+    /* A label with badges ("Activity 3 failed 2") wraps its badges onto a
+       second line before it would spill past its own edge. */
     .nav-button {
       display: flex;
+      flex-wrap: wrap;
       align-items: center;
       justify-content: space-between;
+      column-gap: 6px;
+      row-gap: 2px;
       width: 100%;
-      min-height: 42px;
+      min-height: var(--target-primary);
       border: 1px solid transparent;
       border-radius: var(--control-radius);
       padding: 0 12px;
@@ -323,6 +328,25 @@
       font-size: 12px;
     }
 
+    .nav-badges {
+      display: inline-flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 2px 6px;
+    }
+
+    /* Shell: "N failed" on Activity. The word carries the state; the rust
+       outline only repeats it. */
+    .nav-failed {
+      border: 1px solid var(--fail);
+      border-radius: var(--radius-pill);
+      padding: 1px 7px;
+      color: var(--rust-bright);
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
     .sidebar-bottom {
       display: grid;
       gap: 12px;
@@ -331,108 +355,49 @@
       border-top: 1px solid var(--border);
     }
 
-    .sidebar-more {
+    /* Shell: helper status. A static dot plus words ("Running on this PC",
+       or offline plus what to do on this OS); the dot never stands alone. */
+    .helper-status {
       display: grid;
-      gap: 12px;
+      gap: 6px;
+      color: var(--text);
+      font-weight: 600;
     }
 
-    .sidebar-more summary {
-      list-style: none;
-    }
-
-    .sidebar-more summary::-webkit-details-marker {
-      display: none;
-    }
-
-    .sidebar-more-summary {
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 0 12px;
-      cursor: pointer;
-    }
-
-    .sidebar-more-actions {
-      display: grid;
-      gap: 12px;
-    }
-
-    .sidebar-action {
-      width: 100%;
-      min-height: 36px;
-      border: 1px solid var(--border);
-      border-radius: var(--control-radius);
-      background: transparent;
-      color: var(--muted);
-      cursor: pointer;
-      font-weight: 800;
-    }
-
-    .sidebar-action:hover,
-    .sidebar-action:focus-visible {
-      outline: none;
-      border-color: color-mix(in srgb, var(--action) 48%, transparent);
-      color: var(--cream);
-      background: color-mix(in srgb, var(--action) 12%, transparent);
-    }
-
-    .running-pill {
+    .helper-status-line {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      width: fit-content;
-      max-width: 100%;
-      min-height: 34px;
-      border: 1px solid color-mix(in srgb, var(--ok) 34%, transparent);
-      border-radius: var(--pill-radius);
-      padding: 8px 12px;
-      background: var(--ink-warm);
-      color: var(--cream);
-      font-weight: 800;
+      min-width: 0;
     }
 
-    .running-pill .pip {
+    .helper-status .pip {
       width: 8px;
       height: 8px;
-      border-radius: 999px;
+      flex: 0 0 auto;
+      border-radius: var(--radius-pill);
+      background: var(--line-strong);
+    }
+
+    .helper-status.online .pip {
       background: var(--ok);
-      box-shadow: 0 0 0 0 color-mix(in srgb, var(--ok) 58%, transparent);
-      animation: pulse 1.8s ease-out infinite;
     }
 
-    .running-pill.offline {
-      border-color: color-mix(in srgb, var(--action) 44%, transparent);
+    .helper-status.offline .pip {
+      background: var(--fail);
     }
 
-    .running-pill.offline .pip {
-      background: var(--action);
-      animation: none;
-      box-shadow: none;
-    }
-
-    @keyframes pulse {
-      0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--ok) 58%, transparent); }
-      70% { box-shadow: 0 0 0 8px color-mix(in srgb, var(--ok) 0%, transparent); }
-      100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--ok) 0%, transparent); }
+    .helper-status-fix {
+      color: var(--text-2);
+      font-size: 12px;
+      font-weight: 400;
+      line-height: 1.45;
     }
 
     .localhost {
       color: var(--dim);
       font-family: var(--font-mono);
       font-size: 12px;
-    }
-
-    .stop {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 36px;
-      border: 1px solid color-mix(in srgb, var(--action) 38%, transparent);
-      border-radius: var(--control-radius);
-      background: color-mix(in srgb, var(--action) 8%, transparent);
-      color: var(--text);
-      cursor: pointer;
-      font-weight: 800;
     }
 
     .main {
@@ -479,6 +444,9 @@
     #tab-yoink .page-head > div:first-child {
       flex: 1 1 320px;
       min-width: 0;
+    }
+    #yoinkBack {
+      margin-bottom: 12px;
     }
     .yoink-actions {
       flex: 1 1 100%;
@@ -1298,117 +1266,12 @@
       line-height: 1.45;
     }
 
-    .workspace-layout {
-      display: grid;
-      grid-template-columns: 300px minmax(0, 1fr);
-      gap: 16px;
-      align-items: start;
-    }
-
-    .workspace-list,
-    .workspace-main {
-      display: grid;
-      gap: 12px;
-    }
-
-    .workspace-card {
-      display: grid;
-      gap: 7px;
-      width: 100%;
-      border: 1px solid var(--border);
-      border-radius: var(--control-radius);
-      padding: 13px;
-      background: var(--ink-warm);
-      color: var(--cream);
-      cursor: pointer;
-      text-align: left;
-    }
-
-    .workspace-card:hover,
-    .workspace-card:focus-visible,
-    .workspace-card.active {
-      outline: none;
-      border-color: color-mix(in srgb, var(--action) 52%, transparent);
-      background: var(--surface-sel);
-    }
-
-    .workspace-form {
-      display: grid;
-      gap: 10px;
-    }
-
-    .slider-row {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 12px;
-      align-items: center;
-      color: var(--muted);
-      font-family: var(--font-mono);
-      font-size: 12px;
-    }
-
-    .example-list {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-      gap: 10px;
-    }
-
-    .mini-card {
-      display: grid;
-      gap: 8px;
-      border: 1px solid var(--border);
-      border-radius: var(--control-radius);
-      padding: 12px;
-      background: color-mix(in srgb, var(--bg) 32%, transparent);
-    }
-
-    .workspace-tabs {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-bottom: 12px;
-    }
-
-    .workspace-tab {
-      min-height: 32px;
-      border: 1px solid var(--border);
-      border-radius: var(--pill-radius);
-      padding: 0 12px;
-      background: transparent;
-      color: var(--muted);
-      cursor: pointer;
-      font-weight: 800;
-    }
-
-    .workspace-tab.active {
-      border-color: var(--rust);
-      background: color-mix(in srgb, var(--action) 16%, transparent);
-      color: var(--cream);
-    }
-
-    .workspace-pane {
-      display: none;
-    }
-
-    .workspace-pane.active {
-      display: grid;
-      gap: 10px;
-    }
-
     .draft-box {
       min-height: 160px;
       padding: 12px;
       resize: vertical;
     }
 
-    .script-layout {
-      display: grid;
-      grid-template-columns: 320px minmax(0, 1fr);
-      gap: 16px;
-      align-items: start;
-    }
-
-    .features-layout,
     .writing-layout {
       display: grid;
       grid-template-columns: minmax(280px, 0.8fr) minmax(0, 1.2fr);
@@ -1416,8 +1279,6 @@
       align-items: start;
     }
 
-    .feature-group-list,
-    .feature-row-list,
     .anchor-list,
     .site-list,
     .channel-list {
@@ -1425,8 +1286,6 @@
       gap: 10px;
     }
 
-    .feature-group-card,
-    .feature-row,
     .anchor-row,
     .site-row,
     .channel-row,
@@ -1437,22 +1296,6 @@
       background: var(--ink-warm);
     }
 
-    .feature-group-card {
-      display: grid;
-      gap: 7px;
-      width: 100%;
-      padding: 13px;
-      color: var(--cream);
-      cursor: pointer;
-      text-align: left;
-    }
-
-    .feature-group-card.active {
-      border-color: color-mix(in srgb, var(--action) 52%, transparent);
-      background: var(--surface-sel);
-    }
-
-    .feature-row,
     .anchor-row,
     .site-row,
     .channel-row {
@@ -1461,7 +1304,6 @@
       padding: 13px;
     }
 
-    .feature-row-top,
     .anchor-row-top,
     .site-row,
     .channel-row-top {
@@ -1472,7 +1314,6 @@
       min-width: 0;
     }
 
-    .feature-row p,
     .warning-panel p,
     .writing-output p {
       margin: 0;
@@ -2553,58 +2394,9 @@
       white-space: nowrap;
     }
 
-    .script-list,
-    .script-form,
     .script-view {
       display: grid;
       gap: 12px;
-    }
-
-    .script-card,
-    .script-block {
-      border: 1px solid var(--border);
-      border-radius: var(--control-radius);
-      background: var(--ink-warm);
-    }
-
-    .script-card {
-      display: grid;
-      gap: 7px;
-      width: 100%;
-      padding: 13px;
-      color: var(--cream);
-      cursor: pointer;
-      text-align: left;
-    }
-
-    .script-card:hover,
-    .script-card:focus-visible,
-    .script-card.active {
-      outline: none;
-      border-color: color-mix(in srgb, var(--action) 52%, transparent);
-      background: var(--surface-sel);
-    }
-
-    .script-block summary {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      min-height: 44px;
-      padding: 12px 14px;
-      color: var(--cream);
-      cursor: pointer;
-      font-weight: 900;
-    }
-
-    .script-block-body {
-      display: grid;
-      gap: 10px;
-      border-top: 1px solid var(--border);
-      padding: 14px;
-      color: var(--muted);
-      line-height: 1.5;
-      white-space: pre-wrap;
     }
 
     .source-row {
@@ -3211,33 +3003,54 @@
       color: var(--muted);
     }
 
-    .about-grid {
-      display: grid;
-      grid-template-columns: 1.1fr 1fr 1fr;
-      gap: 16px;
-    }
-
-    .about-hero {
-      display: grid;
-      place-items: center;
-      min-height: 360px;
-      border: 1px solid var(--border);
-      border-radius: 18px;
-      background:
-        radial-gradient(circle at 50% 20%, color-mix(in srgb, var(--action) 18%, transparent), transparent 18rem),
-        var(--ink-warm);
-      text-align: center;
-    }
-
-    .about-hero .wordmark {
-      justify-content: center;
-      font-size: 56px;
+    /* Shell: Settings is one page in five sections; #settings/<section>
+       scrolls to a section and puts focus on its heading. */
+    .settings-index {
+      display: flex;
+      flex-wrap: wrap;
       gap: 8px;
+      margin-bottom: 18px;
     }
 
-    .about-hero .uoink-mark {
-      width: 58px;
-      height: 58px;
+    .settings-index a {
+      display: inline-flex;
+      align-items: center;
+      min-height: var(--target-chip);
+      border: 1px solid var(--line-strong);
+      border-radius: var(--radius-pill);
+      padding: 0 12px;
+      color: var(--text);
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    .settings-index a:hover {
+      text-decoration: underline;
+    }
+
+    .settings-section {
+      display: grid;
+      gap: 12px;
+      margin-bottom: 28px;
+      scroll-margin-top: 16px;
+    }
+
+    .settings-section-title {
+      color: var(--text);
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    /* In-app links that move to another route (For You from Library). */
+    .route-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      min-height: var(--target-chip);
+      color: var(--text);
+      font-weight: 700;
+      text-decoration: underline;
+      text-underline-offset: 3px;
     }
 
     .link-list {
@@ -3272,14 +3085,6 @@
       cursor: pointer;
       font-size: 12px;
       font-weight: 800;
-    }
-
-    .quote {
-      margin-top: 20px;
-      color: var(--muted);
-      font-family: Georgia, "Times New Roman", serif;
-      font-size: 22px;
-      font-style: italic;
     }
 
     .toast {
@@ -3393,17 +3198,22 @@
         width: 28px;
         height: 28px;
       }
+      /* The nav row wraps instead of squeezing five equal columns: each item
+         keeps at least its label and badges ("12 failed" on Activity), and an
+         item that no longer fits moves to the next line instead of running
+         into its neighbour. */
       .nav {
-        grid-template-columns: repeat(5, minmax(0, 1fr));
+        display: flex;
+        flex-wrap: wrap;
         gap: 8px;
       }
       .nav-button {
-        min-width: 0;
-        min-height: 36px;
+        flex: 1 1 auto;
+        width: auto;
+        min-height: var(--target-primary);
         padding: 0 9px;
         font-size: 12px;
         justify-content: flex-start;
-        gap: 6px;
       }
       .nav-button .nav-count {
         margin-left: 0;
@@ -3437,37 +3247,12 @@
       }
       .sidebar-bottom {
         display: grid;
-        grid-template-columns: minmax(180px, auto) minmax(100px, 1fr) minmax(150px, 1fr) minmax(128px, 0.75fr);
         grid-column: 1 / -1;
         gap: 8px;
         align-items: center;
         margin-top: 0;
         padding-top: 0;
         border-top: 0;
-      }
-      .sidebar-more {
-        position: relative;
-        display: block;
-        min-width: 0;
-      }
-      .sidebar-more-summary {
-        display: flex;
-        width: 100%;
-      }
-      .sidebar-more-actions {
-        position: absolute;
-        top: calc(100% + 8px);
-        right: 0;
-        z-index: 26;
-        width: min(260px, calc(100vw - 36px));
-        border: 1px solid var(--border);
-        border-radius: var(--control-radius);
-        padding: 8px;
-        background: var(--surface);
-        box-shadow: var(--shadow-soft);
-      }
-      .sidebar-more:not([open]) .sidebar-more-actions {
-        display: none;
       }
 
       .screenshot-picker {
@@ -3479,15 +3264,11 @@
       .control-grid,
       .activity-layout,
       .feature-grid,
-      .features-layout,
       .resurface-layout,
-      .workspace-layout,
-      .script-layout,
       .writing-layout,
       .evidence-layout,
       .yoink-layout,
-      .settings-grid,
-      .about-grid {
+      .settings-grid {
         grid-template-columns: 1fr;
       }
       .control-grid {
@@ -3503,16 +3284,11 @@
       .sidebar {
         grid-template-columns: 1fr;
       }
-      .nav {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+      .nav-button {
+        flex-basis: calc(50% - 4px);
       }
       .sidebar-bottom {
         grid-template-columns: 1fr;
-      }
-      .sidebar-more-actions {
-        left: 0;
-        right: auto;
-        width: 100%;
       }
       .screenshot-picker {
         grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -3997,24 +3773,17 @@
         <span class="wordmark-text">OINK</span>
       </div>
       <nav class="nav" aria-label="Sections">
-        <button class="nav-button active" type="button" data-tab-button="library" data-nav-label="Library">Library <span class="nav-count" id="libraryNavCount" title="0 saved sources" aria-label="0 saved sources">0</span></button>
-        <button class="nav-button" type="button" data-tab-button="sources" data-nav-label="Sources">Sources <span class="nav-count" id="sourcesNavCount" title="0 source types" aria-label="0 source types">0</span></button>
-        <button class="nav-button" type="button" data-tab-button="for-you" data-nav-label="For You">For You <span class="nav-count" id="forYouNavCount" title="0 suggestions" aria-label="0 suggestions">0</span></button>
+        <button class="nav-button active" type="button" data-tab-button="library" data-nav-label="Library" aria-current="page">Library <span class="nav-count" id="libraryNavCount" title="0 saved sources" aria-label="0 saved sources">0</span></button>
+        <button class="nav-button" type="button" data-tab-button="activity" data-nav-label="Activity">Activity <span class="nav-badges"><span class="nav-failed hidden" id="activityFailedBadge"></span><span class="nav-count" id="activityNavCount" title="0 active jobs" aria-label="0 active jobs">0</span></span></button>
         <button class="nav-button" type="button" data-tab-button="writing" data-nav-label="Generate">Generate <span class="nav-count" id="writingNavCount" title="0 Generate items" aria-label="0 Generate items">0</span></button>
-        <button class="nav-button" type="button" data-tab-button="settings">Settings</button>
+        <button class="nav-button" type="button" data-tab-button="sources" data-nav-label="Sources">Sources <span class="nav-count" id="sourcesNavCount" title="0 source types" aria-label="0 source types">0</span></button>
+        <button class="nav-button" type="button" data-tab-button="settings" data-nav-label="Settings">Settings</button>
       </nav>
       <div class="sidebar-bottom">
-        <div class="running-pill" id="runningPill"><span class="pip"></span><span>Ready on this device</span></div>
-        <div class="localhost" id="portLabel">Private local app</div>
-        <button class="sidebar-action" type="button" id="viewActivity" data-tab-button="activity" data-nav-label="Activity">Activity <span class="nav-count" id="activityNavCount" title="0 active jobs" aria-label="0 active jobs">0</span></button>
-        <details class="sidebar-more" id="sidebarControls" open>
-          <summary class="sidebar-action sidebar-more-summary">More controls</summary>
-          <div class="sidebar-more-actions">
-            <button class="sidebar-action" type="button" data-tab-button="about" data-nav-label="About">About Uoink</button>
-            <button class="sidebar-action" type="button" id="starGithub">⭐ Star on GitHub</button>
-            <button class="stop" type="button" id="stopHelper">Stop Uoink</button>
-          </div>
-        </details>
+        <div class="helper-status" id="runningPill" role="status">
+          <span class="helper-status-line"><span class="pip" aria-hidden="true"></span><span id="helperStatusText">Checking Uoink...</span></span>
+          <span class="helper-status-fix hidden" id="helperOfflineFix"></span>
+        </div>
       </div>
     </aside>
 
@@ -4080,178 +3849,6 @@
               <div class="localhost" id="anchorMeta">anchor signals</div>
             </div>
             <div class="panel-body" id="anchorRows"></div>
-          </div>
-        </section>
-
-        <section class="tab-panel" id="tab-build" data-tab-panel="build">
-          <div class="page-head">
-            <div>
-              <div class="eyebrow">Build</div>
-              <h1>Plan a video <em>against your corpus.</em></h1>
-              <p class="lede">Drop a working hook, format, and topic. Uoink assembles examples, audience questions, and your own channel patterns for an agent or a manual critique pass.</p>
-            </div>
-            <button class="button ghost" type="button" id="reloadBuild">Reload</button>
-          </div>
-          <div class="learn-links" aria-label="Build walkthrough links">
-            <a href="https://uoink.app/features/build-workspace" target="_blank" rel="noreferrer">Learn: Build Workspace</a>
-            <a href="https://uoink.app/features/critique-corpus" target="_blank" rel="noreferrer">Learn: Critique Corpus</a>
-          </div>
-
-          <div class="workspace-layout">
-            <aside class="panel">
-              <div class="panel-head">
-                <div class="panel-title">Saved workspaces</div>
-                <span class="nav-count" id="workspaceCount">0</span>
-              </div>
-              <div class="panel-body">
-                <form class="workspace-form" id="workspaceForm">
-                  <input class="field" id="workspaceHook" type="text" list="hookSuggestions" autocomplete="off" placeholder="working hook or angle">
-                  <select class="field" id="workspaceFormat"></select>
-                  <input class="field" id="workspaceTopic" type="text" list="topicSuggestions" autocomplete="off" placeholder="topic, e.g. AI agents">
-                  <input class="field" id="workspaceChannel" type="text" list="channelSuggestions" autocomplete="off" placeholder="your channel handle (optional)">
-                  <div class="slider-row">
-                    <input id="workspaceExamples" type="range" min="4" max="20" step="1" value="10">
-                    <span id="workspaceExamplesLabel">10 examples</span>
-                  </div>
-                  <label class="inline-row"><input id="workspaceTaste" type="checkbox" checked> Use my taste anchors</label>
-                  <label class="inline-row"><input id="workspaceSelf" type="checkbox" checked> Use my channel's overperformer patterns</label>
-                  <button class="button primary" type="submit">Assemble workspace</button>
-                </form>
-                <div class="workspace-list" id="workspaceList"></div>
-              </div>
-            </aside>
-
-            <section class="workspace-main">
-              <div class="panel">
-                <div class="panel-head">
-                  <div class="panel-title" id="workspaceTitle">Workspace</div>
-                  <button class="button" type="button" id="assembleCurrentWorkspace">Assemble</button>
-                </div>
-                <div class="panel-body" id="workspaceSummary">
-                  <div class="job-row">
-                    <div class="job-title">Planning a video?</div>
-                    <div class="job-sub">Create a workspace to assemble inspiration from your corpus.</div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="panel">
-                <div class="panel-head">
-                  <div class="panel-title">Workspace view</div>
-                  <div class="localhost" id="workspaceMeta">no workspace selected</div>
-                </div>
-                <div class="panel-body">
-                  <div class="workspace-tabs" role="tablist" aria-label="Workspace views">
-                    <button class="workspace-tab active" type="button" data-workspace-tab="patterns">Hook patterns</button>
-                    <button class="workspace-tab" type="button" data-workspace-tab="questions">Audience questions</button>
-                    <button class="workspace-tab" type="button" data-workspace-tab="performance">Your past performance</button>
-                    <button class="workspace-tab" type="button" data-workspace-tab="critique">Critique your draft</button>
-                  </div>
-                  <div class="workspace-pane active" data-workspace-pane="patterns" id="workspacePatterns"></div>
-                  <div class="workspace-pane" data-workspace-pane="questions" id="workspaceQuestions"></div>
-                  <div class="workspace-pane" data-workspace-pane="performance" id="workspacePerformance"></div>
-                  <div class="workspace-pane" data-workspace-pane="critique">
-                    <textarea class="field draft-box" id="workspaceDraft" placeholder="Paste a draft hook, outline, or rough script."></textarea>
-                    <div class="inline-row">
-                      <button class="button primary" type="button" id="runWorkspaceCritique">Run critique</button>
-                      <span class="soft-note">Any agent can post findings back; Uoink stores them here.</span>
-                    </div>
-                    <div id="workspaceCritiqueResult"></div>
-                  </div>
-                </div>
-              </div>
-            </section>
-          </div>
-        </section>
-
-        <section class="tab-panel" id="tab-script" data-tab-panel="script">
-          <div class="page-head">
-            <div>
-              <div class="eyebrow">Script Studio</div>
-              <h1>Draft with evidence, <em>and receipts.</em></h1>
-              <p class="lede">Start from a Build workspace, ask an agent for a grounded script, save versions, revise against critique notes, and pull a shot list.</p>
-            </div>
-            <button class="button ghost" type="button" id="reloadScripts">Reload</button>
-          </div>
-          <div class="learn-links" aria-label="Script walkthrough links">
-            <a href="https://uoink.app/features/script-studio" target="_blank" rel="noreferrer">Learn: Script Studio</a>
-            <a href="https://uoink.app/features/style-anchors" target="_blank" rel="noreferrer">Learn: Style Anchors</a>
-          </div>
-
-          <div class="script-layout">
-            <aside class="panel">
-              <div class="panel-head">
-                <div class="panel-title">Script library</div>
-                <span class="nav-count" id="scriptCount">0</span>
-              </div>
-              <div class="panel-body">
-                <form class="script-form" id="scriptForm">
-                  <label class="soft-note" for="scriptWorkspace">Source picker</label>
-                  <select class="field" id="scriptWorkspace"></select>
-                  <div class="combo" id="scriptSourceCombo">
-                    <input class="field combo-input" id="scriptSourceSearch" type="search" role="combobox" autocomplete="off" aria-expanded="false" aria-controls="scriptSourceOptions" placeholder="Search saved uoinks">
-                    <input id="scriptSource" type="hidden">
-                    <div class="combo-list" id="scriptSourceOptions" role="listbox"></div>
-                  </div>
-                  <input class="field" id="scriptTopic" type="text" list="topicSuggestions" autocomplete="off" placeholder="topic from corpus">
-                  <input class="field" id="scriptTargetLength" type="number" min="15" step="15" value="120" placeholder="target length seconds">
-                  <div class="radio-grid" id="scriptHookLensPicker">
-                    <label class="choice-row"><input type="radio" name="scriptHookLens" value="informative" checked><span>Informative</span></label>
-                    <label class="choice-row"><input type="radio" name="scriptHookLens" value="engagement_bait"><span>Engagement bait</span></label>
-                    <label class="choice-row"><input type="radio" name="scriptHookLens" value="disappointment_contrarian"><span>Contrarian</span></label>
-                    <label class="choice-row"><input type="radio" name="scriptHookLens" value="curiosity_gap"><span>Curiosity gap</span></label>
-                    <label class="choice-row"><input type="radio" name="scriptHookLens" value="stakes"><span>Stakes</span></label>
-                    <label class="choice-row"><input type="radio" name="scriptHookLens" value="success_case_study"><span>Success case</span></label>
-                    <label class="choice-row"><input type="radio" name="scriptHookLens" value="failure_lesson"><span>Failure lesson</span></label>
-                    <label class="choice-row"><input type="radio" name="scriptHookLens" value="question_open_loop"><span>Question</span></label>
-                    <label class="choice-row"><input type="radio" name="scriptHookLens" value="frame_shift"><span>Frame shift</span></label>
-                  </div>
-                  <input class="field" id="scriptHookStyle" type="text" list="anchorNameSuggestions" autocomplete="off" placeholder="style note, optional">
-                  <div class="choice-grid" id="scriptStyleMode">
-                    <label class="choice-row"><input type="radio" name="scriptStyle" value="default" checked><span>Default voice</span></label>
-                    <label class="choice-row"><input type="radio" name="scriptStyle" value="anchors"><span>From anchors</span></label>
-                    <label class="choice-row"><input type="radio" name="scriptStyle" value="specific"><span>Specific anchor</span></label>
-                  </div>
-                  <div class="anchor-list" id="scriptAnchorList"></div>
-                  <input class="field" id="scriptCta" type="text" list="ctaSuggestions" autocomplete="off" placeholder="CTA target">
-                  <label class="inline-row"><input id="scriptVoiceWarnings" type="checkbox" checked> Show Voice DNA warnings</label>
-                  <label class="inline-row"><input id="scriptSkipWarnings" type="checkbox"> Skip warnings this time</label>
-                  <button class="button primary" type="submit" id="generateScript">Generate script</button>
-                </form>
-                <div class="script-list" id="scriptList"></div>
-              </div>
-            </aside>
-
-            <section class="script-view">
-              <div class="panel">
-                <div class="panel-head">
-                  <div class="panel-title" id="scriptTitle">Script</div>
-                  <div class="inline-row">
-                    <button class="button ghost" type="button" id="reviseScript">Revise</button>
-                    <button class="button" type="button" id="deriveShotList">Derive shot list</button>
-                  </div>
-                </div>
-                <div class="panel-body" id="scriptDetail">
-                  <div class="job-row">
-                    <div class="job-title">No script selected.</div>
-                    <div class="job-sub">Pick a workspace and generate. Saved versions land here.</div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="panel">
-                <div class="panel-head">
-                  <div class="panel-title">Revision loop</div>
-                  <div class="localhost">grounded in critique findings</div>
-                </div>
-                <div class="panel-body">
-                  <textarea class="field draft-box" id="scriptRevisionNotes" placeholder="Paste critique findings or revision target."></textarea>
-                  <textarea class="field draft-box" id="scriptRevisionDraft" placeholder="Optional revised script to save as the next version."></textarea>
-                  <button class="button primary" type="button" id="saveScriptRevision">Run revision / save version</button>
-                  <div id="scriptRevisionResult"></div>
-                </div>
-              </div>
-            </section>
           </div>
         </section>
 
@@ -4535,6 +4132,7 @@
               <p class="lede">Filter by platform, source type, author, and topic, or search across every transcript and comment. Everything stays on this machine in your Uoink index.</p>
             </div>
             <div class="inline-row">
+              <a class="route-link" href="#for-you" data-nav-label="For You">For You <span class="nav-count" id="forYouNavCount" title="0 suggestions" aria-label="0 suggestions">0</span></a>
               <button class="button ghost" type="button" id="clearFilters">Clear filters</button>
               <button class="button primary" type="button" id="newYoink">Open YouTube</button>
             </div>
@@ -4945,6 +4543,7 @@
         <section class="tab-panel" id="tab-yoink" data-tab-panel="yoink">
           <div class="page-head">
             <div>
+              <button class="button ghost" type="button" id="yoinkBack">&larr; Back</button>
               <div class="eyebrow">Uoink</div>
               <h1 id="yoinkHeading" tabindex="-1">Pick a uoink <em>to inspect.</em></h1>
               <p class="lede" id="yoinkSubhead">Podcast episodes, interviews, and regular videos share one saved-source view.</p>
@@ -5030,7 +4629,7 @@
             <div>
               <div class="eyebrow">Settings</div>
               <h1>Set up <em>Uoink.</em></h1>
-              <p class="lede">Keys, folders, topics, source rules, transcript checks, and agent connections live here.</p>
+              <p class="lede">Every Uoink setting lives on this page: capture, AI features, library and export, agents, and the app itself.</p>
             </div>
             <button class="button ghost" type="button" id="reloadSettings">Reload</button>
           </div>
@@ -5042,46 +4641,17 @@
             <a href="https://uoink.app/features/claim-extraction" target="_blank" rel="noreferrer">Learn: Claims</a>
           </div>
 
+          <nav class="settings-index" aria-label="Settings sections">
+            <a href="#settings/capture">Capture</a>
+            <a href="#settings/ai">AI features</a>
+            <a href="#settings/library">Library and export</a>
+            <a href="#settings/agents">Agents (MCP)</a>
+            <a href="#settings/app">App</a>
+          </nav>
+
+          <section class="settings-section" id="settings-capture" aria-labelledby="settingsCaptureTitle">
+          <h2 class="settings-section-title" id="settingsCaptureTitle" tabindex="-1">Capture</h2>
           <div class="settings-grid">
-            <div class="setting-block" id="byo-key">
-              <h2>AI writing key</h2>
-              <p class="setting-copy" id="keyStatus">Checking key status...</p>
-              <div class="inline-row">
-                <input class="field" style="flex:1;min-width:260px" id="anthropicKey" type="password" placeholder="Paste your Anthropic key" aria-label="Anthropic API key">
-                <button class="button" type="button" id="saveKey">Save key</button>
-                <button class="button ghost" type="button" id="testKey">Test</button>
-              </div>
-              <p class="setting-copy">Stored on this device and used only for the optional AI features you turn on.</p>
-            </div>
-
-            <div class="setting-block">
-              <h2>Local app</h2>
-              <p class="setting-copy" id="helperStatus">Checking app status...</p>
-              <div class="inline-row">
-                <button class="button danger" type="button" id="stopHelperSettings">Stop Uoink</button>
-                <label class="inline-row"><input id="autostartToggle" type="checkbox" checked> Autostart on login</label>
-              </div>
-              <label class="inline-row"><input id="notificationsEnabled" type="checkbox" checked> Show desktop notifications</label>
-              <p class="setting-copy">When off, updates stay in Activity without opening a balloon. Fullscreen apps also receive this courtesy automatically.</p>
-            </div>
-
-            <div class="setting-block">
-              <h2>Your role</h2>
-              <p class="setting-copy">Sets the default views and what Library puts first.</p>
-              <div class="choice-grid" id="rolePicker"></div>
-            </div>
-
-            <div class="setting-block">
-              <h2>Your channels</h2>
-              <p class="setting-copy" id="channelsStatus">Checking your channel registry...</p>
-              <div class="channel-list" id="channelsList"></div>
-              <div class="inline-row">
-                <input class="field" style="flex:1;min-width:220px" id="channelHandle" type="text" placeholder="@yourhandle" aria-label="Channel handle">
-                <button class="button" type="button" id="addChannel">Add</button>
-                <button class="button ghost" type="button" id="recognizeChannels">Recognize past uoinks</button>
-              </div>
-            </div>
-
             <div class="setting-block">
               <h2>Auto-uoink playlists</h2>
               <p class="setting-copy" id="playlistStatus">Checking playlist monitor...</p>
@@ -5127,6 +4697,71 @@
               <p class="setting-copy">Uoink only works on sites you've enabled. Right-click any page and choose "Uoink this page"; if the site needs permission, the extension asks first.</p>
             </div>
 
+            <div class="setting-block">
+              <h2>Clipboard screenshots</h2>
+              <p class="setting-copy">How many screenshots ride along when you paste a uoink into a chat.</p>
+              <div class="inline-row">
+                <input class="field" style="width:120px" id="screenshotCount" type="number" min="0" max="12" step="1" value="4">
+                <button class="button" type="button" id="saveScreenshotCount">Save</button>
+              </div>
+            </div>
+
+            <div class="setting-block">
+              <h2>Transcript checker</h2>
+              <p class="setting-copy" id="reliabilityStatus">Checking transcript checker...</p>
+              <label class="inline-row"><input id="reliabilityAutoCheck" type="checkbox"> Auto-check transcript quality</label>
+              <label class="inline-row"><input id="asrFallbackEnabled" type="checkbox" checked> Transcribe videos locally when captions are missing</label>
+              <div class="inline-row">
+                <select class="field" id="whisperModel" aria-label="Transcript checker model"></select>
+                <button class="button ghost" type="button" id="saveWhisperModel">Save choice</button>
+              </div>
+              <div class="inline-row">
+                <button class="button" type="button" id="downloadReliabilityModel">Download selected model</button>
+              </div>
+              <p class="setting-copy">Runs locally. When captions are missing, the selected model can take about 10–15 minutes per hour of video on a typical laptop; larger models may take longer. Downloads only after you ask and stays in your Uoink data folder.</p>
+            </div>
+          </div>
+          </section>
+
+          <section class="settings-section" id="settings-ai" aria-labelledby="settingsAiTitle">
+          <h2 class="settings-section-title" id="settingsAiTitle" tabindex="-1">AI features</h2>
+          <div class="settings-grid">
+            <div class="setting-block" id="byo-key">
+              <h2>AI writing key</h2>
+              <p class="setting-copy" id="keyStatus">Checking key status...</p>
+              <div class="inline-row">
+                <input class="field" style="flex:1;min-width:260px" id="anthropicKey" type="password" placeholder="Paste your Anthropic key" aria-label="Anthropic API key">
+                <button class="button" type="button" id="saveKey">Save key</button>
+                <button class="button ghost" type="button" id="testKey">Test</button>
+              </div>
+              <p class="setting-copy">Stored on this device and used only for the optional AI features you turn on.</p>
+            </div>
+
+            <div class="setting-block">
+              <h2>Claim verification</h2>
+              <p class="setting-copy">When on, every uoink's transcript is scanned for checkable factual claims. Evidence is shown for your judgment. Uoink never auto-asserts truth.</p>
+              <label class="inline-row"><input id="claimVerificationToggle" type="checkbox"> Scan new uoinks for claims worth verifying</label>
+            </div>
+
+            <div class="setting-block" id="entity-extraction">
+              <h2>Entity extraction</h2>
+              <p class="setting-copy">Pull people, tools, products and companies off each transcript into the library graph. Uses your Anthropic key (~2,500 output tokens per item). Off by default; a saved key alone never starts it.</p>
+              <label class="inline-row"><input id="entityExtractionToggle" type="checkbox"> Extract entities from new uoinks</label>
+            </div>
+
+            <div class="setting-block">
+              <h2>Writing Studio</h2>
+              <p class="setting-copy">Voice DNA warnings flag canned phrasing without blocking the draft. The screenshot picker shows before anything opens in X.</p>
+              <label class="inline-row"><input id="voiceWarningsEnabled" type="checkbox" checked> Show Voice DNA warnings</label>
+              <label class="inline-row"><input id="voiceWarningsPerGeneration" type="checkbox" checked> Show the per-draft skip control</label>
+              <label class="inline-row"><input id="writingScreenshotPickerToggle" type="checkbox" checked> Show screenshot picker in composer</label>
+            </div>
+          </div>
+          </section>
+
+          <section class="settings-section" id="settings-library" aria-labelledby="settingsLibraryTitle">
+          <h2 class="settings-section-title" id="settingsLibraryTitle" tabindex="-1">Library and export</h2>
+          <div class="settings-grid">
             <div class="setting-block">
               <h2>Output folder</h2>
               <div class="folder-summary">
@@ -5183,6 +4818,28 @@
             </div>
 
             <div class="setting-block">
+              <h2>Your role</h2>
+              <p class="setting-copy">Sets the default views and what Library puts first.</p>
+              <div class="choice-grid" id="rolePicker"></div>
+            </div>
+
+            <div class="setting-block">
+              <h2>Your channels</h2>
+              <p class="setting-copy" id="channelsStatus">Checking your channel registry...</p>
+              <div class="channel-list" id="channelsList"></div>
+              <div class="inline-row">
+                <input class="field" style="flex:1;min-width:220px" id="channelHandle" type="text" placeholder="@yourhandle" aria-label="Channel handle">
+                <button class="button" type="button" id="addChannel">Add</button>
+                <button class="button ghost" type="button" id="recognizeChannels">Recognize past uoinks</button>
+              </div>
+            </div>
+          </div>
+          </section>
+
+          <section class="settings-section" id="settings-agents" aria-labelledby="settingsAgentsTitle">
+          <h2 class="settings-section-title" id="settingsAgentsTitle" tabindex="-1">Agents (MCP)</h2>
+          <div class="settings-grid">
+            <div class="setting-block">
               <h2>Agent connection</h2>
               <div class="agent-setup-card" id="settingsAgentSetupCard">
                 <strong>Checking installed writing agents...</strong>
@@ -5194,8 +4851,24 @@
                 <button class="button" type="button" id="copyMcp">Copy connection JSON</button>
               </details>
             </div>
+          </div>
+          </section>
 
-            <div class="setting-block">
+          <section class="settings-section" id="settings-app" aria-labelledby="settingsAppTitle">
+          <h2 class="settings-section-title" id="settingsAppTitle" tabindex="-1">App</h2>
+          <div class="settings-grid">
+            <div class="setting-block" id="settings-helper">
+              <h2>Local app</h2>
+              <p class="setting-copy" id="helperStatus">Checking app status...</p>
+              <div class="inline-row">
+                <button class="button danger" type="button" id="stopHelperSettings">Stop Uoink</button>
+                <label class="inline-row"><input id="autostartToggle" type="checkbox" checked> Autostart on login</label>
+              </div>
+              <label class="inline-row"><input id="notificationsEnabled" type="checkbox" checked> Show desktop notifications</label>
+              <p class="setting-copy">When off, updates stay in Activity without opening a balloon. Fullscreen apps also receive this courtesy automatically.</p>
+            </div>
+
+            <div class="setting-block" id="settings-updates">
               <h2>Updates</h2>
               <p class="setting-copy" id="versionLine">Loading version...</p>
               <p class="setting-copy" id="updateLine">Last checked: not yet</p>
@@ -5203,136 +4876,28 @@
               <p class="setting-copy-dim" style="font-size:12px;color:var(--dim);margin-top:8px">Checking for updates queries <code>api.github.com</code> to fetch the latest release tag. No telemetry is collected.</p>
             </div>
 
-            <div class="setting-block">
-              <h2>Clipboard screenshots</h2>
-              <p class="setting-copy">How many screenshots ride along when you paste a uoink into a chat.</p>
-              <div class="inline-row">
-                <input class="field" style="width:120px" id="screenshotCount" type="number" min="0" max="12" step="1" value="4">
-                <button class="button" type="button" id="saveScreenshotCount">Save</button>
-              </div>
-            </div>
-
-            <div class="setting-block">
-              <h2>Claim verification</h2>
-              <p class="setting-copy">When on, every uoink's transcript is scanned for checkable factual claims. Evidence is shown for your judgment. Uoink never auto-asserts truth.</p>
-              <label class="inline-row"><input id="claimVerificationToggle" type="checkbox"> Scan new uoinks for claims worth verifying</label>
-            </div>
-
-            <div class="setting-block" id="entity-extraction">
-              <h2>Entity extraction</h2>
-              <p class="setting-copy">Pull people, tools, products and companies off each transcript into the library graph. Uses your Anthropic key (~2,500 output tokens per item). Off by default; a saved key alone never starts it.</p>
-              <label class="inline-row"><input id="entityExtractionToggle" type="checkbox"> Extract entities from new uoinks</label>
-            </div>
-
-            <div class="setting-block">
-              <h2>Writing Studio</h2>
-              <p class="setting-copy">Voice DNA warnings flag canned phrasing without blocking the draft. The screenshot picker shows before anything opens in X.</p>
-              <label class="inline-row"><input id="voiceWarningsEnabled" type="checkbox" checked> Show Voice DNA warnings</label>
-              <label class="inline-row"><input id="voiceWarningsPerGeneration" type="checkbox" checked> Show the per-draft skip control</label>
-              <label class="inline-row"><input id="writingScreenshotPickerToggle" type="checkbox" checked> Show screenshot picker in composer</label>
-            </div>
-
-            <div class="setting-block">
-              <h2>Transcript checker</h2>
-              <p class="setting-copy" id="reliabilityStatus">Checking transcript checker...</p>
-              <label class="inline-row"><input id="reliabilityAutoCheck" type="checkbox"> Auto-check transcript quality</label>
-              <label class="inline-row"><input id="asrFallbackEnabled" type="checkbox" checked> Transcribe videos locally when captions are missing</label>
-              <div class="inline-row">
-                <select class="field" id="whisperModel" aria-label="Transcript checker model"></select>
-                <button class="button ghost" type="button" id="saveWhisperModel">Save choice</button>
-              </div>
-              <div class="inline-row">
-                <button class="button" type="button" id="downloadReliabilityModel">Download selected model</button>
-              </div>
-              <p class="setting-copy">Runs locally. When captions are missing, the selected model can take about 10–15 minutes per hour of video on a typical laptop; larger models may take longer. Downloads only after you ask and stays in your Uoink data folder.</p>
-            </div>
-          </div>
-        </section>
-
-        <section class="tab-panel" id="tab-features" data-tab-panel="features">
-          <div class="page-head">
-            <div>
-              <div class="eyebrow">Features</div>
-              <h1>Everything Uoink does. <em>Learn it as you need it.</em></h1>
-              <p class="lede">This mirrors the feature library on uoink.app. It keeps a local copy so the dashboard still has a map when the site is offline.</p>
-            </div>
-            <div class="inline-row">
-              <button class="button ghost" type="button" id="reloadFeatures">Reload</button>
-              <button class="button primary" type="button" id="openFeaturesIndex">Open feature guide</button>
-            </div>
-          </div>
-
-          <div class="summary-line">
-            <span id="featuresStatus">Loading feature manifest...</span>
-            <span class="soft-note">Capture / Library / Workspace / Verification / Distribution / Identity</span>
-          </div>
-
-          <div class="features-layout">
-            <aside class="panel">
-              <div class="panel-head">
-                <div class="panel-title">Groups</div>
-                <span class="nav-count" id="featureCount">0</span>
-              </div>
-              <div class="panel-body">
-                <div class="feature-group-list" id="featureGroups"></div>
-              </div>
-            </aside>
-            <section class="panel">
-              <div class="panel-head">
-                <div class="panel-title" id="featureGroupTitle">Feature walkthroughs</div>
-                <div class="localhost">guide pages</div>
-              </div>
-              <div class="panel-body">
-                <div class="feature-row-list" id="featureRows"></div>
-              </div>
-            </section>
-          </div>
-        </section>
-
-        <section class="tab-panel" id="tab-about" data-tab-panel="about">
-          <div class="about-grid">
-            <div class="about-hero">
-              <div>
-                <div class="wordmark">
-                  <span class="uoink-mark" aria-hidden="true" style="width:64px;height:64px"></span>
-                  <span class="wordmark-text">OINK</span>
-                </div>
-                <p class="lede" style="margin:18px auto 0">Local-first. Open source. Your machine does the work.</p>
-                <div class="running-pill" id="aboutStatus" style="margin-top:18px"><span class="pip"></span><span>Checking Uoink</span></div>
-                <div class="quote">&quot;Yo. Uoink that.&quot;</div>
-              </div>
-            </div>
-            <div class="setting-block">
-              <h2>Local surfaces</h2>
-              <p class="setting-copy">The same local app serves the dashboard, startup screen, and agent bridge. No cloud account, no sync layer.</p>
-              <div class="link-list">
-                <a href="/dashboard" target="_blank" rel="noreferrer">Dashboard <span>local view</span></a>
-                <a href="/splash" target="_blank" rel="noreferrer">Startup screen <span>local view</span></a>
-                <button type="button" data-tab-button-proxy="settings">Agent setup <span>Settings</span></button>
-              </div>
-            </div>
-            <div class="setting-block">
-              <h2>Runtime</h2>
+            <div class="setting-block" id="settings-about">
+              <h2>About Uoink</h2>
+              <p class="setting-copy">Local-first. Open source. Your machine does the work. No cloud account, no sync layer.</p>
               <p class="setting-copy" id="aboutVersion">Version: checking...</p>
-              <p class="setting-copy">Dashboard, capture, and agent tools are running on this computer.</p>
               <p class="setting-copy" id="librarianStatus" data-library-status="unknown">Librarian: checking...</p>
               <details>
                 <summary>Advanced: local address</summary>
                 <p class="setting-copy" id="aboutPort">Local address loading...</p>
               </details>
+              <div class="inline-row">
+                <button class="button" type="button" id="starGithub">Star on GitHub</button>
+              </div>
             </div>
-            <div class="setting-block">
-              <h2>Learn</h2>
+
+            <div class="setting-block" id="settings-help">
+              <h2>Help and releases</h2>
               <div class="link-list">
+                <a href="/splash" target="_blank" rel="noreferrer">Startup screen <span>local view</span></a>
                 <a href="https://uoink.app" target="_blank" rel="noreferrer">uoink.app <span>open</span></a>
                 <a href="https://uoink.app/how" target="_blank" rel="noreferrer">Quick start guide <span>open</span></a>
                 <a href="https://uoink.app/hooks" target="_blank" rel="noreferrer">9 hook types explained <span>open</span></a>
                 <a href="https://uoink.app/agents" target="_blank" rel="noreferrer">Agent integration docs <span>open</span></a>
-              </div>
-            </div>
-            <div class="setting-block">
-              <h2>Release + support</h2>
-              <div class="link-list">
                 <a href="https://github.com/ryanbiddy/uoink/blob/main/CHANGELOG.md" target="_blank" rel="noreferrer">Release notes <span>open</span></a>
                 <a href="https://github.com/ryanbiddy/uoink/releases" target="_blank" rel="noreferrer">GitHub releases <span>open</span></a>
                 <a href="https://github.com/ryanbiddy/uoink/issues" target="_blank" rel="noreferrer">File an issue <span>open</span></a>
@@ -5340,6 +4905,7 @@
               </div>
             </div>
           </div>
+          </section>
         </section>
       </div>
     </main>
@@ -5475,19 +5041,15 @@
       facetsFallback: false,
       resurface: null,
       resume: null,
-      workspaces: [],
-      currentWorkspace: null,
-      workspaceAssembly: null,
-      scripts: [],
-      currentScript: null,
-      scriptGrounding: null,
-      scriptSelectedSourceRow: null,
-      scriptSourceComboOpen: false,
-      scriptLastPayload: null,
+      // Shell: the tab on screen (switchTab keeps it current).
+      activeTab: "library",
       selectedEvidenceVideo: null,
       selectedEvidenceTitle: "",
       claims: [],
       selectedYoink: null,
+      // Shell: a fresh #item/<id> looking up its Library row
+      // ({ id, state: "loading" | "missing" | "error" }), else null.
+      selectedYoinkLookup: null,
       selectedYoinkRequest: 0,
       selectedYoinkSidecar: null,
       selectedYoinkSidecarError: "",
@@ -5501,8 +5063,6 @@
       channels: [],
       allowedSites: [],
       defaultAllowedSites: ["youtube.com", "youtu.be", "x.com", "twitter.com"],
-      features: [],
-      selectedFeatureGroup: "Capture",
       styleAnchors: [],
       defaultStyleAnchors: [],
       styleAnchorCap: 10,
@@ -5569,34 +5129,6 @@
       [180, "3 min"],
       [300, "5 min"],
     ];
-
-    const FEATURE_MANIFEST_URL = "https://uoink.app/api/features-manifest";
-
-    const FALLBACK_FEATURES = [
-      ["Capture", "in-page-button", "In-page button", "Save a YouTube video from the player actions row.", "https://uoink.app/features/in-page-button"],
-      ["Capture", "right-click-any-link", "Right-click any link", "Queue a video without opening it first.", "https://uoink.app/features/right-click-any-link"],
-      ["Capture", "mobile-playlist-bridge", "Mobile playlist bridge", "Save on mobile, let the local app pick it up.", "https://uoink.app/features/mobile-playlist-bridge"],
-      ["Capture", "universal-page-uoink", "Universal page uoink", "Turn an allowed web page into local markdown and metadata.", "https://uoink.app/features/universal-page-uoink"],
-      ["Capture", "twitter-video", "Twitter video", "Capture X videos with creator credit kept close.", "https://uoink.app/twitter"],
-      ["Capture", "podcast-feeds", "Podcast feeds", "Watch RSS feeds for new episodes. Per-feed Auto-ingest can download, transcribe, and publish locally.", "https://uoink.app/features/podcast-feeds"],
-      ["Library", "memory-search", "Memory search", "Search transcripts, comments, topics, and saved context.", "https://uoink.app/features/memory-search"],
-      ["Library", "faceted-classification", "Faceted classification", "Filter by channel, hook, topic, format, performance, and length.", "https://uoink.app/features/faceted-classification"],
-      ["Library", "your-channel", "Your Channel", "Mark your own channel and compare against your corpus.", "https://uoink.app/features/your-channel"],
-      ["Library", "resurface-for-you", "For You resurfacing", "Bring back old uoinks when the local signals line up.", "https://uoink.app/features/resurface-for-you"],
-      ["Workspace", "build-workspace", "Build Workspace", "Assemble examples and questions for a focused agent pass.", "https://uoink.app/features/build-workspace"],
-      ["Workspace", "critique-corpus", "Critique Corpus", "Check a draft against patterns already saved locally.", "https://uoink.app/features/critique-corpus"],
-      ["Workspace", "script-studio", "Script Studio", "Ask an agent for script grounding from a workspace.", "https://uoink.app/features/script-studio"],
-      ["Workspace", "writing-studio", "Writing Studio", "Turn a saved source into a credited tweet, thread, or blog.", "https://uoink.app/features/writing-studio"],
-      ["Workspace", "style-anchors", "Style anchors", "Bring named writing samples into the draft context.", "https://uoink.app/features/style-anchors"],
-      ["Verification", "claim-extraction", "Claim extraction", "Find factual claims worth checking.", "https://uoink.app/features/claim-extraction"],
-      ["Verification", "evidence-panel", "Evidence panel", "Record evidence signals while you decide what they mean.", "https://uoink.app/features/evidence-panel"],
-      ["Distribution", "mcp-server", "Agent bridge", "Let agents query and assemble your local corpus.", "https://uoink.app/features/mcp-server"],
-      ["Distribution", "claude-desktop-integration", "Claude Desktop", "Connect Claude to the local Uoink tools.", "https://uoink.app/features/claude-desktop-integration"],
-      ["Distribution", "cursor-integration", "Cursor", "Use the same local corpus from your editor.", "https://uoink.app/features/cursor-integration"],
-      ["Identity", "byo-anthropic-key", "BYO Anthropic key", "Keep optional model calls under your key.", "https://uoink.app/features/byo-anthropic-key"],
-      ["Identity", "local-first", "Local-first", "Keep the index, screenshots, and settings on this machine.", "https://uoink.app/features/local-first"],
-      ["Identity", "no-cloud", "No Uoink cloud", "Use local app surfaces instead of a hosted account.", "https://uoink.app/features/no-cloud"],
-    ].map(([group, slug, name, description, url]) => ({ group, slug, name, description, url }));
 
     const SOURCE_CAPABILITIES = [
       ["YouTube video", "shipped", "In-page button, right-click link, playlist bridge", "Transcript, screenshots, comments, facets, hooks", "Library cards, drafts, scripts, and evidence notes"],
@@ -5668,48 +5200,6 @@
       gapCount: document.getElementById("gapCount"),
       anchorRows: document.getElementById("anchorRows"),
       anchorMeta: document.getElementById("anchorMeta"),
-      buildNavCount: document.getElementById("buildNavCount"),
-      workspaceCount: document.getElementById("workspaceCount"),
-      workspaceList: document.getElementById("workspaceList"),
-      workspaceForm: document.getElementById("workspaceForm"),
-      workspaceHook: document.getElementById("workspaceHook"),
-      workspaceFormat: document.getElementById("workspaceFormat"),
-      workspaceTopic: document.getElementById("workspaceTopic"),
-      workspaceChannel: document.getElementById("workspaceChannel"),
-      workspaceExamples: document.getElementById("workspaceExamples"),
-      workspaceExamplesLabel: document.getElementById("workspaceExamplesLabel"),
-      workspaceTaste: document.getElementById("workspaceTaste"),
-      workspaceSelf: document.getElementById("workspaceSelf"),
-      workspaceTitle: document.getElementById("workspaceTitle"),
-      workspaceSummary: document.getElementById("workspaceSummary"),
-      workspaceMeta: document.getElementById("workspaceMeta"),
-      workspacePatterns: document.getElementById("workspacePatterns"),
-      workspaceQuestions: document.getElementById("workspaceQuestions"),
-      workspacePerformance: document.getElementById("workspacePerformance"),
-      workspaceDraft: document.getElementById("workspaceDraft"),
-      workspaceCritiqueResult: document.getElementById("workspaceCritiqueResult"),
-      scriptNavCount: document.getElementById("scriptNavCount"),
-      scriptCount: document.getElementById("scriptCount"),
-      scriptList: document.getElementById("scriptList"),
-      scriptForm: document.getElementById("scriptForm"),
-      scriptWorkspace: document.getElementById("scriptWorkspace"),
-      scriptSource: document.getElementById("scriptSource"),
-      scriptSourceSearch: document.getElementById("scriptSourceSearch"),
-      scriptSourceOptions: document.getElementById("scriptSourceOptions"),
-      scriptTopic: document.getElementById("scriptTopic"),
-      scriptTargetLength: document.getElementById("scriptTargetLength"),
-      scriptHookStyle: document.getElementById("scriptHookStyle"),
-      scriptHookLensPicker: document.getElementById("scriptHookLensPicker"),
-      scriptStyleMode: document.getElementById("scriptStyleMode"),
-      scriptAnchorList: document.getElementById("scriptAnchorList"),
-      scriptCta: document.getElementById("scriptCta"),
-      scriptVoiceWarnings: document.getElementById("scriptVoiceWarnings"),
-      scriptSkipWarnings: document.getElementById("scriptSkipWarnings"),
-      scriptTitle: document.getElementById("scriptTitle"),
-      scriptDetail: document.getElementById("scriptDetail"),
-      scriptRevisionNotes: document.getElementById("scriptRevisionNotes"),
-      scriptRevisionDraft: document.getElementById("scriptRevisionDraft"),
-      scriptRevisionResult: document.getElementById("scriptRevisionResult"),
       writingNavCount: document.getElementById("writingNavCount"),
       writingAnchorSelect: document.getElementById("writingAnchorSelect"),
       writingSource: document.getElementById("writingSource"),
@@ -5789,8 +5279,10 @@
       yoinkRetranscribe: document.getElementById("yoinkRetranscribe"),
       yoinkEvidence: document.getElementById("yoinkEvidence"),
       yoinkWriteFrom: document.getElementById("yoinkWriteFrom"),
+      yoinkBack: document.getElementById("yoinkBack"),
       runningPill: document.getElementById("runningPill"),
-      portLabel: document.getElementById("portLabel"),
+      helperStatusText: document.getElementById("helperStatusText"),
+      helperOfflineFix: document.getElementById("helperOfflineFix"),
       libraryGrid: document.getElementById("libraryGrid"),
       libraryEmpty: document.getElementById("libraryEmpty"),
       libraryHeadline: document.getElementById("libraryHeadline"),
@@ -5826,6 +5318,7 @@
       queueMeta: document.getElementById("queueMeta"),
       activityHeadline: document.getElementById("activityHeadline"),
       activityNavCount: document.getElementById("activityNavCount"),
+      activityFailedBadge: document.getElementById("activityFailedBadge"),
       cancelAll: document.getElementById("cancelAll"),
       completedRows: document.getElementById("completedRows"),
       completedToday: document.getElementById("completedToday"),
@@ -5869,12 +5362,6 @@
       reliabilityAutoCheck: document.getElementById("reliabilityAutoCheck"),
       asrFallbackEnabled: document.getElementById("asrFallbackEnabled"),
       downloadReliabilityModel: document.getElementById("downloadReliabilityModel"),
-      featuresStatus: document.getElementById("featuresStatus"),
-      featureCount: document.getElementById("featureCount"),
-      featureGroups: document.getElementById("featureGroups"),
-      featureGroupTitle: document.getElementById("featureGroupTitle"),
-      featureRows: document.getElementById("featureRows"),
-      aboutStatus: document.getElementById("aboutStatus"),
       aboutVersion: document.getElementById("aboutVersion"),
       aboutPort: document.getElementById("aboutPort"),
       librarianStatus: document.getElementById("librarianStatus"),
@@ -6947,6 +6434,30 @@
       `).join("");
     }
 
+    // What the item view says while a fresh #item/<id> looks up its saved
+    // Library row, and when it cannot. Every action stays off until the
+    // row is found.
+    const YOINK_LOOKUP_COPY = {
+      loading: {
+        heading: "Opening this uoink",
+        subhead: "Looking it up in Library...",
+        factMeta: "checking saved files",
+        facts: "Folder, topic and files show once the saved item is found.",
+      },
+      missing: {
+        heading: "Uoink couldn't find this item",
+        subhead: "No saved uoink in Library matches this link. Search Library for it instead.",
+        factMeta: "not found",
+        facts: "Nothing saved matches this link.",
+      },
+      error: {
+        heading: "Couldn't open this uoink",
+        subhead: "Library didn't answer just now. Reload this page to try again.",
+        factMeta: "unavailable",
+        facts: "Library didn't answer, so no saved files are shown.",
+      },
+    };
+
     function renderYoinkDetail() {
       const row = state.selectedYoink;
       const sidecar = state.selectedYoinkSidecar || {};
@@ -6962,6 +6473,17 @@
       els.yoinkRetranscribe.textContent = state.retranscribing ? "Queuing..." : "Re-transcribe";
       els.yoinkRetranscribe.title = isNote ? "Re-transcription is not applicable for notes." : "";
       els.yoinkRetryCapture.title = isNote ? "Re-capture is not applicable for notes." : (sourceUrl ? "Queue a fresh capture for this source." : "No source link is stored for this uoink.");
+      const lookup = !hasRow && state.selectedYoinkLookup ? YOINK_LOOKUP_COPY[state.selectedYoinkLookup.state] : null;
+      if (lookup) {
+        els.yoinkHeading.textContent = lookup.heading;
+        els.yoinkSubhead.textContent = lookup.subhead;
+        els.yoinkTitle.textContent = lookup.heading;
+        els.yoinkMeta.textContent = "saved source";
+        els.yoinkFactMeta.textContent = lookup.factMeta;
+        els.yoinkDetail.innerHTML = emptyPanelRow(lookup.heading, lookup.subhead);
+        els.yoinkFacts.innerHTML = emptyPanelRow(lookup.factMeta, lookup.facts);
+        return;
+      }
       if (!hasRow) {
         els.yoinkHeading.innerHTML = "Pick a uoink <em>to inspect.</em>";
         els.yoinkSubhead.textContent = "Podcast episodes, interviews, and regular videos share one saved-source view.";
@@ -7070,9 +6592,131 @@
       };
     }
 
-    async function openYoinkDetail(row) {
+    // The Library row already on this page for an item id, or null.
+    function knownLibraryRow(id) {
+      const worth = state.resurface && Array.isArray(state.resurface.worth_revisiting) ? state.resurface.worth_revisiting : [];
+      return state.library.concat(worth).find((row) => videoIdOf(row) === id) || null;
+    }
+
+    const ITEM_LOOKUP_PAGE = 200;
+    // Library search answers 60 requests a minute for the whole page, so a
+    // long lookup waits out a 429 and asks again instead of stopping short.
+    const ITEM_LOOKUP_RETRY_MS = 5000;
+    const ITEM_LOOKUP_RETRIES = 15;
+
+    async function libraryRowsPage(params) {
+      const data = await authFetch(`/memory/search?${new URLSearchParams(params).toString()}`);
+      return { rows: Array.isArray(data.results) ? data.results : [], total: Number(data.total) || 0 };
+    }
+
+    // One page for the item lookup, waiting out the search rate limit;
+    // null once wanted() says the lookup is no longer needed.
+    async function itemLookupPage(params, wanted) {
+      for (let attempt = 0; ; attempt++) {
+        try {
+          return await libraryRowsPage({ ...params, limit: ITEM_LOOKUP_PAGE });
+        } catch (err) {
+          if (!err || err.status !== 429 || attempt >= ITEM_LOOKUP_RETRIES) throw err;
+        }
+        await new Promise((resolve) => setTimeout(resolve, ITEM_LOOKUP_RETRY_MS));
+        if (!wanted()) return null;
+      }
+    }
+
+    // Reads search pages for `params` from `offset` to the last one and
+    // returns the row with this id, or null once every page was read (or
+    // the lookup is no longer wanted). Offsets step by the page size, not
+    // by the rows answered: Library leaves out rows it cannot show, so a
+    // short page is not the end. Throws when a page fails, or when Library
+    // shrank between pages, since a row may then have slid past the pages
+    // already read.
+    async function scanLibraryFor(id, params, offset, wanted, total = null) {
+      for (;;) {
+        if (!wanted()) return null;
+        const page = await itemLookupPage({ ...params, offset }, wanted);
+        if (!page) return null;
+        const found = page.rows.find((row) => videoIdOf(row) === id);
+        if (found) return found;
+        if (total !== null && page.total < total) throw new Error("Library changed during the lookup");
+        total = page.total;
+        offset += ITEM_LOOKUP_PAGE;
+        if (offset >= total) return null;
+      }
+    }
+
+    // The helper's answer when it has no saved item under this id at all:
+    // /yoinks/<id>/details says 404 "uoink not found". Its other 404s (no
+    // sidecar yet, a sidecar file gone) mean the item does exist.
+    function itemNotSaved(err) {
+      return Boolean(err) && err.status === 404 && Boolean(err.data) && !err.data.state
+        && err.data.error === "uoink not found";
+    }
+
+    // The saved Library row for an item id (folder, topic, kind: what a
+    // Library card opens with), or null when Library has none. Library
+    // search has no id filter, so: the newest page first (a just-saved
+    // item, the popup's Read link); then the item's own saved details by
+    // id, where a helper with no item under this id settles it; then every
+    // match for its saved title; then the rest of Library, newest first,
+    // to the end. Null only ever means the whole answer was read, never
+    // that a page bound ran out. Throws when Library does not answer or
+    // changes under the lookup.
+    async function findLibraryRow(id, wanted = () => true) {
+      const known = knownLibraryRow(id);
+      if (known) return known;
+      const first = await itemLookupPage({ offset: 0 }, wanted);
+      if (!first) return null;
+      const found = first.rows.find((row) => videoIdOf(row) === id);
+      if (found || first.total <= ITEM_LOOKUP_PAGE || !wanted()) return found || null;
+      let details = null;
+      try {
+        details = await loadYoinkDetails(id);
+      } catch (err) {
+        if (itemNotSaved(err)) return null;
+      }
+      const title = String((details && firstValue(details.title, details.episode_title)) || "").trim();
+      if (title) {
+        const byTitle = await scanLibraryFor(id, { q: title }, 0, wanted);
+        if (byTitle) return byTitle;
+      }
+      return scanLibraryFor(id, {}, ITEM_LOOKUP_PAGE, wanted, first.total);
+    }
+
+    // #item/<id> with no Library row on the page yet (a new tab, a
+    // bookmark, the popup's Read link): the item view says it is looking,
+    // finds the saved row, then opens it as a Library card would, so Open
+    // folder, the topic and the item's kind are right from the first
+    // render. A move elsewhere while the lookup runs wins.
+    async function openItemFromRoute(id) {
+      const request = ++state.selectedYoinkRequest;
+      const hash = routeHash("item", id);
+      state.selectedYoink = null;
+      state.selectedYoinkLookup = { id, state: "loading" };
+      renderYoinkDetail();
+      switchTab("yoink", { fromRoute: true });
+      const wanted = () => state.selectedYoinkRequest === request && currentRoute === hash;
+      let row = null;
+      let failed = false;
+      try {
+        row = await findLibraryRow(id, wanted);
+      } catch (_) {
+        failed = true;
+      }
+      if (!wanted()) return;
+      if (row) {
+        await openYoinkDetail(row, { fromRoute: true });
+        return;
+      }
+      state.selectedYoinkLookup = { id, state: failed ? "error" : "missing" };
+      renderYoinkDetail();
+    }
+
+    // options.fromRoute: opened by #item/<id> (load, Back), so no new
+    // history entry; any other open records #item/<id>.
+    async function openYoinkDetail(row, options = {}) {
       const request = ++state.selectedYoinkRequest;
       state.selectedYoink = row || null;
+      state.selectedYoinkLookup = null;
       state.selectedYoinkSidecar = null;
       state.selectedYoinkSidecarError = "";
       state.selectedYoinkMarkdown = "";
@@ -7081,7 +6725,7 @@
       state.retranscribeStatus = "";
       state.retranscribing = false;
       renderYoinkDetail();
-      switchTab("yoink");
+      switchTab("yoink", { fromRoute: Boolean(options && options.fromRoute) });
       const isNote = isNoteContent(row);
       const videoId = videoIdOf(row);
       const tasks = [];
@@ -8759,7 +8403,7 @@
               <div class="in-flight-box">
                 <div class="in-flight-head">
                   <span>In-flight capture (${inFlight.length} active)</span>
-                  <a href="#tab-activity" style="color:var(--info); text-decoration:underline;">View in Activity &rarr;</a>
+                  <a href="#activity" style="color:var(--info); text-decoration:underline;">View in Activity &rarr;</a>
                 </div>
                 ${inFlight.map((item) => `
                   <div class="in-flight-item">
@@ -9506,423 +9150,6 @@
       els.freshCards.innerHTML = fresh.length ? fresh.map(freshCard).join("") : "";
     }
 
-    function workspaceFormatOptions() {
-      return `<option value="">Format: any</option>` + facetItems("format")
-        .map((item) => `<option value="${htmlEscape(item.value)}">${htmlEscape(item.label)}</option>`)
-        .join("");
-    }
-
-    function syncWorkspaceOptions() {
-      const current = els.workspaceFormat.value;
-      els.workspaceFormat.innerHTML = workspaceFormatOptions();
-      els.workspaceFormat.value = current;
-    }
-
-    async function loadBuild() {
-      syncWorkspaceOptions();
-      try {
-        const data = await authFetch("/workspaces?limit=50");
-        state.workspaces = Array.isArray(data.workspaces) ? data.workspaces : [];
-      } catch (err) {
-        state.workspaces = [];
-        els.workspaceList.innerHTML = degradedState("Workspaces need another moment.", "Uoink couldn't load saved workspaces yet.", err.message);
-      }
-      renderWorkspaceList();
-      if (!state.currentWorkspace && state.workspaces.length) {
-        await selectWorkspace(state.workspaces[0].id);
-      } else if (!state.workspaces.length) {
-        renderWorkspaceEmpty();
-      }
-    }
-
-    function renderWorkspaceList() {
-      els.buildNavCount.textContent = String(state.workspaces.length);
-      els.workspaceCount.textContent = String(state.workspaces.length);
-      if (!state.workspaces.length) {
-        els.workspaceList.innerHTML = `<div class="soft-note">No saved workspaces yet.</div>`;
-        return;
-      }
-      els.workspaceList.innerHTML = state.workspaces.map((ws) => `
-        <button class="workspace-card ${state.currentWorkspace && state.currentWorkspace.id === ws.id ? "active" : ""}" type="button" data-workspace-id="${htmlEscape(ws.id)}">
-          <strong>${htmlEscape(ws.hook_target || ws.topic || "Untitled workspace")}</strong>
-          <span class="job-sub">${htmlEscape([ws.format, ws.topic, ws.n_examples ? `${ws.n_examples} examples` : ""].filter(Boolean).join(" | "))}</span>
-          <span class="soft-note">${htmlEscape(fmtAge(ws.updated_at || ws.created_at))}</span>
-        </button>
-      `).join("");
-    }
-
-    function renderWorkspaceEmpty() {
-      els.workspaceTitle.textContent = "Workspace";
-      els.workspaceMeta.textContent = "no workspace selected";
-      els.workspaceSummary.innerHTML = `<div class="teach-card"><div class="teach-kicker">Build</div><strong>Start with the hook you're actually considering.</strong><p>Uoink will assemble saved examples, audience questions, and your own channel patterns into a working room for the next agent pass.</p></div>`;
-      els.workspacePatterns.innerHTML = `<div class="teach-card"><div class="teach-kicker">Hook patterns</div><strong>Assembled examples land here.</strong><p>Pick a format and topic, then Assemble. The right column turns into the corpus slice you can teach from.</p></div>`;
-      els.workspaceQuestions.innerHTML = `<div class="teach-card"><div class="teach-kicker">Audience questions</div><strong>Comment-derived questions show the gaps.</strong><p>When comments are present, this pane pulls objections and questions into the brief before you write.</p></div>`;
-      els.workspacePerformance.innerHTML = `<div class="teach-card"><div class="teach-kicker">Your channel</div><strong>Your own overperformers become a guardrail.</strong><p>Add your channel handle to compare a new idea against patterns that already worked for you.</p></div>`;
-      els.workspaceCritiqueResult.innerHTML = `<div class="teach-card"><div class="teach-kicker">Critique</div><strong>Paste rough thinking here before it hardens.</strong><p>Uoink stores the critique context so the next revision can use the same source room.</p></div>`;
-    }
-
-    async function selectWorkspace(workspaceId) {
-      if (!workspaceId) return;
-      try {
-        const data = await authFetch(`/workspace/${encodeURIComponent(workspaceId)}`);
-        state.currentWorkspace = data.workspace;
-        state.workspaceAssembly = null;
-        renderWorkspaceList();
-        renderWorkspaceDetail(data.workspace, data.critique_log || []);
-      } catch (err) {
-        showToast("Couldn't load that workspace.");
-      }
-    }
-
-    function renderWorkspaceDetail(ws, critiqueLog = []) {
-      if (!ws) return renderWorkspaceEmpty();
-      const assembledIds = Array.isArray(ws.assembled_yoinks) ? ws.assembled_yoinks : [];
-      els.workspaceTitle.textContent = ws.hook_target || ws.topic || "Workspace";
-      els.workspaceMeta.textContent = `${assembledIds.length} assembled | ${critiqueLog.length} critique notes`;
-      els.workspaceSummary.innerHTML = `
-        <div class="job-row">
-          <div class="job-title">${htmlEscape(ws.hook_target || "No hook target yet")}</div>
-          <div class="job-sub">${htmlEscape([ws.format, ws.topic, ws.your_channel, `${ws.n_examples || 10} examples`].filter(Boolean).join(" | "))}</div>
-        </div>
-      `;
-      renderWorkspacePanes(state.workspaceAssembly, critiqueLog);
-    }
-
-    function miniExampleCard(row) {
-      return `
-        <div class="mini-card" data-video-id="${htmlEscape(videoIdOf(row))}" data-folder="${htmlEscape(row.folder || "")}" role="button" tabindex="0">
-          <div class="job-title">${htmlEscape(rowTitle(row))}</div>
-          <div class="job-sub">${htmlEscape([row.channel, row.performance_tier || row.performance, prettyHook(row.hook_type)].filter(Boolean).join(" | "))}</div>
-          <span class="topic-chip">${htmlEscape(row.topic || "topic")}</span>
-        </div>
-      `;
-    }
-
-    function patternClusters(rows) {
-      const groups = new Map();
-      (Array.isArray(rows) ? rows : []).forEach((row) => {
-        const key = prettyHook(row.hook_type || "other");
-        const arr = groups.get(key) || [];
-        arr.push(row);
-        groups.set(key, arr);
-      });
-      return [...groups.entries()].map(([label, items]) => `
-        <div class="job-row">
-          <div class="job-title">${htmlEscape(label)} (${items.length})</div>
-          <div class="job-sub">${htmlEscape(items.slice(0, 3).map(rowTitle).join(" | "))}</div>
-        </div>
-      `).join("");
-    }
-
-    function renderWorkspacePanes(assembly, critiqueLog = []) {
-      const assembled = assembly && Array.isArray(assembly.assembled) ? assembly.assembled : [];
-      els.workspacePatterns.innerHTML = assembled.length
-        ? `<div class="example-list">${assembled.slice(0, 10).map(miniExampleCard).join("")}</div>${patternClusters(assembled)}`
-        : `<div class="teach-card"><div class="teach-kicker">Hook patterns</div><strong>Assemble pulls the local examples.</strong><p>This pane becomes the ranked source set plus the recurring hooks Uoink sees across your corpus.</p></div>`;
-      const questions = assembly && Array.isArray(assembly.audience_questions) ? assembly.audience_questions : [];
-      els.workspaceQuestions.innerHTML = questions.length
-        ? questions.slice(0, 12).map((q) => `<div class="job-row"><div class="job-title">${htmlEscape(q.question || "")}</div><div class="job-sub">${htmlEscape(q.likes || 0)} likes | ${htmlEscape(q.video_id || "")}</div></div>`).join("")
-        : `<div class="teach-card"><div class="teach-kicker">Questions</div><strong>Audience gaps show up once comments are present.</strong><p>If this stays empty, the workspace still works from transcripts and facets; comments will sharpen the objections later.</p></div>`;
-      const selfSnapshot = assembly && assembly.self_snapshot;
-      els.workspacePerformance.innerHTML = selfSnapshot && selfSnapshot.ok !== false
-        ? markdownBox(objectToMarkdown(selfSnapshot))
-        : `<div class="teach-card"><div class="teach-kicker">Past performance</div><strong>Your own channel patterns are optional but powerful.</strong><p>Add your handle in the form or Settings to compare this idea against your overperformers.</p></div>`;
-      if (critiqueLog.length && !els.workspaceCritiqueResult.innerHTML) {
-        els.workspaceCritiqueResult.innerHTML = critiqueLog.slice(0, 3).map((row) => `<div class="job-row"><div class="job-title">Critique ${htmlEscape(fmtAge(row.ts_utc))}</div>${markdownBox(objectToMarkdown(row.findings || {}))}</div>`).join("");
-      }
-    }
-
-    function workspacePayloadFromForm() {
-      return {
-        hook_target: els.workspaceHook.value.trim() || null,
-        format: els.workspaceFormat.value || null,
-        topic: els.workspaceTopic.value.trim() || null,
-        your_channel: els.workspaceSelf.checked ? (els.workspaceChannel.value.trim() || null) : null,
-        n_examples: Number(els.workspaceExamples.value || 10),
-        notes: els.workspaceTaste.checked ? "use_taste_anchors=true" : "use_taste_anchors=false",
-      };
-    }
-
-    function workspaceValidationMessage(payload) {
-      const hasDirection = Boolean(payload.hook_target || payload.format || payload.topic || payload.your_channel);
-      if (!hasDirection) return "Add a hook, topic, format, or channel before creating a workspace.";
-      return "";
-    }
-
-    function showWorkspaceValidation(message) {
-      showToast(message);
-      els.workspaceSummary.innerHTML = degradedState("Workspace needs a direction.", message);
-    }
-
-    async function createWorkspaceFromForm(event) {
-      event.preventDefault();
-      const payload = workspacePayloadFromForm();
-      const validation = workspaceValidationMessage(payload);
-      if (validation) return showWorkspaceValidation(validation);
-      try {
-        const data = await authFetch("/workspaces", { method: "POST", body: JSON.stringify(payload) });
-        state.currentWorkspace = data.workspace;
-        showToast("Workspace created.");
-        await loadBuild();
-        if (data.workspace && data.workspace.id) await assembleCurrentWorkspace();
-      } catch (err) {
-        showToast("Couldn't create that workspace.");
-      }
-    }
-
-    async function assembleCurrentWorkspace() {
-      const ws = state.currentWorkspace;
-      if (!ws || !ws.id) return showToast("Create or select a workspace first.");
-      try {
-        const body = {
-          workspace_id: ws.id,
-          format: ws.format || null,
-          topic: ws.topic || null,
-          hook_target: ws.hook_target || null,
-          your_channel: ws.your_channel || null,
-          n_examples: Number(ws.n_examples || els.workspaceExamples.value || 10),
-        };
-        const data = await authFetch("/workspace/assemble", { method: "POST", body: JSON.stringify(body) });
-        state.workspaceAssembly = data;
-        showToast("Workspace assembled.");
-        renderWorkspaceDetail(ws);
-      } catch (err) {
-        showToast("Couldn't assemble that workspace.");
-      }
-    }
-
-    async function runWorkspaceCritique() {
-      const ws = state.currentWorkspace;
-      const draft = els.workspaceDraft.value.trim();
-      if (!ws || !ws.id) return showToast("Select a workspace first.");
-      if (!draft) return showToast("Paste a draft before running critique.");
-      try {
-        const data = await authFetch("/workspace/critique", {
-          method: "POST",
-          body: JSON.stringify({ workspace_id: ws.id, draft_text: draft }),
-        });
-        els.workspaceCritiqueResult.innerHTML = `<div class="job-row"><div class="job-title">${htmlEscape(data.mode || "Critique context ready")}</div>${markdownBox(objectToMarkdown(data))}</div>`;
-      } catch (err) {
-        showToast("Couldn't run critique yet.");
-      }
-    }
-
-    async function loadScripts() {
-      await loadBuild();
-      await loadStyleAnchors();
-      syncScriptWorkspaceOptions();
-      syncScriptSourceOptions();
-      try {
-        const data = await authFetch("/scripts?limit=50");
-        state.scripts = Array.isArray(data.scripts) ? data.scripts : [];
-      } catch (err) {
-        state.scripts = [];
-        els.scriptList.innerHTML = degradedState("Scripts need another moment.", "Uoink couldn't load saved scripts yet.", err.message);
-      }
-      renderScriptList();
-      if (!state.currentScript && state.scripts.length) {
-        selectScript(state.scripts[0].id);
-      } else if (!state.scripts.length) {
-        renderScriptEmpty();
-      }
-    }
-
-    function syncScriptWorkspaceOptions() {
-      const current = els.scriptWorkspace.value;
-      els.scriptWorkspace.innerHTML = `<option value="">Workspace: choose one</option>` + state.workspaces.map((ws) => (
-        `<option value="${htmlEscape(ws.id)}">${htmlEscape(ws.hook_target || ws.topic || ws.id)}</option>`
-      )).join("");
-      if (current) els.scriptWorkspace.value = current;
-      if (!els.scriptWorkspace.value && state.currentWorkspace && state.currentWorkspace.id) {
-        els.scriptWorkspace.value = state.currentWorkspace.id;
-      }
-    }
-
-    function syncScriptSourceOptions() {
-      if (!els.scriptSourceOptions) return;
-      const rows = state.library.slice(0, 80);
-      const current = els.scriptSource.value;
-      const query = String(els.scriptSourceSearch.value || "").toLowerCase();
-      const filtered = rows.filter((row) => {
-        const haystack = `${rowTitle(row)} ${writingSourceSubtitle(row)} ${sourceUrlOf(row)}`.toLowerCase();
-        return !query || haystack.includes(query);
-      });
-      els.scriptSourceOptions.innerHTML = filtered.length
-        ? filtered.slice(0, 20).map((row) => {
-          const id = writingRowId(row);
-          const thumb = sourceThumbnailPath(row);
-          return `
-            <button class="combo-option" type="button" role="option" data-script-source-id="${htmlEscape(id)}">
-              <span class="combo-thumb">${thumb ? `<img alt="" class="hidden" ${sourceThumbnailAttribute(row)}>` : ""}</span>
-              <span>
-                <strong>${htmlEscape(rowTitle(row))}</strong>
-                <span class="job-sub">${htmlEscape(writingSourceSubtitle(row) || platformChipLabel(platformOf(row)))}</span>
-              </span>
-            </button>
-          `;
-        }).join("")
-        : `<div class="job-row"><div class="job-title">${rows.length ? "No matching uoinks." : "Load Library first."}</div><div class="job-sub">Saved sources appear here with thumbnails.</div></div>`;
-      if (query && !filtered.length) {
-        // Same guard as the Writing picker: a no-match query clears the
-        // hidden pick so the script can't ground in (and credit) a source
-        // the user can't see (QA #26).
-        state.scriptSelectedSourceRow = null;
-        els.scriptSource.value = "";
-      } else if (current) {
-        state.scriptSelectedSourceRow = rows.find((row) => writingRowId(row) === current) || state.scriptSelectedSourceRow;
-      }
-      loadDetailFileImages();
-    }
-
-    async function selectScriptSourceById(id) {
-      const row = state.library.find((item) => writingRowId(item) === id);
-      if (!row) return;
-      state.scriptSelectedSourceRow = row;
-      els.scriptSource.value = writingRowId(row);
-      els.scriptSourceSearch.value = rowTitle(row);
-      if (!els.scriptTopic.value.trim() && row.topic) els.scriptTopic.value = row.topic;
-      document.getElementById("scriptSourceCombo").classList.remove("open");
-      els.scriptSourceSearch.setAttribute("aria-expanded", "false");
-    }
-
-    function toggleScriptSourceCombo(open) {
-      state.scriptSourceComboOpen = open;
-      document.getElementById("scriptSourceCombo").classList.toggle("open", open);
-      els.scriptSourceSearch.setAttribute("aria-expanded", open ? "true" : "false");
-      if (open) syncScriptSourceOptions();
-    }
-
-    function selectedScriptHookLens() {
-      return selectedRadio("scriptHookLens", "informative");
-    }
-
-    function selectedScriptAnchorIds() {
-      const styleMode = selectedRadio("scriptStyle", "default");
-      if (styleMode === "default") return [];
-      const checked = [...document.querySelectorAll("[data-script-anchor]:checked")].map((el) => el.dataset.scriptAnchor);
-      return styleMode === "specific" ? checked.slice(0, 1) : checked.slice(0, 5);
-    }
-
-    function renderScriptStyleAnchors() {
-      if (!els.scriptAnchorList) return;
-      const activeAnchors = state.styleAnchors.filter(anchorIsActive);
-      const rowsById = new Map();
-      mergedDefaultAnchors().forEach((anchor) => {
-        const key = anchorId(anchor) || defaultAnchorKey(anchor);
-        if (key) rowsById.set(key, anchor);
-      });
-      activeAnchors.forEach((anchor) => {
-        const key = anchorId(anchor) || defaultAnchorKey(anchor);
-        if (key) rowsById.set(key, { ...(rowsById.get(key) || {}), ...anchor });
-      });
-      const rows = [...rowsById.values()];
-      els.scriptAnchorList.innerHTML = rows.length
-        ? rows.slice(0, 10).map((anchor) => {
-          const id = anchorId(anchor) || defaultAnchorKey(anchor);
-          const label = anchor.name || anchor.title || "Style anchor";
-          const isDefault = anchorIsDefault(anchor);
-          const checked = isDefault || anchorIsActive(anchor);
-          return `
-            <label class="anchor-row">
-              <div class="anchor-row-top">
-                <div>
-                  <strong>${htmlEscape(label)}</strong>
-                  <div class="job-sub">${isDefault ? "default anchor" : htmlEscape(anchor.source_type || "anchor")}</div>
-                </div>
-                <input type="checkbox" data-script-anchor="${htmlEscape(id)}" ${checked ? "checked" : ""}>
-              </div>
-            </label>
-          `;
-        }).join("")
-        : `<div class="job-row"><div class="job-title">No active style anchors yet.</div><div class="job-sub">Browse defaults in Writing Studio, then come back to script with a voice in place.</div></div>`;
-    }
-
-    function renderScriptList() {
-      els.scriptNavCount.textContent = String(state.scripts.length);
-      els.scriptCount.textContent = String(state.scripts.length);
-      if (!state.scripts.length) {
-        els.scriptList.innerHTML = `<div class="soft-note">No scripts saved yet.</div>`;
-        return;
-      }
-      els.scriptList.innerHTML = state.scripts.map((script) => `
-        <button class="script-card ${state.currentScript && Number(state.currentScript.id) === Number(script.id) ? "active" : ""}" type="button" data-script-id="${htmlEscape(script.id)}">
-          <strong>v${htmlEscape(script.version || 1)} ${htmlEscape(script.hook || "Untitled script")}</strong>
-          <span class="job-sub">${htmlEscape([script.format, script.target_length_sec ? `${script.target_length_sec}s` : "", script.mode].filter(Boolean).join(" | "))}</span>
-          <span class="soft-note">${htmlEscape(fmtAge(script.generated_at))}</span>
-        </button>
-      `).join("");
-    }
-
-    function renderScriptEmpty() {
-      state.currentScript = null;
-      els.scriptTitle.textContent = "Script";
-      els.scriptDetail.innerHTML = `<div class="teach-card"><div class="teach-kicker">Script Studio</div><strong>Choose a Build workspace first.</strong><p>Grounding context, script versions, shot lists, and citations will appear here as readable sections.</p></div>`;
-      els.scriptRevisionResult.innerHTML = `<div class="teach-card"><div class="teach-kicker">Revision loop</div><strong>Paste the critique target, then run the pass.</strong><p>The response stays readable here, with technical detail tucked away.</p></div>`;
-    }
-
-    async function selectScript(scriptId) {
-      if (!scriptId) return;
-      try {
-        const data = await authFetch(`/script/${encodeURIComponent(scriptId)}`);
-        state.currentScript = data.script;
-        renderScriptList();
-        renderScriptDetail(data.script);
-      } catch (err) {
-        showToast("Couldn't load that script.");
-      }
-    }
-
-    function scriptBeats(script) {
-      if (Array.isArray(script && script.beats)) return script.beats;
-      const body = String(script && script.body || "");
-      return body.split(/\n+/).filter(Boolean).slice(0, 12).map((line, index) => ({
-        label: `beat ${index + 1}`,
-        content: line,
-      }));
-    }
-
-    function sourceChips(sources) {
-      const rows = Array.isArray(sources) ? sources : [];
-      if (!rows.length) return `<span class="soft-note">No source citations stored on this script.</span>`;
-      return `<div class="source-row">${rows.slice(0, 12).map((src) => `<span class="source-chip" title="${htmlEscape(src.why || src.reason || "")}">${htmlEscape(src.slug || src.video_id || "source")}</span>`).join("")}</div>`;
-    }
-
-    function renderScriptDetail(script) {
-      if (!script) return renderScriptEmpty();
-      els.scriptTitle.textContent = `Script v${script.version || 1}`;
-      const beats = scriptBeats(script);
-      els.scriptDetail.innerHTML = `
-        <div class="warning-panel">
-          <strong>Voice DNA</strong>
-          <p>Voice DNA checked. Tighten anything that sounds canned before publishing.</p>
-        </div>
-        <details class="script-block" open>
-          <summary>Hook <span class="soft-note">${htmlEscape(script.format || "format unset")}</span></summary>
-          <div class="script-block-body markdown-rendered">${renderMarkdown(script.hook || "No hook saved.")}</div>
-        </details>
-        <details class="script-block" open>
-          <summary>Beats <span class="soft-note">${beats.length}</span></summary>
-          <div class="script-block-body markdown-rendered">${renderMarkdown(beats.map((beat) => `- **${beat.label || "beat"}:** ${beat.content || beat.text || ""}`).join("\n") || "No beats saved.")}</div>
-        </details>
-        <details class="script-block">
-          <summary>Body <span class="soft-note">${htmlEscape(script.target_length_sec || "")}${script.target_length_sec ? "s" : ""}</span></summary>
-          <div class="script-block-body markdown-rendered">${renderMarkdown(script.body || "No body saved.")}</div>
-        </details>
-        <details class="script-block">
-          <summary>CTA</summary>
-          <div class="script-block-body markdown-rendered">${renderMarkdown(script.cta || "No CTA saved.")}</div>
-        </details>
-        <details class="script-block" open>
-          <summary>Source credits</summary>
-          <div class="script-block-body">${sourceChips(script.source_yoinks)}</div>
-        </details>
-        <details class="script-block">
-          <summary>Shot list</summary>
-          <div class="script-block-body markdown-rendered">${renderMarkdown(Array.isArray(script.shot_list) && script.shot_list.length ? script.shot_list.map((shot) => `- ${typeof shot === "string" ? shot : objectToMarkdown(shot)}`).join("\n") : "No shot list generated yet.")}</div>
-        </details>
-      `;
-    }
-
     function draftBeatsFromBody(body) {
       return String(body || "").split(/\n+/).map((line) => line.trim()).filter(Boolean).map((line, index) => ({
         label: `beat ${index + 1}`,
@@ -9941,31 +9168,23 @@
         || text.includes("source_yoinks");
     }
 
-    function scriptSourceYoink() {
-      const row = state.scriptSelectedSourceRow;
-      if (!row) return null;
-      return {
-        video_id: evidenceVideoIdOf(row) || videoIdOf(row),
-        slug: row.slug || basenameOf(folderPathOf(row)),
-        title: rowTitle(row),
-        source_url: sourceUrlOf(row),
-        why: "Primary source for the script.",
-        credit: writingAttributionLine(row),
-      };
-    }
-
-    function normalizeScriptDraft(payload) {
+    // Shapes an agent's script answer for Generate's script mode. The Build
+    // and Script Studio panels are gone, so the fallbacks (target length,
+    // CTA) come from the Generate request that asked for the script.
+    function normalizeScriptDraft(payload, request = {}) {
+      const targetLength = Number(request.target_length_sec || 0) || undefined;
+      const cta = String(request.cta || "").trim();
       const raw = payload && (payload.script || payload.structured_script || payload.draft || payload.result || payload);
       if (!raw || typeof raw !== "object") {
         const text = String(payload || "").trim();
         return text ? {
           format: "script",
-          target_length_sec: Number(els.scriptTargetLength.value || 0) || undefined,
+          target_length_sec: targetLength,
           hook: text.split(/\n+/)[0] || "Generated hook",
           beats: draftBeatsFromBody(text).slice(0, 12),
           body: text,
-          cta: els.scriptCta.value.trim() || "",
-          source_yoinks: [scriptSourceYoink()].filter(Boolean),
+          cta,
+          source_yoinks: [],
         } : null;
       }
       const body = String(raw.body || raw.markdown || raw.text || raw.script_body || "").trim();
@@ -9974,194 +9193,17 @@
         : draftBeatsFromBody(body);
       const hook = String(raw.hook || raw.opening || raw.title || (body.split(/\n+/)[0] || "")).trim();
       if (!hook && !body) return null;
-      const sourceYoinks = Array.isArray(raw.source_yoinks) && raw.source_yoinks.length
-        ? raw.source_yoinks
-        : [scriptSourceYoink()].filter(Boolean);
       return {
         format: raw.format || "script",
-        target_length_sec: raw.target_length_sec || Number(els.scriptTargetLength.value || 0) || undefined,
+        target_length_sec: raw.target_length_sec || targetLength,
         hook: hook || "Generated hook",
         beats,
         body,
-        cta: raw.cta || els.scriptCta.value.trim() || "",
+        cta: raw.cta || cta,
         shot_list: Array.isArray(raw.shot_list) ? raw.shot_list : [],
-        source_yoinks: sourceYoinks,
+        source_yoinks: Array.isArray(raw.source_yoinks) ? raw.source_yoinks : [],
         voice_warnings: raw.voice_warnings || [],
       };
-    }
-
-    function renderScriptConnectionFallback() {
-      state.scriptLastPayload = null;
-      els.scriptTitle.textContent = "Script";
-      els.scriptDetail.innerHTML = `
-        <div class="connect-agent-state">
-          <strong>Connect a writing agent to generate</strong>
-          <p>Uoink found the source. Finish setup from Generate or Settings, then run the script again.</p>
-          <button class="button primary" type="button" data-tab-button-proxy="writing">Open Generate</button>
-        </div>
-      `;
-    }
-
-    function renderScriptDraft(script, { saved = false, warnings = [] } = {}) {
-      const safeScript = {
-        ...script,
-        source_yoinks: Array.isArray(script && script.source_yoinks) ? script.source_yoinks : [],
-      };
-      const textProbe = [safeScript.hook, safeScript.body, objectToMarkdown(safeScript)].filter(Boolean).join("\n");
-      if (!String(textProbe).trim() || looksLikeScriptScaffold(textProbe)) {
-        renderScriptConnectionFallback();
-        return;
-      }
-      els.scriptTitle.textContent = saved
-        ? `Script v${safeScript.version || state.currentScript?.version || 1}`
-        : "Generated script";
-      const voiceCopy = warnings.length
-        ? warnings.map((item) => item.phrase || item).join(", ")
-        : "Voice DNA checked. Tighten anything that sounds canned before publishing.";
-      els.scriptDetail.innerHTML = `
-        <div class="warning-panel">
-          <strong>Voice DNA</strong>
-          <p>${htmlEscape(voiceCopy)}</p>
-        </div>
-        <details class="script-block" open>
-          <summary>Hook <span class="soft-note">${htmlEscape(selectedScriptHookLens().replace(/_/g, " "))}</span></summary>
-          <div class="script-block-body markdown-rendered">${renderMarkdown(safeScript.hook || "No hook returned.")}</div>
-        </details>
-        <details class="script-block" open>
-          <summary>Beats <span class="soft-note">${(safeScript.beats || []).length}</span></summary>
-          <div class="script-block-body markdown-rendered">${renderMarkdown((safeScript.beats || []).map((beat, index) => `- **${beat.label || `beat ${index + 1}`}:** ${beat.content || beat.text || beat}`).join("\n") || "No beats returned.")}</div>
-        </details>
-        <details class="script-block" open>
-          <summary>Body <span class="soft-note">${htmlEscape(safeScript.target_length_sec || "")}${safeScript.target_length_sec ? "s" : ""}</span></summary>
-          <div class="script-block-body markdown-rendered">${renderMarkdown(safeScript.body || "No body returned.")}</div>
-        </details>
-        <details class="script-block" open>
-          <summary>CTA</summary>
-          <div class="script-block-body markdown-rendered">${renderMarkdown(safeScript.cta || "No CTA returned.")}</div>
-        </details>
-        <details class="script-block" open>
-          <summary>Source credits</summary>
-          <div class="script-block-body">${sourceChips(safeScript.source_yoinks)}<div class="job-sub">${htmlEscape(scriptSourceYoink()?.credit || "Credits follow the saved source creators where available.")}</div></div>
-        </details>
-        <div class="inline-row">
-          <button class="button" type="button" data-copy-script-output>Copy</button>
-          <button class="button ghost" type="button" id="scriptUseAsIs">Use as is</button>
-        </div>
-      `;
-      els.scriptDetail.dataset.rawText = [safeScript.hook, (safeScript.beats || []).map((beat) => beat.content || beat.text || beat).join("\n"), safeScript.body, safeScript.cta].filter(Boolean).join("\n\n");
-    }
-
-    async function ensureScriptWorkspace() {
-      const existing = els.scriptWorkspace.value;
-      if (existing) return existing;
-      throw new Error("Choose a saved workspace before generating a script.");
-    }
-
-    async function generateScriptFromForm(event) {
-      event.preventDefault();
-      els.scriptDetail.innerHTML = `<div class="job-row"><div class="job-title">Preparing script...</div><div class="job-sub">Uoink is gathering corpus context and waiting for the agent draft.</div></div>`;
-      try {
-        const workspaceId = await ensureScriptWorkspace();
-        const source = scriptSourceYoink();
-        const body = {
-          workspace_id: workspaceId,
-          output_mode: "script",
-          hook_type_lens: selectedScriptHookLens(),
-          target_length_sec: Number(els.scriptTargetLength.value || 0) || undefined,
-          style_anchor_ids: selectedScriptAnchorIds(),
-          style_note: els.scriptHookStyle.value.trim() || undefined,
-          cta: els.scriptCta.value.trim() || undefined,
-          source_yoink_id: source && (source.video_id || source.slug),
-          source_credit_line: source && source.credit,
-          native_attribution: true,
-          voice_dna_warnings_enabled: Boolean(els.scriptVoiceWarnings.checked && !els.scriptSkipWarnings.checked),
-          skip_voice_dna_this_time: Boolean(els.scriptSkipWarnings.checked),
-        };
-        const data = await callMcpTool("generate_script", body);
-        state.scriptLastPayload = data;
-        if (data.mode === "grounding_only") {
-          const agentDraft = await connectedAgentDraft("generate_script", "script", data, body);
-          const draft = normalizeScriptDraft(agentDraft);
-          if (draft && !looksLikeScriptScaffold(objectToMarkdown(draft))) {
-            const persisted = await callMcpTool("generate_script", { ...body, script: draft });
-            if (persisted.id) {
-              showToast(`Script v${persisted.version || ""} saved.`);
-              await loadScripts();
-              await selectScript(persisted.id);
-              return;
-            }
-            renderScriptDraft(draft, { warnings: draft.voice_warnings || [] });
-            showToast("Script draft ready.");
-            return;
-          }
-          renderScriptConnectionFallback();
-          showToast("Connect Claude Desktop to generate.");
-          return;
-        }
-        if (data.id) {
-          showToast(`Script v${data.version || ""} saved.`);
-          await loadScripts();
-          await selectScript(data.id);
-          return;
-        }
-        const draft = normalizeScriptDraft(data);
-        if (draft) {
-          renderScriptDraft(draft, { warnings: draft.voice_warnings || data.voice_warnings || [] });
-          showToast("Script draft ready.");
-          return;
-        }
-        renderScriptConnectionFallback();
-        showToast("Connect Claude Desktop to generate.");
-      } catch (err) {
-        els.scriptDetail.innerHTML = degradedState("Script Studio needs another pass.", "Uoink couldn't prepare this script. Details are tucked below.", err.message);
-      }
-    }
-
-    async function reviseCurrentScript({ persist = false } = {}) {
-      const script = state.currentScript;
-      if (!script || !script.id) return showToast("Select a script first.");
-      const notes = els.scriptRevisionNotes.value.trim();
-      const revisedBody = els.scriptRevisionDraft.value.trim();
-      const payload = {
-        script_id: Number(script.id),
-        critique_findings: notes ? { notes } : {},
-        revision_target: notes || null,
-      };
-      if (persist && revisedBody) {
-        payload.revised_script = {
-          hook: script.hook || "Revised hook",
-          beats: draftBeatsFromBody(revisedBody),
-          body: revisedBody,
-          cta: script.cta,
-          source_yoinks: script.source_yoinks || [],
-        };
-      }
-      try {
-        const data = await authFetch("/script/revise", { method: "POST", body: JSON.stringify(payload) });
-        els.scriptRevisionResult.innerHTML = `<div class="job-row"><div class="job-title">${htmlEscape(data.mode || "Revision response")}</div>${markdownBox(objectToMarkdown(data))}</div>`;
-        if (data.id) {
-          await loadScripts();
-          await selectScript(data.id);
-        }
-      } catch (err) {
-        showToast("Couldn't revise that script.");
-      }
-    }
-
-    async function deriveCurrentShotList() {
-      const script = state.currentScript;
-      if (!script || !script.id) return showToast("Select a script first.");
-      try {
-        const data = await authFetch("/script/shot-list", {
-          method: "POST",
-          body: JSON.stringify({ script_id: Number(script.id) }),
-        });
-        showToast("Shot list generated.");
-        await selectScript(script.id);
-        els.scriptRevisionResult.innerHTML = `<div class="job-row"><div class="job-title">Shot list</div>${markdownBox(objectToMarkdown(data))}</div>`;
-      } catch (err) {
-        showToast("Couldn't create the shot list.");
-      }
     }
 
     function evidenceStatusChip(value) {
@@ -10170,13 +9212,13 @@
       return `<span class="status-chip ${safe}">${htmlEscape(evidenceSignalLabel(status))}</span>`;
     }
 
-    function openEvidenceFor(videoId, title = "") {
+    function openEvidenceFor(videoId, title = "", options = {}) {
       if (!videoId) return;
       state.selectedEvidenceVideo = videoId;
       state.selectedEvidenceTitle = title || videoId;
       // switchTab("evidence") already runs loadEvidence(); a second call
       // here double-loaded the panel.
-      switchTab("evidence");
+      switchTab("evidence", { fromRoute: Boolean(options && options.fromRoute) });
     }
 
     async function loadEvidence() {
@@ -10456,7 +9498,7 @@
       const countLabel = `${visibleCount} ${label}`;
       el.title = countLabel;
       el.setAttribute("aria-label", countLabel);
-      const button = el.closest("button");
+      const button = el.closest("button, a");
       const navLabel = button && button.dataset.navLabel;
       if (button && navLabel) button.setAttribute("aria-label", `${navLabel}, ${countLabel}`);
     }
@@ -10464,6 +9506,22 @@
     function setLibraryNavCount(count) {
       const visibleCount = Number(count) || 0;
       setSidebarBadge(els.libraryNavCount, visibleCount, "saved sources", { hideWhenZero: true });
+    }
+
+    // Shell: Activity's "N failed" badge, shown only while failures wait.
+    // The word says it, so the state never rests on the badge colour; the
+    // nav button's name gains ", N failed" after the active-jobs count.
+    function setActivityFailedBadge(count) {
+      const el = els.activityFailedBadge;
+      if (!el) return;
+      const failed = Math.max(0, Number(count) || 0);
+      el.textContent = failed ? `${failed} failed` : "";
+      el.title = failed ? `${failed} failed capture${failed === 1 ? "" : "s"} in Activity` : "";
+      el.classList.toggle("hidden", failed === 0);
+      const button = typeof el.closest === "function" ? el.closest("button") : null;
+      if (!button) return;
+      const base = String(button.getAttribute("aria-label") || button.dataset.navLabel || "Activity").replace(/, \d+ failed$/, "");
+      button.setAttribute("aria-label", failed ? `${base}, ${failed} failed` : base);
     }
 
     function setLibraryEmptyState(mode) {
@@ -11041,7 +10099,6 @@
       syncOptions(els.formatFilter, "Format", facetItems("format"), FACET_EMPTY_STATES.format);
       syncOptions(els.performanceFilter, "Performance", facetItems("performance"), FACET_EMPTY_STATES.performance);
       syncOptions(els.lengthFilter, "Length", facetItems("length"), FACET_EMPTY_STATES.length);
-      syncWorkspaceOptions();
       els.facetStatus.classList.toggle("hidden", !state.facetsFallback);
       els.facetStatus.title = state.facetsFallback
         ? "Using built-in facet defaults until Uoink sends the latest list."
@@ -11290,26 +10347,66 @@
       els.librarianStatus.dataset.waitingForClient = library && library.waiting_for_client ? "true" : "false";
     }
 
+    // Shell: the helper status at the bottom of the sidebar. Running names
+    // this computer; offline says how to start Uoink on this OS. The page
+    // runs on the same machine as the helper, so the browser's platform is
+    // the helper's. Only Windows has an installed launcher (the installer's
+    // Start menu entry); no Mac or Linux build ships (docs/mac-install.md),
+    // so there the helper can only have been a source checkout's server.py.
+    const HELPER_SOURCE_FIX = "Uoink ships for Windows only. If you ran it from source, start python server.py again. This page reconnects by itself.";
+    const HELPER_STATUS_COPY = {
+      win: {
+        running: "Running on this PC",
+        fix: "Start Uoink from the Start menu. This page reconnects by itself.",
+      },
+      mac: {
+        running: "Running on this Mac",
+        fix: HELPER_SOURCE_FIX,
+      },
+      linux: {
+        running: "Running on this computer",
+        fix: HELPER_SOURCE_FIX,
+      },
+    };
+
+    function helperPlatform() {
+      const nav = typeof navigator === "undefined" ? {} : (navigator || {});
+      const raw = String((nav.userAgentData && nav.userAgentData.platform) || nav.platform || nav.userAgent || "").toLowerCase();
+      if (raw.includes("mac") || raw === "darwin") return "mac";
+      if (raw.includes("linux") || raw.includes("cros") || raw.includes("chrome os")) return "linux";
+      return "win";
+    }
+
+    function renderHelperStatus(online) {
+      const ok = Boolean(online);
+      const copy = HELPER_STATUS_COPY[helperPlatform()];
+      const pill = els.runningPill;
+      if (!pill) return;
+      pill.classList.toggle("online", ok);
+      pill.classList.toggle("offline", !ok);
+      const text = ok ? copy.running : "Uoink is offline";
+      // Same words, no rewrite: the 10 s poll must not re-announce the status.
+      if (els.helperStatusText && els.helperStatusText.textContent !== text) els.helperStatusText.textContent = text;
+      if (els.helperOfflineFix) {
+        const fix = ok ? "" : copy.fix;
+        if (els.helperOfflineFix.textContent !== fix) els.helperOfflineFix.textContent = fix;
+        els.helperOfflineFix.classList.toggle("hidden", ok);
+      }
+    }
+
     async function refreshHealth() {
       try {
         const res = await fetch("/health");
         const data = await res.json();
         state.health = data;
         const ok = data && data.ok !== false;
-        els.runningPill.classList.toggle("offline", !ok);
-        els.runningPill.querySelector("span:last-child").textContent = ok ? "Ready on this device" : "Uoink is offline";
-        els.portLabel.textContent = ok ? "Private local app" : "Open Uoink to reconnect";
+        renderHelperStatus(ok);
         els.versionLine.textContent = `v${data.version || "unknown"} | current`;
-        els.aboutStatus.classList.toggle("offline", !ok);
-        els.aboutStatus.querySelector("span:last-child").textContent = ok ? "Uoink ready" : "Uoink offline";
         els.aboutVersion.textContent = `Version: ${data.version || "unknown"}`;
         els.aboutPort.textContent = `http://127.0.0.1:${data.port || 5179}`;
         renderLibrarianStatus(data.library);
       } catch (_) {
-        els.runningPill.classList.add("offline");
-        els.runningPill.querySelector("span:last-child").textContent = "Uoink is offline";
-        els.aboutStatus.classList.add("offline");
-        els.aboutStatus.querySelector("span:last-child").textContent = "Uoink offline";
+        renderHelperStatus(false);
         renderLibrarianStatus(null);
       }
     }
@@ -11361,6 +10458,9 @@
         const key = failureKey(row);
         return !key || !failedJobKeys.has(key);
       });
+      // Shell: the nav says "N failed" for the failures Activity lists
+      // (cancelled work is not a failure).
+      setActivityFailedBadge(failedJobs.filter((job) => normalizedStatus(job) === "failed").length + queueFailedDeduped.length);
       const rows = []
         .concat(activeJobs.map(jobRowHtml))
         .concat(queueActive.map(queueRowHtml))
@@ -11725,7 +10825,6 @@
         renderAutoUoinkStatus();
         renderLibraryMirrorFromSettings();
         els.writingShowWarnings.checked = els.voiceWarningsEnabled.checked;
-        els.scriptVoiceWarnings.checked = els.voiceWarningsEnabled.checked;
         renderWritingScreenshots();
         renderAgentSetup();
         renderRolePicker(state.settings.role || "mixed");
@@ -11824,94 +10923,6 @@
         `<option value="${htmlEscape(model)}">${htmlEscape(transcriptModelLabel(model))}</option>`
       )).join("");
       els.whisperModel.value = models.includes(current) ? current : "base";
-    }
-
-    function normalizeFeatureManifest(payload) {
-      const raw = Array.isArray(payload)
-        ? payload
-        : Array.isArray(payload && payload.features)
-          ? payload.features
-          : Array.isArray(payload && payload.items)
-            ? payload.items
-            : [];
-      return raw.map((item) => ({
-        group: item.group || item.category || "Capture",
-        slug: item.slug || String(item.url || "").split("/").filter(Boolean).pop() || item.name || "feature",
-        name: item.name || item.title || item.slug || "Feature",
-        description: item.description || item.summary || item.dek || "Walk through this feature on uoink.app.",
-        url: item.url || `https://uoink.app/features/${item.slug}`,
-      })).filter((item) => item.slug && item.name);
-    }
-
-    async function loadFeatures() {
-      let features = [];
-      let source = "fallback";
-      try {
-        const res = await fetch(FEATURE_MANIFEST_URL, { cache: "no-store" });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data = await res.json();
-        features = normalizeFeatureManifest(data);
-        if (!features.length) throw new Error("empty manifest");
-        localStorage.setItem("uoink.featuresManifest", JSON.stringify(features));
-        source = "uoink.app";
-      } catch (err) {
-        try {
-          features = normalizeFeatureManifest(JSON.parse(localStorage.getItem("uoink.featuresManifest") || "[]"));
-          source = features.length ? "local cache" : "fallback";
-        } catch (_) {
-          features = [];
-        }
-        if (!features.length) features = FALLBACK_FEATURES.slice();
-        els.featuresStatus.textContent = `Feature guide unavailable. Showing ${source === "local cache" ? "the saved copy" : "the built-in guide"}.`;
-      }
-      state.features = features;
-      if (!state.selectedFeatureGroup || !features.some((item) => item.group === state.selectedFeatureGroup)) {
-        state.selectedFeatureGroup = features[0] ? features[0].group : "Capture";
-      }
-      if (source === "uoink.app") els.featuresStatus.textContent = `${features.length} feature walkthroughs ready.`;
-      renderFeatureGroups();
-      renderFeatureRows();
-    }
-
-    function featureGroups() {
-      return [...new Set((state.features.length ? state.features : FALLBACK_FEATURES).map((item) => item.group))];
-    }
-
-    function renderFeatureGroups() {
-      const groups = featureGroups();
-      els.featureCount.textContent = String((state.features.length ? state.features : FALLBACK_FEATURES).length);
-      els.featureGroups.innerHTML = groups.map((group) => {
-        const count = (state.features.length ? state.features : FALLBACK_FEATURES).filter((item) => item.group === group).length;
-        return `
-          <button class="feature-group-card ${group === state.selectedFeatureGroup ? "active" : ""}" type="button" data-feature-group="${htmlEscape(group)}">
-            <div class="job-title">${htmlEscape(group)}</div>
-            <div class="job-sub">${count} walkthrough${count === 1 ? "" : "s"}</div>
-          </button>
-        `;
-      }).join("");
-    }
-
-    function renderFeatureRows() {
-      const rows = (state.features.length ? state.features : FALLBACK_FEATURES)
-        .filter((item) => item.group === state.selectedFeatureGroup);
-      els.featureGroupTitle.textContent = state.selectedFeatureGroup || "Feature walkthroughs";
-      els.featureRows.innerHTML = rows.length
-        ? rows.map((item) => `
-          <article class="feature-row">
-            <div class="feature-row-top">
-              <div>
-                <div class="job-title">${htmlEscape(item.name)}</div>
-                <p>${htmlEscape(item.description)}</p>
-              </div>
-              <button class="button ghost" type="button" data-open-feature="${htmlEscape(item.url)}">Open walkthrough</button>
-            </div>
-            <details class="error-details">
-              <summary>Advanced: page detail</summary>
-              <div class="soft-note">${htmlEscape(item.slug)}</div>
-            </details>
-          </article>
-        `).join("")
-        : emptyPanelRow("Feature guide unavailable.", "Open the public feature guide from the button above.");
     }
 
     function writingRowId(row) {
@@ -12685,7 +11696,6 @@
         els.styleAnchorManager.insertAdjacentHTML("afterbegin", `<div class="warning-panel"><strong>You're at ${cap} active anchors.</strong><p>Deactivate one before activating another.</p></div>`);
       }
       renderDefaultStyleAnchors();
-      renderScriptStyleAnchors();
     }
 
     function renderDefaultStyleAnchors() {
@@ -13145,7 +12155,7 @@
         skip_voice_dna_this_time: Boolean(els.writingSkipWarnings.checked),
       };
       const agentDraft = await connectedAgentDraft("generate_script", "script", grounding, body);
-      const draft = normalizeScriptDraft(agentDraft);
+      const draft = normalizeScriptDraft(agentDraft, body);
       if (draft && !looksLikeScriptScaffold(objectToMarkdown(draft))) {
         setWritingOutput(objectToMarkdown(draft));
         state.writingLastPayload = { mode: "agent_draft", grounding, draft };
@@ -13784,14 +12794,6 @@
       openStopHelperConfirm(event && event.currentTarget);
     }
 
-    function syncSidebarControlsDensity() {
-      const controls = document.getElementById("sidebarControls");
-      if (!controls) return;
-      const compact = window.matchMedia("(max-width: 1080px)").matches;
-      if (compact) controls.removeAttribute("open");
-      else controls.setAttribute("open", "");
-    }
-
     async function saveOutputFolder() {
       const outputDir = els.outputFolder.value.trim();
       if (!outputDir) return showToast("Enter an output folder first.");
@@ -13883,13 +12885,144 @@
 
     // U-07 (UX-15): panels without their own nav entry highlight their
     // logical parent, so the sidebar never lies or goes blank.
-    const NAV_OWNER = { yoink: "library", evidence: "library", features: "sources" };
+    const NAV_OWNER = { yoink: "library", evidence: "library", "for-you": "library" };
 
-    function switchTab(tab) {
+    // Shell: hash routes. #library, #item/<id>, #activity, #generate,
+    // #sources and #settings/<section>; #for-you and #evidence/<id> reach
+    // the panels with no nav entry. Every move the page makes pushes one
+    // history entry, so the browser's Back walks them in order and lands
+    // through applyHashRoute(). Older links (#writing, #about,
+    // #tab-activity, ...) still land on the right screen.
+    const ROUTE_TABS = {
+      library: "library",
+      activity: "activity",
+      generate: "writing",
+      sources: "sources",
+      settings: "settings",
+      "for-you": "for-you",
+      evidence: "evidence",
+    };
+    const ROUTE_ALIASES = {
+      writing: "generate",
+      build: "generate",
+      script: "generate",
+      features: "library",
+      yoink: "library",
+      about: "settings/about",
+      "byo-key": "settings/byo-key",
+      "tab-activity": "activity",
+    };
+    // Modes #generate/<mode> can name. Research playbooks add "research"
+    // here alongside their mode picker; the first entry is the default.
+    const GENERATE_MODES = ["write"];
+    let currentRoute = "";
+
+    function routeHash(head, rest = "") {
+      return rest ? `#${head}/${encodeURIComponent(rest)}` : `#${head}`;
+    }
+
+    // { tab, hash, id?, section?, mode? } for a location hash, or null when
+    // the hash names no screen.
+    function parseRoute(hash) {
+      const raw = String(hash || "").replace(/^#\/?/, "");
+      const cut = raw.indexOf("/");
+      let head = (cut < 0 ? raw : raw.slice(0, cut)).toLowerCase();
+      let rest = cut < 0 ? "" : raw.slice(cut + 1);
+      try { rest = decodeURIComponent(rest); } catch (_) {}
+      if (Object.prototype.hasOwnProperty.call(ROUTE_ALIASES, head)) {
+        const alias = ROUTE_ALIASES[head];
+        const aliasCut = alias.indexOf("/");
+        head = aliasCut < 0 ? alias : alias.slice(0, aliasCut);
+        if (aliasCut >= 0) rest = alias.slice(aliasCut + 1);
+      }
+      if (!head) return { tab: "library", hash: "#library" };
+      if (head === "item") {
+        return rest ? { tab: "yoink", id: rest, hash: routeHash("item", rest) } : { tab: "library", hash: "#library" };
+      }
+      if (head === "evidence") {
+        return rest ? { tab: "evidence", id: rest, hash: routeHash("evidence", rest) } : { tab: "evidence", hash: "#evidence" };
+      }
+      if (head === "settings") {
+        const section = rest.trim().toLowerCase();
+        return section
+          ? { tab: "settings", section, hash: routeHash("settings", section) }
+          : { tab: "settings", hash: "#settings" };
+      }
+      if (head === "generate") {
+        const asked = rest.trim().toLowerCase();
+        const mode = GENERATE_MODES.includes(asked) ? asked : GENERATE_MODES[0];
+        return { tab: "writing", mode, hash: mode === GENERATE_MODES[0] ? "#generate" : routeHash("generate", mode) };
+      }
+      const tab = Object.prototype.hasOwnProperty.call(ROUTE_TABS, head) ? ROUTE_TABS[head] : "";
+      return tab ? { tab, hash: `#${head}` } : null;
+    }
+
+    // The hash for the screen a tab switch shows ("" when it has no hash).
+    function routeForTab(tab, options = {}) {
+      if (tab === "yoink") {
+        const id = videoIdOf(state.selectedYoink);
+        return id ? routeHash("item", id) : "";
+      }
+      if (tab === "evidence") return state.selectedEvidenceVideo ? routeHash("evidence", state.selectedEvidenceVideo) : "#evidence";
+      if (tab === "settings") return options.section ? routeHash("settings", options.section) : "#settings";
+      const head = Object.keys(ROUTE_TABS).find((key) => ROUTE_TABS[key] === tab);
+      return head ? `#${head}` : "";
+    }
+
+    function historyDepth() {
+      const hist = window.history;
+      return Number(hist && hist.state && hist.state.uoinkDepth) || 0;
+    }
+
+    // Records a move the page made itself as one new history entry.
+    // pushState fires no hashchange, so the move is not applied twice.
+    function pushRoute(hash) {
+      if (!hash || hash === currentRoute) return;
+      currentRoute = hash;
+      const hist = window.history;
+      const loc = window.location;
+      if (!hist || typeof hist.pushState !== "function" || (loc && loc.hash === hash)) return;
+      try {
+        hist.pushState({ uoinkDepth: historyDepth() + 1 }, "", hash);
+      } catch (_) {}
+    }
+
+    function settingsSectionTarget(section) {
+      const key = String(section || "").toLowerCase();
+      if (!key) return null;
+      const panel = document.getElementById("tab-settings");
+      const target = document.getElementById(`settings-${key}`) || document.getElementById(key);
+      return target && panel && panel.contains(target) ? target : null;
+    }
+
+    // #settings/<section>: scroll the section (or a block such as byo-key)
+    // into view and put focus on its heading, as an in-page link would.
+    function revealSettingsSection(section) {
+      const target = settingsSectionTarget(section);
+      if (!target) return;
+      window.setTimeout(() => {
+        target.scrollIntoView({ block: "start", behavior: scrollBehavior() });
+        const heading = target.querySelector(".settings-section-title, h2") || target;
+        if (!heading.hasAttribute("tabindex")) heading.setAttribute("tabindex", "-1");
+        heading.focus({ preventScroll: true });
+      }, 0);
+    }
+
+    function switchTab(tab, options = {}) {
       if (tab === "build" || tab === "script") tab = "writing";
+      if (tab === "about") {
+        tab = "settings";
+        options = { ...options, section: options.section || "about" };
+      }
       const navTab = NAV_OWNER[tab] || tab;
-      document.querySelectorAll("[data-tab-button]").forEach((btn) => btn.classList.toggle("active", btn.dataset.tabButton === navTab));
+      document.querySelectorAll("[data-tab-button]").forEach((btn) => {
+        const current = btn.dataset.tabButton === navTab;
+        btn.classList.toggle("active", current);
+        if (current) btn.setAttribute("aria-current", "page");
+        else btn.removeAttribute("aria-current");
+      });
       document.querySelectorAll("[data-tab-panel]").forEach((panel) => panel.classList.toggle("active", panel.dataset.tabPanel === tab));
+      state.activeTab = tab;
       if (tab === "library") {
         loadLibraryActivity(false);
         startLibraryActivityTimer();
@@ -13903,23 +13036,82 @@
       if (tab === "sources") renderSources();
       if (tab === "activity") refreshActivity();
       if (tab === "settings") refreshSettings();
-      if (tab === "features") loadFeatures();
-      document.querySelector(".content").scrollTop = 0;
+      const content = document.querySelector(".content");
+      if (content) content.scrollTop = 0;
+      if (!options.fromRoute) pushRoute(routeForTab(tab, options));
+      if (tab === "settings" && options.section) revealSettingsSection(options.section);
     }
 
-    function applyHashRoute() {
-      const route = decodeURIComponent(location.hash || "").replace(/^#\/?/, "");
-      if (!route) return false;
-      const [tab, anchor] = route.split("/");
-      const routedTab = tab === "build" || tab === "script" ? "writing" : tab;
-      if (!document.querySelector(`[data-tab-panel="${CSS.escape(routedTab)}"]`)) return false;
-      switchTab(routedTab);
-      if (routedTab === "settings" && anchor === "byo-key") {
-        window.setTimeout(() => {
-          document.getElementById("byo-key")?.scrollIntoView({ block: "start" });
-        }, 0);
+    // Shows the screen a parsed route names, without pushing history.
+    function applyRoute(route) {
+      if (route.tab === "yoink") {
+        // Back to the item already loaded (from its Evidence, say): show
+        // it again instead of fetching it twice.
+        if (state.activeTab !== "yoink" && videoIdOf(state.selectedYoink) === route.id) {
+          switchTab("yoink", { fromRoute: true });
+          return;
+        }
+        // A row the page already has opens straight away; a fresh deep
+        // link looks the saved row up first (never an id-only stand-in,
+        // which would read as no folder and Uncategorized).
+        const row = knownLibraryRow(route.id);
+        if (row) openYoinkDetail(row, { fromRoute: true });
+        else openItemFromRoute(route.id);
+        return;
       }
+      if (route.tab === "evidence" && route.id) {
+        const row = state.library.find((item) => evidenceVideoIdOf(item) === route.id || videoIdOf(item) === route.id);
+        openEvidenceFor(route.id, row ? rowTitle(row) : "", { fromRoute: true });
+        return;
+      }
+      if (state.activeTab !== route.tab) switchTab(route.tab, { fromRoute: true, section: route.section });
+      else if (route.section) revealSettingsSection(route.section);
+    }
+
+    // Load, Back/Forward and typed hashes. A hash that names no screen
+    // shows Library.
+    function applyHashRoute() {
+      const loc = window.location;
+      const route = parseRoute(loc ? loc.hash : "") || parseRoute("#library");
+      if (route.hash === currentRoute) return true;
+      currentRoute = route.hash;
+      applyRoute(route);
       return true;
+    }
+
+    // An in-app move to a hash: one history entry, then the screen.
+    function navigateTo(hash) {
+      const route = parseRoute(hash);
+      if (!route) return false;
+      pushRoute(route.hash);
+      applyRoute(route);
+      return true;
+    }
+
+    // In-page Back: the browser's own Back when this page put the entry
+    // there, else Library (a deep link opened in a fresh tab).
+    function goBack() {
+      const hist = window.history;
+      if (hist && typeof hist.back === "function" && historyDepth() > 0) {
+        hist.back();
+        return;
+      }
+      navigateTo("#library");
+    }
+
+    function wireRoutes() {
+      window.addEventListener("hashchange", applyHashRoute);
+      window.addEventListener("popstate", applyHashRoute);
+      // In-app hash links (#settings/capture, #for-you, #activity) go
+      // through navigateTo, so each click is exactly one history entry.
+      document.addEventListener("click", (event) => {
+        if (event.defaultPrevented || event.button || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+        const target = event.target;
+        const link = target && typeof target.closest === "function" ? target.closest('a[href^="#"]') : null;
+        const href = link ? link.getAttribute("href") : "";
+        if (href && href !== "#" && navigateTo(href)) event.preventDefault();
+      });
+      if (els.yoinkBack) els.yoinkBack.addEventListener("click", goBack);
     }
 
     function wireEvents() {
@@ -13958,27 +13150,6 @@
       document.getElementById("clearFilters").addEventListener("click", resetLibraryFilters);
       document.getElementById("refreshForYou").addEventListener("click", loadForYou);
       els.loadMore.addEventListener("click", () => loadLibrary());
-      document.getElementById("reloadBuild").addEventListener("click", loadBuild);
-      els.workspaceExamples.addEventListener("input", () => {
-        els.workspaceExamplesLabel.textContent = `${els.workspaceExamples.value} examples`;
-      });
-      els.workspaceForm.addEventListener("submit", createWorkspaceFromForm);
-      document.getElementById("assembleCurrentWorkspace").addEventListener("click", assembleCurrentWorkspace);
-      document.getElementById("runWorkspaceCritique").addEventListener("click", runWorkspaceCritique);
-      document.getElementById("reloadScripts").addEventListener("click", loadScripts);
-      document.getElementById("reviseScript").addEventListener("click", () => reviseCurrentScript({ persist: false }));
-      document.getElementById("saveScriptRevision").addEventListener("click", () => reviseCurrentScript({ persist: Boolean(els.scriptRevisionDraft.value.trim()) }));
-      document.getElementById("deriveShotList").addEventListener("click", deriveCurrentShotList);
-      els.scriptForm.addEventListener("submit", generateScriptFromForm);
-      els.scriptSourceSearch.addEventListener("focus", () => toggleScriptSourceCombo(true));
-      els.scriptSourceSearch.addEventListener("input", () => {
-        if (state.scriptSelectedSourceRow && els.scriptSourceSearch.value !== rowTitle(state.scriptSelectedSourceRow)) {
-          state.scriptSelectedSourceRow = null;
-          els.scriptSource.value = "";
-        }
-        toggleScriptSourceCombo(true);
-        syncScriptSourceOptions();
-      });
       document.getElementById("reloadWriting").addEventListener("click", loadWriting);
       document.getElementById("generateWriting").addEventListener("click", generateWriting);
       document.getElementById("regenerateWriting").addEventListener("click", generateWriting);
@@ -14101,12 +13272,6 @@
       document.querySelectorAll("#yoinkActionMenu button").forEach((button) => {
         button.addEventListener("click", () => document.getElementById("yoinkActionMenu").removeAttribute("open"));
       });
-      document.querySelectorAll("[data-workspace-tab]").forEach((btn) => {
-        btn.addEventListener("click", () => {
-          document.querySelectorAll("[data-workspace-tab]").forEach((item) => item.classList.toggle("active", item.dataset.workspaceTab === btn.dataset.workspaceTab));
-          document.querySelectorAll("[data-workspace-pane]").forEach((pane) => pane.classList.toggle("active", pane.dataset.workspacePane === btn.dataset.workspaceTab));
-        });
-      });
       document.getElementById("refreshActivity").addEventListener("click", refreshActivity);
       document.getElementById("cancelAll").addEventListener("click", async () => {
         const activeJobs = state.jobs.filter((job) => ["queued", "running"].includes(String(job.state || "").toLowerCase()) && job.id);
@@ -14120,7 +13285,7 @@
         refreshActivity();
       });
       document.getElementById("reloadSettings").addEventListener("click", refreshSettings);
-      // viewActivity carries data-tab-button now; the nav loop wires it.
+      // About, Star on GitHub and Stop Uoink live in Settings > App.
       document.getElementById("starGithub").addEventListener("click", () => openExternal("https://github.com/ryanbiddy/uoink"));
       document.getElementById("saveKey").addEventListener("click", saveKey);
       document.getElementById("testKey").addEventListener("click", testKey);
@@ -14135,12 +13300,11 @@
           els.updateLine.textContent = data.update_available
             ? `Update available: ${data.latest}. Checked ${checked}.`
             : `No update available. Checked ${checked}.`;
-          if (data.url) showToast("Update check complete. Open the About tab for release links.");
+          if (data.url) showToast("Update check complete. Release links are under About in Settings, App.");
         } catch (err) {
           els.updateLine.textContent = "Update check needs another moment.";
         }
       });
-      document.getElementById("stopHelper").addEventListener("click", stopHelperWithConfirm);
       document.getElementById("stopHelperSettings").addEventListener("click", stopHelperWithConfirm);
       els.cancelStopHelper.addEventListener("click", closeStopHelperConfirm);
       els.confirmStopHelper.addEventListener("click", confirmStopHelper);
@@ -14191,7 +13355,6 @@
       document.getElementById("addAllowedSite").addEventListener("click", addAllowedSite);
       els.voiceWarningsEnabled.addEventListener("change", () => {
         els.writingShowWarnings.checked = els.voiceWarningsEnabled.checked;
-        els.scriptVoiceWarnings.checked = els.voiceWarningsEnabled.checked;
         saveSettingsPatch({ voice_dna_warnings_enabled: els.voiceWarningsEnabled.checked }, "Voice DNA warning setting updated.");
       });
       els.voiceWarningsPerGeneration.addEventListener("change", () => {
@@ -14202,9 +13365,6 @@
       });
       els.writingShowWarnings.addEventListener("change", () => {
         if (!els.writingShowWarnings.checked) els.voiceWarningCopy.textContent = "Warnings are hidden for this session.";
-      });
-      els.scriptVoiceWarnings.addEventListener("change", () => {
-        if (!els.scriptVoiceWarnings.checked) showToast("Voice DNA warnings hidden for this script.");
       });
       els.saveWhisperModel.addEventListener("click", () => {
         saveSettingsPatch({ whisper_model: els.whisperModel.value }, "Transcript checker choice saved.");
@@ -14331,8 +13491,6 @@
       if (els.imageClearButton) els.imageClearButton.addEventListener("click", clearImageSelection);
       const emptyPasteUrl = document.getElementById("emptyPasteUrl");
       if (emptyPasteUrl) emptyPasteUrl.addEventListener("click", focusUniversalCapture);
-      document.getElementById("reloadFeatures").addEventListener("click", loadFeatures);
-      document.getElementById("openFeaturesIndex").addEventListener("click", () => openExternal("https://uoink.app/features"));
       document.querySelectorAll('a[target="_blank"]').forEach((link) => {
         link.addEventListener("click", (event) => {
           event.preventDefault();
@@ -14361,22 +13519,6 @@
         const removeLibraryFilterButton = event.target.closest("[data-remove-library-filter]");
         if (removeLibraryFilterButton) {
           removeLibraryFilter(removeLibraryFilterButton.dataset.removeLibraryFilter);
-          return;
-        }
-        const scriptSourceOption = event.target.closest("[data-script-source-id]");
-        if (scriptSourceOption) {
-          selectScriptSourceById(scriptSourceOption.dataset.scriptSourceId);
-          return;
-        }
-        if (!event.target.closest("#scriptSourceCombo")) {
-          toggleScriptSourceCombo(false);
-        }
-        const copyScript = event.target.closest("[data-copy-script-output]");
-        if (copyScript) {
-          navigator.clipboard.writeText(els.scriptDetail.dataset.rawText || "").then(
-            () => showToast("Script copied."),
-            () => showToast("Couldn't copy script.")
-          );
           return;
         }
         const sourceOption = event.target.closest("[data-writing-source-id]");
@@ -14516,18 +13658,6 @@
           switchTab("library");
           loadLibrary({ reset: true });
         }
-        const workspaceButton = event.target.closest("[data-workspace-id]");
-        if (workspaceButton) selectWorkspace(workspaceButton.dataset.workspaceId);
-        const scriptButton = event.target.closest("[data-script-id]");
-        if (scriptButton) selectScript(scriptButton.dataset.scriptId);
-        const featureGroup = event.target.closest("[data-feature-group]");
-        if (featureGroup) {
-          state.selectedFeatureGroup = featureGroup.dataset.featureGroup;
-          renderFeatureGroups();
-          renderFeatureRows();
-        }
-        const featureButton = event.target.closest("[data-open-feature]");
-        if (featureButton) openExternal(featureButton.dataset.openFeature);
         const editStyle = event.target.closest("[data-edit-style-anchor]");
         if (editStyle) editStyleAnchor(editStyle);
         const removeStyle = event.target.closest("[data-remove-style-anchor]");
@@ -14692,12 +13822,10 @@
 
     async function init() {
       hydrateMarks();
-      syncSidebarControlsDensity();
       wireEvents();
       wireLibraryActivityEvents();
+      wireRoutes();
       applyHashRoute();
-      window.addEventListener("resize", syncSidebarControlsDensity);
-      window.addEventListener("hashchange", applyHashRoute);
       await refreshHealth();
       await loadLibraryFacets();
       await refreshJobs();
@@ -14708,7 +13836,6 @@
       await loadForYou();
       await loadWriting();
       renderSources();
-      await loadFeatures();
       await refreshActivity();
       connectJobsStream();
       setInterval(refreshHealth, 10000);
