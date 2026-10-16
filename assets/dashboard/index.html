@@ -4780,7 +4780,7 @@
           <div class="page-head">
             <div>
               <div class="eyebrow">Uoink</div>
-              <h1 id="yoinkHeading">Pick a uoink <em>to inspect.</em></h1>
+              <h1 id="yoinkHeading" tabindex="-1">Pick a uoink <em>to inspect.</em></h1>
               <p class="lede" id="yoinkSubhead">Podcast episodes, interviews, and regular videos share one saved-source view.</p>
             </div>
               <div class="inline-row yoink-actions">
@@ -8224,11 +8224,14 @@
         const openYoinkBtn = e.target.closest("[data-open-yoink]");
         if (openYoinkBtn && openYoinkBtn.dataset.openYoink) {
           const vid = openYoinkBtn.dataset.openYoink;
-          const modal = document.getElementById("activityEvidenceModal");
-          if (modal) modal.classList.add("hidden");
-          if (typeof showYoinkDetail === "function") {
-            showYoinkDetail(vid);
-          }
+          const row = state.library.find((item) => videoIdOf(item) === vid) || { video_id: vid };
+          // D3: the item view replaces the Library tab, which hides the
+          // trigger the modal would hand focus back to, so focus goes to the
+          // item view's heading instead.
+          activityEvidenceFocusRestore = null;
+          closeActivityEvidenceModal();
+          openYoinkDetail(row);
+          els.yoinkHeading.focus();
           return;
         }
       });
@@ -14402,28 +14405,49 @@
       handleJobsStreamEvent(eventName, JSON.parse(data));
     }
 
-    async function connectJobsStream() {
-      try {
-        const token = await getToken();
-        const res = await fetch("/jobs/stream", { headers: { "X-Uoink-Token": token } });
-        if (!res.ok || !res.body) throw new Error(`stream unavailable: HTTP ${res.status}`);
-        const reader = res.body.getReader();
-        const decoder = new TextDecoder();
-        let buffer = "";
-        for (;;) {
-          const { value, done } = await reader.read();
-          if (done) break;
-          buffer += decoder.decode(value, { stream: true }).replace(/\r\n/g, "\n");
-          let index = buffer.indexOf("\n\n");
-          while (index >= 0) {
-            const frame = buffer.slice(0, index);
-            buffer = buffer.slice(index + 2);
-            try { handleJobsStreamFrame(frame); } catch (_) {}
-            index = buffer.indexOf("\n\n");
-          }
+    // D20: the stream ends when the helper restarts or the PC sleeps, so it is
+    // reopened with a capped backoff, after a clean end too, and every reopen
+    // catches up through refreshActivity() first. The catch-up lands before
+    // the stream reopens, so a slow /jobs answer never overwrites the newer
+    // snapshot the stream sends. A stream that stayed open at least as long
+    // as the longest wait was healthy; the next wait starts short again.
+    const JOBS_STREAM_RETRY_MIN_MS = 1000;
+    const JOBS_STREAM_RETRY_MAX_MS = 30000;
+
+    async function readJobsStream() {
+      const token = await getToken();
+      const res = await fetch("/jobs/stream", { headers: { "X-Uoink-Token": token } });
+      if (!res.ok || !res.body) throw new Error(`stream unavailable: HTTP ${res.status}`);
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+      for (;;) {
+        const { value, done } = await reader.read();
+        if (done) return;
+        buffer += decoder.decode(value, { stream: true }).replace(/\r\n/g, "\n");
+        let index = buffer.indexOf("\n\n");
+        while (index >= 0) {
+          const frame = buffer.slice(0, index);
+          buffer = buffer.slice(index + 2);
+          try { handleJobsStreamFrame(frame); } catch (_) {}
+          index = buffer.indexOf("\n\n");
         }
-      } catch (_) {
-        setTimeout(refreshActivity, 5000);
+      }
+    }
+
+    async function connectJobsStream() {
+      let delay = JOBS_STREAM_RETRY_MIN_MS;
+      for (;;) {
+        const openedAt = Date.now();
+        try {
+          await readJobsStream();
+        } catch (_) {}
+        if (Date.now() - openedAt >= JOBS_STREAM_RETRY_MAX_MS) delay = JOBS_STREAM_RETRY_MIN_MS;
+        await new Promise((resolve) => setTimeout(resolve, delay));
+        delay = Math.min(delay * 2, JOBS_STREAM_RETRY_MAX_MS);
+        try {
+          await refreshActivity();
+        } catch (_) {}
       }
     }
 
