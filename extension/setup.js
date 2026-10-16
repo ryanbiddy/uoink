@@ -64,6 +64,7 @@ const uoinkSuggestedBtn = document.getElementById("uoink-suggested-btn");
 const openInstallFolderBtn = document.getElementById("open-install-folder-btn");
 let installFolderPath = "";
 const ciEnabled = document.getElementById("ci-enabled");
+const ciEnabledStatus = document.getElementById("ci-enabled-status");
 const ciKeyInput = document.getElementById("anthropic-key");
 const ciStatus = document.getElementById("ci-status");
 const ciSaveBtn = document.getElementById("ci-save-btn");
@@ -71,8 +72,11 @@ const ciTestBtn = document.getElementById("ci-test-btn");
 const ciClearBtn = document.getElementById("ci-clear-btn");
 const aiCostEstimate = document.getElementById("ai-cost-estimate");
 const hookTypeEnabled = document.getElementById("hook-type-enabled");
+const hookTypeStatus = document.getElementById("hook-type-status");
 const smartScreenshotPickerEnabled = document.getElementById("smart-screenshot-picker-enabled");
+const smartScreenshotPickerStatus = document.getElementById("smart-screenshot-picker-status");
 const clipboardScreenshotCap = document.getElementById("clipboard-screenshot-cap");
+const clipboardScreenshotCapStatus = document.getElementById("clipboard-screenshot-cap-status");
 const hookCalibrationSummary = document.getElementById("hook-calibration-summary");
 const hookCorrectionsList = document.getElementById("hook-corrections-list");
 const mcpStdioPath = document.getElementById("mcp-stdio-path");
@@ -503,6 +507,129 @@ function onServerUp() {
 let ciLoaded = false;
 let aiSettings = null;
 let aiPricing = null;
+// Settings writes from this page go to the helper one at a time, in the order
+// they were made, so a later change is never overwritten by an earlier write
+// and no answer is older than one already handled.
+let settingsWriteQueue = Promise.resolve();
+// field -> writes carrying it that the helper has not answered yet.
+const pendingSettingWrites = {};
+
+function writeSettings(body) {
+  const fields = Object.keys(body);
+  // Each field's edit count as it goes out: the helper storing it confirms
+  // those edits (confirmSettingEdits).
+  const sentEdits = {};
+  for (const f of fields) {
+    pendingSettingWrites[f] = (pendingSettingWrites[f] || 0) + 1;
+    sentEdits[f] = settingEditCount(f);
+  }
+  const run = settingsWriteQueue
+    .then(() => STC.updateSettings(body))
+    .then((res) => {
+      if (res && res.ok) {
+        for (const f of fields) {
+          if (settingStored(res.settings, f, body[f])) confirmSettingEdits(f, sentEdits[f]);
+        }
+      }
+      return res;
+    })
+    .finally(() => {
+      for (const f of fields) pendingSettingWrites[f] -= 1;
+    });
+  settingsWriteQueue = run.catch(() => {});
+  return run;
+}
+
+// A field with a newer write still queued keeps showing the change being
+// saved; that write's answer settles it.
+function settingWritePending(field) {
+  return (pendingSettingWrites[field] || 0) > 0;
+}
+
+// Settings fields holding the user's own value the helper hasn't stored yet:
+// edited on this page, or restored from a failed save
+// (loadPendingV3Settings).
+const changedSettingFields = new Set();
+// Fields whose control shows the helper's value (renderCISettings put it
+// there, or the helper stored what it shows).
+const loadedSettingFields = new Set();
+
+// User edits (every input or change) per field, counted. A save or load notes
+// the count when it starts; putting a value back after it is skipped for a
+// field edited since.
+const settingEditCounts = {};
+// Per field, the edit count the helper has confirmed: a save carrying the
+// field at that count was stored (or a failed save's value was put back).
+const confirmedSettingEdits = {};
+
+function settingEditCount(field) {
+  return settingEditCounts[field] || 0;
+}
+
+function noteSettingEdited(field) {
+  settingEditCounts[field] = settingEditCount(field) + 1;
+  changedSettingFields.add(field);
+}
+
+// Edits the helper hasn't confirmed (newer than any stored save, or not
+// saved yet): no settings answer is shown over them.
+function settingEditsUnconfirmed(field) {
+  return settingEditCount(field) > (confirmedSettingEdits[field] || 0);
+}
+
+// The helper stored field as it was at edit count `count`: later answers may
+// show it again (e.g. a value another tab saved since).
+function confirmSettingEdits(field, count) {
+  confirmedSettingEdits[field] = Math.max(confirmedSettingEdits[field] || 0, count);
+  changedSettingFields.delete(field);
+  loadedSettingFields.add(field);
+}
+
+// A field a save may carry: its control shows the helper's value or the
+// user's. Until the read answers (it can fail or time out) every other
+// control shows its HTML default, and sending that would overwrite what the
+// helper has saved.
+function settingKnown(field) {
+  return changedSettingFields.has(field) || loadedSettingFields.has(field);
+}
+
+function knownSettingsOnly(body) {
+  for (const field of Object.keys(body)) {
+    if (!settingKnown(field)) delete body[field];
+  }
+  return body;
+}
+
+// A save's answer carries the helper's settings. If the read on load never
+// showed them, fill in the controls the user hasn't changed from it.
+function adoptSettings(settings) {
+  if (!settings) return;
+  if (ciLoaded) {
+    aiSettings = Object.assign({}, aiSettings, settings);
+    return;
+  }
+  renderCISettings(Object.assign({}, aiSettings, settings), true);
+}
+
+// The settings read on load waits its turn in the same queue. STC.getSettings
+// has no timeout of its own, so give up on it here: a helper that never
+// answers must not hold every later save behind it. The clock starts when the
+// read is sent; an answer that comes after the limit is ignored.
+const SETTINGS_READ_TIMEOUT_MS = 10000;
+
+function readSettingsInTurn() {
+  const read = settingsWriteQueue.then(() => new Promise((resolve, reject) => {
+    const timer = setTimeout(() => {
+      reject(new Error("Uoink helper did not answer"));
+    }, SETTINGS_READ_TIMEOUT_MS);
+    Promise.resolve()
+      .then(() => STC.getSettings())
+      .then(resolve, reject)
+      .finally(() => clearTimeout(timer));
+  }));
+  settingsWriteQueue = read.catch(() => {});
+  return read;
+}
 
 function setCIStatus(text, mode) {
   if (!ciStatus) return;
@@ -585,55 +712,86 @@ function setCIControlsEnabled(enabled) {
   if (!enabled && aiCostEstimate) aiCostEstimate.classList.add("hidden");
 }
 
-function renderCISettings(settings) {
+// onlyGiven (adoptSettings): a save's answer stands in for a read that never
+// answered, so only the fields it has are shown, never over one holding the
+// user's value (changedSettingFields), and the key box and its status line
+// are left alone. keyEdits: the key box's edit count when the read or save
+// started; a key typed since stays in the box.
+function renderCISettings(settings, onlyGiven, keyEdits) {
   if (!settings) return;
   aiSettings = settings;
-  if (ciEnabled) ciEnabled.checked = !!settings.comment_intelligence_enabled;
-  if (hookTypeEnabled) hookTypeEnabled.checked = !!settings.hook_type_enabled;
-  if (smartScreenshotPickerEnabled) {
+  // A control keeps what it shows when a newer change to it is still being
+  // saved or the user edited it here (typing included) and the helper hasn't
+  // stored that edit yet.
+  const show = (field) => {
+    if (settingWritePending(field) || settingEditsUnconfirmed(field)) return false;
+    const given = Object.prototype.hasOwnProperty.call(settings, field);
+    if (onlyGiven && (!given || changedSettingFields.has(field))) return false;
+    if (given) loadedSettingFields.add(field);
+    return true;
+  };
+  if (ciEnabled && show("comment_intelligence_enabled")) {
+    ciEnabled.checked = !!settings.comment_intelligence_enabled;
+  }
+  if (hookTypeEnabled && show("hook_type_enabled")) {
+    hookTypeEnabled.checked = !!settings.hook_type_enabled;
+  }
+  if (smartScreenshotPickerEnabled && show("smart_screenshot_picker_enabled")) {
     smartScreenshotPickerEnabled.checked = !!settings.smart_screenshot_picker_enabled;
   }
-  if (clipboardScreenshotCap) {
+  if (clipboardScreenshotCap && show("clipboard_screenshot_cap")) {
     const cap = Number.isFinite(Number(settings.clipboard_screenshot_cap))
       ? Number(settings.clipboard_screenshot_cap)
       : 4;
     clipboardScreenshotCap.value = String(Math.max(0, Math.min(12, cap)));
   }
-  if (ciKeyInput) {
+  if (ciKeyInput && !onlyGiven && settingEditCount("anthropic_key") === keyEdits) {
     ciKeyInput.value = "";
     ciKeyInput.dataset.dirty = "false";
     ciKeyInput.placeholder = settings.anthropic_key_set
       ? "Key saved - enter a new key to replace"
       : "sk-ant-...";
   }
-  setCIStatus(settings.anthropic_key_set ? "Key set" : "Key not set.",
-              settings.anthropic_key_set ? "ok" : "warn");
+  if (!onlyGiven) {
+    setCIStatus(settings.anthropic_key_set ? "Key set" : "Key not set.",
+                settings.anthropic_key_set ? "ok" : "warn");
+  }
   renderAICostEstimate();
 
   // Populate Your Channels
-  yourChannelsList = settings.your_channels || [];
-  renderYcList();
-  
+  if (show("your_channels")) {
+    yourChannelsList = settings.your_channels || [];
+    renderYcList();
+  }
+
   // Populate Creator Tools
-  if (ctWorkspaceFormat) ctWorkspaceFormat.value = settings.default_workspace_format || "markdown";
-  if (ctTargetLength) {
+  if (ctWorkspaceFormat && show("default_workspace_format")) {
+    ctWorkspaceFormat.value = settings.default_workspace_format || "markdown";
+  }
+  if (ctTargetLength && show("default_target_length")) {
     const len = settings.default_target_length || "5m";
     const lenToVal = { "30s": 0, "60s": 1, "5m": 2, "15m": 3, "30m": 4 };
     ctTargetLength.value = lenToVal[len] !== undefined ? lenToVal[len] : 2;
     updateTargetLengthDisplay(ctTargetLength.value);
   }
-  if (ctStyleSourceRadios) {
+  if (ctStyleSourceRadios && show("style_anchors_source")) {
     const source = settings.style_anchors_source || "taste";
     for (const r of ctStyleSourceRadios) {
       r.checked = r.value === source;
     }
   }
-  if (ctObsidianPath) ctObsidianPath.value = settings.obsidian_vault_path || "";
-  if (ctObsidianMirror) ctObsidianMirror.checked = !!settings.mirror_scripts_to_obsidian;
-  
+  if (ctObsidianPath && show("obsidian_vault_path")) {
+    ctObsidianPath.value = settings.obsidian_vault_path || "";
+  }
+  if (ctObsidianMirror && show("mirror_scripts_to_obsidian")) {
+    ctObsidianMirror.checked = !!settings.mirror_scripts_to_obsidian;
+  }
+
   // Populate Claim Verification
-  if (cvEnabled) cvEnabled.checked = !!settings.claim_verification_enabled;
-  if (cvSources) {
+  if (cvEnabled && show("claim_verification_enabled")) {
+    cvEnabled.checked = !!settings.claim_verification_enabled;
+  }
+  if (cvSources && show("default_evidence_sources")) {
     const sources = Array.isArray(settings.default_evidence_sources)
       ? settings.default_evidence_sources.join("\n")
       : (settings.default_evidence_sources || "");
@@ -674,21 +832,27 @@ async function loadAIPricing() {
 async function loadCISettings() {
   if (ciLoaded || !window.STC || !STC.getSettings) return;
   try {
-    const res = await STC.getSettings();
+    // Read in turn with the writes, so a save made while this read is out
+    // is not undone by an answer from before it.
+    const keyEdits = settingEditCount("anthropic_key");
+    const res = await readSettingsInTurn();
     if (!res || !res.ok) {
       setCIStatus((res && res.error) || "Settings unavailable", "warn");
       return;
     }
     ciLoaded = true;
-    renderCISettings(res.settings);
-  } catch {
-    setCIStatus("Settings unavailable", "warn");
+    renderCISettings(res.settings, false, keyEdits);
+  } catch (err) {
+    setCIStatus(`Settings unavailable: ${(err && err.message) || "read failed"}`, "warn");
   }
 }
 
 if (ciKeyInput) {
   ciKeyInput.addEventListener("input", () => {
     ciKeyInput.dataset.dirty = "true";
+    // Not a setting a save may carry on its own: only counted, so an answer
+    // doesn't clear a key typed since its save or read started.
+    settingEditCounts.anthropic_key = settingEditCount("anthropic_key") + 1;
     renderAICostEstimate();
   });
 }
@@ -697,30 +861,138 @@ for (const toggle of [ciEnabled, hookTypeEnabled]) {
   if (toggle) toggle.addEventListener("change", renderAICostEstimate);
 }
 
+// Comment Intelligence, Hook Type and Smart Screenshot Picker (and the
+// screenshot count) save as soon as they change: just that field (never the
+// API key), with Saved / Save failed on the control's own status line. These
+// saves are the only writes that carry Hook Type, the picker and the count;
+// the Comment Intelligence buttons leave its toggle out while its own save is
+// out (ciToggleBody). A failed save puts the control back to the helper's
+// value.
+function setSettingStatus(el, text, mode) {
+  if (!el) return;
+  el.textContent = text;
+  el.classList.remove("ok", "warn");
+  if (mode) el.classList.add(mode);
+}
+
+// The helper answers ok to a body carrying fields it does not keep and leaves
+// them out of the settings it sends back. A field counts as saved only when
+// that answer has it (with the value sent, for a toggle or a number).
+const SETTING_NOT_SUPPORTED = "Not saved: Uoink helper does not support this setting";
+
+function settingStored(settings, field, sent) {
+  if (!settings || !Object.prototype.hasOwnProperty.call(settings, field)) return false;
+  if (typeof sent === "boolean" || typeof sent === "number") return settings[field] === sent;
+  return true;
+}
+
+async function saveSettingOnChange(field, value, statusEl, restore) {
+  if (!window.STC || !STC.updateSettings) return;
+  noteSettingEdited(field);
+  const edits = settingEditCount(field);
+  setSettingStatus(statusEl, "Saving...", null);
+  let error = "Save failed";
+  try {
+    const res = await writeSettings({ [field]: value });
+    if (res && res.ok) {
+      adoptSettings(res.settings);
+      if (settingStored(res.settings, field, value)) {
+        // A newer change to the same field is queued; its answer decides.
+        if (!settingWritePending(field)) setSettingStatus(statusEl, "Saved", "ok");
+        return;
+      }
+      error = SETTING_NOT_SUPPORTED;
+    } else if (res && res.error) {
+      error = `Save failed: ${res.error}`;
+    }
+  } catch {
+    error = "Save failed: Uoink helper unreachable";
+  }
+  if (settingWritePending(field)) return;
+  // Edited again since this save was made (typing, not yet saved): keep it.
+  if (settingEditCount(field) === edits && aiSettings && aiSettings[field] !== undefined) {
+    restore(aiSettings[field]);
+    // The control shows the helper's value again: the undone edit no longer
+    // holds later answers off it.
+    confirmSettingEdits(field, edits);
+    renderAICostEstimate();
+  }
+  setSettingStatus(statusEl, error, "warn");
+}
+
+if (hookTypeEnabled) {
+  hookTypeEnabled.addEventListener("change", () => {
+    saveSettingOnChange("hook_type_enabled", !!hookTypeEnabled.checked, hookTypeStatus,
+      (saved) => { hookTypeEnabled.checked = !!saved; });
+  });
+}
+
+if (smartScreenshotPickerEnabled) {
+  smartScreenshotPickerEnabled.addEventListener("change", () => {
+    saveSettingOnChange(
+      "smart_screenshot_picker_enabled",
+      !!smartScreenshotPickerEnabled.checked,
+      smartScreenshotPickerStatus,
+      (saved) => { smartScreenshotPickerEnabled.checked = !!saved; }
+    );
+  });
+}
+
+if (clipboardScreenshotCap) {
+  // Typing counts as an edit before the field is left (no answer replaces it).
+  clipboardScreenshotCap.addEventListener("input",
+    () => noteSettingEdited("clipboard_screenshot_cap"));
+  clipboardScreenshotCap.addEventListener("change", () => {
+    // Show the clamped number that is actually saved.
+    const cap = readClipboardScreenshotCap();
+    clipboardScreenshotCap.value = String(cap);
+    saveSettingOnChange("clipboard_screenshot_cap", cap, clipboardScreenshotCapStatus,
+      (saved) => { clipboardScreenshotCap.value = String(saved); });
+  });
+}
+
+if (ciEnabled) {
+  ciEnabled.addEventListener("change", () => {
+    saveSettingOnChange("comment_intelligence_enabled", !!ciEnabled.checked, ciEnabledStatus,
+      (saved) => { ciEnabled.checked = !!saved; });
+  });
+}
+
+// The Comment Intelligence toggle for a write from its section's buttons:
+// left out while the toggle's own save is out (that save carries the newest
+// choice and reports it on the toggle's line), and while the page has its
+// HTML default only (settingKnown).
+function ciToggleBody() {
+  const field = "comment_intelligence_enabled";
+  if (settingWritePending(field)) return {};
+  return knownSettingsOnly({ [field]: !!(ciEnabled && ciEnabled.checked) });
+}
+
 if (ciSaveBtn) {
   ciSaveBtn.addEventListener("click", async () => {
     if (!window.STC || !STC.updateSettings) return;
-    const body = {
-      comment_intelligence_enabled: !!(ciEnabled && ciEnabled.checked),
-      hook_type_enabled: !!(hookTypeEnabled && hookTypeEnabled.checked),
-      smart_screenshot_picker_enabled: !!(
-        smartScreenshotPickerEnabled && smartScreenshotPickerEnabled.checked
-      ),
-      clipboard_screenshot_cap: readClipboardScreenshotCap(),
-    };
+    // Hook Type, the picker and the screenshot count save when changed;
+    // sending them here too could put back a value changed since.
+    const body = ciToggleBody();
     const rawKey = ciKeyInput ? ciKeyInput.value.trim() : "";
     const keyDirty = ciKeyInput && ciKeyInput.dataset.dirty === "true";
     if (rawKey || keyDirty) body.anthropic_key = rawKey || null;
+    // The helper refuses a save with no setting in it.
+    if (!Object.keys(body).length) {
+      setCIStatus("Type an API key to save it.", "warn");
+      return;
+    }
 
     setCIStatus("Saving...", null);
     ciSaveBtn.disabled = true;
+    const keyEdits = settingEditCount("anthropic_key");
     try {
-      const res = await STC.updateSettings(body);
+      const res = await writeSettings(body);
       if (!res || !res.ok) {
         setCIStatus((res && res.error) || "Save failed", "warn");
         return;
       }
-      renderCISettings(res.settings);
+      renderCISettings(res.settings, false, keyEdits);
     } catch {
       setCIStatus("Save failed", "warn");
     } finally {
@@ -760,25 +1032,20 @@ if (ciClearBtn) {
 
     setCIStatus("Clearing key...", null);
     ciClearBtn.disabled = true;
+    const keyEdits = settingEditCount("anthropic_key");
     try {
-      const res = await STC.updateSettings({
-        comment_intelligence_enabled: !!(ciEnabled && ciEnabled.checked),
-        hook_type_enabled: !!(hookTypeEnabled && hookTypeEnabled.checked),
-        smart_screenshot_picker_enabled: !!(
-          smartScreenshotPickerEnabled && smartScreenshotPickerEnabled.checked
-        ),
-        clipboard_screenshot_cap: readClipboardScreenshotCap(),
-        anthropic_key: null,
-      });
+      const res = await writeSettings(Object.assign(ciToggleBody(), { anthropic_key: null }));
       if (!res || !res.ok) {
         setCIStatus((res && res.error) || "Clear failed", "warn");
         return;
       }
-      if (ciKeyInput) {
+      // A key typed since Clear key was clicked stays in the box.
+      if (ciKeyInput && settingEditCount("anthropic_key") === keyEdits) {
         ciKeyInput.value = "";
         ciKeyInput.dataset.dirty = "false";
         ciKeyInput.placeholder = "sk-ant-...";
       }
+      adoptSettings(res.settings);
       aiSettings = Object.assign({}, aiSettings || {}, { anthropic_key_set: false });
       setCIStatus("Key not set.", "warn");
       renderAICostEstimate();
@@ -1440,13 +1707,39 @@ const ctScriptsPath = document.getElementById("ct-scripts-path");
 const ctObsidianPath = document.getElementById("ct-obsidian-path");
 const ctObsidianMirror = document.getElementById("ct-obsidian-mirror");
 
+const creatorToolsStatus = document.getElementById("creator-tools-status");
+
 const cvEnabled = document.getElementById("cv-enabled");
 const cvSources = document.getElementById("cv-sources");
 const cvOverrideInfo = document.getElementById("cv-override-info");
+const claimVerificationStatus = document.getElementById("claim-verification-status");
 
 const settingsPendingBanner = document.getElementById("settings-pending-banner");
 
 let yourChannelsList = [];
+// saveV3Settings calls made so far and those not answered yet; a section's
+// status line still waiting -> { since: the number of the save its latest
+// change made, fields: the fields changed there that no answer has shown as
+// kept yet }.
+let v3SavesMade = 0;
+let v3SavesQueued = 0;
+const v3StatusWaiting = new Map();
+
+// A section's line names the settings in it the helper did not keep.
+const V3_SETTING_LABELS = {
+  default_target_length: "Default target length",
+  default_workspace_format: "Default workspace format",
+  style_anchors_source: "Style anchors source",
+  obsidian_vault_path: "Obsidian vault path",
+  mirror_scripts_to_obsidian: "Mirror scripts to Obsidian vault",
+  claim_verification_enabled: "Scan transcripts for checkable claims",
+  default_evidence_sources: "Default evidence sources",
+};
+
+function v3NotSupportedText(fields) {
+  const names = [...fields].map((f) => `"${V3_SETTING_LABELS[f] || f}"`);
+  return `Not saved: Uoink helper does not support ${names.join(", ")}`;
+}
 
 function renderYcList() {
   if (!ycList) return;
@@ -1497,7 +1790,7 @@ function renderYcList() {
       yourChannelsList.splice(idx, 1);
       renderYcList();
       updateCreatorToolsVisibility();
-      saveV3Settings();
+      saveV3Settings(null, "your_channels");
     });
     
     rightWrap.appendChild(verifyBtn);
@@ -1558,7 +1851,26 @@ async function verifyChannel(channelName, statusEl, btnEl) {
   }
 }
 
-async function saveV3Settings() {
+// Every saveV3Settings call sends the Your Channels, Creator tools and Claim
+// verification settings the page has from the helper or the user changed
+// here (settingKnown), so each save made after a change carries it.
+// The section the change was made in (field: the setting changed) shows
+// Saving..., then Saved as soon as one of those saves is stored with every
+// field changed there kept, Not saved when the helper stored the save but
+// left one out, or Save failed once all of them have failed. A section that
+// failed still waits: a later save from any section that is stored carries
+// its change too and settles it.
+async function saveV3Settings(statusEl, field) {
+  const seq = ++v3SavesMade;
+  if (field) noteSettingEdited(field);
+  if (statusEl) {
+    const waiting = v3StatusWaiting.get(statusEl) || { since: 0, fields: new Set() };
+    waiting.since = seq;
+    if (field) waiting.fields.add(field);
+    v3StatusWaiting.set(statusEl, waiting);
+    setSettingStatus(statusEl, "Saving...", null);
+  }
+  v3SavesQueued += 1;
   const lenVals = { 0: "30s", 1: "60s", 2: "5m", 3: "15m", 4: "30m" };
   let selectedStyleSource = "taste";
   if (ctStyleSourceRadios) {
@@ -1581,40 +1893,106 @@ async function saveV3Settings() {
     default_evidence_sources: sourcesArray
   };
 
-  if (aiSettings) {
-    body.comment_intelligence_enabled = !!(ciEnabled && ciEnabled.checked);
-    body.hook_type_enabled = !!(hookTypeEnabled && hookTypeEnabled.checked);
-    body.smart_screenshot_picker_enabled = !!(
-      smartScreenshotPickerEnabled && smartScreenshotPickerEnabled.checked
-    );
-    body.clipboard_screenshot_cap = readClipboardScreenshotCap();
-  }
+  // Comment Intelligence, Hook Type, the picker and the screenshot count save
+  // on their own when changed (saveSettingOnChange), so they are not repeated
+  // here.
+  const v3Fields = Object.keys(body);
+  knownSettingsOnly(body);
 
+  let failed = null;
+  // The settings the helper sent back, once it has stored this save.
+  let stored = null;
   try {
     if (!window.STC || !STC.updateSettings) {
       throw new Error("STC.updateSettings unavailable");
     }
-    const res = await STC.updateSettings(body);
+    const res = await writeSettings(body);
     if (res && res.ok) {
-      if (settingsPendingBanner) settingsPendingBanner.classList.add("hidden");
-      chrome.storage.local.remove("uoink_settings_pending");
-      aiSettings = Object.assign({}, aiSettings || {}, res.settings || {});
+      // Only what the helper stored leaves the pending record, plus fields
+      // an earlier version kept there that these saves no longer carry.
+      const kept = res.settings || {};
+      updatePendingRecord((record) => {
+        for (const f of Object.keys(record)) {
+          if (!v3Fields.includes(f) || (f in body && settingStored(kept, f, body[f]))) {
+            delete record[f];
+          }
+        }
+        return record;
+      });
+      adoptSettings(res.settings);
+      stored = res.settings || {};
     } else {
+      failed = (res && res.error) ? `Save failed: ${res.error}` : "Save failed";
       throw new Error((res && res.error) || "Save settings failed");
     }
   } catch (err) {
+    if (!failed) failed = "Save failed: Uoink helper unreachable";
     console.warn("Failed to POST settings to server, storing in pending:", err);
-    chrome.storage.local.set({ uoink_settings_pending: body }, () => {
-      if (settingsPendingBanner) settingsPendingBanner.classList.remove("hidden");
-    });
+    updatePendingRecord((record) => Object.assign(record, body));
   }
+
+  v3SavesQueued -= 1;
+  for (const [el, waiting] of [...v3StatusWaiting]) {
+    // Changed again after this save was made: a newer save carries it.
+    if (waiting.since > seq) continue;
+    if (stored) {
+      for (const f of [...waiting.fields]) {
+        if (settingStored(stored, f, body[f])) waiting.fields.delete(f);
+      }
+      if (waiting.fields.size === 0) {
+        setSettingStatus(el, "Saved", "ok");
+        v3StatusWaiting.delete(el);
+      } else {
+        setSettingStatus(el, v3NotSupportedText(waiting.fields), "warn");
+      }
+    } else if (v3SavesQueued === 0) {
+      setSettingStatus(el, failed, "warn");
+    }
+  }
+}
+
+// uoink_settings_pending holds the settings failed saves carried until the
+// helper stores them; the banner shows while it holds any. change(record)
+// edits a copy and returns it; updates run one at a time, in order.
+let pendingRecordUpdates = Promise.resolve();
+
+function updatePendingRecord(change) {
+  pendingRecordUpdates = pendingRecordUpdates.then(() => new Promise((resolve) => {
+    chrome.storage.local.get(["uoink_settings_pending"], (items) => {
+      const prior = items && items.uoink_settings_pending;
+      const record = change(Object.assign({}, prior && typeof prior === "object" ? prior : {}));
+      const done = () => {
+        if (settingsPendingBanner) {
+          settingsPendingBanner.classList.toggle("hidden", !Object.keys(record).length);
+        }
+        resolve();
+      };
+      if (Object.keys(record).length) {
+        chrome.storage.local.set({ uoink_settings_pending: record }, done);
+      } else {
+        chrome.storage.local.remove("uoink_settings_pending", done);
+      }
+    });
+  })).catch((e) => console.warn("Pending settings not updated:", e));
 }
 
 async function loadPendingV3Settings() {
   chrome.storage.local.get(["uoink_settings_pending"], (items) => {
-    const pending = items.uoink_settings_pending;
-    if (pending) {
+    const stored = items.uoink_settings_pending;
+    if (stored) {
       if (settingsPendingBanner) settingsPendingBanner.classList.remove("hidden");
+      // A field the user already edited here keeps that edit (saved or not,
+      // it is newer than this record).
+      const pending = Object.assign({}, stored);
+      for (const field of Object.keys(pending)) {
+        if (settingEditCount(field) > 0) delete pending[field];
+      }
+      // They are the user's changes: later saves carry them (settingKnown)
+      // and a save's answer doesn't put the helper's old values back
+      // (adoptSettings).
+      for (const field of ["your_channels", ...Object.keys(V3_SETTING_LABELS)]) {
+        if (pending[field] !== undefined) changedSettingFields.add(field);
+      }
       if (pending.your_channels !== undefined) {
         yourChannelsList = pending.your_channels;
         renderYcList();
@@ -1660,7 +2038,7 @@ if (ycAddBtn && ycChannelInput) {
         yourChannelsList.push(val);
         renderYcList();
         updateCreatorToolsVisibility();
-        saveV3Settings();
+        saveV3Settings(null, "your_channels");
       }
       ycChannelInput.value = "";
     }
@@ -1713,34 +2091,41 @@ if (ycRecognizeBtn) {
 if (ctTargetLength) {
   ctTargetLength.addEventListener("input", (ev) => {
     updateTargetLengthDisplay(ev.target.value);
-    saveV3Settings();
+    saveV3Settings(creatorToolsStatus, "default_target_length");
   });
 }
 
 if (ctWorkspaceFormat) {
-  ctWorkspaceFormat.addEventListener("change", () => saveV3Settings());
+  ctWorkspaceFormat.addEventListener("change",
+    () => saveV3Settings(creatorToolsStatus, "default_workspace_format"));
 }
 
 if (ctStyleSourceRadios) {
   for (const r of ctStyleSourceRadios) {
-    r.addEventListener("change", () => saveV3Settings());
+    r.addEventListener("change", () => saveV3Settings(creatorToolsStatus, "style_anchors_source"));
   }
 }
 
 if (ctObsidianPath) {
-  ctObsidianPath.addEventListener("change", () => saveV3Settings());
+  ctObsidianPath.addEventListener("input", () => noteSettingEdited("obsidian_vault_path"));
+  ctObsidianPath.addEventListener("change",
+    () => saveV3Settings(creatorToolsStatus, "obsidian_vault_path"));
 }
 
 if (ctObsidianMirror) {
-  ctObsidianMirror.addEventListener("change", () => saveV3Settings());
+  ctObsidianMirror.addEventListener("change",
+    () => saveV3Settings(creatorToolsStatus, "mirror_scripts_to_obsidian"));
 }
 
 if (cvEnabled) {
-  cvEnabled.addEventListener("change", () => saveV3Settings());
+  cvEnabled.addEventListener("change",
+    () => saveV3Settings(claimVerificationStatus, "claim_verification_enabled"));
 }
 
 if (cvSources) {
-  cvSources.addEventListener("change", () => saveV3Settings());
+  cvSources.addEventListener("input", () => noteSettingEdited("default_evidence_sources"));
+  cvSources.addEventListener("change",
+    () => saveV3Settings(claimVerificationStatus, "default_evidence_sources"));
 }
 
 if (cvOverrideInfo) {

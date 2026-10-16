@@ -822,6 +822,7 @@
           <input id="ci-enabled" type="checkbox">
           <span>Enable Comment Intelligence</span>
         </label>
+        <div id="ci-enabled-status" class="settings-status" aria-live="polite"></div>
 
         <label>
           <span class="field-label">Anthropic API key</span>
@@ -935,6 +936,7 @@
           <input id="hook-type-enabled" type="checkbox">
           <span>Enable Hook Type</span>
         </label>
+        <div id="hook-type-status" class="settings-status" aria-live="polite"></div>
       </div>
     </section>
 
@@ -990,12 +992,14 @@
           <input id="smart-screenshot-picker-enabled" type="checkbox">
           <span>Enable Smart Screenshot Picker</span>
         </label>
+        <div id="smart-screenshot-picker-status" class="settings-status" aria-live="polite"></div>
 
         <label>
           <span class="field-label">Screenshots included in clipboard paste</span>
           <input id="clipboard-screenshot-cap" class="input" type="number" min="0" max="12" step="1" value="4">
         </label>
         <p class="sub">Default 4. Uoink still saves the full screenshot set on disk; this only controls embedded images in the AI paste.</p>
+        <div id="clipboard-screenshot-cap-status" class="settings-status" aria-live="polite"></div>
       </div>
     </section>
 
@@ -1090,6 +1094,7 @@
           <input id="ct-obsidian-mirror" type="checkbox">
           <span>Mirror scripts to Obsidian vault</span>
         </label>
+        <div id="creator-tools-status" class="settings-status" aria-live="polite"></div>
       </div>
     </section>
 
@@ -1106,6 +1111,7 @@
           <input id="cv-enabled" type="checkbox">
           <span>Scan transcripts for checkable claims</span>
         </label>
+        <div id="claim-verification-status" class="settings-status" aria-live="polite"></div>
         <p class="sub">When on, every transcript is scanned for checkable factual claims. Evidence is retrieved and shown for your judgment. Uoink never auto-asserts truth or labels a claim 'false.'</p>
 
         <label>

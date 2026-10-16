@@ -106,6 +106,9 @@ function clearSourceAlert() {
 // vars stash the URL/host for the retry + podcast secondary buttons.
 let currentSource = null;
 let pendingAllowHost = null;
+// E1: the capture "Allow this site and retry" reruns ({url, title, retryOf}):
+// a Recent failures Retry can hit the wall on a page other than this tab.
+let pendingAllowCapture = null;
 let pendingPodcastFeed = null;
 const destinationPanel = document.getElementById("destination-panel");
 const quickPromptsPanel = document.getElementById("quick-prompts-panel");
@@ -129,6 +132,8 @@ const RECENT_FAILURES_KEY = "yoink_recent_failures";
 const BACKFILL_DISMISSED_KEY = "yoink_backfill_dismissed_signature";
 const MORE_OPTIONS_OPEN_KEY = "yoink_popup_more_options_open";
 const QUEUE_EXPANDED_KEY = "yoink_popup_queue_expanded";
+// E1: outcomes of popup captures the SW queue ran (chrome.storage.session).
+const POPUP_CAPTURE_RESULTS_KEY = "popup_capture_results";
 let serverOnline = false;
 let isTier2 = false;
 let lastUoinkAt = 0;
@@ -467,6 +472,7 @@ async function detectCurrentSource() {
   if (uoinkPodcastBtn) uoinkPodcastBtn.classList.add("hidden");
   clearSourceAlert();
   pendingAllowHost = null;
+  pendingAllowCapture = null;
   pendingPodcastFeed = null;
   setSourceNote("");
   try {
@@ -499,6 +505,8 @@ async function detectCurrentSource() {
     }
     currentSource = cls;
     const title = (tab.title || "").replace(/\s+-\s+YouTube\s*$/i, "").trim();
+    // E1: the SW queue shows (and records a failure) under the tab title.
+    currentSource.title = title;
     currentSourcePreview.textContent = title || cls.canonical;
     uoinkCurrentBtn.textContent =
       SOURCE_BUTTON_LABELS[cls.source] || "Uoink this tab";
@@ -519,54 +527,47 @@ async function detectCurrentSource() {
 // on by default); a video is queued through the same /extract path YouTube
 // uses. Video-only posts and a disabled flag fall back to that video path so
 // nothing regresses, and a blocked fetch says so plainly instead of leaving
-// a half-saved uoink.
+// a half-saved uoink. E1: the video step runs in the SW queue (queueCapture),
+// so closing the popup can't kill it, and the SW checks the helper's queue
+// for room at the job's turn (a full one comes back as queue_full).
 async function captureXPost(url, interval) {
   const textData = await STC.postExtractX(url);
   // Flag off, or a video-only post with no text worth saving -> video path.
   if (!textData || textData.code === "disabled" || textData.code === "empty") {
-    if ((await serverQueuePendingCount()) >= 5) {
-      showToast("Queue full. Give it a few minutes, then try again.");
-      pollQueueStatus();
-      return;
-    }
-    const data = await STC.postExtract(url, interval);
-    await handleCorpusCapture(data);
+    await queueCapture({ route: "video", url, interval });
     return;
   }
   // X refused the fetch (404 / 429 / tombstone / block page). The server's
   // copy already says which; show it and stop -- no queue, no broken uoink.
   if (!textData.ok) {
-    showToast(STC.friendlyError(textData.error)
+    showToast(STC.describeFailure(textData)
       || "X wouldn't hand over this post. Try again in a minute.");
     return;
   }
   const count = Number(textData.tweets_captured) || 1;
   const posts = `${count} post${count === 1 ? "" : "s"}`;
   const hasVideo = Boolean(textData.metadata && textData.metadata.has_video);
-  if (hasVideo && (await serverQueuePendingCount()) < 5) {
-    try {
-      const vid = await STC.postExtract(url, interval);
-      if (vid && (vid.ok || vid.queued || vid.video_id)) {
-        showToast(`Saved ${posts} + queued the video.`);
-        pollQueueStatus();
-      } else {
-        showToast(`Saved ${posts}. Couldn't queue the video -- try again.`);
-      }
-    } catch {
-      showToast(`Saved ${posts}. Couldn't queue the video -- try again.`);
+  if (hasVideo) {
+    // saveOnly: as before, the video half isn't copied or opened in Claude.
+    // E3/E7: if it fails, the SW notifies and records the real reason, and
+    // this popup (while still open) shows it after the prefix. L-2: a full
+    // queue says the video wasn't queued instead of hiding the dropped video.
+    const handed = await handOffCapture(
+      { route: "video", url, interval, saveOnly: true },
+      {
+        failurePrefix: `Saved ${posts}. Video: `,
+        queueFullMessage: `Saved ${posts}. Video not queued -- the queue is full. `
+          + `Try the video again in a few minutes.`,
+      });
+    if (handed.ok) {
+      showToast(`Saved ${posts} + queued the video.`);
+    } else {
+      showToast(`Saved ${posts}. Video: ${handed.message}`);
     }
     loadRecentUoinks();
     return;
   }
-  // L-2: reaching here with a video means the pending queue was at its cap,
-  // so we couldn't add it. Say so instead of a bare success that hides the
-  // dropped video.
-  if (hasVideo) {
-    showToast(`Saved ${posts}. Video not queued -- the queue is full. `
-      + `Try the video again in a few minutes.`);
-  } else {
-    showToast(`Saved ${posts} to your library.`);
-  }
+  showToast(`Saved ${posts} to your library.`);
   loadRecentUoinks();
 }
 
@@ -613,36 +614,43 @@ async function captureXArticle(url) {
       loadRecentUoinks();
       return;
     }
-    showToast(STC.friendlyError(data && data.error)
+    showToast(STC.describeFailure(data)
       || "Read the article but couldn't save it. Try again.");
     return;
   }
 
-  // 2) FALLBACK — best-effort /extract/page. Honest failure on a login wall.
-  const pageData = await STC.postExtractPage(url);
-  if (pageData && pageData.code === "host_not_allowed") {
-    offerAllowRetry(url);
-    return;
-  }
+  // 2) FALLBACK — best-effort /extract/page. E1: the SW queue runs it
+  // (STC.postExtractPage there) so closing the popup can't kill it; the SW
+  // copies, opens Claude, or notifies honestly on a login wall, and this
+  // popup, if still open, shows the outcome via showXArticleFallbackResult.
+  await queueCapture({ route: "page", url }, { xArticle: true });
+}
+
+// The X Article fallback's outcome in a popup that's still open (called by
+// showCaptureResult). An allowlist wall gets the generic "Allow this site and
+// retry"; a success, or a request the SW stopped waiting on (result.kind:
+// timeout / lost / offline), the generic toast, as before. Returns true if it
+// showed something.
+function showXArticleFallbackResult(result) {
   // A2: X login wall (or any failure to serve the article to a pasted link) is
   // honest and actionable, not a generic failure. Surface it as a PERSISTENT
   // alert (not a 1.8s toast) that names what happened and what to do, so the
   // user never reads a walled capture as a silent no-op.
-  if (pageData && pageData.code === "x_login_wall") {
+  if (result.code === "x_login_wall") {
     showSourceAlert("X blocks logged-out link fetches, so Uoink can't read "
       + "this article from a pasted link. Click the \"Uoink this article\" "
       + "button on the page (bottom-right) to save it from your logged-in "
       + "session. Nothing was saved.");
-    return;
+    return true;
   }
-  if (!pageData || !pageData.ok) {
-    showSourceAlert(STC.friendlyError(pageData && pageData.error)
+  if (!result.ok && !result.kind) {
+    showSourceAlert(result.message
       || "X didn't serve this article to Uoink. Open the article and click "
         + "the in-page \"Uoink this article\" button while you're logged in. "
         + "Nothing was saved.");
-    return;
+    return true;
   }
-  await handleCorpusCapture(pageData);
+  return false;
 }
 
 // ---- Interval setting -----------------------------------------------------
@@ -966,7 +974,7 @@ async function loadPrompts() {
 async function refreshQueue() {
   try {
     const s = await chrome.storage.session.get({
-      busy: false, current: null, queue: [],
+      busy: false, current: null, queue: [], [POPUP_CAPTURE_RESULTS_KEY]: [],
     });
     if (s.busy && s.current) {
       const label = s.current.title || shortLabel(s.current.url);
@@ -981,6 +989,7 @@ async function refreshQueue() {
     queueEl.textContent = `${depth} video${depth === 1 ? "" : "s"} queued.`;
     queueEl.classList.toggle("panel-muted", depth === 0);
     clearBtn.disabled = depth === 0;
+    applyCaptureQueueState(s);
   } catch (e) {
     console.warn("[popup] refreshQueue failed", e);
   }
@@ -1061,13 +1070,38 @@ function renderFailureRow(failure) {
     ev.stopPropagation();
     const isReddit = failure.url && STC.normalizeRedditUrl(failure.url);
     const isTwitter = failure.url && STC.normalizeTwitterUrl(failure.url);
+    // E6: the X Article button now records failures too.
+    const isXArticle = failure.url && STC.isXArticleUrl(failure.url);
     const videoId = failure.videoId || (failure.url && STC.extractVideoId(failure.url));
-    if (!videoId && !isReddit && !isTwitter) {
+    // E1: a capture the SW queue ran and recorded (its record has a route: a
+    // web page, a Reddit thread, a YouTube or X post's video, a short) reruns
+    // in that queue, so a Retry of one that's already queued or running
+    // joins it instead of a content-script tab starting a second capture.
+    // The record stays until the rerun goes through; a new failure replaces
+    // it. Records the in-page buttons wrote have no route and go below, and
+    // so does an X Article whatever wrote it: the queue only has the helper's
+    // logged-out /extract/page fetch, which X walls, while the handoff below
+    // opens the article for content-x-article.js's logged-in DOM capture.
+    if (!isXArticle && ["video", "reddit", "page"].includes(failure.route)) {
+      await queueCapture({
+        route: failure.route,
+        url: failure.url,
+        title: failure.title || "",
+        saveOnly: !!failure.saveOnly,
+        retryOf: failure.id,
+      });
+      return;
+    }
+    if (!videoId && !isReddit && !isTwitter && !isXArticle) {
       showToast("Can't retry: the URL is missing or invalid.");
       return;
     }
-    await removeRecentFailure(failure.id);
-    const autoYoinkObj = videoId ? { videoId, ts: Date.now() } : { url: failure.url, ts: Date.now() };
+    // The page's content script claims this handoff and starts the capture;
+    // the record stays until that capture goes through (or is replaced by
+    // its new failure), so a Retry that never starts loses nothing.
+    const autoYoinkObj = videoId
+      ? { videoId, failure_id: failure.id, ts: Date.now() }
+      : { url: failure.url, failure_id: failure.id, ts: Date.now() };
     chrome.storage.local.set({ auto_yoink: autoYoinkObj }, () => {
       chrome.tabs.create({
         url: failure.url || (videoId ? `https://www.youtube.com/watch?v=${videoId}` : ""),
@@ -1549,20 +1583,6 @@ function startQueueStatusPolling() {
   }
 }
 
-async function serverQueuePendingCount() {
-  if (sseAbortController && sseState.queue) {
-    return Number(sseState.queue.pending) || 0;
-  }
-  try {
-    const status = await popupAuthedJson("/queue/status", { method: "GET" });
-    if (!status || status.ok === false) return 0;
-    lastQueueStatus = status;
-    return Number(status.pending_count ?? status.queued_count) || 0;
-  } catch {
-    return 0;
-  }
-}
-
 if (queueBannerMain) {
   queueBannerMain.addEventListener("click", () => setQueueExpanded(!queueExpanded));
   wireKeyActivation(queueBannerMain);
@@ -1618,37 +1638,125 @@ async function writeClipboardText(text) {
   }
 }
 
-// Shared success path for the capture routes that return a corpus straight
-// back (YouTube/X video, Reddit thread, article page): copy to clipboard,
-// honor the screenshot picker, then open Claude. Returns true if handled.
-async function handleCorpusCapture(data) {
-  if (data && data.ok && data.queued) {
-    showToast(queuedToastMessage(data));
+// E1: captures that hold a helper request open for minutes (/extract,
+// /extract/reddit, /extract/page) run in the service worker's queue, the one
+// the context menu uses, not in this document. Chrome closes the popup as
+// soon as the user clicks back into the page, which used to kill the request
+// and lose its clipboard copy, Claude tab and failure record. The popup hands
+// the job over and returns; the SW does all of that (and checks the helper's
+// queue for room before a video) and notifies. While this popup stays open,
+// refreshQueue() shows the job and its outcome from chrome.storage.session.
+//   request: {route: "video" | "reddit" | "page", url, interval, saveOnly,
+//             title (default: the tab's), retryOf (a Recent failures id)}
+//   view.failurePrefix: put in front of a failure shown in this popup
+//   view.queueFullMessage: shown instead when the helper's queue was full
+//   view.xArticle: the X Article fallback (showXArticleFallbackResult)
+const popupCaptureHandoffs = new Map();
+let currentSourceQueued = false;
+// The SW queue route each source's capture runs as (STC.queueJobRoute); only
+// that capture of this tab holds the button.
+const SOURCE_CAPTURE_ROUTES = {
+  video: "video", x_video: "video", reddit: "reddit", page: "page", x_article: "page",
+};
+
+async function handOffCapture(request, view) {
+  const job = Object.assign({
+    title: (currentSource && currentSource.title) || "",
+  }, request);
+  let res = null;
+  try {
+    res = await chrome.runtime.sendMessage({ type: "popupCapture", job });
+  } catch (e) {
+    console.warn("[popup] capture hand-off failed", e);
+  }
+  if (!res || !res.ok) {
+    return {
+      ok: false,
+      message: (res && res.error) || "Uoink couldn't start this capture. Try again.",
+    };
+  }
+  // The request rides along so an allowlist wall can rerun this capture.
+  if (res.id) popupCaptureHandoffs.set(res.id, Object.assign({ request: job }, view));
+  return { ok: true, duplicate: !!res.duplicate, ahead: Number(res.ahead) || 0 };
+}
+
+async function queueCapture(request, view) {
+  const handed = await handOffCapture(request, view);
+  if (!handed.ok) {
+    showToast(handed.message);
+  } else if (handed.duplicate) {
+    showToast("Already uoinking this one. You can close this popup.");
+  } else if (handed.ahead) {
+    showToast(`Queued behind ${handed.ahead} other uoink${handed.ahead === 1 ? "" : "s"}. `
+      + "You can close this popup.");
+  } else {
+    showToast("Uoinking in the background. You can close this popup.");
+  }
+  return handed.ok;
+}
+
+// Called by refreshQueue() with the SW queue state. The primary button reads
+// "Uoinking..." while this tab's source is queued or running; a capture this
+// popup handed off shows its outcome once (the SW already notified).
+function applyCaptureQueueState(s) {
+  if (uoinkCurrentBtn && currentSource) {
+    // A capture running longer than the request timeout was left behind by
+    // a service worker Chrome stopped mid-job; it doesn't hold the button.
+    const current = s.busy && s.current
+      && Date.now() - (Number(s.current.startedAt) || 0) < STC.REQUEST_TIMEOUT_MS
+      ? s.current
+      : null;
+    // Same URL (#fragment aside, as the SW matches it) and the capture this
+    // button runs: a session add or another route for the same URL is a
+    // different job.
+    const route = SOURCE_CAPTURE_ROUTES[currentSource.action];
+    const url = STC.queueUrlKey(currentSource.canonical);
+    const jobs = [current].concat(s.queue || []);
+    const queued = !!route && jobs.some((job) => job
+      && STC.queueUrlKey(job.url) === url && STC.queueJobRoute(job) === route);
+    if (queued) {
+      uoinkCurrentBtn.textContent = "Uoinking...";
+      uoinkCurrentBtn.disabled = true;
+    } else if (currentSourceQueued) {
+      uoinkCurrentBtn.textContent =
+        SOURCE_BUTTON_LABELS[currentSource.source] || "Uoink this tab";
+      uoinkCurrentBtn.disabled = !serverOnline;
+    }
+    currentSourceQueued = queued;
+  }
+  const results = Array.isArray(s[POPUP_CAPTURE_RESULTS_KEY])
+    ? s[POPUP_CAPTURE_RESULTS_KEY]
+    : [];
+  // Stored newest first; show them in the order they finished.
+  for (const result of results.slice().reverse()) {
+    const view = result && popupCaptureHandoffs.get(result.id);
+    if (!view) continue;
+    popupCaptureHandoffs.delete(result.id);
+    showCaptureResult(result, view);
+  }
+}
+
+function showCaptureResult(result, view) {
+  // Allowlist wall: the one-click "Allow this site and retry" button.
+  if (result.code === "host_not_allowed") {
+    offerAllowRetry(result.url, view.request);
+    return;
+  }
+  if (result.code === "queue_full") {
+    showToast(view.queueFullMessage || result.message);
     pollQueueStatus();
-    return true;
+    return;
   }
-  if (!data || !data.ok) {
-    showToast(STC.friendlyError(data && data.error));
-    return false;
+  if (view.xArticle && showXArticleFallbackResult(result)) return;
+  if (!result.ok) {
+    showToast(`${view.failurePrefix || ""}${result.message}`);
+    // The SW added (or replaced) a Recent failures row for it.
+    loadRecentUoinks();
+    return;
   }
-  const clipboardText = data.corpus_md_paste || data.yoink_md || "";
-  saveClipboardBudget(data, clipboardText);
-  if (await shouldUseScreenshotPicker()) {
-    await STC.stashPickerCorpus(data);
-    showToast("Uoink ready. Pick screenshots in the popup.");
-    return true;
-  }
-  const copied = await writeClipboardText(clipboardText);
-  if (!copied) {
-    await chrome.runtime.sendMessage({ type: "clipboardRetry", text: clipboardText });
-    showToast("Couldn't copy. Use the Try again notification.");
-    return true;
-  }
-  markClipboardUoinkNow();
-  await chrome.tabs.create({ url: CLAUDE_URL, active: true });
-  showToast("Uoinked ★ Paste in Claude.");
+  showToast(result.message);
+  if (result.queued) pollQueueStatus();
   loadRecentUoinks();
-  return true;
 }
 
 async function runPopupUoinkCurrent() {
@@ -1682,28 +1790,19 @@ async function runPopupUoinkCurrent() {
       return;
     }
 
-    // Article / web page: allowlist-gated. On host_not_allowed, surface the
-    // one-click "Allow this site and retry" button instead of a dead error.
+    // Article / web page: allowlist-gated. Runs in the SW queue (E1); on
+    // host_not_allowed, showCaptureResult surfaces the one-click "Allow this
+    // site and retry" button instead of a dead error.
     if (src.action === "page") {
-      const data = await STC.postExtractPage(src.canonical);
-      if (data && data.code === "host_not_allowed") {
-        offerAllowRetry(src.canonical);
-        return;
-      }
-      await handleCorpusCapture(data);
+      await queueCapture({ route: "page", url: src.canonical, interval });
       return;
     }
 
-    // YouTube video: corpus-returning capture. /extract queues, so guard
-    // the queue before firing.
+    // YouTube video: corpus-returning capture. /extract queues, so the SW
+    // queue checks the helper's queue for room before it runs (E1); this
+    // popup doesn't wait on /queue/status before handing it over.
     if (src.action === "video") {
-      if ((await serverQueuePendingCount()) >= 5) {
-        showToast("Queue full. Give it a few minutes, then try again.");
-        pollQueueStatus();
-        return;
-      }
-      const data = await STC.postExtract(src.canonical, interval);
-      await handleCorpusCapture(data);
+      await queueCapture({ route: "video", url: src.canonical, interval });
       return;
     }
     // X post: capture its text/thread (and its video if present). No longer
@@ -1718,30 +1817,39 @@ async function runPopupUoinkCurrent() {
       return;
     }
     if (src.action === "reddit") {
-      const data = await STC.postExtractReddit(src.canonical, interval);
-      await handleCorpusCapture(data);
+      await queueCapture({ route: "reddit", url: src.canonical, interval });
       return;
     }
   } catch (e) {
-    showToast(`Uoink failed: ${e && e.message || e}`);
+    // E7: timed out / lost track / offline (only when /health fails too).
+    const failure = await STC.describeCaptureError(e);
+    showToast(failure.message);
   } finally {
     uoinkCurrentBtn.disabled = !serverOnline || !currentSource;
     uoinkCurrentBtn.textContent = old;
+    // E1: back to "Uoinking..." while the SW queue still has this source.
+    refreshQueue();
   }
 }
 
 // Reveal the "Allow this site and retry" affordance for a page that hit the
 // allowlist wall. Stashes the host so the click handler can grant + re-fire.
-function offerAllowRetry(pageUrl) {
+// E1: request is the walled capture as handed to the SW queue; its URL,
+// title and Recent failures record (retryOf) are what gets re-fired, since a
+// Retry's page needn't be this tab's.
+function offerAllowRetry(pageUrl, request) {
   try {
     pendingAllowHost = new URL(pageUrl).hostname;
   } catch {
     pendingAllowHost = null;
   }
+  pendingAllowCapture = null;
   if (!pendingAllowHost) {
     showToast("That page's site can't be allowed automatically.");
     return;
   }
+  pendingAllowCapture = { url: pageUrl, title: (request && request.title) || "" };
+  if (request && request.retryOf) pendingAllowCapture.retryOf = request.retryOf;
   setSourceNote(`Uoink hasn't been allowed on ${pendingAllowHost} yet.`);
   if (uoinkAllowRetryBtn) {
     uoinkAllowRetryBtn.classList.remove("hidden");
@@ -1750,9 +1858,12 @@ function offerAllowRetry(pageUrl) {
 }
 
 async function runAllowSiteAndRetry() {
-  if (!uoinkAllowRetryBtn || !pendingAllowHost || !currentSource) return;
+  if (!uoinkAllowRetryBtn || !pendingAllowHost) return;
+  // The capture that hit the wall (offerAllowRetry), else this tab's page.
+  const capture = pendingAllowCapture
+    || (currentSource && { url: currentSource.canonical });
+  if (!capture) return;
   const host = pendingAllowHost;
-  const pageUrl = currentSource.canonical;
   const old = uoinkAllowRetryBtn.textContent;
   uoinkAllowRetryBtn.disabled = true;
   uoinkAllowRetryBtn.textContent = "Allowing...";
@@ -1765,14 +1876,14 @@ async function runAllowSiteAndRetry() {
     uoinkAllowRetryBtn.classList.add("hidden");
     setSourceNote("");
     pendingAllowHost = null;
-    const data = await STC.postExtractPage(pageUrl);
-    if (data && data.code === "host_not_allowed") {
-      offerAllowRetry(pageUrl);
-      return;
-    }
-    await handleCorpusCapture(data);
+    pendingAllowCapture = null;
+    // E1: the capture itself runs in the SW queue; a second allowlist wall
+    // comes back through showCaptureResult and re-offers this button.
+    await queueCapture(Object.assign({ route: "page" }, capture));
   } catch (e) {
-    showToast(`Uoink failed: ${e && e.message || e}`);
+    // E7: timed out / lost track / offline, same as the main capture button.
+    const failure = await STC.describeCaptureError(e);
+    showToast(failure.message);
   } finally {
     uoinkAllowRetryBtn.textContent = old;
     if (!uoinkAllowRetryBtn.classList.contains("hidden")) {
@@ -2309,9 +2420,16 @@ async function loadRecentUoinks() {
           copyMDBtn.textContent = "Copying...";
           
           try {
-            const res = await STC._postJson("/mcp/v1/tools/call", {
-              name: "get_uoink_corpus",
-              arguments: { slug: last.slug }
+            // /recent rows carry no slug; the slug is the uoink's folder name
+            // (the same derivation the pairwise card passes to fetchHookText).
+            const slug = last.folder ? last.folder.split(/[\\/]/).pop() : null;
+            const res = await globalThis.UoinkUI.authedJson("/mcp/v1/tools/call", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                name: "get_uoink_corpus",
+                arguments: { slug }
+              })
             });
             const data = res && res.result && res.result.structuredContent;
             if (data && data.ok && data.corpus_md) {

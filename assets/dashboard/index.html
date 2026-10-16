@@ -4224,6 +4224,7 @@
                     <p>Generated drafts, manual edits, screenshot choices, and X handoff all stay visible here before anything leaves your machine.</p>
                   </div>
                   <div class="compute-indicator hidden" id="writingComputeIndicator">Generated using your Anthropic key (no agent)</div>
+                  <div class="hidden" id="writingGenerateStatus" role="status" aria-live="polite"></div>
                   <div class="writing-output markdown-rendered" id="writingOutput">Choose a source, then generate or paste a draft.</div>
                   <div class="generate-research-panel hidden" id="generateResearchPanel"></div>
                   <div class="warning-panel" id="voiceWarningPanel">
@@ -4780,7 +4781,7 @@
           <div class="page-head">
             <div>
               <div class="eyebrow">Uoink</div>
-              <h1 id="yoinkHeading">Pick a uoink <em>to inspect.</em></h1>
+              <h1 id="yoinkHeading" tabindex="-1">Pick a uoink <em>to inspect.</em></h1>
               <p class="lede" id="yoinkSubhead">Podcast episodes, interviews, and regular videos share one saved-source view.</p>
             </div>
               <div class="inline-row yoink-actions">
@@ -5282,6 +5283,8 @@
       offset: 0,
       limit: 24,
       loading: false,
+      libraryRequest: 0,
+      libraryResetPending: false,
       hasMore: false,
       libraryState: "loading",
       libraryErrorDetail: "",
@@ -5342,6 +5345,12 @@
       writingPieces: [],
       writingLastPayload: null,
       writingDrafts: [""],
+      // D21: the saved draft's id and the source it was saved from; Save
+      // reuses the id only while that same source is picked.
+      writingDraftId: null,
+      writingDraftSourceId: null,
+      // D22: true while Generate/Revise runs; the draft actions stay off.
+      writingGenerating: false,
       writingSelectedSourceRow: null,
       writingScreenshots: [],
       writingSelectedScreenshots: new Set(),
@@ -5561,6 +5570,7 @@
       settingsAgentSetupCard: document.getElementById("settingsAgentSetupCard"),
       writingOutput: document.getElementById("writingOutput"),
       writingComputeIndicator: document.getElementById("writingComputeIndicator"),
+      writingGenerateStatus: document.getElementById("writingGenerateStatus"),
       generateResearchPanel: document.getElementById("generateResearchPanel"),
       copyWriting: document.getElementById("copyWriting"),
       saveWriting: document.getElementById("saveWriting"),
@@ -5798,7 +5808,9 @@
       let data = null;
       try { data = text ? JSON.parse(text) : null; } catch (_) { data = { ok: false, error: text || "invalid JSON" }; }
       if (!res.ok || (data && data.ok === false)) {
-        const err = new Error((data && data.error) || `HTTP ${res.status}`);
+        // Contract envelopes carry error as {code, message}; never show "[object Object]".
+        const detail = data && data.error;
+        const err = new Error((detail && typeof detail === "object" ? detail.message : detail) || `HTTP ${res.status}`);
         err.status = res.status;
         err.data = data || {};
         throw err;
@@ -5965,6 +5977,9 @@
     }
 
     function setWritingActionsEnabled(enabled) {
+      // D22: while Generate/Revise runs nothing on screen is the new draft
+      // yet, so Save/Copy/Revise stay off until the run ends.
+      enabled = Boolean(enabled) && !state.writingGenerating;
       if (els.copyWriting) els.copyWriting.disabled = !enabled;
       if (els.saveWriting) els.saveWriting.disabled = !enabled;
       if (els.reviseWriting) els.reviseWriting.disabled = !enabled;
@@ -5990,29 +6005,66 @@
         return;
       }
       els.writingComputeIndicator.classList.add("hidden");
+      setWritingRunStatus("");
       els.writingOutput.dataset.rawText = text;
       els.writingOutput.innerHTML = renderMarkdown(text) || htmlEscape(text);
       setWritingActionsEnabled(Boolean(text.trim()));
       updateWritingComposerFromText(text);
     }
 
+    // D22: Generate/Revise progress and failures live in their own status
+    // line, so the preview and the composer only change when a run returns
+    // a draft.
+    function setWritingRunStatus(html) {
+      if (!els.writingGenerateStatus) return;
+      els.writingGenerateStatus.innerHTML = html || "";
+      els.writingGenerateStatus.classList.toggle("hidden", !html);
+    }
+
+    function beginWritingRun(message) {
+      state.writingGenerating = true;
+      syncWritingGenerateState();
+      setWritingActionsEnabled(false);
+      setWritingRunStatus(`<span class="soft-note">${htmlEscape(message)}</span>`);
+    }
+
+    function endWritingRun() {
+      state.writingGenerating = false;
+      syncWritingGenerateState();
+      if (String(els.writingOutput.dataset.rawText || "").trim()) setWritingActionsEnabled(true);
+      else syncWritingActionsFromComposer();
+    }
+
+    function writingDraftOnScreen() {
+      return Boolean(String(els.writingOutput.dataset.rawText || "").trim()) || composerHasManualDraft();
+    }
+
     function renderAgentConnectionFallback() {
       const connected = connectedAgents();
       const hasConnectedConfig = connected.length > 0;
       state.writingLastPayload = null;
-      state.writingDrafts = [""];
-      els.writingOutput.dataset.rawText = "";
-      els.writingOutput.innerHTML = `
+      const notice = `
         <div class="connect-agent-state">
           <strong>${hasConnectedConfig ? `Open ${htmlEscape(connected.map((agent) => agent.label).join(" or "))} to generate this draft` : "Connect a writing agent to generate this draft"}</strong>
           <p>${hasConnectedConfig ? "Uoink prepared the context, but it can't drive that client from here. Open the client, or add an Anthropic key to generate right in the dashboard." : "Uoink found the source and prepared the local context. Finish setup in the agent card beside the Generate button."}</p>
           <button class="button primary" type="button" data-focus-agent-setup>${hasConnectedConfig ? "Review agent setup" : "View agent setup"}</button>
         </div>
       `;
+      renderAgentSetup();
+      // D22: a run that came back without a draft keeps the draft already
+      // on screen (agent output or hand edits) and says why in the status
+      // line instead.
+      if (state.writingGenerating && writingDraftOnScreen()) {
+        setWritingRunStatus(notice);
+        return;
+      }
+      setWritingRunStatus("");
+      state.writingDrafts = [""];
+      els.writingOutput.dataset.rawText = "";
+      els.writingOutput.innerHTML = notice;
       setWritingActionsEnabled(false);
       renderThreadBuilder();
       els.voiceWarningCopy.textContent = "Voice DNA warnings appear after an agent returns a draft.";
-      renderAgentSetup();
     }
 
     function connectedAgents() {
@@ -7138,6 +7190,7 @@
         const data = await authFetch(`/writing/draft/${id}`);
         if (data && data.body) {
           state.writingDraftId = id;
+          state.writingDraftSourceId = writingDraftSourceKey(data.draft && data.draft.yoink_id);
           localStorage.setItem("uoink.writingDraftId", String(id));
           setWritingOutput(data.body);
         }
@@ -7237,20 +7290,46 @@
        Phase 3: Standing Subscriptions & Real Consent Management
        ========================================================================== */
 
+    // Returns the tool's reply, ok:false included: a refused or failed tool call
+    // is never re-sent (register_source / set_source_consent would run twice).
+    // Only a request that never reached a tool -- no response, or a helper
+    // without the MCP route (404) -- is retried once over /tools/<name>.
     async function callRegistryTool(name, args) {
+      let data;
       try {
-        return await callMcpTool(name, args);
-      } catch (err) {
-        const res = await authFetch(`/tools/${encodeURIComponent(name)}`, {
+        data = await authFetch("/mcp/v1/tools/call", {
           method: "POST",
-          body: JSON.stringify(args || {}),
+          body: JSON.stringify({
+            jsonrpc: "2.0",
+            id: `dashboard-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+            method: "tools/call",
+            params: { name, arguments: args || {} },
+          }),
         });
-        if (res && res.ok === false) {
-          const msg = (res.error && res.error.message) || res.error || `${name} failed`;
-          throw new Error(msg);
+      } catch (err) {
+        if (err && err.status != null && err.status !== 404) throw err;
+        let res;
+        try {
+          res = await authFetch(`/tools/${encodeURIComponent(name)}`, {
+            method: "POST",
+            body: JSON.stringify(args || {}),
+          });
+        } catch (httpErr) {
+          // /tools/ answers a tool refusal as ok:false at 200 (schema refusals at 400).
+          const body = httpErr && httpErr.data;
+          if (body && body.ok === false && (httpErr.status === 200 || httpErr.status === 400)) return body;
+          throw httpErr;
         }
-        return res;
+        // /tools/ wraps a tool's reply as {ok:true, result}; hand back the MCP shape.
+        return res && res.result && typeof res.result === "object" ? res.result : res;
       }
+      return unpackMcpToolPayload(data);
+    }
+
+    function registryToolError(name, res) {
+      const err = new Error(registryErrorText(res) || `${name} failed`);
+      err.data = res || {};
+      return err;
     }
 
     /* ==========================================================================
@@ -7405,6 +7484,13 @@
       };
     }
 
+    // A tool reply's error is a {code, message} envelope or a plain string.
+    function registryErrorText(res) {
+      const detail = res && res.error;
+      if (typeof detail === "string") return detail;
+      return (detail && typeof detail.message === "string" && detail.message) || "";
+    }
+
     function applyLibraryActivityFailure(errCode, errMsg) {
       libraryActivityState.error = { code: errCode, message: errMsg };
       libraryActivityState.stale = true;
@@ -7414,7 +7500,15 @@
 
     async function refreshLibraryActivitySummary() {
       const generation = libraryActivityState.loadGeneration;
-      const res = await callRegistryTool("get_library_activity", libraryActivitySummaryArgs());
+      let res;
+      try {
+        res = await callRegistryTool("get_library_activity", libraryActivitySummaryArgs());
+      } catch (err) {
+        if (generation === libraryActivityState.loadGeneration) {
+          applyLibraryActivityFailure("storage_unavailable", err.message || "Failed to reach reader");
+        }
+        return null;
+      }
       if (generation !== libraryActivityState.loadGeneration) return res;
       if (res && res.ok) {
         libraryActivityState.packet = res;
@@ -7425,7 +7519,7 @@
         return res;
       }
       const errCode = (res && res.error && res.error.code) || "error";
-      const errMsg = (res && res.error && res.error.message) || "Activity fetch failed";
+      const errMsg = registryErrorText(res) || "Activity fetch failed";
       applyLibraryActivityFailure(errCode, errMsg);
       return res;
     }
@@ -7545,7 +7639,7 @@
           renderLibraryActivityUI();
         } else {
           const errCode = (res && res.error && res.error.code) || "error";
-          const errMsg = (res && res.error && res.error.message) || "Activity fetch failed";
+          const errMsg = registryErrorText(res) || "Activity fetch failed";
           applyLibraryActivityFailure(errCode, errMsg);
         }
       } catch (err) {
@@ -7971,10 +8065,11 @@
             container.innerHTML = `<div style="padding:16px;color:#d97706;">Report is stale. A new summary is loading; old evidence pages are disabled.</div>`;
           }
           disableEvidencePaging();
+          // The reload disables paging itself while it is current; once a newer
+          // load has superseded it, the pagers belong to that load.
           await refreshLibraryActivitySummary();
-          disableEvidencePaging();
         } else {
-          const msg = escapeHtmlActivity((res && res.error && res.error.message) || "unknown");
+          const msg = escapeHtmlActivity(registryErrorText(res) || "unknown");
           if (container) container.innerHTML = `<div style="padding:16px;color:var(--error, #e55);">Failed to load evidence: ${msg}</div>`;
           disableEvidencePaging();
         }
@@ -8033,6 +8128,8 @@
           invalidateActivityEvidence();
           updateLibraryActivityBadge("Stale - Refresh", false, true);
           await refreshLibraryActivitySummary();
+        } else {
+          disableCollectionPagers();
         }
       } catch (err) {
         if (!activityReplyIsCurrent(generation, requestSeq, detail)) return;
@@ -8176,11 +8273,14 @@
         const openYoinkBtn = e.target.closest("[data-open-yoink]");
         if (openYoinkBtn && openYoinkBtn.dataset.openYoink) {
           const vid = openYoinkBtn.dataset.openYoink;
-          const modal = document.getElementById("activityEvidenceModal");
-          if (modal) modal.classList.add("hidden");
-          if (typeof showYoinkDetail === "function") {
-            showYoinkDetail(vid);
-          }
+          const row = state.library.find((item) => videoIdOf(item) === vid) || { video_id: vid };
+          // D3: the item view replaces the Library tab, which hides the
+          // trigger the modal would hand focus back to, so focus goes to the
+          // item view's heading instead.
+          activityEvidenceFocusRestore = null;
+          closeActivityEvidenceModal();
+          openYoinkDetail(row);
+          els.yoinkHeading.focus();
           return;
         }
       });
@@ -8609,6 +8709,7 @@
       const args = { source_id: sourceId, item_limit: CAPTURED_ITEMS_PAGE };
       if (view.next_item_cursor) args.item_cursor = view.next_item_cursor;
       const res = await callRegistryTool("source_status", args);
+      if (res && res.ok === false) throw registryToolError("source_status", res);
       const page = (res && res.items) || [];
       return {
         ...view, loading: false, items: (view.items || []).concat(page),
@@ -8775,7 +8876,8 @@
           throw new Error((intentRes && intentRes.error && intentRes.error.message) || "Failed to mint consent intent token");
         }
         const args = { ...operation, user_intent_token: intentRes.user_intent_token };
-        await callRegistryTool("set_source_consent", args);
+        const res = await callRegistryTool("set_source_consent", args);
+        if (res && res.ok === false) throw registryToolError("set_source_consent", res);
         closeConsentModal();
         showToast(intent.consent_state === "on"
           ? "Standing capture enabled. Back-catalog enrollment in progress."
@@ -8816,6 +8918,7 @@
           display_name: displayName || undefined,
         };
         const res = await callRegistryTool("register_source", payload);
+        if (res && res.ok === false) throw registryToolError("register_source", res);
         if (els.standingAddUrl) els.standingAddUrl.value = "";
         if (els.standingAddDisplayName) els.standingAddDisplayName.value = "";
         showToast(res && res.created === false
@@ -8835,7 +8938,8 @@
     async function retrySourcePoll(sourceId) {
       showToast("Checking source status...");
       try {
-        await callRegistryTool("source_status", { source_id: sourceId });
+        const res = await callRegistryTool("source_status", { source_id: sourceId });
+        if (res && res.ok === false) throw registryToolError("source_status", res);
         await loadStandingSubscriptions();
       } catch (err) {
         showToast(`Status check: ${err.message}`);
@@ -10268,14 +10372,22 @@
     }
 
     async function loadLibrary({ reset = false } = {}) {
-      if (state.loading) return;
+      // D1: every load runs, even while an older one is in flight, and only
+      // the newest one's answer (or error) is shown, so typing "ai agents"
+      // after "ai" never leaves the "ai" results under the new search.
+      const request = ++state.libraryRequest;
       const dateMessage = libraryDateRangeMessage();
       if (dateMessage) {
+        state.loading = false;
         renderLibraryInvalidRange(dateMessage);
         return;
       }
+      // A filter edit since the shown rows were loaded: Load more starts the
+      // new search from its first page instead of appending to the old rows.
+      if (state.libraryResetPending) reset = true;
       state.loading = true;
       if (reset) {
+        state.libraryResetPending = false;
         state.offset = 0;
         state.library = [];
         state.libraryState = "loading";
@@ -10290,8 +10402,10 @@
       els.resultSummary.textContent = "Loading library...";
       try {
         if (!state.jobsLoaded || reset) await refreshJobs();
+        if (request !== state.libraryRequest) return;
         const params = paramsFromFilters();
         const data = await authFetch(`/memory/search?${params.toString()}`);
+        if (request !== state.libraryRequest) return;
         const rows = Array.isArray(data.results) ? data.results : [];
         state.total = Number(data.total) || 0;
         state.corpusTotal = Number.isFinite(Number(data.corpus_total)) ? Number(data.corpus_total) : (hasLibraryFilters() ? state.corpusTotal : state.total);
@@ -10303,6 +10417,7 @@
         renderLibrary();
         populateFilterOptions(rows);
       } catch (err) {
+        if (request !== state.libraryRequest) return;
         if (reset) state.library = [];
         if (isInvalidRangeError(err)) {
           renderLibraryInvalidRange("Start date has to be before end date.");
@@ -10310,8 +10425,10 @@
           renderLibraryUnavailable(err.message);
         }
       } finally {
-        state.loading = false;
-        syncWritingSourceOptions();
+        if (request === state.libraryRequest) {
+          state.loading = false;
+          syncWritingSourceOptions();
+        }
       }
     }
 
@@ -11698,7 +11815,7 @@
 
     function syncWritingGenerateState() {
       const hasPick = Boolean(els.writingSource.value && state.writingSelectedSourceRow);
-      document.getElementById("generateWriting").disabled = !hasPick;
+      document.getElementById("generateWriting").disabled = !hasPick || state.writingGenerating;
     }
 
     // The selected source renders as a two-line chip in place of the raw
@@ -11966,14 +12083,25 @@
       return selectedWritingMode() === "thread" ? drafts.join("\n\n") : drafts[0] || "";
     }
 
+    // The source a saved draft is filed under, as the helper stores it
+    // (blank for a draft saved without a source).
+    function writingDraftSourceKey(value) {
+      return String(value || "").trim();
+    }
+
     async function saveWritingDraft() {
       // Save must be a real request against POST /writing/draft (QA #32).
       // The old handler toasted "saved locally" while sending nothing.
       const body = currentWritingText().trim();
       if (!body) return showToast("Write or generate a draft before saving.");
+      const sourceId = writingDraftSourceKey(els.writingSource.value);
+      // D21: the helper overwrites the draft whose id is sent, source and
+      // all, so the id is reused only for the draft saved from the source
+      // that is picked now. A draft for any other source saves as a new one.
+      const sameSource = Boolean(state.writingDraftId) && state.writingDraftSourceId === sourceId;
       const payload = {
-        id: state.writingDraftId || undefined,
-        source_yoink_id: els.writingSource.value || undefined,
+        id: sameSource ? state.writingDraftId : undefined,
+        source_yoink_id: sourceId || undefined,
         kind: selectedWritingMode(),
         source_credit_line: writingAttributionLine(),
         body,
@@ -11981,6 +12109,7 @@
       try {
         const data = await authFetch("/writing/draft", { method: "POST", body: JSON.stringify(payload) });
         state.writingDraftId = data.id;
+        state.writingDraftSourceId = sourceId;
         localStorage.setItem("uoink.writingDraftId", String(data.id));
         showToast("Draft saved. It'll be here after a reload.");
       } catch (err) {
@@ -11997,6 +12126,7 @@
         const data = await authFetch(`/writing/draft/${savedId}`);
         if (data && data.body) {
           state.writingDraftId = savedId;
+          state.writingDraftSourceId = writingDraftSourceKey(data.draft && data.draft.yoink_id);
           setWritingOutput(data.body);
           showToast("Recovered your saved draft.");
         }
@@ -12854,15 +12984,17 @@
     async function generateWriting() {
       const sourceId = els.writingSource.value;
       if (!sourceId) return showToast("Choose a source uoink first.");
+      // One run at a time: Generate, Revise and Regenerate all land here.
+      if (state.writingGenerating) return;
       const mode = selectedRadio("writingMode", "tweet");
       if (mode === "script") {
-        setWritingOutput("Preparing a grounded script...");
+        beginWritingRun("Preparing a grounded script...");
         try {
           await generateScriptInWriting();
         } catch (err) {
-          els.writingOutput.innerHTML = degradedState("Generate needs another pass.", "Uoink couldn't prepare this script.", err.message);
-          els.writingOutput.dataset.rawText = "";
-          setWritingActionsEnabled(false);
+          setWritingRunStatus(degradedState("Generate needs another pass.", "Uoink couldn't prepare this script.", err.message));
+        } finally {
+          endWritingRun();
         }
         return;
       }
@@ -12882,7 +13014,7 @@
         body.generate = true;
         body.compute_mode = "byo_key";
       }
-      setWritingOutput("Preparing your draft...");
+      beginWritingRun("Preparing your draft...");
       try {
         const data = await callMcpTool(toolName, body);
         if (data.mode === "grounding_only") {
@@ -12903,9 +13035,9 @@
         renderWritingResult(data);
         showToast(data.mode === "grounding_only" ? "Connect a writing agent to generate." : "Writing draft ready.");
       } catch (err) {
-        els.writingOutput.innerHTML = degradedState("Writing Studio needs another pass.", "Uoink couldn't prepare this draft. Details are tucked below.", err.message);
-        els.writingOutput.dataset.rawText = "";
-        setWritingActionsEnabled(false);
+        setWritingRunStatus(degradedState("Writing Studio needs another pass.", "Uoink couldn't prepare this draft. Details are tucked below.", err.message));
+      } finally {
+        endWritingRun();
       }
     }
 
@@ -13620,6 +13752,14 @@
         btn.addEventListener("click", () => switchTab(btn.dataset.tabButton));
       });
       const reload = debounce(() => {
+        loadLibrary({ reset: true });
+      }, 260);
+      // D1: an edit takes effect straight away, not 260 ms later when the
+      // debounced search starts. The filters follow the controls, any Library
+      // answer still in flight is stale, and the next load (a note or image
+      // refresh, or Load more) starts from the first page of the new search,
+      // so nothing from the old search shows under the new search box.
+      const invalidateAndReload = () => {
         state.filters.q = els.searchInput.value;
         state.filters.platform = els.platformFilter.value;
         state.filters.source_type = els.sourceTypeFilter.value;
@@ -13633,10 +13773,12 @@
         state.filters.date_to = els.dateTo.value;
         state.filters.sort = els.sortFilter.value;
         updateVideoFacetVisibility();
-        loadLibrary({ reset: true });
-      }, 260);
+        state.libraryRequest++;
+        state.libraryResetPending = true;
+        reload();
+      };
       [els.searchInput, els.platformFilter, els.sourceTypeFilter, els.channelFilter, els.topicFilter, els.hookFilter, els.formatFilter, els.performanceFilter, els.lengthFilter, els.dateFrom, els.dateTo, els.sortFilter].forEach((el) => {
-        el.addEventListener(el.tagName === "INPUT" ? "input" : "change", reload);
+        el.addEventListener(el.tagName === "INPUT" ? "input" : "change", invalidateAndReload);
       });
       document.getElementById("clearFilters").addEventListener("click", resetLibraryFilters);
       document.getElementById("refreshForYou").addEventListener("click", loadForYou);
@@ -14327,28 +14469,49 @@
       handleJobsStreamEvent(eventName, JSON.parse(data));
     }
 
-    async function connectJobsStream() {
-      try {
-        const token = await getToken();
-        const res = await fetch("/jobs/stream", { headers: { "X-Uoink-Token": token } });
-        if (!res.ok || !res.body) throw new Error(`stream unavailable: HTTP ${res.status}`);
-        const reader = res.body.getReader();
-        const decoder = new TextDecoder();
-        let buffer = "";
-        for (;;) {
-          const { value, done } = await reader.read();
-          if (done) break;
-          buffer += decoder.decode(value, { stream: true }).replace(/\r\n/g, "\n");
-          let index = buffer.indexOf("\n\n");
-          while (index >= 0) {
-            const frame = buffer.slice(0, index);
-            buffer = buffer.slice(index + 2);
-            try { handleJobsStreamFrame(frame); } catch (_) {}
-            index = buffer.indexOf("\n\n");
-          }
+    // D20: the stream ends when the helper restarts or the PC sleeps, so it is
+    // reopened with a capped backoff, after a clean end too, and every reopen
+    // catches up through refreshActivity() first. The catch-up lands before
+    // the stream reopens, so a slow /jobs answer never overwrites the newer
+    // snapshot the stream sends. A stream that stayed open at least as long
+    // as the longest wait was healthy; the next wait starts short again.
+    const JOBS_STREAM_RETRY_MIN_MS = 1000;
+    const JOBS_STREAM_RETRY_MAX_MS = 30000;
+
+    async function readJobsStream() {
+      const token = await getToken();
+      const res = await fetch("/jobs/stream", { headers: { "X-Uoink-Token": token } });
+      if (!res.ok || !res.body) throw new Error(`stream unavailable: HTTP ${res.status}`);
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+      for (;;) {
+        const { value, done } = await reader.read();
+        if (done) return;
+        buffer += decoder.decode(value, { stream: true }).replace(/\r\n/g, "\n");
+        let index = buffer.indexOf("\n\n");
+        while (index >= 0) {
+          const frame = buffer.slice(0, index);
+          buffer = buffer.slice(index + 2);
+          try { handleJobsStreamFrame(frame); } catch (_) {}
+          index = buffer.indexOf("\n\n");
         }
-      } catch (_) {
-        setTimeout(refreshActivity, 5000);
+      }
+    }
+
+    async function connectJobsStream() {
+      let delay = JOBS_STREAM_RETRY_MIN_MS;
+      for (;;) {
+        const openedAt = Date.now();
+        try {
+          await readJobsStream();
+        } catch (_) {}
+        if (Date.now() - openedAt >= JOBS_STREAM_RETRY_MAX_MS) delay = JOBS_STREAM_RETRY_MIN_MS;
+        await new Promise((resolve) => setTimeout(resolve, delay));
+        delay = Math.min(delay * 2, JOBS_STREAM_RETRY_MAX_MS);
+        try {
+          await refreshActivity();
+        } catch (_) {}
       }
     }
 
