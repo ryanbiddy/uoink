@@ -685,6 +685,7 @@ def _reject_duplicate_json_keys(pairs):
 def _strict_json_route(bare: str) -> bool:
     return (
         bare == LIBRARY_INTENT_ROUTE
+        or bare == "/playbooks/run"
         or bare == LIBRARY_MIRROR_INTENT_ROUTE
         or bare == LIBRARY_MIRROR_ROUTE
         or bare.startswith(_STRICT_JSON_ROUTE_PREFIXES)
@@ -1618,8 +1619,8 @@ def _record_anthropic_usage(feature: str, resp: dict) -> None:
     response without usage is counted as an unavailable call, and a write
     that cannot happen (no index, locked index) lands in the meter status
     the pricing payload shows. Call sites: Comment Intelligence, Hook
-    Type, entity extraction (the 4-token key probe is excluded on purpose;
-    it is noise in the meter)."""
+    Type, entity extraction, research playbooks (the 4-token key probe is
+    excluded on purpose; it is noise in the meter)."""
     try:
         idx = _get_index()
     except Exception as exc:
@@ -13948,6 +13949,67 @@ class Handler(BaseHTTPRequestHandler):
         return self._send_json(200, {"ok": True, "piece": piece,
                                       "body": piece.get("body")})
 
+    def _handle_playbooks_run(self, body):
+        """POST /playbooks/run {playbook, arguments}: explicit BYO-key run.
+
+        Like Writing Studio, the authenticated request is the user's action.
+        Return the draft body, citation warnings and refs; saving is separate.
+        """
+        if not self._require_token():
+            return
+        import library_resources as _lr
+
+        try:
+            import research_playbooks
+
+            args = _lr._strict_arguments(body, ("playbook", "arguments"),
+                                         ("playbook", "arguments"))
+            if not isinstance(args["arguments"], dict):
+                raise _lr._invalid("arguments_not_object", field="arguments")
+            reader = _lr.make_reader(sys.modules[__name__])
+            # Refuse invalid scope before storage, credentials or spending.
+            research_playbooks._validate(reader, args["playbook"], args["arguments"])
+            key = _saved_anthropic_key()
+            if not key:
+                raise _lr._invalid("anthropic_key_required",
+                                   next_step="add your Anthropic key in Settings")
+            prepared = research_playbooks.get_playbook_input(
+                reader, args["playbook"], args["arguments"])
+            packet = prepared["packet"]
+            user = _lr.render_document(packet)
+            reader.assert_within_deadline()
+            # The read admission ends before the model call. No retries or
+            # automatic saves: each request authorizes one paid call.
+            try:
+                response = _anthropic_messages(
+                    key, system=prepared["instruction"], user=user, max_tokens=4096)
+                _record_anthropic_usage("playbook_" + args["playbook"], response)
+                draft = _anthropic_text(response)
+            except AnthropicAPIError as exc:
+                if exc.status == 401:
+                    _mark_anthropic_key_invalid()
+                # Provider errors can echo prompts or credentials. Expose
+                # only a fixed message and the HTTP status, never their text.
+                return self._send_json(200, {"ok": False, "error": {
+                    "code": "anthropic_error",
+                    "message": "Anthropic could not complete the playbook. Check your key in Settings or try again.",
+                    "retryable": exc.status is None or exc.status == 429 or exc.status >= 500,
+                    "details": {"status": exc.status},
+                }})
+            result = {"ok": True, "playbook": args["playbook"], "body": draft,
+                      "packet_hash": prepared["packet_hash"], "refs": packet["refs"],
+                      "citation_warnings": research_playbooks.check_citations(packet, draft)}
+        except ImportError:
+            result = _lr.ResourceError("feature_unavailable", details={
+                "module": "research_playbooks"}).envelope()
+        except _lr.ResourceError as exc:
+            result = exc.envelope()
+        except Exception:
+            # Match the MCP boundary: source text and keys never enter logs
+            # or error responses, including unexpected serialization errors.
+            result = _lr.ResourceError("internal_error").envelope()
+        return self._send_json(200, result)
+
     def _handle_writing_draft_save(self, body):
         """POST /writing/draft -- persist composer state (G-03, QA #32).
         Insert when `id` is absent, update when present. Returns the stored
@@ -16407,6 +16469,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_auto_uoink_scan(body)
         if bare == "/writing/compose/validate":
             return self._handle_writing_compose_validate(body)
+        if bare == "/playbooks/run":
+            return self._handle_playbooks_run(body)
         if bare == "/writing/draft":
             return self._handle_writing_draft_save(body)
         if bare == "/writing/tweet":

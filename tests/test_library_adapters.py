@@ -14,7 +14,6 @@ audit (docs/library/SERVICE-AUDIT-PLAN-2026-09-04.md) cover that.
 """
 from __future__ import annotations
 
-import asyncio
 import io
 import json
 import math
@@ -195,7 +194,16 @@ def test_library_tools_are_registry_only_and_stdio_is_unchanged():
     import uoink_mcp
     from test_c01_mcp_stdio import CANONICAL_STDIO_TOOLS
 
-    stdio = {tool.name for tool in asyncio.run(uoink_mcp.mcp.list_tools())}
+    # Listing is synchronous local work. Windows asyncio.run opens a socket
+    # pair even for this coroutine, violating the offline acceptance guard.
+    coroutine = uoink_mcp.mcp.list_tools()
+    try:
+        coroutine.send(None)
+    except StopIteration as done:
+        stdio = {tool.name for tool in done.value}
+    else:
+        coroutine.close()
+        pytest.fail("local tool listing unexpectedly suspended")
     assert stdio == CANONICAL_STDIO_TOOLS
     assert stdio.isdisjoint(tools.LIBRARY_TOOL_NAMES)
     for name in tools.LIBRARY_TOOL_NAMES:

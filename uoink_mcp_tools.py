@@ -3586,60 +3586,11 @@ def _library_media_export(args: dict[str, Any]) -> dict[str, Any]:
 
 
 def _research_transcript_result(reader, arguments, *, prompt=False):
-    """Bound chapters before T2's comments/clips/metrics trim pass.
+    """Compatibility entry point for the stdio prompt dispatcher."""
+    import research_playbooks
 
-    T3 cannot change research_playbooks.py. Reuse its selection, enrichment,
-    validation and renderers here; keep this small transcript-only assembly
-    in sync with its _build branch until the core owns the chapter cap.
-    """
-    import library_resources as _lr
-    import research_playbooks as _rp
-
-    name = "transcript-intel"
-    args = _rp._validate(reader, name, arguments)
-    with reader.request() as scope:
-        rows, matched = _rp._select(scope, name, args)
-        items = [_rp._capture(row) for row in rows]
-        body = {
-            "schema_version": _lr.SCHEMA_VERSION, "contract_version": _rp.CONTRACT_VERSION,
-            "render_version": _lr.RENDER_VERSION, "prompt": name, "args": args,
-            "generated_at": reader.utc_now().isoformat().replace("+00:00", "Z"), "packet_hash": "",
-            "coverage": {"matched": matched, "included": len(items), "dropped_for_budget": 0,
-                         "budget_drops": {}, "dropped_for_invalid_text": 0,
-                         "invalid_text_drops": {}, "exhaustive": False},
-            "items": items, "refs": {},
-            "capture_time_note": "Naive capture timestamps are UTC. Since filters capture time, not publication time.",
-        }
-        sidecars = _rp._Sidecars(scope)
-        for row, item in zip(rows, items):
-            sidecar = _rp._enrich(scope, row, item, sidecars, body["coverage"])
-            source = sidecar.get("source_chapters", sidecar.get("chapters", []))
-            source = source if isinstance(source, list) else []
-            chapters = [{"title": _lr.label(c.get("title")),
-                         "start": _rp._number(c.get("start_time", c.get("start"))),
-                         "end": _rp._number(c.get("end_time", c.get("end")))}
-                        for c in source[:100] if isinstance(c, dict)]
-            item["chapters"] = chapters
-            # Check the same source fields as the core before any omission.
-            reader._assert_card_safe(item, row)
-            kept = []
-            for chapter in chapters[:12]:
-                # Measure escaped, model-facing text, including JSON string
-                # wrapping. Eight captures then spend at most 16 KiB here.
-                if _lr.wire_bytes(_lr.render_document({"chapters": kept + [chapter]})) > 2048:
-                    break
-                kept.append(chapter)
-            item["chapters"] = kept
-            dropped = sum(isinstance(c, dict) for c in source) - len(kept)
-            if dropped:
-                coverage = body["coverage"]
-                coverage["dropped_for_budget"] += dropped
-                drops = coverage["budget_drops"]
-                drops["chapters"] = drops.get("chapters", 0) + dropped
-            scope.check()
-        reader._assert_card_safe(body, None)
-        _rp._trim(scope, name, body)
-        return _rp._result(name, body) if prompt else _rp._tool_result(name, body)
+    build = research_playbooks.get_prompt if prompt else research_playbooks.get_playbook_input
+    return build(reader, "transcript-intel", arguments)
 
 
 def _research_playbooks_call(args: Any) -> dict[str, Any]:
@@ -3654,11 +3605,8 @@ def _research_playbooks_call(args: Any) -> dict[str, Any]:
         if not isinstance(args["arguments"], dict):
             raise _lr._invalid("arguments_not_object", field="arguments")
         reader = _lr.make_reader(_b())
-        if args["playbook"] == "transcript-intel":
-            result = _research_transcript_result(reader, args["arguments"])
-        else:
-            result = research_playbooks.get_playbook_input(
-                reader, args["playbook"], args["arguments"])
+        result = research_playbooks.get_playbook_input(
+            reader, args["playbook"], args["arguments"])
         text = _lr.render_tool_text(result)
         _lr._check_wire({"content": [{"type": "text", "text": text}], "isError": False},
                         what="get_playbook_input", next_step="use fewer captures or a narrower scope")

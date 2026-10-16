@@ -652,7 +652,7 @@ def test_playbook_prompt_refusals_keep_domain_envelope(playbook_adapter, name, a
 
 
 @pytest.mark.parametrize("name,kind", [
-    ("outlier-posts", "exception"), ("outlier-posts", "nonfinite"),
+    ("outlier-posts", "exception"), ("outlier-posts", "serialization"),
     ("transcript-intel", "exception"),
 ])
 def test_playbook_unexpected_errors_are_sanitized_on_all_transports(playbook_adapter, monkeypatch, name, kind):
@@ -665,10 +665,15 @@ def test_playbook_unexpected_errors_are_sanitized_on_all_transports(playbook_ada
             raise ValueError("private source text must not escape")
         monkeypatch.setattr(research_playbooks, "_refresh", fail)
     else:
-        # statistics.median adds the middle pair before dividing by two;
-        # four finite values can therefore produce an infinite baseline.
-        for vid, views in (("a", 1e308), ("b", 1e308), ("c", 1e308), ("d", 1e308)):
-            playbook_adapter[1](vid, views=views)
+        refresh = research_playbooks._refresh
+
+        def invalid_packet(body):
+            # Corrupt the packet after numeric sanitization so strict JSON
+            # serialization still raises even when metric baselines are safe.
+            body["items"][0]["private source text must not escape"] = float("inf")
+            return refresh(body)
+
+        monkeypatch.setattr(research_playbooks, "_refresh", invalid_packet)
     payload = {"playbook": name, "arguments": {"author": "fixture"}}
     expected = ResourceError("internal_error").envelope()
     assert uoink_mcp_tools.call_tool("get_playbook_input", payload) == expected

@@ -92,11 +92,19 @@ All other helper endpoints require `X-Uoink-Token` (legacy `X-Yoink-Token` accep
 - Playlist jobs and index progress control: `POST /playlist/preview`, `POST /playlist/start`, `GET /jobs`, `GET /jobs/<id>`, `POST /jobs/<id>/cancel`, `POST /index/backfill-cancel`
 - Sessions: `POST /session/start`, `POST /session/add`, `POST /session/close`, `POST /session/cancel`, `POST /session/open`, `GET /session/list`, `GET /session/active`
 - Settings, AI key testing, and local cost estimates: `GET /settings`, `GET /settings/pricing`, `POST /settings`, `POST /settings/test-key`
+- Research generation: `POST /playbooks/run`. Like Writing Studio, it requires
+  the helper token; an explicit request with a saved Anthropic key authorizes
+  one paid call. It accepts only a playbook name and its scope arguments,
+  builds the bounded library packet on the server, and sends the fixed
+  instruction and fenced data through the existing Anthropic Messages client.
+  It records usage as `playbook_<name>` and returns draft text with citation
+  warnings. Saving is a separate `POST /writing/draft` action and warnings do
+  not block it. Local MCP packet reads never call Anthropic.
 - Local files, folders, Skill prompt, and hook taxonomy: `GET /file`, `GET /skill/system-prompt`, `GET /taxonomy`, `GET /recent`, `GET /open-folder`, `GET /open-index`, `GET /open-prompts`
 - MCP HTTP JSON-RPC helper: `GET /mcp/v1/config`, `GET /mcp/v1/sse`, `POST /mcp/v1`, `POST /mcp/v1/initialize`, `POST /mcp/v1/tools/list`, `POST /mcp/v1/tools/call`
 - Living Library user-intent confirmation: `POST /library/intent`. Mints the five-minute `user_intent_token` that `pin_shelf` and `undo_library_apply` require. Beyond the token it enforces an origin gate (`Origin`, when present, must be a loopback `http` origin on the helper's own port; `Sec-Fetch-Site`, when present, must be `same-origin` or `none`; extension and web origins are refused), strict JSON decoding (no NaN, Infinity or duplicate keys) and a 30 requests/minute limit. No registry tool, MCP client or client-supplied actor string can mint this token; it exists so a pin or undo is a user's own confirmation of a displayed delta.
 
-Requests to `POST /tools/<name>`, `POST /mcp/v1*` and `POST /library/intent` are decoded strictly: NaN, Infinity and duplicate object keys are rejected with HTTP 400 before any argument is used. The six Living Library tools additionally validate every request against their frozen JSON Schema on every transport and return only the contract's error envelope, never raw database exceptions or local paths.
+Requests to `POST /tools/<name>`, `POST /mcp/v1*`, `POST /playbooks/run` and `POST /library/intent` are decoded strictly: NaN, Infinity and duplicate object keys are rejected with HTTP 400 before any argument is used. The six Living Library tools additionally validate every request against their frozen JSON Schema on every transport and return only the contract's error envelope, never raw database exceptions or local paths. Playbook reader failures use the same standard envelope; unexpected failures and Anthropic errors never expose raw exception text or keys.
 
 The token is accepted only in the `X-Uoink-Token` header (or the legacy
 `X-Yoink-Token` compatibility header). Query-string token auth is intentionally
@@ -172,7 +180,7 @@ Protocol validation failures return `4xx` JSON errors. Handled application failu
 
 ## Anthropic API key storage
 
-Comment Intelligence, Hook Type, and Entity Extraction are optional BYO-key features. Normal Uoink extraction works without an Anthropic key.
+Comment Intelligence, Hook Type, Entity Extraction, Writing Studio saved-key generation, and explicit research playbook runs are optional BYO-key features. Comment Intelligence and Hook Type also run on demand when a connected agent calls their MCP tools, and agents can ask Writing Studio to generate with the saved key, whatever the automatic-analysis settings. Normal Uoink extraction and local playbook packets work without an Anthropic key.
 
 Starting in v2.0, the key is stored through Python `keyring`:
 

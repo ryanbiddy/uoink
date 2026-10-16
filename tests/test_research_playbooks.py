@@ -131,6 +131,54 @@ def test_zero_and_missing_medians_do_not_invent_lift(library, views, likes):
     assert metric["lift"] is None and metric["label"] == "none"
 
 
+@pytest.mark.parametrize("views", [1e308, float("inf"), float("nan"), 10 ** 400])
+@pytest.mark.parametrize("name", ["outlier-posts", "creator-teardown"])
+def test_nonfinite_or_overflowed_baselines_produce_finite_packets(library, views, name):
+    for vid in ("a", "b", "c", "d"):
+        library[1](vid, views=views, likes=None)
+    body = packet(library, name)
+    assert body["baselines"][0]["median"] is None
+    assert all(i["metric"]["median"] is None and i["metric"]["lift"] is None
+               for i in body["items"])
+    args = {"author": "fixture"}
+    assert playbooks.get_playbook_input(library[0], name, args)["packet"] == body
+    assert playbooks.get_prompt(library[0], name, args)["messages"][1]["content"]["text"] == library_resources.render_document(body)
+    json.dumps(body, allow_nan=False)
+
+
+@pytest.mark.parametrize("field", ["chapters", "source_chapters"])
+@pytest.mark.parametrize("title", ["Chapter", "<>&`" * 50, "\U0001f600" * 200])
+def test_chapter_caps_live_in_core_and_all_entry_points_match(library, field, title):
+    reader, seed, _ = library
+    for n in range(8):
+        seed(str(n), clips=8, sidecar={field: [
+            {"title": title, "start_time": k, "end_time": k + 1} for k in range(150)]})
+    args = {"video_ids": "0,1,2,3,4,5,6,7"}
+    body = playbooks.build_packet(reader, "transcript-intel", args)
+    assert body["coverage"]["included"] == 8
+    assert all(0 < len(i["chapters"]) <= 12 for i in body["items"])
+    assert all(library_resources.wire_bytes(library_resources.render_document({"chapters": i["chapters"]}))
+               <= 2048 for i in body["items"])
+    assert body["coverage"]["budget_drops"]["chapters"] == 1200 - sum(len(i["chapters"]) for i in body["items"])
+    assert body["coverage"]["dropped_for_budget"] == sum(body["coverage"]["budget_drops"].values())
+    result = playbooks.get_playbook_input(reader, "transcript-intel", args)
+    prompt = playbooks.get_prompt(reader, "transcript-intel", args)
+    assert result["packet"] == body
+    assert prompt["messages"][1]["content"]["text"] == library_resources.render_document(body)
+    assert max(library_resources.wire_bytes(result), library_resources.wire_bytes(prompt)) + 256 <= library_resources.LIMITS["max_response_bytes"]
+
+
+def test_core_chapter_safety_check_precedes_budget_omissions(library):
+    reader, seed, _ = library
+    seed("a", sidecar={"chapters": [{"title": "Chapter"}] * 12 + [
+        {"title": str(reader.data_root / "private.txt")}]})
+    for build in (playbooks.build_packet, playbooks.get_prompt, playbooks.get_playbook_input):
+        with pytest.raises(ResourceError) as exc:
+            build(reader, "transcript-intel", {"video_ids": "a"})
+        assert exc.value.code == "invalid_source_data"
+        assert reader.guard._active == 0
+
+
 class NoDataReader:
     def utc_now(self):
         return NOW

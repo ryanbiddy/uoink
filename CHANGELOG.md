@@ -12,6 +12,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- Token-gated `POST /playbooks/run` for explicit research generation with a
+  saved Anthropic key, metered per playbook, with citation warnings and refs.
+  Reports save through the existing draft route. Privacy and security docs
+  describe the library text sent to Anthropic; dashboard controls are pending.
+- Shared core transcript chapter limits for prompts, MCP tools and HTTP runs.
+  Overflowed metric medians become null so extreme data remains renderable.
 - Five local research playbooks on MCP as prompts and a shared
   `get_playbook_input` tool: 9 prompts, 33 stdio tools and 89 HTTP registry
   tools. The tool returns cited packets without model or network calls;

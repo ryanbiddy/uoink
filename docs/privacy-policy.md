@@ -1,6 +1,6 @@
 # Uoink Privacy Policy
 
-**Repository draft — not yet effective. Last reviewed 2026-07-23.**
+**Repository draft — not yet effective. Last reviewed 2026-10-16.**
 
 This policy explains exactly what Uoink does and does not do with your
 data. It is written to be read, not to be skimmed past. If anything here
@@ -15,7 +15,8 @@ Uoink does not collect anything about you. There is no Uoink account, no
 Uoink server in the cloud, no analytics, and no telemetry. Uoink runs on
 your own machine. It contacts a source service when you ask it to capture
 that source, GitHub only when you click **Check now**, and Anthropic only
-if you turn on an optional AI feature and provide your own API key. The
+with your own API key: for automatic AI analysis you turn on, a key test,
+or an AI action that you or a connected agent start on demand. The
 rest of this document names those requests and the local data they create.
 
 ## 1. What Uoink collects about you
@@ -40,12 +41,34 @@ Uoink makes these outbound requests:
   user-supplied web page or podcast feed. Those services receive the ordinary
   request metadata needed to answer, such as your IP address and Uoink's user
   agent, and may redirect the request to their own CDN.
-- **Anthropic API requests — only if you opt in.** If you enable
-  *Comment Intelligence* or *Hook Type classification* **and** provide
-  your own Anthropic API key, Uoink sends the relevant video text
-  (comments or transcript opening) to Anthropic's API to be analyzed.
-  These features are off by default. If you never turn them on, Uoink
-  never contacts Anthropic.
+- **Anthropic API requests — only with your own key.** Uoink has no
+  Anthropic key of its own and calls Anthropic's API only with your key
+  (the one you saved, or one you type to test it), in these cases:
+  - *Automatic AI analysis you turn on* (each is off by default): Comment
+    Intelligence sends a capture's comments; Hook Type classification sends
+    its title, channel, description, transcript opening and top comment,
+    plus up to 8 of your past hook corrections (other captures' titles and
+    channels with your reasons) as examples; Entity Extraction sends its
+    title, channel and transcript. Each runs after a capture.
+  - *On-demand AI actions that you or a connected agent start*: Comment
+    Intelligence or Hook Type analysis requested through Uoink's MCP tools
+    (these run even when the automatic options are off); Writing Studio
+    generation that uses your saved key, from the dashboard when no agent is
+    connected or when an agent asks for it (up to 8,000 characters of the
+    chosen transcript or corpus text plus its grounding); and research
+    playbook runs (**Run** in the dashboard without a connected agent), which
+    send the playbook instructions and a bounded packet from your library
+    relevant to that playbook, such as titles, channel and creator names,
+    URLs, chapters, transcript excerpts, top comments, earlier analysis
+    summaries and metrics, plus active writing style anchors for repurposing.
+  - *A key test* when you choose to test your key (it sends only a short
+    test message, no library text).
+
+  Each on-demand action makes its own paid request (Comment Intelligence and
+  Writing Studio may retry once, so one action can make two); a saved key
+  starts nothing by itself. Local MCP playbook packets and copying a prompt make no
+  Anthropic request from Uoink. The dashboard Research controls are still
+  pending.
 - **GitHub release check — only when you click `Check now`.** The dashboard
   requests the latest Uoink release record from `api.github.com`. It sends no
   corpus content or usage event. GitHub receives the normal request metadata.
@@ -68,7 +91,9 @@ Uoink stores the following on your Windows machine:
 - **Soft-deleted uoinks** — when you delete a uoink from the Memory page, the folder moves to `%USERPROFILE%\Desktop\Uoink\_yoink-trash\<topic>\<slug>__deleted-<timestamp>\`. The content remains readable on disk for 30 days, then is automatically purged by the helper on startup or every 24 hours thereafter. To delete immediately, manually remove the folder from `_yoink-trash`.
 - **Helper state** — `server.log`, `token.txt`, `server.pid`, the v2.1 migration markers (`.migration-complete`, `.migrated-from-yoink`), and migrated legacy files (`jobs.json.migrated`, `taxonomy.json.migrated`) live alongside `index.db` under `%LOCALAPPDATA%\Uoink\`.
 
-None of this data leaves your machine unless you explicitly enable an optional AI feature that calls the Anthropic API with your key.
+Library text leaves your machine through Uoink's Anthropic integration only
+with your saved key, for the automatic analysis you turn on or an on-demand
+AI action that you or a connected agent start (see section 2).
 
 ## 3. Your Anthropic API key
 
@@ -87,8 +112,11 @@ any server — there is no Uoink server to receive it.
 - **Clear your API key at any time** from the Uoink setup page. If
   Anthropic rejects the key (for example, an expired key), Uoink also
   clears it automatically.
-- **Disable any AI feature at any time** from the setup page. With them
-  off, Uoink makes no Anthropic calls at all.
+- **Disable automatic AI analysis at any time** from the setup page.
+  Key tests and on-demand AI actions (agent-requested Comment Intelligence or
+  Hook Type analysis, Writing Studio saved-key generation and research
+  playbook runs) remain separate actions. Clear your saved key to prevent
+  any of them from using Uoink's Anthropic route.
 - **Uninstall Uoink at any time.**
   To fully remove Uoink and its data:
   1. Remove the extension from `chrome://extensions/`.

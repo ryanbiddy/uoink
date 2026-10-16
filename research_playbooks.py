@@ -493,7 +493,9 @@ def compute_outliers(items):
                           baseline_exclusion="too fresh" if fresh else "duplicate" if duplicate else "missing_metric" if value is None else None)
             if not fresh and not duplicate and value is not None:
                 samples.append(value)
-        base = median(samples) if samples else None
+        # Even finite floats can overflow when median averages its middle
+        # pair. Keep the sample count, but never publish an infinite baseline.
+        base = _number(median(samples)) if samples else None
         summary = {"platform": platform, "source_type": source_type, "metric": primary,
                    "median": base, "n": len(samples), "confidence": confidence(len(samples)),
                    "metric_note": "Views missing on at least half the rows; using likes." if fallback else None,
@@ -757,9 +759,27 @@ def _build(scope, reader, name, args):
             sidecar = _enrich(scope, row, item, sidecars, body["coverage"], opening_only=name == "repurpose-pack")
             if name == "transcript-intel":
                 chapters = sidecar.get("source_chapters", sidecar.get("chapters", []))
+                chapters = chapters if isinstance(chapters, list) else []
                 item["chapters"] = [{"title": label(c.get("title")), "start": _number(c.get("start_time", c.get("start"))),
                                      "end": _number(c.get("end_time", c.get("end")))}
-                                    for c in chapters[:100] if isinstance(c, dict)] if isinstance(chapters, list) else []
+                                    for c in chapters[:100] if isinstance(c, dict)]
+                # Validate the same source fields before budget omissions.
+                reader._assert_card_safe(item, row)
+                kept = []
+                for chapter in item["chapters"][:12]:
+                    # Count escaped, model-facing text, including JSON
+                    # wrapping. Eight captures spend at most 16 KiB here.
+                    if wire_bytes(render_document({"chapters": kept + [chapter]})) > 2048:
+                        break
+                    kept.append(chapter)
+                item["chapters"] = kept
+                dropped = sum(isinstance(c, dict) for c in chapters) - len(kept)
+                if dropped:
+                    coverage = body["coverage"]
+                    coverage["dropped_for_budget"] += dropped
+                    drops = coverage["budget_drops"]
+                    drops["chapters"] = drops.get("chapters", 0) + dropped
+                scope.check()
             else:
                 from writing_studio import build_credit_line
                 card, error = scope.card(item["item_id"])
