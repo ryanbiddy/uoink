@@ -2881,9 +2881,10 @@ def _publish_capture_media(idx, folder: Path, sidecar: dict, corpus_path: Path,
 
 def _index_yoink(folder: Path, sidecar: dict, corpus_path: Path | None,
                  sidecar_path: Path) -> bool:
-    """Upsert one yoink + its citations into the library index. Best-effort
-    and idempotent: callers (extraction hook, backfill) must treat a failure
-    as non-fatal. Returns True if the row was indexed. A Phase 6 publication
+    """Upsert one yoink + its citations into the library index idempotently.
+    Returns True if the row was indexed, False if its identity is missing.
+    Storage errors propagate so capture callers can report a failed save.
+    A Phase 6 publication
     refusal of ``library_unavailable`` is propagated so the owner can retry
     (BD-08); other publication refusals leave the existing snapshot and
     still return True after the row is present."""
@@ -5237,6 +5238,282 @@ def _prepare_video_capture_folder(folder: Path, url: str, metadata: dict) -> Non
         _verify_video_capture_folder(folder, url, metadata)
 
 
+def _schedule_publication_retry(folder: Path, sidecar: dict, corpus_path: Path, metadata: dict,
+                                *, missing_sidecar: bool = False, entries: list | None = None,
+                                video_files: list | None = None,
+                                reliability_pending: bool = False,
+                                markdown_index_attempted: bool = False,
+                                pending_id: int | None = None,
+                                job_id: str | None = None) -> str:
+    """Keep enough local evidence to retry publication without downloading.
+
+    ``job_id`` is the Activity job the failed attempt records. It identifies
+    that attempt's job later, independent of request timestamps."""
+    sidecar_path = folder / f"{folder.name}.json"
+    record = {
+        "folder": str(folder.resolve()),
+        "corpus_name": corpus_path.name,
+        "corpus_sha256": hashlib.sha256(corpus_path.read_bytes()).hexdigest(),
+        "sidecar": sidecar,
+        "metadata_id": metadata.get("id"),
+        "metadata": {key: value for key, value in metadata.items()
+                     if key not in ("formats", "requested_formats", "automatic_captions", "subtitles")},
+        "sidecar_sha256": (None if missing_sidecar else
+                           hashlib.sha256(sidecar_path.read_bytes()).hexdigest()),
+        "entries": entries,
+        "reliability_pending": reliability_pending,
+        "markdown_index_attempted": markdown_index_attempted,
+        "pending_id": pending_id,
+        "temporary_media": [],
+        "job_id": job_id,
+        "created_at": _now_iso(),
+    }
+    if not sidecar.get("media_file"):
+        for path in video_files or []:
+            # Only this attempt's downloads in the capture folder can be
+            # cleaned up. Refresh staging and previous backups are excluded.
+            if path.parent.resolve() == folder.resolve() and path.is_file() and not path.is_symlink():
+                stat = path.stat()
+                record["temporary_media"].append({
+                    "name": path.name, "size": stat.st_size, "mtime_ns": stat.st_mtime_ns})
+    return index.PublicationRetryQueue(DATA_ROOT / "publication-retries").enqueue(record)
+
+
+def _finish_publication_retry(folder: Path, sidecar: dict, corpus_path: Path, record: dict) -> None:
+    """Resume the extraction tail after publishing, without acquiring media."""
+    metadata = record.get("metadata")
+    if metadata is None:  # Receipts from before the extraction tail was retained.
+        metadata = json.loads((folder / "metadata.json").read_text(encoding="utf-8"))
+    media = record.get("temporary_media") or []
+    audio_name = sidecar.get("media_file") or (media[0]["name"] if media else None)
+    if (record.get("reliability_pending") and audio_name
+            and Path(audio_name).name == audio_name and (folder / audio_name).is_file()):
+        try:
+            if (_read_settings().get("transcript_reliability_auto_check")
+                    and sidecar.get("long_video_mode") == LONG_VIDEO_MODE_FULL):
+                _compute_transcript_reliability(
+                    sidecar["video_id"], folder=folder, audio_path=folder / audio_name,
+                    threshold=RELIABILITY_DEFAULT_THRESHOLD, allow_model_download=False)
+                _, sidecar = _read_sidecar_for_folder(folder)
+        except Exception as exc:
+            log.warning("transcript reliability auto-check failed: %s", exc)
+    if not record.get("markdown_index_attempted"):
+        try:
+            _incremental_index_update({
+                "title": sidecar.get("title"), "topic": folder.parent.name or "uncategorised",
+                "channel": metadata.get("channel") or metadata.get("uploader") or "",
+                "yoinked_at": (sidecar.get("yoinked_at") or _now_iso())[:10],
+                "rel_path": f"{folder.parent.name}/{folder.name}/{corpus_path.name}",
+            })
+        except Exception as exc:
+            log.warning("incremental index call site failed: %s", exc)
+    _start_entity_extraction_thread(folder, sidecar.get("video_id"), sidecar)
+    if sidecar.get("long_video_mode") != LONG_VIDEO_MODE_LITE:
+        _start_comments_thread(sidecar["url"], folder, corpus_path, metadata, record.get("entries"))
+    # A failed save preserves downloads. Only a successful publication may
+    # remove the exact unretained inputs; never glob or touch changed files.
+    for saved in media:
+        name = saved["name"]
+        if Path(name).name != name:
+            continue
+        path = folder / name
+        try:
+            if not path.is_file() or path.is_symlink():
+                continue
+            stat = path.stat()
+            if (stat.st_size, stat.st_mtime_ns) != (saved["size"], saved["mtime_ns"]):
+                log.warning("publication retry kept changed media input %s", path)
+                continue
+            path.unlink()
+        except OSError as exc:
+            log.warning("could not remove unretained download %s: %s", path, exc)
+
+
+def _capture_folder_removed(folder: Path) -> bool:
+    """A missing folder is obsolete only while its volume is reachable.
+
+    An offline drive or share reports the folder as missing too; that is a
+    transient failure, not evidence the user removed the capture."""
+    try:
+        return not folder.exists() and Path(folder.anchor).exists()
+    except OSError:
+        return False
+
+
+def _publication_retry_superseded(url: str, receipt_id: str, record: dict) -> bool:
+    with _jobs_lock:
+        return _publication_retry_superseded_locked(url, receipt_id, record)
+
+
+def _publication_retry_superseded_locked(url: str, receipt_id: str, record: dict) -> bool:
+    """True when Activity no longer belongs to the attempt that queued this
+    receipt, so recording the retry's outcome would delete another job.
+    Caller must hold _jobs_lock.
+
+    Ownership is explicit, never inferred from request timestamps: a
+    request can start before this receipt existed and finish after it.
+    The failed attempt recorded its job under the receipt's ``job_id`` (and
+    names the receipt in its error). Recording any single-video job removes
+    the other terminal jobs for the same source, so while that job is still
+    listed nothing newer finished; once it is gone, any listed job replaced
+    it. A running or queued job is always newer. With no job listed at all
+    (a playlist attempt records no single-video job), the outcome may be
+    recorded."""
+    owner = record.get("job_id")
+    jobs = [job for job in _jobs.values()
+            if job.get("kind") == "single" and job.get("source_url") == url]
+    if any(job.get("state") not in _JOB_TERMINAL_STATES for job in jobs):
+        return True
+    if any((owner and job.get("id") == owner) or receipt_id in str(job.get("error") or "")
+           for job in jobs):
+        return False
+    return bool(jobs)
+
+
+def _retry_publication_one() -> bool:
+    """Attempt one durable publication receipt, then retain its outcome.
+
+    Take the normal capture ownership lock and check the saved generation
+    before writing. A stale receipt must never refresh or resurrect a capture.
+    Only an ownership mismatch, a removed folder or newer-generation evidence
+    is obsolete; transient I/O errors are ordinary failures of the one retry.
+    """
+    queue = index.PublicationRetryQueue(DATA_ROOT / "publication-retries")
+    pending = queue.next_pending()
+    if pending is None:
+        return False
+    receipt_id, record = pending
+    sidecar = record["sidecar"]
+    url = sidecar["url"]
+    folder = Path(record["folder"])
+    started_at = _now_iso()
+    job_id = _make_job_id() if record.get("pending_id") is not None else None
+    with _manual_extraction_ownership(url) as ownership:
+        if not ownership.ok:
+            return False  # Waiting for ownership does not spend the retry.
+        # Another process may have settled this receipt while we waited.
+        if queue.is_settled(receipt_id):
+            return False
+        error = None
+        obsolete = False
+        failure_code = "publication_failed"
+
+        def refuse_obsolete(reason: str) -> None:
+            nonlocal obsolete
+            obsolete = True
+            raise RuntimeError(reason)
+
+        try:
+            if not queue.claim(receipt_id):
+                failure_code = "interrupted"
+                raise RuntimeError("publication retry was interrupted; inspect the saved files")
+            if ownership.conflict:
+                refuse_obsolete(ownership.conflict)
+            try:
+                _verify_video_capture_folder(folder, url, {"id": record["metadata_id"]})
+            except FileExistsError:
+                # Another source, unverifiable ownership or a link.
+                obsolete = True
+                raise
+            except OSError:
+                # Sharing violations, permissions and offline volumes are
+                # retry failures. Only a removed folder is obsolete.
+                if _capture_folder_removed(folder):
+                    refuse_obsolete("capture folder was removed; publication retry refused")
+                raise
+            row = _get_index().get_yoink(sidecar["video_id"])
+            if row and (row.get("deleted_at") or
+                        Path(row["corpus_path"]).parent.resolve() != folder.resolve()):
+                refuse_obsolete("capture was deleted or moved; publication retry refused")
+            corpus_path = folder / record["corpus_name"]
+            if (Path(record["corpus_name"]).name != record["corpus_name"]
+                    or corpus_path.is_symlink()
+                    or hashlib.sha256(corpus_path.read_bytes()).hexdigest()
+                    != record["corpus_sha256"]):
+                refuse_obsolete("capture changed; publication retry refused")
+            sidecar_path = folder / f"{folder.name}.json"
+            # Startup backfill can index this same generation first, and its
+            # Phase 6 publication rewrites the sidecar before its SQLite
+            # commit. A row is not proof that publication finished, so this
+            # generation is published again from the sidecar on disk; the
+            # publisher completes or idempotently settles its own state.
+            indexed = bool(row) and row.get("yoinked_at") == sidecar.get("yoinked_at")
+            with _sidecar_update_lock:
+                if sidecar_path.is_symlink():
+                    refuse_obsolete("capture sidecar is a link; publication retry refused")
+                changed = False
+                if record["sidecar_sha256"] is None:
+                    try:
+                        queue._create(sidecar_path, sidecar)
+                    except FileExistsError:
+                        changed = json.loads(sidecar_path.read_text(encoding="utf-8")) != sidecar
+                else:
+                    changed = (hashlib.sha256(sidecar_path.read_bytes()).hexdigest()
+                               != record["sidecar_sha256"])
+                current = (json.loads(sidecar_path.read_text(encoding="utf-8"))
+                           if indexed or not changed else None)
+                if changed and (not isinstance(current, dict)
+                                or current.get("yoinked_at") != sidecar.get("yoinked_at")):
+                    # An existing sidecar must match exactly unless the library
+                    # already holds this generation; different metadata
+                    # belongs to another writer and is never overwritten.
+                    refuse_obsolete("capture sidecar changed; publication retry refused")
+                if _index_yoink(folder, current, corpus_path, sidecar_path) is False:
+                    raise RuntimeError("library index did not publish the capture")
+            _finish_publication_retry(folder, current, corpus_path, record)
+            superseded = _publication_retry_superseded(url, receipt_id, record)
+            if record.get("pending_id") is not None:
+                # The download handed off to this receipt. Complete its queue
+                # row before reporting success, so retry-now cannot download
+                # an already published capture again.
+                _get_index().mark_pending_succeeded(
+                    record["pending_id"], None if superseded else job_id)
+        except Exception as exc:
+            error = f"Capture publication retry failed: {exc}. Files kept in {folder}."
+            log.warning("%s", error)
+            # Every outcome, an ordinary failure included, defers to a newer
+            # attempt's Activity job: recording this one would delete it.
+            superseded = _publication_retry_superseded(url, receipt_id, record)
+        # Settle before recording the job; the receipt stays terminal even
+        # when the same SQLite outage also prevents job persistence. An
+        # obsolete refusal can neither run nor verify publication, so it is
+        # never reported as completed: it ends the queued job as failed.
+        try:
+            queue.settle(receipt_id, error=error,
+                         code="obsolete" if obsolete else failure_code if error else None)
+        except OSError as exc:
+            # No complete outcome was saved (e.g. the disk is full), so the
+            # receipt is not settled and its next pass reports the attempt as
+            # interrupted. Activity still gets this attempt's real outcome;
+            # that later pass then finds this newer job and leaves it alone.
+            log.warning("publication retry %s outcome could not be saved: %s", receipt_id, exc)
+        if superseded:
+            return True
+        # Another attempt records its job after releasing capture ownership,
+        # so one can land at any point up to here (during settlement too).
+        # The final check runs under the jobs lock that performs this insert
+        # and its supersession: a job recorded before the insert always wins.
+        recorded = _record_single_extract_job(
+            url, started_at,
+            result=({"ok": True, "folder": str(folder), "title": sidecar.get("title"),
+                     "long_video_mode": sidecar.get("long_video_mode")}
+                    if error is None else None),
+            error=error, failure_phase="save" if error else None,
+            title=sidecar.get("title"), folder=folder,
+            retry_exhausted=bool(error), attempt_count=1,
+            job_id=job_id,
+            unless=lambda: _publication_retry_superseded_locked(url, receipt_id, record),
+        )
+        if recorded is None and error is None and record.get("pending_id") is not None:
+            # The queue row was linked to a job that is now never recorded.
+            try:
+                _get_index().mark_pending_succeeded(record["pending_id"], None)
+            except Exception as exc:
+                log.warning("publication retry could not unlink pending #%s: %s",
+                            record["pending_id"], exc)
+    return True
+
+
 def _run_extraction(url: str, interval: int, output_folder: Path,
                     *, notify: bool = True,
                     metadata: dict | None = None,
@@ -5245,7 +5522,8 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
                     generate_paste: bool = True,
                     long_video_mode: str = LONG_VIDEO_MODE_FULL,
                     cancel_event: threading.Event | None = None,
-                    phase_callback=None) -> dict:
+                    phase_callback=None,
+                    pending_id: int | None = None) -> dict:
     """Yoink a single video into output_folder.
 
     Steps:
@@ -5362,6 +5640,41 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
     corpus_name = _corpus_path(output_folder).name
     sidecar_name = f"{video_slug}.json"
     staged_names = {Path(corpus_name): Path("c.md"), Path(sidecar_name): Path("c.json")}
+    markdown_index_attempted = False
+
+    def publication_failed(error: Exception, *, missing_sidecar: bool = False) -> None:
+        error.phase = "save"
+        error.publication_error = (
+            f"Capture publication failed: {error}. Files kept in {output_folder}."
+        )
+        receipt_id = None
+        job_id = None
+        try:
+            # The caller records this attempt's Activity job under this ID
+            # (via publication_job_id), so the retry can tell its own job
+            # from a newer attempt's, whatever their request timestamps.
+            job_id = _make_job_id()
+            receipt_id = _schedule_publication_retry(
+                output_folder, sidecar, yoink_path, metadata,
+                missing_sidecar=missing_sidecar, entries=entries, video_files=video_files,
+                reliability_pending=missing_sidecar or refreshing,
+                markdown_index_attempted=markdown_index_attempted, pending_id=pending_id,
+                job_id=job_id)
+        except Exception as retry_error:
+            error.publication_error += f" Publication retry could not be queued: {retry_error}."
+            log.error("%s", error.publication_error)
+        else:
+            error.publication_error += f" One publication retry is queued ({receipt_id})."
+        # Callers that aggregate captures must keep the saved corpus in their
+        # session/playlist while reporting this attempt's failed save honestly.
+        error.capture_result = {
+            "ok": False, "status": "saved_with_errors", "failure_phase": "save",
+            "error": error.publication_error, "folder": str(output_folder),
+            "title": title, "video_slug": video_slug, "screenshot_count": len(shots),
+            "caption_count": platform_caption_count,
+            "publication_retry_id": receipt_id,
+            "publication_job_id": job_id,
+        }
 
     def stage_name(relative: Path) -> Path:
         return staged_names.get(relative, relative)
@@ -5804,8 +6117,9 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
             # Do not publish assets while the previous sidecar still references
             # the old set. A failed staged write leaves that capture intact.
             log.warning("could not write JSON sidecar: %s", e)
-            if refreshing:
-                raise
+            if not refreshing:
+                publication_failed(e, missing_sidecar=True)
+            raise
 
         if refreshing:
             _raise_if_cancelled(cancel_event)
@@ -5876,7 +6190,14 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
         # Ignore later cancellation so pending workers are still started.
         committed = True
         if refreshing:
-            _index_yoink(output_folder, sidecar, yoink_path, sidecar_path)
+            if phase_callback:
+                phase_callback("save")
+            try:
+                if _index_yoink(output_folder, sidecar, yoink_path, sidecar_path) is False:
+                    raise RuntimeError("library index did not publish the capture")
+            except Exception as e:
+                publication_failed(e)
+                raise
 
         # v2.5 A1: optional local transcript reliability detection. It runs only
         # when the user has opted in and the Whisper model is already cached; the
@@ -5920,12 +6241,19 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
                       "previous files retained in %s; media inputs in %s",
                       output_folder, backup_folder, media_backup_folder)
             if isinstance(e, Exception):
-                raise RuntimeError(
+                failure = RuntimeError(
                     f"Capture refresh publication failed: {e}. "
                     f"Replacement files are published in {output_folder}. "
                     f"Previous files are retained in {backup_folder}; "
                     f"media inputs are retained in {media_backup_folder}"
-                ) from e
+                )
+                failure.phase = "save"
+                failure.publication_error = (
+                    f"{failure}. {getattr(e, 'publication_error', '')}"
+                )
+                if getattr(e, "capture_result", None):
+                    failure.capture_result = dict(e.capture_result, error=failure.publication_error)
+                raise failure from e
         elif not committed:
             # Even an unexpected interruption during rollback must leave the
             # backup directory intact until restoration has finished.
@@ -5987,6 +6315,9 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
     try:
         rel_path = (f"{output_folder.parent.name}/"
                     f"{output_folder.name}/{yoink_path.name}")
+        # The best-effort updater can write or start a background rebuild
+        # before failing. Retrying this step would prepend/count it twice.
+        markdown_index_attempted = True
         _incremental_index_update({
             "title": title,
             "topic": output_folder.parent.name or "uncategorised",
@@ -5998,16 +6329,17 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
     except Exception as e:
         log.warning("incremental index call site failed: %s", e)
 
-    # First captures retain their original order: media cleanup, markdown
-    # index update, then SQLite. Refreshes already indexed at the swap boundary.
+    # Preserve first-capture cleanup ordering: unretained downloads are
+    # temporary, while corpus, sidecar, frames and opted-in media remain.
     if not refreshing:
+        if phase_callback:
+            phase_callback("save")
         try:
-            _index_yoink(output_folder, sidecar, yoink_path, sidecar_path)
-        except index.sqlite3.IntegrityError:
-            log.exception("library identity conflict for %s", output_folder)
-            raise
+            if _index_yoink(output_folder, sidecar, yoink_path, sidecar_path) is False:
+                raise RuntimeError("library index did not publish the capture")
         except Exception as e:
-            log.warning("library index update failed for %s: %s", output_folder, e)
+            publication_failed(e)
+            raise
 
     # Sprint 16 (A2): extract named entities off the transcript in the
     # background, in parallel with the comments / Comment Intelligence
@@ -6247,6 +6579,8 @@ def _plain_error_from_text(text: str) -> str:
 
 def friendly_error(e: BaseException) -> str:
     """Translate raw exceptions into copy the user can act on."""
+    if getattr(e, "publication_error", None):
+        return e.publication_error
     if isinstance(e, ExtractionPhaseError):
         return str(e)
     if isinstance(e, FileNotFoundError):
@@ -7940,8 +8274,13 @@ def _supersede_terminal_single_jobs_locked(source_url: str, keep_id: str) -> Non
             log.warning("could not drop superseded job %s: %s", jid, e)
 
 
-def _add_job_record(job: dict) -> dict:
+def _add_job_record(job: dict, *, unless=None) -> dict | None:
+    """Insert one job. ``unless`` is evaluated under the same jobs lock that
+    performs the insert and its supersession; when it returns True nothing
+    is recorded and None is returned. It must not take ``_jobs_lock``."""
     with _jobs_lock:
+        if unless is not None and unless():
+            return None
         _jobs[job["id"]] = job
         # A new single-video attempt supersedes any prior terminal attempt
         # for the same URL, so Activity shows one row per source (G-14).
@@ -7994,16 +8333,24 @@ def _record_single_extract_job(url: str, started_at: str, *,
                                title: str | None = None,
                                folder: Path | None = None,
                                retry_exhausted: bool = False,
-                               attempt_count: int | None = None) -> dict:
+                               attempt_count: int | None = None,
+                               job_id: str | None = None,
+                               unless=None) -> dict | None:
+    # ``unless``: see _add_job_record (an atomic "skip if superseded" check).
     # retry_exhausted marks a terminal failure whose automatic retry budget
     # is used up (G-43 / E2E D4). The dashboard can key honest "stopped
     # retrying" copy off this flag instead of pattern-matching error text.
     now = _now_iso()
+    if result and (result.get("ok") is False or result.get("status") == "saved_with_errors"):
+        error = error or result.get("error") or result.get("reason") or "Capture publication failed."
+        failure_phase = result.get("failure_phase") or failure_phase or "save"
     ok = result is not None and not error
     folder_path = Path(result["folder"]) if result and result.get("folder") else folder
     corpus_path = _resolve_corpus_path(folder_path) if folder_path else None
     job = {
-        "id": _make_job_id(),
+        # A saved-with-errors result carries the job ID its publication
+        # receipt recorded, so the retry recognizes this attempt's job.
+        "id": job_id or (result or {}).get("publication_job_id") or _make_job_id(),
         "kind": "single",
         "state": "completed" if ok else "failed",
         "source_url": url,
@@ -8057,6 +8404,8 @@ def _record_single_extract_job(url: str, started_at: str, *,
         job["message"] = (
             f"Uoink stopped after {int(attempt_count)} attempts."
             if attempt_count else "Uoink stopped retrying this one.")
+    if unless is not None:
+        return _add_job_record(job, unless=unless)
     return _add_job_record(job)
 
 
@@ -9118,10 +9467,21 @@ class _ServerCaptureBackend(source_subscriptions.CaptureBackend):
                 # rejected at preflight before any charge. AS-03a: exceptions
                 # retain the capture lock and the process lock unless
                 # fail_capture verified a terminal commit.
-                code = "youtube_rate_limit" if _is_youtube_rate_limit(exc) else "download_failed"
+                saved = getattr(exc, "capture_result", None)
+                # This acquisition is over. Only the durable publication
+                # receipt may retry its save; never reserve another download.
+                # The source item remains failed/publication_failed even if
+                # that retry succeeds. complete_capture requires a started or
+                # uncertain entry and verified executor completion. This retry
+                # cannot reopen a terminal start or reuse the worker's proof. Its
+                # separate Activity job and receipt record publication recovery.
+                code = ("publication_failed" if saved else
+                        "youtube_rate_limit" if _is_youtube_rate_limit(exc) else "download_failed")
+                if saved:
+                    _record_single_extract_job(url, _now_iso(), result=saved)
                 try:
                     outcome = _source_service().fail_capture(
-                        start_id, owner_token, code, terminal=False, proof=proof)
+                        start_id, owner_token, code, terminal=bool(saved), proof=proof)
                     release_locks = source_subscriptions.settlement_releases_dispatcher_locks(
                         outcome)
                 except Exception:
@@ -9771,7 +10131,7 @@ def _build_playlist_corpus(job: dict, *, text_only: bool) -> str:
 
         if not item.get("ok"):
             parts.append(f"> _Failed: {item.get('error') or 'unknown error'}_")
-        else:
+        if item.get("ok") or item.get("status") == "saved_with_errors":
             md_path = item.get("md_path")
             try:
                 body = Path(md_path).read_text(encoding="utf-8")
@@ -10642,6 +11002,7 @@ def _playlist_worker(job_id: str):
                 detail = machine_error_detail(e)
                 failure_phase = _failure_phase(e, current_phase)
                 last_failure_phase = failure_phase
+                saved = getattr(e, "capture_result", None)
                 log.error("playlist job %s video %d failed: %s", job_id, idx, msg)
                 # Keep diagnostics beside this run's partial capture. An
                 # ownership refusal must never write into the refused folder.
@@ -10651,20 +11012,23 @@ def _playlist_worker(job_id: str):
                         current.get("title") or v.get("id") or f"video-{idx}",
                         used_slugs,
                     )
-                _write_failed_marker(
-                    target,
-                    url=v.get("url"),
-                    index=idx,
-                    reason=msg,
-                )
+                if not saved:
+                    _write_failed_marker(
+                        target,
+                        url=v.get("url"),
+                        index=idx,
+                        reason=msg,
+                    )
                 per_video.append({
                     "index": idx,
                     "title": current.get("title") or "(untitled)",
                     "url": v.get("url"),
                     "folder": str(target),
-                    "md_path": None,
-                    "json_path": None,
-                    "failed_marker_path": str(target / "FAILED.txt"),
+                    "md_path": str(_resolve_corpus_path(target)) if saved else None,
+                    "json_path": str(target / f"{target.name}.json") if saved else None,
+                    "failed_marker_path": None if saved else str(target / "FAILED.txt"),
+                    "status": "saved_with_errors" if saved else "failed",
+                    "publication_retry_id": saved.get("publication_retry_id") if saved else None,
                     "ok": False,
                     "error": msg,
                     "error_detail": detail,
@@ -10701,7 +11065,8 @@ def _playlist_worker(job_id: str):
                 _persist_jobs_locked(job)
 
         _raise_if_cancelled(cancel_event)
-        if videos_done == 0:
+        save_failures = [item for item in per_video if item.get("status") == "saved_with_errors"]
+        if videos_done == 0 and not save_failures:
             _update_job(
                 job_id,
                 state="failed",
@@ -10726,15 +11091,21 @@ def _playlist_worker(job_id: str):
             "combined_md_text": clipboard_md,
             "per_video": per_video,
         }
+        publication_warnings = [
+            f"Video {item['index']}: {item['error']}" for item in save_failures
+        ]
         _update_job(
             job_id,
-            state="completed",
+            # This playlist records the original attempt. A publication
+            # retry has its own Activity outcome and never reruns the batch.
+            state="completed" if videos_done > 0 else "failed",
             current_video=None,
-            current_video_phase=None,
+            current_video_phase="save" if videos_done == 0 else None,
             completed_at=_now_iso(),
-            error=None,
+            error="Some captures could not be published." if videos_done == 0 else None,
             result=result,
-            message="Playlist complete.",
+            warnings=list(job.get("warnings") or []) + publication_warnings,
+            message="Playlist saved with publication errors." if save_failures else "Playlist complete.",
         )
     except PlaylistJobCancelled:
         log.info("playlist job %s cancelled", job_id)
@@ -11041,8 +11412,24 @@ def _retry_pending_one() -> bool:
                 result = _run_extraction(url, interval, folder,
                                          metadata=metadata, topic=topic,
                                          long_video_mode=long_video_mode,
-                                         phase_callback=phase_cb)
+                                         phase_callback=phase_cb, pending_id=pending_id)
         except BaseException as e:
+            if getattr(e, "capture_result", None):
+                # End the download queue's responsibility explicitly. The
+                # receipt carries pending_id and owns one local save retry;
+                # successful publication will complete this row too.
+                msg = friendly_error(e)
+                try:
+                    idx.mark_pending_failed(pending_id, _sanitize_error(msg),
+                                            _now_iso(), force_final=True)
+                except Exception:
+                    log.exception("retry worker: publication handoff failed")
+                _record_single_extract_job(url, started_at, result=e.capture_result,
+                                           long_video_mode=long_video_mode)
+                _pending_long_video_mode(pending_id, remove=True)
+                log.warning("retry worker: pending #%d handed off after save failure: %s",
+                            pending_id, _sanitize_error(msg))
+                return True
             if _is_youtube_rate_limit(e):
                 detail = _youtube_rate_limit_detail(e)
                 attempts = attempts_before + 1
@@ -11139,7 +11526,17 @@ def _start_retry_pending_thread() -> None:
     per pass keeps the lock window short and gives breathing room between
     attempts so we don't ourselves drive YouTube into a deeper rate-limit."""
     def _runner():
+        try:
+            # Settled publication receipts must not keep transcripts or
+            # metadata, even when compaction was interrupted last session.
+            index.PublicationRetryQueue(DATA_ROOT / "publication-retries").compact_settled()
+        except Exception:
+            log.exception("publication retry compaction failed")
         while True:
+            try:
+                _retry_publication_one()
+            except Exception:
+                log.exception("publication retry worker pass crashed")
             try:
                 _retry_pending_one()
             except Exception:
@@ -17583,6 +17980,7 @@ class Handler(BaseHTTPRequestHandler):
                     long_video_mode=long_video_mode,
                     title=title,
                     folder=folder,
+                    job_id=(getattr(e, "capture_result", None) or {}).get("publication_job_id"),
                 )
                 return self._send_json(200, {
                     "ok": False,
@@ -17700,12 +18098,17 @@ class Handler(BaseHTTPRequestHandler):
                 msg = friendly_error(e)
                 detail = machine_error_detail(e)
                 log.error("POST /session/add -> error: %s", msg)
-                return self._send_json(200, {
-                    "ok": False,
-                    "error": msg,
-                    "error_detail": detail,
-                    "session_id": session_id,
-                })
+                result = getattr(e, "capture_result", None)
+                if result is None:
+                    return self._send_json(200, {
+                        "ok": False,
+                        "error": msg,
+                        "error_detail": detail,
+                        "session_id": session_id,
+                    })
+                # Retain membership now, even if the session closes before
+                # publication retries. Its corpus already exists on disk.
+                _record_single_extract_job(url, _now_iso(), result=result)
 
         with _session_lock:
             session = _read_session(session_id) or session
@@ -17719,8 +18122,12 @@ class Handler(BaseHTTPRequestHandler):
             })
             _write_session(session_id, session)
 
-        log.info("POST /session/add -> ok (%d shots, total videos=%d)",
-                 result["screenshot_count"], len(session["videos"]))
+        if result.get("status") == "saved_with_errors":
+            # Membership is committed. Callers use ok=False to offer a new
+            # download, which would append the same capture a second time.
+            result = dict(result, ok=True, reason=result["error"])
+        log.info("POST /session/add -> %s (%d shots, total videos=%d)",
+                 result.get("status") or "ok", result["screenshot_count"], len(session["videos"]))
         result.update({"session_id": session_id, "video_count": len(session["videos"])})
         self._send_json(200, result)
 

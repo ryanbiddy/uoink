@@ -25,8 +25,11 @@ applies any pending ``NNNN_*.sql`` file in numeric order and is idempotent.
 
 from __future__ import annotations
 
+import errno
+import hashlib
 import json
 import logging
+import os
 import re
 import sqlite3
 import tempfile
@@ -100,6 +103,269 @@ _TERMINAL_JOB_STATES = ("completed", "failed", "cancelled")
 
 def _now_iso() -> str:
     return time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime())
+
+
+class PublicationRetryQueue:
+    """File-backed publication receipts, independent of a failing SQLite DB.
+
+    Attempts and terminal outcomes are written once; only a complete,
+    parseable outcome settles a receipt, so a partial one is retried and
+    replaced. Pending work survives restart; an interrupted attempt is
+    reported without running twice. A
+    pending request holds the capture's sidecar (transcript included) and
+    yt-dlp metadata only so its one retry can run. Settling reduces it to a
+    tombstone of IDs, status and timestamps, so no user content outlives the
+    retry or a later library deletion, and the same request can never run again.
+    """
+
+    def __init__(self, root: Path):
+        self.root = Path(root)
+
+    @staticmethod
+    def _valid_id(receipt_id: str) -> None:
+        if not re.fullmatch(r"[a-f0-9]{64}", receipt_id):
+            raise ValueError("invalid publication receipt ID")
+
+    @staticmethod
+    def _temporary(path: Path):
+        # Temporary copies are named "<destination>.<random>.tmp", so the
+        # receipt that owns one can still remove it after a failed unlink.
+        return tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", dir=path.parent,
+                                           prefix=f"{path.name}.", suffix=".tmp",
+                                           delete=False)
+
+    @staticmethod
+    def _replace(path: Path, record: dict) -> None:
+        # Atomic replacement: a settled receipt's tombstone, or a complete
+        # outcome over a partial one that settled nothing.
+        temporary = None
+        try:
+            with PublicationRetryQueue._temporary(path) as stream:
+                temporary = Path(stream.name)
+                json.dump(record, stream, ensure_ascii=False, sort_keys=True)
+                stream.flush()
+                os.fsync(stream.fileno())
+            os.replace(temporary, path)
+            temporary = None
+        finally:
+            if temporary is not None:
+                try:
+                    temporary.unlink(missing_ok=True)
+                except OSError as exc:
+                    log.warning("could not remove publication temp file %s: %s", temporary, exc)
+
+    @staticmethod
+    def _create(path: Path, record: dict, *, direct_fallback: bool = True) -> None:
+        # Prefer publishing a complete, flushed file. Both paths create
+        # exclusively, even if another writer claims the destination first.
+        path.parent.mkdir(parents=True, exist_ok=True)
+        temporary = None
+        try:
+            with PublicationRetryQueue._temporary(path) as stream:
+                temporary = Path(stream.name)
+                json.dump(record, stream, ensure_ascii=False, sort_keys=True)
+                stream.flush()
+                os.fsync(stream.fileno())
+            try:
+                path.hardlink_to(temporary)
+            except FileExistsError:
+                raise
+            except OSError:
+                # exFAT/FAT32 and some network shares cannot hard-link.
+                if not direct_fallback:
+                    # Requests and outcomes are never written in place: an
+                    # interrupted write must not leave a partial file. Move
+                    # the complete copy atomically instead. A concurrent
+                    # writer of one request writes identical bytes, and
+                    # outcomes are written under the capture's ownership lock.
+                    if path.exists():
+                        raise FileExistsError(errno.EEXIST, "publication file exists", str(path))
+                    os.replace(temporary, path)
+                    temporary = None
+                    return
+                # Keep any partial file if writing fails: never replace or
+                # delete a destination another writer may now be using.
+                with path.open("x", encoding="utf-8") as stream:
+                    json.dump(record, stream, ensure_ascii=False, sort_keys=True)
+                    stream.flush()
+                    os.fsync(stream.fileno())
+        finally:
+            if temporary is not None:
+                try:
+                    temporary.unlink(missing_ok=True)
+                except OSError as exc:
+                    log.warning("could not remove publication temp file %s: %s", temporary, exc)
+
+    def enqueue(self, record: dict) -> str:
+        encoded = json.dumps(record, ensure_ascii=False, sort_keys=True).encode("utf-8")
+        receipt_id = hashlib.sha256(encoded).hexdigest()
+        path = self.root / f"{receipt_id}.json"
+        try:
+            self._create(path, record, direct_fallback=False)
+        except FileExistsError:
+            existing = json.loads(path.read_text(encoding="utf-8"))
+            # The ID is the request's digest: its tombstone means this same
+            # request already settled, and it must not be stored or run again.
+            settled = (isinstance(existing, dict) and existing.get("tombstone") is True
+                       and existing.get("receipt_id") == receipt_id)
+            if existing != record and not settled:
+                raise ValueError("publication retry receipt changed")
+        return receipt_id
+
+    def _outcome(self, receipt_id: str) -> tuple[str, dict | None]:
+        """``(state, outcome)``: ``absent``, ``complete``, ``incomplete``
+        (a partial or invalid file, which settles nothing) or ``unreadable``
+        (it exists but cannot be read now, e.g. a sharing violation)."""
+        try:
+            outcome = json.loads((self.root / f"{receipt_id}.result.json").read_text(encoding="utf-8"))
+        except FileNotFoundError:
+            return "absent", None
+        except ValueError:
+            return "incomplete", None
+        except OSError as exc:
+            log.warning("could not read publication outcome %s: %s", receipt_id, exc)
+            return "unreadable", None
+        if not isinstance(outcome, dict) or outcome.get("status") not in ("succeeded", "failed"):
+            return "incomplete", None
+        return "complete", outcome
+
+    def is_settled(self, receipt_id: str) -> bool:
+        """Only a complete outcome settles a receipt. An unreadable one is
+        left alone this pass rather than run or overwritten."""
+        return self._outcome(receipt_id)[0] in ("complete", "unreadable")
+
+    def next_pending(self) -> tuple[str, dict] | None:
+        for path in sorted(self.root.glob("*.json")):
+            if path.name.endswith((".result.json", ".attempt.json")):
+                continue
+            if self.is_settled(path.stem):
+                continue
+            try:
+                record = json.loads(path.read_text(encoding="utf-8"))
+                if not isinstance(record, dict):
+                    raise ValueError("invalid publication receipt")
+            except (OSError, ValueError) as exc:
+                log.warning("could not read publication retry %s: %s", path, exc)
+                continue
+            if record.get("tombstone"):
+                continue  # Settled by another worker after the result check.
+            return path.stem, record
+        return None
+
+    def claim(self, receipt_id: str) -> bool:
+        self._valid_id(receipt_id)
+        try:
+            self._create(self.root / f"{receipt_id}.attempt.json", {"started_at": _now_iso()})
+        except FileExistsError:
+            return False
+        return True
+
+    def settle(self, receipt_id: str, *, error: str | None = None,
+               code: str | None = None) -> None:
+        self._valid_id(receipt_id)
+        path = self.root / f"{receipt_id}.result.json"
+        outcome = {"status": "failed" if error else "succeeded", "error": error,
+                   "code": (code or "publication_failed") if error else None,
+                   "finished_at": _now_iso()}
+        try:
+            self._create(path, outcome, direct_fallback=False)
+        except FileExistsError:
+            state, _ = self._outcome(receipt_id)
+            if state == "unreadable":
+                raise OSError(errno.EBUSY, "publication outcome cannot be read", str(path))
+            if state != "complete":
+                # A partial outcome (an interrupted write) settles nothing.
+                self._replace(path, outcome)
+            # Otherwise another worker already settled this receipt. Keep it.
+        try:
+            self._tombstone(receipt_id)
+        except (OSError, ValueError) as exc:
+            # The outcome is durable and the request can no longer run.
+            # compact_settled() removes the retained content on next start.
+            log.warning("could not compact settled publication retry %s: %s", receipt_id, exc)
+
+    def _tombstone(self, receipt_id: str) -> bool:
+        """Replace a settled request with IDs, status and timestamps only.
+        Without a complete outcome the request is not settled: it is left
+        for its retry, which settles and then compacts it."""
+        self._valid_id(receipt_id)
+        state, outcome = self._outcome(receipt_id)
+        if state != "complete":
+            return False
+        path = self.root / f"{receipt_id}.json"
+        attempt = self.root / f"{receipt_id}.attempt.json"
+        changed = False
+        try:
+            record = json.loads(path.read_text(encoding="utf-8"))
+        except FileNotFoundError:
+            record = None
+        except ValueError:
+            record = {}  # Unreadable content still must not be retained.
+        if record is not None and not (isinstance(record, dict) and record.get("tombstone")):
+            if not isinstance(record, dict):
+                record = {}
+            try:
+                started_at = json.loads(attempt.read_text(encoding="utf-8")).get("started_at")
+            except (OSError, ValueError, AttributeError):
+                started_at = None
+            sidecar = record.get("sidecar") if isinstance(record.get("sidecar"), dict) else {}
+            self._replace(path, {
+                "tombstone": True, "receipt_id": receipt_id,
+                "video_id": sidecar.get("video_id"), "metadata_id": record.get("metadata_id"),
+                "pending_id": record.get("pending_id"), "status": outcome.get("status"),
+                "error_code": outcome.get("code") or (
+                    "publication_failed" if outcome.get("status") == "failed" else None),
+                "created_at": record.get("created_at"), "started_at": started_at,
+                "settled_at": outcome.get("finished_at"),
+            })
+            changed = True
+        # The claim marker and temporary copies (a failed unlink can leave the
+        # complete request behind) only served the unsettled request. Each is
+        # retried independently; compact_settled() repeats this at next start.
+        try:
+            attempt.unlink(missing_ok=True)
+        except OSError as exc:
+            log.warning("could not remove publication attempt marker %s: %s", attempt, exc)
+        removed = self._remove_temporaries(f"{receipt_id}.*.tmp")
+        return changed or removed > 0
+
+    def _remove_temporaries(self, pattern: str, *, older_than: float | None = None) -> int:
+        removed = 0
+        for temporary in sorted(self.root.glob(pattern)):
+            try:
+                if older_than is not None and temporary.stat().st_mtime >= older_than:
+                    continue
+                temporary.unlink()
+                removed += 1
+            except FileNotFoundError:
+                continue
+            except OSError as exc:
+                log.warning("could not remove publication temp file %s: %s", temporary, exc)
+        return removed
+
+    def compact_settled(self, *, abandoned_after: float = 3600.0) -> int:
+        """Tombstone settled requests that still hold content and remove their
+        temporary copies, e.g. after a crash or a sharing violation. A copy
+        whose request was never stored (its enqueue failed) has nothing to
+        settle it; it is removed once no writer can still own it. Copies of a
+        pending request stay until it settles: the request holds that data."""
+        compacted = 0
+        for result in sorted(self.root.glob("*.result.json")):
+            receipt_id = result.name[:-len(".result.json")]
+            if not re.fullmatch(r"[a-f0-9]{64}", receipt_id):
+                continue
+            try:
+                compacted += self._tombstone(receipt_id)
+            except (OSError, ValueError) as exc:
+                log.warning("could not compact settled publication retry %s: %s", receipt_id, exc)
+        owners = {temporary.name.split(".", 1)[0] for temporary in self.root.glob("*.tmp")}
+        for receipt_id in sorted(owners):
+            if (re.fullmatch(r"[a-f0-9]{64}", receipt_id)
+                    and not (self.root / f"{receipt_id}.json").exists()
+                    and not (self.root / f"{receipt_id}.result.json").exists()):
+                compacted += self._remove_temporaries(
+                    f"{receipt_id}.*.tmp", older_than=time.time() - abandoned_after)
+        return compacted
 
 
 # --------------------------------------------------------------------------
@@ -1760,7 +2026,7 @@ class Index:
         with self._lock:
             self._conn.execute(
                 "UPDATE pending_yoinks "
-                "SET status='succeeded', succeeded_job_id=? "
+                "SET status='succeeded', succeeded_job_id=?, last_error=NULL "
                 "WHERE pending_id=?",
                 (succeeded_job_id, pending_id),
             )
