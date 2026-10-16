@@ -258,7 +258,7 @@ async function youtubeEnv({ capture, ping = { ok: true }, platform, activeSessio
 async function contentYoutube() {
   await scenario("E3 content.js {ok:false}", async () => {
     const { env, btn } = await youtubeEnv({ capture: () => ({ data: YT_FAILURE }) });
-    btn.click();
+    btn.userClick();
     await settle();
     const note = lastOf(env.notifyMessages());
     check(note.title === "Uoink failed", "E3: content.js notifies the failure", note);
@@ -275,7 +275,7 @@ async function contentYoutube() {
       capture: () => ({ data: YT_FAILURE }),
       activeSession: { id: "sess1", name: "Research" },
     });
-    btn.click();
+    btn.userClick();
     await settle();
     check(env.sent.some((m) => m.type === "stcSessionAdd"), "session add went through the SW");
     checkYtFailure(lastOf(env.notifyMessages()).message, "E3: content.js session-add notification");
@@ -285,7 +285,7 @@ async function contentYoutube() {
     const { env, btn } = await youtubeEnv({
       capture: () => ({ networkError: "signal is aborted without reason", failure: { kind: "timeout" } }),
     });
-    btn.click();
+    btn.userClick();
     await settle();
     const note = lastOf(env.notifyMessages());
     check(note.title !== "Uoink Helper offline" && /Activity/.test(note.message || ""),
@@ -300,7 +300,7 @@ async function contentYoutube() {
     const { env, btn } = await youtubeEnv({
       capture: () => ({ networkError: "signal is aborted without reason" }),
     });
-    btn.click();
+    btn.userClick();
     await settle();
     const note = lastOf(env.notifyMessages());
     check(/Activity/.test(note.message || "") && env.setupTabsOpened().length === 0,
@@ -311,7 +311,7 @@ async function contentYoutube() {
     const { env, btn } = await youtubeEnv({
       capture: () => ({ __reject: "The message port closed before a response was received." }),
     });
-    btn.click();
+    btn.userClick();
     await settle();
     const note = lastOf(env.notifyMessages());
     check(note.title === "Uoink lost track" && /Library/.test(note.message || ""),
@@ -325,7 +325,7 @@ async function contentYoutube() {
       platform: "MacIntel",
       capture: () => ({ networkError: "Failed to fetch", failure: { kind: "offline" } }),
     });
-    btn.click();
+    btn.userClick();
     await settle();
     const note = lastOf(env.notifyMessages());
     check(note.title === "Uoink Helper offline" && /Applications/.test(note.message || "")
@@ -339,7 +339,7 @@ async function contentYoutube() {
     const { env, btn } = await youtubeEnv({
       ping: null, platform: "Linux x86_64", capture: () => ({ data: { ok: true } }),
     });
-    btn.click();
+    btn.userClick();
     await settle();
     const note = lastOf(env.notifyMessages());
     check(note.title === "Uoink Helper offline" && /Terminal/.test(note.message || "")
@@ -385,7 +385,7 @@ async function contentReddit() {
       failure_phase: "fetch",
     };
     const { env, btn } = await redditEnv({ capture: () => ({ data: failure }) });
-    btn.click();
+    btn.userClick();
     await settle();
     const note = lastOf(env.notifyMessages());
     check(note.title === "Uoink failed" && /Reddit wouldn't hand this thread over/.test(note.message || "")
@@ -402,7 +402,7 @@ async function contentReddit() {
     const { env, btn } = await redditEnv({
       capture: () => ({ __reject: "The message port closed before a response was received." }),
     });
-    btn.click();
+    btn.userClick();
     await settle();
     const note = lastOf(env.notifyMessages());
     check(note.title === "Uoink lost track" && /Library/.test(note.message || ""),
@@ -418,7 +418,7 @@ async function contentReddit() {
     const { env, btn } = await redditEnv({
       capture: () => ({ data: { ok: false, error: "Queue full, wait a few minutes" } }),
     });
-    btn.click();
+    btn.userClick();
     await settle();
     check(lastOf(env.notifyMessages()).title === "Uoink queue full",
       "E6: a full queue is notified, not just logged", lastOf(env.notifyMessages()));
@@ -429,7 +429,7 @@ async function contentReddit() {
   await scenario("E6 reddit failure after navigating away", async () => {
     const answer = deferred();
     const { env, btn } = await redditEnv({ capture: () => answer.promise });
-    btn.click();
+    btn.userClick();
     await settle();
     // New Reddit is a SPA: the user opens another thread while the helper
     // is still working on this one.
@@ -487,7 +487,7 @@ async function contentXArticle() {
         failureMessage: "Article body was empty.",
       }),
     });
-    btn.click();
+    btn.userClick();
     await settle();
     const note = lastOf(env.notifyMessages());
     check(note.title === "Uoink failed" && note.message === "Article body was empty.",
@@ -503,7 +503,7 @@ async function contentXArticle() {
       extract: () => ({ data: { ok: true } }),
       parsed: { ok: false, code: "no_body", error: "Couldn't find the article body on this page." },
     });
-    btn.click();
+    btn.userClick();
     await settle();
     const note = lastOf(env.notifyMessages());
     check(/Couldn't find the article body/.test(note.message || "")
@@ -518,7 +518,7 @@ async function contentXArticle() {
     const { env, btn } = await xArticleEnv({
       extract: () => ({ __reject: "The message port closed before a response was received." }),
     });
-    btn.click();
+    btn.userClick();
     await settle();
     const note = lastOf(env.notifyMessages());
     check(note.title === "Uoink lost track" && /Library/.test(note.message || "")
@@ -538,7 +538,7 @@ async function contentXArticle() {
     const { env, btn } = await xArticleEnv({
       extract: () => ({ networkError: "Failed to fetch", failure: offline }),
     });
-    btn.click();
+    btn.userClick();
     await settle();
     check(lastOf(env.notifyMessages()).title === "Uoink Helper offline"
       && env.setupTabsOpened().length === 1,
@@ -548,7 +548,7 @@ async function contentXArticle() {
   await scenario("E6 x-article failure after navigating away", async () => {
     const answer = deferred();
     const { env, btn } = await xArticleEnv({ extract: () => answer.promise });
-    btn.click();
+    btn.userClick();
     await settle();
     // X is a SPA: the user opens article B while the helper works on A.
     env.ctx.location.href = OTHER_ARTICLE_URL;
@@ -1213,7 +1213,7 @@ async function retry() {
     await settle();
     check(!env.sent.some((m) => m.type === "stcExtract"),
       "E6: video A's Retry never captures video B", env.sent);
-    btn.click(); // the user captures video B by hand
+    btn.userClick(); // the user captures video B by hand
     await settle();
     const sent = env.sent.filter((m) => m.type === "stcExtract");
     check(sent.length === 1 && /zzzzzzzzzzz/.test(sent[0].url || ""),

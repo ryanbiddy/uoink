@@ -147,7 +147,7 @@ async function youtube() {
       "E2: the button shows the live helper status", btn && [...btn.classList.names]);
     check(timersOf(env, INJECT_RETRY_MS) === 0,
       "E2: the injection retry loop stops once the button is in", [...env.intervalDelays.values()]);
-    if (btn) btn.click();
+    if (btn) btn.userClick();
     await settle();
     const sent = env.sent.filter((m) => m.type === "stcExtract");
     check(sent.length === 1 && sent[0].url === `https://www.youtube.com/watch?v=${VIDEO_ID}`,
@@ -284,7 +284,7 @@ async function xArticle() {
       "E2: arriving on an article starts /health polling once", env.sent);
     check(!!btn && !btn.disabled && btn.classList.contains("uoink-status-online"),
       "E2: the article button shows the live helper status", btn && [...btn.classList.names]);
-    if (btn) btn.click();
+    if (btn) btn.userClick();
     await settle();
     const sent = env.sent.filter((m) => m.type === "stcExtractXArticle");
     check(sent.length === 1 && sent[0].article && sent[0].article.url === ARTICLE_URL,

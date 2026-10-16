@@ -86,9 +86,17 @@ class FakeElement {
   }
   addEventListener(type, fn) { (this._listeners[type] ||= []).push(fn); }
   removeEventListener() {}
+  dispatchEvent(ev) {
+    for (const fn of this._listeners[ev.type] || []) fn(ev);
+    return true;
+  }
   click() {
-    const ev = { type: "click", preventDefault() {}, stopPropagation() {} };
-    for (const fn of this._listeners.click || []) fn(ev);
+    this.dispatchEvent({ type: "click", isTrusted: false, preventDefault() {}, stopPropagation() {} });
+  }
+  // Test-only stand-in for browser-dispatched pointer/keyboard activation.
+  // Keep click() synthetic, matching HTMLElement.click() in a real page.
+  userClick() {
+    this.dispatchEvent({ type: "click", isTrusted: true, preventDefault() {}, stopPropagation() {} });
   }
   querySelector() { return null; }
   querySelectorAll() { return []; }

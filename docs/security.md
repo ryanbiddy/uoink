@@ -145,6 +145,19 @@ service worker silently drops runtime messages unless `sender.id` matches
 `chrome.runtime.id`; messages from Uoink's own popup and content scripts continue
 to work.
 
+Page scripts cannot drive the extension's in-page controls. The Uoink buttons
+on YouTube, Reddit and X articles act only on real user clicks
+(`event.isTrusted`), so `HTMLElement.click()`, `dispatchEvent` and other
+scripted clicks from the page, other extensions or userscripts do not start a
+capture. YouTube in-page copy goes only through the extension's offscreen
+document: the content script makes no page `navigator.clipboard` call and adds
+no DOM textarea, so the page cannot read the corpus text from the DOM. If the
+copy fails the button says "Copy blocked" and a notification offers Try again.
+`openTab` requests from content scripts open only Uoink's own extension pages,
+`https://claude.ai/new`, `https://chatgpt.com/` and the local dashboard
+(`http://127.0.0.1:5179/dashboard`); anything else is refused with
+`{ok: false}`.
+
 ## Token-gated endpoints
 
 All other helper endpoints require `X-Uoink-Token` (legacy `X-Yoink-Token` accepted):

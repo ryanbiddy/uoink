@@ -361,6 +361,23 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
 });
 
 // ---- Generic message handling --------------------------------------------
+function allowedTabUrl(value) {
+  if (typeof value !== "string" || !value || /[\s\\]/.test(value)) return null;
+  try {
+    const url = new URL(value);
+    if (url.username || url.password) return null;
+    const extension = new URL(chrome.runtime.getURL(""));
+    const ownPage = url.protocol === extension.protocol && url.host === extension.host;
+    const allowedWebPage =
+      (url.origin === "https://claude.ai" && url.pathname === "/new") ||
+      (url.origin === "https://chatgpt.com" && url.pathname === "/") ||
+      (url.origin === "http://127.0.0.1:5179" && url.pathname === "/dashboard");
+    return ownPage || allowedWebPage ? url.href : null;
+  } catch {
+    return null;
+  }
+}
+
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (!sender || sender.id !== chrome.runtime.id) return;
   if (!msg || typeof msg !== "object") return;
@@ -379,8 +396,13 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     return true;
   }
 
-  if (msg.type === "openTab" && msg.url) {
-    chrome.tabs.create({ url: msg.url, active: true }, (tab) => {
+  if (msg.type === "openTab") {
+    const url = allowedTabUrl(msg.url);
+    if (!url) {
+      sendResponse({ ok: false, error: "Tab destination is not allowed." });
+      return;
+    }
+    chrome.tabs.create({ url, active: true }, (tab) => {
       sendResponse({ ok: true, tabId: tab && tab.id });
     });
     return true;

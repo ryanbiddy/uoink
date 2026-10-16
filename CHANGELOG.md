@@ -20,6 +20,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   `/token` is requested without Origin, preserving the dashboard/WebView path.
   Requests with neither Origin nor fetch metadata now receive HTTP 403.
 - Drop extension runtime messages whose sender ID differs from Uoink's own ID.
+- Public `/diagnose` responses no longer include local paths, raw tool output,
+  credential-store errors or saved-key flags (`/health` and `/ping` carry none
+  of these); the console doctor keeps the full detail. The dashboard and splash cannot be framed by other
+  pages (`frame-ancestors 'none'`, `X-Frame-Options: DENY`).
+- In-page Uoink buttons on YouTube, Reddit and X articles ignore scripted clicks,
+  so other extensions, userscripts or page scripts cannot start a capture.
+  YouTube in-page copy goes only through the extension's offscreen document
+  (no page clipboard call, no DOM textarea); a failed copy shows "Copy blocked"
+  with a Try again notification. Content-script `openTab` requests open only
+  Uoink pages, claude.ai, chatgpt.com and the local dashboard.
 
 ### Changed
 
@@ -28,6 +38,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   storage starts fresh under the new ID: reapply extension preferences as needed;
   the helper token is fetched again. The helper's library and captures stay in
   place. See [the security model](docs/security.md) for additional trusted IDs.
+- The setup page's Helper status panel and the dashboard's Settings > Local app
+  status line no longer show Anthropic key checks; key status stays in the
+  dashboard's own key section. The tray no longer reports Degraded only for an
+  invalid key. The setup page's Installation folder row shows the standard
+  `%LOCALAPPDATA%\Uoink` location instead of the real path, and its Open folder
+  button no longer opens the folder.
 
 ## [3.8.1] - Unreleased
 
