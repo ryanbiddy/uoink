@@ -3690,13 +3690,25 @@ def _extract_generic_transcript(metadata: dict) -> list[dict]:
 
 
 def _fetch_metadata(url: str, *,
-                    cancel_event: threading.Event | None = None) -> dict:
+                    cancel_event: threading.Event | None = None,
+                    resolve_url=None) -> dict:
     """Single yt-dlp call that returns the full metadata blob without
     downloading the video. Used to derive the folder slug, fill the corpus
-    header, and seed the thumbnail URL.
+    header, and seed the thumbnail URL. resolve_url is a test injection.
     """
+    # Match the pacing boundary, including YouTube Music. A preflight GET
+    # here would run outside the shared YouTube slot and alter the input URL.
+    # X/Twitter, TikTok and Instagram skip it only for the strict validator's
+    # own output. Any other URL on those hosts, such as a relaxed /live/status
+    # probe that keeps its full path and query, is admitted like a generic URL.
+    strict_url, strict_platform = _normalize_video_url(url)
+    strict_platform_url = strict_url == url and strict_platform in (
+        PLATFORM_TWITTER, PLATFORM_TIKTOK, PLATFORM_INSTAGRAM)
+    if not _is_youtube_ytdlp_call([*YTDLP_CMD, url]) and not strict_platform_url:
+        url = (resolve_url or source_subscriptions.resolve_public_http_url)(
+            url, user_agent=page_extractor._USER_AGENT)
     cp = _run_subprocess(
-        [*YTDLP_CMD, "--dump-single-json", "--no-download", url],
+        [*YTDLP_CMD, "--dump-single-json", "--no-download", "--", url],
         cancel_event=cancel_event,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
@@ -3709,10 +3721,12 @@ def _fetch_metadata(url: str, *,
 
 
 def _download_thumbnail(metadata: dict, output_folder: Path, *,
-                        cancel_event: threading.Event | None = None) -> Path | None:
+                        cancel_event: threading.Event | None = None,
+                        http_open=None) -> Path | None:
     """Download highest-resolution thumbnail to <folder>/thumbnail.jpg.
     Always re-encodes through ffmpeg so the output is jpg even if YouTube
     served webp/png. Returns the jpg path on success, None on failure.
+    http_open is an explicit test injection for local fixture servers.
     """
     thumbs = metadata.get("thumbnails") or []
     candidates = [t for t in thumbs if t.get("url")]
@@ -3729,7 +3743,8 @@ def _download_thumbnail(metadata: dict, output_folder: Path, *,
 
     raw_path = output_folder / "thumbnail.raw"
     try:
-        with urllib.request.urlopen(url, timeout=30) as resp, open(raw_path, "wb") as f:
+        with (http_open or source_subscriptions.public_http_open)(
+                url, timeout=30) as resp, open(raw_path, "wb") as f:
             f.write(resp.read())
     except Exception as e:
         log.warning("thumbnail download failed: %s", e)
@@ -6251,8 +6266,9 @@ def _normalize_any_url(raw: str) -> tuple[str | None, str | None]:
     Known YouTube and X/Twitter URLs use their platform canonicalizers.
     Everything else reuses page_extractor.normalize_page_url, which accepts
     http(s), rejects embedded credentials and malformed ports, preserves
-    explicit ports, and rejects bracketed IPv6. IP literals are currently
-    permitted. Returns None on failure. Platform is best-effort from the host.
+    explicit ports, and rejects bracketed IPv6. IPv4 literals pass this
+    shape-only step but fail generic yt-dlp URL admission. Returns None on
+    failure. Platform is best-effort from the host.
 
     This deliberately does NOT call yt-dlp -- that's the extraction step.
     The dispatcher's job is to keep attacker-shaped URLs from reaching
@@ -16967,6 +16983,10 @@ class Handler(BaseHTTPRequestHandler):
         try:
             with _ManualOwnership().process_slot():
                 metadata = _fetch_metadata(canonical)
+        except (source_subscriptions.ServiceError, urllib.error.URLError) as e:
+            return self._send_json(400, {
+                "ok": False, "error": f"URL refused or unreachable: {e}",
+                "url": canonical, "platform": platform})
         except subprocess.CalledProcessError as e:
             detail = friendly_error(e) if callable(globals().get(
                 "friendly_error")) else str(e)

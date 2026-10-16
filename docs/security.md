@@ -230,13 +230,69 @@ Protocol validation failures return `4xx` JSON errors. Handled application failu
   platform-specific validators.
 - Generic video, web-page, and podcast capture accepts HTTP(S) only. Embedded
   credentials and malformed ports are rejected, explicit ports are preserved,
-  and bracketed IPv6 is rejected for generic video and page capture. Podcast
-  feeds preserve valid bracketed IPv6.
-- IP literals are currently permitted. Hostnames are not restricted to
-  public-network resolutions, and redirect targets are not revalidated by
-  Uoink before the active fetcher follows them. Page, feed, and generic-video
-  capture are token-gated and user-directed, but a public-network-only fetch
-  policy remains an explicit hardening decision rather than a shipped claim.
+  and bracketed IPv6 is rejected by the generic-video and page validators.
+  Podcast feed normalization preserves bracketed IPv6, but fetching it is
+  refused by the network policy below.
+- Podcast feed polls, the stdlib page fetcher (including Writing Studio's
+  fallback), and thumbnail downloads share the standing-source fetcher's
+  public-network checks. IP literals are refused, including public IPs and
+  alternate numeric IPv4 spellings. Localhost names are also refused. Every
+  resolved address must be public: private, loopback, link-local, shared-address,
+  reserved, unspecified and multicast targets are refused. An IPv6 answer
+  that carries an IPv4 address (IPv4-mapped `::ffff:0:0/96`, NAT64
+  `64:ff9b::/96` or 6to4 `2002::/16`) must also pass the IPv4 check, and the
+  NAT64 local-use prefix `64:ff9b:1::/48` is refused. A hostname that cannot
+  be IDNA-encoded, such as one with an empty or over-long label, is refused
+  before any lookup. Name and IP-literal checks use the IDNA form, so
+  fullwidth spellings of `localhost` or an IP address count as those.
+  Percent-encoded hosts are refused, because the HTTP client and yt-dlp
+  decode them before connecting. DNS is checked for the exact host name the
+  connection is made for, case and trailing dot included, and a URL whose
+  connection host differs from its parsed host is refused. DNS is checked again for
+  each fetch. Redirect targets are revalidated on every hop and
+  must pass the HTTP(S), credentials, port, fragment and host-encoding checks.
+- Podcast enclosure downloads and generic yt-dlp metadata extraction first
+  follow a checked GET redirect chain, close the response without reading
+  the body, and pass its final URL to yt-dlp after `--`. A failed check or
+  unreachable destination prevents the subprocess from starting. This adds
+  a request before extraction, with the podcast fetcher's User-Agent for
+  enclosures and the page fetcher's User-Agent for generic URLs. The header
+  is sent on every redirect hop. A host that rejects that request cannot be
+  captured through these paths. `/extract/any` returns HTTP 400 with the
+  refusal or preflight error, including response timeouts and HTTP protocol
+  errors. Fixed YouTube hosts,
+  including YouTube Music, and the strict X/Twitter, TikTok and Instagram
+  paths retain their existing yt-dlp flow without this extra GET. That
+  exemption covers only the strict validators' canonical URLs. Any other URL
+  on those hosts, such as a `/live/status` probe that falls back to the
+  relaxed validator, takes the checked GET. YouTube
+  metadata requests keep their original URL and shared rate limiter.
+- Crawl4AI page capture checks the initial URL and its DNS answers against
+  the same public-network policy before starting the renderer, including
+  Writing Studio requests that bypass the site allowlist. A refusal stops
+  capture without falling back to another engine. If the renderer fails
+  after admission, the stdlib fallback checks its own requests and redirects.
+- Local and intranet sources that previously worked through these fetchers
+  now fail, including saved feeds polled by the scheduler. Refused thumbnails
+  are omitted; previously downloaded podcast audio remains usable. Localhost
+  fixture servers require explicit transport/resolver injection in tests.
+  The standing-source S20/S21 harnesses can still inject their exact loopback
+  host through `_reject_private_ip` and `_check_resolved_host`; literal-host
+  rejection belongs to the latter check. No setting or environment variable
+  disables these checks in production.
+- Connections made by these fetchers (feed polls, the stdlib page fetcher,
+  thumbnail downloads and the checked GET before yt-dlp) are pinned: each hop
+  dials only the addresses that passed the check for it, in resolver order,
+  and never resolves the name again, so a DNS answer that changes after the
+  check (DNS rebinding) cannot move the connection. The Host header, TLS SNI
+  and certificate hostname verification still use the original host name.
+  These fetches connect directly and do not use system or environment proxy
+  settings, because a proxy would resolve the name again.
+- Requests made inside the Crawl4AI browser renderer and by yt-dlp after
+  admission are not covered: those engines resolve names themselves, so they
+  are not pinned and remain exposed to DNS rebinding, and Uoink does not
+  revalidate their redirects or subresource requests. Those engines are not
+  network-sandboxed by these checks.
 - Playlist IDs must match ASCII `^[A-Za-z0-9_-]{2,}$`; playlist processing is capped at 10 videos.
 - Session IDs must match `^[A-Za-z0-9_-]{1,64}$`.
 - Job IDs must match `^job_[A-Za-z0-9_-]{1,96}$`.

@@ -12,6 +12,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Security
 
+- Apply the standing-source public-network checks to podcast feed polls,
+  stdlib page fetches and thumbnail downloads, and to the redirect chain
+  checked before podcast enclosures and generic URLs reach yt-dlp. Reject
+  IP literals and non-public DNS answers on the initial URL and every
+  redirect hop, including when a saved feed's destination changes. IPv6
+  answers that carry a non-public IPv4 (IPv4-mapped, NAT64 or 6to4) and
+  hostnames that cannot be IDNA-encoded are refused too. Percent-encoded
+  hosts are refused on the initial URL and every redirect, and DNS is checked
+  for the exact host name the connection is made for. Each connection then
+  dials only the addresses that passed that hop's check and never resolves
+  the name again, so DNS rebinding cannot move it; the Host header, SNI and
+  certificate checks keep the host name. Requests made inside yt-dlp and the
+  Crawl4AI renderer resolve names themselves and are not covered.
+- Check the initial page URL and DNS answers before starting Crawl4AI,
+  including Writing Studio captures that bypass the site allowlist. This
+  check does not cover redirects or subresources inside the browser renderer.
 - Pin the extension's Chromium ID to `bkcapfidedhfcjpmjabeopfbcjcbmdmi` with a
   public manifest key. The helper now grants extension token bootstrap and CORS
   only to this ID and IDs explicitly added through `UOINK_EXTENSION_IDS` or
@@ -33,6 +49,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Changed
 
+- Local, intranet and IP-address sources now fail through these fetch paths;
+  blocked thumbnails are omitted. Existing downloaded podcast audio remains
+  usable. Podcast downloads and generic yt-dlp extraction make an additional
+  checked GET before starting, using the podcast or page fetcher's User-Agent
+  on every redirect hop. Hosts that reject it cannot be captured through
+  these paths. These fetches connect directly and no longer use system or
+  environment proxy settings. `/extract/any` reports admission refusals and preflight failures,
+  including response timeouts and HTTP protocol errors, as HTTP 400 errors.
+  Fixed YouTube hosts, including YouTube Music, and strict
+  X/Twitter, TikTok and Instagram capture retain their existing yt-dlp flow;
+  other URLs on those hosts, such as relaxed `/live/status` probes, take the
+  checked GET. YouTube keeps its original URL and shared rate limiter without
+  an extra GET.
+  See [the network policy and its limits](docs/security.md#url-and-identifier-validation).
 - Existing unpacked-extension users must reload the extension once after this
   update. If the old ID differs from `bkcapfidedhfcjpmjabeopfbcjcbmdmi`, extension
   storage starts fresh under the new ID: reapply extension preferences as needed;

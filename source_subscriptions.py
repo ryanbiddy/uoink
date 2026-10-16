@@ -33,6 +33,7 @@ from __future__ import annotations
 import base64
 import copy
 import hashlib
+import http.client
 import ipaddress
 import json
 import logging
@@ -455,13 +456,39 @@ def _new_token() -> str:
 # ===========================================================================
 # URL validation (contract, "Scheduler and adapter boundaries")
 # ===========================================================================
+# NAT64 (RFC 6052) carries its IPv4 destination in the low 32 bits of the
+# well-known prefix. The local-use prefix (RFC 8215) places it wherever the
+# operator chose, so that whole block is refused.
+_NAT64_WELL_KNOWN = ipaddress.IPv6Network("64:ff9b::/96")
+_NAT64_LOCAL_USE = ipaddress.IPv6Network("64:ff9b:1::/48")
+
+
+def _is_nonpublic_address(address) -> bool:
+    return (not address.is_global or address.is_loopback
+            or address.is_link_local or address.is_private
+            or address.is_multicast or address.is_reserved or address.is_unspecified)
+
+
+def _embedded_ipv4(address) -> list:
+    """IPv4 destinations carried inside an IPv6 address: IPv4-mapped, NAT64
+    well-known prefix and 6to4. Each one must pass the IPv4 rule as well,
+    whatever Python's flags say about the IPv6 form."""
+    if address.version != 6:
+        return []
+    embedded = [address.ipv4_mapped, address.sixtofour]
+    if address in _NAT64_WELL_KNOWN:
+        embedded.append(ipaddress.IPv4Address(int(address) & 0xFFFFFFFF))
+    return [ipv4 for ipv4 in embedded if ipv4 is not None]
+
+
 def _reject_private_ip(host: str) -> None:
     try:
         address = ipaddress.ip_address(host.strip("[]"))
     except ValueError:
         return
-    if (address.is_loopback or address.is_link_local or address.is_private
-            or address.is_multicast or address.is_reserved or address.is_unspecified):
+    if (_is_nonpublic_address(address)
+            or (address.version == 6 and address in _NAT64_LOCAL_USE)
+            or any(_is_nonpublic_address(ipv4) for ipv4 in _embedded_ipv4(address))):
         fail("unsupported_source", "Loopback, link-local and private targets are refused")
 
 
@@ -492,6 +519,10 @@ def _parse_http_url(raw: str) -> urllib.parse.ParseResult:
         fail("unsupported_source", "Only http(s) sources are supported")
     if parsed.username is not None or parsed.password is not None:
         fail("unsupported_source", "Credentials in URLs are refused")
+    if "%" in parsed.netloc:
+        # urllib, yt-dlp and browsers percent-decode the authority before
+        # connecting, so a checked %69nternal.example would dial internal.example.
+        fail("unsupported_source", "Percent-encoded URL hosts are refused")
     if parsed.fragment:
         fail("unsupported_source", "URL fragments are refused")
     host = parsed.hostname or ""
@@ -632,31 +663,212 @@ class _BoundedRedirectHandler(urllib.request.HTTPRedirectHandler):
     """Validate every redirect target: http(s) only, no private addresses."""
 
     def redirect_request(self, req, fp, code, msg, headers, newurl):
-        _parse_http_url(newurl)
-        _check_resolved_host(urllib.parse.urlparse(newurl).hostname or "")
-        return super().redirect_request(req, fp, code, msg, headers, newurl)
+        try:
+            newurl, host, addresses = _admit_public_http_url(newurl)
+            new = super().redirect_request(req, fp, code, msg, headers, newurl)
+            if new is not None:
+                # The next hop dials only the addresses checked here.
+                _pin_request(new, host, addresses)
+            return new
+        except Exception:
+            fp.close()
+            raise
 
 
-def _check_resolved_host(host: str) -> None:
-    """Resolve and reject loopback/link-local/private addresses (production)."""
+class _PinnedConnectionMixin:
+    """Dial only the addresses the URL check approved for this host.
+
+    The connection keeps the original host name, so the Host header and, for
+    HTTPS, SNI and certificate hostname verification are unchanged. Only the
+    socket destination is pinned, and there is no fallback to a fresh lookup:
+    a DNS answer that changes after the check cannot redirect the dial.
+    """
+
+    def __init__(self, host, *args, pinned=None, **kwargs):
+        super().__init__(host, *args, **kwargs)
+        pinned_host, addresses = pinned or (None, ())
+        if not addresses or pinned_host != self.host:
+            fail("unsupported_source", "Unchecked request targets are refused")
+        self._pinned_addresses = tuple(addresses)
+        self._create_connection = self._connect_pinned
+
+    def _connect_pinned(self, address, timeout=socket._GLOBAL_DEFAULT_TIMEOUT,
+                        source_address=None):
+        error = None
+        for pinned_address in self._pinned_addresses:
+            try:
+                return socket.create_connection((pinned_address, address[1]),
+                                                timeout, source_address)
+            except OSError as exc:
+                error = exc
+        raise error
+
+
+class _PinnedHTTPConnection(_PinnedConnectionMixin, http.client.HTTPConnection):
+    pass
+
+
+class _PinnedHTTPSConnection(_PinnedConnectionMixin, http.client.HTTPSConnection):
+    pass
+
+
+def _pin_request(request: urllib.request.Request, host: str, addresses) -> None:
+    request._uoink_pinned = (host, tuple(addresses))
+
+
+class _PinnedHTTPHandler(urllib.request.HTTPHandler):
+    def http_open(self, req):
+        return self.do_open(_PinnedHTTPConnection, req,
+                            pinned=getattr(req, "_uoink_pinned", None))
+
+
+class _PinnedHTTPSHandler(urllib.request.HTTPSHandler):
+    def https_open(self, req):
+        # self._context is urllib's default HTTPS context: certificate and
+        # hostname verification against the original host stay on.
+        return self.do_open(_PinnedHTTPSConnection, req, context=self._context,
+                            pinned=getattr(req, "_uoink_pinned", None))
+
+
+def _check_resolved_host(host: str) -> list[str]:
+    """Reject literal hosts and nonpublic DNS answers (production).
+
+    Returns the checked addresses, in resolver order; connections dial only
+    these. Keep host admission at this seam so localhost fixture servers can
+    inject a narrowly scoped allowance alongside _reject_private_ip in tests.
+    """
+    name = host
     try:
-        infos = socket.getaddrinfo(host, None)
+        # Name checks use the IDNA form getaddrinfo resolves, so fullwidth or
+        # other compatibility spellings of localhost or an IP literal count.
+        host = name.encode("idna").decode("ascii")
+    except ValueError:
+        fail("unsupported_source", "Malformed URL host is refused")
+    host = host.rstrip(".")
+    if host.lower() == "localhost" or host.lower().endswith(".localhost"):
+        fail("unsupported_source", "Loopback targets are refused")
+    try:
+        ipaddress.ip_address(host)
+    except ValueError:
+        # getaddrinfo also accepts legacy numeric IPv4 spellings (integer,
+        # shortened, octal and hex). None is a public hostname.
+        if re.fullmatch(r"(?:0[xX][0-9a-fA-F]+|[0-9]+)"
+                        r"(?:\.(?:0[xX][0-9a-fA-F]+|[0-9]+))*", host):
+            fail("unsupported_source", "IP-literal targets are refused")
+    else:
+        fail("unsupported_source", "IP-literal targets are refused")
+    try:
+        # Resolve the name exactly as the connection will (trailing dots
+        # included). getaddrinfo IDNA-encodes it first: an empty or over-long
+        # label such as a..b raises UnicodeError, a ValueError, not gaierror.
+        infos = socket.getaddrinfo(name, None)
     except socket.gaierror as exc:
         raise ServiceError("feed_unreachable", f"DNS resolution failed: {exc.errno}")
+    except ValueError:
+        fail("unsupported_source", "Malformed URL host is refused")
+    if not infos:
+        fail("feed_unreachable", "DNS resolution returned no addresses")
+    addresses = []
     for info in infos:
         address = info[4][0]
         _reject_private_ip(address)
+        if address not in addresses:
+            addresses.append(address)
+    return addresses
+
+
+def check_public_http_url(url: str) -> str:
+    """Validate an outbound URL and all DNS answers; never allow IP literals.
+
+    Shape-only registration validators intentionally remain separate. Repeat
+    this check at fetch time, including for saved feeds and every redirect.
+    """
+    return _admit_public_http_url(url)[0]
+
+
+def _admit_public_http_url(url: str) -> tuple[str, str, tuple[str, ...]]:
+    """Check a URL and return (url, dialed host, addresses to pin)."""
+    parsed = _parse_http_url(url)
+    url = url.strip()
+    host = _connection_host(url, parsed)
+    addresses = _check_resolved_host(host)
+    if not addresses:
+        # Only a test seam that replaces _check_resolved_host (the S20/S21
+        # localhost harnesses) returns nothing. It may admit an exact IP
+        # literal, which the connection dials as-is without any lookup.
+        try:
+            addresses = [str(ipaddress.ip_address(host))]
+        except ValueError:
+            fail("unsupported_source", "URL host has no checked address")
+    return url, host, tuple(addresses)
+
+
+def _connection_host(url: str, parsed: urllib.parse.ParseResult) -> str:
+    """Return the exact host name urllib's HTTP(S) connection is made for.
+
+    urllib.request.Request percent-decodes the authority, and http.client
+    splits off the port and strips IPv6 brackets. Check DNS for that string,
+    case and trailing dot included, and refuse a URL whose connection host
+    differs from the parsed host. The connection then dials only the checked
+    addresses (see _PinnedConnectionMixin).
+    """
+    try:
+        host = http.client.HTTPConnection(urllib.request.Request(url).host).host
+    except (ValueError, http.client.HTTPException):
+        fail("unsupported_source", "Malformed URL host is refused")
+    if host.lower() != (parsed.hostname or "").lower():
+        fail("unsupported_source", "Non-canonical URL hosts are refused")
+    return host
+
+
+def public_http_open(url: str, *, headers: dict | None = None,
+                     timeout: float = FEED_FETCH_TIMEOUT_SEC):
+    """Open HTTP(S) with the shared public-network and redirect policy.
+
+    Callers own/close the response and keep their existing body budgets.
+    Tests needing localhost must explicitly inject a transport or host checks;
+    there is no environment or settings switch to relax production checks.
+    Every hop connects directly to the addresses checked for it: system and
+    environment proxies are not used, since a proxy would resolve again.
+    """
+    url, host, addresses = _admit_public_http_url(url)
+    opener = urllib.request.build_opener(
+        urllib.request.ProxyHandler({}), _PinnedHTTPHandler(), _PinnedHTTPSHandler(),
+        _BoundedRedirectHandler())
+    request = urllib.request.Request(url, headers=headers or {})
+    _pin_request(request, host, addresses)
+    return opener.open(request, timeout=timeout)
+
+
+def resolve_public_http_url(url: str, *, user_agent: str = FEED_USER_AGENT,
+                            timeout: float = FEED_FETCH_TIMEOUT_SEC) -> str:
+    """Check the GET redirect chain before handing its final URL to yt-dlp.
+
+    Close without reading the body: an enclosure may be hours of audio. This
+    admission check does not mediate yt-dlp's subsequent internal requests.
+    """
+    try:
+        with public_http_open(url, headers={"User-Agent": user_agent},
+                              timeout=timeout) as response:
+            return response.geturl()
+    except urllib.error.HTTPError as exc:
+        exc.close()
+        raise
+    except urllib.error.URLError:
+        raise
+    except (OSError, http.client.HTTPException) as exc:
+        # urllib wraps connection/request errors, but getresponse() can raise
+        # raw socket or HTTP errors. Keep all preflight transport failures on
+        # the same error path for callers, including /extract/any's HTTP 400.
+        raise urllib.error.URLError(exc) from exc
 
 
 def default_http_fetch(url: str, headers: dict, *, timeout: float = FEED_FETCH_TIMEOUT_SEC,
                        max_bytes: int = FEED_MAX_BYTES) -> FetchResponse:
     """Bounded conditional GET. Never called by tests; inject a fake fetcher."""
-    parsed = _parse_http_url(url)
-    _check_resolved_host(parsed.hostname or "")
-    opener = urllib.request.build_opener(_BoundedRedirectHandler())
-    request = urllib.request.Request(url, headers=headers)
+    _parse_http_url(url)
     try:
-        with opener.open(request, timeout=timeout) as resp:
+        with public_http_open(url, headers=headers, timeout=timeout) as resp:
             body = resp.read(max_bytes + 1)
             if len(body) > max_bytes:
                 raise ServiceError("feed_too_large", "Feed body exceeds the bounded byte budget")

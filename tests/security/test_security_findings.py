@@ -64,6 +64,9 @@ def test_sec_01_http_enclosure_url_follows_double_dash(
         return subprocess.CompletedProcess(args=args, returncode=1,
                                            stdout="", stderr="offline")
     monkeypatch.setattr(subprocess, "run", fake_run)
+    # This test checks argv separation, not admission; keep it entirely offline.
+    monkeypatch.setattr(podcasts.source_subscriptions, "resolve_public_http_url",
+                        lambda url, **kwargs: url)
     podcasts.download_episode_audio(
         idx, episode_id, data_root=tmp_path / "audio",
         ytdlp_cmd=["yt-dlp"], timeout_sec=5)
