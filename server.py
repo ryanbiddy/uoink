@@ -5134,6 +5134,109 @@ def _fetch_video_subtitles(url: str, output_folder: Path, *,
     return False
 
 
+def _video_capture_source(url: str) -> str:
+    """Stable source identity, including known-platform URL aliases."""
+    canonical, _platform = _normalize_video_url(url)
+    source = canonical or (url or "").strip()
+    if not source:
+        raise ValueError("capture requires a source URL")
+    return source
+
+
+def _video_capture_id(url: str, metadata: dict) -> str:
+    canonical, _platform = _normalize_video_url(url)
+    if canonical and metadata.get("id"):
+        return str(metadata["id"])
+    # Generic extractors can reuse a basename as the ID across hosts and
+    # paths. Scope their library key to the source, even when an ID exists.
+    return "url_" + hashlib.sha256(_video_capture_source(url).encode("utf-8")).hexdigest()
+
+
+def _video_capture_folder(parent: Path, url: str, metadata: dict) -> Path:
+    """Keep the title readable while reserving space for source identity."""
+    title_slug = slugify(metadata.get("title") or "Untitled") or "video"
+    suffix = hashlib.sha256(_video_capture_source(url).encode("utf-8")).hexdigest()[:16]
+    return parent / f"{title_slug[:63]}_{suffix}"
+
+
+def _verify_video_capture_folder(folder: Path, url: str, metadata: dict) -> None:
+    """Refuse ambiguous ownership; never infer it from a folder's title."""
+    if folder.is_symlink() or getattr(folder, "is_junction", lambda: False)():
+        raise FileExistsError(f"capture folder is a link: {folder}")
+    entries = list(folder.iterdir())
+    if not entries:
+        return
+    source = _video_capture_source(url)
+    video_id = _video_capture_id(url, metadata)
+    verified = False
+    for name in (".capture-source.json", f"{folder.name}.json", "yoink.json", "metadata.json"):
+        path = folder / name
+        if not any(entry.name == name for entry in entries):
+            continue
+        # Read errors and malformed records must stop the write, not turn an
+        # occupied folder into an apparently available destination.
+        data = json.loads(path.read_text(encoding="utf-8"))
+        if not isinstance(data, dict):
+            raise ValueError(f"invalid capture ownership record: {path}")
+        if name == "metadata.json":
+            # yt-dlp may resolve a short link to a different webpage URL.
+            # Either recorded URL can identify the requested source.
+            stored_urls = [data.get("webpage_url"), data.get("original_url")]
+            stored_id = data.get("id")
+            expected_id = metadata.get("id")
+        else:
+            stored_urls = [data.get("url")]
+            stored_id = data.get("video_id")
+            expected_id = video_id
+        stored_urls = [stored_url for stored_url in stored_urls if stored_url]
+        matches_source = any(_video_capture_source(stored_url) == source
+                             for stored_url in stored_urls)
+        if ((stored_urls and not matches_source)
+                or (stored_id and str(stored_id) != str(expected_id))):
+            raise FileExistsError(f"capture folder belongs to another source: {folder}")
+        # A bare extractor ID can recur on a different host. Require source
+        # URL evidence as well, and use the ID to reject contradictory files.
+        verified = verified or matches_source
+    if not verified:
+        raise FileExistsError(f"cannot verify capture folder ownership: {folder}")
+
+
+def _create_video_entry_folder(folder: Path, url: str, metadata: dict) -> Path:
+    """Reserve a fresh session/playlist entry without refreshing older entries."""
+    folder.parent.mkdir(parents=True, exist_ok=True)
+    target = folder
+    number = 2
+    while True:
+        try:
+            target.mkdir()
+        except FileExistsError:
+            # Even a matching source must get a separate folder here. Check
+            # ownership before moving on, so foreign/ambiguous data is visible.
+            _verify_video_capture_folder(target, url, metadata)
+            target = folder.with_name(f"{folder.name}_{number}")
+            number += 1
+        else:
+            return target
+
+
+def _prepare_video_capture_folder(folder: Path, url: str, metadata: dict) -> None:
+    """Claim the directory before any capture artifact can be overwritten."""
+    video_id = _video_capture_id(url, metadata)
+    folder.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        folder.mkdir()
+    except FileExistsError:
+        _verify_video_capture_folder(folder, url, metadata)
+    # Exclusive creation also protects an empty directory from two different
+    # sources claiming it concurrently. Keep a failed/partial claim for review.
+    claim = folder / ".capture-source.json"
+    try:
+        with claim.open("x", encoding="utf-8") as stream:
+            json.dump({"url": _video_capture_source(url), "video_id": video_id}, stream)
+    except FileExistsError:
+        _verify_video_capture_folder(folder, url, metadata)
+
+
 def _run_extraction(url: str, interval: int, output_folder: Path,
                     *, notify: bool = True,
                     metadata: dict | None = None,
@@ -5158,8 +5261,6 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
     title, video_slug, caption_count.
     """
     requested_long_video_mode = _normalize_long_video_mode(long_video_mode)
-    output_folder.mkdir(parents=True, exist_ok=True)
-
     if metadata is None:
         if phase_callback:
             phase_callback("metadata")
@@ -5168,7 +5269,9 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
         topic = _classify_topic(metadata)
 
     title = metadata.get("title") or "Untitled"
-    video_slug = slugify(title) or "video"
+    _prepare_video_capture_folder(output_folder, url, metadata)
+    video_slug = output_folder.name
+    video_id = _video_capture_id(url, metadata)
     log.info("Uoinking '%s' -> %s (topic=%s)", title, output_folder, topic)
 
     # P1-4: bound screenshot count so a 4-hour video at 5s interval doesn't
@@ -5497,7 +5600,7 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
     yoinked_at = _now_iso()
     held_chapters = metadata.get("chapters") if isinstance(metadata.get("chapters"), list) else []
     capture_seed = {
-        "video_id": metadata.get("id"), "url": url, "source_type": source_type,
+        "video_id": video_id, "url": url, "source_type": source_type,
         "transcript": [], "source_chapters": held_chapters,
         "transcript_source": transcript_source,
         "asr_fallback": asr_fallback,
@@ -5589,7 +5692,7 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
             "upload_date": metadata.get("upload_date"),
             "view_count": metadata.get("view_count"),
             "like_count": metadata.get("like_count"),
-            "video_id": metadata.get("id"),
+            "video_id": video_id,
             # Phase 6 (BC-2): every transcript row carries its actual stored
             # link values, and the held chapter metadata travels with the
             # capture so reconstruction never re-derives either.
@@ -5714,12 +5817,17 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
         log.warning("incremental index call site failed: %s", e)
 
     # Sprint 15 (A1/A4/A5): incrementally index this yoink + its citation
-    # map + health score in index.db. Best-effort -- a library-index failure
-    # must never fail an otherwise-successful extraction. (This is separate
+    # map + health score in index.db. Best-effort except identity/constraint
+    # conflicts, which must remain visible to the caller. (This is separate
     # from _regenerate_index above, which maintains the human-readable
     # _all-yoinks-index.md file.)
     try:
         _index_yoink(output_folder, sidecar, yoink_path, sidecar_path)
+    except index.sqlite3.IntegrityError:
+        # A globally reserved slug must not be reported as a successful
+        # capture. Keep the new artifacts and the existing index row intact.
+        log.exception("library identity conflict for %s", output_folder)
+        raise
     except Exception as e:
         log.warning("library index update failed for %s: %s", output_folder, e)
 
@@ -8202,6 +8310,7 @@ class _ManualOwnership:
         self.reused = {
             "ok": True, "reused": True, "reason": "captured_while_waiting",
             "video_id": video_id, "title": row.get("title"), "folder": folder,
+            "video_slug": _os.path.basename(folder) if folder else None,
             "corpus_path": corpus_path or None, "sidecar_path": row.get("sidecar_path"),
             "screenshot_count": screenshots, "captured_at": row.get("yoinked_at"),
             "topic": row.get("topic"),
@@ -8805,8 +8914,8 @@ class _ServerCaptureBackend(source_subscriptions.CaptureBackend):
                     metadata = _fetch_metadata(url)
                     title = metadata.get("title") or "Untitled"
                     topic = _classify_topic(metadata)
-                    folder = (DESKTOP_ROOT / _topic_folder_name(topic)
-                              / (slugify(title) or "video"))
+                    folder = _video_capture_folder(
+                        DESKTOP_ROOT / _topic_folder_name(topic), url, metadata)
                     if not self.holds_execution(start):
                         log.warning("standing capture %s lost its execution claim before "
                                     "publication; nothing written", start_id)
@@ -10269,6 +10378,7 @@ def _playlist_worker(job_id: str):
                 "url": v.get("url"),
             }
             target: Path | None = None
+            target_claimed = False
             current_phase = "metadata"
             _update_job(
                 job_id,
@@ -10281,7 +10391,7 @@ def _playlist_worker(job_id: str):
                 metadata = _fetch_metadata(v["url"], cancel_event=cancel_event)
                 title = metadata.get("title") or current["title"] or "Untitled"
                 current["title"] = title
-                target = _unique_child_folder(folder, title, used_slugs)
+                target = _video_capture_folder(folder, v["url"], metadata)
                 _update_job(job_id, current_video=current)
 
                 def phase_cb(phase: str, *, _job_id=job_id):
@@ -10302,9 +10412,19 @@ def _playlist_worker(job_id: str):
                             if ownership.reused.get("folder") else None
                         if source_folder is None or not source_folder.is_dir():
                             raise FileNotFoundError("completed capture folder is missing")
+                        # Preserve corpus/sidecar filenames when copying an
+                        # older capture. Claim an empty target exclusively so
+                        # a copy failure still points to its partial output.
+                        target = folder / source_folder.name
+                        target.mkdir()
+                        target_claimed = True
                         shutil.copytree(source_folder, target, dirs_exist_ok=True)
-                        result = dict(ownership.reused, title=title, folder=str(target))
+                        result = dict(ownership.reused, title=title,
+                                      video_slug=target.name, folder=str(target))
                     else:
+                        target = _create_video_entry_folder(target, v["url"], metadata)
+                        _prepare_video_capture_folder(target, v["url"], metadata)
+                        target_claimed = True
                         result = _run_extraction(
                             v["url"],
                             interval,
@@ -10317,6 +10437,7 @@ def _playlist_worker(job_id: str):
                             phase_callback=phase_cb,
                         )
 
+                target = Path(result["folder"])
                 corpus_path = _resolve_corpus_path(target)
                 item = {
                     "index": idx,
@@ -10344,7 +10465,9 @@ def _playlist_worker(job_id: str):
                 failure_phase = _failure_phase(e, current_phase)
                 last_failure_phase = failure_phase
                 log.error("playlist job %s video %d failed: %s", job_id, idx, msg)
-                if target is None:
+                # Keep diagnostics beside this run's partial capture. An
+                # ownership refusal must never write into the refused folder.
+                if target is None or not target_claimed:
                     target = _unique_child_folder(
                         folder,
                         current.get("title") or v.get("id") or f"video-{idx}",
@@ -10730,8 +10853,8 @@ def _retry_pending_one() -> bool:
                 metadata = _fetch_metadata(url)
                 title = metadata.get("title") or "Untitled"
                 topic = _classify_topic(metadata)
-                folder = (DESKTOP_ROOT / _topic_folder_name(topic)
-                          / (slugify(title) or "video"))
+                folder = _video_capture_folder(
+                    DESKTOP_ROOT / _topic_folder_name(topic), url, metadata)
 
                 def phase_cb(phase: str):
                     nonlocal current_phase
@@ -16941,9 +17064,13 @@ class Handler(BaseHTTPRequestHandler):
 
         title = metadata.get("title") or "Untitled"
         topic = _classify_topic(metadata)
-        folder = (DESKTOP_ROOT / _topic_folder_name(topic)
-                   / (slugify(title) or "video"))
-        folder.mkdir(parents=True, exist_ok=True)
+        folder = _video_capture_folder(
+            DESKTOP_ROOT / _topic_folder_name(topic), canonical, metadata)
+        try:
+            _prepare_video_capture_folder(folder, canonical, metadata)
+        except Exception as e:
+            log.exception("/extract/any (generic) destination unavailable")
+            return self._send_json(500, {"ok": False, "error": str(e)})
 
         # Best-effort transcript reconstruction from yt-dlp's
         # subtitles/automatic_captions map (when present).
@@ -16966,7 +17093,7 @@ class Handler(BaseHTTPRequestHandler):
                                or metadata.get("uploader_url")),
             "upload_date": metadata.get("upload_date"),
             "view_count": metadata.get("view_count"),
-            "video_id": metadata.get("id"),
+            "video_id": _video_capture_id(canonical, metadata),
             "transcript": transcript_entries,
             # Comments/screenshots/hook are explicit nulls so the
             # dashboard knows they're unavailable rather than missing.
@@ -17020,8 +17147,7 @@ class Handler(BaseHTTPRequestHandler):
             _plat = page_extractor.platform_for(None, canonical)
             _auth = sidecar["channel"] or sidecar["host"]
             _get_index().upsert_yoink({
-                "video_id": (metadata.get("id")
-                                or f"generic_{abs(hash(canonical)) & 0xFFFFFF:06x}"),
+                "video_id": sidecar["video_id"],
                 "slug": folder.name,
                 "channel": sidecar["channel"],
                 "platform": _plat,
@@ -17038,6 +17164,10 @@ class Handler(BaseHTTPRequestHandler):
                     "host": sidecar["host"],
                 }),
             }, content=("\n".join(corpus_lines)[:65000]))
+        except index.sqlite3.IntegrityError as e:
+            log.exception("/extract/any generic identity conflict")
+            return self._send_json(500, {"ok": False, "error": str(e),
+                                         "folder": str(folder)})
         except Exception as e:
             log.warning("/extract/any generic upsert_yoink failed: %s", e)
 
@@ -17049,6 +17179,7 @@ class Handler(BaseHTTPRequestHandler):
             "url": canonical,
             "title": title,
             "folder": str(folder),
+            "video_slug": folder.name,
             "transcript_segments": len(transcript_entries),
             "has_thumbnail": bool(sidecar["thumbnail_url"]),
         })
@@ -17209,7 +17340,8 @@ class Handler(BaseHTTPRequestHandler):
                         return response
                 title = metadata.get("title") or "Untitled"
                 topic = _classify_topic(metadata)
-                folder = DESKTOP_ROOT / _topic_folder_name(topic) / (slugify(title) or "video")
+                folder = _video_capture_folder(
+                    DESKTOP_ROOT / _topic_folder_name(topic), url, metadata)
 
                 def phase_cb(phase: str):
                     nonlocal current_phase
@@ -17344,8 +17476,7 @@ class Handler(BaseHTTPRequestHandler):
 
         log.info("POST /session/add session=%s url=%s -> running", session_id, url)
         sess_folder = _session_folder(session_id)
-        # Disambiguate the per-video subfolder by title — fetch metadata once
-        # and re-use it inside _run_extraction.
+        # Fetch metadata once; source identity disambiguates same-title videos.
         with _manual_extraction_ownership(url) as ownership:  # AS-03 shared dispatcher lock
             if not ownership.ok:
                 # AS-03: unavailable ownership is a retryable failure.
@@ -17365,27 +17496,19 @@ class Handler(BaseHTTPRequestHandler):
                     # no second acquisition.
                     reused = ownership.reused
                     title = reused.get("title") or "Untitled"
-                    video_slug = slugify(title) or "video"
-                    target = sess_folder / video_slug
-                    if target.exists():
-                        video_slug = f"{video_slug}_{uuid.uuid4().hex[:6]}"
-                        target = sess_folder / video_slug
                     source_folder = Path(reused["folder"]) if reused.get("folder") else None
                     if source_folder is None or not source_folder.is_dir():
                         raise FileNotFoundError("completed capture folder is missing")
+                    target = sess_folder / source_folder.name
                     shutil.copytree(source_folder, target)
-                    result = dict(reused, title=title, video_slug=video_slug,
+                    result = dict(reused, title=title, video_slug=target.name,
                                   folder=str(target), caption_count=0)
                 else:
                     metadata = _fetch_metadata(url)
                     title = metadata.get("title") or "Untitled"
                     topic = _classify_topic(metadata)
-                    video_slug = slugify(title) or "video"
-                    target = sess_folder / video_slug
-                    # Disambiguate if same-named video already added.
-                    if target.exists():
-                        video_slug = f"{video_slug}_{uuid.uuid4().hex[:6]}"
-                        target = sess_folder / video_slug
+                    target = _video_capture_folder(sess_folder, url, metadata)
+                    target = _create_video_entry_folder(target, url, metadata)
 
                     # Session adds don't go to the clipboard one-by-one (the
                     # whole session is concatenated and copied at /session/close),

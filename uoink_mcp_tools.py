@@ -256,11 +256,10 @@ def uoink_video(args: dict[str, Any]) -> dict[str, Any]:
                 metadata = b._fetch_metadata(url)
                 title = metadata.get("title") or "Untitled"
                 topic = b._classify_topic(metadata)
-                folder = (
-                    b.DESKTOP_ROOT
-                    / b._topic_folder_name(topic)
-                    / (b.slugify(title) or "video")
-                )
+                # Same source-derived folder as /extract, so two videos with
+                # the same title never share (or fight over) one folder.
+                folder = b._video_capture_folder(
+                    b.DESKTOP_ROOT / b._topic_folder_name(topic), url, metadata)
 
                 def phase_cb(phase):
                     nonlocal current_phase
