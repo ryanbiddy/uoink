@@ -18,7 +18,9 @@ import socket
 import sqlite3
 import subprocess
 import sys
+import tempfile
 import threading
+import time
 from types import SimpleNamespace
 from unittest.mock import Mock
 from urllib.parse import parse_qs, urlparse
@@ -113,6 +115,7 @@ def capture(tmp_path, monkeypatch):
         "Path": Path, "json": json, "hashlib": hashlib, "re": re,
         "threading": threading, "datetime": datetime, "shutil": shutil,
         "urlparse": urlparse, "parse_qs": parse_qs, "subprocess": subprocess,
+        "tempfile": tempfile, "time": time,
         "log": logging.getLogger(__name__), "index": SimpleNamespace(sqlite3=sqlite3),
         "LONG_VIDEO_MODE_FULL": "full", "LONG_VIDEO_MODE_LITE": "lite",
         "LONG_VIDEO_MODE_CHUNKED": "chunked", "LONG_VIDEO_SECONDS": 1800,

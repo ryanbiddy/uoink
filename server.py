@@ -5270,6 +5270,9 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
 
     title = metadata.get("title") or "Untitled"
     _prepare_video_capture_folder(output_folder, url, metadata)
+    # A new capture has only its ownership claim. Refreshes keep previous
+    # artifacts until generation and the file swap have succeeded.
+    refreshing = any(p.name != ".capture-source.json" for p in output_folder.iterdir())
     video_slug = output_folder.name
     video_id = _video_capture_id(url, metadata)
     log.info("Uoinking '%s' -> %s (topic=%s)", title, output_folder, topic)
@@ -5346,456 +5349,635 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
         log.warning(notes[-1])
         interval = new_interval
 
-    # Keep bulky format/caption tables in memory, not in the metadata cache.
+    # Keep the stage on the same filesystem so publication uses renames.
+    # Short directory and corpus names leave room for atomic-write temp names
+    # under Windows MAX_PATH, even in long topics with a long capture slug.
+    _raise_if_cancelled(cancel_event)
+    stage_root = None
+    if refreshing:
+        stage_root = Path(tempfile.mkdtemp(prefix=".s-", dir=output_folder))
+    asset_folder = stage_root / "n" if refreshing else output_folder
+    backup_folder = stage_root / "p" if refreshing else None
+    media_backup_folder = stage_root / "m" if refreshing else None
+    corpus_name = _corpus_path(output_folder).name
+    sidecar_name = f"{video_slug}.json"
+    staged_names = {Path(corpus_name): Path("c.md"), Path(sidecar_name): Path("c.json")}
+
+    def stage_name(relative: Path) -> Path:
+        return staged_names.get(relative, relative)
+
+    def rename_artifact(source: Path, target: Path) -> None:
+        # Match storage._atomic_write_text's bounded OneDrive-lock retry.
+        # Use rename, not replace, and recheck the destination on every try.
+        for delay in (0.05, 0.2, 0.5, None):
+            if target.exists() or target.is_symlink():
+                raise FileExistsError(f"capture rename destination occupied: {target}")
+            try:
+                source.rename(target)
+                return
+            except PermissionError:
+                if delay is None:
+                    raise
+                time.sleep(delay)
+
+    moved_originals: list[Path] = []
+    installed: list[Path] = []
+    created_dirs: list[Path] = []
+    committed = False
+    preserve_stage = False
     try:
-        cached_metadata = {
-            key: value for key, value in metadata.items()
-            if key not in ("formats", "requested_formats", "automatic_captions", "subtitles")
-        }
-        (output_folder / "metadata.json").write_text(
-            json.dumps(cached_metadata, indent=2, ensure_ascii=False),
-            encoding="utf-8",
-        )
-    except OSError as e:
-        log.warning("could not write metadata.json: %s", e)
+        if refreshing:
+            asset_folder.mkdir()
+        # Keep bulky format/caption tables in memory, not in the metadata cache.
+        try:
+            cached_metadata = {
+                key: value for key, value in metadata.items()
+                if key not in ("formats", "requested_formats", "automatic_captions", "subtitles")
+            }
+            (asset_folder / "metadata.json").write_text(
+                json.dumps(cached_metadata, indent=2, ensure_ascii=False),
+                encoding="utf-8",
+            )
+        except OSError as e:
+            log.warning("could not write metadata.json: %s", e)
+            if refreshing:
+                raise
 
-    # Thumbnail (best-effort; absence shouldn't fail the extraction).
-    _download_thumbnail(metadata, output_folder, cancel_event=cancel_event)
+        # Thumbnail (best-effort; absence shouldn't fail the extraction).
+        _download_thumbnail(metadata, asset_folder, cancel_event=cancel_event)
 
-    # Clear only helper-owned transient media from an earlier attempt in this
-    # same yoink folder. The corpus/sidecar remain until the new run succeeds.
-    for pattern in ("video.*", "video-chunk-*.*"):
-        for stale in output_folder.glob(pattern):
-            if stale.is_file():
-                stale.unlink(missing_ok=True)
-
-    # Full mode downloads one low-res media file; chunked mode downloads
-    # representative sections. Both fetch optional subtitles separately so
-    # a caption failure cannot prevent the media download.
-    download_timeout = _ytdlp_timeout_for(processed_media_seconds or duration)
-    media_cmd = [
-        *YTDLP_CMD,
-        # Require a video stream. Plain `worst` can pick audio-only on some
-        # Shorts, which makes ffmpeg screenshot extraction fail with no packets.
-        "-f", "worst*[vcodec!=none][height>=360]/worst*[vcodec!=none]/worst",
-        "--concurrent-fragments", "4",
-        "--retries", "10",
-        "--fragment-retries", "10",
-        "--socket-timeout", "30",
-    ]
-    if effective_long_video_mode == LONG_VIDEO_MODE_CHUNKED:
-        for chunk in long_video_chunks:
-            media_cmd.extend(["--download-sections", _chunk_section_spec(chunk)])
-        media_cmd.extend([
-            "-o", str(output_folder / "video-chunk-%(section_number)03d.%(ext)s"),
-            url,
-        ])
-    else:
-        media_cmd.extend([
-            # Full mode still refuses a multi-GB media file. Chunked mode
-            # intentionally omits this source-level check because the selected
-            # sections already bound the downloaded media work.
-            "--max-filesize", str(YTDLP_MAX_FILESIZE_BYTES),
-            "-o", str(output_folder / "video.%(ext)s"),
-            url,
-        ])
-
-    try:
-        if phase_callback:
-            phase_callback("download")
-        _run_subprocess(
-            media_cmd,
-            cancel_event=cancel_event,
-            check=True,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.PIPE,
-            timeout=download_timeout,
-        )
-    except subprocess.TimeoutExpired:
-        # Log the real cause (duration + the budget we actually used) so
-        # helper.log has a trace -- the old path discarded this and left the
-        # 2-hour failure looking like "nothing happened".
-        log.error(
-            "yt-dlp %s download timed out after %ds "
-            "(source duration ~%.0fs, media work ~%ds): %s",
-            effective_long_video_mode, download_timeout, duration,
-            processed_media_seconds, url)
-        mins = max(1, download_timeout // 60)
-        raise ExtractionPhaseError(
-            "download",
-            f"Download timed out after about {mins} minutes. This is a "
-            "download/network issue, not a screenshot setting -- the video "
-            "may be very long, or the connection to YouTube is slow or being "
-            "throttled. Try again on a faster connection, or pick a shorter "
-            "video."
-        )
-
-    if phase_callback:
-        phase_callback("transcript")
-    captions_refused = _fetch_video_subtitles(
-        url, output_folder,
-        long_video_mode=effective_long_video_mode,
-        cancel_event=cancel_event,
-    )
-
-    media_glob = (
-        "video-chunk-*.*"
-        if effective_long_video_mode == LONG_VIDEO_MODE_CHUNKED
-        else "video.*"
-    )
-    video_files = [f for f in sorted(output_folder.glob(media_glob))
-                   if f.suffix in (".mp4", ".webm", ".mkv")]
-    srt_files = list(output_folder.glob("video*.srt"))
-    if not video_files:
+        # Full mode downloads one low-res media file; chunked mode downloads
+        # representative sections. Both fetch optional subtitles separately so
+        # a caption failure cannot prevent the media download.
+        download_timeout = _ytdlp_timeout_for(processed_media_seconds or duration)
+        media_cmd = [
+            *YTDLP_CMD,
+            # Require a video stream. Plain `worst` can pick audio-only on some
+            # Shorts, which makes ffmpeg screenshot extraction fail with no packets.
+            "-f", "worst*[vcodec!=none][height>=360]/worst*[vcodec!=none]/worst",
+            "--concurrent-fragments", "4",
+            "--retries", "10",
+            "--fragment-retries", "10",
+            "--socket-timeout", "30",
+        ]
         if effective_long_video_mode == LONG_VIDEO_MODE_CHUNKED:
+            for chunk in long_video_chunks:
+                media_cmd.extend(["--download-sections", _chunk_section_spec(chunk)])
+            media_cmd.extend([
+                "-o", str(asset_folder / "video-chunk-%(section_number)03d.%(ext)s"),
+                url,
+            ])
+        else:
+            media_cmd.extend([
+                # Full mode still refuses a multi-GB media file. Chunked mode
+                # intentionally omits this source-level check because the selected
+                # sections already bound the downloaded media work.
+                "--max-filesize", str(YTDLP_MAX_FILESIZE_BYTES),
+                "-o", str(asset_folder / "video.%(ext)s"),
+                url,
+            ])
+
+        try:
+            if phase_callback:
+                phase_callback("download")
+            _run_subprocess(
+                media_cmd,
+                cancel_event=cancel_event,
+                check=True,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.PIPE,
+                timeout=download_timeout,
+            )
+        except subprocess.TimeoutExpired:
+            # Log the real cause (duration + the budget we actually used) so
+            # helper.log has a trace -- the old path discarded this and left the
+            # 2-hour failure looking like "nothing happened".
+            log.error(
+                "yt-dlp %s download timed out after %ds "
+                "(source duration ~%.0fs, media work ~%ds): %s",
+                effective_long_video_mode, download_timeout, duration,
+                processed_media_seconds, url)
+            mins = max(1, download_timeout // 60)
             raise ExtractionPhaseError(
                 "download",
-                "Chunked download produced no media sections. The source may "
-                "be unavailable, private, region-locked, or may not support "
-                "section downloads."
+                f"Download timed out after about {mins} minutes. This is a "
+                "download/network issue, not a screenshot setting -- the video "
+                "may be very long, or the connection to YouTube is slow or being "
+                "throttled. Try again on a faster connection, or pick a shorter "
+                "video."
             )
-        raise ExtractionPhaseError(
-            "download",
-            "yt-dlp produced no video file. The video may exceed the 2 GB "
-            "download cap (set in helper config), or it may be unavailable, "
-            "private, or region-locked."
+
+        if phase_callback:
+            phase_callback("transcript")
+        captions_refused = _fetch_video_subtitles(
+            url, asset_folder,
+            long_video_mode=effective_long_video_mode,
+            cancel_event=cancel_event,
         )
 
-    shots_dir = output_folder / "screenshots"
-    shots_dir.mkdir(exist_ok=True)
-    for pattern in ("shot_*.jpg", "chunk_*_shot_*.jpg"):
-        for stale in shots_dir.glob(pattern):
-            stale.unlink(missing_ok=True)
+        media_glob = (
+            "video-chunk-*.*"
+            if effective_long_video_mode == LONG_VIDEO_MODE_CHUNKED
+            else "video.*"
+        )
+        video_files = [f for f in sorted(asset_folder.glob(media_glob))
+                       if f.suffix in (".mp4", ".webm", ".mkv")]
+        srt_files = list(asset_folder.glob("video*.srt"))
+        if not video_files:
+            if effective_long_video_mode == LONG_VIDEO_MODE_CHUNKED:
+                raise ExtractionPhaseError(
+                    "download",
+                    "Chunked download produced no media sections. The source may "
+                    "be unavailable, private, region-locked, or may not support "
+                    "section downloads."
+                )
+            raise ExtractionPhaseError(
+                "download",
+                "yt-dlp produced no video file. The video may exceed the 2 GB "
+                "download cap (set in helper config), or it may be unavailable, "
+                "private, or region-locked."
+            )
 
-    shot_times: list[int] = []
-    if effective_long_video_mode == LONG_VIDEO_MODE_CHUNKED:
-        shot_number = 1
-        for i, video_file in enumerate(video_files):
-            chunk = long_video_chunks[min(i, len(long_video_chunks) - 1)]
-            chunk_phase = f"screenshots_chunk_{i + 1}_of_{len(video_files)}"
+        shots_dir = asset_folder / "screenshots"
+        shots_dir.mkdir(exist_ok=True)
+
+        shot_times: list[int] = []
+        if effective_long_video_mode == LONG_VIDEO_MODE_CHUNKED:
+            shot_number = 1
+            for i, video_file in enumerate(video_files):
+                chunk = long_video_chunks[min(i, len(long_video_chunks) - 1)]
+                chunk_phase = f"screenshots_chunk_{i + 1}_of_{len(video_files)}"
+                try:
+                    if phase_callback:
+                        phase_callback(chunk_phase)
+                    prefix = f"chunk_{i + 1:03d}_shot_"
+                    _run_subprocess(
+                        _screenshot_ffmpeg_command(
+                            video_file,
+                            interval,
+                            shots_dir / f"{prefix}%04d.jpg",
+                        ),
+                        cancel_event=cancel_event,
+                        check=True,
+                        stdout=subprocess.DEVNULL,
+                        stderr=subprocess.PIPE,
+                        timeout=_ffmpeg_timeout_for(chunk["duration_seconds"]),
+                    )
+                except subprocess.TimeoutExpired:
+                    log.error(
+                        "ffmpeg chunk %d/%d timed out (section %ss-%ss, interval %ds)",
+                        i + 1, len(video_files), chunk["start_seconds"],
+                        chunk["end_seconds"], interval)
+                    raise ExtractionPhaseError(
+                        chunk_phase,
+                        f"Screenshot generation timed out in chunk {i + 1} of "
+                        f"{len(video_files)}. Try a longer screenshot interval "
+                        f"(current: {interval}s)."
+                    )
+                local_shots = sorted(shots_dir.glob(f"{prefix}*.jpg"))
+                for local_i, local_shot in enumerate(local_shots):
+                    target = shots_dir / f"shot_{shot_number:04d}.jpg"
+                    local_shot.replace(target)
+                    shot_times.append(
+                        int(chunk["start_seconds"] + (local_i * interval))
+                    )
+                    shot_number += 1
+        else:
+            video_file = video_files[0]
             try:
                 if phase_callback:
-                    phase_callback(chunk_phase)
-                prefix = f"chunk_{i + 1:03d}_shot_"
+                    phase_callback("screenshots")
                 _run_subprocess(
                     _screenshot_ffmpeg_command(
                         video_file,
                         interval,
-                        shots_dir / f"{prefix}%04d.jpg",
+                        shots_dir / "shot_%04d.jpg",
                     ),
                     cancel_event=cancel_event,
                     check=True,
                     stdout=subprocess.DEVNULL,
                     stderr=subprocess.PIPE,
-                    timeout=_ffmpeg_timeout_for(chunk["duration_seconds"]),
+                    timeout=_ffmpeg_timeout_for(duration),
                 )
             except subprocess.TimeoutExpired:
                 log.error(
-                    "ffmpeg chunk %d/%d timed out (section %ss-%ss, interval %ds)",
-                    i + 1, len(video_files), chunk["start_seconds"],
-                    chunk["end_seconds"], interval)
+                    "ffmpeg screenshot extraction timed out after %ds "
+                    "(video duration ~%.0fs, interval %ds)",
+                    _ffmpeg_timeout_for(duration), duration, interval)
                 raise ExtractionPhaseError(
-                    chunk_phase,
-                    f"Screenshot generation timed out in chunk {i + 1} of "
-                    f"{len(video_files)}. Try a longer screenshot interval "
-                    f"(current: {interval}s)."
+                    "screenshots",
+                    "Screenshot generation timed out -- try a longer screenshot "
+                    "interval (current: %ds)." % interval
                 )
-            local_shots = sorted(shots_dir.glob(f"{prefix}*.jpg"))
-            for local_i, local_shot in enumerate(local_shots):
-                target = shots_dir / f"shot_{shot_number:04d}.jpg"
-                local_shot.replace(target)
-                shot_times.append(
-                    int(chunk["start_seconds"] + (local_i * interval))
-                )
-                shot_number += 1
-    else:
-        video_file = video_files[0]
-        try:
-            if phase_callback:
-                phase_callback("screenshots")
-            _run_subprocess(
-                _screenshot_ffmpeg_command(
-                    video_file,
-                    interval,
-                    shots_dir / "shot_%04d.jpg",
-                ),
-                cancel_event=cancel_event,
-                check=True,
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.PIPE,
-                timeout=_ffmpeg_timeout_for(duration),
-            )
-        except subprocess.TimeoutExpired:
-            log.error(
-                "ffmpeg screenshot extraction timed out after %ds "
-                "(video duration ~%.0fs, interval %ds)",
-                _ffmpeg_timeout_for(duration), duration, interval)
-            raise ExtractionPhaseError(
-                "screenshots",
-                "Screenshot generation timed out -- try a longer screenshot "
-                "interval (current: %ds)." % interval
-            )
-    shots = sorted(shots_dir.glob("shot_*.jpg"))
-    if not shot_times:
-        shot_times = [i * interval for i in range(len(shots))]
+        shots = sorted(shots_dir.glob("shot_*.jpg"))
+        if refreshing and not shots:
+            raise ExtractionPhaseError("screenshots", "Screenshot generation produced no images.")
+        if not shot_times:
+            shot_times = [i * interval for i in range(len(shots))]
 
-    entries = list(parse_srt(srt_files[0])) if srt_files else []
-    platform_caption_count = len(entries)
-    if not entries and phase_callback:
-        phase_callback("transcript")
-    entries, transcript_source, asr_fallback = _resolve_video_transcript(
-        entries,
-        video_files[0],
-        duration,
-        captions_refused=captions_refused,
-        media_chunks=[
-            (path, chunk["start_seconds"], chunk["duration_seconds"])
-            for path, chunk in zip(video_files, long_video_chunks)
-        ] if effective_long_video_mode == LONG_VIDEO_MODE_CHUNKED else None,
-        cancel_event=cancel_event,
-    )
-    if effective_long_video_mode == LONG_VIDEO_MODE_CHUNKED:
-        caption_coverage = (
-            " while retaining the full available subtitle track"
-            if transcript_source == "captions" else ""
+        entries = list(parse_srt(srt_files[0])) if srt_files else []
+        platform_caption_count = len(entries)
+        if not entries and phase_callback:
+            phase_callback("transcript")
+        entries, transcript_source, asr_fallback = _resolve_video_transcript(
+            entries,
+            video_files[0],
+            duration,
+            captions_refused=captions_refused,
+            media_chunks=[
+                (path, chunk["start_seconds"], chunk["duration_seconds"])
+                for path, chunk in zip(video_files, long_video_chunks)
+            ] if effective_long_video_mode == LONG_VIDEO_MODE_CHUNKED else None,
+            cancel_event=cancel_event,
         )
-        notes.append(
-            f"Chunked mode sampled {len(long_video_chunks)} media sections "
-            f"({processed_media_seconds // 60}m of {int(duration) // 60}m)"
-            f"{caption_coverage}."
-        )
-    cap_warning = " ".join(notes) or None
-    transcript_note = None
-    if transcript_source != "captions":
-        if captions_refused:
-            caption_note = "YouTube refused captions"
-        elif _detect_platform_from_url(url) == PLATFORM_YOUTUBE:
-            caption_note = "YouTube captions unavailable"
-        else:
-            caption_note = "captions unavailable"
-        if transcript_source == "asr":
-            coverage = (" of sampled sections"
-                        if effective_long_video_mode == LONG_VIDEO_MODE_CHUNKED else "")
-            transcript_note = f"Local Whisper transcript{coverage}: {caption_note}"
-        else:
-            transcript_note = f"No transcript: {caption_note}"
+        if effective_long_video_mode == LONG_VIDEO_MODE_CHUNKED:
+            caption_coverage = (
+                " while retaining the full available subtitle track"
+                if transcript_source == "captions" else ""
+            )
+            notes.append(
+                f"Chunked mode sampled {len(long_video_chunks)} media sections "
+                f"({processed_media_seconds // 60}m of {int(duration) // 60}m)"
+                f"{caption_coverage}."
+            )
+        cap_warning = " ".join(notes) or None
+        transcript_note = None
+        if transcript_source != "captions":
+            if captions_refused:
+                caption_note = "YouTube refused captions"
+            elif _detect_platform_from_url(url) == PLATFORM_YOUTUBE:
+                caption_note = "YouTube captions unavailable"
+            else:
+                caption_note = "captions unavailable"
+            if transcript_source == "asr":
+                coverage = (" of sampled sections"
+                            if effective_long_video_mode == LONG_VIDEO_MODE_CHUNKED else "")
+                transcript_note = f"Local Whisper transcript{coverage}: {caption_note}"
+            else:
+                transcript_note = f"No transcript: {caption_note}"
 
-    if entries:
-        plain = "\n".join(text for _, _, text in entries)
-        (output_folder / "transcript.txt").write_text(plain, encoding="utf-8")
+        if entries:
+            plain = "\n".join(text for _, _, text in entries)
+            (asset_folder / "transcript.txt").write_text(plain, encoding="utf-8")
 
-    if phase_callback:
-        phase_callback("write")
+        if phase_callback:
+            phase_callback("write")
 
-    # Channel context (description + recent videos). Best-effort.
-    channel_url = (metadata.get("channel_url")
-                   or metadata.get("uploader_url")
-                   or "")
-    channel_ctx = _fetch_channel_context(channel_url, cancel_event=cancel_event)
+        # Channel context (description + recent videos). Best-effort.
+        channel_url = (metadata.get("channel_url")
+                       or metadata.get("uploader_url")
+                       or "")
+        channel_ctx = _fetch_channel_context(channel_url, cancel_event=cancel_event)
 
-    # Phase 6 (BC-2): the transcript rows persist their actual link values,
-    # the already-held chapter metadata travels with the capture, and the
-    # shared media snapshot builder/renderer produce the corpus transcript
-    # section (chapters and cues) from that held data. Nothing is fetched.
-    yoinked_at = _now_iso()
-    held_chapters = metadata.get("chapters") if isinstance(metadata.get("chapters"), list) else []
-    capture_seed = {
-        "video_id": video_id, "url": url, "source_type": source_type,
-        "transcript": [], "source_chapters": held_chapters,
-        "transcript_source": transcript_source,
-        "asr_fallback": asr_fallback,
-        "transcript_note": transcript_note,
-        "duration_seconds": duration, "yoinked_at": yoinked_at,
-    }
-    capture_seed["transcript"] = _transcript_entries_with_links(capture_seed, entries)
-    media_sections = None
-    try:
-        import yt_extract as _yt_extract  # noqa: WPS433
-        media_plan = _capture_media_plan(
-            capture_seed, output_folder,
-            item={"metadata_json": json.dumps({"duration_seconds": duration})},
-            chapter_rows=_yt_extract.chapters_from_metadata(metadata))
-        if media_plan is not None:
-            media_sections = media_plan["markdown"]
-    except Exception as e:
-        log.warning("media snapshot build skipped for %s: %s", output_folder, e)
-
-    # Build the corpus markdown.
-    yoink_md = _build_yoink_md(
-        metadata=metadata, url=url, entries=entries, shots=shots,
-        interval=interval, channel_ctx=channel_ctx,
-        yoinked_at=yoinked_at, topic=topic,
-        cap_warning=cap_warning,
-        shot_times=shot_times,
-        media_sections=media_sections,
-        transcript_note=transcript_note,
-    )
-    # Filename matches the folder's slug -- "kapathy-talk/kapathy-talk.md"
-    # rather than "kapathy-talk/yoink.md" -- so the file is identifiable
-    # outside its folder.
-    yoink_path = _corpus_path(output_folder)
-    _atomic_write_text(yoink_path, yoink_md)
-    hook_type_pending = _should_start_hook_type(metadata)
-
-    # Structured JSON sidecar (STRAT). Same data the markdown carries but
-    # in a machine-shaped form: future MCP server / programmatic tooling
-    # consumes this without having to parse the human-facing md. Written
-    # next to the md so it travels with the folder.
-    #
-    # `comments` ships as `null` here and is filled in by the comments
-    # worker once yt-dlp returns -- mirrors the markdown placeholder
-    # behavior. Consumers see `comments_status: "pending"` until the
-    # worker either succeeds (`fetched`), finds none (`disabled`), or
-    # fails (`unavailable`).
-    #
-    # E-1 (Zing enabler): opt-in keep_media retains the downloaded media
-    # file for SHORT-VIDEO captures only, so a downstream director tool
-    # (Zing) can analyze the actual clip (cuts / captions / audio). Scoped
-    # to short_video because shorts are tens of MB while long-form media
-    # can run to gigabytes. Default OFF: deletion below stays the unchanged
-    # path and the sidecar gains no field.
-    keep_media = (
-        source_type == SOURCE_TYPE_SHORT_VIDEO
-        and bool(_read_settings().get("keep_media"))
-    )
-    try:
-        sidecar = {
-            "schema_version": 2,  # bumped: structured screenshots + comments
-            "url": url,
-            # v3.1: platform indicator chip in dashboard. Inferred from the
-            # canonical URL produced by _normalize_video_url; default
-            # 'youtube' so existing rows that pre-date this field render
-            # as YouTube without a migration.
-            "platform": _detect_platform_from_url(url),
-            # source_type is None for a regular YouTube/X video (the index
-            # normalizes that to 'video'); 'short_video' for a TikTok /
-            # Instagram Reel / YouTube Short, so it filters as its own facet
-            # without disturbing existing long-form video rows.
-            "source_type": source_type,
-            "title": title,
-            "topic": topic,
-            "yoinked_at": yoinked_at,
-            "interval_seconds": interval,
-            "requested_interval_seconds": requested_interval,
-            "screenshot_cap_warning": cap_warning,
-            "duration_seconds": duration,
-            "requested_long_video_mode": requested_long_video_mode,
-            "long_video_mode": effective_long_video_mode,
-            "long_video_chunks": long_video_chunks,
-            "processed_media_seconds": processed_media_seconds,
-            # TikTok/Instagram expose the creator as uploader/creator rather
-            # than channel, so fall back through all three. This is the "who"
-            # the taxonomy uses as author for a short video.
-            "channel": (metadata.get("channel") or metadata.get("uploader")
-                        or metadata.get("creator")),
-            "channel_url": metadata.get("channel_url") or metadata.get("uploader_url"),
-            "upload_date": metadata.get("upload_date"),
-            "view_count": metadata.get("view_count"),
-            "like_count": metadata.get("like_count"),
-            "video_id": video_id,
-            # Phase 6 (BC-2): every transcript row carries its actual stored
-            # link values, and the held chapter metadata travels with the
-            # capture so reconstruction never re-derives either.
-            "transcript": capture_seed["transcript"],
-            "source_chapters": held_chapters,
-            # CM-11: provenance is explicit whenever transcript rows exist.
-            # A null source means the capture honestly remains caption-less;
-            # asr_fallback carries the caption reason and local ASR status.
+        # Phase 6 (BC-2): the transcript rows persist their actual link values,
+        # the already-held chapter metadata travels with the capture, and the
+        # shared media snapshot builder/renderer produce the corpus transcript
+        # section (chapters and cues) from that held data. Nothing is fetched.
+        yoinked_at = _now_iso()
+        held_chapters = metadata.get("chapters") if isinstance(metadata.get("chapters"), list) else []
+        capture_seed = {
+            "video_id": video_id, "url": url, "source_type": source_type,
+            "transcript": [], "source_chapters": held_chapters,
             "transcript_source": transcript_source,
             "asr_fallback": asr_fallback,
             "transcript_note": transcript_note,
-            # Structured shape: timestamp + relative path + bare filename so
-            # consumers don't have to parse paths or recompute timestamps.
-            "screenshots": [
-                {
-                    "timestamp": fmt_time(shot_times[i]),
-                    "path": f"screenshots/{p.name}",
-                    "filename": p.name,
-                }
-                for i, p in enumerate(shots)
-            ],
-            "channel_context": channel_ctx,
-            "comments": None,
-            # Lite recovery skips the comments fetch, so mark it skipped rather
-            # than leaving it "pending" forever (no worker will resolve it).
-            "comments_status": (
-                "skipped"
-                if effective_long_video_mode == LONG_VIDEO_MODE_LITE
-                else "pending"
-            ),
-            # Hook Type runs inside the comments worker, so lite mode (which
-            # skips comments) skips hook typing too -- mark it skipped, not
-            # pending, so nothing waits on a worker that never starts.
-            "hook_type_status": (
-                "pending"
-                if hook_type_pending
-                and effective_long_video_mode != LONG_VIDEO_MODE_LITE
-                else "skipped"
-            ),
-            "hook_type": None,
-            "hook_explanation": None,
-            "hook_type_confidence": None,
-            "hook_type_error": None,
-            "comment_intelligence": None,
-            "comment_intelligence_status": "not_run",
-            "comment_intelligence_error": None,
-            # Sprint 16: entity extraction runs in the background once the
-            # row is indexed. D-17: "pending" only when the flag is on and
-            # a key is set (the same gate the spawn reads), "skipped"
-            # otherwise; the worker flips it to completed / failed.
-            "entity_extraction_status": (
-                "pending"
-                if _anthropic_key_for_feature("entity_extraction_enabled")
-                else "skipped"
-            ),
-            "entity_extraction_error": None,
+            "duration_seconds": duration, "yoinked_at": yoinked_at,
         }
-        # E-1: record the kept media filename so downstream tools find the
-        # file without globbing (it sits next to the sidecar in the uoink
-        # folder). Written ONLY when keep_media applies -- the default-off
-        # sidecar stays byte-identical to before.
-        if keep_media:
-            sidecar["media_file"] = video_files[0].name
-        # A5: extraction-time health snapshot, stored on the sidecar.
-        sidecar["health"] = compute_health(sidecar)
-        # v2.5: stamp the per-file data-shape version. Lets v2.5+ readers tell
-        # at a glance whether a sidecar predates facets/engagement. Missing =
-        # treat as 1 via _upgrade_sidecar() (lazy up-convert on read).
-        sidecar["schema_version"] = CURRENT_SIDECAR_SCHEMA
-        sidecar_path = output_folder / f"{output_folder.name}.json"
-        _atomic_write_text(sidecar_path, json.dumps(sidecar, ensure_ascii=False, indent=2))
-    except (OSError, TypeError) as e:
-        # Non-fatal: the markdown is the user-facing artifact. Sidecar is
-        # for future tooling.
-        log.warning("could not write JSON sidecar: %s", e)
+        capture_seed["transcript"] = _transcript_entries_with_links(capture_seed, entries)
+        media_sections = None
+        try:
+            import yt_extract as _yt_extract  # noqa: WPS433
+            media_plan = _capture_media_plan(
+                capture_seed, asset_folder,
+                item={"metadata_json": json.dumps({"duration_seconds": duration})},
+                chapter_rows=_yt_extract.chapters_from_metadata(metadata))
+            if media_plan is not None:
+                media_sections = media_plan["markdown"]
+        except Exception as e:
+            log.warning("media snapshot build skipped for %s: %s", asset_folder, e)
 
-    # v2.5 A1: optional local transcript reliability detection. It runs only
-    # when the user has opted in and the Whisper model is already cached; the
-    # dashboard's "Download model now" button is the explicit consent gate for
-    # the ~150 MB model download. Run before deleting the downloaded video so
-    # the automatic path does not need a second yt-dlp fetch.
-    try:
-        if (_read_settings().get("transcript_reliability_auto_check")
-                and effective_long_video_mode == LONG_VIDEO_MODE_FULL):
-            rel = _compute_transcript_reliability(
-                sidecar.get("video_id") or metadata.get("id") or "",
-                folder=output_folder,
-                audio_path=video_files[0],
-                threshold=RELIABILITY_DEFAULT_THRESHOLD,
-                allow_model_download=False,
-            )
-            if not rel.get("ok"):
-                log.info("transcript reliability skipped/failed: %s", rel.get("error"))
-            _sidecar_path, sidecar = _read_sidecar_for_folder(output_folder)
-    except Exception as e:
-        log.warning("transcript reliability auto-check failed: %s", e)
+        # Build the corpus markdown.
+        yoink_md = _build_yoink_md(
+            metadata=metadata, url=url, entries=entries, shots=shots,
+            interval=interval, channel_ctx=channel_ctx,
+            yoinked_at=yoinked_at, topic=topic,
+            cap_warning=cap_warning,
+            shot_times=shot_times,
+            media_sections=media_sections,
+            transcript_note=transcript_note,
+        )
+        # Filename matches the folder's slug -- "kapathy-talk/kapathy-talk.md"
+        # rather than "kapathy-talk/yoink.md" -- so the file is identifiable
+        # outside its folder.
+        yoink_path = asset_folder / ("c.md" if refreshing else corpus_name)
+        _atomic_write_text(yoink_path, yoink_md)
+        hook_type_pending = _should_start_hook_type(metadata)
 
-    # E-1: keep_media (short_video + opt-in only) skips the cleanup so the
-    # clip stays in the uoink folder for Zing. Every other capture deletes
-    # the media exactly as before.
-    if not keep_media:
-        for video_file in video_files:
-            video_file.unlink(missing_ok=True)
+        # Structured JSON sidecar (STRAT). Same data the markdown carries but
+        # in a machine-shaped form: future MCP server / programmatic tooling
+        # consumes this without having to parse the human-facing md. Written
+        # next to the md so it travels with the folder.
+        #
+        # `comments` ships as `null` here and is filled in by the comments
+        # worker once yt-dlp returns -- mirrors the markdown placeholder
+        # behavior. Consumers see `comments_status: "pending"` until the
+        # worker either succeeds (`fetched`), finds none (`disabled`), or
+        # fails (`unavailable`).
+        #
+        # E-1 (Zing enabler): opt-in keep_media retains the downloaded media
+        # file for SHORT-VIDEO captures only, so a downstream director tool
+        # (Zing) can analyze the actual clip (cuts / captions / audio). Scoped
+        # to short_video because shorts are tens of MB while long-form media
+        # can run to gigabytes. Default OFF: deletion below stays the unchanged
+        # path and the sidecar gains no field.
+        keep_media = (
+            source_type == SOURCE_TYPE_SHORT_VIDEO
+            and bool(_read_settings().get("keep_media"))
+        )
+        try:
+            sidecar = {
+                "schema_version": 2,  # bumped: structured screenshots + comments
+                "url": url,
+                # v3.1: platform indicator chip in dashboard. Inferred from the
+                # canonical URL produced by _normalize_video_url; default
+                # 'youtube' so existing rows that pre-date this field render
+                # as YouTube without a migration.
+                "platform": _detect_platform_from_url(url),
+                # source_type is None for a regular YouTube/X video (the index
+                # normalizes that to 'video'); 'short_video' for a TikTok /
+                # Instagram Reel / YouTube Short, so it filters as its own facet
+                # without disturbing existing long-form video rows.
+                "source_type": source_type,
+                "title": title,
+                "topic": topic,
+                "yoinked_at": yoinked_at,
+                "interval_seconds": interval,
+                "requested_interval_seconds": requested_interval,
+                "screenshot_cap_warning": cap_warning,
+                "duration_seconds": duration,
+                "requested_long_video_mode": requested_long_video_mode,
+                "long_video_mode": effective_long_video_mode,
+                "long_video_chunks": long_video_chunks,
+                "processed_media_seconds": processed_media_seconds,
+                # TikTok/Instagram expose the creator as uploader/creator rather
+                # than channel, so fall back through all three. This is the "who"
+                # the taxonomy uses as author for a short video.
+                "channel": (metadata.get("channel") or metadata.get("uploader")
+                            or metadata.get("creator")),
+                "channel_url": metadata.get("channel_url") or metadata.get("uploader_url"),
+                "upload_date": metadata.get("upload_date"),
+                "view_count": metadata.get("view_count"),
+                "like_count": metadata.get("like_count"),
+                "video_id": video_id,
+                # Phase 6 (BC-2): every transcript row carries its actual stored
+                # link values, and the held chapter metadata travels with the
+                # capture so reconstruction never re-derives either.
+                "transcript": capture_seed["transcript"],
+                "source_chapters": held_chapters,
+                # CM-11: provenance is explicit whenever transcript rows exist.
+                # A null source means the capture honestly remains caption-less;
+                # asr_fallback carries the caption reason and local ASR status.
+                "transcript_source": transcript_source,
+                "asr_fallback": asr_fallback,
+                "transcript_note": transcript_note,
+                # Structured shape: timestamp + relative path + bare filename so
+                # consumers don't have to parse paths or recompute timestamps.
+                "screenshots": [
+                    {
+                        "timestamp": fmt_time(shot_times[i]),
+                        "path": f"screenshots/{p.name}",
+                        "filename": p.name,
+                    }
+                    for i, p in enumerate(shots)
+                ],
+                "channel_context": channel_ctx,
+                "comments": None,
+                # Lite recovery skips the comments fetch, so mark it skipped rather
+                # than leaving it "pending" forever (no worker will resolve it).
+                "comments_status": (
+                    "skipped"
+                    if effective_long_video_mode == LONG_VIDEO_MODE_LITE
+                    else "pending"
+                ),
+                # Hook Type runs inside the comments worker, so lite mode (which
+                # skips comments) skips hook typing too -- mark it skipped, not
+                # pending, so nothing waits on a worker that never starts.
+                "hook_type_status": (
+                    "pending"
+                    if hook_type_pending
+                    and effective_long_video_mode != LONG_VIDEO_MODE_LITE
+                    else "skipped"
+                ),
+                "hook_type": None,
+                "hook_explanation": None,
+                "hook_type_confidence": None,
+                "hook_type_error": None,
+                "comment_intelligence": None,
+                "comment_intelligence_status": "not_run",
+                "comment_intelligence_error": None,
+                # Sprint 16: entity extraction runs in the background once the
+                # row is indexed. D-17: "pending" only when the flag is on and
+                # a key is set (the same gate the spawn reads), "skipped"
+                # otherwise; the worker flips it to completed / failed.
+                "entity_extraction_status": (
+                    "pending"
+                    if _anthropic_key_for_feature("entity_extraction_enabled")
+                    else "skipped"
+                ),
+                "entity_extraction_error": None,
+            }
+            # E-1: record the kept media filename so downstream tools find the
+            # file without globbing (it sits next to the sidecar in the uoink
+            # folder). Written ONLY when keep_media applies -- the default-off
+            # sidecar stays byte-identical to before.
+            if keep_media:
+                sidecar["media_file"] = video_files[0].name
+            # A5: extraction-time health snapshot, stored on the sidecar.
+            sidecar["health"] = compute_health(sidecar)
+            # v2.5: stamp the per-file data-shape version. Lets v2.5+ readers tell
+            # at a glance whether a sidecar predates facets/engagement. Missing =
+            # treat as 1 via _upgrade_sidecar() (lazy up-convert on read).
+            sidecar["schema_version"] = CURRENT_SIDECAR_SCHEMA
+            sidecar_path = asset_folder / ("c.json" if refreshing else sidecar_name)
+            _atomic_write_text(sidecar_path, json.dumps(sidecar, ensure_ascii=False, indent=2))
+        except (OSError, TypeError) as e:
+            # Do not publish assets while the previous sidecar still references
+            # the old set. A failed staged write leaves that capture intact.
+            log.warning("could not write JSON sidecar: %s", e)
+            if refreshing:
+                raise
+
+        if refreshing:
+            _raise_if_cancelled(cancel_event)
+            # Only helper-owned artifacts participate. Leave notes and unrelated files
+            # (including extra files in screenshots/) where they are.
+            published_names = {staged: final for final, staged in staged_names.items()}
+            staged_files = [p.relative_to(asset_folder) for p in asset_folder.rglob("*")
+                            if p.is_file() and (keep_media or p not in video_files)]
+            replacements = [published_names.get(relative, relative) for relative in staged_files]
+            previous = set(replacements)
+            for pattern in ("video.*", "video-chunk-*.*", "screenshots/shot_*.jpg",
+                            "screenshots/chunk_*_shot_*.jpg", "transcript.txt"):
+                previous.update(p.relative_to(output_folder) for p in output_folder.glob(pattern))
+            shots_target = output_folder / "screenshots"
+            if (shots_target.is_symlink()
+                    or getattr(shots_target, "is_junction", lambda: False)()):
+                raise FileExistsError(f"capture screenshots folder is a link: {shots_target}")
+            for relative in sorted(previous):
+                target = output_folder / relative
+                if target.is_symlink() or (target.exists() and not target.is_file()):
+                    raise FileExistsError(f"capture artifact is not a regular file: {target}")
+
+            # The media publisher can prune superseded artifacts before a
+            # later index step fails. Keep recovery copies with the old sidecar,
+            # leaving the live ledger in place for its ownership checks.
+            media_inputs = output_folder / ".media-inputs"
+            if (media_inputs.is_symlink()
+                    or getattr(media_inputs, "is_junction", lambda: False)()):
+                raise FileExistsError(f"capture media inputs folder is a link: {media_inputs}")
+            if media_inputs.exists():
+                # .s-<8 chars>/m is no longer than .media-inputs, so even
+                # digest filenames near MAX_PATH still fit in the backup.
+                shutil.copytree(media_inputs, media_backup_folder, symlinks=True)
+
+            # Move originals aside, never delete them to make room for replacements.
+            # Keep the rollback journal until indexing starts. Index writers
+            # commit independently and can publish/prune media artifacts.
+            for relative in sorted(previous):
+                _raise_if_cancelled(cancel_event)
+                target = output_folder / relative
+                if target.exists():
+                    backup = backup_folder / stage_name(relative)
+                    backup.parent.mkdir(parents=True, exist_ok=True)
+                    # Journal first: an interruption can arrive immediately
+                    # after the OS moves the file, before Python returns.
+                    moved_originals.append(relative)
+                    rename_artifact(target, backup)
+            for relative in sorted(replacements):
+                _raise_if_cancelled(cancel_event)
+                target = output_folder / relative
+                if not target.parent.exists():
+                    target.parent.mkdir()
+                    created_dirs.append(target.parent)
+                if target.exists():
+                    raise FileExistsError(f"capture artifact appeared during publication: {target}")
+                installed.append(relative)
+                rename_artifact(asset_folder / stage_name(relative), target)
+            yoink_path = _corpus_path(output_folder)
+            sidecar_path = output_folder / f"{video_slug}.json"
+            if keep_media:
+                video_files = [output_folder / p.name for p in video_files]
+
+        _raise_if_cancelled(cancel_event)
+        # This is the commit boundary for the file swap, even if indexing
+        # raises: upsert_yoink commits before citations/media publication.
+        # Restoring old files after that would contradict the row/FTS or
+        # point the sidecar at a media artifact the publisher has pruned.
+        # Ignore later cancellation so pending workers are still started.
+        committed = True
+        if refreshing:
+            _index_yoink(output_folder, sidecar, yoink_path, sidecar_path)
+
+        # v2.5 A1: optional local transcript reliability detection. It runs only
+        # when the user has opted in and the Whisper model is already cached; the
+        # dashboard's "Download model now" button is the explicit consent gate for
+        # the ~150 MB model download. Run after the commit boundary because it
+        # also indexes, but before deleting the video to avoid another fetch.
+        try:
+            if (_read_settings().get("transcript_reliability_auto_check")
+                    and effective_long_video_mode == LONG_VIDEO_MODE_FULL):
+                rel = _compute_transcript_reliability(
+                    sidecar.get("video_id") or metadata.get("id") or "",
+                    folder=output_folder,
+                    audio_path=video_files[0],
+                    threshold=RELIABILITY_DEFAULT_THRESHOLD,
+                    allow_model_download=False,
+                )
+                if not rel.get("ok"):
+                    log.info("transcript reliability skipped/failed: %s", rel.get("error"))
+                _sidecar_path, sidecar = _read_sidecar_for_folder(output_folder)
+        except Exception as e:
+            log.warning("transcript reliability auto-check failed: %s", e)
+
+        # Refresh downloads stay in staging until cleanup. Preserve the
+        # first-capture cleanup and partial-artifact recovery behavior.
+        if not refreshing and not keep_media:
+            for video_file in video_files:
+                video_file.unlink(missing_ok=True)
+
+    except BaseException as e:
+        if committed and refreshing:
+            # Publication may have committed before raising. Keep both the
+            # published files and the backup; never roll files back under a
+            # newer index/media ledger. Unpublished downloads can be removed.
+            preserve_stage = True
+            try:
+                shutil.rmtree(asset_folder)
+            except OSError as cleanup_error:
+                log.warning("could not remove unpublished capture files %s: %s",
+                            asset_folder, cleanup_error)
+            log.error("capture refresh publication failed; replacement files kept in %s; "
+                      "previous files retained in %s; media inputs in %s",
+                      output_folder, backup_folder, media_backup_folder)
+            if isinstance(e, Exception):
+                raise RuntimeError(
+                    f"Capture refresh publication failed: {e}. "
+                    f"Replacement files are published in {output_folder}. "
+                    f"Previous files are retained in {backup_folder}; "
+                    f"media inputs are retained in {media_backup_folder}"
+                ) from e
+        elif not committed:
+            # Even an unexpected interruption during rollback must leave the
+            # backup directory intact until restoration has finished.
+            preserve_stage = bool(moved_originals)
+            rollback_errors = []
+            # Move this attempt's files back to staging before restoring the
+            # originals. If any restore fails, retain every remaining backup.
+            for relative in reversed(installed):
+                try:
+                    staged = asset_folder / stage_name(relative)
+                    if staged.exists():
+                        # This journal entry preceded a rename that did not
+                        # move the staged file. Do not touch the destination.
+                        continue
+                    rename_artifact(output_folder / relative, staged)
+                except OSError as e:
+                    rollback_errors.append(e)
+            for relative in reversed(moved_originals):
+                try:
+                    backup = backup_folder / stage_name(relative)
+                    if not backup.exists():
+                        # The backup rename failed before moving this file.
+                        continue
+                    target = output_folder / relative
+                    if target.exists() or target.is_symlink():
+                        raise FileExistsError(f"cannot restore occupied artifact: {target}")
+                    rename_artifact(backup, target)
+                except OSError as e:
+                    rollback_errors.append(e)
+            for directory in reversed(created_dirs):
+                try:
+                    directory.rmdir()  # only if empty; never remove other files
+                except OSError as e:
+                    rollback_errors.append(e)
+            if rollback_errors:
+                preserve_stage = True
+                log.error("capture rollback incomplete; previous files retained in %s: %s",
+                          stage_root, rollback_errors)
+                raise RuntimeError(
+                    f"Capture refresh failed; could not restore all files. "
+                    f"Previous files are retained in {stage_root}"
+                ) from rollback_errors[0]
+            preserve_stage = False
+        raise
+    finally:
+        if stage_root is not None and not preserve_stage:
+            try:
+                shutil.rmtree(stage_root)
+            except OSError as e:
+                # Cleanup must not turn a committed capture into a failure or
+                # hide the original error. Leave locked files for recovery.
+                log.warning("could not remove capture staging directory %s: %s", stage_root, e)
 
     # Sprint 19.6 / Fix 6: refresh _all-yoinks-index.md INCREMENTALLY
     # instead of the pre-Sprint-19.6 full-tree rescan that became O(N) on
@@ -5816,20 +5998,16 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
     except Exception as e:
         log.warning("incremental index call site failed: %s", e)
 
-    # Sprint 15 (A1/A4/A5): incrementally index this yoink + its citation
-    # map + health score in index.db. Best-effort except identity/constraint
-    # conflicts, which must remain visible to the caller. (This is separate
-    # from _regenerate_index above, which maintains the human-readable
-    # _all-yoinks-index.md file.)
-    try:
-        _index_yoink(output_folder, sidecar, yoink_path, sidecar_path)
-    except index.sqlite3.IntegrityError:
-        # A globally reserved slug must not be reported as a successful
-        # capture. Keep the new artifacts and the existing index row intact.
-        log.exception("library identity conflict for %s", output_folder)
-        raise
-    except Exception as e:
-        log.warning("library index update failed for %s: %s", output_folder, e)
+    # First captures retain their original order: media cleanup, markdown
+    # index update, then SQLite. Refreshes already indexed at the swap boundary.
+    if not refreshing:
+        try:
+            _index_yoink(output_folder, sidecar, yoink_path, sidecar_path)
+        except index.sqlite3.IntegrityError:
+            log.exception("library identity conflict for %s", output_folder)
+            raise
+        except Exception as e:
+            log.warning("library index update failed for %s: %s", output_folder, e)
 
     # Sprint 16 (A2): extract named entities off the transcript in the
     # background, in parallel with the comments / Comment Intelligence
