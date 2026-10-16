@@ -21,6 +21,8 @@ making 29 stdio tools. AZ-5h owns the stdio write lifetime: budgeted
 requests keep one admission through the real SDK JSON-RPC dump, then
 release. The registered low-level server applies the same settlement when
 it runs on the installed SDK stdio streams.
+Research playbooks add five prompts and get_playbook_input (T3): the current
+surface has 33 tools and 9 prompts.
 """
 
 from __future__ import annotations
@@ -30,6 +32,7 @@ import json
 import sys
 import time
 from pathlib import Path
+from typing import Literal
 
 # CRIT-1 (C-01): the installer bundles the embeddable Windows Python, whose
 # ._pth locks sys.path to the interpreter's own directory and never adds the
@@ -651,6 +654,25 @@ def read_library_resource(uri: str):
     return uoink_mcp_tools.call_tool("read_library_resource", {"uri": uri})
 
 
+@mcp.tool(
+    name="get_playbook_input",
+    title="Prepare research playbook input",
+    annotations=mcp_types.ToolAnnotations(
+        readOnlyHint=True, destructiveHint=False,
+        idempotentHint=True, openWorldHint=False,
+    ),
+    description=uoink_mcp_tools.PLAYBOOK_INPUT_DESCRIPTION,
+)
+def get_playbook_input(
+    playbook: Literal["outlier-posts", "transcript-intel", "comment-mining",
+                      "creator-teardown", "repurpose-pack"],
+    arguments: dict,
+) -> dict:
+    return uoink_mcp_tools.call_tool("get_playbook_input", {
+        "playbook": playbook, "arguments": arguments,
+    })
+
+
 # Phase 4 second increment (run AV-2): brief generation belongs to the client.
 # get_library_brief_input is a read; publish_library_brief is a local write
 # under DATA_ROOT/reach/briefs. Both are intercepted below like the three read
@@ -752,6 +774,7 @@ def _register_phase4_stdio() -> None:
     try:
         import library_prompts
         import library_resources
+        import research_playbooks
     except ImportError as exc:
         print(f"Uoink MCP: Phase 4 library modules unavailable ({exc}); "
               "resources and prompts are not served.", file=sys.stderr)
@@ -778,6 +801,9 @@ def _register_phase4_stdio() -> None:
 
     ResourceError = library_resources.ResourceError
     limits = library_resources.LIMITS
+    # Register the new read with the existing transport admission owner so
+    # its slot and deadline survive through the SDK's final JSON-RPC dump.
+    library_resources.BUDGETED_STDIO_TOOLS |= {"get_playbook_input"}
 
     def reader():
         # Request-scoped: storage is bound inside the first admitted operation
@@ -847,13 +873,18 @@ def _register_phase4_stdio() -> None:
         return [mcp_types.Prompt(
             name=prompt["name"], description=prompt["description"],
             arguments=[mcp_types.PromptArgument(**argument) for argument in prompt["arguments"]],
-        ) for prompt in library_prompts.PROMPTS]
+        ) for prompt in (*library_prompts.PROMPTS, *research_playbooks.PLAYBOOKS)]
 
     @low.get_prompt()
     async def _phase4_get_prompt(name, arguments):
         try:
             active = reader()
-            result = library_prompts.get_prompt(active, work_service(active), name, arguments)
+            if name == "transcript-intel":
+                result = uoink_mcp_tools._research_transcript_result(active, arguments, prompt=True)
+            elif name in {p["name"] for p in research_playbooks.PLAYBOOKS}:
+                result = research_playbooks.get_prompt(active, name, arguments)
+            else:
+                result = library_prompts.get_prompt(active, work_service(active), name, arguments)
             rendered = mcp_types.GetPromptResult(
                 description=result["description"],
                 messages=[mcp_types.PromptMessage(
@@ -864,6 +895,8 @@ def _register_phase4_stdio() -> None:
             active.assert_within_deadline()
         except ResourceError as exc:
             raise mcp_error(exc) from None
+        except Exception:
+            raise mcp_error(ResourceError("internal_error")) from None
         return rendered
 
     def _bind_transport_handle_request() -> None:
@@ -968,8 +1001,8 @@ def _register_phase4_stdio() -> None:
             return mcp_types.ServerResult(mcp_types.CallToolResult(
                 content=[mcp_types.TextContent(type="text", text=text)], isError=is_error))
 
-    def media_export_result(arguments):
-        # Phase 6 (BC-2): the domain envelope is the tool text, isError
+    def bounded_registry_result(name, arguments):
+        # Bounded registry reads: the domain envelope is the tool text, isError
         # mirrors ok, and the actual wrapped response is measured against
         # the shared transport budget before it leaves the process. The
         # registry handler already admitted the request on the process
@@ -977,7 +1010,7 @@ def _register_phase4_stdio() -> None:
         args = arguments if arguments is not None else {}
         if not isinstance(args, dict):
             args = {}
-        envelope = uoink_mcp_tools.call_tool("export_cited_range", args)
+        envelope = uoink_mcp_tools.call_tool(name, args)
         if not isinstance(envelope, dict) or "ok" not in envelope:
             envelope = ResourceError("internal_error").envelope()
         text = library_resources.render_tool_text(envelope)
@@ -985,7 +1018,7 @@ def _register_phase4_stdio() -> None:
         payload = {"content": [{"type": "text", "text": text}], "isError": is_error}
         if library_resources.wire_bytes(payload) + 256 > limits["max_response_bytes"]:
             envelope = ResourceError("resource_too_large", details={
-                "what": "export_cited_range", "next_step": "read_library_resource"}).envelope()
+                "what": name, "next_step": "read_library_resource"}).envelope()
             text, is_error = library_resources.render_tool_text(envelope), True
         return mcp_types.ServerResult(mcp_types.CallToolResult(
             content=[mcp_types.TextContent(type="text", text=text)], isError=is_error))
@@ -996,8 +1029,8 @@ def _register_phase4_stdio() -> None:
                 return tool_result(req.params.name, req.params.arguments)
             if req.params.name == "get_library_activity":
                 return activity_result(req.params.arguments)
-            if req.params.name == "export_cited_range":
-                return media_export_result(req.params.arguments)
+            if req.params.name in ("export_cited_range", "get_playbook_input"):
+                return bounded_registry_result(req.params.name, req.params.arguments)
             return await fastmcp_call_tool(req)
         handlers[mcp_types.CallToolRequest] = _phase4_call_tool
 
@@ -1010,7 +1043,7 @@ def _register_phase4_stdio() -> None:
                         # Same strict schema and text as the HTTP registry.
                         tool.inputSchema = library_resources.TOOL_SCHEMAS[tool.name]
                         tool.description = library_resources.TOOL_DESCRIPTIONS[tool.name]
-                    if tool.name in ("get_library_activity", "export_cited_range"):
+                    if tool.name in ("get_library_activity", "export_cited_range", "get_playbook_input"):
                         if tool.name in uoink_mcp_tools.TOOL_REGISTRY:
                             reg_spec = uoink_mcp_tools.TOOL_REGISTRY[tool.name]
                             tool.inputSchema = reg_spec.input_schema

@@ -12,6 +12,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- Five local research playbooks on MCP as prompts and a shared
+  `get_playbook_input` tool: 9 prompts, 33 stdio tools and 89 HTTP registry
+  tools. The tool returns cited packets without model or network calls;
+  unexpected adapter failures return a structured `internal_error`. Transcript
+  packets cap chapters per capture and count omissions before response trimming.
 - Local research packet builders for outlier posts, transcript intelligence,
   comment mining, creator teardowns and repurposing, with deterministic metrics,
   citation checks and bounded reads of saved discovery snapshots. Adapted

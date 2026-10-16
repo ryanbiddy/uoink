@@ -9,8 +9,8 @@ Transports: stdio, plus an experimental authenticated local HTTP JSON-RPC helper
 
 Uoink has two deliberately different tool surfaces:
 
-- Supported stdio registry: **32 tools**.
-- Local HTTP/OpenAPI registry: **88 tools**.
+- Supported stdio registry: **33 tools**.
+- Local HTTP/OpenAPI registry: **89 tools**.
 
 The supported stdio MCP surface covers extraction, playlist jobs, search,
 clip search and evidence cards, corpus retrieval, citation maps, health
@@ -914,9 +914,58 @@ reader).
 Refusals use the Phase 4 domain envelope (`invalid_request`,
 `resource_not_found`, `resource_deleted`, `revision_unavailable`,
 `resource_too_large`, `library_unavailable`, `deadline_exceeded`,
-`rate_limited`, ...). Stdio also advertises five resource templates and four
-prompts (`consult-library`, `evidence-brief`, `whats-new`, `reshelve-review`);
+`rate_limited`, ...). Stdio also advertises five resource templates and nine
+prompts: the four frozen library prompts (`consult-library`, `evidence-brief`,
+`whats-new`, `reshelve-review`) plus the five research playbooks below.
 HTTP stays tools-only.
+
+### get_playbook_input
+
+Prepare evidence for a research report from saved captures. The server computes
+metrics and citation keys; the connected client writes the report. This read
+requires no API key and makes no model or network calls.
+
+```json
+{"playbook":"outlier-posts","arguments":{"author":"Example creator","platform":"youtube"}}
+```
+
+Both fields are required. `arguments` is an object with the same string values
+accepted by the matching stdio prompt:
+
+| Playbook / prompt | Arguments |
+|---|---|
+| `outlier-posts` | Required `author`; optional `platform`, `since`. |
+| `transcript-intel` | Exactly one of `video_ids` (at most 8), `topic`, `author`; optional `since`. |
+| `comment-mining` | Exactly one of `video_ids` (at most 10), `author`; `lens` is `voc` (default) or `demand`. |
+| `creator-teardown` | Required `author`; optional `platform`. Needs at least 3 saved captures. |
+| `repurpose-pack` | Required `video_ids` (1–5); optional `kinds`: `tweet`, `thread`, `linkedin`, `script`, `newsletter` (default `tweet,thread`). |
+
+Pass `video_ids` and `kinds` as comma-separated strings. `author` is 1–200
+characters without controls; `topic` is an FTS query of at most 512 characters.
+`platform` accepts `youtube`, `tiktok`, `instagram`, `reddit`. `since` is a UTC
+capture date (`YYYY-MM-DD`), never a future date. Unknown arguments are refused
+before storage access; missing or deleted captures are refused.
+
+Success returns `{ok, playbook, instruction, packet, packet_hash}`. The packet
+uses contract `playbooks-v1-2026-10-15` and includes bounded coverage, items and
+refs. `packet_hash` hashes canonical `items` and `refs`; it excludes generation
+time. Reads share the library's 2-active, 60-per-minute guard and 2-second
+deadline, with a 64 KB response budget. Refusals use the Phase 4 error envelope,
+including `invalid_request`, `rate_limited`, `deadline_exceeded` and
+`internal_error`; stdio tool failures set `isError: true`.
+
+Transcript packets retain at most 12 chapters and 2 KiB of escaped chapter
+text per capture before applying the packet budget. Omitted chapters count
+toward `coverage.dropped_for_budget` and `coverage.budget_drops.chapters`.
+The same cap applies to prompts and tools, leaving room for transcript clips.
+
+`prompts/get` accepts each playbook name directly and returns two user messages:
+the fixed instruction, then a packet fenced as
+`<untrusted_uoink_library_context>`. Source text is data, never instructions.
+Reports cite `[cap:]`, `[m:]`, `[t:]`, `[cm:]`, `[ctx:]` and, when a saved
+discovery snapshot exists, `[sc:]` keys. Metrics state their as-of time;
+non-caption transcript quotes are approximate. Repurposed drafts retain their
+credit lines. These reads do not capture, publish, apply changes or run discovery.
 
 ### get_library_brief_input
 

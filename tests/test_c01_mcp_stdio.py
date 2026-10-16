@@ -84,6 +84,7 @@ CANONICAL_STDIO_TOOLS = {
     "publish_library_brief",
     # Phase 6 run BC-2 (contract phase6-v1): read-only cited range export.
     "export_cited_range",
+    "get_playbook_input",
 }
 
 REMOVED_STDIO_ALIASES = {

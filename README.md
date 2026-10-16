@@ -37,9 +37,9 @@ Published sources are indexed in one local library. Podcast audio and transcript
 
 **1. Clipboard (the creator path)** — Click Uoink, paste into Claude / ChatGPT. Transcript plus a paste-safe subset of screenshots inlined as images so the model sees text *and* frames in one paste.
 
-**2. MCP server (the agent path)** — A local Model Context Protocol server exposing 32 tools over stdio (the curated everyday set, plus five library resource templates, four prompts, the two client-run brief tools since the Living Library Phase 4 increments and the read-only Phase 6 cited export), tested with **Claude Desktop and Cursor**. Cline and Continue are standard-stdio compatibility paths, not individually smoke-tested. Two surfaces, on purpose:
+**2. MCP server (the agent path)** — A local Model Context Protocol server exposing 33 tools over stdio, five library resource templates and nine prompts. Tools include local research packets, client-run briefs and cited transcript exports. The stdio transport is tested with **Claude Desktop and Cursor**. Cline and Continue are standard-stdio compatibility paths, not individually smoke-tested. Two surfaces, on purpose:
 - **stdio** exposes the curated everyday set most agents need, including video capture, podcast feed/episode operations, local transcription jobs, corpus publishing, search, clip search and evidence cards, citation maps, and analysis.
-- **HTTP JSON-RPC** at `/mcp/v1` exposes the 88-tool local registry (Writing Studio, workspaces, podcasts, monitored playlists, taste/engagement memory, source capture, clip search, evidence cards, the six Living Library work-queue tools, the four Phase 3 source-subscription tools, the Phase 5 activity report, the three Phase 4 bounded read tools, the two Phase 4 brief tools and the Phase 6 cited export) — the same handlers, same auth token. `search_clips` and `get_evidence_card` were registry-only in Phase 1; since 2026-09-04 they are also on stdio (23 → 25 tools). The Living Library tools stay registry-only.
+- **HTTP JSON-RPC** at `/mcp/v1` exposes the 89-tool local registry (Writing Studio, workspaces, podcasts, monitored playlists, taste/engagement memory, source capture, clip search, evidence cards, the six Living Library work-queue tools, the four Phase 3 source-subscription tools, the Phase 5 activity report, the three Phase 4 bounded read tools, the two Phase 4 brief tools, the Phase 6 cited export and research playbooks) — the same handlers, same auth token. `search_clips` and `get_evidence_card` were registry-only in Phase 1; since 2026-09-04 they are also on stdio (23 → 25 tools). The six Living Library work-queue tools stay registry-only.
 
 **3. OpenAPI bridge (for local agents that don't speak MCP)** — Local OpenAPI-capable agents and scripts can drive the same tools over an OpenAPI 3.1 surface at `/openapi/v1/spec.json` + `POST /tools/<name>`.
 
@@ -95,6 +95,8 @@ not required.
 **Extension flow:** click Uoink under a video → Uoink extracts transcript, screenshots, comments, metadata → Markdown corpus lands on your clipboard (screenshots embedded) and the full set saves to disk → paste, run a prompt, get analysis.
 
 **Agent flow (MCP):** your agent has the Uoink tools after setup → ask *"uoink this video and decode the hook"* → the agent calls `uoink_video` → `classify_hook` → analysis, no clipboard step.
+
+Five research playbooks work over saved captures: `outlier-posts`, `transcript-intel`, `comment-mining`, `creator-teardown` and `repurpose-pack`. Use their stdio prompts or `get_playbook_input` on either transport. Uoink computes the metrics and supplies cited evidence; your client writes the report. These reads need no API key and make no network calls. See [arguments and examples](docs/v2-mcp.md#get_playbook_input).
 
 ## Privacy
 
