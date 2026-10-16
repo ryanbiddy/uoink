@@ -4224,6 +4224,7 @@
                     <p>Generated drafts, manual edits, screenshot choices, and X handoff all stay visible here before anything leaves your machine.</p>
                   </div>
                   <div class="compute-indicator hidden" id="writingComputeIndicator">Generated using your Anthropic key (no agent)</div>
+                  <div class="hidden" id="writingGenerateStatus" role="status" aria-live="polite"></div>
                   <div class="writing-output markdown-rendered" id="writingOutput">Choose a source, then generate or paste a draft.</div>
                   <div class="generate-research-panel hidden" id="generateResearchPanel"></div>
                   <div class="warning-panel" id="voiceWarningPanel">
@@ -5344,6 +5345,12 @@
       writingPieces: [],
       writingLastPayload: null,
       writingDrafts: [""],
+      // D21: the saved draft's id and the source it was saved from; Save
+      // reuses the id only while that same source is picked.
+      writingDraftId: null,
+      writingDraftSourceId: null,
+      // D22: true while Generate/Revise runs; the draft actions stay off.
+      writingGenerating: false,
       writingSelectedSourceRow: null,
       writingScreenshots: [],
       writingSelectedScreenshots: new Set(),
@@ -5563,6 +5570,7 @@
       settingsAgentSetupCard: document.getElementById("settingsAgentSetupCard"),
       writingOutput: document.getElementById("writingOutput"),
       writingComputeIndicator: document.getElementById("writingComputeIndicator"),
+      writingGenerateStatus: document.getElementById("writingGenerateStatus"),
       generateResearchPanel: document.getElementById("generateResearchPanel"),
       copyWriting: document.getElementById("copyWriting"),
       saveWriting: document.getElementById("saveWriting"),
@@ -5969,6 +5977,9 @@
     }
 
     function setWritingActionsEnabled(enabled) {
+      // D22: while Generate/Revise runs nothing on screen is the new draft
+      // yet, so Save/Copy/Revise stay off until the run ends.
+      enabled = Boolean(enabled) && !state.writingGenerating;
       if (els.copyWriting) els.copyWriting.disabled = !enabled;
       if (els.saveWriting) els.saveWriting.disabled = !enabled;
       if (els.reviseWriting) els.reviseWriting.disabled = !enabled;
@@ -5994,29 +6005,66 @@
         return;
       }
       els.writingComputeIndicator.classList.add("hidden");
+      setWritingRunStatus("");
       els.writingOutput.dataset.rawText = text;
       els.writingOutput.innerHTML = renderMarkdown(text) || htmlEscape(text);
       setWritingActionsEnabled(Boolean(text.trim()));
       updateWritingComposerFromText(text);
     }
 
+    // D22: Generate/Revise progress and failures live in their own status
+    // line, so the preview and the composer only change when a run returns
+    // a draft.
+    function setWritingRunStatus(html) {
+      if (!els.writingGenerateStatus) return;
+      els.writingGenerateStatus.innerHTML = html || "";
+      els.writingGenerateStatus.classList.toggle("hidden", !html);
+    }
+
+    function beginWritingRun(message) {
+      state.writingGenerating = true;
+      syncWritingGenerateState();
+      setWritingActionsEnabled(false);
+      setWritingRunStatus(`<span class="soft-note">${htmlEscape(message)}</span>`);
+    }
+
+    function endWritingRun() {
+      state.writingGenerating = false;
+      syncWritingGenerateState();
+      if (String(els.writingOutput.dataset.rawText || "").trim()) setWritingActionsEnabled(true);
+      else syncWritingActionsFromComposer();
+    }
+
+    function writingDraftOnScreen() {
+      return Boolean(String(els.writingOutput.dataset.rawText || "").trim()) || composerHasManualDraft();
+    }
+
     function renderAgentConnectionFallback() {
       const connected = connectedAgents();
       const hasConnectedConfig = connected.length > 0;
       state.writingLastPayload = null;
-      state.writingDrafts = [""];
-      els.writingOutput.dataset.rawText = "";
-      els.writingOutput.innerHTML = `
+      const notice = `
         <div class="connect-agent-state">
           <strong>${hasConnectedConfig ? `Open ${htmlEscape(connected.map((agent) => agent.label).join(" or "))} to generate this draft` : "Connect a writing agent to generate this draft"}</strong>
           <p>${hasConnectedConfig ? "Uoink prepared the context, but it can't drive that client from here. Open the client, or add an Anthropic key to generate right in the dashboard." : "Uoink found the source and prepared the local context. Finish setup in the agent card beside the Generate button."}</p>
           <button class="button primary" type="button" data-focus-agent-setup>${hasConnectedConfig ? "Review agent setup" : "View agent setup"}</button>
         </div>
       `;
+      renderAgentSetup();
+      // D22: a run that came back without a draft keeps the draft already
+      // on screen (agent output or hand edits) and says why in the status
+      // line instead.
+      if (state.writingGenerating && writingDraftOnScreen()) {
+        setWritingRunStatus(notice);
+        return;
+      }
+      setWritingRunStatus("");
+      state.writingDrafts = [""];
+      els.writingOutput.dataset.rawText = "";
+      els.writingOutput.innerHTML = notice;
       setWritingActionsEnabled(false);
       renderThreadBuilder();
       els.voiceWarningCopy.textContent = "Voice DNA warnings appear after an agent returns a draft.";
-      renderAgentSetup();
     }
 
     function connectedAgents() {
@@ -7142,6 +7190,7 @@
         const data = await authFetch(`/writing/draft/${id}`);
         if (data && data.body) {
           state.writingDraftId = id;
+          state.writingDraftSourceId = writingDraftSourceKey(data.draft && data.draft.yoink_id);
           localStorage.setItem("uoink.writingDraftId", String(id));
           setWritingOutput(data.body);
         }
@@ -11766,7 +11815,7 @@
 
     function syncWritingGenerateState() {
       const hasPick = Boolean(els.writingSource.value && state.writingSelectedSourceRow);
-      document.getElementById("generateWriting").disabled = !hasPick;
+      document.getElementById("generateWriting").disabled = !hasPick || state.writingGenerating;
     }
 
     // The selected source renders as a two-line chip in place of the raw
@@ -12034,14 +12083,25 @@
       return selectedWritingMode() === "thread" ? drafts.join("\n\n") : drafts[0] || "";
     }
 
+    // The source a saved draft is filed under, as the helper stores it
+    // (blank for a draft saved without a source).
+    function writingDraftSourceKey(value) {
+      return String(value || "").trim();
+    }
+
     async function saveWritingDraft() {
       // Save must be a real request against POST /writing/draft (QA #32).
       // The old handler toasted "saved locally" while sending nothing.
       const body = currentWritingText().trim();
       if (!body) return showToast("Write or generate a draft before saving.");
+      const sourceId = writingDraftSourceKey(els.writingSource.value);
+      // D21: the helper overwrites the draft whose id is sent, source and
+      // all, so the id is reused only for the draft saved from the source
+      // that is picked now. A draft for any other source saves as a new one.
+      const sameSource = Boolean(state.writingDraftId) && state.writingDraftSourceId === sourceId;
       const payload = {
-        id: state.writingDraftId || undefined,
-        source_yoink_id: els.writingSource.value || undefined,
+        id: sameSource ? state.writingDraftId : undefined,
+        source_yoink_id: sourceId || undefined,
         kind: selectedWritingMode(),
         source_credit_line: writingAttributionLine(),
         body,
@@ -12049,6 +12109,7 @@
       try {
         const data = await authFetch("/writing/draft", { method: "POST", body: JSON.stringify(payload) });
         state.writingDraftId = data.id;
+        state.writingDraftSourceId = sourceId;
         localStorage.setItem("uoink.writingDraftId", String(data.id));
         showToast("Draft saved. It'll be here after a reload.");
       } catch (err) {
@@ -12065,6 +12126,7 @@
         const data = await authFetch(`/writing/draft/${savedId}`);
         if (data && data.body) {
           state.writingDraftId = savedId;
+          state.writingDraftSourceId = writingDraftSourceKey(data.draft && data.draft.yoink_id);
           setWritingOutput(data.body);
           showToast("Recovered your saved draft.");
         }
@@ -12922,15 +12984,17 @@
     async function generateWriting() {
       const sourceId = els.writingSource.value;
       if (!sourceId) return showToast("Choose a source uoink first.");
+      // One run at a time: Generate, Revise and Regenerate all land here.
+      if (state.writingGenerating) return;
       const mode = selectedRadio("writingMode", "tweet");
       if (mode === "script") {
-        setWritingOutput("Preparing a grounded script...");
+        beginWritingRun("Preparing a grounded script...");
         try {
           await generateScriptInWriting();
         } catch (err) {
-          els.writingOutput.innerHTML = degradedState("Generate needs another pass.", "Uoink couldn't prepare this script.", err.message);
-          els.writingOutput.dataset.rawText = "";
-          setWritingActionsEnabled(false);
+          setWritingRunStatus(degradedState("Generate needs another pass.", "Uoink couldn't prepare this script.", err.message));
+        } finally {
+          endWritingRun();
         }
         return;
       }
@@ -12950,7 +13014,7 @@
         body.generate = true;
         body.compute_mode = "byo_key";
       }
-      setWritingOutput("Preparing your draft...");
+      beginWritingRun("Preparing your draft...");
       try {
         const data = await callMcpTool(toolName, body);
         if (data.mode === "grounding_only") {
@@ -12971,9 +13035,9 @@
         renderWritingResult(data);
         showToast(data.mode === "grounding_only" ? "Connect a writing agent to generate." : "Writing draft ready.");
       } catch (err) {
-        els.writingOutput.innerHTML = degradedState("Writing Studio needs another pass.", "Uoink couldn't prepare this draft. Details are tucked below.", err.message);
-        els.writingOutput.dataset.rawText = "";
-        setWritingActionsEnabled(false);
+        setWritingRunStatus(degradedState("Writing Studio needs another pass.", "Uoink couldn't prepare this draft. Details are tucked below.", err.message));
+      } finally {
+        endWritingRun();
       }
     }
 
