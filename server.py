@@ -19,6 +19,7 @@ import contextlib
 import hashlib
 import json
 import logging
+from logging.handlers import RotatingFileHandler
 import math
 import os
 import queue
@@ -2051,7 +2052,8 @@ logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s %(levelname)s %(message)s",
     handlers=[
-        logging.FileHandler(LOG_PATH, encoding="utf-8"),
+        RotatingFileHandler(LOG_PATH, maxBytes=5 * 1024 * 1024,
+                            backupCount=3, encoding="utf-8"),
         logging.StreamHandler(sys.stdout),
     ],
 )
@@ -8450,7 +8452,12 @@ def _record_single_extract_job(url: str, started_at: str, *,
         failure_phase = result.get("failure_phase") or failure_phase or "save"
     ok = result is not None and not error
     folder_path = Path(result["folder"]) if result and result.get("folder") else folder
-    corpus_path = _resolve_corpus_path(folder_path) if folder_path else None
+    corpus_path = None
+    try:
+        corpus_path = _resolve_corpus_path(folder_path) if folder_path else None
+    except Exception as e:
+        # The optional corpus link must not prevent recording the outcome.
+        log.warning("single capture corpus lookup failed: %s", type(e).__name__)
     job = {
         # A saved-with-errors result carries the job ID its publication
         # receipt recorded, so the retry recognizes this attempt's job.
@@ -12550,6 +12557,8 @@ class Handler(BaseHTTPRequestHandler):
         return False
 
     def _send_json(self, status: int, payload: dict):
+        if status >= 400:
+            self._drain_early_error_body()
         body = json.dumps(payload).encode("utf-8")
         self.send_response(status)
         self.send_header("Content-Type", "application/json; charset=utf-8")
@@ -12557,6 +12566,45 @@ class Handler(BaseHTTPRequestHandler):
         self._send_cors(self._cors_origin())
         self.end_headers()
         self.wfile.write(body)
+
+    def _drain_early_error_body(self):
+        """Consume a rejected POST's body before replying, within tight limits.
+
+        Closing with unread bytes can reset the connection on Windows and
+        hide the HTTP error. Never wait indefinitely or trust an unbounded
+        Content-Length from an unauthenticated client.
+        """
+        if (getattr(self, "command", None) != "POST"
+                or getattr(self, "_body_consumed", False)):
+            return
+        self._body_consumed = True
+        self.close_connection = True
+        try:
+            remaining = min(int(self.headers.get("Content-Length", "0")),
+                            MAX_BODY_BYTES)
+        except ValueError:
+            return
+        if remaining <= 0:
+            return
+        previous_timeout = self.connection.gettimeout()
+        deadline = time.monotonic() + 1.0
+        try:
+            while remaining > 0:
+                timeout = deadline - time.monotonic()
+                if timeout <= 0:
+                    break
+                if previous_timeout is not None:
+                    timeout = min(timeout, previous_timeout)
+                self.connection.settimeout(timeout)
+                chunk = self.rfile.read1(min(remaining, 16 * 1024))
+                if not chunk:
+                    break
+                remaining -= len(chunk)
+        except OSError:
+            # A stalled/disconnected client must not replace the HTTP error.
+            pass
+        finally:
+            self.connection.settimeout(previous_timeout)
 
     def _send_empty(self, status: int = 202):
         self.send_response(status)
@@ -12610,6 +12658,7 @@ class Handler(BaseHTTPRequestHandler):
         if length > MAX_BODY_BYTES:
             raise Handler._BodyError(413, f"Body too large (>{MAX_BODY_BYTES} bytes)")
         raw = self.rfile.read(length) if length else b"{}"
+        self._body_consumed = True
         try:
             text = raw.decode("utf-8") or "{}"
             if strict:
@@ -12648,7 +12697,7 @@ class Handler(BaseHTTPRequestHandler):
         bare = self.path.split("?", 1)[0]
         if bare == "/ping" or bare == "/health":
             # Public liveness probe -- intentionally unauthenticated.
-            log.info("GET %s from %s -> ok", bare, self.client_address[0])
+            log.debug("GET %s from %s -> ok", bare, self.client_address[0])
             settings = _read_settings() or {}
             whisper_model = whisper_runner.normalize_model(
                 settings.get("whisper_model"))
@@ -15953,6 +16002,7 @@ class Handler(BaseHTTPRequestHandler):
                 "ok": False, "code": "too_large",
                 "error": f"That image is over {mb} MB. Nothing was saved."})
         image_bytes = self.rfile.read(length)
+        self._body_consumed = True
 
         qs = parse_qs(urlparse(self.path).query)
 
@@ -17029,13 +17079,13 @@ class Handler(BaseHTTPRequestHandler):
         self._send_json(404, {"ok": False, "error": "not found"})
 
     def do_POST(self):
+        self._body_consumed = False
         # C-04: Host allowlist before auth so a rebind never reaches the
-        # token check or the body reader.
+        # token check or body parsing.
         if self._reject_bad_host():
             return
-        # Auth first so we don't even read the body for unauthenticated
-        # callers. Public POST endpoints don't exist today, so the gate is
-        # unconditional here.
+        # Auth first; rejected bodies are only discarded, never parsed.
+        # Public POST endpoints don't exist today, so the gate is unconditional.
         if not self._require_token():
             return
         # /images carries raw image bytes, not JSON, and can exceed the 64KB
