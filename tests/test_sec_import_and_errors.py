@@ -11,6 +11,7 @@ import contextlib
 import io
 import json
 import logging
+from logging.handlers import RotatingFileHandler
 import re
 import secrets
 import shutil
@@ -26,6 +27,8 @@ from unittest.mock import Mock
 from urllib.parse import urlparse
 
 import pytest
+
+import index
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -57,7 +60,7 @@ def helper(source_tree, tmp_path, monkeypatch):
     names = {
         "Handler", "ALLOWED_ORIGINS", "ALLOWED_HOST_NAMES", "PINNED_EXTENSION_ID",
         "MAX_BODY_BYTES", "EXPORTS_DIRNAME", "_allowed_extension_ids",
-        "_STRICT_JSON_ROUTE_PREFIXES",
+        "_STRICT_JSON_ROUTE_PREFIXES", "DISCOVERY_INTENT_ROUTE",
         "_strict_json_route", "_path_has_parent_ref", "import_corpus_data",
         "run_cli", "rebuild_index_from_disk", "_sanitize_error", "_subprocess_output",
         "_youtube_rate_limit_detail",
@@ -87,6 +90,7 @@ def helper(source_tree, tmp_path, monkeypatch):
         "__name__": "offline_import_errors", "Path": Path,
         "BaseHTTPRequestHandler": BaseHTTPRequestHandler,
         "json": json, "re": re, "secrets": secrets, "subprocess": subprocess,
+        "index": index, "time": time,
         "urlparse": urlparse, "os": SimpleNamespace(environ={}),
         "HOST": "127.0.0.1", "PORT": PORT, "TOKEN": "synthetic-test-token",
         "VERSION": "test", "DESKTOP_ROOT": output,
@@ -122,6 +126,19 @@ def helper(source_tree, tmp_path, monkeypatch):
     return namespace
 
 
+class _RequestInput(io.BytesIO):
+    """Count body parsing separately from bounded read1() rejection drains."""
+
+    def __init__(self, data):
+        super().__init__(data)
+        self.body_reads = 0
+
+    def read(self, size=-1):
+        data = super().read(size)
+        self.body_reads += len(data)
+        return data
+
+
 def request(helper, body, *, route="/corpus/import", headers=None):
     payload = json.dumps(body).encode("utf-8")
     headers = {
@@ -135,11 +152,12 @@ def request(helper, body, *, route="/corpus/import", headers=None):
     handler = object.__new__(helper["Handler"])
     handler.server = SimpleNamespace(server_address=("127.0.0.1", PORT))
     handler.client_address = ("127.0.0.1", 12345)
-    handler.rfile = io.BytesIO(prefix + payload)
+    handler.connection = Mock(gettimeout=Mock(return_value=None))
+    handler.rfile = _RequestInput(prefix + payload)
     handler.wfile = io.BytesIO()
     handler.handle_one_request()
     head, result = handler.wfile.getvalue().split(b"\r\n\r\n", 1)
-    return int(head.split()[1]), json.loads(result), handler.rfile.tell() - len(prefix)
+    return int(head.split()[1]), json.loads(result), handler.rfile.body_reads
 
 
 def export_file(path):
@@ -306,6 +324,7 @@ def test_bad_path_types_are_client_errors(helper, value):
 def test_import_keeps_request_gates_before_body(helper, headers, expected):
     status, result, read = request(helper, {"path": "unused"}, headers=headers)
     assert status == expected and result["ok"] is False
+    # Rejection may discard bytes via read1(), but never read them as JSON.
     assert read == 0
     helper["_get_index"].assert_not_called()
 
@@ -570,7 +589,8 @@ def test_raw_detail_logger_writes_only_server_log(source_tree, tmp_path):
     logger = logging.Logger("offline.detail")
     logger.parent = parent
     path = tmp_path / "server.log"
-    namespace = {"LOG_PATH": path, "logging": SimpleNamespace(
+    namespace = {"LOG_PATH": path, "RotatingFileHandler": RotatingFileHandler,
+                 "logging": SimpleNamespace(
         FileHandler=logging.FileHandler, getLogger=lambda _: logger)}
     exec(compile(ast.Module(body=nodes, type_ignores=[]), "logging-setup", "exec"),
          namespace)

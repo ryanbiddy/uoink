@@ -17,6 +17,7 @@ import secrets
 import shutil
 import subprocess
 import threading
+import time
 from email.parser import BytesParser
 from http.server import BaseHTTPRequestHandler
 from pathlib import Path
@@ -69,7 +70,7 @@ def helper(handler_code):
         "HOST": "127.0.0.1", "PORT": PORT, "VERSION": "test", "TOKEN": TEST_TOKEN,
         "os": SimpleNamespace(environ={}), "_read_settings": Mock(return_value={}),
         "log": Mock(), "json": json, "re": re, "secrets": secrets,
-        "threading": threading, "urlparse": urlparse,
+        "threading": threading, "time": time, "urlparse": urlparse,
         "suite_service": SimpleNamespace(MANIFEST_PATH="/.well-known/suite-service.json",
                                          HEALTH_PATH="/api/suite/v1/health"),
     }
@@ -84,6 +85,7 @@ def request(helper, *, method="GET", path="/token", headers=None):
     handler = object.__new__(helper["Handler"])
     handler.server = SimpleNamespace(server_address=("127.0.0.1", PORT))
     handler.client_address = ("127.0.0.1", 12345)
+    handler.connection = Mock(gettimeout=Mock(return_value=None))
     handler.rfile = io.BytesIO((raw + "\r\n").encode("ascii"))
     handler.wfile = io.BytesIO()
     handler.handle_one_request()

@@ -284,6 +284,10 @@ Protocol validation failures return `4xx` JSON errors. Handled application failu
   and bracketed IPv6 is rejected by the generic-video and page validators.
   Podcast feed normalization preserves bracketed IPv6, but fetching it is
   refused by the network policy below.
+  IP literals are currently permitted only at the syntax-normalization step:
+  IPv4 in generic-video and page URLs, and IPv4 or IPv6 in podcast feed URLs.
+  A normalized URL is not permission to fetch it; network admission refuses
+  these literals before connecting or starting an extraction engine.
 - Podcast feed polls, the stdlib page fetcher (including Writing Studio's
   fallback), and thumbnail downloads share the standing-source fetcher's
   public-network checks. IP literals are refused, including public IPs and
@@ -341,9 +345,9 @@ Protocol validation failures return `4xx` JSON errors. Handled application failu
   settings, because a proxy would resolve the name again.
 - Requests made inside the Crawl4AI browser renderer and by yt-dlp after
   admission are not covered: those engines resolve names themselves, so they
-  are not pinned and remain exposed to DNS rebinding, and Uoink does not
-  revalidate their redirects or subresource requests. Those engines are not
-  network-sandboxed by these checks.
+  are not pinned and remain exposed to DNS rebinding. For these engine-owned
+  requests, redirect targets are not revalidated by Uoink, nor are subresource
+  requests. Those engines are not network-sandboxed by these checks.
 - Playlist IDs must match ASCII `^[A-Za-z0-9_-]{2,}$`; playlist processing is capped at 10 videos.
 - Session IDs must match `^[A-Za-z0-9_-]{1,64}$`.
 - Job IDs must match `^job_[A-Za-z0-9_-]{1,96}$`.

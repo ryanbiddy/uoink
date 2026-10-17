@@ -63,8 +63,8 @@ def http(tmp_path):
     _load(ROOT / "server.py", {"_strict_json_route", "_reject_json_constant",
                               "_reject_duplicate_json_keys"}, scope, constants={
         "MAX_BODY_BYTES", "ALLOWED_HOST_NAMES", "_STRICT_JSON_ROUTE_PREFIXES",
-        "LIBRARY_INTENT_ROUTE", "LIBRARY_MIRROR_INTENT_ROUTE",
-        "LIBRARY_MIRROR_ROUTE", "SOURCES_INTENT_ROUTE",
+        "LIBRARY_INTENT_ROUTE", "DISCOVERY_INTENT_ROUTE",
+        "LIBRARY_MIRROR_INTENT_ROUTE", "LIBRARY_MIRROR_ROUTE", "SOURCES_INTENT_ROUTE",
     })
     tree = ast.parse((ROOT / "server.py").read_text(encoding="utf-8-sig"))
     handler = next(n for n in tree.body
@@ -148,10 +148,13 @@ def test_server_log_rotates_with_three_bounded_backups(tmp_path, monkeypatch):
     config = next(n for n in tree.body if isinstance(n, ast.Expr)
                   and isinstance(n.value, ast.Call)
                   and ast.unparse(n.value.func) == "logging.basicConfig")
+    file_handler = next(n for n in tree.body if isinstance(n, ast.Assign)
+                        and any(isinstance(t, ast.Name) and t.id == "_server_log_handler"
+                                for t in n.targets))
     configure = Mock()
     monkeypatch.setattr(logging, "basicConfig", configure)
     log_path = tmp_path / "server.log"
-    exec(compile(ast.Module(body=[config], type_ignores=[]), "server.py", "exec"), {
+    exec(compile(ast.Module(body=[file_handler, config], type_ignores=[]), "server.py", "exec"), {
         "logging": logging, "RotatingFileHandler": RotatingFileHandler,
         "LOG_PATH": log_path, "sys": sys,
     })

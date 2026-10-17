@@ -59,6 +59,7 @@ def retry(publication):
     })
     _load(ROOT / "server.py", {
         "_retry_pending_one", "_detect_live_state", "_normalize_live_behavior",
+        "_is_youtube_ytdlp_call",
     }, scope, constants={
         "LIVE_STATE_NOT_LIVE", "LIVE_STATE_LIVE", "LIVE_STATE_UPCOMING",
         "LIVE_STATE_POST_LIVE", "LIVE_STATE_WAS_LIVE", "LIVE_BEHAVIOR_WAIT",

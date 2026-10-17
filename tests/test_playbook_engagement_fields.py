@@ -119,7 +119,9 @@ def test_generic_capture_indexes_engagement(capture_env, monkeypatch, metrics):
         handler, {"url": "https://video.example.test/fixture"})
     assert status == 200
     assert body["ok"] is True
-    row = idx.get_yoink("generic-fixture")
+    # Generic extractor IDs are scoped to the URL by the capture lane. Locate
+    # the saved capture through the handler's slug, not the upstream basename.
+    row = idx.get_by_slug(body["video_slug"])
     indexed = json.loads(row["metadata_json"])
     sidecar = json.loads(Path(row["sidecar_path"]).read_text(encoding="utf-8"))
     for data in (indexed, sidecar):
