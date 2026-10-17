@@ -69,7 +69,7 @@ def main():
     idx = index_mod.Index.open(Path(tmp.name) / "index.db")
     server._get_index = lambda: idx  # type: ignore
 
-    def _raise_429(url):
+    def _raise_429(url, *, cancel_event=None):
         raise _rate_limit_error()
 
     orig_fetch = server._fetch_metadata

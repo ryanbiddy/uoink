@@ -66,7 +66,7 @@ def publication(capture, tmp_path):
         "_sidecar_update_lock": threading.Lock(),
         "_manual_extraction_ownership": Mock(side_effect=lambda url: nullcontext(
             SimpleNamespace(ok=True, conflict=None, reused=None, completed_while_waiting=False))),
-        "_fetch_metadata": Mock(side_effect=_metadata),
+        "_fetch_metadata": Mock(side_effect=lambda url, *, cancel_event=None: _metadata(url)),
         "_detect_live_state": lambda m: "none",
         "LIVE_STATE_LIVE": "live", "LIVE_STATE_UPCOMING": "upcoming",
         "LIVE_STATE_POST_LIVE": "post_live", "_is_youtube_rate_limit": lambda e: False,

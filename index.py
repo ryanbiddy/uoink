@@ -697,6 +697,7 @@ class Index:
         # guessing native sqlite3* pointers.
         self._write_txn_owner = None
         self._existing_read_only = False
+        self._pending_cancel_events: dict[int, threading.Event] = {}
 
     # ---- lifecycle -------------------------------------------------------
     @classmethod
@@ -2008,93 +2009,198 @@ class Index:
             )
             self._conn.commit()
 
-    def mark_pending_running(self, pending_id: int) -> None:
+    def mark_pending_running(self, pending_id: int, *,
+                             cancel_event: threading.Event | None = None) -> bool:
         """Mark a pending row in flight. The retry worker calls this before
         the actual extract so a parallel call to next_pending won't pick the
         same row twice."""
         with self._lock:
-            self._conn.execute(
-                "UPDATE pending_yoinks SET status='running' WHERE pending_id=?",
+            cur = self._conn.execute(
+                "UPDATE pending_yoinks SET status='running' "
+                "WHERE pending_id=? AND status='pending'",
                 (pending_id,),
             )
-            self._conn.commit()
+            try:
+                self._conn.commit()
+            except Exception:
+                self._conn.rollback()
+                raise
+            if cur.rowcount and cancel_event is not None:
+                # Register under the same lock as cancellation, so a cancel
+                # between selection and ownership acquisition cannot be lost.
+                self._pending_cancel_events[pending_id] = cancel_event
+            return cur.rowcount > 0
+
+    def release_pending_cancel_event(self, pending_id: int,
+                                     cancel_event: threading.Event) -> None:
+        """Release only this worker's event, including on exceptional exits."""
+        with self._lock:
+            if self._pending_cancel_events.get(pending_id) is cancel_event:
+                self._pending_cancel_events.pop(pending_id)
+
+    def pending_status(self, pending_id: int) -> str | None:
+        with self._lock:
+            row = self._conn.execute(
+                "SELECT status FROM pending_yoinks WHERE pending_id=?", (pending_id,),
+            ).fetchone()
+            return row["status"] if row else None
+
+    def mark_pending_publishing(self, pending_id: int, *,
+                                expected_status: str | None = "running") -> bool:
+        """Fence cancellation before indexing or handing off a save receipt.
+
+        Re-entering publication is harmless. Receipts may also claim a failed
+        handoff or a manually requeued row, but never a cancelled or completed row.
+        """
+        with self._lock:
+            try:
+                cur = self._conn.execute(
+                    "UPDATE pending_yoinks SET status='publishing' "
+                    "WHERE pending_id=? AND status IN ('pending','running','publishing','failed') "
+                    "AND (? IS NULL OR status IN (?, 'publishing'))",
+                    (pending_id, expected_status, expected_status),
+                )
+                self._conn.commit()
+            except Exception:
+                self._conn.rollback()
+                raise
+            return cur.rowcount > 0
+
+    def fail_pending_publication(self, pending_id: int, error: str) -> bool:
+        """Settle a local save retry without counting another download attempt."""
+        with self._lock:
+            try:
+                cur = self._conn.execute(
+                    "UPDATE pending_yoinks SET status='failed', last_error=? "
+                    "WHERE pending_id=? AND status='publishing'",
+                    (error, pending_id),
+                )
+                self._conn.commit()
+            except Exception:
+                self._conn.rollback()
+                raise
+            return cur.rowcount > 0
+
+    def defer_pending(self, pending_id: int, retry_after: str) -> bool:
+        """Wait for an unfinished broadcast without consuming a failure attempt."""
+        with self._lock:
+            cur = self._conn.execute(
+                "UPDATE pending_yoinks SET status='pending', retry_after=? "
+                "WHERE pending_id=? AND status='running'",
+                (retry_after, pending_id),
+            )
+            try:
+                self._conn.commit()
+            except Exception:
+                self._conn.rollback()
+                raise
+            return cur.rowcount > 0
 
     def mark_pending_succeeded(self, pending_id: int,
-                                succeeded_job_id: str) -> None:
+                                succeeded_job_id: str | None, *,
+                                expected_status: str | None = None) -> bool:
         """Mark a pending row terminally succeeded and record the resulting
-        single-extract job_id (so the UI can deep-link to the result)."""
+        single-extract job_id (so the UI can deep-link to the result).
+
+        Workers require their expected running or publishing state. Without
+        that constraint, callers may unlink a settled job, but can never
+        overwrite cancellation. Returns False when the expected state no
+        longer matches."""
         with self._lock:
-            self._conn.execute(
+            cur = self._conn.execute(
                 "UPDATE pending_yoinks "
                 "SET status='succeeded', succeeded_job_id=?, last_error=NULL "
-                "WHERE pending_id=?",
-                (succeeded_job_id, pending_id),
+                "WHERE pending_id=? AND status != 'cancelled' "
+                "AND (? IS NULL OR status=?)",
+                (succeeded_job_id, pending_id, expected_status, expected_status),
             )
-            self._conn.commit()
+            try:
+                self._conn.commit()
+            except Exception:
+                self._conn.rollback()
+                raise
+            return cur.rowcount > 0
 
     def mark_pending_failed(self, pending_id: int, error: str,
                              retry_after: str, *,
-                             force_final: bool = False) -> str:
+                             force_final: bool = False,
+                             expected_status: str | None = None) -> str:
         """Record one failed attempt. Increments attempt_count, then either
         re-queues with the supplied retry_after (status='pending') if under
         the strike cap, or marks the row terminally 'failed' (when the cap
         is reached, or when force_final=True for non-recoverable errors).
+        Workers pass their expected running or publishing state; legacy
+        callers may also record an initial failure while the row is pending.
 
         Returns the resulting status so the caller can tell a re-queue from
         a strike-out without a second query: 'pending' when the row will be
-        retried, 'failed' when it went terminal, '' for an unknown
+        retried, 'failed' when it went terminal, '' for an unknown or stale
         pending_id (G-43 / E2E D5 -- the retry worker used to log a phantom
         'retry at ...' after the final attempt because it couldn't see the
         strike-out happen)."""
         with self._lock:
             row = self._conn.execute(
-                "SELECT attempt_count FROM pending_yoinks WHERE pending_id=?",
-                (pending_id,),
+                "SELECT attempt_count, status FROM pending_yoinks "
+                "WHERE pending_id=? AND status != 'cancelled' AND status IN (?, ?)",
+                (pending_id, expected_status or "pending", expected_status or "running"),
             ).fetchone()
             if row is None:
                 return ""
             attempts = (row["attempt_count"] or 0) + 1
             if force_final or attempts >= _PENDING_MAX_ATTEMPTS:
-                self._conn.execute(
+                cur = self._conn.execute(
                     "UPDATE pending_yoinks "
                     "SET status='failed', attempt_count=?, last_error=? "
-                    "WHERE pending_id=?",
-                    (attempts, error, pending_id),
+                    "WHERE pending_id=? AND status=?",
+                    (attempts, error, pending_id, row["status"]),
                 )
                 status = "failed"
             else:
-                self._conn.execute(
+                cur = self._conn.execute(
                     "UPDATE pending_yoinks "
                     "SET status='pending', attempt_count=?, last_error=?, "
                     "    retry_after=? "
-                    "WHERE pending_id=?",
-                    (attempts, error, retry_after, pending_id),
+                    "WHERE pending_id=? AND status=?",
+                    (attempts, error, retry_after, pending_id, row["status"]),
                 )
                 status = "pending"
-            self._conn.commit()
-            return status
+            try:
+                self._conn.commit()
+            except Exception:
+                self._conn.rollback()
+                raise
+            return status if cur.rowcount else ""
 
     def cancel_pending(self, pending_id: int) -> bool:
         """Mark a pending row terminally cancelled. Returns True when a row
-        actually changed (False for unknown / already-terminal rows)."""
+        actually changed (False for unknown / terminal / publishing rows)."""
         with self._lock:
             cur = self._conn.execute(
                 "UPDATE pending_yoinks SET status='cancelled' "
-                "WHERE pending_id=? AND status NOT IN ('succeeded','failed','cancelled')",
+                "WHERE pending_id=? AND status IN ('pending','running')",
                 (pending_id,),
             )
-            self._conn.commit()
+            try:
+                self._conn.commit()
+            except Exception:
+                self._conn.rollback()
+                raise
+            if cur.rowcount:
+                event = self._pending_cancel_events.get(pending_id)
+                if event is not None:
+                    event.set()
             return cur.rowcount > 0
 
     def retry_pending_now(self, pending_id: int) -> bool:
         """User-initiated 'try this one now': bumps retry_after to now and,
         for a 'failed' row, flips it back to 'pending'. No-op for
-        'succeeded' / 'cancelled' rows. Returns True when a row changed."""
+        'succeeded' / 'cancelled' / 'running' / 'publishing' rows.
+        Returns True when a row changed."""
         with self._lock:
             cur = self._conn.execute(
                 "UPDATE pending_yoinks "
                 "SET status='pending', retry_after=? "
-                "WHERE pending_id=? AND status IN ('pending','failed','running')",
+                "WHERE pending_id=? AND status IN ('pending','failed')",
                 (_now_iso(), pending_id),
             )
             self._conn.commit()
@@ -2139,14 +2245,28 @@ class Index:
     def reset_running_pending(self) -> int:
         """Crash recovery at startup: any row stuck in 'running' (the helper
         died mid-retry) is flipped back to 'pending' with retry_after=now so
-        the retry worker picks it up again. Returns the count reset."""
+        the retry worker picks it up again. Interrupted publication is failed
+        visibly and left to its save receipt. Returns the count requeued."""
         with self._lock:
-            cur = self._conn.execute(
-                "UPDATE pending_yoinks SET status='pending', retry_after=? "
-                "WHERE status='running'",
-                (_now_iso(),),
-            )
-            self._conn.commit()
+            # Publication may have committed before a crash. Do not turn it
+            # into another automatic download; a durable receipt, if present,
+            # owns recovery. Otherwise leave a visible failure and keep files.
+            try:
+                self._conn.execute(
+                    "UPDATE pending_yoinks SET status='failed', last_error=? "
+                    "WHERE status='publishing'",
+                    ("Capture publication was interrupted. Saved files were kept; "
+                     "any queued publication receipt will retry the local save.",),
+                )
+                cur = self._conn.execute(
+                    "UPDATE pending_yoinks SET status='pending', retry_after=? "
+                    "WHERE status='running'",
+                    (_now_iso(),),
+                )
+                self._conn.commit()
+            except Exception:
+                self._conn.rollback()
+                raise
             return cur.rowcount
 
     # ---- citations -------------------------------------------------------

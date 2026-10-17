@@ -5407,6 +5407,10 @@ def _retry_publication_one() -> bool:
             if not queue.claim(receipt_id):
                 failure_code = "interrupted"
                 raise RuntimeError("publication retry was interrupted; inspect the saved files")
+            if (record.get("pending_id") is not None
+                    and not _get_index().mark_pending_publishing(
+                        record["pending_id"], expected_status=None)):
+                refuse_obsolete("download queue row was cancelled, completed or removed; publication retry refused")
             if ownership.conflict:
                 refuse_obsolete(ownership.conflict)
             try:
@@ -5466,11 +5470,18 @@ def _retry_publication_one() -> bool:
                 # The download handed off to this receipt. Complete its queue
                 # row before reporting success, so retry-now cannot download
                 # an already published capture again.
-                _get_index().mark_pending_succeeded(
-                    record["pending_id"], None if superseded else job_id)
+                if not _get_index().mark_pending_succeeded(
+                        record["pending_id"], None if superseded else job_id,
+                        expected_status="publishing"):
+                    raise RuntimeError("download queue row changed during publication")
         except Exception as exc:
             error = f"Capture publication retry failed: {exc}. Files kept in {folder}."
             log.warning("%s", error)
+            if record.get("pending_id") is not None:
+                try:
+                    _get_index().fail_pending_publication(record["pending_id"], _sanitize_error(error))
+                except Exception:
+                    log.exception("publication retry: queue failure could not be settled")
             # Every outcome, an ordinary failure included, defers to a newer
             # attempt's Activity job: recording this one would delete it.
             superseded = _publication_retry_superseded(url, receipt_id, record)
@@ -5641,8 +5652,22 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
     sidecar_name = f"{video_slug}.json"
     staged_names = {Path(corpus_name): Path("c.md"), Path(sidecar_name): Path("c.json")}
     markdown_index_attempted = False
+    publication_started = False
+
+    def begin_publication() -> None:
+        nonlocal publication_started
+        if publication_started:
+            return
+        _raise_if_cancelled(cancel_event)
+        if pending_id is not None and not _get_index().mark_pending_publishing(pending_id):
+            _raise_if_cancelled(cancel_event)
+            raise RuntimeError("download queue row changed before publication")
+        publication_started = True
 
     def publication_failed(error: Exception, *, missing_sidecar: bool = False) -> None:
+        # A first capture can fail its sidecar write before the normal commit
+        # boundary. Its receipt must own publication before cancellation closes.
+        begin_publication()
         error.phase = "save"
         error.publication_error = (
             f"Capture publication failed: {error}. Files kept in {output_folder}."
@@ -5983,6 +6008,7 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
         # rather than "kapathy-talk/yoink.md" -- so the file is identifiable
         # outside its folder.
         yoink_path = asset_folder / ("c.md" if refreshing else corpus_name)
+        _raise_if_cancelled(cancel_event)
         _atomic_write_text(yoink_path, yoink_md)
         hook_type_pending = _should_start_hook_type(metadata)
 
@@ -6182,7 +6208,7 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
             if keep_media:
                 video_files = [output_folder / p.name for p in video_files]
 
-        _raise_if_cancelled(cancel_event)
+        begin_publication()
         # This is the commit boundary for the file swap, even if indexing
         # raises: upsert_yoink commits before citations/media publication.
         # Restoring old files after that would contradict the row/FTS or
@@ -11353,172 +11379,230 @@ def _retry_pending_one() -> bool:
     long_video_mode = _normalize_long_video_mode(
         row.get("long_video_mode") or _pending_long_video_mode(pending_id))
 
+    cancel_event = threading.Event()
     try:
-        idx.mark_pending_running(pending_id)
+        if not idx.mark_pending_running(pending_id, cancel_event=cancel_event):
+            return False
     except Exception:
         log.exception("retry worker: mark_pending_running failed")
         return False
 
-    log.info("retry worker: attempting pending #%d (attempt %d): %s",
-             pending_id, attempts_before + 1, url)
-    started_at = _now_iso()
-    title = None
-    folder = None
-    current_phase = "metadata"
-    with _manual_extraction_ownership(url) as ownership:  # AS-03 shared dispatcher lock
-        if not ownership.ok:
-            # AS-03: unavailable ownership is a retryable failure; re-queue
-            # with backoff, never extract under the process lock alone.
-            attempts = attempts_before + 1
-            delay = min(_RETRY_INITIAL_BACKOFF_SEC * (2 ** attempts), _RETRY_MAX_BACKOFF_SEC)
-            retry_at = (datetime.now() + timedelta(seconds=delay)).strftime(
-                "%Y-%m-%dT%H:%M:%S")
-            try:
-                idx.mark_pending_failed(pending_id, "capture_ownership_unavailable", retry_at)
-            except Exception:
-                log.exception("retry worker: mark_pending_failed failed")
-            log.warning("retry worker: pending #%d could not take the capture lock (%s); "
-                        "retry at %s", pending_id, ownership.error, retry_at)
-            return True
-        if ownership.conflict:
-            # AS-03 (run AT-4): an identity conflict blocks before overwrite;
-            # the queue row goes terminal with the reason.
-            try:
-                idx.mark_pending_failed(pending_id, _sanitize_error(ownership.conflict),
-                                        _now_iso(), force_final=True)
-            except Exception:
-                log.exception("retry worker: mark_pending_failed failed")
-            _record_single_extract_job(url, started_at, error=ownership.conflict,
-                                       failure_phase="metadata",
-                                       long_video_mode=long_video_mode)
-            _pending_long_video_mode(pending_id, remove=True)
-            return True
-        # AS-03 (run AT-4): the capture this row waited behind completed;
-        # reuse it, no fetch, no second acquisition.
-        result = ownership.reused if (ownership.completed_while_waiting
-                                      and ownership.reused) else None
-        try:
-            if result is None:
-                metadata = _fetch_metadata(url)
-                title = metadata.get("title") or "Untitled"
-                topic = _classify_topic(metadata)
-                folder = _video_capture_folder(
-                    DESKTOP_ROOT / _topic_folder_name(topic), url, metadata)
-
-                def phase_cb(phase: str):
-                    nonlocal current_phase
-                    current_phase = phase
-
-                result = _run_extraction(url, interval, folder,
-                                         metadata=metadata, topic=topic,
-                                         long_video_mode=long_video_mode,
-                                         phase_callback=phase_cb, pending_id=pending_id)
-        except BaseException as e:
-            if getattr(e, "capture_result", None):
-                # End the download queue's responsibility explicitly. The
-                # receipt carries pending_id and owns one local save retry;
-                # successful publication will complete this row too.
-                msg = friendly_error(e)
-                try:
-                    idx.mark_pending_failed(pending_id, _sanitize_error(msg),
-                                            _now_iso(), force_final=True)
-                except Exception:
-                    log.exception("retry worker: publication handoff failed")
-                _record_single_extract_job(url, started_at, result=e.capture_result,
-                                           long_video_mode=long_video_mode)
-                _pending_long_video_mode(pending_id, remove=True)
-                log.warning("retry worker: pending #%d handed off after save failure: %s",
-                            pending_id, _sanitize_error(msg))
+    try:
+        log.info("retry worker: attempting pending #%d (attempt %d): %s",
+                 pending_id, attempts_before + 1, url)
+        started_at = _now_iso()
+        title = None
+        folder = None
+        current_phase = "metadata"
+        with _manual_extraction_ownership(url) as ownership:  # AS-03 shared dispatcher lock
+            if cancel_event.is_set():
                 return True
-            if _is_youtube_rate_limit(e):
-                detail = _youtube_rate_limit_detail(e)
+            if not ownership.ok:
+                # AS-03: unavailable ownership is a retryable failure; re-queue
+                # with backoff, never extract under the process lock alone.
                 attempts = attempts_before + 1
-                if attempts >= index._PENDING_MAX_ATTEMPTS:
-                    # Final strike (G-43 / E2E D4 + D5): the row goes
-                    # terminal, so say so. No "retry at ..." log line for a
-                    # retry that will never run, and a real failed job so
-                    # Activity shows the uoink honestly instead of it
-                    # silently vanishing from /queue/status.
-                    final_msg = (
-                        f"YouTube kept refusing this one. Uoink stopped "
-                        f"after {attempts} attempts and won't retry it on "
-                        f"its own.")
-                    final_detail = (
-                        f"{detail}\n"
-                        f"YouTube answered HTTP 429 (too busy) on all "
-                        f"{attempts} attempts. The automatic retry budget "
-                        f"is used up, so Uoink stopped.")
-                    try:
-                        idx.mark_pending_failed(
-                            pending_id, f"{detail}\n{final_msg}",
-                            _now_iso())
-                    except Exception:
-                        log.exception(
-                            "retry worker: mark_pending_failed failed")
-                    _record_single_extract_job(
-                        url, started_at, error=final_msg,
-                        error_detail=final_detail,
-                        failure_phase=_failure_phase(e, current_phase),
-                        long_video_mode=long_video_mode,
-                        title=title, folder=folder,
-                        retry_exhausted=True, attempt_count=attempts)
-                    _pending_long_video_mode(pending_id, remove=True)
-                    log.warning(
-                        "retry worker: pending #%d gave up after %d "
-                        "attempts; YouTube kept refusing. No further "
-                        "retries are scheduled.",
-                        pending_id, attempts)
-                    return True
-                # Still under the strike cap: wait for the next media retry and
-                # re-queue (mark_pending_failed re-queues below the cap).
-                delay = _RATE_LIMIT_BACKOFF_SEC[attempts]
+                delay = min(_RETRY_INITIAL_BACKOFF_SEC * (2 ** attempts), _RETRY_MAX_BACKOFF_SEC)
                 retry_at = (datetime.now() + timedelta(seconds=delay)).strftime(
                     "%Y-%m-%dT%H:%M:%S")
                 try:
-                    idx.mark_pending_failed(
-                        pending_id, detail, retry_at)
+                    status = idx.mark_pending_failed(
+                        pending_id, "capture_ownership_unavailable", retry_at,
+                        expected_status="running")
                 except Exception:
                     log.exception("retry worker: mark_pending_failed failed")
-                log.info(
-                    "retry worker: pending #%d still rate-limited; "
-                    "retry at %s (in %d minutes, retry %d of %d)",
-                    pending_id, retry_at, delay // 60, attempts + 1,
-                    index._PENDING_MAX_ATTEMPTS)
+                    return True
+                if not status:
+                    return True
+                log.warning("retry worker: pending #%d could not take the capture lock (%s); "
+                            "retry at %s", pending_id, ownership.error, retry_at)
                 return True
-            # Non-recoverable error -- jump straight to terminal failure.
-            # The user-facing job gets on-brand copy plus a disclosure detail;
-            # the queue row's persisted last_error still goes through
-            # _sanitize_error so paths / credentials don't leak into a
-            # long-lived store (Sprint 19.6 / Fix 8).
-            msg = friendly_error(e)
-            detail = machine_error_detail(e)
-            failure_phase = _failure_phase(e, current_phase)
-            persisted = _sanitize_error(msg)
+            if ownership.conflict:
+                # AS-03 (run AT-4): an identity conflict blocks before overwrite;
+                # the queue row goes terminal with the reason.
+                # A settlement error must not hide Activity. A committed
+                # cancellation sets the event under the index lock.
+                status = None
+                try:
+                    status = idx.mark_pending_failed(
+                        pending_id, _sanitize_error(ownership.conflict),
+                        _now_iso(), force_final=True, expected_status="running")
+                except Exception:
+                    log.exception("retry worker: mark_pending_failed failed")
+                if status == "" or cancel_event.is_set():
+                    return True
+                _record_single_extract_job(url, started_at, error=ownership.conflict,
+                                           failure_phase="metadata",
+                                           long_video_mode=long_video_mode)
+                _pending_long_video_mode(pending_id, remove=True)
+                return True
+            # AS-03 (run AT-4): the capture this row waited behind completed;
+            # reuse it, no fetch, no second acquisition.
+            result = ownership.reused if (ownership.completed_while_waiting
+                                          and ownership.reused) else None
             try:
-                idx.mark_pending_failed(
-                    pending_id, persisted, _now_iso(), force_final=True)
-            except Exception:
-                log.exception("retry worker: mark_pending_failed failed")
-            _record_single_extract_job(
-                url, started_at, error=msg, error_detail=detail,
-                failure_phase=failure_phase,
-                long_video_mode=long_video_mode,
-                title=title, folder=folder)
-            _pending_long_video_mode(pending_id, remove=True)
-            log.warning(
-                "retry worker: pending #%d non-recoverable: %s",
-                pending_id, persisted)
-            return True
+                if result is None:
+                    metadata = _fetch_metadata(url, cancel_event=cancel_event)
+                    _raise_if_cancelled(cancel_event)
+                    live_state = _detect_live_state(metadata)
+                    if live_state in (LIVE_STATE_LIVE, LIVE_STATE_UPCOMING, LIVE_STATE_POST_LIVE):
+                        behavior = _normalize_live_behavior(
+                            (_read_settings() or {}).get("live_stream_behavior"))
+                        if (live_state != LIVE_STATE_POST_LIVE
+                                or behavior != LIVE_BEHAVIOR_NOW):
+                            retry_at = (datetime.now() + timedelta(
+                                seconds=_LIVE_RETRY_INTERVAL_SEC)).strftime("%Y-%m-%dT%H:%M:%S")
+                            try:
+                                idx.defer_pending(pending_id, retry_at)
+                            except Exception:
+                                log.exception("retry worker: deferring live broadcast failed")
+                            return True
+                    title = metadata.get("title") or "Untitled"
+                    topic = _classify_topic(metadata)
+                    folder = _video_capture_folder(
+                        DESKTOP_ROOT / _topic_folder_name(topic), url, metadata)
 
-    job = _record_single_extract_job(url, started_at, result=result)
-    job_id = (job or {}).get("id") or ""
-    try:
-        idx.mark_pending_succeeded(pending_id, job_id)
-    except Exception:
-        log.exception("retry worker: mark_pending_succeeded failed")
-    _pending_long_video_mode(pending_id, remove=True)
-    log.info("retry worker: pending #%d succeeded -> %s", pending_id, job_id)
-    return True
+                    def phase_cb(phase: str):
+                        nonlocal current_phase
+                        current_phase = phase
+
+                    _raise_if_cancelled(cancel_event)
+                    result = _run_extraction(url, interval, folder,
+                                             metadata=metadata, topic=topic,
+                                             long_video_mode=long_video_mode,
+                                             phase_callback=phase_cb, pending_id=pending_id,
+                                             cancel_event=cancel_event)
+            except BaseException as e:
+                if cancel_event.is_set():
+                    return True
+                if getattr(e, "capture_result", None):
+                    # End the download queue's responsibility explicitly. The
+                    # receipt carries pending_id and owns one local save retry;
+                    # successful publication will complete this row too.
+                    msg = friendly_error(e)
+                    status = None
+                    try:
+                        status = idx.mark_pending_failed(
+                            pending_id, _sanitize_error(msg), _now_iso(),
+                            force_final=True, expected_status="publishing")
+                    except Exception:
+                        log.exception("retry worker: publication handoff failed")
+                    if status == "" or cancel_event.is_set():
+                        return True
+                    _record_single_extract_job(url, started_at, result=e.capture_result,
+                                               long_video_mode=long_video_mode)
+                    _pending_long_video_mode(pending_id, remove=True)
+                    log.warning("retry worker: pending #%d handed off after save failure: %s",
+                                pending_id, _sanitize_error(msg))
+                    return True
+                if _is_youtube_rate_limit(e):
+                    detail = _youtube_rate_limit_detail(e)
+                    attempts = attempts_before + 1
+                    if attempts >= index._PENDING_MAX_ATTEMPTS:
+                        # Final strike (G-43 / E2E D4 + D5): the row goes
+                        # terminal, so say so. No "retry at ..." log line for a
+                        # retry that will never run, and a real failed job so
+                        # Activity shows the uoink honestly instead of it
+                        # silently vanishing from /queue/status.
+                        final_msg = (
+                            f"YouTube kept refusing this one. Uoink stopped "
+                            f"after {attempts} attempts and won't retry it on "
+                            f"its own.")
+                        final_detail = (
+                            f"{detail}\n"
+                            f"YouTube answered HTTP 429 (too busy) on all "
+                            f"{attempts} attempts. The automatic retry budget "
+                            f"is used up, so Uoink stopped.")
+                        status = None
+                        try:
+                            status = idx.mark_pending_failed(
+                                pending_id, f"{detail}\n{final_msg}",
+                                _now_iso(), expected_status="running")
+                        except Exception:
+                            log.exception(
+                                "retry worker: mark_pending_failed failed")
+                        if status == "" or cancel_event.is_set():
+                            return True
+                        _record_single_extract_job(
+                            url, started_at, error=final_msg,
+                            error_detail=final_detail,
+                            failure_phase=_failure_phase(e, current_phase),
+                            long_video_mode=long_video_mode,
+                            title=title, folder=folder,
+                            retry_exhausted=True, attempt_count=attempts)
+                        _pending_long_video_mode(pending_id, remove=True)
+                        log.warning(
+                            "retry worker: pending #%d gave up after %d "
+                            "attempts; YouTube kept refusing. No further "
+                            "retries are scheduled.",
+                            pending_id, attempts)
+                        return True
+                    # Still under the strike cap: wait for the next media retry and
+                    # re-queue (mark_pending_failed re-queues below the cap).
+                    delay = _RATE_LIMIT_BACKOFF_SEC[attempts]
+                    retry_at = (datetime.now() + timedelta(seconds=delay)).strftime(
+                        "%Y-%m-%dT%H:%M:%S")
+                    try:
+                        status = idx.mark_pending_failed(
+                            pending_id, detail, retry_at, expected_status="running")
+                    except Exception:
+                        log.exception("retry worker: mark_pending_failed failed")
+                        return True
+                    if not status:
+                        return True
+                    log.info(
+                        "retry worker: pending #%d still rate-limited; "
+                        "retry at %s (in %d minutes, retry %d of %d)",
+                        pending_id, retry_at, delay // 60, attempts + 1,
+                        index._PENDING_MAX_ATTEMPTS)
+                    return True
+                # Non-recoverable error -- jump straight to terminal failure.
+                # The user-facing job gets on-brand copy plus a disclosure detail;
+                # the queue row's persisted last_error still goes through
+                # _sanitize_error so paths / credentials don't leak into a
+                # long-lived store (Sprint 19.6 / Fix 8).
+                msg = friendly_error(e)
+                detail = machine_error_detail(e)
+                failure_phase = _failure_phase(e, current_phase)
+                persisted = _sanitize_error(msg)
+                status = None
+                try:
+                    expected = ("publishing" if idx.pending_status(pending_id) == "publishing"
+                                else "running")
+                    status = idx.mark_pending_failed(
+                        pending_id, persisted, _now_iso(), force_final=True,
+                        expected_status=expected)
+                except Exception:
+                    log.exception("retry worker: mark_pending_failed failed")
+                if status == "" or cancel_event.is_set():
+                    return True
+                _record_single_extract_job(
+                    url, started_at, error=msg, error_detail=detail,
+                    failure_phase=failure_phase,
+                    long_video_mode=long_video_mode,
+                    title=title, folder=folder)
+                _pending_long_video_mode(pending_id, remove=True)
+                log.warning(
+                    "retry worker: pending #%d non-recoverable: %s",
+                    pending_id, persisted)
+                return True
+
+        if cancel_event.is_set():
+            return True
+        job_id = _make_job_id()
+        settled = None
+        try:
+            expected = "publishing" if idx.pending_status(pending_id) == "publishing" else "running"
+            settled = idx.mark_pending_succeeded(pending_id, job_id, expected_status=expected)
+        except Exception:
+            log.exception("retry worker: mark_pending_succeeded failed")
+        if settled is False or cancel_event.is_set():
+            return True
+        _record_single_extract_job(url, started_at, result=result, job_id=job_id)
+        _pending_long_video_mode(pending_id, remove=True)
+        log.info("retry worker: pending #%d succeeded -> %s", pending_id, job_id)
+        return True
+    finally:
+        idx.release_pending_cancel_event(pending_id, cancel_event)
 
 
 def _start_retry_pending_thread() -> None:
@@ -17210,7 +17294,7 @@ class Handler(BaseHTTPRequestHandler):
         counts = overview.get("counts", {}) if isinstance(overview, dict) else {}
         return {
             "pending": int(counts.get("pending", 0)),
-            "running": int(counts.get("running", 0)),
+            "running": int(counts.get("running", 0)) + int(counts.get("publishing", 0)),
             "failed": int(counts.get("failed", 0)),
             "succeeded": int(counts.get("succeeded", 0)),
             "cancelled": int(counts.get("cancelled", 0)),
@@ -17514,7 +17598,7 @@ class Handler(BaseHTTPRequestHandler):
         self._send_json(200, {
             "ok": True,
             "pending_count": int(counts.get("pending", 0)),
-            "running_count": int(counts.get("running", 0)),
+            "running_count": int(counts.get("running", 0)) + int(counts.get("publishing", 0)),
             "failed_count": int(counts.get("failed", 0)),
             "succeeded_count": int(counts.get("succeeded", 0)),
             "cancelled_count": int(counts.get("cancelled", 0)),
@@ -17542,6 +17626,11 @@ class Handler(BaseHTTPRequestHandler):
             return self._send_json(400, {"ok": False, "error": err})
         try:
             changed = _get_index().cancel_pending(pending_id)
+            if not changed and _get_index().pending_status(pending_id) == "publishing":
+                return self._send_json(409, {
+                    "ok": False,
+                    "error": "Publication has started; it is too late to cancel this capture.",
+                })
         except Exception as e:
             log.warning("queue cancel: index error: %s", e)
             return self._send_json(
@@ -17761,9 +17850,8 @@ class Handler(BaseHTTPRequestHandler):
 
     def _handle_live_extract_dispatch(self, url, interval, live_state,
                                       metadata, long_video_mode):
-        """v3.1 live stream branch. Returns a Response dict (and the
-        caller short-circuits) when we want to defer the extraction;
-        returns None when the caller should proceed with the normal
+        """v3.1 live stream branch. Returns True after sending a response;
+        returns False when the caller should proceed with the normal
         download (post_live with a recording exposed).
 
         Wait-for-end mode: enqueue into pending_yoinks with a future
@@ -17777,7 +17865,7 @@ class Handler(BaseHTTPRequestHandler):
         a useful message. For post_live we try anyway (yt-dlp will
         return a recording when one is exposed).
 
-        Returns None iff the caller should fall through to the normal
+        Returns False iff the caller should fall through to the normal
         _run_extraction pipeline."""
         settings = (_read_settings() or {})
         behavior = _normalize_live_behavior(
@@ -17788,14 +17876,14 @@ class Handler(BaseHTTPRequestHandler):
         # proceed (the recording may already be downloadable).
         if (behavior == LIVE_BEHAVIOR_NOW
                 and live_state == LIVE_STATE_POST_LIVE):
-            return None  # fall through
+            return False  # fall through
 
         # When mode == NOW + state in (LIVE, UPCOMING) we surface the
         # live status as a 409. The dashboard can offer a "retry now"
         # button later.
         if behavior == LIVE_BEHAVIOR_NOW and live_state in (
                 LIVE_STATE_LIVE, LIVE_STATE_UPCOMING):
-            return self._send_json(409, {
+            self._send_json(409, {
                 "ok": False,
                 "live_state": live_state,
                 "behavior": behavior,
@@ -17807,6 +17895,7 @@ class Handler(BaseHTTPRequestHandler):
                            "the setting to wait_for_end to enqueue "
                            "automatically."),
             })
+            return True
 
         # Default (wait_for_end + any live-ish state): enqueue. The
         # retry worker will re-fetch metadata; once live_state moves to
@@ -17818,12 +17907,16 @@ class Handler(BaseHTTPRequestHandler):
             pending_id = _get_index().enqueue_pending(
                 url, interval, retry_after, long_video_mode)
         except Exception as e:
-            log.warning("live: enqueue failed (%s); proceeding inline", e)
-            return None  # fall through -- best-effort
+            log.warning("live: enqueue failed: %s", e)
+            self._send_json(503, {
+                "ok": False, "error": "Live broadcast could not be queued. Try again later.",
+                "live_state": live_state, "retryable": True,
+            })
+            return True
         _remember_pending_long_video_mode(pending_id, long_video_mode)
         log.info("POST /extract -> queued (live state=%s) pending_id=%d",
                   live_state, pending_id)
-        return self._send_json(200, {
+        self._send_json(200, {
             "ok": True,
             "queued": True,
             "pending_id": pending_id,
@@ -17834,6 +17927,7 @@ class Handler(BaseHTTPRequestHandler):
             "title": live_title,
             "long_video_mode": long_video_mode,
         })
+        return True
 
     def _handle_live_status_get(self):
         """GET /live/status?url=... -- check whether a URL is currently
@@ -17909,10 +18003,9 @@ class Handler(BaseHTTPRequestHandler):
                 live_state = _detect_live_state(metadata)
                 if live_state in (LIVE_STATE_LIVE, LIVE_STATE_UPCOMING,
                                     LIVE_STATE_POST_LIVE):
-                    response = self._handle_live_extract_dispatch(
-                        url, interval, live_state, metadata, long_video_mode)
-                    if response is not None:
-                        return response
+                    if self._handle_live_extract_dispatch(
+                            url, interval, live_state, metadata, long_video_mode):
+                        return
                 title = metadata.get("title") or "Untitled"
                 topic = _classify_topic(metadata)
                 folder = _video_capture_folder(
