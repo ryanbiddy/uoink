@@ -25,10 +25,14 @@ applies any pending ``NNNN_*.sql`` file in numeric order and is idempotent.
 
 from __future__ import annotations
 
+import errno
+import hashlib
 import json
 import logging
+import os
 import re
 import sqlite3
+import tempfile
 import threading
 import time
 import unicodedata
@@ -55,6 +59,9 @@ _PENDING_TERMINAL_STATES = ("succeeded", "failed", "cancelled")
 # pending_yoinks without bound. Live (pending / running) rows are never
 # evicted -- they're load-bearing for the retry worker.
 _PENDING_TABLE_CAP = 1000
+
+# Shared with the server's in-memory Activity history.
+TERMINAL_JOB_RETENTION = 200
 
 # SQLite stores INTEGER as signed 64-bit. A row id outside this range cannot
 # exist, and binding one raises OverflowError -- so callers treat out-of-range
@@ -99,6 +106,269 @@ _TERMINAL_JOB_STATES = ("completed", "failed", "cancelled")
 
 def _now_iso() -> str:
     return time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime())
+
+
+class PublicationRetryQueue:
+    """File-backed publication receipts, independent of a failing SQLite DB.
+
+    Attempts and terminal outcomes are written once; only a complete,
+    parseable outcome settles a receipt, so a partial one is retried and
+    replaced. Pending work survives restart; an interrupted attempt is
+    reported without running twice. A
+    pending request holds the capture's sidecar (transcript included) and
+    yt-dlp metadata only so its one retry can run. Settling reduces it to a
+    tombstone of IDs, status and timestamps, so no user content outlives the
+    retry or a later library deletion, and the same request can never run again.
+    """
+
+    def __init__(self, root: Path):
+        self.root = Path(root)
+
+    @staticmethod
+    def _valid_id(receipt_id: str) -> None:
+        if not re.fullmatch(r"[a-f0-9]{64}", receipt_id):
+            raise ValueError("invalid publication receipt ID")
+
+    @staticmethod
+    def _temporary(path: Path):
+        # Temporary copies are named "<destination>.<random>.tmp", so the
+        # receipt that owns one can still remove it after a failed unlink.
+        return tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", dir=path.parent,
+                                           prefix=f"{path.name}.", suffix=".tmp",
+                                           delete=False)
+
+    @staticmethod
+    def _replace(path: Path, record: dict) -> None:
+        # Atomic replacement: a settled receipt's tombstone, or a complete
+        # outcome over a partial one that settled nothing.
+        temporary = None
+        try:
+            with PublicationRetryQueue._temporary(path) as stream:
+                temporary = Path(stream.name)
+                json.dump(record, stream, ensure_ascii=False, sort_keys=True)
+                stream.flush()
+                os.fsync(stream.fileno())
+            os.replace(temporary, path)
+            temporary = None
+        finally:
+            if temporary is not None:
+                try:
+                    temporary.unlink(missing_ok=True)
+                except OSError as exc:
+                    log.warning("could not remove publication temp file %s: %s", temporary, exc)
+
+    @staticmethod
+    def _create(path: Path, record: dict, *, direct_fallback: bool = True) -> None:
+        # Prefer publishing a complete, flushed file. Both paths create
+        # exclusively, even if another writer claims the destination first.
+        path.parent.mkdir(parents=True, exist_ok=True)
+        temporary = None
+        try:
+            with PublicationRetryQueue._temporary(path) as stream:
+                temporary = Path(stream.name)
+                json.dump(record, stream, ensure_ascii=False, sort_keys=True)
+                stream.flush()
+                os.fsync(stream.fileno())
+            try:
+                path.hardlink_to(temporary)
+            except FileExistsError:
+                raise
+            except OSError:
+                # exFAT/FAT32 and some network shares cannot hard-link.
+                if not direct_fallback:
+                    # Requests and outcomes are never written in place: an
+                    # interrupted write must not leave a partial file. Move
+                    # the complete copy atomically instead. A concurrent
+                    # writer of one request writes identical bytes, and
+                    # outcomes are written under the capture's ownership lock.
+                    if path.exists():
+                        raise FileExistsError(errno.EEXIST, "publication file exists", str(path))
+                    os.replace(temporary, path)
+                    temporary = None
+                    return
+                # Keep any partial file if writing fails: never replace or
+                # delete a destination another writer may now be using.
+                with path.open("x", encoding="utf-8") as stream:
+                    json.dump(record, stream, ensure_ascii=False, sort_keys=True)
+                    stream.flush()
+                    os.fsync(stream.fileno())
+        finally:
+            if temporary is not None:
+                try:
+                    temporary.unlink(missing_ok=True)
+                except OSError as exc:
+                    log.warning("could not remove publication temp file %s: %s", temporary, exc)
+
+    def enqueue(self, record: dict) -> str:
+        encoded = json.dumps(record, ensure_ascii=False, sort_keys=True).encode("utf-8")
+        receipt_id = hashlib.sha256(encoded).hexdigest()
+        path = self.root / f"{receipt_id}.json"
+        try:
+            self._create(path, record, direct_fallback=False)
+        except FileExistsError:
+            existing = json.loads(path.read_text(encoding="utf-8"))
+            # The ID is the request's digest: its tombstone means this same
+            # request already settled, and it must not be stored or run again.
+            settled = (isinstance(existing, dict) and existing.get("tombstone") is True
+                       and existing.get("receipt_id") == receipt_id)
+            if existing != record and not settled:
+                raise ValueError("publication retry receipt changed")
+        return receipt_id
+
+    def _outcome(self, receipt_id: str) -> tuple[str, dict | None]:
+        """``(state, outcome)``: ``absent``, ``complete``, ``incomplete``
+        (a partial or invalid file, which settles nothing) or ``unreadable``
+        (it exists but cannot be read now, e.g. a sharing violation)."""
+        try:
+            outcome = json.loads((self.root / f"{receipt_id}.result.json").read_text(encoding="utf-8"))
+        except FileNotFoundError:
+            return "absent", None
+        except ValueError:
+            return "incomplete", None
+        except OSError as exc:
+            log.warning("could not read publication outcome %s: %s", receipt_id, exc)
+            return "unreadable", None
+        if not isinstance(outcome, dict) or outcome.get("status") not in ("succeeded", "failed"):
+            return "incomplete", None
+        return "complete", outcome
+
+    def is_settled(self, receipt_id: str) -> bool:
+        """Only a complete outcome settles a receipt. An unreadable one is
+        left alone this pass rather than run or overwritten."""
+        return self._outcome(receipt_id)[0] in ("complete", "unreadable")
+
+    def next_pending(self) -> tuple[str, dict] | None:
+        for path in sorted(self.root.glob("*.json")):
+            if path.name.endswith((".result.json", ".attempt.json")):
+                continue
+            if self.is_settled(path.stem):
+                continue
+            try:
+                record = json.loads(path.read_text(encoding="utf-8"))
+                if not isinstance(record, dict):
+                    raise ValueError("invalid publication receipt")
+            except (OSError, ValueError) as exc:
+                log.warning("could not read publication retry %s: %s", path, exc)
+                continue
+            if record.get("tombstone"):
+                continue  # Settled by another worker after the result check.
+            return path.stem, record
+        return None
+
+    def claim(self, receipt_id: str) -> bool:
+        self._valid_id(receipt_id)
+        try:
+            self._create(self.root / f"{receipt_id}.attempt.json", {"started_at": _now_iso()})
+        except FileExistsError:
+            return False
+        return True
+
+    def settle(self, receipt_id: str, *, error: str | None = None,
+               code: str | None = None) -> None:
+        self._valid_id(receipt_id)
+        path = self.root / f"{receipt_id}.result.json"
+        outcome = {"status": "failed" if error else "succeeded", "error": error,
+                   "code": (code or "publication_failed") if error else None,
+                   "finished_at": _now_iso()}
+        try:
+            self._create(path, outcome, direct_fallback=False)
+        except FileExistsError:
+            state, _ = self._outcome(receipt_id)
+            if state == "unreadable":
+                raise OSError(errno.EBUSY, "publication outcome cannot be read", str(path))
+            if state != "complete":
+                # A partial outcome (an interrupted write) settles nothing.
+                self._replace(path, outcome)
+            # Otherwise another worker already settled this receipt. Keep it.
+        try:
+            self._tombstone(receipt_id)
+        except (OSError, ValueError) as exc:
+            # The outcome is durable and the request can no longer run.
+            # compact_settled() removes the retained content on next start.
+            log.warning("could not compact settled publication retry %s: %s", receipt_id, exc)
+
+    def _tombstone(self, receipt_id: str) -> bool:
+        """Replace a settled request with IDs, status and timestamps only.
+        Without a complete outcome the request is not settled: it is left
+        for its retry, which settles and then compacts it."""
+        self._valid_id(receipt_id)
+        state, outcome = self._outcome(receipt_id)
+        if state != "complete":
+            return False
+        path = self.root / f"{receipt_id}.json"
+        attempt = self.root / f"{receipt_id}.attempt.json"
+        changed = False
+        try:
+            record = json.loads(path.read_text(encoding="utf-8"))
+        except FileNotFoundError:
+            record = None
+        except ValueError:
+            record = {}  # Unreadable content still must not be retained.
+        if record is not None and not (isinstance(record, dict) and record.get("tombstone")):
+            if not isinstance(record, dict):
+                record = {}
+            try:
+                started_at = json.loads(attempt.read_text(encoding="utf-8")).get("started_at")
+            except (OSError, ValueError, AttributeError):
+                started_at = None
+            sidecar = record.get("sidecar") if isinstance(record.get("sidecar"), dict) else {}
+            self._replace(path, {
+                "tombstone": True, "receipt_id": receipt_id,
+                "video_id": sidecar.get("video_id"), "metadata_id": record.get("metadata_id"),
+                "pending_id": record.get("pending_id"), "status": outcome.get("status"),
+                "error_code": outcome.get("code") or (
+                    "publication_failed" if outcome.get("status") == "failed" else None),
+                "created_at": record.get("created_at"), "started_at": started_at,
+                "settled_at": outcome.get("finished_at"),
+            })
+            changed = True
+        # The claim marker and temporary copies (a failed unlink can leave the
+        # complete request behind) only served the unsettled request. Each is
+        # retried independently; compact_settled() repeats this at next start.
+        try:
+            attempt.unlink(missing_ok=True)
+        except OSError as exc:
+            log.warning("could not remove publication attempt marker %s: %s", attempt, exc)
+        removed = self._remove_temporaries(f"{receipt_id}.*.tmp")
+        return changed or removed > 0
+
+    def _remove_temporaries(self, pattern: str, *, older_than: float | None = None) -> int:
+        removed = 0
+        for temporary in sorted(self.root.glob(pattern)):
+            try:
+                if older_than is not None and temporary.stat().st_mtime >= older_than:
+                    continue
+                temporary.unlink()
+                removed += 1
+            except FileNotFoundError:
+                continue
+            except OSError as exc:
+                log.warning("could not remove publication temp file %s: %s", temporary, exc)
+        return removed
+
+    def compact_settled(self, *, abandoned_after: float = 3600.0) -> int:
+        """Tombstone settled requests that still hold content and remove their
+        temporary copies, e.g. after a crash or a sharing violation. A copy
+        whose request was never stored (its enqueue failed) has nothing to
+        settle it; it is removed once no writer can still own it. Copies of a
+        pending request stay until it settles: the request holds that data."""
+        compacted = 0
+        for result in sorted(self.root.glob("*.result.json")):
+            receipt_id = result.name[:-len(".result.json")]
+            if not re.fullmatch(r"[a-f0-9]{64}", receipt_id):
+                continue
+            try:
+                compacted += self._tombstone(receipt_id)
+            except (OSError, ValueError) as exc:
+                log.warning("could not compact settled publication retry %s: %s", receipt_id, exc)
+        owners = {temporary.name.split(".", 1)[0] for temporary in self.root.glob("*.tmp")}
+        for receipt_id in sorted(owners):
+            if (re.fullmatch(r"[a-f0-9]{64}", receipt_id)
+                    and not (self.root / f"{receipt_id}.json").exists()
+                    and not (self.root / f"{receipt_id}.result.json").exists()):
+                compacted += self._remove_temporaries(
+                    f"{receipt_id}.*.tmp", older_than=time.time() - abandoned_after)
+        return compacted
 
 
 # --------------------------------------------------------------------------
@@ -430,6 +700,7 @@ class Index:
         # guessing native sqlite3* pointers.
         self._write_txn_owner = None
         self._existing_read_only = False
+        self._pending_cancel_events: dict[int, threading.Event] = {}
 
     # ---- lifecycle -------------------------------------------------------
     @classmethod
@@ -522,8 +793,11 @@ class Index:
 
     @classmethod
     def open_or_recover(cls, path) -> tuple["Index", bool]:
-        """Like ``open``, but if the file is a corrupt SQLite database, rename
-        it aside (``index.db.corrupt-<ts>``) and start fresh.
+        """Like ``open``, but quarantine verified corruption and start fresh.
+
+        The database and its WAL/SHM are moved into a unique sibling directory
+        named ``index.db.corrupt-<ts>-<random>``. Operational errors and failed
+        quarantine moves propagate without deleting any files.
 
         Returns ``(index, recovered)`` where ``recovered`` is True if the old
         file had to be quarantined -- the caller should then trigger a full
@@ -531,29 +805,59 @@ class Index:
         path = Path(path)
         try:
             return cls.open(path), False
-        except sqlite3.DatabaseError:
-            log.error("index.db is corrupt or unreadable -- quarantining and "
-                      "rebuilding from disk")
-            if path.exists():
-                quarantine = path.with_name(
-                    f"{path.name}.corrupt-{time.strftime('%Y%m%d-%H%M%S')}"
-                )
-                try:
-                    path.replace(quarantine)
-                    log.error("corrupt index quarantined at %s", quarantine)
-                except OSError:
-                    log.exception("could not rename corrupt index; deleting")
-                    try:
-                        path.unlink(missing_ok=True)
-                    except OSError:
-                        log.exception("could not delete corrupt index either")
-            # WAL/shm siblings of the corrupt file would poison the new DB.
+        except sqlite3.DatabaseError as exc:
+            # Busy/locked, full disks, I/O failures and SQL errors are not
+            # evidence of corruption. Prefer SQLite's code (including extended
+            # codes); older Python versions may only supply the message.
+            if isinstance(exc, sqlite3.OperationalError):
+                raise
+            code = getattr(exc, "sqlite_errorcode", None)
+            if code is not None:
+                corrupt = (code & 0xff) in (sqlite3.SQLITE_CORRUPT,
+                                           sqlite3.SQLITE_NOTADB)
+            else:
+                corrupt = str(exc).lower() in (
+                    "file is not a database", "database disk image is malformed")
+            if not corrupt:
+                raise
+
+            # Stat explicitly: permission/I/O errors must not be mistaken for
+            # missing files. Move the database last so it stays at its original
+            # path if a sidecar cannot be quarantined.
+            path.stat()
+            sources = []
             for suffix in ("-wal", "-shm"):
                 sibling = path.with_name(path.name + suffix)
                 try:
-                    sibling.unlink(missing_ok=True)
-                except OSError:
-                    pass
+                    sibling.stat()
+                except FileNotFoundError:
+                    continue
+                sources.append(sibling)
+            sources.append(path)
+            quarantine = Path(tempfile.mkdtemp(
+                prefix=f"{path.name}.corrupt-{time.strftime('%Y%m%d-%H%M%S')}-",
+                dir=path.parent))
+            moved = []
+            try:
+                for source in sources:
+                    saved = quarantine / source.name
+                    source.rename(saved)
+                    moved.append((source, saved))
+            except OSError:
+                # A hard link restores the original name without ever replacing
+                # a file that appeared there meanwhile. Keep the saved copy even
+                # if restoration fails; never delete on a quarantine failure.
+                for source, saved in reversed(moved):
+                    try:
+                        source.hardlink_to(saved)
+                    except OSError:
+                        log.exception("could not restore %s; preserved at %s",
+                                      source, saved)
+                log.exception("index quarantine failed; files preserved at %s "
+                              "and %s", path.parent, quarantine)
+                raise
+            log.error("corrupt index and sidecars quarantined at %s; "
+                      "rebuilding from disk", quarantine)
             return cls.open(path), True
 
     def close(self) -> None:
@@ -1708,93 +2012,198 @@ class Index:
             )
             self._conn.commit()
 
-    def mark_pending_running(self, pending_id: int) -> None:
+    def mark_pending_running(self, pending_id: int, *,
+                             cancel_event: threading.Event | None = None) -> bool:
         """Mark a pending row in flight. The retry worker calls this before
         the actual extract so a parallel call to next_pending won't pick the
         same row twice."""
         with self._lock:
-            self._conn.execute(
-                "UPDATE pending_yoinks SET status='running' WHERE pending_id=?",
+            cur = self._conn.execute(
+                "UPDATE pending_yoinks SET status='running' "
+                "WHERE pending_id=? AND status='pending'",
                 (pending_id,),
             )
-            self._conn.commit()
+            try:
+                self._conn.commit()
+            except Exception:
+                self._conn.rollback()
+                raise
+            if cur.rowcount and cancel_event is not None:
+                # Register under the same lock as cancellation, so a cancel
+                # between selection and ownership acquisition cannot be lost.
+                self._pending_cancel_events[pending_id] = cancel_event
+            return cur.rowcount > 0
+
+    def release_pending_cancel_event(self, pending_id: int,
+                                     cancel_event: threading.Event) -> None:
+        """Release only this worker's event, including on exceptional exits."""
+        with self._lock:
+            if self._pending_cancel_events.get(pending_id) is cancel_event:
+                self._pending_cancel_events.pop(pending_id)
+
+    def pending_status(self, pending_id: int) -> str | None:
+        with self._lock:
+            row = self._conn.execute(
+                "SELECT status FROM pending_yoinks WHERE pending_id=?", (pending_id,),
+            ).fetchone()
+            return row["status"] if row else None
+
+    def mark_pending_publishing(self, pending_id: int, *,
+                                expected_status: str | None = "running") -> bool:
+        """Fence cancellation before indexing or handing off a save receipt.
+
+        Re-entering publication is harmless. Receipts may also claim a failed
+        handoff or a manually requeued row, but never a cancelled or completed row.
+        """
+        with self._lock:
+            try:
+                cur = self._conn.execute(
+                    "UPDATE pending_yoinks SET status='publishing' "
+                    "WHERE pending_id=? AND status IN ('pending','running','publishing','failed') "
+                    "AND (? IS NULL OR status IN (?, 'publishing'))",
+                    (pending_id, expected_status, expected_status),
+                )
+                self._conn.commit()
+            except Exception:
+                self._conn.rollback()
+                raise
+            return cur.rowcount > 0
+
+    def fail_pending_publication(self, pending_id: int, error: str) -> bool:
+        """Settle a local save retry without counting another download attempt."""
+        with self._lock:
+            try:
+                cur = self._conn.execute(
+                    "UPDATE pending_yoinks SET status='failed', last_error=? "
+                    "WHERE pending_id=? AND status='publishing'",
+                    (error, pending_id),
+                )
+                self._conn.commit()
+            except Exception:
+                self._conn.rollback()
+                raise
+            return cur.rowcount > 0
+
+    def defer_pending(self, pending_id: int, retry_after: str) -> bool:
+        """Wait for an unfinished broadcast without consuming a failure attempt."""
+        with self._lock:
+            cur = self._conn.execute(
+                "UPDATE pending_yoinks SET status='pending', retry_after=? "
+                "WHERE pending_id=? AND status='running'",
+                (retry_after, pending_id),
+            )
+            try:
+                self._conn.commit()
+            except Exception:
+                self._conn.rollback()
+                raise
+            return cur.rowcount > 0
 
     def mark_pending_succeeded(self, pending_id: int,
-                                succeeded_job_id: str) -> None:
+                                succeeded_job_id: str | None, *,
+                                expected_status: str | None = None) -> bool:
         """Mark a pending row terminally succeeded and record the resulting
-        single-extract job_id (so the UI can deep-link to the result)."""
+        single-extract job_id (so the UI can deep-link to the result).
+
+        Workers require their expected running or publishing state. Without
+        that constraint, callers may unlink a settled job, but can never
+        overwrite cancellation. Returns False when the expected state no
+        longer matches."""
         with self._lock:
-            self._conn.execute(
+            cur = self._conn.execute(
                 "UPDATE pending_yoinks "
-                "SET status='succeeded', succeeded_job_id=? "
-                "WHERE pending_id=?",
-                (succeeded_job_id, pending_id),
+                "SET status='succeeded', succeeded_job_id=?, last_error=NULL "
+                "WHERE pending_id=? AND status != 'cancelled' "
+                "AND (? IS NULL OR status=?)",
+                (succeeded_job_id, pending_id, expected_status, expected_status),
             )
-            self._conn.commit()
+            try:
+                self._conn.commit()
+            except Exception:
+                self._conn.rollback()
+                raise
+            return cur.rowcount > 0
 
     def mark_pending_failed(self, pending_id: int, error: str,
                              retry_after: str, *,
-                             force_final: bool = False) -> str:
+                             force_final: bool = False,
+                             expected_status: str | None = None) -> str:
         """Record one failed attempt. Increments attempt_count, then either
         re-queues with the supplied retry_after (status='pending') if under
         the strike cap, or marks the row terminally 'failed' (when the cap
         is reached, or when force_final=True for non-recoverable errors).
+        Workers pass their expected running or publishing state; legacy
+        callers may also record an initial failure while the row is pending.
 
         Returns the resulting status so the caller can tell a re-queue from
         a strike-out without a second query: 'pending' when the row will be
-        retried, 'failed' when it went terminal, '' for an unknown
+        retried, 'failed' when it went terminal, '' for an unknown or stale
         pending_id (G-43 / E2E D5 -- the retry worker used to log a phantom
         'retry at ...' after the final attempt because it couldn't see the
         strike-out happen)."""
         with self._lock:
             row = self._conn.execute(
-                "SELECT attempt_count FROM pending_yoinks WHERE pending_id=?",
-                (pending_id,),
+                "SELECT attempt_count, status FROM pending_yoinks "
+                "WHERE pending_id=? AND status != 'cancelled' AND status IN (?, ?)",
+                (pending_id, expected_status or "pending", expected_status or "running"),
             ).fetchone()
             if row is None:
                 return ""
             attempts = (row["attempt_count"] or 0) + 1
             if force_final or attempts >= _PENDING_MAX_ATTEMPTS:
-                self._conn.execute(
+                cur = self._conn.execute(
                     "UPDATE pending_yoinks "
                     "SET status='failed', attempt_count=?, last_error=? "
-                    "WHERE pending_id=?",
-                    (attempts, error, pending_id),
+                    "WHERE pending_id=? AND status=?",
+                    (attempts, error, pending_id, row["status"]),
                 )
                 status = "failed"
             else:
-                self._conn.execute(
+                cur = self._conn.execute(
                     "UPDATE pending_yoinks "
                     "SET status='pending', attempt_count=?, last_error=?, "
                     "    retry_after=? "
-                    "WHERE pending_id=?",
-                    (attempts, error, retry_after, pending_id),
+                    "WHERE pending_id=? AND status=?",
+                    (attempts, error, retry_after, pending_id, row["status"]),
                 )
                 status = "pending"
-            self._conn.commit()
-            return status
+            try:
+                self._conn.commit()
+            except Exception:
+                self._conn.rollback()
+                raise
+            return status if cur.rowcount else ""
 
     def cancel_pending(self, pending_id: int) -> bool:
         """Mark a pending row terminally cancelled. Returns True when a row
-        actually changed (False for unknown / already-terminal rows)."""
+        actually changed (False for unknown / terminal / publishing rows)."""
         with self._lock:
             cur = self._conn.execute(
                 "UPDATE pending_yoinks SET status='cancelled' "
-                "WHERE pending_id=? AND status NOT IN ('succeeded','failed','cancelled')",
+                "WHERE pending_id=? AND status IN ('pending','running')",
                 (pending_id,),
             )
-            self._conn.commit()
+            try:
+                self._conn.commit()
+            except Exception:
+                self._conn.rollback()
+                raise
+            if cur.rowcount:
+                event = self._pending_cancel_events.get(pending_id)
+                if event is not None:
+                    event.set()
             return cur.rowcount > 0
 
     def retry_pending_now(self, pending_id: int) -> bool:
         """User-initiated 'try this one now': bumps retry_after to now and,
         for a 'failed' row, flips it back to 'pending'. No-op for
-        'succeeded' / 'cancelled' rows. Returns True when a row changed."""
+        'succeeded' / 'cancelled' / 'running' / 'publishing' rows.
+        Returns True when a row changed."""
         with self._lock:
             cur = self._conn.execute(
                 "UPDATE pending_yoinks "
                 "SET status='pending', retry_after=? "
-                "WHERE pending_id=? AND status IN ('pending','failed','running')",
+                "WHERE pending_id=? AND status IN ('pending','failed')",
                 (_now_iso(), pending_id),
             )
             self._conn.commit()
@@ -1839,14 +2248,28 @@ class Index:
     def reset_running_pending(self) -> int:
         """Crash recovery at startup: any row stuck in 'running' (the helper
         died mid-retry) is flipped back to 'pending' with retry_after=now so
-        the retry worker picks it up again. Returns the count reset."""
+        the retry worker picks it up again. Interrupted publication is failed
+        visibly and left to its save receipt. Returns the count requeued."""
         with self._lock:
-            cur = self._conn.execute(
-                "UPDATE pending_yoinks SET status='pending', retry_after=? "
-                "WHERE status='running'",
-                (_now_iso(),),
-            )
-            self._conn.commit()
+            # Publication may have committed before a crash. Do not turn it
+            # into another automatic download; a durable receipt, if present,
+            # owns recovery. Otherwise leave a visible failure and keep files.
+            try:
+                self._conn.execute(
+                    "UPDATE pending_yoinks SET status='failed', last_error=? "
+                    "WHERE status='publishing'",
+                    ("Capture publication was interrupted. Saved files were kept; "
+                     "any queued publication receipt will retry the local save.",),
+                )
+                cur = self._conn.execute(
+                    "UPDATE pending_yoinks SET status='pending', retry_after=? "
+                    "WHERE status='running'",
+                    (_now_iso(),),
+                )
+                self._conn.commit()
+            except Exception:
+                self._conn.rollback()
+                raise
             return cur.rowcount
 
     # ---- citations -------------------------------------------------------
@@ -2103,7 +2526,7 @@ class Index:
             self._conn.commit()
             return cur.rowcount
 
-    def prune_jobs(self, keep_terminal: int = 200) -> int:
+    def prune_jobs(self, keep_terminal: int = TERMINAL_JOB_RETENTION) -> int:
         """Keep at most ``keep_terminal`` most-recent terminal jobs; non-
         terminal jobs (pending/running) are always retained. Returns the
         number of rows deleted."""
@@ -2113,7 +2536,7 @@ class Index:
                 f"DELETE FROM jobs WHERE status IN ({placeholders}) "
                 f"AND job_id NOT IN ("
                 f"  SELECT job_id FROM jobs WHERE status IN ({placeholders}) "
-                f"  ORDER BY updated_at DESC LIMIT ?"
+                f"  ORDER BY updated_at DESC, job_id DESC LIMIT ?"
                 f")",
                 (*_TERMINAL_JOB_STATES, *_TERMINAL_JOB_STATES, keep_terminal),
             )

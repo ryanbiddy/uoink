@@ -19,6 +19,7 @@ import contextlib
 import hashlib
 import json
 import logging
+from logging.handlers import RotatingFileHandler
 import math
 import os
 import queue
@@ -2051,7 +2052,8 @@ logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s %(levelname)s %(message)s",
     handlers=[
-        logging.FileHandler(LOG_PATH, encoding="utf-8"),
+        RotatingFileHandler(LOG_PATH, maxBytes=5 * 1024 * 1024,
+                            backupCount=3, encoding="utf-8"),
         logging.StreamHandler(sys.stdout),
     ],
 )
@@ -2881,9 +2883,10 @@ def _publish_capture_media(idx, folder: Path, sidecar: dict, corpus_path: Path,
 
 def _index_yoink(folder: Path, sidecar: dict, corpus_path: Path | None,
                  sidecar_path: Path) -> bool:
-    """Upsert one yoink + its citations into the library index. Best-effort
-    and idempotent: callers (extraction hook, backfill) must treat a failure
-    as non-fatal. Returns True if the row was indexed. A Phase 6 publication
+    """Upsert one yoink + its citations into the library index idempotently.
+    Returns True if the row was indexed, False if its identity is missing.
+    Storage errors propagate so capture callers can report a failed save.
+    A Phase 6 publication
     refusal of ``library_unavailable`` is propagated so the owner can retry
     (BD-08); other publication refusals leave the existing snapshot and
     still return True after the row is present."""
@@ -3571,14 +3574,14 @@ def _run_subprocess(cmd: list[str], *, cancel_event: threading.Event | None = No
                     log.exception("could not resolve the child-launch intent of %s",
                                   capture["start_id"])
             raise
-        if capture is not None:
-            # AS-02: resolve the launch intent by recording the live child.
-            # Record-write errors must not be swallowed; the unresolved intent
-            # remains if this write fails, so absence is never inferred.
-            source_subscriptions.record_child_start(
-                DATA_ROOT, capture["start_id"], proc.pid, capture.get("instance"))
-        started = time.monotonic()
         try:
+            # Cleanup is armed before registration: this write can fail after
+            # the OS has already started yt-dlp. Keep unresolved evidence on
+            # failure, but never leave the child running because of that write.
+            if capture is not None:
+                source_subscriptions.record_child_start(
+                    DATA_ROOT, capture["start_id"], proc.pid, capture.get("instance"))
+            started = time.monotonic()
             while True:
                 if cancel_event is not None and cancel_event.is_set():
                     _terminate_process(proc)
@@ -3591,12 +3594,29 @@ def _run_subprocess(cmd: list[str], *, cancel_event: threading.Event | None = No
                         _terminate_process(proc)
                         raise subprocess.TimeoutExpired(cmd, timeout)
         finally:
-            if capture is not None and proc.poll() is not None:
-                try:
-                    source_subscriptions.record_child_end(DATA_ROOT, capture["start_id"], proc.pid)
-                except Exception:
-                    log.exception("could not record the child exit of standing capture %s",
-                                  capture["start_id"])
+            try:
+                if proc.poll() is None:
+                    _terminate_process(proc)
+                if proc.poll() is None:
+                    log.error("could not reap subprocess %s", getattr(proc, "pid", "unknown"))
+                else:
+                    # poll reaps an exited child; communicate/termination have
+                    # already waited when they completed normally.
+                    if capture is not None:
+                        source_subscriptions.record_child_end(DATA_ROOT, capture["start_id"], proc.pid)
+            except Exception:
+                log.exception("could not finish subprocess cleanup for %s",
+                              getattr(proc, "pid", "unknown"))
+            finally:
+                for name in ("stdin", "stdout", "stderr"):
+                    pipe = getattr(proc, name, None)
+                    close = getattr(pipe, "close", None)
+                    if callable(close):
+                        try:
+                            close()
+                        except Exception:
+                            log.exception("could not close subprocess %s %s",
+                                          getattr(proc, "pid", "unknown"), name)
 
         cp = subprocess.CompletedProcess(cmd, proc.returncode, out, err)
         if check and proc.returncode:
@@ -5134,6 +5154,396 @@ def _fetch_video_subtitles(url: str, output_folder: Path, *,
     return False
 
 
+def _video_capture_source(url: str) -> str:
+    """Stable source identity, including known-platform URL aliases."""
+    canonical, _platform = _normalize_video_url(url)
+    source = canonical or (url or "").strip()
+    if not source:
+        raise ValueError("capture requires a source URL")
+    return source
+
+
+def _video_capture_id(url: str, metadata: dict) -> str:
+    canonical, _platform = _normalize_video_url(url)
+    if canonical and metadata.get("id"):
+        return str(metadata["id"])
+    # Generic extractors can reuse a basename as the ID across hosts and
+    # paths. Scope their library key to the source, even when an ID exists.
+    return "url_" + hashlib.sha256(_video_capture_source(url).encode("utf-8")).hexdigest()
+
+
+def _video_capture_folder(parent: Path, url: str, metadata: dict) -> Path:
+    """Keep the title readable while reserving space for source identity."""
+    title_slug = slugify(metadata.get("title") or "Untitled") or "video"
+    suffix = hashlib.sha256(_video_capture_source(url).encode("utf-8")).hexdigest()[:16]
+    return parent / f"{title_slug[:63]}_{suffix}"
+
+
+def _verify_video_capture_folder(folder: Path, url: str, metadata: dict) -> None:
+    """Refuse ambiguous ownership; never infer it from a folder's title."""
+    if folder.is_symlink() or getattr(folder, "is_junction", lambda: False)():
+        raise FileExistsError(f"capture folder is a link: {folder}")
+    entries = list(folder.iterdir())
+    if not entries:
+        return
+    source = _video_capture_source(url)
+    video_id = _video_capture_id(url, metadata)
+    verified = False
+    for name in (".capture-source.json", f"{folder.name}.json", "yoink.json", "metadata.json"):
+        path = folder / name
+        if not any(entry.name == name for entry in entries):
+            continue
+        # Read errors and malformed records must stop the write, not turn an
+        # occupied folder into an apparently available destination.
+        data = json.loads(path.read_text(encoding="utf-8"))
+        if not isinstance(data, dict):
+            raise ValueError(f"invalid capture ownership record: {path}")
+        if name == "metadata.json":
+            # yt-dlp may resolve a short link to a different webpage URL.
+            # Either recorded URL can identify the requested source.
+            stored_urls = [data.get("webpage_url"), data.get("original_url")]
+            stored_id = data.get("id")
+            expected_id = metadata.get("id")
+        else:
+            stored_urls = [data.get("url")]
+            stored_id = data.get("video_id")
+            expected_id = video_id
+        stored_urls = [stored_url for stored_url in stored_urls if stored_url]
+        matches_source = any(_video_capture_source(stored_url) == source
+                             for stored_url in stored_urls)
+        if ((stored_urls and not matches_source)
+                or (stored_id and str(stored_id) != str(expected_id))):
+            raise FileExistsError(f"capture folder belongs to another source: {folder}")
+        # A bare extractor ID can recur on a different host. Require source
+        # URL evidence as well, and use the ID to reject contradictory files.
+        verified = verified or matches_source
+    if not verified:
+        raise FileExistsError(f"cannot verify capture folder ownership: {folder}")
+
+
+def _create_video_entry_folder(folder: Path, url: str, metadata: dict) -> Path:
+    """Reserve a fresh session/playlist entry without refreshing older entries."""
+    folder.parent.mkdir(parents=True, exist_ok=True)
+    target = folder
+    number = 2
+    while True:
+        try:
+            target.mkdir()
+        except FileExistsError:
+            # Even a matching source must get a separate folder here. Check
+            # ownership before moving on, so foreign/ambiguous data is visible.
+            _verify_video_capture_folder(target, url, metadata)
+            target = folder.with_name(f"{folder.name}_{number}")
+            number += 1
+        else:
+            return target
+
+
+def _prepare_video_capture_folder(folder: Path, url: str, metadata: dict) -> None:
+    """Claim the directory before any capture artifact can be overwritten."""
+    video_id = _video_capture_id(url, metadata)
+    folder.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        folder.mkdir()
+    except FileExistsError:
+        _verify_video_capture_folder(folder, url, metadata)
+    # Exclusive creation also protects an empty directory from two different
+    # sources claiming it concurrently. Keep a failed/partial claim for review.
+    claim = folder / ".capture-source.json"
+    try:
+        with claim.open("x", encoding="utf-8") as stream:
+            json.dump({"url": _video_capture_source(url), "video_id": video_id}, stream)
+    except FileExistsError:
+        _verify_video_capture_folder(folder, url, metadata)
+
+
+def _schedule_publication_retry(folder: Path, sidecar: dict, corpus_path: Path, metadata: dict,
+                                *, missing_sidecar: bool = False, entries: list | None = None,
+                                video_files: list | None = None,
+                                reliability_pending: bool = False,
+                                markdown_index_attempted: bool = False,
+                                pending_id: int | None = None,
+                                job_id: str | None = None) -> str:
+    """Keep enough local evidence to retry publication without downloading.
+
+    ``job_id`` is the Activity job the failed attempt records. It identifies
+    that attempt's job later, independent of request timestamps."""
+    sidecar_path = folder / f"{folder.name}.json"
+    record = {
+        "folder": str(folder.resolve()),
+        "corpus_name": corpus_path.name,
+        "corpus_sha256": hashlib.sha256(corpus_path.read_bytes()).hexdigest(),
+        "sidecar": sidecar,
+        "metadata_id": metadata.get("id"),
+        "metadata": {key: value for key, value in metadata.items()
+                     if key not in ("formats", "requested_formats", "automatic_captions", "subtitles")},
+        "sidecar_sha256": (None if missing_sidecar else
+                           hashlib.sha256(sidecar_path.read_bytes()).hexdigest()),
+        "entries": entries,
+        "reliability_pending": reliability_pending,
+        "markdown_index_attempted": markdown_index_attempted,
+        "pending_id": pending_id,
+        "temporary_media": [],
+        "job_id": job_id,
+        "created_at": _now_iso(),
+    }
+    if not sidecar.get("media_file"):
+        for path in video_files or []:
+            # Only this attempt's downloads in the capture folder can be
+            # cleaned up. Refresh staging and previous backups are excluded.
+            if path.parent.resolve() == folder.resolve() and path.is_file() and not path.is_symlink():
+                stat = path.stat()
+                record["temporary_media"].append({
+                    "name": path.name, "size": stat.st_size, "mtime_ns": stat.st_mtime_ns})
+    return index.PublicationRetryQueue(DATA_ROOT / "publication-retries").enqueue(record)
+
+
+def _finish_publication_retry(folder: Path, sidecar: dict, corpus_path: Path, record: dict) -> None:
+    """Resume the extraction tail after publishing, without acquiring media."""
+    metadata = record.get("metadata")
+    if metadata is None:  # Receipts from before the extraction tail was retained.
+        metadata = json.loads((folder / "metadata.json").read_text(encoding="utf-8"))
+    media = record.get("temporary_media") or []
+    audio_name = sidecar.get("media_file") or (media[0]["name"] if media else None)
+    if (record.get("reliability_pending") and audio_name
+            and Path(audio_name).name == audio_name and (folder / audio_name).is_file()):
+        try:
+            if (_read_settings().get("transcript_reliability_auto_check")
+                    and sidecar.get("long_video_mode") == LONG_VIDEO_MODE_FULL):
+                _compute_transcript_reliability(
+                    sidecar["video_id"], folder=folder, audio_path=folder / audio_name,
+                    threshold=RELIABILITY_DEFAULT_THRESHOLD, allow_model_download=False)
+                _, sidecar = _read_sidecar_for_folder(folder)
+        except Exception as exc:
+            log.warning("transcript reliability auto-check failed: %s", exc)
+    if not record.get("markdown_index_attempted"):
+        try:
+            _incremental_index_update({
+                "title": sidecar.get("title"), "topic": folder.parent.name or "uncategorised",
+                "channel": metadata.get("channel") or metadata.get("uploader") or "",
+                "yoinked_at": (sidecar.get("yoinked_at") or _now_iso())[:10],
+                "rel_path": f"{folder.parent.name}/{folder.name}/{corpus_path.name}",
+            })
+        except Exception as exc:
+            log.warning("incremental index call site failed: %s", exc)
+    _start_entity_extraction_thread(folder, sidecar.get("video_id"), sidecar)
+    if sidecar.get("long_video_mode") != LONG_VIDEO_MODE_LITE:
+        _start_comments_thread(sidecar["url"], folder, corpus_path, metadata, record.get("entries"))
+    # A failed save preserves downloads. Only a successful publication may
+    # remove the exact unretained inputs; never glob or touch changed files.
+    for saved in media:
+        name = saved["name"]
+        if Path(name).name != name:
+            continue
+        path = folder / name
+        try:
+            if not path.is_file() or path.is_symlink():
+                continue
+            stat = path.stat()
+            if (stat.st_size, stat.st_mtime_ns) != (saved["size"], saved["mtime_ns"]):
+                log.warning("publication retry kept changed media input %s", path)
+                continue
+            path.unlink()
+        except OSError as exc:
+            log.warning("could not remove unretained download %s: %s", path, exc)
+
+
+def _capture_folder_removed(folder: Path) -> bool:
+    """A missing folder is obsolete only while its volume is reachable.
+
+    An offline drive or share reports the folder as missing too; that is a
+    transient failure, not evidence the user removed the capture."""
+    try:
+        return not folder.exists() and Path(folder.anchor).exists()
+    except OSError:
+        return False
+
+
+def _publication_retry_superseded(url: str, receipt_id: str, record: dict) -> bool:
+    with _jobs_lock:
+        return _publication_retry_superseded_locked(url, receipt_id, record)
+
+
+def _publication_retry_superseded_locked(url: str, receipt_id: str, record: dict) -> bool:
+    """True when Activity no longer belongs to the attempt that queued this
+    receipt, so recording the retry's outcome would delete another job.
+    Caller must hold _jobs_lock.
+
+    Ownership is explicit, never inferred from request timestamps: a
+    request can start before this receipt existed and finish after it.
+    The failed attempt recorded its job under the receipt's ``job_id`` (and
+    names the receipt in its error). Recording any single-video job removes
+    the other terminal jobs for the same source, so while that job is still
+    listed nothing newer finished; once it is gone, any listed job replaced
+    it. A running or queued job is always newer. With no job listed at all
+    (a playlist attempt records no single-video job), the outcome may be
+    recorded."""
+    owner = record.get("job_id")
+    jobs = [job for job in _jobs.values()
+            if job.get("kind") == "single" and job.get("source_url") == url]
+    if any(job.get("state") not in _JOB_TERMINAL_STATES for job in jobs):
+        return True
+    if any((owner and job.get("id") == owner) or receipt_id in str(job.get("error") or "")
+           for job in jobs):
+        return False
+    return bool(jobs)
+
+
+def _retry_publication_one() -> bool:
+    """Attempt one durable publication receipt, then retain its outcome.
+
+    Take the normal capture ownership lock and check the saved generation
+    before writing. A stale receipt must never refresh or resurrect a capture.
+    Only an ownership mismatch, a removed folder or newer-generation evidence
+    is obsolete; transient I/O errors are ordinary failures of the one retry.
+    """
+    queue = index.PublicationRetryQueue(DATA_ROOT / "publication-retries")
+    pending = queue.next_pending()
+    if pending is None:
+        return False
+    receipt_id, record = pending
+    sidecar = record["sidecar"]
+    url = sidecar["url"]
+    folder = Path(record["folder"])
+    started_at = _now_iso()
+    job_id = _make_job_id() if record.get("pending_id") is not None else None
+    with _manual_extraction_ownership(url) as ownership:
+        if not ownership.ok:
+            return False  # Waiting for ownership does not spend the retry.
+        # Another process may have settled this receipt while we waited.
+        if queue.is_settled(receipt_id):
+            return False
+        error = None
+        obsolete = False
+        failure_code = "publication_failed"
+
+        def refuse_obsolete(reason: str) -> None:
+            nonlocal obsolete
+            obsolete = True
+            raise RuntimeError(reason)
+
+        try:
+            if not queue.claim(receipt_id):
+                failure_code = "interrupted"
+                raise RuntimeError("publication retry was interrupted; inspect the saved files")
+            if (record.get("pending_id") is not None
+                    and not _get_index().mark_pending_publishing(
+                        record["pending_id"], expected_status=None)):
+                refuse_obsolete("download queue row was cancelled, completed or removed; publication retry refused")
+            if ownership.conflict:
+                refuse_obsolete(ownership.conflict)
+            try:
+                _verify_video_capture_folder(folder, url, {"id": record["metadata_id"]})
+            except FileExistsError:
+                # Another source, unverifiable ownership or a link.
+                obsolete = True
+                raise
+            except OSError:
+                # Sharing violations, permissions and offline volumes are
+                # retry failures. Only a removed folder is obsolete.
+                if _capture_folder_removed(folder):
+                    refuse_obsolete("capture folder was removed; publication retry refused")
+                raise
+            row = _get_index().get_yoink(sidecar["video_id"])
+            if row and (row.get("deleted_at") or
+                        Path(row["corpus_path"]).parent.resolve() != folder.resolve()):
+                refuse_obsolete("capture was deleted or moved; publication retry refused")
+            corpus_path = folder / record["corpus_name"]
+            if (Path(record["corpus_name"]).name != record["corpus_name"]
+                    or corpus_path.is_symlink()
+                    or hashlib.sha256(corpus_path.read_bytes()).hexdigest()
+                    != record["corpus_sha256"]):
+                refuse_obsolete("capture changed; publication retry refused")
+            sidecar_path = folder / f"{folder.name}.json"
+            # Startup backfill can index this same generation first, and its
+            # Phase 6 publication rewrites the sidecar before its SQLite
+            # commit. A row is not proof that publication finished, so this
+            # generation is published again from the sidecar on disk; the
+            # publisher completes or idempotently settles its own state.
+            indexed = bool(row) and row.get("yoinked_at") == sidecar.get("yoinked_at")
+            with _sidecar_update_lock:
+                if sidecar_path.is_symlink():
+                    refuse_obsolete("capture sidecar is a link; publication retry refused")
+                changed = False
+                if record["sidecar_sha256"] is None:
+                    try:
+                        queue._create(sidecar_path, sidecar)
+                    except FileExistsError:
+                        changed = json.loads(sidecar_path.read_text(encoding="utf-8")) != sidecar
+                else:
+                    changed = (hashlib.sha256(sidecar_path.read_bytes()).hexdigest()
+                               != record["sidecar_sha256"])
+                current = (json.loads(sidecar_path.read_text(encoding="utf-8"))
+                           if indexed or not changed else None)
+                if changed and (not isinstance(current, dict)
+                                or current.get("yoinked_at") != sidecar.get("yoinked_at")):
+                    # An existing sidecar must match exactly unless the library
+                    # already holds this generation; different metadata
+                    # belongs to another writer and is never overwritten.
+                    refuse_obsolete("capture sidecar changed; publication retry refused")
+                if _index_yoink(folder, current, corpus_path, sidecar_path) is False:
+                    raise RuntimeError("library index did not publish the capture")
+            _finish_publication_retry(folder, current, corpus_path, record)
+            superseded = _publication_retry_superseded(url, receipt_id, record)
+            if record.get("pending_id") is not None:
+                # The download handed off to this receipt. Complete its queue
+                # row before reporting success, so retry-now cannot download
+                # an already published capture again.
+                if not _get_index().mark_pending_succeeded(
+                        record["pending_id"], None if superseded else job_id,
+                        expected_status="publishing"):
+                    raise RuntimeError("download queue row changed during publication")
+        except Exception as exc:
+            error = f"Capture publication retry failed: {exc}. Files kept in {folder}."
+            log.warning("%s", error)
+            if record.get("pending_id") is not None:
+                try:
+                    _get_index().fail_pending_publication(record["pending_id"], _sanitize_error(error))
+                except Exception:
+                    log.exception("publication retry: queue failure could not be settled")
+            # Every outcome, an ordinary failure included, defers to a newer
+            # attempt's Activity job: recording this one would delete it.
+            superseded = _publication_retry_superseded(url, receipt_id, record)
+        # Settle before recording the job; the receipt stays terminal even
+        # when the same SQLite outage also prevents job persistence. An
+        # obsolete refusal can neither run nor verify publication, so it is
+        # never reported as completed: it ends the queued job as failed.
+        try:
+            queue.settle(receipt_id, error=error,
+                         code="obsolete" if obsolete else failure_code if error else None)
+        except OSError as exc:
+            # No complete outcome was saved (e.g. the disk is full), so the
+            # receipt is not settled and its next pass reports the attempt as
+            # interrupted. Activity still gets this attempt's real outcome;
+            # that later pass then finds this newer job and leaves it alone.
+            log.warning("publication retry %s outcome could not be saved: %s", receipt_id, exc)
+        if superseded:
+            return True
+        # Another attempt records its job after releasing capture ownership,
+        # so one can land at any point up to here (during settlement too).
+        # The final check runs under the jobs lock that performs this insert
+        # and its supersession: a job recorded before the insert always wins.
+        recorded = _record_single_extract_job(
+            url, started_at,
+            result=({"ok": True, "folder": str(folder), "title": sidecar.get("title"),
+                     "long_video_mode": sidecar.get("long_video_mode")}
+                    if error is None else None),
+            error=error, failure_phase="save" if error else None,
+            title=sidecar.get("title"), folder=folder,
+            retry_exhausted=bool(error), attempt_count=1,
+            job_id=job_id,
+            unless=lambda: _publication_retry_superseded_locked(url, receipt_id, record),
+        )
+        if recorded is None and error is None and record.get("pending_id") is not None:
+            # The queue row was linked to a job that is now never recorded.
+            try:
+                _get_index().mark_pending_succeeded(record["pending_id"], None)
+            except Exception as exc:
+                log.warning("publication retry could not unlink pending #%s: %s",
+                            record["pending_id"], exc)
+    return True
+
+
 def _run_extraction(url: str, interval: int, output_folder: Path,
                     *, notify: bool = True,
                     metadata: dict | None = None,
@@ -5142,7 +5552,8 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
                     generate_paste: bool = True,
                     long_video_mode: str = LONG_VIDEO_MODE_FULL,
                     cancel_event: threading.Event | None = None,
-                    phase_callback=None) -> dict:
+                    phase_callback=None,
+                    pending_id: int | None = None) -> dict:
     """Yoink a single video into output_folder.
 
     Steps:
@@ -5158,8 +5569,6 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
     title, video_slug, caption_count.
     """
     requested_long_video_mode = _normalize_long_video_mode(long_video_mode)
-    output_folder.mkdir(parents=True, exist_ok=True)
-
     if metadata is None:
         if phase_callback:
             phase_callback("metadata")
@@ -5168,7 +5577,12 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
         topic = _classify_topic(metadata)
 
     title = metadata.get("title") or "Untitled"
-    video_slug = slugify(title) or "video"
+    _prepare_video_capture_folder(output_folder, url, metadata)
+    # A new capture has only its ownership claim. Refreshes keep previous
+    # artifacts until generation and the file swap have succeeded.
+    refreshing = any(p.name != ".capture-source.json" for p in output_folder.iterdir())
+    video_slug = output_folder.name
+    video_id = _video_capture_id(url, metadata)
     log.info("Uoinking '%s' -> %s (topic=%s)", title, output_folder, topic)
 
     # P1-4: bound screenshot count so a 4-hour video at 5s interval doesn't
@@ -5243,456 +5657,737 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
         log.warning(notes[-1])
         interval = new_interval
 
-    # Keep bulky format/caption tables in memory, not in the metadata cache.
-    try:
-        cached_metadata = {
-            key: value for key, value in metadata.items()
-            if key not in ("formats", "requested_formats", "automatic_captions", "subtitles")
+    # Keep the stage on the same filesystem so publication uses renames.
+    # Short directory and corpus names leave room for atomic-write temp names
+    # under Windows MAX_PATH, even in long topics with a long capture slug.
+    _raise_if_cancelled(cancel_event)
+    keep_media = (
+        source_type == SOURCE_TYPE_SHORT_VIDEO
+        and bool(_read_settings().get("keep_media"))
+    )
+    stage_root = None
+    if refreshing:
+        stage_root = Path(tempfile.mkdtemp(prefix=".s-", dir=output_folder))
+    asset_folder = stage_root / "n" if refreshing else output_folder
+    backup_folder = stage_root / "p" if refreshing else None
+    media_backup_folder = stage_root / "m" if refreshing else None
+    corpus_name = _corpus_path(output_folder).name
+    sidecar_name = f"{video_slug}.json"
+    staged_names = {Path(corpus_name): Path("c.md"), Path(sidecar_name): Path("c.json")}
+    markdown_index_attempted = False
+    publication_started = False
+    publication_recovery_needed = False
+    downloaded_media = {}
+
+    def begin_publication() -> None:
+        nonlocal publication_started
+        if publication_started:
+            return
+        _raise_if_cancelled(cancel_event)
+        if pending_id is not None and not _get_index().mark_pending_publishing(pending_id):
+            _raise_if_cancelled(cancel_event)
+            raise RuntimeError("download queue row changed before publication")
+        publication_started = True
+
+    def publication_failed(error: Exception, *, missing_sidecar: bool = False) -> None:
+        nonlocal publication_recovery_needed
+        # A failed save makes these files recovery inputs, even if cancellation
+        # prevents the publication handoff from claiming the queue row.
+        publication_recovery_needed = True
+        # A first capture can fail its sidecar write before the normal commit
+        # boundary. Its receipt must own publication before cancellation closes.
+        begin_publication()
+        error.phase = "save"
+        error.publication_error = (
+            f"Capture publication failed: {error}. Files kept in {output_folder}."
+        )
+        receipt_id = None
+        job_id = None
+        try:
+            # The caller records this attempt's Activity job under this ID
+            # (via publication_job_id), so the retry can tell its own job
+            # from a newer attempt's, whatever their request timestamps.
+            job_id = _make_job_id()
+            receipt_id = _schedule_publication_retry(
+                output_folder, sidecar, yoink_path, metadata,
+                missing_sidecar=missing_sidecar, entries=entries, video_files=video_files,
+                reliability_pending=missing_sidecar or refreshing,
+                markdown_index_attempted=markdown_index_attempted, pending_id=pending_id,
+                job_id=job_id)
+        except Exception as retry_error:
+            error.publication_error += f" Publication retry could not be queued: {retry_error}."
+            log.error("%s", error.publication_error)
+        else:
+            error.publication_error += f" One publication retry is queued ({receipt_id})."
+        # Callers that aggregate captures must keep the saved corpus in their
+        # session/playlist while reporting this attempt's failed save honestly.
+        error.capture_result = {
+            "ok": False, "status": "saved_with_errors", "failure_phase": "save",
+            "error": error.publication_error, "folder": str(output_folder),
+            "title": title, "video_slug": video_slug, "screenshot_count": len(shots),
+            "caption_count": platform_caption_count,
+            "publication_retry_id": receipt_id,
+            "publication_job_id": job_id,
         }
-        (output_folder / "metadata.json").write_text(
-            json.dumps(cached_metadata, indent=2, ensure_ascii=False),
-            encoding="utf-8",
-        )
-    except OSError as e:
-        log.warning("could not write metadata.json: %s", e)
 
-    # Thumbnail (best-effort; absence shouldn't fail the extraction).
-    _download_thumbnail(metadata, output_folder, cancel_event=cancel_event)
+    def stage_name(relative: Path) -> Path:
+        return staged_names.get(relative, relative)
 
-    # Clear only helper-owned transient media from an earlier attempt in this
-    # same yoink folder. The corpus/sidecar remain until the new run succeeds.
-    for pattern in ("video.*", "video-chunk-*.*"):
-        for stale in output_folder.glob(pattern):
-            if stale.is_file():
-                stale.unlink(missing_ok=True)
+    def rename_artifact(source: Path, target: Path) -> None:
+        # Match storage._atomic_write_text's bounded OneDrive-lock retry.
+        # Use rename, not replace, and recheck the destination on every try.
+        for delay in (0.05, 0.2, 0.5, None):
+            if target.exists() or target.is_symlink():
+                raise FileExistsError(f"capture rename destination occupied: {target}")
+            try:
+                source.rename(target)
+                return
+            except PermissionError:
+                if delay is None:
+                    raise
+                time.sleep(delay)
 
-    # Full mode downloads one low-res media file; chunked mode downloads
-    # representative sections. Both fetch optional subtitles separately so
-    # a caption failure cannot prevent the media download.
-    download_timeout = _ytdlp_timeout_for(processed_media_seconds or duration)
-    media_cmd = [
-        *YTDLP_CMD,
-        # Require a video stream. Plain `worst` can pick audio-only on some
-        # Shorts, which makes ffmpeg screenshot extraction fail with no packets.
-        "-f", "worst*[vcodec!=none][height>=360]/worst*[vcodec!=none]/worst",
-        "--concurrent-fragments", "4",
-        "--retries", "10",
-        "--fragment-retries", "10",
-        "--socket-timeout", "30",
-    ]
-    if effective_long_video_mode == LONG_VIDEO_MODE_CHUNKED:
-        for chunk in long_video_chunks:
-            media_cmd.extend(["--download-sections", _chunk_section_spec(chunk)])
-        media_cmd.extend([
-            "-o", str(output_folder / "video-chunk-%(section_number)03d.%(ext)s"),
-            url,
-        ])
-    else:
-        media_cmd.extend([
-            # Full mode still refuses a multi-GB media file. Chunked mode
-            # intentionally omits this source-level check because the selected
-            # sections already bound the downloaded media work.
-            "--max-filesize", str(YTDLP_MAX_FILESIZE_BYTES),
-            "-o", str(output_folder / "video.%(ext)s"),
-            url,
-        ])
-
+    moved_originals: list[Path] = []
+    installed: list[Path] = []
+    created_dirs: list[Path] = []
+    committed = False
+    preserve_stage = False
     try:
-        if phase_callback:
-            phase_callback("download")
-        _run_subprocess(
-            media_cmd,
-            cancel_event=cancel_event,
-            check=True,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.PIPE,
-            timeout=download_timeout,
-        )
-    except subprocess.TimeoutExpired:
-        # Log the real cause (duration + the budget we actually used) so
-        # helper.log has a trace -- the old path discarded this and left the
-        # 2-hour failure looking like "nothing happened".
-        log.error(
-            "yt-dlp %s download timed out after %ds "
-            "(source duration ~%.0fs, media work ~%ds): %s",
-            effective_long_video_mode, download_timeout, duration,
-            processed_media_seconds, url)
-        mins = max(1, download_timeout // 60)
-        raise ExtractionPhaseError(
-            "download",
-            f"Download timed out after about {mins} minutes. This is a "
-            "download/network issue, not a screenshot setting -- the video "
-            "may be very long, or the connection to YouTube is slow or being "
-            "throttled. Try again on a faster connection, or pick a shorter "
-            "video."
-        )
+        if refreshing:
+            asset_folder.mkdir()
+        # Keep bulky format/caption tables in memory, not in the metadata cache.
+        try:
+            cached_metadata = {
+                key: value for key, value in metadata.items()
+                if key not in ("formats", "requested_formats", "automatic_captions", "subtitles")
+            }
+            (asset_folder / "metadata.json").write_text(
+                json.dumps(cached_metadata, indent=2, ensure_ascii=False),
+                encoding="utf-8",
+            )
+        except OSError as e:
+            log.warning("could not write metadata.json: %s", e)
+            if refreshing:
+                raise
 
-    if phase_callback:
-        phase_callback("transcript")
-    captions_refused = _fetch_video_subtitles(
-        url, output_folder,
-        long_video_mode=effective_long_video_mode,
-        cancel_event=cancel_event,
-    )
+        # Thumbnail (best-effort; absence shouldn't fail the extraction).
+        _download_thumbnail(metadata, asset_folder, cancel_event=cancel_event)
 
-    media_glob = (
-        "video-chunk-*.*"
-        if effective_long_video_mode == LONG_VIDEO_MODE_CHUNKED
-        else "video.*"
-    )
-    video_files = [f for f in sorted(output_folder.glob(media_glob))
-                   if f.suffix in (".mp4", ".webm", ".mkv")]
-    srt_files = list(output_folder.glob("video*.srt"))
-    if not video_files:
+        # Full mode downloads one low-res media file; chunked mode downloads
+        # representative sections. Both fetch optional subtitles separately so
+        # a caption failure cannot prevent the media download.
+        download_timeout = _ytdlp_timeout_for(processed_media_seconds or duration)
+        media_cmd = [
+            *YTDLP_CMD,
+            # Require a video stream. Plain `worst` can pick audio-only on some
+            # Shorts, which makes ffmpeg screenshot extraction fail with no packets.
+            "-f", "worst*[vcodec!=none][height>=360]/worst*[vcodec!=none]/worst",
+            "--concurrent-fragments", "4",
+            "--retries", "10",
+            "--fragment-retries", "10",
+            "--socket-timeout", "30",
+        ]
         if effective_long_video_mode == LONG_VIDEO_MODE_CHUNKED:
+            for chunk in long_video_chunks:
+                media_cmd.extend(["--download-sections", _chunk_section_spec(chunk)])
+            media_cmd.extend([
+                "-o", str(asset_folder / "video-chunk-%(section_number)03d.%(ext)s"),
+                url,
+            ])
+        else:
+            media_cmd.extend([
+                # Full mode still refuses a multi-GB media file. Chunked mode
+                # intentionally omits this source-level check because the selected
+                # sections already bound the downloaded media work.
+                "--max-filesize", str(YTDLP_MAX_FILESIZE_BYTES),
+                "-o", str(asset_folder / "video.%(ext)s"),
+                url,
+            ])
+
+        media_glob = (
+            "video-chunk-*.*"
+            if effective_long_video_mode == LONG_VIDEO_MODE_CHUNKED
+            else "video.*"
+        )
+        try:
+            if phase_callback:
+                phase_callback("download")
+            media_before_download = set(asset_folder.glob(media_glob))
+            try:
+                _run_subprocess(
+                    media_cmd,
+                    cancel_event=cancel_event,
+                    check=True,
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.PIPE,
+                    timeout=download_timeout,
+                )
+            finally:
+                if not refreshing:
+                    # Record only new, regular download outputs. Remember their
+                    # identity so cancellation cannot unlink a replacement file.
+                    for path in asset_folder.glob(media_glob):
+                        if (path not in media_before_download and not path.is_symlink()
+                                and path.suffix in (".mp4", ".webm", ".mkv")
+                                and path.is_file()):
+                            st = path.stat()
+                            downloaded_media[path] = (st.st_dev, st.st_ino, st.st_size, st.st_mtime_ns)
+        except subprocess.TimeoutExpired:
+            # Log the real cause (duration + the budget we actually used) so
+            # helper.log has a trace -- the old path discarded this and left the
+            # 2-hour failure looking like "nothing happened".
+            log.error(
+                "yt-dlp %s download timed out after %ds "
+                "(source duration ~%.0fs, media work ~%ds): %s",
+                effective_long_video_mode, download_timeout, duration,
+                processed_media_seconds, url)
+            mins = max(1, download_timeout // 60)
             raise ExtractionPhaseError(
                 "download",
-                "Chunked download produced no media sections. The source may "
-                "be unavailable, private, region-locked, or may not support "
-                "section downloads."
+                f"Download timed out after about {mins} minutes. This is a "
+                "download/network issue, not a screenshot setting -- the video "
+                "may be very long, or the connection to YouTube is slow or being "
+                "throttled. Try again on a faster connection, or pick a shorter "
+                "video."
             )
-        raise ExtractionPhaseError(
-            "download",
-            "yt-dlp produced no video file. The video may exceed the 2 GB "
-            "download cap (set in helper config), or it may be unavailable, "
-            "private, or region-locked."
+
+        if phase_callback:
+            phase_callback("transcript")
+        captions_refused = _fetch_video_subtitles(
+            url, asset_folder,
+            long_video_mode=effective_long_video_mode,
+            cancel_event=cancel_event,
         )
 
-    shots_dir = output_folder / "screenshots"
-    shots_dir.mkdir(exist_ok=True)
-    for pattern in ("shot_*.jpg", "chunk_*_shot_*.jpg"):
-        for stale in shots_dir.glob(pattern):
-            stale.unlink(missing_ok=True)
+        video_files = [f for f in sorted(asset_folder.glob(media_glob))
+                       if f.suffix in (".mp4", ".webm", ".mkv")]
+        srt_files = list(asset_folder.glob("video*.srt"))
+        if not video_files:
+            if effective_long_video_mode == LONG_VIDEO_MODE_CHUNKED:
+                raise ExtractionPhaseError(
+                    "download",
+                    "Chunked download produced no media sections. The source may "
+                    "be unavailable, private, region-locked, or may not support "
+                    "section downloads."
+                )
+            raise ExtractionPhaseError(
+                "download",
+                "yt-dlp produced no video file. The video may exceed the 2 GB "
+                "download cap (set in helper config), or it may be unavailable, "
+                "private, or region-locked."
+            )
 
-    shot_times: list[int] = []
-    if effective_long_video_mode == LONG_VIDEO_MODE_CHUNKED:
-        shot_number = 1
-        for i, video_file in enumerate(video_files):
-            chunk = long_video_chunks[min(i, len(long_video_chunks) - 1)]
-            chunk_phase = f"screenshots_chunk_{i + 1}_of_{len(video_files)}"
+        shots_dir = asset_folder / "screenshots"
+        shots_dir.mkdir(exist_ok=True)
+
+        shot_times: list[int] = []
+        if effective_long_video_mode == LONG_VIDEO_MODE_CHUNKED:
+            shot_number = 1
+            for i, video_file in enumerate(video_files):
+                chunk = long_video_chunks[min(i, len(long_video_chunks) - 1)]
+                chunk_phase = f"screenshots_chunk_{i + 1}_of_{len(video_files)}"
+                try:
+                    if phase_callback:
+                        phase_callback(chunk_phase)
+                    prefix = f"chunk_{i + 1:03d}_shot_"
+                    _run_subprocess(
+                        _screenshot_ffmpeg_command(
+                            video_file,
+                            interval,
+                            shots_dir / f"{prefix}%04d.jpg",
+                        ),
+                        cancel_event=cancel_event,
+                        check=True,
+                        stdout=subprocess.DEVNULL,
+                        stderr=subprocess.PIPE,
+                        timeout=_ffmpeg_timeout_for(chunk["duration_seconds"]),
+                    )
+                except subprocess.TimeoutExpired:
+                    log.error(
+                        "ffmpeg chunk %d/%d timed out (section %ss-%ss, interval %ds)",
+                        i + 1, len(video_files), chunk["start_seconds"],
+                        chunk["end_seconds"], interval)
+                    raise ExtractionPhaseError(
+                        chunk_phase,
+                        f"Screenshot generation timed out in chunk {i + 1} of "
+                        f"{len(video_files)}. Try a longer screenshot interval "
+                        f"(current: {interval}s)."
+                    )
+                local_shots = sorted(shots_dir.glob(f"{prefix}*.jpg"))
+                for local_i, local_shot in enumerate(local_shots):
+                    target = shots_dir / f"shot_{shot_number:04d}.jpg"
+                    local_shot.replace(target)
+                    shot_times.append(
+                        int(chunk["start_seconds"] + (local_i * interval))
+                    )
+                    shot_number += 1
+        else:
+            video_file = video_files[0]
             try:
                 if phase_callback:
-                    phase_callback(chunk_phase)
-                prefix = f"chunk_{i + 1:03d}_shot_"
+                    phase_callback("screenshots")
                 _run_subprocess(
                     _screenshot_ffmpeg_command(
                         video_file,
                         interval,
-                        shots_dir / f"{prefix}%04d.jpg",
+                        shots_dir / "shot_%04d.jpg",
                     ),
                     cancel_event=cancel_event,
                     check=True,
                     stdout=subprocess.DEVNULL,
                     stderr=subprocess.PIPE,
-                    timeout=_ffmpeg_timeout_for(chunk["duration_seconds"]),
+                    timeout=_ffmpeg_timeout_for(duration),
                 )
             except subprocess.TimeoutExpired:
                 log.error(
-                    "ffmpeg chunk %d/%d timed out (section %ss-%ss, interval %ds)",
-                    i + 1, len(video_files), chunk["start_seconds"],
-                    chunk["end_seconds"], interval)
+                    "ffmpeg screenshot extraction timed out after %ds "
+                    "(video duration ~%.0fs, interval %ds)",
+                    _ffmpeg_timeout_for(duration), duration, interval)
                 raise ExtractionPhaseError(
-                    chunk_phase,
-                    f"Screenshot generation timed out in chunk {i + 1} of "
-                    f"{len(video_files)}. Try a longer screenshot interval "
-                    f"(current: {interval}s)."
+                    "screenshots",
+                    "Screenshot generation timed out -- try a longer screenshot "
+                    "interval (current: %ds)." % interval
                 )
-            local_shots = sorted(shots_dir.glob(f"{prefix}*.jpg"))
-            for local_i, local_shot in enumerate(local_shots):
-                target = shots_dir / f"shot_{shot_number:04d}.jpg"
-                local_shot.replace(target)
-                shot_times.append(
-                    int(chunk["start_seconds"] + (local_i * interval))
-                )
-                shot_number += 1
-    else:
-        video_file = video_files[0]
-        try:
-            if phase_callback:
-                phase_callback("screenshots")
-            _run_subprocess(
-                _screenshot_ffmpeg_command(
-                    video_file,
-                    interval,
-                    shots_dir / "shot_%04d.jpg",
-                ),
-                cancel_event=cancel_event,
-                check=True,
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.PIPE,
-                timeout=_ffmpeg_timeout_for(duration),
-            )
-        except subprocess.TimeoutExpired:
-            log.error(
-                "ffmpeg screenshot extraction timed out after %ds "
-                "(video duration ~%.0fs, interval %ds)",
-                _ffmpeg_timeout_for(duration), duration, interval)
-            raise ExtractionPhaseError(
-                "screenshots",
-                "Screenshot generation timed out -- try a longer screenshot "
-                "interval (current: %ds)." % interval
-            )
-    shots = sorted(shots_dir.glob("shot_*.jpg"))
-    if not shot_times:
-        shot_times = [i * interval for i in range(len(shots))]
+        shots = sorted(shots_dir.glob("shot_*.jpg"))
+        if refreshing and not shots:
+            raise ExtractionPhaseError("screenshots", "Screenshot generation produced no images.")
+        if not shot_times:
+            shot_times = [i * interval for i in range(len(shots))]
 
-    entries = list(parse_srt(srt_files[0])) if srt_files else []
-    platform_caption_count = len(entries)
-    if not entries and phase_callback:
-        phase_callback("transcript")
-    entries, transcript_source, asr_fallback = _resolve_video_transcript(
-        entries,
-        video_files[0],
-        duration,
-        captions_refused=captions_refused,
-        media_chunks=[
-            (path, chunk["start_seconds"], chunk["duration_seconds"])
-            for path, chunk in zip(video_files, long_video_chunks)
-        ] if effective_long_video_mode == LONG_VIDEO_MODE_CHUNKED else None,
-        cancel_event=cancel_event,
-    )
-    if effective_long_video_mode == LONG_VIDEO_MODE_CHUNKED:
-        caption_coverage = (
-            " while retaining the full available subtitle track"
-            if transcript_source == "captions" else ""
+        entries = list(parse_srt(srt_files[0])) if srt_files else []
+        platform_caption_count = len(entries)
+        if not entries and phase_callback:
+            phase_callback("transcript")
+        entries, transcript_source, asr_fallback = _resolve_video_transcript(
+            entries,
+            video_files[0],
+            duration,
+            captions_refused=captions_refused,
+            media_chunks=[
+                (path, chunk["start_seconds"], chunk["duration_seconds"])
+                for path, chunk in zip(video_files, long_video_chunks)
+            ] if effective_long_video_mode == LONG_VIDEO_MODE_CHUNKED else None,
+            cancel_event=cancel_event,
         )
-        notes.append(
-            f"Chunked mode sampled {len(long_video_chunks)} media sections "
-            f"({processed_media_seconds // 60}m of {int(duration) // 60}m)"
-            f"{caption_coverage}."
-        )
-    cap_warning = " ".join(notes) or None
-    transcript_note = None
-    if transcript_source != "captions":
-        if captions_refused:
-            caption_note = "YouTube refused captions"
-        elif _detect_platform_from_url(url) == PLATFORM_YOUTUBE:
-            caption_note = "YouTube captions unavailable"
-        else:
-            caption_note = "captions unavailable"
-        if transcript_source == "asr":
-            coverage = (" of sampled sections"
-                        if effective_long_video_mode == LONG_VIDEO_MODE_CHUNKED else "")
-            transcript_note = f"Local Whisper transcript{coverage}: {caption_note}"
-        else:
-            transcript_note = f"No transcript: {caption_note}"
+        if effective_long_video_mode == LONG_VIDEO_MODE_CHUNKED:
+            caption_coverage = (
+                " while retaining the full available subtitle track"
+                if transcript_source == "captions" else ""
+            )
+            notes.append(
+                f"Chunked mode sampled {len(long_video_chunks)} media sections "
+                f"({processed_media_seconds // 60}m of {int(duration) // 60}m)"
+                f"{caption_coverage}."
+            )
+        cap_warning = " ".join(notes) or None
+        transcript_note = None
+        if transcript_source != "captions":
+            if captions_refused:
+                caption_note = "YouTube refused captions"
+            elif _detect_platform_from_url(url) == PLATFORM_YOUTUBE:
+                caption_note = "YouTube captions unavailable"
+            else:
+                caption_note = "captions unavailable"
+            if transcript_source == "asr":
+                coverage = (" of sampled sections"
+                            if effective_long_video_mode == LONG_VIDEO_MODE_CHUNKED else "")
+                transcript_note = f"Local Whisper transcript{coverage}: {caption_note}"
+            else:
+                transcript_note = f"No transcript: {caption_note}"
 
-    if entries:
-        plain = "\n".join(text for _, _, text in entries)
-        (output_folder / "transcript.txt").write_text(plain, encoding="utf-8")
+        if entries:
+            plain = "\n".join(text for _, _, text in entries)
+            (asset_folder / "transcript.txt").write_text(plain, encoding="utf-8")
 
-    if phase_callback:
-        phase_callback("write")
+        if phase_callback:
+            phase_callback("write")
 
-    # Channel context (description + recent videos). Best-effort.
-    channel_url = (metadata.get("channel_url")
-                   or metadata.get("uploader_url")
-                   or "")
-    channel_ctx = _fetch_channel_context(channel_url, cancel_event=cancel_event)
+        # Channel context (description + recent videos). Best-effort.
+        channel_url = (metadata.get("channel_url")
+                       or metadata.get("uploader_url")
+                       or "")
+        channel_ctx = _fetch_channel_context(channel_url, cancel_event=cancel_event)
 
-    # Phase 6 (BC-2): the transcript rows persist their actual link values,
-    # the already-held chapter metadata travels with the capture, and the
-    # shared media snapshot builder/renderer produce the corpus transcript
-    # section (chapters and cues) from that held data. Nothing is fetched.
-    yoinked_at = _now_iso()
-    held_chapters = metadata.get("chapters") if isinstance(metadata.get("chapters"), list) else []
-    capture_seed = {
-        "video_id": metadata.get("id"), "url": url, "source_type": source_type,
-        "transcript": [], "source_chapters": held_chapters,
-        "transcript_source": transcript_source,
-        "asr_fallback": asr_fallback,
-        "transcript_note": transcript_note,
-        "duration_seconds": duration, "yoinked_at": yoinked_at,
-    }
-    capture_seed["transcript"] = _transcript_entries_with_links(capture_seed, entries)
-    media_sections = None
-    try:
-        import yt_extract as _yt_extract  # noqa: WPS433
-        media_plan = _capture_media_plan(
-            capture_seed, output_folder,
-            item={"metadata_json": json.dumps({"duration_seconds": duration})},
-            chapter_rows=_yt_extract.chapters_from_metadata(metadata))
-        if media_plan is not None:
-            media_sections = media_plan["markdown"]
-    except Exception as e:
-        log.warning("media snapshot build skipped for %s: %s", output_folder, e)
-
-    # Build the corpus markdown.
-    yoink_md = _build_yoink_md(
-        metadata=metadata, url=url, entries=entries, shots=shots,
-        interval=interval, channel_ctx=channel_ctx,
-        yoinked_at=yoinked_at, topic=topic,
-        cap_warning=cap_warning,
-        shot_times=shot_times,
-        media_sections=media_sections,
-        transcript_note=transcript_note,
-    )
-    # Filename matches the folder's slug -- "kapathy-talk/kapathy-talk.md"
-    # rather than "kapathy-talk/yoink.md" -- so the file is identifiable
-    # outside its folder.
-    yoink_path = _corpus_path(output_folder)
-    _atomic_write_text(yoink_path, yoink_md)
-    hook_type_pending = _should_start_hook_type(metadata)
-
-    # Structured JSON sidecar (STRAT). Same data the markdown carries but
-    # in a machine-shaped form: future MCP server / programmatic tooling
-    # consumes this without having to parse the human-facing md. Written
-    # next to the md so it travels with the folder.
-    #
-    # `comments` ships as `null` here and is filled in by the comments
-    # worker once yt-dlp returns -- mirrors the markdown placeholder
-    # behavior. Consumers see `comments_status: "pending"` until the
-    # worker either succeeds (`fetched`), finds none (`disabled`), or
-    # fails (`unavailable`).
-    #
-    # E-1 (Zing enabler): opt-in keep_media retains the downloaded media
-    # file for SHORT-VIDEO captures only, so a downstream director tool
-    # (Zing) can analyze the actual clip (cuts / captions / audio). Scoped
-    # to short_video because shorts are tens of MB while long-form media
-    # can run to gigabytes. Default OFF: deletion below stays the unchanged
-    # path and the sidecar gains no field.
-    keep_media = (
-        source_type == SOURCE_TYPE_SHORT_VIDEO
-        and bool(_read_settings().get("keep_media"))
-    )
-    try:
-        sidecar = {
-            "schema_version": 2,  # bumped: structured screenshots + comments
-            "url": url,
-            # v3.1: platform indicator chip in dashboard. Inferred from the
-            # canonical URL produced by _normalize_video_url; default
-            # 'youtube' so existing rows that pre-date this field render
-            # as YouTube without a migration.
-            "platform": _detect_platform_from_url(url),
-            # source_type is None for a regular YouTube/X video (the index
-            # normalizes that to 'video'); 'short_video' for a TikTok /
-            # Instagram Reel / YouTube Short, so it filters as its own facet
-            # without disturbing existing long-form video rows.
-            "source_type": source_type,
-            "title": title,
-            "topic": topic,
-            "yoinked_at": yoinked_at,
-            "interval_seconds": interval,
-            "requested_interval_seconds": requested_interval,
-            "screenshot_cap_warning": cap_warning,
-            "duration_seconds": duration,
-            "requested_long_video_mode": requested_long_video_mode,
-            "long_video_mode": effective_long_video_mode,
-            "long_video_chunks": long_video_chunks,
-            "processed_media_seconds": processed_media_seconds,
-            # TikTok/Instagram expose the creator as uploader/creator rather
-            # than channel, so fall back through all three. This is the "who"
-            # the taxonomy uses as author for a short video.
-            "channel": (metadata.get("channel") or metadata.get("uploader")
-                        or metadata.get("creator")),
-            "channel_url": metadata.get("channel_url") or metadata.get("uploader_url"),
-            "upload_date": metadata.get("upload_date"),
-            "view_count": metadata.get("view_count"),
-            "like_count": metadata.get("like_count"),
-            "video_id": metadata.get("id"),
-            # Phase 6 (BC-2): every transcript row carries its actual stored
-            # link values, and the held chapter metadata travels with the
-            # capture so reconstruction never re-derives either.
-            "transcript": capture_seed["transcript"],
-            "source_chapters": held_chapters,
-            # CM-11: provenance is explicit whenever transcript rows exist.
-            # A null source means the capture honestly remains caption-less;
-            # asr_fallback carries the caption reason and local ASR status.
+        # Phase 6 (BC-2): the transcript rows persist their actual link values,
+        # the already-held chapter metadata travels with the capture, and the
+        # shared media snapshot builder/renderer produce the corpus transcript
+        # section (chapters and cues) from that held data. Nothing is fetched.
+        yoinked_at = _now_iso()
+        held_chapters = metadata.get("chapters") if isinstance(metadata.get("chapters"), list) else []
+        capture_seed = {
+            "video_id": video_id, "url": url, "source_type": source_type,
+            "transcript": [], "source_chapters": held_chapters,
             "transcript_source": transcript_source,
             "asr_fallback": asr_fallback,
             "transcript_note": transcript_note,
-            # Structured shape: timestamp + relative path + bare filename so
-            # consumers don't have to parse paths or recompute timestamps.
-            "screenshots": [
-                {
-                    "timestamp": fmt_time(shot_times[i]),
-                    "path": f"screenshots/{p.name}",
-                    "filename": p.name,
-                }
-                for i, p in enumerate(shots)
-            ],
-            "channel_context": channel_ctx,
-            "comments": None,
-            # Lite recovery skips the comments fetch, so mark it skipped rather
-            # than leaving it "pending" forever (no worker will resolve it).
-            "comments_status": (
-                "skipped"
-                if effective_long_video_mode == LONG_VIDEO_MODE_LITE
-                else "pending"
-            ),
-            # Hook Type runs inside the comments worker, so lite mode (which
-            # skips comments) skips hook typing too -- mark it skipped, not
-            # pending, so nothing waits on a worker that never starts.
-            "hook_type_status": (
-                "pending"
-                if hook_type_pending
-                and effective_long_video_mode != LONG_VIDEO_MODE_LITE
-                else "skipped"
-            ),
-            "hook_type": None,
-            "hook_explanation": None,
-            "hook_type_confidence": None,
-            "hook_type_error": None,
-            "comment_intelligence": None,
-            "comment_intelligence_status": "not_run",
-            "comment_intelligence_error": None,
-            # Sprint 16: entity extraction runs in the background once the
-            # row is indexed. D-17: "pending" only when the flag is on and
-            # a key is set (the same gate the spawn reads), "skipped"
-            # otherwise; the worker flips it to completed / failed.
-            "entity_extraction_status": (
-                "pending"
-                if _anthropic_key_for_feature("entity_extraction_enabled")
-                else "skipped"
-            ),
-            "entity_extraction_error": None,
+            "duration_seconds": duration, "yoinked_at": yoinked_at,
         }
-        # E-1: record the kept media filename so downstream tools find the
-        # file without globbing (it sits next to the sidecar in the uoink
-        # folder). Written ONLY when keep_media applies -- the default-off
-        # sidecar stays byte-identical to before.
-        if keep_media:
-            sidecar["media_file"] = video_files[0].name
-        # A5: extraction-time health snapshot, stored on the sidecar.
-        sidecar["health"] = compute_health(sidecar)
-        # v2.5: stamp the per-file data-shape version. Lets v2.5+ readers tell
-        # at a glance whether a sidecar predates facets/engagement. Missing =
-        # treat as 1 via _upgrade_sidecar() (lazy up-convert on read).
-        sidecar["schema_version"] = CURRENT_SIDECAR_SCHEMA
-        sidecar_path = output_folder / f"{output_folder.name}.json"
-        _atomic_write_text(sidecar_path, json.dumps(sidecar, ensure_ascii=False, indent=2))
-    except (OSError, TypeError) as e:
-        # Non-fatal: the markdown is the user-facing artifact. Sidecar is
-        # for future tooling.
-        log.warning("could not write JSON sidecar: %s", e)
+        capture_seed["transcript"] = _transcript_entries_with_links(capture_seed, entries)
+        media_sections = None
+        try:
+            import yt_extract as _yt_extract  # noqa: WPS433
+            media_plan = _capture_media_plan(
+                capture_seed, asset_folder,
+                item={"metadata_json": json.dumps({"duration_seconds": duration})},
+                chapter_rows=_yt_extract.chapters_from_metadata(metadata))
+            if media_plan is not None:
+                media_sections = media_plan["markdown"]
+        except Exception as e:
+            log.warning("media snapshot build skipped for %s: %s", asset_folder, e)
 
-    # v2.5 A1: optional local transcript reliability detection. It runs only
-    # when the user has opted in and the Whisper model is already cached; the
-    # dashboard's "Download model now" button is the explicit consent gate for
-    # the ~150 MB model download. Run before deleting the downloaded video so
-    # the automatic path does not need a second yt-dlp fetch.
-    try:
-        if (_read_settings().get("transcript_reliability_auto_check")
-                and effective_long_video_mode == LONG_VIDEO_MODE_FULL):
-            rel = _compute_transcript_reliability(
-                sidecar.get("video_id") or metadata.get("id") or "",
-                folder=output_folder,
-                audio_path=video_files[0],
-                threshold=RELIABILITY_DEFAULT_THRESHOLD,
-                allow_model_download=False,
-            )
-            if not rel.get("ok"):
-                log.info("transcript reliability skipped/failed: %s", rel.get("error"))
-            _sidecar_path, sidecar = _read_sidecar_for_folder(output_folder)
-    except Exception as e:
-        log.warning("transcript reliability auto-check failed: %s", e)
+        # Build the corpus markdown.
+        yoink_md = _build_yoink_md(
+            metadata=metadata, url=url, entries=entries, shots=shots,
+            interval=interval, channel_ctx=channel_ctx,
+            yoinked_at=yoinked_at, topic=topic,
+            cap_warning=cap_warning,
+            shot_times=shot_times,
+            media_sections=media_sections,
+            transcript_note=transcript_note,
+        )
+        # Filename matches the folder's slug -- "kapathy-talk/kapathy-talk.md"
+        # rather than "kapathy-talk/yoink.md" -- so the file is identifiable
+        # outside its folder.
+        yoink_path = asset_folder / ("c.md" if refreshing else corpus_name)
+        _raise_if_cancelled(cancel_event)
+        _atomic_write_text(yoink_path, yoink_md)
+        hook_type_pending = _should_start_hook_type(metadata)
 
-    # E-1: keep_media (short_video + opt-in only) skips the cleanup so the
-    # clip stays in the uoink folder for Zing. Every other capture deletes
-    # the media exactly as before.
-    if not keep_media:
-        for video_file in video_files:
-            video_file.unlink(missing_ok=True)
+        # Structured JSON sidecar (STRAT). Same data the markdown carries but
+        # in a machine-shaped form: future MCP server / programmatic tooling
+        # consumes this without having to parse the human-facing md. Written
+        # next to the md so it travels with the folder.
+        #
+        # `comments` ships as `null` here and is filled in by the comments
+        # worker once yt-dlp returns -- mirrors the markdown placeholder
+        # behavior. Consumers see `comments_status: "pending"` until the
+        # worker either succeeds (`fetched`), finds none (`disabled`), or
+        # fails (`unavailable`).
+        #
+        # E-1 (Zing enabler): opt-in keep_media retains the downloaded media
+        # file for SHORT-VIDEO captures only, so a downstream director tool
+        # (Zing) can analyze the actual clip (cuts / captions / audio). Scoped
+        # to short_video because shorts are tens of MB while long-form media
+        # can run to gigabytes. Default OFF: deletion below stays the unchanged
+        # path and the sidecar gains no field.
+        try:
+            sidecar = {
+                "schema_version": 2,  # bumped: structured screenshots + comments
+                "url": url,
+                # v3.1: platform indicator chip in dashboard. Inferred from the
+                # canonical URL produced by _normalize_video_url; default
+                # 'youtube' so existing rows that pre-date this field render
+                # as YouTube without a migration.
+                "platform": _detect_platform_from_url(url),
+                # source_type is None for a regular YouTube/X video (the index
+                # normalizes that to 'video'); 'short_video' for a TikTok /
+                # Instagram Reel / YouTube Short, so it filters as its own facet
+                # without disturbing existing long-form video rows.
+                "source_type": source_type,
+                "title": title,
+                "topic": topic,
+                "yoinked_at": yoinked_at,
+                "interval_seconds": interval,
+                "requested_interval_seconds": requested_interval,
+                "screenshot_cap_warning": cap_warning,
+                "duration_seconds": duration,
+                "requested_long_video_mode": requested_long_video_mode,
+                "long_video_mode": effective_long_video_mode,
+                "long_video_chunks": long_video_chunks,
+                "processed_media_seconds": processed_media_seconds,
+                # TikTok/Instagram expose the creator as uploader/creator rather
+                # than channel, so fall back through all three. This is the "who"
+                # the taxonomy uses as author for a short video.
+                "channel": (metadata.get("channel") or metadata.get("uploader")
+                            or metadata.get("creator")),
+                "channel_url": metadata.get("channel_url") or metadata.get("uploader_url"),
+                "upload_date": metadata.get("upload_date"),
+                "view_count": metadata.get("view_count"),
+                "like_count": metadata.get("like_count"),
+                "video_id": video_id,
+                # Phase 6 (BC-2): every transcript row carries its actual stored
+                # link values, and the held chapter metadata travels with the
+                # capture so reconstruction never re-derives either.
+                "transcript": capture_seed["transcript"],
+                "source_chapters": held_chapters,
+                # CM-11: provenance is explicit whenever transcript rows exist.
+                # A null source means the capture honestly remains caption-less;
+                # asr_fallback carries the caption reason and local ASR status.
+                "transcript_source": transcript_source,
+                "asr_fallback": asr_fallback,
+                "transcript_note": transcript_note,
+                # Structured shape: timestamp + relative path + bare filename so
+                # consumers don't have to parse paths or recompute timestamps.
+                "screenshots": [
+                    {
+                        "timestamp": fmt_time(shot_times[i]),
+                        "path": f"screenshots/{p.name}",
+                        "filename": p.name,
+                    }
+                    for i, p in enumerate(shots)
+                ],
+                "channel_context": channel_ctx,
+                "comments": None,
+                # Lite recovery skips the comments fetch, so mark it skipped rather
+                # than leaving it "pending" forever (no worker will resolve it).
+                "comments_status": (
+                    "skipped"
+                    if effective_long_video_mode == LONG_VIDEO_MODE_LITE
+                    else "pending"
+                ),
+                # Hook Type runs inside the comments worker, so lite mode (which
+                # skips comments) skips hook typing too -- mark it skipped, not
+                # pending, so nothing waits on a worker that never starts.
+                "hook_type_status": (
+                    "pending"
+                    if hook_type_pending
+                    and effective_long_video_mode != LONG_VIDEO_MODE_LITE
+                    else "skipped"
+                ),
+                "hook_type": None,
+                "hook_explanation": None,
+                "hook_type_confidence": None,
+                "hook_type_error": None,
+                "comment_intelligence": None,
+                "comment_intelligence_status": "not_run",
+                "comment_intelligence_error": None,
+                # Sprint 16: entity extraction runs in the background once the
+                # row is indexed. D-17: "pending" only when the flag is on and
+                # a key is set (the same gate the spawn reads), "skipped"
+                # otherwise; the worker flips it to completed / failed.
+                "entity_extraction_status": (
+                    "pending"
+                    if _anthropic_key_for_feature("entity_extraction_enabled")
+                    else "skipped"
+                ),
+                "entity_extraction_error": None,
+            }
+            # E-1: record the kept media filename so downstream tools find the
+            # file without globbing (it sits next to the sidecar in the uoink
+            # folder). Written ONLY when keep_media applies -- the default-off
+            # sidecar stays byte-identical to before.
+            if keep_media:
+                sidecar["media_file"] = video_files[0].name
+            # A5: extraction-time health snapshot, stored on the sidecar.
+            sidecar["health"] = compute_health(sidecar)
+            # v2.5: stamp the per-file data-shape version. Lets v2.5+ readers tell
+            # at a glance whether a sidecar predates facets/engagement. Missing =
+            # treat as 1 via _upgrade_sidecar() (lazy up-convert on read).
+            sidecar["schema_version"] = CURRENT_SIDECAR_SCHEMA
+            sidecar_path = asset_folder / ("c.json" if refreshing else sidecar_name)
+            _atomic_write_text(sidecar_path, json.dumps(sidecar, ensure_ascii=False, indent=2))
+        except (OSError, TypeError) as e:
+            # Do not publish assets while the previous sidecar still references
+            # the old set. A failed staged write leaves that capture intact.
+            log.warning("could not write JSON sidecar: %s", e)
+            if not refreshing:
+                publication_failed(e, missing_sidecar=True)
+            raise
+
+        if refreshing:
+            _raise_if_cancelled(cancel_event)
+            # Only helper-owned artifacts participate. Leave notes and unrelated files
+            # (including extra files in screenshots/) where they are.
+            published_names = {staged: final for final, staged in staged_names.items()}
+            staged_files = [p.relative_to(asset_folder) for p in asset_folder.rglob("*")
+                            if p.is_file() and (keep_media or p not in video_files)]
+            replacements = [published_names.get(relative, relative) for relative in staged_files]
+            previous = set(replacements)
+            for pattern in ("video.*", "video-chunk-*.*", "screenshots/shot_*.jpg",
+                            "screenshots/chunk_*_shot_*.jpg", "transcript.txt"):
+                previous.update(p.relative_to(output_folder) for p in output_folder.glob(pattern))
+            shots_target = output_folder / "screenshots"
+            if (shots_target.is_symlink()
+                    or getattr(shots_target, "is_junction", lambda: False)()):
+                raise FileExistsError(f"capture screenshots folder is a link: {shots_target}")
+            for relative in sorted(previous):
+                target = output_folder / relative
+                if target.is_symlink() or (target.exists() and not target.is_file()):
+                    raise FileExistsError(f"capture artifact is not a regular file: {target}")
+
+            # The media publisher can prune superseded artifacts before a
+            # later index step fails. Keep recovery copies with the old sidecar,
+            # leaving the live ledger in place for its ownership checks.
+            media_inputs = output_folder / ".media-inputs"
+            if (media_inputs.is_symlink()
+                    or getattr(media_inputs, "is_junction", lambda: False)()):
+                raise FileExistsError(f"capture media inputs folder is a link: {media_inputs}")
+            if media_inputs.exists():
+                # .s-<8 chars>/m is no longer than .media-inputs, so even
+                # digest filenames near MAX_PATH still fit in the backup.
+                shutil.copytree(media_inputs, media_backup_folder, symlinks=True)
+
+            # Move originals aside, never delete them to make room for replacements.
+            # Keep the rollback journal until indexing starts. Index writers
+            # commit independently and can publish/prune media artifacts.
+            for relative in sorted(previous):
+                _raise_if_cancelled(cancel_event)
+                target = output_folder / relative
+                if target.exists():
+                    backup = backup_folder / stage_name(relative)
+                    backup.parent.mkdir(parents=True, exist_ok=True)
+                    # Journal first: an interruption can arrive immediately
+                    # after the OS moves the file, before Python returns.
+                    moved_originals.append(relative)
+                    rename_artifact(target, backup)
+            for relative in sorted(replacements):
+                _raise_if_cancelled(cancel_event)
+                target = output_folder / relative
+                if not target.parent.exists():
+                    target.parent.mkdir()
+                    created_dirs.append(target.parent)
+                if target.exists():
+                    raise FileExistsError(f"capture artifact appeared during publication: {target}")
+                installed.append(relative)
+                rename_artifact(asset_folder / stage_name(relative), target)
+            yoink_path = _corpus_path(output_folder)
+            sidecar_path = output_folder / f"{video_slug}.json"
+            if keep_media:
+                video_files = [output_folder / p.name for p in video_files]
+
+        begin_publication()
+        # This is the commit boundary for the file swap, even if indexing
+        # raises: upsert_yoink commits before citations/media publication.
+        # Restoring old files after that would contradict the row/FTS or
+        # point the sidecar at a media artifact the publisher has pruned.
+        # Ignore later cancellation so pending workers are still started.
+        committed = True
+        if refreshing:
+            if phase_callback:
+                phase_callback("save")
+            try:
+                if _index_yoink(output_folder, sidecar, yoink_path, sidecar_path) is False:
+                    raise RuntimeError("library index did not publish the capture")
+            except Exception as e:
+                publication_failed(e)
+                raise
+
+        # v2.5 A1: optional local transcript reliability detection. It runs only
+        # when the user has opted in and the Whisper model is already cached; the
+        # dashboard's "Download model now" button is the explicit consent gate for
+        # the ~150 MB model download. Run after the commit boundary because it
+        # also indexes, but before deleting the video to avoid another fetch.
+        try:
+            if (_read_settings().get("transcript_reliability_auto_check")
+                    and effective_long_video_mode == LONG_VIDEO_MODE_FULL):
+                rel = _compute_transcript_reliability(
+                    sidecar.get("video_id") or metadata.get("id") or "",
+                    folder=output_folder,
+                    audio_path=video_files[0],
+                    threshold=RELIABILITY_DEFAULT_THRESHOLD,
+                    allow_model_download=False,
+                )
+                if not rel.get("ok"):
+                    log.info("transcript reliability skipped/failed: %s", rel.get("error"))
+                _sidecar_path, sidecar = _read_sidecar_for_folder(output_folder)
+        except Exception as e:
+            log.warning("transcript reliability auto-check failed: %s", e)
+
+        # Refresh downloads stay in staging until cleanup. Preserve the
+        # first-capture cleanup and partial-artifact recovery behavior.
+        if not refreshing and not keep_media:
+            for video_file in video_files:
+                video_file.unlink(missing_ok=True)
+
+    except BaseException as e:
+        if (cancel_event is not None and not refreshing and not keep_media
+                and not publication_started and not publication_recovery_needed
+                and isinstance(e, PlaylistJobCancelled)):
+            for path, identity in downloaded_media.items():
+                try:
+                    if not path.exists():
+                        continue
+                    st = path.stat()
+                    if (path.is_symlink()
+                            or (st.st_dev, st.st_ino, st.st_size, st.st_mtime_ns) != identity):
+                        log.warning("cancelled capture media changed; preserving %s", path)
+                        continue
+                    path.unlink()
+                except OSError as cleanup_error:
+                    log.error("cancelled capture media cleanup failed; file kept at %s: %s",
+                              path, cleanup_error)
+                    raise RuntimeError(
+                        f"Capture cancelled; could not remove downloaded media {path}: {cleanup_error}"
+                    ) from cleanup_error
+        if committed and refreshing:
+            # Publication may have committed before raising. Keep both the
+            # published files and the backup; never roll files back under a
+            # newer index/media ledger. Unpublished downloads can be removed.
+            preserve_stage = True
+            try:
+                shutil.rmtree(asset_folder)
+            except OSError as cleanup_error:
+                log.warning("could not remove unpublished capture files %s: %s",
+                            asset_folder, cleanup_error)
+            log.error("capture refresh publication failed; replacement files kept in %s; "
+                      "previous files retained in %s; media inputs in %s",
+                      output_folder, backup_folder, media_backup_folder)
+            if isinstance(e, Exception):
+                failure = RuntimeError(
+                    f"Capture refresh publication failed: {e}. "
+                    f"Replacement files are published in {output_folder}. "
+                    f"Previous files are retained in {backup_folder}; "
+                    f"media inputs are retained in {media_backup_folder}"
+                )
+                failure.phase = "save"
+                failure.publication_error = (
+                    f"{failure}. {getattr(e, 'publication_error', '')}"
+                )
+                if getattr(e, "capture_result", None):
+                    failure.capture_result = dict(e.capture_result, error=failure.publication_error)
+                raise failure from e
+        elif not committed:
+            # Even an unexpected interruption during rollback must leave the
+            # backup directory intact until restoration has finished.
+            preserve_stage = bool(moved_originals)
+            rollback_errors = []
+            # Move this attempt's files back to staging before restoring the
+            # originals. If any restore fails, retain every remaining backup.
+            for relative in reversed(installed):
+                try:
+                    staged = asset_folder / stage_name(relative)
+                    if staged.exists():
+                        # This journal entry preceded a rename that did not
+                        # move the staged file. Do not touch the destination.
+                        continue
+                    rename_artifact(output_folder / relative, staged)
+                except OSError as e:
+                    rollback_errors.append(e)
+            for relative in reversed(moved_originals):
+                try:
+                    backup = backup_folder / stage_name(relative)
+                    if not backup.exists():
+                        # The backup rename failed before moving this file.
+                        continue
+                    target = output_folder / relative
+                    if target.exists() or target.is_symlink():
+                        raise FileExistsError(f"cannot restore occupied artifact: {target}")
+                    rename_artifact(backup, target)
+                except OSError as e:
+                    rollback_errors.append(e)
+            for directory in reversed(created_dirs):
+                try:
+                    directory.rmdir()  # only if empty; never remove other files
+                except OSError as e:
+                    rollback_errors.append(e)
+            if rollback_errors:
+                preserve_stage = True
+                log.error("capture rollback incomplete; previous files retained in %s: %s",
+                          stage_root, rollback_errors)
+                raise RuntimeError(
+                    f"Capture refresh failed; could not restore all files. "
+                    f"Previous files are retained in {stage_root}"
+                ) from rollback_errors[0]
+            preserve_stage = False
+        raise
+    finally:
+        if stage_root is not None and not preserve_stage:
+            try:
+                shutil.rmtree(stage_root)
+            except OSError as e:
+                # Cleanup must not turn a committed capture into a failure or
+                # hide the original error. Leave locked files for recovery.
+                log.warning("could not remove capture staging directory %s: %s", stage_root, e)
 
     # Sprint 19.6 / Fix 6: refresh _all-yoinks-index.md INCREMENTALLY
     # instead of the pre-Sprint-19.6 full-tree rescan that became O(N) on
@@ -5702,6 +6397,9 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
     try:
         rel_path = (f"{output_folder.parent.name}/"
                     f"{output_folder.name}/{yoink_path.name}")
+        # The best-effort updater can write or start a background rebuild
+        # before failing. Retrying this step would prepend/count it twice.
+        markdown_index_attempted = True
         _incremental_index_update({
             "title": title,
             "topic": output_folder.parent.name or "uncategorised",
@@ -5713,15 +6411,17 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
     except Exception as e:
         log.warning("incremental index call site failed: %s", e)
 
-    # Sprint 15 (A1/A4/A5): incrementally index this yoink + its citation
-    # map + health score in index.db. Best-effort -- a library-index failure
-    # must never fail an otherwise-successful extraction. (This is separate
-    # from _regenerate_index above, which maintains the human-readable
-    # _all-yoinks-index.md file.)
-    try:
-        _index_yoink(output_folder, sidecar, yoink_path, sidecar_path)
-    except Exception as e:
-        log.warning("library index update failed for %s: %s", output_folder, e)
+    # Preserve first-capture cleanup ordering: unretained downloads are
+    # temporary, while corpus, sidecar, frames and opted-in media remain.
+    if not refreshing:
+        if phase_callback:
+            phase_callback("save")
+        try:
+            if _index_yoink(output_folder, sidecar, yoink_path, sidecar_path) is False:
+                raise RuntimeError("library index did not publish the capture")
+        except Exception as e:
+            publication_failed(e)
+            raise
 
     # Sprint 16 (A2): extract named entities off the transcript in the
     # background, in parallel with the comments / Comment Intelligence
@@ -5961,6 +6661,8 @@ def _plain_error_from_text(text: str) -> str:
 
 def friendly_error(e: BaseException) -> str:
     """Translate raw exceptions into copy the user can act on."""
+    if getattr(e, "publication_error", None):
+        return e.publication_error
     if isinstance(e, ExtractionPhaseError):
         return str(e)
     if isinstance(e, FileNotFoundError):
@@ -7513,6 +8215,30 @@ def _persist_jobs_locked(changed_job: dict | None = None) -> None:
             idx.upsert_job(_index_job_row(job))
     except Exception as e:
         log.warning("job persistence write failed: %s", e)
+    finally:
+        # Bound memory even when SQLite is unavailable. Active workers and
+        # unsettled standing captures still need their cancellation/ownership
+        # state; their exit paths call this again after releasing it.
+        terminal = []
+        for job in _jobs.values():
+            if job.get("state") not in _JOB_TERMINAL_STATES:
+                continue
+            result = job.get("result")
+            if isinstance(result, dict):
+                job["result"] = {k: v for k, v in result.items()
+                                 if k not in ("combined_md_text", "corpus_md_paste")}
+            worker = job.get("_thread")
+            if worker is not None and (worker.ident is None or worker.is_alive()):
+                continue
+            if job.get("_source_owner_token"):
+                continue
+            for key in list(job):
+                if key.startswith("_"):
+                    job.pop(key)
+            terminal.append(job)
+        terminal.sort(key=lambda j: (j.get("updated_at") or "", j["id"]), reverse=True)
+        for job in terminal[index.TERMINAL_JOB_RETENTION:]:
+            _jobs.pop(job["id"], None)
 
 
 def _validate_persisted_job(raw: dict) -> dict | None:
@@ -7654,8 +8380,13 @@ def _supersede_terminal_single_jobs_locked(source_url: str, keep_id: str) -> Non
             log.warning("could not drop superseded job %s: %s", jid, e)
 
 
-def _add_job_record(job: dict) -> dict:
+def _add_job_record(job: dict, *, unless=None) -> dict | None:
+    """Insert one job. ``unless`` is evaluated under the same jobs lock that
+    performs the insert and its supersession; when it returns True nothing
+    is recorded and None is returned. It must not take ``_jobs_lock``."""
     with _jobs_lock:
+        if unless is not None and unless():
+            return None
         _jobs[job["id"]] = job
         # A new single-video attempt supersedes any prior terminal attempt
         # for the same URL, so Activity shows one row per source (G-14).
@@ -7708,16 +8439,29 @@ def _record_single_extract_job(url: str, started_at: str, *,
                                title: str | None = None,
                                folder: Path | None = None,
                                retry_exhausted: bool = False,
-                               attempt_count: int | None = None) -> dict:
+                               attempt_count: int | None = None,
+                               job_id: str | None = None,
+                               unless=None) -> dict | None:
+    # ``unless``: see _add_job_record (an atomic "skip if superseded" check).
     # retry_exhausted marks a terminal failure whose automatic retry budget
     # is used up (G-43 / E2E D4). The dashboard can key honest "stopped
     # retrying" copy off this flag instead of pattern-matching error text.
     now = _now_iso()
+    if result and (result.get("ok") is False or result.get("status") == "saved_with_errors"):
+        error = error or result.get("error") or result.get("reason") or "Capture publication failed."
+        failure_phase = result.get("failure_phase") or failure_phase or "save"
     ok = result is not None and not error
     folder_path = Path(result["folder"]) if result and result.get("folder") else folder
-    corpus_path = _resolve_corpus_path(folder_path) if folder_path else None
+    corpus_path = None
+    try:
+        corpus_path = _resolve_corpus_path(folder_path) if folder_path else None
+    except Exception as e:
+        # The optional corpus link must not prevent recording the outcome.
+        log.warning("single capture corpus lookup failed: %s", type(e).__name__)
     job = {
-        "id": _make_job_id(),
+        # A saved-with-errors result carries the job ID its publication
+        # receipt recorded, so the retry recognizes this attempt's job.
+        "id": job_id or (result or {}).get("publication_job_id") or _make_job_id(),
         "kind": "single",
         "state": "completed" if ok else "failed",
         "source_url": url,
@@ -7771,13 +8515,29 @@ def _record_single_extract_job(url: str, started_at: str, *,
         job["message"] = (
             f"Uoink stopped after {int(attempt_count)} attempts."
             if attempt_count else "Uoink stopped retrying this one.")
+    if unless is not None:
+        return _add_job_record(job, unless=unless)
     return _add_job_record(job)
 
 
 def _get_public_job(job_id: str) -> dict | None:
     with _jobs_lock:
         job = _jobs.get(job_id)
-        return _public_job(job) if job else None
+        public = _public_job(job) if job else None
+        if public and isinstance(public.get("result"), dict):
+            public["result"] = dict(public["result"])
+    # Only an individual job request loads corpus text. Lists, SSE snapshots,
+    # and the retained job record stay small; file I/O never holds _jobs_lock.
+    if public and public["state"] in _JOB_TERMINAL_STATES:
+        result = public.get("result")
+        if isinstance(result, dict) and result.get("combined_md_path"):
+            try:
+                result["combined_md_text"] = _job_text_only_corpus(
+                    Path(result["combined_md_path"]).read_text(encoding="utf-8"))
+            except (OSError, UnicodeError) as e:
+                result["combined_md_text"] = ""
+                result["combined_md_error"] = f"Could not read saved corpus: {e}"
+    return public
 
 
 def _update_job(job_id: str, **updates) -> dict | None:
@@ -8202,6 +8962,7 @@ class _ManualOwnership:
         self.reused = {
             "ok": True, "reused": True, "reason": "captured_while_waiting",
             "video_id": video_id, "title": row.get("title"), "folder": folder,
+            "video_slug": _os.path.basename(folder) if folder else None,
             "corpus_path": corpus_path or None, "sidecar_path": row.get("sidecar_path"),
             "screenshot_count": screenshots, "captured_at": row.get("yoinked_at"),
             "topic": row.get("topic"),
@@ -8299,6 +9060,11 @@ def _settle_source_capture(job_id: str, *, video_id: str | None,
                 if row is not None and hasattr(_source_service().backend, "release"):
                     _source_service().backend.release(
                         {"start_id": start_id, "capture_key": row[0]})
+                with _jobs_lock:
+                    job = _jobs.get(job_id)
+                    if job is not None:
+                        job.pop("_source_owner_token", None)
+                        _persist_jobs_locked(job)
             except Exception:
                 log.exception("standing capture lock release failed for %s", start_id)
 
@@ -8805,8 +9571,8 @@ class _ServerCaptureBackend(source_subscriptions.CaptureBackend):
                     metadata = _fetch_metadata(url)
                     title = metadata.get("title") or "Untitled"
                     topic = _classify_topic(metadata)
-                    folder = (DESKTOP_ROOT / _topic_folder_name(topic)
-                              / (slugify(title) or "video"))
+                    folder = _video_capture_folder(
+                        DESKTOP_ROOT / _topic_folder_name(topic), url, metadata)
                     if not self.holds_execution(start):
                         log.warning("standing capture %s lost its execution claim before "
                                     "publication; nothing written", start_id)
@@ -8831,10 +9597,21 @@ class _ServerCaptureBackend(source_subscriptions.CaptureBackend):
                 # rejected at preflight before any charge. AS-03a: exceptions
                 # retain the capture lock and the process lock unless
                 # fail_capture verified a terminal commit.
-                code = "youtube_rate_limit" if _is_youtube_rate_limit(exc) else "download_failed"
+                saved = getattr(exc, "capture_result", None)
+                # This acquisition is over. Only the durable publication
+                # receipt may retry its save; never reserve another download.
+                # The source item remains failed/publication_failed even if
+                # that retry succeeds. complete_capture requires a started or
+                # uncertain entry and verified executor completion. This retry
+                # cannot reopen a terminal start or reuse the worker's proof. Its
+                # separate Activity job and receipt record publication recovery.
+                code = ("publication_failed" if saved else
+                        "youtube_rate_limit" if _is_youtube_rate_limit(exc) else "download_failed")
+                if saved:
+                    _record_single_extract_job(url, _now_iso(), result=saved)
                 try:
                     outcome = _source_service().fail_capture(
-                        start_id, owner_token, code, terminal=False, proof=proof)
+                        start_id, owner_token, code, terminal=bool(saved), proof=proof)
                     release_locks = source_subscriptions.settlement_releases_dispatcher_locks(
                         outcome)
                 except Exception:
@@ -9408,9 +10185,25 @@ def _create_playlist_job(playlist: dict, interval: int) -> tuple[str, dict]:
         "_folder": str(folder),
         "_cancel_event": cancel_event,
     }
+
+    def run_worker():
+        try:
+            _playlist_worker(job_id)
+        except BaseException as e:
+            # Setup (for example mkdir) can fail before the worker's own
+            # exception handler is entered. Settle it before releasing inputs.
+            log.exception("playlist job %s could not run", job_id)
+            _update_job(job_id, state="failed", completed_at=_now_iso(),
+                        error=str(e), message="Playlist failed.")
+        finally:
+            with _jobs_lock:
+                current = _jobs.get(job_id)
+                if current is not None:
+                    current.pop("_thread", None)
+                    _persist_jobs_locked(current)
+
     worker = threading.Thread(
-        target=_playlist_worker,
-        args=(job_id,),
+        target=run_worker,
         name=f"playlist-{job_id}",
         daemon=True,
     )
@@ -9484,7 +10277,7 @@ def _build_playlist_corpus(job: dict, *, text_only: bool) -> str:
 
         if not item.get("ok"):
             parts.append(f"> _Failed: {item.get('error') or 'unknown error'}_")
-        else:
+        if item.get("ok") or item.get("status") == "saved_with_errors":
             md_path = item.get("md_path")
             try:
                 body = Path(md_path).read_text(encoding="utf-8")
@@ -10269,6 +11062,7 @@ def _playlist_worker(job_id: str):
                 "url": v.get("url"),
             }
             target: Path | None = None
+            target_claimed = False
             current_phase = "metadata"
             _update_job(
                 job_id,
@@ -10281,7 +11075,7 @@ def _playlist_worker(job_id: str):
                 metadata = _fetch_metadata(v["url"], cancel_event=cancel_event)
                 title = metadata.get("title") or current["title"] or "Untitled"
                 current["title"] = title
-                target = _unique_child_folder(folder, title, used_slugs)
+                target = _video_capture_folder(folder, v["url"], metadata)
                 _update_job(job_id, current_video=current)
 
                 def phase_cb(phase: str, *, _job_id=job_id):
@@ -10302,9 +11096,19 @@ def _playlist_worker(job_id: str):
                             if ownership.reused.get("folder") else None
                         if source_folder is None or not source_folder.is_dir():
                             raise FileNotFoundError("completed capture folder is missing")
+                        # Preserve corpus/sidecar filenames when copying an
+                        # older capture. Claim an empty target exclusively so
+                        # a copy failure still points to its partial output.
+                        target = folder / source_folder.name
+                        target.mkdir()
+                        target_claimed = True
                         shutil.copytree(source_folder, target, dirs_exist_ok=True)
-                        result = dict(ownership.reused, title=title, folder=str(target))
+                        result = dict(ownership.reused, title=title,
+                                      video_slug=target.name, folder=str(target))
                     else:
+                        target = _create_video_entry_folder(target, v["url"], metadata)
+                        _prepare_video_capture_folder(target, v["url"], metadata)
+                        target_claimed = True
                         result = _run_extraction(
                             v["url"],
                             interval,
@@ -10317,6 +11121,7 @@ def _playlist_worker(job_id: str):
                             phase_callback=phase_cb,
                         )
 
+                target = Path(result["folder"])
                 corpus_path = _resolve_corpus_path(target)
                 item = {
                     "index": idx,
@@ -10343,27 +11148,33 @@ def _playlist_worker(job_id: str):
                 detail = machine_error_detail(e)
                 failure_phase = _failure_phase(e, current_phase)
                 last_failure_phase = failure_phase
+                saved = getattr(e, "capture_result", None)
                 log.error("playlist job %s video %d failed: %s", job_id, idx, msg)
-                if target is None:
+                # Keep diagnostics beside this run's partial capture. An
+                # ownership refusal must never write into the refused folder.
+                if target is None or not target_claimed:
                     target = _unique_child_folder(
                         folder,
                         current.get("title") or v.get("id") or f"video-{idx}",
                         used_slugs,
                     )
-                _write_failed_marker(
-                    target,
-                    url=v.get("url"),
-                    index=idx,
-                    reason=msg,
-                )
+                if not saved:
+                    _write_failed_marker(
+                        target,
+                        url=v.get("url"),
+                        index=idx,
+                        reason=msg,
+                    )
                 per_video.append({
                     "index": idx,
                     "title": current.get("title") or "(untitled)",
                     "url": v.get("url"),
                     "folder": str(target),
-                    "md_path": None,
-                    "json_path": None,
-                    "failed_marker_path": str(target / "FAILED.txt"),
+                    "md_path": str(_resolve_corpus_path(target)) if saved else None,
+                    "json_path": str(target / f"{target.name}.json") if saved else None,
+                    "failed_marker_path": None if saved else str(target / "FAILED.txt"),
+                    "status": "saved_with_errors" if saved else "failed",
+                    "publication_retry_id": saved.get("publication_retry_id") if saved else None,
                     "ok": False,
                     "error": msg,
                     "error_detail": detail,
@@ -10400,7 +11211,8 @@ def _playlist_worker(job_id: str):
                 _persist_jobs_locked(job)
 
         _raise_if_cancelled(cancel_event)
-        if videos_done == 0:
+        save_failures = [item for item in per_video if item.get("status") == "saved_with_errors"]
+        if videos_done == 0 and not save_failures:
             _update_job(
                 job_id,
                 state="failed",
@@ -10425,15 +11237,21 @@ def _playlist_worker(job_id: str):
             "combined_md_text": clipboard_md,
             "per_video": per_video,
         }
+        publication_warnings = [
+            f"Video {item['index']}: {item['error']}" for item in save_failures
+        ]
         _update_job(
             job_id,
-            state="completed",
+            # This playlist records the original attempt. A publication
+            # retry has its own Activity outcome and never reruns the batch.
+            state="completed" if videos_done > 0 else "failed",
             current_video=None,
-            current_video_phase=None,
+            current_video_phase="save" if videos_done == 0 else None,
             completed_at=_now_iso(),
-            error=None,
+            error="Some captures could not be published." if videos_done == 0 else None,
             result=result,
-            message="Playlist complete.",
+            warnings=list(job.get("warnings") or []) + publication_warnings,
+            message="Playlist saved with publication errors." if save_failures else "Playlist complete.",
         )
     except PlaylistJobCancelled:
         log.info("playlist job %s cancelled", job_id)
@@ -10681,156 +11499,230 @@ def _retry_pending_one() -> bool:
     long_video_mode = _normalize_long_video_mode(
         row.get("long_video_mode") or _pending_long_video_mode(pending_id))
 
+    cancel_event = threading.Event()
     try:
-        idx.mark_pending_running(pending_id)
+        if not idx.mark_pending_running(pending_id, cancel_event=cancel_event):
+            return False
     except Exception:
         log.exception("retry worker: mark_pending_running failed")
         return False
 
-    log.info("retry worker: attempting pending #%d (attempt %d): %s",
-             pending_id, attempts_before + 1, url)
-    started_at = _now_iso()
-    title = None
-    folder = None
-    current_phase = "metadata"
-    with _manual_extraction_ownership(url) as ownership:  # AS-03 shared dispatcher lock
-        if not ownership.ok:
-            # AS-03: unavailable ownership is a retryable failure; re-queue
-            # with backoff, never extract under the process lock alone.
-            attempts = attempts_before + 1
-            delay = min(_RETRY_INITIAL_BACKOFF_SEC * (2 ** attempts), _RETRY_MAX_BACKOFF_SEC)
-            retry_at = (datetime.now() + timedelta(seconds=delay)).strftime(
-                "%Y-%m-%dT%H:%M:%S")
-            try:
-                idx.mark_pending_failed(pending_id, "capture_ownership_unavailable", retry_at)
-            except Exception:
-                log.exception("retry worker: mark_pending_failed failed")
-            log.warning("retry worker: pending #%d could not take the capture lock (%s); "
-                        "retry at %s", pending_id, ownership.error, retry_at)
-            return True
-        if ownership.conflict:
-            # AS-03 (run AT-4): an identity conflict blocks before overwrite;
-            # the queue row goes terminal with the reason.
-            try:
-                idx.mark_pending_failed(pending_id, _sanitize_error(ownership.conflict),
-                                        _now_iso(), force_final=True)
-            except Exception:
-                log.exception("retry worker: mark_pending_failed failed")
-            _record_single_extract_job(url, started_at, error=ownership.conflict,
-                                       failure_phase="metadata",
-                                       long_video_mode=long_video_mode)
-            _pending_long_video_mode(pending_id, remove=True)
-            return True
-        # AS-03 (run AT-4): the capture this row waited behind completed;
-        # reuse it, no fetch, no second acquisition.
-        result = ownership.reused if (ownership.completed_while_waiting
-                                      and ownership.reused) else None
-        try:
-            if result is None:
-                metadata = _fetch_metadata(url)
-                title = metadata.get("title") or "Untitled"
-                topic = _classify_topic(metadata)
-                folder = (DESKTOP_ROOT / _topic_folder_name(topic)
-                          / (slugify(title) or "video"))
-
-                def phase_cb(phase: str):
-                    nonlocal current_phase
-                    current_phase = phase
-
-                result = _run_extraction(url, interval, folder,
-                                         metadata=metadata, topic=topic,
-                                         long_video_mode=long_video_mode,
-                                         phase_callback=phase_cb)
-        except BaseException as e:
-            if _is_youtube_rate_limit(e):
-                detail = _youtube_rate_limit_detail(e)
+    try:
+        log.info("retry worker: attempting pending #%d (attempt %d): %s",
+                 pending_id, attempts_before + 1, url)
+        started_at = _now_iso()
+        title = None
+        folder = None
+        current_phase = "metadata"
+        with _manual_extraction_ownership(url) as ownership:  # AS-03 shared dispatcher lock
+            if cancel_event.is_set():
+                return True
+            if not ownership.ok:
+                # AS-03: unavailable ownership is a retryable failure; re-queue
+                # with backoff, never extract under the process lock alone.
                 attempts = attempts_before + 1
-                if attempts >= index._PENDING_MAX_ATTEMPTS:
-                    # Final strike (G-43 / E2E D4 + D5): the row goes
-                    # terminal, so say so. No "retry at ..." log line for a
-                    # retry that will never run, and a real failed job so
-                    # Activity shows the uoink honestly instead of it
-                    # silently vanishing from /queue/status.
-                    final_msg = (
-                        f"YouTube kept refusing this one. Uoink stopped "
-                        f"after {attempts} attempts and won't retry it on "
-                        f"its own.")
-                    final_detail = (
-                        f"{detail}\n"
-                        f"YouTube answered HTTP 429 (too busy) on all "
-                        f"{attempts} attempts. The automatic retry budget "
-                        f"is used up, so Uoink stopped.")
-                    try:
-                        idx.mark_pending_failed(
-                            pending_id, f"{detail}\n{final_msg}",
-                            _now_iso())
-                    except Exception:
-                        log.exception(
-                            "retry worker: mark_pending_failed failed")
-                    _record_single_extract_job(
-                        url, started_at, error=final_msg,
-                        error_detail=final_detail,
-                        failure_phase=_failure_phase(e, current_phase),
-                        long_video_mode=long_video_mode,
-                        title=title, folder=folder,
-                        retry_exhausted=True, attempt_count=attempts)
-                    _pending_long_video_mode(pending_id, remove=True)
-                    log.warning(
-                        "retry worker: pending #%d gave up after %d "
-                        "attempts; YouTube kept refusing. No further "
-                        "retries are scheduled.",
-                        pending_id, attempts)
-                    return True
-                # Still under the strike cap: wait for the next media retry and
-                # re-queue (mark_pending_failed re-queues below the cap).
-                delay = _RATE_LIMIT_BACKOFF_SEC[attempts]
+                delay = min(_RETRY_INITIAL_BACKOFF_SEC * (2 ** attempts), _RETRY_MAX_BACKOFF_SEC)
                 retry_at = (datetime.now() + timedelta(seconds=delay)).strftime(
                     "%Y-%m-%dT%H:%M:%S")
                 try:
-                    idx.mark_pending_failed(
-                        pending_id, detail, retry_at)
+                    status = idx.mark_pending_failed(
+                        pending_id, "capture_ownership_unavailable", retry_at,
+                        expected_status="running")
                 except Exception:
                     log.exception("retry worker: mark_pending_failed failed")
-                log.info(
-                    "retry worker: pending #%d still rate-limited; "
-                    "retry at %s (in %d minutes, retry %d of %d)",
-                    pending_id, retry_at, delay // 60, attempts + 1,
-                    index._PENDING_MAX_ATTEMPTS)
+                    return True
+                if not status:
+                    return True
+                log.warning("retry worker: pending #%d could not take the capture lock (%s); "
+                            "retry at %s", pending_id, ownership.error, retry_at)
                 return True
-            # Non-recoverable error -- jump straight to terminal failure.
-            # The user-facing job gets on-brand copy plus a disclosure detail;
-            # the queue row's persisted last_error still goes through
-            # _sanitize_error so paths / credentials don't leak into a
-            # long-lived store (Sprint 19.6 / Fix 8).
-            msg = friendly_error(e)
-            detail = machine_error_detail(e)
-            failure_phase = _failure_phase(e, current_phase)
-            persisted = _sanitize_error(msg)
+            if ownership.conflict:
+                # AS-03 (run AT-4): an identity conflict blocks before overwrite;
+                # the queue row goes terminal with the reason.
+                # A settlement error must not hide Activity. A committed
+                # cancellation sets the event under the index lock.
+                status = None
+                try:
+                    status = idx.mark_pending_failed(
+                        pending_id, _sanitize_error(ownership.conflict),
+                        _now_iso(), force_final=True, expected_status="running")
+                except Exception:
+                    log.exception("retry worker: mark_pending_failed failed")
+                if status == "" or cancel_event.is_set():
+                    return True
+                _record_single_extract_job(url, started_at, error=ownership.conflict,
+                                           failure_phase="metadata",
+                                           long_video_mode=long_video_mode)
+                _pending_long_video_mode(pending_id, remove=True)
+                return True
+            # AS-03 (run AT-4): the capture this row waited behind completed;
+            # reuse it, no fetch, no second acquisition.
+            result = ownership.reused if (ownership.completed_while_waiting
+                                          and ownership.reused) else None
             try:
-                idx.mark_pending_failed(
-                    pending_id, persisted, _now_iso(), force_final=True)
-            except Exception:
-                log.exception("retry worker: mark_pending_failed failed")
-            _record_single_extract_job(
-                url, started_at, error=msg, error_detail=detail,
-                failure_phase=failure_phase,
-                long_video_mode=long_video_mode,
-                title=title, folder=folder)
-            _pending_long_video_mode(pending_id, remove=True)
-            log.warning(
-                "retry worker: pending #%d non-recoverable: %s",
-                pending_id, persisted)
-            return True
+                if result is None:
+                    metadata = _fetch_metadata(url, cancel_event=cancel_event)
+                    _raise_if_cancelled(cancel_event)
+                    live_state = _detect_live_state(metadata)
+                    if live_state in (LIVE_STATE_LIVE, LIVE_STATE_UPCOMING, LIVE_STATE_POST_LIVE):
+                        behavior = _normalize_live_behavior(
+                            (_read_settings() or {}).get("live_stream_behavior"))
+                        if (live_state != LIVE_STATE_POST_LIVE
+                                or behavior != LIVE_BEHAVIOR_NOW):
+                            retry_at = (datetime.now() + timedelta(
+                                seconds=_LIVE_RETRY_INTERVAL_SEC)).strftime("%Y-%m-%dT%H:%M:%S")
+                            try:
+                                idx.defer_pending(pending_id, retry_at)
+                            except Exception:
+                                log.exception("retry worker: deferring live broadcast failed")
+                            return True
+                    title = metadata.get("title") or "Untitled"
+                    topic = _classify_topic(metadata)
+                    folder = _video_capture_folder(
+                        DESKTOP_ROOT / _topic_folder_name(topic), url, metadata)
 
-    job = _record_single_extract_job(url, started_at, result=result)
-    job_id = (job or {}).get("id") or ""
-    try:
-        idx.mark_pending_succeeded(pending_id, job_id)
-    except Exception:
-        log.exception("retry worker: mark_pending_succeeded failed")
-    _pending_long_video_mode(pending_id, remove=True)
-    log.info("retry worker: pending #%d succeeded -> %s", pending_id, job_id)
-    return True
+                    def phase_cb(phase: str):
+                        nonlocal current_phase
+                        current_phase = phase
+
+                    _raise_if_cancelled(cancel_event)
+                    result = _run_extraction(url, interval, folder,
+                                             metadata=metadata, topic=topic,
+                                             long_video_mode=long_video_mode,
+                                             phase_callback=phase_cb, pending_id=pending_id,
+                                             cancel_event=cancel_event)
+            except BaseException as e:
+                if cancel_event.is_set():
+                    return True
+                if getattr(e, "capture_result", None):
+                    # End the download queue's responsibility explicitly. The
+                    # receipt carries pending_id and owns one local save retry;
+                    # successful publication will complete this row too.
+                    msg = friendly_error(e)
+                    status = None
+                    try:
+                        status = idx.mark_pending_failed(
+                            pending_id, _sanitize_error(msg), _now_iso(),
+                            force_final=True, expected_status="publishing")
+                    except Exception:
+                        log.exception("retry worker: publication handoff failed")
+                    if status == "" or cancel_event.is_set():
+                        return True
+                    _record_single_extract_job(url, started_at, result=e.capture_result,
+                                               long_video_mode=long_video_mode)
+                    _pending_long_video_mode(pending_id, remove=True)
+                    log.warning("retry worker: pending #%d handed off after save failure: %s",
+                                pending_id, _sanitize_error(msg))
+                    return True
+                if _is_youtube_rate_limit(e):
+                    detail = _youtube_rate_limit_detail(e)
+                    attempts = attempts_before + 1
+                    if attempts >= index._PENDING_MAX_ATTEMPTS:
+                        # Final strike (G-43 / E2E D4 + D5): the row goes
+                        # terminal, so say so. No "retry at ..." log line for a
+                        # retry that will never run, and a real failed job so
+                        # Activity shows the uoink honestly instead of it
+                        # silently vanishing from /queue/status.
+                        final_msg = (
+                            f"YouTube kept refusing this one. Uoink stopped "
+                            f"after {attempts} attempts and won't retry it on "
+                            f"its own.")
+                        final_detail = (
+                            f"{detail}\n"
+                            f"YouTube answered HTTP 429 (too busy) on all "
+                            f"{attempts} attempts. The automatic retry budget "
+                            f"is used up, so Uoink stopped.")
+                        status = None
+                        try:
+                            status = idx.mark_pending_failed(
+                                pending_id, f"{detail}\n{final_msg}",
+                                _now_iso(), expected_status="running")
+                        except Exception:
+                            log.exception(
+                                "retry worker: mark_pending_failed failed")
+                        if status == "" or cancel_event.is_set():
+                            return True
+                        _record_single_extract_job(
+                            url, started_at, error=final_msg,
+                            error_detail=final_detail,
+                            failure_phase=_failure_phase(e, current_phase),
+                            long_video_mode=long_video_mode,
+                            title=title, folder=folder,
+                            retry_exhausted=True, attempt_count=attempts)
+                        _pending_long_video_mode(pending_id, remove=True)
+                        log.warning(
+                            "retry worker: pending #%d gave up after %d "
+                            "attempts; YouTube kept refusing. No further "
+                            "retries are scheduled.",
+                            pending_id, attempts)
+                        return True
+                    # Still under the strike cap: wait for the next media retry and
+                    # re-queue (mark_pending_failed re-queues below the cap).
+                    delay = _RATE_LIMIT_BACKOFF_SEC[attempts]
+                    retry_at = (datetime.now() + timedelta(seconds=delay)).strftime(
+                        "%Y-%m-%dT%H:%M:%S")
+                    try:
+                        status = idx.mark_pending_failed(
+                            pending_id, detail, retry_at, expected_status="running")
+                    except Exception:
+                        log.exception("retry worker: mark_pending_failed failed")
+                        return True
+                    if not status:
+                        return True
+                    log.info(
+                        "retry worker: pending #%d still rate-limited; "
+                        "retry at %s (in %d minutes, retry %d of %d)",
+                        pending_id, retry_at, delay // 60, attempts + 1,
+                        index._PENDING_MAX_ATTEMPTS)
+                    return True
+                # Non-recoverable error -- jump straight to terminal failure.
+                # The user-facing job gets on-brand copy plus a disclosure detail;
+                # the queue row's persisted last_error still goes through
+                # _sanitize_error so paths / credentials don't leak into a
+                # long-lived store (Sprint 19.6 / Fix 8).
+                msg = friendly_error(e)
+                detail = machine_error_detail(e)
+                failure_phase = _failure_phase(e, current_phase)
+                persisted = _sanitize_error(msg)
+                status = None
+                try:
+                    expected = ("publishing" if idx.pending_status(pending_id) == "publishing"
+                                else "running")
+                    status = idx.mark_pending_failed(
+                        pending_id, persisted, _now_iso(), force_final=True,
+                        expected_status=expected)
+                except Exception:
+                    log.exception("retry worker: mark_pending_failed failed")
+                if status == "" or cancel_event.is_set():
+                    return True
+                _record_single_extract_job(
+                    url, started_at, error=msg, error_detail=detail,
+                    failure_phase=failure_phase,
+                    long_video_mode=long_video_mode,
+                    title=title, folder=folder)
+                _pending_long_video_mode(pending_id, remove=True)
+                log.warning(
+                    "retry worker: pending #%d non-recoverable: %s",
+                    pending_id, persisted)
+                return True
+
+        if cancel_event.is_set():
+            return True
+        job_id = _make_job_id()
+        settled = None
+        try:
+            expected = "publishing" if idx.pending_status(pending_id) == "publishing" else "running"
+            settled = idx.mark_pending_succeeded(pending_id, job_id, expected_status=expected)
+        except Exception:
+            log.exception("retry worker: mark_pending_succeeded failed")
+        if settled is False or cancel_event.is_set():
+            return True
+        _record_single_extract_job(url, started_at, result=result, job_id=job_id)
+        _pending_long_video_mode(pending_id, remove=True)
+        log.info("retry worker: pending #%d succeeded -> %s", pending_id, job_id)
+        return True
+    finally:
+        idx.release_pending_cancel_event(pending_id, cancel_event)
 
 
 def _start_retry_pending_thread() -> None:
@@ -10838,7 +11730,17 @@ def _start_retry_pending_thread() -> None:
     per pass keeps the lock window short and gives breathing room between
     attempts so we don't ourselves drive YouTube into a deeper rate-limit."""
     def _runner():
+        try:
+            # Settled publication receipts must not keep transcripts or
+            # metadata, even when compaction was interrupted last session.
+            index.PublicationRetryQueue(DATA_ROOT / "publication-retries").compact_settled()
+        except Exception:
+            log.exception("publication retry compaction failed")
         while True:
+            try:
+                _retry_publication_one()
+            except Exception:
+                log.exception("publication retry worker pass crashed")
             try:
                 _retry_pending_one()
             except Exception:
@@ -11655,6 +12557,8 @@ class Handler(BaseHTTPRequestHandler):
         return False
 
     def _send_json(self, status: int, payload: dict):
+        if status >= 400:
+            self._drain_early_error_body()
         body = json.dumps(payload).encode("utf-8")
         self.send_response(status)
         self.send_header("Content-Type", "application/json; charset=utf-8")
@@ -11662,6 +12566,45 @@ class Handler(BaseHTTPRequestHandler):
         self._send_cors(self._cors_origin())
         self.end_headers()
         self.wfile.write(body)
+
+    def _drain_early_error_body(self):
+        """Consume a rejected POST's body before replying, within tight limits.
+
+        Closing with unread bytes can reset the connection on Windows and
+        hide the HTTP error. Never wait indefinitely or trust an unbounded
+        Content-Length from an unauthenticated client.
+        """
+        if (getattr(self, "command", None) != "POST"
+                or getattr(self, "_body_consumed", False)):
+            return
+        self._body_consumed = True
+        self.close_connection = True
+        try:
+            remaining = min(int(self.headers.get("Content-Length", "0")),
+                            MAX_BODY_BYTES)
+        except ValueError:
+            return
+        if remaining <= 0:
+            return
+        previous_timeout = self.connection.gettimeout()
+        deadline = time.monotonic() + 1.0
+        try:
+            while remaining > 0:
+                timeout = deadline - time.monotonic()
+                if timeout <= 0:
+                    break
+                if previous_timeout is not None:
+                    timeout = min(timeout, previous_timeout)
+                self.connection.settimeout(timeout)
+                chunk = self.rfile.read1(min(remaining, 16 * 1024))
+                if not chunk:
+                    break
+                remaining -= len(chunk)
+        except OSError:
+            # A stalled/disconnected client must not replace the HTTP error.
+            pass
+        finally:
+            self.connection.settimeout(previous_timeout)
 
     def _send_empty(self, status: int = 202):
         self.send_response(status)
@@ -11715,6 +12658,7 @@ class Handler(BaseHTTPRequestHandler):
         if length > MAX_BODY_BYTES:
             raise Handler._BodyError(413, f"Body too large (>{MAX_BODY_BYTES} bytes)")
         raw = self.rfile.read(length) if length else b"{}"
+        self._body_consumed = True
         try:
             text = raw.decode("utf-8") or "{}"
             if strict:
@@ -11753,7 +12697,7 @@ class Handler(BaseHTTPRequestHandler):
         bare = self.path.split("?", 1)[0]
         if bare == "/ping" or bare == "/health":
             # Public liveness probe -- intentionally unauthenticated.
-            log.info("GET %s from %s -> ok", bare, self.client_address[0])
+            log.debug("GET %s from %s -> ok", bare, self.client_address[0])
             settings = _read_settings() or {}
             whisper_model = whisper_runner.normalize_model(
                 settings.get("whisper_model"))
@@ -15058,6 +16002,7 @@ class Handler(BaseHTTPRequestHandler):
                 "ok": False, "code": "too_large",
                 "error": f"That image is over {mb} MB. Nothing was saved."})
         image_bytes = self.rfile.read(length)
+        self._body_consumed = True
 
         qs = parse_qs(urlparse(self.path).query)
 
@@ -16134,13 +17079,13 @@ class Handler(BaseHTTPRequestHandler):
         self._send_json(404, {"ok": False, "error": "not found"})
 
     def do_POST(self):
+        self._body_consumed = False
         # C-04: Host allowlist before auth so a rebind never reaches the
-        # token check or the body reader.
+        # token check or body parsing.
         if self._reject_bad_host():
             return
-        # Auth first so we don't even read the body for unauthenticated
-        # callers. Public POST endpoints don't exist today, so the gate is
-        # unconditional here.
+        # Auth first; rejected bodies are only discarded, never parsed.
+        # Public POST endpoints don't exist today, so the gate is unconditional.
         if not self._require_token():
             return
         # /images carries raw image bytes, not JSON, and can exceed the 64KB
@@ -16512,7 +17457,7 @@ class Handler(BaseHTTPRequestHandler):
         counts = overview.get("counts", {}) if isinstance(overview, dict) else {}
         return {
             "pending": int(counts.get("pending", 0)),
-            "running": int(counts.get("running", 0)),
+            "running": int(counts.get("running", 0)) + int(counts.get("publishing", 0)),
             "failed": int(counts.get("failed", 0)),
             "succeeded": int(counts.get("succeeded", 0)),
             "cancelled": int(counts.get("cancelled", 0)),
@@ -16816,7 +17761,7 @@ class Handler(BaseHTTPRequestHandler):
         self._send_json(200, {
             "ok": True,
             "pending_count": int(counts.get("pending", 0)),
-            "running_count": int(counts.get("running", 0)),
+            "running_count": int(counts.get("running", 0)) + int(counts.get("publishing", 0)),
             "failed_count": int(counts.get("failed", 0)),
             "succeeded_count": int(counts.get("succeeded", 0)),
             "cancelled_count": int(counts.get("cancelled", 0)),
@@ -16844,6 +17789,11 @@ class Handler(BaseHTTPRequestHandler):
             return self._send_json(400, {"ok": False, "error": err})
         try:
             changed = _get_index().cancel_pending(pending_id)
+            if not changed and _get_index().pending_status(pending_id) == "publishing":
+                return self._send_json(409, {
+                    "ok": False,
+                    "error": "Publication has started; it is too late to cancel this capture.",
+                })
         except Exception as e:
             log.warning("queue cancel: index error: %s", e)
             return self._send_json(
@@ -16941,9 +17891,13 @@ class Handler(BaseHTTPRequestHandler):
 
         title = metadata.get("title") or "Untitled"
         topic = _classify_topic(metadata)
-        folder = (DESKTOP_ROOT / _topic_folder_name(topic)
-                   / (slugify(title) or "video"))
-        folder.mkdir(parents=True, exist_ok=True)
+        folder = _video_capture_folder(
+            DESKTOP_ROOT / _topic_folder_name(topic), canonical, metadata)
+        try:
+            _prepare_video_capture_folder(folder, canonical, metadata)
+        except Exception as e:
+            log.exception("/extract/any (generic) destination unavailable")
+            return self._send_json(500, {"ok": False, "error": str(e)})
 
         # Best-effort transcript reconstruction from yt-dlp's
         # subtitles/automatic_captions map (when present).
@@ -16966,7 +17920,7 @@ class Handler(BaseHTTPRequestHandler):
                                or metadata.get("uploader_url")),
             "upload_date": metadata.get("upload_date"),
             "view_count": metadata.get("view_count"),
-            "video_id": metadata.get("id"),
+            "video_id": _video_capture_id(canonical, metadata),
             "transcript": transcript_entries,
             # Comments/screenshots/hook are explicit nulls so the
             # dashboard knows they're unavailable rather than missing.
@@ -17020,8 +17974,7 @@ class Handler(BaseHTTPRequestHandler):
             _plat = page_extractor.platform_for(None, canonical)
             _auth = sidecar["channel"] or sidecar["host"]
             _get_index().upsert_yoink({
-                "video_id": (metadata.get("id")
-                                or f"generic_{abs(hash(canonical)) & 0xFFFFFF:06x}"),
+                "video_id": sidecar["video_id"],
                 "slug": folder.name,
                 "channel": sidecar["channel"],
                 "platform": _plat,
@@ -17038,6 +17991,10 @@ class Handler(BaseHTTPRequestHandler):
                     "host": sidecar["host"],
                 }),
             }, content=("\n".join(corpus_lines)[:65000]))
+        except index.sqlite3.IntegrityError as e:
+            log.exception("/extract/any generic identity conflict")
+            return self._send_json(500, {"ok": False, "error": str(e),
+                                         "folder": str(folder)})
         except Exception as e:
             log.warning("/extract/any generic upsert_yoink failed: %s", e)
 
@@ -17049,15 +18006,15 @@ class Handler(BaseHTTPRequestHandler):
             "url": canonical,
             "title": title,
             "folder": str(folder),
+            "video_slug": folder.name,
             "transcript_segments": len(transcript_entries),
             "has_thumbnail": bool(sidecar["thumbnail_url"]),
         })
 
     def _handle_live_extract_dispatch(self, url, interval, live_state,
                                       metadata, long_video_mode):
-        """v3.1 live stream branch. Returns a Response dict (and the
-        caller short-circuits) when we want to defer the extraction;
-        returns None when the caller should proceed with the normal
+        """v3.1 live stream branch. Returns True after sending a response;
+        returns False when the caller should proceed with the normal
         download (post_live with a recording exposed).
 
         Wait-for-end mode: enqueue into pending_yoinks with a future
@@ -17071,7 +18028,7 @@ class Handler(BaseHTTPRequestHandler):
         a useful message. For post_live we try anyway (yt-dlp will
         return a recording when one is exposed).
 
-        Returns None iff the caller should fall through to the normal
+        Returns False iff the caller should fall through to the normal
         _run_extraction pipeline."""
         settings = (_read_settings() or {})
         behavior = _normalize_live_behavior(
@@ -17082,14 +18039,14 @@ class Handler(BaseHTTPRequestHandler):
         # proceed (the recording may already be downloadable).
         if (behavior == LIVE_BEHAVIOR_NOW
                 and live_state == LIVE_STATE_POST_LIVE):
-            return None  # fall through
+            return False  # fall through
 
         # When mode == NOW + state in (LIVE, UPCOMING) we surface the
         # live status as a 409. The dashboard can offer a "retry now"
         # button later.
         if behavior == LIVE_BEHAVIOR_NOW and live_state in (
                 LIVE_STATE_LIVE, LIVE_STATE_UPCOMING):
-            return self._send_json(409, {
+            self._send_json(409, {
                 "ok": False,
                 "live_state": live_state,
                 "behavior": behavior,
@@ -17101,6 +18058,7 @@ class Handler(BaseHTTPRequestHandler):
                            "the setting to wait_for_end to enqueue "
                            "automatically."),
             })
+            return True
 
         # Default (wait_for_end + any live-ish state): enqueue. The
         # retry worker will re-fetch metadata; once live_state moves to
@@ -17112,12 +18070,16 @@ class Handler(BaseHTTPRequestHandler):
             pending_id = _get_index().enqueue_pending(
                 url, interval, retry_after, long_video_mode)
         except Exception as e:
-            log.warning("live: enqueue failed (%s); proceeding inline", e)
-            return None  # fall through -- best-effort
+            log.warning("live: enqueue failed: %s", e)
+            self._send_json(503, {
+                "ok": False, "error": "Live broadcast could not be queued. Try again later.",
+                "live_state": live_state, "retryable": True,
+            })
+            return True
         _remember_pending_long_video_mode(pending_id, long_video_mode)
         log.info("POST /extract -> queued (live state=%s) pending_id=%d",
                   live_state, pending_id)
-        return self._send_json(200, {
+        self._send_json(200, {
             "ok": True,
             "queued": True,
             "pending_id": pending_id,
@@ -17128,6 +18090,7 @@ class Handler(BaseHTTPRequestHandler):
             "title": live_title,
             "long_video_mode": long_video_mode,
         })
+        return True
 
     def _handle_live_status_get(self):
         """GET /live/status?url=... -- check whether a URL is currently
@@ -17203,13 +18166,13 @@ class Handler(BaseHTTPRequestHandler):
                 live_state = _detect_live_state(metadata)
                 if live_state in (LIVE_STATE_LIVE, LIVE_STATE_UPCOMING,
                                     LIVE_STATE_POST_LIVE):
-                    response = self._handle_live_extract_dispatch(
-                        url, interval, live_state, metadata, long_video_mode)
-                    if response is not None:
-                        return response
+                    if self._handle_live_extract_dispatch(
+                            url, interval, live_state, metadata, long_video_mode):
+                        return
                 title = metadata.get("title") or "Untitled"
                 topic = _classify_topic(metadata)
-                folder = DESKTOP_ROOT / _topic_folder_name(topic) / (slugify(title) or "video")
+                folder = _video_capture_folder(
+                    DESKTOP_ROOT / _topic_folder_name(topic), url, metadata)
 
                 def phase_cb(phase: str):
                     nonlocal current_phase
@@ -17273,6 +18236,7 @@ class Handler(BaseHTTPRequestHandler):
                     long_video_mode=long_video_mode,
                     title=title,
                     folder=folder,
+                    job_id=(getattr(e, "capture_result", None) or {}).get("publication_job_id"),
                 )
                 return self._send_json(200, {
                     "ok": False,
@@ -17344,8 +18308,7 @@ class Handler(BaseHTTPRequestHandler):
 
         log.info("POST /session/add session=%s url=%s -> running", session_id, url)
         sess_folder = _session_folder(session_id)
-        # Disambiguate the per-video subfolder by title — fetch metadata once
-        # and re-use it inside _run_extraction.
+        # Fetch metadata once; source identity disambiguates same-title videos.
         with _manual_extraction_ownership(url) as ownership:  # AS-03 shared dispatcher lock
             if not ownership.ok:
                 # AS-03: unavailable ownership is a retryable failure.
@@ -17365,27 +18328,19 @@ class Handler(BaseHTTPRequestHandler):
                     # no second acquisition.
                     reused = ownership.reused
                     title = reused.get("title") or "Untitled"
-                    video_slug = slugify(title) or "video"
-                    target = sess_folder / video_slug
-                    if target.exists():
-                        video_slug = f"{video_slug}_{uuid.uuid4().hex[:6]}"
-                        target = sess_folder / video_slug
                     source_folder = Path(reused["folder"]) if reused.get("folder") else None
                     if source_folder is None or not source_folder.is_dir():
                         raise FileNotFoundError("completed capture folder is missing")
+                    target = sess_folder / source_folder.name
                     shutil.copytree(source_folder, target)
-                    result = dict(reused, title=title, video_slug=video_slug,
+                    result = dict(reused, title=title, video_slug=target.name,
                                   folder=str(target), caption_count=0)
                 else:
                     metadata = _fetch_metadata(url)
                     title = metadata.get("title") or "Untitled"
                     topic = _classify_topic(metadata)
-                    video_slug = slugify(title) or "video"
-                    target = sess_folder / video_slug
-                    # Disambiguate if same-named video already added.
-                    if target.exists():
-                        video_slug = f"{video_slug}_{uuid.uuid4().hex[:6]}"
-                        target = sess_folder / video_slug
+                    target = _video_capture_folder(sess_folder, url, metadata)
+                    target = _create_video_entry_folder(target, url, metadata)
 
                     # Session adds don't go to the clipboard one-by-one (the
                     # whole session is concatenated and copied at /session/close),
@@ -17399,12 +18354,17 @@ class Handler(BaseHTTPRequestHandler):
                 msg = friendly_error(e)
                 detail = machine_error_detail(e)
                 log.error("POST /session/add -> error: %s", msg)
-                return self._send_json(200, {
-                    "ok": False,
-                    "error": msg,
-                    "error_detail": detail,
-                    "session_id": session_id,
-                })
+                result = getattr(e, "capture_result", None)
+                if result is None:
+                    return self._send_json(200, {
+                        "ok": False,
+                        "error": msg,
+                        "error_detail": detail,
+                        "session_id": session_id,
+                    })
+                # Retain membership now, even if the session closes before
+                # publication retries. Its corpus already exists on disk.
+                _record_single_extract_job(url, _now_iso(), result=result)
 
         with _session_lock:
             session = _read_session(session_id) or session
@@ -17418,8 +18378,12 @@ class Handler(BaseHTTPRequestHandler):
             })
             _write_session(session_id, session)
 
-        log.info("POST /session/add -> ok (%d shots, total videos=%d)",
-                 result["screenshot_count"], len(session["videos"]))
+        if result.get("status") == "saved_with_errors":
+            # Membership is committed. Callers use ok=False to offer a new
+            # download, which would append the same capture a second time.
+            result = dict(result, ok=True, reason=result["error"])
+        log.info("POST /session/add -> %s (%d shots, total videos=%d)",
+                 result.get("status") or "ok", result["screenshot_count"], len(session["videos"]))
         result.update({"session_id": session_id, "video_count": len(session["videos"])})
         self._send_json(200, result)
 
