@@ -31,7 +31,7 @@ The helper never binds to a public network interface. Browser pages cannot use t
 | Malicious webpage tries to call `127.0.0.1:5179` | Yes | Token-gated endpoints require `X-Uoink-Token` (legacy `X-Yoink-Token` accepted); `/token` requires a custom `X-Uoink-Client` header (legacy `X-Yoink-Client` accepted) and browser CORS/PNA preflight blocks normal webpages from setting it cross-origin. |
 | Malicious webpage probes whether Uoink is running | Not treated as secret | `/health` and `/ping` are public liveness probes. They disclose the helper version and coarse readiness: Whisper model availability/load state, index recovery, output-root fallback, aggregate path-integrity counts, and a generic path-integrity hint or error. Raw exception details stay in `server.log`. |
 | Local malware reads files or calls localhost | No | Malware already running as the user can read local files, call local ports, and modify output. Uoink does not try to sandbox against same-user malware. |
-| Another installed browser extension calls `/token` | Yes, for unlisted extension origins | `/token` and extension CORS require an exact allowlisted extension origin. The default ID is `bkcapfidedhfcjpmjabeopfbcjcbmdmi`; local configuration can add trusted IDs. Residual risk: an extension that has host access to `http://127.0.0.1:5179` (for example `<all_urls>`) can run script in the dashboard's own origin and read `/token` same-origin; the pin stops extensions without host access to the helper. A launch-scoped dashboard bootstrap would close this later. |
+| Another installed browser extension calls `/token` | Yes, for direct requests from unlisted extensions | The extension uses POST so Chromium sends its Origin, which must match the allowlist. An originless worker GET with `Sec-Fetch-Site: none` is refused, including from extensions with helper host access. The default ID is `bkcapfidedhfcjpmjabeopfbcjcbmdmi`; local configuration can add trusted IDs. Residual risk: an extension with permission to inject script into the helper dashboard can still read `/token` from that page's own origin. A launch-scoped dashboard bootstrap would close this later. |
 | Network attacker | Mostly not applicable | The helper listens only on `127.0.0.1`, not LAN/public interfaces. |
 | Anthropic API key disclosure through settings | Mitigated | The key is stored in the OS credential store via `keyring` (service `Uoink` in normal mode; deterministic profile-derived `Uoink-isolated-<hash>` in isolated mode; the v2.1 install migration moves normal entries from legacy `Yoink`), not in `settings.json`, and is never returned by `GET /settings`. |
 | Dependency compromise | Partially | Direct downloads are SHA256-checked in `build.ps1`; the full installer pip graph is exact-version locked and inventory-verified, but distribution artifacts are not hash-locked. |
@@ -48,8 +48,8 @@ These do not require `X-Uoink-Token`:
 - Suite discovery: `GET /.well-known/suite-service.json` and
   `GET /api/suite/v1/health`
 - Local UI shells: `GET /dashboard` and `GET /splash`
-- Credential bootstrap: `GET /token`, with the separate custom-header and
-  origin checks described below
+- Credential bootstrap: `GET /token` and bodyless `POST /token`, with the
+  separate custom-header and origin checks described below
 
 `/health` and `/ping` are intentionally public because the extension, setup
 page, and YouTube button need to detect whether the helper is running before
@@ -79,9 +79,9 @@ migration failures use generic messages, with details in `server.log`.
 `/health` and `/ping` retain their existing counts and readiness fields;
 neither returns local paths or key-presence flags.
 
-Clients that pass the local-UI bootstrap proof still receive the key-readiness
+Clients that pass the existing splash metadata check still receive the key-readiness
 field `anthropic_key_valid` from `/diagnose` without a token, because the
-first-run splash needs it. The proof requires no `Origin` header,
+first-run splash needs it. This diagnostic-only check requires no `Origin` header,
 `Sec-Fetch-Site: same-origin` or `none`, and a present loopback
 `Host` allowed on the helper's port. The field is `true` for a saved key not
 marked invalid, `false` whenever `anthropic_key_invalid` is set, even if a 401
@@ -89,6 +89,9 @@ cleared the saved key, and absent only when no key is saved and the invalid
 flag is off. This preserves the splash's ready, update-key and add-key states
 without making an Anthropic request. Even pinned extension origins receive
 no such field; a curl-style request without fetch metadata does not qualify.
+This compatibility check is separate from token bootstrap: `none` does not
+prove extension identity and never authorizes a token mint. An originless
+extension worker can satisfy this diagnostic check and see the readiness boolean.
 
 Use authenticated Settings to inspect the output folder or Anthropic key
 status. The extension setup page's public Helper status panel no longer lists
@@ -111,7 +114,7 @@ The manifest, OpenAPI, well-known, and suite-discovery routes expose product
 and protocol metadata, not corpus content or credentials. `/dashboard` and
 `/splash` serve local UI shells. The dashboard completes the normal token
 handshake before requesting user data; the splash readiness check uses the
-local-UI proof above.
+splash metadata check above.
 
 Both HTML shells, including their trailing-slash and query-string forms,
 send `Content-Security-Policy: frame-ancestors 'none'` and
@@ -124,15 +127,24 @@ windows.
 `/token` returns the per-install helper token and is guarded by:
 
 - `X-Uoink-Client: uoink-extension` (legacy `X-Yoink-Client: yoink-extension` remains accepted for shipped-extension compatibility)
-- An exact `chrome-extension://<id>` or `moz-extension://<id>` origin whose ID is allowlisted. Missing `Origin` is accepted only with `Sec-Fetch-Site: same-origin` or `Sec-Fetch-Site: none` and a present loopback `Host` that passes the helper's Host/port check.
+- An exact `chrome-extension://<id>` or `moz-extension://<id>` origin whose ID is allowlisted. Missing `Origin` is accepted only with `Sec-Fetch-Site: same-origin` and a present loopback `Host` that passes the helper's Host/port check. `Sec-Fetch-Site: none` cannot substitute for Origin.
 - A server-wide 10 requests/minute rate limit
+
+The extension uses a bodyless `POST /token`, with `X-Yoink-Client`,
+`credentials: "omit"` and `cache: "no-store"`. In the Chromium 153 probe,
+extension-worker GETs omitted Origin and sent `Sec-Fetch-Site: none`; POSTs
+sent `Origin: chrome-extension://<id>`. POST therefore lets the helper check
+the caller's ID. Token POST rejects nonempty bodies, invalid lengths and
+transfer encodings without reading a body. All other POST routes still require
+the bearer token before reading input; their body limits are unchanged.
 
 The extension's public manifest `key` fixes its Chromium ID at
 `bkcapfidedhfcjpmjabeopfbcjcbmdmi`. This ID is always in the helper's allowlist.
 For Edge or development builds with another ID, add trusted IDs through the
 comma-separated `UOINK_EXTENSION_IDS` environment variable or the
-`extension_ids` setting (a list or comma-separated string). Both sources add
-to the pinned ID and to each other; an empty setting cannot disable the pin.
+`extension_ids` setting (a list or comma-separated string). Previously, a
+nonempty environment variable replaced the settings list. Now the helper
+unions both sources with the pinned ID; an empty setting cannot disable the pin.
 
 After updating an existing unpacked installation, reload the extension once
 from the browser's extensions page. If its previous ID differs, extension
@@ -140,10 +152,26 @@ storage starts fresh under the pinned ID, including saved extension preferences
 and its cached helper token. Reapply those preferences as needed; the extension
 fetches the helper token again. The helper's library and captures are unchanged.
 
-The missing-Origin exception supports the local dashboard and WebView. Clients
-that omit both `Origin` and `Sec-Fetch-Site` now receive HTTP 403, even with the
-client header. An explicitly empty or `null` Origin is also refused. The
-service worker silently drops runtime messages unless `sender.id` matches
+Update/reload the extension with the helper: older extension builds that mint
+with an originless GET receive HTTP 403 when they next need a token. Existing
+cached tokens remain valid until the helper rotates them.
+
+The local-client paths were checked in source before removing the `none`
+exception. `GET /token` remains available for helper-served pages with no
+Origin, `Sec-Fetch-Site: same-origin` and an allowed loopback Host:
+
+| Client | Origin-bound path and compatibility |
+|---|---|
+| Browser dashboard | `assets/dashboard/index.html` fetches relative `/token` from the helper's `/dashboard`, keeping the same-origin GET path. |
+| Tray WebView2 | `uoink_tray.py` launches `uoink_dashboard.py`, which loads the helper's `/dashboard` URL. It uses the same page and relative fetch; the top-level navigation's `none` metadata is not used to mint a token. |
+| Tauri prototype | `tauri-ui/src-tauri/src/main.rs` opens the dashboard as an external helper URL. The installer page does not mint a helper token; the dashboard uses its own helper origin. |
+| Extension popup, setup and worker | All use `extension/lib/extract.js` for token bootstrap and refresh, now through POST with the browser-supplied extension Origin. |
+| Splash | `uoink_splash.py` loads the helper's `/splash`; relative `/health` and `/diagnose` preserve readiness. Its separate token request already fails because it sends `X-Uoink-Client: uoink-splash`, which the token gate does not accept. The authenticated Open last YouTube action remains unavailable through that path; this task does not broaden the client-header gate. The offline failure HTML does not bootstrap a token. |
+| Older WKWebView without fetch metadata | A GET with neither Origin nor `Sec-Fetch-Site` already receives HTTP 403. There is no origin-bound fallback in this client, and it cannot safely use the extension-worker `none` exception. Open the dashboard in a browser that sends same-origin fetch metadata. |
+
+These are source checks and offline request regressions, not native WebView
+runtime verification. An explicitly empty or `null` Origin is also refused.
+The service worker silently drops runtime messages unless `sender.id` matches
 `chrome.runtime.id`; messages from Uoink's own popup and content scripts continue
 to work.
 

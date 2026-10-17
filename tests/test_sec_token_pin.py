@@ -14,6 +14,8 @@ import io
 import json
 import re
 import secrets
+import shutil
+import subprocess
 import threading
 from email.parser import BytesParser
 from http.server import BaseHTTPRequestHandler
@@ -110,7 +112,8 @@ def test_default_allowlist_is_pinned(helper):
 
 
 @pytest.mark.parametrize("configured", [OTHER_ID, [OTHER_ID, EDGE_ID], (OTHER_ID, EDGE_ID)])
-def test_configured_ids_add_to_pin_and_to_each_other(helper, configured):
+@pytest.mark.parametrize("method", ["GET", "POST"])
+def test_configured_ids_add_to_pin_and_to_each_other(helper, configured, method):
     helper["os"].environ["UOINK_EXTENSION_IDS"] = f" {MOZ_ID}, ,{OTHER_ID} "
     helper["_read_settings"].return_value = {"extension_ids": configured}
     expected = {PINNED_ID, MOZ_ID, OTHER_ID}
@@ -120,7 +123,7 @@ def test_configured_ids_add_to_pin_and_to_each_other(helper, configured):
     for extension_id in expected:
         scheme = "moz-extension" if extension_id == MOZ_ID else "chrome-extension"
         origin = f"{scheme}://{extension_id}"
-        status, headers, body = request(helper, headers=token_headers(origin))
+        status, headers, body = request(helper, method=method, headers=token_headers(origin))
         assert status == 200
         assert body == {"ok": True, "token": TEST_TOKEN}
         assert headers["Access-Control-Allow-Origin"] == origin
@@ -143,9 +146,11 @@ def test_unreadable_settings_cannot_unpin(helper):
 
 @pytest.mark.parametrize("client", [{"X-Uoink-Client": "uoink-extension"},
                                    {"X-Yoink-Client": "yoink-extension"}])
-def test_pinned_extension_can_mint_with_current_or_legacy_header(helper, client):
-    headers = {"Host": f"localhost:{PORT}", "Origin": ORIGIN, **client}
-    status, response_headers, body = request(helper, headers=headers)
+@pytest.mark.parametrize("method", ["GET", "POST"])
+def test_pinned_extension_can_mint_with_current_or_legacy_header(helper, client, method):
+    headers = {"Host": f"localhost:{PORT}", "Origin": ORIGIN,
+               "Sec-Fetch-Site": "none", **client}
+    status, response_headers, body = request(helper, method=method, headers=headers)
     assert status == 200
     assert body == {"ok": True, "token": TEST_TOKEN}
     assert response_headers["Access-Control-Allow-Origin"] == ORIGIN
@@ -159,9 +164,11 @@ def test_pinned_extension_can_mint_with_current_or_legacy_header(helper, client)
     "chrome-extension://", "null", "", "https://attacker.test",
     f"http://127.0.0.1:{PORT}",
 ])
-def test_unlisted_or_malformed_origins_cannot_mint_or_receive_cors(helper, origin):
+@pytest.mark.parametrize("method", ["GET", "POST"])
+def test_unlisted_or_malformed_origins_cannot_mint_or_receive_cors(helper, origin, method):
     headers = token_headers(origin)
-    status, response_headers, body = request(helper, headers=headers)
+    headers["Sec-Fetch-Site"] = "none"
+    status, response_headers, body = request(helper, method=method, headers=headers)
     assert status == 403
     assert "token" not in body
     assert response_headers["Access-Control-Allow-Origin"] is None
@@ -172,9 +179,10 @@ def test_unlisted_or_malformed_origins_cannot_mint_or_receive_cors(helper, origi
     assert helper["_token_request_times"] == []
 
 
-def test_pinned_preflight_preserves_auth_headers_and_pna(helper):
+@pytest.mark.parametrize("method", ["GET", "POST"])
+def test_pinned_preflight_preserves_auth_headers_and_pna(helper, method):
     headers = token_headers()
-    headers.update({"Access-Control-Request-Method": "GET",
+    headers.update({"Access-Control-Request-Method": method,
                     "Access-Control-Request-Headers": "X-Uoink-Client",
                     "Access-Control-Request-Private-Network": "true"})
     status, response_headers, _ = request(helper, method="OPTIONS", headers=headers)
@@ -183,58 +191,62 @@ def test_pinned_preflight_preserves_auth_headers_and_pna(helper):
     assert response_headers["Access-Control-Allow-Private-Network"] == "true"
     assert "X-Uoink-Client" in response_headers["Access-Control-Allow-Headers"]
     assert "X-Uoink-Token" in response_headers["Access-Control-Allow-Headers"]
+    assert method in response_headers["Access-Control-Allow-Methods"].split(", ")
 
 
-@pytest.mark.parametrize("site", ["same-origin", "none"])
 @pytest.mark.parametrize("host", [f"127.0.0.1:{PORT}", f"localhost:{PORT}", f"[::1]:{PORT}"])
-def test_no_origin_dashboard_and_webview_bootstrap(helper, site, host):
+def test_no_origin_dashboard_and_webview_bootstrap(helper, host):
     headers = token_headers(None)
-    headers.update({"Host": host, "Sec-Fetch-Site": site})
+    headers.update({"Host": host, "Sec-Fetch-Site": "same-origin"})
     status, response_headers, body = request(helper, headers=headers)
     assert status == 200
     assert body == {"ok": True, "token": TEST_TOKEN}
     assert response_headers["Access-Control-Allow-Origin"] is None
 
 
-@pytest.mark.parametrize("site", [None, "", "cross-site", "same-site", "null"])
-def test_no_origin_requires_explicit_trusted_fetch_metadata(helper, site):
+@pytest.mark.parametrize("method", ["GET", "POST"])
+@pytest.mark.parametrize("site", [None, "", "none", "cross-site", "same-site", "null"])
+def test_no_origin_requires_explicit_trusted_fetch_metadata(helper, site, method):
     headers = token_headers(None)
     if site is not None:
         headers["Sec-Fetch-Site"] = site
-    status, _, body = request(helper, headers=headers)
+    status, _, body = request(helper, method=method, headers=headers)
     assert status == 403
     assert "token" not in body
 
 
 @pytest.mark.parametrize("host", [None, "", "attacker.test", f"localhost:{PORT + 1}"])
-def test_no_origin_requires_loopback_host(helper, host):
+@pytest.mark.parametrize("method", ["GET", "POST"])
+def test_no_origin_requires_loopback_host(helper, host, method):
     headers = token_headers(None)
     headers["Sec-Fetch-Site"] = "same-origin"
     if host is None:
         headers.pop("Host")
     else:
         headers["Host"] = host
-    status, _, body = request(helper, headers=headers)
+    status, _, body = request(helper, method=method, headers=headers)
     assert status == 403
     assert "token" not in body
 
 
 @pytest.mark.parametrize("origin", ["https://www.youtube.com", "https://attacker.test",
                                     f"chrome-extension://{OTHER_ID}", "null", ""])
-def test_fetch_metadata_cannot_override_a_present_untrusted_origin(helper, origin):
+@pytest.mark.parametrize("method", ["GET", "POST"])
+def test_fetch_metadata_cannot_override_a_present_untrusted_origin(helper, origin, method):
     headers = token_headers(origin)
     headers["Sec-Fetch-Site"] = "same-origin"
-    assert request(helper, headers=headers)[0] == 403
+    assert request(helper, method=method, headers=headers)[0] == 403
 
 
 @pytest.mark.parametrize("client", [None, "", "wrong-client"])
-def test_client_header_still_required(helper, client):
+@pytest.mark.parametrize("method", ["GET", "POST"])
+def test_client_header_still_required(helper, client, method):
     headers = token_headers()
     if client is None:
         headers.pop("X-Uoink-Client")
     else:
         headers["X-Uoink-Client"] = client
-    assert request(helper, headers=headers)[0] == 403
+    assert request(helper, method=method, headers=headers)[0] == 403
 
 
 @pytest.mark.parametrize("method", ["GET", "POST", "DELETE", "OPTIONS"])
@@ -253,10 +265,18 @@ def test_pinned_origin_does_not_replace_bearer_auth(helper, method):
     assert body == {"ok": False, "error": "missing or invalid token"}
 
 
-def test_token_rate_limit_still_applies(helper):
+@pytest.mark.parametrize("path", ["/token/", "/token/other", "/images", "/corpus/import"])
+def test_token_post_exception_does_not_open_other_post_routes(helper, path):
+    status, _, body = request(helper, method="POST", path=path)
+    assert status == 403
+    assert body == {"ok": False, "error": "missing or invalid token"}
+
+
+@pytest.mark.parametrize("method", ["GET", "POST"])
+def test_token_rate_limit_still_applies(helper, method):
     for _ in range(10):
-        assert request(helper)[0] == 200
-    status, _, body = request(helper)
+        assert request(helper, method=method)[0] == 200
+    status, _, body = request(helper, method=method)
     assert status == 429
     assert "token" not in body
 
@@ -280,3 +300,53 @@ def test_body_type_and_size_limits_still_apply(helper, headers, status):
         handler._read_json_body()
     assert error.value.status == status
     assert handler.rfile.tell() == 0
+
+
+@pytest.mark.parametrize("extra,status", [
+    ({}, 200),
+    ({"Content-Length": "0"}, 200),
+    ({"Content-Length": "2", "Content-Type": "application/json"}, 400),
+    ({"Content-Length": "2", "Content-Type": "text/plain"}, 400),
+    ({"Content-Length": str(64 * 1024 + 1)}, 413),
+    ({"Content-Length": "-1"}, 400),
+    ({"Content-Length": "invalid"}, 400),
+    ({"Transfer-Encoding": "chunked"}, 400),
+])
+def test_token_post_is_bodyless_and_never_reads_a_body(helper, monkeypatch, extra, status):
+    def no_body_read(*args, **kwargs):
+        raise AssertionError("Token bootstrap must not read a request body")
+
+    class HeadersOnly(io.BytesIO):
+        read = no_body_read
+
+    monkeypatch.setattr(io, "BytesIO", HeadersOnly)
+    headers = {**token_headers(), "Sec-Fetch-Site": "none", **extra}
+    actual, _, body = request(helper, method="POST", headers=headers)
+    assert actual == status
+    if status == 200:
+        assert body == {"ok": True, "token": TEST_TOKEN}
+    else:
+        assert "token" not in body
+        assert helper["_token_request_times"] == []
+
+
+def test_untrusted_post_is_rejected_before_body_validation(helper):
+    headers = {**token_headers(f"chrome-extension://{OTHER_ID}"),
+               "Content-Length": str(64 * 1024 + 1)}
+    status, _, body = request(helper, method="POST", headers=headers)
+    assert status == 403
+    assert body == {"ok": False, "error": "forbidden"}
+
+
+def test_extension_token_mints_use_origin_carrying_post():
+    node = shutil.which("node")
+    assert node, "Node.js is required for the offline extension token harness"
+    result = subprocess.run(
+        [node, "--test", "--test-reporter=tap", "tests/js/sec_token_pin_test.mjs"],
+        cwd=ROOT, capture_output=True, text=True, encoding="utf-8", timeout=60,
+    )
+    output = result.stdout + result.stderr
+    assert result.returncode == 0, output
+    passed = re.findall(r"^# pass (\d+)$", result.stdout, re.MULTILINE)
+    assert len(passed) == 1 and int(passed[0]) >= 5, output
+    assert re.findall(r"^# fail (\d+)$", result.stdout, re.MULTILINE) == ["0"], output

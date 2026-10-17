@@ -11131,7 +11131,7 @@ def _diagnose_payload() -> dict:
 def _public_diagnose_payload(*, local_ui: bool = False) -> dict:
     """HTTP self-check, redacted by default.
 
-    Only the HTTP handler's local-UI bootstrap proof may enable local_ui,
+    Only the HTTP handler's splash metadata check may enable local_ui,
     which adds the splash's key-ready boolean without paths or key checks.
     """
     return _build_diagnose_payload(public=True, local_ui=local_ui)
@@ -11895,16 +11895,30 @@ class Handler(BaseHTTPRequestHandler):
     def _is_extension_origin(self) -> bool:
         """Allow pinned/configured extensions or the local UI bootstrap.
 
-        A missing Origin is only trusted with explicit same-origin/none fetch
+        A missing Origin is only trusted with explicit same-origin fetch
         metadata and a present, allowed loopback Host (dashboard/WebView).
+        Extension worker GETs send no Origin and Sec-Fetch-Site: none, so
+        extensions must use POST to carry the Origin checked against the pin.
         Empty and null Origin headers do not qualify for that exception.
         """
         origin = self.headers.get("Origin")
         if origin is None:
             site = (self.headers.get("Sec-Fetch-Site") or "").strip().lower()
-            return (site in ("same-origin", "none")
+            return (site == "same-origin"
                     and bool(self.headers.get("Host")) and self._host_allowed())
         return self._is_allowed_extension_origin(origin)
+
+    def _is_local_diagnose_request(self) -> bool:
+        """Preserve the splash's existing key-readiness classification only.
+
+        Unlike token bootstrap, diagnostics historically accept metadata
+        'none'. It does not prove extension identity and must never authorize
+        a token mint or a private route.
+        """
+        site = (self.headers.get("Sec-Fetch-Site") or "").strip().lower()
+        return (self.headers.get("Origin") is None
+                and site in ("same-origin", "none")
+                and bool(self.headers.get("Host")) and self._host_allowed())
 
     def _has_yoink_client_header(self) -> bool:
         """Defense-in-depth header that the extension sets on /token. A
@@ -11912,7 +11926,7 @@ class Handler(BaseHTTPRequestHandler):
         triggering a CORS preflight, and our preflight only echoes ACAO
         for allowlisted extension origins + the YouTube allowlist -- so the actual
         request from a malicious origin is blocked by the browser before
-        it even runs the GET.
+        it even runs the request.
 
         v2.1 alias window: accept the new X-Uoink-Client/"uoink-extension"
         pair AND the legacy X-Yoink-Client/"yoink-extension" pair so the
@@ -12082,10 +12096,10 @@ class Handler(BaseHTTPRequestHandler):
             # Public, no-auth (same posture as /health). Sprint 19 / C3:
             # structured self-check the popup uses to surface a specific
             # recovery hint instead of a generic "helper offline".
-            # Only the absent-Origin branch of the existing token-bootstrap
-            # proof may see splash readiness. Even pinned extensions get the
+            # Keep splash readiness's existing metadata rule separate from
+            # the stricter token bootstrap. Explicit extension origins get the
             # public projection; request parameters cannot select CLI details.
-            local_ui = self.headers.get("Origin") is None and self._is_extension_origin()
+            local_ui = self._is_local_diagnose_request()
             return self._send_json(200, _public_diagnose_payload(local_ui=local_ui))
         if bare == "/sources/manifest":
             # Public product metadata (no user data) so the static site can
@@ -12309,7 +12323,7 @@ class Handler(BaseHTTPRequestHandler):
     #      CORS preflight, and our preflight refuses ACAO for any origin
     #      outside the YouTube + pinned/configured extension allowlist.
     #   2. Origin must exactly match an allowlisted extension. Missing Origin
-    #      requires same-origin/none fetch metadata and a loopback Host for
+    #      requires same-origin fetch metadata and a loopback Host for
     #      the dashboard/WebView bootstrap.
     #   3. Per-install rate limit (10/min) so a noisy attacker can't
     #      poll the endpoint indefinitely.
@@ -12319,13 +12333,28 @@ class Handler(BaseHTTPRequestHandler):
     # local-attacker defense.
     def _handle_token(self):
         if not self._has_yoink_client_header():
-            log.info("GET /token rejected (missing X-Uoink-Client)")
+            log.info("%s /token rejected (missing X-Uoink-Client)", self.command)
             return self._send_json(403, {"ok": False, "error": "forbidden"})
         if not self._is_extension_origin():
-            log.info("GET /token rejected (origin=%r)", self.headers.get("Origin"))
+            log.info("%s /token rejected (origin=%r)", self.command, self.headers.get("Origin"))
             return self._send_json(403, {"ok": False, "error": "forbidden"})
+        if self.command == "POST":
+            # Bootstrap has no input payload. Validate framing without reading
+            # a body, after the Host/client/origin gates and before minting.
+            if self.headers.get("Transfer-Encoding") is not None:
+                return self._send_json(400, {"ok": False, "error": "Token request must be bodyless"})
+            try:
+                length = int(self.headers.get("Content-Length", "0"))
+            except ValueError:
+                return self._send_json(400, {"ok": False, "error": "Bad Content-Length"})
+            if length < 0:
+                return self._send_json(400, {"ok": False, "error": "Bad Content-Length"})
+            if length > MAX_BODY_BYTES:
+                return self._send_json(413, {"ok": False, "error": "Body too large"})
+            if length:
+                return self._send_json(400, {"ok": False, "error": "Token request must be bodyless"})
         if not _check_token_rate_limit():
-            log.info("GET /token rate-limited")
+            log.info("%s /token rate-limited", self.command)
             return self._send_json(429, {"ok": False, "error": "too many requests"})
         self._send_json(200, {"ok": True, "token": TOKEN})
 
@@ -16422,18 +16451,22 @@ class Handler(BaseHTTPRequestHandler):
         # token check or the body reader.
         if self._reject_bad_host():
             return
+        bare = self.path.split("?", 1)[0]
+        if bare == "/token":
+            # Extension POST carries its browser-supplied Origin. This one
+            # bootstrap route uses the client/origin/rate gates, not a bearer
+            # token the caller is still trying to obtain.
+            return self._handle_token()
         # Auth first so we don't even read the body for unauthenticated
-        # callers. Public POST endpoints don't exist today, so the gate is
-        # unconditional here.
+        # callers. Every other POST still requires the bearer token.
         if not self._require_token():
             return
         # /images carries raw image bytes, not JSON, and can exceed the 64KB
         # JSON body cap, so it must be handled BEFORE _read_json_body (which
         # would 415 on the image Content-Type and 413 on the size). It reads
         # the raw body itself.
-        if self.path.split("?", 1)[0] == "/images":
+        if bare == "/images":
             return self._handle_create_image()
-        bare = self.path.split("?", 1)[0]
         try:
             body = self._read_json_body(strict=_strict_json_route(bare))
         except Handler._BodyError as e:

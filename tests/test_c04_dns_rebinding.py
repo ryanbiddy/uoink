@@ -13,10 +13,12 @@ Red on unpatched main: a request with `Host: evil.attacker.com` reaches
 the route and answers 200 (the server never looked at Host).
 
 Also covers:
-- the token endpoint's extension-id pin (off by default, enforced when
-  UOINK_EXTENSION_IDS is set),
-- the absent-Origin service-worker path still works, but only behind the
-  Host wall.
+- the token endpoint's extension-id pin (on by default for the manifest-key
+  ID; UOINK_EXTENSION_IDS and settings.extension_ids add trusted IDs),
+- the token endpoint's Host wall, even with an extension Origin and client
+  header. Offline tests/test_sec_token_pin.py separately covers the extension's
+  origin-carrying POST and the same-origin dashboard GET. Originless worker
+  GETs with Sec-Fetch-Site: none are refused.
 """
 from __future__ import annotations
 

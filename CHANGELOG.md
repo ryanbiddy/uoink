@@ -65,20 +65,29 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Pin the extension's Chromium ID to `bkcapfidedhfcjpmjabeopfbcjcbmdmi` with a
   public manifest key. The helper now grants extension token bootstrap and CORS
   only to this ID and IDs explicitly added through `UOINK_EXTENSION_IDS` or
-  `settings.extension_ids`. Both configuration sources remain additive.
-- Require `Sec-Fetch-Site: same-origin` or `none` and a loopback Host when
-  `/token` is requested without Origin, preserving the dashboard/WebView path.
-  Requests with neither Origin nor fetch metadata now receive HTTP 403.
+  `settings.extension_ids`. Previously, a nonempty environment variable replaced
+  the settings list; now both sources are unioned with the pinned ID.
+- Use a bodyless `POST /token` in the extension so Chromium sends its extension
+  Origin and the helper checks the pinned or explicitly configured ID.
+  Keep the client header, omitted credentials and `no-store` fetch policy.
+  Without Origin, `/token` now requires `Sec-Fetch-Site: same-origin` and a
+  present, allowed loopback Host. `Sec-Fetch-Site: none` and missing fetch
+  metadata receive HTTP 403, closing the extension-worker GET bypass.
+  Helper-served dashboard and WebView pages keep their same-origin GET path;
+  update/reload the extension with the helper so token refresh uses POST.
+  Older WKWebView clients that send neither header remain unable to bootstrap;
+  open the dashboard in a browser that sends same-origin fetch metadata.
 - Drop extension runtime messages whose sender ID differs from Uoink's own ID.
 - Public `/diagnose` responses no longer include local paths, raw tool output
   or credential-store errors. Saved-key flags are omitted except for
-  `anthropic_key_valid`: clients with local-UI bootstrap proof still receive
+  `anthropic_key_valid`: clients passing the existing splash metadata check receive
   it without a token, because the first-run splash needs it. The field is `true`
   for a saved key not marked invalid, `false` whenever `anthropic_key_invalid`
   is set, even if a 401 cleared the saved key, and absent only when no key is
   saved and the invalid flag is off.
-  This proof requires no Origin header, `Sec-Fetch-Site: same-origin` or `none`,
-  and a present loopback Host allowed on the helper's port. `/health` and `/ping`
+  This diagnostic-only check requires no Origin header, `Sec-Fetch-Site:
+  same-origin` or `none`, and a present loopback Host allowed on the helper's
+  port. It does not authorize token bootstrap. `/health` and `/ping`
   carry none of these details; the console doctor keeps the full detail.
   The dashboard and splash cannot be framed by other pages
   (`frame-ancestors 'none'`, `X-Frame-Options: DENY`).
