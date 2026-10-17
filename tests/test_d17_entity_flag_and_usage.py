@@ -72,6 +72,8 @@ def test_entity_extraction_flag_settable_via_settings_post(monkeypatch):
     _saved_key(monkeypatch, "")
 
     class Probe:
+        _handle_settings_post_locked = server.Handler._handle_settings_post_locked
+
         def __init__(self):
             self.responses = []
 

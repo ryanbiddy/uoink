@@ -306,5 +306,6 @@ def test_bridge_is_available_through_http_and_full_mcp(tmp_path, monkeypatch):
     assert citation_map["transcript_citations"][1]["deep_link"] == (
         "https://show.example/episodes/42#t=64")
     assert "youtube.com" not in json.dumps(citation_map).lower()
-    assert len(uoink_mcp_tools.TOOL_REGISTRY) == 88  # phase6-v1: export_cited_range (BC-2)  # +6 Living Library tools (run J), +4 Phase 3 source tools (run AM), +1 Phase 5 activity tool (run AZ), +3 Phase 4 read tools (run AV-1), +2 Phase 4 brief tools (run AV-2)
+    # Phase 6's 88 tools + get_playbook_input, discover_candidates, queue_discovered.
+    assert len(uoink_mcp_tools.TOOL_REGISTRY) == 91
     idx.close()

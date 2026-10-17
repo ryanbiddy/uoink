@@ -237,18 +237,23 @@ def _wrap_urlopen():
     urllib.request._c22_urlopen_wrapped = True
 
 
-def _record_inject_child(proc):
+def _record_inject_child(pid, *, registration_failed=False):
     if not PROFILE:
         return
     try:
         dest = os.path.join(PROFILE, "c22-inject-child.json")
         payload = {
-            "pid": getattr(proc, "pid", None),
+            "pid": pid,
             "inject": INJECT,
             "executable": sys.executable,
+            "registration_failed": registration_failed,
+            "cleanup_failure_injected": INJECT == "registration_failure",
         }
-        with open(dest, "w", encoding="utf-8") as handle:
+        # Observers must see either a complete note or no note, never a partial
+        # JSON document between launch and the declared registration failure.
+        with open(dest + ".tmp", "w", encoding="utf-8") as handle:
             json.dump(payload, handle)
+        os.replace(dest + ".tmp", dest)
     except OSError:
         pass
 
@@ -353,6 +358,7 @@ def _wrap_popen():
 
     class GuardedPopen(original):
         def __init__(self, *a, **k):
+            self._c22_cleanup_failure = False
             ctx = None
             try:
                 import source_subscriptions as ss
@@ -369,7 +375,20 @@ def _wrap_popen():
                 a = (sleeper,) + a[1:]
             super().__init__(*a, **k)
             if injected:
-                _record_inject_child(self)
+                self._c22_cleanup_failure = INJECT == "registration_failure"
+                _record_inject_child(self.pid)
+
+        def terminate(self):
+            if self._c22_cleanup_failure:
+                _event("synthetic_cleanup_failure", child_pid=self.pid, operation="terminate")
+                raise OSError("C22 declared child termination failure")
+            return super().terminate()
+
+        def kill(self):
+            if self._c22_cleanup_failure:
+                _event("synthetic_cleanup_failure", child_pid=self.pid, operation="kill")
+                raise OSError("C22 declared child kill failure")
+            return super().kill()
 
     subprocess.Popen = GuardedPopen
     subprocess._c22_popen_wrapped = True
@@ -381,6 +400,9 @@ def _wrap_subscriptions(mod):
 
     def record_child_start(root, start_id, pid, instance):
         if INJECT == "registration_failure":
+            # The survivor oracle exercises failed registration AND failed
+            # cleanup. Ordinary registration failures are reaped by the helper.
+            _record_inject_child(pid, registration_failed=True)
             raise OSError("C22 declared registration failure")
         return original_start(root, start_id, pid, instance)
 

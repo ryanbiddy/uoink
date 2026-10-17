@@ -15,7 +15,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Discovery tools on stdio and HTTP: `discover_candidates` plans and spends
   confirmed credits; `queue_discovered` sends up to ten picks through the
   existing capture queue, with intent/agent gates and duplicate protection.
-  The surface now has 35 stdio tools, 91 registry tools and nine prompts.
+  The MCP server now exposes 35 tools over stdio, with 91 HTTP registry tools
+  and nine prompts.
   Token-gated `GET /discovery/runs/<run_id>` reconciles capture state without
   spending or queueing. Picks are due immediately in the retry worker's local
   clock. Local playbooks use the target-filtered 24-file reader and newest

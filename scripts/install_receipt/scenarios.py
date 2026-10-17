@@ -99,7 +99,7 @@ def scenario_table() -> list[dict[str, str]]:
          "notes": "C22_INJECT=launch_interrupt; unresolved_launch retained"},
         {"id": "registration_failure",
          "as7": "separate registration-failure fixture",
-         "notes": "C22_INJECT=registration_failure; surviving child preserved"},
+         "notes": "C22_INJECT=registration_failure; registration and child cleanup fail; survivor exits naturally"},
         {"id": "browser_state_checkpoint",
          "as7": "post-restart browser state paired with persisted state",
          "notes": "unexecuted without an actual browser image in all modes"},
@@ -937,7 +937,8 @@ class ScenarioRunner:
         return str(path) if path.is_file() else None
 
     def _drive_helper_capture(self, client: HelperClient, profile: Path,
-                              *, variant: str, operation_key: str) -> dict[str, Any]:
+                              *, variant: str, operation_key: str,
+                              inject: str) -> dict[str, Any]:
         """Standing capture through original helper routes, not child_instrument."""
         url = self._synthetic_url(variant)
         guid, title = self._identity_for_variant(variant)
@@ -954,15 +955,7 @@ class ScenarioRunner:
                 "source_id": consented["source_id"],
             }, timeout=30)
             standing = self._wait_standing(profile, timeout=20)
-        deadline = time.time() + 25
-        ownership = child_ownership_records(profile)
-        while time.time() < deadline:
-            ownership = child_ownership_records(profile)
-            if ownership:
-                break
-            if (profile / "c22-inject-child.json").is_file():
-                break
-            time.sleep(0.3)
+        ownership, inject_note = self._wait_child_evidence(profile, inject=inject)
         return {
             "consented": consented,
             "refresh": refresh,
@@ -972,11 +965,33 @@ class ScenarioRunner:
             "episode_title": title,
             "ownership": ownership,
             "helper_state": helper_ownership_state(profile),
-            "inject_child_file": (
-                json.loads((profile / "c22-inject-child.json").read_text(encoding="utf-8"))
-                if (profile / "c22-inject-child.json").is_file() else None
-            ),
+            "inject_child_file": inject_note,
         }
+
+    def _wait_child_evidence(self, profile: Path, *, inject: str,
+                             timeout: float = 25.0):
+        """Wait past launch intent; it is not evidence of a registered child."""
+        deadline = time.monotonic() + timeout
+        while time.monotonic() < deadline:
+            ownership = child_ownership_records(profile)
+            try:
+                note = json.loads((profile / "c22-inject-child.json").read_text(encoding="utf-8"))
+            except FileNotFoundError:
+                note = None
+            unresolved = any(item.get("unresolved_launch") is True for item in ownership)
+            if inject == "spawn_child":
+                ready = any(item.get("children") for item in ownership)
+            elif inject == "registration_failure":
+                ready = (unresolved and note and note.get("pid")
+                         and note.get("registration_failed") is True)
+            elif inject == "launch_interrupt":
+                ready = unresolved
+            else:
+                raise C22ValidationError(f"unknown child injection: {inject}")
+            if ready:
+                return ownership, note
+            time.sleep(0.05)
+        raise C22ValidationError(f"{inject} child evidence did not arrive")
 
     def _child_identity(self, child: dict[str, Any]) -> dict[str, Any]:
         pid = child.get("pid")
@@ -1027,7 +1042,7 @@ class ScenarioRunner:
         def body(record, client, launcher):
             driven = self._drive_helper_capture(
                 client, profile, variant="child-life",
-                operation_key="c22-child-life-on")
+                operation_key="c22-child-life-on", inject="spawn_child")
             live = []
             for item in driven.get("ownership") or []:
                 for child in item.get("children") or []:
@@ -1189,7 +1204,7 @@ class ScenarioRunner:
         def body(record, client, launcher):
             driven = self._drive_helper_capture(
                 client, profile, variant="child-interrupt",
-                operation_key="c22-interrupt-on")
+                operation_key="c22-interrupt-on", inject="launch_interrupt")
             unresolved = [
                 item for item in driven.get("ownership") or []
                 if item.get("unresolved_launch") is True
@@ -1252,7 +1267,7 @@ class ScenarioRunner:
         def body(record, client, launcher):
             driven = self._drive_helper_capture(
                 client, profile, variant="child-regfail",
-                operation_key="c22-regfail-on")
+                operation_key="c22-regfail-on", inject="registration_failure")
             unresolved = [
                 item for item in driven.get("ownership") or []
                 if item.get("unresolved_launch") is True
