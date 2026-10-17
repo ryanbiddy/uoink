@@ -44,8 +44,12 @@ def test_activity_zero_state_headline() -> None:
             "the bare count headline should be gone")
     require("Nothing uoinking" in DASHBOARD,
             "zero-state headline copy missing (UX-17)")
-    require("in flight <em>uoinking...</em>`" in DASHBOARD,
-            "non-zero headline keeps the in-flight sentence")
+    # Reader removes the decorative italic word swap, preserving the
+    # sentence and its live count in a plain-text headline.
+    require('els.activityHeadline.innerHTML = activeCount ? `${activeCount} in flight uoinking...` : "Nothing uoinking right now.";' in DASHBOARD,
+            "headline must keep its live count and sentence at zero and non-zero")
+    require("in flight <em>" not in DASHBOARD,
+            "Activity must not bring back the decorative italic headline")
     print("ok  activity headline reads as a sentence at zero")
 
 

@@ -2540,10 +2540,39 @@
       font-size: 12px;
     }
 
-    .activity-layout {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) 310px;
-      gap: 16px;
+    .app:has(#tab-activity.active) { background: var(--bg); }
+    .app:has(#tab-activity.active) .uoink-mark { filter: none; }
+    #tab-activity .button { min-height: 44px; border-radius: var(--radius-pill); box-shadow: none; transition: none; }
+    #tab-activity .button:active { transform: none; }
+    #tab-activity .button:disabled { opacity: 1; background: var(--surface-sel); color: var(--text-2); border-color: var(--line-strong); }
+    #queueMeta { margin: 0 0 24px; }
+    .activity-layout { display: grid; gap: 32px; }
+    .capture-group h2 { margin: 0; padding-bottom: 12px; font-size: 18px; border-bottom: 1px solid var(--line-strong); }
+    .activity-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px 24px; padding: 20px 0; border-bottom: 1px solid var(--line); }
+    .activity-row-main { min-width: 0; }
+    .activity-row-title { margin: 0 0 4px; color: var(--text); font-size: 16px; font-weight: 600; overflow-wrap: anywhere; }
+    .activity-meta, .activity-empty, .activity-retry-copy { color: var(--text-2); font-size: 13px; line-height: 1.6; overflow-wrap: anywhere; }
+    .activity-meta { margin: 0; }
+    .activity-state { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 12px; font-size: 13px; }
+    .activity-failed-label { color: var(--rust-bright); font-weight: 600; }
+    .activity-row-actions { display: flex; align-items: flex-start; gap: 8px; flex-wrap: wrap; }
+    .activity-row .step-strip { grid-template-columns: repeat(5, 20px); }
+    .activity-retry-copy { margin: 8px 0 0; }
+    .activity-drawer { position: fixed; inset: 0 0 0 auto; margin: 0; width: min(520px, 100%); max-width: 100%; height: 100dvh; max-height: 100dvh; padding: 28px; border: 0; border-left: 1px solid var(--line-strong); background: var(--surface); color: var(--text); overflow-y: auto; overscroll-behavior: contain; }
+    .activity-drawer::backdrop { background: var(--scrim); }
+    .activity-drawer-head { display: flex; gap: 16px; justify-content: space-between; align-items: flex-start; }
+    .activity-drawer h2 { margin: 0 0 12px; font-size: 24px; line-height: 1.3; overflow-wrap: anywhere; }
+    .activity-step-list { list-style: none; padding: 0; margin: 24px 0; }
+    .activity-step-list li { display: flex; align-items: baseline; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
+    .activity-step-state { margin-left: auto; color: var(--text-2); font-size: 12px; }
+    .activity-error-line { padding: 16px; background: var(--surface-sel); color: var(--text); border: 1px solid var(--line-strong); border-radius: 8px; font-family: var(--font-mono); font-size: 12px; line-height: 1.6; white-space: pre-wrap; overflow-wrap: anywhere; }
+    .activity-drawer-actions { display: flex; gap: 8px; flex-wrap: wrap; margin: 24px 0 12px; }
+    .activity-drawer .button { min-height: 44px; }
+    .activity-alternate-retries { margin-top: 24px; }
+    .activity-alternate-retries summary { min-height: 44px; cursor: pointer; }
+    @media (max-width: 600px) {
+      .activity-row { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+      .activity-drawer { padding: 20px; }
     }
 
     .panel {
@@ -5096,40 +5125,54 @@
         <section class="tab-panel" id="tab-activity" data-tab-panel="activity">
           <div class="page-head">
             <div>
-              <div class="eyebrow">Activity</div>
-              <h1 id="activityHeadline">Nothing uoinking <em>right now.</em></h1>
-              <p class="lede">Live work, queue retries, today&apos;s completions, and failures use the same phase language as the popup: fetch, transcribe, screenshots, classify, write.</p>
+              <h1>Activity</h1>
+              <p class="lede" id="activityHeadline" role="status">Nothing uoinking right now.</p>
             </div>
             <div class="inline-row">
               <button class="button ghost" type="button" id="refreshActivity">Refresh</button>
               <button class="button danger" type="button" id="cancelAll">Cancel all</button>
             </div>
           </div>
-          <div class="learn-links" aria-label="Activity walkthrough links">
-            <a href="https://uoink.app/features/playlist-mode" target="_blank" rel="noreferrer">Learn: Playlist Mode</a>
-            <a href="https://uoink.app/features/mobile-playlist-bridge" target="_blank" rel="noreferrer">Learn: Mobile Bridge</a>
-          </div>
-          <div class="summary-line">
-            <span>Saves queued from your phone carry this tag:</span>
-            <span class="activity-source-chip">from mobile playlist</span>
-          </div>
-
+          <p class="activity-meta" id="queueMeta" role="status">Waiting for local app</p>
           <div class="activity-layout">
-            <div class="panel">
-              <div class="panel-head">
-                <div class="panel-title">Queue</div>
-                <div class="localhost" id="queueMeta">waiting for local app</div>
-              </div>
-              <div class="panel-body" id="queueRows"></div>
-            </div>
-            <div class="panel">
-              <div class="panel-head">
-                <div class="panel-title">Completed today</div>
-                <span class="nav-count" id="completedToday">0</span>
-              </div>
-              <div class="panel-body" id="completedRows"></div>
-            </div>
+            <section class="capture-group" aria-labelledby="attentionTitle">
+              <h2 id="attentionTitle">Needs attention</h2>
+              <div id="attentionRows"></div>
+            </section>
+            <section class="capture-group" aria-labelledby="progressTitle">
+              <h2 id="progressTitle">In progress</h2>
+              <div id="queueRows"></div>
+            </section>
+            <section class="capture-group" aria-labelledby="todayTitle">
+              <h2 id="todayTitle">Today <span class="nav-count" id="completedToday">0</span></h2>
+              <div id="completedRows"></div>
+            </section>
+            <section class="capture-group" aria-labelledby="earlierTitle">
+              <h2 id="earlierTitle">Earlier</h2>
+              <div id="earlierRows"></div>
+            </section>
           </div>
+          <dialog class="activity-drawer" id="captureFailureDrawer" aria-labelledby="captureFailureTitle" aria-describedby="captureFailureLabel">
+            <div class="activity-drawer-head">
+              <div><p class="activity-failed-label" id="captureFailureLabel"></p><h2 id="captureFailureTitle" tabindex="-1"></h2></div>
+              <button class="button ghost" type="button" id="closeCaptureFailure">Close</button>
+            </div>
+            <p class="activity-meta" id="captureFailureMeta"></p>
+            <ol class="activity-step-list" id="captureFailureSteps" aria-label="Capture steps"></ol>
+            <h3>Last error</h3>
+            <pre class="activity-error-line" id="captureFailureError"></pre>
+            <p class="activity-retry-copy" id="captureFailureSchedule"></p>
+            <div class="activity-drawer-actions">
+              <button class="button primary" type="button" id="retryCaptureFailure">Retry now</button>
+              <button class="button ghost" type="button" id="removeCaptureFailure">Remove</button>
+            </div>
+            <p class="activity-meta">Remove hides this failure from Activity and cancels any scheduled retry. Saved captures stay in Library.</p>
+            <p class="activity-failed-label" id="captureFailureActionStatus" role="status"></p>
+            <details class="activity-alternate-retries" id="captureFailureAlternates">
+              <summary>Other ways to retry</summary>
+              <div class="inline-row" id="captureFailureAlternateActions"></div>
+            </details>
+          </dialog>
         </section>
 
         <section class="tab-panel" id="tab-settings" data-tab-panel="settings">
@@ -5546,6 +5589,12 @@
       // Re-haul: the last step each in-flight capture showed, so only a
       // step that just advanced animates.
       captureSteps: new Map(),
+      activityEntries: [],
+      activityRemoved: null,
+      activityFailureKey: "",
+      activityFailureFocus: null,
+      activityActionBusy: false,
+      activityQueueRequest: 0,
       // Captures started from the Library box until the helper answers
       // (a single capture is answered when it is saved or has failed).
       libraryRuns: [],
@@ -5856,6 +5905,9 @@
       sortFilter: document.getElementById("sortFilter"),
       facetStatus: document.getElementById("facetStatus"),
       queueRows: document.getElementById("queueRows"),
+      attentionRows: document.getElementById("attentionRows"),
+      earlierRows: document.getElementById("earlierRows"),
+      captureFailureDrawer: document.getElementById("captureFailureDrawer"),
       queueMeta: document.getElementById("queueMeta"),
       activityHeadline: document.getElementById("activityHeadline"),
       activityNavCount: document.getElementById("activityNavCount"),
@@ -10900,7 +10952,7 @@
     // -1 when it names none.
     function captureStepIndex(phase, stateValue = "") {
       const value = String(phase || "").toLowerCase();
-      if (value.includes("screenshot") || value.includes("thumb") || value.includes("writ") || value.includes("comment")
+      if (value.includes("screenshot") || value.includes("thumb") || value.includes("writ") || value.includes("comment") || value.includes("classif") || value.includes("hook") || value.includes("entity")
         || value.includes("publish") || value.includes("index") || value.includes("save") || value === "done") return 4;
       if (value.includes("transcri") || value.includes("caption") || value.includes("asr") || value.includes("whisper")) return 3;
       if (value.includes("download") || value === "video" || value.includes("media")) return 2;
@@ -10989,7 +11041,7 @@
         // The helper is busy or restarting: the rows keep their last step.
         return;
       }
-      renderLibraryCaptures();
+      renderQueue(state.queue || {});
     }
 
     function pollLibraryRuns() {
@@ -11864,14 +11916,18 @@
     }
 
     async function refreshQueue({ skipJobs = false } = {}) {
+      const request = ++state.activityQueueRequest;
       try {
         if (!skipJobs) await refreshJobs();
         const data = await authFetch("/queue/status");
+        if (request !== state.activityQueueRequest) return;
         state.queue = data;
         renderQueue(data);
       } catch (err) {
+        if (request !== state.activityQueueRequest) return;
         els.queueMeta.textContent = "Uoink needs a minute. Retrying...";
-        els.queueRows.innerHTML = degradedState("Uoink needs a minute.", "Queue will refresh again in a moment.", err.message);
+        // Keep the last known rows, including open failure details, while
+        // the reconnect loop catches up. An outage is not an empty queue.
       }
     }
 
@@ -11880,108 +11936,388 @@
       await refreshQueue({ skipJobs: true });
     }
 
+    // One pure projection for Activity's strip, label and drawer step list.
+    // A failed record must use failure_phase before an end-of-job phase.
+    function activitySteps(row = {}) {
+      const status = normalizedStatus(row);
+      const failed = status === "failed" || (status === "pending" && Boolean(row.failure_phase || row.error_detail
+        || (row.last_error && row.last_error !== "capture_ownership_unavailable")));
+      const done = ["completed", "succeeded"].includes(status);
+      const cancelled = status === "cancelled";
+      // Caption-429 retries can have only last_error, with no failure_phase.
+      const phase = (failed && (row.failure_phase || row.error_phase
+        || (row.last_error === "youtube_rate_limit" ? "waiting" : ""))) || row.current_video_phase || row.phase || "";
+      const index = done ? 4 : captureStepIndex(phase, failed || cancelled ? "" : status);
+      const waiting = !failed && !done && !cancelled && (["queued", "pending"].includes(status) || index === 1);
+      const label = done ? "Done" : cancelled ? "Cancelled" : failed
+        ? (index < 0 ? "Failed · step not reported" : `Failed at ${CAPTURE_STEPS[index]} (${index + 1} of 5)`)
+        : waiting ? "Waiting · one YouTube capture at a time"
+        : `Capturing · ${captureStepLine(index) || "step not reported"}`;
+      const steps = CAPTURE_STEPS.map((label, step) => ({ label, state: done ? "done" : cancelled ? "todo"
+        : step < index ? "done" : step !== index ? "todo" : failed ? "fail" : "now" }));
+      return { index, failed, done, cancelled, waiting, label, steps };
+    }
+
+    function activityIdentity(row) {
+      return failureKey(row) || String(row.source_url || row.url || "");
+    }
+
+    function activityTime(row) {
+      return row.completed_at || row.updated_at || row.yoinked_at || row.started_at || row.queued_at || "";
+    }
+
+    function activityRemovalKey(entry) {
+      return JSON.stringify([entry.key, activityTime(entry.row), entry.row.attempt_count || 0]);
+    }
+
+    function activityRemoved() {
+      if (!state.activityRemoved) {
+        let keys;
+        try { keys = JSON.parse(localStorage.getItem("uoink_activity_removed") || "[]"); } catch (_) {}
+        state.activityRemoved = new Set(Array.isArray(keys) ? keys.filter((key) => typeof key === "string") : []);
+      }
+      return state.activityRemoved;
+    }
+
+    // Merge the pending record into its job: the job has the diagnostic;
+    // the pending record has the retry time and the id the queue API needs.
+    function activityEntries(data = {}) {
+      const pending = Array.isArray(data.pending) ? data.pending : [];
+      const jobs = Array.isArray(state.jobs) ? state.jobs : [];
+      const used = new Set();
+      const entries = [];
+      const seenFailures = new Set();
+      for (const job of jobs) {
+        const identity = activityIdentity(job);
+        const failed = normalizedStatus(job) === "failed";
+        if (failed && identity && seenFailures.has(identity)) continue;
+        if (failed && identity) seenFailures.add(identity);
+        const queued = !["completed", "succeeded", "cancelled"].includes(normalizedStatus(job))
+          && pending.find((row) => !used.has(row) && identity && activityIdentity(row) === identity
+          && !["succeeded", "completed", "cancelled"].includes(normalizedStatus(row)));
+        if (queued) used.add(queued);
+        const row = { ...job };
+        if (queued) {
+          // A retry running now supersedes the old failure, even before the
+          // helper records a fresh job. A waiting retry retains its cause.
+          if (normalizedStatus(queued) === "running") {
+            Object.assign(row, { state: "running", phase: queued.phase || "", current_video_phase: queued.phase || "" });
+          }
+          for (const field of ["error_detail", "failure_phase", "last_error", "transcript_source"])
+            if (!row[field] && queued[field]) row[field] = queued[field];
+        }
+        entries.push({ key: `job:${job.id}`, row, job, pending: queued || null });
+      }
+      pending.filter((row) => !used.has(row)).forEach((row) => entries.push({ key: `pending:${row.pending_id}`, row, pending: row }));
+      // /extract has no job until it finishes. Reuse the Library's live
+      // capture records (and its existing phase poll) in Activity too.
+      const runs = (state.libraryRuns || []).filter((run) => run.state === "running" && !libraryRunJob(run, jobs));
+      const live = Array.isArray(state.liveCaptures) ? state.liveCaptures : [];
+      const captures = runs.map((run) => ({
+        ...(live.find((item) => run.ref && item.capture_ref === run.ref) || {}),
+        capture_ref: run.ref || run.id, source_url: run.url, title: run.title || run.url,
+        started_at: run.startedAt,
+      }));
+      live.filter((item) => !captures.some((run) => run.capture_ref === item.capture_ref)).forEach((item) => captures.push(item));
+      for (const capture of captures) {
+        const identity = activityIdentity(capture);
+        const existing = entries.find((entry) => identity && activityIdentity(entry.row) === identity);
+        if (existing && (["queued", "running"].includes(normalizedStatus(existing.row))
+          || timeOf(activityTime(existing.row)) >= timeOf(capture.started_at))) continue;
+        if (existing) entries.splice(entries.indexOf(existing), 1);
+        entries.push({ key: `live:${capture.capture_ref || identity || capture.started_at}`, row: { ...capture, state: "running" } });
+      }
+      // Library adds saved captures that have aged out of /jobs. Keep each
+      // source once and use its persisted transcript provenance when known.
+      const represented = new Set(entries.map((entry) => activityIdentity(entry.row)).filter(Boolean));
+      for (const saved of state.library || []) {
+        const identity = activityIdentity(saved) || videoIdOf(saved);
+        const existing = entries.find((entry) => identity && activityIdentity(entry.row) === identity);
+        if (existing) {
+          existing.saved = saved;
+          continue;
+        }
+        if (represented.has(identity)) continue;
+        represented.add(identity);
+        entries.push({ key: `saved:${videoIdOf(saved)}`, row: { ...saved, state: "completed" }, saved });
+      }
+      const today = new Date().toDateString();
+      return entries.filter((entry) => !activitySteps(entry.row).failed || !activityRemoved().has(activityRemovalKey(entry)))
+        .map((entry) => {
+          const model = activitySteps(entry.row);
+          const active = ["queued", "pending", "running"].includes(normalizedStatus(entry.row));
+          // A failed attempt still belongs to In progress while its queue
+          // record schedules a retry. Keep the failed step and drawer, but
+          // reserve Needs attention for captures that have stopped retrying.
+          // As in activityRetrySchedule, retry-now can revive an exhausted
+          // record without resetting its count; stale pending rows cannot.
+          const retryPending = entry.pending && normalizedStatus(entry.pending) === "pending"
+            && !entry.pending.retry_exhausted
+            && (!entry.row.retry_exhausted || Number(entry.pending.attempt_count) >= 3);
+          return { ...entry, model, group: model.failed && !retryPending ? "attention" : active || retryPending ? "progress"
+            : new Date(activityTime(entry.row)).toDateString() === today ? "today" : "earlier" };
+        }).sort((a, b) => (timeOf(activityTime(b.row)) || 0) - (timeOf(activityTime(a.row)) || 0));
+    }
+
+    function activityTranscript(entry) {
+      const row = { ...entry.saved, ...entry.row.result, ...entry.row };
+      const source = row.transcript_source || (entry.saved && entry.saved.transcript_source) || metadataOf(row).transcript_source;
+      const kind = transcriptKind(source);
+      if (kind === "captions") return `${platformChipLabel(platformOf(row))} captions`;
+      if (kind === "asr") return "transcript by Whisper";
+      if (row.has_transcript === false) return "No transcript";
+      if (source) return `Transcript: ${humanLabel(source)}`;
+      return "Transcript source not reported";
+    }
+
+    function activitySource(row) {
+      const url = row.source_url || row.url || "";
+      return [row.channel || row.uploader || sourceNameFromUrl(url) || humanLabel(row.kind) || "Capture",
+        isMobileQueued(row) ? "from mobile playlist" : "",
+        row.videos_total ? `${row.videos_done || 0} of ${row.videos_total} videos` : ""].filter(Boolean).join(" · ");
+    }
+
+    // Only public diagnostic fields, scrubbed by the shared Library guard.
+    // Select the last ERROR before truncation, so a long stderr preamble
+    // cannot hide the cause. Terminal control codes never reach the page.
+    function activityLastError(row) {
+      const raw = [row.error_detail, row.last_error, row.error].find((value) => typeof value === "string" && value.trim()) || "";
+      const clean = raw.replace(/\x1b\[[0-?]*[ -/]*[@-~]/g, "").replace(/[\x00-\x08\x0b-\x1f\x7f]/g, "");
+      const lines = clean.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
+      const last = lines.filter((line) => /^ERROR:/i.test(line)).pop();
+      const line = last || lines[lines.length - 1] || "";
+      const detail = libraryFailureCopy({ error_detail: line === "youtube_rate_limit"
+        ? "ERROR: YouTube refused it (HTTP 429)." : line }).detail;
+      return detail || "No error detail was reported by the helper.";
+    }
+
+    function activityRetrySchedule(entry, now = Date.now()) {
+      const pending = entry.pending;
+      if (pending && normalizedStatus(pending) === "running") return "Retrying now.";
+      // retry-now revives a failed pending row without resetting its count.
+      // That explicitly requested attempt can still run after the budget is
+      // spent; a stale retry_after on a terminal row cannot.
+      const attempts = Number(pending ? pending.attempt_count : entry.row.attempt_count);
+      const requested = pending && normalizedStatus(pending) === "pending" && attempts >= 3 && !pending.retry_exhausted;
+      const exhausted = !requested && (entry.row.retry_exhausted === true
+        || (pending && (pending.retry_exhausted === true || attempts >= 3)));
+      if (exhausted) return activityErrorMessage("", "", {
+        retryExhausted: exhausted,
+        attempts: entry.row.retry_exhausted === true ? entry.row.attempt_count : attempts,
+      }) + " You can retry now.";
+      if (!pending || ["failed", "cancelled", "succeeded", "completed"].includes(normalizedStatus(pending)))
+        return "No automatic retries are scheduled. You can retry now.";
+      const at = timeOf(pending.retry_after);
+      if (requested) return "No automatic retries are scheduled. " + (!Number.isFinite(at)
+        ? "Waiting for the helper to schedule your requested retry."
+        : at <= now ? "Your requested retry is due. Waiting for the helper."
+          : `Your requested retry is scheduled for ${captureClock(pending.retry_after)}.`);
+      if (!Number.isFinite(at)) return "Waiting for the helper to schedule a retry.";
+      const first = at <= now ? "Retry is due. Waiting for the helper." : `Retries on its own at ${captureClock(pending.retry_after)}.`;
+      // server.py _retry_pending_one: 60 * 2^attempt seconds, capped at
+      // 15 minutes; index.py stops at 3 attempts. Later times depend on
+      // how long each capture takes, so never invent exact clock times.
+      const attempt = Math.max(0, Number(pending.attempt_count) || 0);
+      const delays = [];
+      for (let next = attempt + 1; next < 3; next++) delays.push(Math.min(60 * 2 ** next, 900) / 60);
+      return first + (delays.length ? ` If the capture fails again, retries ${delays.join(" minutes, then ")} minutes after each failed attempt.` : " This is the last automatic attempt.");
+    }
+
+    function activityStripHtml(model, key) {
+      const advanced = !model.failed && !model.done && captureAdvanced(`activity:${key}`, model.index);
+      return `<span class="step-strip" aria-hidden="true">${model.steps.map((step) => `<i class="step ${step.state}${step.state === "now" && advanced ? " advanced" : ""}"></i>`).join("")}</span>`;
+    }
+
+    function activityRowHtml(entry) {
+      const row = entry.row;
+      const model = entry.model || activitySteps(row);
+      const title = row.title || row.playlist_title || (row.current_video && row.current_video.title) || row.source_url || row.url || "Capture";
+      const when = activityTime(row);
+      const time = captureClock(when);
+      const folder = row.session_folder || row.folder || (row.result && row.result.folder);
+      const savedId = entry.saved && videoIdOf(entry.saved);
+      const actions = model.failed ? `<button class="button ghost" type="button" data-activity-detail="${htmlEscape(entry.key)}" aria-haspopup="dialog">Details</button>`
+        : ["queued", "pending", "running"].includes(normalizedStatus(row)) ? entry.pending
+          ? `<button class="button ghost" type="button" data-cancel="${htmlEscape(entry.pending.pending_id)}">Cancel</button>`
+          : row.id ? `<button class="button ghost" type="button" data-cancel-job="${htmlEscape(row.id)}">Cancel</button>` : ""
+        : `${savedId ? `<a class="button ghost" href="#item/${encodeURIComponent(savedId)}">Read</a>` : ""}${folder ? `<button class="button ghost" type="button" data-open-path="${htmlEscape(folder)}">Open folder</button>` : ""}`;
+      return `<article class="activity-row" data-activity-key="${htmlEscape(entry.key)}">
+        <div class="activity-row-main">
+          <h3 class="activity-row-title">${htmlEscape(title)}</h3>
+          <p class="activity-meta">${htmlEscape(activitySource(row))}</p>
+          <div class="activity-state">${activityStripHtml(model, entry.key)}<span class="${model.failed ? "activity-failed-label" : "activity-step-label"}">${model.failed ? '<span aria-hidden="true">✕</span> ' : ""}${htmlEscape(model.label)}</span></div>
+          <p class="activity-meta">${htmlEscape(activityTranscript(entry))} · ${time ? `<time datetime="${htmlEscape(when)}">${htmlEscape(time)}</time>` : "Time not reported"}</p>
+          ${model.failed ? `<p class="activity-retry-copy">${htmlEscape(activityRetrySchedule(entry))}</p>` : ""}
+          ${row.kind === "notification" && row.message ? `<p class="activity-meta">${htmlEscape(row.message)}</p>` : ""}
+        </div><div class="activity-row-actions">${actions}</div>
+      </article>`;
+    }
+
     function renderQueue(data) {
       data = data || {};
-      // Every job update passes here (the stream, catch-ups, the paste poll).
+      const focused = document.activeElement;
+      const focusedRow = focused && focused.closest && focused.closest("[data-activity-key]");
+      const focusKey = focusedRow && focusedRow.dataset.activityKey;
+      const focusAttr = ["data-activity-detail", "data-cancel", "data-cancel-job", "data-open-path", "href"]
+        .find((attr) => focused && focused.hasAttribute && focused.hasAttribute(attr));
+      const focusValue = focusAttr && focused.getAttribute(focusAttr);
       trackCaptureSaves();
-      const pending = Array.isArray(data.pending) ? data.pending : [];
-      const pendingCount = Array.isArray(data.pending) ? pending.length : countValue(data.pending, countValue(data.pending_count, 0));
-      const runningCount = countValue(data.running, countValue(data.running_count, 0));
-      const queueActive = pending.filter((row) => !["failed", "succeeded", "completed", "cancelled"].includes(normalizedStatus(row)));
-      const queueFailed = pending.filter((row) => normalizedStatus(row) === "failed");
-      const activeJobs = state.jobs.filter((job) => ["queued", "running"].includes(normalizedStatus(job)));
-      const failedJobs = dedupeFailedJobsByFailureKey(state.jobs.filter((job) => ["failed", "cancelled"].includes(normalizedStatus(job))));
-      const activeCount = activeJobs.length + queueActive.length;
-      const cancelableCount = activeJobs.filter((job) => job.id).length + queueActive.filter((row) => row.pending_id).length;
-      const mobileCount = activeJobs.concat(queueActive, failedJobs, queueFailed)
-        .filter(isMobileQueued).length;
-      // UX-17: at zero the old "0 in flight uoinking..." headline read as
-      // broken English; give the zero state its own sentence.
-      els.activityHeadline.innerHTML = activeCount
-        ? `${activeCount} in flight <em>uoinking...</em>`
-        : "Nothing uoinking <em>right now.</em>";
+      state.activityEntries = activityEntries(data);
+      const entries = state.activityEntries;
+      const active = entries.filter((entry) => entry.group === "progress");
+      const activeCount = active.length;
+      // Pending retries count as active work, even with a failed last step.
+      const failedJobs = entries.filter((entry) => entry.group === "attention" && entry.job).map((entry) => ({ ...entry.row, state: "failed" }));
+      const queueFailedDeduped = entries.filter((entry) => entry.group === "attention" && !entry.job);
+      els.activityHeadline.innerHTML = activeCount ? `${activeCount} in flight uoinking...` : "Nothing uoinking right now.";
       setSidebarBadge(els.activityNavCount, activeCount, "active jobs");
+      setActivityFailedBadge(failedJobs.filter((job) => normalizedStatus(job) === "failed").length + queueFailedDeduped.length);
+      const cancelableCount = entries.filter((entry) => entry.pending && ["pending", "running"].includes(normalizedStatus(entry.pending))
+        || entry.job && ["queued", "running"].includes(normalizedStatus(entry.row))).length;
       els.cancelAll.disabled = cancelableCount === 0;
       els.cancelAll.title = cancelableCount ? `Cancel ${cancelableCount} active item${cancelableCount === 1 ? "" : "s"}.` : "No active work to cancel.";
-      els.queueMeta.textContent = `${runningCount || activeJobs.filter((job) => normalizedStatus(job) === "running").length} running | ${pendingCount || queueActive.length} queued${mobileCount ? ` | ${mobileCount} mobile` : ""}`;
-      // v2.2.1 fix: dedupe failed queue rows whose video already has a
-      // failed job row, so the same yoink doesn't render twice. Jobs win
-      // because they carry richer state (phase, error_code, retry button).
-      const failedJobKeys = new Set(failedJobs.map(failureKey).filter(Boolean));
-      const queueFailedDeduped = queueFailed.filter((row) => {
-        const key = failureKey(row);
-        return !key || !failedJobKeys.has(key);
-      });
-      // Shell: the nav says "N failed" for the failures Activity lists
-      // (cancelled work is not a failure).
-      setActivityFailedBadge(failedJobs.filter((job) => normalizedStatus(job) === "failed").length + queueFailedDeduped.length);
-      const rows = []
-        .concat(activeJobs.map(jobRowHtml))
-        .concat(queueActive.map(queueRowHtml))
-        .concat(failedJobs.map(jobRowHtml))
-        .concat(queueFailedDeduped.map(queueRowHtml));
-      if (!rows.length) {
-        els.queueRows.innerHTML = `<div class="job-row"><div class="job-title">Nothing running right now.</div><div class="job-sub">New uoinks and rate-limit retries will appear here. Mobile saves use this label:</div><span class="activity-source-chip">from mobile playlist</span></div>`;
-      } else {
-        els.queueRows.innerHTML = rows.join("");
+      els.queueMeta.textContent = "Updates live from this computer.";
+      const groups = [
+        ["attention", els.attentionRows, "No captures need attention."],
+        ["progress", els.queueRows, "Nothing running right now. New captures will appear here."],
+        ["today", els.completedRows, "No finished captures today."],
+        ["earlier", els.earlierRows, "No earlier captures loaded."],
+      ];
+      for (const [group, element, empty] of groups) {
+        const rows = entries.filter((entry) => entry.group === group);
+        element.innerHTML = rows.length ? rows.map(activityRowHtml).join("") : `<p class="activity-empty">${empty}</p>`;
       }
-      // The same jobs and queue rows feed Library's in-progress captures.
+      els.completedToday.textContent = String(entries.filter((entry) => entry.group === "today" && entry.model.done).length);
+      if (focusKey && focusAttr) {
+        const row = Array.from(document.querySelectorAll("[data-activity-key]")).find((el) => el.dataset.activityKey === focusKey);
+        const control = row && Array.from(row.querySelectorAll("button, a")).find((el) => el.getAttribute(focusAttr) === focusValue);
+        (control || document.getElementById("refreshActivity")).focus();
+      }
       renderLibraryCaptures();
-      const completed = completedTodayRows();
-      els.completedToday.textContent = String(data.completed_today || completed.length);
-      els.completedRows.innerHTML = completed.length
-        ? completed.slice(0, 8).map(completedRowHtml).join("")
-        : `<div class="job-row"><div class="job-title">No completed uoinks loaded yet.</div><div class="job-sub">The Library tab will populate this list.</div></div>`;
+      renderCaptureFailure();
     }
 
     function completedTodayRows() {
-      const today = new Date().toDateString();
-      const jobs = state.jobs
-        .filter((job) => normalizedStatus(job) === "completed")
-        .filter((job) => {
-          const date = new Date(job.completed_at || job.updated_at || job.started_at || "");
-          return !Number.isNaN(date.getTime()) && date.toDateString() === today;
-        })
-        .map((job) => ({ type: "job", row: job }));
-      const cards = state.library
-        .filter((row) => {
-          const date = new Date(row.yoinked_at || "");
-          return !Number.isNaN(date.getTime()) && date.toDateString() === today;
-        })
-        .map((row) => ({ type: "card", row }));
-      return jobs.length ? jobs : cards;
+      return state.activityEntries.filter((entry) => entry.group === "today" && entry.model.done);
     }
 
-    function completedRowHtml(item) {
-      const row = item.row;
-      if (item.type === "job") {
-        const sourceChip = activitySourceChip(row);
-        return `
-          <div class="job-row">
-            <div class="job-top">
-              <div>
-                <div class="job-title">${htmlEscape(row.title || row.playlist_title || "Completed uoink")}</div>
-                <div class="job-sub">${htmlEscape(row.kind || "job")} | completed ${htmlEscape(fmtAge(row.completed_at || row.updated_at))}</div>
-                ${sourceChip}
-              </div>
-              ${row.session_folder ? `<button class="row-link" type="button" data-open-path="${htmlEscape(row.session_folder)}">Open</button>` : ""}
-            </div>
-          </div>
-        `;
+    function completedRowHtml(item) { return activityRowHtml(item); }
+
+    function selectedActivityFailure() {
+      return state.activityEntries.find((entry) => entry.key === state.activityFailureKey);
+    }
+
+    function renderCaptureFailure() {
+      if (!state.activityFailureKey) return;
+      const entry = selectedActivityFailure();
+      if (!entry || !entry.model.failed) {
+        if (!state.activityActionBusy) closeCaptureFailure();
+        return;
       }
-      const sourceChip = activitySourceChip(row);
-      return `
-        <div class="job-row">
-          <div class="job-top">
-            <div>
-              <div class="job-title">${htmlEscape(row.title || "Untitled")}</div>
-              <div class="job-sub">${htmlEscape(row.channel || "")} | ${htmlEscape(fmtDuration(row.duration_seconds))} | ${htmlEscape(fmtAge(row.yoinked_at))}</div>
-              ${sourceChip}
-            </div>
-            ${row.folder ? `<button class="row-link" type="button" data-open-path="${htmlEscape(row.folder)}">Open</button>` : ""}
-          </div>
-        </div>
-      `;
+      const row = entry.row;
+      const put = (id, text) => {
+        const el = document.getElementById(id);
+        if (el.textContent !== text) el.textContent = text;
+      };
+      put("captureFailureTitle", row.title || row.playlist_title || (row.current_video && row.current_video.title) || row.url || row.source_url || "Capture");
+      put("captureFailureLabel", entry.model.label);
+      put("captureFailureMeta", `${activitySource(row)} · ${activityTranscript(entry)} · ${captureClock(activityTime(row)) || "Time not reported"}`);
+      const words = { done: "Done", fail: "Failed", now: "In progress", todo: "Not reached" };
+      const symbols = { done: "✓", fail: "✕", now: "○", todo: "○" };
+      document.getElementById("captureFailureSteps").innerHTML = entry.model.steps.map((step) =>
+        `<li><span aria-hidden="true">${symbols[step.state]}</span><span>${htmlEscape(step.label)}</span><span class="activity-step-state">${words[step.state]}</span></li>`).join("");
+      put("captureFailureError", activityLastError(row));
+      put("captureFailureSchedule", activityRetrySchedule(entry));
+      const url = row.source_url || row.url || "";
+      document.getElementById("retryCaptureFailure").disabled = state.activityActionBusy || (!entry.pending && !url);
+      document.getElementById("removeCaptureFailure").disabled = state.activityActionBusy;
+      const raw = row.error_detail || row.last_error || row.error || "";
+      const phase = row.failure_phase || row.current_video_phase || row.phase || "";
+      const actions = (url && shouldOfferChunkedRetry(raw, phase) ? '<button class="button ghost" type="button" data-activity-retry-mode="lite">Retry, captions only</button>' : "")
+        + (url && shouldOfferCookieRetry(raw) ? '<button class="button ghost" type="button" data-activity-retry-mode="cookies">Retry with cookies</button>' : "");
+      const alternates = document.getElementById("captureFailureAlternateActions");
+      // Leave focused buttons in place when an unrelated stream event arrives.
+      if (alternates.innerHTML !== actions) alternates.innerHTML = actions;
+      alternates.querySelectorAll("button").forEach((button) => { button.disabled = state.activityActionBusy; });
+      document.getElementById("captureFailureAlternates").hidden = !actions;
+    }
+
+    function openCaptureFailure(key, trigger) {
+      if (state.activityActionBusy) return;
+      state.activityFailureKey = key;
+      if (!selectedActivityFailure()) { state.activityFailureKey = ""; return; }
+      state.activityFailureFocus = trigger || document.activeElement;
+      document.getElementById("captureFailureActionStatus").textContent = "";
+      renderCaptureFailure();
+      els.captureFailureDrawer.showModal();
+      document.getElementById("captureFailureTitle").focus();
+    }
+
+    function closeCaptureFailure() {
+      const key = state.activityFailureKey;
+      const target = state.activityFailureFocus;
+      state.activityFailureKey = "";
+      state.activityFailureFocus = null;
+      if (els.captureFailureDrawer.open) els.captureFailureDrawer.close();
+      // Stream updates replace rows: find the current copy of the trigger.
+      const replacement = Array.from(document.querySelectorAll("[data-activity-detail]"))
+        .find((button) => button.dataset.activityDetail === key);
+      const fallback = document.getElementById("refreshActivity");
+      (replacement || (target && target.isConnected ? target : null) || fallback).focus();
+    }
+
+    async function actOnActivityFailure(action, mode = "") {
+      const entry = selectedActivityFailure();
+      if (!entry || !entry.model.failed || state.activityActionBusy) return;
+      const status = document.getElementById("captureFailureActionStatus");
+      state.activityActionBusy = true;
+      status.textContent = action === "remove" ? "Removing..." : "Retrying...";
+      renderCaptureFailure();
+      try {
+        if (action === "remove") {
+          if (entry.pending && ["pending", "running"].includes(normalizedStatus(entry.pending))) {
+            await authFetch("/queue/cancel", { method: "POST", body: JSON.stringify({ pending_id: entry.pending.pending_id }) });
+          }
+          const removed = activityRemoved();
+          removed.add(activityRemovalKey(entry));
+          // Bounded, local UI history; this never deletes a saved capture.
+          state.activityRemoved = new Set(Array.from(removed).slice(-300));
+          try { localStorage.setItem("uoink_activity_removed", JSON.stringify(Array.from(state.activityRemoved))); } catch (_) {}
+        } else if (entry.pending && !mode) {
+          await authFetch("/queue/retry-now", { method: "POST", body: JSON.stringify({ pending_id: entry.pending.pending_id }) });
+        } else {
+          // Detect the source again so playlists, pages and podcasts keep
+          // their existing capture routes. Never default every link to video.
+          const url = entry.row.source_url || entry.row.url || "";
+          if (!url) throw new Error("This capture has no source link to retry.");
+          const detected = await detectCaptureUrl(url);
+          if (!detected || !detected.ok || !detected.endpoint) throw new Error((detected && detected.note) || "This link cannot be captured. Check Sources.");
+          const body = { [detected.payload_key || "url"]: detected.canonical || url };
+          if (["/extract", "/playlist/start"].includes(detected.endpoint)) {
+            body.interval = mode === "lite" ? 120 : (entry.pending && entry.pending.interval_seconds) || 30;
+            body.long_video_mode = mode === "lite" ? "lite" : entry.row.long_video_mode || "full";
+            if (mode === "cookies") body.use_cookies = true;
+          }
+          // An alternate retry replaces the scheduled attempt, so it cannot
+          // start a second copy while the explicit request is in progress.
+          if (entry.pending && mode && ["pending", "running"].includes(normalizedStatus(entry.pending)))
+            await authFetch("/queue/cancel", { method: "POST", body: JSON.stringify({ pending_id: entry.pending.pending_id }) });
+          await authFetch(detected.endpoint, { method: "POST", body: JSON.stringify(body) });
+        }
+        state.activityActionBusy = false;
+        closeCaptureFailure();
+        renderQueue(state.queue || {});
+        showToast(action === "remove" ? "Removed from Activity." : "Retry accepted. Activity will update as it runs.");
+        await refreshActivity();
+      } catch (err) {
+        state.activityActionBusy = false;
+        const data = err.data || {};
+        const message = libraryFailureCopy({ error_detail: data.error_detail, error: data.error || err.message }).reason;
+        if (state.activityFailureKey === entry.key) {
+          status.textContent = `Couldn't ${action === "remove" ? "remove" : "retry"} this capture. ${message}`;
+          renderCaptureFailure();
+        } else showToast(message);
+      }
     }
 
     function normalizePhase(value) {
@@ -12039,121 +12375,8 @@
         .some((needle) => haystack.includes(needle));
     }
 
-    function phaseChips(activePhase, stateValue) {
-      const phases = ["fetch", "transcribe", "screenshots", "classify", "write"];
-      const normalized = normalizePhase(activePhase);
-      const activeIndex = phases.indexOf(normalized);
-      const terminalDone = ["completed", "done"].includes(String(stateValue || "").toLowerCase());
-      return phases.map((phase, index) => {
-        const cls = terminalDone || (activeIndex >= 0 && index < activeIndex)
-          ? "done"
-          : phase === normalized
-            ? "active"
-            : "";
-        return `<span class="phase-chip ${cls}">${phase}</span>`;
-      }).join("");
-    }
-
-    function progressForJob(job, stateValue) {
-      const progress = Number(job.progress);
-      if (Number.isFinite(progress)) return progress <= 1 ? Math.round(progress * 100) : Math.round(progress);
-      const total = Number(job.videos_total || 0);
-      const done = Number(job.videos_done || 0);
-      if (total > 0) return Math.round((done / total) * 100);
-      if (stateValue === "completed") return 100;
-      if (stateValue === "queued") return 8;
-      if (stateValue === "running") return 58;
-      return 0;
-    }
-
-    function jobRowHtml(job) {
-      const stateValue = normalizedStatus(job);
-      const failed = ["failed", "cancelled"].includes(stateValue);
-      const progress = progressForJob(job, stateValue);
-      const phase = job.current_video_phase || job.phase || "";
-      const title = job.title || job.playlist_title || (job.current_video && job.current_video.title) || job.url || job.source_url || "Uoink job";
-      const rawError = job.error_detail || (job.error_code ? `${job.error_code}: ${job.error || ""}` : job.error || "");
-      const exhausted = job.retry_exhausted === true;
-      const errorLine = failed && (rawError || exhausted)
-        ? activityErrorMessage(rawError, phase, {
-          url: job.url || job.source_url || "",
-          code: job.error_code || "",
-          terminal: failed,
-          retryExhausted: exhausted,
-          attempts: job.attempt_count,
-        })
-        : "";
-      const liteRetry = failed && shouldOfferChunkedRetry(rawError, phase);
-      const cookieRetry = failed && shouldOfferCookieRetry(rawError);
-      const notificationBody = job.kind === "notification" ? (job.message || "") : "";
-      const sub = [
-        job.kind || "job",
-        stateValue,
-        job.videos_total ? `${job.videos_done || 0}/${job.videos_total} videos` : "",
-      ].filter(Boolean).join(" | ");
-      const sourceChip = activitySourceChip(job);
-      return `
-        <div class="job-row ${failed ? "failed" : ""}" data-job-id="${htmlEscape(job.id || "")}">
-          <div class="job-top">
-            <div>
-              <div class="job-title">${htmlEscape(title)}</div>
-              <div class="job-sub">${htmlEscape(sub)}</div>
-              ${notificationBody ? `<div class="job-sub">${htmlEscape(notificationBody)}</div>` : ""}
-              ${sourceChip}
-            </div>
-            <div class="inline-row">
-              ${liteRetry ? `<button class="button primary" type="button" data-retry-chunked="${htmlEscape(job.url || job.source_url || "")}">Retry, captions only</button>` : ""}
-              ${cookieRetry ? `<button class="button ghost" type="button" data-retry-cookies="${htmlEscape(job.url || job.source_url || "")}">Retry with cookies</button>` : ""}
-              ${["queued", "running"].includes(stateValue) && job.id ? `<button class="button danger" type="button" data-cancel-job="${htmlEscape(job.id)}">Cancel</button>` : ""}
-            </div>
-          </div>
-          ${errorLine ? `<div class="job-error">${htmlEscape(errorLine)}${renderErrorDetails(rawError)}</div>` : ""}
-          <div class="phase-row">${phaseChips(phase, stateValue)}</div>
-          <div class="progress"><span style="width:${Math.max(0, Math.min(100, progress))}%"></span></div>
-        </div>
-      `;
-    }
-
-    function queueRowHtml(row) {
-      const stateValue = normalizedStatus(row);
-      const failed = stateValue === "failed";
-      const rawProgress = Number(row.progress || 0);
-      const progress = rawProgress <= 1 ? rawProgress * 100 : rawProgress;
-      const activePhase = row.phase || (stateValue === "running" ? "screenshots" : "");
-      const sourceChip = activitySourceChip(row);
-      const rawError = row.error_detail || row.last_error || row.error || "";
-      const exhausted = row.retry_exhausted === true;
-      const errorLine = failed && (rawError || exhausted)
-        ? activityErrorMessage(rawError, activePhase, {
-          url: row.url || row.source_url || "",
-          terminal: failed,
-          retryExhausted: exhausted,
-          attempts: row.attempt_count,
-        })
-        : "";
-      const liteRetry = failed && shouldOfferChunkedRetry(rawError, activePhase);
-      const cookieRetry = failed && shouldOfferCookieRetry(rawError);
-      return `
-        <div class="job-row ${failed ? "failed" : ""}" data-pending-id="${htmlEscape(row.pending_id || "")}">
-          <div class="job-top">
-            <div>
-              <div class="job-title">${htmlEscape(row.title || row.url || "Queued uoink")}</div>
-              <div class="job-sub">${htmlEscape(stateValue)}${row.retry_after && !exhausted ? ` | retry ${htmlEscape(fmtAge(row.retry_after))}` : ""}</div>
-              ${sourceChip}
-            </div>
-            <div class="inline-row">
-              ${liteRetry ? `<button class="button primary" type="button" data-retry-chunked="${htmlEscape(row.url || row.source_url || "")}">Retry, captions only</button>` : ""}
-              ${cookieRetry ? `<button class="button ghost" type="button" data-retry-cookies="${htmlEscape(row.url || "")}">Retry with cookies</button>` : ""}
-              ${stateValue === "pending" || failed ? `<button class="button ghost" type="button" data-retry="${htmlEscape(row.pending_id || "")}">Retry now</button>` : ""}
-              ${stateValue !== "succeeded" ? `<button class="button danger" type="button" data-cancel="${htmlEscape(row.pending_id || "")}">Cancel</button>` : ""}
-            </div>
-          </div>
-          ${errorLine ? `<div class="job-error">${htmlEscape(errorLine)}${renderErrorDetails(rawError)}</div>` : ""}
-          <div class="phase-row">${phaseChips(activePhase, stateValue)}</div>
-          <div class="progress"><span style="width:${Math.max(0, Math.min(100, progress || (stateValue === "running" ? 62 : 0)))}%"></span></div>
-        </div>
-      `;
-    }
+    function jobRowHtml(job) { return activityRowHtml({ key: `job:${job.id}`, row: job, job }); }
+    function queueRowHtml(row) { return activityRowHtml({ key: `pending:${row.pending_id}`, row, pending: row }); }
 
     function outputFolderPathFromSettings() {
       return firstValue(
@@ -14465,6 +14688,7 @@
     }
 
     function switchTab(tab, options = {}) {
+      if (tab !== "activity" && state.activityFailureKey) closeCaptureFailure();
       if (tab === "build" || tab === "script") tab = "writing";
       if (tab === "about") {
         tab = "settings";
@@ -14748,6 +14972,20 @@
         button.addEventListener("click", () => document.getElementById("yoinkActionMenu").removeAttribute("open"));
       });
       document.getElementById("refreshActivity").addEventListener("click", refreshActivity);
+      document.getElementById("closeCaptureFailure").addEventListener("click", closeCaptureFailure);
+      els.captureFailureDrawer.addEventListener("cancel", (event) => {
+        event.preventDefault();
+        closeCaptureFailure();
+      });
+      els.captureFailureDrawer.addEventListener("keydown", (event) => {
+        trapModalFocus(event, els.captureFailureDrawer, closeCaptureFailure);
+      });
+      document.getElementById("retryCaptureFailure").addEventListener("click", () => actOnActivityFailure("retry"));
+      document.getElementById("removeCaptureFailure").addEventListener("click", () => actOnActivityFailure("remove"));
+      document.getElementById("captureFailureAlternateActions").addEventListener("click", (event) => {
+        const button = event.target.closest("[data-activity-retry-mode]");
+        if (button) actOnActivityFailure("retry", button.dataset.activityRetryMode);
+      });
       document.getElementById("cancelAll").addEventListener("click", async () => {
         const activeJobs = state.jobs.filter((job) => ["queued", "running"].includes(String(job.state || "").toLowerCase()) && job.id);
         const pending = state.queue && Array.isArray(state.queue.pending) ? state.queue.pending.filter((row) => row.pending_id && !["failed", "succeeded", "completed", "cancelled"].includes(normalizedStatus(row))) : [];
@@ -15194,6 +15432,8 @@
             podcastAutoIngestButton.dataset.autoIngest === "true");
         }
         const cancel = event.target.closest("[data-cancel]");
+        const failureDetail = event.target.closest("[data-activity-detail]");
+        if (failureDetail) openCaptureFailure(failureDetail.dataset.activityDetail, failureDetail);
         if (cancel) postHelper("/queue/cancel", { pending_id: cancel.dataset.cancel });
         const cancelJob = event.target.closest("[data-cancel-job]");
         if (cancelJob) postHelper(`/jobs/${encodeURIComponent(cancelJob.dataset.cancelJob)}/cancel`);
@@ -15267,8 +15507,7 @@
         const recent = Array.isArray(payload.recent) ? payload.recent : [];
         state.jobs = active.concat(recent);
         state.jobsLoaded = true;
-        state.queue = payload.queue || state.queue || {};
-        renderQueue(state.queue);
+        applyActivityQueueEvent(payload.queue || {});
         return;
       }
       if (eventName === "job") {
@@ -15277,8 +15516,22 @@
         return;
       }
       if (eventName === "queue") {
-        state.queue = payload || {};
+        applyActivityQueueEvent(payload || {});
+      }
+    }
+
+    function applyActivityQueueEvent(payload) {
+      // Current helpers stream queue counts, not pending rows. Keep the
+      // details visible, then read /queue/status for ids, errors and times.
+      // A newer event invalidates any older in-flight queue response.
+      state.activityQueueRequest += 1;
+      if (Array.isArray(payload.pending)) {
+        state.queue = payload;
         renderQueue(state.queue);
+      } else {
+        state.queue = { ...state.queue, ...payload, pending: (state.queue && Array.isArray(state.queue.pending)) ? state.queue.pending : [] };
+        renderQueue(state.queue);
+        refreshQueue({ skipJobs: true });
       }
     }
 
@@ -15328,6 +15581,7 @@
         try {
           await readJobsStream();
         } catch (_) {}
+        els.queueMeta.textContent = "Connection interrupted. Reconnecting...";
         if (Date.now() - openedAt >= JOBS_STREAM_RETRY_MAX_MS) delay = JOBS_STREAM_RETRY_MIN_MS;
         await new Promise((resolve) => setTimeout(resolve, delay));
         delay = Math.min(delay * 2, JOBS_STREAM_RETRY_MAX_MS);
