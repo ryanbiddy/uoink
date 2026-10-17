@@ -37,7 +37,10 @@ def _argument(name, description, required=False):
     return {"name": name, "description": description, "required": required}
 
 
-_AUTHOR = _argument("author", "Creator author or channel, 1-200 characters.", True)
+_AUTHOR_DESCRIPTION = ("Creator author or channel, 1-200 code points. "
+                       "Unicode Cc control characters are rejected; "
+                       "format characters such as joiners are accepted.")
+_AUTHOR = _argument("author", _AUTHOR_DESCRIPTION, True)
 _PLATFORM = _argument("platform", "youtube, tiktok, instagram or reddit.")
 _SINCE = _argument("since", "UTC capture date YYYY-MM-DD, not in the future.")
 PLAYBOOKS = (
@@ -46,10 +49,10 @@ PLAYBOOKS = (
     {"name": "transcript-intel", "description": "Extract hooks, ideas, quotes and CTAs from saved transcripts.",
      "arguments": [_argument("video_ids", "Comma-separated capture IDs, at most 8."),
                    _argument("topic", "FTS query, at most 512 characters."),
-                   _argument("author", "Creator author or channel, 1-200 characters."), _SINCE]},
+                   _argument("author", _AUTHOR_DESCRIPTION), _SINCE]},
     {"name": "comment-mining", "description": "Mine saved comments for customer language or demand signals.",
      "arguments": [_argument("video_ids", "Comma-separated capture IDs, at most 10."),
-                   _argument("author", "Creator author or channel, 1-200 characters."),
+                   _argument("author", _AUTHOR_DESCRIPTION),
                    _argument("lens", "voc (default) or demand.")]},
     {"name": "creator-teardown", "description": "Analyze a creator's saved posts, positioning, formats and cadence.",
      "arguments": [_AUTHOR, _PLATFORM]},
@@ -712,7 +715,10 @@ def _trim(scope, name, body):
                 rows = [i for i in candidates if i.get("metric")]
                 if not rows:
                     break
-                item = min(rows, key=lambda i: i["metric"].get("as_of") or "")
+                # Capture timestamps may be naive with a space separator;
+                # discovery uses ISO UTC. Compare instants, unknowns first.
+                item = min(rows, key=lambda i: _stamp(i["metric"].get("as_of"))
+                           or dt.datetime.min.replace(tzinfo=dt.timezone.utc))
                 # A metric row includes its identity; remove both so its key
                 # cannot survive without the evidence it cited.
                 candidates.remove(item)
@@ -730,7 +736,7 @@ def _build(scope, reader, name, args):
     rows, matched = _select(scope, name, args)
     if name in ("outlier-posts", "creator-teardown") and rows and all(r.get("platform") in ("x", "twitter") for r in rows):
         raise _invalid("metrics_unavailable", next_step="choose youtube, tiktok, instagram or reddit")
-    if name == "creator-teardown" and len(rows) < 3:
+    if name == "creator-teardown" and sum(r.get("platform") not in ("x", "twitter") for r in rows) < 3:
         raise _invalid("not_enough_captures", next_step="capture more, or run Discover")
     items = [_capture(row) for row in rows]
     body = {"schema_version": library_resources.SCHEMA_VERSION, "contract_version": CONTRACT_VERSION,
@@ -869,8 +875,10 @@ def check_citations(packet, text):
     refs = packet.get("refs", {})
     keys = set(_CITATION.findall(text))
     unknown = sorted(keys - refs.keys())
+    # Discovery references cite snapshots, even when their video IDs match
+    # saved items. Only library references contribute to cited_items.
     cited = sorted({refs[key]["item_id"] for key in keys & refs.keys()
-                    if isinstance(refs[key].get("item_id"), str)})
+                    if not key.startswith("[sc:") and isinstance(refs[key].get("item_id"), str)})
     lines = [n for n, line in enumerate(text.splitlines(), 1)
              if re.search(r"\d", line) and not any(key in refs for key in _CITATION.findall(line))]
     return {"unknown_keys": unknown, "cited_items": cited, "lines_with_numbers_but_no_key": lines}

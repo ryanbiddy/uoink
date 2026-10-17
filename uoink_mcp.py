@@ -27,6 +27,7 @@ adds discover_candidates and queue_discovered (T6): 35 tools and 9 prompts.
 
 from __future__ import annotations
 
+import asyncio
 import contextvars
 import json
 import sys
@@ -1050,8 +1051,10 @@ def _register_phase4_stdio() -> None:
         async def _phase4_call_tool(req):
             if req.params.name in uoink_mcp_tools.DISCOVERY_TOOL_NAMES:
                 # Paid discovery has its own 8 s/page timeout, not the 2 s
-                # library-read deadline. Preserve strict arguments and errors.
-                envelope = uoink_mcp_tools.call_tool(req.params.name, req.params.arguments)
+                # library-read deadline. Keep stdio responsive to other calls
+                # and cancellation while the bounded worker finishes.
+                envelope = await asyncio.to_thread(
+                    uoink_mcp_tools.call_tool, req.params.name, req.params.arguments)
                 return mcp_types.ServerResult(mcp_types.CallToolResult(
                     content=[mcp_types.TextContent(type="text", text=json.dumps(
                         envelope, ensure_ascii=False, allow_nan=False))],

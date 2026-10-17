@@ -1,13 +1,16 @@
 """T6 acceptance: mocked provider, socket-free transports, tmp_path runs only."""
 from __future__ import annotations
 
+import asyncio
 import datetime as dt
 import contextlib
 import concurrent.futures
 import json
+import selectors
 import socket
 import sqlite3
 import threading
+import time
 import urllib.request
 from pathlib import Path
 from types import SimpleNamespace
@@ -25,7 +28,37 @@ from mcp import types
 from tests.test_discovery_scrapecreators import (
     ARGS, Probe, fixture, intent, no_network_or_real_credentials, reason, rig, run,
 )
-from tests.test_phase4_stdio import _complete_local_call
+
+
+class _PollingSelector(selectors.DefaultSelector):
+    def select(self, timeout=None):
+        timeout = 0.01 if timeout is None else min(timeout, 0.01)
+        if not self.get_map():
+            # Windows select() rejects an empty set of file descriptors.
+            time.sleep(timeout)
+            return []
+        return super().select(timeout)
+
+
+class _SocketFreeEventLoop(asyncio.SelectorEventLoop):
+    # Windows' asyncio socketpair would trip the network guard. Poll instead
+    # of opening a wakeup socket; worker completions still reach the real loop.
+    def __init__(self):
+        super().__init__(_PollingSelector())
+
+    def _make_self_pipe(self):
+        pass
+
+    def _write_to_self(self):
+        pass
+
+    def _close_self_pipe(self):
+        pass
+
+
+def _run_stdio(coroutine):
+    with asyncio.Runner(loop_factory=_SocketFreeEventLoop) as runner:
+        return runner.run(coroutine)
 
 
 @pytest.fixture(autouse=True)
@@ -51,7 +84,7 @@ def call(transport, name, args, *, headers=None):
         return tools.call_tool(name, args)
     if transport == "stdio":
         handler = uoink_mcp.mcp._mcp_server.request_handlers[types.CallToolRequest]
-        result = _complete_local_call(handler(types.CallToolRequest(
+        result = _run_stdio(handler(types.CallToolRequest(
             method="tools/call", params=types.CallToolRequestParams(name=name, arguments=args)))).root
         envelope = json.loads(result.content[0].text)
         assert result.isError is (envelope.get("ok") is not True)
@@ -112,6 +145,52 @@ def test_discovery_plan_agent_gate_and_queue_on_every_transport(adapter, transpo
     again = call(transport, "queue_discovered", picks(result))
     assert again["queued"] == [] and again["skipped"] == [{"key": candidate["key"], "reason": "already_queued"}]
     assert len(adapter.calls) == 1 and adapter.service._credits_today(adapter.idx) == 1
+
+
+@pytest.mark.parametrize("name", ["discover_candidates", "queue_discovered"])
+@pytest.mark.parametrize("cancel", [False, True])
+def test_stdio_discovery_serves_other_requests_and_cancellation(adapter, monkeypatch, name, cancel):
+    handlers = uoink_mcp.mcp._mcp_server.request_handlers
+    release = threading.Event()
+    expected = {"ok": True, "fixture": name}
+
+    async def exercise():
+        loop = asyncio.get_running_loop()
+        started = asyncio.Event()
+
+        def blocked(*args, **kwargs):
+            loop.call_soon_threadsafe(started.set)
+            assert release.wait(5), "discovery worker was not released"
+            return expected
+
+        monkeypatch.setattr(adapter.service, name, blocked)
+        args = ARGS if name == "discover_candidates" else {"run_id": "fixture", "keys": ["a"]}
+        pending = asyncio.create_task(handlers[types.CallToolRequest](types.CallToolRequest(
+            method="tools/call", params=types.CallToolRequestParams(name=name, arguments=args))))
+        try:
+            await asyncio.wait_for(started.wait(), 1)
+            assert not pending.done(), "discovery blocked the stdio event loop"
+            result = await asyncio.wait_for(handlers[types.ListToolsRequest](
+                types.ListToolsRequest(method="tools/list")), 1)
+            assert len(result.root.tools) == 35
+            assert tools.DISCOVERY_TOOL_NAMES <= {tool.name for tool in result.root.tools}
+            assert not pending.done()
+            if cancel:
+                pending.cancel()
+                with pytest.raises(asyncio.CancelledError):
+                    await asyncio.wait_for(pending, 1)
+            else:
+                release.set()
+                response = (await asyncio.wait_for(pending, 1)).root
+                assert response.isError is False
+                assert json.loads(response.content[0].text) == expected
+        finally:
+            release.set()
+            await asyncio.gather(pending, return_exceptions=True)
+
+    _run_stdio(exercise())
+    assert len(tools.TOOL_REGISTRY[name].rate_limiter._calls) == 1
+    assert adapter.calls == []
 
 
 @pytest.mark.parametrize("offset", [-7, -8])

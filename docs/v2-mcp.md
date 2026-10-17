@@ -941,7 +941,8 @@ accepted by the matching stdio prompt:
 | `repurpose-pack` | Required `video_ids` (1–5); optional `kinds`: `tweet`, `thread`, `linkedin`, `script`, `newsletter` (default `tweet,thread`). |
 
 Pass `video_ids` and `kinds` as comma-separated strings. `author` is 1–200
-characters without controls; `topic` is an FTS query of at most 512 characters.
+code points. Unicode Cc control characters are rejected; format characters
+such as joiners are accepted. `topic` is an FTS query of at most 512 characters.
 `platform` accepts `youtube`, `tiktok`, `instagram`, `reddit`. `since` is a UTC
 capture date (`YYYY-MM-DD`), never a future date. Unknown arguments are refused
 before storage access; missing or deleted captures are refused.

@@ -283,6 +283,29 @@ def test_author_control_characters_still_refuse_before_access(control):
     assert exc.value.details == {"reason": "string_control_character", "field": "author"}
 
 
+@pytest.mark.parametrize("character,accepted", [
+    ("\x00", False), ("\x1b", False), ("\x7f", False), ("\x85", False),
+    ("\u200c", True), ("\u200d", True), ("\u202e", True), ("\u2066", True),
+])
+def test_author_unicode_contract_matches_validation(library, character, accepted):
+    contract = ("Unicode Cc control characters are rejected; "
+                "format characters such as joiners are accepted")
+    assert contract in " ".join((ROOT / "docs/v2-mcp.md").read_text(encoding="utf-8").split())
+    for spec in playbooks.PLAYBOOKS:
+        for arg in spec["arguments"]:
+            if arg["name"] == "author":
+                assert contract in arg["description"]
+    author = "Creator" + character + "Name"
+    if accepted:
+        library[1]("unicode-author", author=author)
+        assert list(captures(packet(library, author=author))) == ["unicode-author"]
+    else:
+        with pytest.raises(ResourceError) as exc:
+            playbooks.build_packet(NoDataReader(), "outlier-posts", {"author": author})
+        assert exc.value.code == "invalid_request"
+        assert exc.value.details == {"reason": "string_control_character", "field": "author"}
+
+
 def test_nonexistent_and_deleted_ids_refuse_before_sidecar_reads(library, monkeypatch):
     library[1]("ok")
     library[1]("gone", deleted=True)
@@ -384,6 +407,41 @@ def save_discovery_fixture(folder, run, suffix="0000000000000000"):
     name = stamp.strftime("%Y%m%dT%H%M%S%fZ-") + sc._run_scope(run) + "-" + suffix
     folder.mkdir(parents=True, exist_ok=True)
     (folder / (name + ".json")).write_text(json.dumps(run), encoding="utf-8")
+
+
+@pytest.mark.parametrize("captured", ["2026-10-14 12:00:00", "2026-10-14T00:00:00-07:00"])
+def test_metric_trimming_compares_capture_and_discovery_timestamps(library, tmp_path, monkeypatch, captured):
+    library[1]("local", captured=captured)
+    run = json.loads((ROOT / "tests/fixtures/playbooks/discovery-run.json").read_text())
+    run = {**run, "fetched_at": "2026-10-14T01:00:00Z", "candidates": run["candidates"][:1]}
+    save_discovery_fixture(tmp_path / "discovery/runs/2026-10", run)
+    full = packet(library)
+    assert len(full["items"]) == 2
+    size = max(library_resources.wire_bytes(playbooks._result("outlier-posts", full)),
+               library_resources.wire_bytes(playbooks._tool_result("outlier-posts", full)))
+    monkeypatch.setitem(playbooks.LIMITS, "max_response_bytes", size + playbooks._WIRE_HEADROOM - 1)
+    trimmed = packet(library)
+    assert [item["item_id"] for item in trimmed["items"]] == ["local"]
+    assert trimmed["coverage"]["budget_drops"] == {"metric_rows": 1}
+    assert trimmed["coverage"]["dropped_for_budget"] == 1
+    assert set(trimmed["refs"]) == {"[cap:local]", "[m:local]"}
+    assert playbooks._fits("outlier-posts", trimmed)
+
+
+@pytest.mark.parametrize("local_id", ["local", "discovery-a"])
+def test_cited_items_only_include_saved_library_references(library, tmp_path, local_id):
+    library[1](local_id, clips=1, sidecar={"channel_context": {"recent_videos": [
+        {"title": "Context", "view_count": 300, "upload_date": "20260903"}]}})
+    run = json.loads((ROOT / "tests/fixtures/playbooks/discovery-run.json").read_text())
+    save_discovery_fixture(tmp_path / "discovery/runs/2026-10", run)
+    body = packet(library)
+    discovery_keys = [key for key in body["refs"] if key.startswith("[sc:")]
+    assert len(discovery_keys) == 2
+    assert playbooks.check_citations(body, "500 views " + " ".join(discovery_keys)) == {
+        "unknown_keys": [], "cited_items": [], "lines_with_numbers_but_no_key": []}
+    for key in body["refs"].keys() - set(discovery_keys):
+        warnings = playbooks.check_citations(body, " ".join([*discovery_keys, key]))
+        assert warnings == {"unknown_keys": [], "cited_items": [local_id], "lines_with_numbers_but_no_key": []}
 
 
 def test_channel_context_and_saved_sc_rows_are_cited_and_newest_only(library, tmp_path):
@@ -959,6 +1017,22 @@ def test_teardown_refusal_uses_phase4_invalid_request(library, count, entrypoint
     assert envelope["contract_version"] == library_resources.CONTRACT_VERSION
     assert envelope["error"]["code"] == "invalid_request"
     assert envelope["error"]["details"] == exc.value.details
+
+
+@pytest.mark.parametrize("count", [1, 2])
+@pytest.mark.parametrize("platform", ["x", "twitter"])
+@pytest.mark.parametrize("entrypoint", [playbooks.build_packet, playbooks.get_prompt, playbooks.get_playbook_input])
+def test_teardown_minimum_excludes_x_captures(library, monkeypatch, count, platform, entrypoint):
+    for n in range(count):
+        library[1](f"video-{n}")
+    for n in range(3):
+        library[1](f"x-{n}", platform=platform)
+    monkeypatch.setattr(playbooks, "_read_json", lambda *a, **k: pytest.fail("read sidecar before teardown guard"))
+    with pytest.raises(ResourceError) as exc:
+        entrypoint(library[0], "creator-teardown", {"author": "fixture"})
+    assert exc.value.code == "invalid_request"
+    assert exc.value.details == {"reason": "not_enough_captures", "next_step": "capture more, or run Discover"}
+    assert library[0].guard._active == 0
 
 
 def test_teardown_guard_profile_facets_cadence_top_and_bottom(library):
