@@ -1,9 +1,8 @@
-// E5 regression harness: the popup's Copy Markdown button (Last Uoinked
-// Video card) really fetches the corpus and copies it.
+// E5 regression harness: the popup's Copy Markdown button (Captures row) really fetches the corpus and copies it.
 //
 // Drives the REAL extension scripts in a fake browser (ext_fake_env.mjs):
 // lib/extract.js and lib/ui.js load as the popup loads them, then popup.js's
-// real loadRecentUoinks renders the active card from a stubbed /recent and
+// real loadRecentUoinks renders the Captures row from a stubbed /recent and
 // the test clicks Copy Markdown.
 //   request     -- the click resolves to an exported, authed call and posts
 //                  get_uoink_corpus for the card's folder slug; the corpus
@@ -18,6 +17,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { EXT, jsonResponse, makeEnv, settle } from "./ext_fake_env.mjs";
+import { popupEnv as readerPopupEnv } from "./rehaul_popup_env.mjs";
 
 let failures = 0;
 let checks = 0;
@@ -79,73 +79,30 @@ function mcpReply(payload) {
 
 // mcp(init, token) -> Response for POST /mcp/v1/tools/call.
 async function popupEnv({ folder, mcp, token = "test-token", stored = null }) {
-  const env = makeEnv({
-    fetch: (url, init) => {
-      const path = new URL(url).pathname;
-      if (path === "/token") return jsonResponse({ token });
-      if (path === "/recent") return jsonResponse({ ok: true, recent: [recentRow(folder)] });
-      if (path === MCP_PATH) {
-        const headers = (init && init.headers) || {};
-        env.mcpCalls.push({
-          method: init && init.method,
-          headers: { ...headers },
-          body: init && init.body,
-        });
+  const calls = [];
+  const env = await readerPopupEnv({
+    store: { local: stored ? { yoink_token: stored } : {}, sync: {}, session: {} },
+    routes: {
+      "/token": () => jsonResponse({ token }),
+      "/recent": () => jsonResponse({ ok: true, recent: [recentRow(folder)] }),
+      [MCP_PATH]: (_url, init) => {
+        const headers = init.headers || {};
+        calls.push({ method: init.method, headers: { ...headers }, body: init.body });
         return mcp(init, headers["X-Yoink-Token"]);
-      }
-      throw new TypeError("Failed to fetch");
+      },
     },
   });
-  env.mcpCalls = [];
-  env.clipboard = [];
-  if (stored) env.store.local.yoink_token = stored;
-  env.load("lib/x-article.js");
-  env.load("lib/extract.js");
-  env.load("lib/ui.js");
-
-  // The Last Uoinked Video card, as popup.html lays it out.
-  const card = env.document.createElement("div");
-  card.id = "active-uoink-card";
-  card.classList.add("hidden");
-  for (const id of ["active-uoink-title", "active-uoink-channel", "active-uoink-duration",
-    "active-uoink-hook-container", "active-uoink-open-claude"]) {
-    const el = env.document.createElement("div");
-    el.id = id;
-    card.appendChild(el);
-  }
-  const copyBtn = env.document.createElement("button");
-  copyBtn.id = "active-uoink-copy-md";
-  copyBtn.textContent = "Copy Markdown";
-  card.appendChild(copyBtn);
-  env.document.body.appendChild(card);
-  env.copyBtn = copyBtn;
-
-  // popup.js's real loadRecentUoinks, run against stubbed popup state.
-  Object.assign(env.ctx, {
-    recentUoinksEl: env.document.createElement("div"),
-    knownRecentUoinkCount: 0,
-    loadRecentFailures: async () => [],
-    loadResurfaceCard: async () => {},
-    updateFocalMode: () => {},
-    initPairwiseCalibration: () => {},
-    renderFailureRow: () => env.document.createElement("div"),
-    renderHookCalibration: () => null,
-    renderHealthRow: () => null,
-    renderEntityIndicator: () => null,
-    showToast: (m) => env.toasts.push(String(m)),
-    writeClipboardText: async (text) => { env.clipboard.push(String(text)); return true; },
-  });
-  env.runSource(popupSlice("async function loadRecentUoinks(", "\nasync function loadResurfaceCard("), "popup.js");
-  await env.ctx.loadRecentUoinks();
-  await settle();
+  env.mcpCalls = calls;
+  env.copyBtn = env.copyButton();
   return env;
 }
 
 async function clickCopy(env) {
-  check(typeof env.copyBtn.onclick === "function",
-    "the active card wires a Copy Markdown handler", typeof env.copyBtn.onclick);
-  await env.copyBtn.onclick({ stopPropagation() {} });
+  check(!!env.copyBtn && env.copyBtn._listeners.click.length === 1,
+    "the Captures row wires a Copy Markdown handler");
+  env.copyBtn.click();
   await settle();
+  env.toasts.push(env.el("popup-toast").textContent);
 }
 
 function parsedBody(call) {
@@ -164,8 +121,8 @@ async function request() {
       folder: "C:\\Users\\someone\\Desktop\\Uoink\\Business\\a-saved-video",
       mcp: () => mcpReply({ ok: true, corpus_md: CORPUS_MD }),
     });
-    check(!env.ctx.document.getElementById("active-uoink-card").classList.contains("hidden"),
-      "the Last Uoinked Video card is shown for a recent uoink");
+    check(env.rows().length === 1 && /A saved video/.test(env.rows()[0].textContent),
+      "the Captures list shows the recent uoink");
     await clickCopy(env);
 
     check(env.mcpCalls.length === 1, "E5: one tools/call request reaches the helper", env.mcpCalls.length);

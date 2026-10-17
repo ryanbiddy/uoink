@@ -840,6 +840,9 @@
   // captures on it, and the popup's button only follows its own route.
   function queueJobRoute(job) {
     if (!job || job.kind !== "extract") return null;
+    if (job.usePlaylist) return "playlist";
+    if (job.usePodcast) return "podcast";
+    if (job.useXPost) return "x_post";
     if (job.usePage) return "page";
     if (job.useExtractAny) return "any";
     if (job.useReddit) return "reddit";

@@ -149,7 +149,7 @@ function otherRecord() {
 // Click Retry on a Recent failures row the way the popup renders it.
 function clickRetry(popup, failure) {
   const row = popup.ctx.renderFailureRow(failure);
-  const btn = row._all().find((el) => el.tagName === "BUTTON" && el.textContent === "Retry");
+  const btn = row._all().find((el) => el.tagName === "BUTTON" && el.textContent === "Retry now");
   if (!btn) throw new Error("renderFailureRow has no Retry button");
   btn.click();
 }
@@ -234,6 +234,7 @@ async function makePopup({ worker, store, helper }, { url, title }) {
     pendingAllowCapture: null,
     uoinkCurrentBtn: btn,
     uoinkAllowRetryBtn: allowBtn,
+    queueRead: 0, closed: false, captureData: {}, renderCaptures: () => {},
     currentEl: popup.document.createElement("div"),
     queueEl: popup.document.createElement("div"),
     clearBtn: popup.document.createElement("button"),
@@ -241,14 +242,14 @@ async function makePopup({ worker, store, helper }, { url, title }) {
   popup.runSource(popupSlice("const POPUP_CAPTURE_RESULTS_KEY", "\nlet serverOnline"), "popup.js");
   popup.runSource(popupSlice("const SOURCE_BUTTON_LABELS", "\nfunction setSourceNote("), "popup.js");
   // captureXPost, messageActiveTab, captureXArticle, showXArticleFallbackResult
-  popup.runSource(popupSlice("async function captureXPost(", "\n// ---- Interval setting"), "popup.js");
+  popup.runSource(popupSlice("async function captureXPost(", "\n// ---- Capture request hand-off"), "popup.js");
   // the SW hand-off helpers, runPopupUoinkCurrent
   popup.runSource(popupSlice("const popupCaptureHandoffs", "\nfunction offerAllowRetry("), "popup.js");
   popup.runSource(popupSlice("async function runAllowSiteAndRetry(", "\nasync function runAddPodcastFeed("), "popup.js");
   // refreshQueue: the open popup's 1 s poll of chrome.storage.session
-  popup.runSource(popupSlice("async function refreshQueue(", "\nclearBtn.addEventListener("), "popup.js");
+  popup.runSource(popupSlice("async function refreshQueue(", "\nasync function loadRecentUoinks("), "popup.js");
   // loadRecentFailures ... renderFailureRow: the Recent failures rows
-  popup.runSource(popupSlice("function loadRecentFailures(", "\n// ---- Index backfill status"), "popup.js");
+  popup.runSource(popupSlice("function loadRecentFailures(", "\n// ---- Captures list"), "popup.js");
   btn.textContent = popup.runSource("SOURCE_BUTTON_LABELS[currentSource.source]", "probe.js");
   popup.label = btn.textContent;
   popup.source = source;
@@ -337,11 +338,13 @@ async function handoff() {
     const popup = await makePopup(base, { url: X_POST_URL, title: "A post on X" });
     check(await returnsEarly(() => popup.ctx.runPopupUoinkCurrent()),
       "E1: Uoink this post returns while its video is still being captured");
-    check(popup.fetches.some((u) => pathOf(u) === "/extract/x") && !captureFetches(popup).length,
-      "E1: the popup saves the post text itself but leaves the video to the SW queue", popup.fetches);
-    const job = (handedOff(popup)[0] || {}).job || {};
-    check(job.route === "video" && job.saveOnly === true && job.url === popup.source.canonical,
+    check(!popup.fetches.some((u) => pathOf(u) === "/extract/x") && !captureFetches(popup).length
+      && fetchesOf(base.worker, "/extract/x").length === 1,
+      "E1: the worker saves the post text and captures its video without the popup", popup.fetches);
+    const job = base.store.session.current || {};
+    check(base.worker.ctx.STC.queueJobRoute(job) === "video" && job.saveOnly === true && job.url === popup.source.canonical,
       "the X post's video job is save-only, as before", job);
+    await popup.tick();
     check(lastOf(popup.toasts) === "Saved 2 posts + queued the video.",
       "the popup says the text is saved and the video is queued", popup.toasts);
     answer.resolve(jsonResponse(CORPUS));
@@ -410,7 +413,8 @@ async function handoff() {
     check(await returnsEarly(() => popup.ctx.runPopupUoinkCurrent()),
       "E1: a video-only X post returns while /queue/status hasn't answered");
     const job = (handedOff(popup)[0] || {}).job || {};
-    check(job.route === "video" && !job.saveOnly && popup.queueStatusChecks === 0,
+    check(job.route === "x_post" && !job.saveOnly && popup.queueStatusChecks === 0
+      && fetchesOf(base.worker, "/queue/status").length === 1 && !captureFetches(base.worker).length,
       "E1: its video goes to the SW queue without the popup checking the helper's queue",
       [handedOff(popup), popup.queueStatusChecks]);
     status.resolve(jsonResponse({ ok: true, pending_count: 0 }));

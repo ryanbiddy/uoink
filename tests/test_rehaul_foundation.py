@@ -1026,7 +1026,7 @@ def _variant_failures(page: str):
 
 def test_markup_nesting_is_found():
     # Guards the guard: the nesting the checks below depend on is really read.
-    assert (".queue-banner", ".queue-banner-toggle") in _nesting("extension/popup.html")
+    assert (".paste-controls", "#paste-add") in _nesting("extension/popup.html")
     assert (".uoink-card", ".card-source") in _nesting("assets/dashboard/index.html")
     # An opaque card between a backdrop and its text hides the backdrop.
     elements = [((frozenset({".modal-backdrop"}), frozenset({".modal-card"})), frozenset({".soft-note"}))]
@@ -1103,5 +1103,6 @@ def _script_built_text_failures(page: str):
 
 def test_script_built_text_reads_in_hovered_rows():
     assert ".hook-correction-message" in _script_classes("extension/popup.html")
+    assert ".capture-state" in _script_classes("extension/popup.html")
     failures = [f for page in PAGE_SCRIPTS for f in _script_built_text_failures(page)]
     assert not failures, "\n".join(failures)
