@@ -4958,7 +4958,7 @@
               <div class="reader-kind" id="yoinkKind"></div>
               <h1 id="yoinkHeading" tabindex="-1">Pick something to read</h1>
               <p class="reader-meta" id="yoinkSubhead">Open a capture from Library to read it here.</p>
-              <a class="reader-source-link hidden" id="yoinkSourceLink" href="#" target="_blank" rel="noreferrer">Watch on the source</a>
+              <a class="reader-source-link hidden" id="yoinkSourceLink" data-source-link href="#" target="_blank" rel="noreferrer">Watch on the source</a>
             </div>
               <div class="inline-row yoink-actions">
                 <button class="button" type="button" id="yoinkCopyMarkdown">Copy as Markdown</button>
@@ -5568,14 +5568,14 @@
               <h2>Help and releases</h2>
               <p class="setting-copy">Online guides and release notes open only when you follow a link. The dashboard loads its fonts and feature information locally; it does not contact uoink.app on load.</p>
               <div class="link-list">
-                <a href="/splash" target="_blank" rel="noreferrer">Startup screen <span>local view</span></a>
+                <a href="/splash" data-product-link target="_blank" rel="noreferrer">Startup screen <span>local view</span></a>
                 <a href="https://uoink.app" target="_blank" rel="noreferrer">uoink.app <span>open</span></a>
                 <a href="https://uoink.app/how" target="_blank" rel="noreferrer">Quick start guide <span>open</span></a>
                 <a href="https://uoink.app/hooks" target="_blank" rel="noreferrer">9 hook types explained <span>open</span></a>
                 <a href="https://uoink.app/agents" target="_blank" rel="noreferrer">Agent integration docs <span>open</span></a>
-                <a href="https://github.com/ryanbiddy/uoink/blob/main/CHANGELOG.md" target="_blank" rel="noreferrer">Release notes <span>open</span></a>
-                <a href="https://github.com/ryanbiddy/uoink/releases" target="_blank" rel="noreferrer">GitHub releases <span>open</span></a>
-                <a href="https://github.com/ryanbiddy/uoink/issues" target="_blank" rel="noreferrer">File an issue <span>open</span></a>
+                <a href="https://github.com/ryanbiddy/uoink/blob/main/CHANGELOG.md" data-product-link target="_blank" rel="noreferrer">Release notes <span>open</span></a>
+                <a href="https://github.com/ryanbiddy/uoink/releases" data-product-link target="_blank" rel="noreferrer">GitHub releases <span>open</span></a>
+                <a href="https://github.com/ryanbiddy/uoink/issues" data-product-link target="_blank" rel="noreferrer">File an issue <span>open</span></a>
                 <a href="https://uoink.app/privacy" target="_blank" rel="noreferrer">Privacy policy <span>open</span></a>
               </div>
             </div>
@@ -6141,13 +6141,97 @@
       return window.pywebview && window.pywebview.api ? window.pywebview.api : null;
     }
 
-    function openExternal(url) {
+    function parseExternalUrl(url) {
+      if (typeof url !== "string" || !/^https?:\/\/[^/?#]+/i.test(url)
+          || /[\u0000-\u0020\u007f-\u009f\\]/.test(url)
+          || /^https?:\/\/[^/?#]*@/i.test(url)) throw new Error("Invalid URL");
+      const target = new URL(url);
+      if (!["http:", "https:"].includes(target.protocol) || target.username || target.password) {
+        throw new Error("Invalid URL");
+      }
+      return target;
+    }
+
+    function isProductUrl(target) {
+      // Match the complete origin and path, never a host prefix. A server
+      // response must not opt into this list just because its URL matches.
+      const fixed = [
+        "https://github.com/ryanbiddy/uoink",
+        "https://github.com/ryanbiddy/uoink/blob/main/CHANGELOG.md",
+        "https://github.com/ryanbiddy/uoink/releases",
+        "https://github.com/ryanbiddy/uoink/issues",
+        "https://claude.ai/new",
+        "https://claude.ai/download",
+        "https://youtube.com/",
+      ];
+      const base = target.origin + target.pathname;
+      if (target.href.includes("#")) return false;
+      if (base === "https://twitter.com/intent/tweet") {
+        const keys = [...target.searchParams.keys()];
+        return keys.every((key) => key === "text" || key === "url")
+          && new Set(keys).size === keys.length;
+      }
+      return !target.href.includes("?") && fixed.includes(base);
+    }
+
+    function isSourceUrl(target) {
+      // URL canonicalizes IPv4 shorthand, integer/hex/octal addresses and
+      // bracketed IPv6. Refusing all IP literals covers private, loopback
+      // and link-local ranges too. This is a URL check, not a DNS lookup.
+      const host = target.hostname.replace(/\.+$/, "");
+      return !target.port && !host.startsWith("[") && !/^\d+(\.\d+){3}$/.test(host)
+        && !["localhost", "local", "internal"].includes(host)
+        && ![".localhost", ".local", ".internal"].some((suffix) => host.endsWith(suffix));
+    }
+
+    function openExternal(url, kind = "remote") {
+      let target;
+      try {
+        target = parseExternalUrl(url);
+        let allowed = false;
+        if (kind === "remote") {
+          allowed = target.protocol === "https:"
+            && (target.hostname === "uoink.app" || target.hostname.endsWith(".uoink.app"));
+        } else if (kind === "product") {
+          // The one local UI exception belongs only to the shipped Startup
+          // action; source and remote URLs never get this exception.
+          const localSplash = ["127.0.0.1", "localhost", "[::1]"].includes(target.hostname)
+            && window.location && target.href === new URL("/splash", window.location.href).href;
+          allowed = isProductUrl(target) || localSplash;
+        } else if (kind === "source") {
+          allowed = isSourceUrl(target);
+        }
+        if (!allowed) throw new Error("Blocked destination");
+      } catch (_) {
+        showToast("This link is blocked. Its address is invalid or isn't an allowed destination.");
+        return false;
+      }
       const native = nativeApi();
       if (native && native.open_url) {
-        native.open_url(url);
-        return;
+        native.open_url(target.href);
+        return true;
       }
-      window.open(url, "_blank", "noopener");
+      window.open(target.href, "_blank", "noopener,noreferrer");
+      return true;
+    }
+
+    function openExternalLink(event) {
+      const link = event.target.closest('a[target="_blank"], a[data-source-link]');
+      if (!link) return;
+      event.preventDefault();
+      // href normalizes away tabs/newlines and backslashes. Validate the raw
+      // attribute instead; only the shipped local Startup link is relative.
+      const raw = link.getAttribute("href");
+      const url = raw === "/splash" ? new URL(raw, window.location.href).href : raw;
+      const kind = link.hasAttribute("data-source-link") ? "source"
+        : link.hasAttribute("data-product-link") ? "product" : "remote";
+      openExternal(url, kind);
+    }
+
+    // Bind fixed product buttons with a product-scoped opener. Keep dynamic
+    // server and source links in openExternalLink's explicit classification.
+    function wireProductButtons(openExternal) {
+      document.getElementById("starGithub").addEventListener("click", () => openExternal("https://github.com/ryanbiddy/uoink"));
     }
 
     function debounce(fn, ms) {
@@ -6299,7 +6383,7 @@
       let html = htmlEscape(value);
       html = html.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
       html = html.replace(/`([^`]+)`/g, "<code>$1</code>");
-      html = html.replace(/\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g, '<a href="$2" target="_blank" rel="noreferrer">$1</a>');
+      html = html.replace(/\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g, '<a href="$2" data-source-link target="_blank" rel="noreferrer">$1</a>');
       return html;
     }
 
@@ -6484,7 +6568,7 @@
       return `
         <strong>No supported writing agent found</strong>
         <span class="soft-note">${keyReady ? "Your Anthropic key can generate tweets and blogs now. Install Claude Desktop for agent-grounded scripts and critique." : "Install Claude Desktop, then return here for one-click connection."}</span>
-        <button class="button primary" type="button" data-open-external="https://claude.ai/download">Install Claude Desktop</button>
+        <button class="button primary" type="button" data-open-external="https://claude.ai/download" data-product-link>Install Claude Desktop</button>
       `;
     }
 
@@ -7107,7 +7191,7 @@
       const label = htmlEscape(readerClock(seconds));
       const link = sourceTimeUrl(url, seconds);
       return link
-        ? `<a class="reader-time" href="${htmlEscape(link)}" target="_blank" rel="noreferrer" title="Open the source at ${label}">${label}</a>`
+        ? `<a class="reader-time" href="${htmlEscape(link)}" data-source-link target="_blank" rel="noreferrer" title="Open the source at ${label}">${label}</a>`
         : `<span class="reader-time">${label}</span>`;
     }
 
@@ -7333,8 +7417,9 @@
         return showToast("Couldn't copy the Markdown. Open the transcript file instead.");
       }
       if (!openClaude) return showToast("Copied as Markdown.");
-      openExternal("https://claude.ai/new");
-      showToast("Copied. Paste it into the new Claude chat.");
+      if (openExternal("https://claude.ai/new", "product")) {
+        showToast("Copied. Paste it into the new Claude chat.");
+      }
     }
 
     function screenshotPath(row, shot) {
@@ -8210,12 +8295,8 @@
     }
 
     function sanitizeHttpUrl(url) {
-      if (!url || typeof url !== "string") return null;
       try {
-        const parsed = new URL(url);
-        if (parsed.protocol === "http:" || parsed.protocol === "https:") {
-          return parsed.href;
-        }
+        return parseExternalUrl(url).href;
       } catch (e) {}
       return null;
     }
@@ -8794,7 +8875,7 @@
         const newObs = formatActivityCount(src.new_observations);
         const w = src.observation_window || {};
         const safeUrl = sanitizeHttpUrl(src.canonical_url);
-        const nameLink = safeUrl ? `<a href="${safeUrl}" target="_blank" rel="noreferrer" style="color:inherit;text-decoration:underline;">${escapeHtmlActivity(src.display_name)}</a>` : escapeHtmlActivity(src.display_name);
+        const nameLink = safeUrl ? `<a href="${escapeHtmlActivity(safeUrl)}" data-source-link target="_blank" rel="noreferrer" style="color:inherit;text-decoration:underline;">${escapeHtmlActivity(src.display_name)}</a>` : escapeHtmlActivity(src.display_name);
         const capId = activityMetricId(src.captures_in_interval, "");
         const obsId = activityMetricId(src.new_observations, "");
         return `<tr style="border-bottom:1px solid #282828;">
@@ -13305,7 +13386,7 @@
       if (over) return showToast("Tighten the over-280 tweet before opening X.");
       const text = selectedWritingMode() === "thread" ? drafts[0] : currentWritingText();
       if (!String(text).trim()) return showToast("Write or generate a draft first.");
-      openExternal(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`);
+      openExternal(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`, "product");
       renderWritingHandoff(selectedWritingScreenshots());
     }
 
@@ -15225,11 +15306,10 @@
     }
 
     async function openLastYoutube() {
-      try {
-        const data = await authFetch("/open-last-youtube");
-        showToast(data.action === "focused_existing" ? "Focused your YouTube tab." : "Opened YouTube.");
-      } catch (_) {
-        openExternal("https://youtube.com");
+      // The helper's open-last-youtube route opens a browser itself, before
+      // this boundary could validate anything. Use the fixed product URL.
+      if (openExternal("https://youtube.com", "product")) {
+        showToast("Opened YouTube.");
       }
     }
 
@@ -15670,7 +15750,7 @@
       });
       document.getElementById("reloadSettings").addEventListener("click", refreshSettings);
       // About, Star on GitHub and Stop Uoink live in Settings > App.
-      document.getElementById("starGithub").addEventListener("click", () => openExternal("https://github.com/ryanbiddy/uoink"));
+      wireProductButtons((url) => openExternal(url, "product"));
       wireSettingsAutosave();
       document.getElementById("testKey").addEventListener("click", testKey);
       document.getElementById("copyMcp").addEventListener("click", async () => {
@@ -15828,11 +15908,10 @@
       if (els.imageClearButton) els.imageClearButton.addEventListener("click", clearImageSelection);
       const emptyPasteUrl = document.getElementById("emptyPasteUrl");
       if (emptyPasteUrl) emptyPasteUrl.addEventListener("click", focusLibraryBox);
-      document.querySelectorAll('a[target="_blank"]').forEach((link) => {
-        link.addEventListener("click", (event) => {
-          event.preventDefault();
-          openExternal(link.href);
-        });
+      // Delegate once so links rendered after startup use the same boundary.
+      document.addEventListener("click", openExternalLink);
+      document.addEventListener("auxclick", (event) => {
+        if (event.button === 1) openExternalLink(event);
       });
       document.addEventListener("click", (event) => {
         const openYouTubeButton = event.target.closest("[data-open-youtube]");
@@ -15879,14 +15958,6 @@
           dropLibraryCaptureRow(key);
           state.libraryDismissed.add(key);
           renderLibraryCaptures();
-          return;
-        }
-        // Links the reader builds (timestamps, Markdown, comments) open in
-        // the browser, as the page's own outside links do.
-        const readerLink = event.target.closest("#yoinkDetail a[target='_blank'], #yoinkComments a[target='_blank'], #yoinkAnalysis a[target='_blank']");
-        if (readerLink) {
-          event.preventDefault();
-          openExternal(readerLink.href);
           return;
         }
         const readerTopic = event.target.closest("[data-reader-topic]");
@@ -15940,7 +16011,8 @@
         }
         const externalButton = event.target.closest("[data-open-external]");
         if (externalButton) {
-          openExternal(externalButton.dataset.openExternal);
+          openExternal(externalButton.dataset.openExternal,
+            externalButton.hasAttribute("data-product-link") ? "product" : "remote");
           return;
         }
         const copyAgentConfig = event.target.closest("[data-copy-agent-config]");

@@ -14,9 +14,10 @@ is unclear, email us (see *Contact* below).
 Uoink does not collect anything about you. There is no Uoink account, no
 Uoink server in the cloud, no analytics, and no telemetry. Uoink runs on
 your own machine. It contacts a source service when you ask it to capture
-that source, GitHub only when you click **Check now**, and Anthropic only
+that source, the GitHub release API when you click **Check now**, and Anthropic only
 if you turn on an optional AI feature and provide your own API key. The
-rest of this document names those requests and the local data they create.
+rest of this document names those requests, browser visits from dashboard
+links, and the local data they create.
 
 ## 1. What Uoink collects about you
 
@@ -49,6 +50,43 @@ Uoink makes these outbound requests:
 - **GitHub release check — only when you click `Check now`.** The dashboard
   requests the latest Uoink release record from `api.github.com`. It sends no
   corpus content or usage event. GitHub receives the normal request metadata.
+
+The dashboard makes no features-manifest request to
+`https://uoink.app/api/features-manifest`, on load or when switching views.
+The Features view, remote loader, and bundled fallback catalogue have been
+removed.
+
+Dashboard links open when you click them. The dashboard checks three kinds
+of external link before opening a browser:
+
+1. **Remote or server-supplied URLs**, except captured source links, must use
+   HTTPS and have the host `uoink.app` or a subdomain of it. Uoink help links
+   use this same restriction.
+2. **Fixed product links** must match an exact origin and path: the repository
+   at `https://github.com/ryanbiddy/uoink`, its `/blob/main/CHANGELOG.md`,
+   `/releases`, and `/issues` pages; `https://claude.ai/new`;
+   `https://claude.ai/download`; `https://twitter.com/intent/tweet`; or
+   `https://youtube.com`. Queries and fragments are blocked, except the
+   tweet intent's dashboard-built `text` and/or `url` parameters, each at
+   most once. Opening X sends the draft in that query. Send to Claude copies
+   the Markdown locally and opens a new chat; you paste it there yourself.
+3. **Captured-content source links** include Watch on the source, Markdown
+   links, reader timestamps, and Activity source names. They may use HTTP
+   or HTTPS, but cannot contain credentials or a non-default port. All
+   IP-literal hosts are blocked, including loopback (`127.0.0.0/8`, `::1`),
+   `0.0.0.0`, private ranges (`10/8`, `172.16/12`, `192.168/16`, `fc00::/7`),
+   and link-local ranges (`169.254/16`, `fe80::/10`). `localhost`,
+   `*.localhost`, `.local`, and `.internal` hosts are also blocked, including
+   trailing-dot forms. This checks the URL, not DNS resolutions or redirects.
+
+All three kinds reject embedded credentials, control characters, backslashes,
+and malformed URLs. A refused link shows a blocked message and calls neither
+the native URL opener nor the browser opener. A copy action cannot replace
+that message with a success toast. The local Startup action is a separate,
+narrow exception: the exact `/splash` URL on the dashboard's own loopback
+origin, without a query or fragment. Open YouTube uses the fixed product
+link through the same check, with no helper-side open or focus request.
+Allowed visits send the destination site ordinary browser request metadata.
 
 Uoink sends no analytics, telemetry, usage tracking, or crash reports. The
 extracted corpus, screenshots, and files are written only to folders on your

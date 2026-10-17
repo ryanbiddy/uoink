@@ -138,6 +138,47 @@ Protocol validation failures return `4xx` JSON errors. Handled application failu
 
 ## URL and identifier validation
 
+The dashboard's `openExternal` boundary classifies external opens by caller
+provenance into three kinds. Unknown kinds are refused:
+
+1. **Remote or server-supplied URLs**, except captured source links, use the
+   default `remote` policy: HTTPS only, with the host `uoink.app` or a
+   subdomain of it. Uoink help links use this policy too. A remote URL does
+   not gain product or source permission by matching one of those destinations.
+2. **Fixed product links** use `product` and an exact origin-and-path
+   allowlist: `https://github.com/ryanbiddy/uoink`, its
+   `/blob/main/CHANGELOG.md`, `/releases`, and `/issues` pages;
+   `https://claude.ai/new`; `https://claude.ai/download`;
+   `https://twitter.com/intent/tweet`; and `https://youtube.com`.
+   No query or fragment is allowed except the tweet intent's dashboard-built
+   `text` and/or `url` parameters, each at most once. For example,
+   `https://claude.ai/new?next=https://evil.com` is refused.
+3. **Captured-content source links** use `source`: HTTP or HTTPS only, with
+   no userinfo or non-default port. This covers `data-source-link` anchors
+   for `#yoinkSourceLink`, inline Markdown, reader timestamps, and Activity
+   source names. All IP-literal hosts are refused, including loopback
+   (`127.0.0.0/8`, `::1`), `0.0.0.0`, private ranges (`10/8`, `172.16/12`,
+   `192.168/16`, `fc00::/7`), and link-local ranges (`169.254/16`, `fe80::/10`).
+   `localhost`, `*.localhost`, `.local`, and `.internal` hosts are refused
+   after removing trailing dots. The URL parser canonicalizes alternate IP
+   spellings before the check. Hostname resolution and redirects are not
+   checked by this dashboard URL policy.
+
+All three kinds reject embedded credentials, control characters, backslashes,
+and malformed URLs before calling the native URL opener or `window.open`.
+Refused opens show a blocked-link toast; a successful copy cannot overwrite
+it with a success toast. Delegated click and middle-click handlers check raw
+link attributes, including links rendered after startup. Browser tabs use
+`noopener,noreferrer`.
+
+The fixed Startup action has one local exception: the exact `/splash` URL on
+the dashboard's own loopback origin, without a query or fragment. Remote and
+source links cannot use this exception. Open YouTube goes through the product
+allowlist; it makes no `/open-last-youtube` request, so the helper cannot open
+or focus a window before this check.
+
+Capture API validation is separate from the dashboard's link-opening policy:
+
 - Strict video capture recognizes YouTube, X/Twitter, TikTok, and Instagram
   host and path shapes. Each accepted URL is canonicalized before it reaches
   the extraction pipeline.
@@ -290,6 +331,11 @@ popup (`POST /migration/move-desktop-corpus`), never automatically.
 ## What Uoink does not collect
 
 Uoink has no Uoink cloud service, account system, telemetry endpoint, or hosted analytics. Extraction and files stay on the user's machine.
+
+The dashboard makes no features-manifest request to
+`https://uoink.app/api/features-manifest`, on load or when switching views.
+The Features view, remote catalogue loader, and bundled fallback catalogue
+have been removed. Uoink help links open only when the user clicks them.
 
 Optional AI features send selected comment/hook context to Anthropic only when the user provides an API key and enables those features. YouTube downloads still contact YouTube, and yt-dlp may contact YouTube-owned endpoints as part of uoink extraction.
 
