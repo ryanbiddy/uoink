@@ -20,16 +20,24 @@ def test_advanced_library_filters_are_in_a_closed_disclosure() -> None:
     primary = grid[:details_start] + grid[details_end:]
     advanced = grid[details_start:details_end]
 
+    # UI re-haul (SPEC "Library"): the common controls are the one box, the
+    # type chips and the one sort control; the topic list with counts sits in
+    # the sidebar. Platform, type, author and the topic menu moved into the
+    # disclosure with the other advanced filters.
     for control_id in (
         "searchInput",
+        "libraryKinds",
+        "sortFilter",
+    ):
+        assert f'id="{control_id}"' in primary
+    assert primary.count('data-library-kind="') == 5
+    sidebar = DASHBOARD[DASHBOARD.index('<aside class="sidebar"'):DASHBOARD.index("</aside>")]
+    assert 'id="topicOverview"' in sidebar
+    for control_id in (
         "platformFilter",
         "sourceTypeFilter",
         "channelFilter",
         "topicFilter",
-        "sortFilter",
-    ):
-        assert f'id="{control_id}"' in primary
-    for control_id in (
         "hookFilter",
         "formatFilter",
         "performanceFilter",

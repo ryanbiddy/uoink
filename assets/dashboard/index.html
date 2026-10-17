@@ -731,86 +731,177 @@
       display: none;
     }
 
-    .grid {
+    /* Re-haul Library list: one row per capture -- a thumbnail (the real
+       thumbnail.jpg, else a neutral block naming the kind), the title in
+       two lines at most, source . platform . time, then one state line.
+       No card art; the selected row is the only fill. */
+    .library-list,
+    .library-captures {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      gap: 14px;
+      border-top: 1px solid var(--line);
+    }
+
+    .library-captures {
+      margin-bottom: var(--space-6);
+    }
+
+    .uoink-card,
+    .capture-row {
+      position: relative;
+      display: grid;
+      grid-template-columns: 96px minmax(0, 1fr) auto;
+      align-items: start;
+      gap: var(--space-3);
+      border-bottom: 1px solid var(--line);
+      padding: var(--space-3) var(--space-2);
+      background: transparent;
     }
 
     .uoink-card {
-      position: relative;
-      overflow: hidden;
-      min-height: 232px;
-      border: 1px solid var(--border);
-      border-radius: var(--card-radius);
-      background: var(--ink-warm);
-      box-shadow: var(--shadow-soft);
       cursor: pointer;
-      transition: transform 140ms ease, border-color 140ms ease, background 140ms ease;
     }
 
     .uoink-card:hover,
-    .uoink-card:focus-visible {
-      outline: none;
-      transform: translateY(-1px);
-      border-color: color-mix(in srgb, var(--action) 46%, transparent);
+    .uoink-card:focus-visible,
+    .uoink-card[aria-current="true"] {
       background: var(--surface-sel);
     }
 
-    .thumb {
+    .row-thumb {
       position: relative;
-      height: 124px;
-      border-bottom: 1px solid var(--border);
-      background:
-        radial-gradient(circle at 30% 20%, color-mix(in srgb, var(--acid) 16%, transparent), transparent 7rem),
-        linear-gradient(135deg, var(--surface-sel), var(--surface));
+      display: grid;
+      place-items: center;
+      width: 96px;
+      aspect-ratio: 16 / 9;
+      overflow: hidden;
+      border-radius: var(--radius-thumb);
+      background: var(--line);
     }
 
-    .uoink-card.podcast .thumb {
-      background:
-        linear-gradient(135deg, color-mix(in srgb, var(--acid) 20%, transparent), color-mix(in srgb, var(--action) 24%, transparent)),
-        var(--surface-sel);
-    }
-
-    .uoink-card.live .thumb {
-      background:
-        radial-gradient(circle at 18% 20%, color-mix(in srgb, var(--action) 34%, transparent), transparent 8rem),
-        linear-gradient(135deg, var(--surface-sel), var(--surface));
-    }
-
-    .uoink-card.non-youtube .thumb {
-      background:
-        radial-gradient(circle at 78% 18%, color-mix(in srgb, var(--ok) 14%, transparent), transparent 8rem),
-        linear-gradient(135deg, var(--surface-sel), var(--surface));
-    }
-
-    .thumb img {
+    .row-thumb img {
+      position: absolute;
+      inset: 0;
+      display: block;
       width: 100%;
       height: 100%;
       object-fit: cover;
-      display: block;
     }
 
-    .duration {
-      position: absolute;
-      top: 12px;
-      left: 12px;
-      min-height: 20px;
-      border: 1px solid color-mix(in srgb, var(--acid) 22%, transparent);
-      border-radius: var(--pill-radius);
-      padding: 3px 8px;
-      background: color-mix(in srgb, var(--bg) 72%, transparent);
+    .row-body {
+      display: grid;
+      gap: 3px;
+      min-width: 0;
+    }
+
+    .row-state {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 4px 6px;
+      margin-top: 2px;
+      color: var(--text-2);
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    .state-word {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
       color: var(--text);
-      font-family: var(--font-mono);
-      font-size: 10px;
-      font-weight: 800;
-      text-shadow: 0 1px 8px rgba(0, 0, 0, 0.65);
+      font-weight: 600;
+    }
+
+    .state-word.done { color: var(--ok-bright); }
+    .state-word.fail { color: var(--vermillion); }
+
+    .state-dot {
+      width: 8px;
+      height: 8px;
+      flex: 0 0 auto;
+      border-radius: var(--radius-pill);
+      background: var(--line-strong);
+    }
+
+    .state-word.done .state-dot { background: var(--ok); }
+    .state-word.now .state-dot { background: var(--step-now); }
+    .state-word.fail .state-dot { background: var(--fail); }
+
+    /* B's 5-step strip: details, waiting for YouTube, video, transcript,
+       screenshots and save. The words beside it carry the state; the
+       segments only repeat it. Only a step that just advanced moves. */
+    .step-strip {
+      display: inline-grid;
+      grid-template-columns: repeat(5, 14px);
+      gap: 3px;
+      margin-right: 2px;
+    }
+
+    .step {
+      height: 6px;
+      border-radius: var(--radius-pill);
+      background: var(--step-todo);
+    }
+
+    .step.done { background: var(--step-done); }
+    .step.now { background: var(--step-now); }
+    .step.fail { background: var(--step-fail); }
+
+    .step.now.advanced {
+      transform-origin: left center;
+      animation: step-advance var(--dur-enter) var(--ease-enter);
+    }
+
+    @keyframes step-advance {
+      from { opacity: 0.35; transform: scaleX(0.4); }
+      to { opacity: 1; transform: scaleX(1); }
+    }
+
+    .row-actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: flex-end;
+      gap: var(--space-2);
+    }
+
+    /* Write from this and the hook stay on every saved row; they show on
+       hover and keyboard focus, and always where there is no hover. */
+    .uoink-card .row-actions {
+      opacity: 0;
+    }
+
+    .uoink-card:hover .row-actions,
+    .uoink-card:focus-within .row-actions {
+      opacity: 1;
+    }
+
+    @media (hover: none) {
+      .uoink-card .row-actions {
+        opacity: 1;
+      }
+    }
+
+    .row-actions .hook-chip {
+      position: static;
+      max-width: 180px;
+      min-height: var(--target-chip);
+    }
+
+    .capture-more {
+      margin: 0;
+      padding: var(--space-3) var(--space-2);
+      font-size: 13px;
+    }
+
+    .capture-more a {
+      color: var(--action);
+      font-weight: 600;
     }
 
     .hook-chip,
     .topic-chip,
     .platform-chip,
-    .speaker-count-chip,
     .phase-chip {
       display: inline-flex;
       align-items: center;
@@ -851,99 +942,41 @@
       color: var(--on-action);
     }
 
-    /* Phase 2: source-type badge sits under the platform chip, top-right. */
+    /* The kind inside a row's neutral thumbnail block (no thumbnail.jpg). */
     .source-type-chip {
-      position: absolute;
-      top: 38px;
-      right: 12px;
-      display: inline-flex;
-      align-items: center;
-      min-height: 20px;
-      border-radius: var(--pill-radius);
-      padding: 0 9px;
-      font-size: 10px;
-      font-weight: 800;
+      padding: 0 4px;
+      color: var(--text-2);
+      font-size: 11px;
+      font-weight: 600;
+      text-align: center;
       text-transform: lowercase;
-      letter-spacing: 0.02em;
-      border: 1px solid color-mix(in srgb, var(--text) 14%, transparent);
-      background: color-mix(in srgb, var(--bg) 60%, transparent);
-      color: var(--cream);
+    }
+
+    /* A row's "source . platform . time" line. */
+    .card-source {
+      overflow: hidden;
+      color: var(--text-2);
+      font-size: 13px;
+      text-overflow: ellipsis;
       white-space: nowrap;
     }
 
-    /* Phase 2: source-first meta line ("Platform · type") above the author. */
-    .card-source {
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 0.02em;
-      text-transform: uppercase;
-      color: var(--vermillion);
-      margin-bottom: 2px;
-    }
-
-    .speaker-count-chip {
-      position: absolute;
-      bottom: 10px;
-      left: 12px;
-      border: 1px solid color-mix(in srgb, var(--acid) 36%, transparent);
-      background: color-mix(in srgb, var(--bg) 64%, transparent);
-      color: var(--text);
-    }
-
-    .card-waveform {
-      position: absolute;
-      inset: 42px 14px 36px;
-      display: grid;
-      grid-template-columns: repeat(24, minmax(2px, 1fr));
-      align-items: center;
-      gap: 3px;
-      opacity: 0.94;
-    }
-
-    .card-waveform span {
-      display: block;
-      height: var(--bar-height, 42%);
-      border-radius: 999px;
-      background: linear-gradient(180deg, var(--acid), var(--action));
-    }
-
-    .card-body {
-      display: grid;
-      gap: 10px;
-      padding: 14px;
-    }
-
     .card-title {
-      min-height: 44px;
-      color: var(--cream);
-      font-size: 14px;
-      font-weight: 800;
-      line-height: 1.28;
-    }
-
-    .card-meta {
-      color: var(--muted);
-      font-size: 12px;
+      display: -webkit-box;
+      overflow: hidden;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+      color: var(--text);
+      font-size: 15px;
+      font-weight: 600;
       line-height: 1.35;
-    }
-
-    .card-foot {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
+      overflow-wrap: anywhere;
     }
 
     .topic-chip {
       border: 1px solid var(--rust);
       background: transparent;
       color: var(--rust-bright, #F97316);
-    }
-
-    .age {
-      color: var(--dim);
-      font-size: 10px;
-      white-space: nowrap;
     }
 
     .health-exception {
@@ -1837,14 +1870,29 @@
       white-space: nowrap;
     }
 
-    /* Topics overview (U-05): corpus-wide topic chips with counts above
-       the Library grid. Uncategorized gets a dashed border so the
-       untagged pile is visible instead of buried in a dropdown. */
+    /* Topics (U-05), re-haul: the corpus-wide topic list with counts in the
+       sidebar beside Library and the reader, biggest first. Uncategorized
+       gets a dashed border so the untagged pile stays visible. */
+    .sidebar-topics {
+      display: grid;
+      align-content: start;
+      gap: var(--space-2);
+      min-height: 0;
+      overflow-y: auto;
+    }
+
+    .sidebar-heading {
+      padding: 0 10px;
+      color: var(--text-2);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
     .topic-overview {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-bottom: 4px;
+      display: grid;
+      gap: 2px;
     }
 
     .topic-overview.hidden {
@@ -1852,40 +1900,44 @@
     }
 
     .topic-overview-chip {
-      display: inline-flex;
+      display: flex;
       align-items: center;
+      justify-content: space-between;
       gap: 8px;
-      border: 1px solid var(--border);
-      border-radius: 999px;
-      padding: 6px 12px;
+      width: 100%;
+      min-height: var(--target-chip);
+      border: 1px solid transparent;
+      border-radius: var(--radius-input);
+      padding: 0 10px;
       background: transparent;
-      color: var(--cream);
-      font-weight: 700;
+      color: var(--text);
       font-size: 13px;
+      font-weight: 600;
+      text-align: left;
       cursor: pointer;
     }
 
     .topic-overview-chip span {
-      color: var(--dim);
-      font-family: var(--font-mono);
-      font-size: 11px;
+      color: var(--text-2);
+      font-size: 12px;
+      font-variant-numeric: tabular-nums;
       font-weight: 400;
     }
 
     .topic-overview-chip:hover,
     .topic-overview-chip:focus-visible {
-      outline: none;
-      border-color: var(--action);
+      border-color: var(--line-strong);
     }
 
     .topic-overview-chip.active {
       border-color: var(--action);
-      background: color-mix(in srgb, var(--action) 18%, transparent);
+      background: var(--surface-sel);
     }
 
     .topic-overview-chip.uncategorized {
       border-style: dashed;
-      color: var(--muted);
+      border-color: var(--line-strong);
+      color: var(--text-2);
     }
 
     /* Advanced options disclosure (U-03): one drawer for everything a
@@ -2521,119 +2573,6 @@
       padding: 14px;
     }
 
-    .yoink-layout {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) 320px;
-      gap: 16px;
-    }
-
-    .yoink-hero {
-      display: grid;
-      gap: 16px;
-      overflow: hidden;
-      border: 1px solid var(--border);
-      border-radius: var(--card-radius);
-      padding: 16px;
-      background:
-        radial-gradient(circle at 82% 0%, color-mix(in srgb, var(--acid) 12%, transparent), transparent 16rem),
-        var(--surface);
-    }
-
-    .yoink-hero.podcast {
-      background:
-        linear-gradient(135deg, color-mix(in srgb, var(--action) 24%, transparent), color-mix(in srgb, var(--bg) 22%, transparent)),
-        var(--surface);
-    }
-
-    .yoink-meta-row,
-    .speaker-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      min-width: 0;
-    }
-
-    .media-chip,
-    .speaker-chip {
-      display: inline-flex;
-      align-items: center;
-      min-height: 24px;
-      border: 1px solid var(--border);
-      border-radius: var(--pill-radius);
-      padding: 0 10px;
-      background: color-mix(in srgb, var(--text) 4%, transparent);
-      color: var(--muted);
-      font-size: 11px;
-      font-weight: 800;
-      white-space: nowrap;
-    }
-
-    .media-chip.primary {
-      border-color: color-mix(in srgb, var(--action) 46%, transparent);
-      color: var(--cream);
-      background: color-mix(in srgb, var(--action) 20%, transparent);
-    }
-
-    .speaker-chip {
-      color: var(--cream);
-    }
-
-    .waveform {
-      display: grid;
-      grid-template-columns: repeat(48, minmax(2px, 1fr));
-      align-items: center;
-      gap: 3px;
-      height: 92px;
-      border: 1px solid var(--border);
-      border-radius: var(--control-radius);
-      padding: 12px;
-      background: color-mix(in srgb, var(--bg) 36%, transparent);
-    }
-
-    .waveform span {
-      display: block;
-      height: var(--bar-height, 34%);
-      border-radius: 999px;
-      background: linear-gradient(180deg, var(--acid), var(--action));
-      opacity: 0.88;
-    }
-
-    .screenshot-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(138px, 1fr));
-      gap: 10px;
-    }
-
-    .screenshot-tile {
-      overflow: hidden;
-      border: 1px solid var(--border);
-      border-radius: var(--control-radius);
-      background: var(--surface);
-    }
-
-    .screenshot-tile img {
-      display: block;
-      width: 100%;
-      aspect-ratio: 16 / 9;
-      object-fit: cover;
-      background: var(--surface-sel);
-    }
-
-    .screenshot-tile span {
-      display: block;
-      padding: 8px;
-      color: var(--dim);
-      font-family: var(--font-mono);
-      font-size: 11px;
-    }
-
-    .transcript-preview {
-      display: grid;
-      gap: 8px;
-      max-height: 360px;
-      overflow: auto;
-    }
-
     .yoink-section {
       display: grid;
       gap: 10px;
@@ -2699,19 +2638,6 @@
       border-radius: 999px;
       background: var(--speaker-color, var(--action));
       box-shadow: 0 0 0 1px color-mix(in srgb, var(--bg) 36%, transparent);
-    }
-
-    .transcript-segment {
-      border: 1px solid var(--border);
-      border-radius: var(--control-radius);
-      padding: 10px;
-      background: color-mix(in srgb, var(--bg) 26%, transparent);
-    }
-
-    .transcript-segment b {
-      color: var(--rust-bright);
-      font-family: var(--font-mono);
-      font-size: 11px;
     }
 
     .job-row {
@@ -3161,11 +3087,520 @@
       line-height: 1.45;
     }
 
+    /* ---- Re-haul Library: head, the one box, type chips, sort ---------- */
+    .library-head {
+      align-items: center;
+      margin-bottom: var(--space-4);
+    }
+
+    .library-head h1 {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      margin: 0;
+      font-size: 28px;
+      font-weight: 800;
+      line-height: 1.15;
+    }
+
+    .library-count {
+      color: var(--text-2);
+      font-size: 16px;
+      font-variant-numeric: tabular-nums;
+      font-weight: 600;
+    }
+
+    #tab-library .control-grid {
+      grid-template-columns: minmax(0, 1fr) auto minmax(150px, 190px);
+      align-items: center;
+      gap: var(--space-3);
+      margin: 0 0 var(--space-4);
+    }
+
+    .library-omnibox {
+      display: grid;
+      grid-column: 1 / -1;
+      gap: var(--space-2);
+    }
+
+    .omnibox-row {
+      display: flex;
+      gap: var(--space-2);
+    }
+
+    #tab-library .omnibox-row .control {
+      flex: 1 1 auto;
+      min-width: 0;
+      min-height: var(--target-primary);
+      border-color: var(--line-strong);
+      background: var(--surface);
+      font-size: 16px;
+    }
+
+    .omnibox-row .button {
+      min-height: var(--target-primary);
+      border-radius: var(--radius-pill);
+      padding: 0 18px;
+      white-space: nowrap;
+    }
+
+    .library-capture-note {
+      color: var(--text-2);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .library-capture-note:empty {
+      display: none;
+    }
+
+    .library-kinds {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-2);
+    }
+
+    .kind-chip {
+      min-height: var(--target-chip);
+      border: 1px solid var(--line-strong);
+      border-radius: var(--radius-pill);
+      padding: 0 14px;
+      background: transparent;
+      color: var(--text);
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .kind-chip:hover {
+      border-color: var(--action);
+    }
+
+    .kind-chip[aria-pressed="true"] {
+      border-color: var(--action);
+      background: var(--action);
+      color: var(--on-action);
+    }
+
+    #tab-library .library-more-filters .library-filter-summary,
+    #sortFilter {
+      min-height: var(--target-chip);
+    }
+
+    /* "Library activity" analytics: collapsed below the list, never above
+       the box. */
+    .library-insights {
+      margin-top: var(--space-8);
+      border-top: 1px solid var(--line);
+      padding-top: var(--space-3);
+    }
+
+    .library-insights-summary {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 4px 10px;
+      min-height: var(--target-primary);
+      padding: var(--space-2) 0;
+      color: var(--text);
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .library-insights[open] .library-insights-summary {
+      margin-bottom: var(--space-3);
+    }
+
+    /* ---- Re-haul Reader --------------------------------------------- */
+    .tab-panel.reader {
+      max-width: calc(var(--reader-width) + var(--time-gutter) + var(--space-3));
+    }
+
+    .tab-panel.reader.active {
+      animation: reader-enter var(--dur-enter) var(--ease-enter);
+    }
+
+    @keyframes reader-enter {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: none; }
+    }
+
+    #tab-yoink .page-head.reader-head {
+      display: grid;
+      gap: var(--space-4);
+      margin-bottom: var(--space-6);
+    }
+
+    .reader-crumbs {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: var(--space-2) var(--space-3);
+      min-width: 0;
+    }
+
+    .reader-crumbs #yoinkBack {
+      min-height: var(--target-chip);
+      margin: 0;
+      border-radius: var(--radius-pill);
+    }
+
+    .crumb-list {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+      min-width: 0;
+      margin: 0;
+      padding: 0;
+      color: var(--text-2);
+      font-size: 13px;
+      list-style: none;
+    }
+
+    .crumb-list li {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      min-width: 0;
+    }
+
+    .crumb-list li + li::before {
+      color: var(--text-2);
+      content: "/";
+    }
+
+    .crumb-list a,
+    .crumb-button {
+      border: 0;
+      padding: 0;
+      background: none;
+      color: var(--text-2);
+      cursor: pointer;
+      font: inherit;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+
+    .crumb-current {
+      overflow: hidden;
+      max-width: 40ch;
+      color: var(--text);
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .reader-title-block {
+      display: grid;
+      gap: var(--space-2);
+      min-width: 0;
+    }
+
+    .reader-kind {
+      color: var(--text-2);
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .reader-kind:empty {
+      display: none;
+    }
+
+    #tab-yoink h1 {
+      margin: 0;
+      font-size: 32px;
+      font-weight: 800;
+      line-height: 1.15;
+      overflow-wrap: anywhere;
+    }
+
+    .reader-meta {
+      color: var(--text-2);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .reader-source-link {
+      width: fit-content;
+      color: var(--action);
+      font-weight: 600;
+      text-underline-offset: 2px;
+    }
+
+    .yoink-actions .button {
+      min-height: var(--target-primary);
+      border-radius: var(--radius-pill);
+      padding: 0 16px;
+    }
+
+    .reader-body {
+      display: grid;
+      min-width: 0;
+    }
+
+    .reader-note {
+      margin: 0 0 var(--space-6);
+      border-radius: var(--radius-input);
+      padding: var(--space-3) var(--space-4);
+      background: var(--surface-sel);
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    .reader-doc,
+    .reader-transcript {
+      display: grid;
+      gap: var(--space-4);
+      min-width: 0;
+    }
+
+    /* Paragraphs with their stored time in a 44px gutter. A time wider
+       than the gutter grows into the page margin, never into the text. */
+    .reader-row {
+      display: grid;
+      grid-template-columns: var(--time-gutter) minmax(0, var(--reader-width));
+      column-gap: var(--space-3);
+      align-items: baseline;
+      margin: 0;
+    }
+
+    .reader-gutter {
+      justify-self: end;
+      white-space: nowrap;
+    }
+
+    .reader-time {
+      color: var(--action);
+      font-size: 12px;
+      font-variant-numeric: tabular-nums;
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    a.reader-time:hover {
+      text-decoration: underline;
+    }
+
+    .reader-time.none {
+      display: inline-block;
+      width: 12px;
+      border-top: 1px solid var(--line-strong);
+      vertical-align: middle;
+    }
+
+    .reader-para p {
+      margin: 0;
+      color: var(--text);
+      font-size: 17px;
+      line-height: 1.65;
+      overflow-wrap: anywhere;
+    }
+
+    .reader-speaker {
+      font-weight: 700;
+    }
+
+    .reader-shot {
+      align-items: start;
+    }
+
+    .reader-shot-frame {
+      overflow: hidden;
+      aspect-ratio: 16 / 9;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-figure);
+      background: var(--line);
+    }
+
+    .reader-shot-frame img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .reader-shot-frame img:not([src]) {
+      visibility: hidden;
+    }
+
+    .reader-prose {
+      max-width: var(--reader-width);
+      margin-left: calc(var(--time-gutter) + var(--space-3));
+      font-size: 17px;
+      line-height: 1.65;
+      overflow-wrap: anywhere;
+    }
+
+    .reader-prose p,
+    .reader-prose ul,
+    .reader-prose li {
+      margin: 0 0 var(--space-4);
+      color: var(--text);
+    }
+
+    .reader-prose h2,
+    .reader-prose h3,
+    .reader-prose h4 {
+      margin: var(--space-6) 0 var(--space-2);
+      color: var(--text);
+      line-height: 1.3;
+    }
+
+    .reader-section {
+      margin-top: var(--space-6);
+      border-top: 1px solid var(--line);
+      padding-top: var(--space-2);
+    }
+
+    .reader-section-title {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 4px 10px;
+      min-height: var(--target-primary);
+      padding: var(--space-2) 0;
+      color: var(--text);
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .reader-section-meta {
+      color: var(--text-2);
+      font-size: 13px;
+      font-weight: 400;
+    }
+
+    .reader-section-body {
+      display: grid;
+      gap: var(--space-4);
+      padding: var(--space-2) 0 var(--space-4);
+      line-height: 1.55;
+    }
+
+    .reader-section-empty {
+      color: var(--text-2);
+    }
+
+    .reader-comments {
+      display: grid;
+      gap: var(--space-4);
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .reader-comment p {
+      margin: 4px 0 0;
+      overflow-wrap: anywhere;
+    }
+
+    .reader-comment-head span,
+    .reader-quotes {
+      color: var(--text-2);
+      font-size: 13px;
+    }
+
+    .reader-analysis-block h3 {
+      margin: 0 0 6px;
+      font-size: 15px;
+    }
+
+    .reader-analysis-block ul {
+      display: grid;
+      gap: var(--space-2);
+      margin: 0;
+      padding-left: 20px;
+    }
+
+    .reader-quotes {
+      margin: 6px 0 0;
+      padding-left: 18px;
+    }
+
+    .reader-facts {
+      display: grid;
+      gap: var(--space-2);
+    }
+
+    .visually-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+
+    /* Library beside the reader from 900px up: the list keeps its place
+       while the reader scrolls. Under 900px the reader is full width. */
+    @media (min-width: 900px) {
+      .library-split.reading {
+        display: grid;
+        grid-template-columns: minmax(300px, 380px) minmax(0, 1fr);
+        gap: var(--space-8);
+        max-width: 1280px;
+        margin: 0 auto;
+      }
+
+      .library-split.reading > .tab-panel {
+        max-width: none;
+        margin: 0;
+      }
+
+      .library-split.reading > #tab-library {
+        position: sticky;
+        top: 0;
+        display: block;
+        max-height: calc(100vh - 62px);
+        overflow-y: auto;
+        padding-right: var(--space-2);
+      }
+
+      .library-split.reading #tab-library .library-head-actions,
+      .library-split.reading #tab-library .library-insights,
+      .library-split.reading #tab-library .health-legend,
+      .library-split.reading #tab-library .resume-card {
+        display: none;
+      }
+
+      .library-split.reading #tab-library .control-grid {
+        grid-template-columns: minmax(0, 1fr) auto;
+      }
+
+      .library-split.reading #tab-library .library-kinds {
+        grid-column: 1 / -1;
+      }
+
+      .library-split.reading .uoink-card,
+      .library-split.reading .capture-row {
+        grid-template-columns: 64px minmax(0, 1fr);
+      }
+
+      .library-split.reading .row-thumb {
+        width: 64px;
+      }
+
+      .library-split.reading .uoink-card .row-actions {
+        display: none;
+      }
+
+      .library-split.reading .capture-actions {
+        grid-column: 2;
+        justify-content: flex-start;
+      }
+    }
+
     .hidden {
       display: none !important;
     }
 
     @media (max-width: 1080px) {
+      .sidebar-topics {
+        display: none;
+      }
+
       body { overflow: auto; }
       html,
       body,
@@ -3267,7 +3702,6 @@
       .resurface-layout,
       .writing-layout,
       .evidence-layout,
-      .yoink-layout,
       .settings-grid {
         grid-template-columns: 1fr;
       }
@@ -3283,6 +3717,39 @@
     @media (max-width: 620px) {
       .sidebar {
         grid-template-columns: 1fr;
+      }
+      /* Library and the reader at phone width: the chips get their own
+         line, row actions sit under the row, the title steps down. */
+      #tab-library .control-grid {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      }
+      .library-kinds {
+        grid-column: 1 / -1;
+      }
+      .omnibox-row {
+        flex-wrap: wrap;
+      }
+      .omnibox-row .button {
+        flex: 1 1 100%;
+      }
+      .uoink-card,
+      .capture-row {
+        grid-template-columns: 72px minmax(0, 1fr);
+      }
+      .row-thumb {
+        width: 72px;
+      }
+      .row-actions {
+        grid-column: 2;
+        justify-content: flex-start;
+      }
+      .library-head h1,
+      #tab-yoink h1 {
+        font-size: 26px;
+      }
+      .reader-para p,
+      .reader-prose {
+        font-size: 16px;
       }
       .nav-button {
         flex-basis: calc(50% - 4px);
@@ -3779,6 +4246,13 @@
         <button class="nav-button" type="button" data-tab-button="sources" data-nav-label="Sources">Sources <span class="nav-count" id="sourcesNavCount" title="0 source types" aria-label="0 source types">0</span></button>
         <button class="nav-button" type="button" data-tab-button="settings" data-nav-label="Settings">Settings</button>
       </nav>
+      <!-- Re-haul Library: every topic you've uoinked, with counts (U-05).
+           Shown beside Library and the reader; Filters keeps a Topic menu
+           for narrow windows, where this column becomes the top bar. -->
+      <div class="sidebar-topics hidden" id="sidebarTopics">
+        <h2 class="sidebar-heading" id="sidebarTopicsTitle">Topics</h2>
+        <div class="topic-overview hidden" id="topicOverview" role="group" aria-labelledby="sidebarTopicsTitle"></div>
+      </div>
       <div class="sidebar-bottom">
         <div class="helper-status" id="runningPill" role="status">
           <span class="helper-status-line"><span class="pip" aria-hidden="true"></span><span id="helperStatusText">Checking Uoink...</span></span>
@@ -4123,20 +4597,102 @@
           </div>
         </section>
 
-        <section class="tab-panel active" id="tab-library" data-tab-panel="library">
+        <!-- Re-haul: Library and the reader share one split. Each stays its
+             own tab panel (#library, #item/<id>); from 900px up the list
+             stays beside an open item. -->
+        <div class="library-split" id="librarySplit">
+        <section class="tab-panel active" id="tab-library" data-tab-panel="library" aria-labelledby="libraryHeadline">
           <div class="resume-card hidden" id="resumeCard" aria-live="polite"></div>
-          <div class="page-head">
-            <div>
-              <div class="eyebrow">Library</div>
-              <h1 id="libraryHeadline"><span id="libraryCount">0</span><span id="libraryHeadlineText"> uoinks </span><em id="libraryHeadlineAccent">ready to read.</em></h1>
-              <p class="lede">Filter by platform, source type, author, and topic, or search across every transcript and comment. Everything stays on this machine in your Uoink index.</p>
-            </div>
-            <div class="inline-row">
+          <div class="page-head library-head">
+            <h1 id="libraryHeadline"><span id="libraryHeadlineText">Library</span> <span class="library-count" id="libraryCount">0</span></h1>
+            <div class="inline-row library-head-actions">
               <a class="route-link" href="#for-you" data-nav-label="For You">For You <span class="nav-count" id="forYouNavCount" title="0 suggestions" aria-label="0 suggestions">0</span></a>
               <button class="button ghost" type="button" id="clearFilters">Clear filters</button>
-              <button class="button primary" type="button" id="newYoink">Open YouTube</button>
+              <button class="button ghost" type="button" id="newYoink">Open YouTube</button>
             </div>
           </div>
+          <div class="control-grid">
+            <div class="library-omnibox">
+              <div class="omnibox-row">
+                <input class="control" id="searchInput" type="search" placeholder="Search your library or paste a link to uoink it" aria-label="Search your library or paste a link to uoink it" aria-describedby="libraryCaptureNote" autocomplete="off" spellcheck="false">
+                <button class="button primary hidden" type="button" id="libraryCaptureButton" disabled>Uoink it</button>
+              </div>
+              <p class="library-capture-note" id="libraryCaptureNote" role="status" aria-live="polite"></p>
+            </div>
+            <div class="library-kinds" id="libraryKinds" role="group" aria-label="Show">
+              <button class="kind-chip" type="button" data-library-kind="" aria-pressed="true">All</button>
+              <button class="kind-chip" type="button" data-library-kind="videos" aria-pressed="false">Videos</button>
+              <button class="kind-chip" type="button" data-library-kind="posts" aria-pressed="false">Posts</button>
+              <button class="kind-chip" type="button" data-library-kind="notes" aria-pressed="false">Notes</button>
+              <button class="kind-chip" type="button" data-library-kind="podcasts" aria-pressed="false">Podcasts</button>
+            </div>
+            <details class="library-more-filters" id="libraryMoreFilters">
+              <summary class="control library-filter-summary">Filters <span class="library-filter-count" id="advancedFilterCount">0</span></summary>
+              <div class="library-filter-popover">
+                <select class="control" id="platformFilter" aria-label="Filter by platform"><option value="">All platforms</option></select>
+                <select class="control" id="sourceTypeFilter" aria-label="Filter by source type"><option value="">All types</option></select>
+                <select class="control" id="channelFilter" aria-label="Filter by author"><option value="">All authors</option></select>
+                <select class="control" id="topicFilter" aria-label="Filter by topic"><option value="">All topics</option></select>
+                <select class="control video-facet" id="hookFilter" aria-label="Filter by hook">
+                  <option value="">Any hook</option>
+                  <option value="curiosity_gap">curiosity gap</option>
+                  <option value="question">question</option>
+                  <option value="contrarian">contrarian</option>
+                  <option value="story_open">story open</option>
+                  <option value="promise_list">promise/list</option>
+                  <option value="demo">demo</option>
+                  <option value="authority">authority</option>
+                  <option value="stakes">stakes</option>
+                  <option value="other">other</option>
+                </select>
+                <select class="control video-facet" id="formatFilter" aria-label="Filter by format"><option value="">Format</option></select>
+                <select class="control video-facet" id="performanceFilter" aria-label="Filter by performance"><option value="">Performance</option></select>
+                <select class="control video-facet" id="lengthFilter" aria-label="Filter by length"><option value="">Length</option></select>
+                <input class="control" id="dateFrom" type="date" aria-label="Date from">
+                <input class="control" id="dateTo" type="date" aria-label="Date to">
+              </div>
+            </details>
+            <select class="control" id="sortFilter" aria-label="Sort Library">
+              <option value="newest">Newest first</option>
+              <option value="oldest">Oldest first</option>
+              <option value="title">Title A to Z</option>
+              <option value="relevance">Best match</option>
+            </select>
+          </div>
+          <div id="dateRangeError" class="field-error hidden" role="status" aria-live="polite"></div>
+
+          <div class="summary-line">
+            <span id="resultSummary" aria-live="polite">Loading library...</span>
+            <div class="library-filter-chips hidden" id="activeFilters" aria-live="polite"></div>
+            <span><span id="facetStatus" class="facet-status hidden" title="">?</span> <button class="hook-help-link" type="button" data-hook-explain="">What's a hook?</button></span>
+            <span class="health-legend" title="A row names its state in words; the dot only repeats it.">
+              <span class="warn"><i></i>still working</span>
+              <span class="fail"><i></i>needs attention</span>
+            </span>
+          </div>
+
+          <!-- Captures that are still working, waiting on YouTube, or failed
+               (from the jobs stream and the retry queue), above the saved list. -->
+          <div class="library-captures hidden" id="libraryCaptures" role="group" aria-label="Captures in progress"></div>
+          <div id="libraryGrid" class="library-list"></div>
+          <div id="libraryEmpty" class="empty-state hidden">
+            <div>
+              <h2>No saved uoinks yet.</h2>
+              <p>Save a video, podcast, or article and it shows up here with transcript, screenshots when available, and creator credit. Quickest start: paste any URL in the box above and Uoink figures out the rest.</p>
+              <div class="inline-row" style="justify-content:center;margin-top:20px">
+                <button class="button primary" type="button" id="emptyPasteUrl">Paste a URL to uoink</button>
+                <button class="button ghost" type="button" data-open-extension>Get the extension</button>
+              </div>
+            </div>
+          </div>
+          <div class="summary-line" style="margin-top:18px">
+            <button class="button ghost" type="button" id="loadMore">Load more</button>
+            <span id="pageSummary"></span>
+          </div>
+
+          <!-- Re-haul: Library analytics sit below the list, collapsed. -->
+          <details class="library-insights" id="libraryInsights">
+            <summary class="library-insights-summary">Insights <span class="soft-note">captures over time, shelves, sources and creators</span></summary>
           <div class="learn-links" aria-label="Library walkthrough links">
             <a href="https://uoink.app/features/memory-search" target="_blank" rel="noreferrer">Learn: Memory Search</a>
             <a href="https://uoink.app/features/faceted-classification" target="_blank" rel="noreferrer">Learn: Facets</a>
@@ -4347,73 +4903,70 @@
             </div>
           </div>
 
-          <div class="control-grid">
-            <input class="control" id="searchInput" type="search" placeholder="search transcripts, titles, comments" aria-label="Search Library">
-            <select class="control" id="platformFilter" aria-label="Filter by platform"><option value="">All platforms</option></select>
-            <select class="control" id="sourceTypeFilter" aria-label="Filter by source type"><option value="">All types</option></select>
-            <select class="control" id="channelFilter" aria-label="Filter by author"><option value="">All authors</option></select>
-            <select class="control" id="topicFilter" aria-label="Filter by topic"><option value="">All topics</option></select>
-            <details class="library-more-filters" id="libraryMoreFilters">
-              <summary class="control library-filter-summary">Filters <span class="library-filter-count" id="advancedFilterCount">0</span></summary>
-              <div class="library-filter-popover">
-                <select class="control video-facet" id="hookFilter" aria-label="Filter by hook">
-                  <option value="">Any hook</option>
-                  <option value="curiosity_gap">curiosity gap</option>
-                  <option value="question">question</option>
-                  <option value="contrarian">contrarian</option>
-                  <option value="story_open">story open</option>
-                  <option value="promise_list">promise/list</option>
-                  <option value="demo">demo</option>
-                  <option value="authority">authority</option>
-                  <option value="stakes">stakes</option>
-                  <option value="other">other</option>
-                </select>
-                <select class="control video-facet" id="formatFilter" aria-label="Filter by format"><option value="">Format</option></select>
-                <select class="control video-facet" id="performanceFilter" aria-label="Filter by performance"><option value="">Performance</option></select>
-                <select class="control video-facet" id="lengthFilter" aria-label="Filter by length"><option value="">Length</option></select>
-                <input class="control" id="dateFrom" type="date" aria-label="Date from">
-                <input class="control" id="dateTo" type="date" aria-label="Date to">
+          </details>
+        </section>
+
+        <!-- Re-haul Reader: one saved item as a document. The transcript reads
+             as paragraphs with their times in a 44px margin and screenshots
+             where they were taken; comments, analysis and file details fold
+             away below it. -->
+        <section class="tab-panel reader" id="tab-yoink" data-tab-panel="yoink" aria-labelledby="yoinkHeading">
+          <div class="page-head reader-head">
+            <nav class="reader-crumbs" aria-label="Breadcrumb">
+              <button class="button ghost" type="button" id="yoinkBack">&larr; Back</button>
+              <ol class="crumb-list">
+                <li><a href="#library">Library</a></li>
+                <li class="hidden" id="yoinkCrumbTopicItem"><button class="crumb-button" type="button" id="yoinkCrumbTopic" data-reader-topic="">Topic</button></li>
+                <li><span class="crumb-current" id="yoinkTitle" aria-current="page">No uoink selected</span></li>
+              </ol>
+            </nav>
+            <div class="reader-title-block">
+              <div class="reader-kind" id="yoinkKind"></div>
+              <h1 id="yoinkHeading" tabindex="-1">Pick something to read</h1>
+              <p class="reader-meta" id="yoinkSubhead">Open a capture from Library to read it here.</p>
+              <a class="reader-source-link hidden" id="yoinkSourceLink" href="#" target="_blank" rel="noreferrer">Watch on the source</a>
+            </div>
+              <div class="inline-row yoink-actions">
+                <button class="button" type="button" id="yoinkCopyMarkdown">Copy as Markdown</button>
+                <button class="button" type="button" id="yoinkSendClaude">Send to Claude</button>
+                <button class="button ghost" type="button" id="yoinkOpenFolder">Open folder</button>
+                <button class="button primary" type="button" id="yoinkWriteFrom">Write from this</button>
+                <details class="action-menu yoink-action-menu" id="yoinkActionMenu">
+                  <summary class="button ghost">More actions</summary>
+                  <div class="action-menu-popover">
+                    <button class="button ghost" type="button" id="yoinkOpenMarkdown">Open transcript file</button>
+                    <button class="button ghost" type="button" id="yoinkRetryCapture">Re-capture source</button>
+                    <button class="button ghost" type="button" id="yoinkRetranscribe">Re-transcribe</button>
+                    <button class="button ghost" type="button" id="yoinkEvidence">Evidence</button>
+                  </div>
+                </details>
+              </div>
+          </div>
+
+          <div class="reader-body">
+            <p class="reader-note hidden" id="yoinkTranscriptNote" role="note"></p>
+            <article class="reader-doc" id="yoinkDetail" aria-label="Transcript"></article>
+            <details class="reader-section hidden" id="yoinkCommentsSection">
+              <summary class="reader-section-title">Comments <span class="reader-section-meta" id="yoinkCommentsMeta"></span></summary>
+              <div class="reader-section-body" id="yoinkComments"></div>
+            </details>
+            <details class="reader-section hidden" id="yoinkAnalysisSection">
+              <summary class="reader-section-title">AI analysis <span class="reader-section-meta" id="yoinkAnalysisMeta"></span></summary>
+              <div class="reader-section-body" id="yoinkAnalysis"></div>
+            </details>
+            <details class="reader-section" id="yoinkFactsSection">
+              <summary class="reader-section-title">File details <span class="reader-section-meta" id="yoinkFactMeta">saved files</span></summary>
+              <div class="reader-section-body">
+                <div class="reader-facts" id="yoinkFacts"></div>
+                <div class="learn-links" aria-label="Uoink detail walkthrough links">
+                  <a href="https://uoink.app/features/podcast-feeds" target="_blank" rel="noreferrer">Learn: Podcast Feeds</a>
+                  <a href="https://uoink.app/features/evidence-panel" target="_blank" rel="noreferrer">Learn: Evidence</a>
+                </div>
               </div>
             </details>
-            <select class="control" id="sortFilter" aria-label="Sort Library">
-              <option value="newest">Sort: newest</option>
-              <option value="oldest">Sort: oldest</option>
-              <option value="title">Sort: title</option>
-            </select>
-          </div>
-          <div id="dateRangeError" class="field-error hidden" role="status" aria-live="polite"></div>
-
-          <div class="summary-line">
-            <span id="resultSummary">Loading library...</span>
-            <div class="library-filter-chips hidden" id="activeFilters" aria-live="polite"></div>
-            <span><span id="facetStatus" class="facet-status hidden" title="">?</span> <button class="hook-help-link" type="button" data-hook-explain="">What's a hook?</button></span>
-            <span class="health-legend" title="Card status appears only while extraction is working or needs attention.">
-              <span class="warn"><i></i>still working</span>
-              <span class="fail"><i></i>needs attention</span>
-            </span>
-          </div>
-
-          <!-- U-05 (UX-13): every topic you've uoinked, with counts, as the
-               clickable overview the corpus never had. Feeds the topic
-               filter below. -->
-          <div class="topic-overview hidden" id="topicOverview" role="group" aria-label="Your topics with saved counts"></div>
-
-          <div id="libraryGrid" class="grid" aria-live="polite"></div>
-          <div id="libraryEmpty" class="empty-state hidden">
-            <div>
-              <h2>No saved uoinks yet.</h2>
-              <p>Save a video, podcast, or article and it shows up here with transcript, screenshots when available, and creator credit. Quickest start: paste any URL below and Uoink figures out the rest.</p>
-              <div class="inline-row" style="justify-content:center;margin-top:20px">
-                <button class="button primary" type="button" id="emptyPasteUrl">Paste a URL to uoink</button>
-                <button class="button ghost" type="button" data-open-extension>Get the extension</button>
-              </div>
-            </div>
-          </div>
-          <div class="summary-line" style="margin-top:18px">
-            <button class="button ghost" type="button" id="loadMore">Load more</button>
-            <span id="pageSummary"></span>
           </div>
         </section>
+        </div>
 
         <section class="tab-panel" id="tab-sources" data-tab-panel="sources">
           <div class="page-head">
@@ -4538,51 +5091,6 @@
             <summary>Planned sources <span class="soft-note" id="sourceRoadmapCount">0</span></summary>
             <div class="source-roadmap-list" id="sourceRoadmapList" role="list" aria-label="Planned source types"></div>
           </details>
-        </section>
-
-        <section class="tab-panel" id="tab-yoink" data-tab-panel="yoink">
-          <div class="page-head">
-            <div>
-              <button class="button ghost" type="button" id="yoinkBack">&larr; Back</button>
-              <div class="eyebrow">Uoink</div>
-              <h1 id="yoinkHeading" tabindex="-1">Pick a uoink <em>to inspect.</em></h1>
-              <p class="lede" id="yoinkSubhead">Podcast episodes, interviews, and regular videos share one saved-source view.</p>
-            </div>
-              <div class="inline-row yoink-actions">
-                <button class="button primary" type="button" id="yoinkWriteFrom">Write from this</button>
-                <details class="action-menu yoink-action-menu" id="yoinkActionMenu">
-                  <summary class="button ghost">More actions</summary>
-                  <div class="action-menu-popover">
-                    <button class="button ghost" type="button" id="yoinkOpenFolder">Open folder</button>
-                    <button class="button ghost" type="button" id="yoinkOpenMarkdown">Open transcript file</button>
-                    <button class="button ghost" type="button" id="yoinkRetryCapture">Re-capture source</button>
-                    <button class="button ghost" type="button" id="yoinkRetranscribe">Re-transcribe</button>
-                    <button class="button ghost" type="button" id="yoinkEvidence">Evidence</button>
-                  </div>
-                </details>
-              </div>
-          </div>
-          <div class="learn-links" aria-label="Uoink detail walkthrough links">
-            <a href="https://uoink.app/features/podcast-feeds" target="_blank" rel="noreferrer">Learn: Podcast Feeds</a>
-            <a href="https://uoink.app/features/evidence-panel" target="_blank" rel="noreferrer">Learn: Evidence</a>
-          </div>
-
-          <div class="yoink-layout">
-            <section class="panel">
-              <div class="panel-head">
-                <div class="panel-title" id="yoinkTitle">No uoink selected</div>
-                <div class="localhost" id="yoinkMeta">saved source</div>
-              </div>
-              <div class="panel-body" id="yoinkDetail"></div>
-            </section>
-            <aside class="panel">
-              <div class="panel-head">
-                <div class="panel-title">Local facts</div>
-                <div class="localhost" id="yoinkFactMeta">saved files</div>
-              </div>
-              <div class="panel-body" id="yoinkFacts"></div>
-            </aside>
-          </div>
         </section>
 
         <section class="tab-panel" id="tab-activity" data-tab-panel="activity">
@@ -5032,7 +5540,23 @@
         date_from: "",
         date_to: "",
         sort: "newest",
+        // Re-haul type chips: "" (All), videos, posts, notes, podcasts.
+        kind: "",
       },
+      // Re-haul: the last step each in-flight capture showed, so only a
+      // step that just advanced animates.
+      captureSteps: new Map(),
+      // Captures started from the Library box until the helper answers
+      // (a single capture is answered when it is saved or has failed).
+      libraryRuns: [],
+      // The phase each running /extract capture is in (/jobs live_captures).
+      liveCaptures: [],
+      // Failed captures dismissed from the Library list (Activity keeps them).
+      libraryDismissed: new Set(),
+      // What each job had saved when last seen ({ status, done } by id), so
+      // a capture saving in the background reloads Library.
+      captureSaveMarks: new Map(),
+      captureSaveBaseline: false,
       blobUrls: new Map(),
       queue: null,
       health: null,
@@ -5269,10 +5793,22 @@
       yoinkHeading: document.getElementById("yoinkHeading"),
       yoinkSubhead: document.getElementById("yoinkSubhead"),
       yoinkTitle: document.getElementById("yoinkTitle"),
-      yoinkMeta: document.getElementById("yoinkMeta"),
+      yoinkKind: document.getElementById("yoinkKind"),
+      yoinkCrumbTopic: document.getElementById("yoinkCrumbTopic"),
+      yoinkCrumbTopicItem: document.getElementById("yoinkCrumbTopicItem"),
+      yoinkSourceLink: document.getElementById("yoinkSourceLink"),
+      yoinkTranscriptNote: document.getElementById("yoinkTranscriptNote"),
       yoinkDetail: document.getElementById("yoinkDetail"),
+      yoinkCommentsSection: document.getElementById("yoinkCommentsSection"),
+      yoinkCommentsMeta: document.getElementById("yoinkCommentsMeta"),
+      yoinkComments: document.getElementById("yoinkComments"),
+      yoinkAnalysisSection: document.getElementById("yoinkAnalysisSection"),
+      yoinkAnalysisMeta: document.getElementById("yoinkAnalysisMeta"),
+      yoinkAnalysis: document.getElementById("yoinkAnalysis"),
       yoinkFacts: document.getElementById("yoinkFacts"),
       yoinkFactMeta: document.getElementById("yoinkFactMeta"),
+      yoinkCopyMarkdown: document.getElementById("yoinkCopyMarkdown"),
+      yoinkSendClaude: document.getElementById("yoinkSendClaude"),
       yoinkOpenFolder: document.getElementById("yoinkOpenFolder"),
       yoinkOpenMarkdown: document.getElementById("yoinkOpenMarkdown"),
       yoinkRetryCapture: document.getElementById("yoinkRetryCapture"),
@@ -5283,12 +5819,17 @@
       runningPill: document.getElementById("runningPill"),
       helperStatusText: document.getElementById("helperStatusText"),
       helperOfflineFix: document.getElementById("helperOfflineFix"),
+      librarySplit: document.getElementById("librarySplit"),
+      sidebarTopics: document.getElementById("sidebarTopics"),
+      libraryCaptureButton: document.getElementById("libraryCaptureButton"),
+      libraryCaptureNote: document.getElementById("libraryCaptureNote"),
+      libraryKinds: document.getElementById("libraryKinds"),
+      libraryCaptures: document.getElementById("libraryCaptures"),
       libraryGrid: document.getElementById("libraryGrid"),
       libraryEmpty: document.getElementById("libraryEmpty"),
       libraryHeadline: document.getElementById("libraryHeadline"),
       libraryCount: document.getElementById("libraryCount"),
       libraryHeadlineText: document.getElementById("libraryHeadlineText"),
-      libraryHeadlineAccent: document.getElementById("libraryHeadlineAccent"),
       libraryNavCount: document.getElementById("libraryNavCount"),
       resultSummary: document.getElementById("resultSummary"),
       pageSummary: document.getElementById("pageSummary"),
@@ -6136,7 +6677,8 @@
     function transcriptSegments(sidecar = {}) {
       const raw = sidecar.transcript || sidecar.segments || (sidecar.diarization && sidecar.diarization.segments) || [];
       if (typeof raw === "string") {
-        return raw.split(/\n+/).filter(Boolean).slice(0, 12).map((text) => ({ text }));
+        // The Reader shows the whole text, not a preview.
+        return raw.split(/\n+/).filter(Boolean).map((text) => ({ text }));
       }
       return Array.isArray(raw)
         ? raw.filter((segment) => typeof segment === "string" || (segment && typeof segment === "object" && !Array.isArray(segment)))
@@ -6290,76 +6832,329 @@
       return platform && platform !== "youtube" ? "non-youtube" : "youtube";
     }
 
-    function cardWaveformHtml(row) {
-      const seed = rowTitle(row).length + String(row && row.channel || "").length;
-      const bars = Array.from({ length: 24 }, (_, index) => 24 + ((seed + index * 19) % 62));
-      return `<div class="card-waveform" aria-hidden="true">${bars.map((height) => `<span style="--bar-height:${height}%"></span>`).join("")}</div>`;
+    // ---- Re-haul Reader -------------------------------------------------
+    // One saved item read as a document: paragraphs with their stored times
+    // in a 44px gutter, screenshots where they were taken, then comments
+    // and AI analysis folded away below.
+
+    // Kinds whose words follow a timeline (a transcript), not a page.
+    function isTimedMedia(row, sidecar = {}) {
+      if (isNoteContent(row, sidecar)) return false;
+      const st = String(firstValue(row && row.source_type, sidecar.source_type) || "").toLowerCase();
+      if (["image", "page", "x_article", "x_thread", "reddit_thread"].includes(st)) return false;
+      return platformOf(row, sidecar) !== "image";
     }
 
-    function mediaChipsHtml(row, sidecar = {}) {
-      const channel = firstValue(sidecar.host, sidecar.author, sidecar.channel, row && row.channel);
-      const duration = durationOf(row, sidecar);
-      const chips = [
-        { label: mediaLabelFor(row, sidecar), primary: true },
-        { label: platformOf(row, sidecar) },
-        { label: channel },
-        { label: row && row.topic },
-        { label: Number.isFinite(duration) && duration > 0 ? fmtDuration(duration) : "" },
-      ].filter((item) => item.label);
-      return `<div class="yoink-meta-row">${chips.map((item) => `<span class="media-chip ${item.primary ? "primary" : ""}">${htmlEscape(item.label)}</span>`).join("")}</div>`;
+    // Seconds from a saved clock ("00:01:05", "1:05", 65), or null.
+    function clockSeconds(value) {
+      if (typeof value === "number") return Number.isFinite(value) && value >= 0 ? value : null;
+      const text = String(value ?? "").trim();
+      if (!text) return null;
+      if (/^\d+(\.\d+)?$/.test(text)) return Number(text);
+      const parts = text.split(":");
+      if (parts.length < 2 || parts.length > 3 || !parts.every((part) => /^\d+(\.\d+)?$/.test(part))) return null;
+      return parts.reduce((total, part) => total * 60 + Number(part), 0);
     }
 
-    function waveformHtml(row, sidecar = {}) {
-      const seed = rowTitle(row).length + transcriptSegments(sidecar).length * 7;
-      const bars = Array.from({ length: 48 }, (_, index) => 24 + ((seed + index * 17) % 62));
-      return `<div class="waveform" aria-hidden="true">${bars.map((height) => `<span style="--bar-height:${height}%"></span>`).join("")}</div>`;
+    function shotSeconds(shot) {
+      if (!shot || typeof shot !== "object") return null;
+      const stored = storedTime(shot.timestamp_seconds, shot.start, shot.time);
+      return stored !== null ? stored : clockSeconds(shot.timestamp);
     }
 
-    function markdownPreviewLines(value) {
-      return String(value || "")
-        .split(/\n+/)
-        .map((line) => line.trim())
-        .filter((line) => line && !/^---$/.test(line))
-        .filter((line) => !/^#\s+/.test(line))
-        .slice(0, 8);
+    // The source opened at this second when it takes a time (YouTube's t=);
+    // null for sources with no time links, so no link pretends to seek.
+    function sourceTimeUrl(url, seconds) {
+      const base = String(url || "");
+      if (seconds === null || !/^https?:\/\/([a-z0-9-]+\.)*(youtube\.com|youtu\.be)\//i.test(base)) return null;
+      const t = `t=${Math.floor(seconds)}s`;
+      if (/[?&]t=[^&#]*/.test(base)) return base.replace(/([?&])t=[^&#]*/, `$1${t}`);
+      return `${base}${base.includes("?") ? "&" : "?"}${t}`;
     }
 
-    function markdownTranscriptPreviewHtml(markdown) {
-      const lines = markdownPreviewLines(markdown);
-      if (!lines.length) return "";
-      return `
-        <div class="transcript-preview markdown-rendered">
-          ${lines.map((line) => `<div class="transcript-segment"><div class="job-sub">${renderInlineMarkdown(line)}</div></div>`).join("")}
-        </div>
-      `;
-    }
+    const READER_PARAGRAPH_SEGMENTS = 6;
+    const READER_PARAGRAPH_SECONDS = 45;
+    const READER_PAUSE_SECONDS = 2.5;
 
-    function transcriptPreviewHtml(sidecar = {}, podcast = false) {
-      const segments = transcriptSegments(sidecar).slice(0, podcast ? 10 : 6);
-      if (!segments.length) {
-        const markdownPreview = markdownTranscriptPreviewHtml(state.selectedYoinkMarkdown);
-        if (markdownPreview) return markdownPreview;
-        if (state.selectedYoinkMarkdownState === "no_markdown") {
-          return emptyPanelRow(
-            "Transcript file needs a fresh capture.",
-            "Re-capture this source to rebuild the saved transcript file."
-          );
+    // Transcript segments as reading paragraphs: a new one at a speaker
+    // change or a pause, or once a paragraph has run long and its last line
+    // ends a sentence. Times are only ever the ones the capture stored.
+    function readerParagraphs(sidecar = {}) {
+      const out = [];
+      let current = null;
+      transcriptSegments(sidecar).forEach((segment) => {
+        const text = String(segment.text || segment.content || "").replace(/\s+/g, " ").trim();
+        if (!text) return;
+        const start = storedTime(segment.start, segment.start_seconds);
+        const end = storedTime(segment.end, segment.end_seconds);
+        const speaker = String(firstValue(segment.speaker, segment.speaker_label, segment.speaker_id) || "");
+        let fresh = !current || speaker !== current.speaker;
+        if (!fresh) {
+          const count = current.parts.length;
+          const lastLine = current.parts[count - 1];
+          const paused = start !== null && current.end !== null && start - current.end > READER_PAUSE_SECONDS;
+          const long = count >= READER_PARAGRAPH_SEGMENTS
+            || (start !== null && current.start !== null && start - current.start >= READER_PARAGRAPH_SECONDS);
+          const sentenceEnds = /[.!?…]["'”)\]]?$/.test(lastLine);
+          fresh = paused || (long && sentenceEnds) || count >= READER_PARAGRAPH_SEGMENTS * 2;
         }
-        return emptyPanelRow(
-          "Transcript preview unavailable.",
-          podcast ? "Speaker labels appear here when the local transcript includes them." : "Open the saved transcript for the full text."
-        );
+        if (fresh) {
+          current = { start, end: null, speaker, parts: [] };
+          out.push(current);
+        }
+        current.parts.push(text);
+        const reached = end !== null ? end : start;
+        if (reached !== null) current.end = reached;
+      });
+      return out;
+    }
+
+    // "0:00", "12:34", "1:02:03" (fmtDuration reads 0 as unknown, but a
+    // transcript's first line really is at 0:00).
+    function readerClock(seconds) {
+      const n = Math.max(0, Math.floor(Number(seconds) || 0));
+      const h = Math.floor(n / 3600);
+      const m = Math.floor((n % 3600) / 60);
+      const s = String(n % 60).padStart(2, "0");
+      return h ? `${h}:${String(m).padStart(2, "0")}:${s}` : `${m}:${s}`;
+    }
+
+    function readerTimeHtml(seconds, url) {
+      if (seconds === null) {
+        // Never an invented offset: the gutter says the time is unknown.
+        return `<span class="reader-time none" title="time not stored"><span class="visually-hidden">time not stored</span></span>`;
       }
+      const label = htmlEscape(readerClock(seconds));
+      const link = sourceTimeUrl(url, seconds);
+      return link
+        ? `<a class="reader-time" href="${htmlEscape(link)}" target="_blank" rel="noreferrer" title="Open the source at ${label}">${label}</a>`
+        : `<span class="reader-time">${label}</span>`;
+    }
+
+    function readerShotHtml(row, shot, seconds, url) {
+      const path = screenshotPath(row, shot);
+      if (!path) return "";
+      const label = seconds === null ? "Screenshot" : `Screenshot at ${readerClock(seconds)}`;
       return `
-        <div class="transcript-preview">
-          ${segments.map((segment) => {
-            const speaker = firstValue(segment.speaker, segment.speaker_label, segment.speaker_id);
-            const start = storedTime(segment.start, segment.start_seconds);
-            const label = [start === null ? "time not stored" : fmtTimestamp(start), speaker].filter(Boolean).join(" | ");
-            return `<div class="transcript-segment"><b>${htmlEscape(label)}</b><div class="job-sub">${htmlEscape(segment.text || segment.content || "")}</div></div>`;
-          }).join("")}
-        </div>
+        <figure class="reader-row reader-shot">
+          <div class="reader-gutter">${seconds === null ? "" : readerTimeHtml(seconds, url)}</div>
+          <div class="reader-shot-frame"><img alt="${htmlEscape(label)}" data-reader-img="${htmlEscape(path)}"></div>
+        </figure>
       `;
+    }
+
+    // The saved screenshots: those with a readable time in time order, and
+    // those without one.
+    function readerShotList(sidecar = {}) {
+      const shots = (Array.isArray(sidecar.screenshots) ? sidecar.screenshots : [])
+        .map((shot) => ({ shot, seconds: shotSeconds(shot) }));
+      return {
+        timed: shots.filter((item) => item.seconds !== null).sort((a, b) => a.seconds - b.seconds),
+        loose: shots.filter((item) => item.seconds === null),
+      };
+    }
+
+    // Every saved screenshot at its time, for a capture with no timed
+    // transcript to sit them in (no captions and no local transcript, or
+    // text read from the Markdown, whose image lines are dropped). The
+    // screenshots never wait on a transcript.
+    function readerShotsHtml(row, sidecar = {}) {
+      const { timed, loose } = readerShotList(sidecar);
+      const url = sourceUrlOf(row, sidecar);
+      const html = timed.concat(loose).map((item) => readerShotHtml(row, item.shot, item.seconds, url)).join("");
+      return html ? `<div class="reader-transcript reader-shots">${html}</div>` : "";
+    }
+
+    // Paragraphs in time order with each screenshot after the paragraph
+    // its time falls in; shots with no readable time close the document.
+    function readerTranscriptHtml(row, sidecar = {}) {
+      const paragraphs = readerParagraphs(sidecar);
+      if (!paragraphs.length) return "";
+      const url = sourceUrlOf(row, sidecar);
+      const { timed, loose } = readerShotList(sidecar);
+      // The start of the next paragraph that has a stored time, per index.
+      const nextStart = new Array(paragraphs.length).fill(Infinity);
+      for (let i = paragraphs.length - 2; i >= 0; i -= 1) {
+        const after = paragraphs[i + 1];
+        nextStart[i] = after.start !== null ? after.start : nextStart[i + 1];
+      }
+      let next = 0;
+      const rows = paragraphs.map((paragraph, index) => {
+        const until = nextStart[index];
+        const figures = [];
+        if (paragraph.start !== null || index === paragraphs.length - 1) {
+          while (next < timed.length && timed[next].seconds < until) {
+            figures.push(readerShotHtml(row, timed[next].shot, timed[next].seconds, url));
+            next += 1;
+          }
+        }
+        const speaker = paragraph.speaker ? `<b class="reader-speaker">${htmlEscape(paragraph.speaker)}</b> ` : "";
+        return `
+          <div class="reader-row reader-para">
+            <div class="reader-gutter">${readerTimeHtml(paragraph.start, url)}</div>
+            <p>${speaker}${htmlEscape(paragraph.parts.join(" "))}</p>
+          </div>
+          ${figures.join("")}
+        `;
+      });
+      const rest = timed.slice(next).concat(loose)
+        .map((item) => readerShotHtml(row, item.shot, item.seconds, url)).join("");
+      return `<div class="reader-transcript">${rows.join("")}${rest}</div>`;
+    }
+
+    // The saved Markdown as the document (notes, pages, posts, threads, and
+    // older captures with no saved segments), without its front matter, the
+    // title line the reader already shows, image lines or file markers.
+    function readerMarkdownHtml(markdown) {
+      const text = String(markdown || "").replace(/\r\n/g, "\n")
+        .replace(/^---\n[\s\S]*?\n---\n/, "")
+        .replace(/<!--[\s\S]*?-->/g, "")
+        .replace(/^\s*#\s+[^\n]*\n/, "")
+        .replace(/^\s*!\[[^\]]*\]\([^)]*\)\s*$/gm, "");
+      const html = renderMarkdown(text)
+        .replace(/<(\/?)h([1-3])>/g, (_, slash, level) => `<${slash}h${Number(level) + 1}>`);
+      return html ? `<div class="reader-prose markdown-rendered">${html}</div>` : "";
+    }
+
+    // Why this capture's words came from Whisper, or why it has none
+    // (CM-11: transcript_source plus asr_fallback's status and reason).
+    // Platform captions need no note.
+    function transcriptNoteText(row, sidecar = {}) {
+      if (!row || !isTimedMedia(row, sidecar)) return "";
+      const source = transcriptKind(firstValue(sidecar.transcript_source, row.transcript_source));
+      const fallback = sidecar.asr_fallback && typeof sidecar.asr_fallback === "object" ? sidecar.asr_fallback : {};
+      const status = String(firstValue(fallback.status, row.asr_fallback_status) || "").toLowerCase();
+      const podcast = isPodcastContent(row, sidecar);
+      const modelName = fallback.model ? transcriptModelLabel(fallback.model) : "";
+      const model = modelName ? ` (${modelName} model)` : "";
+      // "Didn't provide": the capture cannot tell a video with no captions
+      // from captions the platform refused to hand over.
+      const noCaptions = `${platformChipLabel(platformOf(row, sidecar))} didn't provide captions for this ${podcast ? "episode" : "video"}`;
+      if (source === "asr") {
+        return podcast
+          ? `Uoink transcribed this episode's audio on this PC with Whisper${model}.`
+          : `${noCaptions}, so Uoink transcribed the audio on this PC with Whisper${model}.`;
+      }
+      if (source) return "";
+      if (status === "disabled") {
+        return `${noCaptions}, and transcribing on this PC is turned off, so there is no transcript. Turn it on in Settings, Capture, then Re-transcribe.`;
+      }
+      if (status === "model_not_downloaded") {
+        return `${noCaptions}, and the local transcriber${modelName ? ` (${modelName})` : ""} isn't on this PC yet, so there is no transcript. Download it in Settings, Capture, then Re-transcribe.`;
+      }
+      if (status === "failed") {
+        const reason = String(fallback.error || "").trim();
+        return `${noCaptions}, and transcribing it on this PC failed${reason ? ` (${reason})` : ""}. Re-transcribe to try again.`;
+      }
+      if (status === "skipped_chunked_mode") {
+        return `${noCaptions}. Uoink saved this long ${podcast ? "episode" : "video"} in sections, so it did not transcribe partial audio.`;
+      }
+      return "";
+    }
+
+    function readerDocumentHtml(row, sidecar = {}) {
+      const transcript = isTimedMedia(row, sidecar) ? readerTranscriptHtml(row, sidecar) : "";
+      if (transcript) return transcript;
+      // No timed transcript: whatever text there is, then the screenshots.
+      const shots = readerShotsHtml(row, sidecar);
+      const prose = readerMarkdownHtml(state.selectedYoinkMarkdown);
+      if (prose) return `${prose}${shots}`;
+      if (state.selectedYoinkMarkdownState === "loading" || (!state.selectedYoinkSidecar && !state.selectedYoinkSidecarError && isTimedMedia(row, sidecar))) {
+        return `${emptyPanelRow("Opening the transcript...", "Reading the saved files on this PC.")}${shots}`;
+      }
+      if (state.selectedYoinkMarkdownState === "no_markdown") {
+        return `${emptyPanelRow(
+          "Transcript file needs a fresh capture.",
+          "Re-capture this source to rebuild the saved transcript file."
+        )}${shots}`;
+      }
+      return `${emptyPanelRow(
+        isTimedMedia(row, sidecar) ? "No transcript saved." : "Nothing to read yet.",
+        shots ? "The screenshots it saved are below." : "Open the folder to see what this capture saved."
+      )}${shots}`;
+    }
+
+    function commentStatusCopy(status) {
+      return ({
+        pending: "Comments are still coming in from the source.",
+        disabled: "Comments are turned off on the source.",
+        unavailable: "Uoink couldn't fetch the comments.",
+        skipped: "Comments were skipped for this capture.",
+      })[String(status || "").toLowerCase()] || "";
+    }
+
+    function readerCommentsHtml(sidecar = {}) {
+      const comments = Array.isArray(sidecar.comments) ? sidecar.comments : [];
+      if (!comments.length) {
+        const copy = commentStatusCopy(sidecar.comments_status);
+        return copy ? `<p class="reader-section-empty">${htmlEscape(copy)}</p>` : "";
+      }
+      return `<ol class="reader-comments">${comments.map((comment) => {
+        const facts = [
+          comment.is_pinned ? "pinned" : "",
+          Number(comment.like_count) ? `${Number(comment.like_count).toLocaleString()} like${Number(comment.like_count) === 1 ? "" : "s"}` : "",
+          Number(comment.reply_count) ? `${Number(comment.reply_count).toLocaleString()} repl${Number(comment.reply_count) === 1 ? "y" : "ies"}` : "",
+          comment.time_text || "",
+        ].filter(Boolean).join(" · ");
+        return `
+          <li class="reader-comment">
+            <div class="reader-comment-head"><b>${htmlEscape(comment.author || "Someone")}</b>${facts ? ` <span>${htmlEscape(facts)}</span>` : ""}</div>
+            <p>${htmlEscape(comment.text || "")}</p>
+          </li>
+        `;
+      }).join("")}</ol>`;
+    }
+
+    function readerAnalysisHtml(sidecar = {}) {
+      const parts = [];
+      if (sidecar.hook_type) {
+        const confidence = Number(sidecar.hook_type_confidence);
+        parts.push(`
+          <div class="reader-analysis-block">
+            <h3>Hook</h3>
+            <p><button class="hook-help-link" type="button" data-hook-explain="${htmlEscape(sidecar.hook_type)}">${htmlEscape(prettyHook(sidecar.hook_type))}</button>${Number.isFinite(confidence) && confidence > 0 ? ` <span class="reader-section-meta">confidence ${htmlEscape(confidence)}/5</span>` : ""}</p>
+            ${sidecar.hook_explanation ? `<p>${htmlEscape(sidecar.hook_explanation)}</p>` : ""}
+          </div>
+        `);
+      }
+      const ci = sidecar.comment_intelligence && typeof sidecar.comment_intelligence === "object" ? sidecar.comment_intelligence : null;
+      if (ci) {
+        const themes = (ci.top_themes || []).filter((theme) => theme && (theme.label || theme.description));
+        const tools = (ci.mentioned_products_tools || []).filter((tool) => tool && tool.name);
+        const disputes = (ci.notable_disagreements || []).filter((item) => item && item.description);
+        const quotes = (list) => (list || []).length
+          ? `<ul class="reader-quotes">${list.map((quote) => `<li>${htmlEscape(quote)}</li>`).join("")}</ul>` : "";
+        if (themes.length) {
+          parts.push(`<div class="reader-analysis-block"><h3>What commenters talk about</h3><ul>${themes.map((theme) => `
+            <li><b>${htmlEscape(theme.label || "Theme")}</b>${theme.count ? ` (${htmlEscape(theme.count)} comments)` : ""}${theme.description ? `: ${htmlEscape(theme.description)}` : ""}${quotes(theme.quotes)}</li>`).join("")}</ul></div>`);
+        }
+        if (tools.length) {
+          parts.push(`<div class="reader-analysis-block"><h3>Products and tools mentioned</h3><p>${tools.map((tool) => `${htmlEscape(tool.name)}${tool.frequency > 1 ? ` (${htmlEscape(tool.frequency)})` : ""}`).join(", ")}</p></div>`);
+        }
+        if (disputes.length) {
+          parts.push(`<div class="reader-analysis-block"><h3>Where commenters disagree</h3><ul>${disputes.map((item) => `
+            <li>${htmlEscape(item.description)}${quotes(item.sample_comments)}</li>`).join("")}</ul></div>`);
+        }
+      }
+      return parts.join("");
+    }
+
+    // Reader actions on the saved Markdown: copy it, or copy it and open
+    // Claude to paste into (the extension's Send-to flow).
+    async function copySelectedMarkdown({ openClaude = false } = {}) {
+      const videoId = videoIdOf(state.selectedYoink);
+      if (!videoId) return showToast("Select a uoink first.");
+      let markdown = state.selectedYoinkMarkdown;
+      try {
+        if (!markdown) markdown = await loadYoinkMarkdown(videoId);
+        if (!markdown) throw new Error("empty");
+        await navigator.clipboard.writeText(markdown);
+      } catch (_) {
+        return showToast("Couldn't copy the Markdown. Open the transcript file instead.");
+      }
+      if (!openClaude) return showToast("Copied as Markdown.");
+      openExternal("https://claude.ai/new");
+      showToast("Copied. Paste it into the new Claude chat.");
     }
 
     function screenshotPath(row, shot) {
@@ -6367,22 +7162,6 @@
       if (shot.absolute_path || shot.file_path) return String(shot.absolute_path || shot.file_path);
       const rel = shot.path || shot.filename;
       return rel ? joinLocalPath(folderPathOf(row), rel) : "";
-    }
-
-    function screenshotGridHtml(row, sidecar = {}) {
-      const shots = Array.isArray(sidecar.screenshots) ? sidecar.screenshots.slice(0, 8) : [];
-      if (!shots.length) {
-        return emptyPanelRow("Screenshots unavailable.", "Video screenshots appear here when the source folder includes local frames.");
-      }
-      return `
-        <div class="screenshot-grid">
-          ${shots.map((shot) => {
-            const path = screenshotPath(row, shot);
-            const label = shot.timestamp || fmtTimestamp(shot.start || shot.time || 0);
-            return `<div class="screenshot-tile"><img alt="" class="hidden" data-file-img="${htmlEscape(path)}"><span>${htmlEscape(label)}</span></div>`;
-          }).join("")}
-        </div>
-      `;
     }
 
     function noteReadinessLabel() {
@@ -6473,69 +7252,124 @@
       els.yoinkRetranscribe.textContent = state.retranscribing ? "Queuing..." : "Re-transcribe";
       els.yoinkRetranscribe.title = isNote ? "Re-transcription is not applicable for notes." : "";
       els.yoinkRetryCapture.title = isNote ? "Re-capture is not applicable for notes." : (sourceUrl ? "Queue a fresh capture for this source." : "No source link is stored for this uoink.");
+      els.yoinkCopyMarkdown.disabled = !hasRow || !videoIdOf(row);
+      els.yoinkSendClaude.disabled = !hasRow || !videoIdOf(row);
       const lookup = !hasRow && state.selectedYoinkLookup ? YOINK_LOOKUP_COPY[state.selectedYoinkLookup.state] : null;
-      if (lookup) {
-        els.yoinkHeading.textContent = lookup.heading;
-        els.yoinkSubhead.textContent = lookup.subhead;
-        els.yoinkTitle.textContent = lookup.heading;
-        els.yoinkMeta.textContent = "saved source";
-        els.yoinkFactMeta.textContent = lookup.factMeta;
-        els.yoinkDetail.innerHTML = emptyPanelRow(lookup.heading, lookup.subhead);
-        els.yoinkFacts.innerHTML = emptyPanelRow(lookup.factMeta, lookup.facts);
+      if (lookup || !hasRow) {
+        const copy = lookup || {
+          heading: "Pick something to read",
+          subhead: "Open a capture from Library to read it here.",
+          factMeta: "saved files",
+          facts: "File details show once a capture is open.",
+        };
+        els.yoinkHeading.textContent = copy.heading;
+        els.yoinkSubhead.textContent = copy.subhead;
+        els.yoinkTitle.textContent = lookup ? copy.heading : "Nothing open";
+        els.yoinkKind.textContent = "";
+        els.yoinkCrumbTopicItem.classList.add("hidden");
+        els.yoinkSourceLink.classList.add("hidden");
+        els.yoinkTranscriptNote.classList.add("hidden");
+        els.yoinkCommentsSection.classList.add("hidden");
+        els.yoinkAnalysisSection.classList.add("hidden");
+        els.yoinkFactMeta.textContent = copy.factMeta;
+        els.yoinkDetail.innerHTML = emptyPanelRow(copy.heading, copy.subhead);
+        els.yoinkFacts.innerHTML = emptyPanelRow(copy.factMeta, copy.facts);
         return;
       }
-      if (!hasRow) {
-        els.yoinkHeading.innerHTML = "Pick a uoink <em>to inspect.</em>";
-        els.yoinkSubhead.textContent = "Podcast episodes, interviews, and regular videos share one saved-source view.";
-        els.yoinkTitle.textContent = "No uoink selected";
-        els.yoinkMeta.textContent = "saved source";
-        els.yoinkFactMeta.textContent = "saved files";
-        els.yoinkDetail.innerHTML = emptyPanelRow("No uoink selected.", "Choose a library card to open its saved-source view.");
-        els.yoinkFacts.innerHTML = emptyPanelRow("No local facts loaded.", "Details are read from the saved library row when present.");
-        return;
-      }
-      const podcast = isPodcastContent(row, sidecar);
-      const mediaLabel = mediaLabelFor(row, sidecar);
-      const speakers = speakerNames(sidecar);
       const title = rowTitle({ ...row, title: firstValue(sidecar.episode_title, sidecar.title, row.title) });
-      els.yoinkHeading.innerHTML = `Saved ${htmlEscape(mediaLabel)} <em>source.</em>`;
-      els.yoinkSubhead.textContent = title;
+      const mediaLabel = mediaLabelFor(row, sidecar);
+      const topic = String(row.topic || "").trim();
+      els.yoinkKind.textContent = mediaLabel.charAt(0).toUpperCase() + mediaLabel.slice(1);
+      els.yoinkHeading.innerHTML = htmlEscape(title);
       els.yoinkTitle.textContent = title;
-      els.yoinkMeta.textContent = [
-        mediaLabel,
-        firstValue(sidecar.podcast_title, sidecar.host, sidecar.channel, row.channel),
-        fmtDuration(durationOf(row, sidecar)),
-      ].filter((value) => value && value !== "--:--").join(" | ") || "saved source";
+      els.yoinkSubhead.textContent = readerMetaLine(row, sidecar);
+      els.yoinkCrumbTopic.textContent = topic;
+      els.yoinkCrumbTopic.setAttribute("data-reader-topic", topic);
+      els.yoinkCrumbTopicItem.classList.toggle("hidden", !topic);
+      els.yoinkSourceLink.href = sourceUrl || "#";
+      els.yoinkSourceLink.textContent = sourceLinkLabel(row, sidecar);
+      els.yoinkSourceLink.classList.toggle("hidden", !sourceUrl);
+      const note = transcriptNoteText(row, sidecar);
+      els.yoinkTranscriptNote.textContent = note;
+      els.yoinkTranscriptNote.classList.toggle("hidden", !note);
       els.yoinkFactMeta.textContent = isNote
         ? noteReadinessLabel()
         : (state.selectedYoinkSidecar ? "ready" : (state.selectedYoinkSidecarError || "checking saved files"));
-      const speakerHtml = speakers.length
-        ? `<div class="speaker-row">${speakers.map((speaker) => `<span class="speaker-chip">${htmlEscape(speaker)}</span>`).join("")}</div>`
-        : `<div class="job-sub">${podcast ? "No speaker labels stored for this episode yet." : "No speaker labels stored for this uoink."}</div>`;
-      const mediaBody = podcast
-        ? `
-          ${waveformHtml(row, sidecar)}
-          ${speakerHtml}
-        `
-        : isNote
-          ? ""
-          : screenshotGridHtml(row, sidecar);
-      els.yoinkDetail.innerHTML = `
-        <div class="yoink-hero ${podcast ? "podcast" : isNote ? "note" : ""}">
-          ${mediaChipsHtml(row, sidecar)}
-          ${mediaBody}
-        </div>
-        ${diarizationTimelineHtml(row, sidecar)}
-        <div class="yoink-section">
-          <div class="yoink-section-head">
-            <div class="panel-title">${podcast ? "Episode transcript" : isNote ? "Note" : "Transcript preview"}</div>
-            <div class="localhost">${isNote ? "saved note" : `${htmlEscape(transcriptSegments(sidecar).length)} segments`}</div>
-          </div>
-          ${transcriptPreviewHtml(sidecar, podcast)}
-        </div>
-      `;
+      const speakers = shouldShowDiarization(row, sidecar) && diarizationSegments(sidecar).length
+        ? diarizationTimelineHtml(row, sidecar) : "";
+      els.yoinkDetail.innerHTML = `${speakers}${readerDocumentHtml(row, sidecar)}`;
+      els.yoinkDetail.setAttribute("aria-label", isTimedMedia(row, sidecar) ? "Transcript" : "Saved text");
+      const comments = readerCommentsHtml(sidecar);
+      const commentCount = Array.isArray(sidecar.comments) ? sidecar.comments.length : 0;
+      els.yoinkComments.innerHTML = comments;
+      els.yoinkCommentsMeta.textContent = commentCount ? `${commentCount} saved` : "";
+      els.yoinkCommentsSection.classList.toggle("hidden", !comments);
+      const analysis = readerAnalysisHtml(sidecar);
+      els.yoinkAnalysis.innerHTML = analysis;
+      els.yoinkAnalysisMeta.textContent = analysis ? "hook and comment themes" : "";
+      els.yoinkAnalysisSection.classList.toggle("hidden", !analysis);
       els.yoinkFacts.innerHTML = yoinkFactsHtml(row, sidecar);
-      loadDetailFileImages();
+      loadReaderImages();
+    }
+
+    // "Channel · YouTube · 12:04 · saved Oct 3, 2026" under the title.
+    function readerMetaLine(row, sidecar = {}) {
+      const who = firstValue(sidecar.podcast_title, sidecar.host, sidecar.author, sidecar.channel, row.author, row.host, row.channel);
+      const duration = durationOf(row, sidecar);
+      const saved = new Date(firstValue(row.yoinked_at, sidecar.yoinked_at) || "");
+      return [
+        who,
+        platformChipLabel(platformOf(row, sidecar)),
+        isTimedMedia(row, sidecar) && Number.isFinite(duration) && duration > 0 ? fmtDuration(duration) : "",
+        Number.isNaN(saved.getTime()) ? "" : `saved ${saved.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}`,
+      ].filter(Boolean).join(" · ");
+    }
+
+    function sourceLinkLabel(row, sidecar = {}) {
+      const platform = platformOf(row, sidecar);
+      if (isPodcastContent(row, sidecar)) return "Listen to the episode";
+      if (["web", "generic", "rss"].includes(platform)) return "Open the page";
+      return `${isTimedMedia(row, sidecar) ? "Watch" : "Read"} on ${platformChipLabel(platform)}`;
+    }
+
+    // Reader screenshots load as they near the screen (a long video can
+    // carry hundreds), through the same token-gated file reads as before.
+    let readerImageObserver = null;
+
+    async function loadFileImage(img, path) {
+      try {
+        if (!state.blobUrls.has(path)) {
+          const token = await getToken();
+          const res = await fetch(`/file?path=${encodeURIComponent(path)}`, {
+            headers: { "X-Uoink-Token": token },
+          });
+          if (!res.ok) throw new Error("file unavailable");
+          state.blobUrls.set(path, URL.createObjectURL(await res.blob()));
+        }
+        img.src = state.blobUrls.get(path);
+      } catch (_) {}
+    }
+
+    function loadReaderImages() {
+      const root = els.yoinkDetail;
+      const images = root && typeof root.querySelectorAll === "function"
+        ? [...root.querySelectorAll("img[data-reader-img]")] : [];
+      if (readerImageObserver) readerImageObserver.disconnect();
+      readerImageObserver = null;
+      if (!images.length) return;
+      if (typeof IntersectionObserver !== "function") {
+        images.forEach((img) => loadFileImage(img, img.dataset.readerImg));
+        return;
+      }
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          observer.unobserve(entry.target);
+          loadFileImage(entry.target, entry.target.dataset.readerImg);
+        });
+      }, { rootMargin: "800px 0px" });
+      readerImageObserver = observer;
+      images.forEach((img) => observer.observe(img));
     }
 
     async function loadJsonFile(path) {
@@ -8772,6 +9606,8 @@
     // is a valid 200 answer with ok:false, not an error.
     let universalDetectSeq = 0;
     let universalDetectTimer = null;
+    // Shared with the Library box, which adds feeds the same way.
+    const PODCAST_FEED_SAVED_COPY = "Podcast feed saved. Uoink will watch for new episodes; audio stays off by default.";
     const universalState = { source: null, endpoint: null, payloadKey: null, canonical: "", label: "", busy: false, lastRaw: null };
 
     async function detectCaptureUrl(url) {
@@ -8872,7 +9708,7 @@
           body: JSON.stringify(body),
         });
         if (universalState.source === "podcast_feed") {
-          showToast("Podcast feed saved. Uoink will watch for new episodes; audio stays off by default.");
+          showToast(PODCAST_FEED_SAVED_COPY);
         } else {
           showToast(`Uoinking that ${label.toLowerCase()}. Track it in Activity.`);
         }
@@ -8894,14 +9730,6 @@
         if (btn) btn.textContent = "Uoink it";
         if (btn) btn.disabled = !universalState.endpoint;
       }
-    }
-
-    function focusUniversalCapture() {
-      switchTab("sources");
-      window.setTimeout(() => {
-        if (els.universalCapture) els.universalCapture.scrollIntoView({ block: "start" });
-        if (els.universalCaptureInput) els.universalCaptureInput.focus();
-      }, 0);
     }
 
     // Context-layer item 1: jot a note. A note is a first-class uoink, so the
@@ -9352,6 +10180,10 @@
       if (state.filters.length) params.set("length", state.filters.length);
       if (state.filters.date_from) params.set("date_from", state.filters.date_from);
       if (state.filters.date_to) params.set("date_to", state.filters.date_to);
+      // Re-haul: the type chip and the one sort control are answered by the
+      // helper over every match, not re-sorted on the loaded page (D26).
+      if (state.filters.kind) params.set("kind", state.filters.kind);
+      params.set("sort", state.filters.sort || "newest");
       params.set("limit", String(extra.limit ?? state.limit));
       params.set("offset", String(extra.offset ?? state.offset));
       return params;
@@ -9384,13 +10216,16 @@
       return String(value || "").trim();
     }
 
+    // Everything inside the Filters disclosure; its badge counts these.
     const ADVANCED_LIBRARY_FILTER_KEYS = new Set([
+      "platform", "source_type", "author", "topic",
       "hook_type", "format", "performance", "length", "date_from", "date_to",
     ]);
 
+    // The type chips show their own state, so the kind is no removable chip.
     function activeLibraryFilterEntries() {
       return Object.entries(state.filters)
-        .filter(([key, value]) => key !== "sort" && String(value || "").trim())
+        .filter(([key, value]) => key !== "sort" && key !== "kind" && String(value || "").trim())
         .map(([key, value]) => ({
           key,
           label: libraryFilterLabel(key),
@@ -9466,27 +10301,18 @@
       return knownCorpusTotal > 0 ? "no_matches" : "empty_corpus";
     }
 
+    // Re-haul: a plain "Library" heading with its count; the state words
+    // replace it only when there is nothing to count.
     function setLibraryHeadline(mode, count = 0) {
       const visibleCount = Number(count) || 0;
       const showCount = mode === "ready";
       els.libraryCount.textContent = showCount ? String(visibleCount) : "";
       els.libraryCount.classList.toggle("hidden", !showCount);
-      if (mode === "no-matches") {
-        els.libraryHeadlineText.textContent = "No matches ";
-        els.libraryHeadlineAccent.textContent = "yet.";
-      } else if (mode === "empty") {
-        els.libraryHeadlineText.textContent = "Your Library is ";
-        els.libraryHeadlineAccent.textContent = "ready.";
-      } else if (mode === "unavailable") {
-        els.libraryHeadlineText.textContent = "Library needs ";
-        els.libraryHeadlineAccent.textContent = "a moment.";
-      } else if (mode === "date-error") {
-        els.libraryHeadlineText.textContent = "Dates need ";
-        els.libraryHeadlineAccent.textContent = "a fix.";
-      } else {
-        els.libraryHeadlineText.textContent = " uoinks ";
-        els.libraryHeadlineAccent.textContent = "ready to read.";
-      }
+      els.libraryHeadlineText.textContent = ({
+        "no-matches": "No matches",
+        unavailable: "Library needs a moment",
+        "date-error": "Dates need a fix",
+      })[mode] || "Library";
     }
 
     function setSidebarBadge(el, count, label, options = {}) {
@@ -9533,8 +10359,8 @@
         },
         empty: {
           title: "No saved uoinks yet.",
-          copy: "Save a video, podcast, or article and it shows up here with transcript, screenshots when available, and creator credit. New here? Load the browser button first, then click Uoink on any video.",
-          action: `<button class="button primary" type="button" data-open-extension>Get the extension</button><button class="button ghost" type="button" data-tab-button-proxy="sources">Open Sources</button>`,
+          copy: "Paste a link in the box above to uoink it, or load the browser button and click Uoink on any video. Each capture lands here with its transcript, screenshots when available, and creator credit.",
+          action: `<button class="button primary" type="button" data-focus-library-box>Paste a link</button><button class="button ghost" type="button" data-open-extension>Get the extension</button><button class="button ghost" type="button" data-tab-button-proxy="sources">Open Sources</button>`,
         },
       };
       const stateCopy = states[mode] || states.empty;
@@ -9552,11 +10378,14 @@
     function resetLibraryFilters() {
       [els.searchInput, els.platformFilter, els.sourceTypeFilter, els.channelFilter, els.topicFilter, els.hookFilter, els.formatFilter, els.performanceFilter, els.lengthFilter, els.dateFrom, els.dateTo].forEach((el) => { el.value = ""; });
       els.sortFilter.value = "newest";
-      state.filters = { q: "", platform: "", source_type: "", author: "", topic: "", hook_type: "", format: "", performance: "", length: "", date_from: "", date_to: "", sort: "newest" };
+      state.filters = { q: "", platform: "", source_type: "", author: "", topic: "", hook_type: "", format: "", performance: "", length: "", date_from: "", date_to: "", sort: "newest", kind: "" };
       setLibraryDateError("");
       els.libraryMoreFilters.removeAttribute("open");
+      resetLibraryCapture();
+      renderLibraryKinds();
       updateVideoFacetVisibility();
       renderLibraryFilterChips();
+      renderTopicOverview();
       loadLibrary({ reset: true });
     }
 
@@ -9592,6 +10421,7 @@
       try {
         const data = await authFetch("/jobs");
         state.jobs = Array.isArray(data.jobs) ? data.jobs : [];
+        state.liveCaptures = Array.isArray(data.live_captures) ? data.live_captures : [];
         state.jobsLoaded = true;
         if (render) renderQueue(state.queue || {});
         return state.jobs;
@@ -9604,7 +10434,9 @@
       }
     }
 
-    async function loadLibrary({ reset = false } = {}) {
+    // jobs: false when the caller has just read the jobs (a reload for a
+    // capture they say was saved), so they are not fetched again.
+    async function loadLibrary({ reset = false, jobs = true } = {}) {
       // D1: every load runs, even while an older one is in flight, and only
       // the newest one's answer (or error) is shown, so typing "ai agents"
       // after "ai" never leaves the "ai" results under the new search.
@@ -9634,7 +10466,12 @@
       setLibraryDateError("");
       els.resultSummary.textContent = "Loading library...";
       try {
-        if (!state.jobsLoaded || reset) await refreshJobs();
+        if (jobs && (!state.jobsLoaded || reset)) {
+          await refreshJobs();
+          // A full reload searches after reading those jobs, so it already
+          // lists every capture they say was saved.
+          trackCaptureSaves({ covered: reset });
+        }
         if (request !== state.libraryRequest) return;
         const params = paramsFromFilters();
         const data = await authFetch(`/memory/search?${params.toString()}`);
@@ -9667,7 +10504,10 @@
 
     function renderLibrary() {
       renderTopicOverview();
-      const rows = sortRows(state.library.slice());
+      renderLibraryCaptures();
+      // The helper orders every match by the Sort control (D26), so the
+      // rows show in the order they arrive, Load more pages included.
+      const rows = state.library.slice();
       const filtersActive = hasLibraryFilters();
       const corpusTotal = Number(state.corpusTotal || 0);
       const navTotal = corpusTotal || state.total;
@@ -9711,18 +10551,46 @@
       els.libraryEmpty.classList.add("hidden");
       els.libraryGrid.innerHTML = rows.map(cardHtml).join("");
       rows.forEach(loadThumbnail);
+      markOpenLibraryRow();
     }
 
-    function sortRows(rows) {
-      if (state.filters.sort === "oldest") {
-        return rows.sort((a, b) => String(a.yoinked_at || "").localeCompare(String(b.yoinked_at || "")));
-      }
-      if (state.filters.sort === "title") {
-        return rows.sort((a, b) => String(a.title || "").localeCompare(String(b.title || "")));
-      }
-      return rows.sort((a, b) => String(b.yoinked_at || "").localeCompare(String(a.yoinked_at || "")));
+    // Re-haul list rows: what the transcript came from (CM-11's
+    // transcript_source: "captions" or "asr"; older or corrected captures
+    // carry longer names).
+    function transcriptKind(source) {
+      const value = String(source || "").toLowerCase();
+      if (!value) return "";
+      if (value.startsWith("asr") || value.includes("whisper") || value.includes("local_asr")) return "asr";
+      if (value.includes("caption")) return "captions";
+      return "other";
     }
 
+    // The words after "Done ·" on a saved row.
+    function savedRowDetail(row) {
+      const st = String(row && row.source_type || "").toLowerCase();
+      if (isNoteContent(row) || st === "note") return "your note";
+      if (st === "image" || platformOf(row) === "image") return "your image";
+      if (st === "page" || st === "x_article") return "article text";
+      if (st === "x_thread") return "post and thread";
+      if (st === "reddit_thread") return "thread and comments";
+      const kind = transcriptKind(row && row.transcript_source);
+      if (kind === "captions") return `${platformChipLabel(platformOf(row))} captions`;
+      if (kind === "asr") return "transcript by Whisper";
+      if (row && row.has_transcript === false) {
+        return row.asr_fallback_status === "failed" ? "no captions, transcription failed" : "no captions";
+      }
+      return "transcript saved";
+    }
+
+    // One state line per saved row: the word carries the state, the dot
+    // only repeats it.
+    function savedStateLine(row) {
+      return `<span class="state-word done"><i class="state-dot" aria-hidden="true"></i>Done</span><span class="state-detail"> &middot; ${htmlEscape(savedRowDetail(row))}</span>`;
+    }
+
+    // Re-haul list row: real thumbnail (or a neutral block naming the kind),
+    // title, source · platform · time, then one state line. Write from this
+    // and the hook stay on the row, shown on hover and keyboard focus.
     function cardHtml(row) {
       const id = htmlEscape(row.video_id || row.slug || "");
       const podcast = isPodcastContent(row);
@@ -9733,36 +10601,29 @@
       // Phase 2: the real author is the "who" (X author, r/<sub>, YouTube
       // channel), never the bare host.
       const author = htmlEscape(firstValue(row.author, row.host, row.channel, podcast ? row.podcast_title : "", "Source not labeled"));
-      const platformLabel = htmlEscape(platformChipLabel(platform));
+      const platformLabel = htmlEscape(live ? `${platformChipLabel(platform)} live` : platformChipLabel(platform));
       const sourceType = htmlEscape(sourceTypeLabel(row));
-      const topic = htmlEscape(row.topic || "Uncategorized");
       const hook = htmlEscape(prettyHook(row.hook_type));
       const confidence = row.hook_type_confidence != null ? ` - confidence ${row.hook_type_confidence}/5` : "";
-      const entities = Number(row.entity_count || 0);
-      const speakers = Number(row.speaker_count || 0);
-      const bottomChip = podcast
-        ? `<span class="speaker-count-chip">${htmlEscape(speakers ? `${speakers} speaker${speakers === 1 ? "" : "s"}` : "speakers pending")}</span>`
-        : `<button class="hook-chip" type="button" data-hook-explain="${htmlEscape(row.hook_type || "other")}" title="What's a ${hook} hook?">${hook}${htmlEscape(confidence)}</button>`;
-      const platformChip = live ? "live" : platformChipLabel(platform);
+      const hookChip = row.hook_type && !podcast
+        ? `<button class="hook-chip" type="button" data-hook-explain="${htmlEscape(row.hook_type || "other")}" title="What's a ${hook} hook?">${hook}${htmlEscape(confidence)}</button>`
+        : "";
+      const age = fmtAge(row.yoinked_at);
+      const current = state.activeTab === "yoink" && videoIdOf(state.selectedYoink) === String(row.video_id || row.slug || "")
+        ? ' aria-current="true"' : "";
       return `
-        <article class="uoink-card ${htmlEscape(variant)}" data-card-id="${id}" data-folder="${htmlEscape(row.folder || "")}" data-video-id="${id}" tabindex="0" role="button" aria-label="Open ${title}">
-          <div class="thumb">
-            <span class="duration">${htmlEscape(fmtDuration(durationOf(row)))}</span>
-            <span class="platform-chip ${live ? "live" : ""}">${htmlEscape(platformChip)}</span>
-            <span class="source-type-chip">${sourceType}</span>
-            ${podcast ? cardWaveformHtml(row) : ""}
-            ${bottomChip}
+        <article class="uoink-card ${htmlEscape(variant)}" data-card-id="${id}" data-folder="${htmlEscape(row.folder || "")}" data-video-id="${id}" tabindex="0" role="button" aria-label="Open ${title}"${current}>
+          <div class="row-thumb" aria-hidden="true">
             <img alt="" data-thumb-for="${id}" class="hidden">
+            <span class="source-type-chip">${sourceType}</span>
           </div>
-          <div class="card-body">
+          <div class="row-body">
             <div class="card-title">${title}</div>
-            <div class="card-source">${platformLabel} &middot; ${sourceType}</div>
-            <div class="card-meta">${author}${podcast && row.podcast_title ? ` | ${htmlEscape(row.podcast_title)}` : ""}${entities && !podcast ? ` | ${entities} entities` : ""}${live ? " | stream" : ""}</div>
-            <div class="card-foot">
-              <span class="topic-chip">${topic}</span>
-              <span class="age">${htmlEscape(fmtAge(row.yoinked_at))}</span>
-            </div>
-            ${healthException(row.health)}
+            <div class="card-source">${author} &middot; ${platformLabel}${age ? ` &middot; ${htmlEscape(age)}` : ""}</div>
+            <div class="row-state">${savedStateLine(row)}${healthException(row.health)}</div>
+          </div>
+          <div class="row-actions">
+            ${hookChip}
             <button class="button ghost card-write" type="button" data-write-from="${id}" aria-label="Write from ${title}">Write from this</button>
           </div>
         </article>
@@ -9793,6 +10654,587 @@
         try { URL.revokeObjectURL(url); } catch (_) {}
       }
       state.blobUrls.clear();
+    }
+
+    // ---- Re-haul Library: one box to search or paste --------------------
+    // A link in the box is a capture, through the same /detect brain and
+    // capture routes as Sources' paste box (a playlist link reads as a
+    // playlist); any other text is a search, sequenced by loadLibrary (D1).
+    // Nothing is captured until Enter or "Uoink it".
+    const libraryCapture = { raw: "", detected: null, seq: 0, timer: null, runs: 0 };
+
+    // A link, not a search: a scheme, "www.", or a host followed by a path
+    // (so "node.js" still searches).
+    function looksLikeLink(value) {
+      const text = String(value || "").trim();
+      if (!text || /\s/.test(text)) return false;
+      return /^https?:\/\//i.test(text) || /^www\.[^.]+\./i.test(text)
+        || /^[a-z0-9-]+(\.[a-z0-9-]+)+\/\S*$/i.test(text);
+    }
+
+    function setLibraryCaptureNote(text) {
+      if (els.libraryCaptureNote) els.libraryCaptureNote.textContent = text || "";
+    }
+
+    function renderLibraryCaptureButton() {
+      const btn = els.libraryCaptureButton;
+      if (!btn) return;
+      const detected = libraryCapture.detected;
+      const linkInBox = Boolean(libraryCapture.raw);
+      const ready = Boolean(detected && detected.ok && detected.endpoint);
+      btn.classList.toggle("hidden", !linkInBox || Boolean(detected && !ready));
+      btn.disabled = !ready;
+      btn.textContent = ready && detected.label ? `Uoink this ${detected.label.toLowerCase()}` : "Uoink it";
+    }
+
+    function resetLibraryCapture() {
+      if (libraryCapture.timer) clearTimeout(libraryCapture.timer);
+      libraryCapture.timer = null;
+      libraryCapture.raw = "";
+      libraryCapture.detected = null;
+      libraryCapture.seq += 1;
+      renderLibraryCaptureButton();
+      setLibraryCaptureNote("");
+    }
+
+    // Asks the helper what the link is; null when it could not tell.
+    async function detectLibraryLink(raw) {
+      const seq = ++libraryCapture.seq;
+      libraryCapture.raw = raw;
+      libraryCapture.detected = null;
+      renderLibraryCaptureButton();
+      setLibraryCaptureNote("Checking the link...");
+      try {
+        const result = await detectCaptureUrl(raw);
+        if (seq !== libraryCapture.seq) return null;
+        libraryCapture.detected = result || { ok: false };
+        const ready = Boolean(result && result.ok && result.endpoint);
+        setLibraryCaptureNote(ready
+          ? `${result.label || "Link"}. ${result.note ? `${result.note} ` : ""}Press Enter or Uoink it to capture it.`
+          : ((result && result.note) || "Uoink can't capture that link yet. Try a YouTube, X, Reddit, podcast or article link."));
+        renderLibraryCaptureButton();
+        return libraryCapture.detected;
+      } catch (_) {
+        if (seq !== libraryCapture.seq) return null;
+        libraryCapture.detected = null;
+        renderLibraryCaptureButton();
+        setLibraryCaptureNote("Checking the link needs the Uoink app. Give it a moment and paste again.");
+        return null;
+      }
+    }
+
+    // The box changed: a link starts (or keeps) the capture prompt; text
+    // drops it. True when the box holds a link.
+    function syncLibraryBox() {
+      const raw = String(els.searchInput.value || "").trim();
+      if (!looksLikeLink(raw)) {
+        if (libraryCapture.raw) resetLibraryCapture();
+        return false;
+      }
+      if (raw !== libraryCapture.raw) {
+        if (libraryCapture.timer) clearTimeout(libraryCapture.timer);
+        libraryCapture.raw = raw;
+        libraryCapture.detected = null;
+        libraryCapture.seq += 1;
+        renderLibraryCaptureButton();
+        setLibraryCaptureNote("Checking the link...");
+        libraryCapture.timer = setTimeout(() => {
+          libraryCapture.timer = null;
+          detectLibraryLink(raw);
+        }, 220);
+      }
+      return true;
+    }
+
+    function captureClock(value) {
+      const when = new Date(value || "");
+      if (Number.isNaN(when.getTime())) return "";
+      const time = when.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+      return when.toDateString() === new Date().toDateString()
+        ? time : `${when.toLocaleDateString([], { month: "short", day: "numeric" })}, ${time}`;
+    }
+
+    async function startLibraryCapture() {
+      const raw = String(els.searchInput.value || "").trim();
+      if (!looksLikeLink(raw)) return;
+      if (libraryCapture.timer) {
+        clearTimeout(libraryCapture.timer);
+        libraryCapture.timer = null;
+      }
+      const detected = libraryCapture.raw === raw && libraryCapture.detected
+        ? libraryCapture.detected : await detectLibraryLink(raw);
+      if (!detected || !detected.ok || !detected.endpoint) return;
+      if (String(els.searchInput.value || "").trim() !== raw) return;
+      const url = detected.canonical || raw;
+      const body = { [detected.payload_key || "url"]: url };
+      if (detected.endpoint === "/extract" || detected.endpoint === "/playlist/start") body.interval = 30;
+      const run = {
+        id: `run${++libraryCapture.runs}`,
+        url,
+        label: detected.label || "Link",
+        source: detected.source || "",
+        platform: detected.platform || "",
+        endpoint: detected.endpoint,
+        state: "running",
+        startedAt: new Date().toISOString(),
+        // A quick retry must not hand its row to a job already on the page.
+        jobIdsAtStart: new Set((state.jobs || []).map((job) => job && job.id).filter(Boolean)),
+        // The helper's job for it, once a failure names one.
+        jobId: "",
+        // A video names itself to /extract by this, so its live phase
+        // (/jobs live_captures) can be told apart from other captures.
+        ref: detected.endpoint === "/extract"
+          ? `lib${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}` : "",
+      };
+      if (run.ref) body.capture_ref = run.ref;
+      state.libraryRuns.unshift(run);
+      els.searchInput.value = "";
+      resetLibraryCapture();
+      setLibraryCaptureNote(`Uoinking that ${run.label.toLowerCase()}. It shows under the box until it's saved.`);
+      renderLibraryCaptures();
+      pollLibraryRuns();
+      try {
+        const data = await authFetch(detected.endpoint, { method: "POST", body: JSON.stringify(body) });
+        finishLibraryRun(run, data || {});
+      } catch (err) {
+        failLibraryRun(run, err);
+      }
+    }
+
+    function dropLibraryRun(run) {
+      state.libraryRuns = state.libraryRuns.filter((item) => item.id !== run.id);
+    }
+
+    function finishLibraryRun(run, data) {
+      dropLibraryRun(run);
+      if (data.queued) {
+        const at = captureClock(data.retry_after);
+        setLibraryCaptureNote(`YouTube asked Uoink to wait, so it's queued${at ? ` and retries on its own at ${at}` : ""}.`);
+      } else if (run.source === "podcast_feed") {
+        setLibraryCaptureNote(PODCAST_FEED_SAVED_COPY);
+      } else if (run.endpoint === "/playlist/start") {
+        setLibraryCaptureNote("Playlist started. Its videos show under the box as Uoink captures them.");
+      } else {
+        setLibraryCaptureNote(`Saved${data.title ? ` "${data.title}"` : ` that ${run.label.toLowerCase()}`}. It's at the top of the list.`);
+        loadLibrary({ reset: true });
+        loadLibraryFacets();
+      }
+      renderLibraryCaptures();
+      refreshActivity();
+    }
+
+    function failLibraryRun(run, err) {
+      const data = (err && err.data) || {};
+      const failure = libraryFailureCopy(data);
+      run.state = "failed";
+      run.phase = data.failure_phase || data.error_phase || "";
+      run.jobId = typeof data.job_id === "string" ? data.job_id : "";
+      run.errorDetail = failure.detail;
+      if (data.code === "host_not_allowed") {
+        run.reason = "That site isn't on your allowed pages list yet. Add it in Settings, then try again.";
+      } else if (data.code === "x_login_wall") {
+        run.reason = failure.detail ? failure.reason : "X login-walls this one. Paste a /status/ link to capture X posts and threads.";
+      } else {
+        run.reason = failure.reason;
+      }
+      run.finishedAt = new Date().toISOString();
+      setLibraryCaptureNote(`That ${run.label.toLowerCase()} didn't save. The reason is in its row.`);
+      renderLibraryCaptures();
+      refreshActivity();
+    }
+
+    // A capture row leaving the list (Dismiss, or Retry replacing it). A
+    // local run takes the helper job its failure named with it, so that job
+    // never turns up later as a second row.
+    function dropLibraryCaptureRow(key) {
+      const run = state.libraryRuns.find((item) => item.id === key);
+      if (run) {
+        if (run.jobId) state.libraryDismissed.add(`job:${run.jobId}`);
+        // ...and the older failures of the same link it stood in for.
+        (Array.isArray(state.jobs) ? state.jobs : []).forEach((job) => {
+          if (job && job.id && normalizedStatus(job) === "failed" && String(job.source_url || job.url || "") === run.url) {
+            state.libraryDismissed.add(`job:${job.id}`);
+          }
+        });
+      }
+      state.libraryRuns = state.libraryRuns.filter((item) => item.id !== key);
+    }
+
+    // Retry a capture that failed: the link goes back through the box, so
+    // it is detected and captured exactly like a fresh paste.
+    // `key` is the failed row being retried: a local run leaves the list, a
+    // failed job steps aside for the fresh capture (Activity keeps it).
+    function retryLibraryCapture(url, key = "") {
+      if (!url) return;
+      if (key) {
+        dropLibraryCaptureRow(key);
+        if (key.startsWith("job:")) state.libraryDismissed.add(key);
+      }
+      els.searchInput.value = url;
+      syncLibraryBox();
+      startLibraryCapture();
+    }
+
+    // ---- Re-haul Library: type chips ------------------------------------
+    function renderLibraryKinds() {
+      if (!els.libraryKinds || typeof els.libraryKinds.querySelectorAll !== "function") return;
+      const active = state.filters.kind || "";
+      els.libraryKinds.querySelectorAll("[data-library-kind]").forEach((chip) => {
+        chip.setAttribute("aria-pressed", String((chip.dataset.libraryKind || "") === active));
+      });
+    }
+
+    function setLibraryKind(kind) {
+      const next = ["videos", "posts", "notes", "podcasts"].includes(kind) ? kind : "";
+      if (next === (state.filters.kind || "")) return;
+      state.filters.kind = next;
+      renderLibraryKinds();
+      loadLibrary({ reset: true });
+    }
+
+    // ---- Re-haul Library: captures still on their way --------------------
+    // The 5-step strip every capture shows (SPEC "B's step strip").
+    const CAPTURE_STEPS = ["details", "waiting for YouTube", "video", "transcript", "screenshots and save"];
+
+    // Which of the five steps a helper phase (or a failure_phase) names;
+    // -1 when it names none.
+    function captureStepIndex(phase, stateValue = "") {
+      const value = String(phase || "").toLowerCase();
+      if (value.includes("screenshot") || value.includes("thumb") || value.includes("writ") || value.includes("comment")
+        || value.includes("publish") || value.includes("index") || value.includes("save") || value === "done") return 4;
+      if (value.includes("transcri") || value.includes("caption") || value.includes("asr") || value.includes("whisper")) return 3;
+      if (value.includes("download") || value === "video" || value.includes("media")) return 2;
+      if (value.includes("wait") || value.includes("queue") || value.includes("rate")) return 1;
+      if (value.includes("metadata") || value.includes("detail") || value === "fetch") return 0;
+      if (!value && ["queued", "pending"].includes(String(stateValue || "").toLowerCase())) return 1;
+      return -1;
+    }
+
+    function captureStripHtml(index, { failed = false, advanced = false } = {}) {
+      if (index < 0) return "";
+      return `<span class="step-strip" aria-hidden="true">${CAPTURE_STEPS.map((_, step) => {
+        const cls = step < index ? "done" : step > index ? "todo" : failed ? "fail" : advanced ? "now advanced" : "now";
+        return `<i class="step ${cls}"></i>`;
+      }).join("")}</span>`;
+    }
+
+    // The strip moves only when a capture's step really advanced since the
+    // last render, not on every repaint. A render with no step known yet
+    // (index -1) is not a step, so the first one the helper reports never
+    // reads as an advance.
+    function captureAdvanced(key, index) {
+      if (index < 0) return false;
+      const before = state.captureSteps.get(key);
+      state.captureSteps.set(key, index);
+      return before !== undefined && index > before;
+    }
+
+    function captureStepLine(index) {
+      return index < 0 ? "" : `${CAPTURE_STEPS[index]} (${index + 1} of 5)`;
+    }
+
+    const LIBRARY_FAILURE_WINDOW_MS = 24 * 60 * 60 * 1000;
+    const LIBRARY_CAPTURE_ROWS = 6;
+    const LIBRARY_RUN_POLL_MS = 1500;
+
+    function timeOf(value) {
+      return new Date(value || "").getTime();
+    }
+
+    // The phase the helper reports for a video pasted here, or null.
+    function liveCaptureFor(run) {
+      const live = Array.isArray(state.liveCaptures) ? state.liveCaptures : [];
+      return (run.ref && live.find((entry) => entry && entry.capture_ref === run.ref)) || null;
+    }
+
+    // The helper's finished job for a capture started here: the one its
+    // failure named, else (no answer yet, or the request itself broke) a
+    // finished single-video job for the same link that started with it.
+    function libraryRunJob(run, jobs) {
+      const candidates = jobs.filter((job) => job && !(run.jobIdsAtStart && run.jobIdsAtStart.has(job.id)));
+      if (run.jobId) return candidates.find((job) => job.id === run.jobId) || null;
+      if (run.endpoint !== "/extract") return null;
+      const correlated = run.ref && candidates.find((job) => job.capture_ref === run.ref);
+      if (correlated) return correlated;
+      // A late stream event can introduce an older job not in jobIdsAtStart.
+      // Without an explicit correlation, its start must be at/after this run.
+      // Rounded helper timestamps reconcile via job_id/capture_ref above.
+      const started = timeOf(run.startedAt);
+      return candidates.find((job) => !job.capture_ref && job.kind === "single" && String(job.source_url || "") === run.url
+        && ["completed", "failed", "cancelled"].includes(normalizedStatus(job))
+        && timeOf(job.started_at) >= started) || null;
+    }
+
+    // Once the helper has its own record of a capture started here, that
+    // record carries it: a failure shows once, as the job Activity lists
+    // (with its one Retry), and a save is in the list. The local run goes
+    // for good, so it can never come back beside that job.
+    function reconcileLibraryRuns() {
+      const jobs = Array.isArray(state.jobs) ? state.jobs : [];
+      state.libraryRuns = (state.libraryRuns || []).filter((run) => !libraryRunJob(run, jobs));
+    }
+
+    // A pasted video has no job until it is saved or has failed, so while
+    // one runs the page reads /jobs for the phase it is in, and stops once
+    // none is running. The poll takes only the live phases: the job list
+    // stays the stream's (D20), so a poll answer that lands after a newer
+    // stream event never puts an older job state back.
+    let libraryRunPoll = null;
+
+    async function refreshLiveCaptures() {
+      try {
+        const data = await authFetch("/jobs");
+        state.liveCaptures = Array.isArray(data.live_captures) ? data.live_captures : [];
+      } catch (_) {
+        // The helper is busy or restarting: the rows keep their last step.
+        return;
+      }
+      renderLibraryCaptures();
+    }
+
+    function pollLibraryRuns() {
+      if (libraryRunPoll || !state.libraryRuns.some((run) => run.state === "running" && run.ref)) return;
+      libraryRunPoll = setTimeout(async () => {
+        if (state.libraryRuns.some((run) => run.state === "running" && run.ref)) await refreshLiveCaptures();
+        libraryRunPoll = null;
+        pollLibraryRuns();
+      }, LIBRARY_RUN_POLL_MS);
+    }
+
+    // Captures that save with nothing on this page waiting on them
+    // (playlist videos, queued retries, podcast episodes, the extension)
+    // show as job changes: a job saved another video, or finished saved.
+    // Library then reloads its rows and topic counts once per batch of
+    // changes, without asking for the jobs it was just given. `covered`: a
+    // reload already under way searches after these jobs.
+    let librarySavesReload = false;
+
+    function trackCaptureSaves({ covered = false } = {}) {
+      const marks = state.captureSaveMarks;
+      let saved = false;
+      (Array.isArray(state.jobs) ? state.jobs : []).forEach((job) => {
+        if (!job || !job.id || job.kind === "notification") return;
+        const status = normalizedStatus(job);
+        const done = Number(job.videos_done) || 0;
+        const before = marks.get(job.id);
+        marks.set(job.id, { status, done });
+        if (!state.captureSaveBaseline) return;
+        if (before ? done > before.done || (status === "completed" && before.status !== "completed")
+          : status === "completed" || done > 0) saved = true;
+      });
+      state.captureSaveBaseline = true;
+      if (!saved || covered || librarySavesReload) return;
+      librarySavesReload = true;
+      Promise.resolve().then(() => {
+        librarySavesReload = false;
+        // A background reload: Library shows its own failure, nothing waits on it.
+        loadLibrary({ reset: true, jobs: false }).catch(() => {});
+        loadLibraryFacets().catch(() => {});
+      });
+    }
+
+    // Only the public error fields belong in a Library failure. Do not
+    // fall back to exception objects, raw stderr or command fields. Scrub
+    // legacy diagnostics too: older helpers could echo paths or secrets.
+    function libraryFailureCopy(data = {}) {
+      const error = typeof data.error === "string" ? data.error : (data.error && data.error.message);
+      const raw = [data.error_detail, error].find((value) => typeof value === "string" && value.trim()) || "";
+      const detail = raw
+        .replace(/https?:\/\/[^\s"'<>]+/gi, "<url>")
+        .replace(/(["'])(?:[a-z]:[\\/]|\\\\|\/)[^\r\n]*?\1/gi, "<path>")
+        .replace(/[a-z]:[\\/][^\s"'<>;]+|\\\\[^\s"'<>;]+/gi, "<path>")
+        .replace(/(^|[\s(=])\/[^\s"'<>;]+/gm, "$1<path>")
+        .replace(/\b(?:authorization|cookie|password|passwd|api[_-]?key|access[_-]?token|refresh[_-]?token|token|secret)\s*[:=][^\r\n]*/gi, "[redacted]")
+        .replace(/\b(?:Bearer|Basic)\s+[a-z0-9+/_=.-]+/gi, "[redacted]")
+        .replace(/\bsk-[a-z0-9_-]{12,}/gi, "[redacted]")
+        .trim().slice(0, 6000);
+      const lines = detail.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
+      const cause = (lines.filter((line) => /^ERROR:/i.test(line)).pop() || lines[0] || "")
+        .replace(/^ERROR:\s*(?:\[[^\]]+\]\s*)?(?:[\w-]+:\s*)?/i, "")
+        .replace(/\s+/g, " ");
+      let reason = cause ? (cause.length > 180 ? `${cause.slice(0, 177)}...` : cause) : "The capture request failed. Retry now.";
+      if (data.retry_exhausted === true) {
+        reason += ` ${activityErrorMessage("", "", { retryExhausted: true, attempts: data.attempt_count })}`;
+      }
+      return { detail, reason };
+    }
+
+    function libraryCaptureItems() {
+      const items = [];
+      const now = Date.now();
+      const recent = (value) => {
+        const when = new Date(value || "").getTime();
+        return Number.isFinite(when) && now - when < LIBRARY_FAILURE_WINDOW_MS;
+      };
+      const runs = state.libraryRuns || [];
+      runs.forEach((run) => {
+        const failed = run.state === "failed";
+        // A running video's step is the phase the helper reports for it.
+        const live = failed ? null : liveCaptureFor(run);
+        const index = failed ? captureStepIndex(run.phase) : (live ? captureStepIndex(live.phase) : -1);
+        const waiting = !failed && index === 1;
+        items.push({
+          key: run.id,
+          title: run.url,
+          kind: run.label,
+          source: [platformChipLabel(run.platform || platformOf({ source_url: run.url })), fmtAge(run.startedAt) || "just now"].join(" · "),
+          tone: failed ? "fail" : waiting ? "wait" : "now",
+          word: failed ? (index >= 0 ? `Failed at ${CAPTURE_STEPS[index]}` : "Failed") : waiting ? "Waiting" : "Capturing",
+          detail: failed ? run.reason
+            : waiting ? "one YouTube capture at a time"
+              : (captureStepLine(index) || "started here, this can take a few minutes"),
+          errorDetail: failed ? run.errorDetail : "",
+          strip: failed ? captureStripHtml(index, { failed }) : captureStripHtml(index, { advanced: captureAdvanced(run.id, index) }),
+          actions: failed
+            ? `<button class="button ghost" type="button" data-library-retry="${htmlEscape(run.url)}" data-library-run="${htmlEscape(run.id)}">Retry now</button><button class="button ghost" type="button" data-library-dismiss="${htmlEscape(run.id)}">Dismiss</button>`
+            : "",
+        });
+      });
+      // An older failure of a link pasted again here steps aside for the
+      // new capture, as the helper drops it once the new one is recorded.
+      const retried = (job) => runs.some((run) => run.url && String(job.source_url || job.url || "") === run.url
+        && ((run.jobIdsAtStart && run.jobIdsAtStart.has(job.id))
+          || timeOf(job.started_at || job.completed_at) < timeOf(run.startedAt)));
+      const jobs = (Array.isArray(state.jobs) ? state.jobs : []).filter((job) => job && job.kind !== "notification");
+      jobs.filter((job) => ["queued", "running"].includes(normalizedStatus(job))).forEach((job) => {
+        const stateValue = normalizedStatus(job);
+        const phase = job.current_video_phase || job.phase || "";
+        const index = stateValue === "queued" && !phase ? 1 : captureStepIndex(phase, stateValue);
+        const key = `job:${job.id}`;
+        const playlist = Number(job.videos_total) > 1;
+        const waiting = stateValue === "queued" || index === 1;
+        items.push({
+          key,
+          title: job.title || job.playlist_title || (job.current_video && job.current_video.title) || job.source_url || "Capture",
+          kind: playlist ? "playlist" : (job.kind === "retranscribe" ? "transcript" : "capture"),
+          source: [platformChipLabel(platformOf({ source_url: job.source_url || job.url || "" })),
+            playlist ? `${Number(job.videos_done) || 0} of ${job.videos_total} videos` : "",
+            fmtAge(job.started_at || job.updated_at)].filter(Boolean).join(" · "),
+          tone: waiting ? "wait" : "now",
+          word: waiting ? "Waiting" : "Capturing",
+          detail: waiting ? "one YouTube capture at a time" : (captureStepLine(index) || "working on it"),
+          strip: captureStripHtml(index, { advanced: captureAdvanced(key, index) }),
+          actions: "",
+        });
+      });
+      const failedJobs = dedupeFailedJobsByFailureKey(jobs.filter((job) => normalizedStatus(job) === "failed"
+        && recent(job.completed_at || job.updated_at) && !state.libraryDismissed.has(`job:${job.id}`) && !retried(job)));
+      const failedKeys = new Set(failedJobs.map(failureKey).filter(Boolean));
+      const pending = state.queue && Array.isArray(state.queue.pending) ? state.queue.pending : [];
+      pending.forEach((row) => {
+        const stateValue = normalizedStatus(row);
+        if (["succeeded", "completed", "cancelled"].includes(stateValue)) return;
+        const key = `pending:${row.pending_id}`;
+        if (stateValue === "failed" && (state.libraryDismissed.has(key) || failedKeys.has(failureKey(row)))) return;
+        const error = String(row.last_error || "");
+        const at = captureClock(row.retry_after);
+        const base = {
+          key,
+          title: row.title || row.url || "Queued capture",
+          kind: "capture",
+          source: [platformChipLabel(platformOf({ source_url: row.url || "" })), row.attempt_count ? `attempt ${row.attempt_count}` : ""].filter(Boolean).join(" · "),
+        };
+        if (stateValue === "running") {
+          const index = captureStepIndex(row.phase);
+          items.push({ ...base, tone: "now", word: "Capturing", detail: captureStepLine(index) || "trying again now",
+            strip: captureStripHtml(index, { advanced: captureAdvanced(key, index) }), actions: "" });
+          return;
+        }
+        if (stateValue === "failed") {
+          const reason = activityErrorMessage(error || row.error || "", row.phase, {
+            url: row.url || "", terminal: true, retryExhausted: row.retry_exhausted === true, attempts: row.attempt_count });
+          items.push({ ...base, tone: "fail", word: "Failed", detail: reason, strip: "",
+            actions: `<button class="button ghost" type="button" data-retry="${htmlEscape(row.pending_id || "")}">Retry now</button><button class="button ghost" type="button" data-library-dismiss="${htmlEscape(key)}">Dismiss</button>` });
+          return;
+        }
+        if (error === "youtube_rate_limit") {
+          items.push({ ...base, tone: "fail", word: "Failed", detail: `YouTube refused it (HTTP 429).${at ? ` Retries ${at}` : " Retries on its own"}`,
+            strip: captureStripHtml(1, { failed: true }),
+            actions: `<button class="button ghost" type="button" data-retry="${htmlEscape(row.pending_id || "")}">Retry now</button>` });
+          return;
+        }
+        items.push({ ...base, tone: "wait", word: "Waiting",
+          detail: error === "capture_ownership_unavailable" || !at ? "one YouTube capture at a time" : `YouTube asked Uoink to wait. Retries ${at}`,
+          strip: captureStripHtml(1), actions: "" });
+      });
+      failedJobs.forEach((job) => {
+        const phase = job.failure_phase || job.current_video_phase || job.phase || "";
+        const index = captureStepIndex(phase);
+        const url = job.source_url || job.url || "";
+        const failure = libraryFailureCopy(job);
+        items.push({
+          key: `job:${job.id}`,
+          title: job.title || job.playlist_title || url || "Capture",
+          kind: Number(job.videos_total) > 1 ? "playlist" : "capture",
+          source: [platformChipLabel(platformOf({ source_url: url })), fmtAge(job.completed_at || job.updated_at)].filter(Boolean).join(" · "),
+          tone: "fail",
+          word: index >= 0 ? `Failed at ${CAPTURE_STEPS[index]}` : "Failed",
+          detail: failure.reason,
+          errorDetail: failure.detail,
+          strip: captureStripHtml(index, { failed: true }),
+          actions: `${url ? `<button class="button ghost" type="button" data-library-retry="${htmlEscape(url)}" data-library-run="${htmlEscape(`job:${job.id}`)}">Retry now</button>` : ""}<button class="button ghost" type="button" data-library-dismiss="${htmlEscape(`job:${job.id}`)}">Dismiss</button>`,
+        });
+      });
+      return items;
+    }
+
+    function libraryCaptureRowHtml(item) {
+      return `
+        <article class="capture-row" data-capture-key="${htmlEscape(item.key)}">
+          <div class="row-thumb" aria-hidden="true"><span class="source-type-chip">${htmlEscape(item.kind)}</span></div>
+          <div class="row-body">
+            <div class="card-title">${htmlEscape(item.title)}</div>
+            <div class="card-source">${htmlEscape(item.source)}</div>
+            <div class="row-state">${item.strip}<span class="state-word ${htmlEscape(item.tone)}"><i class="state-dot" aria-hidden="true"></i>${htmlEscape(item.word)}</span><span class="state-detail"> &middot; ${htmlEscape(item.detail)}</span></div>
+            ${renderErrorDetails(item.errorDetail)}
+          </div>
+          ${item.actions ? `<div class="row-actions capture-actions">${item.actions}</div>` : ""}
+        </article>
+      `;
+    }
+
+    function renderLibraryCaptures() {
+      const wrap = els.libraryCaptures;
+      if (!wrap) return;
+      reconcileLibraryRuns();
+      const items = libraryCaptureItems();
+      const shown = items.slice(0, LIBRARY_CAPTURE_ROWS);
+      const more = items.length - shown.length;
+      wrap.innerHTML = shown.map(libraryCaptureRowHtml).join("")
+        + (more > 0 ? `<p class="capture-more"><a href="#activity">${more} more in Activity</a></p>` : "");
+      wrap.classList.toggle("hidden", !items.length);
+    }
+
+    // Split view: the list row of the open item is marked, so the list
+    // beside the reader shows where you are.
+    function markOpenLibraryRow() {
+      const grid = els.libraryGrid;
+      if (!grid || typeof grid.querySelectorAll !== "function") return;
+      const open = state.activeTab === "yoink" ? videoIdOf(state.selectedYoink) : "";
+      grid.querySelectorAll(".uoink-card").forEach((card) => {
+        if (open && card.dataset.videoId === open) card.setAttribute("aria-current", "true");
+        else card.removeAttribute("aria-current");
+      });
+    }
+
+    function focusReaderHeading() {
+      if (els.yoinkHeading && typeof els.yoinkHeading.focus === "function") els.yoinkHeading.focus({ preventScroll: true });
+    }
+
+    // "Paste a link" from the empty Library: the box is the paste box.
+    function focusLibraryBox() {
+      if (state.activeTab !== "library") switchTab("library");
+      if (els.searchInput && typeof els.searchInput.focus === "function") els.searchInput.focus();
+    }
+
+    // The reader's topic crumb: Library, filtered to that topic.
+    function showLibraryTopic(topic) {
+      els.topicFilter.value = topic;
+      state.filters.topic = topic;
+      renderTopicOverview();
+      renderLibraryFilterChips();
+      navigateTo("#library");
+      loadLibrary({ reset: true });
     }
 
     function populateFilterOptions() {
@@ -10143,9 +11585,19 @@
     // from /library/facets, biggest first, Uncategorized visually flagged
     // (it's a hygiene debt, 8/31 at audit time). Click filters the Library;
     // click again clears.
+    // Re-haul: the topic list sits in the sidebar beside Library and the
+    // reader, and only there; it hides when there are no topics yet.
+    function syncSidebarTopics() {
+      if (!els.sidebarTopics) return;
+      const topics = state.facets && Array.isArray(state.facets.topic) ? state.facets.topic : [];
+      const tab = state.activeTab || "library";
+      els.sidebarTopics.classList.toggle("hidden", !topics.length || !["library", "yoink"].includes(tab));
+    }
+
     function renderTopicOverview() {
       const wrap = els.topicOverview;
       if (!wrap) return;
+      syncSidebarTopics();
       const topics = (state.facets && Array.isArray(state.facets.topic))
         ? state.facets.topic.slice() : [];
       if (!topics.length) {
@@ -10430,6 +11882,8 @@
 
     function renderQueue(data) {
       data = data || {};
+      // Every job update passes here (the stream, catch-ups, the paste poll).
+      trackCaptureSaves();
       const pending = Array.isArray(data.pending) ? data.pending : [];
       const pendingCount = Array.isArray(data.pending) ? pending.length : countValue(data.pending, countValue(data.pending_count, 0));
       const runningCount = countValue(data.running, countValue(data.running_count, 0));
@@ -10471,6 +11925,8 @@
       } else {
         els.queueRows.innerHTML = rows.join("");
       }
+      // The same jobs and queue rows feed Library's in-progress captures.
+      renderLibraryCaptures();
       const completed = completedTodayRows();
       els.completedToday.textContent = String(data.completed_today || completed.length);
       els.completedRows.innerHTML = completed.length
@@ -13023,6 +14479,10 @@
       });
       document.querySelectorAll("[data-tab-panel]").forEach((panel) => panel.classList.toggle("active", panel.dataset.tabPanel === tab));
       state.activeTab = tab;
+      // Re-haul: from 900px up the Library list stays beside the reader.
+      if (els.librarySplit) els.librarySplit.classList.toggle("reading", tab === "yoink");
+      markOpenLibraryRow();
+      syncSidebarTopics();
       if (tab === "library") {
         loadLibraryActivity(false);
         startLibraryActivityTimer();
@@ -13127,7 +14587,8 @@
       // refresh, or Load more) starts from the first page of the new search,
       // so nothing from the old search shows under the new search box.
       const invalidateAndReload = () => {
-        state.filters.q = els.searchInput.value;
+        // A link in the box is a capture, never a search.
+        state.filters.q = looksLikeLink(els.searchInput.value) ? "" : els.searchInput.value;
         state.filters.platform = els.platformFilter.value;
         state.filters.source_type = els.sourceTypeFilter.value;
         state.filters.author = els.channelFilter.value;
@@ -13144,9 +14605,23 @@
         state.libraryResetPending = true;
         reload();
       };
-      [els.searchInput, els.platformFilter, els.sourceTypeFilter, els.channelFilter, els.topicFilter, els.hookFilter, els.formatFilter, els.performanceFilter, els.lengthFilter, els.dateFrom, els.dateTo, els.sortFilter].forEach((el) => {
+      [els.platformFilter, els.sourceTypeFilter, els.channelFilter, els.topicFilter, els.hookFilter, els.formatFilter, els.performanceFilter, els.lengthFilter, els.dateFrom, els.dateTo, els.sortFilter].forEach((el) => {
         el.addEventListener(el.tagName === "INPUT" ? "input" : "change", invalidateAndReload);
       });
+      // Re-haul: the one box searches or, holding a link, offers to capture
+      // it. Pasting a link re-runs the list only to drop a search it replaced.
+      els.searchInput.addEventListener("input", () => {
+        if (syncLibraryBox() && !state.filters.q) return;
+        invalidateAndReload();
+      });
+      els.searchInput.addEventListener("keydown", (event) => {
+        if (event.key !== "Enter" || !looksLikeLink(els.searchInput.value)) return;
+        event.preventDefault();
+        startLibraryCapture();
+      });
+      if (els.libraryCaptureButton) els.libraryCaptureButton.addEventListener("click", startLibraryCapture);
+      els.yoinkCopyMarkdown.addEventListener("click", () => copySelectedMarkdown());
+      els.yoinkSendClaude.addEventListener("click", () => copySelectedMarkdown({ openClaude: true }));
       document.getElementById("clearFilters").addEventListener("click", resetLibraryFilters);
       document.getElementById("refreshForYou").addEventListener("click", loadForYou);
       els.loadMore.addEventListener("click", () => loadLibrary());
@@ -13336,6 +14811,7 @@
         if (!card.dataset.videoId && !card.dataset.folder) return;
         event.preventDefault();
         openYoinkDetail(rowFromCard(card));
+        focusReaderHeading();
       });
       els.autostartToggle.addEventListener("change", () => saveSettingsPatch({ autostart: els.autostartToggle.checked }, "Autostart updated."));
       els.notificationsEnabled.addEventListener("change", () => saveSettingsPatch(
@@ -13490,7 +14966,7 @@
       if (els.imageSaveButton) els.imageSaveButton.addEventListener("click", saveImage);
       if (els.imageClearButton) els.imageClearButton.addEventListener("click", clearImageSelection);
       const emptyPasteUrl = document.getElementById("emptyPasteUrl");
-      if (emptyPasteUrl) emptyPasteUrl.addEventListener("click", focusUniversalCapture);
+      if (emptyPasteUrl) emptyPasteUrl.addEventListener("click", focusLibraryBox);
       document.querySelectorAll('a[target="_blank"]').forEach((link) => {
         link.addEventListener("click", (event) => {
           event.preventDefault();
@@ -13519,6 +14995,42 @@
         const removeLibraryFilterButton = event.target.closest("[data-remove-library-filter]");
         if (removeLibraryFilterButton) {
           removeLibraryFilter(removeLibraryFilterButton.dataset.removeLibraryFilter);
+          return;
+        }
+        // Re-haul Library: type chips, the box, and the capture rows.
+        const kindChip = event.target.closest("[data-library-kind]");
+        if (kindChip) {
+          setLibraryKind(kindChip.dataset.libraryKind || "");
+          return;
+        }
+        if (event.target.closest("[data-focus-library-box]")) {
+          focusLibraryBox();
+          return;
+        }
+        const libraryRetry = event.target.closest("[data-library-retry]");
+        if (libraryRetry) {
+          retryLibraryCapture(libraryRetry.dataset.libraryRetry, libraryRetry.dataset.libraryRun || "");
+          return;
+        }
+        const libraryDismiss = event.target.closest("[data-library-dismiss]");
+        if (libraryDismiss) {
+          const key = libraryDismiss.dataset.libraryDismiss || "";
+          dropLibraryCaptureRow(key);
+          state.libraryDismissed.add(key);
+          renderLibraryCaptures();
+          return;
+        }
+        // Links the reader builds (timestamps, Markdown, comments) open in
+        // the browser, as the page's own outside links do.
+        const readerLink = event.target.closest("#yoinkDetail a[target='_blank'], #yoinkComments a[target='_blank'], #yoinkAnalysis a[target='_blank']");
+        if (readerLink) {
+          event.preventDefault();
+          openExternal(readerLink.href);
+          return;
+        }
+        const readerTopic = event.target.closest("[data-reader-topic]");
+        if (readerTopic && readerTopic.getAttribute("data-reader-topic")) {
+          showLibraryTopic(readerTopic.getAttribute("data-reader-topic"));
           return;
         }
         const sourceOption = event.target.closest("[data-writing-source-id]");
@@ -13637,6 +15149,7 @@
         const card = event.target.closest("[data-folder]");
         if (card && (card.dataset.videoId || card.dataset.folder)) {
           openYoinkDetail(rowFromCard(card));
+          focusReaderHeading();
           return;
         }
         const openPath = event.target.closest("[data-open-path]");
@@ -13648,6 +15161,10 @@
           els.topicFilter.value = next;
           state.filters.topic = next;
           renderTopicOverview();
+          renderLibraryFilterChips();
+          // The topic list sits in the sidebar, so it shows Library from
+          // any screen.
+          if (state.activeTab !== "library") switchTab("library");
           loadLibrary({ reset: true });
           return;
         }

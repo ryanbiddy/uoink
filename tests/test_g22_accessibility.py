@@ -18,7 +18,8 @@ def require(condition: bool, message: str) -> None:
 
 def test_controls_have_real_names() -> None:
     for marker in (
-        'id="searchInput" type="search" placeholder="search transcripts, titles, comments" aria-label="Search Library"',
+        # UI re-haul: the Library box searches or takes a pasted link.
+        'id="searchInput" type="search" placeholder="Search your library or paste a link to uoink it" aria-label="Search your library or paste a link to uoink it"',
         'id="platformFilter" aria-label="Filter by platform"',
         'id="sourceTypeFilter" aria-label="Filter by source type"',
         'id="channelFilter" aria-label="Filter by author"',

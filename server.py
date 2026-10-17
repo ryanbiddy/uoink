@@ -27,6 +27,7 @@ import re
 import secrets
 import shutil
 import socket
+import sqlite3
 import subprocess
 import sys
 import tempfile
@@ -379,6 +380,10 @@ MAX_SCREENSHOTS = 200                  # cap per video
 PLAYLIST_VIDEO_CAP = 10                # v2 Playlist Mode first-ship cap
 MAX_SERVED_FILE_BYTES = 10 * 1024 * 1024
 MAX_SIDECAR_BYTES = 2 * 1024 * 1024           # 2MB saved-metadata sidecar cap
+# UI re-haul Reader: how many saved comments /yoinks/<id>/details returns,
+# and how much of each comment's text.
+READER_COMMENT_LIMIT = 100
+READER_COMMENT_CHARS = 2000
 LONG_VIDEO_SECONDS = 2 * 60 * 60       # 2 hours -- log warning above this
 LONG_VIDEO_MODE_FULL = "full"
 LONG_VIDEO_MODE_CHUNKED = "chunked"
@@ -7460,6 +7465,69 @@ def _queue_dashboard_notification(
     return _add_job_record(job)
 
 
+# Re-haul Library: a pasted single-video capture (/extract) records its job
+# only once it is saved or has failed, so while it runs the phase it is in
+# lives here, for GET /jobs to show as `live_captures` (the dashboard's step
+# strip). Process-local and never persisted: an entry lasts exactly as long
+# as its request. `capture_ref` is the caller's own token for its request.
+_live_extracts: dict[str, dict] = {}
+_live_extracts_lock = threading.Lock()
+_live_extract_local = threading.local()
+_CAPTURE_REF_RE = re.compile(r"^[A-Za-z0-9_-]{1,64}$")
+
+
+def _live_extract_begin(url: str, capture_ref=None) -> None:
+    """Start reporting this request thread's capture, waiting for its turn."""
+    ref = capture_ref if isinstance(capture_ref, str) and _CAPTURE_REF_RE.match(capture_ref) else None
+    key = uuid.uuid4().hex
+    with _live_extracts_lock:
+        _live_extracts[key] = {
+            "capture_ref": ref,
+            "source_url": url,
+            "phase": "waiting",
+            "started_at": _now_iso(),
+        }
+    _live_extract_local.key = key
+
+
+def _live_extract_phase(phase: str | None) -> None:
+    """The phase this request thread's capture just reached."""
+    key = getattr(_live_extract_local, "key", None)
+    if not key or not phase:
+        return
+    with _live_extracts_lock:
+        entry = _live_extracts.get(key)
+        if entry is not None:
+            entry["phase"] = str(phase)
+
+
+def _live_extract_end() -> None:
+    key = getattr(_live_extract_local, "key", None)
+    _live_extract_local.key = None
+    if key:
+        with _live_extracts_lock:
+            _live_extracts.pop(key, None)
+
+
+def _live_extracts_public() -> list[dict]:
+    with _live_extracts_lock:
+        return sorted((dict(entry) for entry in _live_extracts.values()),
+                      key=lambda entry: entry.get("started_at") or "")
+
+
+def _reports_live_extract(method):
+    """Wraps a capture handler so the entry it began always ends with the
+    request, whichever way the handler returns or raises."""
+    def wrapped(self, body):
+        try:
+            return method(self, body)
+        finally:
+            _live_extract_end()
+    wrapped.__name__ = method.__name__
+    wrapped.__doc__ = method.__doc__
+    return wrapped
+
+
 def _record_single_extract_job(url: str, started_at: str, *,
                                result: dict | None = None,
                                error: str | None = None,
@@ -10718,6 +10786,79 @@ def _diagnose_payload() -> dict:
     }
 
 
+# UI re-haul Library: the type chips (All / Videos / Posts / Notes /
+# Podcasts) name groups of the index's source_type values, and the one sort
+# control orders the whole result set, not just the page on screen (D26).
+# The index's own search takes a single source_type and orders newest-first
+# (or by rank for a query), so /memory/search answers these two parameters
+# here, with the same filters and the same FTS query the index builds.
+# Requests without them keep the index's path unchanged.
+_LIBRARY_KINDS = {
+    "videos": ("video", "short_video"),
+    "posts": ("x_thread", "x_article", "reddit_thread", "page"),
+    "notes": ("note", "image"),
+    "podcasts": ("episode",),
+}
+_LIBRARY_SORTS = ("newest", "oldest", "title", "relevance")
+
+
+def _library_search(idx, *, q: str | None, filters: dict, kind: str | None,
+                    sort: str, limit: int, offset: int) -> dict:
+    """``{total, results}`` like Index.search_yoinks_for_memory, plus a
+    source-type group (``kind``) and an order over every match: newest,
+    oldest, title (A to Z), or relevance (FTS rank; newest without q)."""
+    clauses = ["y.deleted_at IS NULL"]
+    params: list = []
+    for column in ("channel", "platform", "source_type", "author", "topic", "hook_type"):
+        value = filters.get(column)
+        if value:
+            clauses.append(f"y.{column} = ?")
+            params.append(value)
+    types = _LIBRARY_KINDS.get(kind or "", ())
+    if types:
+        # Rows saved before source_type existed are regular videos.
+        clauses.append("COALESCE(NULLIF(y.source_type, ''), 'video') IN ("
+                       + ", ".join("?" for _ in types) + ")")
+        params.extend(types)
+    date_from, date_to = filters.get("date_from"), filters.get("date_to")
+    if date_from:
+        clauses.append("y.yoinked_at >= ?")
+        params.append(date_from)
+    if date_to:
+        # Inclusive upper bound, as the index reads it.
+        nxt = (datetime.strptime(date_to, "%Y-%m-%d") + timedelta(days=1)).strftime("%Y-%m-%d")
+        clauses.append("y.yoinked_at < ?")
+        params.append(nxt)
+    where = " AND ".join(clauses)
+    order = {
+        "oldest": "y.yoinked_at ASC, y.video_id ASC",
+        "title": "y.title COLLATE NOCASE ASC, y.yoinked_at DESC",
+    }.get(sort, "y.yoinked_at DESC, y.video_id DESC")
+    match = index._fts_query(q) if q else ""
+    if q and not match:
+        return {"total": 0, "results": []}
+    if match:
+        tail = ("FROM yoinks_fts f JOIN yoinks y ON y.video_id = f.video_id "
+                "WHERE yoinks_fts MATCH ? AND " + where)
+        args = [match] + params
+        if sort == "relevance":
+            order = "bm25(yoinks_fts)"
+    else:
+        tail = "FROM yoinks y WHERE " + where
+        args = params
+    with idx._lock:
+        try:
+            cnt = idx._conn.execute("SELECT COUNT(*) AS n " + tail, args).fetchone()
+            rows = idx._conn.execute(
+                "SELECT y.* " + tail + " ORDER BY " + order + " LIMIT ? OFFSET ?",
+                args + [limit, offset]).fetchall()
+        except sqlite3.OperationalError:
+            # A MATCH expression FTS5 still rejects reads as no matches.
+            log.warning("library search rejected query %r", q)
+            return {"total": 0, "results": []}
+    return {"total": int(cnt["n"]) if cnt else 0, "results": [dict(r) for r in rows]}
+
+
 def _enrich_yoink_rows(idx, rows: list[dict]) -> list[dict]:
     """Shape a page of index yoink rows into the enriched result the popup's
     /recent list and the Memory page both consume: fresh health (Sprint
@@ -10822,6 +10963,12 @@ def _enrich_yoink_rows(idx, rows: list[dict]) -> list[dict]:
                              or seg.get("speaker_id"))
                     if label:
                         speaker_names.add(str(label))
+        # UI re-haul Library rows: where the transcript came from
+        # ("captions" / "asr", CM-11) and why local ASR did or did not run,
+        # for the row's one state line ("Done · YouTube captions").
+        transcript_source = live.get("transcript_source")
+        asr_fallback = live.get("asr_fallback") if isinstance(live.get("asr_fallback"), dict) else {}
+        asr_status = asr_fallback.get("status")
 
         out.append({
             "title": live.get("episode_title") or live.get("title") or r.get("title") or "",
@@ -10850,6 +10997,9 @@ def _enrich_yoink_rows(idx, rows: list[dict]) -> list[dict]:
             "episode_title": live.get("episode_title") or metadata.get("episode_title"),
             "host": live.get("host") or metadata.get("host"),
             "speaker_count": len([s for s in speaker_names if s]),
+            "transcript_source": transcript_source if isinstance(transcript_source, str) else None,
+            "asr_fallback_status": asr_status if isinstance(asr_status, str) else None,
+            "has_transcript": bool(transcript),
         })
     return out
 
@@ -14429,17 +14579,46 @@ class Handler(BaseHTTPRequestHandler):
         except (TypeError, ValueError):
             return self._send_json(
                 400, {"ok": False, "error": "limit/offset must be integers"})
+        # UI re-haul: the Library's type chips and its one sort control.
+        kind = (_one("kind") or "").lower() or None
+        if kind and kind not in _LIBRARY_KINDS:
+            return self._send_json(400, {
+                "ok": False, "error": "kind must be one of " + ", ".join(_LIBRARY_KINDS)})
+        # Any other sort value keeps the index's own order, as this route
+        # always did: callers older than the sort control send their own
+        # (the popup's resurfacing card asks for sort=engagement).
+        sort = (_one("sort") or "").lower() or None
+        if sort not in _LIBRARY_SORTS:
+            sort = None
+
+        q = _one("q")
+        # The index's own order already answers newest-first without a
+        # query and best match with one; only a type group or another
+        # order needs _library_search.
+        own_order = sort is None or sort == "relevance" or (sort == "newest" and not q)
 
         idx = _get_index()
         try:
-            res = idx.search_yoinks_for_memory(
-                q=_one("q"), channel=_one("channel"), topic=_one("topic"),
-                hook_type=hook_type,
-                platform=_one("platform"), source_type=_one("source_type"),
-                author=_one("author"),
-                date_from=date_from, date_to=date_to,
-                limit=limit, offset=offset,
-            )
+            if kind or not own_order:
+                res = _library_search(
+                    idx, q=q, kind=kind, sort=sort or "newest",
+                    filters={
+                        "channel": _one("channel"), "topic": _one("topic"),
+                        "hook_type": hook_type, "platform": _one("platform"),
+                        "source_type": _one("source_type"), "author": _one("author"),
+                        "date_from": date_from, "date_to": date_to,
+                    },
+                    limit=limit, offset=offset,
+                )
+            else:
+                res = idx.search_yoinks_for_memory(
+                    q=q, channel=_one("channel"), topic=_one("topic"),
+                    hook_type=hook_type,
+                    platform=_one("platform"), source_type=_one("source_type"),
+                    author=_one("author"),
+                    date_from=date_from, date_to=date_to,
+                    limit=limit, offset=offset,
+                )
             corpus_total = idx.count_corpus()
         except Exception as e:
             # The Library-unavailable state (G-11 / QA #12). The frontend must
@@ -15732,6 +15911,11 @@ class Handler(BaseHTTPRequestHandler):
             "format", "source_type", "title", "episode_title", "podcast_title",
             "feed_url", "channel", "author", "host", "duration_seconds",
             "is_podcast", "is_live", "live_status",
+            # UI re-haul Reader: meta line and the transcript-source note.
+            "yoinked_at", "upload_date", "transcript_source", "comments_status",
+            # Reader > AI analysis: the hook read and the worker states.
+            "hook_type", "hook_type_confidence", "hook_type_status",
+            "hook_explanation", "comment_intelligence_status",
         )
         filtered = {}
         for key in allowed_scalar_keys:
@@ -15739,6 +15923,69 @@ class Handler(BaseHTTPRequestHandler):
                 val = data[key]
                 if isinstance(val, (str, int, float, bool)) or val is None:
                     filtered[key] = val
+
+        # CM-11: why local ASR ran or did not (disabled, model not downloaded,
+        # failed, chunked media). Short strings only, so a long error never
+        # reaches the page.
+        raw_asr = data.get("asr_fallback")
+        if isinstance(raw_asr, dict):
+            filtered["asr_fallback"] = {
+                key: raw_asr[key].strip()[:300] for key in ("status", "model", "error")
+                if isinstance(raw_asr.get(key), str) and raw_asr[key].strip()
+            }
+
+        # Reader > Comments: the saved top comments (the comments worker's
+        # shape), bounded so a busy thread never floods the page.
+        def short_text(value, limit):
+            return value.strip()[:limit] if isinstance(value, str) else None
+
+        def count(value):
+            return int(value) if isinstance(value, (int, float)) and not isinstance(value, bool) else 0
+
+        raw_comments = data.get("comments")
+        if isinstance(raw_comments, list):
+            filtered["comments"] = [
+                {
+                    "author": short_text(c.get("author"), 120),
+                    "text": short_text(c.get("text"), READER_COMMENT_CHARS),
+                    "like_count": count(c.get("like_count")),
+                    "reply_count": count(c.get("reply_count")),
+                    "time_text": short_text(c.get("time_text"), 40),
+                    "is_pinned": c.get("is_pinned") is True,
+                }
+                for c in raw_comments[:READER_COMMENT_LIMIT]
+                if isinstance(c, dict) and short_text(c.get("text"), 1)
+            ]
+
+        # Reader > AI analysis: Comment Intelligence (themes, tools,
+        # disagreements), the same fields the corpus section renders.
+        raw_ci = data.get("comment_intelligence")
+        if isinstance(raw_ci, dict):
+            def items(key):
+                value = raw_ci.get(key)
+                return [v for v in value[:12] if isinstance(v, dict)] if isinstance(value, list) else []
+
+            def quotes(value):
+                return [q.strip()[:400] for q in value[:5] if isinstance(q, str) and q.strip()] \
+                    if isinstance(value, list) else []
+
+            filtered["comment_intelligence"] = {
+                "top_themes": [
+                    {"label": short_text(t.get("label"), 120), "count": count(t.get("count")),
+                     "description": short_text(t.get("description"), 600),
+                     "quotes": quotes(t.get("quotes"))}
+                    for t in items("top_themes")
+                ],
+                "mentioned_products_tools": [
+                    {"name": short_text(p.get("name"), 120), "frequency": count(p.get("frequency"))}
+                    for p in items("mentioned_products_tools") if short_text(p.get("name"), 1)
+                ],
+                "notable_disagreements": [
+                    {"description": short_text(d.get("description"), 600),
+                     "sample_comments": quotes(d.get("sample_comments"))}
+                    for d in items("notable_disagreements")
+                ],
+            }
 
         raw_shots = data.get("screenshots")
         if isinstance(raw_shots, list):
@@ -16208,6 +16455,10 @@ class Handler(BaseHTTPRequestHandler):
         self._send_json(200, {
             "ok": True,
             "jobs": _list_public_jobs(kind or None),
+            # Single-video captures still running, with the phase each is in
+            # (they have no job record until they finish).
+            "live_captures": (_live_extracts_public()
+                              if kind in (None, "", "single") else []),
         })
 
     # ---- /jobs/stream (Tier 2 SSE) ----
@@ -16867,6 +17118,7 @@ class Handler(BaseHTTPRequestHandler):
             "supported_states": list(_LIVE_STATES),
         })
 
+    @_reports_live_extract
     def _handle_extract(self, body: dict):
         url, interval, err = self._validate_url_interval(body)
         if err:
@@ -16878,6 +17130,8 @@ class Handler(BaseHTTPRequestHandler):
         except ValueError as e:
             return self._send_json(400, {"ok": False, "error": str(e)})
 
+        # Waiting for the capture lock until the `with` below takes it.
+        _live_extract_begin(url, body.get("capture_ref"))
         log.info("POST /extract url=%s interval=%d long_video_mode=%s -> running",
                  url, interval, long_video_mode)
         DESKTOP_ROOT.mkdir(parents=True, exist_ok=True)
@@ -16902,6 +17156,7 @@ class Handler(BaseHTTPRequestHandler):
                 _record_single_extract_job(url, started_at, result=ownership.reused)
                 log.info("POST /extract -> ok (reused capture of %s)", ownership.already_captured)
                 return self._send_json(200, ownership.reused)
+            _live_extract_phase(current_phase)
             try:
                 # One metadata fetch up front — used both to derive the folder
                 # slug here and re-used by _run_extraction (avoids a 2nd call).
@@ -16923,6 +17178,7 @@ class Handler(BaseHTTPRequestHandler):
                 def phase_cb(phase: str):
                     nonlocal current_phase
                     current_phase = phase
+                    _live_extract_phase(phase)
 
                 result = _run_extraction(url, interval, folder,
                                           metadata=metadata, topic=topic,
@@ -16962,7 +17218,7 @@ class Handler(BaseHTTPRequestHandler):
                 detail = machine_error_detail(e)
                 failure_phase = _failure_phase(e, current_phase)
                 log.error("POST /extract -> error: %s", msg)
-                _record_single_extract_job(
+                job = _record_single_extract_job(
                     url,
                     started_at,
                     error=msg,
@@ -16972,11 +17228,14 @@ class Handler(BaseHTTPRequestHandler):
                     title=title,
                     folder=folder,
                 )
+                # job_id: the failed job Activity lists for this request, so
+                # a caller showing its own row can hand over to that record.
                 return self._send_json(200, {
                     "ok": False,
                     "error": msg,
                     "error_detail": detail,
                     "failure_phase": failure_phase,
+                    "job_id": (job or {}).get("id"),
                 })
 
         _record_single_extract_job(url, started_at, result=result)

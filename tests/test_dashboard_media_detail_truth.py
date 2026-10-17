@@ -226,6 +226,7 @@ async function execute() {
       selectedYoinkSidecarError: ctx.state.selectedYoinkSidecarError,
       factMetaText: ctx.els.yoinkFactMeta.textContent,
       subheadText: ctx.els.yoinkSubhead.textContent,
+      headingHtml: ctx.els.yoinkHeading.innerHTML,
     }));
   } else {
     throw new Error('Unknown action: ' + input.action);
@@ -490,7 +491,10 @@ def test_dashboard_node_selection_race_avoids_stale_overwrite():
     assert out["selectedYoink"]["video_id"] == "v_fast_item_02"
     assert out["selectedYoinkSidecar"]["video_id"] == "v_fast_item_02"
     assert out["selectedYoinkSidecar"]["channel"] == "Fast Channel"
-    assert out["subheadText"] == "Title for v_fast_item_02" or "Fast Item Two" in out["subheadText"]
+    # UI re-haul Reader: the title moved from the subhead into the H1; the
+    # subhead is now the meta line, which names the newer item's channel.
+    assert out["headingHtml"] == "Title for v_fast_item_02" or "Fast Item Two" in out["headingHtml"]
+    assert "Fast Channel" in out["subheadText"] and "Slow Channel" not in out["subheadText"]
 
 
 def test_dashboard_node_note_readiness_preserved():
