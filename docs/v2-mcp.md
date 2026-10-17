@@ -9,8 +9,8 @@ Transports: stdio, plus an experimental authenticated local HTTP JSON-RPC helper
 
 Uoink has two deliberately different tool surfaces:
 
-- Supported stdio registry: **33 tools**.
-- Local HTTP/OpenAPI registry: **89 tools**.
+- Supported stdio registry: **35 tools**.
+- Local HTTP/OpenAPI registry: **91 tools**.
 
 The supported stdio MCP surface covers extraction, playlist jobs, search,
 clip search and evidence cards, corpus retrieval, citation maps, health
@@ -953,6 +953,8 @@ time. Reads share the library's 2-active, 60-per-minute guard and 2-second
 deadline, with a 64 KB response budget. Refusals use the Phase 4 error envelope,
 including `invalid_request`, `rate_limited`, `deadline_exceeded` and
 `internal_error`; stdio tool failures set `isError: true`.
+Argument-schema failures on `POST /tools/get_playbook_input` return HTTP 400
+with that same `invalid_request` envelope.
 
 Transcript packets retain at most 12 chapters and 2 KiB of escaped chapter
 text per capture before applying the packet budget. Omitted chapters count
@@ -966,6 +968,104 @@ Reports cite `[cap:]`, `[m:]`, `[t:]`, `[cm:]`, `[ctx:]` and, when a saved
 discovery snapshot exists, `[sc:]` keys. Metrics state their as-of time;
 non-caption transcript quotes are approximate. Repurposed drafts retain their
 credit lines. These reads do not capture, publish, apply changes or run discovery.
+
+### discover_candidates
+
+Run a one-shot ScrapeCreators lookup with your own saved key. Discovery and
+connected-agent spending are both off by default. First request a free plan:
+
+```json
+{"mode":"creator","platform":"youtube","handle":"ExampleCreator","pages":1}
+```
+
+It returns `{ok, needs_confirmation:true, credits_planned, credits_today,
+daily_cap}` without a network call. Repeat the same arguments with
+`"confirm_credits":1` to authorize that many requests. The value must equal
+`pages`; each request sent counts even if it fails. The daily cap defaults to
+25 credits (configurable from 1 to 500), resets in UTC, and applies to all callers.
+
+`mode` is `creator` or `keyword`. Creator platforms are `tiktok`, `instagram`,
+`youtube` and `youtube_shorts`; supply one `handle` (1–100 characters, leading
+`@` stripped) or a YouTube `channel_id` (`UC` plus 22 characters). Keyword mode
+accepts `tiktok` or `youtube` and a `query` of 1–200 characters. `pages` is 1–3,
+default 1. There is no automatic retry.
+
+A paid call requires `scrapecreators_enabled`, a usable saved key, credit room,
+and either `scrapecreators_agent_calls_enabled` or a `user_intent_token` minted
+by a dashboard click. The dashboard token lasts five minutes, is single-use,
+and binds the operation, origin and helper session. MCP tools cannot mint it;
+stdio calls need the agent setting. Confirming a credit count alone does not
+enable agent spending. The registry limit is six calls per minute, including plans.
+
+Runs return `run_id`, provider, endpoint, `fetched_at`, credits, coverage,
+`baselines` and up to 60 normalized candidates. Each baseline identifies its
+`platform`, `source_type`, metric, median, sample count `n` and confidence.
+Candidate lifts use their own group's median: YouTube videos and Shorts have
+separate baselines. The convenience field `baseline` holds the sole group
+when there is exactly one; it is `null` for mixed or empty results.
+Each candidate has a stable `key`,
+canonical URL, platform, video ID, creator handle or channel ID, caption,
+publication time, duration, nullable engagement metrics, lift, label,
+`in_library`, state and `pending_id`. YouTube keyword results include videos
+and Shorts. No thumbnails are fetched or saved. Upstream failures retain a
+partial run with `last_error`; unexpected failures use the standard
+`internal_error` envelope without exception text.
+
+Runs live in `DATA_ROOT/discovery/runs/<YYYY-MM>/<run_id>.json`, with atomic
+writes and a 256 KiB file cap. The daily purge removes runs older than 90 days.
+Local `outlier-posts` and `creator-teardown` packets reuse the newest matching
+snapshot per handle/channel ID and platform within 30 days as `[sc:]` rows.
+They read at most 24 run files per packet, filtering creator filenames by
+target first; remaining reads may include matching authors in keyword runs.
+Creator snapshots take precedence over keyword matches regardless of age;
+keyword rows are used only where that platform has no creator snapshot.
+Videos and Shorts stay separate. A newer successful empty creator run replaces
+the older snapshot and blocks keyword fallback for that platform. Failed runs
+with no candidates are ignored; newly written empty failure receipts carry a
+`-failed` run-ID suffix and are excluded before the file-read budget, so repeated
+failures cannot crowd out the older snapshot or keyword fallback. Partial
+results from a later-page failure remain eligible. These local reads spend no credits.
+
+For YouTube, pass the local author/channel display name as the playbook's
+`author`. Uoink also matches discovery rows using the channel ID or handle in
+the newest matching YouTube capture's sidecar `channel_url`. This joins
+channel-ID creator runs and keyword `channel/UC...` rows to ordinary captures;
+the ID does not replace the local display name in the playbook selector.
+If the saved channel URL has neither an ID nor a handle, matching falls back
+to the supplied author. All identities share the 24-file read limit.
+
+### queue_discovered
+
+Pick saved candidates for the normal capture queue:
+
+```json
+{"run_id":"<run_id returned by discovery>","keys":["<candidate key>"]}
+```
+
+`keys` contains 1–10 selections. This tool requires the agent discovery setting
+or a fresh dashboard intent bound to these picks. It needs no ScrapeCreators
+key, makes no ScrapeCreators request and spends no credits. Its registry limit
+is 30 calls per minute.
+
+Success returns `{ok, run_id, queued, skipped, candidates}`. `queued` entries
+contain `key` and `pending_id`; skipped entries contain `key` and one of
+`in_library`, `already_queued`, `unsupported_url`, `unknown_key`. Active picks
+are deduplicated, including concurrent calls from the helper and stdio server:
+SQLite checks for an active URL and enqueues it in one write transaction.
+A new explicit pick after a
+failed or cancelled attempt enqueues a fresh row and replaces the saved
+`pending_id`; it does not spend ScrapeCreators credits. Enqueued picks are saved
+as `state:"queued"` in the run file. The existing `pending_yoinks` retry worker
+captures them with the usual transcript, comments and screenshots. Picks are
+due immediately, using the same local timestamp format as the retry worker.
+Argument-schema failures on `POST /tools/discover_candidates` and
+`POST /tools/queue_discovered` return HTTP 400 with the standard
+`invalid_request` envelope before tool dispatch.
+`GET /discovery/runs/<run_id>` requires the helper token and returns
+`{ok:true, run}`. It reconciles `captured` or `failed` state against the library
+and queue, saves the refreshed receipt, and never starts a capture or provider
+call. It works with discovery and agent spending off. Queue calls also
+reconcile the run before evaluating picks.
 
 ### get_library_brief_input
 

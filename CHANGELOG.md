@@ -12,6 +12,36 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- Discovery tools on stdio and HTTP: `discover_candidates` plans and spends
+  confirmed credits; `queue_discovered` sends up to ten picks through the
+  existing capture queue, with intent/agent gates and duplicate protection.
+  The surface now has 35 stdio tools, 91 registry tools and nine prompts.
+  Token-gated `GET /discovery/runs/<run_id>` reconciles capture state without
+  spending or queueing. Picks are due immediately in the retry worker's local
+  clock. Local playbooks use the target-filtered 24-file reader and newest
+  snapshots, including YouTube channel IDs from saved channel URLs and keyword
+  Shorts. Playbook authors remain local display names. Late key errors cannot
+  invalidate a replacement key.
+  Source, privacy, security and MCP docs describe these flows; dashboard
+  controls remain pending.
+  A newer rerun that failed or was refused before keeping any row does not
+  replace an older snapshot or block keyword fallback; partial runs and
+  successful empty runs still count as the newest snapshot.
+  Creator snapshots take precedence over newer keyword hits. Mixed YouTube
+  results report baselines per content group. Failed or cancelled picks can
+  be explicitly queued again without duplicating active captures.
+  Empty failed receipts now carry a filename marker so repeated failures
+  cannot consume the 24-file packet budget or hide keyword fallback. SQLite
+  makes active-URL deduplication exclusive across helper and stdio processes;
+  both run receipts reconcile to the same pending capture. Argument errors on
+  `/tools/discover_candidates`, `/tools/queue_discovered` and
+  `/tools/get_playbook_input` return HTTP 400 with the standard error envelope.
+  Storage docs now disclose the submitted query, handle or channel_id, run
+  identity, accounting, coverage and error envelopes, including failed runs,
+  alongside candidates, metrics and queue state. The daily purge removes all
+  these run records once older than 90 days. Intent docs clarify that an HTTP
+  client holding the helper token can omit Origin and fetch metadata to mint
+  an intent; browser checks do not prove a human click. No MCP tool can mint an intent.
 - ScrapeCreators discovery adapter with default-off settings, profile-scoped
   keyring storage, five-minute dashboard intents, a 25-credit daily default cap,
   and a UTC credit ledger. Requests use a pinned host, refuse redirects, and
@@ -21,8 +51,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   including `/v1/youtube/channel-videos` and `/v1/credit-balance` (`creditCount`).
   Run records and filenames identify the requested mode, platform and target.
   TikTok picks use the row's video ID, correcting URLs that point to another post.
-  The bounded reader filters by target before its 24-file limit. Playbook packets
-  do not yet use this reader.
+  The bounded reader filters by target before its 24-file limit.
 - Token-gated `POST /playbooks/run` for explicit research generation with a
   saved Anthropic key, metered per playbook, with citation warnings and refs.
   Reports save through the existing draft route. Privacy and security docs

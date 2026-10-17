@@ -182,6 +182,14 @@
       "description": "Read-only cited export of one stored transcript range or excerpt with speaker labels, provenance, chapters and revision pins."
     },
     {
+      "name": "discover_candidates",
+      "description": "Plan or run opt-in ScrapeCreators discovery with your own key and a daily credit cap. Saves candidates locally for review."
+    },
+    {
+      "name": "queue_discovered",
+      "description": "Queue up to ten saved discovery picks for normal Uoink capture without another ScrapeCreators call."
+    },
+    {
       "name": "get_playbook_input",
       "description": "Read-only: prepare a bounded, cited research packet from the local library for one of five research playbooks; the client writes the report."
     }

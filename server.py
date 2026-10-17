@@ -1345,11 +1345,19 @@ def _store_saved_scrapecreators_key(key: str) -> None:
         raise CredentialStoreError("ScrapeCreators credential store unavailable") from None
 
 
-def _mark_scrapecreators_key_invalid(invalid: bool = True) -> None:
+def _mark_scrapecreators_key_invalid(invalid: bool = True, *, expected_key: str | None = None) -> None:
     # A 401/403 preserves the saved key for the user to replace or clear.
-    data = _read_settings()
-    data["scrapecreators_key_invalid"] = invalid
-    _write_settings(data)
+    # Serialize with settings saves, and ignore a response for a replaced key.
+    with _settings_lock:
+        try:
+            if expected_key is not None and _get_saved_scrapecreators_key() != expected_key:
+                return
+            data = _read_settings()
+            data["scrapecreators_key_invalid"] = invalid
+            data["updated_at"] = _now_iso()
+            _write_settings(data)
+        except OSError:
+            log.warning("ScrapeCreators invalid-key settings update failed")
 
 
 _discovery_service = None
@@ -2159,7 +2167,7 @@ _SSE_HEARTBEAT_SEC = 15.0     # keepalive comment cadence
 _sse_count_lock = threading.Lock()
 _sse_active = [0]
 
-_settings_lock = threading.Lock()
+_settings_lock = threading.RLock()
 _corpus_update_lock = threading.Lock()
 # Serializes read-modify-write of the per-video <slug>.json sidecar. The
 # comments / hook-type / comment-intelligence workers run concurrently for the
@@ -12019,6 +12027,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_session_active()
         if bare == "/settings":
             return self._handle_settings_get()
+        if bare.startswith("/discovery/runs/"):
+            return self._handle_discovery_run_get(bare[len("/discovery/runs/"):])
         if bare == "/api/writer-peer/v1/status":
             return self._send_json(200, writer_peer.status())
         if bare == "/settings/pricing":
@@ -14522,6 +14532,10 @@ class Handler(BaseHTTPRequestHandler):
         threading.Thread(target=self.server.shutdown, daemon=True).start()
 
     def _handle_settings_post(self, body: dict):
+        with _settings_lock:
+            return self._handle_settings_post_locked(body)
+
+    def _handle_settings_post_locked(self, body: dict):
         boolean_fields = (
             "scrapecreators_enabled",
             "scrapecreators_agent_calls_enabled",
@@ -14899,7 +14913,11 @@ class Handler(BaseHTTPRequestHandler):
             args = params.get("arguments") or {}
             if not isinstance(name, str) or not isinstance(args, dict):
                 return self._send_mcp_error(request_id, -32602, "invalid tool call")
-            payload = _mcp_tools_module().call_tool(name, args)
+            tools = _mcp_tools_module()
+            if name in getattr(tools, "DISCOVERY_TOOL_NAMES", ()):
+                payload = tools.call_tool(name, args, **self._discovery_context())
+            else:
+                payload = tools.call_tool(name, args)
             return self._send_mcp_result(request_id, self._mcp_tool_call_result(payload))
         return self._send_mcp_error(request_id, -32601, "method not found")
 
@@ -15444,6 +15462,11 @@ class Handler(BaseHTTPRequestHandler):
             schema_error = tools.library_validate_arguments(name, body)
             if schema_error is not None:
                 return self._send_json(400, tools.library_invalid_request(schema_error))
+        elif name == "get_playbook_input" or name in getattr(tools, "DISCOVERY_TOOL_NAMES", ()):
+            validation_error = tools.validate_research_arguments(name, body)
+            if validation_error is not None:
+                status = 400 if validation_error["error"]["code"] == "invalid_request" else 500
+                return self._send_json(status, validation_error)
         else:
             validation_error = openapi_bridge.validate_arguments(
                 body, tools.TOOL_REGISTRY[name].input_schema)
@@ -15451,7 +15474,10 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send_json(400, {"ok": False,
                                              "error": validation_error})
         try:
-            result = tools.call_tool(name, body if isinstance(body, dict) else {})
+            if name in getattr(tools, "DISCOVERY_TOOL_NAMES", ()):
+                result = tools.call_tool(name, body, **self._discovery_context())
+            else:
+                result = tools.call_tool(name, body if isinstance(body, dict) else {})
         except Exception:
             log.exception("/tools/%s failed", name)
             return self._send_json(500, {"ok": False,
@@ -15464,14 +15490,14 @@ class Handler(BaseHTTPRequestHandler):
 
     # ---- Living Library: user-intent confirmation (Phase 2, 2026-09-04) ----
     def _is_dashboard_origin(self) -> bool:
-        """CSRF/origin gate for dashboard confirmation routes. The request
-        must come from the helper's own page: Origin, when present, must be
+        """Browser CSRF/origin gate for confirmation routes.
+        Origin, when present, must be
         a loopback http origin on the bound port, and Sec-Fetch-Site, when
         present, must be same-origin or none. Extension and web origins are
-        refused even with a valid token -- a pin or undo is a user's own
-        decision made on a displayed delta, not something a page script or
-        an agent may confirm on the user's behalf. Absent Origin is accepted
-        (same-process WebView fetches), behind the Host and token gates."""
+        refused even with a valid token. Absent Origin/fetch metadata is
+        accepted behind the Host and token gates for WebView compatibility.
+        An HTTP client holding the helper token can omit those headers;
+        passing this check does not prove a human clicked."""
         origin = (self.headers.get("Origin") or "").strip()
         if origin:
             try:
@@ -15526,7 +15552,34 @@ class Handler(BaseHTTPRequestHandler):
         """Canonical origin for an intent, including same-process WebView calls."""
         return (self.headers.get("Origin") or "http://" + self.headers.get("Host", "")).strip().lower()
 
+    def _discovery_context(self) -> dict:
+        # HTTP-derived capability context, not proof of dashboard provenance.
+        # A helper-token holder may omit browser headers. Stdio has no context.
+        if not self._is_dashboard_origin():
+            return {}
+        return {"origin": self._discovery_origin(), "session_hash": _library_session_hash()}
+
+    def _handle_discovery_run_get(self, run_id: str):
+        # do_GET enforces the helper token before exposing saved user data.
+        # Reading/reconciling a receipt never spends or queues another capture.
+        import library_resources
+        try:
+            result = _get_discovery_service().read_run(run_id)
+            json.dumps(result, ensure_ascii=False, allow_nan=False)
+            if result.get("run_id") == run_id:
+                return self._send_json(200, {"ok": True, "run": result})
+            if result.get("ok") is not False or not isinstance(result.get("error"), dict):
+                raise library_resources.ResourceError("internal_error")
+        except Exception:
+            result = library_resources.ResourceError("internal_error").envelope()
+        code = (result.get("error") or {}).get("code")
+        status = {"invalid_request": 400, "resource_not_found": 404}.get(code, 500)
+        return self._send_json(status, result)
+
     def _handle_discovery_intent(self, body: dict):
+        # Token-gated HTTP clients can mint without Origin/fetch metadata.
+        # Browser-origin checks are CSRF protection, not proof of a click.
+        # No MCP tool can mint an intent.
         if not self._is_dashboard_origin():
             return self._send_json(403, {"ok": False, "error": "forbidden"})
         import library_resources

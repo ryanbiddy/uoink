@@ -1,7 +1,8 @@
 """Opt-in, one-shot ScrapeCreators discovery. No work occurs on import.
 
 Transport is injectable and returns TransportResponse; production uses a pinned,
-non-redirecting urllib opener. Only normalized candidates are saved. Endpoint
+non-redirecting urllib opener. Run receipts save normalized candidates, request
+identity, accounting and errors, never raw vendor responses. Endpoint
 paths and fields are pinned to the OpenAPI examples fetched on 2026-10-16 under
 tests/fixtures/scrapecreators/openapi/ (each records its source URL and date).
 """
@@ -10,6 +11,7 @@ from __future__ import annotations
 import datetime as dt
 import hashlib
 import heapq
+import itertools
 import json
 import math
 import re
@@ -73,6 +75,7 @@ ENDPOINTS = {
 }
 _PATHS = frozenset(spec["path"] for spec in ENDPOINTS.values()) | {BALANCE_ENDPOINT}
 _network_lock = threading.Lock()
+_queue_lock = threading.Lock()
 _last_sent_at = None
 
 
@@ -212,13 +215,31 @@ def validate_queue_arguments(arguments):
     return args, token
 
 
+def normalize_author(value):
+    """Match handles and YouTube channel IDs without inventing an identity."""
+    value = _text(value, 200) or ""
+    value = value.strip().removeprefix("@")
+    if value.startswith("channel/"):
+        value = value[len("channel/"):]
+    return value
+
+
 def parse_candidates(payload, args, backend):
     spec = ENDPOINTS[(args["mode"], args["platform"])]
     rows = _field(payload, spec["rows"])
     if not isinstance(rows, list):
         raise _invalid("discovery_response_shape")
+    if (args["mode"], args["platform"]) == ("keyword", "youtube"):
+        # The pinned search example has a separate shorts list with the same
+        # fields as videos. Tag it explicitly; canonical URLs are watch URLs.
+        shorts = payload.get("shorts", [])
+        if not isinstance(shorts, list):
+            raise _invalid("discovery_response_shape")
+        rows = [(row, "youtube") for row in rows] + [(row, "youtube_shorts") for row in shorts]
+    else:
+        rows = [(row, args["platform"]) for row in rows]
     result, seen = [], set()
-    for raw in rows:
+    for raw, candidate_platform in rows:
         row = _field(raw, spec["row"]) if "row" in spec else raw
         if not isinstance(row, dict):
             continue
@@ -253,8 +274,9 @@ def parse_candidates(payload, args, backend):
         duration = _number(_field(row, spec["duration"]))
         result.append({
             "key": hashlib.sha256(canonical.encode()).hexdigest()[:24],
-            "url": canonical, "platform": args["platform"], "video_id": video_id,
-            "author_handle": (_text(_field(row, spec["author"]), 100) or args.get("handle") or "").lstrip("@"),
+            "url": canonical, "platform": candidate_platform, "video_id": video_id,
+            "author_handle": normalize_author(_field(row, spec["author"]) or
+                                               args.get("handle") or args.get("channel_id"))[:100],
             "caption": _text(_field(row, spec["caption"]), 300) or "",
             "published_at": _stamp(_field(row, spec["date"])),
             "duration_s": duration / spec["duration_scale"] if duration is not None else None,
@@ -285,7 +307,7 @@ def _redact(value, key):
     return value
 
 
-def _baseline(candidates, fetched_at):
+def _baselines(candidates, fetched_at):
     rows = [{"kind": "discovery", "item_id": c["video_id"], "url": c["url"],
              "platform": "youtube" if c["platform"] == "youtube_shorts" else c["platform"],
              "source_type": "video" if c["platform"] == "youtube" else "short_video",
@@ -295,7 +317,7 @@ def _baseline(candidates, fetched_at):
     for candidate, row in zip(candidates, rows):
         metric = row["metric"]
         candidate.update(lift=metric["lift"], label=metric["label"] if metric["label"] != "too fresh" else "none")
-    return baselines[0] if baselines else {"metric": "views", "median": None, "n": 0, "confidence": "Low"}
+    return baselines
 
 
 def _run_scope(args):
@@ -313,16 +335,19 @@ def _run_scope(args):
 
 
 def recent_runs(data_root, *, now=None, mode=None, platform=None, handle=None,
-                channel_id=None, query=None):
+                channel_id=None, query=None, include_keyword=False, youtube_author=None):
     """Bounded discovery input for packet builders: at most 24 file reads.
 
     Filter filenames by request identity BEFORE applying the read budget, so
     unrelated newer runs cannot displace a creator's newest snapshot. Supplying
     a handle without a platform includes that creator's supported platforms.
+    Empty failed receipts carry a -failed filename marker and use no reads.
     Packet builders must use this iterator to benefit from the read cap.
     """
     now = now or dt.datetime.now(dt.timezone.utc)
     root = Path(data_root) / "discovery" / "runs"
+    if not root.resolve().is_relative_to(Path(data_root).resolve()):
+        return
     earliest = now - dt.timedelta(days=30)
     months = sorted({(earliest + dt.timedelta(days=n)).strftime("%Y-%m") for n in range(31)}, reverse=True)
     target = {k: v for k, v in (("handle", handle), ("channel_id", channel_id), ("query", query)) if v is not None}
@@ -332,45 +357,72 @@ def recent_runs(data_root, *, now=None, mode=None, platform=None, handle=None,
             if ((mode is not None and mode != candidate_mode)
                     or (platform is not None and platform != candidate_platform)):
                 continue
-            try:
-                args, _ = validate_arguments({"mode": candidate_mode, "platform": candidate_platform, **target})
-                scopes.add(_run_scope(args))
-            except ResourceError:
-                continue
+            targets = [target]
+            if youtube_author and candidate_mode == "creator" and candidate_platform.startswith("youtube"):
+                field = "channel_id" if re.fullmatch(r"UC[A-Za-z0-9_-]{22}", youtube_author) else "handle"
+                targets.append({field: youtube_author})
+            for candidate_target in targets:
+                try:
+                    args, _ = validate_arguments({"mode": candidate_mode, "platform": candidate_platform, **candidate_target})
+                    scopes.add(_run_scope(args))
+                except ResourceError:
+                    continue
         if not scopes:
             return
     patterns = [f"*-{scope}-*.json" for scope in scopes] if scopes else ["*.json"]
     remaining = MAX_RUN_FILES_PER_PACKET
-    for month in months:
-        folder = root / month
-        if not folder.exists() or not folder.resolve().is_relative_to(root.resolve()):
-            continue
-        paths = (path for pattern in patterns for path in folder.glob(pattern))
-        for path in heapq.nlargest(remaining, paths):
-            if remaining == 0:
-                return
-            remaining -= 1
-            try:
-                if not path.resolve().is_relative_to(root.resolve()):
+    def read_patterns(patterns, *, keywords=False):
+        nonlocal remaining
+        folders = [root / month for month in months if (root / month).exists()
+                   and (root / month).resolve().is_relative_to(root.resolve())]
+        # Share the read budget across target platforms, including prior
+        # months. Heavy use on one platform must not hide another's newest run.
+        batches = [heapq.nlargest(remaining, (path for folder in folders for path in folder.glob(pattern)
+                                             if not path.name.endswith("-failed.json")))
+                   for pattern in sorted(patterns)]
+        for batch in itertools.zip_longest(*batches):
+            for path in batch:
+                if path is None:
                     continue
-                with path.open("rb") as stream:
-                    raw = stream.read(MAX_RUN_BYTES + 1)
-                if len(raw) > MAX_RUN_BYTES:
+                if remaining == 0:
+                    return
+                remaining -= 1
+                try:
+                    if not path.resolve().is_relative_to(root.resolve()):
+                        continue
+                    with path.open("rb") as stream:
+                        raw = stream.read(MAX_RUN_BYTES + 1)
+                    if len(raw) > MAX_RUN_BYTES:
+                        continue
+                    run = json.loads(raw)
+                    if not isinstance(run, dict):
+                        continue
+                    if not keywords and scopes and _run_scope(run) not in scopes:
+                        continue
+                    if not keywords and ((mode is not None and run.get("mode") != mode)
+                            or (platform is not None and run.get("platform") != platform)):
+                        continue
+                    fetched = dt.datetime.fromisoformat(run["fetched_at"])
+                    if (run.get("provider") == "scrapecreators" and earliest <= fetched <= now
+                            and isinstance(run.get("candidates"), list) and len(run["candidates"]) <= MAX_CANDIDATES):
+                        if keywords and (run.get("mode") != "keyword" or not any(
+                                isinstance(c, dict) and normalize_author(c.get("author_handle")).casefold()
+                                in {normalize_author(handle or channel_id).casefold(),
+                                    normalize_author(youtube_author).casefold() if c.get("platform") in
+                                    ("youtube", "youtube_shorts") and youtube_author else None}
+                                for c in run["candidates"])):
+                            continue
+                        yield run
+                except (OSError, ValueError, KeyError, TypeError, AttributeError, StopIteration):
                     continue
-                run = json.loads(raw)
-                if not isinstance(run, dict):
-                    continue
-                if scopes and _run_scope(run) not in scopes:
-                    continue
-                if ((mode is not None and run.get("mode") != mode)
-                        or (platform is not None and run.get("platform") != platform)):
-                    continue
-                fetched = dt.datetime.fromisoformat(run["fetched_at"])
-                if (run.get("provider") == "scrapecreators" and earliest <= fetched <= now
-                        and isinstance(run.get("candidates"), list) and len(run["candidates"]) <= MAX_CANDIDATES):
-                    yield run
-            except (OSError, ValueError, KeyError, TypeError, AttributeError, StopIteration):
-                continue
+
+    yield from read_patterns(patterns)
+    # Search filenames identify queries, not creators. Scan only their bounded
+    # remainder, after the target-filtered creator reads, and match row authors.
+    if include_keyword and (handle is not None or channel_id is not None) and remaining:
+        keyword_platforms = ("youtube", "tiktok") if platform is None else (
+            "youtube" if platform == "youtube_shorts" else platform,)
+        yield from read_patterns([f"*-keyword-{p}-query-*.json" for p in keyword_platforms], keywords=True)
 
 
 def purge_expired_runs(data_root, *, now=None):
@@ -390,7 +442,7 @@ def purge_expired_runs(data_root, *, now=None):
             # The generated filename supplies the date; never open unbounded
             # vendor data or delete unknown files based only on their mtime.
             if not re.fullmatch(r"\d{8}T\d{12}Z-(?:(?:creator|keyword)-(?:tiktok|instagram|youtube|youtube_shorts)-"
-                                r"(?:handle|channel_id|query)-[A-Za-z0-9_]{1,16}-[0-9a-f]{24}-)?[0-9a-f]{16}\.json", path.name):
+                                r"(?:handle|channel_id|query)-[A-Za-z0-9_]{1,16}-[0-9a-f]{24}-)?[0-9a-f]{16}(?:-failed)?\.json", path.name):
                 continue
             try:
                 created = dt.datetime.strptime(path.name.split("-")[0], "%Y%m%dT%H%M%S%fZ").replace(tzinfo=dt.timezone.utc)
@@ -421,7 +473,10 @@ class DiscoveryService:
                 "arguments": {k: v for k, v in args.items() if k != "confirm_credits"}}
 
     def mint_intent(self, body, *, origin, session_hash):
-        """Only the gated dashboard route may call this, never a registry tool.
+        """Only the token/origin-gated HTTP route calls this, never an MCP tool.
+
+        A helper-token holder can omit browser metadata; this is not proof of
+        a human click. The route checks supplied browser origins for CSRF.
 
         Body: {confirmed:true, operation:{tool:'discover_candidates'|'test_key'|'queue_discovered',
         arguments:{...}}}. The capability is single-use and operation-bound.
@@ -476,6 +531,139 @@ class DiscoveryService:
             if not consent and self.backend._read_settings().get("scrapecreators_agent_calls_enabled") is not True:
                 raise _invalid("user_intent_required")
             return {"ok": True, "arguments": args}
+        except ResourceError as exc:
+            return exc.envelope()
+        except Exception:
+            return ResourceError("internal_error").envelope()
+
+    def _run_path(self, run_id):
+        # Resolve exactly one dated file; no directory walk or caller path.
+        if not isinstance(run_id, str) or not re.fullmatch(r"[A-Za-z0-9_-]{1,150}", run_id):
+            raise _invalid("run_id")
+        try:
+            stamp = dt.datetime.strptime(run_id.split("-")[0], "%Y%m%dT%H%M%S%fZ")
+        except ValueError:
+            raise ResourceError("resource_not_found") from None
+        path = Path(self.backend.DATA_ROOT) / "discovery" / "runs" / stamp.strftime("%Y-%m") / (run_id + ".json")
+        if not path.resolve().is_relative_to(Path(self.backend.DATA_ROOT).resolve()):
+            raise _invalid("discovery_storage_path")
+        return path
+
+    def _load_run(self, run_id):
+        path = self._run_path(run_id)
+        try:
+            with path.open("rb") as stream:
+                raw = stream.read(MAX_RUN_BYTES + 1)
+        except FileNotFoundError:
+            raise ResourceError("resource_not_found") from None
+        if len(raw) > MAX_RUN_BYTES:
+            raise _invalid("discovery_run_too_large")
+        run = json.loads(raw)
+        if (not isinstance(run, dict) or run.get("run_id") != run_id
+                or run.get("provider") != "scrapecreators"
+                or not isinstance(run.get("candidates"), list)
+                or len(run["candidates"]) > MAX_CANDIDATES
+                or any(not isinstance(c, dict) for c in run["candidates"])):
+            raise _invalid("discovery_run_invalid")
+        return run
+
+    def _candidate_url(self, candidate):
+        url = candidate.get("url")
+        if not isinstance(url, str) or len(url) > 2048:
+            return None
+        canonical, platform = self.backend._normalize_video_url(url)
+        expected = candidate.get("platform")
+        expected = "youtube" if expected == "youtube_shorts" else expected
+        if not canonical or platform not in ("youtube", "tiktok", "instagram") or platform != expected:
+            return None
+        parsed = urlparse(canonical)
+        vid = (parse_qs(parsed.query).get("v", [None])[0] if platform == "youtube"
+               else parsed.path.rstrip("/").split("/")[-1])
+        return canonical if vid and vid == candidate.get("video_id") else None
+
+    def _refresh_candidates(self, idx, run):
+        """Caller holds the index lock. Never resurrect a deleted capture."""
+        for candidate in run["candidates"]:
+            canonical = self._candidate_url(candidate)
+            if canonical is None:
+                continue
+            candidate["url"] = canonical
+            existing = idx.get_yoink(candidate["video_id"])
+            candidate["in_library"] = bool(existing and not existing.get("deleted_at"))
+            if candidate["in_library"]:
+                candidate["state"] = "captured"
+                continue
+            # An active row from another run (or a prior interrupted save)
+            # counts too. Do not page list_pending and miss an older live row.
+            pending = idx._conn.execute(
+                "SELECT pending_id,status FROM pending_yoinks WHERE url=? "
+                "AND (status IN ('pending','running') OR pending_id=?) "
+                "ORDER BY CASE WHEN status IN ('pending','running') THEN 0 ELSE 1 END, pending_id DESC LIMIT 1",
+                (canonical, candidate.get("pending_id"))).fetchone()
+            if pending:
+                candidate["pending_id"] = pending["pending_id"]
+                candidate["state"] = ("queued" if pending["status"] in ("pending", "running")
+                                      else "failed")
+            elif candidate.get("pending_id") is not None:
+                # Terminal rows may have been purged. Retain the last receipt
+                # for display; a new explicit pick can enqueue another attempt.
+                candidate["state"] = "failed"
+            else:
+                candidate["state"] = "new"
+
+    def read_run(self, run_id):
+        """Read a saved run and lazily reconcile normal capture queue state."""
+        try:
+            with _queue_lock:
+                run = self._load_run(run_id)
+                idx = self.backend._get_index()
+                with idx._lock:
+                    self._refresh_candidates(idx, run)
+                    self._save_run(run)
+                return run
+        except ResourceError as exc:
+            return exc.envelope()
+        except Exception:
+            return ResourceError("internal_error").envelope()
+
+    def queue_discovered(self, arguments, *, origin="", session_hash=""):
+        authorized = self.authorize_queue(arguments, origin=origin, session_hash=session_hash)
+        if authorized.get("ok") is not True:
+            return authorized
+        try:
+            args = authorized["arguments"]
+            with _queue_lock:
+                run = self._load_run(args["run_id"])
+                idx = self.backend._get_index()
+                queued, skipped = [], []
+                with idx._lock:
+                    self._refresh_candidates(idx, run)
+                    candidates = {c.get("key"): c for c in run["candidates"]}
+                    for key in args["keys"]:
+                        candidate = candidates.get(key)
+                        canonical = self._candidate_url(candidate) if candidate else None
+                        reason = ("unknown_key" if candidate is None else
+                                  "unsupported_url" if canonical is None else
+                                  "in_library" if candidate["in_library"] else
+                                  "already_queued" if candidate.get("state") == "queued" else None)
+                        if reason:
+                            skipped.append({"key": key, "reason": reason})
+                            continue
+                        # The retry worker compares local naive ISO strings.
+                        # Credits/run timestamps use UTC, but queue dates must
+                        # use the backend clock, as mobile playlists do.
+                        pending_id, inserted = idx.enqueue_pending_once(
+                            canonical, 30, retry_after=self.backend._now_iso())
+                        candidate.update(pending_id=pending_id, state="queued")
+                        if inserted:
+                            queued.append({"key": key, "pending_id": pending_id})
+                        else:
+                            skipped.append({"key": key, "reason": "already_queued"})
+                        # Duplicate URLs inside a saved file cannot enqueue twice.
+                        self._refresh_candidates(idx, run)
+                    self._save_run(run)
+                return {"ok": True, "run_id": run["run_id"], "queued": queued,
+                        "skipped": skipped, "candidates": run["candidates"]}
         except ResourceError as exc:
             return exc.envelope()
         except Exception:
@@ -623,7 +811,7 @@ class DiscoveryService:
                 if 300 <= response.status < 400:
                     raise _invalid("discovery_redirect_refused")
                 if response.status in (401, 403):
-                    self.backend._mark_scrapecreators_key_invalid()
+                    self.backend._mark_scrapecreators_key_invalid(expected_key=key)
                     raise _invalid("scrapecreators_key_invalid")
                 if response.status != 200:
                     raise _invalid("discovery_rate_limited" if response.status == 429 else "discovery_upstream_error")
@@ -638,7 +826,7 @@ class DiscoveryService:
                     if amount is None:
                         raise _invalid("discovery_response_shape")
                     run["balance"] = amount
-                    self.backend._mark_scrapecreators_key_invalid(False)
+                    self.backend._mark_scrapecreators_key_invalid(False, expected_key=key)
                     break
                 candidates, cursor, truncated = parse_candidates(payload, args, self.backend)
                 for candidate in candidates:
@@ -673,7 +861,15 @@ class DiscoveryService:
         run["coverage"]["items"] = len(run["candidates"])
         run["coverage"]["truncated"] |= run["coverage"]["next_cursor_present"]
         if not balance:
-            run["baseline"] = _baseline(run["candidates"], run["fetched_at"])
+            # The outcome is final before the first save. Keep failed receipts
+            # addressable by ID while letting packet readers exclude them by
+            # filename, before spending their bounded file-read budget.
+            if not run["candidates"] and run["ok"] is False:
+                run["run_id"] += "-failed"
+            run["baselines"] = _baselines(run["candidates"], run["fetched_at"])
+            # Keep the single-group convenience field without attributing one
+            # group's median to a mixed video/Shorts result.
+            run["baseline"] = run["baselines"][0] if len(run["baselines"]) == 1 else None
             self._save_run(run)
         return run
 
@@ -681,9 +877,6 @@ class DiscoveryService:
         raw = json.dumps(run, ensure_ascii=False, allow_nan=False)
         if len(raw.encode("utf-8")) > MAX_RUN_BYTES:
             raise _invalid("discovery_run_too_large")
-        root = Path(self.backend.DATA_ROOT) / "discovery" / "runs"
-        folder = root / run["fetched_at"][:7]
-        if not folder.resolve().is_relative_to(Path(self.backend.DATA_ROOT).resolve()):
-            raise _invalid("discovery_storage_path")
-        folder.mkdir(parents=True, exist_ok=True)
-        _atomic_write_text(folder / (run["run_id"] + ".json"), raw)
+        path = self._run_path(run["run_id"])
+        path.parent.mkdir(parents=True, exist_ok=True)
+        _atomic_write_text(path, raw)

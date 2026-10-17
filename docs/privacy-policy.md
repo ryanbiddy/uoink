@@ -16,7 +16,9 @@ Uoink server in the cloud, no analytics, and no telemetry. Uoink runs on
 your own machine. It contacts a source service when you ask it to capture
 that source, GitHub only when you click **Check now**, and Anthropic only
 with your own API key: for automatic AI analysis you turn on, a key test,
-or an AI action that you or a connected agent start on demand. The
+or an AI action that you or a connected agent start on demand. Optional
+ScrapeCreators discovery sends your search terms or creator identifier with
+your key only after you enable it and authorize the call. The
 rest of this document names those requests and the local data they create.
 
 ## 1. What Uoink collects about you
@@ -56,11 +58,13 @@ Uoink makes these outbound requests:
     generation that uses your saved key, from the dashboard when no agent is
     connected or when an agent asks for it (up to 8,000 characters of the
     chosen transcript or corpus text plus its grounding); and research
-    playbook runs (**Run** in the dashboard without a connected agent), which
+    playbook runs (from the dashboard without a connected agent, or an
+    authenticated request by a connected agent using the saved key), which
     send the playbook instructions and a bounded packet from your library
     relevant to that playbook, such as titles, channel and creator names,
     URLs, chapters, transcript excerpts, top comments, earlier analysis
-    summaries and metrics, plus active writing style anchors for repurposing.
+    summaries and metrics, including saved discovery rows when available,
+    plus active writing style anchors for repurposing.
   - *A key test* when you choose to test your key (it sends only a short
     test message, no library text).
 
@@ -69,6 +73,15 @@ Uoink makes these outbound requests:
   starts nothing by itself. Local MCP playbook packets and copying a prompt make no
   Anthropic request from Uoink. The dashboard Research controls are still
   pending.
+- **ScrapeCreators discovery: only if you turn it on and add your own key.**
+  Discovery sends the creator handle, YouTube channel ID or search words you
+  type, your key in the `x-api-key` header, and the Uoink user agent to
+  `api.scrapecreators.com`. It sends no library content, transcripts or
+  comments. Each confirmed request uses credits, with a default daily cap of
+  25. Connected agents can spend only if you separately enable agent discovery;
+  dashboard calls require an intent token from that click. Results are saved
+  on this PC without third-party thumbnails. Picking results puts their URLs
+  into the normal capture queue, which then contacts the source service.
 - **GitHub release check — only when you click `Check now`.** The dashboard
   requests the latest Uoink release record from `api.github.com`. It sends no
   corpus content or usage event. GitHub receives the normal request metadata.
@@ -88,6 +101,19 @@ Uoink stores the following on your Windows machine:
 - **Uoinked corpora** — `%USERPROFILE%\Desktop\Uoink\<topic>\<slug>\` (an upgraded install may keep a pre-rename `%USERPROFILE%\Desktop\Yoink\` until you opt in to move it). Plain markdown + JSON + screenshots. Yours to read, edit, delete.
 - **Library index** — `%LOCALAPPDATA%\Uoink\index.db`. SQLite database with FTS5 search index, taxonomy classifications, entity graph, queue, and corrections. Local-only; never transmitted.
 - **Anthropic API key** — Windows Credential Manager, via Python `keyring`. Service `Uoink` (migrated from the legacy `Yoink` service on first launch), username `anthropic_key`. Never stored in plaintext in any settings file.
+- **ScrapeCreators API key** — Windows Credential Manager, via `keyring`,
+  username `scrapecreators_key` in the same service. Isolated profiles use
+  `Uoink-isolated-<hash>` for both keys, with no fallback to the normal profile.
+- **Discovery runs** — `discovery\runs\<YYYY-MM>\<run_id>.json` beneath the
+  local data folder. These store the submitted query, handle or channel_id;
+  run identity, provider, endpoint, mode, platform and fetch time; credit counts,
+  daily cap and page/item coverage; normalized candidates (URLs, IDs, author,
+  caption, publication time, duration and metrics), computed baselines, queue
+  receipts and capture state. Standard error envelopes are also stored for
+  partial and failed runs. Raw vendor responses, thumbnails and API keys are
+  not stored in run files. All these run records are removed by the daily purge
+  once older than 90 days. Local playbooks may reuse eligible snapshots up to
+  30 days old.
 - **Soft-deleted uoinks** — when you delete a uoink from the Memory page, the folder moves to `%USERPROFILE%\Desktop\Uoink\_yoink-trash\<topic>\<slug>__deleted-<timestamp>\`. The content remains readable on disk for 30 days, then is automatically purged by the helper on startup or every 24 hours thereafter. To delete immediately, manually remove the folder from `_yoink-trash`.
 - **Helper state** — `server.log`, `token.txt`, `server.pid`, the v2.1 migration markers (`.migration-complete`, `.migrated-from-yoink`), and migrated legacy files (`jobs.json.migrated`, `taxonomy.json.migrated`) live alongside `index.db` under `%LOCALAPPDATA%\Uoink\`.
 
@@ -95,17 +121,20 @@ Library text leaves your machine through Uoink's Anthropic integration only
 with your saved key, for the automatic analysis you turn on or an on-demand
 AI action that you or a connected agent start (see section 2).
 
-## 3. Your Anthropic API key
+## 3. Your API keys
 
-If you use the optional AI features, you supply your own Anthropic API
-key. Uoink stores that key in **Windows Credential Manager**, the
-operating system's encrypted credential store. It is not kept in
-plaintext, and it is not written into Uoink's settings file.
+Optional AI features use your own Anthropic key; optional discovery uses your
+own ScrapeCreators key. Uoink stores both in **Windows Credential Manager**,
+the operating system's encrypted credential store. Neither key is kept in
+plaintext, written into `settings.json`, or returned by `GET /settings`.
 
-Your key is never transmitted anywhere except to Anthropic
-(`api.anthropic.com`), in the authorization header of the API calls you
-asked Uoink to make. Uoink itself never receives or stores your key on
-any server — there is no Uoink server to receive it.
+Your Anthropic key goes only to `api.anthropic.com` in the request header for
+automatic analysis you enable, a key test, or an on-demand AI action that you
+or a connected agent start. Turning off automatic analysis does not disable
+those agent-requested calls with the saved key. Your ScrapeCreators key goes
+only to `api.scrapecreators.com` in the `x-api-key` header for a confirmed,
+authorized discovery call or balance test. There is no Uoink cloud server
+that receives either key.
 
 ## 4. Your control over your data
 
@@ -117,6 +146,11 @@ any server — there is no Uoink server to receive it.
   Hook Type analysis, Writing Studio saved-key generation and research
   playbook runs) remain separate actions. Clear your saved key to prevent
   any of them from using Uoink's Anthropic route.
+- **Clear the ScrapeCreators key and turn discovery off** in settings to stop
+  paid discovery. Agent discovery has its own off-by-default setting. A
+  ScrapeCreators 401/403 marks the key invalid but keeps it until you replace
+  or clear it. Previously saved candidates can still be queued with a new
+  dashboard intent or enabled agent consent; that action uses no SC credits.
 - **Uninstall Uoink at any time.**
   To fully remove Uoink and its data:
   1. Remove the extension from `chrome://extensions/`.
@@ -132,7 +166,9 @@ any server — there is no Uoink server to receive it.
 Uoink contains no data brokers, analytics SDKs, advertising networks, or
 third-party trackers. The third parties it can contact are the source service
 you ask it to capture (for example YouTube, Reddit, X, or a supplied web/feed
-host), Anthropic when you opt into an AI feature, and GitHub when you request
+host), Anthropic for enabled automatic analysis, key tests or AI actions that
+you or a connected agent start with your key, ScrapeCreators for authorized
+discovery or balance checks after you enable it, and GitHub when you request
 an update check. Their handling of request data is governed by their own
 policies and, where applicable, the terms of your account.
 

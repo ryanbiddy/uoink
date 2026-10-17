@@ -1,6 +1,6 @@
 # MCP tool annotations
 
-All 33 stdio tools have a title and explicit MCP hints. HTTP tools with the same
+All 35 stdio tools have a title and explicit MCP hints. HTTP tools with the same
 names carry identical titles and hints in `uoink_mcp_tools.TOOL_REGISTRY`.
 
 Hints describe successful calls and their possible effects, including queued
@@ -44,6 +44,8 @@ transcripts or published corpora use `destructiveHint=true`.
 | `publish_library_brief` | Publish library brief | false | false | true | false | Creates an immutable local brief; submission_key deduplicates retries. |
 | `export_cited_range` | Export cited transcript range | true | false | true | false | Returns stored cues and citations without fetching, transcribing or saving. |
 | `get_playbook_input` | Prepare research playbook input | true | false | true | false | Reads local research evidence and computes metrics; no model, network or writes. |
+| `discover_candidates` | Discover capture candidates | false | false | false | true | Spends confirmed ScrapeCreators credits and saves candidates; requires enabled discovery and agent consent or a dashboard intent. |
+| `queue_discovered` | Queue discovered posts | false | false | true | true | Enqueues selected URLs for normal capture; skips existing picks and spends no ScrapeCreators credits. |
 
 The MCPB 0.4 manifest tool schema permits only `name` and `description`.
 Titles are therefore advertised by the live MCP servers, not the bundle's tool

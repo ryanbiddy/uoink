@@ -1694,6 +1694,31 @@ class Index:
         return [r["video_id"] for r in rows]
 
     # ---- rate-limit retry queue (Sprint 19 / C4) ------------------------
+    def enqueue_pending_once(self, url: str, interval: int,
+                             retry_after: str, long_video_mode: str = "full") -> tuple[int, bool]:
+        """Return (pending_id, inserted), reusing an active row for this URL.
+
+        The helper and stdio server have separate connections and locks.
+        BEGIN IMMEDIATE holds SQLite's write reservation across the check and
+        enqueue_pending's insert/commit. Ordinary enqueue_pending callers keep
+        their unconditional-insert behavior and terminal-row cleanup.
+        """
+        with self._lock:
+            self._conn.execute("BEGIN IMMEDIATE")
+            try:
+                row = self._conn.execute(
+                    "SELECT pending_id FROM pending_yoinks WHERE url=? "
+                    "AND status IN ('pending','running') ORDER BY pending_id DESC LIMIT 1",
+                    (url,),
+                ).fetchone()
+                if row is not None:
+                    self._conn.commit()
+                    return row["pending_id"], False
+                return self.enqueue_pending(url, interval, retry_after, long_video_mode), True
+            except BaseException:
+                self._conn.rollback()
+                raise
+
     def enqueue_pending(self, url: str, interval: int,
                         retry_after: str, long_video_mode: str = "full") -> int:
         """Add a rate-limited URL to the queue with status='pending' and

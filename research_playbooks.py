@@ -15,7 +15,7 @@ import unicodedata
 from collections import Counter, defaultdict
 from pathlib import Path
 from statistics import median
-from urllib.parse import quote
+from urllib.parse import quote, urlparse
 
 import library_cards
 import library_resources
@@ -379,46 +379,80 @@ def _context_rows(item, sidecar):
     return rows
 
 
-def _discovery_rows(scope, reader, args, platforms):
+def _youtube_author(sidecar):
+    """Use the captured channel URL, not its display name, for SC identity."""
+    url = safe_url(sidecar.get("channel_url"))
+    if not url:
+        return None
+    parsed = urlparse(url)
+    if parsed.hostname not in ("youtube.com", "www.youtube.com", "m.youtube.com"):
+        return None
+    path = parsed.path.rstrip("/")
+    if re.fullmatch(r"/channel/UC[A-Za-z0-9_-]{22}", path):
+        return path.split("/")[-1]
+    if re.fullmatch(r"/@[^/]{1,100}", path):
+        return path[2:]
+    return None
+
+
+def _failed_without_candidates(run):
+    """True for a saved run that failed before keeping any row.
+
+    DiscoveryService saves refused and failed requests as receipts (a first
+    page 429/5xx/401/403/timeout, or a gate such as discovery_disabled or
+    scrapecreators_key_changed) with ok:false, error and last_error and no
+    candidates. That is not evidence about the creator, so it must neither
+    replace an older snapshot nor block a keyword fallback. A run that failed
+    on a later page keeps the pages that arrived; it is still the newest run
+    for that target (§4.7) and stays eligible. A successful empty run is real
+    evidence and also stays eligible.
+    """
+    if run["candidates"]:
+        return False
+    return run.get("ok") is False or bool(run.get("last_error")) or bool(run.get("error"))
+
+
+def _discovery_rows(scope, reader, args, platforms, *, youtube_author=None):
     if reader.data_root is None:
         return []
-    root = reader.data_root / "discovery" / "runs"
-    now = reader.utc_now()
-    earliest = now - dt.timedelta(days=30)
-    # Thirty days can cross three month directories around a short February.
-    months = sorted({(earliest + dt.timedelta(days=n)).strftime("%Y-%m")
-                     for n in range(31)}, reverse=True)
+    import discovery_scrapecreators as discovery
+
+    author = discovery.normalize_author(args["author"])
+    target = ({"channel_id": author} if re.fullmatch(r"UC[A-Za-z0-9_-]{22}", author)
+              else {"handle": author})
+    def matches(candidate):
+        authors = {author.casefold()}
+        if youtube_author and candidate.get("platform") in ("youtube", "youtube_shorts"):
+            authors.add(discovery.normalize_author(youtube_author).casefold())
+        return discovery.normalize_author(candidate.get("author_handle")).casefold() in authors
+
     newest = {}
-    for month in months:
-        folder = root / month
-        if not folder.exists() or not folder.resolve().is_relative_to(root.resolve()):
+    for run in discovery.recent_runs(reader.data_root, now=reader.utc_now(),
+                                    mode="creator", include_keyword=True,
+                                    youtube_author=youtube_author, **target):
+        scope.check()
+        # One rule for creator snapshots and keyword fallbacks alike, applied
+        # before either can claim a platform.
+        if _failed_without_candidates(run):
             continue
-        for path in folder.glob("*.json"):
-            scope.check()
-            run, _ = _read_json(scope, path)
-            fetched = _stamp(run.get("fetched_at"))
-            if fetched is None or not earliest <= fetched <= now or run.get("provider") != "scrapecreators":
+        fetched = _stamp(run.get("fetched_at"))
+        # Creator runs carry their target even when the result is empty. An
+        # empty successful run must replace an older baseline, not revive it.
+        if run.get("mode") == "creator":
+            run_platforms = {run.get("platform")}
+        else:
+            run_platforms = {c.get("platform") for c in run["candidates"] if isinstance(c, dict) and matches(c)}
+        for platform in run_platforms:
+            normalized = "youtube" if platform == "youtube_shorts" else platform
+            if normalized not in platforms:
                 continue
-            candidates = run.get("candidates")
-            if not isinstance(candidates, list):
-                continue
-            for candidate in candidates:
-                scope.check()
-                if not isinstance(candidate, dict):
-                    continue
-                platform = candidate.get("platform")
-                normalized = "youtube" if platform == "youtube_shorts" else platform
-                if normalized not in platforms:
-                    continue
-                handle = candidate.get("author_handle")
-                if not isinstance(handle, str) or handle.lstrip("@").casefold() != args["author"].lstrip("@").casefold():
-                    continue
-                group = _discovery_group(candidate, run)
-                order = (fetched, str(run.get("run_id", "")))
-                if group not in newest or order > newest[group][0]:
-                    newest[group] = (order, run)
+            # A keyword hit is only a fallback: it must not replace a fuller
+            # creator feed, even if newer. Empty creator snapshots count too.
+            order = (run.get("mode") == "creator", fetched, str(run.get("run_id", "")))
+            if platform not in newest or order > newest[platform][0]:
+                newest[platform] = (order, run)
     result = []
-    for (platform, source_type), (_, run) in sorted(newest.items()):
+    for run_platform, (_, run) in sorted(newest.items()):
         run_id = run.get("run_id")
         if not isinstance(run_id, str) or not 1 <= len(run_id) <= 200:
             continue
@@ -426,9 +460,10 @@ def _discovery_rows(scope, reader, args, platforms):
             scope.check()
             if not isinstance(candidate, dict):
                 continue
-            if _discovery_group(candidate, run) != (platform, source_type):
+            if candidate.get("platform") != run_platform:
                 continue
-            if str(candidate.get("author_handle", "")).lstrip("@").casefold() != args["author"].lstrip("@").casefold():
+            platform, source_type = _discovery_group(candidate, run)
+            if not matches(candidate):
                 continue
             ck = candidate.get("key")
             if not isinstance(ck, str) or not 1 <= len(ck) <= 200:
@@ -721,7 +756,9 @@ def _build(scope, reader, name, args):
             sidecar, _ = sidecars.get(newest[0])
             extras = _context_rows(newest[1], sidecar)
         platforms = {args["platform"]} if "platform" in args else set(_PLATFORMS)
-        extras += _discovery_rows(scope, reader, args, platforms)
+        youtube_row = next((r for r in rows if r.get("platform") == "youtube"), None)
+        youtube_author = _youtube_author(sidecars.get(youtube_row)[0]) if youtube_row else None
+        extras += _discovery_rows(scope, reader, args, platforms, youtube_author=youtube_author)
         body["baselines"] = compute_outliers(items + extras)
         if rows:
             ranked = sorted((i for i in items if i.get("metric") and i["metric"]["lift"] is not None and not i["metric"]["too_fresh"]),

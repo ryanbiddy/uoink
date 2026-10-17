@@ -285,7 +285,7 @@ BRIEF_TOOL_NAMES = ("get_library_brief_input", "publish_library_brief")
 TOOL_NAMES = READ_TOOL_NAMES + BRIEF_TOOL_NAMES
 ACTIVITY_TOOL_NAME = "get_library_activity"
 EXPORT_TOOL_NAME = "export_cited_range"
-BUDGETED_STDIO_TOOLS = frozenset(TOOL_NAMES + (ACTIVITY_TOOL_NAME, EXPORT_TOOL_NAME))
+BUDGETED_STDIO_TOOLS = frozenset(TOOL_NAMES + (ACTIVITY_TOOL_NAME, EXPORT_TOOL_NAME, "get_playbook_input"))
 BUDGETED_STDIO_METHODS = frozenset({
     "resources/list",
     "resources/read",

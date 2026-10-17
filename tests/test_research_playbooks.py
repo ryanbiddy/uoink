@@ -9,6 +9,7 @@ import socket
 import sqlite3
 import urllib.request
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -371,6 +372,20 @@ def test_64kb_trimming_comments_then_clips_then_oldest_metrics(library, monkeypa
     assert set(body["refs"]) == set(playbooks._refs(body["items"]))
 
 
+def save_discovery_fixture(folder, run, suffix="0000000000000000"):
+    # T2's synthetic normalized fixture predates T5's target metadata and
+    # filename contract. Write that same evidence in the production layout.
+    import discovery_scrapecreators as sc
+    run = {**run, "mode": "creator", "handle": "fixture",
+           "platform": "youtube_shorts" if "shorts" in run["endpoint"] else "youtube"}
+    if run["platform"] == "youtube_shorts":
+        run["candidates"] = [{**c, "platform": "youtube_shorts"} for c in run["candidates"]]
+    stamp = dt.datetime.fromisoformat(run["fetched_at"].replace("Z", "+00:00"))
+    name = stamp.strftime("%Y%m%dT%H%M%S%fZ-") + sc._run_scope(run) + "-" + suffix
+    folder.mkdir(parents=True, exist_ok=True)
+    (folder / (name + ".json")).write_text(json.dumps(run), encoding="utf-8")
+
+
 def test_channel_context_and_saved_sc_rows_are_cited_and_newest_only(library, tmp_path):
     reader, seed, _ = library
     seed("local", author="fixture", sidecar={"channel_context": {"recent_videos": [
@@ -379,13 +394,13 @@ def test_channel_context_and_saved_sc_rows_are_cited_and_newest_only(library, tm
     run = json.loads((ROOT / "tests/fixtures/playbooks/discovery-run.json").read_text())
     folder = tmp_path / "discovery/runs/2026-10"
     folder.mkdir(parents=True)
-    (folder / "new.json").write_text(json.dumps(run))
+    save_discovery_fixture(folder, run)
     old = {**run, "run_id": "older-run", "fetched_at": "2026-10-13T00:00:00Z"}
-    (folder / "old.json").write_text(json.dumps(old))
-    (folder / "future.json").write_text(json.dumps({**run, "run_id": "future", "fetched_at": "2026-10-16T00:00:00Z"}))
+    save_discovery_fixture(folder, old)
+    save_discovery_fixture(folder, {**run, "run_id": "future", "fetched_at": "2026-10-16T00:00:00Z"})
     prior_month = tmp_path / "discovery/runs/2026-09"
     prior_month.mkdir()
-    (prior_month / "expired.json").write_text(json.dumps({**run, "run_id": "expired", "fetched_at": "2026-09-14T00:00:00Z"}))
+    save_discovery_fixture(prior_month, {**run, "run_id": "expired", "fetched_at": "2026-09-14T00:00:00Z"})
     body = packet(library)
     assert "[ctx:local#0]" in body["refs"]
     assert {k for k in body["refs"] if k.startswith("[sc:")} == {"[sc:fixture-run/candidate-a]", "[sc:fixture-run/candidate-b]"}
@@ -404,7 +419,7 @@ def test_discovery_never_mix_handles_or_platforms(library, tmp_path):
     run["candidates"][1]["platform"] = "tiktok"
     folder = tmp_path / "discovery/runs/2026-10"
     folder.mkdir(parents=True)
-    (folder / "run.json").write_text(json.dumps(run))
+    save_discovery_fixture(folder, run)
     assert not any(k.startswith("[sc:") for k in packet(library, platform="youtube", author="fixture")["refs"])
 
 
@@ -413,7 +428,7 @@ def test_discovery_reuses_matching_id_without_double_counting(library, tmp_path)
     run = json.loads((ROOT / "tests/fixtures/playbooks/discovery-run.json").read_text())
     folder = tmp_path / "discovery/runs/2026-10"
     folder.mkdir(parents=True)
-    (folder / "run.json").write_text(json.dumps(run))
+    save_discovery_fixture(folder, run)
     body = packet(library)
     assert body["baselines"][0]["n"] == 2
     assert body["baselines"][0]["median"] == 300
@@ -436,7 +451,7 @@ def test_saved_runs_work_without_captures_and_across_short_february(library, tmp
         candidate["published_at"] = "2026-02-01T00:00:00Z"
     folder = tmp_path / "discovery/runs/2026-02"
     folder.mkdir(parents=True)
-    (folder / "run.json").write_text(json.dumps(run))
+    save_discovery_fixture(folder, run)
     body = packet(library)
     assert body["coverage"]["matched"] == body["coverage"]["included"] == 0
     assert body["baselines"][0]["n"] == 2
@@ -449,16 +464,332 @@ def test_saved_youtube_shorts_and_long_video_runs_stay_separate(library, tmp_pat
     run = json.loads((ROOT / "tests/fixtures/playbooks/discovery-run.json").read_text())
     folder = tmp_path / "discovery/runs/2026-10"
     folder.mkdir(parents=True)
-    (folder / "long.json").write_text(json.dumps(run))
+    save_discovery_fixture(folder, run)
     short = json.loads(json.dumps(run))
     short.update(run_id="short-run", endpoint="/v1/youtube/channel/shorts")
     for candidate in short["candidates"]:
         candidate["metrics"]["views"] *= 10
         candidate["video_id"] += "-short"
         candidate["url"] += "-short"
-    (folder / "short.json").write_text(json.dumps(short))
+    save_discovery_fixture(folder, short)
     body = packet(library)
     assert {(b["source_type"], b["median"], b["n"]) for b in body["baselines"]} == {("video", 100, 3), ("short_video", 1000, 3)}
+
+
+def test_playbook_discovery_reader_filters_target_and_caps_all_file_reads(library, tmp_path, monkeypatch):
+    import discovery_scrapecreators as sc
+    library[1]("local")
+    folder = tmp_path / "discovery/runs/2026-10"
+    run = json.loads((ROOT / "tests/fixtures/playbooks/discovery-run.json").read_text())
+    for n in range(40):
+        old = {**run, "run_id": f"prior{n}", "fetched_at": f"2026-10-13T00:{n:02d}:00Z"}
+        save_discovery_fixture(folder, old)
+    save_discovery_fixture(folder, run)
+    for n in range(100):
+        unrelated = {**run, "mode": "creator", "platform": "youtube", "handle": f"other{n}"}
+        name = "20261015T000000000000Z-" + sc._run_scope(unrelated) + "-" + f"{n:016x}"
+        (folder / (name + ".json")).write_text(json.dumps(unrelated), encoding="utf-8")
+    original = Path.open
+    opened = []
+    def count(path, *args, **kwargs):
+        if path.parent == folder:
+            opened.append(path)
+        return original(path, *args, **kwargs)
+    monkeypatch.setattr(Path, "open", count)
+    body = packet(library)
+    assert {i["run_id"] for i in body["items"] if i["kind"] == "discovery"} == {"fixture-run"}
+    assert len(opened) == sc.MAX_RUN_FILES_PER_PACKET == 24
+    assert all("other" not in path.name for path in opened)
+
+
+def test_newest_empty_creator_snapshot_replaces_prior_baseline(library, tmp_path):
+    run = json.loads((ROOT / "tests/fixtures/playbooks/discovery-run.json").read_text())
+    folder = tmp_path / "discovery/runs/2026-10"
+    save_discovery_fixture(folder, run)
+    save_discovery_fixture(folder, {**run, "run_id": "empty", "fetched_at": "2026-10-15T00:00:00Z", "candidates": []})
+    assert not any(k.startswith("[sc:") for k in packet(library)["refs"])
+
+
+@pytest.mark.parametrize("playbook", ["outlier-posts", "creator-teardown"])
+@pytest.mark.parametrize("prior_mode", ["creator", "keyword"])
+@pytest.mark.parametrize("failure", [{"last_error": {"code": "internal_error"}}, {"ok": False}])
+def test_newer_failed_creator_run_preserves_prior_snapshot(library, tmp_path, playbook, prior_mode, failure):
+    import discovery_scrapecreators as sc
+    for n in range(3):
+        library[1](f"local{n}")
+    run = json.loads((ROOT / "tests/fixtures/playbooks/discovery-run.json").read_text())
+    folder = tmp_path / "discovery/runs/2026-10"
+    if prior_mode == "creator":
+        save_discovery_fixture(folder, run)
+    else:
+        keyword = {**run, "mode": "keyword", "platform": "youtube", "query": "fixture topic",
+                   "endpoint": "/v1/youtube/search"}
+        name = "20261014T120000000000Z-" + sc._run_scope(keyword) + "-" + "a" * 16
+        folder.mkdir(parents=True)
+        (folder / (name + ".json")).write_text(json.dumps(keyword), encoding="utf-8")
+    save_discovery_fixture(folder, {**run, "run_id": "failed", "fetched_at": "2026-10-15T00:00:00Z",
+                                   "candidates": [], **failure})
+    body = packet(library, playbook)
+    assert {k for k in body["refs"] if k.startswith("[sc:")} == {
+        "[sc:fixture-run/candidate-a]", "[sc:fixture-run/candidate-b]"}
+    assert body["baselines"][0]["n"] == 5
+    assert body["refs"]["[sc:fixture-run/candidate-a]"]["as_of"] == run["fetched_at"]
+
+
+@pytest.mark.parametrize("playbook", ["outlier-posts", "creator-teardown"])
+def test_newer_partial_creator_run_remains_eligible(library, tmp_path, playbook):
+    for n in range(3):
+        library[1](f"local{n}")
+    run = json.loads((ROOT / "tests/fixtures/playbooks/discovery-run.json").read_text())
+    folder = tmp_path / "discovery/runs/2026-10"
+    save_discovery_fixture(folder, run)
+    save_discovery_fixture(folder, {**run, "run_id": "partial", "fetched_at": "2026-10-15T00:00:00Z",
+                                   "candidates": run["candidates"][:1], "ok": False,
+                                   "last_error": {"code": "internal_error"}})
+    body = packet(library, playbook)
+    assert {k for k in body["refs"] if k.startswith("[sc:")} == {"[sc:partial/candidate-a]"}
+    assert body["baselines"][0]["n"] == 4
+
+
+SC_KEY = "synthetic-sc-key-never-a-real-credential"
+# outcome: (requests sent, error code, error reason). Gate refusals stop the
+# run before its first request; the rest fail on the first page.
+SAVED_RUN_OUTCOMES = {
+    "empty": (1, None, None),
+    "rate_limited": (1, "invalid_request", "discovery_rate_limited"),
+    "upstream_error": (1, "invalid_request", "discovery_upstream_error"),
+    "key_invalid": (1, "invalid_request", "scrapecreators_key_invalid"),
+    "timeout": (1, "internal_error", None),
+    "discovery_disabled": (0, "invalid_request", "discovery_disabled"),
+    "scrapecreators_key_changed": (0, "invalid_request", "scrapecreators_key_changed"),
+}
+FAILED_RUN_OUTCOMES = [name for name in SAVED_RUN_OUTCOMES if name != "empty"]
+
+
+def save_adapter_run(tmp_path, monkeypatch, outcome):
+    """Save a creator run through the real adapter with a mocked transport.
+
+    The run file therefore has exactly the shape DiscoveryService writes for
+    that outcome. It is fetched after the fixture snapshot and before NOW.
+    """
+    import discovery_scrapecreators as sc
+    monkeypatch.setattr(sc, "_last_sent_at", None)
+    conn = sqlite3.connect(":memory:", check_same_thread=False)
+    conn.row_factory = sqlite3.Row
+    index._run_migrations(conn)
+    idx = index.Index(conn, tmp_path / "unused-ledger.db")
+    enabled = {"scrapecreators_enabled": True, "scrapecreators_agent_calls_enabled": True,
+               "scrapecreators_daily_credit_cap": 25}
+    # The adapter reads settings and the key at its gate, then again before
+    # each request. The second read models a change in that window.
+    settings = [enabled, {**enabled, "scrapecreators_enabled": outcome != "discovery_disabled"}]
+    keys = [SC_KEY, SC_KEY + ("-replaced" if outcome == "scrapecreators_key_changed" else "")]
+    replies = {"empty": (200, b'{"videos": []}'), "rate_limited": (429, b"{}"),
+               "upstream_error": (503, b"{}"), "key_invalid": (401, b"{}")}
+    sent = []
+
+    def send(method, url, headers, timeout, max_bytes):
+        sent.append(url)
+        if outcome == "timeout":
+            raise TimeoutError("synthetic timeout")
+        status, body = replies[outcome]
+        return sc.TransportResponse(status, body, url)
+
+    backend = SimpleNamespace(
+        DATA_ROOT=tmp_path, VERSION="0.0.0", _get_index=lambda: idx,
+        _read_settings=lambda: dict(settings.pop(0) if len(settings) > 1 else settings[0]),
+        _get_saved_scrapecreators_key=lambda: keys.pop(0) if len(keys) > 1 else keys[0],
+        _mark_scrapecreators_key_invalid=lambda invalid=True, expected_key=None: None,
+        _normalize_video_url=lambda url: (None, None))
+    fetched = dt.datetime(2026, 10, 15, tzinfo=dt.timezone.utc).timestamp()
+    service = sc.DiscoveryService(backend, transport=send, clock=lambda: fetched,
+                                  monotonic=lambda: 0.0, sleep=lambda delay: None)
+    try:
+        result = service.discover_candidates({"mode": "creator", "platform": "youtube",
+                                              "handle": "@fixture", "confirm_credits": 1})
+    finally:
+        conn.close()
+    path = tmp_path / "discovery/runs/2026-10" / (result["run_id"] + ".json")
+    saved = json.loads(path.read_text(encoding="utf-8"))
+    requests, code, reason = SAVED_RUN_OUTCOMES[outcome]
+    assert saved == result and len(sent) == requests
+    assert (saved["mode"], saved["platform"], saved["handle"]) == ("creator", "youtube", "fixture")
+    assert saved["candidates"] == [] and saved["fetched_at"] == "2026-10-15T00:00:00+00:00"
+    if code is None:
+        assert saved["ok"] is True and "error" not in saved and "last_error" not in saved
+    else:
+        assert saved["ok"] is False and saved["last_error"] == saved["error"]
+        assert saved["error"]["code"] == code and saved["error"]["details"].get("reason") == reason
+    return saved
+
+
+@pytest.mark.parametrize("playbook", ["outlier-posts", "creator-teardown"])
+@pytest.mark.parametrize("outcome", FAILED_RUN_OUTCOMES)
+def test_adapter_failed_creator_rerun_keeps_older_snapshot(library, tmp_path, monkeypatch, playbook, outcome):
+    for n in range(3):
+        library[1](f"local{n}")
+    run = json.loads((ROOT / "tests/fixtures/playbooks/discovery-run.json").read_text())
+    save_discovery_fixture(tmp_path / "discovery/runs/2026-10", run)
+    failed = save_adapter_run(tmp_path, monkeypatch, outcome)
+    body = packet(library, playbook)
+    assert {k for k in body["refs"] if k.startswith("[sc:")} == {
+        "[sc:fixture-run/candidate-a]", "[sc:fixture-run/candidate-b]"}
+    assert {i["run_id"] for i in body["items"] if i["kind"] == "discovery"} == {"fixture-run"}
+    assert failed["run_id"] not in json.dumps(body)
+    assert body["baselines"][0]["n"] == 5
+    assert body["refs"]["[sc:fixture-run/candidate-a]"]["as_of"] == run["fetched_at"]
+
+
+@pytest.mark.parametrize("playbook", ["outlier-posts", "creator-teardown"])
+def test_adapter_successful_empty_creator_rerun_still_replaces_snapshot(library, tmp_path, monkeypatch, playbook):
+    for n in range(3):
+        library[1](f"local{n}")
+    run = json.loads((ROOT / "tests/fixtures/playbooks/discovery-run.json").read_text())
+    save_discovery_fixture(tmp_path / "discovery/runs/2026-10", run)
+    save_adapter_run(tmp_path, monkeypatch, "empty")
+    body = packet(library, playbook)
+    assert not any(k.startswith("[sc:") for k in body["refs"])
+    assert not any(i["kind"] == "discovery" for i in body["items"])
+    assert body["baselines"][0]["n"] == 3
+
+
+@pytest.mark.parametrize("playbook", ["outlier-posts", "creator-teardown"])
+@pytest.mark.parametrize("outcome", FAILED_RUN_OUTCOMES)
+def test_adapter_failed_creator_run_does_not_block_keyword_fallback(library, tmp_path, monkeypatch, playbook, outcome):
+    import discovery_scrapecreators as sc
+    for n in range(3):
+        library[1](f"local{n}")
+    run = json.loads((ROOT / "tests/fixtures/playbooks/discovery-run.json").read_text())
+    keyword = {**run, "mode": "keyword", "platform": "youtube", "query": "fixture topic",
+               "run_id": "keyword", "endpoint": "/v1/youtube/search"}
+    folder = tmp_path / "discovery/runs/2026-10"
+    folder.mkdir(parents=True)
+    name = "20261014T120000000000Z-" + sc._run_scope(keyword) + "-" + "a" * 16
+    (folder / (name + ".json")).write_text(json.dumps(keyword), encoding="utf-8")
+    failed = save_adapter_run(tmp_path, monkeypatch, outcome)
+    body = packet(library, playbook)
+    assert {k for k in body["refs"] if k.startswith("[sc:")} == {
+        "[sc:keyword/candidate-a]", "[sc:keyword/candidate-b]"}
+    assert failed["run_id"] not in json.dumps(body)
+    assert body["baselines"][0]["n"] == 5
+
+
+@pytest.mark.parametrize("playbook", ["outlier-posts", "creator-teardown"])
+@pytest.mark.parametrize("prior_mode", ["creator", "keyword"])
+def test_many_adapter_failures_preserve_eligible_snapshot(library, tmp_path, monkeypatch, playbook, prior_mode):
+    import discovery_scrapecreators as sc
+    for n in range(3):
+        library[1](f"local{n}")
+    prior = json.loads((ROOT / "tests/fixtures/playbooks/discovery-run.json").read_text())
+    folder = tmp_path / "discovery/runs/2026-10"
+    if prior_mode == "creator":
+        save_discovery_fixture(folder, prior)
+    else:
+        prior.update(mode="keyword", platform="youtube", query="fixture topic", endpoint="/v1/youtube/search")
+        folder.mkdir(parents=True)
+        name = "20261014T120000000000Z-" + sc._run_scope(prior) + "-" + "a" * 16
+        (folder / (name + ".json")).write_text(json.dumps(prior), encoding="utf-8")
+    for _ in range(sc.MAX_RUN_FILES_PER_PACKET + 5):
+        save_adapter_run(tmp_path, monkeypatch, "rate_limited")
+    original = Path.open
+    opened = []
+    def count(path, *args, **kwargs):
+        if path.parent == folder:
+            opened.append(path)
+        return original(path, *args, **kwargs)
+    monkeypatch.setattr(Path, "open", count)
+    body = packet(library, playbook)
+    assert {k for k in body["refs"] if k.startswith("[sc:")} == {
+        "[sc:fixture-run/candidate-a]", "[sc:fixture-run/candidate-b]"}
+    assert body["baselines"][0]["n"] == 5
+    assert len(opened) <= sc.MAX_RUN_FILES_PER_PACKET == 24
+
+
+@pytest.mark.parametrize("playbook", ["outlier-posts", "creator-teardown"])
+@pytest.mark.parametrize("empty_creator", [False, True])
+def test_newer_keyword_hit_cannot_replace_creator_snapshot(library, tmp_path, playbook, empty_creator):
+    import discovery_scrapecreators as sc
+    for n in range(3):
+        library[1](f"local{n}")
+    run = json.loads((ROOT / "tests/fixtures/playbooks/discovery-run.json").read_text())
+    template = run["candidates"][0]
+    creator_rows = [{**template, "key": f"feed{n}", "video_id": f"feed{n}",
+                     "url": f"https://www.youtube.com/watch?v=feed{n:07d}",
+                     "caption": f"Feed post {n}"} for n in range(20)]
+    run["candidates"] = [] if empty_creator else creator_rows
+    folder = tmp_path / "discovery/runs/2026-10"
+    save_discovery_fixture(folder, run)
+    keyword = {**run, "mode": "keyword", "platform": "youtube", "query": "fixture topic",
+               "run_id": "newer-keyword", "fetched_at": "2026-10-15T00:00:00Z",
+               "endpoint": "/v1/youtube/search", "candidates": [creator_rows[0]]}
+    name = "20261015T000000000000Z-" + sc._run_scope(keyword) + "-" + "a" * 16
+    (folder / (name + ".json")).write_text(json.dumps(keyword), encoding="utf-8")
+    body = packet(library, playbook, author="fixture")
+    rows = [item for item in body["items"] if item["kind"] == "discovery"]
+    assert len(rows) == (0 if empty_creator else 20)
+    assert {item["run_id"] for item in rows} == (set() if empty_creator else {"fixture-run"})
+    assert body["baselines"][0]["n"] == (3 if empty_creator else 23)
+
+
+def test_keyword_fallback_is_per_platform(library, tmp_path):
+    import discovery_scrapecreators as sc
+    run = json.loads((ROOT / "tests/fixtures/playbooks/discovery-run.json").read_text())
+    folder = tmp_path / "discovery/runs/2026-10"
+    save_discovery_fixture(folder, run)
+    short = {**run["candidates"][0], "platform": "youtube_shorts", "key": "short",
+             "video_id": "short", "url": "https://www.youtube.com/watch?v=short000000"}
+    keyword = {**run, "mode": "keyword", "platform": "youtube", "query": "fixture topic",
+               "run_id": "keyword", "endpoint": "/v1/youtube/search",
+               "fetched_at": "2026-10-15T00:00:00Z", "candidates": [run["candidates"][0], short]}
+    name = "20261015T000000000000Z-" + sc._run_scope(keyword) + "-" + "a" * 16
+    (folder / (name + ".json")).write_text(json.dumps(keyword), encoding="utf-8")
+    body = packet(library)
+    assert {key for key in body["refs"] if key.startswith("[sc:")} == {
+        "[sc:fixture-run/candidate-a]", "[sc:fixture-run/candidate-b]", "[sc:keyword/short]"}
+
+
+def test_busy_video_history_cannot_hide_newest_shorts_snapshot(library, tmp_path):
+    run = json.loads((ROOT / "tests/fixtures/playbooks/discovery-run.json").read_text())
+    folder = tmp_path / "discovery/runs/2026-10"
+    for n in range(40):
+        save_discovery_fixture(folder, {**run, "fetched_at": f"2026-10-14T00:{n:02d}:00Z"})
+    short = {**run, "run_id": "short-run", "fetched_at": "2026-09-20T12:00:00Z",
+             "endpoint": "/v1/youtube/channel/shorts"}
+    save_discovery_fixture(tmp_path / "discovery/runs/2026-09", short)
+    assert {i["run_id"] for i in packet(library)["items"] if i["kind"] == "discovery"} == {"fixture-run", "short-run"}
+
+
+@pytest.mark.parametrize("mode", ["creator", "keyword"])
+@pytest.mark.parametrize("playbook", ["outlier-posts", "creator-teardown"])
+@pytest.mark.parametrize("identity", ["UC" + "a" * 22, "fixture_handle"])
+def test_channel_id_and_keyword_snapshots_feed_local_baselines(library, tmp_path, mode, playbook, identity):
+    import discovery_scrapecreators as sc
+    is_id = identity.startswith("UC")
+    channel_path = "channel/" + identity if is_id else "@" + identity
+    # Real YouTube captures store the display name in both index columns;
+    # their channel ID/handle lives in the sidecar channel_url.
+    for n in range(3):
+        library[1](f"local{n}", author="Fixture Creator", sidecar={
+            "channel_url": "https://www.youtube.com/" + channel_path})
+    run = json.loads((ROOT / "tests/fixtures/playbooks/discovery-run.json").read_text())
+    run.update(mode=mode, platform="youtube")
+    run.update({"channel_id" if is_id else "handle": identity} if mode == "creator" else {"query": "fixture search"})
+    run["candidates"] = [{**c, "author_handle": channel_path} for c in run["candidates"]]
+    stamp = "20261014T120000000000Z-" + sc._run_scope(run) + "-" + "a" * 16
+    folder = tmp_path / "discovery/runs/2026-10"
+    folder.mkdir(parents=True)
+    (folder / (stamp + ".json")).write_text(json.dumps(run), encoding="utf-8")
+    body = packet(library, playbook, author="Fixture Creator")
+    assert body["baselines"][0]["n"] == 5
+    assert {i["run_id"] for i in body["items"] if i["kind"] == "discovery"} == {"fixture-run"}
+    assert {i["author"] for i in captures(body).values()} == {"Fixture Creator"}
+
+
+@pytest.mark.parametrize("url", ["https://evil.example/channel/UC" + "a" * 22,
+    "https://www.youtube.com.evil.example/@fixture", "https://www.youtube.com/watch?v=fixture",
+    "https://www.youtube.com/channel/not-a-channel-id", None])
+def test_discovery_does_not_invent_youtube_identity_from_other_urls(url):
+    assert playbooks._youtube_author({"channel_url": url}) is None
 
 
 def test_topic_uses_real_in_memory_fts(library):

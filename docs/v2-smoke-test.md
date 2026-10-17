@@ -221,8 +221,8 @@ Total checkpoints: 127.
 
 ### Research playbooks (local fixtures only)
 
-- [ ] On an isolated fixture library, `tools/list` lists exactly 33 stdio tools
-  and 89 HTTP tools. `get_playbook_input` has hints true/false/true/false
+- [ ] On an isolated fixture library, `tools/list` lists exactly 35 stdio tools
+  and 91 HTTP tools. `get_playbook_input` has hints true/false/true/false
   (read-only/destructive/idempotent/open-world) on both surfaces.
 - [ ] `prompts/list` lists 9 prompts: the four library prompts and all five
   playbooks. `prompts/get` works for each playbook with valid fixture arguments;

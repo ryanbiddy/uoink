@@ -85,6 +85,8 @@ CANONICAL_STDIO_TOOLS = {
     # Phase 6 run BC-2 (contract phase6-v1): read-only cited range export.
     "export_cited_range",
     "get_playbook_input",
+    "discover_candidates",
+    "queue_discovered",
 }
 
 REMOVED_STDIO_ALIASES = {
@@ -165,13 +167,33 @@ class _StdioClient:
 
 def _isolated_env(tmp):
     env = dict(os.environ)
-    # The parent pytest invocation needs the worktree on PYTHONPATH. The
-    # embeddable-path regression must not let that rescue the child import.
-    env.pop("PYTHONPATH", None)
+    profile = Path(tmp) / "profile"
+    profile.mkdir(exist_ok=True)
+    env["UOINK_ISOLATED_PROFILE"] = str(profile)
+    env["UOINK_ISOLATED_PORT"] = "5187"
+    env.pop("UOINK_ISOLATED_APP_DIR", None)
+    # Keep the guarded launcher's audit hook and dependency paths. With its
+    # disposable APPDATA, removing these also hides the user-installed SDK.
+    # Exclude the worktree/cwd and relative entries so they cannot rescue the
+    # app import that this -P regression is meant to exercise.
+    paths = [entry for entry in env.get("PYTHONPATH", "").split(os.pathsep)
+             if os.path.isabs(entry) and Path(entry).resolve() not in (ROOT, Path.cwd().resolve())]
+    if paths:
+        env["PYTHONPATH"] = os.pathsep.join(paths)
+    else:
+        env.pop("PYTHONPATH", None)
     env["LOCALAPPDATA"] = tmp                      # Windows data root
     env["XDG_DATA_HOME"] = os.path.join(tmp, "xdg")  # Linux/mac data root
     env["UOINK_OUTPUT_DIR"] = os.path.join(tmp, "out")
     return env
+
+
+def test_embeddable_env_preserves_guards_without_checkout_imports(tmp_path, monkeypatch):
+    guard, packages = tmp_path / "guard", tmp_path / "site-packages"
+    monkeypatch.setenv("PYTHONPATH", os.pathsep.join((str(ROOT), ".", "", str(guard), str(packages))))
+    env = _isolated_env(str(tmp_path))
+    assert env["PYTHONPATH"].split(os.pathsep) == [str(guard), str(packages)]
+    assert env["UOINK_ISOLATED_PROFILE"] == str(tmp_path / "profile")
 
 
 def _assert_tool_metadata(tools):

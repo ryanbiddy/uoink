@@ -1,7 +1,7 @@
 """tests/test_phase4_stdio.py - Living Library Stdio MCP & Compatibility Tests (AV-1a).
 
 Gates covered:
-- P4-06 (Capabilities: advertised methods, 5 templates, 9 prompts, curated <= 41, 33 tools,
+- P4-06 (Capabilities: advertised methods, 5 templates, 9 prompts, curated <= 41, 35 tools,
   no promised notifications/subscriptions, JSON-RPC error codes -32602, -32002, -32603)
 - P4-13 stdio part (Installed compatibility: python -P embeddable rules, spaced paths, clean stdout,
   diagnostic stderr separation, restart resilience, missing storage handling)
@@ -98,7 +98,7 @@ TOTAL_AV2_TOOLS = TOTAL_AV1_TOOLS | NEW_PHASE4_BRIEF_TOOLS
 NEW_PHASE6_EXPORT_TOOLS = {"export_cited_range"}
 # 32 on stdio after BC-2: 31 + the Phase 6 export tool.
 TOTAL_BC2_TOOLS = TOTAL_AV2_TOOLS | NEW_PHASE6_EXPORT_TOOLS
-TOTAL_PLAYBOOK_TOOLS = TOTAL_BC2_TOOLS | {"get_playbook_input"}
+TOTAL_PLAYBOOK_TOOLS = TOTAL_BC2_TOOLS | {"get_playbook_input", "discover_candidates", "queue_discovered"}
 
 
 class _StdioTestClient:
@@ -169,6 +169,11 @@ class _StdioTestClient:
 
 def _make_isolated_env(tmp_path: Path) -> dict[str, str]:
     env = dict(os.environ)
+    profile = tmp_path / "profile"
+    profile.mkdir(exist_ok=True)
+    env["UOINK_ISOLATED_PROFILE"] = str(profile)
+    env["UOINK_ISOLATED_PORT"] = "5187"
+    env.pop("UOINK_ISOLATED_APP_DIR", None)
     env["LOCALAPPDATA"] = str(tmp_path / "appdata")
     env["XDG_DATA_HOME"] = str(tmp_path / "xdg")
     env["UOINK_OUTPUT_DIR"] = str(tmp_path / "out")
@@ -276,9 +281,9 @@ class TestP406CapabilitiesAndDiscovery:
         finally:
             client.close()
 
-    def test_stdio_tools_list_carries_33_tools(self, tmp_path: Path):
+    def test_stdio_tools_list_carries_35_tools(self, tmp_path: Path):
         """tools/list contains all 25 canonical tools, the 3 read tools, the activity tool,
-        the 2 brief tools, Phase 6 export and playbook input: exactly 33."""
+        the 2 brief tools, Phase 6 export, playbook input and 2 discovery tools: exactly 35."""
         client = _StdioTestClient(
             [sys.executable, "-P", str(ROOT / "uoink_mcp.py")],
             cwd=tmp_path,
@@ -303,7 +308,7 @@ class TestP406CapabilitiesAndDiscovery:
             assert NEW_PHASE4_BRIEF_TOOLS.issubset(names)
             assert NEW_PHASE6_EXPORT_TOOLS.issubset(names)
             assert names == TOTAL_PLAYBOOK_TOOLS
-            assert len(names) == 33
+            assert len(names) == 35
         finally:
             client.close()
 
@@ -471,6 +476,36 @@ class TestP413InstalledCompatibilityStdio:
             c2.close()
 
 
+def test_stdio_discovery_is_default_off_and_queue_requires_consent(tmp_path):
+    client = _StdioTestClient([sys.executable, "-P", str(ROOT / "uoink_mcp.py")],
+                              cwd=tmp_path, env=_make_isolated_env(tmp_path))
+    try:
+        client.send({"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {
+            "protocolVersion": "2024-11-05", "capabilities": {},
+            "clientInfo": {"name": "discovery-offline-test", "version": "1"}}})
+        assert "result" in client.wait_for(1)
+        client.send({"jsonrpc": "2.0", "method": "notifications/initialized"})
+        cases = [
+            ("discover_candidates", {"mode": "creator", "platform": "youtube", "handle": "fixture",
+                                     "confirm_credits": 1}, "discovery_disabled"),
+            ("queue_discovered", {"run_id": "fixture", "keys": ["a"]}, "user_intent_required"),
+            ("queue_discovered", {"run_id": "fixture", "keys": ["a"], "origin": "forged"}, "discovery_queue_arguments"),
+        ]
+        for request_id, (name, args, reason) in enumerate(cases, 2):
+            client.send({"jsonrpc": "2.0", "id": request_id, "method": "tools/call",
+                         "params": {"name": name, "arguments": args}})
+            result = client.wait_for(request_id)["result"]
+            assert result["isError"] is True
+            envelope = json.loads(result["content"][0]["text"])
+            assert envelope["error"]["code"] == "invalid_request"
+            assert envelope["error"]["details"]["reason"] == reason
+        profile = tmp_path / "profile"
+        assert not (profile / "index.db").exists()
+        assert not (profile / "discovery").exists()
+    finally:
+        client.close()
+
+
 # T3: exercise the registered SDK handlers and HTTP registry over synthetic
 # in-memory data. All sidecars come from the T2 fixture's tmp_path.
 PLAYBOOK_CASES = [
@@ -582,8 +617,8 @@ def test_playbook_wire_schema_hints_and_prompt_arguments(playbook_adapter):
     _, _, _, handlers, types = playbook_adapter
     listed = _complete_local_call(handlers[types.ListToolsRequest](
         types.ListToolsRequest(method="tools/list"))).root.tools
-    assert len(listed) == 33
-    assert len(uoink_mcp_tools.TOOL_REGISTRY) == 89
+    assert len(listed) == 35
+    assert len(uoink_mcp_tools.TOOL_REGISTRY) == 91
     _assert_tool_metadata([t.model_dump(by_alias=True, exclude_none=True) for t in listed])
     tool = next(t for t in listed if t.name == "get_playbook_input")
     spec = uoink_mcp_tools.TOOL_REGISTRY[tool.name]

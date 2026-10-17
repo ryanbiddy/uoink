@@ -21,8 +21,8 @@ making 29 stdio tools. AZ-5h owns the stdio write lifetime: budgeted
 requests keep one admission through the real SDK JSON-RPC dump, then
 release. The registered low-level server applies the same settlement when
 it runs on the installed SDK stdio streams.
-Research playbooks add five prompts and get_playbook_input (T3): the current
-surface has 33 tools and 9 prompts.
+Research playbooks add five prompts and get_playbook_input (T3); discovery
+adds discover_candidates and queue_discovered (T6): 35 tools and 9 prompts.
 """
 
 from __future__ import annotations
@@ -673,6 +673,34 @@ def get_playbook_input(
     })
 
 
+@mcp.tool(
+    name="discover_candidates", title="Discover capture candidates",
+    annotations=mcp_types.ToolAnnotations(
+        readOnlyHint=False, destructiveHint=False, idempotentHint=False, openWorldHint=True),
+    description=uoink_mcp_tools.DISCOVER_CANDIDATES_DESCRIPTION,
+)
+def discover_candidates(
+    mode: Literal["creator", "keyword"],
+    platform: Literal["tiktok", "instagram", "youtube", "youtube_shorts"],
+    handle: str | None = None, channel_id: str | None = None,
+    query: str | None = None, pages: int = 1, confirm_credits: int | None = None,
+    user_intent_token: str | None = None,
+) -> dict:
+    return uoink_mcp_tools.call_tool("discover_candidates", {
+        k: v for k, v in locals().items() if v is not None})
+
+
+@mcp.tool(
+    name="queue_discovered", title="Queue discovered posts",
+    annotations=mcp_types.ToolAnnotations(
+        readOnlyHint=False, destructiveHint=False, idempotentHint=True, openWorldHint=True),
+    description=uoink_mcp_tools.QUEUE_DISCOVERED_DESCRIPTION,
+)
+def queue_discovered(run_id: str, keys: list[str], user_intent_token: str | None = None) -> dict:
+    return uoink_mcp_tools.call_tool("queue_discovered", {
+        k: v for k, v in locals().items() if v is not None})
+
+
 # Phase 4 second increment (run AV-2): brief generation belongs to the client.
 # get_library_brief_input is a read; publish_library_brief is a local write
 # under DATA_ROOT/reach/briefs. Both are intercepted below like the three read
@@ -801,9 +829,6 @@ def _register_phase4_stdio() -> None:
 
     ResourceError = library_resources.ResourceError
     limits = library_resources.LIMITS
-    # Register the new read with the existing transport admission owner so
-    # its slot and deadline survive through the SDK's final JSON-RPC dump.
-    library_resources.BUDGETED_STDIO_TOOLS |= {"get_playbook_input"}
 
     def reader():
         # Request-scoped: storage is bound inside the first admitted operation
@@ -879,9 +904,7 @@ def _register_phase4_stdio() -> None:
     async def _phase4_get_prompt(name, arguments):
         try:
             active = reader()
-            if name == "transcript-intel":
-                result = uoink_mcp_tools._research_transcript_result(active, arguments, prompt=True)
-            elif name in {p["name"] for p in research_playbooks.PLAYBOOKS}:
+            if name in {p["name"] for p in research_playbooks.PLAYBOOKS}:
                 result = research_playbooks.get_prompt(active, name, arguments)
             else:
                 result = library_prompts.get_prompt(active, work_service(active), name, arguments)
@@ -1025,6 +1048,14 @@ def _register_phase4_stdio() -> None:
 
     if fastmcp_call_tool is not None:
         async def _phase4_call_tool(req):
+            if req.params.name in uoink_mcp_tools.DISCOVERY_TOOL_NAMES:
+                # Paid discovery has its own 8 s/page timeout, not the 2 s
+                # library-read deadline. Preserve strict arguments and errors.
+                envelope = uoink_mcp_tools.call_tool(req.params.name, req.params.arguments)
+                return mcp_types.ServerResult(mcp_types.CallToolResult(
+                    content=[mcp_types.TextContent(type="text", text=json.dumps(
+                        envelope, ensure_ascii=False, allow_nan=False))],
+                    isError=envelope.get("ok") is not True))
             if req.params.name in library_resources.TOOL_NAMES:
                 return tool_result(req.params.name, req.params.arguments)
             if req.params.name == "get_library_activity":
@@ -1043,7 +1074,8 @@ def _register_phase4_stdio() -> None:
                         # Same strict schema and text as the HTTP registry.
                         tool.inputSchema = library_resources.TOOL_SCHEMAS[tool.name]
                         tool.description = library_resources.TOOL_DESCRIPTIONS[tool.name]
-                    if tool.name in ("get_library_activity", "export_cited_range", "get_playbook_input"):
+                    if tool.name in ({"get_library_activity", "export_cited_range", "get_playbook_input"}
+                                     | uoink_mcp_tools.DISCOVERY_TOOL_NAMES):
                         if tool.name in uoink_mcp_tools.TOOL_REGISTRY:
                             reg_spec = uoink_mcp_tools.TOOL_REGISTRY[tool.name]
                             tool.inputSchema = reg_spec.input_schema

@@ -96,8 +96,8 @@ def rig(tmp_path, monkeypatch):
     backend = SimpleNamespace(
         DATA_ROOT=tmp_path, VERSION="0.0.0", _normalize_video_url=server._normalize_video_url,
         _read_settings=lambda: settings.copy(), _get_saved_scrapecreators_key=lambda: KEY,
-        _get_index=lambda: idx,
-        _mark_scrapecreators_key_invalid=lambda invalid=True: settings.update(scrapecreators_key_invalid=invalid))
+        _get_index=lambda: idx, _now_iso=lambda: server._now_iso(),
+        _mark_scrapecreators_key_invalid=lambda invalid=True, expected_key=None: settings.update(scrapecreators_key_invalid=invalid))
     service = sc.DiscoveryService(backend, transport=send, clock=clock, monotonic=clock, sleep=clock.sleep)
     yield SimpleNamespace(service=service, backend=backend, idx=idx, conn=conn, settings=settings,
                           clock=clock, replies=replies, calls=calls, root=tmp_path)
@@ -230,11 +230,20 @@ def test_endpoint_table_pagination_metrics_and_headers(rig, mode, platform, name
     result = rig.service.discover_candidates(args)
     assert result["ok"] and result["endpoint"] == path
     assert len(rig.calls) == 2 and result["credits_used"] == 2
-    # Each supplied endpoint example has one primary row; repeated rows dedupe.
-    assert result["coverage"] == {"pages": 2, "items": 1, "truncated": False, "next_cursor_present": False}
-    assert result["baseline"]["median"] == result["candidates"][0]["metrics"]["views"]
-    assert result["baseline"]["n"] == 1 and result["baseline"]["confidence"] == "Low"
-    assert result["candidates"][0]["lift"] == 1 and result["candidates"][0]["label"] == "none"
+    # YouTube search supplies one video and one short; repeated rows dedupe.
+    expected_items = 2 if name == "youtube_search" else 1
+    assert result["coverage"] == {"pages": 2, "items": expected_items, "truncated": False, "next_cursor_present": False}
+    groups = {(b["platform"], b["source_type"]): b for b in result["baselines"]}
+    assert len(groups) == expected_items
+    assert result["baseline"] == (None if name == "youtube_search" else result["baselines"][0])
+    for candidate in result["candidates"]:
+        group = ("youtube" if candidate["platform"] == "youtube_shorts" else candidate["platform"],
+                 "video" if candidate["platform"] == "youtube" else "short_video")
+        baseline = groups[group]
+        assert baseline["metric"] == "views" and baseline["median"] == candidate["metrics"]["views"]
+        assert baseline["n"] == 1 and baseline["confidence"] == "Low"
+        assert candidate["lift"] == candidate["metrics"]["views"] / baseline["median"] == 1
+        assert candidate["label"] == "none"
     assert rig.clock.sleeps == [1]
     for method, url, headers, timeout, max_bytes, _ in rig.calls:
         assert method == "GET" and url.startswith(sc.BASE_URL + path + "?")
@@ -262,6 +271,7 @@ def test_channel_id_parameter_and_three_page_limit(rig):
     assert result["ok"] and len(rig.calls) == 3
     assert "channelId=UC" in rig.calls[0][1]
     assert result["channel_id"] == "UC" + "a" * 22
+    assert result["candidates"][0]["author_handle"] == result["channel_id"]
     assert sc._run_scope(result) in result["run_id"]
     assert result["coverage"]["truncated"] and result["coverage"]["next_cursor_present"]
 
@@ -277,7 +287,7 @@ def test_channel_id_parameter_and_three_page_limit(rig):
      (17066, 495, 2, None), 37, "2026-04-22T17:44:35+00:00"),
     ("keyword", "tiktok", "tiktok_keyword", "7268287584244124971", "thatgreygentlemanitdxz",
      (1282645, 481608, 187, 2721), 22.874, "2023-08-17T13:48:40+00:00"),
-    ("keyword", "youtube", "youtube_search", "BzSzwqb-OEE", "channel/UCoRR6OLuIZ2-5VxtnQIaN2w",
+    ("keyword", "youtube", "youtube_search", "BzSzwqb-OEE", "UCoRR6OLuIZ2-5VxtnQIaN2w",
      (14860541, None, None, None), 254, "2023-05-28T17:08:46.499000+00:00"),
 ])
 def test_documented_examples_map_exact_candidate_fields(rig, mode, platform, name, video_id,
@@ -286,7 +296,8 @@ def test_documented_examples_map_exact_candidate_fields(rig, mode, platform, nam
             **({"handle": "fixture"} if mode == "creator" else {"query": "fixture topic"})}
     payload = fixture(name)
     rows, cursor, truncated = sc.parse_candidates(payload, args, rig.backend)
-    assert len(rows) == 1 and cursor is not None and not truncated
+    assert len(rows) == (2 if name == "youtube_search" else 1)
+    assert cursor is not None and not truncated
     candidate = rows[0]
     assert candidate["video_id"] == video_id and candidate["author_handle"] == author
     assert candidate["platform"] == platform
@@ -301,6 +312,18 @@ def test_documented_examples_map_exact_candidate_fields(rig, mode, platform, nam
                     else server._normalize_video_url(original["url"])[0])
     assert candidate["url"] == expected_url
     assert "thumbnail" not in candidate
+
+
+def test_youtube_search_shorts_and_channel_identifiers_match_playbook_authors(rig):
+    rows, _, _ = sc.parse_candidates(fixture("youtube_search"),
+                                    {"mode": "keyword", "platform": "youtube", "query": "running"}, rig.backend)
+    assert [(r["video_id"], r["platform"], r["author_handle"]) for r in rows] == [
+        ("BzSzwqb-OEE", "youtube", "UCoRR6OLuIZ2-5VxtnQIaN2w"),
+        ("uMNvF-lSCHg", "youtube_shorts", "abbyandryan")]
+    short = rows[1]
+    assert short["metrics"] == {"views": 462705, "likes": None, "comments": None, "shares": None}
+    assert short["duration_s"] == 44
+    assert short["published_at"] == "2024-07-28T17:08:46.498000+00:00"
 
 
 @pytest.mark.parametrize("mode,name,rows_key", [
@@ -373,6 +396,15 @@ def test_paginated_fixture_derivatives_append_and_compute_all_lift_labels(rig):
     assert result["baseline"]["confidence"] == "Low"
     assert [c["lift"] for c in result["candidates"]] == [1, 1, 1, 1, 1, 1.5, 2, 5]
     assert [c["label"] for c in result["candidates"]] == ["none"] * 5 + ["mild", "strong", "huge"]
+
+
+def test_empty_run_has_no_baseline_groups(rig):
+    payload = fixture()
+    payload.update(videos=[], continuationToken=None)
+    rig.replies[:] = [(200, payload)]
+    result = run(rig)
+    assert result["ok"] and result["coverage"]["items"] == 0
+    assert result["candidates"] == [] and result["baselines"] == [] and result["baseline"] is None
 
 
 def test_documented_absent_fields_stay_null_without_guessing(rig):
@@ -665,6 +697,31 @@ def test_scoped_reader_caps_matching_files_and_returns_newest_first(rig, monkeyp
     assert [r["fetched_at"] for r in runs] == sorted((r["fetched_at"] for r in runs), reverse=True)
 
 
+def test_channel_url_identity_shares_the_packet_file_budget(rig, monkeypatch):
+    result = run(rig)
+    channel_id = "UC" + "a" * 22
+    folder = rig.root / "discovery" / "runs" / "2026-10"
+    for target in ({"handle": "fixture"}, {"channel_id": channel_id}):
+        for n in range(50):
+            stamp = rig.service._now() - dt.timedelta(minutes=n + 1)
+            prior = {k: v for k, v in result.items() if k != "handle"}
+            prior.update(target, fetched_at=stamp.isoformat())
+            prior["run_id"] = stamp.strftime("%Y%m%dT%H%M%S%fZ-") + sc._run_scope(prior) + "-" + f"{n:016x}"
+            rig.service._save_run(prior)
+    opened = []
+    original = Path.open
+    def count(path, *args, **kwargs):
+        if path.parent == folder:
+            opened.append(path)
+        return original(path, *args, **kwargs)
+    monkeypatch.setattr(Path, "open", count)
+    runs = list(sc.recent_runs(rig.root, now=rig.service._now(), mode="creator",
+                              handle="fixture", youtube_author=channel_id, include_keyword=True))
+    assert len(runs) == len(opened) == sc.MAX_RUN_FILES_PER_PACKET == 24
+    assert {r.get("channel_id") or r.get("handle") for r in runs} == {"fixture", channel_id}
+    assert result in runs
+
+
 @pytest.mark.parametrize("target", ["a/b", "a?b", "CON", "\U0001f600" * 100, "a" * 100])
 def test_request_identity_is_safe_complete_and_queue_compatible(rig, target):
     result = run(rig, handle=target)
@@ -695,6 +752,18 @@ def test_run_retention_is_ninety_days_and_keeps_unknown_files(rig):
     assert sc.purge_expired_runs(rig.root, now=rig.service._now()) == 2
     assert not scoped_old.exists()
     assert not name(old).exists() and name(boundary).exists() and unknown.exists()
+
+
+def test_failed_receipts_are_addressable_and_purged_after_ninety_days(rig):
+    rig.replies[:] = [(429, {})]
+    failed = run(rig)
+    path = rig.service._run_path(failed["run_id"])
+    assert failed["run_id"].endswith("-failed")
+    assert rig.service.read_run(failed["run_id"]) == failed
+    assert sc.purge_expired_runs(rig.root, now=rig.service._now() + dt.timedelta(days=90)) == 0
+    assert path.exists()
+    assert sc.purge_expired_runs(rig.root, now=rig.service._now() + dt.timedelta(days=91)) == 1
+    assert not path.exists()
 
 
 def test_queue_intent_can_only_authorize_its_own_picks_without_paid_access(rig):
@@ -866,3 +935,25 @@ def test_fixtures_are_exact_copies_of_supplied_openapi_examples():
         assert saved["response"] == original["example_200"]
     assert {sc.BALANCE_ENDPOINT, *(spec["path"] for spec in sc.ENDPOINTS.values())} == {
         original["path"] for original in originals.values()}
+
+
+@pytest.mark.parametrize("invalid", [True, False])
+def test_late_key_result_cannot_change_replacement_status(settings_route, invalid):
+    first = Probe("/settings", {"scrapecreators_key": KEY})
+    first.do_POST()
+    replacement = Probe("/settings", {"scrapecreators_key": "synthetic-replacement"})
+    replacement.do_POST()
+    server._mark_scrapecreators_key_invalid(not invalid, expected_key="synthetic-replacement")
+    before = server._read_settings()
+    server._mark_scrapecreators_key_invalid(invalid, expected_key=KEY)
+    assert server._read_settings() == before
+    assert server._get_saved_scrapecreators_key() == "synthetic-replacement"
+    assert before["updated_at"]
+
+
+@pytest.mark.parametrize("operation", ["_read_settings", "_write_settings"])
+def test_invalid_key_settings_io_error_is_guarded_and_redacted(settings_route, monkeypatch, caplog, operation):
+    monkeypatch.setattr(server, operation, Mock(side_effect=OSError(KEY)))
+    server._mark_scrapecreators_key_invalid()
+    assert KEY not in caplog.text
+    assert "ScrapeCreators invalid-key settings update failed" in caplog.text
