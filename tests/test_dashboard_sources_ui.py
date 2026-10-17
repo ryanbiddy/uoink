@@ -247,7 +247,9 @@ def test_in_flight_box_renders_active_items_and_activity_link() -> None:
     """Verifies in-flight container displays active titles, phases, attempts, and activity link."""
     code = _extract_render_template()
     require("in-flight-box" in code, "in-flight-box container missing")
-    require('href="#tab-activity"' in code, "Deep link to #tab-activity missing")
+    # D13 / re-haul hash routes: #activity is the Activity route (the old
+    # #tab-activity matched no panel, so the link did nothing).
+    require('href="#activity"' in code, "Deep link to #activity missing")
     require("actual_starts" in code or "attempt" in code, "Attempt counter missing in in-flight box")
 
 

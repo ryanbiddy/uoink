@@ -36,7 +36,10 @@ def test_capture_copy_promises_metadata_watch_not_default_transcription():
     assert popup.count(
         "Podcast feed saved. Uoink will watch metadata; audio stays off."
     ) == 2
-    assert "Per-feed Auto-ingest can download, transcribe, and publish locally." in dashboard
+    # The Features catalogue that carried the old sentence was removed by the
+    # re-haul shell (SPEC: no hidden Features tab); the Sources setting says it.
+    assert "Auto-ingest new episodes: download, transcribe, and publish locally" in dashboard
+    assert "Feed watching saves metadata only by default." in dashboard
 
 
 def test_developer_docs_and_code_describe_the_live_scheduler():

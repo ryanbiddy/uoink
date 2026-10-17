@@ -202,7 +202,9 @@ def test_dashboard_and_installer_surfaces_honor_the_setting():
     )
 
     assert 'id="notificationsEnabled"' in dashboard
-    assert "notifications_enabled: els.notificationsEnabled.checked" in dashboard
+    assert 'notificationsEnabled: ["notifications_enabled", true]' in dashboard
+    assert 'control.type === "checkbox" ? control.checked' in dashboard
+    assert 'control.addEventListener("change", () => saveSettingControl(id))' in dashboard
     assert 'job.kind === "notification"' in dashboard
     assert "$settings.notifications_enabled" in stop_script
     assert "if ($stoppedAny -and $notificationsEnabled)" in stop_script

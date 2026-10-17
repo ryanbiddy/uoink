@@ -751,6 +751,7 @@ async function popupEnv({ extract, health, platform, routes = {} }) {
     serverOnline: true,
     currentSource: { source: "youtube_video", action: "video", canonical: YT_URL },
     uoinkCurrentBtn: { disabled: false, textContent: "Uoink this video" },
+    queueRead: 0, closed: false, captureData: {}, renderCaptures: () => {},
     currentEl: env.document.createElement("div"),
     queueEl: env.document.createElement("div"),
     clearBtn: env.document.createElement("button"),
@@ -759,11 +760,11 @@ async function popupEnv({ extract, health, platform, routes = {} }) {
   env.runSource(popupSlice("const POPUP_CAPTURE_RESULTS_KEY", "\nlet serverOnline"), "popup.js");
   env.runSource(popupSlice("const SOURCE_BUTTON_LABELS", "\nfunction setSourceNote("), "popup.js");
   // captureXPost, messageActiveTab, captureXArticle, showXArticleFallbackResult
-  env.runSource(popupSlice("async function captureXPost(", "\n// ---- Interval setting"), "popup.js");
+  env.runSource(popupSlice("async function captureXPost(", "\n// ---- Capture request hand-off"), "popup.js");
   // the SW hand-off helpers, runPopupUoinkCurrent
   env.runSource(popupSlice("const popupCaptureHandoffs", "\nfunction offerAllowRetry("), "popup.js");
   // refreshQueue: the open popup's 1 s poll of the SW queue state
-  env.runSource(popupSlice("async function refreshQueue(", "\nclearBtn.addEventListener("), "popup.js");
+  env.runSource(popupSlice("async function refreshQueue(", "\nasync function loadRecentUoinks("), "popup.js");
   env.tick = async () => {
     await settle();
     await env.ctx.refreshQueue();
@@ -953,9 +954,9 @@ async function popupRetry(failures) {
     loadRecentUoinks: async () => {},
   });
   // loadRecentFailures, saveRecentFailures, removeRecentFailure, renderFailureRow
-  env.runSource(popupSlice("function loadRecentFailures(", "\n// ---- Index backfill status"), "popup.js");
+  env.runSource(popupSlice("function loadRecentFailures(", "\n// ---- Captures list"), "popup.js");
   const row = env.ctx.renderFailureRow(failures[0]);
-  const retryBtn = row._all().find((el) => el.tagName === "BUTTON" && el.textContent === "Retry");
+  const retryBtn = row._all().find((el) => el.tagName === "BUTTON" && el.textContent === "Retry now");
   if (!retryBtn) throw new Error("renderFailureRow has no Retry button");
   retryBtn.click();
   await settle();

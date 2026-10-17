@@ -10,6 +10,7 @@ Run: python tests/test_g43_retry_exhausted_copy.py
 from __future__ import annotations
 
 from pathlib import Path
+import subprocess
 
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -65,16 +66,15 @@ def _indexes(text: str, needle: str) -> list[int]:
 
 
 def test_rows_pass_the_new_job_fields() -> None:
-    require("const exhausted = job.retry_exhausted === true;" in DASHBOARD,
-            "jobRowHtml ignores retry_exhausted")
-    require("const exhausted = row.retry_exhausted === true;" in DASHBOARD,
-            "queueRowHtml ignores retry_exhausted")
-    require(DASHBOARD.count("retryExhausted: exhausted,") == 2,
-            "both row renderers should pass retryExhausted")
-    require("attempts: job.attempt_count," in DASHBOARD,
-            "jobRowHtml does not pass attempt_count")
-    require("row.retry_after && !exhausted" in DASHBOARD,
-            "exhausted queue rows still advertise a scheduled retry")
+    # Reader Activity moved both renderers into activityRowHtml and the
+    # failed-capture drawer. Verify their rendered copy for job-only,
+    # pending-only and merged rows, including a stale retry_after.
+    result = subprocess.run(
+        ["node", str(ROOT / "tests/js/rehaul_activity_steps_test.mjs"), "exhaustion"],
+        cwd=ROOT, capture_output=True, text=True, encoding="utf-8", timeout=30,
+    )
+    require(result.returncode == 0, result.stdout + result.stderr)
+    require("PASS exhaustion:" in result.stdout, "retry-exhaustion assertions did not run")
     print("ok  row renderers pass retry_exhausted and attempt_count through")
 
 

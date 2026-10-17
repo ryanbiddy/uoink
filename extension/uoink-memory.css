@@ -1,15 +1,5 @@
 :root {
-  color-scheme: dark;
-  --bg: #0A0A0A;
-  --panel: #15110D;
-  --border: #2C2621;
-  --cream: #FFF4EC;
-  --muted: #C8B19F;
-  --dim: #8F7B6E;
-  --rust: #C2410C;
-  --rust-bright: #F97316;
-  --vermillion: #FF3D00;
-  --acid: #FFD23F;
+  --panel: var(--surface);
 }
 
 * {
@@ -20,9 +10,9 @@ body {
   min-height: 100vh;
   margin: 0;
   background:
-    radial-gradient(circle at 80% 8%, rgba(255, 61, 0, 0.18), transparent 24rem),
+    radial-gradient(circle at 80% 8%, color-mix(in srgb, var(--action) 18%, transparent), transparent 24rem),
     var(--bg);
-  color: var(--cream);
+  color: var(--text);
   font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
@@ -40,18 +30,18 @@ a {
 
 .redirect-card {
   width: min(680px, 100%);
-  border: 1px solid var(--border);
+  border: 1px solid var(--line);
   border-radius: 16px;
   padding: 34px;
   background: var(--panel);
-  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.38);
+  box-shadow: var(--shadow-soft);
 }
 
 .wordmark {
   display: flex;
   align-items: center;
   gap: 12px;
-  color: var(--vermillion);
+  color: var(--action);
   font-family: Bungee, Inter, sans-serif;
   font-size: 34px;
   line-height: 1;
@@ -63,13 +53,13 @@ a {
   height: 42px;
   place-items: center;
   border-radius: 10px;
-  background: var(--rust);
-  color: var(--acid);
+  background: var(--action);
+  color: var(--on-action);
 }
 
 .eyebrow {
   margin: 34px 0 8px;
-  color: var(--rust-bright);
+  color: var(--action);
   font-family: "JetBrains Mono", monospace;
   font-size: 12px;
   font-weight: 800;
@@ -80,7 +70,7 @@ a {
 h1 {
   max-width: 12ch;
   margin: 0;
-  color: var(--cream);
+  color: var(--text);
   font-size: clamp(38px, 8vw, 72px);
   line-height: 0.96;
   letter-spacing: 0;
@@ -89,7 +79,7 @@ h1 {
 .copy {
   max-width: 56ch;
   margin: 18px 0 0;
-  color: var(--muted);
+  color: var(--text-2);
   font-size: 16px;
   line-height: 1.6;
 }
@@ -115,26 +105,26 @@ h1 {
 }
 
 .primary {
-  border: 1px solid var(--vermillion);
-  background: var(--vermillion);
-  color: var(--bg);
+  border: 1px solid var(--action);
+  background: var(--action);
+  color: var(--on-action);
 }
 
 .ghost {
-  border: 1px solid var(--border);
+  border: 1px solid var(--line-strong);
   background: transparent;
-  color: var(--cream);
+  color: var(--text);
 }
 
 .primary:focus-visible,
 .ghost:focus-visible {
-  outline: 2px solid var(--acid);
-  outline-offset: 3px;
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
 }
 
 .hint {
   margin: 18px 0 0;
-  color: var(--dim);
+  color: var(--text-2);
   font-family: "JetBrains Mono", monospace;
   font-size: 12px;
 }

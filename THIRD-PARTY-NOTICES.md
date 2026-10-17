@@ -193,3 +193,23 @@ and [adapted file list](third-party-notices/README.md).
   in `bin/torchcodec`; Uoink does not statically link them into its own code.
 - LGPL text: https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
 
+
+## Bundled fonts (not Python packages)
+
+The dashboard and the Chrome extension ship their own copies of three
+typefaces (the same WOFF files the uoink.app site uses), so neither loads
+fonts from the network. Each font is licensed under the
+SIL Open Font License 1.1. The licence text, with that font's copyright
+line, sits beside the font files in `assets/brand/fonts/` and
+`extension/brand/fonts/`.
+
+- **Inter**, copyright 2020 The Inter Project Authors
+  (https://github.com/rsms/inter): `inter.woff` and `inter-italic.woff`,
+  licence `inter-OFL.txt`.
+- **Bungee**, copyright 2023 The Bungee Project Authors
+  (https://github.com/djrrb/Bungee): `bungee.woff`, licence `bungee-OFL.txt`.
+- **JetBrains Mono**, copyright 2020 The JetBrains Mono Project Authors
+  (https://github.com/JetBrains/JetBrainsMono): `jetbrains-mono.woff`,
+  licence `jetbrains-mono-OFL.txt`.
+- OFL text: https://openfontlicense.org
+

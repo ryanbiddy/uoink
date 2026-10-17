@@ -218,6 +218,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   (no page clipboard call, no DOM textarea); a failed copy shows "Copy blocked"
   with a Try again notification. Content-script `openTab` requests open only
   Uoink pages, claude.ai, chatgpt.com and the local dashboard.
+- Check dashboard external links by kind: remote/server URLs require HTTPS
+  on `uoink.app` or its subdomains; fixed GitHub, Claude, X intent, and
+  YouTube actions use an exact allowlist; captured source links require
+  HTTP(S) and reject IP literals, local hosts, credentials, and non-default
+  ports. Keep the exact local Startup URL working. Route Open YouTube
+  through this check without a helper-side browser open. Block malformed
+  links and keep blocked-link messages visible after copying Markdown.
+- Document that the dashboard makes no features-manifest request. Add
+  regression checks for the removed loader and catalogue, dashboard startup,
+  and the URL allowlist in both browser and native-shell paths.
 
 ## [3.8.1] - Unreleased
 

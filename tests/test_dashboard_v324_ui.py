@@ -25,7 +25,9 @@ def test_sidebar() -> None:
         re.sub(r"<.*?>", "", item).strip().split()[0]
         for item in re.findall(r'<button class="nav-button.*?>(.*?)</button>', nav.group(1), re.S)
     ]
-    require(labels == ["Library", "Sources", "For", "Generate", "Settings"], f"unexpected sidebar: {labels}")
+    # UI re-haul (SPEC "Dashboard IA"): the five tabs are Library, Activity,
+    # Generate, Sources, Settings. For You moved to a Library link.
+    require(labels == ["Library", "Activity", "Generate", "Sources", "Settings"], f"unexpected sidebar: {labels}")
     require('data-tab-button="build"' not in DASHBOARD, "Build tab still visible")
     require('data-tab-button="script"' not in DASHBOARD, "Script tab still visible")
     print("ok  sidebar: five locked tabs, Build and Script gone")
@@ -85,7 +87,10 @@ def test_activity_and_star() -> None:
     require("activityErrorMessage" in DASHBOARD, "phase-level error copy missing")
     locked = "⭐ Star on GitHub"
     url = "https://github.com/ryanbiddy/uoink"
-    require(locked in DASHBOARD and locked in SPLASH, "locked star copy missing from a placement")
+    require(locked in SPLASH, "locked star copy missing from the splash")
+    # UI re-haul: the dashboard CTA moved into Settings > App > About and,
+    # like the rest of the re-hauled UI, carries no emoji.
+    require('id="starGithub">Star on GitHub</button>' in DASHBOARD, "dashboard star CTA missing")
     require(url in DASHBOARD and url in SPLASH, "GitHub URL missing from a placement")
     print("ok  Activity and GitHub star CTAs")
 

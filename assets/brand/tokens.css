@@ -1,24 +1,188 @@
+/* Uoink brand tokens: Direction A "Reader" (UI re-haul SPEC, 2026-10-15).
+ *
+ * Light is the default theme; dark applies under prefers-color-scheme: dark.
+ * The names pages used before the re-haul (--ink, --cream, --rust, ...) are
+ * aliases of the theme tokens, so every page that still uses them follows
+ * the theme: --ink is the page ground, --cream the body text, --rust the
+ * action colour. Older accents with no SPEC role (--acid, --warn, the danger
+ * panel, the soft shadow) carry one value per theme, each readable on that
+ * theme's grounds. Pages must not redefine any of these names.
+ *
+ * Kept byte-identical with extension/brand/tokens.css and mirrored by the
+ * inline block in assets/dashboard/index.html (the helper serves that page
+ * on its own). tests/test_rehaul_foundation.py holds all three to the SPEC.
+ *
+ * Fonts are bundled beside this file: the uoink.app site's own WOFF files
+ * (Inter and JetBrains Mono are variable), SIL OFL 1.1, licence texts in
+ * fonts/. Nothing here loads from the network.
+ */
+
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("fonts/inter.woff") format("woff");
+}
+
+@font-face {
+  font-family: "Inter";
+  font-style: italic;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("fonts/inter-italic.woff") format("woff");
+}
+
+@font-face {
+  font-family: "Bungee";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("fonts/bungee.woff") format("woff");
+}
+
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-weight: 100 800;
+  font-display: swap;
+  src: url("fonts/jetbrains-mono.woff") format("woff");
+}
+
 :root {
-  --rust: #C2410C;
-  --rust-bright: #F97316;
-  --vermillion: #FF3D00;
-  --acid: #FFD23F;
-  --cream: #FFF4EC;
-  --ink: #0A0A0A;
-  --ink-warm: #15110D;
-  --border: #2C2621;
-  --muted: #C8B19F;
-  --dim: #8F7B6E;
-  --ok: #00C853;
-  --ok-on-cream: #0F8F3F;
-  --danger-bg: #3A1F1F;
-  --danger-border: #6A3A3A;
-  --warn: #FFE3A3;
-  --card-radius: 12px;
-  --control-radius: 10px;
-  --pill-radius: 999px;
-  --shadow-soft: 0 22px 70px rgba(0, 0, 0, 0.38);
+  color-scheme: light dark;
+
+  /* Theme tokens (light). */
+  --bg: #FFF4EC;
+  --surface: #FFFFFF;
+  --surface-sel: #FBE6D6;
+  --text: #0A0A0A;
+  --text-2: #5C4A40;
+  --line: #EBD5C5;
+  --line-strong: #D9BBA6;
+  --action: #C2410C;
+  --on-action: #FFFFFF;
+  --ok: #15803D;
+  --fail: #C2410C;
+  --step-done: #0A0A0A;
+  --step-now: #C2410C;
+  --step-fail: #C2410C;
+  --step-todo: #EBD5C5;
+  --focus-ring: #C2410C;
+
+  /* Older accents with no SPEC role (light values). */
+  --acid: #854D0E;
+  --warn: #854D0E;
+  --danger-bg: #FDEEE7;
+  --danger-border: #E7B29C;
+  --shadow-soft: 0 22px 70px rgba(92, 74, 64, 0.16);
+  /* Older accent-text names: small rust and green labels, darker in
+     light so they read on selected and tinted surfaces too. */
+  --rust-bright: #9A3412;
+  --vermillion: #9A3412;
+  --ok-bright: #166534;
+
+  /* Overlays on photos: the same in both themes. */
+  --scrim: rgba(0, 0, 0, 0.72);
+  --on-scrim: #FFFFFF;
+
+  /* Shape, spacing (4px grid) and targets. */
+  --radius-input: 10px;
+  --radius-thumb: 6px;
+  --radius-figure: 8px;
+  --radius-pill: 999px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --target-primary: 44px;
+  --target-chip: 32px;
+  --reader-width: 700px;
+  --time-gutter: 44px;
+
+  /* Motion: transform and opacity only; zeroed under reduced motion. */
+  --ease-enter: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-exit: cubic-bezier(0.6, 0, 0.9, 0.35);
+  --dur-enter: 200ms;
+  --dur-exit: 100ms;
+
+  /* Type. Bungee is for the wordmark only; mono for raw error lines. */
   --font-ui: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-display: Bungee, Inter, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", Consolas, "SFMono-Regular", monospace;
+  --font-sans: var(--font-ui);
+
+  /* Pre-re-haul names, aliased to the theme tokens so they follow it. */
+  --ink: var(--bg);
+  --ink-warm: var(--surface);
+  --cream: var(--text);
+  --border: var(--line);
+  --muted: var(--text-2);
+  --dim: var(--text-2);
+  --rust: var(--action);
+  --ok-on-cream: var(--ok);
+  --card-radius: 12px;
+  --control-radius: var(--radius-input);
+  --pill-radius: var(--radius-pill);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0A0A0A;
+    --surface: #141110;
+    --surface-sel: #1E1815;
+    --text: #F5EDE6;
+    --text-2: #A8968A;
+    --line: #2A211C;
+    --line-strong: #3A2E27;
+    --action: #FF3D00;
+    --on-action: #0A0A0A;
+    --ok: #22C55E;
+    --fail: #FF8A5C;
+    --step-done: #F5EDE6;
+    --step-now: #C2410C;
+    --step-fail: #FF3D00;
+    --step-todo: #3A2E27;
+    --focus-ring: #C2410C;
+
+    --acid: #FFD23F;
+    --warn: #FFE3A3;
+    --danger-bg: #3A1F1F;
+    --danger-border: #6A3A3A;
+    --shadow-soft: 0 22px 70px rgba(0, 0, 0, 0.38);
+    --rust-bright: #FF8A5C;
+    --vermillion: #FF8A5C;
+    --ok-bright: #22C55E;
+    --scrim: rgba(0, 0, 0, 0.72);
+    --on-scrim: #FFFFFF;
+  }
+}
+
+/* Focus ring: 2px rust, offset 2px. Important so older per-control
+   "outline: none" rules cannot hide it from keyboard users. */
+:focus-visible {
+  outline: 2px solid var(--focus-ring) !important;
+  outline-offset: 2px !important;
+}
+
+/* Reduced motion: nothing moves. Durations collapse to near zero rather
+   than "none" so transitionend/animationend listeners still fire. */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-enter: 0ms;
+    --dur-exit: 0ms;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+    scroll-behavior: auto !important;
+  }
 }

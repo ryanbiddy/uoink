@@ -5,6 +5,7 @@ Run: python tests/test_g23_noop_actions.py
 from __future__ import annotations
 
 from pathlib import Path
+import subprocess
 
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -46,7 +47,14 @@ def test_false_use_as_is_action_removed() -> None:
 def test_screenshot_setting_is_explicit() -> None:
     require("Show screenshot picker in composer" in DASHBOARD,
             "screenshot picker setting copy is not explicit")
-    require("saveSettingsPatch({ writing_show_screenshot_picker: els.writingScreenshotPickerToggle.checked }, \"Screenshot picker setting updated.\");" in DASHBOARD,
+    # The control moved into Settings > AI features and now shares the
+    # autosave binding. Exercise it instead of asserting the old toast handler.
+    result = subprocess.run(
+        ["node", str(ROOT / "tests/js/rehaul_settings_test.mjs"), "screenshot"],
+        cwd=ROOT, capture_output=True, text=True, encoding="utf-8", timeout=30,
+    )
+    require(result.returncode == 0, result.stdout + result.stderr)
+    require("PASS screenshot" in result.stdout,
             "screenshot picker setting does not save through the settings API")
     print("ok  screenshot picker setting is explicit and real")
 

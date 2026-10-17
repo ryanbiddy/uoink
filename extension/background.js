@@ -347,7 +347,7 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   if (kind === "session_add") {
     const active = await getActiveFromStorage();
     if (!active || !active.id) {
-      notify("Uoink", "No active session. Start one in the popup first.");
+      notify("Uoink failed", "No active session. Start one in the popup first.");
       return;
     }
     job.session_id = active.id;
@@ -551,6 +551,11 @@ function tryOpenPopup() {
 
 // ---- Notifications -------------------------------------------------------
 function notify(title, message, extraOptions = {}) {
+  // Only capture outcomes interrupt the user. Content scripts still send
+  // queued messages for older helpers; acknowledge them without a desktop toast.
+  const finished = /^(?:Uoinked(?: ★)?|Uoink ready|Posts saved|Added to session|Copied to clipboard)$/i.test(title);
+  const failed = /(?:failed|offline|blocked|queue full|invalid URL|lost track|still working|couldn't (?:read|capture))/i.test(title);
+  if (!finished && !failed) return Promise.resolve(null);
   return new Promise((resolve) => {
     try {
       chrome.notifications.create({
@@ -834,19 +839,13 @@ async function _doEnqueue(job) {
   state.queue.push(job);
   await setState({ queue: state.queue });
 
-  const ahead = (state.busy ? 1 : 0) + state.queue.length - 1;
-  if (state.busy || state.queue.length > 1) {
-    notify("Uoink queued", `${ahead} video${ahead === 1 ? "" : "s"} ahead`);
-  } else {
-    notify("Uoinking", `${shortUrl(job.url)}...`);
-  }
+  // Captures shows queued/running work. Notifications are for outcomes.
   drain();
 }
 
 function clearQueue() {
   return queueStep(async () => {
     await setState({ queue: [] });
-    notify("Uoink", "Queue cleared.");
   });
 }
 
@@ -923,7 +922,7 @@ const POPUP_CAPTURE_RESULTS_KEY = "popup_capture_results";
 // retries: [the Recent failures ids a Retry named]}. That job then settles
 // as a popup capture (joinedByPopup), whatever started it.
 const POPUP_CAPTURE_JOINS_KEY = "popup_capture_joins";
-const POPUP_CAPTURE_ROUTES = ["video", "reddit", "page"];
+const POPUP_CAPTURE_ROUTES = ["video", "reddit", "page", "playlist", "podcast", "x_post"];
 const QUEUE_FULL_MESSAGE = "Queue full. Give it a few minutes, then try again.";
 // How long a popup video waits on /queue/status at its turn before going
 // ahead anyway, so a stalled status call can't hold up the queue.
@@ -946,7 +945,9 @@ function sameCapture(a, b) {
 
 function enqueuePopupCapture(req) {
   const url = req && typeof req.url === "string" ? req.url : "";
-  if (!POPUP_CAPTURE_ROUTES.includes(req && req.route) || !STC.normalizeAnyUrl(url)) {
+  if (!POPUP_CAPTURE_ROUTES.includes(req && req.route) || !STC.normalizeAnyUrl(url)
+      || (req.route === "playlist" && !STC.normalizePlaylistUrl(url))
+      || (req.route === "x_post" && !STC.normalizeTwitterUrl(url))) {
     return Promise.resolve({ ok: false, error: "Uoink can't capture this tab from the popup." });
   }
   // Inside the enqueue chain, so two quick clicks can't both pass the
@@ -968,6 +969,9 @@ function enqueuePopupCapture(req) {
     };
     if (req.route === "page") job.usePage = true;
     if (req.route === "reddit") job.useReddit = true;
+    if (req.route === "playlist") job.usePlaylist = true;
+    if (req.route === "podcast") job.usePodcast = true;
+    if (req.route === "x_post") job.useXPost = true;
     // The popup used to check the helper's queue before a video; that
     // check now runs in runExtractJob so the popup never waits on it.
     if (req.route === "video") job.checkRoom = true;
@@ -1055,7 +1059,11 @@ async function publishPopupResult(job, result) {
     const prior = Array.isArray(items[POPUP_CAPTURE_RESULTS_KEY])
       ? items[POPUP_CAPTURE_RESULTS_KEY]
       : [];
-    const entry = Object.assign({ id: job.id, url: job.url, finishedAt: Date.now() }, result);
+    const entry = Object.assign({
+      id: job.id, url: job.url, title: job.title || "", route: STC.queueJobRoute(job),
+      saveOnly: !!job.saveOnly,
+      finishedAt: Date.now(), ...(job.captureResult || {}),
+    }, result);
     await chrome.storage.session.set({
       [POPUP_CAPTURE_RESULTS_KEY]: [entry]
         .concat(prior.filter((r) => r && r.id !== job.id))
@@ -1153,8 +1161,27 @@ async function runExtractJob(job) {
     return;
   }
   let data;
+  let savedXPosts = false;
   try {
-    if (job.usePage) {
+    if (job.usePlaylist) {
+      data = await STC.playlistStart(job.url, job.interval);
+    } else if (job.usePodcast) {
+      // A page's RSS/Atom link need not contain "feed" or end in .xml.
+      // The helper validates the feed; URL hints only classify pasted links.
+      data = await STC.postPodcastFeed(job.url);
+    } else if (job.useXPost) {
+      data = await STC.postExtractX(job.url);
+      if (!data || data.code === "disabled" || data.code === "empty") {
+        // A video-only post keeps the same queue-room guard as a video.
+        if (!(await serverQueueHasRoomWithin(QUEUE_ROOM_WAIT_MS))) {
+          job = joinedByPopup(job, await settleCaptureRequest(job));
+          notify("Queue full", "Give it a few minutes, then try again.");
+          await publishPopupResult(job, { ok: false, code: "queue_full", message: QUEUE_FULL_MESSAGE });
+          return;
+        }
+        data = await STC.postExtract(job.url, job.interval);
+      } else savedXPosts = !!data.ok;
+    } else if (job.usePage) {
       data = await STC.postExtractPage(job.url);
     } else if (job.useExtractAny) {
       data = await STC.postExtractAny(job.url, job.interval);
@@ -1178,6 +1205,14 @@ async function runExtractJob(job) {
   // plus any a Retry named when it joined this job while queued or running.
   const join = await settleCaptureRequest(job);
   job = joinedByPopup(job, join);
+  // Keep only the fields the small Captures view needs, never a base64 corpus.
+  job.captureResult = {
+    title: (data && data.title) || job.title || "",
+    video_id: data && data.video_id, folder: data && data.folder,
+    video_slug: data && data.video_slug, job_id: data && data.job_id,
+    pending_id: data && data.pending_id,
+    failure_phase: data && data.failure_phase, error_detail: data && data.error_detail,
+  };
   const retried = [job.retryOf].concat(join ? join.retries : []).filter(Boolean);
   if (!data || !data.ok) {
     // A2: an X login wall (or a pasted X link X won't serve logged-out) is not
@@ -1199,7 +1234,10 @@ async function runExtractJob(job) {
     // capture: the popup offers "Allow this site and retry" for it instead.
     if (job.origin === "popup" && !(data && data.code === "host_not_allowed")) {
       for (const id of retried.slice(1)) await STC.forgetFailure(id);
-      await STC.rememberFailure(job.url, message, popupFailureExtra(job), retried[0]);
+      await STC.rememberFailure(job.url, message, {
+        ...popupFailureExtra(job), failure_phase: data && data.failure_phase,
+        error_detail: data && data.error_detail,
+      }, retried[0]);
     }
     notify("Uoink failed", message,
            { requireInteraction: true });
@@ -1210,11 +1248,41 @@ async function runExtractJob(job) {
   }
   // The helper took the retried capture: its Recent failures rows can go.
   for (const id of retried) await STC.forgetFailure(id);
+  if (savedXPosts) {
+    // /extract/x already saved a readable item. Finish that result before
+    // the separate video request, just as captureXPost does in the popup.
+    const count = Number(data.tweets_captured) || 1;
+    const saved = `Saved ${count} post${count === 1 ? "" : "s"}`;
+    let message = `${saved} to your library.`;
+    let followUp = null;
+    if (data.metadata && data.metadata.has_video) {
+      try {
+        const video = await enqueuePopupCapture({ route: "video", url: job.url,
+          interval: job.interval, title: `Video from ${data.title || job.title || "X post"}`, saveOnly: true });
+        message = video.ok ? `${saved} + queued the video.`
+          : `${saved}. Video not queued: ${video.error}`;
+        if (video.ok) followUp = {
+          id: video.id,
+          failurePrefix: `${saved}. Video: `,
+          queueFullMessage: `${saved}. Video not queued -- the queue is full. Try the video again in a few minutes.`,
+        };
+      } catch (_) {
+        message = `${saved}. Couldn't queue the video. Try capturing the post again.`;
+      }
+    }
+    notify("Posts saved", message);
+    await publishPopupResult(job, { ok: true, message, followUp });
+    return;
+  }
+  if (job.usePlaylist) {
+    await publishPopupResult(job, { ok: true, queued: true, message: "Playlist started. Follow it in Captures." });
+    return;
+  }
+  if (job.usePodcast) {
+    await publishPopupResult(job, { ok: true, message: "Podcast feed saved. Uoink will watch metadata; audio stays off." });
+    return;
+  }
   if (data.queued) {
-    const id = await notify("Uoink queued", `${queuedMessage(data)} Click View queue for status.`, {
-      buttons: [{ title: "View queue" }],
-    });
-    if (id) _queueViewNotificationIds.add(id);
     await publishPopupResult(job, { ok: true, queued: true, message: queuedMessage(data) });
     return;
   }

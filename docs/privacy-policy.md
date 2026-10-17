@@ -14,12 +14,13 @@ is unclear, email us (see *Contact* below).
 Uoink does not collect anything about you. There is no Uoink account, no
 Uoink server in the cloud, no analytics, and no telemetry. Uoink runs on
 your own machine. It contacts a source service when you ask it to capture
-that source, GitHub only when you click **Check now**, and Anthropic only
-with your own API key: for automatic AI analysis you turn on, a key test,
-or an AI action that you or a connected agent start on demand. Optional
-ScrapeCreators discovery sends your search terms or creator identifier with
-your key only after you enable it and authorize the call. The
-rest of this document names those requests and the local data they create.
+that source, the GitHub release API only when you click **Check now**, and
+Anthropic only with your own API key: for automatic AI analysis you turn on,
+a key test, or an AI action that you or a connected agent start on demand.
+Optional ScrapeCreators discovery sends your search terms or creator identifier
+with your key only after you enable it and authorize the call. The rest of
+this document names those requests, browser visits from dashboard links,
+and the local data they create.
 
 ## 1. What Uoink collects about you
 
@@ -58,8 +59,8 @@ Uoink makes these outbound requests:
     generation that uses your saved key, from the dashboard when no agent is
     connected or when an agent asks for it (up to 8,000 characters of the
     chosen transcript or corpus text plus its grounding); and research
-    playbook runs (from the dashboard without a connected agent, or an
-    authenticated request by a connected agent using the saved key), which
+    playbook runs through authenticated `POST /playbooks/run` requests
+    (including connected-agent requests using the saved key), which
     send the playbook instructions and a bounded packet from your library
     relevant to that playbook, such as titles, channel and creator names,
     URLs, chapters, transcript excerpts, top comments, earlier analysis
@@ -82,9 +83,58 @@ Uoink makes these outbound requests:
   dashboard calls require an intent token from that click. Results are saved
   on this PC without third-party thumbnails. Picking results puts their URLs
   into the normal capture queue, which then contacts the source service.
+- **Speaker labeling (diarization): when requested.** WhisperX uses pyannote
+  to label speakers in local audio. Its alignment and speaker-model loaders
+  may download model files, including from Hugging Face. The pyannote loader
+  receives a Hugging Face token if supplied through `HF_TOKEN`,
+  `HUGGINGFACE_TOKEN` or `HUGGING_FACE_HUB_TOKEN`, when the installed WhisperX
+  supports it. These model-loading requests
+  are separate from Anthropic analysis and the cached-only transcription-model
+  check; Uoink passes the local audio path to the speaker-labeling pipeline.
 - **GitHub release check — only when you click `Check now`.** The dashboard
   requests the latest Uoink release record from `api.github.com`. It sends no
   corpus content or usage event. GitHub receives the normal request metadata.
+
+The dashboard and extension use bundled Inter, Bungee and JetBrains Mono
+fonts. They make no Google Fonts requests to `fonts.googleapis.com` or
+`fonts.gstatic.com`.
+
+The dashboard makes no features-manifest request to
+`https://uoink.app/api/features-manifest`, on load or when switching views.
+The Features view, remote loader, and bundled fallback catalogue have been
+removed.
+
+Dashboard links open when you click them. The dashboard checks three kinds
+of external link before opening a browser:
+
+1. **Remote or server-supplied URLs**, except captured source links, must use
+   HTTPS and have the host `uoink.app` or a subdomain of it. Uoink help links
+   use this same restriction.
+2. **Fixed product links** must match an exact origin and path: the repository
+   at `https://github.com/ryanbiddy/uoink`, its `/blob/main/CHANGELOG.md`,
+   `/releases`, and `/issues` pages; `https://claude.ai/new`;
+   `https://claude.ai/download`; `https://twitter.com/intent/tweet`; or
+   `https://youtube.com`. Queries and fragments are blocked, except the
+   tweet intent's dashboard-built `text` and/or `url` parameters, each at
+   most once. Opening X sends the draft in that query. Send to Claude copies
+   the Markdown locally and opens a new chat; you paste it there yourself.
+3. **Captured-content source links** include Watch on the source, Markdown
+   links, reader timestamps, and Activity source names. They may use HTTP
+   or HTTPS, but cannot contain credentials or a non-default port. All
+   IP-literal hosts are blocked, including loopback (`127.0.0.0/8`, `::1`),
+   `0.0.0.0`, private ranges (`10/8`, `172.16/12`, `192.168/16`, `fc00::/7`),
+   and link-local ranges (`169.254/16`, `fe80::/10`). `localhost`,
+   `*.localhost`, `.local`, and `.internal` hosts are also blocked, including
+   trailing-dot forms. This checks the URL, not DNS resolutions or redirects.
+
+All three kinds reject embedded credentials, control characters, backslashes,
+and malformed URLs. A refused link shows a blocked message and calls neither
+the native URL opener nor the browser opener. A copy action cannot replace
+that message with a success toast. The local Startup action is a separate,
+narrow exception: the exact `/splash` URL on the dashboard's own loopback
+origin, without a query or fragment. Open YouTube uses the fixed product
+link through the same check, with no helper-side open or focus request.
+Allowed visits send the destination site ordinary browser request metadata.
 
 Uoink sends no analytics, telemetry, usage tracking, or crash reports. The
 extracted corpus, screenshots, and files are written only to folders on your
@@ -138,10 +188,10 @@ that receives either key.
 
 ## 4. Your control over your data
 
-- **Clear your API key at any time** from the Uoink setup page. If
+- **Clear your API key at any time** from dashboard Settings > AI features. If
   Anthropic rejects the key (for example, an expired key), Uoink also
   clears it automatically.
-- **Disable automatic AI analysis at any time** from the setup page.
+- **Disable automatic AI analysis at any time** from dashboard Settings > AI features.
   Key tests and on-demand AI actions (agent-requested Comment Intelligence or
   Hook Type analysis, Writing Studio saved-key generation and research
   playbook runs) remain separate actions. Clear your saved key to prevent
@@ -168,8 +218,9 @@ third-party trackers. The third parties it can contact are the source service
 you ask it to capture (for example YouTube, Reddit, X, or a supplied web/feed
 host), Anthropic for enabled automatic analysis, key tests or AI actions that
 you or a connected agent start with your key, ScrapeCreators for authorized
-discovery or balance checks after you enable it, and GitHub when you request
-an update check. Their handling of request data is governed by their own
+discovery or balance checks after you enable it, Hugging Face for model
+loading during requested speaker labeling, and GitHub when you request an
+update check. Their handling of request data is governed by their own
 policies and, where applicable, the terms of your account.
 
 ## 6. Children

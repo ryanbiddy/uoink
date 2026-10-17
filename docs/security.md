@@ -48,7 +48,9 @@ These do not require `X-Uoink-Token`:
   `GET /openapi/v1/spec.json`, and `GET /.well-known/uoink-mcp.json`
 - Suite discovery: `GET /.well-known/suite-service.json` and
   `GET /api/suite/v1/health`
-- Local UI shells: `GET /dashboard` and `GET /splash`
+- Local UI shells: `GET /dashboard` and `GET /splash`, plus the dashboard's
+  bundled fonts at `GET /brand/fonts/<file>` (only the four shipped WOFF
+  files; anything else is a 404)
 - Credential bootstrap: `GET /token` and bodyless `POST /token`, with the
   separate custom-header and origin checks described below
 
@@ -95,13 +97,11 @@ prove extension identity and never authorizes a token mint. An originless
 extension worker can satisfy this diagnostic check and see the readiness boolean.
 
 Use authenticated Settings to inspect the output folder or Anthropic key
-status. The extension setup page's public Helper status panel no longer lists
-key checks. Its Installation folder row keeps the static `%LOCALAPPDATA%\Uoink`
-hint instead of showing the resolved folder.
-The Open folder button no longer opens that folder; it logs a console warning
-because public diagnostics no longer supply a path. The tray no longer shows
-Degraded solely because a saved key is invalid; other diagnostic errors still
-affect it. The dashboard's Settings > Local app status line no longer counts
+status. The extension setup page's public Connection checks show no key
+checks or local paths and provide no folder action. API-key and automatic AI
+analysis controls now live in dashboard Settings > AI features.
+The tray no longer shows Degraded solely because a saved key is invalid;
+other diagnostic errors still affect it. The dashboard's Settings > Local app status line no longer counts
 Anthropic key checks; key status still appears in the dashboard's own key
 section, which reads authenticated `/settings`.
 
@@ -263,7 +263,10 @@ with paths, ports, credentials, query strings or fragments are refused.
 
 ## POST hardening
 
-All POST routes are authenticated before reading the request body. After auth:
+Except for the bodyless `/token` bootstrap described above, all POST routes
+require the bearer token before reading the request body. JSON POST routes
+then enforce the following limits (`POST /images` has its own raw-image body
+validation and size limit):
 
 - `Content-Type: application/json` is required.
 - `Content-Length` is capped at 64 KB.
@@ -272,6 +275,47 @@ All POST routes are authenticated before reading the request body. After auth:
 Protocol validation failures return `4xx` JSON errors. Handled application failures generally follow the existing Uoink pattern of HTTP 200 with `{ "ok": false, "error": "..." }`.
 
 ## URL and identifier validation
+
+The dashboard's `openExternal` boundary classifies external opens by caller
+provenance into three kinds. Unknown kinds are refused:
+
+1. **Remote or server-supplied URLs**, except captured source links, use the
+   default `remote` policy: HTTPS only, with the host `uoink.app` or a
+   subdomain of it. Uoink help links use this policy too. A remote URL does
+   not gain product or source permission by matching one of those destinations.
+2. **Fixed product links** use `product` and an exact origin-and-path
+   allowlist: `https://github.com/ryanbiddy/uoink`, its
+   `/blob/main/CHANGELOG.md`, `/releases`, and `/issues` pages;
+   `https://claude.ai/new`; `https://claude.ai/download`;
+   `https://twitter.com/intent/tweet`; and `https://youtube.com`.
+   No query or fragment is allowed except the tweet intent's dashboard-built
+   `text` and/or `url` parameters, each at most once. For example,
+   `https://claude.ai/new?next=https://evil.com` is refused.
+3. **Captured-content source links** use `source`: HTTP or HTTPS only, with
+   no userinfo or non-default port. This covers `data-source-link` anchors
+   for `#yoinkSourceLink`, inline Markdown, reader timestamps, and Activity
+   source names. All IP-literal hosts are refused, including loopback
+   (`127.0.0.0/8`, `::1`), `0.0.0.0`, private ranges (`10/8`, `172.16/12`,
+   `192.168/16`, `fc00::/7`), and link-local ranges (`169.254/16`, `fe80::/10`).
+   `localhost`, `*.localhost`, `.local`, and `.internal` hosts are refused
+   after removing trailing dots. The URL parser canonicalizes alternate IP
+   spellings before the check. Hostname resolution and redirects are not
+   checked by this dashboard URL policy.
+
+All three kinds reject embedded credentials, control characters, backslashes,
+and malformed URLs before calling the native URL opener or `window.open`.
+Refused opens show a blocked-link toast; a successful copy cannot overwrite
+it with a success toast. Delegated click and middle-click handlers check raw
+link attributes, including links rendered after startup. Browser tabs use
+`noopener,noreferrer`.
+
+The fixed Startup action has one local exception: the exact `/splash` URL on
+the dashboard's own loopback origin, without a query or fragment. Remote and
+source links cannot use this exception. Open YouTube goes through the product
+allowlist; it makes no `/open-last-youtube` request, so the helper cannot open
+or focus a window before this check.
+
+Capture API validation is separate from the dashboard's link-opening policy:
 
 - Strict video capture recognizes YouTube, X/Twitter, TikTok, and Instagram
   host and path shapes. Each accepted URL is canonicalized before it reaches
@@ -552,6 +596,17 @@ uses cached files only and never authorizes a download; `ensure_model` is the
 explicit user-triggered download path. On Windows the selected model is cached
 under `%LOCALAPPDATA%\Uoink\models\whisper` and is never uploaded.
 
+Speaker labeling is a separate WhisperX/pyannote path in `whisper_runner.py`.
+When diarization is requested, it loads alignment and speaker models, then
+passes the local audio path to the pipeline. Those loaders may download model
+files, including from Hugging Face; the cached-only transcription-model check
+does not cover them. The speaker pipeline selects
+`pyannote/speaker-diarization-community-1` when the installed WhisperX accepts
+`model_name`. A token from `HF_TOKEN`, `HUGGINGFACE_TOKEN` or
+`HUGGING_FACE_HUB_TOKEN` is passed to the loader when supported. Uoink records
+whether speaker labeling succeeded; a failure returns the transcript without
+claiming successful diarization.
+
 Uoink 3.8.0 keeps Torch 2.8.0 and WhisperX 3.8.6. Default voice activity
 detection (VAD) loads through PyAnnote's checkpoint loader with
 `weights_only=False`, the same path used in 3.7.0. This permits checkpoint code
@@ -590,7 +645,21 @@ popup (`POST /migration/move-desktop-corpus`), never automatically.
 
 Uoink has no Uoink cloud service, account system, telemetry endpoint, or hosted analytics. Extraction and files stay on the user's machine.
 
-Optional AI features send selected comment/hook context to Anthropic only when the user provides an API key and enables those features. YouTube downloads still contact YouTube, and yt-dlp may contact YouTube-owned endpoints as part of uoink extraction.
+The dashboard and extension use bundled Inter, Bungee and JetBrains Mono
+fonts. They make no Google Fonts requests to `fonts.googleapis.com` or
+`fonts.gstatic.com`.
+
+The dashboard makes no features-manifest request to
+`https://uoink.app/api/features-manifest`, on load or when switching views.
+The Features view, remote catalogue loader, and bundled fallback catalogue
+have been removed. Uoink help links open only when the user clicks them.
+
+Optional AI features use the user's Anthropic key for enabled automatic
+analysis, key tests, or explicit on-demand actions, including connected-agent
+requests and `POST /playbooks/run`. Playbook runs send the fixed instruction
+and bounded library packet described above. YouTube downloads still contact
+YouTube, and yt-dlp may contact YouTube-owned endpoints as part of uoink
+extraction.
 
 ## Engagement memory (v2.5 S2)
 

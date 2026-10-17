@@ -106,13 +106,13 @@ def test_generate_dogfoods_writer_facing_assembly_path():
     generate = DASHBOARD.split(
         "async function generateAssemblyBody()", 1)[1].split(
         "async function generateScriptInWriting()", 1)[0]
-    build = DASHBOARD.split(
-        "async function assembleCurrentWorkspace()", 1)[1].split(
-        "async function runWorkspaceCritique()", 1)[0]
 
     assert "/api/corpus/v1/assemble" in generate
     assert "/workspace/assemble" not in generate
-    assert "/workspace/assemble" in build
+    # UI re-haul: the dead Build panel, the last dashboard caller of the
+    # legacy route, is gone; nothing in the dashboard assembles that way.
+    assert "async function assembleCurrentWorkspace()" not in DASHBOARD
+    assert "/workspace/assemble" not in DASHBOARD
 
 
 def test_corpus_intelligence_ships_with_the_helper():

@@ -54,28 +54,31 @@ def test_writing_picker_clears_on_no_match() -> None:
 
 
 def test_script_picker_clears_on_no_match() -> None:
-    body = section("function syncScriptSourceOptions()",
-                   "async function selectScriptSourceById")
-    require("if (query && !filtered.length)" in body,
-            "script picker keeps a stale pick after a no-match query")
-    clear = body.split("if (query && !filtered.length)", 1)[1]
-    require('els.scriptSource.value = "";' in clear,
-            "no-match query must clear the hidden script source ID")
-    require("state.scriptSelectedSourceRow = null;" in clear,
-            "no-match query must clear the selected script row")
-    print("ok  script picker: no-match query clears the hidden source ID")
+    # UI re-haul: the Script Studio panel (and its own source picker) was
+    # dead and is gone (SPEC "Dashboard IA"). Scripts are written from
+    # Generate, whose one picker is covered above, so no second hidden
+    # script pick exists to go stale.
+    for leftover in ('id="scriptSource"', 'id="scriptSourceSearch"',
+                     "scriptSelectedSourceRow", "data-script-source-id"):
+        require(leftover not in DASHBOARD,
+                f"a hidden Script Studio pick came back: {leftover}")
+    print("ok  script picker: no hidden Script Studio pick is left")
 
 
 def test_script_search_input_drops_stale_pick() -> None:
-    handler = section('els.scriptSourceSearch.addEventListener("input"',
-                      "});")
-    require('els.scriptSource.value = ""' in handler,
-            "typing away from the picked script source must clear the "
-            "hidden ID")
-    require("state.scriptSelectedSourceRow = null" in handler,
-            "typing away from the picked script source must clear the "
-            "selected row")
-    print("ok  script picker: typing a different query drops the stale pick")
+    # Generate's script mode grounds in the visible Writing pick and stops
+    # when there is none, so it can never credit a source the user can't see.
+    grounding = section("async function generateScriptGrounding()",
+                        "function showGenerateResearch")
+    require("const row = state.writingSelectedSourceRow;" in grounding
+            and 'if (!row) throw new Error("Choose a source uoink first.");' in grounding,
+            "script grounding must use the visible Writing pick")
+    script = section("async function generateScriptInWriting()",
+                     "async function generateWriting()")
+    require("const row = state.writingSelectedSourceRow;" in script
+            and "source_yoink_id: screenshotSourceId(row)" in script,
+            "the script request must name the visible Writing pick")
+    print("ok  script mode: grounded in the visible Writing pick only")
 
 
 def test_generate_blocked_without_pick() -> None:
