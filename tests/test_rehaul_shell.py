@@ -217,17 +217,17 @@ def test_settings_has_the_five_spec_sections_in_order():
 def test_every_settings_control_is_still_in_settings():
     settings = _panel("settings")
     for control in (
-        "anthropicKey", "saveKey", "testKey", "stopHelperSettings", "autostartToggle", "notificationsEnabled",
+        "anthropicKey", "anthropicKeySaveStatus", "testKey", "stopHelperSettings", "autostartToggle", "notificationsEnabled",
         "rolePicker", "channelHandle", "addChannel", "recognizeChannels", "playlistUrl", "addPlaylist",
         "autoUoinkToggle", "autoUoinkScan", "podcastFeedUrl", "addPodcastFeed", "podcastAutoIngest",
-        "allowedSitePattern", "addAllowedSite", "pickOutputFolder", "openOutput", "outputFolder", "saveOutput",
+        "allowedSitePattern", "addAllowedSite", "pickOutputFolder", "openOutput", "outputFolder", "outputFolderSaveStatus",
         "libraryMirrorDestination", "libraryMirrorScope", "libraryMirrorAllowlist", "libraryMirrorPreview",
         "libraryMirrorEnable", "libraryMirrorDisable", "libraryMirrorResync", "topicList", "addTopic",
-        "saveTopics", "undoTopicRemove", "settingsAgentSetupCard", "mcpConfig", "copyMcp", "versionLine",
-        "checkUpdates", "screenshotCount", "saveScreenshotCount", "claimVerificationToggle",
+        "topicListSaveStatus", "undoTopicRemove", "settingsAgentSetupCard", "mcpConfig", "copyMcp", "versionLine",
+        "checkUpdates", "screenshotCount", "screenshotCountSaveStatus", "claimVerificationToggle",
         "entityExtractionToggle", "voiceWarningsEnabled", "voiceWarningsPerGeneration",
         "writingScreenshotPickerToggle", "reliabilityAutoCheck", "asrFallbackEnabled", "whisperModel",
-        "saveWhisperModel", "downloadReliabilityModel", "aboutVersion", "aboutPort", "librarianStatus",
+        "whisperModelSaveStatus", "downloadReliabilityModel", "aboutVersion", "aboutPort", "librarianStatus",
         "starGithub",
     ):
         assert settings.count(f'id="{control}"') == 1, control

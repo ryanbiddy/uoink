@@ -2770,17 +2770,44 @@
 
     .settings-grid {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) minmax(300px, 0.8fr);
+      grid-template-columns: minmax(0, 1fr);
       gap: 16px;
     }
 
     .setting-block {
       display: grid;
       gap: 12px;
-      border: 1px solid var(--border);
-      border-radius: var(--card-radius);
-      padding: 16px;
-      background: color-mix(in srgb, var(--surface) 82%, transparent);
+      border-bottom: 1px solid var(--line);
+      padding: 24px 0;
+      min-width: 0;
+      color: var(--text);
+      background: var(--bg);
+    }
+
+    .app:has(#tab-settings.active) { background: var(--bg); }
+    .app:has(#tab-settings.active) .uoink-mark { filter: none; }
+    #tab-settings { max-width: 900px; }
+    #tab-settings .field { max-width: 100%; min-width: 0 !important; }
+    #tab-settings .inline-row { gap: 12px; }
+    #tab-settings label.inline-row { min-height: 44px; align-items: center; }
+    #tab-settings input[type="checkbox"],
+    #tab-settings input[type="radio"] { accent-color: var(--action); width: 18px; height: 18px; }
+    #tab-settings .mono-box { width: 100%; min-width: 0; font-family: var(--font-ui); }
+    #tab-settings .soft-note,
+    #tab-settings .job-sub,
+    #tab-settings .topic-field span { font-family: var(--font-ui); }
+    .setting-feedback { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .setting-status { color: var(--text-2); font-size: 13px; overflow-wrap: anywhere; }
+    .setting-status[data-state="error"] { color: var(--vermillion); }
+    .setting-retry { min-height: 32px; }
+    .settings-load-status { color: var(--text-2); }
+    .taste-anchor-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; padding: 12px 0; border-bottom: 1px solid var(--line); }
+    .taste-anchor-row strong { flex: 1; overflow-wrap: anywhere; }
+    @media (max-width: 600px) {
+      #tab-settings .page-head { align-items: flex-start; }
+      #tab-settings .topic-row { grid-template-columns: minmax(0, 1fr); }
+      #tab-settings .settings-list-row { flex-wrap: wrap; }
+      #tab-settings #anthropicKey { flex-basis: 100% !important; width: 100%; }
     }
 
     .setting-block h2 {
@@ -5179,8 +5206,8 @@
           <div class="page-head">
             <div>
               <div class="eyebrow">Settings</div>
-              <h1>Set up <em>Uoink.</em></h1>
-              <p class="lede">Every Uoink setting lives on this page: capture, AI features, library and export, agents, and the app itself.</p>
+              <h1>Settings</h1>
+              <p class="lede">Changes save as you make them. Each setting shows when it is saved or needs another try.</p>
             </div>
             <button class="button ghost" type="button" id="reloadSettings">Reload</button>
           </div>
@@ -5192,6 +5219,7 @@
             <a href="https://uoink.app/features/claim-extraction" target="_blank" rel="noreferrer">Learn: Claims</a>
           </div>
 
+          <p class="settings-load-status" id="settingsLoadStatus" role="status" aria-live="polite"></p>
           <nav class="settings-index" aria-label="Settings sections">
             <a href="#settings/capture">Capture</a>
             <a href="#settings/ai">AI features</a>
@@ -5204,11 +5232,20 @@
           <h2 class="settings-section-title" id="settingsCaptureTitle" tabindex="-1">Capture</h2>
           <div class="settings-grid">
             <div class="setting-block">
+              <h2>Screenshots</h2>
+              <p class="setting-copy">Applies to captures started in this dashboard. Saved in this browser; extension captures keep their Chrome setting. Choose 5–300 seconds between screenshots.</p>
+              <label for="screenshotInterval">Screenshot interval (seconds)</label>
+              <input class="field" id="screenshotInterval" type="number" min="5" max="300" step="1" value="30" aria-describedby="screenshotIntervalSaveStatus">
+              <div class="setting-feedback"><span class="setting-status" id="screenshotIntervalSaveStatus" role="status" aria-live="polite" aria-atomic="true"></span><button class="button ghost setting-retry hidden" id="screenshotIntervalSaveRetry" type="button" data-setting-retry="screenshotInterval">Retry save</button></div>
+            </div>
+
+            <div class="setting-block">
               <h2>Auto-uoink playlists</h2>
               <p class="setting-copy" id="playlistStatus">Checking playlist monitor...</p>
               <div class="settings-list" id="playlistList"></div>
               <div class="inline-row">
-                <input class="field" style="flex:1;min-width:240px" id="playlistUrl" type="url" placeholder="YouTube playlist URL" aria-label="YouTube playlist URL">
+                <input class="field" style="flex:1;min-width:240px" id="playlistUrl" type="url" placeholder="YouTube playlist URL" aria-label="YouTube playlist URL" aria-describedby="playlistUrlSaveStatus">
+              <div class="setting-feedback"><span class="setting-status" id="playlistUrlSaveStatus" role="status" aria-live="polite" aria-atomic="true"></span><button class="button ghost setting-retry hidden" id="playlistUrlSaveRetry" type="button" data-setting-retry="playlistUrl">Retry save</button></div>
                 <button class="button" type="button" id="addPlaylist">Add</button>
               </div>
             </div>
@@ -5216,7 +5253,8 @@
             <div class="setting-block" id="auto-uoink">
               <h2>Taste-aware auto-uoink</h2>
               <p class="setting-copy">Off by default. When on, Uoink scores <em>new</em> videos from the playlists you already monitor (above) against your taste &mdash; your 10/10 anchors, admired channels, engagement, and corpus &mdash; and auto-captures the strong matches. They land in your library labelled <strong>auto-uoinked (taste match)</strong>.</p>
-              <label class="inline-row"><input id="autoUoinkToggle" type="checkbox"> Auto-uoink videos that match my taste</label>
+              <label class="inline-row"><input id="autoUoinkToggle" type="checkbox" aria-describedby="autoUoinkToggleSaveStatus"> Auto-uoink videos that match my taste</label>
+              <div class="setting-feedback"><span class="setting-status" id="autoUoinkToggleSaveStatus" role="status" aria-live="polite" aria-atomic="true"></span><button class="button ghost setting-retry hidden" id="autoUoinkToggleSaveRetry" type="button" data-setting-retry="autoUoinkToggle">Retry save</button></div>
               <p class="setting-copy" id="autoUoinkStatus">Checking auto-uoink status...</p>
               <div class="inline-row">
                 <button class="button" type="button" id="autoUoinkScan">Scan my sources now</button>
@@ -5227,9 +5265,11 @@
             <div class="setting-block">
               <h2>Podcast feeds</h2>
               <p class="setting-copy" id="podcastFeedStatus">Checking podcast feeds...</p>
-              <div class="settings-list" id="podcastFeedList"></div>
+              <div class="settings-list" id="podcastFeedList" aria-describedby="podcastFeedListSaveStatus"></div>
+              <div class="setting-feedback"><span class="setting-status" id="podcastFeedListSaveStatus" role="status" aria-live="polite" aria-atomic="true"></span><button class="button ghost setting-retry hidden" id="podcastFeedListSaveRetry" type="button" data-setting-retry="podcastFeedList">Retry save</button></div>
               <div class="inline-row">
-                <input class="field" style="flex:1;min-width:240px" id="podcastFeedUrl" type="url" placeholder="RSS feed URL" aria-label="Podcast RSS feed URL">
+                <input class="field" style="flex:1;min-width:240px" id="podcastFeedUrl" type="url" placeholder="RSS feed URL" aria-label="Podcast RSS feed URL" aria-describedby="podcastFeedUrlSaveStatus">
+              <div class="setting-feedback"><span class="setting-status" id="podcastFeedUrlSaveStatus" role="status" aria-live="polite" aria-atomic="true"></span><button class="button ghost setting-retry hidden" id="podcastFeedUrlSaveRetry" type="button" data-setting-retry="podcastFeedUrl">Retry save</button></div>
                 <button class="button" type="button" id="addPodcastFeed">Add</button>
               </div>
               <label class="inline-row"><input id="podcastAutoIngest" type="checkbox"> Auto-ingest new episodes: download, transcribe, and publish locally</label>
@@ -5240,9 +5280,11 @@
               <h2>Sites Uoink works on</h2>
               <p class="setting-copy" id="allowedSitesStatus">Checking site permissions...</p>
               <div class="badge-row" id="defaultSitesList"></div>
-              <div class="site-list" id="allowedSitesList"></div>
+              <div class="site-list" id="allowedSitesList" aria-describedby="allowedSitesListSaveStatus"></div>
+              <div class="setting-feedback"><span class="setting-status" id="allowedSitesListSaveStatus" role="status" aria-live="polite" aria-atomic="true"></span><button class="button ghost setting-retry hidden" id="allowedSitesListSaveRetry" type="button" data-setting-retry="allowedSitesList">Retry save</button></div>
               <div class="inline-row">
-                <input class="field" style="flex:1;min-width:220px" id="allowedSitePattern" type="text" placeholder="example.com or *.docs.example.com" aria-label="Site domain pattern">
+                <input class="field" style="flex:1;min-width:220px" id="allowedSitePattern" type="text" placeholder="example.com or *.docs.example.com" aria-label="Site domain pattern" aria-describedby="allowedSitePatternSaveStatus">
+              <div class="setting-feedback"><span class="setting-status" id="allowedSitePatternSaveStatus" role="status" aria-live="polite" aria-atomic="true"></span><button class="button ghost setting-retry hidden" id="allowedSitePatternSaveRetry" type="button" data-setting-retry="allowedSitePattern">Retry save</button></div>
                 <button class="button" type="button" id="addAllowedSite">Add</button>
               </div>
               <p class="setting-copy">Uoink only works on sites you've enabled. Right-click any page and choose "Uoink this page"; if the site needs permission, the extension asks first.</p>
@@ -5252,19 +5294,21 @@
               <h2>Clipboard screenshots</h2>
               <p class="setting-copy">How many screenshots ride along when you paste a uoink into a chat.</p>
               <div class="inline-row">
-                <input class="field" style="width:120px" id="screenshotCount" type="number" min="0" max="12" step="1" value="4">
-                <button class="button" type="button" id="saveScreenshotCount">Save</button>
+                <input class="field" style="width:120px" id="screenshotCount" aria-label="Clipboard screenshot count" type="number" min="0" max="12" step="1" value="4" aria-describedby="screenshotCountSaveStatus">
+              <div class="setting-feedback"><span class="setting-status" id="screenshotCountSaveStatus" role="status" aria-live="polite" aria-atomic="true"></span><button class="button ghost setting-retry hidden" id="screenshotCountSaveRetry" type="button" data-setting-retry="screenshotCount">Retry save</button></div>
               </div>
             </div>
 
             <div class="setting-block">
               <h2>Transcript checker</h2>
               <p class="setting-copy" id="reliabilityStatus">Checking transcript checker...</p>
-              <label class="inline-row"><input id="reliabilityAutoCheck" type="checkbox"> Auto-check transcript quality</label>
-              <label class="inline-row"><input id="asrFallbackEnabled" type="checkbox" checked> Transcribe videos locally when captions are missing</label>
+              <label class="inline-row"><input id="reliabilityAutoCheck" type="checkbox" aria-describedby="reliabilityAutoCheckSaveStatus"> Auto-check transcript quality</label>
+              <div class="setting-feedback"><span class="setting-status" id="reliabilityAutoCheckSaveStatus" role="status" aria-live="polite" aria-atomic="true"></span><button class="button ghost setting-retry hidden" id="reliabilityAutoCheckSaveRetry" type="button" data-setting-retry="reliabilityAutoCheck">Retry save</button></div>
+              <label class="inline-row"><input id="asrFallbackEnabled" type="checkbox" checked aria-describedby="asrFallbackEnabledSaveStatus"> Transcribe videos locally when captions are missing</label>
+              <div class="setting-feedback"><span class="setting-status" id="asrFallbackEnabledSaveStatus" role="status" aria-live="polite" aria-atomic="true"></span><button class="button ghost setting-retry hidden" id="asrFallbackEnabledSaveRetry" type="button" data-setting-retry="asrFallbackEnabled">Retry save</button></div>
               <div class="inline-row">
-                <select class="field" id="whisperModel" aria-label="Transcript checker model"></select>
-                <button class="button ghost" type="button" id="saveWhisperModel">Save choice</button>
+                <select class="field" id="whisperModel" aria-label="Transcript checker model" aria-describedby="whisperModelSaveStatus"></select>
+              <div class="setting-feedback"><span class="setting-status" id="whisperModelSaveStatus" role="status" aria-live="polite" aria-atomic="true"></span><button class="button ghost setting-retry hidden" id="whisperModelSaveRetry" type="button" data-setting-retry="whisperModel">Retry save</button></div>
               </div>
               <div class="inline-row">
                 <button class="button" type="button" id="downloadReliabilityModel">Download selected model</button>
@@ -5277,13 +5321,25 @@
           <section class="settings-section" id="settings-ai" aria-labelledby="settingsAiTitle">
           <h2 class="settings-section-title" id="settingsAiTitle" tabindex="-1">AI features</h2>
           <div class="settings-grid">
+            <div class="setting-block">
+              <h2>Capture analysis</h2>
+              <p class="setting-copy">These optional features use your Anthropic key. Each can be turned on separately.</p>
+              <label class="inline-row"><input id="commentIntelligenceToggle" type="checkbox" aria-describedby="commentIntelligenceToggleSaveStatus"> Analyze comments on new captures</label>
+              <div class="setting-feedback"><span class="setting-status" id="commentIntelligenceToggleSaveStatus" role="status" aria-live="polite" aria-atomic="true"></span><button class="button ghost setting-retry hidden" id="commentIntelligenceToggleSaveRetry" type="button" data-setting-retry="commentIntelligenceToggle">Retry save</button></div>
+              <label class="inline-row"><input id="hookTypeToggle" type="checkbox" aria-describedby="hookTypeToggleSaveStatus"> Classify the opening hook</label>
+              <div class="setting-feedback"><span class="setting-status" id="hookTypeToggleSaveStatus" role="status" aria-live="polite" aria-atomic="true"></span><button class="button ghost setting-retry hidden" id="hookTypeToggleSaveRetry" type="button" data-setting-retry="hookTypeToggle">Retry save</button></div>
+              <label class="inline-row"><input id="smartScreenshotPickerToggle" type="checkbox" aria-describedby="smartScreenshotPickerToggleSaveStatus"> Suggest screenshots for sharing</label>
+              <div class="setting-feedback"><span class="setting-status" id="smartScreenshotPickerToggleSaveStatus" role="status" aria-live="polite" aria-atomic="true"></span><button class="button ghost setting-retry hidden" id="smartScreenshotPickerToggleSaveRetry" type="button" data-setting-retry="smartScreenshotPickerToggle">Retry save</button></div>
+            </div>
+
             <div class="setting-block" id="byo-key">
               <h2>AI writing key</h2>
               <p class="setting-copy" id="keyStatus">Checking key status...</p>
               <div class="inline-row">
-                <input class="field" style="flex:1;min-width:260px" id="anthropicKey" type="password" placeholder="Paste your Anthropic key" aria-label="Anthropic API key">
-                <button class="button" type="button" id="saveKey">Save key</button>
+                <input class="field" style="flex:1;min-width:260px" id="anthropicKey" type="password" placeholder="Paste your Anthropic key" aria-label="Anthropic API key" autocomplete="new-password" spellcheck="false" aria-describedby="anthropicKeySaveStatus">
+              <div class="setting-feedback"><span class="setting-status" id="anthropicKeySaveStatus" role="status" aria-live="polite" aria-atomic="true"></span><button class="button ghost setting-retry hidden" id="anthropicKeySaveRetry" type="button" data-setting-retry="anthropicKey">Retry save</button></div>
                 <button class="button ghost" type="button" id="testKey">Test</button>
+                <button class="button ghost" type="button" id="clearKey">Remove key</button>
               </div>
               <p class="setting-copy">Stored on this device and used only for the optional AI features you turn on.</p>
             </div>
@@ -5291,21 +5347,60 @@
             <div class="setting-block">
               <h2>Claim verification</h2>
               <p class="setting-copy">When on, every uoink's transcript is scanned for checkable factual claims. Evidence is shown for your judgment. Uoink never auto-asserts truth.</p>
-              <label class="inline-row"><input id="claimVerificationToggle" type="checkbox"> Scan new uoinks for claims worth verifying</label>
+              <label class="inline-row"><input id="claimVerificationToggle" type="checkbox" aria-describedby="claimVerificationToggleSaveStatus"> Scan new uoinks for claims worth verifying</label>
+              <div class="setting-feedback"><span class="setting-status" id="claimVerificationToggleSaveStatus" role="status" aria-live="polite" aria-atomic="true"></span><button class="button ghost setting-retry hidden" id="claimVerificationToggleSaveRetry" type="button" data-setting-retry="claimVerificationToggle">Retry save</button></div>
+              <label for="defaultEvidenceSources">Default evidence sources (one per line)</label>
+              <textarea class="field" id="defaultEvidenceSources" rows="3" aria-describedby="defaultEvidenceSourcesSaveStatus"></textarea>
+              <div class="setting-feedback"><span class="setting-status" id="defaultEvidenceSourcesSaveStatus" role="status" aria-live="polite" aria-atomic="true"></span><button class="button ghost setting-retry hidden" id="defaultEvidenceSourcesSaveRetry" type="button" data-setting-retry="defaultEvidenceSources">Retry save</button></div>
             </div>
 
             <div class="setting-block" id="entity-extraction">
               <h2>Entity extraction</h2>
               <p class="setting-copy">Pull people, tools, products and companies off each transcript into the library graph. Uses your Anthropic key (~2,500 output tokens per item). Off by default; a saved key alone never starts it.</p>
-              <label class="inline-row"><input id="entityExtractionToggle" type="checkbox"> Extract entities from new uoinks</label>
+              <label class="inline-row"><input id="entityExtractionToggle" type="checkbox" aria-describedby="entityExtractionToggleSaveStatus"> Extract entities from new uoinks</label>
+              <div class="setting-feedback"><span class="setting-status" id="entityExtractionToggleSaveStatus" role="status" aria-live="polite" aria-atomic="true"></span><button class="button ghost setting-retry hidden" id="entityExtractionToggleSaveRetry" type="button" data-setting-retry="entityExtractionToggle">Retry save</button></div>
             </div>
 
             <div class="setting-block">
               <h2>Writing Studio</h2>
               <p class="setting-copy">Voice DNA warnings flag canned phrasing without blocking the draft. The screenshot picker shows before anything opens in X.</p>
-              <label class="inline-row"><input id="voiceWarningsEnabled" type="checkbox" checked> Show Voice DNA warnings</label>
-              <label class="inline-row"><input id="voiceWarningsPerGeneration" type="checkbox" checked> Show the per-draft skip control</label>
-              <label class="inline-row"><input id="writingScreenshotPickerToggle" type="checkbox" checked> Show screenshot picker in composer</label>
+              <label class="inline-row"><input id="voiceWarningsEnabled" type="checkbox" checked aria-describedby="voiceWarningsEnabledSaveStatus"> Show Voice DNA warnings</label>
+              <div class="setting-feedback"><span class="setting-status" id="voiceWarningsEnabledSaveStatus" role="status" aria-live="polite" aria-atomic="true"></span><button class="button ghost setting-retry hidden" id="voiceWarningsEnabledSaveRetry" type="button" data-setting-retry="voiceWarningsEnabled">Retry save</button></div>
+              <label class="inline-row"><input id="voiceWarningsPerGeneration" type="checkbox" checked aria-describedby="voiceWarningsPerGenerationSaveStatus"> Show the per-draft skip control</label>
+              <div class="setting-feedback"><span class="setting-status" id="voiceWarningsPerGenerationSaveStatus" role="status" aria-live="polite" aria-atomic="true"></span><button class="button ghost setting-retry hidden" id="voiceWarningsPerGenerationSaveRetry" type="button" data-setting-retry="voiceWarningsPerGeneration">Retry save</button></div>
+              <label class="inline-row"><input id="writingScreenshotPickerToggle" type="checkbox" checked aria-describedby="writingScreenshotPickerToggleSaveStatus"> Show screenshot picker in composer</label>
+              <div class="setting-feedback"><span class="setting-status" id="writingScreenshotPickerToggleSaveStatus" role="status" aria-live="polite" aria-atomic="true"></span><button class="button ghost setting-retry hidden" id="writingScreenshotPickerToggleSaveRetry" type="button" data-setting-retry="writingScreenshotPickerToggle">Retry save</button></div>
+              <label class="inline-row"><input id="writingAttachAllToggle" type="checkbox" aria-describedby="writingAttachAllToggleSaveStatus"> Attach all screenshots by default</label>
+              <div class="setting-feedback"><span class="setting-status" id="writingAttachAllToggleSaveStatus" role="status" aria-live="polite" aria-atomic="true"></span><button class="button ghost setting-retry hidden" id="writingAttachAllToggleSaveRetry" type="button" data-setting-retry="writingAttachAllToggle">Retry save</button></div>
+            </div>
+            <div class="setting-block">
+              <h2>Taste preferences</h2>
+              <p class="setting-copy">Describe what you want to learn from and what to avoid. Your notes also keep the channels you admire.</p>
+              <label for="tasteHooks">Preferred hooks</label>
+              <textarea class="field" id="tasteHooks" rows="3" aria-describedby="tasteHooksSaveStatus"></textarea>
+              <div class="setting-feedback"><span class="setting-status" id="tasteHooksSaveStatus" role="status" aria-live="polite" aria-atomic="true"></span><button class="button ghost setting-retry hidden" id="tasteHooksSaveRetry" type="button" data-setting-retry="tasteHooks">Retry save</button></div>
+              <label for="tasteFormats">Preferred formats</label>
+              <textarea class="field" id="tasteFormats" rows="3" aria-describedby="tasteFormatsSaveStatus"></textarea>
+              <div class="setting-feedback"><span class="setting-status" id="tasteFormatsSaveStatus" role="status" aria-live="polite" aria-atomic="true"></span><button class="button ghost setting-retry hidden" id="tasteFormatsSaveRetry" type="button" data-setting-retry="tasteFormats">Retry save</button></div>
+              <label for="tasteAvoid">What to avoid</label>
+              <textarea class="field" id="tasteAvoid" rows="3" aria-describedby="tasteAvoidSaveStatus"></textarea>
+              <div class="setting-feedback"><span class="setting-status" id="tasteAvoidSaveStatus" role="status" aria-live="polite" aria-atomic="true"></span><button class="button ghost setting-retry hidden" id="tasteAvoidSaveRetry" type="button" data-setting-retry="tasteAvoid">Retry save</button></div>
+              <label for="tasteUser">Your notes and admired channels</label>
+              <textarea class="field" id="tasteUser" rows="3" aria-describedby="tasteUserSaveStatus"></textarea>
+              <div class="setting-feedback"><span class="setting-status" id="tasteUserSaveStatus" role="status" aria-live="polite" aria-atomic="true"></span><button class="button ghost setting-retry hidden" id="tasteUserSaveRetry" type="button" data-setting-retry="tasteUser">Retry save</button></div>
+            </div>
+            <div class="setting-block">
+              <h2>Taste anchors</h2>
+              <p class="setting-copy">Keep examples you want Uoink to learn from, or avoid. Use a capture ID from its Library link.</p>
+              <div id="tasteAnchorList" aria-describedby="tasteAnchorListSaveStatus"></div>
+              <div class="setting-feedback"><span class="setting-status" id="tasteAnchorListSaveStatus" role="status" aria-live="polite" aria-atomic="true"></span><button class="button ghost setting-retry hidden" id="tasteAnchorListSaveRetry" type="button" data-setting-retry="tasteAnchorList">Retry save</button></div>
+              <p class="setting-copy" id="tasteAnchorStatus" role="status"></p>
+              <label for="tasteAnchorId">Saved capture ID</label>
+              <input class="field" id="tasteAnchorId" type="text"  aria-describedby="tasteAnchorIdSaveStatus">
+              <div class="setting-feedback"><span class="setting-status" id="tasteAnchorIdSaveStatus" role="status" aria-live="polite" aria-atomic="true"></span><button class="button ghost setting-retry hidden" id="tasteAnchorIdSaveRetry" type="button" data-setting-retry="tasteAnchorId">Retry save</button></div>
+              <label for="tasteAnchorType">Rating</label>
+              <select class="field" id="tasteAnchorType"><option value="best">10/10 · Learn from this</option><option value="worst">Avoid this</option></select>
+              <button class="button" type="button" id="addTasteAnchor">Add anchor</button>
             </div>
           </div>
           </section>
@@ -5314,6 +5409,25 @@
           <h2 class="settings-section-title" id="settingsLibraryTitle" tabindex="-1">Library and export</h2>
           <div class="settings-grid">
             <div class="setting-block">
+              <h2>Creator defaults</h2>
+              <p class="setting-copy">Defaults from extension setup. If this helper cannot store a setting, its error appears beside the control.</p>
+              <label for="defaultTargetLength">Target length</label>
+              <select class="field" id="defaultTargetLength" aria-describedby="defaultTargetLengthSaveStatus"><option value="30s">30 seconds</option><option value="60s">60 seconds</option><option value="5m">5 minutes</option><option value="15m">15 minutes</option><option value="30m">30 minutes</option></select>
+              <div class="setting-feedback"><span class="setting-status" id="defaultTargetLengthSaveStatus" role="status" aria-live="polite" aria-atomic="true"></span><button class="button ghost setting-retry hidden" id="defaultTargetLengthSaveRetry" type="button" data-setting-retry="defaultTargetLength">Retry save</button></div>
+              <label for="defaultWorkspaceFormat">Workspace format</label>
+              <select class="field" id="defaultWorkspaceFormat" aria-describedby="defaultWorkspaceFormatSaveStatus"><option value="markdown">Markdown</option><option value="obsidian">Obsidian</option><option value="notion">Notion</option><option value="json">JSON</option></select>
+              <div class="setting-feedback"><span class="setting-status" id="defaultWorkspaceFormatSaveStatus" role="status" aria-live="polite" aria-atomic="true"></span><button class="button ghost setting-retry hidden" id="defaultWorkspaceFormatSaveRetry" type="button" data-setting-retry="defaultWorkspaceFormat">Retry save</button></div>
+              <label for="styleAnchorsSource">Style anchors</label>
+              <select class="field" id="styleAnchorsSource" aria-describedby="styleAnchorsSourceSaveStatus"><option value="taste">Taste profile</option><option value="channel">Your channel</option><option value="both">Both</option></select>
+              <div class="setting-feedback"><span class="setting-status" id="styleAnchorsSourceSaveStatus" role="status" aria-live="polite" aria-atomic="true"></span><button class="button ghost setting-retry hidden" id="styleAnchorsSourceSaveRetry" type="button" data-setting-retry="styleAnchorsSource">Retry save</button></div>
+              <label for="obsidianVaultPath">Obsidian vault path</label>
+              <input class="field" id="obsidianVaultPath" type="text"  aria-describedby="obsidianVaultPathSaveStatus">
+              <div class="setting-feedback"><span class="setting-status" id="obsidianVaultPathSaveStatus" role="status" aria-live="polite" aria-atomic="true"></span><button class="button ghost setting-retry hidden" id="obsidianVaultPathSaveRetry" type="button" data-setting-retry="obsidianVaultPath">Retry save</button></div>
+              <label class="inline-row"><input id="mirrorScriptsToggle" type="checkbox" aria-describedby="mirrorScriptsToggleSaveStatus"> Mirror scripts to Obsidian</label>
+              <div class="setting-feedback"><span class="setting-status" id="mirrorScriptsToggleSaveStatus" role="status" aria-live="polite" aria-atomic="true"></span><button class="button ghost setting-retry hidden" id="mirrorScriptsToggleSaveRetry" type="button" data-setting-retry="mirrorScriptsToggle">Retry save</button></div>
+            </div>
+
+            <div class="setting-block">
               <h2>Output folder</h2>
               <div class="folder-summary">
                 <span class="soft-note">Current save location</span>
@@ -5321,14 +5435,14 @@
                 <span class="setting-copy" id="outputFolderPending"></span>
               </div>
               <div class="inline-row">
-                <button class="button" type="button" id="pickOutputFolder">Choose folder</button>
+                <button class="button" type="button" aria-describedby="outputFolderSaveStatus" id="pickOutputFolder">Choose folder</button>
                 <button class="button ghost" type="button" id="openOutput">Open current folder</button>
               </div>
               <details class="manual-path">
                 <summary>Enter a path manually</summary>
-                <input class="field" id="outputFolder" type="text" value="Loading..." aria-label="Output folder path">
-                <button class="button ghost" type="button" id="saveOutput">Save path</button>
+                <input class="field" id="outputFolder" type="text" value="Loading..." aria-label="Output folder path" aria-describedby="outputFolderSaveStatus">
               </details>
+              <div class="setting-feedback"><span class="setting-status" id="outputFolderSaveStatus" role="status" aria-live="polite" aria-atomic="true"></span><button class="button ghost setting-retry hidden" id="outputFolderSaveRetry" type="button" data-setting-retry="outputFolder">Retry save</button></div>
             </div>
 
             <div class="setting-block" id="library-mirror">
@@ -5356,30 +5470,33 @@
 
             <div class="setting-block">
               <h2>Topics</h2>
-              <p class="setting-copy">Edit topic names and keywords. Remove a topic, undo it if needed, then save when the list looks right.</p>
-              <div class="topic-list" id="topicList"></div>
+              <p class="setting-copy">Topic names and keywords save when you leave the field. Removing a topic saves immediately; Undo restores it.</p>
+              <div class="topic-list" id="topicList" aria-describedby="topicListSaveStatus"></div>
+              <div class="setting-feedback"><span class="setting-status" id="topicListSaveStatus" role="status" aria-live="polite" aria-atomic="true"></span><button class="button ghost setting-retry hidden" id="topicListSaveRetry" type="button" data-setting-retry="topicList">Retry save</button></div>
               <div class="topic-undo hidden" id="topicUndo" role="status">
                 <span id="topicUndoText">Topic removed.</span>
                 <button class="button ghost" type="button" id="undoTopicRemove">Undo</button>
               </div>
               <div class="inline-row">
                 <button class="button ghost" type="button" id="addTopic">Add topic</button>
-                <button class="button" type="button" id="saveTopics">Save topics</button>
               </div>
             </div>
 
             <div class="setting-block">
               <h2>Your role</h2>
               <p class="setting-copy">Sets the default views and what Library puts first.</p>
-              <div class="choice-grid" id="rolePicker"></div>
+              <div class="choice-grid" id="rolePicker" aria-describedby="rolePickerSaveStatus"></div>
+              <div class="setting-feedback"><span class="setting-status" id="rolePickerSaveStatus" role="status" aria-live="polite" aria-atomic="true"></span><button class="button ghost setting-retry hidden" id="rolePickerSaveRetry" type="button" data-setting-retry="rolePicker">Retry save</button></div>
             </div>
 
             <div class="setting-block">
               <h2>Your channels</h2>
               <p class="setting-copy" id="channelsStatus">Checking your channel registry...</p>
-              <div class="channel-list" id="channelsList"></div>
+              <div class="channel-list" id="channelsList" aria-describedby="channelsListSaveStatus"></div>
+              <div class="setting-feedback"><span class="setting-status" id="channelsListSaveStatus" role="status" aria-live="polite" aria-atomic="true"></span><button class="button ghost setting-retry hidden" id="channelsListSaveRetry" type="button" data-setting-retry="channelsList">Retry save</button></div>
               <div class="inline-row">
-                <input class="field" style="flex:1;min-width:220px" id="channelHandle" type="text" placeholder="@yourhandle" aria-label="Channel handle">
+                <input class="field" style="flex:1;min-width:220px" id="channelHandle" type="text" placeholder="@yourhandle" aria-label="Channel handle" aria-describedby="channelHandleSaveStatus">
+              <div class="setting-feedback"><span class="setting-status" id="channelHandleSaveStatus" role="status" aria-live="polite" aria-atomic="true"></span><button class="button ghost setting-retry hidden" id="channelHandleSaveRetry" type="button" data-setting-retry="channelHandle">Retry save</button></div>
                 <button class="button" type="button" id="addChannel">Add</button>
                 <button class="button ghost" type="button" id="recognizeChannels">Recognize past uoinks</button>
               </div>
@@ -5392,13 +5509,21 @@
           <div class="settings-grid">
             <div class="setting-block">
               <h2>Agent connection</h2>
-              <div class="agent-setup-card" id="settingsAgentSetupCard">
+              <div class="agent-setup-card" id="settingsAgentSetupCard" aria-describedby="settingsAgentSetupCardSaveStatus">
                 <strong>Checking installed writing agents...</strong>
                 <span class="soft-note">Uoink will offer one-click setup for clients already on this machine.</span>
               </div>
+              <div class="setting-feedback"><span class="setting-status" id="settingsAgentSetupCardSaveStatus" role="status" aria-live="polite" aria-atomic="true"></span><button class="button ghost setting-retry hidden" id="settingsAgentSetupCardSaveRetry" type="button" data-setting-retry="settingsAgentSetupCard">Retry save</button></div>
               <details>
                 <summary>Advanced: connection JSON</summary>
-                <textarea class="mono-box" id="mcpConfig" readonly>Loading agent connection...</textarea>
+                <label for="mcpClient">Connection format</label>
+                <select class="field" id="mcpClient">
+                  <option value="claude">Claude Desktop / Cursor</option>
+                  <option value="chatgpt">ChatGPT</option>
+                  <option value="http">HTTP</option>
+                </select>
+                <textarea class="mono-box" id="mcpConfig" aria-label="Agent connection JSON" readonly aria-describedby="mcpConfigSaveStatus">Loading agent connection...</textarea>
+              <div class="setting-feedback"><span class="setting-status" id="mcpConfigSaveStatus" role="status" aria-live="polite" aria-atomic="true"></span><button class="button ghost setting-retry hidden" id="mcpConfigSaveRetry" type="button" data-setting-retry="mcpConfig">Retry save</button></div>
                 <button class="button" type="button" id="copyMcp">Copy connection JSON</button>
               </details>
             </div>
@@ -5413,9 +5538,11 @@
               <p class="setting-copy" id="helperStatus">Checking app status...</p>
               <div class="inline-row">
                 <button class="button danger" type="button" id="stopHelperSettings">Stop Uoink</button>
-                <label class="inline-row"><input id="autostartToggle" type="checkbox" checked> Autostart on login</label>
+                <label class="inline-row"><input id="autostartToggle" type="checkbox" checked aria-describedby="autostartToggleSaveStatus"> Autostart on login</label>
+              <div class="setting-feedback"><span class="setting-status" id="autostartToggleSaveStatus" role="status" aria-live="polite" aria-atomic="true"></span><button class="button ghost setting-retry hidden" id="autostartToggleSaveRetry" type="button" data-setting-retry="autostartToggle">Retry save</button></div>
               </div>
-              <label class="inline-row"><input id="notificationsEnabled" type="checkbox" checked> Show desktop notifications</label>
+              <label class="inline-row"><input id="notificationsEnabled" type="checkbox" checked aria-describedby="notificationsEnabledSaveStatus"> Show desktop notifications</label>
+              <div class="setting-feedback"><span class="setting-status" id="notificationsEnabledSaveStatus" role="status" aria-live="polite" aria-atomic="true"></span><button class="button ghost setting-retry hidden" id="notificationsEnabledSaveRetry" type="button" data-setting-retry="notificationsEnabled">Retry save</button></div>
               <p class="setting-copy">When off, updates stay in Activity without opening a balloon. Fullscreen apps also receive this courtesy automatically.</p>
             </div>
 
@@ -5950,7 +6077,6 @@
       voiceWarningsEnabled: document.getElementById("voiceWarningsEnabled"),
       voiceWarningsPerGeneration: document.getElementById("voiceWarningsPerGeneration"),
       whisperModel: document.getElementById("whisperModel"),
-      saveWhisperModel: document.getElementById("saveWhisperModel"),
       reliabilityStatus: document.getElementById("reliabilityStatus"),
       reliabilityAutoCheck: document.getElementById("reliabilityAutoCheck"),
       asrFallbackEnabled: document.getElementById("asrFallbackEnabled"),
@@ -6384,6 +6510,7 @@
 
     async function connectAgent(client) {
       if (!client) return;
+      setSettingFeedback("settingsAgentSetupCard", "Saving…", "saving");
       try {
         await authFetch(`/agents/connect/${encodeURIComponent(client)}`, {
           method: "POST",
@@ -6391,8 +6518,10 @@
         });
         showToast("Writing agent connected.");
         await loadAgentSetup();
+        setSettingFeedback("settingsAgentSetupCard", "Saved. Restart the client to use the connection.", "saved");
       } catch (err) {
         showToast(`Couldn't connect that agent: ${err.message}`);
+        setSettingFeedback("settingsAgentSetupCard", `Not saved: ${settingError(err)}`, "error", () => connectAgent(client));
       }
     }
 
@@ -9748,7 +9877,7 @@
       body[universalState.payloadKey || "url"] = url;
       // /extract and /playlist/start expect an interval; the others ignore it.
       if (universalState.endpoint === "/extract" || universalState.endpoint === "/playlist/start") {
-        body.interval = 30;
+        body.interval = dashboardScreenshotInterval();
       }
       universalState.busy = true;
       const btn = els.universalCaptureButton;
@@ -10819,7 +10948,7 @@
       if (String(els.searchInput.value || "").trim() !== raw) return;
       const url = detected.canonical || raw;
       const body = { [detected.payload_key || "url"]: url };
-      if (detected.endpoint === "/extract" || detected.endpoint === "/playlist/start") body.interval = 30;
+      if (detected.endpoint === "/extract" || detected.endpoint === "/playlist/start") body.interval = dashboardScreenshotInterval();
       const run = {
         id: `run${++libraryCapture.runs}`,
         url,
@@ -12483,58 +12612,25 @@
     }
 
     async function refreshSettings() {
+      const request = ++settingsReadVersion;
+      const versions = Object.fromEntries([...settingEdits].map(([id, edit]) => [id, edit.version]));
+      const status = document.getElementById("settingsLoadStatus");
+      status.textContent = "Loading settings…";
       try {
-        const data = await authFetch("/settings");
-        state.settings = data.settings || data || {};
-        els.keyStatus.textContent = state.settings.anthropic_key_set
-          ? "Key is saved. Optional AI features can run."
-          : "No key saved yet. Local capture still works; optional AI features stay off.";
-        renderOutputFolder(outputFolderPathFromSettings(), Boolean(state.settings.output_dir_pending_restart));
-        els.autostartToggle.checked = Boolean(state.settings.autostart);
-        els.notificationsEnabled.checked = state.settings.notifications_enabled !== false;
-        els.screenshotCount.value = String(state.settings.screenshot_count ?? state.settings.clipboard_screenshot_cap ?? 4);
-        els.claimVerificationToggle.checked = Boolean(state.settings.claim_verification_enabled);
-        if (els.entityExtractionToggle) els.entityExtractionToggle.checked = Boolean(state.settings.entity_extraction_enabled);
-        els.reliabilityAutoCheck.checked = Boolean(state.settings.transcript_reliability_auto_check);
-        els.asrFallbackEnabled.checked = state.settings.asr_fallback_enabled !== false;
-        els.voiceWarningsEnabled.checked = state.settings.voice_dna_warnings_enabled !== false;
-        els.voiceWarningsPerGeneration.checked = state.settings.voice_dna_show_per_generation_toggle !== false;
-        els.writingScreenshotPickerToggle.checked = state.settings.writing_show_screenshot_picker !== false;
-        if (els.autoUoinkToggle) els.autoUoinkToggle.checked = Boolean(state.settings.auto_uoink_enabled);
-        renderAutoUoinkStatus();
-        renderLibraryMirrorFromSettings();
-        els.writingShowWarnings.checked = els.voiceWarningsEnabled.checked;
-        renderWritingScreenshots();
-        renderAgentSetup();
-        renderRolePicker(state.settings.role || "mixed");
-        syncWhisperModelOptions();
-        const relModel = state.settings.transcript_reliability_model || {};
-        els.reliabilityStatus.textContent = reliabilityStatusText(
-          els.whisperModel.value || relModel.model || state.settings.whisper_model,
-          relModel
-        );
+        // A GET can snapshot settings before a pending POST, then finish
+        // after it. Keep the edit snapshot above and wait before reading.
+        await settingsWriteQueue;
+        if (request !== settingsReadVersion) return;
+        const data = await settingsRequest("/settings");
+        if (request !== settingsReadVersion) return;
+        hydrateSettings(data, versions);
+        status.textContent = "";
       } catch (err) {
-        els.keyStatus.textContent = "Settings need another moment.";
-        renderRolePicker("mixed");
-        syncWhisperModelOptions();
+        if (request !== settingsReadVersion) return;
+        status.textContent = `Could not load settings: ${settingError(err)} Use Reload to try again.`;
       }
-      try {
-        const diag = await (await fetch("/diagnose")).json();
-        els.helperStatus.textContent = diagnoseSummary(diag);
-        if (!state.settings || !state.settings.output_dir) {
-          renderOutputFolder(diag.output_root || diag.output_dir || diag.desktop_root || "Output folder unavailable");
-        }
-      } catch (err) {
-        els.helperStatus.textContent = "App status needs another moment.";
-      }
-      try {
-        const cfg = await authFetch("/settings/mcp-config");
-        els.mcpConfig.value = cfg.raw || JSON.stringify(cfg.claude_desktop || cfg, null, 2);
-      } catch (err) {
-        els.mcpConfig.value = "Agent connection needs another moment.";
-      }
-      renderTopics(state.settings && Array.isArray(state.settings.topics) ? state.settings.topics : []);
-      await Promise.all([loadPlaylistSettings(), loadPodcastFeedSettings(), loadChannels(), loadAllowedSites(), loadAgentSetup()]);
+      await Promise.all([loadSettingsMcp(), loadTasteSettings(), loadPlaylistSettings(), loadPodcastFeedSettings(), loadChannels(), loadAllowedSites(), loadAgentSetup()]);
+      els.helperStatus.textContent = els.helperStatusText ? els.helperStatusText.textContent : "See the helper status in the sidebar.";
     }
 
     function diagnoseSummary(diag) {
@@ -13942,34 +14038,37 @@
 
     async function addChannel() {
       const handle = els.channelHandle.value.trim();
-      if (!handle) return showToast("Paste a channel handle first.");
+      if (!handle) return setSettingFeedback("channelHandle", "Paste a channel handle first.", "error");
+      setSettingFeedback("channelHandle", "Saving…", "saving");
       try {
         await authFetch("/channels", { method: "POST", body: JSON.stringify({ handle }) });
         els.channelHandle.value = "";
-        showToast("Channel added.");
+        setSettingFeedback("channelHandle", "Saved");
         await loadChannels();
       } catch (err) {
-        showToast("Couldn't add that channel.");
+        setSettingFeedback("channelHandle", `Not saved: ${settingError(err)}`, "error");
       }
     }
 
     async function verifyChannel(handle) {
+      setSettingFeedback("channelsList", "Saving…", "saving");
       try {
         await authFetch("/channels/verify", { method: "POST", body: JSON.stringify({ handle }) });
-        showToast("Channel verified.");
+        setSettingFeedback("channelsList", "Channel verified.");
         await loadChannels();
       } catch (err) {
-        showToast("Couldn't verify that channel.");
+        setSettingFeedback("channelsList", `Not saved: ${settingError(err)}`, "error");
       }
     }
 
     async function removeChannel(handle) {
+      setSettingFeedback("channelsList", "Saving…", "saving");
       try {
         await authFetch("/channels/remove", { method: "POST", body: JSON.stringify({ handle }) });
-        showToast("Channel removed.");
+        setSettingFeedback("channelsList", "Saved");
         await loadChannels();
       } catch (err) {
-        showToast("Couldn't remove that channel.");
+        setSettingFeedback("channelsList", `Not saved: ${settingError(err)}`, "error");
       }
     }
 
@@ -14026,30 +14125,32 @@
 
     async function addAllowedSite() {
       const urlPattern = els.allowedSitePattern.value.trim();
-      if (!urlPattern) return showToast("Enter a site pattern first.");
+      if (!urlPattern) return setSettingFeedback("allowedSitePattern", "Enter a site pattern first.", "error");
+      setSettingFeedback("allowedSitePattern", "Saving…", "saving");
       try {
         await authFetch("/extract/page/allowlist", {
           method: "POST",
           body: JSON.stringify({ action: "add", url_pattern: urlPattern }),
         });
         els.allowedSitePattern.value = "";
-        showToast("Site enabled.");
+        setSettingFeedback("allowedSitePattern", "Saved");
         await loadAllowedSites();
       } catch (err) {
-        showToast("Couldn't add that site yet.");
+        setSettingFeedback("allowedSitePattern", `Not saved: ${settingError(err)}`, "error");
       }
     }
 
     async function removeAllowedSite(urlPattern) {
+      setSettingFeedback("allowedSitesList", "Saving…", "saving");
       try {
         await authFetch("/extract/page/allowlist", {
           method: "POST",
           body: JSON.stringify({ action: "remove", url_pattern: urlPattern }),
         });
-        showToast("Site removed.");
+        setSettingFeedback("allowedSitesList", "Saved");
         await loadAllowedSites();
       } catch (err) {
-        showToast("Couldn't remove that site.");
+        setSettingFeedback("allowedSitesList", `Not saved: ${settingError(err)}`, "error");
       }
     }
 
@@ -14151,24 +14252,26 @@
 
     async function addMobilePlaylist() {
       const url = els.playlistUrl.value.trim();
-      if (!url) return showToast("Paste a playlist URL first.");
+      if (!url) return setSettingFeedback("playlistUrl", "Paste a playlist URL first.", "error");
+      setSettingFeedback("playlistUrl", "Saving…", "saving");
       try {
         await authFetch("/playlists/monitored", {
           method: "POST",
           body: JSON.stringify({ playlist_url: url, poll_interval_min: 5 }),
         });
         els.playlistUrl.value = "";
-        showToast("Playlist monitor added.");
+        setSettingFeedback("playlistUrl", "Saved");
         loadPlaylistSettings();
       } catch (err) {
-        showToast("Couldn't add that playlist.");
+        setSettingFeedback("playlistUrl", `Not saved: ${settingError(err)}`, "error");
       }
     }
 
     async function addPodcastFeed() {
       const feedUrl = els.podcastFeedUrl.value.trim();
-      if (!feedUrl) return showToast("Paste an RSS feed URL first.");
+      if (!feedUrl) return setSettingFeedback("podcastFeedUrl", "Paste an RSS feed URL first.", "error");
       const autoIngest = Boolean(els.podcastAutoIngest && els.podcastAutoIngest.checked);
+      setSettingFeedback("podcastFeedUrl", "Saving…", "saving");
       try {
         await authFetch("/podcasts/feeds", {
           method: "POST",
@@ -14176,28 +14279,29 @@
         });
         els.podcastFeedUrl.value = "";
         if (els.podcastAutoIngest) els.podcastAutoIngest.checked = false;
-        showToast(autoIngest
+        setSettingFeedback("podcastFeedUrl", autoIngest
           ? "Podcast feed saved. Auto-ingest is on for newly discovered episodes."
           : "Podcast feed saved. Uoink will watch metadata; audio stays off.");
         loadPodcastFeedSettings();
       } catch (err) {
-        showToast("Couldn't add that feed.");
+        setSettingFeedback("podcastFeedUrl", `Not saved: ${settingError(err)}`, "error");
       }
     }
 
     async function setPodcastAutoIngest(feedId, currentValue) {
       const nextValue = !currentValue;
+      setSettingFeedback("podcastFeedList", "Saving…", "saving");
       try {
         await authFetch("/podcasts/feeds/set-auto-ingest", {
           method: "POST",
           body: JSON.stringify({ feed_id: Number(feedId), auto_ingest: nextValue }),
         });
-        showToast(nextValue
+        setSettingFeedback("podcastFeedList", nextValue
           ? "Auto-ingest is on for episodes discovered from now on."
           : "Auto-ingest is off. Feed metadata will keep updating.");
         await loadPodcastFeedSettings();
       } catch (err) {
-        showToast("Couldn't change Auto-ingest for that feed.");
+        setSettingFeedback("podcastFeedList", `Not saved: ${settingError(err)}`, "error");
       }
     }
 
@@ -14228,8 +14332,9 @@
       renderTopics(topics, { useDefaults: false });
       if (!removed) return clearTopicUndo();
       state.topicUndo = { topic: removed, index: Number(index) };
-      els.topicUndoText.textContent = `${removed.name || "Untitled topic"} removed. Save topics when you're ready.`;
+      els.topicUndoText.textContent = `${removed.name || "Untitled topic"} removed.`;
       els.topicUndo.classList.remove("hidden");
+      saveSettingsPatch({ topics: readTopicEditor() }, "topicList");
     }
 
     function undoTopicRemove() {
@@ -14239,6 +14344,7 @@
       topics.splice(index, 0, state.topicUndo.topic);
       renderTopics(topics, { useDefaults: false });
       clearTopicUndo();
+      saveSettingsPatch({ topics: readTopicEditor() }, "topicList");
     }
 
     // V-3 taste-aware auto-uoink status + manual scan.
@@ -14405,36 +14511,445 @@
       }
     }
 
-    async function saveSettingsPatch(patch, successMessage) {
+    // Settings writes are single-field patches. Serialize them so a slow older
+    // write cannot finish after a newer edit; never repaint the form on save.
+    const SETTINGS_FIELDS = {
+      autostartToggle: ["autostart", false],
+      notificationsEnabled: ["notifications_enabled", true],
+      screenshotCount: ["clipboard_screenshot_cap", 4],
+      claimVerificationToggle: ["claim_verification_enabled", false],
+      entityExtractionToggle: ["entity_extraction_enabled", false],
+      commentIntelligenceToggle: ["comment_intelligence_enabled", false],
+      hookTypeToggle: ["hook_type_enabled", false],
+      smartScreenshotPickerToggle: ["smart_screenshot_picker_enabled", false],
+      reliabilityAutoCheck: ["transcript_reliability_auto_check", false],
+      asrFallbackEnabled: ["asr_fallback_enabled", true],
+      whisperModel: ["whisper_model", "base"],
+      voiceWarningsEnabled: ["voice_dna_warnings_enabled", true],
+      voiceWarningsPerGeneration: ["voice_dna_show_per_generation_toggle", true],
+      writingScreenshotPickerToggle: ["writing_show_screenshot_picker", true],
+      writingAttachAllToggle: ["writing_default_attach_all_screenshots", false],
+      autoUoinkToggle: ["auto_uoink_enabled", false],
+      outputFolder: ["output_dir", ""],
+      defaultEvidenceSources: ["default_evidence_sources", []],
+      defaultTargetLength: ["default_target_length", "5m"],
+      defaultWorkspaceFormat: ["default_workspace_format", "markdown"],
+      styleAnchorsSource: ["style_anchors_source", "taste"],
+      obsidianVaultPath: ["obsidian_vault_path", ""],
+      mirrorScriptsToggle: ["mirror_scripts_to_obsidian", false],
+    };
+    const TASTE_FIELDS = { tasteHooks: "preferred_hooks", tasteFormats: "preferred_formats", tasteAvoid: "avoid" };
+    const settingEdits = new Map();
+    let settingsWriteQueue = Promise.resolve();
+    let settingsReadVersion = 0;
+    let settingsMcpConfig = null;
+    let settingsMcpHttp = null;
+    const DASHBOARD_INTERVAL_KEY = "uoink.dashboard.screenshotInterval";
+
+    function settingEdit(id) {
+      if (!settingEdits.has(id)) settingEdits.set(id, { version: 0, dirty: false, retry: null });
+      return settingEdits.get(id);
+    }
+
+    function settingFeedback(id) {
+      let status = document.getElementById(`${id}SaveStatus`);
+      if (status) return status;
+      const control = document.getElementById(id);
+      if (!control) return null;
+      const feedback = document.createElement("div");
+      feedback.className = "setting-feedback";
+      status = document.createElement("span");
+      status.id = `${id}SaveStatus`;
+      status.className = "setting-status";
+      status.setAttribute("role", "status");
+      status.setAttribute("aria-live", "polite");
+      status.setAttribute("aria-atomic", "true");
+      feedback.appendChild(status);
+      const retry = document.createElement("button");
+      retry.type = "button";
+      retry.className = "button ghost setting-retry hidden";
+      retry.id = `${id}SaveRetry`;
+      retry.textContent = "Retry save";
+      retry.addEventListener("click", () => { const fn = settingEdit(id).retry; if (fn) fn(); });
+      feedback.appendChild(retry);
+      const label = control.closest("label");
+      (label || control).insertAdjacentElement("afterend", feedback);
+      control.setAttribute("aria-describedby", [control.getAttribute("aria-describedby"), status.id].filter(Boolean).join(" "));
+      return status;
+    }
+
+    function setSettingFeedback(id, text, kind = "", retry = null) {
+      const status = settingFeedback(id);
+      if (!status) return;
+      status.textContent = text;
+      status.dataset.state = kind;
+      const control = document.getElementById(id);
+      control.setAttribute("aria-invalid", kind === "error" ? "true" : "false");
+      settingEdit(id).retry = retry;
+      document.getElementById(`${id}SaveRetry`).classList.toggle("hidden", !retry);
+    }
+
+    function noteSettingEdit(id) {
+      const edit = settingEdit(id);
+      edit.version += 1;
+      edit.dirty = true;
+      setSettingFeedback(id, id === "tasteAnchorId"
+        ? "Not saved yet. Choose a rating, then select Add anchor."
+        : "Not saved yet. Leave the field to save.");
+      return edit.version;
+    }
+
+    function settingError(error) {
+      // Status is textContent, never HTML. Do not reflect credentials even if
+      // an older helper includes the submitted value in a validation message.
+      return String(error && error.message || "The helper could not save this change.")
+        .replace(/sk-ant-[\w-]+/gi, "[redacted key]").slice(0, 500);
+    }
+
+    function unsupportedSettingError() {
+      return Object.assign(new Error("This helper does not support this setting."), { retryable: false });
+    }
+
+    async function settingsRequest(path, options = {}) {
+      const controller = new AbortController();
+      const timer = window.setTimeout(() => controller.abort(), 15000);
       try {
-        const data = await authFetch("/settings", { method: "POST", body: JSON.stringify(patch) });
-        state.settings = data.settings || data || state.settings || {};
-        showToast(successMessage);
-        refreshSettings();
+        const data = await authFetch(path, { ...options, signal: controller.signal });
+        if (!data || data.ok === false) throw new Error(data && data.error || "Empty response from helper");
+        return data;
       } catch (err) {
-        showToast("Couldn't save settings yet.");
+        if (err.name === "AbortError") throw new Error("The helper did not respond. Check its status, then retry.");
+        // A patch containing only unknown fields is rejected before the
+        // helper reads settings. Retrying cannot make that field supported.
+        if (path === "/settings" && options.method === "POST" && err.status === 400
+            && err.data && err.data.error === "settings field required") throw unsupportedSettingError();
+        throw err;
+      } finally { window.clearTimeout(timer); }
+    }
+
+    function queueSettingSave(id, work, onSaved = () => {}) {
+      const version = noteSettingEdit(id);
+      setSettingFeedback(id, "Saving…", "saving");
+      const run = async () => {
+        try {
+          const data = await work();
+          if (settingEdit(id).version === version) {
+            if (data && data.mirror && data.mirror.ok === false) {
+              const error = settingError({ message: data.mirror.error || "The vault copy could not be written." });
+              setSettingFeedback(id, `Saved locally; Obsidian copy failed: ${error}`, "error",
+                () => queueSettingSave(id, work, onSaved));
+              return false;
+            }
+            onSaved(data);
+            settingEdit(id).dirty = false;
+            setSettingFeedback(id, "Saved", "saved");
+          }
+          return true;
+        } catch (err) {
+          if (settingEdit(id).version === version) {
+            setSettingFeedback(id, `Not saved: ${settingError(err)}`, "error",
+              err.retryable === false ? null : () => queueSettingSave(id, work, onSaved));
+          }
+          return false;
+        }
+      };
+      const pending = settingsWriteQueue.then(run, run);
+      settingsWriteQueue = pending.then(() => {}, () => {});
+      return pending;
+    }
+
+    function saveSettingsPatch(patch, controlId) {
+      const field = Object.keys(patch)[0];
+      const id = controlId || Object.keys(SETTINGS_FIELDS).find(key => SETTINGS_FIELDS[key][0] === field);
+      return queueSettingSave(id, async () => {
+        const data = await settingsRequest("/settings", { method: "POST", body: JSON.stringify(patch) });
+        const stored = data.settings;
+        const confirmedField = field === "anthropic_key" ? "anthropic_key_set" : field === "output_dir" ? "output_dir_configured" : field;
+        if (!stored || !Object.prototype.hasOwnProperty.call(stored, confirmedField)) {
+          throw unsupportedSettingError();
+        }
+        const expected = field === "anthropic_key" ? Boolean(patch[field]) : patch[field];
+        if (!["output_dir", "obsidian_vault_path", "topics"].includes(field) && JSON.stringify(stored[confirmedField]) !== JSON.stringify(expected)) {
+          throw new Error("The helper did not keep this value. Reload to check it, or retry.");
+        }
+        // Only adopt the acknowledged field, not stale siblings in the response.
+        state.settings = { ...(state.settings || {}), [confirmedField]: stored[confirmedField] };
+        if (field === "output_dir") state.settings.output_dir_pending_restart = stored.output_dir_pending_restart;
+        return data;
+      }, () => {
+        if (field === "anthropic_key") {
+          els.anthropicKey.value = "";
+          renderKeyStatus();
+          renderAgentSetup();
+        }
+        if (field === "output_dir") renderOutputFolder(outputFolderPathFromSettings(), Boolean(state.settings.output_dir_pending_restart));
+        if (field === "voice_dna_warnings_enabled") els.writingShowWarnings.checked = patch[field];
+        if (field === "auto_uoink_enabled") renderAutoUoinkStatus();
+        if (field === "writing_show_screenshot_picker") renderWritingScreenshots();
+      });
+    }
+
+    function saveSettingControl(id) {
+      const control = document.getElementById(id);
+      const [field] = SETTINGS_FIELDS[id];
+      let value = control.type === "checkbox" ? control.checked : control.value.trim();
+      if (control.type === "number") {
+        value = Number(control.value);
+        if (!control.value.trim() || !Number.isInteger(value) || value < Number(control.min) || value > Number(control.max)) {
+          noteSettingEdit(id);
+          setSettingFeedback(id, `Not saved: enter a whole number from ${control.min} to ${control.max}.`, "error");
+          return Promise.resolve(false);
+        }
+      }
+      if (field === "default_evidence_sources") value = value.split(/\r?\n/).map(line => line.trim()).filter(Boolean);
+      if (field === "whisper_model") els.reliabilityStatus.textContent = reliabilityStatusText(value, (state.settings || {}).transcript_reliability_model || {});
+      if (field === "output_dir" && !value) {
+        setSettingFeedback(id, "Not saved: enter a folder path.", "error");
+        return Promise.resolve(false);
+      }
+      return saveSettingsPatch({ [field]: value }, id);
+    }
+
+    function dashboardScreenshotInterval() {
+      try {
+        const n = Number(localStorage.getItem(DASHBOARD_INTERVAL_KEY));
+        if (Number.isInteger(n) && n >= 5 && n <= 300) return n;
+      } catch (_) {}
+      return 30;
+    }
+
+    function saveScreenshotInterval() {
+      const control = document.getElementById("screenshotInterval");
+      const value = Number(control.value);
+      noteSettingEdit(control.id);
+      if (!control.value.trim() || !Number.isInteger(value) || value < 5 || value > 300) {
+        setSettingFeedback(control.id, "Not saved: enter a whole number from 5 to 300.", "error");
+        return;
+      }
+      try {
+        localStorage.setItem(DASHBOARD_INTERVAL_KEY, String(value));
+        settingEdit(control.id).dirty = false;
+        setSettingFeedback(control.id, "Saved in this browser", "saved");
+      } catch (_) {
+        setSettingFeedback(control.id, "Not saved: browser storage is unavailable.", "error", saveScreenshotInterval);
       }
     }
 
-    async function saveKey() {
+    function renderKeyStatus() {
+      els.keyStatus.textContent = state.settings && state.settings.anthropic_key_set
+        ? "Key is saved. Optional AI features can run."
+        : "No key saved yet. Local capture still works; optional AI features stay off.";
+    }
+
+    function saveKey() {
       const key = els.anthropicKey.value.trim();
-      if (!key) return showToast("Paste a key first.");
-      try {
-        await authFetch("/settings", { method: "POST", body: JSON.stringify({ anthropic_key: key }) });
-        els.anthropicKey.value = "";
-        showToast("Key saved on this device.");
-        refreshSettings();
-      } catch (err) {
-        showToast("Couldn't save that key.");
+      if (!key) {
+        noteSettingEdit("anthropicKey");
+        setSettingFeedback("anthropicKey", "Not saved: enter a key, or choose Remove key to delete the saved key.", "error");
+        return Promise.resolve(false);
       }
+      return saveSettingsPatch({ anthropic_key: key }, "anthropicKey");
     }
 
     async function testKey() {
+      const button = document.getElementById("testKey");
+      if (button.disabled) return;
+      button.disabled = true;
+      let version;
       try {
-        await authFetch("/settings/test-key", { method: "POST", body: JSON.stringify({}) });
-        showToast("Anthropic key test passed.");
+        await settingsWriteQueue;
+        if (settingEdit("anthropicKey").dirty) return;
+        version = settingEdit("anthropicKey").version;
+        setSettingFeedback("anthropicKey", "Testing key…");
+        const data = await settingsRequest("/settings/test-key", { method: "POST", body: "{}" });
+        if (data.valid !== true) throw new Error(data.error || "The saved key could not be verified.");
+        if (settingEdit("anthropicKey").version === version) setSettingFeedback("anthropicKey", "Key test passed.", "saved");
       } catch (err) {
-        showToast("Key test failed.");
+        if (settingEdit("anthropicKey").version === version) setSettingFeedback("anthropicKey", `Key test failed: ${settingError(err)}`, "error");
+      } finally { button.disabled = false; }
+    }
+
+    function hydrateSettings(data, versions) {
+      const settings = data.settings || {};
+      // The full response is useful to Generate, but must not overwrite a
+      // newer confirmed write or an edit still waiting for its change event.
+      const previous = state.settings || {};
+      state.settings = { ...settings };
+      for (const [id, [field, fallback]] of Object.entries(SETTINGS_FIELDS)) {
+        const control = document.getElementById(id);
+        if (!control) continue;
+        if (settingEdit(id).dirty || settingEdit(id).version !== (versions[id] || 0)) {
+          if (Object.prototype.hasOwnProperty.call(previous, field)) state.settings[field] = previous[field];
+          if (field === "output_dir") {
+            state.settings.output_dir_configured = previous.output_dir_configured;
+            state.settings.output_dir_pending_restart = previous.output_dir_pending_restart;
+          }
+          continue;
+        }
+        const value = field === "output_dir" ? (settings.output_dir_configured || settings.output_dir || "") : (settings[field] ?? fallback);
+        if (control.type === "checkbox") control.checked = Boolean(value);
+        else control.value = Array.isArray(value) ? value.join("\n") : String(value);
+      }
+      if (settingEdit("anthropicKey").version !== (versions.anthropicKey || 0)) state.settings.anthropic_key_set = previous.anthropic_key_set;
+      for (const [id, field] of [["rolePicker", "role"], ["topicList", "topics"]]) {
+        if (settingEdit(id).dirty || settingEdit(id).version !== (versions[id] || 0)) state.settings[field] = previous[field];
+      }
+      renderKeyStatus();
+      if (!settingEdit("outputFolder").dirty && settingEdit("outputFolder").version === (versions.outputFolder || 0)) renderOutputFolder(outputFolderPathFromSettings(), Boolean(settings.output_dir_pending_restart));
+      if (!settingEdit("rolePicker").dirty && settingEdit("rolePicker").version === (versions.rolePicker || 0)) renderRolePicker(settings.role || "mixed");
+      if (!settingEdit("topicList").dirty && settingEdit("topicList").version === (versions.topicList || 0)) renderTopics(settings.topics || [], { useDefaults: false });
+      const modelValue = els.whisperModel.value;
+      syncWhisperModelOptions();
+      if (modelValue) els.whisperModel.value = modelValue;
+      els.reliabilityStatus.textContent = reliabilityStatusText(els.whisperModel.value, settings.transcript_reliability_model || {});
+      els.writingShowWarnings.checked = els.voiceWarningsEnabled.checked;
+      renderWritingScreenshots();
+      renderAgentSetup();
+      renderAutoUoinkStatus();
+      if (!["libraryMirrorDestination", "libraryMirrorScope", "libraryMirrorAllowlist"].some(id => settingEdit(id).dirty)) renderLibraryMirrorFromSettings();
+    }
+
+    function tasteSection(content, heading) {
+      const lines = String(content || "").replace(/\r/g, "").split("\n");
+      const start = lines.indexOf(`## ${heading}`);
+      if (start < 0) return "";
+      let end = start + 1;
+      while (end < lines.length && !lines[end].startsWith("## ")) end += 1;
+      const value = lines.slice(start + 1, end).join("\n").trim();
+      return value === "_no anchors yet_" ? "" : value;
+    }
+
+    async function loadTasteSettings() {
+      const versions = Object.fromEntries(["tasteUser", ...Object.keys(TASTE_FIELDS)].map(id => [id, settingEdit(id).version]));
+      await settingsWriteQueue;
+      const read = async (path, ids, values) => {
+        try {
+          const data = await settingsRequest(path);
+          for (const id of ids) {
+            if (!settingEdit(id).dirty && settingEdit(id).version === versions[id]) document.getElementById(id).value = values(data, id);
+          }
+        } catch (err) {
+          for (const id of ids) if (!settingEdit(id).dirty) setSettingFeedback(id, `Could not load: ${settingError(err)}`, "error", loadTasteSettings);
+        }
+      };
+      await Promise.all([
+        read("/memory/taste", Object.keys(TASTE_FIELDS), (data, id) => tasteSection(data.content, { tasteHooks: "Preferred hooks", tasteFormats: "Preferred formats", tasteAvoid: "Avoid" }[id])),
+        read("/memory/user", ["tasteUser"], data => data.content || ""),
+        loadTasteAnchors(),
+      ]);
+    }
+
+    function renderTasteAnchors(anchors) {
+      document.getElementById("tasteAnchorList").innerHTML = ["best", "worst", "admired_channels"].flatMap(type => (anchors[type] || []).map(row => {
+        const id = typeof row === "string" ? row : row.video_id || row.channel || row.name;
+        const title = typeof row === "string" ? row : row.title || id;
+        return `<div class="taste-anchor-row"><strong>${htmlEscape(title)}</strong><span>${type === "best" ? "10/10" : type === "worst" ? "Avoid" : "Admired channel"}</span><button class="button ghost" type="button" data-remove-taste-anchor="${htmlEscape(id)}">Remove</button></div>`;
+      })).join("") || '<p class="setting-copy">No taste anchors yet.</p>';
+    }
+
+    async function loadTasteAnchors() {
+      try {
+        const data = await settingsRequest("/taste/anchors");
+        renderTasteAnchors(data.anchors || {});
+        document.getElementById("tasteAnchorStatus").textContent = "";
+      } catch (err) { document.getElementById("tasteAnchorStatus").textContent = `Could not load anchors: ${settingError(err)}`; }
+    }
+
+    function addTasteAnchor() {
+      const control = document.getElementById("tasteAnchorId");
+      const video_id = control.value.trim();
+      if (!video_id) return setSettingFeedback(control.id, "Enter a saved capture ID.", "error");
+      const anchor_type = document.getElementById("tasteAnchorType").value;
+      return queueSettingSave(control.id, () => settingsRequest("/taste/anchors", { method: "POST", body: JSON.stringify({ video_id, anchor_type }) }), data => {
+        renderTasteAnchors(data.anchors || {});
+        control.value = "";
+      });
+    }
+
+    async function loadSettingsMcp() {
+      try {
+        const cfg = await settingsRequest("/settings/mcp-config");
+        const transport = await settingsRequest("/mcp/v1/config");
+        settingsMcpHttp = transport.http;
+        const payload = cfg.mcp_config || cfg;
+        settingsMcpConfig = payload.claude_desktop || payload;
+        renderSettingsMcp();
+      } catch (err) {
+        els.mcpConfig.value = "";
+        setSettingFeedback("mcpConfig", `Could not load: ${settingError(err)}`, "error", loadSettingsMcp);
+      }
+    }
+
+    function renderSettingsMcp() {
+      if (!settingsMcpConfig) return;
+      const format = document.getElementById("mcpClient").value;
+      const server = settingsMcpConfig.mcpServers && settingsMcpConfig.mcpServers.uoink;
+      let snippet = settingsMcpConfig;
+      if (format === "chatgpt" && server) snippet = { name: "uoink", transport: "stdio", ...server };
+      if (format === "http") snippet = { url: settingsMcpHttp.url, headers: { [settingsMcpHttp.auth_header || "X-Uoink-Token"]: state.token || "<token>" } };
+      els.mcpConfig.value = JSON.stringify(snippet, null, 2);
+      setSettingFeedback("mcpConfig", "Ready to copy.");
+    }
+
+    function wireSettingsAutosave() {
+      document.querySelectorAll("[data-setting-retry]").forEach(button => {
+        button.addEventListener("click", () => {
+          const fn = settingEdit(button.dataset.settingRetry).retry;
+          if (fn) fn();
+        });
+      });
+      for (const id of Object.keys(SETTINGS_FIELDS)) {
+        const control = document.getElementById(id);
+        settingFeedback(id);
+        control.addEventListener("input", () => noteSettingEdit(id));
+        control.addEventListener("change", () => saveSettingControl(id));
+      }
+      for (const id of ["anthropicKey", "screenshotInterval", "topicList", "rolePicker", "tasteUser", ...Object.keys(TASTE_FIELDS), "tasteAnchorId"]) {
+        settingFeedback(id);
+        document.getElementById(id).addEventListener("input", () => noteSettingEdit(id));
+      }
+      els.anthropicKey.addEventListener("change", saveKey);
+      els.anthropicKey.addEventListener("blur", () => {
+        // Typing then clearing an initially empty key does not fire change.
+        if (settingEdit("anthropicKey").dirty && !els.anthropicKey.value.trim()) saveKey();
+      });
+      document.getElementById("clearKey").addEventListener("click", () => {
+        if (confirm("Remove the saved Anthropic key from this computer?")) saveSettingsPatch({ anthropic_key: null }, "anthropicKey");
+      });
+      const interval = document.getElementById("screenshotInterval");
+      interval.value = String(dashboardScreenshotInterval());
+      interval.addEventListener("change", saveScreenshotInterval);
+      els.topicList.addEventListener("change", () => saveSettingsPatch({ topics: readTopicEditor() }, "topicList"));
+      els.rolePicker.addEventListener("change", event => {
+        if (event.target.name === "role") saveSettingsPatch({ role: event.target.value }, "rolePicker");
+      });
+      for (const [id, section] of Object.entries(TASTE_FIELDS)) {
+        document.getElementById(id).addEventListener("change", () => {
+          const content = document.getElementById(id).value;
+          queueSettingSave(id, () => settingsRequest("/memory/taste", { method: "POST", body: JSON.stringify({ section, content }) }));
+        });
+      }
+      document.getElementById("tasteUser").addEventListener("change", () => {
+        const content = document.getElementById("tasteUser").value;
+        queueSettingSave("tasteUser", () => settingsRequest("/memory/user", { method: "POST", body: JSON.stringify({ content }) }));
+      });
+      document.getElementById("addTasteAnchor").addEventListener("click", addTasteAnchor);
+      document.getElementById("tasteAnchorList").addEventListener("click", event => {
+        const button = event.target.closest("[data-remove-taste-anchor]");
+        if (button) queueSettingSave("tasteAnchorList", async () => {
+          await settingsRequest(`/taste/anchors/${encodeURIComponent(button.dataset.removeTasteAnchor)}`, { method: "DELETE" });
+          return settingsRequest("/taste/anchors");
+        }, data => renderTasteAnchors(data.anchors || {}));
+      });
+      document.getElementById("mcpClient").addEventListener("change", renderSettingsMcp);
+      // Mirror activation is a consent action, not a preference write. Preserve
+      // its preview + explicit enable contract and protect a draft on reload.
+      for (const id of ["libraryMirrorDestination", "libraryMirrorScope", "libraryMirrorAllowlist"]) {
+        document.getElementById(id).addEventListener("input", () => {
+          settingEdit(id).dirty = true;
+          state.libraryMirrorPreview = null;
+          els.libraryMirrorPreviewOut.textContent = "Preview these changes before enabling the mirror.";
+        });
       }
     }
 
@@ -14474,28 +14989,7 @@
     }
 
     async function saveOutputFolder() {
-      const outputDir = els.outputFolder.value.trim();
-      if (!outputDir) return showToast("Enter an output folder first.");
-      try {
-        const data = await authFetch("/settings/output-folder", { method: "POST", body: JSON.stringify({ output_dir: outputDir }) });
-        state.settings = data.settings || data || state.settings || {};
-        renderOutputFolder(outputFolderPathFromSettings(), Boolean(state.settings.output_dir_pending_restart));
-        showToast("Output folder updated.");
-        refreshSettings();
-      } catch (err) {
-        if (!err.message.includes("not found") && !err.message.includes("404")) {
-          showToast("Couldn't save that output folder.");
-          return;
-        }
-        await saveSettingsPatch({ output_dir: outputDir }, "Output folder updated.");
-      }
-      try {
-        const cfg = await authFetch("/settings/mcp-config");
-        els.mcpConfig.value = cfg.raw || JSON.stringify(cfg.claude_desktop || cfg, null, 2);
-      } catch (err) {
-        els.mcpConfig.value = "Agent connection needs another moment.";
-      }
-      renderTopics(state.settings && Array.isArray(state.settings.topics) ? state.settings.topics : []);
+      return saveSettingControl("outputFolder");
     }
 
     async function retryWithCookies(url) {
@@ -14516,27 +15010,38 @@
 
     async function pickOutputFolder() {
       const initialDir = els.outputFolder.value.trim();
+      const version = noteSettingEdit("outputFolder");
       els.pickOutputFolder.disabled = true;
-      try {
-        const data = await authFetch("/settings/output-folder/pick", {
-          method: "POST",
-          body: JSON.stringify({ initial_dir: initialDir }),
-        });
-        if (!data.ok) {
-          showToast(data.cancelled ? "No folder selected." : "Couldn't choose that folder.");
-          return;
-        }
-        state.settings = data.settings || state.settings || {};
-        renderOutputFolder(data.output_dir || outputFolderPathFromSettings(), Boolean(state.settings.output_dir_pending_restart));
-        showToast(state.settings.output_dir_pending_restart
-          ? "Folder selected. Restart Uoink to use it."
-          : "Output folder updated.");
-        refreshSettings();
-      } catch (err) {
-        showToast("Couldn't choose that folder.");
-      } finally {
-        els.pickOutputFolder.disabled = false;
-      }
+      setSettingFeedback("outputFolder", "Choose a folder in the dialog…");
+      const run = async () => {
+        try {
+          const data = await authFetch("/settings/output-folder/pick", {
+            method: "POST", body: JSON.stringify({ initial_dir: initialDir }),
+          });
+          if (settingEdit("outputFolder").version !== version) return;
+          if (!data.ok) {
+            if (data.cancelled) { settingEdit("outputFolder").dirty = false; setSettingFeedback("outputFolder", "No folder selected."); return; }
+            throw new Error(data.error || "Could not choose that folder.");
+          }
+          state.settings = { ...(state.settings || {}), ...data.settings };
+          renderOutputFolder(data.output_dir || outputFolderPathFromSettings(), Boolean(state.settings.output_dir_pending_restart));
+          settingEdit("outputFolder").dirty = false;
+          setSettingFeedback("outputFolder", "Saved", "saved");
+          loadSettingsMcp();
+        } catch (err) {
+          if (settingEdit("outputFolder").version === version) {
+            if (err.data && err.data.cancelled) {
+              settingEdit("outputFolder").dirty = false;
+              setSettingFeedback("outputFolder", "No folder selected.");
+            } else {
+              setSettingFeedback("outputFolder", `Not saved: ${settingError(err)}`, "error", pickOutputFolder);
+            }
+          }
+        } finally { els.pickOutputFolder.disabled = false; }
+      };
+      const pending = settingsWriteQueue.then(run, run);
+      settingsWriteQueue = pending.then(() => {}, () => {});
+      return pending;
     }
 
     async function retryWithLiteMode(url) {
@@ -15000,11 +15505,14 @@
       document.getElementById("reloadSettings").addEventListener("click", refreshSettings);
       // About, Star on GitHub and Stop Uoink live in Settings > App.
       document.getElementById("starGithub").addEventListener("click", () => openExternal("https://github.com/ryanbiddy/uoink"));
-      document.getElementById("saveKey").addEventListener("click", saveKey);
+      wireSettingsAutosave();
       document.getElementById("testKey").addEventListener("click", testKey);
       document.getElementById("copyMcp").addEventListener("click", async () => {
-        try { await navigator.clipboard.writeText(els.mcpConfig.value); showToast("Agent connection copied."); }
-        catch (_) { showToast("Couldn't copy connection."); }
+        try {
+          if (!els.mcpConfig.value) throw new Error("Load the connection first.");
+          await navigator.clipboard.writeText(els.mcpConfig.value);
+          setSettingFeedback("mcpConfig", "Connection copied.");
+        } catch (err) { setSettingFeedback("mcpConfig", `Could not copy: ${settingError(err)}`, "error"); }
       });
       document.getElementById("checkUpdates").addEventListener("click", async () => {
         try {
@@ -15051,69 +15559,21 @@
         openYoinkDetail(rowFromCard(card));
         focusReaderHeading();
       });
-      els.autostartToggle.addEventListener("change", () => saveSettingsPatch({ autostart: els.autostartToggle.checked }, "Autostart updated."));
-      els.notificationsEnabled.addEventListener("change", () => saveSettingsPatch(
-        { notifications_enabled: els.notificationsEnabled.checked },
-        els.notificationsEnabled.checked
-          ? "Desktop notifications are on."
-          : "Desktop notifications are off; updates stay in Activity.",
-      ));
-      els.rolePicker.addEventListener("change", (event) => {
-        const input = event.target.closest('input[name="role"]');
-        if (input) saveSettingsPatch({ role: input.value }, "Role updated.");
-      });
       document.getElementById("addPlaylist").addEventListener("click", addMobilePlaylist);
       document.getElementById("addPodcastFeed").addEventListener("click", addPodcastFeed);
       document.getElementById("addChannel").addEventListener("click", addChannel);
       document.getElementById("recognizeChannels").addEventListener("click", recognizeChannels);
       document.getElementById("addAllowedSite").addEventListener("click", addAllowedSite);
-      els.voiceWarningsEnabled.addEventListener("change", () => {
-        els.writingShowWarnings.checked = els.voiceWarningsEnabled.checked;
-        saveSettingsPatch({ voice_dna_warnings_enabled: els.voiceWarningsEnabled.checked }, "Voice DNA warning setting updated.");
-      });
-      els.voiceWarningsPerGeneration.addEventListener("change", () => {
-        saveSettingsPatch({ voice_dna_show_per_generation_toggle: els.voiceWarningsPerGeneration.checked }, "Writing warning control updated.");
-      });
-      els.writingScreenshotPickerToggle.addEventListener("change", () => {
-        saveSettingsPatch({ writing_show_screenshot_picker: els.writingScreenshotPickerToggle.checked }, "Screenshot picker setting updated.");
-      });
       els.writingShowWarnings.addEventListener("change", () => {
         if (!els.writingShowWarnings.checked) els.voiceWarningCopy.textContent = "Warnings are hidden for this session.";
       });
-      els.saveWhisperModel.addEventListener("click", () => {
-        saveSettingsPatch({ whisper_model: els.whisperModel.value }, "Transcript checker choice saved.");
-      });
-      els.whisperModel.addEventListener("change", () => {
-        const relModel = (state.settings && state.settings.transcript_reliability_model) || {};
-        els.reliabilityStatus.textContent = reliabilityStatusText(els.whisperModel.value, relModel);
-      });
-      els.claimVerificationToggle.addEventListener("change", () => saveSettingsPatch({ claim_verification_enabled: els.claimVerificationToggle.checked }, "Claim verification setting updated."));
-      if (els.entityExtractionToggle) {
-        els.entityExtractionToggle.addEventListener("change", () => saveSettingsPatch(
-          { entity_extraction_enabled: els.entityExtractionToggle.checked },
-          els.entityExtractionToggle.checked
-            ? "Entity extraction is on for new uoinks (uses your Anthropic key)."
-            : "Entity extraction is off.",
-        ));
-      }
-      if (els.autoUoinkToggle) {
-        els.autoUoinkToggle.addEventListener("change", () => saveSettingsPatch({ auto_uoink_enabled: els.autoUoinkToggle.checked }, els.autoUoinkToggle.checked ? "Taste-aware auto-uoink is on." : "Taste-aware auto-uoink is off."));
-      }
       if (els.autoUoinkScan) els.autoUoinkScan.addEventListener("click", runAutoUoinkScan);
       if (els.libraryMirrorPreview) els.libraryMirrorPreview.addEventListener("click", previewLibraryMirror);
       if (els.libraryMirrorEnable) els.libraryMirrorEnable.addEventListener("click", enableLibraryMirror);
       if (els.libraryMirrorDisable) els.libraryMirrorDisable.addEventListener("click", disableLibraryMirror);
       if (els.libraryMirrorResync) els.libraryMirrorResync.addEventListener("click", resyncLibraryMirror);
-      els.reliabilityAutoCheck.addEventListener("change", () => saveSettingsPatch({ transcript_reliability_auto_check: els.reliabilityAutoCheck.checked }, "Transcript reliability setting updated."));
-      els.asrFallbackEnabled.addEventListener("change", () => saveSettingsPatch({ asr_fallback_enabled: els.asrFallbackEnabled.checked }, els.asrFallbackEnabled.checked ? "Caption-less video transcription is on." : "Caption-less video transcription is off."));
       els.downloadReliabilityModel.addEventListener("click", downloadSelectedReliabilityModel);
-      document.getElementById("saveOutput").addEventListener("click", saveOutputFolder);
       els.pickOutputFolder.addEventListener("click", pickOutputFolder);
-      document.getElementById("saveScreenshotCount").addEventListener("click", () => {
-        const value = Math.max(0, Math.min(12, Number(els.screenshotCount.value || 4)));
-        els.screenshotCount.value = String(value);
-        saveSettingsPatch({ clipboard_screenshot_cap: value }, "Clipboard screenshot count updated.");
-      });
       document.getElementById("openOutput").addEventListener("click", () => {
         const path = els.outputFolder.value;
         if (path && !path.includes("unavailable")) {
@@ -15124,13 +15584,10 @@
         const topics = readTopicEditor({ keepBlank: true });
         topics.push({ name: "", keywords: [] });
         renderTopics(topics, { useDefaults: false });
+        noteSettingEdit("topicList");
         clearTopicUndo();
       });
       els.undoTopicRemove.addEventListener("click", undoTopicRemove);
-      document.getElementById("saveTopics").addEventListener("click", () => {
-        clearTopicUndo();
-        saveSettingsPatch({ topics: readTopicEditor() }, "Topics updated.");
-      });
       document.getElementById("newYoink").addEventListener("click", openLastYoutube);
       document.getElementById("openYouTubeForYou").addEventListener("click", openLastYoutube);
       if (els.universalCaptureInput) {

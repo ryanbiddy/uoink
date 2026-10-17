@@ -170,7 +170,7 @@ def test_capture_rows_use_the_five_step_strip_with_words():
 def test_a_link_in_the_box_goes_through_detect_and_the_capture_routes():
     box = _between(SCRIPT, "const libraryCapture = {", "function dropLibraryRun(run)")
     assert "await detectCaptureUrl(raw)" in box, "the same /detect brain as Sources' box"
-    assert 'body.interval = 30' in box and '"/playlist/start"' in box
+    assert 'body.interval = dashboardScreenshotInterval()' in box and '"/playlist/start"' in box
     assert "authFetch(detected.endpoint, { method: \"POST\"" in box
     wire = _between(SCRIPT, "function wireEvents()", "function upsertJob(job)")
     assert 'els.searchInput.addEventListener("keydown", (event) => {' in wire
