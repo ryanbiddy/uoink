@@ -46,7 +46,7 @@ def handler_code():
         "MAX_BODY_BYTES", "_TOKEN_RATE_LIMIT", "_TOKEN_RATE_WINDOW_SEC",
         "_token_request_times", "_token_rate_lock", "_UOINK_CLIENT_HEADER_VALUE",
         "_YOINK_CLIENT_HEADER_VALUE", "_allowed_extension_ids",
-        "_check_token_rate_limit", "Handler",
+        "_check_token_rate_limit", "_reports_live_extract", "Handler",
     }
     nodes = []
     for node in tree.body:

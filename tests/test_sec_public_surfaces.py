@@ -11,6 +11,7 @@ import io
 import json
 import re
 import secrets
+import subprocess
 import threading
 import time
 from datetime import datetime
@@ -36,7 +37,7 @@ HTML = b"<!doctype html><title>Synthetic local UI</title>"
 def surface_code():
     names = {
         "ALLOWED_ORIGINS", "ALLOWED_HOST_NAMES", "PINNED_EXTENSION_ID",
-        "MAX_BODY_BYTES", "_allowed_extension_ids", "Handler",
+        "MAX_BODY_BYTES", "_allowed_extension_ids", "_reports_live_extract", "Handler",
         "_diagnose_payload", "_public_diagnose_payload", "_build_diagnose_payload",
         "_keyring_display_name", "_path_integrity_status",
         "_library_health_payload", "_heartbeat_payload", "_parse_utc_stamp",
@@ -382,12 +383,38 @@ def test_diagnose_omits_tool_output_and_credential_store_exception_paths(helper,
     assert checks["keyring_available"]["status"] == "warning"
 
 
-def _setup_start_helper_pattern():
-    """The matcher extension/setup.js diagnoseAction() uses to offer 'Start helper'."""
-    source = (ROOT / "extension" / "setup.js").read_text(encoding="utf-8")
-    match = re.search(r"if \(/([^/]+)/\.test\(haystack\) && !/anthropic/", source)
-    assert match, "setup.js diagnoseAction() start-helper matcher moved"
-    return re.compile(match.group(1))
+def _setup_diagnostic_rows(payload):
+    """Run the shipped diagnostic renderer with an in-memory DOM, without boot I/O."""
+    script = r"""
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { makeEnv } from './tests/js/ext_fake_env.mjs';
+const source = readFileSync('extension/setup.js', 'utf8');
+const start = source.indexOf('function renderDiagnose(body)');
+const end = source.indexOf('async function checkConnection(', start);
+assert.ok(start >= 0 && end > start, 'setup diagnostic renderer must exist');
+const env = makeEnv();
+for (const id of ['diagnose-list', 'diagnose']) {
+  const el = env.document.createElement('div');
+  el.id = id;
+  env.document.body.appendChild(el);
+}
+env.ctx.payload = JSON.parse(readFileSync(0, 'utf8'));
+env.runSource('const $ = id => document.getElementById(id);\n' +
+  source.slice(start, end) + '\nrenderDiagnose(payload);');
+const list = env.document.getElementById('diagnose-list');
+console.log(JSON.stringify(list.children.map(row => ({
+  text: row.textContent,
+  detail: row.children[1]?.textContent,
+  actions: row._all().filter(el => ['A', 'BUTTON'].includes(el.tagName)).length,
+}))));
+"""
+    result = subprocess.run(
+        ["node", "--input-type=module", "-e", script], input=json.dumps(payload),
+        cwd=ROOT, capture_output=True, text=True, encoding="utf-8", timeout=30,
+    )
+    assert result.returncode == 0, result.stdout + result.stderr
+    return json.loads(result.stdout)
 
 
 def test_public_failure_details_do_not_offer_start_helper(helper):
@@ -398,15 +425,19 @@ def test_public_failure_details_do_not_offer_start_helper(helper):
     helper["migrate_install"].migration_status.side_effect = OSError(PRIVATE_DETAIL)
     status, _, payload = request(helper, "/diagnose")
     assert status == 200
-    start_helper = _setup_start_helper_pattern()
+    rows = _setup_diagnostic_rows(payload)
+    assert len(rows) == len(payload["checks"])
+    for check, row in zip(payload["checks"], rows):
+        assert row["actions"] == 0, f"diagnostics must not offer Start helper: {row}"
+        assert "Start helper" not in row["text"]
+        assert row["detail"] == str(check.get("detail") or check["status"])
     checks = {check["name"]: check for check in payload["checks"]}
     for name in ("yt_dlp_available", "ffmpeg_available", "keyring_available"):
         check = checks[name]
         assert check["status"] != "ok", check
-        haystack = " ".join(str(check.get(key, "")) for key in (
-            "id", "name", "check", "detail", "message", "error", "action", "recommended_action")).lower()
-        assert not start_helper.search(haystack), f"{name} would offer Start helper: {check}"
-    assert not start_helper.search(payload["migration"]["error"].lower())
+        row = rows[payload["checks"].index(check)]
+        assert "Needs attention" in row["text"], row
+    assert payload["migration"]["error"] == "migration status unavailable; details are in the Uoink log"
 
 
 def test_migration_failure_is_generic(helper):

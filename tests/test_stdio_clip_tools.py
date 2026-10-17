@@ -7,7 +7,6 @@ lock-step inventory (docs, MCPB manifest, C-01 canonical set) agrees.
 """
 from __future__ import annotations
 
-import asyncio
 import json
 import re
 from pathlib import Path
@@ -16,13 +15,14 @@ import index
 import uoink_mcp
 import uoink_mcp_tools as tools
 from tests.test_c01_mcp_stdio import CANONICAL_STDIO_TOOLS
+from tests.test_phase4_stdio import _complete_local_call
 
 ROOT = Path(__file__).resolve().parents[1]
 CLIP_TOOLS = {"search_clips", "get_evidence_card"}
 
 
 def _stdio_tools() -> dict[str, object]:
-    return {t.name: t for t in asyncio.run(uoink_mcp.mcp.list_tools())}
+    return {t.name: t for t in _complete_local_call(uoink_mcp.mcp.list_tools())}
 
 
 def test_clip_tools_are_on_stdio_and_the_count_is_35():

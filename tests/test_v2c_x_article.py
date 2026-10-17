@@ -256,8 +256,25 @@ def test_extension_wiring():
     _assert("uoinkParseXArticle" in popup,
             "popup asks the content script to parse the DOM (primary path)")
     _assert("postExtractPage" in popup, "popup keeps the /extract/page fallback")
-    _assert('x_article: "Uoink this article"' in popup,
-            "the article tab shows the 'Uoink this article' primary label")
+    # The re-haul derives primary labels from STC.CAPTURE_SOURCES. Exercise
+    # that derivation and the rendered article tab instead of pinning a literal.
+    script = """
+import assert from 'node:assert/strict';
+import { popupEnv } from './tests/js/rehaul_popup_env.mjs';
+const env = await popupEnv({ tab: {
+  id: 7, title: 'Synthetic article', url: 'https://x.com/a/article/1900000000001',
+} });
+assert.equal(env.ctx.STC.CAPTURE_SOURCES.x_article.label, 'article');
+env.runSource('globalThis.articlePrimaryLabel = SOURCE_BUTTON_LABELS.x_article;');
+assert.equal(env.ctx.articlePrimaryLabel, 'Uoink this article');
+assert.equal(env.el('uoink-current-btn').textContent, 'Uoink this article');
+"""
+    proc = subprocess.run(
+        ["node", "--input-type=module", "-e", script], cwd=REPO_ROOT,
+        capture_output=True, text=True, encoding="utf-8", timeout=30,
+    )
+    _assert(proc.returncode == 0,
+            f"the article tab must show 'Uoink this article':\n{proc.stdout}\n{proc.stderr}")
 
     lib = (ext / "lib" / "extract.js").read_text(encoding="utf-8")
     _assert('"/extract/x-article"' in lib and "postExtractXArticle," in lib,

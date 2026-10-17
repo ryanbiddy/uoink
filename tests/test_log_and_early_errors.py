@@ -60,8 +60,8 @@ def http(tmp_path):
             is_model_downloaded=lambda *args: False),
         "images": SimpleNamespace(MAX_IMAGE_BYTES=1024 * 1024),
     }
-    _load(ROOT / "server.py", {"_strict_json_route", "_reject_json_constant",
-                              "_reject_duplicate_json_keys"}, scope, constants={
+    _load(ROOT / "server.py", {"_reports_live_extract", "_strict_json_route",
+                              "_reject_json_constant", "_reject_duplicate_json_keys"}, scope, constants={
         "MAX_BODY_BYTES", "ALLOWED_HOST_NAMES", "_STRICT_JSON_ROUTE_PREFIXES",
         "LIBRARY_INTENT_ROUTE", "DISCOVERY_INTENT_ROUTE",
         "LIBRARY_MIRROR_INTENT_ROUTE", "LIBRARY_MIRROR_ROUTE", "SOURCES_INTENT_ROUTE",

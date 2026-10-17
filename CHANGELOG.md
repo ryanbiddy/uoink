@@ -82,6 +82,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Changed
 
+- Merged the dashboard and extension re-haul into 3.9. Offline regressions now
+  load the live-capture wrapper, supply the setup worker's sender identity,
+  exercise the current diagnostic renderer and derived article-button label,
+  and read the stdio tool inventory without opening a Windows event-loop socket.
+  Phase 3 acceptance fixtures keep their scratch files in the OS temp directory.
 - To import a backup with `POST /corpus/import` or CLI `--import-corpus <file>`,
   copy it into the active output folder's `_exports` directory first and supply
   its absolute path. Both reject relative paths and files outside `_exports`.

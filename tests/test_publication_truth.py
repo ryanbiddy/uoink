@@ -79,7 +79,10 @@ def publication(capture, tmp_path):
         "_public_job", "_sanitize_single_job_result", "_index_job_row", "_persist_jobs_locked",
         "_add_job_record", "_supersede_terminal_single_jobs_locked", "_make_job_id",
         "_failure_phase", "friendly_error", "_validate_persisted_job",
-    }, scope)
+        "_reports_live_extract", "_live_extract_begin", "_live_extract_phase",
+        "_live_extract_end",
+    }, scope, constants={"_live_extracts", "_live_extracts_lock",
+                         "_live_extract_local", "_CAPTURE_REF_RE"})
     _load(ROOT / "server.py", {"_handle_extract"}, scope, class_name="Handler")
     responses = []
     handler = SimpleNamespace(
@@ -92,6 +95,7 @@ def publication(capture, tmp_path):
                             queue=index.PublicationRetryQueue(scope["DATA_ROOT"] / "publication-retries"))
     try:
         yield state
+        assert scope["_live_extracts"] == {}, "capture tracking ends even on publication failures"
     finally:
         idx.close()
 

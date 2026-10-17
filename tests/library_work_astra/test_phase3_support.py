@@ -80,10 +80,8 @@ def unavailable(what):
 
 @pytest.fixture
 def phase3_isolation(monkeypatch):
-    """Apply guards BEFORE importing runtime modules; all DBs stay in this worktree."""
-    scratch = ROOT / '_scratch'
-    scratch.mkdir(exist_ok=True)
-    with tempfile.TemporaryDirectory(prefix='astra-phase3-', dir=scratch) as temporary:
+    """Apply guards BEFORE importing runtime modules; all DBs stay in OS temp."""
+    with tempfile.TemporaryDirectory(prefix='astra-phase3-') as temporary:
         root = Path(temporary).resolve()
         for key in ('LOCALAPPDATA', 'APPDATA', 'XDG_DATA_HOME', 'TEMP', 'TMP',
                     'UOINK_DATA_ROOT', 'UOINK_OUTPUT_ROOT'):

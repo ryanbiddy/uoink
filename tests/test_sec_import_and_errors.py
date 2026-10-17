@@ -19,6 +19,7 @@ import socket
 import subprocess
 import threading
 import time
+import uuid
 from contextlib import nullcontext
 from http.server import BaseHTTPRequestHandler
 from pathlib import Path
@@ -72,6 +73,9 @@ def helper(source_tree, tmp_path, monkeypatch):
         "_redact_command_args", "_redact_error_credentials", "_redact_error_paths",
         "_ERROR_SANITIZE_INPUT_LIMIT", "_CREDENTIAL_FLAG_PATTERN",
         "_fetch_video_subtitles", "_comments_worker", "PlaylistJobCancelled",
+        "_reports_live_extract", "_live_extract_begin", "_live_extract_phase",
+        "_live_extract_end", "_live_extracts", "_live_extracts_lock",
+        "_live_extract_local", "_CAPTURE_REF_RE",
     }
     nodes = []
     for node in source_tree.body:
@@ -82,6 +86,9 @@ def helper(source_tree, tmp_path, monkeypatch):
             if any(n in names or n.endswith("_SANITIZE_RE")
                    or n == "_USERINFO_URL_RE" for n in assigned):
                 nodes.append(node)
+        elif isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name):
+            if node.target.id in names:
+                nodes.append(node)
     output = tmp_path / "output"
     (output / "_exports").mkdir(parents=True)
     idx = Mock()
@@ -90,7 +97,7 @@ def helper(source_tree, tmp_path, monkeypatch):
         "__name__": "offline_import_errors", "Path": Path,
         "BaseHTTPRequestHandler": BaseHTTPRequestHandler,
         "json": json, "re": re, "secrets": secrets, "subprocess": subprocess,
-        "index": index, "time": time,
+        "index": index, "time": time, "threading": threading, "uuid": uuid,
         "urlparse": urlparse, "os": SimpleNamespace(environ={}),
         "HOST": "127.0.0.1", "PORT": PORT, "TOKEN": "synthetic-test-token",
         "VERSION": "test", "DESKTOP_ROOT": output,

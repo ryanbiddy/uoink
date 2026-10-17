@@ -218,7 +218,9 @@ const groups = {
       return jsonResponse({ok:true});
     }});
     worker.load('background.js');await settle();
-    const env=await setup({store,onSend:msg=>worker.dispatch(msg,{url:worker.chrome.runtime.getURL('setup.html')})});
+    const env=await setup({store,onSend:msg=>worker.dispatch(msg,{
+      id:worker.chrome.runtime.id,url:worker.chrome.runtime.getURL('setup.html'),
+    })});
     env.el('uoink-suggested-btn').click();await settle();
     assert.equal(worker.fetches.filter(url=>url.endsWith('/extract')).length,1);
     assert.equal(worker.notifications.length,0,'no queued notifications');

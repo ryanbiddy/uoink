@@ -7,6 +7,9 @@ No HTTP helper, acquisition subprocess, network request or model is executed.
 import ast
 import contextlib
 import json
+import re
+import threading
+import uuid
 from types import SimpleNamespace
 
 import pytest
@@ -117,12 +120,29 @@ def _load_manual_dispatch(ns):
     """Compile actual manual ownership and handler bodies; replace I/O only."""
     path = ROOT / 'server.py'
     parsed = ast.parse(path.read_text(encoding='utf-8-sig'), filename=str(path))
-    names = {'_ManualOwnership', '_manual_capture_key', '_manual_extraction_ownership'}
+    names = {
+        '_ManualOwnership', '_manual_capture_key', '_manual_extraction_ownership',
+        '_reports_live_extract', '_live_extract_begin', '_live_extract_phase',
+        '_live_extract_end',
+    }
+    constants = {'_live_extracts', '_live_extracts_lock', '_live_extract_local', '_CAPTURE_REF_RE'}
     nodes = [node for node in parsed.body if getattr(node, 'name', None) in names]
+    assert {node.name for node in nodes} == names
+    for node in parsed.body:
+        if isinstance(node, ast.Assign):
+            if any(isinstance(target, ast.Name) and target.id in constants
+                   for target in node.targets):
+                nodes.append(node)
+        elif isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name):
+            if node.target.id in constants:
+                nodes.append(node)
     handler = next(node for node in parsed.body if getattr(node, 'name', None) == 'Handler')
     nodes.append(next(node for node in handler.body if getattr(node, 'name', None) == '_handle_extract'))
-    assert len(nodes) == 4
-    ns['contextlib'] = contextlib
+    assert len(nodes) == len(names) + len(constants) + 1
+    ns.update(contextlib=contextlib, re=re, uuid=uuid)
+    # Keep server_parts' dormant Thread while using real in-memory capture state.
+    ns['threading'].Lock = threading.Lock
+    ns['threading'].local = threading.local
     exec(compile(ast.Module(body=nodes, type_ignores=[]), str(path), 'exec'), ns)
 
 
@@ -138,6 +158,8 @@ def test_as3_s15_manual_waiter_reuses_standing_completion(rig, monkeypatch):
     def completed_during_wait(root, key, **kwargs):
         # The standing worker finishes while this manual request waits.
         assert key == start['capture_key']
+        active = list(ns['_live_extracts'].values())
+        assert len(active) == 1 and active[0]['source_url'] == url
         rig.publication.stage(rig.idx, start)
         ns['_jobs']['finished'] = dict(source_start_id=start['start_id'], state='completed')
         result = rig.svc.service.complete_capture(start['start_id'], start['owner_token'], vid)
@@ -161,6 +183,8 @@ def test_as3_s15_manual_waiter_reuses_standing_completion(rig, monkeypatch):
     response = ns['_handle_extract'](handler, dict(url=url))
     assert acquisitions == [], (acquisitions, response)
     assert len(ledger(rig.idx, sid)) == 1
+    assert ns['_live_extracts'] == {}, 'The real wrapper clears the completed request'
+    assert ns['_live_extract_local'].key is None
 
 
 @pytest.mark.parametrize('field,value', [
