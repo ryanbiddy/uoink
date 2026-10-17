@@ -60,6 +60,9 @@ _PENDING_TERMINAL_STATES = ("succeeded", "failed", "cancelled")
 # evicted -- they're load-bearing for the retry worker.
 _PENDING_TABLE_CAP = 1000
 
+# Shared with the server's in-memory Activity history.
+TERMINAL_JOB_RETENTION = 200
+
 # SQLite stores INTEGER as signed 64-bit. A row id outside this range cannot
 # exist, and binding one raises OverflowError -- so callers treat out-of-range
 # ids as "not found" rather than letting the bind crash (G-90 bug hunt).
@@ -2523,7 +2526,7 @@ class Index:
             self._conn.commit()
             return cur.rowcount
 
-    def prune_jobs(self, keep_terminal: int = 200) -> int:
+    def prune_jobs(self, keep_terminal: int = TERMINAL_JOB_RETENTION) -> int:
         """Keep at most ``keep_terminal`` most-recent terminal jobs; non-
         terminal jobs (pending/running) are always retained. Returns the
         number of rows deleted."""
@@ -2533,7 +2536,7 @@ class Index:
                 f"DELETE FROM jobs WHERE status IN ({placeholders}) "
                 f"AND job_id NOT IN ("
                 f"  SELECT job_id FROM jobs WHERE status IN ({placeholders}) "
-                f"  ORDER BY updated_at DESC LIMIT ?"
+                f"  ORDER BY updated_at DESC, job_id DESC LIMIT ?"
                 f")",
                 (*_TERMINAL_JOB_STATES, *_TERMINAL_JOB_STATES, keep_terminal),
             )

@@ -3572,14 +3572,14 @@ def _run_subprocess(cmd: list[str], *, cancel_event: threading.Event | None = No
                     log.exception("could not resolve the child-launch intent of %s",
                                   capture["start_id"])
             raise
-        if capture is not None:
-            # AS-02: resolve the launch intent by recording the live child.
-            # Record-write errors must not be swallowed; the unresolved intent
-            # remains if this write fails, so absence is never inferred.
-            source_subscriptions.record_child_start(
-                DATA_ROOT, capture["start_id"], proc.pid, capture.get("instance"))
-        started = time.monotonic()
         try:
+            # Cleanup is armed before registration: this write can fail after
+            # the OS has already started yt-dlp. Keep unresolved evidence on
+            # failure, but never leave the child running because of that write.
+            if capture is not None:
+                source_subscriptions.record_child_start(
+                    DATA_ROOT, capture["start_id"], proc.pid, capture.get("instance"))
+            started = time.monotonic()
             while True:
                 if cancel_event is not None and cancel_event.is_set():
                     _terminate_process(proc)
@@ -3592,12 +3592,29 @@ def _run_subprocess(cmd: list[str], *, cancel_event: threading.Event | None = No
                         _terminate_process(proc)
                         raise subprocess.TimeoutExpired(cmd, timeout)
         finally:
-            if capture is not None and proc.poll() is not None:
-                try:
-                    source_subscriptions.record_child_end(DATA_ROOT, capture["start_id"], proc.pid)
-                except Exception:
-                    log.exception("could not record the child exit of standing capture %s",
-                                  capture["start_id"])
+            try:
+                if proc.poll() is None:
+                    _terminate_process(proc)
+                if proc.poll() is None:
+                    log.error("could not reap subprocess %s", getattr(proc, "pid", "unknown"))
+                else:
+                    # poll reaps an exited child; communicate/termination have
+                    # already waited when they completed normally.
+                    if capture is not None:
+                        source_subscriptions.record_child_end(DATA_ROOT, capture["start_id"], proc.pid)
+            except Exception:
+                log.exception("could not finish subprocess cleanup for %s",
+                              getattr(proc, "pid", "unknown"))
+            finally:
+                for name in ("stdin", "stdout", "stderr"):
+                    pipe = getattr(proc, name, None)
+                    close = getattr(pipe, "close", None)
+                    if callable(close):
+                        try:
+                            close()
+                        except Exception:
+                            log.exception("could not close subprocess %s %s",
+                                          getattr(proc, "pid", "unknown"), name)
 
         cp = subprocess.CompletedProcess(cmd, proc.returncode, out, err)
         if check and proc.returncode:
@@ -5642,6 +5659,10 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
     # Short directory and corpus names leave room for atomic-write temp names
     # under Windows MAX_PATH, even in long topics with a long capture slug.
     _raise_if_cancelled(cancel_event)
+    keep_media = (
+        source_type == SOURCE_TYPE_SHORT_VIDEO
+        and bool(_read_settings().get("keep_media"))
+    )
     stage_root = None
     if refreshing:
         stage_root = Path(tempfile.mkdtemp(prefix=".s-", dir=output_folder))
@@ -5653,6 +5674,8 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
     staged_names = {Path(corpus_name): Path("c.md"), Path(sidecar_name): Path("c.json")}
     markdown_index_attempted = False
     publication_started = False
+    publication_recovery_needed = False
+    downloaded_media = {}
 
     def begin_publication() -> None:
         nonlocal publication_started
@@ -5665,6 +5688,10 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
         publication_started = True
 
     def publication_failed(error: Exception, *, missing_sidecar: bool = False) -> None:
+        nonlocal publication_recovery_needed
+        # A failed save makes these files recovery inputs, even if cancellation
+        # prevents the publication handoff from claiming the queue row.
+        publication_recovery_needed = True
         # A first capture can fail its sidecar write before the normal commit
         # boundary. Its receipt must own publication before cancellation closes.
         begin_publication()
@@ -5775,17 +5802,34 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
                 url,
             ])
 
+        media_glob = (
+            "video-chunk-*.*"
+            if effective_long_video_mode == LONG_VIDEO_MODE_CHUNKED
+            else "video.*"
+        )
         try:
             if phase_callback:
                 phase_callback("download")
-            _run_subprocess(
-                media_cmd,
-                cancel_event=cancel_event,
-                check=True,
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.PIPE,
-                timeout=download_timeout,
-            )
+            media_before_download = set(asset_folder.glob(media_glob))
+            try:
+                _run_subprocess(
+                    media_cmd,
+                    cancel_event=cancel_event,
+                    check=True,
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.PIPE,
+                    timeout=download_timeout,
+                )
+            finally:
+                if not refreshing:
+                    # Record only new, regular download outputs. Remember their
+                    # identity so cancellation cannot unlink a replacement file.
+                    for path in asset_folder.glob(media_glob):
+                        if (path not in media_before_download and not path.is_symlink()
+                                and path.suffix in (".mp4", ".webm", ".mkv")
+                                and path.is_file()):
+                            st = path.stat()
+                            downloaded_media[path] = (st.st_dev, st.st_ino, st.st_size, st.st_mtime_ns)
         except subprocess.TimeoutExpired:
             # Log the real cause (duration + the budget we actually used) so
             # helper.log has a trace -- the old path discarded this and left the
@@ -5813,11 +5857,6 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
             cancel_event=cancel_event,
         )
 
-        media_glob = (
-            "video-chunk-*.*"
-            if effective_long_video_mode == LONG_VIDEO_MODE_CHUNKED
-            else "video.*"
-        )
         video_files = [f for f in sorted(asset_folder.glob(media_glob))
                        if f.suffix in (".mp4", ".webm", ".mkv")]
         srt_files = list(asset_folder.glob("video*.srt"))
@@ -6029,10 +6068,6 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
         # to short_video because shorts are tens of MB while long-form media
         # can run to gigabytes. Default OFF: deletion below stays the unchanged
         # path and the sidecar gains no field.
-        keep_media = (
-            source_type == SOURCE_TYPE_SHORT_VIDEO
-            and bool(_read_settings().get("keep_media"))
-        )
         try:
             sidecar = {
                 "schema_version": 2,  # bumped: structured screenshots + comments
@@ -6253,6 +6288,25 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
                 video_file.unlink(missing_ok=True)
 
     except BaseException as e:
+        if (cancel_event is not None and not refreshing and not keep_media
+                and not publication_started and not publication_recovery_needed
+                and isinstance(e, PlaylistJobCancelled)):
+            for path, identity in downloaded_media.items():
+                try:
+                    if not path.exists():
+                        continue
+                    st = path.stat()
+                    if (path.is_symlink()
+                            or (st.st_dev, st.st_ino, st.st_size, st.st_mtime_ns) != identity):
+                        log.warning("cancelled capture media changed; preserving %s", path)
+                        continue
+                    path.unlink()
+                except OSError as cleanup_error:
+                    log.error("cancelled capture media cleanup failed; file kept at %s: %s",
+                              path, cleanup_error)
+                    raise RuntimeError(
+                        f"Capture cancelled; could not remove downloaded media {path}: {cleanup_error}"
+                    ) from cleanup_error
         if committed and refreshing:
             # Publication may have committed before raising. Keep both the
             # published files and the backup; never roll files back under a
@@ -8159,6 +8213,30 @@ def _persist_jobs_locked(changed_job: dict | None = None) -> None:
             idx.upsert_job(_index_job_row(job))
     except Exception as e:
         log.warning("job persistence write failed: %s", e)
+    finally:
+        # Bound memory even when SQLite is unavailable. Active workers and
+        # unsettled standing captures still need their cancellation/ownership
+        # state; their exit paths call this again after releasing it.
+        terminal = []
+        for job in _jobs.values():
+            if job.get("state") not in _JOB_TERMINAL_STATES:
+                continue
+            result = job.get("result")
+            if isinstance(result, dict):
+                job["result"] = {k: v for k, v in result.items()
+                                 if k not in ("combined_md_text", "corpus_md_paste")}
+            worker = job.get("_thread")
+            if worker is not None and (worker.ident is None or worker.is_alive()):
+                continue
+            if job.get("_source_owner_token"):
+                continue
+            for key in list(job):
+                if key.startswith("_"):
+                    job.pop(key)
+            terminal.append(job)
+        terminal.sort(key=lambda j: (j.get("updated_at") or "", j["id"]), reverse=True)
+        for job in terminal[index.TERMINAL_JOB_RETENTION:]:
+            _jobs.pop(job["id"], None)
 
 
 def _validate_persisted_job(raw: dict) -> dict | None:
@@ -8438,7 +8516,21 @@ def _record_single_extract_job(url: str, started_at: str, *,
 def _get_public_job(job_id: str) -> dict | None:
     with _jobs_lock:
         job = _jobs.get(job_id)
-        return _public_job(job) if job else None
+        public = _public_job(job) if job else None
+        if public and isinstance(public.get("result"), dict):
+            public["result"] = dict(public["result"])
+    # Only an individual job request loads corpus text. Lists, SSE snapshots,
+    # and the retained job record stay small; file I/O never holds _jobs_lock.
+    if public and public["state"] in _JOB_TERMINAL_STATES:
+        result = public.get("result")
+        if isinstance(result, dict) and result.get("combined_md_path"):
+            try:
+                result["combined_md_text"] = _job_text_only_corpus(
+                    Path(result["combined_md_path"]).read_text(encoding="utf-8"))
+            except (OSError, UnicodeError) as e:
+                result["combined_md_text"] = ""
+                result["combined_md_error"] = f"Could not read saved corpus: {e}"
+    return public
 
 
 def _update_job(job_id: str, **updates) -> dict | None:
@@ -8961,6 +9053,11 @@ def _settle_source_capture(job_id: str, *, video_id: str | None,
                 if row is not None and hasattr(_source_service().backend, "release"):
                     _source_service().backend.release(
                         {"start_id": start_id, "capture_key": row[0]})
+                with _jobs_lock:
+                    job = _jobs.get(job_id)
+                    if job is not None:
+                        job.pop("_source_owner_token", None)
+                        _persist_jobs_locked(job)
             except Exception:
                 log.exception("standing capture lock release failed for %s", start_id)
 
@@ -10081,9 +10178,25 @@ def _create_playlist_job(playlist: dict, interval: int) -> tuple[str, dict]:
         "_folder": str(folder),
         "_cancel_event": cancel_event,
     }
+
+    def run_worker():
+        try:
+            _playlist_worker(job_id)
+        except BaseException as e:
+            # Setup (for example mkdir) can fail before the worker's own
+            # exception handler is entered. Settle it before releasing inputs.
+            log.exception("playlist job %s could not run", job_id)
+            _update_job(job_id, state="failed", completed_at=_now_iso(),
+                        error=str(e), message="Playlist failed.")
+        finally:
+            with _jobs_lock:
+                current = _jobs.get(job_id)
+                if current is not None:
+                    current.pop("_thread", None)
+                    _persist_jobs_locked(current)
+
     worker = threading.Thread(
-        target=_playlist_worker,
-        args=(job_id,),
+        target=run_worker,
         name=f"playlist-{job_id}",
         daemon=True,
     )
