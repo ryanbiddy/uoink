@@ -2803,6 +2803,13 @@
     .settings-load-status { color: var(--text-2); }
     .taste-anchor-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; padding: 12px 0; border-bottom: 1px solid var(--line); }
     .taste-anchor-row strong { flex: 1; overflow-wrap: anywhere; }
+    .hook-correction-row { display: grid; justify-items: start; gap: 4px; padding: 12px 0; border-top: 1px solid var(--line); overflow-wrap: anywhere; }
+    .settings-tool-details summary { min-height: var(--target-primary); padding: 8px 0; cursor: pointer; }
+    .settings-tool-button { min-height: var(--target-primary); border-radius: var(--radius-pill); transition: none; }
+    .settings-tool-button:active { transform: none; }
+    .settings-tool-button:disabled,
+    .settings-tool-button:disabled:hover,
+    .settings-tool-button:disabled:focus-visible { opacity: 1; background: var(--surface); color: var(--text-2); border-color: var(--line-strong); }
     @media (max-width: 600px) {
       #tab-settings .page-head { align-items: flex-start; }
       #tab-settings .topic-row { grid-template-columns: minmax(0, 1fr); }
@@ -5330,6 +5337,13 @@
               <div class="setting-feedback"><span class="setting-status" id="hookTypeToggleSaveStatus" role="status" aria-live="polite" aria-atomic="true"></span><button class="button ghost setting-retry hidden" id="hookTypeToggleSaveRetry" type="button" data-setting-retry="hookTypeToggle">Retry save</button></div>
               <label class="inline-row"><input id="smartScreenshotPickerToggle" type="checkbox" aria-describedby="smartScreenshotPickerToggleSaveStatus"> Suggest screenshots for sharing</label>
               <div class="setting-feedback"><span class="setting-status" id="smartScreenshotPickerToggleSaveStatus" role="status" aria-live="polite" aria-atomic="true"></span><button class="button ghost setting-retry hidden" id="smartScreenshotPickerToggleSaveRetry" type="button" data-setting-retry="smartScreenshotPickerToggle">Retry save</button></div>
+              <p class="setting-copy hidden" id="aiCostEstimate" role="status" aria-live="polite"></p>
+              <details class="settings-tool-details">
+                <summary>Hook Type correction history</summary>
+                <p class="setting-copy" id="hookCorrectionsStatus" role="status" aria-live="polite"></p>
+                <div id="hookCorrectionsList"></div>
+                <button class="button ghost settings-tool-button" type="button" id="reloadHookCorrections">Refresh history</button>
+              </details>
             </div>
 
             <div class="setting-block" id="byo-key">
@@ -5526,6 +5540,17 @@
               <div class="setting-feedback"><span class="setting-status" id="mcpConfigSaveStatus" role="status" aria-live="polite" aria-atomic="true"></span><button class="button ghost setting-retry hidden" id="mcpConfigSaveRetry" type="button" data-setting-retry="mcpConfig">Retry save</button></div>
                 <button class="button" type="button" id="copyMcp">Copy connection JSON</button>
               </details>
+            </div>
+            <div class="setting-block">
+              <h2>Operator Skill</h2>
+              <p class="setting-copy">Copy these instructions into your agent's system prompt to help it use Uoink.</p>
+              <label for="skillSystemPrompt">System prompt</label>
+              <textarea class="field" id="skillSystemPrompt" rows="6" readonly aria-describedby="skillPromptStatus"></textarea>
+              <p class="setting-copy" id="skillPromptStatus" role="status" aria-live="polite"></p>
+              <div class="inline-row">
+                <button class="button settings-tool-button" type="button" id="copySkillPrompt" disabled>Copy system prompt</button>
+                <button class="button ghost settings-tool-button" type="button" id="reloadSkillPrompt">Reload prompt</button>
+              </div>
             </div>
           </div>
           </section>
@@ -6178,10 +6203,12 @@
 
     async function authFetch(path, opts = {}) {
       const token = await getToken();
+      const { responseType, ...request } = opts;
       const headers = { ...(opts.headers || {}), "X-Uoink-Token": token };
       if (opts.body && !headers["Content-Type"]) headers["Content-Type"] = "application/json";
-      const res = await fetch(path, { ...opts, headers });
+      const res = await fetch(path, { ...request, headers });
       const text = await res.text();
+      if (res.ok && responseType === "text") return text;
       let data = null;
       try { data = text ? JSON.parse(text) : null; } catch (_) { data = { ok: false, error: text || "invalid JSON" }; }
       if (!res.ok || (data && data.ok === false)) {
@@ -12629,7 +12656,7 @@
         if (request !== settingsReadVersion) return;
         status.textContent = `Could not load settings: ${settingError(err)} Use Reload to try again.`;
       }
-      await Promise.all([loadSettingsMcp(), loadTasteSettings(), loadPlaylistSettings(), loadPodcastFeedSettings(), loadChannels(), loadAllowedSites(), loadAgentSetup()]);
+      await Promise.all([loadSettingsMcp(), loadTasteSettings(), loadPlaylistSettings(), loadPodcastFeedSettings(), loadChannels(), loadAllowedSites(), loadAgentSetup(), loadAIPricing(), loadHookCorrections(), loadSkillSystemPrompt()]);
       els.helperStatus.textContent = els.helperStatusText ? els.helperStatusText.textContent : "See the helper status in the sidebar.";
     }
 
@@ -14544,6 +14571,9 @@
     let settingsReadVersion = 0;
     let settingsMcpConfig = null;
     let settingsMcpHttp = null;
+    let aiPricing = null;
+    let aiPricingError = "";
+    const settingsResourceVersions = new Map();
     const DASHBOARD_INTERVAL_KEY = "uoink.dashboard.screenshotInterval";
 
     function settingEdit(id) {
@@ -14675,11 +14705,13 @@
         // Only adopt the acknowledged field, not stale siblings in the response.
         state.settings = { ...(state.settings || {}), [confirmedField]: stored[confirmedField] };
         if (field === "output_dir") state.settings.output_dir_pending_restart = stored.output_dir_pending_restart;
+        renderAICostEstimate();
         return data;
       }, () => {
         if (field === "anthropic_key") {
           els.anthropicKey.value = "";
           renderKeyStatus();
+          renderAICostEstimate();
           renderAgentSetup();
         }
         if (field === "output_dir") renderOutputFolder(outputFolderPathFromSettings(), Boolean(state.settings.output_dir_pending_restart));
@@ -14692,6 +14724,7 @@
     function saveSettingControl(id) {
       const control = document.getElementById(id);
       const [field] = SETTINGS_FIELDS[id];
+      if (id === "commentIntelligenceToggle" || id === "hookTypeToggle") renderAICostEstimate();
       let value = control.type === "checkbox" ? control.checked : control.value.trim();
       if (control.type === "number") {
         value = Number(control.value);
@@ -14795,6 +14828,7 @@
         if (settingEdit(id).dirty || settingEdit(id).version !== (versions[id] || 0)) state.settings[field] = previous[field];
       }
       renderKeyStatus();
+      renderAICostEstimate();
       if (!settingEdit("outputFolder").dirty && settingEdit("outputFolder").version === (versions.outputFolder || 0)) renderOutputFolder(outputFolderPathFromSettings(), Boolean(settings.output_dir_pending_restart));
       if (!settingEdit("rolePicker").dirty && settingEdit("rolePicker").version === (versions.rolePicker || 0)) renderRolePicker(settings.role || "mixed");
       if (!settingEdit("topicList").dirty && settingEdit("topicList").version === (versions.topicList || 0)) renderTopics(settings.topics || [], { useDefaults: false });
@@ -14891,7 +14925,164 @@
       setSettingFeedback("mcpConfig", "Ready to copy.");
     }
 
+    // These read-only tools moved from setup. Keep its one-time token refresh
+    // and use Settings' bounded, authenticated transport for JSON and text.
+    async function readSettingsResource(path, responseType) {
+      const options = { method: "GET", cache: "no-store", responseType };
+      try {
+        return await settingsRequest(path, options);
+      } catch (err) {
+        if (err.status !== 403) throw err;
+        state.token = null;
+        return settingsRequest(path, options);
+      }
+    }
+
+    function nextSettingsResourceVersion(name) {
+      const version = (settingsResourceVersions.get(name) || 0) + 1;
+      settingsResourceVersions.set(name, version);
+      return version;
+    }
+
+    function renderAICostEstimate() {
+      const estimate = document.getElementById("aiCostEstimate");
+      const hasKey = Boolean((state.settings || {}).anthropic_key_set || els.anthropicKey.value.trim());
+      const ci = document.getElementById("commentIntelligenceToggle").checked;
+      const hook = document.getElementById("hookTypeToggle").checked;
+      const visible = hasKey && (ci || hook);
+      estimate.classList.toggle("hidden", !visible);
+      estimate.textContent = "";
+      if (!visible) return;
+      if (!aiPricing) {
+        estimate.textContent = aiPricingError || "Loading cost estimate…";
+        return;
+      }
+      const prices = aiPricing.est_per_video || {};
+      const dollars = value => {
+        const number = Number(value);
+        return Number.isFinite(number) && number >= 0 ? `$${number.toFixed(number < 0.01 ? 3 : 2)}` : "unavailable";
+      };
+      const parts = [];
+      if (ci) parts.push(`Comment Intelligence ${dollars(prices.ci)}`);
+      if (hook) parts.push(`Hook Type ${dollars(prices.hook)}`);
+      const total = dollars(ci && hook ? prices.both : ci ? prices.ci : prices.hook);
+      estimate.textContent = `≈ ${total} estimated per video. ${parts.join(" + ")} · ${aiPricing.display_model || aiPricing.model || "Anthropic"} estimate; actual token usage may vary.`;
+    }
+
+    async function loadAIPricing() {
+      const version = nextSettingsResourceVersion("pricing");
+      aiPricing = null;
+      aiPricingError = "";
+      renderAICostEstimate();
+      try {
+        const data = await readSettingsResource("/settings/pricing");
+        if (settingsResourceVersions.get("pricing") !== version) return;
+        if (!data.pricing) throw new Error("No pricing returned.");
+        aiPricing = data.pricing;
+      } catch (err) {
+        if (settingsResourceVersions.get("pricing") !== version) return;
+        aiPricingError = `Cost estimate unavailable: ${settingError(err)} Use Reload to try again.`;
+      }
+      renderAICostEstimate();
+    }
+
+    async function loadHookCorrections() {
+      const version = nextSettingsResourceVersion("corrections");
+      const status = document.getElementById("hookCorrectionsStatus");
+      const list = document.getElementById("hookCorrectionsList");
+      status.textContent = "Loading correction history…";
+      list.replaceChildren();
+      try {
+        const data = await readSettingsResource("/taxonomy/corrections?limit=20");
+        if (settingsResourceVersions.get("corrections") !== version) return;
+        const rows = [data.corrections, data.items, data.results].find(Array.isArray) || [];
+        const total = Number.isFinite(Number(data.total)) ? Number(data.total) : rows.length;
+        status.textContent = rows.length ? `${total} correction${total === 1 ? "" : "s"}. Showing the latest ${Math.min(rows.length, 20)}.` : "No corrections yet. Hook Type corrections will appear here.";
+        for (const row of rows.slice(0, 20)) {
+          const item = document.createElement("div");
+          item.className = "hook-correction-row";
+          const title = document.createElement("strong");
+          title.textContent = row.title || row.video_title || row.slug || "Untitled capture";
+          const types = document.createElement("p");
+          types.className = "setting-copy";
+          const original = row.original_hook_type || row.previous_hook_type || row.from_hook_type;
+          const corrected = row.corrected_hook_type || row.hook_type || row.to_hook_type;
+          const rawDate = row.corrected_at || row.created_at || row.updated_at || row.date;
+          const date = rawDate && new Date(rawDate);
+          const dateLabel = date && !Number.isNaN(date.getTime()) ? date.toLocaleDateString(undefined, { month: "short", day: "numeric" }) : String(rawDate || "");
+          types.textContent = `${original ? prettyHook(original) : "Unknown"} → ${corrected ? prettyHook(corrected) : "Unknown"}${dateLabel ? " · " + dateLabel : ""}`;
+          item.appendChild(title);
+          item.appendChild(types);
+          const folder = row.folder || row.session_folder || row.output_folder;
+          if (folder) {
+            const button = document.createElement("button");
+            button.type = "button";
+            button.className = "button ghost settings-tool-button";
+            button.textContent = "Open folder";
+            button.setAttribute("aria-label", `Open folder for ${title.textContent}`);
+            const feedback = document.createElement("p");
+            feedback.className = "setting-copy";
+            feedback.setAttribute("role", "status");
+            button.addEventListener("click", async () => {
+              button.disabled = true;
+              feedback.textContent = "Opening folder…";
+              try {
+                await readSettingsResource(`/open-folder?path=${encodeURIComponent(folder)}`);
+                feedback.textContent = "Folder opened.";
+              } catch (err) { feedback.textContent = `Could not open folder: ${settingError(err)}`; }
+              finally { button.disabled = false; }
+            });
+            item.appendChild(button);
+            item.appendChild(feedback);
+          }
+          list.appendChild(item);
+        }
+      } catch (err) {
+        if (settingsResourceVersions.get("corrections") === version) status.textContent = `Could not load history: ${settingError(err)} Use Refresh history to try again.`;
+      }
+    }
+
+    async function loadSkillSystemPrompt() {
+      const version = nextSettingsResourceVersion("prompt");
+      const prompt = document.getElementById("skillSystemPrompt");
+      const button = document.getElementById("copySkillPrompt");
+      const status = document.getElementById("skillPromptStatus");
+      prompt.value = "";
+      button.disabled = true;
+      status.textContent = "Loading system prompt…";
+      try {
+        const text = await readSettingsResource("/skill/system-prompt", "text");
+        if (settingsResourceVersions.get("prompt") !== version) return;
+        if (typeof text !== "string" || !text.trim()) throw new Error("No system prompt returned.");
+        prompt.value = text;
+        button.disabled = false;
+        status.textContent = "Ready to copy.";
+      } catch (err) {
+        if (settingsResourceVersions.get("prompt") === version) status.textContent = `Could not load prompt: ${settingError(err)} Use Reload prompt to try again.`;
+      }
+    }
+
+    async function copySkillSystemPrompt() {
+      const button = document.getElementById("copySkillPrompt");
+      const prompt = document.getElementById("skillSystemPrompt").value;
+      if (button.disabled || !prompt) return;
+      const version = settingsResourceVersions.get("prompt");
+      button.disabled = true;
+      const status = document.getElementById("skillPromptStatus");
+      try {
+        await navigator.clipboard.writeText(prompt);
+        if (settingsResourceVersions.get("prompt") === version) status.textContent = "System prompt copied.";
+      } catch {
+        if (settingsResourceVersions.get("prompt") === version) status.textContent = "Copy failed. Select the system prompt above and copy it manually.";
+      } finally {
+        if (settingsResourceVersions.get("prompt") === version) button.disabled = false;
+      }
+    }
+
     function wireSettingsAutosave() {
+      document.getElementById("reloadHookCorrections").addEventListener("click", loadHookCorrections);
+      document.getElementById("reloadSkillPrompt").addEventListener("click", loadSkillSystemPrompt);
+      document.getElementById("copySkillPrompt").addEventListener("click", copySkillSystemPrompt);
       document.querySelectorAll("[data-setting-retry]").forEach(button => {
         button.addEventListener("click", () => {
           const fn = settingEdit(button.dataset.settingRetry).retry;
@@ -14906,7 +15097,10 @@
       }
       for (const id of ["anthropicKey", "screenshotInterval", "topicList", "rolePicker", "tasteUser", ...Object.keys(TASTE_FIELDS), "tasteAnchorId"]) {
         settingFeedback(id);
-        document.getElementById(id).addEventListener("input", () => noteSettingEdit(id));
+        document.getElementById(id).addEventListener("input", () => {
+          noteSettingEdit(id);
+          if (id === "anthropicKey") renderAICostEstimate();
+        });
       }
       els.anthropicKey.addEventListener("change", saveKey);
       els.anthropicKey.addEventListener("blur", () => {

@@ -347,7 +347,7 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   if (kind === "session_add") {
     const active = await getActiveFromStorage();
     if (!active || !active.id) {
-      notify("Uoink", "No active session. Start one in the popup first.");
+      notify("Uoink failed", "No active session. Start one in the popup first.");
       return;
     }
     job.session_id = active.id;
@@ -528,6 +528,11 @@ function tryOpenPopup() {
 
 // ---- Notifications -------------------------------------------------------
 function notify(title, message, extraOptions = {}) {
+  // Only capture outcomes interrupt the user. Content scripts still send
+  // queued messages for older helpers; acknowledge them without a desktop toast.
+  const finished = /^(?:Uoinked(?: ★)?|Uoink ready|Posts saved|Added to session|Copied to clipboard)$/i.test(title);
+  const failed = /(?:failed|offline|blocked|queue full|invalid URL|lost track|still working|couldn't (?:read|capture))/i.test(title);
+  if (!finished && !failed) return Promise.resolve(null);
   return new Promise((resolve) => {
     try {
       chrome.notifications.create({
@@ -818,7 +823,6 @@ async function _doEnqueue(job) {
 function clearQueue() {
   return queueStep(async () => {
     await setState({ queue: [] });
-    notify("Uoink", "Queue cleared.");
   });
 }
 

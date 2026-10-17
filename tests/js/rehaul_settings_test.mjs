@@ -2,6 +2,7 @@
 import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 import assert from 'node:assert/strict';
+import { pathToFileURL } from 'node:url';
 const page = readFileSync(new URL('../../assets/dashboard/index.html', import.meta.url), 'utf8');
 const logic = page.slice(page.indexOf('    const SETTINGS_FIELDS'), page.indexOf('    async function postHelper'));
 const authLogic = page.slice(page.indexOf('    async function authFetch('), page.indexOf('    function prettyHook('));
@@ -16,17 +17,19 @@ function setup() {
     constructor(id, attrs='') {
       this.id=id; this.value=''; this.checked=false; this.type=/type="([^"]*)"/.exec(attrs)?.[1] || 'text';
       this.min=/min="([^"]*)"/.exec(attrs)?.[1]; this.max=/max="([^"]*)"/.exec(attrs)?.[1];
-      this.dataset={}; this.attrs={}; this.events={}; this.textContent=''; this.innerHTML='';
+      this.dataset={}; this.attrs={}; this.events={}; this.textContent=''; this.innerHTML=''; this.children=[];
       const classes=new Set(); this.classList={toggle:(n,on)=>on?classes.add(n):classes.delete(n), contains:n=>classes.has(n)};
     }
     addEventListener(name, fn) { (this.events[name] ||= []).push(fn); }
     setAttribute(k,v) { this.attrs[k]=v; }
     getAttribute(k) { return this.attrs[k] || null; }
     emit(name) { for(const f of this.events[name] || []) f({target:this}); }
+    appendChild(el) { this.children.push(el); return el; }
+    replaceChildren(...els) { this.children=[...els]; this.textContent=''; }
   }
   for(const m of page.slice(0,page.indexOf('<script>')).matchAll(/<\w+\b([^>]*\bid="([^"]+)"[^>]*)>/g)) nodes.set(m[2],new El(m[2],m[1]));
   for(const m of page.matchAll(/data-setting-retry="([^"]+)"/g)) nodes.get(`${m[1]}SaveRetry`).dataset.settingRetry=m[1];
-  const document={ getElementById:id=>nodes.get(id) || null, querySelectorAll:sel=>sel==='[data-setting-retry]'?[...nodes.values()].filter(n=>n.dataset.settingRetry):[] };
+  const document={ getElementById:id=>nodes.get(id) || null, createElement:tag=>Object.assign(new El(''),{tagName:tag.toUpperCase()}), querySelectorAll:sel=>sel==='[data-setting-retry]'?[...nodes.values()].filter(n=>n.dataset.settingRetry):[] };
   const state={settings:{},token:'fake-token'};
   let handler = async (path,opts) => {
     const body=opts.body?JSON.parse(opts.body):{};
@@ -45,6 +48,7 @@ function setup() {
     outputFolderPathFromSettings:()=>state.settings.output_dir_configured,
     renderOutputFolder:path=>{nodes.get('outputFolder').value=path;},
     htmlEscape:s=>String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('"','&quot;'),
+    prettyHook:type=>String(type).replaceAll('_',' '),
   });
   vm.runInContext(logic + refreshLogic + folderLogic,c);
   c.wireSettingsAutosave();
@@ -100,7 +104,7 @@ const groups = {
   },
   async reload_races() {
     const p=setup(),saving=deferred();
-    for(const fn of ['loadSettingsMcp','loadTasteSettings','loadPlaylistSettings','loadPodcastFeedSettings','loadChannels','loadAllowedSites','loadAgentSetup']) p.c[fn]=async()=>{};
+    for(const fn of ['loadSettingsMcp','loadTasteSettings','loadPlaylistSettings','loadPodcastFeedSettings','loadChannels','loadAllowedSites','loadAgentSetup','loadAIPricing','loadHookCorrections','loadSkillSystemPrompt']) p.c[fn]=async()=>{};
     let stored={clipboard_screenshot_cap:4,hook_type_enabled:false};
     p.c.hydrateSettings({settings:stored},{});
     p.setHandler(async(path,opts)=>{
@@ -413,4 +417,8 @@ const groups = {
     p.nodes.get('mcpClient').value='http';p.nodes.get('mcpClient').emit('change');assert.equal(JSON.parse(p.nodes.get('mcpConfig').value).headers['X-Uoink-Token'],'fake-token');
   },
 };
-const group=process.argv[2];assert.ok(groups[group],group);await groups[group]();console.log(`PASS ${group}`);
+// Also drives the migrated setup-settings regressions against these real controls.
+export { setup, tick, deferred, page, authLogic };
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  const group=process.argv[2];assert.ok(groups[group],group);await groups[group]();console.log(`PASS ${group}`);
+}
