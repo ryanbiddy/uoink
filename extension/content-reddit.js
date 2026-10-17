@@ -382,6 +382,7 @@
     applyStatusToButton(btn);
 
     btn.addEventListener("click", (ev) => {
+      if (!ev.isTrusted) return;
       ev.preventDefault();
       ev.stopPropagation();
       handleUoinkClick(btn);

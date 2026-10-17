@@ -49,6 +49,8 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
 
+import source_subscriptions
+
 log = logging.getLogger("uoink.page_extractor")
 
 
@@ -312,7 +314,8 @@ def normalize_page_url(raw: str) -> str | None:
 
     Rejects javascript: data: file: ftp: vbscript: mailto: blob: per
     same posture as v3.1 universal extractor. Embedded credentials and
-    bracketed IPv6 are rejected; IP literals are currently permitted."""
+    bracketed IPv6 are rejected. This shape-only validator permits IPv4
+    literals; both extraction engines reject them at URL admission."""
     if not raw or not isinstance(raw, str):
         return None
     raw = raw.strip()
@@ -436,7 +439,8 @@ def extract_page(idx, url: str, *,
                   render_mode: str = RENDER_MODE_JS,
                   include_screenshot: bool = True,
                   follow_links_depth: int = 0,
-                  enforce_allowlist: bool = True) -> dict:
+                  enforce_allowlist: bool = True,
+                  check_url=None) -> dict:
     """Extract a single page. Returns the structured response shape per
     PROMPT-V3.2-CC-BACKEND.md Deliverable 2.
 
@@ -446,7 +450,9 @@ def extract_page(idx, url: str, *,
 
     The allowlist gate runs by default. Callers that need to bypass
     (e.g., the Writing Studio URL anchor ingestion that wraps this
-    function) pass enforce_allowlist=False."""
+    function) pass enforce_allowlist=False. Both paths still require a public
+    network target. check_url injects Crawl4AI's initial URL check for tests;
+    the stdlib path separately checks each request and redirect."""
     canonical = normalize_page_url(url)
     if not canonical:
         return {"ok": False,
@@ -465,6 +471,11 @@ def extract_page(idx, url: str, *,
 
     result = None
     if _CRAWL4AI_AVAILABLE:
+        try:
+            (check_url or source_subscriptions.check_public_http_url)(canonical)
+        except source_subscriptions.ServiceError as exc:
+            return {"ok": False, "code": exc.code, "error": str(exc),
+                    "url": canonical}
         try:
             result = _extract_crawl4ai(
                 canonical, render_mode=render_mode,
@@ -594,13 +605,15 @@ def _html_to_markdown(html: str) -> str:
     return s.strip()
 
 
-def _extract_stdlib(url: str, *, include_screenshot: bool) -> dict:
+def _extract_stdlib(url: str, *, include_screenshot: bool, http_open=None) -> dict:
     """Stdlib-only fallback. urllib GET + regex-based HTML-to-markdown.
     Always returns a usable result for static pages; returns
-    screenshot_path=None because we can't render."""
-    req = urllib.request.Request(url, headers={"User-Agent": _USER_AGENT})
+    screenshot_path=None because we can't render. http_open is an explicit
+    test injection; production checks the public network on every hop."""
     try:
-        with urllib.request.urlopen(req, timeout=_PAGE_FETCH_TIMEOUT_SEC) as resp:
+        with (http_open or source_subscriptions.public_http_open)(
+                url, headers={"User-Agent": _USER_AGENT},
+                timeout=_PAGE_FETCH_TIMEOUT_SEC) as resp:
             if resp.status != 200:
                 return {"ok": False,
                         "error": f"upstream returned HTTP {resp.status}",

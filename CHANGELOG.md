@@ -10,7 +10,144 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
-Nothing yet.
+### Security
+
+- Restrict `POST /corpus/import` and CLI `--import-corpus` to resolved files inside
+  the active output folder's `_exports` directory. Reject relative paths, parent
+  traversal and symlinks or junctions that escape that directory before reading a file.
+- Sanitize machine error details before returning them or saving them in jobs:
+  redact local paths, URL credentials, API keys and labelled credentials.
+  A credential's whole value is redacted, including commas, escaped quotes and
+  apostrophes inside it, for prefixed flags such as `--video-password`, the
+  `--flag=value` form and argument lists such as `'--token', 'value'`.
+  Failed and timed-out subprocesses redact whole credential arguments before
+  quoting them, including values containing spaces or line breaks.
+  Preserve full path redaction for apostrophes, colons and repeated separators,
+  including doubled backslashes, while supporting spaces in directory names.
+  Quoted paths also redact names such as `James' O'Brien`; unquoted spaced
+  directory names can include colons, as in `james' smith:family`.
+  Quoted paths redact through the end of their line unless the last closing
+  quote follows a filename with an extension and a complete diagnostic phrase
+  follows it, such as `wasn't found`. Ambiguous words after an apostrophe are
+  removed even without separators or dots, along with later paths on that line.
+  This applies to POSIX, Windows drive and UNC paths, including paths cut off
+  by the input cap. It can hide the rest of a command or diagnostic line after
+  a quoted path. Redaction never crosses a line break.
+  Whole URLs become `<url>`; words such as "download/network" are not paths.
+  The failure handlers that record these details (extraction, playlists,
+  sessions, the retry queue and podcast transcription) write the raw command
+  line and tool output only to `server.log` and log fixed or sanitized text to
+  the console; podcast failures no longer store raw exception text in the job
+  or episode. A podcast transcription or deferred publish error that comes from
+  a subprocess is stored and logged to the console as its type and exit status
+  (or timeout) only, never its command line. Other helper log lines still go to
+  both the console and `server.log`.
+- Optional subtitle-fetch and comments-worker failures now send raw exceptions
+  and yt-dlp output only to `server.log`. The console shows sanitized summaries;
+  comments failures no longer print yt-dlp's last stderr line. Subtitle-refusal
+  detection and comments status updates are unchanged.
+- Apply the standing-source public-network checks to podcast feed polls,
+  stdlib page fetches and thumbnail downloads, and to the redirect chain
+  checked before podcast enclosures and generic URLs reach yt-dlp. Reject
+  IP literals and non-public DNS answers on the initial URL and every
+  redirect hop, including when a saved feed's destination changes. IPv6
+  answers that carry a non-public IPv4 (IPv4-mapped, NAT64 or 6to4) and
+  hostnames that cannot be IDNA-encoded are refused too. Percent-encoded
+  hosts are refused on the initial URL and every redirect, and DNS is checked
+  for the exact host name the connection is made for. Each connection then
+  dials only the addresses that passed that hop's check and never resolves
+  the name again, so DNS rebinding cannot move it; the Host header, SNI and
+  certificate checks keep the host name. Requests made inside yt-dlp and the
+  Crawl4AI renderer resolve names themselves and are not covered.
+- Check the initial page URL and DNS answers before starting Crawl4AI,
+  including Writing Studio captures that bypass the site allowlist. This
+  check does not cover redirects or subresources inside the browser renderer.
+- Pin the extension's Chromium ID to `bkcapfidedhfcjpmjabeopfbcjcbmdmi` with a
+  public manifest key. The helper now grants extension token bootstrap and CORS
+  only to this ID and IDs explicitly added through `UOINK_EXTENSION_IDS` or
+  `settings.extension_ids`. Previously, a nonempty environment variable replaced
+  the settings list; now both sources are unioned with the pinned ID.
+- Use a bodyless `POST /token` in the extension so Chromium sends its extension
+  Origin and the helper checks the pinned or explicitly configured ID.
+  Keep the client header, omitted credentials and `no-store` fetch policy.
+  Without Origin, `/token` now requires `Sec-Fetch-Site: same-origin` and a
+  present, allowed loopback Host. `Sec-Fetch-Site: none` and missing fetch
+  metadata receive HTTP 403, closing the extension-worker GET bypass.
+  Helper-served dashboard and WebView pages keep their same-origin GET path;
+  update/reload the extension with the helper so token refresh uses POST.
+  Older WKWebView clients that send neither header remain unable to bootstrap;
+  open the dashboard in a browser that sends same-origin fetch metadata.
+- Drop extension runtime messages whose sender ID differs from Uoink's own ID.
+- Public `/diagnose` responses no longer include local paths, raw tool output
+  or credential-store errors. Saved-key flags are omitted except for
+  `anthropic_key_valid`: clients passing the existing splash metadata check receive
+  it without a token, because the first-run splash needs it. The field is `true`
+  for a saved key not marked invalid, `false` whenever `anthropic_key_invalid`
+  is set, even if a 401 cleared the saved key, and absent only when no key is
+  saved and the invalid flag is off.
+  This diagnostic-only check requires no Origin header, `Sec-Fetch-Site:
+  same-origin` or `none`, and a present loopback Host allowed on the helper's
+  port. It does not authorize token bootstrap. `/health` and `/ping`
+  carry none of these details; the console doctor keeps the full detail.
+  The dashboard and splash cannot be framed by other pages
+  (`frame-ancestors 'none'`, `X-Frame-Options: DENY`).
+- In-page Uoink buttons on YouTube, Reddit and X articles ignore scripted clicks,
+  so other extensions, userscripts or page scripts cannot start a capture.
+  YouTube in-page copy goes only through the extension's offscreen document
+  (no page clipboard call, no DOM textarea); a failed copy shows "Copy blocked"
+  with a Try again notification. Content-script `openTab` requests open only
+  Uoink pages, claude.ai, chatgpt.com and the local dashboard.
+
+### Changed
+
+- To import a backup with `POST /corpus/import` or CLI `--import-corpus <file>`,
+  copy it into the active output folder's `_exports` directory first and supply
+  its absolute path. Both reject relative paths and files outside `_exports`.
+  Invalid, missing or unreadable imports return HTTP 400 (or CLI JSON with
+  `ok: false`) without exposing local paths.
+  Local index rebuilds still restore exports from their explicitly selected root.
+- Dashboard and extension error details now show `<path>`, `<url>` and `[redacted]`
+  placeholders. Spaces and tabs within each line are compacted; line breaks stay
+  intact so extension notifications can still show the last tool error.
+  Ordinary diagnostics such as "This video requires a GVS PO Token which was not
+  provided." remain readable. Redaction happens before the existing detail length
+  limits, with input capped at 65,536 characters before regex processing to keep
+  oversized tool output from stalling error handling. Timeout details show separate
+  `Command:` and `Timeout:` lines. Unquoted paths keep separate placeholders,
+  and retry diagnostics keep their trailing text within the existing
+  200-character limit.
+  Full diagnostics remain in the local `server.log`.
+- A failed podcast transcription's job error and episode transcript error, and a
+  deferred podcast publish error, now read like `CalledProcessError: exit status 1`
+  or `TimeoutExpired: timed out after 30 seconds` for subprocess failures; other
+  exceptions keep their sanitized message. For subprocess errors the podcast job's
+  `error_detail` still carries the redacted command line (and a failed
+  subprocess's redacted output).
+- Local, intranet and IP-address sources now fail through these fetch paths;
+  blocked thumbnails are omitted. Existing downloaded podcast audio remains
+  usable. Podcast downloads and generic yt-dlp extraction make an additional
+  checked GET before starting, using the podcast or page fetcher's User-Agent
+  on every redirect hop. Hosts that reject it cannot be captured through
+  these paths. These fetches connect directly and no longer use system or
+  environment proxy settings. `/extract/any` reports admission refusals and preflight failures,
+  including response timeouts and HTTP protocol errors, as HTTP 400 errors.
+  Fixed YouTube hosts, including YouTube Music, and strict
+  X/Twitter, TikTok and Instagram capture retain their existing yt-dlp flow;
+  other URLs on those hosts, such as relaxed `/live/status` probes, take the
+  checked GET. YouTube keeps its original URL and shared rate limiter without
+  an extra GET.
+  See [the network policy and its limits](docs/security.md#url-and-identifier-validation).
+- Existing unpacked-extension users must reload the extension once after this
+  update. If the old ID differs from `bkcapfidedhfcjpmjabeopfbcjcbmdmi`, extension
+  storage starts fresh under the new ID: reapply extension preferences as needed;
+  the helper token is fetched again. The helper's library and captures stay in
+  place. See [the security model](docs/security.md) for additional trusted IDs.
+- The setup page's Helper status panel and the dashboard's Settings > Local app
+  status line no longer show Anthropic key checks; key status stays in the
+  dashboard's own key section. The tray no longer reports Degraded only for an
+  invalid key. The setup page's Installation folder row shows the standard
+  `%LOCALAPPDATA%\Uoink` location instead of the real path, and its Open folder
+  button no longer opens the folder.
 
 ## [3.8.1] - Unreleased
 

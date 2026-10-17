@@ -86,9 +86,17 @@ class FakeElement {
   }
   addEventListener(type, fn) { (this._listeners[type] ||= []).push(fn); }
   removeEventListener() {}
+  dispatchEvent(ev) {
+    for (const fn of this._listeners[ev.type] || []) fn(ev);
+    return true;
+  }
   click() {
-    const ev = { type: "click", preventDefault() {}, stopPropagation() {} };
-    for (const fn of this._listeners.click || []) fn(ev);
+    this.dispatchEvent({ type: "click", isTrusted: false, preventDefault() {}, stopPropagation() {} });
+  }
+  // Test-only stand-in for browser-dispatched pointer/keyboard activation.
+  // Keep click() synthetic, matching HTMLElement.click() in a real page.
+  userClick() {
+    this.dispatchEvent({ type: "click", isTrusted: true, preventDefault() {}, stopPropagation() {} });
   }
   querySelector() { return null; }
   querySelectorAll() { return []; }
@@ -385,8 +393,9 @@ export function makeEnv(opts = {}) {
   };
   // Dispatch a runtime message to the listeners the loaded scripts
   // registered (background.js handlers) and resolve with the response.
-  // sender: the MessageSender the listener sees ({} by default).
-  env.dispatch = (msg, sender = {}) => new Promise((resolve) => {
+  // Chrome supplies its own extension ID for internal messages. Explicit
+  // senders are passed unchanged so tests can exercise missing/foreign IDs.
+  env.dispatch = (msg, sender = { id: runtime.id }) => new Promise((resolve) => {
     for (const fn of env.messageListeners) {
       let answered = false;
       const keep = fn(clone(msg), sender, (resp) => { answered = true; resolve(clone(resp)); });

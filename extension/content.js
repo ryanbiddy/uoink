@@ -519,27 +519,18 @@
     rememberClipboardBudget(data, clipboardText);
     let copied = false;
     try {
-      await navigator.clipboard.writeText(clipboardText);
-      copied = true;
+      // Keep corpus text out of the page DOM, including on clipboard failure.
+      const response = await chrome.runtime.sendMessage({
+        type: "copyToClipboard", text: clipboardText,
+      });
+      copied = !!(response && response.ok === true);
     } catch (e) {
-      console.warn("[Uoink] clipboard API failed, falling back", e);
-      try {
-        const ta = document.createElement("textarea");
-        ta.value = clipboardText;
-        ta.style.position = "fixed";
-        ta.style.left = "-9999px";
-        document.body.appendChild(ta);
-        ta.select();
-        copied = document.execCommand("copy");
-        document.body.removeChild(ta);
-      } catch (e2) {
-        console.error("[Uoink] clipboard fallback failed", e2);
-      }
+      console.warn("[Uoink] extension clipboard copy failed", e);
     }
 
     if (!copied) {
       try {
-        chrome.runtime.sendMessage({ type: "clipboardRetry", text: clipboardText });
+        await chrome.runtime.sendMessage({ type: "clipboardRetry", text: clipboardText });
       } catch { /* ignore */ }
       setButtonState(btn, "error", "Copy blocked");
       btn.title = "Couldn't copy to clipboard. Use the notification's Try again button.";
@@ -663,6 +654,7 @@
     setButtonState(btn, "default", defaultLabel());
     applyStatusToButton(btn);
     btn.addEventListener("click", (ev) => {
+      if (!ev.isTrusted) return;
       ev.preventDefault();
       ev.stopPropagation();
       onClick(btn);
@@ -732,7 +724,8 @@
     retryFailure = stored.failure_id
       ? { id: stored.failure_id, videoId: stored.videoId }
       : null;
-    btn.click();
+    // This handoff comes from extension storage, not a page-generated event.
+    if (!btn.disabled) onClick(btn);
   }
 
   function tryInjectWithRetries() {
@@ -796,10 +789,12 @@
   observer.observe(document.body, { childList: true, subtree: true });
 
   chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+    if (!sender || sender.id !== chrome.runtime.id) return;
     if (msg && msg.type === "uoinkShortcutTriggered") {
       const btn = document.getElementById(BTN_ID);
       if (btn) {
-        btn.click();
+        // Extension commands are user actions, but HTMLElement.click() is untrusted.
+        if (!btn.disabled) onClick(btn);
         sendResponse({ success: true });
       } else {
         const url = normalizedCurrentVideoUrl();

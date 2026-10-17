@@ -36,6 +36,8 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
 
+import source_subscriptions
+
 log = logging.getLogger("uoink.podcasts")
 
 # Bounded enum for the episode status flow. The dashboard renders
@@ -436,15 +438,16 @@ def parse_feed_body(body: bytes | str) -> dict:
 
 
 # ---- HTTP fetch with conditional GET -----------------------------------
-def fetch_feed(feed_row: dict) -> tuple[bytes | None, dict | None]:
+def fetch_feed(feed_row: dict, *, http_open=None) -> tuple[bytes | None, dict | None]:
     """Conditional HTTP GET for a feed. Returns:
       (body, response_headers) on 200
       (None,  response_headers) on 304 Not Modified
-      Raises urllib.error.URLError on network failure -- the caller
+      Raises on network failure or a refused target -- the caller
       surfaces the error onto the feed row.
 
     We send ETag / If-Modified-Since headers when previously seen.
-    Reasonable headers + a tight timeout."""
+    Reasonable headers + a tight timeout. http_open is a test injection;
+    production always checks public DNS answers and every redirect."""
     url = feed_row.get("feed_url")
     if not url:
         return None, None
@@ -457,9 +460,9 @@ def fetch_feed(feed_row: dict) -> tuple[bytes | None, dict | None]:
         headers["If-None-Match"] = etag
     if last_mod:
         headers["If-Modified-Since"] = last_mod
-    req = urllib.request.Request(url, headers=headers)
     try:
-        with urllib.request.urlopen(req, timeout=_FEED_FETCH_TIMEOUT_SEC) as resp:
+        with (http_open or source_subscriptions.public_http_open)(
+                url, headers=headers, timeout=_FEED_FETCH_TIMEOUT_SEC) as resp:
             return resp.read(), dict(resp.headers.items())
     except urllib.error.HTTPError as e:
         if e.code == 304:
@@ -1456,11 +1459,13 @@ def _is_http_url(value) -> bool:
 def download_episode_audio(idx, episode_id: int, *,
                             data_root: Path,
                             ytdlp_cmd: list[str] | None = None,
-                            timeout_sec: int = 600) -> dict:
+                            timeout_sec: int = 600,
+                            resolve_url=None) -> dict:
     """Download an episode's MP3 via yt-dlp + ffmpeg into the per-feed
     folder. Idempotent -- if the file already exists at the canonical
     path AND has non-zero size we mark status='downloaded' without
-    re-downloading. Returns a structured result the endpoint surfaces."""
+    re-downloading. Returns a structured result the endpoint surfaces.
+    resolve_url is an explicit test injection for URL admission."""
     episode = get_episode(idx, episode_id)
     if episode is None:
         return {"ok": False, "error": f"episode not found: {episode_id}"}
@@ -1494,6 +1499,17 @@ def download_episode_audio(idx, episode_id: int, *,
                 "size_bytes": out_path.stat().st_size,
                 "skipped_existing": True}
 
+    try:
+        audio_url = (resolve_url or source_subscriptions.resolve_public_http_url)(
+            episode["audio_url"], user_agent=_FEED_USER_AGENT)
+    except Exception as exc:
+        error = f"audio URL refused or unreachable: {exc}"
+        refused = (isinstance(exc, source_subscriptions.ServiceError)
+                   and exc.code in ("unsupported_source", "validation_error"))
+        _record_audio_result(idx, episode_id, local_path=None, size_bytes=0,
+                             error=error, status="error" if refused else EPISODE_STATUS_NEW)
+        return {"ok": False, "episode_id": episode_id, "error": error}
+
     # Move to status='queued' if not already there. This makes the row
     # show up in the in-flight section of the dashboard during the
     # download (which can take several minutes for an hour-long pod).
@@ -1523,7 +1539,7 @@ def download_episode_audio(idx, episode_id: int, *,
         # Output template: yt-dlp will append .mp3 after the postprocess
         "-o", str(out_stem) + ".%(ext)s",
         "--",
-        episode["audio_url"],
+        audio_url,
     ]
     log.info("podcast download: episode_id=%d url=%s -> %s",
               episode_id, episode["audio_url"], out_path)

@@ -22,7 +22,7 @@ Uoink is local-first software with two pieces:
 - A browser extension that injects UI on YouTube and talks to a local helper.
 - A Python helper bound to `127.0.0.1:5179` that downloads public YouTube data, writes local corpus files, serves local thumbnails, and exposes optional MCP tools.
 
-The helper never binds to a public network interface. The main security boundary is therefore local-machine trust: browser pages should not be able to drive the helper without the extension token, but software or browser extensions already running with the user's privileges are treated as trusted local code.
+The helper never binds to a public network interface. Browser pages cannot use token-gated routes without the helper token. The token bootstrap trusts the pinned Uoink extension, explicitly configured extension IDs, and the local dashboard/WebView path described below. Software running with the user's filesystem privileges remains outside this browser security boundary.
 
 ## Threat model
 
@@ -31,7 +31,7 @@ The helper never binds to a public network interface. The main security boundary
 | Malicious webpage tries to call `127.0.0.1:5179` | Yes | Token-gated endpoints require `X-Uoink-Token` (legacy `X-Yoink-Token` accepted); `/token` requires a custom `X-Uoink-Client` header (legacy `X-Yoink-Client` accepted) and browser CORS/PNA preflight blocks normal webpages from setting it cross-origin. |
 | Malicious webpage probes whether Uoink is running | Not treated as secret | `/health` and `/ping` are public liveness probes. They disclose the helper version and coarse readiness: Whisper model availability/load state, index recovery, output-root fallback, aggregate path-integrity counts, and a generic path-integrity hint or error. Raw exception details stay in `server.log`. |
 | Local malware reads files or calls localhost | No | Malware already running as the user can read local files, call local ports, and modify output. Uoink does not try to sandbox against same-user malware. |
-| Another installed browser extension calls `/token` | Not fully | v2 accepts `chrome-extension://*` origins so Chromium forks and dev installs work. Published Chrome Web Store extension ID pinning is deferred until the final ID is known and stable. |
+| Another installed browser extension calls `/token` | Yes, for direct requests from unlisted extensions | The extension uses POST so Chromium sends its Origin, which must match the allowlist. An originless worker GET with `Sec-Fetch-Site: none` is refused, including from extensions with helper host access. The default ID is `bkcapfidedhfcjpmjabeopfbcjcbmdmi`; local configuration can add trusted IDs. Residual risk: an extension with permission to inject script into the helper dashboard can still read `/token` from that page's own origin. A launch-scoped dashboard bootstrap would close this later. |
 | Network attacker | Mostly not applicable | The helper listens only on `127.0.0.1`, not LAN/public interfaces. |
 | Anthropic API key disclosure through settings | Mitigated | The key is stored in the OS credential store via `keyring` (service `Uoink` in normal mode; deterministic profile-derived `Uoink-isolated-<hash>` in isolated mode; the v2.1 install migration moves normal entries from legacy `Yoink`), not in `settings.json`, and is never returned by `GET /settings`. |
 | Dependency compromise | Partially | Direct downloads are SHA256-checked in `build.ps1`; the full installer pip graph is exact-version locked and inventory-verified, but distribution artifacts are not hash-locked. |
@@ -48,8 +48,8 @@ These do not require `X-Uoink-Token`:
 - Suite discovery: `GET /.well-known/suite-service.json` and
   `GET /api/suite/v1/health`
 - Local UI shells: `GET /dashboard` and `GET /splash`
-- Credential bootstrap: `GET /token`, with the separate custom-header and
-  origin checks described below
+- Credential bootstrap: `GET /token` and bodyless `POST /token`, with the
+  separate custom-header and origin checks described below
 
 `/health` and `/ping` are intentionally public because the extension, setup
 page, and YouTube button need to detect whether the helper is running before
@@ -68,21 +68,125 @@ state, a service error code and whether the default-off
 titles, shelf names, evidence text or paths. It does not include the helper
 token or raw exception text.
 
-`/diagnose` is a broader bounded recovery report used by the popup and splash.
+`/diagnose` reports writability, tool availability, path-integrity counts,
+output-folder fallback and migration readiness. Every HTTP response omits
+local filesystem paths, key-dependent checks and warnings, and legacy-key
+flags. Page origins, extension origins and clients without local browser
+proof also receive no saved-key presence or validity fields. Migration exposes
+only the existing `app_data` and `desktop_corpus` readiness booleans. Tool checks report
+availability instead of raw version output; probe, credential-store and
+migration failures use generic messages, with details in `server.log`.
+`/health` and `/ping` retain their existing counts and readiness fields;
+neither returns local paths or key-presence flags.
+
+Clients that pass the existing splash metadata check still receive the key-readiness
+field `anthropic_key_valid` from `/diagnose` without a token, because the
+first-run splash needs it. This diagnostic-only check requires no `Origin` header,
+`Sec-Fetch-Site: same-origin` or `none`, and a present loopback
+`Host` allowed on the helper's port. The field is `true` for a saved key not
+marked invalid, `false` whenever `anthropic_key_invalid` is set, even if a 401
+cleared the saved key, and absent only when no key is saved and the invalid
+flag is off. This preserves the splash's ready, update-key and add-key states
+without making an Anthropic request. Even pinned extension origins receive
+no such field; a curl-style request without fetch metadata does not qualify.
+This compatibility check is separate from token bootstrap: `none` does not
+prove extension identity and never authorizes a token mint. An originless
+extension worker can satisfy this diagnostic check and see the readiness boolean.
+
+Use authenticated Settings to inspect the output folder or Anthropic key
+status. The extension setup page's public Helper status panel no longer lists
+key checks. Its Installation folder row keeps the static `%LOCALAPPDATA%\Uoink`
+hint instead of showing the resolved folder.
+The Open folder button no longer opens that folder; it logs a console warning
+because public diagnostics no longer supply a path. The tray no longer shows
+Degraded solely because a saved key is invalid; other diagnostic errors still
+affect it. The dashboard's Settings > Local app status line no longer counts
+Anthropic key checks; key status still appears in the dashboard's own key
+section, which reads authenticated `/settings`.
+
+The local `uoink doctor` / `--doctor` console report keeps its detailed
+diagnostics: output and index paths, tool versions, probe and credential-store
+errors, migration details and Anthropic key status. HTTP callers always get
+the redacted form, including callers with a token or query parameters asking
+for console details.
+
 The manifest, OpenAPI, well-known, and suite-discovery routes expose product
 and protocol metadata, not corpus content or credentials. `/dashboard` and
-`/splash` serve local UI shells; their user-data requests still complete the
-normal token handshake.
+`/splash` serve local UI shells. The dashboard completes the normal token
+handshake before requesting user data; the splash readiness check uses the
+splash metadata check above.
+
+Both HTML shells, including their trailing-slash and query-string forms,
+send `Content-Security-Policy: frame-ancestors 'none'` and
+`X-Frame-Options: DENY`. Browsers refuse to embed them in frames, including
+frames on the helper's own origin. Open them as top-level pages or native
+windows.
 
 `/index/backfill-status` is intentionally public for the same UI bootstrapping reason. It exposes only `state`, `current`, and `total` counts, not corpus content or file paths.
 
 `/token` returns the per-install helper token and is guarded by:
 
 - `X-Uoink-Client: uoink-extension` (legacy `X-Yoink-Client: yoink-extension` remains accepted for shipped-extension compatibility)
-- `Origin` that is empty or `chrome-extension://*`
+- An exact `chrome-extension://<id>` or `moz-extension://<id>` origin whose ID is allowlisted. Missing `Origin` is accepted only with `Sec-Fetch-Site: same-origin` and a present loopback `Host` that passes the helper's Host/port check. `Sec-Fetch-Site: none` cannot substitute for Origin.
 - A server-wide 10 requests/minute rate limit
 
-The empty-Origin allowance is deliberate. Some Chromium service-worker fetches observed during Comet testing omit `Origin`. The custom-header+CORS preflight gate is the load-bearing browser CSRF defense.
+The extension uses a bodyless `POST /token`, with `X-Yoink-Client`,
+`credentials: "omit"` and `cache: "no-store"`. In the Chromium 153 probe,
+extension-worker GETs omitted Origin and sent `Sec-Fetch-Site: none`; POSTs
+sent `Origin: chrome-extension://<id>`. POST therefore lets the helper check
+the caller's ID. Token POST rejects nonempty bodies, invalid lengths and
+transfer encodings without reading a body. All other POST routes still require
+the bearer token before reading input; their body limits are unchanged.
+
+The extension's public manifest `key` fixes its Chromium ID at
+`bkcapfidedhfcjpmjabeopfbcjcbmdmi`. This ID is always in the helper's allowlist.
+For Edge or development builds with another ID, add trusted IDs through the
+comma-separated `UOINK_EXTENSION_IDS` environment variable or the
+`extension_ids` setting (a list or comma-separated string). Previously, a
+nonempty environment variable replaced the settings list. Now the helper
+unions both sources with the pinned ID; an empty setting cannot disable the pin.
+
+After updating an existing unpacked installation, reload the extension once
+from the browser's extensions page. If its previous ID differs, extension
+storage starts fresh under the pinned ID, including saved extension preferences
+and its cached helper token. Reapply those preferences as needed; the extension
+fetches the helper token again. The helper's library and captures are unchanged.
+
+Update/reload the extension with the helper: older extension builds that mint
+with an originless GET receive HTTP 403 when they next need a token. Existing
+cached tokens remain valid until the helper rotates them.
+
+The local-client paths were checked in source before removing the `none`
+exception. `GET /token` remains available for helper-served pages with no
+Origin, `Sec-Fetch-Site: same-origin` and an allowed loopback Host:
+
+| Client | Origin-bound path and compatibility |
+|---|---|
+| Browser dashboard | `assets/dashboard/index.html` fetches relative `/token` from the helper's `/dashboard`, keeping the same-origin GET path. |
+| Tray WebView2 | `uoink_tray.py` launches `uoink_dashboard.py`, which loads the helper's `/dashboard` URL. It uses the same page and relative fetch; the top-level navigation's `none` metadata is not used to mint a token. |
+| Tauri prototype | `tauri-ui/src-tauri/src/main.rs` opens the dashboard as an external helper URL. The installer page does not mint a helper token; the dashboard uses its own helper origin. |
+| Extension popup, setup and worker | All use `extension/lib/extract.js` for token bootstrap and refresh, now through POST with the browser-supplied extension Origin. |
+| Splash | `uoink_splash.py` loads the helper's `/splash`; relative `/health` and `/diagnose` preserve readiness. Its separate token request already fails because it sends `X-Uoink-Client: uoink-splash`, which the token gate does not accept. The authenticated Open last YouTube action remains unavailable through that path; this task does not broaden the client-header gate. The offline failure HTML does not bootstrap a token. |
+| Older WKWebView without fetch metadata | A GET with neither Origin nor `Sec-Fetch-Site` already receives HTTP 403. There is no origin-bound fallback in this client, and it cannot safely use the extension-worker `none` exception. Open the dashboard in a browser that sends same-origin fetch metadata. |
+
+These are source checks and offline request regressions, not native WebView
+runtime verification. An explicitly empty or `null` Origin is also refused.
+The service worker silently drops runtime messages unless `sender.id` matches
+`chrome.runtime.id`; messages from Uoink's own popup and content scripts continue
+to work.
+
+Page scripts cannot drive the extension's in-page controls. The Uoink buttons
+on YouTube, Reddit and X articles act only on real user clicks
+(`event.isTrusted`), so `HTMLElement.click()`, `dispatchEvent` and other
+scripted clicks from the page, other extensions or userscripts do not start a
+capture. YouTube in-page copy goes only through the extension's offscreen
+document: the content script makes no page `navigator.clipboard` call and adds
+no DOM textarea, so the page cannot read the corpus text from the DOM. If the
+copy fails the button says "Copy blocked" and a notification offers Try again.
+`openTab` requests from content scripts open only Uoink's own extension pages,
+`https://claude.ai/new`, `https://chatgpt.com/` and the local dashboard
+(`http://127.0.0.1:5179/dashboard`); anything else is refused with
+`{ok: false}`.
 
 ## Token-gated endpoints
 
@@ -114,13 +218,25 @@ Access-Control-Allow-Headers: Content-Type, X-Uoink-Token, X-Uoink-Client, X-Yoi
 Access-Control-Allow-Private-Network: true
 ```
 
-Allowed web origins are YouTube pages used by the content script:
+The following YouTube page origins remain allowed because shipped content
+scripts still need direct helper reads:
 
 - `https://www.youtube.com`
 - `https://m.youtube.com`
 - `https://youtube.com`
 
-Extension origins are accepted as `chrome-extension://*`. This is broad by design for v2 dev/fork compatibility; extension ID pinning should be revisited after Chrome Web Store publication.
+Capture, session-add requests and routine health polling use the extension
+service worker. However, `content.js` still calls `STC.getSettings()` directly
+to choose the screenshot picker after capture. The shared capture-error
+fallback also calls `/health` directly when the service worker cannot classify
+the error. Removing page-origin CORS/PNA permission requires moving those
+remaining calls to the service worker first. Public diagnostic redaction
+applies to these origins too.
+
+Extension CORS uses the same ID allowlist as `/token`, for both
+`chrome-extension://<id>` and `moz-extension://<id>`. Unlisted or malformed
+extension origins receive no CORS or Private Network Access permission. Origins
+with paths, ports, credentials, query strings or fragments are refused.
 
 `Access-Control-Allow-Private-Network: true` is required by Chromium's Private Network Access rules when a public HTTPS origin preflights a request to loopback.
 
@@ -144,13 +260,69 @@ Protocol validation failures return `4xx` JSON errors. Handled application failu
   platform-specific validators.
 - Generic video, web-page, and podcast capture accepts HTTP(S) only. Embedded
   credentials and malformed ports are rejected, explicit ports are preserved,
-  and bracketed IPv6 is rejected for generic video and page capture. Podcast
-  feeds preserve valid bracketed IPv6.
-- IP literals are currently permitted. Hostnames are not restricted to
-  public-network resolutions, and redirect targets are not revalidated by
-  Uoink before the active fetcher follows them. Page, feed, and generic-video
-  capture are token-gated and user-directed, but a public-network-only fetch
-  policy remains an explicit hardening decision rather than a shipped claim.
+  and bracketed IPv6 is rejected by the generic-video and page validators.
+  Podcast feed normalization preserves bracketed IPv6, but fetching it is
+  refused by the network policy below.
+- Podcast feed polls, the stdlib page fetcher (including Writing Studio's
+  fallback), and thumbnail downloads share the standing-source fetcher's
+  public-network checks. IP literals are refused, including public IPs and
+  alternate numeric IPv4 spellings. Localhost names are also refused. Every
+  resolved address must be public: private, loopback, link-local, shared-address,
+  reserved, unspecified and multicast targets are refused. An IPv6 answer
+  that carries an IPv4 address (IPv4-mapped `::ffff:0:0/96`, NAT64
+  `64:ff9b::/96` or 6to4 `2002::/16`) must also pass the IPv4 check, and the
+  NAT64 local-use prefix `64:ff9b:1::/48` is refused. A hostname that cannot
+  be IDNA-encoded, such as one with an empty or over-long label, is refused
+  before any lookup. Name and IP-literal checks use the IDNA form, so
+  fullwidth spellings of `localhost` or an IP address count as those.
+  Percent-encoded hosts are refused, because the HTTP client and yt-dlp
+  decode them before connecting. DNS is checked for the exact host name the
+  connection is made for, case and trailing dot included, and a URL whose
+  connection host differs from its parsed host is refused. DNS is checked again for
+  each fetch. Redirect targets are revalidated on every hop and
+  must pass the HTTP(S), credentials, port, fragment and host-encoding checks.
+- Podcast enclosure downloads and generic yt-dlp metadata extraction first
+  follow a checked GET redirect chain, close the response without reading
+  the body, and pass its final URL to yt-dlp after `--`. A failed check or
+  unreachable destination prevents the subprocess from starting. This adds
+  a request before extraction, with the podcast fetcher's User-Agent for
+  enclosures and the page fetcher's User-Agent for generic URLs. The header
+  is sent on every redirect hop. A host that rejects that request cannot be
+  captured through these paths. `/extract/any` returns HTTP 400 with the
+  refusal or preflight error, including response timeouts and HTTP protocol
+  errors. Fixed YouTube hosts,
+  including YouTube Music, and the strict X/Twitter, TikTok and Instagram
+  paths retain their existing yt-dlp flow without this extra GET. That
+  exemption covers only the strict validators' canonical URLs. Any other URL
+  on those hosts, such as a `/live/status` probe that falls back to the
+  relaxed validator, takes the checked GET. YouTube
+  metadata requests keep their original URL and shared rate limiter.
+- Crawl4AI page capture checks the initial URL and its DNS answers against
+  the same public-network policy before starting the renderer, including
+  Writing Studio requests that bypass the site allowlist. A refusal stops
+  capture without falling back to another engine. If the renderer fails
+  after admission, the stdlib fallback checks its own requests and redirects.
+- Local and intranet sources that previously worked through these fetchers
+  now fail, including saved feeds polled by the scheduler. Refused thumbnails
+  are omitted; previously downloaded podcast audio remains usable. Localhost
+  fixture servers require explicit transport/resolver injection in tests.
+  The standing-source S20/S21 harnesses can still inject their exact loopback
+  host through `_reject_private_ip` and `_check_resolved_host`; literal-host
+  rejection belongs to the latter check. No setting or environment variable
+  disables these checks in production.
+- Connections made by these fetchers (feed polls, the stdlib page fetcher,
+  thumbnail downloads and the checked GET before yt-dlp) are pinned: each hop
+  dials only the addresses that passed the check for it, in resolver order,
+  and never resolves the name again, so a DNS answer that changes after the
+  check (DNS rebinding) cannot move the connection. The Host header, TLS SNI
+  and certificate hostname verification still use the original host name.
+  These fetches connect directly and do not use system or environment proxy
+  settings, because a proxy would resolve the name again.
+- Requests made inside the Crawl4AI browser renderer and by yt-dlp after
+  admission are not covered: those engines resolve names themselves, so they
+  are not pinned and remain exposed to DNS rebinding, and Uoink does not
+  revalidate their redirects or subresource requests. Those engines are not
+  network-sandboxed by these checks.
 - Playlist IDs must match ASCII `^[A-Za-z0-9_-]{2,}$`; playlist processing is capped at 10 videos.
 - Session IDs must match `^[A-Za-z0-9_-]{1,64}$`.
 - Job IDs must match `^job_[A-Za-z0-9_-]{1,96}$`.
@@ -169,6 +341,28 @@ Protocol validation failures return `4xx` JSON errors. Handled application failu
 - Only `.png`, `.jpg`, `.jpeg`, and `.webp` are served.
 - Magic bytes must match the extension-derived MIME type.
 - Responses use `Cache-Control: private, max-age=300`.
+
+## Corpus import sandbox
+
+To import a backup through `POST /corpus/import` or the local CLI
+`--import-corpus <file>`, copy the export JSON into the active output folder's
+`_exports` directory and supply its absolute path. Both entry points enforce
+this boundary; the CLI also rejects relative paths and backups in other folders.
+Subdirectories are allowed. Other output locations and sibling folders such as
+`_exports-old` are outside this boundary, even if `/file` can serve their images.
+
+The helper rejects relative paths and `..` segments, resolves the file and
+export directory, then checks containment before probing or reading the file.
+File symlinks and directory junctions cannot point outside `_exports`, and
+`_exports` itself cannot resolve outside the output root. Invalid paths, missing
+files, unreadable files and invalid exports return HTTP 400, or JSON with
+`ok: false` from the CLI; error responses do not echo local paths. The Host
+allowlist, token requirement and JSON body limits still apply before HTTP import
+processing.
+
+Export format and conservative merge rules are unchanged. A local index rebuild
+with an explicit root still restores the newest export under that root's
+`_exports`; HTTP callers cannot override the root in their request body.
 
 ## Anthropic API key storage
 
@@ -217,6 +411,88 @@ Installed Windows builds store helper state under `%LOCALAPPDATA%\Uoink\` (migra
 - `.migration-complete` / `.migrated-from-yoink` - markers written by the v2.1 install migration (see below).
 
 Corpus, sidecar, settings, and migration writes use temp-file-and-replace patterns where practical. Corrupt `index.db` is quarantined as `index.db.corrupt-<timestamp>` and rebuilt from on-disk corpora through a local backfill scan. Legacy corrupt `jobs.json` or `taxonomy.json` migration input is logged and left in place rather than crashing the helper.
+
+Machine error details pass through `_sanitize_error` before a job stores them or
+an extraction/session response returns them. Paths become `<path>`, URLs with
+userinfo become `<url>`, and recognized API keys and labelled credentials become
+`[redacted]`. This includes quoted paths with spaces, Windows drive and UNC paths,
+Unix paths, API-key fields and authorization headers. Each line is sanitized
+separately, with spaces and tabs compacted. Machine details retain line breaks
+between `Command:`, `Exit code:` and tool output, so extension notifications can
+still select the last `ERROR:` line. Credential labels require `:` or `=`, except
+CLI flags such as `--password` and `Bearer`/`Basic` auth schemes, which also accept
+a space or tab. CLI flags include prefixed forms such as `--video-password`, and
+they also accept `--flag=value` and the comma of a Python or JSON argument list,
+as in `'--token', 'value'` (the form `str()` of a subprocess error prints).
+For failed or timed-out subprocesses with an argument list, credential values
+are replaced before the command is joined or quoted. Both `--flag value` and
+`--flag=value` redact the entire argument, including spaces and line breaks.
+The same flag names are recognized in free-text diagnostics.
+A quoted value in free text runs to its matching unescaped quote,
+the one followed by whitespace, the end of the line or only closing punctuation
+(such as `', ` or `']'`), so commas, escaped quotes and apostrophes inside it are
+redacted too; a quoted value without such a closing quote is redacted to the end
+of its line. An unquoted value runs to the next whitespace. Ordinary diagnostics
+such as "This video requires a GVS PO Token which was not provided." are
+preserved. Free-text credential matches do not cross line breaks.
+Spaces within unquoted directory names are supported when a separator follows.
+Once a path starts, redaction consumes its full non-whitespace suffix, including
+apostrophes, colons and repeated separators such as doubled backslashes.
+Quoted absolute paths redact through the end of their line unless the last
+same-quote closer follows a filename with an extension and the remaining text
+is a complete diagnostic phrase, such as `failed`, `wasn't found` or `is locked`.
+For example, `file '/home/x.json' wasn't found` becomes `file <path> wasn't found`,
+but `file '/home/james' smith failed` becomes `file <path>`. This also removes
+ambiguous names such as `James' O'Brien`, tails with no separators or dots,
+and any later paths on that line. Windows drive and UNC paths follow the same
+rule. Several quoted paths and intervening words can become one `<path>`.
+The rule can also hide the rest of a command or diagnostic line after a quoted
+path, including placeholders for URLs or credentials already redacted there.
+Unterminated paths and paths cut off by the 65,536-character input cap redact
+to the end of the available line. Redaction never crosses a line break.
+Unquoted spaced directories can contain colons, such as `james' smith:family`.
+Unquoted paths end at whitespace after the final component, preserving separate
+path placeholders and trailing diagnostic text. Retry details keep their
+200-character limit.
+Sanitizer input is capped at 65,536 characters before splitting lines or
+running regexes. Redaction then runs before the existing 6,000-character
+failed-subprocess detail and 3,000-character other-exception limits. Longer
+diagnostics keep only their prefix, as before; the full text remains in
+`server.log`. Timeout details use separate `Command:` and `Timeout:` lines.
+The sanitizer does not read credentials to perform these replacements.
+
+URLs (`scheme://...`) become `<url>` as a whole before path redaction. A drive
+letter or `/` directly after a letter or digit does not start a path, so text
+such as "download/network issue" or "and/or" is unchanged and phase errors
+match their sanitized detail.
+
+The failure handlers that record a machine error detail (single-video and
+playlist extraction, session capture, the retry queue and podcast
+transcription) write the raw text, including command lines and tool
+stderr/stdout, only to the local `server.log` through a file-only logger. The
+job's `error` and `error_detail`, a podcast episode's transcript error and a
+deferred podcast publish error store only sanitized text. For a podcast
+transcription failure, the job's `error`, the episode's transcript error and the
+console line are a one-line summary: a failed subprocess is recorded only as its
+type and exit status (`CalledProcessError: exit status 1`), a subprocess timeout
+as `TimeoutExpired: timed out after N seconds`, and other exceptions as their
+sanitized text. A deferred podcast publish error (`corpus_error` in the job
+result, and its console line) uses the same summary. The podcast job's
+`error_detail` keeps the exception type and the sanitized machine detail; for a
+subprocess error that includes the redacted command line and, for a failed
+subprocess, its redacted output. The console line each of the other
+handlers logs for the failure uses fixed or sanitized text; podcast
+transcription and deferred-publish tracebacks also go only to `server.log`.
+Optional subtitle-fetch and comments-worker failures follow the same rule:
+raw exceptions and yt-dlp output go to the file-only logger, while the console
+gets a sanitized summary. A comments failure no longer prints yt-dlp's last
+stderr line to the console. Subtitle-refusal detection and comments status
+updates are unchanged.
+Other helper log lines are unchanged and still go to both the console and
+`server.log`; some include local paths, the output folder or a tool's last
+error line. Review `server.log` before sharing it: it can contain the paths and
+credentials removed from dashboard errors. This change does not purge
+historical job records or existing logs.
 
 ## MCP security model
 
@@ -280,9 +556,9 @@ autostart value from `Yoink` to `Uoink`. The legacy folder is left intact for a
 7-day grace period and only hard-deleted after a verified, healthy `\Uoink\`.
 No data leaves the machine; the registry/keyring writes are gated to the
 installed layout so a dev run from the repo never mutates the real machine. A
-failed keyring step is non-fatal and surfaced in `/diagnose` as "re-enter your
-Anthropic key" rather than a silent empty key. The Desktop corpus
-(`Desktop\Yoink\`) is migrated only on explicit user opt-in via the extension
+failed keyring step is non-fatal; check authenticated Settings for key status.
+Public `/diagnose` does not report whether a legacy key exists or migrated.
+The Desktop corpus (`Desktop\Yoink\`) is migrated only on explicit user opt-in via the extension
 popup (`POST /migration/move-desktop-corpus`), never automatically.
 
 ## What Uoink does not collect

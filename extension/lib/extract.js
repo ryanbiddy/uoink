@@ -38,13 +38,11 @@
   }
   async function _fetchFreshToken() {
     try {
-      // X-Yoink-Client is the gate header on /token. Random websites
-      // can't set custom headers cross-origin without a CORS preflight,
-      // which our server only ACAO-echoes for the extension/youtube
-      // allowlist -- so a drive-by attacker is blocked at the browser
-      // before this header even reaches the server.
+      // Chromium worker GETs omit Origin and send Sec-Fetch-Site: none.
+      // POST carries chrome-extension://<id>, so the helper can enforce its
+      // ID allowlist. Keep the custom client header for the bootstrap gate.
       const res = await fetch(`${SERVER}/token`, {
-        method: "GET",
+        method: "POST",
         mode: "cors",
         credentials: "omit",
         cache: "no-store",

@@ -314,6 +314,10 @@ def _validate_facets(body: dict) -> tuple[dict, str | None]:
 # first boot for each installed version (gated by
 # %LOCALAPPDATA%\Uoink\.first-run-done containing VERSION).
 SPLASH_PATH = HERE / "assets" / "splash" / "index.html"
+# Capture and routine health checks use the service worker, but content.js
+# still reads /settings directly for the screenshot picker, and its shared
+# capture-error fallback probes /health. Move those callers before removing
+# these page origins; public diagnostics must not expose paths or key state.
 ALLOWED_ORIGINS = {
     "https://www.youtube.com",
     "https://m.youtube.com",
@@ -333,26 +337,25 @@ ALLOWED_HOST_NAMES = frozenset({
 })
 
 
-# C-04: optional extension-ID pin for /token. Empty by default (load-unpacked
-# gives every dev a different id, and no Chrome Web Store id is published
-# yet). Once the CWS id is known, set UOINK_EXTENSION_IDS=<id>[,<id>] (or the
-# extension_ids settings key) and /token only mints the token for those
-# extension origins. Until then any chrome-/moz-extension origin is accepted,
-# exactly as before -- the Host allowlist above is the load-bearing rebind
-# defense; this is defense-in-depth for after launch.
+# Derived from the public key in extension/manifest.json. Configuration adds
+# trusted Edge/dev IDs; it cannot remove this pin or allow arbitrary origins.
+PINNED_EXTENSION_ID = "bkcapfidedhfcjpmjabeopfbcjcbmdmi"
+
+
 def _allowed_extension_ids() -> set[str]:
-    raw = (os.environ.get("UOINK_EXTENSION_IDS") or "").strip()
-    if not raw:
-        try:
-            settings = _read_settings() or {}
-        except Exception:
-            settings = {}
-        value = settings.get("extension_ids")
-        if isinstance(value, (list, tuple)):
-            raw = ",".join(str(v) for v in value)
-        elif isinstance(value, str):
-            raw = value
-    return {part.strip() for part in raw.split(",") if part.strip()}
+    ids = {PINNED_EXTENSION_ID}
+    extra = (os.environ.get("UOINK_EXTENSION_IDS") or "").split(",")
+    try:
+        settings = _read_settings() or {}
+    except Exception:
+        settings = {}
+    value = settings.get("extension_ids") if isinstance(settings, dict) else None
+    if isinstance(value, str):
+        extra.extend(value.split(","))
+    elif isinstance(value, (list, tuple)):
+        extra.extend(value)
+    ids.update(part.strip() for part in extra if isinstance(part, str) and part.strip())
+    return ids
 
 CREATE_NO_WINDOW = 0x08000000 if sys.platform == "win32" else 0
 SUBPROCESS_KW = {"creationflags": CREATE_NO_WINDOW} if sys.platform == "win32" else {}
@@ -1758,20 +1761,161 @@ def _short_reason(reason: str, *, api_key: str | None = None) -> str:
     return msg[:180] if len(msg) > 180 else msg
 
 
-# Strip filesystem paths (Windows or Unix) before persisting an error
-# string. Windows: ``X:\...`` (one literal backslash per separator). Unix:
-# ``/...``. The URL pattern runs first below so a userinfo-bearing URL
-# is replaced as a unit rather than slashed-up piece by piece.
-_PATH_SANITIZE_RE = re.compile(r"[A-Za-z]:\\[^\s]+|/[^\s]+")
+# Match path starts only; the scanners below handle ambiguous spaces/quotes
+# without nested repetitions or repeatedly searching the same suffix.
+_QUOTED_PATH_SANITIZE_RE = re.compile(
+    r"([\"'])(?:[A-Za-z]:[\\/]|\\\\|/)")
+# Only unmistakable, complete diagnostic phrases may follow a quoted filename.
+# A prefix such as "failed" is not enough: later words could still be a name.
+_PATH_PROSE_SANITIZE_RE = re.compile(
+    r"[ \t]+(?:failed|wasn't found|was not found|not found|is locked|"
+    r"is unavailable|is not available|does not exist)[.!]?[ \t]*\Z")
+_PATH_SANITIZE_RE = re.compile(
+    r"(?:(?<![A-Za-z0-9])[A-Za-z]:[\\/]|\\\\|(?<![A-Za-z0-9])/)"
+    r"[^\s]*")
+# Replace a whole scheme://... URL before path redaction. Path rules would
+# otherwise read its scheme as a drive (https:// -> http<path>) or keep only
+# "https:", as the original sanitizer did, so no host is lost by this. The
+# URL runs to whitespace; only closing quotes and punctuation at its very end
+# stay outside the placeholder.
+_URL_SANITIZE_RE = re.compile(
+    r"(?<![A-Za-z0-9+.-])[A-Za-z][A-Za-z0-9+.-]*://[^\s]*")
 # Strip URLs that carry HTTP basic-auth userinfo (rare but possible: e.g.
 # yt-dlp surfacing the request URL in an error). Match scheme://user@host
 # and replace the whole URL with a placeholder.
-_USERINFO_URL_RE = re.compile(r"https?://[^@\s/]+@[^\s]+")
+_USERINFO_URL_RE = re.compile(
+    r"(?<![A-Za-z0-9+.-])https?://[^@\s/]+@[^\s]+", re.IGNORECASE)
+# Recognize keys and labelled credentials in tool output without consulting
+# settings, the credential store or the token file.
+_KEY_SANITIZE_RE = re.compile(r"\bsk-[A-Za-z0-9_-]+", re.IGNORECASE)
+# Plain labels need ':' or '='. Only CLI flags and auth schemes accept a
+# whitespace separator, so prose such as "PO Token which was not provided"
+# stays readable. Separators must never consume the next diagnostic line.
+# Share the exact flag vocabulary with argument-list redaction. Free-text
+# labels keep the additional space-separated "api key" spelling.
+_CREDENTIAL_FLAG_PATTERN = (
+    r"--(?:[\w-]*-)?(?:api[-_]?key|anthropic[-_](?:api[-_])?key|"
+    r"x-api-key|x-(?:uoink|yoink)-token|access[-_]?token|token|authorization|"
+    r"password|client[-_]?secret)")
+_CREDENTIAL_FLAG_SANITIZE_RE = re.compile(_CREDENTIAL_FLAG_PATTERN + r"\Z", re.IGNORECASE)
+# Only match the label here. Quoted values are scanned once, including escaped
+# quotes, glued apostrophes and unterminated values. Argument-list commas and
+# quotes around a whole --flag=value argument are also recognized.
+_CREDENTIAL_SANITIZE_RE = re.compile(
+    r"(?<![\w-])(?P<flag_quote>[\"'])" + _CREDENTIAL_FLAG_PATTERN + r"="
+    r"|\b(?:api[-_ ]?key|anthropic[-_ ](?:api[-_ ])?key|x-api-key|"
+    r"x-(?:uoink|yoink)-token|access[-_]?token|token|authorization|"
+    r"password|client[-_]?secret)\b"
+    r"[\"']?[ \t]*[:=][ \t]*"
+    r"|(?<![\w-])" + _CREDENTIAL_FLAG_PATTERN + r"\b(?:[\"']?[ \t]*,[ \t]*|[ \t]+)"
+    r"|\b(?:Bearer|Basic)[ \t]+",
+    re.IGNORECASE)
+_CREDENTIAL_END_SANITIZE_RE = re.compile(r"[\"'),.;:!?\]}>]{0,8}(?:\s|$)")
+_CREDENTIAL_VALUE_SANITIZE_RE = re.compile(
+    r"(?:Bearer[ \t]+|Basic[ \t]+)?[^\s]+", re.IGNORECASE)
+_ERROR_SANITIZE_INPUT_LIMIT = 64 * 1024
 
 
-def _sanitize_error(msg: str, *, max_len: int = 200) -> str:
-    """Strip filesystem paths and userinfo-bearing URLs from an error
-    string before persisting it (Sprint 19.6 / Fix 8 / audit F3).
+def _redact_error_credentials(line: str) -> str:
+    pieces = []
+    pos = 0
+    while match := _CREDENTIAL_SANITIZE_RE.search(line, pos):
+        start = end = match.end()
+        flag_quote = match.group("flag_quote")
+        quote = flag_quote or (line[start:start + 1] if line[start:start + 1] in ("'", '"') else "")
+        if quote:
+            if not flag_quote:
+                end += 1
+            while end < len(line):
+                char = line[end]
+                end += 1
+                if char == "\\":
+                    end = min(end + 1, len(line))
+                elif char == quote and _CREDENTIAL_END_SANITIZE_RE.match(line, end):
+                    break
+        elif line.startswith("[redacted]", start):
+            end += len("[redacted]")
+        elif value := _CREDENTIAL_VALUE_SANITIZE_RE.match(line, start):
+            end = value.end()
+        pieces.append(line[pos:start])
+        if end > start:
+            pieces.append("[redacted]" + (flag_quote or ""))
+        pos = end
+    pieces.append(line[pos:])
+    return "".join(pieces)
+
+
+def _redact_error_paths(line: str) -> str:
+    # Locate the LAST same-quote closer before deciding whether any suffix is
+    # safe to keep. Index both quote styles in one pass; an apostrophe inside
+    # a word (O'Brien, wasn't) is not a closer.
+    # _sanitize_error supplies one line at a time, so no span crosses a newline.
+    last_closer = {"'": -1, '"': -1}
+    for offset, char in enumerate(line):
+        following = offset + 1
+        if char in last_closer and (following == len(line) or
+                                   not line[following].isalnum()):
+            last_closer[char] = offset
+
+    pieces = []
+    pos = 0
+    while match := _QUOTED_PATH_SANITIZE_RE.search(line, pos):
+        closing = last_closer[match.group(1)]
+        end = len(line)
+        if closing >= match.end():
+            # An apostrophe can be part of a name even when the remaining
+            # words have no separators or dots. Default to the end of the
+            # line (also the end of capped input), including later paths.
+            # Preserve prose only after a filename with an actual extension.
+            filename = (line[match.start() + 1:closing]
+                        .replace("\\", "/").rsplit("/", 1)[-1])
+            stem, dot, extension = filename.rpartition(".")
+            after_quote = closing + 1
+            while after_quote < len(line) and line[after_quote] in ",.;:!?)]}":
+                after_quote += 1
+            if (stem and dot and extension.isalnum() and
+                    _PATH_PROSE_SANITIZE_RE.fullmatch(line, after_quote)):
+                end = after_quote
+            # Each quote style uses its last closer, so these scans run at
+            # most twice per line and remain linear in the capped input.
+        pieces.extend((line[pos:match.start()], "<path>"))
+        pos = end
+    pieces.append(line[pos:])
+    line = "".join(pieces)
+
+    pieces = []
+    pos = search_at = 0
+    while match := _PATH_SANITIZE_RE.search(line, search_at):
+        end = scan = match.end()
+        # Spaces belong to a directory only if another separator follows.
+        # Stop at a new absolute path or delimiter; consume non-space suffixes
+        # whole, including colons, apostrophes and repeated separators.
+        while scan < len(line):
+            char = line[scan]
+            # A colon only separates paths when it belongs to a new drive
+            # root. In a name such as "james' smith:family/private/x.json",
+            # keep scanning to the separator after the colon.
+            if char in '"<>' or (char == ":" and _PATH_SANITIZE_RE.match(line, scan - 1)):
+                break
+            if char in "/\\":
+                if line[scan - 1].isspace():
+                    break
+                while scan < len(line) and not line[scan].isspace():
+                    scan += 1
+                end = scan
+            else:
+                scan += 1
+        pieces.extend((line[pos:match.start()], "<path>"))
+        pos = end
+        # A ':' delimiter may belong to the next drive letter.
+        search_at = scan - 1 if scan < len(line) and line[scan] == ":" else scan
+    pieces.append(line[pos:])
+    return "".join(pieces)
+
+
+def _sanitize_error(msg: str, *, max_len: int = 200,
+                    preserve_lines: bool = False) -> str:
+    """Strip paths, userinfo URLs and keys before storing or returning errors.
 
     The rate-limit retry queue persists last_error across helper restarts;
     a raw friendly_error string can include yt-dlp's last stderr line,
@@ -1781,12 +1925,26 @@ def _sanitize_error(msg: str, *, max_len: int = 200) -> str:
     leaks it."""
     if not msg:
         return ""
-    # URL pass first so a userinfo URL is replaced as a unit -- otherwise
-    # the path regex would only catch the trailing /-prefixed portion and
-    # leave the credentials visible.
-    cleaned = _USERINFO_URL_RE.sub("<url>", str(msg))
-    cleaned = _PATH_SANITIZE_RE.sub("<path>", cleaned)
-    cleaned = re.sub(r"\s+", " ", cleaned).strip()
+    lines = []
+    # Bound work before splitting or running any regex. Keep the existing
+    # prefix-only truncation style and redact the bounded prefix before the
+    # smaller display limits, including a credential cut at this boundary.
+    for line in str(msg)[:_ERROR_SANITIZE_INPUT_LIMIT].splitlines():
+        # Whole URLs first: userinfo is replaced as a unit, a query-string
+        # credential goes with its URL, and a URL never turns into a partial
+        # path placeholder.
+        cleaned = _USERINFO_URL_RE.sub("<url>", line)
+        cleaned = _URL_SANITIZE_RE.sub(
+            lambda m: "<url>" + m.group().removeprefix(m.group().rstrip("\"'),.;:!?]}>")),
+            cleaned)
+        cleaned = _redact_error_credentials(cleaned)
+        cleaned = _KEY_SANITIZE_RE.sub("[redacted]", cleaned)
+        cleaned = _redact_error_paths(cleaned)
+        lines.append(re.sub(r"[ \t]+", " ", cleaned).strip())
+    # Queue summaries stay on one line; machine details retain the line
+    # boundaries used by the extension to find the last yt-dlp ERROR: line.
+    cleaned = ("\n".join(lines) if preserve_lines else
+               " ".join(line for line in lines if line)).strip()
     return cleaned[:max_len]
 
 
@@ -2048,16 +2206,23 @@ def _allowed_roots() -> set[Path]:
 LOG_PATH = (
     _ISOLATION.log_path if _ISOLATION is not None else HERE / "server.log"
 )
+# One rotating file handler: the root logger and the file-only machine-error
+# detail logger share it, so raw diagnostics rotate with server.log.
+_server_log_handler = RotatingFileHandler(LOG_PATH, maxBytes=5 * 1024 * 1024,
+                                          backupCount=3, encoding="utf-8")
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s %(levelname)s %(message)s",
     handlers=[
-        RotatingFileHandler(LOG_PATH, maxBytes=5 * 1024 * 1024,
-                            backupCount=3, encoding="utf-8"),
+        _server_log_handler,
         logging.StreamHandler(sys.stdout),
     ],
 )
 log = logging.getLogger("uoink")
+# Raw machine diagnostics belong only in server.log, never stdout or a job.
+_error_detail_log = logging.getLogger("uoink.error_detail")
+_error_detail_log.propagate = False
+_error_detail_log.addHandler(_server_log_handler)
 
 # Serialize extractions — yt-dlp + ffmpeg are I/O heavy.
 _extract_lock = threading.Lock()
@@ -3707,13 +3872,25 @@ def _extract_generic_transcript(metadata: dict) -> list[dict]:
 
 
 def _fetch_metadata(url: str, *,
-                    cancel_event: threading.Event | None = None) -> dict:
+                    cancel_event: threading.Event | None = None,
+                    resolve_url=None) -> dict:
     """Single yt-dlp call that returns the full metadata blob without
     downloading the video. Used to derive the folder slug, fill the corpus
-    header, and seed the thumbnail URL.
+    header, and seed the thumbnail URL. resolve_url is a test injection.
     """
+    # Match the pacing boundary, including YouTube Music. A preflight GET
+    # here would run outside the shared YouTube slot and alter the input URL.
+    # X/Twitter, TikTok and Instagram skip it only for the strict validator's
+    # own output. Any other URL on those hosts, such as a relaxed /live/status
+    # probe that keeps its full path and query, is admitted like a generic URL.
+    strict_url, strict_platform = _normalize_video_url(url)
+    strict_platform_url = strict_url == url and strict_platform in (
+        PLATFORM_TWITTER, PLATFORM_TIKTOK, PLATFORM_INSTAGRAM)
+    if not _is_youtube_ytdlp_call([*YTDLP_CMD, url]) and not strict_platform_url:
+        url = (resolve_url or source_subscriptions.resolve_public_http_url)(
+            url, user_agent=page_extractor._USER_AGENT)
     cp = _run_subprocess(
-        [*YTDLP_CMD, "--dump-single-json", "--no-download", url],
+        [*YTDLP_CMD, "--dump-single-json", "--no-download", "--", url],
         cancel_event=cancel_event,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
@@ -3726,10 +3903,12 @@ def _fetch_metadata(url: str, *,
 
 
 def _download_thumbnail(metadata: dict, output_folder: Path, *,
-                        cancel_event: threading.Event | None = None) -> Path | None:
+                        cancel_event: threading.Event | None = None,
+                        http_open=None) -> Path | None:
     """Download highest-resolution thumbnail to <folder>/thumbnail.jpg.
     Always re-encodes through ffmpeg so the output is jpg even if YouTube
     served webp/png. Returns the jpg path on success, None on failure.
+    http_open is an explicit test injection for local fixture servers.
     """
     thumbs = metadata.get("thumbnails") or []
     candidates = [t for t in thumbs if t.get("url")]
@@ -3746,7 +3925,8 @@ def _download_thumbnail(metadata: dict, output_folder: Path, *,
 
     raw_path = output_folder / "thumbnail.raw"
     try:
-        with urllib.request.urlopen(url, timeout=30) as resp, open(raw_path, "wb") as f:
+        with (http_open or source_subscriptions.public_http_open)(
+                url, timeout=30) as resp, open(raw_path, "wb") as f:
             f.write(resp.read())
     except Exception as e:
         log.warning("thumbnail download failed: %s", e)
@@ -4941,14 +5121,15 @@ def _comments_worker(url: str, output_folder: Path, yoink_path: Path,
         log.info("comments appended to %s (%d of %d)",
                  yoink_path, len(ranked), len(raw_comments))
     except subprocess.CalledProcessError as e:
-        stderr = (e.stderr or b"").decode("utf-8", errors="ignore").strip()
-        log.warning("comments yt-dlp failed: %s", stderr.splitlines()[-1] if stderr else e.returncode)
+        _error_detail_log.warning("comments yt-dlp failed: %s\n%s", e, _subprocess_output(e))
+        log.warning("comments yt-dlp failed: %s", _error_summary(e))
         _replace_comments_section(yoink_path,
             "*Comments are disabled on this video.*")
         _update_sidecar_comments(output_folder, [], "disabled")
         _start_hook_after_comments()
     except Exception as e:
-        log.warning("comments worker crashed: %s", e)
+        _error_detail_log.exception("comments worker crashed")
+        log.warning("comments worker crashed: %s", type(e).__name__)
         _replace_comments_section(yoink_path,
             "*Comments could not be retrieved.*")
         _update_sidecar_comments(output_folder, [], "unavailable")
@@ -5147,7 +5328,11 @@ def _fetch_video_subtitles(url: str, output_folder: Path, *,
         raise
     except (OSError, subprocess.CalledProcessError,
             subprocess.TimeoutExpired) as e:
-        log.warning("%s subtitle fetch unavailable: %s", long_video_mode, e)
+        output = (_subprocess_output(e) if isinstance(
+            e, (subprocess.CalledProcessError, subprocess.TimeoutExpired)) else "")
+        _error_detail_log.warning("%s subtitle fetch unavailable: %s\n%s",
+                                  long_video_mode, e, output)
+        log.warning("%s subtitle fetch unavailable: %s", long_video_mode, type(e).__name__)
         return (_detect_platform_from_url(url) == PLATFORM_YOUTUBE
                 and (_is_youtube_captions_refusal(e)
                      or _is_youtube_rate_limit(e)))
@@ -6587,21 +6772,68 @@ def _youtube_rate_limit_detail(e: BaseException) -> str:
     return "youtube_rate_limit"
 
 
+def _redact_command_args(cmd):
+    """Redact whole credential arguments before quoting destroys boundaries."""
+    if isinstance(cmd, str):
+        return cmd  # Free text still goes through _sanitize_error below.
+    args = []
+    redact_next = False
+    for part in cmd:
+        arg = str(part)
+        if redact_next:
+            args.append("[redacted]")
+            redact_next = False
+            continue
+        flag, equals, _ = arg.partition("=")
+        if _CREDENTIAL_FLAG_SANITIZE_RE.fullmatch(flag):
+            if equals:
+                arg = flag + "=[redacted]"
+            else:
+                redact_next = True
+        args.append(arg)
+    return args
+
+
 def machine_error_detail(e: BaseException) -> str:
-    """Raw-ish diagnostic detail for dashboard disclosures, not primary UI."""
-    if isinstance(e, subprocess.CalledProcessError):
+    """Log raw diagnostics locally; return only sanitized disclosure detail."""
+    is_failed_process = isinstance(e, subprocess.CalledProcessError)
+    if is_failed_process or isinstance(e, subprocess.TimeoutExpired):
+        output = _subprocess_output(e) if is_failed_process else ""
+        _error_detail_log.error("%s\n%s", e, output)
         pieces = []
         if e.cmd:
             try:
-                pieces.append("Command: " + " ".join(str(part) for part in e.cmd))
+                args = _redact_command_args(e.cmd)
+                command = args if isinstance(args, str) else subprocess.list2cmdline(args)
+                pieces.append("Command: " + command)
             except TypeError:
                 pieces.append(f"Command: {e.cmd}")
-        pieces.append(f"Exit code: {e.returncode}")
-        output = _subprocess_output(e)
+        pieces.append(f"Exit code: {e.returncode}" if is_failed_process else
+                      f"Timeout: {e.timeout} seconds")
         if output:
             pieces.append(output)
-        return "\n".join(pieces).strip()[:6000]
-    return re.sub(r"\s+", " ", str(e or "")).strip()[:3000]
+        detail = "\n".join(pieces).strip()
+        max_len = 6000 if is_failed_process else 3000
+    else:
+        detail = str(e or "")
+        max_len = 3000
+        _error_detail_log.error("%s", detail)
+    # Redact before truncating so a cut cannot leave a partial credential.
+    return _sanitize_error(detail, max_len=max_len, preserve_lines=True)
+
+
+def _error_summary(e: BaseException) -> str:
+    """One sanitized line for a job's or episode's error field and the console.
+
+    str() of a subprocess error embeds the whole command line (a Python list
+    repr), so those summarize as type plus exit status or timeout; the
+    machine error detail keeps the redacted command and tool output.
+    """
+    if isinstance(e, subprocess.CalledProcessError):
+        return f"{type(e).__name__}: exit status {e.returncode}"
+    if isinstance(e, subprocess.TimeoutExpired):
+        return f"{type(e).__name__}: timed out after {e.timeout} seconds"
+    return _sanitize_error(str(e)) or type(e).__name__
 
 
 def _source_name_from_error(text: str) -> str:
@@ -6669,7 +6901,9 @@ def friendly_error(e: BaseException) -> str:
         return ("Uoink can't find yt-dlp or ffmpeg on this machine. "
                 f"Install both from {INSTALL_HELP_URL}, then try again.")
     if isinstance(e, subprocess.CalledProcessError):
-        return _plain_error_from_text(machine_error_detail(e))
+        # Classification returns fixed UI copy; keep paths/tool names available
+        # here without logging the same raw diagnostic a second time.
+        return _plain_error_from_text(str(e) + "\n" + _subprocess_output(e))
     if isinstance(e, RuntimeError):
         return _plain_error_from_text(str(e))
     return "Uoink couldn't finish this one. Details are tucked below."
@@ -6950,8 +7184,9 @@ def _normalize_any_url(raw: str) -> tuple[str | None, str | None]:
     Known YouTube and X/Twitter URLs use their platform canonicalizers.
     Everything else reuses page_extractor.normalize_page_url, which accepts
     http(s), rejects embedded credentials and malformed ports, preserves
-    explicit ports, and rejects bracketed IPv6. IP literals are currently
-    permitted. Returns None on failure. Platform is best-effort from the host.
+    explicit ports, and rejects bracketed IPv6. IPv4 literals pass this
+    shape-only step but fail generic yt-dlp URL admission. Returns None on
+    failure. Platform is best-effort from the host.
 
     This deliberately does NOT call yt-dlp -- that's the extraction step.
     The dispatcher's job is to keep attacker-shaped URLs from reaching
@@ -8673,10 +8908,15 @@ def _podcast_transcription_worker() -> None:
                     # The transcript is complete and durable. Leave it done so
                     # the next feed tick retries only the idempotent publisher,
                     # not an expensive transcription that already succeeded.
-                    corpus_error = str(exc)
+                    # The raw error goes only to server.log; the job keeps
+                    # sanitized text.
+                    _error_detail_log.exception(
+                        "podcast watch: deferred corpus publish for episode %d",
+                        episode_id)
+                    corpus_error = _error_summary(exc)
                     log.warning(
                         "podcast watch: deferred corpus publish for episode "
-                        "%d after error: %s", episode_id, exc)
+                        "%d after error: %s", episode_id, corpus_error)
             now = _now_iso()
             _update_job(
                 job_id, state="completed", current_video_phase=None,
@@ -8706,21 +8946,30 @@ def _podcast_transcription_worker() -> None:
                 failure_code=None if corpus_result else (
                     "publish_failed" if corpus_error else "publish_not_requested"))
         except BaseException as exc:  # keep the one long-lived worker alive
-            log.exception("podcast transcription job %s failed", job_id)
+            # Tracebacks and raw tool text go only to server.log. The console,
+            # the episode row and the job (shown by the dashboard) get the
+            # sanitized forms used for every other machine error detail.
+            _error_detail_log.exception("podcast transcription job %s failed", job_id)
+            error = _error_summary(exc)
+            error_detail = f"{type(exc).__name__}: {machine_error_detail(exc)}"
+            log.error("podcast transcription job %s failed: %s", job_id, error)
             episode_id = job.get("episode_id") if isinstance(job, dict) else None
             if episode_id is not None:
                 try:
                     whisper_runner.update_episode_transcript_state(
                         _get_index(), int(episode_id),
                         status=whisper_runner.STATUS_FAILED,
-                        model_used=(job or {}).get("model"), error=str(exc))
+                        model_used=(job or {}).get("model"), error=error)
                 except Exception:
-                    log.exception("podcast transcript failure state write failed")
+                    _error_detail_log.exception(
+                        "podcast transcript failure state write failed")
+                    log.error("podcast transcript failure state write failed for job %s",
+                              job_id)
             _update_job(
                 job_id, state="failed", current_video_phase=None,
                 current_video=None, videos_failed=1,
-                completed_at=_now_iso(), error=str(exc),
-                error_detail=f"{type(exc).__name__}: {exc}",
+                completed_at=_now_iso(), error=error,
+                error_detail=error_detail,
                 message="Podcast transcription failed.")
             _settle_source_capture(job_id, video_id=None, failure_code="transcription_failed")
         finally:
@@ -11779,9 +12028,21 @@ def _probe_command(cmd: list[str]) -> tuple[str, str | None]:
 
 
 def _diagnose_payload() -> dict:
-    """Structured self-check (Sprint 19 / C3). Public, no-auth -- the popup
-    polls this when the helper looks unhealthy to surface a specific
-    recovery hint rather than a generic 'helper offline'."""
+    """Detailed self-check for the local console doctor, never an HTTP route."""
+    return _build_diagnose_payload(public=False)
+
+
+def _public_diagnose_payload(*, local_ui: bool = False) -> dict:
+    """HTTP self-check, redacted by default.
+
+    Only the HTTP handler's splash metadata check may enable local_ui,
+    which adds the splash's key-ready boolean without paths or key checks.
+    """
+    return _build_diagnose_payload(public=True, local_ui=local_ui)
+
+
+def _build_diagnose_payload(*, public: bool, local_ui: bool = False) -> dict:
+    """Shared probes with separate HTTP and console disclosure policies."""
     checks: list[dict] = []
     warnings: list[str] = []
 
@@ -11798,12 +12059,15 @@ def _diagnose_payload() -> dict:
 
     # 3. output_root_writable
     if _is_writable_dir(DESKTOP_ROOT):
-        add("output_root_writable", "ok", str(DESKTOP_ROOT))
+        add("output_root_writable", "ok",
+            "Output folder is writable" if public else str(DESKTOP_ROOT))
     else:
         add("output_root_writable", "error",
+            "Output folder is not writable" if public else
             f"{DESKTOP_ROOT} is not writable")
         warnings.append(
-            f"Uoink can't write to {DESKTOP_ROOT}. Check folder "
+            ("Uoink can't write to the output folder. Check folder " if public else
+             f"Uoink can't write to {DESKTOP_ROOT}. Check folder ") +
             "permissions, or set the UOINK_OUTPUT_DIR environment variable.")
 
     # 3b. path_integrity (C-05): a moved output folder used to leave every
@@ -11821,102 +12085,129 @@ def _diagnose_payload() -> dict:
             "Restart Uoink to relink them automatically, or run "
             "python server.py --heal-paths.")
 
-    # 4. anthropic_key_set + 5. anthropic_key_valid
-    try:
-        settings_data = _read_settings()
-    except Exception:
-        settings_data = {}
-    key_invalid = bool(settings_data.get("anthropic_key_invalid"))
-    try:
-        key = (_get_saved_anthropic_key() or "").strip()
-    except Exception:
-        key = ""
+    # Do not inspect saved-key state for public page/extension/CLI HTTP reads.
     anthropic_key_valid = "skipped"
-    if key_invalid:
-        add("anthropic_key_set", "warning", "saved key failed verification")
-        add("anthropic_key_valid", "error", "Your Anthropic key isn't working.")
-        anthropic_key_valid = False
-        warnings.append("Your Anthropic key isn't working. Update it in Settings.")
-    elif key:
-        add("anthropic_key_set", "ok", None)
-        add("anthropic_key_valid", "ok", "saved key present")
-        anthropic_key_valid = True
-    else:
-        add("anthropic_key_set", "warning", "no key configured")
-        add("anthropic_key_valid", "skipped", "no key entered")
-        anthropic_key_valid = "skipped"
-        warnings.append(
-            "Anthropic API key not configured. Open setup to add one if you "
-            "want Comment Intelligence, Hook Type, or entity extraction "
-            "(everything else still works without it).")
+    key = ""
+    if not public or local_ui:
+        try:
+            settings_data = _read_settings()
+        except Exception:
+            settings_data = {}
+        key_invalid = bool(settings_data.get("anthropic_key_invalid"))
+        try:
+            key = (_get_saved_anthropic_key() or "").strip()
+        except Exception:
+            key = ""
+        if key_invalid:
+            anthropic_key_valid = False
+            if not public:
+                add("anthropic_key_set", "warning", "saved key failed verification")
+                add("anthropic_key_valid", "error", "Your Anthropic key isn't working.")
+                warnings.append("Your Anthropic key isn't working. Update it in Settings.")
+        elif key:
+            anthropic_key_valid = True
+            if not public:
+                add("anthropic_key_set", "ok", None)
+                add("anthropic_key_valid", "ok", "saved key present")
+        elif not public:
+            add("anthropic_key_set", "warning", "no key configured")
+            add("anthropic_key_valid", "skipped", "no key entered")
+            warnings.append(
+                "Anthropic API key not configured. Open setup to add one if you "
+                "want Comment Intelligence, Hook Type, or entity extraction "
+                "(everything else still works without it).")
 
-    # 6. index_db_writable
-    if _is_writable_dir(INDEX_PATH.parent):
-        add("index_db_writable", "ok", str(INDEX_PATH))
-    else:
-        add("index_db_writable", "error",
-            f"{INDEX_PATH.parent} is not writable")
+    # 4. index_db_writable
+    index_writable = _is_writable_dir(INDEX_PATH.parent)
+    index_check = {"name": "index_db_writable", "status": "ok" if index_writable else "error"}
+    if not public:
+        index_check["detail"] = (
+            str(INDEX_PATH) if index_writable else f"{INDEX_PATH.parent} is not writable")
+    # setup.js treats any nonempty detail as an installation folder path.
+    # Public responses must omit it, including generic diagnostic sentences.
+    checks.append(index_check)
+    if not index_writable:
         warnings.append(
-            f"Index database is not writable at {INDEX_PATH}. Search, the "
+            ("Index database is not writable. Search, the " if public else
+             f"Index database is not writable at {INDEX_PATH}. Search, the ") +
             "Memory page, and the rate-limit queue will fail.")
 
-    # 7. yt_dlp_available
+    # 5. yt_dlp_available. Even successful version output can contain local
+    # build paths; only the console doctor gets subprocess stdout/stderr.
     status, detail = _probe_command([*YTDLP_CMD, "--version"])
     if status == "ok":
-        add("yt_dlp_available", "ok", f"yt-dlp {detail}")
+        add("yt_dlp_available", "ok",
+            "yt-dlp is available" if public else f"yt-dlp {detail}")
     else:
-        add("yt_dlp_available", "error", detail)
+        log.warning("diagnose: yt-dlp probe failed: %s", detail)
+        add("yt_dlp_available", "error",
+            "yt-dlp is unavailable; details are in the Uoink log" if public else detail)
         warnings.append(
             "yt-dlp is missing or broken. Reinstall with "
             "`python -m pip install -U yt-dlp`.")
 
-    # 8. keyring_available
+    # 6. keyring_available reports backend availability, never key presence.
     err = _credential_store_error()
     if err is None:
         add("keyring_available", "ok", _keyring_display_name())
     else:
-        add("keyring_available", "warning", str(err))
+        log.warning("diagnose: credential store unavailable: %s", err)
+        add("keyring_available", "warning",
+            "Credential store unavailable; details are in the Uoink log" if public else str(err))
         warnings.append(
             "OS credential store is unreachable -- the Anthropic API key "
             "cannot be saved between sessions.")
 
-    # 9. ffmpeg_available
+    # 7. ffmpeg_available
     status, detail = _probe_command(["ffmpeg", "-version"])
     if status == "ok":
-        add("ffmpeg_available", "ok", detail)
+        add("ffmpeg_available", "ok", "ffmpeg is available" if public else detail)
     else:
-        add("ffmpeg_available", "error", detail)
+        log.warning("diagnose: ffmpeg probe failed: %s", detail)
+        add("ffmpeg_available", "error",
+            "ffmpeg is unavailable; details are in the Uoink log" if public else detail)
         warnings.append(
             "ffmpeg is missing or broken. Screenshot extraction will fail.")
 
     if _OUTPUT_ROOT_FALLBACK:
         warnings.append(
-            f"Output folder fallback in effect: uoinks are being saved to "
-            f"{DESKTOP_ROOT} because the Desktop folder was not writable. The "
+            ("Output folder fallback in effect because the Desktop folder "
+             "was not writable. Check Settings for the active output folder. The " if public else
+             f"Output folder fallback in effect: uoinks are being saved to "
+             f"{DESKTOP_ROOT} because the Desktop folder was not writable. The ") +
             "extension's /file sandbox still serves both locations.")
-    # v2.1 migration signal. The extension popup polls /diagnose to decide
-    # whether to offer the opt-in "Move your saved uoinks to Desktop\Uoink\?"
-    # prompt (the Desktop-corpus move is user-confirmed, never automatic).
-    # Also flags a failed keyring migration so the user is told to re-enter
-    # their Anthropic key rather than hitting a silent empty key (design Q4 A).
+    # Keep migration readiness booleans, but explicitly project the public
+    # fields: migration_status also contains local roots and legacy-key state.
     try:
-        migration = migrate_install.migration_status()
-    except Exception as e:
-        migration = {"error": str(e)}
-    if migration.get("keyring_legacy_present") and not key:
+        status = migrate_install.migration_status()
+        migration = {
+            section: {flag: status.get(section, {}).get(flag) is True for flag in flags}
+            for section, flags in (
+                ("app_data", ("old_exists", "new_exists", "complete", "migrated_marker")),
+                ("desktop_corpus", ("legacy_present", "new_present")),
+            )
+        } if public else status
+    except Exception as exc:
+        log.exception("diagnose: migration status unavailable")
+        migration = {"error": "migration status unavailable; details are in the Uoink log" if public else str(exc)}
+    if not public and migration.get("keyring_legacy_present") and not key:
         warnings.append(
             "Your Anthropic key didn't carry over from the previous install. "
             "Re-enter it on the setup page to restore Comment Intelligence, "
             "Hook Type, and entity extraction.")
-    return {
+    payload = {
         "ok": True,
         "version": VERSION,
         "output_root_fallback": _OUTPUT_ROOT_FALLBACK,
         "migration": migration,
-        "anthropic_key_valid": anthropic_key_valid,
         "checks": checks,
         "warnings": warnings,
     }
+    if not public or (local_ui and isinstance(anthropic_key_valid, bool)):
+        # Omit the field for a missing key in the splash: its existing UI
+        # distinguishes absent (setup needed) from false (saved key invalid).
+        payload["anthropic_key_valid"] = anthropic_key_valid
+    return payload
 
 
 def _enrich_yoink_rows(idx, rows: list[dict]) -> list[dict]:
@@ -12413,9 +12704,7 @@ class Handler(BaseHTTPRequestHandler):
             return None
         if origin in ALLOWED_ORIGINS:
             return origin
-        # Some Chromium builds send the extension origin instead of the page
-        # origin for content-script fetches.
-        if origin.startswith("chrome-extension://"):
+        if self._is_allowed_extension_origin(origin):
             return origin
         return None
 
@@ -12502,42 +12791,46 @@ class Handler(BaseHTTPRequestHandler):
             pass
         return True
 
+    def _is_allowed_extension_origin(self, origin: str) -> bool:
+        """Match a complete extension origin, never a URL or an ID prefix."""
+        match = re.fullmatch(r"(?:chrome|moz)-extension://([a-z0-9_-]+)", origin)
+        return bool(match and match.group(1) in _allowed_extension_ids())
+
     def _is_extension_origin(self) -> bool:
-        """True if Origin looks like a browser extension OR is absent.
-        Some Chromium forks (Comet, observed in v1 testing) issue
-        same-process service-worker fetches with no Origin header at all,
-        so a strict allowlist locks them out. Browser-side CSRF defense
-        moves to the X-Uoink-Client header gate + the existing CORS ACAO
-        allowlist; see docs/security.md.
+        """Allow pinned/configured extensions or the local UI bootstrap.
 
-        C-04: the absent-Origin path is now only reachable after the Host
-        allowlist has passed (a rebind carries the attacker's Host and is
-        already rejected), so trusting a missing Origin here no longer
-        widens the rebind surface -- it only serves the genuine
-        same-process service-worker case.
+        A missing Origin is only trusted with explicit same-origin fetch
+        metadata and a present, allowed loopback Host (dashboard/WebView).
+        Extension worker GETs send no Origin and Sec-Fetch-Site: none, so
+        extensions must use POST to carry the Origin checked against the pin.
+        Empty and null Origin headers do not qualify for that exception.
+        """
+        origin = self.headers.get("Origin")
+        if origin is None:
+            site = (self.headers.get("Sec-Fetch-Site") or "").strip().lower()
+            return (site == "same-origin"
+                    and bool(self.headers.get("Host")) and self._host_allowed())
+        return self._is_allowed_extension_origin(origin)
 
-        C-04: when UOINK_EXTENSION_IDS / settings.extension_ids is set, a
-        present extension Origin must additionally match one of those ids.
-        Empty (today) accepts any extension origin, unchanged."""
-        origin = (self.headers.get("Origin", "") or "")
-        if not origin:
-            return True
-        if not (origin.startswith("chrome-extension://")
-                or origin.startswith("moz-extension://")):
-            return False
-        allowed = _allowed_extension_ids()
-        if not allowed:
-            return True
-        ext_id = origin.split("://", 1)[1].split("/", 1)[0].strip()
-        return ext_id in allowed
+    def _is_local_diagnose_request(self) -> bool:
+        """Preserve the splash's existing key-readiness classification only.
+
+        Unlike token bootstrap, diagnostics historically accept metadata
+        'none'. It does not prove extension identity and must never authorize
+        a token mint or a private route.
+        """
+        site = (self.headers.get("Sec-Fetch-Site") or "").strip().lower()
+        return (self.headers.get("Origin") is None
+                and site in ("same-origin", "none")
+                and bool(self.headers.get("Host")) and self._host_allowed())
 
     def _has_yoink_client_header(self) -> bool:
         """Defense-in-depth header that the extension sets on /token. A
         webpage can't set custom request headers cross-origin without
         triggering a CORS preflight, and our preflight only echoes ACAO
-        for chrome-extension://* + the YouTube allowlist -- so the actual
+        for allowlisted extension origins + the YouTube allowlist -- so the actual
         request from a malicious origin is blocked by the browser before
-        it even runs the GET.
+        it even runs the request.
 
         v2.1 alias window: accept the new X-Uoink-Client/"uoink-extension"
         pair AND the legacy X-Yoink-Client/"yoink-extension" pair so the
@@ -12621,6 +12914,9 @@ class Handler(BaseHTTPRequestHandler):
         self.send_header("Content-Type", mime)
         self.send_header("Content-Length", str(len(body)))
         self.send_header("Cache-Control", "private, max-age=300")
+        if mime.split(";", 1)[0].strip().lower() == "text/html":
+            self.send_header("Content-Security-Policy", "frame-ancestors 'none'")
+            self.send_header("X-Frame-Options", "DENY")
         self._send_cors(self._cors_origin())
         self.end_headers()
         self.wfile.write(body)
@@ -12746,7 +13042,11 @@ class Handler(BaseHTTPRequestHandler):
             # Public, no-auth (same posture as /health). Sprint 19 / C3:
             # structured self-check the popup uses to surface a specific
             # recovery hint instead of a generic "helper offline".
-            return self._send_json(200, _diagnose_payload())
+            # Keep splash readiness's existing metadata rule separate from
+            # the stricter token bootstrap. Explicit extension origins get the
+            # public projection; request parameters cannot select CLI details.
+            local_ui = self._is_local_diagnose_request()
+            return self._send_json(200, _public_diagnose_payload(local_ui=local_ui))
         if bare == "/sources/manifest":
             # Public product metadata (no user data) so the static site can
             # bake it at build time and the dashboard Sources tab can read it
@@ -12967,10 +13267,10 @@ class Handler(BaseHTTPRequestHandler):
     #      X-Yoink-Client/"yoink-extension" still accepted). A drive-by
     #      browser request from a random site can't set this without a
     #      CORS preflight, and our preflight refuses ACAO for any origin
-    #      outside the youtube + chrome-extension allowlist.
-    #   2. Origin (if present) must be a browser-extension origin.
-    #      Absent Origin is allowed -- some Chromium forks (Comet) issue
-    #      service-worker fetches with no Origin header.
+    #      outside the YouTube + pinned/configured extension allowlist.
+    #   2. Origin must exactly match an allowlisted extension. Missing Origin
+    #      requires same-origin fetch metadata and a loopback Host for
+    #      the dashboard/WebView bootstrap.
     #   3. Per-install rate limit (10/min) so a noisy attacker can't
     #      poll the endpoint indefinitely.
     # Local processes (curl, malicious scripts on the same machine) CAN
@@ -12979,13 +13279,28 @@ class Handler(BaseHTTPRequestHandler):
     # local-attacker defense.
     def _handle_token(self):
         if not self._has_yoink_client_header():
-            log.info("GET /token rejected (missing X-Uoink-Client)")
+            log.info("%s /token rejected (missing X-Uoink-Client)", self.command)
             return self._send_json(403, {"ok": False, "error": "forbidden"})
         if not self._is_extension_origin():
-            log.info("GET /token rejected (origin=%r)", self.headers.get("Origin"))
+            log.info("%s /token rejected (origin=%r)", self.command, self.headers.get("Origin"))
             return self._send_json(403, {"ok": False, "error": "forbidden"})
+        if self.command == "POST":
+            # Bootstrap has no input payload. Validate framing without reading
+            # a body, after the Host/client/origin gates and before minting.
+            if self.headers.get("Transfer-Encoding") is not None:
+                return self._send_json(400, {"ok": False, "error": "Token request must be bodyless"})
+            try:
+                length = int(self.headers.get("Content-Length", "0"))
+            except ValueError:
+                return self._send_json(400, {"ok": False, "error": "Bad Content-Length"})
+            if length < 0:
+                return self._send_json(400, {"ok": False, "error": "Bad Content-Length"})
+            if length > MAX_BODY_BYTES:
+                return self._send_json(413, {"ok": False, "error": "Body too large"})
+            if length:
+                return self._send_json(400, {"ok": False, "error": "Token request must be bodyless"})
         if not _check_token_rate_limit():
-            log.info("GET /token rate-limited")
+            log.info("%s /token rate-limited", self.command)
             return self._send_json(429, {"ok": False, "error": "too many requests"})
         self._send_json(200, {"ok": True, "token": TOKEN})
 
@@ -17084,17 +17399,22 @@ class Handler(BaseHTTPRequestHandler):
         # token check or body parsing.
         if self._reject_bad_host():
             return
+        bare = self.path.split("?", 1)[0]
+        if bare == "/token":
+            # Extension POST carries its browser-supplied Origin. This one
+            # bootstrap route uses the client/origin/rate gates, not a bearer
+            # token the caller is still trying to obtain.
+            return self._handle_token()
         # Auth first; rejected bodies are only discarded, never parsed.
-        # Public POST endpoints don't exist today, so the gate is unconditional.
+        # Every POST except the /token bootstrap requires the bearer token.
         if not self._require_token():
             return
         # /images carries raw image bytes, not JSON, and can exceed the 64KB
         # JSON body cap, so it must be handled BEFORE _read_json_body (which
         # would 415 on the image Content-Type and 413 on the size). It reads
         # the raw body itself.
-        if self.path.split("?", 1)[0] == "/images":
+        if bare == "/images":
             return self._handle_create_image()
-        bare = self.path.split("?", 1)[0]
         try:
             body = self._read_json_body(strict=_strict_json_route(bare))
         except Handler._BodyError as e:
@@ -17154,11 +17474,11 @@ class Handler(BaseHTTPRequestHandler):
                 log.exception("/corpus/export failed")
                 return self._send_json(500, {"ok": False, "error": str(e)})
         if bare == "/corpus/import":
-            path = ((body or {}).get("path") or "").strip() if isinstance(body, dict) else ""
-            if not path:
+            path = body.get("path")
+            if not isinstance(path, str) or not path.strip():
                 return self._send_json(400, {"ok": False,
-                                             "error": "path required"})
-            result = import_corpus_data(path)
+                                             "error": "path must be a non-empty string"})
+            result = import_corpus_data(path.strip())
             return self._send_json(200 if result.get("ok") else 400, result)
         if bare == "/extract/x":
             return self._handle_extract_x(body)
@@ -17877,6 +18197,10 @@ class Handler(BaseHTTPRequestHandler):
         try:
             with _ManualOwnership().process_slot():
                 metadata = _fetch_metadata(canonical)
+        except (source_subscriptions.ServiceError, urllib.error.URLError) as e:
+            return self._send_json(400, {
+                "ok": False, "error": f"URL refused or unreachable: {e}",
+                "url": canonical, "platform": platform})
         except subprocess.CalledProcessError as e:
             detail = friendly_error(e) if callable(globals().get(
                 "friendly_error")) else str(e)
@@ -19159,20 +19483,36 @@ def export_corpus_data(*, output_root: Path | None = None) -> dict:
     return {"ok": True, "path": str(path), "rows": counts}
 
 
-def import_corpus_data(path) -> dict:
-    """Restore an export file. Merge rules live in Index.import_payload
-    (conservative: never clobbers newer or existing local rows)."""
-    file_path = Path(path)
-    if not file_path.is_file():
-        return {"ok": False, "error": f"{file_path} is not a file"}
+def import_corpus_data(path, *, output_root: Path | None = None) -> dict:
+    """Restore a file inside the selected output root's _exports directory.
+
+    HTTP and --import-corpus callers use DESKTOP_ROOT; the explicit root is for
+    the local rebuild flow. Index.import_payload keeps its conservative merge
+    rules.
+    """
     try:
+        file_path = Path(path)
+        if not file_path.is_absolute() or _path_has_parent_ref(str(path)):
+            return {"ok": False, "error": "path invalid"}
+        root = (Path(output_root) if output_root is not None else DESKTOP_ROOT).resolve()
+        exports_dir = (root / EXPORTS_DIRNAME).resolve()
+        file_path = file_path.resolve()
+        # Check before any existence probe/read. Resolving both sides also
+        # catches file symlinks, directory junctions and a redirected _exports.
+        if root not in exports_dir.parents or exports_dir not in file_path.parents:
+            return {"ok": False, "error": "path must be inside the output root's _exports directory"}
+    except (OSError, RuntimeError, TypeError, ValueError):
+        return {"ok": False, "error": "path invalid"}
+    try:
+        if not file_path.is_file():
+            return {"ok": False, "error": "export file not found"}
         payload = json.loads(file_path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError) as e:
-        return {"ok": False, "error": f"couldn't read the export: {e}"}
+    except (OSError, UnicodeError, json.JSONDecodeError) as e:
+        return {"ok": False, "error": "couldn't read the export: " + machine_error_detail(e)}
     try:
         report = _get_index().import_payload(payload)
     except ValueError as e:
-        return {"ok": False, "error": str(e)}
+        return {"ok": False, "error": machine_error_detail(e)}
     log.info("corpus import <- %s (%s)", file_path,
              ", ".join(f"{t}+{r['imported']}" for t, r in report.items()))
     return {"ok": True, "path": str(file_path), "report": report}
@@ -19196,7 +19536,7 @@ def rebuild_index_from_disk(*, root: Path | None = None) -> dict:
         newest = max(exports_dir.glob("uoink-export-*.json"),
                      key=lambda item: item.name, default=None)
         if newest is not None:
-            restored = import_corpus_data(newest)
+            restored = import_corpus_data(newest.resolve(), output_root=scan_root)
     return {"ok": True, "scanned_root": str(scan_root),
             "rows_before": before, "rows_after": after,
             "indexed": after - before, "clips": clips,
@@ -19373,7 +19713,8 @@ def run_cli(argv: list[str]) -> int:
       the output folder (C-05); prints the relink report.
     - --export-corpus   : write engagement/tags/taste/drafts/workspaces/
       anchors to <output root>/_exports/uoink-export-<stamp>.json (C-03).
-    - --import-corpus <file> : restore an export (conservative merge).
+    - --import-corpus <file> : restore an absolute path under the active output
+      root's _exports directory (conservative merge).
     - --rebuild-index [root] : re-index every on-disk sidecar folder, then
       restore the newest export found under <root>/_exports (C-03).
     - --reconcile-podcast-corpus : re-run the idempotent episode bridge for

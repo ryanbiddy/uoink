@@ -97,10 +97,15 @@ def network(monkeypatch):
     monkeypatch.setattr(server._ServerCaptureBackend, "_local_identities", {})
     monkeypatch.setattr(server._ServerCaptureBackend, "_identity_condition", ObservedCondition())
     monkeypatch.setattr(server.source_subscriptions, "current_capture_context", lambda: None)
+    # Admission has separate SSRF regressions; this fixture exercises pacing
+    # with a synthetic subprocess and must never resolve or fetch these URLs.
+    monkeypatch.setattr(server.source_subscriptions, "resolve_public_http_url",
+                        lambda url, **kwargs: url)
     monkeypatch.setattr(subprocess, "Popen", Process)
     monkeypatch.setattr(subprocess, "run", unexpected_io)
     monkeypatch.setattr(subprocess, "check_output", unexpected_io)
     monkeypatch.setattr(server.urllib.request, "urlopen", unexpected_io)
+    monkeypatch.setattr(server.socket, "getaddrinfo", unexpected_io)
     monkeypatch.setattr(server.socket.socket, "connect", unexpected_io)
     yield state
     unexpected_io.assert_not_called()

@@ -13,10 +13,12 @@ Red on unpatched main: a request with `Host: evil.attacker.com` reaches
 the route and answers 200 (the server never looked at Host).
 
 Also covers:
-- the token endpoint's extension-id pin (off by default, enforced when
-  UOINK_EXTENSION_IDS is set),
-- the absent-Origin service-worker path still works, but only behind the
-  Host wall.
+- the token endpoint's extension-id pin (on by default for the manifest-key
+  ID; UOINK_EXTENSION_IDS and settings.extension_ids add trusted IDs),
+- the token endpoint's Host wall, even with an extension Origin and client
+  header. Offline tests/test_sec_token_pin.py separately covers the extension's
+  origin-carrying POST and the same-origin dashboard GET. Originless worker
+  GETs with Sec-Fetch-Site: none are refused.
 """
 from __future__ import annotations
 
@@ -133,11 +135,17 @@ def test_token_extension_id_pin():
             "Origin": "chrome-extension://abcdefghijklmnopabcdefghijklmnop",
             "X-Uoink-Client": "uoink-extension",
         }
-        # Default: no pin configured -> any extension origin mints the token.
-        status, body = _raw_request("GET", "/token", dict(ext_headers))
+        # Default: only the pinned Uoink extension ID mints the token, so an
+        # unlisted extension origin is refused.
+        status, _body = _raw_request("GET", "/token", dict(ext_headers))
+        _assert(status == 403,
+                f"unlisted extension origin must 403 by default: {status}")
+        pinned = dict(ext_headers,
+                      Origin="chrome-extension://bkcapfidedhfcjpmjabeopfbcjcbmdmi")
+        status, body = _raw_request("GET", "/token", pinned)
         _assert(status == 200 and json.loads(body).get("token"),
-                f"unpinned extension origin gets the token: {status} {body}")
-        print("ok  /token unpinned accepts any extension origin")
+                f"the pinned Uoink extension gets the token: {status} {body}")
+        print("ok  /token accepts only the pinned extension ID by default")
 
         # Pin to a DIFFERENT id -> this extension is refused.
         original = server._allowed_extension_ids
