@@ -27,6 +27,13 @@ PLANNED = "planned"
 # = the output it feeds; `slug` = the /sources/<slug> + /features route stem.
 _SOURCES: list[dict] = [
     {
+        "slug": "scrapecreators-discovery", "name": "ScrapeCreators discovery",
+        "category": "discovery", "status": IN_FLIGHT,
+        "capture": "Enable discovery with your own key, confirm credits, then pick posts to capture.",
+        "lands": "Nothing until you pick results. Picked posts are captured like any link.",
+        "best_for": "Finding creator posts to study and reusing their metric snapshots in local playbooks.",
+    },
+    {
         "slug": "youtube", "name": "YouTube", "category": "video", "status": SHIPPED,
         "capture": "Click the rust U under any video, or right-click a link.",
         "lands": "Transcript, screenshots on an interval, comments, channel context.",
@@ -150,7 +157,7 @@ def build_sources() -> dict:
         "sources": _SOURCES,
         "total": len(_SOURCES),
         "counts": counts,
-        "categories": ["video", "audio", "text", "social"],
+        "categories": ["video", "audio", "text", "social", "discovery"],
     }
 
 

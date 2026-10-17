@@ -101,6 +101,7 @@ Source: "staging\THIRD-PARTY-NOTICES.md"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\third-party-notices\README.md"; DestDir: "{app}\third-party-notices"; Flags: ignoreversion
 Source: "staging\third-party-notices\antlr4-python3-runtime-4.9.3-LICENSE.txt"; DestDir: "{app}\third-party-notices"; Flags: ignoreversion
 Source: "staging\third-party-notices\proxy-tools-0.1.0-UPSTREAM-LICENSE.txt"; DestDir: "{app}\third-party-notices"; Flags: ignoreversion
+Source: "staging\third-party-notices\scrapecreators-social-media-research-skills-MIT-LICENSE.txt"; DestDir: "{app}\third-party-notices"; Flags: ignoreversion
 
 ; Python embeddable distribution (already includes pythonw.exe + python.exe
 ; + the stdlib zip). After staging, Lib\site-packages contains yt_dlp,
@@ -132,6 +133,8 @@ Source: "staging\source_subscriptions.py"; DestDir: "{app}"; Flags: ignoreversio
 Source: "staging\library_analysis.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\library_resources.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\library_prompts.py"; DestDir: "{app}"; Flags: ignoreversion
+Source: "staging\research_playbooks.py"; DestDir: "{app}"; Flags: ignoreversion
+Source: "staging\discovery_scrapecreators.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\library_briefs.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\library_mirror.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\library_mirror_vault_io.py"; DestDir: "{app}"; Flags: ignoreversion

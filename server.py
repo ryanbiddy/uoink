@@ -464,6 +464,7 @@ KEYRING_SERVICE = "Uoink"
 # fallback read can reference one source of truth.
 KEYRING_SERVICE_LEGACY = "Yoink"
 KEYRING_ANTHROPIC_USERNAME = "anthropic_key"
+KEYRING_SCRAPECREATORS_USERNAME = "scrapecreators_key"
 
 
 def _isolated_binding() -> _install_isolation.IsolationBinding | None:
@@ -633,6 +634,7 @@ def _check_memory_search_rate_limit() -> bool:
 # transports (/tools/<name>, /mcp/v1*) and the intent route.
 _STRICT_JSON_ROUTE_PREFIXES = ("/tools/", "/mcp/v1", "/sources")
 LIBRARY_INTENT_ROUTE = "/library/intent"
+DISCOVERY_INTENT_ROUTE = "/discovery/intent"
 # Phase 3 (run AM): dashboard-only capability route for source consent
 # (contract phase3-v1-2026-09-07, "Registry and dashboard contract").
 SOURCES_INTENT_ROUTE = "/sources/consent-intent"
@@ -689,6 +691,8 @@ def _reject_duplicate_json_keys(pairs):
 def _strict_json_route(bare: str) -> bool:
     return (
         bare == LIBRARY_INTENT_ROUTE
+        or bare.startswith("/discovery/")
+        or bare == "/playbooks/run"
         or bare == LIBRARY_MIRROR_INTENT_ROUTE
         or bare == LIBRARY_MIRROR_ROUTE
         or bare.startswith(_STRICT_JSON_ROUTE_PREFIXES)
@@ -932,6 +936,10 @@ def _default_settings() -> dict:
         # remain available in the dashboard Activity stream.
         "notifications_enabled": True,
         "anthropic_key_invalid": False,
+        "scrapecreators_enabled": False,
+        "scrapecreators_agent_calls_enabled": False,
+        "scrapecreators_daily_credit_cap": 25,
+        "scrapecreators_key_invalid": False,
         # v2.1 rename: set True after the one-time post-migration
         # post-migration toast has fired, so it never repeats.
         "post_migration_toast_shown": False,
@@ -1062,6 +1070,13 @@ def _normalize_settings(data: dict) -> dict:
     if isinstance(data, dict):
         clean.update(data)
     clean.pop("anthropic_key", None)
+    clean.pop("scrapecreators_key", None)
+    for field in ("scrapecreators_enabled", "scrapecreators_agent_calls_enabled",
+                  "scrapecreators_key_invalid"):
+        clean[field] = clean.get(field) is True
+    discovery_cap = clean.get("scrapecreators_daily_credit_cap")
+    clean["scrapecreators_daily_credit_cap"] = (
+        discovery_cap if type(discovery_cap) is int and 1 <= discovery_cap <= 500 else 25)
     # Only the JSON boolean true enables apply; "true", 1 or "yes" stay off.
     clean["librarian_apply_enabled"] = clean.get("librarian_apply_enabled") is True
     clean["comment_intelligence_enabled"] = bool(
@@ -1309,6 +1324,59 @@ def _store_saved_anthropic_key(key: str) -> None:
         raise CredentialStoreError(f"credential write failed: {e}") from e
 
 
+def _get_saved_scrapecreators_key() -> str:
+    """Read only this profile's namespace. No legacy or environment fallback."""
+    if _keyring is None:
+        return ""
+    try:
+        value = _keyring.get_password(_keyring_service_name(), KEYRING_SCRAPECREATORS_USERNAME)
+        return value if isinstance(value, str) else ""
+    except Exception:
+        # Credential backends can include the secret in their exception text.
+        return ""
+
+
+def _store_saved_scrapecreators_key(key: str) -> None:
+    if _keyring is None:
+        raise CredentialStoreError("ScrapeCreators credential store unavailable")
+    try:
+        service = _keyring_service_name()
+        if key:
+            _keyring.set_password(service, KEYRING_SCRAPECREATORS_USERNAME, key)
+        elif _keyring.get_password(service, KEYRING_SCRAPECREATORS_USERNAME) is not None:
+            _keyring.delete_password(service, KEYRING_SCRAPECREATORS_USERNAME)
+    except Exception:
+        raise CredentialStoreError("ScrapeCreators credential store unavailable") from None
+
+
+def _mark_scrapecreators_key_invalid(invalid: bool = True, *, expected_key: str | None = None) -> None:
+    # A 401/403 preserves the saved key for the user to replace or clear.
+    # Serialize with settings saves, and ignore a response for a replaced key.
+    with _settings_lock:
+        try:
+            if expected_key is not None and _get_saved_scrapecreators_key() != expected_key:
+                return
+            data = _read_settings()
+            data["scrapecreators_key_invalid"] = invalid
+            data["updated_at"] = _now_iso()
+            _write_settings(data)
+        except OSError:
+            log.warning("ScrapeCreators invalid-key settings update failed")
+
+
+_discovery_service = None
+_discovery_service_lock = threading.Lock()
+
+
+def _get_discovery_service():
+    global _discovery_service
+    import discovery_scrapecreators
+    with _discovery_service_lock:
+        if _discovery_service is None:
+            _discovery_service = discovery_scrapecreators.DiscoveryService(sys.modules[__name__])
+        return _discovery_service
+
+
 def _migrate_plaintext_anthropic_key() -> None:
     """Move legacy settings.json anthropic_key into the OS credential store."""
     settings_file = _settings_path()
@@ -1371,6 +1439,11 @@ def _public_settings(data: dict | None = None) -> dict:
         "claim_verification_enabled": bool(
             data.get("claim_verification_enabled")),
         "anthropic_key_set": bool(key and not data.get("anthropic_key_invalid")),
+        "scrapecreators_enabled": data.get("scrapecreators_enabled") is True,
+        "scrapecreators_agent_calls_enabled": data.get("scrapecreators_agent_calls_enabled") is True,
+        "scrapecreators_daily_credit_cap": _normalize_settings(data)["scrapecreators_daily_credit_cap"],
+        "scrapecreators_key_set": bool(_get_saved_scrapecreators_key()),
+        "scrapecreators_key_invalid": data.get("scrapecreators_key_invalid") is True,
         # Tier 2 dashboard Settings tab additions:
         "anthropic_key_masked": _mask_anthropic_key(key),
         "output_dir": str(DESKTOP_ROOT),
@@ -1622,8 +1695,8 @@ def _record_anthropic_usage(feature: str, resp: dict) -> None:
     response without usage is counted as an unavailable call, and a write
     that cannot happen (no index, locked index) lands in the meter status
     the pricing payload shows. Call sites: Comment Intelligence, Hook
-    Type, entity extraction (the 4-token key probe is excluded on purpose;
-    it is noise in the meter)."""
+    Type, entity extraction, research playbooks (the 4-token key probe is
+    excluded on purpose; it is noise in the meter)."""
     try:
         idx = _get_index()
     except Exception as exc:
@@ -2261,7 +2334,7 @@ _SSE_HEARTBEAT_SEC = 15.0     # keepalive comment cadence
 _sse_count_lock = threading.Lock()
 _sse_active = [0]
 
-_settings_lock = threading.Lock()
+_settings_lock = threading.RLock()
 _corpus_update_lock = threading.Lock()
 # Serializes read-modify-write of the per-video <slug>.json sidecar. The
 # comments / hook-type / comment-intelligence workers run concurrently for the
@@ -3105,6 +3178,8 @@ def _index_yoink(folder: Path, sidecar: dict, corpus_path: Path | None,
             "duration_seconds": sidecar.get("duration_seconds"),
             "view_count": sidecar.get("view_count"),
             "like_count": sidecar.get("like_count"),
+            "comment_count": sidecar.get("comment_count"),
+            "channel_follower_count": sidecar.get("channel_follower_count"),
             "upload_date": sidecar.get("upload_date"),
         }, ensure_ascii=False),
     }
@@ -3239,11 +3314,93 @@ def _start_backfill_thread() -> None:
             _run_phase2_author_backfill_once()
         except Exception:
             log.exception("phase 2 author backfill crashed")
+        # Promote legacy metric snapshots in bounded ticks. The cursor is
+        # process-local: the only durable writes are yoinks.metadata_json.
+        after_video_id = ""
+        while not _backfill_cancel.is_set():
+            try:
+                result = _run_engagement_backfill_tick(after_video_id)
+            except Exception:
+                log.exception("engagement backfill tick crashed")
+                return
+            if result["complete"]:
+                return
+            after_video_id = result["after_video_id"]
+            if _backfill_cancel.wait(_ENGAGEMENT_BACKFILL_TICK_SEC):
+                return
 
     threading.Thread(target=_runner, name="index-backfill", daemon=True).start()
 
 
 _PHASE2_BACKFILL_KEY = "phase2_author_backfill_done"
+
+_ENGAGEMENT_BACKFILL_MAX_BYTES = 32 * 1024 * 1024
+_ENGAGEMENT_BACKFILL_TICK_SEC = 30
+
+
+def _run_engagement_backfill_tick(after_video_id: str = "") -> dict:
+    """Promote local metric snapshots, at most 25 rows / 32 MB per tick.
+
+    Sidecar values take precedence over the legacy yt-dlp metadata.json.
+    Missing or unusable files are skipped; no source files are rewritten.
+    A process-local keyset cursor lets later rows progress even when an old
+    capture has no metrics. Restarting safely repeats the additive scan.
+    """
+    idx = _get_index()
+    rows = idx.engagement_backfill_batch(after_video_id)
+    result = {"after_video_id": after_video_id, "scanned": 0, "updated": 0,
+              "bytes_read": 0, "complete": not rows}
+    for row in rows:
+        if _backfill_cancel.is_set():
+            return result
+        try:
+            metadata = json.loads(row["metadata_json"] or "{}")
+        except (TypeError, ValueError, RecursionError):
+            metadata = None
+        if isinstance(metadata, dict) and any(
+                metadata.get(key) is None for key in index.ENGAGEMENT_METADATA_FIELDS):
+            values = {}
+            row_start_bytes = result["bytes_read"]
+            sidecar_path = Path(row["sidecar_path"])
+            for path in (sidecar_path, sidecar_path.parent / "metadata.json"):
+                try:
+                    if not path.is_file():
+                        continue
+                    size = path.stat().st_size
+                    if size > _ENGAGEMENT_BACKFILL_MAX_BYTES:
+                        continue
+                    remaining = _ENGAGEMENT_BACKFILL_MAX_BYTES - result["bytes_read"]
+                    if size > remaining:
+                        # Retry this row with a fresh budget next tick. If
+                        # this row alone is too large, keep what fits and
+                        # advance rather than starving the rest of the scan.
+                        if row_start_bytes:
+                            return result
+                        continue
+                    with path.open("rb") as stream:
+                        raw = stream.read(remaining)
+                        result["bytes_read"] += len(raw)
+                        if os.fstat(stream.fileno()).st_size > len(raw):
+                            continue  # grew beyond the budget while reading
+                    source = json.loads(raw)
+                except (OSError, ValueError, RecursionError):
+                    continue
+                if not isinstance(source, dict):
+                    continue
+                source_id = source.get("video_id" if path == sidecar_path else "id")
+                if source_id is not None and str(source_id) != row["video_id"]:
+                    continue
+                for key in index.ENGAGEMENT_METADATA_FIELDS:
+                    if metadata.get(key) is None and source.get(key) is not None:
+                        values.setdefault(key, source[key])
+                if all(metadata.get(key) is not None or key in values
+                       for key in index.ENGAGEMENT_METADATA_FIELDS):
+                    break
+            if values and idx.backfill_engagement_metadata(row, values):
+                result["updated"] += 1
+        result["scanned"] += 1
+        result["after_video_id"] = row["video_id"]
+    return result
 
 
 def _run_phase2_author_backfill_once() -> None:
@@ -4056,6 +4213,8 @@ def _shape_comment_for_sidecar(c: dict) -> dict:
     comment objects carry a lot of internal cruft (parent ids, author
     channel ids, thumbnails) that bloats the sidecar without value."""
     return {
+        "id": c.get("id"),
+        "timestamp": c.get("timestamp"),
         "author": c.get("author"),
         "text": c.get("text"),
         "like_count": c.get("like_count") or 0,
@@ -6289,6 +6448,8 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
                 "upload_date": metadata.get("upload_date"),
                 "view_count": metadata.get("view_count"),
                 "like_count": metadata.get("like_count"),
+                "comment_count": metadata.get("comment_count"),
+                "channel_follower_count": metadata.get("channel_follower_count"),
                 "video_id": video_id,
                 # Phase 6 (BC-2): every transcript row carries its actual stored
                 # link values, and the held chapter metadata travels with the
@@ -11681,6 +11842,11 @@ def _start_trash_purge_thread() -> None:
     def _runner():
         while True:
             try:
+                import discovery_scrapecreators
+                discovery_scrapecreators.purge_expired_runs(DATA_ROOT)
+            except Exception:
+                log.warning("discovery run purge failed")
+            try:
                 _purge_trash()
             except Exception:
                 log.exception("trash purge pass crashed")
@@ -13105,6 +13271,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_session_active()
         if bare == "/settings":
             return self._handle_settings_get()
+        if bare.startswith("/discovery/runs/"):
+            return self._handle_discovery_run_get(bare[len("/discovery/runs/"):])
         if bare == "/api/writer-peer/v1/status":
             return self._send_json(200, writer_peer.status())
         if bare == "/settings/pricing":
@@ -15119,6 +15287,67 @@ class Handler(BaseHTTPRequestHandler):
         return self._send_json(200, {"ok": True, "piece": piece,
                                       "body": piece.get("body")})
 
+    def _handle_playbooks_run(self, body):
+        """POST /playbooks/run {playbook, arguments}: explicit BYO-key run.
+
+        Like Writing Studio, the authenticated request is the user's action.
+        Return the draft body, citation warnings and refs; saving is separate.
+        """
+        if not self._require_token():
+            return
+        import library_resources as _lr
+
+        try:
+            import research_playbooks
+
+            args = _lr._strict_arguments(body, ("playbook", "arguments"),
+                                         ("playbook", "arguments"))
+            if not isinstance(args["arguments"], dict):
+                raise _lr._invalid("arguments_not_object", field="arguments")
+            reader = _lr.make_reader(sys.modules[__name__])
+            # Refuse invalid scope before storage, credentials or spending.
+            research_playbooks._validate(reader, args["playbook"], args["arguments"])
+            key = _saved_anthropic_key()
+            if not key:
+                raise _lr._invalid("anthropic_key_required",
+                                   next_step="add your Anthropic key in Settings")
+            prepared = research_playbooks.get_playbook_input(
+                reader, args["playbook"], args["arguments"])
+            packet = prepared["packet"]
+            user = _lr.render_document(packet)
+            reader.assert_within_deadline()
+            # The read admission ends before the model call. No retries or
+            # automatic saves: each request authorizes one paid call.
+            try:
+                response = _anthropic_messages(
+                    key, system=prepared["instruction"], user=user, max_tokens=4096)
+                _record_anthropic_usage("playbook_" + args["playbook"], response)
+                draft = _anthropic_text(response)
+            except AnthropicAPIError as exc:
+                if exc.status == 401:
+                    _mark_anthropic_key_invalid()
+                # Provider errors can echo prompts or credentials. Expose
+                # only a fixed message and the HTTP status, never their text.
+                return self._send_json(200, {"ok": False, "error": {
+                    "code": "anthropic_error",
+                    "message": "Anthropic could not complete the playbook. Check your key in Settings or try again.",
+                    "retryable": exc.status is None or exc.status == 429 or exc.status >= 500,
+                    "details": {"status": exc.status},
+                }})
+            result = {"ok": True, "playbook": args["playbook"], "body": draft,
+                      "packet_hash": prepared["packet_hash"], "refs": packet["refs"],
+                      "citation_warnings": research_playbooks.check_citations(packet, draft)}
+        except ImportError:
+            result = _lr.ResourceError("feature_unavailable", details={
+                "module": "research_playbooks"}).envelope()
+        except _lr.ResourceError as exc:
+            result = exc.envelope()
+        except Exception:
+            # Match the MCP boundary: source text and keys never enter logs
+            # or error responses, including unexpected serialization errors.
+            result = _lr.ResourceError("internal_error").envelope()
+        return self._send_json(200, result)
+
     def _handle_writing_draft_save(self, body):
         """POST /writing/draft -- persist composer state (G-03, QA #32).
         Insert when `id` is absent, update when present. Returns the stored
@@ -15562,7 +15791,13 @@ class Handler(BaseHTTPRequestHandler):
         threading.Thread(target=self.server.shutdown, daemon=True).start()
 
     def _handle_settings_post(self, body: dict):
+        with _settings_lock:
+            return self._handle_settings_post_locked(body)
+
+    def _handle_settings_post_locked(self, body: dict):
         boolean_fields = (
+            "scrapecreators_enabled",
+            "scrapecreators_agent_calls_enabled",
             "comment_intelligence_enabled",
             "hook_type_enabled",
             "entity_extraction_enabled",   # D-17 -- third background model
@@ -15586,7 +15821,7 @@ class Handler(BaseHTTPRequestHandler):
                                             # short-video media after
                                             # extraction (default OFF)
         )
-        integer_fields = ("clipboard_screenshot_cap",)
+        integer_fields = ("clipboard_screenshot_cap", "scrapecreators_daily_credit_cap")
         extra_fields = ("output_dir", "autostart", "topics",
                          "obsidian_vault_path",   # Tier 2 + v2.5 S4
                          "role",                  # v3.1 P2
@@ -15598,6 +15833,7 @@ class Handler(BaseHTTPRequestHandler):
             not any(f in body for f in boolean_fields)
             and not any(f in body for f in integer_fields)
             and "anthropic_key" not in body
+            and "scrapecreators_key" not in body
             and not any(f in body for f in extra_fields)
         ):
             return self._send_json(400, {
@@ -15634,7 +15870,26 @@ class Handler(BaseHTTPRequestHandler):
                     "error": "anthropic_key is too long",
                 })
 
+        if "scrapecreators_daily_credit_cap" in body:
+            cap = body["scrapecreators_daily_credit_cap"]
+            if type(cap) is not int or not 1 <= cap <= 500:
+                return self._send_json(400, {
+                    "ok": False, "error": "scrapecreators_daily_credit_cap must be an integer from 1 to 500"})
+        if "scrapecreators_key" in body:
+            value = body["scrapecreators_key"]
+            if value is not None and (not isinstance(value, str) or len(value) > 4096):
+                return self._send_json(400, {
+                    "ok": False, "error": "scrapecreators_key must be a string of at most 4096 characters or null"})
+
         data = _read_settings()
+        if "scrapecreators_daily_credit_cap" in body:
+            data["scrapecreators_daily_credit_cap"] = body["scrapecreators_daily_credit_cap"]
+        if "scrapecreators_key" in body:
+            try:
+                _store_saved_scrapecreators_key((body["scrapecreators_key"] or "").strip())
+            except CredentialStoreError:
+                return self._send_json(200, {"ok": False, "error": "credential store unavailable"})
+            data["scrapecreators_key_invalid"] = False
         for field in boolean_fields:
             if field in body:
                 data[field] = body[field]
@@ -15917,7 +16172,11 @@ class Handler(BaseHTTPRequestHandler):
             args = params.get("arguments") or {}
             if not isinstance(name, str) or not isinstance(args, dict):
                 return self._send_mcp_error(request_id, -32602, "invalid tool call")
-            payload = _mcp_tools_module().call_tool(name, args)
+            tools = _mcp_tools_module()
+            if name in getattr(tools, "DISCOVERY_TOOL_NAMES", ()):
+                payload = tools.call_tool(name, args, **self._discovery_context())
+            else:
+                payload = tools.call_tool(name, args)
             return self._send_mcp_result(request_id, self._mcp_tool_call_result(payload))
         return self._send_mcp_error(request_id, -32601, "method not found")
 
@@ -16463,6 +16722,11 @@ class Handler(BaseHTTPRequestHandler):
             schema_error = tools.library_validate_arguments(name, body)
             if schema_error is not None:
                 return self._send_json(400, tools.library_invalid_request(schema_error))
+        elif name == "get_playbook_input" or name in getattr(tools, "DISCOVERY_TOOL_NAMES", ()):
+            validation_error = tools.validate_research_arguments(name, body)
+            if validation_error is not None:
+                status = 400 if validation_error["error"]["code"] == "invalid_request" else 500
+                return self._send_json(status, validation_error)
         else:
             validation_error = openapi_bridge.validate_arguments(
                 body, tools.TOOL_REGISTRY[name].input_schema)
@@ -16470,7 +16734,10 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send_json(400, {"ok": False,
                                              "error": validation_error})
         try:
-            result = tools.call_tool(name, body if isinstance(body, dict) else {})
+            if name in getattr(tools, "DISCOVERY_TOOL_NAMES", ()):
+                result = tools.call_tool(name, body, **self._discovery_context())
+            else:
+                result = tools.call_tool(name, body if isinstance(body, dict) else {})
         except Exception:
             log.exception("/tools/%s failed", name)
             return self._send_json(500, {"ok": False,
@@ -16483,14 +16750,14 @@ class Handler(BaseHTTPRequestHandler):
 
     # ---- Living Library: user-intent confirmation (Phase 2, 2026-09-04) ----
     def _is_dashboard_origin(self) -> bool:
-        """CSRF/origin gate for dashboard confirmation routes. The request
-        must come from the helper's own page: Origin, when present, must be
+        """Browser CSRF/origin gate for confirmation routes.
+        Origin, when present, must be
         a loopback http origin on the bound port, and Sec-Fetch-Site, when
         present, must be same-origin or none. Extension and web origins are
-        refused even with a valid token -- a pin or undo is a user's own
-        decision made on a displayed delta, not something a page script or
-        an agent may confirm on the user's behalf. Absent Origin is accepted
-        (same-process WebView fetches), behind the Host and token gates."""
+        refused even with a valid token. Absent Origin/fetch metadata is
+        accepted behind the Host and token gates for WebView compatibility.
+        An HTTP client holding the helper token can omit those headers;
+        passing this check does not prove a human clicked."""
         origin = (self.headers.get("Origin") or "").strip()
         if origin:
             try:
@@ -16539,6 +16806,61 @@ class Handler(BaseHTTPRequestHandler):
             return self._send_json(400, result)
         if code == "rate_limited":
             return self._send_json(429, result)
+        return self._send_json(200, result)
+
+    def _discovery_origin(self) -> str:
+        """Canonical origin for an intent, including same-process WebView calls."""
+        return (self.headers.get("Origin") or "http://" + self.headers.get("Host", "")).strip().lower()
+
+    def _discovery_context(self) -> dict:
+        # HTTP-derived capability context, not proof of dashboard provenance.
+        # A helper-token holder may omit browser headers. Stdio has no context.
+        if not self._is_dashboard_origin():
+            return {}
+        return {"origin": self._discovery_origin(), "session_hash": _library_session_hash()}
+
+    def _handle_discovery_run_get(self, run_id: str):
+        # do_GET enforces the helper token before exposing saved user data.
+        # Reading/reconciling a receipt never spends or queues another capture.
+        import library_resources
+        try:
+            result = _get_discovery_service().read_run(run_id)
+            json.dumps(result, ensure_ascii=False, allow_nan=False)
+            if result.get("run_id") == run_id:
+                return self._send_json(200, {"ok": True, "run": result})
+            if result.get("ok") is not False or not isinstance(result.get("error"), dict):
+                raise library_resources.ResourceError("internal_error")
+        except Exception:
+            result = library_resources.ResourceError("internal_error").envelope()
+        code = (result.get("error") or {}).get("code")
+        status = {"invalid_request": 400, "resource_not_found": 404}.get(code, 500)
+        return self._send_json(status, result)
+
+    def _handle_discovery_intent(self, body: dict):
+        # Token-gated HTTP clients can mint without Origin/fetch metadata.
+        # Browser-origin checks are CSRF protection, not proof of a click.
+        # No MCP tool can mint an intent.
+        if not self._is_dashboard_origin():
+            return self._send_json(403, {"ok": False, "error": "forbidden"})
+        import library_resources
+        try:
+            result = _get_discovery_service().mint_intent(
+                body, origin=self._discovery_origin(), session_hash=_library_session_hash())
+        except Exception:
+            result = library_resources.ResourceError("internal_error").envelope()
+        code = (result.get("error") or {}).get("code")
+        status = 200 if result.get("ok") else {"invalid_request": 400, "rate_limited": 429}.get(code, 500)
+        return self._send_json(status, result)
+
+    def _handle_discovery_test_key(self, body: dict):
+        if not self._is_dashboard_origin():
+            return self._send_json(403, {"ok": False, "error": "forbidden"})
+        import library_resources
+        try:
+            result = _get_discovery_service().test_key(
+                body, origin=self._discovery_origin(), session_hash=_library_session_hash())
+        except Exception:
+            result = library_resources.ResourceError("internal_error").envelope()
         return self._send_json(200, result)
 
     # ---- Phase 3 standing sources (run AM) --------------------------------
@@ -17422,6 +17744,10 @@ class Handler(BaseHTTPRequestHandler):
 
         if bare == LIBRARY_INTENT_ROUTE:
             return self._handle_library_intent(body)
+        if bare == DISCOVERY_INTENT_ROUTE:
+            return self._handle_discovery_intent(body)
+        if bare == "/discovery/test-key":
+            return self._handle_discovery_test_key(body)
         if bare == LIBRARY_MIRROR_INTENT_ROUTE:
             return self._handle_library_mirror_intent(body)
         if bare == LIBRARY_MIRROR_ROUTE:
@@ -17584,6 +17910,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_auto_uoink_scan(body)
         if bare == "/writing/compose/validate":
             return self._handle_writing_compose_validate(body)
+        if bare == "/playbooks/run":
+            return self._handle_playbooks_run(body)
         if bare == "/writing/draft":
             return self._handle_writing_draft_save(body)
         if bare == "/writing/tweet":
@@ -18244,6 +18572,7 @@ class Handler(BaseHTTPRequestHandler):
                                or metadata.get("uploader_url")),
             "upload_date": metadata.get("upload_date"),
             "view_count": metadata.get("view_count"),
+            "like_count": metadata.get("like_count"),
             "video_id": _video_capture_id(canonical, metadata),
             "transcript": transcript_entries,
             # Comments/screenshots/hook are explicit nulls so the
@@ -18313,6 +18642,9 @@ class Handler(BaseHTTPRequestHandler):
                     "author": _auth,
                     "duration_seconds": sidecar["duration_seconds"],
                     "host": sidecar["host"],
+                    "view_count": sidecar["view_count"],
+                    "like_count": sidecar["like_count"],
+                    "upload_date": sidecar["upload_date"],
                 }),
             }, content=("\n".join(corpus_lines)[:65000]))
         except index.sqlite3.IntegrityError as e:

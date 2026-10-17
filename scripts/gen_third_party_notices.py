@@ -42,6 +42,19 @@ FFMPEG_BLOCK = """\
 """
 
 
+ADAPTED_TEXT_BLOCK = """\
+## Adapted documentation text
+
+The five local research-playbook instructions adapt workflow steps, output
+templates, outlier thresholds and pitfalls from
+[ScrapeCreators/social-media-research-skills](https://github.com/ScrapeCreators/social-media-research-skills)
+at commit `64ba7b4dea71e130d2712ffb6c1c1024b3b7c4b2` (MIT).
+Copyright (c) 2026 ScrapeCreators. No upstream script or code is shipped.
+See the [complete MIT license](third-party-notices/scrapecreators-social-media-research-skills-MIT-LICENSE.txt)
+and [adapted file list](third-party-notices/README.md).
+"""
+
+
 SUPPLEMENTAL_NOTICE_BLOCK = """\
 ## Supplemental upstream notices
 
@@ -215,7 +228,7 @@ def main() -> int:
                   "source and build provenance are in vendor/nltk-pathsec in the source "
                   "repository. This modification does not qualify model loading or "
                   "clear unrelated dependency advisories."]
-    lines += ["", supplemental, "", FFMPEG_BLOCK, ""]
+    lines += ["", supplemental, "", ADAPTED_TEXT_BLOCK, "", FFMPEG_BLOCK, ""]
     output.write_text("\n".join(lines), encoding="utf-8")
     print(f"wrote {output} ({len(rows)} python packages, source: {source})")
     return 0

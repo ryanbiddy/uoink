@@ -165,6 +165,17 @@ texts, source bindings and recorded metadata conflict are listed in
   This notice does not resolve that conflict or grant legal clearance.
 
 
+## Adapted documentation text
+
+The five local research-playbook instructions adapt workflow steps, output
+templates, outlier thresholds and pitfalls from
+[ScrapeCreators/social-media-research-skills](https://github.com/ScrapeCreators/social-media-research-skills)
+at commit `64ba7b4dea71e130d2712ffb6c1c1024b3b7c4b2` (MIT).
+Copyright (c) 2026 ScrapeCreators. No upstream script or code is shipped.
+See the [complete MIT license](third-party-notices/scrapecreators-social-media-research-skills-MIT-LICENSE.txt)
+and [adapted file list](third-party-notices/README.md).
+
+
 ## ffmpeg (bundled binary, not a Python package)
 
 - **Component:** ffmpeg / ffprobe, BtbN `win64-lgpl` build (see build.ps1

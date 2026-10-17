@@ -10,6 +10,126 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- Discovery tools on stdio and HTTP: `discover_candidates` plans and spends
+  confirmed credits; `queue_discovered` sends up to ten picks through the
+  existing capture queue, with intent/agent gates and duplicate protection.
+  The surface now has 35 stdio tools, 91 registry tools and nine prompts.
+  Token-gated `GET /discovery/runs/<run_id>` reconciles capture state without
+  spending or queueing. Picks are due immediately in the retry worker's local
+  clock. Local playbooks use the target-filtered 24-file reader and newest
+  snapshots, including YouTube channel IDs from saved channel URLs and keyword
+  Shorts. Playbook authors remain local display names. Late key errors cannot
+  invalidate a replacement key.
+  Source, privacy, security and MCP docs describe these flows; dashboard
+  controls remain pending.
+  A newer rerun that failed or was refused before keeping any row does not
+  replace an older snapshot or block keyword fallback; partial runs and
+  successful empty runs still count as the newest snapshot.
+  Creator snapshots take precedence over newer keyword hits. Mixed YouTube
+  results report baselines per content group. Failed or cancelled picks can
+  be explicitly queued again without duplicating active captures.
+  Empty failed receipts now carry a filename marker so repeated failures
+  cannot consume the 24-file packet budget or hide keyword fallback. SQLite
+  makes active-URL deduplication exclusive across helper and stdio processes;
+  both run receipts reconcile to the same pending capture. Argument errors on
+  `/tools/discover_candidates`, `/tools/queue_discovered` and
+  `/tools/get_playbook_input` return HTTP 400 with the standard error envelope.
+  Storage docs now disclose the submitted query, handle or channel_id, run
+  identity, accounting, coverage and error envelopes, including failed runs,
+  alongside candidates, metrics and queue state. The daily purge removes all
+  these run records once older than 90 days. Intent docs clarify that an HTTP
+  client holding the helper token can omit Origin and fetch metadata to mint
+  an intent; browser checks do not prove a human click. No MCP tool can mint an intent.
+- ScrapeCreators discovery adapter with default-off settings, profile-scoped
+  keyring storage, five-minute dashboard intents, a 25-credit daily default cap,
+  and a UTC credit ledger. Requests use a pinned host, refuse redirects, and
+  stop on errors without retrying. Normalized runs retain at most 60 candidates
+  and expire after 90 days. The installer stages and includes the adapter.
+  Endpoint paths and fields are pinned to the OpenAPI examples fetched October 16,
+  including `/v1/youtube/channel-videos` and `/v1/credit-balance` (`creditCount`).
+  Run records and filenames identify the requested mode, platform and target.
+  TikTok picks use the row's video ID, correcting URLs that point to another post.
+  The bounded reader filters by target before its 24-file limit.
+- Token-gated `POST /playbooks/run` for explicit research generation with a
+  saved Anthropic key, metered per playbook, with citation warnings and refs.
+  Reports save through the existing draft route. Privacy and security docs
+  describe the library text sent to Anthropic; dashboard controls are pending.
+- Shared core transcript chapter limits for prompts, MCP tools and HTTP runs.
+  Overflowed metric medians become null so extreme data remains renderable.
+- Five local research playbooks on MCP as prompts and a shared
+  `get_playbook_input` tool: 9 prompts, 33 stdio tools and 89 HTTP registry
+  tools. The tool returns cited packets without model or network calls;
+  unexpected adapter failures return a structured `internal_error`. Transcript
+  packets cap chapters per capture and count omissions before response trimming.
+- Local research packet builders for outlier posts, transcript intelligence,
+  comment mining, creator teardowns and repurposing, with deterministic metrics,
+  citation checks and bounded reads of saved discovery snapshots. Adapted
+  ScrapeCreators documentation carries its MIT attribution and license.
+  Mixed-platform reports exclude X from metrics, topic selection keeps search
+  relevance order, and author matching accepts Unicode joiners. Unsafe comment
+  and clip text is omitted and counted in packet coverage.
+  The installer includes the playbook module and the MIT license linked from
+  the generated notices.
+- Video captures now retain comment and follower counts in their sidecars and
+  index metadata. Generic captures also index views, likes and upload dates;
+  shaped comments retain yt-dlp IDs and timestamps.
+- Existing captures gain missing engagement fields from local sidecars and
+  cached metadata in batches of up to 25 rows and 32 MB per tick. The backfill
+  updates only index metadata and preserves existing values and source files.
+
+### Changed
+
+- To import a backup with `POST /corpus/import` or CLI `--import-corpus <file>`,
+  copy it into the active output folder's `_exports` directory first and supply
+  its absolute path. Both reject relative paths and files outside `_exports`.
+  Invalid, missing or unreadable imports return HTTP 400 (or CLI JSON with
+  `ok: false`) without exposing local paths.
+  Local index rebuilds still restore exports from their explicitly selected root.
+- Dashboard and extension error details now show `<path>`, `<url>` and `[redacted]`
+  placeholders. Spaces and tabs within each line are compacted; line breaks stay
+  intact so extension notifications can still show the last tool error.
+  Ordinary diagnostics such as "This video requires a GVS PO Token which was not
+  provided." remain readable. Redaction happens before the existing detail length
+  limits, with input capped at 65,536 characters before regex processing to keep
+  oversized tool output from stalling error handling. Timeout details show separate
+  `Command:` and `Timeout:` lines. Unquoted paths keep separate placeholders,
+  and retry diagnostics keep their trailing text within the existing
+  200-character limit.
+  Full diagnostics remain in the local `server.log`.
+- A failed podcast transcription's job error and episode transcript error, and a
+  deferred podcast publish error, now read like `CalledProcessError: exit status 1`
+  or `TimeoutExpired: timed out after 30 seconds` for subprocess failures; other
+  exceptions keep their sanitized message. For subprocess errors the podcast job's
+  `error_detail` still carries the redacted command line (and a failed
+  subprocess's redacted output).
+- Local, intranet and IP-address sources now fail through these fetch paths;
+  blocked thumbnails are omitted. Existing downloaded podcast audio remains
+  usable. Podcast downloads and generic yt-dlp extraction make an additional
+  checked GET before starting, using the podcast or page fetcher's User-Agent
+  on every redirect hop. Hosts that reject it cannot be captured through
+  these paths. These fetches connect directly and no longer use system or
+  environment proxy settings. `/extract/any` reports admission refusals and preflight failures,
+  including response timeouts and HTTP protocol errors, as HTTP 400 errors.
+  Fixed YouTube hosts, including YouTube Music, and strict
+  X/Twitter, TikTok and Instagram capture retain their existing yt-dlp flow;
+  other URLs on those hosts, such as relaxed `/live/status` probes, take the
+  checked GET. YouTube keeps its original URL and shared rate limiter without
+  an extra GET.
+  See [the network policy and its limits](docs/security.md#url-and-identifier-validation).
+- Existing unpacked-extension users must reload the extension once after this
+  update. If the old ID differs from `bkcapfidedhfcjpmjabeopfbcjcbmdmi`, extension
+  storage starts fresh under the new ID: reapply extension preferences as needed;
+  the helper token is fetched again. The helper's library and captures stay in
+  place. See [the security model](docs/security.md) for additional trusted IDs.
+- The setup page's Helper status panel and the dashboard's Settings > Local app
+  status line no longer show Anthropic key checks; key status stays in the
+  dashboard's own key section. The tray no longer reports Degraded only for an
+  invalid key. The setup page's Installation folder row shows the standard
+  `%LOCALAPPDATA%\Uoink` location instead of the real path, and its Open folder
+  button no longer opens the folder.
+
 ### Security
 
 - Restrict `POST /corpus/import` and CLI `--import-corpus` to resolved files inside
@@ -97,57 +217,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   (no page clipboard call, no DOM textarea); a failed copy shows "Copy blocked"
   with a Try again notification. Content-script `openTab` requests open only
   Uoink pages, claude.ai, chatgpt.com and the local dashboard.
-
-### Changed
-
-- To import a backup with `POST /corpus/import` or CLI `--import-corpus <file>`,
-  copy it into the active output folder's `_exports` directory first and supply
-  its absolute path. Both reject relative paths and files outside `_exports`.
-  Invalid, missing or unreadable imports return HTTP 400 (or CLI JSON with
-  `ok: false`) without exposing local paths.
-  Local index rebuilds still restore exports from their explicitly selected root.
-- Dashboard and extension error details now show `<path>`, `<url>` and `[redacted]`
-  placeholders. Spaces and tabs within each line are compacted; line breaks stay
-  intact so extension notifications can still show the last tool error.
-  Ordinary diagnostics such as "This video requires a GVS PO Token which was not
-  provided." remain readable. Redaction happens before the existing detail length
-  limits, with input capped at 65,536 characters before regex processing to keep
-  oversized tool output from stalling error handling. Timeout details show separate
-  `Command:` and `Timeout:` lines. Unquoted paths keep separate placeholders,
-  and retry diagnostics keep their trailing text within the existing
-  200-character limit.
-  Full diagnostics remain in the local `server.log`.
-- A failed podcast transcription's job error and episode transcript error, and a
-  deferred podcast publish error, now read like `CalledProcessError: exit status 1`
-  or `TimeoutExpired: timed out after 30 seconds` for subprocess failures; other
-  exceptions keep their sanitized message. For subprocess errors the podcast job's
-  `error_detail` still carries the redacted command line (and a failed
-  subprocess's redacted output).
-- Local, intranet and IP-address sources now fail through these fetch paths;
-  blocked thumbnails are omitted. Existing downloaded podcast audio remains
-  usable. Podcast downloads and generic yt-dlp extraction make an additional
-  checked GET before starting, using the podcast or page fetcher's User-Agent
-  on every redirect hop. Hosts that reject it cannot be captured through
-  these paths. These fetches connect directly and no longer use system or
-  environment proxy settings. `/extract/any` reports admission refusals and preflight failures,
-  including response timeouts and HTTP protocol errors, as HTTP 400 errors.
-  Fixed YouTube hosts, including YouTube Music, and strict
-  X/Twitter, TikTok and Instagram capture retain their existing yt-dlp flow;
-  other URLs on those hosts, such as relaxed `/live/status` probes, take the
-  checked GET. YouTube keeps its original URL and shared rate limiter without
-  an extra GET.
-  See [the network policy and its limits](docs/security.md#url-and-identifier-validation).
-- Existing unpacked-extension users must reload the extension once after this
-  update. If the old ID differs from `bkcapfidedhfcjpmjabeopfbcjcbmdmi`, extension
-  storage starts fresh under the new ID: reapply extension preferences as needed;
-  the helper token is fetched again. The helper's library and captures stay in
-  place. See [the security model](docs/security.md) for additional trusted IDs.
-- The setup page's Helper status panel and the dashboard's Settings > Local app
-  status line no longer show Anthropic key checks; key status stays in the
-  dashboard's own key section. The tray no longer reports Degraded only for an
-  invalid key. The setup page's Installation folder row shows the standard
-  `%LOCALAPPDATA%\Uoink` location instead of the real path, and its Open folder
-  button no longer opens the folder.
 
 ## [3.8.1] - Unreleased
 

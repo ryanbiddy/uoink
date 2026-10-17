@@ -26,6 +26,11 @@ Protocol/validation failures use non-200 HTTP status codes:
 
 Handled application failures use the v1 pattern: HTTP 200 with `{"ok": false, "error": "..."}`.
 
+For `/tools/get_playbook_input`, `/tools/discover_candidates` and
+`/tools/queue_discovered`, argument-schema failures return HTTP 400 with the
+Phase 4 `invalid_request` envelope (`schema_version`, `contract_version` and
+structured `error`). Their domain validators run before tool dispatch.
+
 ## URL formats supported
 
 Single-video entry points (`/extract`, MCP `uoink_video`, and v1 session adds) accept these YouTube video URL shapes and canonicalize them to `https://www.youtube.com/watch?v=<id>` before extraction:
@@ -1564,10 +1569,25 @@ Tools currently exposed:
 - `get_transcript_reliability`
 
 The full HTTP/OpenAPI registry is generated from `TOOL_REGISTRY` and contains
-88 tools (the two Phase 4 brief tools, `get_library_brief_input` and the
+91 tools (the two Phase 4 brief tools, `get_library_brief_input` and the
 local-write `publish_library_brief`, joined it on 2026-09-08, run AV-2; the
 read-only Phase 6 cited export `export_cited_range` joined it on 2026-09-08,
-run BC-2, and is also on stdio).
+run BC-2, and is also on stdio; `get_playbook_input` adds local research packets,
+and `discover_candidates` / `queue_discovered` add opt-in discovery).
+
+`get_playbook_input` is available through `/tools/get_playbook_input` and MCP
+`tools/call`, with `{"playbook":"comment-mining","arguments":{"author":"Example creator","lens":"demand"}}`.
+It returns `{ok, playbook, instruction, packet, packet_hash}` without calling a
+model or the network. Errors use the Phase 4 structured envelope. Its five
+playbooks and string arguments are documented in
+[the MCP reference](v2-mcp.md#get_playbook_input). Native playbook prompts are
+stdio-only; HTTP clients use this tool. The existing token gate still applies.
+
+`discover_candidates` and `queue_discovered` are available through both
+`/tools/<name>` and MCP `tools/call`, with the same strict argument validation,
+consent checks, rate limits and standard error envelopes as stdio. See
+[discovery arguments and results](v2-mcp.md#discover_candidates).
+
 `search_clips` and `get_evidence_card` were Phase 1 registry-only
 additions; since 2026-09-04 (run E) they are also part of the stdio
 set, sharing the same handlers.
@@ -1591,6 +1611,55 @@ on `/tools/<name>`, inside the JSON-RPC result on `/mcp/v1`). When the
 `apply_disabled` while the default-off `librarian_apply_enabled` setting is
 off. `pin_shelf` and `undo_library_apply` also need a `user_intent_token`
 from `POST /library/intent` (below); no registry tool can mint one.
+
+### GET /discovery/runs/<run_id>
+
+Read one saved discovery run with `X-Uoink-Token`. Returns `{ok:true, run}`,
+where `run` has the same shape as the saved `discover_candidates` result,
+including any provider error from a partial or failed run. The read updates
+candidate states from the local library and capture queue, then saves the
+receipt. Queued picks become `captured` or `failed` as their jobs finish.
+
+This route makes no provider request, spends no credits, and never queues a
+capture. It needs no discovery intent, enabled setting or saved provider key.
+Run IDs resolve to one dated file and cannot contain paths. Invalid IDs return
+HTTP 400, missing runs return 404, and unexpected failures return 500, all with
+the standard error envelope.
+
+### POST /discovery/intent and POST /discovery/test-key
+
+Both require the helper token and the same browser-origin checks as
+`/library/intent`: supplied Origin must be loopback HTTP on the helper's port,
+and Sec-Fetch-Site must be same-origin or none. Extension and web origins are
+refused. An HTTP client holding the helper token can omit Origin and fetch
+metadata and mint an intent; these checks do not prove a human click.
+No MCP tool can mint a discovery intent. The dashboard flow mints one after
+the user confirms the displayed operation:
+
+```json
+{"confirmed":true,"operation":{"tool":"discover_candidates","arguments":{"mode":"creator","platform":"youtube","handle":"ExampleCreator","pages":1}}}
+```
+
+The result contains `user_intent_token` and `expires_at`. Pass that token in the
+subsequent tool call, along with the exact arguments and `confirm_credits`
+equal to `credits_planned`. Tokens are single-use, bound to the operation,
+origin and helper session, expire after five minutes, and mint at most 30 per
+minute. For queueing, use `operation.tool:"queue_discovered"` and the chosen
+`run_id` and `keys`. An agent without a dashboard intent requires
+`scrapecreators_agent_calls_enabled:true`.
+
+For key testing, mint an operation with `tool:"test_key", arguments:{}` and
+send `{confirm_credits:1, user_intent_token}` to `/discovery/test-key`. A balance
+check may use a credit; it uses the same cap and consent gate. Omit
+`confirm_credits` to get a free plan.
+
+`POST /settings` accepts `scrapecreators_enabled` (default false),
+`scrapecreators_agent_calls_enabled` (default false),
+`scrapecreators_daily_credit_cap` (1–500, default 25) and the write-only
+`scrapecreators_key` (at most 4096 characters, or null to clear).
+`GET /settings` returns only key presence and invalid status. A 401/403 marks
+the current key invalid and keeps it; a response for a replaced key cannot
+mark the replacement invalid. Dashboard discovery controls are pending.
 
 ### POST /library/intent
 

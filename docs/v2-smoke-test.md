@@ -218,3 +218,20 @@ Total checkpoints: 127.
 126. [ ] Memory page action "Open folder" launches Finder at the yoink folder.
 127. [ ] Uninstall → Uoink.app gone, LaunchAgent removed (manual cleanup of Application Support optional).
 
+
+### Research playbooks (local fixtures only)
+
+- [ ] On an isolated fixture library, `tools/list` lists exactly 35 stdio tools
+  and 91 HTTP tools. `get_playbook_input` has hints true/false/true/false
+  (read-only/destructive/idempotent/open-world) on both surfaces.
+- [ ] `prompts/list` lists 9 prompts: the four library prompts and all five
+  playbooks. `prompts/get` works for each playbook with valid fixture arguments;
+  each returns a fixed instruction and a fenced data message.
+- [ ] Compare each prompt packet with `get_playbook_input` over stdio and HTTP:
+  items, refs and packet_hash agree. No model, network or capture call occurs.
+- [ ] Eight fixture captures with 100 long chapters each return a packet under
+  64 KB. Chapter omissions are counted, clips remain available, and prompts and
+  tools return the same packet hash. Repeat with Unicode and fence characters.
+- [ ] Invalid arguments return `invalid_request` before storage access;
+  unexpected packet failures return `internal_error` without raw exception text.
+  The original four library prompts still behave as before.

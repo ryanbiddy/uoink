@@ -16,3 +16,25 @@ These two cached Python wheels contain no license-text member. The files beside 
 - Sources: [historical license](https://github.com/jtushman/proxy_tools/blob/f82ae43524fd6d9917b0e9490c7d0394dff8d155/LICENSE.txt), [matching source header](https://github.com/jtushman/proxy_tools/blob/f82ae43524fd6d9917b0e9490c7d0394dff8d155/proxy_tools/__init__.py), [conflicting setup metadata](https://github.com/jtushman/proxy_tools/blob/f82ae43524fd6d9917b0e9490c7d0394dff8d155/setup.py).
 
 These notices do not establish legal clearance, authenticate every package member, or qualify package installation, script execution or model behavior.
+
+## Adapted documentation text
+
+**ScrapeCreators social media research skills.** Uoink's five local research
+playbooks adapt workflow steps, output templates, outlier thresholds and
+pitfalls from [ScrapeCreators/social-media-research-skills](https://github.com/ScrapeCreators/social-media-research-skills)
+at commit `64ba7b4dea71e130d2712ffb6c1c1024b3b7c4b2` (`64ba7b4`).
+The [complete upstream MIT license](scrapecreators-social-media-research-skills-MIT-LICENSE.txt)
+is retained verbatim: Copyright (c) 2026 ScrapeCreators.
+
+Adapted files:
+
+- `skills/outlier-post-finder/SKILL.md`
+- `skills/transcript-intelligence/SKILL.md`
+- `skills/comment-mining/SKILL.md`
+- `skills/product-demand-research/SKILL.md`
+- `skills/creator-profile-teardown/SKILL.md`
+- `skills/content-repurposing/SKILL.md`
+
+No upstream script or code is shipped. Uoink computes metrics locally and gives
+the calling agent bounded, cited library evidence. The lineage pin is
+`vendor/scrapecreators-research-skills/VENDOR.md` in the source repository.

@@ -21,8 +21,8 @@ does not prove Claude Code installation or any current CLI capability.
    Settings → Extensions**).
 3. When prompted for the **Uoink install directory**, accept the default
    (`%LOCALAPPDATA%\Uoink`) unless you installed Uoink somewhere else.
-4. Restart Claude Desktop. The 32 stdio tools, five library resource
-   templates, and four prompts below appear from the launched child.
+4. Restart Claude Desktop. The 35 stdio tools, five library resource
+   templates, and nine prompts below appear from the launched child.
 
 ## What this bundle is (and isn't)
 
@@ -62,13 +62,13 @@ see https://uoink.app/developers. For **Claude Code CLI**, do not use this
 
 ## What stdio advertises
 
-The launched child is `uoink_mcp.py`. On stdio it advertises **29 tools**,
-**five resource templates**, and **four prompts**. HTTP MCP stays tools-only
+The launched child is `uoink_mcp.py`. On stdio it advertises **35 tools**,
+**five resource templates**, and **nine prompts**. HTTP MCP stays tools-only
 and is not what this bundle launches.
 
-Count: **25** legacy tools + Phase 4 `search_library`, `get_library_item`,
-`read_library_resource` + Phase 5 `get_library_activity`. The committed
-[`.mcpb/manifest.json`](manifest.json) lists those 29 names.
+Count: **25** legacy tools + **3** bounded library reads + **3** brief/export
+tools + **1** activity tool + **3** playbook/discovery tools. The committed
+[`.mcpb/manifest.json`](manifest.json) lists all 35 names.
 
 Resources and prompts are advertised on **stdio** (templates under
 `uoink://library/v1/`). Claude Desktop can attach listed resources through
@@ -76,7 +76,7 @@ its `@` picker. Claude Code CLI 2.1.261 has no native resource reader; that
 client uses `read_library_resource(uri)` instead
 ([docs/claude-code-mcp.md](../docs/claude-code-mcp.md)).
 
-### 32 tools
+### 35 tools
 
 **Legacy (25)**
 
@@ -130,6 +130,14 @@ client uses `read_library_resource(uri)` instead
 |---|---|
 | `get_library_activity` | Report deterministic library activity, shelf churn, and source observations. |
 
+**Research playbooks and discovery (3)**
+
+| Tool | Role |
+|---|---|
+| `get_playbook_input` | Prepare a cited local packet for one of five research playbooks. |
+| `discover_candidates` | Plan or run opt-in ScrapeCreators discovery with explicit credit confirmation. |
+| `queue_discovered` | Send up to ten selected discovery results through the normal capture queue. |
+
 The six Living Library work-queue tools and the four Phase 3 source-subscription
 tools stay HTTP/OpenAPI-only. They are not in this bundle's stdio inventory.
 
@@ -146,7 +154,7 @@ hashes.
 | `shelves/{shelf_key}/{taxonomy_revision}/{projection_revision}/{shelf_revision}/{offset}` | Shelf definition and a page of current members. |
 | `briefs/{date}/{brief_hash}` | One persisted client-produced brief. |
 
-### Four prompts
+### Nine prompts
 
 | Prompt | Arguments |
 |---|---|
@@ -154,6 +162,11 @@ hashes.
 | `evidence-brief` | Required `topic`; optional `since` as UTC `YYYY-MM-DD`. |
 | `whats-new` | Optional `days`, canonical decimal 1–30, default `7`. |
 | `reshelve-review` | Required `preview_id` (Phase 2 ID grammar). Read-only; does not apply or approve. |
+| `outlier-posts` | Required `author`; optional `platform`, `since`. |
+| `transcript-intel` | Exactly one of `video_ids` (up to 8), `topic`, or `author`; optional `since`. |
+| `comment-mining` | Exactly one of `video_ids` (up to 10) or `author`; optional `lens` (`voc` or `demand`). |
+| `creator-teardown` | Required `author`; optional `platform`. Needs at least three saved captures. |
+| `repurpose-pack` | Required `video_ids` (1–5); optional `kinds` (defaults to `tweet,thread`). |
 
 ## Bundle format (`manifest_version` 0.4)
 

@@ -41,6 +41,7 @@ def test_metadata_label_and_conflict_survive_normalized_name(tmp_path, monkeypat
     assert text.count("## Supplemental upstream notices") == 1
     assert text.count("third-party-notices/antlr4-python3-runtime-4.9.3-LICENSE.txt") == 1
     assert text.count("third-party-notices/proxy-tools-0.1.0-UPSTREAM-LICENSE.txt") == 1
+    assert text.count(notices.ADAPTED_TEXT_BLOCK) == 1
     assert "2000-01-01" in text and data == before
 
 
@@ -58,6 +59,7 @@ def test_failed_pip_collectors_reach_injected_importlib_fallback(tmp_path, monke
     text = target.read_text(encoding="utf8")
     assert "source: importlib.metadata (pip-licenses unavailable)" in text
     assert notices.SUPPLEMENTAL_NOTICE_BLOCK in text
+    assert text.count(notices.ADAPTED_TEXT_BLOCK) == 1
 
 
 @pytest.mark.parametrize("name", ["proxy_tools", "antlr4-python3-runtime"])
@@ -94,7 +96,9 @@ def test_generated_and_committed_supplement_match():
     committed = (ROOT / "THIRD-PARTY-NOTICES.md").read_text(encoding="utf8")
     assert committed.count(notices.SUPPLEMENTAL_NOTICE_BLOCK) == 1
     assert committed.count(notices.FFMPEG_BLOCK) == 1
+    assert committed.count(notices.ADAPTED_TEXT_BLOCK) == 1
     installer = (ROOT / "installer/uoink.iss").read_text(encoding="utf8")
-    for name in ("README.md", "antlr4-python3-runtime-4.9.3-LICENSE.txt", "proxy-tools-0.1.0-UPSTREAM-LICENSE.txt"):
+    for name in ("README.md", "antlr4-python3-runtime-4.9.3-LICENSE.txt", "proxy-tools-0.1.0-UPSTREAM-LICENSE.txt",
+                 "scrapecreators-social-media-research-skills-MIT-LICENSE.txt"):
         assert f'Source: "staging\\third-party-notices\\{name}"; DestDir: "{{app}}\\third-party-notices"; Flags: ignoreversion' in installer
     assert 'Source: "staging\\THIRD-PARTY-NOTICES.md"; DestDir: "{app}"; Flags: ignoreversion' in installer

@@ -3584,6 +3584,134 @@ def _library_media_export(args: dict[str, Any]) -> dict[str, Any]:
     return _lm.export_cited_range_tool(args, _b())
 
 
+def _research_playbooks_call(args: Any) -> dict[str, Any]:
+    """Local packets on the shared read guard; no raw exception crosses MCP."""
+    import library_resources as _lr
+
+    try:
+        import research_playbooks
+
+        args = _lr._strict_arguments(args, ("playbook", "arguments"),
+                                     ("playbook", "arguments"))
+        if not isinstance(args["arguments"], dict):
+            raise _lr._invalid("arguments_not_object", field="arguments")
+        reader = _lr.make_reader(_b())
+        result = research_playbooks.get_playbook_input(
+            reader, args["playbook"], args["arguments"])
+        text = _lr.render_tool_text(result)
+        _lr._check_wire({"content": [{"type": "text", "text": text}], "isError": False},
+                        what="get_playbook_input", next_step="use fewer captures or a narrower scope")
+        reader.assert_within_deadline()
+        return result
+    except ImportError:
+        return _lr.ResourceError("feature_unavailable", details={
+            "module": "research_playbooks"}).envelope()
+    except _lr.ResourceError as exc:
+        return exc.envelope()
+    except Exception:
+        # Exception text may contain local source data. Keep it out of both
+        # the response and logs, including serialization errors (NaN/inf).
+        return _lr.ResourceError("internal_error").envelope()
+
+
+PLAYBOOK_INPUT_SCHEMA: dict[str, Any] = _schema({
+    "playbook": {"type": "string", "enum": [
+        "outlier-posts", "transcript-intel", "comment-mining",
+        "creator-teardown", "repurpose-pack",
+    ]},
+    "arguments": {"type": "object", "description": (
+        "The selected playbook's prompt arguments, with string values. "
+        "Pass video_ids and kinds as comma-separated strings.")},
+}, ["playbook", "arguments"])
+
+PLAYBOOK_INPUT_DESCRIPTION = (
+    "Prepare a bounded, cited research packet from the local library for "
+    "outlier-posts, transcript-intel, comment-mining, creator-teardown or "
+    "repurpose-pack. Returns instruction, packet and packet_hash; the client "
+    "writes the report. No model, network, capture or settings changes."
+)
+
+
+DISCOVERY_TOOL_NAMES = frozenset({"discover_candidates", "queue_discovered"})
+DISCOVER_CANDIDATES_DESCRIPTION = (
+    "Plan or run one ScrapeCreators discovery search with your saved key. "
+    "Off by default. Omit confirm_credits for a free plan; set it to the planned "
+    "credits to spend. Requires discovery enabled, room under the daily cap, "
+    "and agent discovery enabled or a dashboard intent. Saves normalized "
+    "candidates locally; does not capture them or fetch thumbnails."
+)
+QUEUE_DISCOVERED_DESCRIPTION = (
+    "Queue 1-10 saved discovery candidates for normal Uoink capture. Requires "
+    "agent discovery enabled or a dashboard intent. Skips captured, queued, "
+    "unsupported and unknown picks. No ScrapeCreators call or credits; the "
+    "normal retry worker captures the selected URLs."
+)
+DISCOVER_CANDIDATES_SCHEMA = _schema({
+    "mode": {"type": "string", "enum": ["creator", "keyword"]},
+    "platform": {"type": "string", "enum": ["tiktok", "instagram", "youtube", "youtube_shorts"]},
+    "handle": {"type": "string", "minLength": 1, "maxLength": 100},
+    "channel_id": {"type": "string", "pattern": "^UC[A-Za-z0-9_-]{22}$"},
+    "query": {"type": "string", "minLength": 1, "maxLength": 200},
+    "pages": {"type": "integer", "minimum": 1, "maximum": 3, "default": 1},
+    "confirm_credits": {"type": "integer"},
+    "user_intent_token": {"type": "string", "minLength": 1, "maxLength": 256},
+}, ["mode", "platform"])
+QUEUE_DISCOVERED_SCHEMA = _schema({
+    "run_id": {"type": "string", "pattern": "^[A-Za-z0-9_-]{1,150}$"},
+    "keys": {"type": "array", "minItems": 1, "maxItems": 10,
+             "items": {"type": "string", "pattern": "^[A-Za-z0-9_-]{1,100}$"}},
+    "user_intent_token": {"type": "string", "minLength": 1, "maxLength": 256},
+}, ["run_id", "keys"])
+
+
+def validate_research_arguments(name, args):
+    """HTTP schema preflight using the domain validators, without data access."""
+    import library_resources as _lr
+
+    try:
+        if name == "get_playbook_input":
+            import research_playbooks
+
+            args = _lr._strict_arguments(args, ("playbook", "arguments"),
+                                         ("playbook", "arguments"))
+            if not isinstance(args["arguments"], dict):
+                raise _lr._invalid("arguments_not_object", field="arguments")
+            research_playbooks._validate(_lr.LibraryReader(None, data_root=None),
+                                         args["playbook"], args["arguments"])
+        else:
+            import discovery_scrapecreators as discovery
+
+            validator = (discovery.validate_arguments if name == "discover_candidates"
+                         else discovery.validate_queue_arguments)
+            validator(args)
+    except _lr.ResourceError as exc:
+        return exc.envelope()
+    except Exception:
+        return _lr.ResourceError("internal_error").envelope()
+    return None
+
+
+def _discovery_call(name, args, *, origin="", session_hash=""):
+    """Transport context is supplied by HTTP, never taken from tool arguments."""
+    import library_resources as _lr
+
+    try:
+        TOOL_REGISTRY[name].rate_limiter.check()
+        service = _b()._get_discovery_service()
+        result = getattr(service, name)(args, origin=origin, session_hash=session_hash)
+        if not isinstance(result, dict) or type(result.get("ok")) is not bool:
+            raise _lr.ResourceError("internal_error")
+        # Check serialization here too, so neither transport exposes exceptions.
+        json.dumps(result, ensure_ascii=False, allow_nan=False)
+        return result
+    except RateLimitExceeded:
+        return _lr.ResourceError("rate_limited", details={"retry_after_ms": 60000}).envelope()
+    except _lr.ResourceError as exc:
+        return exc.envelope()
+    except Exception:
+        return _lr.ResourceError("internal_error").envelope()
+
+
 EXPORT_CITED_RANGE_SCHEMA: dict[str, Any] = {
     "type": "object",
     "properties": {
@@ -5166,6 +5294,35 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
         }, ["uri"]),
         handler=lambda args: _library_resources_call("read_library_resource", args),
     ),
+    "get_playbook_input": ToolSpec(
+        name="get_playbook_input",
+        title="Prepare research playbook input",
+        annotations={
+            "readOnlyHint": True, "destructiveHint": False,
+            "idempotentHint": True, "openWorldHint": False,
+        },
+        description=PLAYBOOK_INPUT_DESCRIPTION,
+        input_schema=PLAYBOOK_INPUT_SCHEMA,
+        handler=_research_playbooks_call,
+    ),
+    "discover_candidates": ToolSpec(
+        name="discover_candidates", title="Discover capture candidates",
+        annotations={"readOnlyHint": False, "destructiveHint": False,
+                     "idempotentHint": False, "openWorldHint": True},
+        description=DISCOVER_CANDIDATES_DESCRIPTION,
+        input_schema=DISCOVER_CANDIDATES_SCHEMA,
+        handler=lambda args: _discovery_call("discover_candidates", args),
+        rate_limiter=_RateLimiter(6),
+    ),
+    "queue_discovered": ToolSpec(
+        name="queue_discovered", title="Queue discovered posts",
+        annotations={"readOnlyHint": False, "destructiveHint": False,
+                     "idempotentHint": True, "openWorldHint": True},
+        description=QUEUE_DISCOVERED_DESCRIPTION,
+        input_schema=QUEUE_DISCOVERED_SCHEMA,
+        handler=lambda args: _discovery_call("queue_discovered", args),
+        rate_limiter=_RateLimiter(30),
+    ),
     # ---- Living Library Phase 4 brief tools (run AV-2) ----
     # Brief generation belongs to the client: get_library_brief_input is a
     # read (no lease, no mutation); publish_library_brief is a LOCAL WRITE
@@ -5262,10 +5419,16 @@ def list_tools() -> list[dict[str, Any]]:
     return tools
 
 
-def call_tool(name: str, arguments: dict[str, Any] | None = None) -> dict[str, Any]:
+def call_tool(name: str, arguments: dict[str, Any] | None = None, *,
+              origin: str = "", session_hash: str = "") -> dict[str, Any]:
     spec = TOOL_REGISTRY.get(name)
     if not spec:
         return _err("tool not found")
+    if name in DISCOVERY_TOOL_NAMES:
+        return _discovery_call(name, arguments, origin=origin, session_hash=session_hash)
+    if name == "get_playbook_input":
+        # Preserve malformed/falsy input for the strict domain validator.
+        return spec.handler(arguments)
     args = arguments or {}
     if not isinstance(args, dict):
         return _err("arguments must be an object")

@@ -338,6 +338,8 @@ foreach ($f in @(
     'library_analysis.py',
     'library_resources.py',
     'library_prompts.py',
+    'research_playbooks.py',
+    'discovery_scrapecreators.py',
     'library_briefs.py',
     'library_mirror.py',
     'library_mirror_vault_io.py',
@@ -585,6 +587,7 @@ Write-Host '    copying server source + templates...'
 # Confirm-Hash deletes a mismatched cache file, so do not use it on source notices.
 $noticeRoot = Join-Path $RepoRoot 'third-party-notices'
 $noticePins = @{
+    'scrapecreators-social-media-research-skills-MIT-LICENSE.txt' = '37a2301a00eef329530cc65ddb9f1c1085a2fbfb1bb748adb9eb6fa05bde4f9b'
     'antlr4-python3-runtime-4.9.3-LICENSE.txt' = 'b1b379fcaf3219593a4c433feb1b35c780bed23fafaae440b1ae2771a9521e3a'
     'proxy-tools-0.1.0-UPSTREAM-LICENSE.txt' = 'a428fb8a2e762af3eb0a6edbbb88e9b42ccfee80fd9b423958bcacf9b9abbfe4'
 }
@@ -602,7 +605,8 @@ foreach ($noticeName in $noticePins.Keys) {
 New-Item -ItemType Directory -Force -Path (Join-Path $StagingDir 'third-party-notices') | Out-Null
 foreach ($noticeRelative in @('THIRD-PARTY-NOTICES.md', 'third-party-notices\README.md',
         'third-party-notices\antlr4-python3-runtime-4.9.3-LICENSE.txt',
-        'third-party-notices\proxy-tools-0.1.0-UPSTREAM-LICENSE.txt')) {
+        'third-party-notices\proxy-tools-0.1.0-UPSTREAM-LICENSE.txt',
+        'third-party-notices\scrapecreators-social-media-research-skills-MIT-LICENSE.txt')) {
     $noticeSource = Join-Path $RepoRoot $noticeRelative
     $noticeTarget = Join-Path $StagingDir $noticeRelative
     $noticeHash = (Get-FileHash -LiteralPath $noticeSource -Algorithm SHA256).Hash
@@ -635,6 +639,8 @@ Copy-Item (Join-Path $RepoRoot 'source_subscriptions.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'library_analysis.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'library_resources.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'library_prompts.py') $StagingDir -Force
+Copy-Item (Join-Path $RepoRoot 'research_playbooks.py') $StagingDir -Force
+Copy-Item (Join-Path $RepoRoot 'discovery_scrapecreators.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'library_briefs.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'library_mirror.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'library_mirror_vault_io.py') $StagingDir -Force
