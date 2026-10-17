@@ -79,19 +79,21 @@ migration failures use generic messages, with details in `server.log`.
 `/health` and `/ping` retain their existing counts and readiness fields;
 neither returns local paths or key-presence flags.
 
-The first-run splash receives one additional field, `anthropic_key_valid`,
-only when `/diagnose` passes the existing local-UI bootstrap proof: no
-`Origin` header, `Sec-Fetch-Site: same-origin` or `none`, and a present loopback
+Clients that pass the local-UI bootstrap proof still receive the key-readiness
+field `anthropic_key_valid` from `/diagnose` without a token, because the
+first-run splash needs it. The proof requires no `Origin` header,
+`Sec-Fetch-Site: same-origin` or `none`, and a present loopback
 `Host` allowed on the helper's port. The field is `true` for a saved key not
-marked invalid, `false` for a key marked invalid, and absent when no key is
-saved. This preserves the splash's ready, update-key and add-key states
+marked invalid, `false` whenever `anthropic_key_invalid` is set, even if a 401
+cleared the saved key, and absent only when no key is saved and the invalid
+flag is off. This preserves the splash's ready, update-key and add-key states
 without making an Anthropic request. Even pinned extension origins receive
 no such field; a curl-style request without fetch metadata does not qualify.
 
 Use authenticated Settings to inspect the output folder or Anthropic key
 status. The extension setup page's public Helper status panel no longer lists
-key checks or key-migration warnings. Its Installation folder row keeps the
-static `%LOCALAPPDATA%\Uoink` hint instead of showing the resolved folder.
+key checks. Its Installation folder row keeps the static `%LOCALAPPDATA%\Uoink`
+hint instead of showing the resolved folder.
 The Open folder button no longer opens that folder; it logs a console warning
 because public diagnostics no longer supply a path. The tray no longer shows
 Degraded solely because a saved key is invalid; other diagnostic errors still
@@ -312,6 +314,28 @@ Protocol validation failures return `4xx` JSON errors. Handled application failu
 - Magic bytes must match the extension-derived MIME type.
 - Responses use `Cache-Control: private, max-age=300`.
 
+## Corpus import sandbox
+
+To import a backup through `POST /corpus/import` or the local CLI
+`--import-corpus <file>`, copy the export JSON into the active output folder's
+`_exports` directory and supply its absolute path. Both entry points enforce
+this boundary; the CLI also rejects relative paths and backups in other folders.
+Subdirectories are allowed. Other output locations and sibling folders such as
+`_exports-old` are outside this boundary, even if `/file` can serve their images.
+
+The helper rejects relative paths and `..` segments, resolves the file and
+export directory, then checks containment before probing or reading the file.
+File symlinks and directory junctions cannot point outside `_exports`, and
+`_exports` itself cannot resolve outside the output root. Invalid paths, missing
+files, unreadable files and invalid exports return HTTP 400, or JSON with
+`ok: false` from the CLI; error responses do not echo local paths. The Host
+allowlist, token requirement and JSON body limits still apply before HTTP import
+processing.
+
+Export format and conservative merge rules are unchanged. A local index rebuild
+with an explicit root still restores the newest export under that root's
+`_exports`; HTTP callers cannot override the root in their request body.
+
 ## Anthropic API key storage
 
 Comment Intelligence, Hook Type, and Entity Extraction are optional BYO-key features. Normal Uoink extraction works without an Anthropic key.
@@ -359,6 +383,88 @@ Installed Windows builds store helper state under `%LOCALAPPDATA%\Uoink\` (migra
 - `.migration-complete` / `.migrated-from-yoink` - markers written by the v2.1 install migration (see below).
 
 Corpus, sidecar, settings, and migration writes use temp-file-and-replace patterns where practical. Corrupt `index.db` is quarantined as `index.db.corrupt-<timestamp>` and rebuilt from on-disk corpora through a local backfill scan. Legacy corrupt `jobs.json` or `taxonomy.json` migration input is logged and left in place rather than crashing the helper.
+
+Machine error details pass through `_sanitize_error` before a job stores them or
+an extraction/session response returns them. Paths become `<path>`, URLs with
+userinfo become `<url>`, and recognized API keys and labelled credentials become
+`[redacted]`. This includes quoted paths with spaces, Windows drive and UNC paths,
+Unix paths, API-key fields and authorization headers. Each line is sanitized
+separately, with spaces and tabs compacted. Machine details retain line breaks
+between `Command:`, `Exit code:` and tool output, so extension notifications can
+still select the last `ERROR:` line. Credential labels require `:` or `=`, except
+CLI flags such as `--password` and `Bearer`/`Basic` auth schemes, which also accept
+a space or tab. CLI flags include prefixed forms such as `--video-password`, and
+they also accept `--flag=value` and the comma of a Python or JSON argument list,
+as in `'--token', 'value'` (the form `str()` of a subprocess error prints).
+For failed or timed-out subprocesses with an argument list, credential values
+are replaced before the command is joined or quoted. Both `--flag value` and
+`--flag=value` redact the entire argument, including spaces and line breaks.
+The same flag names are recognized in free-text diagnostics.
+A quoted value in free text runs to its matching unescaped quote,
+the one followed by whitespace, the end of the line or only closing punctuation
+(such as `', ` or `']'`), so commas, escaped quotes and apostrophes inside it are
+redacted too; a quoted value without such a closing quote is redacted to the end
+of its line. An unquoted value runs to the next whitespace. Ordinary diagnostics
+such as "This video requires a GVS PO Token which was not provided." are
+preserved. Free-text credential matches do not cross line breaks.
+Spaces within unquoted directory names are supported when a separator follows.
+Once a path starts, redaction consumes its full non-whitespace suffix, including
+apostrophes, colons and repeated separators such as doubled backslashes.
+Quoted absolute paths redact through the end of their line unless the last
+same-quote closer follows a filename with an extension and the remaining text
+is a complete diagnostic phrase, such as `failed`, `wasn't found` or `is locked`.
+For example, `file '/home/x.json' wasn't found` becomes `file <path> wasn't found`,
+but `file '/home/james' smith failed` becomes `file <path>`. This also removes
+ambiguous names such as `James' O'Brien`, tails with no separators or dots,
+and any later paths on that line. Windows drive and UNC paths follow the same
+rule. Several quoted paths and intervening words can become one `<path>`.
+The rule can also hide the rest of a command or diagnostic line after a quoted
+path, including placeholders for URLs or credentials already redacted there.
+Unterminated paths and paths cut off by the 65,536-character input cap redact
+to the end of the available line. Redaction never crosses a line break.
+Unquoted spaced directories can contain colons, such as `james' smith:family`.
+Unquoted paths end at whitespace after the final component, preserving separate
+path placeholders and trailing diagnostic text. Retry details keep their
+200-character limit.
+Sanitizer input is capped at 65,536 characters before splitting lines or
+running regexes. Redaction then runs before the existing 6,000-character
+failed-subprocess detail and 3,000-character other-exception limits. Longer
+diagnostics keep only their prefix, as before; the full text remains in
+`server.log`. Timeout details use separate `Command:` and `Timeout:` lines.
+The sanitizer does not read credentials to perform these replacements.
+
+URLs (`scheme://...`) become `<url>` as a whole before path redaction. A drive
+letter or `/` directly after a letter or digit does not start a path, so text
+such as "download/network issue" or "and/or" is unchanged and phase errors
+match their sanitized detail.
+
+The failure handlers that record a machine error detail (single-video and
+playlist extraction, session capture, the retry queue and podcast
+transcription) write the raw text, including command lines and tool
+stderr/stdout, only to the local `server.log` through a file-only logger. The
+job's `error` and `error_detail`, a podcast episode's transcript error and a
+deferred podcast publish error store only sanitized text. For a podcast
+transcription failure, the job's `error`, the episode's transcript error and the
+console line are a one-line summary: a failed subprocess is recorded only as its
+type and exit status (`CalledProcessError: exit status 1`), a subprocess timeout
+as `TimeoutExpired: timed out after N seconds`, and other exceptions as their
+sanitized text. A deferred podcast publish error (`corpus_error` in the job
+result, and its console line) uses the same summary. The podcast job's
+`error_detail` keeps the exception type and the sanitized machine detail; for a
+subprocess error that includes the redacted command line and, for a failed
+subprocess, its redacted output. The console line each of the other
+handlers logs for the failure uses fixed or sanitized text; podcast
+transcription and deferred-publish tracebacks also go only to `server.log`.
+Optional subtitle-fetch and comments-worker failures follow the same rule:
+raw exceptions and yt-dlp output go to the file-only logger, while the console
+gets a sanitized summary. A comments failure no longer prints yt-dlp's last
+stderr line to the console. Subtitle-refusal detection and comments status
+updates are unchanged.
+Other helper log lines are unchanged and still go to both the console and
+`server.log`; some include local paths, the output folder or a tool's last
+error line. Review `server.log` before sharing it: it can contain the paths and
+credentials removed from dashboard errors. This change does not purge
+historical job records or existing logs.
 
 ## MCP security model
 

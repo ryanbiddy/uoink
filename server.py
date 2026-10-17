@@ -1760,20 +1760,161 @@ def _short_reason(reason: str, *, api_key: str | None = None) -> str:
     return msg[:180] if len(msg) > 180 else msg
 
 
-# Strip filesystem paths (Windows or Unix) before persisting an error
-# string. Windows: ``X:\...`` (one literal backslash per separator). Unix:
-# ``/...``. The URL pattern runs first below so a userinfo-bearing URL
-# is replaced as a unit rather than slashed-up piece by piece.
-_PATH_SANITIZE_RE = re.compile(r"[A-Za-z]:\\[^\s]+|/[^\s]+")
+# Match path starts only; the scanners below handle ambiguous spaces/quotes
+# without nested repetitions or repeatedly searching the same suffix.
+_QUOTED_PATH_SANITIZE_RE = re.compile(
+    r"([\"'])(?:[A-Za-z]:[\\/]|\\\\|/)")
+# Only unmistakable, complete diagnostic phrases may follow a quoted filename.
+# A prefix such as "failed" is not enough: later words could still be a name.
+_PATH_PROSE_SANITIZE_RE = re.compile(
+    r"[ \t]+(?:failed|wasn't found|was not found|not found|is locked|"
+    r"is unavailable|is not available|does not exist)[.!]?[ \t]*\Z")
+_PATH_SANITIZE_RE = re.compile(
+    r"(?:(?<![A-Za-z0-9])[A-Za-z]:[\\/]|\\\\|(?<![A-Za-z0-9])/)"
+    r"[^\s]*")
+# Replace a whole scheme://... URL before path redaction. Path rules would
+# otherwise read its scheme as a drive (https:// -> http<path>) or keep only
+# "https:", as the original sanitizer did, so no host is lost by this. The
+# URL runs to whitespace; only closing quotes and punctuation at its very end
+# stay outside the placeholder.
+_URL_SANITIZE_RE = re.compile(
+    r"(?<![A-Za-z0-9+.-])[A-Za-z][A-Za-z0-9+.-]*://[^\s]*")
 # Strip URLs that carry HTTP basic-auth userinfo (rare but possible: e.g.
 # yt-dlp surfacing the request URL in an error). Match scheme://user@host
 # and replace the whole URL with a placeholder.
-_USERINFO_URL_RE = re.compile(r"https?://[^@\s/]+@[^\s]+")
+_USERINFO_URL_RE = re.compile(
+    r"(?<![A-Za-z0-9+.-])https?://[^@\s/]+@[^\s]+", re.IGNORECASE)
+# Recognize keys and labelled credentials in tool output without consulting
+# settings, the credential store or the token file.
+_KEY_SANITIZE_RE = re.compile(r"\bsk-[A-Za-z0-9_-]+", re.IGNORECASE)
+# Plain labels need ':' or '='. Only CLI flags and auth schemes accept a
+# whitespace separator, so prose such as "PO Token which was not provided"
+# stays readable. Separators must never consume the next diagnostic line.
+# Share the exact flag vocabulary with argument-list redaction. Free-text
+# labels keep the additional space-separated "api key" spelling.
+_CREDENTIAL_FLAG_PATTERN = (
+    r"--(?:[\w-]*-)?(?:api[-_]?key|anthropic[-_](?:api[-_])?key|"
+    r"x-api-key|x-(?:uoink|yoink)-token|access[-_]?token|token|authorization|"
+    r"password|client[-_]?secret)")
+_CREDENTIAL_FLAG_SANITIZE_RE = re.compile(_CREDENTIAL_FLAG_PATTERN + r"\Z", re.IGNORECASE)
+# Only match the label here. Quoted values are scanned once, including escaped
+# quotes, glued apostrophes and unterminated values. Argument-list commas and
+# quotes around a whole --flag=value argument are also recognized.
+_CREDENTIAL_SANITIZE_RE = re.compile(
+    r"(?<![\w-])(?P<flag_quote>[\"'])" + _CREDENTIAL_FLAG_PATTERN + r"="
+    r"|\b(?:api[-_ ]?key|anthropic[-_ ](?:api[-_ ])?key|x-api-key|"
+    r"x-(?:uoink|yoink)-token|access[-_]?token|token|authorization|"
+    r"password|client[-_]?secret)\b"
+    r"[\"']?[ \t]*[:=][ \t]*"
+    r"|(?<![\w-])" + _CREDENTIAL_FLAG_PATTERN + r"\b(?:[\"']?[ \t]*,[ \t]*|[ \t]+)"
+    r"|\b(?:Bearer|Basic)[ \t]+",
+    re.IGNORECASE)
+_CREDENTIAL_END_SANITIZE_RE = re.compile(r"[\"'),.;:!?\]}>]{0,8}(?:\s|$)")
+_CREDENTIAL_VALUE_SANITIZE_RE = re.compile(
+    r"(?:Bearer[ \t]+|Basic[ \t]+)?[^\s]+", re.IGNORECASE)
+_ERROR_SANITIZE_INPUT_LIMIT = 64 * 1024
 
 
-def _sanitize_error(msg: str, *, max_len: int = 200) -> str:
-    """Strip filesystem paths and userinfo-bearing URLs from an error
-    string before persisting it (Sprint 19.6 / Fix 8 / audit F3).
+def _redact_error_credentials(line: str) -> str:
+    pieces = []
+    pos = 0
+    while match := _CREDENTIAL_SANITIZE_RE.search(line, pos):
+        start = end = match.end()
+        flag_quote = match.group("flag_quote")
+        quote = flag_quote or (line[start:start + 1] if line[start:start + 1] in ("'", '"') else "")
+        if quote:
+            if not flag_quote:
+                end += 1
+            while end < len(line):
+                char = line[end]
+                end += 1
+                if char == "\\":
+                    end = min(end + 1, len(line))
+                elif char == quote and _CREDENTIAL_END_SANITIZE_RE.match(line, end):
+                    break
+        elif line.startswith("[redacted]", start):
+            end += len("[redacted]")
+        elif value := _CREDENTIAL_VALUE_SANITIZE_RE.match(line, start):
+            end = value.end()
+        pieces.append(line[pos:start])
+        if end > start:
+            pieces.append("[redacted]" + (flag_quote or ""))
+        pos = end
+    pieces.append(line[pos:])
+    return "".join(pieces)
+
+
+def _redact_error_paths(line: str) -> str:
+    # Locate the LAST same-quote closer before deciding whether any suffix is
+    # safe to keep. Index both quote styles in one pass; an apostrophe inside
+    # a word (O'Brien, wasn't) is not a closer.
+    # _sanitize_error supplies one line at a time, so no span crosses a newline.
+    last_closer = {"'": -1, '"': -1}
+    for offset, char in enumerate(line):
+        following = offset + 1
+        if char in last_closer and (following == len(line) or
+                                   not line[following].isalnum()):
+            last_closer[char] = offset
+
+    pieces = []
+    pos = 0
+    while match := _QUOTED_PATH_SANITIZE_RE.search(line, pos):
+        closing = last_closer[match.group(1)]
+        end = len(line)
+        if closing >= match.end():
+            # An apostrophe can be part of a name even when the remaining
+            # words have no separators or dots. Default to the end of the
+            # line (also the end of capped input), including later paths.
+            # Preserve prose only after a filename with an actual extension.
+            filename = (line[match.start() + 1:closing]
+                        .replace("\\", "/").rsplit("/", 1)[-1])
+            stem, dot, extension = filename.rpartition(".")
+            after_quote = closing + 1
+            while after_quote < len(line) and line[after_quote] in ",.;:!?)]}":
+                after_quote += 1
+            if (stem and dot and extension.isalnum() and
+                    _PATH_PROSE_SANITIZE_RE.fullmatch(line, after_quote)):
+                end = after_quote
+            # Each quote style uses its last closer, so these scans run at
+            # most twice per line and remain linear in the capped input.
+        pieces.extend((line[pos:match.start()], "<path>"))
+        pos = end
+    pieces.append(line[pos:])
+    line = "".join(pieces)
+
+    pieces = []
+    pos = search_at = 0
+    while match := _PATH_SANITIZE_RE.search(line, search_at):
+        end = scan = match.end()
+        # Spaces belong to a directory only if another separator follows.
+        # Stop at a new absolute path or delimiter; consume non-space suffixes
+        # whole, including colons, apostrophes and repeated separators.
+        while scan < len(line):
+            char = line[scan]
+            # A colon only separates paths when it belongs to a new drive
+            # root. In a name such as "james' smith:family/private/x.json",
+            # keep scanning to the separator after the colon.
+            if char in '"<>' or (char == ":" and _PATH_SANITIZE_RE.match(line, scan - 1)):
+                break
+            if char in "/\\":
+                if line[scan - 1].isspace():
+                    break
+                while scan < len(line) and not line[scan].isspace():
+                    scan += 1
+                end = scan
+            else:
+                scan += 1
+        pieces.extend((line[pos:match.start()], "<path>"))
+        pos = end
+        # A ':' delimiter may belong to the next drive letter.
+        search_at = scan - 1 if scan < len(line) and line[scan] == ":" else scan
+    pieces.append(line[pos:])
+    return "".join(pieces)
+
+
+def _sanitize_error(msg: str, *, max_len: int = 200,
+                    preserve_lines: bool = False) -> str:
+    """Strip paths, userinfo URLs and keys before storing or returning errors.
 
     The rate-limit retry queue persists last_error across helper restarts;
     a raw friendly_error string can include yt-dlp's last stderr line,
@@ -1783,12 +1924,26 @@ def _sanitize_error(msg: str, *, max_len: int = 200) -> str:
     leaks it."""
     if not msg:
         return ""
-    # URL pass first so a userinfo URL is replaced as a unit -- otherwise
-    # the path regex would only catch the trailing /-prefixed portion and
-    # leave the credentials visible.
-    cleaned = _USERINFO_URL_RE.sub("<url>", str(msg))
-    cleaned = _PATH_SANITIZE_RE.sub("<path>", cleaned)
-    cleaned = re.sub(r"\s+", " ", cleaned).strip()
+    lines = []
+    # Bound work before splitting or running any regex. Keep the existing
+    # prefix-only truncation style and redact the bounded prefix before the
+    # smaller display limits, including a credential cut at this boundary.
+    for line in str(msg)[:_ERROR_SANITIZE_INPUT_LIMIT].splitlines():
+        # Whole URLs first: userinfo is replaced as a unit, a query-string
+        # credential goes with its URL, and a URL never turns into a partial
+        # path placeholder.
+        cleaned = _USERINFO_URL_RE.sub("<url>", line)
+        cleaned = _URL_SANITIZE_RE.sub(
+            lambda m: "<url>" + m.group().removeprefix(m.group().rstrip("\"'),.;:!?]}>")),
+            cleaned)
+        cleaned = _redact_error_credentials(cleaned)
+        cleaned = _KEY_SANITIZE_RE.sub("[redacted]", cleaned)
+        cleaned = _redact_error_paths(cleaned)
+        lines.append(re.sub(r"[ \t]+", " ", cleaned).strip())
+    # Queue summaries stay on one line; machine details retain the line
+    # boundaries used by the extension to find the last yt-dlp ERROR: line.
+    cleaned = ("\n".join(lines) if preserve_lines else
+               " ".join(line for line in lines if line)).strip()
     return cleaned[:max_len]
 
 
@@ -2050,15 +2205,20 @@ def _allowed_roots() -> set[Path]:
 LOG_PATH = (
     _ISOLATION.log_path if _ISOLATION is not None else HERE / "server.log"
 )
+_server_log_handler = logging.FileHandler(LOG_PATH, encoding="utf-8")
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s %(levelname)s %(message)s",
     handlers=[
-        logging.FileHandler(LOG_PATH, encoding="utf-8"),
+        _server_log_handler,
         logging.StreamHandler(sys.stdout),
     ],
 )
 log = logging.getLogger("uoink")
+# Raw machine diagnostics belong only in server.log, never stdout or a job.
+_error_detail_log = logging.getLogger("uoink.error_detail")
+_error_detail_log.propagate = False
+_error_detail_log.addHandler(_server_log_handler)
 
 # Serialize extractions — yt-dlp + ffmpeg are I/O heavy.
 _extract_lock = threading.Lock()
@@ -4939,14 +5099,15 @@ def _comments_worker(url: str, output_folder: Path, yoink_path: Path,
         log.info("comments appended to %s (%d of %d)",
                  yoink_path, len(ranked), len(raw_comments))
     except subprocess.CalledProcessError as e:
-        stderr = (e.stderr or b"").decode("utf-8", errors="ignore").strip()
-        log.warning("comments yt-dlp failed: %s", stderr.splitlines()[-1] if stderr else e.returncode)
+        _error_detail_log.warning("comments yt-dlp failed: %s\n%s", e, _subprocess_output(e))
+        log.warning("comments yt-dlp failed: %s", _error_summary(e))
         _replace_comments_section(yoink_path,
             "*Comments are disabled on this video.*")
         _update_sidecar_comments(output_folder, [], "disabled")
         _start_hook_after_comments()
     except Exception as e:
-        log.warning("comments worker crashed: %s", e)
+        _error_detail_log.exception("comments worker crashed")
+        log.warning("comments worker crashed: %s", type(e).__name__)
         _replace_comments_section(yoink_path,
             "*Comments could not be retrieved.*")
         _update_sidecar_comments(output_folder, [], "unavailable")
@@ -5145,7 +5306,11 @@ def _fetch_video_subtitles(url: str, output_folder: Path, *,
         raise
     except (OSError, subprocess.CalledProcessError,
             subprocess.TimeoutExpired) as e:
-        log.warning("%s subtitle fetch unavailable: %s", long_video_mode, e)
+        output = (_subprocess_output(e) if isinstance(
+            e, (subprocess.CalledProcessError, subprocess.TimeoutExpired)) else "")
+        _error_detail_log.warning("%s subtitle fetch unavailable: %s\n%s",
+                                  long_video_mode, e, output)
+        log.warning("%s subtitle fetch unavailable: %s", long_video_mode, type(e).__name__)
         return (_detect_platform_from_url(url) == PLATFORM_YOUTUBE
                 and (_is_youtube_captions_refusal(e)
                      or _is_youtube_rate_limit(e)))
@@ -5905,21 +6070,68 @@ def _youtube_rate_limit_detail(e: BaseException) -> str:
     return "youtube_rate_limit"
 
 
+def _redact_command_args(cmd):
+    """Redact whole credential arguments before quoting destroys boundaries."""
+    if isinstance(cmd, str):
+        return cmd  # Free text still goes through _sanitize_error below.
+    args = []
+    redact_next = False
+    for part in cmd:
+        arg = str(part)
+        if redact_next:
+            args.append("[redacted]")
+            redact_next = False
+            continue
+        flag, equals, _ = arg.partition("=")
+        if _CREDENTIAL_FLAG_SANITIZE_RE.fullmatch(flag):
+            if equals:
+                arg = flag + "=[redacted]"
+            else:
+                redact_next = True
+        args.append(arg)
+    return args
+
+
 def machine_error_detail(e: BaseException) -> str:
-    """Raw-ish diagnostic detail for dashboard disclosures, not primary UI."""
-    if isinstance(e, subprocess.CalledProcessError):
+    """Log raw diagnostics locally; return only sanitized disclosure detail."""
+    is_failed_process = isinstance(e, subprocess.CalledProcessError)
+    if is_failed_process or isinstance(e, subprocess.TimeoutExpired):
+        output = _subprocess_output(e) if is_failed_process else ""
+        _error_detail_log.error("%s\n%s", e, output)
         pieces = []
         if e.cmd:
             try:
-                pieces.append("Command: " + " ".join(str(part) for part in e.cmd))
+                args = _redact_command_args(e.cmd)
+                command = args if isinstance(args, str) else subprocess.list2cmdline(args)
+                pieces.append("Command: " + command)
             except TypeError:
                 pieces.append(f"Command: {e.cmd}")
-        pieces.append(f"Exit code: {e.returncode}")
-        output = _subprocess_output(e)
+        pieces.append(f"Exit code: {e.returncode}" if is_failed_process else
+                      f"Timeout: {e.timeout} seconds")
         if output:
             pieces.append(output)
-        return "\n".join(pieces).strip()[:6000]
-    return re.sub(r"\s+", " ", str(e or "")).strip()[:3000]
+        detail = "\n".join(pieces).strip()
+        max_len = 6000 if is_failed_process else 3000
+    else:
+        detail = str(e or "")
+        max_len = 3000
+        _error_detail_log.error("%s", detail)
+    # Redact before truncating so a cut cannot leave a partial credential.
+    return _sanitize_error(detail, max_len=max_len, preserve_lines=True)
+
+
+def _error_summary(e: BaseException) -> str:
+    """One sanitized line for a job's or episode's error field and the console.
+
+    str() of a subprocess error embeds the whole command line (a Python list
+    repr), so those summarize as type plus exit status or timeout; the
+    machine error detail keeps the redacted command and tool output.
+    """
+    if isinstance(e, subprocess.CalledProcessError):
+        return f"{type(e).__name__}: exit status {e.returncode}"
+    if isinstance(e, subprocess.TimeoutExpired):
+        return f"{type(e).__name__}: timed out after {e.timeout} seconds"
+    return _sanitize_error(str(e)) or type(e).__name__
 
 
 def _source_name_from_error(text: str) -> str:
@@ -5985,7 +6197,9 @@ def friendly_error(e: BaseException) -> str:
         return ("Uoink can't find yt-dlp or ffmpeg on this machine. "
                 f"Install both from {INSTALL_HELP_URL}, then try again.")
     if isinstance(e, subprocess.CalledProcessError):
-        return _plain_error_from_text(machine_error_detail(e))
+        # Classification returns fixed UI copy; keep paths/tool names available
+        # here without logging the same raw diagnostic a second time.
+        return _plain_error_from_text(str(e) + "\n" + _subprocess_output(e))
     if isinstance(e, RuntimeError):
         return _plain_error_from_text(str(e))
     return "Uoink couldn't finish this one. Details are tucked below."
@@ -7932,10 +8146,15 @@ def _podcast_transcription_worker() -> None:
                     # The transcript is complete and durable. Leave it done so
                     # the next feed tick retries only the idempotent publisher,
                     # not an expensive transcription that already succeeded.
-                    corpus_error = str(exc)
+                    # The raw error goes only to server.log; the job keeps
+                    # sanitized text.
+                    _error_detail_log.exception(
+                        "podcast watch: deferred corpus publish for episode %d",
+                        episode_id)
+                    corpus_error = _error_summary(exc)
                     log.warning(
                         "podcast watch: deferred corpus publish for episode "
-                        "%d after error: %s", episode_id, exc)
+                        "%d after error: %s", episode_id, corpus_error)
             now = _now_iso()
             _update_job(
                 job_id, state="completed", current_video_phase=None,
@@ -7965,21 +8184,30 @@ def _podcast_transcription_worker() -> None:
                 failure_code=None if corpus_result else (
                     "publish_failed" if corpus_error else "publish_not_requested"))
         except BaseException as exc:  # keep the one long-lived worker alive
-            log.exception("podcast transcription job %s failed", job_id)
+            # Tracebacks and raw tool text go only to server.log. The console,
+            # the episode row and the job (shown by the dashboard) get the
+            # sanitized forms used for every other machine error detail.
+            _error_detail_log.exception("podcast transcription job %s failed", job_id)
+            error = _error_summary(exc)
+            error_detail = f"{type(exc).__name__}: {machine_error_detail(exc)}"
+            log.error("podcast transcription job %s failed: %s", job_id, error)
             episode_id = job.get("episode_id") if isinstance(job, dict) else None
             if episode_id is not None:
                 try:
                     whisper_runner.update_episode_transcript_state(
                         _get_index(), int(episode_id),
                         status=whisper_runner.STATUS_FAILED,
-                        model_used=(job or {}).get("model"), error=str(exc))
+                        model_used=(job or {}).get("model"), error=error)
                 except Exception:
-                    log.exception("podcast transcript failure state write failed")
+                    _error_detail_log.exception(
+                        "podcast transcript failure state write failed")
+                    log.error("podcast transcript failure state write failed for job %s",
+                              job_id)
             _update_job(
                 job_id, state="failed", current_video_phase=None,
                 current_video=None, videos_failed=1,
-                completed_at=_now_iso(), error=str(exc),
-                error_detail=f"{type(exc).__name__}: {exc}",
+                completed_at=_now_iso(), error=error,
+                error_detail=error_detail,
                 message="Podcast transcription failed.")
             _settle_source_capture(job_id, video_id=None, failure_code="transcription_failed")
         finally:
@@ -16265,11 +16493,11 @@ class Handler(BaseHTTPRequestHandler):
                 log.exception("/corpus/export failed")
                 return self._send_json(500, {"ok": False, "error": str(e)})
         if bare == "/corpus/import":
-            path = ((body or {}).get("path") or "").strip() if isinstance(body, dict) else ""
-            if not path:
+            path = body.get("path")
+            if not isinstance(path, str) or not path.strip():
                 return self._send_json(400, {"ok": False,
-                                             "error": "path required"})
-            result = import_corpus_data(path)
+                                             "error": "path must be a non-empty string"})
+            result = import_corpus_data(path.strip())
             return self._send_json(200 if result.get("ok") else 400, result)
         if bare == "/extract/x":
             return self._handle_extract_x(body)
@@ -18255,20 +18483,36 @@ def export_corpus_data(*, output_root: Path | None = None) -> dict:
     return {"ok": True, "path": str(path), "rows": counts}
 
 
-def import_corpus_data(path) -> dict:
-    """Restore an export file. Merge rules live in Index.import_payload
-    (conservative: never clobbers newer or existing local rows)."""
-    file_path = Path(path)
-    if not file_path.is_file():
-        return {"ok": False, "error": f"{file_path} is not a file"}
+def import_corpus_data(path, *, output_root: Path | None = None) -> dict:
+    """Restore a file inside the selected output root's _exports directory.
+
+    HTTP and --import-corpus callers use DESKTOP_ROOT; the explicit root is for
+    the local rebuild flow. Index.import_payload keeps its conservative merge
+    rules.
+    """
     try:
+        file_path = Path(path)
+        if not file_path.is_absolute() or _path_has_parent_ref(str(path)):
+            return {"ok": False, "error": "path invalid"}
+        root = (Path(output_root) if output_root is not None else DESKTOP_ROOT).resolve()
+        exports_dir = (root / EXPORTS_DIRNAME).resolve()
+        file_path = file_path.resolve()
+        # Check before any existence probe/read. Resolving both sides also
+        # catches file symlinks, directory junctions and a redirected _exports.
+        if root not in exports_dir.parents or exports_dir not in file_path.parents:
+            return {"ok": False, "error": "path must be inside the output root's _exports directory"}
+    except (OSError, RuntimeError, TypeError, ValueError):
+        return {"ok": False, "error": "path invalid"}
+    try:
+        if not file_path.is_file():
+            return {"ok": False, "error": "export file not found"}
         payload = json.loads(file_path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError) as e:
-        return {"ok": False, "error": f"couldn't read the export: {e}"}
+    except (OSError, UnicodeError, json.JSONDecodeError) as e:
+        return {"ok": False, "error": "couldn't read the export: " + machine_error_detail(e)}
     try:
         report = _get_index().import_payload(payload)
     except ValueError as e:
-        return {"ok": False, "error": str(e)}
+        return {"ok": False, "error": machine_error_detail(e)}
     log.info("corpus import <- %s (%s)", file_path,
              ", ".join(f"{t}+{r['imported']}" for t, r in report.items()))
     return {"ok": True, "path": str(file_path), "report": report}
@@ -18292,7 +18536,7 @@ def rebuild_index_from_disk(*, root: Path | None = None) -> dict:
         newest = max(exports_dir.glob("uoink-export-*.json"),
                      key=lambda item: item.name, default=None)
         if newest is not None:
-            restored = import_corpus_data(newest)
+            restored = import_corpus_data(newest.resolve(), output_root=scan_root)
     return {"ok": True, "scanned_root": str(scan_root),
             "rows_before": before, "rows_after": after,
             "indexed": after - before, "clips": clips,
@@ -18469,7 +18713,8 @@ def run_cli(argv: list[str]) -> int:
       the output folder (C-05); prints the relink report.
     - --export-corpus   : write engagement/tags/taste/drafts/workspaces/
       anchors to <output root>/_exports/uoink-export-<stamp>.json (C-03).
-    - --import-corpus <file> : restore an export (conservative merge).
+    - --import-corpus <file> : restore an absolute path under the active output
+      root's _exports directory (conservative merge).
     - --rebuild-index [root] : re-index every on-disk sidecar folder, then
       restore the newest export found under <root>/_exports (C-03).
     - --reconcile-podcast-corpus : re-run the idempotent episode bridge for
