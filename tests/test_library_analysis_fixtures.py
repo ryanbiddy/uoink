@@ -1471,10 +1471,13 @@ def test_activity_cost_548_and_10000(tmp_dir):
     # Memory tracing changes execution cost, especially on Python 3.11 in CI.
     # Keep both latency measurements above untraced, with the production
     # deadline and all success/payload assertions. Measure memory separately.
+    # The traced reads only report peak memory (nothing asserts on time), and
+    # tracemalloc made the 10,000-item read exceed 30 s on GitHub's runners,
+    # so the traced reads get a ceiling that only catches a hang.
     old_deadline = library_analysis.SERVICE_DEADLINE_SEC
     peaks = []
     try:
-        library_analysis.SERVICE_DEADLINE_SEC = 30.0
+        library_analysis.SERVICE_DEADLINE_SEC = 600.0
         for conn in (conn_548, conn_10k):
             tracemalloc.start()
             memory_result = library_analysis.get_library_activity(req_548, db=conn, clock=fixed_as_of)
