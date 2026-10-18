@@ -35,5 +35,5 @@ reapply its preferences; your helper library and captures stay in place.
 
 | File | SHA-256 |
 | --- | --- |
-| `Uoink-Setup-3.9.1.exe` | `<sha256 pending>` |
-| `uoink-3.9.1.mcpb` | `<sha256 pending>` |
+| `Uoink-Setup-3.9.1.exe` | `1b5b8b82b6137f3bc6d7f3a899cde9a641302f5d525f46da5f1f4a4c7cd16c2a` |
+| `uoink-3.9.1.mcpb` | `4c8df098ddb66144fcc78302595f4e62fc1ead2d321fc634d3a5617cff4efbc7` |
