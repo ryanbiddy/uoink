@@ -64,6 +64,8 @@ def _binding(tmp: Path, *, port=18081, instrument=True):
     )
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Windows install-receipt kit requires LOCALAPPDATA and Job Object cleanup")
 def test_isolation_refuses_port_5179_and_relative_profile(tmp_path: Path):
     receipt = tmp_path / "r"
     receipt.mkdir()
@@ -95,6 +97,8 @@ def test_isolation_refuses_port_5179_and_relative_profile(tmp_path: Path):
         )
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Windows install-receipt kit requires LOCALAPPDATA and Job Object cleanup")
 def test_isolation_refuses_live_uoink_root_and_missing_entry(tmp_path: Path):
     original = Path(os.environ.get("P4_ORIGINAL_LOCALAPPDATA") or os.environ["LOCALAPPDATA"])
     live = original / "Uoink"
@@ -410,6 +414,8 @@ def test_collector_absent_screenshot_is_unobserved_not_passed(tmp_path: Path):
     assert follow["status"] == "blocked"
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Windows install-receipt kit requires LOCALAPPDATA and Job Object cleanup")
 def test_prepare_fixture_seeds_synthetic_items_and_keeps_apply_false(tmp_path: Path):
     receipt = tmp_path / "r"
     profile = receipt / "p"
@@ -463,6 +469,8 @@ def test_prepare_fixture_seeds_synthetic_items_and_keeps_apply_false(tmp_path: P
         prepare.prepare(binding)
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Windows install-receipt kit requires LOCALAPPDATA and Job Object cleanup")
 def test_stdio_synthetic_inventory_packets_reconnect_and_bounds(tmp_path: Path):
     receipt = tmp_path / "r"
     profile = receipt / "p"
@@ -490,10 +498,13 @@ def test_stdio_synthetic_inventory_packets_reconnect_and_bounds(tmp_path: Path):
     assert result["reconnect"]["distinct"] is True
     assert result["unavailable_storage"]["within_bound"] is True
     assert result["transport_failure"]["within_bound"] is True
+    assert result["transport_failure"]["exit_code"] == 7
     assert result["inspection"]["packet_and_prompt_subset_complete"] is True
     assert not result["inspection"]["missing_required_native_prompts"]
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Windows install-receipt kit requires LOCALAPPDATA and Job Object cleanup")
 def test_original_route_failure_is_product_finding_not_hidden(tmp_path: Path):
     receipt = tmp_path / "r"
     profile = receipt / "p"

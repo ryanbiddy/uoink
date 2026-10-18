@@ -119,6 +119,8 @@ def test_mutated_guard_is_preserved_and_restoration_fails(tmp_path):
     assert path.read_bytes() == b"changed by another owner"
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Windows install-receipt kit requires LOCALAPPDATA and Job Object cleanup")
 def test_provenance_deadline_applies_when_child_keeps_stdout_open(tmp_path):
     import os
     import time

@@ -39,7 +39,7 @@ def network(monkeypatch):
     limiter._condition = ObservedCondition()
     state = SimpleNamespace(
         limiter=limiter, calls=[], blocks={}, started={}, returncode=0,
-        launch_error=None, clock=time.monotonic,
+        launch_error=None, clock=time.monotonic, sequence=0,
     )
     guard = threading.Lock()
 
@@ -51,7 +51,7 @@ def network(monkeypatch):
             self.returncode = None
             self.result_code = state.returncode
             self.release = state.blocks.get(cmd[-1])
-            self.record = {"cmd": cmd, "start": time.monotonic(), "end": None,
+            self.record = {"cmd": cmd, "start": None, "end": None,
                            "clock": state.clock(),
                            "process_lock_held": server._extract_lock.locked()}
             self.stdout = json.dumps({"id": "abcdef12345", "description": "Channel",
@@ -65,6 +65,8 @@ def network(monkeypatch):
                     json.dumps({"comments": [{"author": "Example", "text": "Comment",
                                               "like_count": 1}]}), encoding="utf-8")
             with guard:
+                state.sequence += 1
+                self.record["start"] = state.sequence
                 state.calls.append(self.record)
             state.started.setdefault(cmd[-1], threading.Event()).set()
 
@@ -72,12 +74,19 @@ def network(monkeypatch):
             if self.release is not None and not self.release.wait(timeout):
                 raise subprocess.TimeoutExpired(self.cmd, timeout)
             self.returncode = self.result_code
-            self.record["end"] = time.monotonic()
+            self.record_end()
             return self.stdout, self.stderr
+
+        def record_end(self):
+            # Order all process events independently of the OS clock tick.
+            with guard:
+                if self.record["end"] is None:
+                    state.sequence += 1
+                    self.record["end"] = state.sequence
 
         def terminate(self):
             self.returncode = -15
-            self.record["end"] = time.monotonic()
+            self.record_end()
             if self.release is not None:
                 self.release.set()
 
@@ -119,7 +128,7 @@ def block(network, url):
 def assert_serial(calls):
     ordered = sorted(calls, key=lambda call: call["start"])
     assert all(call["end"] is not None for call in ordered)
-    assert all(left["end"] <= right["start"]
+    assert all(left["end"] < right["start"]
                for left, right in zip(ordered, ordered[1:]))
 
 

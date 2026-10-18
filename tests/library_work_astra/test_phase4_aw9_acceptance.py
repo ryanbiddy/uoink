@@ -1,4 +1,5 @@
 """Integrator diagnostic of B4 physical death and destination exclusion."""
+import pytest
 import json, subprocess, sys, threading
 from types import SimpleNamespace
 import library_mirror as mirror
@@ -18,6 +19,8 @@ def test_unknown_writer_after_launcher_exit_is_retained(env, monkeypatch):
     env.mirror._kill_vault_io(session)
     assert env.mirror._vault_io is session, 'Unknown writer was forgotten after its launcher exited'
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Windows process handles, Job Objects and destination mutex")
 def test_destination_exclusion_survives_owning_thread_exit_before_lease(env):
     sessions=[];errors=[]
     def own():

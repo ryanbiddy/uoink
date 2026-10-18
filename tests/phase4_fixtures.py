@@ -11,6 +11,8 @@ import base64
 import hashlib
 import json
 from pathlib import Path
+import threading
+from types import SimpleNamespace
 from typing import Any, Generator
 
 import index
@@ -52,6 +54,29 @@ class MockClock:
     def advance(self, seconds: float) -> None:
         self._mono += seconds
         self._wall += seconds
+
+
+def arm_mirror_timeout_at_boundary(monkeypatch, entered, budget=0.1):
+    """Start the real cancellable wait once the test holds its I/O boundary.
+
+    Keep the fixture's MockClock so setup cannot consume the operation budget.
+    A separate watchdog fails if the boundary is never reached. Only the
+    mirror's Event class is replaced; other threads keep their normal waits.
+    """
+    import library_mirror as mirror
+
+    armed = []
+
+    class BoundaryEvent(threading.Event):
+        def wait(self, timeout=None):
+            if timeout is not None and abs(timeout - budget) < 1e-9:
+                assert entered.wait(5), "The held I/O boundary was not reached"
+                armed.append(timeout)
+            return super().wait(timeout)
+
+    monkeypatch.setattr(mirror, "threading", SimpleNamespace(
+        **{**vars(threading), "Event": BoundaryEvent}))
+    return armed
 
 
 def make_disposable_index(tmp_path: Path) -> index.Index:

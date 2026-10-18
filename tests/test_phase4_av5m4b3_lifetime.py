@@ -5,6 +5,7 @@ for Ryan or AV-5m4a3 where assigned.
 """
 from __future__ import annotations
 
+import sys
 import threading
 import time
 from pathlib import Path
@@ -177,6 +178,8 @@ def _late_intent_unlink_body(env, monkeypatch, session):
     assert raised
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Mirror publication/deletion requires Windows handle sharing exclusion")
 def test_dead_bound_session_refuses_lease_write_before_destination(env):
     export(env)
     session = mirror._VaultIoSession.start(str(env.vault))
@@ -196,6 +199,8 @@ def test_dead_bound_session_refuses_lease_write_before_destination(env):
     mirror._IO_CTX.token = None
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Mirror publication/deletion requires Windows handle sharing exclusion")
 def test_real_child_stall_timeout_keeps_independent_user_edit(env, monkeypatch):
     env.mirror._clock = time.monotonic
     export(env)
@@ -229,6 +234,8 @@ def test_real_child_stall_timeout_keeps_independent_user_edit(env, monkeypatch):
     assert not mirror._foreign_vault_worker_alive(str(env.vault))
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Mirror publication/deletion requires Windows handle sharing exclusion")
 def test_parent_stub_timeout_is_a_separate_blocking_boundary(env, monkeypatch):
     """Parent-stub of session.call is not the child-stall proof; it is extra coverage."""
     env.mirror._clock = time.monotonic

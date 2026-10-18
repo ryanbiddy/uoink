@@ -61,6 +61,8 @@ def test_vault_io_worker_startup_and_terminate_are_real(tmp_path_factory):
     assert dst.read_bytes() == b"new-bytes"
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Mirror publication/deletion requires Windows handle sharing exclusion")
 def test_timeout_kills_worker_and_keeps_independent_user_edit(env, monkeypatch):
     env.mirror._clock = time.monotonic
     export(env)
@@ -103,6 +105,8 @@ def test_timeout_kills_worker_and_keeps_independent_user_edit(env, monkeypatch):
     assert env.mirror._vault_io is None
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Mirror publication/deletion requires Windows handle sharing exclusion")
 def test_live_worker_lease_blocks_a_second_mirror(env):
     export(env)
     dummy = subprocess.Popen(
@@ -125,6 +129,8 @@ def test_live_worker_lease_blocks_a_second_mirror(env):
         mirror._clear_dest_lease(str(env.vault), dummy.pid)
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Mirror publication/deletion requires Windows handle sharing exclusion")
 def test_recorded_temp_hash_does_not_delete_user_bytes(env):
     export(env)
     uoink = env.vault / mirror.MIRROR_ROOT
@@ -144,6 +150,8 @@ def test_recorded_temp_hash_does_not_delete_user_bytes(env):
         env.mirror._stop_vault_io()
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Mirror publication/deletion requires Windows handle sharing exclusion")
 def test_failed_replace_retains_temp_generation(env, monkeypatch):
     export(env)
     mutate_clip(env)

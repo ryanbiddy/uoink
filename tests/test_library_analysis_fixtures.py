@@ -1405,16 +1405,13 @@ def test_activity_cost_548_and_10000(tmp_dir):
         "date_basis": "capture_time",
     }
 
-    tracemalloc.start()
     t0 = time.perf_counter()
     res_548 = library_analysis.get_library_activity(req_548, db=conn_548, clock=fixed_as_of)
     t1 = time.perf_counter()
     ser_548 = json.dumps(res_548, ensure_ascii=False).encode("utf-8")
     t2 = time.perf_counter()
-    _, peak_548 = tracemalloc.get_traced_memory()
-    tracemalloc.stop()
 
-    assert res_548["ok"] is True
+    assert res_548["ok"] is True, res_548
     assert res_548["items"]["total"]["value"] == 548
     assert len(ser_548) <= library_analysis.MAX_RESPONSE_BYTES
     construction_time_548 = (t1 - t0)
@@ -1464,23 +1461,31 @@ def test_activity_cost_548_and_10000(tmp_dir):
     ser_10k = json.dumps(res_10k, ensure_ascii=False).encode("utf-8")
     t2_10k = time.perf_counter()
 
-    assert res_10k["ok"] is True
+    assert res_10k["ok"] is True, res_10k
     assert res_10k["items"]["total"]["value"] == 10000
     assert len(ser_10k) <= library_analysis.MAX_RESPONSE_BYTES
     construction_time_10k = (t1_10k - t0_10k)
     serialization_time_10k = (t2_10k - t1_10k)
     assert construction_time_10k < library_analysis.SERVICE_DEADLINE_SEC
 
-    # Measure peak memory under tracemalloc with relaxed deadline for debug tracing
+    # Memory tracing changes execution cost, especially on Python 3.11 in CI.
+    # Keep both latency measurements above untraced, with the production
+    # deadline and all success/payload assertions. Measure memory separately.
     old_deadline = library_analysis.SERVICE_DEADLINE_SEC
+    peaks = []
     try:
         library_analysis.SERVICE_DEADLINE_SEC = 30.0
-        tracemalloc.start()
-        _ = library_analysis.get_library_activity(req_548, db=conn_10k, clock=fixed_as_of)
-        _, peak_10k = tracemalloc.get_traced_memory()
-        tracemalloc.stop()
+        for conn in (conn_548, conn_10k):
+            tracemalloc.start()
+            memory_result = library_analysis.get_library_activity(req_548, db=conn, clock=fixed_as_of)
+            _, peak = tracemalloc.get_traced_memory()
+            tracemalloc.stop()
+            assert memory_result["ok"] is True, memory_result
+            peaks.append(peak)
     finally:
+        tracemalloc.stop()
         library_analysis.SERVICE_DEADLINE_SEC = old_deadline
+    peak_548, peak_10k = peaks
 
     # Print measurement stats to test output
     print(f"\n[SYNTHETIC MEASUREMENT 548-ITEM]: Construction={construction_time_548*1000:.2f}ms, Ser={serialization_time_548*1000:.2f}ms, PeakMem={peak_548/1024:.1f}KiB, WireBytes={len(ser_548)}")
@@ -1600,7 +1605,7 @@ def test_activity_cost_548_and_10000(tmp_dir):
     t0_3mem = time.perf_counter()
     res_3mem = library_analysis.get_library_activity(req_548, db=conn_3mem, clock=fixed_as_of)
     t1_3mem = time.perf_counter()
-    assert res_3mem["ok"] is True
+    assert res_3mem["ok"] is True, res_3mem
     time_3mem = (t1_3mem - t0_3mem)
 
     # -----------------------------------------------------------------------
@@ -1628,7 +1633,7 @@ def test_activity_cost_548_and_10000(tmp_dir):
     t0_multi = time.perf_counter()
     res_multi = library_analysis.get_library_activity(req_replay, db=conn_multi, clock=fixed_as_of)
     t1_multi = time.perf_counter()
-    assert res_multi["ok"] is True
+    assert res_multi["ok"] is True, res_multi
     assert res_multi["coverage"]["cov_shelf_activity"]["coverage_status"] == "journal_complete"
     assert not res_multi["coverage"]["cov_shelf_activity"]["reasons"]
     time_multi = (t1_multi - t0_multi)
@@ -1652,7 +1657,7 @@ def test_activity_cost_548_and_10000(tmp_dir):
     t0_100k = time.perf_counter()
     res_100k = library_analysis.get_library_activity(req_548, db=conn_100k, clock=fixed_as_of)
     t1_100k = time.perf_counter()
-    assert res_100k["ok"] is True
+    assert res_100k["ok"] is True, res_100k
     time_100k = (t1_100k - t0_100k)
 
     print(f"[SYNTHETIC MEASUREMENT REPLAY-548]: Construction={time_replay*1000:.2f}ms, Proved={res_replay['coverage']['cov_shelf_activity']['coverage_status'] == 'journal_complete'}")

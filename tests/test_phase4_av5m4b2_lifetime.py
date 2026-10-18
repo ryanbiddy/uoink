@@ -4,6 +4,7 @@ Does not edit frozen AW/AW-3/AW-4/AW-5 cases.
 """
 from __future__ import annotations
 
+import sys
 import json
 import sqlite3
 import threading
@@ -53,6 +54,8 @@ def test_write_transaction_is_reused_for_exclusion(env):
     assert row[0] == 3
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Mirror publication/deletion requires Windows handle sharing exclusion")
 def test_stalled_dest_lease_write_is_inside_cancellation(env, monkeypatch):
     export(env)
     env.mirror._clock = time.monotonic
@@ -113,6 +116,8 @@ def test_late_intent_write_cannot_replace_newer_generation(env):
         mirror._IO_CTX.token = None
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Mirror publication/deletion requires Windows handle sharing exclusion")
 def test_unknown_lease_liveness_refuses_destination(env, monkeypatch):
     export(env)
     path = mirror._dest_lease_path(str(env.vault))
@@ -128,6 +133,8 @@ def test_unknown_lease_liveness_refuses_destination(env, monkeypatch):
     assert item_file(env).is_file()
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Mirror publication/deletion requires Windows handle sharing exclusion")
 def test_lease_write_failure_after_startup_does_not_leak_child(env, monkeypatch):
     env.mirror._clock = time.monotonic
     export(env)
@@ -153,6 +160,8 @@ def test_lease_write_failure_after_startup_does_not_leak_child(env, monkeypatch)
     assert not mirror._foreign_vault_worker_alive(str(env.vault))
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Mirror publication/deletion requires Windows handle sharing exclusion")
 def test_frozen_child_timeout_cannot_return_success(env, monkeypatch):
     env.mirror._clock = time.monotonic
     export(env)

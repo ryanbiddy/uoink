@@ -1,15 +1,19 @@
 """AW-7 draft review: timeout must stop the destination lease mutation too."""
+import sys
+import pytest
 import threading
-import time
 
 import library_mirror as mirror
 from tests.library_work_astra.test_phase4_aw_acceptance import env, export
+from tests.phase4_fixtures import arm_mirror_timeout_at_boundary
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Mirror publication/deletion requires Windows handle sharing exclusion")
 def test_aw7_timed_out_lease_writer_cannot_mutate_destination_after_return(env, monkeypatch):
     export(env)
-    env.mirror._clock = time.monotonic
     entered, release, completed = threading.Event(), threading.Event(), threading.Event()
+    armed = arm_mirror_timeout_at_boundary(monkeypatch, entered)
     original_write = mirror._write_dest_lease
     lease_path = mirror._dest_lease_path(str(env.vault))
 
@@ -26,6 +30,8 @@ def test_aw7_timed_out_lease_writer_cannot_mutate_destination_after_return(env, 
         result = env.mirror.resync(budget_s=0.1)
         assert entered.is_set(), "The real lease mutation boundary was not entered"
         assert not result["ok"]
+        assert armed == pytest.approx([0.1])
+        assert result["error"]["details"]["reason"] == "timeout"
         before = lease_path.read_bytes() if lease_path.is_file() else None
     finally:
         release.set()

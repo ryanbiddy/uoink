@@ -1,8 +1,11 @@
 """AW-9 startup failure diagnostic; actual owned worker, simulated uncertain death."""
+import pytest
 import json, subprocess, sys, threading
 import library_mirror as mirror
 from tests.library_work_astra.test_phase4_aw_acceptance import env
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Windows process handles, Job Objects and destination mutex")
 def test_startup_failure_keeps_exclusion_until_child_death(env, monkeypatch):
     sessions=[]; errors=[]
     original_terminate=mirror._VaultIoSession.terminate

@@ -51,7 +51,9 @@ def test_original_stdio_reads_stored_preview_after_restart(tmp_path, change, exp
             if change == "expired": conn.execute("UPDATE library_previews SET expires_ms=1")
             if change == "missing": conn.execute("DELETE FROM library_previews")
         local = tmp_path / "user" / "local"
-        data = local / "Uoink"
+        home = tmp_path / "user"
+        data = (home / "Library" / "Application Support" / "Uoink"
+                if sys.platform == "darwin" else local / "Uoink")
         data.mkdir(parents=True)
         with sqlite3.connect(data / "index.db") as dest:
             idx._conn.backup(dest)
@@ -71,8 +73,9 @@ def test_original_stdio_reads_stored_preview_after_restart(tmp_path, change, exp
     env.pop("ANTHROPIC_API_KEY", None)
     for name in ("UOINK_ISOLATED_PROFILE", "UOINK_ISOLATED_PORT", "UOINK_ISOLATED_APP_DIR"):
         env.pop(name, None)
-    env.update(LOCALAPPDATA=str(local), APPDATA=str(tmp_path / "user" / "roaming"),
-        USERPROFILE=str(tmp_path / "user"), UOINK_OUTPUT_DIR=str(data / "output"),
+    env.update(LOCALAPPDATA=str(local), XDG_DATA_HOME=str(local),
+        APPDATA=str(tmp_path / "user" / "roaming"),
+        USERPROFILE=str(home), HOME=str(home), UOINK_OUTPUT_DIR=str(data / "output"),
         PYTHONDONTWRITEBYTECODE="1")
     stdio = _StdioTestClient([sys.executable, "-B", "-P", str(ROOT / "uoink_mcp.py")],
                              cwd=tmp_path, env=env)

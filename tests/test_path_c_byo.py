@@ -269,7 +269,7 @@ def test_fatal_voice_dna_regenerates_once():
         _assert(res["ok"] is True, f"clean retry should persist: {res}")
         _assert(res["voice_dna_regenerated"] is True, "retry flag exposed")
         _assert(len(idx.calls) == 2, f"exactly one retry: {len(idx.calls)} calls")
-        _assert("PREVIOUS ATTEMPT VIOLATED VOICE DNA" in idx.calls[1]["user"],
+        _assert("PREVIOUS ATTEMPT CONTAINED CANNED PHRASES" in idx.calls[1]["user"],
                 "retry prompt highlights prior violation")
         _assert(ws.HOOK_LENS_TYPES["curiosity_gap"] in idx.calls[0]["user"],
                 "selected hook lens reaches Path C call")

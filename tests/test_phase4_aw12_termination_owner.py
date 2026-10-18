@@ -1,4 +1,6 @@
 """Concurrent cancellation has one native-job cleanup owner."""
+import sys
+import pytest
 import json
 import threading
 import time
@@ -7,6 +9,8 @@ import library_mirror as m
 from tests.library_work_astra.test_phase4_aw_acceptance import env
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Windows process handles, Job Objects and destination mutex")
 def test_concurrent_termination_does_not_close_a_job_twice(env, monkeypatch):
     session = m._VaultIoSession.start(str(env.vault))
     job = session.job

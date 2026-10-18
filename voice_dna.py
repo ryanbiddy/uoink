@@ -227,10 +227,10 @@ def warning_copy() -> str:
     returns a non-empty list. Locked text per PROMPT-V3.2-CC-BACKEND.md
     Deliverable 1, Voice DNA enforcement section."""
     return (
-        "Heads up — Uoink spotted some patterns that often read as "
+        "Heads up: Uoink spotted some patterns that often read as "
         "AI-slop in your output. We just want you not to sound like a "
-        "robot — up to you whether to keep them. Regenerate to try "
-        "again, or toggle Voice DNA warnings off for this generation "
+        "robot. It's up to you whether to keep them. Regenerate to try "
+        "again, or toggle canned-phrase warnings off for this generation "
         "or forever in Settings."
     )
 

@@ -6,6 +6,7 @@ a refusal is not treated as a valid-preview pass.
 """
 from __future__ import annotations
 
+import pytest
 import base64
 import hashlib
 import json
@@ -299,6 +300,8 @@ def test_inspect_missing_and_unknown_source_labels_fail(tmp_path: Path):
                for r in unknown_report["unknown_or_missing_source_labels"])
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Windows install-receipt kit requires LOCALAPPDATA and Job Object cleanup")
 def test_multimegabyte_stdin_close_remains_bounded(tmp_path: Path):
     child = tmp_path / "noread-huge.py"
     child.write_text("import time\ntime.sleep(60)\n", encoding="utf-8")
@@ -336,6 +339,8 @@ def test_multimegabyte_stdin_close_remains_bounded(tmp_path: Path):
     assert params.get("_truncated") is True or "huge" not in params
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Windows install-receipt kit requires LOCALAPPDATA and Job Object cleanup")
 def test_job_query_failure_is_not_cleaned_credit(tmp_path: Path, monkeypatch):
     env = os.environ.copy()
     env.pop("ANTHROPIC_API_KEY", None)
@@ -363,6 +368,8 @@ def test_job_query_failure_is_not_cleaned_credit(tmp_path: Path, monkeypatch):
     assert owned._job is None
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Windows install-receipt kit requires LOCALAPPDATA and Job Object cleanup")
 def test_failed_canary_refuses_product_launch(tmp_path: Path, monkeypatch):
     receipt = tmp_path / "r"
     profile = receipt / "p"
@@ -424,6 +431,8 @@ def test_fixture_generator_uses_product_default_store_root():
     assert prepare.ARCHIVED_V1_NONDEFAULT_STORE == "prompt-store"
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Windows install-receipt kit requires LOCALAPPDATA and Job Object cleanup")
 def test_prepare_writes_default_store_and_versioned_artifact(tmp_path: Path):
     receipt = tmp_path / "r"
     profile = receipt / "p"

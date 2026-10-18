@@ -1173,6 +1173,10 @@ def _pid_identity_liveness(
             return "dead"
         except PermissionError:
             return "unknown"
+        # An unreaped child still answers kill(pid, 0), but its procfs exe
+        # link is gone. Recognize exit before that lookup can return unknown.
+        if _posix_process_state(int(pid)) in {"Z", "X"}:
+            return "dead"
         actual = _posix_process_created_ms(int(pid))
         if actual is None:
             return "unknown"
@@ -1312,6 +1316,14 @@ def _windows_process_created_ms(handle) -> int | None:
         return None
     value = (int(creation.dwHighDateTime) << 32) | int(creation.dwLowDateTime)
     return (value - _FILETIME_EPOCH_OFFSET_100NS) // 10_000
+
+
+def _posix_process_state(pid: int) -> str | None:
+    try:
+        with open(f"/proc/{pid}/stat", "r", encoding="ascii", errors="replace") as handle:
+            return handle.read().rsplit(")", 1)[1].split()[0]
+    except (OSError, IndexError):
+        return None
 
 
 def _posix_process_created_ms(pid: int) -> int | None:

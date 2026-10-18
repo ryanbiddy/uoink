@@ -1,4 +1,5 @@
 """Actual handle-discovery paths against an inert Windows lifetime model."""
+import sys
 import ctypes
 import gc
 import weakref
@@ -127,6 +128,8 @@ def native(monkeypatch):
     return s, k, parent, child
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Windows process handles, Job Objects and destination mutex")
 def test_child_older_within_same_millisecond_is_refused(native):
     s, k, parent, child = native
     child.born = parent.born - 1
@@ -136,6 +139,8 @@ def test_child_older_within_same_millisecond_is_refused(native):
     assert not any(p is child for p in k.handles.values())
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Windows process handles, Job Objects and destination mutex")
 def test_foreign_replacement_before_child_open_fails_final_relationship(native):
     s, k, parent, child = native
     foreign = Process(child.pid, child.born, 99001)
@@ -152,6 +157,8 @@ def test_foreign_replacement_before_child_open_fails_final_relationship(native):
     assert not any(p is foreign for p in k.handles.values())
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Windows process handles, Job Objects and destination mutex")
 def test_pinned_child_cannot_be_replaced_before_relationship_or_mutation(native):
     s, k, parent, child = native
     snapshots = []
@@ -192,6 +199,8 @@ def test_borrowed_handle_keeps_owner_until_last_user_finishes(monkeypatch):
     assert closed == []
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Windows process handles, Job Objects and destination mutex")
 def test_repeated_discovery_keeps_original_child_handle_open(native):
     s, k, parent, child = native
     assert child.pid in s.owned_pids()
@@ -203,6 +212,8 @@ def test_repeated_discovery_keeps_original_child_handle_open(native):
     assert len([proc for proc in k.handles.values() if proc is child]) == 1
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Windows process handles, Job Objects and destination mutex")
 def test_parent_without_original_handle_cannot_adopt_from_raw_pid(native):
     s, k, parent, child = native
     original = parent._handle
@@ -215,6 +226,8 @@ def test_parent_without_original_handle_cannot_adopt_from_raw_pid(native):
     assert not any(effect[0] == "open" for effect in k.effects)
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Windows process handles, Job Objects and destination mutex")
 def test_cancellation_during_discovery_defers_cleanup_without_losing_child(native):
     s, k, parent, child = native
     results = []
@@ -235,6 +248,8 @@ def test_cancellation_during_discovery_defers_cleanup_without_losing_child(nativ
     assert s._owned_handles == {}
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Windows process handles, Job Objects and destination mutex")
 def test_cancelled_session_refuses_canonical_writer_publication(native):
     s, k, parent, child = native
     s._dead = True
