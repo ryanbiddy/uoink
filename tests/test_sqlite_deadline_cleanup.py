@@ -169,7 +169,7 @@ def test_active_reader_storage_maps_interrupt_to_deadline_exceeded(tmp_path):
         idx.close()
 
 
-def test_cross_consumer_media_export_regression(tmp_path):
+def test_cross_consumer_media_export_regression(tmp_path, monkeypatch):
     """Cross-consumer regression: reproducing the installed diagnostic sequence
     (resources/list, wait 2.1s, export_cited_range).
 
@@ -183,6 +183,10 @@ def test_cross_consumer_media_export_regression(tmp_path):
     root.mkdir()
     clock = Clock()
     env = SimpleNamespace(root=root, clock=clock)
+    # Export admission and deadline checks must use the same clock, without
+    # inheriting the process guard's clock or rate budget from another test.
+    guard = library_resources.ReadGuard(clock=clock)
+    monkeypatch.setattr(library_resources, "_PROCESS_GUARD", guard)
 
     idx = index.Index.open(root / "cross_index.db")
     try:
@@ -191,7 +195,7 @@ def test_cross_consumer_media_export_regression(tmp_path):
         _seed(idx._conn, f)
 
         reader = library_resources.LibraryReader(
-            idx, data_root=root, clock=env.clock, deadline_s=2.0
+            idx, data_root=root, clock=env.clock, deadline_s=2.0, guard=guard
         )
 
         # 1. First operation: resources/list
@@ -200,6 +204,7 @@ def test_cross_consumer_media_export_regression(tmp_path):
 
         # 2. Wait 2.1 seconds (elapsed past the 2.0s deadline)
         env.clock.advance(2.1)
+        assert env.clock() > reader._deadline_at
 
         # 3. Second operation: Phase 6 export_cited_range on the same connection
         exported = media.export_cited_range(
