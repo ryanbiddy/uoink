@@ -147,6 +147,8 @@ def test_guard_restore_keeps_modified_prefix_and_restores_exact_bytes(tmp_path: 
     assert any(row.get("exact_original_bytes") for row in restored["restored"])
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Windows install-receipt kit requires LOCALAPPDATA and Job Object cleanup")
 def test_ig_forbidden_live_preserved_under_redirected_localappdata(tmp_path: Path):
     receipt = tmp_path / "r"
     profile = receipt / "p"
@@ -176,6 +178,8 @@ def test_ig_forbidden_live_preserved_under_redirected_localappdata(tmp_path: Pat
             os.environ["IG_FORBIDDEN_LIVE"] = previous
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Windows install-receipt kit requires LOCALAPPDATA and Job Object cleanup")
 def test_canary_refuses_disposable_index_and_does_not_open_live(tmp_path: Path):
     receipt = tmp_path / "r"
     profile = receipt / "p"
@@ -200,6 +204,8 @@ def test_canary_refuses_disposable_index_and_does_not_open_live(tmp_path: Path):
     assert os.path.normcase(canary["canary_path"]) != os.path.normcase(live)
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Windows install-receipt kit requires LOCALAPPDATA and Job Object cleanup")
 def test_bounded_stdin_write_when_child_does_not_read(tmp_path: Path):
     child = tmp_path / "noread.py"
     child.write_text("import time\ntime.sleep(30)\n", encoding="utf-8")
@@ -220,6 +226,8 @@ def test_bounded_stdin_write_when_child_does_not_read(tmp_path: Path):
     assert cleanup["cleaned"] is True
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Windows install-receipt kit requires LOCALAPPDATA and Job Object cleanup")
 def test_partial_line_stdout_is_retained_in_file(tmp_path: Path):
     child = tmp_path / "partial.py"
     child.write_text(
@@ -250,6 +258,8 @@ def test_partial_line_stdout_is_retained_in_file(tmp_path: Path):
     assert cleanup["cleaned"] is True
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Windows install-receipt kit requires LOCALAPPDATA and Job Object cleanup")
 def test_noisy_stderr_is_retained_in_file_not_truncated(tmp_path: Path):
     child = tmp_path / "noisy.py"
     child.write_text(
@@ -282,6 +292,8 @@ def test_noisy_stderr_is_retained_in_file_not_truncated(tmp_path: Path):
     assert cleanup["cleaned"] is True
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Windows install-receipt kit requires LOCALAPPDATA and Job Object cleanup")
 def test_grandchild_hang_job_cleanup_descendants_exit(tmp_path: Path):
     grand = tmp_path / "grand.py"
     grand.write_text("import time\ntime.sleep(60)\n", encoding="utf-8")
@@ -317,6 +329,8 @@ def test_grandchild_hang_job_cleanup_descendants_exit(tmp_path: Path):
     assert snap["job_assigned"] is True
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Windows install-receipt kit requires LOCALAPPDATA and Job Object cleanup")
 def test_job_assignment_to_closed_handle_fails_closed(tmp_path: Path):
     job = session.create_kill_job()
     assert job is not None

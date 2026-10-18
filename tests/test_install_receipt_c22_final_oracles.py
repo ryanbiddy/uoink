@@ -396,6 +396,8 @@ def test_final_nine_profiles_are_named():
     assert "child-regfail" in CAPTURE_PROFILE_NAMES
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Windows Inno install-receipt scenarios and process ownership")
 def test_final_source_runtime_corrected_oracles(scratch):
     """Source-runtime synthetic check of the five corrected sequences.
 

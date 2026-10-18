@@ -51,6 +51,8 @@ def test_hex64_string_is_not_sealed_without_package_bytes(tmp_path: Path):
     assert loaded["package_bytes"] is None
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Windows install-receipt kit requires LOCALAPPDATA and Job Object cleanup")
 def test_installed_mode_fails_closed_without_package_bytes(tmp_path: Path):
     receipt = tmp_path / "r"
     receipt.mkdir()
@@ -76,6 +78,8 @@ def test_installed_mode_fails_closed_without_package_bytes(tmp_path: Path):
         )
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Windows install-receipt kit requires LOCALAPPDATA and Job Object cleanup")
 def test_not_instrument_only_is_not_installed_credit(tmp_path: Path):
     receipt = tmp_path / "r"
     receipt.mkdir()
@@ -100,6 +104,8 @@ def test_not_instrument_only_is_not_installed_credit(tmp_path: Path):
     assert binding["installed_eligibility"]["eligible"] is False
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Windows install-receipt kit requires LOCALAPPDATA and Job Object cleanup")
 def test_isolation_root_is_profile_index_not_uoink_subdir(tmp_path: Path):
     receipt = tmp_path / "r"
     profile = receipt / "p"
@@ -141,6 +147,8 @@ def test_c22_guard_conflict_is_refused(tmp_path: Path):
         common.write_guard(profile, binding)
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Windows install-receipt kit requires LOCALAPPDATA and Job Object cleanup")
 def test_bounded_rpc_hang_fails_closed_with_retained_traffic_and_cleanup(tmp_path: Path):
     child = tmp_path / "hang.py"
     child.write_text(
@@ -215,6 +223,8 @@ def test_collector_operator_boolean_reconnect_is_not_a_pass(tmp_path: Path):
     assert names["recall_silent_unavailable"]["status"] == "unobserved"
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Windows install-receipt kit requires LOCALAPPDATA and Job Object cleanup")
 def test_prepare_writes_supported_isolation_root(tmp_path: Path):
     receipt = tmp_path / "r"
     profile = receipt / "p"
@@ -240,6 +250,8 @@ def test_prepare_writes_supported_isolation_root(tmp_path: Path):
     assert child_env["UOINK_INDEX_PATH"] == str(profile / "index.db")
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Windows install-receipt kit requires LOCALAPPDATA and Job Object cleanup")
 def test_original_route_does_not_use_fake_child(tmp_path: Path):
     receipt = tmp_path / "r"
     profile = receipt / "p"

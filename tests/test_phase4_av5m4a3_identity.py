@@ -4,6 +4,7 @@ Does not edit frozen AW-6 or parent-interceptor fixtures.
 """
 from __future__ import annotations
 
+import sys
 import base64
 import hashlib
 import os
@@ -75,6 +76,8 @@ def test_worker_replace_does_not_adopt_replaced_temp(tmp_path_factory):
         session.terminate()
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Mirror publication/deletion requires Windows handle sharing exclusion")
 def test_finally_cleanup_retains_intent_when_temp_name_changed_owners(env, monkeypatch):
     export(env)
     mutate_clip(env)
@@ -107,6 +110,8 @@ def test_finally_cleanup_retains_intent_when_temp_name_changed_owners(env, monke
     assert pending, "failed publication dropped unresolved temp intent"
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Mirror publication/deletion requires Windows handle sharing exclusion")
 def test_recorded_cleanup_still_preserves_same_byte_replacement(tmp_path_factory):
     root = tmp_path_factory.mktemp("u")
     session = mirror._VaultIoSession.start(str(root))

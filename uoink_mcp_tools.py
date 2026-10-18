@@ -1327,7 +1327,7 @@ def _byo_generate(kind, args):
             for warning in fatal_warnings
         }))
         retry_user = (
-            "PREVIOUS ATTEMPT VIOLATED VOICE DNA: "
+            "PREVIOUS ATTEMPT CONTAINED CANNED PHRASES: "
             f"{phrases}. Regenerate the output strictly avoiding these "
             "patterns.\n\n" + user
         )
@@ -1349,7 +1349,7 @@ def _byo_generate(kind, args):
             return {
                 "ok": False,
                 "error": (
-                    "Generation still violated a fatal Voice DNA rule after "
+                    "Generation still violated a fatal canned-phrase rule after "
                     "one retry. Nothing was saved."
                 ),
                 "voice_warnings": fatal_warnings,
@@ -4870,8 +4870,8 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "Two-phase tweet/thread generator. "
             "Phase 1 (no `body`) returns grounding (source yoink + "
             "creator credit + style anchors + Voice DNA prompt). "
-            "Phase 2 (`body` present) persists + scans for Voice DNA "
-            "violations + returns structured warnings (soft warn -- "
+            "Phase 2 (`body` present) persists + scans for canned phrases "
+            "+ returns structured warnings (soft warn -- "
             "NEVER auto-blocks). Creator credit is required in the body."
         ),
         input_schema=_schema({
@@ -4924,7 +4924,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "Two-phase blog generator. Same shape "
             "as write_tweet but Phase 2 accepts title, dek, tags, and "
             "expects markdown body with a Source section. Soft-warn "
-            "Voice DNA scan; creator credit non-suppressible."
+            "canned-phrase scan; creator credit non-suppressible."
         ),
         input_schema=_schema({
             "source_yoink_id": {"type": "string"},

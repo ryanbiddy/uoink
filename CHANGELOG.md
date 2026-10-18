@@ -10,6 +10,26 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [3.9.1] - 2026-10-18
+
+The MCP server still exposes 35 tools over stdio.
+
+### Changed
+
+- Writing warnings now use "canned-phrase" wording. Voice DNA remains the
+  voice spec's name.
+
+### Fixed
+
+- Fixed the Windows/Ubuntu CI test baseline. Windows-only Library mirror
+  and installer-receipt tests skip on other systems, and portable tests
+  now pass on both. A few timing-sensitive measurement tests can still
+  miss their budget on slow CI runners.
+- Linux isolated-install stop recognizes exited processes, including
+  unreaped children, instead of reporting their liveness as unknown.
+- Made the YouTube pacing test deterministic by checking process event order
+  independently of the operating system's clock resolution.
+
 ## [3.9.0] - 2026-10-18
 
 ### Added

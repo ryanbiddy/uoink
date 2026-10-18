@@ -176,27 +176,28 @@ def test_legacy_data_profile_is_rejected(tmp_path):
     assert caught.value.code == "isolated-profile-legacy-data"
 
 
-def test_root_volume_profile_is_rejected():
+def test_root_volume_profile_is_rejected(tmp_path):
     with pytest.raises(iso.IsolationError) as caught:
         iso.validate_binding(
-            profile="C:\\",
+            profile=Path(tmp_path.anchor),
             port=5180,
             require_existing=False,
-            platform_name="win32",
+            platform_name=sys.platform,
             environ={},
-            home=Path("C:\\Users\\nobody"),
+            home=tmp_path,
         )
     assert caught.value.code == "isolated-profile-root-volume"
 
 
 def test_unsafe_system_profile_is_rejected(tmp_path):
+    system_path = Path(os.environ.get("WINDIR", r"C:\Windows")) if sys.platform == "win32" else Path("/usr")
     with pytest.raises(iso.IsolationError) as caught:
         iso.validate_binding(
-            profile=r"C:\Windows",
+            profile=system_path,
             port=5180,
             require_existing=False,
-            platform_name="win32",
-            environ={"WINDIR": r"C:\Windows", "LOCALAPPDATA": str(tmp_path)},
+            platform_name=sys.platform,
+            environ={"WINDIR": str(system_path), "LOCALAPPDATA": str(tmp_path)},
             home=tmp_path,
         )
     assert caught.value.code == "isolated-profile-unsafe"

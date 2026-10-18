@@ -189,8 +189,10 @@ def main() -> int:
                 except OSError:
                     pass
 
+    # The daemon can still be reading when the child exits. A raw read avoids
+    # holding BufferedReader's lock during interpreter shutdown.
     incoming = threading.Thread(
-        target=pump, args=(sys.stdin.buffer, child.stdin, "client_to_server"),
+        target=pump, args=(sys.stdin.buffer.raw, child.stdin, "client_to_server"),
         kwargs={"close_destination": True}, daemon=True)
     outgoing = threading.Thread(
         target=pump, args=(child.stdout, sys.stdout.buffer, "server_to_client"), daemon=True)

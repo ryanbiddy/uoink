@@ -12,6 +12,7 @@ import pytest
 import library_mirror as mirror
 import library_resources as resources
 from tests.library_work_astra.test_phase4_aw_acceptance import env, export
+from tests.phase4_fixtures import arm_mirror_timeout_at_boundary
 
 
 def test_aw5_another_writer_lock_does_not_certify_our_deferred_transaction(env):
@@ -34,10 +35,12 @@ def test_aw5_another_writer_lock_does_not_certify_our_deferred_transaction(env):
         conn.rollback()
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Mirror publication/deletion requires Windows handle sharing exclusion")
 def test_aw5_destination_lease_io_is_inside_a_cancellable_boundary(env, monkeypatch):
     export(env)
-    env.mirror._clock = time.monotonic
     entered, release, done = threading.Event(), threading.Event(), threading.Event()
+    armed = arm_mirror_timeout_at_boundary(monkeypatch, entered)
     original_write = mirror._write_dest_lease
     results = []
 
@@ -62,6 +65,8 @@ def test_aw5_destination_lease_io_is_inside_a_cancellable_boundary(env, monkeypa
         # the caller before its cancellable operation starts.
         assert done.wait(5), "Destination lease I/O trapped resync outside cancellation"
         assert results and not results[0]["ok"]
+        assert armed == pytest.approx([0.1])
+        assert results[0]["error"]["details"]["reason"] == "timeout"
     finally:
         release.set()
         thread.join(8)

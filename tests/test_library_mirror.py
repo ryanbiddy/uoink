@@ -33,6 +33,7 @@ Tests against the frozen interface in docs/library/PHASE4-AV2-BRIEF-2026-09-08.m
 """
 from __future__ import annotations
 
+import sys
 import hashlib
 import json
 import os
@@ -246,6 +247,8 @@ class TestP409PathsAndConsent:
         assert not (h.uoink_dir / "Library").exists()
         assert not h.library_index_path().exists()
 
+    @pytest.mark.skipif(sys.platform != "win32",
+                        reason="Mirror publication/deletion requires Windows handle sharing exclusion")
     def test_consent_allowlist_filtering(self, tmp_path: Path):
         """allowlist scope mirrors only allowed items; unallowed items and their dependent briefs are omitted."""
         h = MirrorTestHarness(
@@ -284,6 +287,8 @@ class TestP409PathsAndConsent:
         st = unwrap_dict(h.mirror.status())
         assert st.get("enabled") is False or st.get("state") == "disabled"
 
+    @pytest.mark.skipif(sys.platform != "win32",
+                        reason="Mirror publication/deletion requires Windows handle sharing exclusion")
     def test_path_traversal_confinement(self, tmp_path: Path):
         """Hostile IDs with path traversal (../, C:\\, /etc/) cannot escape <vault>/Uoink/Library/."""
         h = MirrorTestHarness(tmp_path, enabled=True)
@@ -300,6 +305,8 @@ class TestP409PathsAndConsent:
         assert target.resolve().parent == (h.uoink_dir / "Library").resolve()
         assert not (tmp_path / "etc").exists()
 
+    @pytest.mark.skipif(sys.platform != "win32",
+                        reason="Mirror publication/deletion requires Windows handle sharing exclusion")
     def test_windows_reserved_names_confinement(self, tmp_path: Path):
         """Items or channels with Windows device names (CON, PRN, AUX, NUL, COM1) do not become filenames."""
         h = MirrorTestHarness(tmp_path, enabled=True)
@@ -313,6 +320,8 @@ class TestP409PathsAndConsent:
         assert target.exists()
         assert target.name == f"{hashlib.sha256(b'aux').hexdigest()}.md"
 
+    @pytest.mark.skipif(sys.platform != "win32",
+                        reason="Mirror publication/deletion requires Windows handle sharing exclusion")
     def test_case_and_unicode_collisions(self, tmp_path: Path):
         """Distinct IDs differing only by case or Unicode normalization forms map to distinct hash paths."""
         h = MirrorTestHarness(tmp_path, enabled=True)
@@ -362,6 +371,8 @@ class TestP409PathsAndConsent:
 class TestP410EditsAndAtomicity:
     """Gate P4-10: User edit preservation, crash atomicity, two writers, stale work, manifest corruption, size cap."""
 
+    @pytest.mark.skipif(sys.platform != "win32",
+                        reason="Mirror publication/deletion requires Windows handle sharing exclusion")
     def test_user_edit_conflict_preserves_bytes(self, tmp_path: Path):
         """When an owned file is edited by the user, destination byte hash mismatch reports user_edit_conflict and preserves bytes."""
         h = MirrorTestHarness(tmp_path, enabled=True)
@@ -389,6 +400,8 @@ class TestP410EditsAndAtomicity:
         assert _compute_file_sha256(file_path) == edited_hash
         assert not (file_path.parent / f"{file_path.stem}.conflict.md").exists()
 
+    @pytest.mark.skipif(sys.platform != "win32",
+                        reason="Mirror publication/deletion requires Windows handle sharing exclusion")
     def test_crash_before_replacement_preserves_old_file(self, tmp_path: Path):
         """Crash before atomic replacement leaves the existing destination intact.
 
@@ -418,6 +431,8 @@ class TestP410EditsAndAtomicity:
         assert tmp_file.exists()
         assert tmp_file.read_text(encoding="utf-8") == "Interrupted partial write"
 
+    @pytest.mark.skipif(sys.platform != "win32",
+                        reason="Mirror publication/deletion requires Windows handle sharing exclusion")
     def test_two_writers_serialized(self, tmp_path: Path):
         """Two concurrent writers per destination serialize safely without corrupted manifests or lost files."""
         h1 = MirrorTestHarness(tmp_path, enabled=True)
@@ -442,6 +457,8 @@ class TestP410EditsAndAtomicity:
         assert h1.item_file_path("vid-standard-01").exists()
         assert h1.item_file_path("doc-prose-02").exists()
 
+    @pytest.mark.skipif(sys.platform != "win32",
+                        reason="Mirror publication/deletion requires Windows handle sharing exclusion")
     def test_stale_delayed_work_rejected(self, tmp_path: Path):
         """Delayed event with an older generation cannot overwrite a newer generation."""
         h = MirrorTestHarness(tmp_path, enabled=True)
@@ -478,6 +495,8 @@ class TestP410EditsAndAtomicity:
         res = unwrap_dict(h.mirror.resync())
         assert res.get("ok") is False or "reconciliation" in str(res).lower() or res.get("synced", 0) == 0
 
+    @pytest.mark.skipif(sys.platform != "win32",
+                        reason="Mirror publication/deletion requires Windows handle sharing exclusion")
     def test_file_size_cap_and_frontmatter_escaping(self, tmp_path: Path):
         """Mirror files never exceed 65,536 UTF-8 bytes and escape hostile YAML/HTML/wikilink syntax."""
         h = MirrorTestHarness(tmp_path, enabled=True)
@@ -505,6 +524,8 @@ class TestP410EditsAndAtomicity:
         assert "<script>" not in text
         assert "[[SecretWikiLink]]" not in text
 
+    @pytest.mark.skipif(sys.platform != "win32",
+                        reason="Mirror publication/deletion requires Windows handle sharing exclusion")
     def test_library_md_written_last(self, tmp_path: Path):
         """Library.md is written last, referencing only successfully completed files."""
         h = MirrorTestHarness(tmp_path, enabled=True)
@@ -531,6 +552,8 @@ def _mark_deleted(idx, video_id: str, deleted_at):
 class TestP411Deletion:
     """Gate P4-11: Soft delete tombstones, hard purge, replay/restore, purge_blocked_user_edit, disconnected vault."""
 
+    @pytest.mark.skipif(sys.platform != "win32",
+                        reason="Mirror publication/deletion requires Windows handle sharing exclusion")
     def test_soft_delete_tombstone(self, tmp_path: Path):
         """Soft delete replaces file with content-free tombstone, stripping title, URL, and quotes."""
         h = MirrorTestHarness(tmp_path, enabled=True)
@@ -557,6 +580,8 @@ class TestP411Deletion:
         assert "https://youtube.example" not in tombstone_content
         assert "Timed evidence point" not in tombstone_content
 
+    @pytest.mark.skipif(sys.platform != "win32",
+                        reason="Mirror publication/deletion requires Windows handle sharing exclusion")
     def test_hard_purge_removes_owned_files_idempotent(self, tmp_path: Path):
         """Hard purge unlinks owned item file and dependent briefs; repeated purge is idempotent."""
         h = MirrorTestHarness(tmp_path, enabled=True)
@@ -578,6 +603,8 @@ class TestP411Deletion:
         res2 = unwrap_dict(h.mirror.purge(vid))
         assert res2.get("ok") is not False or "purged" in str(res2).lower()
 
+    @pytest.mark.skipif(sys.platform != "win32",
+                        reason="Mirror publication/deletion requires Windows handle sharing exclusion")
     def test_restore_replaces_tombstone(self, tmp_path: Path):
         """Authoritative restore replaces tombstone with active evidence card, removing deleted flag."""
         h = MirrorTestHarness(tmp_path, enabled=True)
@@ -601,6 +628,8 @@ class TestP411Deletion:
         assert "deleted: true" not in restored_content.lower()
         assert "Standard Analysis Video" in restored_content
 
+    @pytest.mark.skipif(sys.platform != "win32",
+                        reason="Mirror publication/deletion requires Windows handle sharing exclusion")
     def test_purge_blocked_user_edit(self, tmp_path: Path):
         """When an owned file was edited by the user, hard purge preserves user file and reports purge_blocked_user_edit."""
         h = MirrorTestHarness(tmp_path, enabled=True)
@@ -643,6 +672,8 @@ class TestP411Deletion:
         resync_res = unwrap_dict(h.mirror.resync())
         assert resync_res.get("ok") is False or "destination_unavailable" in str(resync_res)
 
+    @pytest.mark.skipif(sys.platform != "win32",
+                        reason="Mirror publication/deletion requires Windows handle sharing exclusion")
     def test_reconnected_destination_validates_marker_and_drains_deletions_first(self, tmp_path: Path):
         """Reconnected destination validates volume marker and drains pending deletions before content writes."""
         h = MirrorTestHarness(tmp_path, enabled=True)
@@ -717,6 +748,8 @@ class TestP412CorrectionStoreSeparation:
         assert _compute_file_sha256(h.taste_file) == taste_hash
         assert _compute_file_sha256(h.user_file) == user_hash
 
+    @pytest.mark.skipif(sys.platform != "win32",
+                        reason="Mirror publication/deletion requires Windows handle sharing exclusion")
     def test_no_read_back_into_taxonomy(self, tmp_path: Path):
         """Modifying frontmatter or text in vault mirror files has zero effect on Uoink internal database."""
         h = MirrorTestHarness(tmp_path, enabled=True)

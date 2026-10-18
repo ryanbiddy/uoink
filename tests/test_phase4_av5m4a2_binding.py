@@ -12,7 +12,7 @@ import os
 import shutil
 import subprocess
 import sys
-import uuid
+from tests.source_stage_fixture import copy_stage_source
 from dataclasses import replace
 from pathlib import Path
 
@@ -41,6 +41,8 @@ def test_failed_initial_binding_write_leaves_no_usable_authority(env, monkeypatc
     assert not witness.exists()
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Mirror publication/deletion requires Windows handle sharing exclusion")
 def test_witness_persistence_failure_is_not_swallowed(env, monkeypatch):
     export(env)
     binding = env.mirror._dest_binding_path()
@@ -67,6 +69,8 @@ def test_io_unlink_without_worker_refuses_and_retains(env):
     assert target.read_bytes() == b"retain-without-isolated-worker"
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Mirror publication/deletion requires Windows handle sharing exclusion")
 def test_unknown_temp_record_has_no_deletion_authority(env):
     export(env)
     uoink = env.vault / mirror.MIRROR_ROOT
@@ -84,6 +88,8 @@ def test_unknown_temp_record_has_no_deletion_authority(env):
         env.mirror._stop_vault_io()
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Mirror publication/deletion requires Windows handle sharing exclusion")
 def test_worker_unlink_preserves_same_byte_replacement(tmp_path_factory):
     root = tmp_path_factory.mktemp("u")
     session = mirror._VaultIoSession.start(str(root))
@@ -110,6 +116,8 @@ def test_worker_unlink_preserves_same_byte_replacement(tmp_path_factory):
         session.terminate()
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Mirror publication/deletion requires Windows handle sharing exclusion")
 def test_newer_consent_authorizes_destination_change(env):
     export(env)
     other = env.root / "v2"
@@ -124,13 +132,16 @@ def test_newer_consent_authorizes_destination_change(env):
     assert (other / mirror.MIRROR_ROOT / mirror.item_relpath("a")).is_file()
 
 
-def test_staged_vault_worker_writes_without_source_tree():
-    root = Path(mirror.__file__).resolve().parent
-    stage = root / "_scratch" / ("a2s-" + uuid.uuid4().hex[:8])
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Windows installer staging uses build.ps1 and Windows paths")
+def test_staged_vault_worker_writes_without_source_tree(tmp_path):
+    root = copy_stage_source(tmp_path / "source")
+    stage = root / "stage"
     assert stage.resolve().is_relative_to(root)
     assert not stage.exists()
     staged = subprocess.run(
-        [PWSH, "-NoProfile", "-File", str(root / "build.ps1"),
+        [PWSH, "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass",
+         "-File", str(root / "build.ps1"),
          "-StageSourceOnly", "-SourceStagePath", str(stage)],
         cwd=root, capture_output=True, text=True, timeout=60,
     )

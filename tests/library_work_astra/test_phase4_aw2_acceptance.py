@@ -4,6 +4,7 @@ These are acceptance assertions, not xfails. See PHASE4-ACCEPTANCE-2-2026-09-08.
 for the isolated profile and short temporary-path runner.
 """
 from dataclasses import replace
+import sys
 import hashlib
 import json
 from pathlib import Path
@@ -263,6 +264,8 @@ def test_d08_interrupted_cleanup_cannot_report_success(env, monkeypatch):
         env.store.purge_dependents("b")
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Mirror publication/deletion requires Windows handle sharing exclusion")
 def test_d09_resync_repairs_missed_refresh(env):
     export(env)
     mutate_clip(env)
@@ -271,6 +274,8 @@ def test_d09_resync_repairs_missed_refresh(env):
 
 
 @pytest.mark.parametrize("kind", ["shelf", "brief"])
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Mirror publication/deletion requires Windows handle sharing exclusion")
 def test_d09_fresh_resync_exports_shelf_and_brief(env, kind):
     seed_shelf(env.idx, member_video_ids=["a"])
     receipt = publish(env)
@@ -280,6 +285,8 @@ def test_d09_fresh_resync_exports_shelf_and_brief(env, kind):
     assert (env.vault / mirror.MIRROR_ROOT / expected).is_file()
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Mirror publication/deletion requires Windows handle sharing exclusion")
 def test_d09_scope_cleanup_keeps_local_brief(env):
     receipt = publish(env)
     export(env, "a", "b")
@@ -304,6 +311,8 @@ def test_d10_brief_dependencies_rechecked_at_replace(env, monkeypatch):
     assert not target.exists(), "brief exported after its dependency was deleted"
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Mirror publication/deletion requires Windows handle sharing exclusion")
 def test_d11_server_delivers_deletion_events_while_disabled(env, monkeypatch):
     import server
     export(env)
@@ -317,6 +326,8 @@ def test_d11_server_delivers_deletion_events_while_disabled(env, monkeypatch):
     assert not item_file(env).exists()
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Mirror publication/deletion requires Windows handle sharing exclusion")
 def test_d11_soft_delete_removes_item_source_text(env):
     export(env)
     delete_item(env)
@@ -328,6 +339,8 @@ def test_d11_soft_delete_removes_item_source_text(env):
     ("stem", b"My Interrupted personal draft"),
     ("unique", b"USER OWNED TEMP"),
 ])
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Mirror publication/deletion requires Windows handle sharing exclusion")
 def test_d12_unowned_temps_are_never_inferred_from_name_or_text(env, suffix, content):
     export(env)
     target = item_file(env)
@@ -367,6 +380,8 @@ def test_d13_replace_syscall_cannot_complete_after_timeout(env, monkeypatch):
     assert not target.exists(), "timed-out worker published after return"
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Mirror publication/deletion requires Windows handle sharing exclusion")
 def test_d13_purge_rechecks_user_edit_before_unlink(env, monkeypatch):
     export(env)
     target = item_file(env)
@@ -389,6 +404,8 @@ def test_d13_purge_rechecks_user_edit_before_unlink(env, monkeypatch):
     assert target.is_file() and target.read_bytes() == personal
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Mirror publication/deletion requires Windows handle sharing exclusion")
 def test_d14_index_has_recoverable_intent_on_manifest_failure(env, monkeypatch):
     original = env.mirror._atomic_vault
 
@@ -404,6 +421,8 @@ def test_d14_index_has_recoverable_intent_on_manifest_failure(env, monkeypatch):
     assert mirror.index_key() in env.mirror._load_intents()
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Mirror publication/deletion requires Windows handle sharing exclusion")
 def test_d15_bound_volume_not_readopted_after_ledger_loss(env):
     export(env)
     env.mirror._ledger_path().unlink()
@@ -413,6 +432,8 @@ def test_d15_bound_volume_not_readopted_after_ledger_loss(env):
     assert not result["ok"] and not item_file(env).exists()
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Mirror publication/deletion requires Windows handle sharing exclusion")
 def test_d16_shelf_title_cannot_introduce_markdown_image(env):
     with env.idx.write_transaction() as conn:
         conn.execute("UPDATE yoinks SET title=? WHERE video_id='a'",

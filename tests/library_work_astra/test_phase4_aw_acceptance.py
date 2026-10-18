@@ -6,6 +6,7 @@ Run with the isolated profile documented in PHASE4-ACCEPTANCE-2026-09-08.md.
 from __future__ import annotations
 
 from dataclasses import replace
+import sys
 import hashlib
 import json
 from pathlib import Path
@@ -99,6 +100,8 @@ def publish(env, **kwargs):
     return env.store.publish(**publication_args(env, **kwargs), client_identity="aw-fixture")
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Mirror publication/deletion requires Windows handle sharing exclusion")
 def test_baseline_owned_export_and_brief_are_real(env):
     export(env)
     assert "Original evidence a." in item_file(env).read_text(encoding="utf-8")
@@ -272,6 +275,8 @@ def test_brief_tool_publication_emits_committed_mirror_event(env, monkeypatch):
     assert events == [("brief_published", {"brief_hash": result["brief_hash"]})]
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Mirror publication/deletion requires Windows handle sharing exclusion")
 def test_resync_rebuilds_from_current_sources_without_prior_events(env):
     assert env.mirror.preview(str(env.vault), mirror.SCOPE_ALL)["counts"]["items"] == 2
     result = env.mirror.resync()
@@ -279,6 +284,8 @@ def test_resync_rebuilds_from_current_sources_without_prior_events(env):
 
 
 @pytest.mark.parametrize("event", ["source_refresh", "apply", "undo"])
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Mirror publication/deletion requires Windows handle sharing exclusion")
 def test_bulk_wiring_events_schedule_current_derivatives(env, event):
     export(env)
     mutate_clip(env)
@@ -287,6 +294,8 @@ def test_bulk_wiring_events_schedule_current_derivatives(env, event):
     assert "Changed evidence a." in item_file(env).read_text(encoding="utf-8")
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Mirror publication/deletion requires Windows handle sharing exclusion")
 def test_scope_narrowing_cleans_previously_exported_items(env):
     export(env, "a", "b")
     env.mirror.consent = replace(env.mirror.consent, scope="allowlist", allowlist=("a",))
@@ -304,6 +313,8 @@ def test_real_brief_dependencies_enforce_mirror_allowlist(env):
     assert not exported.exists(), "brief citing excluded item b was exported"
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Mirror publication/deletion requires Windows handle sharing exclusion")
 def test_real_brief_mirror_is_removed_when_dependency_deleted(env):
     receipt = publish(env)
     env.mirror.on_committed_event("brief_published", brief_hash=receipt["brief_hash"])
@@ -315,6 +326,8 @@ def test_real_brief_mirror_is_removed_when_dependency_deleted(env):
     assert not exported.exists(), "old generated brief still contains deleted source text"
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Mirror publication/deletion requires Windows handle sharing exclusion")
 def test_disabled_mirror_retains_pending_deletes_and_cleans_owned_files(env):
     export(env)
     delete_item(env)
@@ -327,6 +340,8 @@ def test_disabled_mirror_retains_pending_deletes_and_cleans_owned_files(env):
     assert not item_file(env).exists()
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Mirror publication/deletion requires Windows handle sharing exclusion")
 def test_missing_manifest_stops_replacement_for_reconciliation(env):
     export(env)
     before = item_file(env).read_bytes()
@@ -338,6 +353,8 @@ def test_missing_manifest_stops_replacement_for_reconciliation(env):
     assert result.get("reconciliation") or not result["ok"]
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Mirror publication/deletion requires Windows handle sharing exclusion")
 def test_unowned_temp_named_like_item_is_preserved(env):
     export(env)
     personal = item_file(env).with_suffix(".tmp")
@@ -346,6 +363,8 @@ def test_unowned_temp_named_like_item_is_preserved(env):
     assert personal.exists() and personal.read_bytes() == b"USER OWNED TEMP"
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Mirror publication/deletion requires Windows handle sharing exclusion")
 def test_purge_removes_intent_owned_actual_temp_name(env, monkeypatch):
     export(env)
     target = item_file(env)
@@ -439,6 +458,8 @@ def test_manifest_failure_keeps_recovery_intent_and_no_success(env, monkeypatch)
     assert env.mirror._intent_path(mirror.item_key("a")).exists()
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Mirror publication/deletion requires Windows handle sharing exclusion")
 def test_missing_volume_marker_is_not_adopted_after_prior_sync(env):
     export(env)
     # Simulate unplugging this fixture volume and replacing it with another.
@@ -449,6 +470,8 @@ def test_missing_volume_marker_is_not_adopted_after_prior_sync(env):
     assert not result["ok"] and not item_file(env).exists(), result
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Mirror publication/deletion requires Windows handle sharing exclusion")
 def test_shelf_links_resolve_to_exported_item_files(env):
     seed_shelf(env.idx, member_video_ids=["a"])
     export(env)
@@ -461,6 +484,8 @@ def test_shelf_links_resolve_to_exported_item_files(env):
     assert (shelf.parent / expected).is_file()
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Mirror publication/deletion requires Windows handle sharing exclusion")
 def test_generated_index_escapes_raw_identity_markup(env):
     hostile = "` <img src=https://example.invalid/aw-sentinel>"
     seed_yoink_item(env.idx, env.root, video_id=hostile, slug="markup", title="Safe title",
@@ -471,6 +496,8 @@ def test_generated_index_escapes_raw_identity_markup(env):
     assert "<img" not in index
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Mirror publication/deletion requires Windows handle sharing exclusion")
 def test_mirror_preserves_user_edit_between_hash_and_replace(env, monkeypatch):
     export(env)
     mutate_clip(env)

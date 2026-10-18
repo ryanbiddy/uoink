@@ -33,6 +33,9 @@ def test_canned_phrase_warning_setting_uses_generate_terminology():
     assert 'id="voiceWarningsEnabled" type="checkbox" checked aria-describedby="voiceWarningsEnabledSaveStatus"> Show canned-phrase warnings</label>' in settings
     assert "Canned-phrase warnings flag canned phrasing without blocking the draft." in settings
     assert "Voice DNA" not in settings
+    assert 'id="writingShowWarnings" type="checkbox" checked> Show canned-phrase warnings</label>' in PAGE
+    assert "Canned-phrase warnings appear after an agent returns a draft." in PAGE
+    assert "No canned-phrase warnings in this draft." in PAGE
 
 
 def test_autosave_keeps_existing_api_and_does_not_silently_sync_later():

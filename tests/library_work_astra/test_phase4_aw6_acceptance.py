@@ -1,10 +1,14 @@
 """AW-6: failed publication cleanup must preserve a replacement temp file."""
 from pathlib import Path
 
+import sys
+import pytest
 import library_mirror as mirror
 from tests.library_work_astra.test_phase4_aw_acceptance import env, export, item_file, mutate_clip
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Mirror publication/deletion requires Windows handle sharing exclusion")
 def test_aw6_finally_cleanup_preserves_replacement_at_allocated_temp(env, monkeypatch):
     export(env)
     mutate_clip(env)

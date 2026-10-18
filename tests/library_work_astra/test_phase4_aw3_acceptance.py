@@ -4,6 +4,7 @@ Run under the isolated profile in PHASE4-ACCEPTANCE-3-2026-09-08.md.
 These intentionally fail on unresolved defects; no xfails or weakened assertions.
 """
 from dataclasses import replace
+import sys
 import hashlib
 from pathlib import Path
 import sqlite3
@@ -11,6 +12,7 @@ import threading
 import time
 
 import pytest
+from tests.phase4_fixtures import arm_mirror_timeout_at_boundary
 
 import library_briefs as briefs
 import library_mirror as mirror
@@ -154,6 +156,8 @@ def test_d08_unreadable_day_retains_local_brief_cleanup_retry(env, monkeypatch):
     assert not artifact.exists(), "day enumeration failed, but its cleanup retry was cleared"
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Mirror publication/deletion requires Windows handle sharing exclusion")
 def test_d09_resync_reexports_explicitly_readmitted_scope_item(env):
     export(env, "a", "b")
     env.mirror.consent = replace(env.mirror.consent, scope="allowlist", allowlist=("a",))
@@ -213,6 +217,8 @@ def interrupted_item_temp(env, monkeypatch):
     return allocated[0]
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Mirror publication/deletion requires Windows handle sharing exclusion")
 def test_d12_retry_keeps_ownership_of_interrupted_temp(env, monkeypatch):
     temporary = interrupted_item_temp(env, monkeypatch)
     assert env.mirror.resync()["ok"]
@@ -222,6 +228,8 @@ def test_d12_retry_keeps_ownership_of_interrupted_temp(env, monkeypatch):
     assert not temporary.exists(), "rewriting the intent orphaned source-bearing temp bytes"
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Mirror publication/deletion requires Windows handle sharing exclusion")
 def test_d12_control_hard_purge_removes_unedited_recorded_temp(env, monkeypatch):
     temporary = interrupted_item_temp(env, monkeypatch)
     delete_item(env)
@@ -230,6 +238,8 @@ def test_d12_control_hard_purge_removes_unedited_recorded_temp(env, monkeypatch)
     assert not temporary.exists()
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Mirror publication/deletion requires Windows handle sharing exclusion")
 def test_d12_recorded_temp_path_does_not_authorize_deleting_user_replacement(env, monkeypatch):
     temporary = interrupted_item_temp(env, monkeypatch)
     temporary.unlink()
@@ -243,9 +253,9 @@ def test_d12_recorded_temp_path_does_not_authorize_deleting_user_replacement(env
 
 @pytest.mark.parametrize("observe", ["visibility", "user_edit"])
 def test_d13_timeout_never_publishes_or_rolls_back_over_user_bytes(env, monkeypatch, observe):
-    env.mirror._clock = time.monotonic
     target = item_file(env)
     entered, release, finished = threading.Event(), threading.Event(), threading.Event()
+    armed = arm_mirror_timeout_at_boundary(monkeypatch, entered)
     original_replace, original_work = env.mirror._io_replace, env.mirror._vault_work
     published = []
     personal = b"USER EDIT AFTER TIMEOUT"
@@ -270,6 +280,8 @@ def test_d13_timeout_never_publishes_or_rolls_back_over_user_bytes(env, monkeypa
     try:
         result = env.mirror.resync(budget_s=0.1)
         assert entered.is_set() and not result["ok"]
+        assert armed == pytest.approx([0.1])
+        assert result["error"]["details"]["reason"] == "timeout"
         if observe == "user_edit":
             target.parent.mkdir(parents=True, exist_ok=True)
             target.write_bytes(personal)
@@ -282,6 +294,8 @@ def test_d13_timeout_never_publishes_or_rolls_back_over_user_bytes(env, monkeypa
         assert target.is_file() and target.read_bytes() == personal, "rollback deleted the intervening user edit"
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Mirror publication/deletion requires Windows handle sharing exclusion")
 def test_d14_index_intent_matches_exact_published_bytes(env, monkeypatch):
     """A failed item is omitted from the delivered index, but not its intent."""
     target = item_file(env, "b")
@@ -303,9 +317,9 @@ def test_d14_index_intent_matches_exact_published_bytes(env, monkeypatch):
 
 
 def test_d13_timed_out_writer_cannot_erase_a_later_successful_sync(env, monkeypatch):
-    env.mirror._clock = time.monotonic
     target = item_file(env)
     entered, release, finished = threading.Event(), threading.Event(), threading.Event()
+    armed = arm_mirror_timeout_at_boundary(monkeypatch, entered)
     original_replace, original_work = env.mirror._io_replace, env.mirror._vault_work
     plans = []
 
@@ -328,6 +342,8 @@ def test_d13_timed_out_writer_cannot_erase_a_later_successful_sync(env, monkeypa
     try:
         first = env.mirror.resync(budget_s=0.1)
         assert entered.is_set() and not first["ok"]
+        assert armed == pytest.approx([0.1])
+        assert first["error"]["details"]["reason"] == "timeout"
         mutate_clip(env)
         second = env.mirror.resync(budget_s=0.5)
         if second["ok"]:

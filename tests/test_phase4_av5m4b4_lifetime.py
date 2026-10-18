@@ -5,6 +5,7 @@ failures remain failed observations of B3's parent boundaries.
 """
 from __future__ import annotations
 
+import sys
 import os
 import threading
 import time
@@ -130,6 +131,8 @@ def test_ready_identifies_actual_writer_process(tmp_path_factory):
         assert not session.physically_alive()
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Windows process handles, Job Objects and destination mutex")
 def test_dest_mutex_does_not_block_on_parent_realpath(tmp_path_factory, monkeypatch):
     dest = tmp_path_factory.mktemp("v")
 

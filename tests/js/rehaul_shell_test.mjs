@@ -486,7 +486,7 @@ function makePage({ hash = "", platform = "Win32", uaPlatform = "", library = [D
     fire("hashchange");
   };
 
-  const helper = { down: false, libraryDown, health: () => ({ ok: true, version: "3.9.0", port: 5179 }) };
+  const helper = { down: false, libraryDown, health: () => ({ ok: true, version: "3.9.1", port: 5179 }) };
   const requests = [];
   const fakeFetch = (url) => {
     const path = String(url);
@@ -1107,7 +1107,7 @@ async function groupStatus() {
     p.helper.health = () => ({ ok: false });
     await p.page.refreshHealth();
     check(p.els.helperStatusText.textContent === "Uoink is offline", "a helper that answers ok:false is offline too", p.els.helperStatusText.textContent);
-    p.helper.health = () => ({ ok: true, version: "3.9.0" });
+    p.helper.health = () => ({ ok: true, version: "3.9.1" });
     await p.page.refreshHealth();
     check(p.els.helperStatusText.textContent === "Running on this PC" && p.els.helperOfflineFix.classList.contains("hidden"), "coming back reads running again", p.els.helperStatusText.textContent);
   });

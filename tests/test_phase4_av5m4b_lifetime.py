@@ -226,6 +226,8 @@ def test_job_assignment_failure_refuses_before_mutation(tmp_path_factory, monkey
     assert lease in (None, "corrupt", "unavailable") or lease == {}
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Mirror publication/deletion requires Windows handle sharing exclusion")
 def test_child_boundary_timeout_confirms_death_and_keeps_user_edit(env, monkeypatch):
     env.mirror._clock = time.monotonic
     export(env)
@@ -265,6 +267,8 @@ def test_child_boundary_timeout_confirms_death_and_keeps_user_edit(env, monkeypa
     assert before != personal
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Mirror publication/deletion requires Windows handle sharing exclusion")
 def test_timed_out_parent_cannot_use_later_resync_session(env, monkeypatch):
     env.mirror._clock = time.monotonic
     export(env)
@@ -296,6 +300,8 @@ def test_timed_out_parent_cannot_use_later_resync_session(env, monkeypatch):
     assert target.read_bytes() == personal
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Mirror publication/deletion requires Windows handle sharing exclusion")
 def test_second_process_with_different_temp_root_is_excluded(env, tmp_path_factory):
     export(env)
     session = mirror._VaultIoSession.start(str(env.vault))
@@ -360,6 +366,8 @@ def test_second_process_with_different_temp_root_is_excluded(env, tmp_path_facto
         assert not session.alive
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Mirror publication/deletion requires Windows handle sharing exclusion")
 def test_corrupt_lease_does_not_grant_destination(env):
     export(env)
     path = mirror._dest_lease_path(str(env.vault))

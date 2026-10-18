@@ -5,6 +5,7 @@ them with an explicit inert implementation. No prepare() or writer gate runs.
 """
 from __future__ import annotations
 
+import sys
 import io
 import json
 import threading
@@ -80,6 +81,8 @@ def inert_native_boundary(monkeypatch):
     return kernel
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Windows process handles, Job Objects and destination mutex")
 def test_original_popen_handle_creation_positive_control(monkeypatch):
     proc = SimpleNamespace(pid=LAUNCHER, _handle=LAUNCHER_HANDLE)
     monkeypatch.setattr(
@@ -186,6 +189,8 @@ def _inert_launch(monkeypatch, kernel, *, ready_pid, legitimate_writer=False):
     return session, state
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Windows process handles, Job Objects and destination mutex")
 def test_ready_pid_foreign_epoch_is_neither_registered_nor_assigned(
     monkeypatch, inert_native_boundary,
 ):
@@ -211,6 +216,8 @@ def test_ready_pid_foreign_epoch_is_neither_registered_nor_assigned(
     }, {"observed": observed, "refusal": refusal, "assignments": kernel.assignments}
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Windows process handles, Job Objects and destination mutex")
 def test_ready_launcher_identity_positive_control(monkeypatch, inert_native_boundary):
     kernel = inert_native_boundary
     session, state = _inert_launch(monkeypatch, kernel, ready_pid=LAUNCHER)
@@ -222,6 +229,8 @@ def test_ready_launcher_identity_positive_control(monkeypatch, inert_native_boun
     assert state.raw_queries == [], "The same-PID writer already has original-handle identity"
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Windows process handles, Job Objects and destination mutex")
 def test_cancelled_launch_does_not_release_active_terminator_job_lease(
     monkeypatch, inert_native_boundary,
 ):

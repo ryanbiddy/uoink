@@ -1,9 +1,10 @@
 """AW-4 ownership and packaging counterexamples, using disposable fixtures."""
+import sys
 import hashlib
 from pathlib import Path
 import shutil
 import subprocess
-import uuid
+from tests.source_stage_fixture import copy_stage_source
 
 import pytest
 
@@ -13,6 +14,8 @@ from tests.library_work_astra.test_phase4_aw_acceptance import env, export, item
 PWSH = shutil.which("pwsh") or shutil.which("powershell") or "powershell.exe"
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Mirror publication/deletion requires Windows handle sharing exclusion")
 def test_aw4_missing_binding_does_not_readopt_an_empty_replacement_vault(env):
     export(env)
     binding = env.mirror._dest_binding_path()
@@ -28,6 +31,8 @@ def test_aw4_missing_binding_does_not_readopt_an_empty_replacement_vault(env):
     assert not item_file(env).exists()
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Mirror publication/deletion requires Windows handle sharing exclusion")
 def test_aw4_failed_atomic_binding_write_preserves_previous_binding(env, monkeypatch):
     export(env)
     binding = env.mirror._dest_binding_path()
@@ -45,6 +50,8 @@ def test_aw4_failed_atomic_binding_write_preserves_previous_binding(env, monkeyp
     assert binding.read_bytes() == before, "A direct write changed binding bytes before atomic persistence failed"
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Mirror publication/deletion requires Windows handle sharing exclusion")
 def test_aw4_temp_cleanup_preserves_same_content_replacement_file(env):
     export(env)
     uoink = env.vault / mirror.MIRROR_ROOT
@@ -68,13 +75,16 @@ def test_aw4_temp_cleanup_preserves_same_content_replacement_file(env):
         env.mirror._stop_vault_io()
 
 
-def test_aw4_source_stage_contains_the_isolated_vault_writer():
-    root = Path(mirror.__file__).resolve().parent
-    stage = root / "_scratch" / ("aw4-stage-" + uuid.uuid4().hex[:10])
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Windows installer staging uses build.ps1 and Windows paths")
+def test_aw4_source_stage_contains_the_isolated_vault_writer(tmp_path):
+    root = copy_stage_source(tmp_path / "source")
+    stage = root / "stage"
     assert stage.resolve().is_relative_to(root)
     assert not stage.exists()
     result = subprocess.run(
-        [PWSH, "-NoProfile", "-File", str(root / "build.ps1"),
+        [PWSH, "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass",
+         "-File", str(root / "build.ps1"),
          "-StageSourceOnly", "-SourceStagePath", str(stage)],
         cwd=root, capture_output=True, text=True, timeout=60,
     )

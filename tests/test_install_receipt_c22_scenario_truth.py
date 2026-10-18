@@ -1,7 +1,7 @@
 """C22 scenario-truth regressions. New file only.
 
 Does not execute Inno, the production default helper, live index, or port 5179
-(including negative probes). Scratch lives under the worktree _scratch/c22-t.
+(including negative probes). Scratch lives in pytest's temporary directory.
 Original kit test files remain frozen.
 """
 
@@ -12,13 +12,11 @@ import json
 import os
 import socket
 import sys
-import tempfile
 from pathlib import Path
 
 import pytest
 
 ROOT = Path(__file__).resolve().parent.parent
-SCRATCH = ROOT / "_scratch" / "c22-t"
 SCRIPTS = ROOT / "scripts"
 KIT = SCRIPTS / "install_receipt"
 sys.path.insert(0, str(SCRIPTS))
@@ -65,10 +63,8 @@ def _free_port() -> int:
 
 
 @pytest.fixture
-def scratch():
-    SCRATCH.mkdir(parents=True, exist_ok=True)
-    path = Path(tempfile.mkdtemp(prefix="t-", dir=str(SCRATCH))).resolve()
-    yield path
+def scratch(tmp_path):
+    yield tmp_path.resolve()
 
 
 def _sha(data: bytes) -> str:
@@ -331,6 +327,8 @@ def test_truth_instrument_must_not_accept_fail_as_pass():
                           scenario_id="manual_first")
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Windows Inno install-receipt scenarios and process ownership")
 def test_truth_source_runtime_measured_scenarios(scratch):
     """Source-runtime synthetic check. Not installed credit.
 

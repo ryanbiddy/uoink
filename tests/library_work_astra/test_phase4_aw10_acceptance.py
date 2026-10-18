@@ -1,4 +1,5 @@
 """AW-10: session admission through a verified same-directory junction."""
+import pytest
 import json
 import os
 from pathlib import Path
@@ -12,6 +13,8 @@ from tests.library_work_astra.test_phase4_aw_acceptance import env
 PWSH = shutil.which("pwsh") or shutil.which("powershell") or "powershell.exe"
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Windows process handles, Job Objects and destination mutex")
 def test_junction_alias_refuses_competing_session_before_first_lease(env):
     original = str(env.vault)
     alias = str(env.vault.parent / "aw10-alias")

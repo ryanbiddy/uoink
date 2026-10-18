@@ -4554,7 +4554,7 @@
                       <div class="anchor-list" id="writingAnchorList"></div>
                       <button class="hook-help-link" type="button" id="manageAnchorsLink">Manage anchors &rarr;</button>
                     </div>
-                    <label class="inline-row"><input id="writingShowWarnings" type="checkbox" checked> Show Voice DNA warnings</label>
+                    <label class="inline-row"><input id="writingShowWarnings" type="checkbox" checked> Show canned-phrase warnings</label>
                     <label class="inline-row"><input id="writingSkipWarnings" type="checkbox"> Skip warnings this time</label>
                   </div>
                 </details>
@@ -6702,7 +6702,7 @@
       els.writingOutput.innerHTML = notice;
       setWritingActionsEnabled(false);
       renderThreadBuilder();
-      els.voiceWarningCopy.textContent = "Voice DNA warnings appear after an agent returns a draft.";
+      els.voiceWarningCopy.textContent = "Canned-phrase warnings appear after an agent returns a draft.";
     }
 
     function connectedAgents() {
@@ -14566,7 +14566,7 @@
       setWritingOutput(`${title}${dek}${writingBodyWithCredit(renderedBody, credit)}`);
       els.writingComputeIndicator.classList.toggle("hidden", !(piece.compute_path === "byo_key" || piece.generated_via === "byo_key"));
       const warnings = piece.voice_warnings || data.voice_warnings || [];
-      const warningCopy = piece.warning_copy || data.warning_copy || "No Voice DNA warnings in this draft.";
+      const warningCopy = piece.warning_copy || data.warning_copy || "No canned-phrase warnings in this draft.";
       els.voiceWarningCopy.textContent = warnings.length
         ? `${warningCopy} ${warnings.map((w) => w.phrase || w).join(", ")}`
         : warningCopy;

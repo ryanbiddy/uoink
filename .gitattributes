@@ -10,6 +10,14 @@
 # materialized bytes identical on Windows, macOS, and Linux.
 tests/fixtures/suite_integration_v1/*.json text eol=lf
 
+# Stage 1 proof hashes were sealed from CRLF bytes. Materialize those exact
+# bytes on POSIX too; the repository blobs remain normalized text.
+docs/library/proof/run-2026-09-05/receipts.json text eol=crlf
+docs/library/proof/manifest-2026-09-05.json text eol=crlf
+docs/library/holdout-split-2026-09-04.json text eol=crlf
+docs/library/taxonomy-v1-2026-09-04.json text eol=crlf
+docs/library/gold-set-2026-09-04.json text eol=crlf
+
 # Living Library stage 2: execution archives and freeze artifacts are hashed
 # byte-for-byte by tests/validate_proof_receipts.py. No EOL conversion anywhere.
 docs/library/proof/induction-run-*/** -text

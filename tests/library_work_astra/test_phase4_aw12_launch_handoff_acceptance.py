@@ -1,4 +1,5 @@
 """Prepared cancellation and job ownership during the launch handoff."""
+import sys
 import json
 import threading
 import time
@@ -9,6 +10,8 @@ from tests.library_work_astra.test_phase4_aw_acceptance import env
 from tests.test_phase4_av5m4b5_lifetime import _competitor_mutex
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Windows process handles, Job Objects and destination mutex")
 def test_cancelled_prepare_releases_without_requiring_a_future_launch(env):
     session = m._VaultIoSession.prepare(str(env.vault))
     try:
@@ -37,6 +40,8 @@ def test_cancelled_prepare_releases_without_requiring_a_future_launch(env):
         assert session.terminate()
 
 
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="Windows process handles, Job Objects and destination mutex")
 def test_cancel_cannot_close_job_during_launch_assignment(env, monkeypatch):
     entered = threading.Event()
     resume = threading.Event()

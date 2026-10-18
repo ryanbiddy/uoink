@@ -13,6 +13,8 @@ import subprocess
 import sys
 import time
 from pathlib import Path
+from types import SimpleNamespace
+from unittest.mock import Mock, mock_open
 
 import pytest
 
@@ -71,6 +73,35 @@ def test_exact_creation_identity_of_this_process_is_alive():
     created = iso.current_process_created_ms()
     assert created is not None
     assert iso._pid_liveness(os.getpid(), created) == "alive"
+
+
+@pytest.mark.parametrize("state,expected", [("Z", "dead"), ("X", "dead"), ("S", "alive")])
+def test_posix_exit_state_precedes_executable_lookup(monkeypatch, state, expected):
+    # Model Linux procfs without changing the host's pathlib or signalling a PID.
+    kill = Mock()
+    monkeypatch.setattr(iso, "os", SimpleNamespace(**{**vars(os), "name": "posix", "kill": kill}))
+    monkeypatch.setattr(iso, "open", mock_open(read_data=f"123 (name with ) parens) {state} 0 0"), raising=False)
+    monkeypatch.setattr(iso, "_posix_process_created_ms", lambda pid: 456)
+    image = Mock(return_value=sys.executable)
+    if expected == "dead":
+        image.side_effect = AssertionError("An exited process has no executable link")
+    monkeypatch.setattr(iso, "_process_executable", image)
+    assert iso._pid_identity_liveness(123, 456, sys.executable) == expected
+    kill.assert_called_once_with(123, 0)
+    if expected == "dead":
+        image.assert_not_called()
+    else:
+        image.assert_called_once_with(123)
+
+
+@pytest.mark.parametrize("created,expected", [(None, "unknown"), (457, "dead")])
+def test_posix_live_state_still_requires_exact_creation(monkeypatch, created, expected):
+    kill = Mock()
+    monkeypatch.setattr(iso, "os", SimpleNamespace(**{**vars(os), "name": "posix", "kill": kill}))
+    monkeypatch.setattr(iso, "_posix_process_state", lambda pid: "S")
+    monkeypatch.setattr(iso, "_posix_process_created_ms", lambda pid: created)
+    assert iso._pid_identity_liveness(123, 456, sys.executable) == expected
+    kill.assert_called_once_with(123, 0)
 
 
 def test_incomplete_identity_never_authorizes_stop(tmp_path):
