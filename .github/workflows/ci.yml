@@ -146,6 +146,11 @@ jobs:
 
           for path in ("README.md", "CHANGELOG.md"):
               text = Path(path).read_text(encoding="utf-8")
+              if path == "CHANGELOG.md":
+                  unreleased = re.search(r"^## \[Unreleased\]$", text, re.M)
+                  releases = list(re.finditer(r"^## \[", text[unreleased.end():], re.M))
+                  if len(releases) > 1:
+                      text = text[:unreleased.end() + releases[1].start()]
               counts = [
                   int(m.group(1))
                   for m in re.finditer(r"MCP server[^\n]*?\b(\d+)\s+tools\b", text, re.I)

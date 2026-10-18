@@ -263,7 +263,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Handle YouTube caption HTTP 429 refusals separately from video rate limits,
   allowing local transcription fallback with a visible caption-refusal note.
 
-## [3.8.1] - Unreleased
+## [3.8.1] - Not released (these changes ship in 3.9.0)
 
 ### Added
 

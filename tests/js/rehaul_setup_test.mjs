@@ -73,12 +73,14 @@ const groups = {
     assert.equal(env.scroll.behavior,'auto');assert.equal(env.document.activeElement.id,'verify-btn');
   },
   async platforms() {
+    const setupSource = readFileSync(join(EXT, 'setup.js'), 'utf8');
+    const version = setupSource.match(/const PUBLISHED_INSTALLER_VERSION = "([^"]+)";/)[1];
     for (const [os,word] of [['win','Start Menu'],['mac','Applications'],['linux','Terminal']]) {
       const env=await setup({os,fetch:()=>jsonResponse({ok:false},503)});
       assert.match(env.el('status-instructions').textContent,new RegExp(word));
       assert.equal(env.el('download-btn').hidden,os!=='win');
       assert.equal(env.el('manual-install').hidden,os==='win');
-      assert.match(env.el('download-btn').href,/v3\.8\.0\/Uoink-Setup-3\.8\.0\.exe$/);
+      assert.equal(env.el('download-btn').href,`https://github.com/ryanbiddy/uoink/releases/download/v${version}/Uoink-Setup-${version}.exe`);
       if(os!=='win') assert.doesNotMatch(env.el('status-instructions').textContent,/Windows/);
     }
   },
