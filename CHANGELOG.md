@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [3.9.0] - 2026-10-18
+
 ### Added
 
 - Settings → Connected services and Sources → Discover: write-only
@@ -247,6 +249,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Document that the dashboard makes no features-manifest request. Add
   regression checks for the removed loader and catalogue, dashboard startup,
   and the URL allowlist in both browser and native-shell paths.
+
+### Fixed
+
+- Recover a corrupt library index by preserving the damaged database and
+  sidecars before rebuilding from saved captures. Other storage errors stop
+  recovery without deleting files.
+- Give video capture folders a source-specific suffix and verify ownership
+  before reusing a folder, so matching titles cannot overwrite another capture.
+- Keep live-stream captures waiting for the recording by default and honor cancellation
+  while waiting or running.
+- Rotate `server.log` at 5 MB and keep three backups.
+- Handle YouTube caption HTTP 429 refusals separately from video rate limits,
+  allowing local transcription fallback with a visible caption-refusal note.
 
 ## [3.8.1] - Unreleased
 

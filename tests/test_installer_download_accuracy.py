@@ -30,12 +30,9 @@ def _tracked_docs() -> list[Path]:
     except (OSError, subprocess.SubprocessError):
         return sorted((ROOT / "docs").rglob("*.md"))
     return [ROOT / name for name in listing.split("\0") if name.endswith(".md")]
-# The in-product download link (extension/setup.js) must only ever name an
-# installer that is already published, so it lags one release behind until
-# the owner publishes and bumps it.
-PUBLISHED_VERSION = "3.8.0"
-# Install instructions must also point at an available installer while the
-# source VERSION advances to an unpublished release.
+# The v3.9.0 GitHub release, installer and website go live together.
+# Keep download pointers aligned for that coordinated publication.
+PUBLISHED_VERSION = "3.9.0"
 RELEASE_VERSION = (ROOT / "VERSION").read_text(encoding="utf-8").strip()
 PUBLISHED_ASSET = f"Uoink-Setup-{PUBLISHED_VERSION}.exe"
 
@@ -56,6 +53,10 @@ def test_setup_page_points_to_the_verified_published_installer() -> None:
         "`https://github.com/ryanbiddy/uoink/releases/download/"
         "v${PUBLISHED_INSTALLER_VERSION}/${installerName}`"
     ) in script
+    assert (
+        f'href="https://github.com/ryanbiddy/uoink/releases/download/'
+        f'v{PUBLISHED_VERSION}/{PUBLISHED_ASSET}"'
+    ) in html
     assert "data-win-only" in html
     assert "Uoink-Setup-3.2.2.exe" not in script + html
 

@@ -72,8 +72,9 @@ Uoink makes these outbound requests:
   Each on-demand action makes its own paid request (Comment Intelligence and
   Writing Studio may retry once, so one action can make two); a saved key
   starts nothing by itself. Local MCP playbook packets and copying a prompt make no
-  Anthropic request from Uoink. The dashboard Research controls are still
-  pending.
+  Anthropic request from Uoink. Generate → Research uses a connected agent
+  first, your saved Anthropic key otherwise, or prepares a prompt to copy
+  when neither is available.
 - **ScrapeCreators discovery: only if you turn it on and add your own key.**
   Discovery sends the creator handle, YouTube channel ID or search words you
   type, your key in the `x-api-key` header, and the Uoink user agent to

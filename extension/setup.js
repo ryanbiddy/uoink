@@ -3,8 +3,8 @@
 const SERVER = "http://127.0.0.1:5179";
 const POLL_MS = 2000;
 const HEARTBEAT_MS = 10000;
-// Last verified published asset; independent of the unreleased product VERSION.
-const PUBLISHED_INSTALLER_VERSION = "3.8.0";
+// Release download target; 3.9.0 goes live with the installer and website.
+const PUBLISHED_INSTALLER_VERSION = "3.9.0";
 const SUGGESTED_VIDEO = {
   url: "https://www.youtube.com/watch?v=8rABwKRsec4",
   title: "Andrej Karpathy on AGI, hiring, and the future of programming",

@@ -1,7 +1,7 @@
 """C22 final-oracle regressions. New file only.
 
 Does not execute Inno, the production default helper, live index, or port 5179
-(including negative probes). Scratch lives under the worktree _scratch/c22-f.
+(including negative probes). Scratch lives in pytest's OS-temp directory.
 The three imported kit test files remain frozen.
 """
 
@@ -12,13 +12,11 @@ import json
 import os
 import socket
 import sys
-import tempfile
 from pathlib import Path
 
 import pytest
 
 ROOT = Path(__file__).resolve().parent.parent
-SCRATCH = ROOT / "_scratch" / "c22-f"
 SCRIPTS = ROOT / "scripts"
 KIT = SCRIPTS / "install_receipt"
 sys.path.insert(0, str(SCRIPTS))
@@ -74,10 +72,8 @@ def _free_port() -> int:
 
 
 @pytest.fixture
-def scratch():
-    SCRATCH.mkdir(parents=True, exist_ok=True)
-    path = Path(tempfile.mkdtemp(prefix="f-", dir=str(SCRATCH))).resolve()
-    yield path
+def scratch(tmp_path):
+    yield tmp_path.resolve()
 
 
 def _sha(data: bytes) -> str:
