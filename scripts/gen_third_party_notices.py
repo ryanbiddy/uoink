@@ -42,6 +42,28 @@ FFMPEG_BLOCK = """\
 """
 
 
+BUNDLED_FONTS_BLOCK = """\
+## Bundled fonts (not Python packages)
+
+The dashboard and the Chrome extension ship their own copies of three
+typefaces (the same WOFF files the uoink.app site uses), so neither loads
+fonts from the network. Each font is licensed under the
+SIL Open Font License 1.1. The licence text, with that font's copyright
+line, sits beside the font files in `assets/brand/fonts/` and
+`extension/brand/fonts/`.
+
+- **Inter**, copyright 2020 The Inter Project Authors
+  (https://github.com/rsms/inter): `inter.woff` and `inter-italic.woff`,
+  licence `inter-OFL.txt`.
+- **Bungee**, copyright 2023 The Bungee Project Authors
+  (https://github.com/djrrb/Bungee): `bungee.woff`, licence `bungee-OFL.txt`.
+- **JetBrains Mono**, copyright 2020 The JetBrains Mono Project Authors
+  (https://github.com/JetBrains/JetBrainsMono): `jetbrains-mono.woff`,
+  licence `jetbrains-mono-OFL.txt`.
+- OFL text: https://openfontlicense.org
+"""
+
+
 ADAPTED_TEXT_BLOCK = """\
 ## Adapted documentation text
 
@@ -228,7 +250,8 @@ def main() -> int:
                   "source and build provenance are in vendor/nltk-pathsec in the source "
                   "repository. This modification does not qualify model loading or "
                   "clear unrelated dependency advisories."]
-    lines += ["", supplemental, "", ADAPTED_TEXT_BLOCK, "", FFMPEG_BLOCK, ""]
+    lines += ["", supplemental, "", ADAPTED_TEXT_BLOCK, "", FFMPEG_BLOCK,
+              "", BUNDLED_FONTS_BLOCK, ""]
     output.write_text("\n".join(lines), encoding="utf-8")
     print(f"wrote {output} ({len(rows)} python packages, source: {source})")
     return 0
