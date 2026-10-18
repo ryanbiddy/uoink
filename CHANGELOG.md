@@ -12,6 +12,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- Settings → Connected services and Sources → Discover: write-only
+  ScrapeCreators key controls, the disclosure gate, credit plans, balance
+  testing, daily caps and separate agent consent. Each Run and queue click
+  obtains a fresh intent; results sort by lift and up to ten picks can be
+  queued without loading third-party thumbnails.
+  Failed local saves retain paid results and offer a save-only retry.
+  Local library or ledger errors also preserve fetched candidates.
+  Deleted, unavailable and cancelled captures have distinct states; real
+  failed capture attempts remain failed.
 - Generate → Research: five playbooks with creator, capture, or topic scopes,
   cited reports, inline citation warnings, draft saving, and Tweet/Thread
   follow-ups. Runs use a connected agent first, then your Anthropic key, or
@@ -29,8 +38,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   snapshots, including YouTube channel IDs from saved channel URLs and keyword
   Shorts. Playbook authors remain local display names. Late key errors cannot
   invalidate a replacement key.
-  Source, privacy, security and MCP docs describe these flows; dashboard
-  discovery controls remain pending.
+  Source, privacy, security and MCP docs describe these flows.
   A newer rerun that failed or was refused before keeping any row does not
   replace an older snapshot or block keyword fallback; partial runs and
   successful empty runs still count as the newest snapshot.

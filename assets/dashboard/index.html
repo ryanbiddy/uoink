@@ -1441,6 +1441,21 @@
     a.research-citation { color: var(--action); text-decoration: underline; }
     .research-citation:focus-visible { outline: 2px solid var(--action); outline-offset: 2px; }
 
+    .discovery-panel { margin-block: 24px; padding-block: 24px; border-block: 1px solid var(--line-strong); color: var(--text); }
+    .discovery-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; border: 0; margin: 16px 0; padding: 0; }
+    .discovery-form label { display: grid; gap: 8px; }
+    .discovery-panel .field { background: var(--surface); color: var(--text); border-color: var(--line-strong); }
+    .discovery-note { color: var(--text-2); line-height: 1.6; overflow-wrap: anywhere; }
+    .discovery-results { list-style: none; margin: 16px 0; padding: 0; }
+    .discovery-result { display: grid; grid-template-columns: 32px minmax(0, 1fr); gap: 12px; padding: 16px 0; border-top: 1px solid var(--line-strong); overflow-wrap: anywhere; }
+    .discovery-result label { display: block; font-weight: 600; }
+    .discovery-result input { width: 20px; height: 32px; margin: 0; accent-color: var(--action); }
+    .discovery-chip { display: inline-flex; align-items: center; min-height: 32px; padding: 0 8px; border: 1px solid var(--line-strong); border-radius: 10px; color: var(--text); }
+    .discovery-panel .button { min-height: 44px; }
+    .discovery-panel :focus-visible, #settings-connected-services :focus-visible { outline: 2px solid var(--action); outline-offset: 2px; }
+    #settings-connected-services .disclosure { display: flex; align-items: flex-start; gap: 12px; line-height: 1.6; color: var(--text); }
+    #settings-connected-services .disclosure input { flex: none; margin-top: 6px; accent-color: var(--action); }
+
     .get-extension {
       display: grid;
       gap: 14px;
@@ -5165,6 +5180,27 @@
               <p class="setting-copy">Paste an RSS feed URL or YouTube channel/playlist link above. Automatic capture is always <strong>off by default</strong> until you explicitly opt in; detection tracks metadata without downloading audio or spending compute.</p>
             </div>
           </section>
+          <section class="discovery-panel" id="sources-discover" aria-labelledby="discoveryTitle">
+            <h2 id="discoveryTitle">Discover</h2>
+            <p class="discovery-note">Find posts with ScrapeCreators, then choose what to capture. <a href="#settings/connected-services">Set up Connected services</a>.</p>
+            <fieldset class="discovery-form" id="discoveryFields">
+              <legend class="visually-hidden">Discovery search</legend>
+              <label for="discoveryMode">Find by<select class="field" id="discoveryMode"><option value="creator">Creator</option><option value="keyword">Keyword</option></select></label>
+              <label for="discoveryPlatform">Platform<select class="field" id="discoveryPlatform"><option value="youtube">YouTube</option><option value="youtube_shorts">YouTube Shorts</option><option value="tiktok">TikTok</option><option value="instagram">Instagram Reels</option></select></label>
+              <label for="discoveryTerm"><span id="discoveryTermLabel">Creator handle or YouTube channel ID</span><input class="field" id="discoveryTerm" type="text" maxlength="100" autocomplete="off" spellcheck="false"></label>
+              <label for="discoveryPages">Pages<select class="field" id="discoveryPages"><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></label>
+            </fieldset>
+            <div class="inline-row"><button class="button" id="discoveryPlan" type="button">Review credits</button><button class="button primary" id="discoveryRun" type="button" disabled aria-describedby="discoveryCreditPlan">Run</button></div>
+            <p class="discovery-note" id="discoveryCreditPlan" role="status" aria-live="polite">Review the credit plan before running discovery.</p>
+            <p class="discovery-note" id="discoveryStatus" role="status" aria-live="polite"></p>
+            <div id="discoveryRecovery" class="hidden">
+              <p class="discovery-note" role="status">Results were fetched, but could not be saved on this PC. Keep Uoink open and save them again before queueing. This uses no more provider credits.</p>
+              <button class="button" id="discoverySaveAgain" type="button">Save results locally again</button>
+            </div>
+            <div class="inline-row"><button class="button primary" id="discoveryQueue" type="button" disabled>Uoink selected (0)</button><button class="button ghost" id="discoveryRefresh" type="button" disabled>Refresh capture states</button></div>
+            <p class="discovery-note">Select up to 10 posts. Results are sorted by lift; posts without a lift appear last. No thumbnails are loaded.</p>
+            <ul class="discovery-results" id="discoveryResults" aria-label="Discovery results"></ul>
+          </section>
           <div class="universal-capture" id="universalCapture">
             <div class="eyebrow">Paste a URL</div>
             <h2>Uoink anything</h2>
@@ -5304,6 +5340,7 @@
           <nav class="settings-index" aria-label="Settings sections">
             <a href="#settings/capture">Capture</a>
             <a href="#settings/ai">AI features</a>
+            <a href="#settings/connected-services">Connected services</a>
             <a href="#settings/library">Library and export</a>
             <a href="#settings/agents">Agents (MCP)</a>
             <a href="#settings/app">App</a>
@@ -5493,6 +5530,33 @@
           </div>
           </section>
 
+          <section class="settings-section" id="settings-connected-services" aria-labelledby="settingsConnectedServicesTitle">
+            <h2 class="settings-section-title" id="settingsConnectedServicesTitle" tabindex="-1">Connected services</h2>
+            <div class="settings-grid">
+              <div class="setting-block">
+                <h3>ScrapeCreators</h3>
+                <label for="scrapecreatorsKey">API key</label>
+                <input class="field" id="scrapecreatorsKey" type="password" maxlength="4096" autocomplete="new-password" spellcheck="false" aria-describedby="scrapecreatorsKeyStatus scrapecreatorsKeySaveStatus">
+                <p class="setting-copy" id="scrapecreatorsKeyStatus" role="status">No key saved.</p>
+                <div class="inline-row"><button class="button" id="saveScrapecreatorsKey" type="button">Save key</button><button class="button ghost" id="removeScrapecreatorsKey" type="button">Remove key</button></div>
+                <div class="setting-feedback"><span class="setting-status" id="scrapecreatorsKeySaveStatus" role="status" aria-live="polite"></span><button class="button ghost setting-retry hidden" id="scrapecreatorsKeySaveRetry" type="button" data-setting-retry="scrapecreatorsKey">Retry save</button></div>
+                <label class="disclosure" for="scrapecreatorsDisclosure"><input id="scrapecreatorsDisclosure" type="checkbox"><span>Discovery sends the creator handle or search words you type, with your key, to api.scrapecreators.com. Each request uses ScrapeCreators credits (most endpoints: 1 credit per request, per their docs). Nothing from your library is sent. Results are saved on this PC.</span></label>
+                <label class="inline-row" for="scrapecreatorsEnabled"><input id="scrapecreatorsEnabled" type="checkbox" disabled aria-describedby="scrapecreatorsEnabledSaveStatus"> Enable discovery</label>
+                <div class="setting-feedback"><span class="setting-status" id="scrapecreatorsEnabledSaveStatus" role="status" aria-live="polite"></span><button class="button ghost setting-retry hidden" id="scrapecreatorsEnabledSaveRetry" type="button" data-setting-retry="scrapecreatorsEnabled">Retry save</button></div>
+                <p class="setting-copy">Save a key and tick the disclosure to enable discovery. Discovery and agent spending start off.</p>
+              </div>
+              <div class="setting-block">
+                <label for="scrapecreatorsCap">Daily credit cap</label>
+                <input class="field" id="scrapecreatorsCap" type="number" min="1" max="500" step="1" value="25" aria-describedby="scrapecreatorsCapSaveStatus">
+                <div class="setting-feedback"><span class="setting-status" id="scrapecreatorsCapSaveStatus" role="status" aria-live="polite"></span><button class="button ghost setting-retry hidden" id="scrapecreatorsCapSaveRetry" type="button" data-setting-retry="scrapecreatorsCap">Retry save</button></div>
+                <label class="inline-row" for="scrapecreatorsAgents"><input id="scrapecreatorsAgents" type="checkbox" aria-describedby="scrapecreatorsAgentsSaveStatus"> Let connected agents run discovery</label>
+                <div class="setting-feedback"><span class="setting-status" id="scrapecreatorsAgentsSaveStatus" role="status" aria-live="polite"></span><button class="button ghost setting-retry hidden" id="scrapecreatorsAgentsSaveRetry" type="button" data-setting-retry="scrapecreatorsAgents">Retry save</button></div>
+                <p class="setting-copy">Test key checks your balance and may use a credit. Enable discovery first, then review the plan.</p>
+                <button class="button" id="testScrapecreatorsKey" type="button" disabled aria-describedby="scrapecreatorsTestStatus">Test key</button>
+                <p class="setting-copy" id="scrapecreatorsTestStatus" role="status" aria-live="polite"></p>
+              </div>
+            </div>
+          </section>
           <section class="settings-section" id="settings-library" aria-labelledby="settingsLibraryTitle">
           <h2 class="settings-section-title" id="settingsLibraryTitle" tabindex="-1">Library and export</h2>
           <div class="settings-grid">
@@ -8278,7 +8342,237 @@
       return `<div class="job-row"><div class="job-title">${htmlEscape(title)}</div><div class="job-sub">${htmlEscape(copy || "")}</div></div>`;
     }
 
+    // T8: planning is free. Capabilities exist only inside explicit click handlers.
+    const discoveryState = { busy: false, plan: null, run: null, selected: new Set(), balancePlan: null };
+    const discoveryElement = id => document.getElementById(id);
+
+    function discoveryArguments() {
+      const mode = discoveryElement("discoveryMode").value;
+      const platform = discoveryElement("discoveryPlatform").value;
+      const term = discoveryElement("discoveryTerm").value.trim();
+      if (!term) throw new Error(mode === "keyword" ? "Enter search words." : "Enter a creator handle or channel ID.");
+      const args = { mode, platform, pages: Number(discoveryElement("discoveryPages").value) };
+      if (mode === "keyword") args.query = term;
+      else if (platform.startsWith("youtube") && /^UC[\w-]{22}$/.test(term)) args.channel_id = term;
+      else args.handle = term.replace(/^@/, "");
+      return args;
+    }
+
+    function discoveryMessage(error) {
+      const reason = error && error.data && error.data.error && error.data.error.details && error.data.error.details.reason;
+      const messages = {
+        discovery_disabled: "Enable discovery in Connected services first.",
+        scrapecreators_key_required: "Save a ScrapeCreators key in Connected services first.",
+        scrapecreators_key_invalid: "The saved key was rejected. It has been kept; replace it or test it in Connected services.",
+        daily_cap_reached: "This request would exceed your daily credit cap.",
+        discovery_rate_limited: "ScrapeCreators refused the request because of its rate limit. No automatic retry was made.",
+        discovery_save_conflict: "A different saved receipt exists. It was preserved. These results remain in memory.",
+      };
+      if (reason === "scrapecreators_key_invalid") {
+        state.settings = { ...(state.settings || {}), scrapecreators_key_invalid: true };
+        renderConnectedServices();
+      }
+      return messages[reason] || "The request did not complete. No automatic retry was made.";
+    }
+
+    function renderConnectedServices() {
+      const settings = state.settings || {};
+      discoveryElement("scrapecreatorsKeyStatus").textContent = !settings.scrapecreators_key_set ? "No key saved."
+        : settings.scrapecreators_key_invalid ? "Key saved · Invalid. The key is kept until you replace or remove it." : "Key saved.";
+      discoveryElement("scrapecreatorsEnabled").disabled = !settings.scrapecreators_key_set || !discoveryElement("scrapecreatorsDisclosure").checked;
+      discoveryElement("testScrapecreatorsKey").disabled = discoveryState.busy || !settings.scrapecreators_key_set || !settings.scrapecreators_enabled;
+    }
+
+    function renderDiscoveryControls() {
+      const d = discoveryState;
+      discoveryElement("discoveryFields").disabled = d.busy;
+      discoveryElement("discoveryPlan").disabled = d.busy || Boolean(d.run && d.run.save_failed);
+      discoveryElement("discoveryRun").disabled = d.busy || !d.plan || Boolean(d.run && d.run.save_failed);
+      discoveryElement("discoveryQueue").disabled = d.busy || !d.run || d.run.save_failed || !d.selected.size || d.selected.size > 10;
+      discoveryElement("discoveryQueue").textContent = `Uoink selected (${d.selected.size})`;
+      discoveryElement("discoverySaveAgain").disabled = d.busy;
+      discoveryElement("discoveryRefresh").disabled = d.busy || !d.run || d.run.save_failed;
+      discoveryElement("discoveryRecovery").classList.toggle("hidden", !(d.run && d.run.save_failed));
+      discoveryElement("sources-discover").setAttribute("aria-busy", String(d.busy));
+      discoveryElement("discoveryResults").querySelectorAll("input").forEach(input => {
+        const row = d.run.candidates.find(c => c.key === input.dataset.discoveryPick);
+        input.disabled = d.busy || row.in_library || row.state === "queued" || (!input.checked && d.selected.size >= 10);
+      });
+      renderConnectedServices();
+    }
+
+    function invalidateDiscoveryPlan() {
+      discoveryState.plan = null;
+      discoveryElement("discoveryCreditPlan").textContent = "Review the credit plan before running discovery.";
+      const keyword = discoveryElement("discoveryMode").value === "keyword";
+      const platform = discoveryElement("discoveryPlatform");
+      Array.from(platform.options).forEach(option => { option.disabled = keyword && !["tiktok", "youtube"].includes(option.value); });
+      if (keyword && !["tiktok", "youtube"].includes(platform.value)) platform.value = "youtube";
+      discoveryElement("discoveryTerm").maxLength = keyword ? 200 : 100;
+      discoveryElement("discoveryTermLabel").textContent = keyword ? "Search words" : "Creator handle or YouTube channel ID";
+      renderDiscoveryControls();
+    }
+
+    async function discoveryIntent(tool, args) {
+      const data = await authFetch("/discovery/intent", { method: "POST", body: JSON.stringify({ confirmed: true, operation: { tool, arguments: args } }) });
+      if (!data || typeof data.user_intent_token !== "string" || !data.user_intent_token) throw new Error("Intent unavailable");
+      return data.user_intent_token;
+    }
+
+    async function planDiscovery() {
+      if (discoveryState.busy || (discoveryState.run && discoveryState.run.save_failed)) return;
+      let args;
+      try { args = discoveryArguments(); }
+      catch (error) { discoveryElement("discoveryStatus").textContent = error.message; discoveryElement("discoveryTerm").focus(); return; }
+      discoveryState.busy = true;
+      discoveryState.plan = null;
+      renderDiscoveryControls();
+      discoveryElement("discoveryStatus").textContent = "Checking the local credit plan…";
+      try {
+        const plan = await callMcpTool("discover_candidates", args);
+        if (!plan || plan.needs_confirmation !== true || plan.credits_planned !== args.pages) throw new Error("Invalid plan");
+        discoveryState.plan = { args, ...plan };
+        discoveryElement("discoveryCreditPlan").textContent = `${plan.credits_planned} credit${plan.credits_planned === 1 ? "" : "s"} planned · ${plan.credits_today} used today · daily cap ${plan.daily_cap}. Requests count even if they fail. Run sends this request once.`;
+        discoveryElement("discoveryStatus").textContent = "Plan ready. No provider request has been sent.";
+      } catch (error) { discoveryElement("discoveryStatus").textContent = discoveryMessage(error); }
+      finally { discoveryState.busy = false; renderDiscoveryControls(); }
+    }
+
+    function renderDiscoveryResults() {
+      const d = discoveryState;
+      const candidates = (d.run && d.run.candidates || []).slice().sort((a, b) =>
+        (Number.isFinite(b.lift) ? b.lift : -Infinity) - (Number.isFinite(a.lift) ? a.lift : -Infinity));
+      d.selected = new Set([...d.selected].filter(key => candidates.some(c => c.key === key && !c.in_library && c.state !== "queued")));
+      const labels = { new: "Not queued", queued: "Queued", captured: "Captured", failed: "Capture failed", deleted: "Deleted from library", unavailable: "Capture unavailable", cancelled: "Capture cancelled" };
+      discoveryElement("discoveryResults").innerHTML = candidates.map((c, i) => {
+        const title = c.caption || c.video_id;
+        const lift = Number.isFinite(c.lift) ? `${c.lift.toFixed(2)}× lift` : "Lift unavailable";
+        return `<li class="discovery-result"><input type="checkbox" id="discoveryPick${i}" data-discovery-pick="${htmlEscape(c.key)}" ${d.selected.has(c.key) ? "checked" : ""} ${c.in_library || c.state === "queued" ? "disabled" : ""}><div><label for="discoveryPick${i}">${htmlEscape(title)}</label><p class="discovery-note">${htmlEscape(c.platform)}${c.author_handle ? ` · ${htmlEscape(c.author_handle)}` : ""} · ${htmlEscape(lift)}</p><span class="discovery-chip">${c.in_library ? "In library" : htmlEscape(labels[c.state] || "Capture unavailable")}</span></div></li>`;
+      }).join("");
+      renderDiscoveryControls();
+    }
+
+    async function runDiscovery() {
+      const d = discoveryState;
+      if (d.busy || !d.plan || (d.run && d.run.save_failed)) return;
+      const plan = d.plan;
+      if (JSON.stringify(discoveryArguments()) !== JSON.stringify(plan.args)) { invalidateDiscoveryPlan(); return; }
+      d.busy = true;
+      d.plan = null; // A second run always needs a new plan and a fresh click.
+      renderDiscoveryControls();
+      discoveryElement("discoveryStatus").textContent = "Running discovery…";
+      try {
+        const token = await discoveryIntent("discover_candidates", plan.args);
+        const result = await callMcpTool("discover_candidates", { ...plan.args, confirm_credits: plan.credits_planned, user_intent_token: token });
+        d.run = result;
+        d.selected.clear();
+        discoveryElement("discoveryStatus").textContent = `${result.candidates.length} results · ${result.credits_used} credits used. ${result.save_failed ? "Local save failed." : "Saved on this PC."}`;
+      } catch (error) {
+        // A partial provider failure can still carry paid candidates and a save failure.
+        if (error.data && error.data.run_id && Array.isArray(error.data.candidates)) { d.run = error.data; d.selected.clear(); }
+        discoveryElement("discoveryStatus").textContent = discoveryMessage(error);
+      } finally { d.busy = false; renderDiscoveryResults(); }
+    }
+
+    async function saveDiscoveryAgain() {
+      const d = discoveryState;
+      if (d.busy || !d.run || !d.run.save_failed) return;
+      d.busy = true;
+      renderDiscoveryControls();
+      try {
+        const data = await authFetch("/discovery/runs/save", { method: "POST", body: JSON.stringify({ run_id: d.run.run_id }) });
+        if (!data.run || data.run.run_id !== d.run.run_id || !Array.isArray(data.run.candidates)) throw new Error("Invalid saved receipt");
+        d.run = data.run;
+        discoveryElement("discoveryStatus").textContent = d.run.save_failed ? "Local save still failed. Results remain in memory; keep Uoink open and try saving again." : "Results saved on this PC. No provider credits used.";
+      } catch (error) { discoveryElement("discoveryStatus").textContent = discoveryMessage(error); }
+      finally { d.busy = false; renderDiscoveryResults(); }
+    }
+
+    async function queueDiscovery() {
+      const d = discoveryState;
+      if (d.busy || !d.run || d.run.save_failed || !d.selected.size || d.selected.size > 10) return;
+      const args = { run_id: d.run.run_id, keys: [...d.selected] };
+      d.busy = true;
+      renderDiscoveryControls();
+      try {
+        const token = await discoveryIntent("queue_discovered", args);
+        const result = await callMcpTool("queue_discovered", { ...args, user_intent_token: token });
+        d.run.candidates = result.candidates;
+        d.selected.clear();
+        discoveryElement("discoveryStatus").textContent = `${result.queued.length} queued · ${result.skipped.length} skipped. No discovery credits used.`;
+      } catch (error) { discoveryElement("discoveryStatus").textContent = discoveryMessage(error); }
+      finally { d.busy = false; renderDiscoveryResults(); }
+    }
+
+    async function refreshDiscoveryRun() {
+      const d = discoveryState;
+      if (d.busy || !d.run || d.run.save_failed) return;
+      d.busy = true;
+      renderDiscoveryControls();
+      try {
+        const data = await authFetch(`/discovery/runs/${encodeURIComponent(d.run.run_id)}`);
+        if (!data.run || data.run.run_id !== d.run.run_id || !Array.isArray(data.run.candidates)) throw new Error("Invalid saved receipt");
+        d.run = data.run;
+        discoveryElement("discoveryStatus").textContent = "Capture states refreshed. No discovery credits used.";
+      } catch (error) { discoveryElement("discoveryStatus").textContent = discoveryMessage(error); }
+      finally { d.busy = false; renderDiscoveryResults(); }
+    }
+
+    async function testScrapecreatorsKey() {
+      const d = discoveryState;
+      if (d.busy || discoveryElement("testScrapecreatorsKey").disabled) return;
+      d.busy = true;
+      renderDiscoveryControls();
+      const status = discoveryElement("scrapecreatorsTestStatus");
+      try {
+        await settingsWriteQueue;
+        if (!d.balancePlan) {
+          const plan = await authFetch("/discovery/test-key", { method: "POST", body: "{}" });
+          if (plan.needs_confirmation !== true || plan.credits_planned !== 1) throw new Error("Invalid balance plan");
+          d.balancePlan = plan;
+          status.textContent = `Balance check may use a credit: 1 credit planned · ${plan.credits_today} used today · daily cap ${plan.daily_cap}. Click Test key again to send it.`;
+        } else {
+          d.balancePlan = null;
+          const token = await discoveryIntent("test_key", {});
+          const result = await authFetch("/discovery/test-key", { method: "POST", body: JSON.stringify({ confirm_credits: 1, user_intent_token: token }) });
+          state.settings.scrapecreators_key_invalid = false;
+          status.textContent = `Key accepted · balance ${result.balance} credits · ${result.credits_used} credit counted for this test.`;
+        }
+      } catch (error) { d.balancePlan = null; status.textContent = discoveryMessage(error); }
+      finally { d.busy = false; renderDiscoveryControls(); }
+    }
+
+    function bindDiscoveryControls() {
+      ["discoveryMode", "discoveryPlatform", "discoveryTerm", "discoveryPages"].forEach(id => discoveryElement(id).addEventListener("input", invalidateDiscoveryPlan));
+      discoveryElement("discoveryPlan").addEventListener("click", planDiscovery);
+      discoveryElement("discoveryRun").addEventListener("click", runDiscovery);
+      discoveryElement("discoverySaveAgain").addEventListener("click", saveDiscoveryAgain);
+      discoveryElement("discoveryQueue").addEventListener("click", queueDiscovery);
+      discoveryElement("discoveryRefresh").addEventListener("click", refreshDiscoveryRun);
+      discoveryElement("discoveryResults").addEventListener("change", event => {
+        const input = event.target;
+        const key = input.dataset.discoveryPick;
+        if (!key || discoveryState.busy) return;
+        const row = discoveryState.run.candidates.find(c => c.key === key);
+        if (!row || row.in_library || row.state === "queued") { input.checked = false; return; }
+        if (input.checked && discoveryState.selected.size < 10) discoveryState.selected.add(key);
+        else { discoveryState.selected.delete(key); input.checked = false; }
+        renderDiscoveryControls();
+      });
+      discoveryElement("scrapecreatorsDisclosure").addEventListener("change", renderConnectedServices);
+      discoveryElement("testScrapecreatorsKey").addEventListener("click", testScrapecreatorsKey);
+      discoveryElement("scrapecreatorsKey").addEventListener("input", () => noteSettingEdit("scrapecreatorsKey"));
+      discoveryElement("saveScrapecreatorsKey").addEventListener("click", () => {
+        const key = discoveryElement("scrapecreatorsKey").value.trim();
+        if (!key) { setSettingFeedback("scrapecreatorsKey", "Enter a key to save.", "error"); return; }
+        return saveSettingsPatch({ scrapecreators_key: key }, "scrapecreatorsKey");
+      });
+      discoveryElement("removeScrapecreatorsKey").addEventListener("click", () => saveSettingsPatch({ scrapecreators_key: null }, "scrapecreatorsKey"));
+      renderDiscoveryControls();
+    }
+
     function renderSources() {
+      renderConnectedServices();
       if (!els.sourceMap) return;
       const ready = SOURCE_CAPABILITIES.filter((source) => source.status !== "planned");
       const planned = SOURCE_CAPABILITIES.filter((source) => source.status === "planned");
@@ -15018,6 +15312,9 @@
     // Settings writes are single-field patches. Serialize them so a slow older
     // write cannot finish after a newer edit; never repaint the form on save.
     const SETTINGS_FIELDS = {
+      scrapecreatorsEnabled: ["scrapecreators_enabled", false],
+      scrapecreatorsAgents: ["scrapecreators_agent_calls_enabled", false],
+      scrapecreatorsCap: ["scrapecreators_daily_credit_cap", 25],
       autostartToggle: ["autostart", false],
       notificationsEnabled: ["notifications_enabled", true],
       screenshotCount: ["clipboard_screenshot_cap", 4],
@@ -15169,22 +15466,34 @@
       const field = Object.keys(patch)[0];
       const id = controlId || Object.keys(SETTINGS_FIELDS).find(key => SETTINGS_FIELDS[key][0] === field);
       return queueSettingSave(id, async () => {
+        if (field === "scrapecreators_enabled" && patch[field] && (!(state.settings || {}).scrapecreators_key_set || !discoveryElement("scrapecreatorsDisclosure").checked)) {
+          throw new Error("Save a key and tick the disclosure first.");
+        }
         const data = await settingsRequest("/settings", { method: "POST", body: JSON.stringify(patch) });
         const stored = data.settings;
-        const confirmedField = field === "anthropic_key" ? "anthropic_key_set" : field === "output_dir" ? "output_dir_configured" : field;
+        const isKey = field === "anthropic_key" || field === "scrapecreators_key";
+        const confirmedField = isKey ? `${field}_set` : field === "output_dir" ? "output_dir_configured" : field;
         if (!stored || !Object.prototype.hasOwnProperty.call(stored, confirmedField)) {
           throw unsupportedSettingError();
         }
-        const expected = field === "anthropic_key" ? Boolean(patch[field]) : patch[field];
+        const expected = isKey ? Boolean(patch[field]) : patch[field];
         if (!["output_dir", "obsidian_vault_path", "topics"].includes(field) && JSON.stringify(stored[confirmedField]) !== JSON.stringify(expected)) {
           throw new Error("The helper did not keep this value. Reload to check it, or retry.");
         }
         // Only adopt the acknowledged field, not stale siblings in the response.
         state.settings = { ...(state.settings || {}), [confirmedField]: stored[confirmedField] };
+        if (field === "scrapecreators_key") state.settings.scrapecreators_key_invalid = stored.scrapecreators_key_invalid === true;
         if (field === "output_dir") state.settings.output_dir_pending_restart = stored.output_dir_pending_restart;
         renderAICostEstimate();
         return data;
       }, () => {
+        if (field.startsWith("scrapecreators_")) {
+          if (field === "scrapecreators_key") discoveryElement("scrapecreatorsKey").value = "";
+          discoveryState.balancePlan = null;
+          discoveryElement("scrapecreatorsTestStatus").textContent = "";
+          invalidateDiscoveryPlan();
+          renderConnectedServices();
+        }
         if (field === "anthropic_key") {
           els.anthropicKey.value = "";
           renderKeyStatus();
@@ -15200,6 +15509,11 @@
 
     function saveSettingControl(id) {
       const control = document.getElementById(id);
+      if (id === "scrapecreatorsEnabled" && control.checked && (!(state.settings || {}).scrapecreators_key_set || !discoveryElement("scrapecreatorsDisclosure").checked)) {
+        control.checked = false;
+        setSettingFeedback(id, "Save a key and tick the disclosure first.", "error");
+        return Promise.resolve(false);
+      }
       const [field] = SETTINGS_FIELDS[id];
       if (id === "commentIntelligenceToggle" || id === "hookTypeToggle") renderAICostEstimate();
       let value = control.type === "checkbox" ? control.checked : control.value.trim();
@@ -15301,6 +15615,11 @@
         else control.value = Array.isArray(value) ? value.join("\n") : String(value);
       }
       if (settingEdit("anthropicKey").version !== (versions.anthropicKey || 0)) state.settings.anthropic_key_set = previous.anthropic_key_set;
+      if (settingEdit("scrapecreatorsKey").version !== (versions.scrapecreatorsKey || 0)) {
+        state.settings.scrapecreators_key_set = previous.scrapecreators_key_set;
+        state.settings.scrapecreators_key_invalid = previous.scrapecreators_key_invalid;
+      }
+      renderConnectedServices();
       for (const [id, field] of [["rolePicker", "role"], ["topicList", "topics"]]) {
         if (settingEdit(id).dirty || settingEdit(id).version !== (versions[id] || 0)) state.settings[field] = previous[field];
       }
@@ -16026,6 +16345,7 @@
       els.loadMore.addEventListener("click", () => loadLibrary());
       document.getElementById("reloadWriting").addEventListener("click", loadWriting);
       bindResearchControls();
+      bindDiscoveryControls();
       document.getElementById("generateWriting").addEventListener("click", generateWriting);
       document.getElementById("regenerateWriting").addEventListener("click", generateWriting);
       document.getElementById("critiqueWriting").addEventListener("click", critiqueWritingAgainstCorpus);

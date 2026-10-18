@@ -39,6 +39,7 @@ def offline_capture(monkeypatch):
     monkeypatch.setattr(server.urllib.request, "urlopen", unexpected_io)
     monkeypatch.setattr(server.socket, "create_connection", unexpected_io)
     monkeypatch.setattr(server, "_get_saved_anthropic_key", lambda: None)
+    monkeypatch.setattr(server, "_get_saved_scrapecreators_key", lambda: "")
     monkeypatch.setattr(server, "_anthropic_key_for_feature", lambda *_args: None)
     monkeypatch.setattr(server, "_autostart_enabled", lambda: False)
     yield

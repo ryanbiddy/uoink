@@ -163,7 +163,12 @@ Uoink stores the following on your Windows machine:
   partial and failed runs. Raw vendor responses, thumbnails and API keys are
   not stored in run files. All these run records are removed by the daily purge
   once older than 90 days. Local playbooks may reuse eligible snapshots up to
-  30 days old.
+    30 days old. Local library lookup or credit-summary errors do not discard
+    fetched candidates. If saving a fetched run fails, its normalized results are
+  returned to the dashboard and retained in helper memory until a local save
+  succeeds or the helper exits. The dashboard shows the save failure and can
+  retry saving without another provider request. Deleted and unavailable
+  captures are shown separately from failed capture attempts.
 - **Soft-deleted uoinks** — when you delete a uoink from the Memory page, the folder moves to `%USERPROFILE%\Desktop\Uoink\_yoink-trash\<topic>\<slug>__deleted-<timestamp>\`. The content remains readable on disk for 30 days, then is automatically purged by the helper on startup or every 24 hours thereafter. To delete immediately, manually remove the folder from `_yoink-trash`.
 - **Helper state** — `server.log`, `token.txt`, `server.pid`, the v2.1 migration markers (`.migration-complete`, `.migrated-from-yoink`), and migrated legacy files (`jobs.json.migrated`, `taxonomy.json.migrated`) live alongside `index.db` under `%LOCALAPPDATA%\Uoink\`.
 

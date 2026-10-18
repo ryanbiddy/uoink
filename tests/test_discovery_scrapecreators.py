@@ -6,6 +6,7 @@ import io
 import json
 import socket
 import sqlite3
+import subprocess
 import threading
 import urllib.error
 import urllib.request
@@ -33,6 +34,8 @@ def no_network_or_real_credentials(monkeypatch):
         raise AssertionError("discovery tests must not use network or real credentials")
     monkeypatch.setattr(socket.socket, "connect", forbidden)
     monkeypatch.setattr(urllib.request, "urlopen", forbidden)
+    monkeypatch.setattr(subprocess, "run", forbidden)
+    monkeypatch.setattr(subprocess, "Popen", forbidden)
     monkeypatch.setattr(server, "_keyring", SimpleNamespace(
         get_password=forbidden, set_password=forbidden, delete_password=forbidden))
     monkeypatch.setattr(server, "_get_saved_anthropic_key", lambda: "")
@@ -572,6 +575,113 @@ def test_partial_upstream_failure_retains_candidates_and_counts_two_requests(rig
     assert result["credits_used"] == 2 and len(rig.calls) == 2
     assert result["coverage"]["items"] == 1 and result["coverage"]["pages"] == 1
     assert list(sc.recent_runs(rig.root, now=rig.service._now())) == [result]
+
+
+@pytest.mark.parametrize("failure", [OSError("private path"), sqlite3.OperationalError("private database")])
+@pytest.mark.parametrize("partial", [False, True])
+def test_paid_save_failure_returns_candidates_and_local_retry_never_spends(rig, monkeypatch, failure, partial):
+    if partial:
+        rig.replies[:] = [(200, {**fixture(), "continuationToken": "next"}), (429, {})]
+    with monkeypatch.context() as patch:
+        patch.setattr(sc, "_atomic_write_text", Mock(side_effect=failure))
+        result = run(rig, pages=2 if partial else 1, confirm_credits=2 if partial else 1)
+        assert result["save_failed"] is True and len(result["candidates"]) == 1
+        assert result["ok"] is (not partial)
+        assert result["credits_used"] == result["credits_today"] == (2 if partial else 1)
+        assert "private" not in json.dumps(result) and KEY not in json.dumps(result)
+        retry = rig.service.retry_save({"run_id": result["run_id"]})
+        assert retry == result
+    before = len(rig.calls)
+    rig.service.transport = Mock(side_effect=AssertionError("retry must not send"))
+    rig.backend._read_settings = Mock(side_effect=AssertionError("retry must not check spending"))
+    rig.backend._get_saved_scrapecreators_key = Mock(side_effect=AssertionError("retry must not read credentials"))
+    rig.backend._get_index = Mock(side_effect=AssertionError("retry must not touch the index"))
+    # The returned object cannot mutate the retained receipt.
+    expected = json.loads(json.dumps(result))
+    result["candidates"].clear()
+    recovered = rig.service.retry_save({"run_id": result["run_id"]})
+    expected.pop("save_failed")
+    assert recovered == expected
+    assert json.loads(rig.service._run_path(result["run_id"]).read_text(encoding="utf-8")) == expected
+    assert rig.service.retry_save({"run_id": result["run_id"]}) == expected
+    assert len(rig.calls) == before
+    assert result["run_id"] not in rig.service._unsaved_runs
+
+
+@pytest.mark.parametrize("stage", ["library_lookup", "failure_counter", "daily_total"])
+@pytest.mark.parametrize("save_fails", [False, True])
+def test_local_database_failure_preserves_paid_page(rig, monkeypatch, stage, save_fails):
+    payload = fixture()
+    original = payload["videos"][0]
+    payload["videos"] = [dict(original, id=vid, url=f"https://www.youtube.com/watch?v={vid}")
+                         for vid in ("abcdefghijk", "lmnopqrstuv", "12345678901")]
+    rig.replies[:] = [(200, payload), (429, {})]
+    error = sqlite3.OperationalError("private database path")
+    record, credits_today = rig.service._record, rig.service._credits_today
+
+    def record_failure(*args, **kwargs):
+        if kwargs.get("failure"):
+            raise error
+        return record(*args, **kwargs)
+
+    def read_total(idx):
+        if rig.calls:
+            raise error
+        return credits_today(idx)
+
+    with monkeypatch.context() as patch:
+        if stage == "library_lookup":
+            patch.setattr(rig.idx, "get_yoink", Mock(side_effect=error))
+        elif stage == "failure_counter":
+            patch.setattr(rig.service, "_record", record_failure)
+        else:
+            patch.setattr(rig.service, "_credits_today", read_total)
+        if save_fails:
+            patch.setattr(sc, "_atomic_write_text", Mock(side_effect=OSError("disk full")))
+        result = run(rig, pages=2 if stage == "failure_counter" else 1,
+                     confirm_credits=2 if stage == "failure_counter" else 1)
+    assert result["ok"] is False and result["last_error"] == result["error"]
+    assert [c["video_id"] for c in result["candidates"]] == ["abcdefghijk", "lmnopqrstuv", "12345678901"]
+    assert result["coverage"]["items"] == 3
+    assert result["credits_used"] == len(rig.calls) == (2 if stage == "failure_counter" else 1)
+    assert result["credits_today"] == (None if stage == "daily_total" else result["credits_used"])
+    assert bool(result.get("save_failed")) is save_fails
+    assert "private" not in json.dumps(result) and KEY not in json.dumps(result)
+    assert rig.service._credits_today(rig.idx) == result["credits_used"]
+    rig.service.transport = Mock(side_effect=AssertionError("local recovery must not send"))
+    recovered = rig.service.retry_save({"run_id": result["run_id"]})
+    assert recovered == {key: value for key, value in result.items() if key != "save_failed"}
+    assert json.loads(rig.service._run_path(result["run_id"]).read_text(encoding="utf-8")) == recovered
+
+
+def test_local_save_retry_preserves_conflicting_file(rig, monkeypatch):
+    with monkeypatch.context() as patch:
+        patch.setattr(sc, "_atomic_write_text", Mock(side_effect=OSError("disk full")))
+        result = run(rig)
+    path = rig.service._run_path(result["run_id"])
+    original = json.dumps({**result, "candidates": []})
+    path.write_text(original, encoding="utf-8")
+    assert reason(rig.service.retry_save({"run_id": result["run_id"]})) == "discovery_save_conflict"
+    assert path.read_text(encoding="utf-8") == original
+    assert rig.service._unsaved_runs[result["run_id"]]["candidates"] == result["candidates"]
+    assert len(rig.calls) == 1
+
+
+def test_local_save_retry_cannot_replace_a_file_created_during_retry(rig, monkeypatch):
+    with monkeypatch.context() as patch:
+        patch.setattr(sc, "_atomic_write_text", Mock(side_effect=OSError("disk full")))
+        result = run(rig)
+    destination = rig.service._run_path(result["run_id"])
+    original = b"a receipt from another writer"
+    link = sc.os.link
+    def race(source, target):
+        destination.write_bytes(original)
+        return link(source, target)
+    monkeypatch.setattr(sc.os, "link", race)
+    retry = rig.service.retry_save({"run_id": result["run_id"]})
+    assert retry["save_failed"] is True and retry["candidates"] == result["candidates"]
+    assert destination.read_bytes() == original
+    assert len(rig.calls) == 1
 
 
 def test_daily_ledger_rolls_at_utc_midnight(rig):

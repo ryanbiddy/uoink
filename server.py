@@ -17045,6 +17045,22 @@ class Handler(BaseHTTPRequestHandler):
         status = 200 if result.get("ok") else {"invalid_request": 400, "rate_limited": 429}.get(code, 500)
         return self._send_json(status, result)
 
+    def _handle_discovery_save(self, body: dict):
+        # F45: retry only a server-retained normalized receipt, never a paid call.
+        if not self._is_dashboard_origin():
+            return self._send_json(403, {"ok": False, "error": "forbidden"})
+        import library_resources
+        try:
+            result = _get_discovery_service().retry_save(body)
+            json.dumps(result, ensure_ascii=False, allow_nan=False)
+            if isinstance(result.get("run_id"), str):
+                return self._send_json(200, {"ok": True, "run": result})
+        except Exception:
+            result = library_resources.ResourceError("internal_error").envelope()
+        code = (result.get("error") or {}).get("code")
+        status = {"invalid_request": 400, "resource_not_found": 404}.get(code, 500)
+        return self._send_json(status, result)
+
     def _handle_discovery_test_key(self, body: dict):
         if not self._is_dashboard_origin():
             return self._send_json(403, {"ok": False, "error": "forbidden"})
@@ -18009,6 +18025,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_discovery_intent(body)
         if bare == "/discovery/test-key":
             return self._handle_discovery_test_key(body)
+        if bare == "/discovery/runs/save":
+            return self._handle_discovery_save(body)
         if bare == LIBRARY_MIRROR_INTENT_ROUTE:
             return self._handle_library_mirror_intent(body)
         if bare == LIBRARY_MIRROR_ROUTE:

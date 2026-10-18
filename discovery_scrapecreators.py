@@ -8,15 +8,18 @@ tests/fixtures/scrapecreators/openapi/ (each records its source URL and date).
 """
 from __future__ import annotations
 
+import copy
 import datetime as dt
 import hashlib
 import heapq
 import itertools
 import json
 import math
+import os
 import re
 import secrets
 import threading
+import tempfile
 import time
 import urllib.error
 import urllib.request
@@ -463,6 +466,9 @@ class DiscoveryService:
         self._intents = {}
         self._mint_times = []
         self._intent_lock = threading.Lock()
+        # Only normalized receipts, never credentials or raw provider payloads.
+        # Keep failed saves until an explicit local retry succeeds.
+        self._unsaved_runs = {}
 
     def _now(self):
         return dt.datetime.fromtimestamp(self.clock(), dt.timezone.utc)
@@ -597,17 +603,25 @@ class DiscoveryService:
             # counts too. Do not page list_pending and miss an older live row.
             pending = idx._conn.execute(
                 "SELECT pending_id,status FROM pending_yoinks WHERE url=? "
-                "AND (status IN ('pending','running') OR pending_id=?) "
-                "ORDER BY CASE WHEN status IN ('pending','running') THEN 0 ELSE 1 END, pending_id DESC LIMIT 1",
+                "AND (status IN ('pending','running','publishing') OR pending_id=?) "
+                "ORDER BY CASE WHEN status IN ('pending','running','publishing') THEN 0 ELSE 1 END, pending_id DESC LIMIT 1",
                 (canonical, candidate.get("pending_id"))).fetchone()
             if pending:
                 candidate["pending_id"] = pending["pending_id"]
-                candidate["state"] = ("queued" if pending["status"] in ("pending", "running")
-                                      else "failed")
+                candidate["state"] = (
+                    "queued" if pending["status"] in ("pending", "running", "publishing") else
+                    "deleted" if existing and existing.get("deleted_at") else
+                    "failed" if pending["status"] == "failed" else
+                    "cancelled" if pending["status"] == "cancelled" else "unavailable")
+            elif existing and existing.get("deleted_at"):
+                candidate["state"] = "deleted"
             elif candidate.get("pending_id") is not None:
                 # Terminal rows may have been purged. Retain the last receipt
-                # for display; a new explicit pick can enqueue another attempt.
-                candidate["state"] = "failed"
+                # only when it recorded an actual failure or cancellation.
+                if candidate.get("state") not in ("failed", "cancelled"):
+                    candidate["state"] = "unavailable"
+            elif candidate.get("state") in ("captured", "deleted", "unavailable"):
+                candidate["state"] = "unavailable"
             else:
                 candidate["state"] = "new"
 
@@ -829,6 +843,7 @@ class DiscoveryService:
                     self.backend._mark_scrapecreators_key_invalid(False, expected_key=key)
                     break
                 candidates, cursor, truncated = parse_candidates(payload, args, self.backend)
+                fetched = []
                 for candidate in candidates:
                     if candidate["key"] in seen:
                         continue
@@ -836,13 +851,19 @@ class DiscoveryService:
                         truncated = True
                         break
                     seen.add(candidate["key"])
+                    # Keep the entire normalized page before consulting SQLite.
+                    # A local lookup failure must not discard paid candidates.
+                    run["candidates"].append(candidate)
+                    fetched.append(candidate)
+                run["coverage"].update(truncated=run["coverage"]["truncated"] or truncated,
+                                        next_cursor_present=cursor is not None)
+                for candidate in fetched:
                     existing = idx.get_yoink(candidate["video_id"])
                     candidate["in_library"] = bool(existing and not existing.get("deleted_at"))
                     if candidate["in_library"]:
                         candidate["state"] = "captured"
-                    run["candidates"].append(candidate)
-                run["coverage"].update(truncated=run["coverage"]["truncated"] or truncated,
-                                        next_cursor_present=cursor is not None)
+                    elif existing and existing.get("deleted_at"):
+                        candidate["state"] = "deleted"
                 if cursor is None:
                     break
                 if str(cursor) in cursors or len(run["candidates"]) == MAX_CANDIDATES:
@@ -852,12 +873,25 @@ class DiscoveryService:
                 params[spec["cursor"]] = cursor
             except Exception as exc:
                 if charged:
-                    self._record(idx, endpoint, sent_at, cap=cap, failure=True)
+                    try:
+                        self._record(idx, endpoint, sent_at, cap=cap, failure=True)
+                    except Exception:
+                        # The spend was recorded before sending. A failed local
+                        # failure-counter update cannot erase the paid receipt.
+                        pass
                 error = exc if isinstance(exc, ResourceError) else ResourceError("internal_error")
                 run.update(error.envelope())
                 run["last_error"] = run["error"]
                 break  # Sent requests count even on timeout, 401, 429 or 5xx.
-        run["credits_today"] = self._credits_today(idx)
+        try:
+            run["credits_today"] = self._credits_today(idx)
+        except Exception:
+            # Report an unknown daily total, never a made-up zero. The next
+            # paid call still fails closed on its normal ledger preflight.
+            run["credits_today"] = None
+            if run["ok"]:
+                run.update(ResourceError("internal_error").envelope())
+                run["last_error"] = run["error"]
         run["coverage"]["items"] = len(run["candidates"])
         run["coverage"]["truncated"] |= run["coverage"]["next_cursor_present"]
         if not balance:
@@ -870,13 +904,57 @@ class DiscoveryService:
             # Keep the single-group convenience field without attributing one
             # group's median to a mixed video/Shorts result.
             run["baseline"] = run["baselines"][0] if len(run["baselines"]) == 1 else None
-            self._save_run(run)
+            with _queue_lock:
+                self._save_discovery_result(run)
         return run
 
-    def _save_run(self, run):
+    def _save_discovery_result(self, run, *, exclusive=False):
+        """A disk failure must not turn paid results into an empty error."""
+        try:
+            self._save_run(run, exclusive=exclusive)
+        except Exception:
+            run["save_failed"] = True
+            self._unsaved_runs[run["run_id"]] = copy.deepcopy(run)
+
+    def retry_save(self, arguments):
+        """Save a retained receipt only; no provider, key, ledger or queue work."""
+        try:
+            if not isinstance(arguments, dict) or set(arguments) != {"run_id"}:
+                raise _invalid("discovery_save_arguments")
+            run_id = arguments["run_id"]
+            path = self._run_path(run_id)
+            with _queue_lock:
+                retained = self._unsaved_runs.get(run_id)
+                if retained is None:
+                    return self._load_run(run_id)  # An already completed retry.
+                run = copy.deepcopy(retained)
+                run.pop("save_failed", None)
+                # Never overwrite a receipt changed by another process.
+                if path.exists():
+                    if self._load_run(run_id) != run:
+                        raise _invalid("discovery_save_conflict")
+                else:
+                    self._save_discovery_result(run, exclusive=True)
+                if not run.get("save_failed"):
+                    self._unsaved_runs.pop(run_id, None)
+                return run
+        except ResourceError as exc:
+            return exc.envelope()
+        except Exception:
+            return ResourceError("internal_error").envelope()
+
+    def _save_run(self, run, *, exclusive=False):
         raw = json.dumps(run, ensure_ascii=False, allow_nan=False)
         if len(raw.encode("utf-8")) > MAX_RUN_BYTES:
             raise _invalid("discovery_run_too_large")
         path = self._run_path(run["run_id"])
         path.parent.mkdir(parents=True, exist_ok=True)
-        _atomic_write_text(path, raw)
+        if exclusive:
+            # Publish a complete file without replacing any destination that
+            # appeared after the conflict check (including another process).
+            with tempfile.TemporaryDirectory(prefix=".save-", dir=path.parent) as staging:
+                staged = Path(staging) / path.name
+                _atomic_write_text(staged, raw)
+                os.link(staged, path)
+        else:
+            _atomic_write_text(path, raw)

@@ -208,6 +208,11 @@ All other helper endpoints require `X-Uoink-Token` (legacy `X-Yoink-Token` accep
   intent; these browser checks do not prove a human click. Intent minting is
   limited to 30 per minute. The five-minute, single-use token binds the exact
   operation, origin and helper session. No MCP tool can mint an intent.
+- Discovery save recovery: `POST /discovery/runs/save` requires the helper
+  token and the same browser-origin checks. It accepts only a run ID and
+  retries a normalized receipt retained in helper memory, with no provider,
+  credential, ledger or capture-queue access. It refuses to overwrite a
+  conflicting file; repeated completed saves return the existing receipt.
 - Research generation: `POST /playbooks/run`. Like Writing Studio, it requires
   the helper token; an explicit request with a saved Anthropic key authorizes
   one paid call, including a connected agent's authenticated request. It accepts
@@ -720,3 +725,13 @@ saved empty failed runs are marked in their filenames and skipped before this
 read budget, preserving older eligible snapshots and keyword fallback.
 Picked URLs are revalidated before entering `pending_yoinks`, and saved runs
 are never interpreted as capture instructions.
+If the initial run save fails, the response keeps the candidates and adds
+`save_failed: true`. A copy stays in helper memory until saved or the helper
+exits. The dashboard offers a local save retry and blocks queueing or another
+paid run while that receipt is unsaved. Capture reconciliation distinguishes
+deleted, unavailable and cancelled captures from actual failed attempts;
+active pending, running and publishing rows remain queued.
+Normalized pages are retained before local library lookups. A failed lookup,
+failure-counter write or final daily-total read cannot discard fetched rows.
+An unreadable daily total returns `credits_today: null` with an error; the
+next paid request still requires a successful ledger check before sending.

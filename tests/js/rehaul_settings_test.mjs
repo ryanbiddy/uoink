@@ -8,6 +8,7 @@ const logic = page.slice(page.indexOf('    const SETTINGS_FIELDS'), page.indexOf
 const authLogic = page.slice(page.indexOf('    async function authFetch('), page.indexOf('    function prettyHook('));
 const refreshLogic = page.slice(page.indexOf('    async function refreshSettings()'), page.indexOf('    function diagnoseSummary('));
 const folderLogic = page.slice(page.indexOf('    async function pickOutputFolder()'), page.indexOf('    async function retryWithLiteMode('));
+const discoveryLogic = page.slice(page.indexOf('    const discoveryState ='), page.indexOf('    function renderSources()'));
 const tick = async () => { for (let i = 0; i < 8; i++) await new Promise(r => setImmediate(r)); };
 const deferred = () => { let resolve, reject; const promise = new Promise((a,b) => { resolve=a; reject=b; }); return {promise,resolve,reject}; };
 
@@ -50,7 +51,7 @@ function setup() {
     htmlEscape:s=>String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('"','&quot;'),
     prettyHook:type=>String(type).replaceAll('_',' '),
   });
-  vm.runInContext(logic + refreshLogic + folderLogic,c);
+  vm.runInContext(discoveryLogic + logic + refreshLogic + folderLogic,c);
   c.wireSettingsAutosave();
   return {c,nodes,writes,storage,state,setHandler:fn=>{handler=fn;},run:code=>vm.runInContext(code,c),
     useHttp:(status,body)=>{

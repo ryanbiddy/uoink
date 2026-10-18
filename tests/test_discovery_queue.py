@@ -347,8 +347,9 @@ def test_queue_needs_no_provider_access_and_refreshes_terminal_states(adapter, t
             adapter.conn.execute("DELETE FROM pending_yoinks WHERE pending_id=?", (pending,))
             adapter.conn.commit()
     adapter.settings["scrapecreators_agent_calls_enabled"] = False
-    assert read_run(adapter, result["run_id"])["candidates"][0]["state"] == "failed"
-    assert saved(adapter, result)["candidates"][0]["state"] == "failed"
+    expected_state = {"failed": "failed", "cancelled": "cancelled", "purged": "unavailable"}[terminal]
+    assert read_run(adapter, result["run_id"])["candidates"][0]["state"] == expected_state
+    assert saved(adapter, result)["candidates"][0]["state"] == expected_state
     adapter.settings["scrapecreators_agent_calls_enabled"] = True
     retried = call("registry", "queue_discovered", picks(result))
     assert len(retried["queued"]) == 1 and retried["skipped"] == []
@@ -365,6 +366,92 @@ def test_queue_needs_no_provider_access_and_refreshes_terminal_states(adapter, t
     assert refreshed["state"] == "captured" and refreshed["in_library"]
     assert saved(adapter, result)["candidates"][0] == refreshed
     assert adapter.service._credits_today(adapter.idx) == 1
+
+
+@pytest.mark.parametrize("state", ["deleted", "missing", "purged_success", "purged_failure", "publishing"])
+def test_capture_unavailable_deleted_and_real_failure_are_distinct(adapter, state):
+    result = run(adapter)
+    pending = adapter.service.queue_discovered(picks(result))["queued"][0]["pending_id"]
+    candidate = result["candidates"][0]
+    if state == "publishing":
+        adapter.conn.execute("UPDATE pending_yoinks SET status='publishing' WHERE pending_id=?", (pending,))
+        expected = "queued"
+    elif state == "purged_failure":
+        adapter.idx.mark_pending_failed(pending, "fixture failure", "2026-10-17", force_final=True)
+        assert read_run(adapter, result["run_id"])["candidates"][0]["state"] == "failed"
+        expected = "failed"  # A recorded real failure remains known after purge.
+    else:
+        capture(adapter, candidate)
+        adapter.idx.mark_pending_succeeded(pending, "fixture-job")
+        assert read_run(adapter, result["run_id"])["candidates"][0]["state"] == "captured"
+        if state == "deleted":
+            adapter.conn.execute("UPDATE yoinks SET deleted_at='2026-10-17' WHERE video_id=?", (candidate["video_id"],))
+            expected = "deleted"
+        else:
+            adapter.conn.execute("DELETE FROM yoinks WHERE video_id=?", (candidate["video_id"],))
+            expected = "unavailable"
+    if state in ("purged_success", "purged_failure"):
+        adapter.conn.execute("DELETE FROM pending_yoinks WHERE pending_id=?", (pending,))
+    adapter.conn.commit()
+    refreshed = read_run(adapter, result["run_id"])["candidates"][0]
+    assert refreshed["state"] == expected and refreshed["in_library"] is False
+    assert refreshed["pending_id"] == pending
+    assert saved(adapter, result)["candidates"][0] == refreshed
+    assert len(adapter.calls) == 1
+
+
+def test_discover_shows_previously_deleted_capture_before_queueing(adapter):
+    first = run(adapter)
+    capture(adapter, first["candidates"][0], deleted=True)
+    adapter.replies[:] = [(200, fixture())]
+    result = run(adapter)
+    assert result["candidates"][0]["state"] == "deleted"
+    assert result["candidates"][0]["in_library"] is False
+    assert adapter.idx.list_pending() == []
+
+
+def test_discovery_save_retry_route_returns_receipt_without_provider(adapter, monkeypatch):
+    with monkeypatch.context() as patch:
+        patch.setattr(sc, "_atomic_write_text", Mock(side_effect=OSError("disk full")))
+        result = run(adapter)
+    adapter.service.transport = Mock(side_effect=AssertionError("save route must not send"))
+    probe = Probe("/discovery/runs/save", {"run_id": result["run_id"]})
+    probe.do_POST()
+    assert probe.status == 200 and probe.payload["ok"] is True
+    assert probe.payload["run"]["candidates"] == result["candidates"]
+    assert not probe.payload["run"].get("save_failed")
+    assert len(adapter.calls) == 1
+
+
+@pytest.mark.parametrize("headers", [{"X-Uoink-Token": "wrong"}, {"Origin": "https://evil.example"},
+                                     {"Origin": "chrome-extension://fixture"}])
+def test_discovery_save_retry_route_gates_before_storage(adapter, monkeypatch, headers):
+    retry = Mock(side_effect=AssertionError("unauthorized save"))
+    monkeypatch.setattr(adapter.service, "retry_save", retry)
+    probe = Probe("/discovery/runs/save", {"run_id": "fixture"}, headers)
+    probe.do_POST()
+    assert probe.status == 403
+    retry.assert_not_called()
+
+
+@pytest.mark.parametrize("body", [{}, {"run_id": "../outside"}, {"run_id": []},
+                                 {"run_id": "fixture", "candidates": []}])
+def test_discovery_save_retry_rejects_client_data(adapter, body):
+    probe = Probe("/discovery/runs/save", body)
+    probe.do_POST()
+    assert probe.status == 400 and probe.payload["error"]["code"] == "invalid_request"
+    assert adapter.calls == []
+
+
+@pytest.mark.parametrize("bad", [ValueError("private failure"), [],
+                                 {"run_id": "fixture", "balance": float("nan")}])
+def test_discovery_save_retry_unexpected_errors_are_redacted(adapter, monkeypatch, bad):
+    retry = Mock(side_effect=bad) if isinstance(bad, Exception) else Mock(return_value=bad)
+    monkeypatch.setattr(adapter.service, "retry_save", retry)
+    probe = Probe("/discovery/runs/save", {"run_id": "fixture"})
+    probe.do_POST()
+    assert probe.status == 500
+    assert probe.payload == library_resources.ResourceError("internal_error").envelope()
 
 
 @pytest.mark.parametrize("terminal", [None, "failed", "cancelled"])
