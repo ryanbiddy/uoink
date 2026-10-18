@@ -1,0 +1,242 @@
+# Gemini Final Application and Supply-Chain Security Review (Role B)
+
+**Date:** 2026-09-09  
+**Reviewer:** Gemini (Worker B, Security Council)  
+**Worktree:** `uoink-library` (`8e109b99-190\gemini`)  
+**Scope:** Application runtime security, attack surface boundaries, subprocess execution, default-off egress, isolated credential storage, supply-chain package integrity, and historical finding verification.  
+**Constraint Boundary:** Read-only analysis of checkout code and test suites. No installer execution, no live index access (`index.db`), no socket binding on port 5179, no network fetches, and no modifications to production or test files.
+
+---
+
+## 1. Executive Summary and Disposition Table
+
+This review audits the current application and supply-chain security posture of the Uoink codebase prior to isolated installation verification. It checks the historical findings from [`docs/library/SECURITY-REVIEW-2026-09-04.md`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/8e109b99-190/gemini/docs/library/SECURITY-REVIEW-2026-09-04.md) against the active implementation, audits newly added features (such as isolated profiles, standing sources, and Loki claim verification), and distinguishes concrete protections from unverified claims.
+
+### Historical Finding Verification Matrix
+
+| ID | Historical Title | Current Code Status | Verification Evidence | Release Disposition |
+|---|---|---|---|---|
+| **SEC-01** | Remote command injection via unvalidated podcast enclosure URL | **Repaired** | [`podcasts.py:1476`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/8e109b99-190/gemini/podcasts.py#L1476) validates `_is_http_url`; [`podcasts.py:1525`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/8e109b99-190/gemini/podcasts.py#L1525) inserts positional separator `"--"` before `audio_url`. Verified by [`tests/security/test_security_findings.py:34-74`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/8e109b99-190/gemini/tests/security/test_security_findings.py#L34-L74). | Accepted repair. Not a release blocker. |
+| **SEC-02** | Indirect prompt injection into Claude Code via Recall hook | **Boundary Repaired** | [`scripts/recall_hook.py:80-86, 144-162, 316`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/8e109b99-190/gemini/scripts/recall_hook.py#L80-L86) wraps context in `<untrusted_uoink_library_context>` with data-not-instructions preface. Cleans control bytes, neutralizes angle brackets (`<` to `‹`, `>` to `›`) and backticks. Verified by [`tests/security/test_security_findings.py:76-145`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/8e109b99-190/gemini/tests/security/test_security_findings.py#L76-L145) and [`tests/security/test_adversarial_fixtures.py:36-98`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/8e109b99-190/gemini/tests/security/test_adversarial_fixtures.py#L36-L98). | Accepted boundary mitigation. Note model-level prompt-injection limits below. |
+| **SEC-03** | Unfenced third-party text injection in Librarian prompts | **Partially Repaired** | [`library_cards.py:32-42`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/8e109b99-190/gemini/library_cards.py#L32-L42) serializes cards with escaped delimiters (`\u003c`, `\u003e`, `\u0026`, `\u0060`) and wraps in `<untrusted_evidence_card>`. However, [`scripts/librarian/dryrun.py:197`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/8e109b99-190/gemini/scripts/librarian/dryrun.py#L197) still passes `f"--print={prompt}"` directly on Windows `argv`. | Acceptable for release; dryrun is a developer script. Bounded repair proposed. |
+| **SEC-04** | Undocumented and unmetered background egress in entity extraction | **Repaired** | [`server.py:849`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/8e109b99-190/gemini/server.py#L849) adds `"entity_extraction_enabled": False` in [`_default_settings`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/8e109b99-190/gemini/server.py#L841). [`_start_entity_extraction_thread`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/8e109b99-190/gemini/server.py#L4630-L4649) refuses to spawn unless the flag is explicitly enabled. Verified by [`tests/security/test_security_findings.py:147-169`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/8e109b99-190/gemini/tests/security/test_security_findings.py#L147-L169). | Accepted repair. Rule D-17 satisfied. |
+| **SEC-05** | Unauthenticated third-party egress and content replacement via FxTwitter v2 | **Unmitigated Runtime Behavior** | [`x_extractor.py:156-157, 186-205`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/8e109b99-190/gemini/x_extractor.py#L156-L157) still executes outbound HTTP GET to `https://api.fxtwitter.com/2/status/{tweet_id}` unconditionally on every X capture. Replaces syndication text if FxTwitter returns longer text. | Documented known exception. Not a release blocker, but must be acknowledged as active third-party egress. |
+| **SEC-06** | Unicode token stripping in FTS5 `_fts_query` | **Open Defect** | [`index.py:333`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/8e109b99-190/gemini/index.py#L333) still compiles `_FTS_TERM_RE = re.compile(r"[A-Za-z0-9_]+")`. Non-ASCII text yields empty or truncated search terms. Demonstrated by [`tests/security/test_security_findings.py:171-185`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/8e109b99-190/gemini/tests/security/test_security_findings.py#L171-L185) (`xfail(strict=True)`). | Functional defect / search blindness for non-English text. Not a security vulnerability; defer repair past release freeze. |
+| **SEC-07** | Unauthenticated local IPC on stdio MCP server | **Documented Architectural Boundary** | [`uoink_mcp.py:1-60`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/8e109b99-190/gemini/uoink_mcp.py#L1-L60) operates over stdin/stdout without token authentication, relying entirely on OS user process isolation. | Architectural boundary documented in [`docs/security.md:204-210`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/8e109b99-190/gemini/docs/security.md#L204-L210). Accepted. |
+| **SEC-08** | Ineffective POSIX permissions on `token.txt` on Windows | **Partially Mitigated** | Isolated mode stores token at `profile / "token.txt"`. Standard fallback in [`server.py:445`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/8e109b99-190/gemini/server.py#L445) uses `HERE / "token.txt"`. [`os.chmod`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/8e109b99-190/gemini/server.py#L512) has no effect on Windows NTFS ACLs. | Documented local same-user limitation. |
+| **SEC-09** | Lack of cryptographic hash verification on runtime pip dependencies | **Unverified Supply-Chain Coverage** | [`requirements-installer-lock.txt:11`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/8e109b99-190/gemini/requirements-installer-lock.txt#L11) pins version strings only (`name==version`). [`build.ps1:400-404`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/8e109b99-190/gemini/build.ps1#L400-L404) uses `--constraint $InstallerLock` without `--require-hashes`. | Documented supply-chain limit. Release candidate accepts version pinning. |
+| **SEC-10** | Unredacted video titles in persistent logs | **Open Info** | [`server.py:4926`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/8e109b99-190/gemini/server.py#L4926) logs raw video title to `server.log`. | Low risk / diagnostic tradeoff. Not a blocker. |
+
+---
+
+## 2. Authentication, Origin, and Path Boundary Verification
+
+### 2.1 HTTP Authentication and DNS Rebinding Defenses
+
+The HTTP helper bound to loopback enforces strict perimeter validation:
+
+1. **Host Header and Port Enforcement:** [`server.py:11213-11243`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/8e109b99-190/gemini/server.py#L11213-L11243) implements [`_host_allowed`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/8e109b99-190/gemini/server.py#L11213). It verifies that the `Host` header strictly resolves to loopback (`127.0.0.1`, `localhost`, or `[::1]`) and that any explicit port exactly matches the server's bound port (`5179`, or the isolated instance port). This blocks DNS rebinding attacks where an external malicious domain resolves to `127.0.0.1` in the victim's browser.
+2. **Token Authentication:** Token-gated endpoints require the `X-Uoink-Token` header (or legacy `X-Yoink-Token`). Query-string token parameters (`?token=...`) are explicitly refused in [`server.py:11198-11208`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/8e109b99-190/gemini/server.py#L11198-L11208), preventing token leaks in server access logs, browser history, or referrer headers.
+3. **CORS and Private Network Access:** [`server.py:11175-11196`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/8e109b99-190/gemini/server.py#L11175-L11196) restricts allowed web origins to official YouTube domains (`youtube.com`, `www.youtube.com`, `m.youtube.com`) and browser extension origins matching `chrome-extension://*`. Private Network Access headers (`Access-Control-Allow-Private-Network: true`) are emitted only on permitted origins.
+4. **Token Minting Gate:** The `/token` endpoint in [`server.py:11689-11699`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/8e109b99-190/gemini/server.py#L11689-L11699) enforces three independent gates:
+   - Custom header check: requires `X-Uoink-Client: uoink-extension` (or legacy `X-Yoink-Client`).
+   - Origin check: requires empty origin or `chrome-extension://*`.
+   - Rate limit: 10 requests per minute.
+   Because standard web pages cannot emit custom headers across origins without a successful CORS preflight, malicious web pages cannot access `/token`.
+
+### 2.2 Path Traversal Defenses and the `/file` Sandbox
+
+The image-serving endpoint `GET /file` is protected by [`_resolve_served_file`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/8e109b99-190/gemini/server.py#L9194-L9226) in [`server.py`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/8e109b99-190/gemini/server.py):
+
+- Input path must be non-empty and absolute.
+- Raw strings and resolved path segments containing `..` are rejected immediately.
+- Symlinks are resolved prior to boundary evaluation.
+- The resolved path must reside strictly under an approved output root (`Desktop\Uoink` or `%LOCALAPPDATA%\Uoink\output`, or the isolated profile output root).
+- Files must exist, be regular files, and not exceed 10 MB.
+- File extensions are restricted to `.png`, `.jpg`, `.jpeg`, and `.webp`, and initial magic bytes must strictly match the declared MIME type ([`_magic_matches`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/8e109b99-190/gemini/server.py#L9173-L9191)).
+
+### 2.3 Identifier Grammar and MCP Slug Traversal Resistance
+
+MCP tools that access saved library items by folder slug (`get_uoink_corpus`, `get_citation_map`, `get_uoink_health`, `analyze_comments_tool`, `classify_hook`) validate the slug through [`_find_yoink`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/8e109b99-190/gemini/uoink_mcp_tools.py#L340-L368).
+
+[`tests/test_mcp_slug_security.py:12-84`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/8e109b99-190/gemini/tests/test_mcp_slug_security.py#L12-L84) verifies that:
+- Path separators (`/`, `\`), traversal tokens (`.`, `..`, `../outside`, `..\outside`), and URL-encoded traversals (`%2e%2e%2foutside`) are rejected before index query or filesystem walk.
+- Absolute paths (`/absolute`, `C:\absolute`) and nested directories (`nested/child`) are rejected.
+- Non-ASCII characters (such as `résumé`) and strings exceeding 160 characters fail validation immediately.
+- Invalid slugs return `{ "ok": False, "error": "uoink not found" }` without leaking internal file paths or exceptions.
+
+### 2.4 Authoritative Intent Gate (`POST /library/intent`)
+
+The Living Library mutation endpoints (`pin_shelf`, `undo_library_apply`) require a short-lived, five-minute `user_intent_token`. In [`server.py:14906-14934`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/8e109b99-190/gemini/server.py#L14906-L14934), `POST /library/intent`:
+- Enforces loopback dashboard origin validation via [`_is_dashboard_origin`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/8e109b99-190/gemini/server.py#L14890-L14904). `Origin` must match the server's own loopback host and port; `Sec-Fetch-Site` must be `same-origin` or `none`. Extension and public web origins are rejected with HTTP 403.
+- Capped by a 30 requests per minute rate limit.
+- Rejects JSON payloads containing `NaN`, `Infinity`, or duplicate object keys.
+- Requires user confirmation from the local dashboard UI; MCP agents cannot self-mint intent tokens.
+
+---
+
+## 3. Subprocess Execution and Command Injection Analysis
+
+External binaries (`yt-dlp`, `ffmpeg`, `powershell`) are executed across extraction, comment retrieval, and audio conversion workflows.
+
+### 3.1 Verification of Podcast Enclosure Hardening (SEC-01)
+
+The critical vulnerability in podcast enclosure handling identified on 2026-09-04 allowed an RSS feed author to supply `--exec=calc.exe` in the enclosure URL, resulting in arbitrary command execution when passed to `yt-dlp`.
+
+Current code in [`podcasts.py:1464-1534`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/8e109b99-190/gemini/podcasts.py#L1464-L1534) enforces two distinct defenses:
+1. Scheme validation: [`podcasts.py:1476`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/8e109b99-190/gemini/podcasts.py#L1476) checks `_is_http_url(episode["audio_url"])`. Any value not starting with `http://` or `https://` is rejected immediately.
+2. Positional argument boundary: [`podcasts.py:1525-1526`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/8e109b99-190/gemini/podcasts.py#L1525-L1526) constructs the command array as:
+   ```python
+   args = cmd + [
+       "--no-progress",
+       "--extract-audio",
+       ...,
+       "-o", str(out_stem) + ".%(ext)s",
+       "--",
+       episode["audio_url"],
+   ]
+   ```
+   The explicit `"--"` token tells `yt-dlp` that all subsequent tokens are positional targets, preventing option injection even if a URL begins with leading dashes. Both defenses are verified by automated tests in [`tests/security/test_security_findings.py:34-74`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/8e109b99-190/gemini/tests/security/test_security_findings.py#L34-L74).
+
+### 3.2 Main Pipeline Invocations (`yt-dlp`)
+
+In [`server.py`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/8e109b99-190/gemini/server.py):
+- Metadata retrieval: [`server.py:3517-3527`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/8e109b99-190/gemini/server.py#L3517-L3527) executes `[*YTDLP_CMD, "--dump-single-json", "--no-download", url]`.
+- Comment extraction: [`server.py:4672-4684`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/8e109b99-190/gemini/server.py#L4672-L4684) executes `[*YTDLP_CMD, "--write-info-json", "--write-comments", "--skip-download", ..., url]`.
+- Playlist video listing: [`mobile_playlists.py:169-175`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/8e109b99-190/gemini/mobile_playlists.py#L169-L175) executes `[*ytdlp_cmd, "--flat-playlist", "--dump-json", ..., playlist_url]`.
+
+**Assessment:** Input URLs for these routines pass through [`_normalize_video_url`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/8e109b99-190/gemini/server.py#L6010-L6028), [`_normalize_any_url`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/8e109b99-190/gemini/server.py#L5971-L6008), or [`_normalize_playlist_url`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/8e109b99-190/gemini/server.py#L6031-L6055). These normalizers strictly enforce allowed hostnames and `http(s)://` schemes, preventing flag injection into `argv`. However, unlike `podcasts.py`, these calls omit the explicit `"--"` separator before the URL argument. Inserting `"--"` before positional URLs across all `yt-dlp` invocations is recommended as a defense-in-depth hardening step.
+
+### 3.3 Librarian Model CLI Execution (`dryrun.py`)
+
+In [`scripts/librarian/dryrun.py:197`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/8e109b99-190/gemini/scripts/librarian/dryrun.py#L197), when running under client `gemini`:
+```python
+cmd = [AGY_EXE, f"--print={prompt}", "--json-schema", json.dumps(schema), ...]
+res = subprocess.run(cmd, capture_output=True, text=True, ...)
+```
+While line 195 caps `len(prompt) > 7000`, placing multi-kilobyte text payloads on the command line in Windows is brittle due to command-line length limits and Windows argument escaping conventions. Claude and Codex execution paths in `dryrun.py` use `stdin` rather than `argv`. Feeding prompts via `stdin` or temporary files for all CLI clients is recommended.
+
+---
+
+## 4. Egress Inventory and Rule D-17 Enforcement
+
+Rule D-17 stipulates: *"The server performs no LLM reasoning on the user's behalf except through named, default-off, metered feature flags."*
+
+### 4.1 Feature Gating Audit
+
+Inspection of [`_default_settings()`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/8e109b99-190/gemini/server.py#L841-L900) in [`server.py`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/8e109b99-190/gemini/server.py) confirms that all AI features and automated background egress default to `False`:
+- `"comment_intelligence_enabled": False`
+- `"hook_type_enabled": False`
+- `"entity_extraction_enabled": False` (SEC-04 repair)
+- `"claim_verification_enabled": False` (Loki v3 A2 claim verification)
+- `"auto_uoink_enabled": False` (Taste-aware background capture)
+- `"transcript_reliability_auto_check": False`
+
+In [`server.py:4639`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/8e109b99-190/gemini/server.py#L4639), the spawn gate for entity extraction verifies [`_anthropic_key_for_feature("entity_extraction_enabled")`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/8e109b99-190/gemini/server.py#L1683-L1690). If the flag is disabled or if the key is marked invalid, no thread spawns, no API call executes, and sidecar records `entity_extraction_status: "skipped"`.
+
+### 4.2 Active Egress Inventory
+
+| Destination | Initiating Module | Trigger | Data Disclosed | Authorization Gate |
+|---|---|---|---|---|
+| `api.anthropic.com` | [`server.py:1683-1704`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/8e109b99-190/gemini/server.py#L1683-L1704) | Comment analysis, Hook classification, Entity extraction | Video title, description, top comments, transcript excerpt | Explicit user opt-in setting + saved API key in keyring |
+| `api.fxtwitter.com` | [`x_extractor.py:160-184`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/8e109b99-190/gemini/x_extractor.py#L160-L184) | X post capture | Tweet ID, User-Agent `Uoink (+https://uoink.app)` | **Automatic** (no flag; documented exception) |
+| `cdn.syndication.twimg.com` | [`x_extractor.py:100-145`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/8e109b99-190/gemini/x_extractor.py#L100-L145) | X post capture | Tweet ID, computed token | User capture request |
+| Podcast RSS host | [`podcasts.py:395-430`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/8e109b99-190/gemini/podcasts.py#L395-L430) | Scheduler feed poll | HTTP GET, `If-None-Match` / `If-Modified-Since` | User feed subscription |
+| Podcast media host | [`podcasts.py:1517-1534`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/8e109b99-190/gemini/podcasts.py#L1517-L1534) | Episode download | Audio URL via `yt-dlp` | Explicit user download or feed `auto_ingest` |
+| YouTube / Media hosts | `yt-dlp` via [`server.py`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/8e109b99-190/gemini/server.py) | Capture request | Video URL, user-agent | User capture request |
+| GitHub Releases API | [`server.py:5830`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/8e109b99-190/gemini/server.py#L5830) | Update check | GET request, User-Agent `uoink-update-check` | Dashboard load / manual check |
+
+---
+
+## 5. Isolated Installation and Credential Custody Limits
+
+Astra will perform an isolated installation check using `uoink_install_isolation.py`. This review examines the runtime boundary established by isolated mode.
+
+### 5.1 Isolated Filesystem Containment
+
+[`uoink_install_isolation.py:69-105`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/8e109b99-190/gemini/uoink_install_isolation.py#L69-L105) encapsulates runtime isolation through [`IsolationBinding`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/8e109b99-190/gemini/uoink_install_isolation.py#L69):
+- Loopback port is explicitly bound away from `5179`.
+- App-data paths are redirected to `profile`: `token_path` (`profile/token.txt`), `pid_path` (`profile/server.pid`), `identity_path` (`profile/runtime-identity.json`), and `log_path` (`profile/server.log`).
+- Output files are contained in `profile/output`.
+- Install migration is suppressed: [`server.py:17171`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/8e109b99-190/gemini/server.py#L17171) checks `_install_isolation.current_binding() is None` before executing [`migrate_install.run_migration`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/8e109b99-190/gemini/migrate_install.py#L427). The HKCU autostart registry key and legacy data copy are not modified during an isolated run.
+
+### 5.2 The Keyring Isolation Gap (Finding)
+
+While filesystem paths and loopback ports are isolated, **OS credential storage is not segregated**:
+- In [`server.py:455, 1229, 1256`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/8e109b99-190/gemini/server.py#L455), the credential service name is hardcoded to `KEYRING_SERVICE = "Uoink"` and username `KEYRING_ANTHROPIC_USERNAME = "anthropic_key"`.
+- Functions [`_get_saved_anthropic_key`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/8e109b99-190/gemini/server.py#L1223-L1243) and [`_store_saved_anthropic_key`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/8e109b99-190/gemini/server.py#L1246-L1272) interact directly with `_keyring.get_password` and `_keyring.set_password` without consulting `_ISOLATION`.
+- **Impact:** An isolated instance running under the same Windows account reads the real user's saved Anthropic key from Windows Credential Manager. Furthermore, if an isolated instance encounters an HTTP 401 response or issues a key update, [`_store_saved_anthropic_key("")`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/8e109b99-190/gemini/server.py#L1246) clears the shared Windows Credential Manager entry, wiping the production user's key.
+- **Remediation:** In isolated mode, the service name should be derived from the profile (e.g. `f"Uoink-Isolated-{binding.port}"`) or keyring writes should be disabled entirely.
+
+---
+
+## 6. Supply Chain, Package Proof, and Verification Limits
+
+The review evaluated release packaging integrity across `requirements-installer-lock.txt` and `build.ps1`.
+
+### 6.1 Verified Controls vs. Unverified Coverage
+
+| Surface | Claimed Control | Actual Verified Implementation | Remaining Unverified Exposure |
+|---|---|---|---|
+| **Direct Downloads** | Verified SHA256 hashes | [`build.ps1:358-362`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/8e109b99-190/gemini/build.ps1#L358-L362) verifies SHA256 for Python embeddable zip, ffmpeg zip, and `get-pip.py`. Corrupt downloads fail the build. | None for these three binary archives. |
+| **Python Wheel Graph** | Exact-version lock | [`requirements-installer-lock.txt`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/8e109b99-190/gemini/requirements-installer-lock.txt) pins 100+ packages with `name==version`. [`scripts/verify_installer_lock.py`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/8e109b99-190/gemini/scripts/verify_installer_lock.py) verifies staged packages against the lock. | **No cryptographic package hashes.** `pip install` does not pass `--require-hashes`. Wheel archives fetched from PyPI during build are not checked against cryptographic checksums. |
+| **Code Signing** | Authenticode signing | None. The Inno Setup build produces an unsigned installer binary. | Unsigned installer triggers Microsoft Defender SmartScreen warnings on download and launch. |
+| **Malware Scanning** | Antivirus verification | None. No automated Microsoft Defender, VirusTotal, or static scanner runs in the pipeline. | Relies entirely on client-side AV upon execution. |
+| **Vulnerability DBs** | Known CVE auditing | None. The repository has no `pip-audit`, Dependabot, or OSV database scans integrated into CI or build scripts. | Transitive vulnerabilities in locked dependency versions are not automatically reported. |
+
+---
+
+## 7. Threat Model Boundaries: Same-User Isolation and Prompt Injection
+
+Two boundaries are frequently misunderstood as security guarantees when they are architectural containment mechanisms:
+
+### 7.1 Same-User Process Isolation Limits
+
+On Windows, all processes launched within the user's desktop session share the same Windows Security Token, User SID, and Medium Integrity Level:
+- Any script or executable running under the user's account has full NTFS read/write permissions to `%LOCALAPPDATA%\Uoink`, the user's Desktop, and worktree directories.
+- Any local process can connect to loopback ports (`127.0.0.1:5179`) or read `token.txt`.
+- Any local process can query Windows Credential Manager under the user's context and extract stored secrets.
+- Isolated installations (`--isolated-profile`) partition files and prevent port collisions between distinct instances. They provide operational isolation for testing and multiple profiles, but **they do not provide security sandboxing against malware running under the same user token**.
+
+### 7.2 Prompt Injection Boundaries and Limits
+
+The codebase employs defensive fencing against indirect prompt injection:
+1. **Recall Hook:** Encloses retrieved context in `<untrusted_uoink_library_context>` with an explicit data-not-instructions header, escaping angle brackets and code fences ([`scripts/recall_hook.py:80-86, 144-162`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/8e109b99-190/gemini/scripts/recall_hook.py#L80-L86)).
+2. **Librarian Evidence Cards:** Encloses card contents in `<untrusted_evidence_card>`, converting `<>&`` to Unicode escape sequences `\u003c\u003e\u0026\u0060` ([`library_cards.py:32-42`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/8e109b99-190/gemini/library_cards.py#L32-L42)).
+3. **Loki Claim Verification:** Caps evidence quotes, sanitizes inputs, and restricts verdicts to assistance enums (`supports`, `contradicts`, `mixed`, `inconclusive`) without allowing models to assert definitive truth values ([`docs/security.md:275-286`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/8e109b99-190/gemini/docs/security.md#L275-L286)).
+
+**Fundamental Limitation:** Syntactic tags and character sanitization prevent naive format breakouts and structural delimiter collision. However, Large Language Models process tokens semantically and probabilistically. No textual fence or prompt instruction can mathematically guarantee that an underlying model will not follow an adversarial instruction embedded in third-party content. Untrusted library text must always be treated as potentially adversarial input to downstream agent tools.
+
+---
+
+## 8. Proposed Bounded Repairs
+
+The following bounded repairs address identified gaps without destabilizing release candidate contracts:
+
+1. **Isolated Keyring Partitioning:** In [`server.py:455`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/8e109b99-190/gemini/server.py#L455), make `KEYRING_SERVICE` isolation-aware:
+   ```python
+   _ISOLATION = _install_isolation.current_binding()
+   KEYRING_SERVICE = (
+       f"Uoink-Isolated-{_ISOLATION.port}" if _ISOLATION is not None else "Uoink"
+   )
+   ```
+   This prevents isolated instances from reading, modifying, or clearing the production user's saved Anthropic key in Windows Credential Manager.
+
+2. **Positional Parameter Boundary on `yt-dlp` Invocations:** In [`server.py:3518`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/8e109b99-190/gemini/server.py#L3518) and [`server.py:4680`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/8e109b99-190/gemini/server.py#L4680), insert `"--"` immediately before `url`:
+   ```python
+   # server.py line 3518:
+   [*YTDLP_CMD, "--dump-single-json", "--no-download", "--", url]
+   # server.py line 4680:
+   [*YTDLP_CMD, "--write-info-json", ..., "-o", str(info_template), "--", url]
+   ```
+   This aligns `server.py` with the positional separator pattern established in `podcasts.py:1525`.
+
+3. **Opt-in Feature Flag for FxTwitter Enrichment:** In [`server.py:841`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/8e109b99-190/gemini/server.py#L841), add `"fxtwitter_enrichment_enabled": False` to `_default_settings()`. In [`x_extractor.py:156`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/8e109b99-190/gemini/x_extractor.py#L156), execute `fetch_fxtwitter_status_json` only when the flag is enabled.
+
+4. **Unicode Term Extraction for FTS5 Query Sanitization (SEC-06):** Update [`index.py:333`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/8e109b99-190/gemini/index.py#L333) to allow Unicode alphanumeric characters:
+   ```python
+   _FTS_TERM_RE = re.compile(r"\w+", re.UNICODE)
+   ```
+   This resolves search blindness on accented Latin characters and non-Latin scripts.
+
+5. **Cryptographic Hash Pinning for Pip Dependencies (SEC-09):** Transition `requirements-installer-lock.txt` to include SHA256 hashes generated via `pip-compile --generate-hashes`, and pass `--require-hashes` to `pip install` in [`build.ps1:400`](file:///C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/8e109b99-190/gemini/build.ps1#L400). Integrate `pip-audit` into the release packaging script.

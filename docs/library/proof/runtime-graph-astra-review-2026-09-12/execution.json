@@ -1,0 +1,140 @@
+[
+  {
+    "name": "current",
+    "exit": 1,
+    "command": [
+      "C:\\Python314\\python.exe",
+      "-I",
+      "-S",
+      "-B",
+      "-c",
+      "import runpy,sys\nsys.path.append(r'C:\\Users\\hello\\AppData\\Roaming\\Python\\Python314\\site-packages')\ndef guard(event,args):\n    if event.startswith('socket.') or event=='subprocess.Popen': raise PermissionError('Offline metadata check')\nsys.addaudithook(guard)\npath=sys.argv.pop(1)\nrunpy.run_path(path,run_name='__main__')\n",
+      "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\6c96f0a3-c02\\gemini\\scripts\\check_runtime_graph.py",
+      "--selection",
+      "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\6c96f0a3-c02\\gemini\\docs\\library\\proof\\runtime-graph-astra-review-2026-09-12\\input-lock-02e06db.txt",
+      "--evidence-dir",
+      "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\6c96f0a3-c02\\gemini\\docs\\library\\proof\\runtime-graph-01-2026-09-12",
+      "--output-json",
+      "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\6c96f0a3-c02\\gemini\\docs\\library\\proof\\runtime-graph-astra-review-2026-09-12\\current.json"
+    ],
+    "passed": false,
+    "edges": 283,
+    "wheel_failures": [
+      {
+        "package": "antlr4-python3-runtime",
+        "version": "4.9.3",
+        "status": "NO_WHEELS",
+        "error": "No wheel distributions found for antlr4-python3-runtime==4.9.3 in release files",
+        "rejected_invalid": []
+      },
+      {
+        "package": "proxy-tools",
+        "version": "0.1.0",
+        "status": "NO_WHEELS",
+        "error": "No wheel distributions found for proxy-tools==0.1.0 in release files",
+        "rejected_invalid": []
+      }
+    ],
+    "conflicts": [],
+    "missing": [],
+    "incomplete": [],
+    "manifest_errors": []
+  },
+  {
+    "name": "proposal",
+    "exit": 1,
+    "command": [
+      "C:\\Python314\\python.exe",
+      "-I",
+      "-S",
+      "-B",
+      "-c",
+      "import runpy,sys\nsys.path.append(r'C:\\Users\\hello\\AppData\\Roaming\\Python\\Python314\\site-packages')\ndef guard(event,args):\n    if event.startswith('socket.') or event=='subprocess.Popen': raise PermissionError('Offline metadata check')\nsys.addaudithook(guard)\npath=sys.argv.pop(1)\nrunpy.run_path(path,run_name='__main__')\n",
+      "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\6c96f0a3-c02\\gemini\\scripts\\check_runtime_graph.py",
+      "--selection",
+      "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\6c96f0a3-c02\\gemini\\docs\\library\\proof\\runtime-graph-review-2026-09-12\\proposal_selection.json",
+      "--evidence-dir",
+      "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\6c96f0a3-c02\\gemini\\docs\\library\\proof\\runtime-graph-01-2026-09-12",
+      "--output-json",
+      "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\6c96f0a3-c02\\gemini\\docs\\library\\proof\\runtime-graph-astra-review-2026-09-12\\proposal.json"
+    ],
+    "passed": false,
+    "edges": 275,
+    "wheel_failures": [
+      {
+        "package": "antlr4-python3-runtime",
+        "version": "4.9.3",
+        "status": "NO_WHEELS",
+        "error": "No wheel distributions found for antlr4-python3-runtime==4.9.3 in release files",
+        "rejected_invalid": []
+      },
+      {
+        "package": "proxy-tools",
+        "version": "0.1.0",
+        "status": "NO_WHEELS",
+        "error": "No wheel distributions found for proxy-tools==0.1.0 in release files",
+        "rejected_invalid": []
+      },
+      {
+        "package": "transformers",
+        "version": "5.10.0",
+        "status": "YANKED",
+        "error": "All available matching wheels for transformers==5.10.0 are yanked: We pushed from a week old main branch. It does include the latest model but uncertain its gonna be working properly and mostly it is missing a bunch of fixes!",
+        "rejected_invalid": []
+      }
+    ],
+    "conflicts": [
+      {
+        "source": "whisperx",
+        "target": "huggingface-hub",
+        "selected_version": "1.5.0",
+        "required_specifier": "<1.0.0",
+        "requirement_raw": "huggingface-hub<1.0.0"
+      },
+      {
+        "source": "whisperx",
+        "target": "torch",
+        "selected_version": "2.10.0",
+        "required_specifier": "~=2.8.0",
+        "requirement_raw": "torch~=2.8.0"
+      },
+      {
+        "source": "whisperx",
+        "target": "torchaudio",
+        "selected_version": "2.10.0",
+        "required_specifier": "~=2.8.0",
+        "requirement_raw": "torchaudio~=2.8.0"
+      },
+      {
+        "source": "whisperx",
+        "target": "torchvision",
+        "selected_version": "0.25.0",
+        "required_specifier": "~=0.23.0",
+        "requirement_raw": "torchvision~=0.23.0"
+      },
+      {
+        "source": "whisperx",
+        "target": "torchcodec",
+        "selected_version": "0.9.0",
+        "required_specifier": "<0.8.0,>=0.6.0",
+        "requirement_raw": "torchcodec<0.8.0,>=0.6.0; (sys_platform == \"linux\" and platform_machine == \"x86_64\") or sys_platform == \"darwin\" or sys_platform == \"win32\""
+      }
+    ],
+    "missing": [
+      {
+        "source": "huggingface-hub",
+        "target": "hf-xet",
+        "specifier": "<2.0.0,>=1.2.0",
+        "requirement_raw": "hf-xet<2.0.0,>=1.2.0; platform_machine == \"x86_64\" or platform_machine == \"amd64\" or platform_machine == \"AMD64\" or platform_machine == \"arm64\" or platform_machine == \"aarch64\""
+      },
+      {
+        "source": "huggingface-hub",
+        "target": "typer",
+        "specifier": "",
+        "requirement_raw": "typer"
+      }
+    ],
+    "incomplete": [],
+    "manifest_errors": []
+  }
+]

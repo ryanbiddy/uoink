@@ -30,7 +30,6 @@
   const SHORTS_FLOATING_CLASS = "stc-yt-shorts-floating";
   const LAST_YOINK_CLIPBOARD_KEY = "yoink_last_clipboard_at";
   const LAST_CLIPBOARD_BUDGET_KEY = "yoink_last_clipboard_budget";
-  const RECENT_FAILURES_KEY = "yoink_recent_failures";
 
   // ---- Styles (scoped via the unique class prefix) ----------------------
   const STYLE_ID = "stc-yt-styles";
@@ -273,7 +272,17 @@
     }
   }
 
-  async function pollStatus() {
+  // A caller that needs the verdict (the Retry handoff) waits for the poll
+  // already in flight instead of returning before it lands.
+  let statusPoll = null;
+  function pollStatus() {
+    if (!statusPoll) {
+      statusPoll = pollStatusOnce().finally(() => { statusPoll = null; });
+    }
+    return statusPoll;
+  }
+
+  async function pollStatusOnce() {
     if (statusInflight) return;
     statusInflight = true;
     try {
@@ -312,7 +321,7 @@
   document.addEventListener("visibilitychange", () => {
     if (document.hidden) {
       stopStatusPolling();
-    } else {
+    } else if (isSupportedVideoPage()) {
       // Fire an immediate check on resume so a server we missed coming back
       // online doesn't make the user wait the full 10s.
       startStatusPolling();
@@ -411,25 +420,19 @@
     });
   }
 
-  function rememberFailure(url, error) {
-    const videoId = STC.extractVideoId(url);
-    const entry = {
-      id: `${Date.now()}-${videoId || "video"}`,
-      url,
-      videoId,
-      title: pageVideoTitle(),
-      error,
-      failed_at: new Date().toISOString(),
-    };
-    try {
-      chrome.storage.local.get({ [RECENT_FAILURES_KEY]: [] }, (items) => {
-        const failures = Array.isArray(items && items[RECENT_FAILURES_KEY])
-          ? items[RECENT_FAILURES_KEY]
-          : [];
-        const next = [entry].concat(failures.filter((f) => f.url !== url)).slice(0, 5);
-        chrome.storage.local.set({ [RECENT_FAILURES_KEY]: next });
-      });
-    } catch { /* ignore */ }
+  function rememberFailure(url, error, replacesId) {
+    STC.rememberFailure(url, error, { title: pageVideoTitle() }, replacesId);
+  }
+
+  // E7: a thrown request is not proof the helper is down. Only an offline
+  // verdict (the /health ping failed too) points at the setup guide.
+  async function showThrownFailure(btn, e) {
+    const failure = await STC.describeCaptureError(e);
+    setButtonState(btn, "error", failure.label);
+    btn.title = failure.message;
+    notify(failure.title, failure.message);
+    if (failure.kind === "offline") openSetupOffline();
+    resetButtonAfter(btn, 5000);
   }
 
   async function onClick(btn) {
@@ -441,7 +444,7 @@
     // disabled at the button level so this branch usually isn't reached.
     if (serverStatus === "checking") return;
     if (serverStatus === "offline") {
-      notify("Uoink Helper offline", "Start Uoink from the Start Menu");
+      notify("Uoink Helper offline", STC.helperOfflineHint());
       openSetupOffline();
       return;
     }
@@ -457,22 +460,19 @@
 
   async function runExtract(btn, url, interval) {
     setButtonState(btn, "working", "Uoinking...");
+    const retryOf = takeRetryFailureId();
 
     let data;
     try {
       data = await STC.postExtractViaBg(url, interval);
     } catch (e) {
-      console.error("[Uoink] server unreachable", e);
-      setButtonState(btn, "error", "Uoink Helper offline");
-      btn.title = "Open the Uoink setup guide to start the helper.";
-      notify("Uoink Helper offline", "Start Uoink from the Start Menu");
-      openSetupOffline();
-      resetButtonAfter(btn, 5000);
+      console.error("[Uoink] extract request failed", e);
+      await showThrownFailure(btn, e);
       return;
     }
 
     if (!data || !data.ok) {
-      const msg = STC.friendlyError(data && data.error);
+      const msg = STC.describeFailure(data);
       if (/queue full/i.test(msg)) {
         setButtonState(btn, "error", "Queue full");
         btn.title = "Queue full. Give it a few minutes.";
@@ -480,13 +480,14 @@
         resetButtonAfter(btn, 5000);
         return;
       }
-      rememberFailure(url, msg);
+      rememberFailure(url, msg, retryOf);
       setButtonState(btn, "error", "Uoink failed");
       btn.title = msg;
       notify("Uoink failed", msg);
       resetButtonAfter(btn, 5000);
       return;
     }
+    STC.forgetFailure(retryOf);
 
     if (data.queued) {
       setButtonState(btn, "success", "Queued");
@@ -518,27 +519,18 @@
     rememberClipboardBudget(data, clipboardText);
     let copied = false;
     try {
-      await navigator.clipboard.writeText(clipboardText);
-      copied = true;
+      // Keep corpus text out of the page DOM, including on clipboard failure.
+      const response = await chrome.runtime.sendMessage({
+        type: "copyToClipboard", text: clipboardText,
+      });
+      copied = !!(response && response.ok === true);
     } catch (e) {
-      console.warn("[Uoink] clipboard API failed, falling back", e);
-      try {
-        const ta = document.createElement("textarea");
-        ta.value = clipboardText;
-        ta.style.position = "fixed";
-        ta.style.left = "-9999px";
-        document.body.appendChild(ta);
-        ta.select();
-        copied = document.execCommand("copy");
-        document.body.removeChild(ta);
-      } catch (e2) {
-        console.error("[Uoink] clipboard fallback failed", e2);
-      }
+      console.warn("[Uoink] extension clipboard copy failed", e);
     }
 
     if (!copied) {
       try {
-        chrome.runtime.sendMessage({ type: "clipboardRetry", text: clipboardText });
+        await chrome.runtime.sendMessage({ type: "clipboardRetry", text: clipboardText });
       } catch { /* ignore */ }
       setButtonState(btn, "error", "Copy blocked");
       btn.title = "Couldn't copy to clipboard. Use the notification's Try again button.";
@@ -574,29 +566,27 @@
   async function runSessionAdd(btn, url, interval) {
     const sessionName = activeSession.name || activeSession.id;
     setButtonState(btn, "working", `Adding to ${sessionName}...`);
+    const retryOf = takeRetryFailureId();
 
     let data;
     try {
       data = await STC.addToSessionViaBg(activeSession.id, url, interval);
     } catch (e) {
-      console.error("[Uoink] server unreachable", e);
-      setButtonState(btn, "error", "Uoink Helper offline");
-      btn.title = "Open the Uoink setup guide to start the helper.";
-      notify("Uoink Helper offline", "Start Uoink from the Start Menu");
-      openSetupOffline();
-      resetButtonAfter(btn, 5000);
+      console.error("[Uoink] session add request failed", e);
+      await showThrownFailure(btn, e);
       return;
     }
 
     if (!data || !data.ok) {
-      const msg = STC.friendlyError(data && data.error);
-      rememberFailure(url, msg);
+      const msg = STC.describeFailure(data);
+      rememberFailure(url, msg, retryOf);
       setButtonState(btn, "error", "Uoink failed");
       btn.title = msg;
       notify("Uoink failed", msg);
       resetButtonAfter(btn, 5000);
       return;
     }
+    STC.forgetFailure(retryOf);
 
     notify("Added to session",
            `${sessionName} · ${data.video_count} video${data.video_count === 1 ? "" : "s"} so far. ` +
@@ -664,6 +654,7 @@
     setButtonState(btn, "default", defaultLabel());
     applyStatusToButton(btn);
     btn.addEventListener("click", (ev) => {
+      if (!ev.isTrusted) return;
       ev.preventDefault();
       ev.stopPropagation();
       onClick(btn);
@@ -686,7 +677,18 @@
   // opens the YouTube URL in a new tab. We trigger the button on the first
   // injection on the matching video, then atomically clear the flag so a
   // page refresh or a different tab doesn't re-fire it.
+  // A popup Retry also passes failure_id: that record stays until the
+  // retried capture goes through (or is replaced by its new failure).
   const AUTO_UOINK_TTL_MS = 60_000;
+  // Bound to the video it was handed off for: navigating elsewhere before
+  // the retried capture starts can never make another capture consume it.
+  let retryFailure = null;
+  function takeRetryFailureId() {
+    const pending = retryFailure;
+    if (!pending || pending.videoId !== currentVideoId()) return null;
+    retryFailure = null;
+    return pending.id;
+  }
   function currentVideoId() {
     return STC.extractVideoId(window.location.href);
   }
@@ -708,17 +710,27 @@
     if (serverStatus === "checking") {
       try { await pollStatus(); } catch { /* ignore */ }
     }
+    // The tab can move on while the health check settles.
+    if (currentVideoId() !== stored.videoId) return;
 
     // Clear before clicking so a concurrent injection (mutation observer +
     // retry loop both fire) can't double-trigger.
     await new Promise((r) => {
       try { chrome.storage.local.remove("auto_yoink", r); } catch { r(); }
     });
+    // ...or while the handoff was being cleared.
+    if (currentVideoId() !== stored.videoId) return;
 
-    btn.click();
+    retryFailure = stored.failure_id
+      ? { id: stored.failure_id, videoId: stored.videoId }
+      : null;
+    // This handoff comes from extension storage, not a page-generated event.
+    if (!btn.disabled) onClick(btn);
   }
 
   function tryInjectWithRetries() {
+    // Off a video page there is no button to wait for.
+    if (!isSupportedVideoPage()) return;
     let tries = 0;
     const maxTries = 20;
     const interval = setInterval(() => {
@@ -727,11 +739,40 @@
     }, 500);
   }
 
+  // E2: the manifest loads this script on every YouTube page, because
+  // YouTube moves between pages with the History API and Chrome only injects
+  // declared scripts on a real page load. So the button and the /health
+  // polling self-gate on the URL, re-checked on yt-navigate-finish, popstate
+  // and DOM churn (a string compare until the URL actually changes).
+  let lastHref = null;
+  let onVideoPage = false;
+  // Returns true when the URL changed since the last check.
+  function syncToUrl() {
+    const href = window.location.href;
+    if (href === lastHref) return false;
+    lastHref = href;
+    onVideoPage = isSupportedVideoPage();
+    if (!onVideoPage) {
+      stopStatusPolling();
+      injectButton(); // tears down a lingering floating Shorts button
+    } else if (!statusTimer && !document.hidden) {
+      startStatusPolling();
+    }
+    return true;
+  }
+
   window.addEventListener("yt-navigate-finish", () => {
+    syncToUrl();
     setTimeout(tryInjectWithRetries, 250);
   });
 
+  window.addEventListener("popstate", () => {
+    if (syncToUrl()) setTimeout(tryInjectWithRetries, 250);
+  });
+
   const observer = new MutationObserver(() => {
+    syncToUrl();
+    if (!onVideoPage) return;
     const btn = document.getElementById(BTN_ID);
     if (!btn) {
       injectButton();
@@ -748,10 +789,12 @@
   observer.observe(document.body, { childList: true, subtree: true });
 
   chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+    if (!sender || sender.id !== chrome.runtime.id) return;
     if (msg && msg.type === "uoinkShortcutTriggered") {
       const btn = document.getElementById(BTN_ID);
       if (btn) {
-        btn.click();
+        // Extension commands are user actions, but HTMLElement.click() is untrusted.
+        if (!btn.disabled) onClick(btn);
         sendResponse({ success: true });
       } else {
         const url = normalizedCurrentVideoUrl();
@@ -766,7 +809,8 @@
   });
 
   tryInjectWithRetries();
-  // Kick off /health polling so the button has a real status before the
-  // user has time to click. Pause/resume is wired via visibilitychange.
-  startStatusPolling();
+  // Kick off /health polling on a video page so the button has a real status
+  // before the user has time to click. Pause/resume is wired via
+  // visibilitychange.
+  syncToUrl();
 })();

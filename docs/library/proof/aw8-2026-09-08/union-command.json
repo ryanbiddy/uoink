@@ -1,0 +1,41 @@
+[
+  {
+    "name": "tests",
+    "command": [
+      "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\ig-runtime\\Scripts\\python.exe",
+      "-B",
+      "-m",
+      "pytest",
+      "-q",
+      "-ra",
+      "--tb=short",
+      "-p",
+      "no:cacheprovider",
+      "-p",
+      "ig_paths",
+      "tests/library_work_astra/test_phase4_aw_acceptance.py",
+      "tests/library_work_astra/test_phase4_aw2_acceptance.py",
+      "tests/library_work_astra/test_phase4_aw3_acceptance.py",
+      "tests/library_work_astra/test_phase4_aw4_acceptance.py",
+      "tests/test_library_resources.py",
+      "tests/test_library_prompts.py",
+      "tests/test_library_briefs.py",
+      "tests/test_library_mirror.py",
+      "tests/test_library_mirror_wiring.py",
+      "tests/test_phase4_stdio.py",
+      "tests/test_c01_mcp_stdio.py",
+      "tests/test_phase4_av5m3_isolation.py",
+      "tests/test_phase4_av5m4a2_binding.py",
+      "tests/library_work_astra/test_phase4_aw6_acceptance.py",
+      "tests/library_work_astra/test_phase4_aw5_acceptance.py",
+      "tests/library_work_astra/test_phase4_aw7_acceptance.py",
+      "tests/test_phase4_av5m4b_lifetime.py",
+      "tests/test_phase4_av5m4b2_lifetime.py",
+      "tests/test_phase4_av5m4b3_lifetime.py",
+      "--basetemp=C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\260ef22c-4a8\\grok\\_scratch\\av5m4b3-wi-0",
+      "--junitxml=C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\260ef22c-4a8\\grok\\_scratch\\av5m4b3-wi\\tests.xml"
+    ],
+    "exit": 1,
+    "log": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\260ef22c-4a8\\grok\\_scratch\\av5m4b3-wi\\tests.log"
+  }
+]

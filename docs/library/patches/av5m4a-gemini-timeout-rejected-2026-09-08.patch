@@ -1,0 +1,484 @@
+diff --git a/build.ps1 b/build.ps1
+index 8f001c8..155e803 100644
+--- a/build.ps1
++++ b/build.ps1
+@@ -309,6 +309,7 @@ foreach ($f in @(
+     'library_prompts.py',
+     'library_briefs.py',
+     'library_mirror.py',
++    'library_mirror_vault_io.py',
+     'library_media.py',
+     'library_faithfulness.py',
+     'reddit_extractor.py',
+@@ -529,6 +530,7 @@ Copy-Item (Join-Path $RepoRoot 'library_resources.py') $StagingDir -Force
+ Copy-Item (Join-Path $RepoRoot 'library_prompts.py') $StagingDir -Force
+ Copy-Item (Join-Path $RepoRoot 'library_briefs.py') $StagingDir -Force
+ Copy-Item (Join-Path $RepoRoot 'library_mirror.py') $StagingDir -Force
++Copy-Item (Join-Path $RepoRoot 'library_mirror_vault_io.py') $StagingDir -Force
+ Copy-Item (Join-Path $RepoRoot 'library_media.py') $StagingDir -Force
+ Copy-Item (Join-Path $RepoRoot 'library_faithfulness.py') $StagingDir -Force
+ Copy-Item (Join-Path $RepoRoot 'usage_meter.py')   $StagingDir -Force
+diff --git a/installer/uoink.iss b/installer/uoink.iss
+index 4b5b9ca..ba47b77 100644
+--- a/installer/uoink.iss
++++ b/installer/uoink.iss
+@@ -115,6 +115,7 @@ Source: "staging\library_resources.py"; DestDir: "{app}"; Flags: ignoreversion
+ Source: "staging\library_prompts.py"; DestDir: "{app}"; Flags: ignoreversion
+ Source: "staging\library_briefs.py"; DestDir: "{app}"; Flags: ignoreversion
+ Source: "staging\library_mirror.py"; DestDir: "{app}"; Flags: ignoreversion
++Source: "staging\library_mirror_vault_io.py"; DestDir: "{app}"; Flags: ignoreversion
+ Source: "staging\library_media.py"; DestDir: "{app}"; Flags: ignoreversion
+ Source: "staging\library_faithfulness.py"; DestDir: "{app}"; Flags: ignoreversion
+ Source: "staging\usage_meter.py"; DestDir: "{app}"; Flags: ignoreversion
+diff --git a/library_mirror.py b/library_mirror.py
+index f271635..be351c0 100644
+--- a/library_mirror.py
++++ b/library_mirror.py
+@@ -341,18 +341,33 @@ def _pending_temps_from_intent(intent: dict | None) -> list[dict]:
+     out: list[dict] = []
+     seen: set[str] = set()
+ 
+-    def add(rel: str, digest: str) -> None:
++    def add(rel: str, digest: str, file_id: int | None = None) -> None:
+         if not rel or rel in seen:
+             return
+         seen.add(rel)
+-        out.append({"rel": rel, "hash": digest or ""})
++        entry: dict[str, Any] = {"rel": rel, "hash": digest or ""}
++        if file_id is not None:
++            entry["file_id"] = file_id
++        out.append(entry)
+ 
+     for item in intent.get("pending_temps") or []:
+         if isinstance(item, dict):
+-            add(str(item.get("rel") or ""), str(item.get("hash") or ""))
++            fid = item.get("file_id")
++            if fid is not None:
++                try:
++                    fid = int(fid)
++                except (ValueError, TypeError):
++                    fid = None
++            add(str(item.get("rel") or ""), str(item.get("hash") or ""), fid)
+         elif isinstance(item, str):
+             add(item, "")
+-    add(str(intent.get("temp_rel") or ""), str(intent.get("temp_hash") or ""))
++    current_fid = intent.get("temp_file_id")
++    if current_fid is not None:
++        try:
++            current_fid = int(current_fid)
++        except (ValueError, TypeError):
++            current_fid = None
++    add(str(intent.get("temp_rel") or ""), str(intent.get("temp_hash") or ""), current_fid)
+     return out
+ 
+ 
+@@ -627,7 +642,7 @@ class _VaultIoSession:
+                 raise OSError("vault io worker returned invalid status")
+             return result
+ 
+-    def write_file(self, path: str, data: bytes) -> None:
++    def write_file(self, path: str, data: bytes) -> dict:
+         result = self.call({
+             "cmd": "write",
+             "path": path,
+@@ -635,16 +650,33 @@ class _VaultIoSession:
+         })
+         if not result.get("ok"):
+             raise OSError(result.get("error") or "write failed")
++        return result
+ 
+     def replace(self, src: str, dst: str) -> None:
+         result = self.call({"cmd": "replace", "src": src, "dst": dst})
+         if not result.get("ok"):
+             raise OSError(result.get("error") or "replace failed")
+ 
+-    def unlink(self, path: str) -> None:
+-        result = self.call({"cmd": "unlink", "path": path})
++    def unlink(self, path: str, expected_file_id: int | None = None, expected_hash: str | None = None) -> dict:
++        req: dict[str, Any] = {"cmd": "unlink", "path": path}
++        if expected_file_id is not None:
++            req["expected_file_id"] = int(expected_file_id)
++        if expected_hash is not None:
++            req["expected_hash"] = str(expected_hash)
++        result = self.call(req)
+         if not result.get("ok"):
+             raise OSError(result.get("error") or "unlink failed")
++        return result
++
++    def file_id(self, path: str) -> int | None:
++        try:
++            result = self.call({"cmd": "file_id", "path": path})
++        except OSError:
++            return None
++        if not result.get("ok"):
++            return None
++        fid = result.get("file_id")
++        return int(fid) if fid is not None else None
+ 
+     def mkdir(self, path: str, exist_ok: bool = True) -> None:
+         result = self.call({"cmd": "mkdir", "path": path, "exist_ok": exist_ok})
+@@ -1323,10 +1355,66 @@ class Mirror:
+     def _dest_binding_path(self) -> Path:
+         return self.ledger_dir / "destination_binding.json"
+ 
++    def _authority_witness_path(self) -> Path:
++        return self.ledger_dir / "authority_witness.json"
++
++    def _read_authority_witness(self) -> dict | None:
++        p = self._authority_witness_path()
++        try:
++            if not p.is_file():
++                return None
++            data = json.loads(p.read_text(encoding="utf-8"))
++            if isinstance(data, dict):
++                return data
++        except Exception:
++            pass
++        return None
++
++    def _write_authority_witness(self, dest: str, marker: str, have_synced: bool) -> None:
++        p = self._authority_witness_path()
++        p.parent.mkdir(parents=True, exist_ok=True)
++        payload = json.dumps({
++            "destination": dest,
++            "marker": marker,
++            "have_synced": have_synced,
++            "consented_at_ms": int(self.consent.consented_at_ms if self.consent else 0),
++        }, ensure_ascii=False, sort_keys=True)
++        self._atomic_local(p, payload.encode("utf-8"))
++
++    def _has_prior_authority(self) -> tuple[bool, str, int]:
++        witness = self._read_authority_witness()
++        if witness and witness.get("destination") and witness.get("have_synced"):
++            return True, str(witness.get("destination")), int(witness.get("consented_at_ms") or 0)
++        ledger = self._load_ledger()
++        if ledger.get("destination"):
++            entries = ledger.get("entries", {})
++            has_synced_entry = any(
++                int(e.get("written_generation") or 0) > 0 or e.get("status") == "synced"
++                for e in entries.values()
++            )
++            if has_synced_entry:
++                consented_at = witness.get("consented_at_ms") if witness else 0
++                return True, str(ledger.get("destination")), int(consented_at or 0)
++        return False, "", 0
++
+     def _read_dest_binding(self) -> dict | str:
+         p = self._dest_binding_path()
+         try:
+             if not p.is_file():
++                has_prior, prior_dest, prior_consented_at = self._has_prior_authority()
++                if has_prior:
++                    dest_str = str(self.consent.destination) if self.consent and self.consent.destination else ""
++                    dest_changed = bool(
++                        dest_str and prior_dest
++                        and os.path.normcase(os.path.realpath(dest_str)) != os.path.normcase(os.path.realpath(prior_dest))
++                    )
++                    user_authorized_change = bool(
++                        dest_changed
++                        and self.consent
++                        and int(self.consent.consented_at_ms or 0) > prior_consented_at
++                    )
++                    if not user_authorized_change:
++                        return "missing"
+                 return {}
+         except OSError:
+             return "unavailable"
+@@ -1349,10 +1437,22 @@ class Mirror:
+             "marker": marker,
+             "have_synced": have_synced,
+         }, ensure_ascii=False, sort_keys=True)
+-        # Path.write_text is part of destination-binding persistence; a failure
+-        # here must refuse initialization rather than acknowledge export.
+-        p.write_text(payload, encoding="utf-8")
+-        self._atomic_local(p, payload.encode("utf-8"))
++        existed = p.is_file()
++        if not existed:
++            p.write_text(payload, encoding="utf-8")
++        try:
++            self._atomic_local(p, payload.encode("utf-8"))
++        except Exception:
++            if not existed:
++                try:
++                    p.unlink(missing_ok=True)
++                except OSError:
++                    pass
++            raise
++        try:
++            self._write_authority_witness(dest, marker, have_synced)
++        except Exception:
++            pass
+         with open(p, "r+b") as stream:
+             stream.flush()
+             os.fsync(stream.fileno())
+@@ -1779,7 +1879,7 @@ class Mirror:
+             ledger["marker"] = self.consent.marker
+         dest_binding = self._read_dest_binding()
+         dest_str = str(dest)
+-        if dest_binding in ("corrupt", "unavailable"):
++        if dest_binding in ("corrupt", "unavailable", "missing"):
+             return _mirror_refusal(
+                 "invalid_request",
+                 "The mirror destination binding needs reconciliation.",
+@@ -1795,14 +1895,19 @@ class Mirror:
+         )
+         have_synced = bool(isinstance(dest_binding, dict) and dest_matches and dest_binding.get("have_synced"))
+         if isinstance(dest_binding, dict) and dest_binding.get("destination") and not dest_matches:
+-            return _mirror_refusal(
+-                "destination_unavailable",
+-                "The mirror destination is unavailable.",
+-                retryable=True,
+-                destination_unavailable=True,
+-                details={"reason": "destination_binding_mismatch"},
+-                synced=0,
++            user_auth_change = bool(
++                self.consent
++                and int(self.consent.consented_at_ms or 0) > int(dest_binding.get("consented_at_ms") or 0)
+             )
++            if not user_auth_change:
++                return _mirror_refusal(
++                    "destination_unavailable",
++                    "The mirror destination is unavailable.",
++                    retryable=True,
++                    destination_unavailable=True,
++                    details={"reason": "destination_binding_mismatch"},
++                    synced=0,
++                )
+         if not have_synced:
+             try:
+                 self._write_dest_binding(
+@@ -2320,7 +2425,7 @@ class Mirror:
+                     "counted": False,
+                 })
+ 
+-    def _try_unlink_recorded_temp(self, uoink: Path, rel: str, expected_hash: str) -> str:
++    def _try_unlink_recorded_temp(self, uoink: Path, rel: str, expected_hash: str, expected_file_id: int | None = None) -> str:
+         """Delete only the recorded bytes. Returns gone, not_ours, or failed."""
+         path = _safe_temp_path(uoink, rel)
+         if path is None:
+@@ -2333,6 +2438,8 @@ class Mirror:
+                     return "gone"
+             elif not path.exists():
+                 return "gone"
++            if expected_file_id is None:
++                return "failed"
+             if not path.is_file() or _is_reparse(path) or _hardlink_conflict(path):
+                 return "not_ours"
+             if not expected_hash:
+@@ -2340,7 +2447,18 @@ class Mirror:
+             current = self._io_sha256(path) or _sha256_file(path)
+             if current != expected_hash:
+                 return "not_ours"
+-            self._io_unlink(path)
++            current_fid = self._io_file_id(path)
++            if current_fid is not None and int(current_fid) != int(expected_file_id):
++                return "not_ours"
++            try:
++                unlink_res = self._io_unlink(path, expected_file_id=expected_file_id, expected_hash=expected_hash)
++            except TypeError:
++                unlink_res = self._io_unlink(path)
++            if isinstance(unlink_res, dict):
++                if unlink_res.get("not_ours"):
++                    return "not_ours"
++                if unlink_res.get("gone") or unlink_res.get("ok"):
++                    return "gone"
+             return "gone"
+         except OSError:
+             return "failed"
+@@ -2348,11 +2466,17 @@ class Mirror:
+     def _cleanup_intent_temps(self, uoink: Path, key: str, intent: dict | None) -> list[dict]:
+         kept: list[dict] = []
+         for item in _pending_temps_from_intent(intent):
++            rel = str(item.get("rel") or "")
++            digest = str(item.get("hash") or "")
++            fid = item.get("file_id")
+             status = self._try_unlink_recorded_temp(
+-                uoink, str(item.get("rel") or ""), str(item.get("hash") or ""),
++                uoink, rel, digest, expected_file_id=fid,
+             )
+             if status == "failed":
+-                kept.append({"rel": item.get("rel") or "", "hash": item.get("hash") or ""})
++                kept_entry: dict[str, Any] = {"rel": rel, "hash": digest}
++                if fid is not None:
++                    kept_entry["file_id"] = fid
++                kept.append(kept_entry)
+         return kept
+ 
+     def _retain_or_clear_intent(self, key: str, uoink: Path | None = None) -> None:
+@@ -2369,23 +2493,49 @@ class Mirror:
+             stub["action"] = stub.get("action") or "cleanup"
+             stub.pop("temp_rel", None)
+             stub.pop("temp_hash", None)
++            stub.pop("temp_file_id", None)
+             stub["pending_temps"] = kept
+             self._write_intent(key, stub)
+         else:
+             self._clear_intent(key)
+ 
+-    def _record_allocated_temp(self, key: str, temp_rel: str, temp_hash: str) -> None:
++    def _record_allocated_temp(self, key: str, temp_rel: str, temp_hash: str, file_id: int | None = None) -> None:
+         if not key:
+             raise OSError("temp allocation is missing an intent key")
+         if not temp_rel or not temp_hash:
+             raise OSError("temp allocation is missing path or content identity")
++        if file_id is None:
++            dest = None
++            if self.consent and self.consent.destination:
++                dest = Path(self.consent.destination) / MIRROR_ROOT
++            elif getattr(self, "_vault_io", None) and getattr(self._vault_io, "dest", None):
++                dest = Path(self._vault_io.dest) / MIRROR_ROOT
++            if dest is not None:
++                path = _safe_temp_path(dest, temp_rel)
++                if path is not None:
++                    file_id = self._io_file_id(path)
+         intent = self._load_intents().get(key) or {"key": key}
+         pending = _pending_temps_from_intent(intent)
+-        if not any(item.get("rel") == temp_rel for item in pending):
+-            pending.append({"rel": temp_rel, "hash": temp_hash})
++        entry: dict[str, Any] = {"rel": temp_rel, "hash": temp_hash}
++        if file_id is not None:
++            entry["file_id"] = int(file_id)
++        updated = False
++        for item in pending:
++            if item.get("rel") == temp_rel:
++                item["hash"] = temp_hash
++                if file_id is not None:
++                    item["file_id"] = int(file_id)
++                updated = True
++                break
++        if not updated:
++            pending.append(entry)
+         intent["pending_temps"] = pending
+         intent["temp_rel"] = temp_rel
+         intent["temp_hash"] = temp_hash
++        if file_id is not None:
++            intent["temp_file_id"] = int(file_id)
++        else:
++            intent.pop("temp_file_id", None)
+         self._write_intent(key, intent)
+ 
+     def _clear_current_temp_rel(self, key: str) -> None:
+@@ -2398,6 +2548,7 @@ class Mirror:
+             pending = [item for item in pending if item.get("rel") != current]
+         intent.pop("temp_rel", None)
+         intent.pop("temp_hash", None)
++        intent.pop("temp_file_id", None)
+         intent["pending_temps"] = pending
+         self._write_intent(key, intent)
+ 
+@@ -2409,12 +2560,14 @@ class Mirror:
+                 intent = dict(intent)
+                 intent.pop("temp_rel", None)
+                 intent.pop("temp_hash", None)
++                intent.pop("temp_file_id", None)
+                 intent["pending_temps"] = kept
+                 self._write_intent(key, intent)
+             elif intent.get("temp_rel") or intent.get("pending_temps"):
+                 intent = dict(intent)
+                 intent.pop("temp_rel", None)
+                 intent.pop("temp_hash", None)
++                intent.pop("temp_file_id", None)
+                 intent["pending_temps"] = []
+                 if intent.get("content_hash"):
+                     self._write_intent(key, intent)
+@@ -2680,11 +2833,18 @@ class Mirror:
+             raise OSError("temp path escapes mirror root")
+         if _path_too_long(tmp):
+             raise OSError("temp path too long")
++        digest = _sha256_bytes(data)
++        file_id = None
+         if key:
+-            digest = _sha256_bytes(data)
+             self._record_allocated_temp(key, str(tmp.relative_to(uoink)), digest)
+         try:
+-            self._io_write_file(tmp, data)
++            write_res = self._io_write_file(tmp, data)
++            if isinstance(write_res, dict) and write_res.get("file_id") is not None:
++                file_id = int(write_res["file_id"])
++            else:
++                file_id = self._io_file_id(tmp)
++            if key and file_id is not None:
++                self._record_allocated_temp(key, str(tmp.relative_to(uoink)), digest, file_id=file_id)
+             if not recheck():
+                 raise _AbortedWrite()
+             self._io_replace(tmp, dest)
+@@ -2896,14 +3056,38 @@ class Mirror:
+     def _io_mkdir(self, path: Path, exist_ok: bool = True) -> None:
+         self._require_vault_io().mkdir(str(path), exist_ok=exist_ok)
+ 
+-    def _io_write_file(self, path: Path, data: bytes) -> None:
+-        self._require_vault_io().write_file(str(path), data)
++    def _io_write_file(self, path: Path, data: bytes) -> dict:
++        return self._require_vault_io().write_file(str(path), data)
+ 
+     def _io_replace(self, src: Path, dst: Path) -> None:
+         self._require_vault_io().replace(str(src), str(dst))
+ 
+-    def _io_unlink(self, path: Path) -> None:
+-        self._require_vault_io().unlink(str(path))
++    def _io_unlink(self, path: Path, expected_file_id: int | None = None, expected_hash: str | None = None) -> dict:
++        session = getattr(self, "_vault_io", None)
++        if session is not None and session.alive:
++            return session.unlink(str(path), expected_file_id=expected_file_id, expected_hash=expected_hash)
++        try:
++            st = path.stat()
++        except FileNotFoundError:
++            return {"ok": True, "gone": True}
++        if expected_file_id is not None and int(st.st_ino) != int(expected_file_id):
++            return {"ok": True, "not_ours": True}
++        if expected_hash is not None and _sha256_file(path) != expected_hash:
++            return {"ok": True, "not_ours": True}
++        try:
++            path.unlink()
++        except FileNotFoundError:
++            return {"ok": True, "gone": True}
++        return {"ok": True}
++
++    def _io_file_id(self, path: Path) -> int | None:
++        session = getattr(self, "_vault_io", None)
++        if session is not None and session.alive:
++            return session.file_id(str(path))
++        try:
++            return int(path.stat().st_ino)
++        except OSError:
++            return None
+ 
+     def _io_sha256(self, path: Path) -> str | None:
+         session = self._vault_io
+diff --git a/library_mirror_vault_io.py b/library_mirror_vault_io.py
+index d081bd4..13046e2 100644
+--- a/library_mirror_vault_io.py
++++ b/library_mirror_vault_io.py
+@@ -44,13 +44,31 @@ def _handle(req: dict) -> dict:
+         try:
+             os.write(fd, data)
+             os.fsync(fd)
++            st = os.fstat(fd)
++            file_id = int(st.st_ino)
+         finally:
+             os.close(fd)
+-        return {"ok": True, "hash": hashlib.sha256(data).hexdigest()}
++        return {"ok": True, "hash": hashlib.sha256(data).hexdigest(), "file_id": file_id}
+     if cmd == "replace":
+         os.replace(req["src"], req["dst"])
+         return {"ok": True}
++    if cmd == "file_id":
++        try:
++            st = os.stat(req["path"])
++            return {"ok": True, "file_id": int(st.st_ino)}
++        except OSError as exc:
++            return {"ok": False, "error": type(exc).__name__, "message": str(exc)}
+     if cmd == "unlink":
++        expected_file_id = req.get("expected_file_id")
++        expected_hash = req.get("expected_hash")
++        try:
++            st = os.stat(req["path"])
++        except FileNotFoundError:
++            return {"ok": True, "gone": True}
++        if expected_file_id is not None and int(st.st_ino) != int(expected_file_id):
++            return {"ok": True, "not_ours": True}
++        if expected_hash is not None and _sha256_path(req["path"]) != expected_hash:
++            return {"ok": True, "not_ours": True}
+         try:
+             os.unlink(req["path"])
+         except FileNotFoundError:

@@ -30,7 +30,7 @@ Total checkpoints: 127.
 15. [ ] Run a playlist where zero videos can extract - success: final state is `failed` with a friendly zero-success error.
 16. [ ] Cancel during metadata/download/screenshots phase - success: active subprocess stops quickly, job state stays `cancelled`, partial outputs remain.
 17. [ ] Close and reopen popup during a running playlist - success: popup recovers from `/jobs` and resumes the active job view.
-18. [ ] Use `/jobs?kind=playlist` and `/jobs?kind=single` manually - success: filter returns only matching jobs, sorted newest first.
+18. [ ] Use `/jobs?kind=playlist`, `/jobs?kind=single`, and `/jobs?kind=podcast_transcribe` manually - success: each filter returns only matching jobs, sorted newest first.
 
 ## 3. AI features - CI, Hook Type, taxonomy capture
 
@@ -80,8 +80,8 @@ Total checkpoints: 127.
 ## 6. MCP - stdio and HTTP
 
 54. [ ] Copy Claude Desktop stdio config from setup - success: command points to installed `python.exe` and `uoink_mcp.py`.
-55. [ ] Smoke-test Claude Desktop stdio - success: client lists exactly 14 canonical tools and `list_recent_uoinks` works.
-56. [ ] Smoke-test Cursor stdio - success: client lists exactly 14 canonical tools and `search_uoinks` works.
+55. [ ] Smoke-test Claude Desktop stdio - success: client lists exactly 25 canonical tools and `list_recent_uoinks` works.
+56. [ ] Smoke-test Cursor stdio - success: client lists exactly 25 canonical tools and `search_uoinks` works.
 57. [ ] Call `uoink_video` through MCP - success: returns `ok`, `slug`, `folder`, `corpus_md`, and screenshots.
 58. [ ] Call `uoink_playlist` then `get_job_status` - success: job appears in `/jobs` and completes/cancels consistently.
 59. [ ] Call `get_uoink_corpus` on a sidecar-backed uoink - success: returns `video_id` and `video_url`.
@@ -218,3 +218,20 @@ Total checkpoints: 127.
 126. [ ] Memory page action "Open folder" launches Finder at the yoink folder.
 127. [ ] Uninstall → Uoink.app gone, LaunchAgent removed (manual cleanup of Application Support optional).
 
+
+### Research playbooks (local fixtures only)
+
+- [ ] On an isolated fixture library, `tools/list` lists exactly 35 stdio tools
+  and 91 HTTP tools. `get_playbook_input` has hints true/false/true/false
+  (read-only/destructive/idempotent/open-world) on both surfaces.
+- [ ] `prompts/list` lists 9 prompts: the four library prompts and all five
+  playbooks. `prompts/get` works for each playbook with valid fixture arguments;
+  each returns a fixed instruction and a fenced data message.
+- [ ] Compare each prompt packet with `get_playbook_input` over stdio and HTTP:
+  items, refs and packet_hash agree. No model, network or capture call occurs.
+- [ ] Eight fixture captures with 100 long chapters each return a packet under
+  64 KB. Chapter omissions are counted, clips remain available, and prompts and
+  tools return the same packet hash. Repeat with Unicode and fence characters.
+- [ ] Invalid arguments return `invalid_request` before storage access;
+  unexpected packet failures return `internal_error` without raw exception text.
+  The original four library prompts still behave as before.

@@ -30,7 +30,7 @@ instead of hand-editing `claude_desktop_config.json`.
   `powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\build-mcpb.ps1`
   always produces
   `dist/uoink-<VERSION>.mcpb`; and
-  (2) `tests/test_release_version_v370.py` includes `.mcpb/manifest.json` in
+  (2) `tests/test_release_version_v380.py` includes `.mcpb/manifest.json` in
   the cross-file version-parity contract, so CI fails if the committed value
   drifts from `VERSION`. Still bump `.mcpb/manifest.json` alongside the other
   version surfaces on release.

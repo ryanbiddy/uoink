@@ -27,18 +27,29 @@ from pathlib import Path
 log = logging.getLogger("uoink.dashboard")
 
 HERE = Path(__file__).parent.resolve()
+sys.path.insert(0, str(HERE))
+import uoink_install_isolation as _install_isolation  # noqa: E402
+_install_isolation.apply_from_process()
+
 DASHBOARD_URL = "http://127.0.0.1:5179/dashboard"
 WIDTH, HEIGHT = 1280, 800
 ICON_PATH = HERE / "uoink.ico"
 _ICON_HANDLES = []
 
 
+def _dashboard_url() -> str:
+    return _install_isolation.helper_url("/dashboard")
+
+
 def _target_url() -> str:
-    if len(sys.argv) > 1:
-        candidate = str(sys.argv[1])
-        if candidate.startswith(DASHBOARD_URL):
+    bound = _dashboard_url()
+    for candidate in sys.argv[1:]:
+        if candidate.startswith(bound) or (
+            _install_isolation.current_binding() is None
+            and candidate.startswith(DASHBOARD_URL)
+        ):
             return candidate
-    return DASHBOARD_URL
+    return bound
 
 
 class JsApi:

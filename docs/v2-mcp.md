@@ -9,15 +9,32 @@ Transports: stdio, plus an experimental authenticated local HTTP JSON-RPC helper
 
 Uoink has two deliberately different tool surfaces:
 
-- Supported stdio registry: **14 tools**.
-- Local HTTP/OpenAPI registry: **64 tools**.
+- Supported stdio registry: **35 tools**.
+- Local HTTP/OpenAPI registry: **91 tools**.
 
 The supported stdio MCP surface covers extraction, playlist jobs, search,
-corpus retrieval, citation maps, health scores, transcript reliability,
-Comment Intelligence, Hook Type, hook taxonomy, and entity mentions. The
+clip search and evidence cards, corpus retrieval, citation maps, health
+scores, transcript reliability, Comment Intelligence, Hook Type, hook
+taxonomy, entity mentions, and manual podcast feed-to-corpus operations. The
 authenticated local HTTP helper exposes that set plus a broader collection of
-legacy and application operations. Overlapping tools share the handlers in
+legacy and application operations, including registry-only URL, note, image,
+and X capture. Overlapping tools share the handlers in
 `uoink_mcp_tools.py`, but the two transports do not expose the same registry.
+Clip search (`search_clips`) and evidence cards (`get_evidence_card`) were
+HTTP/OpenAPI-only in Phase 1; the repair increment of 2026-09-04 (run E)
+added both to stdio, taking the stdio set from 23 to 25 tools. On both
+transports they call the same handlers and return the same shapes.
+The six Living Library work-queue tools (`list_library_work`,
+`claim_library_work`, `submit_library_result`, `apply_reshelving`,
+`pin_shelf`, `undo_library_apply`; Phase 2 stage 1, 2026-09-04) are
+HTTP/OpenAPI registry-only and are not on stdio. Their input schemas are the
+frozen `docs/library/phase2-contract/tool-schemas.json`; see `docs/v2-api.md`
+for the envelope, strict decoding and the `POST /library/intent` route that
+mints the user-intent token `pin_shelf` and `undo_library_apply` require.
+The four Phase 3 source-subscription tools (`list_sources`, `register_source`,
+`source_status`, `set_source_consent`; contract `phase3-v1-2026-09-07`, run AM)
+are likewise HTTP/OpenAPI registry-only; consent changes require the
+dashboard-minted intent from `POST /sources/consent-intent`.
 For MCP clients, use stdio (`uoink_mcp.py`). The HTTP JSON-RPC surface at
 `/mcp/v1` remains experimental.
 
@@ -37,7 +54,7 @@ only the canonical names, so clients using an old name receive
 | `get_yoink_corpus` | `get_uoink_corpus` |
 | `get_yoink_health` | `get_uoink_health` |
 
-The eight brand-neutral tools are unchanged: `get_job_status`, `cancel_job`,
+The original eight brand-neutral tools are unchanged: `get_job_status`, `cancel_job`,
 `analyze_comments`, `classify_hook`, `get_taxonomy`, `get_citation_map`,
 `find_mentions`, and `get_transcript_reliability`.
 
@@ -87,7 +104,7 @@ Dev command:
   "mcpServers": {
     "uoink": {
       "command": "python",
-      "args": ["C:\\Users\\hello\\OneDrive\\Desktop\\Yoink-codex-v2\\uoink_mcp.py"]
+      "args": ["C:\\Users\\<you>\\OneDrive\\Desktop\\Yoink-codex-v2\\uoink_mcp.py"]
     }
   }
 }
@@ -306,6 +323,72 @@ Errors:
 
 - `{ "ok": false, "error": "query required" }`
 
+### search_clips
+
+Search merged transcript windows (45-120 s; a single long source cue keeps
+coarse timing and is marked `timing: coarse`) and return a deep link to each
+matching moment. Optional `video_id` and `channel` fields narrow the search.
+Available on stdio and HTTP/OpenAPI since 2026-09-04 (run E); both call the
+same handler.
+
+Parameters:
+
+```json
+{ "query": "loop engineering", "limit": 20, "channel": "Example channel" }
+```
+
+Return shape:
+
+```json
+{
+  "ok": true,
+  "results": [
+    {
+      "video_id": "abc123DEF45",
+      "slug": "video-slug",
+      "title": "Video title",
+      "channel": "Example channel",
+      "start": 64.2,
+      "end": 112.0,
+      "text": "The matching transcript window...",
+      "deep_link": "https://youtube.com/watch?v=abc123DEF45&t=64s",
+      "timing": "source_cues",
+      "score": 7.3021
+    }
+  ]
+}
+```
+
+Errors:
+
+- `{ "ok": false, "error": "query required" }`
+
+### get_evidence_card
+
+Return one item's metadata and up to 20 clips spread across its timeline.
+Resolve the item by `slug` or `video_id`; `n_clips` defaults to 10 for the
+`full` profile and 6 for `librarian`. Available on stdio and HTTP/OpenAPI
+since 2026-09-04 (run E); both call the same handler.
+
+Parameters:
+
+```json
+{ "slug": "video-slug", "profile": "full", "n_clips": 10 }
+```
+
+`profile` is `full` (default: untruncated clips) or `librarian` (bounded: at
+most 6 excerpts of 240 characters plus a total serialized-byte budget, with
+truncation markers). The result includes `video_id`, `slug`, `title`,
+`channel`, `platform`, `source_type`, `topic`, `yoinked_at`, `url`,
+`summary_hint`, `profile`, `evidence_kind`, `excerpts`, `clips`,
+`clip_count`, and the total character count across all clips. Every returned
+clip has `start`, `end`, `text`, `deep_link`, and `timing`.
+
+Errors:
+
+- `{ "ok": false, "error": "slug or video_id required" }`
+- `{ "ok": false, "error": "uoink not found" }`
+
 ### get_uoink_corpus
 
 Return the full markdown corpus for a saved uoink.
@@ -325,6 +408,7 @@ Return shape:
   "folder": "C:\\Users\\Ryan\\Desktop\\Uoink\\Topic\\video-slug",
   "video_id": "abc123DEF45",
   "video_url": "https://www.youtube.com/watch?v=abc123DEF45",
+  "source_url": "https://www.youtube.com/watch?v=abc123DEF45",
   "citations": [
     {
       "video_id": "abc123DEF45",
@@ -334,13 +418,19 @@ Return shape:
       "timestamp_end": 6.2,
       "text": "Opening transcript chunk...",
       "file_path": null,
-      "youtube_deep_link": "https://youtube.com/watch?v=abc123DEF45&t=0s"
+      "youtube_deep_link": "https://youtube.com/watch?v=abc123DEF45&t=0s",
+      "source_url": "https://youtube.com/watch?v=abc123DEF45&t=0s",
+      "source_deep_link": "https://youtube.com/watch?v=abc123DEF45&t=0s"
     }
   ]
 }
 ```
 
-`video_id`, `video_url`, and `citations` are additive fields. `video_id` and `video_url` are populated from the per-video JSON sidecar when available and are `null` for legacy/malformed uoinks without sidecar metadata. `citations` is best-effort and may be empty if the uoink has not been indexed yet.
+`video_id`, `video_url`, `source_url`, and `citations` are additive fields.
+`video_url` is populated only for YouTube items. `source_url` carries the real
+public source page for any supported source type. These fields are `null` when
+the sidecar does not identify a usable source. `citations` is best-effort and
+may be empty if the uoink has not been indexed yet.
 
 Errors:
 
@@ -455,7 +545,9 @@ Errors:
 
 ### get_citation_map
 
-Return pre-computed transcript and screenshot citations for a saved uoink. Each citation includes a timestamped YouTube deep link so agents can cite the source without reparsing markdown.
+Return pre-computed transcript and screenshot citations for a saved uoink.
+Each citation includes its public source URL and a source-aware timestamp link
+when one is available, so agents can cite the source without reparsing Markdown.
 
 Parameters:
 
@@ -475,6 +567,7 @@ Return shape:
       "timestamp_start": 0.0,
       "timestamp_end": 6.2,
       "text": "Opening transcript chunk...",
+      "source_url": "https://www.youtube.com/watch?v=abc123DEF45",
       "deep_link": "https://youtube.com/watch?v=abc123DEF45&t=0s"
     }
   ],
@@ -483,6 +576,7 @@ Return shape:
       "seq": 0,
       "timestamp": 30.0,
       "file_path": "C:\\Users\\Ryan\\Desktop\\Uoink\\Topic\\video-slug\\screenshots\\shot_0001.jpg",
+      "source_url": "https://www.youtube.com/watch?v=abc123DEF45",
       "deep_link": "https://youtube.com/watch?v=abc123DEF45&t=30s"
     }
   ]
@@ -494,7 +588,8 @@ Fields:
 - `transcript_citations` contains one entry per transcript chunk from the sidecar.
 - `screenshot_citations` contains one entry per screenshot from the sidecar.
 - `seq` preserves original order within each citation kind.
-- `deep_link` is a YouTube `watch?v=<id>&t=<seconds>s` URL.
+- `deep_link` preserves the YouTube watch URL for YouTube items. Podcast
+  episodes use the retained episode page with `#t=<seconds>`.
 
 Errors:
 
@@ -641,6 +736,416 @@ Errors:
 
 Rate limit: 60 calls/minute per process.
 
+### add_podcast_feed
+
+Register an RSS or Atom feed. The helper automatically polls enabled feeds for
+metadata after their stored interval elapses. Audio processing stays off unless
+`auto_ingest` is explicitly set for that feed; it defaults to `false`.
+
+Parameters:
+
+```json
+{
+  "feed_url": "https://show.example/feed.xml",
+  "poll_interval_min": 60,
+  "auto_ingest": false
+}
+```
+
+The interval must be between 15 and 1440 minutes. The scheduler checks for due
+feeds every 30 seconds. `auto_ingest: true` applies to episodes discovered
+after opt-in and authorizes automatic MP3 download, local transcription, and
+corpus publishing. It does not authorize a first-time Whisper model download.
+Use the dashboard or `POST /podcasts/feeds/set-auto-ingest` to change the flag
+for an existing feed.
+
+### list_podcast_feeds
+
+List registered feeds, their latest discovered episode, poll state, and error
+state. Pass `{ "enabled_only": true }` to omit disabled feeds.
+
+### remove_podcast_feed
+
+Delete a feed and its tracked episode rows.
+
+```json
+{ "feed_id": 12 }
+```
+
+Local MP3, transcript, and already-published corpus files are not deleted by
+this operation.
+
+### poll_podcast_feed
+
+Fetch and parse one feed now through the same path used by watch mode, retaining
+up to 50 new episode records. The request uses stored ETag and Last-Modified
+values on later polls.
+
+```json
+{ "feed_id": 12 }
+```
+
+RSS and Atom episode page URLs are retained separately from opaque GUIDs and
+audio enclosure URLs.
+
+### list_podcast_episodes
+
+List tracked episodes, newest first.
+
+```json
+{ "feed_id": 12, "status": "downloaded", "limit": 100 }
+```
+
+All fields are optional. `status` may be `new`, `queued`, `downloaded`,
+`transcribed`, or `ignored`.
+
+### download_podcast_episode
+
+Download one episode enclosure as an MP3 with the local yt-dlp and ffmpeg
+runtime. The call is synchronous and idempotent when the canonical MP3 already
+exists.
+
+```json
+{ "episode_id": 42 }
+```
+
+Audio stays flat under `<data_root>/Podcasts/<feed-slug>/`.
+
+### get_whisperx_status
+
+Report whether the local WhisperX runtime is available, the selected model,
+supported models, and the diarization default. This read-only call neither
+downloads a model nor starts transcription.
+
+### transcribe_podcast_episode
+
+Queue one downloaded episode for local transcription and return immediately
+with a durable job ID.
+
+```json
+{
+  "episode_id": 42,
+  "model": "base",
+  "language": "en",
+  "diarize": false,
+  "consent_given": false
+}
+```
+
+Models are `tiny`, `base`, `small`, `medium`, `large`, and
+`large-v3-turbo`; `base` is the default. CPU inference uses int8. Exactly one
+podcast transcription runs at a time, on a below-normal-priority worker on
+Windows. Call `get_job_status` with the returned `job_id` for queued, running,
+writing, completed, or failed progress. An interrupted non-terminal podcast
+job queues again after helper restart. A first model download returns
+`consent_required: true` unless `consent_given` is explicit.
+
+### episode_to_corpus
+
+Publish a completed transcript into the shared local corpus.
+
+```json
+{ "episode_id": 42 }
+```
+
+The operation writes Markdown and a dashboard-readable sidecar into a stable
+per-episode folder, indexes the transcript for FTS and corpus-contract reads,
+adds `source_url#t=<seconds>` citations, and stores the
+`podcast_episodes.yoink_video_id` link. The stable ID is
+`episode_<sha1(feed URL + GUID)[:11]>`. Repeating the call returns the same
+identity and repairs partial prior writes without duplicating rows or files.
+
+### get_library_activity
+
+Report deterministic library activity, shelf churn, and source observations.
+
+```json
+{
+  "interval": {
+    "start": "2026-09-01T00:00:00.000Z",
+    "end": "2026-09-08T00:00:00.000Z"
+  },
+  "date_basis": "capture_time"
+}
+```
+
+The operation returns pure aggregation over saved items, shelf movements, and source observations, bounded by half-open UTC intervals, survivor baseline proof, and explicit provenance.
+
+### search_library
+
+Bounded clip-first search of the saved library (default 5, at most 20 hits)
+with an item-text fallback for items without clips (Phase 4, contract
+`phase4-v1-2026-09-08`, run AV-1).
+
+```json
+{ "query": "agent harness", "limit": 5 }
+```
+
+Each hit carries the item id, source revision, safe title and link, evidence
+kind and timing, a bounded preview and revision-bound card and excerpt URIs
+for `read_library_resource`. A `next_step` says when more retrieval is
+needed; the result never claims an exhaustive search.
+
+### get_library_item
+
+Resolve one saved item by `video_id` or `slug` (exactly one) and return its
+default Librarian evidence card unchanged plus canonical card, excerpt and
+initial corpus-chunk URIs.
+
+```json
+{ "slug": "some-saved-item" }
+```
+
+If corpus-chunk admission fails, that is reported separately while the card
+stays usable.
+
+### read_library_resource
+
+Read one `uoink://library/v1/...` resource URI (card, excerpt, corpus chunk,
+shelf page or brief) with the same validation, contents and refusals as the
+stdio `resources/read` method: the fallback for a client that cannot attach a
+template-derived URI natively (Claude Code CLI 2.1.261 has no native resource
+reader).
+
+```json
+{ "uri": "uoink://library/v1/items/<item_key>/cards/<source_revision>/<selection>/<card_hash>" }
+```
+
+Refusals use the Phase 4 domain envelope (`invalid_request`,
+`resource_not_found`, `resource_deleted`, `revision_unavailable`,
+`resource_too_large`, `library_unavailable`, `deadline_exceeded`,
+`rate_limited`, ...). Stdio also advertises five resource templates and nine
+prompts: the four frozen library prompts (`consult-library`, `evidence-brief`,
+`whats-new`, `reshelve-review`) plus the five research playbooks below.
+HTTP stays tools-only.
+
+### get_playbook_input
+
+Prepare evidence for a research report from saved captures. The server computes
+metrics and citation keys; the connected client writes the report. This read
+requires no API key and makes no model or network calls.
+
+```json
+{"playbook":"outlier-posts","arguments":{"author":"Example creator","platform":"youtube"}}
+```
+
+Both fields are required. `arguments` is an object with the same string values
+accepted by the matching stdio prompt:
+
+| Playbook / prompt | Arguments |
+|---|---|
+| `outlier-posts` | Required `author`; optional `platform`, `since`. |
+| `transcript-intel` | Exactly one of `video_ids` (at most 8), `topic`, `author`; optional `since`. |
+| `comment-mining` | Exactly one of `video_ids` (at most 10), `author`; `lens` is `voc` (default) or `demand`. |
+| `creator-teardown` | Required `author`; optional `platform`. Needs at least 3 saved captures. |
+| `repurpose-pack` | Required `video_ids` (1–5); optional `kinds`: `tweet`, `thread`, `linkedin`, `script`, `newsletter` (default `tweet,thread`). |
+
+Pass `video_ids` and `kinds` as comma-separated strings. `author` is 1–200
+code points. Unicode Cc control characters are rejected; format characters
+such as joiners are accepted. `topic` is an FTS query of at most 512 characters.
+`platform` accepts `youtube`, `tiktok`, `instagram`, `reddit`. `since` is a UTC
+capture date (`YYYY-MM-DD`), never a future date. Unknown arguments are refused
+before storage access; missing or deleted captures are refused.
+
+Success returns `{ok, playbook, instruction, packet, packet_hash}`. The packet
+uses contract `playbooks-v1-2026-10-15` and includes bounded coverage, items and
+refs. `packet_hash` hashes canonical `items` and `refs`; it excludes generation
+time. Reads share the library's 2-active, 60-per-minute guard and 2-second
+deadline, with a 64 KB response budget. Refusals use the Phase 4 error envelope,
+including `invalid_request`, `rate_limited`, `deadline_exceeded` and
+`internal_error`; stdio tool failures set `isError: true`.
+Argument-schema failures on `POST /tools/get_playbook_input` return HTTP 400
+with that same `invalid_request` envelope.
+
+Transcript packets retain at most 12 chapters and 2 KiB of escaped chapter
+text per capture before applying the packet budget. Omitted chapters count
+toward `coverage.dropped_for_budget` and `coverage.budget_drops.chapters`.
+The same cap applies to prompts and tools, leaving room for transcript clips.
+
+`prompts/get` accepts each playbook name directly and returns two user messages:
+the fixed instruction, then a packet fenced as
+`<untrusted_uoink_library_context>`. Source text is data, never instructions.
+Reports cite `[cap:]`, `[m:]`, `[t:]`, `[cm:]`, `[ctx:]` and, when a saved
+discovery snapshot exists, `[sc:]` keys. Metrics state their as-of time;
+non-caption transcript quotes are approximate. Repurposed drafts retain their
+credit lines. These reads do not capture, publish, apply changes or run discovery.
+
+### discover_candidates
+
+Run a one-shot ScrapeCreators lookup with your own saved key. Discovery and
+connected-agent spending are both off by default. First request a free plan:
+
+```json
+{"mode":"creator","platform":"youtube","handle":"ExampleCreator","pages":1}
+```
+
+It returns `{ok, needs_confirmation:true, credits_planned, credits_today,
+daily_cap}` without a network call. Repeat the same arguments with
+`"confirm_credits":1` to authorize that many requests. The value must equal
+`pages`; each request sent counts even if it fails. The daily cap defaults to
+25 credits (configurable from 1 to 500), resets in UTC, and applies to all callers.
+
+`mode` is `creator` or `keyword`. Creator platforms are `tiktok`, `instagram`,
+`youtube` and `youtube_shorts`; supply one `handle` (1–100 characters, leading
+`@` stripped) or a YouTube `channel_id` (`UC` plus 22 characters). Keyword mode
+accepts `tiktok` or `youtube` and a `query` of 1–200 characters. `pages` is 1–3,
+default 1. There is no automatic retry.
+
+A paid call requires `scrapecreators_enabled`, a usable saved key, credit room,
+and either `scrapecreators_agent_calls_enabled` or a `user_intent_token` minted
+by a dashboard click. The dashboard token lasts five minutes, is single-use,
+and binds the operation, origin and helper session. MCP tools cannot mint it;
+stdio calls need the agent setting. Confirming a credit count alone does not
+enable agent spending. The registry limit is six calls per minute, including plans.
+
+Runs return `run_id`, provider, endpoint, `fetched_at`, credits, coverage,
+`baselines` and up to 60 normalized candidates. Each baseline identifies its
+`platform`, `source_type`, metric, median, sample count `n` and confidence.
+Candidate lifts use their own group's median: YouTube videos and Shorts have
+separate baselines. The convenience field `baseline` holds the sole group
+when there is exactly one; it is `null` for mixed or empty results.
+Each candidate has a stable `key`,
+canonical URL, platform, video ID, creator handle or channel ID, caption,
+publication time, duration, nullable engagement metrics, lift, label,
+`in_library`, state and `pending_id`. YouTube keyword results include videos
+and Shorts. No thumbnails are fetched or saved. Upstream failures retain a
+partial run with `last_error`; unexpected failures use the standard
+`internal_error` envelope without exception text.
+
+Runs live in `DATA_ROOT/discovery/runs/<YYYY-MM>/<run_id>.json`, with atomic
+writes and a 256 KiB file cap. The daily purge removes runs older than 90 days.
+Local `outlier-posts` and `creator-teardown` packets reuse the newest matching
+snapshot per handle/channel ID and platform within 30 days as `[sc:]` rows.
+They read at most 24 run files per packet, filtering creator filenames by
+target first; remaining reads may include matching authors in keyword runs.
+Creator snapshots take precedence over keyword matches regardless of age;
+keyword rows are used only where that platform has no creator snapshot.
+Videos and Shorts stay separate. A newer successful empty creator run replaces
+the older snapshot and blocks keyword fallback for that platform. Failed runs
+with no candidates are ignored; newly written empty failure receipts carry a
+`-failed` run-ID suffix and are excluded before the file-read budget, so repeated
+failures cannot crowd out the older snapshot or keyword fallback. Partial
+results from a later-page failure remain eligible. These local reads spend no credits.
+
+For YouTube, pass the local author/channel display name as the playbook's
+`author`. Uoink also matches discovery rows using the channel ID or handle in
+the newest matching YouTube capture's sidecar `channel_url`. This joins
+channel-ID creator runs and keyword `channel/UC...` rows to ordinary captures;
+the ID does not replace the local display name in the playbook selector.
+If the saved channel URL has neither an ID nor a handle, matching falls back
+to the supplied author. All identities share the 24-file read limit.
+
+### queue_discovered
+
+Pick saved candidates for the normal capture queue:
+
+```json
+{"run_id":"<run_id returned by discovery>","keys":["<candidate key>"]}
+```
+
+`keys` contains 1–10 selections. This tool requires the agent discovery setting
+or a fresh dashboard intent bound to these picks. It needs no ScrapeCreators
+key, makes no ScrapeCreators request and spends no credits. Its registry limit
+is 30 calls per minute.
+
+Success returns `{ok, run_id, queued, skipped, candidates}`. `queued` entries
+contain `key` and `pending_id`; skipped entries contain `key` and one of
+`in_library`, `already_queued`, `unsupported_url`, `unknown_key`. Active picks
+are deduplicated, including concurrent calls from the helper and stdio server:
+SQLite checks for an active URL and enqueues it in one write transaction.
+A new explicit pick after a
+failed or cancelled attempt enqueues a fresh row and replaces the saved
+`pending_id`; it does not spend ScrapeCreators credits. Enqueued picks are saved
+as `state:"queued"` in the run file. The existing `pending_yoinks` retry worker
+captures them with the usual transcript, comments and screenshots. Picks are
+due immediately, using the same local timestamp format as the retry worker.
+Argument-schema failures on `POST /tools/discover_candidates` and
+`POST /tools/queue_discovered` return HTTP 400 with the standard
+`invalid_request` envelope before tool dispatch.
+`GET /discovery/runs/<run_id>` requires the helper token and returns
+`{ok:true, run}`. It reconciles `captured` or `failed` state against the library
+and queue, saves the refreshed receipt, and never starts a capture or provider
+call. It works with discovery and agent spending off. Queue calls also
+reconcile the run before evaluating picks.
+
+### get_library_brief_input
+
+Prepare bounded input for a client-run daily brief (Phase 4 second increment,
+run AV-2). Brief generation belongs to the client: Uoink never runs a model or
+a scheduler for it. For a UTC `date` (not in the future) and a Phase 2
+`run_id`, the tool returns `job_key`, `input_hash`, the bound queue digest,
+run revision, taxonomy/projection revisions and latest covered operation
+sequence, capture and event counts, coverage, up to 20 work-status rows and up
+to 5 default Librarian cards, at most 24,576 bytes. Read only: no lease, no
+mutation. The client tracks its own job (`prepared`, `running`, `submitted`,
+`stale`, `failed`, `waiting_for_client`) and keeps the packet.
+
+```json
+{ "date": "2026-09-08", "run_id": "run-2026-09-08" }
+```
+
+### publish_library_brief
+
+**Local write.** Persist one client-produced brief for a job prepared by
+`get_library_brief_input`. The server rebuilds the packet against current
+library data (a changed queue, source or deletion is `stale_brief`), requires
+`job_key` and `input_hash` to match the packet, binds each citation (at most
+20; item id, source revision, card hash, excerpt id, a 1-500 code point quote
+that occurs in that excerpt after NFC/whitespace normalisation, evidence kind
+and time bounds) to the supplied cards only, and stores an immutable artifact
+plus receipt under `DATA_ROOT/reach/briefs/`. The document is at most 8,192
+UTF-8 bytes; the whole request at most 65,536 bytes. An identical retry on the
+same `submission_key` returns the recorded receipt; changed content under that
+key is `idempotency_conflict`; a competing artifact for a job that already has
+one is `brief_conflict`. Missing usage is stored as unavailable, never as zero
+tokens or a cost. The brief is readable at
+`uoink://library/v1/briefs/{date}/{brief_hash}` and appears in the curated
+resource list as the latest valid brief; a cited or sampled item that is
+deleted or changes makes it unavailable immediately. It cannot apply labels or
+alter the assignment queue.
+
+```json
+{
+  "job_key": "<64 hex>", "input_hash": "<64 hex>",
+  "input_packet": { "...": "the packet returned by get_library_brief_input" },
+  "submission_key": "brief-2026-09-08-1",
+  "document": "# Daily brief\n...",
+  "citations": [{ "item_id": "...", "source_revision": "<64 hex>", "card_hash": "<64 hex>",
+                  "excerpt_id": "<64 hex>", "quote": "...", "evidence_kind": "timed_clip",
+                  "start": 12.0, "end": 40.0 }],
+  "usage": null
+}
+```
+
+### export_cited_range
+
+Read-only cited export (Phase 6 second increment, run BC-2, contract
+`phase6-v1`). Select exactly one of a cue-aligned time range (`start` and
+`end` must equal the first selected cue's start and the last selected cue's
+end; at most 120 s and 200 cues) or a current `excerpt_id`; optional
+`source_revision` / `media_revision` pins refuse `revision_unavailable` on
+change. The result carries the verbatim stored cue text, per-cue speaker
+labels with their provenance (diarization run or source metadata), the
+overlapping chapters, safe source and seek links (a `youtube` seek only for a
+verified YouTube item; podcasts record `seek_kind: "none"`), the item's
+source and media revisions and evidence refs. Every referenced original
+artifact is validated by bytes before anything is quoted; a missing input is
+`library_unavailable`, corrupt bytes or bindings `invalid_source_data`. The
+read is one coherent SQLite transaction with a final source/media recheck,
+admitted on the shared Phase 4 guard (2 s deadline, 2 active, 60/minute) with
+the same wire budgets (24,576 rendered bytes, 65,536 wrapped bytes). Nothing
+is fetched, transcribed or saved; text-only items refuse `not_timed` with
+`next_step: get_library_item`, and coarse (paragraph) timing refuses
+`coarse_timing` with `next_step: read_library_resource`.
+
+```json
+{ "video_id": "<item id>", "start": 60.0, "end": 125.0 }
+```
+
+```json
+{ "video_id": "<item id>", "excerpt_id": "<64 hex>", "source_revision": "<64 hex>" }
+```
+
 ## Rate limits and abuse mitigations
 
 - `uoink_video`: 5 calls/minute per process.
@@ -649,10 +1154,15 @@ Rate limit: 60 calls/minute per process.
 - `classify_hook`: 10 calls/minute per process.
 - `list_recent_uoinks`: 60 calls/minute per process.
 - `search_uoinks`: 30 calls/minute per process.
+- `search_clips` and `get_evidence_card`: 30 calls/minute per process.
 - `get_citation_map`: 60 calls/minute per process.
 - `get_uoink_health`: 60 calls/minute per process.
 - `find_mentions`: 60 calls/minute per process.
 - `get_transcript_reliability`: 60 calls/minute per process.
+- Podcast feed mutations and `episode_to_corpus`: 30 calls/minute per process.
+- `list_podcast_feeds`, `list_podcast_episodes`, and `get_whisperx_status`: 60 calls/minute per process.
+- `download_podcast_episode`: 10 calls/minute per process.
+- `transcribe_podcast_episode`: 5 calls/minute per process.
 - Other read-only tools (`get_uoink_corpus`, `get_job_status`, `get_taxonomy`) are not rate-limited.
 
 Rate-limit errors return friendly tool payloads, for example:

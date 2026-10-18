@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd">
+  <channel>
+    <title>The Architecture of Memory</title>
+    <link>https://example.com/podcast</link>
+    <description>Deep dives into distributed storage, local memory systems, and human recall.</description>
+    <language>en-us</language>
+    <itunes:author>Elena Vance</itunes:author>
+    <item>
+      <title>Episode 105: Durable Ledgers and Atomic Slots</title>
+      <link>https://example.com/podcast/105</link>
+      <guid isPermaLink="false">aom-ep-105-atomic-slots</guid>
+      <pubDate>Mon, 07 Sep 2026 18:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/ep105.mp3" length="42100000" type="audio/mpeg"/>
+      <itunes:duration>2540</itunes:duration>
+    </item>
+    <item>
+      <title>Episode 104: The Two-Phase Confirmation Capability</title>
+      <link>https://example.com/podcast/104</link>
+      <guid isPermaLink="false">aom-ep-104-two-phase-token</guid>
+      <pubDate>Mon, 31 Aug 2026 18:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/ep104.mp3" length="38900000" type="audio/mpeg"/>
+      <itunes:duration>2310</itunes:duration>
+    </item>
+    <item>
+      <title>Episode 103: Recovery Boundaries and Process Restarts</title>
+      <link>https://example.com/podcast/103</link>
+      <guid isPermaLink="false">aom-ep-103-process-restart</guid>
+      <pubDate>Mon, 24 Aug 2026 18:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/ep103.mp3" length="45200000" type="audio/mpeg"/>
+      <itunes:duration>2700</itunes:duration>
+    </item>
+    <item>
+      <title>Episode 102: Back-Catalog Ceilings and Observation Windows</title>
+      <link>https://example.com/podcast/102</link>
+      <guid isPermaLink="false">aom-ep-102-back-catalog</guid>
+      <pubDate>Mon, 17 Aug 2026 18:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/ep102.mp3" length="41000000" type="audio/mpeg"/>
+      <itunes:duration>2450</itunes:duration>
+    </item>
+    <item>
+      <title>Episode 101: Separating Discovery from Acquisition</title>
+      <link>https://example.com/podcast/101</link>
+      <guid isPermaLink="false">aom-ep-101-discovery-split</guid>
+      <pubDate>Mon, 10 Aug 2026 18:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/ep101.mp3" length="39500000" type="audio/mpeg"/>
+      <itunes:duration>2380</itunes:duration>
+    </item>
+  </channel>
+</rss>

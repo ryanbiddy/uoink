@@ -1,0 +1,40 @@
+{
+  "_provenance": {
+    "kind": "openapi-example",
+    "source_url": "https://docs.scrapecreators.com/v1/youtube/channel/shorts/openapi.json",
+    "fetched_at": "2026-10-16T16:12:24Z",
+    "source_sha256": "bd16b38867ed8cb4e9b8156976ae176ca71fefb891472840990094fa8a769eec",
+    "path": "/v1/youtube/channel/shorts"
+  },
+  "response": {
+    "success": true,
+    "credits_remaining": 49998970118,
+    "credits_charged": 1,
+    "videos": [],
+    "channels": [],
+    "playlists": [],
+    "shorts": [
+      {
+        "type": "short",
+        "id": "VREVC0wXPfs",
+        "url": "https://www.youtube.com/watch?v=VREVC0wXPfs",
+        "title": "This idea validation formula has made him $500K from iOS apps",
+        "thumbnail": "https://img.youtube.com/vi/VREVC0wXPfs/maxresdefault.jpg",
+        "viewCountText": "17,066",
+        "viewCountInt": 17066,
+        "description": "Most founders think their app isn’t selling because of market conditions.\n\nIt’s not.\n\nThis founder sold multiple apps and noticed the same pattern every time: Great products but broken deals.\n\nNot because the app was bad but because founders overcomplicate operations and chase the highest price instead of the fastest close.",
+        "commentCountText": "2",
+        "commentCountInt": 2,
+        "likeCountInt": 495,
+        "likeCountText": "495",
+        "publishDate": "2026-04-22T10:44:35-07:00",
+        "genre": "People & Blogs",
+        "durationMs": 37000,
+        "durationFormatted": "00:00:37"
+      }
+    ],
+    "shelves": [],
+    "lives": [],
+    "continuationToken": "4qmFsgK7DBIY....."
+  }
+}

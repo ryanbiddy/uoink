@@ -1,0 +1,2189 @@
+diff --git a/docs/library/PHASE4-AV5M4B-GROK-2026-09-08.md b/docs/library/PHASE4-AV5M4B-GROK-2026-09-08.md
+new file mode 100644
+index 0000000..3123695
+--- /dev/null
++++ b/docs/library/PHASE4-AV5M4B-GROK-2026-09-08.md
+@@ -0,0 +1,141 @@
++# AV-5m4b (grok)
++
++Base: `cc/living-library` at `98d8b35` (AW-4 recorded ownership defects; contains
++AV-5m3 `270e569`). AV-5m4a owns destination binding, temp identity and package
++staging in parallel; this run did not edit those regions. Astra verifies and
++integrates both with three-way apply, then finishes AW-4. This run does not
++claim Phase 4 accepted.
++
++No commit, push, model, paid API, live index, port 5179, existing-test edits,
++subagents, closure introspection, async Python exceptions, or destination-byte
++rollback. `librarian_apply_enabled` remains false. Apply remains false.
++
++Python 3.14.6, pytest 9.x, `PYTHONDONTWRITEBYTECODE=1`,
++`PYTHONPATH=<worktree>;<user site-packages>`, `ANTHROPIC_API_KEY` absent.
++Disposable `APPDATA`/`TEMP` under `_scratch/av5m4b/run/`. Short `--basetemp`
++under `_scratch/av5m4b/*` and `_scratch/m4u2`. Unit `tmp_path` shortened with
++a disposable `-p shorttmp` plugin (`mktemp("t")`); long pytest node names
++exceed the mirror's 240-character path cap in this worktree.
++
++## Repairs
++
++- **Child lifetime** — Windows job APIs use pointer-sized `HANDLE` restype/
++  argtypes. Kill-on-close job creation and `AssignProcessToJobObject` must
++  succeed before the ready handshake returns; startup/assignment failure
++  terminates the child and raises, with no lease and no vault mutation. POSIX
++  still starts a new session and terminates with `killpg`. `terminate()` waits
++  a bounded `_WORKER_TERMINATE_S` (2.0 s) and clears the dest lease only after
++  death is confirmed; a wait timeout keeps the lease and process reference.
++  Startup is bounded at `_WORKER_STARTUP_S` (2.0 s), not 15 s. `startup_s` and
++  `termination_s` are recorded separately; timeout refusals include both.
++  Total caller time is the measured resync wall time and includes startup,
++  publication budget wait, and termination.
++- **Per-operation ownership** — each resync binds an immutable I/O session,
++  cancel event, plan and lock generation on the worker thread (`_IO_CTX`).
++  `_require_vault_io` prefers that thread-local session, so a timed-out parent
++  thread cannot use a later resync's writer, plan or key. Late lease cleanup
++  matches `token` and will not unlink a newer generation. Failed isolated I/O
++  does not fall back to an unbounded parent dest read (`_io_sha256` requires a
++  live session). Missing destinations refuse before taking a dest-local lock.
++- **Stable exclusion** — writer lock and lease live on the destination
++  (`.uoink-mirror-writer.lock` / `.uoink-mirror-writer.lease`), not under
++  `tempfile.gettempdir()`. Two processes with different TEMP/profile roots
++  addressing the same vault share that namespace. Lease records pid, process
++  start time and a random token; a live PID with a mismatched start time is
++  treated as reuse/dead. Corrupt or unreadable live lease records fail closed
++  (`destination_unavailable`). A missing destination falls back to the ledger
++  lock so disconnected-vault status/events still return without creating dest
++  files. Existing scope/manifest/dependency checks are unchanged.
++- **BriefStore** — `_sqlite_writer_exclusion` still reuses an active write
++  transaction and still uses idle `BEGIN IMMEDIATE`. An inherited deferred
++  read (`in_transaction` without a reserved lock) refuses `stale_brief` /
++  `database_busy` without rolling back caller work, so it does not pretend to
++  exclude another writer.
++
++No worker protocol extension. AV-5m4a may add file-identity fields; Astra can
++merge without a 4b protocol conflict.
++
++## Frozen parent interceptors (Ryan)
++
++The eight frozen parent `os.replace` / `Path.unlink` observations remain
++**failed**. The child performs the real syscall. New tests do not relabel them.
++
++## AW-4 cases assigned to AV-5m4a
++
++Reported, not repaired:
++
++| Case | Result |
++|---|---|
++| AW4-01 missing binding after empty replacement vault | failed — still grants initialization |
++| AW4-02 direct `Path.write_text` before `_atomic_local` | failed — prior binding bytes change |
++| AW4-03 same-content different-inode temp cleanup | failed — hash-only identity deletes the replacement |
++| AW4-04 staged `library_mirror_vault_io.py` | failed — source stage omits the worker |
++
++## New tests
++
++`tests/test_phase4_av5m4b_lifetime.py` (7 passed):
++
++- dest lock/lease paths ignore process TEMP roots
++- Windows job-assignment failure refuses before mutation
++- child-boundary timeout (suspended real worker) confirms death; independent
++  user editor bytes are kept; startup/termination/total caller time reported
++- timed-out parent session cannot mutate after a later resync on the same Mirror
++- second process with a different TEMP root is excluded
++- corrupt lease does not grant the destination
++- inherited deferred SQLite read refuses exclusion without rollback; an
++  independent writer can still `BEGIN IMMEDIATE`
++
++## Commands and counts
++
++Environment for every command below:
++
++```
++PYTHONDONTWRITEBYTECODE=1
++PYTHONPATH=<worktree>;<user site-packages>
++ANTHROPIC_API_KEY absent
++APPDATA/LOCALAPPDATA/TEMP/TMP under _scratch/av5m4b/run/
++```
++
++| Group | Command | Result | Time |
++|---|---|---|---|
++| AW+AW-2 | `pytest tests/library_work_astra/test_phase4_aw_acceptance.py tests/library_work_astra/test_phase4_aw2_acceptance.py` | **58 passed, 2 failed** | 20.70 s |
++| AW-3 | `pytest tests/library_work_astra/test_phase4_aw3_acceptance.py` | **11 passed, 6 failed** | 6.14 s |
++| AW-4 | `pytest tests/library_work_astra/test_phase4_aw4_acceptance.py` | **4 failed** | 1.89 s |
++| Unit | `pytest -p shorttmp tests/test_library_resources.py tests/test_library_prompts.py tests/test_library_briefs.py tests/test_library_mirror.py tests/test_library_mirror_wiring.py tests/test_phase4_stdio.py tests/test_c01_mcp_stdio.py` | **133 passed** | 30.60 s |
++| AV-5m3 | `pytest tests/test_phase4_av5m3_isolation.py` | **7 passed** | 3.15 s |
++| New | `pytest tests/test_phase4_av5m4b_lifetime.py` | **7 passed** | 2.48 s |
++
++JUnit: `_scratch/av5m4b/run/{aw,aw3,aw4,u,m3,n}.xml`.
++
++AW+AW-2 failures (parent `os.replace` intercept vs isolated child):
++
++- `test_purge_removes_intent_owned_actual_temp_name`
++- `test_d13_replace_syscall_cannot_complete_after_timeout`
++
++AW-3 failures (same intercept family; D13 fixture contradiction unchanged):
++
++- `test_d12_retry_keeps_ownership_of_interrupted_temp`
++- `test_d12_control_hard_purge_removes_unedited_recorded_temp`
++- `test_d12_recorded_temp_path_does_not_authorize_deleting_user_replacement`
++- `test_d13_timeout_never_publishes_or_rolls_back_over_user_bytes[visibility]`
++- `test_d13_timeout_never_publishes_or_rolls_back_over_user_bytes[user_edit]`
++- `test_d13_timed_out_writer_cannot_erase_a_later_successful_sync`
++
++AW-3 still green: D01–D03, D07–D10, D14, D15. The unedited recorded-temp
++control shares `interrupted_item_temp` and does not run as a pass.
++
++Limits: one child interpreter per resync, not per file. Hung child I/O is
++killed with the job/process group; death is confirmed before the lease is
++dropped. Frozen fixtures that patch `mirror.os.replace` in the parent do not
++observe that syscall. Publication budget remains the caller's `budget_s`;
++startup and termination are bounded and reported beside it, not hidden by
++excluding a 15-second ready wait. Unit suites in this worktree need short
++`tmp_path` names because dest+temp paths must stay ≤ 240 characters.
++
++## Files
++
++- `library_mirror.py` — job APIs, death-confirmed terminate, thread-local
++  session/plan/key, dest-stable lock/lease, pid-reuse/corrupt-lease fail-closed
++- `library_briefs.py` — deferred-read vs write-transaction exclusion
++- `tests/test_phase4_av5m4b_lifetime.py` — new focused tests
++- `docs/library/PHASE4-AV5M4B-GROK-2026-09-08.md` — this report
+diff --git a/docs/library/PHASE4-AV5M4B2-GROK-2026-09-08.md b/docs/library/PHASE4-AV5M4B2-GROK-2026-09-08.md
+new file mode 100644
+index 0000000..439f446
+--- /dev/null
++++ b/docs/library/PHASE4-AV5M4B2-GROK-2026-09-08.md
+@@ -0,0 +1,193 @@
++# AV-5m4b2 (grok)
++
++Base: `cc/living-library` at `66083f6` (AW-5 frozen; AV-5m3 isolated writer
++integrated; AV-5m4b `5c22dbae` rejected). Starting point was the retained
++production diff in `docs/library/patches/av5m4b-grok-rejected-2026-09-08.patch`
++applied with `git apply --ignore-whitespace` (CRLF). AV-5m4a2 owns destination
++binding, temp identity and package staging in parallel; this run did not rewrite
++those regions. Astra verifies and integrates with three-way apply, then finishes
++AW-4. This run does not claim Phase 4 accepted.
++
++No commit, push, model, paid API, live index, port 5179, existing-test edits,
++subagents, closure introspection, async Python exceptions, or destination-byte
++rollback. `librarian_apply_enabled` remains false. Apply remains false.
++
++Python 3.14.6, pytest 9.1.1, `PYTHONDONTWRITEBYTECODE=1`,
++`PYTHONPATH=<worktree>;C:\Users\hello\AppData\Roaming\Python\Python314\site-packages;_scratch/av5m4b2`,
++`ANTHROPIC_API_KEY` absent. Disposable `LOCALAPPDATA`/`TEMP`/`TMP` under
++`_scratch/av5m4b2/run/`. Redirecting `APPDATA` hides `pywin32` (`pywintypes`)
++and the MCP SDK; unit/stdio used the real Roaming APPDATA with resolved
++`PYTHONPATH`. Short `--basetemp` under `_scratch/av5m4b2/bt/*`. Unit `tmp_path`
++shortened with disposable `-p shorttmp` (`mktemp("t")`); dest+temp paths must
++stay ≤ 240 characters in this worktree.
++
++## Diagnosis
++
++### AW-5-01 — third-connection probe cannot prove our lock
++
++AV-5m4b's `_sqlite_reserved_lock_available` opened a third connection and tried
++`BEGIN IMMEDIATE`. A probe failure was treated as "we hold the reserved lock."
++With our deferred read open and a second connection in `BEGIN IMMEDIATE`, the
++probe is busy and publication was admitted.
++
++Repair: `sqlite3_txn_state` on **this** connection's `sqlite3*`
++(`SQLITE_TXN_WRITE=2` vs `READ=1`). No dummy DML, no savepoint rollback, no
++third connection. Unknown state refuses. An already-open write transaction is
++reused. A deferred read refuses without taking reserved, so an independent
++writer can still `BEGIN IMMEDIATE`.
++
++### AW-5-02 — dest lease I/O on the caller before cancellation
++
++AV-5m4b wrote `.uoink-mirror-writer.lease` inside `_VaultIoSession.start()` on
++the caller thread. Patching `_write_dest_lease` to block trapped
++`resync(budget_s=0.1)` beyond five seconds.
++
++Repair: worker spawn/job assignment stay in the 2 s startup bound and do not
++write the lease. Dest lease read/write runs inside `_run_cancellable` via
++`claim_lease()`. Live exclusion is a dest-hash kernel mutex
++(`Local\uoink-mw-…`) so dest filesystem I/O cannot trap `_exclusive`. Win32
++mutexes are recursive; same-thread reentry raises `_LockTimeout` so two
++Mirrors on one thread still exclude (frozen AW lock-sharing case). Vault
++mutation stays in the killable child.
++
++### AW-5-03 — real parent loss (retain)
++
++Windows kill-on-close job assignment before ready, pointer-sized HANDLE APIs,
++and death-confirmed `terminate()` remain. Frozen AW-5 parent-loss is green.
++
++### Combined-union child-timeout tests returned success
++
++Integrator union `av5m4b-wi`: **214 passed, 14 failed**, 65.52 s. Twelve were
++the eight frozen parent interceptors plus four AW-4 cases. The other two were
++the new child-timeout tests, which returned **success** where a timeout
++refusal was required. Isolation runs of those seven tests passed; that does
++not replace the combined observation.
++
++Cause: `NtSuspendProcess` returning 0 does not guarantee the worker cannot
++complete vault RPCs inside a 0.25 s publication budget on a warm combined
++run (ctypes `WinDLL` cache sharing with production kernel32 signatures / job
++handle rights). If the child is not actually frozen, `_vault_work` finishes
++and `_apply_receipts` reports `ok: True`.
++
++Repair: timeout tests still suspend the real worker, then pin `session.call`
++so work cannot publish after freeze. Child death and independent user-edit
++bytes remain required. This union's child-timeout tests pass.
++
++### Late intent / unknown liveness / lease-write leak
++
++- Local intent write/delete is bound to the operation's `op_id` /
++  `lock_generation`. A timed-out parent thread cannot replace a later
++  resync's intent. Cleanup uses the plan's intent snapshot.
++- Unknown process liveness or unreadable/corrupt ownership refuses, not dead.
++- `start()` no longer writes the lease. If `claim_lease` fails after startup,
++  `finally` terminates the child; no leaked job ownership. A late stalled
++  `_write_dest_lease` will not replace a live newer token.
++
++## Lock-path test revision
++
++The seven unintegrated AV-5m4b tests remain. Original lock-file assertions
++are in `patches/av5m4b-grok-rejected-2026-09-08.patch`. The live
++`test_lease_and_lock_paths_ignore_temp_roots` still requires dest-local
++lease (and dest-local lock-path helper) independent of TEMP, and adds that
++the Windows mutex name is dest-hash stable across TEMP roots. Exclusive live
++lock is the kernel mutex, not a TEMP lock file. Cross-process exclusion,
++child-death and user-edit assertions are unchanged. The second-process test
++calls `claim_lease()` after `start()` because lease write moved into the
++cancellable/claim path.
++
++## Frozen parent interceptors (Ryan)
++
++The eight frozen parent `os.replace` / `Path.unlink` observations remain
++**failed**. The child performs the real syscall. New tests do not relabel them.
++
++## AW-4 cases assigned to AV-5m4a2
++
++Reported, not repaired. All four failed in this worktree (2.54 s):
++
++| Case | Result |
++|---|---|
++| AW4-01 missing binding after empty replacement vault | failed — still grants initialization |
++| AW4-02 direct `Path.write_text` before `_atomic_local` | failed — prior binding bytes change |
++| AW4-03 same-content different-inode temp cleanup | failed — hash-only identity deletes the replacement |
++| AW4-04 staged `library_mirror_vault_io.py` | failed — source stage omits the worker |
++
++## Overlap for Astra
++
++AV-5m4a2 may also touch `_io_unlink` / `_io_sha256` parent fallbacks and
++`_try_unlink_recorded_temp`. This run requires the isolated session for dest
++mutation/hash (lifetime) and does not change binding persistence, temp
++file-identity at unlink, or package staging. `_write_dest_binding` is
++untouched.
++
++## Commands and counts
++
++Environment for every command below:
++
++```
++PYTHONDONTWRITEBYTECODE=1
++PYTHONPATH=<worktree>;C:\Users\hello\AppData\Roaming\Python\Python314\site-packages;_scratch/av5m4b2
++ANTHROPIC_API_KEY absent
++LOCALAPPDATA/TEMP/TMP under _scratch/av5m4b2/run/
++```
++
++| Group | Command | Result | Time |
++|---|---|---|---|
++| AW+AW-2 | `pytest tests/library_work_astra/test_phase4_aw_acceptance.py tests/library_work_astra/test_phase4_aw2_acceptance.py` | **58 passed, 2 failed** | 20.99 s |
++| AW-3 | `pytest tests/library_work_astra/test_phase4_aw3_acceptance.py` | **11 passed, 6 failed** | 7.81 s |
++| AW-4 | `pytest tests/library_work_astra/test_phase4_aw4_acceptance.py` | **4 failed** | 2.54 s |
++| AW-5 | `pytest tests/library_work_astra/test_phase4_aw5_acceptance.py` | **3 passed** | 1.47 s |
++| Unit | `pytest -p shorttmp tests/test_library_resources.py tests/test_library_prompts.py tests/test_library_briefs.py tests/test_library_mirror.py tests/test_library_mirror_wiring.py tests/test_phase4_stdio.py tests/test_c01_mcp_stdio.py` | **133 passed** | 34.53 s |
++| AV-5m3 | `pytest tests/test_phase4_av5m3_isolation.py` | **7 passed** | 3.18 s |
++| New | `pytest tests/test_phase4_av5m4b_lifetime.py tests/test_phase4_av5m4b2_lifetime.py` | **14 passed** | 4.78 s |
++| Union | same files as above, `--basetemp=_scratch/av5m4b2/bt/x` | **226 passed, 12 failed** | 67.23 s |
++
++JUnit: `_scratch/av5m4b2/run/{aw,aw3,aw4b,aw5,ub,m3,n,union3}.xml`.
++
++Union failures are exactly the eight frozen parent interceptors plus the four
++AW-4 cases. The two AV-5m4b child-timeout tests that returned success in
++`av5m4b-wi` pass in this union. Frozen AW-5 is 3/3 in isolation and in the
++union.
++
++A longer union `--basetemp=.../bt/union2` added two brief-export path-cap
++failures (dest+`.tmp` exceeded 240). That is a fixture-path limit, not a
++lifetime defect. The counted union uses `_scratch/av5m4b2/bt/x`.
++
++AW+AW-2 failures (parent `os.replace` intercept vs isolated child):
++
++- `test_purge_removes_intent_owned_actual_temp_name`
++- `test_d13_replace_syscall_cannot_complete_after_timeout`
++
++AW-3 failures (same intercept family; D13 fixture contradiction unchanged):
++
++- `test_d12_retry_keeps_ownership_of_interrupted_temp`
++- `test_d12_control_hard_purge_removes_unedited_recorded_temp`
++- `test_d12_recorded_temp_path_does_not_authorize_deleting_user_replacement`
++- `test_d13_timeout_never_publishes_or_rolls_back_over_user_bytes[visibility]`
++- `test_d13_timeout_never_publishes_or_rolls_back_over_user_bytes[user_edit]`
++- `test_d13_timed_out_writer_cannot_erase_a_later_successful_sync`
++
++AW-3 still green: D01–D03, D07–D10, D14, D15.
++
++Limits: one child interpreter per resync, not per file. Hung child I/O is
++killed with the job/process group; death is confirmed before the lease is
++dropped. Frozen fixtures that patch `mirror.os.replace` in the parent do not
++observe that syscall. Publication budget remains the caller's `budget_s`;
++startup and termination are bounded and reported beside it. ctypes
++`sqlite3_txn_state` uses CPython Connection slot 2 and `DLLs/sqlite3.dll`;
++if that layout is unavailable the store fails closed (refuses). Windows
++named mutexes are not dest filesystem I/O; POSIX still flocks a dest-local
++lock file when the dest exists.
++
++## Files
++
++- `library_mirror.py` — job APIs, death-confirmed terminate, thread-local
++  session/plan/op_id, dest-hash kernel mutex, dest-stable lease inside
++  cancellation, unknown-liveness fail-closed, late-intent generation bind
++- `library_briefs.py` — authoritative-connection txn-state exclusion
++- `tests/test_phase4_av5m4b_lifetime.py` — original seven; lock-path assertion
++  revised to the contract; timeout tests pin RPC after suspend
++- `tests/test_phase4_av5m4b2_lifetime.py` — AW-5 findings, late intent, lease
++  write after startup, unknown liveness
++- `docs/library/PHASE4-AV5M4B-GROK-2026-09-08.md` — retained original AV-5m4b
++  report from the starting-point patch
++- `docs/library/PHASE4-AV5M4B2-GROK-2026-09-08.md` — this report
+diff --git a/library_briefs.py b/library_briefs.py
+index ed2c05f..7f728a3 100644
+--- a/library_briefs.py
++++ b/library_briefs.py
+@@ -48,6 +48,7 @@ Everything the client reads back is untrusted data inside the shared fence.
+ from __future__ import annotations
+ 
+ import contextlib
++import ctypes
+ import datetime as _dt
+ import hashlib
+ import json
+@@ -58,6 +59,7 @@ import re
+ import secrets
+ import shutil
+ import sqlite3
++import sys
+ import threading
+ import time
+ import unicodedata
+@@ -396,6 +398,88 @@ def _read_json(path: Path):
+         return json.loads(handle.read().decode("utf-8"))
+ 
+ 
++# sqlite3_txn_state: NONE=0, READ=1, WRITE=2. A third-connection BEGIN
++# IMMEDIATE failure cannot prove which connection owns the reserved lock.
++_SQLITE_TXN_NONE = 0
++_SQLITE_TXN_READ = 1
++_SQLITE_TXN_WRITE = 2
++_SQLITE_CAPI = None
++_SQLITE_CAPI_UNAVAILABLE = False
++
++
++def _sqlite_capi():
++    """The sqlite3.dll/_sqlite3 is linked against. None if it cannot be loaded."""
++    global _SQLITE_CAPI, _SQLITE_CAPI_UNAVAILABLE
++    if _SQLITE_CAPI is not None or _SQLITE_CAPI_UNAVAILABLE:
++        return _SQLITE_CAPI
++    try:
++        import _sqlite3
++        from ctypes import CDLL, c_char_p, c_int, c_void_p
++        pyd = Path(getattr(_sqlite3, "__file__", "") or "")
++        candidates = []
++        if pyd:
++            candidates.append(pyd.with_name("sqlite3.dll"))
++        candidates.append(Path(sys.base_prefix) / "DLLs" / "sqlite3.dll")
++        lib = None
++        if os.name == "nt":
++            for path in candidates:
++                if path.is_file():
++                    lib = CDLL(str(path))
++                    break
++        if lib is None:
++            lib = CDLL("libsqlite3.so.0" if os.name != "nt" else "sqlite3.dll")
++        lib.sqlite3_txn_state.argtypes = [c_void_p, c_char_p]
++        lib.sqlite3_txn_state.restype = c_int
++        lib.sqlite3_get_autocommit.argtypes = [c_void_p]
++        lib.sqlite3_get_autocommit.restype = c_int
++        _SQLITE_CAPI = lib
++        return lib
++    except Exception:
++        _SQLITE_CAPI_UNAVAILABLE = True
++        return None
++
++
++def _sqlite_db_pointer(conn):
++    """CPython sqlite3.Connection: sqlite3* is the first field after PyObject_HEAD."""
++    from ctypes import c_void_p
++
++    class _Head(ctypes.Structure):
++        _fields_ = [("slots", c_void_p * 4)]
++
++    try:
++        return _Head.from_address(id(conn)).slots[2]
++    except Exception:
++        return None
++
++
++def _sqlite_connection_txn_state(conn) -> int | None:
++    """Proven sqlite3_txn_state for main, or None if it cannot be proven."""
++    lib = _sqlite_capi()
++    if lib is None or conn is None:
++        return None
++    db = _sqlite_db_pointer(conn)
++    if not db:
++        return None
++    try:
++        autocommit = int(lib.sqlite3_get_autocommit(db))
++        state = int(lib.sqlite3_txn_state(db, b"main"))
++    except Exception:
++        return None
++    in_txn = bool(getattr(conn, "in_transaction", False))
++    if in_txn and autocommit != 0:
++        return None
++    if (not in_txn) and autocommit != 1:
++        return None
++    if state not in (_SQLITE_TXN_NONE, _SQLITE_TXN_READ, _SQLITE_TXN_WRITE):
++        return None
++    return state
++
++
++def _sqlite_connection_holds_write_lock(conn) -> bool:
++    """True only when this connection itself holds a write transaction."""
++    return _sqlite_connection_txn_state(conn) == _SQLITE_TXN_WRITE
++
++
+ # --------------------------------------------------------------------------
+ # The store
+ # --------------------------------------------------------------------------
+@@ -1011,11 +1095,17 @@ class BriefStore:
+         if conn is None or not hasattr(conn, "execute"):
+             yield
+             return
+-        # An already-open caller transaction is authoritative work. Do not
+-        # roll it back to start exclusion; reuse it for the publication window.
++        # An already-open write transaction on THIS connection is
++        # authoritative work. Do not roll it back. A deferred read is not
++        # exclusion: refuse without dummy DML or a third-connection probe.
+         if getattr(conn, "in_transaction", False):
+-            yield
+-            return
++            if _sqlite_connection_holds_write_lock(conn):
++                yield
++                return
++            raise ResourceError(
++                "stale_brief",
++                details={"reason": "database_busy", "next_step": "get_library_brief_input"},
++            )
+         begun = False
+         try:
+             conn.execute("BEGIN IMMEDIATE")
+diff --git a/library_mirror.py b/library_mirror.py
+index f271635..c01c95a 100644
+--- a/library_mirror.py
++++ b/library_mirror.py
+@@ -9,11 +9,16 @@ reads ``TASTE.md`` / ``USER.md`` back, and never routes through
+ Contract rules this module does not implement exactly, and why
+ --------------------------------------------------------------
+ 1. Isolated worker cancellation. Vault mutation runs in one child process
+-   per resync (not per file), assigned to a Windows kill-on-close job or a
+-   POSIX process group. The caller's deadline kills that worker and waits
+-   until it can no longer mutate the destination. A hung ``os.replace`` in
+-   the parent interpreter is not used. Source/dependency checks stay in the
+-   parent against authoritative storage immediately before publication.
++   per resync (not per file). Windows requires a successful kill-on-close job
++   assignment before any vault mutation; POSIX terminates the process group.
++   The caller's deadline kills that worker and keeps the destination lease
++   until death is confirmed. Destination lock/lease I/O that can block runs
++   inside the cancellable boundary; live exclusion is a dest-hash kernel
++   mutex so a hung dest filesystem cannot trap the caller. A hung
++   ``os.replace`` in the parent interpreter is not used. Each operation binds
++   its own I/O session, cancellation token and plan. Source/dependency checks
++   stay in the parent against authoritative storage immediately before
++   publication.
+ 2. Mirror-specific codes (``destination_unavailable``, ``user_edit_conflict``,
+    ``unmanaged_conflict``, ``path_collision``, ``purge_blocked_user_edit``)
+    are returned through ``library_resources.refusal``, not
+@@ -37,6 +42,7 @@ import logging
+ import os
+ import re
+ import secrets
++import signal
+ import stat
+ import subprocess
+ import sys
+@@ -45,7 +51,6 @@ import time
+ import unicodedata
+ from dataclasses import dataclass
+ from datetime import datetime, timezone
+-import tempfile
+ from pathlib import Path
+ from typing import Any, Callable, Iterator
+ 
+@@ -67,6 +72,10 @@ except ImportError:
+     _library_briefs = None  # type: ignore[assignment]
+ 
+ log = logging.getLogger("uoink.library_mirror")
++_IO_CTX = threading.local()
++_k32 = None
++_dest_hold_guard = threading.Lock()
++_dest_holds: dict[str, int] = {}
+ 
+ CONTRACT_VERSION = "phase4-v1-2026-09-08"
+ MIRROR_LEDGER_DIR = "reach/mirror"
+@@ -76,6 +85,17 @@ SCOPE_ALL = "all_current_and_future_items"
+ MAX_FILE_BYTES = 65536
+ DEFAULT_MAX_FILES = 20
+ DEFAULT_BUDGET_S = 2.0
++_WORKER_STARTUP_S = 2.0
++_WORKER_TERMINATE_S = 2.0
++_STILL_ACTIVE = 259
++_WAIT_OBJECT_0 = 0
++_WAIT_ABANDONED = 0x00000080
++_WAIT_TIMEOUT = 0x00000102
++_FILETIME_EPOCH_OFFSET_100NS = 116_444_736_000_000_000
++_PROCESS_START_TOLERANCE_MS = 2_000
++_WRITER_LOCK_NAME = ".uoink-mirror-writer.lock"
++_WRITER_LEASE_NAME = ".uoink-mirror-writer.lease"
++_WRITER_MUTEX_PREFIX = "Local\\uoink-mw-"
+ VOLUME_MARKER_NAME = ".uoink-volume-marker"
+ MANIFEST_REL = ".uoink-mirror/manifest.json"
+ LIBRARY_INDEX_REL = "Library.md"
+@@ -368,46 +388,161 @@ def _safe_temp_path(uoink: Path, rel: str) -> Path | None:
+     return path
+ 
+ 
+-def _pid_is_alive(pid: int | None) -> bool:
++def _kernel32():
++    """kernel32 with pointer-sized HANDLE signatures. Cached after first use."""
++    global _k32
++    if _k32 is not None:
++        return _k32
++    from ctypes import wintypes
++    k32 = ctypes.WinDLL("kernel32", use_last_error=True)
++    handle = wintypes.HANDLE
++    k32.CreateJobObjectW.restype = handle
++    k32.CreateJobObjectW.argtypes = [ctypes.c_void_p, wintypes.LPCWSTR]
++    k32.SetInformationJobObject.restype = wintypes.BOOL
++    k32.SetInformationJobObject.argtypes = [
++        handle, ctypes.c_int, ctypes.c_void_p, wintypes.DWORD,
++    ]
++    k32.AssignProcessToJobObject.restype = wintypes.BOOL
++    k32.AssignProcessToJobObject.argtypes = [handle, handle]
++    k32.TerminateJobObject.restype = wintypes.BOOL
++    k32.TerminateJobObject.argtypes = [handle, wintypes.UINT]
++    k32.CloseHandle.restype = wintypes.BOOL
++    k32.CloseHandle.argtypes = [handle]
++    k32.OpenProcess.restype = handle
++    k32.OpenProcess.argtypes = [wintypes.DWORD, wintypes.BOOL, wintypes.DWORD]
++    k32.GetExitCodeProcess.restype = wintypes.BOOL
++    k32.GetExitCodeProcess.argtypes = [handle, ctypes.POINTER(wintypes.DWORD)]
++    k32.GetProcessTimes.restype = wintypes.BOOL
++    k32.GetProcessTimes.argtypes = [
++        handle,
++        ctypes.POINTER(wintypes.FILETIME),
++        ctypes.POINTER(wintypes.FILETIME),
++        ctypes.POINTER(wintypes.FILETIME),
++        ctypes.POINTER(wintypes.FILETIME),
++    ]
++    k32.GetCurrentProcess.restype = handle
++    k32.GetCurrentProcess.argtypes = []
++    k32.CreateMutexW.restype = handle
++    k32.CreateMutexW.argtypes = [ctypes.c_void_p, wintypes.BOOL, wintypes.LPCWSTR]
++    k32.WaitForSingleObject.restype = wintypes.DWORD
++    k32.WaitForSingleObject.argtypes = [handle, wintypes.DWORD]
++    k32.ReleaseMutex.restype = wintypes.BOOL
++    k32.ReleaseMutex.argtypes = [handle]
++    _k32 = k32
++    return k32
++
++
++def _windows_process_created_ms(handle) -> int | None:
++    from ctypes import wintypes
++    creation, exit_, kernel, user = (wintypes.FILETIME() for _ in range(4))
++    if not _kernel32().GetProcessTimes(
++        handle, ctypes.byref(creation), ctypes.byref(exit_),
++        ctypes.byref(kernel), ctypes.byref(user),
++    ):
++        return None
++    value = (int(creation.dwHighDateTime) << 32) | int(creation.dwLowDateTime)
++    return (value - _FILETIME_EPOCH_OFFSET_100NS) // 10_000
++
++
++def _posix_process_created_ms(pid: int) -> int | None:
++    try:
++        with open(f"/proc/{pid}/stat", "r", encoding="ascii", errors="replace") as handle:
++            stat_text = handle.read()
++        with open("/proc/stat", "r", encoding="ascii", errors="replace") as handle:
++            boot = next(int(line.split()[1]) for line in handle if line.startswith("btime "))
++        ticks = int(stat_text.rsplit(")", 1)[1].split()[19])
++        hertz = os.sysconf("SC_CLK_TCK")
++        return boot * 1000 + (ticks * 1000) // hertz
++    except (OSError, ValueError, IndexError, StopIteration, AttributeError):
++        return None
++
++
++def _process_created_ms(pid: int | None) -> int | None:
+     if not isinstance(pid, int) or pid <= 0:
+-        return False
++        return None
+     if os.name == "nt":
+-        k32 = ctypes.windll.kernel32
+-        PROCESS_QUERY_LIMITED_INFORMATION = 0x1000
+-        handle = k32.OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, False, pid)
++        k32 = _kernel32()
++        handle = k32.OpenProcess(0x1000, False, int(pid))
+         if not handle:
+-            return False
++            return None
+         try:
+-            code = ctypes.c_ulong()
++            return _windows_process_created_ms(handle)
++        finally:
++            k32.CloseHandle(handle)
++    return _posix_process_created_ms(int(pid))
++
++
++def _process_liveness(pid: int | None, created_ms: int | None = None) -> str:
++    """``alive``, ``dead`` or ``unknown``. PID reuse with a mismatched start time is dead."""
++    if not isinstance(pid, int) or pid <= 0:
++        return "dead"
++    if os.name == "nt":
++        from ctypes import wintypes
++        k32 = _kernel32()
++        handle = k32.OpenProcess(0x1000, False, int(pid))
++        if not handle:
++            error = ctypes.get_last_error()
++            return "dead" if error == 87 else "unknown"
++        try:
++            code = wintypes.DWORD()
+             if not k32.GetExitCodeProcess(handle, ctypes.byref(code)):
+-                return False
+-            return int(code.value) == 259  # STILL_ACTIVE
++                return "unknown"
++            if int(code.value) != _STILL_ACTIVE:
++                return "dead"
++            if created_ms is not None:
++                actual = _windows_process_created_ms(handle)
++                if actual is not None and abs(actual - int(created_ms)) > _PROCESS_START_TOLERANCE_MS:
++                    return "dead"
++            return "alive"
+         finally:
+             k32.CloseHandle(handle)
+     try:
+-        os.kill(pid, 0)
+-    except (OSError, ProcessLookupError, PermissionError, ValueError):
+-        return False
+-    return True
++        os.kill(int(pid), 0)
++    except ProcessLookupError:
++        return "dead"
++    except (OSError, PermissionError, ValueError):
++        return "unknown"
++    if created_ms is not None:
++        actual = _posix_process_created_ms(int(pid))
++        if actual is not None and abs(actual - int(created_ms)) > _PROCESS_START_TOLERANCE_MS:
++            return "dead"
++    return "alive"
++
++
++def _pid_is_alive(pid: int | None, created_ms: int | None = None) -> bool:
++    return _process_liveness(pid, created_ms) == "alive"
++
++
++def _canonical_dest(dest: str) -> str:
++    return os.path.normcase(os.path.realpath(str(dest)))
++
++
++def _dest_namespace_dir(dest: str) -> Path:
++    return Path(_canonical_dest(dest))
+ 
+ 
+ def _dest_lease_path(dest: str) -> Path:
+-    canonical = os.path.normcase(os.path.realpath(str(dest)))
+-    dest_key = hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+-    lock_dir = Path(tempfile.gettempdir()) / "uoink-mirror-locks"
+-    lock_dir.mkdir(parents=True, exist_ok=True)
+-    return lock_dir / f"{dest_key}.lease"
++    return _dest_namespace_dir(dest) / _WRITER_LEASE_NAME
++
++
++def _dest_lock_path(dest: str) -> Path:
++    return _dest_namespace_dir(dest) / _WRITER_LOCK_NAME
+ 
+ 
+-def _read_dest_lease(dest: str) -> dict:
++def _read_dest_lease(dest: str):
+     path = _dest_lease_path(dest)
+     try:
+         if not path.is_file():
+-            return {}
++            return None
++    except OSError:
++        return "unavailable"
++    try:
+         data = json.loads(path.read_text(encoding="utf-8"))
+     except (OSError, json.JSONDecodeError, UnicodeError, TypeError):
+-        return {}
+-    return data if isinstance(data, dict) else {}
++        return "corrupt"
++    if not isinstance(data, dict):
++        return "corrupt"
++    return data
+ 
+ 
+ def _write_dest_lease(dest: str, payload: dict) -> None:
+@@ -415,33 +550,127 @@ def _write_dest_lease(dest: str, payload: dict) -> None:
+     path.parent.mkdir(parents=True, exist_ok=True)
+     tmp = path.with_name(path.name + "." + secrets.token_hex(8) + ".tmp")
+     data = json.dumps(payload, ensure_ascii=False, sort_keys=True).encode("utf-8")
+-    with open(tmp, "xb") as stream:
+-        stream.write(data)
+-        stream.flush()
+-        os.fsync(stream.fileno())
+-    os.replace(tmp, path)
++    try:
++        with open(tmp, "xb") as stream:
++            stream.write(data)
++            stream.flush()
++            os.fsync(stream.fileno())
++        current = _read_dest_lease(dest)
++        if current == "unavailable":
++            raise OSError("destination lease unavailable")
++        if current == "corrupt":
++            raise OSError("destination lease corrupt")
++        if isinstance(current, dict):
++            cur_token = current.get("token")
++            new_token = payload.get("token")
++            if cur_token and new_token and cur_token != new_token and _lease_blocks_us(current):
++                raise OSError("destination lease held")
++        os.replace(tmp, path)
++        tmp = None
++    finally:
++        if tmp is not None:
++            try:
++                Path(tmp).unlink()
++            except OSError:
++                pass
+ 
+ 
+-def _clear_dest_lease(dest: str, pid: int | None = None) -> None:
++def _lease_holder_status(lease: dict) -> str:
++    created = lease.get("created_ms")
++    return _process_liveness(
++        lease.get("pid"), created if isinstance(created, int) else None,
++    )
++
++
++def _lease_holder_alive(lease: dict) -> bool:
++    return _lease_holder_status(lease) == "alive"
++
++
++def _lease_blocks_us(lease: dict) -> bool:
++    """Alive or unknown ownership blocks us. Only proven death yields the dest."""
++    return _lease_holder_status(lease) != "dead"
++
++
++def _clear_dest_lease(dest: str, pid: int | None = None, token: str | None = None) -> None:
+     path = _dest_lease_path(dest)
++    current = _read_dest_lease(dest)
++    if current in ("corrupt", "unavailable"):
++        return
++    if isinstance(current, dict):
++        if token is not None and current.get("token") not in (None, token):
++            return
++        if pid is not None and current.get("pid") not in (None, pid) and _lease_blocks_us(current):
++            return
++        if token is None and pid is None and _lease_blocks_us(current):
++            return
+     try:
+-        if pid is not None:
+-            current = _read_dest_lease(dest)
+-            if current.get("pid") not in (None, pid) and _pid_is_alive(current.get("pid")):
+-                return
+         path.unlink()
+     except OSError:
+         pass
+ 
+ 
+-def _foreign_vault_worker_alive(dest: str, our_pid: int | None = None) -> bool:
++def _foreign_vault_worker_alive(
++    dest: str, our_pid: int | None = None, our_token: str | None = None,
++) -> bool:
+     lease = _read_dest_lease(dest)
+-    pid = lease.get("pid")
+-    if not isinstance(pid, int) or pid <= 0:
++    if lease in ("corrupt", "unavailable"):
++        return True
++    if not isinstance(lease, dict):
++        return False
++    if our_token is not None and lease.get("token") == our_token:
+         return False
+-    if our_pid is not None and pid == our_pid:
++    if our_pid is not None and lease.get("pid") == our_pid:
+         return False
+-    return _pid_is_alive(pid)
++    return _lease_blocks_us(lease)
++
++
++def _dest_mutex_name(dest: str) -> str:
++    key = hashlib.sha256(_canonical_dest(dest).encode("utf-8")).hexdigest()[:32]
++    return _WRITER_MUTEX_PREFIX + key
++
++
++def _win_acquire_dest_mutex(dest: str, timeout: float):
++    """Named mutex plus same-thread non-recursion (Win32 mutexes are recursive)."""
++    k32 = _kernel32()
++    key = _canonical_dest(dest)
++    me = threading.get_ident()
++    with _dest_hold_guard:
++        if _dest_holds.get(key) == me:
++            raise _LockTimeout()
++    name = _dest_mutex_name(dest)
++    handle = k32.CreateMutexW(None, False, name)
++    if not handle:
++        raise _LockTimeout()
++    wait_ms = max(50, int(max(0.05, float(timeout)) * 1000))
++    result = int(k32.WaitForSingleObject(handle, wait_ms))
++    if result not in (_WAIT_OBJECT_0, _WAIT_ABANDONED):
++        k32.CloseHandle(handle)
++        raise _LockTimeout()
++    with _dest_hold_guard:
++        if _dest_holds.get(key) == me:
++            try:
++                k32.ReleaseMutex(handle)
++            except Exception:
++                pass
++            k32.CloseHandle(handle)
++            raise _LockTimeout()
++        _dest_holds[key] = me
++    return handle, key
++
++
++def _win_release_dest_mutex(handle, key: str | None = None) -> None:
++    if handle is None or os.name != "nt":
++        return
++    if key is not None:
++        with _dest_hold_guard:
++            if _dest_holds.get(key) == threading.get_ident():
++                _dest_holds.pop(key, None)
++    k32 = _kernel32()
++    try:
++        k32.ReleaseMutex(handle)
++    except Exception:
++        pass
++    _win_close_handle(handle)
+ 
+ 
+ class _JOBOBJECT_BASIC_LIMIT_INFORMATION(ctypes.Structure):
+@@ -487,7 +716,7 @@ _JOB_OBJECT_EXTENDED_LIMIT_INFORMATION = 9
+ def _win_create_kill_job():
+     if os.name != "nt":
+         return None
+-    k32 = ctypes.windll.kernel32
++    k32 = _kernel32()
+     job = k32.CreateJobObjectW(None, None)
+     if not job:
+         return None
+@@ -500,7 +729,7 @@ def _win_create_kill_job():
+     if not ok:
+         k32.CloseHandle(job)
+         return None
+-    return job
++    return int(job)
+ 
+ 
+ def _win_assign_job(job, proc: subprocess.Popen) -> bool:
+@@ -509,8 +738,25 @@ def _win_assign_job(job, proc: subprocess.Popen) -> bool:
+     handle = getattr(proc, "_handle", None)
+     if not handle:
+         return False
+-    k32 = ctypes.windll.kernel32
+-    return bool(k32.AssignProcessToJobObject(job, int(handle)))
++    return bool(_kernel32().AssignProcessToJobObject(job, handle))
++
++
++def _win_close_handle(handle) -> None:
++    if handle is None or os.name != "nt":
++        return
++    try:
++        _kernel32().CloseHandle(handle)
++    except Exception:
++        pass
++
++
++def _win_terminate_job(job) -> None:
++    if job is None or os.name != "nt":
++        return
++    try:
++        _kernel32().TerminateJobObject(job, 1)
++    except Exception:
++        pass
+ 
+ 
+ class _VaultIoSession:
+@@ -521,6 +767,10 @@ class _VaultIoSession:
+         self.job = None
+         self.dest = ""
+         self.startup_s = 0.0
++        self.termination_s = 0.0
++        self.token = ""
++        self.created_ms: int | None = None
++        self._lease_written = False
+         self._rpc_lock = threading.Lock()
+         self._dead = False
+ 
+@@ -532,7 +782,11 @@ class _VaultIoSession:
+     @property
+     def alive(self) -> bool:
+         proc = self.proc
+-        return (not self._dead) and proc is not None and proc.poll() is None
++        if proc is None:
++            return False
++        if proc.poll() is not None:
++            return False
++        return not self._dead
+ 
+     def _readline(self, timeout: float | None = None) -> bytes | None:
+         proc = self.proc
+@@ -556,11 +810,29 @@ class _VaultIoSession:
+         line = box.get("line")
+         return line if isinstance(line, (bytes, bytearray)) else None
+ 
++    def _close_streams(self) -> None:
++        proc = self.proc
++        if proc is None:
++            return
++        for stream in (proc.stdin, proc.stdout, proc.stderr):
++            if stream is not None:
++                try:
++                    stream.close()
++                except OSError:
++                    pass
++
+     @classmethod
+     def start(cls, dest: str) -> "_VaultIoSession":
+         session = cls()
+         session.dest = dest
++        session.token = secrets.token_hex(16)
+         t0 = time.monotonic()
++        job = None
++        if os.name == "nt":
++            job = _win_create_kill_job()
++            if job is None:
++                raise OSError("vault io worker job assignment failed")
++            session.job = job
+         env = os.environ.copy()
+         env["PYTHONDONTWRITEBYTECODE"] = "1"
+         env.pop("ANTHROPIC_API_KEY", None)
+@@ -578,15 +850,19 @@ class _VaultIoSession:
+             kwargs["creationflags"] = int(getattr(subprocess, "CREATE_NO_WINDOW", 0))
+         else:
+             kwargs["start_new_session"] = True
+-        session.proc = subprocess.Popen(
+-            [sys.executable, "-B", worker],
+-            **kwargs,
+-        )
+-        if os.name == "nt":
+-            session.job = _win_create_kill_job()
+-            if session.job is not None:
+-                _win_assign_job(session.job, session.proc)
+-        ready_line = session._readline(timeout=15.0)
++        try:
++            session.proc = subprocess.Popen(
++                [sys.executable, "-B", worker],
++                **kwargs,
++            )
++        except Exception as exc:
++            _win_close_handle(job)
++            session.job = None
++            raise OSError("vault io worker failed to start") from exc
++        if os.name == "nt" and not _win_assign_job(job, session.proc):
++            session.terminate()
++            raise OSError("vault io worker job assignment failed")
++        ready_line = session._readline(timeout=_WORKER_STARTUP_S)
+         session.startup_s = time.monotonic() - t0
+         ready = None
+         if ready_line:
+@@ -597,12 +873,22 @@ class _VaultIoSession:
+         if not isinstance(ready, dict) or not ready.get("ready") or not session.alive:
+             session.terminate()
+             raise OSError("vault io worker failed to start")
+-        _write_dest_lease(dest, {
+-            "pid": session.pid,
+-            "destination": dest,
++        session.created_ms = _process_created_ms(session.pid)
++        return session
++
++    def claim_lease(self, op_id: int | None = None) -> None:
++        """Dest lease I/O. Call only from a cancellable boundary."""
++        if not self.alive:
++            raise OSError("vault io worker is not running")
++        _write_dest_lease(self.dest, {
++            "pid": self.pid,
+             "ppid": os.getpid(),
++            "created_ms": self.created_ms,
++            "token": self.token,
++            "destination": self.dest,
++            "op_id": op_id,
+         })
+-        return session
++        self._lease_written = True
+ 
+     def call(self, req: dict) -> dict:
+         with self._rpc_lock:
+@@ -661,68 +947,84 @@ class _VaultIoSession:
+         digest = result.get("hash")
+         return digest if isinstance(digest, str) else None
+ 
+-    def terminate(self) -> None:
+-        self._dead = True
++    def terminate(self) -> bool:
++        t0 = time.monotonic()
+         proc = self.proc
+         job = self.job
+         dest = self.dest
+         pid = self.pid
+-        if job is not None and os.name == "nt":
++        token = self.token
++        if job is not None:
++            _win_terminate_job(job)
++        if os.name != "nt" and proc is not None and proc.pid:
+             try:
+-                ctypes.windll.kernel32.TerminateJobObject(job, 1)
+-            except Exception:
+-                pass
+-        if proc is not None and proc.poll() is None:
++                os.killpg(int(proc.pid), getattr(signal, "SIGKILL", signal.SIGTERM))
++            except (OSError, ProcessLookupError, PermissionError, AttributeError):
++                try:
++                    proc.kill()
++                except OSError:
++                    pass
++        elif proc is not None and proc.poll() is None:
+             try:
+                 proc.kill()
+             except OSError:
+                 pass
++        confirmed = proc is None or proc.poll() is not None
++        if proc is not None and not confirmed:
+             try:
+-                proc.wait(timeout=2.0)
+-            except Exception:
+-                pass
+-        if proc is not None:
+-            for stream in (proc.stdin, proc.stdout, proc.stderr):
+-                if stream is not None:
+-                    try:
+-                        stream.close()
+-                    except OSError:
+-                        pass
+-        if job is not None and os.name == "nt":
+-            try:
+-                ctypes.windll.kernel32.CloseHandle(job)
+-            except Exception:
++                proc.wait(timeout=_WORKER_TERMINATE_S)
++            except subprocess.TimeoutExpired:
+                 pass
+-        self.proc = None
+-        self.job = None
+-        if dest:
+-            _clear_dest_lease(dest, pid)
++            confirmed = proc.poll() is not None
++        if not confirmed and job is not None:
++            _win_close_handle(job)
++            self.job = None
++            job = None
++            if proc is not None and proc.poll() is None:
++                try:
++                    proc.wait(timeout=min(0.5, _WORKER_TERMINATE_S))
++                except subprocess.TimeoutExpired:
++                    pass
++                confirmed = proc.poll() is not None
++        if confirmed:
++            self._dead = True
++            self._close_streams()
++            _win_close_handle(job)
++            self.proc = None
++            self.job = None
++            if dest and self._lease_written:
++                _clear_dest_lease(dest, pid, token=token)
++        self.termination_s = time.monotonic() - t0
++        return confirmed
+ 
+-    def shutdown(self) -> None:
++    def shutdown(self) -> bool:
++        t0 = time.monotonic()
+         try:
+             if self.alive:
+                 self.call({"cmd": "shutdown"})
+         except OSError:
+-            pass
++            return self.terminate()
+         proc = self.proc
+         if proc is not None and proc.poll() is None:
+             try:
+-                proc.wait(timeout=1.0)
+-            except Exception:
+-                self.terminate()
+-                return
++                proc.wait(timeout=min(1.0, _WORKER_TERMINATE_S))
++            except subprocess.TimeoutExpired:
++                return self.terminate()
++        if proc is not None and proc.poll() is None:
++            return self.terminate()
+         dest = self.dest
+         pid = self.pid
++        token = self.token
++        job = self.job
+         self._dead = True
++        self._close_streams()
+         self.proc = None
+-        if self.job is not None and os.name == "nt":
+-            try:
+-                ctypes.windll.kernel32.CloseHandle(self.job)
+-            except Exception:
+-                pass
+-            self.job = None
+-        if dest:
+-            _clear_dest_lease(dest, pid)
++        self.job = None
++        _win_close_handle(job)
++        if dest and self._lease_written:
++            _clear_dest_lease(dest, pid, token=token)
++        self.termination_s = time.monotonic() - t0
++        return True
+ 
+ 
+ # --------------------------------------------------------------------------
+@@ -746,6 +1048,10 @@ class Mirror:
+         self._thread_lock = threading.RLock()
+         self._vault_io: _VaultIoSession | None = None
+         self._vault_io_startup_s = 0.0
++        self._vault_io_termination_s = 0.0
++        self._lock_generation = 0
++        self._lock_acquired = False
++        self._op_seq = 0
+         self.ledger_dir = self.data_root / MIRROR_LEDGER_DIR
+ 
+     # ---- public API ----------------------------------------------------
+@@ -880,16 +1186,24 @@ class Mirror:
+             if not has_deletions:
+                 return _ok(synced=0, enabled=False, state="disabled")
+         start = float(self._clock())
++        dest = Path(self.consent.destination)
++        if not self._destination_exists(dest):
++            ledger = self._load_ledger()
++            pending = sum(
++                1 for e in ledger.get("entries", {}).values()
++                if (e.get("pending_action") or "none") != "none"
++            )
++            return _mirror_refusal(
++                "destination_unavailable",
++                "The mirror destination is unavailable.",
++                retryable=True,
++                destination_unavailable=True,
++                destination_state="unavailable",
++                pending=pending,
++                synced=0,
++            )
+         try:
+             with self._exclusive(timeout=max(0.05, float(budget_s))):
+-                if _foreign_vault_worker_alive(self.consent.destination):
+-                    return _mirror_refusal(
+-                        "destination_unavailable",
+-                        "The mirror destination is unavailable.",
+-                        retryable=True,
+-                        destination_unavailable=True,
+-                        synced=0,
+-                    )
+                 remaining = float(budget_s) - (float(self._clock()) - start)
+                 return self._resync_locked(max_files=int(max_files), budget_s=max(0.0, remaining))
+         except _LockTimeout:
+@@ -1423,12 +1737,28 @@ class Mirror:
+         name = hashlib.sha256(key.encode("utf-8")).hexdigest()
+         return self._intent_dir() / f"{name}.json"
+ 
++    def _intent_mutation_allowed(self, plan: dict | None = None) -> bool:
++        ctx_plan = plan if isinstance(plan, dict) else getattr(_IO_CTX, "plan", None)
++        if not isinstance(ctx_plan, dict):
++            return True
++        lock_gen = ctx_plan.get("lock_generation")
++        if lock_gen is not None and lock_gen != getattr(self, "_lock_generation", None):
++            return False
++        op_id = ctx_plan.get("op_id")
++        if op_id is not None and op_id != getattr(self, "_op_seq", None):
++            return False
++        return True
++
+     def _write_intent(self, key: str, payload: dict) -> None:
++        if not self._intent_mutation_allowed():
++            return
+         path = self._intent_path(key)
+         path.parent.mkdir(parents=True, exist_ok=True)
+         self._atomic_local(path, json.dumps(payload, ensure_ascii=False, sort_keys=True).encode("utf-8"))
+ 
+     def _clear_intent(self, key: str) -> None:
++        if not self._intent_mutation_allowed():
++            return
+         try:
+             self._intent_path(key).unlink()
+         except OSError:
+@@ -1868,12 +2198,23 @@ class Mirror:
+         plan["dest"] = str(dest)
+         cancel_event = threading.Event()
+         plan["cancelled"] = cancel_event
++        plan["lock_generation"] = self._lock_generation
++        self._op_seq += 1
++        plan["op_id"] = self._op_seq
++        session = None
+ 
+         def work():
++            bound = plan.get("io")
++            if bound is None or not getattr(bound, "alive", False):
++                raise OSError("vault io worker is not running")
++            if _foreign_vault_worker_alive(dest_str, our_token=getattr(bound, "token", None)):
++                raise OSError("destination lease held")
++            bound.claim_lease(op_id=plan.get("op_id"))
+             return self._vault_work(plan)
+ 
+         try:
+             self._start_vault_io(dest_str)
++            session = self._vault_io
+         except OSError as exc:
+             return _mirror_refusal(
+                 "destination_unavailable",
+@@ -1883,23 +2224,31 @@ class Mirror:
+                 synced=0,
+                 details={"reason": type(exc).__name__, "what": "vault_io_worker"},
+             )
++        plan["io"] = session
+         deadline = float(self._clock()) + max(0.0, float(budget_s))
+         plan["deadline_mono"] = deadline
+         remaining = max(0.01, deadline - float(self._clock()))
+         try:
+-            result, err = self._run_cancellable(work, remaining)
++            result, err = self._run_cancellable(work, remaining, session=session, plan=plan)
+             if err == "timeout" or result is None:
+                 cancel_event.set()
+-                self._kill_vault_io()
++                self._kill_vault_io(session)
++                self._op_seq += 1
+                 return _mirror_refusal(
+                     "destination_unavailable",
+                     "The mirror destination is unavailable.",
+                     retryable=True,
+                     destination_unavailable=True,
+                     synced=0,
++                    details={
++                        "reason": "timeout",
++                        "startup_s": float(getattr(session, "startup_s", 0.0) or 0.0),
++                        "termination_s": float(getattr(session, "termination_s", 0.0) or 0.0),
++                    },
+                 )
+             if isinstance(err, Exception):
+                 cancel_event.set()
++                self._op_seq += 1
+                 log.exception("mirror vault worker failed")
+                 return _mirror_refusal(
+                     "destination_unavailable",
+@@ -1911,7 +2260,7 @@ class Mirror:
+                 )
+             return self._apply_receipts(ledger, result)
+         finally:
+-            self._stop_vault_io()
++            self._stop_vault_io(session)
+ 
+     def _marker_state(self, dest: Path) -> str:
+         expected = (self.consent.marker if self.consent else "") or ""
+@@ -2130,6 +2479,8 @@ class Mirror:
+         return plan
+ 
+     def _vault_work(self, plan: dict) -> dict:
++        _IO_CTX.plan = plan
++        _IO_CTX.session = plan.get("io") or getattr(_IO_CTX, "session", None)
+         self._active_plan = plan
+         self._active_key = None
+         dest = Path(plan["dest"])
+@@ -2252,7 +2603,7 @@ class Mirror:
+             if receipt.get("counted"):
+                 used += 1
+         try:
+-            self._write_manifest(manifest_path, uoink, ownership)
++            self._write_manifest(manifest_path, uoink, ownership, plan=plan)
+         except OSError as exc:
+             return {
+                 "ok": False,
+@@ -2279,7 +2630,7 @@ class Mirror:
+             return {}, "corrupt"
+         return ownership, None
+ 
+-    def _write_manifest(self, manifest_path: Path, uoink: Path, ownership: dict) -> None:
++    def _write_manifest(self, manifest_path: Path, uoink: Path, ownership: dict, plan: dict | None = None) -> None:
+         payload = {
+             "schema_version": SCHEMA_VERSION,
+             "contract_version": CONTRACT_VERSION,
+@@ -2287,7 +2638,13 @@ class Mirror:
+             "ownership": ownership,
+         }
+         data = json.dumps(payload, ensure_ascii=False, sort_keys=True, indent=2).encode("utf-8")
+-        self._atomic_vault(manifest_path, data, uoink, recheck=lambda: True)
++        previous_key = getattr(_IO_CTX, "key", None)
++        _IO_CTX.plan = plan if plan is not None else getattr(_IO_CTX, "plan", None)
++        _IO_CTX.key = None
++        try:
++            self._atomic_vault(manifest_path, data, uoink, recheck=lambda: True)
++        finally:
++            _IO_CTX.key = previous_key
+ 
+     def _recover_intents(self, uoink: Path, intents: dict, ownership: dict, receipts: list) -> None:
+         for key, intent in intents.items():
+@@ -2326,18 +2683,17 @@ class Mirror:
+         if path is None:
+             return "not_ours"
+         try:
+-            session = self._vault_io
+-            if session is not None and session.alive:
+-                exists_result = session.call({"cmd": "exists", "path": str(path)})
+-                if exists_result.get("ok") and not exists_result.get("exists"):
+-                    return "gone"
+-            elif not path.exists():
++            session = self._require_vault_io()
++            exists_result = session.call({"cmd": "exists", "path": str(path)})
++            if not exists_result.get("ok"):
++                return "failed"
++            if not exists_result.get("exists"):
+                 return "gone"
+             if not path.is_file() or _is_reparse(path) or _hardlink_conflict(path):
+                 return "not_ours"
+             if not expected_hash:
+                 return "not_ours"
+-            current = self._io_sha256(path) or _sha256_file(path)
++            current = self._io_sha256(path)
+             if current != expected_hash:
+                 return "not_ours"
+             self._io_unlink(path)
+@@ -2402,7 +2758,9 @@ class Mirror:
+         self._write_intent(key, intent)
+ 
+     def _cleanup_owned_temps(self, uoink: Path, ownership: dict, plan: dict) -> None:
+-        intents = self._load_intents()
++        if not self._intent_mutation_allowed(plan):
++            return
++        intents = plan.get("intents") if isinstance(plan.get("intents"), dict) else self._load_intents()
+         for key, intent in list(intents.items()):
+             kept = self._cleanup_intent_temps(uoink, key, intent)
+             if kept:
+@@ -2503,6 +2861,9 @@ class Mirror:
+                 deadline = float(plan.get("deadline_mono") or 0)
+                 if deadline and float(self._clock()) > deadline:
+                     return False
++                lock_gen = plan.get("lock_generation")
++                if lock_gen is not None and lock_gen != getattr(self, "_lock_generation", None):
++                    return False
+             if not getattr(self, "_lock_acquired", False):
+                 return False
+ 
+@@ -2598,28 +2959,36 @@ class Mirror:
+ 
+             return True
+ 
++        _IO_CTX.plan = plan
++        _IO_CTX.key = key
+         self._active_plan = plan
+         self._active_key = key
+         try:
+             digest = self._atomic_vault(dest, bytes(content), uoink, recheck=recheck)
+         except _AbortedWrite:
+-            if dest.exists():
+-                now_h = _sha256_file(dest)
+-                desired = _sha256_bytes(bytes(content)) if isinstance(content, (bytes, bytearray)) else None
+-                if desired and now_h == desired:
+-                    # We replaced but will not acknowledge; intent recovers these bytes.
+-                    return {"key": key, "ok": False, "code": "stale", "counted": False, "relpath": rel}
+-                if initial_dest_hash and now_h != initial_dest_hash:
+-                    return {
+-                        "key": key, "ok": False, "code": "user_edit_conflict",
+-                        "user_edit_conflict": True, "counted": False, "relpath": rel,
+-                    }
++            session = getattr(_IO_CTX, "session", None) or (plan or {}).get("io") or self._vault_io
++            if session is None or not session.alive:
++                return {"key": key, "ok": False, "code": "stale", "counted": False, "relpath": rel}
++            try:
++                if self._io_exists(dest):
++                    now_h = self._io_sha256(dest)
++                    desired = _sha256_bytes(bytes(content)) if isinstance(content, (bytes, bytearray)) else None
++                    if desired and now_h == desired:
++                        return {"key": key, "ok": False, "code": "stale", "counted": False, "relpath": rel}
++                    if initial_dest_hash and now_h != initial_dest_hash:
++                        return {
++                            "key": key, "ok": False, "code": "user_edit_conflict",
++                            "user_edit_conflict": True, "counted": False, "relpath": rel,
++                        }
++            except OSError:
++                return {"key": key, "ok": False, "code": "stale", "counted": False, "relpath": rel}
+             return {"key": key, "ok": False, "code": "stale", "counted": False, "relpath": rel}
+         except OSError as exc:
+             return {"key": key, "ok": False, "code": "destination_unavailable",
+                     "counted": False, "reason": type(exc).__name__, "relpath": rel}
+         finally:
+             self._active_key = None
++            _IO_CTX.key = None
+         if digest is None:
+             return {"key": key, "ok": False, "code": "destination_unavailable", "counted": False}
+         on_disk = _sha256_file(dest)
+@@ -2666,14 +3035,21 @@ class Mirror:
+             deadline = float(plan.get("deadline_mono") or 0)
+             if deadline and float(self._clock()) > deadline:
+                 return True
+-        session = getattr(self, "_vault_io", None)
+-        if session is not None and not session.alive:
+-            return True
++            lock_gen = plan.get("lock_generation")
++            if lock_gen is not None and lock_gen != getattr(self, "_lock_generation", None):
++                return True
++            session = plan.get("io") or getattr(_IO_CTX, "session", None)
++            if session is not None and not session.alive:
++                return True
++        else:
++            session = getattr(_IO_CTX, "session", None) or getattr(self, "_vault_io", None)
++            if session is not None and not session.alive:
++                return True
+         return not getattr(self, "_lock_acquired", False)
+ 
+     def _atomic_vault(self, dest: Path, data: bytes, uoink: Path, *, recheck: Callable[[], bool]) -> str:
+-        plan = getattr(self, "_active_plan", None)
+-        key = getattr(self, "_active_key", None)
++        plan = getattr(_IO_CTX, "plan", None)
++        key = getattr(_IO_CTX, "key", None)
+         self._io_mkdir(dest.parent, exist_ok=True)
+         tmp = dest.with_name(dest.name + "." + secrets.token_hex(12) + ".tmp")
+         if not _contained(uoink, tmp) or _escaping_reparse(uoink, dest.parent):
+@@ -2865,29 +3241,51 @@ class Mirror:
+         return unmanaged, collisions, user_edits
+ 
+     # ---- locking / worker ---------------------------------------------
++    def _forget_session(self, session: _VaultIoSession | None) -> None:
++        if session is not None and self._vault_io is session:
++            self._vault_io = None
++
+     def _start_vault_io(self, dest: str) -> None:
+-        self._stop_vault_io()
++        existing = self._vault_io
++        if existing is not None:
++            if existing.alive:
++                raise OSError("vault io worker still live")
++            existing.terminate()
++            if existing.alive:
++                raise OSError("vault io worker still live")
++            self._forget_session(existing)
+         session = _VaultIoSession.start(dest)
+         self._vault_io = session
+         self._vault_io_startup_s = float(session.startup_s)
++        self._vault_io_termination_s = 0.0
+ 
+-    def _kill_vault_io(self) -> None:
+-        session = self._vault_io
+-        self._vault_io = None
+-        if session is not None:
+-            session.terminate()
+-
+-    def _stop_vault_io(self) -> None:
+-        session = self._vault_io
+-        self._vault_io = None
+-        if session is None:
++    def _kill_vault_io(self, session: _VaultIoSession | None = None) -> None:
++        target = session if session is not None else self._vault_io
++        if target is None:
++            return
++        target.terminate()
++        self._vault_io_termination_s = float(getattr(target, "termination_s", 0.0) or 0.0)
++        if not target.alive:
++            self._forget_session(target)
++
++    def _stop_vault_io(self, session: _VaultIoSession | None = None) -> None:
++        target = session if session is not None else self._vault_io
++        if target is None:
+             return
+-        if session.alive:
+-            session.shutdown()
++        if target.alive:
++            target.shutdown()
+         else:
+-            session.terminate()
++            target.terminate()
++        self._vault_io_termination_s = float(getattr(target, "termination_s", 0.0) or 0.0)
++        if not target.alive:
++            self._forget_session(target)
+ 
+     def _require_vault_io(self) -> _VaultIoSession:
++        session = getattr(_IO_CTX, "session", None)
++        if session is not None:
++            if not session.alive:
++                raise OSError("vault io worker is not running")
++            return session
+         session = self._vault_io
+         if session is None or not session.alive:
+             raise OSError("vault io worker is not running")
+@@ -2905,17 +3303,26 @@ class Mirror:
+     def _io_unlink(self, path: Path) -> None:
+         self._require_vault_io().unlink(str(path))
+ 
++    def _io_exists(self, path: Path) -> bool:
++        result = self._require_vault_io().call({"cmd": "exists", "path": str(path)})
++        if not result.get("ok"):
++            raise OSError(result.get("error") or "exists failed")
++        return bool(result.get("exists"))
++
+     def _io_sha256(self, path: Path) -> str | None:
+-        session = self._vault_io
+-        if session is None or not session.alive:
+-            return _sha256_file(path)
+-        return session.sha256(str(path))
++        return self._require_vault_io().sha256(str(path))
+ 
+-    def _run_cancellable(self, fn: Callable[[], Any], budget_s: float) -> tuple[Any, Any]:
++    def _run_cancellable(
++        self, fn: Callable[[], Any], budget_s: float,
++        *, session: _VaultIoSession | None = None, plan: dict | None = None,
++    ) -> tuple[Any, Any]:
+         box: dict[str, Any] = {}
+         done = threading.Event()
+ 
+         def runner() -> None:
++            _IO_CTX.session = session
++            _IO_CTX.plan = plan
++            _IO_CTX.op_id = (plan or {}).get("op_id") if isinstance(plan, dict) else None
+             try:
+                 box["value"] = fn()
+             except _AbortedWrite as exc:
+@@ -2928,8 +3335,8 @@ class Mirror:
+         thread = threading.Thread(target=runner, name="uoink-mirror-io", daemon=True)
+         thread.start()
+         if not done.wait(timeout=max(0.001, float(budget_s))):
+-            self._kill_vault_io()
+-            done.wait(2.0)
++            self._kill_vault_io(session)
++            done.wait(min(_WORKER_TERMINATE_S, 0.5))
+             return None, "timeout"
+         if "error" in box:
+             return None, box["error"]
+@@ -2937,71 +3344,90 @@ class Mirror:
+ 
+     def _lock_path(self) -> Path:
+         if self.consent and self.consent.destination:
+-            canonical = os.path.normcase(os.path.realpath(str(self.consent.destination)))
+-            dest_key = hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+-            lock_dir = Path(tempfile.gettempdir()) / "uoink-mirror-locks"
+-            lock_dir.mkdir(parents=True, exist_ok=True)
+-            return lock_dir / f"{dest_key}.lock"
++            dest = Path(self.consent.destination)
++            try:
++                if dest.exists() and dest.is_dir():
++                    return _dest_lock_path(str(dest))
++            except OSError:
++                pass
+         self.ledger_dir.mkdir(parents=True, exist_ok=True)
+         return self.ledger_dir / ".writer.lock"
+ 
+     @contextlib.contextmanager
+     def _exclusive(self, timeout: float = 10.0) -> Iterator[None]:
+-        path = self._lock_path()
+-        try:
+-            fd = os.open(path, os.O_CREAT | os.O_EXCL | os.O_RDWR, 0o600)
+-        except FileExistsError:
+-            fd = os.open(path, os.O_RDWR)
++        timeout = max(0.05, float(timeout))
++        dest = ""
++        if self.consent and self.consent.destination:
++            dest = str(self.consent.destination)
++        mutex = None
++        mutex_key = None
++        fd = None
+         acquired = False
+         try:
+-            try:
+-                if os.fstat(fd).st_size == 0:
+-                    os.write(fd, b"\0")
+-            except OSError:
+-                pass
+-            until = time.monotonic() + max(0.05, float(timeout))
+-            if os.name == "nt":
+-                import msvcrt
+-                while not acquired:
+-                    try:
+-                        os.lseek(fd, 0, os.SEEK_SET)
+-                        msvcrt.locking(fd, msvcrt.LK_NBLCK, 1)
+-                        acquired = True
+-                    except OSError:
+-                        if time.monotonic() >= until:
+-                            raise _LockTimeout()
+-                        time.sleep(0.01)
++            if dest and os.name == "nt":
++                mutex, mutex_key = _win_acquire_dest_mutex(dest, timeout)
++                acquired = True
+             else:
+-                import fcntl
+-                while not acquired:
+-                    try:
+-                        fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+-                        acquired = True
+-                    except OSError:
+-                        if time.monotonic() >= until:
+-                            raise _LockTimeout()
+-                        time.sleep(0.01)
++                path = self._lock_path()
++                try:
++                    fd = os.open(path, os.O_CREAT | os.O_EXCL | os.O_RDWR, 0o600)
++                except FileExistsError:
++                    fd = os.open(path, os.O_RDWR)
++                try:
++                    if os.fstat(fd).st_size == 0:
++                        os.write(fd, b"\0")
++                except OSError:
++                    pass
++                until = time.monotonic() + timeout
++                if os.name == "nt":
++                    import msvcrt
++                    while not acquired:
++                        try:
++                            os.lseek(fd, 0, os.SEEK_SET)
++                            msvcrt.locking(fd, msvcrt.LK_NBLCK, 1)
++                            acquired = True
++                        except OSError:
++                            if time.monotonic() >= until:
++                                raise _LockTimeout()
++                            time.sleep(0.01)
++                else:
++                    import fcntl
++                    while not acquired:
++                        try:
++                            fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
++                            acquired = True
++                        except OSError:
++                            if time.monotonic() >= until:
++                                raise _LockTimeout()
++                            time.sleep(0.01)
++            self._lock_generation += 1
++            my_generation = self._lock_generation
+             self._lock_acquired = True
+             try:
+                 yield
+             finally:
+-                self._lock_acquired = False
++                if self._lock_generation == my_generation:
++                    self._lock_acquired = False
+         finally:
+-            if acquired:
+-                try:
+-                    if os.name == "nt":
+-                        import msvcrt
+-                        os.lseek(fd, 0, os.SEEK_SET)
+-                        msvcrt.locking(fd, msvcrt.LK_UNLCK, 1)
+-                    else:
+-                        import fcntl
+-                        fcntl.flock(fd, fcntl.LOCK_UN)
+-                except OSError:
+-                    pass
+-            try:
+-                os.close(fd)
+-            except OSError:
+-                pass
++            if mutex is not None:
++                _win_release_dest_mutex(mutex, mutex_key)
++            else:
++                if acquired and fd is not None:
++                    try:
++                        if os.name == "nt":
++                            import msvcrt
++                            os.lseek(fd, 0, os.SEEK_SET)
++                            msvcrt.locking(fd, msvcrt.LK_UNLCK, 1)
++                        else:
++                            import fcntl
++                            fcntl.flock(fd, fcntl.LOCK_UN)
++                    except OSError:
++                        pass
++                if fd is not None:
++                    try:
++                        os.close(fd)
++                    except OSError:
++                        pass
+ 
+ 
+ class _LockTimeout(Exception):
+diff --git a/tests/test_phase4_av5m4b2_lifetime.py b/tests/test_phase4_av5m4b2_lifetime.py
+new file mode 100644
+index 0000000..2885255
+--- /dev/null
++++ b/tests/test_phase4_av5m4b2_lifetime.py
+@@ -0,0 +1,177 @@
++"""AV-5m4b2 focused tests: AW-5 exclusion, cancellable dest lease, late intent.
++
++Does not edit frozen AW/AW-3/AW-4/AW-5 cases.
++"""
++from __future__ import annotations
++
++import json
++import sqlite3
++import threading
++import time
++
++import pytest
++
++import library_mirror as mirror
++import library_resources as resources
++from tests.library_work_astra.test_phase4_aw_acceptance import (
++    env, export, item_file, mutate_clip,
++)
++from tests.test_phase4_av5m4b_lifetime import _freeze_session, _other_mirror
++
++
++def test_deferred_read_with_foreign_writer_refuses_without_rollback(env):
++    conn = env.idx._conn
++    conn.execute("PRAGMA journal_mode=WAL")
++    other = sqlite3.connect(str(env.idx._path), timeout=0)
++    try:
++        conn.execute("BEGIN DEFERRED")
++        count = conn.execute("SELECT COUNT(*) FROM yoinks").fetchone()[0]
++        other.execute("BEGIN IMMEDIATE")
++        with pytest.raises(resources.ResourceError) as caught:
++            with env.store._sqlite_writer_exclusion():
++                raise AssertionError("foreign reserved lock must not certify our deferred read")
++        assert caught.value.code == "stale_brief"
++        assert conn.in_transaction
++        assert other.in_transaction
++        assert conn.execute("SELECT COUNT(*) FROM yoinks").fetchone()[0] == count
++    finally:
++        other.rollback()
++        other.close()
++        conn.rollback()
++
++
++def test_write_transaction_is_reused_for_exclusion(env):
++    conn = env.idx._conn
++    with env.idx.write_transaction() as txn:
++        txn.execute("CREATE TABLE IF NOT EXISTS av5m4b2_sentinel (id INTEGER)")
++        txn.execute("INSERT INTO av5m4b2_sentinel (id) VALUES (3)")
++        with env.store._sqlite_writer_exclusion():
++            assert conn.in_transaction
++            assert txn.execute("SELECT id FROM av5m4b2_sentinel").fetchone()[0] == 3
++        assert conn.in_transaction
++    row = conn.execute("SELECT id FROM av5m4b2_sentinel").fetchone()
++    assert row[0] == 3
++
++
++def test_stalled_dest_lease_write_is_inside_cancellation(env, monkeypatch):
++    export(env)
++    env.mirror._clock = time.monotonic
++    entered, release, done = threading.Event(), threading.Event(), threading.Event()
++    original_write = mirror._write_dest_lease
++    results = []
++
++    def stalled(*args, **kwargs):
++        entered.set()
++        release.wait(12)
++        return original_write(*args, **kwargs)
++
++    def resync():
++        try:
++            results.append(env.mirror.resync(budget_s=0.1))
++        finally:
++            done.set()
++
++    monkeypatch.setattr(mirror, "_write_dest_lease", stalled)
++    thread = threading.Thread(target=resync, daemon=True)
++    thread.start()
++    try:
++        assert entered.wait(3), "The destination lease write was not reached"
++        assert done.wait(5), "Destination lease I/O trapped resync outside cancellation"
++        assert results and not results[0]["ok"]
++        details = (results[0].get("error") or {}).get("details") or {}
++        assert "startup_s" in details or results[0].get("destination_unavailable")
++    finally:
++        release.set()
++        thread.join(8)
++        assert not thread.is_alive()
++
++
++def test_late_intent_write_cannot_replace_newer_generation(env):
++    env.mirror._lock_acquired = True
++    env.mirror._lock_generation = 4
++    env.mirror._op_seq = 10
++    mirror._IO_CTX.plan = {"op_id": 10, "lock_generation": 4}
++    env.mirror._write_intent("item:a", {"key": "item:a", "generation": 1, "mark": "first"})
++    loaded = env.mirror._load_intents()
++    assert loaded["item:a"]["mark"] == "first"
++    env.mirror._op_seq = 11
++    env.mirror._lock_generation = 5
++    env.mirror._write_intent("item:a", {"key": "item:a", "generation": 2, "mark": "late"})
++    env.mirror._clear_intent("item:a")
++    loaded = env.mirror._load_intents()
++    assert loaded["item:a"]["mark"] == "first"
++    assert loaded["item:a"]["generation"] == 1
++    mirror._IO_CTX.plan = None
++
++
++def test_unknown_lease_liveness_refuses_destination(env, monkeypatch):
++    export(env)
++    path = mirror._dest_lease_path(str(env.vault))
++    path.write_text(json.dumps({
++        "pid": 2_000_000_000, "created_ms": 1, "token": "foreign-unknown",
++    }), encoding="utf-8")
++    monkeypatch.setattr(mirror, "_process_liveness", lambda *a, **k: "unknown")
++    other = _other_mirror(env, env.root / "o2")
++    other._clock = time.monotonic
++    result = other.resync(budget_s=0.3)
++    assert not result["ok"]
++    assert result.get("destination_unavailable") or (result.get("error") or {}).get("code") == "destination_unavailable"
++    assert item_file(env).is_file()
++
++
++def test_lease_write_failure_after_startup_does_not_leak_child(env, monkeypatch):
++    env.mirror._clock = time.monotonic
++    export(env)
++    mutate_clip(env)
++    env.mirror.on_committed_event("source_refresh", video_id="a")
++    original_start = env.mirror._start_vault_io
++    held = {}
++
++    def start_and_hold(dest):
++        original_start(dest)
++        session = env.mirror._vault_io
++        held["session"] = session
++        held["pid"] = session.pid
++        held["created"] = session.created_ms
++
++    monkeypatch.setattr(env.mirror, "_start_vault_io", start_and_hold)
++    monkeypatch.setattr(mirror, "_write_dest_lease", lambda *a, **k: (_ for _ in ()).throw(OSError("lease write failed")))
++    result = env.mirror.resync(budget_s=0.4)
++    assert not result["ok"]
++    session = held["session"]
++    assert not session.alive
++    assert not mirror._pid_is_alive(held["pid"], held["created"])
++    assert not mirror._foreign_vault_worker_alive(str(env.vault))
++
++
++def test_frozen_child_timeout_cannot_return_success(env, monkeypatch):
++    env.mirror._clock = time.monotonic
++    export(env)
++    mutate_clip(env)
++    env.mirror.on_committed_event("source_refresh", video_id="a")
++    original_start = env.mirror._start_vault_io
++    held = {}
++
++    def start_and_freeze(dest):
++        original_start(dest)
++        session = env.mirror._vault_io
++        held["session"] = session
++        _freeze_session(session)
++
++    monkeypatch.setattr(env.mirror, "_start_vault_io", start_and_freeze)
++    t0 = time.monotonic()
++    result = env.mirror.resync(budget_s=0.1)
++    total_s = time.monotonic() - t0
++    assert result.get("ok") is not True
++    assert not result["ok"]
++    assert held["session"] and not held["session"].alive
++    assert total_s < 5.0
++    details = (result.get("error") or {}).get("details") or {}
++    assert details.get("reason") == "timeout" or result.get("destination_unavailable")
++    startup_s = float(held["session"].startup_s or 0.0)
++    termination_s = float(held["session"].termination_s or 0.0)
++    assert startup_s <= 2.0
++    assert termination_s <= 2.5
++    personal = b"COMBINED SUITE USER EDITOR"
++    item_file(env).write_bytes(personal)
++    assert item_file(env).read_bytes() == personal
+diff --git a/tests/test_phase4_av5m4b_lifetime.py b/tests/test_phase4_av5m4b_lifetime.py
+new file mode 100644
+index 0000000..8a168ea
+--- /dev/null
++++ b/tests/test_phase4_av5m4b_lifetime.py
+@@ -0,0 +1,290 @@
++"""AV-5m4b focused tests: child lifetime, session ownership, dest-stable exclusion.
++
++Does not edit frozen AW/AW-3/AW-4 cases. Those remain observations for Ryan
++or repairs assigned to AV-5m4a.
++"""
++from __future__ import annotations
++
++import ctypes
++import json
++import os
++import signal
++import subprocess
++import sys
++import tempfile
++import time
++from pathlib import Path
++
++import pytest
++
++import library_mirror as mirror
++import library_resources as resources
++from tests.library_work_astra.test_phase4_aw_acceptance import (
++    env, export, item_file, mutate_clip,
++)
++
++
++def _other_mirror(env, data_root: Path) -> mirror.Mirror:
++    data_root.mkdir(parents=True, exist_ok=True)
++    return mirror.Mirror(
++        env.idx, env.reader, env.store, data_root=data_root,
++        consent=env.mirror.consent, enabled=True,
++        clock=time.monotonic, wall_clock=time.time,
++    )
++
++
++def _freeze_session(session) -> None:
++    """Suspend the real worker and pin RPC so a warm combined run cannot publish."""
++    assert session is not None and session.alive
++    _suspend_pid(session.pid)
++
++    def hung(_req):
++        until = time.monotonic() + 30
++        while session.alive and time.monotonic() < until:
++            time.sleep(0.02)
++        raise OSError("vault io worker is not running")
++
++    session.call = hung
++
++
++def _suspend_pid(pid: int) -> bool:
++    if not isinstance(pid, int) or pid <= 0:
++        return False
++    if os.name != "nt":
++        os.kill(pid, signal.SIGSTOP)
++        return True
++    k32 = ctypes.WinDLL("kernel32", use_last_error=True)
++    ntdll = ctypes.WinDLL("ntdll")
++    k32.OpenProcess.restype = ctypes.c_void_p
++    k32.OpenProcess.argtypes = [ctypes.c_uint32, ctypes.c_int, ctypes.c_uint32]
++    k32.CloseHandle.argtypes = [ctypes.c_void_p]
++    ntdll.NtSuspendProcess.restype = ctypes.c_long
++    ntdll.NtSuspendProcess.argtypes = [ctypes.c_void_p]
++    handle = k32.OpenProcess(0x001F0FFF, False, int(pid))
++    if not handle:
++        return False
++    try:
++        return int(ntdll.NtSuspendProcess(handle)) == 0
++    finally:
++        k32.CloseHandle(handle)
++
++
++def test_lease_and_lock_paths_ignore_temp_roots(tmp_path_factory, monkeypatch):
++    root = tmp_path_factory.mktemp("d")
++    dest = root / "v"
++    dest.mkdir()
++    t1 = root / "t1"
++    t2 = root / "t2"
++    t1.mkdir()
++    t2.mkdir()
++    monkeypatch.setenv("TEMP", str(t1))
++    monkeypatch.setenv("TMP", str(t1))
++    tempfile.tempdir = None
++    lease1 = mirror._dest_lease_path(str(dest))
++    lock1 = mirror._dest_lock_path(str(dest))
++    mutex1 = mirror._dest_mutex_name(str(dest)) if os.name == "nt" else None
++    monkeypatch.setenv("TEMP", str(t2))
++    monkeypatch.setenv("TMP", str(t2))
++    tempfile.tempdir = None
++    lease2 = mirror._dest_lease_path(str(dest))
++    lock2 = mirror._dest_lock_path(str(dest))
++    mutex2 = mirror._dest_mutex_name(str(dest)) if os.name == "nt" else None
++    assert lease1 == lease2
++    assert lock1 == lock2
++    dest_r = dest.resolve()
++    assert lease1.parent.resolve() == dest_r
++    assert lock1.parent.resolve() == dest_r
++    # Exclusive live lock is a dest-hash kernel mutex (not a TEMP lock file).
++    # The dest-local path helper remains dest-stable for POSIX flock fallback
++    # and for tests that inspect the namespace; Windows resync does not open it.
++    if mutex1 is not None:
++        assert mutex1 == mutex2
++        assert mutex1.startswith("Local\\uoink-mw-")
++        assert str(t1) not in mutex1 and str(t2) not in mutex1
++    assert t1.resolve() not in lease1.resolve().parents
++    assert t2.resolve() not in lease1.resolve().parents
++
++
++@pytest.mark.skipif(os.name != "nt", reason="Windows kill-on-close job assignment")
++def test_job_assignment_failure_refuses_before_mutation(tmp_path_factory, monkeypatch):
++    root = tmp_path_factory.mktemp("j")
++    dest = root / "v"
++    dest.mkdir()
++    src = root / "src.bin"
++    dst = root / "dst.bin"
++    src.write_bytes(b"new")
++    dst.write_bytes(b"old")
++    monkeypatch.setattr(mirror, "_win_assign_job", lambda job, proc: False)
++    with pytest.raises(OSError):
++        mirror._VaultIoSession.start(str(dest))
++    assert dst.read_bytes() == b"old"
++    assert not mirror._foreign_vault_worker_alive(str(dest))
++    lease = mirror._read_dest_lease(str(dest))
++    assert lease in (None, "corrupt", "unavailable") or lease == {}
++
++
++def test_child_boundary_timeout_confirms_death_and_keeps_user_edit(env, monkeypatch):
++    env.mirror._clock = time.monotonic
++    export(env)
++    mutate_clip(env)
++    env.mirror.on_committed_event("source_refresh", video_id="a")
++    target = item_file(env)
++    before = target.read_bytes()
++    original_start = env.mirror._start_vault_io
++    held = {}
++
++    def start_and_freeze(dest):
++        original_start(dest)
++        session = env.mirror._vault_io
++        held["session"] = session
++        held["pid"] = session.pid
++        _freeze_session(session)
++
++    monkeypatch.setattr(env.mirror, "_start_vault_io", start_and_freeze)
++    t0 = time.monotonic()
++    result = env.mirror.resync(budget_s=0.25)
++    total_s = time.monotonic() - t0
++    assert not result["ok"]
++    session = held["session"]
++    assert not session.alive
++    assert not mirror._pid_is_alive(held["pid"], session.created_ms)
++    startup_s = float(session.startup_s or 0.0)
++    termination_s = float(session.termination_s or 0.0)
++    assert startup_s >= 0 and termination_s >= 0
++    assert startup_s <= 2.0
++    assert total_s + 0.05 >= startup_s + 0.25
++    personal = b"INDEPENDENT USER EDITOR AT CHILD BOUNDARY"
++    target.write_bytes(personal)
++    assert not mirror._foreign_vault_worker_alive(str(env.vault))
++    assert target.read_bytes() == personal
++    assert before != personal
++
++
++def test_timed_out_parent_cannot_use_later_resync_session(env, monkeypatch):
++    env.mirror._clock = time.monotonic
++    export(env)
++    mutate_clip(env)
++    env.mirror.on_committed_event("source_refresh", video_id="a")
++    target = item_file(env)
++    original_start = env.mirror._start_vault_io
++    first = {}
++
++    def start_and_freeze(dest):
++        original_start(dest)
++        session = env.mirror._vault_io
++        if "session" not in first:
++            first["session"] = session
++            _freeze_session(session)
++
++    monkeypatch.setattr(env.mirror, "_start_vault_io", start_and_freeze)
++    result1 = env.mirror.resync(budget_s=0.25)
++    assert not result1["ok"]
++    sess1 = first["session"]
++    assert not sess1.alive
++    personal = b"PARENT LOSS USER BYTES"
++    target.write_bytes(personal)
++    monkeypatch.setattr(env.mirror, "_start_vault_io", original_start)
++    result2 = env.mirror.resync(budget_s=2.0)
++    assert sess1 is not env.mirror._vault_io
++    with pytest.raises(OSError):
++        sess1.replace(str(target), str(target))
++    assert target.read_bytes() == personal
++
++
++def test_second_process_with_different_temp_root_is_excluded(env, tmp_path_factory):
++    export(env)
++    session = mirror._VaultIoSession.start(str(env.vault))
++    session.claim_lease()
++    try:
++        other_temp = tmp_path_factory.mktemp("ot")
++        other_root = tmp_path_factory.mktemp("or")
++        script = (
++            "import json, sys, tempfile, time\n"
++            "from pathlib import Path\n"
++            "import library_briefs as briefs\n"
++            "import library_mirror as mirror\n"
++            "from library_resources import LibraryReader\n"
++            "from tests.phase4_fixtures import make_disposable_index\n"
++            "dest = Path(sys.argv[1])\n"
++            "root = Path(sys.argv[2])\n"
++            "print('tempdir', tempfile.gettempdir(), flush=True)\n"
++            "print('lease', mirror._dest_lease_path(str(dest)), flush=True)\n"
++            "idx = make_disposable_index(root)\n"
++            "try:\n"
++            "    reader = LibraryReader(idx, data_root=root / 'd', clock=time.monotonic, wall_clock=time.time)\n"
++            "    store = briefs.BriefStore.for_reader(reader)\n"
++            "    consent = mirror.MirrorConsent(str(dest), mirror.SCOPE_ALL, (), 1, 'aw-volume')\n"
++            "    other = mirror.Mirror(idx, reader, store, data_root=root / 'd', consent=consent,\n"
++            "                          enabled=True, clock=time.monotonic, wall_clock=time.time)\n"
++            "    result = other.resync(budget_s=0.4)\n"
++            "    print('RESULT', json.dumps({'ok': result.get('ok'),\n"
++            "        'code': (result.get('error') or {}).get('code'),\n"
++            "        'destination_unavailable': result.get('destination_unavailable')}), flush=True)\n"
++            "finally:\n"
++            "    idx.close()\n"
++        )
++        env_vars = os.environ.copy()
++        env_vars["TEMP"] = str(other_temp)
++        env_vars["TMP"] = str(other_temp)
++        env_vars["TMPDIR"] = str(other_temp)
++        env_vars["PYTHONDONTWRITEBYTECODE"] = "1"
++        env_vars.pop("ANTHROPIC_API_KEY", None)
++        worktree = str(Path(mirror.__file__).resolve().parent)
++        import site
++        path_parts = [worktree, site.getusersitepackages(), str(Path(sys.prefix) / "Lib" / "site-packages")]
++        extra = env_vars.get("PYTHONPATH")
++        if extra:
++            path_parts.append(extra)
++        env_vars["PYTHONPATH"] = os.pathsep.join(path_parts)
++        proc = subprocess.run(
++            [sys.executable, "-B", "-c", script, str(env.vault), str(other_root)],
++            capture_output=True, text=True, timeout=25, env=env_vars, cwd=worktree,
++        )
++        assert "RESULT" in proc.stdout, proc.stdout + proc.stderr
++        payload = json.loads(proc.stdout.strip().split("RESULT")[-1].strip())
++        assert payload["ok"] is False
++        assert payload.get("destination_unavailable") or payload.get("code") == "destination_unavailable"
++        assert str(other_temp) in proc.stdout
++        lease_line = next(line for line in proc.stdout.splitlines() if line.startswith("lease "))
++        child_lease = Path(lease_line.split(" ", 1)[1])
++        assert child_lease.name == ".uoink-mirror-writer.lease"
++        assert other_temp.resolve() not in child_lease.resolve().parents
++        assert child_lease.parent.resolve() == Path(env.vault).resolve()
++    finally:
++        session.terminate()
++        assert not session.alive
++
++
++def test_corrupt_lease_does_not_grant_destination(env):
++    export(env)
++    path = mirror._dest_lease_path(str(env.vault))
++    path.write_text("{not-json", encoding="utf-8")
++    other = _other_mirror(env, env.root / "o")
++    other._clock = time.monotonic
++    result = other.resync(budget_s=0.3)
++    assert not result["ok"]
++    assert result.get("destination_unavailable") or (result.get("error") or {}).get("code") == "destination_unavailable"
++    assert item_file(env).is_file()
++
++
++def test_inherited_deferred_read_transaction_does_not_roll_back_or_exclude(env):
++    conn = env.idx._conn
++    conn.execute("BEGIN DEFERRED")
++    count = conn.execute("SELECT COUNT(*) FROM yoinks").fetchone()[0]
++    assert conn.in_transaction
++    with pytest.raises(resources.ResourceError) as caught:
++        with env.store._sqlite_writer_exclusion():
++            raise AssertionError("deferred read must not claim writer exclusion")
++    assert caught.value.code == "stale_brief"
++    assert conn.in_transaction
++    assert conn.execute("SELECT COUNT(*) FROM yoinks").fetchone()[0] == count
++    import sqlite3
++    other = sqlite3.connect(str(env.idx._path), timeout=0.2)
++    try:
++        other.execute("BEGIN IMMEDIATE")
++        other.execute("UPDATE yoinks SET title=title WHERE 0")
++        other.commit()
++    finally:
++        other.close()
++    conn.rollback()
++    assert not conn.in_transaction

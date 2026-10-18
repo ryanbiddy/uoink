@@ -35,6 +35,24 @@ def utc_now() -> str:
     )
 
 
+def _active_port() -> int:
+    try:
+        import uoink_install_isolation as iso
+        binding = iso.current_binding()
+    except Exception:
+        binding = None
+    return binding.port if binding is not None else DEFAULT_PORT
+
+
+def _active_base_url() -> str:
+    try:
+        import uoink_install_isolation as iso
+        binding = iso.current_binding()
+    except Exception:
+        binding = None
+    return binding.base_url if binding is not None else BASE_URL
+
+
 def service_manifest(service_version: str) -> dict:
     """Return the exact public ``ryan.suite.service`` v1 provider shape."""
     return {
@@ -47,7 +65,7 @@ def service_manifest(service_version: str) -> dict:
             "service_version": service_version,
             "api_version": 1,
             "resident": True,
-            "default_port": DEFAULT_PORT,
+            "default_port": _active_port(),
             "health": {
                 "contract": "ryan.suite.health",
                 "version": 1,
@@ -134,15 +152,16 @@ def runtime_lease(
     started_at: str,
 ) -> dict:
     """Return Uoink's exact token-free ``ryan.suite.runtime-lease`` v1."""
+    url = _active_base_url()
     return {
         "contract": "ryan.suite.runtime-lease",
         "version": 1,
         "service_id": SERVICE_ID,
         "service_version": service_version,
         "api_version": 1,
-        "base_url": BASE_URL,
-        "health_url": f"{BASE_URL}{HEALTH_PATH}",
-        "manifest_url": f"{BASE_URL}{MANIFEST_PATH}",
+        "base_url": url,
+        "health_url": f"{url}{HEALTH_PATH}",
+        "manifest_url": f"{url}{MANIFEST_PATH}",
         "capabilities": list(CAPABILITIES),
         "ui": {
             "home": UI["home"],
@@ -161,9 +180,18 @@ def write_runtime_lease(
     started_at: str,
 ) -> Path:
     """Atomically replace Uoink's runtime lease with per-user permissions."""
-    registry = (
-        runtime_registry_dir() if registry_dir is None else Path(registry_dir)
-    )
+    if registry_dir is None:
+        try:
+            import uoink_install_isolation as iso
+            binding = iso.current_binding()
+        except Exception:
+            binding = None
+        if binding is not None:
+            registry = binding.suite_registry_dir()
+        else:
+            registry = runtime_registry_dir()
+    else:
+        registry = Path(registry_dir)
     registry.mkdir(parents=True, exist_ok=True)
     destination = registry / f"{SERVICE_ID}.json"
     payload = runtime_lease(

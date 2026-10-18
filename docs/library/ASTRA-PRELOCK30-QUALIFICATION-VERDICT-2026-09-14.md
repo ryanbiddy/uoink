@@ -1,0 +1,15 @@
+# Repaired controller passes both fake qualifications
+
+Accept the repaired generated controller within its inert scope. Under admission `7316e53`, author `c3d9f3` and independent `01d8d4` each returned zero with **30 passed, 0 failed, 0 skipped and 62 passing nested subtests**. Case execution took 0.3696067 and 0.3497912 seconds respectively. These are focused generated checks, not full-tree or Windows outcomes.
+
+The two-line insertion in `generated_adapter_flow.py` calls the existing write probe for five files while the confirmed adapter context is live, before media work. It retains the five existing probes after retirement. Source hash `24844bf419e4d34adaf0d5c5a2678de33a4796de86dad0f83b7e386f1785f961` reconstructs the full predecessor after removing only that insertion. All prior source lines and assertions remain unchanged.
+
+The two new tests at `6370a4846e3f5f43688ede53c6665988771db53ddf309065fbc92e5965288bb4` exercise the actual controller and helper. The positive case observes five sharing refusals before ticket/transcription work and five successful zero-byte opens after retirement. The negative case checks each of five refusal positions: an unexpected returned handle is closed, media work never starts, and actual context cleanup retains unconfirmed ownership in quarantine. The original 28 case objects, their 57 subtests and all five old test files remain unchanged.
+
+Root `50475b` checks the complete saved results, including identical ordered case/subtest objects and all 36 child hashes. Both runs retain ten valid guards, 12 metadata traps, 25 registry traps, no denials or heavy imports, empty stderr, unchanged 39 source inputs and three controls, and exact 47-file output membership. `302c4f` verified both preparation maps and the independent copy's five label-only launcher substitutions before admission. The two PINS hashes are `f70f8f0ad7f1ad634939d91f04096996852cfe700c41829a492b00df883c1851` and `8cd78502de3f77aa5ce22e0060a19d7a7911881f63f2f389487c077ea6055e30`.
+
+Independent passive review `10a40c` confirms both results, including complete case objects, source/control pairs and 179 unchanged fixed texts. Its verdict is `4754f2c4c554d7d5354c0d1e9fb2d41bba56bd2f9315e392c0049ce01bd710dc`.
+
+Root reviewed the complete new qualifier, launcher, tests and deltas before execution. Independent source reviews find no blocker. Documentary checks had a wrong template filename, a parser that omitted digits, a PowerShell helper-name alias collision and doubled path separators; their actual errors and repairs remain preserved. They were preparation/checker failures, not candidate runs. The final input and receipt checks above pass without changing any subject assertion.
+
+Native01 stays failed at `7f142e8`; these passes cannot supply its missing observations. Native02 source preparation follows `6dc7b8b` and needs its own exact admission and actual Windows result. No real model, D1/D2 repeat, D3/D4, production migration, full-tree, package, installed-client or market acceptance follows. Website and marketing remain paused.

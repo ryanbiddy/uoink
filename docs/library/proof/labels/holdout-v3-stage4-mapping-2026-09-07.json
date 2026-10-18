@@ -1,0 +1,948 @@
+{
+  "schema_version": 1,
+  "kind": "holdout-v3-stage4-mapping",
+  "scoring_version": "strict-mapped-primary-v2",
+  "holdout_version": "holdout-v3-2026-09-07",
+  "bindings_sha256": "f22f6850ae564d0c73eadf90e1817c8eb6ecc61e8e756f787c6f74c1508f7f6b",
+  "gold_sha256": "7b9eb7c3880bcb321e5aade8f83a9561de048b56ade9ce172e69db3fb0fffbe6",
+  "adjudicated_sha256": "62a29bf51ae7961a5e1ee759ee8edd5ddcf282bcefb0cf91966a44fa7f889815",
+  "taxonomy_revision_hash": "8a1b16033eb4d6acd57c91c6a5d5e7f2af6d6f60f3adef92502b62d81ba28d04",
+  "rule": "NFC + trimmed segments, case preserved, deepest unambiguous approved ancestor, strict primary equality",
+  "sealed_at": "2026-09-08T05:40:32.394823+00:00",
+  "items": {
+    "-JXwa-WlkU8": {
+      "source_revision": "7d948df8b454d673ec3bbc3bf2c2aa168e2b8ecbcaa55c4a03a510aea888e474",
+      "card_hash": "702039cfe0c34f2aa032220301a45f9f2c4b094dbd8112a56b30d8c667a95329",
+      "stratum": "timed_evidence",
+      "gold_path": [
+        "AI and ML",
+        "Education"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "Education"
+      ],
+      "mapped_shelf_id": "education",
+      "scorable": true
+    },
+    "2079336900192595969": {
+      "source_revision": "e1795970a788f515e326e3c48e203ce8231d53a52bb00381fe250ab993585206",
+      "card_hash": "5b3eba99e973dd3bbe60847bff10739ed65673a992203e585421ae23350bd0c7",
+      "stratum": "timed_evidence",
+      "gold_path": [
+        "AI and ML",
+        "AI Agents and Automation"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "AI Agents and Automation"
+      ],
+      "mapped_shelf_id": "ai-agents-and-automation",
+      "scorable": true
+    },
+    "2079405880332664832": {
+      "source_revision": "a32b8d59e5bad0055ebe07e9672df64eed4eca7a0b597149d4ee036bb9f1d3bf",
+      "card_hash": "a07664d19645b7a46c3ce03fd1d0552d51c0b6cd904d771630e40c9244fb90a0",
+      "stratum": "timed_evidence",
+      "gold_path": [
+        "AI and ML"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML"
+      ],
+      "mapped_shelf_id": "ai-and-ml",
+      "scorable": true
+    },
+    "2080368030136107009": {
+      "source_revision": "5be5d7b5143ceed31d83f2630734c06c50df3074091c7c0484aaec5ac45406c4",
+      "card_hash": "95c02b739c5647006ec778b9ff217dab76383426dfd690d1634ef372cfe1dbe4",
+      "stratum": "timed_evidence",
+      "gold_path": [
+        "AI and ML",
+        "AI Agents and Automation"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "AI Agents and Automation"
+      ],
+      "mapped_shelf_id": "ai-agents-and-automation",
+      "scorable": true
+    },
+    "2080739568429494272": {
+      "source_revision": "88eaa7ab1868ef6a82ab4ca64164313a8f2be873893c2bcbdc00c29fa4d5492c",
+      "card_hash": "398b315913f5e6aca8aa7ba686dfedd564f57fbec919369d8ebfa6ca13bd8521",
+      "stratum": "timed_evidence",
+      "gold_path": [
+        "AI and ML",
+        "Frontier Models"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "Frontier Models"
+      ],
+      "mapped_shelf_id": "frontier-models",
+      "scorable": true
+    },
+    "2080788252425150535": {
+      "source_revision": "9ab01283c8aaf7f7c27f1ca66e5b4abbac211c2d418a94062f2f35ea786c8c17",
+      "card_hash": "2af6e2d7b03614c9890e21a5f8560308b4a51b94029e1a79d24d009d2fd23518",
+      "stratum": "timed_evidence",
+      "gold_path": [
+        "AI and ML",
+        "Generative Media"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "Generative Media"
+      ],
+      "mapped_shelf_id": "generative-media",
+      "scorable": true
+    },
+    "2081031860679770112": {
+      "source_revision": "afbcfbea425472c1b0eca7de4c2bb2de5bdf2800402062f94e30f0d580e2c1c8",
+      "card_hash": "c1cee854dd1c98a8352b9d1dd32901b6f478b3d047be587023f840ea8d267f1f",
+      "stratum": "timed_evidence",
+      "gold_path": [
+        "AI and ML",
+        "Frontier Models"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "Frontier Models"
+      ],
+      "mapped_shelf_id": "frontier-models",
+      "scorable": true
+    },
+    "2081060018053369942": {
+      "source_revision": "8b05a11557418c4263a2bb9c01038caa6ceff6524d11caa6ae0378c822911118",
+      "card_hash": "cd62c38d70134362ba745dc1588f9027c7b0c675376ada43313f8d7589893b0b",
+      "stratum": "timed_evidence",
+      "gold_path": [
+        "AI and ML",
+        "Generative Media"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "Generative Media"
+      ],
+      "mapped_shelf_id": "generative-media",
+      "scorable": true
+    },
+    "2081149998704521712": {
+      "source_revision": "9bfe40969ded7c4a5d3f10ccbdebe2a7bb7f0e20c49749a0d5d2fba6f9abf569",
+      "card_hash": "db7d6dd8007faba8e2ddcfc29f030487775669ba9e7b08d42808e1b32e4bea2f",
+      "stratum": "timed_evidence",
+      "gold_path": [
+        "AI and ML",
+        "AI Industry and Business"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "AI Industry and Business"
+      ],
+      "mapped_shelf_id": "ai-industry-and-business",
+      "scorable": true
+    },
+    "2081807471145029632": {
+      "source_revision": "d6782054eb968af11a2a3e160bf24ab389e723a1518a5040cc4fe20b1f8bc9fb",
+      "card_hash": "f7be5f5ccdf44097836662a21728ae174669f2db23c7f9f9aed2bb2952023dea",
+      "stratum": "timed_evidence",
+      "gold_path": [
+        "AI and ML",
+        "Developer Tools"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "Developer Tools"
+      ],
+      "mapped_shelf_id": "developer-tools",
+      "scorable": true
+    },
+    "2083597581263769600": {
+      "source_revision": "61508420cace9c8aa4b308f457730514eefd13f4bde215c1f55d969d1762bdbd",
+      "card_hash": "1710e6bde5f8f56faf8954a96eade21b4a13047f77a95a11863eaf7e92117de7",
+      "stratum": "timed_evidence",
+      "gold_path": [
+        "AI and ML",
+        "Education"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "Education"
+      ],
+      "mapped_shelf_id": "education",
+      "scorable": true
+    },
+    "2084009513531703296": {
+      "source_revision": "f8c48eaeea8ba67ea6f2b43043584d539f55344203d68ee166740d68064bbfea",
+      "card_hash": "0f469e518bf1913fb51e7f571dd8477d33a4dce2a6ab02faab7ae9518dbcf3cc",
+      "stratum": "timed_evidence",
+      "gold_path": [
+        "AI and ML",
+        "AI Industry and Business"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "AI Industry and Business"
+      ],
+      "mapped_shelf_id": "ai-industry-and-business",
+      "scorable": true
+    },
+    "2084022671646273536": {
+      "source_revision": "47e3110dad980efc8d0fd681d15a2b8fe596afd3bfeb2ee48884425e56bad41a",
+      "card_hash": "ba750616a6f5e04839541d7c5e66d37138f6be62ee98dde4f6e1356854008551",
+      "stratum": "timed_evidence",
+      "gold_path": [
+        "AI and ML",
+        "Education"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "Education"
+      ],
+      "mapped_shelf_id": "education",
+      "scorable": true
+    },
+    "2084284247058382974": {
+      "source_revision": "3a4a59cf1044bf0452651fb76891798b60b9a1d683d184415326e4abae50f9b3",
+      "card_hash": "72f294b7e5d642d5dadc1d9443aa54c4b1df437155bdb6dd1cbeb0fa98e40ef7",
+      "stratum": "timed_evidence",
+      "gold_path": [
+        "AI and ML",
+        "Generative Media"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "Generative Media"
+      ],
+      "mapped_shelf_id": "generative-media",
+      "scorable": true
+    },
+    "2084345349293166592": {
+      "source_revision": "1d77af40b45c439f853f62f50f4088687cc61966e6e1cf1d37ddfe8a536e5e72",
+      "card_hash": "902de49fc125efe9adb3a12134c17fddb0d80af2e0f68695dc9216ba651b753c",
+      "stratum": "timed_evidence",
+      "gold_path": [
+        "AI and ML",
+        "Education"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "Education"
+      ],
+      "mapped_shelf_id": "education",
+      "scorable": true
+    },
+    "2084651855372808192": {
+      "source_revision": "7b5c86cc28496808700207622ac2730c42116f78af03329a939eff0c7702ac4c",
+      "card_hash": "238101a27e99bcc7d5498a2027e6ae82fd2d05885bb01fdbad1ab39a7de4f68e",
+      "stratum": "timed_evidence",
+      "gold_path": [
+        "AI and ML",
+        "AI Industry and Business"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "AI Industry and Business"
+      ],
+      "mapped_shelf_id": "ai-industry-and-business",
+      "scorable": true
+    },
+    "2084670556981338112": {
+      "source_revision": "a81b44ca734b1fc3f74cedf2fe0c70d71dcbad0d7f3dbb829a6a2a5f9842fe35",
+      "card_hash": "1687d99f1540cc39db7855812486aec515b5789b24fcca7e63fb10d1816bbb7c",
+      "stratum": "timed_evidence",
+      "gold_path": [
+        "AI and ML",
+        "Education"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "Education"
+      ],
+      "mapped_shelf_id": "education",
+      "scorable": true
+    },
+    "2085020353986785281": {
+      "source_revision": "6a26fee503942e6fcbfd85bf83e64831f00b0c7c4f3ae732cea8532e7a40bc6a",
+      "card_hash": "1d19066a9a23d33a62cea2f63167c1e0de839b0675e09f000755fe026add0e82",
+      "stratum": "timed_evidence",
+      "gold_path": [
+        "AI and ML",
+        "Education"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "Education"
+      ],
+      "mapped_shelf_id": "education",
+      "scorable": true
+    },
+    "2085065022733205504": {
+      "source_revision": "12db6b7bcd6d09b8379ef4f76d5de1a259acd4278981051f30926c66a569808c",
+      "card_hash": "04088c590d96f8c9c57bde9edd47d4aceaeb878fcc85d8147b5fd9c6a69dbb08",
+      "stratum": "timed_evidence",
+      "gold_path": [
+        "AI and ML",
+        "Developer Tools"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "Developer Tools"
+      ],
+      "mapped_shelf_id": "developer-tools",
+      "scorable": true
+    },
+    "2085398091726041088": {
+      "source_revision": "1765d0783ccdf11b94c36b1468887925ae2f88037236efd14eb8681dbbbe3435",
+      "card_hash": "0c00b9e9cde838f548d373b673e6268a449c0d24b5c0fdce97a1d14ffc6d8394",
+      "stratum": "timed_evidence",
+      "gold_path": [
+        "AI and ML",
+        "Developer Tools"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "Developer Tools"
+      ],
+      "mapped_shelf_id": "developer-tools",
+      "scorable": true
+    },
+    "2085409224574545920": {
+      "source_revision": "f1dc4127f1b8d182c90d0cdaf2dbbafe2dbfbf1edd84b61bd7b908e33bccd5e6",
+      "card_hash": "670cd5f1142cc3468f060ffeff2792710b0a5e85d68ac6d70f1e45b692ef82f7",
+      "stratum": "timed_evidence",
+      "gold_path": [
+        "AI and ML",
+        "Education"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "Education"
+      ],
+      "mapped_shelf_id": "education",
+      "scorable": true
+    },
+    "2085459208485359617": {
+      "source_revision": "19fab43d1ac900b002c19c12c0a5ffd795baee51771def79c02230ca8b963c34",
+      "card_hash": "eaf31c435ed07c025740e47743e0903c9f5d63a98d3e74dc590d76f1769e4452",
+      "stratum": "timed_evidence",
+      "gold_path": [
+        "AI and ML",
+        "Education"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "Education"
+      ],
+      "mapped_shelf_id": "education",
+      "scorable": true
+    },
+    "2086124560861270016": {
+      "source_revision": "5cbfc38a4cf3d4a035e59455ab4f42703acb4167d8a7d2d8c95623b50ba4f6d0",
+      "card_hash": "cde56d8b327bf7ebed455a6f5f7f29f8ae0c66ff6e36c1ba2dfde37587f73465",
+      "stratum": "timed_evidence",
+      "gold_path": [
+        "AI and ML",
+        "Security"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "Security"
+      ],
+      "mapped_shelf_id": "security",
+      "scorable": true
+    },
+    "2086224231277216132": {
+      "source_revision": "51cc2623025ee6ff5b1073c83567aecde7c6473d13af243d98f39610f6936c75",
+      "card_hash": "a7cd0de89424e026189e2da20bbce28e81d034383de8d74cef4a0071d5750dbc",
+      "stratum": "timed_evidence",
+      "gold_path": [
+        "AI and ML",
+        "Generative Media"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "Generative Media"
+      ],
+      "mapped_shelf_id": "generative-media",
+      "scorable": true
+    },
+    "2087207632528719872": {
+      "source_revision": "e7dfc0d8c06087f521414d1b184e7a7803a75c6e51f9b8d00b071e796db34982",
+      "card_hash": "bc402635969ce9011456053244e17a78bbdb221a2672c308c225a7e1cb2af9aa",
+      "stratum": "timed_evidence",
+      "gold_path": [
+        "AI and ML",
+        "Developer Tools"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "Developer Tools"
+      ],
+      "mapped_shelf_id": "developer-tools",
+      "scorable": true
+    },
+    "2088677333066465280": {
+      "source_revision": "729d19f3269d602a83facf837d19a6b421f052771d0da8dfd37eda2dfe0dcc69",
+      "card_hash": "20e7684d2fe857e2271ba7cd2a2888d46069262f123c6b619a5c02ca33da556a",
+      "stratum": "timed_evidence",
+      "gold_path": [
+        "AI and ML",
+        "Education"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "Education"
+      ],
+      "mapped_shelf_id": "education",
+      "scorable": true
+    },
+    "2089007841277276160": {
+      "source_revision": "f21a4a2b13db04f44e7855ace8ab57d993f6c289f4531b84625abd7ef092fb22",
+      "card_hash": "c22f65a4049fd186d9c239d8c36121b1a5146f8995fa1fe41f4aaba69b744f00",
+      "stratum": "timed_evidence",
+      "gold_path": [
+        "AI and ML",
+        "Education"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "Education"
+      ],
+      "mapped_shelf_id": "education",
+      "scorable": true
+    },
+    "2090844215756419072": {
+      "source_revision": "e097397097f5387165d045d8d240cd5f247f8db115096401d846ba2be2c7aeeb",
+      "card_hash": "bc7b962862f2b21a29f6aefb0cb9db3ca8f8ac8d00fa117b1fd5ab20881e60fa",
+      "stratum": "timed_evidence",
+      "gold_path": [
+        "AI and ML",
+        "Education"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "Education"
+      ],
+      "mapped_shelf_id": "education",
+      "scorable": true
+    },
+    "2090953710696329216": {
+      "source_revision": "2f05c77ccdbb5c062ba4f98498553bf69f612ae2873a1b9be0f2846df97b0a53",
+      "card_hash": "397bd8106e430d679f9d73c157204c4adc3c45da96b2b63a3f4dafe0fc6e8993",
+      "stratum": "timed_evidence",
+      "gold_path": [
+        "AI and ML",
+        "Education"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "Education"
+      ],
+      "mapped_shelf_id": "education",
+      "scorable": true
+    },
+    "2091546907713662977": {
+      "source_revision": "8136abb8999b524f796d7c037551adb8b34b58a6902352745da0ed67e96c6d81",
+      "card_hash": "e958c86afde428e11dbfa64c6c4dec5ceadd8dcea8b425c1c2d38f219519d5c4",
+      "stratum": "timed_evidence",
+      "gold_path": [
+        "AI and ML",
+        "AI Industry and Business"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "AI Industry and Business"
+      ],
+      "mapped_shelf_id": "ai-industry-and-business",
+      "scorable": true
+    },
+    "2091979655037300736": {
+      "source_revision": "72d794f765ef6ca7ea70bfb0def73a2446d1b5cba9344eb82039eb0300a7cc82",
+      "card_hash": "cb5c1534c06a00a9a29b34950d69121bd75ec857c29429e518984f4f7957f5ee",
+      "stratum": "timed_evidence",
+      "gold_path": [
+        "AI and ML",
+        "Developer Tools"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "Developer Tools"
+      ],
+      "mapped_shelf_id": "developer-tools",
+      "scorable": true
+    },
+    "2091993721768116224": {
+      "source_revision": "6197e26d25207982538039ece948a8b71b8c24050a5b832010bb39dfd04aeed7",
+      "card_hash": "28df8987cf388f6b779545ead96ba8fef56d931f9f59917670844617e4055660",
+      "stratum": "timed_evidence",
+      "gold_path": [
+        "AI and ML"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML"
+      ],
+      "mapped_shelf_id": "ai-and-ml",
+      "scorable": true
+    },
+    "2092386459282182144": {
+      "source_revision": "ad6874617dccb89f82faaf5caa2b472fad7c4db915766055b7e5d74fd0b14780",
+      "card_hash": "e56baed68244b3c560e7712223551ce59a141986571f1364b5ce98f72d395c58",
+      "stratum": "timed_evidence",
+      "gold_path": [
+        "AI and ML"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML"
+      ],
+      "mapped_shelf_id": "ai-and-ml",
+      "scorable": true
+    },
+    "2092646578058412032": {
+      "source_revision": "bf47d1882cecb2781e8b6596a62a10e603ba3eaa3d780395e3cca6eb68f3961d",
+      "card_hash": "3d8b57a45ae3785a1e429e0b4f0cdc578ab0f2b6a48901deb498afe963520c0d",
+      "stratum": "timed_evidence",
+      "gold_path": [
+        "AI and ML",
+        "Frontier Models"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "Frontier Models"
+      ],
+      "mapped_shelf_id": "frontier-models",
+      "scorable": true
+    },
+    "2093359169139326976": {
+      "source_revision": "ed0223fd0ff2744eac3056bd1c90b3dfda85b01e70caa6cb7d94a4fc9016bea9",
+      "card_hash": "8385df697edc07fdf20ab87aa184b1f13162e3dc4d15d98bf6a48ff5812ff9a9",
+      "stratum": "timed_evidence",
+      "gold_path": [
+        "Computing",
+        "Hardware Infrastructure"
+      ],
+      "outcome": "unmappable",
+      "mapped_path": null,
+      "mapped_shelf_id": null,
+      "scorable": false
+    },
+    "2093715067636154369": {
+      "source_revision": "6130553b9b9a31855a03be21d7f983c3e0ec5c1be8edb41684f1e337c061a067",
+      "card_hash": "10a0123e150e5cad259f1b4cdc1697ced1eca1688f57394beb4990829969685c",
+      "stratum": "timed_evidence",
+      "gold_path": [
+        "AI and ML",
+        "Education"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "Education"
+      ],
+      "mapped_shelf_id": "education",
+      "scorable": true
+    },
+    "2094027052739592192": {
+      "source_revision": "a32e10e0cd53ebe3459bf814778d20526e21885d71e2618b4dd38460228edc71",
+      "card_hash": "816a9cadc73eadfc794876df5bbd8843bff18e4fdc054397a7da14a628481279",
+      "stratum": "timed_evidence",
+      "gold_path": [
+        "Space and Science",
+        "Spaceflight"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "Space and Science",
+        "Spaceflight"
+      ],
+      "mapped_shelf_id": "spaceflight",
+      "scorable": true
+    },
+    "2094362669444648960": {
+      "source_revision": "b35260e348156f9d656d9ca2d886b9c49dd4aa3d33b77205b7f23ec06a9cc3b4",
+      "card_hash": "0cc15b7ab7294400ac02c7d38e31b66d15b7714c5a783d075bb9b6d82dd7c3d0",
+      "stratum": "timed_evidence",
+      "gold_path": [
+        "AI and ML",
+        "Education"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "Education"
+      ],
+      "mapped_shelf_id": "education",
+      "scorable": true
+    },
+    "2094462045219438592": {
+      "source_revision": "31cf501d6dd914576ff164685f61db67df6f0ea25a29294d05b9baad33dcdfc9",
+      "card_hash": "aea34c141f29f037016e50e88bd17c2828af29e63aa24b4f28f60b94880a6d9b",
+      "stratum": "timed_evidence",
+      "gold_path": [
+        "AI and ML",
+        "Frontier Models"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "Frontier Models"
+      ],
+      "mapped_shelf_id": "frontier-models",
+      "scorable": true
+    },
+    "2094843633572659200": {
+      "source_revision": "c3a2d04c7b7b9a24975a0b828243389addbcabb69445987aa3ea6cec4a7ffa49",
+      "card_hash": "fc0fb02d36402136621896572fc5b465686205fc3fa4b82eaa628a4e1da4edab",
+      "stratum": "timed_evidence",
+      "gold_path": [
+        "AI and ML",
+        "Frontier Models"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "Frontier Models"
+      ],
+      "mapped_shelf_id": "frontier-models",
+      "scorable": true
+    },
+    "G2GEUhe2ro8": {
+      "source_revision": "d011455021187a1150e9d6536fe4ae63901639a1a90100d18cfb2e943d5670d0",
+      "card_hash": "7ec8482bb55f63c4f225bd10e968f9ad1f426374db1e70f2265a7f240aeed12b",
+      "stratum": "timed_evidence",
+      "gold_path": [
+        "AI and ML",
+        "Education"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "Education"
+      ],
+      "mapped_shelf_id": "education",
+      "scorable": true
+    },
+    "JmCXZQ2xiZo": {
+      "source_revision": "e622bcf3aff29f649041776834d9b51c665a139c53f54cd30f6076a6df31bf00",
+      "card_hash": "dc8456437f698627c11910bd72c50dc856361d34af901cf9074c74243529495e",
+      "stratum": "timed_evidence",
+      "gold_path": [
+        "AI and ML"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML"
+      ],
+      "mapped_shelf_id": "ai-and-ml",
+      "scorable": true
+    },
+    "Vh4O04Bpovw": {
+      "source_revision": "41b126f9d4d797db89f22bb3d500d7528ac9a042b8fa67df7d65bca50a3b4bdf",
+      "card_hash": "cfa134ea9321567cdd417370fdc5b89033bf4959530e565bdcfa1f95cd428674",
+      "stratum": "timed_evidence",
+      "gold_path": [
+        "Space and Science"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "Space and Science"
+      ],
+      "mapped_shelf_id": "space-and-science",
+      "scorable": true
+    },
+    "WgPbbWmnXJ8": {
+      "source_revision": "bb5826ef56d62ae5c0c9b44bb1ab040510560b5515f06cb0356078c957899825",
+      "card_hash": "58f8b660d84b7e82c9f2141e399bf11598c6e473a50f2cd51ff4057b3ce4fcf8",
+      "stratum": "timed_evidence",
+      "gold_path": [
+        "AI and ML",
+        "Education"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "Education"
+      ],
+      "mapped_shelf_id": "education",
+      "scorable": true
+    },
+    "hPJYSxsHDtQ": {
+      "source_revision": "840e7af5396322a5a75c2cbe87acd03201ee28509673a6ebca83619ac66eb7dd",
+      "card_hash": "f676fc05d489b65c2a75a21d302f145311722cc537b787f9e6567a8df436abf7",
+      "stratum": "timed_evidence",
+      "gold_path": [
+        "AI and ML",
+        "AI Industry and Business"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "AI Industry and Business"
+      ],
+      "mapped_shelf_id": "ai-industry-and-business",
+      "scorable": true
+    },
+    "pFlLqO3oUoc": {
+      "source_revision": "aefdb286764dff4bdfd12adf0787920c5fd67a03680ca4865f9a14578c1dd7c5",
+      "card_hash": "4b6adbc51aeb9d85849b2e54adc2b41a7f9e0369e0cdc8a7ac4d5e21e0376a43",
+      "stratum": "timed_evidence",
+      "gold_path": [
+        "AI and ML",
+        "AI Agents and Automation"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "AI Agents and Automation"
+      ],
+      "mapped_shelf_id": "ai-agents-and-automation",
+      "scorable": true
+    },
+    "pI_WARqK_X4": {
+      "source_revision": "db4d3af0519b88345dfbf00142cc560b37083852e9bd8d881d408d9a06b0674e",
+      "card_hash": "4f708229a6c751d6d3f3f5d3ea971163d414ec3029b155ac3d1253b0ac744e64",
+      "stratum": "timed_evidence",
+      "gold_path": [
+        "AI and ML",
+        "AI Agents and Automation"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "AI Agents and Automation"
+      ],
+      "mapped_shelf_id": "ai-agents-and-automation",
+      "scorable": true
+    },
+    "2080274574113947649": {
+      "source_revision": "ad9e6072bc7bc8a60511cbeb814da6c096c9bc797e0b86cbcc0cf2597a95aae8",
+      "card_hash": "263261dce5b1ee5d9260f33839aaec42fb0063bd6a12898a810952a6db78395c",
+      "stratum": "text_only",
+      "gold_path": [
+        "AI and ML",
+        "Frontier Models"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "Frontier Models"
+      ],
+      "mapped_shelf_id": "frontier-models",
+      "scorable": true
+    },
+    "2080394147458846720": {
+      "source_revision": "81702850f80357a6bcbd347c431a508e94f241026de9494af285c7b83aa75df4",
+      "card_hash": "15cd1d12363a4e205abf6d4b447fc8ea68b04ab10336ce4ffc30ccba5983f888",
+      "stratum": "text_only",
+      "gold_path": [
+        "AI and ML"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML"
+      ],
+      "mapped_shelf_id": "ai-and-ml",
+      "scorable": true
+    },
+    "2081715828459028480": {
+      "source_revision": "86f2e7d544dd0e277107deb3c845615e9ef1d6cf70e866aa167c026dcea6f6e9",
+      "card_hash": "09925a513cb1d9bfd3385b96a356c4a72ea2e195fab5d49ff1faa1a0e2e0edb3",
+      "stratum": "text_only",
+      "gold_path": [
+        "AI and ML",
+        "Frontier Models"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "Frontier Models"
+      ],
+      "mapped_shelf_id": "frontier-models",
+      "scorable": true
+    },
+    "2086879775277125633": {
+      "source_revision": "21dcae88d8fba8ff742591fa33d39426744ac51bb4f28f454c888fb4e7d58d54",
+      "card_hash": "27d201ead9b94a8d14319bf8e7e0cc71da1b05abeb8f23da9a937dbd54d98730",
+      "stratum": "text_only",
+      "gold_path": [
+        "AI and ML",
+        "Developer Tools"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "Developer Tools"
+      ],
+      "mapped_shelf_id": "developer-tools",
+      "scorable": true
+    },
+    "2088367256468164608": {
+      "source_revision": "c567eebc4b177b6210e8c341fdabbee00a3fd661c61fc82ead7c06b9b0fef83d",
+      "card_hash": "42c920d033a13ab10089483bb8406e978fe81dcf76e8d6993d7846269064e98d",
+      "stratum": "text_only",
+      "gold_path": [
+        "AI and ML",
+        "Developer Tools"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "Developer Tools"
+      ],
+      "mapped_shelf_id": "developer-tools",
+      "scorable": true
+    },
+    "2088390532988891136": {
+      "source_revision": "c0ddb72400ccd31a20e6a563cc6c07c1ac5db906ff6d9d849b52cb47bd61ea7d",
+      "card_hash": "344e92c5c339d34ea7a7d6a625b6089f900be2d08735fac38b91de1f704259c7",
+      "stratum": "text_only",
+      "gold_path": [
+        "AI and ML"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML"
+      ],
+      "mapped_shelf_id": "ai-and-ml",
+      "scorable": true
+    },
+    "2088397814267080704": {
+      "source_revision": "4fc0ba7fcf4aed9bff45038fac45c39a21317dbd4adedc372d6f493a9fedbc45",
+      "card_hash": "ad64a90dc07daad6bd618d8ffbdd82f4ea623036fbf2e1121afa594e480307a5",
+      "stratum": "text_only",
+      "gold_path": [
+        "AI and ML"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML"
+      ],
+      "mapped_shelf_id": "ai-and-ml",
+      "scorable": true
+    },
+    "2088703526553968640": {
+      "source_revision": "d6d2cfb07bff878b9fb907b0e1b0aba588b20cf55d2193e2ec2fe20cfbf93973",
+      "card_hash": "0bc5385d034f30df8b927c5dc2caa79e7c6f19f06ba617060230ed7948630820",
+      "stratum": "text_only",
+      "gold_path": [
+        "AI and ML",
+        "Developer Tools"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "Developer Tools"
+      ],
+      "mapped_shelf_id": "developer-tools",
+      "scorable": true
+    },
+    "2090106310385688577": {
+      "source_revision": "81a352ad9b255deddc2785f695d75f0c17ca8099073627f943c7f8765c268eb9",
+      "card_hash": "1be2e860a151d70de7b6839fb911b8965c3b169f39d2b61adbabb5804679106e",
+      "stratum": "text_only",
+      "gold_path": [
+        "Developer Tools",
+        "Terminal Editors"
+      ],
+      "outcome": "unmappable",
+      "mapped_path": null,
+      "mapped_shelf_id": null,
+      "scorable": false
+    },
+    "2090852806257422336": {
+      "source_revision": "28f316df0bf6a954d035577f2a7db8286da21a885c24afe7d0955f0c15159ae1",
+      "card_hash": "7d4ee09e57e90178990efd2984280ee24109bcd05d69aad2d87523b8eb056749",
+      "stratum": "text_only",
+      "gold_path": [
+        "AI and ML"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML"
+      ],
+      "mapped_shelf_id": "ai-and-ml",
+      "scorable": true
+    },
+    "2091957857650716672": {
+      "source_revision": "7219b4ed77b0a6750859dc95dc631887fa59750fdede71ee36f6c15cfb3e3f6d",
+      "card_hash": "4402ba4c902b09ce1331f6a51fedb9311587fc973c24a6f2d062257ccf439c9a",
+      "stratum": "text_only",
+      "gold_path": [
+        "AI and ML",
+        "AI Industry and Business"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "AI Industry and Business"
+      ],
+      "mapped_shelf_id": "ai-industry-and-business",
+      "scorable": true
+    },
+    "2092658884297334784": {
+      "source_revision": "fe9061677d7c91e2667115fbac143a259ebf794902f6ddf2f229e15036b77d33",
+      "card_hash": "b2e201c2093d0fc3efd0a5d960ae83b68bf9d30a3987daa640dc4c679378078c",
+      "stratum": "text_only",
+      "gold_path": [
+        "AI and ML",
+        "Frontier Models"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "Frontier Models"
+      ],
+      "mapped_shelf_id": "frontier-models",
+      "scorable": true
+    },
+    "2092919679475941376": {
+      "source_revision": "e4bcbc4f62823cc9da50b8667f5a1ec91e63311ea5cf01b4f9c3d21d631540dd",
+      "card_hash": "3279ad5493e6c4740cb42afd1e0c0a973890628aa28aa8f9b2572bb18318438b",
+      "stratum": "text_only",
+      "gold_path": [
+        "AI and ML"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML"
+      ],
+      "mapped_shelf_id": "ai-and-ml",
+      "scorable": true
+    }
+  }
+}

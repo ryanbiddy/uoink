@@ -1,0 +1,10 @@
+=== RUNTIME GRAPH COMPATIBILITY REPORT: FAIL ===
+Target Environment: Windows x86-64 CPython 3.13 (AMD64)
+Selected Packages: 140
+Active Edges Evaluated: 283
+
+[!] WHEEL REJECTIONS (2):
+  - antlr4-python3-runtime==4.9.3 [NO_WHEELS]: No wheel distributions found for antlr4-python3-runtime==4.9.3 in release files
+  - proxy-tools==0.1.0 [NO_WHEELS]: No wheel distributions found for proxy-tools==0.1.0 in release files
+
+Scope: Graph compatibility verifies PEP 508 constraints and wheel metadata only. A local SHA256 manifest proves retained-byte integrity, not authenticity on its own. Advisory disposition, binary import compatibility, model safety, and inference quality are separate gates and are not qualified by this check.

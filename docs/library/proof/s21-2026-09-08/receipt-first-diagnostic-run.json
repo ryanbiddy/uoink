@@ -1,0 +1,172 @@
+{
+  "procedure": "S21",
+  "result": "AUTOMATED PASS; browser observation still required",
+  "root": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\s21-7qt34b01",
+  "fixture_downloads": 1,
+  "fixture_transcripts": 1,
+  "model_calls": 0,
+  "forbidden_attempts": [],
+  "connections": [
+    [
+      "127.0.0.1",
+      63186
+    ],
+    [
+      "127.0.0.1",
+      63186
+    ],
+    [
+      "127.0.0.1",
+      63186
+    ],
+    [
+      "127.0.0.1",
+      63185
+    ],
+    [
+      "127.0.0.1",
+      63185
+    ],
+    [
+      "127.0.0.1",
+      63185
+    ],
+    [
+      "127.0.0.1",
+      63186
+    ],
+    [
+      "127.0.0.1",
+      63185
+    ]
+  ],
+  "prepare_observations": [
+    {
+      "after_commit": true,
+      "video_id": "episode_6aea00fe47e"
+    }
+  ],
+  "input_hashes": {
+    "server.py": "f8a16f12de2b9c9aca37009119b3d064e4b73516ba4a024bc38ffa4c72a89eb0",
+    "source_subscriptions.py": "b0baa5dabc57dd4836d76bc4ebd29120f55950f9c1cdc891e62cee032b0770d2",
+    "docs\\library\\taxonomy-v3-2026-09-07.json": "c3fdb4fb0c3f89c68b06676f7613c75d3a293787d28c32b0a5adb9fa91e4fdf7",
+    "scripts\\librarian\\prompts\\assign.md": "cd22a3c1819f693bc921033847e21b18dfac6bbac138da6162af3a0244d12f32"
+  },
+  "helper_url": "http://127.0.0.1:63186",
+  "feed_url": "http://127.0.0.1:63185/feed.xml",
+  "source_status": {
+    "ok": true,
+    "schema_version": 1,
+    "contract_version": "phase3-v1-2026-09-07",
+    "source": {
+      "source_id": "src_351a4395a99ec53d422e3a10442caab561459b5de78cfd5585add5528dc01394",
+      "kind": "podcast_rss",
+      "canonical_url": "http://127.0.0.1:63185/feed.xml",
+      "display_name": null,
+      "adapter": "podcast_rss_v1",
+      "consent_state": "on",
+      "revision": 1,
+      "consent_epoch": 1,
+      "detection_enabled": true,
+      "archived": false,
+      "poll_interval_min": 15,
+      "boundary": "none",
+      "enrollment": {
+        "cap": 25,
+        "enrolled": 0,
+        "initial_completed": true,
+        "known_candidates": 0,
+        "pending": false,
+        "remaining_initial_slots": 0,
+        "coverage": "complete",
+        "initial_completed_ms": 1788863015573
+      },
+      "allowance": {
+        "utc_day": "2026-09-08",
+        "cap": 10,
+        "reserved": 0,
+        "charged": 1,
+        "remaining": 9,
+        "resets_at_ms": 1788912000000,
+        "capture_not_before_ms": 1788864815573,
+        "hold_reason": null,
+        "hold_until_ms": null
+      },
+      "detection": {
+        "cursor_revision": 2,
+        "enabled": true,
+        "last_poll_attempt_ms": 1788863915573,
+        "last_poll_success_ms": 1788863915573,
+        "next_poll_at_ms": 1788864815573,
+        "observed_count": 1,
+        "coverage": "complete",
+        "truncated": false,
+        "consecutive_failures": 0,
+        "poll_in_progress": false,
+        "error": null
+      },
+      "item_counts": {
+        "observed": 0,
+        "eligible": 0,
+        "reserved": 0,
+        "started": 0,
+        "uncertain": 0,
+        "committed": 1,
+        "failed": 0,
+        "deleted": 0
+      },
+      "in_flight": [],
+      "capture_status": "not_due",
+      "legacy": {
+        "feed_id": 1,
+        "playlist_id": null
+      },
+      "created_at_ms": 1788863015573,
+      "updated_at_ms": 1788863915573
+    },
+    "items": [
+      {
+        "item_id": "si_063a742f1410480528ffceb2253d38669679ee8c517e881bf2959438583f5ce7",
+        "entry_id": "s21-entry-1",
+        "title": "S21 controlled capture",
+        "canonical_url": "http://127.0.0.1:63185/episode",
+        "published_at_ms": 1788782400000,
+        "first_seen_ms": 1788863915573,
+        "last_seen_ms": 1788863915573,
+        "eligibility": "future",
+        "capture_state": "committed",
+        "blocked_reason": null,
+        "actual_attempts": 1,
+        "preflight_failures": 0,
+        "retry_at_ms": null,
+        "start_id": "st_34a578e56c68df3f7457489862d86b42",
+        "start_state": "succeeded",
+        "charged_utc_day": "2026-09-08",
+        "video_id": "episode_6aea00fe47e",
+        "committed_at_ms": 1788863915573,
+        "classification": {
+          "state": "waiting_for_client",
+          "work_id": "FEjJcO2ocxRDbx7YbcrU24Y7myR2KvAI",
+          "run_id": "ss_fd47beb6d73bc70c50e80aef71857b9d872481f07064d7ea5ebcd44b29ad38f6"
+        }
+      }
+    ],
+    "next_item_cursor": null,
+    "in_flight": [],
+    "as_of_ms": 1788863915573
+  },
+  "video_id": "episode_6aea00fe47e",
+  "clip": {
+    "clip_id": 1,
+    "video_id": "episode_6aea00fe47e",
+    "seq": 0,
+    "start": 12.5,
+    "end": 21.75,
+    "text": "S21 fixture: durable capture waits for complete publication.",
+    "speaker": null,
+    "source_deep_link": "http://127.0.0.1:63185/episode#t=12",
+    "cue_count": 1
+  },
+  "unfiled": true,
+  "evidence_sha256": "92c18676824e4b4819cefe55dd92ef435435e09e2572cad8fcdf18b4155adb6a"
+}

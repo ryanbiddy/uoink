@@ -1,0 +1,1 @@
+persisted: consent on enrolled 14 | starts {'succeeded': 10} | charged today 10 | receipts 1

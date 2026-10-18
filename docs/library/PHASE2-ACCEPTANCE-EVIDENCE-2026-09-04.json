@@ -1,0 +1,602 @@
+{
+  "candidate_sha": "f53adaf3206c22dadb8cd3ba48546d3535245810",
+  "checkout_sha": "12ba709df81f82230b704f9af58727280292dffd",
+  "python": "3.14.6 (tags/v3.14.6:c63aec6, Jun 10 2026, 10:26:10) [MSC v.1944 64 bit (AMD64)]",
+  "sqlite": "3.50.4",
+  "source_date": "2026-09-04",
+  "source_bytes": 71733248,
+  "source_sha256_before": "2765cc359805fb12f7a90aecd3dd0b34d884aa8cb3015785011bf400da3b4dfc",
+  "model_calls": 0,
+  "named_copy": {
+    "schema": 25,
+    "counts": {
+      "allowed_sites": 4,
+      "citations": 149041,
+      "claims": 0,
+      "clips": 3216,
+      "clips_fts": 3216,
+      "clips_fts_config": 1,
+      "clips_fts_data": 588,
+      "clips_fts_docsize": 3216,
+      "clips_fts_idx": 538,
+      "engagement_events": 0,
+      "entities": 995,
+      "entity_mentions": 2401,
+      "jobs": 212,
+      "memory_layer": 1,
+      "mobile_queue_events": 0,
+      "monitored_playlists": 0,
+      "pending_yoinks": 8,
+      "podcast_episodes": 150,
+      "podcast_feeds": 3,
+      "schema_version": 25,
+      "scripts": 0,
+      "sqlite_sequence": 9,
+      "style_anchors": 5,
+      "taxonomy": 511,
+      "taxonomy_corrections": 0,
+      "user_channels": 0,
+      "workspace_critique_log": 0,
+      "workspaces": 0,
+      "writing_drafts": 0,
+      "writing_pieces": 29,
+      "yoink_tags": 0,
+      "yoinks": 548,
+      "yoinks_fts": 548,
+      "yoinks_fts_config": 1,
+      "yoinks_fts_content": 548,
+      "yoinks_fts_data": 930,
+      "yoinks_fts_docsize": 548,
+      "yoinks_fts_idx": 819
+    },
+    "source_table_hashes": {
+      "yoinks": "c9eb9a60d54796e7c660cf28febf3caca5fbefdfa83709f87c2413f954ba9375",
+      "citations": "b433285c1219e9b30a9af703701406601342587e6f12ea9c770ddccee61e5eab",
+      "clips": "10374bfef9d958ae4bdf8f92cedb1b2fa656a89c77d710c26db7d5e3c9a2b57a"
+    },
+    "items_with_clips": 212
+  },
+  "before": {
+    "schema": 26,
+    "counts": {
+      "allowed_sites": 4,
+      "citations": 149041,
+      "claims": 0,
+      "clips": 3705,
+      "clips_fts": 3705,
+      "clips_fts_config": 1,
+      "clips_fts_data": 612,
+      "clips_fts_docsize": 3705,
+      "clips_fts_idx": 579,
+      "engagement_events": 0,
+      "entities": 995,
+      "entity_mentions": 2401,
+      "jobs": 212,
+      "memory_layer": 1,
+      "mobile_queue_events": 0,
+      "monitored_playlists": 0,
+      "pending_yoinks": 8,
+      "podcast_episodes": 150,
+      "podcast_feeds": 3,
+      "schema_version": 26,
+      "scripts": 0,
+      "sqlite_sequence": 9,
+      "style_anchors": 5,
+      "taxonomy": 511,
+      "taxonomy_corrections": 0,
+      "user_channels": 0,
+      "workspace_critique_log": 0,
+      "workspaces": 0,
+      "writing_drafts": 0,
+      "writing_pieces": 29,
+      "yoink_tags": 0,
+      "yoinks": 548,
+      "yoinks_fts": 548,
+      "yoinks_fts_config": 1,
+      "yoinks_fts_content": 548,
+      "yoinks_fts_data": 930,
+      "yoinks_fts_docsize": 548,
+      "yoinks_fts_idx": 819
+    },
+    "source_table_hashes": {
+      "yoinks": "c9eb9a60d54796e7c660cf28febf3caca5fbefdfa83709f87c2413f954ba9375",
+      "citations": "b433285c1219e9b30a9af703701406601342587e6f12ea9c770ddccee61e5eab",
+      "clips": "e0c9b5eb794679f50fb907b69898345c16531483fbb64b0a0023ac7c616ec2dc"
+    },
+    "items_with_clips": 212
+  },
+  "prepared26_integrity": {
+    "integrity_check": [
+      "ok"
+    ],
+    "foreign_key_check": [],
+    "yoinks_fts": "ok",
+    "clips_fts": "ok"
+  },
+  "prepared26_sha256": "4fc3179cd1167a3a664ff2dce2f3837c2501ba4b09e10bc1092cc58262b824b2",
+  "after": {
+    "schema": 27,
+    "counts": {
+      "allowed_sites": 4,
+      "citations": 149041,
+      "claims": 0,
+      "clips": 3705,
+      "clips_fts": 3705,
+      "clips_fts_config": 1,
+      "clips_fts_data": 612,
+      "clips_fts_docsize": 3705,
+      "clips_fts_idx": 579,
+      "engagement_events": 0,
+      "entities": 995,
+      "entity_mentions": 2401,
+      "item_shelves": 0,
+      "jobs": 212,
+      "library_applies": 0,
+      "library_attempts": 0,
+      "library_item_policy": 0,
+      "library_manifest": 0,
+      "library_meta": 1,
+      "library_operation_receipts": 0,
+      "library_previews": 0,
+      "library_proposals": 0,
+      "library_runs": 0,
+      "library_submissions": 0,
+      "library_user_intents": 0,
+      "library_work": 0,
+      "memory_layer": 1,
+      "mobile_queue_events": 0,
+      "monitored_playlists": 0,
+      "pending_yoinks": 8,
+      "podcast_episodes": 150,
+      "podcast_feeds": 3,
+      "schema_version": 27,
+      "scripts": 0,
+      "shelf_nodes": 0,
+      "shelf_versions": 0,
+      "shelves": 0,
+      "sqlite_sequence": 9,
+      "style_anchors": 5,
+      "taxonomy": 511,
+      "taxonomy_corrections": 0,
+      "user_channels": 0,
+      "workspace_critique_log": 0,
+      "workspaces": 0,
+      "writing_drafts": 0,
+      "writing_pieces": 29,
+      "yoink_tags": 0,
+      "yoinks": 548,
+      "yoinks_fts": 548,
+      "yoinks_fts_config": 1,
+      "yoinks_fts_content": 548,
+      "yoinks_fts_data": 930,
+      "yoinks_fts_docsize": 548,
+      "yoinks_fts_idx": 819
+    },
+    "source_table_hashes": {
+      "yoinks": "c9eb9a60d54796e7c660cf28febf3caca5fbefdfa83709f87c2413f954ba9375",
+      "citations": "b433285c1219e9b30a9af703701406601342587e6f12ea9c770ddccee61e5eab",
+      "clips": "e0c9b5eb794679f50fb907b69898345c16531483fbb64b0a0023ac7c616ec2dc"
+    },
+    "items_with_clips": 212
+  },
+  "populated_integrity": {
+    "integrity_check": [
+      "ok"
+    ],
+    "foreign_key_check": [],
+    "yoinks_fts": "ok",
+    "clips_fts": "ok"
+  },
+  "post_upgrade_sha256": "fd9db30deea7695a339a07d41b559748fd5a91514bcff64d47e9bad25b867661",
+  "repeat": {
+    "schema": 27,
+    "counts": {
+      "allowed_sites": 4,
+      "citations": 149041,
+      "claims": 0,
+      "clips": 3705,
+      "clips_fts": 3705,
+      "clips_fts_config": 1,
+      "clips_fts_data": 612,
+      "clips_fts_docsize": 3705,
+      "clips_fts_idx": 579,
+      "engagement_events": 0,
+      "entities": 995,
+      "entity_mentions": 2401,
+      "item_shelves": 0,
+      "jobs": 212,
+      "library_applies": 0,
+      "library_attempts": 0,
+      "library_item_policy": 0,
+      "library_manifest": 0,
+      "library_meta": 1,
+      "library_operation_receipts": 0,
+      "library_previews": 0,
+      "library_proposals": 0,
+      "library_runs": 0,
+      "library_submissions": 0,
+      "library_user_intents": 0,
+      "library_work": 0,
+      "memory_layer": 1,
+      "mobile_queue_events": 0,
+      "monitored_playlists": 0,
+      "pending_yoinks": 8,
+      "podcast_episodes": 150,
+      "podcast_feeds": 3,
+      "schema_version": 27,
+      "scripts": 0,
+      "shelf_nodes": 0,
+      "shelf_versions": 0,
+      "shelves": 0,
+      "sqlite_sequence": 9,
+      "style_anchors": 5,
+      "taxonomy": 511,
+      "taxonomy_corrections": 0,
+      "user_channels": 0,
+      "workspace_critique_log": 0,
+      "workspaces": 0,
+      "writing_drafts": 0,
+      "writing_pieces": 29,
+      "yoink_tags": 0,
+      "yoinks": 548,
+      "yoinks_fts": 548,
+      "yoinks_fts_config": 1,
+      "yoinks_fts_content": 548,
+      "yoinks_fts_data": 930,
+      "yoinks_fts_docsize": 548,
+      "yoinks_fts_idx": 819
+    },
+    "source_table_hashes": {
+      "yoinks": "c9eb9a60d54796e7c660cf28febf3caca5fbefdfa83709f87c2413f954ba9375",
+      "citations": "b433285c1219e9b30a9af703701406601342587e6f12ea9c770ddccee61e5eab",
+      "clips": "e0c9b5eb794679f50fb907b69898345c16531483fbb64b0a0023ac7c616ec2dc"
+    },
+    "items_with_clips": 212
+  },
+  "repeat_integrity": {
+    "integrity_check": [
+      "ok"
+    ],
+    "foreign_key_check": [],
+    "yoinks_fts": "ok",
+    "clips_fts": "ok"
+  },
+  "repeat_open_sha256": "fd9db30deea7695a339a07d41b559748fd5a91514bcff64d47e9bad25b867661",
+  "added_tables": [
+    "item_shelves",
+    "library_applies",
+    "library_attempts",
+    "library_item_policy",
+    "library_manifest",
+    "library_meta",
+    "library_operation_receipts",
+    "library_previews",
+    "library_proposals",
+    "library_runs",
+    "library_submissions",
+    "library_user_intents",
+    "library_work",
+    "shelf_nodes",
+    "shelf_versions",
+    "shelves"
+  ],
+  "fresh_before_schema": 26,
+  "fresh_after": {
+    "schema": 27,
+    "counts": {
+      "allowed_sites": 4,
+      "citations": 0,
+      "claims": 0,
+      "clips": 0,
+      "clips_fts": 0,
+      "clips_fts_config": 1,
+      "clips_fts_data": 2,
+      "clips_fts_docsize": 0,
+      "clips_fts_idx": 0,
+      "engagement_events": 0,
+      "entities": 0,
+      "entity_mentions": 0,
+      "item_shelves": 0,
+      "jobs": 0,
+      "library_applies": 0,
+      "library_attempts": 0,
+      "library_item_policy": 0,
+      "library_manifest": 0,
+      "library_meta": 1,
+      "library_operation_receipts": 0,
+      "library_previews": 0,
+      "library_proposals": 0,
+      "library_runs": 0,
+      "library_submissions": 0,
+      "library_user_intents": 0,
+      "library_work": 0,
+      "memory_layer": 0,
+      "mobile_queue_events": 0,
+      "monitored_playlists": 0,
+      "pending_yoinks": 0,
+      "podcast_episodes": 0,
+      "podcast_feeds": 0,
+      "schema_version": 27,
+      "scripts": 0,
+      "shelf_nodes": 0,
+      "shelf_versions": 0,
+      "shelves": 0,
+      "sqlite_sequence": 2,
+      "style_anchors": 0,
+      "taxonomy": 0,
+      "taxonomy_corrections": 0,
+      "user_channels": 0,
+      "workspace_critique_log": 0,
+      "workspaces": 0,
+      "writing_drafts": 0,
+      "writing_pieces": 0,
+      "yoink_tags": 0,
+      "yoinks": 0,
+      "yoinks_fts": 0,
+      "yoinks_fts_config": 1,
+      "yoinks_fts_content": 0,
+      "yoinks_fts_data": 2,
+      "yoinks_fts_docsize": 0,
+      "yoinks_fts_idx": 0
+    },
+    "source_table_hashes": {
+      "yoinks": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "citations": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "clips": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "items_with_clips": 0
+  },
+  "fresh_integrity": {
+    "integrity_check": [
+      "ok"
+    ],
+    "foreign_key_check": [],
+    "yoinks_fts": "ok",
+    "clips_fts": "ok"
+  },
+  "fresh_upgrade_sha256": "272bf8bec2141f27710bdf04c8a7002defda3d693ca578f106c8beaf9892c41b",
+  "fresh_repeat_sha256": "272bf8bec2141f27710bdf04c8a7002defda3d693ca578f106c8beaf9892c41b",
+  "injected_failure": {
+    "type": "OperationalError",
+    "message": "near \"THIS\": syntax error"
+  },
+  "after_rollback": {
+    "schema": 26,
+    "counts": {
+      "allowed_sites": 4,
+      "citations": 149041,
+      "claims": 0,
+      "clips": 3705,
+      "clips_fts": 3705,
+      "clips_fts_config": 1,
+      "clips_fts_data": 612,
+      "clips_fts_docsize": 3705,
+      "clips_fts_idx": 579,
+      "engagement_events": 0,
+      "entities": 995,
+      "entity_mentions": 2401,
+      "jobs": 212,
+      "memory_layer": 1,
+      "mobile_queue_events": 0,
+      "monitored_playlists": 0,
+      "pending_yoinks": 8,
+      "podcast_episodes": 150,
+      "podcast_feeds": 3,
+      "schema_version": 26,
+      "scripts": 0,
+      "sqlite_sequence": 9,
+      "style_anchors": 5,
+      "taxonomy": 511,
+      "taxonomy_corrections": 0,
+      "user_channels": 0,
+      "workspace_critique_log": 0,
+      "workspaces": 0,
+      "writing_drafts": 0,
+      "writing_pieces": 29,
+      "yoink_tags": 0,
+      "yoinks": 548,
+      "yoinks_fts": 548,
+      "yoinks_fts_config": 1,
+      "yoinks_fts_content": 548,
+      "yoinks_fts_data": 930,
+      "yoinks_fts_docsize": 548,
+      "yoinks_fts_idx": 819
+    },
+    "source_table_hashes": {
+      "yoinks": "c9eb9a60d54796e7c660cf28febf3caca5fbefdfa83709f87c2413f954ba9375",
+      "citations": "b433285c1219e9b30a9af703701406601342587e6f12ea9c770ddccee61e5eab",
+      "clips": "e0c9b5eb794679f50fb907b69898345c16531483fbb64b0a0023ac7c616ec2dc"
+    },
+    "items_with_clips": 212
+  },
+  "rollback_repaired_schema": 27,
+  "rollback_repaired_integrity": {
+    "integrity_check": [
+      "ok"
+    ],
+    "foreign_key_check": [],
+    "yoinks_fts": "ok",
+    "clips_fts": "ok"
+  },
+  "source_sha256_after": "2765cc359805fb12f7a90aecd3dd0b34d884aa8cb3015785011bf400da3b4dfc",
+  "installed_imports": {
+    "modules": [
+      "index",
+      "library_work",
+      "library_cards",
+      "provenance",
+      "clips",
+      "server",
+      "uoink_mcp_tools",
+      "uoink_mcp"
+    ],
+    "schema": 27,
+    "contract_version": "phase2-v1.2-2026-09-04",
+    "apply_enabled": false,
+    "checkout_on_sys_path": false
+  },
+  "elapsed_seconds": 8.57284,
+  "verdict": "REJECT",
+  "results": {
+    "suite": {
+      "counts": {
+        "passed": 888,
+        "xfailed": 1,
+        "skipped": 3
+      },
+      "junit_seconds": 61.216,
+      "groups": null,
+      "failing_cases": [],
+      "skips": [
+        {
+          "case": "tests.security.test_security_findings::test_sec_06_fts_query_non_ascii_dropped",
+          "status": "xfailed"
+        },
+        {
+          "case": "tests.test_mcpb_posix_build::test_posix_build_falls_back_to_python_without_mcpb_or_zip",
+          "status": "skipped"
+        },
+        {
+          "case": "tests.test_s6_suite_integration::test_kept_media_rejects_outside_folder_symlink",
+          "status": "skipped"
+        },
+        {
+          "case": "tests.test_screenshot_extraction_cm10::test_limited_range_15_second_fixture_produces_eight_jpegs",
+          "status": "skipped"
+        }
+      ],
+      "xml_sha256": "525c257c89d478195c401dfdde219707efd41799e6fc176b25d1cdccf2a5f2a4"
+    },
+    "independent": {
+      "counts": {
+        "passed": 232
+      },
+      "junit_seconds": 15.96,
+      "groups": {
+        "tests.test_library_work_leases": {
+          "passed": 9
+        },
+        "tests.test_library_work_validation": {
+          "passed": 10
+        },
+        "tests.test_library_work_apply_undo": {
+          "passed": 8
+        },
+        "tests.test_library_work_recovery": {
+          "passed": 6
+        },
+        "tests.test_library_work_rulings": {
+          "passed": 8
+        },
+        "tests.test_library_service_audit": {
+          "passed": 20
+        },
+        "tests.library_work_astra.test_durable": {
+          "passed": 11
+        },
+        "tests.library_work_astra.test_edges": {
+          "passed": 30
+        },
+        "tests.library_work_astra.test_missing": {
+          "passed": 12
+        },
+        "tests.library_work_astra.test_projection": {
+          "passed": 2
+        },
+        "tests.library_work_astra.test_reconciliation": {
+          "passed": 1
+        },
+        "tests.library_work_astra.test_review": {
+          "passed": 7
+        },
+        "tests.library_work_astra.test_rulings": {
+          "passed": 4
+        },
+        "tests.library_work_astra.test_substrate": {
+          "passed": 1
+        },
+        "tests.test_library_adapters": {
+          "passed": 94
+        },
+        "tests.test_openapi_bridge": {
+          "passed": 5
+        },
+        "tests.test_installed_library_runtime": {
+          "passed": 1
+        },
+        "tests.test_installer_files_complete": {
+          "passed": 3
+        }
+      },
+      "failing_cases": [],
+      "skips": [],
+      "xml_sha256": "6baaa1e591934ef72f29cc4f2f885787f440ff6f9601080b5eb5457a0949e35f"
+    },
+    "repro-final": {
+      "counts": {
+        "failed": 4,
+        "passed": 2
+      },
+      "junit_seconds": 0.827,
+      "groups": null,
+      "failing_cases": [
+        "tests.test_phase2_acceptance_m::test_real_registry_http_rpc_list_matches_service",
+        "tests.test_phase2_acceptance_m::test_real_registry_claim_reaches_service",
+        "tests.test_phase2_acceptance_m::test_real_health_reports_waiting_work",
+        "tests.test_phase2_acceptance_m::test_real_dashboard_intent_reaches_service"
+      ],
+      "skips": [],
+      "xml_sha256": "e4c5870bad8475600e29119f7d210b73987d376125c809888161ef3892e78410"
+    },
+    "final-suite": {
+      "counts": {
+        "passed": 890,
+        "xfailed": 1,
+        "skipped": 3,
+        "failed": 4
+      },
+      "junit_seconds": 61.031,
+      "groups": null,
+      "failing_cases": [
+        "tests.test_phase2_acceptance_m::test_real_registry_http_rpc_list_matches_service",
+        "tests.test_phase2_acceptance_m::test_real_registry_claim_reaches_service",
+        "tests.test_phase2_acceptance_m::test_real_health_reports_waiting_work",
+        "tests.test_phase2_acceptance_m::test_real_dashboard_intent_reaches_service"
+      ],
+      "skips": [
+        {
+          "case": "tests.security.test_security_findings::test_sec_06_fts_query_non_ascii_dropped",
+          "status": "xfailed"
+        },
+        {
+          "case": "tests.test_mcpb_posix_build::test_posix_build_falls_back_to_python_without_mcpb_or_zip",
+          "status": "skipped"
+        },
+        {
+          "case": "tests.test_s6_suite_integration::test_kept_media_rejects_outside_folder_symlink",
+          "status": "skipped"
+        },
+        {
+          "case": "tests.test_screenshot_extraction_cm10::test_limited_range_15_second_fixture_produces_eight_jpegs",
+          "status": "skipped"
+        }
+      ],
+      "xml_sha256": "ee47e1b8d10e330fbc49c31ae7975e42b0a4e04fdf115356c8c5b1ad8b4023e8"
+    }
+  },
+  "artifact_sha256": {
+    "suite.log": "354678782495b3fbd469c28ae4635330646103465f10820e095d12a04ce2726d",
+    "independent.log": "1b3aacc23a72d2eb35bfe3328c7357febae5db4c2a5016ef5707fe60e8dd24aa",
+    "repro-final.log": "7b819d4e45c09a8f2e2b148819ad23f870a12bceded8607ec1f8a664047585a6",
+    "final-suite.log": "8761bfeef20ba0789fcab519c2ddae51d94c1025929522437dd3fca14e6f0c66",
+    "migration-final/measurement.json": "ab631bce44ebc4def80e0673699b7e0067f7c2c2dd01f83e5875290280ca235b",
+    "migration-final/installed.log": "8b36b8d9ff7e9e146a857134e1068dc60266cd4ac9a794a8a6f5af3c472b5e60"
+  },
+  "limits": [
+    "P2-6 installed-client/restart/GUI receipt not run",
+    "P2-7 product proof not run",
+    "Staged import smoke is not an installer run",
+    "No source-document heads or cards remeasured in the migration probe",
+    "No model calls or paid usage"
+  ]
+}

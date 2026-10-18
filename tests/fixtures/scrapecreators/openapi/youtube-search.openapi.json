@@ -1,0 +1,129 @@
+{
+  "kind": "openapi-example",
+  "source_url": "https://docs.scrapecreators.com/v1/youtube/search/openapi.json",
+  "fetched_at": "2026-10-16T16:12:24Z",
+  "source_sha256": "770a96a0e8de370c92faea7fe1a0498ae86a9a415ddffc9888d00e3ab35e0a45",
+  "method": "GET",
+  "path": "/v1/youtube/search",
+  "summary": "Search",
+  "parameters": [
+    {
+      "name": "query",
+      "in": "query",
+      "required": true,
+      "type": "string"
+    },
+    {
+      "name": "uploadDate",
+      "in": "query",
+      "required": false,
+      "type": "string"
+    },
+    {
+      "name": "sortBy",
+      "in": "query",
+      "required": false,
+      "type": "string"
+    },
+    {
+      "name": "type",
+      "in": "query",
+      "required": false,
+      "type": "string"
+    },
+    {
+      "name": "duration",
+      "in": "query",
+      "required": false,
+      "type": "string"
+    },
+    {
+      "name": "region",
+      "in": "query",
+      "required": false,
+      "type": "string"
+    },
+    {
+      "name": "continuationToken",
+      "in": "query",
+      "required": false,
+      "type": "string"
+    },
+    {
+      "name": "includeExtras",
+      "in": "query",
+      "required": false,
+      "type": "string"
+    }
+  ],
+  "example_200": {
+    "success": true,
+    "credits_remaining": 1000000,
+    "credits_charged": 1,
+    "videos": [
+      {
+        "type": "video",
+        "id": "BzSzwqb-OEE",
+        "url": "https://www.youtube.com/watch?v=BzSzwqb-OEE",
+        "title": "NF - RUNNING (Audio)",
+        "thumbnail": "https://i.ytimg.com/vi/BzSzwqb-OEE/hq720.jpg?sqp=-oaymwEnCNAFEJQDSFryq4qpAxkIARUAAIhCGAHYAQHiAQoIGBACGAY4AUAB&rs=AOn4CLCasEKav1CLqeSSE2IYDqjGiIMBGw",
+        "channel": {
+          "id": "UCoRR6OLuIZ2-5VxtnQIaN2w",
+          "title": "NFrealmusic",
+          "handle": "channel/UCoRR6OLuIZ2-5VxtnQIaN2w",
+          "thumbnail": "https://yt3.ggpht.com/J1_Si0TYNZ-991v09y8RpCh4_Z_ALwKmPgMYnJqjNhoglVtipf3oEN8LpzG1kS0qsv8Jptpmmg=s88-c-k-c0x00ffffff-no-rj"
+        },
+        "viewCountText": "14,860,541 views",
+        "viewCountInt": 14860541,
+        "publishedTimeText": "2 years ago",
+        "publishedTime": "2023-05-28T17:08:46.499Z",
+        "lengthText": "4:14",
+        "lengthSeconds": 254,
+        "badges": []
+      }
+    ],
+    "channels": [],
+    "playlists": [],
+    "shorts": [
+      {
+        "type": "short",
+        "id": "uMNvF-lSCHg",
+        "url": "https://www.youtube.com/watch?v=uMNvF-lSCHg",
+        "title": "LONG RUN ROUTINE #run #runvlog #runner #shorts #morning",
+        "thumbnail": "https://i.ytimg.com/vi/uMNvF-lSCHg/hq720.jpg?sqp=-oaymwFBCNAFEJQDSFryq4qpAzMIARUAAIhCGADYAQHiAQoIGBACGAY4AUAB8AEB-AG2CIACgA-KAgwIABABGFsgXyhlMA8=&rs=AOn4CLA_P-5ExEn9EGLJDNeJedsxb3k1eQ",
+        "channel": {
+          "id": "UCGRdcRxpJWi5Q2oDCrMDUuQ",
+          "title": "Abby and Ryan",
+          "handle": "abbyandryan",
+          "thumbnail": "https://yt3.ggpht.com/8UdUEesepx1Ry_rFUPJOJgndTCKno9VTkSysnuJpFjMj63N6av0pNwnqoiKh_7PN2dw7PGIp=s68-c-k-c0x00ffffff-no-rj"
+        },
+        "viewCountText": "462,705 views",
+        "viewCountInt": 462705,
+        "publishedTimeText": "10 months ago",
+        "publishedTime": "2024-07-28T17:08:46.498Z",
+        "lengthText": "0:44",
+        "lengthSeconds": 44,
+        "badges": []
+      }
+    ],
+    "shelves": [
+      {
+        "type": "shelf",
+        "title": "Shorts",
+        "items": [
+          {
+            "type": "short",
+            "id": "LLBR5nO05tE",
+            "url": "https://www.youtube.com/watch?v=LLBR5nO05tE",
+            "title": "running through walls gone wrong",
+            "thumbnail": "https://i.ytimg.com/vi/LLBR5nO05tE/oardefault.jpg?sqp=-oaymwEoCJUDENAFSFqQAgHyq4qpAxcIARUAAIhC2AEB4gEKCBgQAhgGOAFAAQ==&rs=AOn4CLCYYIIDmBllgkLP68AjVs25UpyevQ",
+            "viewCountText": "750K",
+            "viewCountInt": 750000
+          }
+        ]
+      }
+    ],
+    "lives": [],
+    "continuationToken": "EooDEg..."
+  }
+}

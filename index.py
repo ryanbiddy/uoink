@@ -25,12 +25,18 @@ applies any pending ``NNNN_*.sql`` file in numeric order and is idempotent.
 
 from __future__ import annotations
 
+import errno
+import hashlib
 import json
 import logging
+import os
 import re
 import sqlite3
+import tempfile
 import threading
 import time
+import unicodedata
+from contextlib import contextmanager
 from datetime import datetime, timedelta
 from pathlib import Path
 
@@ -53,6 +59,9 @@ _PENDING_TERMINAL_STATES = ("succeeded", "failed", "cancelled")
 # pending_yoinks without bound. Live (pending / running) rows are never
 # evicted -- they're load-bearing for the retry worker.
 _PENDING_TABLE_CAP = 1000
+
+# Shared with the server's in-memory Activity history.
+TERMINAL_JOB_RETENTION = 200
 
 # SQLite stores INTEGER as signed 64-bit. A row id outside this range cannot
 # exist, and binding one raises OverflowError -- so callers treat out-of-range
@@ -77,6 +86,13 @@ def _valid_rowid(value) -> bool:
 # tracked by the schema_version *table*).
 CURRENT_YOINK_SCHEMA = 2
 
+# Capture-time snapshots used by local research playbooks. No schema change:
+# both new captures and the bounded legacy backfill store them in metadata_json.
+ENGAGEMENT_METADATA_FIELDS = (
+    "view_count", "like_count", "upload_date", "comment_count",
+    "channel_follower_count",
+)
+
 _YOINK_COLUMNS = (
     "video_id", "slug", "channel", "title", "topic", "hook_type",
     "yoinked_at", "corpus_path", "sidecar_path", "health_score_json",
@@ -97,6 +113,269 @@ _TERMINAL_JOB_STATES = ("completed", "failed", "cancelled")
 
 def _now_iso() -> str:
     return time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime())
+
+
+class PublicationRetryQueue:
+    """File-backed publication receipts, independent of a failing SQLite DB.
+
+    Attempts and terminal outcomes are written once; only a complete,
+    parseable outcome settles a receipt, so a partial one is retried and
+    replaced. Pending work survives restart; an interrupted attempt is
+    reported without running twice. A
+    pending request holds the capture's sidecar (transcript included) and
+    yt-dlp metadata only so its one retry can run. Settling reduces it to a
+    tombstone of IDs, status and timestamps, so no user content outlives the
+    retry or a later library deletion, and the same request can never run again.
+    """
+
+    def __init__(self, root: Path):
+        self.root = Path(root)
+
+    @staticmethod
+    def _valid_id(receipt_id: str) -> None:
+        if not re.fullmatch(r"[a-f0-9]{64}", receipt_id):
+            raise ValueError("invalid publication receipt ID")
+
+    @staticmethod
+    def _temporary(path: Path):
+        # Temporary copies are named "<destination>.<random>.tmp", so the
+        # receipt that owns one can still remove it after a failed unlink.
+        return tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", dir=path.parent,
+                                           prefix=f"{path.name}.", suffix=".tmp",
+                                           delete=False)
+
+    @staticmethod
+    def _replace(path: Path, record: dict) -> None:
+        # Atomic replacement: a settled receipt's tombstone, or a complete
+        # outcome over a partial one that settled nothing.
+        temporary = None
+        try:
+            with PublicationRetryQueue._temporary(path) as stream:
+                temporary = Path(stream.name)
+                json.dump(record, stream, ensure_ascii=False, sort_keys=True)
+                stream.flush()
+                os.fsync(stream.fileno())
+            os.replace(temporary, path)
+            temporary = None
+        finally:
+            if temporary is not None:
+                try:
+                    temporary.unlink(missing_ok=True)
+                except OSError as exc:
+                    log.warning("could not remove publication temp file %s: %s", temporary, exc)
+
+    @staticmethod
+    def _create(path: Path, record: dict, *, direct_fallback: bool = True) -> None:
+        # Prefer publishing a complete, flushed file. Both paths create
+        # exclusively, even if another writer claims the destination first.
+        path.parent.mkdir(parents=True, exist_ok=True)
+        temporary = None
+        try:
+            with PublicationRetryQueue._temporary(path) as stream:
+                temporary = Path(stream.name)
+                json.dump(record, stream, ensure_ascii=False, sort_keys=True)
+                stream.flush()
+                os.fsync(stream.fileno())
+            try:
+                path.hardlink_to(temporary)
+            except FileExistsError:
+                raise
+            except OSError:
+                # exFAT/FAT32 and some network shares cannot hard-link.
+                if not direct_fallback:
+                    # Requests and outcomes are never written in place: an
+                    # interrupted write must not leave a partial file. Move
+                    # the complete copy atomically instead. A concurrent
+                    # writer of one request writes identical bytes, and
+                    # outcomes are written under the capture's ownership lock.
+                    if path.exists():
+                        raise FileExistsError(errno.EEXIST, "publication file exists", str(path))
+                    os.replace(temporary, path)
+                    temporary = None
+                    return
+                # Keep any partial file if writing fails: never replace or
+                # delete a destination another writer may now be using.
+                with path.open("x", encoding="utf-8") as stream:
+                    json.dump(record, stream, ensure_ascii=False, sort_keys=True)
+                    stream.flush()
+                    os.fsync(stream.fileno())
+        finally:
+            if temporary is not None:
+                try:
+                    temporary.unlink(missing_ok=True)
+                except OSError as exc:
+                    log.warning("could not remove publication temp file %s: %s", temporary, exc)
+
+    def enqueue(self, record: dict) -> str:
+        encoded = json.dumps(record, ensure_ascii=False, sort_keys=True).encode("utf-8")
+        receipt_id = hashlib.sha256(encoded).hexdigest()
+        path = self.root / f"{receipt_id}.json"
+        try:
+            self._create(path, record, direct_fallback=False)
+        except FileExistsError:
+            existing = json.loads(path.read_text(encoding="utf-8"))
+            # The ID is the request's digest: its tombstone means this same
+            # request already settled, and it must not be stored or run again.
+            settled = (isinstance(existing, dict) and existing.get("tombstone") is True
+                       and existing.get("receipt_id") == receipt_id)
+            if existing != record and not settled:
+                raise ValueError("publication retry receipt changed")
+        return receipt_id
+
+    def _outcome(self, receipt_id: str) -> tuple[str, dict | None]:
+        """``(state, outcome)``: ``absent``, ``complete``, ``incomplete``
+        (a partial or invalid file, which settles nothing) or ``unreadable``
+        (it exists but cannot be read now, e.g. a sharing violation)."""
+        try:
+            outcome = json.loads((self.root / f"{receipt_id}.result.json").read_text(encoding="utf-8"))
+        except FileNotFoundError:
+            return "absent", None
+        except ValueError:
+            return "incomplete", None
+        except OSError as exc:
+            log.warning("could not read publication outcome %s: %s", receipt_id, exc)
+            return "unreadable", None
+        if not isinstance(outcome, dict) or outcome.get("status") not in ("succeeded", "failed"):
+            return "incomplete", None
+        return "complete", outcome
+
+    def is_settled(self, receipt_id: str) -> bool:
+        """Only a complete outcome settles a receipt. An unreadable one is
+        left alone this pass rather than run or overwritten."""
+        return self._outcome(receipt_id)[0] in ("complete", "unreadable")
+
+    def next_pending(self) -> tuple[str, dict] | None:
+        for path in sorted(self.root.glob("*.json")):
+            if path.name.endswith((".result.json", ".attempt.json")):
+                continue
+            if self.is_settled(path.stem):
+                continue
+            try:
+                record = json.loads(path.read_text(encoding="utf-8"))
+                if not isinstance(record, dict):
+                    raise ValueError("invalid publication receipt")
+            except (OSError, ValueError) as exc:
+                log.warning("could not read publication retry %s: %s", path, exc)
+                continue
+            if record.get("tombstone"):
+                continue  # Settled by another worker after the result check.
+            return path.stem, record
+        return None
+
+    def claim(self, receipt_id: str) -> bool:
+        self._valid_id(receipt_id)
+        try:
+            self._create(self.root / f"{receipt_id}.attempt.json", {"started_at": _now_iso()})
+        except FileExistsError:
+            return False
+        return True
+
+    def settle(self, receipt_id: str, *, error: str | None = None,
+               code: str | None = None) -> None:
+        self._valid_id(receipt_id)
+        path = self.root / f"{receipt_id}.result.json"
+        outcome = {"status": "failed" if error else "succeeded", "error": error,
+                   "code": (code or "publication_failed") if error else None,
+                   "finished_at": _now_iso()}
+        try:
+            self._create(path, outcome, direct_fallback=False)
+        except FileExistsError:
+            state, _ = self._outcome(receipt_id)
+            if state == "unreadable":
+                raise OSError(errno.EBUSY, "publication outcome cannot be read", str(path))
+            if state != "complete":
+                # A partial outcome (an interrupted write) settles nothing.
+                self._replace(path, outcome)
+            # Otherwise another worker already settled this receipt. Keep it.
+        try:
+            self._tombstone(receipt_id)
+        except (OSError, ValueError) as exc:
+            # The outcome is durable and the request can no longer run.
+            # compact_settled() removes the retained content on next start.
+            log.warning("could not compact settled publication retry %s: %s", receipt_id, exc)
+
+    def _tombstone(self, receipt_id: str) -> bool:
+        """Replace a settled request with IDs, status and timestamps only.
+        Without a complete outcome the request is not settled: it is left
+        for its retry, which settles and then compacts it."""
+        self._valid_id(receipt_id)
+        state, outcome = self._outcome(receipt_id)
+        if state != "complete":
+            return False
+        path = self.root / f"{receipt_id}.json"
+        attempt = self.root / f"{receipt_id}.attempt.json"
+        changed = False
+        try:
+            record = json.loads(path.read_text(encoding="utf-8"))
+        except FileNotFoundError:
+            record = None
+        except ValueError:
+            record = {}  # Unreadable content still must not be retained.
+        if record is not None and not (isinstance(record, dict) and record.get("tombstone")):
+            if not isinstance(record, dict):
+                record = {}
+            try:
+                started_at = json.loads(attempt.read_text(encoding="utf-8")).get("started_at")
+            except (OSError, ValueError, AttributeError):
+                started_at = None
+            sidecar = record.get("sidecar") if isinstance(record.get("sidecar"), dict) else {}
+            self._replace(path, {
+                "tombstone": True, "receipt_id": receipt_id,
+                "video_id": sidecar.get("video_id"), "metadata_id": record.get("metadata_id"),
+                "pending_id": record.get("pending_id"), "status": outcome.get("status"),
+                "error_code": outcome.get("code") or (
+                    "publication_failed" if outcome.get("status") == "failed" else None),
+                "created_at": record.get("created_at"), "started_at": started_at,
+                "settled_at": outcome.get("finished_at"),
+            })
+            changed = True
+        # The claim marker and temporary copies (a failed unlink can leave the
+        # complete request behind) only served the unsettled request. Each is
+        # retried independently; compact_settled() repeats this at next start.
+        try:
+            attempt.unlink(missing_ok=True)
+        except OSError as exc:
+            log.warning("could not remove publication attempt marker %s: %s", attempt, exc)
+        removed = self._remove_temporaries(f"{receipt_id}.*.tmp")
+        return changed or removed > 0
+
+    def _remove_temporaries(self, pattern: str, *, older_than: float | None = None) -> int:
+        removed = 0
+        for temporary in sorted(self.root.glob(pattern)):
+            try:
+                if older_than is not None and temporary.stat().st_mtime >= older_than:
+                    continue
+                temporary.unlink()
+                removed += 1
+            except FileNotFoundError:
+                continue
+            except OSError as exc:
+                log.warning("could not remove publication temp file %s: %s", temporary, exc)
+        return removed
+
+    def compact_settled(self, *, abandoned_after: float = 3600.0) -> int:
+        """Tombstone settled requests that still hold content and remove their
+        temporary copies, e.g. after a crash or a sharing violation. A copy
+        whose request was never stored (its enqueue failed) has nothing to
+        settle it; it is removed once no writer can still own it. Copies of a
+        pending request stay until it settles: the request holds that data."""
+        compacted = 0
+        for result in sorted(self.root.glob("*.result.json")):
+            receipt_id = result.name[:-len(".result.json")]
+            if not re.fullmatch(r"[a-f0-9]{64}", receipt_id):
+                continue
+            try:
+                compacted += self._tombstone(receipt_id)
+            except (OSError, ValueError) as exc:
+                log.warning("could not compact settled publication retry %s: %s", receipt_id, exc)
+        owners = {temporary.name.split(".", 1)[0] for temporary in self.root.glob("*.tmp")}
+        for receipt_id in sorted(owners):
+            if (re.fullmatch(r"[a-f0-9]{64}", receipt_id)
+                    and not (self.root / f"{receipt_id}.json").exists()
+                    and not (self.root / f"{receipt_id}.result.json").exists()):
+                compacted += self._remove_temporaries(
+                    f"{receipt_id}.*.tmp", older_than=time.time() - abandoned_after)
+        return compacted
 
 
 # --------------------------------------------------------------------------
@@ -120,6 +399,12 @@ def _discover_migrations() -> list[tuple[int, Path]]:
     return out
 
 
+def latest_schema_version() -> int:
+    """Return the newest migration version shipped with this checkout."""
+    migrations = _discover_migrations()
+    return migrations[-1][0] if migrations else 0
+
+
 def _current_schema_version(conn: sqlite3.Connection) -> int:
     """Return the highest applied schema version, or 0 on a fresh database."""
     row = conn.execute(
@@ -129,6 +414,47 @@ def _current_schema_version(conn: sqlite3.Connection) -> int:
         return 0
     row = conn.execute("SELECT MAX(version) AS v FROM schema_version").fetchone()
     return int(row["v"]) if row and row["v"] is not None else 0
+
+
+def schema_migration_status(path) -> dict:
+    """Inspect an existing index without creating or migrating it.
+
+    Doctor uses this read-only path so asking whether an upgrade is pending
+    cannot silently perform the upgrade it is meant to report.
+    """
+    db_path = Path(path)
+    latest = latest_schema_version()
+    if not db_path.is_file():
+        return {
+            "database_exists": False,
+            "current": 0,
+            "latest": latest,
+            "pending": False,
+        }
+
+    conn = None
+    try:
+        uri = f"{db_path.resolve().as_uri()}?mode=ro"
+        conn = sqlite3.connect(uri, uri=True)
+        conn.row_factory = sqlite3.Row
+        current = _current_schema_version(conn)
+        return {
+            "database_exists": True,
+            "current": current,
+            "latest": latest,
+            "pending": current < latest,
+        }
+    except sqlite3.Error as exc:
+        return {
+            "database_exists": True,
+            "current": None,
+            "latest": latest,
+            "pending": True,
+            "error": f"{type(exc).__name__}: {exc}",
+        }
+    finally:
+        if conn is not None:
+            conn.close()
 
 
 # ``ALTER TABLE ... ADD COLUMN`` has no IF NOT EXISTS form, so the runner
@@ -223,10 +549,80 @@ def _run_migrations(conn: sqlite3.Connection) -> int:
     return applied
 
 
+def _citation_label_columns(citation: dict) -> tuple:
+    """Phase 6 (phase6-v1): ``(speaker, speaker_provenance_json)`` for one
+    citation dict. Accepts either a pre-serialized ``speaker_provenance_json``
+    string or a ``speaker_provenance`` object; a label with no provenance
+    object is stored as NULL (never promoted to attributed evidence)."""
+    speaker = citation.get("speaker")
+    raw = citation.get("speaker_provenance_json")
+    if raw is None and isinstance(citation.get("speaker_provenance"), dict):
+        raw = json.dumps(citation["speaker_provenance"], ensure_ascii=False,
+                         sort_keys=True, allow_nan=False)
+    if not isinstance(speaker, str) or not isinstance(raw, str):
+        return (None, None)
+    return (speaker, raw)
+
+
+def _backfill_clips_if_needed(conn: sqlite3.Connection, schema_version: int) -> None:
+    """Build the derived clip index once for an upgraded library.
+
+    Migration 0024 creates the tables but deliberately does not run Python
+    from SQL. Existing installs can already have thousands of transcript
+    citations, so the first open on schema 24 fills an empty clip table from
+    those rows. Fresh databases and test fixtures pinned before 0024 skip the
+    check entirely.
+    """
+    if schema_version < 24:
+        return
+    import clips as _clips
+    clip_count = conn.execute("SELECT COUNT(*) FROM clips").fetchone()[0]
+    if clip_count:
+        # A schema-25 index may contain merged windows past the boundary or
+        # unsplit long cues. Repair once; already bounded coarse excerpts do
+        # not trigger another rebuild on the next open.
+        legacy = conn.execute(
+            'SELECT 1 FROM clips WHERE "end" - start > ? '
+            'AND (cue_count > 1 OR length(text) > ?) LIMIT 1',
+            (_clips.MAX_WINDOW_SECONDS, _clips.MAX_COARSE_CHARS)).fetchone()
+        if not legacy:
+            return
+    citation_count = conn.execute(
+        "SELECT COUNT(*) FROM citations WHERE kind='transcript_chunk'"
+    ).fetchone()[0]
+    if not citation_count:
+        return
+
+    report = _clips.rebuild_all_clips(conn)
+    log.info(
+        "clip upgrade backfill: %d transcript citations -> %d clips "
+        "across %d/%d items in %.3fs",
+        citation_count,
+        report["clip_count"],
+        report["items_with_clips"],
+        report["items"],
+        report["seconds"],
+    )
+
+
 # --------------------------------------------------------------------------
 # FTS query sanitisation
 # --------------------------------------------------------------------------
-_FTS_TERM_RE = re.compile(r"[A-Za-z0-9_]+")
+def _fts_terms(raw: str) -> list[str]:
+    """Keep Unicode words intact while excluding the FTS operator grammar."""
+    terms: list[str] = []
+    word: list[str] = []
+    for char in unicodedata.normalize("NFC", raw or ""):
+        # Combining marks belong to the preceding word, including scripts
+        # where NFC cannot compose them. Bare marks are not search terms.
+        if char.isalnum() or char == "_" or (word and unicodedata.category(char).startswith("M")):
+            word.append(char)
+        elif word:
+            terms.append("".join(word))
+            word = []
+    if word:
+        terms.append("".join(word))
+    return terms
 
 
 def _like_escape(value: str) -> str:
@@ -243,7 +639,7 @@ def _fts_query(raw: str) -> str:
     and a raw user string can be a syntax error. We extract bare word
     tokens, quote each one, and AND them together. A trailing ``*`` is kept
     on the last token for prefix matching so partial words still hit."""
-    terms = _FTS_TERM_RE.findall(raw or "")
+    terms = _fts_terms(raw)
     if not terms:
         return ""
     quoted = [f'"{t}"' for t in terms]
@@ -268,14 +664,24 @@ def normalize_entity_name(name: str) -> str:
     return "".join(ch for ch in str(name or "").lower() if ch.isalnum())
 
 
-def _entity_deep_link(video_id: str, seconds) -> str:
-    """A timestamped watch URL for an entity mention. Mirrors server.py's
-    _youtube_deep_link; duplicated here so index.py stays self-contained."""
+def _entity_deep_link(video_id: str, seconds, *, platform: str | None = None,
+                      metadata_json: str | None = None) -> str | None:
+    """Return a source-aware timestamp link for an entity mention."""
     vid = (video_id or "").strip()
     try:
         t = max(0, int(float(seconds)))
     except (TypeError, ValueError):
         t = 0
+    metadata = {}
+    try:
+        metadata = json.loads(metadata_json or "{}")
+    except (TypeError, json.JSONDecodeError):
+        pass
+    source_url = metadata.get("url") if isinstance(metadata, dict) else None
+    if platform and platform != "youtube":
+        if isinstance(source_url, str) and source_url.startswith(("http://", "https://")):
+            return f"{source_url.split('#', 1)[0]}#t={t}"
+        return None
     return f"https://youtube.com/watch?v={vid}&t={t}s"
 
 
@@ -296,8 +702,68 @@ class Index:
         self._path = path
         self._lock = threading.RLock()
         self._insert_count = 0
+        # Explicit write-transaction owner: (id(connection), thread ident).
+        # Bound only by write_transaction(); BriefStore uses this instead of
+        # guessing native sqlite3* pointers.
+        self._write_txn_owner = None
+        self._existing_read_only = False
+        self._pending_cancel_events: dict[int, threading.Event] = {}
 
     # ---- lifecycle -------------------------------------------------------
+    @classmethod
+    def open_existing(cls, path) -> "Index":
+        """Read existing storage without migrations, backfills or recovery."""
+        path = Path(path).resolve()
+        conn = sqlite3.connect(path.as_uri() + "?mode=ro", uri=True,
+                               check_same_thread=False)
+        try:
+            conn.row_factory = sqlite3.Row
+            conn.execute("PRAGMA foreign_keys=ON")
+            conn.execute("SELECT name FROM sqlite_master LIMIT 1").fetchone()
+            idx = cls(conn, path)
+            idx._existing_read_only = True
+            return idx
+        except BaseException:
+            conn.close()
+            raise
+
+    def initialize_for_write(self) -> None:
+        """Promote an existing-only handle on an explicit ordinary operation.
+
+        Readers share this Index lock, so no read can observe the connection
+        swap. Keep the original connection usable if initialization fails.
+        """
+        with self._lock:
+            if not self._existing_read_only:
+                return
+            previous = self._conn
+            conn = sqlite3.connect(str(self._path), check_same_thread=False)
+            try:
+                conn.row_factory = sqlite3.Row
+                conn.execute("PRAGMA journal_mode=WAL")
+                conn.execute("PRAGMA foreign_keys=ON")
+                version = _run_migrations(conn)
+                _backfill_clips_if_needed(conn, version)
+                self._conn = conn
+                try:
+                    from provenance import backfill_source_types
+                    backfill_source_types(self)
+                except Exception:
+                    log.exception("source_type provenance backfill failed")
+                has_meta = conn.execute(
+                    "SELECT 1 FROM sqlite_master WHERE name='library_meta'").fetchone()
+                if has_meta and ((self._path.parent / "library").is_dir() or conn.execute(
+                        "SELECT last_operation_sequence FROM library_meta WHERE singleton=1").fetchone()[0]):
+                    self.library_service()
+            except BaseException:
+                self._conn = previous
+                if hasattr(self, "_library_work_service"):
+                    del self._library_work_service
+                conn.close()
+                raise
+            self._existing_read_only = False
+            previous.close()
+
     @classmethod
     def open(cls, path) -> "Index":
         """Open (creating if needed) the index database and run migrations."""
@@ -312,16 +778,33 @@ class Index:
             conn.row_factory = sqlite3.Row
             conn.execute("PRAGMA journal_mode=WAL")
             conn.execute("PRAGMA foreign_keys=ON")
-            _run_migrations(conn)
+            schema_version = _run_migrations(conn)
+            _backfill_clips_if_needed(conn, schema_version)
         except Exception:
             conn.close()
             raise
-        return cls(conn, path)
+        idx = cls(conn, path)
+        try:
+            from provenance import backfill_source_types
+            backfill_source_types(idx)
+        except Exception:
+            log.exception("source_type provenance backfill failed")
+        # Records are local authority. Replay only an existing store; opening a
+        # fresh index does not seed a taxonomy, work, pins, or enabled apply flag.
+        has_library_meta = conn.execute(
+            "SELECT 1 FROM sqlite_master WHERE name='library_meta'").fetchone()
+        if has_library_meta and ((path.parent / "library").is_dir() or conn.execute(
+                "SELECT last_operation_sequence FROM library_meta WHERE singleton=1").fetchone()[0]):
+            idx.library_service()
+        return idx
 
     @classmethod
     def open_or_recover(cls, path) -> tuple["Index", bool]:
-        """Like ``open``, but if the file is a corrupt SQLite database, rename
-        it aside (``index.db.corrupt-<ts>``) and start fresh.
+        """Like ``open``, but quarantine verified corruption and start fresh.
+
+        The database and its WAL/SHM are moved into a unique sibling directory
+        named ``index.db.corrupt-<ts>-<random>``. Operational errors and failed
+        quarantine moves propagate without deleting any files.
 
         Returns ``(index, recovered)`` where ``recovered`` is True if the old
         file had to be quarantined -- the caller should then trigger a full
@@ -329,40 +812,161 @@ class Index:
         path = Path(path)
         try:
             return cls.open(path), False
-        except sqlite3.DatabaseError:
-            log.error("index.db is corrupt or unreadable -- quarantining and "
-                      "rebuilding from disk")
-            if path.exists():
-                quarantine = path.with_name(
-                    f"{path.name}.corrupt-{time.strftime('%Y%m%d-%H%M%S')}"
-                )
-                try:
-                    path.replace(quarantine)
-                    log.error("corrupt index quarantined at %s", quarantine)
-                except OSError:
-                    log.exception("could not rename corrupt index; deleting")
-                    try:
-                        path.unlink(missing_ok=True)
-                    except OSError:
-                        log.exception("could not delete corrupt index either")
-            # WAL/shm siblings of the corrupt file would poison the new DB.
+        except sqlite3.DatabaseError as exc:
+            # Busy/locked, full disks, I/O failures and SQL errors are not
+            # evidence of corruption. Prefer SQLite's code (including extended
+            # codes); older Python versions may only supply the message.
+            if isinstance(exc, sqlite3.OperationalError):
+                raise
+            code = getattr(exc, "sqlite_errorcode", None)
+            if code is not None:
+                corrupt = (code & 0xff) in (sqlite3.SQLITE_CORRUPT,
+                                           sqlite3.SQLITE_NOTADB)
+            else:
+                corrupt = str(exc).lower() in (
+                    "file is not a database", "database disk image is malformed")
+            if not corrupt:
+                raise
+
+            # Stat explicitly: permission/I/O errors must not be mistaken for
+            # missing files. Move the database last so it stays at its original
+            # path if a sidecar cannot be quarantined.
+            path.stat()
+            sources = []
             for suffix in ("-wal", "-shm"):
                 sibling = path.with_name(path.name + suffix)
                 try:
-                    sibling.unlink(missing_ok=True)
-                except OSError:
-                    pass
+                    sibling.stat()
+                except FileNotFoundError:
+                    continue
+                sources.append(sibling)
+            sources.append(path)
+            quarantine = Path(tempfile.mkdtemp(
+                prefix=f"{path.name}.corrupt-{time.strftime('%Y%m%d-%H%M%S')}-",
+                dir=path.parent))
+            moved = []
+            try:
+                for source in sources:
+                    saved = quarantine / source.name
+                    source.rename(saved)
+                    moved.append((source, saved))
+            except OSError:
+                # A hard link restores the original name without ever replacing
+                # a file that appeared there meanwhile. Keep the saved copy even
+                # if restoration fails; never delete on a quarantine failure.
+                for source, saved in reversed(moved):
+                    try:
+                        source.hardlink_to(saved)
+                    except OSError:
+                        log.exception("could not restore %s; preserved at %s",
+                                      source, saved)
+                log.exception("index quarantine failed; files preserved at %s "
+                              "and %s", path.parent, quarantine)
+                raise
+            log.error("corrupt index and sidecars quarantined at %s; "
+                      "rebuilding from disk", quarantine)
             return cls.open(path), True
 
     def close(self) -> None:
         with self._lock:
             self._conn.close()
 
+    def schema_version(self) -> int:
+        """Return the newest migration applied to this open index."""
+        with self._lock:
+            return _current_schema_version(self._conn)
+
     def __enter__(self) -> "Index":
         return self
 
     def __exit__(self, *exc) -> None:
         self.close()
+
+    @contextmanager
+    def write_transaction(self):
+        """Run one durable write unit without absorbing unrelated state.
+
+        Helper modules share this connection. Refuse to enter while another
+        caller has left a transaction open instead of accidentally committing
+        that caller's work. The re-entrant Index lock keeps the boundary
+        exclusive across worker threads.
+        """
+        with self._lock:
+            if self._conn.in_transaction:
+                raise RuntimeError(
+                    "cannot start a write transaction while another "
+                    "transaction is active"
+                )
+            owner = (id(self._conn), threading.get_ident())
+            try:
+                self._conn.execute("BEGIN IMMEDIATE")
+                self._write_txn_owner = owner
+                yield self._conn
+                self._conn.commit()
+            except BaseException:
+                if self._conn.in_transaction:
+                    self._conn.rollback()
+                raise
+            finally:
+                if self._write_txn_owner == owner:
+                    self._write_txn_owner = None
+
+    @contextmanager
+    def read_snapshot(self):
+        """Hold Index lock and an explicit read transaction across reading."""
+        with self._lock:
+            if self._conn.in_transaction:
+                raise RuntimeError(
+                    "cannot start a read snapshot while another "
+                    "transaction is active"
+                )
+            try:
+                self._conn.execute("BEGIN DEFERRED")
+                yield self._conn
+            finally:
+                if self._conn.in_transaction:
+                    self._conn.rollback()
+
+    snapshot = read_snapshot
+    read_transaction = read_snapshot
+
+    def library_service(self):
+        """One service seam, shared by transports and corpus lifecycle hooks."""
+        service = getattr(self, "_library_work_service", None)
+        if service is None:
+            from library_work import LibraryWorkService
+            event_hook = None
+            try:
+                import server as _server
+                event_hook = getattr(_server, "_mirror_event", None)
+            except Exception:
+                event_hook = None
+            service = LibraryWorkService(self, event_hook=event_hook)
+        return service
+
+    def rebuild_library_state(self) -> dict:
+        """Call after rebuilding corpus identities/clips to restore local pins.
+
+        Missing/deleted item corrections remain authoritative orphan records.
+        This does not rebuild or resurrect any source content.
+        """
+        from library_work import RequestContext
+        return self.library_service().rebuild_library_state(
+            RequestContext(authenticated=True, operator=True), {})
+
+    def _invalidate_library_sources(self, video_ids) -> None:
+        # Keep old installed trees importable until they package the service;
+        # no service import is needed when no assignment run exists.
+        with self._lock:
+            exists = self._conn.execute(
+                "SELECT 1 FROM sqlite_master WHERE name='library_runs'").fetchone()
+            if not exists or not self._conn.execute("SELECT 1 FROM library_runs LIMIT 1").fetchone():
+                return
+        from library_work import RequestContext
+        result = self.library_service().invalidate_source_items(
+            RequestContext(authenticated=True, operator=True), {"video_ids": list(video_ids)})
+        if not result["ok"]:
+            log.error("library source invalidation failed: %s", result["error"]["code"])
 
     # ---- yoinks ----------------------------------------------------------
     def upsert_yoink(self, record: dict, *, content: str = "") -> None:
@@ -379,6 +983,16 @@ class Index:
         # the NOT NULL column always has a value.
         if record.get("schema_version") is None:
             record = {**record, "schema_version": CURRENT_YOINK_SCHEMA}
+        if not str(record.get("source_type") or "").strip():
+            from provenance import derive_source_type
+            record = {
+                **record,
+                "source_type": derive_source_type(
+                    platform=record.get("platform"),
+                    metadata_json=record.get("metadata_json"),
+                    sidecar_path=record.get("sidecar_path"),
+                ),
+            }
         values = [record.get(col) for col in _YOINK_COLUMNS]
         placeholders = ", ".join("?" * len(_YOINK_COLUMNS))
         update_set = ", ".join(
@@ -413,6 +1027,7 @@ class Index:
                 logging.getLogger("uoink.index").warning(
                     "self-channel recognition skipped: %s", e)
             self._conn.commit()
+        self._invalidate_library_sources([video_id])
 
     def delete_yoink(self, video_id: str) -> None:
         """Delete a yoink and its citations (FK cascade) and FTS row."""
@@ -420,6 +1035,7 @@ class Index:
             self._conn.execute("DELETE FROM yoinks WHERE video_id=?", (video_id,))
             self._conn.execute("DELETE FROM yoinks_fts WHERE video_id=?", (video_id,))
             self._conn.commit()
+        self._invalidate_library_sources([video_id])
 
     def get_yoink(self, video_id: str) -> dict | None:
         with self._lock:
@@ -460,11 +1076,21 @@ class Index:
             rows = self._conn.execute("SELECT video_id FROM yoinks").fetchall()
         return {r["video_id"] for r in rows}
 
+    # bm25() column weights for yoinks_fts, in column order
+    # (0:video_id 1:slug 2:channel 3:title 4:topic 5:hook_type 6:content).
+    # Living library phase 1: a term in the title says far more about what
+    # an item *is* than the same term buried once in a long transcript, so
+    # title dominates (8), channel and topic are strong identity signals (3),
+    # slug is a lossy copy of the title (2), hook_type and the body count
+    # once (1), and video_id -- an opaque id -- never matches on purpose (0).
+    _YOINKS_BM25_WEIGHTS = "0.0, 2.0, 3.0, 8.0, 3.0, 1.0, 1.0"
+
     def search(self, query: str, limit: int = 10, *,
                channel: str | None = None,
                hook_type: str | None = None) -> list[dict]:
         """Full-text search across indexed corpora. Returns yoink rows ranked
-        by FTS5 bm25 (best first), optionally filtered by channel/hook_type."""
+        by weighted FTS5 bm25 (best first; see _YOINKS_BM25_WEIGHTS),
+        optionally filtered by channel/hook_type."""
         match = _fts_query(query)
         if not match:
             return []
@@ -472,9 +1098,10 @@ class Index:
         # (0:video_id 1:slug 2:channel 3:title 4:topic 5:hook_type 6:content).
         # Each result row carries `_snippet` (a match excerpt) and `_score`
         # (bm25; lower is a better match) alongside the yoinks columns.
+        rank = f"bm25(yoinks_fts, {self._YOINKS_BM25_WEIGHTS})"
         sql = ("SELECT y.*, "
                "snippet(yoinks_fts, 6, '', '', '…', 12) AS _snippet, "
-               "bm25(yoinks_fts) AS _score "
+               f"{rank} AS _score "
                "FROM yoinks_fts f "
                "JOIN yoinks y ON y.video_id = f.video_id "
                "WHERE yoinks_fts MATCH ? AND y.deleted_at IS NULL ")
@@ -485,7 +1112,7 @@ class Index:
         if hook_type:
             sql += "AND y.hook_type = ? "
             params.append(hook_type)
-        sql += "ORDER BY bm25(yoinks_fts) LIMIT ?"
+        sql += f"ORDER BY {rank} LIMIT ?"
         params.append(max(1, int(limit)))
         with self._lock:
             try:
@@ -495,6 +1122,69 @@ class Index:
                 log.warning("FTS search rejected query %r", query)
                 return []
         return [dict(r) for r in rows]
+
+    # ---- clips (living library phase 1; see clips.py) --------------------
+    def search_clips(self, query: str, limit: int = 20, *,
+                     video_id: str | None = None,
+                     channel: str | None = None) -> list[dict]:
+        """Full-text search over clips (merged transcript windows). Returns
+        one row per clip -- ``{clip_id, video_id, slug, title, channel,
+        start, end, text, source_deep_link, _score, _snippet}`` -- ranked by
+        bm25(clips_fts), best first, restricted to live items."""
+        match = _fts_query(query)
+        if not match:
+            return []
+        sql = ("SELECT c.clip_id, c.video_id, y.slug, y.title, y.channel, "
+               "c.start, c.\"end\", c.text, c.source_deep_link, "
+               "bm25(clips_fts) AS _score, "
+               "snippet(clips_fts, 0, '', '', '…', 16) AS _snippet "
+               "FROM clips_fts f "
+               "JOIN clips c ON c.clip_id = f.rowid "
+               "JOIN yoinks y ON y.video_id = c.video_id "
+               "WHERE clips_fts MATCH ? AND y.deleted_at IS NULL ")
+        params: list = [match]
+        if video_id:
+            sql += "AND c.video_id = ? "
+            params.append(video_id)
+        if channel:
+            sql += "AND y.channel = ? "
+            params.append(channel)
+        # Tie-break on (video_id, seq) so equal scores order deterministically.
+        sql += "ORDER BY bm25(clips_fts), c.video_id, c.seq LIMIT ?"
+        params.append(max(1, int(limit)))
+        with self._lock:
+            try:
+                rows = self._conn.execute(sql, params).fetchall()
+            except sqlite3.OperationalError:
+                log.warning("clips FTS search rejected query %r", query)
+                return []
+        from clips import timing_kind
+        return [{**dict(r), "timing": timing_kind(dict(r))} for r in rows]
+
+    def get_clips(self, video_id: str) -> list[dict]:
+        """Every clip for one item, in timeline order."""
+        with self._lock:
+            rows = self._conn.execute(
+                "SELECT clip_id, video_id, seq, start, \"end\", text, speaker, "
+                "source_deep_link, cue_count FROM clips WHERE video_id=? "
+                "ORDER BY seq", (video_id,)).fetchall()
+        from clips import timing_kind
+        return [{**dict(r), "timing": timing_kind(dict(r))} for r in rows]
+
+    def rebuild_clips(self) -> dict:
+        """Re-derive every item's clips from its citations (clips.py)."""
+        import clips as _clips  # noqa: WPS433 -- keeps index importable alone
+        with self._lock:
+            result = _clips.rebuild_all_clips(self._conn)
+        self._invalidate_library_sources(self.all_video_ids())
+        return result
+
+    def clip_coverage(self) -> dict:
+        """``{items_with_clips, items_without_clips, clip_count}`` over the
+        live (non-deleted) library."""
+        import clips as _clips  # noqa: WPS433
+        with self._lock:
+            return _clips.clip_coverage(self._conn)
 
     def count_corpus(self) -> int:
         """Total non-deleted yoinks in the library, ignoring every filter.
@@ -529,6 +1219,49 @@ class Index:
                 (corpus_path, sidecar_path, video_id),
             )
             self._conn.commit()
+
+    def engagement_backfill_batch(self, after_video_id: str = "") -> list[dict]:
+        """At most 25 live rows, keyset-paged without retaining the library."""
+        with self.read_snapshot() as conn:
+            rows = conn.execute(
+                "SELECT video_id, sidecar_path, yoinked_at, metadata_json "
+                "FROM yoinks WHERE deleted_at IS NULL AND video_id > ? "
+                "AND sidecar_path IS NOT NULL AND sidecar_path != '' "
+                "ORDER BY video_id LIMIT 25", (after_video_id,)).fetchall()
+        return [dict(row) for row in rows]
+
+    def backfill_engagement_metadata(self, snapshot: dict, values: dict) -> bool:
+        """Fill missing metrics only; preserve concurrent edits and all other data.
+
+        The file read happens outside the index lock. Recheck the capture's
+        identity and deletion state here so an old file cannot fill a newer
+        capture. This deliberately avoids upsert_yoink's FTS/media side effects.
+        """
+        with self.write_transaction() as conn:
+            row = conn.execute(
+                "SELECT metadata_json FROM yoinks WHERE video_id=? "
+                "AND deleted_at IS NULL AND sidecar_path IS ? AND yoinked_at IS ?",
+                (snapshot["video_id"], snapshot["sidecar_path"],
+                 snapshot["yoinked_at"])).fetchone()
+            if row is None:
+                return False
+            try:
+                metadata = json.loads(row["metadata_json"] or "{}")
+            except (TypeError, ValueError, RecursionError):
+                return False
+            if not isinstance(metadata, dict):
+                return False
+            additions = {
+                key: values[key] for key in ENGAGEMENT_METADATA_FIELDS
+                if metadata.get(key) is None and values.get(key) is not None
+            }
+            if not additions:
+                return False
+            metadata.update(additions)
+            conn.execute(
+                "UPDATE yoinks SET metadata_json=? WHERE video_id=?",
+                (json.dumps(metadata, ensure_ascii=False), snapshot["video_id"]))
+        return True
 
     # ---- Phase 2 taxonomy backfill (migration 0020) --------------------
     def rows_for_taxonomy_backfill(self) -> list[dict]:
@@ -1235,6 +1968,7 @@ class Index:
             row = self._conn.execute(
                 "SELECT * FROM yoinks WHERE video_id=?", (video_id,)
             ).fetchone()
+        self._invalidate_library_sources([video_id])
         return dict(row) if row else None
 
     def restore_yoink(self, video_id: str) -> dict | None:
@@ -1264,6 +1998,31 @@ class Index:
         return [r["video_id"] for r in rows]
 
     # ---- rate-limit retry queue (Sprint 19 / C4) ------------------------
+    def enqueue_pending_once(self, url: str, interval: int,
+                             retry_after: str, long_video_mode: str = "full") -> tuple[int, bool]:
+        """Return (pending_id, inserted), reusing an active row for this URL.
+
+        The helper and stdio server have separate connections and locks.
+        BEGIN IMMEDIATE holds SQLite's write reservation across the check and
+        enqueue_pending's insert/commit. Ordinary enqueue_pending callers keep
+        their unconditional-insert behavior and terminal-row cleanup.
+        """
+        with self._lock:
+            self._conn.execute("BEGIN IMMEDIATE")
+            try:
+                row = self._conn.execute(
+                    "SELECT pending_id FROM pending_yoinks WHERE url=? "
+                    "AND status IN ('pending','running') ORDER BY pending_id DESC LIMIT 1",
+                    (url,),
+                ).fetchone()
+                if row is not None:
+                    self._conn.commit()
+                    return row["pending_id"], False
+                return self.enqueue_pending(url, interval, retry_after, long_video_mode), True
+            except BaseException:
+                self._conn.rollback()
+                raise
+
     def enqueue_pending(self, url: str, interval: int,
                         retry_after: str, long_video_mode: str = "full") -> int:
         """Add a rate-limited URL to the queue with status='pending' and
@@ -1318,93 +2077,208 @@ class Index:
             ).fetchone()
         return dict(row) if row else None
 
-    def mark_pending_running(self, pending_id: int) -> None:
+    def set_pending_error(self, pending_id: int, error: str) -> None:
+        """Store the initial refusal without counting it as a retry."""
+        with self._lock:
+            self._conn.execute(
+                "UPDATE pending_yoinks SET last_error=? "
+                "WHERE pending_id=? AND status='pending' AND attempt_count=0",
+                (error, pending_id),
+            )
+            self._conn.commit()
+
+    def mark_pending_running(self, pending_id: int, *,
+                             cancel_event: threading.Event | None = None) -> bool:
         """Mark a pending row in flight. The retry worker calls this before
         the actual extract so a parallel call to next_pending won't pick the
         same row twice."""
         with self._lock:
-            self._conn.execute(
-                "UPDATE pending_yoinks SET status='running' WHERE pending_id=?",
+            cur = self._conn.execute(
+                "UPDATE pending_yoinks SET status='running' "
+                "WHERE pending_id=? AND status='pending'",
                 (pending_id,),
             )
-            self._conn.commit()
+            try:
+                self._conn.commit()
+            except Exception:
+                self._conn.rollback()
+                raise
+            if cur.rowcount and cancel_event is not None:
+                # Register under the same lock as cancellation, so a cancel
+                # between selection and ownership acquisition cannot be lost.
+                self._pending_cancel_events[pending_id] = cancel_event
+            return cur.rowcount > 0
+
+    def release_pending_cancel_event(self, pending_id: int,
+                                     cancel_event: threading.Event) -> None:
+        """Release only this worker's event, including on exceptional exits."""
+        with self._lock:
+            if self._pending_cancel_events.get(pending_id) is cancel_event:
+                self._pending_cancel_events.pop(pending_id)
+
+    def pending_status(self, pending_id: int) -> str | None:
+        with self._lock:
+            row = self._conn.execute(
+                "SELECT status FROM pending_yoinks WHERE pending_id=?", (pending_id,),
+            ).fetchone()
+            return row["status"] if row else None
+
+    def mark_pending_publishing(self, pending_id: int, *,
+                                expected_status: str | None = "running") -> bool:
+        """Fence cancellation before indexing or handing off a save receipt.
+
+        Re-entering publication is harmless. Receipts may also claim a failed
+        handoff or a manually requeued row, but never a cancelled or completed row.
+        """
+        with self._lock:
+            try:
+                cur = self._conn.execute(
+                    "UPDATE pending_yoinks SET status='publishing' "
+                    "WHERE pending_id=? AND status IN ('pending','running','publishing','failed') "
+                    "AND (? IS NULL OR status IN (?, 'publishing'))",
+                    (pending_id, expected_status, expected_status),
+                )
+                self._conn.commit()
+            except Exception:
+                self._conn.rollback()
+                raise
+            return cur.rowcount > 0
+
+    def fail_pending_publication(self, pending_id: int, error: str) -> bool:
+        """Settle a local save retry without counting another download attempt."""
+        with self._lock:
+            try:
+                cur = self._conn.execute(
+                    "UPDATE pending_yoinks SET status='failed', last_error=? "
+                    "WHERE pending_id=? AND status='publishing'",
+                    (error, pending_id),
+                )
+                self._conn.commit()
+            except Exception:
+                self._conn.rollback()
+                raise
+            return cur.rowcount > 0
+
+    def defer_pending(self, pending_id: int, retry_after: str) -> bool:
+        """Wait for an unfinished broadcast without consuming a failure attempt."""
+        with self._lock:
+            cur = self._conn.execute(
+                "UPDATE pending_yoinks SET status='pending', retry_after=? "
+                "WHERE pending_id=? AND status='running'",
+                (retry_after, pending_id),
+            )
+            try:
+                self._conn.commit()
+            except Exception:
+                self._conn.rollback()
+                raise
+            return cur.rowcount > 0
 
     def mark_pending_succeeded(self, pending_id: int,
-                                succeeded_job_id: str) -> None:
+                                succeeded_job_id: str | None, *,
+                                expected_status: str | None = None) -> bool:
         """Mark a pending row terminally succeeded and record the resulting
-        single-extract job_id (so the UI can deep-link to the result)."""
+        single-extract job_id (so the UI can deep-link to the result).
+
+        Workers require their expected running or publishing state. Without
+        that constraint, callers may unlink a settled job, but can never
+        overwrite cancellation. Returns False when the expected state no
+        longer matches."""
         with self._lock:
-            self._conn.execute(
+            cur = self._conn.execute(
                 "UPDATE pending_yoinks "
-                "SET status='succeeded', succeeded_job_id=? "
-                "WHERE pending_id=?",
-                (succeeded_job_id, pending_id),
+                "SET status='succeeded', succeeded_job_id=?, last_error=NULL "
+                "WHERE pending_id=? AND status != 'cancelled' "
+                "AND (? IS NULL OR status=?)",
+                (succeeded_job_id, pending_id, expected_status, expected_status),
             )
-            self._conn.commit()
+            try:
+                self._conn.commit()
+            except Exception:
+                self._conn.rollback()
+                raise
+            return cur.rowcount > 0
 
     def mark_pending_failed(self, pending_id: int, error: str,
                              retry_after: str, *,
-                             force_final: bool = False) -> str:
+                             force_final: bool = False,
+                             expected_status: str | None = None) -> str:
         """Record one failed attempt. Increments attempt_count, then either
         re-queues with the supplied retry_after (status='pending') if under
         the strike cap, or marks the row terminally 'failed' (when the cap
         is reached, or when force_final=True for non-recoverable errors).
+        Workers pass their expected running or publishing state; legacy
+        callers may also record an initial failure while the row is pending.
 
         Returns the resulting status so the caller can tell a re-queue from
         a strike-out without a second query: 'pending' when the row will be
-        retried, 'failed' when it went terminal, '' for an unknown
+        retried, 'failed' when it went terminal, '' for an unknown or stale
         pending_id (G-43 / E2E D5 -- the retry worker used to log a phantom
         'retry at ...' after the final attempt because it couldn't see the
         strike-out happen)."""
         with self._lock:
             row = self._conn.execute(
-                "SELECT attempt_count FROM pending_yoinks WHERE pending_id=?",
-                (pending_id,),
+                "SELECT attempt_count, status FROM pending_yoinks "
+                "WHERE pending_id=? AND status != 'cancelled' AND status IN (?, ?)",
+                (pending_id, expected_status or "pending", expected_status or "running"),
             ).fetchone()
             if row is None:
                 return ""
             attempts = (row["attempt_count"] or 0) + 1
             if force_final or attempts >= _PENDING_MAX_ATTEMPTS:
-                self._conn.execute(
+                cur = self._conn.execute(
                     "UPDATE pending_yoinks "
                     "SET status='failed', attempt_count=?, last_error=? "
-                    "WHERE pending_id=?",
-                    (attempts, error, pending_id),
+                    "WHERE pending_id=? AND status=?",
+                    (attempts, error, pending_id, row["status"]),
                 )
                 status = "failed"
             else:
-                self._conn.execute(
+                cur = self._conn.execute(
                     "UPDATE pending_yoinks "
                     "SET status='pending', attempt_count=?, last_error=?, "
                     "    retry_after=? "
-                    "WHERE pending_id=?",
-                    (attempts, error, retry_after, pending_id),
+                    "WHERE pending_id=? AND status=?",
+                    (attempts, error, retry_after, pending_id, row["status"]),
                 )
                 status = "pending"
-            self._conn.commit()
-            return status
+            try:
+                self._conn.commit()
+            except Exception:
+                self._conn.rollback()
+                raise
+            return status if cur.rowcount else ""
 
     def cancel_pending(self, pending_id: int) -> bool:
         """Mark a pending row terminally cancelled. Returns True when a row
-        actually changed (False for unknown / already-terminal rows)."""
+        actually changed (False for unknown / terminal / publishing rows)."""
         with self._lock:
             cur = self._conn.execute(
                 "UPDATE pending_yoinks SET status='cancelled' "
-                "WHERE pending_id=? AND status NOT IN ('succeeded','failed','cancelled')",
+                "WHERE pending_id=? AND status IN ('pending','running')",
                 (pending_id,),
             )
-            self._conn.commit()
+            try:
+                self._conn.commit()
+            except Exception:
+                self._conn.rollback()
+                raise
+            if cur.rowcount:
+                event = self._pending_cancel_events.get(pending_id)
+                if event is not None:
+                    event.set()
             return cur.rowcount > 0
 
     def retry_pending_now(self, pending_id: int) -> bool:
         """User-initiated 'try this one now': bumps retry_after to now and,
         for a 'failed' row, flips it back to 'pending'. No-op for
-        'succeeded' / 'cancelled' rows. Returns True when a row changed."""
+        'succeeded' / 'cancelled' / 'running' / 'publishing' rows.
+        Returns True when a row changed."""
         with self._lock:
             cur = self._conn.execute(
                 "UPDATE pending_yoinks "
                 "SET status='pending', retry_after=? "
-                "WHERE pending_id=? AND status IN ('pending','failed','running')",
+                "WHERE pending_id=? AND status IN ('pending','failed')",
                 (_now_iso(), pending_id),
             )
             self._conn.commit()
@@ -1449,39 +2323,214 @@ class Index:
     def reset_running_pending(self) -> int:
         """Crash recovery at startup: any row stuck in 'running' (the helper
         died mid-retry) is flipped back to 'pending' with retry_after=now so
-        the retry worker picks it up again. Returns the count reset."""
+        the retry worker picks it up again. Interrupted publication is failed
+        visibly and left to its save receipt. Returns the count requeued."""
         with self._lock:
-            cur = self._conn.execute(
-                "UPDATE pending_yoinks SET status='pending', retry_after=? "
-                "WHERE status='running'",
-                (_now_iso(),),
-            )
-            self._conn.commit()
+            # Publication may have committed before a crash. Do not turn it
+            # into another automatic download; a durable receipt, if present,
+            # owns recovery. Otherwise leave a visible failure and keep files.
+            try:
+                self._conn.execute(
+                    "UPDATE pending_yoinks SET status='failed', last_error=? "
+                    "WHERE status='publishing'",
+                    ("Capture publication was interrupted. Saved files were kept; "
+                     "any queued publication receipt will retry the local save.",),
+                )
+                cur = self._conn.execute(
+                    "UPDATE pending_yoinks SET status='pending', retry_after=? "
+                    "WHERE status='running'",
+                    (_now_iso(),),
+                )
+                self._conn.commit()
+            except Exception:
+                self._conn.rollback()
+                raise
             return cur.rowcount
 
     # ---- citations -------------------------------------------------------
     def insert_citations(self, video_id: str, citations: list[dict]) -> int:
         """Bulk insert citation rows. Idempotent per (video_id, kind, seq):
         re-yoinking a video rewrites its rows via INSERT OR REPLACE. Returns
-        the number of rows written."""
+        the number of rows written.
+
+        Callers pass a kind's complete, contiguous seq range, so any row of
+        that kind with a seq past the batch's highest is a leftover from an
+        earlier, longer extraction (a raw caption track re-yoinked into a
+        few long paragraph chunks left ~700 stale cues behind on two live
+        items). Those are removed so the citation map stays time-ordered.
+        An empty list is an explicit empty replacement: every citation for
+        the video is removed and clips are rebuilt in the same commit
+        (BD-09).
+
+        Living library phase 1: the video's clips are re-derived from the
+        fresh citations in the same commit (clips.build_clips_for_video)."""
         rows = [
             (video_id, c.get("kind"), c.get("seq"),
              c.get("timestamp_start"), c.get("timestamp_end"),
-             c.get("text"), c.get("file_path"), c.get("youtube_deep_link"))
+             c.get("text"), c.get("file_path"), c.get("youtube_deep_link"),
+             c.get("source_url"), c.get("source_deep_link"))
             for c in citations
         ]
         if not rows:
+            import clips as _clips  # noqa: WPS433 -- keeps index importable alone
+            with self._lock:
+                self._conn.execute(
+                    "DELETE FROM citations WHERE video_id=?", (video_id,))
+                try:
+                    _clips.build_clips_for_video(self._conn, video_id, commit=False)
+                except sqlite3.Error:
+                    log.exception("clip build failed for %s", video_id)
+                except Exception:
+                    self._conn.rollback()
+                    raise
+                self._conn.commit()
+            self._invalidate_library_sources([video_id])
             return 0
+        max_seq_by_kind: dict = {}
+        for r in rows:
+            kind, seq = r[1], r[2]
+            if isinstance(seq, int) and kind is not None:
+                max_seq_by_kind[kind] = max(max_seq_by_kind.get(kind, -1), seq)
+        import clips as _clips  # noqa: WPS433 -- keeps index importable alone
         with self._lock:
-            self._conn.executemany(
-                "INSERT OR REPLACE INTO citations "
-                "(video_id, kind, seq, timestamp_start, timestamp_end, "
-                " text, file_path, youtube_deep_link) "
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-                rows,
-            )
+            # Phase 6 (phase6-v1): once migration 0030 exists, each cue's local
+            # label and its provenance object travel in the same write. A
+            # label without provenance is never stored as attributed evidence.
+            labelled = any(r[1] == "speaker" for r in
+                           self._conn.execute("PRAGMA table_info(citations)"))
+            if labelled:
+                self._conn.executemany(
+                    "INSERT OR REPLACE INTO citations "
+                    "(video_id, kind, seq, timestamp_start, timestamp_end, "
+                    " text, file_path, youtube_deep_link, source_url, "
+                    " source_deep_link, speaker, speaker_provenance_json) "
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                    [row + _citation_label_columns(c)
+                     for row, c in zip(rows, citations)],
+                )
+            else:
+                self._conn.executemany(
+                    "INSERT OR REPLACE INTO citations "
+                    "(video_id, kind, seq, timestamp_start, timestamp_end, "
+                    " text, file_path, youtube_deep_link, source_url, "
+                    " source_deep_link) "
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                    rows,
+                )
+            for kind, max_seq in max_seq_by_kind.items():
+                self._conn.execute(
+                    "DELETE FROM citations WHERE video_id=? AND kind=? "
+                    "AND seq > ?", (video_id, kind, max_seq))
+            try:
+                _clips.build_clips_for_video(self._conn, video_id, commit=False)
+            except sqlite3.Error:
+                # Clips are derived data; never let them block a citation
+                # write. --build-clips re-derives everything.
+                log.exception("clip build failed for %s", video_id)
+            except Exception:
+                # Phase 6 (BC-2): a current but unusable media snapshot is a
+                # refusal (library_media.MediaError), not a silent downgrade
+                # to unannotated clips. Nothing is committed, so the existing
+                # citations, snapshot and clips are preserved.
+                self._conn.rollback()
+                raise
             self._conn.commit()
+        self._invalidate_library_sources([video_id])
         return len(rows)
+
+    # ---- Phase 6 media publication (phase6-v1, BC-2) ----------------------
+    def _invalidate_after_publication(self, video_id: str) -> None:
+        """Phase 2 invalidation as part of the publication operation: the
+        committed snapshot is durable and replayable, so a failure here is a
+        retryable ``library_unavailable`` rather than a silent log line."""
+        import library_media as _media  # noqa: WPS433 -- keeps index importable alone
+        with self._lock:
+            exists = self._conn.execute(
+                "SELECT 1 FROM sqlite_master WHERE name='library_runs'").fetchone()
+            if not exists or not self._conn.execute("SELECT 1 FROM library_runs LIMIT 1").fetchone():
+                return
+        try:
+            from library_work import RequestContext
+            result = self.library_service().invalidate_source_items(
+                RequestContext(authenticated=True, operator=True), {"video_ids": [video_id]})
+        except _media.MediaError:
+            raise
+        except Exception as exc:
+            log.error("library source invalidation failed for %s: %s", video_id, type(exc).__name__)
+            raise _media.MediaError("library_unavailable", details={
+                "reason": "invalidation_failed", "next_step": "retry_publication"}) from exc
+        if not result.get("ok"):
+            log.error("library source invalidation failed: %s", result["error"]["code"])
+            raise _media.MediaError("library_unavailable", details={
+                "reason": "invalidation_failed", "service_error": result["error"]["code"],
+                "next_step": "retry_publication"})
+
+    def begin_media_publication(self, video_id: str, *, folder=None, capture_binding=None,
+                                input_files=None):
+        """Mint the publication ticket (ownership fence) a caller must carry
+        into ``publish_media_snapshot``. See library_media.begin_publication."""
+        import library_media as _media  # noqa: WPS433 -- keeps index importable alone
+        with self._lock:
+            return _media.begin_publication(
+                self._conn, video_id, folder=folder, capture_binding=capture_binding,
+                input_files=input_files)
+
+    def publish_media_snapshot(self, video_id: str, *, cues: list[dict], media_block: dict,
+                               artifacts: dict, ticket=None) -> dict:
+        """The complete publication operation: one coherent source/citation/
+        media/clip snapshot committed under the index lock through
+        ``library_media.publish_transcript`` (ownership fence, owned files,
+        DB rows, artifact retention), then Phase 2 invalidation. Raises
+        ``library_media.MediaError`` with a recoverable state on refusal.
+        ``ticket`` is the build-time fence from ``begin_media_publication``;
+        an omitted ticket is refused rather than minted here. Classification
+        of omitted versus superseded committed input is the publisher's."""
+        import library_media as _media  # noqa: WPS433 -- keeps index importable alone
+        with self._lock:
+            if self._conn.in_transaction:
+                raise _media.MediaError("library_unavailable", details={"reason": "transaction_active"})
+            result = _media.publish_transcript(self._conn, video_id, cues=cues, media_block=media_block,
+                                               artifacts=artifacts, ticket=ticket)
+        self._invalidate_after_publication(video_id)
+        return result
+
+    def rebuild_media_item(self, video_id: str, *, sidecar: dict | None) -> dict:
+        """Reconstruction (or clip-only rebuild) as a complete operation:
+        ``library_media.rebuild_item`` under the index lock, then Phase 2
+        invalidation."""
+        import library_media as _media  # noqa: WPS433 -- keeps index importable alone
+        with self._lock:
+            if self._conn.in_transaction:
+                raise _media.MediaError("library_unavailable", details={"reason": "transaction_active"})
+            result = _media.rebuild_item(self._conn, video_id, sidecar=sidecar)
+        self._invalidate_after_publication(video_id)
+        return result
+
+    def prune_media_artifacts(self, video_id: str) -> dict:
+        """Retry artifact retention cleanup for one item (never a read)."""
+        import library_media as _media  # noqa: WPS433 -- keeps index importable alone
+        with self._lock:
+            row = self._conn.execute(
+                "SELECT * FROM yoinks WHERE video_id=?", (video_id,)).fetchone()
+            if row is None:
+                raise _media.MediaError("resource_not_found")
+            return _media.prune_artifacts(self._conn, dict(row))
+
+    def store_media_snapshot(self, video_id: str, cues: list[dict], block: dict) -> int:
+        """Phase 6 (phase6-v1): persist the validated media block's rows and
+        the annotated clip projection for ``video_id`` after its citations
+        were written, then invalidate Phase 2 work. Returns the clip count.
+        Raises ``library_media.MediaError`` on a binding mismatch. Legacy
+        seam: production publication goes through ``publish_media_snapshot``."""
+        import library_media as _media  # noqa: WPS433 -- keeps index importable alone
+        with self._lock:
+            row = self._conn.execute(
+                "SELECT * FROM yoinks WHERE video_id=?", (video_id,)).fetchone()
+            if row is None:
+                raise _media.MediaError("resource_not_found")
+            count = _media.store_snapshot(self._conn, dict(row), cues, block, commit=True)
+        self._invalidate_after_publication(video_id)
+        return count
 
     def get_citations(self, video_id: str) -> list[dict]:
         """All citations for a video, ordered by kind then seq."""
@@ -1552,7 +2601,7 @@ class Index:
             self._conn.commit()
             return cur.rowcount
 
-    def prune_jobs(self, keep_terminal: int = 200) -> int:
+    def prune_jobs(self, keep_terminal: int = TERMINAL_JOB_RETENTION) -> int:
         """Keep at most ``keep_terminal`` most-recent terminal jobs; non-
         terminal jobs (pending/running) are always retained. Returns the
         number of rows deleted."""
@@ -1562,7 +2611,7 @@ class Index:
                 f"DELETE FROM jobs WHERE status IN ({placeholders}) "
                 f"AND job_id NOT IN ("
                 f"  SELECT job_id FROM jobs WHERE status IN ({placeholders}) "
-                f"  ORDER BY updated_at DESC LIMIT ?"
+                f"  ORDER BY updated_at DESC, job_id DESC LIMIT ?"
                 f")",
                 (*_TERMINAL_JOB_STATES, *_TERMINAL_JOB_STATES, keep_terminal),
             )
@@ -1835,7 +2884,8 @@ class Index:
             return []
         sql = (
             "SELECT y.video_id AS video_id, y.slug AS slug, y.title AS title, "
-            "       y.channel AS channel, em.source AS source, "
+            "       y.channel AS channel, y.platform AS platform, "
+            "       y.metadata_json AS metadata_json, em.source AS source, "
             "       em.timestamp AS timestamp, em.context AS context "
             "FROM entity_mentions em "
             "JOIN entities e ON e.entity_id = em.entity_id "
@@ -1848,7 +2898,11 @@ class Index:
         out = []
         for r in rows:
             d = dict(r)
-            d["deep_link"] = _entity_deep_link(d.get("video_id"), d.get("timestamp"))
+            d["deep_link"] = _entity_deep_link(
+                d.get("video_id"), d.get("timestamp"),
+                platform=d.get("platform"),
+                metadata_json=d.get("metadata_json"))
+            d.pop("metadata_json", None)
             out.append(d)
         return out
 

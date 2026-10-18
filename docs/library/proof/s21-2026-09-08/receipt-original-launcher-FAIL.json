@@ -1,0 +1,59 @@
+{
+  "procedure": "S21",
+  "result": "FAIL",
+  "root": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\s21-u9769m7d",
+  "fixture_downloads": 1,
+  "fixture_transcripts": 1,
+  "model_calls": 1,
+  "forbidden_attempts": [],
+  "connections": [
+    [
+      "127.0.0.1",
+      53423
+    ],
+    [
+      "127.0.0.1",
+      53423
+    ],
+    [
+      "127.0.0.1",
+      53423
+    ],
+    [
+      "127.0.0.1",
+      53422
+    ],
+    [
+      "127.0.0.1",
+      53422
+    ],
+    [
+      "127.0.0.1",
+      53422
+    ],
+    [
+      "127.0.0.1",
+      53423
+    ],
+    [
+      "127.0.0.1",
+      53422
+    ]
+  ],
+  "prepare_observations": [
+    {
+      "after_commit": true,
+      "video_id": "episode_2a889436c01"
+    }
+  ],
+  "input_hashes": {
+    "server.py": "f8a16f12de2b9c9aca37009119b3d064e4b73516ba4a024bc38ffa4c72a89eb0",
+    "source_subscriptions.py": "b0baa5dabc57dd4836d76bc4ebd29120f55950f9c1cdc891e62cee032b0770d2",
+    "docs\\library\\taxonomy-v3-2026-09-07.json": "c3fdb4fb0c3f89c68b06676f7613c75d3a293787d28c32b0a5adb9fa91e4fdf7",
+    "scripts\\librarian\\prompts\\assign.md": "cd22a3c1819f693bc921033847e21b18dfac6bbac138da6162af3a0244d12f32"
+  },
+  "helper_url": "http://127.0.0.1:53423",
+  "feed_url": "http://127.0.0.1:53422/feed.xml",
+  "error": "AssertionError: ",
+  "evidence_sha256": "783d4678ec77457d3a5aeecc08773ed76437f9181b7b4784e5b261c62090ba43"
+}

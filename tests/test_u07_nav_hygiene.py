@@ -22,15 +22,21 @@ def require(condition: bool, message: str) -> None:
 def test_orphan_routes_get_nav_state() -> None:
     require('data-tab-button="activity"' in DASHBOARD,
             "Activity needs a real nav entry (UX-15)")
-    require('data-tab-button="about"' in DASHBOARD,
-            "About needs a real nav entry (UX-15)")
+    # UI re-haul: About moved into Settings > App; #settings/about (and the
+    # old #about link) land on it.
+    require('id="settings-about"' in DASHBOARD
+            and 'about: "settings/about"' in DASHBOARD,
+            "About needs a reachable home in Settings > App (UX-15)")
     require("const NAV_OWNER" in DASHBOARD
             and '"library"' in DASHBOARD.split("const NAV_OWNER", 1)[1][:200],
             "panels without nav entries must highlight their logical parent")
-    for orphan in ("yoink:", "evidence:", "features:"):
+    # The hidden Features tab is gone (SPEC); For You lost its nav entry.
+    require('data-tab-panel="features"' not in DASHBOARD,
+            "the hidden Features tab must be gone")
+    for orphan in ("yoink:", "evidence:", '"for-you":'):
         require(orphan in DASHBOARD.split("const NAV_OWNER", 1)[1][:200],
                 f"NAV_OWNER must cover {orphan}")
-    print("ok  Activity + About in nav; orphan panels map to a parent")
+    print("ok  Activity in nav, About in Settings; orphan panels map to a parent")
 
 
 def test_activity_zero_state_headline() -> None:
@@ -38,8 +44,12 @@ def test_activity_zero_state_headline() -> None:
             "the bare count headline should be gone")
     require("Nothing uoinking" in DASHBOARD,
             "zero-state headline copy missing (UX-17)")
-    require("in flight <em>uoinking...</em>`" in DASHBOARD,
-            "non-zero headline keeps the in-flight sentence")
+    # Reader removes the decorative italic word swap, preserving the
+    # sentence and its live count in a plain-text headline.
+    require('els.activityHeadline.innerHTML = activeCount ? `${activeCount} in flight uoinking...` : "Nothing uoinking right now.";' in DASHBOARD,
+            "headline must keep its live count and sentence at zero and non-zero")
+    require("in flight <em>" not in DASHBOARD,
+            "Activity must not bring back the decorative italic headline")
     print("ok  activity headline reads as a sentence at zero")
 
 

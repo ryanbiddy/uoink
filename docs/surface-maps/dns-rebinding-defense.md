@@ -40,28 +40,30 @@ defense is against the BROWSER-driven rebind, which is the CRIT-4 vector.
 
 ## /token hardening
 
-- **Extension-id pin** (`_allowed_extension_ids()`): off by default
-  (load-unpacked gives every dev a different id, and no Chrome Web Store id
-  is published yet). Set `UOINK_EXTENSION_IDS=<id>[,<id>]` (or the
-  `extension_ids` settings key) and `/token` mints the token only for those
-  extension origins. Until then any `chrome-`/`moz-extension` origin is
-  accepted, exactly as before. When Ryan has the CWS id, one env var locks
-  it.
-- **Absent-Origin trust, revisited**: `/token` still trusts a missing
-  Origin (genuine same-process service-worker fetches from Chromium forks
-  like Comet send none). C-04's judgment: this is now safe because the Host
-  allowlist runs first and a rebind always carries the attacker's Host, so
-  trusting a missing Origin no longer widens the rebind surface. The
-  narrower alternative (rejecting absent Origin) would relock the forks
-  this rule was added for, with no security gain once Host is validated.
+- **Extension-id pin** (`_allowed_extension_ids()`): on by default. The
+  public manifest key fixes Uoink's Chromium ID at
+  `bkcapfidedhfcjpmjabeopfbcjcbmdmi`. The helper always includes that ID and
+  unions IDs from `UOINK_EXTENSION_IDS=<id>[,<id>]` and `settings.extension_ids`.
+  Previously, a nonempty environment variable replaced the settings list.
+  Extension origins must match an allowed ID exactly, for both `/token` and CORS.
+- **Origin-carrying extension POST**: the extension uses a bodyless
+  `POST /token` so Chromium sends `Origin: chrome-extension://<id>`.
+  Worker GETs can omit Origin and send `Sec-Fetch-Site: none`; the Host wall
+  alone cannot distinguish those workers, so that token path is now refused.
+- **Same-origin page GET**: missing Origin is accepted only with
+  `Sec-Fetch-Site: same-origin` and a present, allowed loopback Host. This
+  preserves the helper-served dashboard in browsers, tray WebView2 and the
+  Tauri dashboard window. Requests with `none` or missing fetch metadata
+  receive HTTP 403. See [local-client compatibility](../security.md) for the
+  existing splash-header mismatch and older WKWebView limitation.
 
 ## Layered posture (after C-04)
 
 1. **Host allowlist** (new) -- blocks the rebind for every verb, first.
 2. Token (`X-Uoink-Token`) on all private routes.
-3. `/token` CSRF gate: `X-Uoink-Client` header + extension Origin
-   (+ optional id pin) + per-install rate limit.
-4. CORS ACAO allowlist (extension origins + youtube).
+3. `/token` CSRF gate: `X-Uoink-Client` header + pinned/configured extension
+   Origin (or the same-origin page proof above) + per-install rate limit.
+4. CORS ACAO allowlist (pinned/configured extension origins + YouTube).
 
 ## Tests / proof
 
@@ -73,8 +75,11 @@ Host from the connection target, hiding the bug):
   with a valid token, and on a POST -- the rebind's real goal.
 - loopback hosts (`127.0.0.1:<port>`, `localhost`, bare, absent) still
   pass.
-- the extension-id pin: unpinned accepts any extension, pinned-out 403s,
-  pinned-in passes.
+- the extension-id pin: the default pinned ID passes, unlisted IDs receive
+  403, and an explicitly allowed ID passes.
 - `/token` rebind blocked at the Host wall.
 
-Full suite 177 passed.
+`tests/test_sec_token_pin.py` exercises the real handler over in-memory HTTP,
+including pinned-origin POST, foreign-origin rejection and refusal of an
+originless `Sec-Fetch-Site: none` GET. Its Node harness executes the shipped
+extension's bootstrap and refresh code with fake fetch and storage.

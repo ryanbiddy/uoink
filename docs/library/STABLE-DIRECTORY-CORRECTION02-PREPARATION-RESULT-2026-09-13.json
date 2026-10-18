@@ -1,0 +1,23 @@
+{
+  "materialization": {
+    "chunk_id": "9ab1aa",
+    "wall_time_seconds": 1.1210597,
+    "exit_code": 1,
+    "original_token_count": 115,
+    "output": "Measure-Object: E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\stable-directory-correction02-materialization01\\materialize.ps1:182\r\nLine |\r\n 182 |      payload_bytes=($manifest.files | Measure-Object bytes -Sum).Sum\r\n     |                                       ~~~~~~~~~~~~~~~~~~~~~~~~~\r\n     | Cannot process argument because the value of argument \"bytes\" is not valid. Change the value of the \"bytes\"\r\n     | argument and run the operation again.\r\n"
+  },
+  "independent_index": {
+    "chunk_id": "e5d5fe",
+    "wall_time_seconds": 1.0438786,
+    "exit_code": 0,
+    "original_token_count": 96,
+    "output": "warning: in the working copy of 'docs/library/GEMINI-STABLE-DIRECTORY-CORRECTION02-BRIEF-2026-09-13.md', LF will be replaced by CRLF the next time Git touches it\n{\"proof\": \"docs/library/proof/stable-directory-correction02-brief-2026-09-13\", \"payloads_matching_disk_and_git\": 15, \"bytes\": 36012, \"manifest_sha256\": \"831212c5b2e4e500b3333a98d5a0a5c62f073100461d07318a7d8c0250c719ac\"}\r\n"
+  },
+  "independent_text": {
+    "chunk_id": "b6486c",
+    "wall_time_seconds": 0.3825574,
+    "exit_code": 0,
+    "original_token_count": 69,
+    "output": "{\"selected_inputs\": 5, \"selected_bytes\": 65576, \"canonical_bytes\": 3950, \"canonical_sha256\": \"23ab81309cf61b840aa8e2d666eba8449bcf941d9d91cc383ad7b875581fb15e\", \"git_prose_eol_normalization_only\": true, \"materializer_9ab1aa_exit_remains\": 1, \"materializer_repeated\": false}\r\n"
+  }
+}

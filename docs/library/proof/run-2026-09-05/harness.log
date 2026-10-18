@@ -1,0 +1,89 @@
+whisperx unavailable: ModuleNotFoundError: No module named 'whisperx'
+2026-09-05 06:14:07,860 INFO migration[run]: no_legacy -- E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\proof\run-proof-subscription-2026-09-05-5d6d19f5\local\Yoink does not exist
+2026-09-05 06:14:07,860 INFO migration[run]: legacy_run_key -- skipped: dev layout
+2026-09-05 06:14:07,860 INFO install migration: no_legacy
+2026-09-05 06:14:08,194 INFO Restored 212 job record(s) from the library index
+2026-09-05 06:14:08,195 INFO backfill complete: scanned 0 folder(s), indexed 0 new
+2026-09-05 06:14:08,199 INFO Uoink server v3.8.0 running on http://127.0.0.1:5180
+2026-09-05 06:14:08,199 INFO Ready to uoink. Click any YouTube video's Uoink button.
+2026-09-05 06:14:08,199 INFO Output: E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\proof\run-proof-subscription-2026-09-05-5d6d19f5\output
+2026-09-05 06:14:08,199 INFO Log file: E:\AI\projects\uoink\checkouts\Yoink-library\server.log
+2026-09-05 06:14:08,460 INFO GET /health from 127.0.0.1 -> ok
+[proof] model call done: 22821 ms, exit 0, stdout 6064 B
+[proof] model call done: 47912 ms, exit 0, stdout 6117 B
+[proof] model call done: 83071 ms, exit 0, stdout 9200 B
+[proof] model call done: 105233 ms, exit 0, stdout 8531 B
+[proof] model call done: 101394 ms, exit 0, stdout 8626 B
+[proof] model call done: 122109 ms, exit 0, stdout 9045 B
+[proof] rejected model output 2079389488686551041: model output failed schema: result.reason: is not an allowed field
+[proof] rejected model output 2079405880332664832: model output failed schema: result.reason: is not an allowed field
+[proof] model call done: 95451 ms, exit 0, stdout 7866 B
+[proof] model call done: 137069 ms, exit 0, stdout 10612 B
+[proof] model call done: 153267 ms, exit 0, stdout 11268 B
+[proof] retry limit reached for 2046008958511702016; cancelling attempt 3
+[proof] model call done: 100102 ms, exit 0, stdout 9657 B
+[proof] model call done: 101147 ms, exit 0, stdout 9642 B
+[proof] model call done: 109832 ms, exit 0, stdout 7916 B
+[proof] model call done: 169187 ms, exit 0, stdout 10079 B
+[proof] model call done: 93009 ms, exit 0, stdout 9660 B
+[proof] model call done: 190388 ms, exit 0, stdout 9840 B
+[proof] model call done: 136698 ms, exit 0, stdout 9201 B
+[proof] model call done: 100889 ms, exit 0, stdout 8477 B
+[proof] model call done: 157087 ms, exit 0, stdout 9736 B
+[proof] model call done: 113739 ms, exit 0, stdout 10023 B
+[proof] model call done: 134216 ms, exit 0, stdout 10967 B
+[proof] model call done: 156237 ms, exit 0, stdout 11063 B
+[proof] model call done: 127753 ms, exit 0, stdout 10250 B
+[proof] model call done: 145302 ms, exit 0, stdout 9475 B
+[proof] model call done: 224481 ms, exit 0, stdout 9568 B
+[proof] model call done: 152950 ms, exit 0, stdout 12052 B
+[proof] model call done: 156020 ms, exit 0, stdout 9446 B
+[proof] model call done: 127964 ms, exit 0, stdout 11381 B
+[proof] model call done: 144184 ms, exit 0, stdout 10107 B
+[proof] model call done: 129075 ms, exit 0, stdout 10713 B
+[proof] model call done: 164154 ms, exit 0, stdout 10741 B
+[proof] model call done: 63568 ms, exit 0, stdout 8262 B
+[proof] model call done: 120474 ms, exit 0, stdout 9640 B
+[proof] model call done: 152372 ms, exit 0, stdout 11112 B
+[proof] model call done: 100506 ms, exit 0, stdout 9642 B
+[proof] model call done: 125897 ms, exit 0, stdout 10566 B
+[proof] model call done: 91812 ms, exit 0, stdout 8328 B
+[proof] model call done: 141234 ms, exit 0, stdout 9042 B
+[proof] model call done: 133326 ms, exit 0, stdout 11081 B
+[proof] model call done: 155486 ms, exit 0, stdout 9027 B
+[proof] model call done: 66374 ms, exit 0, stdout 8748 B
+[proof] model call done: 175293 ms, exit 0, stdout 11186 B
+[proof] model call done: 121703 ms, exit 0, stdout 8410 B
+[proof] model call done: 99165 ms, exit 0, stdout 8665 B
+[proof] model call done: 115181 ms, exit 0, stdout 9320 B
+[proof] model call done: 128699 ms, exit 0, stdout 9952 B
+[proof] model call done: 111250 ms, exit 0, stdout 9371 B
+[proof] model call done: 168099 ms, exit 0, stdout 10354 B
+[proof] model call done: 115649 ms, exit 0, stdout 9923 B
+[proof] model call done: 187637 ms, exit 0, stdout 11120 B
+[proof] model call done: 98171 ms, exit 0, stdout 9532 B
+[proof] model call done: 118452 ms, exit 0, stdout 9466 B
+[proof] model call done: 122268 ms, exit 0, stdout 8408 B
+[proof] model call done: 141757 ms, exit 0, stdout 9130 B
+[proof] model call done: 145590 ms, exit 0, stdout 10576 B
+[proof] model call done: 113998 ms, exit 0, stdout 8610 B
+[proof] model call done: 150900 ms, exit 0, stdout 9422 B
+[proof] model call done: 105585 ms, exit 0, stdout 8981 B
+[proof] model call done: 141072 ms, exit 0, stdout 11278 B
+[proof] model call done: 105441 ms, exit 0, stdout 8756 B
+[proof] model call done: 123763 ms, exit 0, stdout 9976 B
+[proof] model call done: 124280 ms, exit 0, stdout 9555 B
+[proof] model call done: 150750 ms, exit 0, stdout 10262 B
+[proof] model call done: 129411 ms, exit 0, stdout 7700 B
+[proof] model call done: 134532 ms, exit 0, stdout 9385 B
+[proof] model call done: 145672 ms, exit 0, stdout 9814 B
+[proof] model call done: 154140 ms, exit 0, stdout 9113 B
+[proof] model call done: 100783 ms, exit 0, stdout 9490 B
+[proof] model call done: 172059 ms, exit 0, stdout 10310 B
+[proof] model call done: 107053 ms, exit 0, stdout 7403 B
+[proof] model call done: 48921 ms, exit 0, stdout 3030 B
+[proof] model call done: 204164 ms, exit 0, stdout 11224 B
+[proof] model quote over 24 words for zYGDpG-pTho (25 words); rejecting output
+[proof] model call done: 22720 ms, exit 0, stdout 3032 B
+Product proof run complete. Receipts written to: E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\proof\subscription-2026-09-05\receipts.json
+exit=0

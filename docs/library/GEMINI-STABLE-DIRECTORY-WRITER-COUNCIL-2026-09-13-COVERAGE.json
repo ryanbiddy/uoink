@@ -1,0 +1,543 @@
+{
+  "schema": "uoink.gemini.stable-directory-writer-council-coverage.v1",
+  "status": "COMPLETE",
+  "verified_at": "2026-09-13T21:05:00-07:00",
+  "worker": {
+    "agent": "gemini",
+    "run_mode": "work",
+    "worktree_path": "C:\\Users\\hello\\AppData\\Local\\AgentControlRoom\\worktrees\\uoink-library\\2b39a17c-941\\gemini",
+    "brief_commit": "74d209ca2418f732f754fc2938a8bed2930d6242",
+    "brief_path": "docs/library/GEMINI-STABLE-DIRECTORY-WRITER-REVIEW-BRIEF-2026-09-13.md"
+  },
+  "provenance": {
+    "input_selection_map": "docs/library/proof/stable-writer-council-brief-2026-09-13/INPUT-SELECTION.json",
+    "input_selection_map_sha256": "3053c328e65636d895f8caa1545425638492f9cb816fc0ac8bdff4fe19baa51d",
+    "root_materialization": "docs/library/proof/stable-writer-council-brief-2026-09-13/ROOT-MATERIALIZATION.json",
+    "root_materialization_sha256": "fcb75eb67a90b4bcffbe7ec75908cfcb1e5b8aa97a47d25e0bc089851147e4ad",
+    "bound_proof_roots": [
+      {
+        "group": "A",
+        "root": "docs/library/proof/windows-stable-directory-qualification-2026-09-13",
+        "commit": "d317a88",
+        "manifest": "SHA256.json",
+        "manifest_sha256": "f15a1a85baad9ccfcdf15edfbc4a43933c0093a7207a7de00c4cb2fdf9b80dd4"
+      },
+      {
+        "group": "B",
+        "root": "docs/library/proof/windows-writer-exclusion-native-2026-09-13",
+        "commit": "f630264114811a6d508f4c58c7e0d936b8e0380b",
+        "manifest": "SHA256.json",
+        "manifest_sha256": "393c1cc60616933e69baced60630c13867bdc8bb12f71c295b12d237b143ee57"
+      },
+      {
+        "group": "history",
+        "root": "docs/library/proof/windows-writer-exclusion-diagnostic-2026-09-13",
+        "commit": "cc6bb7c",
+        "manifest": "SHA256.json",
+        "manifest_sha256": "6f370206ba29fd225ab60c5cc7d053c57bf29c3522b56368d92146cae9193b16"
+      }
+    ]
+  },
+  "accounting": {
+    "cataloged_files": 48,
+    "cataloged_bytes": 480562,
+    "cataloged_lines": 9372,
+    "read_files": 48,
+    "read_bytes": 480562,
+    "read_lines": 9372,
+    "unread_files": 0,
+    "unread_bytes": 0,
+    "unread_lines": 0,
+    "omitted_controller_array": {
+      "id": "B-17",
+      "member": "run04/controller-result.json",
+      "omitted_json_pointer": "/native_api_calls",
+      "omitted_array_count": 8230,
+      "review_status": "EXPLICITLY_UNREVIEWED",
+      "notes": "The 8,230-entry native_api_calls array was omitted from controller-selected-fields.json by extract-controller.ps1 and is explicitly outside council coverage. All other 31 parsed controller fields were fully read."
+    }
+  },
+  "files": [
+    {
+      "id": "history-01",
+      "group": "history",
+      "path": "docs/library/proof/windows-writer-exclusion-diagnostic-2026-09-13/ASTRA-WRITER-EXCLUSION03-DIAGNOSTIC-2026-09-13.md",
+      "bytes": 1987,
+      "lines": 12,
+      "sha256": "3b89b4f97152aeaa1e16f39ddc1ae8c9a3d44321db829ffdf0ea8d10b7596f73",
+      "read_ranges": [[1, 12]],
+      "status": "READ_COMPLETE"
+    },
+    {
+      "id": "history-02",
+      "group": "history",
+      "path": "docs/library/proof/windows-writer-exclusion-diagnostic-2026-09-13/WINDOWS-WRITER-EXCLUSION03-ROOT-REVIEW.md",
+      "bytes": 2119,
+      "lines": 12,
+      "sha256": "18f77342738bcfc23689c13b2e59174094aee3eefee64b8da1eb8008a6568285",
+      "read_ranges": [[1, 12]],
+      "status": "READ_COMPLETE"
+    },
+    {
+      "id": "A-01",
+      "group": "A",
+      "path": "docs/library/proof/windows-stable-directory-qualification-2026-09-13/proposal01/win32_worker_connection.py",
+      "bytes": 29660,
+      "lines": 589,
+      "sha256": "60d22036d6827205be5d0657af8e4693aa534605bdfb1b501878eb2a889fe25f",
+      "read_ranges": [[1, 589]],
+      "status": "READ_COMPLETE"
+    },
+    {
+      "id": "A-02",
+      "group": "A",
+      "path": "docs/library/proof/windows-stable-directory-qualification-2026-09-13/proposal01/windows_reservation_port.py",
+      "bytes": 18234,
+      "lines": 392,
+      "sha256": "b93076ab07b8c0567f6608520c99f5e5523be3dd388010a5a49037a4a899f775",
+      "read_ranges": [[1, 392]],
+      "status": "READ_COMPLETE"
+    },
+    {
+      "id": "A-03",
+      "group": "A",
+      "path": "docs/library/proof/windows-stable-directory-qualification-2026-09-13/proposal01/win32_worker_connection.py.diff",
+      "bytes": 2245,
+      "lines": 38,
+      "sha256": "8affde1a60913d81671e247c77b85a709c168074685dc8984787df4c3c4924e4",
+      "read_ranges": [[1, 38]],
+      "status": "READ_COMPLETE"
+    },
+    {
+      "id": "A-04",
+      "group": "A",
+      "path": "docs/library/proof/windows-stable-directory-qualification-2026-09-13/proposal01/directory-policy-vs-diagnostic03.diff",
+      "bytes": 1222,
+      "lines": 23,
+      "sha256": "00ca72895513dcf68a9fc438ff037648354ea60455db70e882b52472d42647c2",
+      "read_ranges": [[1, 23]],
+      "status": "READ_COMPLETE"
+    },
+    {
+      "id": "A-05",
+      "group": "A",
+      "path": "docs/library/proof/windows-stable-directory-qualification-2026-09-13/proposal01/test_stable_directory.py",
+      "bytes": 12140,
+      "lines": 244,
+      "sha256": "6207fae76c7ee64188b0a9dbbb09df8c805eb3d1544a83424d9c02506e789886",
+      "read_ranges": [[1, 244]],
+      "status": "READ_COMPLETE"
+    },
+    {
+      "id": "A-06",
+      "group": "A",
+      "path": "docs/library/proof/windows-stable-directory-qualification-2026-09-13/proposal01/qualify_windows_reservations.py",
+      "bytes": 8780,
+      "lines": 201,
+      "sha256": "09c62953285994f2719a86a6358dbb2ec6204e13ecda0fba20042fb18968d9f4",
+      "read_ranges": [[1, 201]],
+      "status": "READ_COMPLETE"
+    },
+    {
+      "id": "A-07",
+      "group": "A",
+      "path": "docs/library/proof/windows-stable-directory-qualification-2026-09-13/proposal01/run_preflight01.ps1",
+      "bytes": 5742,
+      "lines": 133,
+      "sha256": "0d4cbb8f4be2b8d0a0d9e7949ee1616c1417537b018bdfecaa65dfd5c92f2545",
+      "read_ranges": [[1, 133]],
+      "status": "READ_COMPLETE"
+    },
+    {
+      "id": "A-08",
+      "group": "A",
+      "path": "docs/library/proof/windows-stable-directory-qualification-2026-09-13/proposal01/QUALIFICATION-PROTOCOL.md",
+      "bytes": 3413,
+      "lines": 46,
+      "sha256": "cf24e58b9588667ce19b48c349dfbf755a5a92bf223fc99c488390b168698cb1",
+      "read_ranges": [[1, 46]],
+      "status": "READ_COMPLETE"
+    },
+    {
+      "id": "A-09",
+      "group": "A",
+      "path": "docs/library/proof/windows-stable-directory-qualification-2026-09-13/proposal01/EXPECTED-CASES.json",
+      "bytes": 2420,
+      "lines": 84,
+      "sha256": "5db21c56f6c9945fa6759c5d15a5105220c3a2f8d8393c83b8b1db64b1ea9f52",
+      "read_ranges": [[1, 84]],
+      "status": "READ_COMPLETE"
+    },
+    {
+      "id": "A-10",
+      "group": "A",
+      "path": "docs/library/proof/windows-stable-directory-qualification-2026-09-13/proposal01/PRESERVATION-CHECKS.json",
+      "bytes": 8472,
+      "lines": 186,
+      "sha256": "86221c56515865a7f2df20067ffbb355bc93c0429a32c256ca62b9f36e4f3a61",
+      "read_ranges": [[1, 186]],
+      "status": "READ_COMPLETE"
+    },
+    {
+      "id": "A-11",
+      "group": "A",
+      "path": "docs/library/proof/windows-stable-directory-qualification-2026-09-13/proposal01/stable-directory01/stdout.json",
+      "bytes": 49454,
+      "lines": 1008,
+      "sha256": "3bfe92a64c4c2a5bc65166b5795aa7e4b9ef49dd89eb5b799047c6a90dc2e0ef",
+      "read_ranges": [[1, 800], [801, 1008]],
+      "status": "READ_COMPLETE"
+    },
+    {
+      "id": "A-12",
+      "group": "A",
+      "path": "docs/library/proof/windows-stable-directory-qualification-2026-09-13/independent01/stable-directory01/stdout.json",
+      "bytes": 49454,
+      "lines": 1008,
+      "sha256": "ef130f1fcfa440a4e7561beff3bb29fbaf816c7cb09e13a9fa938f45a2cc94dc",
+      "read_ranges": [[1, 800], [801, 1008]],
+      "status": "READ_COMPLETE"
+    },
+    {
+      "id": "A-13",
+      "group": "A",
+      "path": "docs/library/proof/windows-stable-directory-qualification-2026-09-13/proposal01/stable-directory01/exit.json",
+      "bytes": 421,
+      "lines": 16,
+      "sha256": "fc028f804593bc14e498c8c5c7d0d024aa896171efec27cb8ec7764d2fc0028e",
+      "read_ranges": [[1, 16]],
+      "status": "READ_COMPLETE"
+    },
+    {
+      "id": "A-14",
+      "group": "A",
+      "path": "docs/library/proof/windows-stable-directory-qualification-2026-09-13/independent01/stable-directory01/exit.json",
+      "bytes": 421,
+      "lines": 16,
+      "sha256": "08fa8d390a382103a3d53860bb4a9058b8f21914eb1bc8f0426bb972ee7f8a7e",
+      "read_ranges": [[1, 16]],
+      "status": "READ_COMPLETE"
+    },
+    {
+      "id": "A-15",
+      "group": "A",
+      "path": "docs/library/proof/windows-stable-directory-qualification-2026-09-13/STABLE-DIRECTORY-AUTHOR-ACTUAL01.json",
+      "bytes": 418,
+      "lines": 8,
+      "sha256": "48bc53ca1b58532bf172a6b22579df638a167098e9c0c169223e7f225ae02cb0",
+      "read_ranges": [[1, 8]],
+      "status": "READ_COMPLETE"
+    },
+    {
+      "id": "A-16",
+      "group": "A",
+      "path": "docs/library/proof/windows-stable-directory-qualification-2026-09-13/STABLE-DIRECTORY-INDEPENDENT-ACTUAL01.json",
+      "bytes": 421,
+      "lines": 8,
+      "sha256": "1fc5f3e4e9f733f1ffca628b030438cf15d2a937a77e81cc6574f268fdfb6cfc",
+      "read_ranges": [[1, 8]],
+      "status": "READ_COMPLETE"
+    },
+    {
+      "id": "A-17",
+      "group": "A",
+      "path": "docs/library/proof/windows-stable-directory-qualification-2026-09-13/STABLE-DIRECTORY-PAIR-CHECK01.json",
+      "bytes": 1968,
+      "lines": 37,
+      "sha256": "2a7a4c7cfbbd5fba4dae734c26a5789f5c40ba9198642a2ff8f0f35368a4d70b",
+      "read_ranges": [[1, 37]],
+      "status": "READ_COMPLETE"
+    },
+    {
+      "id": "A-18",
+      "group": "A",
+      "path": "docs/library/proof/windows-stable-directory-qualification-2026-09-13/ASTRA-STABLE-DIRECTORY-VERDICT-2026-09-13.md",
+      "bytes": 2719,
+      "lines": 14,
+      "sha256": "0364d0bc7dfcbe5426176a91176b627f12e1262d169c9bf6bb9ea57f6b9bcda5",
+      "read_ranges": [[1, 14]],
+      "status": "READ_COMPLETE"
+    },
+    {
+      "id": "B-01",
+      "group": "B",
+      "path": "docs/library/proof/windows-writer-exclusion-native-2026-09-13/source/generated_writer_exclusion.py",
+      "bytes": 8779,
+      "lines": 197,
+      "sha256": "a937085ea3e0f98be6041eb4cf81ccfffa8340d04b873f27622998399e5256e2",
+      "read_ranges": [[1, 197]],
+      "status": "READ_COMPLETE"
+    },
+    {
+      "id": "B-02",
+      "group": "B",
+      "path": "docs/library/proof/windows-writer-exclusion-native-2026-09-13/source/generated_adapter_flow.py",
+      "bytes": 18765,
+      "lines": 427,
+      "sha256": "81bb37e7dfc924765d1d6e857416fc01d141e57c6b9070dbda0f04c0d892695a",
+      "read_ranges": [[1, 427]],
+      "status": "READ_COMPLETE"
+    },
+    {
+      "id": "B-03",
+      "group": "B",
+      "path": "docs/library/proof/windows-writer-exclusion-native-2026-09-13/source/generated_journal_setup.py",
+      "bytes": 9028,
+      "lines": 206,
+      "sha256": "ce2a875a90e386927bb30a10aa4601b0f0bcfbe3e46c76193f41c305b5832a8f",
+      "read_ranges": [[1, 206]],
+      "status": "READ_COMPLETE"
+    },
+    {
+      "id": "B-04",
+      "group": "B",
+      "path": "docs/library/proof/windows-writer-exclusion-native-2026-09-13/source/dummy_bootstrap.py",
+      "bytes": 24700,
+      "lines": 636,
+      "sha256": "fdb354972e21b8f05a109bb67c6999a4c8bc4aa128e46977fffe8c4e4026bc68",
+      "read_ranges": [[1, 636]],
+      "status": "READ_COMPLETE"
+    },
+    {
+      "id": "B-05",
+      "group": "B",
+      "path": "docs/library/proof/windows-writer-exclusion-native-2026-09-13/source/run_writer_exclusion04.ps1",
+      "bytes": 16182,
+      "lines": 307,
+      "sha256": "d36ddff47e0bfcf5fcff6aa85d03ec1ec26a5759ff535c5c088ef3914a1a5b67",
+      "read_ranges": [[1, 307]],
+      "status": "READ_COMPLETE"
+    },
+    {
+      "id": "B-06",
+      "group": "B",
+      "path": "docs/library/proof/windows-writer-exclusion-native-2026-09-13/source/win32_private_pipe.py",
+      "bytes": 17267,
+      "lines": 391,
+      "sha256": "3b8dfa2e6e2ea8593ccf6055d7f1d3f58a3605e5d326ff0f8db70701024bcda3",
+      "read_ranges": [[1, 391]],
+      "status": "READ_COMPLETE"
+    },
+    {
+      "id": "B-07",
+      "group": "B",
+      "path": "docs/library/proof/windows-writer-exclusion-native-2026-09-13/source/reservation_file_port.py",
+      "bytes": 4296,
+      "lines": 107,
+      "sha256": "1852d4dd6721595d2c2069b35061616f7ec006e890987efabfcae9a0f443b7be",
+      "read_ranges": [[1, 107]],
+      "status": "READ_COMPLETE"
+    },
+    {
+      "id": "B-08",
+      "group": "B",
+      "path": "docs/library/proof/windows-writer-exclusion-native-2026-09-13/source/snapshot_reservations.py",
+      "bytes": 21544,
+      "lines": 488,
+      "sha256": "fc0db004f4a3bfec69a2123fa3c5d6c8b417ee6aee33d368e5d07fe0cb9ee873",
+      "read_ranges": [[1, 488]],
+      "status": "READ_COMPLETE"
+    },
+    {
+      "id": "B-09",
+      "group": "B",
+      "path": "docs/library/proof/windows-writer-exclusion-native-2026-09-13/source/durable_lifecycle.py",
+      "bytes": 12260,
+      "lines": 274,
+      "sha256": "09c6eb5ba99e97f0fb97956795f7004f995fc04df6065675e29a3fc86eebef6c",
+      "read_ranges": [[1, 274]],
+      "status": "READ_COMPLETE"
+    },
+    {
+      "id": "B-10",
+      "group": "B",
+      "path": "docs/library/proof/windows-writer-exclusion-native-2026-09-13/source/snapshot_lifecycle.py",
+      "bytes": 23641,
+      "lines": 518,
+      "sha256": "e0e4ca067b84dddfa3e4fe1c5bc790e79fb4b73243a411516e6f98c8c222ff49",
+      "read_ranges": [[1, 518]],
+      "status": "READ_COMPLETE"
+    },
+    {
+      "id": "B-11",
+      "group": "B",
+      "path": "docs/library/proof/windows-writer-exclusion-native-2026-09-13/source/SOURCE-INPUTS.json",
+      "bytes": 6013,
+      "lines": 81,
+      "sha256": "dd3f9829cc6477e6fcfe0a9ff35b80e457f9cb89c5fa07b4694cf6f0cc232a93",
+      "read_ranges": [[1, 81]],
+      "status": "READ_COMPLETE"
+    },
+    {
+      "id": "B-12",
+      "group": "B",
+      "path": "docs/library/proof/windows-writer-exclusion-native-2026-09-13/source/SOURCE-PRESERVATION.json",
+      "bytes": 6695,
+      "lines": 121,
+      "sha256": "04ca65851412030232402436f56a5996eb7ebff77ff6a0c5c4e9768652bb6c81",
+      "read_ranges": [[1, 121]],
+      "status": "READ_COMPLETE"
+    },
+    {
+      "id": "B-13",
+      "group": "B",
+      "path": "docs/library/proof/windows-writer-exclusion-native-2026-09-13/source/dummy_bootstrap.py.diff",
+      "bytes": 855,
+      "lines": 14,
+      "sha256": "5765fe65ca1e2e92c23ae67b7fce8f31b084e5904fa18dca4ddda251b681997d",
+      "read_ranges": [[1, 14]],
+      "status": "READ_COMPLETE"
+    },
+    {
+      "id": "B-14",
+      "group": "B",
+      "path": "docs/library/proof/windows-writer-exclusion-native-2026-09-13/source/run_writer_exclusion04.ps1.diff",
+      "bytes": 1493,
+      "lines": 25,
+      "sha256": "db4391cf8e801b702ec28087799986b1ba87363f82cb34e9e09d57fb4a781b2a",
+      "read_ranges": [[1, 25]],
+      "status": "READ_COMPLETE"
+    },
+    {
+      "id": "B-15",
+      "group": "B",
+      "path": "docs/library/proof/windows-writer-exclusion-native-2026-09-13/run04/NATIVE-PROTOCOL.md",
+      "bytes": 2196,
+      "lines": 31,
+      "sha256": "f522f778d91f1c841c6e1cb2a3a5e1cf49ae443f0554ef42557fcff686539a2f",
+      "read_ranges": [[1, 31]],
+      "status": "READ_COMPLETE"
+    },
+    {
+      "id": "B-16",
+      "group": "B",
+      "path": "docs/library/proof/windows-writer-exclusion-native-2026-09-13/run04/API-AND-BOUNDS.md",
+      "bytes": 1358,
+      "lines": 20,
+      "sha256": "fb8d7fa6bf690e0354117b4c6e93eb2cb7fb6763a83266e7fb63435164bc7d62",
+      "read_ranges": [[1, 20]],
+      "status": "READ_COMPLETE"
+    },
+    {
+      "id": "B-17",
+      "group": "B",
+      "path": "docs/library/proof/windows-writer-exclusion-native-2026-09-13/run04/controller-selected-fields.json",
+      "bytes": 28312,
+      "lines": 636,
+      "sha256": "41b8a514d48508f7db08e2f3d640ff7181c009d1858a74e0c38827725ca2e1ae",
+      "read_ranges": [[1, 636]],
+      "status": "READ_COMPLETE",
+      "notes": "Read all 636 lines containing 31 parsed fields in full. The raw 8,230-entry native_api_calls array was omitted by extract-controller.ps1 and is explicitly marked unreviewed."
+    },
+    {
+      "id": "B-18",
+      "group": "B",
+      "path": "docs/library/proof/windows-writer-exclusion-native-2026-09-13/run04/child-result.json",
+      "bytes": 21087,
+      "lines": 475,
+      "sha256": "78229873a55fb12dc539828d0eb5fcaec09139cf1e52ee3bdf081c7e937d1000",
+      "read_ranges": [[1, 475]],
+      "status": "READ_COMPLETE"
+    },
+    {
+      "id": "B-19",
+      "group": "B",
+      "path": "docs/library/proof/windows-writer-exclusion-native-2026-09-13/run04/contender-result.json",
+      "bytes": 9473,
+      "lines": 212,
+      "sha256": "ca5483a9f7d2fbf0e85efd90e0c036d07d12f46ea7f1d43a6d713c7db10f6eb9",
+      "read_ranges": [[1, 212]],
+      "status": "READ_COMPLETE"
+    },
+    {
+      "id": "B-20",
+      "group": "B",
+      "path": "docs/library/proof/windows-writer-exclusion-native-2026-09-13/run04/closed-journal-observation.json",
+      "bytes": 485,
+      "lines": 9,
+      "sha256": "d9426fc0c9b0e258679f220379ea54c7d0d62d3cb542aa7ec87b4096d2994c65",
+      "read_ranges": [[1, 9]],
+      "status": "READ_COMPLETE"
+    },
+    {
+      "id": "B-21",
+      "group": "B",
+      "path": "docs/library/proof/windows-writer-exclusion-native-2026-09-13/run04/exit.json",
+      "bytes": 418,
+      "lines": 14,
+      "sha256": "7d043c9ba8bcf8cbb39d73d63b2f56195c6fcf4aeb35817e0e7a2b2170c36bb7",
+      "read_ranges": [[1, 14]],
+      "status": "READ_COMPLETE"
+    },
+    {
+      "id": "B-22",
+      "group": "B",
+      "path": "docs/library/proof/windows-writer-exclusion-native-2026-09-13/run04/native-exit.json",
+      "bytes": 2,
+      "lines": 1,
+      "sha256": "ba5b89ebc34138e6b13e9a5c8ff745d2b70f0ce148ea87399580a5f972b26b38",
+      "read_ranges": [[1, 1]],
+      "status": "READ_COMPLETE"
+    },
+    {
+      "id": "B-23",
+      "group": "B",
+      "path": "docs/library/proof/windows-writer-exclusion-native-2026-09-13/WINDOWS-WRITER-EXCLUSION04-ACTUAL.json",
+      "bytes": 421,
+      "lines": 8,
+      "sha256": "573ca0c5e7b25ae15a31a403487c6999a7000d662b21a329d91f24ddb534bf2a",
+      "read_ranges": [[1, 8]],
+      "status": "READ_COMPLETE"
+    },
+    {
+      "id": "B-24",
+      "group": "B",
+      "path": "docs/library/proof/windows-writer-exclusion-native-2026-09-13/WINDOWS-WRITER-EXCLUSION04-ROOT-CHECK.json",
+      "bytes": 900,
+      "lines": 21,
+      "sha256": "64a5c6ca80d5071987baae9efae9127814c1fa0bcf9eb1ec3ec9df3aa6981881",
+      "read_ranges": [[1, 21]],
+      "status": "READ_COMPLETE"
+    },
+    {
+      "id": "B-25",
+      "group": "B",
+      "path": "docs/library/proof/windows-writer-exclusion-native-2026-09-13/WINDOWS-WRITER-EXCLUSION04-ROOT-CHECK-ACTUAL.json",
+      "bytes": 421,
+      "lines": 8,
+      "sha256": "64455ae0e660144f83b27bcfb99dbbb24f5a3424d9c02506e789886a03b60384",
+      "read_ranges": [[1, 8]],
+      "status": "READ_COMPLETE"
+    },
+    {
+      "id": "B-26",
+      "group": "B",
+      "path": "docs/library/proof/windows-writer-exclusion-native-2026-09-13/WINDOWS-WRITER-EXCLUSION04-ROOT-REVIEW.md",
+      "bytes": 2125,
+      "lines": 12,
+      "sha256": "79116e012586b625501831bb2183c5a66a1523c923eb4174352e6761008d5fd7",
+      "read_ranges": [[1, 12]],
+      "status": "READ_COMPLETE"
+    },
+    {
+      "id": "B-27",
+      "group": "B",
+      "path": "docs/library/proof/windows-writer-exclusion-native-2026-09-13/ASTRA-WRITER-EXCLUSION04-VERDICT-2026-09-13.md",
+      "bytes": 3379,
+      "lines": 16,
+      "sha256": "a93d39da6c5efdfbaeaefb12a8740cfa94a6b28a8d16dcaae1a84f33b1e77243",
+      "read_ranges": [[1, 16]],
+      "status": "READ_COMPLETE"
+    },
+    {
+      "id": "B-28",
+      "group": "B",
+      "path": "docs/library/proof/windows-writer-exclusion-native-2026-09-13/extract-controller.ps1",
+      "bytes": 2577,
+      "lines": 42,
+      "sha256": "c1186716091ba81cb0db088ca9e2469d80d2870ee8740263f25c7fa3b3e24b74",
+      "read_ranges": [[1, 42]],
+      "status": "READ_COMPLETE"
+    }
+  ]
+}

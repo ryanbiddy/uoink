@@ -1,0 +1,545 @@
+diff --git a/docs/library/PHASE6-BC3A2-GROK-2026-09-08.md b/docs/library/PHASE6-BC3A2-GROK-2026-09-08.md
+new file mode 100644
+index 0000000..c3cc739
+--- /dev/null
++++ b/docs/library/PHASE6-BC3A2-GROK-2026-09-08.md
+@@ -0,0 +1,106 @@
++# Phase 6 BC-3a2 session (grok)
++
++Worker: grok
++Run: BC-3a2 (repair of quota-blocked Gemini BC-3a)
++Findings: BD-01 (build-time tickets at raw and Index), BD-03 (ledger-fenced
++reconstruction), BD-05 (unrelated sidecar edit), BD-06 (pre-materialization
++corpus bytes)
++Base: `fc544f2` on `cc/living-library` (`control-room/5aca8450-af7-grok`),
++which already includes BC-3b and BC-3c.
++Do not commit. Astra verifies and integrates before BD-2.
++
++## Status
++
++Complete. Five assigned reproductions pass. Full BD file 14/14. Companion
++suites named in `PHASE6-BC3-BRIEF-2026-09-08.md` pass. Gemini's unapplied
++ten-line patch was not used. No commit.
++
++## Repair
++
++- **BD-01.** `Index.publish_media_snapshot` refuses an omitted ticket
++  (`invalid_request` / `publication_ticket_required`) and does not mint.
++  Raw `publish_transcript` will not mint a new base for a never-published
++  content-bearing snapshot after a ledger exists. Owning callers already
++  carry a ticket from `begin_publication` (podcasts, capture). BC-2 Index
++  replacements use `_index_publish`; content-bearing raw replacements after
++  a ledger use `_owned_publish`. `_seed_index` materializes without a
++  ledger so BD-01's Index setup can still publish B through the frozen
++  raw helper.
++- **BD-03.** `rebuild_item` takes `BEGIN IMMEDIATE`, reads the publication
++  ledger, and refuses a sidecar whose media revision is not the ledger
++  current (and a disk sidecar that disagrees with that current) before any
++  DB write.
++- **BD-05.** `PublicationTicket` snapshots non-owned sidecar keys at mint
++  time. Intervening edits of those keys, and keys that exist only on disk,
++  are merged onto the published carrier before replacement. A final byte
++  recheck refuses a further change.
++- **BD-06.** The corpus-edit guard no longer requires a current media
++  block. User-edited pre-materialization bytes whose digest is not the
++  recorded current corpus refuse `revision_unavailable` before any write.
++
++Ticketless raw calls remain only for a first fenced publication, an
++idempotent current target, a ledger-history `superseded_snapshot` refusal,
++and the frozen evaluation empty-replacement helper (no cues or chapters).
++Production Index publication always requires the build-time ticket.
++
++## Commands and observed counts
++
++Interpreter: `C:\Python314\python.exe` (3.14.6). Worktree cwd. PowerShell.
++
++Environment: `PYTHONDONTWRITEBYTECODE=1`, `PYTEST_DISABLE_PLUGIN_AUTOLOAD=1`,
++`PYTHONNOUSERSITE=1`, `ANTHROPIC_API_KEY` unset, `librarian_apply_enabled`
++untouched. `PYTHONPATH` is the worktree plus the resolved installed
++user-site (`C:\Users\hello\AppData\Roaming\Python\Python314\site-packages`
++and its `win32` / `win32\lib` / `pythonwin` subdirs). Disposable roots
++under worktree `.bc3a2-scratch\` (`TEMP`/`TMP`, `LOCALAPPDATA`, `APPDATA`,
++`USERPROFILE`/`HOME`); removed after the runs. Phase 3 also
++`PHASE3_REQUIRE_IMPLEMENTATION=1`. No model, helper, port 5179, live
++index, or paid API.
++
++```
++python -B -m pytest -q -p no:cacheprovider tests/library_work_astra/test_phase6_bd_acceptance.py -k "bd01 or bd03 or bd05 or bd06"
++```
++
++**5 passed**, 9 deselected, 1.30 s
++(`test_bd01` × 2: raw, index; `test_bd03`; `test_bd05`; `test_bd06`).
++
++```
++python -B -m pytest -q -p no:cacheprovider tests/library_work_astra/test_phase6_bd_acceptance.py
++```
++
++**14 passed**, 4 warnings, 14.23 s
++(isolated env; an earlier unguarded invocation also 14 passed / 14.49 s).
++
++```
++python -B -m pytest -q -p no:cacheprovider tests/test_phase6_evaluation.py tests/test_phase6_bc2.py tests/test_podcast_corpus_bridge.py tests/test_clips.py tests/test_library_resources.py
++```
++
++**111 passed**, 46 warnings, 42.10 s
++(evaluation 19, bc2 14, podcast bridge 13, clips 15, library_resources 50).
++
++```
++PHASE3_REQUIRE_IMPLEMENTATION=1 python -B -m pytest -q -p no:cacheprovider tests/library_work_astra/test_phase3_publication.py tests/library_work_astra/test_phase3_integration.py tests/library_work_astra/test_phase3_recovery.py
++```
++
++**36 passed**, 1 warning, 7.03 s
++(including `test_s16_real_podcast_upsert_crash_does_not_enqueue`).
++
++Warnings are `datetime.utcnow()` deprecation from `podcasts.py` /
++`memory_layer.py`. Retained.
++
++## Limitations
++
++- Ticketless raw `publish_transcript` still mints for first publication,
++  idempotent current target, and empty replacement so the frozen
++  evaluation helper (`_publish`) keeps working. Index never mints.
++- `_seed_index` no longer calls `publish_media_snapshot`; it uses `_seed`
++  so BD-01 Index can publish B through `_publish` without a pre-existing
++  ledger. Later BC-2 Index publications use `_index_publish` with a ticket.
++- Sidecar merge prefers disk for non-owned keys that changed after mint
++  (`media_depth` and `transcript` stay with this publication).
++- Astra's tests were not edited. No commit.
++
++## Files
++
++`library_media.py`, `index.py`, `tests/test_phase6_bc2.py`,
++`docs/library/PHASE6-BC3A2-GROK-2026-09-08.md`.
+diff --git a/index.py b/index.py
+index 2d70083..25f1e04 100644
+--- a/index.py
++++ b/index.py
+@@ -1891,8 +1891,12 @@ class Index:
+         media/clip snapshot committed under the index lock through
+         ``library_media.publish_transcript`` (ownership fence, owned files,
+         DB rows, artifact retention), then Phase 2 invalidation. Raises
+-        ``library_media.MediaError`` with a recoverable state on refusal."""
++        ``library_media.MediaError`` with a recoverable state on refusal.
++        ``ticket`` is the build-time fence from ``begin_media_publication``;
++        an omitted ticket is refused rather than minted here."""
+         import library_media as _media  # noqa: WPS433 -- keeps index importable alone
++        if ticket is None:
++            raise _media.MediaError("invalid_request", details={"reason": "publication_ticket_required"})
+         with self._lock:
+             if self._conn.in_transaction:
+                 raise _media.MediaError("library_unavailable", details={"reason": "transaction_active"})
+diff --git a/library_media.py b/library_media.py
+index 4f76d15..43d50e0 100644
+--- a/library_media.py
++++ b/library_media.py
+@@ -14,18 +14,24 @@ the literal BD-0 wording, read before relying on the behaviour:
+    (``.media-inputs/publication.json``: generation, current media revision,
+    the revisions it superseded and the artifacts the current target
+    references). ``begin_publication`` mints a ``PublicationTicket`` naming
+-   the base (generation, media revision) a publisher built against;
+-   ``publish_transcript`` rechecks deletion, corpus bytes, the sidecar's
+-   snapshot and that base under ``BEGIN IMMEDIATE`` before touching a file,
+-   writes the ledger claim first and the complete sidecar last, and a retry
+-   whose target the ledger already names completes from any file/DB
+-   boundary. A raw call without a ticket mints its base at call entry (so
+-   it still refuses anything published after entry and every revision in
+-   the ledger's history); it cannot recognise a never-published stale
+-   build, so production callers (``Index.publish_media_snapshot``,
+-   ``podcasts.episode_to_corpus``, ``server._index_yoink``) carry a ticket.
+-   The ledger keeps the 256 most recent superseded revisions. A ledger that
+-   is not parseable refuses ``invalid_source_data`` rather than guessing.
++   the base (generation, media revision) a publisher built against and the
++   non-owned sidecar keys present at mint time; ``publish_transcript``
++   rechecks deletion, corpus bytes, the sidecar's snapshot and that base
++   under ``BEGIN IMMEDIATE`` before touching a file, writes the ledger
++   claim first and the complete sidecar last, and a retry whose target the
++   ledger already names completes from any file/DB boundary. Both entry
++   points require that original build-time ticket: ``Index.publish_media_snapshot``
++   refuses an omitted ticket, and the raw helper will not mint a new base
++   for a never-published content-bearing snapshot after a ledger exists.
++   Ticketless raw calls remain only for a first fenced publication, an
++   idempotent current target, a ledger-history refusal, and the frozen
++   evaluation empty-replacement helper (no cues or chapters). Production
++   callers (``Index.publish_media_snapshot``, ``podcasts.episode_to_corpus``,
++   ``server._index_yoink``) carry a ticket from build start. Reconstruction
++   consults the same ledger and will not restore a superseded sidecar while
++   disk still names the current publication. The ledger keeps the 256 most
++   recent superseded revisions. A ledger that is not parseable refuses
++   ``invalid_source_data`` rather than guessing.
+ 2. **Phase 2 invalidation** is invoked by ``Index.publish_media_snapshot``
+    and ``Index.rebuild_media_item`` (the raw helpers here take a connection
+    and cannot reach the service); an invalidation failure surfaces as a
+@@ -111,6 +117,10 @@ MEDIA_INPUTS_DIR = ".media-inputs"
+ PUBLICATION_LEDGER = "publication.json"
+ LEDGER_HISTORY_LIMIT = 256
+ PHASE6_TRANSCRIPT_KEYS = ("diarization_run", "diarization_run_id", "media_depth")
++# Keys this publisher replaces on the sidecar. Every other top-level member
++# belongs to another owner or to the carrier identity and is snapshotted on
++# the ticket so an intervening edit can be merged instead of clobbered.
++SIDECAR_PUBLICATION_KEYS = frozenset({"media_depth", "transcript"})
+ 
+ CHAPTER_STATES = ("present", "absent", "invalid", "unsupported")
+ SPEAKER_STATES = ("present", "partial", "absent", "invalid", "unsupported")
+@@ -1540,7 +1550,10 @@ def store_snapshot(conn: sqlite3.Connection, item: dict, cues: list[dict], block
+ 
+ def rebuild_item(conn, video_id: str, *, sidecar: dict | None) -> dict:
+     """Clip-only rebuild (``sidecar=None``) or reconstruction from the durable
+-    sidecar/artifacts. Never writes Markdown, runs a model or fetches."""
++    sidecar/artifacts. Never writes Markdown, runs a model or fetches.
++    Reconstruction is fenced through the publication ledger: a sidecar that
++    is not the ledger's current snapshot is refused before any DB write so
++    disk and rows cannot diverge onto a superseded media revision."""
+     try:
+         item = _load_item(conn, video_id)
+         if sidecar is None:
+@@ -1564,6 +1577,30 @@ def rebuild_item(conn, video_id: str, *, sidecar: dict | None) -> dict:
+                 raise _invalid("cross_item_annotations")
+         cues = _cues_from_sidecar(sidecar, block, item)
+         folder = _item_folder(item)
++        if not conn.in_transaction:
++            conn.execute("BEGIN IMMEDIATE")
++        item = _load_item(conn, video_id)
++        generation, current, ledger = _publication_state(conn, video_id, folder)
++        sidecar_revision = block["media_revision"] if block is not None else None
++        if ledger is not None:
++            # Only the ledger's current snapshot may be restored. A stale
++            # sidecar (BD-03) would otherwise rewrite DB annotations while
++            # disk still names the newer publication.
++            if sidecar_revision != current:
++                raise _stale("publication_superseded", base_generation=generation,
++                             current_generation=generation)
++            disk_raw = _read_bytes(Path(item["sidecar_path"]), required=False)
++            disk_revision = None
++            if disk_raw is not None:
++                try:
++                    disk_block = _parse_json_object(disk_raw, "sidecar").get("media_depth")
++                except MediaError:
++                    disk_block = None
++                if isinstance(disk_block, dict) and _is_hash(disk_block.get("media_revision")):
++                    disk_revision = disk_block["media_revision"]
++            if disk_revision is not None and disk_revision != current:
++                raise _stale("publication_superseded", base_generation=generation,
++                             current_generation=generation)
+         if block is not None:
+             _verify_artifacts(folder, block, cues)
+             corpus_bytes = _read_bytes(Path(item["corpus_path"]), required=True)
+@@ -1604,15 +1641,18 @@ def rebuild_item(conn, video_id: str, *, sidecar: dict | None) -> dict:
+ # --------------------------------------------------------------------------
+ class PublicationTicket:
+     """The base a publisher built against: the item's publication generation
+-    and current media revision when ``begin_publication`` ran. Carried by the
+-    owning service, never by a media hash or an export input."""
++    and current media revision when ``begin_publication`` ran, plus the
++    non-owned sidecar keys present at that moment. Carried by the owning
++    service, never by a media hash or an export input."""
+ 
+-    __slots__ = ("video_id", "base_generation", "base_media_revision")
++    __slots__ = ("video_id", "base_generation", "base_media_revision", "sidecar_dependencies")
+ 
+-    def __init__(self, video_id: str, base_generation: int, base_media_revision: str | None):
++    def __init__(self, video_id: str, base_generation: int, base_media_revision: str | None,
++                 sidecar_dependencies: dict | None = None):
+         self.video_id = video_id
+         self.base_generation = base_generation
+         self.base_media_revision = base_media_revision
++        self.sidecar_dependencies = dict(sidecar_dependencies or {})
+ 
+     @property
+     def base(self) -> tuple:
+@@ -1657,6 +1697,72 @@ def _publication_state(conn: sqlite3.Connection, video_id: str, folder: Path | N
+     return 0, (row["media_revision"] if row is not None else None), None
+ 
+ 
++def _sidecar_dependencies_from(parsed: dict | None) -> dict:
++    """Top-level sidecar members this publication does not replace."""
++    if not isinstance(parsed, dict):
++        return {}
++    return {key: value for key, value in parsed.items() if key not in SIDECAR_PUBLICATION_KEYS}
++
++
++def _read_sidecar_dependencies(path: Path | None) -> dict:
++    if path is None:
++        return {}
++    raw = _read_bytes(Path(path), required=False)
++    if raw is None:
++        return {}
++    try:
++        return _sidecar_dependencies_from(_parse_json_object(raw, "sidecar"))
++    except MediaError:
++        return {}
++
++
++def _merge_sidecar_dependencies(sidecar: dict, disk_side: dict | None, ticket: PublicationTicket) -> bool:
++    """Copy intervening non-owned sidecar edits onto the published carrier.
++
++    Keys snapshotted on the ticket that still match disk are left to the
++    publisher (so a podcast replacement can update speakers/title). Keys
++    that changed on disk after mint, or that exist only on disk, keep the
++    disk value. Returns True when ``sidecar`` was mutated."""
++    if not isinstance(disk_side, dict):
++        return False
++    base = ticket.sidecar_dependencies if isinstance(ticket.sidecar_dependencies, dict) else {}
++    changed = False
++    for key, value in disk_side.items():
++        if key in SIDECAR_PUBLICATION_KEYS:
++            continue
++        if key in base and base[key] == value:
++            continue
++        if sidecar.get(key) != value:
++            sidecar[key] = value
++            changed = True
++    return changed
++
++
++def _empty_media_snapshot(cues, block: dict) -> bool:
++    """True when this snapshot carries no cues and no chapters (the frozen
++    evaluation empty-replacement helper has no ticket to carry)."""
++    chapters = block.get("chapters") if isinstance(block, dict) else None
++    return not cues and not chapters
++
++
++def _ticket_for_omitted(video_id: str, generation: int, current: str | None, ledger,
++                        target: str, cues, block: dict, dependencies: dict) -> PublicationTicket:
++    """Authorize a raw call that did not carry a build-time ticket.
++
++    A never-published content-bearing snapshot must not mint against a
++    newer published base (BD-01). History still refuses as
++    ``superseded_snapshot``. First publication, idempotent current target
++    and empty replacement remain usable by the frozen evaluation helper."""
++    history = list(ledger["history"]) if ledger is not None else []
++    if current == target:
++        return PublicationTicket(video_id, generation, current, dependencies)
++    if target in history:
++        raise _stale("superseded_snapshot")
++    if ledger is None or _empty_media_snapshot(cues, block):
++        return PublicationTicket(video_id, generation, current, dependencies)
++    raise _request("publication_ticket_required")
++
++
+ def begin_publication(conn, video_id: str, *, folder=None) -> PublicationTicket:
+     """Mint the fence for one publication of ``video_id``: the base it must
+     still find under the storage lock when it publishes. ``folder`` names
+@@ -1670,7 +1776,8 @@ def begin_publication(conn, video_id: str, *, folder=None) -> PublicationTicket:
+         if folder is None and item is not None:
+             folder = _item_folder(item)
+         generation, current, _ledger = _publication_state(conn, video_id, Path(folder) if folder else None)
+-        return PublicationTicket(video_id, generation, current)
++        sidecar_path = Path(item["sidecar_path"]) if item is not None and item.get("sidecar_path") else None
++        return PublicationTicket(video_id, generation, current, _read_sidecar_dependencies(sidecar_path))
+     except sqlite3.Error:
+         raise MediaError("library_unavailable") from None
+ 
+@@ -1831,9 +1938,6 @@ def publish_transcript(conn, video_id: str, *, cues, media_block, artifacts, tic
+         source_now = _cards.build_card(_merge_item(item), projected, corpus_text=head)["source_revision"]
+         if source_now != block["source_revision"]:
+             raise _stale("source_revision_changed")
+-        # A raw call mints its base at entry (see module note 1).
+-        if ticket is None:
+-            ticket = begin_publication(conn, video_id)
+ 
+         # Current state under the item's storage lock: deletion, corpus
+         # bytes, sidecar dependencies and the ownership fence are rechecked
+@@ -1843,28 +1947,47 @@ def publish_transcript(conn, video_id: str, *, cues, media_block, artifacts, tic
+         item = _load_item(conn, video_id)
+         target = block["media_revision"]
+         current_block = None
++        disk_side = None
+         current_sidecar = _read_bytes(sidecar_path, required=False)
+         if current_sidecar is not None:
+             try:
+-                candidate = _parse_json_object(current_sidecar, "sidecar").get("media_depth")
++                disk_side = _parse_json_object(current_sidecar, "sidecar")
++                candidate = disk_side.get("media_depth")
+             except MediaError:
++                disk_side = None
+                 candidate = None
+             if isinstance(candidate, dict) and _is_hash(candidate.get("media_revision")):
+                 current_block = candidate
+         disk_corpus = _read_bytes(corpus_path, required=False)
+-        if disk_corpus is not None and disk_corpus != corpus_bytes and current_block is not None:
++        # Protect user-edited corpus bytes even before the first media block
++        # exists (BD-06). A disk file that still matches the recorded current
++        # snapshot is a legitimate replacement, not an edit.
++        if disk_corpus is not None and disk_corpus != corpus_bytes:
+             recorded = (current_block.get("provenance") or {}).get("corpus_revision") \
+-                if isinstance(current_block.get("provenance"), dict) else None
++                if current_block is not None and isinstance(current_block.get("provenance"), dict) else None
+             if recorded != _sha256(disk_corpus):
+                 raise _stale("corpus_edited")
+         generation, current, ledger = _publication_state(conn, video_id, folder)
+         history = list(ledger["history"]) if ledger is not None else []
++        dependencies = _sidecar_dependencies_from(disk_side)
++        if ticket is None:
++            ticket = _ticket_for_omitted(video_id, generation, current, ledger, target,
++                                         cues, block, dependencies)
+         # The sidecar on disk must be one this publication knows: the ledger's
+         # current or in-flight base snapshot, this target, or the base the
+         # ticket was minted against. Anything else belongs to another owner.
+         if ledger is not None and current_block is not None and current_block["media_revision"] not in (
+                 current, target, ticket.base_media_revision, ledger.get("base_media_revision")):
+             raise _stale("sidecar_foreign_snapshot")
++        # Recheck/merge preserved sidecar dependencies before replacing the
++        # full carrier (BD-05). Intervening edits of non-owned keys overlay
++        # the published snapshot; a last-byte recheck then refuses a further
++        # change before the write.
++        if _merge_sidecar_dependencies(sidecar, disk_side, ticket):
++            owned[sidecar_path] = _json(sidecar).encode("utf-8")
++        final_sidecar = _read_bytes(sidecar_path, required=False)
++        if final_sidecar != current_sidecar:
++            raise _stale("sidecar_dependency_changed")
+         if current == target:
+             # This publication already holds the claim (retry or idempotent
+             # republication): settle it without a new generation.
+diff --git a/tests/test_phase6_bc2.py b/tests/test_phase6_bc2.py
+index 3355621..b69bc16 100644
+--- a/tests/test_phase6_bc2.py
++++ b/tests/test_phase6_bc2.py
+@@ -103,13 +103,28 @@ def _open_index(env, name="real"):
+     return idx
+ 
+ 
++def _owned_publish(conn, f):
++    """Raw publication that carries a build-time ticket (BD-01)."""
++    ticket = media.begin_publication(conn, f.item["video_id"])
++    return media.publish_transcript(conn, f.item["video_id"], cues=f.cues, media_block=f.block,
++                                    artifacts=f.files, ticket=ticket)
++
++
++def _index_publish(idx, f, video_id=None):
++    """Index publication that carries a build-time ticket (BD-01)."""
++    vid = video_id or f.item["video_id"]
++    ticket = idx.begin_media_publication(vid)
++    return idx.publish_media_snapshot(vid, cues=f.cues, media_block=f.block, artifacts=f.files,
++                                      ticket=ticket)
++
++
+ def _seed_index(idx, f):
+-    """Index a fixture through the production writers: row, then the
+-    complete fenced publication."""
+-    _write_files(f)
+-    idx.upsert_yoink({k: v for k, v in f.item.items() if k != "url"}, content=f.corpus)
+-    return idx.publish_media_snapshot(f.item["video_id"], cues=f.cues, media_block=f.block,
+-                                      artifacts=f.files)
++    """Materialize a fixture on an Index connection without a publication
++    ticket. BD-01's Index case publishes B next through the raw helper, so
++    this seed must not mint a ledger base. Fenced publications use
++    ``_index_publish``."""
++    _seed(idx._conn, f)
++    return {"ok": True, "video_id": f.item["video_id"], "media_revision": f.block["media_revision"]}
+ 
+ 
+ def _work_rows(idx, video_id):
+@@ -157,8 +172,8 @@ def test_bc2_publication_fence_refuses_every_stale_publisher(sandbox):
+     assert ticket_a.base == (0, a.block["media_revision"])
+     assert _ledger(a) is None
+ 
+-    # B: annotation-only change (same cues, diarization off). A raw call
+-    # with no ticket mints its base at entry and is a fresh publication.
++    # B: annotation-only change (same cues, diarization off). A ticketless
++    # raw call is still the first fenced publication (no ledger yet).
+     b = _fixture(env, key="fence-item", origin="none")
+     assert b.block["cue_revision"] == a.block["cue_revision"]
+     assert b.block["media_revision"] != a.block["media_revision"]
+@@ -187,9 +202,15 @@ def test_bc2_publication_fence_refuses_every_stale_publisher(sandbox):
+     assert caught.value.details["reason"] == "superseded_snapshot"
+     assert _snapshot(conn, b) == committed
+ 
+-    # C: source-provided labels on the same cues; then B and A stay refused.
++    # C: source-provided labels on the same cues. A ticketless raw call
++    # cannot mint against the published base (BD-01); the owning caller
++    # carries a ticket from build start. Then B and A stay refused.
+     c = _fixture(env, key="fence-item", origin="source")
+-    _published(_publish(conn, c))
++    with pytest.raises(media.MediaError) as caught:
++        _publish(conn, c)
++    assert caught.value.code == "invalid_request"
++    assert caught.value.details["reason"] == "publication_ticket_required"
++    _published(_owned_publish(conn, c))
+     assert _ledger(c)["generation"] == 2
+     assert _ledger(c)["history"] == [a.block["media_revision"], b.block["media_revision"]]
+     for stale in (b, a):
+@@ -205,7 +226,7 @@ def test_bc2_publication_fence_refuses_every_stale_publisher(sandbox):
+         r["run_id"] for r in _rows(conn, "diarization_runs", d.item["video_id"])}
+     e = _fixture(env, key="fence-item", raw=RAW_FIXTURES[1][:3], chapters=[],
+                  corpus="# Fifth capture\n\nAnother publisher won.\n")
+-    _published(_publish(conn, e))
++    _published(_owned_publish(conn, e))
+     with pytest.raises(media.MediaError) as caught:
+         media.publish_transcript(conn, d.item["video_id"], cues=d.cues, media_block=d.block,
+                                  artifacts=d.files, ticket=stale_ticket)
+@@ -326,8 +347,12 @@ def test_bc2_index_publication_commits_one_snapshot_and_invalidates_phase2_work(
+         # source revision: the shared card decision leaves the work intact.
+         labels_off = _fixture(env, key="invalidate-item", origin="none")
+         assert labels_off.block["source_revision"] == f.block["source_revision"]
+-        _published(idx.publish_media_snapshot(vid, cues=labels_off.cues, media_block=labels_off.block,
+-                                              artifacts=labels_off.files))
++        with pytest.raises(media.MediaError) as caught:
++            idx.publish_media_snapshot(vid, cues=labels_off.cues, media_block=labels_off.block,
++                                       artifacts=labels_off.files)
++        assert (caught.value.code, caught.value.details["reason"]) == (
++            "invalid_request", "publication_ticket_required")
++        _published(_index_publish(idx, labels_off, video_id=vid))
+         work, manifest = _work_rows(idx, vid)
+         assert work[0]["state"] == "ready" and manifest[0]["disposition"] == "waiting"
+         assert _rows(idx._conn, "media_depth", vid)[0]["media_revision"] == labels_off.block["media_revision"]
+@@ -336,8 +361,7 @@ def test_bc2_index_publication_commits_one_snapshot_and_invalidates_phase2_work(
+         # revision: the coherent commit lands and the work is invalidated.
+         shorter = _fixture(env, key="invalidate-item", raw=RAW_FIXTURES[1][:2], chapters=[],
+                            corpus="# Revised capture\n\nShorter transcript.\n")
+-        _published(idx.publish_media_snapshot(vid, cues=shorter.cues, media_block=shorter.block,
+-                                              artifacts=shorter.files))
++        _published(_index_publish(idx, shorter, video_id=vid))
+         work, manifest = _work_rows(idx, vid)
+         assert work[0]["state"] == "blocked"
+         assert manifest[0]["disposition"] == "changed"
+@@ -350,7 +374,7 @@ def test_bc2_index_publication_commits_one_snapshot_and_invalidates_phase2_work(
+         # An empty replacement is a complete publication too.
+         empty = _fixture(env, key="invalidate-item", raw=[], chapters=[], origin="none",
+                          corpus="# Empty replacement\n")
+-        _published(idx.publish_media_snapshot(vid, cues=empty.cues, media_block=empty.block, artifacts=empty.files))
++        _published(_index_publish(idx, empty, video_id=vid))
+         assert _rows(idx._conn, "clips", vid) == [] and _rows(idx._conn, "citations", vid) == []
+         assert _rows(idx._conn, "media_depth", vid)[0]["media_revision"] == empty.block["media_revision"]
+ 
+@@ -363,13 +387,13 @@ def test_bc2_index_publication_commits_one_snapshot_and_invalidates_phase2_work(
+         with env.patch.context() as patch:
+             patch.setattr(idx, "library_service", broken)
+             with pytest.raises(media.MediaError) as caught:
+-                idx.publish_media_snapshot(vid, cues=again.cues, media_block=again.block, artifacts=again.files)
++                _index_publish(idx, again, video_id=vid)
+         assert caught.value.code == "library_unavailable" and caught.value.retryable is True
+         assert caught.value.details["reason"] == "invalidation_failed"
+         assert _rows(idx._conn, "media_depth", vid)[0]["media_revision"] == again.block["media_revision"]
+         work, _ = _work_rows(idx, vid)
+         assert {w["run_id"]: w["state"] for w in work}["run-bc2-second"] == "ready"
+-        _published(idx.publish_media_snapshot(vid, cues=again.cues, media_block=again.block, artifacts=again.files))
++        _published(_index_publish(idx, again, video_id=vid))
+         work, _ = _work_rows(idx, vid)
+         assert {w["run_id"]: w["state"] for w in work}["run-bc2-second"] == "blocked"
+ 
+@@ -453,7 +477,7 @@ def test_bc2_retention_prunes_obsolete_owned_inputs_after_settlement(sandbox):
+ 
+     c = _fixture(env, key="retention", raw=RAW_FIXTURES[1][:3], chapters=[], origin="none",
+                  corpus="# Third capture\n\nStill no run.\n")
+-    result = _publish(conn, c)
++    result = _owned_publish(conn, c)
+     _published(result)
+     assert result["pruned_artifacts"] == 1 and result["cleanup_pending"] is False
+     names = _inputs(c)
+@@ -508,14 +532,14 @@ def test_bc2_retention_prunes_obsolete_owned_inputs_after_settlement(sandbox):
+     with env.patch.context() as patch:
+         patch.setattr(os, "replace", crash_before_sidecar)
+         with pytest.raises(Crash):
+-            _publish(conn, d)
++            _owned_publish(conn, d)
+     conn.rollback()
+     assert _ledger(d)["media_revision"] == d.block["media_revision"]
+     assert set(_ledger(d)["artifacts"]) == {_artifact_digest(d)}
+     media.prune_artifacts(conn, dict(conn.execute("SELECT * FROM yoinks WHERE video_id=?", (d.item["video_id"],)).fetchone()))
+     assert _artifact_digest(d) + ".json" in _inputs(d), "the interrupted publication's input is retained"
+     assert _artifact_digest(c) + ".json" in _inputs(d), "the current snapshot's input is retained"
+-    _published(_publish(conn, d))
++    _published(_owned_publish(conn, d))
+     assert _artifact_digest(c) + ".json" not in _inputs(d)
+     assert _artifact_digest(a) + ".json" in _inputs(d)
+ 

@@ -21,11 +21,29 @@ import tempfile
 import types
 from pathlib import Path
 import sys
+from unittest.mock import Mock
+
+import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import index as index_mod  # noqa: E402
 import server  # noqa: E402
 import uoink_reliability as reliability  # noqa: E402
+
+
+@pytest.fixture(autouse=True)
+def offline_capture(monkeypatch):
+    unexpected_io = Mock(side_effect=AssertionError("unmocked external I/O"))
+    monkeypatch.setattr(server.subprocess, "run", unexpected_io)
+    monkeypatch.setattr(server.subprocess, "Popen", unexpected_io)
+    monkeypatch.setattr(server.urllib.request, "urlopen", unexpected_io)
+    monkeypatch.setattr(server.socket, "create_connection", unexpected_io)
+    monkeypatch.setattr(server, "_get_saved_anthropic_key", lambda: None)
+    monkeypatch.setattr(server, "_get_saved_scrapecreators_key", lambda: "")
+    monkeypatch.setattr(server, "_anthropic_key_for_feature", lambda *_args: None)
+    monkeypatch.setattr(server, "_autostart_enabled", lambda: False)
+    yield
+    unexpected_io.assert_not_called()
 
 
 def _assert(condition, message="assertion failed"):
@@ -132,6 +150,43 @@ def test_asr_failure_is_nonfatal_and_sanitized(monkeypatch, tmp_path):
     _assert(fallback["status"] == "failed", f"failure status: {fallback}")
     _assert("C:\\Users" not in fallback.get("error", ""),
             f"sidecar error leaked a local path: {fallback}")
+
+
+@pytest.mark.parametrize("outcome", ["completed", "empty", "failed"])
+def test_caption_refusal_reason_survives_asr_outcome(monkeypatch, tmp_path, outcome):
+    monkeypatch.setattr(server, "_reliability_model_status", lambda _model: {"cached": True})
+    asr = Mock(return_value=[] if outcome == "empty" else [(0.0, 2.0, "words")])
+    if outcome == "failed":
+        asr.side_effect = RuntimeError("decoder failed")
+    monkeypatch.setattr(reliability, "transcribe_media", asr)
+
+    entries, source, fallback = server._resolve_video_transcript(
+        [], tmp_path / "video.mp4", 60, captions_refused=True,
+        settings={"whisper_model": "base"})
+
+    asr.assert_called_once_with(
+        tmp_path / "video.mp4", model_name="base", model_root=server.RELIABILITY_MODEL_ROOT)
+    assert fallback["reason"] == "captions_refused"
+    assert fallback["status"] == ("failed" if outcome == "failed" else "completed")
+    assert source == ("asr" if outcome == "completed" else None)
+    assert entries == ([(0.0, 2.0, "words")] if outcome == "completed" else [])
+
+
+def test_chunk_asr_bounds_segments_before_source_timestamp_mapping(monkeypatch, tmp_path):
+    monkeypatch.setattr(server, "_reliability_model_status", lambda _model: {"cached": True})
+    monkeypatch.setattr(reliability, "transcribe_media", Mock(return_value=[
+        (-1.0, 2.0, "opening"), (8.0, 12.0, "ending"), (11.0, 13.0, "outside"),
+    ]))
+    media = tmp_path / "video-chunk-002.mp4"
+    entries, source, fallback = server._resolve_video_transcript(
+        [], media, 7200, settings={"whisper_model": "base"},
+        media_chunks=[(media, 1200.0, 10.0)])
+
+    assert entries == [(1200.0, 1202.0, "opening"), (1208.0, 1210.0, "ending")]
+    assert source == "asr"
+    assert fallback["reason"] == "captions_unavailable"
+    assert fallback["coverage"] == "sampled_sections"
+    assert fallback["duration_seconds"] == 10.0
 
 
 def test_transcribe_media_uses_cached_model_only(tmp_path, monkeypatch):
@@ -276,6 +331,10 @@ def test_captionless_x_capture_persists_asr_and_provenance(
                 f"sidecar provenance missing: {sidecar}")
         _assert(sidecar.get("asr_fallback", {}).get("status") == "completed",
                 f"sidecar fallback status missing: {sidecar}")
+        _assert(sidecar["asr_fallback"]["reason"] == "captions_unavailable",
+                f"sidecar fallback reason missing: {sidecar}")
+        _assert(sidecar["transcript_note"] == "Local Whisper transcript: captions unavailable",
+                f"X capture must not claim a YouTube refusal: {sidecar}")
         _assert(len(sidecar.get("transcript") or []) == 2,
                 f"ASR segments not persisted: {sidecar.get('transcript')}")
         _assert("x video words" in (
@@ -284,6 +343,9 @@ def test_captionless_x_capture_persists_asr_and_provenance(
         _assert("x video words" in (
             folder / f"{folder.name}.md").read_text(encoding="utf-8"),
             "corpus markdown did not use ASR output")
+        _assert(sidecar["transcript_note"] in (
+            folder / f"{folder.name}.md").read_text(encoding="utf-8"),
+            "corpus publication lost the ASR provenance note")
         _assert(result.get("transcript_source") == "asr",
                 f"caller response lacks provenance: {result}")
     finally:

@@ -1,6 +1,6 @@
-mcp==1.27.1
+mcp==1.28.1
 keyring==25.7.0
-Pillow==10.4.0
+Pillow==12.3.0
 pystray==0.19.5
 pywebview==5.4
 pythonnet==3.0.5

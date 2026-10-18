@@ -1,0 +1,13 @@
+# Stable directory identity repair
+
+Both copies pass 81 cases and 72 nested subtests, with zero failures or skips. Author a491fc and independent5f0736 return outer exit0; their native and qualification receipts also record0. Pair check92aef7 confirms identical ordered case objects, all ten valid guards,25 registry traps, empty stderr and unchanged source/control bytes.
+
+This repairs the directory-size refusal observed in failed writer-exclusion03. The new directory-only comparator preserves exact physical identity, path, link count and directory type while allowing a different valid directory size. FileIdentity's ordinary equality and all regular-file size checks remain unchanged. Native identity still refuses reparse points, pending deletion and invalid size before comparison. Journal durability, poisoning, custody and release conditions are unchanged.
+
+All three original test files and the original70 case IDs/order are byte-identical to the qualified creation-transfer origin. Eleven new cases cover directory growth through journal clear/release, changed identity fields, invalid sizes, actual primitive pinning against fake query values, strict file-size refusal and retained custody after failure. They add37 nested controls to the original35. No acceptance assertion or fixture was edited.
+
+The measured case times are0.09175220000906847 seconds and0.08587920002173632 seconds. Both stdout receipts are44,041 bytes: author SHA256 04717a40fbc70a366d4b95126b64dfa0fa6490ee657bfe6a4a38d4caa31c40b5, independent1e3a5283cae7b9be6da83ba0e44da42b22349cc05e7a47c87e8b4ccc6052a7cb. The independent preparation copied all31 source/map files byte-for-byte and received its own generated-only admission. Real service entries remain closed.
+
+Root reviewed both product deltas, every new case and the full guard/launcher. Independent source verdict04bb6273b607d5a8698e81f5b4c17021a1093105d8e4e85c25a1ea585430540a verifies the30 final pins and unchanged original cases. The final map is0462d15628f65591b3fc19dc36e50e19534f0e66db9de84536a90c3d951821df. The pre-admission correction of a historical-note count from seven to six is preserved as a prose correction; no test ran before it.
+
+The generated checks exercise actual source methods with fake Windows query and journal services. They do not qualify physical flush, process exclusion, crash/restart recovery or real models. Failed native02/03 remain failed. A fresh writer04 native observation using these exact repaired sources needs separate source review and root admission. D2 remains a separate owner decision; no checkpoint, model, package, installation or release credit follows.

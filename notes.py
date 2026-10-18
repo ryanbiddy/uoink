@@ -123,6 +123,27 @@ def build_note(text: str, title: str | None = None,
     }
 
 
+def compute_note_health(sidecar: dict) -> dict:
+    """Check actual note text; type tags and fixture markers are not content."""
+    def has_text(value):
+        return isinstance(value, str) and bool(value.strip())
+
+    present = any(has_text(sidecar.get(key)) for key in
+                  ("note", "text", "markdown", "body", "transcript"))
+    transcript = sidecar.get("transcript")
+    if isinstance(transcript, list):
+        present = present or any(isinstance(segment, dict) and
+                                 has_text(segment.get("text"))
+                                 for segment in transcript)
+    return {
+        "transcript": "ok" if present else "missing",
+        "screenshots": "skipped",
+        "comments": "skipped",
+        "hook": "skipped",
+        "comment_intelligence": "skipped",
+    }
+
+
 def persist_note(idx, note: dict, *, data_root: Path | None = None,
                  subfolder: str = "Notes",
                  topic_classifier=None) -> str | None:
@@ -161,6 +182,7 @@ def persist_note(idx, note: dict, *, data_root: Path | None = None,
             log.warning("persist_note topic classify failed: %s", e)
             topic = None
 
+    health = compute_note_health({"note": md})
     corpus_path = None
     sidecar_path = None
     if data_root is not None:
@@ -179,6 +201,7 @@ def persist_note(idx, note: dict, *, data_root: Path | None = None,
             "extraction_engine": EXTRACTION_ENGINE,
             "yoinked_at": yoinked_at,
             "extracted_at": yoinked_at,
+            "health": health,
         }, indent=2, ensure_ascii=False), encoding="utf-8")
 
     metadata_json = json.dumps({
@@ -202,6 +225,7 @@ def persist_note(idx, note: dict, *, data_root: Path | None = None,
             "yoinked_at": yoinked_at,
             "corpus_path": str(corpus_path) if corpus_path else None,
             "sidecar_path": str(sidecar_path) if sidecar_path else None,
+            "health_score_json": json.dumps(health, ensure_ascii=False),
             "metadata_json": metadata_json,
             "source_type": SOURCE_TYPE,
         }, content=md[:65000])

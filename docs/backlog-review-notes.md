@@ -1,6 +1,6 @@
 # Backlog draft review notes from build lens
 
-Source reviewed: `C:\Users\hello\OneDrive\Desktop\Uoink\BACKLOG-draft.md` because `BACKLOG-draft.md` is not present in this worktree at `c6bfbe5`. `BACKLOG.md` in this worktree is older than the draft and still describes pre-v2 planning.
+Source reviewed: `C:\Users\<you>\OneDrive\Desktop\Uoink\BACKLOG-draft.md` because `BACKLOG-draft.md` is not present in this worktree at `c6bfbe5`. `BACKLOG.md` in this worktree is older than the draft and still describes pre-v2 planning.
 
 - SCOPE-QUESTION: `BACKLOG-draft.md` is not committed on `v2-integration` in this worktree. If it is intended to be the canonical backlog, commit it or rename it to `BACKLOG.md` before using it as planning input.
 - REORDER: API key encryption, job persistence across server restart, and single-video job logging are listed under v2.1 but shipped in Sprint 7. Move them to Shipped or a "v2.1 built, awaiting integration smoke" section.

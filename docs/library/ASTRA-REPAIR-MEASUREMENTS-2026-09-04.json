@@ -1,0 +1,100 @@
+{
+  "source_date": "2026-09-04",
+  "source_sha256": "2765cc359805fb12f7a90aecd3dd0b34d884aa8cb3015785011bf400da3b4dfc",
+  "before": {
+    "clips": 3216,
+    "over_120_seconds": 1729,
+    "over_180_seconds": 72,
+    "max_seconds": 1041.839
+  },
+  "cards_before": {
+    "full": {
+      "items": 548,
+      "caller_mismatches": 0,
+      "evidence_kinds": {
+        "text_only": 336,
+        "timed_clip": 212
+      },
+      "max_serialized_bytes": 109336,
+      "cards_hash": "c763abe23f801af174c67fba22cadda7a4c8c068419b9db56bd1a74c80c207b8"
+    },
+    "librarian": {
+      "items": 548,
+      "caller_mismatches": 0,
+      "evidence_kinds": {
+        "text_only": 336,
+        "timed_clip": 212
+      },
+      "max_serialized_bytes": 8153,
+      "cards_hash": "7270277aeb0b4ffdd76ee5fc50a1affc2eee4ce4af0b3dc0c1c8857a81c4c655"
+    }
+  },
+  "after_upgrade": {
+    "clips": 3705,
+    "over_120_seconds": 435,
+    "over_180_seconds": 271,
+    "max_seconds": 1041.839
+  },
+  "schema": 26,
+  "rebuild": {
+    "items": 548,
+    "items_with_clips": 212,
+    "items_without_clips": 336,
+    "clip_count": 3705,
+    "seconds": 1.935
+  },
+  "repeat_rebuild": {
+    "items": 548,
+    "items_with_clips": 212,
+    "items_without_clips": 336,
+    "clip_count": 3705,
+    "seconds": 1.854
+  },
+  "rebuild_payload_sha256": "d2eb5f2da8277a39e446eef99839684fc18a946b5aed7a4230d4ada0603f6928",
+  "after": {
+    "clips": 3705,
+    "over_120_seconds": 435,
+    "over_180_seconds": 271,
+    "max_seconds": 1041.839
+  },
+  "cards_after": {
+    "full": {
+      "items": 548,
+      "caller_mismatches": 0,
+      "evidence_kinds": {
+        "text_only": 336,
+        "timed_clip": 212
+      },
+      "max_serialized_bytes": 54481,
+      "cards_hash": "2ebedaa1982913fedb00ac778e271997cf656ff2afbfcb5c15895cd8df592535"
+    },
+    "librarian": {
+      "items": 548,
+      "caller_mismatches": 0,
+      "evidence_kinds": {
+        "text_only": 336,
+        "timed_clip": 212
+      },
+      "max_serialized_bytes": 8153,
+      "cards_hash": "e4b3465e4f7a1230eecd7412c6120c805c7088f4c2038d3e432caecc8adeee07"
+    }
+  },
+  "integrity": "quick_check, foreign_key_check, FTS external-content integrity passed",
+  "oversize_fine_windows": 0,
+  "copy_x_article_case": "x_article",
+  "source_unchanged": true,
+  "distinct_coarse_intervals": 114,
+  "distinct_coarse_intervals_over_180_seconds": 45,
+  "tests": {
+    "passed": 581,
+    "skipped": 3,
+    "xfailed": 1,
+    "warnings": 171,
+    "seconds": 40.79
+  },
+  "base_sha": "ad44850",
+  "commit": null,
+  "commit_error": "Shared Git metadata: index.lock Permission denied",
+  "source_staging": "passed; no dependency downloads or Inno Setup",
+  "installed_tree_smoke": "passed with source checkout absent from sys.path; host Python and installed third-party packages"
+}

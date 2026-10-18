@@ -145,7 +145,7 @@ Used by setup.html's cost estimator. It returns local pricing constants and per-
       "both": 0.0091
     },
     "source": "https://docs.claude.com/en/docs/about-claude/pricing",
-    "source_checked": "2026-05-12"
+    "source_checked": "2026-09-04"
   }
 }
 ```

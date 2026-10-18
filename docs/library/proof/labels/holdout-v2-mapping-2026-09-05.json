@@ -1,0 +1,844 @@
+{
+  "schema_version": 1,
+  "kind": "holdout-v2-mapping",
+  "holdout_version": "holdout-v2-2026-09-05",
+  "taxonomy_version_id": "taxonomy-v2-2026-09-05",
+  "taxonomy_revision_hash": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+  "adjudicated_file": "docs/library/proof/labels/holdout-v2-labels-adjudicated-12-2026-09-06.json",
+  "adjudicated_sha256": "2511cf42e10a8635ce79f2b1807f61ad106ce62df0d377448181b8667da46763",
+  "gold_sha256": "14cd54dc4063a71b4d5e357f9a534a9cb98534c654d6602087a908de16938815",
+  "scoring_version": "strict-mapped-primary-v2",
+  "items": {
+    "2079930744781070336": {
+      "gold_path": [
+        "AI and ML"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML"
+      ],
+      "mapped_shelf_id": "ai-and-ml",
+      "scorable": true,
+      "rule": "deepest unambiguous approved ancestor; no ancestor means any assignment is incorrect"
+    },
+    "2080061661197570048": {
+      "gold_path": [
+        "AI and ML",
+        "Generative Media"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "Generative Media"
+      ],
+      "mapped_shelf_id": "generative-media",
+      "scorable": true,
+      "rule": "deepest unambiguous approved ancestor; no ancestor means any assignment is incorrect"
+    },
+    "2080447768397787137": {
+      "gold_path": [
+        "AI and ML",
+        "Developer Tools"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "Developer Tools"
+      ],
+      "mapped_shelf_id": "developer-tools",
+      "scorable": true,
+      "rule": "deepest unambiguous approved ancestor; no ancestor means any assignment is incorrect"
+    },
+    "2080736332205436952": {
+      "gold_path": [
+        "AI and ML",
+        "Developer Tools"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "Developer Tools"
+      ],
+      "mapped_shelf_id": "developer-tools",
+      "scorable": true,
+      "rule": "deepest unambiguous approved ancestor; no ancestor means any assignment is incorrect"
+    },
+    "2081117060013473792": {
+      "gold_path": [
+        "AI and ML",
+        "AI Industry and Business"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "AI Industry and Business"
+      ],
+      "mapped_shelf_id": "ai-industry-and-business",
+      "scorable": true,
+      "rule": "deepest unambiguous approved ancestor; no ancestor means any assignment is incorrect"
+    },
+    "2081133656869920768": {
+      "gold_path": [
+        "AI and ML",
+        "Generative Media"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "Generative Media"
+      ],
+      "mapped_shelf_id": "generative-media",
+      "scorable": true,
+      "rule": "deepest unambiguous approved ancestor; no ancestor means any assignment is incorrect"
+    },
+    "2082501832442814465": {
+      "gold_path": [
+        "AI and ML",
+        "Frontier Models"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "Frontier Models"
+      ],
+      "mapped_shelf_id": "frontier-models",
+      "scorable": true,
+      "rule": "deepest unambiguous approved ancestor; no ancestor means any assignment is incorrect"
+    },
+    "2083262686318444544": {
+      "gold_path": [
+        "AI and ML",
+        "Education"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "Education"
+      ],
+      "mapped_shelf_id": "education",
+      "scorable": true,
+      "rule": "deepest unambiguous approved ancestor; no ancestor means any assignment is incorrect"
+    },
+    "2083438553493843968": {
+      "gold_path": [
+        "AI and ML"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML"
+      ],
+      "mapped_shelf_id": "ai-and-ml",
+      "scorable": true,
+      "rule": "deepest unambiguous approved ancestor; no ancestor means any assignment is incorrect"
+    },
+    "2083664004506145276": {
+      "gold_path": [
+        "AI and ML"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML"
+      ],
+      "mapped_shelf_id": "ai-and-ml",
+      "scorable": true,
+      "rule": "deepest unambiguous approved ancestor; no ancestor means any assignment is incorrect"
+    },
+    "2084046660087525376": {
+      "gold_path": [
+        "AI and ML",
+        "Frontier Models"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "Frontier Models"
+      ],
+      "mapped_shelf_id": "frontier-models",
+      "scorable": true,
+      "rule": "deepest unambiguous approved ancestor; no ancestor means any assignment is incorrect"
+    },
+    "2084093069323104256": {
+      "gold_path": [
+        "AI and ML",
+        "Frontier Models"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "Frontier Models"
+      ],
+      "mapped_shelf_id": "frontier-models",
+      "scorable": true,
+      "rule": "deepest unambiguous approved ancestor; no ancestor means any assignment is incorrect"
+    },
+    "2084309519715139584": {
+      "gold_path": [
+        "AI and ML",
+        "Developer Tools"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "Developer Tools"
+      ],
+      "mapped_shelf_id": "developer-tools",
+      "scorable": true,
+      "rule": "deepest unambiguous approved ancestor; no ancestor means any assignment is incorrect"
+    },
+    "2084333713937068032": {
+      "gold_path": [
+        "AI and ML",
+        "Education"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "Education"
+      ],
+      "mapped_shelf_id": "education",
+      "scorable": true,
+      "rule": "deepest unambiguous approved ancestor; no ancestor means any assignment is incorrect"
+    },
+    "2084671000906735616": {
+      "gold_path": [
+        "AI and ML",
+        "Developer Tools"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "Developer Tools"
+      ],
+      "mapped_shelf_id": "developer-tools",
+      "scorable": true,
+      "rule": "deepest unambiguous approved ancestor; no ancestor means any assignment is incorrect"
+    },
+    "2085710761423437824": {
+      "gold_path": [
+        "AI and ML",
+        "Education"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "Education"
+      ],
+      "mapped_shelf_id": "education",
+      "scorable": true,
+      "rule": "deepest unambiguous approved ancestor; no ancestor means any assignment is incorrect"
+    },
+    "2086120621734326272": {
+      "gold_path": [
+        "AI and ML",
+        "Education"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "Education"
+      ],
+      "mapped_shelf_id": "education",
+      "scorable": true,
+      "rule": "deepest unambiguous approved ancestor; no ancestor means any assignment is incorrect"
+    },
+    "2086167440203923456": {
+      "gold_path": [
+        "AI and ML",
+        "Education"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "Education"
+      ],
+      "mapped_shelf_id": "education",
+      "scorable": true,
+      "rule": "deepest unambiguous approved ancestor; no ancestor means any assignment is incorrect"
+    },
+    "2086219750065967512": {
+      "gold_path": [
+        "AI and ML",
+        "Generative Media"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "Generative Media"
+      ],
+      "mapped_shelf_id": "generative-media",
+      "scorable": true,
+      "rule": "deepest unambiguous approved ancestor; no ancestor means any assignment is incorrect"
+    },
+    "2086663463162830848": {
+      "gold_path": [
+        "AI and ML",
+        "Developer Tools"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "Developer Tools"
+      ],
+      "mapped_shelf_id": "developer-tools",
+      "scorable": true,
+      "rule": "deepest unambiguous approved ancestor; no ancestor means any assignment is incorrect"
+    },
+    "2087232179613077504": {
+      "gold_path": [
+        "AI and ML",
+        "Frontier Models"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "Frontier Models"
+      ],
+      "mapped_shelf_id": "frontier-models",
+      "scorable": true,
+      "rule": "deepest unambiguous approved ancestor; no ancestor means any assignment is incorrect"
+    },
+    "2087945138823741440": {
+      "gold_path": [
+        "AI and ML",
+        "Frontier Models"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "Frontier Models"
+      ],
+      "mapped_shelf_id": "frontier-models",
+      "scorable": true,
+      "rule": "deepest unambiguous approved ancestor; no ancestor means any assignment is incorrect"
+    },
+    "2087982002381221888": {
+      "gold_path": [
+        "AI and ML",
+        "Developer Tools"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "Developer Tools"
+      ],
+      "mapped_shelf_id": "developer-tools",
+      "scorable": true,
+      "rule": "deepest unambiguous approved ancestor; no ancestor means any assignment is incorrect"
+    },
+    "2089011298621399260": {
+      "gold_path": [
+        "AI and ML",
+        "Education"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "Education"
+      ],
+      "mapped_shelf_id": "education",
+      "scorable": true,
+      "rule": "deepest unambiguous approved ancestor; no ancestor means any assignment is incorrect"
+    },
+    "2090872209241976832": {
+      "gold_path": [
+        "AI and ML",
+        "Frontier Models"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "Frontier Models"
+      ],
+      "mapped_shelf_id": "frontier-models",
+      "scorable": true,
+      "rule": "deepest unambiguous approved ancestor; no ancestor means any assignment is incorrect"
+    },
+    "2090888779125116928": {
+      "gold_path": [
+        "AI and ML",
+        "Culture and Memes"
+      ],
+      "outcome": "unmappable",
+      "mapped_path": [
+        "AI and ML"
+      ],
+      "mapped_shelf_id": "ai-and-ml",
+      "scorable": true,
+      "rule": "deepest unambiguous approved ancestor; no ancestor means any assignment is incorrect"
+    },
+    "2091205272920358912": {
+      "gold_path": [
+        "AI and ML",
+        "Developer Tools"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "Developer Tools"
+      ],
+      "mapped_shelf_id": "developer-tools",
+      "scorable": true,
+      "rule": "deepest unambiguous approved ancestor; no ancestor means any assignment is incorrect"
+    },
+    "2091208884786520487": {
+      "gold_path": [
+        "AI and ML",
+        "Education"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "Education"
+      ],
+      "mapped_shelf_id": "education",
+      "scorable": true,
+      "rule": "deepest unambiguous approved ancestor; no ancestor means any assignment is incorrect"
+    },
+    "2091230104793858048": {
+      "gold_path": [
+        "AI and ML",
+        "Education"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "Education"
+      ],
+      "mapped_shelf_id": "education",
+      "scorable": true,
+      "rule": "deepest unambiguous approved ancestor; no ancestor means any assignment is incorrect"
+    },
+    "2091248592774369280": {
+      "gold_path": [
+        "AI and ML",
+        "AI Industry and Business"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "AI Industry and Business"
+      ],
+      "mapped_shelf_id": "ai-industry-and-business",
+      "scorable": true,
+      "rule": "deepest unambiguous approved ancestor; no ancestor means any assignment is incorrect"
+    },
+    "2091297765133578240": {
+      "gold_path": [
+        "AI and ML",
+        "Generative Media"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "Generative Media"
+      ],
+      "mapped_shelf_id": "generative-media",
+      "scorable": true,
+      "rule": "deepest unambiguous approved ancestor; no ancestor means any assignment is incorrect"
+    },
+    "2091537085874520064": {
+      "gold_path": [
+        "AI and ML",
+        "AI Agents and Automation"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "AI Agents and Automation"
+      ],
+      "mapped_shelf_id": "ai-agents-and-automation",
+      "scorable": true,
+      "rule": "deepest unambiguous approved ancestor; no ancestor means any assignment is incorrect"
+    },
+    "2091998648997441536": {
+      "gold_path": [
+        "AI and ML",
+        "Developer Tools"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "Developer Tools"
+      ],
+      "mapped_shelf_id": "developer-tools",
+      "scorable": true,
+      "rule": "deepest unambiguous approved ancestor; no ancestor means any assignment is incorrect"
+    },
+    "2092244803295571968": {
+      "gold_path": [
+        "AI and ML",
+        "Developer Tools"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "Developer Tools"
+      ],
+      "mapped_shelf_id": "developer-tools",
+      "scorable": true,
+      "rule": "deepest unambiguous approved ancestor; no ancestor means any assignment is incorrect"
+    },
+    "2092270658524745728": {
+      "gold_path": [
+        "AI and ML",
+        "AI Industry and Business"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "AI Industry and Business"
+      ],
+      "mapped_shelf_id": "ai-industry-and-business",
+      "scorable": true,
+      "rule": "deepest unambiguous approved ancestor; no ancestor means any assignment is incorrect"
+    },
+    "2092364350317281280": {
+      "gold_path": [
+        "AI and ML",
+        "AI Industry and Business"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "AI Industry and Business"
+      ],
+      "mapped_shelf_id": "ai-industry-and-business",
+      "scorable": true,
+      "rule": "deepest unambiguous approved ancestor; no ancestor means any assignment is incorrect"
+    },
+    "2092369226262786048": {
+      "gold_path": [
+        "AI and ML",
+        "Developer Tools"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "Developer Tools"
+      ],
+      "mapped_shelf_id": "developer-tools",
+      "scorable": true,
+      "rule": "deepest unambiguous approved ancestor; no ancestor means any assignment is incorrect"
+    },
+    "2093296474498990080": {
+      "gold_path": [
+        "AI and ML",
+        "Education"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "Education"
+      ],
+      "mapped_shelf_id": "education",
+      "scorable": true,
+      "rule": "deepest unambiguous approved ancestor; no ancestor means any assignment is incorrect"
+    },
+    "2093359694366572544": {
+      "gold_path": [
+        "AI and ML",
+        "AI Agents and Automation"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "AI Agents and Automation"
+      ],
+      "mapped_shelf_id": "ai-agents-and-automation",
+      "scorable": true,
+      "rule": "deepest unambiguous approved ancestor; no ancestor means any assignment is incorrect"
+    },
+    "2093462510389354496": {
+      "gold_path": [
+        "AI and ML",
+        "Security"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "Security"
+      ],
+      "mapped_shelf_id": "security",
+      "scorable": true,
+      "rule": "deepest unambiguous approved ancestor; no ancestor means any assignment is incorrect"
+    },
+    "2093678734708801536": {
+      "gold_path": [
+        "AI and ML",
+        "Frontier Models"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "Frontier Models"
+      ],
+      "mapped_shelf_id": "frontier-models",
+      "scorable": true,
+      "rule": "deepest unambiguous approved ancestor; no ancestor means any assignment is incorrect"
+    },
+    "2093727982317936640": {
+      "gold_path": [
+        "AI and ML",
+        "Developer Tools"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "Developer Tools"
+      ],
+      "mapped_shelf_id": "developer-tools",
+      "scorable": true,
+      "rule": "deepest unambiguous approved ancestor; no ancestor means any assignment is incorrect"
+    },
+    "2093860831595499892": {
+      "gold_path": [
+        "AI and ML",
+        "AI Industry and Business"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "AI Industry and Business"
+      ],
+      "mapped_shelf_id": "ai-industry-and-business",
+      "scorable": true,
+      "rule": "deepest unambiguous approved ancestor; no ancestor means any assignment is incorrect"
+    },
+    "2094184640873373696": {
+      "gold_path": [
+        "AI and ML",
+        "AI Industry and Business"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "AI Industry and Business"
+      ],
+      "mapped_shelf_id": "ai-industry-and-business",
+      "scorable": true,
+      "rule": "deepest unambiguous approved ancestor; no ancestor means any assignment is incorrect"
+    },
+    "2094227178032599040": {
+      "gold_path": [
+        "AI and ML"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML"
+      ],
+      "mapped_shelf_id": "ai-and-ml",
+      "scorable": true,
+      "rule": "deepest unambiguous approved ancestor; no ancestor means any assignment is incorrect"
+    },
+    "2094477244164947968": {
+      "gold_path": [
+        "AI and ML",
+        "Developer Tools"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "Developer Tools"
+      ],
+      "mapped_shelf_id": "developer-tools",
+      "scorable": true,
+      "rule": "deepest unambiguous approved ancestor; no ancestor means any assignment is incorrect"
+    },
+    "2094718226601218048": {
+      "gold_path": [
+        "AI and ML",
+        "Security"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "Security"
+      ],
+      "mapped_shelf_id": "security",
+      "scorable": true,
+      "rule": "deepest unambiguous approved ancestor; no ancestor means any assignment is incorrect"
+    },
+    "2095070893944832003": {
+      "gold_path": [
+        "AI and ML",
+        "Frontier Models"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "Frontier Models"
+      ],
+      "mapped_shelf_id": "frontier-models",
+      "scorable": true,
+      "rule": "deepest unambiguous approved ancestor; no ancestor means any assignment is incorrect"
+    },
+    "2095624765327458304": {
+      "gold_path": [
+        "AI and ML",
+        "Frontier Models"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "Frontier Models"
+      ],
+      "mapped_shelf_id": "frontier-models",
+      "scorable": true,
+      "rule": "deepest unambiguous approved ancestor; no ancestor means any assignment is incorrect"
+    },
+    "2095783502306545664": {
+      "gold_path": [
+        "AI and ML",
+        "Frontier Models"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "Frontier Models"
+      ],
+      "mapped_shelf_id": "frontier-models",
+      "scorable": true,
+      "rule": "deepest unambiguous approved ancestor; no ancestor means any assignment is incorrect"
+    },
+    "5LqC6qdVAwU": {
+      "gold_path": [
+        "AI and ML",
+        "Security"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "Security"
+      ],
+      "mapped_shelf_id": "security",
+      "scorable": true,
+      "rule": "deepest unambiguous approved ancestor; no ancestor means any assignment is incorrect"
+    },
+    "8GRmLR__OGQ": {
+      "gold_path": [
+        "AI and ML",
+        "Developer Tools"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "Developer Tools"
+      ],
+      "mapped_shelf_id": "developer-tools",
+      "scorable": true,
+      "rule": "deepest unambiguous approved ancestor; no ancestor means any assignment is incorrect"
+    },
+    "FLcrvMfHUJM": {
+      "gold_path": [
+        "AI and ML",
+        "Security"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "Security"
+      ],
+      "mapped_shelf_id": "security",
+      "scorable": true,
+      "rule": "deepest unambiguous approved ancestor; no ancestor means any assignment is incorrect"
+    },
+    "LNwODJXcvt4": {
+      "gold_path": [
+        "AI and ML",
+        "Education"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "Education"
+      ],
+      "mapped_shelf_id": "education",
+      "scorable": true,
+      "rule": "deepest unambiguous approved ancestor; no ancestor means any assignment is incorrect"
+    },
+    "MgbP5szEBDo": {
+      "gold_path": [
+        "AI and ML",
+        "Frontier Models"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "Frontier Models"
+      ],
+      "mapped_shelf_id": "frontier-models",
+      "scorable": true,
+      "rule": "deepest unambiguous approved ancestor; no ancestor means any assignment is incorrect"
+    },
+    "YtKX2wbCpVQ": {
+      "gold_path": [
+        "AI and ML",
+        "Frontier Models"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "Frontier Models"
+      ],
+      "mapped_shelf_id": "frontier-models",
+      "scorable": true,
+      "rule": "deepest unambiguous approved ancestor; no ancestor means any assignment is incorrect"
+    },
+    "r0RspiLG260": {
+      "gold_path": [
+        "AI and ML",
+        "Education"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "Education"
+      ],
+      "mapped_shelf_id": "education",
+      "scorable": true,
+      "rule": "deepest unambiguous approved ancestor; no ancestor means any assignment is incorrect"
+    },
+    "tOC2N0B9lio": {
+      "gold_path": [
+        "AI and ML",
+        "AI Agents and Automation"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "AI Agents and Automation"
+      ],
+      "mapped_shelf_id": "ai-agents-and-automation",
+      "scorable": true,
+      "rule": "deepest unambiguous approved ancestor; no ancestor means any assignment is incorrect"
+    },
+    "ub2xbSlay7g": {
+      "gold_path": [
+        "AI and ML",
+        "Education"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "Education"
+      ],
+      "mapped_shelf_id": "education",
+      "scorable": true,
+      "rule": "deepest unambiguous approved ancestor; no ancestor means any assignment is incorrect"
+    },
+    "z70ZrSZNi-8": {
+      "gold_path": [
+        "AI and ML",
+        "Education"
+      ],
+      "outcome": "assigned",
+      "mapped_path": [
+        "AI and ML",
+        "Education"
+      ],
+      "mapped_shelf_id": "education",
+      "scorable": true,
+      "rule": "deepest unambiguous approved ancestor; no ancestor means any assignment is incorrect"
+    }
+  }
+}

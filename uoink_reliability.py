@@ -54,6 +54,32 @@ _HOMOPHONE_HINTS = {
 }
 
 
+# Repository identities from the pinned faster-whisper 1.2.1 mapping.
+# Do not change production provider/repository mapping here.
+_MODEL_REPOSITORIES = {
+    "tiny": "Systran/faster-whisper-tiny",
+    "base": "Systran/faster-whisper-base",
+    "small": "Systran/faster-whisper-small",
+    "medium": "Systran/faster-whisper-medium",
+    "large": "Systran/faster-whisper-large-v3",
+    "large-v3-turbo": "mobiuslabsgmbh/faster-whisper-large-v3-turbo",
+}
+_RELIABILITY_CACHE_FILES = ("model.bin", "config.json", "tokenizer.json")
+
+# Conservative rounded decimal MB estimates of advertised Hub file totals
+# captured 2026-09-13. These are advertised logical bytes of the current
+# helper's model/config/tokenizer/vocabulary/preprocessor files, not
+# observed network transfers or an approved model manifest.
+_ESTIMATED_DOWNLOAD_MB = {
+    "tiny": 80,
+    "base": 150,
+    "small": 490,
+    "medium": 1540,
+    "large": 3100,
+    "large-v3-turbo": 1630,
+}
+
+
 def _import_faster_whisper():
     try:
         from faster_whisper import WhisperModel  # type: ignore
@@ -72,7 +98,12 @@ _COMPUTE_TYPE = "int8"
 
 
 def _load_model(model_name: str, model_root: str | Path | None, *,
-                local_files_only: bool = False):
+                local_files_only: bool = True):
+    """Construct WhisperModel. Ordinary callers stay local-only.
+
+    ``ensure_model`` is the only acquisition path and must pass
+    ``local_files_only=False``.
+    """
     WhisperModel = _import_faster_whisper()
     kwargs: dict[str, Any] = {
         "device": "cpu",
@@ -80,21 +111,24 @@ def _load_model(model_name: str, model_root: str | Path | None, *,
         "local_files_only": bool(local_files_only),
     }
     if model_root:
-        Path(model_root).mkdir(parents=True, exist_ok=True)
-        kwargs["download_root"] = str(model_root)
+        root = Path(model_root)
+        if not local_files_only:
+            root.mkdir(parents=True, exist_ok=True)
+        kwargs["download_root"] = str(root)
     return WhisperModel(model_name, **kwargs)
 
 
 def ensure_model(model_name: str = DEFAULT_MODEL,
                  model_root: str | Path | None = None) -> dict[str, Any]:
     """Load the model once so faster-whisper downloads it if missing."""
-    _load_model(model_name, model_root)
+    _load_model(model_name, model_root, local_files_only=False)
     ready_marker: Path | None = None
     if model_root:
         # The model itself is a Hugging Face snapshot directory managed by
         # faster-whisper. This tiny sentinel is the explicit-consent signal
-        # consumed by server._reliability_model_status; it is written only
-        # after the user-triggered model load succeeds.
+        # consumed by readiness checks; it is written only after the
+        # user-triggered model load succeeds. A marker without the Hub
+        # snapshot files is not a ready cache.
         ready_marker = Path(model_root) / f"{model_name}.pt"
         ready_marker.write_text(
             "Uoink faster-whisper model ready\n",
@@ -105,6 +139,123 @@ def ensure_model(model_name: str = DEFAULT_MODEL,
         "model": model_name,
         "model_root": str(model_root) if model_root else None,
         "ready_marker": str(ready_marker) if ready_marker else None,
+    }
+
+
+def _supported_model_name(model_name: object) -> str | None:
+    name = str(model_name or "").strip().lower()
+    return name if name in _MODEL_REPOSITORIES else None
+
+
+def estimated_download_mb(model_name: object) -> int | None:
+    """Return the per-choice rounded advertised size, or None if unknown."""
+    name = _supported_model_name(model_name)
+    if name is None:
+        return None
+    return _ESTIMATED_DOWNLOAD_MB.get(name)
+
+
+def _reliability_cache_root(model_root: str | Path) -> Path:
+    """Return the reliability download root without creating it."""
+    root = Path(model_root).absolute()
+    if root.resolve() != root:
+        raise RuntimeError("Reliability cache directories must not be redirected")
+    return root
+
+
+def _reliability_repo_root(model_root: str | Path, model_name: str) -> Path:
+    name = _supported_model_name(model_name)
+    if name is None:
+        raise ValueError(f"unsupported reliability model: {model_name!r}")
+    repo_id = _MODEL_REPOSITORIES[name]
+    repo = _reliability_cache_root(model_root) / (
+        "models--" + repo_id.replace("/", "--")
+    )
+    for directory in (repo, repo / "refs", repo / "snapshots", repo / "blobs"):
+        if directory.resolve() != directory:
+            raise RuntimeError("Reliability repository cache must not be redirected")
+    return repo
+
+
+def _checked_reliability_snapshot(
+        model_root: str | Path, model_name: str, snapshot: Path) -> Path | None:
+    """Check minimum ASR cache structure, not model integrity or safety."""
+    try:
+        repo = _reliability_repo_root(model_root, model_name)
+        snapshot = Path(snapshot).absolute()
+        if (snapshot.parent != repo / "snapshots"
+                or re.fullmatch(r"[0-9a-f]{40}", snapshot.name) is None
+                or snapshot.resolve(strict=True) != snapshot
+                or not snapshot.is_dir()):
+            return None
+        for name in _RELIABILITY_CACHE_FILES:
+            asset = (snapshot / name).resolve(strict=True)
+            # Hub may link snapshot files to this repository's blob store.
+            if (not asset.is_relative_to(repo) or not asset.is_file()
+                    or asset.stat().st_size == 0):
+                return None
+        return snapshot
+    except (OSError, RuntimeError, ValueError):
+        return None
+
+
+def _cached_reliability_snapshot(
+        model_root: str | Path, model_name: str) -> Path | None:
+    """Read the Hub cache layout under the reliability root; never fetch or write."""
+    try:
+        repo = _reliability_repo_root(model_root, model_name)
+        reference = repo / "refs" / "main"
+        if reference.resolve(strict=True) != reference or not reference.is_file():
+            return None
+        with reference.open("rb") as stream:
+            raw_revision = stream.read(65)
+        if len(raw_revision) > 64:
+            return None
+        revision = raw_revision.decode("ascii").strip()
+        if re.fullmatch(r"[0-9a-f]{40}", revision) is None:
+            return None
+        return _checked_reliability_snapshot(
+            model_root, model_name, repo / "snapshots" / revision)
+    except (OSError, RuntimeError, ValueError):
+        return None
+
+
+def is_model_ready(model_name: object,
+                   model_root: str | Path | None) -> bool:
+    """Consent marker plus minimum Hub snapshot files.
+
+    Structural readiness for settings/preflight: no runtime import, no
+    constructor, no writes, and no authenticity claim.
+    """
+    if model_root is None:
+        return False
+    name = _supported_model_name(model_name)
+    if name is None:
+        return False
+    try:
+        root = _reliability_cache_root(model_root)
+        marker = root / f"{name}.pt"
+        if not marker.is_file():
+            return False
+        resolved_marker = marker.resolve(strict=True)
+        if (not resolved_marker.is_relative_to(root.resolve())
+                or not resolved_marker.is_file()):
+            return False
+        return _cached_reliability_snapshot(root, name) is not None
+    except (OSError, RuntimeError, ValueError):
+        return False
+
+
+def reliability_model_status(model_name: object,
+                             model_root: str | Path) -> dict[str, Any]:
+    """Selected-model status used by the helper settings payload."""
+    selected = str(model_name or "").strip().lower()
+    root = Path(model_root)
+    return {
+        "model": selected,
+        "model_root": str(root),
+        "cached": is_model_ready(selected, root),
+        "estimated_download_mb": estimated_download_mb(selected),
     }
 
 
@@ -266,9 +417,10 @@ def detect_unreliable_spans(transcript_text: str, audio_path: str | Path,
 
     ``transcript_text`` is accepted for the public interface and future
     alignment work; the confidence source is faster-whisper's per-word
-    probability over the ASR stream. ``_transcribe`` is a test seam: a
-    callable (audio_path) -> iterable of segments, so the clustering can be
-    exercised without the model.
+    probability over the ASR stream. Ordinary execution is local-only;
+    ``ensure_model`` remains the explicit download path. ``_transcribe`` is
+    a test seam: a callable (audio_path) -> iterable of segments, so the
+    clustering can be exercised without the model.
     """
     _ = transcript_text  # reserved for future YouTube-vs-ASR alignment
     threshold = max(0.05, min(0.95, float(threshold)))
@@ -279,7 +431,7 @@ def detect_unreliable_spans(transcript_text: str, audio_path: str | Path,
     if _transcribe is not None:
         segments = _transcribe(str(audio))
     else:
-        model = _load_model(model_name, model_root)
+        model = _load_model(model_name, model_root, local_files_only=True)
         segments, _info = model.transcribe(
             str(audio), language="en", word_timestamps=True,
             beam_size=1, best_of=1)

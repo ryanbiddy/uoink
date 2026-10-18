@@ -1,0 +1,1647 @@
+{
+  "run": "H",
+  "review_date_local": "2026-09-04",
+  "recorded_at_utc": "2026-09-05T02:30:57.599465+00:00",
+  "candidate_sha": "b9c6a05b5ba17033cfc4090c061a2f298c3c4518",
+  "tested_sha": "d51f67366dd02f6954943640cd41828e0d693a19",
+  "candidate_to_tested_diff": [
+    "docs/library/RE-ACCEPTANCE-BRIEF-2026-09-04.md"
+  ],
+  "reviewed_commits": {
+    "gemini": "2a4a5d3a1cbe0022d7c420c36cb1e6b6f942d0b0",
+    "claude": "a6d7700a1d38415ddd89d1fcbecf77a5ad0ca5bf",
+    "packaging": "df780f1ff998939ff8be76b1be6ca0d2033f8120"
+  },
+  "production_code_changed": false,
+  "runtime": {
+    "python": "3.14.6 (tags/v3.14.6:c63aec6, Jun 10 2026, 10:26:10) [MSC v.1944 64 bit (AMD64)]",
+    "sqlite": "3.50.4",
+    "platform": "Windows-11-10.0.26200-SP0"
+  },
+  "source_name": "uoink-index-copy-2026-09-04-upgraded.db",
+  "source_date": "2026-09-04",
+  "source_bytes": 71733248,
+  "source_final_sha256": "2765cc359805fb12f7a90aecd3dd0b34d884aa8cb3015785011bf400da3b4dfc",
+  "suite": {
+    "passed": 664,
+    "skipped": 3,
+    "xfail": 1,
+    "failed": 0,
+    "warnings": 171,
+    "seconds": 49.59,
+    "exit_code": 0,
+    "groups": {
+      "tests.security.test_adversarial_fixtures": {
+        "passed": 3,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.security.test_bench_local": {
+        "passed": 13,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.security.test_security_findings": {
+        "passed": 4,
+        "skipped": 0,
+        "xfail": 1,
+        "failed": 0
+      },
+      "tests.test_agents_connect": {
+        "passed": 7,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_any_url_validation": {
+        "passed": 4,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_assemble_workspace_surface": {
+        "passed": 2,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_auto_uoink_poll": {
+        "passed": 3,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_auto_uoink_scan": {
+        "passed": 1,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_build_guide_accuracy": {
+        "passed": 3,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_c01_mcp_stdio": {
+        "passed": 4,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_c02_reliability_faster_whisper": {
+        "passed": 5,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_c03_durability": {
+        "passed": 4,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_c04_dns_rebinding": {
+        "passed": 4,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_c05_stale_path_heal": {
+        "passed": 3,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_cat_p1_routing_feedback": {
+        "passed": 13,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_cat_p2_taxonomy": {
+        "passed": 4,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_ci_trigger_scope": {
+        "passed": 3,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_clips": {
+        "passed": 15,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_cm11_asr_fallback": {
+        "passed": 10,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_cm12_assembly_boundary": {
+        "passed": 6,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_cm4_detail_actions_ui": {
+        "passed": 2,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_cm4_health_exceptions_ui": {
+        "passed": 2,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_cm4_library_filter_disclosure_ui": {
+        "passed": 2,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_cm4_secondary_card_write_ui": {
+        "passed": 2,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_cm4_source_roadmap_ui": {
+        "passed": 2,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_composer": {
+        "passed": 7,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_corpus_contract_v1": {
+        "passed": 20,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_cost_model": {
+        "passed": 8,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_current_doc_references": {
+        "passed": 5,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_d17_entity_flag_and_usage": {
+        "passed": 18,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_dashboard_v324_ui": {
+        "passed": 4,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_discovery_route": {
+        "passed": 1,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_docs_live_contracts": {
+        "passed": 10,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_engagement_decay": {
+        "passed": 1,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_extension_classifier": {
+        "passed": 1,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_fxtwitter_policy_addendum": {
+        "passed": 1,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_g20_humanized_copy": {
+        "passed": 2,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_g21_smart_inputs_ui": {
+        "passed": 3,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_g22_accessibility": {
+        "passed": 4,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_g23_noop_actions": {
+        "passed": 3,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_g24_recovery_ui": {
+        "passed": 3,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_g25_settings_polish": {
+        "passed": 2,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_g26_uoink_copy": {
+        "passed": 2,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_g40_manual_draft_actions": {
+        "passed": 4,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_g43_retry_exhausted_copy": {
+        "passed": 3,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_g44_empty_facets": {
+        "passed": 3,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_generate_picker_no_match": {
+        "passed": 4,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_heartbeat_semantics": {
+        "passed": 10,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_image_capture": {
+        "passed": 7,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_installed_library_runtime": {
+        "passed": 1,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_installer_dependency_lock": {
+        "passed": 5,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_installer_download_accuracy": {
+        "passed": 5,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_installer_files_complete": {
+        "passed": 3,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_keep_media": {
+        "passed": 4,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_library_cards": {
+        "passed": 6,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_lite_recovery_a01": {
+        "passed": 3,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_long_video_v324": {
+        "passed": 8,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_mac_layout_prep": {
+        "passed": 5,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_mcp_slug_security": {
+        "passed": 19,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_mcpb_posix_build": {
+        "passed": 0,
+        "skipped": 1,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_migration_step0_characterization": {
+        "passed": 4,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_notes_capture": {
+        "passed": 7,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_openapi_bridge": {
+        "passed": 5,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_page_url_validation": {
+        "passed": 3,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_path_c_byo": {
+        "passed": 12,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_phase0_cli": {
+        "passed": 7,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_phase0_liveness": {
+        "passed": 7,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_phase0_podcast_repair": {
+        "passed": 4,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_phase0_provenance": {
+        "passed": 40,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_phase0_registry_capture": {
+        "passed": 4,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_phase0_x_full_text": {
+        "passed": 2,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_podcast_background_jobs": {
+        "passed": 5,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_podcast_corpus_bridge": {
+        "passed": 13,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_podcast_durability": {
+        "passed": 4,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_podcast_url_validation": {
+        "passed": 5,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_podcast_watch": {
+        "passed": 4,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_podcast_workflow_truth": {
+        "passed": 3,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_quiet_notifications": {
+        "passed": 9,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_recall_hook": {
+        "passed": 25,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_reddit_extractor": {
+        "passed": 7,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_release_version_v380": {
+        "passed": 1,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_resume_route": {
+        "passed": 1,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_s6_suite_integration": {
+        "passed": 19,
+        "skipped": 1,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_screenshot_extraction_cm10": {
+        "passed": 2,
+        "skipped": 1,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_screenshots_picker_v324": {
+        "passed": 6,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_screenshots_reyoink": {
+        "passed": 4,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_short_video": {
+        "passed": 6,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_source_manifest": {
+        "passed": 4,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_source_url_conformance": {
+        "passed": 17,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_splash_hotfix": {
+        "passed": 2,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_stdio_clip_tools": {
+        "passed": 5,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_taste_scoring": {
+        "passed": 1,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_u01_backend_enablers": {
+        "passed": 6,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_u02_source_picker": {
+        "passed": 4,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_u03_generate_redesign": {
+        "passed": 4,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_u04_write_from_this": {
+        "passed": 4,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_u05_topics_overview": {
+        "passed": 3,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_u06_hooks_explainer": {
+        "passed": 4,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_u07_nav_hygiene": {
+        "passed": 4,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_u11_installer_overhaul": {
+        "passed": 6,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_u12_first_run_polish": {
+        "passed": 5,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_u15_x_capture": {
+        "passed": 15,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_v2a_universal_capture": {
+        "passed": 10,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_v2c_x_article": {
+        "passed": 11,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_v333_live_fixes": {
+        "passed": 6,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_v3_2_3_anchors_lens": {
+        "passed": 7,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_workspaces_crud": {
+        "passed": 5,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_writer_peer": {
+        "passed": 21,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_writing_save_real": {
+        "passed": 3,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_writing_surface_ownership": {
+        "passed": 1,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      },
+      "tests.test_ytdlp_pin": {
+        "passed": 1,
+        "skipped": 0,
+        "xfail": 0,
+        "failed": 0
+      }
+    }
+  },
+  "measurement": {
+    "source_date": "2026-09-04",
+    "source_sha256": "2765cc359805fb12f7a90aecd3dd0b34d884aa8cb3015785011bf400da3b4dfc",
+    "before": {
+      "clips": 3216,
+      "over_120_seconds": 1729,
+      "over_180_seconds": 72,
+      "max_seconds": 1041.839
+    },
+    "cards_before": {
+      "full": {
+        "items": 548,
+        "caller_mismatches": 0,
+        "evidence_kinds": {
+          "text_only": 336,
+          "timed_clip": 212
+        },
+        "max_serialized_bytes": 109336,
+        "cards_hash": "c763abe23f801af174c67fba22cadda7a4c8c068419b9db56bd1a74c80c207b8"
+      },
+      "librarian": {
+        "items": 548,
+        "caller_mismatches": 0,
+        "evidence_kinds": {
+          "text_only": 336,
+          "timed_clip": 212
+        },
+        "max_serialized_bytes": 8153,
+        "cards_hash": "7270277aeb0b4ffdd76ee5fc50a1affc2eee4ce4af0b3dc0c1c8857a81c4c655"
+      }
+    },
+    "after_upgrade": {
+      "clips": 3705,
+      "over_120_seconds": 435,
+      "over_180_seconds": 271,
+      "max_seconds": 1041.839
+    },
+    "schema": 26,
+    "rebuild": {
+      "items": 548,
+      "items_with_clips": 212,
+      "items_without_clips": 336,
+      "clip_count": 3705,
+      "seconds": 1.912
+    },
+    "repeat_rebuild": {
+      "items": 548,
+      "items_with_clips": 212,
+      "items_without_clips": 336,
+      "clip_count": 3705,
+      "seconds": 1.883
+    },
+    "rebuild_payload_sha256": "d2eb5f2da8277a39e446eef99839684fc18a946b5aed7a4230d4ada0603f6928",
+    "after": {
+      "clips": 3705,
+      "over_120_seconds": 435,
+      "over_180_seconds": 271,
+      "max_seconds": 1041.839
+    },
+    "cards_after": {
+      "full": {
+        "items": 548,
+        "caller_mismatches": 0,
+        "evidence_kinds": {
+          "text_only": 336,
+          "timed_clip": 212
+        },
+        "max_serialized_bytes": 54481,
+        "cards_hash": "2ebedaa1982913fedb00ac778e271997cf656ff2afbfcb5c15895cd8df592535"
+      },
+      "librarian": {
+        "items": 548,
+        "caller_mismatches": 0,
+        "evidence_kinds": {
+          "text_only": 336,
+          "timed_clip": 212
+        },
+        "max_serialized_bytes": 8153,
+        "cards_hash": "e4b3465e4f7a1230eecd7412c6120c805c7088f4c2038d3e432caecc8adeee07"
+      }
+    },
+    "integrity": "quick_check, foreign_key_check, FTS external-content integrity passed",
+    "oversize_fine_windows": 0,
+    "copy_x_article_case": "x_article",
+    "source_unchanged": true
+  },
+  "run_f_comparison": {
+    "all_four_card_set_hashes_identical": true,
+    "rebuild_payload_hash_identical": true,
+    "both_corpus_head_manifests_identical": true
+  },
+  "original_probes": {
+    "candidate_sha": "d51f67366dd02f6954943640cd41828e0d693a19",
+    "source_date": "2026-09-04",
+    "source_sha256": "2765cc359805fb12f7a90aecd3dd0b34d884aa8cb3015785011bf400da3b4dfc",
+    "packaging": {
+      "clips.py": {
+        "staged": true,
+        "installed": true
+      },
+      "provenance.py": {
+        "staged": true,
+        "installed": true
+      },
+      "library_cards.py": {
+        "staged": true,
+        "installed": true
+      },
+      "usage_meter.py": {
+        "staged": true,
+        "installed": true
+      },
+      "uoink": {
+        "staged": true,
+        "installed": true
+      },
+      "uoink.cmd": {
+        "staged": true,
+        "installed": true
+      },
+      "scripts/install-watchdog.ps1": {
+        "staged": true,
+        "installed": true
+      },
+      "scripts/recall_hook.py": {
+        "staged": true,
+        "installed": true
+      }
+    },
+    "frozen.db": {
+      "handlers": [
+        {
+          "video_id": "WgPbbWmnXJ8",
+          "query": "blue line purple detector tracker",
+          "hits": 1,
+          "seconds": 0.004618,
+          "first": {
+            "video_id": "WgPbbWmnXJ8",
+            "start": 7069.38,
+            "end": 7199.689,
+            "timing": "coarse",
+            "deep_link": "https://youtube.com/watch?v=WgPbbWmnXJ8&t=7069s"
+          },
+          "cards": [
+            {
+              "profile": "full",
+              "clip_count": 116,
+              "selected": 10,
+              "selected_chars": 25624,
+              "bytes": 59141,
+              "card_hash": "e0d19efb04e989908b8de2d0745690903aecb1a6851ae337d972f6e63a12e658"
+            },
+            {
+              "profile": "librarian",
+              "clip_count": 116,
+              "selected": 6,
+              "selected_chars": 1440,
+              "bytes": 7260,
+              "card_hash": "b5a2fac809bffa0a70e26c854179ea31c1cef2037ad00bca9a75e06db3bcfa4e"
+            }
+          ]
+        },
+        {
+          "video_id": "episode_9ddb44f98b2",
+          "query": "site side by side verbose skills",
+          "hits": 1,
+          "seconds": 0.000502,
+          "first": {
+            "video_id": "episode_9ddb44f98b2",
+            "start": 1718.38,
+            "end": 1787.98,
+            "timing": "source_cues",
+            "deep_link": "https://www.latent.space/p/chatgpt-work#t=1718"
+          },
+          "cards": [
+            {
+              "profile": "full",
+              "clip_count": 64,
+              "selected": 10,
+              "selected_chars": 18197,
+              "bytes": 44110,
+              "card_hash": "b94dc1d1e371a831f6b6083483cf8f5b708dbba11539928d55efd6b95fb2206e"
+            },
+            {
+              "profile": "librarian",
+              "clip_count": 64,
+              "selected": 6,
+              "selected_chars": 1440,
+              "bytes": 7209,
+              "card_hash": "e57a977ad6b3fbf5ab83d1d429021803c62fb91065222fb9382d1404837e6c1b"
+            }
+          ]
+        }
+      ],
+      "items": 548,
+      "null_source_type": 0,
+      "tail_timing": {
+        "coarse": 72
+      },
+      "tail_distinct_items": 18,
+      "corpus_heads_manifest_sha256": "690cdf04396c8c1a8e1ad5cc4098b1e75de67a4c388de7e3ce94c8a361581367"
+    },
+    "rebuild.db": {
+      "handlers": [
+        {
+          "video_id": "WgPbbWmnXJ8",
+          "query": "blue line purple detector tracker",
+          "hits": 1,
+          "seconds": 0.001271,
+          "first": {
+            "video_id": "WgPbbWmnXJ8",
+            "start": 7077.3,
+            "end": 7199.689,
+            "timing": "coarse",
+            "deep_link": "https://youtube.com/watch?v=WgPbbWmnXJ8&t=7077s"
+          },
+          "cards": [
+            {
+              "profile": "full",
+              "clip_count": 177,
+              "selected": 10,
+              "selected_chars": 15475,
+              "bytes": 38937,
+              "card_hash": "fd0d730a8bc428b110cd500153dfdc4f9c0eb7e40c152acb8209300a69aec8c9"
+            },
+            {
+              "profile": "librarian",
+              "clip_count": 177,
+              "selected": 6,
+              "selected_chars": 1440,
+              "bytes": 7324,
+              "card_hash": "08ca7ba3b4f0d1654af0203f3e40d9e0848638a04d81d0927b91f4a768e6d5dd"
+            }
+          ]
+        },
+        {
+          "video_id": "episode_9ddb44f98b2",
+          "query": "site side by side verbose skills",
+          "hits": 1,
+          "seconds": 0.00045,
+          "first": {
+            "video_id": "episode_9ddb44f98b2",
+            "start": 1718.38,
+            "end": 1787.98,
+            "timing": "source_cues",
+            "deep_link": "https://www.latent.space/p/chatgpt-work#t=1718"
+          },
+          "cards": [
+            {
+              "profile": "full",
+              "clip_count": 64,
+              "selected": 10,
+              "selected_chars": 18006,
+              "bytes": 43746,
+              "card_hash": "b109b3160633105ba11c47fa3c56a0eab597a5ba039cb8b86ba1fe1e3cc0e7a9"
+            },
+            {
+              "profile": "librarian",
+              "clip_count": 64,
+              "selected": 6,
+              "selected_chars": 1440,
+              "bytes": 7215,
+              "card_hash": "dbad26b53d1eabdf4408943fb4da03097dd99a866c3fa9f9884a845e9d6bdea5"
+            }
+          ]
+        }
+      ],
+      "items": 548,
+      "null_source_type": 0,
+      "tail_timing": {
+        "coarse": 271
+      },
+      "tail_distinct_items": 18,
+      "corpus_heads_manifest_sha256": "690cdf04396c8c1a8e1ad5cc4098b1e75de67a4c388de7e3ce94c8a361581367"
+    },
+    "card_marker": {
+      "excerpt_chars": 240,
+      "bytes": 1777,
+      "truncated": true,
+      "truncation": {
+        "selection": false,
+        "byte_budget": false,
+        "fields": []
+      },
+      "truncation_markers": null
+    },
+    "benchmark": {
+      "cross_clip_quote": {
+        "id_valid": true,
+        "id_status": "valid",
+        "l1_match": true,
+        "l2_match": true,
+        "evidence_valid": false,
+        "completion_tokens": "unavailable"
+      },
+      "unexpected_extra_id": {
+        "id_valid": false,
+        "id_status": "extra_id",
+        "l1_match": false,
+        "l2_match": false,
+        "evidence_valid": false,
+        "completion_tokens": "unavailable"
+      },
+      "unhashable_id": {
+        "id_valid": false,
+        "id_status": "wrong_id",
+        "l1_match": false,
+        "l2_match": false,
+        "evidence_valid": false,
+        "completion_tokens": "unavailable"
+      },
+      "malformed_shelf": {
+        "id_valid": true,
+        "id_status": "valid",
+        "l1_match": false,
+        "l2_match": false,
+        "evidence_valid": true,
+        "completion_tokens": "unavailable"
+      },
+      "wrong_id": {
+        "id_valid": false,
+        "id_status": "wrong_id",
+        "l1_match": false,
+        "l2_match": false,
+        "evidence_valid": false,
+        "completion_tokens": "unavailable"
+      },
+      "missing_id": {
+        "id_valid": false,
+        "id_status": "missing_id",
+        "l1_match": false,
+        "l2_match": false,
+        "evidence_valid": false,
+        "completion_tokens": "unavailable"
+      },
+      "duplicate_id": {
+        "id_valid": false,
+        "id_status": "duplicate_id",
+        "l1_match": false,
+        "l2_match": false,
+        "evidence_valid": false,
+        "completion_tokens": "unavailable"
+      }
+    },
+    "benchmark_fence": {
+      "mocked_calls": 1,
+      "opening_fences": 1,
+      "closing_fences": 1,
+      "unescaped_attack_present": false
+    },
+    "concurrent_usage": {
+      "recorded": 200,
+      "feature": "entity_extraction",
+      "model": "fixture-model",
+      "month": "2026-09",
+      "calls": 200,
+      "unavailable_calls": 0,
+      "input_tokens": 600,
+      "output_tokens": 400,
+      "cache_read": 0,
+      "cache_create": 0,
+      "est_usd": 0.0,
+      "est_rates": null,
+      "last_call_at": "2026-09-04T00:00:00Z",
+      "last_unavailable_at": null,
+      "last_usage": {
+        "input_tokens": 3,
+        "output_tokens": 2,
+        "cache_read": 0,
+        "cache_create": 0
+      }
+    },
+    "nested_transaction": {
+      "still_open": true,
+      "pending_row_present": 1,
+      "usage_calls_after_refusal": 200
+    },
+    "missing_usage": {
+      "buckets": [
+        {
+          "feature": "entity_extraction",
+          "model": "fixture-model",
+          "month": "2026-09",
+          "calls": 0,
+          "unavailable_calls": 1,
+          "input_tokens": 0,
+          "output_tokens": 0,
+          "cache_read": 0,
+          "cache_create": 0,
+          "est_usd": 0.0,
+          "est_rates": {
+            "input_per_million": 1.0,
+            "output_per_million": 5.0,
+            "cache_read_per_million": 0.1,
+            "cache_create_per_million": 1.25,
+            "source": "https://docs.claude.com/en/docs/about-claude/pricing",
+            "source_checked": "2026-09-04"
+          },
+          "last_call_at": null,
+          "last_unavailable_at": "2026-09-05T02:27:19Z",
+          "last_usage": null
+        }
+      ],
+      "public_actual": {
+        "month": "2026-09",
+        "by_feature": {
+          "entity_extraction": {
+            "calls": 0,
+            "unavailable_calls": 1,
+            "input_tokens": 0,
+            "output_tokens": 0,
+            "cache_read": 0,
+            "cache_create": 0,
+            "usd": 0.0,
+            "models": [
+              "fixture-model"
+            ]
+          }
+        },
+        "total_usd": 0.0,
+        "unavailable_calls": 1,
+        "estimate": true,
+        "rates": {
+          "input_per_million": 1.0,
+          "output_per_million": 5.0,
+          "cache_read_per_million": 0.1,
+          "cache_create_per_million": 1.25,
+          "source": "https://docs.claude.com/en/docs/about-claude/pricing",
+          "source_checked": "2026-09-04"
+        },
+        "status": {
+          "write_failures": 1,
+          "last_error": "RuntimeError",
+          "last_failure_at": "2026-09-04T00:00:00Z",
+          "last_failed_feature": "entity_extraction",
+          "ok": false
+        }
+      }
+    },
+    "cache_only_usage": {
+      "month": "2026-09",
+      "by_feature": {
+        "entity_extraction": {
+          "calls": 1,
+          "unavailable_calls": 0,
+          "input_tokens": 0,
+          "output_tokens": 0,
+          "cache_read": 1000,
+          "cache_create": 0,
+          "usd": 0.0,
+          "models": [
+            "fixture-model"
+          ]
+        }
+      },
+      "total_usd": 0.0,
+      "unavailable_calls": 0,
+      "estimate": true,
+      "rates": null,
+      "status": {
+        "write_failures": 1,
+        "last_error": "RuntimeError",
+        "last_failure_at": "2026-09-04T00:00:00Z",
+        "last_failed_feature": "entity_extraction",
+        "ok": false
+      }
+    },
+    "recall_fence": {
+      "characters": 599,
+      "surfaced": 1,
+      "closing_fences": 1,
+      "raw_code_fences": 0,
+      "unsafe_link_present": false,
+      "control_present": false
+    },
+    "recall_locked": {
+      "seconds": 1.0466,
+      "returncode": 0,
+      "stdout_bytes": 0,
+      "main_seconds": 1.0023,
+      "main_returncode": 0,
+      "main_stdout_bytes": 0
+    },
+    "recall_disabled": {
+      "returncode": 0,
+      "stdout_bytes": 0
+    },
+    "failed_poll_heartbeat": {
+      "last_tick_completed_at": "2026-09-05T02:27:21Z",
+      "last_successful_tick_at": null,
+      "last_successful_poll_at": null,
+      "last_failed_poll_at": "2026-09-05T02:27:21Z",
+      "last_poll_error": "poll returned ok=false",
+      "last_ingest_completed_at": null,
+      "last_tick": {
+        "ok": false,
+        "polls": 1,
+        "failed_polls": 1
+      },
+      "counts": {
+        "ticks": 1,
+        "polls_ok": 0,
+        "polls_failed": 1,
+        "ingests": 0
+      },
+      "tick_interval_sec": 30,
+      "freshness": {
+        "state": "fresh",
+        "age_sec": 0.0,
+        "stale_after_sec": 300
+      }
+    },
+    "sec06": {
+      "日本語": "",
+      "canción": "\"canci\" \"n\"*"
+    }
+  },
+  "supplemental": {
+    "tested_sha": "d51f67366dd02f6954943640cd41828e0d693a19",
+    "real_model_calls": 0,
+    "usage_counters": "synthetic fixtures",
+    "malformed_path": {
+      "input": {
+        "video_id": "fixture",
+        "shelf_paths": [
+          [
+            "Science",
+            42,
+            "Physics"
+          ]
+        ],
+        "confidence": 0.9,
+        "evidence_quote": "alpha beta",
+        "unmapped": false,
+        "unsupported": false,
+        "proposed_new_leaf": ""
+      },
+      "valid_control": {
+        "video_id": "fixture",
+        "title": "Fixture",
+        "platform": "youtube",
+        "gold_path": [
+          "Science",
+          "Physics"
+        ],
+        "predicted_path": [
+          "Science",
+          "Physics"
+        ],
+        "l1_match": true,
+        "l2_match": true,
+        "evidence_quote": "alpha beta",
+        "evidence_valid": true,
+        "id_status": "valid",
+        "id_valid": true,
+        "wall_time_sec": 0.01,
+        "completion_tokens": "unavailable",
+        "tokens_per_sec": "unavailable"
+      },
+      "observed": {
+        "video_id": "fixture",
+        "title": "Fixture",
+        "platform": "youtube",
+        "gold_path": [
+          "Science",
+          "Physics"
+        ],
+        "predicted_path": [
+          "Science",
+          42,
+          "Physics"
+        ],
+        "l1_match": true,
+        "l2_match": true,
+        "evidence_quote": "alpha beta",
+        "evidence_valid": true,
+        "id_status": "valid",
+        "id_valid": true,
+        "wall_time_sec": 0.01,
+        "completion_tokens": "unavailable",
+        "tokens_per_sec": "unavailable"
+      },
+      "expected": {
+        "l1_match": false,
+        "l2_match": false
+      },
+      "passes": false,
+      "runner": {
+        "status": "completed_mock",
+        "mock_mode": true,
+        "total_items": 1,
+        "level_1_accuracy": 100.0,
+        "level_2_accuracy": 100.0,
+        "evidence_grounding_accuracy": 100.0
+      }
+    },
+    "cache_read": {
+      "bucket": {
+        "feature": "entity_extraction",
+        "model": "claude-haiku-4-5-20251001",
+        "month": "2026-09",
+        "calls": 1,
+        "unavailable_calls": 0,
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "cache_read": 1000,
+        "cache_create": 0,
+        "est_usd": 0.0001,
+        "est_rates": {
+          "input_per_million": 1.0,
+          "output_per_million": 5.0,
+          "cache_read_per_million": 0.1,
+          "cache_create_per_million": 1.25,
+          "source": "https://docs.claude.com/en/docs/about-claude/pricing",
+          "source_checked": "2026-09-04"
+        },
+        "last_call_at": "2026-09-05T02:29:46Z",
+        "last_unavailable_at": null,
+        "last_usage": {
+          "input_tokens": 0,
+          "output_tokens": 0,
+          "cache_read": 1000,
+          "cache_create": 0
+        }
+      },
+      "public": {
+        "month": "2026-09",
+        "by_feature": {
+          "entity_extraction": {
+            "calls": 1,
+            "unavailable_calls": 0,
+            "input_tokens": 0,
+            "output_tokens": 0,
+            "cache_read": 1000,
+            "cache_create": 0,
+            "usd": 0.0001,
+            "models": [
+              "claude-haiku-4-5-20251001"
+            ]
+          }
+        },
+        "total_usd": 0.0001,
+        "unavailable_calls": 0,
+        "estimate": true,
+        "rates": {
+          "input_per_million": 1.0,
+          "output_per_million": 5.0,
+          "cache_read_per_million": 0.1,
+          "cache_create_per_million": 1.25,
+          "source": "https://docs.claude.com/en/docs/about-claude/pricing",
+          "source_checked": "2026-09-04"
+        },
+        "status": {
+          "write_failures": 0,
+          "last_error": null,
+          "last_failure_at": null,
+          "last_failed_feature": null,
+          "ok": true
+        }
+      }
+    },
+    "cache_create": {
+      "bucket": {
+        "feature": "entity_extraction",
+        "model": "claude-haiku-4-5-20251001",
+        "month": "2026-09",
+        "calls": 2,
+        "unavailable_calls": 0,
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "cache_read": 1000,
+        "cache_create": 1000,
+        "est_usd": 0.00135,
+        "est_rates": {
+          "input_per_million": 1.0,
+          "output_per_million": 5.0,
+          "cache_read_per_million": 0.1,
+          "cache_create_per_million": 1.25,
+          "source": "https://docs.claude.com/en/docs/about-claude/pricing",
+          "source_checked": "2026-09-04"
+        },
+        "last_call_at": "2026-09-05T02:29:46Z",
+        "last_unavailable_at": null,
+        "last_usage": {
+          "input_tokens": 0,
+          "output_tokens": 0,
+          "cache_read": 0,
+          "cache_create": 1000
+        }
+      },
+      "public": {
+        "month": "2026-09",
+        "by_feature": {
+          "entity_extraction": {
+            "calls": 2,
+            "unavailable_calls": 0,
+            "input_tokens": 0,
+            "output_tokens": 0,
+            "cache_read": 1000,
+            "cache_create": 1000,
+            "usd": 0.00135,
+            "models": [
+              "claude-haiku-4-5-20251001"
+            ]
+          }
+        },
+        "total_usd": 0.00135,
+        "unavailable_calls": 0,
+        "estimate": true,
+        "rates": {
+          "input_per_million": 1.0,
+          "output_per_million": 5.0,
+          "cache_read_per_million": 0.1,
+          "cache_create_per_million": 1.25,
+          "source": "https://docs.claude.com/en/docs/about-claude/pricing",
+          "source_checked": "2026-09-04"
+        },
+        "status": {
+          "write_failures": 0,
+          "last_error": null,
+          "last_failure_at": null,
+          "last_failed_feature": null,
+          "ok": true
+        }
+      }
+    },
+    "ordinary": {
+      "bucket": {
+        "feature": "entity_extraction",
+        "model": "claude-haiku-4-5-20251001",
+        "month": "2026-09",
+        "calls": 3,
+        "unavailable_calls": 0,
+        "input_tokens": 1000,
+        "output_tokens": 1000,
+        "cache_read": 1000,
+        "cache_create": 1000,
+        "est_usd": 0.00735,
+        "est_rates": {
+          "input_per_million": 1.0,
+          "output_per_million": 5.0,
+          "cache_read_per_million": 0.1,
+          "cache_create_per_million": 1.25,
+          "source": "https://docs.claude.com/en/docs/about-claude/pricing",
+          "source_checked": "2026-09-04"
+        },
+        "last_call_at": "2026-09-05T02:29:46Z",
+        "last_unavailable_at": null,
+        "last_usage": {
+          "input_tokens": 1000,
+          "output_tokens": 1000,
+          "cache_read": 0,
+          "cache_create": 0
+        }
+      },
+      "public": {
+        "month": "2026-09",
+        "by_feature": {
+          "entity_extraction": {
+            "calls": 3,
+            "unavailable_calls": 0,
+            "input_tokens": 1000,
+            "output_tokens": 1000,
+            "cache_read": 1000,
+            "cache_create": 1000,
+            "usd": 0.00735,
+            "models": [
+              "claude-haiku-4-5-20251001"
+            ]
+          }
+        },
+        "total_usd": 0.00735,
+        "unavailable_calls": 0,
+        "estimate": true,
+        "rates": {
+          "input_per_million": 1.0,
+          "output_per_million": 5.0,
+          "cache_read_per_million": 0.1,
+          "cache_create_per_million": 1.25,
+          "source": "https://docs.claude.com/en/docs/about-claude/pricing",
+          "source_checked": "2026-09-04"
+        },
+        "status": {
+          "write_failures": 0,
+          "last_error": null,
+          "last_failure_at": null,
+          "last_failed_feature": null,
+          "ok": true
+        }
+      }
+    },
+    "missing_after_usage": {
+      "month": "2026-09",
+      "by_feature": {
+        "entity_extraction": {
+          "calls": 3,
+          "unavailable_calls": 1,
+          "input_tokens": 1000,
+          "output_tokens": 1000,
+          "cache_read": 1000,
+          "cache_create": 1000,
+          "usd": 0.00735,
+          "models": [
+            "claude-haiku-4-5-20251001"
+          ]
+        }
+      },
+      "total_usd": 0.00735,
+      "unavailable_calls": 1,
+      "estimate": true,
+      "rates": {
+        "input_per_million": 1.0,
+        "output_per_million": 5.0,
+        "cache_read_per_million": 0.1,
+        "cache_create_per_million": 1.25,
+        "source": "https://docs.claude.com/en/docs/about-claude/pricing",
+        "source_checked": "2026-09-04"
+      },
+      "status": {
+        "write_failures": 0,
+        "last_error": null,
+        "last_failure_at": null,
+        "last_failed_feature": null,
+        "ok": true
+      }
+    },
+    "write_failure": {
+      "month": "2026-09",
+      "by_feature": {
+        "entity_extraction": {
+          "calls": 3,
+          "unavailable_calls": 1,
+          "input_tokens": 1000,
+          "output_tokens": 1000,
+          "cache_read": 1000,
+          "cache_create": 1000,
+          "usd": 0.00735,
+          "models": [
+            "claude-haiku-4-5-20251001"
+          ]
+        }
+      },
+      "total_usd": 0.00735,
+      "unavailable_calls": 1,
+      "estimate": true,
+      "rates": {
+        "input_per_million": 1.0,
+        "output_per_million": 5.0,
+        "cache_read_per_million": 0.1,
+        "cache_create_per_million": 1.25,
+        "source": "https://docs.claude.com/en/docs/about-claude/pricing",
+        "source_checked": "2026-09-04"
+      },
+      "status": {
+        "write_failures": 1,
+        "last_error": "RuntimeError",
+        "last_failure_at": "2026-09-05T02:29:46Z",
+        "last_failed_feature": "entity_extraction",
+        "ok": false
+      }
+    },
+    "read_failure": {
+      "month": "2026-09",
+      "by_feature": {},
+      "total_usd": 0.0,
+      "unavailable_calls": null,
+      "estimate": true,
+      "rates": {
+        "input_per_million": 1.0,
+        "output_per_million": 5.0,
+        "cache_read_per_million": 0.1,
+        "cache_create_per_million": 1.25,
+        "source": "https://docs.claude.com/en/docs/about-claude/pricing",
+        "source_checked": "2026-09-04"
+      },
+      "status": {
+        "write_failures": 1,
+        "last_error": "RuntimeError",
+        "last_failure_at": "2026-09-05T02:29:46Z",
+        "last_failed_feature": "entity_extraction",
+        "ok": false
+      },
+      "error": "usage unavailable"
+    },
+    "recall_locked_main_seconds": [
+      1.0033,
+      1.0064,
+      1.0073,
+      1.0055,
+      1.0048
+    ]
+  },
+  "execution_notes": [
+    "Original P is unchanged, including its legacy two-argument cache pricer; the public four-counter path is exercised by the supplemental probe.",
+    "Original P status.write_failures=1 is the deliberately refused nested transaction preceding its missing-usage probe.",
+    "Supplemental probe exit 0 means receipt written; malformed_path.passes=false is the reproduced acceptance failure.",
+    "No real model calls, paid usage, helper, installed app, browser or media player were used."
+  ],
+  "local_artifact_hashes": {
+    "tests/.acceptance-run-h/suite.log": "ef71266a029bd1d4d185e66ffdb53f4caff8eca2531f26e955e3a929e74f1c80",
+    "tests/.acceptance-run-h/suite.xml": "c33df4ed1a20a2a93b2746cacc5440baeb60d7d20efd2737df3e774d50dab6fb",
+    "tests/.acceptance-run-h/measurement/measurements.json": "a61b1c4990666dff4fb954744e1cf1bd0a822b407f3a1ee96c02f176adc965de",
+    "tests/.acceptance-run-h/delivery/receipts.json": "a4a4b355d61dd5e9510f24d533004b033537773b1fdf82fc730a49b30107dae9",
+    "tests/.acceptance-run-h/supplemental-final/receipts.json": "92696c03a568eff2544fb326dad7570770f7144ebd23922ec1128df23274f8b3",
+    "tests/acceptance_run_f_probe.py": "1d0f46921195c5119b1efffca2a378464f76d2cd1a75c5dd5de5f9837ad2a57d",
+    "tests/repair_run_d_measure.py": "98310f2b224206bcb401cce2af503840a5925d87cb4ffd417a31bcb47ec5bc4c",
+    "tests/acceptance_run_h_probe.py": "dc76ec02fd44335c868db512bb791334b92d1946f6c06501dcd9c84b43227fb5"
+  },
+  "remaining_acceptance_failure": {
+    "id": "H-1",
+    "owner": "Gemini",
+    "file": "scripts/librarian/bench_local.py",
+    "line": 262,
+    "input_path": [
+      "Science",
+      42,
+      "Physics"
+    ],
+    "expected_l1_accuracy": 0.0,
+    "expected_l2_accuracy": 0.0,
+    "observed_l1_accuracy": 100.0,
+    "observed_l2_accuracy": 100.0,
+    "runner_status": "completed_mock"
+  },
+  "listed_exceptions": [
+    "SEC-06 Unicode FTS tokenization",
+    "SEC-05 automatic FxTwitter enrichment"
+  ],
+  "unverified_release": [
+    "installer build/install and autostart",
+    "watchdog recovery",
+    "installed client/extension/dashboard and Recall",
+    "media seek/coarse interval presentation",
+    "real model quality and reported usage; live rates and invoice cost",
+    "POSIX bundle execution, Windows symlink case, ffmpeg/native ASR"
+  ],
+  "verdict": "REJECT",
+  "git_completion": {
+    "staging": "failed",
+    "reason": "Permission denied creating E:/AI/projects/uoink/checkouts/Yoink/.git/worktrees/codex5/index.lock",
+    "commit_created": false,
+    "merge_attempted": false,
+    "push_attempted": false
+  },
+  "run_f_body_sha256": "a1f11e9a48fb51702c099e78483eb47945e683e69bef5066e332c563899f85ea"
+}

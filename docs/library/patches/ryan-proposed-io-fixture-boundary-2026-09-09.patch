@@ -1,0 +1,100 @@
+--- a/tests/library_work_astra/test_phase4_aw2_acceptance.py
++++ b/tests/library_work_astra/test_phase4_aw2_acceptance.py
+@@ -341,7 +341,7 @@
+     env.mirror._clock = time.monotonic
+     target = item_file(env)
+     entered, release, finished = threading.Event(), threading.Event(), threading.Event()
+-    original_replace, original_work = mirror.os.replace, env.mirror._vault_work
++    original_replace, original_work = env.mirror._io_replace, env.mirror._vault_work
+ 
+     def blocked_replace(src, dst):
+         if Path(dst) == target:
+@@ -355,7 +355,7 @@
+         finally:
+             finished.set()
+ 
+-    monkeypatch.setattr(mirror.os, "replace", blocked_replace)
++    monkeypatch.setattr(env.mirror, "_io_replace", blocked_replace)
+     monkeypatch.setattr(env.mirror, "_vault_work", complete_work)
+     try:
+         result = env.mirror.resync(budget_s=0.1)
+--- a/tests/library_work_astra/test_phase4_aw3_acceptance.py
++++ b/tests/library_work_astra/test_phase4_aw3_acceptance.py
+@@ -189,7 +189,7 @@
+     export(env)
+     mutate_clip(env)
+     target = item_file(env)
+-    original_replace, original_unlink = mirror.os.replace, Path.unlink
++    original_replace, original_unlink = env.mirror._io_replace, env.mirror._io_unlink
+     allocated = []
+ 
+     def failed_replace(src, dst):
+@@ -204,8 +204,8 @@
+         return original_unlink(path, *args, **kwargs)
+ 
+     with monkeypatch.context() as blocked:
+-        blocked.setattr(mirror.os, "replace", failed_replace)
+-        blocked.setattr(Path, "unlink", failed_unlink)
++        blocked.setattr(env.mirror, "_io_replace", failed_replace)
++        blocked.setattr(env.mirror, "_io_unlink", failed_unlink)
+         env.mirror.resync()
+     assert len(allocated) == 1 and allocated[0].is_file()
+     intent = env.mirror._load_intents()[mirror.item_key("a")]
+@@ -246,7 +246,7 @@
+     env.mirror._clock = time.monotonic
+     target = item_file(env)
+     entered, release, finished = threading.Event(), threading.Event(), threading.Event()
+-    original_replace, original_work = mirror.os.replace, env.mirror._vault_work
++    original_replace, original_work = env.mirror._io_replace, env.mirror._vault_work
+     published = []
+     personal = b"USER EDIT AFTER TIMEOUT"
+ 
+@@ -265,7 +265,7 @@
+         finally:
+             finished.set()
+ 
+-    monkeypatch.setattr(mirror.os, "replace", blocked_replace)
++    monkeypatch.setattr(env.mirror, "_io_replace", blocked_replace)
+     monkeypatch.setattr(env.mirror, "_vault_work", complete_work)
+     try:
+         result = env.mirror.resync(budget_s=0.1)
+@@ -306,7 +306,7 @@
+     env.mirror._clock = time.monotonic
+     target = item_file(env)
+     entered, release, finished = threading.Event(), threading.Event(), threading.Event()
+-    original_replace, original_work = mirror.os.replace, env.mirror._vault_work
++    original_replace, original_work = env.mirror._io_replace, env.mirror._vault_work
+     plans = []
+ 
+     def blocked_first_replace(src, dst):
+@@ -323,7 +323,7 @@
+             if plan is plans[0]:
+                 finished.set()
+ 
+-    monkeypatch.setattr(mirror.os, "replace", blocked_first_replace)
++    monkeypatch.setattr(env.mirror, "_io_replace", blocked_first_replace)
+     monkeypatch.setattr(env.mirror, "_vault_work", complete_work)
+     try:
+         first = env.mirror.resync(budget_s=0.1)
+--- a/tests/library_work_astra/test_phase4_aw_acceptance.py
++++ b/tests/library_work_astra/test_phase4_aw_acceptance.py
+@@ -351,7 +351,7 @@
+     target = item_file(env)
+     mutate_clip(env)
+     env.mirror.on_committed_event("source_refresh", video_id="a")
+-    original_replace, original_unlink = mirror.os.replace, Path.unlink
++    original_replace, original_unlink = env.mirror._io_replace, env.mirror._io_unlink
+ 
+     def fail_replace(src, dst):
+         if Path(dst) == target:
+@@ -364,8 +364,8 @@
+         return original_unlink(path, *args, **kwargs)
+ 
+     with monkeypatch.context() as patch:
+-        patch.setattr(mirror.os, "replace", fail_replace)
+-        patch.setattr(Path, "unlink", fail_temp_cleanup)
++        patch.setattr(env.mirror, "_io_replace", fail_replace)
++        patch.setattr(env.mirror, "_io_unlink", fail_temp_cleanup)
+         env.mirror.resync()
+     orphans = list(target.parent.glob(target.name + ".*.tmp"))
+     assert len(orphans) == 1

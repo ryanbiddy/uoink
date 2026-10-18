@@ -1,0 +1,94 @@
+{
+  "schema": "fable-s21-run-record-v1",
+  "label": "at7",
+  "candidate_sha": "1d9e438f4e4087539fa66911c04f4acb2dc862dc",
+  "command": [
+    "C:\\Python314\\python.exe",
+    "-B",
+    "tests/library_work_astra/test_phase3_s21.py",
+    "--execute-s21",
+    "--hold-seconds",
+    "560"
+  ],
+  "cwd": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library",
+  "python": "3.14.6 (tags/v3.14.6:c63aec6, Jun 10 2026, 10:26:10) [MSC v.1944 64 bit (AMD64)]",
+  "exit_code": 0,
+  "started_utc": "2026-09-08T22:15:59.681417+00:00",
+  "finished_utc": "2026-09-08T22:25:21.434963+00:00",
+  "wall_seconds": 561.76,
+  "executed_launcher": {
+    "path": "tests/library_work_astra/test_phase3_s21.py",
+    "retained_copy": "executed-launcher-at7-1d9e438.py",
+    "sha256_raw": "d17a84c65d126abc60774ccb5fe1b63f6195faca4435f6d2a8e8f116e326b3a7",
+    "sha256_lf": "e4649df0ca1278c2ce509536e45dbcf7899481be271c789ed7e780316ec5dff5"
+  },
+  "stdout": "stdout-at7.log",
+  "stderr": "stderr-at7.log",
+  "env": {
+    "PYTHONPATH": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library",
+    "S21_CANDIDATE_SHA": "1d9e438f4e4087539fa66911c04f4acb2dc862dc",
+    "ANTHROPIC_API_KEY": "unset",
+    "PHASE3_REQUIRE_IMPLEMENTATION": "1"
+  },
+  "evidence_db": {
+    "retained_copy": "evidence-at7-candidate-1d9e438.db",
+    "sha256": "09a24ef0c3ed0f93b33219b6ff826344b77793543412f2dec29605213ef60d97",
+    "matches_receipt": true
+  },
+  "receipt": "receipt-at7-candidate-1d9e438.json",
+  "data_root": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library\\_scratch\\s21-i99ry9oc",
+  "artifact_archive": "artifacts-at7-candidate-1d9e438",
+  "artifact_manifest": {
+    "evidence.db": {
+      "sha256": "09a24ef0c3ed0f93b33219b6ff826344b77793543412f2dec29605213ef60d97",
+      "matches_receipt": true,
+      "bytes": 876544
+    },
+    "fixture.transcript.json": {
+      "sha256": "93034f25b169019e84bbd2b17007caf745966843c15e9ce45a5865d2da3d8bc7",
+      "matches_receipt": true,
+      "bytes": 240
+    },
+    "helper/server.log": {
+      "sha256": "75c70e5a1c8bf3ec396e233098f3180ec0af8879b71f547263dd0a596c963bdd",
+      "matches_receipt": true,
+      "bytes": 5331
+    },
+    "source_instances/ba598de24924f18e.json": {
+      "sha256": "e2c71076f07ec6c0a7758058517f890eb2f1eb44b1e558434e5c73f99398d6bd",
+      "matches_receipt": true,
+      "bytes": 204
+    },
+    "Podcasts/untitled-podcast/s21-controlled-capture-25f460e5817/s21-controlled-capture-25f460e5817.json": {
+      "sha256": "715a8ad2efcfcf0791feb0477d8bb7ac91f4133372ef51b444d1e996fd450153",
+      "matches_receipt": true,
+      "bytes": 2682
+    },
+    "Podcasts/untitled-podcast/s21-controlled-capture-25f460e5817/s21-controlled-capture-25f460e5817.md": {
+      "sha256": "6f6831b3f336f7144290a378d5497fae17dc8a4b34fb4ef4bb3b11e51557db8c",
+      "matches_receipt": true,
+      "bytes": 380
+    },
+    "Podcasts/untitled-podcast/s21-controlled-capture-25f460e5817/.media-inputs/93034f25b169019e84bbd2b17007caf745966843c15e9ce45a5865d2da3d8bc7.json": {
+      "sha256": "93034f25b169019e84bbd2b17007caf745966843c15e9ce45a5865d2da3d8bc7",
+      "matches_receipt": true,
+      "bytes": 240
+    },
+    "Podcasts/untitled-podcast/s21-controlled-capture-25f460e5817/.media-inputs/publication.json": {
+      "sha256": "b64458510b7f96a6c03e7fba3d88df03f57278b86a464e70f2fa683d9386c4e3",
+      "matches_receipt": true,
+      "bytes": 319
+    },
+    "library/taxonomies/8a1b16033eb4d6acd57c91c6a5d5e7f2af6d6f60f3adef92502b62d81ba28d04.json": {
+      "sha256": "f3372d0686d56a4a2adb977e916a5cdcbf32405917bb583da4325ebead116d26",
+      "matches_receipt": true,
+      "bytes": 12183
+    }
+  },
+  "all_artifacts_match": true,
+  "result": "AUTOMATED PASS; browser observation still required",
+  "feed_url": "http://127.0.0.1:59403/feed.xml",
+  "helper_url": "http://127.0.0.1:59404",
+  "launcher_hash_in_receipt": "d17a84c65d126abc60774ccb5fe1b63f6195faca4435f6d2a8e8f116e326b3a7",
+  "launcher_hash_matches_executed_bytes": true
+}

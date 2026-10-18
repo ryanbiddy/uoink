@@ -347,7 +347,7 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   if (kind === "session_add") {
     const active = await getActiveFromStorage();
     if (!active || !active.id) {
-      notify("Uoink", "No active session. Start one in the popup first.");
+      notify("Uoink failed", "No active session. Start one in the popup first.");
       return;
     }
     job.session_id = active.id;
@@ -361,12 +361,48 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
 });
 
 // ---- Generic message handling --------------------------------------------
-chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
+function allowedTabUrl(value) {
+  if (typeof value !== "string" || !value || /[\s\\]/.test(value)) return null;
+  try {
+    const url = new URL(value);
+    if (url.username || url.password) return null;
+    const extension = new URL(chrome.runtime.getURL(""));
+    const ownPage = url.protocol === extension.protocol && url.host === extension.host;
+    const allowedWebPage =
+      (url.origin === "https://claude.ai" && url.pathname === "/new") ||
+      (url.origin === "https://chatgpt.com" && url.pathname === "/") ||
+      (url.origin === "http://127.0.0.1:5179" && url.pathname === "/dashboard");
+    return ownPage || allowedWebPage ? url.href : null;
+  } catch {
+    return null;
+  }
+}
+
+chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+  if (!sender || sender.id !== chrome.runtime.id) return;
   if (!msg || typeof msg !== "object") return;
   if (msg.target === "offscreen") return;
 
-  if (msg.type === "openTab" && msg.url) {
-    chrome.tabs.create({ url: msg.url, active: true }, (tab) => {
+  // E1: a capture handed over by the popup (see enqueuePopupCapture). Only
+  // extension pages can start one; content scripts keep their own routes.
+  if (msg.type === "popupCapture") {
+    if (!isExtensionPage(sender)) {
+      sendResponse({ ok: false, error: "Only the Uoink popup can start this capture." });
+      return;
+    }
+    enqueuePopupCapture(msg.job).then(sendResponse, (e) => {
+      sendResponse({ ok: false, error: `Uoink couldn't queue this capture: ${(e && e.message) || e}` });
+    });
+    return true;
+  }
+
+  if (msg.type === "openTab") {
+    const url = allowedTabUrl(msg.url);
+    if (!url) {
+      sendResponse({ ok: false, error: "Tab destination is not allowed." });
+      return;
+    }
+    chrome.tabs.create({ url, active: true }, (tab) => {
       sendResponse({ ok: true, tabId: tab && tab.id });
     });
     return true;
@@ -433,7 +469,10 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
         if (data && data.ok) tryOpenPopup();
       } catch (e) {
         console.error("[stc] proxied extract failed", e);
-        sendResponse({ networkError: String(e && e.message || e) });
+        sendResponse({
+          networkError: String(e && e.message || e),
+          failure: await STC.describeCaptureError(e),
+        });
       }
     })();
     return true;
@@ -446,13 +485,35 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
     (async () => {
       try {
         const data = await STC.postExtractXArticle(msg.article);
-        sendResponse({ data });
+        // content-x-article.js loads without lib/extract.js, so word its
+        // failure here with the same helper the other in-page buttons use.
+        sendResponse({
+          data,
+          failureMessage: (data && data.ok) ? null : STC.describeFailure(data),
+        });
         if (data && data.ok) tryOpenPopup();
       } catch (e) {
         console.error("[stc] proxied x-article extract failed", e);
-        sendResponse({ networkError: String(e && e.message || e) });
+        sendResponse({
+          networkError: String(e && e.message || e),
+          failure: await STC.describeCaptureError(e),
+        });
       }
     })();
+    return true;
+  }
+  // E6: remembered failure for content-x-article.js (no STC there). Same
+  // record content.js and content-reddit.js write via STC.rememberFailure.
+  // msg.replaces / forgetFailure: the popup Retry record a retried capture
+  // replaces (on failure) or drops (on success).
+  if (msg.type === "rememberFailure" && typeof msg.url === "string") {
+    STC.rememberFailure(msg.url, String(msg.error || ""), {
+      title: String(msg.title || ""),
+    }, msg.replaces).then(() => sendResponse({ ok: true }));
+    return true;
+  }
+  if (msg.type === "forgetFailure" && typeof msg.id === "string") {
+    STC.forgetFailure(msg.id).then(() => sendResponse({ ok: true }));
     return true;
   }
   if (msg.type === "stcSessionAdd" && msg.session_id && msg.url) {
@@ -463,7 +524,10 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
         if (data && data.ok) tryOpenPopup();
       } catch (e) {
         console.error("[stc] proxied session add failed", e);
-        sendResponse({ networkError: String(e && e.message || e) });
+        sendResponse({
+          networkError: String(e && e.message || e),
+          failure: await STC.describeCaptureError(e),
+        });
       }
     })();
     return true;
@@ -487,6 +551,11 @@ function tryOpenPopup() {
 
 // ---- Notifications -------------------------------------------------------
 function notify(title, message, extraOptions = {}) {
+  // Only capture outcomes interrupt the user. Content scripts still send
+  // queued messages for older helpers; acknowledge them without a desktop toast.
+  const finished = /^(?:Uoinked(?: ★)?|Uoink ready|Posts saved|Added to session|Copied to clipboard)$/i.test(title);
+  const failed = /(?:failed|offline|blocked|queue full|invalid URL|lost track|still working|couldn't (?:read|capture))/i.test(title);
+  if (!finished && !failed) return Promise.resolve(null);
   return new Promise((resolve) => {
     try {
       chrome.notifications.create({
@@ -721,6 +790,19 @@ async function refreshActiveSession() {
 
 // ---- Queue ---------------------------------------------------------------
 const _draining = { running: false };
+// MV3: Chrome stops an extension service worker after 30 s without an
+// extension event or API call, and can stop one that's waiting on a slow
+// fetch, so a capture the helper takes minutes over could die with the
+// worker. Chrome's documented keep-alive is a cheap extension API call on a
+// timer: drain() makes one every 20 s while it has jobs. restoreQueue()
+// handles the stops this can't prevent.
+const KEEPALIVE_MS = 20 * 1000;
+
+function keepWorkerAlive() {
+  try {
+    chrome.runtime.getPlatformInfo(() => {});
+  } catch { /* ignore */ }
+}
 
 async function getState() {
   return chrome.storage.session.get({ busy: false, current: null, queue: [] });
@@ -737,29 +819,275 @@ function enqueue(job) {
   return _enqueueChain;
 }
 
+// Runs fn on the enqueue chain, after every queue change already asked for,
+// so the steps that read and rewrite the queue state (enqueuePopupCapture,
+// restoreQueue, settleCaptureRequest, drain's takeNextJob, clearQueue) take
+// turns. Resolves with fn's result.
+function queueStep(fn) {
+  const step = _enqueueChain.then(fn);
+  _enqueueChain = step.catch((e) => {
+    console.error("[stc] enqueue failed", e);
+  });
+  return step;
+}
+
 async function _doEnqueue(job) {
+  // Every job carries an id (popup captures already do): a popup's outcome
+  // and a popup click or Retry that joins the job (addPopupJoin) key on it.
+  if (!job.id) job.id = `job-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
   const state = await getState();
   state.queue.push(job);
   await setState({ queue: state.queue });
 
-  const ahead = (state.busy ? 1 : 0) + state.queue.length - 1;
-  if (state.busy || state.queue.length > 1) {
-    notify("Uoink queued", `${ahead} video${ahead === 1 ? "" : "s"} ahead`);
-  } else {
-    notify("Uoinking", `${shortUrl(job.url)}...`);
-  }
+  // Captures shows queued/running work. Notifications are for outcomes.
   drain();
 }
 
-async function clearQueue() {
-  await setState({ queue: [] });
-  notify("Uoink", "Queue cleared.");
+function clearQueue() {
+  return queueStep(async () => {
+    await setState({ queue: [] });
+  });
 }
 
-async function restoreQueue() {
+// MV3: Chrome can still stop this worker mid-job (an update, a crash, a stop
+// the keep-alive can't prevent), and the next one starts with
+// chrome.storage.session as the old one left it: busy, the job it was
+// running as `current`, the rest queued. Nothing of the old worker survives,
+// so that job isn't running anywhere. Every worker start runs this once, as
+// the first queue step, so it comes before the click or menu item that woke
+// the worker up:
+//  - a capture the helper hadn't answered goes back to the head of the
+//    queue, once. It finishes here (clipboard, Claude tab, notification,
+//    failure record), and a popup click for it is a duplicate instead of a
+//    second capture. The helper holds a repeat of a YouTube capture it's
+//    still running until that one is done and answers with it (no second
+//    download); anything else, or one it had already finished, runs again.
+//  - a job the helper had answered, one already resumed once, or a session
+//    add (sending it again would add the video twice) is dropped with the
+//    "lost track" notice instead.
+// Then the queue drains. (This used to run only on browser start or an
+// update, when chrome.storage.session is empty anyway.)
+let _restored = null;
+function restoreQueue() {
+  if (!_restored) _restored = queueStep(recoverInterruptedJob);
+  return _restored;
+}
+
+async function recoverInterruptedJob() {
   const state = await getState();
-  if (state.busy) await setState({ busy: false, current: null });
-  if (state.queue && state.queue.length) drain();
+  if (!state.busy) {
+    if (state.queue.length) drain();
+    return;
+  }
+  const queue = state.queue;
+  const stopped = state.current ? { ...state.current } : null;
+  let lost = null;
+  if (stopped) {
+    delete stopped.startedAt;
+    if (stopped.kind === "extract" && !stopped.answered && !stopped.resumed) {
+      stopped.resumed = true;
+      queue.unshift(stopped);
+    } else {
+      lost = stopped;
+    }
+  }
+  await setState({ busy: false, current: null, queue });
+  if (lost) {
+    const join = await takePopupJoin(lost.id);
+    const failure = await notifyThrownCaptureError({ uoinkKind: "lost" });
+    await publishPopupResult(joinedByPopup(lost, join), {
+      ok: false, kind: failure.kind, message: failure.message,
+    });
+  }
+  if (queue.length) drain();
+}
+
+restoreQueue().catch((e) => console.warn("[stc] restore failed", e));
+
+// ---- Popup captures (E1) ---------------------------------------------------
+// The popup used to await /extract (and /extract/reddit, /extract/page) in its
+// own document. Chrome closes the popup as soon as the user clicks back into
+// the page, which killed the request and lost its clipboard copy, Claude tab
+// and failure record, so users retried captures that had actually finished.
+// The popup now hands the capture to this queue and returns; runExtractJob
+// does the side effects here and publishes the outcome for a popup that's
+// still open (popup.js refreshQueue -> applyCaptureQueueState).
+// The popup's Recent failures Retry for a capture this queue ran sends the
+// same message with retryOf (the record's id): the record stays until the
+// rerun goes through, and a new failure replaces it. A click or Retry for a
+// capture that's already queued or running, the context menu's included,
+// joins that job instead (addPopupJoin).
+const POPUP_CAPTURE_RESULTS_KEY = "popup_capture_results";
+// Popup requests that joined a queued or running job, by job id: {title,
+// retries: [the Recent failures ids a Retry named]}. That job then settles
+// as a popup capture (joinedByPopup), whatever started it.
+const POPUP_CAPTURE_JOINS_KEY = "popup_capture_joins";
+const POPUP_CAPTURE_ROUTES = ["video", "reddit", "page", "playlist", "podcast", "x_post"];
+const QUEUE_FULL_MESSAGE = "Queue full. Give it a few minutes, then try again.";
+// How long a popup video waits on /queue/status at its turn before going
+// ahead anyway, so a stalled status call can't hold up the queue.
+const QUEUE_ROOM_WAIT_MS = 10 * 1000;
+
+function isExtensionPage(sender) {
+  const base = chrome.runtime.getURL("");
+  return !!(sender && typeof sender.url === "string" && sender.url.startsWith(base));
+}
+
+// Two jobs that would run the same capture of the same URL with the same
+// side effects (a save-only X video doesn't copy or open Claude). A session
+// add has no capture route, so nothing matches it. URLs compare without a
+// #fragment (STC.queueUrlKey): a context-menu job keeps the tab's.
+function sameCapture(a, b) {
+  const route = STC.queueJobRoute(a);
+  return !!(a && b && route) && STC.queueUrlKey(a.url) === STC.queueUrlKey(b.url)
+    && route === STC.queueJobRoute(b) && !!a.saveOnly === !!b.saveOnly;
+}
+
+function enqueuePopupCapture(req) {
+  const url = req && typeof req.url === "string" ? req.url : "";
+  if (!POPUP_CAPTURE_ROUTES.includes(req && req.route) || !STC.normalizeAnyUrl(url)
+      || (req.route === "playlist" && !STC.normalizePlaylistUrl(url))
+      || (req.route === "x_post" && !STC.normalizeTwitterUrl(url))) {
+    return Promise.resolve({ ok: false, error: "Uoink can't capture this tab from the popup." });
+  }
+  // Inside the enqueue chain, so two quick clicks can't both pass the
+  // duplicate check before either job is stored.
+  return queueStep(async () => {
+    const state = await getState();
+    // Only this service worker's drain() runs captures (restoreQueue has
+    // already taken back a job a stopped worker left). A job the helper has
+    // answered is finishing up: a click now is a new capture.
+    const running = _draining.running && state.busy && state.current
+      && !state.current.answered ? state.current : null;
+    const job = {
+      kind: "extract",
+      url,
+      addedAt: Date.now(),
+      origin: "popup",
+      id: `popup-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      title: typeof req.title === "string" ? req.title.slice(0, 300) : "",
+    };
+    if (req.route === "page") job.usePage = true;
+    if (req.route === "reddit") job.useReddit = true;
+    if (req.route === "playlist") job.usePlaylist = true;
+    if (req.route === "podcast") job.usePodcast = true;
+    if (req.route === "x_post") job.useXPost = true;
+    // The popup used to check the helper's queue before a video; that
+    // check now runs in runExtractJob so the popup never waits on it.
+    if (req.route === "video") job.checkRoom = true;
+    if (req.saveOnly) job.saveOnly = true;
+    if (typeof req.retryOf === "string" && req.retryOf) job.retryOf = req.retryOf.slice(0, 100);
+    const same = [running].concat(state.queue).find((other) => sameCapture(other, job));
+    if (same) {
+      // A click or Retry for a capture that's already queued or running
+      // (a context-menu one included): no second extraction, and that job
+      // answers this popup too: its outcome is published, a failure gets a
+      // Recent failures row, and a Retry's record goes once it goes through.
+      if (same.id) await addPopupJoin(same.id, job);
+      drain(); // no-op while running
+      return { ok: true, duplicate: true, id: same.id || null };
+    }
+    let interval = parseInt(req.interval, 10);
+    if (!Number.isFinite(interval) || interval < 5 || interval > 300) {
+      interval = await STC.getInterval();
+    }
+    job.interval = interval;
+    const ahead = (running ? 1 : 0) + state.queue.length;
+    await _doEnqueue(job);
+    return { ok: true, id: job.id, ahead };
+  });
+}
+
+// req: the popup's job that matched (sameCapture) the queued or running one.
+async function addPopupJoin(jobId, req) {
+  const items = await chrome.storage.session.get({ [POPUP_CAPTURE_JOINS_KEY]: {} });
+  const all = Object.assign({}, items[POPUP_CAPTURE_JOINS_KEY]);
+  const prior = all[jobId] || {};
+  const retries = Array.isArray(prior.retries) ? prior.retries : [];
+  all[jobId] = {
+    title: prior.title || req.title || "",
+    retries: req.retryOf && !retries.includes(req.retryOf) ? retries.concat(req.retryOf) : retries,
+  };
+  await chrome.storage.session.set({ [POPUP_CAPTURE_JOINS_KEY]: all });
+}
+
+// The popup requests that joined this job ({title, retries}), or null when
+// none did; forgets them.
+async function takePopupJoin(jobId) {
+  if (!jobId) return null;
+  const items = await chrome.storage.session.get({ [POPUP_CAPTURE_JOINS_KEY]: {} });
+  const all = Object.assign({}, items[POPUP_CAPTURE_JOINS_KEY]);
+  if (!(jobId in all)) return null;
+  const join = all[jobId] || {};
+  delete all[jobId];
+  await chrome.storage.session.set({ [POPUP_CAPTURE_JOINS_KEY]: all });
+  return { title: join.title || "", retries: Array.isArray(join.retries) ? join.retries : [] };
+}
+
+// A job a popup request joined (takePopupJoin) settles as a popup capture:
+// it publishes its outcome for that popup and records a failure in Recent
+// failures, under the popup's title when the job has none (a context-menu
+// job doesn't). Without a join, the job as it is.
+function joinedByPopup(job, join) {
+  if (!join) return job;
+  return Object.assign({}, job, { origin: "popup", title: job.title || join.title });
+}
+
+// E1: the job's capture request is over: the helper answered, the request
+// threw, or the helper's queue had no room. One queue step, so a popup
+// click or Retry can't slip in between: the running job is marked answered
+// (restoreQueue won't send it again, and a later click is a new capture,
+// not a duplicate) and the popup requests that joined it are taken.
+// Resolves with those (takePopupJoin), or null.
+function settleCaptureRequest(job) {
+  return queueStep(async () => {
+    const state = await getState();
+    if (job.id && state.busy && state.current && state.current.id === job.id) {
+      await setState({ current: { ...state.current, answered: true } });
+    }
+    return takePopupJoin(job.id);
+  });
+}
+
+// The outcome of a popup capture, for the popup if it's still open (it shows
+// the ones it handed off). Newest first, five max. A context-menu job has no
+// origin and publishes nothing, unless a popup joined it (joinedByPopup).
+async function publishPopupResult(job, result) {
+  if (!job || job.origin !== "popup" || !job.id) return;
+  try {
+    const items = await chrome.storage.session.get({ [POPUP_CAPTURE_RESULTS_KEY]: [] });
+    const prior = Array.isArray(items[POPUP_CAPTURE_RESULTS_KEY])
+      ? items[POPUP_CAPTURE_RESULTS_KEY]
+      : [];
+    const entry = Object.assign({
+      id: job.id, url: job.url, title: job.title || "", route: STC.queueJobRoute(job),
+      saveOnly: !!job.saveOnly,
+      finishedAt: Date.now(), ...(job.captureResult || {}),
+    }, result);
+    await chrome.storage.session.set({
+      [POPUP_CAPTURE_RESULTS_KEY]: [entry]
+        .concat(prior.filter((r) => r && r.id !== job.id))
+        .slice(0, 5),
+    });
+  } catch (e) {
+    console.warn("[stc] popup capture result not stored", e);
+  }
+}
+
+// serverQueueHasRoom, but no answer within `ms` counts as room, the way the
+// popup's own check treated a failed /queue/status.
+function serverQueueHasRoomWithin(ms) {
+  let timer = null;
+  const gaveUp = new Promise((resolve) => { timer = setTimeout(() => resolve(true), ms); });
+  return Promise.race([serverQueueHasRoom(), gaveUp]).finally(() => clearTimeout(timer));
+}
+
+// What the popup's Recent failures Retry needs to rerun a failed popup
+// capture in this queue.
+function popupFailureExtra(job) {
+  const extra = { title: job.title || "", route: STC.queueJobRoute(job) };
+  if (job.saveOnly) extra.saveOnly = true;
+  return extra;
 }
 
 function shortUrl(url) {
@@ -773,19 +1101,16 @@ function shortUrl(url) {
 async function drain() {
   if (_draining.running) return;
   _draining.running = true;
+  const keepAlive = setInterval(keepWorkerAlive, KEEPALIVE_MS);
+  let idle = false;
   try {
     while (true) {
-      const state = await getState();
-      if (!state.queue.length) {
-        await setState({ busy: false, current: null });
-        checkHealthAndUpdateBadge().catch(() => {});
+      const job = await queueStep(takeNextJob);
+      checkHealthAndUpdateBadge().catch(() => {});
+      if (!job) {
+        idle = true;
         return;
       }
-      const job = state.queue.shift();
-      const newQueue = state.queue;
-      const current = { ...job, startedAt: Date.now() };
-      await setState({ busy: true, current, queue: newQueue });
-      checkHealthAndUpdateBadge().catch(() => {});
 
       try {
         await runJob(job);
@@ -795,8 +1120,28 @@ async function drain() {
       }
     }
   } finally {
-    _draining.running = false;
+    clearInterval(keepAlive);
+    // takeNextJob already let go when the queue went idle, and a drain() an
+    // enqueue started after that owns the flag now.
+    if (!idle) _draining.running = false;
   }
+}
+
+// drain()'s queue step, so an enqueue (or Clear queue) can't land between
+// reading the queue and writing it back: the next job becomes `current`, or,
+// with none left, the queue goes idle and this drain() lets go in the same
+// step. A job enqueued after that starts a new drain() instead of waiting on
+// one that's about to stop. Resolves with the job, or null when idle.
+async function takeNextJob() {
+  const state = await getState();
+  if (!state.queue.length) {
+    await setState({ busy: false, current: null });
+    _draining.running = false;
+    return null;
+  }
+  const job = state.queue.shift();
+  await setState({ busy: true, current: { ...job, startedAt: Date.now() }, queue: state.queue });
+  return job;
 }
 
 async function runJob(job) {
@@ -805,9 +1150,38 @@ async function runJob(job) {
 }
 
 async function runExtractJob(job) {
+  // E1: a popup video checks the helper's queue here, at its turn, instead
+  // of the popup waiting on /queue/status before handing it over. A full
+  // queue isn't a failed capture: no Recent failures row, and a retried
+  // record stays.
+  if (job.checkRoom && !(await serverQueueHasRoomWithin(QUEUE_ROOM_WAIT_MS))) {
+    job = joinedByPopup(job, await settleCaptureRequest(job));
+    notify("Queue full", "Give it a few minutes, then try again.");
+    await publishPopupResult(job, { ok: false, code: "queue_full", message: QUEUE_FULL_MESSAGE });
+    return;
+  }
   let data;
+  let savedXPosts = false;
   try {
-    if (job.usePage) {
+    if (job.usePlaylist) {
+      data = await STC.playlistStart(job.url, job.interval);
+    } else if (job.usePodcast) {
+      // A page's RSS/Atom link need not contain "feed" or end in .xml.
+      // The helper validates the feed; URL hints only classify pasted links.
+      data = await STC.postPodcastFeed(job.url);
+    } else if (job.useXPost) {
+      data = await STC.postExtractX(job.url);
+      if (!data || data.code === "disabled" || data.code === "empty") {
+        // A video-only post keeps the same queue-room guard as a video.
+        if (!(await serverQueueHasRoomWithin(QUEUE_ROOM_WAIT_MS))) {
+          job = joinedByPopup(job, await settleCaptureRequest(job));
+          notify("Queue full", "Give it a few minutes, then try again.");
+          await publishPopupResult(job, { ok: false, code: "queue_full", message: QUEUE_FULL_MESSAGE });
+          return;
+        }
+        data = await STC.postExtract(job.url, job.interval);
+      } else savedXPosts = !!data.ok;
+    } else if (job.usePage) {
       data = await STC.postExtractPage(job.url);
     } else if (job.useExtractAny) {
       data = await STC.postExtractAny(job.url, job.interval);
@@ -817,36 +1191,130 @@ async function runExtractJob(job) {
       data = await STC.postExtract(job.url, job.interval);
     }
   } catch (e) {
-    console.error("[Uoink] server unreachable", e);
+    console.error("[Uoink] extract request failed", e);
+    job = joinedByPopup(job, await settleCaptureRequest(job));
     // No tab open here -- setup.html only opens from direct user actions
     // (the in-page YouTube button or the popup help link), never from
     // background-queued jobs. Keeps unrelated context-menu work from
     // surprising the user with new tabs.
-    notify("Uoink Helper offline",
-           "Start Uoink from the Start Menu, then try again.");
+    const failure = await notifyThrownCaptureError(e);
+    await publishPopupResult(job, { ok: false, kind: failure.kind, message: failure.message });
     return;
   }
+  // E1: the Recent failures records this capture settles: its own retryOf,
+  // plus any a Retry named when it joined this job while queued or running.
+  const join = await settleCaptureRequest(job);
+  job = joinedByPopup(job, join);
+  // Keep only the fields the small Captures view needs, never a base64 corpus.
+  job.captureResult = {
+    title: (data && data.title) || job.title || "",
+    video_id: data && data.video_id, folder: data && data.folder,
+    video_slug: data && data.video_slug, job_id: data && data.job_id,
+    pending_id: data && data.pending_id,
+    failure_phase: data && data.failure_phase, error_detail: data && data.error_detail,
+  };
+  const retried = [job.retryOf].concat(join ? join.retries : []).filter(Boolean);
   if (!data || !data.ok) {
     // A2: an X login wall (or a pasted X link X won't serve logged-out) is not
     // a generic failure — it's honest and actionable. Say what happened and
     // what to do, and make it persistent so it isn't a toast that vanishes.
     if (data && data.code === "x_login_wall") {
       await notifyWalledXArticle();
+      await publishPopupResult(job, {
+        ok: false, code: data.code, message: STC.describeFailure(data),
+      });
       return;
     }
-    notify("Uoink failed", STC.friendlyError(data && data.error),
+    const message = STC.describeFailure(data);
+    // E1: a failed popup capture (or one a popup joined) gets a Recent
+    // failures row, like the in-page button's, replacing the retried
+    // records: rememberFailure drops the one it names and any row for this
+    // exact URL; the rest go by id (a joined Retry's URL can differ by its
+    // #fragment, see sameCapture). An allowlist wall isn't a failed
+    // capture: the popup offers "Allow this site and retry" for it instead.
+    if (job.origin === "popup" && !(data && data.code === "host_not_allowed")) {
+      for (const id of retried.slice(1)) await STC.forgetFailure(id);
+      await STC.rememberFailure(job.url, message, {
+        ...popupFailureExtra(job), failure_phase: data && data.failure_phase,
+        error_detail: data && data.error_detail,
+      }, retried[0]);
+    }
+    notify("Uoink failed", message,
            { requireInteraction: true });
+    await publishPopupResult(job, {
+      ok: false, code: (data && data.code) || null, message,
+    });
+    return;
+  }
+  // The helper took the retried capture: its Recent failures rows can go.
+  for (const id of retried) await STC.forgetFailure(id);
+  if (savedXPosts) {
+    // /extract/x already saved a readable item. Finish that result before
+    // the separate video request, just as captureXPost does in the popup.
+    const count = Number(data.tweets_captured) || 1;
+    const saved = `Saved ${count} post${count === 1 ? "" : "s"}`;
+    let message = `${saved} to your library.`;
+    let followUp = null;
+    if (data.metadata && data.metadata.has_video) {
+      try {
+        const video = await enqueuePopupCapture({ route: "video", url: job.url,
+          interval: job.interval, title: `Video from ${data.title || job.title || "X post"}`, saveOnly: true });
+        message = video.ok ? `${saved} + queued the video.`
+          : `${saved}. Video not queued: ${video.error}`;
+        if (video.ok) followUp = {
+          id: video.id,
+          failurePrefix: `${saved}. Video: `,
+          queueFullMessage: `${saved}. Video not queued -- the queue is full. Try the video again in a few minutes.`,
+        };
+      } catch (_) {
+        message = `${saved}. Couldn't queue the video. Try capturing the post again.`;
+      }
+    }
+    notify("Posts saved", message);
+    await publishPopupResult(job, { ok: true, message, followUp });
+    return;
+  }
+  if (job.usePlaylist) {
+    await publishPopupResult(job, { ok: true, queued: true, message: "Playlist started. Follow it in Captures." });
+    return;
+  }
+  if (job.usePodcast) {
+    await publishPopupResult(job, { ok: true, message: "Podcast feed saved. Uoink will watch metadata; audio stays off." });
     return;
   }
   if (data.queued) {
-    const id = await notify("Uoink queued", `${queuedMessage(data)} Click View queue for status.`, {
-      buttons: [{ title: "View queue" }],
-    });
-    if (id) _queueViewNotificationIds.add(id);
+    await publishPopupResult(job, { ok: true, queued: true, message: queuedMessage(data) });
     return;
   }
 
-  await setState({ current: { ...job, startedAt: Date.now(), title: data.title || null } });
+  await setState({
+    current: {
+      ...job, startedAt: Date.now(), title: data.title || job.title || null, answered: true,
+    },
+  });
+
+  // E1: the video half of an X post whose text the popup already saved. The
+  // popup never copied that one or opened Claude for it, so neither do we.
+  if (job.saveOnly) {
+    const message = data.title
+      ? `Saved the video "${data.title}" to your library.`
+      : "Saved the video to your library.";
+    notify("Uoinked ★", message);
+    await publishPopupResult(job, { ok: true, message });
+    return;
+  }
+
+  // E1: a capture the helper reused comes back without its markdown (a job
+  // restoreQueue resumed waited behind the capture the helper was still
+  // running). Say it's saved rather than copy nothing and open Claude.
+  if (!data.corpus_md_paste && !data.yoink_md) {
+    const message = data.title
+      ? `Saved "${data.title}" to your library. Use Copy Markdown in the Uoink popup to paste it.`
+      : "Saved to your library. Use Copy Markdown in the Uoink popup to paste it.";
+    notify("Uoinked ★", message);
+    await publishPopupResult(job, { ok: true, message });
+    return;
+  }
 
   // Sprint 3: Smart Screenshot Picker intercept. When the user has the
   // picker setting enabled, we hand the corpus off to the popup instead of
@@ -856,6 +1324,9 @@ async function runExtractJob(job) {
     await STC.stashPickerCorpus(data);
     notify("Uoink ready",
            "Click the Uoink icon to pick which screenshots to include.");
+    await publishPopupResult(job, {
+      ok: true, message: "Uoink ready. Pick screenshots in the popup.",
+    });
     return;
   }
 
@@ -868,7 +1339,14 @@ async function runExtractJob(job) {
   const copied = await copyToClipboard(clipboardText);
   if (!copied) {
     await notifyClipboardRetry(clipboardText);
+    await publishPopupResult(job, {
+      ok: true, message: "Couldn't copy. Use the Try again notification.",
+    });
     return;
+  }
+  if (job.origin === "popup") {
+    // The popup logged its own pastes; keep that signal now the SW copies.
+    STC.logEngagement("paste", "popup", { length: clipboardText.length }).catch(() => {});
   }
   await markClipboardYoinkNow();
   await chrome.tabs.create({ url: "https://claude.ai/new", active: true });
@@ -878,6 +1356,17 @@ async function runExtractJob(job) {
   // so the in-page YouTube button gets the same first-time CTA.
   const message = await STC.buildUoinkedMessage(data, copied);
   notify("Uoinked ★", message);
+  await publishPopupResult(job, { ok: true, message: "Uoinked ★ Paste in Claude." });
+}
+
+// E7: a thrown capture request is not proof the helper is down. Say what it
+// means: still working (we stopped waiting), lost track, or offline (only
+// when the /health ping fails too, with platform-aware start copy).
+// Returns the {kind, title, label, message} it showed.
+async function notifyThrownCaptureError(e, extraOptions) {
+  const failure = await STC.describeCaptureError(e);
+  await notify(failure.title, failure.message, extraOptions);
+  return failure;
 }
 
 // A2: the one honest, persistent "X walled it" message. requireInteraction
@@ -894,17 +1383,40 @@ function notifyWalledXArticle() {
     { requireInteraction: true });
 }
 
-// Message a tab and resolve the response (or null if the content script isn't
-// there / errors). Mirrors the popup's messageActiveTab.
+// Chrome's lastError when nothing in the tab listens for the message.
+const NO_RECEIVER_RE = /Receiving end does not exist|Could not establish connection/i;
+
+// Message a tab and resolve {resp, noReceiver}: resp is the response (or null
+// if the content script errors / doesn't answer), noReceiver is true when the
+// content script isn't in the tab at all. Mirrors the popup's messageActiveTab.
 function messageTab(tabId, payload) {
   return new Promise((resolve) => {
     try {
       chrome.tabs.sendMessage(tabId, payload, (resp) => {
-        void chrome.runtime.lastError; // no listener -> lastError; treat as null
-        resolve(resp || null);
+        const err = chrome.runtime.lastError;
+        resolve({
+          resp: resp || null,
+          noReceiver: !!err && NO_RECEIVER_RE.test(String(err.message || "")),
+        });
       });
-    } catch { resolve(null); }
+    } catch { resolve({ resp: null, noReceiver: false }); }
   });
+}
+
+// E2: a tab open since before the extension was installed or updated never
+// got the declared content scripts. Inject the article parser and its
+// content script (host permission + "scripting"); true if they ran.
+async function injectXArticleScripts(tabId) {
+  try {
+    await chrome.scripting.executeScript({
+      target: { tabId },
+      files: ["lib/x-article.js", "content-x-article.js"],
+    });
+    return true;
+  } catch (e) {
+    console.warn("[stc] x-article script injection failed", e);
+    return false;
+  }
 }
 
 // A1: capture an X Article from the context menu the same way the in-page
@@ -913,8 +1425,14 @@ function messageTab(tabId, payload) {
 // to the best-effort /extract/page fetch when the in-page parser isn't
 // available. A walled fallback reports honestly (A2) instead of saving junk.
 async function captureXArticleFromTab(tabId, pageUrl) {
-  // 1) PRIMARY — in-page DOM parse via content-x-article.js.
-  const resp = await messageTab(tabId, { type: "uoinkParseXArticle" });
+  // 1) PRIMARY — in-page DOM parse via content-x-article.js. E2: with no
+  // receiver in the tab, inject the script and ask once more.
+  const ask = { type: "uoinkParseXArticle" };
+  let reply = await messageTab(tabId, ask);
+  if (reply.noReceiver && await injectXArticleScripts(tabId)) {
+    reply = await messageTab(tabId, ask);
+  }
+  const resp = reply.resp;
   const parsed = (resp && resp.ok && resp.article && resp.article.ok)
     ? resp.article : null;
   if (parsed) {
@@ -923,9 +1441,7 @@ async function captureXArticleFromTab(tabId, pageUrl) {
       data = await STC.postExtractXArticle(parsed);
     } catch (e) {
       console.error("[stc] context-menu x-article capture failed", e);
-      notify("Uoink Helper offline",
-             "Start Uoink from the Start Menu, then try again.",
-             { requireInteraction: true });
+      await notifyThrownCaptureError(e, { requireInteraction: true });
       return;
     }
     if (data && data.ok) {
@@ -936,7 +1452,7 @@ async function captureXArticleFromTab(tabId, pageUrl) {
       return;
     }
     notify("Uoink failed",
-           STC.friendlyError(data && data.error)
+           STC.describeFailure(data)
              || "Read the article but couldn't save it. Try again.",
            { requireInteraction: true });
     return;
@@ -948,9 +1464,7 @@ async function captureXArticleFromTab(tabId, pageUrl) {
     pageData = await STC.postExtractPage(pageUrl);
   } catch (e) {
     console.error("[stc] context-menu x-article page fallback failed", e);
-    notify("Uoink Helper offline",
-           "Start Uoink from the Start Menu, then try again.",
-           { requireInteraction: true });
+    await notifyThrownCaptureError(e, { requireInteraction: true });
     return;
   }
   if (pageData && pageData.code === "x_login_wall") {
@@ -965,7 +1479,7 @@ async function captureXArticleFromTab(tabId, pageUrl) {
   }
   if (!pageData || !pageData.ok) {
     notify("Uoink failed",
-           STC.friendlyError(pageData && pageData.error)
+           STC.describeFailure(pageData)
              || "X didn't serve this article to Uoink. Open it and use the "
                + "in-page \"Uoink this article\" button while logged in.",
            { requireInteraction: true });
@@ -1003,13 +1517,12 @@ async function runSessionAddJob(job) {
   try {
     data = await STC.addToSession(job.session_id, job.url, job.interval);
   } catch (e) {
-    console.error("[Uoink] server unreachable", e);
-    notify("Uoink Helper offline",
-           "Start Uoink from the Start Menu, then try again.");
+    console.error("[Uoink] session add request failed", e);
+    await notifyThrownCaptureError(e);
     return;
   }
   if (!data || !data.ok) {
-    notify("Uoink failed", STC.friendlyError(data && data.error));
+    notify("Uoink failed", STC.describeFailure(data));
     return;
   }
 

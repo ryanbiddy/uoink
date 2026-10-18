@@ -1,0 +1,80 @@
+{
+  "schema_version": 2,
+  "video_id": "episode_cf538072f1d",
+  "slug": "s20-matrix-item-2-cf538072f1d",
+  "source_type": "episode",
+  "platform": "podcast",
+  "url": "http://127.0.0.1:49557/episode/2",
+  "source_url": "http://127.0.0.1:49557/episode/2",
+  "feed_url": "http://127.0.0.1:49557/feed.xml",
+  "guid": "s20-entry-2",
+  "capture_key": "podcast:c87a92acb140772050022b03add9cff0a847d1bc6240bd31f53c875b50988e65",
+  "podcast_title": "Untitled podcast",
+  "episode_title": "S20 matrix item 2",
+  "title": "S20 matrix item 2",
+  "channel": "Untitled podcast",
+  "author": "Untitled podcast",
+  "host": null,
+  "duration_seconds": null,
+  "published_at": "Mon, 07 Sep 2026 02:00:00 GMT",
+  "upload_date": "Mon, 07 Sep 2026 02:00:00 GMT",
+  "yoinked_at": "2026-09-08T21:43:27Z",
+  "transcript_model": "base",
+  "language": "en",
+  "diarization_ran": false,
+  "speakers": [],
+  "transcript": [
+    {
+      "start": 12.5,
+      "end": 21.75,
+      "text": "S21 fixture: durable capture waits for complete publication.",
+      "speaker": null,
+      "speaker_provenance": null,
+      "source_url": "http://127.0.0.1:49557/episode/2",
+      "source_deep_link": "http://127.0.0.1:49557/episode/2#t=12",
+      "youtube_deep_link": null
+    }
+  ],
+  "media_depth": {
+    "schema_version": 1,
+    "contract_version": "phase6-v1",
+    "video_id": "episode_cf538072f1d",
+    "source_revision": "5b1b90ba0f156458c1bc0bf38495cecaa42c6e4861a76f5a235e2fdd3fd336f6",
+    "cue_revision": "6483b874bbd95726315b965ce51911471c94edb9f88ebc52b4a4e627d80f8892",
+    "media_revision": "e0c0e5da5c0e72be9c03cdc347d5dd6c6e97903f80425d248ed2966d97280a12",
+    "chapter_state": "unsupported",
+    "speaker_state": "absent",
+    "diarization_state": "not_requested",
+    "provenance": {
+      "chapter_source": null,
+      "transcript_source": {
+        "kind": "local_asr",
+        "artifact_sha256": "93034f25b169019e84bbd2b17007caf745966843c15e9ce45a5865d2da3d8bc7",
+        "provider": "whisperx",
+        "model": "synthetic-S21",
+        "language": "en"
+      },
+      "active_diarization_run_id": null,
+      "absence_reason": {
+        "chapters": "adapter_unsupported",
+        "speakers": "diarization_off"
+      },
+      "corpus_revision": "8962ff1f417181ea7512fe674dce38feb79b0c4545ec59ca4ad8a82927b55fd1"
+    },
+    "playback": {
+      "source_url": "http://127.0.0.1:49557/episode/2",
+      "seek_url": null,
+      "seek_kind": "none"
+    },
+    "chapters": [],
+    "runs": [],
+    "cues": [
+      {
+        "seq": 0,
+        "cue_hash": "3ccbb6d1de01ab8e5da0a661e534fb4e2dbdc43cdafd82708bdf5e12fbd01d39",
+        "speaker": null,
+        "speaker_provenance": null
+      }
+    ]
+  }
+}

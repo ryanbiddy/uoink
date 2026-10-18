@@ -1,0 +1,165 @@
+.......................F...............................F.............FFF [ 28%]
+FF.FF................................................................... [ 56%]
+........................................................................ [ 85%]
+............F......FF.........F.....F.                                   [100%]
+================================== FAILURES ===================================
+______________ test_purge_removes_intent_owned_actual_temp_name _______________
+tests\library_work_astra\test_phase4_aw_acceptance.py:371: in test_purge_removes_intent_owned_actual_temp_name
+    assert len(orphans) == 1
+E   assert 0 == 1
+E    +  where 0 = len([])
+___________ test_d13_replace_syscall_cannot_complete_after_timeout ____________
+tests\library_work_astra\test_phase4_aw2_acceptance.py:362: in test_d13_replace_syscall_cannot_complete_after_timeout
+    assert entered.is_set() and result["ok"] is False
+E   assert (False)
+E    +  where False = is_set()
+E    +    where is_set = <threading.Event at 0x1e643873770: unset>.is_set
+_____________ test_d12_retry_keeps_ownership_of_interrupted_temp ______________
+tests\library_work_astra\test_phase4_aw3_acceptance.py:217: in test_d12_retry_keeps_ownership_of_interrupted_temp
+    temporary = interrupted_item_temp(env, monkeypatch)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\library_work_astra\test_phase4_aw3_acceptance.py:210: in interrupted_item_temp
+    assert len(allocated) == 1 and allocated[0].is_file()
+E   assert (0 == 1)
+E    +  where 0 = len([])
+_________ test_d12_control_hard_purge_removes_unedited_recorded_temp __________
+tests\library_work_astra\test_phase4_aw3_acceptance.py:226: in test_d12_control_hard_purge_removes_unedited_recorded_temp
+    temporary = interrupted_item_temp(env, monkeypatch)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\library_work_astra\test_phase4_aw3_acceptance.py:210: in interrupted_item_temp
+    assert len(allocated) == 1 and allocated[0].is_file()
+E   assert (0 == 1)
+E    +  where 0 = len([])
+__ test_d12_recorded_temp_path_does_not_authorize_deleting_user_replacement ___
+tests\library_work_astra\test_phase4_aw3_acceptance.py:234: in test_d12_recorded_temp_path_does_not_authorize_deleting_user_replacement
+    temporary = interrupted_item_temp(env, monkeypatch)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\library_work_astra\test_phase4_aw3_acceptance.py:210: in interrupted_item_temp
+    assert len(allocated) == 1 and allocated[0].is_file()
+E   assert (0 == 1)
+E    +  where 0 = len([])
+_ test_d13_timeout_never_publishes_or_rolls_back_over_user_bytes[visibility] __
+tests\library_work_astra\test_phase4_aw3_acceptance.py:274: in test_d13_timeout_never_publishes_or_rolls_back_over_user_bytes
+    assert entered.is_set() and not result["ok"]
+E   assert (False)
+E    +  where False = is_set()
+E    +    where is_set = <threading.Event at 0x1e6439a23f0: unset>.is_set
+__ test_d13_timeout_never_publishes_or_rolls_back_over_user_bytes[user_edit] __
+tests\library_work_astra\test_phase4_aw3_acceptance.py:274: in test_d13_timeout_never_publishes_or_rolls_back_over_user_bytes
+    assert entered.is_set() and not result["ok"]
+E   assert (False)
+E    +  where False = is_set()
+E    +    where is_set = <threading.Event at 0x1e6439a2930: unset>.is_set
+_______ test_d13_timed_out_writer_cannot_erase_a_later_successful_sync ________
+tests\library_work_astra\test_phase4_aw3_acceptance.py:329: in test_d13_timed_out_writer_cannot_erase_a_later_successful_sync
+    assert entered.is_set() and not first["ok"]
+E   assert (False)
+E    +  where False = is_set()
+E    +    where is_set = <threading.Event at 0x1e6439a0410: unset>.is_set
+__ test_d15_failed_destination_binding_persistence_does_not_allow_readoption __
+tests\library_work_astra\test_phase4_aw3_acceptance.py:360: in test_d15_failed_destination_binding_persistence_does_not_allow_readoption
+    assert item_file(env).exists() and not binding.exists()
+E   AssertionError: assert (True and not True)
+E    +  where True = exists()
+E    +    where exists = WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/260ef22c-4a8/grok/_scratch/av5m4b3-wi-0/a76/v/Uoink/Library/ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb.md').exists
+E    +      where WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/260ef22c-4a8/grok/_scratch/av5m4b3-wi-0/a76/v/Uoink/Library/ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb.md') = item_file(namespace(root=WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/260ef22c-4a8/grok/_s...k-library/260ef22c-4a8/grok/_scratch/av5m4b3-wi-0/a76/v'), mirror=<library_mirror.Mirror object at 0x000001E6439B37A0>))
+E    +  and   True = exists()
+E    +    where exists = WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/260ef22c-4a8/grok/_scratch/av5m4b3-wi-0/a76/d/reach/mirror/destination_binding.json').exists
+______ test_aw6_finally_cleanup_preserves_replacement_at_allocated_temp _______
+tests\library_work_astra\test_phase4_aw6_acceptance.py:33: in test_aw6_finally_cleanup_preserves_replacement_at_allocated_temp
+    assert temp.is_file(), "finally cleanup deleted an independently replaced temp pathname"
+E   AssertionError: finally cleanup deleted an independently replaced temp pathname
+E   assert False
+E    +  where False = is_file()
+E    +    where is_file = WindowsPath('C:/Users/hello/AppData/Local/AgentControlRoom/worktrees/uoink-library/260ef22c-4a8/grok/_scratch/av5m4b3-.../a91/v/Uoink/Library/ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb.md.120dbe0c4f16d7838882278d.tmp').is_file
+_______ test_child_boundary_timeout_confirms_death_and_keeps_user_edit ________
+tests\test_phase4_av5m4b_lifetime.py:202: in test_child_boundary_timeout_confirms_death_and_keeps_user_edit
+    result = env.mirror.resync(budget_s=0.25)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+library_mirror.py:1381: in resync
+    return self._resync_locked(max_files=int(max_files), budget_s=max(0.0, remaining))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+library_mirror.py:2506: in _resync_locked
+    self._start_vault_io(dest_str)
+tests\test_phase4_av5m4b_lifetime.py:198: in start_and_freeze
+    held["stall"] = _freeze_session(session)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_phase4_av5m4b_lifetime.py:126: in _freeze_session
+    return _prove_real_child_stall(session)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_phase4_av5m4b_lifetime.py:119: in _prove_real_child_stall
+    assert evidence["stalled"], evidence
+E   AssertionError: {'pid': 69516, 'suspended': True, 'platform': 'nt', 'open_error': 0, ...}
+E   assert False
+____________ test_timed_out_parent_cannot_use_later_resync_session ____________
+tests\test_phase4_av5m4b_lifetime.py:239: in test_timed_out_parent_cannot_use_later_resync_session
+    result1 = env.mirror.resync(budget_s=0.25)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+library_mirror.py:1381: in resync
+    return self._resync_locked(max_files=int(max_files), budget_s=max(0.0, remaining))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+library_mirror.py:2506: in _resync_locked
+    self._start_vault_io(dest_str)
+tests\test_phase4_av5m4b_lifetime.py:236: in start_and_freeze
+    _freeze_session(session)
+tests\test_phase4_av5m4b_lifetime.py:126: in _freeze_session
+    return _prove_real_child_stall(session)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_phase4_av5m4b_lifetime.py:119: in _prove_real_child_stall
+    assert evidence["stalled"], evidence
+E   AssertionError: {'pid': 43384, 'suspended': True, 'platform': 'nt', 'open_error': 0, ...}
+E   assert False
+_______________ test_frozen_child_timeout_cannot_return_success _______________
+tests\test_phase4_av5m4b2_lifetime.py:167: in test_frozen_child_timeout_cannot_return_success
+    result = env.mirror.resync(budget_s=0.1)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+library_mirror.py:1381: in resync
+    return self._resync_locked(max_files=int(max_files), budget_s=max(0.0, remaining))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+library_mirror.py:2506: in _resync_locked
+    self._start_vault_io(dest_str)
+tests\test_phase4_av5m4b2_lifetime.py:163: in start_and_freeze
+    held["stall"] = _freeze_session(session)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_phase4_av5m4b_lifetime.py:126: in _freeze_session
+    return _prove_real_child_stall(session)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_phase4_av5m4b_lifetime.py:119: in _prove_real_child_stall
+    assert evidence["stalled"], evidence
+E   AssertionError: {'pid': 68756, 'suspended': True, 'platform': 'nt', 'open_error': 0, ...}
+E   assert False
+__________ test_real_child_stall_timeout_keeps_independent_user_edit __________
+tests\test_phase4_av5m4b3_lifetime.py:193: in test_real_child_stall_timeout_keeps_independent_user_edit
+    result = env.mirror.resync(budget_s=0.15)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+library_mirror.py:1381: in resync
+    return self._resync_locked(max_files=int(max_files), budget_s=max(0.0, remaining))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+library_mirror.py:2506: in _resync_locked
+    self._start_vault_io(dest_str)
+tests\test_phase4_av5m4b3_lifetime.py:189: in start_and_freeze
+    held["stall"] = _freeze_session(session)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_phase4_av5m4b_lifetime.py:126: in _freeze_session
+    return _prove_real_child_stall(session)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_phase4_av5m4b_lifetime.py:119: in _prove_real_child_stall
+    assert evidence["stalled"], evidence
+E   AssertionError: {'pid': 71032, 'suspended': True, 'platform': 'nt', 'open_error': 0, ...}
+E   assert False
+=========================== short test summary info ===========================
+FAILED tests/library_work_astra/test_phase4_aw_acceptance.py::test_purge_removes_intent_owned_actual_temp_name
+FAILED tests/library_work_astra/test_phase4_aw2_acceptance.py::test_d13_replace_syscall_cannot_complete_after_timeout
+FAILED tests/library_work_astra/test_phase4_aw3_acceptance.py::test_d12_retry_keeps_ownership_of_interrupted_temp
+FAILED tests/library_work_astra/test_phase4_aw3_acceptance.py::test_d12_control_hard_purge_removes_unedited_recorded_temp
+FAILED tests/library_work_astra/test_phase4_aw3_acceptance.py::test_d12_recorded_temp_path_does_not_authorize_deleting_user_replacement
+FAILED tests/library_work_astra/test_phase4_aw3_acceptance.py::test_d13_timeout_never_publishes_or_rolls_back_over_user_bytes[visibility]
+FAILED tests/library_work_astra/test_phase4_aw3_acceptance.py::test_d13_timeout_never_publishes_or_rolls_back_over_user_bytes[user_edit]
+FAILED tests/library_work_astra/test_phase4_aw3_acceptance.py::test_d13_timed_out_writer_cannot_erase_a_later_successful_sync
+FAILED tests/library_work_astra/test_phase4_aw3_acceptance.py::test_d15_failed_destination_binding_persistence_does_not_allow_readoption
+FAILED tests/library_work_astra/test_phase4_aw6_acceptance.py::test_aw6_finally_cleanup_preserves_replacement_at_allocated_temp
+FAILED tests/test_phase4_av5m4b_lifetime.py::test_child_boundary_timeout_confirms_death_and_keeps_user_edit
+FAILED tests/test_phase4_av5m4b_lifetime.py::test_timed_out_parent_cannot_use_later_resync_session
+FAILED tests/test_phase4_av5m4b2_lifetime.py::test_frozen_child_timeout_cannot_return_success
+FAILED tests/test_phase4_av5m4b3_lifetime.py::test_real_child_stall_timeout_keeps_independent_user_edit
+14 failed, 240 passed in 81.11s (0:01:21)

@@ -199,9 +199,107 @@ def show_toast(title: str, body: str, icon_path: str | None = None) -> None:
         log.debug("toast (%s) failed: %s", platform_label(), e)
 
 
+def is_foreground_fullscreen(
+    *,
+    platform_name: str | None = None,
+    bounds_probe=None,
+) -> bool:
+    """Return whether a real foreground window covers its monitor.
+
+    This is deliberately a courtesy signal, not an ownership or security
+    boundary. On Windows it catches exclusive-fullscreen games and borderless
+    fullscreen windows. Other platforms return False until their window APIs
+    have an equally cheap, bounded probe.
+
+    ``bounds_probe`` exists so tests never need to create or focus a window.
+    It returns ``(window_rect, monitor_rect, class_name)`` where each rect is
+    ``(left, top, right, bottom)``.
+    """
+    selected_platform = sys.platform if platform_name is None else platform_name
+    if selected_platform != "win32":
+        return False
+    probe = bounds_probe or _windows_foreground_bounds
+    try:
+        observed = probe()
+        if observed is None:
+            return False
+        window_rect, monitor_rect, class_name = observed
+        if class_name in {"Progman", "WorkerW", "Shell_TrayWnd"}:
+            return False
+        tolerance = 2
+        return bool(
+            window_rect[0] <= monitor_rect[0] + tolerance
+            and window_rect[1] <= monitor_rect[1] + tolerance
+            and window_rect[2] >= monitor_rect[2] - tolerance
+            and window_rect[3] >= monitor_rect[3] - tolerance
+        )
+    except (OSError, TypeError, ValueError):
+        return False
+
+
 # --------------------------------------------------------------------------
 # Windows-only internals
 # --------------------------------------------------------------------------
+def _windows_foreground_bounds():
+    """Return foreground/monitor bounds without changing window state."""
+    import ctypes
+    from ctypes import wintypes
+
+    class _RECT(ctypes.Structure):
+        _fields_ = [
+            ("left", ctypes.c_long),
+            ("top", ctypes.c_long),
+            ("right", ctypes.c_long),
+            ("bottom", ctypes.c_long),
+        ]
+
+    class _MONITORINFO(ctypes.Structure):
+        _fields_ = [
+            ("cbSize", wintypes.DWORD),
+            ("rcMonitor", _RECT),
+            ("rcWork", _RECT),
+            ("dwFlags", wintypes.DWORD),
+        ]
+
+    user32 = ctypes.windll.user32
+    user32.GetForegroundWindow.restype = wintypes.HWND
+    user32.GetWindowRect.argtypes = [wintypes.HWND, ctypes.POINTER(_RECT)]
+    user32.GetWindowRect.restype = wintypes.BOOL
+    user32.MonitorFromWindow.argtypes = [wintypes.HWND, wintypes.DWORD]
+    user32.MonitorFromWindow.restype = ctypes.c_void_p
+    user32.GetMonitorInfoW.argtypes = [
+        ctypes.c_void_p,
+        ctypes.POINTER(_MONITORINFO),
+    ]
+    user32.GetMonitorInfoW.restype = wintypes.BOOL
+    user32.GetClassNameW.argtypes = [
+        wintypes.HWND,
+        wintypes.LPWSTR,
+        ctypes.c_int,
+    ]
+    user32.GetClassNameW.restype = ctypes.c_int
+    hwnd = user32.GetForegroundWindow()
+    if not hwnd:
+        return None
+    window = _RECT()
+    if not user32.GetWindowRect(hwnd, ctypes.byref(window)):
+        return None
+    monitor = user32.MonitorFromWindow(hwnd, 2)  # MONITOR_DEFAULTTONEAREST
+    if not monitor:
+        return None
+    info = _MONITORINFO()
+    info.cbSize = ctypes.sizeof(_MONITORINFO)
+    if not user32.GetMonitorInfoW(monitor, ctypes.byref(info)):
+        return None
+    class_buffer = ctypes.create_unicode_buffer(256)
+    user32.GetClassNameW(hwnd, class_buffer, len(class_buffer))
+
+    def values(rect):
+        return (rect.left, rect.top, rect.right, rect.bottom)
+
+    return values(window), values(info.rcMonitor), class_buffer.value
+
+
 def _windows_desktop_dir() -> Path:
     """Windows-specific Desktop resolution via the known-folder API. See
     desktop_dir() for the rationale."""

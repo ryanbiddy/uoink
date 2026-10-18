@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import asyncio
 import json
 import re
 from pathlib import Path
@@ -10,6 +9,7 @@ from pathlib import Path
 import server
 import uoink_mcp
 import uoink_mcp_tools
+from tests.test_phase4_stdio import _complete_local_call
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -23,12 +23,92 @@ def _documented_count(label: str) -> int:
 
 
 def test_documented_transport_counts_match_both_live_registries() -> None:
-    stdio_tools = asyncio.run(uoink_mcp.mcp.list_tools())
+    stdio_tools = _complete_local_call(uoink_mcp.mcp.list_tools())
 
     assert _documented_count("Supported stdio registry") == len(stdio_tools)
     assert _documented_count("Local HTTP/OpenAPI registry") == len(
         uoink_mcp_tools.TOOL_REGISTRY
     )
+    # 71 + the six Living Library work-queue tools (Phase 2 stage 1) + the four
+    # Phase 3 source-subscription tools (run AM) + get_library_activity (Phase 5 Part A)
+    # + three Phase 4 read tools (run AV-1) + two Phase 4 brief tools (run AV-2)
+    # + the Phase 6 cited export tool (run BC-2) + local playbook input (T3).
+    assert len(uoink_mcp_tools.TOOL_REGISTRY) == 91
+
+
+def test_discovery_manifest_privacy_security_and_transport_contracts() -> None:
+    import source_manifest
+
+    row = next(r for r in source_manifest.build_sources()["sources"]
+               if r["slug"] == "scrapecreators-discovery")
+    assert "discovery" in source_manifest.build_sources()["categories"]
+    assert row["category"] == "discovery" and row["status"] == "in-flight"
+    assert row["lands"] == "Nothing until you pick results. Picked posts are captured like any link."
+    privacy = (ROOT / "docs/privacy-policy.md").read_text(encoding="utf-8")
+    for text in ("ScrapeCreators discovery: only if you turn it on and add your own key",
+                 "api.scrapecreators.com", "no library content, transcripts or", "discovery\\runs",
+                 "## 3. Your API keys", "Clear the ScrapeCreators key and turn discovery off",
+                 "saved discovery rows", "Uoink-isolated-<hash>", "90 days"):
+        assert text in privacy
+    for section in ("## 2.", "## 3.", "## 5."):
+        text = privacy.split(section, 1)[1].split("\n## ", 1)[0]
+        assert "connected agent" in text and "ScrapeCreators" in text
+    for label in ("ScrapeCreators API key", "Discovery runs"):
+        assert f"- **{label}** \u2014 " in privacy
+    mcp_docs = (ROOT / "docs/v2-mcp.md").read_text(encoding="utf-8")
+    for text in ("`baselines`", "`platform`, `source_type`", "`null` for mixed or empty results",
+                 "Creator snapshots take precedence", "failed or cancelled attempt enqueues a fresh row",
+                 "GET /discovery/runs/<run_id>", "sidecar `channel_url`", "local author/channel display name"):
+        assert text in mcp_docs
+    api_docs = (ROOT / "docs/v2-api.md").read_text(encoding="utf-8")
+    assert "### GET /discovery/runs/<run_id>" in api_docs
+    assert "Returns `{ok:true, run}`" in api_docs
+    security = (ROOT / "docs/security.md").read_text(encoding="utf-8")
+    for text in ("ScrapeCreators API key disclosure", "API key storage", "scrapecreators_key",
+                 "POST /discovery/intent", "POST /playbooks/run", "api.scrapecreators.com",
+                 "all redirects are refused", "8-second", "8 MB", "five-minute", "single-use",
+                 "25 by default", "24 run files", "GET /discovery/runs/<run_id>"):
+        assert text in security
+    from mcp import types
+    # Exercise tools/list on the wire: the low-level adapter installs the
+    # registry's strict schemas over FastMCP's signature-generated defaults.
+    handler = uoink_mcp.mcp._mcp_server.request_handlers[types.ListToolsRequest]
+    stdio = _complete_local_call(handler(types.ListToolsRequest(method="tools/list"))).root.tools
+    assert len(stdio) == 35
+    audit = (ROOT / "docs/mcp-tool-annotations.md").read_text(encoding="utf-8")
+    manifest = json.loads((ROOT / ".mcpb/manifest.json").read_text(encoding="utf-8"))
+    assert manifest["manifest_version"] == "0.4" and len(manifest["tools"]) == 35
+    for name, idempotent in (("discover_candidates", False), ("queue_discovered", True)):
+        spec = uoink_mcp_tools.TOOL_REGISTRY[name]
+        assert spec.annotations == {"readOnlyHint": False, "destructiveHint": False,
+                                    "idempotentHint": idempotent, "openWorldHint": True}
+        wire = next(t for t in stdio if t.name == name)
+        assert wire.inputSchema == spec.input_schema and wire.description == spec.description
+        assert all(getattr(wire.annotations, k) == v for k, v in spec.annotations.items())
+        assert f"| `{name}` |" in audit
+        bundled = next(t for t in manifest["tools"] if t["name"] == name)
+        assert set(bundled) == {"name", "description"}
+    assert "All 35 stdio tools" in audit
+
+
+def test_discovery_docs_disclose_saved_request_and_failure_receipts() -> None:
+    for name in ("docs/privacy-policy.md", "docs/security.md", "CHANGELOG.md"):
+        text = " ".join((ROOT / name).read_text(encoding="utf-8").split())
+        for disclosure in ("query, handle or channel_id", "run identity", "error envelopes",
+                           "failed runs", "90 days", "daily purge"):
+            assert disclosure in text, (name, disclosure)
+    privacy = (ROOT / "docs/privacy-policy.md").read_text(encoding="utf-8")
+    assert "Only normalized candidates and their metrics are stored" not in privacy
+
+
+def test_discovery_docs_describe_http_intent_authority_without_click_proof() -> None:
+    for name in ("docs/security.md", "CHANGELOG.md"):
+        text = " ".join((ROOT / name).read_text(encoding="utf-8").split())
+        for disclosure in ("helper token", "Origin", "fetch metadata", "human click",
+                           "No MCP tool can mint an intent"):
+            assert disclosure in text, (name, disclosure)
+    handler = server.Handler._is_dashboard_origin.__doc__
+    assert "does not prove a human clicked" in handler
 
 
 def test_documented_ping_keys_match_the_real_handler(monkeypatch) -> None:
@@ -46,6 +126,11 @@ def test_documented_ping_keys_match_the_real_handler(monkeypatch) -> None:
     )
     monkeypatch.setattr(server, "_index_recovering", False)
     monkeypatch.setattr(server, "_OUTPUT_ROOT_FALLBACK", False)
+    monkeypatch.setattr(server, "_active_migration_version", 25)
+    monkeypatch.setattr(server.index, "latest_schema_version", lambda: 25)
+    monkeypatch.setattr(
+        server, "_last_successful_tick_at", "2026-09-04T16:30:00Z"
+    )
 
     class Probe:
         path = "/ping"

@@ -1,8 +1,9 @@
 {
   "manifest_version": 3,
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA1Q2UgVorBNEDEZIsJjIx9imc5NoNqSHRiA+Xh6FbO+jjZyA/WXY89UsOJJjDvN6dqOPWvjtLVUmQscSYC48M3zhJeiItrvyrfQenH0LJinkHyKLKqlfMm5XhHxWPYureoCNqUIxhqqN6Um0+KItqfEUW8FAodJJKHNxmULCEFmY7krhsRJamG9aXCgkiBlga9Ix5v+og+p/LWiJqX7ENUxVS7YnvGzQIlUuCAtcr8cZD6qsXmByKzG2Wsq4JnnyyDM+CmKLaoQtqmbgR4GVZyAS6IVSZJVbhqacTaNAMxw/NFzWGk4RUZE9Y54sD3+NY/OQ5Bk/6QDEzo9n7cm5NdwIDAQAB",
   "name": "Uoink",
   "short_name": "Uoink",
-  "version": "3.7.0",
+  "version": "3.9.0",
   "description": "Save videos, podcasts, and articles to a local corpus your AI can write from.",
   "homepage_url": "https://uoink.app",
   "permissions": [
@@ -45,9 +46,14 @@
   "background": {
     "service_worker": "background.js"
   },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'; font-src 'self'"
+  },
   "content_scripts": [
     {
       "matches": [
+        "https://www.youtube.com/*",
+        "https://m.youtube.com/*",
         "https://www.youtube.com/watch*",
         "https://www.youtube.com/shorts/*",
         "https://m.youtube.com/watch*",
@@ -73,6 +79,10 @@
     },
     {
       "matches": [
+        "https://x.com/*",
+        "https://www.x.com/*",
+        "https://twitter.com/*",
+        "https://www.twitter.com/*",
         "https://x.com/*/article/*",
         "https://x.com/i/article/*",
         "https://www.x.com/*/article/*",

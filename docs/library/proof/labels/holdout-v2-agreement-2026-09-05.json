@@ -1,0 +1,1596 @@
+{
+  "total": 60,
+  "agree_outcome": 58,
+  "agree_primary": 51,
+  "disagreements": [
+    {
+      "video_id": "2083438553493843968",
+      "stratum": "timed_evidence",
+      "a": {
+        "outcome": "assigned",
+        "shelf_id": "ai-product-launches-demos",
+        "path": [
+          "AI and ML",
+          "AI Product Launches & Demos"
+        ],
+        "confidence": 0.8
+      },
+      "b": {
+        "outcome": "assigned",
+        "shelf_id": "ai-and-ml",
+        "path": [
+          "AI and ML"
+        ],
+        "confidence": 0.68
+      },
+      "agree": false
+    },
+    {
+      "video_id": "2089011298621399260",
+      "stratum": "timed_evidence",
+      "a": {
+        "outcome": "assigned",
+        "shelf_id": "developer-tools",
+        "path": [
+          "AI and ML",
+          "Developer Tools"
+        ],
+        "confidence": 0.9
+      },
+      "b": {
+        "outcome": "assigned",
+        "shelf_id": "education",
+        "path": [
+          "AI and ML",
+          "Education"
+        ],
+        "confidence": 0.87
+      },
+      "agree": false
+    },
+    {
+      "video_id": "2091208884786520487",
+      "stratum": "timed_evidence",
+      "a": {
+        "outcome": "assigned",
+        "shelf_id": "developer-tools",
+        "path": [
+          "AI and ML",
+          "Developer Tools"
+        ],
+        "confidence": 0.9
+      },
+      "b": {
+        "outcome": "assigned",
+        "shelf_id": "education",
+        "path": [
+          "AI and ML",
+          "Education"
+        ],
+        "confidence": 0.88
+      },
+      "agree": false
+    },
+    {
+      "video_id": "2095070893944832003",
+      "stratum": "timed_evidence",
+      "a": {
+        "outcome": "assigned",
+        "shelf_id": "frontier-models",
+        "path": [
+          "AI and ML",
+          "Frontier Models"
+        ],
+        "confidence": 0.9
+      },
+      "b": {
+        "outcome": "assigned",
+        "shelf_id": "generative-media",
+        "path": [
+          "AI and ML",
+          "Generative Media"
+        ],
+        "confidence": 0.81
+      },
+      "agree": false
+    },
+    {
+      "video_id": "2095783502306545664",
+      "stratum": "timed_evidence",
+      "a": {
+        "outcome": "assigned",
+        "shelf_id": "ai-industry-and-business",
+        "path": [
+          "AI and ML",
+          "AI Industry and Business"
+        ],
+        "confidence": 0.9
+      },
+      "b": {
+        "outcome": "assigned",
+        "shelf_id": "frontier-models",
+        "path": [
+          "AI and ML",
+          "Frontier Models"
+        ],
+        "confidence": 0.84
+      },
+      "agree": false
+    },
+    {
+      "video_id": "5LqC6qdVAwU",
+      "stratum": "timed_evidence",
+      "a": {
+        "outcome": "assigned",
+        "shelf_id": "security",
+        "path": [
+          "AI and ML",
+          "Security"
+        ],
+        "confidence": 0.9
+      },
+      "b": {
+        "outcome": "assigned",
+        "shelf_id": "frontier-models",
+        "path": [
+          "AI and ML",
+          "Frontier Models"
+        ],
+        "confidence": 0.82
+      },
+      "agree": false
+    },
+    {
+      "video_id": "FLcrvMfHUJM",
+      "stratum": "timed_evidence",
+      "a": {
+        "outcome": "assigned",
+        "shelf_id": "security",
+        "path": [
+          "AI and ML",
+          "Security"
+        ],
+        "confidence": 0.9
+      },
+      "b": {
+        "outcome": "unmappable",
+        "shelf_id": null,
+        "path": [
+          "AI and ML",
+          "Existential Risk"
+        ],
+        "confidence": 0.8
+      },
+      "agree": false
+    },
+    {
+      "video_id": "YtKX2wbCpVQ",
+      "stratum": "timed_evidence",
+      "a": {
+        "outcome": "unmappable",
+        "shelf_id": null,
+        "path": [
+          "AI and ML",
+          "Robotics"
+        ],
+        "confidence": 0.9
+      },
+      "b": {
+        "outcome": "assigned",
+        "shelf_id": "ai-and-ml",
+        "path": [
+          "AI and ML"
+        ],
+        "confidence": 0.76
+      },
+      "agree": false
+    },
+    {
+      "video_id": "tOC2N0B9lio",
+      "stratum": "timed_evidence",
+      "a": {
+        "outcome": "assigned",
+        "shelf_id": "ai-agents",
+        "path": [
+          "AI and ML",
+          "AI Agents"
+        ],
+        "confidence": 0.9
+      },
+      "b": {
+        "outcome": "assigned",
+        "shelf_id": "developer-tools",
+        "path": [
+          "AI and ML",
+          "Developer Tools"
+        ],
+        "confidence": 0.87
+      },
+      "agree": false
+    }
+  ],
+  "rows": [
+    {
+      "video_id": "2079930744781070336",
+      "stratum": "timed_evidence",
+      "a": {
+        "outcome": "unmappable",
+        "shelf_id": null,
+        "path": [
+          "AI and ML",
+          "Robotics"
+        ],
+        "confidence": 0.9
+      },
+      "b": {
+        "outcome": "unmappable",
+        "shelf_id": null,
+        "path": [
+          "AI and ML",
+          "Robotics"
+        ],
+        "confidence": 0.78
+      },
+      "agree": true
+    },
+    {
+      "video_id": "2080061661197570048",
+      "stratum": "timed_evidence",
+      "a": {
+        "outcome": "assigned",
+        "shelf_id": "generative-media",
+        "path": [
+          "AI and ML",
+          "Generative Media"
+        ],
+        "confidence": 0.9
+      },
+      "b": {
+        "outcome": "assigned",
+        "shelf_id": "generative-media",
+        "path": [
+          "AI and ML",
+          "Generative Media"
+        ],
+        "confidence": 0.86
+      },
+      "agree": true
+    },
+    {
+      "video_id": "2080447768397787137",
+      "stratum": "timed_evidence",
+      "a": {
+        "outcome": "assigned",
+        "shelf_id": "developer-tools",
+        "path": [
+          "AI and ML",
+          "Developer Tools"
+        ],
+        "confidence": 0.9
+      },
+      "b": {
+        "outcome": "assigned",
+        "shelf_id": "developer-tools",
+        "path": [
+          "AI and ML",
+          "Developer Tools"
+        ],
+        "confidence": 0.9
+      },
+      "agree": true
+    },
+    {
+      "video_id": "2080736332205436952",
+      "stratum": "timed_evidence",
+      "a": {
+        "outcome": "assigned",
+        "shelf_id": "developer-tools",
+        "path": [
+          "AI and ML",
+          "Developer Tools"
+        ],
+        "confidence": 0.9
+      },
+      "b": {
+        "outcome": "assigned",
+        "shelf_id": "developer-tools",
+        "path": [
+          "AI and ML",
+          "Developer Tools"
+        ],
+        "confidence": 0.92
+      },
+      "agree": true
+    },
+    {
+      "video_id": "2081117060013473792",
+      "stratum": "timed_evidence",
+      "a": {
+        "outcome": "assigned",
+        "shelf_id": "ai-industry-and-business",
+        "path": [
+          "AI and ML",
+          "AI Industry and Business"
+        ],
+        "confidence": 0.85
+      },
+      "b": {
+        "outcome": "assigned",
+        "shelf_id": "ai-industry-and-business",
+        "path": [
+          "AI and ML",
+          "AI Industry and Business"
+        ],
+        "confidence": 0.84
+      },
+      "agree": true
+    },
+    {
+      "video_id": "2081133656869920768",
+      "stratum": "text_only",
+      "a": {
+        "outcome": "assigned",
+        "shelf_id": "generative-media",
+        "path": [
+          "AI and ML",
+          "Generative Media"
+        ],
+        "confidence": 0.85
+      },
+      "b": {
+        "outcome": "assigned",
+        "shelf_id": "generative-media",
+        "path": [
+          "AI and ML",
+          "Generative Media"
+        ],
+        "confidence": 0.88
+      },
+      "agree": true
+    },
+    {
+      "video_id": "2082501832442814465",
+      "stratum": "timed_evidence",
+      "a": {
+        "outcome": "assigned",
+        "shelf_id": "frontier-models",
+        "path": [
+          "AI and ML",
+          "Frontier Models"
+        ],
+        "confidence": 0.9
+      },
+      "b": {
+        "outcome": "assigned",
+        "shelf_id": "frontier-models",
+        "path": [
+          "AI and ML",
+          "Frontier Models"
+        ],
+        "confidence": 0.93
+      },
+      "agree": true
+    },
+    {
+      "video_id": "2083262686318444544",
+      "stratum": "text_only",
+      "a": {
+        "outcome": "assigned",
+        "shelf_id": "education",
+        "path": [
+          "AI and ML",
+          "Education"
+        ],
+        "confidence": 0.9
+      },
+      "b": {
+        "outcome": "assigned",
+        "shelf_id": "education",
+        "path": [
+          "AI and ML",
+          "Education"
+        ],
+        "confidence": 0.91
+      },
+      "agree": true
+    },
+    {
+      "video_id": "2083438553493843968",
+      "stratum": "timed_evidence",
+      "a": {
+        "outcome": "assigned",
+        "shelf_id": "ai-product-launches-demos",
+        "path": [
+          "AI and ML",
+          "AI Product Launches & Demos"
+        ],
+        "confidence": 0.8
+      },
+      "b": {
+        "outcome": "assigned",
+        "shelf_id": "ai-and-ml",
+        "path": [
+          "AI and ML"
+        ],
+        "confidence": 0.68
+      },
+      "agree": false
+    },
+    {
+      "video_id": "2083664004506145276",
+      "stratum": "timed_evidence",
+      "a": {
+        "outcome": "assigned",
+        "shelf_id": "developer-tools",
+        "path": [
+          "AI and ML",
+          "Developer Tools"
+        ],
+        "confidence": 0.85
+      },
+      "b": {
+        "outcome": "assigned",
+        "shelf_id": "developer-tools",
+        "path": [
+          "AI and ML",
+          "Developer Tools"
+        ],
+        "confidence": 0.8
+      },
+      "agree": true
+    },
+    {
+      "video_id": "2084046660087525376",
+      "stratum": "text_only",
+      "a": {
+        "outcome": "assigned",
+        "shelf_id": "frontier-models",
+        "path": [
+          "AI and ML",
+          "Frontier Models"
+        ],
+        "confidence": 0.9
+      },
+      "b": {
+        "outcome": "assigned",
+        "shelf_id": "frontier-models",
+        "path": [
+          "AI and ML",
+          "Frontier Models"
+        ],
+        "confidence": 0.87
+      },
+      "agree": true
+    },
+    {
+      "video_id": "2084093069323104256",
+      "stratum": "text_only",
+      "a": {
+        "outcome": "assigned",
+        "shelf_id": "frontier-models",
+        "path": [
+          "AI and ML",
+          "Frontier Models"
+        ],
+        "confidence": 0.9
+      },
+      "b": {
+        "outcome": "assigned",
+        "shelf_id": "frontier-models",
+        "path": [
+          "AI and ML",
+          "Frontier Models"
+        ],
+        "confidence": 0.72
+      },
+      "agree": true
+    },
+    {
+      "video_id": "2084309519715139584",
+      "stratum": "timed_evidence",
+      "a": {
+        "outcome": "assigned",
+        "shelf_id": "developer-tools",
+        "path": [
+          "AI and ML",
+          "Developer Tools"
+        ],
+        "confidence": 0.85
+      },
+      "b": {
+        "outcome": "assigned",
+        "shelf_id": "developer-tools",
+        "path": [
+          "AI and ML",
+          "Developer Tools"
+        ],
+        "confidence": 0.82
+      },
+      "agree": true
+    },
+    {
+      "video_id": "2084333713937068032",
+      "stratum": "timed_evidence",
+      "a": {
+        "outcome": "assigned",
+        "shelf_id": "education",
+        "path": [
+          "AI and ML",
+          "Education"
+        ],
+        "confidence": 0.9
+      },
+      "b": {
+        "outcome": "assigned",
+        "shelf_id": "education",
+        "path": [
+          "AI and ML",
+          "Education"
+        ],
+        "confidence": 0.9
+      },
+      "agree": true
+    },
+    {
+      "video_id": "2084671000906735616",
+      "stratum": "timed_evidence",
+      "a": {
+        "outcome": "assigned",
+        "shelf_id": "developer-tools",
+        "path": [
+          "AI and ML",
+          "Developer Tools"
+        ],
+        "confidence": 0.9
+      },
+      "b": {
+        "outcome": "assigned",
+        "shelf_id": "developer-tools",
+        "path": [
+          "AI and ML",
+          "Developer Tools"
+        ],
+        "confidence": 0.88
+      },
+      "agree": true
+    },
+    {
+      "video_id": "2085710761423437824",
+      "stratum": "text_only",
+      "a": {
+        "outcome": "assigned",
+        "shelf_id": "education",
+        "path": [
+          "AI and ML",
+          "Education"
+        ],
+        "confidence": 0.9
+      },
+      "b": {
+        "outcome": "assigned",
+        "shelf_id": "education",
+        "path": [
+          "AI and ML",
+          "Education"
+        ],
+        "confidence": 0.92
+      },
+      "agree": true
+    },
+    {
+      "video_id": "2086120621734326272",
+      "stratum": "timed_evidence",
+      "a": {
+        "outcome": "assigned",
+        "shelf_id": "education",
+        "path": [
+          "AI and ML",
+          "Education"
+        ],
+        "confidence": 0.95
+      },
+      "b": {
+        "outcome": "assigned",
+        "shelf_id": "education",
+        "path": [
+          "AI and ML",
+          "Education"
+        ],
+        "confidence": 0.91
+      },
+      "agree": true
+    },
+    {
+      "video_id": "2086167440203923456",
+      "stratum": "timed_evidence",
+      "a": {
+        "outcome": "assigned",
+        "shelf_id": "education",
+        "path": [
+          "AI and ML",
+          "Education"
+        ],
+        "confidence": 0.9
+      },
+      "b": {
+        "outcome": "assigned",
+        "shelf_id": "education",
+        "path": [
+          "AI and ML",
+          "Education"
+        ],
+        "confidence": 0.83
+      },
+      "agree": true
+    },
+    {
+      "video_id": "2086219750065967512",
+      "stratum": "timed_evidence",
+      "a": {
+        "outcome": "assigned",
+        "shelf_id": "generative-media",
+        "path": [
+          "AI and ML",
+          "Generative Media"
+        ],
+        "confidence": 0.9
+      },
+      "b": {
+        "outcome": "assigned",
+        "shelf_id": "generative-media",
+        "path": [
+          "AI and ML",
+          "Generative Media"
+        ],
+        "confidence": 0.85
+      },
+      "agree": true
+    },
+    {
+      "video_id": "2086663463162830848",
+      "stratum": "text_only",
+      "a": {
+        "outcome": "assigned",
+        "shelf_id": "developer-tools",
+        "path": [
+          "AI and ML",
+          "Developer Tools"
+        ],
+        "confidence": 0.9
+      },
+      "b": {
+        "outcome": "assigned",
+        "shelf_id": "developer-tools",
+        "path": [
+          "AI and ML",
+          "Developer Tools"
+        ],
+        "confidence": 0.86
+      },
+      "agree": true
+    },
+    {
+      "video_id": "2087232179613077504",
+      "stratum": "timed_evidence",
+      "a": {
+        "outcome": "assigned",
+        "shelf_id": "frontier-models",
+        "path": [
+          "AI and ML",
+          "Frontier Models"
+        ],
+        "confidence": 0.8
+      },
+      "b": {
+        "outcome": "assigned",
+        "shelf_id": "frontier-models",
+        "path": [
+          "AI and ML",
+          "Frontier Models"
+        ],
+        "confidence": 0.64
+      },
+      "agree": true
+    },
+    {
+      "video_id": "2087945138823741440",
+      "stratum": "text_only",
+      "a": {
+        "outcome": "assigned",
+        "shelf_id": "frontier-models",
+        "path": [
+          "AI and ML",
+          "Frontier Models"
+        ],
+        "confidence": 0.95
+      },
+      "b": {
+        "outcome": "assigned",
+        "shelf_id": "frontier-models",
+        "path": [
+          "AI and ML",
+          "Frontier Models"
+        ],
+        "confidence": 0.9
+      },
+      "agree": true
+    },
+    {
+      "video_id": "2087982002381221888",
+      "stratum": "timed_evidence",
+      "a": {
+        "outcome": "assigned",
+        "shelf_id": "developer-tools",
+        "path": [
+          "AI and ML",
+          "Developer Tools"
+        ],
+        "confidence": 0.95
+      },
+      "b": {
+        "outcome": "assigned",
+        "shelf_id": "developer-tools",
+        "path": [
+          "AI and ML",
+          "Developer Tools"
+        ],
+        "confidence": 0.89
+      },
+      "agree": true
+    },
+    {
+      "video_id": "2089011298621399260",
+      "stratum": "timed_evidence",
+      "a": {
+        "outcome": "assigned",
+        "shelf_id": "developer-tools",
+        "path": [
+          "AI and ML",
+          "Developer Tools"
+        ],
+        "confidence": 0.9
+      },
+      "b": {
+        "outcome": "assigned",
+        "shelf_id": "education",
+        "path": [
+          "AI and ML",
+          "Education"
+        ],
+        "confidence": 0.87
+      },
+      "agree": false
+    },
+    {
+      "video_id": "2090872209241976832",
+      "stratum": "timed_evidence",
+      "a": {
+        "outcome": "assigned",
+        "shelf_id": "frontier-models",
+        "path": [
+          "AI and ML",
+          "Frontier Models"
+        ],
+        "confidence": 0.85
+      },
+      "b": {
+        "outcome": "assigned",
+        "shelf_id": "frontier-models",
+        "path": [
+          "AI and ML",
+          "Frontier Models"
+        ],
+        "confidence": 0.77
+      },
+      "agree": true
+    },
+    {
+      "video_id": "2090888779125116928",
+      "stratum": "timed_evidence",
+      "a": {
+        "outcome": "assigned",
+        "shelf_id": "ai-culture-and-memes",
+        "path": [
+          "AI and ML",
+          "AI Culture & Memes"
+        ],
+        "confidence": 0.95
+      },
+      "b": {
+        "outcome": "assigned",
+        "shelf_id": "ai-culture-and-memes",
+        "path": [
+          "AI and ML",
+          "AI Culture & Memes"
+        ],
+        "confidence": 0.84
+      },
+      "agree": true
+    },
+    {
+      "video_id": "2091205272920358912",
+      "stratum": "text_only",
+      "a": {
+        "outcome": "assigned",
+        "shelf_id": "developer-tools",
+        "path": [
+          "AI and ML",
+          "Developer Tools"
+        ],
+        "confidence": 0.9
+      },
+      "b": {
+        "outcome": "assigned",
+        "shelf_id": "developer-tools",
+        "path": [
+          "AI and ML",
+          "Developer Tools"
+        ],
+        "confidence": 0.86
+      },
+      "agree": true
+    },
+    {
+      "video_id": "2091208884786520487",
+      "stratum": "timed_evidence",
+      "a": {
+        "outcome": "assigned",
+        "shelf_id": "developer-tools",
+        "path": [
+          "AI and ML",
+          "Developer Tools"
+        ],
+        "confidence": 0.9
+      },
+      "b": {
+        "outcome": "assigned",
+        "shelf_id": "education",
+        "path": [
+          "AI and ML",
+          "Education"
+        ],
+        "confidence": 0.88
+      },
+      "agree": false
+    },
+    {
+      "video_id": "2091230104793858048",
+      "stratum": "timed_evidence",
+      "a": {
+        "outcome": "assigned",
+        "shelf_id": "education",
+        "path": [
+          "AI and ML",
+          "Education"
+        ],
+        "confidence": 0.95
+      },
+      "b": {
+        "outcome": "assigned",
+        "shelf_id": "education",
+        "path": [
+          "AI and ML",
+          "Education"
+        ],
+        "confidence": 0.94
+      },
+      "agree": true
+    },
+    {
+      "video_id": "2091248592774369280",
+      "stratum": "timed_evidence",
+      "a": {
+        "outcome": "assigned",
+        "shelf_id": "ai-industry-and-business",
+        "path": [
+          "AI and ML",
+          "AI Industry and Business"
+        ],
+        "confidence": 0.9
+      },
+      "b": {
+        "outcome": "assigned",
+        "shelf_id": "ai-industry-and-business",
+        "path": [
+          "AI and ML",
+          "AI Industry and Business"
+        ],
+        "confidence": 0.85
+      },
+      "agree": true
+    },
+    {
+      "video_id": "2091297765133578240",
+      "stratum": "text_only",
+      "a": {
+        "outcome": "assigned",
+        "shelf_id": "generative-media",
+        "path": [
+          "AI and ML",
+          "Generative Media"
+        ],
+        "confidence": 0.95
+      },
+      "b": {
+        "outcome": "assigned",
+        "shelf_id": "generative-media",
+        "path": [
+          "AI and ML",
+          "Generative Media"
+        ],
+        "confidence": 0.9
+      },
+      "agree": true
+    },
+    {
+      "video_id": "2091537085874520064",
+      "stratum": "timed_evidence",
+      "a": {
+        "outcome": "assigned",
+        "shelf_id": "developer-tools",
+        "path": [
+          "AI and ML",
+          "Developer Tools"
+        ],
+        "confidence": 0.85
+      },
+      "b": {
+        "outcome": "assigned",
+        "shelf_id": "developer-tools",
+        "path": [
+          "AI and ML",
+          "Developer Tools"
+        ],
+        "confidence": 0.84
+      },
+      "agree": true
+    },
+    {
+      "video_id": "2091998648997441536",
+      "stratum": "timed_evidence",
+      "a": {
+        "outcome": "assigned",
+        "shelf_id": "developer-tools",
+        "path": [
+          "AI and ML",
+          "Developer Tools"
+        ],
+        "confidence": 0.9
+      },
+      "b": {
+        "outcome": "assigned",
+        "shelf_id": "developer-tools",
+        "path": [
+          "AI and ML",
+          "Developer Tools"
+        ],
+        "confidence": 0.86
+      },
+      "agree": true
+    },
+    {
+      "video_id": "2092244803295571968",
+      "stratum": "text_only",
+      "a": {
+        "outcome": "assigned",
+        "shelf_id": "developer-tools",
+        "path": [
+          "AI and ML",
+          "Developer Tools"
+        ],
+        "confidence": 0.9
+      },
+      "b": {
+        "outcome": "assigned",
+        "shelf_id": "developer-tools",
+        "path": [
+          "AI and ML",
+          "Developer Tools"
+        ],
+        "confidence": 0.83
+      },
+      "agree": true
+    },
+    {
+      "video_id": "2092270658524745728",
+      "stratum": "timed_evidence",
+      "a": {
+        "outcome": "assigned",
+        "shelf_id": "ai-industry-and-business",
+        "path": [
+          "AI and ML",
+          "AI Industry and Business"
+        ],
+        "confidence": 0.95
+      },
+      "b": {
+        "outcome": "assigned",
+        "shelf_id": "ai-industry-and-business",
+        "path": [
+          "AI and ML",
+          "AI Industry and Business"
+        ],
+        "confidence": 0.93
+      },
+      "agree": true
+    },
+    {
+      "video_id": "2092364350317281280",
+      "stratum": "timed_evidence",
+      "a": {
+        "outcome": "assigned",
+        "shelf_id": "ai-culture-and-memes",
+        "path": [
+          "AI and ML",
+          "AI Culture & Memes"
+        ],
+        "confidence": 0.9
+      },
+      "b": {
+        "outcome": "assigned",
+        "shelf_id": "ai-culture-and-memes",
+        "path": [
+          "AI and ML",
+          "AI Culture & Memes"
+        ],
+        "confidence": 0.82
+      },
+      "agree": true
+    },
+    {
+      "video_id": "2092369226262786048",
+      "stratum": "timed_evidence",
+      "a": {
+        "outcome": "assigned",
+        "shelf_id": "developer-tools",
+        "path": [
+          "AI and ML",
+          "Developer Tools"
+        ],
+        "confidence": 0.95
+      },
+      "b": {
+        "outcome": "assigned",
+        "shelf_id": "developer-tools",
+        "path": [
+          "AI and ML",
+          "Developer Tools"
+        ],
+        "confidence": 0.88
+      },
+      "agree": true
+    },
+    {
+      "video_id": "2093296474498990080",
+      "stratum": "timed_evidence",
+      "a": {
+        "outcome": "assigned",
+        "shelf_id": "education",
+        "path": [
+          "AI and ML",
+          "Education"
+        ],
+        "confidence": 0.95
+      },
+      "b": {
+        "outcome": "assigned",
+        "shelf_id": "education",
+        "path": [
+          "AI and ML",
+          "Education"
+        ],
+        "confidence": 0.89
+      },
+      "agree": true
+    },
+    {
+      "video_id": "2093359694366572544",
+      "stratum": "timed_evidence",
+      "a": {
+        "outcome": "assigned",
+        "shelf_id": "ai-agents",
+        "path": [
+          "AI and ML",
+          "AI Agents"
+        ],
+        "confidence": 0.9
+      },
+      "b": {
+        "outcome": "assigned",
+        "shelf_id": "ai-agents",
+        "path": [
+          "AI and ML",
+          "AI Agents"
+        ],
+        "confidence": 0.87
+      },
+      "agree": true
+    },
+    {
+      "video_id": "2093462510389354496",
+      "stratum": "timed_evidence",
+      "a": {
+        "outcome": "assigned",
+        "shelf_id": "security",
+        "path": [
+          "AI and ML",
+          "Security"
+        ],
+        "confidence": 0.9
+      },
+      "b": {
+        "outcome": "assigned",
+        "shelf_id": "security",
+        "path": [
+          "AI and ML",
+          "Security"
+        ],
+        "confidence": 0.86
+      },
+      "agree": true
+    },
+    {
+      "video_id": "2093678734708801536",
+      "stratum": "text_only",
+      "a": {
+        "outcome": "assigned",
+        "shelf_id": "frontier-models",
+        "path": [
+          "AI and ML",
+          "Frontier Models"
+        ],
+        "confidence": 0.85
+      },
+      "b": {
+        "outcome": "assigned",
+        "shelf_id": "frontier-models",
+        "path": [
+          "AI and ML",
+          "Frontier Models"
+        ],
+        "confidence": 0.88
+      },
+      "agree": true
+    },
+    {
+      "video_id": "2093727982317936640",
+      "stratum": "timed_evidence",
+      "a": {
+        "outcome": "assigned",
+        "shelf_id": "developer-tools",
+        "path": [
+          "AI and ML",
+          "Developer Tools"
+        ],
+        "confidence": 0.85
+      },
+      "b": {
+        "outcome": "assigned",
+        "shelf_id": "developer-tools",
+        "path": [
+          "AI and ML",
+          "Developer Tools"
+        ],
+        "confidence": 0.8
+      },
+      "agree": true
+    },
+    {
+      "video_id": "2093860831595499892",
+      "stratum": "timed_evidence",
+      "a": {
+        "outcome": "assigned",
+        "shelf_id": "ai-industry-and-business",
+        "path": [
+          "AI and ML",
+          "AI Industry and Business"
+        ],
+        "confidence": 0.85
+      },
+      "b": {
+        "outcome": "assigned",
+        "shelf_id": "ai-industry-and-business",
+        "path": [
+          "AI and ML",
+          "AI Industry and Business"
+        ],
+        "confidence": 0.84
+      },
+      "agree": true
+    },
+    {
+      "video_id": "2094184640873373696",
+      "stratum": "text_only",
+      "a": {
+        "outcome": "assigned",
+        "shelf_id": "ai-industry-and-business",
+        "path": [
+          "AI and ML",
+          "AI Industry and Business"
+        ],
+        "confidence": 0.9
+      },
+      "b": {
+        "outcome": "assigned",
+        "shelf_id": "ai-industry-and-business",
+        "path": [
+          "AI and ML",
+          "AI Industry and Business"
+        ],
+        "confidence": 0.9
+      },
+      "agree": true
+    },
+    {
+      "video_id": "2094227178032599040",
+      "stratum": "timed_evidence",
+      "a": {
+        "outcome": "assigned",
+        "shelf_id": "ai-industry-and-business",
+        "path": [
+          "AI and ML",
+          "AI Industry and Business"
+        ],
+        "confidence": 0.9
+      },
+      "b": {
+        "outcome": "assigned",
+        "shelf_id": "ai-industry-and-business",
+        "path": [
+          "AI and ML",
+          "AI Industry and Business"
+        ],
+        "confidence": 0.86
+      },
+      "agree": true
+    },
+    {
+      "video_id": "2094477244164947968",
+      "stratum": "timed_evidence",
+      "a": {
+        "outcome": "assigned",
+        "shelf_id": "developer-tools",
+        "path": [
+          "AI and ML",
+          "Developer Tools"
+        ],
+        "confidence": 0.95
+      },
+      "b": {
+        "outcome": "assigned",
+        "shelf_id": "developer-tools",
+        "path": [
+          "AI and ML",
+          "Developer Tools"
+        ],
+        "confidence": 0.88
+      },
+      "agree": true
+    },
+    {
+      "video_id": "2094718226601218048",
+      "stratum": "timed_evidence",
+      "a": {
+        "outcome": "assigned",
+        "shelf_id": "security",
+        "path": [
+          "AI and ML",
+          "Security"
+        ],
+        "confidence": 0.95
+      },
+      "b": {
+        "outcome": "assigned",
+        "shelf_id": "security",
+        "path": [
+          "AI and ML",
+          "Security"
+        ],
+        "confidence": 0.91
+      },
+      "agree": true
+    },
+    {
+      "video_id": "2095070893944832003",
+      "stratum": "timed_evidence",
+      "a": {
+        "outcome": "assigned",
+        "shelf_id": "frontier-models",
+        "path": [
+          "AI and ML",
+          "Frontier Models"
+        ],
+        "confidence": 0.9
+      },
+      "b": {
+        "outcome": "assigned",
+        "shelf_id": "generative-media",
+        "path": [
+          "AI and ML",
+          "Generative Media"
+        ],
+        "confidence": 0.81
+      },
+      "agree": false
+    },
+    {
+      "video_id": "2095624765327458304",
+      "stratum": "text_only",
+      "a": {
+        "outcome": "assigned",
+        "shelf_id": "ai-culture-and-memes",
+        "path": [
+          "AI and ML",
+          "AI Culture & Memes"
+        ],
+        "confidence": 0.95
+      },
+      "b": {
+        "outcome": "assigned",
+        "shelf_id": "ai-culture-and-memes",
+        "path": [
+          "AI and ML",
+          "AI Culture & Memes"
+        ],
+        "confidence": 0.74
+      },
+      "agree": true
+    },
+    {
+      "video_id": "2095783502306545664",
+      "stratum": "timed_evidence",
+      "a": {
+        "outcome": "assigned",
+        "shelf_id": "ai-industry-and-business",
+        "path": [
+          "AI and ML",
+          "AI Industry and Business"
+        ],
+        "confidence": 0.9
+      },
+      "b": {
+        "outcome": "assigned",
+        "shelf_id": "frontier-models",
+        "path": [
+          "AI and ML",
+          "Frontier Models"
+        ],
+        "confidence": 0.84
+      },
+      "agree": false
+    },
+    {
+      "video_id": "5LqC6qdVAwU",
+      "stratum": "timed_evidence",
+      "a": {
+        "outcome": "assigned",
+        "shelf_id": "security",
+        "path": [
+          "AI and ML",
+          "Security"
+        ],
+        "confidence": 0.9
+      },
+      "b": {
+        "outcome": "assigned",
+        "shelf_id": "frontier-models",
+        "path": [
+          "AI and ML",
+          "Frontier Models"
+        ],
+        "confidence": 0.82
+      },
+      "agree": false
+    },
+    {
+      "video_id": "8GRmLR__OGQ",
+      "stratum": "timed_evidence",
+      "a": {
+        "outcome": "assigned",
+        "shelf_id": "developer-tools",
+        "path": [
+          "AI and ML",
+          "Developer Tools"
+        ],
+        "confidence": 0.9
+      },
+      "b": {
+        "outcome": "assigned",
+        "shelf_id": "developer-tools",
+        "path": [
+          "AI and ML",
+          "Developer Tools"
+        ],
+        "confidence": 0.85
+      },
+      "agree": true
+    },
+    {
+      "video_id": "FLcrvMfHUJM",
+      "stratum": "timed_evidence",
+      "a": {
+        "outcome": "assigned",
+        "shelf_id": "security",
+        "path": [
+          "AI and ML",
+          "Security"
+        ],
+        "confidence": 0.9
+      },
+      "b": {
+        "outcome": "unmappable",
+        "shelf_id": null,
+        "path": [
+          "AI and ML",
+          "Existential Risk"
+        ],
+        "confidence": 0.8
+      },
+      "agree": false
+    },
+    {
+      "video_id": "LNwODJXcvt4",
+      "stratum": "timed_evidence",
+      "a": {
+        "outcome": "assigned",
+        "shelf_id": "education",
+        "path": [
+          "AI and ML",
+          "Education"
+        ],
+        "confidence": 0.95
+      },
+      "b": {
+        "outcome": "assigned",
+        "shelf_id": "education",
+        "path": [
+          "AI and ML",
+          "Education"
+        ],
+        "confidence": 0.95
+      },
+      "agree": true
+    },
+    {
+      "video_id": "MgbP5szEBDo",
+      "stratum": "timed_evidence",
+      "a": {
+        "outcome": "assigned",
+        "shelf_id": "frontier-models",
+        "path": [
+          "AI and ML",
+          "Frontier Models"
+        ],
+        "confidence": 0.9
+      },
+      "b": {
+        "outcome": "assigned",
+        "shelf_id": "frontier-models",
+        "path": [
+          "AI and ML",
+          "Frontier Models"
+        ],
+        "confidence": 0.86
+      },
+      "agree": true
+    },
+    {
+      "video_id": "YtKX2wbCpVQ",
+      "stratum": "timed_evidence",
+      "a": {
+        "outcome": "unmappable",
+        "shelf_id": null,
+        "path": [
+          "AI and ML",
+          "Robotics"
+        ],
+        "confidence": 0.9
+      },
+      "b": {
+        "outcome": "assigned",
+        "shelf_id": "ai-and-ml",
+        "path": [
+          "AI and ML"
+        ],
+        "confidence": 0.76
+      },
+      "agree": false
+    },
+    {
+      "video_id": "r0RspiLG260",
+      "stratum": "timed_evidence",
+      "a": {
+        "outcome": "assigned",
+        "shelf_id": "education",
+        "path": [
+          "AI and ML",
+          "Education"
+        ],
+        "confidence": 0.95
+      },
+      "b": {
+        "outcome": "assigned",
+        "shelf_id": "education",
+        "path": [
+          "AI and ML",
+          "Education"
+        ],
+        "confidence": 0.95
+      },
+      "agree": true
+    },
+    {
+      "video_id": "tOC2N0B9lio",
+      "stratum": "timed_evidence",
+      "a": {
+        "outcome": "assigned",
+        "shelf_id": "ai-agents",
+        "path": [
+          "AI and ML",
+          "AI Agents"
+        ],
+        "confidence": 0.9
+      },
+      "b": {
+        "outcome": "assigned",
+        "shelf_id": "developer-tools",
+        "path": [
+          "AI and ML",
+          "Developer Tools"
+        ],
+        "confidence": 0.87
+      },
+      "agree": false
+    },
+    {
+      "video_id": "ub2xbSlay7g",
+      "stratum": "timed_evidence",
+      "a": {
+        "outcome": "assigned",
+        "shelf_id": "frontier-models",
+        "path": [
+          "AI and ML",
+          "Frontier Models"
+        ],
+        "confidence": 0.9
+      },
+      "b": {
+        "outcome": "assigned",
+        "shelf_id": "frontier-models",
+        "path": [
+          "AI and ML",
+          "Frontier Models"
+        ],
+        "confidence": 0.84
+      },
+      "agree": true
+    },
+    {
+      "video_id": "z70ZrSZNi-8",
+      "stratum": "timed_evidence",
+      "a": {
+        "outcome": "assigned",
+        "shelf_id": "education",
+        "path": [
+          "AI and ML",
+          "Education"
+        ],
+        "confidence": 0.95
+      },
+      "b": {
+        "outcome": "assigned",
+        "shelf_id": "education",
+        "path": [
+          "AI and ML",
+          "Education"
+        ],
+        "confidence": 0.94
+      },
+      "agree": true
+    }
+  ],
+  "labellers": [
+    "gemini (Gemini 3.8 Flash)",
+    "xAI Grok 4.6"
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "schema": "c22-operator-manifest-v1",
+  "kit_date": "2026-09-09",
+  "sealed_by": null,
+  "seal_note": "Astra fills expected_package_sha256, candidate_sha and installer_source_sha when sealing. This kit refuses to invent them.",
+  "expected_package_sha256": null,
+  "candidate_sha": null,
+  "installer_source_sha": null,
+  "isolation_flags": {
+    "profile": "--isolated-profile",
+    "port": "--isolated-port",
+    "from_install_dir": "--isolated-from-install-dir",
+    "token": "<profile>/token.txt",
+    "marker": "isolated-install.json",
+    "implemented_by": "isolation worker; this kit only consumes them"
+  },
+  "inno_isolated_args_template": [
+    "/VERYSILENT",
+    "/NORESTART",
+    "/SUPPRESSMSGBOXES",
+    "/DIR=\"{installed_app_path}\"",
+    "/ISOLATED=1",
+    "/PROFILE={isolated_profile}",
+    "/PORT={isolated_port}",
+    "/NOCLOSEAPPLICATIONS",
+    "/NORESTARTAPPLICATIONS"
+  ],
+  "upgrade": {
+    "same_version_reinstall_label": "same_version_reinstall",
+    "cross_version_upgrade_label": "cross_version_upgrade",
+    "do_not_mislabel": true
+  },
+  "legacy_fixture_version": "c22-legacy-populated-v1-schema27",
+  "phase4_client_scope": "astra_separate_not_this_kit"
+}

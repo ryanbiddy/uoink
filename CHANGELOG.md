@@ -10,6 +10,319 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [3.9.0] - 2026-10-18
+
+### Added
+
+- Settings → Connected services and Sources → Discover: write-only
+  ScrapeCreators key controls, the disclosure gate, credit plans, balance
+  testing, daily caps and separate agent consent. Each Run and queue click
+  obtains a fresh intent; results sort by lift and up to ten picks can be
+  queued without loading third-party thumbnails.
+  Failed local saves retain paid results and offer a save-only retry.
+  Local library or ledger errors also preserve fetched candidates.
+  Deleted, unavailable and cancelled captures have distinct states; real
+  failed capture attempts remain failed.
+- Generate → Research: five playbooks with creator, capture, or topic scopes,
+  cited reports, inline citation warnings, draft saving, and Tweet/Thread
+  follow-ups. Runs use a connected agent first, then your Anthropic key, or
+  prepare a free prompt to copy into Claude. Run stays disabled until the
+  request settles; provider and library errors never trigger a paid retry.
+  Packet refusals show the server's message, reason, and recovery step.
+- Discovery tools on stdio and HTTP: `discover_candidates` plans and spends
+  confirmed credits; `queue_discovered` sends up to ten picks through the
+  existing capture queue, with intent/agent gates and duplicate protection.
+  The MCP server now exposes 35 tools over stdio, with 91 HTTP registry tools
+  and nine prompts.
+  Token-gated `GET /discovery/runs/<run_id>` reconciles capture state without
+  spending or queueing. Picks are due immediately in the retry worker's local
+  clock. Local playbooks use the target-filtered 24-file reader and newest
+  snapshots, including YouTube channel IDs from saved channel URLs and keyword
+  Shorts. Playbook authors remain local display names. Late key errors cannot
+  invalidate a replacement key.
+  Source, privacy, security and MCP docs describe these flows.
+  A newer rerun that failed or was refused before keeping any row does not
+  replace an older snapshot or block keyword fallback; partial runs and
+  successful empty runs still count as the newest snapshot.
+  Creator snapshots take precedence over newer keyword hits. Mixed YouTube
+  results report baselines per content group. Failed or cancelled picks can
+  be explicitly queued again without duplicating active captures.
+  Empty failed receipts now carry a filename marker so repeated failures
+  cannot consume the 24-file packet budget or hide keyword fallback. SQLite
+  makes active-URL deduplication exclusive across helper and stdio processes;
+  both run receipts reconcile to the same pending capture. Argument errors on
+  `/tools/discover_candidates`, `/tools/queue_discovered` and
+  `/tools/get_playbook_input` return HTTP 400 with the standard error envelope.
+  Storage docs now disclose the submitted query, handle or channel_id, run
+  identity, accounting, coverage and error envelopes, including failed runs,
+  alongside candidates, metrics and queue state. The daily purge removes all
+  these run records once older than 90 days. Intent docs clarify that an HTTP
+  client holding the helper token can omit Origin and fetch metadata to mint
+  an intent; browser checks do not prove a human click. No MCP tool can mint an intent.
+- ScrapeCreators discovery adapter with default-off settings, profile-scoped
+  keyring storage, five-minute dashboard intents, a 25-credit daily default cap,
+  and a UTC credit ledger. Requests use a pinned host, refuse redirects, and
+  stop on errors without retrying. Normalized runs retain at most 60 candidates
+  and expire after 90 days. The installer stages and includes the adapter.
+  Endpoint paths and fields are pinned to the OpenAPI examples fetched October 16,
+  including `/v1/youtube/channel-videos` and `/v1/credit-balance` (`creditCount`).
+  Run records and filenames identify the requested mode, platform and target.
+  TikTok picks use the row's video ID, correcting URLs that point to another post.
+  The bounded reader filters by target before its 24-file limit.
+- Token-gated `POST /playbooks/run` for explicit research generation with a
+  saved Anthropic key, metered per playbook, with citation warnings and refs.
+  Reports save through the existing draft route. Privacy and security docs
+  describe the library text sent to Anthropic; dashboard controls are pending.
+- Shared core transcript chapter limits for prompts, MCP tools and HTTP runs.
+  Overflowed metric medians become null so extreme data remains renderable.
+- Five local research playbooks on MCP as prompts and a shared
+  `get_playbook_input` tool: 9 prompts, 33 stdio tools and 89 HTTP registry
+  tools. The tool returns cited packets without model or network calls;
+  unexpected adapter failures return a structured `internal_error`. Transcript
+  packets cap chapters per capture and count omissions before response trimming.
+- Local research packet builders for outlier posts, transcript intelligence,
+  comment mining, creator teardowns and repurposing, with deterministic metrics,
+  citation checks and bounded reads of saved discovery snapshots. Adapted
+  ScrapeCreators documentation carries its MIT attribution and license.
+  Mixed-platform reports exclude X from metrics, topic selection keeps search
+  relevance order, and author matching accepts Unicode joiners. Unsafe comment
+  and clip text is omitted and counted in packet coverage.
+  The installer includes the playbook module and the MIT license linked from
+  the generated notices.
+- Video captures now retain comment and follower counts in their sidecars and
+  index metadata. Generic captures also index views, likes and upload dates;
+  shaped comments retain yt-dlp IDs and timestamps.
+- Existing captures gain missing engagement fields from local sidecars and
+  cached metadata in batches of up to 25 rows and 32 MB per tick. The backfill
+  updates only index metadata and preserves existing values and source files.
+
+### Changed
+
+- Merged the dashboard and extension re-haul into 3.9. Offline regressions now
+  load the live-capture wrapper, supply the setup worker's sender identity,
+  exercise the current diagnostic renderer and derived article-button label,
+  and read the stdio tool inventory without opening a Windows event-loop socket.
+  Phase 3 acceptance fixtures keep their scratch files in the OS temp directory.
+- To import a backup with `POST /corpus/import` or CLI `--import-corpus <file>`,
+  copy it into the active output folder's `_exports` directory first and supply
+  its absolute path. Both reject relative paths and files outside `_exports`.
+  Invalid, missing or unreadable imports return HTTP 400 (or CLI JSON with
+  `ok: false`) without exposing local paths.
+  Local index rebuilds still restore exports from their explicitly selected root.
+- Dashboard and extension error details now show `<path>`, `<url>` and `[redacted]`
+  placeholders. Spaces and tabs within each line are compacted; line breaks stay
+  intact so extension notifications can still show the last tool error.
+  Ordinary diagnostics such as "This video requires a GVS PO Token which was not
+  provided." remain readable. Redaction happens before the existing detail length
+  limits, with input capped at 65,536 characters before regex processing to keep
+  oversized tool output from stalling error handling. Timeout details show separate
+  `Command:` and `Timeout:` lines. Unquoted paths keep separate placeholders,
+  and retry diagnostics keep their trailing text within the existing
+  200-character limit.
+  Full diagnostics remain in the local `server.log`.
+- A failed podcast transcription's job error and episode transcript error, and a
+  deferred podcast publish error, now read like `CalledProcessError: exit status 1`
+  or `TimeoutExpired: timed out after 30 seconds` for subprocess failures; other
+  exceptions keep their sanitized message. For subprocess errors the podcast job's
+  `error_detail` still carries the redacted command line (and a failed
+  subprocess's redacted output).
+- Local, intranet and IP-address sources now fail through these fetch paths;
+  blocked thumbnails are omitted. Existing downloaded podcast audio remains
+  usable. Podcast downloads and generic yt-dlp extraction make an additional
+  checked GET before starting, using the podcast or page fetcher's User-Agent
+  on every redirect hop. Hosts that reject it cannot be captured through
+  these paths. These fetches connect directly and no longer use system or
+  environment proxy settings. `/extract/any` reports admission refusals and preflight failures,
+  including response timeouts and HTTP protocol errors, as HTTP 400 errors.
+  Fixed YouTube hosts, including YouTube Music, and strict
+  X/Twitter, TikTok and Instagram capture retain their existing yt-dlp flow;
+  other URLs on those hosts, such as relaxed `/live/status` probes, take the
+  checked GET. YouTube keeps its original URL and shared rate limiter without
+  an extra GET.
+  See [the network policy and its limits](docs/security.md#url-and-identifier-validation).
+- Existing unpacked-extension users must reload the extension once after this
+  update. If the old ID differs from `bkcapfidedhfcjpmjabeopfbcjcbmdmi`, extension
+  storage starts fresh under the new ID: reapply extension preferences as needed;
+  the helper token is fetched again. The helper's library and captures stay in
+  place. See [the security model](docs/security.md) for additional trusted IDs.
+- The setup page's Helper status panel and the dashboard's Settings > Local app
+  status line no longer show Anthropic key checks; key status stays in the
+  dashboard's own key section. The tray no longer reports Degraded only for an
+  invalid key. The setup page's Installation folder row shows the standard
+  `%LOCALAPPDATA%\Uoink` location instead of the real path, and its Open folder
+  button no longer opens the folder.
+
+### Security
+
+- Restrict `POST /corpus/import` and CLI `--import-corpus` to resolved files inside
+  the active output folder's `_exports` directory. Reject relative paths, parent
+  traversal and symlinks or junctions that escape that directory before reading a file.
+- Sanitize machine error details before returning them or saving them in jobs:
+  redact local paths, URL credentials, API keys and labelled credentials.
+  A credential's whole value is redacted, including commas, escaped quotes and
+  apostrophes inside it, for prefixed flags such as `--video-password`, the
+  `--flag=value` form and argument lists such as `'--token', 'value'`.
+  Failed and timed-out subprocesses redact whole credential arguments before
+  quoting them, including values containing spaces or line breaks.
+  Preserve full path redaction for apostrophes, colons and repeated separators,
+  including doubled backslashes, while supporting spaces in directory names.
+  Quoted paths also redact names such as `James' O'Brien`; unquoted spaced
+  directory names can include colons, as in `james' smith:family`.
+  Quoted paths redact through the end of their line unless the last closing
+  quote follows a filename with an extension and a complete diagnostic phrase
+  follows it, such as `wasn't found`. Ambiguous words after an apostrophe are
+  removed even without separators or dots, along with later paths on that line.
+  This applies to POSIX, Windows drive and UNC paths, including paths cut off
+  by the input cap. It can hide the rest of a command or diagnostic line after
+  a quoted path. Redaction never crosses a line break.
+  Whole URLs become `<url>`; words such as "download/network" are not paths.
+  The failure handlers that record these details (extraction, playlists,
+  sessions, the retry queue and podcast transcription) write the raw command
+  line and tool output only to `server.log` and log fixed or sanitized text to
+  the console; podcast failures no longer store raw exception text in the job
+  or episode. A podcast transcription or deferred publish error that comes from
+  a subprocess is stored and logged to the console as its type and exit status
+  (or timeout) only, never its command line. Other helper log lines still go to
+  both the console and `server.log`.
+- Optional subtitle-fetch and comments-worker failures now send raw exceptions
+  and yt-dlp output only to `server.log`. The console shows sanitized summaries;
+  comments failures no longer print yt-dlp's last stderr line. Subtitle-refusal
+  detection and comments status updates are unchanged.
+- Apply the standing-source public-network checks to podcast feed polls,
+  stdlib page fetches and thumbnail downloads, and to the redirect chain
+  checked before podcast enclosures and generic URLs reach yt-dlp. Reject
+  IP literals and non-public DNS answers on the initial URL and every
+  redirect hop, including when a saved feed's destination changes. IPv6
+  answers that carry a non-public IPv4 (IPv4-mapped, NAT64 or 6to4) and
+  hostnames that cannot be IDNA-encoded are refused too. Percent-encoded
+  hosts are refused on the initial URL and every redirect, and DNS is checked
+  for the exact host name the connection is made for. Each connection then
+  dials only the addresses that passed that hop's check and never resolves
+  the name again, so DNS rebinding cannot move it; the Host header, SNI and
+  certificate checks keep the host name. Requests made inside yt-dlp and the
+  Crawl4AI renderer resolve names themselves and are not covered.
+- Check the initial page URL and DNS answers before starting Crawl4AI,
+  including Writing Studio captures that bypass the site allowlist. This
+  check does not cover redirects or subresources inside the browser renderer.
+- Pin the extension's Chromium ID to `bkcapfidedhfcjpmjabeopfbcjcbmdmi` with a
+  public manifest key. The helper now grants extension token bootstrap and CORS
+  only to this ID and IDs explicitly added through `UOINK_EXTENSION_IDS` or
+  `settings.extension_ids`. Previously, a nonempty environment variable replaced
+  the settings list; now both sources are unioned with the pinned ID.
+- Use a bodyless `POST /token` in the extension so Chromium sends its extension
+  Origin and the helper checks the pinned or explicitly configured ID.
+  Keep the client header, omitted credentials and `no-store` fetch policy.
+  Without Origin, `/token` now requires `Sec-Fetch-Site: same-origin` and a
+  present, allowed loopback Host. `Sec-Fetch-Site: none` and missing fetch
+  metadata receive HTTP 403, closing the extension-worker GET bypass.
+  Helper-served dashboard and WebView pages keep their same-origin GET path;
+  update/reload the extension with the helper so token refresh uses POST.
+  Older WKWebView clients that send neither header remain unable to bootstrap;
+  open the dashboard in a browser that sends same-origin fetch metadata.
+- Drop extension runtime messages whose sender ID differs from Uoink's own ID.
+- Public `/diagnose` responses no longer include local paths, raw tool output
+  or credential-store errors. Saved-key flags are omitted except for
+  `anthropic_key_valid`: clients passing the existing splash metadata check receive
+  it without a token, because the first-run splash needs it. The field is `true`
+  for a saved key not marked invalid, `false` whenever `anthropic_key_invalid`
+  is set, even if a 401 cleared the saved key, and absent only when no key is
+  saved and the invalid flag is off.
+  This diagnostic-only check requires no Origin header, `Sec-Fetch-Site:
+  same-origin` or `none`, and a present loopback Host allowed on the helper's
+  port. It does not authorize token bootstrap. `/health` and `/ping`
+  carry none of these details; the console doctor keeps the full detail.
+  The dashboard and splash cannot be framed by other pages
+  (`frame-ancestors 'none'`, `X-Frame-Options: DENY`).
+- In-page Uoink buttons on YouTube, Reddit and X articles ignore scripted clicks,
+  so other extensions, userscripts or page scripts cannot start a capture.
+  YouTube in-page copy goes only through the extension's offscreen document
+  (no page clipboard call, no DOM textarea); a failed copy shows "Copy blocked"
+  with a Try again notification. Content-script `openTab` requests open only
+  Uoink pages, claude.ai, chatgpt.com and the local dashboard.
+- Check dashboard external links by kind: remote/server URLs require HTTPS
+  on `uoink.app` or its subdomains; fixed GitHub, Claude, X intent, and
+  YouTube actions use an exact allowlist; captured source links require
+  HTTP(S) and reject IP literals, local hosts, credentials, and non-default
+  ports. Keep the exact local Startup URL working. Route Open YouTube
+  through this check without a helper-side browser open. Block malformed
+  links and keep blocked-link messages visible after copying Markdown.
+- Document that the dashboard makes no features-manifest request. Add
+  regression checks for the removed loader and catalogue, dashboard startup,
+  and the URL allowlist in both browser and native-shell paths.
+
+### Fixed
+
+- Recover a corrupt library index by preserving the damaged database and
+  sidecars before rebuilding from saved captures. Other storage errors stop
+  recovery without deleting files.
+- Give video capture folders a source-specific suffix and verify ownership
+  before reusing a folder, so matching titles cannot overwrite another capture.
+- Keep live-stream captures waiting for the recording by default and honor cancellation
+  while waiting or running.
+- Rotate `server.log` at 5 MB and keep three backups.
+- Handle YouTube caption HTTP 429 refusals separately from video rate limits,
+  allowing local transcription fallback with a visible caption-refusal note.
+
+## [3.8.1] - Not released (these changes ship in 3.9.0)
+
+### Added
+
+- Titles and explicit read-only, destructive, idempotent and open-world hints
+  for all 32 stdio tools, with matching HTTP metadata and a documented
+  per-tool audit. The real stdio handshake test verifies the advertised hints.
+- The privacy-policy link in the MCPB manifest and a README Privacy section
+  covering local storage, source fetches, feed polling, FxTwitter and optional
+  Anthropic calls.
+
+### Fixed
+
+- Updated bundled yt-dlp from 2026.07.04 to 2026.08.19.
+- On a fresh install the dashboard's Library activity panel collapses to one
+  line ("Library activity appears here after your first few captures.")
+  instead of a wall of "Unavailable" tiles; with history it is unchanged.
+- The `.mcpb` packer writes the bundled manifest without a UTF-8 BOM. Windows
+  PowerShell 5.1 added one, and the official `mcpb validate` rejected the
+  bundle as invalid JSON (the 3.8.0 bundle is affected).
+- Windows-only process-authority tests are skipped on other platforms before
+  they can change `os.name` and break pytest's path handling.
+- Model-readiness fixtures resolve temporary paths, including Windows runner
+  paths using `RUNNER~1`, before testing cache containment.
+- Source version fields advance to 3.8.1; the setup page and install instructions
+  point to the published 3.8.0 installer.
+
+## [3.8.0] - 2026-09-15
+
+### Added
+
+- **Living Library media depth (Phase 6, contract `phase6-v1`).**
+  The MCP server now exposes 32 tools over stdio (31 → 32: the read-only
+  `export_cited_range`, which quotes stored cues with speaker labels,
+  provenance, chapters and revision pins after validating every original
+  artifact by bytes); the HTTP/OpenAPI registry grows to 88. Publication is
+  fenced by a per-item ownership ledger, commits one coherent snapshot with
+  Phase 2 invalidation, prunes obsolete owned `.media-inputs` artifacts after
+  settlement, and podcast items record `seek_kind: "none"` until a player
+  path exists.
+- **Living Library reach, activity and standing capture (Phases 3 to 5).** The
+  stdio surface grew from 25 to 31 at this point (`search_library`,
+  `get_library_item`, `read_library_resource`, `get_library_activity`, and the
+  client-run brief pair `get_library_brief_input` / `publish_library_brief`,
+  the latter a local write under `reach/briefs`), five `uoink://library/v1/`
+  resource templates and four prompts; the HTTP/OpenAPI registry grows to 87
+  with the four source-subscription tools and the same additions.
+  Contracts `phase3-v1`, `phase4-v1` and `phase5-v1` under `docs/library/`.
+- **`search_clips` and `get_evidence_card` on stdio.** The two Phase 1 clip
+  tools join the curated stdio MCP surface (23 → 25 tools); they call the
+  same handlers as the HTTP/OpenAPI registry and return the same shapes.
+- **Real model-usage meter.** Every Anthropic response's `usage` block is
+  now accumulated per feature, model, and month into the local index
+  (`usage.anthropic.<feature>.<model>.<YYYY-MM>`); `GET /settings/pricing`
+  gains an `actual` block beside the estimate (D-17 "metered").
+- **Scheduler heartbeat.** `/health` and `uoink doctor` gain a `heartbeat`
+  block that separates tick completion, last successful poll, last ingest
+  completion, and freshness. A failed feed poll no longer advances the
+  success timestamp; a stale scheduler fails `doctor`.
+
 ### Changed
 
 - **Captures notify instead of opening Explorer.** Finishing a uoink (and
@@ -17,6 +330,68 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   folder instead of popping a File Explorer window per capture — batch grabs
   no longer bury the desktop in open folders. Opening the folder stays one
   click away via the tray menu, the Recent list, and the dashboard.
+
+- **Entity extraction is now opt-in (D-17).** The background entity
+  extraction call gets a named `entity_extraction_enabled` setting, default
+  off, beside Comment Intelligence and Hook Type. A saved Anthropic key alone
+  no longer starts it; turn it on under Settings → Entity extraction.
+  Existing installs start with it off.
+
+### Security
+
+- **Recall hook hardening (SEC-02).** `scripts/recall_hook.py` now wraps
+  library text in an explicit untrusted-data boundary with a
+  data-not-instructions preface, strips control characters, neutralises
+  fence-breaking markup, bounds its output, opens the index read-only with a
+  1 s timeout under a 1.5 s wall-clock budget, de-duplicates hits per
+  session, honours `UOINK_RECALL_DISABLED=1`, and never prints file paths.
+
+
+Podcast subscriptions can now keep themselves current and publish selected
+episodes into the local corpus. The helper also gained controls for keeping
+background work quiet without losing its history.
+
+### Added
+
+- **Podcast episodes can enter the shared corpus.** After an on-demand local
+  transcription completes, `episode_to_corpus` writes deterministic Markdown
+  and a sidecar, indexes the transcript for search, adds source-aware timestamp
+  citations, and links the episode to its stable `episode_<hash>` corpus ID.
+- **Podcast transcription now runs as durable background work.** One local
+  worker processes jobs sequentially at below-normal priority on Windows;
+  `get_job_status` reports progress, and interrupted jobs queue again when the
+  helper restarts. Model downloads still require explicit consent.
+- **Podcast feeds update automatically.** A lightweight scheduler checks due
+  RSS and Atom subscriptions for new episode metadata. Audio stays off by
+  default; each feed has a separate Auto-ingest switch for downloading,
+  transcribing, and publishing one new episode at a time.
+- **Desktop notifications can be silenced.** A Local app setting disables
+  balloons without discarding the event from Activity. Uoink also suppresses
+  notifications while a foreground window covers its monitor, including
+  borderless and exclusive-fullscreen apps.
+
+### Changed
+
+- **The stdio MCP surface now has 23 tools.** Podcast feed, episode, WhisperX,
+  transcription-job, and corpus-publishing operations join the curated stdio
+  surface. The full HTTP/OpenAPI registry now has 65 tools.
+- **Citations are source-aware.** Podcast citations use the retained episode
+  page URL with `#t=<seconds>` instead of inventing YouTube watch URLs. Legacy
+  YouTube citation fields remain available for compatibility.
+- **Podcast state survives helper restarts.** Feed polling, downloads,
+  transcription progress, and corpus links are committed as state changes
+  happen. Interrupted transcription jobs return to the queue, and completed
+  transcripts are reused instead of running again.
+- **Background captures stay in the background.** Successful unattended work
+  remains available from the dashboard and tray menu instead of opening File
+  Explorer.
+
+### Fixed
+
+- **Interrupted podcast publishing can be repaired without retranscription.**
+  Startup recovery finishes pending corpus publication, `--doctor` reports
+  incomplete episode links, and `--reconcile-podcast-corpus` repairs them
+  through the deterministic bridge.
 
 ## [3.7.0] - 2026-07-24
 
@@ -341,7 +716,7 @@ The "YouTube layer for any AI agent" release. Three adoption funnels: Chrome ext
 - **`LOCALAPPDATA` output fallback.** The helper automatically falls back to writing outputs to `%LOCALAPPDATA%\Yoink\output` if `DESKTOP_ROOT` is read-only or unwritable.
 - **`pending_yoinks` schema (migration 0005).** Adds a new table in `index.db` to track rate-limited yoinks, attempts, and errors.
 
-- **MCP server** with 14 tools (`uoink_video`, `uoink_playlist`, `get_job_status`, `cancel_job`, `list_recent_uoinks`, `search_uoinks`, `get_uoink_corpus`, `analyze_comments`, `classify_hook`, `get_taxonomy`, `get_citation_map`, `get_uoink_health`, `find_mentions`, `get_transcript_reliability`). Stdio transport officially tested with Claude Desktop and Cursor. Local HTTP JSON-RPC transport available, marked experimental.
+- **MCP server** with 32 tools. The current curated surface includes the original video/library tools plus clip search, evidence cards, library search, activity, briefs, cited-range export, podcast feed, episode, local transcription, and corpus-publishing operations. Stdio transport is officially tested with Claude Desktop and Cursor. Local HTTP JSON-RPC transport is available and marked experimental.
 - **Library Index (SQLite FTS5).** `%LOCALAPPDATA%\Yoink\index.db` replaces scan-based search/recent/get-taxonomy code paths where indexed consumers need fast library access. First boot backfills existing corpora; subsequent yoinks update incrementally.
 - **Migration framework.** `schema_version` table plus numbered `migrations/NNNN_*.sql` scripts for future schema changes.
 - **Yoink Memory page.** New corpus gallery at `chrome-extension://<id>/yoink-memory.html`, opened from the popup's "View all yoinks" link. Filters by search text, channel, topic, Hook Type, and date range, with pagination at 50 results/page.

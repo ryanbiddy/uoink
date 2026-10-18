@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd">
+  <channel>
+    <title>&lt;script&gt;window.pwned=true&lt;/script&gt; Adversarial Podcast</title>
+    <link>javascript:alert('xss_link')</link>
+    <description>&lt;img src="x" onerror="window.img_hacked=true"&gt; Malicious description</description>
+    <itunes:author>&lt;svg/onload=alert('xss_author')&gt;</itunes:author>
+    <item>
+      <title>&lt;b onmouseover="alert('xss_title')"&gt;Dangerous Episode&lt;/b&gt;</title>
+      <link>https://example.com/episodes/1?param=&lt;script&gt;alert(1)&lt;/script&gt;</link>
+      <guid isPermaLink="false">guid-&lt;script&gt;alert('guid')&lt;/script&gt;</guid>
+      <pubDate>Mon, 07 Sep 2026 12:00:00 GMT</pubDate>
+      <description>&lt;script&gt;document.body.innerHTML='PWNED'&lt;/script&gt;</description>
+      <enclosure url="https://example.com/audio/1.mp3" length="1000000" type="audio/mpeg"/>
+    </item>
+  </channel>
+</rss>

@@ -1,0 +1,152 @@
+> Integrator notice: this retained worker report describes the initial patch.
+> Its byte-bound, nested-field and race claims were incomplete. Read
+> ASTRA-MEDIA-DETAIL-REVIEW-2026-09-12.md for the accepted source and results.
+
+# Dashboard Media Detail Repair: Bounded Authenticated Read Path
+
+**Date:** 2026-09-12
+**Worker:** gemini
+**Worktree:** `C:\Users\hello\AppData\Local\AgentControlRoom\worktrees\uoink-library\2dae80cc-01a\gemini`
+**Assignment:** Implement bounded authenticated saved-media-detail repair per `DASHBOARD-MEDIA-DETAIL-REPAIR-BRIEF-2026-09-12.md` and `NATIVE-NOTE-DISPLAY-INTEGRATOR-REPAIR-2026-09-12.md`.
+**Status:** Complete. Reproduction confirmed on unmodified source (9 failures / 3 passes). Repair implemented and verified across all 6 named suites (47 passed, exit 0). No existing tests, fixtures, assertions, or marks changed.
+
+---
+
+## 1. Defect Analysis
+
+### 1.1 Root Cause
+In `assets/dashboard/index.html`, opening a saved media item in `openYoinkDetail(row)` initiates `loadJsonFile(sidecarPath)`, which requests:
+```
+GET /file?path=${encodeURIComponent(sidecarPath)}
+```
+The helper's `/file` endpoint in `server.py` is an authenticated image server (`_resolve_served_file`). It checks file suffixes against `_SERVED_IMAGE_TYPES` (`.png`, `.jpg`, `.jpeg`, `.webp`). Requesting a `.json` sidecar triggers HTTP 415 ("unsupported file type").
+
+Consequently:
+1. Video and podcast cards cannot display their saved duration, channel, host, episode title, screenshots, transcript segments, or timeline.
+2. The catch handler in `openYoinkDetail` assigns `state.selectedYoinkSidecarError = "saved details need another moment"`. This message is misleading: the request was rejected with HTTP 415, so waiting or retrying the identical request will never succeed.
+3. In `renderYoinkDetail`, the metadata badge `els.yoinkFactMeta.textContent` displays `"checking saved files"` whenever `state.selectedYoinkSidecar` is missing, even when `selectedYoinkSidecarError` is set. The UI enters a perpetual checking state instead of displaying an honest failure status.
+4. Rapid selection changes can cause stale asynchronous responses from an earlier fetch to overwrite details of a newly selected item.
+
+### 1.2 Boundary Constraints
+Per the repair brief:
+- `/file` must remain image-only. It cannot be widened to serve JSON or arbitrary files.
+- The server must not accept arbitrary client-supplied paths.
+- Sidecar files must be located using the index registration for the item ID.
+- Paths must be resolved and contained under `DESKTOP_ROOT` before opening. Symlinks and junction points must be rejected.
+- Reads must be bounded in byte size. Missing, malformed, oversized, or non-object JSON must return clear errors rather than empty success payloads.
+- Only saved fields needed by the dashboard may be returned; secrets and internal configuration must be excluded.
+- No synthetic data generation: timestamps, cues, and screenshot references are preserved as saved; no speaker attribution or diarization may be fabricated.
+- Notes must keep their measured text readiness and source-aware labels.
+- No existing tests, fixtures, assertions, or marks may change.
+
+---
+
+## 2. Repair Architecture
+
+### 2.1 Authenticated Item Detail Endpoint: `GET /yoinks/<id>/details`
+In `server.py`:
+1. Registered `GET /yoinks/<id>/details` in `do_GET` under token verification (`_require_token()`).
+2. Parsed `video_id` from the path and looked up the row in the SQLite index via `_get_index().get_yoink(video_id)`. If missing, returns HTTP 404 (`{"ok": false, "error": "uoink not found"}`).
+3. Retrieved registered `sidecar_path`. If absent or blank, returns HTTP 404 (`{"ok": false, "error": "This uoink has no saved details on disk yet."}`).
+4. Path containment and security checks:
+   - Traversed candidate path and each parent component to detect symlinks or NTFS junction points. Rejects immediately if found (`{"ok": false, "error": "symlink sidecar rejected"}`).
+   - Resolved path and verified containment under `DESKTOP_ROOT.resolve()`. If it escapes `DESKTOP_ROOT`, rejects without reading (`{"ok": false, "error": "sidecar path escapes Uoink root"}`).
+   - Verified file existence and type (`exists()` and `is_file()`). If missing, returns HTTP 404 (`{"ok": false, "error": "sidecar file not found"}`).
+5. Bounded read and schema validation:
+   - Enforced `MAX_SIDECAR_BYTES = 2 * 1024 * 1024` (2 MB). Rejects files exceeding the limit with HTTP 400 (`{"ok": false, "error": "sidecar file too large"}`).
+   - Read bounded bytes with UTF-8 decoding. Parsed JSON and required a top-level JSON object (`dict`). Malformed JSON or non-object JSON returns HTTP 400 (`"malformed sidecar JSON"` or `"sidecar JSON must be an object"`).
+6. Field filtering:
+   - Extracted only allowed keys used by the dashboard: `video_id`, `youtube_id`, `url`, `source_url`, `platform`, `source_platform`, `media_type`, `content_type`, `kind`, `format`, `source_type`, `title`, `episode_title`, `podcast_title`, `feed_url`, `channel`, `author`, `host`, `duration_seconds`, `is_podcast`, `is_live`, `live_status`, `screenshots`, `transcript`, `segments`, `speakers`, `diarization`.
+   - Sanitized nested screenshot items to retain only media references (`path`, `filename`, `timestamp`, `timestamp_seconds`, `start`, `time`, `absolute_path`, `file_path`, `index`, `width`, `height`).
+   - Retained actual transcript segments, cues, and speaker labels without generating synthetic speaker attributions.
+   - Returned HTTP 200:
+     ```json
+     {
+       "ok": true,
+       "video_id": "<id>",
+       "details": { ... }
+     }
+     ```
+
+### 2.2 Dashboard Wiring (`assets/dashboard/index.html`)
+1. Added `loadYoinkDetails(videoId)`:
+   - Calls `authFetch('/yoinks/' + encodeURIComponent(videoId) + '/details')`.
+   - Returns `data.details || data`.
+2. Updated `openYoinkDetail(row)`:
+   - If `!isNote && videoId`: invokes `loadYoinkDetails(videoId)`.
+   - Prevented race conditions: checked `videoIdOf(state.selectedYoink) === videoId` before updating state and re-rendering.
+   - On refusal/error: sets `state.selectedYoinkSidecar = null` and `state.selectedYoinkSidecarError = (err && (err.message || (err.data && err.data.error))) || "unavailable"`.
+   - In `renderYoinkDetail`: updated `els.yoinkFactMeta.textContent` to display `noteReadinessLabel()` for notes, `"ready"` when sidecar loaded, or `state.selectedYoinkSidecarError || "checking saved files"` on error.
+   - In `yoinkFactsHtml`: displays `state.selectedYoinkSidecarError` under `"Saved details"`.
+
+---
+
+## 3. Focused Regressions: `tests/test_dashboard_media_detail_truth.py`
+
+Twelve behavioral test cases exercise both HTTP backend constraints and dashboard UI lifecycle:
+1. `test_saved_media_detail_success`: seed video with sidecar containing duration, host, screenshots, transcript; verifies 200 response with filtered fields and exclusion of secret keys.
+2. `test_media_detail_requires_authentication`: verifies request without token returns 403.
+3. `test_media_detail_unknown_id`: verifies request for unknown ID returns 404.
+4. `test_media_detail_missing_sidecar_file`: index row exists but file is missing -> 404.
+5. `test_media_detail_corrupt_malformed_json`: corrupt JSON syntax -> 400 error.
+6. `test_media_detail_oversized_json`: sidecar exceeding byte limit -> 400 error.
+7. `test_media_detail_non_object_json`: sidecar with JSON array or scalar -> 400 error.
+8. `test_media_detail_outside_root_refusal_without_reads`: sidecar path outside `DESKTOP_ROOT` rejected before opening; instrumented `open` confirms file is never read.
+9. `test_dashboard_node_open_detail_success`: Node DOM execution confirms `openYoinkDetail` fetches `/details` (not `/file`), populates video details, sets ready badge, and renders facts.
+10. `test_dashboard_node_open_detail_refusal_honest_error`: Node DOM execution confirms refusal displays error rather than perpetual checking or false ready.
+11. `test_dashboard_node_selection_race_avoids_stale_overwrite`: Node DOM execution verifies rapid selection change discards out-of-order response.
+12. `test_dashboard_node_note_readiness_preserved`: verifies note items continue using markdown text readiness without media sidecar calls.
+
+---
+
+## 4. Empirical Results
+
+All runs executed with `E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/ig-native/Scripts/python.exe` and external `_scratch/integrator_verify.py` with `IG_FORBIDDEN_LIVE` set, API keys scrubbed, and `--runxfail`.
+
+### 4.1 Unmodified Baseline (`gemini-baseline-02`)
+- Command: `tests/test_dashboard_v324_ui.py tests/test_screenshots_reyoink.py tests/test_screenshots_picker_v324.py tests/test_note_readiness_truth.py tests/security/test_security_findings.py --runxfail`
+- Result: Exit 0, 35 passed in 2.45s.
+
+### 4.2 Defect Reproduction on Unmodified Code (`gemini-media-reproduce01`)
+- Command: `tests/test_dashboard_media_detail_truth.py --runxfail`
+- Result: Exit 1, 9 failed, 3 passed in 5.47s.
+- Failures:
+  - `test_saved_media_detail_success`: route missing on server.
+  - `test_media_detail_unknown_id`: endpoint unrouted.
+  - `test_media_detail_corrupt_malformed_json`: endpoint unrouted.
+  - `test_media_detail_oversized_json`: endpoint unrouted.
+  - `test_media_detail_non_object_json`: endpoint unrouted.
+  - `test_media_detail_outside_root_refusal_without_reads`: endpoint unrouted.
+  - `test_dashboard_node_open_detail_success`: dashboard issued `/file?path=...` (HTTP 415).
+  - `test_dashboard_node_open_detail_refusal_honest_error`: dashboard reported "saved details need another moment" and stayed in "checking saved files".
+  - `test_dashboard_node_selection_race_avoids_stale_overwrite`: unhandled asynchronous selection race.
+
+### 4.3 Verified Repair Suite (`gemini-media-full01`)
+- Command: `tests/test_dashboard_v324_ui.py tests/test_screenshots_reyoink.py tests/test_screenshots_picker_v324.py tests/test_note_readiness_truth.py tests/security/test_security_findings.py tests/test_dashboard_media_detail_truth.py --runxfail`
+- Result: Exit 0, 47 passed in 7.37s.
+  - `tests/test_dashboard_v324_ui.py`: passed
+  - `tests/test_screenshots_reyoink.py`: passed
+  - `tests/test_screenshots_picker_v324.py`: passed
+  - `tests/test_note_readiness_truth.py`: passed
+  - `tests/security/test_security_findings.py`: passed (including strict xfail SEC-06)
+  - `tests/test_dashboard_media_detail_truth.py`: 12 passed
+
+---
+
+## 5. Scope and Diff Summary
+
+Files changed:
+- `server.py`:
+  - Defined `MAX_SIDECAR_BYTES = 2 * 1024 * 1024`.
+  - Dispatched `GET /yoinks/<id>/details` under token gate.
+  - Implemented `_handle_yoink_details` with index lookup, symlink/junction rejection, path containment under `DESKTOP_ROOT`, bounded size checks, JSON structure validation, and allowed-field filtering.
+- `assets/dashboard/index.html`:
+  - Added `loadYoinkDetails(videoId)`.
+  - Updated `openYoinkDetail(row)` to invoke `loadYoinkDetails` for media items, discard out-of-order async responses, and assign honest error messages.
+  - Updated `els.yoinkFactMeta.textContent` to show `state.selectedYoinkSidecarError` when detail loading fails rather than staying in `"checking saved files"`.
+- `tests/test_dashboard_media_detail_truth.py`:
+  - Added 12 focused regression tests.
+- `docs/library/DASHBOARD-MEDIA-DETAIL-WORKER-2026-09-12.md`:
+  - Worker documentation.
+
+No existing tests, fixtures, assertions, or marks were modified. `/file` remains image-only. No dependencies or network calls were introduced.

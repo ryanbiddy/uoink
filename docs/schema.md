@@ -70,7 +70,7 @@ Primary metadata table for one saved single-video yoink.
 
 | Column | Type | Nullability | Stores |
 |---|---|---|---|
-| `video_id` | TEXT PRIMARY KEY | required | YouTube video ID (or a synthetic `x-article_`/`reddit_`/`page_` id for non-video captures). Also the join key for FTS, citations, health, and taxonomy. |
+| `video_id` | TEXT PRIMARY KEY | required | YouTube video ID (or a stable synthetic ID such as `episode_<sha1[:11]>` for non-video captures). Also the join key for FTS, citations, health, and taxonomy. |
 | `slug` | TEXT UNIQUE | required | Folder slug, usually the saved folder name. |
 | `channel` | TEXT | nullable | The real "who". YouTube uploader, X "Name (@handle)", reddit "r/<sub>", or a site host. Kept equal to `author` for backward compatibility (FTS, performance-tier, channel picker). |
 | `platform` | TEXT | nullable | cat P2 (migration 0020). Source network: `youtube` / `x` / `reddit` / `podcast` / `web`. Indexed + filterable. |
@@ -229,7 +229,12 @@ Pre-computed timestamp citation map for each indexed yoink.
 | `timestamp_end` | REAL | nullable | End time in seconds for transcript chunks. |
 | `text` | TEXT | nullable | Transcript text for transcript citations. |
 | `file_path` | TEXT | nullable | Absolute screenshot path for screenshot citations. |
-| `youtube_deep_link` | TEXT | required | YouTube URL with `t=<seconds>s`. |
+| `youtube_deep_link` | TEXT | nullable | Legacy YouTube URL with `t=<seconds>s`; null for non-YouTube sources. |
+| `source_url` | TEXT | nullable | Public HTTP(S) source page used for credit. |
+| `source_deep_link` | TEXT | nullable | Source-aware timestamp URL. Podcasts use `source_url#t=<seconds>`. |
+
+Fragment seeking depends on the target player; the visible `HH:MM:SS` label is
+the authoritative reference.
 
 Uniqueness:
 
@@ -240,6 +245,26 @@ MCP surfaces:
 
 - `get_citation_map(slug)` returns transcript citations and screenshot citations separately.
 - `get_uoink_corpus(slug)` also includes the raw citations list as an additive optional field.
+
+### `podcast_feeds` and `podcast_episodes`
+
+Podcast subscriptions poll metadata automatically but store metadata only by
+default. `podcast_feeds` holds the RSS/Atom URL, title, public homepage,
+conditional-request headers, poll state, and default-off `auto_ingest` flag.
+`podcast_episodes` holds the feed-scoped GUID, retained public episode page
+URL, enclosure URL, download/transcript paths and status, a durable
+`auto_ingest_requested` marker, plus `yoink_video_id` after corpus publication.
+
+Migration `0022_podcast_corpus.sql` adds `episode_page_url` and replaces the
+YouTube-required citation shape with the compatible source-aware fields above.
+Existing YouTube links are copied into all three link columns during migration.
+Migration `0023_podcast_watch.sql` adds the per-feed opt-in and episode-level
+request marker used by the 30-second due-feed scheduler.
+
+`python server.py --doctor` reports podcast corpus rows that were indexed before
+their episode's `yoink_video_id` completion link was stored. Run
+`python server.py --reconcile-podcast-corpus` to re-run the deterministic bridge
+for every repairable row; the command does not transcribe audio again.
 
 ### Entity graph (Sprint 16, migration 0002)
 

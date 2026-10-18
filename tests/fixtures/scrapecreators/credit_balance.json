@@ -1,0 +1,12 @@
+{
+  "_provenance": {
+    "kind": "openapi-example",
+    "source_url": "https://docs.scrapecreators.com/v1/credit-balance/openapi.json",
+    "fetched_at": "2026-10-16T16:12:24Z",
+    "source_sha256": "327970fe85b1dce0e0b4d755f32e5ab883dee25e2379997f2ebe17af42858ead",
+    "path": "/v1/credit-balance"
+  },
+  "response": {
+    "creditCount": 333
+  }
+}

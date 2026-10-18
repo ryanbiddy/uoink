@@ -37,6 +37,7 @@ _yoink-trash/
 # explicitly instead.
 /AI and ML/
 /Developer Marketing/
+/Finance and Markets/
 /Job Hunt and Career/
 /New Tools to Try/
 /Productivity and Workflows/
@@ -68,3 +69,6 @@ installer/uoink.ico
 # the version stamped in from helper/_version.py -- the committed source is
 # uoink.iss; the generated copy is a build artifact.
 installer/uoink.generated.iss
+
+# local scratch (index copies, proof logs)
+_scratch/

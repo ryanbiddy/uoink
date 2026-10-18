@@ -117,7 +117,7 @@ If for any reason that fails, you can rename manually:
 2. In a fresh PowerShell window, run:
 
    ```
-   cd C:\Users\hello\OneDrive\Desktop
+   cd C:\Users\<you>\OneDrive\Desktop
    Rename-Item -Path "yt-extractor" -NewName "Yoink"
    ```
 
@@ -125,7 +125,7 @@ If for any reason that fails, you can rename manually:
 
 4. Restart the Yoink server from the new location:
    ```
-   cd C:\Users\hello\OneDrive\Desktop\Yoink
+   cd C:\Users\<you>\OneDrive\Desktop\Yoink
    .\start_server.bat
    ```
 
