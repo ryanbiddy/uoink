@@ -12,6 +12,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- Generate → Research: five playbooks with creator, capture, or topic scopes,
+  cited reports, inline citation warnings, draft saving, and Tweet/Thread
+  follow-ups. Runs use a connected agent first, then your Anthropic key, or
+  prepare a free prompt to copy into Claude. Run stays disabled until the
+  request settles; provider and library errors never trigger a paid retry.
+  Packet refusals show the server's message, reason, and recovery step.
 - Discovery tools on stdio and HTTP: `discover_candidates` plans and spends
   confirmed credits; `queue_discovered` sends up to ten picks through the
   existing capture queue, with intent/agent gates and duplicate protection.
@@ -24,7 +30,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   Shorts. Playbook authors remain local display names. Late key errors cannot
   invalidate a replacement key.
   Source, privacy, security and MCP docs describe these flows; dashboard
-  controls remain pending.
+  discovery controls remain pending.
   A newer rerun that failed or was refused before keeping any row does not
   replace an older snapshot or block keyword fallback; partial runs and
   successful empty runs still count as the newest snapshot.
