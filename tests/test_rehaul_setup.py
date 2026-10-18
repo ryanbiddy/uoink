@@ -11,6 +11,49 @@ JS = (ROOT / "extension/setup.js").read_text(encoding="utf-8-sig")
 DASHBOARD = (ROOT / "assets/dashboard/index.html").read_text(encoding="utf-8-sig")
 
 
+def test_dashboard_extension_steps_use_chrome_and_finish_with_pin():
+    card = DASHBOARD.split('id="getExtensionCard"', 1)[1].split('<div class="source-map-heading">', 1)[0]
+    steps = card.split('<ol class="get-extension-steps">', 1)[1].split('</ol>', 1)[0]
+    assert re.findall(r'<li>(.*?)</li>', steps, re.S) == [
+        'Open <code>chrome://extensions</code> in Chrome.',
+        'Turn on <strong>Developer mode</strong> in the top right.',
+        'Click <strong>Load unpacked</strong> and pick the <code>extension</code> folder that just opened.',
+        'Click the puzzle-piece Extensions icon in the toolbar and pin <strong>Uoink</strong>, so the Uoink button stays visible.',
+    ]
+    assert (
+        '<p class="get-extension-note">Uoink is built and tested for Chrome. '
+        'Edge and Brave are Chromium-based and may work, but are not tested.</p>'
+    ) in card
+    assert 'edge://extensions' not in card and 'brave://extensions' not in card
+
+
+def test_dashboard_empty_state_adds_the_uoink_button_to_chrome():
+    empty_state = DASHBOARD.split('function setLibraryEmptyState(mode)', 1)[1].split('const stateCopy', 1)[0]
+    assert (
+        'copy: "Paste a link in the box above to uoink it, or add the Uoink button to Chrome '
+        'and click Uoink on any video. Each capture lands here with its transcript, '
+        'screenshots when available, and creator credit."'
+    ) in empty_state
+
+
+def test_setup_explains_pinning_before_first_capture():
+    capture = HTML.split('<section id="first-capture"', 1)[1].split('</section>', 1)[0]
+    pin = (
+        '<p>Click the puzzle-piece Extensions icon in the toolbar and pin '
+        '<strong>Uoink</strong>, so the Uoink button stays visible.</p>'
+    )
+    assert pin in capture
+    assert capture.index(pin) < capture.index('Try this video') < capture.index('id="uoink-suggested-btn"')
+
+
+def test_installer_doc_distinguishes_tested_browser_and_explains_pinning():
+    doc = (ROOT / "docs/surface-maps/installer-firstrun.md").read_text(encoding="utf-8")
+    guidance = doc.split("## Browser Guidance", 1)[1].split("## Splash HTML", 1)[0]
+    assert "Uoink is built and tested for Chrome." in guidance
+    assert "Edge and Brave may work, but are not tested." in guidance
+    assert guidance.index("**Load unpacked**") < guidance.index("puzzle-piece **Extensions** menu") < guidance.index("pin **Uoink**")
+
+
 def test_setup_is_only_install_verify_and_first_capture():
     assert re.findall(r'<section id="([^"]+)"', HTML) == ["install", "verify", "first-capture"]
     assert '<main aria-labelledby="page-title">' in HTML

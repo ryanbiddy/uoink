@@ -22,9 +22,9 @@
     const index = done ? 4 : stepIndex(phase, failed || cancelled ? "" : state);
     const waiting = !failed && !done && !cancelled && (["queued", "pending"].includes(state) || index === 1);
     const label = done ? "Done" : cancelled ? "Cancelled" : failed
-      ? (index < 0 ? "Failed · step not reported" : `Failed at ${STEPS[index]} (${index + 1} of 5)`)
+      ? (index < 0 ? "Failed" : `Failed at ${STEPS[index]} (${index + 1} of 5)`)
       : waiting ? "Waiting · one YouTube capture at a time"
-      : `Capturing · ${index < 0 ? "step not reported" : `${STEPS[index]} (${index + 1} of 5)`}`;
+      : ["Capturing", index < 0 ? "" : `${STEPS[index]} (${index + 1} of 5)`].filter(Boolean).join(" · ");
     return { index, failed, done, waiting, cancelled, label,
       segments: STEPS.map((_, i) => done ? "done" : cancelled ? "todo"
         : i < index ? "done" : i !== index ? "todo" : failed ? "fail" : "now") };

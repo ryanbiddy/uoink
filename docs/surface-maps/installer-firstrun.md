@@ -84,6 +84,14 @@ Auto-close:
 
 ## Browser Guidance
 
+Uoink is built and tested for Chrome. Edge and Brave may work, but are not tested.
+
+To add the Uoink button in Chrome:
+
+1. Open `chrome://extensions/` and turn on **Developer mode**.
+2. Click **Load unpacked** and select the installed `extension` folder.
+3. Open the puzzle-piece **Extensions** menu in the toolbar and pin **Uoink** so its button stays visible.
+
 The native wrapper detects the default HTTPS browser on Windows through the `UrlAssociations\https\UserChoice` registry key. It maps common Chromium browsers to their extension pages:
 
 - Microsoft Edge, `edge://extensions/`
@@ -93,7 +101,7 @@ The native wrapper detects the default HTTPS browser on Windows through the `Url
 - Opera GX, `opera://extensions/`
 - Arc, `arc://extensions/`
 
-If no supported browser is detected, the splash falls back to `your Chromium browser` with `chrome://extensions/` and keeps the Copy path button visible.
+These mappings identify the detected browser; they do not indicate which browsers Uoink has been tested in. If no listed browser is detected, the splash falls back to `your Chromium browser` with `chrome://extensions/` and keeps the Copy path button visible.
 
 ## Splash HTML
 

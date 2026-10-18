@@ -12,7 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 HARNESS = ROOT / "tests/js/rehaul_activity_steps_test.mjs"
 
 
-@pytest.mark.parametrize("group", ["steps", "rows", "errors", "caption429", "exhaustion", "actions", "stream"])
+@pytest.mark.parametrize("group", ["steps", "rows", "errors", "caption429", "exhaustion", "presentation", "first_pending", "first_running", "actions", "stream"])
 def test_activity_behaviour(group):
     result = subprocess.run(
         ["node", str(HARNESS), group], cwd=ROOT,

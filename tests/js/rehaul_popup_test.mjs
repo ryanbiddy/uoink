@@ -20,6 +20,8 @@ const groups = {
     assert.match(m.steps({ state: "pending" }).label, /Waiting · one YouTube/);
     assert.equal(m.steps({ state: "pending", last_error: "youtube_rate_limit" }).failed, true);
     assert.equal(m.steps({ state: "running", phase: "future-phase" }).index, -1);
+    assert.equal(m.steps({ state: "running", phase: "future-phase" }).label, "Capturing");
+    assert.equal(m.steps({ state: "failed" }).label, "Failed");
     assert.equal(m.steps({ state: "failed" }).segments.join(","), "todo,todo,todo,todo,todo");
     assert.equal(m.steps({ state: "completed" }).segments.join(","), "done,done,done,done,done");
     const reason = m.safeError({ error_detail: "Command: private\nERROR: old\nERROR: HTTP 429 https://secret.example/ api_key=private" });
@@ -70,6 +72,12 @@ const groups = {
     assert.equal(env.copyButton().textContent, "Copy Markdown");
     env.setData({ jobs: [{ id: "j", source_url: url, state: "pending" }], recent: [] });
     assert.match(env.rows()[0].textContent, /Waiting · one YouTube capture at a time/);
+    for (const state of ["running", "failed"]) {
+      env.setData({ jobs: [{ id: "unknown", source_url: url, state, phase: "future-phase" }], recent: [] });
+      const text = env.rows()[0].textContent;
+      assert.match(text, state === "failed" ? /Failed/ : /Capturing/);
+      assert.doesNotMatch(text, /not reported|Capturing ·|Failed ·|Transcript:/, "unknown step and transcript source are omitted");
+    }
     const offline = await popupEnv({ platform: "Linux", routes: { "/health": () => { throw new TypeError("offline"); } } });
     assert.equal(offline.el("status").textContent, "Offline"); assert.match(offline.el("status-help").textContent, /Terminal/);
     assert.doesNotMatch(offline.el("status-help").textContent, /Start Menu/);

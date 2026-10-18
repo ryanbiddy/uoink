@@ -28,6 +28,13 @@ def test_settings_has_one_save_model_and_all_five_sections():
     assert "Chrome setting" in settings  # never imply localStorage updates Chrome sync
 
 
+def test_canned_phrase_warning_setting_uses_generate_terminology():
+    settings = PAGE.split('id="tab-settings"', 1)[1].split("<script>", 1)[0]
+    assert 'id="voiceWarningsEnabled" type="checkbox" checked aria-describedby="voiceWarningsEnabledSaveStatus"> Show canned-phrase warnings</label>' in settings
+    assert "Canned-phrase warnings flag canned phrasing without blocking the draft." in settings
+    assert "Voice DNA" not in settings
+
+
 def test_autosave_keeps_existing_api_and_does_not_silently_sync_later():
     logic = PAGE.split("const SETTINGS_FIELDS", 1)[1].split("async function postHelper", 1)[0]
     assert 'settingsRequest("/settings", { method: "POST", body: JSON.stringify(patch)' in logic

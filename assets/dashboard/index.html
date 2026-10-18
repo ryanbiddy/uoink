@@ -2821,7 +2821,7 @@
 
     .app:has(#tab-settings.active) { background: var(--bg); }
     .app:has(#tab-settings.active) .uoink-mark { filter: none; }
-    #tab-settings { max-width: 900px; }
+    #tab-settings .setting-copy { max-width: 72ch; }
     #tab-settings .field { max-width: 100%; min-width: 0 !important; }
     #tab-settings .inline-row { gap: 12px; }
     #tab-settings label.inline-row { min-height: 44px; align-items: center; }
@@ -3893,8 +3893,8 @@
       line-height: 1.2;
     }
     .standing-summary-bar {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)) auto;
+      display: flex;
+      flex-wrap: wrap;
       gap: 12px;
       align-items: center;
       padding: 14px 18px;
@@ -3904,6 +3904,8 @@
     }
     .standing-stat {
       display: flex;
+      flex: 1 1 140px;
+      min-width: 0;
       flex-direction: column;
       gap: 2px;
     }
@@ -4615,7 +4617,7 @@
                   <div class="writing-output markdown-rendered" id="writingOutput">Choose a source, then generate or paste a draft.</div>
                   <div class="generate-research-panel hidden" id="generateResearchPanel"></div>
                   <div class="warning-panel" id="voiceWarningPanel">
-                    <strong>Voice DNA warning panel</strong>
+                    <strong>Canned-phrase check</strong>
                     <p id="voiceWarningCopy">If a draft starts sounding canned, Uoink shows the flagged phrases here. Regenerate, save the draft, or change the warning setting.</p>
                     <div class="inline-row">
                       <button class="button ghost" type="button" id="regenerateWriting">Regenerate</button>
@@ -5127,7 +5129,10 @@
               <h1>What Uoink can read next.</h1>
               <p class="lede">A plain map of capture surfaces, what lands locally, and where each source shows up next.</p>
             </div>
-            <button class="button primary" type="button" data-open-youtube>Open YouTube</button>
+            <div class="inline-row">
+              <a class="button ghost" href="#sources/discover">Discover</a>
+              <button class="button primary" type="button" data-open-youtube>Open YouTube</button>
+            </div>
           </div>
           <div class="learn-links" aria-label="Sources walkthrough links">
             <a href="https://uoink.app/features/universal-page-uoink" target="_blank" rel="noreferrer">Learn: Universal Page Uoink</a>
@@ -5181,7 +5186,7 @@
             </div>
           </section>
           <section class="discovery-panel" id="sources-discover" aria-labelledby="discoveryTitle">
-            <h2 id="discoveryTitle">Discover</h2>
+            <h2 id="discoveryTitle" tabindex="-1">Discover</h2>
             <p class="discovery-note">Find posts with ScrapeCreators, then choose what to capture. <a href="#settings/connected-services">Set up Connected services</a>.</p>
             <fieldset class="discovery-form" id="discoveryFields">
               <legend class="visually-hidden">Discovery search</legend>
@@ -5249,10 +5254,12 @@
               <button class="button primary" type="button" data-open-extension>Open extension folder</button>
             </div>
             <ol class="get-extension-steps">
-              <li>Open your extensions page: <code>chrome://extensions</code> (Chrome), <code>edge://extensions</code> (Edge), or <code>brave://extensions</code> (Brave).</li>
+              <li>Open <code>chrome://extensions</code> in Chrome.</li>
               <li>Turn on <strong>Developer mode</strong> in the top right.</li>
               <li>Click <strong>Load unpacked</strong> and pick the <code>extension</code> folder that just opened.</li>
+              <li>Click the puzzle-piece Extensions icon in the toolbar and pin <strong>Uoink</strong>, so the Uoink button stays visible.</li>
             </ol>
+            <p class="get-extension-note">Uoink is built and tested for Chrome. Edge and Brave are Chromium-based and may work, but are not tested.</p>
             <p class="get-extension-note">Chrome Web Store review is still pending, so you load it unpacked for now.</p>
           </div>
           <div class="source-map-heading">
@@ -5488,8 +5495,8 @@
 
             <div class="setting-block">
               <h2>Writing Studio</h2>
-              <p class="setting-copy">Voice DNA warnings flag canned phrasing without blocking the draft. The screenshot picker shows before anything opens in X.</p>
-              <label class="inline-row"><input id="voiceWarningsEnabled" type="checkbox" checked aria-describedby="voiceWarningsEnabledSaveStatus"> Show Voice DNA warnings</label>
+              <p class="setting-copy">Canned-phrase warnings flag canned phrasing without blocking the draft. The screenshot picker shows before anything opens in X.</p>
+              <label class="inline-row"><input id="voiceWarningsEnabled" type="checkbox" checked aria-describedby="voiceWarningsEnabledSaveStatus"> Show canned-phrase warnings</label>
               <div class="setting-feedback"><span class="setting-status" id="voiceWarningsEnabledSaveStatus" role="status" aria-live="polite" aria-atomic="true"></span><button class="button ghost setting-retry hidden" id="voiceWarningsEnabledSaveRetry" type="button" data-setting-retry="voiceWarningsEnabled">Retry save</button></div>
               <label class="inline-row"><input id="voiceWarningsPerGeneration" type="checkbox" checked aria-describedby="voiceWarningsPerGenerationSaveStatus"> Show the per-draft skip control</label>
               <div class="setting-feedback"><span class="setting-status" id="voiceWarningsPerGenerationSaveStatus" role="status" aria-live="polite" aria-atomic="true"></span><button class="button ghost setting-retry hidden" id="voiceWarningsPerGenerationSaveRetry" type="button" data-setting-retry="voiceWarningsPerGeneration">Retry save</button></div>
@@ -11021,7 +11028,7 @@
         },
         empty: {
           title: "No saved uoinks yet.",
-          copy: "Paste a link in the box above to uoink it, or load the browser button and click Uoink on any video. Each capture lands here with its transcript, screenshots when available, and creator credit.",
+          copy: "Paste a link in the box above to uoink it, or add the Uoink button to Chrome and click Uoink on any video. Each capture lands here with its transcript, screenshots when available, and creator credit.",
           action: `<button class="button primary" type="button" data-focus-library-box>Paste a link</button><button class="button ghost" type="button" data-open-extension>Get the extension</button><button class="button ghost" type="button" data-tab-button-proxy="sources">Open Sources</button>`,
         },
       };
@@ -12560,9 +12567,9 @@
       const index = done ? 4 : captureStepIndex(phase, failed || cancelled ? "" : status);
       const waiting = !failed && !done && !cancelled && (["queued", "pending"].includes(status) || index === 1);
       const label = done ? "Done" : cancelled ? "Cancelled" : failed
-        ? (index < 0 ? "Failed · step not reported" : `Failed at ${CAPTURE_STEPS[index]} (${index + 1} of 5)`)
+        ? (index < 0 ? "Failed" : `Failed at ${CAPTURE_STEPS[index]} (${index + 1} of 5)`)
         : waiting ? "Waiting · one YouTube capture at a time"
-        : `Capturing · ${captureStepLine(index) || "step not reported"}`;
+        : ["Capturing", captureStepLine(index)].filter(Boolean).join(" · ");
       const steps = CAPTURE_STEPS.map((label, step) => ({ label, state: done ? "done" : cancelled ? "todo"
         : step < index ? "done" : step !== index ? "todo" : failed ? "fail" : "now" }));
       return { index, failed, done, cancelled, waiting, label, steps };
@@ -12661,10 +12668,10 @@
           // reserve Needs attention for captures that have stopped retrying.
           // As in activityRetrySchedule, retry-now can revive an exhausted
           // record without resetting its count; stale pending rows cannot.
-          const retryPending = entry.pending && normalizedStatus(entry.pending) === "pending"
+          const retryPending = activityHasFailedAttempt(entry) && entry.pending && normalizedStatus(entry.pending) === "pending"
             && !entry.pending.retry_exhausted
             && (!entry.row.retry_exhausted || Number(entry.pending.attempt_count) >= 3);
-          return { ...entry, model, group: model.failed && !retryPending ? "attention" : active || retryPending ? "progress"
+          return { ...entry, model, retryPending, group: model.failed && !retryPending ? "attention" : active || retryPending ? "progress"
             : new Date(activityTime(entry.row)).toDateString() === today ? "today" : "earlier" };
         }).sort((a, b) => (timeOf(activityTime(b.row)) || 0) - (timeOf(activityTime(a.row)) || 0));
     }
@@ -12677,7 +12684,7 @@
       if (kind === "asr") return "transcript by Whisper";
       if (row.has_transcript === false) return "No transcript";
       if (source) return `Transcript: ${humanLabel(source)}`;
-      return "Transcript source not reported";
+      return "";
     }
 
     function activitySource(row) {
@@ -12701,7 +12708,17 @@
       return detail || "No error detail was reported by the helper.";
     }
 
+    function activityHasFailedAttempt(entry) {
+      // Queue membership and attempt_count alone are not capture failures:
+      // waiting for ownership can also increment the queue's attempt count.
+      // The original job retains the last failure when a retry starts running.
+      return [entry.row, entry.job, entry.pending].some((row) => row && (activitySteps(row).failed
+        || (["pending", "running"].includes(normalizedStatus(row)) && Boolean(row.failure_phase || row.error_detail || row.error
+          || (row.last_error && row.last_error !== "capture_ownership_unavailable")))));
+    }
+
     function activityRetrySchedule(entry, now = Date.now()) {
+      if (!activityHasFailedAttempt(entry)) return "";
       const pending = entry.pending;
       if (pending && normalizedStatus(pending) === "running") return "Retrying now.";
       // retry-now revives a failed pending row without resetting its count.
@@ -12741,6 +12758,11 @@
     function activityRowHtml(entry) {
       const row = entry.row;
       const model = entry.model || activitySteps(row);
+      const retryCopy = activityRetrySchedule(entry);
+      // The strip describes current work; the drawer keeps the last failed
+      // attempt's steps and diagnostic. No job or queue state is changed.
+      const display = entry.retryPending && model.failed
+        ? { ...activitySteps({ state: "pending" }), label: "Waiting to retry" } : model;
       const title = row.title || row.playlist_title || (row.current_video && row.current_video.title) || row.source_url || row.url || "Capture";
       const when = activityTime(row);
       const time = captureClock(when);
@@ -12755,9 +12777,9 @@
         <div class="activity-row-main">
           <h3 class="activity-row-title">${htmlEscape(title)}</h3>
           <p class="activity-meta">${htmlEscape(activitySource(row))}</p>
-          <div class="activity-state">${activityStripHtml(model, entry.key)}<span class="${model.failed ? "activity-failed-label" : "activity-step-label"}">${model.failed ? '<span aria-hidden="true">✕</span> ' : ""}${htmlEscape(model.label)}</span></div>
-          <p class="activity-meta">${htmlEscape(activityTranscript(entry))} · ${time ? `<time datetime="${htmlEscape(when)}">${htmlEscape(time)}</time>` : "Time not reported"}</p>
-          ${model.failed ? `<p class="activity-retry-copy">${htmlEscape(activityRetrySchedule(entry))}</p>` : ""}
+          <div class="activity-state">${activityStripHtml(display, entry.key)}<span class="${display.failed ? "activity-failed-label" : "activity-step-label"}">${display.failed ? '<span aria-hidden="true">✕</span> ' : ""}${htmlEscape(display.label)}</span></div>
+          <p class="activity-meta">${[htmlEscape(activityTranscript(entry)), time ? `<time datetime="${htmlEscape(when)}">${htmlEscape(time)}</time>` : "Time not reported"].filter(Boolean).join(" · ")}</p>
+          ${retryCopy && (model.failed || entry.retryPending || (entry.pending && normalizedStatus(entry.pending) === "running")) ? `<p class="activity-retry-copy">${htmlEscape(retryCopy)}</p>` : ""}
           ${row.kind === "notification" && row.message ? `<p class="activity-meta">${htmlEscape(row.message)}</p>` : ""}
         </div><div class="activity-row-actions">${actions}</div>
       </article>`;
@@ -12831,7 +12853,7 @@
       };
       put("captureFailureTitle", row.title || row.playlist_title || (row.current_video && row.current_video.title) || row.url || row.source_url || "Capture");
       put("captureFailureLabel", entry.model.label);
-      put("captureFailureMeta", `${activitySource(row)} · ${activityTranscript(entry)} · ${captureClock(activityTime(row)) || "Time not reported"}`);
+      put("captureFailureMeta", [activitySource(row), activityTranscript(entry), captureClock(activityTime(row)) || "Time not reported"].filter(Boolean).join(" · "));
       const words = { done: "Done", fail: "Failed", now: "In progress", todo: "Not reached" };
       const symbols = { done: "✓", fail: "✕", now: "○", todo: "○" };
       document.getElementById("captureFailureSteps").innerHTML = entry.model.steps.map((step) =>
@@ -16121,6 +16143,9 @@
           ? { tab: "settings", section, hash: routeHash("settings", section) }
           : { tab: "settings", hash: "#settings" };
       }
+      if (head === "sources" && rest.trim().toLowerCase() === "discover") {
+        return { tab: "sources", section: "discover", hash: "#sources/discover" };
+      }
       if (head === "generate") {
         const asked = rest.trim().toLowerCase();
         const mode = GENERATE_MODES.includes(asked) ? asked : GENERATE_MODES[0];
@@ -16181,6 +16206,13 @@
       }, 0);
     }
 
+    function revealSourcesDiscover() {
+      window.setTimeout(() => {
+        document.getElementById("sources-discover").scrollIntoView({ block: "start", behavior: scrollBehavior() });
+        document.getElementById("discoveryTitle").focus({ preventScroll: true });
+      }, 0);
+    }
+
     function switchTab(tab, options = {}) {
       if (tab !== "activity" && state.activityFailureKey) closeCaptureFailure();
       if (tab === "build" || tab === "script") tab = "writing";
@@ -16218,6 +16250,7 @@
       if (content) content.scrollTop = 0;
       if (!options.fromRoute) pushRoute(routeForTab(tab, options));
       if (tab === "settings" && options.section) revealSettingsSection(options.section);
+      if (tab === "sources" && options.section === "discover") revealSourcesDiscover();
     }
 
     // Shows the screen a parsed route names, without pushing history.
@@ -16243,7 +16276,8 @@
         return;
       }
       if (state.activeTab !== route.tab) switchTab(route.tab, { fromRoute: true, section: route.section });
-      else if (route.section) revealSettingsSection(route.section);
+      else if (route.tab === "settings" && route.section) revealSettingsSection(route.section);
+      else if (route.tab === "sources" && route.section === "discover") revealSourcesDiscover();
     }
 
     // Load, Back/Forward and typed hashes. A hash that names no screen

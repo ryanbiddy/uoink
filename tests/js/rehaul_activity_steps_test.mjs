@@ -83,6 +83,8 @@ async function steps() {
   check(!p.activitySteps(pending({ last_error: "capture_ownership_unavailable" })).failed, "lock waiting is not a capture failure");
   same(p.activitySteps({ state: "running", phase: "future_phase" }).steps.map((s) => s.state), Array(5).fill("todo"), "unknown progress never invented");
   same(p.activitySteps({ state: "failed" }).index, -1, "unknown failure does not guess metadata");
+  same(p.activitySteps({ state: "failed" }).label, "Failed", "unknown failed step is omitted");
+  same(p.activitySteps({ state: "running", phase: "future_phase" }).label, "Capturing", "unknown running step is omitted");
   same(p.activitySteps({ state: "queued" }).index, 1, "queued waits");
   for (const state of ["done", "completed", "succeeded"]) same(p.activitySteps({ state }).steps.map((s) => s.state), Array(5).fill("done"), state);
   same(p.activitySteps({ state: "cancelled", phase: "download" }).steps.map((s) => s.state), Array(5).fill("todo"), "cancelled never claims success or failure");
@@ -174,7 +176,9 @@ async function caption429() {
   same(p.get("activityNavCount").textContent, "1", "a pending retry counts as active work");
   check(!p.get("attentionRows").innerHTML.includes('data-activity-key="pending:7"'), "pending retry is absent from Needs attention");
   const row = p.get("queueRows").innerHTML;
-  check(row.includes(model.label) && row.includes('<i class="step fail">'), "row renders the caption 429 failed strip and label");
+  check(row.includes("Waiting to retry") && row.includes('<i class="step now'), "row shows the current wait with its active strip");
+  check(!row.includes("Failed") && !row.includes('step fail') && !row.includes('activity-failed-label'), "waiting retry has no failed label, segment or styling");
+  check(row.includes("Retries on its own at "), "waiting row includes its retry time");
   check(!row.includes("youtube_rate_limit"), "row does not expose the machine token");
   p.openCaptureFailure("pending:7", p.get("trigger"));
   check(p.els.captureFailureDrawer.open, "pending caption failure opens its drawer");
@@ -241,6 +245,78 @@ async function exhaustion() {
   const requested = p.activityRetrySchedule({ row: job, pending: pending({ attempt_count: 3 }) });
   check(requested.includes("Your requested retry is scheduled") && !requested.includes("Retries on its own"), "manual retry after exhaustion is distinguished from automatic retries");
   same(p.activityRetrySchedule({ row: job, pending: pending({ status: "running", attempt_count: 3 }) }), "Retrying now.", "running manual attempt supersedes exhaustion");
+}
+
+async function firstAttempt(status) {
+  const p = makePage();
+  const expected = status === "pending" ? "Waiting · one YouTube capture at a time" : "Capturing · video (3 of 5)";
+  for (const withJob of [false, true]) for (const extra of [
+    { attempt_count: 0, last_error: "" },
+    { attempt_count: 1, last_error: "" },
+    { attempt_count: 0, last_error: "capture_ownership_unavailable" },
+    { attempt_count: 1, last_error: "capture_ownership_unavailable" },
+  ]) {
+    const queued = Object.freeze(pending({ ...extra, status, phase: status === "running" ? "download" : "", queued_at: today }));
+    p.state.jobs = withJob ? [Object.freeze({ id: "first", state: status === "pending" ? "queued" : "running",
+      source_url: video, phase: queued.phase, started_at: today })] : [];
+    p.renderQueue({ pending: [queued] });
+    same(p.state.activityEntries.length, 1, "first attempt merges with its job");
+    const entry = p.state.activityEntries[0];
+    same(entry.group, "progress", "first attempt stays in progress");
+    check(!entry.model.failed && !entry.retryPending, "queue status alone is not failure evidence");
+    const row = p.get("queueRows").innerHTML;
+    check(row.includes(expected) && row.includes('<i class="step now'), "first attempt retains its normal label and progress strip");
+    check(!/Waiting to retry|Retries on its own|Retrying now|activity-retry-copy|data-activity-detail/.test(row), "first attempt has no retry or failure presentation");
+    check(row.includes('data-cancel="7"'), "first attempt remains cancellable");
+    same(p.activityRetrySchedule(entry), "", "first attempt has no retry schedule copy");
+  }
+}
+
+async function presentation() {
+  const p = makePage();
+  for (const withJob of [false, true]) for (const phase of ["", "download"]) {
+    const job = Object.freeze(failed({ failure_phase: phase, phase: "" }));
+    const queued = Object.freeze(pending({ failure_phase: phase, last_error: "HTTP Error 429", queued_at: today }));
+    p.state.jobs = withJob ? [job] : [];
+    p.renderQueue({ pending: [queued] });
+    const entry = p.state.activityEntries[0];
+    same(entry.group, "progress", "automatic retry remains in progress");
+    check(entry.model.failed, "last attempt remains failed in the model");
+    const row = p.get("queueRows").innerHTML;
+    check(row.includes("Waiting to retry") && row.includes("Retries on its own at "), "wait and schedule shown for merged and queue-only retries");
+    check(!/Failed|not reported|activity-failed-label|step fail/.test(row), "retry row omits failure presentation and unknown fragments");
+    check(!row.includes('activity-meta"> ·') && !row.includes(' · </p>'), "omitted transcript leaves no stray separator");
+    check(row.includes('data-activity-detail='), "last failure stays reachable");
+    p.openCaptureFailure(entry.key, p.get("trigger"));
+    check(p.get("captureFailureLabel").textContent.startsWith("Failed"), "drawer describes the last failure");
+    check(!/not reported| ·  · /.test(p.get("captureFailureMeta").textContent), "drawer omits missing transcript without empty fragments");
+    p.closeCaptureFailure();
+    same(job.state, "failed", "presentation never mutates job state");
+    same(queued.status, "pending", "presentation never mutates pending state");
+  }
+  p.state.jobs = [failed({ failure_phase: "", phase: "", retry_exhausted: true, attempt_count: 3 })];
+  p.renderQueue({ pending: [pending({ status: "failed", attempt_count: 3, retry_exhausted: true })] });
+  check(p.get("attentionRows").innerHTML.includes('activity-failed-label') && p.get("attentionRows").innerHTML.includes("Failed"), "exhausted unknown-step failure remains Failed in Needs attention");
+  check(!/Waiting to retry|Retries on its own|Retrying now/.test(p.get("attentionRows").innerHTML), "exhausted failure never promises another attempt");
+  p.renderQueue({ pending: [pending({ attempt_count: 3 })] });
+  check(p.get("queueRows").innerHTML.includes("Waiting to retry") && p.get("queueRows").innerHTML.includes("Your requested retry is scheduled"), "manual retry after exhaustion is still distinguished");
+  p.renderQueue({ pending: [pending({ status: "running", phase: "transcript", attempt_count: 3 })] });
+  check(p.get("queueRows").innerHTML.includes("Retrying now.") && !p.get("queueRows").innerHTML.includes("Failed"), "running retry shows progress and retry status");
+  p.state.jobs = [];
+  for (const error of [{ last_error: "HTTP Error 429" }, { error_detail: "ERROR: download failed" }]) {
+    p.renderQueue({ pending: [pending({ ...error, status: "running", phase: "transcript", queued_at: today })] });
+    check(p.get("queueRows").innerHTML.includes("Retrying now."), "running queue-only retry retains its recorded failure evidence");
+  }
+  p.state.jobs = [failed({ error_detail: "", failure_phase: "", phase: "", attempt_count: 1 })];
+  p.renderQueue({ pending: [pending({ status: "running", phase: "download", attempt_count: 1 })] });
+  check(p.get("queueRows").innerHTML.includes("Retrying now."), "failed last job identifies a running retry even without error text");
+  p.state.jobs = [];
+  for (const [retry_after, copy] of [[yesterday, "Retry is due. Waiting for the helper."], ["bad", "Waiting for the helper to schedule a retry."]]) {
+    p.renderQueue({ pending: [pending({ last_error: "HTTP Error 429", retry_after, queued_at: today })] });
+    check(p.get("queueRows").innerHTML.includes(copy), "due or unknown schedule never invents a retry time");
+  }
+  const transcript = p.activityRowHtml({ key: "none", row: { state: "completed", has_transcript: false, completed_at: today } });
+  check(transcript.includes("No transcript"), "known absent transcript stays explicit");
 }
 
 async function actions() {
@@ -324,7 +400,8 @@ async function stream() {
   check(p.get("completedRows").innerHTML.includes('step done'), "completion moves into Today");
 }
 
-const groups = { steps, rows, errors, caption429, exhaustion, actions, stream };
+const groups = { steps, rows, errors, caption429, exhaustion, presentation,
+  first_pending: () => firstAttempt("pending"), first_running: () => firstAttempt("running"), actions, stream };
 for (const name of process.argv.slice(2).length ? process.argv.slice(2) : Object.keys(groups)) {
   assert.ok(groups[name], `Unknown group ${name}`);
   const before = checks;

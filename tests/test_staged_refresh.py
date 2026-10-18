@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import ast
 import json
+import shutil
 from pathlib import Path
 import sqlite3
 import subprocess
@@ -644,7 +645,9 @@ def test_long_topic_and_63_character_slug_keep_all_staged_paths_under_max_path(
         folder = root / ("Long_topic_" + "t" * (topic_length - 11)) / slug
         folder.parent.mkdir()
         old_name = refresh.folder.name
-        refresh.folder.rename(folder)
+        # The capture lives under pytest's basetemp; on CI that can be a different
+        # drive from ROOT, where os.rename fails with WinError 17.
+        shutil.move(str(refresh.folder), str(folder))
         for suffix in (".md", ".json"):
             (folder / f"{old_name}{suffix}").rename(folder / f"{slug}{suffix}")
         refresh.folder = folder
@@ -704,7 +707,9 @@ def test_long_media_artifact_backup_does_not_exceed_original_path_length(
         folder = root / ("t" * topic_length) / slug
         folder.parent.mkdir()
         old_name = refresh.folder.name
-        refresh.folder.rename(folder)
+        # The capture lives under pytest's basetemp; on CI that can be a different
+        # drive from ROOT, where os.rename fails with WinError 17.
+        shutil.move(str(refresh.folder), str(folder))
         for suffix in (".md", ".json"):
             (folder / f"{old_name}{suffix}").rename(folder / f"{slug}{suffix}")
         refresh.folder = folder
