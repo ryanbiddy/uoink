@@ -6,8 +6,8 @@ over 3.9.0 keeps your library and saved captures.
 
 ## Reliability
 
-- The Windows/Ubuntu CI test baseline is green. Windows-only Library mirror
-  and installer-receipt tests skip on other systems; portable tests work on both.
+- The Windows/Ubuntu CI test baseline is fixed: Windows-only Library mirror
+  and installer-receipt tests skip on other systems, and portable tests pass on both.
 - Linux isolated-install stop recognizes processes that have already exited.
 - The YouTube pacing test checks process event order without relying on clock resolution.
 
