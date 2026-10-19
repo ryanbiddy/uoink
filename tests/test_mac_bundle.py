@@ -281,6 +281,8 @@ def test_loader_path_symlink_containment_without_os_symlink_privileges(monkeypat
 @pytest.mark.parametrize("failure", [None, "delete", "remaining_rpath", "dependency"])
 @pytest.mark.parametrize("relative", ["libjpeg.62.4.0.dylib", "Contents/Helpers/ffmpeg",
                                     "Contents/Helpers/ffprobe", "Contents/Frameworks/FFmpeg7/libavcodec.61.dylib",
+                                    "Contents/Resources/Python/bin/python3",
+                                    "Contents/Resources/Python/lib/python3.13/site-packages/PIL/_imaging.so",
                                     "Contents/MacOS/Uoink"])
 def test_rpath_rewrite_reports_edits_and_inventory_rechecks(monkeypatch, tmp_path, failure, relative):
     from types import SimpleNamespace
@@ -363,7 +365,7 @@ def test_smoke_success_requires_completed_checks_and_immutable_bundle(monkeypatc
             contents = scratch / "Relocated App With Spaces/Uoink.app/Contents"
             return SimpleNamespace(returncode=0,
                 stdout=json.dumps({"mcpServers": {"uoink": {
-                    "command": str(contents / "Frameworks/Python/bin/python3"),
+                    "command": str(contents / "Resources/Python/bin/python3"),
                     "args": ["-B", "-s", str(contents / "Resources/uoink_mcp.py")]}}}),
                 stderr=str(Path(kwargs["env"]["HOME"]) / "Library/Application Support/Claude/claude_desktop_config.json"))
         if "helper.mac_lifecycle" in command:
@@ -403,3 +405,49 @@ def test_smoke_success_requires_completed_checks_and_immutable_bundle(monkeypatc
     assert report["ok"] is (not mutate and not fail)
     assert report["bundle_unchanged"] is (not mutate)
     assert app.is_dir()
+
+
+def test_python_pruning_records_removals_and_preserves_runtime(tmp_path):
+    app = tmp_path / "Uoink.app"
+    root = app / bundle.PYTHON_ROOT
+    discarded = ["bin/pip3", "bin/python3-config", "bin/python3.14", "include/python3.13/Python.h",
+                 "lib/pkgconfig/python-3.13-embed.pc", "lib/python3.13/config-3.13-darwin/Makefile",
+                 "share/man/man1/python.1", "lib/python3.13/test/test_os.py",
+                 "lib/python3.13/unittest/test/test_case.py", "lib/python3.13/ctypes/test/test_loading.py"]
+    retained = ["bin/python3", "lib/libpython3.13.dylib", "lib/python3.13/os.py",
+                "lib/python3.13/lib-dynload/_ssl.so", "lib/python3.13/lib-dynload/_tkinter.so",
+                "lib/python3.13/tkinter/filedialog.py", "lib/python3.13/idlelib/__init__.py",
+                "lib/tcl8.6/init.tcl", "lib/tk8.6/tk.tcl",
+                "lib/python3.13/site-packages/torchcodec/libtorchcodec_core7.dylib",
+                "lib/python3.13/site-packages/package/tests/runtime_data.json"]
+    for name in discarded + retained:
+        path = root / name
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(b"fixture")
+    report = tmp_path / "python-pruned.json"
+    rows = bundle.prune_python(app, report)
+    assert rows == json.loads(report.read_text())
+    assert {r["path"] for r in rows if r["type"] == "file"} == set(discarded)
+    assert all(not (root / name).exists() for name in discarded)
+    assert all((root / name).read_bytes() == b"fixture" for name in retained)
+
+
+@pytest.mark.parametrize("external", [False, True])
+def test_python_pruning_keeps_only_internal_interpreter_target(tmp_path, external):
+    app = tmp_path / "Uoink.app"
+    root = app / bundle.PYTHON_ROOT
+    (root / "bin").mkdir(parents=True)
+    target = tmp_path / "outside-python" if external else root / "bin/python3.13"
+    target.write_bytes(b"interpreter")
+    try:
+        (root / "bin/python3").symlink_to(target)
+    except OSError as error:
+        pytest.skip(f"Symlink creation unavailable: {error}")
+    report = tmp_path / "pruned.json"
+    if external:
+        with pytest.raises(ValueError, match="inside Python/bin"):
+            bundle.prune_python(app, report)
+    else:
+        assert bundle.prune_python(app, report) == []
+    assert target.read_bytes() == b"interpreter"
+    assert (root / "bin/python3").is_symlink()

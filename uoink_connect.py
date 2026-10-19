@@ -124,7 +124,8 @@ def bundle_resources(app_dir: Path) -> Path | None:
 def python_command(app_dir: Path) -> Path:
     resources = bundle_resources(app_dir)
     if resources is not None:
-        bundled = resources.parent / "Frameworks/Python/bin/python3"
+        from _platform import MAC_BUNDLE_PYTHON
+        bundled = resources.parent / MAC_BUNDLE_PYTHON
         if not bundled.is_file() or not (resources / "uoink_mcp.py").is_file():
             raise FileNotFoundError(f"Uoink installation is incomplete at {resources.parent.parent}. Reinstall Uoink.app from the DMG.")
         # Keep the documented bin/python3 launch path even if it is a symlink.

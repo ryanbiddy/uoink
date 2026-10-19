@@ -23,6 +23,8 @@ from wheel_lock import LOCK_NAME, verify
 import ffmpeg_bundle
 
 MAC = Path(__file__).parent
+PYTHON_ROOT = Path("Contents/Resources/Python")
+PYTHON_EXECUTABLE = PYTHON_ROOT / "bin/python3"
 
 
 def run(command, **kwargs):
@@ -111,6 +113,40 @@ def extract_python(archive: Path, destination: Path, pin: dict) -> None:
             raise ValueError("Unexpected standalone Python archive root")
         # data_filter rejects escaping symlinks, traversal and special files.
         bundle.extractall(destination, filter="data")
+
+
+def prune_python(app: Path, report: Path) -> list[dict]:
+    """Remove development payload after pip installation; preserve the Tk picker."""
+    root = app / PYTHON_ROOT
+    targets = [root / name for name in ("include", "lib/pkgconfig", "share")]
+    for pattern in ("lib/python*/config-*-darwin", "lib/python*/test",
+                    "lib/python*/unittest/test", "lib/python*/ctypes/test"):
+        targets.extend(root.glob(pattern))
+    # Uoink invokes modules via python3 -m, never wheel console entry points.
+    # Keep the canonical python3 link and its real interpreter target only.
+    python = root / "bin/python3"
+    keep = {python, python.resolve(strict=True)}
+    if not bundle_path(python, root) or python.resolve().parent != (root / "bin").resolve():
+        raise ValueError("Bundled Python interpreter must stay inside Python/bin")
+    targets.extend(path for path in (root / "bin").iterdir() if path not in keep)
+    removed = []
+    write_json(report, removed)
+    for target in sorted(set(targets)):
+        if not target.exists() and not target.is_symlink():
+            continue
+        if not bundle_path(target, root):
+            raise ValueError(f"Refusing to prune outside bundled Python: {target}")
+        entries = [target] if target.is_symlink() else [target, *sorted(target.rglob("*"))]
+        rows = [{"path": entry.relative_to(root).as_posix(),
+                 "type": "symlink" if entry.is_symlink() else "directory" if entry.is_dir() else "file"}
+                for entry in entries]
+        if target.is_symlink() or target.is_file():
+            target.unlink()
+        else:
+            shutil.rmtree(target)
+        removed.extend(rows)
+        write_json(report, removed)
+    return removed
 
 
 MACHO = {b"\xcf\xfa\xed\xfe", b"\xfe\xed\xfa\xcf", b"\xce\xfa\xed\xfe", b"\xfe\xed\xfa\xce",
@@ -206,7 +242,7 @@ def rewrite_rpaths(app: Path, report: Path) -> None:
             removals.append({"file": path.relative_to(app).as_posix(), "rpath": rpath})
             write_json(report, removals)
         # Header edits invalidate old signatures. sign_app signs the completed
-        # tree inside-out, with the main executable signed only via its bundle.
+        # tree inside-out, including native files under Resources, then the app.
 
 
 def binary_inventory(app: Path) -> list[dict]:
@@ -239,7 +275,6 @@ def signing_order(app: Path) -> list[Path]:
     main = app / "Contents/MacOS/Uoink"
     if main not in targets:
         raise ValueError("Contents/MacOS/Uoink must be a native executable")
-    targets.remove(main)
     for path in app.rglob("*"):
         if path.is_symlink() or not path.is_dir() or path.suffix not in {".app", ".framework", ".bundle", ".xpc"}:
             continue
@@ -307,12 +342,12 @@ def build(wheels: Path, output: Path, ffmpeg_output: Path | None = None) -> Path
         with urllib.request.urlopen(url, timeout=120) as response, archive.open("wb") as target:
             shutil.copyfileobj(response, target)
         extract_python(archive, scratch / "unpacked", pin)
-        shutil.move(str(scratch / "unpacked/python"), contents / "Frameworks/Python")
+        shutil.move(str(scratch / "unpacked/python"), app / PYTHON_ROOT)
         selected = scratch / "wheels"
         selected.mkdir()
         for row in rows:
             shutil.copyfile(wheels / row["filename"], selected / row["filename"])
-        python = contents / "Frameworks/Python/bin/python3"
+        python = app / PYTHON_EXECUTABLE
         env = os.environ.copy()
         for key in ("PYTHONHOME", "PYTHONPATH", "PYTHONSTARTUP"):
             env.pop(key, None)
@@ -332,18 +367,9 @@ def build(wheels: Path, output: Path, ffmpeg_output: Path | None = None) -> Path
                         "'license_files': d.metadata.get_all('License-File') or []} "
                         "for d in m.distributions()], key=lambda d:d['name'])))"],
                        env=env, capture_output=True).stdout
-        # Uoink runs modules through the interpreter (python3 -m ...), never the
-        # console scripts pip and the wheels install into bin/. Unsigned scripts
-        # under Contents/Frameworks make codesign reject the whole bundle, so the
-        # bundle keeps only the interpreter and records what it removed.
-        keep = re.compile(r"^python3(?:\.\d+)?$")
-        pruned = []
-        for entry in sorted((contents / "Frameworks/Python/bin").iterdir()):
-            if keep.match(entry.name):
-                continue
-            pruned.append(entry.name)
-            entry.unlink()
-        write_json(output / "python-bin-pruned.json", pruned)
+        pruned = prune_python(app, output / "python-pruned.json")
+        write_json(output / "python-bin-pruned.json", [row["path"].split("/")[1] for row in pruned
+                   if row["path"].startswith("bin/") and row["path"].count("/") == 1])
     files = payload_files()
     for relative in files:
         target = resources / relative
@@ -365,6 +391,7 @@ def build(wheels: Path, output: Path, ffmpeg_output: Path | None = None) -> Path
                        "LSUIElement": True}, stream)
     notices = resources / "notices"
     notices.mkdir()
+    shutil.copyfile(output / "python-pruned.json", notices / "python-pruned.json")
     shutil.copyfile(wheels / LOCK_NAME, notices / LOCK_NAME)
     shutil.copyfile(MAC / "standalone-python.json", notices / "standalone-python.json")
     shutil.copyfile(MAC / "FFMPEG.md", notices / "FFMPEG.md")

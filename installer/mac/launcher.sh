@@ -5,7 +5,7 @@ for variable in "${!DYLD_@}"; do unset "$variable"; done
 unset PYTHONHOME PYTHONPATH PYTHONSTARTUP PYTHONUSERBASE PYTHONEXECUTABLE
 if [[ "${1:-}" == --helper ]]; then shift; fi
 contents="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-python="$contents/Frameworks/Python/bin/python3"
+python="$contents/Resources/Python/bin/python3"
 if [[ ! -x "$python" ]]; then
   echo 'Uoink: bundled Python is missing or not executable.' >&2
   exit 1

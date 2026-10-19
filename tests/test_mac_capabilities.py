@@ -186,7 +186,7 @@ def test_cli_refusal_and_status(darwin, monkeypatch, capsys):
 
 def test_media_bundle_gate_never_uses_path(darwin, monkeypatch, tmp_path):
     monkeypatch.setattr(_platform.sys, "executable",
-        str(tmp_path / "Uoink.app/Contents/Frameworks/Python/bin/python3"), raising=False)
+        str(tmp_path / "Uoink.app/Contents/Resources/Python/bin/python3"), raising=False)
     monkeypatch.setattr(_platform, "__file__", str(tmp_path / "Uoink.app/Contents/Resources/_platform.py"))
     monkeypatch.setenv("PATH", "/opt/homebrew/bin")
     assert _platform.media_capability()["code"] == "media_requires_ffmpeg"
@@ -242,7 +242,7 @@ def test_settings_and_transcription_fields_are_darwin_only(monkeypatch, platform
 @pytest.fixture
 def missing_media(darwin, monkeypatch, tmp_path):
     monkeypatch.setattr(_platform.sys, "executable",
-        str(tmp_path / "Uoink.app/Contents/Frameworks/Python/bin/python3"), raising=False)
+        str(tmp_path / "Uoink.app/Contents/Resources/Python/bin/python3"), raising=False)
     monkeypatch.setattr(_platform, "__file__", str(tmp_path / "Uoink.app/Contents/Resources/_platform.py"))
     monkeypatch.setenv("PATH", "/opt/homebrew/bin")
     monkeypatch.setattr(server, "_run_subprocess", forbidden)
@@ -449,12 +449,15 @@ def test_status_cli_retains_main_fallthrough(monkeypatch, platform):
 
 def test_real_bundle_interpreter_resolution(monkeypatch, tmp_path):
     resources = tmp_path / "Uoink.app/Contents/Resources"
-    python = resources.parent / "Frameworks/Python/bin/python3"
+    python = resources.parent / "Resources/Python/bin/python3"
     python.parent.mkdir(parents=True)
     python.touch()
-    monkeypatch.setattr(server, "sys", SimpleNamespace(platform="darwin"))
+    monkeypatch.setattr(server, "sys", SimpleNamespace(platform="darwin", executable=str(python)))
+    monkeypatch.setattr(_platform, "sys", server.sys)
     monkeypatch.setattr(server, "HERE", resources)
     assert server._bundled_interpreter(gui=False) == python
+    monkeypatch.setattr(server.sys, "executable", str(tmp_path / "external-python"))
+    assert server._bundled_interpreter(gui=False) is None
 
 
 def test_dashboard_gate_disables_controls_and_displays_code():

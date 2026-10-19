@@ -569,7 +569,7 @@ def test_terminal_settlement_errors_preserve_activity_unless_cancelled(
 def test_retry_reports_missing_bundle_media_before_metadata(retry, monkeypatch, tmp_path):
     platform = retry.scope["_platform"]
     monkeypatch.setattr(platform, "sys", SimpleNamespace(platform="darwin",
-        executable=str(tmp_path / "Uoink.app/Contents/Frameworks/Python/bin/python3")))
+        executable=str(tmp_path / "Uoink.app/Contents/Resources/Python/bin/python3")))
     # Exercise the real translation too; the retry fixture normally uses str.
     _load(ROOT / "server.py", {"friendly_error"}, retry.scope)
     retry.record.side_effect = retry.real_record

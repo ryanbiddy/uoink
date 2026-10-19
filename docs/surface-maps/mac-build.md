@@ -12,7 +12,7 @@ capability limits and release work still required.
 - `scripts/mac/wheel_lock.py`: generate and verify the hash lock from the
   successful qualification graph; install only its matching wheel artifact.
 - `installer/mac/launcher.sh`: installed as `Contents/MacOS/Uoink`, resolves
-  `Contents/Frameworks/Python/bin/python3`, disables runtime bytecode writes
+  `Contents/Resources/Python/bin/python3`, disables runtime bytecode writes
   and user site packages, and has no system-Python fallback.
 - `scripts/mac/build_bundle.py`: emits a versioned plist, notices, full file
   and native loader inventories, size report and permission-preserving tar.

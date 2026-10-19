@@ -13,7 +13,7 @@ it does not include Python, the app, or your library. The CLI requires the
 For the private macOS build, follow [the draft Mac install guide](../docs/mac/INSTALL.md).
 The CLI is `<installed Uoink.app>/Contents/Helpers/uoink`. Use a PATH symlink
 to that shim, then run `uoink connect <client>` to print the actual app paths.
-The command uses `Contents/Frameworks/Python/bin/python3 -B -s` and
+The command uses `Contents/Resources/Python/bin/python3 -B -s` and
 `Contents/Resources/uoink_mcp.py`, including when the app lives outside
 `/Applications`. Claude Desktop's file is
 `~/Library/Application Support/Claude/claude_desktop_config.json`; Cursor uses

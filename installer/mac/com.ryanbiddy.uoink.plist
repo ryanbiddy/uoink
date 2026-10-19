@@ -8,10 +8,8 @@
     <string>com.ryanbiddy.uoink</string>
     <key>ProgramArguments</key>
     <array>
-        <string>__APP_PATH__/Contents/Frameworks/Python/bin/python3</string>
-        <string>-B</string>
-        <string>-s</string>
-        <string>__APP_PATH__/Contents/Resources/server.py</string>
+        <string>__APP_PATH__/Contents/MacOS/Uoink</string>
+        <string>--helper</string>
     </array>
     <!-- Start at login. -->
     <key>RunAtLoad</key>

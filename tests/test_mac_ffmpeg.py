@@ -209,7 +209,7 @@ def darwin_bundle(monkeypatch, tmp_path):
     (contents / "Helpers").mkdir(parents=True)
     (contents / "Resources").mkdir()
     monkeypatch.setattr(_platform, "sys", SimpleNamespace(platform="darwin",
-        executable=str(contents / "Frameworks/Python/bin/python3")))
+        executable=str(contents / "Resources/Python/bin/python3")))
     monkeypatch.setattr(_platform, "__file__", str(contents / "Resources/_platform.py"))
     monkeypatch.setenv("PATH", "/opt/homebrew/bin")
     _platform._media_self_test.cache_clear()
@@ -238,9 +238,54 @@ def test_bundle_policy_cannot_be_relaxed_by_environment_or_module_path(darwin_bu
 def test_renamed_app_still_requires_bundled_media(monkeypatch, tmp_path):
     contents = tmp_path / "Renamed by user.app/Contents"
     monkeypatch.setattr(_platform, "sys", SimpleNamespace(platform="darwin",
-        executable=str(contents / "Frameworks/Python/bin/python3")))
+        executable=str(contents / "Resources/Python/bin/python3")))
     assert _platform.mac_bundle_contents() == contents
     assert _platform.media_capability()["code"] == "media_requires_ffmpeg"
+
+
+@pytest.mark.parametrize("relative", [
+    "Resources/Python/bin/python3", "Resources/Python/bin/python3.13",
+    "Resources/Python/bin/pip3", "Resources/Python/lib/python3.13/tool",
+    "Frameworks/Python/bin/python3", "MacOS/Uoink", "Resources/python/bin/python3",
+])
+def test_bundle_detection_requires_exact_embedded_interpreter(monkeypatch, tmp_path, relative):
+    contents = tmp_path / "Relocated Name.app/Contents"
+    monkeypatch.setattr(_platform, "sys", SimpleNamespace(platform="darwin", executable=str(contents / relative)))
+    monkeypatch.setenv("UOINK_BUNDLE_MODE", "1")
+    monkeypatch.setattr(_platform, "__file__", str(contents / "Resources/_platform.py"))
+    expected = contents if relative == "Resources/Python/bin/python3" else None
+    assert _platform.mac_bundle_contents() == expected
+
+
+@pytest.mark.parametrize("external", [False, True])
+def test_bundle_detection_uses_real_location_and_canonical_python_link(monkeypatch, tmp_path, external):
+    contents = tmp_path / "Uoink.app/Contents"
+    python = contents / "Resources/Python/bin/python3"
+    python.parent.mkdir(parents=True)
+    target = tmp_path / "external-python" if external else python.with_name("python3.13")
+    target.touch()
+    alias = tmp_path / "python-alias"
+    try:
+        python.symlink_to(target)
+        alias.symlink_to(python)
+    except OSError as error:
+        pytest.skip(f"Symlink creation unavailable: {error}")
+    for launch in (python, target, alias):
+        monkeypatch.setattr(_platform, "sys", SimpleNamespace(platform="darwin", executable=str(launch)))
+        assert _platform.mac_bundle_contents() == (None if external else contents)
+
+
+@pytest.mark.parametrize("external", [False, True])
+def test_bundle_detection_resolved_links_without_os_symlink_privilege(monkeypatch, tmp_path, external):
+    contents = tmp_path / "Uoink.app/Contents"
+    python = contents / "Resources/Python/bin/python3"
+    target = tmp_path / "external-python" if external else python.with_name("python3.13")
+    alias = tmp_path / "alias"
+    resolve = Path.resolve
+    monkeypatch.setattr(Path, "resolve", lambda path, **kw: target if path in (alias, python) else resolve(path, **kw))
+    for launch in (python, alias, target):
+        monkeypatch.setattr(_platform, "sys", SimpleNamespace(platform="darwin", executable=str(launch)))
+        assert _platform.mac_bundle_contents() == (None if external else contents)
 
 
 @pytest.mark.parametrize("failure", [None, "version", "decode", "empty", "silence"])
@@ -310,7 +355,7 @@ def test_alignment_stays_separate_from_cli(darwin_bundle):
 
 
 def test_torchcodec_rewrite_uses_loader_relative_ffmpeg7(tmp_path):
-    binary = tmp_path / "Contents/Frameworks/Python/lib/python3.13/site-packages/torchcodec/libtorchcodec_core7.dylib"
+    binary = tmp_path / "Contents/Resources/Python/lib/python3.13/site-packages/torchcodec/libtorchcodec_core7.dylib"
     root = tmp_path / "Contents/Frameworks/FFmpeg7"
     commands = ("cmd LC_LOAD_DYLIB\nname @rpath/libavcodec.61.dylib (offset 24)\n"
                 "cmd LC_LOAD_DYLIB\nname @rpath/libtorch.dylib (offset 24)\n")
@@ -369,10 +414,13 @@ def test_torchcodec_install_retains_only_a_qualified_runtime(monkeypatch, tmp_pa
         binary = output / "shared/lib" / f"lib{name}.{major}.dylib"
         binary.parent.mkdir(parents=True, exist_ok=True)
         binary.write_bytes(b"\xcf\xfa\xed\xfelibrary")
-    codec = app / "Contents/Frameworks/Python/lib/python3.13/site-packages/torchcodec/libtorchcodec_core7.dylib"
+    codec = app / "Contents/Resources/Python/lib/python3.13/site-packages/torchcodec/libtorchcodec_core7.dylib"
     codec.parent.mkdir(parents=True)
     original = b"\xcf\xfa\xed\xfeoriginal"
     codec.write_bytes(original)
+    metadata = output / "shared/lib/pkgconfig/libavcodec.pc"
+    metadata.parent.mkdir()
+    metadata.write_text("build metadata")
     monkeypatch.setattr(ffmpeg_bundle, "verify_output", lambda *args: None)
 
     def run(command, **kwargs):
@@ -381,6 +429,7 @@ def test_torchcodec_install_retains_only_a_qualified_runtime(monkeypatch, tmp_pa
         return SimpleNamespace(stdout="cmd LC_LOAD_DYLIB\nname @rpath/libavcodec.61.dylib (offset 24)\n")
 
     def probe(*args):
+        assert args[0] == app / "Contents/Resources/Python/bin/python3"
         if not succeeds:
             raise RuntimeError("synthetic ABI mismatch")
         return {"available": True, "samples": 1600}
@@ -390,9 +439,26 @@ def test_torchcodec_install_retains_only_a_qualified_runtime(monkeypatch, tmp_pa
     result = ffmpeg_bundle.install(output, app, notices)
     assert result["shared_bundled"] is succeeds
     assert (app / "Contents/Frameworks/FFmpeg7").exists() is succeeds
+    if succeeds:
+        assert all(p.suffix == ".dylib" for p in (app / "Contents/Frameworks/FFmpeg7").iterdir())
     assert (codec.read_bytes() == original) is (not succeeds)
     assert (app / "Contents/Helpers/ffmpeg").read_bytes() == b"CLI"
     report = json.loads((notices / "torchcodec.json").read_text())
     assert report["available"] is succeeds
     if not succeeds:
         assert "synthetic ABI mismatch" in report["reason"]
+
+
+def test_ffmpeg_framework_directory_rejects_non_macho(monkeypatch, tmp_path):
+    output, app = tmp_path / "build", tmp_path / "Uoink.app"
+    notices = app / "Contents/Resources/notices"
+    notices.mkdir(parents=True)
+    (output / "notices").mkdir(parents=True)
+    (output / "cli/bin").mkdir(parents=True)
+    for name in ("ffmpeg", "ffprobe"):
+        (output / "cli/bin" / name).write_bytes(b"fixture")
+    (output / "shared/lib").mkdir(parents=True)
+    (output / "shared/lib/not-native.dylib").write_text("not code")
+    monkeypatch.setattr(ffmpeg_bundle, "verify_output", lambda *args: None)
+    with pytest.raises(ValueError, match="Non-Mach-O"):
+        ffmpeg_bundle.install(output, app, notices)

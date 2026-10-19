@@ -12,6 +12,8 @@ import subprocess
 import sys
 import tempfile
 
+from _platform import MAC_BUNDLE_PYTHON
+
 LABEL = "com.ryanbiddy.uoink"
 
 
@@ -25,7 +27,7 @@ def app_path(location: Path) -> Path:
     with (location / "Contents/Info.plist").open("rb") as stream:
         if plistlib.load(stream).get("CFBundleIdentifier") != LABEL:
             raise ValueError("The selected app is not Uoink")
-    for relative in ("MacOS/Uoink", "Frameworks/Python/bin/python3", "Resources/server.py", "Resources/uoink_mcp.py"):
+    for relative in ("MacOS/Uoink", MAC_BUNDLE_PYTHON, "Resources/server.py", "Resources/uoink_mcp.py"):
         path = location / "Contents" / relative
         if not path.is_file() or not path.resolve().is_relative_to(location):
             raise ValueError(f"Uoink installation is incomplete: {relative}")
@@ -152,7 +154,7 @@ def disable_after_reply(app: Path) -> None:
     env.update(PYTHONDONTWRITEBYTECODE="1", PYTHONNOUSERSITE="1")
     # A separate session survives launchd's termination of the service process
     # group. The child rechecks ownership, boots out, then removes the plist.
-    subprocess.Popen([str(contents / "Frameworks/Python/bin/python3"), "-B", "-s", "-m",
+    subprocess.Popen([str(contents / MAC_BUNDLE_PYTHON), "-B", "-s", "-m",
                       "helper.mac_lifecycle", "disable", str(app)],
                      cwd=contents / "Resources", env=env, start_new_session=True,
                      stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
@@ -215,7 +217,7 @@ def read_identity(app: Path, home: Path) -> dict | None:
     contents = app / "Contents"
     if (not isinstance(identity, dict) or
             Path(identity.get("script", "")).resolve() != (contents / "Resources/server.py").resolve() or
-            Path(identity.get("executable", "")).resolve() != (contents / "Frameworks/Python/bin/python3").resolve()):
+            Path(identity.get("executable", "")).resolve() != (contents / MAC_BUNDLE_PYTHON).resolve()):
         raise ValueError("Runtime identity belongs to another install; no process stopped or app removed")
     return identity
 

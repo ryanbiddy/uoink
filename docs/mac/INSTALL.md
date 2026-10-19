@@ -71,7 +71,7 @@ uoink connect vscode --deeplink
 ```
 
 The output uses your current app location, with
-`Contents/Frameworks/Python/bin/python3`, `-B -s`, and
+`Contents/Resources/Python/bin/python3`, `-B -s`, and
 `Contents/Resources/uoink_mcp.py`. It works with spaces in the app path.
 Merge the printed entry into the client's existing configuration and keep
 unrelated entries. Back up the file first. Restart the client after editing.

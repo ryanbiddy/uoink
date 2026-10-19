@@ -18,7 +18,7 @@ import time
 import urllib.request
 import wave
 
-from build_bundle import ROOT, tree_inventory
+from build_bundle import ROOT, PYTHON_EXECUTABLE, tree_inventory
 from qualify_deps import write_json
 from ffmpeg_bundle import probe_torchcodec
 
@@ -152,7 +152,7 @@ def media_smoke(contents: Path, scratch: Path, env: dict) -> dict:
          "-pix_fmt", "yuvj420p", "-q:v", "2", "-frames:v", "1", "-update", "1", str(frame)])
     assert frame.read_bytes().startswith(b"\xff\xd8")
     report.update(audio="16000 Hz mono PCM WAV", frame="MJPEG/MOV -> JPEG")
-    python = contents / "Frameworks/Python/bin/python3"
+    python = contents.parent / PYTHON_EXECUTABLE
     qualification = json.loads((contents / "Resources/notices/torchcodec.json").read_text())
     if qualification["available"]:
         report["torchcodec"] = probe_torchcodec(python, contents / "Frameworks/FFmpeg7", scratch, env)
@@ -188,7 +188,7 @@ def smoke(app: Path, output: Path) -> None:
             assert port != 5179
             env = environment(scratch, port)
             contents = relocated / "Contents"
-            python = contents / "Frameworks/Python/bin/python3"
+            python = relocated / PYTHON_EXECUTABLE
             resources = contents / "Resources"
             launcher = contents / "MacOS/Uoink"
             cli = contents / "Helpers/uoink"

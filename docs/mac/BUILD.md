@@ -50,9 +50,9 @@ Uoink.app/Contents/
   MacOS/Uoink
   Helpers/uoink                 symlink-aware CLI shim
   Helpers/ffmpeg, ffprobe        static LGPL FFmpeg 8.1.2 CLI
-  Frameworks/Python/             relocatable Python and installed wheels
   Frameworks/FFmpeg7/            LGPL 7.1.5 dylibs, only if TorchCodec decodes
   Resources/
+    Python/                     relocatable Python, stdlib and installed wheels
     server.py, uoink_mcp.py, remaining application modules, uoink, VERSION
     helper/, uoink_core/, migrations/, defaults/, assets/, extension/
     skills/, voice_dna/, scripts/recall_hook.py, scripts/mac/uninstall.sh
@@ -72,10 +72,24 @@ The launcher, CLI shim and MCPB shim clear every `DYLD_*` variable and
 `PYTHONEXECUTABLE` before executing bundled Python. The LaunchAgent runs
 `Contents/MacOS/Uoink --helper` so login startup uses the same environment cleanup.
 
-Signing runs inside-out: nested Mach-O files and code bundles first, then
+Python's entire install lives under `Contents/Resources/Python`, including
+stdlib, site-packages, extension `.so` files and dylibs. `MacOS` contains the
+native launcher; `Frameworks/FFmpeg7` admits only Mach-O dylibs and their links.
+FFmpeg headers, pkg-config files and notices are not copied into Frameworks.
+
+After wheel installation, the builder removes Python's `include/`,
+`lib/pkgconfig/`, `lib/python*/config-*-darwin/`, `share/`, stdlib `test/`,
+`unittest/test/`, `ctypes/test/`, and all `bin/` entries except `python3` and its
+real interpreter target. Every removed entry is recorded in `python-pruned.json`
+beside the build and in `Resources/notices/`; `python-bin-pruned.json` retains
+the console-script removal list. Tkinter, Tcl/Tk and idlelib stay: the server's
+macOS folder picker calls `_pick_output_folder_tk`. The splash uses pywebview.
+
+Signing runs inside-out: every Mach-O file anywhere in the app, including
+Resources and the main launcher, then enclosing code bundles, then
 `codesign --force --sign - --timestamp=none Uoink.app` last. The outer bundle
-signing step signs `Contents/MacOS/Uoink` with its `Info.plist` bound; the main
-executable is never signed separately. `codesign --verify --strict --deep`
+signing step seals `Contents/MacOS/Uoink` with its `Info.plist` bound.
+`codesign --verify --strict --deep`
 verifies the completed app. Failures print the exit code and codesign stderr.
 The launcher is compiled for arm64 with `-mmacosx-version-min=14.0`, and
 `CFBundleExecutable` must be `Uoink`.
@@ -159,12 +173,14 @@ on Darwin prints the refusal and exits 1; CLI `status` includes capabilities.
 Windows and Linux keep their existing mirror behavior and safety checks.
 Separate taste/user/script copying is outside this corpus-mirror capability.
 
-**Bundled media availability is tested at runtime.** An interpreter under
-`Uoink.app/Contents/Frameworks/Python` resolves FFmpeg only from that app's
+**Bundled media availability is tested at runtime.** The real target of
+`Uoink.app/Contents/Resources/Python/bin/python3` resolves FFmpeg only from that app's
 `Contents/Helpers`, passes the location to yt-dlp and ignores ambient yt-dlp
 configuration. Both executables must pass `-version`, and FFmpeg must decode
 generated audio. Failure returns `media_requires_ffmpeg`. Environment variables
-cannot relax this policy. A Darwin source/dev checkout uses PATH, as Linux does,
+cannot relax this policy. Detection uses only `sys.executable`'s resolved location;
+the module directory, working directory, other Python files and links pointing
+outside the app do not establish bundle mode. A Darwin source/dev checkout uses PATH, as Linux does,
 without the bundle self-test or codec restrictions. Windows/Linux retain their
 existing behavior. Input and security validation precede the media gate.
 

@@ -10,7 +10,7 @@ while [[ -L "$source_path" ]]; do
   [[ "$source_path" = /* ]] || source_path="$source_dir/$source_path"
 done
 contents="$(cd -P "$(dirname "$source_path")/.." && pwd)"
-python="$contents/Frameworks/Python/bin/python3"
+python="$contents/Resources/Python/bin/python3"
 [[ -x "$python" && -f "$contents/Resources/uoink_cli.py" ]] || {
   echo 'Uoink installation is incomplete. Reinstall Uoink.app from the DMG.' >&2; exit 1;
 }

@@ -47,7 +47,7 @@ terminal. `uoink connect --list` lists print-only MCP setup recipes.
 For the private macOS build, use the CLI at
 `<installed Uoink.app>/Contents/Helpers/uoink`, or a PATH symlink to it.
 `uoink connect <client>` resolves the running bundle and prints
-`Contents/Frameworks/Python/bin/python3 -B -s` with
+`Contents/Resources/Python/bin/python3 -B -s` with
 `Contents/Resources/uoink_mcp.py`. Never assume the app is in `/Applications`.
 Claude Desktop uses `~/Library/Application Support/Claude/claude_desktop_config.json`,
 Cursor uses `~/.cursor/mcp.json`, and Codex uses `~/.codex/config.toml`.

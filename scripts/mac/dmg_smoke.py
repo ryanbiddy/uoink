@@ -29,12 +29,12 @@ def smoke_dmg(dmg: Path, mcpb: Path, output: Path) -> None:
             installed = scratch / "Applications With Spaces/Uoink.app"
             installed.parent.mkdir()
             run(["ditto", mount / "Uoink.app", installed])
-            run(["codesign", "--verify", "--strict", installed], capture_output=True)
+            run(["codesign", "--verify", "--strict", "--deep", installed], capture_output=True)
             report["mcpb"] = {"version": check(mcpb)["version"], "platform": "darwin", "ok": True}
             smoke(installed, output / "installed-copy")
             # The existing smoke relocates and restores its input. Verify again
             # at the temporary Applications destination after that exercise.
-            run(["codesign", "--verify", "--strict", installed], capture_output=True)
+            run(["codesign", "--verify", "--strict", "--deep", installed], capture_output=True)
             report["ok"] = True
         finally:
             try:

@@ -29,7 +29,7 @@ import uoink_cli as cli
 @pytest.fixture
 def install(tmp_path, monkeypatch):
     app = tmp_path / "Custom Apps & Snow 雪" / "Uoink.app"
-    for relative in ("MacOS/Uoink", "Frameworks/Python/bin/python3", "Resources/server.py", "Resources/uoink_mcp.py"):
+    for relative in ("MacOS/Uoink", "Resources/Python/bin/python3", "Resources/server.py", "Resources/uoink_mcp.py"):
         path = app / "Contents" / relative
         path.parent.mkdir(parents=True, exist_ok=True)
         path.touch()
@@ -173,7 +173,7 @@ def test_legacy_python_agent_can_be_disabled(install, monkeypatch):
     path = life.agent_path(home)
     path.parent.mkdir(parents=True)
     payload = life.plist(app, home)
-    payload["ProgramArguments"] = [str(app / "Contents/Frameworks/Python/bin/python3"), "-B", "-s",
+    payload["ProgramArguments"] = [str(app / "Contents/Resources/Python/bin/python3"), "-B", "-s",
                                    str(app / "Contents/Resources/server.py")]
     path.write_bytes(plistlib.dumps(payload))
     fake = Launchctl()
@@ -234,7 +234,7 @@ def test_uninstall_uses_shared_identity_and_fails_closed(install, monkeypatch, s
     path = home / "Library/Application Support/Uoink/runtime-identity.json"
     path.parent.mkdir(parents=True)
     identity = {"pid": 43210, "created_ms": 123456789, "script": str(app / "Contents/Resources/server.py"),
-                "executable": str(app / "Contents/Frameworks/Python/bin/python3")}
+                "executable": str(app / "Contents/Resources/Python/bin/python3")}
     path.write_text(json.dumps(identity))
     calls = []
     monkeypatch.setattr(_platform, "darwin_liveness", lambda *a: state)
@@ -269,7 +269,7 @@ def test_connect_darwin_paths_and_deeplinks(install, monkeypatch):
     monkeypatch.setattr(connect.sys, "platform", "darwin")
     python = connect.python_command(resources)
     entry = connect.server_entry("claude-desktop", resources, python)
-    assert entry["command"] == str(app / "Contents/Frameworks/Python/bin/python3")
+    assert entry["command"] == str(app / "Contents/Resources/Python/bin/python3")
     assert entry["args"] == ["-B", "-s", str(resources / "uoink_mcp.py")]
     for client in ("cursor", "vscode"):
         link = connect.deeplink(client, resources, python)
@@ -329,6 +329,7 @@ def test_connect_output_is_byte_identical_to_v3100(tmp_path, monkeypatch, platfo
 def test_darwin_mcpb_payload_and_validation(tmp_path):
     path = build_mcpb.build(tmp_path)
     manifest = build_mcpb.check(path)
+    assert "Contents/Resources/Python/bin/python3" in manifest["long_description"]
     assert path.name == f"uoink-{(ROOT / 'VERSION').read_text().strip()}-macos.mcpb"
     assert manifest["compatibility"]["platforms"] == ["darwin"]
     assert manifest["user_config"]["uoink_dir"]["default"] == "/Applications/Uoink.app"
@@ -340,6 +341,7 @@ def test_darwin_mcpb_payload_and_validation(tmp_path):
     with zipfile.ZipFile(path) as archive:
         assert not archive.read("manifest.json").startswith(b"\xef\xbb\xbf")
         launcher = archive.read("launch-macos.sh").decode()
+        assert 'python="$app/Contents/Resources/Python/bin/python3"' in launcher
         assert 'exec "$python" -B -s "$script"' in launcher
         assert "Uoink is not installed" in launcher
 
@@ -352,15 +354,16 @@ def test_signing_order_and_assessment(tmp_path, monkeypatch):
     nested = binary.parents[2]
     (nested / "Contents/Info.plist").write_bytes(plistlib.dumps({"CFBundleExecutable": "inner"}))
     main = app / "Contents/MacOS/Uoink"
-    natives = [main, app / "Contents/Frameworks/Python/bin/python3",
-               app / "Contents/Frameworks/Python/lib/python3.13/lib-dynload/_ssl.so",
-               app / "Contents/Frameworks/Python/lib/libpython3.13.dylib",
+    natives = [main, app / "Contents/Resources/Python/bin/python3",
+               app / "Contents/Resources/Python/lib/python3.13/lib-dynload/_ssl.so",
+               app / "Contents/Resources/Python/lib/libpython3.13.dylib",
                app / "Contents/Helpers/ffmpeg", app / "Contents/Helpers/ffprobe",
                app / "Contents/Frameworks/Codec.framework/Versions/A/Codec"]
     for path in natives:
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_bytes(b"\xcf\xfa\xed\xfe")
     (app / "Contents/Info.plist").write_bytes(plistlib.dumps({"CFBundleExecutable": "Uoink"}))
+    (app / "Contents/Resources/Python/lib/os.py").write_text("# resource, not native code")
     framework = app / "Contents/Frameworks/Codec.framework"
     (framework / "Resources").mkdir()
     (framework / "Resources/Info.plist").write_bytes(plistlib.dumps({"CFBundleExecutable": "Codec"}))
@@ -371,10 +374,10 @@ def test_signing_order_and_assessment(tmp_path, monkeypatch):
     build_bundle.sign_app(app, report)
     signed = [c[-1] for c in calls if "--sign" in c]
     assert signed == build_bundle.signing_order(app)
-    assert set(signed) == {binary, nested, framework, app, *natives[1:]}
+    assert set(signed) == {binary, nested, framework, app, *natives}
     assert signed.index(binary) < signed.index(nested) < signed.index(app)
     assert signed.index(natives[-1]) < signed.index(framework) < signed.index(app)
-    assert signed[-1] == app and main not in signed
+    assert signed[-1] == app and signed.index(main) < signed.index(app)
     assert all(c[:5] == ["codesign", "--force", "--sign", "-", "--timestamp=none"]
                and "--deep" not in c for c in calls if "--sign" in c)
     assert [c for c in calls if "--verify" in c] == [["codesign", "--verify", "--strict", "--deep", app]]
@@ -442,7 +445,7 @@ def test_bootout_never_stops_an_unverified_service(install, monkeypatch, foreign
     identity.parent.mkdir(parents=True)
     identity.write_text(json.dumps({"pid": 124 if foreign == "pid" else 123, "created_ms": 12345,
         "script": str(app / "Contents/Resources/server.py"),
-        "executable": str(app / "Contents/Frameworks/Python/bin/python3")}))
+        "executable": str(app / "Contents/Resources/Python/bin/python3")}))
     calls = []
     def fake(*args):
         calls.append(args)
@@ -517,7 +520,7 @@ def test_settings_autostart_uses_lifecycle_and_flushes_before_unload(install, mo
         return fake(*args)
     monkeypatch.setattr(life, "launchctl", launchctl)
     def spawn(command, **kwargs):
-        assert command == [str(app / "Contents/Frameworks/Python/bin/python3"), "-B", "-s", "-m",
+        assert command == [str(app / "Contents/Resources/Python/bin/python3"), "-B", "-s", "-m",
                            "helper.mac_lifecycle", "disable", str(app)]
         assert kwargs["start_new_session"] is True
         assert kwargs["cwd"] == app / "Contents/Resources"
@@ -584,6 +587,9 @@ def test_dmg_smoke_detaches_on_success_and_failure(tmp_path, monkeypatch, fail):
         dmg_smoke.smoke_dmg(dmg, tmp_path / "fake.mcpb", output)
     assert calls[0][:4] == ["hdiutil", "attach", "-readonly", "-nobrowse"]
     assert calls[-1][:2] == ["hdiutil", "detach"]
+    installed = next(c[-1] for c in calls if c[0] == "ditto")
+    assert [c for c in calls if c[0] == "codesign"] == [
+        ["codesign", "--verify", "--strict", "--deep", installed]] * (1 if fail else 2)
     report = json.loads((output / "dmg-smoke.json").read_text())
     assert report["detached"] is True and report["ok"] is not fail
 

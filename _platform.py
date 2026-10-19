@@ -67,6 +67,9 @@ def capability_refusal(capability: dict) -> dict | None:
                       "retryable": False}}
 
 
+MAC_BUNDLE_PYTHON = Path("Resources/Python/bin/python3")
+
+
 def mac_bundle_contents() -> Path | None:
     """Identify the embedded interpreter, independently of cwd/env/module path."""
     if sys.platform != "darwin":
@@ -74,14 +77,21 @@ def mac_bundle_contents() -> Path | None:
     executable = getattr(sys, "executable", "")
     if not executable:
         return None
-    # Check both the launch path and its resolved target: a symlink must not
-    # turn an embedded interpreter into a source-checkout PATH fallback.
-    for path in (Path(executable).absolute(), Path(executable).resolve()):
-        for parent in path.parents:
-            if (parent.name == "Python" and parent.parent.name == "Frameworks"
-                    and parent.parent.parent.name == "Contents"
-                    and parent.parent.parent.parent.suffix == ".app"):
-                return parent.parent.parent
+    # Only the real interpreter location establishes bundle mode. python3 may
+    # resolve to python3.13, but a link from the app to an external Python does
+    # not qualify, nor does an unrelated executable elsewhere in the install.
+    try:
+        path = Path(executable).resolve()
+        if len(path.parents) < 5:
+            return None
+        contents = path.parents[3]
+        if (path.parent.name == "bin" and path.parents[1].name == "Python"
+                and path.parents[2].name == "Resources" and contents.name == "Contents"
+                and contents.parent.suffix == ".app"
+                and path == (contents / MAC_BUNDLE_PYTHON).resolve()):
+            return contents
+    except (OSError, RuntimeError):
+        pass
     return None
 
 

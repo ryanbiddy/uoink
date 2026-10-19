@@ -11318,6 +11318,8 @@ def _mcp_stdio_command() -> tuple[str, list[str]]:
 
     Installed builds should use the bundled console `python.exe` for stdio;
     `pythonw.exe` has no standard streams and would break JSON-RPC.
+    On Darwin, python_command supplies Resources/Python/bin/python3 and
+    server_entry supplies -B -s, shared with the CLI and client recipes.
     """
     from uoink_connect import python_command, server_entry
     entry = server_entry("claude-desktop", HERE, python_command(HERE), _install_isolation.child_argv())
@@ -19757,12 +19759,15 @@ def _bundled_interpreter(*, gui: bool) -> Path | None:
     ``sys.executable`` or a browser tab.
 
     Windows uses bundled python.exe or pythonw.exe. Darwin app resources
-    resolve Contents/Frameworks/Python/bin/python3; older POSIX development
-    layouts retain python/bin/python3. The GUI flag is ignored off Windows.
+    resolve Contents/Resources/Python/bin/python3 from the running interpreter;
+    Linux layouts retain python/bin/python3. The GUI flag is ignored off Windows.
     Hosted bundle verification is described in docs/mac/BUILD.md.
     """
-    if sys.platform == "darwin" and HERE.name == "Resources" and HERE.parent.name == "Contents":
-        candidate = HERE.parent / "Frameworks/Python/bin/python3"
+    if sys.platform == "darwin":
+        contents = _platform.mac_bundle_contents()
+        if contents is None:
+            return None
+        candidate = contents / _platform.MAC_BUNDLE_PYTHON
         return candidate if candidate.is_file() else None
     base = HERE / "python"
     if sys.platform == "win32":

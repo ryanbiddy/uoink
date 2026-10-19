@@ -60,7 +60,7 @@ def torchcodec_changes(commands: str, binary: Path, library_root: Path) -> list[
 
 
 def install(output: Path, app: Path, notices: Path) -> dict:
-    from build_bundle import macho_files, native_loader_paths, run
+    from build_bundle import PYTHON_ROOT, PYTHON_EXECUTABLE, macho_files, native_loader_paths, run
     config = load_config()
     verify_output(output, config)
     contents = app / "Contents"
@@ -74,9 +74,13 @@ def install(output: Path, app: Path, notices: Path) -> dict:
     for name in ("FFMPEG.md", "build_ffmpeg.py", "ffmpeg_bundle.py", "payload.json"):
         shutil.copyfile(Path(__file__).parent / name, notices / "ffmpeg" / name)
     libraries = contents / "Frameworks/FFmpeg7"
-    libraries.mkdir()
+    libraries.mkdir(parents=True)
     for path in (output / "shared/lib").glob("*.dylib"):
         shutil.copy2(path, libraries / path.name, follow_symlinks=False)
+    natives = {path.resolve() for path in macho_files(libraries)}
+    for path in libraries.iterdir():
+        if path.resolve() not in natives:
+            raise ValueError(f"Non-Mach-O file in FFmpeg7: {path}")
     majors = [f"lib{name}.{major}.dylib" for name, major in LIBRARIES.items()]
     for name in majors:
         if not (libraries / name).is_file():
@@ -91,7 +95,7 @@ def install(output: Path, app: Path, notices: Path) -> dict:
     original = {}
     report = {"available": False, "code": "alignment_requires_torchcodec", "libraries": []}
     try:
-        packages = list((contents / "Frameworks/Python/lib").glob("python*/site-packages/torchcodec"))
+        packages = list((app / PYTHON_ROOT / "lib").glob("python*/site-packages/torchcodec"))
         patched = []
         for package in packages:
             for binary in macho_files(package):
@@ -110,7 +114,7 @@ def install(output: Path, app: Path, notices: Path) -> dict:
                 patched.append({"file": binary.relative_to(app).as_posix(), "changes": changes, "rpath": rpath})
         if not patched:
             raise RuntimeError("The qualified wheel contains no FFmpeg 7 TorchCodec Mach-O payload")
-        python = contents / "Frameworks/Python/bin/python3"
+        python = app / PYTHON_EXECUTABLE
         with tempfile.TemporaryDirectory(prefix="uoink-torchcodec-") as tmp:
             report.update(probe_torchcodec(python, libraries, Path(tmp), os.environ.copy()))
         report.update(code=None, libraries=majors, patched=patched)

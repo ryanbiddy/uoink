@@ -6,7 +6,7 @@ non-Windows layout the tray + splash were silently dead. The gate is now
 platform-aware. This test proves:
 
   * Windows behaviour is unchanged (pythonw.exe -> installed; nothing -> dev).
-  * A macOS ``.app`` layout (python/bin/python3) is recognised as installed.
+  * Only the running macOS app interpreter is recognised as installed.
   * The darwin/linux branch can NEVER match on a Windows install, so the
     change is Windows-behaviour-identical.
 
@@ -50,16 +50,20 @@ def test_windows_dev_checkout_has_no_bundle(monkeypatch, tmp_path):
 def test_macos_app_bundle_layout(monkeypatch, tmp_path):
     monkeypatch.setattr(server.sys, "platform", "darwin")
     monkeypatch.setattr(server, "HERE", tmp_path)
-    _mk(tmp_path / "python" / "bin" / "python3")
+    python = tmp_path / "Uoink.app/Contents/Resources/Python/bin/python3"
+    _mk(python)
+    monkeypatch.setattr(server.sys, "executable", str(python))
     assert server._is_installed_layout() is True
     # gui flag is ignored off Windows -- a .app child has no console to flash.
-    assert server._bundled_interpreter(gui=True) == tmp_path / "python" / "bin" / "python3"
-    assert server._bundled_interpreter(gui=False) == tmp_path / "python" / "bin" / "python3"
+    assert server._bundled_interpreter(gui=True) == python
+    assert server._bundled_interpreter(gui=False) == python
 
 
 def test_macos_dev_checkout_has_no_bundle(monkeypatch, tmp_path):
     monkeypatch.setattr(server.sys, "platform", "darwin")
+    monkeypatch.setattr(server.sys, "executable", str(tmp_path / "external-python"))
     monkeypatch.setattr(server, "HERE", tmp_path)
+    _mk(tmp_path / "python/bin/python3")
     assert server._is_installed_layout() is False
 
 

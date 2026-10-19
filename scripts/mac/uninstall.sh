@@ -9,4 +9,4 @@ app="$(cd "$(dirname "$app")" && pwd)/$(basename "$app")"
 cd "$app/Contents/Resources"
 export PYTHONDONTWRITEBYTECODE=1 PYTHONNOUSERSITE=1
 unset PYTHONHOME PYTHONPATH PYTHONSTARTUP
-exec "$app/Contents/Frameworks/Python/bin/python3" -B -s -m helper.mac_lifecycle uninstall "$app" "$@"
+exec "$app/Contents/Resources/Python/bin/python3" -B -s -m helper.mac_lifecycle uninstall "$app" "$@"
