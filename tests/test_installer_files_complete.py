@@ -89,6 +89,7 @@ def test_agent_launchers_and_modules_are_staged_and_installed():
     modules = {"uoink_cli.py", "uoink_connect.py", "uoink_agent_runtime.py"}
     assert modules | {"cli/uoink.cmd", "cli/uoink"} <= staged_sources()
     assert modules | {"cli/uoink.cmd", "cli/uoink"} <= installed_sources()
+    assert "bin/*" in installed_sources()  # ffmpeg and ffprobe still ship in bin.
     assert {p.name for p in (ROOT / "cli").iterdir()} == {"uoink", "uoink.cmd"}
 
 

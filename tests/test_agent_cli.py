@@ -322,20 +322,22 @@ def test_agent_kit_version_drift_fails_check_and_build_repairs_it(tmp_path, monk
 
 
 def test_installer_path_ownership_isolation_and_exact_removal():
-    source = (ROOT / "installer/uoink.iss").read_text()
+    source = (ROOT / "installer/uoink.iss").read_text(encoding="utf-8")
     assert "ChangesEnvironment=yes" in source
     task = next(line for line in source.splitlines() if line.startswith('Name: "agentpath"'))
     assert "unchecked" not in task and "Check: not IsolatedInstall" in task
     def block(start, end):
         return source.split(start, 1)[1].split(end, 1)[0]
     add = block("procedure AddAgentPath();", "procedure RemoveAgentPath();")
-    remove = block("procedure RemoveAgentPath();", "procedure CurUninstallStepChanged")
+    remove = block("procedure RemoveAgentPath();\nvar", "procedure CurUninstallStepChanged")
     for body in (add, remove):
         assert body.index("if IsolatedInstall() then Exit;") < body.index("AgentReadPath(")
-        assert "Target := ExpandConstant('{app}\\cli');" in body
-        assert "{app}\\bin" not in body
+    assert "Target := ExpandConstant('{app}\\cli');" in add
     assert add.index("if Found then Exit") < add.index("SaveStringToFile") < add.index("AgentWritePath")
-    assert "if Utf8Decode(Saved) <> Target then Exit;" in remove
+    assert remove.index("if not LoadStringFromFile(Marker, Saved) then Exit;") < remove.index("AgentReadPath(")
+    assert "Target := Utf8Decode(Saved);" in remove
+    assert "if not (AgentSameEntry(AgentExpandedEntry(Target), ExpandConstant('{app}\\cli')) or\n" in remove
+    assert "AgentSameEntry(AgentExpandedEntry(Target), ExpandConstant('{app}\\bin'))) then Exit;" in remove
     assert "AgentFilterPath(Value, Target, True, Found)" in remove
     assert "AgentWritePath(Updated, ValueType)" in remove
     assert "if CurUninstallStep = usUninstall then RemoveAgentPath();" in source
@@ -349,6 +351,40 @@ def test_installer_path_ownership_isolation_and_exact_removal():
     assert "RegWriteStringValue(HKCU, 'Environment', 'Path', Value)" in writing
     assert "if ValueType = 2" in writing
     assert "RegQueryValueExW@advapi32.dll" in source
+
+
+def test_installer_migrates_only_marker_owned_legacy_path_before_adding_cli():
+    code = (ROOT / "installer/uoink.iss").read_text(encoding="utf-8").split("[Code]", 1)[1]
+    add = code.split("procedure AddAgentPath();", 1)[1].split("procedure RemoveAgentPath();", 1)[0]
+    migration = (
+        "if LoadStringFromFile(Marker, Saved) then\n"
+        "    if AgentSameEntry(AgentExpandedEntry(Utf8Decode(Saved)), ExpandConstant('{app}\\bin')) then\n"
+        "      RemoveAgentPath();"
+    )
+    assert migration in add
+    assert add.index("if IsolatedInstall() then Exit;") < add.index(migration)
+    assert add.index(migration) < add.index("if not WizardIsTaskSelected('agentpath') then Exit;")
+    assert add.index(migration) < add.index("AgentReadPath(") < add.index("if Found then Exit")
+    assert add.index("if Found then Exit") < add.index("SaveStringToFile(Marker, Utf8Encode(Target), False)")
+    remove = code.split("procedure RemoveAgentPath();\nvar", 1)[1].split("procedure CurUninstallStepChanged", 1)[0]
+    assert remove.index("IsolatedMarkerFileExists") < remove.index("LoadStringFromFile")
+    assert remove.index("LoadStringFromFile") < remove.index("if not (AgentSameEntry") < remove.index("AgentReadPath(")
+    assert remove.index("AgentFilterPath(Value, Target, True, Found)") < remove.index("if Found and not AgentWritePath") < remove.index("DeleteFile(Marker)")
+    # Expand the marker only for ownership validation. Removal matches its raw
+    # spelling, preserving other equivalent entries, duplicates and prefixes.
+    same = code.split("function AgentSameEntry(", 1)[1].split("function AgentFilterPath(", 1)[0]
+    assert "CompareText(RemoveBackslash(RemoveQuotes(Trim(Entry)))," in same
+    assert "RemoveBackslash(RemoveQuotes(Trim(Target)))) = 0" in same
+    assert "AgentExpandedEntry" not in same
+    expanded = code.split("function AgentExpandedEntry(", 1)[1].split("function AgentSameEntry(", 1)[0]
+    assert "AgentExpandEnvironmentStrings(" in expanded
+    assert "(Written = 0) or (Written > Size)" in expanded
+    assert "ExpandEnvironmentStringsW@kernel32.dll stdcall" in code
+    filtering = code.split("function AgentFilterPath(", 1)[1].split("procedure RemoveAgentPath(); forward;", 1)[0]
+    assert "Drop := (not Found) and AgentSameEntry(Entry, Target);" in filtering
+    assert "if not (Remove and Drop) then" in filtering
+    assert "Result := Result + Entry;" in filtering
+    assert "AgentExpandedEntry" not in filtering
 
 
 def test_receipt_uses_installed_launcher_and_isolated_profile():

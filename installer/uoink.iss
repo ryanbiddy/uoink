@@ -1791,10 +1791,28 @@ begin
     Result := RegWriteStringValue(HKCU, 'Environment', 'Path', Value);
 end;
 
+function AgentExpandEnvironmentStrings(Source, Dest: String; Size: Integer): Integer;
+external 'ExpandEnvironmentStringsW@kernel32.dll stdcall';
+
+function AgentExpandedEntry(const Value: String): String;
+var
+  Size, Written: Integer;
+begin
+  Result := RemoveBackslash(RemoveQuotes(Trim(Value)));
+  Size := AgentExpandEnvironmentStrings(Result, '', 0);
+  if Size = 0 then RaiseException('Could not expand User PATH entry safely.');
+  SetLength(Result, Size);
+  Written := AgentExpandEnvironmentStrings(
+    RemoveBackslash(RemoveQuotes(Trim(Value))), Result, Size);
+  if (Written = 0) or (Written > Size) then
+    RaiseException('Could not expand User PATH entry safely.');
+  SetLength(Result, Written - 1);
+end;
+
 function AgentSameEntry(const Entry, Target: String): Boolean;
 begin
   Result := CompareText(RemoveBackslash(RemoveQuotes(Trim(Entry))),
-                        RemoveBackslash(Target)) = 0;
+                        RemoveBackslash(RemoveQuotes(Trim(Target)))) = 0;
 end;
 
 function AgentFilterPath(const Value, Target: String; Remove: Boolean;
@@ -1827,20 +1845,29 @@ begin
   end;
 end;
 
+procedure RemoveAgentPath(); forward;
+
 procedure AddAgentPath();
 var
   Value, Target, Marker, Ignored: String;
+  Saved: AnsiString;
   ValueType: Integer;
   Found: Boolean;
 begin
   if IsolatedInstall() then Exit;
+  Marker := ExpandConstant('{app}\.uoink-agent-path');
+  { Pre-release 3.10 builds owned bin. Remove that exact owned entry before
+    replacing its marker with cli, even when the PATH task is deselected.
+    Without a matching marker, a user's bin entry must stay untouched. }
+  if LoadStringFromFile(Marker, Saved) then
+    if AgentSameEntry(AgentExpandedEntry(Utf8Decode(Saved)), ExpandConstant('{app}\bin')) then
+      RemoveAgentPath();
   if not WizardIsTaskSelected('agentpath') then Exit;
   if not AgentReadPath(Value, ValueType) then
     RaiseException('Could not read User PATH safely.');
   Target := ExpandConstant('{app}\cli');
   Ignored := AgentFilterPath(Value, Target, False, Found);
   if Found then Exit; { pre-existing entries are not owned by this installer }
-  Marker := ExpandConstant('{app}\.uoink-agent-path');
   { Persist ownership before mutation; a failed registry write removes it. }
   if not SaveStringToFile(Marker, Utf8Encode(Target), False) then
     RaiseException('Could not record Uoink PATH ownership.');
@@ -1862,9 +1889,12 @@ begin
   if IsolatedInstall() then Exit;
   if IsolatedMarkerFileExists(ExpandConstant('{app}')) then Exit;
   Marker := ExpandConstant('{app}\.uoink-agent-path');
-  Target := ExpandConstant('{app}\cli');
   if not LoadStringFromFile(Marker, Saved) then Exit;
-  if Utf8Decode(Saved) <> Target then Exit;
+  Target := Utf8Decode(Saved);
+  { Expand only to validate ownership. Filter with the raw marker so another
+    entry with an equivalent environment-variable spelling stays untouched. }
+  if not (AgentSameEntry(AgentExpandedEntry(Target), ExpandConstant('{app}\cli')) or
+          AgentSameEntry(AgentExpandedEntry(Target), ExpandConstant('{app}\bin'))) then Exit;
   if not AgentReadPath(Value, ValueType) then
     RaiseException('Could not read User PATH safely for removal.');
   Updated := AgentFilterPath(Value, Target, True, Found);
