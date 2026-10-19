@@ -14,7 +14,7 @@ Uoink serves the same tool registry over both MCP transports:
 
 Claude Desktop (.mcpb), Claude Code and Cursor use `uoink_mcp.py` over stdio.
 It advertises every registry tool with the same name, description, input schema,
-title and safety hints as HTTP. Three registry schemas use a top-level `oneOf` (`claim_library_work`, `apply_reshelving`, `set_source_consent`). Claude Code and the Anthropic API reject that shape and Claude Code then shows none of the server's tools, so stdio advertises each as one object whose properties merge the variants. The handlers still validate the exact registry schema. This includes URL/page/X/Reddit/note/image
+title and safety hints as HTTP. Three registry schemas use a top-level `oneOf` (`claim_library_work`, `apply_reshelving`, `set_source_consent`). Claude Code and the Anthropic API reject that shape and Claude Code then shows none of the server's tools, so both stdio and HTTP MCP advertise each as one object whose properties merge the variants. The server still validates every call against the exact frozen registry schema. This includes URL/page/X/Reddit/note/image
 capture, writing, scripts, claims, workspaces, facets, monitored playlists,
 taste and memory, allowed sites, sources and the Library work queue.
 No registry tools are excluded from stdio.

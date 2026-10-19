@@ -612,13 +612,13 @@ does not cover them. The speaker pipeline selects
 whether speaker labeling succeeded; a failure returns the transcript without
 claiming successful diarization.
 
-Uoink 3.9.2 keeps Torch 2.8.0 and WhisperX 3.8.6. Default voice activity
+Uoink 3.9.3 keeps Torch 2.8.0 and WhisperX 3.8.6. Default voice activity
 detection (VAD) loads through PyAnnote's checkpoint loader with
 `weights_only=False`, the same path used in 3.7.0. This permits checkpoint code
 to run during loading; the mitigation for this release is local-only model
 files. Migration to a safer loading path remains planned.
 
-Uoink 3.9.2 ships unsigned: `SigningCertificateThumbprint=none`. Signing is
+Uoink 3.9.3 ships unsigned: `SigningCertificateThumbprint=none`. Signing is
 skipped for this release; the signing path remains available for a future release.
 Windows SmartScreen warnings are expected for unsigned builds.
 

@@ -84,12 +84,12 @@ regression gate now requires exactly 91 canonical names and rejects the six
 removed names. The same sequence on the original C-01 file exits 1 with the
 ModuleNotFoundError.
 
-## 3.9.2 toolsets
+## 3.9.3 toolsets
 
 `UOINK_MCP_TOOLSET=full` serves all registry tools; `core` preserves the previous
 35 in their original order. Full keeps that prefix. Unknown values warn on
 stderr and use full. Cursor and other clients with tool caps can select core.
-Both modes use registry schemas and consent gates. Three registry schemas use a top-level `oneOf` (`claim_library_work`, `apply_reshelving`, `set_source_consent`). Claude Code and the Anthropic API reject that shape and Claude Code then shows none of the server's tools, so stdio advertises each as one object whose properties merge the variants. The handlers still validate the exact registry schema.
+Both modes use registry schemas and consent gates. Three registry schemas use a top-level `oneOf` (`claim_library_work`, `apply_reshelving`, `set_source_consent`). Claude Code and the Anthropic API reject that shape and Claude Code then shows none of the server's tools, so both stdio and HTTP MCP advertise each as one object whose properties merge the variants. The server still validates every call against the exact frozen registry schema.
 Registry handlers run on the event loop one at a time, as in v3.9.1, because they
 share the Index connection with Library reads; paid discovery keeps its worker
 thread. Library reads retain their existing deadline and AZ-5h serialization budget.
