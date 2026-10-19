@@ -307,7 +307,8 @@ def _assert_tool_metadata(tools):
             "tools/list must not duplicate tools")
     for tool in tools:
         name = tool["name"]
-        _assert(tool["inputSchema"] == registry[name]["inputSchema"], f"{name}: schema drift")
+        _assert(tool["inputSchema"] == uoink_mcp_tools.client_input_schema(
+            registry[name]["inputSchema"]), f"{name}: schema drift")
         _assert(tool["description"] == registry[name]["description"], f"{name}: description drift")
         _assert(isinstance(tool.get("title"), str) and tool["title"].strip(),
                 f"{name}: missing human title")

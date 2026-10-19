@@ -149,7 +149,8 @@ different adapter; do not copy the stdio capability object onto HTTP
 ### 91 tools
 
 The bundle lists every tool in `uoink_mcp_tools.TOOL_REGISTRY`. Live stdio
-uses those exact schemas and descriptions. The previous 35 tools remain first
+uses the registry descriptions and schemas (three are flattened; see
+[v2-mcp.md](v2-mcp.md)). The previous 35 tools remain first
 in their original order. `UOINK_MCP_TOOLSET=core` serves only that earlier set
 for Cursor and other clients with tool caps; full is the default. Unknown
 values warn on stderr and use full. See the complete inventories in

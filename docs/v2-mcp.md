@@ -14,7 +14,7 @@ Uoink serves the same tool registry over both MCP transports:
 
 Claude Desktop (.mcpb), Claude Code and Cursor use `uoink_mcp.py` over stdio.
 It advertises every registry tool with the same name, description, input schema,
-title and safety hints as HTTP. This includes URL/page/X/Reddit/note/image
+title and safety hints as HTTP. Three registry schemas use a top-level `oneOf` (`claim_library_work`, `apply_reshelving`, `set_source_consent`). Claude Code and the Anthropic API reject that shape and Claude Code then shows none of the server's tools, so stdio advertises each as one object whose properties merge the variants. The handlers still validate the exact registry schema. This includes URL/page/X/Reddit/note/image
 capture, writing, scripts, claims, workspaces, facets, monitored playlists,
 taste and memory, allowed sites, sources and the Library work queue.
 No registry tools are excluded from stdio.
@@ -52,7 +52,7 @@ Capture and model calls run in workers so other stdio requests can proceed.
 The existing bounded Library tools keep their two-second deadline, response
 budget and AZ-5h admission lifetime through final JSON-RPC serialization.
 Only the server-generated tool inventory has a larger 256 KiB frame cap so all
-91 exact schemas fit; inbound requests and tool results retain their existing caps.
+91 schemas fit; inbound requests and tool results retain their existing caps.
 Work-queue mutations use their service's lease, transaction and operation-key
 bounds; they do not inherit a read timeout that could abandon a committed write.
 

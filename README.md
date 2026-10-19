@@ -42,7 +42,7 @@ Published sources are indexed in one local library. Podcast audio and transcript
 The stdio transport is tested with **Claude Desktop and Cursor**. Cline and Continue are standard-stdio compatibility paths, not individually smoke-tested.
 
 - **stdio** defaults to all 91 registry tools. Set `UOINK_MCP_TOOLSET=core` in the client's environment for the previous 35 tools. Cursor and other clients with tool caps may need this setting. Restart the connection after changing it.
-- **HTTP JSON-RPC** at `/mcp/v1` exposes the same 91-tool registry through the token-authenticated local helper. Both transports share handlers and input schemas.
+- **HTTP JSON-RPC** at `/mcp/v1` exposes the same 91-tool registry through the token-authenticated local helper. Both transports share handlers and input schemas; stdio flattens three top-level `oneOf` schemas so Claude Code can load them, and validation is unchanged.
 
 **3. OpenAPI bridge (for local agents that don't speak MCP)** — Local OpenAPI-capable agents and scripts can drive the same tools over an OpenAPI 3.1 surface at `/openapi/v1/spec.json` + `POST /tools/<name>`.
 

@@ -89,6 +89,7 @@ ModuleNotFoundError.
 `UOINK_MCP_TOOLSET=full` serves all registry tools; `core` preserves the previous
 35 in their original order. Full keeps that prefix. Unknown values warn on
 stderr and use full. Cursor and other clients with tool caps can select core.
-Both modes use registry schemas and consent gates. Worker threads keep long
-captures and model calls from blocking the session. Library reads retain their
-existing deadline and AZ-5h serialization budget.
+Both modes use registry schemas and consent gates. Three registry schemas use a top-level `oneOf` (`claim_library_work`, `apply_reshelving`, `set_source_consent`). Claude Code and the Anthropic API reject that shape and Claude Code then shows none of the server's tools, so stdio advertises each as one object whose properties merge the variants. The handlers still validate the exact registry schema.
+Registry handlers run on the event loop one at a time, as in v3.9.1, because they
+share the Index connection with Library reads; paid discovery keeps its worker
+thread. Library reads retain their existing deadline and AZ-5h serialization budget.

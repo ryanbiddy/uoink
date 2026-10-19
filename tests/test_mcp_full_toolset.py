@@ -52,7 +52,7 @@ def test_real_stdio_toolsets_and_helper_down(tmp_path, mode, count):
         assert tuple(names) == tools.stdio_tool_names("core" if mode == "core" else "full")
         for tool in listed:
             spec = tools.TOOL_REGISTRY[tool["name"]]
-            assert tool["inputSchema"] == spec.input_schema
+            assert tool["inputSchema"] == tools.client_input_schema(spec.input_schema)
             assert tool["description"] == spec.description
         client.send({"jsonrpc": "2.0", "id": 3, "method": "tools/call", "params": {
             "name": "poll_monitored_playlist", "arguments": {"playlist_id": 1}}})
@@ -135,92 +135,28 @@ def test_library_apply_stays_off_on_stdio_and_http(local_backend):
     assert stdio == http and stdio["error"]["code"] == "apply_disabled"
 
 
-def _tool_request(name):
-    return types.CallToolRequest(
-        method="tools/call", params=types.CallToolRequestParams(name=name, arguments={}))
+def test_registry_handlers_run_on_the_event_loop_like_v391(monkeypatch):
+    # Registry handlers share one Index connection with the Library read,
+    # prompt and resource handlers, which run on the event loop. A worker
+    # thread would let them interleave, so non-discovery handlers run on the
+    # loop thread, one at a time, as the v3.9.1 FastMCP tools did.
+    seen = {}
 
-
-def test_new_long_tool_keeps_stdio_responsive_and_serializes_handlers(monkeypatch):
-    # Handlers share one Index connection, so registry calls run one at a
-    # time; tools/list still answers while a long capture holds the slot.
-    entered, release = threading.Event(), threading.Event()
-    ran = []
-
-    def capture(args):
-        entered.set()
-        assert release.wait(5)
-        return {"ok": True}
-
-    def taxonomy(args):
-        ran.append("taxonomy")
+    def page(args):
+        seen["page"] = threading.get_ident()
         return {"ok": True}
 
     monkeypatch.setitem(tools.TOOL_REGISTRY, "uoink_page",
-                        replace(tools.TOOL_REGISTRY["uoink_page"], handler=capture, rate_limiter=None))
-    monkeypatch.setitem(tools.TOOL_REGISTRY, "get_facet_taxonomy",
-                        replace(tools.TOOL_REGISTRY["get_facet_taxonomy"], handler=taxonomy))
-    handlers = uoink_mcp.mcp._mcp_server.request_handlers
-    handler = handlers[types.CallToolRequest]
-
-    async def exercise():
-        pending = asyncio.create_task(handler(_tool_request("uoink_page")))
-        try:
-            while not entered.is_set():
-                await asyncio.sleep(.01)
-            listed = await asyncio.wait_for(handlers[types.ListToolsRequest](
-                types.ListToolsRequest(method="tools/list")), 1)
-            assert len(listed.root.tools) == 91 and not pending.done()
-            queued = asyncio.create_task(handler(_tool_request("get_facet_taxonomy")))
-            await asyncio.sleep(.2)
-            assert not queued.done() and ran == []
-        finally:
-            release.set()
-            await pending
-        response = await asyncio.wait_for(queued, 5)
-        assert not response.root.isError and ran == ["taxonomy"]
-    _run_stdio(exercise())
-
-
-def test_cancelled_queued_call_never_starts(monkeypatch):
-    entered, release = threading.Event(), threading.Event()
-    ran = []
-
-    def capture(args):
-        entered.set()
-        assert release.wait(5)
-        return {"ok": True}
-
-    def tweet(args):
-        ran.append("write_tweet")
-        return {"ok": True}
-
-    monkeypatch.setitem(tools.TOOL_REGISTRY, "uoink_page",
-                        replace(tools.TOOL_REGISTRY["uoink_page"], handler=capture, rate_limiter=None))
-    monkeypatch.setitem(tools.TOOL_REGISTRY, "write_tweet",
-                        replace(tools.TOOL_REGISTRY["write_tweet"], handler=tweet, rate_limiter=None))
+                        replace(tools.TOOL_REGISTRY["uoink_page"], handler=page, rate_limiter=None))
     handler = uoink_mcp.mcp._mcp_server.request_handlers[types.CallToolRequest]
 
     async def exercise():
-        pending = asyncio.create_task(handler(_tool_request("uoink_page")))
-        try:
-            while not entered.is_set():
-                await asyncio.sleep(.01)
-            queued = asyncio.create_task(handler(_tool_request("write_tweet")))
-            await asyncio.sleep(.2)
-            queued.cancel()
-            with pytest.raises(asyncio.CancelledError):
-                await queued
-        finally:
-            release.set()
-            await pending
-        # Give the abandoned worker thread time to take the slot and see the flag.
-        for _ in range(50):
-            if not uoink_mcp._REGISTRY_CALL_LOCK.locked():
-                break
-            await asyncio.sleep(.02)
-        await asyncio.sleep(.1)
-        assert ran == []
+        seen["loop"] = threading.get_ident()
+        response = await handler(types.CallToolRequest(
+            method="tools/call", params=types.CallToolRequestParams(name="uoink_page", arguments={})))
+        assert not response.root.isError
     _run_stdio(exercise())
+    assert seen["page"] == seen["loop"]
 
 
 def test_public_manifest_advertises_full_default():
@@ -260,3 +196,48 @@ def test_resident_helper_pid_requires_live_original_process(tmp_path, monkeypatc
     else:
         monkeypatch.setattr(iso, "_posix_process_created_ms", lambda pid: created_ms)
     assert uoink_mcp._helper_running() is expected
+
+
+FLATTENED = {"claim_library_work", "apply_reshelving", "set_source_consent"}
+
+
+def test_listed_schemas_have_no_top_level_combinators():
+    # The Anthropic API rejects top-level oneOf/anyOf/allOf, and Claude Code
+    # then shows none of the server's tools (seen with the 3.9.2 build).
+    listed = _run_stdio(uoink_mcp.mcp.list_tools())
+    changed = set()
+    for tool in listed:
+        schema = tool.inputSchema
+        assert schema.get("type") == "object", tool.name
+        assert not {"oneOf", "anyOf", "allOf", "not"} & set(schema), tool.name
+        if schema != tools.TOOL_REGISTRY[tool.name].input_schema:
+            changed.add(tool.name)
+    assert changed == FLATTENED
+
+
+def test_flattened_schemas_keep_every_variant_field_and_defs():
+    for name in FLATTENED:
+        frozen = tools.TOOL_REGISTRY[name].input_schema
+        flat = tools.client_input_schema(frozen)
+        assert flat.get("$defs") == frozen.get("$defs")
+        fields = set(frozen.get("properties", {}))
+        for branch in frozen.get("oneOf", []):
+            fields |= set(branch.get("properties", {}))
+        assert set(flat["properties"]) == fields, name
+        # Only fields every variant requires are advertised as required.
+        for field in flat.get("required", []):
+            assert field in frozen.get("required", []) or all(
+                field in b.get("required", []) for b in frozen["oneOf"]), (name, field)
+    flat = tools.client_input_schema(tools.TOOL_REGISTRY["apply_reshelving"].input_schema)
+    assert flat["properties"]["mode"] == {"anyOf": [
+        {"const": "preview", "default": "preview"}, {"const": "apply"}]}
+    assert flat["required"] == ["expected_projection_revision"]
+
+
+def test_flattened_schema_does_not_loosen_server_validation():
+    # The advertised union would allow apply mode without its preview fields;
+    # the handler still validates the frozen oneOf and refuses it.
+    body = call("apply_reshelving", {"mode": "apply", "expected_projection_revision": 1})
+    assert body["error"]["code"] == "invalid_request" and body["error"]["details"]["field"] == "preview_id"
+    body = call("claim_library_work", {"action": "renew", "run_id": "r", "client_id": "c"})
+    assert body["error"]["code"] == "invalid_request" and body["error"]["details"]["field"] == "work_id"

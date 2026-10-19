@@ -19,6 +19,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - `UOINK_MCP_TOOLSET=core` keeps the previous 35-tool set for clients that cap
   tool counts. Full mode keeps those tools first in their original order.
 - Consent gates are unchanged.
+- Three tools whose input schemas used a top-level `oneOf` (`claim_library_work`,
+  `apply_reshelving`, `set_source_consent`) are advertised over stdio as one object
+  with the variants' fields, so Claude Code and Claude Desktop load every tool.
+  The server still validates the exact schema.
 
 ## [3.9.1] - 2026-10-18
 

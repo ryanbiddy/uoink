@@ -5770,3 +5770,54 @@ def stdio_tool_names(toolset: str = "full") -> tuple[str, ...]:
     if toolset == "core":
         return CORE_STDIO_TOOLS
     return CORE_STDIO_TOOLS + tuple(name for name in TOOL_REGISTRY if name not in CORE_STDIO_TOOLS)
+
+
+_SCHEMA_COMBINATORS = ("oneOf", "anyOf", "allOf")
+
+
+def client_input_schema(schema: dict) -> dict:
+    """The input schema stdio advertises to MCP clients.
+
+    The Anthropic API rejects tool input schemas with oneOf/anyOf/allOf at the
+    top level, and Claude Code then shows none of the server's tools. Three
+    frozen registry schemas (claim_library_work, apply_reshelving,
+    set_source_consent) use a top-level oneOf. Advertise them as one object
+    whose properties merge the variants. The handlers still validate every
+    call against the exact registry schema, so nothing looser is accepted.
+    """
+    if schema.get("type") == "object" and not any(k in schema for k in _SCHEMA_COMBINATORS):
+        return schema
+    flat = {k: v for k, v in schema.items() if k not in _SCHEMA_COMBINATORS + ("not",)}
+    flat["type"] = "object"
+    properties = dict(schema.get("properties", {}))
+    variants: dict[str, list] = {}
+    required = set(schema.get("required", []))
+    branch_required = None
+    branches = []
+    for key in _SCHEMA_COMBINATORS:
+        for branch in schema.get(key, []):
+            branches.append(branch)
+            for name, sub in branch.get("properties", {}).items():
+                variants.setdefault(name, [])
+                if sub not in variants[name]:
+                    variants[name].append(sub)
+            names = set(branch.get("required", []))
+            if key == "allOf":
+                required |= names
+            else:
+                branch_required = names if branch_required is None else branch_required & names
+    for name, subs in variants.items():
+        if name not in properties:
+            properties[name] = subs[0] if len(subs) == 1 else {"anyOf": subs}
+    flat["properties"] = properties
+    required |= branch_required or set()
+    ordered = [n for n in schema.get("required", []) if n in required]
+    ordered += sorted(required - set(ordered))
+    if ordered:
+        flat["required"] = ordered
+    else:
+        flat.pop("required", None)
+    if ("additionalProperties" not in schema and branches
+            and all(b.get("additionalProperties") is False for b in branches)):
+        flat["additionalProperties"] = False
+    return flat

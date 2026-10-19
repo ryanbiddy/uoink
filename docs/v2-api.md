@@ -1589,7 +1589,8 @@ consent checks, rate limits and standard error envelopes as stdio. See
 [discovery arguments and results](v2-mcp.md#discover_candidates).
 
 All 91 registry tools are also available over stdio by default in 3.9.2, with
-identical schemas and handlers. `UOINK_MCP_TOOLSET=core` keeps the earlier 35.
+the same handlers and schemas (stdio flattens the three top-level `oneOf` schemas for
+client compatibility; validation is unchanged). `UOINK_MCP_TOOLSET=core` keeps the earlier 35.
 
 The six Living Library work-queue tools added on 2026-09-04 (Phase 2 stage 1,
 contract `phase2-v1-2026-09-04`) are available on both HTTP and default stdio:
