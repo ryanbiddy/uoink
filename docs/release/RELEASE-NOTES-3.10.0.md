@@ -19,9 +19,18 @@ edits another app's settings. The dashboard's **Add to Cursor** and
 **Add to VS Code** buttons open the client's review flow. See
 [Connect your agent](../connect-your-agent.md) for recipes and known limits.
 
-TODO-ORCH: Tested: Claude Code, Codex CLI, Gemini CLI, pi (see release notes)
-This is a placeholder, not a test result. Replace it with confirmed client
-results before release. Other recipes remain unverified unless stated here.
+Tested on a clean, isolated install of this build:
+
+- **Claude Code 2.1.302** over MCP: all 91 tools listed; a note saved and listed back.
+- **Claude Code with the Uoink skill and the `uoink` command only** (no MCP server,
+  the way pi and OpenClaw work): skill loaded, `uoink note` and `uoink recent` ran.
+- **Codex CLI 0.153.4** over MCP: a note saved and listed back.
+- **The `uoink` command**: `status`, `note`, `recent`, `connect`.
+- **Claude Code plugin**: loads its skill and starts its MCP server. Its tool calls
+  were not run end to end, because the test install is isolated from a normal one.
+
+Not yet tested: Gemini CLI and pi (no sign-in on the test machine) and every other
+recipe in `uoink connect`, which says "not yet tested" until it is.
 
 This release makes no data or settings changes besides the optional PATH
 entry. There is no new index or migration. Installing over the previous

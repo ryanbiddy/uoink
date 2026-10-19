@@ -42,9 +42,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - The MCP server exposes 91 tools by default. Consent gates are unchanged.
 - No data or settings changes besides the optional PATH entry. No index or
   migration is added; existing libraries and saved captures stay in place.
-- TODO-ORCH: Tested: Claude Code, Codex CLI, Gemini CLI, pi (see release notes)
-  This is a placeholder. Replace it with confirmed client results before release.
-  Other client recipes remain unverified unless the release notes say otherwise.
+- Tested on a clean isolated install: Claude Code 2.1.302 (MCP: 91 tools, a note
+  saved and listed; skill plus `uoink` command with no MCP: note saved and listed),
+  Codex CLI 0.153.4 (MCP: note saved and listed), and the `uoink` command itself
+  (`status`, `note`, `recent`, `connect`). The Claude Code plugin loads its skill
+  and starts its MCP server; its tool calls were not run end to end because the
+  test install is isolated. Gemini CLI and pi were not tested (no sign-in on the
+  test machine). Every other recipe is marked "not yet tested".
 
 ## [3.9.3] - 2026-10-19
 
