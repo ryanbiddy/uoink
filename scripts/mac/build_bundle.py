@@ -275,6 +275,18 @@ def signing_order(app: Path) -> list[Path]:
     main = app / "Contents/MacOS/Uoink"
     if main not in targets:
         raise ValueError("Contents/MacOS/Uoink must be a native executable")
+    # Executable scripts in code locations (the uoink CLI shim in Helpers) are
+    # code to codesign; sign them like Mach-O files (signature in xattrs).
+    for folder in ("Contents/Helpers", "Contents/MacOS"):
+        root = app / folder
+        if not root.is_dir():
+            continue
+        for path in root.rglob("*"):
+            if path.is_symlink() or not path.is_file() or path in targets:
+                continue
+            with path.open("rb") as stream:
+                if stream.read(2) == b"#!":
+                    targets.add(path)
     for path in app.rglob("*"):
         if path.is_symlink() or not path.is_dir() or path.suffix not in {".app", ".framework", ".bundle", ".xpc"}:
             continue

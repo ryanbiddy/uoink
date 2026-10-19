@@ -364,6 +364,8 @@ def test_signing_order_and_assessment(tmp_path, monkeypatch):
         path.write_bytes(b"\xcf\xfa\xed\xfe")
     (app / "Contents/Info.plist").write_bytes(plistlib.dumps({"CFBundleExecutable": "Uoink"}))
     (app / "Contents/Resources/Python/lib/os.py").write_text("# resource, not native code")
+    shim = app / "Contents/Helpers/uoink"
+    shim.write_text("#!/bin/sh\nexec true\n")
     framework = app / "Contents/Frameworks/Codec.framework"
     (framework / "Resources").mkdir()
     (framework / "Resources/Info.plist").write_bytes(plistlib.dumps({"CFBundleExecutable": "Codec"}))
@@ -374,7 +376,9 @@ def test_signing_order_and_assessment(tmp_path, monkeypatch):
     build_bundle.sign_app(app, report)
     signed = [c[-1] for c in calls if "--sign" in c]
     assert signed == build_bundle.signing_order(app)
-    assert set(signed) == {binary, nested, framework, app, *natives}
+    assert set(signed) == {binary, nested, framework, app, shim, *natives}
+    # Scripts in code locations are signed before the bundle that contains them.
+    assert signed.index(shim) < signed.index(app)
     assert signed.index(binary) < signed.index(nested) < signed.index(app)
     assert signed.index(natives[-1]) < signed.index(framework) < signed.index(app)
     assert signed[-1] == app and signed.index(main) < signed.index(app)
