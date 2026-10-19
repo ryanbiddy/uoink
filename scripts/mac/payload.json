@@ -100,9 +100,9 @@
         "flac",
         "mpegts",
         "image2",
-        "jpeg_pipe",
-        "png_pipe",
-        "webp_pipe"
+        "image_jpeg_pipe",
+        "image_png_pipe",
+        "image_webp_pipe"
       ],
       "decoder": [
         "aac",

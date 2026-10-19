@@ -193,9 +193,6 @@ def main():
     args = ap.parse_args()
 
     import _platform
-    if sys.platform == "darwin":
-        from source_subscriptions import check_public_http_url
-        args.url = check_public_http_url(args.url)
     _platform.require_media()
 
     out_root = Path(args.out)

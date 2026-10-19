@@ -71,7 +71,7 @@ and `enabled-components.json` record the actual result for each version.
 
 | Components | Enabled names | Reason |
 | --- | --- | --- |
-| Common demuxers | `mov,matroska,mp3,aac,ogg,wav,flac,mpegts,image2,jpeg_pipe,png_pipe,webp_pipe` | MP4/M4A/QuickTime, WebM/MKV, podcast audio, transport streams and downloaded thumbnails |
+| Common demuxers | `mov,matroska,mp3,aac,ogg,wav,flac,mpegts,image2,image_jpeg_pipe,image_png_pipe,image_webp_pipe` | MP4/M4A/QuickTime, WebM/MKV, podcast audio, transport streams and downloaded thumbnails |
 | Common audio decoders | `aac,aac_latm,mp3float,opus,vorbis,flac,alac,pcm_u8,pcm_s16le,pcm_s16be,pcm_s24le,pcm_s32le,pcm_f32le,pcm_f64le` | AAC/M4A, MP3, WebM/Opus, Ogg and PCM/lossless podcast inputs |
 | Common image/video decoders | `h264,vp8,vp9,mjpeg,png,webp,ppm` | Selected video formats, JPEG/PNG/WebP thumbnails; PPM supplies the generated smoke video |
 | Common parsers | `aac,aac_latm,mpegaudio,opus,vorbis,flac,h264,vp8,vp9,mjpeg,png` | Packet parsing for enabled codecs |
