@@ -29,7 +29,7 @@ import uoink_cli as cli
 @pytest.fixture
 def install(tmp_path, monkeypatch):
     app = tmp_path / "Custom Apps & Snow 雪" / "Uoink.app"
-    for relative in ("Frameworks/Python/bin/python3", "Resources/server.py", "Resources/uoink_mcp.py"):
+    for relative in ("MacOS/Uoink", "Frameworks/Python/bin/python3", "Resources/server.py", "Resources/uoink_mcp.py"):
         path = app / "Contents" / relative
         path.parent.mkdir(parents=True, exist_ok=True)
         path.touch()
@@ -69,7 +69,7 @@ def test_login_opt_in_idempotence_disable_and_quit_policy(install, monkeypatch):
     assert not life.agent_path(home).exists()
     life.set_enabled(app, True, home)
     payload = plistlib.loads(life.agent_path(home).read_bytes())
-    assert payload["ProgramArguments"] == [str(app / "Contents/Frameworks/Python/bin/python3"), "-B", "-s", str(app / "Contents/Resources/server.py")]
+    assert payload["ProgramArguments"] == [str(app / "Contents/MacOS/Uoink"), "--helper"]
     assert payload["RunAtLoad"] is True and payload["KeepAlive"] is False
     assert Path(payload["StandardOutPath"]).parent == home / "Library/Logs/Uoink"
     assert life.status(app, home)["enabled"] is True
@@ -94,15 +94,120 @@ def test_launchctl_failures_are_not_reported_as_success(install, monkeypatch, fa
     assert life.agent_path(home).exists() == (failure == "bootout")
 
 
-def test_disable_can_flush_settings_before_bootout(install, monkeypatch):
+def test_disable_preflight_leaves_plist_until_bootout(install, monkeypatch):
     app, home = install
     fake = Launchctl()
     monkeypatch.setattr(life, "launchctl", fake)
     life.set_enabled(app, True, home)
-    life.set_enabled(app, False, home, unload=False)
-    assert fake.active and not life.agent_path(home).exists()
-    life.bootout(app, home)
-    assert not fake.active
+    assert life.check_disable(app, home)
+    assert fake.active and life.agent_path(home).exists()
+    def launchctl(*args):
+        if args[0] == "bootout":
+            assert life.agent_path(home).is_file()
+        return fake(*args)
+    monkeypatch.setattr(life, "launchctl", launchctl)
+    life.set_enabled(app, False, home)
+    assert not fake.active and not life.agent_path(home).exists()
+
+
+@pytest.mark.parametrize("active", [False, True])
+@pytest.mark.parametrize("action", ["disable", "uninstall", "bootout", "preflight", "settings"])
+def test_foreign_plist_refused_before_any_change(install, monkeypatch, active, action):
+    app, home = install
+    foreign = home / "Another Uoink.app/Contents/MacOS/Uoink"
+    foreign.parent.mkdir(parents=True)
+    foreign.touch()
+    payload = life.plist(app, home)
+    payload["ProgramArguments"][0] = str(foreign)
+    path = life.agent_path(home)
+    path.parent.mkdir(parents=True)
+    before = plistlib.dumps(payload)
+    path.write_bytes(before)
+    fake = Launchctl()
+    fake.active = active
+    fake.program = str(app / "Contents/MacOS/Uoink")
+    monkeypatch.setattr(life, "launchctl", fake)
+    if action == "settings":
+        import server
+        monkeypatch.setattr(server.sys, "platform", "darwin")
+        monkeypatch.setattr(server, "HERE", app / "Contents/Resources")
+        monkeypatch.setattr(server, "_read_settings", lambda: pytest.fail("Must refuse before settings access"))
+        replies = []
+        handler = server.Handler.__new__(server.Handler)
+        handler._send_json = lambda code, payload: replies.append((code, payload))
+        handler._handle_settings_post({"autostart": False})
+        assert replies[0][0] == 200 and replies[0][1]["ok"] is False
+        assert "another install" in replies[0][1]["error"]
+        assert not handler._mac_bootout_pending
+    else:
+        with pytest.raises(ValueError, match="another install"):
+            if action == "disable":
+                life.set_enabled(app, False, home)
+            else:
+                {"uninstall": life.uninstall, "bootout": life.bootout,
+                 "preflight": life.check_disable}[action](app, home)
+    assert path.read_bytes() == before and app.is_dir()
+    assert fake.active is active and not fake.calls
+
+
+def test_agent_program_symlink_must_resolve_inside_verified_app(install, monkeypatch):
+    app, home = install
+    path = life.agent_path(home)
+    path.parent.mkdir(parents=True)
+    payload = life.plist(app, home)
+    program = Path(payload["ProgramArguments"][0])
+    path.write_bytes(plistlib.dumps(payload))
+    original_resolve = Path.resolve
+    # Model an escaping executable link without requiring Windows symlink rights.
+    monkeypatch.setattr(Path, "resolve", lambda p, **kw:
+                        home / "foreign" if p == program else original_resolve(p, **kw))
+    fake = Launchctl()
+    monkeypatch.setattr(life, "launchctl", fake)
+    with pytest.raises(ValueError):
+        life.set_enabled(app, False, home)
+    assert path.exists() and app.exists() and not fake.calls
+
+
+def test_legacy_python_agent_can_be_disabled(install, monkeypatch):
+    app, home = install
+    path = life.agent_path(home)
+    path.parent.mkdir(parents=True)
+    payload = life.plist(app, home)
+    payload["ProgramArguments"] = [str(app / "Contents/Frameworks/Python/bin/python3"), "-B", "-s",
+                                   str(app / "Contents/Resources/server.py")]
+    path.write_bytes(plistlib.dumps(payload))
+    fake = Launchctl()
+    fake.active = True
+    fake.program = payload["ProgramArguments"][0]
+    monkeypatch.setattr(life, "launchctl", fake)
+    life.set_enabled(app, False, home)
+    assert not fake.active and not path.exists()
+
+
+def test_loaded_service_without_owned_plist_is_not_booted_out(install, monkeypatch):
+    app, home = install
+    fake = Launchctl()
+    fake.active = True
+    fake.program = str(app / "Contents/MacOS/Uoink")
+    monkeypatch.setattr(life, "launchctl", fake)
+    with pytest.raises(ValueError, match="no owned plist"):
+        life.set_enabled(app, False, home)
+    assert fake.active and all(call[0] == "print" for call in fake.calls)
+
+
+@pytest.mark.parametrize("payload", [b"not a plist", [], {}, {"ProgramArguments": []},
+                                   {"Label": life.LABEL, "ProgramArguments": ["relative/python3"]}])
+def test_malformed_agent_refuses_removal(install, monkeypatch, payload):
+    app, home = install
+    path = life.agent_path(home)
+    path.parent.mkdir(parents=True)
+    before = payload if isinstance(payload, bytes) else plistlib.dumps(payload)
+    path.write_bytes(before)
+    fake = Launchctl()
+    monkeypatch.setattr(life, "launchctl", fake)
+    with pytest.raises(ValueError, match="ownership"):
+        life.set_enabled(app, False, home)
+    assert path.read_bytes() == before and not fake.calls
 
 
 def test_uninstall_plan_and_removal_preserve_user_data(install, monkeypatch):
@@ -246,16 +351,59 @@ def test_signing_order_and_assessment(tmp_path, monkeypatch):
     binary.write_bytes(b"\xcf\xfa\xed\xfe")
     nested = binary.parents[2]
     (nested / "Contents/Info.plist").write_bytes(plistlib.dumps({"CFBundleExecutable": "inner"}))
+    main = app / "Contents/MacOS/Uoink"
+    natives = [main, app / "Contents/Frameworks/Python/bin/python3",
+               app / "Contents/Frameworks/Python/lib/python3.13/lib-dynload/_ssl.so",
+               app / "Contents/Frameworks/Python/lib/libpython3.13.dylib",
+               app / "Contents/Helpers/ffmpeg", app / "Contents/Helpers/ffprobe",
+               app / "Contents/Frameworks/Codec.framework/Versions/A/Codec"]
+    for path in natives:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(b"\xcf\xfa\xed\xfe")
+    (app / "Contents/Info.plist").write_bytes(plistlib.dumps({"CFBundleExecutable": "Uoink"}))
+    framework = app / "Contents/Frameworks/Codec.framework"
+    (framework / "Resources").mkdir()
+    (framework / "Resources/Info.plist").write_bytes(plistlib.dumps({"CFBundleExecutable": "Codec"}))
     calls = []
     monkeypatch.setattr(build_bundle, "run", lambda args, **kw: calls.append(args))
     monkeypatch.setattr(build_bundle.subprocess, "run", lambda *a, **kw: SimpleNamespace(returncode=3, stdout="", stderr="rejected"))
     report = tmp_path / "signing.json"
     build_bundle.sign_app(app, report)
     signed = [c[-1] for c in calls if "--sign" in c]
-    assert signed == [binary, nested, app]
-    assert all("--deep" not in c for c in calls)
-    assert len([c for c in calls if "--verify" in c and "--strict" in c]) == 3
+    assert signed == build_bundle.signing_order(app)
+    assert set(signed) == {binary, nested, framework, app, *natives[1:]}
+    assert signed.index(binary) < signed.index(nested) < signed.index(app)
+    assert signed.index(natives[-1]) < signed.index(framework) < signed.index(app)
+    assert signed[-1] == app and main not in signed
+    assert all(c[:5] == ["codesign", "--force", "--sign", "-", "--timestamp=none"]
+               and "--deep" not in c for c in calls if "--sign" in c)
+    assert [c for c in calls if "--verify" in c] == [["codesign", "--verify", "--strict", "--deep", app]]
     assert json.loads(report.read_text())["spctl"]["returncode"] == 3
+
+
+@pytest.mark.parametrize("verify", [False, True])
+def test_codesign_failure_prints_captured_stderr(monkeypatch, capsys, verify):
+    def fail(command, **kwargs):
+        assert kwargs["capture_output"] and kwargs["check"]
+        raise subprocess.CalledProcessError(1, command, stderr="fixture signing failure detail")
+    monkeypatch.setattr(build_bundle.subprocess, "run", fail)
+    command = ["codesign", *( ["--verify", "--strict", "--deep"] if verify else
+                             ["--force", "--sign", "-", "--timestamp=none"]), "Uoink.app"]
+    with pytest.raises(subprocess.CalledProcessError):
+        build_bundle.run(command)
+    stderr = capsys.readouterr().err
+    assert "codesign failed (1): Uoink.app" in stderr
+    assert "fixture signing failure detail" in stderr
+
+
+@pytest.mark.parametrize("executable", [None, "wrong", "../MacOS/Uoink"])
+def test_signing_rejects_wrong_main_executable(tmp_path, executable):
+    contents = tmp_path / "Uoink.app/Contents"
+    contents.mkdir(parents=True)
+    (contents / "Info.plist").write_bytes(plistlib.dumps(
+        {} if executable is None else {"CFBundleExecutable": executable}))
+    with pytest.raises(ValueError, match="CFBundleExecutable"):
+        build_bundle.signing_order(contents.parent)
 
 
 def test_dmg_format_volume_link_and_digest(tmp_path, monkeypatch):
@@ -284,7 +432,10 @@ def test_dmg_format_volume_link_and_digest(tmp_path, monkeypatch):
 def test_bootout_never_stops_an_unverified_service(install, monkeypatch, foreign):
     import _platform
     app, home = install
-    text = f"program = {app / 'Contents/Frameworks/Python/bin/python3'}\npid = 123\n"
+    agent = life.agent_path(home)
+    agent.parent.mkdir(parents=True)
+    agent.write_bytes(plistlib.dumps(life.plist(app, home)))
+    text = f"program = {app / 'Contents/MacOS/Uoink'}\npid = 123\n"
     if foreign == "program":
         text = "program = /foreign/python3\npid = 123\n"
     identity = home / "Library/Application Support/Uoink/runtime-identity.json"
@@ -347,15 +498,63 @@ def test_settings_autostart_uses_lifecycle_and_flushes_before_unload(install, mo
     assert server._autostart_enabled() is True
     events = []
     handler = server.Handler.__new__(server.Handler)
-    def settings(_):
-        assert server._set_autostart(False, defer_stop=True)
-        handler._mac_bootout_pending = True
+    def write_settings(_):
+        assert fake.active and life.agent_path(home).exists()
+        events.append("write")
+    def reply(code, payload):
+        assert code == 200 and payload == {"ok": True, "settings": {"autostart": False}}
+        assert fake.active and life.agent_path(home).exists()
         events.append("reply")
-    handler._handle_settings_post_locked = settings
+    monkeypatch.setattr(server, "_read_settings", lambda: {})
+    monkeypatch.setattr(server, "_write_settings", write_settings)
+    monkeypatch.setattr(server, "_public_settings", lambda _: {"autostart": True})
+    handler._send_json = reply
     handler.wfile = SimpleNamespace(flush=lambda: events.append("flush"))
-    monkeypatch.setattr(life, "bootout", lambda *a: events.append("bootout"))
+    def launchctl(*args):
+        if args[0] == "bootout":
+            assert life.agent_path(home).is_file()
+            events.append("bootout")
+        return fake(*args)
+    monkeypatch.setattr(life, "launchctl", launchctl)
+    def spawn(command, **kwargs):
+        assert command == [str(app / "Contents/Frameworks/Python/bin/python3"), "-B", "-s", "-m",
+                           "helper.mac_lifecycle", "disable", str(app)]
+        assert kwargs["start_new_session"] is True
+        assert kwargs["cwd"] == app / "Contents/Resources"
+        assert not any(key.startswith("DYLD_") for key in kwargs["env"])
+        assert not {"PYTHONHOME", "PYTHONPATH", "PYTHONSTARTUP", "PYTHONUSERBASE", "PYTHONEXECUTABLE"} & kwargs["env"].keys()
+        events.append("spawn")
+        life.set_enabled(app, False, home)  # Simulate the detached worker's CLI.
+    monkeypatch.setattr(life.subprocess, "Popen", spawn)
     handler._handle_settings_post({"autostart": False})
-    assert events == ["reply", "flush", "bootout"]
+    assert events == ["write", "reply", "flush", "spawn", "bootout"]
+    assert not fake.active and not life.agent_path(home).exists()
+
+
+@pytest.mark.parametrize("failure", ["validation", "write"])
+def test_failed_settings_request_does_not_schedule_disable(install, monkeypatch, failure):
+    import server
+    app, home = install
+    monkeypatch.setattr(server.sys, "platform", "darwin")
+    monkeypatch.setattr(server, "HERE", app / "Contents/Resources")
+    fake = Launchctl()
+    monkeypatch.setattr(life, "launchctl", fake)
+    life.set_enabled(app, True, home)
+    path = life.agent_path(home)
+    before = path.read_bytes()
+    monkeypatch.setattr(server, "_read_settings", lambda: {})
+    def fail_write(_):
+        raise OSError("fixture write failed")
+    monkeypatch.setattr(server, "_write_settings", fail_write)
+    monkeypatch.setattr(life, "disable_after_reply", lambda *a: pytest.fail("Failed request must not disable"))
+    handler = server.Handler.__new__(server.Handler)
+    replies = []
+    handler._send_json = lambda code, payload: replies.append((code, payload))
+    body = {"autostart": False, **({"topics": {}} if failure == "validation" else {})}
+    handler._handle_settings_post(body)
+    assert replies and replies[0][1]["ok"] is False
+    assert not handler._mac_bootout_pending
+    assert fake.active and path.read_bytes() == before
 
 
 @pytest.mark.parametrize("fail", [False, True])

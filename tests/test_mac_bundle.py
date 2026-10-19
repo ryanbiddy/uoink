@@ -278,9 +278,10 @@ def test_loader_path_symlink_containment_without_os_symlink_privileges(monkeypat
     assert bundle.rpath_removals(loader_fixture("rpath", str(value)), app) == ([] if allowed else [str(value)])
 
 
-@pytest.mark.parametrize("failure", [None, "delete", "sign", "remaining_rpath", "dependency"])
+@pytest.mark.parametrize("failure", [None, "delete", "remaining_rpath", "dependency"])
 @pytest.mark.parametrize("relative", ["libjpeg.62.4.0.dylib", "Contents/Helpers/ffmpeg",
-                                    "Contents/Helpers/ffprobe", "Contents/Frameworks/FFmpeg7/libavcodec.61.dylib"])
+                                    "Contents/Helpers/ffprobe", "Contents/Frameworks/FFmpeg7/libavcodec.61.dylib",
+                                    "Contents/MacOS/Uoink"])
 def test_rpath_rewrite_reports_edits_and_inventory_rechecks(monkeypatch, tmp_path, failure, relative):
     from types import SimpleNamespace
     app = tmp_path / "Uoink.app"
@@ -308,16 +309,13 @@ def test_rpath_rewrite_reports_edits_and_inventory_rechecks(monkeypatch, tmp_pat
             if failure != "remaining_rpath":
                 pending.remove(command[2])
         elif command[0] == "codesign":
-            assert command == ["codesign", "--force", "--sign", "-", str(binary)]
-            if failure == "sign":
-                raise subprocess.CalledProcessError(1, command)
-            binary.write_bytes(b"\xcf\xfa\xed\xfe" + b"signed after edits")
+            pytest.fail("Rpath edits must leave signing to the final inside-out pass")
         elif command[0] == "lipo":
             output = "arm64"
         return SimpleNamespace(stdout=output)
 
     monkeypatch.setattr(bundle.subprocess, "run", run)
-    if failure in {"delete", "sign"}:
+    if failure == "delete":
         with pytest.raises(subprocess.CalledProcessError):
             bundle.rewrite_rpaths(app, report)
     else:
@@ -328,12 +326,11 @@ def test_rpath_rewrite_reports_edits_and_inventory_rechecks(monkeypatch, tmp_pat
         else:
             inventory = bundle.binary_inventory(app)
             assert inventory[0]["sha256"] == hashlib.sha256(binary.read_bytes()).hexdigest()
-            assert "signed after edits" in binary.read_text(errors="replace")
             bundle.rewrite_rpaths(app, tmp_path / "second-report.json")
             assert json.loads((tmp_path / "second-report.json").read_text()) == []
     expected = [PILLOW_RPATH] if failure == "delete" else [PILLOW_RPATH, "/opt/homebrew/lib"]
     assert json.loads(report.read_text()) == [{"file": relative, "rpath": value} for value in expected]
-    assert sum(command[0] == "codesign" for command in calls) == (0 if failure == "delete" else 1)
+    assert not any(command[0] == "codesign" for command in calls)
 
 
 @pytest.mark.parametrize("mutate,fail", [(False, False), (True, False), (False, True)])
@@ -373,7 +370,7 @@ def test_smoke_success_requires_completed_checks_and_immutable_bundle(monkeypatc
             import plistlib
             contents = Path(command[-1]) / "Contents"
             return SimpleNamespace(returncode=0, stdout=plistlib.dumps({
-                "ProgramArguments": [str(contents / "Frameworks/Python/bin/python3"), "-B", "-s", str(contents / "Resources/server.py")],
+                "ProgramArguments": [str(contents / "MacOS/Uoink"), "--helper"],
                 "KeepAlive": False, "RunAtLoad": True,
                 "StandardOutPath": str(Path(kwargs["env"]["HOME"]) / "Library/Logs/Uoink/launchd.out.log")}))
         if command[-1] == "status":

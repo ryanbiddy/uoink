@@ -209,13 +209,13 @@ def smoke(app: Path, output: Path) -> None:
             agent_path.parent.mkdir(parents=True)
             agent_path.write_bytes(agent.stdout)
             config = plistlib.loads(agent.stdout)
-            assert config["ProgramArguments"] == [str(python), "-B", "-s", str(resources / "server.py")]
+            assert config["ProgramArguments"] == [str(launcher), "--helper"]
             assert config["KeepAlive"] is False and config["RunAtLoad"] is True
             assert Path(config["StandardOutPath"]).is_relative_to(Path(env["HOME"]) / "Library/Logs/Uoink")
             report["launchagent"] = {"generated": True, "bootstrapped": False}
             report["media"] = media_smoke(contents, scratch, env)
             with (output / "helper.txt").open("w") as log:
-                helper = subprocess.Popen([str(launcher)], cwd=scratch, env=env,
+                helper = subprocess.Popen([str(launcher), "--helper"], cwd=scratch, env=env,
                                           stdout=log, stderr=subprocess.STDOUT, start_new_session=True)
                 deadline = time.monotonic() + 120
                 while time.monotonic() < deadline:

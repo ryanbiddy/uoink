@@ -26,7 +26,16 @@ MAC = Path(__file__).parent
 
 
 def run(command, **kwargs):
-    return subprocess.run([str(x) for x in command], check=True, text=True, **kwargs)
+    command = [str(x) for x in command]
+    if command[0] == "codesign":
+        kwargs["capture_output"] = True
+    try:
+        return subprocess.run(command, check=True, text=True, **kwargs)
+    except subprocess.CalledProcessError as exc:
+        if command[0] == "codesign":
+            print(f"codesign failed ({exc.returncode}): {command[-1]}", file=sys.stderr)
+            print(exc.stderr or "codesign produced no stderr", file=sys.stderr)
+        raise
 
 
 def payload_files(root: Path = ROOT) -> list[Path]:
@@ -196,9 +205,8 @@ def rewrite_rpaths(app: Path, report: Path) -> None:
             run(["install_name_tool", "-delete_rpath", rpath, path])
             removals.append({"file": path.relative_to(app).as_posix(), "rpath": rpath})
             write_json(report, removals)
-        if planned:
-            # Header edits invalidate the wheel's original code signature.
-            run(["codesign", "--force", "--sign", "-", path])
+        # Header edits invalidate old signatures. sign_app signs the completed
+        # tree inside-out, with the main executable signed only via its bundle.
 
 
 def binary_inventory(app: Path) -> list[dict]:
@@ -223,8 +231,15 @@ def binary_inventory(app: Path) -> list[dict]:
     return rows
 
 
-def sign_app(app: Path, report: Path) -> None:
+def signing_order(app: Path) -> list[Path]:
+    with (app / "Contents/Info.plist").open("rb") as stream:
+        if plistlib.load(stream).get("CFBundleExecutable") != "Uoink":
+            raise ValueError("CFBundleExecutable must match Contents/MacOS/Uoink")
     targets = set(macho_files(app))
+    main = app / "Contents/MacOS/Uoink"
+    if main not in targets:
+        raise ValueError("Contents/MacOS/Uoink must be a native executable")
+    targets.remove(main)
     for path in app.rglob("*"):
         if path.is_symlink() or not path.is_dir() or path.suffix not in {".app", ".framework", ".bundle", ".xpc"}:
             continue
@@ -235,11 +250,14 @@ def sign_app(app: Path, report: Path) -> None:
                     if plistlib.load(stream).get("CFBundleExecutable"):
                         targets.add(path)
                 break
-    ordered = sorted(targets, key=lambda p: (-len(p.parts), str(p))) + [app]
+    return sorted(targets, key=lambda p: (-len(p.parts), str(p))) + [app]
+
+
+def sign_app(app: Path, report: Path) -> None:
+    ordered = signing_order(app)
     for path in ordered:
         run(["codesign", "--force", "--sign", "-", "--timestamp=none", path])
-    for path in ordered:
-        run(["codesign", "--verify", "--strict", path], capture_output=True)
+    run(["codesign", "--verify", "--strict", "--deep", app])
     assessment = subprocess.run(["spctl", "--assess", "--type", "execute", "--verbose=4", str(app)],
                                 text=True, capture_output=True, timeout=120)
     write_json(report, {"identity": "ad-hoc", "strict_verification": "passed",

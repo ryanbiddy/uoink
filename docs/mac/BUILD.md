@@ -64,8 +64,31 @@ Uoink.app/Contents/
 symlink resolves back to this shim. `Contents/Resources/uoink` remains a
 forwarder to the app launcher.
 Neither command starts the helper. Run the launcher without arguments to
-start the headless helper. Finder and interactive desktop behavior are not
-qualified by this build job.
+start the headless helper, or pass `--helper` as login startup does. Finder and
+interactive desktop behavior are not qualified by this build job.
+
+The launcher, CLI shim and MCPB shim clear every `DYLD_*` variable and
+`PYTHONHOME`, `PYTHONPATH`, `PYTHONSTARTUP`, `PYTHONUSERBASE` and
+`PYTHONEXECUTABLE` before executing bundled Python. The LaunchAgent runs
+`Contents/MacOS/Uoink --helper` so login startup uses the same environment cleanup.
+
+Signing runs inside-out: nested Mach-O files and code bundles first, then
+`codesign --force --sign - --timestamp=none Uoink.app` last. The outer bundle
+signing step signs `Contents/MacOS/Uoink` with its `Info.plist` bound; the main
+executable is never signed separately. `codesign --verify --strict --deep`
+verifies the completed app. Failures print the exit code and codesign stderr.
+The launcher is compiled for arm64 with `-mmacosx-version-min=14.0`, and
+`CFBundleExecutable` must be `Uoink`.
+
+Developer ID signing will enable hardened runtime with `--options runtime`.
+Start with no entitlements. Qualify bundled Python, native extensions and media
+processing under that policy before release. Add `com.apple.security.cs.allow-jit`
+only if a required JIT fails that qualification; consider
+`com.apple.security.cs.allow-unsigned-executable-memory` only if a required
+dependency demonstrably needs it. No entitlement is currently established as
+necessary. Keep library validation enabled by signing nested code with the same
+Developer ID; do not grant `com.apple.security.cs.disable-library-validation` or
+`com.apple.security.cs.allow-dyld-environment-variables` by default.
 
 ## Inputs and reproducibility
 
@@ -168,10 +191,11 @@ Before inventory, the builder removes absolute `LC_RPATH` entries outside the
 bundle, `/usr/lib` and `/System/Library`, including paths left by wheel build
 machines. Each removal uses a separate `install_name_tool -delete_rpath` call;
 `native-rpath-removals.json` records the bundle-relative file and original rpath.
-After all rewrites and resource writes, the builder ad-hoc signs every Mach-O
-file and nested code bundle from the inside out, then signs Uoink.app. It never
-uses `--deep` as a signing strategy. `codesign --verify --strict` must pass for
-each target. `signing.json` records the order and `spctl --assess` output;
+After all rewrites and resource writes, the builder ad-hoc signs nested Mach-O
+files and code bundles from the inside out, then signs Uoink.app and its main
+executable together. `--deep` is used only for the final
+`codesign --verify --strict --deep` check. `signing.json` records the order and
+`spctl --assess` output;
 Gatekeeper rejection is expected until Developer ID signing and notarization.
 The main app entry is compiled from `installer/mac/launcher.c`; it execs only
 the bundled Python with `-B -s`. No credentials or signing certificates are used.
@@ -235,8 +259,12 @@ keeps signing, DMG hash/size, native/file inventories and both smoke reports.
 LaunchAgent behavior lives in `helper/mac_lifecycle.py`. Tests simulate
 `launchctl` and use temporary home directories. `RunAtLoad: true` and
 `KeepAlive: false` start once at login without a Quit or duplicate-launch restart
-loop. Settings use the same enable/disable/status functions. Disabling flushes
-the settings reply before bootout can stop the current helper. The uninstall
+loop. Disable and uninstall parse the plist and require its first program
+argument to resolve inside the verified app before any bootout or unlink.
+A foreign or unverifiable definition is retained with an error. Bootout must
+succeed before the owned plist is removed. Settings validate ownership before
+saving, then flush the reply and run disable in a separate process session so
+removal can finish after bootout stops the current helper. The uninstall
 planner checks the bundle identifier and required files; execution uses the
 shared Darwin process identity and termination adapter before app removal.
 It preserves user data. No test should access the real user's Library.

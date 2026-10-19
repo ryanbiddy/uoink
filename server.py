@@ -8217,12 +8217,12 @@ def _autostart_enabled() -> bool | None:
         return None
 
 
-def _set_autostart(enabled: bool, *, defer_stop: bool = False) -> bool | None:
+def _set_autostart(enabled: bool) -> bool | None:
     """Set the Windows Run value or Mac LaunchAgent. None means unsupported."""
     if sys.platform == "darwin":
         from helper import mac_lifecycle
         try:
-            mac_lifecycle.set_enabled(HERE, enabled, unload=not defer_stop)
+            mac_lifecycle.set_enabled(HERE, enabled)
             return True
         except (OSError, ValueError, subprocess.SubprocessError) as exc:
             log.warning("autostart toggle failed: %s", exc)
@@ -16086,11 +16086,18 @@ class Handler(BaseHTTPRequestHandler):
                     self.wfile.flush()
                 finally:
                     try:
-                        mac_lifecycle.bootout(HERE)
+                        mac_lifecycle.disable_after_reply(HERE)
                     except (OSError, ValueError, subprocess.SubprocessError) as exc:
-                        log.warning("Login startup disabled; bootout failed: %s", exc)
+                        log.warning("Login startup disable failed; LaunchAgent retained: %s", exc)
 
     def _handle_settings_post_locked(self, body: dict):
+        defer_stop = sys.platform == "darwin" and body.get("autostart") is False
+        if defer_stop:
+            from helper import mac_lifecycle
+            try:
+                mac_lifecycle.check_disable(HERE)
+            except (OSError, ValueError, subprocess.SubprocessError) as exc:
+                return self._send_json(200, {"ok": False, "error": str(exc)})
         if "library_mirror_enabled" in body or "library_mirror_consent" in body:
             refusal = _platform.capability_refusal(_platform.library_mirror_capability())
             if refusal is not None:
@@ -16222,14 +16229,10 @@ class Handler(BaseHTTPRequestHandler):
             if not isinstance(body.get("autostart"), bool):
                 return self._send_json(400, {
                     "ok": False, "error": "autostart must be boolean"})
-            defer_stop = sys.platform == "darwin" and body["autostart"] is False
-            changed = (_set_autostart(body["autostart"], defer_stop=True) if defer_stop
-                       else _set_autostart(body["autostart"]))
+            changed = True if defer_stop else _set_autostart(body["autostart"])
             if changed is False:
                 return self._send_json(200, {
                     "ok": False, "error": "autostart toggle failed"})
-            if defer_stop and changed is True:
-                self._mac_bootout_pending = True
         if "obsidian_vault_path" in body:
             val = body.get("obsidian_vault_path")
             if val is None or val == "":
@@ -16371,7 +16374,11 @@ class Handler(BaseHTTPRequestHandler):
         except OSError as e:
             log.warning("settings write failed: %s", e)
             return self._send_json(200, {"ok": False, "error": "settings write failed"})
-        self._send_json(200, {"ok": True, "settings": _public_settings(data)})
+        settings = _public_settings(data)
+        if defer_stop:
+            self._mac_bootout_pending = True
+            settings["autostart"] = False
+        self._send_json(200, {"ok": True, "settings": settings})
 
     # ---- /settings/test-key ----
     def _handle_settings_test_key(self, body: dict):
@@ -20074,11 +20081,16 @@ def main(*, show_dashboard: bool = False):
             "Click the rust U under any YouTube video to pull context. "
             "Open the dashboard anytime from the magnet-U in your system tray.",
         )
-    if sys.platform == "darwin":
+    if sys.platform == "darwin" and threading.current_thread() is threading.main_thread():
         import signal
         # launchctl bootout and verified uninstall send SIGTERM. Let main return
         # so atexit removes the identity and owned-child lifelines close.
-        signal.signal(signal.SIGTERM, lambda *_: threading.Thread(target=server.shutdown, daemon=True).start())
+        try:
+            signal.signal(signal.SIGTERM, lambda *_: threading.Thread(target=server.shutdown, daemon=True).start())
+        except ValueError:
+            # A subinterpreter also has a main_thread(), but CPython permits
+            # signal handlers only in the main interpreter. Leave it unchanged.
+            pass
     try:
         server.serve_forever()
     except KeyboardInterrupt:

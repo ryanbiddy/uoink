@@ -25,7 +25,7 @@ def app_path(location: Path) -> Path:
     with (location / "Contents/Info.plist").open("rb") as stream:
         if plistlib.load(stream).get("CFBundleIdentifier") != LABEL:
             raise ValueError("The selected app is not Uoink")
-    for relative in ("Frameworks/Python/bin/python3", "Resources/server.py", "Resources/uoink_mcp.py"):
+    for relative in ("MacOS/Uoink", "Frameworks/Python/bin/python3", "Resources/server.py", "Resources/uoink_mcp.py"):
         path = location / "Contents" / relative
         if not path.is_file() or not path.resolve().is_relative_to(location):
             raise ValueError(f"Uoink installation is incomplete: {relative}")
@@ -40,8 +40,7 @@ def plist(app: Path, home: Path) -> dict:
     contents = app_path(app) / "Contents"
     logs = home.resolve() / "Library/Logs/Uoink"
     return {"Label": LABEL,
-            "ProgramArguments": [str(contents / "Frameworks/Python/bin/python3"), "-B", "-s",
-                                 str(contents / "Resources/server.py")],
+            "ProgramArguments": [str(contents / "MacOS/Uoink"), "--helper"],
             "WorkingDirectory": str(contents / "Resources"),
             "RunAtLoad": True, "KeepAlive": False, "ProcessType": "Background",
             "EnvironmentVariables": {"PYTHONDONTWRITEBYTECODE": "1", "PYTHONNOUSERSITE": "1"},
@@ -80,16 +79,47 @@ def status(app: Path, home: Path | None = None) -> dict:
     return {"enabled": enabled, "loaded": loaded(), "path": str(path)}
 
 
-def bootout(app: Path, home: Path | None = None) -> None:
+def owned_agent(app: Path, home: Path) -> dict | None:
+    """Read the on-disk definition before any unload, replacement or removal."""
+    path = agent_path(home)
+    if any(p.is_symlink() for p in (path, *path.parents)):
+        raise ValueError("Refusing a linked LaunchAgent path")
+    if not path.exists():
+        return None
+    try:
+        with path.open("rb") as stream:
+            payload = plistlib.load(stream)
+        args = payload.get("ProgramArguments") if isinstance(payload, dict) else None
+        if (not isinstance(args, list) or not args or not isinstance(args[0], str) or
+                not args[0] or payload.get("Label") != LABEL):
+            raise ValueError("Invalid LaunchAgent definition")
+        program = Path(args[0])
+        if (not program.is_absolute() or not program.resolve(strict=True).is_relative_to(app) or
+                not program.is_file()):
+            raise ValueError("LaunchAgent belongs to another install")
+        # launchd's Program key overrides ProgramArguments[0]. Reject a
+        # conflicting executable even when the argument list looks owned.
+        if "Program" in payload and payload["Program"] != args[0]:
+            raise ValueError("LaunchAgent has a conflicting Program")
+    except (OSError, ValueError, plistlib.InvalidFileException) as exc:
+        raise ValueError(f"Cannot prove LaunchAgent ownership; refusing changes: {exc}") from exc
+    return payload
+
+
+def check_disable(app: Path, home: Path | None = None) -> bool:
+    """Validate both file and loaded service without changing either."""
     home = Path.home() if home is None else home
     app = app_path(app)
+    payload = owned_agent(app, home)
     if loaded():
+        if payload is None:
+            raise ValueError("Loaded LaunchAgent has no owned plist; refusing bootout")
         service = launchctl("print", f"{domain()}/{LABEL}")
         if service.returncode != 0:
             raise OSError("LaunchAgent changed before bootout")
         program = re.search(r"(?m)^\s*program = (.+)$", service.stdout)
-        expected = app / "Contents/Frameworks/Python/bin/python3"
-        if not program or Path(program.group(1).strip()).resolve() != expected.resolve():
+        expected = Path(payload["ProgramArguments"][0]).resolve(strict=True)
+        if not program or Path(program.group(1).strip()).resolve() != expected:
             raise ValueError("Loaded LaunchAgent belongs to another install; refusing bootout")
         pid = re.search(r"(?m)^\s*pid = (\d+)\s*$", service.stdout)
         if pid:
@@ -98,21 +128,46 @@ def bootout(app: Path, home: Path | None = None) -> None:
             if (identity is None or identity.get("pid") != int(pid.group(1)) or
                     _platform.darwin_liveness(identity.get("pid"), identity.get("created_ms"), identity.get("executable")) != "alive"):
                 raise ValueError("Loaded LaunchAgent process ownership is unknown; refusing bootout")
+        return True
+    return False
+
+
+def bootout(app: Path, home: Path | None = None) -> None:
+    if check_disable(app, home):
         result = launchctl("bootout", f"{domain()}/{LABEL}")
         if result.returncode != 0:
             raise OSError(f"launchctl bootout failed ({result.returncode}): {result.stderr.strip()}")
 
 
-def set_enabled(app: Path, enabled: bool, home: Path | None = None, *, unload: bool = True) -> None:
+def disable_after_reply(app: Path) -> None:
+    """Finish a settings disable even if bootout terminates the HTTP helper."""
+    app = app_path(app)
+    if not check_disable(app):
+        set_enabled(app, False)
+        return
+    contents = app / "Contents"
+    env = {key: value for key, value in os.environ.items()
+           if not key.startswith("DYLD_") and key not in {
+               "PYTHONHOME", "PYTHONPATH", "PYTHONSTARTUP", "PYTHONUSERBASE", "PYTHONEXECUTABLE"}}
+    env.update(PYTHONDONTWRITEBYTECODE="1", PYTHONNOUSERSITE="1")
+    # A separate session survives launchd's termination of the service process
+    # group. The child rechecks ownership, boots out, then removes the plist.
+    subprocess.Popen([str(contents / "Frameworks/Python/bin/python3"), "-B", "-s", "-m",
+                      "helper.mac_lifecycle", "disable", str(app)],
+                     cwd=contents / "Resources", env=env, start_new_session=True,
+                     stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
+
+
+def set_enabled(app: Path, enabled: bool, home: Path | None = None) -> None:
     home = Path.home() if home is None else home
+    app = app_path(app)
     path = agent_path(home)
     if any(p.is_symlink() for p in (path, *path.parents)):
         raise ValueError("Refusing a linked LaunchAgent path")
     if not enabled:
-        if unload:
-            bootout(app, home)
-        else:
-            loaded()  # Fail before deleting if the GUI domain cannot be queried.
+        bootout(app, home)
+        # Do not delete a replacement written while launchctl was running.
+        owned_agent(app, home)
         path.unlink(missing_ok=True)
         return
     payload = plist(app, home)
