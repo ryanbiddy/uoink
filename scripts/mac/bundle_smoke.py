@@ -217,7 +217,9 @@ def smoke(app: Path, output: Path) -> None:
             assert len(program) == 2 and program[1] == "--helper", ("launchagent args", program)
             assert same_file(program[0], launcher), ("launchagent program", program, str(launcher))
             assert config["KeepAlive"] is False and config["RunAtLoad"] is True
-            assert Path(config["StandardOutPath"]).is_relative_to(Path(env["HOME"]) / "Library/Logs/Uoink")
+            logs = (Path(env["HOME"]) / "Library/Logs/Uoink").resolve()
+            for key in ("StandardOutPath", "StandardErrorPath"):
+                assert Path(config[key]).resolve().is_relative_to(logs), ("launchagent log path", key, config[key])
             report["launchagent"] = {"generated": True, "bootstrapped": False}
             report["media"] = media_smoke(contents, scratch, env)
             with (output / "helper.txt").open("w") as log:
