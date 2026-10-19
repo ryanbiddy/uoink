@@ -1,0 +1,8 @@
+{
+  "name": "uoink",
+  "owner": {"name": "Ryan Biddy"},
+  "metadata": {"description": "Local Uoink library tools and skills for AI agents."},
+  "plugins": [
+    {"name": "uoink", "source": "./plugins/uoink", "description": "Search, cite, and capture with your local Uoink library."}
+  ]
+}

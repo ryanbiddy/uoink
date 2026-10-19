@@ -5383,7 +5383,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
         },
         description=(
             "Capture an X post and the author's earlier chain as a local corpus "
-            "item. Requires the default-off x_text_capture_enabled setting."
+            "item. Requires x_text_capture_enabled, which defaults on."
         ),
         input_schema=_schema({
             "url": {"type": "string"},
@@ -5792,7 +5792,7 @@ _SCHEMA_COMBINATORS = ("oneOf", "anyOf", "allOf")
 
 
 def client_input_schema(schema: dict) -> dict:
-    """The input schema stdio advertises to MCP clients.
+    """The input schema both stdio and HTTP advertise to MCP clients.
 
     The Anthropic API rejects tool input schemas with oneOf/anyOf/allOf at the
     top level, and Claude Code then shows none of the server's tools. Three

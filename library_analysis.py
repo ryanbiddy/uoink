@@ -21,6 +21,7 @@ import uuid
 from contextlib import contextmanager
 from datetime import date, datetime, timedelta, timezone
 from decimal import Decimal, ROUND_HALF_UP
+from functools import lru_cache
 from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
 import library_resources
@@ -920,6 +921,20 @@ class _EvidenceRows(list):
         if self.limit is None or len(self) < self.limit:
             self.append(build())
 
+    def add_group(self, members: List[dict], build: Any) -> None:
+        """Count an indexed group once; build only the requested prefix."""
+        self.total_rows += len(members)
+        remaining = len(members) if self.limit is None else max(0, self.limit - len(self))
+        for member in members[:remaining]:
+            self.append(build(member))
+
+    def count_without_row(self) -> bool:
+        """Count support beyond the page without preparing its row fields."""
+        if self.limit is not None and len(self) >= self.limit:
+            self.total_rows += 1
+            return True
+        return False
+
 
 def _bind_support(descriptor: dict, rows: Optional[List[dict]]) -> None:
     """Bind exact support/sample counts. Do not attach a summary observation
@@ -1142,6 +1157,13 @@ def _execute_activity(
     clock: Any = None,
     start_time: float,
 ) -> dict:
+    # SQLite values are immutable scalars. Keep typed, bounded caches within
+    # this read so repeated clocks cost one parse without retaining user data
+    # between calls or conflating invalid bools with integer timestamps.
+    stored_iso = lru_cache(maxsize=4096, typed=True)(parse_iso_utc)
+    stored_epoch = lru_cache(maxsize=4096, typed=True)(parse_epoch_ms)
+    formatted_utc = lru_cache(maxsize=4096)(format_canonical_utc)
+
     def _check_deadline() -> Optional[dict]:
         if time.monotonic() - start_time > SERVICE_DEADLINE_SEC:
             return error_envelope("deadline_exceeded", "Service deadline exceeded", retryable=True)
@@ -1173,7 +1195,7 @@ def _execute_activity(
             now_dt = datetime.now(timezone.utc)
     else:
         now_dt = datetime.now(timezone.utc)
-    as_of_str = format_canonical_utc(now_dt)
+    as_of_str = formatted_utc(now_dt)
     as_of_dt = datetime.fromisoformat(as_of_str)
 
     # Validate interval
@@ -1184,8 +1206,8 @@ def _execute_activity(
     if int_err is not None:
         return int_err
 
-    canonical_start = format_canonical_utc(dt_start)
-    canonical_end = format_canonical_utc(dt_end)
+    canonical_start = formatted_utc(dt_start)
+    canonical_end = formatted_utc(dt_end)
     canonical_interval = {"start": canonical_start, "end": canonical_end}
 
     date_basis = "capture_time"
@@ -1368,25 +1390,8 @@ def _execute_activity(
         if dl_err is not None:
             return dl_err
 
-        live_yoinks: List[dict] = []
-        tombstone_yoinks: List[dict] = []
-        for r in all_yoinks:
-            vid, stype, author, channel, platform, y_at, d_at = r
-            row_dict = {
-                "video_id": vid,
-                "source_type": stype or "unknown",
-                "author": author or "",
-                "channel": channel or "",
-                "platform": (platform or "").strip() or "unknown",
-                "raw_yoinked_at": y_at,
-                "raw_deleted_at": d_at,
-            }
-            if d_at is None:
-                live_yoinks.append(row_dict)
-            else:
-                tombstone_yoinks.append(row_dict)
-        live_survivor_ids = {item["video_id"] for item in live_yoinks}
-        tombstone_ids = {item["video_id"] for item in tombstone_yoinks}
+        live_survivor_ids = {r[0] for r in all_yoinks if r[6] is None}
+        tombstone_ids = {r[0] for r in all_yoinks if r[6] is not None}
 
         # Q2a podcast episodes
         c_episodes = conn.execute(
@@ -1976,7 +1981,7 @@ def _execute_activity(
         parsed_items: List[dict] = []
         for item in live_yoinks:
             # Capture time parsing
-            dt_cap, cap_err = parse_iso_utc(item["raw_yoinked_at"])
+            dt_cap, cap_err = stored_iso(item["raw_yoinked_at"])
             if dt_cap is not None:
                 capture_available_count += 1
             else:
@@ -1998,7 +2003,7 @@ def _execute_activity(
             t1_candidates: List[Tuple[datetime, dict]] = []
             t1_reasons: List[str] = []
             for entry in t1:
-                dt_p, r_err = parse_epoch_ms(entry["published_at_ms"])
+                dt_p, r_err = stored_epoch(entry["published_at_ms"])
                 if dt_p is not None:
                     t1_candidates.append((dt_p, entry))
                 else:
@@ -2032,7 +2037,7 @@ def _execute_activity(
                                     "table": "podcast_episodes",
                                     "source_key": t2_entry["id"],
                                     "original_clock_encoding": str(t2_entry["published_at"]),
-                                    "normalized_instant": format_canonical_utc(t2_dt),
+                                    "normalized_instant": formatted_utc(t2_dt),
                                     "observation_hash": hashlib.sha256(
                                         f"ep_{t2_entry['id']}_{t2_entry['published_at']}".encode("utf-8")
                                     ).hexdigest(),
@@ -2045,7 +2050,7 @@ def _execute_activity(
                             "source_table": "source_items",
                             "source_key": entry["item_id"],
                             "original_clock_encoding": str(entry["published_at_ms"]),
-                            "normalized_instant": format_canonical_utc(dt_p),
+                            "normalized_instant": formatted_utc(dt_p),
                             "encoding": "adapter_normalized",
                             "observation_hash": canonical_json_hash({
                                 "item_id": entry["item_id"],
@@ -2072,7 +2077,7 @@ def _execute_activity(
                                 "source_table": "podcast_episodes",
                                 "source_key": str(entry["id"]),
                                 "original_clock_encoding": str(entry["published_at"]),
-                                "normalized_instant": format_canonical_utc(dt_p),
+                                "normalized_instant": formatted_utc(dt_p),
                                 "encoding": "direct_episode_parse",
                                 "observation_hash": canonical_json_hash({
                                     "id": entry["id"],
@@ -2109,7 +2114,7 @@ def _execute_activity(
         tombstones_in_interval = 0
         tombstones_unlocated = 0
         for item in tombstone_yoinks:
-            dt_cap, cap_err = parse_iso_utc(item["raw_yoinked_at"])
+            dt_cap, cap_err = stored_iso(item["raw_yoinked_at"])
             item["capture_dt"] = dt_cap
             item["capture_err"] = cap_err
             if dt_cap is not None:
@@ -2149,7 +2154,7 @@ def _execute_activity(
 
         daily_buckets = _build_daily_buckets(dt_start, dt_end)
         daily_counts: Dict[Tuple[str, str], int] = {
-            (format_canonical_utc(b[0]), format_canonical_utc(b[1])): 0 for b in daily_buckets
+            (formatted_utc(b[0]), formatted_utc(b[1])): 0 for b in daily_buckets
         }
 
         for item in selected_items:
@@ -2175,7 +2180,7 @@ def _execute_activity(
             assert target_dt is not None
             for b_start, b_end in daily_buckets:
                 if b_start <= target_dt < b_end:
-                    k = (format_canonical_utc(b_start), format_canonical_utc(b_end))
+                    k = (formatted_utc(b_start), formatted_utc(b_end))
                     daily_counts[k] += 1
                     break
 
@@ -2478,8 +2483,8 @@ def _execute_activity(
             ls_ms = s[6]
             st = s[7]
 
-            dt_fs, err_fs = parse_epoch_ms(fs_ms)
-            dt_ls, err_ls = parse_epoch_ms(ls_ms)
+            dt_fs, err_fs = stored_epoch(fs_ms)
+            dt_ls, err_ls = stored_epoch(ls_ms)
             if fs_ms is not None and fs_ms != 0 and dt_fs is None:
                 sources_unavailable_count += 1
                 source_invalid_obs[s_id] = source_invalid_obs.get(s_id, 0) + 1
@@ -2541,14 +2546,14 @@ def _execute_activity(
 
                 fs_list = source_first_seen_ms.get(s_id, [])
                 ls_list = source_last_seen_ms.get(s_id, [])
-                first_obs_dt = parse_epoch_ms(min(fs_list))[0] if fs_list else None
-                last_obs_dt = parse_epoch_ms(max(ls_list))[0] if ls_list else None
+                first_obs_dt = stored_epoch(min(fs_list))[0] if fs_list else None
+                last_obs_dt = stored_epoch(max(ls_list))[0] if ls_list else None
                 obs_no_history = new_obs_count == 0 and (first_obs_dt is None or first_obs_dt >= dt_end)
                 src_cov_id = f"cov_source_{s_id}"
                 src_invalid = source_invalid_obs.get(s_id, 0)
                 src_span_dts: List[datetime] = []
                 for ms in fs_list + ls_list:
-                    dt_obs, _ = parse_epoch_ms(ms)
+                    dt_obs, _ = stored_epoch(ms)
                     if dt_obs is not None:
                         src_span_dts.append(dt_obs)
                 src_earliest = min(src_span_dts) if src_span_dts else None
@@ -2563,8 +2568,8 @@ def _execute_activity(
                     "clock": "observation_time",
                     "requested_interval": canonical_interval,
                     "coverage_status": src_cov_status,
-                    "earliest_retained_timestamp": format_canonical_utc(src_earliest) if src_earliest else None,
-                    "latest_retained_timestamp": format_canonical_utc(src_latest) if src_latest else None,
+                    "earliest_retained_timestamp": formatted_utc(src_earliest) if src_earliest else None,
+                    "latest_retained_timestamp": formatted_utc(src_latest) if src_latest else None,
                 }
                 if src_invalid:
                     src_cov_rec["exclusions"] = {"invalid_observation_timestamp": src_invalid}
@@ -2608,11 +2613,11 @@ def _execute_activity(
                         for st, c in state_counts.items()
                     },
                     "observation_window": {
-                        "first_observed_at": format_canonical_utc(first_obs_dt) if first_obs_dt else None,
-                        "last_item_seen_at": format_canonical_utc(last_obs_dt) if last_obs_dt else None,
-                        "enrollment_at": format_canonical_utc(parse_epoch_ms(created_ms)[0]) if parse_epoch_ms(created_ms)[0] else None,
-                        "last_poll_attempt": format_canonical_utc(parse_epoch_ms(cur_info.get("last_poll_attempt_ms"))[0]) if parse_epoch_ms(cur_info.get("last_poll_attempt_ms"))[0] else None,
-                        "last_poll_success": format_canonical_utc(parse_epoch_ms(cur_info.get("last_poll_success_ms"))[0]) if parse_epoch_ms(cur_info.get("last_poll_success_ms"))[0] else None,
+                        "first_observed_at": formatted_utc(first_obs_dt) if first_obs_dt else None,
+                        "last_item_seen_at": formatted_utc(last_obs_dt) if last_obs_dt else None,
+                        "enrollment_at": formatted_utc(stored_epoch(created_ms)[0]) if stored_epoch(created_ms)[0] else None,
+                        "last_poll_attempt": formatted_utc(stored_epoch(cur_info.get("last_poll_attempt_ms"))[0]) if stored_epoch(cur_info.get("last_poll_attempt_ms"))[0] else None,
+                        "last_poll_success": formatted_utc(stored_epoch(cur_info.get("last_poll_success_ms"))[0]) if stored_epoch(cur_info.get("last_poll_success_ms"))[0] else None,
                         "cursor_coverage": f"latest enumeration at as_of: {cur_info.get('coverage', 'unknown')}",
                         "cursor_observed_count": cur_info.get("observed_count", 0),
                         "cursor_truncated": bool(cur_info.get("truncated", 0)),
@@ -2657,12 +2662,12 @@ def _execute_activity(
                 "display_name": display_hint,
                 "captures_in_interval": _count_metric(f"sources.hint.{h_hash}.captures", len(group_items), "saved_items", "scope_source_captures"),
                 "retained_capture_span": {
-                    "earliest_captured_at": format_canonical_utc(min_cap) if min_cap else None,
-                    "latest_captured_at": format_canonical_utc(max_cap) if max_cap else None,
+                    "earliest_captured_at": formatted_utc(min_cap) if min_cap else None,
+                    "latest_captured_at": formatted_utc(max_cap) if max_cap else None,
                 },
                 "capture_span": {
-                    "earliest_captured_at": format_canonical_utc(min_cap) if min_cap else None,
-                    "latest_captured_at": format_canonical_utc(max_cap) if max_cap else None,
+                    "earliest_captured_at": formatted_utc(min_cap) if min_cap else None,
+                    "latest_captured_at": formatted_utc(max_cap) if max_cap else None,
                 },
             })
 
@@ -2732,7 +2737,7 @@ def _execute_activity(
             combined_events.append({
                 "event_id": f"item_{item['video_id']}",
                 "kind": "capture" if date_basis == "capture_time" else "publication",
-                "time": format_canonical_utc(dt_ev),
+                "time": formatted_utc(dt_ev),
                 "time_dt": dt_ev,
                 "operation_sequence": -1,
                 "stable_id": item["video_id"],
@@ -2751,7 +2756,7 @@ def _execute_activity(
             combined_events.append({
                 "event_id": f"apply_{app['apply_id']}",
                 "kind": app["kind"],
-                "time": format_canonical_utc(dt_ev),
+                "time": formatted_utc(dt_ev),
                 "time_dt": dt_ev,
                 "operation_sequence": app["operation_sequence"],
                 "stable_id": app["apply_id"],
@@ -2772,7 +2777,7 @@ def _execute_activity(
                 combined_events.append({
                     "event_id": f"tax_{sv[0]}",
                     "kind": "taxonomy_version",
-                    "time": format_canonical_utc(dt_sv),
+                    "time": formatted_utc(dt_sv),
                     "time_dt": dt_sv,
                     "operation_sequence": -1,
                     "stable_id": sv[0],
@@ -2790,7 +2795,7 @@ def _execute_activity(
                 combined_events.append({
                     "event_id": f"run_{r[0]}",
                     "kind": "run",
-                    "time": format_canonical_utc(dt_r),
+                    "time": formatted_utc(dt_r),
                     "time_dt": dt_r,
                     "operation_sequence": -1,
                     "stable_id": r[0],
@@ -3036,7 +3041,7 @@ def _execute_activity(
         obs_span_dts: List[datetime] = []
         for ms_list in list(source_first_seen_ms.values()) + list(source_last_seen_ms.values()):
             for ms in ms_list:
-                dt_obs, _ = parse_epoch_ms(ms)
+                dt_obs, _ = stored_epoch(ms)
                 if dt_obs is not None:
                     obs_span_dts.append(dt_obs)
         earliest_obs = min(obs_span_dts) if obs_span_dts else None
@@ -3073,24 +3078,24 @@ def _execute_activity(
                 "clock": "capture_time",
                 "requested_interval": canonical_interval,
                 "coverage_status": cap_cov_status,
-                "earliest_retained_timestamp": format_canonical_utc(earliest_cap) if earliest_cap else None,
-                "latest_retained_timestamp": format_canonical_utc(latest_cap) if latest_cap else None,
+                "earliest_retained_timestamp": formatted_utc(earliest_cap) if earliest_cap else None,
+                "latest_retained_timestamp": formatted_utc(latest_cap) if latest_cap else None,
                 "exclusions": {"capture_time_unavailable": capture_unavailable_count},
             },
             "cov_publication": {
                 "clock": "publication_time",
                 "requested_interval": canonical_interval,
                 "coverage_status": pub_cov_status,
-                "earliest_retained_timestamp": format_canonical_utc(earliest_pub) if earliest_pub else None,
-                "latest_retained_timestamp": format_canonical_utc(latest_pub) if latest_pub else None,
+                "earliest_retained_timestamp": formatted_utc(earliest_pub) if earliest_pub else None,
+                "latest_retained_timestamp": formatted_utc(latest_pub) if latest_pub else None,
                 "exclusions": pub_unavailable_by_reason,
             },
             "cov_shelf_activity": {
                 "clock": "applied_journal_time",
                 "requested_interval": canonical_interval,
                 "coverage_status": "journal_complete" if baseline_proved else ("no_history" if total_applies_count == 0 or (first_apply_dt is not None and dt_end <= first_apply_dt) else "partial"),
-                "earliest_retained_timestamp": format_canonical_utc(earliest_apply_dt) if earliest_apply_dt else None,
-                "latest_retained_timestamp": format_canonical_utc(latest_apply_dt) if latest_apply_dt else None,
+                "earliest_retained_timestamp": formatted_utc(earliest_apply_dt) if earliest_apply_dt else None,
+                "latest_retained_timestamp": formatted_utc(latest_apply_dt) if latest_apply_dt else None,
                 "reasons": [baseline_reason] if baseline_reason else [],
                 "exclusions": {"invalid_apply_timestamp": invalid_apply_date_count} if invalid_apply_date_count > 0 else {},
             },
@@ -3105,16 +3110,16 @@ def _execute_activity(
                 "clock": "observation_time",
                 "requested_interval": canonical_interval,
                 "coverage_status": sources_cov_status,
-                "earliest_retained_timestamp": format_canonical_utc(earliest_obs) if earliest_obs else None,
-                "latest_retained_timestamp": format_canonical_utc(latest_obs) if latest_obs else None,
+                "earliest_retained_timestamp": formatted_utc(earliest_obs) if earliest_obs else None,
+                "latest_retained_timestamp": formatted_utc(latest_obs) if latest_obs else None,
                 "exclusions": {"invalid_observation_timestamp": sources_unavailable_count} if sources_unavailable_count else {},
             },
             "cov_revisions": {
                 "clock": "creation_time",
                 "requested_interval": canonical_interval,
                 "coverage_status": rev_cov_status,
-                "earliest_retained_timestamp": format_canonical_utc(earliest_rev) if earliest_rev else None,
-                "latest_retained_timestamp": format_canonical_utc(latest_rev) if latest_rev else None,
+                "earliest_retained_timestamp": formatted_utc(earliest_rev) if earliest_rev else None,
+                "latest_retained_timestamp": formatted_utc(latest_rev) if latest_rev else None,
             },
         }
         if invalid_revision_count:
@@ -3250,13 +3255,14 @@ def _execute_activity(
         _register_metric_tree(events_family)
 
         daily_buckets_map = {
-            hashlib.sha256(f"{format_canonical_utc(b[0])}_{format_canonical_utc(b[1])}".encode("utf-8")).hexdigest()[:16]: (b[0], b[1])
+            hashlib.sha256(f"{formatted_utc(b[0])}_{formatted_utc(b[1])}".encode("utf-8")).hexdigest()[:16]: (b[0], b[1])
             for b in daily_buckets
         }
 
         # Group index: one pass over the selected items so per-bucket, per-type
         # and per-hint lookups are O(group) rather than O(items) per metric.
         group_index = _build_item_group_index(selected_items, daily_buckets, date_basis)
+        group_index["live_vid_set"] = live_survivor_ids
 
         def _rows_for(m_id: str, row_limit: Optional[int] = None) -> Optional[_EvidenceRows]:
             return _lookup_evidence(
@@ -3629,6 +3635,8 @@ def _build_item_group_index(selected_items: List[dict], daily_buckets: List[Tupl
     by_creator: Dict[str, List[dict]] = {}
     by_joint: Dict[str, List[dict]] = {}
     by_bucket: Dict[str, List[dict]] = {}
+    creator_hashes: Dict[tuple, str] = {}
+    joint_hashes: Dict[tuple, str] = {}
     bucket_keys = [
         (b_start, b_end, hashlib.sha256(f"{format_canonical_utc(b_start)}_{format_canonical_utc(b_end)}".encode("utf-8")).hexdigest()[:16])
         for b_start, b_end in daily_buckets
@@ -3637,9 +3645,17 @@ def _build_item_group_index(selected_items: List[dict], daily_buckets: List[Tupl
         stype = item["source_type"] if item["source_type"] in CANONICAL_SOURCE_TYPES else "unknown"
         by_type.setdefault(stype, []).append(item)
         platform, c_field, c_val = _creator_hint_key(item)
-        k_hash = hashlib.sha256(json.dumps([platform, c_field, c_val], ensure_ascii=False).encode("utf-8")).hexdigest()
+        creator_key = (platform, c_field, c_val)
+        k_hash = creator_hashes.get(creator_key)
+        if k_hash is None:
+            k_hash = hashlib.sha256(json.dumps(creator_key, ensure_ascii=False).encode("utf-8")).hexdigest()
+            creator_hashes[creator_key] = k_hash
         by_creator.setdefault(k_hash, []).append(item)
-        j_hash = hashlib.sha256(json.dumps([stype, platform, c_field, c_val], ensure_ascii=False).encode("utf-8")).hexdigest()
+        joint_key = (stype, platform, c_field, c_val)
+        j_hash = joint_hashes.get(joint_key)
+        if j_hash is None:
+            j_hash = hashlib.sha256(json.dumps(joint_key, ensure_ascii=False).encode("utf-8")).hexdigest()
+            joint_hashes[joint_key] = j_hash
         by_joint.setdefault(j_hash, []).append(item)
         target_dt = item["capture_dt"] if date_basis == "capture_time" else item["pub_dt"]
         if target_dt is not None:
@@ -3835,8 +3851,7 @@ def _lookup_evidence(
 
     # 1. items.total
     if metric_id == "items.total":
-        for item in selected_items:
-            rows.add(lambda:_selected_observation_row(item, date_basis))
+        rows.add_group(selected_items, lambda item: _selected_observation_row(item, date_basis))
         return rows
 
     # 2. Availability and exclusion metrics
@@ -3908,6 +3923,8 @@ def _lookup_evidence(
                 continue
             reason = item.get("pub_reason") or "missing_unindexed"
             if reason_filter is not None and reason != reason_filter:
+                continue
+            if rows.count_without_row():
                 continue
             candidates = item.get("pub_conflict_candidates") or []
             details = {
@@ -3994,8 +4011,7 @@ def _lookup_evidence(
                     item for item in selected_items
                     if ((item["source_type"] == stype) if stype in CANONICAL_SOURCE_TYPES else (item["source_type"] not in CANONICAL_SOURCE_TYPES))
                 ]
-            for item in members:
-                rows.add(lambda:_selected_observation_row(item, date_basis))
+            rows.add_group(members, lambda item: _selected_observation_row(item, date_basis))
             return rows
 
     # 4. Creator hints
@@ -4027,8 +4043,7 @@ def _lookup_evidence(
                 }
                 return row
 
-            for item in members:
-                rows.add(lambda: _creator_row(item))
+            rows.add_group(members, _creator_row)
             return rows
 
     # 5. Joint type + creator hints
@@ -4063,8 +4078,7 @@ def _lookup_evidence(
                 }
                 return row
 
-            for item in members:
-                rows.add(lambda: _joint_row(item))
+            rows.add_group(members, _joint_row)
             return rows
 
     # 6. Daily buckets
@@ -4083,12 +4097,12 @@ def _lookup_evidence(
                         assert target_dt is not None
                         if b_start <= target_dt < b_end:
                             members.append(item)
-                for item in members:
-                    rows.add(lambda:_selected_observation_row(item, date_basis))
+                rows.add_group(members, lambda item: _selected_observation_row(item, date_basis))
                 return rows
 
     # 7. Shelf activity
-    live_vid_set = {it["video_id"] for it in live_yoinks}
+    live_vid_set = (group_index["live_vid_set"] if group_index is not None and "live_vid_set" in group_index
+                    else {it["video_id"] for it in live_yoinks})
 
     def _apply_row(app: dict, s_id: Optional[str] = None) -> dict:
         """Applied-journal evidence: operation identity, revisions, undo binding,
@@ -4178,6 +4192,8 @@ def _lookup_evidence(
     if metric_id == "shelf_activity.current_memberships":
         for r in all_item_shelves:
             if r[0] in live_vid_set:
+                if rows.count_without_row():
+                    continue
                 vid, s_id = r[0], r[1]
                 assigned_at = r[9]
                 dt_a = parse_iso_utc(assigned_at)[0] if assigned_at else as_of_dt
@@ -4204,6 +4220,8 @@ def _lookup_evidence(
             if metric_kind == "current_size":
                 for r in all_item_shelves:
                     if r[1] == s_id and r[0] in live_vid_set:
+                        if rows.count_without_row():
+                            continue
                         vid = r[0]
                         assigned_at = r[9]
                         dt_a = parse_iso_utc(assigned_at)[0] if assigned_at else as_of_dt
@@ -4394,6 +4412,8 @@ def _lookup_evidence(
                 e_id = o[2]
                 if e_id not in seen_entries:
                     seen_entries.add(e_id)
+                    if rows.count_without_row():
+                        continue
                     dt_fs, _ = parse_epoch_ms(o[5])
                     rows.add(lambda:{
                         "row_id": e_id,
@@ -4424,6 +4444,8 @@ def _lookup_evidence(
                 if e_id in seen_entries:
                     continue
                 seen_entries.add(e_id)
+                if rows.count_without_row():
+                    continue
                 dt_fs, _ = parse_epoch_ms(o[5])
                 rows.add(lambda:{
                     "row_id": e_id,

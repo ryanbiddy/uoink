@@ -15,6 +15,23 @@ The helper is the stdlib-only HTTP server in `server.py`, bound to
 
 ---
 
+## MCP tool schemas (3.10.0)
+
+`POST /mcp/v1` with `tools/list` and `POST /mcp/v1/tools/list` advertise the
+same full name, description and input-schema list as default stdio. Both
+transports use `client_input_schema` to flatten the top-level `oneOf` in
+`claim_library_work`, `apply_reshelving` and `set_source_consent`. Calls still
+validate against the exact frozen schemas and keep their existing refusals.
+
+`GET /mcp/v1/sse` points clients at `/mcp/v1`, so it uses that same listing.
+`GET /mcp/v1/config` contains connection settings only, with no tool schemas.
+OpenAPI and `/sources/schema` describe the frozen contracts and keep `oneOf`.
+The public discovery manifests (`/.well-known/uoink-mcp.json` and
+`/developers/manifest`) contain endpoints and counts, with no input schemas.
+The `.mcpb` manifest lists names and descriptions; its launched stdio server
+supplies the flattened input schemas at runtime. Contract documents also keep
+the frozen schemas.
+
 ## GET /open-extension (token-gated)
 
 **What it does.** Pops the OS file manager with the bundled browser-extension

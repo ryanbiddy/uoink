@@ -1,8 +1,8 @@
-"""Cross-file source-build version contract for v3.9.2.
+"""Cross-file source-build version contract for v3.10.0.
 
 Run: python -m pytest tests/test_release_version_v380.py
 
-The installer, GitHub release and uoink.app go live with v3.9.2. Download pointers are
+The installer, GitHub release and uoink.app go live with v3.10.0. Download pointers are
 guarded separately by test_installer_download_accuracy.py.
 """
 from __future__ import annotations
@@ -11,9 +11,10 @@ import json
 import re
 from pathlib import Path
 
+import pytest
 
 ROOT = Path(__file__).resolve().parent.parent
-EXPECTED = "3.9.2"
+EXPECTED = "3.10.0"
 
 
 def match(path: str, pattern: str) -> str:
@@ -49,6 +50,12 @@ def test_release_version():
     values = collect()
     bad = {path: value for path, value in values.items() if value != EXPECTED}
     assert not bad, f"release version drift: {bad}"
+
+
+@pytest.mark.parametrize("path", ["CHANGELOG.md", "docs/release/RELEASE-NOTES-3.10.0.md"])
+def test_release_has_no_orchestrator_placeholders(path):
+    text = (ROOT / path).read_text(encoding="utf-8")
+    assert "TODO-ORCH" not in text, f"{path}: replace TODO-ORCH with confirmed client test results before release"
 
 
 def main() -> int:

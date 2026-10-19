@@ -5674,13 +5674,20 @@
                 <span class="soft-note">Uoink will offer one-click setup for clients already on this machine.</span>
               </div>
               <div class="setting-feedback"><span class="setting-status" id="settingsAgentSetupCardSaveStatus" role="status" aria-live="polite" aria-atomic="true"></span><button class="button ghost setting-retry hidden" id="settingsAgentSetupCardSaveRetry" type="button" data-setting-retry="settingsAgentSetupCard">Retry save</button></div>
+              <div class="inline-row">
+                <button class="button" type="button" id="addToCursor" disabled aria-describedby="mcpInstallStatus">Add to Cursor</button>
+                <button class="button ghost" type="button" id="addToVscode" disabled aria-describedby="mcpInstallStatus">Add to VS Code</button>
+              </div>
+              <p class="setting-copy" id="mcpInstallStatus" role="status" aria-live="polite">Loading local install links...</p>
               <details>
                 <summary>Advanced: connection JSON</summary>
                 <label for="mcpClient">Connection format</label>
                 <select class="field" id="mcpClient">
-                  <option value="claude">Claude Desktop / Cursor</option>
-                  <option value="chatgpt">ChatGPT</option>
-                  <option value="http">HTTP</option>
+                  <option value="claude">Claude Desktop</option>
+                  <option value="cursor">Cursor</option>
+                  <option value="vscode">VS Code</option>
+                  <option value="stdio">Generic stdio</option>
+                  <option value="http">HTTP (local clients)</option>
                 </select>
                 <textarea class="mono-box" id="mcpConfig" aria-label="Agent connection JSON" readonly aria-describedby="mcpConfigSaveStatus">Loading agent connection...</textarea>
               <div class="setting-feedback"><span class="setting-status" id="mcpConfigSaveStatus" role="status" aria-live="polite" aria-atomic="true"></span><button class="button ghost setting-retry hidden" id="mcpConfigSaveRetry" type="button" data-setting-retry="mcpConfig">Retry save</button></div>
@@ -15380,6 +15387,7 @@
     let settingsWriteQueue = Promise.resolve();
     let settingsReadVersion = 0;
     let settingsMcpConfig = null;
+    let settingsMcpCursor = null;
     let settingsMcpHttp = null;
     let aiPricing = null;
     let aiPricingError = "";
@@ -15733,16 +15741,47 @@
     }
 
     async function loadSettingsMcp() {
+      setMcpInstallLinks({});
       try {
         const cfg = await settingsRequest("/settings/mcp-config");
         const transport = await settingsRequest("/mcp/v1/config");
         settingsMcpHttp = transport.http;
+        setMcpInstallLinks(transport.install_links || {});
         const payload = cfg.mcp_config || cfg;
         settingsMcpConfig = payload.claude_desktop || payload;
+        settingsMcpCursor = payload.cursor || settingsMcpConfig;
         renderSettingsMcp();
       } catch (err) {
+        setMcpInstallLinks({});
+        document.getElementById("mcpInstallStatus").textContent = "Could not load install links. Reload Settings to try again.";
         els.mcpConfig.value = "";
         setSettingFeedback("mcpConfig", `Could not load: ${settingError(err)}`, "error", loadSettingsMcp);
+      }
+    }
+
+    const mcpInstallTargets = { cursor: "addToCursor", vscode: "addToVscode" };
+    let mcpInstallLinks = {};
+    function setMcpInstallLinks(links) {
+      mcpInstallLinks = {};
+      for (const [client, id] of Object.entries(mcpInstallTargets)) {
+        const prefix = client === "cursor" ? "cursor://anysphere.cursor-deeplink/mcp/install?" : "vscode:mcp/install?";
+        const link = links[client];
+        if (typeof link === "string" && link.startsWith(prefix) && !/[\r\n]/.test(link)) mcpInstallLinks[client] = link;
+        document.getElementById(id).disabled = !mcpInstallLinks[client];
+      }
+      document.getElementById("mcpInstallStatus").textContent = Object.keys(mcpInstallLinks).length
+        ? "Opens the client to review this local stdio connection. Not yet tested in these clients."
+        : "Install links are unavailable. Use the connection JSON below.";
+    }
+
+    function openMcpInstall(client) {
+      const link = mcpInstallLinks[client];
+      if (!link) return;
+      try {
+        window.location.href = link;
+        document.getElementById("mcpInstallStatus").textContent = "Install link opened. Review it in the client; Uoink cannot confirm installation.";
+      } catch (err) {
+        document.getElementById("mcpInstallStatus").textContent = "Could not open the client. Use the connection JSON or uoink connect --deeplink.";
       }
     }
 
@@ -15751,7 +15790,9 @@
       const format = document.getElementById("mcpClient").value;
       const server = settingsMcpConfig.mcpServers && settingsMcpConfig.mcpServers.uoink;
       let snippet = settingsMcpConfig;
-      if (format === "chatgpt" && server) snippet = { name: "uoink", transport: "stdio", ...server };
+      if (format === "cursor") snippet = settingsMcpCursor;
+      if (format === "vscode" && server) snippet = { servers: { uoink: { type: "stdio", ...server } } };
+      if (format === "stdio" && server) snippet = { name: "uoink", transport: "stdio", ...server };
       if (format === "http") snippet = { url: settingsMcpHttp.url, headers: { [settingsMcpHttp.auth_header || "X-Uoink-Token"]: state.token || "<token>" } };
       els.mcpConfig.value = JSON.stringify(snippet, null, 2);
       setSettingFeedback("mcpConfig", "Ready to copy.");
@@ -15968,6 +16009,9 @@
         }, data => renderTasteAnchors(data.anchors || {}));
       });
       document.getElementById("mcpClient").addEventListener("change", renderSettingsMcp);
+      for (const [client, id] of Object.entries(mcpInstallTargets)) {
+        document.getElementById(id).addEventListener("click", () => openMcpInstall(client));
+      }
       // Mirror activation is a consent action, not a preference write. Preserve
       // its preview + explicit enable contract and protect a draft on reload.
       for (const id of ["libraryMirrorDestination", "libraryMirrorScope", "libraryMirrorAllowlist"]) {

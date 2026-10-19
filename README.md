@@ -42,9 +42,23 @@ Published sources are indexed in one local library. Podcast audio and transcript
 The stdio transport is tested with **Claude Desktop and Cursor**. Cline and Continue are standard-stdio compatibility paths, not individually smoke-tested.
 
 - **stdio** defaults to all 91 registry tools. Set `UOINK_MCP_TOOLSET=core` in the client's environment for the previous 35 tools. Cursor and other clients with tool caps may need this setting. Restart the connection after changing it.
-- **HTTP JSON-RPC** at `/mcp/v1` exposes the same 91-tool registry through the token-authenticated local helper. Both transports share handlers and input schemas; stdio flattens three top-level `oneOf` schemas so Claude Code can load them, and validation is unchanged.
+- **HTTP JSON-RPC** at `/mcp/v1` exposes the same 91-tool registry through the token-authenticated local helper. Both MCP transports share handlers and flatten the same three top-level `oneOf` input schemas for client compatibility. The server still validates the exact frozen schemas.
 
 **3. OpenAPI bridge (for local agents that don't speak MCP)** — Local OpenAPI-capable agents and scripts can drive the same tools over an OpenAPI 3.1 surface at `/openapi/v1/spec.json` + `POST /tools/<name>`.
+
+### Use Uoink from any AI agent
+
+After installing, open a new terminal and run `uoink status` or
+`uoink search "working memory" --limit 5`. The installer's checked PATH option
+makes `uoink` available to agents with a local shell. `uoink connect <client>`
+prints connection instructions for MCP clients.
+
+The [portable skill](skills/uoink/SKILL.md) supports Claude Code, Codex, pi,
+Hermes Agent, and OpenClaw through MCP or the CLI. The Claude Code marketplace
+at [ryanbiddy/uoink-agent-kit](https://github.com/ryanbiddy/uoink-agent-kit),
+published with this release, bundles the skill and MCP config. See
+[Connect your agent](docs/connect-your-agent.md) for commands and client limits,
+or [agent installation steps](llms-install.md) for installation from a shell.
 
 ### MCP setup (Claude Desktop, Cursor, Cline)
 
@@ -69,11 +83,11 @@ After installing Uoink, open the setup page from the extension popup's **Setting
 
 ### Uoink Operator Skill
 
-Uoink ships a portable Skill at `skills/uoink/SKILL.md` (installed to `%LOCALAPPDATA%\Uoink\skills\uoink\`) that gives MCP-capable agents the operating frame for Uoink corpora: timestamp-citation discipline, decode-don't-dunk analysis, and the Uoink Hook Type taxonomy. Clients that support Agent Skills can load the same file alongside Uoink's MCP tools.
+Uoink ships a portable Skill at `skills/uoink/SKILL.md` (installed to `%LOCALAPPDATA%\Uoink\skills\uoink\`) for finding saved evidence, citing timestamps, capturing URLs, saving notes, and writing from the user's sources and voice. Clients that support Agent Skills can load the same file alongside Uoink's MCP tools or use its exact CLI commands. See [Connect your agent](docs/connect-your-agent.md) for install paths and the small Claude Code plugin kit.
 
 ## Install
 
-1. **Download the installer.** Download `Uoink-Setup-3.9.2.exe` from the [v3.9.2 release](https://github.com/ryanbiddy/uoink/releases/tag/v3.9.2). Windows 10/11 only — there is no Mac build today. The installer is unsigned: if SmartScreen shows "Windows protected your PC", choose **More info → Run anyway**, and check the file against the SHA-256 listed on the release page.
+1. **Download the installer.** Download `Uoink-Setup-3.10.0.exe` from the [v3.10.0 release](https://github.com/ryanbiddy/uoink/releases/tag/v3.10.0). Windows 10/11 only. There is no Mac build today. The installer is unsigned: if SmartScreen shows "Windows protected your PC", choose **More info -> Run anyway**, and check the file against the SHA-256 listed on the release page.
 2. **Run it.** Defaults install to `%LOCALAPPDATA%\Uoink\` (no admin required). The finish page can launch the helper immediately, and an autostart entry runs it on each login.
 3. **Load the bundled extension.** On first launch, Uoink shows a one-time setup splash. Use it to open your browser's extensions page and copy the installed extension path; then enable Developer mode, click **Load unpacked**, and select that folder. (The Chrome Web Store listing is pending; sideload is the current path.)
 

@@ -138,6 +138,16 @@ foreach ($taskKey in $taskBefore.registry.Keys) {
 if ($taskBefore.ordinary_autorun_hash -ne $taskAfter.ordinary_autorun_hash -or ($taskBefore.ordinary_shortcut_hashes | ConvertTo-Json -Compress) -ne ($taskAfter.ordinary_shortcut_hashes | ConvertTo-Json -Compress)) { throw 'Ordinary autorun/shortcuts changed.' }
 $taskInstalledMarker=Get-Content -LiteralPath (Join-Path $taskApp 'isolated-install.json') -Raw | ConvertFrom-Json
 if ($taskInstalledMarker.mode -ne 'isolated' -or $taskInstalledMarker.app_dir -ine $taskApp -or $taskInstalledMarker.profile -ine $taskProfile -or $taskInstalledMarker.port -ne $taskPort) { throw 'New installed marker differs.' }
+# The installer skips User PATH entirely under /ISOLATED=1, independent of
+# /TASKS="" above. Invoke the installed launcher by absolute path, never PATH.
+$taskAgentCli = Join-Path $taskApp 'cli\uoink.cmd'
+if (-not (Test-Path -LiteralPath $taskAgentCli -PathType Leaf)) { throw 'Installed agent launcher is missing.' }
+$taskCliError = Join-Path $taskRoot ($Stage + '.cli-stderr.txt')
+$taskCliRaw = & $taskAgentCli --isolated-from-install-dir $taskApp status 2> $taskCliError
+$taskCliExit = $LASTEXITCODE
+$taskCliStatus = ($taskCliRaw -join "`n") | ConvertFrom-Json
+if ($taskCliExit -ne 0 -or $taskCliStatus.ok -ne $true -or $taskCliStatus.data_dir -ine $taskProfile) { throw 'Agent CLI status did not use the isolated profile.' }
+Write-Receipt (Join-Path $taskRoot ($Stage + '.cli-status.json')) $taskCliStatus
 $taskInstalledLocation=Get-ItemPropertyValue -LiteralPath $taskIsoKey -Name InstallLocation
 if ($taskInstalledLocation.TrimEnd('\') -ine $taskApp) { throw 'Isolated uninstall location differs.' }
 if (-not (Test-Path -LiteralPath $taskGroupPath -PathType Container)) { throw 'Isolated shortcut group is missing.' }
