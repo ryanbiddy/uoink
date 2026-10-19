@@ -48,7 +48,10 @@ no authority.
 Paid Anthropic generation still requires the explicit generation request and
 saved key. Whisper downloads still require approval. Rate limits, private-network
 fetch checks, path confinement and service error scrubbing use the same handlers.
-Capture and model calls run in workers so other stdio requests can proceed.
+Registry tools run one at a time on the stdio event loop, as in v3.9.1, because they share
+the Index connection with Library reads; a long capture or model call holds the session
+until it returns. Paid discovery runs in a worker thread so other requests and cancellation
+still answer.
 The existing bounded Library tools keep their two-second deadline, response
 budget and AZ-5h admission lifetime through final JSON-RPC serialization.
 Only the server-generated tool inventory has a larger 256 KiB frame cap so all

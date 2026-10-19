@@ -8,8 +8,9 @@ MCP clients launch this process and speak JSON-RPC over stdin/stdout. Keep
 stdout reserved for the protocol; server.py logging is redirected to stderr
 while importing the backend.
 
-The default full toolset serves all 91 tools in TOOL_REGISTRY, with identical
-names, descriptions, schemas, titles and annotations. UOINK_MCP_TOOLSET=core
+The default full toolset serves all 91 tools in TOOL_REGISTRY, with the same
+names, descriptions, schemas, titles and annotations; three schemas with a
+top-level oneOf are flattened for client compatibility (client_input_schema). UOINK_MCP_TOOLSET=core
 serves the previous 35 tools. Those tools remain first, in their original
 order, in full mode. Unknown toolset values warn on stderr and use full.
 
@@ -21,8 +22,10 @@ source intents use the same token-derived trusted session as HTTP.
 
 Five resource templates and nine prompts remain available in both modes.
 AZ-5h keeps bounded Library admission alive through the real SDK JSON-RPC
-dump and releases it after serialization. Other tools run in worker threads
-so captures and model calls do not block the stdio event loop.
+dump and releases it after serialization. Other registry tools run on the
+event loop one at a time, as in v3.9.1, because they share the Index
+connection with Library reads; a long capture holds the session until it
+returns. Paid discovery runs in a worker thread, as in v3.9.1.
 """
 
 from __future__ import annotations
