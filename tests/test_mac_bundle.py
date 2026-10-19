@@ -5,6 +5,7 @@ import hashlib
 import io
 import json
 from pathlib import Path
+import subprocess
 import sys
 import tarfile
 
@@ -199,6 +200,137 @@ def test_native_inventory_accepts_bundle_absolute_load_and_system_rpath(monkeypa
     monkeypatch.setattr(bundle, "run", lambda command, **kwargs: SimpleNamespace(
         stdout="arm64" if command[0] == "lipo" else commands if command[1] == "-l" else ""))
     assert bundle.binary_inventory(tmp_path)[0]["path"] == binary.name
+
+
+PILLOW_RPATH = "/Users/runner/work/Pillow/Pillow/build/deps/darwin/lib"
+
+
+def loader_fixture(kind, value):
+    command, field, offset = ("LC_RPATH", "path", 12) if kind == "rpath" else ("LC_LOAD_DYLIB", "name", 24)
+    return f"Load command 1\n      cmd {command}\n  cmdsize 128\n     {field} {value} (offset {offset})\n"
+
+
+def test_rpath_rewrite_plan_parses_universal_otool_fixture(tmp_path):
+    commands = (
+        "Load command 0\n      cmd LC_ID_DYLIB\n  cmdsize 64\n"
+        "     name /DLC/PIL/.dylibs/libjpeg.62.4.0.dylib (offset 24)\n"
+        + loader_fixture("dependency", "/outside/libbad.dylib")
+        + "".join(loader_fixture("rpath", value) for value in (
+            PILLOW_RPATH, "/opt/homebrew/lib", "/System/PrivateFrameworks",
+            "/System/Library/../../outside", "@loader_path/..", "@rpath",
+            "@executable_path/../Frameworks", "/usr/lib", "/System/Library",
+            "/System/Library/Frameworks", str(tmp_path / "Contents/Frameworks"), "relative/lib")))
+    universal = "libjpeg (architecture arm64):\n" + commands + "libjpeg (architecture x86_64):\n" + commands
+    assert bundle.rpath_removals(universal, tmp_path) == [
+        PILLOW_RPATH, "/opt/homebrew/lib", "/System/PrivateFrameworks", "/System/Library/../../outside"]
+
+
+@pytest.mark.parametrize("kind", ["dependency", "rpath"])
+@pytest.mark.parametrize("value,allowed", [
+    ("/usr/lib", True), ("/usr/lib/libSystem.B.dylib", True),
+    ("/System/Library", True), ("/System/Library/Frameworks/Cocoa.framework/Cocoa", True),
+    ("/System", False), ("/System/PrivateFrameworks/libbad.dylib", False),
+    ("/System/LibraryExtra/libbad.dylib", False), ("/usr/library/libbad.dylib", False),
+    ("/System/Library/../../outside", False), ("/usr/lib/../../outside", False),
+    ("/Users/runner/build/libbad.dylib", False), ("relative/lib", False),
+])
+def test_native_inventory_checks_stored_paths(monkeypatch, tmp_path, kind, value, allowed):
+    from types import SimpleNamespace
+    binary = tmp_path / "native.dylib"
+    binary.write_bytes(b"\xcf\xfa\xed\xfe" + b"fixture")
+    commands = loader_fixture(kind, value)
+    monkeypatch.setattr(bundle, "run", lambda command, **kwargs: SimpleNamespace(
+        stdout="arm64" if command[0] == "lipo" else commands))
+    if allowed:
+        assert bundle.binary_inventory(tmp_path)
+    else:
+        with pytest.raises(ValueError, match=f"Nonrelocatable {kind}"):
+            bundle.binary_inventory(tmp_path)
+
+
+@pytest.mark.parametrize("case", ["outside_in", "inside_out", "inside_out_in", "inside_in", "traversal", "sibling"])
+def test_loader_path_symlink_containment_without_os_symlink_privileges(monkeypatch, tmp_path, case):
+    app = tmp_path / "Uoink.app"
+    app.mkdir()
+    inside = app / "lib"
+    outside = tmp_path / "external"
+    link = app / "link"
+    links = {}
+    if case == "outside_in":
+        value, links = outside, {outside: inside}
+    elif case == "inside_out":
+        value, links = link, {link: outside}
+    elif case == "inside_out_in":
+        value, links = link, {link: outside, outside: inside}
+    elif case == "inside_in":
+        value, links = link, {link: Path("lib")}
+    elif case == "traversal":
+        value = app / ".." / "external"
+    else:
+        value = tmp_path / "Uoink.app-extra/lib"
+    # Model the OS answers, including the deceptive final target inside the app.
+    monkeypatch.setattr(Path, "is_symlink", lambda path: path in links)
+    monkeypatch.setattr(bundle.os, "readlink", lambda path: str(links[path]))
+    monkeypatch.setattr(Path, "resolve", lambda path, **kwargs:
+                        app if path == app else outside if case == "inside_out" else inside)
+    allowed = case == "inside_in"
+    assert bundle.allowed_absolute_loader_path(str(value), app) is allowed
+    assert bundle.rpath_removals(loader_fixture("rpath", str(value)), app) == ([] if allowed else [str(value)])
+
+
+@pytest.mark.parametrize("failure", [None, "delete", "sign", "remaining_rpath", "dependency"])
+def test_rpath_rewrite_reports_edits_and_inventory_rechecks(monkeypatch, tmp_path, failure):
+    from types import SimpleNamespace
+    app = tmp_path / "Uoink.app"
+    app.mkdir()
+    binary = app / "libjpeg.62.4.0.dylib"
+    binary.write_bytes(b"\xcf\xfa\xed\xfe" + b"before")
+    (app / "plain.txt").write_text("not Mach-O")
+    report = tmp_path / "removals.json"
+    pending = [PILLOW_RPATH, "/opt/homebrew/lib"]
+    calls = []
+
+    def run(command, **kwargs):
+        assert kwargs["check"] is True
+        calls.append(command)
+        output = ""
+        if command[0] == "otool":
+            output = "".join(loader_fixture("rpath", value) for value in pending)
+            if failure == "dependency":
+                output += loader_fixture("dependency", "/outside/libbad.dylib")
+        elif command[0] == "install_name_tool":
+            assert command[1] == "-delete_rpath" and len(command) == 4
+            if failure == "delete" and command[2] == pending[-1]:
+                raise subprocess.CalledProcessError(1, command)
+            if failure != "remaining_rpath":
+                pending.remove(command[2])
+        elif command[0] == "codesign":
+            assert command == ["codesign", "--force", "--sign", "-", str(binary)]
+            if failure == "sign":
+                raise subprocess.CalledProcessError(1, command)
+            binary.write_bytes(b"\xcf\xfa\xed\xfe" + b"signed after edits")
+        elif command[0] == "lipo":
+            output = "arm64"
+        return SimpleNamespace(stdout=output)
+
+    monkeypatch.setattr(bundle.subprocess, "run", run)
+    if failure in {"delete", "sign"}:
+        with pytest.raises(subprocess.CalledProcessError):
+            bundle.rewrite_rpaths(app, report)
+    else:
+        bundle.rewrite_rpaths(app, report)
+        if failure:
+            with pytest.raises(ValueError, match="Nonrelocatable"):
+                bundle.binary_inventory(app)
+        else:
+            inventory = bundle.binary_inventory(app)
+            assert inventory[0]["sha256"] == hashlib.sha256(binary.read_bytes()).hexdigest()
+            assert "signed after edits" in binary.read_text(errors="replace")
+            bundle.rewrite_rpaths(app, tmp_path / "second-report.json")
+            assert json.loads((tmp_path / "second-report.json").read_text()) == []
+    expected = [PILLOW_RPATH] if failure == "delete" else [PILLOW_RPATH, "/opt/homebrew/lib"]
+    assert json.loads(report.read_text()) == [{"file": binary.name, "rpath": value} for value in expected]
+    assert sum(command[0] == "codesign" for command in calls) == (0 if failure == "delete" else 1)
 
 
 @pytest.mark.parametrize("mutate,fail", [(False, False), (True, False), (False, True)])

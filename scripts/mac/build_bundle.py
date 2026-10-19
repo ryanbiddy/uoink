@@ -57,7 +57,7 @@ def tree_inventory(root: Path) -> list[dict]:
         meta = path.lstat()
         row = {"path": path.relative_to(root).as_posix(), "mode": stat.S_IMODE(meta.st_mode)}
         if path.is_symlink():
-            if not path.resolve(strict=True).is_relative_to(root.resolve()):
+            if not bundle_path(path, root) or not path.resolve(strict=True).is_relative_to(root.resolve()):
                 raise ValueError(f"Symlink escapes app: {path}")
             row.update(type="symlink", target=os.readlink(path))
         elif path.is_file():
@@ -124,15 +124,77 @@ def native_loader_paths(commands: str) -> list[tuple[str, str]]:
     return paths
 
 
-def binary_inventory(app: Path) -> list[dict]:
-    rows = []
+def bundle_path(path: Path, app: Path, seen: frozenset[Path] = frozenset()) -> bool:
+    """Require lexical containment as well as symlink containment.
+
+    An outside link pointing back into the app is still an outside stored path.
+    Inspect link targets too, so a chain cannot leave the app and return to it.
+    """
+    app = Path(os.path.abspath(app))
+    if not path.is_absolute():
+        path = Path.cwd() / path
+    if not Path(os.path.abspath(path)).is_relative_to(app):
+        return False
+    for entry in (path, *path.parents):
+        if entry == app:
+            break
+        if entry.is_symlink():
+            if entry in seen or not bundle_path(
+                    entry.parent / os.readlink(entry), app, seen | {entry}):
+                return False
+    try:
+        return path.resolve().is_relative_to(app.resolve())
+    except (OSError, RuntimeError):
+        return False
+
+
+def allowed_absolute_loader_path(value: str, app: Path) -> bool:
+    normalized = posixpath.normpath(value)
+    if normalized in ("/usr/lib", "/System/Library") or normalized.startswith(
+            ("/usr/lib/", "/System/Library/")):
+        return True
+    return Path(value).is_absolute() and bundle_path(Path(value), app)
+
+
+def rpath_removals(commands: str, app: Path) -> list[str]:
+    """Plan deletions from otool -l, once per value across universal slices."""
+    return list(dict.fromkeys(value for kind, value in native_loader_paths(commands)
+                             if kind == "rpath" and
+                             (posixpath.isabs(value) or Path(value).is_absolute()) and
+                             not allowed_absolute_loader_path(value, app)))
+
+
+def macho_files(app: Path):
     for path in sorted(app.rglob("*")):
         if path.is_symlink() or not path.is_file():
             continue
+        if not bundle_path(path, app):
+            raise ValueError(f"File escapes app: {path}")
         with path.open("rb") as stream:
             magic = stream.read(4)
-        if magic not in MACHO:
-            continue
+        if magic in MACHO:
+            yield path
+
+
+def rewrite_rpaths(app: Path, report: Path) -> None:
+    removals = []
+    # Keep successful removals available even if a later tool or inventory fails.
+    write_json(report, removals)
+    for path in macho_files(app):
+        commands = run(["otool", "-l", path], capture_output=True).stdout
+        planned = rpath_removals(commands, app)
+        for rpath in planned:
+            run(["install_name_tool", "-delete_rpath", rpath, path])
+            removals.append({"file": path.relative_to(app).as_posix(), "rpath": rpath})
+            write_json(report, removals)
+        if planned:
+            # Header edits invalidate the wheel's original code signature.
+            run(["codesign", "--force", "--sign", "-", path])
+
+
+def binary_inventory(app: Path) -> list[dict]:
+    rows = []
+    for path in macho_files(app):
         arch = run(["lipo", "-archs", path], capture_output=True).stdout.strip()
         if "arm64" not in arch.split():
             raise ValueError(f"Missing arm64 architecture: {path}: {arch}")
@@ -142,10 +204,7 @@ def binary_inventory(app: Path) -> list[dict]:
             if dependency.startswith(("@loader_path/", "@rpath/", "@executable_path/")) or dependency in (
                                           "@loader_path", "@rpath", "@executable_path"):
                 continue
-            normalized = posixpath.normpath(dependency)
-            if normalized in ("/usr/lib", "/System") or normalized.startswith(("/usr/lib/", "/System/")):
-                continue
-            if Path(dependency).is_absolute() and Path(dependency).resolve().is_relative_to(app.resolve()):
+            if allowed_absolute_loader_path(dependency, app):
                 continue
             raise ValueError(f"Nonrelocatable {kind}: {path}: {dependency}")
         rows.append({"path": path.relative_to(app).as_posix(), "architectures": arch,
@@ -242,8 +301,10 @@ def build(wheels: Path, output: Path) -> Path:
                                        "platform": platform.platform(), "ffmpeg": {"bundled": False,
                                        "code": "media_requires_ffmpeg", "source": None,
                                        "sha256": None, "configure_flags": None},
-                                       "signing": "not performed", "minimum_os": "15.0",
+                                       "signing": "modified Mach-O binaries ad-hoc; no Developer ID",
+                                       "minimum_os": "15.0",
                                        "source_files": [p.as_posix() for p in files]})
+    rewrite_rpaths(app, output / "native-rpath-removals.json")
     write_json(output / "native-inventory.json", binary_inventory(app))
     inventory = tree_inventory(app)
     write_json(output / "file-inventory.json", inventory)

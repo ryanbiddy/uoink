@@ -125,8 +125,22 @@ bundled libraries do not qualify the missing CLI or TorchCodec ABI.
 
 ## Hosted acceptance and evidence
 
+Before inventory, the builder removes absolute `LC_RPATH` entries outside the
+bundle, `/usr/lib` and `/System/Library`, including paths left by wheel build
+machines. Each removal uses a separate `install_name_tool -delete_rpath` call;
+`native-rpath-removals.json` records the bundle-relative file and original rpath.
+Modified binaries need re-signing: the builder ad-hoc signs each one after its
+edits, before inventory and smoke testing. Developer ID signing belongs to the
+later signing pass; the app is still an unsigned CI artifact for distribution.
+
 The build must fail on an incomplete graph, a changed hash, a missing source,
-a Mach-O file without arm64, or a non-system absolute loader/rpath dependency.
+a Mach-O file without arm64, or any remaining absolute load dependency or rpath
+outside the bundle and those two system directories. Other `/System/` paths
+are rejected. Bundle paths must be inside the app both literally (after path
+normalization) and through symlinks; an outside link pointing into the app
+does not qualify, and bundle symlinks cannot escape it. The inventory reads
+`otool` output again after edits and signing; `LC_ID_DYLIB` remains excluded
+because it identifies the binary itself, rather than a load dependency.
 `native-inventory.json` records architectures, hashes and `otool` output.
 `file-inventory.json` records the entire app; `size.json` records its total file
 bytes and entry count. The compressed archive preserves modes and symlinks.
