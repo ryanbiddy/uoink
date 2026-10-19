@@ -41,7 +41,7 @@ def runner_functions(source):
     )]
     assert functions == {node.name for node in nodes if isinstance(node, ast.FunctionDef)}
     scope = {
-        "Path": Path, "re": re, "_WHISPERX_AVAILABLE": True,
+        "Path": Path, "re": re, "sys": sys, "_WHISPERX_AVAILABLE": True,
         "_download_model_snapshot": blocked, "_runtime_device": lambda: "cpu",
         "_compute_type": lambda device: "int8", "_now_iso": lambda: "synthetic-time",
     }
