@@ -37,7 +37,7 @@ Uoink's container matches the protocol note's layout
 ([protocol-limits note](library/PHASE4-PROTOCOL-LIMITS-2026-09-08.md) §4.1):
 
 ```text
-uoink-3.9.2.mcpb (ZIP archive)
+uoink-3.9.3.mcpb (ZIP archive)
 ├── manifest.json       (manifest_version 0.4)
 ├── README.md           (bundle documentation)
 ├── icon.png            (display icon)
@@ -63,7 +63,7 @@ already uses these fields.
 | `manifest_version` | `"0.4"` (string, required) | `"0.4"` |
 | `name` | Package identifier matching `^[a-z0-9-_]+$` | `"uoink"` |
 | `display_name` | Display string | `"Uoink"` |
-| `version` | Valid SemVer matching repository `VERSION` | `"3.9.2"` |
+| `version` | Valid SemVer matching repository `VERSION` | `"3.9.3"` |
 | `description` | Single-line summary | present |
 | `long_description` | Extended description for marketplace views | present |
 | `author` | `{ "name": "...", "url": "..." }` | Ryan Biddy / https://uoink.app |
@@ -148,8 +148,9 @@ different adapter; do not copy the stdio capability object onto HTTP
 
 ### 91 tools
 
-The bundle lists every tool in `uoink_mcp_tools.TOOL_REGISTRY`. Live stdio
-uses the registry descriptions and schemas (three are flattened; see
+The bundle lists every tool in `uoink_mcp_tools.TOOL_REGISTRY`. Live stdio and HTTP MCP
+use the registry descriptions and flatten the same three input schemas; the
+server still validates the exact frozen schemas (see
 [v2-mcp.md](v2-mcp.md)). The previous 35 tools remain first
 in their original order. `UOINK_MCP_TOOLSET=core` serves only that earlier set
 for Cursor and other clients with tool caps; full is the default. Unknown
@@ -160,7 +161,7 @@ and [the tool reference](v2-mcp.md).
 The Library work queue and source subscriptions are included. Dashboard intent
 requirements, default-off Library apply, discovery credit confirmation and all
 other consent gates are unchanged. Do not use `get_uoink_corpus` as an automatic
-overflow fallback for bounded Library reads. Reinstall the 3.9.2 `.mcpb` in
+overflow fallback for bounded Library reads. Reinstall the 3.9.3 `.mcpb` in
 Claude Desktop and restart Desktop to get the new tools.
 
 ### Five resource templates (`uoink://library/v1/`)

@@ -16327,8 +16327,11 @@ class Handler(BaseHTTPRequestHandler):
         if method == "ping":
             return self._send_mcp_result(request_id, {})
         if bare == "/mcp/v1/tools/list" or (bare == "/mcp/v1" and method == "tools/list"):
+            tools = _mcp_tools_module()
+            registry = {tool["name"]: tool for tool in tools.list_tools()}
             return self._send_mcp_result(request_id, {
-                "tools": _mcp_tools_module().list_tools(),
+                "tools": [dict(registry[name], inputSchema=tools.client_input_schema(
+                    registry[name]["inputSchema"])) for name in tools.stdio_tool_names("full")],
             })
         if bare == "/mcp/v1/tools/call" or (bare == "/mcp/v1" and method == "tools/call"):
             params = body.get("params") if isinstance(body.get("params"), dict) else body

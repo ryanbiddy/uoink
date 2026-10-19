@@ -10,6 +10,30 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [3.9.3] - 2026-10-19
+
+### Added
+
+- Uoink is listed in the official MCP registry as `io.github.ryanbiddy/uoink`.
+  Each published release updates the listing through a GitHub Actions job
+  (`.github/workflows/mcp-registry.yml`) that first checks `server.json`
+  against the tag and the release checksums.
+
+### Fixed
+
+- The three tool schemas with a top-level `oneOf` (`claim_library_work`,
+  `apply_reshelving`, `set_source_consent`) are now flattened on the HTTP MCP
+  connection too. HTTP MCP clients that pass tool schemas to a model no longer
+  drop Uoink's tools because of those schemas. The server still checks the
+  exact frozen schema for every call. The MCP server exposes 91 tools by default
+  on both transports.
+- Activity and Phase 5 measurement reads are faster on large libraries. In
+  seven local runs per size, median read time fell from 40.3 to 30.8 ms for
+  548 items (23% less time), and from 461.4 to 285.5 ms for 10,000 items
+  (38% less time). Responses are byte-identical; the 2-second deadline stays.
+- No data or settings changes. No new index or migration. Installing over
+  3.9.2 keeps your library and saved captures.
+
 ## [3.9.2] - 2026-10-18
 
 ### Changed

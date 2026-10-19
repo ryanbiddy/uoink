@@ -5776,7 +5776,7 @@ _SCHEMA_COMBINATORS = ("oneOf", "anyOf", "allOf")
 
 
 def client_input_schema(schema: dict) -> dict:
-    """The input schema stdio advertises to MCP clients.
+    """The input schema both stdio and HTTP advertise to MCP clients.
 
     The Anthropic API rejects tool input schemas with oneOf/anyOf/allOf at the
     top level, and Claude Code then shows none of the server's tools. Three
