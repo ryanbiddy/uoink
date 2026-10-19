@@ -196,8 +196,8 @@
         ],
         "muxer": [
           "wav",
-          "s16le",
-          "f32le",
+          "pcm_s16le",
+          "pcm_f32le",
           "image2",
           "srt",
           "mp4",

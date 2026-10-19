@@ -1575,9 +1575,12 @@ def test_phase6_adapter_fetch_boundaries(sandbox):
 
     def record_command(command, **kwargs):
         commands.append(command)
-        if command[0] == "yt-dlp" and "--get-title" in command:
+        # yt-dlp runs as `yt-dlp` on Windows/Linux and as the bundle's
+        # `python -m yt_dlp` on macOS; both are the same downloader here.
+        is_ytdlp = command[0] == "yt-dlp" or list(command[1:3]) == ["-m", "yt_dlp"]
+        if is_ytdlp and "--get-title" in command:
             return "Synthetic Video"
-        if command[0] == "yt-dlp":
+        if is_ytdlp:
             folder = output / "Synthetic_Video"
             folder.mkdir(parents=True, exist_ok=True)
             (folder / "video.mp4").write_bytes(b"synthetic placeholder; never decoded")
@@ -1588,12 +1591,17 @@ def test_phase6_adapter_fetch_boundaries(sandbox):
         patch.setattr(yt_extract, "subprocess", SimpleNamespace(run=record_command, check_output=record_command))
         patch.setattr(yt_extract.sys, "argv", ["yt_extract.py", "https://www.youtube.com/watch?v=abcdefghijk", "--out", str(output), "--keep-video"])
         yt_extract.main()
-    downloads = [cmd for cmd in commands if cmd[0] == "yt-dlp" and "--write-subs" in cmd]
+    def tool(cmd):
+        if cmd[0] == "yt-dlp" or list(cmd[1:3]) == ["-m", "yt_dlp"]:
+            return "yt-dlp"
+        return Path(cmd[0]).stem.lower()
+
+    downloads = [cmd for cmd in commands if tool(cmd) == "yt-dlp" and "--write-subs" in cmd]
     assert len(downloads) == 1
     command = downloads[0]
     assert command[command.index("--sub-lang") + 1] == "en.*,en"
     assert not any(flag in command for flag in ("--all-subs", "--cookies", "--cookies-from-browser", "--username", "--password"))
-    assert [cmd[0] for cmd in commands] == ["yt-dlp", "yt-dlp", "ffmpeg"]
+    assert [tool(cmd) for cmd in commands] == ["yt-dlp", "yt-dlp", "ffmpeg"]
     # X's existing same-author bounded parent traversal is the only supplied
     # status transport. It gains neither watcher nor media acquisition.
     x_requests = []
