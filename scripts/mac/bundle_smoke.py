@@ -10,6 +10,7 @@ import queue
 import plistlib
 import shutil
 import signal
+import sys
 import socket
 import subprocess
 import tempfile
@@ -127,8 +128,12 @@ def media_smoke(contents: Path, scratch: Path, env: dict) -> dict:
     ffmpeg, ffprobe = [str(contents / "Helpers" / name) for name in ("ffmpeg", "ffprobe")]
 
     def run(command):
-        return subprocess.run(command, cwd=scratch, env=env, check=True,
-                              capture_output=True, text=True, timeout=60).stdout
+        try:
+            return subprocess.run(command, cwd=scratch, env=env, check=True,
+                                  capture_output=True, text=True, timeout=60).stdout
+        except subprocess.CalledProcessError as error:
+            print(f"media smoke command failed: {command[:3]}\n{error.stderr}", file=sys.stderr, flush=True)
+            raise
 
     report = {name: run([binary, "-version"]) for name, binary in (("ffmpeg", ffmpeg), ("ffprobe", ffprobe))}
     source, decoded = scratch / "input.wav", scratch / "decoded.wav"
