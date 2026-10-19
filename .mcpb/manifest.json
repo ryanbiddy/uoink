@@ -2,9 +2,9 @@
   "manifest_version": "0.4",
   "name": "uoink",
   "display_name": "Uoink",
-  "version": "3.9.3",
+  "version": "3.10.0",
   "description": "Connect Claude Desktop to all 91 Uoink tools for local capture, research, writing and library work.",
-  "long_description": "Uoink keeps the videos, podcasts, and articles you study on your own disk, then hands them to Claude as a cited corpus. This bundle connects Claude Desktop to your already-installed Uoink helper's local MCP server (stdio). Install the Uoink helper from https://uoink.app/install first, then install this bundle. Core capture is local and needs no API key; optional AI features use your own Anthropic key. Version 3.9.3 exposes all 91 tools over the standard connection, with the same consent gates. Set UOINK_MCP_TOOLSET=core for the previous 35 tools on clients that cap tool counts.",
+  "long_description": "Uoink keeps the videos, podcasts, and articles you study on your own disk, then hands them to Claude as a cited corpus. This bundle connects Claude Desktop to your already-installed Uoink helper's local MCP server (stdio). Install the Uoink helper from https://uoink.app/install first, then install this bundle. Core capture is local and needs no API key; optional AI features use your own Anthropic key. Version 3.10.0 exposes all 91 tools over the standard connection, with the same consent gates. Set UOINK_MCP_TOOLSET=core for the previous 35 tools on clients that cap tool counts.",
   "author": {
     "name": "Ryan Biddy",
     "url": "https://uoink.app"

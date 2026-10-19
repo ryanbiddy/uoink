@@ -8,11 +8,11 @@ Install [Uoink for Windows](https://github.com/ryanbiddy/uoink/releases/latest)
 first, with **Add the uoink command to PATH for AI agents** checked. Open a new
 terminal and run `uoink status`. This kit contains instructions and MCP config;
 it does not include Python, the app, or your library. The CLI requires the
-agent-reach build of Uoink.
+3.10.0 release of Uoink or later.
 
 ## Claude Code
 
-After this kit is published as `ryanbiddy/uoink-agent-kit`:
+The marketplace at `ryanbiddy/uoink-agent-kit` is published with this release:
 
 ```powershell
 claude plugin marketplace add ryanbiddy/uoink-agent-kit
@@ -67,7 +67,7 @@ Cline's location varies by editor/profile. The affected recipes print notes.
 
 Use this table to choose the MCP config, skill, plugin or CLI path. Every row
 is **not yet tested** in the named client. Full recipes and limits are in
-[`docs/connect-your-agent.md`](https://github.com/ryanbiddy/uoink/blob/feat/3.10-agents/docs/connect-your-agent.md).
+[`docs/connect-your-agent.md`](https://github.com/ryanbiddy/uoink/blob/main/docs/connect-your-agent.md).
 The generator keeps all client choices in one table in `uoink_connect.py`.
 
 | Harness | Path and format |
@@ -124,7 +124,7 @@ skills/uoink/
 The two skill folders are generated copies. In the main Uoink repository, edit
 `skills/uoink`, run `python scripts/build_agent_kit.py`, then run
 `python scripts/build_agent_kit.py --check`. The test suite fails on drift.
-The plugin's `0.0.0` version is a placeholder for the release process.
+The same script sets the plugin version from `VERSION`; `--check` fails if it drifts.
 
 Before publication, run locally:
 

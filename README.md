@@ -46,10 +46,21 @@ The stdio transport is tested with **Claude Desktop and Cursor**. Cline and Cont
 
 **3. OpenAPI bridge (for local agents that don't speak MCP)** — Local OpenAPI-capable agents and scripts can drive the same tools over an OpenAPI 3.1 surface at `/openapi/v1/spec.json` + `POST /tools/<name>`.
 
-### MCP setup (Claude Desktop, Cursor, Cline)
+### Use Uoink from any AI agent
 
-For CLI access, portable skills, and setup recipes for Codex, Gemini, pi,
-Hermes, OpenClaw, and other clients, see [Connect your agent](docs/connect-your-agent.md).
+After installing, open a new terminal and run `uoink status` or
+`uoink search "working memory" --limit 5`. The installer's checked PATH option
+makes `uoink` available to agents with a local shell. `uoink connect <client>`
+prints connection instructions for MCP clients.
+
+The [portable skill](skills/uoink/SKILL.md) supports Claude Code, Codex, pi,
+Hermes Agent, and OpenClaw through MCP or the CLI. The Claude Code marketplace
+at [ryanbiddy/uoink-agent-kit](https://github.com/ryanbiddy/uoink-agent-kit),
+published with this release, bundles the skill and MCP config. See
+[Connect your agent](docs/connect-your-agent.md) for commands and client limits,
+or [agent installation steps](llms-install.md) for installation from a shell.
+
+### MCP setup (Claude Desktop, Cursor, Cline)
 
 After installing Uoink, open the setup page from the extension popup's **Settings** link and copy the generated snippet — or paste this into your client's MCP config. The stdio server runs the bundled Python against the installed `uoink_mcp.py` (the C-01 fix pins the app dir onto `sys.path`, so this command works on every install):
 
@@ -76,7 +87,7 @@ Uoink ships a portable Skill at `skills/uoink/SKILL.md` (installed to `%LOCALAPP
 
 ## Install
 
-1. **Download the installer.** Download `Uoink-Setup-3.9.3.exe` from the [v3.9.3 release](https://github.com/ryanbiddy/uoink/releases/tag/v3.9.3). Windows 10/11 only — there is no Mac build today. The installer is unsigned: if SmartScreen shows "Windows protected your PC", choose **More info → Run anyway**, and check the file against the SHA-256 listed on the release page.
+1. **Download the installer.** Download `Uoink-Setup-3.10.0.exe` from the [v3.10.0 release](https://github.com/ryanbiddy/uoink/releases/tag/v3.10.0). Windows 10/11 only. There is no Mac build today. The installer is unsigned: if SmartScreen shows "Windows protected your PC", choose **More info -> Run anyway**, and check the file against the SHA-256 listed on the release page.
 2. **Run it.** Defaults install to `%LOCALAPPDATA%\Uoink\` (no admin required). The finish page can launch the helper immediately, and an autostart entry runs it on each login.
 3. **Load the bundled extension.** On first launch, Uoink shows a one-time setup splash. Use it to open your browser's extensions page and copy the installed extension path; then enable Developer mode, click **Load unpacked**, and select that folder. (The Chrome Web Store listing is pending; sideload is the current path.)
 

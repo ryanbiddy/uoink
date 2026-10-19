@@ -297,6 +297,30 @@ def test_agent_kit_copies_cannot_drift():
     assert len((ROOT / "skills/uoink/SKILL.md").read_text().splitlines()) < 200
 
 
+def test_agent_kit_version_drift_fails_check_and_build_repairs_it(tmp_path, monkeypatch, capsys):
+    import runpy
+    build = runpy.run_path(str(ROOT / "scripts/build_agent_kit.py"))["build"]
+    source = tmp_path / "skills/uoink"
+    source.mkdir(parents=True)
+    (source / "SKILL.md").write_text("Fixture skill\n", encoding="utf-8")
+    manifest = tmp_path / "agent-kit/plugins/uoink/.claude-plugin/plugin.json"
+    manifest.parent.mkdir(parents=True)
+    manifest.write_text('{"name": "uoink", "version": "0.0.0"}\n', encoding="utf-8")
+    (tmp_path / "VERSION").write_text("3.10.0\n", encoding="utf-8")
+    monkeypatch.setitem(build.__globals__, "ROOT", tmp_path)
+    monkeypatch.setitem(build.__globals__, "SOURCE", source)
+    monkeypatch.setitem(build.__globals__, "DESTINATIONS", ())
+    before = manifest.read_bytes()
+    assert build(check=True) == [str(manifest.relative_to(tmp_path))]
+    monkeypatch.setattr(sys, "argv", ["build_agent_kit.py", "--check"])
+    assert build.__globals__["main"]() == 1
+    assert "plugin.json" in capsys.readouterr().err
+    assert manifest.read_bytes() == before
+    assert build() == []
+    assert json.loads(manifest.read_text(encoding="utf-8")) == {"name": "uoink", "version": "3.10.0"}
+    assert build(check=True) == []
+
+
 def test_installer_path_ownership_isolation_and_exact_removal():
     source = (ROOT / "installer/uoink.iss").read_text()
     assert "ChangesEnvironment=yes" in source

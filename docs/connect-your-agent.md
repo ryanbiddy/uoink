@@ -2,8 +2,8 @@
 
 Install [Uoink for Windows](https://github.com/ryanbiddy/uoink/releases/latest)
 first. In the installer, leave **Add the uoink command to PATH for AI agents**
-checked, then open a new terminal. The agent CLI described here ships with the
-agent-reach build. In PowerShell, check the install:
+checked, then open a new terminal. The agent CLI ships with Uoink 3.10.0.
+In PowerShell, check the install:
 
 ```powershell
 uoink status
@@ -217,8 +217,8 @@ and arrange local execution on the Uoink machine. A copied skill alone cannot
 give a remote agent access to Windows files or commands.
 
 The small [agent kit](../agent-kit/README.md) contains a Claude Code marketplace
-and plain skill copies for pi, Hermes taps, and ClawHub packaging. Once the kit
-is published as `ryanbiddy/uoink-agent-kit`, install the Claude Code plugin:
+and plain skill copies for pi, Hermes taps, and ClawHub packaging. The marketplace
+at `ryanbiddy/uoink-agent-kit` is published with this release. Install the Claude Code plugin:
 
 ```powershell
 claude plugin marketplace add ryanbiddy/uoink-agent-kit

@@ -1,7 +1,8 @@
-"""Generate the two publishable skill copies from skills/uoink; no network."""
+"""Generate skill copies and the plugin version from repository sources; no network."""
 from __future__ import annotations
 
 import argparse
+import json
 from pathlib import Path
 import sys
 
@@ -21,6 +22,17 @@ def build(check=False):
         raise ValueError("canonical skills/uoink/SKILL.md is missing")
     expected = files(SOURCE)
     problems = []
+    plugin_path = ROOT / "agent-kit/plugins/uoink/.claude-plugin/plugin.json"
+    if plugin_path.is_symlink() or ROOT.resolve() not in plugin_path.resolve().parents:
+        raise ValueError(f"unsafe plugin manifest: {plugin_path}")
+    plugin = json.loads(plugin_path.read_text(encoding="utf-8"))
+    version = (ROOT / "VERSION").read_text(encoding="utf-8").strip()
+    if plugin.get("version") != version:
+        if check:
+            problems.append(str(plugin_path.relative_to(ROOT)))
+        else:
+            plugin["version"] = version
+            plugin_path.write_text(json.dumps(plugin, indent=2) + "\n", encoding="utf-8")
     for destination in DESTINATIONS:
         if destination.is_symlink() or ROOT.resolve() not in destination.resolve().parents:
             raise ValueError(f"unsafe generated directory: {destination}")
@@ -49,9 +61,9 @@ def main():
     args = parser.parse_args()
     problems = build(args.check)
     if problems:
-        print("Agent kit skill copies differ:\n" + "\n".join(problems), file=sys.stderr)
+        print("Agent kit differs from repository sources:\n" + "\n".join(problems), file=sys.stderr)
         return 1
-    print("Agent kit skills match skills/uoink" if args.check else "Agent kit skills generated")
+    print("Agent kit skills and version match" if args.check else "Agent kit skills and version generated")
     return 0
 
 

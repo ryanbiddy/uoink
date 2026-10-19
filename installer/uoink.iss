@@ -23,7 +23,7 @@
 
 #define AppName       "Uoink"
 ; build.ps1 rewrites AppVersion from helper/_version.py before compiling.
-#define AppVersion    "3.9.3"
+#define AppVersion    "3.10.0"
 #define AppPublisher  "ReplayRyan"
 #define AppURL        "https://uoink.app"
 
