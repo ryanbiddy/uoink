@@ -220,6 +220,7 @@ def build(output: Path) -> None:
     cc = run(["/usr/bin/xcrun", "--sdk", "macosx", "--find", "clang"], env=env, capture_output=True).stdout.strip()
     compiler = run([cc, "--version"], env=env, capture_output=True).stdout
     sdk_version = run(["/usr/bin/xcrun", "--sdk", "macosx", "--show-sdk-version"], env=env, capture_output=True).stdout.strip()
+    env["SDKROOT"] = sdk
     # Separate per-role trees prevent cross-version object/library contamination.
     with tempfile.TemporaryDirectory(prefix="uoink-ffmpeg-") as temporary:
         scratch = Path(temporary)
@@ -232,10 +233,11 @@ def build(output: Path) -> None:
             prefix = output / role
             evidence = output / "notices" / role
             evidence.mkdir(parents=True)
+            # Apple clang takes the SDK through -isysroot (and SDKROOT); FFmpeg's
+            # --sysroot left the SDK's libc headers (ctype.h) unresolved on macOS 15.
             flags = [f"--prefix={prefix}", "--arch=aarch64", "--target-os=darwin", f"--cc={cc}",
-                     f"--sysroot={sdk}",
-                     "--extra-cflags=-arch arm64 -mmacosx-version-min=14.0",
-                     "--extra-ldflags=-arch arm64 -mmacosx-version-min=14.0 -Wl,-headerpad_max_install_names",
+                     f"--extra-cflags=-arch arm64 -isysroot {sdk} -mmacosx-version-min=14.0",
+                     f"--extra-ldflags=-arch arm64 -isysroot {sdk} -mmacosx-version-min=14.0 -Wl,-headerpad_max_install_names",
                      *configure_flags(config, role)]
             command = ["/bin/bash", str(source / "configure"), *flags]
             write_json(evidence / "build.json", {"source": pin, "configure": command,
