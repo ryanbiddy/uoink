@@ -34,9 +34,29 @@ to get the new tools. Cursor users may want `UOINK_MCP_TOOLSET=core` in their
 MCP server environment. It keeps the previous 35-tool set for clients that
 cap tool counts. Full mode is the default and keeps those 35 tools first.
 
+## Setting up with an agent
+
+An agent with a shell can install and connect Uoink. Verify the installer
+against `SHA256SUMS.txt`, then install silently (per user, no admin):
+
+```powershell
+Start-Process -Wait -FilePath .\Uoink-Setup-3.9.2.exe -ArgumentList '/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART'
+```
+
+Connect Claude Code with absolute paths:
+
+```powershell
+claude mcp add --scope user --transport stdio uoink -e PYTHONIOENCODING=utf-8 -e PYTHONUTF8=1 -- "$env:LOCALAPPDATA\Uoink\python\python.exe" "$env:LOCALAPPDATA\Uoink\uoink_mcp.py"
+```
+
+The MCP connection works without the Uoink helper running. A silent install
+does not start the helper; start **Uoink** from the Start menu for the
+dashboard and the browser button. Loading the Chrome extension stays a manual
+step for the person.
+
 ## Checksums
 
 | File | SHA-256 |
 | --- | --- |
-| `Uoink-Setup-3.9.2.exe` | `<sha256 pending>` |
-| `uoink-3.9.2.mcpb` | `<sha256 pending>` |
+| `Uoink-Setup-3.9.2.exe` | `83c08d1f39d817cad8a2ececd59dc9bf640b9c76069f08234c0101dafdcbb351` |
+| `uoink-3.9.2.mcpb` | `39fa0039215c4f0451af689aa1ec3f8c20a9c575fafdc9648057fcfcffd486be` |
