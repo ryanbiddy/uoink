@@ -22,6 +22,7 @@ from unittest.mock import Mock
 import urllib.request
 
 import pytest
+import _platform
 
 import index
 import source_subscriptions
@@ -214,7 +215,7 @@ def test_unreaped_child_never_records_an_exit_or_clears_intent(child, caplog):
 @pytest.fixture
 def jobs(tmp_path):
     idx = index.Index.open(tmp_path / "jobs.db")
-    scope = {"index": index, "Path": Path, "json": json, "threading": threading, "re": re,
+    scope = {"_platform": _platform, "index": index, "Path": Path, "json": json, "threading": threading, "re": re,
              "log": logging.getLogger(__name__), "_jobs": {}, "_jobs_lock": threading.Lock(),
              "_get_index": lambda: idx, "_now_iso": lambda: "2026-10-17T12:00:00"}
     _load(ROOT / "server.py", {

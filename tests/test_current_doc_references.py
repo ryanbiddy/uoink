@@ -25,7 +25,8 @@ def test_current_install_docs_do_not_name_retired_internal_files() -> None:
     bundle = (ROOT / "docs" / "mcpb-bundle.md").read_text(encoding="utf-8")
 
     assert "RB-4-mac-plan.md" not in mac
-    assert "[MAC-BUILD-PLAN.md](MAC-BUILD-PLAN.md)" in mac
+    assert "[Build the macOS CI bundle](mac/BUILD.md)" in mac
+    assert (ROOT / "docs/mac/BUILD.md").is_file()
     assert "handoff/DISTRIBUTION-CHECKLIST-2026-07-07.md" not in bundle
     assert "does not ship one today" in bundle
 

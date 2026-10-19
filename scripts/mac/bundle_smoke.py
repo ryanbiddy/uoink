@@ -118,6 +118,7 @@ def stdio(python: Path, resources: Path, scratch: Path, env: dict, mode: str, ou
 def smoke(app: Path, output: Path) -> None:
     output.mkdir(parents=True)
     report = {"ok": False, "mcp": []}
+    checks_passed = False
     with tempfile.TemporaryDirectory(prefix="uoink-bundle-smoke-") as temporary:
         scratch = Path(temporary)
         # Move, then restore, to prove the loader does not depend on build paths.
@@ -174,11 +175,12 @@ def smoke(app: Path, output: Path) -> None:
                                 "assert Image.open('pillow.png').size == (8,8)"],
                                cwd=scratch, env=env, check=True, timeout=60)
                 report["pillow"] = "passed"
-                report["ok"] = True
+                checks_passed = True
         finally:
             stop(helper)
             after = tree_inventory(relocated)
             report["bundle_unchanged"] = before == after
+            report["ok"] = checks_passed and report["bundle_unchanged"]
             write_json(output / "tree-before.json", before)
             write_json(output / "tree-after.json", after)
             write_json(output / "smoke.json", report)

@@ -43,6 +43,7 @@ from urllib.parse import parse_qs, urlsplit
 import uuid
 
 import pytest
+import _platform
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -170,10 +171,10 @@ class Connection(sqlite3.Connection):
 
 
 @pytest.fixture
-def sandbox(monkeypatch):
-    # The module owns its temp directory so even an ordinary pytest invocation
-    # stays within the worker checkout. No default Index.open() is used.
-    parent = ROOT / ".phase6-test-tmp"
+def sandbox(monkeypatch, tmp_path):
+    # Keep all synthetic state under pytest's disposable temporary directory.
+    # No default Index.open() is used.
+    parent = tmp_path / "phase6"
     parent.mkdir(exist_ok=True)
     with tempfile.TemporaryDirectory(prefix="case-", dir=parent) as name:
         root = Path(name).resolve()
@@ -1486,6 +1487,7 @@ def test_phase6_diarization_opt_in_default_off(sandbox):
     audio_placeholder = env.root / "never-decoded.mp3"
     audio_placeholder.write_bytes(b"synthetic placeholder; not an audio fixture")
     admission_globals = {
+        "_platform": _platform,
         "Path": Path, "_get_index": lambda: None,
         "podcasts": SimpleNamespace(get_episode=lambda idx, episode_id: {
             "audio_local_path": str(audio_placeholder), "title": "Synthetic episode"}),

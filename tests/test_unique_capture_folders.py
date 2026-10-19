@@ -27,6 +27,7 @@ from urllib.parse import parse_qs, urlparse
 import urllib.request
 
 import pytest
+import _platform
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -41,7 +42,7 @@ def _load(path, names, scope, *, constants=(), class_name=None):
         body = next(n.body for n in body
                     if isinstance(n, ast.ClassDef) and n.name == class_name)
     nodes = [n for n in body if (
-        isinstance(n, ast.FunctionDef) and n.name in names
+        isinstance(n, (ast.FunctionDef, ast.ClassDef)) and n.name in names
     ) or (
         isinstance(n, ast.Assign) and any(
             isinstance(t, ast.Name) and t.id in constants for t in n.targets)
@@ -49,7 +50,7 @@ def _load(path, names, scope, *, constants=(), class_name=None):
         isinstance(n, ast.AnnAssign) and isinstance(n.target, ast.Name)
         and n.target.id in constants
     )]
-    assert {n.name for n in nodes if isinstance(n, ast.FunctionDef)} == set(names)
+    assert {n.name for n in nodes if isinstance(n, (ast.FunctionDef, ast.ClassDef))} == set(names)
     future = ast.ImportFrom(module="__future__", names=[ast.alias(name="annotations")], level=0)
     module = ast.fix_missing_locations(ast.Module(body=[future, *nodes], type_ignores=[]))
     exec(compile(module, str(path), "exec"), scope)
@@ -112,6 +113,7 @@ def capture(tmp_path, monkeypatch):
         path.write_text(text, encoding="utf-8")
 
     scope = {
+        "_platform": _platform,
         "Path": Path, "json": json, "hashlib": hashlib, "re": re,
         "threading": threading, "datetime": datetime, "shutil": shutil,
         "urlparse": urlparse, "parse_qs": parse_qs, "subprocess": subprocess,
@@ -148,6 +150,7 @@ def capture(tmp_path, monkeypatch):
     }
     _load(ROOT / "yt_extract.py", {"slugify"}, scope, constants={"_WINDOWS_RESERVED_NAMES"})
     _load(ROOT / "server.py", {
+        "ExtractionPhaseError",
         "_video_capture_source", "_video_capture_id", "_video_capture_folder",
         "_verify_video_capture_folder", "_create_video_entry_folder",
         "_prepare_video_capture_folder", "_run_extraction",

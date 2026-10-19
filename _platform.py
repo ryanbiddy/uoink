@@ -71,9 +71,10 @@ def media_capability() -> dict:
     Source checkouts and other platforms retain their existing media behavior.
     Bundle identity, rather than PATH, prevents Homebrew from hiding this gap.
     """
+    if sys.platform != "darwin":
+        return {"available": True, "code": None, "reason": None}
     resources = Path(__file__).resolve().parent
-    if (sys.platform == "darwin" and resources.name == "Resources"
-            and resources.parent.name == "Contents"):
+    if resources.name == "Resources" and resources.parent.name == "Contents":
         return {"available": False, "code": "media_requires_ffmpeg",
                 "reason": "Media features need FFmpeg. This macOS build does not include "
                           "qualified ffmpeg/ffprobe or TorchCodec decoder libraries; "
@@ -90,10 +91,19 @@ def capability_notice() -> str:
                    for value in platform_capabilities().values() if not value["available"])
 
 
+class MediaUnavailableError(RuntimeError):
+    """A capability refusal that survives user-facing error translation."""
+
+    def __init__(self, capability: dict):
+        self.code = capability["code"]
+        self.refusal = capability_refusal(capability)
+        super().__init__(f"{self.code}: {capability['reason']}")
+
+
 def require_media() -> None:
     capability = media_capability()
     if not capability["available"]:
-        raise RuntimeError(f"{capability['code']}: {capability['reason']}")
+        raise MediaUnavailableError(capability)
 
 
 def platform_detail() -> str:

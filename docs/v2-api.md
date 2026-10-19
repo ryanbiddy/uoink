@@ -74,6 +74,10 @@ is metered; see `GET /settings/pricing` → `actual`.
 
 ### GET /health and GET /ping
 
+On macOS only, both probes also return `capabilities`, with `library_mirror`
+and `media` entries containing `available`, `code`, and `reason`. Windows and
+Linux use the response shape shown below.
+
 Public liveness probes. `/health` and `/ping` return the same payload and intentionally do not require `X-Uoink-Token`, so the extension can detect whether the helper is running before it has a token.
 
 Auth: none.

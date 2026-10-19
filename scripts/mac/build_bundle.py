@@ -7,6 +7,7 @@ import os
 from pathlib import Path
 import platform
 import plistlib
+import posixpath
 import re
 import shutil
 import stat
@@ -99,6 +100,30 @@ MACHO = {b"\xcf\xfa\xed\xfe", b"\xfe\xed\xfa\xcf", b"\xce\xfa\xed\xfe", b"\xfe\x
          b"\xca\xfe\xba\xbf", b"\xbf\xba\xfe\xca"}
 
 
+def native_loader_paths(commands: str) -> list[tuple[str, str]]:
+    """Read loader paths from otool -l, excluding LC_ID_DYLIB in every slice.
+
+    otool -L also prints a dylib's own install ID as an indented entry. That
+    ID (including delocate's /DLC/... IDs) is not a dependency to resolve.
+    """
+    paths = []
+    load_commands = {"LC_LOAD_DYLIB", "LC_LOAD_WEAK_DYLIB", "LC_REEXPORT_DYLIB",
+                     "LC_LAZY_LOAD_DYLIB", "LC_LOAD_UPWARD_DYLIB"}
+    blocks = re.split(r"(?m)^\s*cmd (LC_\w+)\s*$", commands)
+    for command, body in zip(blocks[1::2], blocks[2::2]):
+        if command == "LC_RPATH":
+            kind, field = "rpath", "path"
+        elif command in load_commands:
+            kind, field = "dependency", "name"
+        else:
+            continue
+        match = re.search(rf"(?m)^\s*{field} (.+?) \(offset \d+\)\s*$", body)
+        if not match:
+            raise ValueError(f"Malformed {command} load command")
+        paths.append((kind, match.group(1)))
+    return paths
+
+
 def binary_inventory(app: Path) -> list[dict]:
     rows = []
     for path in sorted(app.rglob("*")):
@@ -113,17 +138,16 @@ def binary_inventory(app: Path) -> list[dict]:
             raise ValueError(f"Missing arm64 architecture: {path}: {arch}")
         loads = run(["otool", "-L", path], capture_output=True).stdout
         commands = run(["otool", "-l", path], capture_output=True).stdout
-        for line in loads.splitlines():
-            # Universal binaries have another absolute filename header for
-            # each architecture; only indented lines are dependencies.
-            if not line.startswith("\t"):
+        for kind, dependency in native_loader_paths(commands):
+            if dependency.startswith(("@loader_path/", "@rpath/", "@executable_path/")) or dependency in (
+                                          "@loader_path", "@rpath", "@executable_path"):
                 continue
-            dependency = line.strip().split(" (", 1)[0]
-            if dependency.startswith("/") and not dependency.startswith(("/usr/lib/", "/System/Library/")):
-                raise ValueError(f"Nonrelocatable dependency: {path}: {dependency}")
-        for rpath in re.findall(r"\bpath (.*?) \(offset", commands):
-            if rpath.startswith("/") and not rpath.startswith(("/usr/lib/", "/System/Library/")):
-                raise ValueError(f"Nonrelocatable rpath: {path}: {rpath}")
+            normalized = posixpath.normpath(dependency)
+            if normalized in ("/usr/lib", "/System") or normalized.startswith(("/usr/lib/", "/System/")):
+                continue
+            if Path(dependency).is_absolute() and Path(dependency).resolve().is_relative_to(app.resolve()):
+                continue
+            raise ValueError(f"Nonrelocatable {kind}: {path}: {dependency}")
         rows.append({"path": path.relative_to(app).as_posix(), "architectures": arch,
                      "sha256": sha256(path), "load_commands": loads, "headers": commands})
     if not rows:

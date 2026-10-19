@@ -1511,8 +1511,9 @@ def _public_settings(data: dict | None = None) -> dict:
         # Living Library Phase 2: read-only here; see _default_settings.
         "librarian_apply_enabled": data.get("librarian_apply_enabled") is True,
         # Phase 4 opt-in corpus mirror (separate from obsidian_vault_path).
-        "library_mirror_capability": _platform.library_mirror_capability(),
-        "media_capability": _platform.media_capability(),
+        **({"library_mirror_capability": _platform.library_mirror_capability(),
+            "media_capability": _platform.media_capability()}
+           if _platform.sys.platform == "darwin" else {}),
         "library_mirror_enabled": (data.get("library_mirror_enabled") is True
                                    and _platform.library_mirror_capability()["available"]),
         "library_mirror_consent": _normalize_mirror_consent(
@@ -2793,6 +2794,7 @@ def _replace_reliability_section(corpus_path: Path, reliability: dict) -> None:
 
 def _download_reliability_audio(url: str, tmp_dir: Path,
                                 cancel_event: threading.Event | None = None) -> Path:
+    _platform.require_media()
     _run_subprocess(
         [
             *YTDLP_CMD,
@@ -2827,6 +2829,9 @@ def _compute_transcript_reliability(
     extraction-time call passes the just-downloaded video file before it is
     deleted, avoiding a second network request.
     """
+    refusal = _platform.capability_refusal(_platform.media_capability())
+    if refusal is not None:
+        return refusal
     if folder is None:
         folder, _row = _folder_for_video_id(video_id)
     if folder is None:
@@ -7086,6 +7091,9 @@ def _plain_error_from_text(text: str) -> str:
 
 def friendly_error(e: BaseException) -> str:
     """Translate raw exceptions into copy the user can act on."""
+    from _platform import MediaUnavailableError
+    if isinstance(e, MediaUnavailableError):
+        return str(e)
     if getattr(e, "publication_error", None):
         return e.publication_error
     if isinstance(e, ExtractionPhaseError):
@@ -8487,6 +8495,9 @@ def _fetch_monitored_playlist_entries(playlist_url: str) -> list[dict]:
 
 def _fetch_playlist_preview(url: str) -> tuple[dict | None, str | None, int]:
     """Return (playlist, error, status_code) for a validated playlist URL."""
+    capability = _platform.media_capability()
+    if not capability["available"]:
+        return None, capability["code"], 501
     normalized = _normalize_playlist_url(url)
     if not normalized:
         return None, "playlist URL invalid", 400
@@ -9941,6 +9952,10 @@ class _ServerCaptureBackend(source_subscriptions.CaptureBackend):
             self._leases[start["capture_key"]] = (lock, True, start["start_id"])
 
     def preflight(self, item, source):
+        media = _platform.media_capability()
+        if not media["available"]:
+            return source_subscriptions.CaptureOutcome(
+                "preflight_failed", code=media["code"], terminal=True)
         if source["kind"] == "podcast_rss":
             if item.get("legacy_episode_id") is None:
                 return source_subscriptions.CaptureOutcome(
@@ -9989,6 +10004,10 @@ class _ServerCaptureBackend(source_subscriptions.CaptureBackend):
         return outcome
 
     def _run_podcast(self, start, item, source):
+        media = _platform.media_capability()
+        if not media["available"]:
+            return source_subscriptions.CaptureOutcome(
+                "failed", code=media["code"], terminal=True)
         episode_id = int(item["legacy_episode_id"])
         start_id = start["start_id"]
         # AS-02: the bounded enclosure download runs on this thread with no
@@ -10032,6 +10051,10 @@ class _ServerCaptureBackend(source_subscriptions.CaptureBackend):
                 _source_capture_threads.pop(start_id, None)
 
     def _run_youtube(self, start, item, source):
+        media = _platform.media_capability()
+        if not media["available"]:
+            return source_subscriptions.CaptureOutcome(
+                "failed", code=media["code"], terminal=True)
         video_id = item["entry_id"]
         url = source_subscriptions.video_watch_url(video_id)
         start_id = start["start_id"]
@@ -10074,6 +10097,7 @@ class _ServerCaptureBackend(source_subscriptions.CaptureBackend):
                     release_locks = current.get("state") in (
                         "succeeded", "failed", "released")
                     return
+                _platform.require_media()
                 incarnation = source_subscriptions.process_incarnation(DATA_ROOT)
                 self._pacing.owner = (self, start)
                 with source_subscriptions.capture_context(start_id, incarnation):
@@ -10114,13 +10138,14 @@ class _ServerCaptureBackend(source_subscriptions.CaptureBackend):
                 # uncertain entry and verified executor completion. This retry
                 # cannot reopen a terminal start or reuse the worker's proof. Its
                 # separate Activity job and receipt record publication recovery.
-                code = ("publication_failed" if saved else
+                media_refused = isinstance(exc, _platform.MediaUnavailableError)
+                code = (exc.code if media_refused else "publication_failed" if saved else
                         "youtube_rate_limit" if _is_youtube_rate_limit(exc) else "download_failed")
                 if saved:
                     _record_single_extract_job(url, _now_iso(), result=saved)
                 try:
                     outcome = _source_service().fail_capture(
-                        start_id, owner_token, code, terminal=bool(saved), proof=proof)
+                        start_id, owner_token, code, terminal=bool(saved) or media_refused, proof=proof)
                     release_locks = source_subscriptions.settlement_releases_dispatcher_locks(
                         outcome)
                 except Exception:
@@ -10661,6 +10686,7 @@ def _create_playlist_job(playlist: dict, interval: int) -> tuple[str, dict]:
     Shared by the HTTP `/playlist/start` route and the MCP `uoink_playlist`
     tool so both entry points get identical job shapes and lifecycle.
     """
+    _platform.require_media()
     job_id = _make_job_id()
     title = playlist.get("title") or "YouTube Playlist"
     folder_slug = slugify(title) or "playlist"
@@ -11528,6 +11554,13 @@ def _playlist_worker(job_id: str):
     public = _get_public_job(job_id)
     if not public:
         return
+    refusal = _platform.capability_refusal(_platform.media_capability())
+    if refusal is not None:
+        _update_job(job_id, state="failed", completed_at=_now_iso(),
+                    current_video=None, current_video_phase="capability",
+                    error=refusal["code"], error_detail=refusal["reason"],
+                    result=refusal, message=refusal["reason"])
+        return
     cancel_event = _job_cancel_event(job_id)
     used_slugs: set[str] = set()
 
@@ -11584,6 +11617,7 @@ def _playlist_worker(job_id: str):
             )
 
             try:
+                _platform.require_media()
                 metadata = _fetch_metadata(v["url"], cancel_event=cancel_event)
                 title = metadata.get("title") or current["title"] or "Untitled"
                 current["title"] = title
@@ -12078,6 +12112,7 @@ def _retry_pending_one() -> bool:
                                           and ownership.reused) else None
             try:
                 if result is None:
+                    _platform.require_media()
                     metadata = _fetch_metadata(url, cancel_event=cancel_event)
                     _raise_if_cancelled(cancel_event)
                     live_state = _detect_live_state(metadata)
@@ -13383,7 +13418,8 @@ class Handler(BaseHTTPRequestHandler):
                 # means staged Librarian work exists and no client holds a
                 # lease; the server never runs the Librarian itself.
                 "library": _library_health_payload(),
-                "capabilities": _platform.platform_capabilities(),
+                **({"capabilities": _platform.platform_capabilities()}
+                   if _platform.sys.platform == "darwin" else {}),
             })
         if bare == "/index/backfill-status":
             # Public, read-only progress counts (same posture as /health) so
@@ -14996,7 +15032,8 @@ class Handler(BaseHTTPRequestHandler):
         return self._send_json(200, {
             "ok": True,
             "whisperx_available": whisper_runner.is_whisperx_available(),
-            "media_capability": _platform.media_capability(),
+            **({"media_capability": _platform.media_capability()}
+               if _platform.sys.platform == "darwin" else {}),
             "selected_model": settings.get("whisper_model") or "base",
             "supported_models": list(whisper_runner._MODELS),
             "diarization_default": bool(settings.get("diarization_default")),
@@ -15943,6 +15980,9 @@ class Handler(BaseHTTPRequestHandler):
         })
 
     def _handle_reliability_compute(self, video_id: str, body: dict):
+        refusal = _platform.capability_refusal(_platform.media_capability())
+        if refusal is not None:
+            return self._send_json(501, refusal)
         threshold = RELIABILITY_DEFAULT_THRESHOLD
         raw_threshold = body.get("threshold") if isinstance(body, dict) else None
         if raw_threshold is not None:
@@ -18368,6 +18408,9 @@ class Handler(BaseHTTPRequestHandler):
 
     # ---- /playlist/preview ----
     def _handle_playlist_preview(self, body: dict):
+        refusal = _platform.capability_refusal(_platform.media_capability())
+        if refusal is not None:
+            return self._send_json(501, refusal)
         url, _interval, err, status = self._validate_playlist_body(body)
         if err:
             return self._send_json(status, {"ok": False, "error": err})
@@ -18378,6 +18421,9 @@ class Handler(BaseHTTPRequestHandler):
 
     # ---- /playlist/start ----
     def _handle_playlist_start(self, body: dict):
+        refusal = _platform.capability_refusal(_platform.media_capability())
+        if refusal is not None:
+            return self._send_json(501, refusal)
         url, interval, err, status = self._validate_playlist_body(body, require_interval=True)
         if err:
             return self._send_json(status, {"ok": False, "error": err})
@@ -18840,6 +18886,9 @@ class Handler(BaseHTTPRequestHandler):
         The slim path is the prompt's `transcript + thumbnail only`
         graceful fallback. A later PR can deepen it with optional
         ffmpeg screenshots once we know which sites benefit."""
+        refusal = _platform.capability_refusal(_platform.media_capability())
+        if refusal is not None:
+            return self._send_json(501, refusal)
         raw = (body.get("url") or "").strip()
         canonical, platform = _normalize_any_url(raw)
         if not canonical:
@@ -19299,6 +19348,9 @@ class Handler(BaseHTTPRequestHandler):
 
     # ---- /session/add ----
     def _handle_session_add(self, body: dict):
+        refusal = _platform.capability_refusal(_platform.media_capability())
+        if refusal is not None:
+            return self._send_json(501, refusal)
         session_id, sid_err = self._validate_session_id(body)
         if sid_err:
             return self._send_json(400, {"ok": False, "error": sid_err})
@@ -20430,7 +20482,7 @@ def run_cli(argv: list[str]) -> int:
     if _install_isolation.CLI_STOP in argv or _install_isolation.CLI_UPGRADE_CHECK in argv:
         return _install_isolation.cli(argv)
     argv = _install_isolation.strip_cli(argv)
-    if argv and argv[0] == "status":
+    if argv and argv[0] == "status" and _platform.sys.platform == "darwin":
         payload = _helper_health_status()
         payload["capabilities"] = _platform.platform_capabilities()
         _print_json(payload)

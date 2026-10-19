@@ -78,6 +78,10 @@ foreground window covers its monitor. The authenticated settings equivalent is
 
 ### `GET /ping`
 
+On macOS only, `/ping` and `/health` also return `capabilities`, with
+`library_mirror` and `media` entries containing `available`, `code`, and
+`reason`. Windows and Linux use the response shape shown below.
+
 Values vary with the installed version, selected Whisper model, downloaded
 models, output-root recovery, and corpus state. The response shape is:
 

@@ -207,7 +207,137 @@ def test_media_bundle_gate_never_uses_path(darwin, monkeypatch, tmp_path):
 def test_media_other_platforms_unchanged(monkeypatch, tmp_path, platform):
     monkeypatch.setattr(_platform, "sys", SimpleNamespace(platform=platform))
     monkeypatch.setattr(_platform, "__file__", str(tmp_path / "Uoink.app/Contents/Resources/_platform.py"))
+    monkeypatch.setattr(_platform, "Path", forbidden)
     assert _platform.media_capability()["available"] is True
+    _platform.require_media()
+
+
+@pytest.mark.parametrize("platform", ["win32", "linux", "darwin"])
+def test_settings_and_transcription_fields_are_darwin_only(monkeypatch, platform):
+    monkeypatch.setattr(_platform, "sys", SimpleNamespace(platform=platform))
+    monkeypatch.setattr(server, "_get_saved_anthropic_key", lambda: None)
+    monkeypatch.setattr(server, "_autostart_enabled", lambda: False)
+    monkeypatch.setattr(server, "_load_topics", lambda: {"topics": []})
+    monkeypatch.setattr(server, "_read_settings", lambda: {})
+    monkeypatch.setattr(server.whisper_runner, "is_whisperx_available", lambda: False)
+    settings = server._public_settings({"library_mirror_enabled": True})
+    assert settings["library_mirror_enabled"] is (platform != "darwin")
+    assert ("library_mirror_capability" in settings) is (platform == "darwin")
+    assert ("media_capability" in settings) is (platform == "darwin")
+    monkeypatch.setattr(uoink_mcp_tools, "_b", lambda: server)
+    result = uoink_mcp_tools.get_whisperx_status({})
+    assert ("media_capability" in result) is (platform == "darwin")
+
+
+@pytest.fixture
+def missing_media(darwin, monkeypatch, tmp_path):
+    monkeypatch.setattr(_platform, "__file__", str(tmp_path / "Uoink.app/Contents/Resources/_platform.py"))
+    monkeypatch.setenv("PATH", "/opt/homebrew/bin")
+    monkeypatch.setattr(server, "_run_subprocess", forbidden)
+    monkeypatch.setattr(server, "_fetch_metadata", forbidden)
+    return _platform.capability_refusal(_platform.media_capability())
+
+
+@pytest.mark.parametrize("method,args", [
+    ("_handle_extract", ({"url": "https://www.youtube.com/watch?v=aaaaaaaaaaa"},)),
+    ("_handle_playlist_preview", ({"url": "https://www.youtube.com/playlist?list=PLtest"},)),
+    ("_handle_playlist_start", ({"url": "https://www.youtube.com/playlist?list=PLtest"},)),
+    ("_handle_session_add", ({"session_id": "test", "url": "https://example.test/video"},)),
+    ("_handle_extract_any", ({"url": "https://example.test/video"},)),
+    ("_handle_reliability_compute", ("aaaaaaaaaaa", {})),
+])
+def test_media_routes_refuse_before_metadata_or_job_start(missing_media, monkeypatch, method, args):
+    monkeypatch.setattr(server, "_create_playlist_job", forbidden)
+    monkeypatch.setattr(server, "_fetch_playlist_preview", forbidden)
+    monkeypatch.setattr(server, "_read_session", forbidden)
+    monkeypatch.setattr(server, "_compute_transcript_reliability", forbidden)
+    probe = object.__new__(server.Handler)
+    replies = []
+    probe._send_json = lambda status, payload: replies.append((status, payload))
+    getattr(probe, method)(*args)
+    assert replies == [(501, missing_media)]
+
+
+def test_media_helpers_fail_before_subprocess_or_capture_io(missing_media, monkeypatch, tmp_path):
+    assert server._fetch_playlist_preview("https://www.youtube.com/playlist?list=PLtest") == (
+        None, "media_requires_ffmpeg", 501)
+    monkeypatch.setattr(server, "_folder_for_video_id", forbidden)
+    assert server._compute_transcript_reliability("aaaaaaaaaaa") == missing_media
+    with pytest.raises(_platform.MediaUnavailableError) as exc:
+        server._download_reliability_audio("https://example.test/video", tmp_path)
+    assert exc.value.code == "media_requires_ffmpeg"
+    assert server.friendly_error(exc.value).startswith("media_requires_ffmpeg:")
+    monkeypatch.setattr(server, "_make_job_id", forbidden)
+    with pytest.raises(_platform.MediaUnavailableError):
+        server._create_playlist_job({}, 30)
+
+
+def test_playlist_worker_records_gate_before_folder_or_metadata(missing_media, monkeypatch, tmp_path):
+    updates = []
+    monkeypatch.setattr(server, "_get_public_job", lambda job_id: {"id": job_id})
+    monkeypatch.setattr(server, "_job_cancel_event", forbidden)
+    monkeypatch.setattr(server, "_update_job", lambda job_id, **values: updates.append(values))
+    server._playlist_worker("blocked-playlist")
+    assert len(updates) == 1
+    assert updates[0]["state"] == "failed"
+    assert updates[0]["error"] == "media_requires_ffmpeg"
+    assert updates[0]["result"] == missing_media
+    assert not list(tmp_path.iterdir())
+
+
+def test_standing_preflight_reports_media_gate(missing_media):
+    backend = object.__new__(server._ServerCaptureBackend)
+    for kind in ("youtube_channel", "podcast_rss"):
+        outcome = backend.preflight({}, {"kind": kind})
+        assert outcome.status == "preflight_failed"
+        assert outcome.code == "media_requires_ffmpeg"
+        assert outcome.terminal is True
+    outcome = backend._run_podcast({}, {}, {})
+    assert outcome.code == "media_requires_ffmpeg" and outcome.terminal
+    outcome = backend._run_youtube({}, {}, {})
+    assert outcome.code == "media_requires_ffmpeg" and outcome.terminal
+
+
+def test_standing_worker_settles_with_media_code(missing_media, monkeypatch):
+    from unittest.mock import Mock
+    # Defensive worker check: availability can change after thread admission.
+    missing = _platform.media_capability()
+    monkeypatch.setattr(_platform, "media_capability", Mock(side_effect=[
+        {"available": True, "code": None, "reason": None}, missing]))
+    service = SimpleNamespace(
+        claim_execution=Mock(return_value={"outcome": "active"}),
+        fail_capture=Mock(return_value={"outcome": "failed"}),
+        complete_capture=Mock())
+    backend = SimpleNamespace(kind="test", _pacing=SimpleNamespace(),
+                              _ensure_ownership=Mock(), holds_execution=lambda start: True,
+                              release=Mock())
+    monkeypatch.setattr(server, "_source_service", lambda: service)
+    monkeypatch.setattr(server, "threading", SimpleNamespace(
+        Thread=lambda *, target, **kwargs: SimpleNamespace(start=target)))
+    monkeypatch.setattr(server.source_subscriptions, "process_incarnation", forbidden)
+    monkeypatch.setattr(server.source_subscriptions, "settlement_releases_dispatcher_locks", lambda result: True)
+    start = {"start_id": "test-start", "owner_token": "test-owner"}
+    outcome = server._ServerCaptureBackend._run_youtube(
+        backend, start, {"entry_id": "aaaaaaaaaaa"}, {})
+    assert outcome.status == "in_flight"
+    args, kwargs = service.fail_capture.call_args
+    assert args == ("test-start", "test-owner", "media_requires_ffmpeg")
+    assert kwargs["terminal"] is True
+    assert kwargs["proof"].start_id == "test-start"
+    service.fail_capture.assert_called_once()
+    service.complete_capture.assert_not_called()
+    backend.release.assert_called_once_with(start)
+    assert "test-start" not in server._source_capture_threads
+
+
+@pytest.mark.parametrize("platform", ["win32", "linux"])
+def test_status_cli_retains_main_fallthrough(monkeypatch, platform):
+    monkeypatch.setattr(_platform, "sys", SimpleNamespace(platform=platform))
+    calls = []
+    monkeypatch.setattr(server, "main", lambda **kwargs: calls.append(kwargs))
+    monkeypatch.setattr(server, "_helper_health_status", forbidden)
+    assert server.run_cli(["status"]) == 0
+    assert calls == [{"show_dashboard": False}]
 
 
 def test_real_bundle_interpreter_resolution(monkeypatch, tmp_path):

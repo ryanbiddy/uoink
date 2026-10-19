@@ -219,11 +219,17 @@ class TestP409PathsAndConsent:
 
         # status reports disabled
         st = unwrap_dict(h.mirror.status())
+        if sys.platform == "darwin":
+            assert st["code"] == "library_mirror_unavailable_macos"
+            assert st["ok"] is False
         assert st.get("enabled") is False or st.get("state") == "disabled" or st.get("synced", 0) == 0
 
         # on_committed_event and resync do nothing
         h.mirror.on_committed_event("capture", video_id="vid-standard-01")
         resync_res = unwrap_dict(h.mirror.resync())
+        if sys.platform == "darwin":
+            assert resync_res["code"] == "library_mirror_unavailable_macos"
+            assert resync_res["ok"] is False
         assert resync_res.get("synced", 0) == 0
 
         # No library files generated under Uoink
@@ -742,12 +748,13 @@ class TestP412CorrectionStoreSeparation:
         user_hash = _compute_file_sha256(h.user_file)
 
         # Perform multiple mirror events, resyncs, and purges
-        h.mirror.on_committed_event("capture", video_id="vid-standard-01")
-        h.mirror.resync()
-        h.mirror.on_committed_event("soft_delete", video_id="vid-standard-01")
-        h.mirror.resync()
-        h.mirror.on_committed_event("hard_purge", video_id="vid-standard-01")
-        h.mirror.resync()
+        for event in ("capture", "soft_delete", "hard_purge"):
+            event_result = h.mirror.on_committed_event(event, video_id="vid-standard-01")
+            result = h.mirror.resync()
+            if sys.platform == "darwin":
+                for refusal in (event_result, result):
+                    assert refusal["code"] == "library_mirror_unavailable_macos"
+                    assert refusal["ok"] is False
 
         # TASTE.md and USER.md remain byte-identical
         assert _compute_file_sha256(h.taste_file) == taste_hash

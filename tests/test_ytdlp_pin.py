@@ -20,9 +20,13 @@ def test_ytdlp_build_pins_match_current_stable():
         r"(?m)^\$YTDLP_VERSION\s*=\s*'([^']+)'$",
     )
     macos = _required_match(
-        ROOT / "build-mac.sh",
-        r'(?m)^YTDLP_VERSION="([^"]+)"$',
+        ROOT / "requirements-installer-lock.txt",
+        r'(?m)^yt-dlp==([^\s]+)$',
     )
 
     assert windows == EXPECTED
-    assert macos == EXPECTED
+    # Wheel metadata normalizes zero-padded release components.
+    assert tuple(map(int, macos.split("."))) == tuple(map(int, EXPECTED.split(".")))
+    # The mac builder now installs the qualified wheel graph from this lock.
+    qualification = (ROOT / "scripts/mac/qualify_deps.py").read_text(encoding="utf-8")
+    assert 'default=ROOT / "requirements-installer-lock.txt"' in qualification

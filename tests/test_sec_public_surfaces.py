@@ -98,6 +98,8 @@ def helper(surface_code):
         "DASHBOARD_PATH": Mock(read_bytes=Mock(return_value=HTML)),
         "SPLASH_PATH": Mock(read_bytes=Mock(return_value=HTML)),
         "_platform": SimpleNamespace(platform_detail=lambda: "Windows AMD64",
+                                     sys=SimpleNamespace(platform="win32"),
+                                     media_capability=lambda: {"available": True, "code": None, "reason": None},
                                      keyring_display_name=lambda: "Windows Credential Manager"),
         "_is_writable_dir": Mock(return_value=True),
         "_read_settings": Mock(return_value={

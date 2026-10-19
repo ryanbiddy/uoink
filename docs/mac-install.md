@@ -1,9 +1,10 @@
 # Uoink on macOS: build status
 
-There is no public macOS installer yet. Passes 1?4 passed the hosted macOS 15
+There is no public macOS installer yet. Passes 1-4 passed the hosted macOS 15
 arm64 checks on Python 3.11 and 3.13. The new build pipeline assembles an
-unsigned Apple Silicon app for CI testing; its first hosted bundle run is
-still pending. See [Build the macOS CI bundle](mac/BUILD.md) for commands,
+unsigned Apple Silicon app for CI testing. Hosted run 39244020379 failed the
+portable suite and native-loader inventory; the repairs still need a hosted
+rerun. See [Build the macOS CI bundle](mac/BUILD.md) for commands,
 artifact contents and the evidence required from that run.
 
 The first app bundle deliberately disables library mirroring

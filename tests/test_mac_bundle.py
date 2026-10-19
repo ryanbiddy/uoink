@@ -132,7 +132,10 @@ def test_native_inventory_rejects_wrong_architecture_and_external_loaders(monkey
             dependency = "/opt/homebrew/lib/libbad.dylib" if problem == "dependency" else "/usr/lib/libSystem.B.dylib"
             output = f"{binary}:\n\t{dependency} (compatibility version 1.0.0)\n"
         else:
-            output = "cmd LC_RPATH\npath /Users/runner/build/lib (offset 12)" if problem == "rpath" else ""
+            dependency = "/opt/homebrew/lib/libbad.dylib" if problem == "dependency" else "/usr/lib/libSystem.B.dylib"
+            output = f"Load command 0\ncmd LC_LOAD_DYLIB\nname {dependency} (offset 24)\n"
+            if problem == "rpath":
+                output += "Load command 1\ncmd LC_RPATH\npath /Users/runner/build/lib (offset 12)\n"
         return SimpleNamespace(stdout=output)
 
     monkeypatch.setattr(bundle, "run", inspect)
@@ -141,3 +144,112 @@ def test_native_inventory_rejects_wrong_architecture_and_external_loaders(monkey
             bundle.binary_inventory(tmp_path)
     else:
         assert bundle.binary_inventory(tmp_path)[0]["architectures"] == "arm64"
+
+
+@pytest.mark.parametrize("universal", [False, True])
+@pytest.mark.parametrize("dependency", [
+    "@loader_path/libok.dylib", "@rpath/libok.dylib", "@executable_path/../libok.dylib",
+    "/usr/lib/libSystem.B.dylib", "/System/Library/Frameworks/Cocoa.framework/Cocoa",
+    "/DLC/PIL/.dylibs/libXau.6.dylib", "/opt/homebrew/lib/libbad.dylib",
+    "/Users/runner/build/libbad.dylib", "/usr/lib/../../opt/libbad.dylib",
+    "/System/../opt/libbad.dylib",
+])
+def test_native_inventory_distinguishes_install_id_from_real_loads(
+        monkeypatch, tmp_path, dependency, universal):
+    from types import SimpleNamespace
+    binary = tmp_path / "libXau.6.dylib"
+    binary.write_bytes(b"\xcf\xfa\xed\xfe" + b"fixture")
+    install_id = "/DLC/PIL/.dylibs/libXau.6.dylib"
+    arches = ("arm64", "x86_64") if universal else ("arm64",)
+    loads = commands = ""
+    for arch in arches:
+        header = f"{binary} (architecture {arch}):\n"
+        loads += header + f"\t{install_id} (compatibility version 1.0.0)\n\t{dependency} (compatibility version 1.0.0)\n"
+        commands += (header + f"Load command 0\n      cmd LC_ID_DYLIB\n  cmdsize 64\n     name {install_id} (offset 24)\n"
+                     f"Load command 1\n      cmd LC_LOAD_DYLIB\n  cmdsize 64\n     name {dependency} (offset 24)\n"
+                     "Load command 2\n      cmd LC_RPATH\n  cmdsize 32\n     path @loader_path/.. (offset 12)\n")
+    monkeypatch.setattr(bundle, "run", lambda command, **kwargs: SimpleNamespace(
+        stdout=" ".join(arches) if command[0] == "lipo" else loads if command[1] == "-L" else commands))
+    if dependency.startswith(("/DLC/", "/opt/", "/Users/")) or "libbad" in dependency:
+        with pytest.raises(ValueError, match="Nonrelocatable dependency"):
+            bundle.binary_inventory(tmp_path)
+    else:
+        assert bundle.binary_inventory(tmp_path)[0]["path"] == binary.name
+
+
+@pytest.mark.parametrize("command", ["LC_LOAD_WEAK_DYLIB", "LC_REEXPORT_DYLIB",
+                                     "LC_LAZY_LOAD_DYLIB", "LC_LOAD_UPWARD_DYLIB"])
+def test_optional_native_loads_are_still_dependencies(command):
+    assert bundle.native_loader_paths(
+        f"cmd {command}\nname /outside/libbad.dylib (offset 24)\n"
+    ) == [("dependency", "/outside/libbad.dylib")]
+    with pytest.raises(ValueError, match="Malformed"):
+        bundle.native_loader_paths(f"cmd {command}\nname broken\n")
+
+
+def test_native_inventory_accepts_bundle_absolute_load_and_system_rpath(monkeypatch, tmp_path):
+    from types import SimpleNamespace
+    binary = tmp_path / "native.dylib"
+    binary.write_bytes(b"\xcf\xfa\xed\xfe" + b"fixture")
+    dependency = tmp_path / "internal/libhelper.dylib"
+    dependency.parent.mkdir()
+    dependency.write_bytes(b"fixture")
+    commands = (f"cmd LC_LOAD_DYLIB\nname {dependency} (offset 24)\n"
+                "cmd LC_RPATH\npath /usr/lib (offset 12)\n")
+    monkeypatch.setattr(bundle, "run", lambda command, **kwargs: SimpleNamespace(
+        stdout="arm64" if command[0] == "lipo" else commands if command[1] == "-l" else ""))
+    assert bundle.binary_inventory(tmp_path)[0]["path"] == binary.name
+
+
+@pytest.mark.parametrize("mutate,fail", [(False, False), (True, False), (False, True)])
+def test_smoke_success_requires_completed_checks_and_immutable_bundle(monkeypatch, tmp_path, mutate, fail):
+    from types import SimpleNamespace
+    import bundle_smoke
+    app = tmp_path / "Original.app"
+    app.mkdir()
+    (app / "payload").write_text("original")
+    output = tmp_path / "evidence"
+    capabilities = {"library_mirror": {"code": "library_mirror_unavailable_macos"},
+                    "media": {"code": "media_requires_ffmpeg"}}
+
+    class Socket:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            pass
+
+        def bind(self, address):
+            assert address == ("127.0.0.1", 0)
+
+        def getsockname(self):
+            return ("127.0.0.1", 43871)
+
+    def run(command, **kwargs):
+        if command[-1] == "status":
+            mirror = "mirror" in command
+            return SimpleNamespace(returncode=1 if mirror else 0, stderr="",
+                stdout=json.dumps({"ok": not mirror, "code": "library_mirror_unavailable_macos"}))
+        if fail:
+            raise RuntimeError("synthetic Pillow failure")
+        if mutate:
+            relocated = Path(kwargs["cwd"]) / "Relocated App With Spaces/Uoink.app"
+            (relocated / "payload").write_text("changed")
+        return SimpleNamespace(returncode=0)
+
+    monkeypatch.setattr(bundle_smoke.socket, "socket", Socket)
+    monkeypatch.setattr(bundle_smoke.urllib.request, "urlopen", lambda *args, **kwargs: io.StringIO(
+        json.dumps({"ok": True, "capabilities": capabilities})))
+    monkeypatch.setattr(bundle_smoke.subprocess, "Popen", lambda *args, **kwargs: SimpleNamespace(poll=lambda: None))
+    monkeypatch.setattr(bundle_smoke.subprocess, "run", run)
+    monkeypatch.setattr(bundle_smoke, "stdio", lambda *args: {"ok": True})
+    monkeypatch.setattr(bundle_smoke, "stop", lambda proc: None)
+    if mutate or fail:
+        with pytest.raises(AssertionError if mutate else RuntimeError):
+            bundle_smoke.smoke(app, output)
+    else:
+        bundle_smoke.smoke(app, output)
+    report = json.loads((output / "smoke.json").read_text())
+    assert report["ok"] is (not mutate and not fail)
+    assert report["bundle_unchanged"] is (not mutate)
+    assert app.is_dir()
