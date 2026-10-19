@@ -263,8 +263,9 @@ def build(output: Path) -> None:
                 shown = run([prefix / "bin/ffmpeg", "-L"], env=env, capture_output=True)
                 license_info = (shown.stdout or "") + (shown.stderr or "")
                 (evidence / "ffmpeg-license.txt").write_text(license_info)
-                if ("GNU Lesser General Public License" not in license_info
-                        or "GNU General Public License as published" in license_info.replace("Lesser General", "")):
+                text = " ".join(license_info.split())  # the license text wraps across lines
+                if ("GNU Lesser General Public License" not in text
+                        or "GNU General Public License as published" in text.replace("Lesser General", "")):
                     raise ValueError("FFmpeg did not report an LGPL build")
     for name in ("build_ffmpeg.py", "ffmpeg_bundle.py", "payload.json", "FFMPEG.md"):
         shutil.copyfile(MAC / name, output / "notices" / name)
