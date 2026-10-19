@@ -8,21 +8,21 @@ MCP clients launch this process and speak JSON-RPC over stdin/stdout. Keep
 stdout reserved for the protocol; server.py logging is redirected to stderr
 while importing the backend.
 
-The stdio surface is the 25 canonical tools below plus, since Phase 4 run
-AV-1 (2026-09-08), the three bounded read tools `search_library`,
-`get_library_item` and `read_library_resource`, the five library resource
-templates and the four library prompts (contract phase4-v1-2026-09-08,
-docs/library/PHASE4-CONTRACT-2026-09-08.md). The six Yoink-era aliases
-completed their deprecation window in Uoink v2.5 and are not registered in
-v3. Run E (2026-09-04) added the two Phase 1 clip tools, `search_clips` and
-`get_evidence_card`, to stdio. See docs/v2-mcp.md.
-Phase 5 run AZ (2026-09-08) added `get_library_activity` (contract phase5-v1),
-making 29 stdio tools. AZ-5h owns the stdio write lifetime: budgeted
-requests keep one admission through the real SDK JSON-RPC dump, then
-release. The registered low-level server applies the same settlement when
-it runs on the installed SDK stdio streams.
-Research playbooks add five prompts and get_playbook_input (T3); discovery
-adds discover_candidates and queue_discovered (T6): 35 tools and 9 prompts.
+The default full toolset serves all 91 tools in TOOL_REGISTRY, with identical
+names, descriptions, schemas, titles and annotations. UOINK_MCP_TOOLSET=core
+serves the previous 35 tools. Those tools remain first, in their original
+order, in full mode. Unknown toolset values warn on stderr and use full.
+
+All handlers use the shared registry's consent and safety checks. No tools
+are excluded from stdio. Dashboard intent minting is never an MCP tool;
+discovery's in-memory, origin-bound intents cannot cross into this process,
+so discovery requires the explicit agent-consent setting here. Library and
+source intents use the same token-derived trusted session as HTTP.
+
+Five resource templates and nine prompts remain available in both modes.
+AZ-5h keeps bounded Library admission alive through the real SDK JSON-RPC
+dump and releases it after serialization. Other tools run in worker threads
+so captures and model calls do not block the stdio event loop.
 """
 
 from __future__ import annotations
@@ -30,6 +30,7 @@ from __future__ import annotations
 import asyncio
 import contextvars
 import json
+import os
 import sys
 import time
 from pathlib import Path
@@ -100,7 +101,36 @@ import uoink_mcp_tools  # noqa: E402
 
 uoink_mcp_tools.bind_backend(server)
 
-mcp = FastMCP(
+def _selected_toolset() -> str:
+    value = os.environ.get("UOINK_MCP_TOOLSET", "full")
+    if value not in ("full", "core"):
+        print("Uoink MCP: unknown UOINK_MCP_TOOLSET; using full (expected full or core).",
+              file=sys.stderr)
+        return "full"
+    return value
+
+
+class RegistryMCP(FastMCP):
+    """Publish registry JSON schemas without FastMCP signature inference."""
+
+    async def list_tools(self):
+        names = uoink_mcp_tools.stdio_tool_names(STDIO_TOOLSET)
+        registry = {tool["name"]: tool for tool in uoink_mcp_tools.list_tools()}
+        return [mcp_types.Tool(**registry[name]) for name in names]
+
+    async def call_tool(self, name, arguments):
+        if name not in uoink_mcp_tools.stdio_tool_names(STDIO_TOOLSET):
+            envelope = {"ok": False, "error": "tool not found"}
+        else:
+            envelope = await asyncio.to_thread(_call_stdio_registry, name, arguments)
+        return mcp_types.CallToolResult(
+            content=[mcp_types.TextContent(type="text", text=json.dumps(
+                envelope, ensure_ascii=False, allow_nan=False))],
+            isError=envelope.get("ok") is not True)
+
+
+STDIO_TOOLSET = _selected_toolset()
+mcp = RegistryMCP(
     "uoink",
     instructions=(
         "Uoink turns videos, playlists, and podcast episodes into local "
@@ -119,102 +149,34 @@ except AttributeError:
 
 
 # --------------------------------------------------------------------------
-# Canonical tools (26). The CI doc-accuracy + backend-static jobs count these
-# @mcp.tool decorators against the ### headings in docs/v2-mcp.md, so keep the
-# decorator count and the documented tool count in lock-step (also
-# tests/test_c01_mcp_stdio.py CANONICAL_STDIO_TOOLS and .mcpb/manifest.json).
+# Python convenience wrappers retained for existing callers. Live tool metadata
+# and dispatch are generated from TOOL_REGISTRY. scripts/check_mcp_inventory.py
+# checks the complete inventory against docs, the bundle and receipt pins.
 # --------------------------------------------------------------------------
-@mcp.tool(
-    name="uoink_video",
-    title="Capture video",
-    annotations=mcp_types.ToolAnnotations(
-        readOnlyHint=False, destructiveHint=False,
-        idempotentHint=False, openWorldHint=True,
-    ),
-    description="Extract a single YouTube video into a Uoink corpus.",
-)
 def uoink_video(url: str, interval: int = 30) -> dict:
     return uoink_mcp_tools.call_tool("uoink_video", {"url": url, "interval": interval})
 
 
-@mcp.tool(
-    name="uoink_playlist",
-    title="Capture playlist",
-    annotations=mcp_types.ToolAnnotations(
-        readOnlyHint=False, destructiveHint=False,
-        idempotentHint=False, openWorldHint=True,
-    ),
-    description="Start asynchronous extraction for a YouTube playlist.",
-)
 def uoink_playlist(url: str, interval: int = 30) -> dict:
     return uoink_mcp_tools.call_tool("uoink_playlist", {"url": url, "interval": interval})
 
 
-@mcp.tool(
-    name="get_job_status",
-    title="Get job status",
-    annotations=mcp_types.ToolAnnotations(
-        readOnlyHint=True, destructiveHint=False,
-        idempotentHint=True, openWorldHint=False,
-    ),
-    description="Return the full status object for an async Uoink job.",
-)
 def get_job_status(job_id: str) -> dict:
     return uoink_mcp_tools.call_tool("get_job_status", {"job_id": job_id})
 
 
-@mcp.tool(
-    name="cancel_job",
-    title="Cancel job",
-    annotations=mcp_types.ToolAnnotations(
-        readOnlyHint=False, destructiveHint=True,
-        idempotentHint=True, openWorldHint=False,
-    ),
-    description="Cancel an async Uoink job and leave partial outputs on disk.",
-)
 def cancel_job(job_id: str) -> dict:
     return uoink_mcp_tools.call_tool("cancel_job", {"job_id": job_id})
 
 
-@mcp.tool(
-    name="list_recent_uoinks",
-    title="List recent captures",
-    annotations=mcp_types.ToolAnnotations(
-        readOnlyHint=True, destructiveHint=False,
-        idempotentHint=True, openWorldHint=False,
-    ),
-    description="List recent saved Uoink corpora.",
-)
 def list_recent_uoinks(limit: int = 20) -> dict:
     return uoink_mcp_tools.call_tool("list_recent_uoinks", {"limit": limit})
 
 
-@mcp.tool(
-    name="search_uoinks",
-    title="Search captures",
-    annotations=mcp_types.ToolAnnotations(
-        readOnlyHint=True, destructiveHint=False,
-        idempotentHint=True, openWorldHint=False,
-    ),
-    description="Keyword search across saved Uoink markdown corpora.",
-)
 def search_uoinks(query: str, limit: int = 10) -> dict:
     return uoink_mcp_tools.call_tool("search_uoinks", {"query": query, "limit": limit})
 
 
-@mcp.tool(
-    name="search_clips",
-    title="Search transcript clips",
-    annotations=mcp_types.ToolAnnotations(
-        readOnlyHint=True, destructiveHint=False,
-        idempotentHint=True, openWorldHint=False,
-    ),
-    description=(
-        "Full-text search over transcript windows from saved uoinks; each hit "
-        "carries a deep link to the moment. Use this to find the exact "
-        "quotable passage; use search_uoinks to find whole items."
-    ),
-)
 def search_clips(
     query: str,
     limit: int = 20,
@@ -229,20 +191,6 @@ def search_clips(
     return uoink_mcp_tools.call_tool("search_clips", args)
 
 
-@mcp.tool(
-    name="get_evidence_card",
-    title="Get evidence card",
-    annotations=mcp_types.ToolAnnotations(
-        readOnlyHint=True, destructiveHint=False,
-        idempotentHint=True, openWorldHint=False,
-    ),
-    description=(
-        "Return an evidence card for one saved uoink: metadata, source URL, "
-        "a short summary hint, and its most quotable clips spread across the "
-        "timeline, each with a deep link. Resolve by slug or video_id. "
-        "profile 'full' (default) or 'librarian' (bounded)."
-    ),
-)
 def get_evidence_card(
     slug: str | None = None,
     video_id: str | None = None,
@@ -259,60 +207,18 @@ def get_evidence_card(
     return uoink_mcp_tools.call_tool("get_evidence_card", args)
 
 
-@mcp.tool(
-    name="get_uoink_corpus",
-    title="Get saved corpus",
-    annotations=mcp_types.ToolAnnotations(
-        readOnlyHint=True, destructiveHint=False,
-        idempotentHint=True, openWorldHint=False,
-    ),
-    description="Return the full markdown corpus for a saved uoink by slug.",
-)
 def get_uoink_corpus(slug: str) -> dict:
     return uoink_mcp_tools.call_tool("get_uoink_corpus", {"slug": slug})
 
 
-@mcp.tool(
-    name="analyze_comments",
-    title="Analyze comments",
-    annotations=mcp_types.ToolAnnotations(
-        readOnlyHint=False, destructiveHint=True,
-        idempotentHint=False, openWorldHint=True,
-    ),
-    description=(
-        "Run Comment Intelligence on an existing uoink using the configured "
-        "Anthropic key."
-    ),
-)
 def analyze_comments(slug: str) -> dict:
     return uoink_mcp_tools.call_tool("analyze_comments", {"slug": slug})
 
 
-@mcp.tool(
-    name="classify_hook",
-    title="Classify hook",
-    annotations=mcp_types.ToolAnnotations(
-        readOnlyHint=False, destructiveHint=True,
-        idempotentHint=False, openWorldHint=True,
-    ),
-    description="Classify the hook type for an existing uoink.",
-)
 def classify_hook(slug: str) -> dict:
     return uoink_mcp_tools.call_tool("classify_hook", {"slug": slug})
 
 
-@mcp.tool(
-    name="get_taxonomy",
-    title="Get hook taxonomy",
-    annotations=mcp_types.ToolAnnotations(
-        readOnlyHint=True, destructiveHint=False,
-        idempotentHint=True, openWorldHint=False,
-    ),
-    description=(
-        "Return captured Hook Type taxonomy rows, optionally "
-        "filtered by channel and hook_type."
-    ),
-)
 def get_taxonomy(
     channel: str | None = None,
     hook_type: str | None = None,
@@ -324,79 +230,26 @@ def get_taxonomy(
     )
 
 
-@mcp.tool(
-    name="get_citation_map",
-    title="Get citation map",
-    annotations=mcp_types.ToolAnnotations(
-        readOnlyHint=True, destructiveHint=False,
-        idempotentHint=True, openWorldHint=False,
-    ),
-    description=(
-        "Return the transcript + screenshot citation map for a saved "
-        "uoink, each entry with a source-aware timestamp link."
-    ),
-)
 def get_citation_map(slug: str) -> dict:
     return uoink_mcp_tools.call_tool("get_citation_map", {"slug": slug})
 
 
-@mcp.tool(
-    name="get_uoink_health",
-    title="Get capture health",
-    annotations=mcp_types.ToolAnnotations(
-        readOnlyHint=True, destructiveHint=False,
-        idempotentHint=True, openWorldHint=False,
-    ),
-    description="Return the per-section extraction health score for a saved uoink.",
-)
 def get_uoink_health(slug: str) -> dict:
     return uoink_mcp_tools.call_tool("get_uoink_health", {"slug": slug})
 
 
-@mcp.tool(
-    name="find_mentions",
-    title="Find entity mentions",
-    annotations=mcp_types.ToolAnnotations(
-        readOnlyHint=True, destructiveHint=False,
-        idempotentHint=True, openWorldHint=False,
-    ),
-    description=(
-        "Find every mention of an entity (person, tool, product, company, "
-        "or topic) across saved uoinks, each with a source-aware timestamp "
-        "link when the source has a public URL."
-    ),
-)
 def find_mentions(entity: str, limit: int = 50) -> dict:
     return uoink_mcp_tools.call_tool(
         "find_mentions", {"entity": entity, "limit": limit}
     )
 
 
-@mcp.tool(
-    name="get_transcript_reliability",
-    title="Get transcript reliability",
-    annotations=mcp_types.ToolAnnotations(
-        readOnlyHint=True, destructiveHint=False,
-        idempotentHint=True, openWorldHint=False,
-    ),
-    description="Return stored transcript reliability spans for a saved uoink.",
-)
 def get_transcript_reliability(video_id: str) -> dict:
     return uoink_mcp_tools.call_tool(
         "get_transcript_reliability", {"video_id": video_id}
     )
 
 
-@mcp.tool(
-    name="add_podcast_feed",
-    title="Add podcast feed",
-    annotations=mcp_types.ToolAnnotations(
-        readOnlyHint=False, destructiveHint=False,
-        idempotentHint=True, openWorldHint=True,
-    ),
-    description=("Register a podcast RSS or Atom feed for metadata watching, "
-                 "with optional per-feed Auto-ingest."),
-)
 def add_podcast_feed(
     feed_url: str,
     poll_interval_min: int = 60,
@@ -409,56 +262,20 @@ def add_podcast_feed(
     )
 
 
-@mcp.tool(
-    name="list_podcast_feeds",
-    title="List podcast feeds",
-    annotations=mcp_types.ToolAnnotations(
-        readOnlyHint=True, destructiveHint=False,
-        idempotentHint=True, openWorldHint=False,
-    ),
-    description="List registered podcast feeds.",
-)
 def list_podcast_feeds(enabled_only: bool = False) -> dict:
     return uoink_mcp_tools.call_tool(
         "list_podcast_feeds", {"enabled_only": enabled_only}
     )
 
 
-@mcp.tool(
-    name="remove_podcast_feed",
-    title="Remove podcast feed",
-    annotations=mcp_types.ToolAnnotations(
-        readOnlyHint=False, destructiveHint=True,
-        idempotentHint=True, openWorldHint=False,
-    ),
-    description="Remove a podcast feed and its tracked episode rows.",
-)
 def remove_podcast_feed(feed_id: int) -> dict:
     return uoink_mcp_tools.call_tool("remove_podcast_feed", {"feed_id": feed_id})
 
 
-@mcp.tool(
-    name="poll_podcast_feed",
-    title="Poll podcast feed",
-    annotations=mcp_types.ToolAnnotations(
-        readOnlyHint=False, destructiveHint=False,
-        idempotentHint=False, openWorldHint=True,
-    ),
-    description="Fetch one podcast feed now and retain newly discovered episodes.",
-)
 def poll_podcast_feed(feed_id: int) -> dict:
     return uoink_mcp_tools.call_tool("poll_podcast_feed", {"feed_id": feed_id})
 
 
-@mcp.tool(
-    name="list_podcast_episodes",
-    title="List podcast episodes",
-    annotations=mcp_types.ToolAnnotations(
-        readOnlyHint=True, destructiveHint=False,
-        idempotentHint=True, openWorldHint=False,
-    ),
-    description="List tracked podcast episodes with optional feed and status filters.",
-)
 def list_podcast_episodes(
     feed_id: int | None = None,
     status: str | None = None,
@@ -470,43 +287,16 @@ def list_podcast_episodes(
     )
 
 
-@mcp.tool(
-    name="download_podcast_episode",
-    title="Download podcast audio",
-    annotations=mcp_types.ToolAnnotations(
-        readOnlyHint=False, destructiveHint=False,
-        idempotentHint=True, openWorldHint=True,
-    ),
-    description="Download one episode's MP3 locally with yt-dlp and ffmpeg.",
-)
 def download_podcast_episode(episode_id: int) -> dict:
     return uoink_mcp_tools.call_tool(
         "download_podcast_episode", {"episode_id": episode_id}
     )
 
 
-@mcp.tool(
-    name="get_whisperx_status",
-    title="Get transcription status",
-    annotations=mcp_types.ToolAnnotations(
-        readOnlyHint=True, destructiveHint=False,
-        idempotentHint=True, openWorldHint=False,
-    ),
-    description="Report local WhisperX availability and supported models.",
-)
 def get_whisperx_status() -> dict:
     return uoink_mcp_tools.call_tool("get_whisperx_status", {})
 
 
-@mcp.tool(
-    name="transcribe_podcast_episode",
-    title="Transcribe podcast episode",
-    annotations=mcp_types.ToolAnnotations(
-        readOnlyHint=False, destructiveHint=True,
-        idempotentHint=False, openWorldHint=True,
-    ),
-    description="Queue one local podcast transcription and return its durable job id.",
-)
 def transcribe_podcast_episode(
     episode_id: int,
     model: str = "base",
@@ -526,30 +316,12 @@ def transcribe_podcast_episode(
     )
 
 
-@mcp.tool(
-    name="episode_to_corpus",
-    title="Publish podcast corpus",
-    annotations=mcp_types.ToolAnnotations(
-        readOnlyHint=False, destructiveHint=True,
-        idempotentHint=True, openWorldHint=False,
-    ),
-    description="Publish a completed podcast transcript into the local corpus.",
-)
 def episode_to_corpus(episode_id: int) -> dict:
     return uoink_mcp_tools.call_tool(
         "episode_to_corpus", {"episode_id": episode_id}
     )
 
 
-@mcp.tool(
-    name="get_library_activity",
-    title="Get library activity",
-    annotations=mcp_types.ToolAnnotations(
-        readOnlyHint=True, destructiveHint=False,
-        idempotentHint=True, openWorldHint=False,
-    ),
-    description="Report deterministic library activity, shelf churn, and source observations.",
-)
 def get_library_activity(
     interval: dict,
     date_basis: str = "capture_time",
@@ -578,56 +350,25 @@ def get_library_activity(
 # --------------------------------------------------------------------------
 # Phase 4 (run AV-1, contract phase4-v1-2026-09-08): bounded library access.
 #
-# The three read tools are registered with @mcp.tool so they appear in
-# tools/list next to the 25 canonical tools; their execution is intercepted
+# The three read tools are advertised from TOOL_REGISTRY and appear in
+# tools/list with the full registry; their execution is intercepted
 # on the low-level server so the domain envelope is returned as text with
 # isError set from the envelope, never wrapped in the SDK's "Error executing
 # tool" string. Resources and prompts use low-level handlers on
 # mcp._mcp_server (replacing FastMCP's empty defaults) so the curated list,
-# the five templates, the four prompts and the JSON-RPC error codes are ours:
+# the five templates, the nine prompts and the JSON-RPC error codes are ours:
 # -32602 invalid parameters, -32002 missing or deleted resource, -32603 any
 # other refusal, each carrying the domain envelope in error.data. The SDK
 # advertises resources {subscribe:false, listChanged:false} and prompts
 # {listChanged:false} only because these handlers exist; no notification is
-# ever emitted. Duplicate JSON keys are not detectable here (the SDK hands
-# handlers parsed objects); the HTTP /tools/* route rejects them from raw
-# bytes. Every reader is request-scoped on the process-wide guard (2 active,
+# ever emitted. The raw stdio decoder and the HTTP /tools/* route both
+# reject duplicate JSON keys before handlers receive parsed objects. Every reader is request-scoped on the process-wide guard (2 active,
 # 60 admissions per minute, 2 s deadline). Nothing here writes to stdout.
 # --------------------------------------------------------------------------
-@mcp.tool(
-    name="search_library",
-    title="Search library",
-    annotations=mcp_types.ToolAnnotations(
-        readOnlyHint=True, destructiveHint=False,
-        idempotentHint=True, openWorldHint=False,
-    ),
-    description=(
-        "Bounded clip-first search of the saved library (default 5, at most "
-        "20 hits) with an item-text fallback for items without clips. Each "
-        "hit carries the item id, source revision, safe title and link, "
-        "evidence kind and timing, a 240-character preview and revision-bound "
-        "card and excerpt URIs for read_library_resource. Results are "
-        "bounded, not exhaustive; follow next_step when more retrieval is "
-        "needed."
-    ),
-)
 def search_library(query: str, limit: int = 5):
     return uoink_mcp_tools.call_tool("search_library", {"query": query, "limit": limit})
 
 
-@mcp.tool(
-    name="get_library_item",
-    title="Get library item",
-    annotations=mcp_types.ToolAnnotations(
-        readOnlyHint=True, destructiveHint=False,
-        idempotentHint=True, openWorldHint=False,
-    ),
-    description=(
-        "Resolve one saved item by video_id or slug (exactly one) and return "
-        "its default Librarian evidence card unchanged plus canonical card, "
-        "excerpt and initial corpus-chunk URIs. Bounded; use before quoting."
-    ),
-)
 def get_library_item(video_id: str | None = None, slug: str | None = None):
     args: dict = {}
     if video_id is not None:
@@ -637,33 +378,10 @@ def get_library_item(video_id: str | None = None, slug: str | None = None):
     return uoink_mcp_tools.call_tool("get_library_item", args)
 
 
-@mcp.tool(
-    name="read_library_resource",
-    title="Read library resource",
-    annotations=mcp_types.ToolAnnotations(
-        readOnlyHint=True, destructiveHint=False,
-        idempotentHint=True, openWorldHint=False,
-    ),
-    description=(
-        "Read one uoink://library/v1/ resource URI (card, excerpt, corpus "
-        "chunk, shelf page or brief) with the same validation, contents and "
-        "refusals as resources/read. Fallback for clients without native "
-        "resource reads; identical text, one renderer."
-    ),
-)
 def read_library_resource(uri: str):
     return uoink_mcp_tools.call_tool("read_library_resource", {"uri": uri})
 
 
-@mcp.tool(
-    name="get_playbook_input",
-    title="Prepare research playbook input",
-    annotations=mcp_types.ToolAnnotations(
-        readOnlyHint=True, destructiveHint=False,
-        idempotentHint=True, openWorldHint=False,
-    ),
-    description=uoink_mcp_tools.PLAYBOOK_INPUT_DESCRIPTION,
-)
 def get_playbook_input(
     playbook: Literal["outlier-posts", "transcript-intel", "comment-mining",
                       "creator-teardown", "repurpose-pack"],
@@ -674,12 +392,6 @@ def get_playbook_input(
     })
 
 
-@mcp.tool(
-    name="discover_candidates", title="Discover capture candidates",
-    annotations=mcp_types.ToolAnnotations(
-        readOnlyHint=False, destructiveHint=False, idempotentHint=False, openWorldHint=True),
-    description=uoink_mcp_tools.DISCOVER_CANDIDATES_DESCRIPTION,
-)
 def discover_candidates(
     mode: Literal["creator", "keyword"],
     platform: Literal["tiktok", "instagram", "youtube", "youtube_shorts"],
@@ -691,12 +403,6 @@ def discover_candidates(
         k: v for k, v in locals().items() if v is not None})
 
 
-@mcp.tool(
-    name="queue_discovered", title="Queue discovered posts",
-    annotations=mcp_types.ToolAnnotations(
-        readOnlyHint=False, destructiveHint=False, idempotentHint=True, openWorldHint=True),
-    description=uoink_mcp_tools.QUEUE_DISCOVERED_DESCRIPTION,
-)
 def queue_discovered(run_id: str, keys: list[str], user_intent_token: str | None = None) -> dict:
     return uoink_mcp_tools.call_tool("queue_discovered", {
         k: v for k, v in locals().items() if v is not None})
@@ -706,43 +412,10 @@ def queue_discovered(run_id: str, keys: list[str], user_intent_token: str | None
 # get_library_brief_input is a read; publish_library_brief is a local write
 # under DATA_ROOT/reach/briefs. Both are intercepted below like the three read
 # tools, so the domain envelope is the tool text.
-@mcp.tool(
-    name="get_library_brief_input",
-    title="Prepare library brief input",
-    annotations=mcp_types.ToolAnnotations(
-        readOnlyHint=True, destructiveHint=False,
-        idempotentHint=True, openWorldHint=False,
-    ),
-    description=(
-        "Prepare bounded input for a client-run daily brief: for a UTC date "
-        "and a Phase 2 run id, return job_key, input_hash, bound "
-        "queue/run/projection revisions, capture and event counts, coverage, "
-        "up to 20 work-status rows and up to 5 default Librarian cards (at "
-        "most 24,576 bytes). Read only: no lease, no mutation. The client "
-        "tracks its own report job."
-    ),
-)
 def get_library_brief_input(date: str, run_id: str):
     return uoink_mcp_tools.call_tool("get_library_brief_input", {"date": date, "run_id": run_id})
 
 
-@mcp.tool(
-    name="publish_library_brief",
-    title="Publish library brief",
-    annotations=mcp_types.ToolAnnotations(
-        readOnlyHint=False, destructiveHint=False,
-        idempotentHint=True, openWorldHint=False,
-    ),
-    description=(
-        "Local write: persist one client-produced brief for a job prepared by "
-        "get_library_brief_input. Validates the packet against current "
-        "library data (stale_brief on change), binds every citation to "
-        "supplied evidence, is idempotent on submission_key, and stores an "
-        "immutable artifact under the local reach/briefs directory. Cannot "
-        "apply labels or alter the assignment queue. Invoke only as part of "
-        "the user's requested brief job."
-    ),
-)
 def publish_library_brief(
     job_key: str,
     input_hash: str,
@@ -764,22 +437,6 @@ def publish_library_brief(
 # domain validator sees exactly the selector it was given (start/end or
 # excerpt_id, optional revision pins) and refuses anything else before any
 # storage access. Intercepted below like the Phase 4 tools.
-@mcp.tool(
-    name="export_cited_range",
-    title="Export cited transcript range",
-    annotations=mcp_types.ToolAnnotations(
-        readOnlyHint=True, destructiveHint=False,
-        idempotentHint=True, openWorldHint=False,
-    ),
-    description=(
-        "Read-only cited export of one stored transcript range (exact "
-        "cue-aligned start/end, at most 120 s and 200 cues) or one current "
-        "excerpt id from a saved item: verbatim stored text, per-cue speaker "
-        "labels with provenance, overlapping chapters, safe source and seek "
-        "links, source/media revisions and evidence refs. Nothing is fetched, "
-        "transcribed or saved; refusals carry a next_step."
-    ),
-)
 def export_cited_range(
     video_id: str,
     start: float | None = None,
@@ -796,24 +453,68 @@ def export_cited_range(
     return uoink_mcp_tools.call_tool("export_cited_range", args)
 
 
+def _helper_running() -> bool:
+    """Read process identity only; stdio never probes an HTTP port."""
+    binding = _install_isolation.current_binding()
+    if binding is not None:
+        return _install_isolation.owned_process_status(binding) == "alive"
+    try:
+        pid_path = server.HERE / "server.pid"
+        pid = int(pid_path.read_text(encoding="utf-8").strip())
+        if pid <= 0 or pid == os.getpid():
+            return False
+        image = _install_isolation._process_executable(pid)
+        own_image = _install_isolation.current_process_executable()
+        if not image or not own_image:
+            return False
+        allowed_images = {Path(own_image).resolve()}
+        if os.name == "nt":
+            allowed_images.add(Path(own_image).with_name("pythonw.exe").resolve())
+            allowed_images.add(Path(own_image).with_name("python.exe").resolve())
+        if Path(image).resolve() not in allowed_images:
+            return False
+        if os.name == "nt":
+            handle, _ = _install_isolation._windows_open_process(
+                pid, _install_isolation._PROCESS_QUERY_LIMITED_INFORMATION)
+            if not handle:
+                return False
+            try:
+                created_ms = _install_isolation._windows_process_created_ms(handle)
+            finally:
+                _install_isolation._windows_close_handle(handle)
+        else:
+            created_ms = _install_isolation._posix_process_created_ms(pid)
+        # The resident writes server.pid after binding. A process born after
+        # that file was written is a reused PID, not the helper that wrote it.
+        if created_ms is None or created_ms > pid_path.stat().st_mtime_ns // 1_000_000:
+            return False
+        return _install_isolation._pid_liveness(pid, created_ms) == "alive"
+    except (OSError, ValueError, UnicodeError):
+        return False
+
+
+def _call_stdio_registry(name, arguments):
+    # A monitored playlist poll can schedule captures for the helper's worker.
+    # Do not report queued work as running in this short-lived stdio process.
+    if name == "poll_monitored_playlist" and not _helper_running():
+        return {"ok": False, "error": "Open Uoink first, then retry polling the monitored playlist. "
+                "Its scheduled captures need the running Uoink helper."}
+    return uoink_mcp_tools.call_tool(name, arguments)
+
+
 def _register_phase4_stdio() -> None:
-    """Low-level resource, prompt and tool-execution handlers (see above).
-    Any missing piece degrades to FastMCP's defaults with a stderr note
-    rather than failing startup; the 25 canonical tools are untouched."""
+    """Register the Library budget hooks; missing safety plumbing fails startup."""
     try:
         import library_prompts
         import library_resources
         import research_playbooks
     except ImportError as exc:
-        print(f"Uoink MCP: Phase 4 library modules unavailable ({exc}); "
-              "resources and prompts are not served.", file=sys.stderr)
-        return
+        raise RuntimeError("Uoink MCP: required Library modules unavailable; repair the installation.") from exc
     try:
         from mcp import types as mcp_types
         from mcp.shared.exceptions import McpError
     except ImportError as exc:  # pragma: no cover -- SDK reshaped
-        print(f"Uoink MCP: cannot register Phase 4 handlers ({exc}).", file=sys.stderr)
-        return
+        raise RuntimeError("Uoink MCP: cannot register required Library handlers.") from exc
     try:
         from mcp.server.lowlevel.helper_types import ReadResourceContents
     except ImportError:  # pragma: no cover -- SDK reshaped; duck-typed by the decorator
@@ -824,9 +525,7 @@ def _register_phase4_stdio() -> None:
 
     low = getattr(mcp, "_mcp_server", None)
     if low is None:  # pragma: no cover -- SDK reshaped
-        print("Uoink MCP: low-level server not exposed; Phase 4 handlers not registered.",
-              file=sys.stderr)
-        return
+        raise RuntimeError("Uoink MCP: SDK does not expose the required low-level server.")
 
     ResourceError = library_resources.ResourceError
     limits = library_resources.LIMITS
@@ -951,12 +650,11 @@ def _register_phase4_stdio() -> None:
 
     handlers = getattr(low, "request_handlers", None)
     if not isinstance(handlers, dict):  # pragma: no cover -- SDK reshaped
-        print("Uoink MCP: tool interception unavailable; Phase 4 tools use FastMCP's "
-              "default result shape.", file=sys.stderr)
-        _bind_transport_handle_request()
-        return
+        raise RuntimeError("Uoink MCP: SDK tool interception unavailable; cannot enforce Library budgets.")
     fastmcp_call_tool = handlers.get(mcp_types.CallToolRequest)
     fastmcp_list_tools = handlers.get(mcp_types.ListToolsRequest)
+    if fastmcp_call_tool is None or fastmcp_list_tools is None:
+        raise RuntimeError("Uoink MCP: SDK tool handlers unavailable.")
 
     def tool_result(name, arguments):
         active = reader()
@@ -1049,43 +747,29 @@ def _register_phase4_stdio() -> None:
 
     if fastmcp_call_tool is not None:
         async def _phase4_call_tool(req):
-            if req.params.name in uoink_mcp_tools.DISCOVERY_TOOL_NAMES:
-                # Paid discovery has its own 8 s/page timeout, not the 2 s
-                # library-read deadline. Keep stdio responsive to other calls
-                # and cancellation while the bounded worker finishes.
-                envelope = await asyncio.to_thread(
-                    uoink_mcp_tools.call_tool, req.params.name, req.params.arguments)
-                return mcp_types.ServerResult(mcp_types.CallToolResult(
-                    content=[mcp_types.TextContent(type="text", text=json.dumps(
-                        envelope, ensure_ascii=False, allow_nan=False))],
-                    isError=envelope.get("ok") is not True))
-            if req.params.name in library_resources.TOOL_NAMES:
-                return tool_result(req.params.name, req.params.arguments)
-            if req.params.name == "get_library_activity":
+            name = req.params.name
+            if name not in uoink_mcp_tools.stdio_tool_names(STDIO_TOOLSET):
+                envelope = {"ok": False, "error": "tool not found"}
+            elif name in library_resources.TOOL_NAMES:
+                return tool_result(name, req.params.arguments)
+            elif name == "get_library_activity":
                 return activity_result(req.params.arguments)
-            if req.params.name in ("export_cited_range", "get_playbook_input"):
-                return bounded_registry_result(req.params.name, req.params.arguments)
-            return await fastmcp_call_tool(req)
+            elif name in ("export_cited_range", "get_playbook_input"):
+                return bounded_registry_result(name, req.params.arguments)
+            else:
+                # Captures/model calls have their own service deadlines. Do not
+                # put mutable jobs on the 2 s Library read deadline: timing out
+                # their reply cannot cancel a worker's already-committed write.
+                return mcp_types.ServerResult(await mcp.call_tool(name, req.params.arguments))
+            return mcp_types.ServerResult(mcp_types.CallToolResult(
+                content=[mcp_types.TextContent(type="text", text=json.dumps(
+                    envelope, ensure_ascii=False, allow_nan=False))],
+                isError=envelope.get("ok") is not True))
         handlers[mcp_types.CallToolRequest] = _phase4_call_tool
 
     if fastmcp_list_tools is not None:
         async def _phase4_list_tools(req):
-            result = await fastmcp_list_tools(req)
-            try:
-                for tool in result.root.tools:
-                    if tool.name in library_resources.TOOL_SCHEMAS:
-                        # Same strict schema and text as the HTTP registry.
-                        tool.inputSchema = library_resources.TOOL_SCHEMAS[tool.name]
-                        tool.description = library_resources.TOOL_DESCRIPTIONS[tool.name]
-                    if tool.name in ({"get_library_activity", "export_cited_range", "get_playbook_input"}
-                                     | uoink_mcp_tools.DISCOVERY_TOOL_NAMES):
-                        if tool.name in uoink_mcp_tools.TOOL_REGISTRY:
-                            reg_spec = uoink_mcp_tools.TOOL_REGISTRY[tool.name]
-                            tool.inputSchema = reg_spec.input_schema
-                            tool.description = reg_spec.description
-            except (AttributeError, TypeError, ValueError):  # pragma: no cover
-                pass
-            return result
+            return mcp_types.ServerResult(mcp_types.ListToolsResult(tools=await mcp.list_tools()))
         handlers[mcp_types.ListToolsRequest] = _phase4_list_tools
 
     _bind_transport_handle_request()
@@ -1349,10 +1033,13 @@ def _stdio_request_id_rejection(message) -> str | None:
     return _stdio_protocol_rejection_frame(None)
 
 
-def _stdio_enforce_completed_frame(text: str, request_id, scope) -> str:
+def _stdio_enforce_completed_frame(text: str, request_id, scope, *, tool_inventory=False) -> str:
     """Bound success, typed errors, and replacement refusals to the wire cap."""
     import library_resources
-    cap = _stdio_completed_frame_cap()
+    # The full registry's exact JSON schemas exceed the Library data cap.
+    # Only server-generated tools/list metadata gets this larger bound;
+    # requests and tool/resource results keep their existing 64 KiB limit.
+    cap = 256 * 1024 if tool_inventory and scope is None else _stdio_completed_frame_cap()
     if len(text.encode("utf-8")) <= cap:
         return text
     if request_id is not None and _stdio_request_id_fits(request_id, cap):
@@ -1414,7 +1101,11 @@ async def _deliver_bounded_outbound(session_message, stdout) -> None:
                 text = _stdio_budget_refusal_message(
                     scope, request_id, "resource_too_large"
                 ).model_dump_json(by_alias=True, exclude_none=True)
-        text = _stdio_enforce_completed_frame(text, request_id, scope)
+        tool_inventory = (isinstance(root, mcp_types.JSONRPCResponse)
+                          and isinstance(root.result, dict)
+                          and set(root.result) == {"tools"})
+        text = _stdio_enforce_completed_frame(
+            text, request_id, scope, tool_inventory=tool_inventory)
         await stdout.write(text + "\n")
         await stdout.flush()
     finally:

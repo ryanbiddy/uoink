@@ -61,6 +61,18 @@ def _run_stdio(coroutine):
         return runner.run(coroutine)
 
 
+def test_full_stdio_credit_plan_and_refusal_equal_http(adapter):
+    adapter.settings["scrapecreators_agent_calls_enabled"] = False
+    plan = call("stdio", "discover_candidates", ARGS)
+    assert plan == call("http", "discover_candidates", ARGS)
+    assert plan["needs_confirmation"] is True
+    args = {**ARGS, "confirm_credits": 1}
+    refusal = call("stdio", "discover_candidates", args)
+    assert refusal == call("http", "discover_candidates", args)
+    assert reason(refusal) == "user_intent_required"
+    assert adapter.calls == []
+
+
 @pytest.fixture(autouse=True)
 def network_guard(monkeypatch, no_network_or_real_credentials):
     def forbidden(*args, **kwargs):
@@ -172,7 +184,7 @@ def test_stdio_discovery_serves_other_requests_and_cancellation(adapter, monkeyp
             assert not pending.done(), "discovery blocked the stdio event loop"
             result = await asyncio.wait_for(handlers[types.ListToolsRequest](
                 types.ListToolsRequest(method="tools/list")), 1)
-            assert len(result.root.tools) == 35
+            assert len(result.root.tools) == 91
             assert tools.DISCOVERY_TOOL_NAMES <= {tool.name for tool in result.root.tools}
             assert not pending.done()
             if cancel:

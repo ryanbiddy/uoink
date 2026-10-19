@@ -44,6 +44,13 @@ and does not proxy through the helper
 ([contract](library/PHASE4-CONTRACT-2026-09-08.md), Capabilities / client
 artifacts). Do not put a helper URL in this configuration.
 
+Uoink 3.9.2 advertises all 91 registry tools by default, with the previous 35
+first in their original order. Set `UOINK_MCP_TOOLSET=core` in the MCP server's
+`env` object for clients with tool caps, including Cursor. Unknown values warn
+on stderr and use full. Restart the connection after changing it. Consent gates
+are unchanged; monitored playlist polling asks you to open Uoink first if its
+resident helper is down. Local Library reads still work without that helper.
+
 ## 1. Installed Windows stdio setup
 
 Typical installed tree (resolve these to **absolute** paths on your machine;
@@ -95,7 +102,7 @@ the absolute installed paths. Schema against Claude Code CLI 2.1.261:
 - `"type": "stdio"`
 - `"command"`: absolute installed console `python.exe`
 - `"args"`: array whose first element is the absolute installed `uoink_mcp.py`
-- `"env"`: UTF-8 only (`PYTHONIOENCODING`, `PYTHONUTF8`)
+- `"env"`: UTF-8 (`PYTHONIOENCODING`, `PYTHONUTF8`), plus optional `UOINK_MCP_TOOLSET`
 
 The template contains no credentials, no checkout-specific path, and no
 resident-helper URL. Do not add `url`, headers, or tokens.

@@ -1,7 +1,7 @@
 """Run E (2026-09-04): `search_clips` and `get_evidence_card` on stdio.
 
-Transport parity: the two Phase 1 clip tools are now registered on the stdio
-surface (23 -> 25), delegate to the same `uoink_mcp_tools` handlers the
+Transport parity: the two Phase 1 clip tools are part of the full stdio
+registry, delegate to the same `uoink_mcp_tools` handlers the
 HTTP/OpenAPI registry uses, accept the same parameter names, and every
 lock-step inventory (docs, MCPB manifest, C-01 canonical set) agrees.
 """
@@ -25,13 +25,11 @@ def _stdio_tools() -> dict[str, object]:
     return {t.name: t for t in _complete_local_call(uoink_mcp.mcp.list_tools())}
 
 
-def test_clip_tools_are_on_stdio_and_the_count_is_35():
+def test_clip_tools_are_on_stdio_and_the_count_is_91():
     stdio = _stdio_tools()
     assert CLIP_TOOLS.issubset(stdio)
-    # 25 + three Phase 4 read tools + one Phase 5 activity tool + two Phase 4
-    # brief tools + one Phase 6 cited export tool (run BC-2) + get_playbook_input,
-    # discover_candidates and queue_discovered (research playbooks).
-    assert len(stdio) == 35
+    # Full mode includes the clip tools and every other shared registry tool.
+    assert len(stdio) == 91
     assert set(stdio) == CANONICAL_STDIO_TOOLS
 
 
@@ -106,11 +104,11 @@ def test_both_transports_return_the_same_shape_on_a_fixture(monkeypatch, tmp_pat
 
 
 def test_lock_step_inventories_agree():
-    src = (ROOT / "uoink_mcp.py").read_text(encoding="utf-8")
-    decorators = len(re.findall(r"^\s*@mcp\.tool\b", src, re.M))
+    import runpy
+    runpy.run_path(str(ROOT / "scripts/check_mcp_inventory.py"))["check"]()
     doc = (ROOT / "docs" / "v2-mcp.md").read_text(encoding="utf-8")
     headings = re.findall(r"^### ([a-z][a-z_]+)$", doc, re.M)
-    assert decorators == len(headings) == 35
+    assert len(headings) == 91
     assert set(headings) == CANONICAL_STDIO_TOOLS
     assert "(HTTP/OpenAPI only)" not in doc
     manifest = json.loads((ROOT / ".mcpb" / "manifest.json").read_text(encoding="utf-8"))
@@ -122,4 +120,4 @@ def test_lock_step_inventories_agree():
                   re.finditer(r"MCP server[^\n]*?\b(\d+)\s+tools\b", text, re.I)]
         # The first match is the current statement (README body, newest changelog
         # entry); older changelog entries keep their historical counts.
-        assert counts and counts[0] == 35, counts
+        assert counts and counts[0] == 91, counts

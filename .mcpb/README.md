@@ -21,7 +21,7 @@ does not prove Claude Code installation or any current CLI capability.
    Settings → Extensions**).
 3. When prompted for the **Uoink install directory**, accept the default
    (`%LOCALAPPDATA%\Uoink`) unless you installed Uoink somewhere else.
-4. Restart Claude Desktop. The 35 stdio tools, five library resource
+4. Restart Claude Desktop. The 91 stdio tools, five library resource
    templates, and nine prompts below appear from the launched child.
 
 ## What this bundle is (and isn't)
@@ -62,13 +62,15 @@ see https://uoink.app/developers. For **Claude Code CLI**, do not use this
 
 ## What stdio advertises
 
-The launched child is `uoink_mcp.py`. On stdio it advertises **35 tools**,
+The launched child is `uoink_mcp.py`. On stdio it advertises **91 tools**,
 **five resource templates**, and **nine prompts**. HTTP MCP stays tools-only
 and is not what this bundle launches.
 
-Count: **25** legacy tools + **3** bounded library reads + **3** brief/export
-tools + **1** activity tool + **3** playbook/discovery tools. The committed
-[`.mcpb/manifest.json`](manifest.json) lists all 35 names.
+The committed [manifest](manifest.json) lists all 91 names. The previous 35
+remain first in `tools/list`. Set `UOINK_MCP_TOOLSET=core` for clients with tool
+caps, including Cursor. Unknown values warn on stderr and use full.
+Claude Desktop users should reinstall the 3.9.2 `.mcpb` and restart Desktop
+to get the expanded inventory. Consent gates are unchanged.
 
 Resources and prompts are advertised on **stdio** (templates under
 `uoink://library/v1/`). Claude Desktop can attach listed resources through
@@ -76,7 +78,7 @@ its `@` picker. Claude Code CLI 2.1.261 has no native resource reader; that
 client uses `read_library_resource(uri)` instead
 ([docs/claude-code-mcp.md](../docs/claude-code-mcp.md)).
 
-### 35 tools
+### 91 tools
 
 **Legacy (25)**
 
@@ -138,8 +140,66 @@ client uses `read_library_resource(uri)` instead
 | `discover_candidates` | Plan or run opt-in ScrapeCreators discovery with explicit credit confirmation. |
 | `queue_discovered` | Send up to ten selected discovery results through the normal capture queue. |
 
-The six Living Library work-queue tools and the four Phase 3 source-subscription
-tools stay HTTP/OpenAPI-only. They are not in this bundle's stdio inventory.
+**Additional full-mode tools (56)**
+
+| Tool | Role |
+|---|---|
+| `list_library_work` | List library work. |
+| `claim_library_work` | Claim library work. |
+| `submit_library_result` | Submit library result. |
+| `apply_reshelving` | Apply reshelving. |
+| `pin_shelf` | Pin library shelf. |
+| `undo_library_apply` | Undo library apply. |
+| `list_sources` | List standing sources. |
+| `register_source` | Register standing source. |
+| `source_status` | Get source status. |
+| `set_source_consent` | Set source consent. |
+| `analyze_self_channel` | Analyze own channel. |
+| `get_schema_version` | Get storage schema version. |
+| `get_user_role` | Get user role. |
+| `set_user_role` | Set user role. |
+| `check_live_status` | Check live video status. |
+| `add_monitored_playlist` | Add monitored playlist. |
+| `list_monitored_playlists` | List monitored playlists. |
+| `remove_monitored_playlist` | Remove monitored playlist. |
+| `poll_monitored_playlist` | Poll monitored playlist. |
+| `list_monitored_playlist_events` | List playlist events. |
+| `get_user_taste` | Get taste memory. |
+| `get_user_memory` | Get user memory. |
+| `update_user_taste` | Update taste memory. |
+| `get_engagement_signal` | Get engagement signal. |
+| `classify_facets` | Classify item facets. |
+| `query_by_facets` | Query item facets. |
+| `get_facet_taxonomy` | Get facet taxonomy. |
+| `assemble_workspace` | Assemble workspace. |
+| `critique_against_corpus` | Critique against corpus. |
+| `list_workspaces` | List workspaces. |
+| `get_workspace` | Get workspace. |
+| `extract_claims` | Extract claims. |
+| `verify_claim` | Record claim evidence. |
+| `list_claims` | List claims. |
+| `get_claim` | Get claim. |
+| `generate_script` | Generate script. |
+| `revise_script` | Revise script. |
+| `get_shot_list` | Generate shot list. |
+| `list_scripts` | List scripts. |
+| `get_script` | Get script. |
+| `write_tweet` | Write tweet or thread. |
+| `write_blog` | Write blog. |
+| `list_writing_pieces` | List writing pieces. |
+| `get_writing_piece` | Get writing piece. |
+| `add_style_anchor` | Add style anchor. |
+| `list_style_anchors` | List style anchors. |
+| `remove_style_anchor` | Remove style anchor. |
+| `uoink_url` | Capture URL. |
+| `uoink_note` | Save note. |
+| `uoink_image` | Save image. |
+| `uoink_x` | Capture X post. |
+| `uoink_page` | Capture web page. |
+| `uoink_reddit_thread` | Capture Reddit thread. |
+| `list_allowed_sites` | List allowed sites. |
+| `add_allowed_site` | Add allowed site. |
+| `remove_allowed_site` | Remove allowed site. |
 
 ### Five resource templates (`uoink://library/v1/`)
 

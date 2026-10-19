@@ -56,3 +56,8 @@ instead of hand-editing `claude_desktop_config.json`.
 - Someone changes the installer's default install dir → the `user_config`
   default silently points at nothing; the user must re-pick the dir. Keep them
   in sync.
+
+The 3.9.2 bundle inventory contains all 91 registry tools. Claude Desktop users
+reinstall the new bundle and restart Desktop. `UOINK_MCP_TOOLSET=core` keeps
+the previous 35 tools for clients with caps; default full mode keeps them first.
+The inventory checker compares the bundle, registry, docs and receipt pins.

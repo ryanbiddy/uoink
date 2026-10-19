@@ -37,7 +37,7 @@ Uoink's container matches the protocol note's layout
 ([protocol-limits note](library/PHASE4-PROTOCOL-LIMITS-2026-09-08.md) §4.1):
 
 ```text
-uoink-3.9.1.mcpb (ZIP archive)
+uoink-3.9.2.mcpb (ZIP archive)
 ├── manifest.json       (manifest_version 0.4)
 ├── README.md           (bundle documentation)
 ├── icon.png            (display icon)
@@ -63,7 +63,7 @@ already uses these fields.
 | `manifest_version` | `"0.4"` (string, required) | `"0.4"` |
 | `name` | Package identifier matching `^[a-z0-9-_]+$` | `"uoink"` |
 | `display_name` | Display string | `"Uoink"` |
-| `version` | Valid SemVer matching repository `VERSION` | `"3.9.1"` |
+| `version` | Valid SemVer matching repository `VERSION` | `"3.9.2"` |
 | `description` | Single-line summary | present |
 | `long_description` | Extended description for marketplace views | present |
 | `author` | `{ "name": "...", "url": "..." }` | Ryan Biddy / https://uoink.app |
@@ -146,44 +146,21 @@ This bundle launches `uoink_mcp.py` over stdio. That process advertises
 different adapter; do not copy the stdio capability object onto HTTP
 ([contract](library/PHASE4-CONTRACT-2026-09-08.md)).
 
-### 29 tools
+### 91 tools
 
-Count: **25** legacy + Phase 4 `search_library`, `get_library_item`,
-`read_library_resource` + Phase 5 `get_library_activity` = **29**.
-[`.mcpb/manifest.json`](../.mcpb/manifest.json) already lists those 29 names
-in `tools`. The same 29 are registered on stdio.
+The bundle lists every tool in `uoink_mcp_tools.TOOL_REGISTRY`. Live stdio
+uses those exact schemas and descriptions. The previous 35 tools remain first
+in their original order. `UOINK_MCP_TOOLSET=core` serves only that earlier set
+for Cursor and other clients with tool caps; full is the default. Unknown
+values warn on stderr and use full. See the complete inventories in
+[the manifest](../.mcpb/manifest.json), [the bundle README](../.mcpb/README.md)
+and [the tool reference](v2-mcp.md).
 
-**Legacy (25):** `uoink_video`, `uoink_playlist`, `get_job_status`,
-`cancel_job`, `list_recent_uoinks`, `search_uoinks`, `search_clips`,
-`get_evidence_card`, `get_uoink_corpus`, `analyze_comments`, `classify_hook`,
-`get_taxonomy`, `get_citation_map`, `get_uoink_health`, `find_mentions`,
-`get_transcript_reliability`, `add_podcast_feed`, `list_podcast_feeds`,
-`remove_podcast_feed`, `poll_podcast_feed`, `list_podcast_episodes`,
-`download_podcast_episode`, `get_whisperx_status`,
-`transcribe_podcast_episode`, `episode_to_corpus`.
-
-**Phase 4 (3), contract `phase4-v1-2026-09-08`:**
-
-| Tool | Role |
-|---|---|
-| `search_library` | Bounded clip-first search (default 5, at most 20 hits) with item-FTS fallback and revision-bound follow-up URIs. |
-| `get_library_item` | Exactly one of `video_id` or `slug`. Default Librarian card plus canonical card, excerpt, and initial corpus-chunk URIs. |
-| `read_library_resource` | Same URI validation, contents, and refusals as `resources/read`. Tool fallback for a client that cannot attach a template-derived URI. |
-
-**Phase 5 (1), contract `phase5-v1`:** `get_library_activity` — deterministic
-library activity, shelf churn, and source observations.
-
-Not on stdio (and not in this bundle's `tools` list): the six Phase 2
-work-queue tools (`list_library_work`, `claim_library_work`,
-`submit_library_result`, `apply_reshelving`, `pin_shelf`,
-`undo_library_apply`) and the four Phase 3 source-subscription tools. Those
-remain HTTP/OpenAPI registry-only. Do not treat `get_uoink_corpus` as an
-automatic overflow fallback for the bounded library tools.
-
-One-line descriptions for all 29 names live in
-[`.mcpb/manifest.json`](../.mcpb/manifest.json) and
-[`.mcpb/README.md`](../.mcpb/README.md). The public tool reference is
-[`docs/v2-mcp.md`](v2-mcp.md).
+The Library work queue and source subscriptions are included. Dashboard intent
+requirements, default-off Library apply, discovery credit confirmation and all
+other consent gates are unchanged. Do not use `get_uoink_corpus` as an automatic
+overflow fallback for bounded Library reads. Reinstall the 3.9.2 `.mcpb` in
+Claude Desktop and restart Desktop to get the new tools.
 
 ### Five resource templates (`uoink://library/v1/`)
 
@@ -209,9 +186,10 @@ that pair uses `read_library_resource(uri)`
 [`docs/claude-code-mcp.md`](claude-code-mcp.md)). That CLI gap is not a
 Desktop-bundle defect.
 
-### Four prompts
+### Nine prompts
 
-Stdio advertises these four names (`prompts/list` / `prompts/get`):
+Stdio advertises nine prompts (`prompts/list` / `prompts/get`): the four Library
+prompts below and five research playbooks.
 
 | Prompt | Arguments |
 |---|---|
@@ -219,6 +197,8 @@ Stdio advertises these four names (`prompts/list` / `prompts/get`):
 | `evidence-brief` | Required `topic`; optional `since` as UTC `YYYY-MM-DD`. |
 | `whats-new` | Optional `days`, canonical decimal 1–30, default `7`. |
 | `reshelve-review` | Required `preview_id` (Phase 2 ID grammar). Reads an existing preview; does not call `apply_reshelving`. |
+
+Five research playbooks also appear: `outlier-posts`, `transcript-intel`, `comment-mining`, `creator-teardown`, `repurpose-pack`.
 
 Prompts return a fixed instruction plus fenced data. They do not call a
 model on the server, start capture, or mutate the queue
@@ -262,9 +242,8 @@ CLI ([protocol-limits note](library/PHASE4-PROTOCOL-LIMITS-2026-09-08.md)
    → confirm `dist/uoink-<VERSION>.mcpb` exists
    (the script derives `<VERSION>` from the repo `VERSION` file).
 2. Double-click it in Claude Desktop → accept the install dir → restart.
-3. In Claude, confirm the 29-tool list (25 legacy + the three Phase 4
-   library reads + `get_library_activity`), the five `uoink://library/v1/`
-   templates, and the four prompts (`consult-library`, `evidence-brief`,
+3. In Claude, confirm the 91-tool list (the complete shared registry), the five `uoink://library/v1/`
+   templates, and the nine prompts (including `consult-library`, `evidence-brief`,
    `whats-new`, `reshelve-review`). A smoke call such as
    `list_recent_uoinks` still works. Bounded library reads
    (`search_library` / `get_library_item`) do not require the resident HTTP

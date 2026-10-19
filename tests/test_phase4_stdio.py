@@ -1,7 +1,7 @@
 """tests/test_phase4_stdio.py - Living Library Stdio MCP & Compatibility Tests (AV-1a).
 
 Gates covered:
-- P4-06 (Capabilities: advertised methods, 5 templates, 9 prompts, curated <= 41, 35 tools,
+- P4-06 (Capabilities: advertised methods, 5 templates, 9 prompts, curated <= 41, 91 tools,
   no promised notifications/subscriptions, JSON-RPC error codes -32602, -32002, -32603)
 - P4-13 stdio part (Installed compatibility: python -P embeddable rules, spaced paths, clean stdout,
   diagnostic stderr separation, restart resilience, missing storage handling)
@@ -281,9 +281,8 @@ class TestP406CapabilitiesAndDiscovery:
         finally:
             client.close()
 
-    def test_stdio_tools_list_carries_35_tools(self, tmp_path: Path):
-        """tools/list contains all 25 canonical tools, the 3 read tools, the activity tool,
-        the 2 brief tools, Phase 6 export, playbook input and 2 discovery tools: exactly 35."""
+    def test_stdio_tools_list_carries_full_registry(self, tmp_path: Path):
+        """tools/list contains every registry tool, including the bounded reads."""
         client = _StdioTestClient(
             [sys.executable, "-P", str(ROOT / "uoink_mcp.py")],
             cwd=tmp_path,
@@ -307,8 +306,8 @@ class TestP406CapabilitiesAndDiscovery:
             assert NEW_PHASE4_READ_TOOLS.issubset(names)
             assert NEW_PHASE4_BRIEF_TOOLS.issubset(names)
             assert NEW_PHASE6_EXPORT_TOOLS.issubset(names)
-            assert names == TOTAL_PLAYBOOK_TOOLS
-            assert len(names) == 35
+            assert names == set(__import__("uoink_mcp_tools").TOOL_REGISTRY)
+            assert len(names) == 91
         finally:
             client.close()
 
@@ -617,7 +616,7 @@ def test_playbook_wire_schema_hints_and_prompt_arguments(playbook_adapter):
     _, _, _, handlers, types = playbook_adapter
     listed = _complete_local_call(handlers[types.ListToolsRequest](
         types.ListToolsRequest(method="tools/list"))).root.tools
-    assert len(listed) == 35
+    assert len(listed) == 91
     assert len(uoink_mcp_tools.TOOL_REGISTRY) == 91
     _assert_tool_metadata([t.model_dump(by_alias=True, exclude_none=True) for t in listed])
     tool = next(t for t in listed if t.name == "get_playbook_input")

@@ -74,10 +74,10 @@ def test_discovery_manifest_privacy_security_and_transport_contracts() -> None:
     # registry's strict schemas over FastMCP's signature-generated defaults.
     handler = uoink_mcp.mcp._mcp_server.request_handlers[types.ListToolsRequest]
     stdio = _complete_local_call(handler(types.ListToolsRequest(method="tools/list"))).root.tools
-    assert len(stdio) == 35
+    assert len(stdio) == 91
     audit = (ROOT / "docs/mcp-tool-annotations.md").read_text(encoding="utf-8")
     manifest = json.loads((ROOT / ".mcpb/manifest.json").read_text(encoding="utf-8"))
-    assert manifest["manifest_version"] == "0.4" and len(manifest["tools"]) == 35
+    assert manifest["manifest_version"] == "0.4" and len(manifest["tools"]) == 91
     for name, idempotent in (("discover_candidates", False), ("queue_discovered", True)):
         spec = uoink_mcp_tools.TOOL_REGISTRY[name]
         assert spec.annotations == {"readOnlyHint": False, "destructiveHint": False,
@@ -88,7 +88,7 @@ def test_discovery_manifest_privacy_security_and_transport_contracts() -> None:
         assert f"| `{name}` |" in audit
         bundled = next(t for t in manifest["tools"] if t["name"] == name)
         assert set(bundled) == {"name", "description"}
-    assert "All 35 stdio tools" in audit
+    assert "All 91 stdio tools" in audit
 
 
 def test_discovery_docs_disclose_saved_request_and_failure_receipts() -> None:

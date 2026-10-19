@@ -94,16 +94,8 @@ jobs:
           if [ -f index.py ]; then files+=(index.py); fi
           python -m py_compile "${files[@]}"
 
-      - name: Check MCP tool floor
-        run: |
-          # Bump to 12 when Sprint 15 merges, 13 when Sprint 16 merges.
-          # v2.1: canonical @mcp.tool decorators live in uoink_mcp.py (the 6
-          # deprecated yoink_* aliases use mcp.add_tool, not the decorator).
-          count="$(grep -c '@mcp\.tool' uoink_mcp.py)"
-          if [ "$count" -lt 10 ]; then
-            echo "Expected at least 10 MCP tools, found $count"
-            exit 1
-          fi
+      - name: Check complete MCP inventory
+        run: python scripts/check_mcp_inventory.py
 
   doc-accuracy:
     name: doc accuracy checks
@@ -130,37 +122,8 @@ jobs:
               raise SystemExit(f"manifest version {manifest.get('version')!r} != VERSION {version!r}")
           PY
 
-      - name: Compare MCP tool counts across code and docs
-        run: |
-          python - <<'PY'
-          import re
-          from pathlib import Path
-
-          mcp_py = Path("uoink_mcp.py").read_text(encoding="utf-8")
-          code_count = len(re.findall(r"^\s*@mcp\.tool\b", mcp_py, re.M))
-
-          mcp_doc = Path("docs/v2-mcp.md").read_text(encoding="utf-8")
-          doc_count = len(re.findall(r"^### [a-z][a-z_]+$", mcp_doc, re.M))
-          if doc_count != code_count:
-              raise SystemExit(f"docs/v2-mcp.md documents {doc_count} tools, code has {code_count}")
-
-          for path in ("README.md", "CHANGELOG.md"):
-              text = Path(path).read_text(encoding="utf-8")
-              if path == "CHANGELOG.md":
-                  unreleased = re.search(r"^## \[Unreleased\]$", text, re.M)
-                  releases = list(re.finditer(r"^## \[", text[unreleased.end():], re.M))
-                  if len(releases) > 1:
-                      text = text[:unreleased.end() + releases[1].start()]
-              counts = [
-                  int(m.group(1))
-                  for m in re.finditer(r"MCP server[^\n]*?\b(\d+)\s+tools\b", text, re.I)
-              ]
-              if not counts:
-                  raise SystemExit(f"{path} has no 'MCP server with N tools' count")
-              bad = [c for c in counts if c != code_count]
-              if bad:
-                  raise SystemExit(f"{path} MCP tool counts {counts} do not match code count {code_count}")
-          PY
+      - name: Compare MCP inventory across registry, docs, bundle and receipt
+        run: python scripts/check_mcp_inventory.py
 
   bash-lint:
     name: bash script lint
