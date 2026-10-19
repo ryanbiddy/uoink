@@ -332,14 +332,18 @@ def build(wheels: Path, output: Path, ffmpeg_output: Path | None = None) -> Path
                         "'license_files': d.metadata.get_all('License-File') or []} "
                         "for d in m.distributions()], key=lambda d:d['name'])))"],
                        env=env, capture_output=True).stdout
-        for script in (contents / "Frameworks/Python/bin").iterdir():
-            if script.is_symlink() or not script.is_file():
+        # Uoink runs modules through the interpreter (python3 -m ...), never the
+        # console scripts pip and the wheels install into bin/. Unsigned scripts
+        # under Contents/Frameworks make codesign reject the whole bundle, so the
+        # bundle keeps only the interpreter and records what it removed.
+        keep = re.compile(r"^python3(?:\.\d+)?$")
+        pruned = []
+        for entry in sorted((contents / "Frameworks/Python/bin").iterdir()):
+            if keep.match(entry.name):
                 continue
-            with script.open("rb") as stream:
-                is_script = stream.read(2) == b"#!"
-            if is_script:
-                content = script.read_text(encoding="utf-8")
-                script.write_text(relocate_python_script(content), encoding="utf-8", newline="\n")
+            pruned.append(entry.name)
+            entry.unlink()
+        write_json(output / "python-bin-pruned.json", pruned)
     files = payload_files()
     for relative in files:
         target = resources / relative
