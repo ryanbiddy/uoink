@@ -131,9 +131,14 @@ def configure_and_build(config: dict, role: str, source: Path, evidence: Path,
                        validate_source_components(config, role, source, env))
             run(command, cwd=source, env=env, stdout=log, stderr=subprocess.STDOUT)
             log.flush()
-            if re.search(r"WARNING:.*(?:did not match|not found|disabled)",
-                         (evidence / "build.log").read_text(encoding="utf-8"), re.I):
-                raise ValueError("FFmpeg configure could not enable a requested component; see build.log")
+            # pkg-config is absent on purpose (no system-library autodetection), so
+            # its warning is expected; any other configure warning still fails, and
+            # validate_configuration below checks every requested component.
+            warnings = [line for line in (evidence / "build.log").read_text(encoding="utf-8").splitlines()
+                        if re.search(r"WARNING:.*(?:did not match|not found|disabled)", line, re.I)
+                        and not re.search(r"WARNING: pkg-config not found", line, re.I)]
+            if warnings:
+                raise ValueError("FFmpeg configure could not enable a requested component: " + "; ".join(warnings))
             validate_configuration(config, role, (source / "config.h").read_text() + "\n" +
                                    (source / "config_components.h").read_text())
             run(["/usr/bin/make", f"-j{os.cpu_count() or 2}"], cwd=source, env=env,
