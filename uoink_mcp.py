@@ -32,6 +32,7 @@ import contextvars
 import json
 import os
 import sys
+import threading
 import time
 from pathlib import Path
 from typing import Literal
@@ -122,7 +123,12 @@ class RegistryMCP(FastMCP):
         if name not in uoink_mcp_tools.stdio_tool_names(STDIO_TOOLSET):
             envelope = {"ok": False, "error": "tool not found"}
         else:
-            envelope = await asyncio.to_thread(_call_stdio_registry, name, arguments)
+            cancelled = threading.Event()
+            try:
+                envelope = await asyncio.to_thread(_call_stdio_registry, name, arguments, cancelled)
+            except asyncio.CancelledError:
+                cancelled.set()
+                raise
         return mcp_types.CallToolResult(
             content=[mcp_types.TextContent(type="text", text=json.dumps(
                 envelope, ensure_ascii=False, allow_nan=False))],
@@ -493,13 +499,28 @@ def _helper_running() -> bool:
         return False
 
 
-def _call_stdio_registry(name, arguments):
+# Registry handlers share one Index connection, and several of them read
+# idx._conn outside the Index lock. Through v3.9.1 they ran one at a time on
+# the event loop. Keep them serialized, but in a worker thread so tools/list,
+# pings and cancellation still answer during a long capture. Discovery ran in
+# its own thread in v3.9.1 and still does.
+_REGISTRY_CALL_LOCK = threading.Lock()
+
+
+def _call_stdio_registry(name, arguments, cancelled=None):
     # A monitored playlist poll can schedule captures for the helper's worker.
     # Do not report queued work as running in this short-lived stdio process.
     if name == "poll_monitored_playlist" and not _helper_running():
         return {"ok": False, "error": "Open Uoink first, then retry polling the monitored playlist. "
                 "Its scheduled captures need the running Uoink helper."}
-    return uoink_mcp_tools.call_tool(name, arguments)
+    if name in uoink_mcp_tools.DISCOVERY_TOOL_NAMES:
+        return uoink_mcp_tools.call_tool(name, arguments)
+    with _REGISTRY_CALL_LOCK:
+        # A call the client cancelled while it waited must not start (a
+        # queued write_tweet would otherwise still make its paid model call).
+        if cancelled is not None and cancelled.is_set():
+            return {"ok": False, "error": "cancelled"}
+        return uoink_mcp_tools.call_tool(name, arguments)
 
 
 def _register_phase4_stdio() -> None:

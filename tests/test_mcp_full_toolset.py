@@ -135,33 +135,91 @@ def test_library_apply_stays_off_on_stdio_and_http(local_backend):
     assert stdio == http and stdio["error"]["code"] == "apply_disabled"
 
 
-def test_new_long_tool_does_not_block_other_stdio_requests(monkeypatch):
+def _tool_request(name):
+    return types.CallToolRequest(
+        method="tools/call", params=types.CallToolRequestParams(name=name, arguments={}))
+
+
+def test_new_long_tool_keeps_stdio_responsive_and_serializes_handlers(monkeypatch):
+    # Handlers share one Index connection, so registry calls run one at a
+    # time; tools/list still answers while a long capture holds the slot.
     entered, release = threading.Event(), threading.Event()
+    ran = []
 
     def capture(args):
         entered.set()
         assert release.wait(5)
         return {"ok": True}
 
+    def taxonomy(args):
+        ran.append("taxonomy")
+        return {"ok": True}
+
     monkeypatch.setitem(tools.TOOL_REGISTRY, "uoink_page",
                         replace(tools.TOOL_REGISTRY["uoink_page"], handler=capture, rate_limiter=None))
     monkeypatch.setitem(tools.TOOL_REGISTRY, "get_facet_taxonomy",
-                        replace(tools.TOOL_REGISTRY["get_facet_taxonomy"], handler=lambda _: {"ok": True}))
-    handler = uoink_mcp.mcp._mcp_server.request_handlers[types.CallToolRequest]
+                        replace(tools.TOOL_REGISTRY["get_facet_taxonomy"], handler=taxonomy))
+    handlers = uoink_mcp.mcp._mcp_server.request_handlers
+    handler = handlers[types.CallToolRequest]
 
     async def exercise():
-        pending = asyncio.create_task(handler(types.CallToolRequest(
-            method="tools/call", params=types.CallToolRequestParams(name="uoink_page", arguments={}))))
+        pending = asyncio.create_task(handler(_tool_request("uoink_page")))
         try:
             while not entered.is_set():
                 await asyncio.sleep(.01)
-            response = await asyncio.wait_for(handler(types.CallToolRequest(
-                method="tools/call", params=types.CallToolRequestParams(
-                    name="get_facet_taxonomy", arguments={}))), 1)
-            assert not response.root.isError and not pending.done()
+            listed = await asyncio.wait_for(handlers[types.ListToolsRequest](
+                types.ListToolsRequest(method="tools/list")), 1)
+            assert len(listed.root.tools) == 91 and not pending.done()
+            queued = asyncio.create_task(handler(_tool_request("get_facet_taxonomy")))
+            await asyncio.sleep(.2)
+            assert not queued.done() and ran == []
         finally:
             release.set()
             await pending
+        response = await asyncio.wait_for(queued, 5)
+        assert not response.root.isError and ran == ["taxonomy"]
+    _run_stdio(exercise())
+
+
+def test_cancelled_queued_call_never_starts(monkeypatch):
+    entered, release = threading.Event(), threading.Event()
+    ran = []
+
+    def capture(args):
+        entered.set()
+        assert release.wait(5)
+        return {"ok": True}
+
+    def tweet(args):
+        ran.append("write_tweet")
+        return {"ok": True}
+
+    monkeypatch.setitem(tools.TOOL_REGISTRY, "uoink_page",
+                        replace(tools.TOOL_REGISTRY["uoink_page"], handler=capture, rate_limiter=None))
+    monkeypatch.setitem(tools.TOOL_REGISTRY, "write_tweet",
+                        replace(tools.TOOL_REGISTRY["write_tweet"], handler=tweet, rate_limiter=None))
+    handler = uoink_mcp.mcp._mcp_server.request_handlers[types.CallToolRequest]
+
+    async def exercise():
+        pending = asyncio.create_task(handler(_tool_request("uoink_page")))
+        try:
+            while not entered.is_set():
+                await asyncio.sleep(.01)
+            queued = asyncio.create_task(handler(_tool_request("write_tweet")))
+            await asyncio.sleep(.2)
+            queued.cancel()
+            with pytest.raises(asyncio.CancelledError):
+                await queued
+        finally:
+            release.set()
+            await pending
+        # Give the abandoned worker thread time to take the slot and see the flag.
+        for _ in range(50):
+            if not uoink_mcp._REGISTRY_CALL_LOCK.locked():
+                break
+            await asyncio.sleep(.02)
+        await asyncio.sleep(.1)
+        assert ran == []
     _run_stdio(exercise())
 
 
