@@ -22,6 +22,7 @@ ROOT = Path(__file__).resolve().parents[1]
 @pytest.mark.parametrize("args", [
     ["unknown"], ["--text"], ["call"], ["search"], ["connect"], ["connect", "unknown"],
     ["connect", "codex", "--list"], ["tools", "--toolset", "invalid"],
+    ["connect", "codex", "--deeplink"], ["connect", "--list", "--deeplink"],
     ["call", "search_library", "--args", "[]"],
     ["call", "search_library", "--args", '{"query":"a","query":"b"}'],
     ["call", "search_library", "--args", '{"limit":NaN}'],
@@ -213,6 +214,9 @@ def test_connect_formats_parse_and_paths_are_absolute(tmp_path, client):
     python = app / "python" / "python.exe"
     output = connect.render(client, app, python)
     spec = connect.CLIENTS[client]
+    if spec.format == "text":
+        assert output and "<ENTRY>" not in output and "<CLI>" not in output
+        return
     if spec.format == "shell":
         tokens = re.findall(r"'((?:[^']|'')*)'", output) if os.name == "nt" else []
         paths = [s.replace("''", "'") for s in tokens] if tokens else shlex.split(output)[-2:]
@@ -220,7 +224,7 @@ def test_connect_formats_parse_and_paths_are_absolute(tmp_path, client):
     else:
         # YAML clients receive JSON-form YAML (a strict YAML 1.2 subset).
         data = tomllib.loads(output) if spec.format == "toml" else json.loads(output)
-        entry = data[spec.shape]["uoink"]
+        entry = data["mcpServers"][0] if spec.shape == "list" else data[spec.shape]["uoink"]
         if spec.shape == "mcp":
             paths = entry["command"]
         else:
@@ -237,7 +241,7 @@ def test_connect_stdout_only_config_and_notes_on_stderr(capsys):
     for client in connect.CLIENTS:
         assert cli.main(["connect", client]) == 0
         output = capsys.readouterr()
-        assert "File:" in output.err and "Tested: not yet" in output.err
+        assert "File:" in output.err and "not yet tested" in output.err
         assert connect.CLIENTS[client].location in output.err
         if connect.CLIENTS[client].note.startswith("Uncertain"):
             assert "Uncertain" in output.err
@@ -278,10 +282,10 @@ def test_legacy_launcher_unchanged_and_serve_forwards(monkeypatch):
     assert cli.main(["serve", "--doctor"]) == 0
     assert seen == [[], ["--doctor"]]
     assert '"%UOINK_ROOT%server.py" %*' in (ROOT / "uoink.cmd").read_text()
-    launcher = (ROOT / "bin/uoink.cmd").read_text()
+    launcher = (ROOT / "cli/uoink.cmd").read_text()
     assert '"%~dp0..\\python\\python.exe" "%~dp0..\\uoink_cli.py" %*' in launcher
     assert "exit /b %ERRORLEVEL%" in launcher
-    shell = (ROOT / "bin/uoink").read_text()
+    shell = (ROOT / "cli/uoink").read_text()
     assert '"$uoink_root/python/python.exe"' in shell
     assert 'exec "$uoink_python" "$uoink_root/uoink_cli.py" "$@"' in shell
 
@@ -304,6 +308,8 @@ def test_installer_path_ownership_isolation_and_exact_removal():
     remove = block("procedure RemoveAgentPath();", "procedure CurUninstallStepChanged")
     for body in (add, remove):
         assert body.index("if IsolatedInstall() then Exit;") < body.index("AgentReadPath(")
+        assert "Target := ExpandConstant('{app}\\cli');" in body
+        assert "{app}\\bin" not in body
     assert add.index("if Found then Exit") < add.index("SaveStringToFile") < add.index("AgentWritePath")
     assert "if Utf8Decode(Saved) <> Target then Exit;" in remove
     assert "AgentFilterPath(Value, Target, True, Found)" in remove
@@ -326,4 +332,4 @@ def test_receipt_uses_installed_launcher_and_isolated_profile():
     assert "'/ISOLATED=1'" in source and "'/TASKS=\"\"'" in source
     assert "& $taskAgentCli --isolated-from-install-dir $taskApp status" in source
     assert "$taskCliStatus.data_dir -ine $taskProfile" in source
-    assert "'bin\\uoink.cmd'" in (ROOT / "installer/verify_install.ps1").read_text()
+    assert "'cli\\uoink.cmd'" in (ROOT / "installer/verify_install.ps1").read_text()

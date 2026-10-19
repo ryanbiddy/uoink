@@ -65,6 +65,52 @@ Zed's command shape, Goose's extension fields/location, LM Studio's location,
 and Hermes's MCP fields need confirmation against the installed releases.
 Cline's location varies by editor/profile. The affected recipes print notes.
 
+Use this table to choose the MCP config, skill, plugin or CLI path. Every row
+is **not yet tested** in the named client. Full recipes and limits are in
+[`docs/connect-your-agent.md`](https://github.com/ryanbiddy/uoink/blob/feat/3.10-agents/docs/connect-your-agent.md).
+The generator keeps all client choices in one table in `uoink_connect.py`.
+
+| Harness | Path and format |
+|---|---|
+| Claude Code | Plugin: `plugins/uoink` via `.claude-plugin/marketplace.json`. Standalone skill: `~/.claude/skills/uoink/`. MCP: `claude mcp add` manages `~/.claude.json`. |
+| Claude Desktop | `%APPDATA%/Claude/claude_desktop_config.json`, JSON `mcpServers`; or the separate MCPB bundle. |
+| Codex | `~/.codex/config.toml`, `mcp_servers`; skill `~/.agents/skills/uoink/` (older setups: `~/.codex/skills/uoink/`). |
+| Gemini CLI | `~/.gemini/settings.json`, JSON `mcpServers`. |
+| Cursor | `~/.cursor/mcp.json`, JSON `mcpServers`; `uoink connect cursor --deeplink`, core toolset. |
+| VS Code | Project `.vscode/mcp.json`, JSON `servers` with stdio type; `uoink connect vscode --deeplink`. |
+| Windsurf | `~/.codeium/windsurf/mcp_config.json`, JSON `mcpServers`. |
+| Cline | MCP settings opens `cline_mcp_settings.json`, JSON `mcpServers`; editor/profile decides the directory. |
+| Warp | `~/.warp/.mcp.json` or project `.warp/.mcp.json`, JSON `mcpServers`. |
+| JetBrains Junie | `~/.junie/mcp/mcp.json` or project `.junie/mcp/mcp.json`, JSON `mcpServers`; AI Assistant's JSON import is unverified. |
+| Amp | `%APPDATA%/amp/settings.json` or `~/.config/amp/settings.json`; project `.amp/settings.json` needs approval. JSON `amp.mcpServers`. |
+| Roo Code | `.roo/mcp.json`, or global `mcp_settings.json` via MCP settings; JSON `mcpServers`. |
+| Kilo Code | Newer: `~/.config/kilo/kilo.jsonc` or project `kilo.jsonc`, `mcp` local command array. Older: `.kilocode/mcp.json` or global `mcp_settings.json`, `mcpServers`. Both recipes ship; choose the installed format. |
+| Zed | Windows `%APPDATA%/Zed/settings.json`, elsewhere `~/.config/zed/settings.json`; `context_servers`. Command shape unverified. |
+| Goose | `~/.config/goose/config.yaml`, `extensions`; fields/path unverified. |
+| OpenCode | `~/.config/opencode/opencode.json` or project `opencode.json`, `mcp` local command array. |
+| Continue | `~/.continue/config.yaml` or `.continue/mcpServers/uoink.yaml`, YAML `mcpServers` list; unverified. |
+| Cherry Studio | Settings > MCP Server > STDIO / Import from JSON, `mcpServers`; no file path established. |
+| Jan / Msty / BoltAI | Jan MCP Servers UI / Msty Toolbox MCP Tools / BoltAI MCP JSON import; candidate `mcpServers`, paths not established, unverified. BoltAI is Mac-later. |
+| LibreChat | App's `librechat.yaml`, `mcpServers` with stdio type; same PC, accessible host paths. |
+| LM Studio | Candidate `~/.lmstudio/mcp.json`, `mcpServers`; confirm path in MCP settings. |
+| Open WebUI | Candidate mcpo JSON file selected with `--config`, then tool-server UI; unverified, including native MCP support. |
+| AnythingLLM | Desktop MCP UI; candidate `storage/plugins/anythingllm_mcp_servers.json`, `mcpServers`; storage root/schema unverified. |
+| Ollama-based clients | MCP-capable client's config/UI, candidate `mcpServers`; client-specific and unverified. Ollama itself is only the runtime. |
+| Raycast MCP | AI MCP settings with command/args/env; no file path established. JSON import and Windows availability unverified. |
+| Smithery local | Future `smithery.yaml` at kit root. Deferred: research gives `target: local` but no complete local stdio format. |
+| Windows On-Device Agent Registry | Local MCPB `manifest.json` via `odr.exe mcp add`; preview, build 26220+ (research cites 26220.7262+), exact local flag unverified. Documentation only; never run by installer. |
+| pi | `~/.pi/agent/skills/uoink/`; CLI. Kit `skills/uoink/` can be packaged. |
+| Hermes Agent | `~/.hermes/skills/uoink/`; CLI or `~/.hermes/config.yaml` `mcp_servers` (unverified). Kit `skills/uoink/` for taps. |
+| OpenClaw / ClawHub | `~/.openclaw/skills/uoink/`; CLI. Kit `skills/uoink/` for ClawHub packaging. |
+| Obsidian | Uoink Settings > Library > Library Mirror exports Markdown to `<vault>/Uoink/`. No MCP plugin was named in the research. |
+| n8n self-hosted | Same-PC HTTP Request node, `/memory/search` with `X-Uoink-Token` in credentials. |
+| Make / Zapier | Cloud runners cannot reach this PC's loopback; no remote HTTPS recipe. |
+| AutoHotkey / PowerToys Command Palette | User `.ahk` script / command or shortcut settings calling `{app}/cli/uoink.cmd`. PowerToys UI route unverified. |
+| Alfred | macOS workflow Run Script calling `uoink`; Mac-later. |
+
+ChatGPT developer mode, claude.ai web and Notion AI remote connectors are
+skipped. A local skill or config file does not make a cloud runner local.
+
 ## Layout and maintenance
 
 ```text

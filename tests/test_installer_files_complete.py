@@ -87,8 +87,9 @@ def test_cli_and_watchdog_assets_are_in_both_lists():
 
 def test_agent_launchers_and_modules_are_staged_and_installed():
     modules = {"uoink_cli.py", "uoink_connect.py", "uoink_agent_runtime.py"}
-    assert modules | {"bin/uoink.cmd", "bin/uoink"} <= staged_sources()
-    assert modules | {"bin/*"} <= installed_sources()
+    assert modules | {"cli/uoink.cmd", "cli/uoink"} <= staged_sources()
+    assert modules | {"cli/uoink.cmd", "cli/uoink"} <= installed_sources()
+    assert {p.name for p in (ROOT / "cli").iterdir()} == {"uoink", "uoink.cmd"}
 
 
 def test_playbook_core_is_staged_and_installed_before_mcp_registration():

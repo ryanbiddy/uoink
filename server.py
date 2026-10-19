@@ -8235,11 +8235,12 @@ def _mcp_settings_snippet() -> dict:
     """MCP server config snippet for the Settings tab's Copy button. Points at
     the bundled stdio entry (uoink_mcp.py) under the install dir. (Distinct from
     _mcp_config_payload(), which serves the /mcp/v1/config protocol endpoint.)"""
-    py = str(HERE / "python" / "python.exe")
-    script = str(HERE / "uoink_mcp.py")
-    entry = {"command": py, "args": [script]}
+    from uoink_connect import python_command, server_entry
+    py = python_command(HERE)
+    entry = server_entry("claude-desktop", HERE, py, _install_isolation.child_argv())
     cfg = {"mcpServers": {"uoink": entry}}
-    return {"claude_desktop": cfg, "cursor": cfg,
+    return {"claude_desktop": cfg,
+            "cursor": {"mcpServers": {"uoink": server_entry("cursor", HERE, py, _install_isolation.child_argv())}},
             "raw": json.dumps(cfg, indent=2)}
 
 
@@ -11227,12 +11228,13 @@ def _mcp_stdio_command() -> tuple[str, list[str]]:
     Installed builds should use the bundled console `python.exe` for stdio;
     `pythonw.exe` has no standard streams and would break JSON-RPC.
     """
-    bundled = HERE / "python" / "python.exe"
-    command = bundled if bundled.exists() else Path(sys.executable)
-    return str(command), [str(HERE / "uoink_mcp.py")]
+    from uoink_connect import python_command, server_entry
+    entry = server_entry("claude-desktop", HERE, python_command(HERE), _install_isolation.child_argv())
+    return entry["command"], entry["args"]
 
 
 def _mcp_config_payload() -> dict:
+    from uoink_connect import deeplink, python_command
     command, args = _mcp_stdio_command()
     return {
         "ok": True,
@@ -11240,6 +11242,8 @@ def _mcp_config_payload() -> dict:
             "command": command,
             "args": args,
         },
+        "install_links": {client: deeplink(client, HERE, python_command(HERE), _install_isolation.child_argv())
+                          for client in ("cursor", "vscode")},
         "http": {
             "url": f"http://{HOST}:{PORT}/mcp/v1",
             "sse_url": f"http://{HOST}:{PORT}/mcp/v1/sse",

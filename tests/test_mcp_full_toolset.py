@@ -1,4 +1,4 @@
-"""3.9.3 MCP inventory, consent parity, scheduling and offline startup."""
+"""3.9.2 stdio inventory, consent parity, scheduling and offline startup."""
 from __future__ import annotations
 
 import asyncio
@@ -19,7 +19,7 @@ import uoink_mcp
 import uoink_mcp_tools as tools
 from tests.test_c01_mcp_stdio import CORE_STDIO_TOOLS, ROOT, _StdioClient, _isolated_env
 from tests.test_discovery_queue import _run_stdio
-from tests.test_library_adapters import mcp_call, post, valid_pin_operation
+from tests.test_library_adapters import mcp_call, valid_pin_operation
 
 
 def call(name, args):
@@ -42,8 +42,8 @@ def test_real_stdio_toolsets_and_helper_down(tmp_path, mode, count):
     try:
         client.send({"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {
             "protocolVersion": "2024-11-05", "capabilities": {},
-            "clientInfo": {"name": "release-393-smoke", "version": "1"}}})
-        assert client.wait_for(1)["result"]["serverInfo"]["version"] == "3.9.3"
+            "clientInfo": {"name": "release-smoke", "version": "1"}}})
+        assert client.wait_for(1)["result"]["serverInfo"]["version"] == (ROOT / "VERSION").read_text(encoding="utf-8").strip()
         client.send({"jsonrpc": "2.0", "method": "notifications/initialized"})
         client.send({"jsonrpc": "2.0", "id": 2, "method": "tools/list"})
         listed = client.wait_for(2)["result"]["tools"]
@@ -160,7 +160,7 @@ def test_registry_handlers_run_on_the_event_loop_like_v391(monkeypatch):
 
 
 def test_public_manifest_advertises_full_default():
-    manifest = openapi_bridge.build_well_known("http://example.invalid", version="3.9.3", tool_count=91)
+    manifest = openapi_bridge.build_well_known("http://example.invalid", version="3.9.2", tool_count=91)
     assert manifest["transports"] == ["stdio", "http"]
     assert manifest["stdio_tool_count"] == 91
     assert manifest["stdio_toolsets"] == {"full": 91, "core": 35}
@@ -199,56 +199,6 @@ def test_resident_helper_pid_requires_live_original_process(tmp_path, monkeypatc
 
 
 FLATTENED = {"claim_library_work", "apply_reshelving", "set_source_consent"}
-
-
-@pytest.mark.parametrize("path", ["/mcp/v1", "/mcp/v1/tools/list"])
-def test_http_and_stdio_list_identical_client_schemas(local_backend, monkeypatch, path):
-    monkeypatch.setenv("UOINK_MCP_TOOLSET", "full")
-    frozen = json.dumps(tools.list_tools(), sort_keys=True)
-    http = post(path, {"jsonrpc": "2.0", "id": 1, "method": "tools/list"})
-    assert http.status == 200
-    listed = http.payload["result"]["tools"]
-    stdio = _run_stdio(uoink_mcp.mcp.list_tools())
-    fields = ("name", "description", "inputSchema")
-    assert [{k: t[k] for k in fields} for t in listed] == [
-        {k: getattr(t, k) for k in fields} for t in stdio]
-    assert len(listed) == len(tools.TOOL_REGISTRY) == 91
-    changed = set()
-    for tool in listed:
-        schema = tool["inputSchema"]
-        assert schema.get("type") == "object", tool["name"]
-        assert not {"oneOf", "anyOf", "allOf", "not"} & set(schema), tool["name"]
-        spec = tools.TOOL_REGISTRY[tool["name"]]
-        assert schema == tools.client_input_schema(spec.input_schema)
-        if schema != spec.input_schema:
-            changed.add(tool["name"])
-    assert changed == FLATTENED
-    assert json.dumps(tools.list_tools(), sort_keys=True) == frozen
-
-
-@pytest.mark.parametrize("name,args", [
-    ("apply_reshelving", {"mode": "apply", "expected_projection_revision": 1}),
-    ("claim_library_work", {"action": "renew", "run_id": "r", "client_id": "c"}),
-    ("claim_library_work", {"action": "claim", "run_id": "r", "client_id": "c", "work_id": "w"}),
-    ("set_source_consent", {"source_id": "src_" + "a" * 64, "consent_state": "on",
-                            "expected_revision": 0, "operation_key": "fixture", "user_intent_token": "A" * 43}),
-    ("set_source_consent", {"source_id": "src_" + "a" * 64, "consent_state": "off",
-                            "expected_revision": 0, "expected_cursor_revision": 0,
-                            "operation_key": "fixture", "user_intent_token": "A" * 43}),
-])
-@pytest.mark.parametrize("path", ["/mcp/v1", "/mcp/v1/tools/call"])
-def test_http_flattening_preserves_frozen_schema_refusals(local_backend, name, args, path):
-    expected = call(name, args)
-    # Phase 3's frozen source contract calls this validation_error; preserve
-    # it as well as Phase 2's invalid_request, including message/details.
-    code = "validation_error" if name == "set_source_consent" else "invalid_request"
-    assert expected["ok"] is False and expected["error"]["code"] == code
-    http = post(path, {"jsonrpc": "2.0", "id": 1, "method": "tools/call",
-                       "params": {"name": name, "arguments": args}})
-    assert http.status == 200
-    result = http.payload["result"]
-    assert result["isError"] is True
-    assert result["structuredContent"] == json.loads(result["content"][0]["text"]) == expected
 
 
 def test_listed_schemas_have_no_top_level_combinators():

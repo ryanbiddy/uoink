@@ -5372,7 +5372,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
         },
         description=(
             "Capture an X post and the author's earlier chain as a local corpus "
-            "item. Requires the default-off x_text_capture_enabled setting."
+            "item. Requires x_text_capture_enabled, which defaults on."
         ),
         input_schema=_schema({
             "url": {"type": "string"},

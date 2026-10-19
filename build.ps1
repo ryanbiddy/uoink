@@ -649,9 +649,9 @@ Copy-Item (Join-Path $RepoRoot 'library_faithfulness.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'usage_meter.py')   $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'uoink.cmd')      $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'uoink')          $StagingDir -Force
-New-Item -ItemType Directory -Force -Path (Join-Path $StagingDir 'bin') | Out-Null
-Copy-Item (Join-Path $RepoRoot 'bin\uoink.cmd') (Join-Path $StagingDir 'bin\uoink.cmd') -Force
-Copy-Item (Join-Path $RepoRoot 'bin\uoink') (Join-Path $StagingDir 'bin\uoink') -Force
+New-Item -ItemType Directory -Force -Path (Join-Path $StagingDir 'cli') | Out-Null
+Copy-Item (Join-Path $RepoRoot 'cli\uoink.cmd') (Join-Path $StagingDir 'cli\uoink.cmd') -Force
+Copy-Item (Join-Path $RepoRoot 'cli\uoink') (Join-Path $StagingDir 'cli\uoink') -Force
 Copy-Item (Join-Path $RepoRoot 'uoink_cli.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'uoink_connect.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'uoink_agent_runtime.py') $StagingDir -Force

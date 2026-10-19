@@ -36,8 +36,8 @@ try {
 # reached build.ps1 staging but never made it into uoink.iss [Files]. This
 # asserts the files that have bitten us (or would) are actually in {app}.
 $requiredFiles = @(
-    'bin\uoink.cmd',
-    'bin\uoink',
+    'cli\uoink.cmd',
+    'cli\uoink',
     'uoink_cli.py',
     'uoink_connect.py',
     'uoink_agent_runtime.py',

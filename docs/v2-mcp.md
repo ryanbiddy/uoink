@@ -1507,7 +1507,7 @@ Arguments: `image_base64`, `mime`, `filename`, `caption`, `source_url`, `author`
 
 ### uoink_x
 
-Capture an X post and the author's earlier chain as a local corpus item. Requires the default-off x_text_capture_enabled setting.
+Capture an X post and the author's earlier chain as a local corpus item. Requires x_text_capture_enabled, which defaults on.
 
 Arguments: `url`. The registry schema in `tools/list` defines required fields and bounds.
 

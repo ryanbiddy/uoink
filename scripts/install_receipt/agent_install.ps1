@@ -140,7 +140,7 @@ $taskInstalledMarker=Get-Content -LiteralPath (Join-Path $taskApp 'isolated-inst
 if ($taskInstalledMarker.mode -ne 'isolated' -or $taskInstalledMarker.app_dir -ine $taskApp -or $taskInstalledMarker.profile -ine $taskProfile -or $taskInstalledMarker.port -ne $taskPort) { throw 'New installed marker differs.' }
 # The installer skips User PATH entirely under /ISOLATED=1, independent of
 # /TASKS="" above. Invoke the installed launcher by absolute path, never PATH.
-$taskAgentCli = Join-Path $taskApp 'bin\uoink.cmd'
+$taskAgentCli = Join-Path $taskApp 'cli\uoink.cmd'
 if (-not (Test-Path -LiteralPath $taskAgentCli -PathType Leaf)) { throw 'Installed agent launcher is missing.' }
 $taskCliError = Join-Path $taskRoot ($Stage + '.cli-stderr.txt')
 $taskCliRaw = & $taskAgentCli --isolated-from-install-dir $taskApp status 2> $taskCliError

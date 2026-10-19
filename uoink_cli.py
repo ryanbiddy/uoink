@@ -1,6 +1,6 @@
 """Agent CLI: one registry envelope per call, with no HTTP proxy.
 
-The root uoink launchers still run server.py. The installed bin launcher runs
+The root uoink launchers still run server.py. The installed cli launcher runs
 this module with bundled Python; pin sys.path for Python's embedded ._pth mode.
 """
 from __future__ import annotations
@@ -9,8 +9,10 @@ import argparse
 from contextlib import redirect_stdout
 import json
 import math
+import os
 from pathlib import Path
 import shutil
+import stat
 import sys
 import threading
 
@@ -61,9 +63,10 @@ def parser():
     note.add_argument("text")
     note.add_argument("--title")
     command("status")
-    connect = command("connect", help="print MCP config; never writes client files")
+    connect = command("connect", help="print local connection recipes; never writes client files")
     connect.add_argument("client", nargs="?")
     connect.add_argument("--list", action="store_true")
+    connect.add_argument("--deeplink", action="store_true", help="print a Cursor or VS Code install link")
     skill = command("skill")
     skill_sub = skill.add_subparsers(dest="skill_command", required=True)
     skill_sub.add_parser("path")
@@ -212,13 +215,31 @@ def emit(payload, text=False):
     return 0
 
 
+def refuse_linked_path(path: Path):
+    """Inspect without resolving links, including Windows junctions/reparse points."""
+    for part in (*reversed(path.parents), path):
+        try:
+            info = part.lstat()
+        except FileNotFoundError:
+            continue
+        if (stat.S_ISLNK(info.st_mode)
+                or getattr(info, "st_file_attributes", 0) & getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0x400)):
+            raise UsageError(f"skill destination contains a link or reparse point: {part}")
+
+
 def install_skill(parent: Path, force=False):
     source = APP_DIR / "skills" / "uoink"
-    destination = parent.expanduser().resolve() / "uoink"
-    if destination.is_symlink() or destination == source.resolve() or destination in source.resolve().parents:
+    destination = Path(os.path.abspath(parent.expanduser())) / "uoink"
+    refuse_linked_path(destination)
+    if destination == source.resolve() or destination in source.resolve().parents or source.resolve() in destination.parents:
         raise UsageError("skill destination must be separate from the source folder")
     if destination.exists() and not force:
         raise UsageError(f"{destination} already exists; pass --force to overwrite skill files")
+    # Preflight the entire existing tree before writing anything. os.walk does
+    # not follow symlinks; reject junctions before descending into them too.
+    for directory, dirs, files in os.walk(destination, followlinks=False):
+        for name in dirs + files:
+            refuse_linked_path(Path(directory) / name)
     shutil.copytree(source, destination, dirs_exist_ok=force)
     return {"ok": True, "path": str(destination)}
 
@@ -265,24 +286,27 @@ def main(argv=None):
             with redirect_stdout(sys.stderr):
                 return backend().run_cli([*isolation.child_argv(), *ns.server_args])
         if ns.command == "connect":
-            from uoink_connect import CLIENTS, render
+            from uoink_connect import CLIENTS, render, deeplink, python_command
             if ns.list and ns.client:
                 raise UsageError("choose a client or --list, not both")
+            if ns.deeplink and (ns.list or ns.client not in ("cursor", "vscode")):
+                raise UsageError("--deeplink requires cursor or vscode")
             if ns.list:
                 return emit({"ok": True, "clients": list(CLIENTS)}, text_mode)
             if ns.client not in CLIENTS:
                 raise UsageError("unknown or missing client; use uoink connect --list")
             spec = CLIENTS[ns.client]
-            bundled = APP_DIR / "python" / ("python.exe" if sys.platform == "win32" else "bin/python3")
-            python = bundled if bundled.is_file() else Path(sys.executable)
-            print(f"File: {spec.location}\nFormat: {spec.format}. Tested: not yet. Merge this server entry into your config.", file=sys.stderr)
+            python = python_command(APP_DIR)
+            output_format = "install deeplink" if ns.deeplink else spec.format
+            print(f"File: {spec.location}\nFormat: {output_format}. Status: not yet tested.", file=sys.stderr)
             if spec.note:
                 print(spec.note, file=sys.stderr)
             if spec.format == "yaml":
                 print("JSON-form YAML 1.2; the entire output is a valid YAML document.", file=sys.stderr)
             if spec.format == "shell" and sys.platform == "win32":
                 print("Run this command in PowerShell.", file=sys.stderr)
-            print(render(ns.client, APP_DIR, python, isolation.child_argv()))
+            print(deeplink(ns.client, APP_DIR, python, isolation.child_argv()) if ns.deeplink
+                  else render(ns.client, APP_DIR, python, isolation.child_argv()))
             return 0
         if ns.command == "skill":
             if ns.skill_command == "path":

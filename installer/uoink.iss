@@ -111,6 +111,9 @@ Source: "staging\python\*"; DestDir: "{app}\python"; Flags: recursesubdirs ignor
 
 ; Bundled binaries -- prepended to PATH at runtime by server.py.
 Source: "staging\bin\*"; DestDir: "{app}\bin"; Flags: recursesubdirs ignoreversion
+; Only agent launchers belong on User PATH. Keep media binaries in bin/.
+Source: "staging\cli\uoink.cmd"; DestDir: "{app}\cli"; Flags: ignoreversion
+Source: "staging\cli\uoink"; DestDir: "{app}\cli"; Flags: ignoreversion
 
 ; Server source.
 Source: "staging\server.py"; DestDir: "{app}"; Flags: ignoreversion
@@ -1834,7 +1837,7 @@ begin
   if not WizardIsTaskSelected('agentpath') then Exit;
   if not AgentReadPath(Value, ValueType) then
     RaiseException('Could not read User PATH safely.');
-  Target := ExpandConstant('{app}\bin');
+  Target := ExpandConstant('{app}\cli');
   Ignored := AgentFilterPath(Value, Target, False, Found);
   if Found then Exit; { pre-existing entries are not owned by this installer }
   Marker := ExpandConstant('{app}\.uoink-agent-path');
@@ -1859,7 +1862,7 @@ begin
   if IsolatedInstall() then Exit;
   if IsolatedMarkerFileExists(ExpandConstant('{app}')) then Exit;
   Marker := ExpandConstant('{app}\.uoink-agent-path');
-  Target := ExpandConstant('{app}\bin');
+  Target := ExpandConstant('{app}\cli');
   if not LoadStringFromFile(Marker, Saved) then Exit;
   if Utf8Decode(Saved) <> Target then Exit;
   if not AgentReadPath(Value, ValueType) then

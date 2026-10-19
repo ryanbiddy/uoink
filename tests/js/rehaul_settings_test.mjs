@@ -411,11 +411,35 @@ const groups = {
     assert.equal(p.nodes.get('tasteAnchorId').value,'');
   },
   async mcp() {
-    const p=setup();p.setHandler(async path=>path==='/mcp/v1/config'?{ok:true,http:{url:'http://fixture.invalid/mcp/v1',auth_header:'X-Uoink-Token'}}:{ok:true,mcp_config:{claude_desktop:{mcpServers:{uoink:{command:'python',args:['fixture.py']}}},raw:'ignored'}});
+    const links={cursor:'cursor://anysphere.cursor-deeplink/mcp/install?name=uoink&config=fixture',vscode:'vscode:mcp/install?%7B%22name%22%3A%22uoink%22%7D'};
+    const p=setup();p.setHandler(async path=>path==='/mcp/v1/config'?{ok:true,install_links:links,http:{url:'http://fixture.invalid/mcp/v1',auth_header:'X-Uoink-Token'}}:{ok:true,mcp_config:{claude_desktop:{mcpServers:{uoink:{command:'python',args:['fixture.py']}}},cursor:{mcpServers:{uoink:{command:'python',args:['fixture.py'],env:{UOINK_MCP_TOOLSET:'core'}}}},raw:'ignored'}});
     await p.c.loadSettingsMcp();
     assert.deepEqual(JSON.parse(p.nodes.get('mcpConfig').value),{mcpServers:{uoink:{command:'python',args:['fixture.py']}}});
-    p.nodes.get('mcpClient').value='chatgpt';p.nodes.get('mcpClient').emit('change');assert.equal(JSON.parse(p.nodes.get('mcpConfig').value).transport,'stdio');
+    p.nodes.get('mcpClient').value='stdio';p.nodes.get('mcpClient').emit('change');assert.equal(JSON.parse(p.nodes.get('mcpConfig').value).transport,'stdio');
+    p.nodes.get('mcpClient').value='cursor';p.nodes.get('mcpClient').emit('change');assert.equal(JSON.parse(p.nodes.get('mcpConfig').value).mcpServers.uoink.env.UOINK_MCP_TOOLSET,'core');
+    p.nodes.get('mcpClient').value='vscode';p.nodes.get('mcpClient').emit('change');assert.equal(JSON.parse(p.nodes.get('mcpConfig').value).servers.uoink.type,'stdio');
     p.nodes.get('mcpClient').value='http';p.nodes.get('mcpClient').emit('change');assert.equal(JSON.parse(p.nodes.get('mcpConfig').value).headers['X-Uoink-Token'],'fake-token');
+    assert.equal(p.nodes.get('addToCursor').disabled,false);
+    assert.equal(p.nodes.get('addToVscode').disabled,false);
+    const count=p.writes.length;
+    for(const [client,id] of [['cursor','addToCursor'],['vscode','addToVscode']]) {
+      p.nodes.get(id).emit('click');
+      assert.equal(p.c.window.location.href,links[client]);
+      assert.match(p.nodes.get('mcpInstallStatus').textContent,/cannot confirm installation/);
+    }
+    assert.equal(p.writes.length,count,'clicking install uses the already loaded link without a request');
+    p.c.setMcpInstallLinks({cursor:'https://outside.invalid/',vscode:'javascript:alert(1)'});
+    assert.equal(p.nodes.get('addToCursor').disabled,true);
+    assert.equal(p.nodes.get('addToVscode').disabled,true);
+    p.nodes.get('addToCursor').emit('click');
+    assert.equal(p.c.window.location.href,links.vscode,'invalid schemes never navigate');
+    p.c.setMcpInstallLinks(links);
+    const loading=deferred();p.setHandler(()=>loading.promise);
+    const reload=p.c.loadSettingsMcp();await tick();
+    assert.equal(p.nodes.get('addToCursor').disabled,true,'clear stale links during reload');
+    loading.reject(new Error('offline fixture'));await reload;
+    assert.equal(p.nodes.get('addToVscode').disabled,true);
+    assert.match(p.nodes.get('mcpInstallStatus').textContent,/Could not load/);
   },
 };
 // Also drives the migrated setup-settings regressions against these real controls.

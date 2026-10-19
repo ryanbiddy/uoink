@@ -1,4 +1,4 @@
-"""Print-only MCP client recipes. Keep format and location choices in one table.
+"""Print-only agent connection recipes. Keep format and location choices in one table.
 
 These are offline templates, not claims of client acceptance. JSON is also valid
 YAML 1.2, so YAML clients receive a JSON-form YAML document without a dependency.
@@ -6,10 +6,13 @@ YAML 1.2, so YAML clients receive a JSON-form YAML document without a dependency
 from __future__ import annotations
 
 from dataclasses import dataclass
+import base64
 import json
 import os
 from pathlib import Path
 import shlex
+import sys
+from urllib.parse import quote, urlencode
 
 
 @dataclass(frozen=True)
@@ -18,6 +21,7 @@ class Client:
     location: str
     shape: str = "mcpServers"
     note: str = ""
+    guide: str = ""
 
 
 CLIENTS = {
@@ -39,17 +43,92 @@ CLIENTS = {
                         note="Uncertain: confirm mcp.json location in your LM Studio MCP settings."),
     "hermes": Client("yaml", "~/.hermes/config.yaml", "mcp_servers",
                      "Uncertain: verify mcp_servers stdio fields against your installed Hermes Agent release."),
+    "warp": Client("json", "~/.warp/.mcp.json or project .warp/.mcp.json"),
+    "junie": Client("json", "~/.junie/mcp/mcp.json or project .junie/mcp/mcp.json",
+                    note="Junie recipe. AI Assistant JSON import is unverified in the research."),
+    "amp": Client("json", "%APPDATA%/amp/settings.json or ~/.config/amp/settings.json; project .amp/settings.json",
+                  "amp.mcpServers", "Workspace config needs client approval. Paths are from secondary research."),
+    "roo": Client("json", ".roo/mcp.json or global mcp_settings.json via Roo's MCP settings"),
+    "kilo": Client("jsonc", "~/.config/kilo/kilo.jsonc or project kilo.jsonc", "mcp",
+                   "Newer Kilo format. Research found conflicting generations; choose the one your installed client uses."),
+    "kilo-legacy": Client("json", ".kilocode/mcp.json or global mcp_settings.json via Kilo's MCP settings",
+                          note="Older Kilo extension format; do not combine it with kilo.jsonc."),
+    "cherry-studio": Client("json", "Settings > MCP Server > Add > STDIO / Import from JSON (no file path established)"),
+    "jan": Client("json", "Settings > MCP Servers > Add (no file path established)",
+                  note="Unverified in the research: confirm JSON import or enter command, args and env in the UI."),
+    "librechat": Client("yaml", "librechat.yaml beside the self-hosted LibreChat app", "mcpServers",
+                        "Run on this PC with access to these paths; Docker/container localhost and paths differ."),
+    "msty": Client("json", "Toolbox > MCP Tools > JSON (no file path established)",
+                   note="Unverified in the research: confirm fields in your installed Msty."),
+    "boltai": Client("json", "BoltAI MCP settings / JSON import (macOS; no file path established)",
+                     note="Unverified in the research. Mac-later: the current Uoink installer is Windows-only."),
+    "continue": Client("yaml", "~/.continue/config.yaml or .continue/mcpServers/uoink.yaml", "list",
+                       "Unverified in the research: mcpServers list, agent mode; check the installed schema before merging."),
+    "raycast": Client("json", "Raycast AI > MCP settings (no config file path established)",
+                      note="Local stdio is documented in the research; JSON import and Windows availability are unverified. Enter command/args/env if needed."),
+    "open-webui": Client("json", "Local mcpo --config <chosen-config.json>; Open WebUI tool-server settings",
+                         note="Unverified: the supplied research did not verify Open WebUI's native MCP or mcpo. This is a candidate mcpo stdio config; confirm with the installed bridge. Keep mcpo on loopback and authenticate it."),
+    "anythingllm": Client("json", "AnythingLLM Desktop MCP settings; candidate storage/plugins/anythingllm_mcp_servers.json",
+                          note="Unverified: not covered by the supplied research. Confirm the storage root and schema in your installed client."),
+    "ollama": Client("json", "MCP-capable Ollama client settings (client-specific file or JSON import)",
+                     note="Unverified client route. Ollama itself is the model runtime, not an MCP client. Use a tool-capable client and model on this PC."),
+    "smithery-local": Client("text", "agent-kit/smithery.yaml (deferred until local schema is confirmed)",
+                             note="Unverified local stdio schema; research only establishes target: local from a secondary source.",
+                             guide="Smithery local: the research gives target: local but no command/args schema.\nNo smithery.yaml is shipped. Confirm the local stdio schema first, then use:\n<ENTRY>\nDo not publish this private install path or select remote hosting."),
+    "windows-odr": Client("text", ".mcpb/manifest.json from the Uoink bundle; Windows ODR registration",
+                          note="Preview, not yet tested. Windows build 26220 or later; research cites 26220.7262+. Local manifest argument syntax is unverified.",
+                          guide="Documentation only. Inspect odr.exe mcp add --help on a supported Windows build,\nthen use odr.exe mcp add with the local .mcpb/manifest.json and the manifest\noption shown by that build. The research only supplies --uri for remote servers;\ndo not use that remote route. Uoink's installer never runs ODR."),
+    "obsidian": Client("text", "Uoink Settings > Library > Library Mirror; destination is your vault folder",
+                       guide="Choose the vault root, select all items or an item-ID allowlist, Preview, then\nselect Enable to confirm. Uoink writes evidence cards, shelf pages and accepted\nbriefs under <vault>/Uoink/. This is an opt-in one-way export, not full-media or\ntwo-way sync. The research names no MCP-capable Obsidian plugin; no plugin recipe is claimed."),
+    "n8n": Client("text", "Self-hosted n8n HTTP Request node on the Uoink PC (workflow UI)",
+                  guide="GET http://127.0.0.1:5179/memory/search?q=memory&limit=5\nHeader: X-Uoink-Token: <your local token, stored in n8n credentials>\nUse the configured port if different. Never put the token in a URL, workflow\nexport, chat, or log. Containers and other machines have their own localhost.\nCloud n8n, Make and Zapier cannot reach this PC's 127.0.0.1."),
+    "make": Client("text", "No local recipe for Make cloud runners",
+                   guide="Make cloud runners cannot reach Uoink's 127.0.0.1. Remote HTTPS/tunnels are skipped.\nUse uoink connect n8n for same-PC self-hosted automation."),
+    "zapier": Client("text", "No local recipe for Zapier cloud runners",
+                     guide="Zapier cloud runners cannot reach Uoink's 127.0.0.1. Remote HTTPS/tunnels are skipped.\nUse uoink connect n8n for same-PC self-hosted automation."),
+    "autohotkey": Client("text", "A user-created .ahk file (AutoHotkey v2)",
+                         guide='#Requires AutoHotkey v2.0\n^!u::Run(\'"<CLI>" search "working memory" --text\')'),
+    "powertoys": Client("text", "PowerToys Command Palette > command/shortcut settings (release-dependent)",
+                        note="Unverified in the research: confirm command support in your installed version.",
+                        guide='Configure a command or shortcut target as "<CLI>" with arguments:\nsearch "working memory" --text\nThis launches the CLI. It does not add inline search results or an extension.'),
+    "alfred": Client("text", "Alfred workflow > Run Script (macOS)",
+                     guide='Mac-later: Uoink currently ships for Windows. A future local Mac install could\nuse this fixed Run Script action: uoink search "working memory" --text\nDo not pass unquoted clipboard or query text into a shell.'),
 }
 
 
-def render(client: str, app_dir: Path, python: Path, isolation_args=()) -> str:
-    spec = CLIENTS[client]
+def python_command(app_dir: Path) -> Path:
+    bundled = app_dir / "python" / ("python.exe" if sys.platform == "win32" else "bin/python3")
+    return (bundled if bundled.is_file() else Path(sys.executable)).resolve()
+
+
+def server_entry(client: str, app_dir: Path, python: Path, isolation_args=()) -> dict:
     command = str(python.resolve())
     args = [str((app_dir / "uoink_mcp.py").resolve()), *isolation_args]
     env = {"PYTHONIOENCODING": "utf-8", "PYTHONUTF8": "1"}
     if client == "cursor":
         env["UOINK_MCP_TOOLSET"] = "core"
-    entry = {"command": command, "args": args, "env": env}
+    return {"command": command, "args": args, "env": env}
+
+
+def deeplink(client: str, app_dir: Path, python: Path, isolation_args=()) -> str:
+    entry = server_entry(client, app_dir, python, isolation_args)
+    if client == "cursor":
+        config = base64.b64encode(json.dumps(entry, ensure_ascii=False, separators=(",", ":")).encode("utf-8")).decode("ascii")
+        return "cursor://anysphere.cursor-deeplink/mcp/install?" + urlencode({"name": "uoink", "config": config})
+    if client == "vscode":
+        return "vscode:mcp/install?" + quote(json.dumps({"name": "uoink", "type": "stdio", **entry}, ensure_ascii=False, separators=(",", ":")), safe="")
+    raise ValueError("deeplinks require cursor or vscode")
+
+
+def render(client: str, app_dir: Path, python: Path, isolation_args=()) -> str:
+    spec = CLIENTS[client]
+    entry = server_entry(client, app_dir, python, isolation_args)
+    command, args, env = entry["command"], entry["args"], entry["env"]
+    if spec.format == "text":
+        launcher = str((app_dir / "cli" / "uoink.cmd").resolve())
+        if client == "autohotkey":
+            launcher = launcher.replace("`", "``").replace("'", "`'")
+        return spec.guide.replace("<ENTRY>", json.dumps(entry, indent=2, ensure_ascii=False)).replace("<CLI>", launcher)
     if spec.format == "shell":
         # PowerShell single quotes preserve spaces, $, backticks and apostrophes.
         quote = (lambda s: "'" + s.replace("'", "''") + "'") if os.name == "nt" else shlex.quote
@@ -61,7 +140,9 @@ def render(client: str, app_dir: Path, python: Path, isolation_args=()) -> str:
                 + "\nargs = " + json.dumps(args, ensure_ascii=False)
                 + "\n\n[mcp_servers.uoink.env]\n"
                 + "\n".join(f"{key} = {json.dumps(value)}" for key, value in env.items()))
-    if spec.shape == "servers":
+    if spec.shape == "list":
+        return json.dumps({"mcpServers": [{"name": "uoink", **entry}]}, indent=2, ensure_ascii=False)
+    if spec.shape == "servers" or client == "librechat":
         entry = {"type": "stdio", **entry}
     elif spec.shape == "extensions":
         entry = {"name": "uoink", "type": "stdio", "enabled": True,
