@@ -68,23 +68,33 @@ def capability_refusal(capability: dict) -> dict | None:
 
 
 def mac_bundle_contents() -> Path | None:
+    """Identify the embedded interpreter, independently of cwd/env/module path."""
     if sys.platform != "darwin":
         return None
-    resources = Path(__file__).resolve().parent
-    if resources.name == "Resources" and resources.parent.name == "Contents":
-        return resources.parent
+    executable = getattr(sys, "executable", "")
+    if not executable:
+        return None
+    # Check both the launch path and its resolved target: a symlink must not
+    # turn an embedded interpreter into a source-checkout PATH fallback.
+    for path in (Path(executable).absolute(), Path(executable).resolve()):
+        for parent in path.parents:
+            if (parent.name == "Python" and parent.parent.name == "Frameworks"
+                    and parent.parent.parent.name == "Contents"
+                    and parent.parent.parent.parent.suffix == ".app"):
+                return parent.parent.parent
     return None
 
 
 def media_binary(name: str) -> str:
-    """Darwin never resolves media executables through PATH or Homebrew."""
+    """Use app-owned binaries in a bundle; source checkouts retain PATH lookup."""
     if name not in {"ffmpeg", "ffprobe"}:
         raise ValueError(f"Unknown media executable: {name}")
     if sys.platform != "darwin":
         return name
     contents = mac_bundle_contents()
-    # Source checkouts may stage the same Helpers layout under their root.
-    helpers = (contents or Path(__file__).resolve().parent) / "Helpers"
+    if contents is None:
+        return name
+    helpers = contents / "Helpers"
     path = helpers / name
     if path.is_symlink() or helpers.is_symlink() or not path.is_file():
         raise FileNotFoundError(f"Bundled media executable missing: {path}")
@@ -95,13 +105,15 @@ def ytdlp_media_args() -> list[str]:
     if sys.platform != "darwin":
         return []
     contents = mac_bundle_contents()
-    helpers = (contents or Path(__file__).resolve().parent) / "Helpers"
+    if contents is None:
+        return []
+    helpers = contents / "Helpers"
     # A missing explicit location makes yt-dlp refuse FFmpeg, without PATH fallback.
     return ["--ignore-config", "--ffmpeg-location", str(helpers)]
 
 
 def video_format(default: str) -> str:
-    if sys.platform != "darwin":
+    if sys.platform != "darwin" or mac_bundle_contents() is None:
         return default
     # No unknown-codec or unrestricted fallback: AV1/HEVC have not been enabled.
     native = '[vcodec~="^(avc1|h264|vp0?8|vp0?9)"]'
@@ -110,7 +122,7 @@ def video_format(default: str) -> str:
 
 def podcast_audio_format() -> str:
     # FFmpeg has no native MP3 encoder. WAV avoids an additional LGPL library.
-    return "wav" if sys.platform == "darwin" else "mp3"
+    return "wav" if sys.platform == "darwin" and mac_bundle_contents() is not None else "mp3"
 
 
 def _test_wav() -> bytes:
@@ -137,8 +149,8 @@ def _media_self_test(ffmpeg: str, ffprobe: str, identities: tuple) -> bool:
 
 
 def media_capability() -> dict:
-    """A Darwin capability is earned by the app-owned executables, never PATH."""
-    if sys.platform == "darwin":
+    """Only a bundled runtime requires the app-owned executable self-test."""
+    if sys.platform == "darwin" and mac_bundle_contents() is not None:
         try:
             binaries = [media_binary(name) for name in ("ffmpeg", "ffprobe")]
             identities = tuple((p.stat().st_size, p.stat().st_mtime_ns, p.stat().st_ino)
@@ -155,9 +167,9 @@ def media_capability() -> dict:
 
 def alignment_capability() -> dict:
     """FFmpeg CLI availability does not establish the TorchCodec/WhisperX ABI."""
-    if sys.platform == "darwin":
+    contents = mac_bundle_contents() if sys.platform == "darwin" else None
+    if contents is not None:
         import json
-        contents = mac_bundle_contents()
         try:
             report = json.loads((contents / "Resources/notices/torchcodec.json").read_text()) if contents else {}
             libraries = report.get("libraries", [])

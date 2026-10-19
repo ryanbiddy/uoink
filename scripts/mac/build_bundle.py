@@ -300,8 +300,8 @@ def build(wheels: Path, output: Path, ffmpeg_output: Path | None = None) -> Path
     shutil.copyfile(MAC / "payload.json", notices / "payload.json")
     write_json(notices / "resolved-wheels.json", {"wheels": rows})
     write_json(notices / "packages.json", json.loads(packages))
-    rewrite_rpaths(app, output / "native-rpath-removals.json")
     ffmpeg = ffmpeg_bundle.install(ffmpeg_output, app, notices)
+    rewrite_rpaths(app, output / "native-rpath-removals.json")
     write_json(notices / "build.json", {"version": version, "python": pin, "python_url": url,
                                        "platform": platform.platform(), "ffmpeg": ffmpeg,
                                        "signing": "modified Mach-O binaries ad-hoc; no Developer ID",

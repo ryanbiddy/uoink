@@ -2137,7 +2137,9 @@ def _test_anthropic_key(api_key: str) -> tuple[bool, str | None, int | None]:
 # Reference: yt-dlp's twitter:api extractor-arg, values are
 #   {legacy, syndication, graphql}.
 YTDLP_CMD = [sys.executable, "-m", "yt_dlp",
-              "--extractor-args", "twitter:api=syndication", *_platform.ytdlp_media_args()]
+              "--extractor-args", "twitter:api=syndication"]
+if sys.platform == "darwin":
+    YTDLP_CMD.extend(_platform.ytdlp_media_args())
 
 # Hard cap on the video file yt-dlp downloads before ffmpeg runs. yt-dlp
 # pulls the whole file to disk first; on a small disk a few livestream-length
@@ -2794,6 +2796,8 @@ def _replace_reliability_section(corpus_path: Path, reliability: dict) -> None:
 
 def _download_reliability_audio(url: str, tmp_dir: Path,
                                 cancel_event: threading.Event | None = None) -> Path:
+    if _platform.sys.platform == "darwin" and _platform.mac_bundle_contents() is not None:
+        url = source_subscriptions.check_public_http_url(url)
     _platform.require_media()
     _run_subprocess(
         [
@@ -2829,9 +2833,9 @@ def _compute_transcript_reliability(
     extraction-time call passes the just-downloaded video file before it is
     deleted, avoiding a second network request.
     """
-    refusal = _platform.capability_refusal(_platform.media_capability())
-    if refusal is not None:
-        return refusal
+    if (_platform.sys.platform == "darwin" and _platform.mac_bundle_contents() is not None
+            and not _VIDEO_ID_RE.fullmatch(video_id or "")):
+        return {"ok": False, "error": "video id invalid"}
     if folder is None:
         folder, _row = _folder_for_video_id(video_id)
     if folder is None:
@@ -2841,6 +2845,9 @@ def _compute_transcript_reliability(
     vid = (sidecar.get("video_id") or video_id or "").strip()
     if not vid:
         return {"ok": False, "error": "uoink has no video_id"}
+    refusal = _platform.capability_refusal(_platform.media_capability())
+    if refusal is not None:
+        return refusal
     existing = sidecar.get("reliability")
     if isinstance(existing, dict) and existing.get("status") == "completed" and not force:
         return {"ok": True, "reliability": existing, "cached": True}
@@ -3757,7 +3764,8 @@ def _screenshot_ffmpeg_command(video_file: Path, interval: int,
                                output_pattern: Path) -> list[str]:
     """Build the screenshot command with an explicit full-range JPEG format."""
     return [
-        _platform.media_binary("ffmpeg"), "-loglevel", "error", "-y",
+        _platform.media_binary("ffmpeg") if _platform.sys.platform == "darwin" else "ffmpeg",
+        "-loglevel", "error", "-y",
         "-i", str(video_file),
         "-vf", f"fps=1/{max(1, int(interval))}",
         # MJPEG requires full-range YUV. Without this, limited-range yuv420p(tv)
@@ -4128,7 +4136,8 @@ def _download_thumbnail(metadata: dict, output_folder: Path, *,
     jpg_path = output_folder / "thumbnail.jpg"
     try:
         _run_subprocess(
-            [_platform.media_binary("ffmpeg"), "-loglevel", "error", "-y",
+            [_platform.media_binary("ffmpeg") if _platform.sys.platform == "darwin" else "ffmpeg",
+             "-loglevel", "error", "-y",
              "-i", str(raw_path), str(jpg_path)],
             cancel_event=cancel_event,
             check=True,
@@ -5948,8 +5957,11 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
     Returns a dict with folder, yoink_md (current text), screenshot_count,
     title, video_slug, caption_count.
     """
-    _platform.require_media()
     requested_long_video_mode = _normalize_long_video_mode(long_video_mode)
+    if (_platform.sys.platform == "darwin" and _platform.mac_bundle_contents() is not None
+            and not _normalize_video_url(url)[0]):
+        raise ValueError("video URL invalid")
+    _platform.require_media()
     if metadata is None:
         if phase_callback:
             phase_callback("metadata")
@@ -6162,7 +6174,8 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
             *YTDLP_CMD,
             # Require a video stream. Plain `worst` can pick audio-only on some
             # Shorts, which makes ffmpeg screenshot extraction fail with no packets.
-            "-f", _platform.video_format("worst*[vcodec!=none][height>=360]/worst*[vcodec!=none]/worst"),
+            "-f", (_platform.video_format("worst*[vcodec!=none][height>=360]/worst*[vcodec!=none]/worst")
+                   if _platform.sys.platform == "darwin" else "worst*[vcodec!=none][height>=360]/worst*[vcodec!=none]/worst"),
             "--concurrent-fragments", "4",
             "--retries", "10",
             "--fragment-retries", "10",
@@ -8495,12 +8508,12 @@ def _fetch_monitored_playlist_entries(playlist_url: str) -> list[dict]:
 
 def _fetch_playlist_preview(url: str) -> tuple[dict | None, str | None, int]:
     """Return (playlist, error, status_code) for a validated playlist URL."""
-    capability = _platform.media_capability()
-    if not capability["available"]:
-        return None, capability["code"], 501
     normalized = _normalize_playlist_url(url)
     if not normalized:
         return None, "playlist URL invalid", 400
+    capability = _platform.media_capability()
+    if not capability["available"]:
+        return None, capability["code"], 501
     try:
         cp = _run_subprocess(
             [*YTDLP_CMD, "--dump-single-json", "--flat-playlist", normalized],
@@ -9612,9 +9625,6 @@ def _queue_podcast_transcription(
     capture ledger row; the worker completes or fails that row with the owner
     token when the job ends (Phase 3, "Atomic starts": the start id is the
     job's idempotency identity)."""
-    refusal = _platform.capability_refusal(_platform.media_capability())
-    if refusal is not None:
-        return refusal, 501
     episode = podcasts.get_episode(_get_index(), episode_id)
     if episode is None:
         return {"ok": False, "error": "episode not found"}, 404
@@ -9628,6 +9638,11 @@ def _queue_podcast_transcription(
     audio_path = Path(audio_path_raw)
     if not audio_path.is_file():
         return {"ok": False, "error": f"audio file missing: {audio_path}"}, 404
+    if _platform.sys.platform == "darwin" and language is not None and not isinstance(language, str):
+        return {"ok": False, "error": "language must be text when provided"}, 400
+    refusal = _platform.capability_refusal(_platform.media_capability())
+    if refusal is not None:
+        return refusal, 501
     with _jobs_lock:
         existing = next((
             _public_job(job) for job in _jobs.values()
@@ -9952,10 +9967,6 @@ class _ServerCaptureBackend(source_subscriptions.CaptureBackend):
             self._leases[start["capture_key"]] = (lock, True, start["start_id"])
 
     def preflight(self, item, source):
-        media = _platform.media_capability()
-        if not media["available"]:
-            return source_subscriptions.CaptureOutcome(
-                "preflight_failed", code=media["code"], terminal=True)
         if source["kind"] == "podcast_rss":
             if item.get("legacy_episode_id") is None:
                 return source_subscriptions.CaptureOutcome(
@@ -9964,6 +9975,16 @@ class _ServerCaptureBackend(source_subscriptions.CaptureBackend):
             if not podcasts._is_http_url(meta.get("audio_url")):
                 return source_subscriptions.CaptureOutcome(
                     "preflight_failed", code="no_audio_url", terminal=True)
+            if _platform.sys.platform == "darwin" and _platform.mac_bundle_contents() is not None:
+                try:
+                    source_subscriptions.check_public_http_url(meta["audio_url"])
+                except source_subscriptions.ServiceError as error:
+                    return source_subscriptions.CaptureOutcome(
+                        "preflight_failed", code=error.code, terminal=True)
+            media = _platform.media_capability()
+            if not media["available"]:
+                return source_subscriptions.CaptureOutcome(
+                    "preflight_failed", code=media["code"], terminal=True)
             if not whisper_runner.is_whisperx_available():
                 return source_subscriptions.CaptureOutcome(
                     "preflight_failed", code="missing_transcription_setup")
@@ -9977,6 +9998,10 @@ class _ServerCaptureBackend(source_subscriptions.CaptureBackend):
         if not source_subscriptions._VIDEO_ID_RE.match(item.get("entry_id") or ""):
             return source_subscriptions.CaptureOutcome(
                 "preflight_failed", code="invalid_identity", terminal=True)
+        media = _platform.media_capability()
+        if not media["available"]:
+            return source_subscriptions.CaptureOutcome(
+                "preflight_failed", code=media["code"], terminal=True)
         return None
 
     def bind(self, conn, start, item, source):
@@ -10004,10 +10029,6 @@ class _ServerCaptureBackend(source_subscriptions.CaptureBackend):
         return outcome
 
     def _run_podcast(self, start, item, source):
-        media = _platform.media_capability()
-        if not media["available"]:
-            return source_subscriptions.CaptureOutcome(
-                "failed", code=media["code"], terminal=True)
         episode_id = int(item["legacy_episode_id"])
         start_id = start["start_id"]
         # AS-02: the bounded enclosure download runs on this thread with no
@@ -10027,6 +10048,10 @@ class _ServerCaptureBackend(source_subscriptions.CaptureBackend):
                 downloaded = podcasts.download_episode_audio(
                     _get_index(), episode_id, data_root=DATA_ROOT)
             if not downloaded.get("ok"):
+                # The downloader validates the enclosure before testing media.
+                if _platform.sys.platform == "darwin" and downloaded.get("code") == "media_requires_ffmpeg":
+                    return source_subscriptions.CaptureOutcome(
+                        "failed", code="media_requires_ffmpeg", terminal=True)
                 code = "download_failed"
                 if downloaded.get("error") == "timeout":
                     code = "download_timeout"
@@ -10051,12 +10076,12 @@ class _ServerCaptureBackend(source_subscriptions.CaptureBackend):
                 _source_capture_threads.pop(start_id, None)
 
     def _run_youtube(self, start, item, source):
+        video_id = item["entry_id"]
+        url = source_subscriptions.video_watch_url(video_id)
         media = _platform.media_capability()
         if not media["available"]:
             return source_subscriptions.CaptureOutcome(
                 "failed", code=media["code"], terminal=True)
-        video_id = item["entry_id"]
-        url = source_subscriptions.video_watch_url(video_id)
         start_id = start["start_id"]
         owner_token = start["owner_token"]
         # AS-02: the callback carries an explicit proof the backend verifies
@@ -12463,7 +12488,9 @@ def _build_diagnose_payload(*, public: bool, local_ui: bool = False) -> dict:
 
     # 7. ffmpeg_available
     media = _platform.media_capability()
-    status, detail = (_probe_command([_platform.media_binary("ffmpeg"), "-version"]) if media["available"]
+    status, detail = (_probe_command([
+        _platform.media_binary("ffmpeg") if _platform.sys.platform == "darwin" else "ffmpeg", "-version"])
+                      if media["available"]
                       else ("unavailable", f"{media['reason']} ({media['code']})"))
     if status == "ok":
         add("ffmpeg_available", "ok", "ffmpeg is available" if public else detail)
@@ -15980,9 +16007,6 @@ class Handler(BaseHTTPRequestHandler):
         })
 
     def _handle_reliability_compute(self, video_id: str, body: dict):
-        refusal = _platform.capability_refusal(_platform.media_capability())
-        if refusal is not None:
-            return self._send_json(501, refusal)
         threshold = RELIABILITY_DEFAULT_THRESHOLD
         raw_threshold = body.get("threshold") if isinstance(body, dict) else None
         if raw_threshold is not None:
@@ -15999,7 +16023,9 @@ class Handler(BaseHTTPRequestHandler):
             allow_model_download=bool(body.get("allow_model_download")),
             force=bool(body.get("force")),
         )
-        self._send_json(200, result)
+        status = 501 if (_platform.sys.platform == "darwin"
+                         and result.get("code") == "media_requires_ffmpeg") else 200
+        self._send_json(status, result)
 
     def _handle_open_last_youtube(self):
         """Focus an existing YouTube browser window, else open youtube.com.
@@ -18408,12 +18434,12 @@ class Handler(BaseHTTPRequestHandler):
 
     # ---- /playlist/preview ----
     def _handle_playlist_preview(self, body: dict):
-        refusal = _platform.capability_refusal(_platform.media_capability())
-        if refusal is not None:
-            return self._send_json(501, refusal)
         url, _interval, err, status = self._validate_playlist_body(body)
         if err:
             return self._send_json(status, {"ok": False, "error": err})
+        refusal = _platform.capability_refusal(_platform.media_capability())
+        if refusal is not None:
+            return self._send_json(501, refusal)
         playlist, err, status = _fetch_playlist_preview(url)
         if err:
             return self._send_json(status, {"ok": False, "error": err})
@@ -18421,12 +18447,12 @@ class Handler(BaseHTTPRequestHandler):
 
     # ---- /playlist/start ----
     def _handle_playlist_start(self, body: dict):
-        refusal = _platform.capability_refusal(_platform.media_capability())
-        if refusal is not None:
-            return self._send_json(501, refusal)
         url, interval, err, status = self._validate_playlist_body(body, require_interval=True)
         if err:
             return self._send_json(status, {"ok": False, "error": err})
+        refusal = _platform.capability_refusal(_platform.media_capability())
+        if refusal is not None:
+            return self._send_json(501, refusal)
         playlist, err, status = _fetch_playlist_preview(url)
         if err:
             return self._send_json(status, {"ok": False, "error": err})
@@ -18886,9 +18912,6 @@ class Handler(BaseHTTPRequestHandler):
         The slim path is the prompt's `transcript + thumbnail only`
         graceful fallback. A later PR can deepen it with optional
         ffmpeg screenshots once we know which sites benefit."""
-        refusal = _platform.capability_refusal(_platform.media_capability())
-        if refusal is not None:
-            return self._send_json(501, refusal)
         raw = (body.get("url") or "").strip()
         canonical, platform = _normalize_any_url(raw)
         if not canonical:
@@ -18907,6 +18930,16 @@ class Handler(BaseHTTPRequestHandler):
             body = dict(body)
             body["url"] = canonical
             return self._handle_extract(body)
+
+        if _platform.sys.platform == "darwin" and _platform.mac_bundle_contents() is not None:
+            try:
+                canonical = source_subscriptions.check_public_http_url(canonical)
+            except (source_subscriptions.ServiceError, urllib.error.URLError) as e:
+                return self._send_json(400, {"ok": False, "error": f"URL refused or unreachable: {e}",
+                                            "url": canonical, "platform": platform})
+        refusal = _platform.capability_refusal(_platform.media_capability())
+        if refusal is not None:
+            return self._send_json(501, refusal)
 
         # Generic path: metadata-only extraction. Best-effort -- if
         # yt-dlp doesn't support the URL we surface its error verbatim
@@ -19170,9 +19203,6 @@ class Handler(BaseHTTPRequestHandler):
 
     @_reports_live_extract
     def _handle_extract(self, body: dict):
-        refusal = _platform.capability_refusal(_platform.media_capability())
-        if refusal is not None:
-            return self._send_json(501, refusal)
         url, interval, err = self._validate_url_interval(body)
         if err:
             log.info("POST /extract -> 400 (%s)", err)
@@ -19184,6 +19214,9 @@ class Handler(BaseHTTPRequestHandler):
             return self._send_json(400, {"ok": False, "error": str(e)})
 
         # Waiting for the capture lock until the `with` below takes it.
+        refusal = _platform.capability_refusal(_platform.media_capability())
+        if refusal is not None:
+            return self._send_json(501, refusal)
         _live_extract_begin(url, body.get("capture_ref"))
         log.info("POST /extract url=%s interval=%d long_video_mode=%s -> running",
                  url, interval, long_video_mode)
@@ -19348,9 +19381,6 @@ class Handler(BaseHTTPRequestHandler):
 
     # ---- /session/add ----
     def _handle_session_add(self, body: dict):
-        refusal = _platform.capability_refusal(_platform.media_capability())
-        if refusal is not None:
-            return self._send_json(501, refusal)
         session_id, sid_err = self._validate_session_id(body)
         if sid_err:
             return self._send_json(400, {"ok": False, "error": sid_err})
@@ -19367,6 +19397,9 @@ class Handler(BaseHTTPRequestHandler):
                 "error": f"session '{session_id}' is {session.get('status')}, not open",
             })
 
+        refusal = _platform.capability_refusal(_platform.media_capability())
+        if refusal is not None:
+            return self._send_json(501, refusal)
         log.info("POST /session/add session=%s url=%s -> running", session_id, url)
         sess_folder = _session_folder(session_id)
         # Fetch metadata once; source identity disambiguates same-title videos.

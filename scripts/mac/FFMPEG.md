@@ -37,12 +37,12 @@ Both builds start with:
 
 ```text
 --arch=aarch64 --target-os=darwin
---cc=<xcrun clang> --sysroot=<xcrun macosx SDK> --pkg-config=/usr/bin/false
+--cc=<xcrun clang> --sysroot=<xcrun macosx SDK>
 --extra-cflags='-arch arm64 -mmacosx-version-min=14.0'
 --extra-ldflags='-arch arm64 -mmacosx-version-min=14.0 -Wl,-headerpad_max_install_names'
---disable-gpl --disable-nonfree --disable-version3 --disable-autodetect
+--disable-gpl --disable-nonfree --disable-autodetect
 --disable-doc --disable-debug --disable-everything --disable-programs
---disable-network --enable-zlib
+--enable-zlib
 ```
 
 The CLI adds `--enable-static --disable-shared --enable-ffmpeg
@@ -51,7 +51,7 @@ necessary: `server.py` sends `--download-sections` to yt-dlp for chunked
 video capture, which invokes FFmpeg against remote media URLs. HTTP/HTTPS,
 TCP/TLS and encrypted HLS use explicitly enabled Apple Secure Transport;
 no external TLS package is linked. The shared build keeps networking disabled
-and adds `--enable-shared --disable-static --enable-pic
+and adds `--disable-network --enable-shared --disable-static --enable-pic
 --install-name-dir=@rpath`.
 
 System zlib is explicitly enabled for native PNG decoding and compressed
@@ -61,6 +61,11 @@ dependencies are allowed by the native inventory's `/usr/lib` and
 from the environment, and subprocess PATH contains only system directories.
 
 Each row below becomes a comma-separated `--enable-<kind>=...` argument.
+Before configuring, the builder checks every requested component against the
+hash-verified source's `configure --list-<kind>s` output for that version.
+It also checks generated configuration headers for disabled dependencies and
+GPL/nonfree/version3 code. Configure and make failures print the final 150 lines
+of both `ffbuild/config.log` and `build.log` to CI output and preserve the logs.
 FFmpeg may enable internal dependencies; the generated `config_components.h`
 and `enabled-components.json` record the actual result for each version.
 
@@ -70,7 +75,7 @@ and `enabled-components.json` record the actual result for each version.
 | Common audio decoders | `aac,aac_latm,mp3float,opus,vorbis,flac,alac,pcm_u8,pcm_s16le,pcm_s16be,pcm_s24le,pcm_s32le,pcm_f32le,pcm_f64le` | AAC/M4A, MP3, WebM/Opus, Ogg and PCM/lossless podcast inputs |
 | Common image/video decoders | `h264,vp8,vp9,mjpeg,png,webp,ppm` | Selected video formats, JPEG/PNG/WebP thumbnails; PPM supplies the generated smoke video |
 | Common parsers | `aac,aac_latm,mpegaudio,opus,vorbis,flac,h264,vp8,vp9,mjpeg,png` | Packet parsing for enabled codecs |
-| Common filters | `abuffer,abuffersink,aformat,anull,aresample,atrim,buffer,buffersink,format,null,scale,trim,transpose,hflip,vflip` | TorchCodec graphs, audio/pixel conversion and automatic rotation |
+| Common filters | `aformat,anull,aresample,atrim,format,null,scale,trim,transpose,hflip,vflip` | TorchCodec graphs, audio/pixel conversion and automatic rotation |
 | Common protocols | `file,pipe` | Local media, generated test input and decoded samples |
 | CLI demuxers | `hls,concat,srt,webvtt,ass,lrc` | Section downloads, concatenation and yt-dlp subtitle conversion |
 | CLI subtitle decoders | `srt,subrip,webvtt,ass,text` | Convert downloaded captions to SRT |
@@ -79,6 +84,12 @@ and `enabled-components.json` record the actual result for each version.
 | CLI filters | `fps` | Periodic screenshots in `server.py` and `yt_extract.py` |
 | CLI bitstream filters | `aac_adtstoasc,h264_mp4toannexb,vp9_superframe,extract_extradata` | Container fixups and stream-copy remuxing |
 | CLI protocols | `http,https,tcp,tls,crypto` | Remote section input and encrypted HLS |
+
+`buffer`, `buffersink`, `abuffer` and `abuffersink` are built-in libavfilter
+endpoints, so they are not requested as configurable filters. Protocols are
+listed explicitly after `--disable-everything`. The default LGPL version is
+retained; the header check rejects `CONFIG_VERSION3`. SDK dependency probes
+use configure's normal fallback checks, without a forced failing pkg-config.
 
 `server.py` also converts downloaded thumbnails to JPEG and probes FFmpeg in
 diagnostics. `podcasts.py` delegates extraction to yt-dlp's FFmpeg postprocessor;
@@ -93,20 +104,20 @@ conversion and FFmpeg's `fps`/JPEG path. It is absent from the reviewed macOS
 payload and remains unchanged. The Windows installer invokes its separately
 pinned BtbN tools; the macOS build and smoke scripts use explicit paths.
 
-Darwin video selectors accept only H.264/AVC, VP8 and VP9, including codec
+Bundled Darwin video selectors accept only H.264/AVC, VP8 and VP9, including codec
 prefix variants. There is no unknown-codec or unrestricted fallback. An
 AV1-only or HEVC-only source fails format selection. No libdav1d is included.
 Audio-only reliability downloads do not decode video frames.
 
-FFmpeg has no native MP3 encoder. Darwin podcast output is PCM WAV, with a
+FFmpeg has no native MP3 encoder. Bundled Darwin podcast output is PCM WAV, with a
 `.wav` path; Windows/Linux MP3 commands and paths are unchanged. WAV uses
 more storage. The MP3 decoder and stream-copy muxer do not imply encoding
 support. No libmp3lame, x264, x265 or other external codec library is enabled.
 
 ## Loading and capabilities
 
-Darwin resolves media tools only from `Contents/Helpers`. Direct source runs
-must stage `Helpers` under the checkout; they also have no PATH fallback.
+The embedded interpreter resolves media tools only from `Contents/Helpers`.
+Darwin source/dev runs use PATH and retain the Linux media formats and behavior.
 yt-dlp gets `--ignore-config --ffmpeg-location <Helpers>` so ambient config
 cannot replace the tools. Missing binaries, failed `-version`, or a failed
 generated PCM decode retain `media_requires_ffmpeg`. The decode self-test

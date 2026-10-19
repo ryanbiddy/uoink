@@ -180,6 +180,15 @@ def assert_public(payload):
     assert not re.search(r"[a-z]:[\\/]|/home/|/users/|\\\\", text)
 
 
+@pytest.mark.parametrize("platform", ["win32", "linux"])
+def test_non_darwin_diagnose_keeps_bare_ffmpeg_without_new_resolver(helper, platform):
+    helper["_platform"].sys.platform = platform
+    assert not hasattr(helper["_platform"], "media_binary")
+    payload = helper["_build_diagnose_payload"](public=True)
+    helper["_probe_command"].assert_any_call(["ffmpeg", "-version"])
+    assert next(row for row in payload["checks"] if row["name"] == "ffmpeg_available")["status"] == "ok"
+
+
 @pytest.mark.parametrize("writable", [True, False])
 @pytest.mark.parametrize("origin", [None, "https://www.youtube.com", PINNED_ORIGIN])
 def test_diagnose_has_no_paths_or_key_flags(helper, writable, origin):

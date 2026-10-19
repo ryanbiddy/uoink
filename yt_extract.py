@@ -14,7 +14,7 @@ Outputs (per video, in a folder named after the video title):
 
 Requirements:
     pip install yt-dlp
-    ffmpeg on PATH on Windows/Linux; app-owned Helpers on macOS
+    ffmpeg on PATH in source checkouts; app-owned Helpers in the macOS bundle
 """
 
 import argparse
@@ -193,6 +193,9 @@ def main():
     args = ap.parse_args()
 
     import _platform
+    if sys.platform == "darwin":
+        from source_subscriptions import check_public_http_url
+        args.url = check_public_http_url(args.url)
     _platform.require_media()
 
     out_root = Path(args.out)
@@ -214,7 +217,8 @@ def main():
             "--write-subs",
             "--sub-lang", "en.*,en",
             "--convert-subs", "srt",
-            "-f", _platform.video_format("worst[height>=360]/worst"),
+            "-f", (_platform.video_format("worst[height>=360]/worst")
+                   if sys.platform == "darwin" else "worst[height>=360]/worst"),
             "-o", str(folder / "video.%(ext)s"),
             args.url,
         ],
@@ -232,7 +236,8 @@ def main():
     shots_dir.mkdir(exist_ok=True)
     subprocess.run(
         [
-            _platform.media_binary("ffmpeg"), "-loglevel", "error", "-y",
+            _platform.media_binary("ffmpeg") if sys.platform == "darwin" else "ffmpeg",
+            "-loglevel", "error", "-y",
             "-i", str(video_file),
             "-vf", f"fps=1/{args.interval}",
             "-q:v", "2",

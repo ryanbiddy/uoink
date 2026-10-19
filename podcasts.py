@@ -23,6 +23,7 @@ import hashlib
 import json
 import logging
 import os
+import sys
 import re
 import sqlite3
 import subprocess
@@ -1426,8 +1427,11 @@ def _episode_audio_path(data_root: Path, feed_row: dict,
                         fallback=f"ep-{episode_row.get('id') or 0}")
     folder = _podcast_root(data_root) / feed_slug
     folder.mkdir(parents=True, exist_ok=True)
-    import _platform
-    return folder / f"{ep_slug}.{_platform.podcast_audio_format()}"
+    audio_format = "mp3"
+    if sys.platform == "darwin":
+        import _platform
+        audio_format = _platform.podcast_audio_format()
+    return folder / f"{ep_slug}.{audio_format}"
 
 
 def _record_audio_result(idx, episode_id: int, *,
@@ -1468,9 +1472,6 @@ def download_episode_audio(idx, episode_id: int, *,
     re-downloading. Returns a structured result the endpoint surfaces.
     resolve_url is an explicit test injection for URL admission."""
     import _platform
-    refusal = _platform.capability_refusal(_platform.media_capability())
-    if refusal is not None:
-        return refusal
     episode = get_episode(idx, episode_id)
     if episode is None:
         return {"ok": False, "error": f"episode not found: {episode_id}"}
@@ -1514,6 +1515,10 @@ def download_episode_audio(idx, episode_id: int, *,
                              error=error, status="error" if refused else EPISODE_STATUS_NEW)
         return {"ok": False, "episode_id": episode_id, "error": error}
 
+    refusal = _platform.capability_refusal(_platform.media_capability())
+    if refusal is not None:
+        return refusal
+
     # Move to status='queued' if not already there. This makes the row
     # show up in the in-flight section of the dashboard during the
     # download (which can take several minutes for an hour-long pod).
@@ -1533,10 +1538,27 @@ def download_episode_audio(idx, episode_id: int, *,
     if not cmd:
         return {"ok": False, "error": "yt-dlp command not configured"}
 
-    args = cmd + _platform.ytdlp_media_args() + [
+    audio_format = "mp3"
+    if sys.platform == "darwin":
+        audio_format = _platform.podcast_audio_format()
+        media_args = _platform.ytdlp_media_args()
+        if media_args:
+            # YTDLP_CMD already contains these in a bundle. Replace any supplied
+            # location too, so custom commands cannot escape the bundle policy.
+            cleaned = []
+            skip = False
+            for arg in cmd:
+                if skip:
+                    skip = False
+                elif arg == "--ffmpeg-location":
+                    skip = True
+                elif arg != "--ignore-config" and not arg.startswith("--ffmpeg-location="):
+                    cleaned.append(arg)
+            cmd = cleaned + media_args
+    args = cmd + [
         "--no-progress",
         "--extract-audio",
-        "--audio-format", _platform.podcast_audio_format(),
+        "--audio-format", audio_format,
         "--audio-quality", "0",   # use VBR best
         "--max-filesize", str(_AUDIO_MAX_BYTES),
         # yt-dlp replaces this extension after the postprocess.

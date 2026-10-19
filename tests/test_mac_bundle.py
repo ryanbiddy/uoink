@@ -279,11 +279,14 @@ def test_loader_path_symlink_containment_without_os_symlink_privileges(monkeypat
 
 
 @pytest.mark.parametrize("failure", [None, "delete", "sign", "remaining_rpath", "dependency"])
-def test_rpath_rewrite_reports_edits_and_inventory_rechecks(monkeypatch, tmp_path, failure):
+@pytest.mark.parametrize("relative", ["libjpeg.62.4.0.dylib", "Contents/Helpers/ffmpeg",
+                                    "Contents/Helpers/ffprobe", "Contents/Frameworks/FFmpeg7/libavcodec.61.dylib"])
+def test_rpath_rewrite_reports_edits_and_inventory_rechecks(monkeypatch, tmp_path, failure, relative):
     from types import SimpleNamespace
     app = tmp_path / "Uoink.app"
     app.mkdir()
-    binary = app / "libjpeg.62.4.0.dylib"
+    binary = app / relative
+    binary.parent.mkdir(parents=True, exist_ok=True)
     binary.write_bytes(b"\xcf\xfa\xed\xfe" + b"before")
     (app / "plain.txt").write_text("not Mach-O")
     report = tmp_path / "removals.json"
@@ -329,7 +332,7 @@ def test_rpath_rewrite_reports_edits_and_inventory_rechecks(monkeypatch, tmp_pat
             bundle.rewrite_rpaths(app, tmp_path / "second-report.json")
             assert json.loads((tmp_path / "second-report.json").read_text()) == []
     expected = [PILLOW_RPATH] if failure == "delete" else [PILLOW_RPATH, "/opt/homebrew/lib"]
-    assert json.loads(report.read_text()) == [{"file": binary.name, "rpath": value} for value in expected]
+    assert json.loads(report.read_text()) == [{"file": relative, "rpath": value} for value in expected]
     assert sum(command[0] == "codesign" for command in calls) == (0 if failure == "delete" else 1)
 
 

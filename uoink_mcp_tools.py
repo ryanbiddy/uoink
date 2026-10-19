@@ -229,9 +229,6 @@ def _hook_context_for_folder(folder: Path) -> dict[str, Any]:
 
 def uoink_video(args: dict[str, Any]) -> dict[str, Any]:
     import _platform
-    refusal = _platform.capability_refusal(_platform.media_capability())
-    if refusal is not None:
-        return refusal
     b = _b()
     raw_url = args.get("url")
     if not isinstance(raw_url, str):
@@ -241,6 +238,9 @@ def uoink_video(args: dict[str, Any]) -> dict[str, Any]:
         return _err("URL must be a youtube.com or youtu.be video link")
     interval = _limit_int(args.get("interval"), default=30, low=5, high=300)
 
+    refusal = _platform.capability_refusal(_platform.media_capability())
+    if refusal is not None:
+        return refusal
     b.DESKTOP_ROOT.mkdir(parents=True, exist_ok=True)
     started_at = b._now_iso()
     title = None
@@ -306,9 +306,6 @@ def uoink_video(args: dict[str, Any]) -> dict[str, Any]:
 
 def uoink_playlist(args: dict[str, Any]) -> dict[str, Any]:
     import _platform
-    refusal = _platform.capability_refusal(_platform.media_capability())
-    if refusal is not None:
-        return refusal
     b = _b()
     raw_url = args.get("url")
     if not isinstance(raw_url, str):
@@ -317,6 +314,9 @@ def uoink_playlist(args: dict[str, Any]) -> dict[str, Any]:
     if not url:
         return _err("playlist URL invalid")
     interval = _limit_int(args.get("interval"), default=30, low=5, high=300)
+    refusal = _platform.capability_refusal(_platform.media_capability())
+    if refusal is not None:
+        return refusal
     playlist, error, _status = b._fetch_playlist_preview(url)
     if error:
         return _err(error)

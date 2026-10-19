@@ -82,13 +82,11 @@
     "common_flags": [
       "--disable-gpl",
       "--disable-nonfree",
-      "--disable-version3",
       "--disable-autodetect",
       "--disable-doc",
       "--disable-debug",
       "--disable-everything",
       "--disable-programs",
-      "--disable-network",
       "--enable-zlib"
     ],
     "components": {
@@ -143,14 +141,10 @@
         "png"
       ],
       "filter": [
-        "abuffer",
-        "abuffersink",
         "aformat",
         "anull",
         "aresample",
         "atrim",
-        "buffer",
-        "buffersink",
         "format",
         "null",
         "scale",
@@ -244,6 +238,7 @@
         "--enable-shared",
         "--disable-static",
         "--enable-pic",
+        "--disable-network",
         "--install-name-dir=@rpath"
       ],
       "components": {}

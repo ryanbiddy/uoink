@@ -6,6 +6,7 @@ The installed output is cacheable; build directories are not.
 from __future__ import annotations
 
 import argparse
+from collections import deque
 import hashlib
 import json
 import os
@@ -24,13 +25,14 @@ MAC = Path(__file__).resolve().parent
 FINGERPRINT = "FCF986EA15E6E293A5644F10B4322F04D67658D8"
 LIBRARIES = {"avcodec": 61, "avformat": 61, "avutil": 59, "swresample": 5,
              "swscale": 8, "avfilter": 10, "avdevice": 61}
-BASE_FLAGS = {"--disable-gpl", "--disable-nonfree", "--disable-version3",
+BASE_FLAGS = {"--disable-gpl", "--disable-nonfree",
               "--disable-autodetect", "--disable-doc", "--disable-debug",
-              "--disable-everything", "--disable-programs", "--disable-network", "--enable-zlib"}
+              "--disable-everything", "--disable-programs", "--enable-zlib"}
 ROLE_FLAGS = {
     "cli": {"--enable-static", "--disable-shared", "--enable-ffmpeg", "--enable-ffprobe",
             "--enable-network", "--enable-securetransport"},
-    "shared": {"--enable-shared", "--disable-static", "--enable-pic", "--install-name-dir=@rpath"},
+    "shared": {"--enable-shared", "--disable-static", "--enable-pic", "--disable-network",
+               "--install-name-dir=@rpath"},
 }
 
 
@@ -96,6 +98,57 @@ def validate_configuration(config: dict, role: str, headers: str) -> None:
                          f"forbidden={sorted(forbidden & enabled)}")
 
 
+def validate_source_components(config: dict, role: str, source: Path, env: dict) -> dict:
+    """Check every requested name against this hash-verified release's configure."""
+    inventory = {}
+    for kind, names in sorted(components(config, role).items()):
+        result = run(["/bin/bash", source / "configure", f"--list-{kind}s"],
+                     cwd=source, env=env, capture_output=True)
+        available = set(result.stdout.split())
+        missing = set(names) - available
+        if missing:
+            raise ValueError(f"FFmpeg {config[role]['version']} unknown {kind}s: {sorted(missing)}")
+        inventory[kind] = sorted(available)
+    return inventory
+
+
+def print_failure_logs(source: Path, evidence: Path) -> None:
+    """Expose useful diagnostics before TemporaryDirectory removes the build."""
+    for path in (source / "ffbuild/config.log", evidence / "build.log"):
+        print(f"\n--- Last 150 lines: {path} ---", file=sys.stderr, flush=True)
+        try:
+            with path.open(encoding="utf-8", errors="replace") as stream:
+                print("".join(deque(stream, maxlen=150)), end="", file=sys.stderr, flush=True)
+        except OSError as error:
+            print(f"Log unavailable: {error}", file=sys.stderr, flush=True)
+
+
+def configure_and_build(config: dict, role: str, source: Path, evidence: Path,
+                        command: list, env: dict) -> None:
+    with (evidence / "build.log").open("w", encoding="utf-8") as log:
+        try:
+            write_json(evidence / "source-components.json",
+                       validate_source_components(config, role, source, env))
+            run(command, cwd=source, env=env, stdout=log, stderr=subprocess.STDOUT)
+            log.flush()
+            if re.search(r"WARNING:.*(?:did not match|not found|disabled)",
+                         (evidence / "build.log").read_text(encoding="utf-8"), re.I):
+                raise ValueError("FFmpeg configure could not enable a requested component; see build.log")
+            validate_configuration(config, role, (source / "config.h").read_text() + "\n" +
+                                   (source / "config_components.h").read_text())
+            run(["/usr/bin/make", f"-j{os.cpu_count() or 2}"], cwd=source, env=env,
+                stdout=log, stderr=subprocess.STDOUT)
+            run(["/usr/bin/make", "install"], cwd=source, env=env, stdout=log, stderr=subprocess.STDOUT)
+        except (OSError, ValueError, subprocess.SubprocessError):
+            log.flush()
+            print_failure_logs(source, evidence)
+            raise
+        finally:
+            for name in ("config.h", "config_components.h", "ffbuild/config.mak", "ffbuild/config.log"):
+                if (source / name).is_file():
+                    shutil.copyfile(source / name, evidence / Path(name).name)
+
+
 def cache_key(config: dict) -> str:
     # Includes source hashes, flags/components, this recipe and the consumer.
     value = json.dumps(config, sort_keys=True).encode()
@@ -120,7 +173,8 @@ def extract_source(archive: Path, destination: Path, pin: dict) -> Path:
 def clean_environment() -> dict:
     env = {k: v for k, v in os.environ.items() if k not in {
         "CC", "CXX", "CPP", "CFLAGS", "CXXFLAGS", "CPPFLAGS", "LDFLAGS", "LIBRARY_PATH",
-        "CPATH", "C_INCLUDE_PATH", "CPLUS_INCLUDE_PATH", "PKG_CONFIG_PATH", "PKG_CONFIG_LIBDIR",
+        "CPATH", "C_INCLUDE_PATH", "CPLUS_INCLUDE_PATH", "PKG_CONFIG", "PKG_CONFIG_PATH",
+        "PKG_CONFIG_LIBDIR", "PKG_CONFIG_SYSROOT_DIR",
         "AS", "ASFLAGS", "LD", "AR", "RANLIB", "STRIP", "NM", "LDSOFLAGS",
         "SDKROOT", "MACOSX_DEPLOYMENT_TARGET", "BASH_ENV", "ENV"} and not k.startswith("DYLD_")}
     env.update(PATH="/usr/bin:/bin:/usr/sbin:/sbin", LC_ALL="C", MACOSX_DEPLOYMENT_TARGET="14.0")
@@ -179,7 +233,7 @@ def build(output: Path) -> None:
             evidence = output / "notices" / role
             evidence.mkdir(parents=True)
             flags = [f"--prefix={prefix}", "--arch=aarch64", "--target-os=darwin", f"--cc={cc}",
-                     f"--sysroot={sdk}", "--pkg-config=/usr/bin/false",
+                     f"--sysroot={sdk}",
                      "--extra-cflags=-arch arm64 -mmacosx-version-min=14.0",
                      "--extra-ldflags=-arch arm64 -mmacosx-version-min=14.0 -Wl,-headerpad_max_install_names",
                      *configure_flags(config, role)]
@@ -189,21 +243,7 @@ def build(output: Path) -> None:
                        "compiler": compiler, "sdk": sdk, "sdk_version": sdk_version,
                        "minimum_macos": config["minimum_macos"], "source_modified": False,
                        "signature": "Verified by orchestrator before pinning; CI verifies size and SHA-256"})
-            with (evidence / "build.log").open("w") as log:
-                try:
-                    run(command, cwd=source, env=env, stdout=log, stderr=subprocess.STDOUT)
-                    log.flush()
-                    if re.search(r"WARNING:.*(?:did not match|not found|disabled)",
-                                 (evidence / "build.log").read_text(), re.I):
-                        raise ValueError("FFmpeg configure could not enable a requested component; see build.log")
-                    validate_configuration(config, role, (source / "config.h").read_text() + "\n" +
-                                           (source / "config_components.h").read_text())
-                    run(["/usr/bin/make", f"-j{os.cpu_count() or 2}"], cwd=source, env=env, stdout=log, stderr=subprocess.STDOUT)
-                    run(["/usr/bin/make", "install"], cwd=source, env=env, stdout=log, stderr=subprocess.STDOUT)
-                finally:
-                    for name in ("config.h", "config_components.h", "ffbuild/config.mak", "ffbuild/config.log"):
-                        if (source / name).is_file():
-                            shutil.copyfile(source / name, evidence / Path(name).name)
+            configure_and_build(config, role, source, evidence, command, env)
             shutil.copyfile(source / "COPYING.LGPLv2.1", evidence / "LGPL-2.1.txt")
             actual = (source / "config_components.h").read_text()
             write_json(evidence / "enabled-components.json", sorted(re.findall(r"^#define (CONFIG_\w+) 1$", actual, re.M)))

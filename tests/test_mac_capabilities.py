@@ -185,22 +185,32 @@ def test_cli_refusal_and_status(darwin, monkeypatch, capsys):
 
 
 def test_media_bundle_gate_never_uses_path(darwin, monkeypatch, tmp_path):
+    monkeypatch.setattr(_platform.sys, "executable",
+        str(tmp_path / "Uoink.app/Contents/Frameworks/Python/bin/python3"), raising=False)
     monkeypatch.setattr(_platform, "__file__", str(tmp_path / "Uoink.app/Contents/Resources/_platform.py"))
     monkeypatch.setenv("PATH", "/opt/homebrew/bin")
     assert _platform.media_capability()["code"] == "media_requires_ffmpeg"
     with pytest.raises(RuntimeError, match="media_requires_ffmpeg"):
-        server._run_extraction("https://invalid.example", 5, tmp_path / "absent")
+        server._run_extraction("https://www.youtube.com/watch?v=aaaaaaaaaaa", 5, tmp_path / "absent")
     assert not (tmp_path / "absent").exists()
-    monkeypatch.setattr(server, "_get_index", forbidden)
+    audio = tmp_path / "audio.wav"
+    audio.touch()
+    monkeypatch.setattr(server, "_get_index", lambda: None)
+    monkeypatch.setattr(server.podcasts, "get_episode", lambda *args: {"audio_local_path": str(audio)})
     result, status = server._queue_podcast_transcription(1)
     assert status == 501 and result["code"] == "media_requires_ffmpeg"
-    for name in ("uoink_video", "uoink_playlist"):
-        assert uoink_mcp_tools.call_tool(name, {"url": "https://invalid.example"})["code"] == "media_requires_ffmpeg"
+    for name, url in (("uoink_video", "https://www.youtube.com/watch?v=aaaaaaaaaaa"),
+                      ("uoink_playlist", "https://www.youtube.com/playlist?list=PLtest")):
+        assert uoink_mcp_tools.call_tool(name, {"url": url})["code"] == "media_requires_ffmpeg"
     import podcasts
     import whisper_runner
-    assert podcasts.download_episode_audio(None, 1, data_root=tmp_path)["code"] == "media_requires_ffmpeg"
+    monkeypatch.setattr(podcasts, "get_episode", lambda *args: {
+        "id": 1, "feed_id": 1, "audio_url": "https://example.test/audio.m4a"})
+    monkeypatch.setattr(podcasts, "get_feed", lambda *args: {"id": 1, "title": "feed"})
+    assert podcasts.download_episode_audio(None, 1, data_root=tmp_path,
+        resolve_url=lambda url, **kwargs: url)["code"] == "media_requires_ffmpeg"
     with pytest.raises(RuntimeError, match="media_requires_ffmpeg"):
-        whisper_runner.transcribe_audio(tmp_path / "absent.wav", data_root=tmp_path)
+        whisper_runner.transcribe_audio(audio, data_root=tmp_path)
 
 
 @pytest.mark.parametrize("platform", ["win32", "linux"])
@@ -231,26 +241,115 @@ def test_settings_and_transcription_fields_are_darwin_only(monkeypatch, platform
 
 @pytest.fixture
 def missing_media(darwin, monkeypatch, tmp_path):
+    monkeypatch.setattr(_platform.sys, "executable",
+        str(tmp_path / "Uoink.app/Contents/Frameworks/Python/bin/python3"), raising=False)
     monkeypatch.setattr(_platform, "__file__", str(tmp_path / "Uoink.app/Contents/Resources/_platform.py"))
     monkeypatch.setenv("PATH", "/opt/homebrew/bin")
     monkeypatch.setattr(server, "_run_subprocess", forbidden)
     monkeypatch.setattr(server, "_fetch_metadata", forbidden)
+    monkeypatch.setattr(server.source_subscriptions, "check_public_http_url", lambda url: url)
     return _platform.capability_refusal(_platform.media_capability())
+
+
+@pytest.mark.parametrize("method,args", [
+    ("_handle_extract", ({"url": "--exec=bad"},)),
+    ("_handle_extract", ({"url": "https://www.youtube.com/watch?v=aaaaaaaaaaa", "long_video_mode": "bad"},)),
+    ("_handle_playlist_preview", ({"url": "--exec=bad"},)),
+    ("_handle_playlist_start", ({"url": "https://www.youtube.com/playlist?list=PLtest", "interval": "bad"},)),
+    ("_handle_session_add", ({"session_id": "../escape", "url": "--exec=bad"},)),
+    ("_handle_session_add", ({"session_id": "test", "url": "--exec=bad"},)),
+    ("_handle_extract_any", ({"url": "file:///private/media"},)),
+    ("_handle_reliability_compute", ("aaaaaaaaaaa", {"threshold": "bad"})),
+])
+def test_input_errors_precede_media_gate(missing_media, monkeypatch, method, args):
+    monkeypatch.setattr(_platform, "media_capability", forbidden)
+    probe = object.__new__(server.Handler)
+    replies = []
+    probe._send_json = lambda status, payload: replies.append((status, payload))
+    getattr(probe, method)(*args)
+    assert replies[0][0] == 400
+
+
+@pytest.mark.parametrize("name", ["uoink_video", "uoink_playlist"])
+def test_mcp_input_errors_precede_media_gate(missing_media, monkeypatch, name):
+    monkeypatch.setattr(_platform, "media_capability", forbidden)
+    result = getattr(uoink_mcp_tools, name)({"url": "--exec=bad"})
+    assert result["ok"] is False and "media_requires_ffmpeg" not in str(result)
+
+
+@pytest.mark.parametrize("url", ["--exec=bad", "http://127.0.0.1/private"])
+def test_podcast_security_checks_precede_media_gate(missing_media, monkeypatch, tmp_path, url):
+    import podcasts
+    monkeypatch.setattr(_platform, "media_capability", forbidden)
+    monkeypatch.setattr(podcasts, "get_episode", lambda *a: {
+        "id": 1, "feed_id": 1, "audio_url": url})
+    monkeypatch.setattr(podcasts, "get_feed", lambda *a: {"id": 1, "title": "feed"})
+    monkeypatch.setattr(podcasts, "_record_audio_result", lambda *a, **k: None)
+
+    def refuse(url, **kwargs):
+        raise ValueError("private address refused")
+
+    result = podcasts.download_episode_audio(None, 1, data_root=tmp_path, resolve_url=refuse)
+    assert result["ok"] is False and "media_requires_ffmpeg" not in str(result)
+
+
+def test_transcription_and_preflight_validate_before_media(missing_media, monkeypatch, tmp_path):
+    monkeypatch.setattr(_platform, "media_capability", forbidden)
+    with pytest.raises(FileNotFoundError):
+        server.whisper_runner.transcribe_audio(tmp_path / "absent.wav", data_root=tmp_path)
+    backend = object.__new__(server._ServerCaptureBackend)
+    assert backend.preflight({}, {"kind": "youtube_channel"}).code == "invalid_identity"
+    assert backend.preflight({}, {"kind": "podcast_rss"}).code == "missing_episode_row"
+    assert backend.preflight({"legacy_episode_id": 1}, {"kind": "podcast_rss"}).code == "no_audio_url"
+
+
+def test_public_url_admission_precedes_bundle_media_self_test(missing_media, monkeypatch, tmp_path):
+    monkeypatch.setattr(_platform, "media_capability", forbidden)
+
+    def refuse(url):
+        raise server.source_subscriptions.ServiceError("validation_error", "private address refused")
+
+    monkeypatch.setattr(server.source_subscriptions, "check_public_http_url", refuse)
+    probe = object.__new__(server.Handler)
+    replies = []
+    probe._send_json = lambda status, payload: replies.append((status, payload))
+    probe._handle_extract_any({"url": "http://127.0.0.1/private"})
+    assert replies[0][0] == 400
+    with pytest.raises(server.source_subscriptions.ServiceError, match="private address"):
+        server._download_reliability_audio("http://127.0.0.1/private", tmp_path)
+    backend = object.__new__(server._ServerCaptureBackend)
+    item = {"legacy_episode_id": 1, "metadata_json": json.dumps({"audio_url": "http://127.0.0.1/private"})}
+    assert backend.preflight(item, {"kind": "podcast_rss"}).code == "validation_error"
+
+
+def test_missing_local_inputs_precede_media_gate(missing_media, monkeypatch):
+    monkeypatch.setattr(_platform, "media_capability", forbidden)
+    monkeypatch.setattr(server, "_get_index", lambda: None)
+    monkeypatch.setattr(server.podcasts, "get_episode", lambda *a: None)
+    assert server._queue_podcast_transcription(1)[1] == 404
+    monkeypatch.setattr(server, "_folder_for_video_id", lambda video_id: (None, None))
+    assert server._compute_transcript_reliability("aaaaaaaaaaa")["error"] == "uoink not found"
+    monkeypatch.setattr(server, "_read_session", lambda session_id: None)
+    probe = object.__new__(server.Handler)
+    replies = []
+    probe._send_json = lambda status, payload: replies.append((status, payload))
+    probe._handle_session_add({"session_id": "test", "url": "https://www.youtube.com/watch?v=aaaaaaaaaaa"})
+    assert replies[0][0] == 404
 
 
 @pytest.mark.parametrize("method,args", [
     ("_handle_extract", ({"url": "https://www.youtube.com/watch?v=aaaaaaaaaaa"},)),
     ("_handle_playlist_preview", ({"url": "https://www.youtube.com/playlist?list=PLtest"},)),
     ("_handle_playlist_start", ({"url": "https://www.youtube.com/playlist?list=PLtest"},)),
-    ("_handle_session_add", ({"session_id": "test", "url": "https://example.test/video"},)),
+    ("_handle_session_add", ({"session_id": "test", "url": "https://www.youtube.com/watch?v=aaaaaaaaaaa"},)),
     ("_handle_extract_any", ({"url": "https://example.test/video"},)),
     ("_handle_reliability_compute", ("aaaaaaaaaaa", {})),
 ])
 def test_media_routes_refuse_before_metadata_or_job_start(missing_media, monkeypatch, method, args):
     monkeypatch.setattr(server, "_create_playlist_job", forbidden)
     monkeypatch.setattr(server, "_fetch_playlist_preview", forbidden)
-    monkeypatch.setattr(server, "_read_session", forbidden)
-    monkeypatch.setattr(server, "_compute_transcript_reliability", forbidden)
+    monkeypatch.setattr(server, "_read_session", lambda session_id: {"status": "open"})
+    monkeypatch.setattr(server, "_compute_transcript_reliability", lambda *a, **k: missing_media)
     probe = object.__new__(server.Handler)
     replies = []
     probe._send_json = lambda status, payload: replies.append((status, payload))
@@ -261,7 +360,8 @@ def test_media_routes_refuse_before_metadata_or_job_start(missing_media, monkeyp
 def test_media_helpers_fail_before_subprocess_or_capture_io(missing_media, monkeypatch, tmp_path):
     assert server._fetch_playlist_preview("https://www.youtube.com/playlist?list=PLtest") == (
         None, "media_requires_ffmpeg", 501)
-    monkeypatch.setattr(server, "_folder_for_video_id", forbidden)
+    monkeypatch.setattr(server, "_folder_for_video_id", lambda video_id: (tmp_path, {}))
+    monkeypatch.setattr(server, "_read_sidecar_for_folder", lambda folder: (None, {"video_id": "aaaaaaaaaaa"}))
     assert server._compute_transcript_reliability("aaaaaaaaaaa") == missing_media
     with pytest.raises(_platform.MediaUnavailableError) as exc:
         server._download_reliability_audio("https://example.test/video", tmp_path)
@@ -285,16 +385,23 @@ def test_playlist_worker_records_gate_before_folder_or_metadata(missing_media, m
     assert not list(tmp_path.iterdir())
 
 
-def test_standing_preflight_reports_media_gate(missing_media):
+def test_standing_preflight_reports_media_gate(missing_media, monkeypatch):
     backend = object.__new__(server._ServerCaptureBackend)
+    item = {"legacy_episode_id": 1, "entry_id": "aaaaaaaaaaa",
+            "metadata_json": json.dumps({"audio_url": "https://example.test/audio.m4a"})}
     for kind in ("youtube_channel", "podcast_rss"):
-        outcome = backend.preflight({}, {"kind": kind})
+        outcome = backend.preflight(item, {"kind": kind})
         assert outcome.status == "preflight_failed"
         assert outcome.code == "media_requires_ffmpeg"
         assert outcome.terminal is True
-    outcome = backend._run_podcast({}, {}, {})
+    monkeypatch.setattr(backend, "holds_execution", lambda start: True)
+    monkeypatch.setattr(server, "_get_index", lambda: None)
+    monkeypatch.setattr(server.source_subscriptions, "process_incarnation",
+                        lambda root: SimpleNamespace(identity="test-incarnation"))
+    monkeypatch.setattr(server.podcasts, "download_episode_audio", lambda *a, **k: missing_media)
+    outcome = backend._run_podcast({"start_id": "test-start"}, item, {})
     assert outcome.code == "media_requires_ffmpeg" and outcome.terminal
-    outcome = backend._run_youtube({}, {}, {})
+    outcome = backend._run_youtube({}, item, {})
     assert outcome.code == "media_requires_ffmpeg" and outcome.terminal
 
 

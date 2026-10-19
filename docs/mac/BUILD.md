@@ -5,13 +5,15 @@ branch or with `workflow_dispatch`. Its `mac-build` job creates an unsigned
 Apple Silicon `Uoink.app` and uploads `uoink-<VERSION>-macos-arm64.tar.gz` after
 the bundle smoke test passes. The preceding bundle build and smoke passed
 on the hosted runner without FFmpeg. Pass 6c adds the source-built media
-payload; that hosted run is pending.
+payload; hosted run `39260530038` failed during FFmpeg configure. The repair
+still needs a successful hosted build and bundle smoke test.
 
 The archive is a CI test artifact. It has no Developer ID signature,
 notarization, DMG, LaunchAgent, menu bar, first-run UI or app icon. Darwin's
 automatic tray and splash startup are disabled until the native UI pass.
-The plist and FFmpeg deployment flags target macOS 14. The runner tests
-macOS 15; Python and wheel compatibility on macOS 14 remains a release gate.
+`LSMinimumSystemVersion` stays at `14.0`, as do the FFmpeg deployment flags.
+Only macOS 15 is CI-tested; Python and wheel compatibility on macOS 14 remains
+a release gate.
 
 ## Build locally on a disposable macOS arm64 machine
 
@@ -120,13 +122,16 @@ on Darwin prints the refusal and exits 1; CLI `status` includes capabilities.
 Windows and Linux keep their existing mirror behavior and safety checks.
 Separate taste/user/script copying is outside this corpus-mirror capability.
 
-**Media availability is tested at runtime.** Darwin resolves FFmpeg only from
-app-owned `Helpers`, passes that location to yt-dlp and ignores ambient yt-dlp
+**Bundled media availability is tested at runtime.** An interpreter under
+`Uoink.app/Contents/Frameworks/Python` resolves FFmpeg only from that app's
+`Contents/Helpers`, passes the location to yt-dlp and ignores ambient yt-dlp
 configuration. Both executables must pass `-version`, and FFmpeg must decode
-generated audio. Failure retains `media_requires_ffmpeg`. Source checkouts
-must stage their own `Helpers`; Windows/Linux retain their existing behavior.
+generated audio. Failure returns `media_requires_ffmpeg`. Environment variables
+cannot relax this policy. A Darwin source/dev checkout uses PATH, as Linux does,
+without the bundle self-test or codec restrictions. Windows/Linux retain their
+existing behavior. Input and security validation precede the media gate.
 
-Darwin podcasts use WAV because no native MP3 encoder exists in this build.
+Bundled Darwin podcasts use WAV because no native MP3 encoder exists in this build.
 Video selection accepts H.264/VP8/VP9 and rejects AV1/unknown codecs. Chunked
 downloads require FFmpeg HTTPS input, explicitly enabled through Apple Secure
 Transport. There are no autodetected third-party libraries.

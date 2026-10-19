@@ -126,7 +126,7 @@ def _probe_whisperx() -> bool:
     import _platform
     if not _platform.media_capability()["available"]:
         return False
-    if not _platform.alignment_capability()["available"]:
+    if sys.platform == "darwin" and not _platform.alignment_capability()["available"]:
         return False
     try:
         import whisperx  # noqa: F401
@@ -401,14 +401,15 @@ def transcribe_audio(audio_path: Path, *,
     execution call receives a local snapshot and local_files_only=True;
     this does not qualify the separate VAD loader or artifact integrity."""
     import _platform
-    _platform.require_media()
-    alignment = _platform.alignment_capability()
-    if not alignment["available"]:
-        raise RuntimeError(f"{alignment['code']}: {alignment['reason']}")
     audio_path = Path(audio_path)
     if not audio_path.exists():
         raise FileNotFoundError(f"audio file missing: {audio_path}")
     model_size = normalize_model(model_size)
+    _platform.require_media()
+    if sys.platform == "darwin":
+        alignment = _platform.alignment_capability()
+        if not alignment["available"]:
+            raise RuntimeError(f"{alignment['code']}: {alignment['reason']}")
 
     # Short-circuit on the cached cold-boot probe result. If whisperx
     # failed to import at module-top, re-trying here would pay the same
@@ -445,7 +446,7 @@ def transcribe_audio(audio_path: Path, *,
                                       download_root=str(_model_cache_root(data_root, model_size)),
                                       local_files_only=True)
         audio_input = str(audio_path)
-        if _platform.platform_label() == "macos":
+        if sys.platform == "darwin" and _platform.mac_bundle_contents() is not None:
             # WhisperX's string loader invokes bare `ffmpeg`. Supply samples so
             # transcription, alignment and diarization all use our resolver.
             import numpy as np

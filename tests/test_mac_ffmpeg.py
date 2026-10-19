@@ -5,6 +5,7 @@ import copy
 import io
 import json
 from pathlib import Path
+import shutil
 import subprocess
 import sys
 import tarfile
@@ -35,6 +36,13 @@ def test_verified_source_pins_and_build_policy():
         assert "mp3" not in ff.components(config, role).get("encoder", [])
     assert "--enable-network" in ff.configure_flags(config, "cli")
     assert "--enable-network" not in ff.configure_flags(config, "shared")
+    assert "--disable-network" not in ff.configure_flags(config, "cli")
+    assert "--disable-network" in ff.configure_flags(config, "shared")
+    assert "--disable-version3" not in config["common_flags"]
+    assert set(ff.components(config, "cli")["protocol"]) == {
+        "file", "pipe", "http", "https", "tcp", "tls", "crypto"}
+    # These endpoints are built into libavfilter, not configurable filters.
+    assert not {"buffer", "buffersink", "abuffer", "abuffersink"} & set(config["components"]["filter"])
     original = ff.cache_key(config)
     for change in ("hash", "flags"):
         changed = copy.deepcopy(config)
@@ -124,12 +132,84 @@ def test_build_cannot_download_on_windows(monkeypatch, tmp_path):
     assert not (tmp_path / "output").exists()
 
 
+@pytest.mark.parametrize("role", ["cli", "shared"])
+def test_every_requested_component_is_checked_against_pinned_source(monkeypatch, tmp_path, role):
+    config = ff.load_config()
+    requested = ff.components(config, role)
+    seen = []
+
+    def run(command, **kwargs):
+        kind = command[-1].removeprefix("--list-").removesuffix("s")
+        seen.append(kind)
+        assert command[:2] == ["/bin/bash", tmp_path / "configure"]
+        return SimpleNamespace(stdout="\n".join(requested[kind]))
+
+    monkeypatch.setattr(ff, "run", run)
+    assert ff.validate_source_components(config, role, tmp_path, {}) == requested
+    assert set(seen) == set(requested)
+    monkeypatch.setattr(ff, "run", lambda *args, **kwargs: SimpleNamespace(stdout=""))
+    with pytest.raises(ValueError, match="unknown"):
+        ff.validate_source_components(config, role, tmp_path, {})
+
+
+@pytest.mark.parametrize("phase", ["configure", "make", "install"])
+def test_build_failures_print_both_log_tails_and_preserve_error(monkeypatch, tmp_path, capsys, phase):
+    source, evidence = tmp_path / "source", tmp_path / "evidence"
+    (source / "ffbuild").mkdir(parents=True)
+    evidence.mkdir()
+    (source / "ffbuild/config.log").write_text("".join(f"config-{i}\n" for i in range(170)))
+    for name in ("config.h", "config_components.h"):
+        (source / name).touch()
+    monkeypatch.setattr(ff, "validate_source_components", lambda *args: {})
+    monkeypatch.setattr(ff, "validate_configuration", lambda *args: None)
+    error = subprocess.CalledProcessError(17, [phase])
+    calls = []
+
+    def run(command, **kwargs):
+        step = "configure" if command[0] == "configure" else "install" if command[-1] == "install" else "make"
+        calls.append(step)
+        if step == phase:
+            kwargs["stdout"].write("".join(f"build-{i}\n" for i in range(170)))
+            raise error
+
+    monkeypatch.setattr(ff, "run", run)
+    with pytest.raises(subprocess.CalledProcessError) as exc:
+        ff.configure_and_build(ff.load_config(), "cli", source, evidence, ["configure"], {})
+    assert exc.value is error
+    output = capsys.readouterr().err
+    for label in ("config", "build"):
+        assert f"{label}-19\n" not in output
+        assert f"{label}-20\n" in output and f"{label}-169\n" in output
+    assert (evidence / "config.log").read_text() == (source / "ffbuild/config.log").read_text()
+    assert calls[-1] == phase
+
+
+def test_darwin_dev_mode_uses_resolvable_path_ffmpeg(monkeypatch, tmp_path):
+    binary = tmp_path / ("ffmpeg.exe" if sys.platform == "win32" else "ffmpeg")
+    binary.touch(mode=0o755)
+    monkeypatch.setenv("PATH", str(tmp_path))
+    monkeypatch.setattr(_platform, "sys", SimpleNamespace(platform="darwin",
+        executable=str(tmp_path / "dev-python")))
+    # A module copied into Resources alone does not make the interpreter bundled.
+    monkeypatch.setattr(_platform, "__file__", str(tmp_path / "Uoink.app/Contents/Resources/_platform.py"))
+    monkeypatch.setattr(_platform.subprocess, "run", lambda *a, **k: pytest.fail("dev self-test"))
+    assert Path(shutil.which(_platform.media_binary("ffmpeg"))) == binary
+    assert _platform.mac_bundle_contents() is None
+    assert _platform.media_capability()["available"] is True
+    assert _platform.alignment_capability()["available"] is True
+    _platform.require_media()
+    assert _platform.ytdlp_media_args() == []
+    assert _platform.video_format("original") == "original"
+    assert _platform.podcast_audio_format() == "mp3"
+
+
 @pytest.fixture
 def darwin_bundle(monkeypatch, tmp_path):
     contents = tmp_path / "Relocated With Spaces/Uoink.app/Contents"
     (contents / "Helpers").mkdir(parents=True)
     (contents / "Resources").mkdir()
-    monkeypatch.setattr(_platform, "sys", SimpleNamespace(platform="darwin"))
+    monkeypatch.setattr(_platform, "sys", SimpleNamespace(platform="darwin",
+        executable=str(contents / "Frameworks/Python/bin/python3")))
     monkeypatch.setattr(_platform, "__file__", str(contents / "Resources/_platform.py"))
     monkeypatch.setenv("PATH", "/opt/homebrew/bin")
     _platform._media_self_test.cache_clear()
@@ -143,6 +223,24 @@ def test_missing_binary_never_falls_back_to_path(darwin_bundle, monkeypatch):
         _platform.media_binary("ffmpeg")
     assert _platform.media_capability()["code"] == "media_requires_ffmpeg"
     assert _platform.ytdlp_media_args() == ["--ignore-config", "--ffmpeg-location", str(darwin_bundle / "Helpers")]
+    with pytest.raises(_platform.MediaUnavailableError, match="media_requires_ffmpeg"):
+        _platform.require_media()
+
+
+def test_bundle_policy_cannot_be_relaxed_by_environment_or_module_path(darwin_bundle, monkeypatch, tmp_path):
+    monkeypatch.setattr(_platform, "__file__", str(tmp_path / "source/_platform.py"))
+    monkeypatch.setenv("UOINK_DEV_MODE", "1")
+    monkeypatch.setenv("UOINK_BUNDLE_MODE", "0")
+    assert _platform.mac_bundle_contents() == darwin_bundle
+    assert _platform.media_capability()["code"] == "media_requires_ffmpeg"
+
+
+def test_renamed_app_still_requires_bundled_media(monkeypatch, tmp_path):
+    contents = tmp_path / "Renamed by user.app/Contents"
+    monkeypatch.setattr(_platform, "sys", SimpleNamespace(platform="darwin",
+        executable=str(contents / "Frameworks/Python/bin/python3")))
+    assert _platform.mac_bundle_contents() == contents
+    assert _platform.media_capability()["code"] == "media_requires_ffmpeg"
 
 
 @pytest.mark.parametrize("failure", [None, "version", "decode", "empty", "silence"])
@@ -222,8 +320,10 @@ def test_torchcodec_rewrite_uses_loader_relative_ffmpeg7(tmp_path):
     assert (binary.parent / changes[0][1].removeprefix("@loader_path/")).resolve() == root / "libavcodec.61.dylib"
 
 
-def test_podcast_download_uses_bundled_tools_and_wav(darwin_bundle, monkeypatch, tmp_path):
+@pytest.mark.parametrize("supplied", ["bare", "bundle", "external"])
+def test_podcast_download_uses_bundled_tools_and_wav(darwin_bundle, monkeypatch, tmp_path, supplied):
     import podcasts
+    monkeypatch.setattr(podcasts, "sys", _platform.sys)
     monkeypatch.setattr(_platform, "media_capability", lambda: {"available": True})
     episode = {"id": 1, "title": "episode", "feed_id": 1,
                "audio_url": "https://podcast.test/audio.m4a", "status": podcasts.EPISODE_STATUS_QUEUED}
@@ -236,15 +336,21 @@ def test_podcast_download_uses_bundled_tools_and_wav(darwin_bundle, monkeypatch,
     def run(command, **kwargs):
         assert command[command.index("--audio-format") + 1] == "wav"
         assert command[command.index("--ffmpeg-location") + 1] == str(darwin_bundle / "Helpers")
-        assert "--ignore-config" in command
+        assert command.count("--ignore-config") == 1
+        assert command.count("--ffmpeg-location") == 1
         expected.write_bytes(b"generated WAV placeholder")
         return SimpleNamespace(returncode=0, stderr="", stdout="")
 
     import uoink_processes
     monkeypatch.setattr(uoink_processes, "run_owned", run)
     monkeypatch.setattr(podcasts.subprocess, "run", run)
+    cmd = ["python", "-m", "yt_dlp"]
+    if supplied == "bundle":
+        cmd += _platform.ytdlp_media_args()
+    elif supplied == "external":
+        cmd += ["--ignore-config", "--ffmpeg-location=/opt/homebrew/bin"]
     result = podcasts.download_episode_audio(None, 1, data_root=tmp_path,
-        ytdlp_cmd=["python", "-m", "yt_dlp"], resolve_url=lambda url, **kwargs: url)
+        ytdlp_cmd=cmd, resolve_url=lambda url, **kwargs: url)
     assert result["ok"] is True and Path(result["local_path"]).suffix == ".wav"
 
 
