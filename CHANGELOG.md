@@ -10,6 +10,46 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [3.10.0] - 2026-10-19
+
+### Added
+
+- The `uoink` command lets agents search saved sources, read evidence, capture
+  URLs, save notes, and call registry tools from a shell. For example:
+  `uoink search "working memory" --limit 5`, `uoink recent --limit 10`, and
+  `uoink note "A useful thought" --title "Research note"`. Local reads work
+  without a running helper. Capture and paid tools keep their existing gates.
+  The installer adds the command to User PATH by default through the checked
+  **Add the uoink command to PATH for AI agents** checkbox. Open a new terminal
+  after installation, then run `uoink status`.
+- A portable Uoink skill for Claude Code, Codex, pi, Hermes Agent, and OpenClaw
+  covers finding evidence, citing sources, and using MCP tools or the CLI.
+  `uoink skill path` locates it; `uoink skill install --to <skills-directory>`
+  copies the skill and its references into the agent's skills directory.
+- The Claude Code plugin marketplace at `ryanbiddy/uoink-agent-kit` is
+  published with this release. It bundles the skill and MCP connection for a default install.
+- `uoink connect` provides setup recipes for 38 clients and integrations.
+  Run `uoink connect --list`, then `uoink connect <client>` for config or
+  instructions and where to put them. It does not edit client settings.
+  The dashboard has **Add to Cursor** and **Add to VS Code** buttons that open
+  the client's review flow.
+- [Connect your agent](docs/connect-your-agent.md) documents the CLI, skill
+  paths, client recipes, and known limits. [Agent installation](llms-install.md)
+  gives Windows download, checksum, silent install, and connection steps.
+
+### Compatibility and testing
+
+- The MCP server exposes 91 tools by default. Consent gates are unchanged.
+- No data or settings changes besides the optional PATH entry. No index or
+  migration is added; existing libraries and saved captures stay in place.
+- Tested on a clean isolated install: Claude Code 2.1.302 (MCP: 91 tools, a note
+  saved and listed; skill plus `uoink` command with no MCP: note saved and listed),
+  Codex CLI 0.153.4 (MCP: note saved and listed), and the `uoink` command itself
+  (`status`, `note`, `recent`, `connect`). The Claude Code plugin loads its skill
+  and starts its MCP server; its tool calls were not run end to end because the
+  test install is isolated. Gemini CLI and pi were not tested (no sign-in on the
+  test machine). Every other recipe is marked "not yet tested".
+
 ## [3.9.3] - 2026-10-19
 
 ### Added

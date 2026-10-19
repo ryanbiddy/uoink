@@ -83,6 +83,7 @@ The installer lays out `%LOCALAPPDATA%\Uoink\`:
 ```
 python\           Python 3.13 embeddable + the pinned runtime packages listed below
 bin\              ffmpeg.exe, ffprobe.exe (PATH-prepended by server.py)
+cli\              uoink.cmd, uoink (only this folder goes on User PATH)
 bin\torchcodec\   seven LGPL FFmpeg 7.1.5 shared libraries for TorchCodec 0.7
 server.py         The local HTTP helper
 uoink_mcp.py      MCP stdio entry point for agent clients

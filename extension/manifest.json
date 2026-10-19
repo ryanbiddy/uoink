@@ -3,7 +3,7 @@
   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA1Q2UgVorBNEDEZIsJjIx9imc5NoNqSHRiA+Xh6FbO+jjZyA/WXY89UsOJJjDvN6dqOPWvjtLVUmQscSYC48M3zhJeiItrvyrfQenH0LJinkHyKLKqlfMm5XhHxWPYureoCNqUIxhqqN6Um0+KItqfEUW8FAodJJKHNxmULCEFmY7krhsRJamG9aXCgkiBlga9Ix5v+og+p/LWiJqX7ENUxVS7YnvGzQIlUuCAtcr8cZD6qsXmByKzG2Wsq4JnnyyDM+CmKLaoQtqmbgR4GVZyAS6IVSZJVbhqacTaNAMxw/NFzWGk4RUZE9Y54sD3+NY/OQ5Bk/6QDEzo9n7cm5NdwIDAQAB",
   "name": "Uoink",
   "short_name": "Uoink",
-  "version": "3.9.3",
+  "version": "3.10.0",
   "description": "Save videos, podcasts, and articles to a local corpus your AI can write from.",
   "homepage_url": "https://uoink.app",
   "permissions": [

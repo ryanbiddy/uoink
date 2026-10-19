@@ -1,4 +1,4 @@
-"""3.9.3 MCP inventory, consent parity, scheduling and offline startup."""
+"""MCP inventory, consent parity, scheduling and offline startup (current release)."""
 from __future__ import annotations
 
 import asyncio
@@ -42,8 +42,8 @@ def test_real_stdio_toolsets_and_helper_down(tmp_path, mode, count):
     try:
         client.send({"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {
             "protocolVersion": "2024-11-05", "capabilities": {},
-            "clientInfo": {"name": "release-393-smoke", "version": "1"}}})
-        assert client.wait_for(1)["result"]["serverInfo"]["version"] == "3.9.3"
+            "clientInfo": {"name": "release-smoke", "version": "1"}}})
+        assert client.wait_for(1)["result"]["serverInfo"]["version"] == "3.10.0"
         client.send({"jsonrpc": "2.0", "method": "notifications/initialized"})
         client.send({"jsonrpc": "2.0", "id": 2, "method": "tools/list"})
         listed = client.wait_for(2)["result"]["tools"]
@@ -160,7 +160,7 @@ def test_registry_handlers_run_on_the_event_loop_like_v391(monkeypatch):
 
 
 def test_public_manifest_advertises_full_default():
-    manifest = openapi_bridge.build_well_known("http://example.invalid", version="3.9.3", tool_count=91)
+    manifest = openapi_bridge.build_well_known("http://example.invalid", version="3.10.0", tool_count=91)
     assert manifest["transports"] == ["stdio", "http"]
     assert manifest["stdio_tool_count"] == 91
     assert manifest["stdio_toolsets"] == {"full": 91, "core": 35}

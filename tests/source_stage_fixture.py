@@ -12,7 +12,7 @@ def copy_stage_source(destination: Path) -> Path:
                  "requirements.txt", "requirements-installer-lock.txt",
                  "THIRD-PARTY-NOTICES.md"):
         shutil.copy2(source / name, destination / name)
-    for name in ("helper", "uoink_core", "skills", "voice_dna", "assets",
+    for name in ("helper", "uoink_core", "skills", "voice_dna", "assets", "cli",
                  "extension", "migrations", "defaults", "third-party-notices",
                  "installer/templates"):
         shutil.copytree(source / name, destination / name,

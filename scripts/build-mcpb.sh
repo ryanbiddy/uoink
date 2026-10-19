@@ -59,7 +59,7 @@ text = open(path, encoding="utf-8").read()
 text = re.sub(r'"version"\s*:\s*"[^"]*"', '"version": "%s"' % version, text, count=1)
 open(path, "w", encoding="utf-8", newline="\n").write(text)
 PYEOF
-for f in uoink_mcp.py uoink_mcp_tools.py; do
+for f in uoink_mcp.py uoink_mcp_tools.py uoink_agent_runtime.py; do
   [ -f "$REPO_ROOT/$f" ] && cp "$REPO_ROOT/$f" "$BUILD_DIR/$f" || true
 done
 [ -f "$SRC_DIR/README.md" ] && cp "$SRC_DIR/README.md" "$BUILD_DIR/README.md" || true

@@ -471,53 +471,13 @@ def export_cited_range(
 
 
 def _helper_running() -> bool:
-    """Read process identity only; stdio never probes an HTTP port."""
-    binding = _install_isolation.current_binding()
-    if binding is not None:
-        return _install_isolation.owned_process_status(binding) == "alive"
-    try:
-        pid_path = server.HERE / "server.pid"
-        pid = int(pid_path.read_text(encoding="utf-8").strip())
-        if pid <= 0 or pid == os.getpid():
-            return False
-        image = _install_isolation._process_executable(pid)
-        own_image = _install_isolation.current_process_executable()
-        if not image or not own_image:
-            return False
-        allowed_images = {Path(own_image).resolve()}
-        if os.name == "nt":
-            allowed_images.add(Path(own_image).with_name("pythonw.exe").resolve())
-            allowed_images.add(Path(own_image).with_name("python.exe").resolve())
-        if Path(image).resolve() not in allowed_images:
-            return False
-        if os.name == "nt":
-            handle, _ = _install_isolation._windows_open_process(
-                pid, _install_isolation._PROCESS_QUERY_LIMITED_INFORMATION)
-            if not handle:
-                return False
-            try:
-                created_ms = _install_isolation._windows_process_created_ms(handle)
-            finally:
-                _install_isolation._windows_close_handle(handle)
-        else:
-            created_ms = _install_isolation._posix_process_created_ms(pid)
-        # The resident writes server.pid after binding. A process born after
-        # that file was written is a reused PID, not the helper that wrote it.
-        if created_ms is None or created_ms > pid_path.stat().st_mtime_ns // 1_000_000:
-            return False
-        return _install_isolation._pid_liveness(pid, created_ms) == "alive"
-    except (OSError, ValueError, UnicodeError):
-        return False
+    from uoink_agent_runtime import helper_running
+    return helper_running(server)
 
 
 def _call_stdio_registry(name, arguments):
-    # A monitored playlist poll can schedule captures for the helper's worker.
-    # Do not report queued work as running in this short-lived stdio process.
-    if name == "poll_monitored_playlist" and not _helper_running():
-        return {"ok": False, "error": "Open Uoink first, then retry polling the monitored playlist. "
-                "Its scheduled captures need the running Uoink helper."}
-    return uoink_mcp_tools.call_tool(name, arguments)
-
+    from uoink_agent_runtime import call_tool
+    return call_tool(name, arguments, server, running=_helper_running)
 
 def _register_phase4_stdio() -> None:
     """Register the Library budget hooks; missing safety plumbing fails startup."""

@@ -17,6 +17,10 @@ Uoink/
 !skills/yoink/**
 !skills/uoink/
 !skills/uoink/**
+!agent-kit/plugins/uoink/
+!agent-kit/plugins/uoink/**
+!agent-kit/skills/uoink/
+!agent-kit/skills/uoink/**
 
 # User-facing yoink output. In dev mode the server's Desktop resolves to
 # the user's actual Desktop -- and on this machine the OneDrive Desktop

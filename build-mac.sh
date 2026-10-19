@@ -113,7 +113,7 @@ HELPER_FILES=(
   claims.py scripts.py voice_dna.py writing_studio.py page_extractor.py
   source_manifest.py openapi_bridge.py reddit_extractor.py x_extractor.py
   memory_layer.py podcasts.py mobile_playlists.py whisper_runner.py
-  uoink_mcp.py uoink_mcp_tools.py uoink_reliability.py yoink_mcp.py
+  uoink_mcp.py uoink_mcp_tools.py uoink_agent_runtime.py uoink_cli.py uoink_connect.py uoink_reliability.py yoink_mcp.py
   uoink_tray.py uoink_splash.py uoink_dashboard.py yt_extract.py
   requirements.txt topics.json VERSION
 )

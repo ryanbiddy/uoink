@@ -1,5 +1,10 @@
 # Claude Code CLI: installed Windows stdio setup
 
+For the agent CLI, portable skill, and print-only setup recipes for other
+clients, see [Connect your agent](connect-your-agent.md). The new
+`uoink connect claude-code` command prints a user-scoped registration command;
+the older project-scoped setup below remains available.
+
 Contract: `phase4-v1-2026-09-08`
 ([PHASE4-CONTRACT-2026-09-08.md](library/PHASE4-CONTRACT-2026-09-08.md)).
 Client evidence:
@@ -44,7 +49,7 @@ and does not proxy through the helper
 ([contract](library/PHASE4-CONTRACT-2026-09-08.md), Capabilities / client
 artifacts). Do not put a helper URL in this configuration.
 
-Uoink 3.9.3 advertises all 91 registry tools by default, with the previous 35
+Uoink 3.10.0 advertises all 91 registry tools by default, with the previous 35
 first in their original order. Set `UOINK_MCP_TOOLSET=core` in the MCP server's
 `env` object for clients with tool caps, including Cursor. Unknown values warn
 on stderr and use full. Restart the connection after changing it. Consent gates

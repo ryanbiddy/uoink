@@ -1,3 +1,3 @@
 """Single source of truth for the shipped Uoink helper version."""
 
-__version__ = "3.9.3"
+__version__ = "3.10.0"
