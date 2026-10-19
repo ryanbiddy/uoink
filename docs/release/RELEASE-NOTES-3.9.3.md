@@ -68,5 +68,5 @@ step for the person.
 
 | File | SHA-256 |
 | --- | --- |
-| `Uoink-Setup-3.9.3.exe` | `<sha256 pending>` |
-| `uoink-3.9.3.mcpb` | `<sha256 pending>` |
+| `Uoink-Setup-3.9.3.exe` | `8e48666634572f7a29d34e15051a3847a0e9f9cab742926e06769ee03a1f7302` |
+| `uoink-3.9.3.mcpb` | `11d7147afd9d9ab491a6964f72950ae2316ce0a44d4196e609fe9c61aafa5b47` |
