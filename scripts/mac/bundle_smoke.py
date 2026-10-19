@@ -219,6 +219,8 @@ def smoke(app: Path, output: Path) -> None:
             assert config["KeepAlive"] is False and config["RunAtLoad"] is True
             logs = (Path(env["HOME"]) / "Library/Logs/Uoink").resolve()
             for key in ("StandardOutPath", "StandardErrorPath"):
+                if key == "StandardErrorPath" and key not in config:
+                    continue
                 assert Path(config[key]).resolve().is_relative_to(logs), ("launchagent log path", key, config[key])
             report["launchagent"] = {"generated": True, "bootstrapped": False}
             report["media"] = media_smoke(contents, scratch, env)

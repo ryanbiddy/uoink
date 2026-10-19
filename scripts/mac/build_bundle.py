@@ -15,6 +15,7 @@ import subprocess
 import sys
 import tarfile
 import tempfile
+import time
 import urllib.parse
 import urllib.request
 
@@ -321,8 +322,22 @@ def create_dmg(app: Path, output: Path, version: str) -> Path:
         stage = Path(temporary)
         run(["ditto", app, stage / "Uoink.app"])
         (stage / "Applications").symlink_to("/Applications", target_is_directory=True)
-        run(["hdiutil", "create", "-format", "UDZO", "-volname", f"Uoink {version}",
-             "-srcfolder", stage, dmg])
+        command = ["hdiutil", "create", "-format", "UDZO", "-volname", f"Uoink {version}",
+                   "-srcfolder", stage, dmg]
+        # Hosted macOS runners intermittently report "hdiutil: create failed -
+        # Resource busy"; retry a bounded number of times before failing.
+        for attempt in range(1, 4):
+            try:
+                run(command, capture_output=True)
+                break
+            except subprocess.CalledProcessError as error:
+                detail = (error.stderr or "").strip()
+                print(f"hdiutil create attempt {attempt} failed: {detail}", file=sys.stderr, flush=True)
+                if dmg.exists():
+                    dmg.unlink()
+                if "Resource busy" not in detail or attempt == 3:
+                    raise
+                time.sleep(10 * attempt)
     write_json(output / "dmg.json", {"filename": dmg.name, "size_bytes": dmg.stat().st_size,
                                      "sha256": sha256(dmg), "volume": f"Uoink {version}"})
     return dmg
