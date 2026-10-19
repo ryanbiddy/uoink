@@ -1,5 +1,10 @@
 # Claude Code CLI: installed Windows stdio setup
 
+For the agent CLI, portable skill, and print-only setup recipes for other
+clients, see [Connect your agent](connect-your-agent.md). The new
+`uoink connect claude-code` command prints a user-scoped registration command;
+the older project-scoped setup below remains available.
+
 Contract: `phase4-v1-2026-09-08`
 ([PHASE4-CONTRACT-2026-09-08.md](library/PHASE4-CONTRACT-2026-09-08.md)).
 Client evidence:

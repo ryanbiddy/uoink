@@ -66,7 +66,7 @@ ArchitecturesInstallIn64BitMode=x64compatible
 ; /NOCLOSEAPPLICATIONS /NORESTARTAPPLICATIONS switches and must refuse
 ; /CLOSEAPPLICATIONS, /FORCECLOSEAPPLICATIONS and /RESTARTAPPLICATIONS.
 CloseApplications=force
-ChangesEnvironment=no
+ChangesEnvironment=yes
 #ifdef ReleaseSigning
 SignTool=uoinkrelease
 SignedUninstaller=yes
@@ -94,6 +94,7 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 ; Optional desktop shortcut (checked by default). The matching [Icons] entry
 ; below is gated on this task so users who uncheck it get no desktop icon.
 Name: "desktopicon"; Description: "Create a desktop shortcut"; GroupDescription: "Additional shortcuts:"
+Name: "agentpath"; Description: "Add the uoink command to PATH for AI agents"; GroupDescription: "Agent access:"; Check: not IsolatedInstall
 
 [Files]
 ; Attribution index and exact supplemental notices (staged with hash checks).
@@ -142,6 +143,9 @@ Source: "staging\library_media.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\library_faithfulness.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\usage_meter.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\uoink.cmd"; DestDir: "{app}"; Flags: ignoreversion
+Source: "staging\uoink_cli.py"; DestDir: "{app}"; Flags: ignoreversion
+Source: "staging\uoink_connect.py"; DestDir: "{app}"; Flags: ignoreversion
+Source: "staging\uoink_agent_runtime.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\uoink"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\scripts\install-watchdog.ps1"; DestDir: "{app}\scripts"; Flags: ignoreversion
 Source: "staging\scripts\recall_hook.py"; DestDir: "{app}\scripts"; Flags: ignoreversion
@@ -1742,6 +1746,135 @@ begin
   end;
 end;
 
+{ Agent PATH ownership is deliberately independent of the desktop task.
+  /ISOLATED=1 and persisted isolated uninstalls NEVER read/write User PATH.
+  Store raw entries, including empty ones, and query the value's type so an
+  existing REG_EXPAND_SZ remains expandable and REG_SZ remains REG_SZ. }
+function AgentRegOpenKey(Root: Integer; SubKey: String; Options, Access: Integer;
+  var Key: Integer): Integer;
+external 'RegOpenKeyExW@advapi32.dll stdcall';
+function AgentRegQueryType(Key: Integer; ValueName: String; Reserved: Integer;
+  var ValueType: Integer; Data: Integer; var Size: Integer): Integer;
+external 'RegQueryValueExW@advapi32.dll stdcall';
+function AgentRegCloseKey(Key: Integer): Integer;
+external 'RegCloseKey@advapi32.dll stdcall';
+
+function AgentReadPath(var Value: String; var ValueType: Integer): Boolean;
+var
+  Key, Size, Status: Integer;
+begin
+  Result := False;
+  Value := '';
+  ValueType := 2; { new PATH values use REG_EXPAND_SZ }
+  Status := AgentRegOpenKey(HKCU, 'Environment', 0, $0001, Key);
+  if Status = 2 then begin Result := True; Exit; end;
+  if Status <> 0 then Exit;
+  try
+    Size := 0;
+    Status := AgentRegQueryType(Key, 'Path', 0, ValueType, 0, Size);
+    if Status = 2 then begin ValueType := 2; Result := True; Exit; end;
+    if (Status <> 0) or ((ValueType <> 1) and (ValueType <> 2)) then Exit;
+    Result := RegQueryStringValue(HKCU, 'Environment', 'Path', Value);
+  finally
+    AgentRegCloseKey(Key);
+  end;
+end;
+
+function AgentWritePath(const Value: String; ValueType: Integer): Boolean;
+begin
+  if ValueType = 2 then
+    Result := RegWriteExpandStringValue(HKCU, 'Environment', 'Path', Value)
+  else
+    Result := RegWriteStringValue(HKCU, 'Environment', 'Path', Value);
+end;
+
+function AgentSameEntry(const Entry, Target: String): Boolean;
+begin
+  Result := CompareText(RemoveBackslash(RemoveQuotes(Trim(Entry))),
+                        RemoveBackslash(Target)) = 0;
+end;
+
+function AgentFilterPath(const Value, Target: String; Remove: Boolean;
+  var Found: Boolean): String;
+var
+  Start, I: Integer;
+  Entry: String;
+  First, Drop: Boolean;
+begin
+  Result := '';
+  Found := False;
+  First := True;
+  Start := 1;
+  for I := 1 to Length(Value) + 1 do
+  begin
+    if (I > Length(Value)) or (Value[I] = ';') then
+    begin
+      Entry := Copy(Value, Start, I - Start);
+      { Only remove one owned exact entry, never a substring or prefix. }
+      Drop := (not Found) and AgentSameEntry(Entry, Target);
+      if Drop then Found := True;
+      if not (Remove and Drop) then
+      begin
+        if not First then Result := Result + ';';
+        Result := Result + Entry;
+        First := False;
+      end;
+      Start := I + 1;
+    end;
+  end;
+end;
+
+procedure AddAgentPath();
+var
+  Value, Target, Marker, Ignored: String;
+  ValueType: Integer;
+  Found: Boolean;
+begin
+  if IsolatedInstall() then Exit;
+  if not WizardIsTaskSelected('agentpath') then Exit;
+  if not AgentReadPath(Value, ValueType) then
+    RaiseException('Could not read User PATH safely.');
+  Target := ExpandConstant('{app}\bin');
+  Ignored := AgentFilterPath(Value, Target, False, Found);
+  if Found then Exit; { pre-existing entries are not owned by this installer }
+  Marker := ExpandConstant('{app}\.uoink-agent-path');
+  { Persist ownership before mutation; a failed registry write removes it. }
+  if not SaveStringToFile(Marker, Utf8Encode(Target), False) then
+    RaiseException('Could not record Uoink PATH ownership.');
+  if Value = '' then Value := Target else Value := Value + ';' + Target;
+  if not AgentWritePath(Value, ValueType) then
+  begin
+    DeleteFile(Marker);
+    RaiseException('Could not add Uoink to User PATH.');
+  end;
+end;
+
+procedure RemoveAgentPath();
+var
+  Value, Target, Marker, Updated: String;
+  Saved: AnsiString;
+  ValueType: Integer;
+  Found: Boolean;
+begin
+  if IsolatedInstall() then Exit;
+  if IsolatedMarkerFileExists(ExpandConstant('{app}')) then Exit;
+  Marker := ExpandConstant('{app}\.uoink-agent-path');
+  Target := ExpandConstant('{app}\bin');
+  if not LoadStringFromFile(Marker, Saved) then Exit;
+  if Utf8Decode(Saved) <> Target then Exit;
+  if not AgentReadPath(Value, ValueType) then
+    RaiseException('Could not read User PATH safely for removal.');
+  Updated := AgentFilterPath(Value, Target, True, Found);
+  if Found and not AgentWritePath(Updated, ValueType) then
+    RaiseException('Could not remove Uoink from User PATH.');
+  DeleteFile(Marker);
+end;
+
+procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
+begin
+  if CurUninstallStep = usUninstall then RemoveAgentPath();
+end;
+
 procedure VerifyInstalledHelper();
 var
   ResultCode: Integer;
@@ -1823,6 +1956,7 @@ begin
         RaiseException('isolated-install-marker-write-failed: could not write isolated-install.json');
     end;
     VerifyInstalledHelper();
+    AddAgentPath();
   end;
 end;
 

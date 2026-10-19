@@ -1,0 +1,8 @@
+{
+  "name": "uoink",
+  "description": "Search saved videos, podcasts, articles, and notes; cite evidence and capture sources with local Uoink tools.",
+  "version": "0.0.0",
+  "author": {"name": "Ryan Biddy"},
+  "homepage": "https://uoink.app",
+  "repository": "https://github.com/ryanbiddy/uoink"
+}

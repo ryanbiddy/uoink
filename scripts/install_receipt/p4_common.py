@@ -31,6 +31,11 @@ CANDIDATE_SEAL_BINDING_FIELDS = (
     "staged_path", "source_path", "source_git_blob", "checkout_and_staged_sha256",
 )
 REQUIRED_SEALED_MODULES = (
+    "bin/uoink.cmd",
+    "bin/uoink",
+    "uoink_cli.py",
+    "uoink_connect.py",
+    "uoink_agent_runtime.py",
     "index.py",
     "uoink_mcp.py",
     "uoink_mcp_tools.py",

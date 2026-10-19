@@ -90,12 +90,15 @@ jobs:
         run: |
           # v2.1 rename: canonical MCP modules are uoink_mcp*.py; yoink_mcp.py
           # is a back-compat shim that re-exports from uoink_mcp.
-          files=(server.py uoink_mcp.py uoink_mcp_tools.py yoink_mcp.py)
+          files=(server.py uoink_mcp.py uoink_mcp_tools.py uoink_agent_runtime.py uoink_cli.py uoink_connect.py yoink_mcp.py)
           if [ -f index.py ]; then files+=(index.py); fi
           python -m py_compile "${files[@]}"
 
       - name: Check complete MCP inventory
         run: python scripts/check_mcp_inventory.py
+
+      - name: Check generated agent kit skills
+        run: python scripts/build_agent_kit.py --check
 
   doc-accuracy:
     name: doc accuracy checks

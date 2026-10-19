@@ -48,6 +48,9 @@ The stdio transport is tested with **Claude Desktop and Cursor**. Cline and Cont
 
 ### MCP setup (Claude Desktop, Cursor, Cline)
 
+For CLI access, portable skills, and setup recipes for Codex, Gemini, pi,
+Hermes, OpenClaw, and other clients, see [Connect your agent](docs/connect-your-agent.md).
+
 After installing Uoink, open the setup page from the extension popup's **Settings** link and copy the generated snippet — or paste this into your client's MCP config. The stdio server runs the bundled Python against the installed `uoink_mcp.py` (the C-01 fix pins the app dir onto `sys.path`, so this command works on every install):
 
 ```json
@@ -69,7 +72,7 @@ After installing Uoink, open the setup page from the extension popup's **Setting
 
 ### Uoink Operator Skill
 
-Uoink ships a portable Skill at `skills/uoink/SKILL.md` (installed to `%LOCALAPPDATA%\Uoink\skills\uoink\`) that gives MCP-capable agents the operating frame for Uoink corpora: timestamp-citation discipline, decode-don't-dunk analysis, and the Uoink Hook Type taxonomy. Clients that support Agent Skills can load the same file alongside Uoink's MCP tools.
+Uoink ships a portable Skill at `skills/uoink/SKILL.md` (installed to `%LOCALAPPDATA%\Uoink\skills\uoink\`) for finding saved evidence, citing timestamps, capturing URLs, saving notes, and writing from the user's sources and voice. Clients that support Agent Skills can load the same file alongside Uoink's MCP tools or use its exact CLI commands. See [Connect your agent](docs/connect-your-agent.md) for install paths and the small Claude Code plugin kit.
 
 ## Install
 

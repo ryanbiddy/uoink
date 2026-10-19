@@ -8,7 +8,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 ISS = (ROOT / "installer" / "uoink.iss").read_text(encoding="utf-8")
 BUILD = (ROOT / "build.ps1").read_text(encoding="utf-8")
-ENTRYPOINTS = ("server", "index", "uoink_mcp", "uoink_mcp_tools")
+ENTRYPOINTS = ("server", "index", "uoink_mcp", "uoink_mcp_tools", "uoink_cli")
 
 
 def reachable_modules(root: Path, entrypoints=ENTRYPOINTS) -> set[Path]:
@@ -83,6 +83,12 @@ def test_cli_and_watchdog_assets_are_in_both_lists():
                 "scripts/recall_hook.py"}
     assert required <= staged_sources()
     assert required <= installed_sources()
+
+
+def test_agent_launchers_and_modules_are_staged_and_installed():
+    modules = {"uoink_cli.py", "uoink_connect.py", "uoink_agent_runtime.py"}
+    assert modules | {"bin/uoink.cmd", "bin/uoink"} <= staged_sources()
+    assert modules | {"bin/*"} <= installed_sources()
 
 
 def test_playbook_core_is_staged_and_installed_before_mcp_registration():

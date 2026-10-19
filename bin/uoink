@@ -1,0 +1,14 @@
+#!/bin/sh
+set -eu
+
+uoink_root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+export PYTHONIOENCODING=utf-8 PYTHONUTF8=1
+if [ -x "$uoink_root/python/python.exe" ]; then
+    uoink_python="$uoink_root/python/python.exe"
+elif [ -x "$uoink_root/python/bin/python3" ]; then
+    uoink_python="$uoink_root/python/bin/python3"
+else
+    echo 'Uoink bundled Python is missing. Repair the Uoink installation.' >&2
+    exit 1
+fi
+exec "$uoink_python" "$uoink_root/uoink_cli.py" "$@"

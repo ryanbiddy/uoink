@@ -649,6 +649,12 @@ Copy-Item (Join-Path $RepoRoot 'library_faithfulness.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'usage_meter.py')   $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'uoink.cmd')      $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'uoink')          $StagingDir -Force
+New-Item -ItemType Directory -Force -Path (Join-Path $StagingDir 'bin') | Out-Null
+Copy-Item (Join-Path $RepoRoot 'bin\uoink.cmd') (Join-Path $StagingDir 'bin\uoink.cmd') -Force
+Copy-Item (Join-Path $RepoRoot 'bin\uoink') (Join-Path $StagingDir 'bin\uoink') -Force
+Copy-Item (Join-Path $RepoRoot 'uoink_cli.py') $StagingDir -Force
+Copy-Item (Join-Path $RepoRoot 'uoink_connect.py') $StagingDir -Force
+Copy-Item (Join-Path $RepoRoot 'uoink_agent_runtime.py') $StagingDir -Force
 New-Item -ItemType Directory -Force -Path (Join-Path $StagingDir 'scripts') | Out-Null
 Copy-Item (Join-Path $RepoRoot 'scripts\install-watchdog.ps1') (Join-Path $StagingDir 'scripts') -Force
 Copy-Item (Join-Path $RepoRoot 'scripts\recall_hook.py') (Join-Path $StagingDir 'scripts') -Force
@@ -756,7 +762,7 @@ Write-Step 'Staged smoke'
 Push-Location $StagingDir
 try {
     & '.\python\python.exe' -m py_compile `
-        server.py index.py clips.py provenance.py library_cards.py usage_meter.py migrate_install.py uoink_install_isolation.py channels.py workspaces.py claims.py scripts.py voice_dna.py writing_studio.py corpus_contract.py corpus_provider.py corpus_intelligence.py page_extractor.py writer_peer.py engagement_contract.py media_handoff.py suite_service.py source_manifest.py openapi_bridge.py reddit_extractor.py x_extractor.py x_article_extractor.py notes.py images.py taste_scoring.py memory_layer.py podcasts.py mobile_playlists.py whisper_runner.py uoink_mcp.py uoink_mcp_tools.py uoink_reliability.py yoink_mcp.py yt_extract.py helper\_version.py
+        server.py index.py clips.py provenance.py library_cards.py usage_meter.py migrate_install.py uoink_install_isolation.py channels.py workspaces.py claims.py scripts.py voice_dna.py writing_studio.py corpus_contract.py corpus_provider.py corpus_intelligence.py page_extractor.py writer_peer.py engagement_contract.py media_handoff.py suite_service.py source_manifest.py openapi_bridge.py reddit_extractor.py x_extractor.py x_article_extractor.py notes.py images.py taste_scoring.py memory_layer.py podcasts.py mobile_playlists.py whisper_runner.py uoink_mcp.py uoink_mcp_tools.py uoink_agent_runtime.py uoink_cli.py uoink_connect.py uoink_reliability.py yoink_mcp.py yt_extract.py helper\_version.py
     if ($LASTEXITCODE -ne 0) {
         throw 'staged smoke: py_compile of staged Python files failed'
     }

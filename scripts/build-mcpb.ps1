@@ -92,7 +92,7 @@ $stagedJson = $json -replace '"version"\s*:\s*"[^"]*"', ('"version": "' + $versi
 # Reference copies so entry_point resolves inside the bundle. The RUNTIME uses
 # the installed copy (via user_config.uoink_dir) because that is where the
 # dependencies and sibling modules live.
-foreach ($f in @("uoink_mcp.py", "uoink_mcp_tools.py")) {
+foreach ($f in @("uoink_mcp.py", "uoink_mcp_tools.py", "uoink_agent_runtime.py")) {
   $p = Join-Path $RepoRoot $f
   if (Test-Path $p) { Copy-Item $p (Join-Path $BuildDir $f) -Force }
 }

@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "uoink": {
+      "command": "${LOCALAPPDATA}\\Uoink\\python\\python.exe",
+      "args": ["${LOCALAPPDATA}\\Uoink\\uoink_mcp.py"],
+      "env": {"PYTHONIOENCODING": "utf-8", "PYTHONUTF8": "1"}
+    }
+  }
+}
