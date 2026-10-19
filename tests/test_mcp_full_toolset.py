@@ -182,7 +182,11 @@ def test_resident_helper_pid_requires_live_original_process(tmp_path, monkeypatc
     from types import SimpleNamespace
     # This is the legacy PID-file/mtime contract. Darwin has a full native
     # identity record, covered separately below on every test host.
-    monkeypatch.setattr(uoink_mcp, "sys", SimpleNamespace(platform="win32" if os.name == "nt" else "linux"))
+    import uoink_agent_runtime
+    legacy = SimpleNamespace(platform="win32" if os.name == "nt" else "linux")
+    monkeypatch.setattr(uoink_mcp, "sys", legacy)
+    # 3.10 moved the resident check into uoink_agent_runtime.helper_running.
+    monkeypatch.setattr(uoink_agent_runtime, "sys", legacy)
     iso = uoink_mcp._install_isolation
     monkeypatch.setattr(iso, "current_binding", lambda: None)
     monkeypatch.setattr(server, "HERE", tmp_path)
