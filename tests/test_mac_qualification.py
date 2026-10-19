@@ -7,6 +7,7 @@ import json
 from pathlib import Path
 import sys
 import tempfile
+from types import SimpleNamespace
 import unittest
 from unittest.mock import patch
 
@@ -150,6 +151,114 @@ class QualificationTests(unittest.TestCase):
         selected = smoke.select_wheels(self.root)
         self.assertEqual(len(selected), 2)
         self.assertTrue(any("macosx_14_0_arm64" in path.name for path in selected))
+
+    def test_pinned_sdist_verified_before_build_and_recorded(self):
+        body = b"reviewed source fixture"
+        pin = {"version": "0.1.0", "url": "https://example.invalid/proxy_tools-0.1.0.tar.gz",
+               "blake2b_256": hashlib.blake2b(body, digest_size=32).hexdigest()}
+        manifest = self.root / "sources.json"
+        deps.write_json(manifest, {"proxy-tools": pin})
+        commands = []
+        wheels = self.root / "wheels"
+        wheels.mkdir()
+
+        def fake_run(command, log, timeout=240):
+            commands.append(command)
+            if "wheel" in command:
+                self.assertIn("--no-deps", command)
+                self.assertIn("--no-build-isolation", command)
+                self.assertIn("--no-index", command)
+                self.assertEqual(Path(command[-1]).read_bytes(), body)
+                destination = Path(command[command.index("--wheel-dir") + 1])
+                (destination / "proxy_tools-0.1.0-py2.py3-none-any.whl").write_bytes(b"built fixture")
+            return 0
+
+        with patch.object(deps, "SOURCE_PINS", manifest), patch.object(deps, "run_logged", side_effect=fake_run), \
+                patch.object(deps, "request", return_value=io.BytesIO(body)):
+            report = deps.build_source_wheels([("proxy_tools", "0.1.0")], wheels, self.root)
+        row = report["proxy-tools"]
+        self.assertTrue(row["wheel_found"])
+        self.assertEqual(row["source_sha256"], hashlib.sha256(body).hexdigest())
+        self.assertEqual(row["source_blake2b_256"], pin["blake2b_256"])
+        self.assertEqual(len(commands), 2)
+        self.assertIn("setuptools==" + deps.windows_build_pin("SETUPTOOLS_VERSION"), commands[0])
+
+        # Wrong bytes at the exact pinned URL never reach pip's build hooks.
+        commands.clear()
+        with patch.object(deps, "SOURCE_PINS", manifest), patch.object(deps, "run_logged", side_effect=fake_run), \
+                patch.object(deps, "request", return_value=io.BytesIO(body + b"tamper")):
+            report = deps.build_source_wheels([("proxy_tools", "0.1.0")], wheels, self.root)
+        self.assertFalse(report["proxy-tools"]["wheel_found"])
+        self.assertIn("BLAKE2-256 mismatch", str(report))
+        self.assertEqual(len(commands), 1)
+
+    def test_source_content_addresses_match_retained_qualification_urls(self):
+        pins = json.loads(deps.SOURCE_PINS.read_text(encoding="utf-8"))
+        retained = (ROOT / "docs/library/GEMINI-PYTHON-313-QUALIFICATION-2026-09-09.md").read_text(encoding="utf-8")
+        for row in pins.values():
+            self.assertIn(row["url"], retained)
+            address = "".join(row["url"].split("/packages/", 1)[1].split("/")[:3])
+            self.assertEqual(row["blake2b_256"], address)
+            self.assertEqual(len(address), 64)
+
+    def test_nltk_uses_existing_builder_and_rejects_non_windows_output_hash(self):
+        wheels = self.root / "wheels"
+        wheels.mkdir()
+        commands, builds = [], []
+        class Builder:
+            EXPECTED_WHEEL_NAME = "nltk-3.10.3-py3-none-any.whl"
+            EXPECTED_WHEEL_SHA256 = "f" * 64
+            OUTPUT_WHEEL_NAME = "nltk-3.10.3+uoink.pathsec1-py3-none-any.whl"
+            @staticmethod
+            def build_nltk_wheel(source, output):
+                builds.append((source, output))
+                output.mkdir()
+                (output / Builder.OUTPUT_WHEEL_NAME).write_bytes(b"wrong output hash")
+                return {}
+        loader = SimpleNamespace(exec_module=lambda module: None)
+        def fake_run(command, log, timeout=240):
+            commands.append(command)
+            if "download" in command:
+                self.assertIn("--require-hashes", command)
+                self.assertIn(Builder.EXPECTED_WHEEL_SHA256, Path(command[-1]).read_text())
+            return 0
+        with patch.object(deps.importlib.util, "spec_from_file_location", return_value=SimpleNamespace(loader=loader)), \
+                patch.object(deps.importlib.util, "module_from_spec", return_value=Builder), \
+                patch.object(deps, "run_logged", side_effect=fake_run):
+            report = deps.build_source_wheels([("nltk", "3.10.3+uoink.pathsec1")], wheels, self.root)
+        self.assertEqual(len(builds), 1)
+        self.assertFalse(report["nltk"]["wheel_found"])
+        self.assertIn("Windows build hash", str(report))
+        self.assertEqual(list(wheels.iterdir()), [])
+
+    def test_combined_resolver_uses_built_wheels(self):
+        lock = self.root / "lock.txt"
+        lock.write_text("proxy_tools==0.1.0\n", encoding="utf-8")
+        exclusions = self.root / "exclude.json"
+        deps.write_json(exclusions, {})
+        commands = []
+        def fake_run(command, log, timeout=240):
+            commands.append(command)
+            self.assertIn("--find-links", command)
+            self.assertIn("-r", command)
+            return 0
+        built = {"proxy-tools": {"wheel_found": True, "wheels": [], "errors": []}}
+        with patch.object(deps, "build_source_wheels", return_value=built), \
+                patch.object(deps, "run_logged", side_effect=fake_run):
+            report = deps.qualify_wheels(lock, exclusions, self.root / "evidence")
+        self.assertEqual(len(commands), 2)
+        self.assertTrue(all(row["source_built"] for row in report["packages"]))
+
+    def test_smoke_rejects_missing_pins_and_changed_bytes(self):
+        wheel = self.root / "sample-1.0-py3-none-any.whl"
+        wheel.write_bytes(b"fixture")
+        manifest = {"pins": [{"package": "sample", "version": "1.0.0"}], "errors": [],
+                    "wheels": [{"filename": wheel.name, "sha256": deps.sha256(wheel)}]}
+        deps.write_json(self.root / "wheel-manifest.json", manifest)
+        self.assertEqual(smoke.verify_complete_set(self.root, [wheel]), [])
+        self.assertIn("Missing qualified pin", str(smoke.verify_complete_set(self.root, [])))
+        wheel.write_bytes(b"changed")
+        self.assertIn("hash mismatch", str(smoke.verify_complete_set(self.root, [wheel])))
 
 
 if __name__ == "__main__":

@@ -102,16 +102,18 @@ def test_open_extension_token_gated():
 
 
 def test_open_extension_reveals_bundled_folder():
-    expected = server.HERE / "extension"
-    _assert(expected.is_dir(),
-            f"repo must ship an extension folder at {expected}")
+    packaged = server.HERE / "extension"
+    _assert(packaged.is_dir(),
+            f"repo must ship an extension folder at {packaged}")
+    expected = (server.DATA_ROOT.resolve() / "extension"
+                if sys.platform == "darwin" else packaged)
     with _server(), _fake_reveal() as calls:
         status, res = _get("/open-extension")
         _assert(status == 200,
                 f"/open-extension must exist (red on main: 404), got {status}")
         _assert(res.get("ok") is True, f"ok flag: {res}")
         _assert(res.get("path") == str(expected),
-                f"path must be the bundled extension dir: {res}")
+                f"path must be the platform's editable extension dir: {res}")
         _assert(calls == [expected],
                 f"reveal_in_file_manager must get exactly {expected}: {calls}")
 

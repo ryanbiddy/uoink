@@ -14,10 +14,14 @@ darwin / linux branches are best-effort + flagged in their docstrings.
 from __future__ import annotations
 
 import logging
+import ctypes
+import errno
 import os
 import subprocess
 import sys
 from pathlib import Path
+from dataclasses import dataclass
+from functools import lru_cache
 from typing import Iterable
 
 log = logging.getLogger("uoink.platform")
@@ -108,6 +112,193 @@ def legacy_user_data_dir() -> Path:
     xdg = os.environ.get("XDG_DATA_HOME")
     base = Path(xdg) if xdg else Path.home() / ".local" / "share"
     return base / "Yoink"
+
+
+def app_state_path(app: Path, data: Path, name: str) -> Path:
+    """Darwin state belongs outside the sealed app; other layouts stay intact."""
+    return (data if sys.platform == "darwin" else app) / name
+
+
+def prepare_app_state(data: Path) -> None:
+    if sys.platform == "darwin":
+        data.mkdir(mode=0o700, parents=True, exist_ok=True)
+
+
+def topics_source(app: Path, target: Path) -> Path:
+    if sys.platform == "darwin" and not target.exists():
+        return app / "topics.json"
+    return target
+
+
+def write_darwin_identity(data: Path, script: Path) -> Path:
+    """Record a complete native identity for the ordinary Darwin resident."""
+    import json
+    observation = darwin_observe(os.getpid(), with_executable=True)
+    if observation.status != "alive" or observation.created_ms is None or not observation.executable:
+        raise OSError("Darwin helper process identity is unavailable")
+    target = data / "runtime-identity.json"
+    temporary = target.with_suffix(".json.tmp")
+    payload = {"pid": os.getpid(), "created_ms": observation.created_ms,
+               "executable": observation.executable, "script": str(script.resolve())}
+    fd = os.open(temporary, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+    with os.fdopen(fd, "w", encoding="utf-8") as stream:
+        json.dump(payload, stream)
+    temporary.replace(target)
+    return target
+
+
+def darwin_helper_running(app: Path, data: Path) -> bool:
+    import json
+    try:
+        identity = json.loads((data / "runtime-identity.json").read_text(encoding="utf-8"))
+        if not isinstance(identity, dict) or identity.get("pid") == os.getpid():
+            return False
+        script = identity.get("script")
+        executable = identity.get("executable")
+        if not script or not executable or not (app / "server.py").samefile(script):
+            return False
+        return darwin_liveness(identity.get("pid"), identity.get("created_ms"), executable) == "alive"
+    except (OSError, ValueError, TypeError):
+        return False
+
+
+def editable_extension_dir(app: Path, data: Path) -> Path:
+    """Seed/update Darwin's unpacked extension, preserving edited prompts.
+
+    A version change refreshes packaged files, retaining prompts.json and any
+    user-added files. The version stamp is written last so interrupted copies
+    are retried. Windows continues to return the installed extension directory.
+    """
+    packaged = app / "extension"
+    if sys.platform != "darwin":
+        return packaged
+    import shutil
+    if not packaged.is_dir():
+        return packaged  # Let callers report a missing installation resource.
+    target = data.resolve() / "extension"
+    version = (app / "VERSION").read_text(encoding="utf-8").strip()
+    stamp = target / ".uoink-packaged-version"
+    if stamp.is_file() and stamp.read_text(encoding="utf-8").strip() == version:
+        return target
+    target.mkdir(mode=0o700, parents=True, exist_ok=True)
+    for source in packaged.rglob("*"):
+        relative = source.relative_to(packaged)
+        dest = target / relative
+        if source.is_symlink() or dest.is_symlink() or any(p.is_symlink() for p in dest.parents):
+            raise OSError("Linked extension resources are not writable copies")
+        if source.is_dir():
+            dest.mkdir(exist_ok=True)
+        elif not (relative == Path("prompts.json") and dest.exists()):
+            temporary = dest.with_name(dest.name + ".uoink-tmp")
+            if temporary.is_symlink():
+                raise OSError("Linked extension temporary file")
+            shutil.copyfile(source, temporary)
+            temporary.replace(dest)
+    stamp.write_text(version + "\n", encoding="utf-8")
+    return target
+
+
+# Darwin's native process adapter lives in this already-shipped module so the
+# Windows installer file set does not change. Calls load libproc only on demand.
+class _DarwinProcBSDInfo(ctypes.Structure):
+    # Darwin sys/proc_info.h: PROC_PIDTBSDINFO (flavor 3), 136 bytes on arm64.
+    _fields_ = [(name, ctypes.c_uint32) for name in (
+        "flags", "status", "xstatus", "pid", "ppid", "uid", "gid", "ruid",
+        "rgid", "svuid", "svgid", "rfu_1",
+    )] + [("comm", ctypes.c_char * 16), ("name", ctypes.c_char * 32)] + [
+        (name, ctypes.c_uint32) for name in ("nfiles", "pgid", "pjobc", "e_tdev", "e_tpgid")
+    ] + [("nice", ctypes.c_int32), ("start_sec", ctypes.c_uint64),
+         ("start_usec", ctypes.c_uint64)]
+
+
+@dataclass(frozen=True)
+class DarwinProcessObservation:
+    status: str  # alive, dead, unknown
+    started_us: int | None = None
+    executable: str | None = None
+
+    @property
+    def created_ms(self) -> int | None:
+        return None if self.started_us is None else self.started_us // 1000
+
+
+@lru_cache(maxsize=1)
+def _darwin_libproc():
+    lib = ctypes.CDLL("/usr/lib/libproc.dylib", use_errno=True)
+    lib.proc_pidinfo.argtypes = [ctypes.c_int, ctypes.c_int, ctypes.c_uint64,
+                                 ctypes.c_void_p, ctypes.c_int]
+    lib.proc_pidinfo.restype = ctypes.c_int
+    lib.proc_pidpath.argtypes = [ctypes.c_int, ctypes.c_void_p, ctypes.c_uint32]
+    lib.proc_pidpath.restype = ctypes.c_int
+    return lib
+
+
+def _darwin_bsd_info(lib, pid: int) -> DarwinProcessObservation:
+    info = _DarwinProcBSDInfo()
+    ctypes.set_errno(0)
+    size = lib.proc_pidinfo(pid, 3, 0, ctypes.byref(info), ctypes.sizeof(info))
+    if size <= 0:
+        return DarwinProcessObservation("dead" if ctypes.get_errno() == errno.ESRCH else "unknown")
+    if size != ctypes.sizeof(info) or info.pid != pid:
+        return DarwinProcessObservation("unknown")
+    if info.status == 5:  # SZOMB: kill(pid, 0) would still succeed.
+        return DarwinProcessObservation("dead")
+    if info.status not in (1, 2, 3, 4) or not info.start_sec or info.start_usec >= 1_000_000:
+        return DarwinProcessObservation("unknown")
+    return DarwinProcessObservation("alive", info.start_sec * 1_000_000 + info.start_usec)
+
+
+def darwin_observe(pid: int, *, with_executable: bool = False) -> DarwinProcessObservation:
+    if type(pid) is not int or not 0 < pid <= 0x7fffffff:
+        return DarwinProcessObservation("unknown")
+    try:
+        lib = _darwin_libproc()
+        before = _darwin_bsd_info(lib, pid)
+        if before.status != "alive" or not with_executable:
+            return before
+        buf = ctypes.create_string_buffer(4096)  # PROC_PIDPATHINFO_MAXSIZE
+        size = lib.proc_pidpath(pid, buf, len(buf))
+        after = _darwin_bsd_info(lib, pid)
+        if after.status == "dead":
+            return after
+        if (after.status != "alive" or before.started_us != after.started_us
+                or size <= 0 or size >= len(buf) or not buf.value.startswith(b"/")):
+            return DarwinProcessObservation("unknown")
+        return DarwinProcessObservation("alive", before.started_us, os.fsdecode(buf.value))
+    except (OSError, AttributeError, ValueError):
+        return DarwinProcessObservation("unknown")
+
+
+def darwin_created_ms(pid: int) -> int | None:
+    return darwin_observe(pid).created_ms
+
+
+def darwin_executable(pid: int) -> str | None:
+    return darwin_observe(pid, with_executable=True).executable
+
+
+def darwin_state(pid: int) -> str | None:
+    status = darwin_observe(pid).status
+    return {"alive": "R", "dead": "Z"}.get(status)
+
+
+def darwin_liveness(pid: int, expected_ms: int | None, expected_exe: str | None = None) -> str:
+    observation = darwin_observe(pid, with_executable=expected_exe is not None)
+    if observation.status != "alive":
+        return observation.status
+    if type(expected_ms) is not int or observation.created_ms is None:
+        return "unknown"
+    if observation.created_ms != expected_ms:
+        return "dead"
+    if expected_exe is not None:
+        if not observation.executable:
+            return "unknown"
+        try:
+            if not os.path.samefile(observation.executable, expected_exe):
+                return "dead"
+        except OSError:
+            return "unknown"
+    return "alive"
 
 
 def desktop_dir() -> Path:

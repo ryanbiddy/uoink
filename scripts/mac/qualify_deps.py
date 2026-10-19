@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import importlib.util
 import json
 from pathlib import Path
 import re
@@ -19,6 +20,7 @@ import urllib.request
 ROOT = Path(__file__).resolve().parents[2]
 PLATFORMS = ("macosx_14_0_arm64", "macosx_15_0_arm64")
 RELEASE_URL = "https://api.github.com/repos/astral-sh/python-build-standalone/releases/latest"
+SOURCE_PINS = Path(__file__).with_name("source-wheels.json")
 
 
 def canonical(name: str) -> str:
@@ -119,6 +121,99 @@ def collect_wheels(source: Path, destination: Path | None, package: str | None =
     return found, errors
 
 
+def windows_build_pin(name: str) -> str:
+    """Use the reviewed Windows build's tooling and final NLTK hash verbatim."""
+    source = (ROOT / "build.ps1").read_text(encoding="utf-8-sig")
+    matches = re.findall(r"^\$" + re.escape(name) + r"\s*=\s*'([^']+)'", source, re.MULTILINE)
+    if len(matches) != 1:
+        raise ValueError(f"Expected exactly one Windows build pin: {name}")
+    return matches[0]
+
+
+def build_source_wheels(included: list[tuple[str, str]], wheels: Path, output: Path) -> dict:
+    """Only the two reviewed pure-Python sdists and the existing NLTK patch.
+
+    The sdists are pinned to the BLAKE2-256 content addresses retained in the
+    September Python qualification. Verify bytes before executing build hooks;
+    also record their SHA-256. There is no generic source-build fallback.
+    """
+    sources = json.loads(SOURCE_PINS.read_text(encoding="utf-8"))
+    requested = {canonical(name): version for name, version in included}
+    selected = {key: value for key, value in sources.items() if key in requested}
+    if "nltk" in requested:
+        selected["nltk"] = {"version": "3.10.3+uoink.pathsec1"}
+    if not selected:
+        return {}
+    logs = output / "logs"
+    logs.mkdir(exist_ok=True)
+    tooling = [f"{package}=={windows_build_pin(pin)}" for package, pin in (
+        ("pip", "PIP_VERSION"), ("setuptools", "SETUPTOOLS_VERSION"),
+        ("wheel", "WHEEL_VERSION"), ("packaging", "PACKAGING_VERSION"))]
+    tooling_code = run_logged([sys.executable, "-m", "pip", "--isolated", "install",
+                              "--disable-pip-version-check", "--no-cache-dir",
+                              "--index-url", "https://pypi.org/simple", *tooling],
+                             logs / "source-build-tooling.txt", timeout=300)
+    results = {}
+    for key, pin in selected.items():
+        row = {"package": key, "version": requested[key], "tooling": tooling,
+               "wheel_found": False, "wheels": [], "errors": []}
+        try:
+            if requested[key] != pin["version"]:
+                raise ValueError(f"Unreviewed source version: {key}=={requested[key]}")
+            if tooling_code:
+                raise ValueError("Pinned build tooling installation failed")
+            with tempfile.TemporaryDirectory(prefix="uoink-source-wheel-") as temporary:
+                # /var is a symlink on macOS. The NLTK builder intentionally
+                # rejects linked ancestors, so pass canonical scratch paths.
+                scratch = Path(temporary).resolve()
+                built = scratch / "built"
+                if key == "nltk":
+                    spec = importlib.util.spec_from_file_location(
+                        "nltk_pathsec_builder", ROOT / "scripts/build_nltk_pathsec_wheel.py")
+                    builder = importlib.util.module_from_spec(spec)
+                    spec.loader.exec_module(builder)
+                    requirement = scratch / "upstream.txt"
+                    requirement.write_text(
+                        f"nltk==3.10.3 --hash=sha256:{builder.EXPECTED_WHEEL_SHA256}\n", encoding="utf-8")
+                    command = [sys.executable, "-m", "pip", "--isolated", "download", "--no-deps",
+                               "--only-binary=:all:", "--require-hashes", "--no-cache-dir",
+                               "--index-url", "https://pypi.org/simple", "--dest", str(scratch),
+                               "-r", str(requirement)]
+                    if run_logged(command, logs / "nltk-upstream.txt"):
+                        raise ValueError("Pinned NLTK upstream download failed")
+                    provenance = builder.build_nltk_wheel(scratch / builder.EXPECTED_WHEEL_NAME, built)
+                    expected = windows_build_pin("NLTK_PATHSEC_SHA256")
+                    if sha256(built / builder.OUTPUT_WHEEL_NAME) != expected:
+                        raise ValueError("Patched NLTK wheel differs from the Windows build hash")
+                    row.update(upstream_sha256=builder.EXPECTED_WHEEL_SHA256,
+                               expected_wheel_sha256=expected, provenance=provenance)
+                else:
+                    source = scratch / pin["url"].rsplit("/", 1)[1]
+                    with request(pin["url"]) as response, source.open("wb") as stream:
+                        shutil.copyfileobj(response, stream)
+                    actual = hashlib.blake2b(source.read_bytes(), digest_size=32).hexdigest()
+                    row.update(source_url=pin["url"], source_blake2b_256=actual, source_sha256=sha256(source))
+                    if actual != pin["blake2b_256"]:
+                        raise ValueError("Pinned sdist BLAKE2-256 mismatch")
+                    built.mkdir()
+                    command = [sys.executable, "-m", "pip", "--isolated", "wheel", "--no-deps",
+                               "--no-build-isolation", "--no-index", "--no-cache-dir",
+                               "--wheel-dir", str(built), str(source)]
+                    if run_logged(command, logs / f"{key}-source-build.txt", timeout=300):
+                        raise ValueError("Pinned sdist wheel build failed")
+                found, errors = collect_wheels(built, None, key)
+                if (errors or len(found) != 1 or found[0]["version"] != requested[key]
+                        or found[0]["wheel_tag"] not in ("py3-none-any", "py2.py3-none-any")):
+                    raise ValueError("Source build did not produce the expected pure Python wheel")
+                row["wheels"], row["errors"] = collect_wheels(built, wheels, key)
+                row["wheel_found"] = bool(row["wheels"]) and not row["errors"]
+        except Exception as exc:
+            row["errors"].append({"error": f"{type(exc).__name__}: {exc}"})
+        results[key] = row
+        write_json(output / "source-builds.json", results)
+    return results
+
+
 def qualify_wheels(lock: Path, exclusions_path: Path, output: Path) -> dict:
     pins = read_pins(lock)
     exclusions = json.loads(exclusions_path.read_text(encoding="utf-8"))
@@ -142,9 +237,16 @@ def qualify_wheels(lock: Path, exclusions_path: Path, output: Path) -> dict:
                               "reason": exclusions[canonical(name)]}
                              for name, version in pins if canonical(name) in exclusions],
               "packages": [], "graph_attempts": []}
+    source_builds = build_source_wheels(included, wheels, output)
+    report["source_builds"] = source_builds
     for platform in PLATFORMS:
         for name, version in included:
             key = canonical(name)
+            if key in source_builds:
+                report["packages"].append({**source_builds[key], "platform": platform,
+                                            "source_built": True})
+                write_json(output / "wheels.json", report)
+                continue
             log = output / "logs" / f"{platform}-{key}.txt"
             with tempfile.TemporaryDirectory(prefix="uoink-wheel-") as scratch:
                 destination = Path(scratch)
@@ -161,7 +263,8 @@ def qualify_wheels(lock: Path, exclusions_path: Path, output: Path) -> dict:
         # wheel availability is never mistaken for a mutually consistent graph.
         log = output / "logs" / f"{platform}-combined-graph.txt"
         with tempfile.TemporaryDirectory(prefix="uoink-graph-") as scratch:
-            code = run_logged(download_command(platform, Path(scratch)) + ["-r", str(filtered)],
+            code = run_logged(download_command(platform, Path(scratch)) +
+                              ["--find-links", str(wheels), "-r", str(filtered)],
                               log, timeout=600)
             # Preserve additional Darwin dependencies only on resolver success.
             graph_wheels, errors = collect_wheels(Path(scratch), wheels if code == 0 else None)
@@ -169,6 +272,11 @@ def qualify_wheels(lock: Path, exclusions_path: Path, output: Path) -> dict:
                                          "pip_exit_code": code, "wheels": graph_wheels, "errors": errors,
                                          "log": str(log.relative_to(output))})
         write_json(output / "wheels.json", report)
+    inventory, errors = collect_wheels(wheels, None)
+    write_json(wheels / "wheel-manifest.json", {
+        "pins": [{"package": canonical(name), "version": version} for name, version in included],
+        "wheels": inventory, "errors": errors,
+    })
     return report
 
 

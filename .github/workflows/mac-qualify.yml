@@ -44,13 +44,13 @@ jobs:
         with:
           python-version: ${{ matrix.python }}
           architecture: arm64
-      - name: Establish disposable profile before imports
-        run: bash scripts/mac/runner-env.sh
+      - name: Establish disposable home before suite imports
+        run: bash scripts/mac/runner-env.sh suite
       - name: Record runner and Python
         run: bash scripts/mac/runner-info.sh "$RUNNER_TEMP/mac-evidence/environment.txt"
       - name: Install the existing stdlib suite dependencies
         run: python -m pip install pytest Pillow "mcp<2"
-      - name: Run the unchanged portable suite
+      - name: Run the portable suite
         env:
           PYTHONPATH: ${{ github.workspace }}
         run: pytest tests/ -q -rfE --junitxml="$RUNNER_TEMP/mac-evidence/pytest.xml"
@@ -82,7 +82,7 @@ jobs:
         run: bash scripts/mac/runner-env.sh
       - name: Record runner and Python
         run: bash scripts/mac/runner-info.sh "$RUNNER_TEMP/mac-evidence/environment.txt"
-      - name: Probe every pin and attempt the combined graph
+      - name: Build pinned source wheels, probe every pin and resolve the graph
         id: wheels
         continue-on-error: true
         run: python scripts/mac/qualify_deps.py wheels --output "$RUNNER_TEMP/mac-evidence/deps"
@@ -108,12 +108,12 @@ jobs:
             ${{ runner.temp }}/mac-evidence/standalone/*.json
           if-no-files-found: error
           retention-days: 14
-      - name: Upload found wheels for import smoke
+      - name: Upload wheels and verified inventory for import smoke
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: mac-qualified-wheels
-          path: ${{ runner.temp }}/mac-evidence/deps/wheels/*.whl
+          path: ${{ runner.temp }}/mac-evidence/deps/wheels/
           if-no-files-found: error
           compression-level: 0
           retention-days: 3
@@ -140,14 +140,14 @@ jobs:
         run: bash scripts/mac/runner-env.sh
       - name: Record runner and Python
         run: bash scripts/mac/runner-info.sh "$RUNNER_TEMP/mac-evidence/environment.txt"
-      - name: Fetch the wheels Job B actually found
+      - name: Fetch the wheels and inventory from Job B
         uses: actions/download-artifact@v4
         with:
           name: mac-qualified-wheels
           path: ${{ runner.temp }}/mac-wheels
       - name: Create a fresh venv
         run: python -m venv "$RUNNER_TEMP/mac-smoke-venv"
-      - name: Install found wheels and exercise imports and stdio
+      - name: Verify the complete wheel set, install and exercise imports and stdio
         run: >-
           python scripts/mac/import_smoke.py
           --python "$RUNNER_TEMP/mac-smoke-venv/bin/python"

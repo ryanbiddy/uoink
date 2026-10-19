@@ -43,6 +43,10 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
+if sys.platform == "darwin":
+    sys.dont_write_bytecode = True
+    os.environ["PYTHONDONTWRITEBYTECODE"] = "1"  # inherited by app workers
+
 try:
     import keyring as _keyring
 except Exception as _keyring_error:  # pragma: no cover - env-specific
@@ -447,21 +451,21 @@ PLAYLIST_RATE_LIMIT_BACKOFF_BASE_SEC = 30.0
 PLAYLIST_RATE_LIMIT_BACKOFF_MAX_SEC = 5 * 60.0
 
 # ---- Auth token (P0-1) ----------------------------------------------------
-# Per-install random token. Persisted next to server.py (which lives in the
-# install root -- %LOCALAPPDATA%\Uoink on Windows, ~/Library/Application
-# Support/Uoink on macOS -- in the shipped product, or in the dev repo
-# directory in dev mode; gitignored either way). The extension fetches
+# Per-install random token. Windows retains the source-adjacent location;
+# Darwin uses Application Support, outside the sealed app. The extension fetches
 # this via /token (gated by chrome-extension:// origin) on first launch
 # and includes it in X-Uoink-Token on every subsequent request. The legacy
 # X-Yoink-Token header is still accepted through the v2.x alias window.
 _ISOLATION = _install_isolation.current_binding()
-TOKEN_PATH = (
-    _ISOLATION.token_path if _ISOLATION is not None else HERE / "token.txt"
-)
 # Sprint 19.5 Stage 1: DATA_ROOT is now resolved by _platform.user_data_dir
 # so the same helper runs on Windows + macOS without per-call branches.
 # Isolated installs substitute the declared profile instead of the normal root.
 DATA_ROOT = _install_isolation.data_root(_platform.user_data_dir())
+_platform.prepare_app_state(DATA_ROOT)
+TOKEN_PATH = (
+    _ISOLATION.token_path if _ISOLATION is not None
+    else _platform.app_state_path(HERE, DATA_ROOT, "token.txt")
+)
 RELIABILITY_MODEL_ROOT = DATA_ROOT / "models" / "whisper"
 SETTINGS_PATH = DATA_ROOT / "settings.json"
 JOBS_PATH = DATA_ROOT / "jobs.json"
@@ -2286,7 +2290,8 @@ def _allowed_roots() -> set[Path]:
 
 # --- Logging ---------------------------------------------------------------
 LOG_PATH = (
-    _ISOLATION.log_path if _ISOLATION is not None else HERE / "server.log"
+    _ISOLATION.log_path if _ISOLATION is not None
+    else _platform.app_state_path(HERE, DATA_ROOT, "server.log")
 )
 # One rotating file handler: the root logger and the file-only machine-error
 # detail logger share it, so raw diagnostics rotate with server.log.
@@ -3532,21 +3537,23 @@ def _fmt_iso_date(s) -> str:
     return s
 
 
-TOPICS_PATH = HERE / "topics.json"
+TOPICS_PATH = _platform.app_state_path(HERE, DATA_ROOT, "topics.json")
 
 
 def _load_topics() -> dict:
-    """Read topics.json from project root. Returns a dict with a 'topics'
+    """Read edited topics, or packaged defaults before the first Darwin edit.
+    Returns a dict with a 'topics'
     list of {name, keywords} and a 'fallback' string. On any error (missing
     or malformed file) returns an empty topic list with a sane fallback so
     classification just degrades to 'Uncategorized'.
     """
-    if not TOPICS_PATH.exists():
+    source = _platform.topics_source(HERE, TOPICS_PATH)
+    if not source.exists():
         log.warning("topics.json missing at %s — falling back to 'Uncategorized'",
                     TOPICS_PATH)
         return {"topics": [], "fallback": "Uncategorized"}
     try:
-        return json.loads(TOPICS_PATH.read_text(encoding="utf-8"))
+        return json.loads(source.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as e:
         log.warning("topics.json read failed: %s", e)
         return {"topics": [], "fallback": "Uncategorized"}
@@ -8216,7 +8223,8 @@ def _validate_topics(topics) -> str | None:
 def _write_topics(topics: list) -> None:
     """Persist the topics editor to topics.json, preserving any other keys."""
     try:
-        existing = json.loads(TOPICS_PATH.read_text(encoding="utf-8"))
+        source = _platform.topics_source(HERE, TOPICS_PATH)
+        existing = json.loads(source.read_text(encoding="utf-8"))
         if not isinstance(existing, dict):
             existing = {}
     except (OSError, ValueError):
@@ -16528,7 +16536,7 @@ class Handler(BaseHTTPRequestHandler):
     # prompts without hunting through the project folder. Selected so the file
     # is highlighted (not just the parent folder opened).
     def _handle_open_prompts(self):
-        prompts_path = HERE / "extension" / "prompts.json"
+        prompts_path = _platform.editable_extension_dir(HERE, DATA_ROOT) / "prompts.json"
         if not prompts_path.exists():
             return self._send_json(200, {
                 "ok": False,
@@ -16549,7 +16557,7 @@ class Handler(BaseHTTPRequestHandler):
     # the extension ships inside the install dir (HERE), which sits outside
     # DESKTOP_ROOT by design.
     def _handle_open_extension(self):
-        ext_dir = HERE / "extension"
+        ext_dir = _platform.editable_extension_dir(HERE, DATA_ROOT)
         if not ext_dir.is_dir():
             return self._send_json(200, {
                 "ok": False,
@@ -19627,7 +19635,15 @@ class _YoinkHTTPServer(ThreadingHTTPServer):
             self.allow_reuse_address = False
             if hasattr(socket, "SO_EXCLUSIVEADDRUSE"):
                 self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_EXCLUSIVEADDRUSE, 1)
-        super().server_bind()
+        if sys.platform == "darwin":
+            # HTTPServer calls getfqdn(), which can block boot on the runner's
+            # reverse DNS. This loopback service needs no DNS-derived name.
+            from socketserver import TCPServer
+            TCPServer.server_bind(self)
+            self.server_name = "localhost"
+            self.server_port = self.server_address[1]
+        else:
+            super().server_bind()
 
 
 def main(*, show_dashboard: bool = False):
@@ -19741,7 +19757,8 @@ def main(*, show_dashboard: bool = False):
 
     # Bind succeeded -- now safe to claim the PID file.
     isolated = _install_isolation.current_binding()
-    pid_file = isolated.pid_path if isolated is not None else HERE / "server.pid"
+    pid_file = (isolated.pid_path if isolated is not None
+                else _platform.app_state_path(HERE, DATA_ROOT, "server.pid"))
     try:
         pid_file.write_text(str(os.getpid()), encoding="utf-8")
     except OSError:
@@ -19766,6 +19783,14 @@ def main(*, show_dashboard: bool = False):
             server.server_close()
             sys.exit(1)
         atexit.register(lambda binding=isolated: binding.identity_path.unlink(missing_ok=True))
+    elif sys.platform == "darwin":
+        try:
+            identity_file = _platform.write_darwin_identity(DATA_ROOT, HERE / "server.py")
+        except OSError as e:
+            log.error("Darwin identity write failed: %s", e)
+            server.server_close()
+            sys.exit(1)
+        atexit.register(lambda: identity_file.unlink(missing_ok=True))
 
     # S6: advertise only the resident address and bounded capabilities.
     # The lease is deliberately token-free and non-executable; credentials

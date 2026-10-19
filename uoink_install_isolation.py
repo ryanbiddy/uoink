@@ -603,6 +603,9 @@ def current_process_executable() -> str | None:
             kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
             kernel32.GetCurrentProcess.restype = ctypes.c_void_p
             return _windows_process_image(kernel32.GetCurrentProcess())
+        if sys.platform == "darwin":
+            from _platform import darwin_executable as executable
+            return executable(os.getpid())
         return os.path.realpath(f"/proc/{os.getpid()}/exe")
     except Exception:
         return None
@@ -1052,6 +1055,13 @@ def _is_unsafe_system_path(
 
 
 def _same_path(left: Path, right: Path) -> bool:
+    if sys.platform == "darwin":
+        try:
+            # Handles /var aliases, APFS case folding and Unicode aliases
+            # using filesystem identity, without lowercasing a POSIX path.
+            return left.samefile(right)
+        except OSError:
+            pass
     try:
         a = os.path.normcase(os.path.normpath(str(left.resolve())))
         b = os.path.normcase(os.path.normpath(str(right.resolve())))
@@ -1062,6 +1072,13 @@ def _same_path(left: Path, right: Path) -> bool:
 
 
 def _is_nested(inner: Path, outer: Path) -> bool:
+    if sys.platform == "darwin":
+        try:
+            return not _same_path(inner, outer) and any(
+                _same_path(parent, outer) for parent in inner.resolve().parents
+            )
+        except OSError:
+            return False
     try:
         inner.resolve().relative_to(outer.resolve())
         return not _same_path(inner, outer)
@@ -1188,6 +1205,13 @@ def _pid_identity_liveness(
                 return "unknown"
             if not _same_path(Path(live_exe), Path(expected_exe)):
                 return "dead"
+        if sys.platform == "darwin":
+            # Do not combine an executable lookup with an earlier incarnation.
+            confirmed = _posix_process_created_ms(int(pid))
+            if confirmed is None:
+                return "unknown"
+            if confirmed != int(created_ms):
+                return "dead"
         return "alive"
     except Exception:
         return "unknown"
@@ -1281,6 +1305,9 @@ def _process_executable(pid: int) -> str | None:
                 return _windows_process_image(handle)
             finally:
                 _windows_close_handle(handle)
+        if sys.platform == "darwin":
+            from _platform import darwin_executable as executable
+            return executable(pid)
         return os.path.realpath(f"/proc/{pid}/exe")
     except OSError:
         return None
@@ -1319,6 +1346,9 @@ def _windows_process_created_ms(handle) -> int | None:
 
 
 def _posix_process_state(pid: int) -> str | None:
+    if sys.platform == "darwin":
+        from _platform import darwin_state as state
+        return state(pid)
     try:
         with open(f"/proc/{pid}/stat", "r", encoding="ascii", errors="replace") as handle:
             return handle.read().rsplit(")", 1)[1].split()[0]
@@ -1327,6 +1357,9 @@ def _posix_process_state(pid: int) -> str | None:
 
 
 def _posix_process_created_ms(pid: int) -> int | None:
+    if sys.platform == "darwin":
+        from _platform import darwin_created_ms as created_ms
+        return created_ms(pid)
     try:
         with open(f"/proc/{pid}/stat", "r", encoding="ascii", errors="replace") as handle:
             stat = handle.read()

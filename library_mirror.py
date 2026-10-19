@@ -766,6 +766,9 @@ def _windows_process_created_ms(handle) -> int | None:
 
 
 def _posix_process_created_ms(pid: int) -> int | None:
+    if sys.platform == "darwin":
+        from _platform import darwin_created_ms as created_ms
+        return created_ms(pid)
     try:
         with open(f"/proc/{pid}/stat", "r", encoding="ascii", errors="replace") as handle:
             stat_text = handle.read()
@@ -804,6 +807,9 @@ def _process_liveness(
     """
     if not isinstance(pid, int) or pid <= 0:
         return "dead"
+    if sys.platform == "darwin":
+        from _platform import darwin_liveness as liveness
+        return liveness(pid, created_ms)
     if os.name == "nt":
         from ctypes import wintypes
         k32 = _kernel32()

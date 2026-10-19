@@ -36,6 +36,10 @@ import urllib.request
 import webbrowser
 from pathlib import Path
 
+if sys.platform == "darwin":
+    sys.dont_write_bytecode = True
+    os.environ["PYTHONDONTWRITEBYTECODE"] = "1"
+
 log = logging.getLogger("uoink.splash")
 
 HERE = Path(__file__).parent.resolve()
@@ -74,6 +78,8 @@ def _data_root() -> Path:
         import _platform
         return _platform.user_data_dir()
     except Exception:
+        if sys.platform == "darwin":
+            return Path.home() / "Library" / "Application Support" / "Uoink"
         return HERE
 
 
@@ -96,7 +102,10 @@ def _dashboard_settings_url() -> str:
 
 
 def _extension_dir() -> Path:
-    return HERE / "extension"
+    if sys.platform != "darwin":
+        return HERE / "extension"
+    import _platform
+    return _platform.editable_extension_dir(HERE, _data_root())
 
 
 BROWSER_CATALOG = [

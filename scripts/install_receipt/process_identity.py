@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import sys
 import time
 from typing import Any
 
@@ -52,6 +53,9 @@ def identity_for_pid(pid: int) -> dict[str, Any]:
 
 def liveness(pid: int, created_ms: int | None) -> str:
     """alive, dead, or unknown. Never signals the process on Windows."""
+    if sys.platform == "darwin":
+        from _platform import darwin_liveness
+        return darwin_liveness(pid, created_ms)
     try:
         if os.name == "nt":
             import ctypes
@@ -118,6 +122,9 @@ def executable_for_pid(pid: int) -> str | None:
                 return _windows_executable(ctypes.c_void_p(handle))
             finally:
                 kernel32.CloseHandle(ctypes.c_void_p(handle))
+        if sys.platform == "darwin":
+            from _platform import darwin_executable as executable
+            return executable(int(pid))
         return os.readlink(f"/proc/{int(pid)}/exe")
     except Exception:
         return None
@@ -168,6 +175,11 @@ def exact_identity_on_handle(observed: dict[str, Any],
     expected_exe = expected.get("executable")
     if not expected_exe or not actual_exe:
         return False
+    if sys.platform == "darwin":
+        try:
+            return os.path.samefile(actual_exe, expected_exe)
+        except OSError:
+            return False
     return os.path.normcase(os.path.normpath(str(actual_exe))) == os.path.normcase(
         os.path.normpath(str(expected_exe)))
 
@@ -230,6 +242,9 @@ def _windows_created_ms(handle) -> int | None:
 
 
 def _posix_created_ms(pid: int) -> int | None:
+    if sys.platform == "darwin":
+        from _platform import darwin_created_ms as created_ms
+        return created_ms(pid)
     try:
         with open(f"/proc/{pid}/stat", "r", encoding="ascii",
                   errors="replace") as handle:

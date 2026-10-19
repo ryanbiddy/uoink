@@ -39,6 +39,10 @@ import time
 from pathlib import Path
 from typing import Literal
 
+if sys.platform == "darwin":
+    sys.dont_write_bytecode = True
+    os.environ["PYTHONDONTWRITEBYTECODE"] = "1"
+
 # CRIT-1 (C-01): the installer bundles the embeddable Windows Python, whose
 # ._pth locks sys.path to the interpreter's own directory and never adds the
 # script's folder. Every MCP client launch therefore died on
@@ -475,6 +479,8 @@ def _helper_running() -> bool:
     binding = _install_isolation.current_binding()
     if binding is not None:
         return _install_isolation.owned_process_status(binding) == "alive"
+    if sys.platform == "darwin":
+        return server._platform.darwin_helper_running(server.HERE, server.DATA_ROOT)
     try:
         pid_path = server.HERE / "server.pid"
         pid = int(pid_path.read_text(encoding="utf-8").strip())

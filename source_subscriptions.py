@@ -39,6 +39,7 @@ import json
 import logging
 import math
 import os
+import sys
 import re
 import secrets
 import socket
@@ -1568,6 +1569,9 @@ def _windows_process_created_ms(handle) -> int | None:
 
 
 def _posix_process_created_ms(pid: int) -> int | None:
+    if sys.platform == "darwin":
+        from _platform import darwin_created_ms as created_ms
+        return created_ms(pid)
     try:
         with open(f"/proc/{pid}/stat", "r", encoding="ascii", errors="replace") as handle:
             stat = handle.read()
@@ -1595,6 +1599,9 @@ def _current_process_created_ms() -> int | None:
 def _process_alive(pid: int, created_ms: int | None) -> str:
     """``alive``, ``dead`` or ``unknown`` for a persisted pid. Never signals
     the process; on Windows ``os.kill`` would terminate it."""
+    if sys.platform == "darwin":
+        from _platform import darwin_liveness as liveness
+        return liveness(pid, created_ms)
     try:
         if os.name == "nt":
             import ctypes

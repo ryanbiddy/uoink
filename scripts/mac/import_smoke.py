@@ -3,12 +3,13 @@ from __future__ import annotations
 
 import argparse
 import ast
+import json
 from pathlib import Path
 import runpy
 import subprocess
 import tempfile
 
-from qualify_deps import ROOT, run_logged, wheel_details, write_json
+from qualify_deps import ROOT, run_logged, sha256, wheel_details, write_json
 
 
 def local_source(root: Path, name: str) -> Path | None:
@@ -143,6 +144,27 @@ def select_wheels(directory: Path) -> list[Path]:
     return [selected[key][1] for key in sorted(selected)]
 
 
+def verify_complete_set(directory: Path, wheels: list[Path]) -> list[str]:
+    """Job C must fail if B omitted a pin or artifact bytes changed in transit."""
+    manifest = json.loads((directory / "wheel-manifest.json").read_text(encoding="utf-8"))
+    errors = [str(error) for error in manifest["errors"]]
+    expected = {row["filename"]: row["sha256"] for row in manifest["wheels"]}
+    versions = {}
+    for wheel in wheels:
+        info = wheel_details(wheel.name)
+        versions[info["package"]] = info["version"]
+        if expected.get(wheel.name) != sha256(wheel):
+            errors.append(f"Wheel hash mismatch or unreported artifact: {wheel.name}")
+    # Pins in this lock are normalized release numbers (the public parser
+    # permits 1.0 / 1.0.0). Compare versions with pip's vendored PEP 440 parser.
+    from pip._vendor.packaging.version import Version
+    for pin in manifest["pins"]:
+        actual = versions.get(pin["package"])
+        if actual is None or Version(actual) != Version(pin["version"]):
+            errors.append(f"Missing qualified pin: {pin['package']}=={pin['version']}")
+    return errors
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--python", type=Path, required=True)
@@ -155,6 +177,13 @@ def main() -> int:
     logs.mkdir(exist_ok=True)
     wheels = select_wheels(args.wheels)
     report = {"selected_wheels": [path.name for path in wheels], "imports": [], "mcp": []}
+    try:
+        report["wheel_set_errors"] = verify_complete_set(args.wheels, wheels)
+    except (OSError, ValueError, KeyError) as exc:
+        report["wheel_set_errors"] = [f"Invalid wheel manifest: {exc}"]
+    if report["wheel_set_errors"]:
+        write_json(output / "smoke.json", report)
+        return 1
     base = [str(args.python), "-m", "pip", "--isolated", "install", "--no-index", "--no-deps",
             "--disable-pip-version-check"]
     code = run_logged(base + [str(path) for path in wheels], output / "install.txt", timeout=600) if wheels else 1

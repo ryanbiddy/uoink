@@ -24,6 +24,10 @@ import time
 import webbrowser
 from pathlib import Path
 
+if sys.platform == "darwin":
+    sys.dont_write_bytecode = True
+    os.environ["PYTHONDONTWRITEBYTECODE"] = "1"
+
 log = logging.getLogger("uoink.dashboard")
 
 HERE = Path(__file__).parent.resolve()
