@@ -1,0 +1,6 @@
+{
+  "pywin32": "Windows Win32 bindings; no Darwin implementation is expected.",
+  "pywin32-ctypes": "Windows Credential Manager support used by keyring's Windows backend; macOS uses a different backend.",
+  "pythonnet": "CLR bridge for the Windows pywebview renderer; the macOS Python UI needs the Cocoa backend instead.",
+  "clr-loader": "CLR runtime loader used by pythonnet's Windows renderer path; not part of the Cocoa backend."
+}
