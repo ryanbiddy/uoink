@@ -97,5 +97,5 @@ Chrome extension remain steps for the person.
 
 | File | SHA-256 |
 | --- | --- |
-| `Uoink-Setup-3.10.0.exe` | `<sha256 pending>` |
-| `uoink-3.10.0.mcpb` | `<sha256 pending>` |
+| `Uoink-Setup-3.10.0.exe` | `9e024a31ea890f061ac3a43c97672c2b721b777089766d09156091de8f6e983b` |
+| `uoink-3.10.0.mcpb` | `3c2048c6ec78472a923a0852f0cb83c1984ee7e75fb2fbfa7a484d69aa41c69b` |
