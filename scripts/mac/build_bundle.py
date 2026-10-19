@@ -1,0 +1,248 @@
+"""Assemble the unsigned CI app. Network is limited to one pinned Python archive."""
+from __future__ import annotations
+
+import argparse
+import json
+import os
+from pathlib import Path
+import platform
+import plistlib
+import re
+import shutil
+import stat
+import subprocess
+import sys
+import tarfile
+import tempfile
+import urllib.parse
+import urllib.request
+
+from qualify_deps import ROOT, sha256, standalone_pins, write_json
+from wheel_lock import LOCK_NAME, verify
+
+MAC = Path(__file__).parent
+
+
+def run(command, **kwargs):
+    return subprocess.run([str(x) for x in command], check=True, text=True, **kwargs)
+
+
+def payload_files(root: Path = ROOT) -> list[Path]:
+    manifest = json.loads((root / "scripts/mac/payload.json").read_text(encoding="utf-8"))
+    if manifest["schema_version"] != 1:
+        raise ValueError("Unknown payload manifest")
+    paths = manifest["paths"]
+    for name in paths:
+        path = Path(name)
+        if path.is_absolute() or ".." in path.parts or not (root / path).exists():
+            raise ValueError(f"Invalid or missing payload path: {name}")
+    # Tracked files only: never copy scratch, state, caches or developer secrets.
+    result = run(["git", "ls-files", "-z", "--", *paths], cwd=root, capture_output=True)
+    files = [Path(name) for name in result.stdout.split("\0") if name]
+    for path in files:
+        if (path.name in {"token.txt", "server.log", "server.pid"} or
+                path.suffix in {".pem", ".key", ".pyc"} or path.name.startswith(".env") or
+                "__pycache__" in path.parts or (root / path).is_symlink()):
+            raise ValueError(f"Forbidden source payload: {path}")
+    for name in paths:
+        if not any(p == Path(name) or Path(name) in p.parents for p in files):
+            raise ValueError(f"Payload not tracked: {name}")
+    return sorted(files)
+
+
+def tree_inventory(root: Path) -> list[dict]:
+    rows = []
+    for path in sorted(root.rglob("*")):
+        meta = path.lstat()
+        row = {"path": path.relative_to(root).as_posix(), "mode": stat.S_IMODE(meta.st_mode)}
+        if path.is_symlink():
+            if not path.resolve(strict=True).is_relative_to(root.resolve()):
+                raise ValueError(f"Symlink escapes app: {path}")
+            row.update(type="symlink", target=os.readlink(path))
+        elif path.is_file():
+            row.update(type="file", size=meta.st_size, sha256=sha256(path))
+        elif path.is_dir():
+            row.update(type="directory")
+        else:
+            raise ValueError(f"Special file in app: {path}")
+        rows.append(row)
+    return rows
+
+
+def relocate_python_script(content: str) -> str:
+    """Replace pip's build-path shebang with a relative interpreter shim."""
+    lines = content.splitlines(keepends=True)
+    if not lines or not lines[0].startswith("#!"):
+        return content
+    if "python" in lines[0]:
+        body = "".join(lines[1:])
+    elif len(lines) > 2 and lines[1].startswith("'''exec'") and "python" in lines[1]:
+        body = "".join(lines[3:])
+    else:
+        return content
+    return ("#!/bin/sh\n'''exec' \"$(dirname \"$0\")/python3\" -B -s \"$0\" \"$@\"\n' '''\n" + body)
+
+
+def extract_python(archive: Path, destination: Path, pin: dict) -> None:
+    if archive.stat().st_size != pin["size_bytes"] or sha256(archive) != pin["sha256"]:
+        raise ValueError("Standalone Python size/hash mismatch")
+    with tarfile.open(archive) as bundle:
+        members = bundle.getmembers()
+        if not members or any(m.name.split("/")[0] != "python" for m in members):
+            raise ValueError("Unexpected standalone Python archive root")
+        # data_filter rejects escaping symlinks, traversal and special files.
+        bundle.extractall(destination, filter="data")
+
+
+MACHO = {b"\xcf\xfa\xed\xfe", b"\xfe\xed\xfa\xcf", b"\xce\xfa\xed\xfe", b"\xfe\xed\xfa\xce",
+         b"\xca\xfe\xba\xbe", b"\xbe\xba\xfe\xca",
+         b"\xca\xfe\xba\xbf", b"\xbf\xba\xfe\xca"}
+
+
+def binary_inventory(app: Path) -> list[dict]:
+    rows = []
+    for path in sorted(app.rglob("*")):
+        if path.is_symlink() or not path.is_file():
+            continue
+        with path.open("rb") as stream:
+            magic = stream.read(4)
+        if magic not in MACHO:
+            continue
+        arch = run(["lipo", "-archs", path], capture_output=True).stdout.strip()
+        if "arm64" not in arch.split():
+            raise ValueError(f"Missing arm64 architecture: {path}: {arch}")
+        loads = run(["otool", "-L", path], capture_output=True).stdout
+        commands = run(["otool", "-l", path], capture_output=True).stdout
+        for line in loads.splitlines():
+            # Universal binaries have another absolute filename header for
+            # each architecture; only indented lines are dependencies.
+            if not line.startswith("\t"):
+                continue
+            dependency = line.strip().split(" (", 1)[0]
+            if dependency.startswith("/") and not dependency.startswith(("/usr/lib/", "/System/Library/")):
+                raise ValueError(f"Nonrelocatable dependency: {path}: {dependency}")
+        for rpath in re.findall(r"\bpath (.*?) \(offset", commands):
+            if rpath.startswith("/") and not rpath.startswith(("/usr/lib/", "/System/Library/")):
+                raise ValueError(f"Nonrelocatable rpath: {path}: {rpath}")
+        rows.append({"path": path.relative_to(app).as_posix(), "architectures": arch,
+                     "sha256": sha256(path), "load_commands": loads, "headers": commands})
+    if not rows:
+        raise ValueError("App has no Mach-O payload")
+    return rows
+
+
+def build(wheels: Path, output: Path) -> Path:
+    if sys.platform != "darwin" or platform.machine() != "arm64":
+        raise RuntimeError("Build requires native macOS arm64")
+    if output.exists():
+        raise ValueError("Build output must be a new directory; existing artifacts are never overwritten")
+    output.mkdir(parents=True)
+    exclusions = json.loads((MAC / "dependency-exclusions.json").read_text())
+    rows = verify(wheels, exclusions)
+    pins = standalone_pins()
+    pin = next(row for row in pins["assets"] if row["name"].endswith("-install_only.tar.gz"))
+    app = output / "Uoink.app"
+    contents = app / "Contents"
+    resources = contents / "Resources"
+    resources.mkdir(parents=True)
+    (contents / "MacOS").mkdir()
+    (contents / "Frameworks").mkdir()
+    with tempfile.TemporaryDirectory(prefix="uoink-payload-") as temporary:
+        scratch = Path(temporary)
+        archive = scratch / pin["name"]
+        url = ("https://github.com/astral-sh/python-build-standalone/releases/download/" +
+               pins["release_tag"] + "/" + urllib.parse.quote(pin["name"], safe=""))
+        with urllib.request.urlopen(url, timeout=120) as response, archive.open("wb") as target:
+            shutil.copyfileobj(response, target)
+        extract_python(archive, scratch / "unpacked", pin)
+        shutil.move(str(scratch / "unpacked/python"), contents / "Frameworks/Python")
+        selected = scratch / "wheels"
+        selected.mkdir()
+        for row in rows:
+            shutil.copyfile(wheels / row["filename"], selected / row["filename"])
+        python = contents / "Frameworks/Python/bin/python3"
+        env = os.environ.copy()
+        for key in ("PYTHONHOME", "PYTHONPATH", "PYTHONSTARTUP"):
+            env.pop(key, None)
+        env.update(PYTHONDONTWRITEBYTECODE="1", PYTHONNOUSERSITE="1")
+        version = run([python, "-B", "-c", "import platform; print(platform.python_version()); print(platform.machine())"],
+                      env=env, capture_output=True).stdout.splitlines()
+        expected_python = pin["name"].split("+")[0].removeprefix("cpython-")
+        if version != [expected_python, "arm64"]:
+            raise ValueError(f"Wrong bundled interpreter: {version}")
+        run([python, "-B", "-m", "pip", "--isolated", "install", "--no-index", "--no-cache-dir",
+             "--no-compile", "--only-binary=:all:", "--require-hashes", "--find-links", selected,
+             "-r", wheels / LOCK_NAME], env=env)
+        run([python, "-B", "-m", "pip", "check"], env=env)
+        packages = run([python, "-B", "-c", "import importlib.metadata as m, json; "
+                        "print(json.dumps(sorted([{'name': d.metadata['Name'], 'version': d.version, "
+                        "'license': d.metadata.get('License-Expression') or d.metadata.get('License'), "
+                        "'license_files': d.metadata.get_all('License-File') or []} "
+                        "for d in m.distributions()], key=lambda d:d['name'])))"],
+                       env=env, capture_output=True).stdout
+        for script in (contents / "Frameworks/Python/bin").iterdir():
+            if script.is_symlink() or not script.is_file():
+                continue
+            with script.open("rb") as stream:
+                is_script = stream.read(2) == b"#!"
+            if is_script:
+                content = script.read_text(encoding="utf-8")
+                script.write_text(relocate_python_script(content), encoding="utf-8", newline="\n")
+    files = payload_files()
+    for relative in files:
+        target = resources / relative
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(ROOT / relative, target)
+    (resources / "uoink").chmod(0o755)
+    launcher = contents / "MacOS/Uoink"
+    shutil.copyfile(ROOT / "installer/mac/launcher.sh", launcher)
+    launcher.chmod(0o755)
+    version = (ROOT / "VERSION").read_text().strip()
+    if not re.fullmatch(r"\d+\.\d+\.\d+", version):
+        raise ValueError("Invalid product VERSION")
+    with (contents / "Info.plist").open("wb") as stream:
+        plistlib.dump({"CFBundleName": "Uoink", "CFBundleDisplayName": "Uoink",
+                       "CFBundleIdentifier": "com.ryanbiddy.uoink", "CFBundleExecutable": "Uoink",
+                       "CFBundlePackageType": "APPL", "CFBundleShortVersionString": version,
+                       "CFBundleVersion": version, "LSMinimumSystemVersion": "15.0",
+                       "LSUIElement": True}, stream)
+    notices = resources / "notices"
+    notices.mkdir()
+    shutil.copyfile(wheels / LOCK_NAME, notices / LOCK_NAME)
+    shutil.copyfile(MAC / "standalone-python.json", notices / "standalone-python.json")
+    shutil.copyfile(MAC / "FFMPEG.md", notices / "FFMPEG.md")
+    shutil.copyfile(MAC / "payload.json", notices / "payload.json")
+    write_json(notices / "resolved-wheels.json", {"wheels": rows})
+    write_json(notices / "packages.json", json.loads(packages))
+    write_json(notices / "build.json", {"version": version, "python": pin, "python_url": url,
+                                       "platform": platform.platform(), "ffmpeg": {"bundled": False,
+                                       "code": "media_requires_ffmpeg", "source": None,
+                                       "sha256": None, "configure_flags": None},
+                                       "signing": "not performed", "minimum_os": "15.0",
+                                       "source_files": [p.as_posix() for p in files]})
+    write_json(output / "native-inventory.json", binary_inventory(app))
+    inventory = tree_inventory(app)
+    write_json(output / "file-inventory.json", inventory)
+    write_json(output / "size.json", {"file_bytes": sum(row.get("size", 0) for row in inventory),
+                                      "entries": len(inventory)})
+    # tar preserves executable modes and relative symlinks, unlike artifact upload.
+    with tarfile.open(output / f"uoink-{version}-macos-arm64.tar.gz", "w:gz") as archive:
+        archive.add(app, arcname=app.name)
+    archive_path = output / f"uoink-{version}-macos-arm64.tar.gz"
+    write_json(output / "archive.json", {"filename": archive_path.name,
+                                         "size_bytes": archive_path.stat().st_size,
+                                         "sha256": sha256(archive_path)})
+    return app
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--wheels", required=True, type=Path)
+    parser.add_argument("--output", required=True, type=Path)
+    args = parser.parse_args()
+    print(build(args.wheels.resolve(), args.output.resolve()))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

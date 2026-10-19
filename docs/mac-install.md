@@ -1,47 +1,17 @@
-# Uoink on macOS — current status
+# Uoink on macOS: build status
 
-**Uoink does not run on macOS today. There is no macOS build, no `.dmg`,
-and no `Uoink.app`.** Uoink currently ships as a Windows installer only.
+There is no public macOS installer yet. Passes 1?4 passed the hosted macOS 15
+arm64 checks on Python 3.11 and 3.13. The new build pipeline assembles an
+unsigned Apple Silicon app for CI testing; its first hosted bundle run is
+still pending. See [Build the macOS CI bundle](mac/BUILD.md) for commands,
+artifact contents and the evidence required from that run.
 
-This page previously described a macOS installation flow — a `.dmg`, an
-app bundle, a LaunchAgent, a universal binary — that was never built and
-never released. That was wrong, and it is corrected here rather than
-quietly deleted, so anyone who followed those instructions understands
-what happened.
+The first app bundle deliberately disables library mirroring
+(`library_mirror_unavailable_macos`) and media features that need FFmpeg
+(`media_requires_ffmpeg`). The dashboard and API report these limitations.
+Windows remains the shipped installer.
 
-## What actually works on a Mac right now
-
-Two of the three tools in the suite are pure Python and install cleanly
-on macOS today (both have macOS continuous integration passing):
-
-- **zing** (the video director) — install from source per its README.
-- **writer** (prose and scripts) — install from source per its README.
-
-Both work standalone. They do not require uoink to be installed, and
-they degrade honestly when it is absent.
-
-## What blocks uoink specifically
-
-Uoink bundles a Python runtime, `ffmpeg`, `yt-dlp`, and machine-learning
-dependencies, and ships a tray application. Porting it means solving:
-
-- **Distribution shape** — either a non-app helper install (no Apple
-  developer account required) or a signed, notarized `.app` (which
-  requires signing every nested binary in the ML dependency tree
-  individually; Apple forbids the shortcut).
-- **Architecture reality** — a universal binary is not currently
-  achievable with our dependency set. The honest target would be Apple
-  Silicon (arm64) on macOS 14 or later.
-- **ffmpeg licensing** — the LGPL build uoink uses on Windows has no
-  macOS equivalent from the same source, and the common macOS suppliers
-  ship GPL builds. This is an unresolved licensing question, not just a
-  packaging one.
-
-The full analysis, with sources, lives in
-[MAC-BUILD-PLAN.md](MAC-BUILD-PLAN.md).
-
-## If you want macOS support
-
-Open or upvote an issue. Mac support is a real roadmap item, but it will
-be announced when a build exists — not before. Nothing on this page
-promises a date.
+Signing, notarization, a DMG, LaunchAgent, menu bar and first-run UI are still
+pending. The bundle targets the macOS 15 runner; macOS 14 is a provisional
+future minimum, and Intel is not included. Do not treat the CI archive as a
+verified Finder installation or a public release.

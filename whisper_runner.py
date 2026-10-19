@@ -123,6 +123,9 @@ def _now_iso() -> str:
 # catch so even a DLL load failure leaves the helper booting cleanly and the
 # transcribe endpoints return a clean 503 instead of a 500.
 def _probe_whisperx() -> bool:
+    import _platform
+    if not _platform.media_capability()["available"]:
+        return False
     try:
         import whisperx  # noqa: F401
         return True
@@ -395,6 +398,8 @@ def transcribe_audio(audio_path: Path, *,
     Resolution and minimum-file checks precede model construction. The
     execution call receives a local snapshot and local_files_only=True;
     this does not qualify the separate VAD loader or artifact integrity."""
+    import _platform
+    _platform.require_media()
     audio_path = Path(audio_path)
     if not audio_path.exists():
         raise FileNotFoundError(f"audio file missing: {audio_path}")

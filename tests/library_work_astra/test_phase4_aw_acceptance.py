@@ -304,6 +304,7 @@ def test_scope_narrowing_cleans_previously_exported_items(env):
     assert "Source b" not in (env.vault / "Uoink/Library.md").read_text(encoding="utf-8")
 
 
+@pytest.mark.skipif(sys.platform == "darwin", reason="library_mirror_unavailable_macos: gate covered in test_mac_capabilities.py")
 def test_real_brief_dependencies_enforce_mirror_allowlist(env):
     receipt = publish(env)
     env.mirror.consent = replace(env.mirror.consent, scope="allowlist", allowlist=("a",))
@@ -396,6 +397,7 @@ def test_purge_removes_intent_owned_actual_temp_name(env, monkeypatch):
     assert not orphan.exists(), "writer creates 24 hex temp suffix; cleanup only recognizes 12"
 
 
+@pytest.mark.skipif(sys.platform == "darwin", reason="library_mirror_unavailable_macos: gate covered in test_mac_capabilities.py")
 def test_mirror_rechecks_authoritative_deletion_before_replace(env, monkeypatch):
     env.mirror.on_committed_event("capture", video_id="a")
     original = env.mirror._atomic_vault
@@ -411,6 +413,7 @@ def test_mirror_rechecks_authoritative_deletion_before_replace(env, monkeypatch)
     assert not target.exists() or b"Original evidence a." not in target.read_bytes()
 
 
+@pytest.mark.skipif(sys.platform == "darwin", reason="library_mirror_unavailable_macos: gate covered in test_mac_capabilities.py")
 def test_timed_out_vault_worker_cannot_publish_after_return(env, monkeypatch):
     env.mirror._clock = time.monotonic
     env.mirror.on_committed_event("capture", video_id="a")
@@ -443,6 +446,7 @@ def test_timed_out_vault_worker_cannot_publish_after_return(env, monkeypatch):
     assert not item_file(env).exists(), "abandoned daemon wrote after timeout and lock release"
 
 
+@pytest.mark.skipif(sys.platform == "darwin", reason="library_mirror_unavailable_macos: gate covered in test_mac_capabilities.py")
 def test_manifest_failure_keeps_recovery_intent_and_no_success(env, monkeypatch):
     env.mirror.on_committed_event("capture", video_id="a")
     original = env.mirror._atomic_vault

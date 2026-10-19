@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import io
 import json
+import sys
 from pathlib import Path
 
 import pytest
@@ -19,6 +20,10 @@ from tests.test_library_work_apply_undo import (
     make_apply_environment,
     submit_accepted_result,
 )
+
+pytestmark = pytest.mark.skipif(
+    sys.platform == "darwin",
+    reason="Mirror enable/publication wiring is unavailable on Darwin; test_mac_capabilities.py covers refusal across surfaces")
 
 ROOT = Path(__file__).resolve().parents[1]
 DASHBOARD = (ROOT / "assets" / "dashboard" / "index.html").read_text(encoding="utf-8")

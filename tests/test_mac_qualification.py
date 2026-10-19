@@ -308,8 +308,11 @@ class QualificationTests(unittest.TestCase):
             commands.append(command)
             self.assertIn("--find-links", command)
             self.assertIn("-r", command)
+            destination = Path(command[command.index("--dest") + 1])
+            (destination / "proxy_tools-0.1.0-py3-none-any.whl").write_bytes(b"fixture wheel")
             return 0
-        built = {"proxy-tools": {"wheel_found": True, "wheels": [], "errors": []}}
+        built = {"proxy-tools": {"package": "proxy-tools", "version": "0.1.0",
+                                 "wheel_found": True, "wheels": [], "errors": []}}
         with patch.object(deps, "build_source_wheels", return_value=built), \
                 patch.object(deps, "run_logged", side_effect=fake_run):
             report = deps.qualify_wheels(lock, exclusions, self.root / "evidence")

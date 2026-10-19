@@ -192,6 +192,9 @@ def main():
     ap.add_argument("--keep-video", action="store_true", help="keep the downloaded video file")
     args = ap.parse_args()
 
+    import _platform
+    _platform.require_media()
+
     out_root = Path(args.out)
     out_root.mkdir(parents=True, exist_ok=True)
 

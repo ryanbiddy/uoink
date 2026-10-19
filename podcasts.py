@@ -1466,6 +1466,10 @@ def download_episode_audio(idx, episode_id: int, *,
     path AND has non-zero size we mark status='downloaded' without
     re-downloading. Returns a structured result the endpoint surfaces.
     resolve_url is an explicit test injection for URL admission."""
+    import _platform
+    refusal = _platform.capability_refusal(_platform.media_capability())
+    if refusal is not None:
+        return refusal
     episode = get_episode(idx, episode_id)
     if episode is None:
         return {"ok": False, "error": f"episode not found: {episode_id}"}

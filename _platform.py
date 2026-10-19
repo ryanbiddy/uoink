@@ -47,6 +47,55 @@ def platform_label() -> str:
     }.get(sys.platform, sys.platform)
 
 
+def library_mirror_capability() -> dict:
+    """Publication is deferred until Darwin has identity-bound vault I/O."""
+    if sys.platform == "darwin":
+        return {"available": False, "code": "library_mirror_unavailable_macos",
+                "reason": "Library mirroring is unavailable on macOS in this release. "
+                          "Safe replacement and deletion of vault files have not been qualified."}
+    return {"available": True, "code": None, "reason": None}
+
+
+def capability_refusal(capability: dict) -> dict | None:
+    if capability["available"]:
+        return None
+    return {"ok": False, "available": False, "enabled": False, "state": "unavailable",
+            "code": capability["code"], "reason": capability["reason"],
+            "error": {"code": capability["code"], "message": capability["reason"],
+                      "retryable": False}}
+
+
+def media_capability() -> dict:
+    """The first Darwin bundle deliberately omits unqualified FFmpeg binaries.
+
+    Source checkouts and other platforms retain their existing media behavior.
+    Bundle identity, rather than PATH, prevents Homebrew from hiding this gap.
+    """
+    resources = Path(__file__).resolve().parent
+    if (sys.platform == "darwin" and resources.name == "Resources"
+            and resources.parent.name == "Contents"):
+        return {"available": False, "code": "media_requires_ffmpeg",
+                "reason": "Media features need FFmpeg. This macOS build does not include "
+                          "qualified ffmpeg/ffprobe or TorchCodec decoder libraries; "
+                          "frame extraction and audio transcription are unavailable."}
+    return {"available": True, "code": None, "reason": None}
+
+
+def platform_capabilities() -> dict:
+    return {"library_mirror": library_mirror_capability(), "media": media_capability()}
+
+
+def capability_notice() -> str:
+    return "".join(f" {value['reason']} ({value['code']})"
+                   for value in platform_capabilities().values() if not value["available"])
+
+
+def require_media() -> None:
+    capability = media_capability()
+    if not capability["available"]:
+        raise RuntimeError(f"{capability['code']}: {capability['reason']}")
+
+
 def platform_detail() -> str:
     """Human-readable ``<os> <arch>`` for /diagnose -- e.g. ``windows
     AMD64``, ``macos arm64``, ``linux x86_64``. The arch comes from

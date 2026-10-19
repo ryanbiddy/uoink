@@ -235,6 +235,7 @@ class TestP409PathsAndConsent:
         assert "Initial taste preferences." in h.taste_file.read_text(encoding="utf-8")
         assert h.user_file.exists()
 
+    @pytest.mark.skipif(sys.platform == "darwin", reason="library_mirror_unavailable_macos: gate covered in test_mac_capabilities.py")
     def test_preview_does_not_perform_writes(self, tmp_path: Path):
         """preview returns planned paths, counts, and third-party notice; performs zero disk writes."""
         h = MirrorTestHarness(tmp_path, enabled=False)
@@ -340,6 +341,7 @@ class TestP409PathsAndConsent:
         assert f1.exists()
         assert f2.exists()
 
+    @pytest.mark.skipif(sys.platform == "darwin", reason="library_mirror_unavailable_macos: gate covered in test_mac_capabilities.py")
     def test_unmanaged_file_conflict(self, tmp_path: Path):
         """An existing file without a matching ownership entry in manifest is reported as unmanaged_conflict and preserved."""
         h = MirrorTestHarness(tmp_path, enabled=True)
@@ -356,6 +358,7 @@ class TestP409PathsAndConsent:
         # User file must NOT be overwritten
         assert "Unmanaged User File" in target_file.read_text(encoding="utf-8")
 
+    @pytest.mark.skipif(sys.platform == "darwin", reason="library_mirror_unavailable_macos: gate covered in test_mac_capabilities.py")
     def test_reparse_point_symlink_rejection(self, tmp_path: Path):
         """Symlinks or reparse points escaping the vault root are rejected."""
         h = MirrorTestHarness(tmp_path, enabled=True)
@@ -478,6 +481,7 @@ class TestP410EditsAndAtomicity:
         # Verify file is never rolled back to older gen1
         assert f.exists()
 
+    @pytest.mark.skipif(sys.platform == "darwin", reason="library_mirror_unavailable_macos: gate covered in test_mac_capabilities.py")
     def test_corrupt_manifest_stops_writes(self, tmp_path: Path):
         """A corrupt manifest stops writes for reconciliation and refuses to adopt markdown files."""
         h = MirrorTestHarness(tmp_path, enabled=True)
@@ -649,6 +653,7 @@ class TestP411Deletion:
         assert f.exists()
         assert "Must not be deleted!" in f.read_text(encoding="utf-8")
 
+    @pytest.mark.skipif(sys.platform == "darwin", reason="library_mirror_unavailable_macos: gate covered in test_mac_capabilities.py")
     def test_disconnected_destination_handling(self, tmp_path: Path):
         """When destination is disconnected, status reports destination_unavailable and primary operations still succeed."""
         h = MirrorTestHarness(tmp_path, enabled=True)

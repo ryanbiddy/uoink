@@ -228,6 +228,10 @@ def _hook_context_for_folder(folder: Path) -> dict[str, Any]:
 
 
 def uoink_video(args: dict[str, Any]) -> dict[str, Any]:
+    import _platform
+    refusal = _platform.capability_refusal(_platform.media_capability())
+    if refusal is not None:
+        return refusal
     b = _b()
     raw_url = args.get("url")
     if not isinstance(raw_url, str):
@@ -301,6 +305,10 @@ def uoink_video(args: dict[str, Any]) -> dict[str, Any]:
 
 
 def uoink_playlist(args: dict[str, Any]) -> dict[str, Any]:
+    import _platform
+    refusal = _platform.capability_refusal(_platform.media_capability())
+    if refusal is not None:
+        return refusal
     b = _b()
     raw_url = args.get("url")
     if not isinstance(raw_url, str):
@@ -876,10 +884,12 @@ def get_whisperx_status(_args: dict[str, Any]) -> dict[str, Any]:
     surface a 'still need to install whisperx' affordance before
     queueing a transcribe call."""
     server = _b()
+    import _platform
     import whisper_runner as _wr
     settings = server._read_settings() or {}
     return _ok(
         whisperx_available=_wr.is_whisperx_available(),
+        media_capability=_platform.media_capability(),
         selected_model=settings.get("whisper_model") or "base",
         supported_models=list(_wr._MODELS),
         diarization_default=bool(settings.get("diarization_default")),
@@ -5754,7 +5764,12 @@ def call_tool(name: str, arguments: dict[str, Any] | None = None, *,
     try:
         if spec.rate_limiter:
             spec.rate_limiter.check()
-        return spec.handler(args)
+        result = spec.handler(args)
+        if name in {"get_library_activity", "publish_library_brief"}:
+            import _platform
+            if not _platform.library_mirror_capability()["available"]:
+                result["capabilities"] = _platform.platform_capabilities()
+        return result
     except RateLimitExceeded as e:
         return _err(str(e))
     except Exception as e:

@@ -1511,7 +1511,10 @@ def _public_settings(data: dict | None = None) -> dict:
         # Living Library Phase 2: read-only here; see _default_settings.
         "librarian_apply_enabled": data.get("librarian_apply_enabled") is True,
         # Phase 4 opt-in corpus mirror (separate from obsidian_vault_path).
-        "library_mirror_enabled": data.get("library_mirror_enabled") is True,
+        "library_mirror_capability": _platform.library_mirror_capability(),
+        "media_capability": _platform.media_capability(),
+        "library_mirror_enabled": (data.get("library_mirror_enabled") is True
+                                   and _platform.library_mirror_capability()["available"]),
         "library_mirror_consent": _normalize_mirror_consent(
             data.get("library_mirror_consent")),
     }
@@ -1604,6 +1607,8 @@ def _consent_to_dataclass(consent: dict | None):
 
 def _library_mirror(*, enabled: bool | None = None, consent: dict | None = None):
     """Construct library_mirror.Mirror from current settings. None if missing."""
+    if not _platform.library_mirror_capability()["available"]:
+        return None
     try:
         import library_mirror
         from library_resources import LibraryReader
@@ -1643,6 +1648,8 @@ def _mirror_event(kind, *, video_id=None, shelf_id=None, brief_hash=None):
     Named seams: capture_commit, source_refresh, restore, soft_delete,
     hard_purge (server.py); apply, undo, pin (library_work.py event_hook).
     """
+    if not _platform.library_mirror_capability()["available"]:
+        return None
     try:
         settings = _read_settings()
         enabled = settings.get("library_mirror_enabled") is True
@@ -5936,6 +5943,7 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
     Returns a dict with folder, yoink_md (current text), screenshot_count,
     title, video_slug, caption_count.
     """
+    _platform.require_media()
     requested_long_video_mode = _normalize_long_video_mode(long_video_mode)
     if metadata is None:
         if phase_callback:
@@ -9593,6 +9601,9 @@ def _queue_podcast_transcription(
     capture ledger row; the worker completes or fails that row with the owner
     token when the job ends (Phase 3, "Atomic starts": the start id is the
     job's idempotency identity)."""
+    refusal = _platform.capability_refusal(_platform.media_capability())
+    if refusal is not None:
+        return refusal, 501
     episode = podcasts.get_episode(_get_index(), episode_id)
     if episode is None:
         return {"ok": False, "error": "episode not found"}, 404
@@ -11233,7 +11244,7 @@ def _mcp_initialize_result(body: dict) -> dict:
         "instructions": (
             "Uoink exposes local YouTube extraction tools. Outputs are stored "
             "under the user's Uoink output folder on this machine."
-        ),
+        ) + _platform.capability_notice(),
     }
 
 
@@ -11243,6 +11254,9 @@ def _mcp_stdio_command() -> tuple[str, list[str]]:
     Installed builds should use the bundled console `python.exe` for stdio;
     `pythonw.exe` has no standard streams and would break JSON-RPC.
     """
+    if sys.platform == "darwin":
+        command = _bundled_interpreter(gui=False) or Path(sys.executable)
+        return str(command), ["-B", "-s", str(HERE / "uoink_mcp.py")]
     bundled = HERE / "python" / "python.exe"
     command = bundled if bundled.exists() else Path(sys.executable)
     return str(command), [str(HERE / "uoink_mcp.py")]
@@ -12413,7 +12427,9 @@ def _build_diagnose_payload(*, public: bool, local_ui: bool = False) -> dict:
             "cannot be saved between sessions.")
 
     # 7. ffmpeg_available
-    status, detail = _probe_command(["ffmpeg", "-version"])
+    media = _platform.media_capability()
+    status, detail = (_probe_command(["ffmpeg", "-version"]) if media["available"]
+                      else ("unavailable", f"{media['reason']} ({media['code']})"))
     if status == "ok":
         add("ffmpeg_available", "ok", "ffmpeg is available" if public else detail)
     else:
@@ -13367,6 +13383,7 @@ class Handler(BaseHTTPRequestHandler):
                 # means staged Librarian work exists and no client holds a
                 # lease; the server never runs the Librarian itself.
                 "library": _library_health_payload(),
+                "capabilities": _platform.platform_capabilities(),
             })
         if bare == "/index/backfill-status":
             # Public, read-only progress counts (same posture as /health) so
@@ -14979,6 +14996,7 @@ class Handler(BaseHTTPRequestHandler):
         return self._send_json(200, {
             "ok": True,
             "whisperx_available": whisper_runner.is_whisperx_available(),
+            "media_capability": _platform.media_capability(),
             "selected_model": settings.get("whisper_model") or "base",
             "supported_models": list(whisper_runner._MODELS),
             "diarization_default": bool(settings.get("diarization_default")),
@@ -15975,6 +15993,10 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_settings_post_locked(body)
 
     def _handle_settings_post_locked(self, body: dict):
+        if "library_mirror_enabled" in body or "library_mirror_consent" in body:
+            refusal = _platform.capability_refusal(_platform.library_mirror_capability())
+            if refusal is not None:
+                return self._send_json(501, refusal)
         boolean_fields = (
             "scrapecreators_enabled",
             "scrapecreators_agent_calls_enabled",
@@ -17189,6 +17211,9 @@ class Handler(BaseHTTPRequestHandler):
         scope, allowlist, and this dashboard session. Same posture as
         /sources/consent-intent: origin/CSRF gate here; no registry tool
         can reach this route's authority."""
+        refusal = _platform.capability_refusal(_platform.library_mirror_capability())
+        if refusal is not None:
+            return self._send_json(501, refusal)
         if not self._is_dashboard_origin():
             log.info("POST %s rejected (origin=%r, sec-fetch-site=%r)",
                      LIBRARY_MIRROR_INTENT_ROUTE, self.headers.get("Origin"),
@@ -17254,6 +17279,9 @@ class Handler(BaseHTTPRequestHandler):
         """POST /library/mirror {op: preview|enable|disable|resync|status, ...}.
         Token-gated by do_POST. Enable/broaden consume a dashboard-minted
         user_intent_token and require a matching preview."""
+        refusal = _platform.capability_refusal(_platform.library_mirror_capability())
+        if refusal is not None:
+            return self._send_json(501, refusal)
         if not isinstance(body, dict):
             return self._send_json(400, {
                 "ok": False, "error": "arguments must be an object"})
@@ -17274,6 +17302,9 @@ class Handler(BaseHTTPRequestHandler):
         return self._library_mirror_enable(body)
 
     def _library_mirror_preview(self, body: dict):
+        refusal = _platform.capability_refusal(_platform.library_mirror_capability())
+        if refusal is not None:
+            return self._send_json(501, refusal)
         parsed, err = _parse_mirror_scope_args(body)
         if err or parsed is None:
             return self._send_json(400, {"ok": False, "error": err})
@@ -17300,6 +17331,9 @@ class Handler(BaseHTTPRequestHandler):
         })
 
     def _library_mirror_status(self):
+        refusal = _platform.capability_refusal(_platform.library_mirror_capability())
+        if refusal is not None:
+            return self._send_json(501, refusal)
         settings = _read_settings()
         consent = _normalize_mirror_consent(settings.get("library_mirror_consent"))
         enabled = settings.get("library_mirror_enabled") is True
@@ -17330,6 +17364,9 @@ class Handler(BaseHTTPRequestHandler):
         return self._send_json(200, result)
 
     def _library_mirror_resync(self):
+        refusal = _platform.capability_refusal(_platform.library_mirror_capability())
+        if refusal is not None:
+            return self._send_json(501, refusal)
         mirror = _library_mirror()
         if mirror is None:
             return self._send_json(200, {
@@ -17341,6 +17378,9 @@ class Handler(BaseHTTPRequestHandler):
         })
 
     def _library_mirror_disable(self):
+        refusal = _platform.capability_refusal(_platform.library_mirror_capability())
+        if refusal is not None:
+            return self._send_json(501, refusal)
         data = _read_settings()
         data["library_mirror_enabled"] = False
         data["updated_at"] = _now_iso()
@@ -17359,6 +17399,9 @@ class Handler(BaseHTTPRequestHandler):
         })
 
     def _library_mirror_enable(self, body: dict):
+        refusal = _platform.capability_refusal(_platform.library_mirror_capability())
+        if refusal is not None:
+            return self._send_json(501, refusal)
         token = body.get("user_intent_token")
         if not isinstance(token, str) or not token:
             return self._send_json(403, {
@@ -19078,6 +19121,9 @@ class Handler(BaseHTTPRequestHandler):
 
     @_reports_live_extract
     def _handle_extract(self, body: dict):
+        refusal = _platform.capability_refusal(_platform.media_capability())
+        if refusal is not None:
+            return self._send_json(501, refusal)
         url, interval, err = self._validate_url_interval(body)
         if err:
             log.info("POST /extract -> 400 (%s)", err)
@@ -19578,15 +19624,14 @@ def _bundled_interpreter(*, gui: bool) -> Path | None:
     dev checkout (no bundled ``python/`` dir), so callers fall back to
     ``sys.executable`` or a browser tab.
 
-    Windows installer layout: ``python\\pythonw.exe`` (gui=True, no console
-    flash) or ``python\\python.exe``. A future macOS ``.app`` bundle ships a
-    relocatable Python at ``python/bin/python3`` -- there is no windowless
-    variant because a ``.app``-launched child has no console to flash, so
-    ``gui`` is ignored off Windows. This is the single place that encodes
-    "where is the bundled interpreter". It is Windows-behaviour-identical: the
-    darwin/linux branch can only match when a Mac/Linux bundle actually exists
-    on disk, which never happens on a Windows install. The macOS branch needs
-    Mac runtime verification -- see docs/MAC-BUILD-PLAN.md."""
+    Windows uses bundled python.exe or pythonw.exe. Darwin app resources
+    resolve Contents/Frameworks/Python/bin/python3; older POSIX development
+    layouts retain python/bin/python3. The GUI flag is ignored off Windows.
+    Hosted bundle verification is described in docs/mac/BUILD.md.
+    """
+    if sys.platform == "darwin" and HERE.name == "Resources" and HERE.parent.name == "Contents":
+        candidate = HERE.parent / "Frameworks/Python/bin/python3"
+        return candidate if candidate.is_file() else None
     base = HERE / "python"
     if sys.platform == "win32":
         exe = base / ("pythonw.exe" if gui else "python.exe")
@@ -19830,7 +19875,8 @@ def main(*, show_dashboard: bool = False):
     # spawns a tray. Runs in a daemon thread; any failure (no pystray, no
     # system tray) degrades to "no tray, server still runs" -- the boot balloon
     # below is the fallback "it's running" affordance.
-    if _is_installed_layout():
+    # Darwin AppKit/menu-bar and first-run integration are a later pass.
+    if _is_installed_layout() and sys.platform != "darwin":
         try:
             import uoink_tray
 
@@ -20384,6 +20430,14 @@ def run_cli(argv: list[str]) -> int:
     if _install_isolation.CLI_STOP in argv or _install_isolation.CLI_UPGRADE_CHECK in argv:
         return _install_isolation.cli(argv)
     argv = _install_isolation.strip_cli(argv)
+    if argv and argv[0] == "status":
+        payload = _helper_health_status()
+        payload["capabilities"] = _platform.platform_capabilities()
+        _print_json(payload)
+        return 0 if payload.get("ok") else 1
+    if argv and argv[0] == "mirror" and not _platform.library_mirror_capability()["available"]:
+        _print_json(_platform.capability_refusal(_platform.library_mirror_capability()))
+        return 1
     if argv and argv[0] == "doctor":
         argv = ["--doctor", *argv[1:]]
     elif argv and argv[0] == "rebuild-index":

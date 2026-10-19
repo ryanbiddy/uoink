@@ -60,6 +60,7 @@ from pathlib import Path
 from typing import Any, Callable, Iterator
 
 import library_cards
+import _platform
 from library_resources import (
     CONTRACT_VERSION as _RESOURCES_CONTRACT,
     LIMITS,
@@ -2625,6 +2626,9 @@ class Mirror:
     # ---- public API ----------------------------------------------------
     def preview(self, destination: str, scope: str,
                 allowlist: list[str] | None = None) -> dict:
+        refusal = _platform.capability_refusal(_platform.library_mirror_capability())
+        if refusal is not None:
+            return refusal
         dest = Path(destination) if destination else None
         if dest is None or not self._destination_exists(dest):
             return _mirror_refusal(
@@ -2673,6 +2677,9 @@ class Mirror:
         )
 
     def status(self) -> dict:
+        refusal = _platform.capability_refusal(_platform.library_mirror_capability())
+        if refusal is not None:
+            return refusal
         if self.consent is None or not self.consent.destination:
             return _ok(
                 enabled=False,
@@ -2743,6 +2750,9 @@ class Mirror:
         )
 
     def resync(self, *, max_files: int = DEFAULT_MAX_FILES, budget_s: float = DEFAULT_BUDGET_S) -> dict:
+        refusal = _platform.capability_refusal(_platform.library_mirror_capability())
+        if refusal is not None:
+            return refusal
         if self.consent is None or not self.consent.destination:
             return _ok(synced=0, enabled=False, state="disabled")
         if not self.enabled:
@@ -2784,7 +2794,10 @@ class Mirror:
             )
 
     def on_committed_event(self, kind: str, *, video_id: str | None = None,
-                           shelf_id: str | None = None, brief_hash: str | None = None) -> None:
+                           shelf_id: str | None = None, brief_hash: str | None = None) -> dict | None:
+        refusal = _platform.capability_refusal(_platform.library_mirror_capability())
+        if refusal is not None:
+            return refusal
         if self.consent is None or not self.consent.destination:
             return
         if not self.enabled and kind not in _PURGE_KINDS and kind not in _TOMBSTONE_KINDS:
@@ -2796,6 +2809,9 @@ class Mirror:
             log.exception("mirror ledger update failed for %s", kind)
 
     def tombstone(self, video_id: str) -> dict:
+        refusal = _platform.capability_refusal(_platform.library_mirror_capability())
+        if refusal is not None:
+            return refusal
         if self.consent is None or not self.consent.destination:
             return _ok(tombstoned=False, enabled=False)
         try:
@@ -2813,6 +2829,9 @@ class Mirror:
             )
 
     def purge(self, video_id: str) -> dict:
+        refusal = _platform.capability_refusal(_platform.library_mirror_capability())
+        if refusal is not None:
+            return refusal
         if self.consent is None or not self.consent.destination:
             return _ok(purged=True, enabled=False)
         try:
@@ -2831,6 +2850,9 @@ class Mirror:
             )
 
     def restore(self, video_id: str) -> dict:
+        refusal = _platform.capability_refusal(_platform.library_mirror_capability())
+        if refusal is not None:
+            return refusal
         if not self._is_enabled():
             return _ok(restored=False, enabled=False)
         try:

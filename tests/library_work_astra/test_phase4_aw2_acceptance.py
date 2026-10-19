@@ -295,6 +295,7 @@ def test_d09_scope_cleanup_keeps_local_brief(env):
     assert env.store.read(receipt["date"], receipt["brief_hash"])["ok"]
 
 
+@pytest.mark.skipif(sys.platform == "darwin", reason="library_mirror_unavailable_macos: gate covered in test_mac_capabilities.py")
 def test_d10_brief_dependencies_rechecked_at_replace(env, monkeypatch):
     receipt = publish(env)
     target = env.vault / mirror.MIRROR_ROOT / mirror.brief_relpath(receipt["date"], receipt["brief_hash"])
@@ -350,6 +351,7 @@ def test_d12_unowned_temps_are_never_inferred_from_name_or_text(env, suffix, con
     assert personal.is_file() and personal.read_bytes() == content
 
 
+@pytest.mark.skipif(sys.platform == "darwin", reason="library_mirror_unavailable_macos: gate covered in test_mac_capabilities.py")
 def test_d13_replace_syscall_cannot_complete_after_timeout(env, monkeypatch):
     env.mirror._clock = time.monotonic
     target = item_file(env)

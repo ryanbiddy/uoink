@@ -282,6 +282,9 @@ def qualify_wheels(lock: Path, exclusions_path: Path, output: Path) -> dict:
         "pins": [{"package": canonical(name), "version": version} for name, version in included],
         "wheels": inventory, "errors": errors,
     })
+    if not errors and all(row["resolved"] for row in report["graph_attempts"]):
+        from wheel_lock import generate
+        generate(report, wheels, exclusions)
     return report
 
 

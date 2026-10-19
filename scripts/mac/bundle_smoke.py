@@ -1,0 +1,195 @@
+"""Exercise only the built payload from a relocated path and disposable profile."""
+from __future__ import annotations
+
+import argparse
+import ast
+import json
+import os
+from pathlib import Path
+import queue
+import shutil
+import signal
+import socket
+import subprocess
+import tempfile
+import threading
+import time
+import urllib.request
+
+from build_bundle import ROOT, tree_inventory
+from qualify_deps import write_json
+
+
+def environment(scratch: Path, port: int) -> dict:
+    env = os.environ.copy()
+    for key in ("PYTHONPATH", "PYTHONHOME", "PYTHONSTARTUP", "UOINK_ISOLATED_APP_DIR"):
+        env.pop(key, None)
+    for key, relative in (("HOME", "home"), ("USERPROFILE", "home"), ("APPDATA", "roaming"),
+                          ("LOCALAPPDATA", "local"), ("XDG_DATA_HOME", "data"),
+                          ("XDG_CONFIG_HOME", "config"), ("XDG_CACHE_HOME", "cache"),
+                          ("UOINK_ISOLATED_PROFILE", "profile"), ("UOINK_OUTPUT_DIR", "output")):
+        path = scratch / relative
+        path.mkdir(exist_ok=True)
+        env[key] = str(path)
+    env.update(UOINK_ISOLATED_PORT=str(port), YOINK_OUTPUT_DIR=env["UOINK_OUTPUT_DIR"],
+               PYTHONDONTWRITEBYTECODE="1", PYTHONNOUSERSITE="1", HF_HUB_OFFLINE="1",
+               TRANSFORMERS_OFFLINE="1", PYTHON_KEYRING_BACKEND="keyring.backends.null.Keyring")
+    return env
+
+
+def stop(proc):
+    if proc is None:
+        return
+    # Each process was started in a new session; never terminate by name.
+    try:
+        os.killpg(proc.pid, signal.SIGTERM)
+    except ProcessLookupError:
+        pass
+    try:
+        proc.wait(timeout=15)
+    except subprocess.TimeoutExpired:
+        os.killpg(proc.pid, signal.SIGKILL)
+        proc.wait(timeout=10)
+
+
+def expected_tools() -> dict:
+    tree = ast.parse((ROOT / "tests/test_c01_mcp_stdio.py").read_text(encoding="utf-8"))
+    values = {}
+    for node in tree.body:
+        if isinstance(node, ast.Assign):
+            for target in node.targets:
+                if isinstance(target, ast.Name) and target.id in {"CORE_STDIO_TOOLS", "CANONICAL_STDIO_TOOLS"}:
+                    values[target.id] = set(ast.literal_eval(node.value))
+    assert len(values["CORE_STDIO_TOOLS"]) == 35 and len(values["CANONICAL_STDIO_TOOLS"]) == 91
+    return {"core": values["CORE_STDIO_TOOLS"], "full": values["CANONICAL_STDIO_TOOLS"]}
+
+
+def stdio(python: Path, resources: Path, scratch: Path, env: dict, mode: str, output: Path):
+    proc = None
+    with (output / f"mcp-{mode}-stderr.txt").open("w") as log:
+        try:
+            proc = subprocess.Popen([str(python), "-B", "-s", str(resources / "uoink_mcp.py")],
+                                    cwd=scratch, env={**env, "UOINK_MCP_TOOLSET": mode}, text=True,
+                                    stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=log,
+                                    start_new_session=True)
+            replies = queue.Queue()
+            threading.Thread(target=lambda: [replies.put(line) for line in proc.stdout], daemon=True).start()
+
+            def exchange(message):
+                proc.stdin.write(json.dumps(message) + "\n")
+                proc.stdin.flush()
+                if "id" not in message:
+                    return None
+                deadline = time.monotonic() + 120
+                while time.monotonic() < deadline:
+                    try:
+                        reply = json.loads(replies.get(timeout=1))
+                    except queue.Empty:
+                        if proc.poll() is not None:
+                            raise AssertionError(f"MCP {mode} exited: {proc.returncode}")
+                        continue
+                    if reply.get("id") == message["id"]:
+                        return reply
+                raise AssertionError(f"MCP {mode} timed out")
+
+            init = exchange({"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {
+                "protocolVersion": "2024-11-05", "capabilities": {},
+                "clientInfo": {"name": "bundle-smoke", "version": "1"}}})
+            assert init["result"]["serverInfo"]["version"] == (resources / "VERSION").read_text().strip()
+            assert "library_mirror_unavailable_macos" in init["result"]["instructions"]
+            assert "media_requires_ffmpeg" in init["result"]["instructions"]
+            exchange({"jsonrpc": "2.0", "method": "notifications/initialized"})
+            listed = exchange({"jsonrpc": "2.0", "id": 2, "method": "tools/list"})
+            names = [row["name"] for row in listed["result"]["tools"]]
+            assert len(names) == len(set(names)) and set(names) == expected_tools()[mode]
+            write_json(output / f"tools-{mode}.json", listed)
+            activity = exchange({"jsonrpc": "2.0", "id": 3, "method": "tools/call",
+                                 "params": {"name": "get_library_activity", "arguments": {}}})
+            text = activity["result"]["content"][0]["text"]
+            if "<untrusted_uoink_library_context>\n" in text:
+                text = text.split("<untrusted_uoink_library_context>\n", 1)[1].split("\n</untrusted_uoink_library_context>", 1)[0]
+            envelope = json.loads(text)
+            assert envelope["capabilities"]["library_mirror"]["code"] == "library_mirror_unavailable_macos"
+            return {"toolset": mode, "count": len(names), "ok": True}
+        finally:
+            stop(proc)
+
+
+def smoke(app: Path, output: Path) -> None:
+    output.mkdir(parents=True)
+    report = {"ok": False, "mcp": []}
+    with tempfile.TemporaryDirectory(prefix="uoink-bundle-smoke-") as temporary:
+        scratch = Path(temporary)
+        # Move, then restore, to prove the loader does not depend on build paths.
+        relocated = scratch / "Relocated App With Spaces" / "Uoink.app"
+        relocated.parent.mkdir()
+        shutil.move(str(app), relocated)
+        before = tree_inventory(relocated)
+        helper = None
+        try:
+            with socket.socket() as sock:
+                sock.bind(("127.0.0.1", 0))
+                port = sock.getsockname()[1]
+            assert port != 5179
+            env = environment(scratch, port)
+            contents = relocated / "Contents"
+            python = contents / "Frameworks/Python/bin/python3"
+            resources = contents / "Resources"
+            launcher = contents / "MacOS/Uoink"
+            with (output / "helper.txt").open("w") as log:
+                helper = subprocess.Popen([str(launcher)], cwd=scratch, env=env,
+                                          stdout=log, stderr=subprocess.STDOUT, start_new_session=True)
+                deadline = time.monotonic() + 120
+                while time.monotonic() < deadline:
+                    if helper.poll() is not None:
+                        raise AssertionError(f"Helper exited: {helper.returncode}")
+                    try:
+                        with urllib.request.urlopen(f"http://127.0.0.1:{port}/health", timeout=2) as response:
+                            health = json.load(response)
+                        assert health["ok"] is True
+                        assert health["capabilities"]["library_mirror"]["code"] == "library_mirror_unavailable_macos"
+                        assert health["capabilities"]["media"]["code"] == "media_requires_ffmpeg"
+                        report["health"] = health
+                        break
+                    except OSError:
+                        time.sleep(0.2)
+                else:
+                    raise AssertionError("Bundled helper health timed out")
+                status = subprocess.run([str(launcher), "status"], cwd=scratch, env=env,
+                                        capture_output=True, text=True, timeout=90)
+                assert status.returncode == 0, status.stderr
+                report["status"] = json.loads(status.stdout)
+                assert report["status"]["ok"] is True
+                mirror = subprocess.run([str(launcher), "mirror", "status"], cwd=scratch, env=env,
+                                        capture_output=True, text=True, timeout=90)
+                assert mirror.returncode == 1, mirror.stderr
+                report["mirror"] = json.loads(mirror.stdout)
+                assert report["mirror"]["ok"] is False
+                assert report["mirror"]["code"] == "library_mirror_unavailable_macos"
+                for mode in ("full", "core"):
+                    report["mcp"].append(stdio(python, resources, scratch, env, mode, output))
+                # A native Pillow operation with an output file outside the app.
+                subprocess.run([str(python), "-B", "-c", "from PIL import Image; "
+                                "im=Image.new('RGB',(8,8)); im.save('pillow.png'); "
+                                "assert Image.open('pillow.png').size == (8,8)"],
+                               cwd=scratch, env=env, check=True, timeout=60)
+                report["pillow"] = "passed"
+                report["ok"] = True
+        finally:
+            stop(helper)
+            after = tree_inventory(relocated)
+            report["bundle_unchanged"] = before == after
+            write_json(output / "tree-before.json", before)
+            write_json(output / "tree-after.json", after)
+            write_json(output / "smoke.json", report)
+            shutil.move(str(relocated), app)
+            if before != after:
+                raise AssertionError("Bundle changed during smoke")
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--app", type=Path, required=True)
+    parser.add_argument("--output", type=Path, required=True)
+    args = parser.parse_args()
+    smoke(args.app.resolve(), args.output.resolve())
