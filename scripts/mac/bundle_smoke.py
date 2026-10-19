@@ -199,8 +199,12 @@ def smoke(app: Path, output: Path) -> None:
                                         env=env, cwd=scratch, capture_output=True, text=True,
                                         check=True, timeout=90)
             entry = json.loads(connection.stdout)["mcpServers"]["uoink"]
-            assert entry["command"] == str(python)
-            assert entry["args"][:3] == ["-B", "-s", str(resources / "uoink_mcp.py")]
+            # /var is a symlink to /private/var on macOS; compare real locations.
+            def same_file(printed: str, expected: Path) -> bool:
+                return Path(printed).resolve() == expected.resolve()
+            assert same_file(entry["command"], python), ("connect command", entry, str(python))
+            assert entry["args"][:2] == ["-B", "-s"], ("connect args", entry)
+            assert same_file(entry["args"][2], resources / "uoink_mcp.py"), ("connect script", entry)
             assert str(Path(env["HOME"]) / "Library/Application Support/Claude/claude_desktop_config.json") in connection.stderr
             report["connect"] = entry
             agent = subprocess.run([str(python), "-B", "-s", "-m", "helper.mac_lifecycle", "plist", str(relocated)],
@@ -209,7 +213,9 @@ def smoke(app: Path, output: Path) -> None:
             agent_path.parent.mkdir(parents=True)
             agent_path.write_bytes(agent.stdout)
             config = plistlib.loads(agent.stdout)
-            assert config["ProgramArguments"] == [str(launcher), "--helper"]
+            program = config["ProgramArguments"]
+            assert len(program) == 2 and program[1] == "--helper", ("launchagent args", program)
+            assert same_file(program[0], launcher), ("launchagent program", program, str(launcher))
             assert config["KeepAlive"] is False and config["RunAtLoad"] is True
             assert Path(config["StandardOutPath"]).is_relative_to(Path(env["HOME"]) / "Library/Logs/Uoink")
             report["launchagent"] = {"generated": True, "bootstrapped": False}
