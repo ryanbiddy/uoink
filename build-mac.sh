@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Assemble an unsigned arm64 CI bundle from the qualified wheel artifact.
+# Assemble an ad-hoc-signed arm64 CI app and DMG from the qualified wheel artifact.
 set -euo pipefail
 if [[ "$(uname -s)" != Darwin || "$(uname -m)" != arm64 ]]; then
   echo 'build-mac.sh requires a macOS arm64 runner.' >&2

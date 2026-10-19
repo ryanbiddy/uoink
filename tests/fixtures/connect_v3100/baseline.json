@@ -1,0 +1,13 @@
+{
+  "release": "v3.10.0",
+  "files": {
+    "uoink_connect": {
+      "sha256": "c837338c244253276d97c023c062fcfab17d638745fde07eafad739153c6945d",
+      "git_blob": "fb17c49cc940b8d2bce3dc18a4eb079f65de055f"
+    },
+    "uoink_cli": {
+      "sha256": "5e2672352ea3193101f4a7774e3d7177a3779c9eb9a3c3faf6ede513857f0a97",
+      "git_blob": "c544929b3db070fce536f679f3c1f30c6c0d6c11"
+    }
+  }
+}

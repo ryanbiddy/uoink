@@ -1,19 +1,22 @@
 # Build the macOS CI bundle
 
 Run **macOS qualification** (`.github/workflows/mac-qualify.yml`) on a `mac/**`
-branch or with `workflow_dispatch`. Its `mac-build` job creates an unsigned
-Apple Silicon `Uoink.app` and uploads `uoink-<VERSION>-macos-arm64.tar.gz` after
-the bundle smoke test passes. The preceding bundle build and smoke passed
-on the hosted runner without FFmpeg. Pass 6c adds the source-built media
-payload; hosted run `39260530038` failed during FFmpeg configure. The repair
-still needs a successful hosted build and bundle smoke test.
+branch or with `workflow_dispatch`. Its `mac-build` job now produces:
 
-The archive is a CI test artifact. It has no Developer ID signature,
-notarization, DMG, LaunchAgent, menu bar, first-run UI or app icon. Darwin's
-automatic tray and splash startup are disabled until the native UI pass.
-`LSMinimumSystemVersion` stays at `14.0`, as do the FFmpeg deployment flags.
-Only macOS 15 is CI-tested; Python and wheel compatibility on macOS 14 remains
-a release gate.
+- `Uoink-<VERSION>-macos-arm64.dmg`, with an Applications shortcut and volume
+  name `Uoink <VERSION>`.
+- `uoink-<VERSION>-macos.mcpb`, the Darwin-only thin Claude Desktop connector.
+- `uoink-<VERSION>-macos-arm64.tar.gz`, retained for bundle inspection.
+
+The preceding hosted run built Python 3.13.16, the hashed wheel graph and LGPL
+FFmpeg, then passed helper health, media/alignment, mirror gating, MCP 91/35
+and immutable-bundle smoke. The DMG, whole-app ad-hoc signature, login startup
+and client setup added in passes 7, 9 and 10 still need a hosted run.
+
+Artifacts are private test builds. Ad-hoc signing establishes no developer
+trust. Developer ID, notarization, the native UI pass and interactive Mac
+acceptance remain pending. `LSMinimumSystemVersion` remains `14.0`; only
+macOS 15 has hosted coverage. See [INSTALL.md](INSTALL.md) for draft user steps.
 
 ## Build locally on a disposable macOS arm64 machine
 
@@ -26,6 +29,12 @@ bash build-mac.sh --wheels "$RUNNER_TEMP/mac-wheels" \
 python3 -B scripts/mac/bundle_smoke.py \
   --app "$RUNNER_TEMP/mac-app/Uoink.app" \
   --output "$RUNNER_TEMP/mac-smoke"
+python3 -B scripts/mac/build_mcpb.py --output "$RUNNER_TEMP/mac-app"
+version="$(cat VERSION)"
+python3 -B scripts/mac/dmg_smoke.py \
+  --dmg "$RUNNER_TEMP/mac-app/Uoink-$version-macos-arm64.dmg" \
+  --mcpb "$RUNNER_TEMP/mac-app/uoink-$version-macos.mcpb" \
+  --output "$RUNNER_TEMP/mac-dmg-smoke"
 ```
 
 Use a new output directory. The builder refuses to overwrite one. CI sets a
@@ -33,24 +42,27 @@ disposable home, profile and output root before imports. The smoke test uses
 its own isolated profile and an ephemeral loopback port, never port 5179.
 It does not upload the profile or credentials.
 
-The app's small shell launcher has no system-Python fallback:
+The app's small native launcher has no system-Python fallback:
 
 ```text
 Uoink.app/Contents/
   Info.plist
   MacOS/Uoink
+  Helpers/uoink                 symlink-aware CLI shim
   Helpers/ffmpeg, ffprobe        static LGPL FFmpeg 8.1.2 CLI
   Frameworks/Python/             relocatable Python and installed wheels
   Frameworks/FFmpeg7/            LGPL 7.1.5 dylibs, only if TorchCodec decodes
   Resources/
     server.py, uoink_mcp.py, remaining application modules, uoink, VERSION
     helper/, uoink_core/, migrations/, defaults/, assets/, extension/
-    skills/, voice_dna/, scripts/recall_hook.py
+    skills/, voice_dna/, scripts/recall_hook.py, scripts/mac/uninstall.sh
     notices/, third-party-notices/, LICENSE
 ```
 
 `Contents/MacOS/Uoink status` queries the helper and prints its capabilities.
-`Contents/Resources/uoink status` forwards to the same bundled launcher.
+`Contents/Helpers/uoink status` uses the bundled CLI. A user-created PATH
+symlink resolves back to this shim. `Contents/Resources/uoink` remains a
+forwarder to the app launcher.
 Neither command starts the helper. Run the launcher without arguments to
 start the headless helper. Finder and interactive desktop behavior are not
 qualified by this build job.
@@ -80,7 +92,9 @@ qualified by this build job.
   its Windows launch/watchdog scripts removed and version/license files added.
   The Windows builder and installer are unchanged. Tests compare the manifests
   and verify that every reachable local import is included. Copying uses
-  tracked files only; caches, state and credential files are excluded.
+  tracked files plus the individually reviewed `mac_files` additions; caches,
+  state and credential files are excluded. Explicit additions allow testing
+  an uncommitted worktree without staging files or moving refs.
 - `scripts/mac/payload.json` also pins both FFmpeg source tarballs, sizes,
   SHA-256 hashes and signing-key fingerprint. `build_ffmpeg.py` verifies both
   byte checks before extraction and builds explicit LGPL components. The
@@ -154,9 +168,13 @@ Before inventory, the builder removes absolute `LC_RPATH` entries outside the
 bundle, `/usr/lib` and `/System/Library`, including paths left by wheel build
 machines. Each removal uses a separate `install_name_tool -delete_rpath` call;
 `native-rpath-removals.json` records the bundle-relative file and original rpath.
-Modified binaries need re-signing: the builder ad-hoc signs each one after its
-edits, before inventory and smoke testing. Developer ID signing belongs to the
-later signing pass; the app is still an unsigned CI artifact for distribution.
+After all rewrites and resource writes, the builder ad-hoc signs every Mach-O
+file and nested code bundle from the inside out, then signs Uoink.app. It never
+uses `--deep` as a signing strategy. `codesign --verify --strict` must pass for
+each target. `signing.json` records the order and `spctl --assess` output;
+Gatekeeper rejection is expected until Developer ID signing and notarization.
+The main app entry is compiled from `installer/mac/launcher.c`; it execs only
+the bundled Python with `-B -s`. No credentials or signing certificates are used.
 
 The build must fail on an incomplete graph, a changed hash, a missing source,
 a Mach-O file without arm64, or any remaining absolute load dependency or rpath
@@ -183,24 +201,76 @@ Generated smoke fixtures do not prove all compressed formats, live HTTPS/HLS
 section downloads, model ASR/alignment, minimum-OS compatibility,
 Gatekeeper acceptance, native UI, Chrome onboarding or real client setup.
 Those remain release gates alongside real-format media acceptance, signing,
-notarization, DMG packaging, LaunchAgent lifecycle and interactive Mac testing.
+notarization, login/logout lifecycle and interactive Mac testing.
 
 The portable suite explicitly skips the older enable/publication wiring tests
 and publication-dependent mirror cases on Darwin. Their Windows/Linux coverage
 is retained; `test_mac_capabilities.py` verifies Darwin refusals separately.
 Those skips are intentional feature deferral, not Mac publication evidence.
 
-Pass 6c offline verification covers source pins and archive safety, cache
-integrity, bundled resolution, decode-gated capabilities, format selection,
-TorchCodec loader rewrites and existing Windows media regressions. Local
-checks cannot compile or run the macOS binaries. The hosted run must produce
-the build, native inventory and relocated smoke evidence described above.
+## DMG and client acceptance
 
-The targeted Windows run passed 229 tests and 19 subtests. One existing
-real-FFmpeg fixture skipped because no FFmpeg was installed locally. Python
-compilation, YAML/JSON/version checks, five shell scripts and 36 workflow run
-blocks passed syntax checks. All 13 extension JavaScript files passed parsing
-and the cached ESLint 8 checks from `ci.yml`. The MCP inventory remains 91 full
-/ 35 core, and the source payload remains 160 tracked files. Network access
-was blocked during the Python tests; no dependencies were downloaded. The
-full portable suite and the new hosted macOS build were not run locally.
+After signing, `hdiutil create -format UDZO` packages Uoink.app and an
+`/Applications` symlink. `dmg.json` records SHA-256 and byte size. The Darwin
+MCPB builder shares the entry-point, command and platform checks in
+`scripts/mcpb_manifest.py` with the POSIX builder. It checks the ZIP payload
+again after writing it. The Windows PowerShell builder retains its equivalent
+entry command and entry-point checks.
+
+The Darwin connector uses `/bin/bash` to check the selected install before
+executing its Python with `-B -s` and `Contents/Resources/uoink_mcp.py`. This
+allows a clear missing-install message even when that Python is absent. The
+app selection defaults to `/Applications/Uoink.app`; CLI and dashboard output
+always resolve the running app and do not use that default.
+
+`dmg_smoke.py` mounts the DMG read-only, copies the app with `ditto` into a
+temporary Applications folder with spaces, verifies the signature, runs the
+existing relocated bundle smoke against that copy, verifies again, and detaches
+in cleanup. The smoke also runs the Helpers CLI through a symlink for `status`
+and `connect claude-desktop`, checks the Darwin MCPB, and generates a LaunchAgent
+plist under a temporary HOME. It never bootstraps the agent on the runner.
+Artifact upload happens only after these checks pass. The evidence artifact
+keeps signing, DMG hash/size, native/file inventories and both smoke reports.
+
+LaunchAgent behavior lives in `helper/mac_lifecycle.py`. Tests simulate
+`launchctl` and use temporary home directories. `RunAtLoad: true` and
+`KeepAlive: false` start once at login without a Quit or duplicate-launch restart
+loop. Settings use the same enable/disable/status functions. Disabling flushes
+the settings reply before bootout can stop the current helper. The uninstall
+planner checks the bundle identifier and required files; execution uses the
+shared Darwin process identity and termination adapter before app removal.
+It preserves user data. No test should access the real user's Library.
+
+Offline Windows checks cover relocated connect paths, Windows/Linux output
+comparison against frozen v3.10.0 Git blobs, simulated launchctl, plist
+contents, uninstall refusal/planning, signing order, DMG command construction,
+MCPB manifests and ZIP contents, shell/YAML syntax, payload closure and the
+static jobs in `ci.yml`. These checks do not execute Apple tools.
+
+The next hosted run must prove compilation of the native entry, all strict
+signature checks, DMG creation/mount/copy/detach, the relocated immutable-bundle
+smoke, CLI output and the generated plist. The owner must provide Developer ID
+certificates for the later signing pass and an interactive Apple Silicon Mac
+for Gatekeeper, Finder, login/logout, Quit, Chrome, clients, Keychain and UI
+acceptance. The provisional macOS 14 floor still needs qualification.
+
+## Offline check record for passes 7, 9 and 10
+
+On Windows, the targeted suite passed 322 tests. Seven skipped: five existing
+symlink cases without Windows symlink privileges, the POSIX MCPB packer test,
+and a native Darwin process test. Five process/protocol integration cases were
+excluded from this offline selection. The full portable suite was not run.
+Python network calls were blocked, and test home, profile, output and temporary
+directories were inside the worktree. Credential-file reads were blocked.
+
+The v3.10.0 source snapshots in `tests/fixtures/connect_v3100` came from the
+local release tag. `baseline.json` records their Git blob IDs and SHA-256.
+The comparison exercises every client, list output, stderr notes and both
+deeplinks under simulated Windows and Linux branches. The fixtures also work
+in CI's shallow checkout, which may not contain the release tag.
+
+Static checks passed for Python compilation, nine shell scripts, workflow YAML
+and 43 bash run blocks, JSON/version guards, 13 extension JavaScript files,
+cached ESLint 8.57.1, the generated agent kit and the MCP inventory (91/35).
+The reviewed Mac payload contains 168 source files. No dependency installation,
+network fetch, commit, push or ref change was used for this verification.

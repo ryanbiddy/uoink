@@ -212,6 +212,8 @@ def test_isolated_install_marker_before_backend(tmp_path):
 def test_connect_formats_parse_and_paths_are_absolute(tmp_path, client):
     app = tmp_path / "O'Brien install with spaces 🪁"
     python = app / "python" / "python.exe"
+    if sys.platform == "darwin":
+        python = connect.python_command(app)
     output = connect.render(client, app, python)
     spec = connect.CLIENTS[client]
     if spec.format == "text":
@@ -219,8 +221,9 @@ def test_connect_formats_parse_and_paths_are_absolute(tmp_path, client):
         return
     if spec.format == "shell":
         tokens = re.findall(r"'((?:[^']|'')*)'", output) if os.name == "nt" else []
-        paths = [s.replace("''", "'") for s in tokens] if tokens else shlex.split(output)[-2:]
-        assert paths == [str(python), str(app / "uoink_mcp.py")]
+        flags = ["-B", "-s"] if sys.platform == "darwin" else []
+        paths = [s.replace("''", "'") for s in tokens] if tokens else shlex.split(output)[-(2 + len(flags)):]
+        assert paths == [str(python), *flags, str(app / "uoink_mcp.py")]
     else:
         # YAML clients receive JSON-form YAML (a strict YAML 1.2 subset).
         data = tomllib.loads(output) if spec.format == "toml" else json.loads(output)
@@ -229,8 +232,9 @@ def test_connect_formats_parse_and_paths_are_absolute(tmp_path, client):
             paths = entry["command"]
         else:
             paths = [entry.get("command", entry.get("cmd")), *entry["args"]]
-        assert paths == [str(python), str(app / "uoink_mcp.py")]
-        assert all(Path(p).is_absolute() for p in paths)
+        flags = ["-B", "-s"] if sys.platform == "darwin" else []
+        assert paths == [str(python), *flags, str(app / "uoink_mcp.py")]
+        assert all(Path(p).is_absolute() for p in paths if p not in flags)
         env = entry.get("env", entry.get("envs", entry.get("environment")))
         assert env["PYTHONUTF8"] == "1" and env["PYTHONIOENCODING"] == "utf-8"
         if client == "cursor":
@@ -242,7 +246,7 @@ def test_connect_stdout_only_config_and_notes_on_stderr(capsys):
         assert cli.main(["connect", client]) == 0
         output = capsys.readouterr()
         assert "File:" in output.err and "not yet tested" in output.err
-        assert connect.CLIENTS[client].location in output.err
+        assert connect.client_spec(client).location in output.err
         if connect.CLIENTS[client].note.startswith("Uncertain"):
             assert "Uncertain" in output.err
         if connect.CLIENTS[client].format != "shell":

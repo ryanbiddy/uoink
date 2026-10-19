@@ -286,7 +286,7 @@ def main(argv=None):
             with redirect_stdout(sys.stderr):
                 return backend().run_cli([*isolation.child_argv(), *ns.server_args])
         if ns.command == "connect":
-            from uoink_connect import CLIENTS, render, deeplink, python_command
+            from uoink_connect import CLIENTS, client_spec, render, deeplink, python_command
             if ns.list and ns.client:
                 raise UsageError("choose a client or --list, not both")
             if ns.deeplink and (ns.list or ns.client not in ("cursor", "vscode")):
@@ -295,7 +295,7 @@ def main(argv=None):
                 return emit({"ok": True, "clients": list(CLIENTS)}, text_mode)
             if ns.client not in CLIENTS:
                 raise UsageError("unknown or missing client; use uoink connect --list")
-            spec = CLIENTS[ns.client]
+            spec = client_spec(ns.client)
             python = python_command(APP_DIR)
             output_format = "install deeplink" if ns.deeplink else spec.format
             print(f"File: {spec.location}\nFormat: {output_format}. Status: not yet tested.", file=sys.stderr)
@@ -333,6 +333,8 @@ def main(argv=None):
                            "data_dir": str(server.DATA_ROOT.resolve()),
                            "helper_running": runtime.helper_running(server),
                            "tool_counts": {mode: len(registry.stdio_tool_names(mode)) for mode in ("full", "core")}}
+                if sys.platform == "darwin":
+                    payload["capabilities"] = server._platform.platform_capabilities()
             else:
                 name, args = (ns.tool, call_args) if ns.command == "call" else friendly_call(ns, server)
                 existing_threads = set(threading.enumerate())

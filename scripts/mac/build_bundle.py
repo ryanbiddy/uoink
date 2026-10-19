@@ -1,4 +1,4 @@
-"""Assemble the unsigned CI app. Network is limited to one pinned Python archive."""
+"""Assemble the ad-hoc-signed CI app and DMG from pinned payloads."""
 from __future__ import annotations
 
 import argparse
@@ -41,6 +41,14 @@ def payload_files(root: Path = ROOT) -> list[Path]:
     # Tracked files only: never copy scratch, state, caches or developer secrets.
     result = run(["git", "ls-files", "-z", "--", *paths], cwd=root, capture_output=True)
     files = [Path(name) for name in result.stdout.split("\0") if name]
+    # Explicit reviewed additions also work in an uncommitted worktree. No glob
+    # may admit untracked state; this list names individual source files only.
+    for name in manifest.get("mac_files", []):
+        path = Path(name)
+        if path.is_absolute() or ".." in path.parts or not (root / path).is_file():
+            raise ValueError(f"Invalid Mac source: {name}")
+        if path not in files:
+            files.append(path)
     for path in files:
         if (path.name in {"token.txt", "server.log", "server.pid"} or
                 path.suffix in {".pem", ".key", ".pyc"} or path.name.startswith(".env") or
@@ -215,6 +223,46 @@ def binary_inventory(app: Path) -> list[dict]:
     return rows
 
 
+def sign_app(app: Path, report: Path) -> None:
+    targets = set(macho_files(app))
+    for path in app.rglob("*"):
+        if path.is_symlink() or not path.is_dir() or path.suffix not in {".app", ".framework", ".bundle", ".xpc"}:
+            continue
+        for relative in ("Contents/Info.plist", "Resources/Info.plist", "Info.plist"):
+            info = path / relative
+            if info.is_file():
+                with info.open("rb") as stream:
+                    if plistlib.load(stream).get("CFBundleExecutable"):
+                        targets.add(path)
+                break
+    ordered = sorted(targets, key=lambda p: (-len(p.parts), str(p))) + [app]
+    for path in ordered:
+        run(["codesign", "--force", "--sign", "-", "--timestamp=none", path])
+    for path in ordered:
+        run(["codesign", "--verify", "--strict", path], capture_output=True)
+    assessment = subprocess.run(["spctl", "--assess", "--type", "execute", "--verbose=4", str(app)],
+                                text=True, capture_output=True, timeout=120)
+    write_json(report, {"identity": "ad-hoc", "strict_verification": "passed",
+                        "signed": [p.relative_to(app).as_posix() for p in ordered],
+                        "spctl": {"returncode": assessment.returncode, "stdout": assessment.stdout,
+                                  "stderr": assessment.stderr, "expected": "rejection until Developer ID and notarization"}})
+
+
+def create_dmg(app: Path, output: Path, version: str) -> Path:
+    dmg = output / f"Uoink-{version}-macos-arm64.dmg"
+    if dmg.exists():
+        raise ValueError("DMG already exists")
+    with tempfile.TemporaryDirectory(prefix="uoink-dmg-stage-") as temporary:
+        stage = Path(temporary)
+        run(["ditto", app, stage / "Uoink.app"])
+        (stage / "Applications").symlink_to("/Applications", target_is_directory=True)
+        run(["hdiutil", "create", "-format", "UDZO", "-volname", f"Uoink {version}",
+             "-srcfolder", stage, dmg])
+    write_json(output / "dmg.json", {"filename": dmg.name, "size_bytes": dmg.stat().st_size,
+                                     "sha256": sha256(dmg), "volume": f"Uoink {version}"})
+    return dmg
+
+
 def build(wheels: Path, output: Path, ffmpeg_output: Path | None = None) -> Path:
     if sys.platform != "darwin" or platform.machine() != "arm64":
         raise RuntimeError("Build requires native macOS arm64")
@@ -281,7 +329,8 @@ def build(wheels: Path, output: Path, ffmpeg_output: Path | None = None) -> Path
         shutil.copy2(ROOT / relative, target)
     (resources / "uoink").chmod(0o755)
     launcher = contents / "MacOS/Uoink"
-    shutil.copyfile(ROOT / "installer/mac/launcher.sh", launcher)
+    run(["xcrun", "clang", "-arch", "arm64", "-mmacosx-version-min=14.0", "-Wall", "-Wextra", "-Werror",
+         ROOT / "installer/mac/launcher.c", "-o", launcher])
     launcher.chmod(0o755)
     version = (ROOT / "VERSION").read_text().strip()
     if not re.fullmatch(r"\d+\.\d+\.\d+", version):
@@ -301,12 +350,17 @@ def build(wheels: Path, output: Path, ffmpeg_output: Path | None = None) -> Path
     write_json(notices / "resolved-wheels.json", {"wheels": rows})
     write_json(notices / "packages.json", json.loads(packages))
     ffmpeg = ffmpeg_bundle.install(ffmpeg_output, app, notices)
+    cli = contents / "Helpers/uoink"
+    shutil.copyfile(ROOT / "installer/mac/cli.sh", cli)
+    cli.chmod(0o755)
+    (resources / "scripts/mac/uninstall.sh").chmod(0o755)
     rewrite_rpaths(app, output / "native-rpath-removals.json")
     write_json(notices / "build.json", {"version": version, "python": pin, "python_url": url,
                                        "platform": platform.platform(), "ffmpeg": ffmpeg,
-                                       "signing": "modified Mach-O binaries ad-hoc; no Developer ID",
+                                       "signing": "whole app ad-hoc; no Developer ID or notarization",
                                        "minimum_os": "14.0",
                                        "source_files": [p.as_posix() for p in files]})
+    sign_app(app, output / "signing.json")
     write_json(output / "native-inventory.json", binary_inventory(app))
     inventory = tree_inventory(app)
     write_json(output / "file-inventory.json", inventory)
@@ -319,6 +373,7 @@ def build(wheels: Path, output: Path, ffmpeg_output: Path | None = None) -> Path
     write_json(output / "archive.json", {"filename": archive_path.name,
                                          "size_bytes": archive_path.stat().st_size,
                                          "sha256": sha256(archive_path)})
+    create_dmg(app, output, version)
     return app
 
 

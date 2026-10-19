@@ -8192,7 +8192,13 @@ def _autostart_command() -> str:
 
 
 def _autostart_enabled() -> bool | None:
-    """True/False on Windows; None where there's no HKCU Run key (non-Windows)."""
+    """Login preference on Windows/macOS; None if unsupported or unreadable."""
+    if sys.platform == "darwin":
+        from helper import mac_lifecycle
+        try:
+            return mac_lifecycle.status(HERE)["enabled"]
+        except (OSError, ValueError, subprocess.SubprocessError):
+            return None
     if sys.platform != "win32":
         return None
     try:
@@ -8211,9 +8217,16 @@ def _autostart_enabled() -> bool | None:
         return None
 
 
-def _set_autostart(enabled: bool) -> bool | None:
-    """Set/clear the HKCU Run\\Uoink value. Returns True on success, None when
-    unsupported (non-Windows), False on a registry error."""
+def _set_autostart(enabled: bool, *, defer_stop: bool = False) -> bool | None:
+    """Set the Windows Run value or Mac LaunchAgent. None means unsupported."""
+    if sys.platform == "darwin":
+        from helper import mac_lifecycle
+        try:
+            mac_lifecycle.set_enabled(HERE, enabled, unload=not defer_stop)
+            return True
+        except (OSError, ValueError, subprocess.SubprocessError) as exc:
+            log.warning("autostart toggle failed: %s", exc)
+            return False
     if sys.platform != "win32":
         return None
     try:
@@ -11306,9 +11319,6 @@ def _mcp_stdio_command() -> tuple[str, list[str]]:
     Installed builds should use the bundled console `python.exe` for stdio;
     `pythonw.exe` has no standard streams and would break JSON-RPC.
     """
-    if sys.platform == "darwin":
-        command = _bundled_interpreter(gui=False) or Path(sys.executable)
-        return str(command), ["-B", "-s", str(HERE / "uoink_mcp.py"), *_install_isolation.child_argv()]
     from uoink_connect import python_command, server_entry
     entry = server_entry("claude-desktop", HERE, python_command(HERE), _install_isolation.child_argv())
     return entry["command"], entry["args"]
@@ -11359,6 +11369,10 @@ def _agent_client_specs() -> list[dict]:
     appdata = _env_dir("APPDATA") or (home / "AppData" / "Roaming")
     local = _env_dir("LOCALAPPDATA") or (home / "AppData" / "Local")
     code_user = appdata / "Code" / "User"
+    if sys.platform == "darwin":
+        appdata = home / "Library/Application Support"
+        local = home / "Applications"
+        code_user = appdata / "Code/User"
     return [
         {
             "name": "claude-desktop",
@@ -16059,8 +16073,22 @@ class Handler(BaseHTTPRequestHandler):
         threading.Thread(target=self.server.shutdown, daemon=True).start()
 
     def _handle_settings_post(self, body: dict):
-        with _settings_lock:
-            return self._handle_settings_post_locked(body)
+        self._mac_bootout_pending = False
+        try:
+            with _settings_lock:
+                return self._handle_settings_post_locked(body)
+        finally:
+            if self._mac_bootout_pending:
+                # Disabling login startup can stop this launchd-owned process.
+                # Flush the settings reply before unloading its service.
+                from helper import mac_lifecycle
+                try:
+                    self.wfile.flush()
+                finally:
+                    try:
+                        mac_lifecycle.bootout(HERE)
+                    except (OSError, ValueError, subprocess.SubprocessError) as exc:
+                        log.warning("Login startup disabled; bootout failed: %s", exc)
 
     def _handle_settings_post_locked(self, body: dict):
         if "library_mirror_enabled" in body or "library_mirror_consent" in body:
@@ -16194,9 +16222,14 @@ class Handler(BaseHTTPRequestHandler):
             if not isinstance(body.get("autostart"), bool):
                 return self._send_json(400, {
                     "ok": False, "error": "autostart must be boolean"})
-            if _set_autostart(body["autostart"]) is False:
+            defer_stop = sys.platform == "darwin" and body["autostart"] is False
+            changed = (_set_autostart(body["autostart"], defer_stop=True) if defer_stop
+                       else _set_autostart(body["autostart"]))
+            if changed is False:
                 return self._send_json(200, {
                     "ok": False, "error": "autostart toggle failed"})
+            if defer_stop and changed is True:
+                self._mac_bootout_pending = True
         if "obsidian_vault_path" in body:
             val = body.get("obsidian_vault_path")
             if val is None or val == "":
@@ -19828,6 +19861,12 @@ def main(*, show_dashboard: bool = False):
     # /extract would try to write to it.
     _apply_output_root_fallback()
 
+    if sys.platform == "darwin":
+        try:
+            _platform.editable_extension_dir(HERE, DATA_ROOT)
+        except OSError as exc:
+            log.warning("Chrome extension copy could not be prepared: %s", exc)
+
     # Bind FIRST. Writing the PID file before the bind would create stale
     # files when another instance still owns the port (and would also have
     # the wrong PID -- ours, not the live one).
@@ -20035,6 +20074,11 @@ def main(*, show_dashboard: bool = False):
             "Click the rust U under any YouTube video to pull context. "
             "Open the dashboard anytime from the magnet-U in your system tray.",
         )
+    if sys.platform == "darwin":
+        import signal
+        # launchctl bootout and verified uninstall send SIGTERM. Let main return
+        # so atexit removes the identity and owned-child lifelines close.
+        signal.signal(signal.SIGTERM, lambda *_: threading.Thread(target=server.shutdown, daemon=True).start())
     try:
         server.serve_forever()
     except KeyboardInterrupt:

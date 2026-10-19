@@ -7,6 +7,7 @@ import json
 import os
 from pathlib import Path
 import queue
+import plistlib
 import shutil
 import signal
 import socket
@@ -190,6 +191,28 @@ def smoke(app: Path, output: Path) -> None:
             python = contents / "Frameworks/Python/bin/python3"
             resources = contents / "Resources"
             launcher = contents / "MacOS/Uoink"
+            cli = contents / "Helpers/uoink"
+            # Exercise a PATH-style symlink as well as the bundle's direct shim.
+            cli_link = scratch / "uoink"
+            cli_link.symlink_to(cli)
+            connection = subprocess.run([str(cli_link), "connect", "claude-desktop"],
+                                        env=env, cwd=scratch, capture_output=True, text=True,
+                                        check=True, timeout=90)
+            entry = json.loads(connection.stdout)["mcpServers"]["uoink"]
+            assert entry["command"] == str(python)
+            assert entry["args"][:3] == ["-B", "-s", str(resources / "uoink_mcp.py")]
+            assert str(Path(env["HOME"]) / "Library/Application Support/Claude/claude_desktop_config.json") in connection.stderr
+            report["connect"] = entry
+            agent = subprocess.run([str(python), "-B", "-s", "-m", "helper.mac_lifecycle", "plist", str(relocated)],
+                                   env=env, cwd=resources, capture_output=True, check=True, timeout=30)
+            agent_path = Path(env["HOME"]) / "Library/LaunchAgents/com.ryanbiddy.uoink.plist"
+            agent_path.parent.mkdir(parents=True)
+            agent_path.write_bytes(agent.stdout)
+            config = plistlib.loads(agent.stdout)
+            assert config["ProgramArguments"] == [str(python), "-B", "-s", str(resources / "server.py")]
+            assert config["KeepAlive"] is False and config["RunAtLoad"] is True
+            assert Path(config["StandardOutPath"]).is_relative_to(Path(env["HOME"]) / "Library/Logs/Uoink")
+            report["launchagent"] = {"generated": True, "bootstrapped": False}
             report["media"] = media_smoke(contents, scratch, env)
             with (output / "helper.txt").open("w") as log:
                 helper = subprocess.Popen([str(launcher)], cwd=scratch, env=env,
@@ -211,11 +234,12 @@ def smoke(app: Path, output: Path) -> None:
                         time.sleep(0.2)
                 else:
                     raise AssertionError("Bundled helper health timed out")
-                status = subprocess.run([str(launcher), "status"], cwd=scratch, env=env,
+                status = subprocess.run([str(cli_link), "status"], cwd=scratch, env=env,
                                         capture_output=True, text=True, timeout=90)
                 assert status.returncode == 0, status.stderr
                 report["status"] = json.loads(status.stdout)
                 assert report["status"]["ok"] is True
+                assert report["status"]["helper_running"] is True
                 assert report["status"]["capabilities"]["media"]["available"] is True
                 mirror = subprocess.run([str(launcher), "mirror", "status"], cwd=scratch, env=env,
                                         capture_output=True, text=True, timeout=90)

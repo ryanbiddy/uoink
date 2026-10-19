@@ -19,17 +19,7 @@ OUT_DIR="${1:-$REPO_ROOT/dist}"
 
 # --- Validate manifest -----------------------------------------------------
 if command -v python3 >/dev/null 2>&1; then PY=python3; else PY=python; fi
-VERSION="$("$PY" - "$MANIFEST" <<'PYEOF'
-import json,sys
-m=json.load(open(sys.argv[1],encoding="utf-8"))
-cmd=m["server"]["mcp_config"]["command"]
-args=" ".join(m["server"]["mcp_config"]["args"])
-assert cmd.endswith("python/python.exe"), f"command not python.exe: {cmd}"
-assert "uoink_mcp.py" in args, f"args do not invoke uoink_mcp.py: {args}"
-assert m["server"]["entry_point"]=="uoink_mcp.py", "entry_point must be uoink_mcp.py"
-print(m["version"])
-PYEOF
-)"
+VERSION="$("$PY" "$SCRIPT_DIR/mcpb_manifest.py" "$MANIFEST")"
 echo "Manifest validated OK (valid JSON; entry command matches working stdio command)."
 
 # M-2: derive the bundle version from the product VERSION at build time so the

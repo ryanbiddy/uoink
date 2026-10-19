@@ -361,10 +361,25 @@ def test_smoke_success_requires_completed_checks_and_immutable_bundle(monkeypatc
             return ("127.0.0.1", 43871)
 
     def run(command, **kwargs):
+        if "connect" in command:
+            scratch = Path(kwargs["cwd"])
+            contents = scratch / "Relocated App With Spaces/Uoink.app/Contents"
+            return SimpleNamespace(returncode=0,
+                stdout=json.dumps({"mcpServers": {"uoink": {
+                    "command": str(contents / "Frameworks/Python/bin/python3"),
+                    "args": ["-B", "-s", str(contents / "Resources/uoink_mcp.py")]}}}),
+                stderr=str(Path(kwargs["env"]["HOME"]) / "Library/Application Support/Claude/claude_desktop_config.json"))
+        if "helper.mac_lifecycle" in command:
+            import plistlib
+            contents = Path(command[-1]) / "Contents"
+            return SimpleNamespace(returncode=0, stdout=plistlib.dumps({
+                "ProgramArguments": [str(contents / "Frameworks/Python/bin/python3"), "-B", "-s", str(contents / "Resources/server.py")],
+                "KeepAlive": False, "RunAtLoad": True,
+                "StandardOutPath": str(Path(kwargs["env"]["HOME"]) / "Library/Logs/Uoink/launchd.out.log")}))
         if command[-1] == "status":
             mirror = "mirror" in command
             return SimpleNamespace(returncode=1 if mirror else 0, stderr="",
-                stdout=json.dumps({"ok": not mirror, "code": "library_mirror_unavailable_macos",
+                stdout=json.dumps({"ok": not mirror, "helper_running": True, "code": "library_mirror_unavailable_macos",
                                    "capabilities": capabilities}))
         if fail:
             raise RuntimeError("synthetic Pillow failure")
@@ -374,6 +389,7 @@ def test_smoke_success_requires_completed_checks_and_immutable_bundle(monkeypatc
         return SimpleNamespace(returncode=0)
 
     monkeypatch.setattr(bundle_smoke.socket, "socket", Socket)
+    monkeypatch.setattr(Path, "symlink_to", lambda *args, **kwargs: None)
     monkeypatch.setattr(bundle_smoke.urllib.request, "urlopen", lambda *args, **kwargs: io.StringIO(
         json.dumps({"ok": True, "capabilities": capabilities})))
     monkeypatch.setattr(bundle_smoke.subprocess, "Popen", lambda *args, **kwargs: SimpleNamespace(poll=lambda: None))

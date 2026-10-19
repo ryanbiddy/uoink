@@ -129,7 +129,7 @@ jobs:
         run: exit 1
 
   mac-build:
-    name: unsigned arm64 app bundle
+    name: ad-hoc arm64 app and DMG
     needs: dependency-graph
     runs-on: macos-15
     timeout-minutes: 90
@@ -170,11 +170,24 @@ jobs:
         run: bash build-mac.sh --wheels "$RUNNER_TEMP/mac-wheels" --output "$RUNNER_TEMP/mac-app" --ffmpeg-output "$RUNNER_TEMP/mac-ffmpeg"
       - name: Smoke relocated bundle and verify immutable tree
         run: python -B scripts/mac/bundle_smoke.py --app "$RUNNER_TEMP/mac-app/Uoink.app" --output "$RUNNER_TEMP/mac-evidence/bundle-smoke"
-      - name: Upload app archive
+      - name: Build and validate the Darwin MCPB
+        run: python -B scripts/mac/build_mcpb.py --output "$RUNNER_TEMP/mac-app"
+      - name: Install from read-only DMG and smoke the installed copy
+        run: |
+          version="$(cat VERSION)"
+          python -B scripts/mac/dmg_smoke.py \
+            --dmg "$RUNNER_TEMP/mac-app/Uoink-$version-macos-arm64.dmg" \
+            --mcpb "$RUNNER_TEMP/mac-app/uoink-$version-macos.mcpb" \
+            --output "$RUNNER_TEMP/mac-evidence/dmg-smoke"
+      - name: Upload app archive, DMG and Darwin connector
         uses: actions/upload-artifact@v4
         with:
-          name: uoink-macos-arm64-unsigned
-          path: ${{ runner.temp }}/mac-app/*.tar.gz
+          name: uoink-macos-arm64-adhoc
+          path: |
+            ${{ runner.temp }}/mac-app/*.tar.gz
+            ${{ runner.temp }}/mac-app/*.dmg
+            ${{ runner.temp }}/mac-app/*.mcpb
+            ${{ runner.temp }}/mac-app/dmg.json
           if-no-files-found: error
           compression-level: 0
           retention-days: 7

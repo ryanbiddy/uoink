@@ -1,5 +1,6 @@
 {
   "schema_version": 1,
+  "mac_files": ["helper/mac_lifecycle.py", "scripts/mac/uninstall.sh"],
   "basis": "Reviewed build.ps1 source payload; Windows launch/watchdog scripts excluded. VERSION and license notices added.",
   "paths": [
     "_platform.py",
