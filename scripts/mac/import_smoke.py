@@ -155,9 +155,9 @@ def verify_complete_set(directory: Path, wheels: list[Path]) -> list[str]:
         versions[info["package"]] = info["version"]
         if expected.get(wheel.name) != sha256(wheel):
             errors.append(f"Wheel hash mismatch or unreported artifact: {wheel.name}")
-    # Pins in this lock are normalized release numbers (the public parser
-    # permits 1.0 / 1.0.0). Compare versions with pip's vendored PEP 440 parser.
-    from pip._vendor.packaging.version import Version
+    # packaging is an explicit qualification/test dependency. Validation must
+    # also work in interpreters that have pytest but no pip installation.
+    from packaging.version import Version
     for pin in manifest["pins"]:
         actual = versions.get(pin["package"])
         if actual is None or Version(actual) != Version(pin["version"]):

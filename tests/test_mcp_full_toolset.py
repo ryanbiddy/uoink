@@ -179,6 +179,10 @@ def test_inventory_checker_fails_closed_on_missing_tool(monkeypatch):
     ("unknown", False, False), ("alive", True, False),
 ])
 def test_resident_helper_pid_requires_live_original_process(tmp_path, monkeypatch, state, reused, expected):
+    from types import SimpleNamespace
+    # This is the legacy PID-file/mtime contract. Darwin has a full native
+    # identity record, covered separately below on every test host.
+    monkeypatch.setattr(uoink_mcp, "sys", SimpleNamespace(platform="win32" if os.name == "nt" else "linux"))
     iso = uoink_mcp._install_isolation
     monkeypatch.setattr(iso, "current_binding", lambda: None)
     monkeypatch.setattr(server, "HERE", tmp_path)
@@ -195,6 +199,30 @@ def test_resident_helper_pid_requires_live_original_process(tmp_path, monkeypatc
         monkeypatch.setattr(iso, "_windows_close_handle", lambda handle: None)
     else:
         monkeypatch.setattr(iso, "_posix_process_created_ms", lambda pid: created_ms)
+    assert uoink_mcp._helper_running() is expected
+
+
+@pytest.mark.parametrize("state,reused,expected", [
+    ("alive", False, True), ("dead", False, False),
+    ("unknown", False, False), ("alive", True, False),
+])
+def test_darwin_resident_requires_native_original_identity(tmp_path, monkeypatch, state, reused, expected):
+    import json
+    import sys
+    from types import SimpleNamespace
+    import _platform
+    monkeypatch.setattr(uoink_mcp, "sys", SimpleNamespace(platform="darwin"))
+    monkeypatch.setattr(uoink_mcp._install_isolation, "current_binding", lambda: None)
+    monkeypatch.setattr(server, "HERE", tmp_path)
+    monkeypatch.setattr(server, "DATA_ROOT", tmp_path)
+    script = tmp_path / "server.py"
+    script.write_text("# fixture")
+    (tmp_path / "runtime-identity.json").write_text(json.dumps({
+        "pid": 77, "created_ms": 1700000000123.456,
+        "executable": sys.executable, "script": str(script)}))
+    monkeypatch.setattr(_platform, "darwin_observe", lambda *a, **k:
+                        _platform.DarwinProcessObservation(state,
+                            1700000000123456 + int(reused), sys.executable))
     assert uoink_mcp._helper_running() is expected
 
 

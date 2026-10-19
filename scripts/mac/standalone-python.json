@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "provenance": "macos-15 arm64 run 39203865751, deps/standalone/python-standalone.json; downloaded hashes equal published digests",
+  "release_tag": "20261013",
+  "assets": [
+    {
+      "name": "cpython-3.13.16+20261013-aarch64-apple-darwin-install_only.tar.gz",
+      "size_bytes": 25393336,
+      "sha256": "ca0e6a70fb75a0984751bd75493e3de77680aef7fbd0fea9b903c299537b3423"
+    },
+    {
+      "name": "cpython-3.13.16+20261013-aarch64-apple-darwin-install_only_stripped.tar.gz",
+      "size_bytes": 25268458,
+      "sha256": "16a5332fb0dcb77f163fc8f8cbccd95be1644cc53e68e5d2a79f50afd6680a0e"
+    }
+  ]
+}

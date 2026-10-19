@@ -218,8 +218,21 @@ class DarwinProcessObservation:
     executable: str | None = None
 
     @property
-    def created_ms(self) -> int | None:
-        return None if self.started_us is None else self.started_us // 1000
+    def created_ms(self) -> float | None:
+        # Keep the wire field's millisecond units, including its microsecond
+        # fraction. At current epoch dates binary64 round-trips every native
+        # microsecond through JSON. Never truncate this value to an integer.
+        return None if self.started_us is None else self.started_us / 1000
+
+
+def darwin_creation_us(created_ms) -> int | None:
+    """Decode a persisted millisecond timestamp at libproc's native precision."""
+    import math
+    if type(created_ms) not in (int, float) or not 0 < created_ms < 2**42:
+        return None
+    if not math.isfinite(created_ms):
+        return None
+    return round(created_ms * 1000)
 
 
 @lru_cache(maxsize=1)
@@ -238,6 +251,8 @@ def _darwin_bsd_info(lib, pid: int) -> DarwinProcessObservation:
     ctypes.set_errno(0)
     size = lib.proc_pidinfo(pid, 3, 0, ctypes.byref(info), ctypes.sizeof(info))
     if size <= 0:
+        # libproc can report ESRCH for an unreaped child: kill(pid, 0) alone
+        # cannot distinguish that exited process from a running one.
         return DarwinProcessObservation("dead" if ctypes.get_errno() == errno.ESRCH else "unknown")
     if size != ctypes.sizeof(info) or info.pid != pid:
         return DarwinProcessObservation("unknown")
@@ -269,7 +284,7 @@ def darwin_observe(pid: int, *, with_executable: bool = False) -> DarwinProcessO
         return DarwinProcessObservation("unknown")
 
 
-def darwin_created_ms(pid: int) -> int | None:
+def darwin_created_ms(pid: int) -> float | None:
     return darwin_observe(pid).created_ms
 
 
@@ -282,16 +297,30 @@ def darwin_state(pid: int) -> str | None:
     return {"alive": "R", "dead": "Z"}.get(status)
 
 
-def darwin_liveness(pid: int, expected_ms: int | None, expected_exe: str | None = None) -> str:
+def darwin_liveness(
+    pid: int, expected_ms: int | float | None, expected_exe: str | None = None,
+    *, tolerance_ms: int = 0, require_identity: bool = True,
+) -> str:
+    """Check birth and executable in one snapshot; PID-only probes opt in.
+
+    A tolerance is only for legacy lease observations, never ownership. Missing
+    birth identity remains unknown unless the caller requests a liveness probe.
+    """
     observation = darwin_observe(pid, with_executable=expected_exe is not None)
     if observation.status != "alive":
         return observation.status
-    if type(expected_ms) is not int or observation.created_ms is None:
-        return "unknown"
-    if observation.created_ms != expected_ms:
-        return "dead"
+    if expected_ms is None and not require_identity:
+        pass
+    else:
+        expected_us = darwin_creation_us(expected_ms)
+        if expected_us is None or observation.started_us is None:
+            return "unknown"
+        if type(tolerance_ms) is not int or tolerance_ms < 0:
+            return "unknown"
+        if abs(observation.started_us - expected_us) > tolerance_ms * 1000:
+            return "dead"
     if expected_exe is not None:
-        if not observation.executable:
+        if not isinstance(expected_exe, str) or not expected_exe or not observation.executable:
             return "unknown"
         try:
             if not os.path.samefile(observation.executable, expected_exe):

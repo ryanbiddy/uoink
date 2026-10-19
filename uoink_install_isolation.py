@@ -518,7 +518,7 @@ def write_runtime_identity(
     pid: int,
     executable: str,
     script: str,
-    created_ms: int | None,
+    created_ms: int | float | None,
     nonce: str,
 ) -> Path:
     expected_exe = str(executable or "").strip()
@@ -533,7 +533,7 @@ def write_runtime_identity(
             "runtime identity requires the owned process creation time",
         )
     try:
-        created = int(created_ms)
+        created = _creation_identity_value(created_ms)
     except (TypeError, ValueError) as error:
         raise IsolationError(
             "isolated-identity-incomplete",
@@ -581,7 +581,7 @@ def read_runtime_identity(binding: IsolationBinding) -> dict:
     return payload
 
 
-def current_process_created_ms() -> int | None:
+def current_process_created_ms() -> int | float | None:
     try:
         if os.name == "nt":
             import ctypes
@@ -1137,11 +1137,20 @@ def _unlink_identity(binding: IsolationBinding) -> None:
 # --------------------------------------------------------------------------
 # Process identity
 # --------------------------------------------------------------------------
+def _creation_identity_value(value):
+    if sys.platform == "darwin":
+        from _platform import darwin_creation_us
+        if darwin_creation_us(value) is None:
+            raise ValueError("invalid Darwin birth timestamp")
+        return value
+    return int(value)
+
+
 def _parse_owned_identity(identity: dict) -> dict | None:
     """Return pid/created_ms/executable only when the record is complete."""
     try:
         pid = int(identity["pid"])
-        created = int(identity["created_ms"])
+        created = _creation_identity_value(identity["created_ms"])
     except (KeyError, TypeError, ValueError):
         return None
     expected_exe = str(identity.get("executable") or "").strip()
@@ -1159,21 +1168,24 @@ def _identity_liveness(identity: dict) -> str:
     )
 
 
-def _pid_liveness(pid: int, created_ms: int | None) -> str:
+def _pid_liveness(pid: int, created_ms: int | float | None) -> str:
     """PID plus exact creation identity. Incomplete creation is never alive."""
     if created_ms is None:
         return "unknown"
     try:
-        created = int(created_ms)
+        created = _creation_identity_value(created_ms)
     except (TypeError, ValueError):
         return "unknown"
     return _pid_identity_liveness(int(pid), created, None)
 
 
 def _pid_identity_liveness(
-    pid: int, created_ms: int, expected_exe: str | None
+    pid: int, created_ms: int | float, expected_exe: str | None
 ) -> str:
     try:
+        if sys.platform == "darwin":
+            from _platform import darwin_liveness
+            return darwin_liveness(pid, created_ms, expected_exe)
         if os.name == "nt":
             handle, error = _windows_open_process(
                 int(pid), _PROCESS_QUERY_LIMITED_INFORMATION
@@ -1204,13 +1216,6 @@ def _pid_identity_liveness(
             if not live_exe:
                 return "unknown"
             if not _same_path(Path(live_exe), Path(expected_exe)):
-                return "dead"
-        if sys.platform == "darwin":
-            # Do not combine an executable lookup with an earlier incarnation.
-            confirmed = _posix_process_created_ms(int(pid))
-            if confirmed is None:
-                return "unknown"
-            if confirmed != int(created_ms):
                 return "dead"
         return "alive"
     except Exception:
@@ -1356,7 +1361,7 @@ def _posix_process_state(pid: int) -> str | None:
         return None
 
 
-def _posix_process_created_ms(pid: int) -> int | None:
+def _posix_process_created_ms(pid: int) -> int | float | None:
     if sys.platform == "darwin":
         from _platform import darwin_created_ms as created_ms
         return created_ms(pid)

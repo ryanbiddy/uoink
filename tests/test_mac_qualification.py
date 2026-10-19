@@ -3,12 +3,15 @@ from __future__ import annotations
 
 import hashlib
 import io
+import contextlib
 import json
+import os
 from pathlib import Path
 import sys
 import tempfile
 from types import SimpleNamespace
 import unittest
+import urllib.error
 from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -24,6 +27,15 @@ class QualificationTests(unittest.TestCase):
         self.temporary = tempfile.TemporaryDirectory(prefix="uoink-mac-unit-")
         self.addCleanup(self.temporary.cleanup)
         self.root = Path(self.temporary.name)
+        self.release = json.loads(json.dumps(FIXTURE["release"]))
+        self.pins = {"schema_version": 1, "release_tag": self.release["tag_name"], "assets": [
+            {"name": row["name"], "size_bytes": 7, "sha256": hashlib.sha256(b"fixture").hexdigest()}
+            for row in self.release["assets"][:2]]}
+        self.pin_path = self.root / "standalone-python.json"
+        deps.write_json(self.pin_path, self.pins)
+        pins_patch = patch.object(deps, "STANDALONE_PINS", self.pin_path)
+        pins_patch.start()
+        self.addCleanup(pins_patch.stop)
         # Any accidentally unmocked external work makes the offline test fail.
         self.network = patch("urllib.request.urlopen", side_effect=AssertionError("network forbidden"))
         self.processes = patch("subprocess.run", side_effect=AssertionError("process forbidden"))
@@ -99,11 +111,11 @@ class QualificationTests(unittest.TestCase):
         self.assertTrue((destination / found[0]["filename"]).is_file())
 
     def test_standalone_selection_and_download_hashes(self):
-        release = FIXTURE["release"]
-        self.assertEqual(len(deps.standalone_candidates(release)), 2)
+        release = self.release
+        self.assertEqual(len(deps.standalone_candidates(release, self.pins)), 2)
 
         def fake_request(url):
-            return io.BytesIO(json.dumps(release).encode() if url == deps.RELEASE_URL else b"fixture")
+            return io.BytesIO(json.dumps(release).encode() if url == deps.RELEASE_API + self.pins["release_tag"] else b"fixture")
 
         with patch.object(deps, "request", side_effect=fake_request):
             report = deps.qualify_standalone(self.root / "standalone")
@@ -116,9 +128,9 @@ class QualificationTests(unittest.TestCase):
 
     def test_standalone_failure_is_recorded_and_next_candidate_runs(self):
         def fake_request(url):
-            if url == deps.RELEASE_URL:
-                return io.BytesIO(json.dumps(FIXTURE["release"]).encode())
-            return io.BytesIO(b"short" if url.endswith("python") else b"fixture")
+            if url == deps.RELEASE_API + self.pins["release_tag"]:
+                return io.BytesIO(json.dumps(self.release).encode())
+            return io.BytesIO(b"short" if url.endswith("install_only.tar.gz") else b"fixture")
 
         with patch.object(deps, "request", side_effect=fake_request):
             report = deps.qualify_standalone(self.root / "standalone")
@@ -126,10 +138,64 @@ class QualificationTests(unittest.TestCase):
         self.assertIn("size differs", report["candidates"][0]["error"])
 
     def test_no_candidate_is_an_explicit_failure(self):
+        self.release["assets"] = []
         with patch.object(deps, "request", return_value=io.BytesIO(
-                b'{"tag_name":"empty","html_url":"https://example.invalid","assets":[]}')):
+                json.dumps(self.release).encode())):
             report = deps.qualify_standalone(self.root / "standalone")
-        self.assertIn("no matching", report["error"])
+        self.assertIn("matching pinned asset", report["error"])
+
+    def test_standalone_rejects_changed_bytes_without_published_digest(self):
+        def fake_request(url):
+            if url.startswith(deps.RELEASE_API):
+                return io.BytesIO(json.dumps(self.release).encode())
+            return io.BytesIO(b"changed")  # Same length; only the pinned hash catches this.
+        with patch.object(deps, "request", side_effect=fake_request):
+            report = deps.qualify_standalone(self.root / "standalone")
+        self.assertTrue(all(not row["downloaded"] for row in report["candidates"]))
+        self.assertIn("pinned SHA-256", report["candidates"][0]["error"])
+
+    def test_standalone_rejects_changed_release_and_unpinned_assets(self):
+        self.release["tag_name"] = "20261002"
+        with self.assertRaisesRegex(ValueError, "Release tag differs"):
+            deps.standalone_candidates(self.release, self.pins)
+        self.pins["assets"][0]["sha256"] = ""
+        deps.write_json(self.pin_path, self.pins)
+        with patch.object(deps, "request") as network:
+            report = deps.qualify_standalone(self.root / "standalone")
+        network.assert_not_called()
+        self.assertIn("asset pin", report["error"])
+
+    def test_standalone_http_status_is_reported_on_console_and_disk(self):
+        output = io.StringIO()
+        error = urllib.error.HTTPError("https://api.github.com/fixture", 403, "rate limit exceeded", {}, None)
+        with patch.object(deps, "request", side_effect=error), contextlib.redirect_stdout(output):
+            report = deps.qualify_standalone(self.root / "standalone")
+        self.assertEqual(report["http_status"], 403)
+        self.assertIn("403", output.getvalue())
+        self.assertEqual(json.loads((self.root / "standalone/python-standalone.json").read_text())["http_status"], 403)
+
+    def test_github_token_is_only_sent_to_api(self):
+        with patch.dict(os.environ, {"GITHUB_TOKEN": "fixture-only"}), \
+                patch.object(deps.urllib.request, "urlopen", return_value=io.BytesIO()) as opened:
+            for url, authorized in ((deps.RELEASE_API + self.pins["release_tag"], True),
+                                    ("https://github.com/fixture.tar.gz", False),
+                                    ("https://files.pythonhosted.org/fixture.tar.gz", False)):
+                deps.request(url)
+                request = opened.call_args.args[0]
+                self.assertEqual(request.get_header("Authorization") is not None, authorized)
+
+    def test_build_tooling_is_exact_hashed_and_matches_windows_versions(self):
+        lines = [line for line in deps.BUILD_TOOLING.read_text().splitlines() if line and not line.startswith("#")]
+        expected = {name: deps.windows_build_pin(key) for name, key in (
+            ("pip", "PIP_VERSION"), ("setuptools", "SETUPTOOLS_VERSION"),
+            ("wheel", "WHEEL_VERSION"), ("packaging", "PACKAGING_VERSION"))}
+        self.assertEqual(len(lines), len(expected))
+        for line in lines:
+            pin, digest = line.split(" --hash=sha256:")
+            name, version = pin.split("==")
+            self.assertEqual(version, expected.pop(name))
+            self.assertRegex(digest, r"^[0-9a-f]{64}$")
+        self.assertFalse(expected)
 
     def test_recursive_startup_discovery_does_not_execute_modules(self):
         (self.root / "entry.py").write_text(
@@ -181,7 +247,8 @@ class QualificationTests(unittest.TestCase):
         self.assertEqual(row["source_sha256"], hashlib.sha256(body).hexdigest())
         self.assertEqual(row["source_blake2b_256"], pin["blake2b_256"])
         self.assertEqual(len(commands), 2)
-        self.assertIn("setuptools==" + deps.windows_build_pin("SETUPTOOLS_VERSION"), commands[0])
+        self.assertIn("--require-hashes", commands[0])
+        self.assertIn(str(deps.BUILD_TOOLING), commands[0])
 
         # Wrong bytes at the exact pinned URL never reach pip's build hooks.
         commands.clear()
@@ -255,7 +322,8 @@ class QualificationTests(unittest.TestCase):
         manifest = {"pins": [{"package": "sample", "version": "1.0.0"}], "errors": [],
                     "wheels": [{"filename": wheel.name, "sha256": deps.sha256(wheel)}]}
         deps.write_json(self.root / "wheel-manifest.json", manifest)
-        self.assertEqual(smoke.verify_complete_set(self.root, [wheel]), [])
+        with patch.dict(sys.modules, {"pip": None}):
+            self.assertEqual(smoke.verify_complete_set(self.root, [wheel]), [])
         self.assertIn("Missing qualified pin", str(smoke.verify_complete_set(self.root, [])))
         wheel.write_bytes(b"changed")
         self.assertIn("hash mismatch", str(smoke.verify_complete_set(self.root, [wheel])))

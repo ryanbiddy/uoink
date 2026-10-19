@@ -12,7 +12,7 @@ _STILL_ACTIVE = 259
 _PROCESS_START_TOLERANCE_MS = 2000
 
 
-def current_created_ms() -> int | None:
+def current_created_ms() -> int | float | None:
     try:
         if os.name == "nt":
             import ctypes
@@ -24,7 +24,7 @@ def current_created_ms() -> int | None:
         return None
 
 
-def created_ms_for_pid(pid: int) -> int | None:
+def created_ms_for_pid(pid: int) -> int | float | None:
     try:
         if os.name == "nt":
             import ctypes
@@ -51,7 +51,7 @@ def identity_for_pid(pid: int) -> dict[str, Any]:
     }
 
 
-def liveness(pid: int, created_ms: int | None) -> str:
+def liveness(pid: int, created_ms: int | float | None) -> str:
     """alive, dead, or unknown. Never signals the process on Windows."""
     if sys.platform == "darwin":
         from _platform import darwin_liveness
@@ -161,7 +161,11 @@ def exact_identity_on_handle(observed: dict[str, Any],
     if type(pid) is not int or pid <= 0 or pid != expected.get("pid"):
         return False
     expected_created = expected.get("created_ms")
-    if type(expected_created) is not int:
+    if sys.platform == "darwin":
+        from _platform import darwin_creation_us
+        if darwin_creation_us(expected_created) is None:
+            return False
+    elif type(expected_created) is not int:
         return False
     handle = observed.get("handle")
     if handle is not None and os.name == "nt":
@@ -170,7 +174,10 @@ def exact_identity_on_handle(observed: dict[str, Any],
     else:
         actual_created = observed.get("created_ms")
         actual_exe = observed.get("executable") or executable_for_pid(pid)
-    if type(actual_created) is not int or actual_created != expected_created:
+    if sys.platform == "darwin":
+        if darwin_creation_us(actual_created) != darwin_creation_us(expected_created):
+            return False
+    elif type(actual_created) is not int or actual_created != expected_created:
         return False
     expected_exe = expected.get("executable")
     if not expected_exe or not actual_exe:
@@ -241,7 +248,7 @@ def _windows_created_ms(handle) -> int | None:
     return (value - _FILETIME_EPOCH_OFFSET_100NS) // 10_000
 
 
-def _posix_created_ms(pid: int) -> int | None:
+def _posix_created_ms(pid: int) -> int | float | None:
     if sys.platform == "darwin":
         from _platform import darwin_created_ms as created_ms
         return created_ms(pid)

@@ -9,18 +9,23 @@ import argparse
 import hashlib
 import importlib.util
 import json
+import os
 from pathlib import Path
 import re
 import shutil
 import subprocess
 import sys
 import tempfile
+import urllib.error
+import urllib.parse
 import urllib.request
 
 ROOT = Path(__file__).resolve().parents[2]
 PLATFORMS = ("macosx_14_0_arm64", "macosx_15_0_arm64")
-RELEASE_URL = "https://api.github.com/repos/astral-sh/python-build-standalone/releases/latest"
+RELEASE_API = "https://api.github.com/repos/astral-sh/python-build-standalone/releases/tags/"
 SOURCE_PINS = Path(__file__).with_name("source-wheels.json")
+BUILD_TOOLING = Path(__file__).with_name("build-tooling.txt")
+STANDALONE_PINS = Path(__file__).with_name("standalone-python.json")
 
 
 def canonical(name: str) -> str:
@@ -146,12 +151,12 @@ def build_source_wheels(included: list[tuple[str, str]], wheels: Path, output: P
         return {}
     logs = output / "logs"
     logs.mkdir(exist_ok=True)
-    tooling = [f"{package}=={windows_build_pin(pin)}" for package, pin in (
-        ("pip", "PIP_VERSION"), ("setuptools", "SETUPTOOLS_VERSION"),
-        ("wheel", "WHEEL_VERSION"), ("packaging", "PACKAGING_VERSION"))]
+    tooling = [line for line in BUILD_TOOLING.read_text(encoding="utf-8").splitlines()
+               if line and not line.startswith("#")]
     tooling_code = run_logged([sys.executable, "-m", "pip", "--isolated", "install",
                               "--disable-pip-version-check", "--no-cache-dir",
-                              "--index-url", "https://pypi.org/simple", *tooling],
+                              "--index-url", "https://pypi.org/simple", "--only-binary=:all:",
+                              "--require-hashes", "-r", str(BUILD_TOOLING)],
                              logs / "source-build-tooling.txt", timeout=300)
     results = {}
     for key, pin in selected.items():
@@ -280,52 +285,100 @@ def qualify_wheels(lock: Path, exclusions_path: Path, output: Path) -> dict:
     return report
 
 
-def standalone_candidates(release: dict) -> list[dict]:
-    pattern = r"cpython-3\.13\.\d+\+[^/]+-aarch64-apple-darwin-install_only(?:_stripped)?\.tar\.gz"
-    return sorted([asset for asset in release.get("assets", [])
-                   if re.fullmatch(pattern, asset.get("name", ""))], key=lambda asset: asset["name"])
+def standalone_pins() -> dict:
+    pins = json.loads(STANDALONE_PINS.read_text(encoding="utf-8"))
+    tag = pins.get("release_tag", "")
+    if pins.get("schema_version") != 1 or not re.fullmatch(r"\d{8}", tag):
+        raise ValueError("Standalone Python requires a pinned dated release tag")
+    if not pins.get("assets"):
+        raise ValueError("Standalone Python requires pinned asset names and SHA-256 values")
+    names = set()
+    for asset in pins["assets"]:
+        name = asset.get("name", "")
+        pattern = (r"cpython-3\.13\.\d+\+" + tag +
+                   r"-aarch64-apple-darwin-install_only(?:_stripped)?\.tar\.gz")
+        if (not re.fullmatch(pattern, name) or name in names or
+                not re.fullmatch(r"[0-9a-f]{64}", asset.get("sha256", "")) or
+                type(asset.get("size_bytes")) is not int or asset["size_bytes"] <= 0):
+            raise ValueError("Invalid or duplicate standalone Python asset pin")
+        names.add(name)
+    return pins
+
+
+def standalone_candidates(release: dict, pins: dict) -> list[dict]:
+    if release.get("tag_name") != pins["release_tag"]:
+        raise ValueError("Release tag differs from the standalone Python pin")
+    selected = []
+    for pin in pins["assets"]:
+        matches = [asset for asset in release.get("assets", []) if asset.get("name") == pin["name"]]
+        if len(matches) != 1:
+            raise ValueError(f"Expected one matching pinned asset: {pin['name']}")
+        selected.append(matches[0])
+    return selected
 
 
 def request(url: str):
-    # Public release metadata and assets only. No credentials are needed or read.
-    return urllib.request.urlopen(urllib.request.Request(
-        url, headers={"User-Agent": "uoink-mac-qualification", "Accept": "application/vnd.github+json"}),
-        timeout=120)
+    headers = {"User-Agent": "uoink-mac-qualification"}
+    if urllib.parse.urlparse(url).netloc == "api.github.com":
+        headers["Accept"] = "application/vnd.github+json"
+        # Hosted Actions provides this env var. Never read credential files,
+        # print headers, or send the API token to release assets or PyPI.
+        token = os.environ.get("GITHUB_TOKEN")
+        if token:
+            headers["Authorization"] = "Bearer " + token
+    return urllib.request.urlopen(urllib.request.Request(url, headers=headers), timeout=120)
+
+
+def standalone_error(exc: Exception) -> dict:
+    result = {"error": f"{type(exc).__name__}: {exc}"}
+    if isinstance(exc, urllib.error.HTTPError):
+        result["http_status"] = exc.code
+        exc.close()
+    return result
 
 
 def qualify_standalone(output: Path) -> dict:
     output.mkdir(parents=True, exist_ok=True)
-    report = {"schema_version": 1, "release_api": RELEASE_URL, "candidates": []}
+    report = {"schema_version": 1, "candidates": []}
     try:
-        with request(RELEASE_URL) as response:
+        pins = standalone_pins()
+        release_api = RELEASE_API + pins["release_tag"]
+        report.update(release_api=release_api, release_tag=pins["release_tag"])
+        with request(release_api) as response:
             release = json.load(response)
-        report.update(release_tag=release["tag_name"], release_url=release["html_url"])
-        for asset in standalone_candidates(release):
-            row = {"name": asset["name"], "url": asset["browser_download_url"],
+        report.update(release_url=release["html_url"])
+        for pin, asset in zip(pins["assets"], standalone_candidates(release, pins)):
+            url = ("https://github.com/astral-sh/python-build-standalone/releases/download/" +
+                   pins["release_tag"] + "/" + urllib.parse.quote(pin["name"], safe=""))
+            row = {"name": pin["name"], "url": url, "expected_sha256": pin["sha256"],
+                   "expected_size_bytes": pin["size_bytes"],
                    "published_size_bytes": asset["size"], "published_digest": asset.get("digest"),
                    "downloaded": False}
             try:
+                if asset["size"] != pin["size_bytes"]:
+                    raise ValueError("Published size differs from pinned size")
+                digest = asset.get("digest")
+                if digest and digest != "sha256:" + pin["sha256"]:
+                    raise ValueError("Published hash differs from pinned SHA-256")
                 # Download completely, hash, then discard; never commit or upload binaries.
                 with tempfile.TemporaryDirectory(prefix="uoink-python-") as scratch:
                     target = Path(scratch) / asset["name"]
                     with request(row["url"]) as response, target.open("wb") as dest:
                         shutil.copyfileobj(response, dest)
                     row.update(size_bytes=target.stat().st_size, sha256=sha256(target))
-                    if row["size_bytes"] != asset["size"]:
-                        raise ValueError("Downloaded size differs from release metadata")
-                    digest = asset.get("digest")
-                    if digest and digest != "sha256:" + row["sha256"]:
-                        raise ValueError("Downloaded hash differs from release metadata")
+                    if row["size_bytes"] != pin["size_bytes"]:
+                        raise ValueError("Downloaded size differs from pinned size")
+                    if row["sha256"] != pin["sha256"]:
+                        raise ValueError("Downloaded hash differs from pinned SHA-256")
                     row["downloaded"] = True
             except Exception as exc:
-                row["error"] = f"{type(exc).__name__}: {exc}"
+                row.update(standalone_error(exc))
             report["candidates"].append(row)
             print(json.dumps(row), flush=True)
             write_json(output / "python-standalone.json", report)
-        if not report["candidates"]:
-            report["error"] = "Latest release has no matching Python 3.13 install_only candidates"
     except Exception as exc:
-        report["error"] = f"{type(exc).__name__}: {exc}"
+        report.update(standalone_error(exc))
+        print(json.dumps({key: value for key, value in report.items() if key != "candidates"}), flush=True)
     write_json(output / "python-standalone.json", report)
     return report
 

@@ -6,7 +6,7 @@
     "last==3.0": "last-3.0-py3-none-any.whl"
   },
   "release": {
-    "tag_name": "fixture-release",
+    "tag_name": "20261001",
     "html_url": "https://example.invalid/release",
     "assets": [
       {"name": "cpython-3.13.15+20261001-aarch64-apple-darwin-install_only.tar.gz", "size": 7, "browser_download_url": "https://example.invalid/python"},

@@ -566,9 +566,13 @@ def _is_console_host(exe: str) -> bool:
 
 
 def _creation_identity_equal(actual, expected) -> bool:
-    """Exact process-creation identity. One millisecond is a different process."""
+    """Exact recorded process-creation identity, including Darwin microseconds."""
     if actual is None or expected is None:
         return False
+    if sys.platform == "darwin":
+        from _platform import darwin_creation_us
+        value = darwin_creation_us(actual)
+        return value is not None and value == darwin_creation_us(expected)
     try:
         return int(actual) == int(expected)
     except (TypeError, ValueError):
@@ -588,6 +592,10 @@ def _child_born_on_or_after_parent(child_created, parent_created) -> bool:
     """A child older than its parent is not that parent's child."""
     if child_created is None or parent_created is None:
         return False
+    if sys.platform == "darwin":
+        from _platform import darwin_creation_us
+        child, parent = darwin_creation_us(child_created), darwin_creation_us(parent_created)
+        return child is not None and parent is not None and child >= parent
     try:
         return int(child_created) >= int(parent_created)
     except (TypeError, ValueError):
@@ -765,7 +773,7 @@ def _windows_process_created_ms(handle) -> int | None:
     return None if value is None else (value - _FILETIME_EPOCH_OFFSET_100NS) // 10_000
 
 
-def _posix_process_created_ms(pid: int) -> int | None:
+def _posix_process_created_ms(pid: int) -> int | float | None:
     if sys.platform == "darwin":
         from _platform import darwin_created_ms as created_ms
         return created_ms(pid)
@@ -781,7 +789,7 @@ def _posix_process_created_ms(pid: int) -> int | None:
         return None
 
 
-def _process_created_ms(pid: int | None) -> int | None:
+def _process_created_ms(pid: int | None) -> int | float | None:
     if not isinstance(pid, int) or pid <= 0:
         return None
     if os.name == "nt":
@@ -797,7 +805,7 @@ def _process_created_ms(pid: int | None) -> int | None:
 
 
 def _process_liveness(
-    pid: int | None, created_ms: int | None = None, *, tolerance_ms: int = 0,
+    pid: int | None, created_ms: int | float | None = None, *, tolerance_ms: int = 0,
 ) -> str:
     """``alive``, ``dead`` or ``unknown``. PID reuse with a mismatched start time is dead.
 
@@ -809,7 +817,8 @@ def _process_liveness(
         return "dead"
     if sys.platform == "darwin":
         from _platform import darwin_liveness as liveness
-        return liveness(pid, created_ms)
+        return liveness(pid, created_ms, sys.executable, tolerance_ms=tolerance_ms,
+                        require_identity=False)
     if os.name == "nt":
         from ctypes import wintypes
         k32 = _kernel32()
@@ -1100,6 +1109,12 @@ def _write_dest_lease(dest: str, payload: dict) -> None:
 
 def _lease_holder_status(lease: dict) -> str:
     created = lease.get("created_ms")
+    if sys.platform == "darwin":
+        from _platform import darwin_creation_us
+        if created is not None and darwin_creation_us(created) is None:
+            return "unknown"
+        return _process_liveness(lease.get("pid"), created,
+                                 tolerance_ms=_PROCESS_START_TOLERANCE_MS)
     return _process_liveness(
         lease.get("pid"), created if isinstance(created, int) else None,
         tolerance_ms=_PROCESS_START_TOLERANCE_MS,
@@ -2355,6 +2370,8 @@ class _VaultIoSession:
             return True
         if self.created_ms is None:
             return False
+        if sys.platform == "darwin":
+            return _creation_identity_equal(self.writer_created_ms, self.created_ms)
         return int(self.writer_created_ms) == int(self.created_ms)
 
     def _publish_job(self, job) -> None:

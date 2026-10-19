@@ -18,8 +18,29 @@ import pytest
 import _platform
 import server
 from tests.test_c01_mcp_stdio import _StdioClient, CANONICAL_STDIO_TOOLS, CORE_STDIO_TOOLS
+from tests.test_installer_files_complete import staged_sources
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+def _copy_staged_app(app):
+    # Consume the Windows builder's real source list, including package trees
+    # and non-code resources. VERSION is generated separately by that builder.
+    for name in sorted(staged_sources() | {"VERSION"}):
+        source, target = ROOT / name, app / name
+        target.parent.mkdir(parents=True, exist_ok=True)
+        if source.is_dir():
+            shutil.copytree(source, target, dirs_exist_ok=True,
+                            ignore=shutil.ignore_patterns("__pycache__", "*.pyc"))
+        else:
+            shutil.copyfile(source, target)
+
+
+def test_readonly_fixture_uses_complete_staged_payload(tmp_path):
+    _copy_staged_app(tmp_path)
+    from tests.test_installer_files_complete import reachable_modules
+    assert all((tmp_path / path).is_file() for path in reachable_modules(ROOT))
+    assert (tmp_path / "voice_dna/VOICE-DNA.md").is_file()
 
 
 @pytest.mark.parametrize("platform", ["win32", "darwin", "linux"])
@@ -135,6 +156,9 @@ def guard(event, args):
         if isinstance(address, tuple) and (address[0] not in {"127.0.0.1", "::1"} or address[1] == 5179):
             raise AssertionError("external or production-port connection forbidden")
 sys.addaudithook(guard)
+# Portable CI intentionally has no ASR stack. Exercise its supported absence,
+# even on developer machines where importing it would load torch/model caches.
+sys.modules["whisperx"] = None
 # Exercise Darwin's resource/state policy on every POSIX host. On Darwin all
 # process and filesystem calls remain native; Linux keeps its real /proc API.
 if sys.platform != "darwin":
@@ -166,10 +190,7 @@ else:
 def test_helper_and_mcp_start_from_read_only_app(tmp_path, isolated):
     app = tmp_path / "Uoink App"
     app.mkdir()
-    for source in list(ROOT.glob("*.py")) + [ROOT / "VERSION", ROOT / "topics.json"]:
-        shutil.copyfile(source, app / source.name)
-    for name in ("helper", "migrations", "defaults", "assets", "extension", "skills"):
-        shutil.copytree(ROOT / name, app / name, ignore=shutil.ignore_patterns("__pycache__", "*.pyc"))
+    _copy_staged_app(app)
     files = [path for path in app.rglob("*") if path.is_file()]
     before = {str(path.relative_to(app)): hashlib.sha256(path.read_bytes()).hexdigest() for path in files}
     directories = [app, *(path for path in app.rglob("*") if path.is_dir())]

@@ -1543,7 +1543,7 @@ class ProcessIncarnation:
     root: str
     token: str
     pid: int
-    created_ms: int | None
+    created_ms: int | float | None
 
     @property
     def identity(self) -> str:
@@ -1568,7 +1568,7 @@ def _windows_process_created_ms(handle) -> int | None:
     return (value - _FILETIME_EPOCH_OFFSET_100NS) // 10_000
 
 
-def _posix_process_created_ms(pid: int) -> int | None:
+def _posix_process_created_ms(pid: int) -> int | float | None:
     if sys.platform == "darwin":
         from _platform import darwin_created_ms as created_ms
         return created_ms(pid)
@@ -1584,7 +1584,7 @@ def _posix_process_created_ms(pid: int) -> int | None:
         return None
 
 
-def _current_process_created_ms() -> int | None:
+def _current_process_created_ms() -> int | float | None:
     try:
         if os.name == "nt":
             import ctypes
@@ -1596,12 +1596,12 @@ def _current_process_created_ms() -> int | None:
         return None
 
 
-def _process_alive(pid: int, created_ms: int | None) -> str:
+def _process_alive(pid: int, created_ms: int | float | None, executable: str | None = None) -> str:
     """``alive``, ``dead`` or ``unknown`` for a persisted pid. Never signals
     the process; on Windows ``os.kill`` would terminate it."""
     if sys.platform == "darwin":
         from _platform import darwin_liveness as liveness
-        return liveness(pid, created_ms)
+        return liveness(pid, created_ms, executable or sys.executable)
     try:
         if os.name == "nt":
             import ctypes
@@ -1701,6 +1701,8 @@ def instance_liveness(identity: Any, root) -> str:
     if type(pid) is not int or pid <= 0 or pid == os.getpid():
         return "unknown"
     created = record.get("created_ms")
+    if sys.platform == "darwin":
+        return _process_alive(pid, created)
     return _process_alive(pid, created if type(created) is int else None)
 
 
@@ -1942,7 +1944,7 @@ def current_capture_context() -> dict | None:
     return getattr(_CAPTURE_CONTEXT, "value", None)
 
 
-def _process_created_ms(pid: int) -> int | None:
+def _process_created_ms(pid: int) -> int | float | None:
     try:
         if os.name == "nt":
             import ctypes
@@ -1984,7 +1986,8 @@ def _child_record_bound(record: dict | None, start_id: str) -> bool:
 
 def _child_entry_valid(child) -> bool:
     """AS-6 (AS-02b): a child entry certifies anything only when its identity
-    fields are present and typed (positive int pid, int or None created_ms)
+    fields are present and typed (positive int pid, birth timestamp or None;
+    Darwin timestamps retain fractional milliseconds)
     and its exit stamp is an int or None. ``ended_ms=false``, a string, or an
     entry without identity is damage and keeps the start unknown."""
     if type(child) is not dict:
@@ -1993,8 +1996,13 @@ def _child_entry_valid(child) -> bool:
     if type(pid) is not int or pid <= 0:
         return False
     created = child.get("created_ms")
-    if created is not None and type(created) is not int:
-        return False
+    if created is not None:
+        if sys.platform == "darwin":
+            from _platform import darwin_creation_us
+            if darwin_creation_us(created) is None:
+                return False
+        elif type(created) is not int:
+            return False
     ended = child.get("ended_ms")
     if ended is not None and (type(ended) is not int or ended < 0):
         return False
@@ -2060,6 +2068,12 @@ def record_child_start(root, start_id: str, pid: int, instance: str | None) -> N
         children.append({"pid": int(pid), "created_ms": _process_created_ms(int(pid)),
                          "instance": instance, "started_ms": int(time.time() * 1000),
                          "ended_ms": None})
+        if sys.platform == "darwin":
+            from _platform import darwin_observe
+            # Media children can be ffmpeg as well as Python. Persist the
+            # executable and birth from the same native observation.
+            observed = darwin_observe(int(pid), with_executable=True)
+            children[-1].update(created_ms=observed.created_ms, executable=observed.executable)
         record["children"] = children[-50:]
         record["unresolved_launch"] = False
         record.pop("unresolved_instance", None)
@@ -2108,7 +2122,11 @@ def child_ownership_liveness(root, start_id: str) -> str:
             continue
         pid = child["pid"]
         created = child.get("created_ms")
-        state = _process_alive(pid, created)
+        if sys.platform == "darwin":
+            executable = child.get("executable")
+            state = _process_alive(pid, created, executable) if executable else "unknown"
+        else:
+            state = _process_alive(pid, created)
         if state == "alive":
             return "alive"
         if state == "unknown":

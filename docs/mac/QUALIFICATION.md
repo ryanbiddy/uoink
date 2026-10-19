@@ -1,4 +1,59 @@
-# macOS qualification, pass 2
+# macOS qualification, pass 2 repair
+
+The repair follows hosted arm64 run **39215500494** at commit `954198d`.
+Import smoke passed with 91 full / 35 core tools and every dependency pin
+resolved. Both portable Python versions had the same six failures. The
+standalone download failed with HTTP 403, `rate limit exceeded`.
+
+| Finding | Root cause and repair |
+| --- | --- |
+| Two zombie/exit assertions | The fixture supplied Linux `/proc` text but left `sys.platform` as Darwin. It now explicitly selects Linux. Separate Darwin fixtures verify `SZOMB` (5) and `ESRCH` before executable lookup; a native test waits for an exited child without reaping it first. Isolation now uses the same complete native observation as the other consumers. |
+| Two read-only app startups | The hand-written copy list omitted `uoink_core` and `voice_dna/VOICE-DNA.md`. The fixture now consumes `build.ps1`'s staging list through the existing installer completeness helper. A portable completeness assertion checks all reachable modules and the voice resource. Startup deliberately exercises WhisperX being unavailable. |
+| Resident-helper assertion | The test supplied only the legacy PID file and mocked legacy probes. Darwin requires `runtime-identity.json`. Separate fixtures now exercise both contracts, including a birth mismatch of one microsecond; the native child case also checks resident detection. |
+| Live vault worker reported absent | The Darwin adapter required a birth identity even for a PID-only liveness query. Mirror probes now explicitly allow that query, while ownership checks still require a birth timestamp. |
+| Lost birth precision | `created_ms` truncated native microseconds. Darwin records now retain fractional milliseconds and compare integer microseconds after JSON round-trip. Isolation parsing, mirror comparisons, subscription records and the receipt adapter preserve the fraction. Windows timestamps remain integers. |
+| Inconsistent executable and lease checks | Mirror and subscriptions now request executable-bound observations through the shared adapter. Subscription children persist their own executable, including ffmpeg. Missing child executable evidence remains unknown. Mirror passes its lease tolerance through in milliseconds; ownership defaults to zero. |
+| Standalone download failure | The unauthenticated moving release endpoint hit GitHub's rate limit. `standalone-python.json` pins release `20261013`, both Python 3.13.16 arm64 asset names, sizes and SHA-256 values from the successful run-1 report. CI supplies its token through the environment for API metadata only. HTTP failures print their status and persist it in the report; pinned hashes are mandatory even if GitHub omits a digest. |
+| Linux qualification unit failure | Wheel-set validation imported pip's private vendored parser. It now uses `packaging.version`, with a regression that makes pip unavailable. |
+| Moving qualification tooling | `build-tooling.txt` hashes pip 26.1.2, setuptools 83.0.0, wheel 0.47.0 and packaging 26.2. Workflow and source builds use that file. Portable tests pin pytest 9.1.1, Pillow 13.0.0 and mcp 1.30.0, the versions observed in both hosted legs. |
+
+The local repair checks use the requested Windows interpreter, BelowNormal
+priority, `IG_FORBIDDEN_LIVE`, and a guarded source copy under `%TEMP%`.
+They make no external connections and exclude the live installation and port
+5179. CI static checks pass, including 13 JavaScript parses, cached ESLint
+8.57.1, Python compilation, JSON/version checks, bash syntax and the 91/35 MCP
+inventory. The workflow YAML also parses. The full suite was not rerun.
+The 47-file targeted run completed in 17:30: **715 passed, 5 skipped,
+6 subtests passed**. The skips are two existing absent-proof-archive cases,
+the Darwin unreaped-child case and the two POSIX read-only cases. Its six
+warnings are existing `utcnow()` deprecations in podcasts/mobile playlists.
+The final adapter recheck passed **20 tests, 1 native skip**; qualification
+unit tests passed **19 tests**. These rechecks overlap the targeted selection.
+All standalone pins were compared offline with run 1's download report, and
+all four tooling hashes with retained wheel evidence or PyPI metadata.
+Repair evidence is under `%TEMP%/mr-6d91/`: `targeted.txt`, `targeted.xml`,
+`selection.txt`, `adapter-final.xml`, `native-final.xml` and `static.json`.
+WSL startup was denied by the local environment, so Linux runtime confirmation
+remains pending alongside the hosted Mac checks.
+
+Files changed for this repair:
+
+| Area | Files |
+| --- | --- |
+| Process identity | `_platform.py`, `uoink_install_isolation.py`, `library_mirror.py`, `source_subscriptions.py`, `scripts/install_receipt/process_identity.py` |
+| Qualification | `.github/workflows/mac-qualify.yml`, `scripts/mac/qualify_deps.py`, `scripts/mac/import_smoke.py`; new `scripts/mac/build-tooling.txt`, `scripts/mac/portable-tests.txt`, `scripts/mac/standalone-python.json` |
+| Tests | `tests/test_install_isolation_repair.py`, `tests/test_mac_process_identity.py`, `tests/test_mac_state.py`, `tests/test_mac_qualification.py`, `tests/test_mcp_full_toolset.py`, `tests/fixtures/mac_qualification.json` |
+| Report | `docs/mac/QUALIFICATION.md` |
+
+Hosted confirmation is still required for both Python portable suites, native
+libproc behavior (especially an unreaped child), read-only helper/MCP startup,
+the real vault worker, and authenticated downloads with the pinned hashes.
+The offline fixtures do not provide those results. Windows user behavior,
+`ci.yml`, `build.ps1`, the Windows dependency lock and third-party notices are
+unchanged. No commits, pushes or ref changes were made.
+
+The following records the pass-2 scope and earlier evidence, with the adapter
+and qualification descriptions updated for this repair.
 
 Pass 2 separates Darwin application resources from writable state, supplies
 native process identity and repairs the three missing-wheel paths in Job B.
@@ -31,8 +86,9 @@ The shared Darwin adapter in `_platform.py` uses `/usr/lib/libproc.dylib`: `proc
 `PROC_PIDTBSDINFO` supplies PID, state and birth time; `proc_pidpath` supplies the
 executable. It checks the full 136-byte BSD-info response and PID. Birth time
 retains native microseconds while collecting an executable observation, with
-before/after reads rejecting mixed incarnations. Existing records still use
-epoch milliseconds and exact comparison. Darwin neither parses locale-dependent
+before/after reads rejecting mixed incarnations. Darwin records use epoch
+milliseconds with a microsecond fraction; comparisons decode that fraction at
+native resolution. Windows records retain integer milliseconds. Darwin neither parses locale-dependent
 `ps` output nor reads `/proc`.
 
 `ESRCH` and zombies establish death. Denied access, short responses, missing
@@ -156,7 +212,8 @@ Job B builds only the two reviewed pure-Python sdists listed in
 `scripts/mac/source-wheels.json`. Their exact URLs were retained in the September
 Python qualification. The BLAKE2-256 content addresses are checked before build
 hooks run; SHA-256 is also recorded. `pip wheel --no-deps --no-build-isolation
---no-index` uses build-tool versions read directly from `build.ps1`. There is no
+--no-index` uses the hashed `scripts/mac/build-tooling.txt` lock, whose versions
+are checked against `build.ps1` by an offline test. There is no
 generic source fallback for missing native wheels.
 
 For NLTK, Job B downloads upstream 3.10.3 with the existing builder's SHA-256
@@ -168,14 +225,14 @@ canonical system temporary paths, resolving `/var` before the no-linked-ancestor
 checks; Windows build scratch is unchanged. Build provenance is retained in
 `source-builds.json`. No real archive was downloaded or built during local checks.
 
-The standalone probe queries the latest public
-`astral-sh/python-build-standalone` release. It downloads all matching Python
-3.13 `aarch64-apple-darwin` `install_only` and `install_only_stripped` candidates,
-records their release/name/URL, byte size and SHA-256, then discards the archives.
-It checks published size and hash when available. Missing candidates, download
-errors, and mismatches are explicit failures. This is candidate discovery, not
-a pinned runtime: the archives are neither executed nor used by A or C, which
-use `actions/setup-python`.
+The standalone probe queries the explicit `20261013` release of
+`astral-sh/python-build-standalone`. It downloads only the two Python 3.13.16
+arm64 assets in `standalone-python.json`, verifies their pinned sizes and hashes,
+then discards the archives. Those pins come from the successful download report
+in run **39203865751**, where computed hashes matched published digests. Missing
+assets, changed metadata, HTTP errors and changed bytes fail qualification.
+The archives are neither executed nor used by A or C, which use
+`actions/setup-python`.
 
 Import discovery follows statically named local imports recursively from `server`,
 `uoink_mcp`, and the tray, splash, and dashboard entry modules. Conditional
@@ -204,8 +261,8 @@ belong to pass 12. If safe Darwin mirror publication is not proven, the Mac
 release must disable mirroring through an explicit capability gate. Passing
 these jobs alone cannot justify shipping it enabled.
 
-The qualification helper's offline fixtures use the standard library and pip's
-vendored version parser:
+The qualification helper's offline fixtures use the standard library and
+`packaging`'s version parser; they do not import or execute pip:
 
 ```text
 python -B tests/test_mac_qualification.py
@@ -220,7 +277,8 @@ installation access, external connections and port 5179. This keeps existing
 source-adjacent Windows test writes out of the worktree. Short temporary test
 paths are needed for the existing Windows mirror's long staging filenames.
 
-The requested interpreter reports Python 3.14.6. Local static checks pass:
+The original pass-2 verification below predates this repair. The requested
+interpreter reports Python 3.14.6. Local static checks pass:
 backend compilation, JSON/version checks, all 13 extension JS parses, cached
 ESLint 8.57.1 `no-undef`, the noisy-log guard, bash syntax and MCP inventory
 (91 full / 35 core). Shellcheck is unavailable, so the bash check uses CI's
