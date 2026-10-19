@@ -1455,7 +1455,8 @@ def _terminate_owned(identity: dict) -> bool:
             # Register before signaling: libproc can report ESRCH while exit
             # is still becoming waitable. NOTE_EXIT is the completion event;
             # a liveness snapshot alone must not release the identity file.
-            with select.kqueue() as queue:
+            queue = select.kqueue()
+            try:
                 event = select.kevent(pid, filter=select.KQ_FILTER_PROC,
                                       flags=select.KQ_EV_ADD | select.KQ_EV_ONESHOT,
                                       fflags=select.KQ_NOTE_EXIT)
@@ -1469,6 +1470,8 @@ def _terminate_owned(identity: dict) -> bool:
                 events = queue.control(None, 1, _STOP_WAIT_MS / 1000)
                 return any(event.ident == pid and event.fflags & select.KQ_NOTE_EXIT
                            for event in events)
+            finally:
+                queue.close()
         if _pid_identity_liveness(pid, created_ms, expected_exe) != "alive":
             return False
         os.kill(pid, 15)

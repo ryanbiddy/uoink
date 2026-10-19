@@ -5,6 +5,7 @@ from pathlib import Path
 import select
 import subprocess
 import sys
+import time
 
 import pytest
 
@@ -42,52 +43,72 @@ def locked():
             service._ledger_lock_release(fd, acquired)
     else:
         owner = mirror._DestExclusionOwner(str(root), 10)
-        owner.acquire()
+        owner.start_wait()
         try:
             yield mirror._dest_lock_path(str(root))
         finally:
             owner.release()
-print('attempting', flush=True)
-with locked() as path:
-    st = path.stat()
-    print(json.dumps([st.st_dev, st.st_ino]), flush=True)
-    if mode == 'hold':
-        sys.stdin.readline()
+def send(event, **fields):
+    print(json.dumps({'event': event, **fields}), flush=True)
+send('attempting')
+try:
+    with locked() as path:
+        st = path.stat()
+        send('acquired', inode=[st.st_dev, st.st_ino])
+        if mode == 'hold':
+            sys.stdin.readline()
+except BaseException as exc:
+    send('error', error=type(exc).__name__, message=str(exc))
+    raise
 '''
 
 
-def read(proc):
-    assert select.select([proc.stdout], [], [], 15)[0], "lock worker stalled"
-    return proc.stdout.readline().strip()
+def read(proc, expected):
+    # Read a bounded, newline-framed message without a buffered readline
+    # hiding the next frame from select or hanging on an incomplete frame.
+    deadline = time.monotonic() + 15
+    data = bytearray()
+    while len(data) < 65536:
+        remaining = max(0, deadline - time.monotonic())
+        assert select.select([proc.stdout], [], [], remaining)[0], (
+            f"lock worker stalled waiting for {expected}: {data!r}")
+        byte = os.read(proc.stdout.fileno(), 1)
+        assert byte, f"lock worker closed before {expected} (exit={proc.poll()}): {data!r}"
+        if byte == b"\n":
+            message = json.loads(data)
+            assert message.get("event") == expected, message
+            return message
+        data.extend(byte)
+    pytest.fail("lock worker frame exceeded 64 KiB")
 
 
 @pytest.mark.skipif(os.name == "nt", reason="native fcntl contention and recovery")
 @pytest.mark.parametrize("kind", ["capture", "work", "ledger", "admission"])
 def test_lock_contention_holder_death_and_restart(tmp_path, kind):
     def spawn(mode):
-        return subprocess.Popen([sys.executable, "-c", CHILD, str(tmp_path), kind, mode],
+        return subprocess.Popen([sys.executable, "-u", "-c", CHILD, str(tmp_path), kind, mode],
                                 stdin=subprocess.PIPE, stdout=subprocess.PIPE, bufsize=0)
     processes = []
     try:
         holder = spawn("hold")
         processes.append(holder)
-        assert read(holder) == b"attempting"
-        inode = json.loads(read(holder))
+        read(holder, "attempting")
+        inode = read(holder, "acquired")["inode"]
         contender = spawn("hold")
         processes.append(contender)
-        assert read(contender) == b"attempting"
+        read(contender, "attempting")
         assert not select.select([contender.stdout], [], [], .2)[0]
         assert holder.poll() is None and contender.poll() is None
         holder.kill()
         holder.wait(timeout=10)
-        assert json.loads(read(contender)) == inode
+        assert read(contender, "acquired")["inode"] == inode
         contender.stdin.write(b"release\n")
         contender.stdin.flush()
         assert contender.wait(timeout=10) == 0
         restarted = spawn("once")
         processes.append(restarted)
-        assert read(restarted) == b"attempting"
-        assert json.loads(read(restarted)) == inode
+        read(restarted, "attempting")
+        assert read(restarted, "acquired")["inode"] == inode
         assert restarted.wait(timeout=10) == 0
     finally:
         for proc in processes:

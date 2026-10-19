@@ -111,6 +111,9 @@ def network(monkeypatch):
     monkeypatch.setattr(server.source_subscriptions, "resolve_public_http_url",
                         lambda url, **kwargs: url)
     monkeypatch.setattr(subprocess, "Popen", Process)
+    # Fake the command boundary on POSIX too. Patching Popen alone intercepts
+    # the supervisor, whose handshake/streams this command fake cannot model.
+    monkeypatch.setattr("uoink_processes.PosixChild", Process)
     monkeypatch.setattr(subprocess, "run", unexpected_io)
     monkeypatch.setattr(subprocess, "check_output", unexpected_io)
     monkeypatch.setattr(server.urllib.request, "urlopen", unexpected_io)

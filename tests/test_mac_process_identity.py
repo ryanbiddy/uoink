@@ -108,20 +108,29 @@ def test_darwin_lost_creation_lookup_never_authorizes_ownership(monkeypatch):
     assert isolation._pid_liveness(123, 456.001) == "unknown"
 
 
-@pytest.mark.parametrize("alive, exited", [(True, True), (True, False), (False, False)])
-def test_darwin_stop_registers_exit_before_signal_and_requires_event(monkeypatch, alive, exited):
+@pytest.mark.parametrize("alive, exited, error_at", [
+    (True, True, None), (True, False, None), (False, False, None),
+    (True, False, "register"), (True, False, "kill"), (True, False, "wait"),
+])
+def test_darwin_stop_registers_exit_before_signal_and_requires_event(
+        monkeypatch, alive, exited, error_at):
     import select
     effects = []
+
+    def effect(name):
+        effects.append(name)
+        if name == error_at:
+            raise OSError("fixture " + name + " failure")
+
     class Queue:
-        def __enter__(self):
-            return self
-        def __exit__(self, *args):
+        # Real kqueue objects have close(), but no context manager methods.
+        def close(self):
             effects.append("close")
         def control(self, changes, count, timeout):
             if changes:
-                effects.append("register")
+                effect("register")
                 return []
-            effects.append("wait")
+            effect("wait")
             assert timeout == isolation._STOP_WAIT_MS / 1000
             return [SimpleNamespace(ident=123, fflags=4)] if exited else []
     monkeypatch.setattr(select, "kqueue", Queue, raising=False)
@@ -129,16 +138,18 @@ def test_darwin_stop_registers_exit_before_signal_and_requires_event(monkeypatch
     for name, value in {"KQ_FILTER_PROC": 1, "KQ_EV_ADD": 1,
                         "KQ_EV_ONESHOT": 2, "KQ_NOTE_EXIT": 4}.items():
         monkeypatch.setattr(select, name, value, raising=False)
-    monkeypatch.setattr(isolation, "os", SimpleNamespace(name="posix", kill=lambda *a: effects.append("kill")))
+    monkeypatch.setattr(isolation, "os", SimpleNamespace(name="posix", kill=lambda *a: effect("kill")))
     monkeypatch.setattr(isolation, "sys", SimpleNamespace(platform="darwin"))
     def probe(*args):
         effects.append("identity")
         return "alive" if alive else "unknown"
     monkeypatch.setattr(isolation, "_pid_identity_liveness", probe)
     result = isolation._terminate_owned({"pid": 123, "created_ms": 456.001, "executable": "fixture"})
-    assert result is (alive and exited)
-    assert effects == (["register", "identity", "kill", "wait", "close"] if alive
-                       else ["register", "identity", "close"])
+    assert result is (alive and exited and error_at is None)
+    expected = ["register", "identity", "kill", "wait"] if alive else ["register", "identity"]
+    if error_at is not None:
+        expected = expected[:expected.index(error_at) + 1]
+    assert effects == [*expected, "close"]
 
 
 def test_darwin_death_precedes_executable_query(monkeypatch):
