@@ -162,7 +162,7 @@ def media_smoke(contents: Path, scratch: Path, env: dict) -> dict:
     # Test the resolver and actual cached self-test in the bundled interpreter.
     run([str(python), "-B", "-s", "-c", "import sys; sys.path.insert(0, sys.argv[1]); "
          "import _platform; from pathlib import Path; "
-         "assert Path(_platform.media_binary('ffmpeg')) == Path(sys.argv[2]); "
+         "assert Path(_platform.media_binary('ffmpeg')).resolve() == Path(sys.argv[2]).resolve(), (_platform.media_binary('ffmpeg'), sys.argv[2]); "
          "assert _platform.media_capability()['available']; "
          "assert _platform.alignment_capability()['available'] == (sys.argv[3] == 'True')",
          str(contents / "Resources"), ffmpeg, str(qualification["available"])])
