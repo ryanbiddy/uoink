@@ -76,5 +76,177 @@
     "x_extractor.py",
     "yoink_mcp.py",
     "yt_extract.py"
-  ]
+  ],
+  "ffmpeg": {
+    "minimum_macos": "14.0",
+    "common_flags": [
+      "--disable-gpl",
+      "--disable-nonfree",
+      "--disable-version3",
+      "--disable-autodetect",
+      "--disable-doc",
+      "--disable-debug",
+      "--disable-everything",
+      "--disable-programs",
+      "--disable-network",
+      "--enable-zlib"
+    ],
+    "components": {
+      "demuxer": [
+        "mov",
+        "matroska",
+        "mp3",
+        "aac",
+        "ogg",
+        "wav",
+        "flac",
+        "mpegts",
+        "image2",
+        "jpeg_pipe",
+        "png_pipe",
+        "webp_pipe"
+      ],
+      "decoder": [
+        "aac",
+        "aac_latm",
+        "mp3float",
+        "opus",
+        "vorbis",
+        "flac",
+        "alac",
+        "pcm_u8",
+        "pcm_s16le",
+        "pcm_s16be",
+        "pcm_s24le",
+        "pcm_s32le",
+        "pcm_f32le",
+        "pcm_f64le",
+        "h264",
+        "vp8",
+        "vp9",
+        "mjpeg",
+        "png",
+        "webp",
+        "ppm"
+      ],
+      "parser": [
+        "aac",
+        "aac_latm",
+        "mpegaudio",
+        "opus",
+        "vorbis",
+        "flac",
+        "h264",
+        "vp8",
+        "vp9",
+        "mjpeg",
+        "png"
+      ],
+      "filter": [
+        "abuffer",
+        "abuffersink",
+        "aformat",
+        "anull",
+        "aresample",
+        "atrim",
+        "buffer",
+        "buffersink",
+        "format",
+        "null",
+        "scale",
+        "trim",
+        "transpose",
+        "hflip",
+        "vflip"
+      ],
+      "protocol": [
+        "file",
+        "pipe"
+      ]
+    },
+    "cli": {
+      "version": "8.1.2",
+      "url": "https://ffmpeg.org/releases/ffmpeg-8.1.2.tar.xz",
+      "size_bytes": 11710924,
+      "sha256": "464beb5e7bf0c311e68b45ae2f04e9cc2af88851abb4082231742a74d97b524c",
+      "signing_key_fingerprint": "FCF986EA15E6E293A5644F10B4322F04D67658D8",
+      "flags": [
+        "--enable-static",
+        "--disable-shared",
+        "--enable-ffmpeg",
+        "--enable-ffprobe",
+        "--enable-network",
+        "--enable-securetransport"
+      ],
+      "components": {
+        "demuxer": [
+          "hls",
+          "concat",
+          "srt",
+          "webvtt",
+          "ass",
+          "lrc"
+        ],
+        "decoder": [
+          "srt",
+          "subrip",
+          "webvtt",
+          "ass",
+          "text"
+        ],
+        "encoder": [
+          "pcm_s16le",
+          "pcm_f32le",
+          "mjpeg",
+          "srt"
+        ],
+        "muxer": [
+          "wav",
+          "s16le",
+          "f32le",
+          "image2",
+          "srt",
+          "mp4",
+          "mov",
+          "ipod",
+          "matroska",
+          "webm",
+          "mpegts",
+          "adts",
+          "mp3",
+          "ogg"
+        ],
+        "filter": [
+          "fps"
+        ],
+        "bsf": [
+          "aac_adtstoasc",
+          "h264_mp4toannexb",
+          "vp9_superframe",
+          "extract_extradata"
+        ],
+        "protocol": [
+          "http",
+          "https",
+          "tcp",
+          "tls",
+          "crypto"
+        ]
+      }
+    },
+    "shared": {
+      "version": "7.1.5",
+      "url": "https://ffmpeg.org/releases/ffmpeg-7.1.5.tar.xz",
+      "size_bytes": 11050340,
+      "sha256": "de668509caf9e35e3cd162473441fdb29538c6d96ed080292b3cf9e6fc5d558f",
+      "signing_key_fingerprint": "FCF986EA15E6E293A5644F10B4322F04D67658D8",
+      "flags": [
+        "--enable-shared",
+        "--disable-static",
+        "--enable-pic",
+        "--install-name-dir=@rpath"
+      ],
+      "components": {}
+    }
+  }
 }

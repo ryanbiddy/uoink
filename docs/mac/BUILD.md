@@ -3,21 +3,24 @@
 Run **macOS qualification** (`.github/workflows/mac-qualify.yml`) on a `mac/**`
 branch or with `workflow_dispatch`. Its `mac-build` job creates an unsigned
 Apple Silicon `Uoink.app` and uploads `uoink-<VERSION>-macos-arm64.tar.gz` after
-the bundle smoke test passes. This work has been checked offline on Windows;
-the new hosted build and smoke test still need their first run.
+the bundle smoke test passes. The preceding bundle build and smoke passed
+on the hosted runner without FFmpeg. Pass 6c adds the source-built media
+payload; that hosted run is pending.
 
 The archive is a CI test artifact. It has no Developer ID signature,
 notarization, DMG, LaunchAgent, menu bar, first-run UI or app icon. Darwin's
 automatic tray and splash startup are disabled until the native UI pass.
-The plist currently requires macOS 15, the tested runner target. The plan's
-macOS 14 floor remains provisional; wheel filenames alone cannot establish it.
+The plist and FFmpeg deployment flags target macOS 14. The runner tests
+macOS 15; Python and wheel compatibility on macOS 14 remains a release gate.
 
 ## Build locally on a disposable macOS arm64 machine
 
 Use the `mac-qualified-wheels` artifact from the same workflow revision:
 
 ```sh
-bash build-mac.sh --wheels "$RUNNER_TEMP/mac-wheels" --output "$RUNNER_TEMP/mac-app"
+python3 -B scripts/mac/build_ffmpeg.py --output "$RUNNER_TEMP/mac-ffmpeg"
+bash build-mac.sh --wheels "$RUNNER_TEMP/mac-wheels" \
+  --ffmpeg-output "$RUNNER_TEMP/mac-ffmpeg" --output "$RUNNER_TEMP/mac-app"
 python3 -B scripts/mac/bundle_smoke.py \
   --app "$RUNNER_TEMP/mac-app/Uoink.app" \
   --output "$RUNNER_TEMP/mac-smoke"
@@ -34,7 +37,9 @@ The app's small shell launcher has no system-Python fallback:
 Uoink.app/Contents/
   Info.plist
   MacOS/Uoink
+  Helpers/ffmpeg, ffprobe        static LGPL FFmpeg 8.1.2 CLI
   Frameworks/Python/             relocatable Python and installed wheels
+  Frameworks/FFmpeg7/            LGPL 7.1.5 dylibs, only if TorchCodec decodes
   Resources/
     server.py, uoink_mcp.py, remaining application modules, uoink, VERSION
     helper/, uoink_core/, migrations/, defaults/, assets/, extension/
@@ -74,6 +79,12 @@ qualified by this build job.
   The Windows builder and installer are unchanged. Tests compare the manifests
   and verify that every reachable local import is included. Copying uses
   tracked files only; caches, state and credential files are excluded.
+- `scripts/mac/payload.json` also pins both FFmpeg source tarballs, sizes,
+  SHA-256 hashes and signing-key fingerprint. `build_ffmpeg.py` verifies both
+  byte checks before extraction and builds explicit LGPL components. The
+  workflow caches verified output by pins, flags, recipe, compiler and SDK.
+  See [FFMPEG.md](../../scripts/mac/FFMPEG.md) for component reasons, exact
+  inputs, network use, source availability and the legal-review boundary.
 - Build tooling is hash-pinned in `scripts/mac/build-tooling.txt`. The hosted
   `macos-15` image, Xcode/SDK and Actions major tags are not immutable inputs;
   their observed versions are recorded. Tar timestamps and build metadata also
@@ -109,19 +120,28 @@ on Darwin prints the refusal and exits 1; CLI `status` includes capabilities.
 Windows and Linux keep their existing mirror behavior and safety checks.
 Separate taste/user/script copying is outside this corpus-mirror capability.
 
-**Media features need FFmpeg** (`media_requires_ffmpeg`) in this app bundle.
-No reviewed, checksum-pinned macOS FFmpeg input was present in the offline
-checkout. This pass therefore uses the explicitly permitted deferral instead
-of copying Homebrew executables or inventing a source checksum. Frame capture,
-podcast audio download and audio transcription refuse before their media work.
-The dashboard, `/health`, CLI status and MCP initialize report the limitation.
-Source checkouts and Windows/Linux keep their existing media behavior.
+**Media availability is tested at runtime.** Darwin resolves FFmpeg only from
+app-owned `Helpers`, passes that location to yt-dlp and ignores ambient yt-dlp
+configuration. Both executables must pass `-version`, and FFmpeg must decode
+generated audio. Failure retains `media_requires_ffmpeg`. Source checkouts
+must stage their own `Helpers`; Windows/Linux retain their existing behavior.
 
-`notices/FFMPEG.md` records this decision and the proposed LGPL source-build
-configuration. `notices/build.json` records FFmpeg as absent, with null source,
-hash and configure flags. `notices/packages.json`, `resolved-wheels.json` and
-the installed wheel license files describe the actual Python payload. PyAV's
-bundled libraries do not qualify the missing CLI or TorchCodec ABI.
+Darwin podcasts use WAV because no native MP3 encoder exists in this build.
+Video selection accepts H.264/VP8/VP9 and rejects AV1/unknown codecs. Chunked
+downloads require FFmpeg HTTPS input, explicitly enabled through Apple Secure
+Transport. There are no autodetected third-party libraries.
+
+**WhisperX/alignment has a separate gate.** The builder patches FFmpeg 7 and
+TorchCodec loader paths, ad-hoc signs changed binaries, and runs a generated
+TorchCodec decode. A failed probe removes the shared runtime and records
+`alignment_requires_torchcodec` plus its cause in `notices/torchcodec.json`.
+A passing CLI test alone cannot enable WhisperX. PyAV's own wheel libraries
+remain independently inventoried; they do not substitute for this probe.
+
+`notices/ffmpeg/` records source pins, exact configure commands, actual enabled
+components, compiler/SDK, build logs, LGPL-2.1 texts and build scripts.
+`notices/build.json` records which payloads were retained. Source/relinking
+and signing obligations still require legal review before distribution.
 
 ## Hosted acceptance and evidence
 
@@ -147,13 +167,17 @@ bytes and entry count. The compressed archive preserves modes and symlinks.
 
 After relocation, the job must prove bundled helper `/health`, bundled CLI
 `status`, exact bundled MCP `tools/list` inventories (91/35), a Pillow image
-write/read, and an unchanged app tree. The `mac-build-evidence` artifact keeps
+write/read, both bundled media programs, generated audio converted to 16 kHz
+WAV, a frame extracted from generated video, media availability and an
+unchanged app tree. Retained TorchCodec libraries must decode again after
+relocation without `DYLD_*` variables or Homebrew in PATH. The `mac-build-evidence` artifact keeps
 the reports, hash lock, environment/SDK record and smoke output. Failed smoke
 tests do not publish the app archive.
 
-This does not prove decoding, ASR/alignment, minimum-OS compatibility,
+Generated smoke fixtures do not prove all compressed formats, live HTTPS/HLS
+section downloads, model ASR/alignment, minimum-OS compatibility,
 Gatekeeper acceptance, native UI, Chrome onboarding or real client setup.
-Those remain release gates alongside FFmpeg qualification, signing,
+Those remain release gates alongside real-format media acceptance, signing,
 notarization, DMG packaging, LaunchAgent lifecycle and interactive Mac testing.
 
 The portable suite explicitly skips the older enable/publication wiring tests
@@ -161,11 +185,17 @@ and publication-dependent mirror cases on Darwin. Their Windows/Linux coverage
 is retained; `test_mac_capabilities.py` verifies Darwin refusals separately.
 Those skips are intentional feature deferral, not Mac publication evidence.
 
-Offline Windows verification for this change passed 167 tests and 19 subtests,
-covering capabilities, real MCP SDK dispatch, dashboard controls, builder/lock
-logic, qualification fixtures, Windows mirror behavior, settings, CLI and
-podcast/Whisper regressions. Python compilation, YAML parsing, shell syntax,
-extension/dashboard JavaScript syntax, JSON/version checks and the 91/35 MCP
-inventory also passed. The source payload inventory contains 160 tracked files.
-ESLint was unavailable locally and was not downloaded. The full test suite and
-the new macOS build were not run on this machine.
+Pass 6c offline verification covers source pins and archive safety, cache
+integrity, bundled resolution, decode-gated capabilities, format selection,
+TorchCodec loader rewrites and existing Windows media regressions. Local
+checks cannot compile or run the macOS binaries. The hosted run must produce
+the build, native inventory and relocated smoke evidence described above.
+
+The targeted Windows run passed 229 tests and 19 subtests. One existing
+real-FFmpeg fixture skipped because no FFmpeg was installed locally. Python
+compilation, YAML/JSON/version checks, five shell scripts and 36 workflow run
+blocks passed syntax checks. All 13 extension JavaScript files passed parsing
+and the cached ESLint 8 checks from `ci.yml`. The MCP inventory remains 91 full
+/ 35 core, and the source payload remains 160 tracked files. Network access
+was blocked during the Python tests; no dependencies were downloaded. The
+full portable suite and the new hosted macOS build were not run locally.

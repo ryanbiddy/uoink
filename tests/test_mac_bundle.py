@@ -342,7 +342,7 @@ def test_smoke_success_requires_completed_checks_and_immutable_bundle(monkeypatc
     (app / "payload").write_text("original")
     output = tmp_path / "evidence"
     capabilities = {"library_mirror": {"code": "library_mirror_unavailable_macos"},
-                    "media": {"code": "media_requires_ffmpeg"}}
+                    "media": {"available": True, "code": None}}
 
     class Socket:
         def __enter__(self):
@@ -361,7 +361,8 @@ def test_smoke_success_requires_completed_checks_and_immutable_bundle(monkeypatc
         if command[-1] == "status":
             mirror = "mirror" in command
             return SimpleNamespace(returncode=1 if mirror else 0, stderr="",
-                stdout=json.dumps({"ok": not mirror, "code": "library_mirror_unavailable_macos"}))
+                stdout=json.dumps({"ok": not mirror, "code": "library_mirror_unavailable_macos",
+                                   "capabilities": capabilities}))
         if fail:
             raise RuntimeError("synthetic Pillow failure")
         if mutate:
@@ -375,6 +376,7 @@ def test_smoke_success_requires_completed_checks_and_immutable_bundle(monkeypatc
     monkeypatch.setattr(bundle_smoke.subprocess, "Popen", lambda *args, **kwargs: SimpleNamespace(poll=lambda: None))
     monkeypatch.setattr(bundle_smoke.subprocess, "run", run)
     monkeypatch.setattr(bundle_smoke, "stdio", lambda *args: {"ok": True})
+    monkeypatch.setattr(bundle_smoke, "media_smoke", lambda *args: {"ok": True})
     monkeypatch.setattr(bundle_smoke, "stop", lambda proc: None)
     if mutate or fail:
         with pytest.raises(AssertionError if mutate else RuntimeError):

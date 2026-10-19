@@ -17,8 +17,10 @@ import logging
 import ctypes
 import errno
 import os
+import io
 import subprocess
 import sys
+import wave
 from pathlib import Path
 from dataclasses import dataclass
 from functools import lru_cache
@@ -65,25 +67,116 @@ def capability_refusal(capability: dict) -> dict | None:
                       "retryable": False}}
 
 
-def media_capability() -> dict:
-    """The first Darwin bundle deliberately omits unqualified FFmpeg binaries.
-
-    Source checkouts and other platforms retain their existing media behavior.
-    Bundle identity, rather than PATH, prevents Homebrew from hiding this gap.
-    """
+def mac_bundle_contents() -> Path | None:
     if sys.platform != "darwin":
-        return {"available": True, "code": None, "reason": None}
+        return None
     resources = Path(__file__).resolve().parent
     if resources.name == "Resources" and resources.parent.name == "Contents":
+        return resources.parent
+    return None
+
+
+def media_binary(name: str) -> str:
+    """Darwin never resolves media executables through PATH or Homebrew."""
+    if name not in {"ffmpeg", "ffprobe"}:
+        raise ValueError(f"Unknown media executable: {name}")
+    if sys.platform != "darwin":
+        return name
+    contents = mac_bundle_contents()
+    # Source checkouts may stage the same Helpers layout under their root.
+    helpers = (contents or Path(__file__).resolve().parent) / "Helpers"
+    path = helpers / name
+    if path.is_symlink() or helpers.is_symlink() or not path.is_file():
+        raise FileNotFoundError(f"Bundled media executable missing: {path}")
+    return str(path)
+
+
+def ytdlp_media_args() -> list[str]:
+    if sys.platform != "darwin":
+        return []
+    contents = mac_bundle_contents()
+    helpers = (contents or Path(__file__).resolve().parent) / "Helpers"
+    # A missing explicit location makes yt-dlp refuse FFmpeg, without PATH fallback.
+    return ["--ignore-config", "--ffmpeg-location", str(helpers)]
+
+
+def video_format(default: str) -> str:
+    if sys.platform != "darwin":
+        return default
+    # No unknown-codec or unrestricted fallback: AV1/HEVC have not been enabled.
+    native = '[vcodec~="^(avc1|h264|vp0?8|vp0?9)"]'
+    return f"worst*{native}[height>=360]/worst*{native}"
+
+
+def podcast_audio_format() -> str:
+    # FFmpeg has no native MP3 encoder. WAV avoids an additional LGPL library.
+    return "wav" if sys.platform == "darwin" else "mp3"
+
+
+def _test_wav() -> bytes:
+    data = io.BytesIO()
+    with wave.open(data, "wb") as audio:
+        audio.setparams((1, 2, 8000, 0, "NONE", "not compressed"))
+        audio.writeframes(b"\x10\x00" * 800)
+    return data.getvalue()
+
+
+@lru_cache(maxsize=8)
+def _media_self_test(ffmpeg: str, ffprobe: str, identities: tuple) -> bool:
+    """Cache by executable identity; writes no files inside or outside the app."""
+    try:
+        for binary in (ffmpeg, ffprobe):
+            subprocess.run([binary, "-version"], check=True, capture_output=True, timeout=10)
+        result = subprocess.run([ffmpeg, "-v", "error", "-nostdin", "-i", "pipe:0",
+                                 "-ar", "16000", "-ac", "1", "-c:a", "pcm_s16le",
+                                 "-f", "s16le", "pipe:1"], input=_test_wav(),
+                                check=True, capture_output=True, timeout=10)
+        return len(result.stdout) == 3200 and any(result.stdout)
+    except (OSError, subprocess.SubprocessError):
+        return False
+
+
+def media_capability() -> dict:
+    """A Darwin capability is earned by the app-owned executables, never PATH."""
+    if sys.platform == "darwin":
+        try:
+            binaries = [media_binary(name) for name in ("ffmpeg", "ffprobe")]
+            identities = tuple((p.stat().st_size, p.stat().st_mtime_ns, p.stat().st_ino)
+                               for p in map(Path, binaries))
+            if _media_self_test(*binaries, identities):
+                return {"available": True, "code": None, "reason": None}
+        except OSError:
+            pass
         return {"available": False, "code": "media_requires_ffmpeg",
-                "reason": "Media features need FFmpeg. This macOS build does not include "
-                          "qualified ffmpeg/ffprobe or TorchCodec decoder libraries; "
-                          "frame extraction and audio transcription are unavailable."}
+                "reason": "Bundled ffmpeg/ffprobe are missing or failed their decode self-test. "
+                          "Media extraction is unavailable."}
+    return {"available": True, "code": None, "reason": None}
+
+
+def alignment_capability() -> dict:
+    """FFmpeg CLI availability does not establish the TorchCodec/WhisperX ABI."""
+    if sys.platform == "darwin":
+        import json
+        contents = mac_bundle_contents()
+        try:
+            report = json.loads((contents / "Resources/notices/torchcodec.json").read_text()) if contents else {}
+            libraries = report.get("libraries", [])
+            if (report.get("available") is True and libraries and
+                    all((contents / "Frameworks/FFmpeg7" / name).is_file() for name in libraries)):
+                return {"available": True, "code": None, "reason": None}
+        except (OSError, ValueError):
+            pass
+        return {"available": False, "code": "alignment_requires_torchcodec",
+                "reason": "WhisperX/alignment is unavailable: the bundled TorchCodec FFmpeg 7 "
+                          "decoder did not pass qualification. See notices/torchcodec.json."}
     return {"available": True, "code": None, "reason": None}
 
 
 def platform_capabilities() -> dict:
-    return {"library_mirror": library_mirror_capability(), "media": media_capability()}
+    result = {"library_mirror": library_mirror_capability(), "media": media_capability()}
+    if sys.platform == "darwin":
+        result["alignment"] = alignment_capability()
+    return result
 
 
 def capability_notice() -> str:

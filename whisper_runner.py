@@ -126,6 +126,8 @@ def _probe_whisperx() -> bool:
     import _platform
     if not _platform.media_capability()["available"]:
         return False
+    if not _platform.alignment_capability()["available"]:
+        return False
     try:
         import whisperx  # noqa: F401
         return True
@@ -400,6 +402,9 @@ def transcribe_audio(audio_path: Path, *,
     this does not qualify the separate VAD loader or artifact integrity."""
     import _platform
     _platform.require_media()
+    alignment = _platform.alignment_capability()
+    if not alignment["available"]:
+        raise RuntimeError(f"{alignment['code']}: {alignment['reason']}")
     audio_path = Path(audio_path)
     if not audio_path.exists():
         raise FileNotFoundError(f"audio file missing: {audio_path}")
@@ -439,7 +444,19 @@ def transcribe_audio(audio_path: Path, *,
                                       compute_type=_compute_type(device),
                                       download_root=str(_model_cache_root(data_root, model_size)),
                                       local_files_only=True)
-        result = model.transcribe(str(audio_path),
+        audio_input = str(audio_path)
+        if _platform.platform_label() == "macos":
+            # WhisperX's string loader invokes bare `ffmpeg`. Supply samples so
+            # transcription, alignment and diarization all use our resolver.
+            import numpy as np
+            import subprocess
+            decoded = subprocess.run([
+                _platform.media_binary("ffmpeg"), "-nostdin", "-v", "error",
+                "-i", str(audio_path), "-vn", "-ac", "1", "-ar", "16000",
+                "-c:a", "pcm_f32le", "-f", "f32le", "pipe:1"],
+                check=True, capture_output=True, timeout=600)
+            audio_input = np.frombuffer(decoded.stdout, dtype=np.float32).copy()
+        result = model.transcribe(audio_input,
                                     language=language)
         segments = result.get("segments") or []
         detected_lang = result.get("language") or language or "en"
@@ -465,10 +482,10 @@ def transcribe_audio(audio_path: Path, *,
                     language_code=detected_lang, device=device)
                 aligned = whisperx.align(
                     segments, align_model, align_meta,
-                    str(audio_path), device=device)
+                    audio_input, device=device)
                 diarize_pipeline = _diarization_pipeline(
                     whisperx, device=device, data_root=data_root)
-                diarize_segments = diarize_pipeline(str(audio_path))
+                diarize_segments = diarize_pipeline(audio_input)
                 aligned = whisperx.assign_word_speakers(
                     diarize_segments, aligned)
                 segments = aligned.get("segments") or segments

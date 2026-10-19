@@ -2137,7 +2137,7 @@ def _test_anthropic_key(api_key: str) -> tuple[bool, str | None, int | None]:
 # Reference: yt-dlp's twitter:api extractor-arg, values are
 #   {legacy, syndication, graphql}.
 YTDLP_CMD = [sys.executable, "-m", "yt_dlp",
-              "--extractor-args", "twitter:api=syndication"]
+              "--extractor-args", "twitter:api=syndication", *_platform.ytdlp_media_args()]
 
 # Hard cap on the video file yt-dlp downloads before ffmpeg runs. yt-dlp
 # pulls the whole file to disk first; on a small disk a few livestream-length
@@ -3757,7 +3757,7 @@ def _screenshot_ffmpeg_command(video_file: Path, interval: int,
                                output_pattern: Path) -> list[str]:
     """Build the screenshot command with an explicit full-range JPEG format."""
     return [
-        "ffmpeg", "-loglevel", "error", "-y",
+        _platform.media_binary("ffmpeg"), "-loglevel", "error", "-y",
         "-i", str(video_file),
         "-vf", f"fps=1/{max(1, int(interval))}",
         # MJPEG requires full-range YUV. Without this, limited-range yuv420p(tv)
@@ -4128,7 +4128,7 @@ def _download_thumbnail(metadata: dict, output_folder: Path, *,
     jpg_path = output_folder / "thumbnail.jpg"
     try:
         _run_subprocess(
-            ["ffmpeg", "-loglevel", "error", "-y",
+            [_platform.media_binary("ffmpeg"), "-loglevel", "error", "-y",
              "-i", str(raw_path), str(jpg_path)],
             cancel_event=cancel_event,
             check=True,
@@ -6162,7 +6162,7 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
             *YTDLP_CMD,
             # Require a video stream. Plain `worst` can pick audio-only on some
             # Shorts, which makes ffmpeg screenshot extraction fail with no packets.
-            "-f", "worst*[vcodec!=none][height>=360]/worst*[vcodec!=none]/worst",
+            "-f", _platform.video_format("worst*[vcodec!=none][height>=360]/worst*[vcodec!=none]/worst"),
             "--concurrent-fragments", "4",
             "--retries", "10",
             "--fragment-retries", "10",
@@ -12463,7 +12463,7 @@ def _build_diagnose_payload(*, public: bool, local_ui: bool = False) -> dict:
 
     # 7. ffmpeg_available
     media = _platform.media_capability()
-    status, detail = (_probe_command(["ffmpeg", "-version"]) if media["available"]
+    status, detail = (_probe_command([_platform.media_binary("ffmpeg"), "-version"]) if media["available"]
                       else ("unavailable", f"{media['reason']} ({media['code']})"))
     if status == "ok":
         add("ffmpeg_available", "ok", "ffmpeg is available" if public else detail)

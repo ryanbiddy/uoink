@@ -1426,7 +1426,8 @@ def _episode_audio_path(data_root: Path, feed_row: dict,
                         fallback=f"ep-{episode_row.get('id') or 0}")
     folder = _podcast_root(data_root) / feed_slug
     folder.mkdir(parents=True, exist_ok=True)
-    return folder / f"{ep_slug}.mp3"
+    import _platform
+    return folder / f"{ep_slug}.{_platform.podcast_audio_format()}"
 
 
 def _record_audio_result(idx, episode_id: int, *,
@@ -1489,9 +1490,8 @@ def download_episode_audio(idx, episode_id: int, *,
         return {"ok": False, "error": "audio_url is not an http(s) URL"}
 
     out_path = _episode_audio_path(Path(data_root), feed, episode)
-    # Idempotent -- skip re-download when the canonical path already
-    # has a non-zero file. yt-dlp writes a .mp3 extension after the
-    # ffmpeg post-process, so we check the .mp3 directly.
+    # Idempotent: inspect the final postprocessed path (WAV on Darwin,
+    # MP3 elsewhere), rather than yt-dlp's intermediate download.
     if out_path.exists() and out_path.stat().st_size > 0:
         _record_audio_result(idx, episode_id,
                               local_path=str(out_path),
@@ -1520,8 +1520,7 @@ def download_episode_audio(idx, episode_id: int, *,
     if episode["status"] != EPISODE_STATUS_QUEUED:
         set_episode_status(idx, episode_id, EPISODE_STATUS_QUEUED)
 
-    # Output template: drop the extension; yt-dlp adds .mp3 after
-    # ffmpeg converts. Pass the bare stem.
+    # Drop the extension; yt-dlp adds the selected format after conversion.
     out_stem = out_path.with_suffix("")
     cmd = list(ytdlp_cmd or [])
     if not cmd:
@@ -1534,13 +1533,13 @@ def download_episode_audio(idx, episode_id: int, *,
     if not cmd:
         return {"ok": False, "error": "yt-dlp command not configured"}
 
-    args = cmd + [
+    args = cmd + _platform.ytdlp_media_args() + [
         "--no-progress",
         "--extract-audio",
-        "--audio-format", "mp3",
+        "--audio-format", _platform.podcast_audio_format(),
         "--audio-quality", "0",   # use VBR best
         "--max-filesize", str(_AUDIO_MAX_BYTES),
-        # Output template: yt-dlp will append .mp3 after the postprocess
+        # yt-dlp replaces this extension after the postprocess.
         "-o", str(out_stem) + ".%(ext)s",
         "--",
         audio_url,

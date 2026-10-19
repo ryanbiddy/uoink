@@ -15,13 +15,18 @@ import tempfile
 import threading
 import time
 import urllib.request
+import wave
 
 from build_bundle import ROOT, tree_inventory
 from qualify_deps import write_json
+from ffmpeg_bundle import probe_torchcodec
 
 
 def environment(scratch: Path, port: int) -> dict:
     env = os.environ.copy()
+    for key in list(env):
+        if key.startswith("DYLD_"):
+            env.pop(key)
     for key in ("PYTHONPATH", "PYTHONHOME", "PYTHONSTARTUP", "UOINK_ISOLATED_APP_DIR"):
         env.pop(key, None)
     for key, relative in (("HOME", "home"), ("USERPROFILE", "home"), ("APPDATA", "roaming"),
@@ -31,7 +36,8 @@ def environment(scratch: Path, port: int) -> dict:
         path = scratch / relative
         path.mkdir(exist_ok=True)
         env[key] = str(path)
-    env.update(UOINK_ISOLATED_PORT=str(port), YOINK_OUTPUT_DIR=env["UOINK_OUTPUT_DIR"],
+    env.update(PATH="/usr/bin:/bin:/usr/sbin:/sbin",
+               UOINK_ISOLATED_PORT=str(port), YOINK_OUTPUT_DIR=env["UOINK_OUTPUT_DIR"],
                PYTHONDONTWRITEBYTECODE="1", PYTHONNOUSERSITE="1", HF_HUB_OFFLINE="1",
                TRANSFORMERS_OFFLINE="1", PYTHON_KEYRING_BACKEND="keyring.backends.null.Keyring")
     return env
@@ -97,7 +103,7 @@ def stdio(python: Path, resources: Path, scratch: Path, env: dict, mode: str, ou
                 "clientInfo": {"name": "bundle-smoke", "version": "1"}}})
             assert init["result"]["serverInfo"]["version"] == (resources / "VERSION").read_text().strip()
             assert "library_mirror_unavailable_macos" in init["result"]["instructions"]
-            assert "media_requires_ffmpeg" in init["result"]["instructions"]
+            assert "media_requires_ffmpeg" not in init["result"]["instructions"]
             exchange({"jsonrpc": "2.0", "method": "notifications/initialized"})
             listed = exchange({"jsonrpc": "2.0", "id": 2, "method": "tools/list"})
             names = [row["name"] for row in listed["result"]["tools"]]
@@ -113,6 +119,53 @@ def stdio(python: Path, resources: Path, scratch: Path, env: dict, mode: str, ou
             return {"toolset": mode, "count": len(names), "ok": True}
         finally:
             stop(proc)
+
+
+def media_smoke(contents: Path, scratch: Path, env: dict) -> dict:
+    """Use generated local fixtures; every command names the relocated binary."""
+    ffmpeg, ffprobe = [str(contents / "Helpers" / name) for name in ("ffmpeg", "ffprobe")]
+
+    def run(command):
+        return subprocess.run(command, cwd=scratch, env=env, check=True,
+                              capture_output=True, text=True, timeout=60).stdout
+
+    report = {name: run([binary, "-version"]) for name, binary in (("ffmpeg", ffmpeg), ("ffprobe", ffprobe))}
+    source, decoded = scratch / "input.wav", scratch / "decoded.wav"
+    with wave.open(str(source), "wb") as audio:
+        audio.setparams((2, 2, 8000, 0, "NONE", "not compressed"))
+        audio.writeframes(b"\x10\x00\x20\x00" * 8000)
+    run([ffmpeg, "-v", "error", "-nostdin", "-i", str(source), "-ar", "16000", "-ac", "1",
+         "-c:a", "pcm_s16le", str(decoded)])
+    with wave.open(str(decoded), "rb") as audio:
+        assert (audio.getframerate(), audio.getnchannels(), audio.getsampwidth(), audio.getnframes()) == (16000, 1, 2, 16000)
+        assert any(audio.readframes(16000))
+    probe = json.loads(run([ffprobe, "-v", "error", "-show_streams", "-of", "json", str(decoded)]))
+    assert probe["streams"][0]["sample_rate"] == "16000"
+    # Native PPM -> MJPEG/MOV needs no video encoder library or fixture download.
+    image = scratch / "input.ppm"
+    image.write_bytes(b"P6\n16 16\n255\n" + b"\xff\x40\x20" * 256)
+    video, frame = scratch / "generated.mov", scratch / "frame.jpg"
+    run([ffmpeg, "-v", "error", "-nostdin", "-loop", "1", "-i", str(image), "-t", "1",
+         "-c:v", "mjpeg", "-pix_fmt", "yuvj420p", str(video)])
+    run([ffmpeg, "-v", "error", "-nostdin", "-i", str(video), "-vf", "fps=1,scale=16:16",
+         "-pix_fmt", "yuvj420p", "-q:v", "2", "-frames:v", "1", "-update", "1", str(frame)])
+    assert frame.read_bytes().startswith(b"\xff\xd8")
+    report.update(audio="16000 Hz mono PCM WAV", frame="MJPEG/MOV -> JPEG")
+    python = contents / "Frameworks/Python/bin/python3"
+    qualification = json.loads((contents / "Resources/notices/torchcodec.json").read_text())
+    if qualification["available"]:
+        report["torchcodec"] = probe_torchcodec(python, contents / "Frameworks/FFmpeg7", scratch, env)
+    else:
+        assert not (contents / "Frameworks/FFmpeg7").exists()
+        report["torchcodec"] = qualification
+    # Test the resolver and actual cached self-test in the bundled interpreter.
+    run([str(python), "-B", "-s", "-c", "import sys; sys.path.insert(0, sys.argv[1]); "
+         "import _platform; from pathlib import Path; "
+         "assert Path(_platform.media_binary('ffmpeg')) == Path(sys.argv[2]); "
+         "assert _platform.media_capability()['available']; "
+         "assert _platform.alignment_capability()['available'] == (sys.argv[3] == 'True')",
+         str(contents / "Resources"), ffmpeg, str(qualification["available"])])
+    return report
 
 
 def smoke(app: Path, output: Path) -> None:
@@ -137,6 +190,7 @@ def smoke(app: Path, output: Path) -> None:
             python = contents / "Frameworks/Python/bin/python3"
             resources = contents / "Resources"
             launcher = contents / "MacOS/Uoink"
+            report["media"] = media_smoke(contents, scratch, env)
             with (output / "helper.txt").open("w") as log:
                 helper = subprocess.Popen([str(launcher)], cwd=scratch, env=env,
                                           stdout=log, stderr=subprocess.STDOUT, start_new_session=True)
@@ -149,7 +203,8 @@ def smoke(app: Path, output: Path) -> None:
                             health = json.load(response)
                         assert health["ok"] is True
                         assert health["capabilities"]["library_mirror"]["code"] == "library_mirror_unavailable_macos"
-                        assert health["capabilities"]["media"]["code"] == "media_requires_ffmpeg"
+                        assert health["capabilities"]["media"]["available"] is True
+                        assert health["capabilities"]["media"]["code"] is None
                         report["health"] = health
                         break
                     except OSError:
@@ -161,6 +216,7 @@ def smoke(app: Path, output: Path) -> None:
                 assert status.returncode == 0, status.stderr
                 report["status"] = json.loads(status.stdout)
                 assert report["status"]["ok"] is True
+                assert report["status"]["capabilities"]["media"]["available"] is True
                 mirror = subprocess.run([str(launcher), "mirror", "status"], cwd=scratch, env=env,
                                         capture_output=True, text=True, timeout=90)
                 assert mirror.returncode == 1, mirror.stderr

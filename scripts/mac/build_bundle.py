@@ -20,6 +20,7 @@ import urllib.request
 
 from qualify_deps import ROOT, sha256, standalone_pins, write_json
 from wheel_lock import LOCK_NAME, verify
+import ffmpeg_bundle
 
 MAC = Path(__file__).parent
 
@@ -214,9 +215,11 @@ def binary_inventory(app: Path) -> list[dict]:
     return rows
 
 
-def build(wheels: Path, output: Path) -> Path:
+def build(wheels: Path, output: Path, ffmpeg_output: Path | None = None) -> Path:
     if sys.platform != "darwin" or platform.machine() != "arm64":
         raise RuntimeError("Build requires native macOS arm64")
+    if ffmpeg_output is None:
+        raise ValueError("A verified FFmpeg build output is required")
     if output.exists():
         raise ValueError("Build output must be a new directory; existing artifacts are never overwritten")
     output.mkdir(parents=True)
@@ -287,7 +290,7 @@ def build(wheels: Path, output: Path) -> Path:
         plistlib.dump({"CFBundleName": "Uoink", "CFBundleDisplayName": "Uoink",
                        "CFBundleIdentifier": "com.ryanbiddy.uoink", "CFBundleExecutable": "Uoink",
                        "CFBundlePackageType": "APPL", "CFBundleShortVersionString": version,
-                       "CFBundleVersion": version, "LSMinimumSystemVersion": "15.0",
+                       "CFBundleVersion": version, "LSMinimumSystemVersion": "14.0",
                        "LSUIElement": True}, stream)
     notices = resources / "notices"
     notices.mkdir()
@@ -297,14 +300,13 @@ def build(wheels: Path, output: Path) -> Path:
     shutil.copyfile(MAC / "payload.json", notices / "payload.json")
     write_json(notices / "resolved-wheels.json", {"wheels": rows})
     write_json(notices / "packages.json", json.loads(packages))
-    write_json(notices / "build.json", {"version": version, "python": pin, "python_url": url,
-                                       "platform": platform.platform(), "ffmpeg": {"bundled": False,
-                                       "code": "media_requires_ffmpeg", "source": None,
-                                       "sha256": None, "configure_flags": None},
-                                       "signing": "modified Mach-O binaries ad-hoc; no Developer ID",
-                                       "minimum_os": "15.0",
-                                       "source_files": [p.as_posix() for p in files]})
     rewrite_rpaths(app, output / "native-rpath-removals.json")
+    ffmpeg = ffmpeg_bundle.install(ffmpeg_output, app, notices)
+    write_json(notices / "build.json", {"version": version, "python": pin, "python_url": url,
+                                       "platform": platform.platform(), "ffmpeg": ffmpeg,
+                                       "signing": "modified Mach-O binaries ad-hoc; no Developer ID",
+                                       "minimum_os": "14.0",
+                                       "source_files": [p.as_posix() for p in files]})
     write_json(output / "native-inventory.json", binary_inventory(app))
     inventory = tree_inventory(app)
     write_json(output / "file-inventory.json", inventory)
@@ -324,8 +326,9 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--wheels", required=True, type=Path)
     parser.add_argument("--output", required=True, type=Path)
+    parser.add_argument("--ffmpeg-output", required=True, type=Path)
     args = parser.parse_args()
-    print(build(args.wheels.resolve(), args.output.resolve()))
+    print(build(args.wheels.resolve(), args.output.resolve(), args.ffmpeg_output.resolve()))
     return 0
 
 
