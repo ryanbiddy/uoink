@@ -817,7 +817,10 @@ def _process_liveness(
         return "dead"
     if sys.platform == "darwin":
         from _platform import darwin_liveness as liveness
-        return liveness(pid, created_ms, sys.executable, tolerance_ms=tolerance_ms,
+        # This is a liveness probe, not executable-based adoption authority.
+        # Framework Python may exec Python.app, a different inode from the
+        # sys.executable launcher. Ownership comes from our retained spawn.
+        return liveness(pid, created_ms, tolerance_ms=tolerance_ms,
                         require_identity=False)
     if os.name == "nt":
         from ctypes import wintypes
@@ -2002,8 +2005,6 @@ class _VaultIoSession:
         }
         if os.name == "nt":
             kwargs["creationflags"] = int(getattr(subprocess, "CREATE_NO_WINDOW", 0))
-        else:
-            kwargs["start_new_session"] = True
         with self._state_lock:
             if self._dead:
                 self._launching = False
@@ -2016,12 +2017,27 @@ class _VaultIoSession:
             self._abandon_unstarted()
             raise OSError("vault io worker cancelled")
         try:
-            proc = subprocess.Popen(
+            popen = subprocess.Popen
+            if os.name != "nt":
+                from uoink_processes import PosixChild
+                popen = PosixChild
+                # Retain the flock open-file description until the supervisor
+                # drains the group, even if this helper is killed abruptly.
+                owner = self._exclusion_owner
+                if owner is None or owner._posix_fd is None:
+                    raise OSError("vault io admission lock unavailable")
+                kwargs["hold_fds"] = (owner._posix_fd,)
+            proc = popen(
                 [sys.executable, "-B", worker],
                 **kwargs,
             )
         except Exception as exc:
             with self._state_lock:
+                if os.name != "nt" and getattr(exc, "owned_process", None) is not None:
+                    # A timed-out supervisor handshake is not proof that no
+                    # mutator exists. Keep admission until cleanup is affirmed.
+                    self.proc = exc.owned_process
+                    self._dead = True
                 self._popen_in_progress = False
                 self._launching = False
             self._close_session_job()
@@ -2501,13 +2517,9 @@ class _VaultIoSession:
                     if self.owns_pid(pid):
                         self._terminate_owned_handle(pid)
             if os.name != "nt" and proc is not None and proc.pid:
-                try:
-                    os.killpg(int(proc.pid), getattr(signal, "SIGKILL", signal.SIGTERM))
-                except (OSError, ProcessLookupError, PermissionError, AttributeError):
-                    try:
-                        proc.kill()
-                    except OSError:
-                        pass
+                # Only the retained supervisor owns the group. Never signal a
+                # numeric group after poll/reaping could permit PID reuse.
+                proc.kill()
             elif proc is not None and proc.poll() is None:
                 try:
                     proc.kill()

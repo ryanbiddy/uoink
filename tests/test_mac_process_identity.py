@@ -95,6 +95,52 @@ def test_invalid_pid_and_library_unavailable_are_unknown(monkeypatch):
     assert native.darwin_observe(123).status == "unknown"
 
 
+def test_stopped_darwin_process_remains_alive_with_exact_birth(monkeypatch):
+    monkeypatch.setattr(native, "_darwin_libproc", lambda: LibprocFixture(status=4))
+    assert native.darwin_liveness(123, 1700000000123.456) == "alive"
+
+
+def test_darwin_lost_creation_lookup_never_authorizes_ownership(monkeypatch):
+    monkeypatch.setattr(isolation, "sys", SimpleNamespace(platform="darwin"))
+    monkeypatch.setattr(native, "darwin_observe", lambda *a, **k:
+                        native.DarwinProcessObservation("alive", 456001))
+    monkeypatch.setattr(isolation, "_posix_process_created_ms", lambda pid: None)
+    assert isolation._pid_liveness(123, 456.001) == "unknown"
+
+
+@pytest.mark.parametrize("alive, exited", [(True, True), (True, False), (False, False)])
+def test_darwin_stop_registers_exit_before_signal_and_requires_event(monkeypatch, alive, exited):
+    import select
+    effects = []
+    class Queue:
+        def __enter__(self):
+            return self
+        def __exit__(self, *args):
+            effects.append("close")
+        def control(self, changes, count, timeout):
+            if changes:
+                effects.append("register")
+                return []
+            effects.append("wait")
+            assert timeout == isolation._STOP_WAIT_MS / 1000
+            return [SimpleNamespace(ident=123, fflags=4)] if exited else []
+    monkeypatch.setattr(select, "kqueue", Queue, raising=False)
+    monkeypatch.setattr(select, "kevent", lambda *a, **k: object(), raising=False)
+    for name, value in {"KQ_FILTER_PROC": 1, "KQ_EV_ADD": 1,
+                        "KQ_EV_ONESHOT": 2, "KQ_NOTE_EXIT": 4}.items():
+        monkeypatch.setattr(select, name, value, raising=False)
+    monkeypatch.setattr(isolation, "os", SimpleNamespace(name="posix", kill=lambda *a: effects.append("kill")))
+    monkeypatch.setattr(isolation, "sys", SimpleNamespace(platform="darwin"))
+    def probe(*args):
+        effects.append("identity")
+        return "alive" if alive else "unknown"
+    monkeypatch.setattr(isolation, "_pid_identity_liveness", probe)
+    result = isolation._terminate_owned({"pid": 123, "created_ms": 456.001, "executable": "fixture"})
+    assert result is (alive and exited)
+    assert effects == (["register", "identity", "kill", "wait", "close"] if alive
+                       else ["register", "identity", "close"])
+
+
 def test_darwin_death_precedes_executable_query(monkeypatch):
     for fixture in (LibprocFixture(status=5), LibprocFixture(error=errno.ESRCH)):
         def forbidden(*args):
@@ -122,11 +168,15 @@ def test_consumers_compare_executable_and_mirror_lease_tolerance(monkeypatch, tm
     assert mirror._process_liveness(123, 1700000000123.455) == "dead"
     assert mirror._lease_holder_status({"pid": 123, "created_ms": 1700000000123.456}) == "alive"
     assert subscriptions._process_alive(123, 1700000000123.456, str(foreign)) == "dead"
-    assert all(calls)
+    assert any(calls)  # Subscription ownership still checks its recorded image.
     assert not mirror._creation_identity_equal(1700000000123.455, 1700000000123.456)
     assert not mirror._child_born_on_or_after_parent(1700000000123.455, 1700000000123.456)
     monkeypatch.setattr(mirror, "sys", SimpleNamespace(platform="darwin", executable=str(foreign)))
-    assert mirror._process_liveness(123, 1700000000123.456) == "dead"
+    # Mirror observation must not require the observer's Python launcher image.
+    assert mirror._process_liveness(123, 1700000000123.456) == "alive"
+    monkeypatch.setattr(subscriptions, "sys", SimpleNamespace(platform="darwin", executable=str(foreign)))
+    assert subscriptions._process_alive(123, 1700000000123.456) == "alive"
+    assert subscriptions._process_alive(123, 1700000000123.456, str(foreign)) == "dead"
 
 
 def test_darwin_identity_file_keeps_microseconds(monkeypatch, tmp_path):
@@ -232,8 +282,11 @@ def test_darwin_filesystem_identity_not_string_case(monkeypatch, tmp_path):
 def test_live_child_exact_identity_exit_and_foreign_executable(tmp_path):
     # On macOS this executes libproc; on Windows it retains the existing native
     # handle path. No test is skipped and no process is killed by a guessed PID.
-    child = subprocess.Popen([sys.executable, "-B", "-c", "import time; time.sleep(30)"])
+    child = subprocess.Popen([sys.executable, "-B", "-c",
+                              "import time; print('ready', flush=True); time.sleep(30)"],
+                             stdout=subprocess.PIPE)
     try:
+        assert child.stdout.readline().strip() == b"ready"
         if os.name == "nt":
             handle, _ = isolation._windows_open_process(child.pid, isolation._PROCESS_QUERY_LIMITED_INFORMATION)
             try:
@@ -270,3 +323,4 @@ def test_live_child_exact_identity_exit_and_foreign_executable(tmp_path):
         if child.poll() is None:
             child.kill()
         child.wait(timeout=10)
+        child.stdout.close()

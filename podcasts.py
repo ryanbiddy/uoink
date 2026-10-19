@@ -1544,7 +1544,10 @@ def download_episode_audio(idx, episode_id: int, *,
     log.info("podcast download: episode_id=%d url=%s -> %s",
               episode_id, episode["audio_url"], out_path)
     try:
-        cp = subprocess.run(
+        run = subprocess.run
+        if os.name != "nt":
+            from uoink_processes import run_owned as run
+        cp = run(
             args, capture_output=True, text=True,
             timeout=timeout_sec, check=False,
         )

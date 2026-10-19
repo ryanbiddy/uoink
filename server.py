@@ -367,7 +367,8 @@ def _allowed_extension_ids() -> set[str]:
     return ids
 
 CREATE_NO_WINDOW = 0x08000000 if sys.platform == "win32" else 0
-SUBPROCESS_KW = {"creationflags": CREATE_NO_WINDOW} if sys.platform == "win32" else {}
+SUBPROCESS_KW = ({"creationflags": CREATE_NO_WINDOW} if sys.platform == "win32"
+                 else {"start_new_session": True})
 
 
 def _splash_should_spawn(sentinel: Path) -> bool:
@@ -3888,7 +3889,11 @@ def _run_subprocess(cmd: list[str], *, cancel_event: threading.Event | None = No
             source_subscriptions.record_child_launch_intent(
                 DATA_ROOT, capture["start_id"], capture.get("instance"))
         try:
-            proc = subprocess.Popen(
+            popen = subprocess.Popen
+            if SUBPROCESS_KW.get("start_new_session"):
+                from uoink_processes import PosixChild
+                popen = PosixChild
+            proc = popen(
                 cmd,
                 stdout=stdout,
                 stderr=stderr,
@@ -3917,8 +3922,11 @@ def _run_subprocess(cmd: list[str], *, cancel_event: threading.Event | None = No
             # the OS has already started yt-dlp. Keep unresolved evidence on
             # failure, but never leave the child running because of that write.
             if capture is not None:
+                capture_pid = getattr(proc, "ownership_pid", None)
+                if type(capture_pid) is not int:
+                    capture_pid = proc.pid
                 source_subscriptions.record_child_start(
-                    DATA_ROOT, capture["start_id"], proc.pid, capture.get("instance"))
+                    DATA_ROOT, capture["start_id"], capture_pid, capture.get("instance"))
             started = time.monotonic()
             while True:
                 if cancel_event is not None and cancel_event.is_set():
@@ -3941,7 +3949,7 @@ def _run_subprocess(cmd: list[str], *, cancel_event: threading.Event | None = No
                     # poll reaps an exited child; communicate/termination have
                     # already waited when they completed normally.
                     if capture is not None:
-                        source_subscriptions.record_child_end(DATA_ROOT, capture["start_id"], proc.pid)
+                        source_subscriptions.record_child_end(DATA_ROOT, capture["start_id"], capture_pid)
             except Exception:
                 log.exception("could not finish subprocess cleanup for %s",
                               getattr(proc, "pid", "unknown"))

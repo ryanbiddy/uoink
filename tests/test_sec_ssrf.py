@@ -277,6 +277,7 @@ def consumers(network, monkeypatch, tmp_path):
 
     audio_child = Mock(side_effect=audio_run)
     monkeypatch.setattr(subprocess, "run", audio_child)
+    monkeypatch.setattr("uoink_processes.run_owned", audio_child)
 
     def invoke(kind, url):
         if kind == "feed":

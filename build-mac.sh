@@ -109,7 +109,7 @@ echo "==> [4/7] Stage helper source into the bundle"
 # The full list is authoritative in build.ps1 (step 2g) + installer/uoink.iss.
 # Keep this in sync -- a missing module crashes the helper before it binds 5179.
 HELPER_FILES=(
-  server.py index.py _platform.py migrate_install.py channels.py workspaces.py
+  server.py index.py _platform.py uoink_processes.py migrate_install.py channels.py workspaces.py
   claims.py scripts.py voice_dna.py writing_studio.py page_extractor.py
   source_manifest.py openapi_bridge.py reddit_extractor.py x_extractor.py
   memory_layer.py podcasts.py mobile_playlists.py whisper_runner.py

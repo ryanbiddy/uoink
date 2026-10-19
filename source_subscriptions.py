@@ -1601,7 +1601,9 @@ def _process_alive(pid: int, created_ms: int | float | None, executable: str | N
     the process; on Windows ``os.kill`` would terminate it."""
     if sys.platform == "darwin":
         from _platform import darwin_liveness as liveness
-        return liveness(pid, created_ms, executable or sys.executable)
+        # Incarnation records bind an exact birth, not the observer's Python
+        # launcher. Child records additionally supply their observed image.
+        return liveness(pid, created_ms, executable)
     try:
         if os.name == "nt":
             import ctypes

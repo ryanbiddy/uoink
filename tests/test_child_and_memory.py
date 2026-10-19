@@ -81,6 +81,13 @@ def child(tmp_path):
                            run=lambda **kw: scope["_run_subprocess"](["mock-yt-dlp"], **kw))
 
 
+def test_supervised_child_records_the_owner_until_cleanup(child):
+    child.proc.ownership_pid = 54321
+    child.run()
+    assert child.sources.record_child_start.call_args.args[2] == 54321
+    assert child.sources.record_child_end.call_args.args[2] == 54321
+
+
 @pytest.mark.parametrize("error", [OSError("disk full"), sqlite3.OperationalError("locked"),
                                    KeyboardInterrupt("interrupted registration")])
 @pytest.mark.parametrize("force_kill", [False, True])

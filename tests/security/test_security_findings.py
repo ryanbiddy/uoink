@@ -64,6 +64,7 @@ def test_sec_01_http_enclosure_url_follows_double_dash(
         return subprocess.CompletedProcess(args=args, returncode=1,
                                            stdout="", stderr="offline")
     monkeypatch.setattr(subprocess, "run", fake_run)
+    monkeypatch.setattr("uoink_processes.run_owned", fake_run)
     # This test checks argv separation, not admission; keep it entirely offline.
     monkeypatch.setattr(podcasts.source_subscriptions, "resolve_public_http_url",
                         lambda url, **kwargs: url)

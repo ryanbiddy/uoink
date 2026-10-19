@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 import subprocess
 from datetime import datetime
 from typing import Any
@@ -174,6 +175,8 @@ def _fetch_playlist_video_ids(playlist_url: str, *,
         playlist_url,
     ]
     run = run_subprocess if run_subprocess is not None else subprocess.run
+    if run_subprocess is None and os.name != "nt":
+        from uoink_processes import run_owned as run
     cp = run(
         args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
         timeout=_PLAYLIST_LIST_TIMEOUT_SEC, check=False,

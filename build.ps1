@@ -307,6 +307,7 @@ foreach ($f in @(
     'server.py',
     'index.py',
     '_platform.py',
+    'uoink_processes.py',
     'uoink_install_isolation.py',
     'migrate_install.py',
     'channels.py',
@@ -656,6 +657,7 @@ Copy-Item (Join-Path $RepoRoot 'scripts\recall_hook.py') (Join-Path $StagingDir 
 # migrate_install.py `import _platform` at module top -- omitting it ships a
 # helper that crashes with ModuleNotFoundError before binding the port.
 Copy-Item (Join-Path $RepoRoot '_platform.py')   $StagingDir -Force
+Copy-Item (Join-Path $RepoRoot 'uoink_processes.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'uoink_install_isolation.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'migrate_install.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'channels.py')    $StagingDir -Force

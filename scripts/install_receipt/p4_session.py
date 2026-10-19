@@ -375,6 +375,27 @@ class OwnedProcess:
         foreign PID."""
         if self._closed and self._cleanup_result is not None:
             return dict(self._cleanup_result)
+        if os.name != "nt":
+            self.popen.terminate()
+            try:
+                code = self.popen.wait(timeout=timeout)
+                cleaned = bool(getattr(self.popen, "cleaned", False))
+            except (OSError, subprocess.TimeoutExpired):
+                code, cleaned = None, False
+            result = {
+                "pid": self.pid, "label": self.label,
+                "exit_code": code, "parent_exited": code is not None,
+                "descendants_exited": cleaned, "cleaned": cleaned,
+                "identity_uncertain": not cleaned,
+                "process_group": getattr(self.popen, "pgid", None),
+                "group_drained_affirmed": cleaned,
+                "descendants_remaining": [] if cleaned else None,
+                "job_assigned": False,
+            }
+            if cleaned:
+                self._closed = True
+                self._cleanup_result = dict(result)
+            return result
         snapshot_before = self.descendant_snapshot()
         result = {
             "pid": self.pid,
@@ -469,10 +490,10 @@ def spawn_owned(command, *, cwd, env, stdin=subprocess.PIPE,
     """Launch an owned child. On Windows: create job, start suspended, assign,
     resume. Assignment failure kills the suspended child and refuses."""
     if os.name != "nt":
-        popen = subprocess.Popen(
+        from uoink_processes import PosixChild
+        popen = PosixChild(
             command, cwd=str(cwd), env=env,
             stdin=stdin, stdout=stdout, stderr=stderr,
-            start_new_session=True,
         )
         return OwnedProcess(
             popen, label=label, job=None, job_assigned=False,

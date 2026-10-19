@@ -1185,7 +1185,15 @@ def _pid_identity_liveness(
     try:
         if sys.platform == "darwin":
             from _platform import darwin_liveness
-            return darwin_liveness(pid, created_ms, expected_exe)
+            status = darwin_liveness(pid, created_ms, expected_exe)
+            if status != "alive":
+                return status
+            # Keep the same fail-closed creation lookup boundary as the other
+            # platforms, including lookup loss between native observations.
+            actual = _posix_process_created_ms(pid)
+            if actual is None:
+                return "unknown"
+            return "alive" if actual == created_ms else "dead"
         if os.name == "nt":
             handle, error = _windows_open_process(
                 int(pid), _PROCESS_QUERY_LIMITED_INFORMATION
@@ -1441,6 +1449,26 @@ def _terminate_owned(identity: dict) -> bool:
                 return _windows_wait_handle_exit(handle, _STOP_WAIT_MS)
             finally:
                 _windows_close_handle(handle)
+        if sys.platform == "darwin":
+            import select
+
+            # Register before signaling: libproc can report ESRCH while exit
+            # is still becoming waitable. NOTE_EXIT is the completion event;
+            # a liveness snapshot alone must not release the identity file.
+            with select.kqueue() as queue:
+                event = select.kevent(pid, filter=select.KQ_FILTER_PROC,
+                                      flags=select.KQ_EV_ADD | select.KQ_EV_ONESHOT,
+                                      fflags=select.KQ_NOTE_EXIT)
+                try:
+                    queue.control([event], 0, 0)
+                except ProcessLookupError:
+                    return _pid_identity_liveness(pid, created_ms, expected_exe) == "dead"
+                if _pid_identity_liveness(pid, created_ms, expected_exe) != "alive":
+                    return False
+                os.kill(pid, 15)
+                events = queue.control(None, 1, _STOP_WAIT_MS / 1000)
+                return any(event.ident == pid and event.fflags & select.KQ_NOTE_EXIT
+                           for event in events)
         if _pid_identity_liveness(pid, created_ms, expected_exe) != "alive":
             return False
         os.kill(pid, 15)
