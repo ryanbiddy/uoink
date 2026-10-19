@@ -2,10 +2,9 @@
 
 Turns the full TOOL_REGISTRY into an OpenAPI spec so any HTTP-capable AI that
 can't speak MCP (Gemini, Grok, Perplexity, custom agents) can call the local
-tools over plain HTTP. The full registry includes HTTP/OpenAPI-only tools such
-as search_clips and get_evidence_card; it is deliberately broader than the
-23-tool stdio set. Both transports share uoink_mcp_tools.call_tool, one rate
-limiter, and one auth gate.
+tools over plain HTTP. The default stdio surface serves the same registry.
+Both transports dispatch through uoink_mcp_tools.call_tool and its safety gates.
+HTTP requires the helper token; stdio is launched by the local client.
 
 Pure data assembly. server.py owns the routes (GET /openapi/v1/spec.json,
 GET /.well-known/uoink-mcp.json, POST /tools/<name>).
@@ -238,6 +237,9 @@ def build_well_known(base_url: str, *, version: str, tool_count: int) -> dict:
                         "tools. Runs on your machine, no cloud."),
         "local_first": True,
         "tool_count": tool_count,
+        "stdio_tool_count": tool_count,
+        "transports": ["stdio", "http"],
+        "stdio_toolsets": {"full": tool_count, "core": 35},
         "mcp_endpoint": f"{base_url}/mcp/v1",
         "openapi_spec": f"{base_url}/openapi/v1/spec.json",
         "tools_endpoint_template": f"{base_url}/tools/{{tool_name}}",

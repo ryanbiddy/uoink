@@ -1,8 +1,8 @@
-"""Cross-file source-build version contract for v3.9.1.
+"""Cross-file source-build version contract for v3.9.2.
 
 Run: python -m pytest tests/test_release_version_v380.py
 
-The installer, GitHub release and uoink.app go live with v3.9.1. Download pointers are
+The installer, GitHub release and uoink.app go live with v3.9.2. Download pointers are
 guarded separately by test_installer_download_accuracy.py.
 """
 from __future__ import annotations
@@ -13,7 +13,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parent.parent
-EXPECTED = "3.9.1"
+EXPECTED = "3.9.2"
 
 
 def match(path: str, pattern: str) -> str:

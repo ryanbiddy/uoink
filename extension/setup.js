@@ -1,10 +1,11 @@
 ﻿// Setup owns install, verify and the first capture. Settings live in the dashboard.
+// Agent connections now expose all 91 tools; capped clients can use UOINK_MCP_TOOLSET=core.
 "use strict";
 const SERVER = "http://127.0.0.1:5179";
 const POLL_MS = 2000;
 const HEARTBEAT_MS = 10000;
-// Release download target; 3.9.1, its GitHub release and uoink.app go live together.
-const PUBLISHED_INSTALLER_VERSION = "3.9.1";
+// Release download target; 3.9.2, its GitHub release and uoink.app go live together.
+const PUBLISHED_INSTALLER_VERSION = "3.9.2";
 const SUGGESTED_VIDEO = {
   url: "https://www.youtube.com/watch?v=8rABwKRsec4",
   title: "Andrej Karpathy on AGI, hiring, and the future of programming",
@@ -36,7 +37,7 @@ function setPlatform(os) {
   const installerName = `Uoink-Setup-${PUBLISHED_INSTALLER_VERSION}.exe`;
   $("download-btn").href = `https://github.com/ryanbiddy/uoink/releases/download/v${PUBLISHED_INSTALLER_VERSION}/${installerName}`;
   $("install-instructions").textContent = windows
-    ? "Download the Windows installer, open it, and follow the installation steps."
+    ? "Download the Windows installer, open it, and follow the installation steps. Agent connections include all 91 Uoink tools."
     : `The published installer is for Windows. On ${platformOs === "mac" ? "macOS" : "Linux"}, use the manual install instructions.`;
   if (!helperUp && $("status-block").dataset.state === "down") $("status-instructions").textContent = helperOfflineDetail();
 }

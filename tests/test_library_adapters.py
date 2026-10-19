@@ -190,7 +190,7 @@ def test_registry_schemas_are_the_frozen_contract_file():
     assert len(tools.TOOL_REGISTRY) == 91  # 77 + four Phase 3 source tools + one Phase 5 activity tool + three Phase 4 read tools + two Phase 4 brief tools + one Phase 6 export tool (BC-2), +1 local playbook input (T3)
 
 
-def test_library_tools_are_registry_only_and_stdio_is_unchanged():
+def test_library_tools_are_on_stdio_with_the_same_registry():
     import uoink_mcp
     from test_c01_mcp_stdio import CANONICAL_STDIO_TOOLS
 
@@ -205,7 +205,7 @@ def test_library_tools_are_registry_only_and_stdio_is_unchanged():
         coroutine.close()
         pytest.fail("local tool listing unexpectedly suspended")
     assert stdio == CANONICAL_STDIO_TOOLS
-    assert stdio.isdisjoint(tools.LIBRARY_TOOL_NAMES)
+    assert set(tools.LIBRARY_TOOL_NAMES) <= stdio
     for name in tools.LIBRARY_TOOL_NAMES:
         # Limits are enforced inside the adapter so the error keeps the
         # contract envelope; the ToolSpec limiter must therefore be absent.

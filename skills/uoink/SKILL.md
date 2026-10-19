@@ -356,9 +356,11 @@ read is truncated (contract: Bounded reads and refusal shapes).
 Phase 2 work-queue tools (`list_library_work`, `claim_library_work`,
 `submit_library_result`, `apply_reshelving`, `pin_shelf`,
 `undo_library_apply`) and Phase 3 source-subscription tools are
-HTTP-only unless a later adapter exposes them. Do not assume they exist
-on stdio. A brief report does not require those mutation tools
-(contract: Capabilities, compatibility and client artifacts).
+available on stdio by default in Uoink 3.9.2, along with every other registry
+tool (91 total). `UOINK_MCP_TOOLSET=core` keeps the previous 35 tools for
+clients with tool caps. Read the live `tools/list` before choosing a tool.
+Dashboard intents, default-off Library apply and all other consent gates
+still apply. A brief report does not require those mutation tools.
 
 ---
 

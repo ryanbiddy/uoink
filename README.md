@@ -37,9 +37,12 @@ Published sources are indexed in one local library. Podcast audio and transcript
 
 **1. Clipboard (the creator path)** — Click Uoink, paste into Claude / ChatGPT. Transcript plus a paste-safe subset of screenshots inlined as images so the model sees text *and* frames in one paste.
 
-**2. MCP server (the agent path)** — A local Model Context Protocol server exposing 35 tools over stdio, five library resource templates and nine prompts. Tools include local research packets, opt-in discovery, client-run briefs and cited transcript exports. The stdio transport is tested with **Claude Desktop and Cursor**. Cline and Continue are standard-stdio compatibility paths, not individually smoke-tested. Two surfaces, on purpose:
-- **stdio** exposes the curated everyday set most agents need, including video capture, podcast feed/episode operations, local transcription jobs, corpus publishing, search, clip search and evidence cards, citation maps, and analysis.
-- **HTTP JSON-RPC** at `/mcp/v1` exposes the 91-tool local registry (Writing Studio, workspaces, podcasts, monitored playlists, taste/engagement memory, source capture, clip search, evidence cards, the six Living Library work-queue tools, the four Phase 3 source-subscription tools, the Phase 5 activity report, the three Phase 4 bounded read tools, the two Phase 4 brief tools, the Phase 6 cited export and research playbooks) — the same handlers, same auth token. `search_clips` and `get_evidence_card` were registry-only in Phase 1; since 2026-09-04 they are also on stdio (23 → 25 tools). The six Living Library work-queue tools stay registry-only.
+**2. MCP server (the agent path)**: A local MCP server exposing 91 tools over stdio, five library resource templates and nine prompts. Claude Desktop (.mcpb), Claude Code and Cursor get the full capture, research, writing and Library tool set through the standard connection. Consent gates are unchanged.
+
+The stdio transport is tested with **Claude Desktop and Cursor**. Cline and Continue are standard-stdio compatibility paths, not individually smoke-tested.
+
+- **stdio** defaults to all 91 registry tools. Set `UOINK_MCP_TOOLSET=core` in the client's environment for the previous 35 tools. Cursor and other clients with tool caps may need this setting. Restart the connection after changing it.
+- **HTTP JSON-RPC** at `/mcp/v1` exposes the same 91-tool registry through the token-authenticated local helper. Both transports share handlers and input schemas; stdio flattens three top-level `oneOf` schemas so Claude Code can load them, and validation is unchanged.
 
 **3. OpenAPI bridge (for local agents that don't speak MCP)** — Local OpenAPI-capable agents and scripts can drive the same tools over an OpenAPI 3.1 surface at `/openapi/v1/spec.json` + `POST /tools/<name>`.
 
@@ -70,7 +73,7 @@ Uoink ships a portable Skill at `skills/uoink/SKILL.md` (installed to `%LOCALAPP
 
 ## Install
 
-1. **Download the installer.** Download `Uoink-Setup-3.9.1.exe` from the [v3.9.1 release](https://github.com/ryanbiddy/uoink/releases/tag/v3.9.1). Windows 10/11 only — there is no Mac build today. The installer is unsigned: if SmartScreen shows "Windows protected your PC", choose **More info → Run anyway**, and check the file against the SHA-256 listed on the release page.
+1. **Download the installer.** Download `Uoink-Setup-3.9.2.exe` from the [v3.9.2 release](https://github.com/ryanbiddy/uoink/releases/tag/v3.9.2). Windows 10/11 only — there is no Mac build today. The installer is unsigned: if SmartScreen shows "Windows protected your PC", choose **More info → Run anyway**, and check the file against the SHA-256 listed on the release page.
 2. **Run it.** Defaults install to `%LOCALAPPDATA%\Uoink\` (no admin required). The finish page can launch the helper immediately, and an autostart entry runs it on each login.
 3. **Load the bundled extension.** On first launch, Uoink shows a one-time setup splash. Use it to open your browser's extensions page and copy the installed extension path; then enable Developer mode, click **Load unpacked**, and select that folder. (The Chrome Web Store listing is pending; sideload is the current path.)
 

@@ -925,19 +925,19 @@ def test_bc2_export_is_on_stdio_with_the_registry_schema_and_wrapped_response_ch
     from mcp import types as mcp_types
     from tests.test_phase4_stdio import _complete_local_call
     tools = {t.name: t for t in _complete_local_call(uoink_mcp.mcp.list_tools())}
-    assert "export_cited_range" in tools and len(tools) == 35
+    assert "export_cited_range" in tools and len(tools) == 91
     spec = uoink_mcp_tools.TOOL_REGISTRY["export_cited_range"]
     handlers = uoink_mcp.mcp._mcp_server.request_handlers
     listed = _complete_local_call(handlers[mcp_types.ListToolsRequest](
         mcp_types.ListToolsRequest(method="tools/list"))).root.tools
     wire = {t.name: t for t in listed}
-    assert len(wire) == 35
+    assert len(wire) == 91
     assert wire["export_cited_range"].inputSchema == spec.input_schema
     assert wire["export_cited_range"].description == spec.description
     assert wire["export_cited_range"].annotations.readOnlyHint is True
     manifest = json.loads((ROOT / ".mcpb" / "manifest.json").read_text(encoding="utf-8"))
     assert "export_cited_range" in {t["name"] for t in manifest["tools"]}
-    assert len(manifest["tools"]) == 35
+    assert len(manifest["tools"]) == 91
     doc = (ROOT / "docs" / "v2-mcp.md").read_text(encoding="utf-8")
     assert "### export_cited_range" in doc and "**35 tools**" in doc and "**91 tools**" in doc
     assert "91 tools" in (ROOT / "docs" / "v2-api.md").read_text(encoding="utf-8")

@@ -7,36 +7,65 @@ Transports: stdio, plus an experimental authenticated local HTTP JSON-RPC helper
 
 ## Overview
 
-Uoink has two deliberately different tool surfaces:
+Uoink serves the same tool registry over both MCP transports:
 
-- Supported stdio registry: **35 tools**.
+- Supported stdio registry: **91 tools**.
 - Local HTTP/OpenAPI registry: **91 tools**.
 
-The supported stdio MCP surface covers extraction, playlist jobs, search,
-clip search and evidence cards, corpus retrieval, citation maps, health
-scores, transcript reliability, Comment Intelligence, Hook Type, hook
-taxonomy, entity mentions, and manual podcast feed-to-corpus operations. The
-authenticated local HTTP helper exposes that set plus a broader collection of
-legacy and application operations, including registry-only URL, note, image,
-and X capture. Overlapping tools share the handlers in
-`uoink_mcp_tools.py`, but the two transports do not expose the same registry.
-Clip search (`search_clips`) and evidence cards (`get_evidence_card`) were
-HTTP/OpenAPI-only in Phase 1; the repair increment of 2026-09-04 (run E)
-added both to stdio, taking the stdio set from 23 to 25 tools. On both
-transports they call the same handlers and return the same shapes.
-The six Living Library work-queue tools (`list_library_work`,
-`claim_library_work`, `submit_library_result`, `apply_reshelving`,
-`pin_shelf`, `undo_library_apply`; Phase 2 stage 1, 2026-09-04) are
-HTTP/OpenAPI registry-only and are not on stdio. Their input schemas are the
-frozen `docs/library/phase2-contract/tool-schemas.json`; see `docs/v2-api.md`
-for the envelope, strict decoding and the `POST /library/intent` route that
-mints the user-intent token `pin_shelf` and `undo_library_apply` require.
-The four Phase 3 source-subscription tools (`list_sources`, `register_source`,
-`source_status`, `set_source_consent`; contract `phase3-v1-2026-09-07`, run AM)
-are likewise HTTP/OpenAPI registry-only; consent changes require the
-dashboard-minted intent from `POST /sources/consent-intent`.
-For MCP clients, use stdio (`uoink_mcp.py`). The HTTP JSON-RPC surface at
-`/mcp/v1` remains experimental.
+Claude Desktop (.mcpb), Claude Code and Cursor use `uoink_mcp.py` over stdio.
+It advertises every registry tool with the same name, description, input schema,
+title and safety hints as HTTP. Three registry schemas use a top-level `oneOf` (`claim_library_work`, `apply_reshelving`, `set_source_consent`). Claude Code and the Anthropic API reject that shape and Claude Code then shows none of the server's tools, so stdio advertises each as one object whose properties merge the variants. The handlers still validate the exact registry schema. This includes URL/page/X/Reddit/note/image
+capture, writing, scripts, claims, workspaces, facets, monitored playlists,
+taste and memory, allowed sites, sources and the Library work queue.
+No registry tools are excluded from stdio.
+
+### Tool-capped clients
+
+`UOINK_MCP_TOOLSET=full` is the default. Set `UOINK_MCP_TOOLSET=core` in the
+client's MCP server environment to keep the previous **35 tools**. The original
+35 remain first, in their original order, in full mode. Cursor is reported to
+pass only the first 40 tools to its agent; core mode also helps other clients
+with a tool cap. Restart the MCP connection after changing the environment.
+Unknown values emit a stderr warning and use full.
+
+For example, add `"UOINK_MCP_TOOLSET": "core"` to the `env` object in Cursor's
+`mcpServers.uoink` configuration. Core mode rejects calls to tools outside its
+advertised set. Resources and prompts are unchanged in either mode.
+
+### Consent and execution
+
+Both transports dispatch through `uoink_mcp_tools.call_tool`. Dashboard-minted
+intent tokens remain required for `pin_shelf`, `undo_library_apply` and
+`set_source_consent`; stdio derives the trusted session from the same local
+helper token, never from tool arguments. No MCP tool can mint an intent.
+Library apply stays off by default. Discovery still requires enabled discovery,
+credit confirmation, a daily cap and explicit agent consent. Its dashboard
+intents live only in the HTTP process and bind to that request origin and
+session, so stdio cannot redeem them. Enable agent discovery in Settings to
+use discovery over stdio; supplying an origin or session in tool JSON grants
+no authority.
+
+Paid Anthropic generation still requires the explicit generation request and
+saved key. Whisper downloads still require approval. Rate limits, private-network
+fetch checks, path confinement and service error scrubbing use the same handlers.
+Registry tools run one at a time on the stdio event loop, as in v3.9.1, because they share
+the Index connection with Library reads; a long capture or model call holds the session
+until it returns. Paid discovery runs in a worker thread so other requests and cancellation
+still answer.
+The existing bounded Library tools keep their two-second deadline, response
+budget and AZ-5h admission lifetime through final JSON-RPC serialization.
+Only the server-generated tool inventory has a larger 256 KiB frame cap so all
+91 schemas fit; inbound requests and tool results retain their existing caps.
+Work-queue mutations use their service's lease, transaction and operation-key
+bounds; they do not inherit a read timeout that could abandon a committed write.
+
+Local reads and synchronous captures work without the resident HTTP helper.
+Monitored playlist polling returns an actionable "Open Uoink first" error when
+the helper is down, because subsequent scheduled captures need its workers.
+Registering sources and playlists saves local configuration; automatic detection
+and capture run while Uoink is open. Discovery picks enter the durable queue;
+open Uoink to process them. Stdio never probes an HTTP port for readiness.
+The HTTP JSON-RPC surface at `/mcp/v1` remains experimental.
 
 ## Tool naming
 
@@ -1187,3 +1216,327 @@ None for Sprint 4. `extension/lib/extract.js` does not need new helpers to surfa
 ## Open questions
 
 - Should v2.1 persist MCP call logs or agent activity indicators in the popup? Out of scope for Sprint 4.
+
+## Additional tools available in full mode
+
+### list_library_work
+
+List Librarian assignment work for a run: counts by work state and manifest disposition, the run revision, one cursor page of items, and whether staged work is waiting for a subscribed client. Expires stale leases while listing; the server never runs the Librarian itself.
+
+Arguments: `run_id`, `state`, `limit`, `cursor`. The registry schema in `tools/list` defines required fields and bounds.
+
+### claim_library_work
+
+Lease Librarian work for a client (action=claim returns up to twelve single-item packets, each with one evidence card and an attempt token), or renew, release or cancel the client's own current attempt. Leases run 60-900 seconds and never past one hour after the first claim; a row is exhausted after three.
+
+### submit_library_result
+
+Submit one Librarian result for one leased work row: an assignment of one to three shelf memberships with quoted evidence, or an explicit unmapped, unsupported or error outcome. Validated and stored; nothing is applied to current labels. An identical retry under the same submission_key returns the recorded response.
+
+Arguments: `work_id`, `client_id`, `attempt_token`, `submission_key`, `schema_version`, `video_id`, `source_revision`, `taxonomy_revision`, `packet_hash`, `result`, `usage`. The registry schema in `tools/list` defines required fields and bounds.
+
+### apply_reshelving
+
+Preview the exact reshelving delta for a run (mode=preview, the default), or apply a locally approved, unexpired preview by its delta hash and operation key (mode=apply). Apply is refused while librarian_apply_enabled is off, which is the shipping default, and stops at 15 percent churn without a trusted human approval.
+
+### pin_shelf
+
+Pin, unpin or move one item on a shelf as a user decision that the Librarian may not override. Requires a user_intent_token minted by the dashboard confirmation route; no client actor string grants that authority.
+
+Arguments: `video_id`, `shelf_id`, `action`, `expected_projection_revision`, `operation_key`, `user_intent_token`, `reason`. The registry schema in `tools/list` defines required fields and bounds.
+
+### undo_library_apply
+
+Undo one recorded library apply by replaying its stored inverse as a new, itself reversible, journal operation. Only the apply that produced the current projection revision can be undone, and a user_intent_token from the dashboard is required.
+
+Arguments: `apply_id`, `expected_projection_revision`, `operation_key`, `user_intent_token`. The registry schema in `tools/list` defines required fields and bounds.
+
+### list_sources
+
+List standing sources (podcast RSS feeds, YouTube channels and playlists) with consent state, enrollment, today's UTC start allowance and detection health. Read-only; keyset pagination.
+
+Arguments: `kind`, `consent_state`, `include_archived`, `limit`, `cursor`. The registry schema in `tools/list` defines required fields and bounds.
+
+### register_source
+
+Register a standing source for metadata detection only. Creates the source with capture off and a due detection cursor; no network call, no capture. A duplicate returns the existing source unchanged (created=false).
+
+Arguments: `kind`, `url`, `display_name`, `poll_interval_min`. The registry schema in `tools/list` defines required fields and bounds.
+
+### source_status
+
+One source's current summary, one page of observed items with capture and classification state, and every in-flight reservation. Read-only: never enrolls, polls or starts work.
+
+Arguments: `source_id`, `item_limit`, `item_cursor`. The registry schema in `tools/list` defines required fields and bounds.
+
+### set_source_consent
+
+Turn standing capture on or off for one source. Requires the expected source revision (and cursor revision when enabling), an operation key and a user_intent_token minted by the local dashboard confirmation; the stored receipt is returned on an identical retry. On: at most 25 back-catalog items once, then new items, 10 starts per UTC day. Off: releases unstarted reservations.
+
+Arguments: `source_id`, `consent_state`, `expected_revision`, `expected_cursor_revision`, `operation_key`, `user_intent_token`. The registry schema in `tools/list` defines required fields and bounds.
+
+### analyze_self_channel
+
+Aggregate the user's own saved videos (those tagged is_self via channel-name recognition) into hook evolution, format evolution, performance trend by month, and a top-performers list. Pass `handle` to scope to one of the user's registered channels; omit for the union across every registered channel. `limit` caps the top_performers list (default 10, max 100). Pure local read.
+
+Arguments: `handle`, `limit`. The registry schema in `tools/list` defines required fields and bounds.
+
+### get_schema_version
+
+Report the data-shape versions Uoink writes + the supported read-range. v2.5 substrate: cross-version aggregators (Channel Decoder, Niche Corpus) check this before assuming v2 fields are present in older rows/sidecars. Read-only, no arguments.
+
+### get_user_role
+
+Report the user's persisted role (creator | researcher | marketer | mixed) + the dashboard emphasis (primary/secondary chip order + default sort) the helper computes from it. Read-only.
+
+### set_user_role
+
+Persist the user's role choice. Drives Library default sort + filter-chip emphasis on the dashboard. Bounded enum -- one of creator | researcher | marketer | mixed.
+
+Arguments: `role`. The registry schema in `tools/list` defines required fields and bounds.
+
+### check_live_status
+
+Probe a URL to find out if it is a live broadcast without extracting. Returns one of: not_live | live | upcoming | post_live | was_live. The agent uses this to decide between immediate extraction and 'wait until the broadcast ends' (the helper's live_stream_behavior setting handles the latter for /extract; this tool is the read-only probe path).
+
+Arguments: `url`. The registry schema in `tools/list` defines required fields and bounds.
+
+### add_monitored_playlist
+
+Register a YouTube playlist URL to monitor for auto-uoinks. Idempotent on UNIQUE playlist_url. poll_interval_min default 5, range 1-1440.
+
+Arguments: `playlist_url`, `name`, `poll_interval_min`. The registry schema in `tools/list` defines required fields and bounds.
+
+### list_monitored_playlists
+
+List registered playlists newest-first.
+
+Arguments: `enabled_only`. The registry schema in `tools/list` defines required fields and bounds.
+
+### remove_monitored_playlist
+
+Delete a playlist + cascade its discovery events.
+
+Arguments: `playlist_id`. The registry schema in `tools/list` defines required fields and bounds.
+
+### poll_monitored_playlist
+
+Poll one playlist (yt-dlp --flat-playlist) + diff against last_seen_video_ids + auto-queue new videos via the existing pending_yoinks retry worker. Returns the new[] discovery list so the dashboard can show it under a 'from mobile playlist' label distinct from rate-limit retries.
+
+Arguments: `playlist_id`. The registry schema in `tools/list` defines required fields and bounds.
+
+### list_monitored_playlist_events
+
+List per-discovery events. Optional filters: playlist_id, status (discovered | queued | extracted | failed). Newest first.
+
+Arguments: `playlist_id`, `status`, `limit`. The registry schema in `tools/list` defines required fields and bounds.
+
+### get_user_taste
+
+Return the consolidated TASTE.md (preferred hooks/formats, avoid list, top performance anchors). Generated from engagement events + persisted taste anchors. Read-only, no arguments.
+
+### get_user_memory
+
+Return the user's free-form USER.md notes (Channels I admire, My channel(s), Topics, Workflow notes). Hand-edited markdown -- the consolidator never overwrites this file. No arguments.
+
+### update_user_taste
+
+Set one taste anchor section (preferred_hooks | preferred_formats | avoid) and re-consolidate TASTE.md. `content` is markdown that replaces the section body verbatim -- bullets recommended.
+
+Arguments: `section`, `content`. The registry schema in `tools/list` defines required fields and bounds.
+
+### get_engagement_signal
+
+Return the time-decayed value_score for one video plus per-event-type counts and last event timestamp. Events live entirely on the local SQLite index (zero outbound). Weights are documented in index.py (_ENGAGEMENT_WEIGHTS); decay half-life is 30 days.
+
+Arguments: `video_id`. The registry schema in `tools/list` defines required fields and bounds.
+
+### classify_facets
+
+Persist agent-classified facets + free-form tags for a video. Model-agnostic: the calling agent does the LLM work using its own model; this tool validates against bounded enums and writes to the row. The server fills performance_tier (channel-relative) and length_bucket (from duration) if you don't pass them.
+
+Arguments: `video_id`, `format`, `performance_tier`, `length_bucket`, `production_style`, `topic`, `hook_type`, `tags`. The registry schema in `tools/list` defines required fields and bounds.
+
+### query_by_facets
+
+Filter saved yoinks by facet values (format / performance_tier / hook_type / topic / length_bucket / tag). All filters AND-combined; newest first.
+
+Arguments: `format`, `performance_tier`, `hook_type`, `topic`, `length_bucket`, `tag`, `limit`. The registry schema in `tools/list` defines required fields and bounds.
+
+### get_facet_taxonomy
+
+Enum lists for the v2.5 facet axes (used for filter chips).
+
+### assemble_workspace
+
+v3 P4 build workspace: pull a corpus slice for planning a video. Ranks yoinks by S1 facets (format match), performance tier (over > average > under), and S2 engagement value_score. Returns the slice + audience questions from comments + optional self-channel snapshot (if your_channel is set) + optional taste anchors (if S4 memory layer is available). Pure local read; the calling agent does any LLM analysis downstream. If `workspace_id` is provided the slice is persisted onto that row.
+
+Arguments: `format`, `topic`, `hook_target`, `your_channel`, `n_examples`, `workspace_id`. The registry schema in `tools/list` defines required fields and bounds.
+
+### critique_against_corpus
+
+v3 P4 critique tool. Two-phase: call WITHOUT `findings` to retrieve the assembled context (corpus slice + audience questions + taste anchors) -- the agent does the LLM analysis on that context. Call WITH `findings` (structured JSON object with hook_strength, structural_deviation, pacing_issues, missing_audience_hooks per ROADMAP P4) to persist the analysis to the workspace's critique log. Model-agnostic default; BYO-key mode accepted but not yet implemented on-server.
+
+Arguments: `workspace_id`, `draft_text`, `findings`, `mode`. The registry schema in `tools/list` defines required fields and bounds.
+
+### list_workspaces
+
+v3 P4: list build workspaces newest-first. Read-only.
+
+Arguments: `limit`. The registry schema in `tools/list` defines required fields and bounds.
+
+### get_workspace
+
+v3 P4: fetch one workspace + its full critique log (every draft + findings combination the agent has persisted).
+
+Arguments: `id`, `workspace_id`. The registry schema in `tools/list` defines required fields and bounds.
+
+### extract_claims
+
+v3 A2 (Loki-inspired): persist agent-extracted claims for a video. LOCKED FRAMING -- the calling agent does the LLM decomposition; this tool validates + writes. Each claim is {claim_text, check_worthiness? (0.0-1.0), context?}. NEVER auto-asserts truth verdicts -- surfaces checkable claims so the user can decide which to verify.
+
+Arguments: `video_id`, `claims`, `mode`. The registry schema in `tools/list` defines required fields and bounds.
+
+### verify_claim
+
+v3 A2: record evidence for one extracted claim. alignment_signal MUST be one of supports / contradicts / mixed / inconclusive. NEVER 'true' / 'false' / 'lie'. The user judges the verdict from the surfaced evidence.
+
+Arguments: `claim_id`, `evidence`, `mode`. The registry schema in `tools/list` defines required fields and bounds.
+
+### list_claims
+
+v3 A2: list extracted claims. Filter by video_id and/or status (extracted | verified | not-attempted).
+
+Arguments: `video_id`, `status`, `limit`. The registry schema in `tools/list` defines required fields and bounds.
+
+### get_claim
+
+v3 A2: fetch one claim by id, with stored evidence.
+
+Arguments: `id`, `claim_id`. The registry schema in `tools/list` defines required fields and bounds.
+
+### generate_script
+
+v3 P5 script studio: two-phase generator. Call WITHOUT `script` payload to retrieve grounding context (workspace metadata + assembled corpus slice + audience questions + optional taste anchors + optional self-channel snapshot). The calling agent does the writing using its own model. Call WITH `script` (a structured object with hook + beats + body + cta + source_yoinks citations) to persist as a new versioned row. parent_script_id chains revisions. An optional hook_type_lens biases the opening toward one of the 9 hook styles.
+
+Arguments: `workspace_id`, `script`, `mode`, `parent_script_id`, `hook_type_lens`. The registry schema in `tools/list` defines required fields and bounds.
+
+### revise_script
+
+v3 P5: revise an existing script grounded in critique findings. Two-phase like generate_script -- without `revised_script` returns previous + grounding for the agent to act on; with `revised_script` persists as a new version (parent_script_id auto-set to the prior id).
+
+Arguments: `script_id`, `critique_findings`, `revision_target`, `revised_script`, `mode`. The registry schema in `tools/list` defines required fields and bounds.
+
+### get_shot_list
+
+v3 P5: derive (and persist) a default shot list from a script's beats + the parent workspace's S1 format facet. Per-beat row with format-specific cue suggestions. The calling agent can override by supplying shot_list directly in generate_script.
+
+Arguments: `script_id`. The registry schema in `tools/list` defines required fields and bounds.
+
+### list_scripts
+
+v3 P5: list scripts newest-first. Optional workspace_id filter scopes to one workspace's history.
+
+Arguments: `workspace_id`, `limit`. The registry schema in `tools/list` defines required fields and bounds.
+
+### get_script
+
+v3 P5: fetch one script by id.
+
+Arguments: `id`, `script_id`. The registry schema in `tools/list` defines required fields and bounds.
+
+### write_tweet
+
+Two-phase tweet/thread generator. Phase 1 (no `body`) returns grounding (source yoink + creator credit + style anchors + Voice DNA prompt). Phase 2 (`body` present) persists + scans for canned phrases + returns structured warnings (soft warn -- NEVER auto-blocks). Creator credit is required in the body.
+
+Arguments: `source_yoink_id`, `angle`, `target_length_chars`, `generate`, `compute_mode`, `kind`, `output_mode`, `hook_type_lens`, `style_anchor_ids`, `body`, `source_credit_line`, `skip_voice_dna_this_time`, `suppress_credit`, `tags`, `parent_id`. The registry schema in `tools/list` defines required fields and bounds.
+
+### write_blog
+
+Two-phase blog generator. Same shape as write_tweet but Phase 2 accepts title, dek, tags, and expects markdown body with a Source section. Soft-warn canned-phrase scan; creator credit non-suppressible.
+
+Arguments: `source_yoink_id`, `angle`, `target_length_words`, `generate`, `compute_mode`, `kind`, `hook_type_lens`, `style_anchor_ids`, `body`, `title`, `dek`, `tags`, `source_credit_line`, `skip_voice_dna_this_time`, `suppress_credit`, `parent_id`. The registry schema in `tools/list` defines required fields and bounds.
+
+### list_writing_pieces
+
+List generated pieces newest-first. Optional `kind` (tweet|thread|blog) + `yoink_id` filters.
+
+Arguments: `kind`, `yoink_id`, `limit`. The registry schema in `tools/list` defines required fields and bounds.
+
+### get_writing_piece
+
+Fetch one piece by id.
+
+Arguments: `id`, `piece_id`. The registry schema in `tools/list` defines required fields and bounds.
+
+### add_style_anchor
+
+Add a Substack-style voice anchor (URL or raw pasted text). User names each. Cap at 10 -- returns 422-shaped error when exceeded. URL ingestion extracts prose via the helper's page extractor (Universal Site PR); falls back to NULL raw_text when the extractor isn't bound yet.
+
+Arguments: `name`, `source_type`, `source_value`. The registry schema in `tools/list` defines required fields and bounds.
+
+### list_style_anchors
+
+List style anchors + their active flag + the helper's 10-anchor cap.
+
+Arguments: `active_only`. The registry schema in `tools/list` defines required fields and bounds.
+
+### remove_style_anchor
+
+Delete a style anchor.
+
+Arguments: `anchor_id`, `id`. The registry schema in `tools/list` defines required fields and bounds.
+
+### uoink_url
+
+Capture any http(s) URL through the helper's universal extractor. Known video platforms use the full media pipeline; other sites use the metadata and transcript fallback.
+
+Arguments: `url`, `interval`, `long_video_mode`. The registry schema in `tools/list` defines required fields and bounds.
+
+### uoink_note
+
+Save a text note as a first-class local corpus item.
+
+Arguments: `text`, `title`, `author`. The registry schema in `tools/list` defines required fields and bounds.
+
+### uoink_image
+
+Save a base64 PNG, JPEG, or WebP as a local image corpus item. No cloud OCR or vision service runs.
+
+Arguments: `image_base64`, `mime`, `filename`, `caption`, `source_url`, `author`. The registry schema in `tools/list` defines required fields and bounds.
+
+### uoink_x
+
+Capture an X post and the author's earlier chain as a local corpus item. Requires the default-off x_text_capture_enabled setting.
+
+Arguments: `url`. The registry schema in `tools/list` defines required fields and bounds.
+
+### uoink_page
+
+Capture an allowed page as a yoink. Crawl4AI runs ON-DEVICE when available (JS render + screenshot); stdlib fallback otherwise (static HTML + markdown synthesis, no screenshot). Allowlist-gated -- add the host via add_allowed_site first if it's not in the defaults (youtube.com, youtu.be, x.com, twitter.com). Result auto-persists as a yoink with source_type='page'.
+
+Arguments: `url`, `render_mode`, `include_screenshot`, `follow_links_depth`. The registry schema in `tools/list` defines required fields and bounds.
+
+### uoink_reddit_thread
+
+Fetch a thread via its public .json (no API key, no OAuth), flatten the comment tree with a depth limit and a score threshold, and persist it as a yoink with source_type='reddit_thread'. Renders as Post -> Top comments -> nested replies so search and facets work on the conversation. Runs on-device; no allowlist gate.
+
+Arguments: `url`, `depth_limit`, `score_threshold`. The registry schema in `tools/list` defines required fields and bounds.
+
+### list_allowed_sites
+
+List the user's allowed hostnames. Default seeds (youtube.com, youtu.be, x.com, twitter.com) are pre-added by migration 0015 and removable like any other entry.
+
+Arguments: `active_only`. The registry schema in `tools/list` defines required fields and bounds.
+
+### add_allowed_site
+
+Add a hostname or wildcard pattern (`*.docs.example.com` matches all sub.docs.example.com subdomains). Idempotent on UNIQUE url_pattern. Plain hostnames also match their subdomains (so 'example.com' matches 'www.example.com').
+
+Arguments: `url_pattern`. The registry schema in `tools/list` defines required fields and bounds.
+
+### remove_allowed_site
+
+Remove a hostname or wildcard pattern from the allowlist.
+
+Arguments: `url_pattern`. The registry schema in `tools/list` defines required fields and bounds.

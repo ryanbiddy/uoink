@@ -450,7 +450,7 @@ def _inventory_finding(route, names, templates, prompts) -> list:
         findings.append(record_product_finding(
             operation="tools/list",
             input_value={"expected": list(EXPECTED_STDIO_TOOLS), "actual": names},
-            error="installed tool inventory differs from the frozen 32-tool set",
+            error="installed tool inventory differs from the default full 91-tool set",
             route=route,
         ))
     if sorted(templates) != sorted(EXPECTED_TEMPLATE_NAMES):
@@ -464,7 +464,7 @@ def _inventory_finding(route, names, templates, prompts) -> list:
         findings.append(record_product_finding(
             operation="prompts/list",
             input_value={"expected": list(EXPECTED_PROMPTS), "actual": prompts},
-            error="installed prompt inventory differs from the frozen four prompts",
+            error="installed prompt inventory differs from the nine shipped prompts",
             route=route,
         ))
     return findings

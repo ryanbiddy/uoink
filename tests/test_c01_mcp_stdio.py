@@ -48,14 +48,14 @@ except ImportError:
     HAVE_MCP_SDK = False
 
 
-CANONICAL_STDIO_TOOLS = {
+CORE_STDIO_TOOLS = (
     "uoink_video",
     "uoink_playlist",
     "get_job_status",
     "cancel_job",
     "list_recent_uoinks",
     "search_uoinks",
-    "search_clips",          # run E (2026-09-04): Phase 1 clip tools on stdio
+    "search_clips",
     "get_evidence_card",
     "get_uoink_corpus",
     "analyze_comments",
@@ -75,18 +75,109 @@ CANONICAL_STDIO_TOOLS = {
     "transcribe_podcast_episode",
     "episode_to_corpus",
     "get_library_activity",
-    # Phase 4 run AV-1 (contract phase4-v1-2026-09-08): bounded library reads.
     "search_library",
     "get_library_item",
     "read_library_resource",
-    # Phase 4 run AV-2: client-run daily briefs (input is a read; publish is a local write).
-    "get_library_brief_input",
-    "publish_library_brief",
-    # Phase 6 run BC-2 (contract phase6-v1): read-only cited range export.
-    "export_cited_range",
     "get_playbook_input",
     "discover_candidates",
     "queue_discovered",
+    "get_library_brief_input",
+    "publish_library_brief",
+    "export_cited_range",
+)
+
+CANONICAL_STDIO_TOOLS = {
+    "uoink_video",
+    "uoink_playlist",
+    "get_job_status",
+    "cancel_job",
+    "list_recent_uoinks",
+    "search_uoinks",
+    "search_clips",
+    "get_evidence_card",
+    "get_uoink_corpus",
+    "analyze_comments",
+    "classify_hook",
+    "get_taxonomy",
+    "get_citation_map",
+    "get_uoink_health",
+    "find_mentions",
+    "get_transcript_reliability",
+    "add_podcast_feed",
+    "list_podcast_feeds",
+    "remove_podcast_feed",
+    "poll_podcast_feed",
+    "list_podcast_episodes",
+    "download_podcast_episode",
+    "get_whisperx_status",
+    "transcribe_podcast_episode",
+    "episode_to_corpus",
+    "get_library_activity",
+    "search_library",
+    "get_library_item",
+    "read_library_resource",
+    "get_playbook_input",
+    "discover_candidates",
+    "queue_discovered",
+    "get_library_brief_input",
+    "publish_library_brief",
+    "export_cited_range",
+    "list_library_work",
+    "claim_library_work",
+    "submit_library_result",
+    "apply_reshelving",
+    "pin_shelf",
+    "undo_library_apply",
+    "list_sources",
+    "register_source",
+    "source_status",
+    "set_source_consent",
+    "analyze_self_channel",
+    "get_schema_version",
+    "get_user_role",
+    "set_user_role",
+    "check_live_status",
+    "add_monitored_playlist",
+    "list_monitored_playlists",
+    "remove_monitored_playlist",
+    "poll_monitored_playlist",
+    "list_monitored_playlist_events",
+    "get_user_taste",
+    "get_user_memory",
+    "update_user_taste",
+    "get_engagement_signal",
+    "classify_facets",
+    "query_by_facets",
+    "get_facet_taxonomy",
+    "assemble_workspace",
+    "critique_against_corpus",
+    "list_workspaces",
+    "get_workspace",
+    "extract_claims",
+    "verify_claim",
+    "list_claims",
+    "get_claim",
+    "generate_script",
+    "revise_script",
+    "get_shot_list",
+    "list_scripts",
+    "get_script",
+    "write_tweet",
+    "write_blog",
+    "list_writing_pieces",
+    "get_writing_piece",
+    "add_style_anchor",
+    "list_style_anchors",
+    "remove_style_anchor",
+    "uoink_url",
+    "uoink_note",
+    "uoink_image",
+    "uoink_x",
+    "uoink_page",
+    "uoink_reddit_thread",
+    "list_allowed_sites",
+    "add_allowed_site",
+    "remove_allowed_site",
 }
 
 REMOVED_STDIO_ALIASES = {
@@ -185,6 +276,7 @@ def _isolated_env(tmp):
     env["LOCALAPPDATA"] = tmp                      # Windows data root
     env["XDG_DATA_HOME"] = os.path.join(tmp, "xdg")  # Linux/mac data root
     env["UOINK_OUTPUT_DIR"] = os.path.join(tmp, "out")
+    env["UOINK_MCP_TOOLSET"] = "full"
     return env
 
 
@@ -215,6 +307,9 @@ def _assert_tool_metadata(tools):
             "tools/list must not duplicate tools")
     for tool in tools:
         name = tool["name"]
+        _assert(tool["inputSchema"] == uoink_mcp_tools.client_input_schema(
+            registry[name]["inputSchema"]), f"{name}: schema drift")
+        _assert(tool["description"] == registry[name]["description"], f"{name}: description drift")
         _assert(isinstance(tool.get("title"), str) and tool["title"].strip(),
                 f"{name}: missing human title")
         annotations = tool.get("annotations") or {}
@@ -269,6 +364,8 @@ def test_stdio_handshake_under_embeddable_path_rules():
                     "stdio tool surface drift: "
                     f"missing={sorted(CANONICAL_STDIO_TOOLS - set(names))}, "
                     f"extra={sorted(set(names) - CANONICAL_STDIO_TOOLS)}")
+            _assert(tuple(names[:35]) == CORE_STDIO_TOOLS, "legacy tool order drift")
+            _assert(set(names) == set(uoink_registry_names()), "registry inventory drift")
             _assert(not REMOVED_STDIO_ALIASES.intersection(names),
                     f"removed aliases returned by tools/list: {names}")
             _assert_tool_metadata(tools["result"]["tools"])
@@ -343,6 +440,11 @@ def main():
     test_removed_aliases_are_rejected_and_manifest_matches()
     test_stdio_handshake_under_embeddable_path_rules()
     print("\nall green")
+
+
+def uoink_registry_names():
+    import uoink_mcp_tools
+    return uoink_mcp_tools.TOOL_REGISTRY
 
 
 if __name__ == "__main__":

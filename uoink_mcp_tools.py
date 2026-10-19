@@ -1619,7 +1619,7 @@ def remove_style_anchor(args: dict[str, Any]) -> dict[str, Any]:
     return _ok(removed=removed, id=anchor_id)
 
 
-# ---- registry-only capture parity ------------------------------------
+# ---- shared capture parity ------------------------------------
 def uoink_url(args: dict[str, Any]) -> dict[str, Any]:
     """Capture any URL through the helper's existing /extract/any logic."""
     server = _b()
@@ -2395,9 +2395,8 @@ def get_taxonomy(args: dict[str, Any]) -> dict[str, Any]:
 #     request context (index handle, server clock, librarian_apply_enabled)
 #     and return the service's result in the contract envelope. They add no
 #     alternate domain validation and never call a model or the network.
-#   * HTTP registry only. Nothing here is on stdio this stage: the brief
-#     permits stdio only for the read-only pair that includes
-#     `get_library_status`, and the frozen schema set does not define it.
+#   * Both HTTP and full stdio expose these adapters. The frozen input
+#     schemas and dashboard-intent requirements are identical on both.
 # ===========================================================================
 
 _library_log = logging.getLogger("uoink.library")
@@ -3737,6 +3736,46 @@ EXPORT_CITED_RANGE_DESCRIPTION = (
 )
 
 
+# Stable v3.9.1 wire order. Keep these first for clients that cap tool counts.
+CORE_STDIO_TOOLS = (
+    "uoink_video",
+    "uoink_playlist",
+    "get_job_status",
+    "cancel_job",
+    "list_recent_uoinks",
+    "search_uoinks",
+    "search_clips",
+    "get_evidence_card",
+    "get_uoink_corpus",
+    "analyze_comments",
+    "classify_hook",
+    "get_taxonomy",
+    "get_citation_map",
+    "get_uoink_health",
+    "find_mentions",
+    "get_transcript_reliability",
+    "add_podcast_feed",
+    "list_podcast_feeds",
+    "remove_podcast_feed",
+    "poll_podcast_feed",
+    "list_podcast_episodes",
+    "download_podcast_episode",
+    "get_whisperx_status",
+    "transcribe_podcast_episode",
+    "episode_to_corpus",
+    "get_library_activity",
+    "search_library",
+    "get_library_item",
+    "read_library_resource",
+    "get_playbook_input",
+    "discover_candidates",
+    "queue_discovered",
+    "get_library_brief_input",
+    "publish_library_brief",
+    "export_cited_range",
+)
+
+
 TOOL_REGISTRY: dict[str, ToolSpec] = {
     "uoink_video": ToolSpec(
         name="uoink_video",
@@ -3900,22 +3939,32 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
         handler=get_evidence_card,
         rate_limiter=_RateLimiter(30),
     ),
-    # ---- Living Library work queue (Phase 2 stage 1; HTTP registry only) ----
+    # ---- Living Library work queue (Phase 2 stage 1; both MCP transports) ----
     # Rate limits live inside _library_call so a throttled caller still gets
     # the contract's error envelope rather than the plain string one.
     "list_library_work": ToolSpec(
         name="list_library_work",
+        title="List library work",
+        annotations={
+            "readOnlyHint": False, "destructiveHint": True,
+            "idempotentHint": False, "openWorldHint": False,
+        },
         description=(
             "List Librarian assignment work for a run: counts by work state "
             "and manifest disposition, the run revision, one cursor page of "
             "items, and whether staged work is waiting for a subscribed "
-            "client. Read-only; the server never runs the Librarian itself."
+            "client. Expires stale leases while listing; the server never runs the Librarian itself."
         ),
         input_schema=LIBRARY_TOOL_SCHEMAS["list_library_work"],
         handler=list_library_work,
     ),
     "claim_library_work": ToolSpec(
         name="claim_library_work",
+        title="Claim library work",
+        annotations={
+            "readOnlyHint": False, "destructiveHint": True,
+            "idempotentHint": False, "openWorldHint": False,
+        },
         description=(
             "Lease Librarian work for a client (action=claim returns up to "
             "twelve single-item packets, each with one evidence card and an "
@@ -3928,6 +3977,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "submit_library_result": ToolSpec(
         name="submit_library_result",
+        title="Submit library result",
+        annotations={
+            "readOnlyHint": False, "destructiveHint": False,
+            "idempotentHint": True, "openWorldHint": False,
+        },
         description=(
             "Submit one Librarian result for one leased work row: an "
             "assignment of one to three shelf memberships with quoted "
@@ -3941,6 +3995,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "apply_reshelving": ToolSpec(
         name="apply_reshelving",
+        title="Apply reshelving",
+        annotations={
+            "readOnlyHint": False, "destructiveHint": True,
+            "idempotentHint": False, "openWorldHint": False,
+        },
         description=(
             "Preview the exact reshelving delta for a run (mode=preview, the "
             "default), or apply a locally approved, unexpired preview by its "
@@ -3954,6 +4013,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "pin_shelf": ToolSpec(
         name="pin_shelf",
+        title="Pin library shelf",
+        annotations={
+            "readOnlyHint": False, "destructiveHint": True,
+            "idempotentHint": True, "openWorldHint": False,
+        },
         description=(
             "Pin, unpin or move one item on a shelf as a user decision that "
             "the Librarian may not override. Requires a user_intent_token "
@@ -3965,6 +4029,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "undo_library_apply": ToolSpec(
         name="undo_library_apply",
+        title="Undo library apply",
+        annotations={
+            "readOnlyHint": False, "destructiveHint": True,
+            "idempotentHint": True, "openWorldHint": False,
+        },
         description=(
             "Undo one recorded library apply by replaying its stored inverse "
             "as a new, itself reversible, journal operation. Only the apply "
@@ -3979,6 +4048,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     # transport returns the contract's error envelope.
     "list_sources": ToolSpec(
         name="list_sources",
+        title="List standing sources",
+        annotations={
+            "readOnlyHint": True, "destructiveHint": False,
+            "idempotentHint": True, "openWorldHint": False,
+        },
         description=(
             "List standing sources (podcast RSS feeds, YouTube channels and "
             "playlists) with consent state, enrollment, today's UTC start "
@@ -3989,6 +4063,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "register_source": ToolSpec(
         name="register_source",
+        title="Register standing source",
+        annotations={
+            "readOnlyHint": False, "destructiveHint": False,
+            "idempotentHint": True, "openWorldHint": True,
+        },
         description=(
             "Register a standing source for metadata detection only. Creates "
             "the source with capture off and a due detection cursor; no "
@@ -4000,6 +4079,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "source_status": ToolSpec(
         name="source_status",
+        title="Get source status",
+        annotations={
+            "readOnlyHint": True, "destructiveHint": False,
+            "idempotentHint": True, "openWorldHint": False,
+        },
         description=(
             "One source's current summary, one page of observed items with "
             "capture and classification state, and every in-flight "
@@ -4010,6 +4094,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "set_source_consent": ToolSpec(
         name="set_source_consent",
+        title="Set source consent",
+        annotations={
+            "readOnlyHint": False, "destructiveHint": True,
+            "idempotentHint": True, "openWorldHint": True,
+        },
         description=(
             "Turn standing capture on or off for one source. Requires the "
             "expected source revision (and cursor revision when enabling), an "
@@ -4167,6 +4256,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "analyze_self_channel": ToolSpec(
         name="analyze_self_channel",
+        title="Analyze own channel",
+        annotations={
+            "readOnlyHint": True, "destructiveHint": False,
+            "idempotentHint": True, "openWorldHint": False,
+        },
         description=(
             "Aggregate the user's own saved "
             "videos (those tagged is_self via channel-name recognition) "
@@ -4193,6 +4287,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "get_schema_version": ToolSpec(
         name="get_schema_version",
+        title="Get storage schema version",
+        annotations={
+            "readOnlyHint": True, "destructiveHint": False,
+            "idempotentHint": True, "openWorldHint": False,
+        },
         description=(
             "Report the data-shape versions Uoink writes + the supported "
             "read-range. v2.5 substrate: cross-version aggregators (Channel "
@@ -4205,6 +4304,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "get_user_role": ToolSpec(
         name="get_user_role",
+        title="Get user role",
+        annotations={
+            "readOnlyHint": True, "destructiveHint": False,
+            "idempotentHint": True, "openWorldHint": False,
+        },
         description=(
             "Report the user's persisted role (creator | "
             "researcher | marketer | mixed) + the dashboard emphasis "
@@ -4217,6 +4321,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "set_user_role": ToolSpec(
         name="set_user_role",
+        title="Set user role",
+        annotations={
+            "readOnlyHint": False, "destructiveHint": True,
+            "idempotentHint": True, "openWorldHint": False,
+        },
         description=(
             "Persist the user's role choice. Drives Library "
             "default sort + filter-chip emphasis on the dashboard. "
@@ -4234,6 +4343,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "check_live_status": ToolSpec(
         name="check_live_status",
+        title="Check live video status",
+        annotations={
+            "readOnlyHint": True, "destructiveHint": False,
+            "idempotentHint": True, "openWorldHint": True,
+        },
         description=(
             "Probe a URL to find out if it is a live broadcast "
             "without extracting. Returns one of: not_live | live | "
@@ -4431,6 +4545,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "add_monitored_playlist": ToolSpec(
         name="add_monitored_playlist",
+        title="Add monitored playlist",
+        annotations={
+            "readOnlyHint": False, "destructiveHint": False,
+            "idempotentHint": True, "openWorldHint": True,
+        },
         description=(
             "Register a YouTube playlist URL to "
             "monitor for auto-uoinks. Idempotent on UNIQUE "
@@ -4447,6 +4566,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "list_monitored_playlists": ToolSpec(
         name="list_monitored_playlists",
+        title="List monitored playlists",
+        annotations={
+            "readOnlyHint": True, "destructiveHint": False,
+            "idempotentHint": True, "openWorldHint": False,
+        },
         description=("List registered playlists "
                       "newest-first."),
         input_schema=_schema({
@@ -4457,6 +4581,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "remove_monitored_playlist": ToolSpec(
         name="remove_monitored_playlist",
+        title="Remove monitored playlist",
+        annotations={
+            "readOnlyHint": False, "destructiveHint": True,
+            "idempotentHint": True, "openWorldHint": False,
+        },
         description=("Delete a playlist + cascade "
                       "its discovery events."),
         input_schema=_schema({
@@ -4467,6 +4596,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "poll_monitored_playlist": ToolSpec(
         name="poll_monitored_playlist",
+        title="Poll monitored playlist",
+        annotations={
+            "readOnlyHint": False, "destructiveHint": False,
+            "idempotentHint": False, "openWorldHint": True,
+        },
         description=(
             "Poll one playlist (yt-dlp "
             "--flat-playlist) + diff against last_seen_video_ids + "
@@ -4483,6 +4617,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "list_monitored_playlist_events": ToolSpec(
         name="list_monitored_playlist_events",
+        title="List playlist events",
+        annotations={
+            "readOnlyHint": True, "destructiveHint": False,
+            "idempotentHint": True, "openWorldHint": False,
+        },
         description=(
             "List per-discovery events. Optional "
             "filters: playlist_id, status (discovered | queued | "
@@ -4501,6 +4640,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "get_user_taste": ToolSpec(
         name="get_user_taste",
+        title="Get taste memory",
+        annotations={
+            "readOnlyHint": False, "destructiveHint": False,
+            "idempotentHint": True, "openWorldHint": False,
+        },
         description=(
             "Return the consolidated TASTE.md "
             "(preferred hooks/formats, avoid list, top performance "
@@ -4513,6 +4657,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "get_user_memory": ToolSpec(
         name="get_user_memory",
+        title="Get user memory",
+        annotations={
+            "readOnlyHint": False, "destructiveHint": False,
+            "idempotentHint": True, "openWorldHint": False,
+        },
         description=(
             "Return the user's free-form USER.md "
             "notes (Channels I admire, My channel(s), Topics, Workflow "
@@ -4525,6 +4674,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "update_user_taste": ToolSpec(
         name="update_user_taste",
+        title="Update taste memory",
+        annotations={
+            "readOnlyHint": False, "destructiveHint": True,
+            "idempotentHint": True, "openWorldHint": False,
+        },
         description=(
             "Set one taste anchor section "
             "(preferred_hooks | preferred_formats | avoid) and "
@@ -4543,6 +4697,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "get_engagement_signal": ToolSpec(
         name="get_engagement_signal",
+        title="Get engagement signal",
+        annotations={
+            "readOnlyHint": True, "destructiveHint": False,
+            "idempotentHint": True, "openWorldHint": False,
+        },
         description=(
             "Return the time-decayed value_score "
             "for one video plus per-event-type counts and last event "
@@ -4561,6 +4720,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "classify_facets": ToolSpec(
         name="classify_facets",
+        title="Classify item facets",
+        annotations={
+            "readOnlyHint": False, "destructiveHint": True,
+            "idempotentHint": True, "openWorldHint": False,
+        },
         description=(
             "Persist agent-classified facets + free-form tags for a video. "
             "Model-agnostic: the calling agent does the LLM work using its "
@@ -4588,6 +4752,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "query_by_facets": ToolSpec(
         name="query_by_facets",
+        title="Query item facets",
+        annotations={
+            "readOnlyHint": True, "destructiveHint": False,
+            "idempotentHint": True, "openWorldHint": False,
+        },
         description=(
             "Filter saved yoinks by facet values (format / performance_tier / "
             "hook_type / topic / length_bucket / tag). All filters "
@@ -4607,6 +4776,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "get_facet_taxonomy": ToolSpec(
         name="get_facet_taxonomy",
+        title="Get facet taxonomy",
+        annotations={
+            "readOnlyHint": True, "destructiveHint": False,
+            "idempotentHint": True, "openWorldHint": False,
+        },
         description="Enum lists for the v2.5 facet axes (used for filter chips).",
         input_schema=_schema({}, []),
         handler=get_facet_taxonomy,
@@ -4635,6 +4809,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "assemble_workspace": ToolSpec(
         name="assemble_workspace",
+        title="Assemble workspace",
+        annotations={
+            "readOnlyHint": False, "destructiveHint": True,
+            "idempotentHint": True, "openWorldHint": False,
+        },
         description=(
             "v3 P4 build workspace: pull a corpus slice for planning a "
             "video. Ranks yoinks by S1 facets (format match), performance "
@@ -4660,6 +4839,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "critique_against_corpus": ToolSpec(
         name="critique_against_corpus",
+        title="Critique against corpus",
+        annotations={
+            "readOnlyHint": False, "destructiveHint": False,
+            "idempotentHint": False, "openWorldHint": False,
+        },
         description=(
             "v3 P4 critique tool. Two-phase: call WITHOUT `findings` to "
             "retrieve the assembled context (corpus slice + audience "
@@ -4682,6 +4866,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "list_workspaces": ToolSpec(
         name="list_workspaces",
+        title="List workspaces",
+        annotations={
+            "readOnlyHint": True, "destructiveHint": False,
+            "idempotentHint": True, "openWorldHint": False,
+        },
         description=(
             "v3 P4: list build workspaces newest-first. Read-only."
         ),
@@ -4694,6 +4883,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "get_workspace": ToolSpec(
         name="get_workspace",
+        title="Get workspace",
+        annotations={
+            "readOnlyHint": True, "destructiveHint": False,
+            "idempotentHint": True, "openWorldHint": False,
+        },
         description=(
             "v3 P4: fetch one workspace + its full critique log (every "
             "draft + findings combination the agent has persisted)."
@@ -4707,6 +4901,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "extract_claims": ToolSpec(
         name="extract_claims",
+        title="Extract claims",
+        annotations={
+            "readOnlyHint": False, "destructiveHint": False,
+            "idempotentHint": False, "openWorldHint": False,
+        },
         description=(
             "v3 A2 (Loki-inspired): persist agent-extracted claims for "
             "a video. LOCKED FRAMING -- the calling agent does the LLM "
@@ -4725,6 +4924,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "verify_claim": ToolSpec(
         name="verify_claim",
+        title="Record claim evidence",
+        annotations={
+            "readOnlyHint": False, "destructiveHint": True,
+            "idempotentHint": False, "openWorldHint": False,
+        },
         description=(
             "v3 A2: record evidence for one extracted claim. "
             "alignment_signal MUST be one of supports / contradicts / "
@@ -4748,6 +4952,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "list_claims": ToolSpec(
         name="list_claims",
+        title="List claims",
+        annotations={
+            "readOnlyHint": True, "destructiveHint": False,
+            "idempotentHint": True, "openWorldHint": False,
+        },
         description=(
             "v3 A2: list extracted claims. Filter by video_id and/or "
             "status (extracted | verified | not-attempted)."
@@ -4766,6 +4975,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "get_claim": ToolSpec(
         name="get_claim",
+        title="Get claim",
+        annotations={
+            "readOnlyHint": True, "destructiveHint": False,
+            "idempotentHint": True, "openWorldHint": False,
+        },
         description="v3 A2: fetch one claim by id, with stored evidence.",
         input_schema=_schema({
             "id": {"type": "integer"},
@@ -4776,6 +4990,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "generate_script": ToolSpec(
         name="generate_script",
+        title="Generate script",
+        annotations={
+            "readOnlyHint": False, "destructiveHint": False,
+            "idempotentHint": False, "openWorldHint": False,
+        },
         description=(
             "v3 P5 script studio: two-phase generator. Call WITHOUT "
             "`script` payload to retrieve grounding context (workspace "
@@ -4807,6 +5026,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "revise_script": ToolSpec(
         name="revise_script",
+        title="Revise script",
+        annotations={
+            "readOnlyHint": False, "destructiveHint": False,
+            "idempotentHint": False, "openWorldHint": False,
+        },
         description=(
             "v3 P5: revise an existing script grounded in critique "
             "findings. Two-phase like generate_script -- without "
@@ -4826,6 +5050,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "get_shot_list": ToolSpec(
         name="get_shot_list",
+        title="Generate shot list",
+        annotations={
+            "readOnlyHint": False, "destructiveHint": True,
+            "idempotentHint": True, "openWorldHint": False,
+        },
         description=(
             "v3 P5: derive (and persist) a default shot list from a "
             "script's beats + the parent workspace's S1 format facet. "
@@ -4841,6 +5070,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "list_scripts": ToolSpec(
         name="list_scripts",
+        title="List scripts",
+        annotations={
+            "readOnlyHint": True, "destructiveHint": False,
+            "idempotentHint": True, "openWorldHint": False,
+        },
         description=(
             "v3 P5: list scripts newest-first. Optional workspace_id "
             "filter scopes to one workspace's history."
@@ -4855,6 +5089,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "get_script": ToolSpec(
         name="get_script",
+        title="Get script",
+        annotations={
+            "readOnlyHint": True, "destructiveHint": False,
+            "idempotentHint": True, "openWorldHint": False,
+        },
         description="v3 P5: fetch one script by id.",
         input_schema=_schema({
             "id": {"type": "integer"},
@@ -4866,6 +5105,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     # v3.2 Writing Studio (7 tools)
     "write_tweet": ToolSpec(
         name="write_tweet",
+        title="Write tweet or thread",
+        annotations={
+            "readOnlyHint": False, "destructiveHint": False,
+            "idempotentHint": False, "openWorldHint": True,
+        },
         description=(
             "Two-phase tweet/thread generator. "
             "Phase 1 (no `body`) returns grounding (source yoink + "
@@ -4920,6 +5164,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "write_blog": ToolSpec(
         name="write_blog",
+        title="Write blog",
+        annotations={
+            "readOnlyHint": False, "destructiveHint": False,
+            "idempotentHint": False, "openWorldHint": True,
+        },
         description=(
             "Two-phase blog generator. Same shape "
             "as write_tweet but Phase 2 accepts title, dek, tags, and "
@@ -4966,6 +5215,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "list_writing_pieces": ToolSpec(
         name="list_writing_pieces",
+        title="List writing pieces",
+        annotations={
+            "readOnlyHint": True, "destructiveHint": False,
+            "idempotentHint": True, "openWorldHint": False,
+        },
         description=(
             "List generated pieces newest-first. "
             "Optional `kind` (tweet|thread|blog) + `yoink_id` filters."
@@ -4982,6 +5236,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "get_writing_piece": ToolSpec(
         name="get_writing_piece",
+        title="Get writing piece",
+        annotations={
+            "readOnlyHint": True, "destructiveHint": False,
+            "idempotentHint": True, "openWorldHint": False,
+        },
         description="Fetch one piece by id.",
         input_schema=_schema({
             "id": {"type": "integer"},
@@ -4992,6 +5251,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "add_style_anchor": ToolSpec(
         name="add_style_anchor",
+        title="Add style anchor",
+        annotations={
+            "readOnlyHint": False, "destructiveHint": False,
+            "idempotentHint": False, "openWorldHint": True,
+        },
         description=(
             "Add a Substack-style voice anchor "
             "(URL or raw pasted text). User names each. Cap at 10 -- "
@@ -5011,6 +5275,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "list_style_anchors": ToolSpec(
         name="list_style_anchors",
+        title="List style anchors",
+        annotations={
+            "readOnlyHint": True, "destructiveHint": False,
+            "idempotentHint": True, "openWorldHint": False,
+        },
         description=("List style anchors + their "
                       "active flag + the helper's 10-anchor cap."),
         input_schema=_schema({
@@ -5021,6 +5290,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "remove_style_anchor": ToolSpec(
         name="remove_style_anchor",
+        title="Remove style anchor",
+        annotations={
+            "readOnlyHint": False, "destructiveHint": True,
+            "idempotentHint": True, "openWorldHint": False,
+        },
         description="Delete a style anchor.",
         input_schema=_schema({
             "anchor_id": {"type": "integer"},
@@ -5029,9 +5303,14 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
         handler=remove_style_anchor,
         rate_limiter=_RateLimiter(30),
     ),
-    # Phase 0 registry-only capture parity (4 tools)
+    # Phase 0 shared capture parity (4 tools)
     "uoink_url": ToolSpec(
         name="uoink_url",
+        title="Capture URL",
+        annotations={
+            "readOnlyHint": False, "destructiveHint": False,
+            "idempotentHint": False, "openWorldHint": True,
+        },
         description=(
             "Capture any http(s) URL through the helper's universal extractor. "
             "Known video platforms use the full media pipeline; other sites "
@@ -5048,6 +5327,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "uoink_note": ToolSpec(
         name="uoink_note",
+        title="Save note",
+        annotations={
+            "readOnlyHint": False, "destructiveHint": False,
+            "idempotentHint": False, "openWorldHint": False,
+        },
         description="Save a text note as a first-class local corpus item.",
         input_schema=_schema({
             "text": {"type": "string"},
@@ -5059,6 +5343,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "uoink_image": ToolSpec(
         name="uoink_image",
+        title="Save image",
+        annotations={
+            "readOnlyHint": False, "destructiveHint": False,
+            "idempotentHint": False, "openWorldHint": False,
+        },
         description=(
             "Save a base64 PNG, JPEG, or WebP as a local image corpus item. "
             "No cloud OCR or vision service runs."
@@ -5076,6 +5365,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "uoink_x": ToolSpec(
         name="uoink_x",
+        title="Capture X post",
+        annotations={
+            "readOnlyHint": False, "destructiveHint": False,
+            "idempotentHint": False, "openWorldHint": True,
+        },
         description=(
             "Capture an X post and the author's earlier chain as a local corpus "
             "item. Requires the default-off x_text_capture_enabled setting."
@@ -5089,6 +5383,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     # v3.2 Universal Site Uoinking (4 tools)
     "uoink_page": ToolSpec(
         name="uoink_page",
+        title="Capture web page",
+        annotations={
+            "readOnlyHint": False, "destructiveHint": False,
+            "idempotentHint": False, "openWorldHint": True,
+        },
         description=(
             "Capture an allowed page as "
             "a yoink. Crawl4AI runs ON-DEVICE when available "
@@ -5113,6 +5412,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "uoink_reddit_thread": ToolSpec(
         name="uoink_reddit_thread",
+        title="Capture Reddit thread",
+        annotations={
+            "readOnlyHint": False, "destructiveHint": False,
+            "idempotentHint": False, "openWorldHint": True,
+        },
         description=(
             "Fetch a thread via its public .json "
             "(no API key, no OAuth), flatten the comment tree with a depth "
@@ -5135,6 +5439,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "list_allowed_sites": ToolSpec(
         name="list_allowed_sites",
+        title="List allowed sites",
+        annotations={
+            "readOnlyHint": True, "destructiveHint": False,
+            "idempotentHint": True, "openWorldHint": False,
+        },
         description=(
             "List the user's allowed hostnames. "
             "Default seeds (youtube.com, youtu.be, x.com, "
@@ -5149,6 +5458,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "add_allowed_site": ToolSpec(
         name="add_allowed_site",
+        title="Add allowed site",
+        annotations={
+            "readOnlyHint": False, "destructiveHint": False,
+            "idempotentHint": True, "openWorldHint": True,
+        },
         description=(
             "Add a hostname or wildcard pattern "
             "(`*.docs.example.com` matches all sub.docs.example.com "
@@ -5164,6 +5478,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "remove_allowed_site": ToolSpec(
         name="remove_allowed_site",
+        title="Remove allowed site",
+        annotations={
+            "readOnlyHint": False, "destructiveHint": True,
+            "idempotentHint": True, "openWorldHint": False,
+        },
         description=(
             "Remove a hostname or wildcard "
             "pattern from the allowlist."
@@ -5440,3 +5759,65 @@ def call_tool(name: str, arguments: dict[str, Any] | None = None, *,
         return _err(str(e))
     except Exception as e:
         return _err(f"tool failed: {e}")
+
+
+def stdio_tool_names(toolset: str = "full") -> tuple[str, ...]:
+    """Full registry, with the v3.9.1 prefix preserved; core is opt-in."""
+    if len(CORE_STDIO_TOOLS) != 35 or len(set(CORE_STDIO_TOOLS)) != 35:
+        raise RuntimeError("Invalid core stdio inventory")
+    if not set(CORE_STDIO_TOOLS) <= TOOL_REGISTRY.keys():
+        raise RuntimeError("Core stdio tool missing from registry")
+    if toolset == "core":
+        return CORE_STDIO_TOOLS
+    return CORE_STDIO_TOOLS + tuple(name for name in TOOL_REGISTRY if name not in CORE_STDIO_TOOLS)
+
+
+_SCHEMA_COMBINATORS = ("oneOf", "anyOf", "allOf")
+
+
+def client_input_schema(schema: dict) -> dict:
+    """The input schema stdio advertises to MCP clients.
+
+    The Anthropic API rejects tool input schemas with oneOf/anyOf/allOf at the
+    top level, and Claude Code then shows none of the server's tools. Three
+    frozen registry schemas (claim_library_work, apply_reshelving,
+    set_source_consent) use a top-level oneOf. Advertise them as one object
+    whose properties merge the variants. The handlers still validate every
+    call against the exact registry schema, so nothing looser is accepted.
+    """
+    if schema.get("type") == "object" and not any(k in schema for k in _SCHEMA_COMBINATORS):
+        return schema
+    flat = {k: v for k, v in schema.items() if k not in _SCHEMA_COMBINATORS + ("not",)}
+    flat["type"] = "object"
+    properties = dict(schema.get("properties", {}))
+    variants: dict[str, list] = {}
+    required = set(schema.get("required", []))
+    branch_required = None
+    branches = []
+    for key in _SCHEMA_COMBINATORS:
+        for branch in schema.get(key, []):
+            branches.append(branch)
+            for name, sub in branch.get("properties", {}).items():
+                variants.setdefault(name, [])
+                if sub not in variants[name]:
+                    variants[name].append(sub)
+            names = set(branch.get("required", []))
+            if key == "allOf":
+                required |= names
+            else:
+                branch_required = names if branch_required is None else branch_required & names
+    for name, subs in variants.items():
+        if name not in properties:
+            properties[name] = subs[0] if len(subs) == 1 else {"anyOf": subs}
+    flat["properties"] = properties
+    required |= branch_required or set()
+    ordered = [n for n in schema.get("required", []) if n in required]
+    ordered += sorted(required - set(ordered))
+    if ordered:
+        flat["required"] = ordered
+    else:
+        flat.pop("required", None)
+    if ("additionalProperties" not in schema and branches
+            and all(b.get("additionalProperties") is False for b in branches)):
+        flat["additionalProperties"] = False
+    return flat
