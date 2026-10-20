@@ -21,10 +21,10 @@ Out of scope: `extension/*` except setup copy read for `docs/setup-copy-revision
 - Why it matters: A helper crash or Windows shutdown during a direct write can leave a partial `.md` or `.json`. The risk is low during normal operation, but these are the files users inspect and MCP tools read later.
 - Recommended fix: Add a small `_atomic_write_text(path, text)` helper and use it for corpus/sidecar writes. Keep existing tmp+replace behavior for settings/jobs/taxonomy.
 
-### no issues found - Token-gated mutating routes
+### no issues found - Token-gated mutating routes (historical v2 review)
 
 - Reference: `server.py:3426`, `server.py:3440`, `server.py:3762`
-- Notes: `/health`, `/ping`, and `/token` are the only unauthenticated GET paths. All other GET paths and every POST path require `X-Uoink-Token` before body parsing. This matches the v2 security model.
+- Notes: At the time of this v2 review, `/health`, `/ping`, and `/token` were the only unauthenticated GET paths. All other GET paths and every POST path required `X-Uoink-Token` before body parsing. The helper has since added public metadata, recovery, suite-discovery, and local-shell routes. See [`docs/security.md`](security.md) for the current, tested inventory.
 
 ### no issues found - `/file` sandbox and MIME checks
 
