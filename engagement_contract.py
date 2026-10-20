@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import re
 from datetime import datetime
-from urllib.parse import unquote, urlparse
+from urllib.parse import quote, unquote, urlparse
 
 CONTRACT = "uoink.engagement.ingest"
 VERSION = 1
@@ -85,7 +85,13 @@ def item_id_from_ref(item_ref: str) -> str:
         item_id = unquote(encoded, errors="strict")
     except (UnicodeDecodeError, TypeError) as error:
         raise _invalid("item_ref must identify one corpus item") from error
-    if not item_id or len(item_id) > 200 or "/" in item_id or "\\" in item_id:
+    if (
+        not item_id
+        or len(item_id) > 200
+        or "/" in item_id
+        or "\\" in item_id
+        or quote(item_id, safe="") != encoded
+    ):
         raise _invalid("item_ref must identify one corpus item")
     return item_id
 
