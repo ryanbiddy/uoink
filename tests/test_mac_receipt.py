@@ -211,6 +211,21 @@ def test_protected_snapshot_never_reads_contents_and_detects_added_file(tmp_path
     assert set(before["data"]["token.txt"]) == {"exists", "mtime_ns"}
 
 
+def test_survivor_settle_is_bounded_and_records_first_look(tmp_path, monkeypatch):
+    row = {"pid": 7, "created_ms": 1.0, "started_us": 1000, "executable": "x"}
+    looks = iter([[row], [row], []])
+    monkeypatch.setattr(receipt, "scoped_processes", lambda app: next(looks))
+    monkeypatch.setattr(receipt, "listeners", lambda port: [])
+    monkeypatch.setattr(receipt, "describe", lambda pid: {"command": "python3 -m probe"})
+    monkeypatch.setattr(receipt.time, "sleep", lambda seconds: None)
+    settled = receipt.no_survivors(tmp_path, [], 18081)
+    assert settled["ok"] and settled["first_look"][0]["command"] == "python3 -m probe"
+    monkeypatch.setattr(receipt, "scoped_processes", lambda app: [row])
+    stuck = receipt.no_survivors(tmp_path, [], 18081)
+    assert not stuck["ok"] and stuck["settled_after_s"] == 5.0
+    assert stuck["survivors"][0]["command"] == "python3 -m probe"
+
+
 def test_passive_port_observation_uses_no_network(monkeypatch):
     calls = []
     monkeypatch.setattr(receipt, "command", lambda argv: calls.append(argv) or {"exit": 1, "stdout": "", "stderr": ""})
