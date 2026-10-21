@@ -19823,7 +19823,9 @@ def _is_installed_layout() -> bool:
 def _spawn_dashboard_window(*, reason: str, settings: bool = False) -> bool:
     """Open the local dashboard window without making the helper re-bind."""
     try:
-        if sys.platform == "darwin":
+        # Source checkouts on macOS keep the script path below; the bundle
+        # spawner requires the installed app's interpreter.
+        if sys.platform == "darwin" and _platform.mac_bundle_contents() is not None:
             from helper.mac_ui import spawn
             spawn("uoink_dashboard", _install_isolation.helper_url("/dashboard") + ("#settings" if settings else ""))
             log.info("dashboard: spawned (%s)", reason)

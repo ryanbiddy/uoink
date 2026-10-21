@@ -11,7 +11,7 @@ import tempfile
 
 from qualify_deps import ROOT, run_logged, sha256, verify_ui_wheels, wheel_details, write_json
 
-COCOA_IMPORT = "import AppKit, Quartz, WebKit, Security, webview; import webview.platforms.cocoa as cocoa; assert cocoa.renderer == 'cocoa'; print('pywebview backend: cocoa (import only)')"
+COCOA_IMPORT = "import AppKit, Quartz, WebKit, Security, webview; import webview.platforms.cocoa as cocoa; assert cocoa.renderer == 'wkwebview', cocoa.renderer; print('pywebview backend: cocoa (WKWebView, import only)')"
 
 
 def local_source(root: Path, name: str) -> Path | None:
