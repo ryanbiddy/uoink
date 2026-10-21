@@ -13,6 +13,7 @@ import stat
 import subprocess
 import sys
 import tempfile
+import time
 import urllib.request
 
 # The collector may use system Python. Only the tested processes earn credit.
@@ -145,12 +146,30 @@ def scoped_processes(app: Path) -> list[dict]:
     return found
 
 
-def no_survivors(app: Path, identities: list[dict], port: int) -> dict:
+def describe(pid: int) -> dict:
+    # Only processes running from the disposable copy reach here, so their
+    # arguments name disposable paths, never the real user's data.
+    result = command(["/bin/ps", "-o", "ppid=,pgid=,etime=,command=", "-p", str(pid)])
+    fields = result["stdout"].strip().split(None, 3)
+    if result["exit"] != 0 or len(fields) < 4:
+        return {"gone": True}
+    return {"ppid": int(fields[0]), "pgid": int(fields[1]), "etime": fields[2], "command": fields[3]}
+
+
+def no_survivors(app: Path, identities: list[dict], port: int, settle: float = 5.0) -> dict:
     rows = [{**item, "state": darwin_liveness(item["pid"], item["created_ms"])} for item in identities]
     # Birth identity is sufficient after uninstall, when samefile cannot work.
-    survivors = scoped_processes(app)
+    first = [{**row, **describe(row["pid"])} for row in scoped_processes(app)]
+    survivors, waited = first, 0.0
+    # Lifeline children exit on their parent's death asynchronously; allow a
+    # short bounded settle, and record what was alive at the first look.
+    while survivors and waited < settle:
+        time.sleep(.25)
+        waited += .25
+        survivors = scoped_processes(app)
     owners = listeners(port)
-    return {"identities": rows, "survivors": survivors, "listeners": owners,
+    return {"identities": rows, "first_look": first, "settled_after_s": waited,
+            "survivors": [{**row, **describe(row["pid"])} for row in survivors], "listeners": owners,
             "ok": all(row["state"] == "dead" for row in rows) and not survivors and not owners}
 
 
