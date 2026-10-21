@@ -25,6 +25,8 @@ applies any pending ``NNNN_*.sql`` file in numeric order and is idempotent.
 
 from __future__ import annotations
 
+import uoink_usage
+
 import errno
 import hashlib
 import json
@@ -1085,6 +1087,7 @@ class Index:
     # once (1), and video_id -- an opaque id -- never matches on purpose (0).
     _YOINKS_BM25_WEIGHTS = "0.0, 2.0, 3.0, 8.0, 3.0, 1.0, 1.0"
 
+    @uoink_usage.search
     def search(self, query: str, limit: int = 10, *,
                channel: str | None = None,
                hook_type: str | None = None) -> list[dict]:
@@ -1124,6 +1127,7 @@ class Index:
         return [dict(r) for r in rows]
 
     # ---- clips (living library phase 1; see clips.py) --------------------
+    @uoink_usage.search
     def search_clips(self, query: str, limit: int = 20, *,
                      video_id: str | None = None,
                      channel: str | None = None) -> list[dict]:
@@ -1881,6 +1885,8 @@ class Index:
         With ``q`` the rows are ranked by FTS5 bm25; without it they are
         ordered newest-first. ``date_from`` / ``date_to`` are inclusive
         YYYY-MM-DD bounds on yoinked_at."""
+        if q:
+            uoink_usage.count("searches")
         limit = max(1, min(200, int(limit)))
         offset = max(0, int(offset))
 

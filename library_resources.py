@@ -126,6 +126,8 @@ and every other refusal to ``-32603``, with :meth:`ResourceError.envelope` in
 """
 from __future__ import annotations
 
+import uoink_usage
+
 import base64
 import binascii
 import contextlib
@@ -2044,6 +2046,7 @@ class LibraryReader:
         }
         return hit
 
+    @uoink_usage.search
     def _search(self, op: _Operation, query: str, limit: int) -> dict:
         hits: list[dict] = []
         seen: set[str] = set()

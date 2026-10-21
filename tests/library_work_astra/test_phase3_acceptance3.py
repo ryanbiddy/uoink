@@ -118,6 +118,8 @@ def test_as3_s14_two_service_instances_cannot_dispatch_one_start_twice(rig):
 
 def _load_manual_dispatch(ns):
     """Compile actual manual ownership and handler bodies; replace I/O only."""
+    import uoink_usage
+    ns["uoink_usage"] = uoink_usage
     path = ROOT / 'server.py'
     parsed = ast.parse(path.read_text(encoding='utf-8-sig'), filename=str(path))
     names = {

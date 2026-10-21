@@ -104,6 +104,7 @@ finally:
     sys.stdout = _stdout
 
 import uoink_mcp_tools  # noqa: E402
+import uoink_usage  # noqa: E402
 
 
 uoink_mcp_tools.bind_backend(server)
@@ -1052,7 +1053,12 @@ def _begin_inbound_transport_scope(message) -> None:
         return
     if not isinstance(root, mcp_types.JSONRPCRequest):
         return
+    if root.method == "initialize":
+        client = _stdio_param(root.params, "clientInfo")
+        uoink_usage.count("mcp_clients", _stdio_param(client, "name"))
     tool_name = _stdio_param(root.params, "name") if root.method == "tools/call" else None
+    if tool_name:
+        uoink_usage.mcp_call(tool_name, "stdio")
     if not library_resources.is_budgeted_stdio_request(root.method, tool_name):
         return
     library_resources.begin_transport_request(root.id, root.method, tool_name)

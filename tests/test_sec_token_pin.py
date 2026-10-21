@@ -26,6 +26,7 @@ from unittest.mock import Mock
 from urllib.parse import urlparse
 
 import pytest
+import uoink_usage
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -66,6 +67,7 @@ def handler_code():
 @pytest.fixture
 def helper(handler_code):
     namespace = {
+        "uoink_usage": uoink_usage,
         "__name__": "offline_token_handler", "BaseHTTPRequestHandler": BaseHTTPRequestHandler,
         "HOST": "127.0.0.1", "PORT": PORT, "VERSION": "test", "TOKEN": TEST_TOKEN,
         "os": SimpleNamespace(environ={}), "_read_settings": Mock(return_value={}),

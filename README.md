@@ -127,8 +127,16 @@ pending; see the [discovery tool contract](docs/v2-mcp.md#discover_candidates).
 ## Privacy
 
 Your saved corpora, screenshots, podcast audio, transcripts, library index and
-diagnostic logs stay on your computer. Uoink has no account, cloud library or
-telemetry.
+diagnostic logs stay on your computer. Uoink has no account or cloud library.
+
+Uoink sends no usage data by default. If you turn on "Share anonymous usage counts", it sends daily counts to usage.uoink.app: calls by tool name, known MCP clients, stdio or HTTP calls, captures by source and result, and library searches. Reports include a random install ID, app version, operating system and major version, processor type, install type and hours counted. They never include content, URLs, titles, paths, search text, usernames, IP addresses or account details.
+
+Sharing is off by default. In Dashboard > Settings > App > Usage sharing,
+"See what is sent" shows the next report and the last ten sent reports with
+their dates. Turning sharing off deletes the random ID, local counts and
+sent history. UOINK_USAGE_SHARING=0 forces it off.
+
+See the [usage payload and counting design](docs/usage-sharing.md).
 
 Capture fetches the source you ask for. Podcast watches poll feeds you enable;
 Auto-ingest can also download new episodes. Truncated X posts may use the

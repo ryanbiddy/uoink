@@ -10,6 +10,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Added **Share anonymous usage counts** in dashboard Settings, off by default,
+  with a one-time opt-in card. Enabled installs send daily tool, known-client,
+  transport, capture and search counts to usage.uoink.app, with a random ID and
+  app and system versions. Reports contain no content, URLs, titles, paths,
+  search text, usernames, IP addresses or account details. Settings shows the
+  next payload and the last ten successful payloads. See
+  [usage sharing](docs/usage-sharing.md) for the schema and controls. Earlier
+  release notes describing zero telemetry refer to those earlier releases.
+
 ## [3.10.0] - 2026-10-19
 
 ### Added

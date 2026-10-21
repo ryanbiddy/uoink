@@ -15,6 +15,8 @@ only.
 
 from __future__ import annotations
 
+import uoink_usage
+
 import base64
 import json
 import logging
@@ -227,6 +229,8 @@ def _hook_context_for_folder(folder: Path) -> dict[str, Any]:
     }
 
 
+@uoink_usage.capture(lambda args: {"youtube": "youtube", "twitter": "x"}.get(
+    _b()._detect_platform_from_url(args.get("url", "")), "other"))
 def uoink_video(args: dict[str, Any]) -> dict[str, Any]:
     import _platform
     b = _b()
@@ -1644,6 +1648,7 @@ def uoink_url(args: dict[str, Any]) -> dict[str, Any]:
             self.payload = None
 
         def _send_json(self, status: int, payload: dict) -> dict:
+            uoink_usage.capture_result(payload)
             self.status = status
             self.payload = payload
             return payload
@@ -1658,6 +1663,7 @@ def uoink_url(args: dict[str, Any]) -> dict[str, Any]:
     return _err("uoink_url returned no result")
 
 
+@uoink_usage.capture("note")
 def uoink_note(args: dict[str, Any]) -> dict[str, Any]:
     """Persist a text note through the same builders as POST /notes."""
     server = _b()
@@ -1689,6 +1695,7 @@ def uoink_note(args: dict[str, Any]) -> dict[str, Any]:
     )
 
 
+@uoink_usage.capture("image")
 def uoink_image(args: dict[str, Any]) -> dict[str, Any]:
     """Persist a base64 PNG, JPEG, or WebP through POST /images logic."""
     server = _b()
@@ -1736,6 +1743,7 @@ def uoink_image(args: dict[str, Any]) -> dict[str, Any]:
     )
 
 
+@uoink_usage.capture("x")
 def uoink_x(args: dict[str, Any]) -> dict[str, Any]:
     """Capture an X post through the same extractor as POST /extract/x."""
     server = _b()
@@ -1780,6 +1788,7 @@ def uoink_x(args: dict[str, Any]) -> dict[str, Any]:
 
 
 # ---- v3.2 Universal Site Uoinking ------------------------------------
+@uoink_usage.capture("page")
 def uoink_page(args: dict[str, Any]) -> dict[str, Any]:
     """v3.2 Universal Site Uoinking: capture an allowed page as a yoink.
 
@@ -1824,6 +1833,7 @@ def uoink_page(args: dict[str, Any]) -> dict[str, Any]:
     return result
 
 
+@uoink_usage.capture("reddit")
 def uoink_reddit_thread(args: dict[str, Any]) -> dict[str, Any]:
     """v3.3 Reddit capture: fetch a thread via its public .json (no API key),
     flatten the comment tree (depth + score limited), and persist it as a

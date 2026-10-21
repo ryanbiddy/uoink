@@ -90,7 +90,7 @@ jobs:
         run: |
           # v2.1 rename: canonical MCP modules are uoink_mcp*.py; yoink_mcp.py
           # is a back-compat shim that re-exports from uoink_mcp.
-          files=(server.py uoink_mcp.py uoink_mcp_tools.py uoink_agent_runtime.py uoink_cli.py uoink_connect.py yoink_mcp.py)
+          files=(server.py uoink_usage.py uoink_mcp.py uoink_mcp_tools.py uoink_agent_runtime.py uoink_cli.py uoink_connect.py yoink_mcp.py)
           if [ -f index.py ]; then files+=(index.py); fi
           python -m py_compile "${files[@]}"
 
