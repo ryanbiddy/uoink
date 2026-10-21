@@ -5,7 +5,7 @@ YAML 1.2, so YAML clients receive a JSON-form YAML document without a dependency
 """
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 import base64
 import json
 import os
@@ -96,7 +96,40 @@ CLIENTS = {
 }
 
 
+def client_spec(client: str) -> Client:
+    spec = CLIENTS[client]
+    if sys.platform == "darwin":
+        if client == "claude-desktop":
+            return replace(spec, location=str(Path.home() / "Library/Application Support/Claude/claude_desktop_config.json"))
+        if client in {"cursor", "codex"}:
+            return replace(spec, location=str(Path(spec.location).expanduser()))
+        if client == "boltai":
+            return replace(spec, note="Unverified: confirm JSON import in your installed BoltAI.")
+        if client == "alfred":
+            return replace(spec, guide='Use a fixed Run Script action: uoink search "working memory" --text\nDo not pass unquoted clipboard or query text into a shell.')
+    return spec
+
+
+def bundle_resources(app_dir: Path) -> Path | None:
+    if sys.platform != "darwin":
+        return None
+    app_dir = app_dir.resolve()
+    if app_dir.suffix == ".app":
+        return app_dir / "Contents/Resources"
+    if app_dir.name == "Resources" and app_dir.parent.name == "Contents" and app_dir.parent.parent.suffix == ".app":
+        return app_dir
+    return None
+
+
 def python_command(app_dir: Path) -> Path:
+    resources = bundle_resources(app_dir)
+    if resources is not None:
+        from _platform import MAC_BUNDLE_PYTHON
+        bundled = resources.parent / MAC_BUNDLE_PYTHON
+        if not bundled.is_file() or not (resources / "uoink_mcp.py").is_file():
+            raise FileNotFoundError(f"Uoink installation is incomplete at {resources.parent.parent}. Reinstall Uoink.app from the DMG.")
+        # Keep the documented bin/python3 launch path even if it is a symlink.
+        return bundled
     bundled = app_dir / "python" / ("python.exe" if sys.platform == "win32" else "bin/python3")
     return (bundled if bundled.is_file() else Path(sys.executable)).resolve()
 
@@ -104,6 +137,10 @@ def python_command(app_dir: Path) -> Path:
 def server_entry(client: str, app_dir: Path, python: Path, isolation_args=()) -> dict:
     command = str(python.resolve())
     args = [str((app_dir / "uoink_mcp.py").resolve()), *isolation_args]
+    if sys.platform == "darwin":
+        resources = bundle_resources(app_dir) or app_dir.resolve()
+        command = str(python_command(resources))
+        args = ["-B", "-s", str(resources / "uoink_mcp.py"), *isolation_args]
     env = {"PYTHONIOENCODING": "utf-8", "PYTHONUTF8": "1"}
     if client == "cursor":
         env["UOINK_MCP_TOOLSET"] = "core"
@@ -121,7 +158,7 @@ def deeplink(client: str, app_dir: Path, python: Path, isolation_args=()) -> str
 
 
 def render(client: str, app_dir: Path, python: Path, isolation_args=()) -> str:
-    spec = CLIENTS[client]
+    spec = client_spec(client)
     entry = server_entry(client, app_dir, python, isolation_args)
     command, args, env = entry["command"], entry["args"], entry["env"]
     if spec.format == "text":

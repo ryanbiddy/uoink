@@ -13,6 +13,7 @@ import threading
 from types import SimpleNamespace
 
 import pytest
+import _platform
 
 from test_phase3_support import (
     ROOT, cursor_row, item_rows, ledger, migration_dir, observation, ok,
@@ -43,6 +44,7 @@ def server_parts(rig):
             return True
 
     namespace = dict(
+        _platform=_platform,
         source_subscriptions=rig.module, json=json, log=logging.getLogger('astra'),
         threading=SimpleNamespace(Thread=DormantThread),
         socket=SimpleNamespace(gethostname=lambda: 'fixture-host'), DATA_ROOT=rig.root,

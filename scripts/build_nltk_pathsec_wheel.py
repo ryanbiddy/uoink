@@ -357,7 +357,12 @@ def build_nltk_wheel(
         orig_record, metadata_text, _ = validate_zip_archive_members(archive)
 
         # 4. Extract pristine NLTK package tree into a fresh isolated scratch space
-        scratch_dir = safe_local_path(Path(__file__).absolute().parent.parent / '_scratch')
+        # Darwin builds need no writable source tree. Resolve /var's system
+        # alias before the no-linked-ancestor check; retain Windows build paths.
+        scratch_dir = safe_local_path(
+            Path(tempfile.gettempdir()).resolve() if sys.platform == "darwin"
+            else Path(__file__).absolute().parent.parent / '_scratch'
+        )
         scratch_dir.mkdir(parents=True, exist_ok=True)
         tmp_base = safe_local_path(scratch_dir / f'.tmp_whl_build_{os.getpid()}_{time.time_ns()}')
         assert tmp_base.parent == scratch_dir

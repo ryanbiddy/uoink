@@ -78,6 +78,7 @@ def test_exact_creation_identity_of_this_process_is_alive():
 @pytest.mark.parametrize("state,expected", [("Z", "dead"), ("X", "dead"), ("S", "alive")])
 def test_posix_exit_state_precedes_executable_lookup(monkeypatch, state, expected):
     # Model Linux procfs without changing the host's pathlib or signalling a PID.
+    monkeypatch.setattr(iso, "sys", SimpleNamespace(platform="linux"))
     kill = Mock()
     monkeypatch.setattr(iso, "os", SimpleNamespace(**{**vars(os), "name": "posix", "kill": kill}))
     monkeypatch.setattr(iso, "open", mock_open(read_data=f"123 (name with ) parens) {state} 0 0"), raising=False)
@@ -96,6 +97,7 @@ def test_posix_exit_state_precedes_executable_lookup(monkeypatch, state, expecte
 
 @pytest.mark.parametrize("created,expected", [(None, "unknown"), (457, "dead")])
 def test_posix_live_state_still_requires_exact_creation(monkeypatch, created, expected):
+    monkeypatch.setattr(iso, "sys", SimpleNamespace(platform="linux"))
     kill = Mock()
     monkeypatch.setattr(iso, "os", SimpleNamespace(**{**vars(os), "name": "posix", "kill": kill}))
     monkeypatch.setattr(iso, "_posix_process_state", lambda pid: "S")
@@ -164,10 +166,14 @@ def test_owned_stop_waits_for_exit_before_unlinking_identity(tmp_path):
     profile = tmp_path / "profile"
     profile.mkdir()
     decoy = subprocess.Popen(
-        [sys.executable, "-B", "-c", "import time; time.sleep(60)"],
+        [sys.executable, "-B", "-c", "import time; print('ready', flush=True); time.sleep(60)"],
         cwd=str(profile),
+        stdout=subprocess.PIPE,
     )
     try:
+        # Framework Python can exec a different native image during startup.
+        # Bind identity only after the actual interpreter is ready.
+        assert decoy.stdout.readline().strip() == b"ready"
         deadline = time.time() + 5
         created = None
         image = None
@@ -199,12 +205,16 @@ def test_owned_stop_waits_for_exit_before_unlinking_identity(tmp_path):
             nonce="owned-stop",
         )
         assert iso.stop_owned_helper(binding) == iso.EXIT_OK
+        # Native exit observation can precede waitpid's reapable status.
+        # Wait on our retained child instead of racing a single poll().
+        decoy.wait(timeout=5)
         assert decoy.poll() is not None
         assert not (profile / iso.IDENTITY_FILENAME).exists()
     finally:
         if decoy.poll() is None:
             decoy.kill()
             decoy.wait(timeout=5)
+        decoy.stdout.close()
 
 
 def test_inno_initialize_setup_does_not_use_unready_app_dir():

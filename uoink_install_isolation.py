@@ -518,7 +518,7 @@ def write_runtime_identity(
     pid: int,
     executable: str,
     script: str,
-    created_ms: int | None,
+    created_ms: int | float | None,
     nonce: str,
 ) -> Path:
     expected_exe = str(executable or "").strip()
@@ -533,7 +533,7 @@ def write_runtime_identity(
             "runtime identity requires the owned process creation time",
         )
     try:
-        created = int(created_ms)
+        created = _creation_identity_value(created_ms)
     except (TypeError, ValueError) as error:
         raise IsolationError(
             "isolated-identity-incomplete",
@@ -581,7 +581,7 @@ def read_runtime_identity(binding: IsolationBinding) -> dict:
     return payload
 
 
-def current_process_created_ms() -> int | None:
+def current_process_created_ms() -> int | float | None:
     try:
         if os.name == "nt":
             import ctypes
@@ -603,6 +603,9 @@ def current_process_executable() -> str | None:
             kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
             kernel32.GetCurrentProcess.restype = ctypes.c_void_p
             return _windows_process_image(kernel32.GetCurrentProcess())
+        if sys.platform == "darwin":
+            from _platform import darwin_executable as executable
+            return executable(os.getpid())
         return os.path.realpath(f"/proc/{os.getpid()}/exe")
     except Exception:
         return None
@@ -1052,6 +1055,13 @@ def _is_unsafe_system_path(
 
 
 def _same_path(left: Path, right: Path) -> bool:
+    if sys.platform == "darwin":
+        try:
+            # Handles /var aliases, APFS case folding and Unicode aliases
+            # using filesystem identity, without lowercasing a POSIX path.
+            return left.samefile(right)
+        except OSError:
+            pass
     try:
         a = os.path.normcase(os.path.normpath(str(left.resolve())))
         b = os.path.normcase(os.path.normpath(str(right.resolve())))
@@ -1062,6 +1072,13 @@ def _same_path(left: Path, right: Path) -> bool:
 
 
 def _is_nested(inner: Path, outer: Path) -> bool:
+    if sys.platform == "darwin":
+        try:
+            return not _same_path(inner, outer) and any(
+                _same_path(parent, outer) for parent in inner.resolve().parents
+            )
+        except OSError:
+            return False
     try:
         inner.resolve().relative_to(outer.resolve())
         return not _same_path(inner, outer)
@@ -1120,11 +1137,20 @@ def _unlink_identity(binding: IsolationBinding) -> None:
 # --------------------------------------------------------------------------
 # Process identity
 # --------------------------------------------------------------------------
+def _creation_identity_value(value):
+    if sys.platform == "darwin":
+        from _platform import darwin_creation_us
+        if darwin_creation_us(value) is None:
+            raise ValueError("invalid Darwin birth timestamp")
+        return value
+    return int(value)
+
+
 def _parse_owned_identity(identity: dict) -> dict | None:
     """Return pid/created_ms/executable only when the record is complete."""
     try:
         pid = int(identity["pid"])
-        created = int(identity["created_ms"])
+        created = _creation_identity_value(identity["created_ms"])
     except (KeyError, TypeError, ValueError):
         return None
     expected_exe = str(identity.get("executable") or "").strip()
@@ -1142,21 +1168,32 @@ def _identity_liveness(identity: dict) -> str:
     )
 
 
-def _pid_liveness(pid: int, created_ms: int | None) -> str:
+def _pid_liveness(pid: int, created_ms: int | float | None) -> str:
     """PID plus exact creation identity. Incomplete creation is never alive."""
     if created_ms is None:
         return "unknown"
     try:
-        created = int(created_ms)
+        created = _creation_identity_value(created_ms)
     except (TypeError, ValueError):
         return "unknown"
     return _pid_identity_liveness(int(pid), created, None)
 
 
 def _pid_identity_liveness(
-    pid: int, created_ms: int, expected_exe: str | None
+    pid: int, created_ms: int | float, expected_exe: str | None
 ) -> str:
     try:
+        if sys.platform == "darwin":
+            from _platform import darwin_liveness
+            status = darwin_liveness(pid, created_ms, expected_exe)
+            if status != "alive":
+                return status
+            # Keep the same fail-closed creation lookup boundary as the other
+            # platforms, including lookup loss between native observations.
+            actual = _posix_process_created_ms(pid)
+            if actual is None:
+                return "unknown"
+            return "alive" if actual == created_ms else "dead"
         if os.name == "nt":
             handle, error = _windows_open_process(
                 int(pid), _PROCESS_QUERY_LIMITED_INFORMATION
@@ -1281,6 +1318,9 @@ def _process_executable(pid: int) -> str | None:
                 return _windows_process_image(handle)
             finally:
                 _windows_close_handle(handle)
+        if sys.platform == "darwin":
+            from _platform import darwin_executable as executable
+            return executable(pid)
         return os.path.realpath(f"/proc/{pid}/exe")
     except OSError:
         return None
@@ -1319,6 +1359,9 @@ def _windows_process_created_ms(handle) -> int | None:
 
 
 def _posix_process_state(pid: int) -> str | None:
+    if sys.platform == "darwin":
+        from _platform import darwin_state as state
+        return state(pid)
     try:
         with open(f"/proc/{pid}/stat", "r", encoding="ascii", errors="replace") as handle:
             return handle.read().rsplit(")", 1)[1].split()[0]
@@ -1326,7 +1369,10 @@ def _posix_process_state(pid: int) -> str | None:
         return None
 
 
-def _posix_process_created_ms(pid: int) -> int | None:
+def _posix_process_created_ms(pid: int) -> int | float | None:
+    if sys.platform == "darwin":
+        from _platform import darwin_created_ms as created_ms
+        return created_ms(pid)
     try:
         with open(f"/proc/{pid}/stat", "r", encoding="ascii", errors="replace") as handle:
             stat = handle.read()
@@ -1403,6 +1449,29 @@ def _terminate_owned(identity: dict) -> bool:
                 return _windows_wait_handle_exit(handle, _STOP_WAIT_MS)
             finally:
                 _windows_close_handle(handle)
+        if sys.platform == "darwin":
+            import select
+
+            # Register before signaling: libproc can report ESRCH while exit
+            # is still becoming waitable. NOTE_EXIT is the completion event;
+            # a liveness snapshot alone must not release the identity file.
+            queue = select.kqueue()
+            try:
+                event = select.kevent(pid, filter=select.KQ_FILTER_PROC,
+                                      flags=select.KQ_EV_ADD | select.KQ_EV_ONESHOT,
+                                      fflags=select.KQ_NOTE_EXIT)
+                try:
+                    queue.control([event], 0, 0)
+                except ProcessLookupError:
+                    return _pid_identity_liveness(pid, created_ms, expected_exe) == "dead"
+                if _pid_identity_liveness(pid, created_ms, expected_exe) != "alive":
+                    return False
+                os.kill(pid, 15)
+                events = queue.control(None, 1, _STOP_WAIT_MS / 1000)
+                return any(event.ident == pid and event.fflags & select.KQ_NOTE_EXIT
+                           for event in events)
+            finally:
+                queue.close()
         if _pid_identity_liveness(pid, created_ms, expected_exe) != "alive":
             return False
         os.kill(pid, 15)

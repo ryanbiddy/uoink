@@ -5,6 +5,7 @@ No HTTP probes, SDK dependency, or alternate consent path.
 from __future__ import annotations
 
 import os
+import sys
 from pathlib import Path
 
 import uoink_install_isolation as isolation
@@ -16,6 +17,10 @@ def helper_running(backend) -> bool:
     binding = isolation.current_binding()
     if binding is not None:
         return isolation.owned_process_status(binding) == "alive"
+    if sys.platform == "darwin":
+        # macOS keeps the helper's identity record in the data dir, not beside
+        # the (read-only) app files; see _platform.darwin_helper_running.
+        return backend._platform.darwin_helper_running(backend.HERE, backend.DATA_ROOT)
     try:
         pid_path = backend.HERE / "server.pid"
         pid = int(pid_path.read_text(encoding="utf-8").strip())

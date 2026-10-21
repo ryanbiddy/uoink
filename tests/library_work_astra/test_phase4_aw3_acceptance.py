@@ -170,6 +170,7 @@ def test_d09_resync_reexports_explicitly_readmitted_scope_item(env):
     assert b"Original evidence b." in item_file(env, "b").read_bytes()
 
 
+@pytest.mark.skipif(sys.platform == "darwin", reason="library_mirror_unavailable_macos: gate covered in test_mac_capabilities.py")
 def test_d10_brief_source_revision_rechecked_at_replace(env, monkeypatch):
     receipt = publish(env)
     target = env.vault / mirror.MIRROR_ROOT / mirror.brief_relpath(receipt["date"], receipt["brief_hash"])
@@ -251,6 +252,7 @@ def test_d12_recorded_temp_path_does_not_authorize_deleting_user_replacement(env
     assert temporary.is_file() and temporary.read_bytes() == personal
 
 
+@pytest.mark.skipif(sys.platform == "darwin", reason="library_mirror_unavailable_macos: gate covered in test_mac_capabilities.py")
 @pytest.mark.parametrize("observe", ["visibility", "user_edit"])
 def test_d13_timeout_never_publishes_or_rolls_back_over_user_bytes(env, monkeypatch, observe):
     target = item_file(env)
@@ -316,6 +318,7 @@ def test_d14_index_intent_matches_exact_published_bytes(env, monkeypatch):
         "the index intent cannot recover the bytes actually replaced before manifest failure"
 
 
+@pytest.mark.skipif(sys.platform == "darwin", reason="library_mirror_unavailable_macos: gate covered in test_mac_capabilities.py")
 def test_d13_timed_out_writer_cannot_erase_a_later_successful_sync(env, monkeypatch):
     target = item_file(env)
     entered, release, finished = threading.Event(), threading.Event(), threading.Event()
@@ -360,6 +363,7 @@ def test_d13_timed_out_writer_cannot_erase_a_later_successful_sync(env, monkeypa
             "the abandoned worker erased a subsequently acknowledged write"
 
 
+@pytest.mark.skipif(sys.platform == "darwin", reason="library_mirror_unavailable_macos: gate covered in test_mac_capabilities.py")
 def test_d15_failed_destination_binding_persistence_does_not_allow_readoption(env, monkeypatch):
     binding = env.mirror._dest_binding_path()
     original = env.mirror._atomic_local

@@ -366,6 +366,12 @@ Generated brief text remains untrusted data when read back by another client.
 
 ## Opt-in corpus mirror
 
+Platform note (macOS passes 5?6): the first Darwin release defers corpus
+mirroring. All mirror operations refuse with `library_mirror_unavailable_macos`
+before destination, ledger or settings work. Dashboard controls are disabled;
+HTTP, MCP and CLI disclose the same reason/code. Windows and Linux behavior
+is unchanged. See [macOS build capabilities](../mac/BUILD.md#deferred-capabilities).
+
 The corpus mirror is a one-way view of bounded evidence cards, shelf pages and
 accepted briefs. Existing `obsidian_vault_path` authorizes only the current taste
 integration. Add a separate `library_mirror_enabled=false` setting and record the

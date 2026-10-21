@@ -60,6 +60,7 @@ from pathlib import Path
 from typing import Any, Callable, Iterator
 
 import library_cards
+import _platform
 from library_resources import (
     CONTRACT_VERSION as _RESOURCES_CONTRACT,
     LIMITS,
@@ -566,9 +567,13 @@ def _is_console_host(exe: str) -> bool:
 
 
 def _creation_identity_equal(actual, expected) -> bool:
-    """Exact process-creation identity. One millisecond is a different process."""
+    """Exact recorded process-creation identity, including Darwin microseconds."""
     if actual is None or expected is None:
         return False
+    if sys.platform == "darwin":
+        from _platform import darwin_creation_us
+        value = darwin_creation_us(actual)
+        return value is not None and value == darwin_creation_us(expected)
     try:
         return int(actual) == int(expected)
     except (TypeError, ValueError):
@@ -588,6 +593,10 @@ def _child_born_on_or_after_parent(child_created, parent_created) -> bool:
     """A child older than its parent is not that parent's child."""
     if child_created is None or parent_created is None:
         return False
+    if sys.platform == "darwin":
+        from _platform import darwin_creation_us
+        child, parent = darwin_creation_us(child_created), darwin_creation_us(parent_created)
+        return child is not None and parent is not None and child >= parent
     try:
         return int(child_created) >= int(parent_created)
     except (TypeError, ValueError):
@@ -765,7 +774,10 @@ def _windows_process_created_ms(handle) -> int | None:
     return None if value is None else (value - _FILETIME_EPOCH_OFFSET_100NS) // 10_000
 
 
-def _posix_process_created_ms(pid: int) -> int | None:
+def _posix_process_created_ms(pid: int) -> int | float | None:
+    if sys.platform == "darwin":
+        from _platform import darwin_created_ms as created_ms
+        return created_ms(pid)
     try:
         with open(f"/proc/{pid}/stat", "r", encoding="ascii", errors="replace") as handle:
             stat_text = handle.read()
@@ -778,7 +790,7 @@ def _posix_process_created_ms(pid: int) -> int | None:
         return None
 
 
-def _process_created_ms(pid: int | None) -> int | None:
+def _process_created_ms(pid: int | None) -> int | float | None:
     if not isinstance(pid, int) or pid <= 0:
         return None
     if os.name == "nt":
@@ -794,7 +806,7 @@ def _process_created_ms(pid: int | None) -> int | None:
 
 
 def _process_liveness(
-    pid: int | None, created_ms: int | None = None, *, tolerance_ms: int = 0,
+    pid: int | None, created_ms: int | float | None = None, *, tolerance_ms: int = 0,
 ) -> str:
     """``alive``, ``dead`` or ``unknown``. PID reuse with a mismatched start time is dead.
 
@@ -804,6 +816,13 @@ def _process_liveness(
     """
     if not isinstance(pid, int) or pid <= 0:
         return "dead"
+    if sys.platform == "darwin":
+        from _platform import darwin_liveness as liveness
+        # This is a liveness probe, not executable-based adoption authority.
+        # Framework Python may exec Python.app, a different inode from the
+        # sys.executable launcher. Ownership comes from our retained spawn.
+        return liveness(pid, created_ms, tolerance_ms=tolerance_ms,
+                        require_identity=False)
     if os.name == "nt":
         from ctypes import wintypes
         k32 = _kernel32()
@@ -1094,6 +1113,12 @@ def _write_dest_lease(dest: str, payload: dict) -> None:
 
 def _lease_holder_status(lease: dict) -> str:
     created = lease.get("created_ms")
+    if sys.platform == "darwin":
+        from _platform import darwin_creation_us
+        if created is not None and darwin_creation_us(created) is None:
+            return "unknown"
+        return _process_liveness(lease.get("pid"), created,
+                                 tolerance_ms=_PROCESS_START_TOLERANCE_MS)
     return _process_liveness(
         lease.get("pid"), created if isinstance(created, int) else None,
         tolerance_ms=_PROCESS_START_TOLERANCE_MS,
@@ -1981,8 +2006,6 @@ class _VaultIoSession:
         }
         if os.name == "nt":
             kwargs["creationflags"] = int(getattr(subprocess, "CREATE_NO_WINDOW", 0))
-        else:
-            kwargs["start_new_session"] = True
         with self._state_lock:
             if self._dead:
                 self._launching = False
@@ -1995,12 +2018,27 @@ class _VaultIoSession:
             self._abandon_unstarted()
             raise OSError("vault io worker cancelled")
         try:
-            proc = subprocess.Popen(
+            popen = subprocess.Popen
+            if os.name != "nt":
+                from uoink_processes import PosixChild
+                popen = PosixChild
+                # Retain the flock open-file description until the supervisor
+                # drains the group, even if this helper is killed abruptly.
+                owner = self._exclusion_owner
+                if owner is None or owner._posix_fd is None:
+                    raise OSError("vault io admission lock unavailable")
+                kwargs["hold_fds"] = (owner._posix_fd,)
+            proc = popen(
                 [sys.executable, "-B", worker],
                 **kwargs,
             )
         except Exception as exc:
             with self._state_lock:
+                if os.name != "nt" and getattr(exc, "owned_process", None) is not None:
+                    # A timed-out supervisor handshake is not proof that no
+                    # mutator exists. Keep admission until cleanup is affirmed.
+                    self.proc = exc.owned_process
+                    self._dead = True
                 self._popen_in_progress = False
                 self._launching = False
             self._close_session_job()
@@ -2349,6 +2387,8 @@ class _VaultIoSession:
             return True
         if self.created_ms is None:
             return False
+        if sys.platform == "darwin":
+            return _creation_identity_equal(self.writer_created_ms, self.created_ms)
         return int(self.writer_created_ms) == int(self.created_ms)
 
     def _publish_job(self, job) -> None:
@@ -2478,13 +2518,9 @@ class _VaultIoSession:
                     if self.owns_pid(pid):
                         self._terminate_owned_handle(pid)
             if os.name != "nt" and proc is not None and proc.pid:
-                try:
-                    os.killpg(int(proc.pid), getattr(signal, "SIGKILL", signal.SIGTERM))
-                except (OSError, ProcessLookupError, PermissionError, AttributeError):
-                    try:
-                        proc.kill()
-                    except OSError:
-                        pass
+                # Only the retained supervisor owns the group. Never signal a
+                # numeric group after poll/reaping could permit PID reuse.
+                proc.kill()
             elif proc is not None and proc.poll() is None:
                 try:
                     proc.kill()
@@ -2590,6 +2626,9 @@ class Mirror:
     # ---- public API ----------------------------------------------------
     def preview(self, destination: str, scope: str,
                 allowlist: list[str] | None = None) -> dict:
+        refusal = _platform.capability_refusal(_platform.library_mirror_capability())
+        if refusal is not None:
+            return refusal
         dest = Path(destination) if destination else None
         if dest is None or not self._destination_exists(dest):
             return _mirror_refusal(
@@ -2638,6 +2677,9 @@ class Mirror:
         )
 
     def status(self) -> dict:
+        refusal = _platform.capability_refusal(_platform.library_mirror_capability())
+        if refusal is not None:
+            return refusal
         if self.consent is None or not self.consent.destination:
             return _ok(
                 enabled=False,
@@ -2708,6 +2750,9 @@ class Mirror:
         )
 
     def resync(self, *, max_files: int = DEFAULT_MAX_FILES, budget_s: float = DEFAULT_BUDGET_S) -> dict:
+        refusal = _platform.capability_refusal(_platform.library_mirror_capability())
+        if refusal is not None:
+            return refusal
         if self.consent is None or not self.consent.destination:
             return _ok(synced=0, enabled=False, state="disabled")
         if not self.enabled:
@@ -2749,7 +2794,10 @@ class Mirror:
             )
 
     def on_committed_event(self, kind: str, *, video_id: str | None = None,
-                           shelf_id: str | None = None, brief_hash: str | None = None) -> None:
+                           shelf_id: str | None = None, brief_hash: str | None = None) -> dict | None:
+        refusal = _platform.capability_refusal(_platform.library_mirror_capability())
+        if refusal is not None:
+            return refusal
         if self.consent is None or not self.consent.destination:
             return
         if not self.enabled and kind not in _PURGE_KINDS and kind not in _TOMBSTONE_KINDS:
@@ -2761,6 +2809,9 @@ class Mirror:
             log.exception("mirror ledger update failed for %s", kind)
 
     def tombstone(self, video_id: str) -> dict:
+        refusal = _platform.capability_refusal(_platform.library_mirror_capability())
+        if refusal is not None:
+            return refusal
         if self.consent is None or not self.consent.destination:
             return _ok(tombstoned=False, enabled=False)
         try:
@@ -2778,6 +2829,9 @@ class Mirror:
             )
 
     def purge(self, video_id: str) -> dict:
+        refusal = _platform.capability_refusal(_platform.library_mirror_capability())
+        if refusal is not None:
+            return refusal
         if self.consent is None or not self.consent.destination:
             return _ok(purged=True, enabled=False)
         try:
@@ -2796,6 +2850,9 @@ class Mirror:
             )
 
     def restore(self, video_id: str) -> dict:
+        refusal = _platform.capability_refusal(_platform.library_mirror_capability())
+        if refusal is not None:
+            return refusal
         if not self._is_enabled():
             return _ok(restored=False, enabled=False)
         try:

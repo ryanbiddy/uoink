@@ -10,6 +10,21 @@ terminal and run `uoink status`. This kit contains instructions and MCP config;
 it does not include Python, the app, or your library. The CLI requires the
 3.10.0 release of Uoink or later.
 
+For the private macOS build, follow [the draft Mac install guide](../docs/mac/INSTALL.md).
+The CLI is `<installed Uoink.app>/Contents/Helpers/uoink`. Use a PATH symlink
+to that shim, then run `uoink connect <client>` to print the actual app paths.
+The command uses `Contents/Resources/Python/bin/python3 -B -s` and
+`Contents/Resources/uoink_mcp.py`, including when the app lives outside
+`/Applications`. Claude Desktop's file is
+`~/Library/Application Support/Claude/claude_desktop_config.json`; Cursor uses
+`~/.cursor/mcp.json` and Codex uses `~/.codex/config.toml`.
+
+On Mac, use `uoink connect claude-code` with the standalone skill instead of
+the static Windows plugin MCP entry below. For example,
+`uoink skill install --to "$HOME/.claude/skills"`. For Codex, use
+`uoink skill install --to "$HOME/.agents/skills"` and the printed Codex MCP
+recipe. Mac client acceptance and notarization remain pending.
+
 ## Claude Code
 
 The marketplace at `ryanbiddy/uoink-agent-kit` is published with this release:

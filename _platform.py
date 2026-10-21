@@ -14,10 +14,16 @@ darwin / linux branches are best-effort + flagged in their docstrings.
 from __future__ import annotations
 
 import logging
+import ctypes
+import errno
 import os
+import io
 import subprocess
 import sys
+import wave
 from pathlib import Path
+from dataclasses import dataclass
+from functools import lru_cache
 from typing import Iterable
 
 log = logging.getLogger("uoink.platform")
@@ -41,6 +47,178 @@ def platform_label() -> str:
         "darwin": "macos",
         "linux": "linux",
     }.get(sys.platform, sys.platform)
+
+
+def library_mirror_capability() -> dict:
+    """Publication is deferred until Darwin has identity-bound vault I/O."""
+    if sys.platform == "darwin":
+        return {"available": False, "code": "library_mirror_unavailable_macos",
+                "reason": "Library mirroring is unavailable on macOS in this release. "
+                          "Safe replacement and deletion of vault files have not been qualified."}
+    return {"available": True, "code": None, "reason": None}
+
+
+def capability_refusal(capability: dict) -> dict | None:
+    if capability["available"]:
+        return None
+    return {"ok": False, "available": False, "enabled": False, "state": "unavailable",
+            "code": capability["code"], "reason": capability["reason"],
+            "error": {"code": capability["code"], "message": capability["reason"],
+                      "retryable": False}}
+
+
+MAC_BUNDLE_PYTHON = Path("Resources/Python/bin/python3")
+
+
+def mac_bundle_contents() -> Path | None:
+    """Identify the embedded interpreter, independently of cwd/env/module path."""
+    if sys.platform != "darwin":
+        return None
+    executable = getattr(sys, "executable", "")
+    if not executable:
+        return None
+    # Only the real interpreter location establishes bundle mode. python3 may
+    # resolve to python3.13, but a link from the app to an external Python does
+    # not qualify, nor does an unrelated executable elsewhere in the install.
+    try:
+        path = Path(executable).resolve()
+        if len(path.parents) < 5:
+            return None
+        contents = path.parents[3]
+        if (path.parent.name == "bin" and path.parents[1].name == "Python"
+                and path.parents[2].name == "Resources" and contents.name == "Contents"
+                and contents.parent.suffix == ".app"
+                and path == (contents / MAC_BUNDLE_PYTHON).resolve()):
+            return contents
+    except (OSError, RuntimeError):
+        pass
+    return None
+
+
+def media_binary(name: str) -> str:
+    """Use app-owned binaries in a bundle; source checkouts retain PATH lookup."""
+    if name not in {"ffmpeg", "ffprobe"}:
+        raise ValueError(f"Unknown media executable: {name}")
+    if sys.platform != "darwin":
+        return name
+    contents = mac_bundle_contents()
+    if contents is None:
+        return name
+    helpers = contents / "Helpers"
+    path = helpers / name
+    if path.is_symlink() or helpers.is_symlink() or not path.is_file():
+        raise FileNotFoundError(f"Bundled media executable missing: {path}")
+    return str(path)
+
+
+def ytdlp_media_args() -> list[str]:
+    if sys.platform != "darwin":
+        return []
+    contents = mac_bundle_contents()
+    if contents is None:
+        return []
+    helpers = contents / "Helpers"
+    # A missing explicit location makes yt-dlp refuse FFmpeg, without PATH fallback.
+    return ["--ignore-config", "--ffmpeg-location", str(helpers)]
+
+
+def video_format(default: str) -> str:
+    if sys.platform != "darwin" or mac_bundle_contents() is None:
+        return default
+    # No unknown-codec or unrestricted fallback: AV1/HEVC have not been enabled.
+    native = '[vcodec~="^(avc1|h264|vp0?8|vp0?9)"]'
+    return f"worst*{native}[height>=360]/worst*{native}"
+
+
+def podcast_audio_format() -> str:
+    # FFmpeg has no native MP3 encoder. WAV avoids an additional LGPL library.
+    return "wav" if sys.platform == "darwin" and mac_bundle_contents() is not None else "mp3"
+
+
+def _test_wav() -> bytes:
+    data = io.BytesIO()
+    with wave.open(data, "wb") as audio:
+        audio.setparams((1, 2, 8000, 0, "NONE", "not compressed"))
+        audio.writeframes(b"\x10\x00" * 800)
+    return data.getvalue()
+
+
+@lru_cache(maxsize=8)
+def _media_self_test(ffmpeg: str, ffprobe: str, identities: tuple) -> bool:
+    """Cache by executable identity; writes no files inside or outside the app."""
+    try:
+        for binary in (ffmpeg, ffprobe):
+            subprocess.run([binary, "-version"], check=True, capture_output=True, timeout=10)
+        result = subprocess.run([ffmpeg, "-v", "error", "-nostdin", "-i", "pipe:0",
+                                 "-ar", "16000", "-ac", "1", "-c:a", "pcm_s16le",
+                                 "-f", "s16le", "pipe:1"], input=_test_wav(),
+                                check=True, capture_output=True, timeout=10)
+        return len(result.stdout) == 3200 and any(result.stdout)
+    except (OSError, subprocess.SubprocessError):
+        return False
+
+
+def media_capability() -> dict:
+    """Only a bundled runtime requires the app-owned executable self-test."""
+    if sys.platform == "darwin" and mac_bundle_contents() is not None:
+        try:
+            binaries = [media_binary(name) for name in ("ffmpeg", "ffprobe")]
+            identities = tuple((p.stat().st_size, p.stat().st_mtime_ns, p.stat().st_ino)
+                               for p in map(Path, binaries))
+            if _media_self_test(*binaries, identities):
+                return {"available": True, "code": None, "reason": None}
+        except OSError:
+            pass
+        return {"available": False, "code": "media_requires_ffmpeg",
+                "reason": "Bundled ffmpeg/ffprobe are missing or failed their decode self-test. "
+                          "Media extraction is unavailable."}
+    return {"available": True, "code": None, "reason": None}
+
+
+def alignment_capability() -> dict:
+    """FFmpeg CLI availability does not establish the TorchCodec/WhisperX ABI."""
+    contents = mac_bundle_contents() if sys.platform == "darwin" else None
+    if contents is not None:
+        import json
+        try:
+            report = json.loads((contents / "Resources/notices/torchcodec.json").read_text()) if contents else {}
+            libraries = report.get("libraries", [])
+            if (report.get("available") is True and libraries and
+                    all((contents / "Frameworks/FFmpeg7" / name).is_file() for name in libraries)):
+                return {"available": True, "code": None, "reason": None}
+        except (OSError, ValueError):
+            pass
+        return {"available": False, "code": "alignment_requires_torchcodec",
+                "reason": "WhisperX/alignment is unavailable: the bundled TorchCodec FFmpeg 7 "
+                          "decoder did not pass qualification. See notices/torchcodec.json."}
+    return {"available": True, "code": None, "reason": None}
+
+
+def platform_capabilities() -> dict:
+    result = {"library_mirror": library_mirror_capability(), "media": media_capability()}
+    if sys.platform == "darwin":
+        result["alignment"] = alignment_capability()
+    return result
+
+
+def capability_notice() -> str:
+    return "".join(f" {value['reason']} ({value['code']})"
+                   for value in platform_capabilities().values() if not value["available"])
+
+
+class MediaUnavailableError(RuntimeError):
+    """A capability refusal that survives user-facing error translation."""
+
+    def __init__(self, capability: dict):
+        self.code = capability["code"]
+        self.refusal = capability_refusal(capability)
+        super().__init__(f"{self.code}: {capability['reason']}")
+
+
+def require_media() -> None:
+    capability = media_capability()
+    if not capability["available"]:
+        raise MediaUnavailableError(capability)
 
 
 def platform_detail() -> str:
@@ -108,6 +286,222 @@ def legacy_user_data_dir() -> Path:
     xdg = os.environ.get("XDG_DATA_HOME")
     base = Path(xdg) if xdg else Path.home() / ".local" / "share"
     return base / "Yoink"
+
+
+def app_state_path(app: Path, data: Path, name: str) -> Path:
+    """Darwin state belongs outside the sealed app; other layouts stay intact."""
+    return (data if sys.platform == "darwin" else app) / name
+
+
+def prepare_app_state(data: Path) -> None:
+    if sys.platform == "darwin":
+        data.mkdir(mode=0o700, parents=True, exist_ok=True)
+
+
+def topics_source(app: Path, target: Path) -> Path:
+    if sys.platform == "darwin" and not target.exists():
+        return app / "topics.json"
+    return target
+
+
+def write_darwin_identity(data: Path, script: Path) -> Path:
+    """Record a complete native identity for the ordinary Darwin resident."""
+    import json
+    observation = darwin_observe(os.getpid(), with_executable=True)
+    if observation.status != "alive" or observation.created_ms is None or not observation.executable:
+        raise OSError("Darwin helper process identity is unavailable")
+    target = data / "runtime-identity.json"
+    temporary = target.with_suffix(".json.tmp")
+    payload = {"pid": os.getpid(), "created_ms": observation.created_ms,
+               "executable": observation.executable, "script": str(script.resolve())}
+    fd = os.open(temporary, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+    with os.fdopen(fd, "w", encoding="utf-8") as stream:
+        json.dump(payload, stream)
+    temporary.replace(target)
+    return target
+
+
+def darwin_helper_running(app: Path, data: Path) -> bool:
+    import json
+    try:
+        identity = json.loads((data / "runtime-identity.json").read_text(encoding="utf-8"))
+        if not isinstance(identity, dict) or identity.get("pid") == os.getpid():
+            return False
+        script = identity.get("script")
+        executable = identity.get("executable")
+        if not script or not executable or not (app / "server.py").samefile(script):
+            return False
+        return darwin_liveness(identity.get("pid"), identity.get("created_ms"), executable) == "alive"
+    except (OSError, ValueError, TypeError):
+        return False
+
+
+def editable_extension_dir(app: Path, data: Path) -> Path:
+    """Seed/update Darwin's unpacked extension, preserving edited prompts.
+
+    A version change refreshes packaged files, retaining prompts.json and any
+    user-added files. The version stamp is written last so interrupted copies
+    are retried. Windows continues to return the installed extension directory.
+    """
+    packaged = app / "extension"
+    if sys.platform != "darwin":
+        return packaged
+    import shutil
+    if not packaged.is_dir():
+        return packaged  # Let callers report a missing installation resource.
+    target = data.resolve() / "extension"
+    version = (app / "VERSION").read_text(encoding="utf-8").strip()
+    stamp = target / ".uoink-packaged-version"
+    if stamp.is_file() and stamp.read_text(encoding="utf-8").strip() == version:
+        return target
+    target.mkdir(mode=0o700, parents=True, exist_ok=True)
+    for source in packaged.rglob("*"):
+        relative = source.relative_to(packaged)
+        dest = target / relative
+        if source.is_symlink() or dest.is_symlink() or any(p.is_symlink() for p in dest.parents):
+            raise OSError("Linked extension resources are not writable copies")
+        if source.is_dir():
+            dest.mkdir(exist_ok=True)
+        elif not (relative == Path("prompts.json") and dest.exists()):
+            temporary = dest.with_name(dest.name + ".uoink-tmp")
+            if temporary.is_symlink():
+                raise OSError("Linked extension temporary file")
+            shutil.copyfile(source, temporary)
+            temporary.replace(dest)
+    stamp.write_text(version + "\n", encoding="utf-8")
+    return target
+
+
+# Darwin's native process adapter lives in this already-shipped module so the
+# Windows installer file set does not change. Calls load libproc only on demand.
+class _DarwinProcBSDInfo(ctypes.Structure):
+    # Darwin sys/proc_info.h: PROC_PIDTBSDINFO (flavor 3), 136 bytes on arm64.
+    _fields_ = [(name, ctypes.c_uint32) for name in (
+        "flags", "status", "xstatus", "pid", "ppid", "uid", "gid", "ruid",
+        "rgid", "svuid", "svgid", "rfu_1",
+    )] + [("comm", ctypes.c_char * 16), ("name", ctypes.c_char * 32)] + [
+        (name, ctypes.c_uint32) for name in ("nfiles", "pgid", "pjobc", "e_tdev", "e_tpgid")
+    ] + [("nice", ctypes.c_int32), ("start_sec", ctypes.c_uint64),
+         ("start_usec", ctypes.c_uint64)]
+
+
+@dataclass(frozen=True)
+class DarwinProcessObservation:
+    status: str  # alive, dead, unknown
+    started_us: int | None = None
+    executable: str | None = None
+
+    @property
+    def created_ms(self) -> float | None:
+        # Keep the wire field's millisecond units, including its microsecond
+        # fraction. At current epoch dates binary64 round-trips every native
+        # microsecond through JSON. Never truncate this value to an integer.
+        return None if self.started_us is None else self.started_us / 1000
+
+
+def darwin_creation_us(created_ms) -> int | None:
+    """Decode a persisted millisecond timestamp at libproc's native precision."""
+    import math
+    if type(created_ms) not in (int, float) or not 0 < created_ms < 2**42:
+        return None
+    if not math.isfinite(created_ms):
+        return None
+    return round(created_ms * 1000)
+
+
+@lru_cache(maxsize=1)
+def _darwin_libproc():
+    lib = ctypes.CDLL("/usr/lib/libproc.dylib", use_errno=True)
+    lib.proc_pidinfo.argtypes = [ctypes.c_int, ctypes.c_int, ctypes.c_uint64,
+                                 ctypes.c_void_p, ctypes.c_int]
+    lib.proc_pidinfo.restype = ctypes.c_int
+    lib.proc_pidpath.argtypes = [ctypes.c_int, ctypes.c_void_p, ctypes.c_uint32]
+    lib.proc_pidpath.restype = ctypes.c_int
+    return lib
+
+
+def _darwin_bsd_info(lib, pid: int) -> DarwinProcessObservation:
+    info = _DarwinProcBSDInfo()
+    ctypes.set_errno(0)
+    size = lib.proc_pidinfo(pid, 3, 0, ctypes.byref(info), ctypes.sizeof(info))
+    if size <= 0:
+        # libproc can report ESRCH for an unreaped child: kill(pid, 0) alone
+        # cannot distinguish that exited process from a running one.
+        return DarwinProcessObservation("dead" if ctypes.get_errno() == errno.ESRCH else "unknown")
+    if size != ctypes.sizeof(info) or info.pid != pid:
+        return DarwinProcessObservation("unknown")
+    if info.status == 5:  # SZOMB: kill(pid, 0) would still succeed.
+        return DarwinProcessObservation("dead")
+    if info.status not in (1, 2, 3, 4) or not info.start_sec or info.start_usec >= 1_000_000:
+        return DarwinProcessObservation("unknown")
+    return DarwinProcessObservation("alive", info.start_sec * 1_000_000 + info.start_usec)
+
+
+def darwin_observe(pid: int, *, with_executable: bool = False) -> DarwinProcessObservation:
+    if type(pid) is not int or not 0 < pid <= 0x7fffffff:
+        return DarwinProcessObservation("unknown")
+    try:
+        lib = _darwin_libproc()
+        before = _darwin_bsd_info(lib, pid)
+        if before.status != "alive" or not with_executable:
+            return before
+        buf = ctypes.create_string_buffer(4096)  # PROC_PIDPATHINFO_MAXSIZE
+        size = lib.proc_pidpath(pid, buf, len(buf))
+        after = _darwin_bsd_info(lib, pid)
+        if after.status == "dead":
+            return after
+        if (after.status != "alive" or before.started_us != after.started_us
+                or size <= 0 or size >= len(buf) or not buf.value.startswith(b"/")):
+            return DarwinProcessObservation("unknown")
+        return DarwinProcessObservation("alive", before.started_us, os.fsdecode(buf.value))
+    except (OSError, AttributeError, ValueError):
+        return DarwinProcessObservation("unknown")
+
+
+def darwin_created_ms(pid: int) -> float | None:
+    return darwin_observe(pid).created_ms
+
+
+def darwin_executable(pid: int) -> str | None:
+    return darwin_observe(pid, with_executable=True).executable
+
+
+def darwin_state(pid: int) -> str | None:
+    status = darwin_observe(pid).status
+    return {"alive": "R", "dead": "Z"}.get(status)
+
+
+def darwin_liveness(
+    pid: int, expected_ms: int | float | None, expected_exe: str | None = None,
+    *, tolerance_ms: int = 0, require_identity: bool = True,
+) -> str:
+    """Check birth and executable in one snapshot; PID-only probes opt in.
+
+    A tolerance is only for legacy lease observations, never ownership. Missing
+    birth identity remains unknown unless the caller requests a liveness probe.
+    """
+    observation = darwin_observe(pid, with_executable=expected_exe is not None)
+    if observation.status != "alive":
+        return observation.status
+    if expected_ms is None and not require_identity:
+        pass
+    else:
+        expected_us = darwin_creation_us(expected_ms)
+        if expected_us is None or observation.started_us is None:
+            return "unknown"
+        if type(tolerance_ms) is not int or tolerance_ms < 0:
+            return "unknown"
+        if abs(observation.started_us - expected_us) > tolerance_ms * 1000:
+            return "dead"
+    if expected_exe is not None:
+        if not isinstance(expected_exe, str) or not expected_exe or not observation.executable:
+            return "unknown"
+        try:
+            if not os.path.samefile(observation.executable, expected_exe):
+                return "dead"
+        except OSError:
+            return "unknown"
+    return "alive"
 
 
 def desktop_dir() -> Path:

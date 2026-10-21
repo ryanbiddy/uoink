@@ -1,0 +1,4 @@
+# Exact direct dependencies observed in both legs of run 39215500494.
+pytest==9.1.1
+Pillow==13.0.0
+mcp==1.30.0

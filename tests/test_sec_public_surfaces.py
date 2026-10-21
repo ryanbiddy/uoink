@@ -90,7 +90,8 @@ def helper(surface_code):
         "BaseHTTPRequestHandler": BaseHTTPRequestHandler,
         "HOST": "127.0.0.1", "PORT": PORT, "VERSION": "test",
         "TOKEN": "synthetic-public-surfaces-token",
-        "os": SimpleNamespace(environ={}), "json": json, "re": re,
+        "os": SimpleNamespace(environ={}), "sys": SimpleNamespace(platform="win32"),
+        "json": json, "re": re,
         "secrets": secrets, "urlparse": urlparse, "time": time,
         "datetime": datetime, "log": Mock(),
         "DESKTOP_ROOT": PRIVATE_ROOT, "INDEX_PATH": PRIVATE_ROOT / "index.db",
@@ -98,6 +99,8 @@ def helper(surface_code):
         "DASHBOARD_PATH": Mock(read_bytes=Mock(return_value=HTML)),
         "SPLASH_PATH": Mock(read_bytes=Mock(return_value=HTML)),
         "_platform": SimpleNamespace(platform_detail=lambda: "Windows AMD64",
+                                     sys=SimpleNamespace(platform="win32"),
+                                     media_capability=lambda: {"available": True, "code": None, "reason": None},
                                      keyring_display_name=lambda: "Windows Credential Manager"),
         "_is_writable_dir": Mock(return_value=True),
         "_read_settings": Mock(return_value={
@@ -176,6 +179,15 @@ def assert_public(payload):
                     "no key configured", "no key entered", "key didn't carry"):
         assert private not in text
     assert not re.search(r"[a-z]:[\\/]|/home/|/users/|\\\\", text)
+
+
+@pytest.mark.parametrize("platform", ["win32", "linux"])
+def test_non_darwin_diagnose_keeps_bare_ffmpeg_without_new_resolver(helper, platform):
+    helper["_platform"].sys.platform = platform
+    assert not hasattr(helper["_platform"], "media_binary")
+    payload = helper["_build_diagnose_payload"](public=True)
+    helper["_probe_command"].assert_any_call(["ffmpeg", "-version"])
+    assert next(row for row in payload["checks"] if row["name"] == "ffmpeg_available")["status"] == "ok"
 
 
 @pytest.mark.parametrize("writable", [True, False])

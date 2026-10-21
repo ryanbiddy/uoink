@@ -707,6 +707,23 @@ def test_spawn_dashboard_passes_isolation_argv(tmp_path, monkeypatch):
     assert captured["env"][iso.ENV_PORT] == str(port)
 
 
+def test_live_listener_probe_refuses_occupied_port_only():
+    import errno
+    import server
+
+    holder = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    holder.bind(("127.0.0.1", 0))
+    holder.listen(1)
+    address = holder.getsockname()
+    try:
+        with pytest.raises(OSError) as raised:
+            server._refuse_live_listener(address)
+        assert raised.value.errno == errno.EADDRINUSE
+    finally:
+        holder.close()
+    server._refuse_live_listener(address)
+
+
 def test_suite_lease_follows_isolated_port(tmp_path):
     import suite_service
 

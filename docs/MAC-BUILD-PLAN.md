@@ -1,5 +1,11 @@
 # Uoink macOS Build Plan
 
+Implementation update, October 19, 2026: the document below records the older
+scaffold audit. Passes 1–4 now have hosted macOS evidence. Passes 5–6 add an
+explicit Darwin mirror limitation and an unsigned arm64 bundle builder whose
+first hosted build is pending. Use [the current build instructions](mac/BUILD.md)
+for layout, pinned inputs, FFmpeg deferral and remaining release gates.
+
 This document is the prep work for a macOS build of Uoink. It was produced on a
 Windows machine with no macOS toolchain. Nothing here has been compiled,
 signed, notarized, or run on a Mac. It is an audit, a packaging plan, an

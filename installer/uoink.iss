@@ -155,6 +155,7 @@ Source: "staging\scripts\recall_hook.py"; DestDir: "{app}\scripts"; Flags: ignor
 ; Cross-platform path/OS helpers -- server.py and migrate_install.py import
 ; this at module top. Omitting it crashes the helper before it binds the port.
 Source: "staging\_platform.py"; DestDir: "{app}"; Flags: ignoreversion
+Source: "staging\uoink_processes.py"; DestDir: "{app}"; Flags: ignoreversion
 ; Isolated installed-profile configuration. server.py, uoink_mcp.py, the
 ; splash/dashboard wrappers and the isolated stop command import this before
 ; opening default data. Must ship or isolated mode cannot start.

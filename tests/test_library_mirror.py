@@ -219,11 +219,17 @@ class TestP409PathsAndConsent:
 
         # status reports disabled
         st = unwrap_dict(h.mirror.status())
+        if sys.platform == "darwin":
+            assert st["code"] == "library_mirror_unavailable_macos"
+            assert st["ok"] is False
         assert st.get("enabled") is False or st.get("state") == "disabled" or st.get("synced", 0) == 0
 
         # on_committed_event and resync do nothing
         h.mirror.on_committed_event("capture", video_id="vid-standard-01")
         resync_res = unwrap_dict(h.mirror.resync())
+        if sys.platform == "darwin":
+            assert resync_res["code"] == "library_mirror_unavailable_macos"
+            assert resync_res["ok"] is False
         assert resync_res.get("synced", 0) == 0
 
         # No library files generated under Uoink
@@ -235,6 +241,7 @@ class TestP409PathsAndConsent:
         assert "Initial taste preferences." in h.taste_file.read_text(encoding="utf-8")
         assert h.user_file.exists()
 
+    @pytest.mark.skipif(sys.platform == "darwin", reason="library_mirror_unavailable_macos: gate covered in test_mac_capabilities.py")
     def test_preview_does_not_perform_writes(self, tmp_path: Path):
         """preview returns planned paths, counts, and third-party notice; performs zero disk writes."""
         h = MirrorTestHarness(tmp_path, enabled=False)
@@ -340,6 +347,7 @@ class TestP409PathsAndConsent:
         assert f1.exists()
         assert f2.exists()
 
+    @pytest.mark.skipif(sys.platform == "darwin", reason="library_mirror_unavailable_macos: gate covered in test_mac_capabilities.py")
     def test_unmanaged_file_conflict(self, tmp_path: Path):
         """An existing file without a matching ownership entry in manifest is reported as unmanaged_conflict and preserved."""
         h = MirrorTestHarness(tmp_path, enabled=True)
@@ -356,6 +364,7 @@ class TestP409PathsAndConsent:
         # User file must NOT be overwritten
         assert "Unmanaged User File" in target_file.read_text(encoding="utf-8")
 
+    @pytest.mark.skipif(sys.platform == "darwin", reason="library_mirror_unavailable_macos: gate covered in test_mac_capabilities.py")
     def test_reparse_point_symlink_rejection(self, tmp_path: Path):
         """Symlinks or reparse points escaping the vault root are rejected."""
         h = MirrorTestHarness(tmp_path, enabled=True)
@@ -478,6 +487,7 @@ class TestP410EditsAndAtomicity:
         # Verify file is never rolled back to older gen1
         assert f.exists()
 
+    @pytest.mark.skipif(sys.platform == "darwin", reason="library_mirror_unavailable_macos: gate covered in test_mac_capabilities.py")
     def test_corrupt_manifest_stops_writes(self, tmp_path: Path):
         """A corrupt manifest stops writes for reconciliation and refuses to adopt markdown files."""
         h = MirrorTestHarness(tmp_path, enabled=True)
@@ -649,6 +659,7 @@ class TestP411Deletion:
         assert f.exists()
         assert "Must not be deleted!" in f.read_text(encoding="utf-8")
 
+    @pytest.mark.skipif(sys.platform == "darwin", reason="library_mirror_unavailable_macos: gate covered in test_mac_capabilities.py")
     def test_disconnected_destination_handling(self, tmp_path: Path):
         """When destination is disconnected, status reports destination_unavailable and primary operations still succeed."""
         h = MirrorTestHarness(tmp_path, enabled=True)
@@ -737,12 +748,13 @@ class TestP412CorrectionStoreSeparation:
         user_hash = _compute_file_sha256(h.user_file)
 
         # Perform multiple mirror events, resyncs, and purges
-        h.mirror.on_committed_event("capture", video_id="vid-standard-01")
-        h.mirror.resync()
-        h.mirror.on_committed_event("soft_delete", video_id="vid-standard-01")
-        h.mirror.resync()
-        h.mirror.on_committed_event("hard_purge", video_id="vid-standard-01")
-        h.mirror.resync()
+        for event in ("capture", "soft_delete", "hard_purge"):
+            event_result = h.mirror.on_committed_event(event, video_id="vid-standard-01")
+            result = h.mirror.resync()
+            if sys.platform == "darwin":
+                for refusal in (event_result, result):
+                    assert refusal["code"] == "library_mirror_unavailable_macos"
+                    assert refusal["ok"] is False
 
         # TASTE.md and USER.md remain byte-identical
         assert _compute_file_sha256(h.taste_file) == taste_hash

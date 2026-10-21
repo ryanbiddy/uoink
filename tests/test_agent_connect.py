@@ -1,6 +1,7 @@
 """Offline recipe and install-link contracts. No real client launches."""
 import base64
 import json
+import sys
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlsplit
 
@@ -43,7 +44,7 @@ def test_cli_dashboard_deeplinks_match_and_round_trip(tmp_path, monkeypatch, cap
         entry = json.loads(unquote(link.split("?", 1)[1]))
         assert entry.pop("name") == "uoink" and entry.pop("type") == "stdio"
     assert entry["command"] == str(python)
-    assert entry["args"] == [str(app / "uoink_mcp.py"), *args]
+    assert entry["args"] == (["-B", "-s"] if sys.platform == "darwin" else []) + [str(app / "uoink_mcp.py"), *args]
     assert entry["env"] == ({"PYTHONUTF8": "1", "PYTHONIOENCODING": "utf-8"}
                             | ({"UOINK_MCP_TOOLSET": "core"} if client == "cursor" else {}))
 

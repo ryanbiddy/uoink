@@ -22,6 +22,7 @@ from unittest.mock import Mock
 import urllib.request
 
 import pytest
+import _platform
 
 import index
 import source_subscriptions
@@ -79,6 +80,13 @@ def child(tmp_path):
     _load(ROOT / "server.py", {"_run_subprocess", "_terminate_process", "_raise_if_cancelled"}, scope)
     return SimpleNamespace(proc=proc, sources=sources, spawn=spawn, scope=scope,
                            run=lambda **kw: scope["_run_subprocess"](["mock-yt-dlp"], **kw))
+
+
+def test_supervised_child_records_the_owner_until_cleanup(child):
+    child.proc.ownership_pid = 54321
+    child.run()
+    assert child.sources.record_child_start.call_args.args[2] == 54321
+    assert child.sources.record_child_end.call_args.args[2] == 54321
 
 
 @pytest.mark.parametrize("error", [OSError("disk full"), sqlite3.OperationalError("locked"),
@@ -207,7 +215,7 @@ def test_unreaped_child_never_records_an_exit_or_clears_intent(child, caplog):
 @pytest.fixture
 def jobs(tmp_path):
     idx = index.Index.open(tmp_path / "jobs.db")
-    scope = {"index": index, "Path": Path, "json": json, "threading": threading, "re": re,
+    scope = {"_platform": _platform, "index": index, "Path": Path, "json": json, "threading": threading, "re": re,
              "log": logging.getLogger(__name__), "_jobs": {}, "_jobs_lock": threading.Lock(),
              "_get_index": lambda: idx, "_now_iso": lambda: "2026-10-17T12:00:00"}
     _load(ROOT / "server.py", {

@@ -30,6 +30,7 @@ from urllib.parse import parse_qs, quote, urlparse
 from urllib.response import addinfourl
 
 import pytest
+import _platform
 
 import podcasts
 import source_subscriptions as ss
@@ -212,7 +213,7 @@ def dialer(network, monkeypatch):
 
 @pytest.fixture
 def consumers(network, monkeypatch, tmp_path):
-    namespace = dict(source_subscriptions=ss, urllib=urllib, log=logging.getLogger(__name__),
+    namespace = dict(_platform=_platform, source_subscriptions=ss, urllib=urllib, log=logging.getLogger(__name__),
                      subprocess=subprocess, json=json, Path=Path, urlparse=urlparse,
                      parse_qs=parse_qs, re=re,
                      YTDLP_CMD=["synthetic-yt-dlp"], COMMENTS_TIMEOUT_SEC=10,
@@ -277,6 +278,7 @@ def consumers(network, monkeypatch, tmp_path):
 
     audio_child = Mock(side_effect=audio_run)
     monkeypatch.setattr(subprocess, "run", audio_child)
+    monkeypatch.setattr("uoink_processes.run_owned", audio_child)
 
     def invoke(kind, url):
         if kind == "feed":

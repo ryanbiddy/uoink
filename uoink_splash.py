@@ -36,6 +36,10 @@ import urllib.request
 import webbrowser
 from pathlib import Path
 
+if sys.platform == "darwin":
+    sys.dont_write_bytecode = True
+    os.environ["PYTHONDONTWRITEBYTECODE"] = "1"
+
 log = logging.getLogger("uoink.splash")
 
 HERE = Path(__file__).parent.resolve()
@@ -74,6 +78,8 @@ def _data_root() -> Path:
         import _platform
         return _platform.user_data_dir()
     except Exception:
+        if sys.platform == "darwin":
+            return Path.home() / "Library" / "Application Support" / "Uoink"
         return HERE
 
 
@@ -96,7 +102,10 @@ def _dashboard_settings_url() -> str:
 
 
 def _extension_dir() -> Path:
-    return HERE / "extension"
+    if sys.platform != "darwin":
+        return HERE / "extension"
+    import _platform
+    return _platform.editable_extension_dir(HERE, _data_root())
 
 
 BROWSER_CATALOG = [
@@ -244,6 +253,16 @@ def _browser_from_prog_id(prog_id: str):
 
 
 def _browser_executable(browser) -> str:
+    if sys.platform == "darwin":
+        names = {"chrome": "Google Chrome", "edge": "Microsoft Edge", "brave": "Brave Browser",
+                 "vivaldi": "Vivaldi", "opera-gx": "Opera GX", "arc": "Arc", "chromium": "Chromium"}
+        name = names.get(browser["id"])
+        if name:
+            for root in (Path("/Applications"), Path.home() / "Applications"):
+                candidate = root / (name + ".app") / "Contents/MacOS" / name
+                if candidate.is_file():
+                    return str(candidate)
+        return ""
     for env_name, relative in browser["paths"]:
         root = os.environ.get(env_name)
         if not root:
@@ -317,6 +336,9 @@ def _open_extensions_page(browser_id: str | None = None) -> bool:
 def _copy_to_clipboard(text: str) -> bool:
     if not text:
         return False
+    if sys.platform == "darwin":
+        from helper.mac_ui import copy_text
+        return copy_text(text)
     if sys.platform != "win32":
         return False
     creationflags = 0x08000000
@@ -351,6 +373,23 @@ def _copy_to_clipboard(text: str) -> bool:
 def _spawn_dashboard(url: str | None = None) -> None:
     """Launch the dashboard pywebview window in its OWN subprocess so the
     splash can minimize/exit without taking the dashboard with it."""
+    if sys.platform == "darwin":
+        # The helper owns the new window so dismissing this splash does not
+        # close the dashboard's lifeline.
+        target = url or _install_isolation.helper_url("/dashboard")
+        try:
+            import _platform
+            token = _platform.app_state_path(HERE, _data_root(), "token.txt").read_text(encoding="utf-8").strip()
+            request = urllib.request.Request(_install_isolation.helper_url("/helper/dashboard"),
+                data=json.dumps({"settings": "#settings" in target}).encode(),
+                headers={"X-Uoink-Token": token, "Content-Type": "application/json"})
+            with urllib.request.urlopen(request, timeout=5) as response:
+                if json.load(response).get("ok"):
+                    return
+        except Exception as exc:
+            log.warning("dashboard request failed: %s", exc)
+        webbrowser.open(target)
+        return
     script = str(HERE / "uoink_dashboard.py")
     try:
         creationflags = 0x08000000 if sys.platform == "win32" else 0  # CREATE_NO_WINDOW
@@ -510,6 +549,8 @@ def _slide_up(window, final_x: int, sh: int) -> None:
 
 
 def main() -> int:
+    if sys.platform == "darwin":
+        return _main_mac()
     sentinel = _sentinel_path()
     # Belt-and-suspenders: if this version already showed the splash, do
     # nothing. Server also gates the spawn on this, but a double-spawn race is
@@ -563,6 +604,44 @@ def main() -> int:
         webview.start()
     finally:
         log.debug("splash webview exited")
+    return 0
+
+
+def _main_mac() -> int:
+    from helper.mac_ui import watch_parent
+    watch_parent()
+    sentinel = _sentinel_path()
+    if _sentinel_current(sentinel):
+        return 0
+    # HTTP serving starts after the subprocess is admitted. Wait briefly for
+    # it instead of showing a startup error during that ordinary race.
+    for _ in range(60):
+        if _helper_health_ok():
+            break
+        time.sleep(0.25)
+    try:
+        import webview
+        import webview.platforms.cocoa  # noqa: F401
+        api = JsApi()
+        window = webview.create_window("Welcome to Uoink", _splash_url(),
+                                      width=WIDTH, height=HEIGHT, resizable=False,
+                                      js_api=api)
+        api.attach(window)
+
+        def loaded():
+            # Store only after WebKit loaded the first-run UI. Closing the
+            # title-bar button and auto-dismiss both count as shown.
+            _write_sentinel(sentinel)
+            time.sleep(LINGER_SEC)
+            if not api.should_hold_open():
+                api._auto_close()
+
+        window.events.loaded += loaded
+        webview.start(gui="cocoa")
+    except Exception as exc:
+        log.warning("Cocoa splash unavailable; opening browser: %s", exc)
+        if webbrowser.open(_splash_url()):
+            _write_sentinel(sentinel)
     return 0
 
 

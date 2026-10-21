@@ -7,6 +7,7 @@ import logging
 from pathlib import Path
 
 import pytest
+import _platform
 
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -25,6 +26,7 @@ def classify_topic():
     scope = {
         "json": json, "log": logging.getLogger(__name__),
         "TOPICS_PATH": ROOT / "topics.json",
+        "HERE": ROOT, "_platform": _platform,
     }
     exec(compile(ast.Module(body=nodes, type_ignores=[]), str(source), "exec"), scope)
     return scope["_classify_topic"]

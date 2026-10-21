@@ -43,6 +43,7 @@ from urllib.parse import parse_qs, urlsplit
 import uuid
 
 import pytest
+import _platform
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -170,10 +171,10 @@ class Connection(sqlite3.Connection):
 
 
 @pytest.fixture
-def sandbox(monkeypatch):
-    # The module owns its temp directory so even an ordinary pytest invocation
-    # stays within the worker checkout. No default Index.open() is used.
-    parent = ROOT / ".phase6-test-tmp"
+def sandbox(monkeypatch, tmp_path):
+    # Keep all synthetic state under pytest's disposable temporary directory.
+    # No default Index.open() is used.
+    parent = tmp_path / "phase6"
     parent.mkdir(exist_ok=True)
     with tempfile.TemporaryDirectory(prefix="case-", dir=parent) as name:
         root = Path(name).resolve()
@@ -1486,6 +1487,7 @@ def test_phase6_diarization_opt_in_default_off(sandbox):
     audio_placeholder = env.root / "never-decoded.mp3"
     audio_placeholder.write_bytes(b"synthetic placeholder; not an audio fixture")
     admission_globals = {
+        "_platform": _platform,
         "Path": Path, "_get_index": lambda: None,
         "podcasts": SimpleNamespace(get_episode=lambda idx, episode_id: {
             "audio_local_path": str(audio_placeholder), "title": "Synthetic episode"}),
@@ -1573,9 +1575,12 @@ def test_phase6_adapter_fetch_boundaries(sandbox):
 
     def record_command(command, **kwargs):
         commands.append(command)
-        if command[0] == "yt-dlp" and "--get-title" in command:
+        # yt-dlp runs as `yt-dlp` on Windows/Linux and as the bundle's
+        # `python -m yt_dlp` on macOS; both are the same downloader here.
+        is_ytdlp = command[0] == "yt-dlp" or list(command[1:3]) == ["-m", "yt_dlp"]
+        if is_ytdlp and "--get-title" in command:
             return "Synthetic Video"
-        if command[0] == "yt-dlp":
+        if is_ytdlp:
             folder = output / "Synthetic_Video"
             folder.mkdir(parents=True, exist_ok=True)
             (folder / "video.mp4").write_bytes(b"synthetic placeholder; never decoded")
@@ -1586,12 +1591,17 @@ def test_phase6_adapter_fetch_boundaries(sandbox):
         patch.setattr(yt_extract, "subprocess", SimpleNamespace(run=record_command, check_output=record_command))
         patch.setattr(yt_extract.sys, "argv", ["yt_extract.py", "https://www.youtube.com/watch?v=abcdefghijk", "--out", str(output), "--keep-video"])
         yt_extract.main()
-    downloads = [cmd for cmd in commands if cmd[0] == "yt-dlp" and "--write-subs" in cmd]
+    def tool(cmd):
+        if cmd[0] == "yt-dlp" or list(cmd[1:3]) == ["-m", "yt_dlp"]:
+            return "yt-dlp"
+        return Path(cmd[0]).stem.lower()
+
+    downloads = [cmd for cmd in commands if tool(cmd) == "yt-dlp" and "--write-subs" in cmd]
     assert len(downloads) == 1
     command = downloads[0]
     assert command[command.index("--sub-lang") + 1] == "en.*,en"
     assert not any(flag in command for flag in ("--all-subs", "--cookies", "--cookies-from-browser", "--username", "--password"))
-    assert [cmd[0] for cmd in commands] == ["yt-dlp", "yt-dlp", "ffmpeg"]
+    assert [tool(cmd) for cmd in commands] == ["yt-dlp", "yt-dlp", "ffmpeg"]
     # X's existing same-author bounded parent traversal is the only supplied
     # status transport. It gains neither watcher nor media acquisition.
     x_requests = []

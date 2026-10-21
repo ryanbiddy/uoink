@@ -5608,6 +5608,7 @@
               <h2>Library Mirror</h2>
               <p class="setting-copy">Optional one-way export of evidence cards, shelf pages, and accepted briefs into <code>&lt;vault&gt;/Uoink/</code>. Off by default. Enabling or broadening scope needs a preview and a confirmation from this page.</p>
               <p class="setting-copy" id="libraryMirrorIndexingNotice">Other software with access to that vault can index its contents. Uoink does not register the vault with Basic Memory/Hermes, start another indexer, edit its configuration, turn on sync, or infer consent from an installed application. Existing third-party indexing is outside Uoink's deletion control.</p>
+              <p class="setting-copy" id="mediaCapabilityStatus" role="status"></p>
               <p class="setting-copy" id="libraryMirrorStatus">Checking library mirror...</p>
               <p class="setting-copy" id="libraryMirrorCounts"></p>
               <div class="inline-row">
@@ -15226,6 +15227,19 @@
     function renderLibraryMirrorFromSettings() {
       if (!els.libraryMirrorStatus) return;
       const settings = state.settings || {};
+      const mediaStatus = document.getElementById("mediaCapabilityStatus");
+      if (mediaStatus) mediaStatus.textContent = settings.media_capability && settings.media_capability.available === false
+        ? `${settings.media_capability.reason} (${settings.media_capability.code})` : "";
+      const capability = settings.library_mirror_capability;
+      const unavailable = capability && capability.available === false;
+      document.querySelectorAll("#library-mirror input, #library-mirror select, #library-mirror button").forEach((control) => {
+        control.disabled = Boolean(unavailable);
+      });
+      if (unavailable) {
+        els.libraryMirrorStatus.textContent = `${capability.reason} (${capability.code})`;
+        if (els.libraryMirrorCounts) els.libraryMirrorCounts.textContent = "";
+        return;
+      }
       const enabled = Boolean(settings.library_mirror_enabled);
       const consent = settings.library_mirror_consent || null;
       if (consent && els.libraryMirrorDestination && !els.libraryMirrorDestination.value) {

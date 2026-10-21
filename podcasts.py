@@ -23,6 +23,7 @@ import hashlib
 import json
 import logging
 import os
+import sys
 import re
 import sqlite3
 import subprocess
@@ -1426,7 +1427,11 @@ def _episode_audio_path(data_root: Path, feed_row: dict,
                         fallback=f"ep-{episode_row.get('id') or 0}")
     folder = _podcast_root(data_root) / feed_slug
     folder.mkdir(parents=True, exist_ok=True)
-    return folder / f"{ep_slug}.mp3"
+    audio_format = "mp3"
+    if sys.platform == "darwin":
+        import _platform
+        audio_format = _platform.podcast_audio_format()
+    return folder / f"{ep_slug}.{audio_format}"
 
 
 def _record_audio_result(idx, episode_id: int, *,
@@ -1466,6 +1471,7 @@ def download_episode_audio(idx, episode_id: int, *,
     path AND has non-zero size we mark status='downloaded' without
     re-downloading. Returns a structured result the endpoint surfaces.
     resolve_url is an explicit test injection for URL admission."""
+    import _platform
     episode = get_episode(idx, episode_id)
     if episode is None:
         return {"ok": False, "error": f"episode not found: {episode_id}"}
@@ -1485,9 +1491,8 @@ def download_episode_audio(idx, episode_id: int, *,
         return {"ok": False, "error": "audio_url is not an http(s) URL"}
 
     out_path = _episode_audio_path(Path(data_root), feed, episode)
-    # Idempotent -- skip re-download when the canonical path already
-    # has a non-zero file. yt-dlp writes a .mp3 extension after the
-    # ffmpeg post-process, so we check the .mp3 directly.
+    # Idempotent: inspect the final postprocessed path (WAV on Darwin,
+    # MP3 elsewhere), rather than yt-dlp's intermediate download.
     if out_path.exists() and out_path.stat().st_size > 0:
         _record_audio_result(idx, episode_id,
                               local_path=str(out_path),
@@ -1510,14 +1515,17 @@ def download_episode_audio(idx, episode_id: int, *,
                              error=error, status="error" if refused else EPISODE_STATUS_NEW)
         return {"ok": False, "episode_id": episode_id, "error": error}
 
+    refusal = _platform.capability_refusal(_platform.media_capability())
+    if refusal is not None:
+        return refusal
+
     # Move to status='queued' if not already there. This makes the row
     # show up in the in-flight section of the dashboard during the
     # download (which can take several minutes for an hour-long pod).
     if episode["status"] != EPISODE_STATUS_QUEUED:
         set_episode_status(idx, episode_id, EPISODE_STATUS_QUEUED)
 
-    # Output template: drop the extension; yt-dlp adds .mp3 after
-    # ffmpeg converts. Pass the bare stem.
+    # Drop the extension; yt-dlp adds the selected format after conversion.
     out_stem = out_path.with_suffix("")
     cmd = list(ytdlp_cmd or [])
     if not cmd:
@@ -1530,13 +1538,30 @@ def download_episode_audio(idx, episode_id: int, *,
     if not cmd:
         return {"ok": False, "error": "yt-dlp command not configured"}
 
+    audio_format = "mp3"
+    if sys.platform == "darwin":
+        audio_format = _platform.podcast_audio_format()
+        media_args = _platform.ytdlp_media_args()
+        if media_args:
+            # YTDLP_CMD already contains these in a bundle. Replace any supplied
+            # location too, so custom commands cannot escape the bundle policy.
+            cleaned = []
+            skip = False
+            for arg in cmd:
+                if skip:
+                    skip = False
+                elif arg == "--ffmpeg-location":
+                    skip = True
+                elif arg != "--ignore-config" and not arg.startswith("--ffmpeg-location="):
+                    cleaned.append(arg)
+            cmd = cleaned + media_args
     args = cmd + [
         "--no-progress",
         "--extract-audio",
-        "--audio-format", "mp3",
+        "--audio-format", audio_format,
         "--audio-quality", "0",   # use VBR best
         "--max-filesize", str(_AUDIO_MAX_BYTES),
-        # Output template: yt-dlp will append .mp3 after the postprocess
+        # yt-dlp replaces this extension after the postprocess.
         "-o", str(out_stem) + ".%(ext)s",
         "--",
         audio_url,
@@ -1544,7 +1569,10 @@ def download_episode_audio(idx, episode_id: int, *,
     log.info("podcast download: episode_id=%d url=%s -> %s",
               episode_id, episode["audio_url"], out_path)
     try:
-        cp = subprocess.run(
+        run = subprocess.run
+        if os.name != "nt":
+            from uoink_processes import run_owned as run
+        cp = run(
             args, capture_output=True, text=True,
             timeout=timeout_sec, check=False,
         )

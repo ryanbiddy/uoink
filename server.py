@@ -16,6 +16,7 @@ Endpoints:
 """
 
 import contextlib
+import errno
 import hashlib
 import json
 import logging
@@ -42,6 +43,10 @@ from datetime import datetime, timedelta
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
+
+if sys.platform == "darwin":
+    sys.dont_write_bytecode = True
+    os.environ["PYTHONDONTWRITEBYTECODE"] = "1"  # inherited by app workers
 
 try:
     import keyring as _keyring
@@ -363,7 +368,8 @@ def _allowed_extension_ids() -> set[str]:
     return ids
 
 CREATE_NO_WINDOW = 0x08000000 if sys.platform == "win32" else 0
-SUBPROCESS_KW = {"creationflags": CREATE_NO_WINDOW} if sys.platform == "win32" else {}
+SUBPROCESS_KW = ({"creationflags": CREATE_NO_WINDOW} if sys.platform == "win32"
+                 else {"start_new_session": True})
 
 
 def _splash_should_spawn(sentinel: Path) -> bool:
@@ -447,21 +453,21 @@ PLAYLIST_RATE_LIMIT_BACKOFF_BASE_SEC = 30.0
 PLAYLIST_RATE_LIMIT_BACKOFF_MAX_SEC = 5 * 60.0
 
 # ---- Auth token (P0-1) ----------------------------------------------------
-# Per-install random token. Persisted next to server.py (which lives in the
-# install root -- %LOCALAPPDATA%\Uoink on Windows, ~/Library/Application
-# Support/Uoink on macOS -- in the shipped product, or in the dev repo
-# directory in dev mode; gitignored either way). The extension fetches
+# Per-install random token. Windows retains the source-adjacent location;
+# Darwin uses Application Support, outside the sealed app. The extension fetches
 # this via /token (gated by chrome-extension:// origin) on first launch
 # and includes it in X-Uoink-Token on every subsequent request. The legacy
 # X-Yoink-Token header is still accepted through the v2.x alias window.
 _ISOLATION = _install_isolation.current_binding()
-TOKEN_PATH = (
-    _ISOLATION.token_path if _ISOLATION is not None else HERE / "token.txt"
-)
 # Sprint 19.5 Stage 1: DATA_ROOT is now resolved by _platform.user_data_dir
 # so the same helper runs on Windows + macOS without per-call branches.
 # Isolated installs substitute the declared profile instead of the normal root.
 DATA_ROOT = _install_isolation.data_root(_platform.user_data_dir())
+_platform.prepare_app_state(DATA_ROOT)
+TOKEN_PATH = (
+    _ISOLATION.token_path if _ISOLATION is not None
+    else _platform.app_state_path(HERE, DATA_ROOT, "token.txt")
+)
 RELIABILITY_MODEL_ROOT = DATA_ROOT / "models" / "whisper"
 SETTINGS_PATH = DATA_ROOT / "settings.json"
 JOBS_PATH = DATA_ROOT / "jobs.json"
@@ -1225,6 +1231,9 @@ if ($dialog.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) {
 
 
 def _pick_output_folder_tk(initial_dir: Path | None = None) -> str | None:
+    if sys.platform == "darwin":
+        from helper.mac_ui import pick_folder
+        return pick_folder(initial_dir).get("path")
     try:
         import tkinter as tk  # type: ignore
         from tkinter import filedialog  # type: ignore
@@ -1255,6 +1264,9 @@ def _pick_output_folder_tk(initial_dir: Path | None = None) -> str | None:
 
 
 def _pick_output_folder(initial_dir: Path | None = None) -> str | None:
+    if sys.platform == "darwin":
+        from helper.mac_ui import pick_folder
+        return pick_folder(initial_dir).get("path")
     if os.name == "nt":
         selected = _pick_output_folder_windows(initial_dir)
         if selected:
@@ -1506,7 +1518,11 @@ def _public_settings(data: dict | None = None) -> dict:
         # Living Library Phase 2: read-only here; see _default_settings.
         "librarian_apply_enabled": data.get("librarian_apply_enabled") is True,
         # Phase 4 opt-in corpus mirror (separate from obsidian_vault_path).
-        "library_mirror_enabled": data.get("library_mirror_enabled") is True,
+        **({"library_mirror_capability": _platform.library_mirror_capability(),
+            "media_capability": _platform.media_capability()}
+           if _platform.sys.platform == "darwin" else {}),
+        "library_mirror_enabled": (data.get("library_mirror_enabled") is True
+                                   and _platform.library_mirror_capability()["available"]),
         "library_mirror_consent": _normalize_mirror_consent(
             data.get("library_mirror_consent")),
     }
@@ -1599,6 +1615,8 @@ def _consent_to_dataclass(consent: dict | None):
 
 def _library_mirror(*, enabled: bool | None = None, consent: dict | None = None):
     """Construct library_mirror.Mirror from current settings. None if missing."""
+    if not _platform.library_mirror_capability()["available"]:
+        return None
     try:
         import library_mirror
         from library_resources import LibraryReader
@@ -1638,6 +1656,8 @@ def _mirror_event(kind, *, video_id=None, shelf_id=None, brief_hash=None):
     Named seams: capture_commit, source_refresh, restore, soft_delete,
     hard_purge (server.py); apply, undo, pin (library_work.py event_hook).
     """
+    if not _platform.library_mirror_capability()["available"]:
+        return None
     try:
         settings = _read_settings()
         enabled = settings.get("library_mirror_enabled") is True
@@ -2125,6 +2145,8 @@ def _test_anthropic_key(api_key: str) -> tuple[bool, str | None, int | None]:
 #   {legacy, syndication, graphql}.
 YTDLP_CMD = [sys.executable, "-m", "yt_dlp",
               "--extractor-args", "twitter:api=syndication"]
+if sys.platform == "darwin":
+    YTDLP_CMD.extend(_platform.ytdlp_media_args())
 
 # Hard cap on the video file yt-dlp downloads before ffmpeg runs. yt-dlp
 # pulls the whole file to disk first; on a small disk a few livestream-length
@@ -2286,7 +2308,8 @@ def _allowed_roots() -> set[Path]:
 
 # --- Logging ---------------------------------------------------------------
 LOG_PATH = (
-    _ISOLATION.log_path if _ISOLATION is not None else HERE / "server.log"
+    _ISOLATION.log_path if _ISOLATION is not None
+    else _platform.app_state_path(HERE, DATA_ROOT, "server.log")
 )
 # One rotating file handler: the root logger and the file-only machine-error
 # detail logger share it, so raw diagnostics rotate with server.log.
@@ -2780,6 +2803,9 @@ def _replace_reliability_section(corpus_path: Path, reliability: dict) -> None:
 
 def _download_reliability_audio(url: str, tmp_dir: Path,
                                 cancel_event: threading.Event | None = None) -> Path:
+    if _platform.sys.platform == "darwin" and _platform.mac_bundle_contents() is not None:
+        url = source_subscriptions.check_public_http_url(url)
+    _platform.require_media()
     _run_subprocess(
         [
             *YTDLP_CMD,
@@ -2814,6 +2840,9 @@ def _compute_transcript_reliability(
     extraction-time call passes the just-downloaded video file before it is
     deleted, avoiding a second network request.
     """
+    if (_platform.sys.platform == "darwin" and _platform.mac_bundle_contents() is not None
+            and not _VIDEO_ID_RE.fullmatch(video_id or "")):
+        return {"ok": False, "error": "video id invalid"}
     if folder is None:
         folder, _row = _folder_for_video_id(video_id)
     if folder is None:
@@ -2823,6 +2852,9 @@ def _compute_transcript_reliability(
     vid = (sidecar.get("video_id") or video_id or "").strip()
     if not vid:
         return {"ok": False, "error": "uoink has no video_id"}
+    refusal = _platform.capability_refusal(_platform.media_capability())
+    if refusal is not None:
+        return refusal
     existing = sidecar.get("reliability")
     if isinstance(existing, dict) and existing.get("status") == "completed" and not force:
         return {"ok": True, "reliability": existing, "cached": True}
@@ -3532,21 +3564,23 @@ def _fmt_iso_date(s) -> str:
     return s
 
 
-TOPICS_PATH = HERE / "topics.json"
+TOPICS_PATH = _platform.app_state_path(HERE, DATA_ROOT, "topics.json")
 
 
 def _load_topics() -> dict:
-    """Read topics.json from project root. Returns a dict with a 'topics'
+    """Read edited topics, or packaged defaults before the first Darwin edit.
+    Returns a dict with a 'topics'
     list of {name, keywords} and a 'fallback' string. On any error (missing
     or malformed file) returns an empty topic list with a sane fallback so
     classification just degrades to 'Uncategorized'.
     """
-    if not TOPICS_PATH.exists():
+    source = _platform.topics_source(HERE, TOPICS_PATH)
+    if not source.exists():
         log.warning("topics.json missing at %s — falling back to 'Uncategorized'",
                     TOPICS_PATH)
         return {"topics": [], "fallback": "Uncategorized"}
     try:
-        return json.loads(TOPICS_PATH.read_text(encoding="utf-8"))
+        return json.loads(source.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as e:
         log.warning("topics.json read failed: %s", e)
         return {"topics": [], "fallback": "Uncategorized"}
@@ -3737,7 +3771,8 @@ def _screenshot_ffmpeg_command(video_file: Path, interval: int,
                                output_pattern: Path) -> list[str]:
     """Build the screenshot command with an explicit full-range JPEG format."""
     return [
-        "ffmpeg", "-loglevel", "error", "-y",
+        _platform.media_binary("ffmpeg") if _platform.sys.platform == "darwin" else "ffmpeg",
+        "-loglevel", "error", "-y",
         "-i", str(video_file),
         "-vf", f"fps=1/{max(1, int(interval))}",
         # MJPEG requires full-range YUV. Without this, limited-range yuv420p(tv)
@@ -3881,7 +3916,11 @@ def _run_subprocess(cmd: list[str], *, cancel_event: threading.Event | None = No
             source_subscriptions.record_child_launch_intent(
                 DATA_ROOT, capture["start_id"], capture.get("instance"))
         try:
-            proc = subprocess.Popen(
+            popen = subprocess.Popen
+            if SUBPROCESS_KW.get("start_new_session"):
+                from uoink_processes import PosixChild
+                popen = PosixChild
+            proc = popen(
                 cmd,
                 stdout=stdout,
                 stderr=stderr,
@@ -3910,8 +3949,11 @@ def _run_subprocess(cmd: list[str], *, cancel_event: threading.Event | None = No
             # the OS has already started yt-dlp. Keep unresolved evidence on
             # failure, but never leave the child running because of that write.
             if capture is not None:
+                capture_pid = getattr(proc, "ownership_pid", None)
+                if type(capture_pid) is not int:
+                    capture_pid = proc.pid
                 source_subscriptions.record_child_start(
-                    DATA_ROOT, capture["start_id"], proc.pid, capture.get("instance"))
+                    DATA_ROOT, capture["start_id"], capture_pid, capture.get("instance"))
             started = time.monotonic()
             while True:
                 if cancel_event is not None and cancel_event.is_set():
@@ -3934,7 +3976,7 @@ def _run_subprocess(cmd: list[str], *, cancel_event: threading.Event | None = No
                     # poll reaps an exited child; communicate/termination have
                     # already waited when they completed normally.
                     if capture is not None:
-                        source_subscriptions.record_child_end(DATA_ROOT, capture["start_id"], proc.pid)
+                        source_subscriptions.record_child_end(DATA_ROOT, capture["start_id"], capture_pid)
             except Exception:
                 log.exception("could not finish subprocess cleanup for %s",
                               getattr(proc, "pid", "unknown"))
@@ -4101,7 +4143,8 @@ def _download_thumbnail(metadata: dict, output_folder: Path, *,
     jpg_path = output_folder / "thumbnail.jpg"
     try:
         _run_subprocess(
-            ["ffmpeg", "-loglevel", "error", "-y",
+            [_platform.media_binary("ffmpeg") if _platform.sys.platform == "darwin" else "ffmpeg",
+             "-loglevel", "error", "-y",
              "-i", str(raw_path), str(jpg_path)],
             cancel_event=cancel_event,
             check=True,
@@ -5922,6 +5965,10 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
     title, video_slug, caption_count.
     """
     requested_long_video_mode = _normalize_long_video_mode(long_video_mode)
+    if (_platform.sys.platform == "darwin" and _platform.mac_bundle_contents() is not None
+            and not _normalize_video_url(url)[0]):
+        raise ValueError("video URL invalid")
+    _platform.require_media()
     if metadata is None:
         if phase_callback:
             phase_callback("metadata")
@@ -6134,7 +6181,8 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
             *YTDLP_CMD,
             # Require a video stream. Plain `worst` can pick audio-only on some
             # Shorts, which makes ffmpeg screenshot extraction fail with no packets.
-            "-f", "worst*[vcodec!=none][height>=360]/worst*[vcodec!=none]/worst",
+            "-f", (_platform.video_format("worst*[vcodec!=none][height>=360]/worst*[vcodec!=none]/worst")
+                   if _platform.sys.platform == "darwin" else "worst*[vcodec!=none][height>=360]/worst*[vcodec!=none]/worst"),
             "--concurrent-fragments", "4",
             "--retries", "10",
             "--fragment-retries", "10",
@@ -7063,6 +7111,9 @@ def _plain_error_from_text(text: str) -> str:
 
 def friendly_error(e: BaseException) -> str:
     """Translate raw exceptions into copy the user can act on."""
+    from _platform import MediaUnavailableError
+    if isinstance(e, MediaUnavailableError):
+        return str(e)
     if getattr(e, "publication_error", None):
         return e.publication_error
     if isinstance(e, ExtractionPhaseError):
@@ -8148,7 +8199,13 @@ def _autostart_command() -> str:
 
 
 def _autostart_enabled() -> bool | None:
-    """True/False on Windows; None where there's no HKCU Run key (non-Windows)."""
+    """Login preference on Windows/macOS; None if unsupported or unreadable."""
+    if sys.platform == "darwin":
+        from helper import mac_lifecycle
+        try:
+            return mac_lifecycle.status(HERE)["enabled"]
+        except (OSError, ValueError, subprocess.SubprocessError):
+            return None
     if sys.platform != "win32":
         return None
     try:
@@ -8168,8 +8225,15 @@ def _autostart_enabled() -> bool | None:
 
 
 def _set_autostart(enabled: bool) -> bool | None:
-    """Set/clear the HKCU Run\\Uoink value. Returns True on success, None when
-    unsupported (non-Windows), False on a registry error."""
+    """Set the Windows Run value or Mac LaunchAgent. None means unsupported."""
+    if sys.platform == "darwin":
+        from helper import mac_lifecycle
+        try:
+            mac_lifecycle.set_enabled(HERE, enabled)
+            return True
+        except (OSError, ValueError, subprocess.SubprocessError) as exc:
+            log.warning("autostart toggle failed: %s", exc)
+            return False
     if sys.platform != "win32":
         return None
     try:
@@ -8216,7 +8280,8 @@ def _validate_topics(topics) -> str | None:
 def _write_topics(topics: list) -> None:
     """Persist the topics editor to topics.json, preserving any other keys."""
     try:
-        existing = json.loads(TOPICS_PATH.read_text(encoding="utf-8"))
+        source = _platform.topics_source(HERE, TOPICS_PATH)
+        existing = json.loads(source.read_text(encoding="utf-8"))
         if not isinstance(existing, dict):
             existing = {}
     except (OSError, ValueError):
@@ -8467,6 +8532,9 @@ def _fetch_playlist_preview(url: str) -> tuple[dict | None, str | None, int]:
     normalized = _normalize_playlist_url(url)
     if not normalized:
         return None, "playlist URL invalid", 400
+    capability = _platform.media_capability()
+    if not capability["available"]:
+        return None, capability["code"], 501
     try:
         cp = _run_subprocess(
             [*YTDLP_CMD, "--dump-single-json", "--flat-playlist", normalized],
@@ -9591,6 +9659,11 @@ def _queue_podcast_transcription(
     audio_path = Path(audio_path_raw)
     if not audio_path.is_file():
         return {"ok": False, "error": f"audio file missing: {audio_path}"}, 404
+    if _platform.sys.platform == "darwin" and language is not None and not isinstance(language, str):
+        return {"ok": False, "error": "language must be text when provided"}, 400
+    refusal = _platform.capability_refusal(_platform.media_capability())
+    if refusal is not None:
+        return refusal, 501
     with _jobs_lock:
         existing = next((
             _public_job(job) for job in _jobs.values()
@@ -9923,6 +9996,16 @@ class _ServerCaptureBackend(source_subscriptions.CaptureBackend):
             if not podcasts._is_http_url(meta.get("audio_url")):
                 return source_subscriptions.CaptureOutcome(
                     "preflight_failed", code="no_audio_url", terminal=True)
+            if _platform.sys.platform == "darwin" and _platform.mac_bundle_contents() is not None:
+                try:
+                    source_subscriptions.check_public_http_url(meta["audio_url"])
+                except source_subscriptions.ServiceError as error:
+                    return source_subscriptions.CaptureOutcome(
+                        "preflight_failed", code=error.code, terminal=True)
+            media = _platform.media_capability()
+            if not media["available"]:
+                return source_subscriptions.CaptureOutcome(
+                    "preflight_failed", code=media["code"], terminal=True)
             if not whisper_runner.is_whisperx_available():
                 return source_subscriptions.CaptureOutcome(
                     "preflight_failed", code="missing_transcription_setup")
@@ -9936,6 +10019,10 @@ class _ServerCaptureBackend(source_subscriptions.CaptureBackend):
         if not source_subscriptions._VIDEO_ID_RE.match(item.get("entry_id") or ""):
             return source_subscriptions.CaptureOutcome(
                 "preflight_failed", code="invalid_identity", terminal=True)
+        media = _platform.media_capability()
+        if not media["available"]:
+            return source_subscriptions.CaptureOutcome(
+                "preflight_failed", code=media["code"], terminal=True)
         return None
 
     def bind(self, conn, start, item, source):
@@ -9982,6 +10069,10 @@ class _ServerCaptureBackend(source_subscriptions.CaptureBackend):
                 downloaded = podcasts.download_episode_audio(
                     _get_index(), episode_id, data_root=DATA_ROOT)
             if not downloaded.get("ok"):
+                # The downloader validates the enclosure before testing media.
+                if _platform.sys.platform == "darwin" and downloaded.get("code") == "media_requires_ffmpeg":
+                    return source_subscriptions.CaptureOutcome(
+                        "failed", code="media_requires_ffmpeg", terminal=True)
                 code = "download_failed"
                 if downloaded.get("error") == "timeout":
                     code = "download_timeout"
@@ -10008,6 +10099,10 @@ class _ServerCaptureBackend(source_subscriptions.CaptureBackend):
     def _run_youtube(self, start, item, source):
         video_id = item["entry_id"]
         url = source_subscriptions.video_watch_url(video_id)
+        media = _platform.media_capability()
+        if not media["available"]:
+            return source_subscriptions.CaptureOutcome(
+                "failed", code=media["code"], terminal=True)
         start_id = start["start_id"]
         owner_token = start["owner_token"]
         # AS-02: the callback carries an explicit proof the backend verifies
@@ -10048,6 +10143,7 @@ class _ServerCaptureBackend(source_subscriptions.CaptureBackend):
                     release_locks = current.get("state") in (
                         "succeeded", "failed", "released")
                     return
+                _platform.require_media()
                 incarnation = source_subscriptions.process_incarnation(DATA_ROOT)
                 self._pacing.owner = (self, start)
                 with source_subscriptions.capture_context(start_id, incarnation):
@@ -10088,13 +10184,14 @@ class _ServerCaptureBackend(source_subscriptions.CaptureBackend):
                 # uncertain entry and verified executor completion. This retry
                 # cannot reopen a terminal start or reuse the worker's proof. Its
                 # separate Activity job and receipt record publication recovery.
-                code = ("publication_failed" if saved else
+                media_refused = isinstance(exc, _platform.MediaUnavailableError)
+                code = (exc.code if media_refused else "publication_failed" if saved else
                         "youtube_rate_limit" if _is_youtube_rate_limit(exc) else "download_failed")
                 if saved:
                     _record_single_extract_job(url, _now_iso(), result=saved)
                 try:
                     outcome = _source_service().fail_capture(
-                        start_id, owner_token, code, terminal=bool(saved), proof=proof)
+                        start_id, owner_token, code, terminal=bool(saved) or media_refused, proof=proof)
                     release_locks = source_subscriptions.settlement_releases_dispatcher_locks(
                         outcome)
                 except Exception:
@@ -10635,6 +10732,7 @@ def _create_playlist_job(playlist: dict, interval: int) -> tuple[str, dict]:
     Shared by the HTTP `/playlist/start` route and the MCP `uoink_playlist`
     tool so both entry points get identical job shapes and lifecycle.
     """
+    _platform.require_media()
     job_id = _make_job_id()
     title = playlist.get("title") or "YouTube Playlist"
     folder_slug = slugify(title) or "playlist"
@@ -11218,7 +11316,7 @@ def _mcp_initialize_result(body: dict) -> dict:
         "instructions": (
             "Uoink exposes local YouTube extraction tools. Outputs are stored "
             "under the user's Uoink output folder on this machine."
-        ),
+        ) + _platform.capability_notice(),
     }
 
 
@@ -11227,6 +11325,8 @@ def _mcp_stdio_command() -> tuple[str, list[str]]:
 
     Installed builds should use the bundled console `python.exe` for stdio;
     `pythonw.exe` has no standard streams and would break JSON-RPC.
+    On Darwin, python_command supplies Resources/Python/bin/python3 and
+    server_entry supplies -B -s, shared with the CLI and client recipes.
     """
     from uoink_connect import python_command, server_entry
     entry = server_entry("claude-desktop", HERE, python_command(HERE), _install_isolation.child_argv())
@@ -11278,6 +11378,10 @@ def _agent_client_specs() -> list[dict]:
     appdata = _env_dir("APPDATA") or (home / "AppData" / "Roaming")
     local = _env_dir("LOCALAPPDATA") or (home / "AppData" / "Local")
     code_user = appdata / "Code" / "User"
+    if sys.platform == "darwin":
+        appdata = home / "Library/Application Support"
+        local = home / "Applications"
+        code_user = appdata / "Code/User"
     return [
         {
             "name": "claude-desktop",
@@ -11502,6 +11606,13 @@ def _playlist_worker(job_id: str):
     public = _get_public_job(job_id)
     if not public:
         return
+    refusal = _platform.capability_refusal(_platform.media_capability())
+    if refusal is not None:
+        _update_job(job_id, state="failed", completed_at=_now_iso(),
+                    current_video=None, current_video_phase="capability",
+                    error=refusal["code"], error_detail=refusal["reason"],
+                    result=refusal, message=refusal["reason"])
+        return
     cancel_event = _job_cancel_event(job_id)
     used_slugs: set[str] = set()
 
@@ -11558,6 +11669,7 @@ def _playlist_worker(job_id: str):
             )
 
             try:
+                _platform.require_media()
                 metadata = _fetch_metadata(v["url"], cancel_event=cancel_event)
                 title = metadata.get("title") or current["title"] or "Untitled"
                 current["title"] = title
@@ -12052,6 +12164,7 @@ def _retry_pending_one() -> bool:
                                           and ownership.reused) else None
             try:
                 if result is None:
+                    _platform.require_media()
                     metadata = _fetch_metadata(url, cancel_event=cancel_event)
                     _raise_if_cancelled(cancel_event)
                     live_state = _detect_live_state(metadata)
@@ -12401,7 +12514,11 @@ def _build_diagnose_payload(*, public: bool, local_ui: bool = False) -> dict:
             "cannot be saved between sessions.")
 
     # 7. ffmpeg_available
-    status, detail = _probe_command(["ffmpeg", "-version"])
+    media = _platform.media_capability()
+    status, detail = (_probe_command([
+        _platform.media_binary("ffmpeg") if _platform.sys.platform == "darwin" else "ffmpeg", "-version"])
+                      if media["available"]
+                      else ("unavailable", f"{media['reason']} ({media['code']})"))
     if status == "ok":
         add("ffmpeg_available", "ok", "ffmpeg is available" if public else detail)
     else:
@@ -13234,6 +13351,9 @@ class Handler(BaseHTTPRequestHandler):
             body = path.read_bytes()
         except OSError:
             return self._send_json(404, {"ok": False, "error": "file not found"})
+        if sys.platform == "darwin" and path == DASHBOARD_PATH:
+            from helper.mac_ui import dashboard_html
+            body = dashboard_html(body)
         self.send_response(200)
         self.send_header("Content-Type", mime)
         self.send_header("Content-Length", str(len(body)))
@@ -13355,6 +13475,8 @@ class Handler(BaseHTTPRequestHandler):
                 # means staged Librarian work exists and no client holds a
                 # lease; the server never runs the Librarian itself.
                 "library": _library_health_payload(),
+                **({"capabilities": _platform.platform_capabilities()}
+                   if _platform.sys.platform == "darwin" else {}),
             })
         if bare == "/index/backfill-status":
             # Public, read-only progress counts (same posture as /health) so
@@ -13433,6 +13555,9 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_session_active()
         if bare == "/settings":
             return self._handle_settings_get()
+        if sys.platform == "darwin" and bare == "/helper/ui":
+            from helper.mac_ui import menu_state
+            return self._send_json(200, {"ok": True, **menu_state()})
         if bare.startswith("/discovery/runs/"):
             return self._handle_discovery_run_get(bare[len("/discovery/runs/"):])
         if bare == "/api/writer-peer/v1/status":
@@ -13665,7 +13790,14 @@ class Handler(BaseHTTPRequestHandler):
             else settings.get("output_dir") or str(DESKTOP_ROOT)
         )
         initial_dir = Path(initial_value).expanduser()
-        selected = _pick_output_folder(initial_dir)
+        if sys.platform == "darwin":
+            from helper.mac_ui import pick_folder
+            result = pick_folder(initial_dir)
+            if not result["ok"]:
+                return self._send_json(200, {**result, "settings": _public_settings(settings)})
+            selected = result["path"]
+        else:
+            selected = _pick_output_folder(initial_dir)
         if not selected:
             return self._send_json(200, {
                 "ok": False,
@@ -13675,6 +13807,14 @@ class Handler(BaseHTTPRequestHandler):
             })
         candidate, error = _validate_output_dir_value(selected)
         if error or candidate is None:
+            if sys.platform == "darwin":
+                return self._send_json(200, {
+                    "ok": False, "code": "folder_access_denied",
+                    "error": "Uoink cannot write to that folder. Allow access in System Settings > "
+                             "Privacy & Security > Files and Folders, or choose another folder. "
+                             "Your output folder has not changed.",
+                    "settings": _public_settings(settings),
+                })
             return self._send_json(400, {"ok": False, "error": error})
         settings["output_dir"] = str(candidate)
         settings["updated_at"] = _now_iso()
@@ -14967,6 +15107,8 @@ class Handler(BaseHTTPRequestHandler):
         return self._send_json(200, {
             "ok": True,
             "whisperx_available": whisper_runner.is_whisperx_available(),
+            **({"media_capability": _platform.media_capability()}
+               if _platform.sys.platform == "darwin" else {}),
             "selected_model": settings.get("whisper_model") or "base",
             "supported_models": list(whisper_runner._MODELS),
             "diarization_default": bool(settings.get("diarization_default")),
@@ -15929,7 +16071,9 @@ class Handler(BaseHTTPRequestHandler):
             allow_model_download=bool(body.get("allow_model_download")),
             force=bool(body.get("force")),
         )
-        self._send_json(200, result)
+        status = 501 if (_platform.sys.platform == "darwin"
+                         and result.get("code") == "media_requires_ffmpeg") else 200
+        self._send_json(status, result)
 
     def _handle_open_last_youtube(self):
         """Focus an existing YouTube browser window, else open youtube.com.
@@ -15959,10 +16103,35 @@ class Handler(BaseHTTPRequestHandler):
         threading.Thread(target=self.server.shutdown, daemon=True).start()
 
     def _handle_settings_post(self, body: dict):
-        with _settings_lock:
-            return self._handle_settings_post_locked(body)
+        self._mac_bootout_pending = False
+        try:
+            with _settings_lock:
+                return self._handle_settings_post_locked(body)
+        finally:
+            if self._mac_bootout_pending:
+                # Disabling login startup can stop this launchd-owned process.
+                # Flush the settings reply before unloading its service.
+                from helper import mac_lifecycle
+                try:
+                    self.wfile.flush()
+                finally:
+                    try:
+                        mac_lifecycle.disable_after_reply(HERE)
+                    except (OSError, ValueError, subprocess.SubprocessError) as exc:
+                        log.warning("Login startup disable failed; LaunchAgent retained: %s", exc)
 
     def _handle_settings_post_locked(self, body: dict):
+        defer_stop = sys.platform == "darwin" and body.get("autostart") is False
+        if defer_stop:
+            from helper import mac_lifecycle
+            try:
+                mac_lifecycle.check_disable(HERE)
+            except (OSError, ValueError, subprocess.SubprocessError) as exc:
+                return self._send_json(200, {"ok": False, "error": str(exc)})
+        if "library_mirror_enabled" in body or "library_mirror_consent" in body:
+            refusal = _platform.capability_refusal(_platform.library_mirror_capability())
+            if refusal is not None:
+                return self._send_json(501, refusal)
         boolean_fields = (
             "scrapecreators_enabled",
             "scrapecreators_agent_calls_enabled",
@@ -16090,7 +16259,8 @@ class Handler(BaseHTTPRequestHandler):
             if not isinstance(body.get("autostart"), bool):
                 return self._send_json(400, {
                     "ok": False, "error": "autostart must be boolean"})
-            if _set_autostart(body["autostart"]) is False:
+            changed = True if defer_stop else _set_autostart(body["autostart"])
+            if changed is False:
                 return self._send_json(200, {
                     "ok": False, "error": "autostart toggle failed"})
         if "obsidian_vault_path" in body:
@@ -16234,7 +16404,11 @@ class Handler(BaseHTTPRequestHandler):
         except OSError as e:
             log.warning("settings write failed: %s", e)
             return self._send_json(200, {"ok": False, "error": "settings write failed"})
-        self._send_json(200, {"ok": True, "settings": _public_settings(data)})
+        settings = _public_settings(data)
+        if defer_stop:
+            self._mac_bootout_pending = True
+            settings["autostart"] = False
+        self._send_json(200, {"ok": True, "settings": settings})
 
     # ---- /settings/test-key ----
     def _handle_settings_test_key(self, body: dict):
@@ -16535,7 +16709,7 @@ class Handler(BaseHTTPRequestHandler):
     # prompts without hunting through the project folder. Selected so the file
     # is highlighted (not just the parent folder opened).
     def _handle_open_prompts(self):
-        prompts_path = HERE / "extension" / "prompts.json"
+        prompts_path = _platform.editable_extension_dir(HERE, DATA_ROOT) / "prompts.json"
         if not prompts_path.exists():
             return self._send_json(200, {
                 "ok": False,
@@ -16556,7 +16730,7 @@ class Handler(BaseHTTPRequestHandler):
     # the extension ships inside the install dir (HERE), which sits outside
     # DESKTOP_ROOT by design.
     def _handle_open_extension(self):
-        ext_dir = HERE / "extension"
+        ext_dir = _platform.editable_extension_dir(HERE, DATA_ROOT)
         if not ext_dir.is_dir():
             return self._send_json(200, {
                 "ok": False,
@@ -17180,6 +17354,9 @@ class Handler(BaseHTTPRequestHandler):
         scope, allowlist, and this dashboard session. Same posture as
         /sources/consent-intent: origin/CSRF gate here; no registry tool
         can reach this route's authority."""
+        refusal = _platform.capability_refusal(_platform.library_mirror_capability())
+        if refusal is not None:
+            return self._send_json(501, refusal)
         if not self._is_dashboard_origin():
             log.info("POST %s rejected (origin=%r, sec-fetch-site=%r)",
                      LIBRARY_MIRROR_INTENT_ROUTE, self.headers.get("Origin"),
@@ -17245,6 +17422,9 @@ class Handler(BaseHTTPRequestHandler):
         """POST /library/mirror {op: preview|enable|disable|resync|status, ...}.
         Token-gated by do_POST. Enable/broaden consume a dashboard-minted
         user_intent_token and require a matching preview."""
+        refusal = _platform.capability_refusal(_platform.library_mirror_capability())
+        if refusal is not None:
+            return self._send_json(501, refusal)
         if not isinstance(body, dict):
             return self._send_json(400, {
                 "ok": False, "error": "arguments must be an object"})
@@ -17265,6 +17445,9 @@ class Handler(BaseHTTPRequestHandler):
         return self._library_mirror_enable(body)
 
     def _library_mirror_preview(self, body: dict):
+        refusal = _platform.capability_refusal(_platform.library_mirror_capability())
+        if refusal is not None:
+            return self._send_json(501, refusal)
         parsed, err = _parse_mirror_scope_args(body)
         if err or parsed is None:
             return self._send_json(400, {"ok": False, "error": err})
@@ -17291,6 +17474,9 @@ class Handler(BaseHTTPRequestHandler):
         })
 
     def _library_mirror_status(self):
+        refusal = _platform.capability_refusal(_platform.library_mirror_capability())
+        if refusal is not None:
+            return self._send_json(501, refusal)
         settings = _read_settings()
         consent = _normalize_mirror_consent(settings.get("library_mirror_consent"))
         enabled = settings.get("library_mirror_enabled") is True
@@ -17321,6 +17507,9 @@ class Handler(BaseHTTPRequestHandler):
         return self._send_json(200, result)
 
     def _library_mirror_resync(self):
+        refusal = _platform.capability_refusal(_platform.library_mirror_capability())
+        if refusal is not None:
+            return self._send_json(501, refusal)
         mirror = _library_mirror()
         if mirror is None:
             return self._send_json(200, {
@@ -17332,6 +17521,9 @@ class Handler(BaseHTTPRequestHandler):
         })
 
     def _library_mirror_disable(self):
+        refusal = _platform.capability_refusal(_platform.library_mirror_capability())
+        if refusal is not None:
+            return self._send_json(501, refusal)
         data = _read_settings()
         data["library_mirror_enabled"] = False
         data["updated_at"] = _now_iso()
@@ -17350,6 +17542,9 @@ class Handler(BaseHTTPRequestHandler):
         })
 
     def _library_mirror_enable(self, body: dict):
+        refusal = _platform.capability_refusal(_platform.library_mirror_capability())
+        if refusal is not None:
+            return self._send_json(501, refusal)
         token = body.get("user_intent_token")
         if not isinstance(token, str) or not token:
             return self._send_json(403, {
@@ -18058,6 +18253,15 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_agents_connect(bare)
         if bare == "/helper/quit":
             return self._handle_helper_quit()
+        if sys.platform == "darwin" and bare == "/helper/dashboard":
+            settings = isinstance(body, dict) and body.get("settings") is True
+            return self._send_json(200, {"ok": _spawn_dashboard_window(reason="native-ui", settings=settings)})
+        if sys.platform == "darwin" and bare == "/helper/ui":
+            from helper.mac_ui import menu_connected
+            connected = isinstance(body, dict) and menu_connected(body.get("pid"))
+            if connected:
+                log.info("menu bar connected (pid %s)", body["pid"])
+            return self._send_json(200 if connected else 409, {"ok": connected})
         if bare == "/facets/classify":
             return self._handle_facets_classify(body)
         if bare.startswith("/mcp/v1"):
@@ -18319,6 +18523,9 @@ class Handler(BaseHTTPRequestHandler):
         url, _interval, err, status = self._validate_playlist_body(body)
         if err:
             return self._send_json(status, {"ok": False, "error": err})
+        refusal = _platform.capability_refusal(_platform.media_capability())
+        if refusal is not None:
+            return self._send_json(501, refusal)
         playlist, err, status = _fetch_playlist_preview(url)
         if err:
             return self._send_json(status, {"ok": False, "error": err})
@@ -18329,6 +18536,9 @@ class Handler(BaseHTTPRequestHandler):
         url, interval, err, status = self._validate_playlist_body(body, require_interval=True)
         if err:
             return self._send_json(status, {"ok": False, "error": err})
+        refusal = _platform.capability_refusal(_platform.media_capability())
+        if refusal is not None:
+            return self._send_json(501, refusal)
         playlist, err, status = _fetch_playlist_preview(url)
         if err:
             return self._send_json(status, {"ok": False, "error": err})
@@ -18807,6 +19017,16 @@ class Handler(BaseHTTPRequestHandler):
             body["url"] = canonical
             return self._handle_extract(body)
 
+        if _platform.sys.platform == "darwin" and _platform.mac_bundle_contents() is not None:
+            try:
+                canonical = source_subscriptions.check_public_http_url(canonical)
+            except (source_subscriptions.ServiceError, urllib.error.URLError) as e:
+                return self._send_json(400, {"ok": False, "error": f"URL refused or unreachable: {e}",
+                                            "url": canonical, "platform": platform})
+        refusal = _platform.capability_refusal(_platform.media_capability())
+        if refusal is not None:
+            return self._send_json(501, refusal)
+
         # Generic path: metadata-only extraction. Best-effort -- if
         # yt-dlp doesn't support the URL we surface its error verbatim
         # so the user gets a useful message rather than a generic 500.
@@ -19080,6 +19300,9 @@ class Handler(BaseHTTPRequestHandler):
             return self._send_json(400, {"ok": False, "error": str(e)})
 
         # Waiting for the capture lock until the `with` below takes it.
+        refusal = _platform.capability_refusal(_platform.media_capability())
+        if refusal is not None:
+            return self._send_json(501, refusal)
         _live_extract_begin(url, body.get("capture_ref"))
         log.info("POST /extract url=%s interval=%d long_video_mode=%s -> running",
                  url, interval, long_video_mode)
@@ -19260,6 +19483,9 @@ class Handler(BaseHTTPRequestHandler):
                 "error": f"session '{session_id}' is {session.get('status')}, not open",
             })
 
+        refusal = _platform.capability_refusal(_platform.media_capability())
+        if refusal is not None:
+            return self._send_json(501, refusal)
         log.info("POST /session/add session=%s url=%s -> running", session_id, url)
         sess_folder = _session_folder(session_id)
         # Fetch metadata once; source identity disambiguates same-title videos.
@@ -19569,15 +19795,17 @@ def _bundled_interpreter(*, gui: bool) -> Path | None:
     dev checkout (no bundled ``python/`` dir), so callers fall back to
     ``sys.executable`` or a browser tab.
 
-    Windows installer layout: ``python\\pythonw.exe`` (gui=True, no console
-    flash) or ``python\\python.exe``. A future macOS ``.app`` bundle ships a
-    relocatable Python at ``python/bin/python3`` -- there is no windowless
-    variant because a ``.app``-launched child has no console to flash, so
-    ``gui`` is ignored off Windows. This is the single place that encodes
-    "where is the bundled interpreter". It is Windows-behaviour-identical: the
-    darwin/linux branch can only match when a Mac/Linux bundle actually exists
-    on disk, which never happens on a Windows install. The macOS branch needs
-    Mac runtime verification -- see docs/MAC-BUILD-PLAN.md."""
+    Windows uses bundled python.exe or pythonw.exe. Darwin app resources
+    resolve Contents/Resources/Python/bin/python3 from the running interpreter;
+    Linux layouts retain python/bin/python3. The GUI flag is ignored off Windows.
+    Hosted bundle verification is described in docs/mac/BUILD.md.
+    """
+    if sys.platform == "darwin":
+        contents = _platform.mac_bundle_contents()
+        if contents is None:
+            return None
+        candidate = contents / _platform.MAC_BUNDLE_PYTHON
+        return candidate if candidate.is_file() else None
     base = HERE / "python"
     if sys.platform == "win32":
         exe = base / ("pythonw.exe" if gui else "python.exe")
@@ -19593,9 +19821,16 @@ def _is_installed_layout() -> bool:
     return _bundled_interpreter(gui=True) is not None
 
 
-def _spawn_dashboard_window(*, reason: str) -> bool:
+def _spawn_dashboard_window(*, reason: str, settings: bool = False) -> bool:
     """Open the local dashboard window without making the helper re-bind."""
     try:
+        # Source checkouts on macOS keep the script path below; the bundle
+        # spawner requires the installed app's interpreter.
+        if sys.platform == "darwin" and _platform.mac_bundle_contents() is not None:
+            from helper.mac_ui import spawn
+            spawn("uoink_dashboard", _install_isolation.helper_url("/dashboard") + ("#settings" if settings else ""))
+            log.info("dashboard: spawned (%s)", reason)
+            return True
         script = HERE / "uoink_dashboard.py"
         if script.exists():
             exe = _bundled_interpreter(gui=True) or Path(sys.executable)
@@ -19614,12 +19849,23 @@ def _spawn_dashboard_window(*, reason: str) -> bool:
         log.warning("dashboard: window spawn failed (%s): %s", reason, e)
 
     try:
-        webbrowser.open(_install_isolation.helper_url("/dashboard"))
+        url = _install_isolation.helper_url("/dashboard")
+        if sys.platform == "darwin" and settings:
+            url += "#settings"
+        webbrowser.open(url)
         log.info("dashboard: opened browser fallback (%s)", reason)
         return True
     except Exception as e:
         log.warning("dashboard: browser fallback failed (%s): %s", reason, e)
         return False
+
+
+def _refuse_live_listener(address) -> None:
+    """Raise EADDRINUSE when something already accepts connections on address."""
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as probe:
+        probe.settimeout(1.0)
+        if probe.connect_ex(address) == 0:
+            raise OSError(errno.EADDRINUSE, f"live listener on {address[0]}:{address[1]}")
 
 
 class _YoinkHTTPServer(ThreadingHTTPServer):
@@ -19631,10 +19877,25 @@ class _YoinkHTTPServer(ThreadingHTTPServer):
 
     def server_bind(self):
         if _install_isolation.current_binding() is not None:
-            self.allow_reuse_address = False
+            if sys.platform == "darwin":
+                # macOS SO_REUSEADDR only permits a bind over the TIME_WAIT
+                # sockets a quit helper leaves for ~30 s; it never lets two
+                # listeners share an address. BSD reuse could shadow a wildcard
+                # listener, so any live listener is still refused here.
+                _refuse_live_listener(self.server_address)
+            else:
+                self.allow_reuse_address = False
             if hasattr(socket, "SO_EXCLUSIVEADDRUSE"):
                 self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_EXCLUSIVEADDRUSE, 1)
-        super().server_bind()
+        if sys.platform == "darwin":
+            # HTTPServer calls getfqdn(), which can block boot on the runner's
+            # reverse DNS. This loopback service needs no DNS-derived name.
+            from socketserver import TCPServer
+            TCPServer.server_bind(self)
+            self.server_name = "localhost"
+            self.server_port = self.server_address[1]
+        else:
+            super().server_bind()
 
 
 def main(*, show_dashboard: bool = False):
@@ -19673,6 +19934,12 @@ def main(*, show_dashboard: bool = False):
     # active output root to %LOCALAPPDATA%\Uoink\output before the first
     # /extract would try to write to it.
     _apply_output_root_fallback()
+
+    if sys.platform == "darwin":
+        try:
+            _platform.editable_extension_dir(HERE, DATA_ROOT)
+        except OSError as exc:
+            log.warning("Chrome extension copy could not be prepared: %s", exc)
 
     # Bind FIRST. Writing the PID file before the bind would create stale
     # files when another instance still owns the port (and would also have
@@ -19748,7 +20015,8 @@ def main(*, show_dashboard: bool = False):
 
     # Bind succeeded -- now safe to claim the PID file.
     isolated = _install_isolation.current_binding()
-    pid_file = isolated.pid_path if isolated is not None else HERE / "server.pid"
+    pid_file = (isolated.pid_path if isolated is not None
+                else _platform.app_state_path(HERE, DATA_ROOT, "server.pid"))
     try:
         pid_file.write_text(str(os.getpid()), encoding="utf-8")
     except OSError:
@@ -19773,6 +20041,14 @@ def main(*, show_dashboard: bool = False):
             server.server_close()
             sys.exit(1)
         atexit.register(lambda binding=isolated: binding.identity_path.unlink(missing_ok=True))
+    elif sys.platform == "darwin":
+        try:
+            identity_file = _platform.write_darwin_identity(DATA_ROOT, HERE / "server.py")
+        except OSError as e:
+            log.error("Darwin identity write failed: %s", e)
+            server.server_close()
+            sys.exit(1)
+        atexit.register(lambda: identity_file.unlink(missing_ok=True))
 
     # S6: advertise only the resident address and bounded capabilities.
     # The lease is deliberately token-free and non-executable; credentials
@@ -19804,7 +20080,8 @@ def main(*, show_dashboard: bool = False):
     # spawns a tray. Runs in a daemon thread; any failure (no pystray, no
     # system tray) degrades to "no tray, server still runs" -- the boot balloon
     # below is the fallback "it's running" affordance.
-    if _is_installed_layout():
+    # Darwin owns AppKit in separate processes with parent-death lifelines.
+    if _is_installed_layout() and sys.platform != "darwin":
         try:
             import uoink_tray
 
@@ -19851,6 +20128,23 @@ def main(*, show_dashboard: bool = False):
     else:
         splash_spawned = False
 
+    if sys.platform == "darwin" and _is_installed_layout():
+        from helper import mac_ui
+        try:
+            child = mac_ui.start_menu(host=HOST, port=PORT, version=VERSION,
+                                      token_path=TOKEN_PATH, output_dir=DESKTOP_ROOT,
+                                      data_root=DATA_ROOT)
+            log.info("menu bar spawned (pid %s)", child.pid)
+        except Exception as exc:
+            log.warning("menu bar could not start: %s", exc)
+        try:
+            if _splash_should_spawn(DATA_ROOT / ".first-run-done"):
+                mac_ui.spawn("uoink_splash")
+                splash_spawned = True
+                log.info("splash: spawned (version %s)", VERSION)
+        except Exception as exc:
+            log.warning("splash: failed to spawn (non-fatal): %s", exc)
+
     if show_dashboard:
         _spawn_dashboard_window(reason="launch-flag")
 
@@ -19871,11 +20165,24 @@ def main(*, show_dashboard: bool = False):
             "Click the rust U under any YouTube video to pull context. "
             "Open the dashboard anytime from the magnet-U in your system tray.",
         )
+    if sys.platform == "darwin" and threading.current_thread() is threading.main_thread():
+        import signal
+        # launchctl bootout and verified uninstall send SIGTERM. Let main return
+        # so atexit removes the identity and owned-child lifelines close.
+        try:
+            signal.signal(signal.SIGTERM, lambda *_: threading.Thread(target=server.shutdown, daemon=True).start())
+        except ValueError:
+            # A subinterpreter also has a main_thread(), but CPython permits
+            # signal handlers only in the main interpreter. Leave it unchanged.
+            pass
     try:
         server.serve_forever()
     except KeyboardInterrupt:
         log.info("Shutting down.")
     finally:
+        if sys.platform == "darwin":
+            from helper.mac_ui import close_children
+            close_children()
         _remove_suite_lease()
         server.server_close()
 
@@ -20358,6 +20665,14 @@ def run_cli(argv: list[str]) -> int:
     if _install_isolation.CLI_STOP in argv or _install_isolation.CLI_UPGRADE_CHECK in argv:
         return _install_isolation.cli(argv)
     argv = _install_isolation.strip_cli(argv)
+    if argv and argv[0] == "status" and _platform.sys.platform == "darwin":
+        payload = _helper_health_status()
+        payload["capabilities"] = _platform.platform_capabilities()
+        _print_json(payload)
+        return 0 if payload.get("ok") else 1
+    if argv and argv[0] == "mirror" and not _platform.library_mirror_capability()["available"]:
+        _print_json(_platform.capability_refusal(_platform.library_mirror_capability()))
+        return 1
     if argv and argv[0] == "doctor":
         argv = ["--doctor", *argv[1:]]
     elif argv and argv[0] == "rebuild-index":

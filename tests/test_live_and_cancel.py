@@ -504,8 +504,11 @@ def test_cancel_racing_with_settlement_keeps_cancelled_row(retry, monkeypatch, o
 
 @pytest.mark.parametrize("cancel", [False, True])
 @pytest.mark.parametrize("outcome", ["success", "failure", "final_rate_limit", "conflict"])
+@pytest.mark.parametrize("platform", ["win32", "linux", "darwin"])
 def test_terminal_settlement_errors_preserve_activity_unless_cancelled(
-        retry, monkeypatch, caplog, outcome, cancel):
+        retry, monkeypatch, caplog, outcome, cancel, platform):
+    monkeypatch.setattr(retry.scope["_platform"], "sys",
+                        SimpleNamespace(platform=platform, executable=str(ROOT / "dev-python")))
     attempts_before = 2 if outcome == "final_rate_limit" else 0
     pending_id = _enqueue(retry, attempts=attempts_before)
     retry.record.side_effect = retry.real_record
@@ -561,6 +564,26 @@ def test_terminal_settlement_errors_preserve_activity_unless_cancelled(
         retry.extract.assert_not_called()
     elif outcome == "failure":
         assert job["error"] == "injected extraction failure"
+
+
+def test_retry_reports_missing_bundle_media_before_metadata(retry, monkeypatch, tmp_path):
+    platform = retry.scope["_platform"]
+    monkeypatch.setattr(platform, "sys", SimpleNamespace(platform="darwin",
+        executable=str(tmp_path / "Uoink.app/Contents/Resources/Python/bin/python3")))
+    # Exercise the real translation too; the retry fixture normally uses str.
+    _load(ROOT / "server.py", {"friendly_error"}, retry.scope)
+    retry.record.side_effect = retry.real_record
+    _enqueue(retry)
+    assert retry.run() is True
+    retry.scope["_fetch_metadata"].assert_not_called()
+    retry.extract.assert_not_called()
+    assert _row(retry)["status"] == "failed"
+    assert _row(retry)["last_error"].startswith("media_requires_ffmpeg:")
+    assert retry.idx._pending_cancel_events == {}
+    job, = retry.scope["_jobs"].values()
+    assert job["state"] == "failed"
+    assert job["error"].startswith("media_requires_ffmpeg:")
+    assert not retry.folder.exists()
 
 
 @pytest.mark.parametrize("phase", ["media", "screenshots", "before_publication", "publish_rename"])

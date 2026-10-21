@@ -5,6 +5,9 @@ from __future__ import annotations
 import json
 import re
 from pathlib import Path
+from types import SimpleNamespace
+
+import pytest
 
 import server
 import uoink_mcp
@@ -111,7 +114,9 @@ def test_discovery_docs_describe_http_intent_authority_without_click_proof() -> 
     assert "does not prove a human clicked" in handler
 
 
-def test_documented_ping_keys_match_the_real_handler(monkeypatch) -> None:
+@pytest.mark.parametrize("platform", ["win32", "linux", "darwin"])
+def test_documented_ping_keys_match_the_real_handler(monkeypatch, platform) -> None:
+    monkeypatch.setattr(server._platform, "sys", SimpleNamespace(platform=platform))
     monkeypatch.setattr(server, "_read_settings", lambda: {})
     monkeypatch.setattr(
         server.whisper_runner, "is_whisperx_available", lambda: False
@@ -163,7 +168,11 @@ def test_documented_ping_keys_match_the_real_handler(monkeypatch) -> None:
         match = re.search(pattern, text, re.DOTALL)
         assert match is not None, f"{path.name} has no public-probe JSON schema"
         documented = json.loads(match.group(1))
-        assert set(documented) == set(probe.payload), path
+        expected = set(documented) | ({"capabilities"} if platform == "darwin" else set())
+        assert expected == set(probe.payload), path
+        if platform == "darwin":
+            assert probe.payload["capabilities"] == server._platform.platform_capabilities()
+            assert "macOS" in text and "`capabilities`" in text
         assert set(documented["path_integrity"]) == set(
             probe.payload["path_integrity"]
         ), path

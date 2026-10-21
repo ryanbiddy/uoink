@@ -1,0 +1,19 @@
+{
+  "pins": ["first==1.0", "missing==2.0", "last==3.0", "pywin32==312"],
+  "exclusions": {"pywin32": "Windows Win32 API bindings"},
+  "wheel_names": {
+    "first==1.0": "first-1.0-cp313-cp313-macosx_14_0_arm64.whl",
+    "last==3.0": "last-3.0-py3-none-any.whl"
+  },
+  "release": {
+    "tag_name": "20261001",
+    "html_url": "https://example.invalid/release",
+    "assets": [
+      {"name": "cpython-3.13.15+20261001-aarch64-apple-darwin-install_only.tar.gz", "size": 7, "browser_download_url": "https://example.invalid/python"},
+      {"name": "cpython-3.13.15+20261001-aarch64-apple-darwin-install_only_stripped.tar.gz", "size": 7, "browser_download_url": "https://example.invalid/stripped"},
+      {"name": "cpython-3.13.15+20261001-x86_64-apple-darwin-install_only.tar.gz"},
+      {"name": "cpython-3.12.9+20261001-aarch64-apple-darwin-install_only.tar.gz"},
+      {"name": "cpython-3.13.15+20261001-aarch64-apple-darwin-debug-full.tar.zst"}
+    ]
+  }
+}

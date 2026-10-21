@@ -1,0 +1,277 @@
+name: macOS qualification
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - 'mac/**'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mac-qualify-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+# Keep qualification separate from every required job in ci.yml.
+# macos-15 is the explicit Apple Silicon image; each job also asserts arm64.
+# macOS 15 is the supported floor. The 14 wheel probe is diagnostic only.
+env:
+  PYTHONDONTWRITEBYTECODE: '1'
+  PYTHONNOUSERSITE: '1'
+  PIP_DISABLE_PIP_VERSION_CHECK: '1'
+  PIP_NO_INPUT: '1'
+
+jobs:
+  portable-tests:
+    name: portable tests (Python ${{ matrix.python }})
+    runs-on: macos-15
+    timeout-minutes: 45
+    continue-on-error: true
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ['3.11', '3.13']
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python }}
+          architecture: arm64
+      - name: Establish disposable home before suite imports
+        run: bash scripts/mac/runner-env.sh suite
+      - name: Record runner and Python
+        run: bash scripts/mac/runner-info.sh "$RUNNER_TEMP/mac-evidence/environment.txt"
+      - name: Install the existing stdlib suite dependencies
+        run: |
+          python -m pip install --require-hashes --only-binary=:all: -r scripts/mac/build-tooling.txt
+          python -m pip install -r scripts/mac/portable-tests.txt
+      - name: Run the portable suite
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+        run: pytest tests/ -q -rfE --junitxml="$RUNNER_TEMP/mac-evidence/pytest.xml"
+      - name: Record installed versions
+        if: always()
+        run: python -m pip freeze --all | tee "$RUNNER_TEMP/mac-evidence/pip-freeze.txt"
+      - name: Upload portable evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mac-portable-py${{ matrix.python }}
+          path: ${{ runner.temp }}/mac-evidence/
+          if-no-files-found: error
+          retention-days: 14
+
+  dependency-graph:
+    name: dependency graph
+    runs-on: macos-15
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+          architecture: arm64
+      - name: Establish disposable profile before imports
+        run: bash scripts/mac/runner-env.sh
+      - name: Record runner and Python
+        run: bash scripts/mac/runner-info.sh "$RUNNER_TEMP/mac-evidence/environment.txt"
+      - name: Install hash-pinned build tooling
+        run: >-
+          python -m pip install --require-hashes --only-binary=:all: -r scripts/mac/build-tooling.txt
+      - name: Build pinned source wheels, probe every pin and resolve the graph
+        id: wheels
+        continue-on-error: true
+        run: python scripts/mac/qualify_deps.py wheels --output "$RUNNER_TEMP/mac-evidence/deps"
+      - name: Download and hash standalone Python candidates
+        id: standalone
+        if: ${{ !cancelled() }}
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python scripts/mac/qualify_deps.py standalone --output "$RUNNER_TEMP/mac-evidence/standalone"
+      - name: Record installed versions
+        if: always()
+        run: python -m pip freeze --all | tee "$RUNNER_TEMP/mac-evidence/pip-freeze.txt"
+      - name: Upload dependency reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mac-dependency-evidence
+          path: |
+            ${{ runner.temp }}/mac-evidence/environment.txt
+            ${{ runner.temp }}/mac-evidence/pip-freeze.txt
+            ${{ runner.temp }}/mac-evidence/deps/*.json
+            ${{ runner.temp }}/mac-evidence/deps/*.txt
+            ${{ runner.temp }}/mac-evidence/deps/logs/
+            ${{ runner.temp }}/mac-evidence/standalone/*.json
+          if-no-files-found: error
+          retention-days: 14
+      - name: Upload wheels and verified inventory for import smoke
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mac-qualified-wheels
+          path: ${{ runner.temp }}/mac-evidence/deps/wheels/
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 3
+      - name: Surface incomplete dependency qualification
+        if: ${{ !cancelled() && (steps.wheels.outcome != 'success' || steps.standalone.outcome != 'success') }}
+        run: exit 1
+
+  mac-build:
+    name: ad-hoc arm64 app and DMG
+    needs: dependency-graph
+    runs-on: macos-15
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+          architecture: arm64
+      - name: Establish disposable profile before imports
+        run: bash scripts/mac/runner-env.sh
+      - name: Record runner, SDK and Python
+        run: |
+          bash scripts/mac/runner-info.sh "$RUNNER_TEMP/mac-evidence/environment.txt"
+          xcrun --show-sdk-version >> "$RUNNER_TEMP/mac-evidence/environment.txt"
+          clang --version >> "$RUNNER_TEMP/mac-evidence/environment.txt"
+      - uses: actions/download-artifact@v4
+        with:
+          name: mac-qualified-wheels
+          path: ${{ runner.temp }}/mac-wheels
+      - name: Install hash-pinned build tooling
+        run: >-
+          python -m pip install --require-hashes --only-binary=:all: -r scripts/mac/build-tooling.txt
+      - name: Key FFmpeg cache by verified pins, configure flags and toolchain
+        id: ffmpeg-key
+        run: |
+          echo "recipe=$(python -B scripts/mac/build_ffmpeg.py --cache-key)" >> "$GITHUB_OUTPUT"
+          echo "toolchain=$( { xcrun --show-sdk-version; clang --version; } | shasum -a 256 | cut -d ' ' -f 1)" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/mac-ffmpeg
+          key: ffmpeg-macos15-arm64-floor15-${{ steps.ffmpeg-key.outputs.recipe }}-${{ steps.ffmpeg-key.outputs.toolchain }}
+      - name: Build pinned LGPL FFmpeg or verify cached output
+        run: python -B scripts/mac/build_ffmpeg.py --output "$RUNNER_TEMP/mac-ffmpeg"
+      - name: Assemble pinned payload and inventory native loaders
+        run: bash build-mac.sh --wheels "$RUNNER_TEMP/mac-wheels" --output "$RUNNER_TEMP/mac-app" --ffmpeg-output "$RUNNER_TEMP/mac-ffmpeg"
+      - name: Smoke relocated bundle and verify immutable tree
+        run: python -B scripts/mac/bundle_smoke.py --app "$RUNNER_TEMP/mac-app/Uoink.app" --output "$RUNNER_TEMP/mac-evidence/bundle-smoke"
+      - name: Build and validate the Darwin MCPB
+        run: python -B scripts/mac/build_mcpb.py --output "$RUNNER_TEMP/mac-app"
+      - name: Install DMG copy and prove Cocoa imports, menu connection, duplicate launch and Quit
+        run: |
+          version="$(cat VERSION)"
+          python -B scripts/mac/dmg_smoke.py \
+            --dmg "$RUNNER_TEMP/mac-app/Uoink-$version-macos-arm64.dmg" \
+            --mcpb "$RUNNER_TEMP/mac-app/uoink-$version-macos.mcpb" \
+            --output "$RUNNER_TEMP/mac-evidence/dmg-smoke"
+      - name: Collect installed receipt bound to this DMG
+        run: |
+          version="$(cat VERSION)"
+          dmg="$RUNNER_TEMP/mac-app/Uoink-$version-macos-arm64.dmg"
+          digest="$(shasum -a 256 "$dmg" | cut -d ' ' -f 1)"
+          python -B scripts/mac/receipt.py --dmg "$dmg" \
+            --expected-sha256 "$digest" --output "$RUNNER_TEMP/mac-receipt"
+          python -c 'import json,sys; r=json.load(open(sys.argv[1])); sys.exit(0 if r["verdict"] == "installed-pass" else 1)' \
+            "$RUNNER_TEMP/mac-receipt/receipt.json"
+      - name: Upload installed receipt even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mac-install-receipt
+          path: ${{ runner.temp }}/mac-receipt/receipt.json
+          if-no-files-found: error
+          retention-days: 14
+      - name: Upload app archive, DMG and Darwin connector
+        uses: actions/upload-artifact@v4
+        with:
+          name: uoink-macos-arm64-adhoc
+          path: |
+            ${{ runner.temp }}/mac-app/*.tar.gz
+            ${{ runner.temp }}/mac-app/*.dmg
+            ${{ runner.temp }}/mac-app/*.mcpb
+            ${{ runner.temp }}/mac-app/dmg.json
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 7
+      - name: Upload build evidence and resolved hash lock
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mac-build-evidence
+          path: |
+            ${{ runner.temp }}/mac-evidence/
+            ${{ runner.temp }}/mac-app/*.json
+            ${{ runner.temp }}/mac-ffmpeg/notices/
+            ${{ runner.temp }}/mac-ffmpeg/cache.json
+            ${{ runner.temp }}/mac-app/Uoink.app/Contents/Resources/notices/torchcodec.json
+            ${{ runner.temp }}/mac-wheels/requirements-macos-arm64-lock.txt
+            ${{ runner.temp }}/mac-wheels/resolved-wheels.json
+          if-no-files-found: error
+          retention-days: 14
+
+  import-smoke:
+    name: import smoke
+    needs: dependency-graph
+    if: ${{ always() && !cancelled() }}
+    runs-on: macos-15
+    timeout-minutes: 20
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+          architecture: arm64
+      - name: Establish disposable profile before imports
+        run: bash scripts/mac/runner-env.sh
+      - name: Record runner and Python
+        run: bash scripts/mac/runner-info.sh "$RUNNER_TEMP/mac-evidence/environment.txt"
+      - name: Fetch the wheels and inventory from Job B
+        uses: actions/download-artifact@v4
+        with:
+          name: mac-qualified-wheels
+          path: ${{ runner.temp }}/mac-wheels
+      - name: Create a fresh venv
+        run: |
+          python -m pip install --require-hashes --only-binary=:all: -r scripts/mac/build-tooling.txt
+          python -m venv "$RUNNER_TEMP/mac-smoke-venv"
+          "$RUNNER_TEMP/mac-smoke-venv/bin/python" -m pip install --require-hashes --only-binary=:all: -r scripts/mac/build-tooling.txt
+      - name: Verify the complete wheel set, install and exercise imports and stdio
+        run: >-
+          python scripts/mac/import_smoke.py
+          --python "$RUNNER_TEMP/mac-smoke-venv/bin/python"
+          --wheels "$RUNNER_TEMP/mac-wheels"
+          --output "$RUNNER_TEMP/mac-evidence/smoke"
+      - name: Record installed versions
+        if: always()
+        run: |
+          if [ -x "$RUNNER_TEMP/mac-smoke-venv/bin/python" ]; then
+            "$RUNNER_TEMP/mac-smoke-venv/bin/python" -m pip freeze --all | tee "$RUNNER_TEMP/mac-evidence/pip-freeze.txt"
+          else
+            python -m pip freeze --all | tee "$RUNNER_TEMP/mac-evidence/pip-freeze.txt"
+          fi
+      - name: Upload import and protocol evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mac-import-smoke
+          path: ${{ runner.temp }}/mac-evidence/
+          if-no-files-found: error
+          retention-days: 14

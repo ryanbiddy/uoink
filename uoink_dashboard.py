@@ -24,6 +24,10 @@ import time
 import webbrowser
 from pathlib import Path
 
+if sys.platform == "darwin":
+    sys.dont_write_bytecode = True
+    os.environ["PYTHONDONTWRITEBYTECODE"] = "1"
+
 log = logging.getLogger("uoink.dashboard")
 
 HERE = Path(__file__).parent.resolve()
@@ -63,6 +67,12 @@ class JsApi:
         except Exception as e:
             log.debug("open_url failed: %s", e)
         return True
+
+
+class MacJsApi(JsApi):
+    def copy_text(self, text):
+        from helper.mac_ui import copy_text
+        return copy_text(text)
 
 
 def _apply_windows_icon_once() -> bool:
@@ -142,6 +152,20 @@ def _brand_windows_icon_when_ready() -> None:
 
 def main() -> int:
     target_url = _target_url()
+    if sys.platform == "darwin":
+        from helper.mac_ui import watch_parent
+        watch_parent()
+        try:
+            import webview
+            # Fail before making a window if the Cocoa backend cannot import.
+            import webview.platforms.cocoa  # noqa: F401
+            webview.create_window("Uoink", target_url, width=WIDTH, height=HEIGHT,
+                                  resizable=True, js_api=MacJsApi())
+            webview.start(gui="cocoa")
+        except Exception as exc:
+            log.warning("Cocoa dashboard unavailable; opening browser: %s", exc)
+            webbrowser.open(target_url)
+        return 0
     try:
         import webview
     except Exception as e:

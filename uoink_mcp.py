@@ -39,6 +39,10 @@ import time
 from pathlib import Path
 from typing import Literal
 
+if sys.platform == "darwin":
+    sys.dont_write_bytecode = True
+    os.environ["PYTHONDONTWRITEBYTECODE"] = "1"
+
 # CRIT-1 (C-01): the installer bundles the embeddable Windows Python, whose
 # ._pth locks sys.path to the interpreter's own directory and never adds the
 # script's folder. Every MCP client launch therefore died on
@@ -153,7 +157,7 @@ mcp = RegistryMCP(
         "Uoink turns videos, playlists, and podcast episodes into local "
         "AI-ready corpora. Use the tools to capture, transcribe, publish, "
         "search, inspect, and analyze saved uoinks."
-    ),
+    ) + server._platform.capability_notice(),
 )
 # FastMCP defaults initialize.serverInfo.version to the MCP SDK's version,
 # which makes client logs identify the dependency rather than this product.
@@ -637,6 +641,8 @@ def _register_phase4_stdio() -> None:
         active = reader()
         envelope = library_resources.call_tool(name, arguments if arguments is not None else {}, active,
                                                client_identity="stdio")
+        if name == "publish_library_brief" and not server._platform.library_mirror_capability()["available"]:
+            envelope["capabilities"] = server._platform.platform_capabilities()
         text = library_resources.render_tool_text(envelope)
         is_error = envelope.get("ok") is not True
         payload = {"content": [{"type": "text", "text": text}], "isError": is_error}
@@ -670,6 +676,8 @@ def _register_phase4_stdio() -> None:
         try:
             with library_analysis.adapter_admission():
                 envelope = library_analysis.get_library_activity(args)
+                if not server._platform.library_mirror_capability()["available"]:
+                    envelope["capabilities"] = server._platform.platform_capabilities()
                 if envelope.get("ok") is not True:
                     text = library_resources.render_tool_text(envelope)
                     if time.monotonic() - start_time > library_analysis.SERVICE_DEADLINE_SEC:

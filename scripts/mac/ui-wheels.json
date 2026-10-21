@@ -1,0 +1,27 @@
+{
+  "pyobjc-core": {
+    "version": "12.2.2",
+    "filename": "pyobjc_core-12.2.2-cp313-cp313-macosx_10_13_universal2.whl",
+    "sha256": "950bd2d9c74634398c4e3d24ef2f213d4e23d705083697464fa67afedc53c1ad"
+  },
+  "pyobjc-framework-cocoa": {
+    "version": "12.2.2",
+    "filename": "pyobjc_framework_cocoa-12.2.2-cp313-cp313-macosx_10_13_universal2.whl",
+    "sha256": "600b1723184ca094931330e79355274949965460e23de38628d601b5a967baf9"
+  },
+  "pyobjc-framework-quartz": {
+    "version": "12.2.2",
+    "filename": "pyobjc_framework_quartz-12.2.2-cp313-cp313-macosx_10_13_universal2.whl",
+    "sha256": "0ec9751904ef975bf0789d760dc4fadcb400edc4ffe4a736eb54971968babe5c"
+  },
+  "pyobjc-framework-webkit": {
+    "version": "12.2.2",
+    "filename": "pyobjc_framework_webkit-12.2.2-cp313-cp313-macosx_10_13_universal2.whl",
+    "sha256": "206f88451e1c3e152c72c16c2af2664646cd752a3007c9cda8029a9e3f0ec9a4"
+  },
+  "pyobjc-framework-security": {
+    "version": "12.2.2",
+    "filename": "pyobjc_framework_security-12.2.2-cp313-cp313-macosx_10_13_universal2.whl",
+    "sha256": "ca580d5f56e1222d63f1322a4fbf63be0bad77e77cca084290310df007b3fdde"
+  }
+}

@@ -636,7 +636,7 @@ def test_long_topic_and_63_character_slug_keep_all_staged_paths_under_max_path(
         refresh, monkeypatch, mode, rollback):
     # A short disposable root makes this test independent of pytest's own
     # potentially long basetemp. The final JSON path is 259 characters.
-    with tempfile.TemporaryDirectory(prefix="sr-", dir=ROOT) as temporary:
+    with tempfile.TemporaryDirectory(prefix="sr-") as temporary:
         root = Path(temporary)
         slug = "Long_video_" + "x" * 52
         assert len(slug) == 63
@@ -646,7 +646,7 @@ def test_long_topic_and_63_character_slug_keep_all_staged_paths_under_max_path(
         folder.parent.mkdir()
         old_name = refresh.folder.name
         # The capture lives under pytest's basetemp; on CI that can be a different
-        # drive from ROOT, where os.rename fails with WinError 17.
+        # drive from the short temp root, where os.rename fails with WinError 17.
         shutil.move(str(refresh.folder), str(folder))
         for suffix in (".md", ".json"):
             (folder / f"{old_name}{suffix}").rename(folder / f"{slug}{suffix}")
@@ -699,7 +699,7 @@ def test_long_topic_and_63_character_slug_keep_all_staged_paths_under_max_path(
 @pytest.mark.parametrize("failure", ["publish", "index"])
 def test_long_media_artifact_backup_does_not_exceed_original_path_length(
         refresh, monkeypatch, failure):
-    with tempfile.TemporaryDirectory(prefix="sr-", dir=ROOT) as temporary:
+    with tempfile.TemporaryDirectory(prefix="sr-") as temporary:
         root = Path(temporary)
         slug = "Long_video_" + "x" * 52
         topic_length = 175 - len(str(root)) - len(slug) - 2
@@ -708,7 +708,7 @@ def test_long_media_artifact_backup_does_not_exceed_original_path_length(
         folder.parent.mkdir()
         old_name = refresh.folder.name
         # The capture lives under pytest's basetemp; on CI that can be a different
-        # drive from ROOT, where os.rename fails with WinError 17.
+        # drive from the short temp root, where os.rename fails with WinError 17.
         shutil.move(str(refresh.folder), str(folder))
         for suffix in (".md", ".json"):
             (folder / f"{old_name}{suffix}").rename(folder / f"{slug}{suffix}")

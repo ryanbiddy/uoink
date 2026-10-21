@@ -14,7 +14,7 @@ Outputs (per video, in a folder named after the video title):
 
 Requirements:
     pip install yt-dlp
-    ffmpeg installed and on PATH  (winget install ffmpeg, or brew install ffmpeg)
+    ffmpeg on PATH in source checkouts; app-owned Helpers in the macOS bundle
 """
 
 import argparse
@@ -192,11 +192,16 @@ def main():
     ap.add_argument("--keep-video", action="store_true", help="keep the downloaded video file")
     args = ap.parse_args()
 
+    import _platform
+    _platform.require_media()
+
     out_root = Path(args.out)
     out_root.mkdir(parents=True, exist_ok=True)
 
     print("Fetching title...")
-    title = subprocess.check_output(["yt-dlp", "--get-title", args.url], text=True).strip()
+    ytdlp = ([sys.executable, "-m", "yt_dlp", *_platform.ytdlp_media_args()]
+             if sys.platform == "darwin" else ["yt-dlp"])
+    title = subprocess.check_output([*ytdlp, "--get-title", args.url], text=True).strip()
     folder = out_root / slugify(title)
     folder.mkdir(exist_ok=True)
     print(f"-> {folder}")
@@ -204,12 +209,13 @@ def main():
     print("Downloading video + subtitles...")
     subprocess.run(
         [
-            "yt-dlp",
+            *ytdlp,
             "--write-auto-subs",
             "--write-subs",
             "--sub-lang", "en.*,en",
             "--convert-subs", "srt",
-            "-f", "worst[height>=360]/worst",
+            "-f", (_platform.video_format("worst[height>=360]/worst")
+                   if sys.platform == "darwin" else "worst[height>=360]/worst"),
             "-o", str(folder / "video.%(ext)s"),
             args.url,
         ],
@@ -227,7 +233,8 @@ def main():
     shots_dir.mkdir(exist_ok=True)
     subprocess.run(
         [
-            "ffmpeg", "-loglevel", "error", "-y",
+            _platform.media_binary("ffmpeg") if sys.platform == "darwin" else "ffmpeg",
+            "-loglevel", "error", "-y",
             "-i", str(video_file),
             "-vf", f"fps=1/{args.interval}",
             "-q:v", "2",
