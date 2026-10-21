@@ -17,6 +17,7 @@ import secrets
 import shutil
 import socket
 import subprocess
+import sys
 import threading
 import time
 import uuid
@@ -95,7 +96,7 @@ def helper(source_tree, tmp_path, monkeypatch):
     idx = Mock()
     idx.import_payload.return_value = {"style_anchors": {"imported": 1}}
     namespace = {
-        "_platform": _platform,
+        "_platform": _platform, "sys": sys,
         "__name__": "offline_import_errors", "Path": Path,
         "BaseHTTPRequestHandler": BaseHTTPRequestHandler,
         "json": json, "re": re, "secrets": secrets, "subprocess": subprocess,

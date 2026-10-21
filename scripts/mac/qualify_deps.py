@@ -28,6 +28,34 @@ BUILD_TOOLING = Path(__file__).with_name("build-tooling.txt")
 STANDALONE_PINS = Path(__file__).with_name("standalone-python.json")
 
 
+def ui_pins() -> dict:
+    manifest = json.loads((ROOT / "scripts/mac/payload.json").read_text(encoding="utf-8"))
+    filename = manifest["ui_wheels"]
+    if Path(filename).name != filename:
+        raise ValueError("UI wheel pins must be beside the payload manifest")
+    pins = json.loads((ROOT / "scripts/mac" / filename).read_text(encoding="utf-8"))
+    for name, pin in pins.items():
+        info = wheel_details(pin["filename"])
+        if (canonical(name) != name or info["package"] != name or info["version"] != pin["version"]
+                or not re.fullmatch(r"[0-9a-f]{64}", pin["sha256"])):
+            raise ValueError("Invalid Darwin UI wheel pin: " + name)
+    return pins
+
+
+def verify_ui_wheels(rows: list[dict], *, complete: bool = False) -> None:
+    pins = ui_pins()
+    found = set()
+    for row in rows:
+        name = wheel_details(row["filename"])["package"]
+        if name in pins:
+            pin = pins[name]
+            if row["filename"] != pin["filename"] or row["sha256"] != pin["sha256"]:
+                raise ValueError("Darwin UI wheel differs from reviewed PyPI bytes: " + name)
+            found.add(name)
+    if complete and found != set(pins):
+        raise ValueError("Missing Darwin UI wheels: " + ", ".join(sorted(set(pins) - found)))
+
+
 def canonical(name: str) -> str:
     return re.sub(r"[-_.]+", "-", name).lower()
 
@@ -235,13 +263,17 @@ def qualify_wheels(lock: Path, exclusions_path: Path, output: Path) -> dict:
     if any(wheels.iterdir()):
         raise ValueError("Use an empty wheel directory so stale wheels cannot count as evidence")
     included = [(name, version) for name, version in pins if canonical(name) not in exclusions]
+    additions = ui_pins()
+    if set(additions) & {canonical(name) for name, _ in included}:
+        raise ValueError("Darwin UI pins duplicate the base lock")
+    included += [(name, pin["version"]) for name, pin in additions.items()]
     filtered = output / "included-pins.txt"
     filtered.write_text("".join(f"{name}=={version}\n" for name, version in included), encoding="utf-8")
     report = {"schema_version": 1, "python_version": "3.13", "lock_sha256": sha256(lock),
               "exclusions": [{"package": name, "version": version,
                               "reason": exclusions[canonical(name)]}
                              for name, version in pins if canonical(name) in exclusions],
-              "packages": [], "graph_attempts": []}
+              "darwin_additions": additions, "packages": [], "graph_attempts": []}
     source_builds = build_source_wheels(included, wheels, output)
     report["source_builds"] = source_builds
     for platform in PLATFORMS:
@@ -258,6 +290,10 @@ def qualify_wheels(lock: Path, exclusions_path: Path, output: Path) -> dict:
                 command = download_command(platform, destination) + ["--no-deps", f"{name}=={version}"]
                 code = run_logged(command, log)
                 found, errors = collect_wheels(destination, wheels, key) if code == 0 else ([], [])
+                try:
+                    verify_ui_wheels(found)
+                except ValueError as exc:
+                    errors.append({"error": str(exc)})
                 row = {"package": name, "version": version, "platform": platform,
                        "wheel_found": bool(found) and not errors, "pip_exit_code": code,
                        "wheels": found, "errors": errors, "log": str(log.relative_to(output))}
@@ -273,6 +309,11 @@ def qualify_wheels(lock: Path, exclusions_path: Path, output: Path) -> dict:
                               log, timeout=600)
             # Preserve additional Darwin dependencies only on resolver success.
             graph_wheels, errors = collect_wheels(Path(scratch), wheels if code == 0 else None)
+            if code == 0:
+                try:
+                    verify_ui_wheels(graph_wheels, complete=True)
+                except ValueError as exc:
+                    errors.append({"error": str(exc)})
         report["graph_attempts"].append({"platform": platform, "resolved": code == 0 and not errors,
                                          "pip_exit_code": code, "wheels": graph_wheels, "errors": errors,
                                          "log": str(log.relative_to(output))})
@@ -282,7 +323,8 @@ def qualify_wheels(lock: Path, exclusions_path: Path, output: Path) -> dict:
         "pins": [{"package": canonical(name), "version": version} for name, version in included],
         "wheels": inventory, "errors": errors,
     })
-    if not errors and all(row["resolved"] for row in report["graph_attempts"]):
+    if not errors and any(row["platform"] == "macosx_15_0_arm64" and row["resolved"]
+                          for row in report["graph_attempts"]):
         from wheel_lock import generate
         generate(report, wheels, exclusions)
     return report
@@ -395,8 +437,11 @@ def main() -> int:
     args = parser.parse_args()
     if args.command == "wheels":
         report = qualify_wheels(args.lock, args.exclusions, args.output)
-        return int(any(not row["wheel_found"] for row in report["packages"]) or
-                   any(not row["resolved"] for row in report["graph_attempts"]))
+        # macOS 14 is retained as diagnostic evidence, not a supported target.
+        return int(any(not row["wheel_found"] for row in report["packages"]
+                       if row["platform"] == "macosx_15_0_arm64") or
+                   any(not row["resolved"] for row in report["graph_attempts"]
+                       if row["platform"] == "macosx_15_0_arm64"))
     report = qualify_standalone(args.output)
     return int(bool(report.get("error")) or any(not row["downloaded"] for row in report["candidates"]))
 

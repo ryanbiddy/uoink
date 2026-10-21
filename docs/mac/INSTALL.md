@@ -4,8 +4,7 @@ These are draft steps for the private Apple Silicon build. Use the DMG from
 the matching successful `mac-build` job, named `Uoink-<VERSION>-macos-arm64.dmg`.
 The artifact also contains `dmg.json` with its SHA-256 and size. This build has
 an ad-hoc signature. Developer ID signing, notarization and interactive Mac
-acceptance are still pending. macOS 14 is the provisional minimum; the hosted
-runner tests macOS 15.
+acceptance are still pending. Apple Silicon and macOS 15 or later are required.
 
 ## Install and open
 
@@ -18,9 +17,11 @@ runner tests macOS 15.
 4. Do not use that flow for a damaged-signature or malware alert. A managed
    Mac may prohibit overrides. A later update can require another override.
 
-The current app runs the helper. The native menu bar, first-run window and
-WKWebView dashboard still need the UI pass and real-Mac acceptance. Do not
-expect the Finder launch to show an onboarding window yet.
+The installed app starts a menu-bar process and shows the welcome window once
+per version. Open dashboard, Open folder, Settings, Recent items and Quit Uoink
+are in its menu. The splash and dashboard use WKWebView, with a default-browser
+fallback if Cocoa cannot start. Follow [ACCEPTANCE.md](ACCEPTANCE.md) to check
+these paths on a real Mac.
 
 ## Put the CLI on your PATH
 
@@ -106,7 +107,8 @@ in `gui/<uid>`. Logs go to `~/Library/Logs/Uoink`. Status uses `launchctl print`
 disabling uses `bootout` and removes the plist. Disabling can stop the helper
 for the current session. Open Uoink again to run it manually.
 
-Quit from the dashboard stops the helper without restarting it. The LaunchAgent
+Quit from the menu bar or dashboard stops the helper and its native UI
+processes without restarting them. The LaunchAgent
 uses `KeepAlive: false`. If login startup is still enabled, Uoink starts again
 at the next login. After moving or replacing the app, disable and re-enable
 login startup so its absolute paths match. Quit Uoink and close MCP clients

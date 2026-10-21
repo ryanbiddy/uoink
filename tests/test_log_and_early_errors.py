@@ -44,7 +44,7 @@ def offline(monkeypatch):
 @pytest.fixture
 def http(tmp_path):
     scope = {
-        "_platform": _platform,
+        "_platform": _platform, "sys": sys,
         "BaseHTTPRequestHandler": BaseHTTPRequestHandler, "Path": Path,
         "json": json, "secrets": secrets, "time": time,
         "VERSION": "0.0.0", "HOST": "127.0.0.1", "PORT": 12345,

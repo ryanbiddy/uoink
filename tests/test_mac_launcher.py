@@ -34,7 +34,7 @@ def test_native_launcher_cleanup_and_build_contract():
     assert source.index("if (clear_environment())") < source.index("execv(python, args)")
     assert 'strcmp(argv[1], "--helper")' in source
     builder = (ROOT / "scripts/mac/build_bundle.py").read_text(encoding="utf-8")
-    assert '"clang", "-arch", "arm64", "-mmacosx-version-min=14.0"' in builder
+    assert '"clang", "-arch", "arm64", f"-mmacosx-version-min={MINIMUM_MACOS}"' in builder
     assert '"CFBundleExecutable": "Uoink"' in builder
 
 

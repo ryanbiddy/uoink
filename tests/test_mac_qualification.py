@@ -36,6 +36,11 @@ class QualificationTests(unittest.TestCase):
         pins_patch = patch.object(deps, "STANDALONE_PINS", self.pin_path)
         pins_patch.start()
         self.addCleanup(pins_patch.stop)
+        # Small graph fixtures test the resolver independently of the five
+        # reviewed UI additions, covered by test_mac_ui and the real manifest.
+        ui_patch = patch.object(deps, "ui_pins", return_value={})
+        ui_patch.start()
+        self.addCleanup(ui_patch.stop)
         # Any accidentally unmocked external work makes the offline test fail.
         self.network = patch("urllib.request.urlopen", side_effect=AssertionError("network forbidden"))
         self.processes = patch("subprocess.run", side_effect=AssertionError("process forbidden"))

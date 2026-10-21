@@ -19,7 +19,7 @@ defaults:
 
 # Keep qualification separate from every required job in ci.yml.
 # macos-15 is the explicit Apple Silicon image; each job also asserts arm64.
-# Runtime testing on 15 does not establish the provisional macOS 14 floor.
+# macOS 15 is the supported floor. The 14 wheel probe is diagnostic only.
 env:
   PYTHONDONTWRITEBYTECODE: '1'
   PYTHONNOUSERSITE: '1'
@@ -163,7 +163,7 @@ jobs:
       - uses: actions/cache@v4
         with:
           path: ${{ runner.temp }}/mac-ffmpeg
-          key: ffmpeg-macos15-arm64-floor14-${{ steps.ffmpeg-key.outputs.recipe }}-${{ steps.ffmpeg-key.outputs.toolchain }}
+          key: ffmpeg-macos15-arm64-floor15-${{ steps.ffmpeg-key.outputs.recipe }}-${{ steps.ffmpeg-key.outputs.toolchain }}
       - name: Build pinned LGPL FFmpeg or verify cached output
         run: python -B scripts/mac/build_ffmpeg.py --output "$RUNNER_TEMP/mac-ffmpeg"
       - name: Assemble pinned payload and inventory native loaders
@@ -172,7 +172,7 @@ jobs:
         run: python -B scripts/mac/bundle_smoke.py --app "$RUNNER_TEMP/mac-app/Uoink.app" --output "$RUNNER_TEMP/mac-evidence/bundle-smoke"
       - name: Build and validate the Darwin MCPB
         run: python -B scripts/mac/build_mcpb.py --output "$RUNNER_TEMP/mac-app"
-      - name: Install from read-only DMG and smoke the installed copy
+      - name: Install DMG copy and prove Cocoa imports, menu connection, duplicate launch and Quit
         run: |
           version="$(cat VERSION)"
           python -B scripts/mac/dmg_smoke.py \

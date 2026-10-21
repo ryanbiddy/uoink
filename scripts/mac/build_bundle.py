@@ -19,13 +19,14 @@ import time
 import urllib.parse
 import urllib.request
 
-from qualify_deps import ROOT, sha256, standalone_pins, write_json
+from qualify_deps import ROOT, sha256, standalone_pins, verify_ui_wheels, write_json
 from wheel_lock import LOCK_NAME, verify
 import ffmpeg_bundle
 
 MAC = Path(__file__).parent
 PYTHON_ROOT = Path("Contents/Resources/Python")
 PYTHON_EXECUTABLE = PYTHON_ROOT / "bin/python3"
+MINIMUM_MACOS = "15.0"
 
 
 def run(command, **kwargs):
@@ -117,7 +118,7 @@ def extract_python(archive: Path, destination: Path, pin: dict) -> None:
 
 
 def prune_python(app: Path, report: Path) -> list[dict]:
-    """Remove development payload after pip installation; preserve the Tk picker."""
+    """Remove development payload after pip installation."""
     root = app / PYTHON_ROOT
     targets = [root / name for name in ("include", "lib/pkgconfig", "share")]
     for pattern in ("lib/python*/config-*-darwin", "lib/python*/test",
@@ -331,6 +332,11 @@ def create_dmg(app: Path, output: Path, version: str) -> Path:
         stage = Path(temporary)
         run(["ditto", app, stage / "Uoink.app"])
         (stage / "Applications").symlink_to("/Applications", target_is_directory=True)
+        (stage / "Read Me.txt").write_text(
+            f"Uoink {version} for Apple Silicon requires macOS {MINIMUM_MACOS} or later.\n"
+            "Drag Uoink to Applications. Eject this disk, then open Uoink from Applications.\n"
+            "This private test build is ad-hoc signed. Developer ID and notarization are pending.\n",
+            encoding="utf-8")
         command = ["hdiutil", "create", "-format", "UDZO", "-volname", f"Uoink {version}",
                    "-srcfolder", stage, dmg]
         # Hosted macOS runners intermittently report "hdiutil: create failed -
@@ -362,6 +368,7 @@ def build(wheels: Path, output: Path, ffmpeg_output: Path | None = None) -> Path
     output.mkdir(parents=True)
     exclusions = json.loads((MAC / "dependency-exclusions.json").read_text())
     rows = verify(wheels, exclusions)
+    verify_ui_wheels(rows, complete=True)
     pins = standalone_pins()
     pin = next(row for row in pins["assets"] if row["name"].endswith("-install_only.tar.gz"))
     app = output / "Uoink.app"
@@ -413,7 +420,7 @@ def build(wheels: Path, output: Path, ffmpeg_output: Path | None = None) -> Path
         shutil.copy2(ROOT / relative, target)
     (resources / "uoink").chmod(0o755)
     launcher = contents / "MacOS/Uoink"
-    run(["xcrun", "clang", "-arch", "arm64", "-mmacosx-version-min=14.0", "-Wall", "-Wextra", "-Werror",
+    run(["xcrun", "clang", "-arch", "arm64", f"-mmacosx-version-min={MINIMUM_MACOS}", "-Wall", "-Wextra", "-Werror",
          ROOT / "installer/mac/launcher.c", "-o", launcher])
     launcher.chmod(0o755)
     version = (ROOT / "VERSION").read_text().strip()
@@ -423,7 +430,7 @@ def build(wheels: Path, output: Path, ffmpeg_output: Path | None = None) -> Path
         plistlib.dump({"CFBundleName": "Uoink", "CFBundleDisplayName": "Uoink",
                        "CFBundleIdentifier": "com.ryanbiddy.uoink", "CFBundleExecutable": "Uoink",
                        "CFBundlePackageType": "APPL", "CFBundleShortVersionString": version,
-                       "CFBundleVersion": version, "LSMinimumSystemVersion": "14.0",
+                       "CFBundleVersion": version, "LSMinimumSystemVersion": MINIMUM_MACOS,
                        "LSUIElement": True}, stream)
     notices = resources / "notices"
     notices.mkdir()
@@ -432,6 +439,7 @@ def build(wheels: Path, output: Path, ffmpeg_output: Path | None = None) -> Path
     shutil.copyfile(MAC / "standalone-python.json", notices / "standalone-python.json")
     shutil.copyfile(MAC / "FFMPEG.md", notices / "FFMPEG.md")
     shutil.copyfile(MAC / "payload.json", notices / "payload.json")
+    shutil.copyfile(MAC / "ui-wheels.json", notices / "ui-wheels.json")
     write_json(notices / "resolved-wheels.json", {"wheels": rows})
     write_json(notices / "packages.json", json.loads(packages))
     ffmpeg = ffmpeg_bundle.install(ffmpeg_output, app, notices)
@@ -443,7 +451,7 @@ def build(wheels: Path, output: Path, ffmpeg_output: Path | None = None) -> Path
     write_json(notices / "build.json", {"version": version, "python": pin, "python_url": url,
                                        "platform": platform.platform(), "ffmpeg": ffmpeg,
                                        "signing": "whole app ad-hoc; no Developer ID or notarization",
-                                       "minimum_os": "14.0",
+                                       "minimum_os": MINIMUM_MACOS,
                                        "source_files": [p.as_posix() for p in files]})
     sign_app(app, output / "signing.json")
     write_json(output / "native-inventory.json", binary_inventory(app))

@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 import re
 
-from qualify_deps import canonical, sha256, wheel_details, write_json
+from qualify_deps import canonical, sha256, verify_ui_wheels, wheel_details, write_json
 
 LOCK_NAME = "requirements-macos-arm64-lock.txt"
 
@@ -18,6 +18,7 @@ def resolved_lock(report: dict, directory: Path, exclusions: dict) -> list[dict]
     rows = graphs[0]["wheels"]
     if not rows:
         raise ValueError("Resolved graph is empty")
+    verify_ui_wheels(rows)
     names = set()
     for row in rows:
         info = wheel_details(row["filename"])

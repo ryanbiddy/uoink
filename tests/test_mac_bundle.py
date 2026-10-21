@@ -342,6 +342,8 @@ def test_smoke_success_requires_completed_checks_and_immutable_bundle(monkeypatc
     app = tmp_path / "Original.app"
     app.mkdir()
     (app / "payload").write_text("original")
+    (app / "Contents/Resources").mkdir(parents=True)
+    (app / "Contents/Resources/VERSION").write_text("3.10.0")
     output = tmp_path / "evidence"
     capabilities = {"library_mirror": {"code": "library_mirror_unavailable_macos"},
                     "media": {"available": True, "code": None}}
@@ -360,6 +362,13 @@ def test_smoke_success_requires_completed_checks_and_immutable_bundle(monkeypatc
             return ("127.0.0.1", 43871)
 
     def run(command, **kwargs):
+        if command[0] == "/bin/ps":
+            if command[1] == "-axo":
+                row = "" if current[0].dead else f"{current[0].pid + 1} -m helper.mac_menubar --data-root {current[0].profile}"
+                return SimpleNamespace(returncode=0, stdout=row)
+            if command[-1] == "stat=":
+                return SimpleNamespace(returncode=1, stdout="")
+            return SimpleNamespace(returncode=0, stdout=str(current[0].python) + " -B -s -m helper.mac_menubar")
         if "connect" in command:
             scratch = Path(kwargs["cwd"])
             contents = scratch / "Relocated App With Spaces/Uoink.app/Contents"
@@ -385,13 +394,34 @@ def test_smoke_success_requires_completed_checks_and_immutable_bundle(monkeypatc
         if mutate:
             relocated = Path(kwargs["cwd"]) / "Relocated App With Spaces/Uoink.app"
             (relocated / "payload").write_text("changed")
-        return SimpleNamespace(returncode=0)
+        return SimpleNamespace(returncode=0, stdout="cocoa")
+
+    current = [None]
+    def popen(command, **kwargs):
+        pid = 100 if current[0] is None else 200
+        current[0] = SimpleNamespace(pid=pid, poll=lambda: None, wait=lambda **kw: 0, kill=lambda: None,
+                                     python=Path(command[0]).parents[1] / "Resources/Python/bin/python3",
+                                     profile=Path(kwargs["env"]["UOINK_ISOLATED_PROFILE"]).resolve(), dead=False)
+        current[0].kill = lambda: setattr(current[0], "dead", True)
+        return current[0]
+
+    def request(req, **kwargs):
+        url = req.full_url if hasattr(req, "full_url") else req
+        if url.endswith("/token"):
+            data = {"token": "fixture-only"}
+        elif url.endswith("/helper/ui"):
+            data = {"ok": True, "alive": True, "connected": True, "pid": current[0].pid + 1}
+        else:
+            if url.endswith("/helper/quit"):
+                current[0].dead = True
+            data = {"ok": True, "capabilities": capabilities}
+        return io.StringIO(json.dumps(data))
 
     monkeypatch.setattr(bundle_smoke.socket, "socket", Socket)
     monkeypatch.setattr(Path, "symlink_to", lambda *args, **kwargs: None)
-    monkeypatch.setattr(bundle_smoke.urllib.request, "urlopen", lambda *args, **kwargs: io.StringIO(
-        json.dumps({"ok": True, "capabilities": capabilities})))
-    monkeypatch.setattr(bundle_smoke.subprocess, "Popen", lambda *args, **kwargs: SimpleNamespace(poll=lambda: None))
+    monkeypatch.setattr(bundle_smoke.urllib.request, "urlopen", request)
+    monkeypatch.setattr(bundle_smoke.subprocess, "Popen", popen)
+    monkeypatch.setattr(bundle_smoke.time, "sleep", lambda *_: None)
     monkeypatch.setattr(bundle_smoke.subprocess, "run", run)
     monkeypatch.setattr(bundle_smoke, "stdio", lambda *args: {"ok": True})
     monkeypatch.setattr(bundle_smoke, "media_smoke", lambda *args: {"ok": True})

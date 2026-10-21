@@ -1,17 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  Uoink.app Info.plist TEMPLATE (cc/mac-prep).
-
-  STATUS: scaffold, never loaded by a real .app on a Mac yet. build-mac.sh
-  copies this into Contents/Info.plist. Values marked __PLACEHOLDER__ or noted
-  below still need confirming on a Mac. See docs/MAC-BUILD-PLAN.md.
+  Uoink.app reference plist. scripts/mac/build_bundle.py writes the installed
+  plist and substitutes VERSION. Both require macOS 15, the hosted test OS.
 
   Key decisions encoded here:
   - LSUIElement = true: Uoink is a background/menu-bar helper, not a Dock app.
-    This mirrors the Windows tray-only presence. The pystray/rumps menu bar
+    This mirrors the Windows tray-only presence. The AppKit menu bar
     item and pywebview windows still appear; there is just no Dock icon.
   - CFBundleIdentifier = com.ryanbiddy.uoink: matches the LaunchAgent label in
-    installer/mac/com.ryanbiddy.uoink.plist and docs/mac-install.md.
+    installer/mac/com.ryanbiddy.uoink.plist and docs/mac/INSTALL.md.
   - CFBundleVersion / CFBundleShortVersionString: build-mac.sh must rewrite
     these from the repo VERSION file at build time (the way build.ps1 rewrites
     #define AppVersion in uoink.iss).
@@ -40,7 +37,7 @@
     <key>CFBundleVersion</key>
     <string>__VERSION__</string>
     <key>LSMinimumSystemVersion</key>
-    <string>12.0</string>
+    <string>15.0</string>
     <!-- Background/menu-bar helper: no Dock icon (mirrors the Windows tray). -->
     <key>LSUIElement</key>
     <true/>

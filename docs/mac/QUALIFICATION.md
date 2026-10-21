@@ -1,5 +1,11 @@
 # macOS qualification, pass 2 repair
 
+Pass 8 updates: the current minimum is macOS 15. The macOS 14 probe is
+diagnostic only. The five PyObjC 12.2.2 wheel hashes are now reviewed inputs,
+and Cocoa imports and installed menu-process checks are required. See
+[BUILD.md](BUILD.md) and [ACCEPTANCE.md](ACCEPTANCE.md). The historical test
+results below remain the pass-2 results.
+
 The repair follows hosted arm64 run **39215500494** at commit `954198d`.
 Import smoke passed with 91 full / 35 core tools and every dependency pin
 resolved. Both portable Python versions had the same six failures. The
@@ -160,7 +166,8 @@ macOS 15. Each job records and checks the actual architecture. A runner or
 interpreter reporting anything other than `arm64` fails that check. The image
 can still receive updates; the log records `uname -m`, `sw_vers`,
 `xcode-select -p`, Python version/build/configuration, and `pip freeze --all`.
-macOS 14 remains a provisional minimum, subject to later runtime testing.
+The original macOS 14 proposal was not runtime-qualified. Pass 8 sets the
+minimum to macOS 15, the OS used for hosted runtime checks.
 
 | Job | Evidence |
 | --- | --- |
@@ -206,8 +213,9 @@ The exclusions are checked in at
 
 Portable packages such as `cffi`, `pycparser`, `colorama`, and `proxy_tools` stay
 in the probe. No ASR package is excluded because it is difficult to resolve.
-The Windows lock does not define a complete Mac payload. Missing PyObjC/Cocoa
-dependencies and Mac-specific graph additions must be reviewed in a later lock.
+The Windows lock does not define a complete Mac payload. Pass 8 adds the five
+PyObjC/Cocoa packages through `payload.json` and `ui-wheels.json`. Their pins
+and hashes participate in qualification, graph accounting and bundle verification.
 Job B builds only the two reviewed pure-Python sdists listed in
 `scripts/mac/source-wheels.json`. Their exact URLs were retained in the September
 Python qualification. The BLAKE2-256 content addresses are checked before build
@@ -248,8 +256,9 @@ The hosted rerun must confirm the source hashes/builds, complete Darwin dependen
 resolution, libproc behavior, read-only startup, both portable suites and stdio
 inventory. Local fixture tests cannot supply those runtime results.
 
-This workflow does not build an app or DMG, run transcription or decode media,
-qualify Intel, prove the macOS 14 runtime floor, or verify mirror publication.
+At pass 2 this workflow did not build an app or DMG, run transcription or decode media,
+qualify Intel, establish an older runtime floor, or verify mirror publication.
+Later passes added the build, media and installed-copy checks described in BUILD.md.
 It performs no Finder installation, Gatekeeper/quarantine, Keychain prompt,
 menu-bar interaction, WKWebView rendering, Chrome load-unpacked, or real client
 checks. It also does not test login startup, Desktop permissions, sleep/wake,

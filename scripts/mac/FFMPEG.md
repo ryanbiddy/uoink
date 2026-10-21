@@ -38,8 +38,8 @@ Both builds start with:
 ```text
 --arch=aarch64 --target-os=darwin
 --cc=<xcrun clang> --sysroot=<xcrun macosx SDK>
---extra-cflags='-arch arm64 -mmacosx-version-min=14.0'
---extra-ldflags='-arch arm64 -mmacosx-version-min=14.0 -Wl,-headerpad_max_install_names'
+--extra-cflags='-arch arm64 -mmacosx-version-min=15.0'
+--extra-ldflags='-arch arm64 -mmacosx-version-min=15.0 -Wl,-headerpad_max_install_names'
 --disable-gpl --disable-nonfree --disable-autodetect
 --disable-doc --disable-debug --disable-everything --disable-programs
 --enable-zlib
@@ -178,6 +178,6 @@ and compares the entire app tree before and after execution.
 
 These fixtures do not cover every compressed format or a live HTTPS/HLS
 chunk download. Real AAC/Opus/MP3/H.264/VP9 captures and subtitle conversion
-remain acceptance checks. Deployment flags and the plist target macOS 14;
-a macOS 15 runner cannot prove macOS 14 compatibility of Python, resolved
-wheels or the complete application.
+remain acceptance checks. Pass 8 sets both deployment flags and the app plist
+to macOS 15, the OS used for hosted runtime qualification. The earlier 14.0
+FFmpeg target did not establish support for the complete app on macOS 14.

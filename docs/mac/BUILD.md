@@ -14,9 +14,9 @@ and immutable-bundle smoke. The DMG, whole-app ad-hoc signature, login startup
 and client setup added in passes 7, 9 and 10 still need a hosted run.
 
 Artifacts are private test builds. Ad-hoc signing establishes no developer
-trust. Developer ID, notarization, the native UI pass and interactive Mac
-acceptance remain pending. `LSMinimumSystemVersion` remains `14.0`; only
-macOS 15 has hosted coverage. See [INSTALL.md](INSTALL.md) for draft user steps.
+trust. Developer ID, notarization and interactive Mac acceptance remain
+pending. Pass 8 adds the native UI and its hosted process checks.
+`LSMinimumSystemVersion` is `15.0`, matching the hosted runtime coverage. See [INSTALL.md](INSTALL.md) for draft user steps.
 
 ## Build locally on a disposable macOS arm64 machine
 
@@ -64,8 +64,8 @@ Uoink.app/Contents/
 symlink resolves back to this shim. `Contents/Resources/uoink` remains a
 forwarder to the app launcher.
 Neither command starts the helper. Run the launcher without arguments to
-start the headless helper, or pass `--helper` as login startup does. Finder and
-interactive desktop behavior are not qualified by this build job.
+start the helper and its menu-bar process, or pass `--helper` as login startup
+does. Finder and interactive desktop behavior still need the acceptance checklist.
 
 The launcher, CLI shim and MCPB shim clear every `DYLD_*` variable and
 `PYTHONHOME`, `PYTHONPATH`, `PYTHONSTARTUP`, `PYTHONUSERBASE` and
@@ -82,8 +82,9 @@ After wheel installation, the builder removes Python's `include/`,
 `unittest/test/`, `ctypes/test/`, and all `bin/` entries except `python3` and its
 real interpreter target. Every removed entry is recorded in `python-pruned.json`
 beside the build and in `Resources/notices/`; `python-bin-pruned.json` retains
-the console-script removal list. Tkinter, Tcl/Tk and idlelib stay: the server's
-macOS folder picker calls `_pick_output_folder_tk`. The splash uses pywebview.
+the console-script removal list. Tkinter, Tcl/Tk and idlelib remain in the
+Python payload, but the Darwin picker uses a timed osascript subprocess.
+No helper worker enters Tk. The splash and dashboard use pywebview Cocoa.
 
 Signing runs inside-out: every Mach-O file anywhere in the app, including
 Resources and the main launcher, then enclosing code bundles, then
@@ -91,7 +92,7 @@ Resources and the main launcher, then enclosing code bundles, then
 signing step seals `Contents/MacOS/Uoink` with its `Info.plist` bound.
 `codesign --verify --strict --deep`
 verifies the completed app. Failures print the exit code and codesign stderr.
-The launcher is compiled for arm64 with `-mmacosx-version-min=14.0`, and
+The launcher is compiled for arm64 with `-mmacosx-version-min=15.0`, and
 `CFBundleExecutable` must be `Uoink`.
 
 Developer ID signing will enable hardened runtime with `--options runtime`.
@@ -112,8 +113,9 @@ Developer ID; do not grant `com.apple.security.cs.disable-library-validation` or
   rejects tar traversal and escaping links. It verifies the running Python
   version and architecture.
 - Qualification uses the shipping pins in `requirements-installer-lock.txt`,
-  excludes only `scripts/mac/dependency-exclusions.json`, and retains the
-  reviewed source-wheel/NLTK patches. After a successful macOS 15 solve,
+  excludes only `scripts/mac/dependency-exclusions.json`, adds the five hashed
+  PyObjC 12.2.2 pins in `scripts/mac/ui-wheels.json`, and retains the reviewed
+  source-wheel/NLTK patches. `payload.json` names that Darwin-only input. After a successful macOS 15 solve,
   `wheel_lock.py` writes `requirements-macos-arm64-lock.txt` and
   `resolved-wheels.json` into the wheel artifact.
 - Build verifies those files against `wheel-manifest.json` and every selected
@@ -149,6 +151,89 @@ are disabled. Pip installation uses `--no-compile`, and installed console
 scripts resolve Python relative to their own directory. Runtime state belongs
 outside the app. The smoke test checks file bytes, modes, symlink targets and
 new/deleted entries before and after running it from a path with spaces.
+
+## Native UI in pass 8
+
+The helper starts `helper.mac_menubar` with the bundle interpreter, `-B -s`
+and a clean Python/loader environment. AppKit runs on that process's main
+thread. HTTP polling uses a worker; a main-run-loop timer applies menu changes.
+Direct AppKit calls allow `NSImage.setTemplate_(True)` without private pystray
+APIs. The 18px and 36px images are monochrome alpha masks of the existing U
+brand mark, displayed at 18 points. Status stays in the menu text.
+
+The helper's existing bind check prevents repeated launches from spawning
+another menu. A flock in the user data directory also admits only one menu
+process. The lock file is retained so its inode cannot split into two locks.
+Each child receives only the read end of an ownership pipe. Normal Quit closes
+the writer and waits; helper death closes it in the kernel. EOF ends the UI
+process even if its Cocoa thread is blocked. The helper makes one menu launch
+attempt and never restarts it automatically. `/helper/ui` is authenticated
+and reports the owned PID and whether its AppKit loop has connected.
+
+Quit uses the existing authenticated `/helper/quit`. Menu and splash requests
+to open a dashboard go through authenticated `/helper/dashboard`, so the
+helper owns the new window and closing the splash cannot close it. The
+dashboard and splash explicitly select Cocoa and open their URL in the default
+browser if WebKit cannot start. The splash records VERSION after its page
+loads, or after a successful browser fallback, in the existing user-data
+sentinel. The native UI never chooses Python from PATH.
+
+The Darwin folder picker runs `/usr/bin/osascript` with a 120-second timeout.
+Cancellation, timeout, failed selection and a failed write probe retain the
+old output folder. The dashboard gets a clear message, including where to
+allow Files and Folders access. No Darwin path calls Tk in the helper.
+
+The only Python clipboard writer found in the existing UI was the splash's
+Windows clip.exe/PowerShell path. The dashboard and extension write text with
+`navigator.clipboard.writeText`. Darwin adds `/usr/bin/pbcopy` with UTF-8 stdin
+and a five-second timeout. Only the Darwin dashboard HTTP response redirects
+its copy calls to a native bridge; a browser uses its ordinary clipboard API.
+The shared HTML bytes and Windows/Linux responses stay unchanged. This covers
+Markdown with base64 image links, configs, prompts, attribution and extension
+paths. No current path writes a rich clipboard format, so NSPasteboard is not
+needed. The Chrome extension continues to use Chrome's clipboard API.
+
+`ui-wheels.json` pins pyobjc-core and the Cocoa, Quartz, WebKit and Security
+framework packages at 12.2.2, with SHA-256 for each CPython 3.13 universal2
+wheel. Hashes came from the release files on PyPI:
+[core](https://pypi.org/project/pyobjc-core/12.2.2/#files),
+[Cocoa](https://pypi.org/project/pyobjc-framework-Cocoa/12.2.2/#files),
+[Quartz](https://pypi.org/project/pyobjc-framework-Quartz/12.2.2/#files),
+[WebKit](https://pypi.org/project/pyobjc-framework-WebKit/12.2.2/#files), and
+[Security](https://pypi.org/project/pyobjc-framework-Security/12.2.2/#files).
+These are Darwin-only qualification inputs named by `payload.json`.
+`source-wheels.json` stays limited to the two reviewed source builds.
+Qualification adds the five packages to the pin count and combined graph;
+the generated Mac lock carries their hashes. The Windows lock is unchanged.
+
+Universal2 files keep both slices. `binary_inventory` requires arm64 but does
+not require it to be the only slice, and checks loader paths across slices.
+Retaining the upstream layout avoids a new binary rewrite step. It does not
+make this arm64 app an Intel build. `signing_order` scans Mach-O magic under
+the whole app, including PyObjC `.so` files under Resources/Python, before
+signing enclosing bundles and Uoink.app. Offline tests cover those extensions
+and universal2 inventory. Hosted strict codesign verification is still required.
+
+The minimum is now macOS 15. The previous 12.0 reference plist contradicted
+the 14.0 generated plist and compiler targets. Neither established support on
+an older OS: passes 1 through 7 qualified the selected wheel graph and pinned
+python-build-standalone 3.13.16 release 20261013 on macOS 15 only. Some wheels
+have lower filename floors, including the PyObjC universal2 wheels and
+[ONNX Runtime 1.27.0's macOS 14 wheel](https://pypi.org/project/onnxruntime/1.27.0/#files).
+Those tags do not prove the whole app runs there. The standalone pin records
+size and hash, not an older runtime test. FFmpeg's old 14.0 build target was
+also a component target, not a whole-app result. The reference/generated
+plists, launcher, FFmpeg build, DMG text and install docs now all say 15.0.
+The 14 wheel probe remains diagnostic; only the 15 graph gates the build.
+
+Both relocated and installed-copy smoke now import AppKit, Quartz, WebKit,
+Security and pywebview's Cocoa backend without a webview window. They run the
+real menu process, wait for its authenticated connection, inspect its bundled
+command, launch again and count menu processes. Quit must stop helper and
+menu. A relaunch followed by killing the owned helper must leave no menu
+survivor. First-run windows are suppressed with a current sentinel only in
+the disposable smoke profile. [ACCEPTANCE.md](ACCEPTANCE.md) covers visible
+windows, light/dark menus, TCC, Notes and login sessions on Ryan's Mac.
 
 ## Deferred capabilities
 
@@ -296,7 +381,7 @@ signature checks, DMG creation/mount/copy/detach, the relocated immutable-bundle
 smoke, CLI output and the generated plist. The owner must provide Developer ID
 certificates for the later signing pass and an interactive Apple Silicon Mac
 for Gatekeeper, Finder, login/logout, Quit, Chrome, clients, Keychain and UI
-acceptance. The provisional macOS 14 floor still needs qualification.
+acceptance. macOS 15 is the minimum for this test build; macOS 14 is not supported.
 
 ## Offline check record for passes 7, 9 and 10
 
@@ -318,3 +403,63 @@ and 43 bash run blocks, JSON/version guards, 13 extension JavaScript files,
 cached ESLint 8.57.1, the generated agent kit and the MCP inventory (91/35).
 The reviewed Mac payload contains 168 source files. No dependency installation,
 network fetch, commit, push or ref change was used for this verification.
+
+## Offline check record for pass 8
+
+Files changed for this pass:
+
+| Area | Files |
+| --- | --- |
+| Runtime | `server.py`, `uoink_dashboard.py`, `uoink_splash.py`, new `helper/mac_ui.py` and `helper/mac_menubar.py` |
+| Icon | New `assets/brand/menubar-template.png` and `assets/brand/menubar-template@2x.png` |
+| Qualification and build | `.github/workflows/mac-qualify.yml`, `installer/mac/Info.plist`, `installer/mac/launcher.c`, `scripts/mac/build_bundle.py`, `build_ffmpeg.py`, `bundle_smoke.py`, `import_smoke.py`, `payload.json`, `qualify_deps.py`, `wheel_lock.py`, `FFMPEG.md`, new `scripts/mac/ui-wheels.json` |
+| Tests | `tests/test_mac_bundle.py`, `test_mac_launcher.py`, `test_mac_qualification.py`, `test_log_and_early_errors.py`, `test_sec_import_and_errors.py`, `test_sec_public_surfaces.py`, new `tests/test_mac_ui.py` |
+| Docs | `docs/mac/BUILD.md`, `INSTALL.md`, `QUALIFICATION.md`, new `ACCEPTANCE.md`, and `docs/mac-install.md` |
+
+Windows verification used
+`E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/ig-native/Scripts/python.exe`
+(Python 3.14.6) at BelowNormal priority. `PYTHONPATH` named this worktree,
+`PYTHONDONTWRITEBYTECODE=1`, and `IG_FORBIDDEN_LIVE` named the live index to
+block. A guarded source copy, home, output and temporary directories stayed
+under `_scratch/p8`. The guard blocked credential-file reads, external network,
+port 5179 and writes outside the worktree. Read-only Git inventory queries
+used the real worktree, since the copied tree has no Git index.
+
+The wrapper `_scratch/p8/run.py` invokes pytest with `-q`, no cache provider,
+a disposable base directory and JUnit output. Commands and results:
+
+| Command or selection | Result |
+| --- | --- |
+| `python -B _scratch/p8/run.py tests/` | Run once: 6,123 passed, 50 failed, 157 skipped, one expected failure and 19 subtests passed, in 23:23. |
+| All `tests/test_mac_*.py`, splash/first-run tests, HTTP error/security tests, installer-download checks, `test_agents_connect.py`, both `test_agent_cli*.py`, `test_mcp_full_toolset.py`, `test_c01_mcp_stdio.py` | Final focused check: 1,124 passed, 24 skipped and six subtests passed, in 1:16. |
+| `python -B _scratch/p8/run.py static` | Python compilation, nine shell scripts, 43 workflow bash blocks, JSON/version/log guards, 13 JavaScript parses, cached ESLint 8.57.1, generated agent kit, MCP inventory 91/35 and payload closure passed. |
+| `git diff --check` and Windows lock comparison | Whitespace check passed; `requirements-installer-lock.txt` remains byte-identical to its HEAD checkout. |
+
+Forty-five full-run failures came from three AST-based HTTP fixtures that did
+not supply `sys` for the new Darwin guards. Those fixtures now supply it;
+their complete test files pass in the final focused run. One failure came
+from a Git `-C` inventory query inside the copied tree. The harness now maps
+that read-only query to the worktree, and the check passes.
+
+Four Windows receipt scenarios remain unverified in this environment:
+`test_final_source_runtime_corrected_oracles`,
+`test_synthetic_helper_scenarios_and_verdict`,
+`test_repair_source_runtime_helper_and_oracles`, and
+`test_truth_source_runtime_measured_scenarios`. Three encountered the guard's
+credential-file read refusal. The fourth reported its isolated test port
+already occupied. These are not counted as passes or as the named timing
+flakes. The four recorded helper identities were checked and stopped using
+executable and creation-time ownership checks after the run.
+
+The known Windows timing cases all passed:
+`test_timed_out_vault_worker_cannot_publish_after_return`, both parameters of
+`test_d12_unowned_temps_are_never_inferred_from_name_or_text`, and
+`test_d13_replace_syscall_cannot_complete_after_timeout`.
+The full suite was not repeated after the fixture corrections; the final
+focused run covers them and the last Mac UI edits. Logs and JUnit files are
+under `_scratch/p8`. No macOS runtime result is claimed from these Windows
+checks. The next hosted run must resolve the new wheel graph, import Cocoa,
+sign the added native extensions and pass the real menu-process lifecycle
+smoke. A runner without a usable WindowServer session will fail that smoke.
+Visible windows, template tinting, TCC attribution, Notes paste and login
+sessions still require [ACCEPTANCE.md](ACCEPTANCE.md).

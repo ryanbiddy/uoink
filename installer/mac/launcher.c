@@ -50,7 +50,7 @@ int main(int argc, char **argv) {
     char **args = calloc((size_t)argc + 4, sizeof(char *));
     if (!args) return 1;
     args[0] = python; args[1] = "-B"; args[2] = "-s"; args[3] = script;
-    /* Login startup explicitly requests the headless helper. */
+    /* Login startup requests the helper entry instead of a CLI operation. */
     int first = argc > 1 && strcmp(argv[1], "--helper") == 0 ? 2 : 1;
     for (int i = first; i < argc; ++i) args[i - first + 4] = argv[i];
     execv(python, args);

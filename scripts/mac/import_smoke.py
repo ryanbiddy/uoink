@@ -9,7 +9,9 @@ import runpy
 import subprocess
 import tempfile
 
-from qualify_deps import ROOT, run_logged, sha256, wheel_details, write_json
+from qualify_deps import ROOT, run_logged, sha256, verify_ui_wheels, wheel_details, write_json
+
+COCOA_IMPORT = "import AppKit, Quartz, WebKit, Security, webview; import webview.platforms.cocoa as cocoa; assert cocoa.renderer == 'cocoa'; print('pywebview backend: cocoa (import only)')"
 
 
 def local_source(root: Path, name: str) -> Path | None:
@@ -179,6 +181,7 @@ def main() -> int:
     report = {"selected_wheels": [path.name for path in wheels], "imports": [], "mcp": []}
     try:
         report["wheel_set_errors"] = verify_complete_set(args.wheels, wheels)
+        verify_ui_wheels([{"filename": path.name, "sha256": sha256(path)} for path in wheels], complete=True)
     except (OSError, ValueError, KeyError) as exc:
         report["wheel_set_errors"] = [f"Invalid wheel manifest: {exc}"]
     if report["wheel_set_errors"]:
@@ -194,8 +197,10 @@ def main() -> int:
             base + [str(path)], output / f"install-{i}.txt")} for i, path in enumerate(wheels)]
     report["pip_check_exit_code"] = run_logged(
         [str(args.python), "-m", "pip", "check"], output / "pip-check.txt")
+    report["cocoa_import_exit_code"] = run_logged(
+        [str(args.python), "-B", "-c", COCOA_IMPORT], output / "cocoa-import.txt")
     support = runpy.run_path(str(ROOT / "tests/test_c01_mcp_stdio.py"), run_name="mac_smoke_support")
-    seeds = ("server", "uoink_mcp", "uoink_tray", "uoink_splash", "uoink_dashboard")
+    seeds = ("server", "uoink_mcp", "uoink_tray", "uoink_splash", "uoink_dashboard", "helper.mac_menubar")
     report["module_discovery"] = {"method": "recursive static local imports, including function bodies", "seeds": seeds}
     for name in startup_modules(ROOT, seeds):
         row = import_one(args.python, name, support, logs / f"{name}.txt")
@@ -205,7 +210,7 @@ def main() -> int:
     for mode in ("full", "core"):
         report["mcp"].append(protocol_smoke(args.python, mode, support, output))
         write_json(output / "smoke.json", report)
-    return int(bool(code) or bool(report["pip_check_exit_code"]) or
+    return int(bool(code) or bool(report["pip_check_exit_code"]) or bool(report["cocoa_import_exit_code"]) or
                any(not row["ok"] for row in report["imports"] + report["mcp"]))
 
 

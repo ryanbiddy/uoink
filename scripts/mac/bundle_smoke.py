@@ -22,6 +22,7 @@ import wave
 from build_bundle import ROOT, PYTHON_EXECUTABLE, tree_inventory
 from qualify_deps import write_json
 from ffmpeg_bundle import probe_torchcodec
+from import_smoke import COCOA_IMPORT
 
 
 def environment(scratch: Path, port: int) -> dict:
@@ -229,6 +230,15 @@ def smoke(app: Path, output: Path) -> None:
                 assert Path(config[key]).resolve().is_relative_to(logs), ("launchagent log path", key, config[key])
             report["launchagent"] = {"generated": True, "bootstrapped": False}
             report["media"] = media_smoke(contents, scratch, env)
+            cocoa = subprocess.run([str(python), "-B", "-s", "-c", COCOA_IMPORT],
+                                   cwd=scratch, env=env, capture_output=True, text=True,
+                                   check=True, timeout=60)
+            report["cocoa"] = {"import_only": True, "stdout": cocoa.stdout}
+            # The runner proves the menu run loop, not a visible WebKit window.
+            # A current sentinel suppresses first-run UI only in this test profile.
+            (Path(env["UOINK_ISOLATED_PROFILE"]) / ".first-run-done").write_text(
+                (resources / "VERSION").read_text(), encoding="utf-8")
+            report["splash"] = "suppressed in disposable smoke profile; interactive acceptance required"
             with (output / "helper.txt").open("w") as log:
                 helper = subprocess.Popen([str(launcher), "--helper"], cwd=scratch, env=env,
                                           stdout=log, stderr=subprocess.STDOUT, start_new_session=True)
@@ -249,6 +259,54 @@ def smoke(app: Path, output: Path) -> None:
                         time.sleep(0.2)
                 else:
                     raise AssertionError("Bundled helper health timed out")
+                base = f"http://127.0.0.1:{port}"
+                # Obtain a fixture token via the normal local-UI handshake. Do
+                # not read or log credential files or persist this response.
+                request = urllib.request.Request(base + "/token", headers={
+                    "X-Uoink-Client": "uoink-extension", "Sec-Fetch-Site": "same-origin",
+                    "Sec-Fetch-Mode": "cors", "Sec-Fetch-Dest": "empty"})
+                with urllib.request.urlopen(request, timeout=3) as response:
+                    token = json.load(response)["token"]
+
+                def ui_request(path, body=None):
+                    headers = {"X-Uoink-Token": token, "Content-Type": "application/json"}
+                    request = urllib.request.Request(base + path, headers=headers,
+                        data=None if body is None else json.dumps(body).encode())
+                    with urllib.request.urlopen(request, timeout=5) as response:
+                        return json.load(response)
+
+                def wait_menu():
+                    deadline = time.monotonic() + 45
+                    while time.monotonic() < deadline:
+                        state = ui_request("/helper/ui")
+                        if state["alive"] and state["connected"]:
+                            return state
+                        time.sleep(.25)
+                    raise AssertionError("Installed AppKit menu did not connect: " + str(state))
+
+                menu = wait_menu()
+                menu_pid = menu["pid"]
+                command = subprocess.run(["/bin/ps", "-p", str(menu_pid), "-o", "command="],
+                                         capture_output=True, text=True, check=True).stdout
+                assert "-m helper.mac_menubar" in command, command
+                assert str(python) in command or str(python.resolve()) in command, command
+                report["menubar"] = {**menu, "bundled_command": command.strip()}
+
+                def menu_pids():
+                    listing = subprocess.run(["/bin/ps", "-axo", "pid=,command="],
+                                             capture_output=True, text=True, check=True).stdout
+                    return [int(line.strip().split(None, 1)[0]) for line in listing.splitlines()
+                            if "-m helper.mac_menubar" in line
+                            and str(Path(env["UOINK_ISOLATED_PROFILE"]).resolve()) in line]
+
+                duplicate = subprocess.run([str(launcher), "--helper"], cwd=scratch, env=env,
+                                           capture_output=True, text=True, timeout=45)
+                assert duplicate.returncode == 0, duplicate.stderr
+                assert wait_menu()["pid"] == menu_pid
+                time.sleep(2)
+                assert ui_request("/helper/ui")["alive"]
+                assert menu_pids() == [menu_pid]
+                report["menubar"]["duplicate_launch_same_pid"] = True
                 status = subprocess.run([str(cli_link), "status"], cwd=scratch, env=env,
                                         capture_output=True, text=True, timeout=90)
                 assert status.returncode == 0, status.stderr
@@ -270,6 +328,41 @@ def smoke(app: Path, output: Path) -> None:
                                 "assert Image.open('pillow.png').size == (8,8)"],
                                cwd=scratch, env=env, check=True, timeout=60)
                 report["pillow"] = "passed"
+                assert ui_request("/helper/quit", {})["ok"]
+                helper.wait(timeout=20)
+
+                def assert_menu_gone(pid):
+                    deadline = time.monotonic() + 10
+                    while time.monotonic() < deadline:
+                        check = subprocess.run(["/bin/ps", "-p", str(pid), "-o", "stat="],
+                                               capture_output=True, text=True)
+                        if check.returncode != 0 or check.stdout.strip().startswith("Z"):
+                            return
+                        time.sleep(.1)
+                    raise AssertionError(f"Menu process survived helper exit: {pid}")
+
+                assert_menu_gone(menu_pid)
+                assert menu_pids() == []
+                report["menubar"]["quit_no_survivor"] = True
+                # A second helper must acquire the released lock. Kill only
+                # this test's direct child to exercise kernel-close of its pipe.
+                helper = subprocess.Popen([str(launcher), "--helper"], cwd=scratch, env=env,
+                                          stdout=log, stderr=subprocess.STDOUT, start_new_session=True)
+                deadline = time.monotonic() + 120
+                while time.monotonic() < deadline:
+                    try:
+                        restarted = wait_menu()
+                        break
+                    except OSError:
+                        time.sleep(.2)
+                else:
+                    raise AssertionError("Menu did not reconnect after relaunch")
+                assert restarted["pid"] != menu_pid
+                helper.kill()
+                helper.wait(timeout=10)
+                assert_menu_gone(restarted["pid"])
+                assert menu_pids() == []
+                report["menubar"]["helper_death_no_survivor"] = True
                 checks_passed = True
         finally:
             stop(helper)

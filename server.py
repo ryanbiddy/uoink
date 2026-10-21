@@ -1230,6 +1230,9 @@ if ($dialog.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) {
 
 
 def _pick_output_folder_tk(initial_dir: Path | None = None) -> str | None:
+    if sys.platform == "darwin":
+        from helper.mac_ui import pick_folder
+        return pick_folder(initial_dir).get("path")
     try:
         import tkinter as tk  # type: ignore
         from tkinter import filedialog  # type: ignore
@@ -1260,6 +1263,9 @@ def _pick_output_folder_tk(initial_dir: Path | None = None) -> str | None:
 
 
 def _pick_output_folder(initial_dir: Path | None = None) -> str | None:
+    if sys.platform == "darwin":
+        from helper.mac_ui import pick_folder
+        return pick_folder(initial_dir).get("path")
     if os.name == "nt":
         selected = _pick_output_folder_windows(initial_dir)
         if selected:
@@ -13344,6 +13350,9 @@ class Handler(BaseHTTPRequestHandler):
             body = path.read_bytes()
         except OSError:
             return self._send_json(404, {"ok": False, "error": "file not found"})
+        if sys.platform == "darwin" and path == DASHBOARD_PATH:
+            from helper.mac_ui import dashboard_html
+            body = dashboard_html(body)
         self.send_response(200)
         self.send_header("Content-Type", mime)
         self.send_header("Content-Length", str(len(body)))
@@ -13545,6 +13554,9 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_session_active()
         if bare == "/settings":
             return self._handle_settings_get()
+        if sys.platform == "darwin" and bare == "/helper/ui":
+            from helper.mac_ui import menu_state
+            return self._send_json(200, {"ok": True, **menu_state()})
         if bare.startswith("/discovery/runs/"):
             return self._handle_discovery_run_get(bare[len("/discovery/runs/"):])
         if bare == "/api/writer-peer/v1/status":
@@ -13777,7 +13789,14 @@ class Handler(BaseHTTPRequestHandler):
             else settings.get("output_dir") or str(DESKTOP_ROOT)
         )
         initial_dir = Path(initial_value).expanduser()
-        selected = _pick_output_folder(initial_dir)
+        if sys.platform == "darwin":
+            from helper.mac_ui import pick_folder
+            result = pick_folder(initial_dir)
+            if not result["ok"]:
+                return self._send_json(200, {**result, "settings": _public_settings(settings)})
+            selected = result["path"]
+        else:
+            selected = _pick_output_folder(initial_dir)
         if not selected:
             return self._send_json(200, {
                 "ok": False,
@@ -13787,6 +13806,14 @@ class Handler(BaseHTTPRequestHandler):
             })
         candidate, error = _validate_output_dir_value(selected)
         if error or candidate is None:
+            if sys.platform == "darwin":
+                return self._send_json(200, {
+                    "ok": False, "code": "folder_access_denied",
+                    "error": "Uoink cannot write to that folder. Allow access in System Settings > "
+                             "Privacy & Security > Files and Folders, or choose another folder. "
+                             "Your output folder has not changed.",
+                    "settings": _public_settings(settings),
+                })
             return self._send_json(400, {"ok": False, "error": error})
         settings["output_dir"] = str(candidate)
         settings["updated_at"] = _now_iso()
@@ -18225,6 +18252,15 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_agents_connect(bare)
         if bare == "/helper/quit":
             return self._handle_helper_quit()
+        if sys.platform == "darwin" and bare == "/helper/dashboard":
+            settings = isinstance(body, dict) and body.get("settings") is True
+            return self._send_json(200, {"ok": _spawn_dashboard_window(reason="native-ui", settings=settings)})
+        if sys.platform == "darwin" and bare == "/helper/ui":
+            from helper.mac_ui import menu_connected
+            connected = isinstance(body, dict) and menu_connected(body.get("pid"))
+            if connected:
+                log.info("menu bar connected (pid %s)", body["pid"])
+            return self._send_json(200 if connected else 409, {"ok": connected})
         if bare == "/facets/classify":
             return self._handle_facets_classify(body)
         if bare.startswith("/mcp/v1"):
@@ -19784,9 +19820,14 @@ def _is_installed_layout() -> bool:
     return _bundled_interpreter(gui=True) is not None
 
 
-def _spawn_dashboard_window(*, reason: str) -> bool:
+def _spawn_dashboard_window(*, reason: str, settings: bool = False) -> bool:
     """Open the local dashboard window without making the helper re-bind."""
     try:
+        if sys.platform == "darwin":
+            from helper.mac_ui import spawn
+            spawn("uoink_dashboard", _install_isolation.helper_url("/dashboard") + ("#settings" if settings else ""))
+            log.info("dashboard: spawned (%s)", reason)
+            return True
         script = HERE / "uoink_dashboard.py"
         if script.exists():
             exe = _bundled_interpreter(gui=True) or Path(sys.executable)
@@ -19805,7 +19846,10 @@ def _spawn_dashboard_window(*, reason: str) -> bool:
         log.warning("dashboard: window spawn failed (%s): %s", reason, e)
 
     try:
-        webbrowser.open(_install_isolation.helper_url("/dashboard"))
+        url = _install_isolation.helper_url("/dashboard")
+        if sys.platform == "darwin" and settings:
+            url += "#settings"
+        webbrowser.open(url)
         log.info("dashboard: opened browser fallback (%s)", reason)
         return True
     except Exception as e:
@@ -20018,7 +20062,7 @@ def main(*, show_dashboard: bool = False):
     # spawns a tray. Runs in a daemon thread; any failure (no pystray, no
     # system tray) degrades to "no tray, server still runs" -- the boot balloon
     # below is the fallback "it's running" affordance.
-    # Darwin AppKit/menu-bar and first-run integration are a later pass.
+    # Darwin owns AppKit in separate processes with parent-death lifelines.
     if _is_installed_layout() and sys.platform != "darwin":
         try:
             import uoink_tray
@@ -20066,6 +20110,23 @@ def main(*, show_dashboard: bool = False):
     else:
         splash_spawned = False
 
+    if sys.platform == "darwin" and _is_installed_layout():
+        from helper import mac_ui
+        try:
+            child = mac_ui.start_menu(host=HOST, port=PORT, version=VERSION,
+                                      token_path=TOKEN_PATH, output_dir=DESKTOP_ROOT,
+                                      data_root=DATA_ROOT)
+            log.info("menu bar spawned (pid %s)", child.pid)
+        except Exception as exc:
+            log.warning("menu bar could not start: %s", exc)
+        try:
+            if _splash_should_spawn(DATA_ROOT / ".first-run-done"):
+                mac_ui.spawn("uoink_splash")
+                splash_spawned = True
+                log.info("splash: spawned (version %s)", VERSION)
+        except Exception as exc:
+            log.warning("splash: failed to spawn (non-fatal): %s", exc)
+
     if show_dashboard:
         _spawn_dashboard_window(reason="launch-flag")
 
@@ -20101,6 +20162,9 @@ def main(*, show_dashboard: bool = False):
     except KeyboardInterrupt:
         log.info("Shutting down.")
     finally:
+        if sys.platform == "darwin":
+            from helper.mac_ui import close_children
+            close_children()
         _remove_suite_lease()
         server.server_close()
 
