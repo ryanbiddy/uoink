@@ -1,0 +1,32 @@
+{
+  "checked": "2026-10-21",
+  "stderr": "Every supported recipe now identifies its official source URLs, documentation verification and check date. Locations and notes follow the current docs.",
+  "added": ["kiro", "copilot-cli", "auggie", "factory-droid", "qwen-code", "crush", "antigravity", "chatbox", "dive", "perplexity"],
+  "stdout_changed": {
+    "claude-code": "Place environment options before the server name as the current CLI docs require.",
+    "kilo-legacy": "Replace an unverified obsolete config with migration guidance.",
+    "cherry-studio": "Use documented separate fields rather than assuming a JSON import wrapper.",
+    "jan": "Use documented separate fields rather than assuming a JSON import wrapper.",
+    "msty": "Tool Configuration takes a bare command/args/env object.",
+    "continue": "Standalone YAML files require name, version and schema metadata.",
+    "raycast": "Use documented Stdio form and JSON argument array, not an assumed import wrapper.",
+    "ollama": "Runtime has no MCP client config; direct users to actual clients.",
+    "smithery-local": "Current docs mention MCPB publication; no local YAML schema verified.",
+    "windows-odr": "Document the positional local manifest argument.",
+    "obsidian": "Document Windows mirror, URI and Mac gate/read-only alternative.",
+    "n8n": "Add credential fields and HTTP Streamable MCP Client Tool route.",
+    "make": "Distinguish cloud runners from the separate Enterprise on-prem agent.",
+    "zapier": "Make the local-only limitation and n8n alternative explicit.",
+    "powertoys": "Use the documented Run commands route.",
+    "alfred": "Use the shipped Mac CLI shim and refuse other platforms."
+  },
+  "restricted_platforms": {
+    "boltai": ["darwin"],
+    "alfred": ["darwin"],
+    "windows-odr": ["win32"],
+    "autohotkey": ["win32"],
+    "powertoys": ["win32"],
+    "perplexity": ["darwin"],
+    "auggie": ["darwin", "linux"]
+  }
+}

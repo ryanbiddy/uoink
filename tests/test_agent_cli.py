@@ -214,8 +214,12 @@ def test_connect_formats_parse_and_paths_are_absolute(tmp_path, client):
     python = app / "python" / "python.exe"
     if sys.platform == "darwin":
         python = connect.python_command(app)
-    output = connect.render(client, app, python)
     spec = connect.CLIENTS[client]
+    if sys.platform not in spec.platforms:
+        with pytest.raises(ValueError, match="no recipe"):
+            connect.render(client, app, python)
+        return
+    output = connect.render(client, app, python)
     if spec.format == "text":
         assert output and "<ENTRY>" not in output and "<CLI>" not in output
         return
@@ -224,10 +228,17 @@ def test_connect_formats_parse_and_paths_are_absolute(tmp_path, client):
         flags = ["-B", "-s"] if sys.platform == "darwin" else []
         paths = [s.replace("''", "'") for s in tokens] if tokens else shlex.split(output)[-(2 + len(flags)):]
         assert paths == [str(python), *flags, str(app / "uoink_mcp.py")]
+    elif spec.format == "crushrc":
+        tokens = shlex.split(output)
+        assert tokens[:3] == ["mcp", "add", "uoink"]
+        assert tokens[4] == str(python)
+        flags = ["-B", "-s"] if sys.platform == "darwin" else []
+        assert tokens[6:tokens.index("--env")] == [*flags, str(app / "uoink_mcp.py")]
     else:
         # YAML clients receive JSON-form YAML (a strict YAML 1.2 subset).
         data = tomllib.loads(output) if spec.format == "toml" else json.loads(output)
-        entry = data["mcpServers"][0] if spec.shape == "list" else data[spec.shape]["uoink"]
+        entry = (data if spec.shape == "entry" else data["mcpServers"][0]
+                 if spec.shape == "list" else data[spec.shape]["uoink"])
         if spec.shape == "mcp":
             paths = entry["command"]
         else:
@@ -243,12 +254,16 @@ def test_connect_formats_parse_and_paths_are_absolute(tmp_path, client):
 
 def test_connect_stdout_only_config_and_notes_on_stderr(capsys):
     for client in connect.CLIENTS:
+        if sys.platform not in connect.CLIENTS[client].platforms:
+            assert cli.main(["connect", client]) == 2
+            output = capsys.readouterr()
+            assert not output.out and "no recipe" in output.err
+            continue
         assert cli.main(["connect", client]) == 0
         output = capsys.readouterr()
         assert "File:" in output.err and "not yet tested" in output.err
         assert connect.client_spec(client).location in output.err
-        if connect.CLIENTS[client].note.startswith("Uncertain"):
-            assert "Uncertain" in output.err
+        assert "Official docs verified:" in output.err and "Checked: 2026-10-21" in output.err
         if connect.CLIENTS[client].format != "shell":
             assert "Tested:" not in output.out
 
@@ -311,6 +326,11 @@ def test_agent_kit_version_drift_fails_check_and_build_repairs_it(tmp_path, monk
     manifest.parent.mkdir(parents=True)
     manifest.write_text('{"name": "uoink", "version": "0.0.0"}\n', encoding="utf-8")
     (tmp_path / "VERSION").write_text("3.10.0\n", encoding="utf-8")
+    for relative in ("docs/connect-your-agent.md", "agent-kit/README.md"):
+        document = tmp_path / relative
+        document.parent.mkdir(parents=True, exist_ok=True)
+        document.write_text("<!-- BEGIN GENERATED CLIENTS -->\n" + connect.client_table()
+                            + "<!-- END GENERATED CLIENTS -->\n", encoding="utf-8")
     monkeypatch.setitem(build.__globals__, "ROOT", tmp_path)
     monkeypatch.setitem(build.__globals__, "SOURCE", source)
     monkeypatch.setitem(build.__globals__, "DESTINATIONS", ())

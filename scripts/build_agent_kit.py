@@ -1,4 +1,4 @@
-"""Generate skill copies and the plugin version from repository sources; no network."""
+"""Generate skills, client tables and the plugin version from repository sources."""
 from __future__ import annotations
 
 import argparse
@@ -7,6 +7,9 @@ from pathlib import Path
 import sys
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
+from uoink_connect import client_table
+
 SOURCE = ROOT / "skills" / "uoink"
 DESTINATIONS = (ROOT / "agent-kit" / "skills" / "uoink",
                 ROOT / "agent-kit" / "plugins" / "uoink" / "skills" / "uoink")
@@ -22,6 +25,23 @@ def build(check=False):
         raise ValueError("canonical skills/uoink/SKILL.md is missing")
     expected = files(SOURCE)
     problems = []
+    start = "<!-- BEGIN GENERATED CLIENTS -->"
+    end = "<!-- END GENERATED CLIENTS -->"
+    for relative in ("docs/connect-your-agent.md", "agent-kit/README.md"):
+        path = ROOT / relative
+        if path.is_symlink() or ROOT.resolve() not in path.resolve().parents:
+            raise ValueError(f"unsafe generated document: {path}")
+        document = path.read_text(encoding="utf-8")
+        if document.count(start) != 1 or document.count(end) != 1:
+            raise ValueError(f"missing or duplicate client table markers: {path}")
+        before, after = document.split(start)
+        _, after = after.split(end)
+        generated = before + start + "\n" + client_table() + end + after
+        if document != generated:
+            if check:
+                problems.append(relative)
+            else:
+                path.write_text(generated, encoding="utf-8", newline="\n")
     plugin_path = ROOT / "agent-kit/plugins/uoink/.claude-plugin/plugin.json"
     if plugin_path.is_symlink() or ROOT.resolve() not in plugin_path.resolve().parents:
         raise ValueError(f"unsafe plugin manifest: {plugin_path}")
@@ -63,7 +83,7 @@ def main():
     if problems:
         print("Agent kit differs from repository sources:\n" + "\n".join(problems), file=sys.stderr)
         return 1
-    print("Agent kit skills and version match" if args.check else "Agent kit skills and version generated")
+    print("Agent kit skills, client tables and version match" if args.check else "Agent kit skills, client tables and version generated")
     return 0
 
 
