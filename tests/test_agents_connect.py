@@ -14,9 +14,24 @@ import os
 import sys
 import tempfile
 from pathlib import Path
+from unittest.mock import patch
+
+import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import server  # noqa: E402
+
+
+def _home_env(home: Path) -> dict:
+    return {"HOME": str(home), "USERPROFILE": str(home),
+            "APPDATA": str(home / "AppData/Roaming"),
+            "LOCALAPPDATA": str(home / "AppData/Local")}
+
+
+@pytest.fixture(autouse=True)
+def temp_client_home(tmp_path, monkeypatch):
+    for key, value in _home_env(tmp_path / "temporary client home").items():
+        monkeypatch.setenv(key, value)
 
 
 def _assert(cond, msg):
@@ -184,19 +199,24 @@ def test_connect_unknown_client():
 
 
 def main():
-    test_detect_shape()
     with tempfile.TemporaryDirectory() as d:
         base = Path(d)
-        detect = base / "detect"
-        detect.mkdir()
-        test_plain_vscode_is_not_cline(detect)
-        for name, fn in [("new", test_connect_creates_new),
-                         ("preserve", test_connect_preserves_and_backs_up),
-                         ("malformed", test_connect_refuses_malformed),
-                         ("backup", test_connect_refuses_when_backup_fails)]:
-            sub = base / name
-            sub.mkdir()
-            fn(sub)
+        with patch.dict(os.environ, _home_env(base / "home")):
+            return _run_standalone(base)
+
+
+def _run_standalone(base):
+    test_detect_shape()
+    detect = base / "detect"
+    detect.mkdir()
+    test_plain_vscode_is_not_cline(detect)
+    for name, fn in [("new", test_connect_creates_new),
+                     ("preserve", test_connect_preserves_and_backs_up),
+                     ("malformed", test_connect_refuses_malformed),
+                     ("backup", test_connect_refuses_when_backup_fails)]:
+        sub = base / name
+        sub.mkdir()
+        fn(sub)
     test_connect_unknown_client()
     print("\nALL AGENT CONNECT TESTS PASSED")
     return 0

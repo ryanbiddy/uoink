@@ -296,9 +296,17 @@ def main(argv=None):
             if ns.client not in CLIENTS:
                 raise UsageError("unknown or missing client; use uoink connect --list")
             spec = client_spec(ns.client)
+            from uoink_connect import require_platform
+            try:
+                require_platform(ns.client)
+            except ValueError as exc:
+                raise UsageError(str(exc)) from exc
             python = python_command(APP_DIR)
             output_format = "install deeplink" if ns.deeplink else spec.format
             print(f"File: {spec.location}\nFormat: {output_format}. Status: not yet tested.", file=sys.stderr)
+            verification = "yes" if spec.verified else "no: " + spec.reason
+            print(f"Official docs verified: {verification}. Checked: {spec.checked}.", file=sys.stderr)
+            print("Sources: " + ", ".join(spec.sources), file=sys.stderr)
             if spec.note:
                 print(spec.note, file=sys.stderr)
             if spec.format == "yaml":
