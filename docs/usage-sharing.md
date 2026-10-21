@@ -54,7 +54,7 @@ MCP client counts measure initialization messages. Names map to a fixed list:
 Claude Desktop, Claude Code, Cursor, Cline, Continue, Codex, ChatGPT and VS Code.
 All other names become `other`. Transport counts measure registered tool calls
 over `stdio` or `http`. Only registry tool names are accepted. Tool counts
-have at most 64 keys; counts saturate at 999,999. The complete compact JSON
+have at most 64 keys; counts saturate at 100,000, the receiver's limit. The complete compact JSON
 must stay below 4,096 bytes. Tool keys are reduced further if needed to fit.
 
 Captures use eight source labels: `youtube`, `x`, `reddit`, `page`, `podcast`,
