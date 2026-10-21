@@ -195,12 +195,21 @@ def bundle_path(path: Path, app: Path, seen: frozenset[Path] = frozenset()) -> b
             break
         if entry.is_symlink():
             if entry in seen or not bundle_path(
-                    entry.parent / os.readlink(entry), app, seen | {entry}):
+                    entry.parent / link_target(entry), app, seen | {entry}):
                 return False
     try:
         return path.resolve().is_relative_to(app.resolve())
     except (OSError, RuntimeError):
         return False
+
+
+def link_target(link: Path) -> str:
+    # Windows readlink returns the \\?\ substitute name, which never compares
+    # as inside a plain app path; the portable suite runs this check there.
+    target = os.readlink(link)
+    if os.name == "nt" and target.startswith("\\\\?\\") and not target.startswith("\\\\?\\UNC\\"):
+        target = target[4:]
+    return target
 
 
 def allowed_absolute_loader_path(value: str, app: Path) -> bool:
