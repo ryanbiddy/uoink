@@ -211,9 +211,10 @@ def collect(dmg: Path, output: Path, expected_sha256: str | None = None) -> dict
         digest = sha256(dmg)
         report["artifact"] = {"path": str(dmg), "sha256": digest, "size": dmg.stat().st_size,
                               "expected_sha256": expected_sha256}
-        if expected_sha256 is not None:
-            require(bool(re.fullmatch(r"[0-9a-fA-F]{64}", expected_sha256)), "Invalid expected SHA-256")
-            require(digest == expected_sha256.lower(), "DMG SHA-256 differs from --expected-sha256")
+        # The receipt binds to a built artifact, so the build's recorded hash is mandatory.
+        require(expected_sha256 is not None, "No --expected-sha256: pass the hash the build recorded")
+        require(bool(re.fullmatch(r"[0-9a-fA-F]{64}", expected_sha256)), "Invalid expected SHA-256")
+        require(digest == expected_sha256.lower(), "DMG SHA-256 differs from --expected-sha256")
         require(sys.platform == "darwin", "Installed receipt requires macOS")
         home = real_home()
         report["isolation"]["before"] = protected_snapshot(home)

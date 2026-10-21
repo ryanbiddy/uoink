@@ -138,12 +138,20 @@ def test_hash_mismatch_refusal_before_mount(rig, tmp_path, monkeypatch):
     assert result["verdict"] == "fail" and "SHA-256 differs" in result["reasons"][0]
 
 
+def test_missing_expected_hash_refusal_before_mount(rig, tmp_path, monkeypatch):
+    monkeypatch.setattr(receipt.dmg_smoke, "installed_dmg", lambda *a: pytest.fail("No hash must not mount"))
+    assert receipt.main(["--dmg", str(rig.dmg), "--output", str(tmp_path / "out")]) == 1
+    result = json.loads((tmp_path / "out/receipt.json").read_text())
+    assert result["verdict"] == "fail" and "No --expected-sha256" in result["reasons"][0]
+
+
 def test_python_link_outside_bundle_refusal_without_symlink_privileges(rig, tmp_path, monkeypatch):
     original = Path.resolve
     python = rig.app / receipt.PYTHON_EXECUTABLE
     monkeypatch.setattr(Path, "resolve", lambda p, *a, **kw:
                         tmp_path / "system/python3" if p == python else original(p, *a, **kw))
-    assert receipt.main(["--dmg", str(rig.dmg), "--output", str(tmp_path / "out")]) == 1
+    assert receipt.main(["--dmg", str(rig.dmg), "--output", str(tmp_path / "out"),
+                         "--expected-sha256", receipt.sha256(rig.dmg)]) == 1
     result = json.loads((tmp_path / "out/receipt.json").read_text())
     assert result["verdict"] == "fail" and "resolves outside" in result["reasons"][0]
 
@@ -152,7 +160,8 @@ def test_non_bundle_health_interpreter_refusal_writes_fail(rig, tmp_path, monkey
     # Keep the real binder; a valid installed path alone cannot earn credit.
     monkeypatch.setattr(receipt, "bind_health", rig.real_bind)
     monkeypatch.setattr(receipt, "observe", lambda pid: {"pid": pid, "executable": str(tmp_path / "system/python3")})
-    assert receipt.main(["--dmg", str(rig.dmg), "--output", str(tmp_path / "out")]) == 1
+    assert receipt.main(["--dmg", str(rig.dmg), "--output", str(tmp_path / "out"),
+                         "--expected-sha256", receipt.sha256(rig.dmg)]) == 1
     result = json.loads((tmp_path / "out/receipt.json").read_text())
     assert result["verdict"] == "fail" and "non-bundle interpreter" in result["reasons"][0]
 
@@ -161,7 +170,7 @@ def test_non_bundle_health_interpreter_refusal_writes_fail(rig, tmp_path, monkey
                                      "missing_check", "missing_binding", "changed_dmg", "signature"])
 def test_incomplete_or_failed_evidence_never_earns_installed_pass(rig, tmp_path, failure):
     rig.failure = failure
-    result = receipt.collect(rig.dmg, tmp_path / "out")
+    result = receipt.collect(rig.dmg, tmp_path / "out", receipt.sha256(rig.dmg))
     assert result["verdict"] == "fail" and result["reasons"]
     if failure != "detach":
         assert result["install"]["detached"]
