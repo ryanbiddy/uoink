@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import ast
+from contextlib import nullcontext
 import json
 import os
 from pathlib import Path
@@ -30,12 +31,14 @@ def environment(scratch: Path, port: int) -> dict:
     for key in list(env):
         if key.startswith("DYLD_"):
             env.pop(key)
-    for key in ("PYTHONPATH", "PYTHONHOME", "PYTHONSTARTUP", "UOINK_ISOLATED_APP_DIR"):
+    for key in ("PYTHONPATH", "PYTHONHOME", "PYTHONSTARTUP", "PYTHONUSERBASE",
+                "PYTHONEXECUTABLE", "UOINK_ISOLATED_APP_DIR"):
         env.pop(key, None)
     for key, relative in (("HOME", "home"), ("USERPROFILE", "home"), ("APPDATA", "roaming"),
                           ("LOCALAPPDATA", "local"), ("XDG_DATA_HOME", "data"),
                           ("XDG_CONFIG_HOME", "config"), ("XDG_CACHE_HOME", "cache"),
-                          ("UOINK_ISOLATED_PROFILE", "profile"), ("UOINK_OUTPUT_DIR", "output")):
+                          ("UOINK_ISOLATED_PROFILE", "profile"), ("UOINK_OUTPUT_DIR", "output"),
+                          ("TMPDIR", "tmp"), ("TMP", "tmp"), ("TEMP", "tmp")):
         path = scratch / relative
         path.mkdir(exist_ok=True)
         env[key] = str(path)
@@ -179,24 +182,31 @@ def media_smoke(contents: Path, scratch: Path, env: dict) -> dict:
     return report
 
 
-def smoke(app: Path, output: Path) -> None:
+def smoke(app: Path, output: Path, *, scratch: Path | None = None,
+          env: dict | None = None, observer=None) -> dict:
+    """Receipt callers keep the installed path/profile and observe live processes."""
     output.mkdir(parents=True)
     report = {"ok": False, "mcp": []}
     checks_passed = False
-    with tempfile.TemporaryDirectory(prefix="uoink-bundle-smoke-") as temporary:
+    relocate = scratch is None
+    context = tempfile.TemporaryDirectory(prefix="uoink-bundle-smoke-") if relocate else nullcontext(scratch)
+    with context as temporary:
         scratch = Path(temporary)
         # Move, then restore, to prove the loader does not depend on build paths.
-        relocated = scratch / "Relocated App With Spaces" / "Uoink.app"
-        relocated.parent.mkdir()
-        shutil.move(str(app), relocated)
+        relocated = scratch / "Relocated App With Spaces" / "Uoink.app" if relocate else app
+        if relocate:
+            relocated.parent.mkdir()
+            shutil.move(str(app), relocated)
         before = tree_inventory(relocated)
         helper = None
         try:
-            with socket.socket() as sock:
-                sock.bind(("127.0.0.1", 0))
-                port = sock.getsockname()[1]
+            if env is None:
+                with socket.socket() as sock:
+                    sock.bind(("127.0.0.1", 0))
+                    port = sock.getsockname()[1]
+                env = environment(scratch, port)
+            port = int(env["UOINK_ISOLATED_PORT"])
             assert port != 5179
-            env = environment(scratch, port)
             contents = relocated / "Contents"
             python = relocated / PYTHON_EXECUTABLE
             resources = contents / "Resources"
@@ -289,6 +299,8 @@ def smoke(app: Path, output: Path) -> None:
                     raise AssertionError("Installed AppKit menu did not connect: " + str(state))
 
                 menu = wait_menu()
+                if observer:
+                    observer("connected", helper, menu)
                 menu_pid = menu["pid"]
                 command = subprocess.run(["/bin/ps", "-p", str(menu_pid), "-o", "command="],
                                          capture_output=True, text=True, check=True).stdout
@@ -348,6 +360,8 @@ def smoke(app: Path, output: Path) -> None:
                 assert_menu_gone(menu_pid)
                 assert menu_pids() == []
                 report["menubar"]["quit_no_survivor"] = True
+                if observer:
+                    observer("quit", helper, menu)
                 # A second helper must acquire the released lock. Kill only
                 # this test's direct child to exercise kernel-close of its pipe.
                 helper = subprocess.Popen([str(launcher), "--helper"], cwd=scratch, env=env,
@@ -364,11 +378,16 @@ def smoke(app: Path, output: Path) -> None:
                 else:
                     raise AssertionError("Menu did not reconnect after relaunch")
                 assert restarted["pid"] != menu_pid
+                if observer:
+                    observer("relaunch", helper, restarted)
+                report["menubar"]["relaunch_connected"] = True
                 helper.kill()
                 helper.wait(timeout=10)
                 assert_menu_gone(restarted["pid"])
                 assert menu_pids() == []
                 report["menubar"]["helper_death_no_survivor"] = True
+                if observer:
+                    observer("helper_death", helper, restarted)
                 checks_passed = True
         finally:
             stop(helper)
@@ -378,9 +397,11 @@ def smoke(app: Path, output: Path) -> None:
             write_json(output / "tree-before.json", before)
             write_json(output / "tree-after.json", after)
             write_json(output / "smoke.json", report)
-            shutil.move(str(relocated), app)
+            if relocate:
+                shutil.move(str(relocated), app)
             if before != after:
                 raise AssertionError("Bundle changed during smoke")
+    return report
 
 
 if __name__ == "__main__":

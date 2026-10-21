@@ -179,6 +179,23 @@ jobs:
             --dmg "$RUNNER_TEMP/mac-app/Uoink-$version-macos-arm64.dmg" \
             --mcpb "$RUNNER_TEMP/mac-app/uoink-$version-macos.mcpb" \
             --output "$RUNNER_TEMP/mac-evidence/dmg-smoke"
+      - name: Collect installed receipt bound to this DMG
+        run: |
+          version="$(cat VERSION)"
+          dmg="$RUNNER_TEMP/mac-app/Uoink-$version-macos-arm64.dmg"
+          digest="$(shasum -a 256 "$dmg" | cut -d ' ' -f 1)"
+          python -B scripts/mac/receipt.py --dmg "$dmg" \
+            --expected-sha256 "$digest" --output "$RUNNER_TEMP/mac-receipt"
+          python -c 'import json,sys; r=json.load(open(sys.argv[1])); sys.exit(0 if r["verdict"] == "installed-pass" else 1)' \
+            "$RUNNER_TEMP/mac-receipt/receipt.json"
+      - name: Upload installed receipt even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mac-install-receipt
+          path: ${{ runner.temp }}/mac-receipt/receipt.json
+          if-no-files-found: error
+          retention-days: 14
       - name: Upload app archive, DMG and Darwin connector
         uses: actions/upload-artifact@v4
         with:

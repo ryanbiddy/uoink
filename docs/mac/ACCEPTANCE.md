@@ -5,6 +5,46 @@ and version from the same successful hosted build. Record the macOS version,
 app version and result beside each step. A fresh macOS test account makes the
 first-run check repeatable without changing your existing Uoink data.
 
+## Run the receipt on your Mac
+
+Download `uoink-macos-arm64-adhoc` from the workflow run being tested and
+unzip it into `~/Downloads/uoink-mac`. It holds the DMG and `dmg.json`, the
+hash the hosted build recorded. Make a fresh clone of
+`https://github.com/ryanbiddy/uoink.git` and check out that run's exact commit.
+From the clone's root, run this in Terminal:
+
+```sh
+version="$(cat VERSION)"
+dmg="$HOME/Downloads/uoink-mac/Uoink-$version-macos-arm64.dmg"
+expected="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["sha256"])' "$HOME/Downloads/uoink-mac/dmg.json")"
+python3 -B scripts/mac/receipt.py --dmg "$dmg" --expected-sha256 "$expected" \
+  --output "$HOME/Desktop/uoink-receipt"
+```
+
+The expected hash comes from the build, not from the downloaded file, so a
+changed or corrupted download fails the receipt.
+
+Use Python 3.10 or later. System `python3` runs only the collector. You can
+replace `python3` with the full quoted path to an app's
+`Contents/Resources/Python/bin/python3`. All tested processes must use the
+Python inside the disposable copy made from this DMG. Running the source
+helper cannot earn `installed-pass`.
+
+The receipt mounts read-only, installs into a temporary path with spaces,
+uses a disposable home, profile, output folder and port, then removes that
+app with `uninstall.sh --remove` and detaches the DMG. That flag removes the
+app only. The disposable profile is kept at the path recorded in the receipt.
+Real user data and matching LaunchAgents are listed by existence and mtime
+only; port 5179 is observed without connecting. Any change fails the receipt.
+An existing login agent belonging to another install makes uninstall refuse
+to proceed. Use a fresh test account in that case.
+
+Send back **`~/Desktop/uoink-receipt/receipt.json` only**, even if it says
+`fail`. Keep any earlier receipt before rerunning; the collector refuses to
+overwrite it. A passing receipt does not replace the visible UI checks below.
+
+## Check the visible app
+
 1. Open the DMG. Read the minimum version, drag Uoink to Applications, eject
    the disk and open the installed app. Expected: it starts from Applications,
    shows one menu-bar U and opens the welcome window. This private build is
