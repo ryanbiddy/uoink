@@ -54,6 +54,10 @@ def stop(proc):
         os.killpg(proc.pid, signal.SIGTERM)
     except ProcessLookupError:
         pass
+    except PermissionError:
+        # macOS refuses signals to a group whose leader exited unreaped.
+        if proc.poll() is None:
+            raise
     try:
         proc.wait(timeout=15)
     except subprocess.TimeoutExpired:
@@ -354,6 +358,8 @@ def smoke(app: Path, output: Path) -> None:
                         restarted = wait_menu()
                         break
                     except OSError:
+                        if helper.poll() is not None:
+                            raise AssertionError(f"Relaunched helper exited with {helper.returncode}; see helper.txt")
                         time.sleep(.2)
                 else:
                     raise AssertionError("Menu did not reconnect after relaunch")

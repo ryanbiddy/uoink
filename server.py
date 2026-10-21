@@ -16,6 +16,7 @@ Endpoints:
 """
 
 import contextlib
+import errno
 import hashlib
 import json
 import logging
@@ -19859,6 +19860,14 @@ def _spawn_dashboard_window(*, reason: str, settings: bool = False) -> bool:
         return False
 
 
+def _refuse_live_listener(address) -> None:
+    """Raise EADDRINUSE when something already accepts connections on address."""
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as probe:
+        probe.settimeout(1.0)
+        if probe.connect_ex(address) == 0:
+            raise OSError(errno.EADDRINUSE, f"live listener on {address[0]}:{address[1]}")
+
+
 class _YoinkHTTPServer(ThreadingHTTPServer):
     """ThreadingHTTPServer with a bounded listen() backlog so a burst of
     connections is refused at the OS layer instead of piling up unbounded
@@ -19868,7 +19877,14 @@ class _YoinkHTTPServer(ThreadingHTTPServer):
 
     def server_bind(self):
         if _install_isolation.current_binding() is not None:
-            self.allow_reuse_address = False
+            if sys.platform == "darwin":
+                # macOS SO_REUSEADDR only permits a bind over the TIME_WAIT
+                # sockets a quit helper leaves for ~30 s; it never lets two
+                # listeners share an address. BSD reuse could shadow a wildcard
+                # listener, so any live listener is still refused here.
+                _refuse_live_listener(self.server_address)
+            else:
+                self.allow_reuse_address = False
             if hasattr(socket, "SO_EXCLUSIVEADDRUSE"):
                 self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_EXCLUSIVEADDRUSE, 1)
         if sys.platform == "darwin":
