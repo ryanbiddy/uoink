@@ -9,7 +9,7 @@ import sys
 from pathlib import Path
 
 
-PIN = re.compile(r"^([A-Za-z0-9_.-]+)==([^\s;]+)$")
+PIN = re.compile(r"^([A-Za-z0-9_.-]+)==([^\s;]+)(?: --hash=sha256:[0-9a-f]{64})?$")
 
 
 def canonical_name(value: str) -> str:
@@ -60,12 +60,18 @@ def inventory_diff(
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("lock", type=Path)
+    parser.add_argument("--write-constraints", type=Path,
+                        help="Export validated version pins for the Windows resolver; artifact qualification is separate")
     parser.add_argument(
         "--print-inventory",
         action="store_true",
         help="print the current interpreter inventory as exact pins",
     )
     args = parser.parse_args(argv)
+    if args.write_constraints is not None:
+        locked = read_lock(args.lock)
+        args.write_constraints.write_text("".join(f"{name}=={version}\n" for name, version in locked.items()), encoding="utf-8")
+        return 0
     installed = installed_inventory()
     if args.print_inventory:
         for name, version in sorted(installed.items()):

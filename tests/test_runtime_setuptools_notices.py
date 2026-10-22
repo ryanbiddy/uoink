@@ -13,10 +13,11 @@ spec.loader.exec_module(notices)
 
 
 def test_runtime_notice_generation_includes_setuptools_and_excludes_build_tools(tmp_path, monkeypatch):
-    rows = [{'Name': line.split('==')[0], 'Version': line.split('==')[1], 'License': 'fixture'}
+    rows = [{'Name': line.split('==')[0], 'Version': line.split('==', 1)[1].split()[0], 'License': 'fixture'}
             for line in (ROOT / 'requirements-installer-lock.txt').read_text().splitlines()
             if line and not line.startswith('#')]
     rows += [{'Name': name, 'Version': 'fixture'} for name in ('pip', 'wheel', 'pip-licenses', 'prettytable')]
+    assert all(not any(char.isspace() for char in row['Version']) for row in rows)
     def collect(command, **kwargs):
         assert '--with-system' in command, 'pip-licenses otherwise omits setuptools'
         return json.dumps(rows)

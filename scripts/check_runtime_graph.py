@@ -35,7 +35,7 @@ EXTRA_NAME_REGEX = re.compile(r"^[A-Za-z0-9]([A-Za-z0-9._-]*[A-Za-z0-9])?$")
 SHA256_HEX_REGEX = re.compile(r"^[0-9a-fA-F]{64}$")
 
 PIN_REGEX = re.compile(
-    r"^([A-Za-z0-9](?:[A-Za-z0-9._-]*[A-Za-z0-9])?)(?:\[([A-Za-z0-9_.,\s-]+)\])?==([^\s;]+)$"
+    r"^([A-Za-z0-9](?:[A-Za-z0-9._-]*[A-Za-z0-9])?)(?:\[([A-Za-z0-9_.,\s-]+)\])?==([^\s;]+)(?: --hash=sha256:[0-9a-f]{64})?$"
 )
 
 # Canonical environment for Windows x86-64 CPython 3.13 (non-free-threaded)

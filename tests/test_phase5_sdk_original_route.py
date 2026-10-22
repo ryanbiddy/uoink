@@ -76,7 +76,7 @@ def _activity_call(request_id=2):
         "name": "get_library_activity", "arguments": {"interval": INTERVAL}}}
 
 
-def _run_original_stdio(send_lines, collect=1):
+def _run_original_stdio(send_lines, collect=1, *, modern=False):
     async def exchange():
         incoming, input_stream = anyio.create_memory_object_stream(4)
         output_stream, outgoing = anyio.create_memory_object_stream(4)
@@ -84,15 +84,20 @@ def _run_original_stdio(send_lines, collect=1):
 
         async def serve():
             async with stdio_server(_Input(input_stream), _Output(output_stream)) as (reads, writes):
-                low = uoink_mcp.mcp._mcp_server
+                low = uoink_mcp.mcp
                 await low.run(reads, writes, low.create_initialization_options())
 
         async with anyio.create_task_group() as group:
             group.start_soon(serve)
-            await incoming.send(json.dumps(_initialize()) + "\n")
+            from tests.test_mcp_wire import modern_params
+            opening = {"jsonrpc": "2.0", "id": 1, "method": "server/discover", "params": modern_params()} if modern else _initialize()
+            await incoming.send(json.dumps(opening) + "\n")
             assert json.loads(await outgoing.receive())["id"] == 1
-            await incoming.send(json.dumps({"jsonrpc": "2.0", "method": "notifications/initialized"}) + "\n")
+            if not modern:
+                await incoming.send(json.dumps({"jsonrpc": "2.0", "method": "notifications/initialized"}) + "\n")
             for line in send_lines:
+                if modern:
+                    line = dict(line, params=modern_params(line.get("params")))
                 await incoming.send(json.dumps(line) + "\n")
             for _ in range(collect):
                 responses.append(json.loads(await outgoing.receive()))
@@ -125,30 +130,36 @@ def test_original_sdk_route_success_keeps_complete_packet(db, monkeypatch):
     assert library_resources.process_guard()._active == 0
 
 
-def test_original_sdk_route_refuses_expired_actual_serialization(db, monkeypatch):
+@pytest.mark.parametrize("modern", [False, True])
+def test_original_sdk_route_refuses_expired_actual_serialization(db, monkeypatch, modern):
     seed.insert_yoink(db, "sdk-deadline", yoinked_at="2026-09-05T12:00:00.000Z")
     db.commit()
     monkeypatch.setattr(analysis, "_analysis_db_override", db)
     original_read = analysis.get_library_activity
     monkeypatch.setattr(analysis, "get_library_activity", lambda args: original_read(args, clock=NOW))
-    original_dump = types.JSONRPCMessage.model_dump_json
+    original_dump = types.JSONRPCResponse.model_dump_json
     original_clock = time.monotonic
     clock_shift = [0.0]
     observed_active = []
 
     def expensive_actual_serialization(message, *args, **kwargs):
         text = original_dump(message, *args, **kwargs)
-        if isinstance(message.root, types.JSONRPCResponse) and message.root.id == 2:
+        if isinstance(message, types.JSONRPCResponse) and message.id == 2:
             observed_active.append(library_resources.process_guard()._active)
             clock_shift[0] += 3.0
         return text
 
-    monkeypatch.setattr(types.JSONRPCMessage, "model_dump_json", expensive_actual_serialization)
+    monkeypatch.setattr(types.JSONRPCResponse, "model_dump_json", expensive_actual_serialization)
     monkeypatch.setattr(time, "monotonic", lambda: original_clock() + clock_shift[0])
 
-    response = _run_original_stdio([_activity_call()])[0]
+    response = _run_original_stdio([_activity_call()], modern=modern)[0]
     assert response["id"] == 2
     result = response["result"]
+    if modern:
+        from tests.test_mcp_wire import modern_domain
+        result = modern_domain(result)
+    else:
+        assert "resultType" not in result and "_meta" not in result
     assert observed_active, "The actual SDK serializer was not exercised"
     assert result["isError"], f"Expired actual serialization emitted success; active={observed_active}"
     envelope = json.loads(result["content"][0]["text"])

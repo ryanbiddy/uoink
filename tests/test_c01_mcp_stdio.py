@@ -30,12 +30,8 @@ from __future__ import annotations
 
 import json
 import os
-import queue
-import subprocess
 import sys
 import tempfile
-import threading
-import time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -202,67 +198,11 @@ def _skip(reason):
         pytest.skip(reason)
 
 
-class _StdioClient:
-    """Minimal MCP stdio client: one request in flight, honest timeouts."""
-
-    def __init__(self, cmd, cwd, env, timeout=120):
-        self.proc = subprocess.Popen(
-            cmd, cwd=cwd, env=env, stdin=subprocess.PIPE,
-            stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-            text=True, encoding="utf-8")
-        self.deadline = time.time() + timeout
-        self.lines: queue.Queue = queue.Queue()
-        threading.Thread(
-            target=lambda: [self.lines.put(l) for l in self.proc.stdout],
-            daemon=True).start()
-        self.stderr_lines: list[str] = []
-        threading.Thread(target=self._drain_stderr, daemon=True).start()
-
-    def _drain_stderr(self):
-        for line in self.proc.stderr:
-            self.stderr_lines.append(line.rstrip())
-
-    def send(self, message):
-        self.proc.stdin.write(json.dumps(message) + "\n")
-        self.proc.stdin.flush()
-
-    def wait_for(self, request_id):
-        while time.time() < self.deadline:
-            try:
-                line = self.lines.get(timeout=0.5)
-            except queue.Empty:
-                if self.proc.poll() is not None:
-                    tail = "\n".join(self.stderr_lines[-6:])
-                    raise AssertionError(
-                        f"MCP process exited {self.proc.returncode} before "
-                        f"answering id={request_id}. stderr tail:\n{tail}")
-                continue
-            try:
-                message = json.loads(line)
-            except json.JSONDecodeError:
-                continue
-            if message.get("id") == request_id:
-                return message
-        raise AssertionError(f"timed out waiting for response id={request_id}")
-
-    def close(self):
-        try:
-            self.proc.stdin.close()
-        except Exception:
-            pass
-        try:
-            self.proc.wait(timeout=15)
-        except Exception:
-            self.proc.kill()
+from tests.mcp_wire import StdioClient as _StdioClient, isolated_env
 
 
 def _isolated_env(tmp):
-    env = dict(os.environ)
-    profile = Path(tmp) / "profile"
-    profile.mkdir(exist_ok=True)
-    env["UOINK_ISOLATED_PROFILE"] = str(profile)
-    env["UOINK_ISOLATED_PORT"] = "5187"
-    env.pop("UOINK_ISOLATED_APP_DIR", None)
+    env = isolated_env(tmp)
     # Keep the guarded launcher's audit hook and dependency paths. With its
     # disposable APPDATA, removing these also hides the user-installed SDK.
     # Exclude the worktree/cwd and relative entries so they cannot rescue the
@@ -392,7 +332,7 @@ def test_doctor_carries_the_selfcheck():
     server_src = (ROOT / "server.py").read_text(encoding="utf-8")
     _assert("def _mcp_stdio_selfcheck" in server_src,
             "doctor self-check function missing")
-    _assert('"mcp_stdio": _mcp_stdio_selfcheck()' in server_src,
+    _assert('"mcp_stdio": _mcp_stdio_selfcheck(timeout=' in server_src,
             "doctor_payload must include the mcp_stdio check")
     _assert('"-P"' in server_src.split("def _mcp_stdio_selfcheck", 1)[1][:2000],
             "self-check must recreate the embeddable condition with -P")

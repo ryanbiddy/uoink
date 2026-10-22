@@ -132,7 +132,7 @@ installed into the embeddable Python with the exact pip versions below.
 | FFmpeg shared runtime | n7.1.5 BtbN win64 LGPL shared | Locked in `build.ps1` | Seven DLLs in `bin/torchcodec`; required by TorchCodec 0.7's FFmpeg 7 ABI. |
 | yt-dlp | 2026.08.19 | (pip) | Pinned via `pip install yt-dlp==2026.08.19`. Bump after compatibility-testing a new release. |
 | Pillow | 12.3.0 | (pip) | Drives the multimodal paste-corpus generator (resize + JPEG-recompress + base64-encode screenshots for clipboard embedding). Pinned via `pip install Pillow==12.3.0`. |
-| MCP Python SDK | 1.28.1 | (pip) | Official Model Context Protocol Python SDK. Powers the stdio MCP server. Pinned via `pip install mcp==1.28.1` and `requirements.txt`. |
+| MCP Python SDK | 2.3.0 | (pip) | Official Model Context Protocol Python SDK. Powers the dual-era stdio server. The SDK, mcp-types and transport dependencies are pinned in `requirements.txt` and the installer lock. |
 | keyring | 25.7.0 | (pip) | Stores the BYO Anthropic API key in Windows Credential Manager. Pinned via `pip install keyring==25.7.0` and `requirements.txt`. |
 | pystray | 0.19.5 | (pip) | Windows tray integration. |
 | pywebview | 5.4 | (pip) | Local desktop shell. |

@@ -237,7 +237,8 @@ def test_health_exposes_heartbeat_block(monkeypatch):
 def _doctor_with_health(monkeypatch, health: dict):
     monkeypatch.setattr(server, "_diagnose_payload", lambda: {"ok": True})
     monkeypatch.setattr(server.migrate_install, "migration_status", lambda: {})
-    monkeypatch.setattr(server, "_mcp_stdio_selfcheck", lambda: {"ok": True})
+    monkeypatch.setattr(server, "_mcp_stdio_selfcheck", lambda **_kwargs: {"ok": True})
+    monkeypatch.setattr(server, "_mcp_modern_stdio_selfcheck", lambda **_kwargs: {"ok": True})
     monkeypatch.setattr(server, "_path_integrity_status", lambda force=False: {"ok": True})
     monkeypatch.setattr(server, "_podcast_corpus_reconciliation_status", lambda: {"ok": True})
     monkeypatch.setattr(server.index, "schema_migration_status",

@@ -20414,94 +20414,185 @@ def _print_json(payload: dict) -> None:
     print(json.dumps(payload, indent=2, default=str))
 
 
-def _mcp_stdio_selfcheck(timeout: float = 60.0) -> dict:
+def _mcp_stdio_selfcheck(timeout: float = 60.0, *, modern: bool = False, env=None) -> dict:
     """C-01 (CRIT-1): prove the stdio MCP entry point actually boots from
     THIS interpreter and answers the protocol, the way an MCP client would
     drive it. Runs `python -P uoink_mcp.py` (-P withholds the script dir
     from sys.path, recreating the bundled embeddable Python's ._pth
-    behavior even on a dev interpreter) and walks
-    initialize -> initialized -> tools/list. Returns {ok, tools|error}.
+    behavior even on a dev interpreter). Legacy mode walks initialize ->
+    initialized -> tools/list; modern mode uses discover -> tools/list.
+    Records the observed protocol version. expected_serializer and
+    expected_transport name the implementation we expect, not wire evidence.
 
     This is the check that was missing while every install shipped a dead
     agentic path: the import crash only reproduced under the embeddable
     interpreter, so nothing in dev or CI ever saw it."""
-    script = HERE / "uoink_mcp.py"
-    if not script.exists():
-        return {"ok": False, "error": f"uoink_mcp.py not found at {script}"}
-    try:
+    deadline = time.monotonic() + max(0.0, timeout)
+    # Keep part of the same budget for process and pipe cleanup.
+    handshake_deadline = deadline - min(2.0, max(0.0, timeout) / 5)
+    proc = None
+    threads = []
+    result = {}
+
+    def probe():
+        nonlocal proc
+        if time.monotonic() >= handshake_deadline:
+            return {"ok": False, "error": "stdio self-check deadline exhausted"}
+        script = HERE / "uoink_mcp.py"
+        if not script.exists():
+            return {"ok": False, "error": f"uoink_mcp.py not found at {script}"}
         proc = subprocess.Popen(
             [sys.executable, "-P", str(script)],
             cwd=str(HERE), stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE, text=True, encoding="utf-8")
-    except OSError as e:
-        return {"ok": False, "error": f"couldn't launch the MCP process: {e}"}
+            stderr=subprocess.PIPE, text=True, encoding="utf-8", env=env)
+        lines: queue.Queue = queue.Queue()
+        stderr_tail: list[str] = []
 
-    lines: queue.Queue = queue.Queue()
-    threading.Thread(
-        target=lambda: [lines.put(line) for line in proc.stdout],
-        daemon=True).start()
-    stderr_tail: list[str] = []
+        def drain_stdout():
+            for line in proc.stdout:
+                lines.put(line)
 
-    def _drain_stderr() -> None:
-        for line in proc.stderr:
-            stderr_tail.append(line.rstrip())
-            del stderr_tail[:-5]
+        def drain_stderr():
+            for line in proc.stderr:
+                stderr_tail.append(line.rstrip())
+                del stderr_tail[:-5]
 
-    threading.Thread(target=_drain_stderr, daemon=True).start()
-    deadline = time.time() + timeout
+        for drain in (drain_stdout, drain_stderr):
+            thread = threading.Thread(target=drain, daemon=True)
+            threads.append(thread)
+            thread.start()
 
-    def _send(message: dict) -> None:
-        proc.stdin.write(json.dumps(message) + "\n")
-        proc.stdin.flush()
+        def send(message: dict) -> None:
+            proc.stdin.write(json.dumps(message) + "\n")
+            proc.stdin.flush()
 
-    def _wait_for(request_id: int) -> dict | None:
-        while time.time() < deadline:
-            try:
-                line = lines.get(timeout=0.5)
-            except queue.Empty:
-                if proc.poll() is not None:
-                    return None
-                continue
-            try:
-                message = json.loads(line)
-            except (json.JSONDecodeError, TypeError):
-                continue
-            if message.get("id") == request_id:
-                return message
-        return None
+        def wait_for(request_id: int) -> dict | None:
+            while (remaining := handshake_deadline - time.monotonic()) > 0:
+                try:
+                    line = lines.get(timeout=min(0.5, remaining))
+                except queue.Empty:
+                    if proc.poll() is not None:
+                        return None
+                    continue
+                try:
+                    message = json.loads(line)
+                except (json.JSONDecodeError, TypeError) as exc:
+                    raise ValueError("Non-JSON output on MCP stdout") from exc
+                if not isinstance(message, dict) or message.get("jsonrpc") != "2.0":
+                    raise ValueError("Invalid JSON-RPC output on MCP stdout")
+                if message.get("id") == request_id:
+                    return message
+            return None
 
-    try:
-        _send({"jsonrpc": "2.0", "id": 1, "method": "initialize",
+        from mcp.types.version import LATEST_MODERN_VERSION
+        modern_params = {"_meta": {
+            "io.modelcontextprotocol/protocolVersion": LATEST_MODERN_VERSION,
+            "io.modelcontextprotocol/clientCapabilities": {}}}
+        opening = "server/discover" if modern else "initialize"
+        send({"jsonrpc": "2.0", "id": 1, "method": opening,
+               "params": modern_params} if modern else {
+               "jsonrpc": "2.0", "id": 1, "method": "initialize",
                "params": {"protocolVersion": "2024-11-05", "capabilities": {},
                           "clientInfo": {"name": "uoink-doctor",
                                          "version": VERSION}}})
-        init = _wait_for(1)
+        init = wait_for(1)
         if not init or "result" not in init:
             tail = "; ".join(stderr_tail)
             return {"ok": False,
-                    "error": "initialize got no response"
+                    "error": f"{opening} got no response"
                              + (f" (stderr: {tail})" if tail else "")}
-        _send({"jsonrpc": "2.0", "method": "notifications/initialized"})
-        _send({"jsonrpc": "2.0", "id": 2, "method": "tools/list"})
-        tools = _wait_for(2)
+        if modern:
+            if LATEST_MODERN_VERSION not in init["result"].get("supportedVersions", []):
+                return {"ok": False, "error": "discover did not confirm modern protocol"}
+            version = LATEST_MODERN_VERSION
+        else:
+            version = init["result"].get("protocolVersion")
+            if version not in ("2024-11-05", "2025-03-26", "2025-06-18", "2025-11-25"):
+                return {"ok": False, "error": "initialize returned an invalid protocol version"}
+            send({"jsonrpc": "2.0", "method": "notifications/initialized"})
+        listing = {"jsonrpc": "2.0", "id": 2, "method": "tools/list"}
+        if modern:
+            listing["params"] = modern_params
+        send(listing)
+        tools = wait_for(2)
         if not tools or "result" not in tools:
             return {"ok": False, "error": "tools/list got no response"}
+        if modern and (tools["result"].get("resultType") != "complete" or
+                       "io.modelcontextprotocol/serverInfo" not in tools["result"].get("_meta", {})):
+            return {"ok": False, "error": "tools/list lacks the modern result envelope"}
         count = len((tools.get("result") or {}).get("tools") or [])
         if count < 14:
             return {"ok": False,
                     "error": f"tools/list returned only {count} tools"}
-        return {"ok": True, "tools": count}
-    except Exception as e:
-        return {"ok": False, "error": f"stdio handshake failed: {e}"}
-    finally:
+        return {"ok": True, "tools": count, "protocol_era": "modern" if modern else "legacy",
+                "protocol_version": version, "opening_method": opening,
+                "expected_serializer": "JSONRPCResponse.model_dump_json",
+                "expected_transport": "bounded_stdio_server", "evidence": "JSON-RPC self-check"}
+
+    def cleanup_step(label, action):
         try:
-            proc.stdin.close()
-        except Exception:
-            pass
+            action()
+        except Exception as exc:
+            prior = result.get("error")
+            result.update(ok=False, error=(f"{prior}; " if prior else "") + f"{label}: {exc}")
+
+    def remaining(cap):
+        return min(cap, max(0.0, deadline - time.monotonic()))
+
+    def reap():
         try:
-            proc.wait(timeout=10)
-        except Exception:
+            proc.wait(timeout=remaining(1.0))
+        except subprocess.TimeoutExpired:
             proc.kill()
+            proc.wait(timeout=remaining(1.0))
+
+    try:
+        result.update(probe())
+    except Exception as e:
+        result.update(ok=False, error=f"stdio self-check failed: {e}")
+    finally:
+        if proc is not None:
+            cleanup_step("stdin cleanup failed", proc.stdin.close)
+            cleanup_step("process cleanup failed", reap)
+            for thread in threads:
+                cleanup_step("reader cleanup failed", lambda: thread.join(timeout=remaining(0.5)))
+            for position, pipe in enumerate((proc.stdout, proc.stderr)):
+                # Closing a buffered reader while its thread is blocked can
+                # itself block doctor. Leave it to the daemon if reaping failed.
+                def close_reader():
+                    if position < len(threads) and threads[position].is_alive():
+                        raise RuntimeError("reader did not stop before the deadline")
+                    pipe.close()
+                cleanup_step("pipe cleanup failed", close_reader)
+    return result
+
+
+def _mcp_modern_stdio_selfcheck(timeout: float = 60.0) -> dict:
+    """Probe a disposable profile; report setup and cleanup failures as data."""
+    try:
+        import tempfile
+        deadline = time.monotonic() + max(0.0, timeout)
+        if timeout <= 0:
+            return {"ok": False, "error": "modern stdio self-check deadline exhausted"}
+        # Keep cleanup strict so a locked file produces ok=False. The outer
+        # catch covers __enter__, every setup step, and __exit__ as well.
+        with tempfile.TemporaryDirectory(prefix="uoink-modern-selfcheck-") as directory:
+            root = Path(directory)
+            for name in ("profile", "app", "temp"):
+                (root / name).mkdir()
+            with socket.socket() as probe:
+                probe.bind(("127.0.0.1", 0))
+                port = probe.getsockname()[1]
+            if port == 5179:
+                return {"ok": False, "error": "isolated port allocation selected the production port"}
+            env = dict(os.environ, UOINK_ISOLATED_PROFILE=str(root / "profile"),
+                       UOINK_ISOLATED_APP_DIR=str(root / "app"), UOINK_ISOLATED_PORT=str(port),
+                       LOCALAPPDATA=str(root / "appdata"), XDG_DATA_HOME=str(root / "xdg"),
+                       UOINK_OUTPUT_DIR=str(root / "out"), TMP=str(root / "temp"), TEMP=str(root / "temp"),
+                       PYTHONDONTWRITEBYTECODE="1", PYTHONUTF8="1")
+            return _mcp_stdio_selfcheck(max(0.0, deadline - time.monotonic()), modern=True, env=env)
+    except Exception as exc:
+        return {"ok": False, "error": f"modern stdio self-check failed: {exc}"}
 
 
 # ---- C-05 (CRIT-5): stale-path integrity + heal ---------------------------
@@ -20842,6 +20933,7 @@ def doctor_payload() -> dict:
     # not completed a pass within the freshness bound is not healthy even
     # though its HTTP listener still answers.
     heartbeat = _doctor_heartbeat(helper_health)
+    mcp_deadline = time.monotonic() + 30.0
     payload = {
         "ok": bool(
             helper_health.get("ok")
@@ -20854,7 +20946,8 @@ def doctor_payload() -> dict:
         "schema_migration": schema_migration,
         "diagnose": _diagnose_payload(),
         "migration": migrate_install.migration_status(),
-        "mcp_stdio": _mcp_stdio_selfcheck(),
+        "mcp_stdio": _mcp_stdio_selfcheck(timeout=max(0.0, mcp_deadline - time.monotonic())),
+        "mcp_stdio_modern": _mcp_modern_stdio_selfcheck(timeout=max(0.0, mcp_deadline - time.monotonic())),
         "path_integrity": _path_integrity_status(force=True),
         "podcast_corpus": _podcast_corpus_reconciliation_status(),
     }

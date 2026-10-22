@@ -1119,8 +1119,9 @@ def test_adapted_notice_regeneration_exact_license_and_build_staging(tmp_path, m
     spec = importlib.util.spec_from_file_location("playbook_notice_generator", ROOT / "scripts/gen_third_party_notices.py")
     notices = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(notices)
-    rows = [{"Name": line.split("==")[0], "Version": line.split("==")[1], "License": "fixture"}
+    rows = [{"Name": line.split("==")[0], "Version": line.split("==", 1)[1].split()[0], "License": "fixture"}
             for line in (ROOT / "requirements-installer-lock.txt").read_text().splitlines() if line and not line.startswith("#")]
+    assert all(not any(char.isspace() for char in row["Version"]) for row in rows)
     monkeypatch.setattr(notices, "_from_pip_licenses", lambda: rows)
     target = tmp_path / "notices.md"
     monkeypatch.setattr(notices.sys, "argv", ["notices", str(target)])

@@ -26,19 +26,19 @@ def test_ba4_actual_sdk_serialization_retains_admission_and_deadline(tmp_path, m
     original_read = analysis.get_library_activity
     monkeypatch.setattr(analysis, "get_library_activity", lambda args: original_read(
         args, clock=datetime(2026, 9, 8, 12, tzinfo=timezone.utc)))
-    original_dump = types.JSONRPCMessage.model_dump_json
+    original_dump = types.JSONRPCResponse.model_dump_json
     original_clock = time.monotonic
     clock_shift = [0.0]
     observed_active = []
 
     def expensive_actual_serialization(message, *args, **kwargs):
         text = original_dump(message, *args, **kwargs)
-        if isinstance(message.root, types.JSONRPCResponse) and message.root.id == 2:
+        if isinstance(message, types.JSONRPCResponse) and message.id == 2:
             observed_active.append(library_resources.process_guard()._active)
             clock_shift[0] += 3.0
         return text
 
-    monkeypatch.setattr(types.JSONRPCMessage, "model_dump_json", expensive_actual_serialization)
+    monkeypatch.setattr(types.JSONRPCResponse, "model_dump_json", expensive_actual_serialization)
     monkeypatch.setattr(time, "monotonic", lambda: original_clock() + clock_shift[0])
 
     class Input:
@@ -70,7 +70,7 @@ def test_ba4_actual_sdk_serialization_retains_admission_and_deadline(tmp_path, m
 
         async def serve():
             async with stdio_server(Input(input_stream), Output(output_stream)) as (reads, writes):
-                low = uoink_mcp.mcp._mcp_server
+                low = uoink_mcp.mcp
                 await low.run(reads, writes, low.create_initialization_options())
 
         async with anyio.create_task_group() as group:

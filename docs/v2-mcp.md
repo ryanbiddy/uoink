@@ -2,7 +2,7 @@
 
 Status: Sprint 4 backend implemented  
 Schema version: 2.1.0  
-SDK: official Model Context Protocol Python SDK, `mcp==1.27.1`  
+SDK: official Model Context Protocol Python SDK, `mcp==2.3.0` and `mcp-types==2.3.0`\
 Transports: stdio, plus an experimental authenticated local HTTP JSON-RPC helper
 
 ## Overview
@@ -11,6 +11,38 @@ Uoink serves the same tool registry over both MCP transports:
 
 - Supported stdio registry: **91 tools**.
 - Local HTTP/OpenAPI registry: **91 tools**.
+
+Stdio uses the SDK's native dual-era runner. Existing clients can initialize
+with `2024-11-05`, `2025-03-26`, `2025-06-18` or `2025-11-25`, then send
+`notifications/initialized`. Unsupported handshake versions negotiate
+`2025-11-25`. Modern clients can start with `server/discover` or a normal
+request such as `tools/list`; every modern request carries this envelope:
+
+```json
+{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{"_meta":{"io.modelcontextprotocol/protocolVersion":"2026-07-28","io.modelcontextprotocol/clientCapabilities":{}}}}
+```
+
+The first request selects the era for that connection. `initialize` selects
+legacy even when it carries modern metadata. Changing eras requires a new
+connection. Modern results include `resultType` and server identity in `_meta`.
+Cacheable results use `ttlMs: 0` and `cacheScope: "private"`. Legacy responses
+retain their earlier shapes. `/mcp/v1` retains its legacy HTTP contract and
+does not advertise 2026-07-28 HTTP support.
+
+| Stdio refusal | Code or result |
+|---|---|
+| Malformed JSON or duplicate keys | Bounded null-ID error, `-32700` |
+| Invalid envelope or ID, oversized input, modern request on a legacy connection | `-32600` |
+| Unknown method | `-32601`, with the method name in error data |
+| Malformed arguments or missing/malformed modern metadata | `-32602` |
+| Unsupported modern version or initialize on a modern connection | `-32022` |
+| Missing/deleted resource | Legacy `-32002`; modern `-32602` with the URI and domain error data |
+| Tool domain refusal | `CallToolResult` with `isError: true` and the existing text envelope |
+
+These refusals leave the connection usable. Accepted cancellation sends no
+response and releases admission when the operation settles. Ordinary completed
+frames have a 65,536-byte limit before the newline; genuine `tools/list`
+responses have 262,144 bytes. The incoming method selects that allowance.
 
 Claude Desktop (.mcpb), Claude Code and Cursor use `uoink_mcp.py` over stdio.
 It advertises every registry tool with the same name, description, input schema,
