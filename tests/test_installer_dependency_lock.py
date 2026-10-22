@@ -24,7 +24,7 @@ def test_installer_lock_is_complete_and_exact() -> None:
     assert locked["pillow"] == "12.3.0"
     assert locked["mcp"] == "2.3.0"
     assert locked["mcp-types"] == "2.3.0"
-    assert locked["httpx2"] == locked["httpcore2"] == "2.10.0"
+    assert locked["httpx2"] == locked["httpcore2"] == "2.16.0"
     assert locked["truststore"] == "0.10.5"
     assert not {"httpx", "httpcore", "httpx-sse", "pydantic-settings", "python-dotenv"} & locked.keys()
     assert locked["faster-whisper"] == "1.2.1"
@@ -143,8 +143,8 @@ def test_sdk2_hash_rows_and_version_constraint_export(tmp_path):
     assert hashes == {
         "mcp": "dd0c44c089d16453e8ae31a3877a0054d7a2314caaa81f5e0541b9b1734b2377",
         "mcp-types": "968efdbdaedfab06adae40d378a34395f1090c5921d4be3c9cde283aaf76d91d",
-        "httpx2": "5e3194a432701e1cc6f69a8b1b2fa199ef907013fede8d9a09a2c5b7b8141a18",
-        "httpcore2": "7df06cfb34070cae4f7c89be69dc1095eca138e9704ceffb98d25c1912ab6f01",
+        "httpx2": "fd2c5d7909e8d86fe92d53020c310ca0e4e431b838c207c5754b9bbf0308d49a",
+        "httpcore2": "5c4358319f2602d984ad93182c9fee5160f22e9da7babdda870a5e7c4e2dc34f",
         "truststore": "9aaaedaefaf06d8b206278cf8b5012bc897f485a874503501e12d776df78951c",
     }
     destination = tmp_path / "constraints.txt"

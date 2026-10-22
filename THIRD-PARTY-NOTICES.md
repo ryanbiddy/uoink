@@ -1,7 +1,7 @@
 # Third-Party Notices
 
 Uoink is MIT-licensed. It bundles the third-party components below.
-This file is generated from the installed dependency tree (source: pip-licenses) on 2026-10-18. The SDK 2 candidate delta was updated from the five installed wheel metadata records on 2026-10-21; native full-graph regeneration is pending M5. Regenerate with `python scripts/gen_third_party_notices.py`.
+This file is generated from the installed dependency tree (source: pip-licenses) on 2026-10-22; regenerate with `python scripts/gen_third_party_notices.py`.
 
 | Package | Version | License | Project |
 |---|---|---|---|
@@ -39,8 +39,8 @@ This file is generated from the installed dependency tree (source: pip-licenses)
 | greenlet | 3.5.4 | MIT AND PSF-2.0 | https://greenlet.readthedocs.io |
 | grpcio | 1.82.1 | Apache-2.0 | https://grpc.io |
 | h11 | 0.16.0 | MIT License | https://github.com/python-hyper/h11 |
-| httpcore2 | 2.10.0 | BSD-3-Clause | https://github.com/pydantic/httpx2 |
-| httpx2 | 2.10.0 | BSD-3-Clause | https://github.com/pydantic/httpx2 |
+| httpcore2 | 2.16.0 | BSD License | https://github.com/pydantic/httpx2 |
+| httpx2 | 2.16.0 | BSD License | https://github.com/pydantic/httpx2 |
 | huggingface_hub | 0.36.2 | Apache Software License | https://github.com/huggingface/huggingface_hub |
 | idna | 3.18 | BSD-3-Clause | https://github.com/kjd/idna |
 | jaraco.classes | 3.4.0 | MIT License | https://github.com/jaraco/jaraco.classes |
@@ -59,8 +59,8 @@ This file is generated from the installed dependency tree (source: pip-licenses)
 | markdown-it-py | 4.2.0 | MIT License | https://github.com/executablebooks/markdown-it-py |
 | MarkupSafe | 3.0.3 | BSD-3-Clause | https://github.com/pallets/markupsafe/ |
 | matplotlib | 3.11.1 | Python Software Foundation License | https://matplotlib.org |
-| mcp | 2.3.0 | MIT | https://modelcontextprotocol.io |
-| mcp-types | 2.3.0 | MIT | https://modelcontextprotocol.io |
+| mcp | 2.3.0 | MIT License | https://modelcontextprotocol.io |
+| mcp-types | 2.3.0 | MIT License | https://modelcontextprotocol.io |
 | mdurl | 0.1.2 | MIT License | https://github.com/executablebooks/mdurl |
 | more-itertools | 11.1.0 | MIT | https://github.com/more-itertools/more-itertools |
 | mpmath | 1.3.0 | BSD License | http://mpmath.org/ |
@@ -136,8 +136,8 @@ This file is generated from the installed dependency tree (source: pip-licenses)
 | tqdm | 4.69.0 | MPL-2.0 AND MIT | https://tqdm.github.io |
 | transformers | 4.57.6 | Apache Software License | https://github.com/huggingface/transformers |
 | truststore | 0.10.5 | MIT | https://github.com/sethmlarson/truststore |
-| typing_extensions | 4.16.0 | PSF-2.0 | https://github.com/python/typing_extensions |
 | typing-inspection | 0.4.2 | MIT | https://github.com/pydantic/typing-inspection |
+| typing_extensions | 4.16.0 | PSF-2.0 | https://github.com/python/typing_extensions |
 | tzdata | 2026.3 | Apache-2.0 | https://github.com/python/tzdata |
 | urllib3 | 2.7.0 | MIT | https://github.com/urllib3/urllib3/blob/main/CHANGES.rst |
 | uvicorn | 0.51.0 | BSD-3-Clause | https://uvicorn.dev/ |

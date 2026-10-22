@@ -1,7 +1,7 @@
 mcp==2.3.0
 mcp-types==2.3.0
-httpx2==2.10.0
-httpcore2==2.10.0
+httpx2==2.16.0
+httpcore2==2.16.0
 truststore==0.10.5
 keyring==25.7.0
 Pillow==12.3.0

@@ -156,7 +156,7 @@ jobs:
           python-version: "3.11"
       - name: Install dependencies
         # Match the dual-era stdio runtime and its reviewed transport dependencies.
-        run: pip install pytest Pillow "mcp==2.3.0" "mcp-types==2.3.0" "httpx2==2.10.0" "httpcore2==2.10.0" "truststore==0.10.5"
+        run: pip install pytest Pillow "mcp==2.3.0" "mcp-types==2.3.0" "httpx2==2.16.0" "httpcore2==2.16.0" "truststore==0.10.5"
       - name: Run tests
         # The Living Library tests import top-level modules (index, server,
         # library_*) directly, so the checkout root must be on PYTHONPATH.
