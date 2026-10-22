@@ -69,7 +69,7 @@ and is not what this bundle launches.
 The committed [manifest](manifest.json) lists all 91 names. The previous 35
 remain first in `tools/list`. Set `UOINK_MCP_TOOLSET=core` for clients with tool
 caps, including Cursor. Unknown values warn on stderr and use full.
-Claude Desktop users should reinstall the 3.10.0 `.mcpb` and restart Desktop
+Claude Desktop users should reinstall the 3.11.0 `.mcpb` and restart Desktop
 to get the expanded inventory. Consent gates are unchanged.
 
 Resources and prompts are advertised on **stdio** (templates under

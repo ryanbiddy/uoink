@@ -10,6 +10,139 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [3.11.0] - 2026-10-22
+
+### Added
+
+- Forgiving keyword search is the default. Search drops common English words,
+  matches any remaining word and ranks results in groups: an exact title first
+  (ignoring case and punctuation), then results with every useful word, then
+  partial matches, with BM25 ordering inside each group. `match: "strict"`
+  keeps the previous every-word search; the dashboard calls it **Exact words**.
+  This covers `search_library`, `search_uoinks`, `search_clips`,
+  `find_mentions`, `/memory/search`, `/api/corpus/v1/search`, `uoink search`
+  and the dashboard, which selects **Best match** order when a query starts.
+- Optional local semantic search in Settings > Semantic search. After the user
+  accepts the Gemma Terms of Use and Prohibited Use Policy, Uoink downloads
+  EmbeddingGemma from Hugging Face once (about 330 MB, pinned and hash
+  checked), builds a vector index in the background, keeps it current as
+  captures change and works offline after that. Settings has Pause, Resume and
+  Remove; Remove deletes the model, its vectors and the acceptance record.
+  The model is not bundled in the installer, `.mcpb` or DMG, and a build check
+  fails if it is. No MCP tool can accept the terms or start the download.
+  The installer includes the EmbeddingGemma notice and both Gemma documents.
+- `search_uoinks`, `search_clips` and `search_library` take an optional `mode`:
+  `auto` (default; hybrid when the semantic index is ready, keyword
+  otherwise), `keyword`, `semantic` or `hybrid` (reciprocal rank fusion, k=60,
+  over the top 100 of each). Responses name the mode that ran in
+  `search_mode` and give a `fallback_reason` when search fell back to keywords.
+- Quotable citations. Search results carry the source ID and, only when the
+  passage really contains the match, the passage text with its clip ID and
+  start and end seconds or its character span, plus the timestamp where one
+  exists. Otherwise `passage_verified` is false and `citation_reason` says
+  why. `find_mentions` keeps its stored `timestamp` and `deep_link` and adds
+  verified timing in `timestamp_seconds` and `passage`. `/api/corpus/v1/search`
+  keeps its exact v1 response unless the caller sends `search_details=true`.
+- **Share anonymous usage counts** in Settings > App > Usage sharing, off by
+  default, with a one-time dashboard card whose default is **No thanks**. When
+  on, the helper sends at most one report a day to `usage.uoink.app`: counts
+  of tool calls by tool name, stdio and HTTP calls, AI apps from a fixed list
+  (others count as `other`), captures by source and result, and searches, plus
+  a random install ID, a report ID, app version, operating system and major
+  version, processor type, install type and hours covered. Reports never
+  include content, URLs, titles, paths, search text, usernames, IP addresses
+  or account details. **See what is sent** shows the next report and the last
+  ten sent. Turning sharing off deletes the install ID, counts and sent
+  history. Isolated installs and tests never send, and `UOINK_USAGE_SHARING=0`
+  set for the helper stops sending. See [usage sharing](docs/usage-sharing.md).
+  Release notes before 3.11.0 that say Uoink has no telemetry describe those
+  releases.
+- `uoink connect` adds 10 clients: Kiro, Copilot CLI, Auggie, Factory Droid,
+  Qwen Code, Crush, Antigravity, Chatbox, Dive and Perplexity (Mac). It now
+  has 48 recipes. 45 are checked against each client's official documentation,
+  with sources and check dates in `docs/integrations-verification-2026-10-21.md`,
+  and `uoink connect` prints each recipe's verification status.
+- Linux in the client tables. Recipes carry a Linux location where the client
+  has one, and the tables in `docs/connect-your-agent.md` and the agent kit
+  list Linux. A Linux location without its own Linux doc source is labeled as
+  reusing the POSIX spelling. Clients with no Linux build (Claude Desktop,
+  Raycast, AnythingLLM, Obsidian) refuse on Linux instead of printing a macOS
+  path, and Mac-only recipes refuse on Windows.
+- The dashboard detects Continue. It reads Continue's `config.yaml` (and the
+  legacy `config.json`) read-only and shows Continue as connected when an MCP
+  entry launches this install.
+
+### Changed
+
+- The MCP server moved from the Python SDK 1.28.1 to the official SDK 2.3.0,
+  which implements the stateless 2026-07-28 protocol. Stdio serves both eras:
+  clients that send a legacy `initialize` (protocol versions 2024-11-05,
+  2025-03-26, 2025-06-18 and 2025-11-25) connect as before, and 2026-07-28
+  clients can use `server/discover` or an inline first request. HTTP
+  `/mcp/v1` keeps its existing contract and is not advertised as 2026-07-28
+  HTTP. The SDK move changes no tool names or schemas.
+- Installer dependencies: `mcp` 2.3.0, `mcp-types` 2.3.0, `httpx2` 2.16.0,
+  `httpcore2` 2.16.0 and `truststore` 0.10.5 join; `httpx`, `httpcore`,
+  `httpx-sse`, `pydantic-settings` and `python-dotenv` leave. The locked graph
+  has 139 packages, with about 172 KB more wheels.
+- Dashboard connection status for Claude Desktop, Cursor and Cline now checks
+  whether any MCP entry launches this install, not whether a key named
+  `uoink` exists. An entry that points at an old or moved install, or at a dev
+  checkout, now shows **Connect**, which rewrites it and keeps a backup. A
+  renamed entry that launches this install counts as connected. A bundle
+  missing its launcher reads as not connected instead of failing the scan.
+- Continue is manual only. Its current config is YAML, so the dashboard's
+  Connect returns 409 with instructions and writes nothing;
+  `uoink connect continue` prints a standalone
+  `.continue/mcpServers/uoink.yaml` entry.
+- Third-party notices prefer a package's PEP 639 `License-Expression` over its
+  license classifier.
+- Library search uses separate read connections with per-request deadlines,
+  so up to four library reads run at once (previously two). The two-second
+  deadline and rate limit are unchanged. Large forgiving clip searches rank a
+  bounded shortlist of sources (`max(32, limit)`) before ranking their clips,
+  so clip results are a ranked selection, not an exhaustive listing.
+
+### Fixed
+
+- MCP stdio error replies follow the specification: an unknown method returns
+  -32601, malformed JSON returns -32700 with a null id, a request with a null
+  id returns -32600, and an accepted cancellation gets no response.
+
+### Compatibility and testing
+
+- The MCP server exposes 91 tools by default and 35 with
+  `UOINK_MCP_TOOLSET=core`. No tool is added or removed, and consent gates
+  are unchanged.
+- Search schema changes are additive optional parameters (`match`, `mode`,
+  and `search_details` on corpus v1).
+- Upgrading keeps the library and saved captures. Migration 0031 adds a clip
+  metadata index, and migration 0032 rebuilds the derived keyword search
+  indexes once on first start. On a 3,000-source test library with 180,000
+  clips, the rebuild took 2.8 seconds and the index file grew from 154 MB to
+  231 MB, 34 MB of it reusable free space. Source, clip and mention data were
+  unchanged (hashes compared).
+- Frozen 30-query benchmark on a copy of a 693-source library, top 5:
+  strict (the previous behavior) 10/30, forgiving keyword 24/30, semantic
+  27/30 and hybrid 28/30. All 10 keyword queries were found in every mode.
+  p95 latency was 7 ms, 46-52 ms, 106 ms and 333 ms. Exact titles came first
+  for 692 of 693 sources; the miss is two captures with the same title. The
+  first semantic index build took about 40 minutes for 693 sources on CPU,
+  in the background.
+- On a synthetic 3,000-source library with 180,000 clips, every measured
+  search call stayed within 1.5 times the previous search code's time or
+  under 150 ms, and batches of two and four concurrent library searches all
+  succeeded.
+- Real clients against the SDK 2 server, run from source with an isolated
+  profile: Claude Code 2.1.307 listed 91 tools (35 in core mode) and called a
+  tool, also with `MCP_PROTOCOL_NEGOTIATION=auto`; Codex 0.153.4 called a tool
+  with its default settings and with `CODEX_MCP_PROTOCOL_VERSION=2026-07-28`.
+  {{PACKAGED_CLIENT_CHECK}} Characterization recordings from SDK 1 cover all
+  four legacy protocol versions, and 66 adversarial cases pass in both eras.
+- Client recipes: 45 of 48 are checked against official docs. The connect
+  docs still mark client acceptance as "not yet tested" for every recipe.
+- No usage report was sent during verification; tests mock the request.
+
 ## [3.10.0] - 2026-10-19
 
 ### Added

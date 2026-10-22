@@ -1,8 +1,21 @@
 {
   "name": "uoink",
-  "owner": {"name": "Ryan Biddy"},
-  "metadata": {"description": "Local Uoink library tools and skills for AI agents."},
+  "owner": {
+    "name": "Ryan Biddy"
+  },
+  "metadata": {
+    "description": "Local Uoink library and Zing video tools and skills for AI agents."
+  },
   "plugins": [
-    {"name": "uoink", "source": "./plugins/uoink", "description": "Search, cite, and capture with your local Uoink library."}
+    {
+      "name": "uoink",
+      "source": "./plugins/uoink",
+      "description": "Search, cite, and capture with your local Uoink library."
+    },
+    {
+      "name": "zing",
+      "source": "./plugins/zing",
+      "description": "Study, match, render and inspect short videos and memes locally with Zing; uses your Uoink library for references."
+    }
   ]
 }

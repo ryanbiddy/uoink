@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "zing": {
+      "command": "zing",
+      "args": ["serve-mcp"],
+      "env": {"PYTHONIOENCODING": "utf-8", "PYTHONUTF8": "1"}
+    }
+  }
+}
