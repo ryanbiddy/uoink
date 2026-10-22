@@ -474,52 +474,58 @@ class VectorStore:
             db.execute("INSERT INTO sources VALUES (?, ?)", (source.source_id, fingerprint))
             db.executemany("INSERT INTO vectors VALUES (?, ?, ?, ?, ?, ?)", rows)
 
-    def search(self, vector, live, limit, *, clips_only=False):
-        if not self.path.exists():
-            return []
-        query = _unit_vector(vector)
-        best = {}
+    def _stamp(self):
+        return tuple((p.stat().st_mtime_ns, p.stat().st_size) if p.exists() else None
+                     for p in (self.path, self.path.with_name(self.path.name + "-wal")))
+
+    def refresh(self):
+        """Build on the indexing worker, then publish one complete snapshot."""
+        stamp = self._stamp()
+        if self._cache is not None and self._cache[0] == stamp:
+            return
+        stored = []
+        if self.path.exists():
+            with closing(self._connect()) as db:
+                stored = db.execute("SELECT * FROM vectors ORDER BY source_id, passage_id").fetchall()
         # Inference already depends on numpy. Fake/stdlib-only callers retain
         # the scalar path. einsum avoids an unbounded BLAS thread pool.
         try:
             import numpy as np
         except ImportError:
             np = None
-        stamp = tuple((p.stat().st_mtime_ns, p.stat().st_size) if p.exists() else None
-                      for p in (self.path, self.path.with_name(self.path.name + "-wal")))
         if np is not None:
-            if self._cache is None or self._cache[0] != stamp:
-                with closing(self._connect()) as db:
-                    stored = db.execute("SELECT * FROM vectors ORDER BY source_id, passage_id").fetchall()
-                matrix = (np.vstack([np.frombuffer(row[5], dtype="<f4") for row in stored])
-                          if stored else np.empty((0, DIMENSIONS), dtype="float32"))
-                if matrix.shape != (len(stored), DIMENSIONS) or not np.isfinite(matrix).all():
-                    raise ValueError("Invalid stored embedding")
-                self._cache = stamp, [row[:5] for row in stored], matrix
-            _, rows, matrix = self._cache
+            matrix = (np.vstack([np.frombuffer(row[5], dtype="<f4") for row in stored])
+                      if stored else np.empty((0, DIMENSIONS), dtype="float32"))
+            if matrix.shape != (len(stored), DIMENSIONS) or not np.isfinite(matrix).all():
+                raise ValueError("Invalid stored embedding")
+        else:
+            matrix = [struct.unpack("<768f", row[5]) for row in stored]
+            if any(not math.isfinite(value) for vector in matrix for value in vector):
+                raise ValueError("Invalid stored embedding")
+        if stamp == self._stamp():
+            self._cache = stamp, [row[:5] for row in stored], matrix, np
+
+    def cached(self):
+        cache = self._cache
+        if cache is None or cache[0] != self._stamp():
+            raise SearchUnavailable("Vector snapshot is refreshing; use keyword search")
+        return cache
+
+    def search(self, vector, live, limit, *, clips_only=False):
+        _, rows, matrix, np = self.cached()
+        query = _unit_vector(vector)
+        best = {}
+        if np is not None:
             scores = np.einsum("ij,j->i", matrix, np.asarray(query), dtype="float64", optimize=False)
-            for row, score in zip(rows, scores):
-                identity, passage, fingerprint, span, timestamp = row
-                if live.get(identity) != fingerprint or (clips_only and not passage.startswith("clip:")):
-                    continue
-                key = (identity, passage) if clips_only else identity
-                if key not in best or score > best[key].score:
-                    best[key] = SearchHit(identity, passage, json.loads(span), timestamp, float(score), fingerprint)
-            return sorted(best.values(), key=lambda hit: (-hit.score, hit.source_id, hit.passage_id))[:limit]
-        with closing(self._connect()) as db:
-            for identity, passage, fingerprint, span, timestamp, blob in db.execute(
-                    "SELECT * FROM vectors ORDER BY source_id, passage_id"):
-                if live.get(identity) != fingerprint:
-                    continue
-                if clips_only and not passage.startswith("clip:"):
-                    continue
-                values = struct.unpack("<768f", blob)
-                if not all(math.isfinite(value) for value in values):
-                    raise ValueError("Invalid stored embedding")
-                score = math.fsum(a * b for a, b in zip(query, values))
-                key = (identity, passage) if clips_only else identity
-                if key not in best or score > best[key].score:
-                    best[key] = SearchHit(identity, passage, json.loads(span), timestamp, score, fingerprint)
+        else:
+            scores = (math.fsum(a * b for a, b in zip(query, values)) for values in matrix)
+        for row, score in zip(rows, scores):
+            identity, passage, fingerprint, span, timestamp = row
+            if live.get(identity) != fingerprint or (clips_only and not passage.startswith("clip:")):
+                continue
+            key = (identity, passage) if clips_only else identity
+            if key not in best or score > best[key].score:
+                best[key] = SearchHit(identity, passage, json.loads(span), timestamp, float(score), fingerprint)
         return sorted(best.values(), key=lambda hit: (-hit.score, hit.source_id, hit.passage_id))[:limit]
 
     def remove(self):
@@ -578,6 +584,7 @@ class LocalSearch:
         self._state_lock = threading.RLock()
         self._control = threading.RLock()
         self._activity = threading.RLock()
+        self._query_lock = threading.Lock()
         self._stop = threading.Event()
         self._worker = None
         self._pending = set()
@@ -772,6 +779,7 @@ class LocalSearch:
                 current = self.sources.snapshot(source_id=doc.source_id)
                 if current and current[0].fingerprint == doc.fingerprint:
                     self.store.replace(doc, vectors)
+                    self.store.refresh()
                     if identities is not None and doc.source_id not in existing:
                         completed += 1
                 else:
@@ -782,6 +790,9 @@ class LocalSearch:
         # keyword fallback until a current immutable snapshot is available.
         if identities is not None:
             self.sources.snapshot()
+        # Also load persisted vectors at startup and publish deletions when
+        # this batch had no replacement to trigger a rebuild.
+        self.store.refresh()
 
     def _run(self):
         try:
@@ -818,6 +829,34 @@ class LocalSearch:
                 if self._worker is threading.current_thread():
                     self._worker = None
 
+    def query_with_timeout(self, work, timeout):
+        """Bound the caller's wait; at most one unfinished query per engine."""
+        if timeout <= 0 or not self._query_lock.acquire(blocking=False):
+            raise SearchUnavailable("Semantic search is busy or out of time. Keyword search still works.")
+        done = threading.Event()
+        result, errors = [], []
+
+        def run():
+            try:
+                result.append(work())
+            except Exception as exc:
+                errors.append(exc)
+            finally:
+                self._query_lock.release()
+                done.set()
+
+        worker = threading.Thread(target=run, name="search-semantic-query", daemon=True)
+        try:
+            worker.start()
+        except Exception:
+            self._query_lock.release()
+            raise
+        if not done.wait(timeout):
+            raise SearchUnavailable("Semantic search ran out of time. Keyword search still works.")
+        if errors:
+            raise errors[0]
+        return result[0]
+
     def embedding_search(self, query, limit=100, filters=None, *, source_id=None,
                          source_types=None, clips_only=False):
         if not isinstance(query, str):
@@ -837,9 +876,9 @@ class LocalSearch:
         try:
             if self._model is None:
                 raise SearchUnavailable("Start local search before querying")
-            # Full snapshot for invalidation, filtered snapshot for eligibility.
+            # Cache rebuilds and database invalidation belong to the worker.
+            self.store.cached()
             live = {doc.source_id: doc.fingerprint for doc in self.sources.snapshot(wait=False)}
-            self.store.invalidate(live)
             eligible = ({doc.source_id: doc.fingerprint for doc in self.sources.snapshot(
                 filters=filters, source_id=source_id, source_types=source_types, wait=False)}
                 if any(filters.values()) or source_id or source_types else live)

@@ -211,7 +211,7 @@ def test_edit_soft_delete_hard_delete_restore_and_restart(engine, index):
         engine.embedding_search("rust")
     engine.sources._refresh_worker.join(5)
     assert "mars" not in [hit.source_id for hit in engine.embedding_search("rust")]
-    assert "mars" not in engine.store.fingerprints()
+    assert engine.store.fingerprints() == before  # queries never rewrite the cache
     assert engine.update_source("mars")
     assert engine.wait(5)
     assert engine.store.fingerprints()["mars"] != before["mars"]
@@ -435,6 +435,9 @@ def test_corrupt_cache_has_error_status_and_rebuild_recovers(engine, index):
     engine.store.path.write_bytes(b"not a sqlite database")
     with pytest.raises(ls.SearchUnavailable):
         engine.embedding_search("rust")
+    # A query only detects the stale snapshot. The worker diagnoses storage.
+    engine.start()
+    assert engine.wait(5)
     assert engine.status()["state"] == "error"
     engine.rebuild()
     assert engine.wait(5)

@@ -3555,7 +3555,7 @@ class Index:
         sql = (
             "SELECT y.video_id AS video_id, y.slug AS slug, y.title AS title, "
             "       y.channel AS channel, y.platform AS platform, "
-            "       CASE WHEN json_valid(y.metadata_json) THEN json_extract(y.metadata_json, '$.url') END AS _source_url, "
+            "       y.metadata_json AS metadata_json, "
             "       em.source AS source, "
             "       em.mention_id AS mention_id, em.timestamp AS timestamp, em.context AS context, "
             "       e.name AS _entity_name "
@@ -3649,7 +3649,7 @@ class Index:
         out = []
         for r in rows:
             d = r  # this method owns the dictionaries materialized above
-            source_url = d.pop("_source_url", None)
+            metadata_json = d.pop("metadata_json", None)
             video_id = d["video_id"]
             entity = d.pop("_entity_name")
             # Context is an entity annotation. When it quotes a stored clip,
@@ -3675,7 +3675,7 @@ class Index:
             # Keep the v1 annotation timestamp and link. Verified coordinates
             # live only in the additive passage and timestamp_seconds fields.
             d["deep_link"] = _entity_deep_link(
-                video_id, d["timestamp"], platform=d["platform"], source_url=source_url)
+                video_id, d["timestamp"], platform=d["platform"], metadata_json=metadata_json)
             out.append(d)
         return out
 

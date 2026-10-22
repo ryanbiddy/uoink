@@ -2067,9 +2067,15 @@ class LibraryReader:
 
     def _search(self, op: _Operation, query: str, limit: int, *, match: str = "forgiving", mode="auto") -> dict:
         from uoink_core.search_service import select_mode, metadata, CITATION_FIELDS
+        from uoink_core.local_search import SearchUnavailable
         actual, reason = select_mode(self.index, mode)
         mode_info = {"search_mode": "keyword", "requested_mode": mode, "fallback_reason": reason}
         semantic_rows = None
+        # Reserve time for keyword ranking, cards and response serialization.
+        semantic_reserve = 0.6
+        if actual != "keyword" and op.remaining() <= semantic_reserve:
+            actual = "keyword"
+            mode_info["fallback_reason"] = "Not enough time for semantic search. Keyword search still works."
         if actual != "keyword":
             def keyword_candidates(count, offset, override):
                 keyword_match = override or match
@@ -2084,15 +2090,29 @@ class LibraryReader:
                 ranked = sorted(candidates.values(), key=lambda row: (row["_score"], row["video_id"]))
                 return {"total": len(ranked), "results": ranked[offset:offset + count]}
 
-            # Inference and detached snapshots must not inherit Index._lock.
-            # Keyword DB calls retain their own bounded lock/deadline above.
-            page = self._storage(lambda: self.index.search_mode(
-                query, limit, mode=mode, match=match, keyword=keyword_candidates))
+            # Prepare lexical candidates on the request thread. A timed-out
+            # semantic worker must never call back into this operation.
+            lexical = keyword_candidates(100, 0, "forgiving") if actual == "hybrid" else {"total": 0, "results": []}
+            def prepared_keyword(count, offset, override):
+                return {"total": lexical["total"], "results": lexical["results"][offset:offset + count]}
+
+            try:
+                page = self._storage(lambda: self.index._local_search.query_with_timeout(
+                    lambda: self.index.search_mode(query, limit, mode=mode, match=match, keyword=prepared_keyword),
+                    op.remaining() - semantic_reserve))
+            except SearchUnavailable as exc:
+                page = None
+                mode_info["fallback_reason"] = str(exc)
             op.check()
-            mode_info = metadata(page)
-            semantic_rows = page["results"]
-            if page["search_mode"] != "keyword":
-                match = "forgiving"  # merge timed and prose hits in the returned source order
+            if page is None and actual == "hybrid" and match == "forgiving":
+                page = {**mode_info, "results": self._search_call(op, lambda:
+                    self.index._search_passages(lexical["results"][:limit], query, match))}
+            if page is not None:
+                mode_info = metadata(page)
+                if page["search_mode"] != "keyword" or (actual == "hybrid" and match == "forgiving"):
+                    semantic_rows = page["results"]
+                if page["search_mode"] != "keyword":
+                    match = "forgiving"  # merge timed and prose hits in the returned source order
         hits: list[dict] = []
         seen: set[str] = set()
         omitted = {"invalid_source_data": 0, "deleted_or_missing": 0, "other": 0}
