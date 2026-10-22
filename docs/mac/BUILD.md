@@ -10,7 +10,10 @@ branch or with `workflow_dispatch`. Its `mac-build` job now produces:
 
 Pass 11 hosted arm64 run `39552211211` passed the ad-hoc build, DMG smoke and
 installed receipt. Pass 12 adds `mac-sign` after `mac-build` for Developer ID
-signing and notarization. Its first hosted result is still pending.
+signing and notarization. Run `39707190093` signed all 1,436 targets after the
+G2 intermediate import fix, then hit the app's 30-minute notary wait timeout.
+Submission `a85b5ddc-eff7-496a-af76-df93e91632ab` was still processing at that
+timeout. A complete signed hosted result is still pending.
 
 Artifacts are private test builds. Use `uoink-macos-arm64-signed` for signed
 installation testing. The ad-hoc artifact establishes no developer trust.
@@ -132,10 +135,39 @@ Traversal, escaping links, excessive nesting or more than 8 GiB of expanded
 archive data fail the job. The first hosted scan must establish the real
 payload findings; offline tests use nested archive fixtures.
 
-CI submits a ditto ZIP of the signed app with a 30-minute notary timeout, staples
-the accepted app, then builds the DMG from that app. It signs and submits the
-DMG separately, staples it and validates both tickets. `dmg.json` is rewritten
-after DMG stapling so its SHA-256 names the final bytes.
+CI submits a ditto ZIP of the signed app without `--wait`, saves the submission
+ID immediately, then checks `notarytool info` every 60 seconds. JSON can arrive
+on stdout or stderr. The app has a 150-minute budget; the DMG has 90 minutes.
+Each budget starts before upload and includes polling. Individual uploads have
+a 15-minute process timeout; info calls have at most two minutes, bounded by
+the remaining budget. `Accepted` permits stapling; `Invalid` and `Rejected`
+fail and fetch Apple's log. An exhausted budget fails with the submission ID
+and a command to check it later.
+
+Set `NOTARY_APP_TIMEOUT_MINUTES` and `NOTARY_DMG_TIMEOUT_MINUTES` to positive
+whole minutes to override the defaults. CI reads the matching GitHub Actions
+variables from the repository or `mac-release` environment. The job limit is
+350 minutes, leaving 110 minutes beyond the default budgets for signing,
+packaging, smoke tests and cleanup. Keep that headroom when changing budgets.
+The temporary keychain stays unlocked for up to six hours so the DMG can be
+signed after a long app wait. The sign phase's `finally` cleanup and the
+workflow's `always()` cleanup still delete it before any payload runs.
+
+To try an existing app submission, set `NOTARY_REUSE_SUBMISSION_ID` to its ID
+in the signing step's environment or the matching Actions variable. It is
+empty by default. For the timed-out run above, the value is
+`a85b5ddc-eff7-496a-af76-df93e91632ab`. CI checks its status and, only when it
+is `Accepted`, tries stapling and validating the freshly signed app before
+creating or uploading a ZIP. Successful stapling skips the app submission.
+If that ticket does not match the fresh cdhashes, or stapling or validation
+otherwise fails, CI submits a new app ZIP. An unconfirmed or pending submission
+also takes the normal submission path. Clear the variable after the attempt;
+it is a retry aid, not a way to skip ticket validation.
+
+CI builds the DMG from the stapled app, signs and submits the DMG separately,
+then staples and validates its ticket. `dmg.json` is rewritten after DMG
+stapling so its SHA-256 names the final bytes. App submission reuse never skips
+DMG notarization.
 
 After key deletion, CI verifies strict signatures, team, runtime flags, secure
 timestamps and both tickets. It quarantines a DMG copy as a Safari download,
@@ -145,10 +177,13 @@ attribute, and assesses both app and DMG with spctl. It records
 with disposable paths and requires `/health` within 120 seconds. DMG smoke
 and the strict installed receipt then run against the signed artifact.
 
-Read `mac-signed-evidence` after a failure. `notary-app.json` and
-`notary-dmg.json` give submission IDs and status. Any status other than
-`Accepted` fails; CI fetches the submission's `notary-*-log.json`, whose issues
-name rejected paths and reasons. `codesign-sign.txt` records signing failures;
+Read `mac-signed-evidence` after a failure. `notary-*-submission.json` preserves
+each new submission ID. `notary-app.json` and `notary-dmg.json` give the latest
+status, elapsed seconds and budget. `notary-*-polls.jsonl` records every poll;
+the numbered poll files retain redacted tool output. `notary-*-log.json` holds
+Apple's issues for `Invalid` or `Rejected` submissions, when available.
+`notary-app-reuse.json` records the optional reuse decision, with separate
+info and stapler evidence. `codesign-sign.txt` records signing failures;
 `quarantine/quarantine.json` records codesign, spctl and policy output.
 Launch stderr and smoke output help locate hardened-runtime crashes.
 `receipt/receipt.json` records the strict verdict and all existing runtime,

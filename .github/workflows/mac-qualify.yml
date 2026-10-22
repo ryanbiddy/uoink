@@ -229,9 +229,13 @@ jobs:
     needs: mac-build
     environment: mac-release
     runs-on: macos-15
-    timeout-minutes: 120
+    # 240 minutes for notarization, 110 for signing, packaging, smoke and cleanup.
+    timeout-minutes: 350
     env:
       MACOS_TEAM_ID: WTGFF582VY
+      NOTARY_APP_TIMEOUT_MINUTES: ${{ vars.NOTARY_APP_TIMEOUT_MINUTES || '150' }}
+      NOTARY_DMG_TIMEOUT_MINUTES: ${{ vars.NOTARY_DMG_TIMEOUT_MINUTES || '90' }}
+      NOTARY_REUSE_SUBMISSION_ID: ${{ vars.NOTARY_REUSE_SUBMISSION_ID || '' }}
     steps:
       - uses: actions/checkout@v5
         with:

@@ -102,6 +102,7 @@ def test_private_import_and_cleanup_never_print_password_or_read_key_files(tmp_p
     assert calls[created + 1] == ["security", "import", signing.DEVELOPER_ID_G2, "-k", keychain]
     assert ["security", "default-keychain", "-d", "user", "-s", keychain] in calls
     assert any("set-key-partition-list" in c for c in calls)
+    assert ["security", "set-keychain-settings", "-lut", "21600", keychain] in calls
     assert capsys.readouterr().out == "::add-mask::random-fixture-password\n"
     signing.cleanup(private)
     assert not private.exists()
@@ -238,43 +239,152 @@ def test_codesign_failure_diagnostics_are_public_and_complete(tmp_path, monkeypa
     assert all(value not in public for value in values.values())
 
 
-@pytest.mark.parametrize("status,code", [("Accepted", 0), ("Invalid", 0), ("Rejected", 1), ("In Progress", 1)])
-def test_notary_commands_timeout_and_failure_log(tmp_path, monkeypatch, status, code):
-    monkeypatch.setenv("NOTARY_API_KEY_ID", "fixture-key-id")
-    monkeypatch.setenv("NOTARY_API_ISSUER_ID", "fixture-issuer")
-    calls = []
+@pytest.fixture
+def notary_rig(tmp_path, monkeypatch):
+    values = {name: "secret-fixture-" + name.lower() for name in (
+        "MACOS_CERT_P12_BASE64", "MACOS_CERT_PASSWORD", "NOTARY_API_KEY_P8_BASE64",
+        "NOTARY_API_KEY_ID", "NOTARY_API_ISSUER_ID")}
+    values["MACOS_CERT_PASSWORD"] += '\n"quoted"\\password'
+    for name, value in values.items():
+        monkeypatch.setenv(name, value)
+    for name in ("NOTARY_APP_TIMEOUT_MINUTES", "NOTARY_DMG_TIMEOUT_MINUTES", "NOTARY_REUSE_SUBMISSION_ID"):
+        monkeypatch.delenv(name, raising=False)
+    evidence = tmp_path / "evidence"
+    evidence.mkdir()
+    rig = SimpleNamespace(calls=[], replies=[], now=0, evidence=evidence,
+                          private=tmp_path / "private", values=values)
+
+    def sleep(seconds):
+        rig.now += seconds
 
     def tool(argv, **kw):
-        calls.append((argv, kw))
-        return SimpleNamespace(returncode=code if "submit" in argv else 0,
-                               stdout=json.dumps({"id": "submission-123", "status": status}), stderr="")
+        operation, response, code, stream = rig.replies.pop(0)
+        assert argv[2] == operation
+        # Every poll sees the durable ID, even when submit returned stderr JSON.
+        if operation == "info" and any(call[0][2] == "submit" for call in rig.calls):
+            saved = list(evidence.glob("notary-*-submission.json"))
+            assert len(saved) == 1 and json.loads(saved[0].read_text())["id"] == argv[3]
+        rig.calls.append((argv, kw))
+        rig.now += 2
+        secret_text = " ".join(values.values())
+        if isinstance(response, dict):
+            response = json.dumps({**response, "message": secret_text})
+        output = {"stdout": "", "stderr": ""}
+        output[stream] = response
+        output["stderr" if stream == "stdout" else "stdout"] = secret_text
+        return SimpleNamespace(returncode=code, **output)
 
     monkeypatch.setattr(signing, "tool", tool)
-    action = lambda: signing.notarize(tmp_path / "app.zip", "app", tmp_path / "private", tmp_path)
-    if status == "Accepted":
-        action()
-        assert len(calls) == 1
-    else:
-        with pytest.raises(RuntimeError, match="not Accepted"):
-            action()
-        assert calls[1][0][:4] == ["xcrun", "notarytool", "log", "submission-123"]
-        assert (tmp_path / "notary-app-log.json").is_file()
-    submit, kwargs = calls[0]
+    monkeypatch.setattr(signing.time, "monotonic", lambda: rig.now)
+    monkeypatch.setattr(signing.time, "sleep", sleep)
+    yield rig
+    assert not rig.replies
+    # Inspect every evidence file, including escaped JSON and both tool streams.
+    for path in evidence.rglob("*"):
+        if path.is_file():
+            content = path.read_text(encoding="utf-8")
+            for value in values.values():
+                assert value not in content and json.dumps(value)[1:-1] not in content
+
+
+@pytest.mark.parametrize("stream", ["stdout", "stderr"])
+def test_notary_submit_records_id_from_either_stream_without_wait(notary_rig, stream):
+    rig = notary_rig
+    rig.replies = [("submit", {"id": "submission-123"}, 1, stream),
+                   ("info", {"id": "submission-123", "status": "Accepted"}, 0, stream)]
+    signing.notarize(rig.evidence / "app.zip", "app", rig.private, rig.evidence)
+    submit, kwargs = rig.calls[0]
     assert submit[:3] == ["xcrun", "notarytool", "submit"]
-    assert "--wait" in submit and submit[submit.index("--timeout") + 1] == "30m"
-    assert submit[submit.index("--key") + 1] == tmp_path / "private/notary.p8"
-    assert submit[submit.index("--key-id") + 1] == "fixture-key-id"
-    assert submit[submit.index("--issuer") + 1] == "fixture-issuer"
-    assert kwargs["timeout"] == 1860
+    assert "--wait" not in submit and "--timeout" not in submit
+    assert submit[-2:] == ["--output-format", "json"]
+    assert submit[submit.index("--key") + 1] == rig.private / "notary.p8"
+    assert submit[submit.index("--key-id") + 1] == rig.values["NOTARY_API_KEY_ID"]
+    assert submit[submit.index("--issuer") + 1] == rig.values["NOTARY_API_ISSUER_ID"]
+    assert kwargs["timeout"] == 900
+    assert rig.calls[1][0][:4] == ["xcrun", "notarytool", "info", "submission-123"]
+    assert json.loads((rig.evidence / "notary-app.json").read_text())["status"] == "Accepted"
 
 
-def test_tool_timeout_does_not_expose_command_or_credentials(monkeypatch):
+def test_notary_polls_in_progress_and_transient_errors_until_accepted(notary_rig):
+    rig = notary_rig
+    rig.replies = [("submit", {"id": "submission-123"}, 0, "stdout"),
+                   ("info", {"id": "submission-123", "status": "In Progress"}, 0, "stdout"),
+                   ("info", {"id": "submission-123", "status": "In Progress"}, 1, "stderr"),
+                   ("info", "temporary service error", 1, "stderr"),
+                   ("info", {"id": "submission-123", "status": "Accepted"}, 0, "stdout")]
+    signing.notarize(rig.evidence / "app.zip", "app", rig.private, rig.evidence)
+    records = [json.loads(line) for line in (rig.evidence / "notary-app-polls.jsonl").read_text().splitlines()]
+    assert [r["status"] for r in records] == ["Unknown", "In Progress", "In Progress", "Unknown", "Accepted"]
+    assert [r["poll"] for r in records] == list(range(5))
+    assert [r["elapsed_seconds"] for r in records] == [2, 4, 66, 128, 190]
+    assert records[-1]["budget_seconds"] == 150 * 60
+    assert len(list(rig.evidence.glob("notary-app-poll-*-stderr.txt"))) == 4
+    assert all(call[0][2] != "log" for call in rig.calls)
+
+
+@pytest.mark.parametrize("status", ["Invalid", "Rejected"])
+def test_notary_terminal_rejection_fetches_log(notary_rig, status):
+    rig = notary_rig
+    rig.replies = [("submit", {"id": "submission-bad"}, 0, "stdout"),
+                   ("info", {"id": "submission-bad", "status": status}, 1, "stderr"),
+                   ("log", {"issues": [{"path": "Uoink.app", "message": "bad signature"}]}, 0, "stderr")]
+    with pytest.raises(RuntimeError, match=f"submission-bad was {status}"):
+        signing.notarize(rig.evidence / "app.zip", "app", rig.private, rig.evidence)
+    assert rig.calls[-1][0][:4] == ["xcrun", "notarytool", "log", "submission-bad"]
+    assert json.loads((rig.evidence / "notary-app-log.json").read_text())["issues"]
+
+
+@pytest.mark.parametrize("label,minutes", [("app", 1), ("dmg", 2)])
+def test_notary_budget_exhaustion_names_id_and_bounds_calls(notary_rig, monkeypatch, label, minutes):
+    rig = notary_rig
+    monkeypatch.setenv(f"NOTARY_{label.upper()}_TIMEOUT_MINUTES", str(minutes))
+    rig.replies = [("submit", {"id": "submission-pending"}, 0, "stdout")]
+    rig.replies += [("info", {"id": "submission-pending", "status": "In Progress"}, 0, "stdout")] * minutes
+    with pytest.raises(RuntimeError, match=f"submission-pending exhausted its {minutes}-minute budget") as error:
+        signing.notarize(rig.evidence / f"payload.{label}", label, rig.private, rig.evidence)
+    assert "notarytool info submission-pending" in str(error.value)
+    assert rig.now == minutes * 60
+    assert len(rig.calls) == minutes + 1  # No resubmission or log fetch for pending work.
+    assert rig.calls[0][1]["timeout"] == minutes * 60
+    assert rig.calls[-1][1]["timeout"] <= minutes * 60 - 2
+    latest = json.loads((rig.evidence / f"notary-{label}.json").read_text())
+    assert latest["id"] == "submission-pending" and latest["elapsed_seconds"] == minutes * 60
+    assert latest["budget_exhausted"]
+    records = (rig.evidence / f"notary-{label}-polls.jsonl").read_text().splitlines()
+    assert len(records) == len(rig.calls)  # Sleeping to the deadline is not another poll.
+
+
+@pytest.mark.parametrize("value", ["0", "-1", "1.5", "invalid"])
+def test_notary_invalid_budgets_fail_before_tools(notary_rig, monkeypatch, value):
+    monkeypatch.setenv("NOTARY_APP_TIMEOUT_MINUTES", value)
+    with pytest.raises(ValueError, match="positive whole number"):
+        signing.notarize(Path("app.zip"), "app", notary_rig.private, notary_rig.evidence)
+    assert not notary_rig.calls
+
+
+def test_notary_default_budgets(notary_rig):
+    assert signing.notary_budget_seconds("app") == 150 * 60
+    assert signing.notary_budget_seconds("dmg") == 90 * 60
+
+
+@pytest.mark.parametrize("response", ["not JSON", "[]", {"status": "Accepted"}])
+def test_notary_missing_id_fails_without_resubmitting(notary_rig, response):
+    rig = notary_rig
+    rig.replies = [("submit", response, 1, "stderr")]
+    with pytest.raises(RuntimeError, match="no submission id"):
+        signing.notarize(Path("app.zip"), "app", rig.private, rig.evidence)
+    assert len(rig.calls) == 1
+
+
+@pytest.mark.parametrize("stream", ["stdout", "stderr"])
+def test_tool_timeout_does_not_expose_command_or_credentials(monkeypatch, stream):
     def timeout(*args, **kwargs):
-        raise subprocess.TimeoutExpired(["security", "private-password"], 1, output=b'{"id":"123"}')
+        output = {"output" if stream == "stdout" else "stderr": b'{"id":"123"}'}
+        raise subprocess.TimeoutExpired(["security", "private-password"], 1, **output)
     monkeypatch.setattr(signing.subprocess, "run", timeout)
     result = signing.tool(["security", "private-password"], timeout=1)
     assert result.returncode == 124 and "private-password" not in result.stderr
-    assert result.stdout == '{"id":"123"}'
+    assert getattr(result, stream) == '{"id":"123"}'
 
 
 def test_notary_output_redacts_auth_values(monkeypatch):
@@ -296,7 +406,13 @@ def test_stapler_commands_and_failures(tmp_path, monkeypatch, failure):
         assert [c[:3] for c in calls] == [["xcrun", "stapler", "staple"], ["xcrun", "stapler", "validate"]]
 
 
-def test_release_sequence_staples_app_before_dmg_and_hashes_final_bytes(tmp_path, monkeypatch):
+@pytest.mark.parametrize("reuse", ["off", "accepted", "staple-fails"])
+def test_release_sequence_staples_app_before_dmg_and_hashes_final_bytes(tmp_path, monkeypatch, reuse):
+    monkeypatch.setenv("NOTARY_API_KEY_ID", "fixture-key-id")
+    monkeypatch.setenv("NOTARY_API_ISSUER_ID", "fixture-issuer")
+    monkeypatch.delenv("NOTARY_REUSE_SUBMISSION_ID", raising=False)
+    if reuse != "off":
+        monkeypatch.setenv("NOTARY_REUSE_SUBMISSION_ID", "previous-submission")
     app = make_app(tmp_path)
     (app / "Contents/Resources/VERSION").write_text("3.10.0")
     notices = app / "Contents/Resources/notices"
@@ -308,13 +424,23 @@ def test_release_sequence_staples_app_before_dmg_and_hashes_final_bytes(tmp_path
     monkeypatch.setattr(signing, "sign", lambda path, *a: events.append("sign " + path.name))
     monkeypatch.setattr(signing, "notarize", lambda path, label, *a: events.append("notarize " + label))
 
+    def tool(argv, **kw):
+        assert argv[:4] == ["xcrun", "notarytool", "info", "previous-submission"]
+        events.append("reuse info")
+        return SimpleNamespace(returncode=0, stdout=json.dumps({"id": "previous-submission", "status": "Accepted"}),
+                               stderr="")
+
+    monkeypatch.setattr(signing, "tool", tool)
+
     def staple(path, label, evidence):
         events.append("staple " + label)
+        if label == "app-reuse" and reuse == "staple-fails":
+            raise RuntimeError("stapler staple failed on app-reuse")
         if label == "dmg":
             path.write_bytes(b"final stapled bytes")
 
     def create(app, output, version, *, signed):
-        assert signed and events[-1] == "staple app"
+        assert signed and events[-1] == ("staple app-reuse" if reuse == "accepted" else "staple app")
         events.append("create dmg")
         path = output / "fixture.dmg"
         path.write_bytes(b"before signing")
@@ -322,11 +448,47 @@ def test_release_sequence_staples_app_before_dmg_and_hashes_final_bytes(tmp_path
 
     monkeypatch.setattr(signing, "staple", staple)
     monkeypatch.setattr(signing, "create_dmg", create)
-    monkeypatch.setattr(signing, "checked", lambda argv, **kw: Path(argv[-1]).touch())
+
+    def checked(argv, **kw):
+        assert reuse != "accepted", "Do not create/upload a ZIP when the old ticket fits"
+        events.append("zip app")
+        Path(argv[-1]).touch()
+
+    monkeypatch.setattr(signing, "checked", checked)
     signing.sign_release(tmp_path, tmp_path / "evidence", tmp_path / "private", TEAM)
-    assert events[-7:] == ["sign Uoink.app", "notarize app", "staple app", "create dmg",
-                           "sign fixture.dmg", "notarize dmg", "staple dmg"]
+    assert events[-4:] == ["create dmg", "sign fixture.dmg", "notarize dmg", "staple dmg"]
+    if reuse == "accepted":
+        assert events[-7:-4] == ["sign Uoink.app", "reuse info", "staple app-reuse"]
+        assert "notarize app" not in events
+    else:
+        assert events[-7:-4] == ["zip app", "notarize app", "staple app"]
+        if reuse == "staple-fails":
+            assert events.index("staple app-reuse") < events.index("zip app")
+    assert not (tmp_path / "notary-app.zip").exists()
     assert json.loads((tmp_path / "dmg.json").read_text())["sha256"] == build_bundle.sha256(tmp_path / "fixture.dmg")
+
+
+@pytest.mark.parametrize("case,expected", [("accepted", True), ("pending", False), ("info-fails", False),
+                                          ("staple-fails", False), ("validate-fails", False)])
+def test_reuse_requires_accepted_and_matching_validated_ticket(notary_rig, monkeypatch, case, expected):
+    rig = notary_rig
+    monkeypatch.setenv("NOTARY_REUSE_SUBMISSION_ID", "previous-submission")
+    status = "In Progress" if case == "pending" else "Accepted"
+    rig.replies = [("info", {"id": "previous-submission", "status": status},
+                    1 if case == "info-fails" else 0, "stderr")]
+    if case not in ("pending", "info-fails"):
+        rig.replies.append(("staple", "ticket output", 1 if case == "staple-fails" else 0, "stdout"))
+        if case != "staple-fails":
+            rig.replies.append(("validate", "ticket output", 1 if case == "validate-fails" else 0, "stdout"))
+    assert signing.reuse_notarization(Path("Uoink.app"), rig.private, rig.evidence) is expected
+    assert json.loads((rig.evidence / "notary-app-reuse.json").read_text())["reused"] is expected
+    assert rig.calls[0][0][:4] == ["xcrun", "notarytool", "info", "previous-submission"]
+    assert all(call[0][2] != "submit" for call in rig.calls)
+
+
+def test_reuse_is_off_by_default(notary_rig):
+    assert not signing.reuse_notarization(Path("Uoink.app"), notary_rig.private, notary_rig.evidence)
+    assert not notary_rig.calls and not list(notary_rig.evidence.iterdir())
 
 
 def zip_bytes(entries):
@@ -571,6 +733,10 @@ def test_workflow_limits_secrets_and_orders_cleanup_before_every_runtime_step():
             assert "secrets." not in other and "mac-release" not in other
     header, body = job.split("    steps:\n", 1)
     assert "secrets." not in header
+    timeout = int(re.search(r"timeout-minutes: (\d+)", header)[1])
+    assert sum(signing.NOTARY_BUDGET_MINUTES.values()) + 90 <= timeout < 360
+    for variable in ("NOTARY_APP_TIMEOUT_MINUTES", "NOTARY_DMG_TIMEOUT_MINUTES", "NOTARY_REUSE_SUBMISSION_ID"):
+        assert f"vars.{variable}" in header
     steps = re.split(r"(?m)^      - ", body)[1:]
     key_step = next(i for i, step in enumerate(steps) if "secrets." in step)
     assert set(re.findall(r"secrets\.([A-Z0-9_]+)", steps[key_step])) == {"MACOS_CERT_P12_BASE64", "MACOS_CERT_PASSWORD",
