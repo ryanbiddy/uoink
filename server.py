@@ -12592,7 +12592,7 @@ _LIBRARY_SORTS = ("newest", "oldest", "title", "relevance")
 
 
 def _library_search(idx, *, q: str | None, filters: dict, kind: str | None,
-                    sort: str, limit: int, offset: int) -> dict:
+                    sort: str, limit: int, offset: int, match: str = "forgiving") -> dict:
     """``{total, results}`` like Index.search_yoinks_for_memory, plus a
     source-type group (``kind``) and an order over every match: newest,
     oldest, title (A to Z), or relevance (FTS rank; newest without q)."""
@@ -12623,23 +12623,26 @@ def _library_search(idx, *, q: str | None, filters: dict, kind: str | None,
         "oldest": "y.yoinked_at ASC, y.video_id ASC",
         "title": "y.title COLLATE NOCASE ASC, y.yoinked_at DESC",
     }.get(sort, "y.yoinked_at DESC, y.video_id DESC")
-    match = index._fts_query(q) if q else ""
-    if q and not match:
+    expression = index._fts_query(q, match)
+    prefix = ""
+    if q and not expression:
         return {"total": 0, "results": []}
-    if match:
-        tail = ("FROM yoinks_fts f JOIN yoinks y ON y.video_id = f.video_id "
-                "WHERE yoinks_fts MATCH ? AND " + where)
-        args = [match] + params
+    if expression:
+        prefix, search_params = index._fts_hits(
+            "yoinks_fts", q, match, idx._YOINKS_BM25_WEIGHTS if match == "forgiving" else "")
+        tail = ("FROM search_hits h CROSS JOIN yoinks_fts f ON f.rowid=h.rowid "
+                "CROSS JOIN yoinks y ON y.video_id = f.video_id WHERE " + where)
+        args = search_params + params
         if sort == "relevance":
-            order = "bm25(yoinks_fts)"
+            order = "h._score, y.video_id"
     else:
         tail = "FROM yoinks y WHERE " + where
         args = params
     with idx._lock:
         try:
-            cnt = idx._conn.execute("SELECT COUNT(*) AS n " + tail, args).fetchone()
+            cnt = idx._conn.execute(prefix + "SELECT COUNT(*) AS n " + tail, args).fetchone()
             rows = idx._conn.execute(
-                "SELECT y.* " + tail + " ORDER BY " + order + " LIMIT ? OFFSET ?",
+                prefix + "SELECT y.* " + tail + " ORDER BY " + order + " LIMIT ? OFFSET ?",
                 args + [limit, offset]).fetchall()
         except sqlite3.OperationalError:
             # A MATCH expression FTS5 still rejects reads as no matches.
@@ -16602,6 +16605,9 @@ class Handler(BaseHTTPRequestHandler):
             sort = None
 
         q = _one("q")
+        match = _one("match") or "forgiving"
+        if match not in ("forgiving", "strict"):
+            return self._send_json(400, {"ok": False, "error": "match must be forgiving or strict"})
         # The index's own order already answers newest-first without a
         # query and best match with one; only a type group or another
         # order needs _library_search.
@@ -16611,7 +16617,7 @@ class Handler(BaseHTTPRequestHandler):
         try:
             if kind or not own_order:
                 res = _library_search(
-                    idx, q=q, kind=kind, sort=sort or "newest",
+                    idx, q=q, kind=kind, sort=sort or ("relevance" if q else "newest"), match=match,
                     filters={
                         "channel": _one("channel"), "topic": _one("topic"),
                         "hook_type": hook_type, "platform": _one("platform"),
@@ -16622,7 +16628,7 @@ class Handler(BaseHTTPRequestHandler):
                 )
             else:
                 res = idx.search_yoinks_for_memory(
-                    q=q, channel=_one("channel"), topic=_one("topic"),
+                    q=q, channel=_one("channel"), topic=_one("topic"), match=match,
                     hook_type=hook_type,
                     platform=_one("platform"), source_type=_one("source_type"),
                     author=_one("author"),

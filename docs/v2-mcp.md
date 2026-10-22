@@ -326,6 +326,19 @@ opaque response keys; product copy and human-readable messages use Uoink.
 
 Keyword search across saved Uoink markdown corpora.
 
+`match` is optional: `"forgiving"` (default) drops common English words and
+matches any remaining word; `"strict"` requires every word, as before.
+Both treat punctuation and FTS operators as text and prefix-match the last
+word. If all words are stopwords, forgiving search keeps them. Forgiving
+results put an exact title first, ignoring case and punctuation, then hits
+with every useful word, then partial hits. BM25 orders hits within each group.
+
+Results also carry `video_id` and, when source text is available, an optional
+`passage`. Quote `passage.text`: `snippet` may contain ellipses. A passage has
+either a stored `clip_id` with `start` and `end` in seconds, or `char_start`
+and `char_end` (exclusive) in the indexed `content` field. These are Unicode
+character offsets, not byte offsets. `timing` describes the stored timing.
+
 Parameters:
 
 ```json
@@ -359,6 +372,10 @@ coarse timing and is marked `timing: coarse`) and return a deep link to each
 matching moment. Optional `video_id` and `channel` fields narrow the search.
 Available on stdio and HTTP/OpenAPI since 2026-09-04 (run E); both call the
 same handler.
+
+Optional `match: "forgiving" | "strict"` uses the same defaults and ranking
+as `search_uoinks`. Each result includes its stored `clip_id`, `video_id`,
+verbatim `text`, and `start`/`end` in seconds where timing exists.
 
 Parameters:
 
@@ -689,6 +706,16 @@ Parameters:
 
 `entity` is required. `name` is accepted as an alias by the backend. `limit` is optional, defaults to 50, and is clamped to 1-200.
 
+Optional `match` defaults to `"forgiving"`: it matches useful words in recorded
+entity names, with exact normalized names and complete names ahead of partial
+names. An exact source title ranks first; ties use newest mentions first.
+`"strict"` keeps the original exact, case and punctuation insensitive entity
+lookup. This tool searches recorded entity names, not transcript text.
+Each row includes `mention_id`, `video_id`, and the stored `timestamp` in
+seconds. `context` is an entity annotation. When it matches a stored clip,
+the optional `passage` supplies that clip's ID, verbatim text, and timing.
+When it matches indexed prose, `passage` supplies character offsets instead.
+
 Return shape:
 
 ```json
@@ -905,6 +932,17 @@ The operation returns pure aggregation over saved items, shelf movements, and so
 Bounded clip-first search of the saved library (default 5, at most 20 hits)
 with an item-text fallback for items without clips (Phase 4, contract
 `phase4-v1-2026-09-08`, run AV-1).
+
+Optional `match: "forgiving" | "strict"` defaults to forgiving search.
+Forgiving results put exact titles and complete word matches before partial
+matches across clips and item text. Strict mode keeps clip-first retrieval.
+Timed hits also include `clip_id`; existing `item_id`, `excerpt_id`, source
+revision, excerpt URI, and `start`/`end` fields identify the exact evidence.
+
+The dashboard, `/memory/search`, and `/api/corpus/v1/search` accept the same
+optional `match` parameter and default to forgiving. The dashboard selects
+Best match when a query starts. Date sorting stays available, and Exact words
+selects strict mode. Clearing the query returns to newest-first browsing.
 
 ```json
 { "query": "agent harness", "limit": 5 }

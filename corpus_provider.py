@@ -121,6 +121,7 @@ class UoinkCorpusProvider:
         try:
             result = self.idx.search_yoinks_for_memory(
                 q=request.q,
+                match=request.match,
                 channel=request.channel,
                 topic=request.topic,
                 hook_type=request.hook_type,

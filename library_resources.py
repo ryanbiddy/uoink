@@ -1156,10 +1156,12 @@ class LibraryReader:
         with self._operation() as op:
             return self._read(op, parsed, uri)
 
-    def search(self, query: str, limit: int = 5) -> dict:
+    def search(self, query: str, limit: int = 5, *, match: str = "forgiving") -> dict:
         query, limit = _validate_search(query, limit)
+        if match not in ("forgiving", "strict"):
+            raise _invalid("invalid_match", field="match")
         with self._operation() as op:
-            return self._search(op, query, limit)
+            return self._search(op, query, limit, match=match)
 
     def get_item(self, *, video_id: str | None = None, slug: str | None = None) -> dict:
         selector = _validate_selector(video_id, slug)
@@ -2044,7 +2046,7 @@ class LibraryReader:
         }
         return hit
 
-    def _search(self, op: _Operation, query: str, limit: int) -> dict:
+    def _search(self, op: _Operation, query: str, limit: int, *, match: str = "forgiving") -> dict:
         hits: list[dict] = []
         seen: set[str] = set()
         omitted = {"invalid_source_data": 0, "deleted_or_missing": 0, "other": 0}
@@ -2068,11 +2070,9 @@ class LibraryReader:
             if not self._has_tables((table,), op):
                 raise ResourceError("library_unavailable", details={"storage": "missing_table"})
         op.check()
-        rows = self._index_call(op, lambda: self.index.search_clips(query, limit))
+        rows = self._index_call(op, lambda: self.index.search_clips(query, limit, match=match))
         op.check()
         for row in rows:
-            if len(hits) >= limit:
-                break
             vid = row.get("video_id")
             if not isinstance(vid, str):
                 continue
@@ -2084,19 +2084,21 @@ class LibraryReader:
             clip = next((c for c in bundle.clips if c.get("clip_id") == row.get("clip_id")), None)
             if clip is None:
                 continue
-            match = next(((eid, ev) for eid, ev in bundle.evidence if ev["seq"] == clip.get("seq")), None)
-            if match is None:
+            matched_evidence = next(((eid, ev) for eid, ev in bundle.evidence if ev["seq"] == clip.get("seq")), None)
+            if matched_evidence is None:
                 continue
-            eid, evidence = match
+            eid, evidence = matched_evidence
             hits.append(self._hit(vid, bundle, evidence_kind="timed_clip", preview=self._preview(evidence["text"]),
                                   excerpt_id=eid, timing=evidence["timing"], start=evidence["start"],
                                   end=evidence["end"], deep_link=evidence["deep_link"]))
+            hits[-1]["clip_id"] = clip["clip_id"]
+            hits[-1]["_score"] = row.get("_score", 0)
             seen.add(vid)
-        if len(hits) < limit:
-            rows = self._index_call(op, lambda: self.index.search(query, limit))
+        if match == "forgiving" or len(hits) < limit:
+            rows = self._index_call(op, lambda: self.index.search(query, limit, match=match))
             op.check()
             for row in rows:
-                if len(hits) >= limit:
+                if match == "strict" and len(hits) >= limit:
                     break
                 vid = row.get("video_id")
                 if not isinstance(vid, str) or vid in seen:
@@ -2119,6 +2121,12 @@ class LibraryReader:
                     hits.append(self._hit(vid, bundle, evidence_kind="discovery_hint",
                                           preview=self._preview(snippet or label(bundle.card.get("title"))),
                                           excerpt_id=None, timing=None, start=None, end=None, deep_link=None))
+                hits[-1]["_score"] = row.get("_score", 0)
+        if match == "forgiving":
+            hits.sort(key=lambda hit: hit["_score"])
+            hits = hits[:limit]
+        for hit in hits:
+            hit.pop("_score", None)
         exhausted = len(hits) < limit
         result = _success(
             query=query, limit=limit, hits=hits, hit_count=len(hits),
@@ -2204,9 +2212,11 @@ class RequestScope:
     def read(self, uri: str) -> dict:
         return self.reader._read(self.op, parse_uri(uri), uri)
 
-    def search(self, query: str, limit: int = 5) -> dict:
+    def search(self, query: str, limit: int = 5, *, match: str = "forgiving") -> dict:
         query, limit = _validate_search(query, limit)
-        return self.reader._search(self.op, query, limit)
+        if match not in ("forgiving", "strict"):
+            raise _invalid("invalid_match", field="match")
+        return self.reader._search(self.op, query, limit, match=match)
 
     def get_item(self, *, video_id: str | None = None, slug: str | None = None) -> dict:
         return self.reader._get_item(self.op, _validate_selector(video_id, slug))
@@ -2296,6 +2306,9 @@ TOOL_SCHEMAS: dict[str, dict] = {
     "search_library": {
         "type": "object",
         "properties": {
+            "match": {"type": "string", "enum": ["forgiving", "strict"],
+                      "default": "forgiving",
+                      "description": "Forgiving matches useful words; strict requires every word."},
             "query": {"type": "string", "description": "Search text, at most 512 characters."},
             "limit": {"type": "integer", "minimum": 1, "maximum": 20, "default": 5,
                       "description": "Maximum hits, 1-20 (default 5)."},
@@ -2424,10 +2437,11 @@ def call_tool(name: str, args, reader: LibraryReader, *, client_identity: str = 
             store = library_briefs.BriefStore.for_reader(reader)
             return library_briefs.call_tool(name, args, store, client_identity=client_identity)
         if name == "search_library":
-            args = _strict_arguments(args, ("query", "limit"), ("query",))
+            args = _strict_arguments(args, ("query", "limit", "match"), ("query",))
             if "limit" in args and args["limit"] is None:
                 raise _invalid("null_field", field="limit")
-            return reader.search(args["query"], args.get("limit", LIMITS["default_search_hits"]))
+            return reader.search(args["query"], args.get("limit", LIMITS["default_search_hits"]),
+                                 match=args.get("match", "forgiving"))
         if name == "get_library_item":
             args = _strict_arguments(args, ("video_id", "slug"), ())
             if "video_id" in args and args["video_id"] is None:

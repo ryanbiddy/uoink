@@ -113,7 +113,7 @@
     },
     {
       "name": "find_mentions",
-      "description": "Find every place an entity (person, tool, product, company, or topic) is mentioned across saved uoinks, newest first, each with a timestamped YouTube deep link."
+      "description": "Find every place an entity (person, tool, product, company, or topic) is mentioned across saved uoinks. Rank by name match, with newest first for ties. Results include stored timestamps and source links."
     },
     {
       "name": "get_transcript_reliability",

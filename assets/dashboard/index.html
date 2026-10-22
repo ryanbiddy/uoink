@@ -3284,6 +3284,7 @@
     }
 
     #tab-library .library-more-filters .library-filter-summary,
+    #matchFilter,
     #sortFilter {
       min-height: var(--target-chip);
     }
@@ -4804,6 +4805,10 @@
                 <input class="control" id="dateTo" type="date" aria-label="Date to">
               </div>
             </details>
+            <select class="control" id="matchFilter" aria-label="Search matching">
+              <option value="forgiving">Any useful words</option>
+              <option value="strict">Exact words</option>
+            </select>
             <select class="control" id="sortFilter" aria-label="Sort Library">
               <option value="newest">Newest first</option>
               <option value="oldest">Oldest first</option>
@@ -5889,6 +5894,7 @@
         date_from: "",
         date_to: "",
         sort: "newest",
+        match: "forgiving",
         // Re-haul type chips: "" (All), videos, posts, notes, podcasts.
         kind: "",
       },
@@ -6213,6 +6219,7 @@
       dateTo: document.getElementById("dateTo"),
       dateRangeError: document.getElementById("dateRangeError"),
       sortFilter: document.getElementById("sortFilter"),
+      matchFilter: document.getElementById("matchFilter"),
       facetStatus: document.getElementById("facetStatus"),
       queueRows: document.getElementById("queueRows"),
       attentionRows: document.getElementById("attentionRows"),
@@ -10861,13 +10868,14 @@
       // helper over every match, not re-sorted on the loaded page (D26).
       if (state.filters.kind) params.set("kind", state.filters.kind);
       params.set("sort", state.filters.sort || "newest");
+      params.set("match", state.filters.match || "forgiving");
       params.set("limit", String(extra.limit ?? state.limit));
       params.set("offset", String(extra.offset ?? state.offset));
       return params;
     }
 
     function hasLibraryFilters() {
-      return Object.entries(state.filters).some(([key, value]) => key !== "sort" && String(value || "").trim());
+      return Object.entries(state.filters).some(([key, value]) => key !== "sort" && key !== "match" && String(value || "").trim());
     }
 
     function libraryFilterLabel(key) {
@@ -10902,7 +10910,7 @@
     // The type chips show their own state, so the kind is no removable chip.
     function activeLibraryFilterEntries() {
       return Object.entries(state.filters)
-        .filter(([key, value]) => key !== "sort" && key !== "kind" && String(value || "").trim())
+        .filter(([key, value]) => key !== "sort" && key !== "kind" && key !== "match" && String(value || "").trim())
         .map(([key, value]) => ({
           key,
           label: libraryFilterLabel(key),
@@ -11055,7 +11063,8 @@
     function resetLibraryFilters() {
       [els.searchInput, els.platformFilter, els.sourceTypeFilter, els.channelFilter, els.topicFilter, els.hookFilter, els.formatFilter, els.performanceFilter, els.lengthFilter, els.dateFrom, els.dateTo].forEach((el) => { el.value = ""; });
       els.sortFilter.value = "newest";
-      state.filters = { q: "", platform: "", source_type: "", author: "", topic: "", hook_type: "", format: "", performance: "", length: "", date_from: "", date_to: "", sort: "newest", kind: "" };
+      els.matchFilter.value = "forgiving";
+      state.filters = { q: "", platform: "", source_type: "", author: "", topic: "", hook_type: "", format: "", performance: "", length: "", date_from: "", date_to: "", sort: "newest", match: "forgiving", kind: "" };
       setLibraryDateError("");
       els.libraryMoreFilters.removeAttribute("open");
       resetLibraryCapture();
@@ -16398,7 +16407,10 @@
       // so nothing from the old search shows under the new search box.
       const invalidateAndReload = () => {
         // A link in the box is a capture, never a search.
+        const hadQuery = Boolean(state.filters.q.trim());
         state.filters.q = looksLikeLink(els.searchInput.value) ? "" : els.searchInput.value;
+        const hasQuery = Boolean(state.filters.q.trim());
+        if (hasQuery !== hadQuery) els.sortFilter.value = hasQuery ? "relevance" : "newest";
         state.filters.platform = els.platformFilter.value;
         state.filters.source_type = els.sourceTypeFilter.value;
         state.filters.author = els.channelFilter.value;
@@ -16410,12 +16422,13 @@
         state.filters.date_from = els.dateFrom.value;
         state.filters.date_to = els.dateTo.value;
         state.filters.sort = els.sortFilter.value;
+        state.filters.match = els.matchFilter.value || "forgiving";
         updateVideoFacetVisibility();
         state.libraryRequest++;
         state.libraryResetPending = true;
         reload();
       };
-      [els.platformFilter, els.sourceTypeFilter, els.channelFilter, els.topicFilter, els.hookFilter, els.formatFilter, els.performanceFilter, els.lengthFilter, els.dateFrom, els.dateTo, els.sortFilter].forEach((el) => {
+      [els.platformFilter, els.sourceTypeFilter, els.channelFilter, els.topicFilter, els.hookFilter, els.formatFilter, els.performanceFilter, els.lengthFilter, els.dateFrom, els.dateTo, els.sortFilter, els.matchFilter].forEach((el) => {
         el.addEventListener(el.tagName === "INPUT" ? "input" : "change", invalidateAndReload);
       });
       // Re-haul: the one box searches or, holding a link, offers to capture

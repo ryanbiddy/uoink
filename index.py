@@ -632,20 +632,90 @@ def _like_escape(value: str) -> str:
             .replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_"))
 
 
-def _fts_query(raw: str) -> str:
+SEARCH_STOPWORDS = frozenset(
+    "a an the and or of to for from with on in at by as is are was were be been "
+    "being it its this that these those i me my we our you your they their how "
+    "what which where when who why can could would should do does did have has "
+    "had find show saved about using use through into some any all just most "
+    "now only very also than then want need get please".split()
+)
+
+
+def _search_terms(raw: str, match: str = "forgiving") -> list[str]:
+    if match not in ("forgiving", "strict"):
+        raise ValueError("match must be forgiving or strict")
+    terms = _fts_terms(raw)
+    if match == "forgiving":
+        return [t for t in terms if t.casefold() not in SEARCH_STOPWORDS] or terms
+    return terms
+
+
+def _fts_query(raw: str, match: str = "forgiving") -> str:
     """Turn an arbitrary user string into a safe FTS5 MATCH expression.
 
     FTS5 MATCH has its own grammar (quotes, NEAR, column filters, ``*``),
     and a raw user string can be a syntax error. We extract bare word
-    tokens, quote each one, and AND them together. A trailing ``*`` is kept
-    on the last token for prefix matching so partial words still hit."""
-    terms = _fts_terms(raw)
+    tokens and quote each one. Forgiving search drops common English words
+    and ORs the rest; strict search preserves the original AND expression.
+    The last term always uses prefix matching."""
+    terms = _search_terms(raw, match)
     if not terms:
         return ""
     quoted = [f'"{t}"' for t in terms]
     # Prefix-match the final term so "hook" matches "hooks".
     quoted[-1] = quoted[-1][:-1] + '"*'
-    return " ".join(quoted)
+    return (" " if match == "strict" else " OR ").join(quoted)
+
+
+def _search_title_key(title: str) -> str:
+    return "".join(c for c in unicodedata.normalize("NFC", title or "").casefold()
+                   if c.isalnum())
+
+
+def _entity_keyword_score(name: str, query: str) -> int:
+    terms = _search_terms(query)
+    words = [word.casefold() for word in _fts_terms(name)]
+    return sum(any(word.startswith(term.casefold()) if i == len(terms) - 1
+                   else word == term.casefold() for word in words)
+               for i, term in enumerate(terms))
+
+
+def _fts_hits(table: str, query: str, match: str, weights: str = "") -> tuple[str, list]:
+    """Rank before pagination, using only FTS-tokenized words for coverage.
+
+    BM25 alone can put short partial hits above long complete hits. Scale it
+    into (-.001, 0], then give complete hits .001 and exact titles .002.
+    This preserves BM25 order within each group and guarantees both guards.
+    Exact titles also enter the candidate set when punctuation splits words
+    differently (for example GPT-4 and GPT4). No persistent cache is needed.
+    Table and weights are internal constants, never user SQL.
+    """
+    assert table in ("yoinks_fts", "clips_fts")
+    expression = _fts_query(query, match)
+    rank = f"bm25({table}{', ' + weights if weights else ''})"
+    column = 6 if table == "yoinks_fts" else 0
+    snippet_words = 12 if table == "yoinks_fts" else 16
+    base = (f"SELECT rowid, {rank} AS _score, "
+            f"snippet({table}, {column}, '', '', '…', {snippet_words}) AS _snippet "
+            f"FROM {table} WHERE {table} MATCH ?")
+    if match == "strict":
+        return f"WITH search_hits AS MATERIALIZED ({base}) ", [expression]
+    joins = ("JOIN yoinks y ON y.video_id=f.video_id" if table == "yoinks_fts" else
+             "JOIN clips c ON c.clip_id=f.rowid JOIN yoinks y ON y.video_id=c.video_id")
+    all_terms = _fts_query(" ".join(_search_terms(query)), "strict")
+    sql = (
+        f"WITH word_hits AS MATERIALIZED ({base}), "
+        f"title_hits AS MATERIALIZED (SELECT f.rowid FROM {table} f {joins} "
+        "WHERE search_title_key(y.title)=? AND y.deleted_at IS NULL), "
+        f"all_hits AS MATERIALIZED (SELECT rowid FROM {table} WHERE {table} MATCH ?), "
+        "candidates AS (SELECT * FROM word_hits UNION ALL "
+        "SELECT rowid, 0.0, '' FROM title_hits WHERE rowid NOT IN (SELECT rowid FROM word_hits)), "
+        "search_hits AS (SELECT rowid, _snippet, "
+        ".001 * _score / (1.0 - _score) "
+        "- .001 * (rowid IN (SELECT rowid FROM all_hits)) "
+        "- .002 * (rowid IN (SELECT rowid FROM title_hits)) AS _score FROM candidates) "
+    )
+    return sql, [expression, _search_title_key(query), all_terms]
 
 
 # --------------------------------------------------------------------------
@@ -699,6 +769,8 @@ class Index:
 
     def __init__(self, conn: sqlite3.Connection, path: Path):
         self._conn = conn
+        conn.create_function("search_title_key", 1, _search_title_key, deterministic=True)
+        conn.create_function("entity_keyword_score", 2, _entity_keyword_score, deterministic=True)
         self._path = path
         self._lock = threading.RLock()
         self._insert_count = 0
@@ -739,6 +811,8 @@ class Index:
             previous = self._conn
             conn = sqlite3.connect(str(self._path), check_same_thread=False)
             try:
+                conn.create_function("search_title_key", 1, _search_title_key, deterministic=True)
+                conn.create_function("entity_keyword_score", 2, _entity_keyword_score, deterministic=True)
                 conn.row_factory = sqlite3.Row
                 conn.execute("PRAGMA journal_mode=WAL")
                 conn.execute("PRAGMA foreign_keys=ON")
@@ -1087,32 +1161,29 @@ class Index:
 
     def search(self, query: str, limit: int = 10, *,
                channel: str | None = None,
-               hook_type: str | None = None) -> list[dict]:
+               hook_type: str | None = None,
+               match: str = "forgiving") -> list[dict]:
         """Full-text search across indexed corpora. Returns yoink rows ranked
         by weighted FTS5 bm25 (best first; see _YOINKS_BM25_WEIGHTS),
         optionally filtered by channel/hook_type."""
-        match = _fts_query(query)
-        if not match:
+        if not _fts_query(query, match):
             return []
         # snippet() column index 6 == the `content` column of yoinks_fts
         # (0:video_id 1:slug 2:channel 3:title 4:topic 5:hook_type 6:content).
         # Each result row carries `_snippet` (a match excerpt) and `_score`
         # (bm25; lower is a better match) alongside the yoinks columns.
-        rank = f"bm25(yoinks_fts, {self._YOINKS_BM25_WEIGHTS})"
-        sql = ("SELECT y.*, "
-               "snippet(yoinks_fts, 6, '', '', '…', 12) AS _snippet, "
-               f"{rank} AS _score "
-               "FROM yoinks_fts f "
-               "JOIN yoinks y ON y.video_id = f.video_id "
-               "WHERE yoinks_fts MATCH ? AND y.deleted_at IS NULL ")
-        params: list = [match]
+        prefix, params = _fts_hits("yoinks_fts", query, match, self._YOINKS_BM25_WEIGHTS)
+        sql = (prefix + "SELECT y.*, h._snippet, h._score, f.content AS _content "
+               "FROM search_hits h CROSS JOIN yoinks_fts f ON f.rowid=h.rowid "
+               "CROSS JOIN yoinks y ON y.video_id = f.video_id "
+               "WHERE y.deleted_at IS NULL ")
         if channel:
             sql += "AND y.channel = ? "
             params.append(channel)
         if hook_type:
             sql += "AND y.hook_type = ? "
             params.append(hook_type)
-        sql += f"ORDER BY {rank} LIMIT ?"
+        sql += "ORDER BY h._score, y.video_id LIMIT ?"
         params.append(max(1, int(limit)))
         with self._lock:
             try:
@@ -1121,28 +1192,53 @@ class Index:
                 # Defensive: a MATCH expression FTS5 still rejects.
                 log.warning("FTS search rejected query %r", query)
                 return []
-        return [dict(r) for r in rows]
+        return [self._search_passage(dict(r), query, match) for r in rows]
+
+    def _search_passage(self, row: dict, query: str, match: str) -> dict:
+        """Attach a stored clip, or exact character span in indexed content.
+
+        FTS snippets may contain ellipses, so they are discovery text. The
+        optional passage is the verbatim text an agent can quote instead.
+        """
+        content = row.pop("_content", "") or ""
+        clips = self.get_clips(row["video_id"])
+        if clips:
+            clips = self.search_clips(query, 1, video_id=row["video_id"], match=match) or clips[:1]
+        if clips:
+            clip = clips[0]
+            row["passage"] = {key: clip.get(key) for key in
+                              ("video_id", "clip_id", "text", "start", "end", "timing")}
+        elif content:
+            # Locate the contiguous part of SQLite's snippet in the original
+            # indexed string. Fall back to the opening span for title-only hits.
+            excerpt = max((row.get("_snippet") or "").split("…"), key=len).strip()
+            start = content.find(excerpt) if excerpt else 0
+            start = max(0, start)
+            end = min(len(content), start + (len(excerpt) if excerpt else 240))
+            row["passage"] = {"video_id": row["video_id"], "text": content[start:end],
+                              "char_start": start, "char_end": end,
+                              "field": "content", "timing": "not_timed"}
+        return row
 
     # ---- clips (living library phase 1; see clips.py) --------------------
     def search_clips(self, query: str, limit: int = 20, *,
                      video_id: str | None = None,
-                     channel: str | None = None) -> list[dict]:
+                     channel: str | None = None,
+                     match: str = "forgiving") -> list[dict]:
         """Full-text search over clips (merged transcript windows). Returns
         one row per clip -- ``{clip_id, video_id, slug, title, channel,
         start, end, text, source_deep_link, _score, _snippet}`` -- ranked by
         bm25(clips_fts), best first, restricted to live items."""
-        match = _fts_query(query)
-        if not match:
+        if not _fts_query(query, match):
             return []
-        sql = ("SELECT c.clip_id, c.video_id, y.slug, y.title, y.channel, "
+        prefix, params = _fts_hits("clips_fts", query, match)
+        sql = (prefix + "SELECT c.clip_id, c.video_id, y.slug, y.title, y.channel, "
                "c.start, c.\"end\", c.text, c.source_deep_link, "
-               "bm25(clips_fts) AS _score, "
-               "snippet(clips_fts, 0, '', '', '…', 16) AS _snippet "
-               "FROM clips_fts f "
-               "JOIN clips c ON c.clip_id = f.rowid "
+               "h._score, h._snippet "
+               "FROM search_hits h "
+               "JOIN clips c ON c.clip_id = h.rowid "
                "JOIN yoinks y ON y.video_id = c.video_id "
-               "WHERE clips_fts MATCH ? AND y.deleted_at IS NULL ")
-        params: list = [match]
+               "WHERE y.deleted_at IS NULL ")
         if video_id:
             sql += "AND c.video_id = ? "
             params.append(video_id)
@@ -1150,7 +1246,7 @@ class Index:
             sql += "AND y.channel = ? "
             params.append(channel)
         # Tie-break on (video_id, seq) so equal scores order deterministically.
-        sql += "ORDER BY bm25(clips_fts), c.video_id, c.seq LIMIT ?"
+        sql += "ORDER BY h._score, c.video_id, c.seq LIMIT ?"
         params.append(max(1, int(limit)))
         with self._lock:
             try:
@@ -1872,7 +1968,8 @@ class Index:
                                  date_from: str | None = None,
                                  date_to: str | None = None,
                                  limit: int = 50,
-                                 offset: int = 0) -> dict:
+                                 offset: int = 0,
+                                 match: str = "forgiving") -> dict:
         """Filtered query backing the memory page. All filters are optional
         and combinable. Returns ``{total, results}`` where ``total`` is the
         match count before limit/offset (for pagination). Soft-deleted rows
@@ -1920,21 +2017,25 @@ class Index:
                 log.warning("memory search: bad date_to %r ignored", date_to)
         where = " AND ".join(clauses)
 
-        match = _fts_query(q) if q else ""
+        expression = _fts_query(q, match)
         with self._lock:
             try:
-                if match:
-                    tail = ("FROM yoinks_fts f "
-                            "JOIN yoinks y ON y.video_id = f.video_id "
-                            "WHERE yoinks_fts MATCH ? AND " + where)
+                if expression:
+                    prefix, search_params = _fts_hits(
+                        "yoinks_fts", q, match, self._YOINKS_BM25_WEIGHTS if match == "forgiving" else "")
+                    # Keep FTS candidates first. Driving this join from the
+                    # deleted_at index repeats every hit for every live row.
+                    tail = ("FROM search_hits h CROSS JOIN yoinks_fts f ON f.rowid=h.rowid "
+                            "CROSS JOIN yoinks y ON y.video_id = f.video_id "
+                            "WHERE " + where)
                     cnt = self._conn.execute(
-                        "SELECT COUNT(*) AS n " + tail, [match] + params
+                        prefix + "SELECT COUNT(*) AS n " + tail, search_params + params
                     ).fetchone()
                     total = int(cnt["n"]) if cnt else 0
                     rows = self._conn.execute(
-                        "SELECT y.* " + tail
-                        + " ORDER BY bm25(yoinks_fts) LIMIT ? OFFSET ?",
-                        [match] + params + [limit, offset],
+                        prefix + "SELECT y.* " + tail
+                        + " ORDER BY h._score, y.video_id LIMIT ? OFFSET ?",
+                        search_params + params + [limit, offset],
                     ).fetchall()
                 elif q:
                     # q was given but yielded no usable FTS terms.
@@ -2872,29 +2973,41 @@ class Index:
                 raise
         return written
 
-    def find_mentions(self, name: str, limit: int = 50) -> list[dict]:
-        """Every recorded mention of an entity, newest first.
+    def find_mentions(self, name: str, limit: int = 50, *, match: str = "forgiving") -> list[dict]:
+        """Recorded mentions ranked by entity name, with newest first for ties.
 
-        Matches on the normalised name (case/punctuation-insensitive) across
-        every type the name was tagged as, joining through to the yoink for
-        its slug/title/channel. Each row carries a timestamped deep link.
-        Soft-deleted yoinks are excluded. Returns [] for an unknown entity."""
+        Strict keeps the original normalized-name lookup. Forgiving also
+        matches useful words in recorded names. Rows carry source identity,
+        stored timestamps, and a clip passage when the context quotes one.
+        Soft-deleted yoinks are excluded."""
         norm = normalize_entity_name(name)
+        _search_terms(name, match)
         if not norm:
             return []
         sql = (
             "SELECT y.video_id AS video_id, y.slug AS slug, y.title AS title, "
             "       y.channel AS channel, y.platform AS platform, "
             "       y.metadata_json AS metadata_json, em.source AS source, "
-            "       em.timestamp AS timestamp, em.context AS context "
+            "       em.mention_id AS mention_id, em.timestamp AS timestamp, em.context AS context, "
+            "       (SELECT content FROM yoinks_fts WHERE video_id=y.video_id LIMIT 1) AS _content "
             "FROM entity_mentions em "
             "JOIN entities e ON e.entity_id = em.entity_id "
             "JOIN yoinks   y ON y.video_id  = em.video_id "
-            "WHERE e.name_normalized = ? AND y.deleted_at IS NULL "
-            "ORDER BY em.mention_id DESC LIMIT ?"
         )
+        if match == "strict":
+            sql += ("WHERE e.name_normalized = ? AND y.deleted_at IS NULL "
+                    "ORDER BY em.mention_id DESC LIMIT ?")
+            params = [norm, max(1, int(limit))]
+        else:
+            # This is an entity-name lookup, not transcript FTS. Preserve
+            # exact normalized names, then admit any useful name word.
+            sql += ("WHERE (e.name_normalized = ? OR entity_keyword_score(e.name, ?) > 0) "
+                    "AND y.deleted_at IS NULL ORDER BY (search_title_key(y.title)=?) DESC, "
+                    "(e.name_normalized=?) DESC, entity_keyword_score(e.name, ?) DESC, "
+                    "em.mention_id DESC LIMIT ?")
+            params = [norm, name, _search_title_key(name), norm, name, max(1, int(limit))]
         with self._lock:
-            rows = self._conn.execute(sql, (norm, max(1, int(limit)))).fetchall()
+            rows = self._conn.execute(sql, params).fetchall()
         out = []
         for r in rows:
             d = dict(r)
@@ -2903,6 +3016,23 @@ class Index:
                 platform=d.get("platform"),
                 metadata_json=d.get("metadata_json"))
             d.pop("metadata_json", None)
+            content = d.pop("_content", "") or ""
+            # Context is an entity annotation. When it quotes a stored clip,
+            # carry that clip's identity and actual timing for exact quoting.
+            context = d.get("context") or ""
+            if context:
+                clip = next((c for c in self.get_clips(d["video_id"])
+                             if context in c["text"]), None)
+                if clip:
+                    d["passage"] = {"video_id": d["video_id"], **{
+                        key: clip.get(key) for key in ("clip_id", "text", "start", "end", "timing")}}
+                elif context in content:
+                    start = content.index(context)
+                    d["passage"] = {"video_id": d["video_id"], "text": context,
+                                    "char_start": start, "char_end": start + len(context),
+                                    "field": "content"}
+                    if d.get("timestamp") is not None:
+                        d["passage"]["timestamp"] = d["timestamp"]
             out.append(d)
         return out
 

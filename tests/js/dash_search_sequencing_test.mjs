@@ -201,6 +201,8 @@ function makePage() {
       return new Promise((resolve) => {
         searches.push({
           q: params.get("q") || "",
+          match: params.get("match"),
+          sort: params.get("sort"),
           platform: params.get("platform") || "",
           hook_type: params.get("hook_type") || "",
           offset: Number(params.get("offset") || 0),
@@ -706,7 +708,29 @@ async function groupRefreshBeforeDebounce() {
   });
 }
 
+async function groupSearchModes() {
+  const p = makePage();
+  await typeSearch(p, "lunar lander");
+  check(p.searches[0].match === "forgiving", "search defaults to forgiving");
+  check(p.searches[0].sort === "relevance", "query defaults to Best match");
+  check(p.els.sortFilter.value === "relevance", "sort control displays Best match");
+  edit(p.els.sortFilter, "oldest");
+  await sleep(DEBOUNCE_WAIT_MS);
+  check(p.searches[1].sort === "oldest", "date sort stays available");
+  edit(p.els.matchFilter, "strict");
+  await sleep(DEBOUNCE_WAIT_MS);
+  check(p.searches[2].match === "strict", "Exact words sends strict");
+  check(p.searches[2].sort === "oldest", "matching change preserves chosen date order");
+  p.searches[0].answer([row("stale", "Old forgiving result")]);
+  p.searches[2].answer([row("strict", "Exact result")]);
+  await settle();
+  check(JSON.stringify(libraryIds(p)) === JSON.stringify(["strict"]), "late forgiving answer cannot replace strict results");
+  await typeSearch(p, "");
+  check(p.searches[3].sort === "newest", "clearing query restores newest browse order");
+}
+
 const GROUPS = {
+  search_modes: groupSearchModes,
   typing: groupTyping,
   stale_error: groupStaleError,
   load_more: groupLoadMore,

@@ -28,6 +28,7 @@ FACET_NAMES = (
 )
 SEARCH_QUERY_KEYS = {
     "q",
+    "match",
     "channel",
     "topic",
     "hook_type",
@@ -125,6 +126,7 @@ class SearchRequest:
     date_to: str | None = None
     limit: int = 50
     offset: int = 0
+    match: str = "forgiving"
 
     @classmethod
     def from_query(cls, query: Mapping[str, Any]) -> "SearchRequest":
@@ -189,7 +191,10 @@ class SearchRequest:
                 and values["date_from"] > values["date_to"]):
             raise ContractError(
                 "invalid_request", "date_from is after date_to")
-        return cls(limit=limit, offset=offset, **values)
+        match = one("match") or "forgiving"
+        if match not in ("forgiving", "strict"):
+            raise ContractError("invalid_request", "match must be forgiving or strict")
+        return cls(limit=limit, offset=offset, match=match, **values)
 
 
 @dataclass(frozen=True)
