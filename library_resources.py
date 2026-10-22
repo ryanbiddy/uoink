@@ -1213,7 +1213,9 @@ class LibraryReader:
                 return 1 if float(clock()) > deadline_at else 0
 
             try:
-                conn.set_progress_handler(progress, 64)
+                # Check roughly every millisecond on large FTS scans. Calling
+                # Python every 64 opcodes dominates otherwise bounded queries.
+                conn.set_progress_handler(progress, 4096)
             except (AttributeError, sqlite3.Error, TypeError):
                 pass
 
@@ -2056,19 +2058,25 @@ class LibraryReader:
         if actual != "keyword":
             def keyword_candidates(count, offset, override):
                 keyword_match = override or match
-                candidates = {row["video_id"]: row for row in self.index.search(query, count, match=keyword_match)}
-                for row in self.index.search_clips(query, count, match=keyword_match, group_sources=True):
+                candidates = {row["video_id"]: row for row in self._index_call(op, lambda:
+                    self.index.search(query, count, match=keyword_match, passages=False))}
+                clip_rows = self._index_call(op, lambda: self.index.search_clips(
+                    query, count, match=keyword_match, group_sources=True, _snippets=False))
+                for row in clip_rows:
                     existing = candidates.get(row["video_id"], {})
                     candidates[row["video_id"]] = {
                         **existing, **row, "_score": min(existing.get("_score", 0), row["_score"])}
                 ranked = sorted(candidates.values(), key=lambda row: (row["_score"], row["video_id"]))
                 return {"total": len(ranked), "results": ranked[offset:offset + count]}
 
-            page = self._index_call(op, lambda: self.index.search_mode(
+            # Inference and detached snapshots must not inherit Index._lock.
+            # Keyword DB calls retain their own bounded lock/deadline above.
+            page = self._storage(lambda: self.index.search_mode(
                 query, limit, mode=mode, match=match, keyword=keyword_candidates))
+            op.check()
             mode_info = metadata(page)
+            semantic_rows = page["results"]
             if page["search_mode"] != "keyword":
-                semantic_rows = page["results"]
                 match = "forgiving"  # merge timed and prose hits in the returned source order
         hits: list[dict] = []
         seen: set[str] = set()
@@ -2095,7 +2103,33 @@ class LibraryReader:
         op.check()
         rows = ([{**row, "clip_id": row["passage"]["clip_id"]} for row in semantic_rows
                  if row.get("passage", {}).get("clip_id") is not None] if semantic_rows is not None
-                else self._index_call(op, lambda: self.index.search_clips(query, limit, match=match, group_sources=True)))
+                else self._index_call(op, lambda: self.index.search_clips(query, limit, match=match, group_sources=True, _snippets=False)))
+        source_rows = None
+        if match == "forgiving" and semantic_rows is None:
+            bound = getattr(self.index, "source_score_lower_bound", None)
+            clips_win = (len(rows) >= limit and bound is not None and
+                         self._index_call(op, lambda: bound(query)) > max(row["_score"] for row in rows))
+            # Do not skip possible replacements for an invalid clip source.
+            clips_win = clips_win and all(self._bundle(op, row["video_id"]).error is None for row in rows)
+            source_rows = ([] if clips_win else self._index_call(op, lambda:
+                self.index.search(query, limit, match=match, passages=False)))
+            scores = {}
+            for row in [*rows, *source_rows]:
+                vid = row["video_id"]
+                scores[vid] = min(scores.get(vid, float("inf")), row["_score"])
+            selected = set()
+            # Resolve only the final page's bundles. Continue past an invalid
+            # source so an omission does not hide a valid lower-ranked hit.
+            for vid in sorted(scores, key=lambda vid: scores[vid]):
+                bundle = self._bundle(op, vid)
+                if bundle.error is not None:
+                    note_omission(bundle)
+                    continue
+                selected.add(vid)
+                if len(selected) == limit:
+                    break
+            rows = [row for row in rows if row["video_id"] in selected]
+            source_rows = [row for row in source_rows if row["video_id"] in selected]
         op.check()
         for row in rows:
             vid = row.get("video_id")
@@ -2121,8 +2155,13 @@ class LibraryReader:
             hits[-1].update({key: row[key] for key in CITATION_FIELDS if key in row})
             seen.add(vid)
         if match == "forgiving" or len(hits) < limit:
-            rows = (semantic_rows if semantic_rows is not None else
-                    self._index_call(op, lambda: self.index.search(query, limit, match=match)))
+            rows = (semantic_rows if semantic_rows is not None else source_rows if source_rows is not None else
+                    self._index_call(op, lambda: self.index.search(query, limit, match=match, passages=False)))
+            if semantic_rows is None:
+                pending = self._index_call(op, lambda: self.index._search_passages(
+                    [row for row in rows if row["video_id"] not in seen], query, match))
+                hydrated = {row["video_id"]: row for row in pending}
+                rows = [hydrated.get(row["video_id"], row) for row in rows]
             op.check()
             for row in rows:
                 if match == "strict" and len(hits) >= limit:

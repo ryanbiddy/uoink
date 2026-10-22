@@ -7,13 +7,14 @@ MODE_SCHEMA = {"type": "string", "enum": list(MODES), "default": "auto",
 META_FIELDS = ("search_mode", "requested_mode", "fallback_reason")
 CITATION_FIELDS = ("passage", "source_id", "passage_id", "span", "timestamp_seconds",
                    "passage_verified", "citation_reason")
+_COORDINATE_FIELDS = frozenset(("passage", "passage_id", "span", "timestamp_seconds",
+                              "start", "end", "timing", "source_deep_link"))
 
 
-def unverified(row, reason="No matched passage could be verified in stored source text."):
-    row = dict(row)
-    for key in ("passage", "passage_id", "span", "timestamp_seconds", "start", "end", "timing",
-                "source_deep_link"):
-        row.pop(key, None)
+def unverified(row, reason="No matched passage could be verified in stored source text.", *, copy_row=True):
+    row = dict(row) if copy_row else row
+    for key in row.keys() & _COORDINATE_FIELDS:
+        del row[key]
     row.update(source_id=row["video_id"], passage_verified=False, citation_reason=reason)
     return row
 
@@ -22,10 +23,10 @@ def metadata(result):
     return {key: result[key] for key in META_FIELDS if key in result}
 
 
-def citation_fields(row):
-    row = dict(row)
+def citation_fields(row, *, copy_row=True):
     if row.get("passage_verified") is not True:
-        return unverified(row, row.get("citation_reason") or "No matched passage could be verified in stored source text.")
+        return unverified(row, row.get("citation_reason") or "No matched passage could be verified in stored source text.", copy_row=copy_row)
+    row = dict(row) if copy_row else row
     passage = row.get("passage")
     if not passage and row.get("clip_id") is not None:
         passage = {key: row.get(key) for key in ("video_id", "clip_id", "text", "start", "end", "timing")}
@@ -42,7 +43,7 @@ def citation_fields(row):
         row.update(extra, passage=passage)
         row.pop("citation_reason", None)
         return row
-    return unverified(row)
+    return unverified(row, copy_row=False)
 
 
 def select_mode(index, mode):
@@ -60,7 +61,7 @@ def select_mode(index, mode):
                 reason = "Accept the current Gemma terms in Settings first."
             elif status["paused"]:
                 reason = "Semantic search is paused. Resume it in Settings."
-            elif status["state"] != "ready":
+            elif status["state"] != "ready" and not engine.retry_ready():
                 reason = "Semantic search is not ready (" + status["state"] + ")."
             else:
                 return ("hybrid" if mode == "auto" else mode), None
@@ -76,11 +77,11 @@ def _hydrate(index, hits, *, clips_only=False):
     if not hits:
         return []
     result = []
-    with index.read_snapshot() as db:
+    with index.detached_snapshot() as db:
         from uoink_core.local_search import IndexSources
         sources_reader = getattr(getattr(index, "_local_search", None), "sources", None) or IndexSources(index)
-        current = {source.source_id: source for source in sources_reader.snapshot(_db=db)}
         identities = list(dict.fromkeys(hit.source_id for hit in hits))
+        current = {source.source_id: source for source in sources_reader.snapshot(source_ids=identities, _db=db)}
         placeholders = ",".join("?" for _ in identities)
         sources = {row["video_id"]: dict(row) for row in db.execute(
             "SELECT * FROM yoinks WHERE video_id IN (" + placeholders + ") AND deleted_at IS NULL", identities)}
@@ -133,7 +134,7 @@ def _hydrate(index, hits, *, clips_only=False):
 
 
 def search(index, query, *, mode="auto", limit=50, offset=0, filters=None,
-           source_types=None, source_id=None, clips_only=False, keyword):
+           source_types=None, source_id=None, clips_only=False, keyword, passages=True, match="forgiving"):
     """Keyword callback accepts (limit, offset, match override) for existing contracts.
 
     Hybrid fuses 100 forgiving keyword and 100 semantic candidates with k=60.
@@ -155,19 +156,26 @@ def search(index, query, *, mode="auto", limit=50, offset=0, filters=None,
             rows = {row[key]: row for row in semantic}
             ranking = [(row[key], -row["_score"]) for row in semantic]
             if actual == "hybrid":
-                lexical = [citation_fields(row) for row in keyword(100, 0, "forgiving")["results"]]
+                lexical = keyword(100, 0, "forgiving")["results"]
                 for row in lexical:
-                    if row[key] not in rows or (not rows[row[key]].get("passage_verified") and row.get("passage_verified")):
+                    if row[key] not in rows or (not rows[row[key]].get("passage_verified") and
+                                               (row.get("passage_verified") or "_content" in row)):
                         rows[row[key]] = row
                 ranking = rrf_merge([row[key] for row in lexical], [row[key] for row in semantic], k=60)
             title_key = _search_title_key(query)
             ranking.sort(key=lambda pair: _search_title_key(rows[pair[0]].get("title") or "") != title_key)
             results = [{**rows[identity], "_score": -score, "_search_order": rank}
                        for rank, (identity, score) in enumerate(ranking)]
-            return {"total": len(results), "results": results[offset:offset + limit],
+            page = results[offset:offset + limit]
+            if passages and not clips_only:
+                page = index._search_passages(page, query, "forgiving")
+            return {"total": len(results), "results": page,
                     "search_mode": actual, "requested_mode": mode, "fallback_reason": None}
         except Exception:
-            reason = "Semantic search is unavailable. Keyword search still works. Retry setup in Settings."
+            reason = "Semantic search is temporarily unavailable. Keyword search still works."
     result = keyword(limit, offset, None)
-    return {**result, "results": [citation_fields(row) for row in result["results"]],
+    rows = result["results"]
+    if query and passages and not clips_only:
+        rows = index._search_passages(rows, query, match)
+    return {**result, "results": rows,
             "search_mode": "keyword", "requested_mode": mode, "fallback_reason": reason}

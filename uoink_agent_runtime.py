@@ -66,8 +66,12 @@ def dispatch_search(name, arguments, backend, local, *, running=None):
         return local()
     try:
         if running() if running is not None else helper_running(backend):
-            result = backend._call_http_registry_tool(name, args, timeout=1.5)
-            if result.get("ok") is True and result.get("search_mode") in ("keyword", "semantic", "hybrid"):
+            # The HTTP transport wraps the registry result. Allow the tool's
+            # two-second deadline plus a small local transport margin.
+            envelope = backend._call_http_registry_tool(name, args, timeout=2.5)
+            result = envelope.get("result") if envelope.get("ok") is True else None
+            if (isinstance(result, dict) and result.get("ok") is True
+                    and result.get("search_mode") in ("keyword", "semantic", "hybrid")):
                 return result
     except Exception:
         pass

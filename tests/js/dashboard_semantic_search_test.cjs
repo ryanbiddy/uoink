@@ -13,7 +13,7 @@ function env() {
       addEventListener(name, fn) { this.listeners[name] = fn; }, removeAttribute(name) { delete this.attributes[name]; },
       showModal() { this.open = true; } });
   }
-  const calls = [], timers = [];
+  const calls = [], timers = [], delays = [];
   let current = {ok:true,state:'not_installed',enabled:false,terms_version:'current-fixture',acceptance:null};
   let handler = async (path, options) => {
     if (path === '/search/terms') { current = {...current, acceptance:{accepted:true}}; return current; }
@@ -25,12 +25,12 @@ function env() {
   };
   const invoke = async (path, options={}) => { assert(path.startsWith('/search/')); calls.push({path,...options}); return handler(path,options); };
   const context = vm.createContext({document:{getElementById:id=>elements.get(id),querySelectorAll:()=>[]},
-    window:{clearTimeout:()=>{},setTimeout:(fn)=>timers.push(fn)}, state:{activeTab:'settings'},
+    window:{clearTimeout:()=>{},setTimeout:(fn,delay)=>{delays.push(delay); return timers.push(fn);}}, state:{activeTab:'settings'},
     readSettingsResource:invoke, settingsRequest:invoke, settingError:err=>err.message, confirm:()=>true});
   vm.runInContext(code,context);
   const run = value => vm.runInContext(value,context);
   run('bindSemanticSearch()');
-  return {run, calls, timers, el:id=>elements.get(id), setHandler:fn=>handler=fn};
+  return {run, calls, timers, delays, el:id=>elements.get(id), setHandler:fn=>handler=fn};
 }
 (async () => {
   const e = env();
@@ -71,5 +71,18 @@ function env() {
   release({state:'indexing',done:0,total:9});
   await first;
   assert.match(stale.el('semanticStatus').textContent,/Ready/);
+  const retry = env();
+  retry.setHandler(async () => { const error = Error('too many requests'); error.status = 429; throw error; });
+  await retry.run('loadSemanticStatus()');
+  await retry.timers[0]();
+  assert.deepEqual(retry.delays, [2000, 4000]);
+  retry.setHandler(async () => ({state:'indexing',enabled:true,done:3,total:9}));
+  await retry.timers[1]();
+  assert.equal(retry.delays.at(-1), 2000);
+  assert.match(retry.el('semanticStatus').textContent,/3 of 9/);
+  retry.run('state.activeTab = "library"');
+  retry.setHandler(async () => { throw Error('offline'); });
+  await retry.run('loadSemanticStatus()');
+  assert.equal(retry.delays.length, 3);
   console.log('PASS semantic settings: consent, progress, pause, resume, remove, failure, stale status');
 })().catch(error => { console.error(error); process.exitCode=1; });

@@ -17,9 +17,6 @@
         "items": [
           {
             "id": "video-contract",
-            "source_id": "video-contract",
-            "passage_verified": false,
-            "citation_reason": "No matched passage could be verified in stored source text.",
             "title": "The saved hour",
             "author": "Fixture Creator",
             "source_type": "youtube",
@@ -51,9 +48,6 @@
           },
           {
             "id": "note-contract",
-            "source_id": "note-contract",
-            "passage_verified": false,
-            "citation_reason": "No matched passage could be verified in stored source text.",
             "title": "Local note",
             "author": "You",
             "source_type": "note",
@@ -76,9 +70,6 @@
             "preview": null
           }
         ],
-        "search_mode": "keyword",
-        "requested_mode": "auto",
-        "fallback_reason": null,
         "page": {
           "state": "matches",
           "total": 2,
@@ -97,31 +88,6 @@
         "items": [
           {
             "id": "video-contract",
-            "passage": {
-              "video_id": "video-contract",
-              "text": "saved hour local workflow repeated task",
-              "char_start": 0,
-              "char_end": 39,
-              "field": "content",
-              "timing": "not_timed",
-              "source_id": "video-contract",
-              "passage_id": "text:0",
-              "span": {
-                "kind": "text",
-                "char_start": 0,
-                "char_end": 39
-              },
-              "timestamp_seconds": null
-            },
-            "source_id": "video-contract",
-            "passage_id": "text:0",
-            "span": {
-              "kind": "text",
-              "char_start": 0,
-              "char_end": 39
-            },
-            "timestamp_seconds": null,
-            "passage_verified": true,
             "title": "The saved hour",
             "author": "Fixture Creator",
             "source_type": "youtube",
@@ -152,9 +118,6 @@
             }
           }
         ],
-        "search_mode": "keyword",
-        "requested_mode": "auto",
-        "fallback_reason": "Semantic search is off. Enable it in Settings.",
         "page": {
           "state": "matches",
           "total": 1,
@@ -171,9 +134,6 @@
       "operation": "search",
       "data": {
         "items": [],
-        "search_mode": "keyword",
-        "requested_mode": "auto",
-        "fallback_reason": "Semantic search is off. Enable it in Settings.",
         "page": {
           "state": "no_matches",
           "total": 0,

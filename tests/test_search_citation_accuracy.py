@@ -26,9 +26,9 @@ def results(idx, surface, query, mode):
         return server._library_search(idx, q=query, filters={}, kind=None, limit=10,
                                       offset=0, sort="relevance", mode=mode)["results"]
     if surface == "corpus":
-        response = request("GET", f"/api/corpus/v1/search?q={query}&mode={mode}")
+        response = request("GET", f"/api/corpus/v1/search?q={query}&mode={mode}&search_details=true")
         assert response.status == 200, response.payload
-        corpus_contract.validate_data("search", response.payload["data"])
+        corpus_contract.validate_data("search", response.payload["data"], search_details=True)
         return response.payload["data"]["items"]
     raise AssertionError(surface)
 

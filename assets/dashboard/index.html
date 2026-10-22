@@ -16001,6 +16001,7 @@
     let semanticBusy = false;
     let semanticVersion = 0;
     let semanticTimer = null;
+    let semanticRetryMs = 2000;
 
     function renderSemanticStatus() {
       const data = semanticState || {};
@@ -16016,6 +16017,7 @@
         verifying: "Verifying the model files.",
         indexing: `Indexing saved sources: ${data.done || 0} of ${data.total || 0}. Keyword search is available.`,
         ready: `Ready. ${data.done || 0} of ${data.total || 0} sources indexed.`,
+        retrying: data.message || "Semantic search is retrying. Keyword search is available.",
         error: data.message || "Semantic search is unavailable. Retry setup. Keyword search still works."
       };
       document.getElementById("semanticStatus").textContent = data.paused ? "Paused. Select Resume to continue. Keyword search is available." : (messages[data.state] || messages.not_installed);
@@ -16041,12 +16043,19 @@
         const data = await readSettingsResource("/search/status");
         if (version !== semanticVersion) return;
         semanticState = data;
+        semanticRetryMs = 2000;
         renderSemanticStatus();
-        if (state.activeTab === "settings" && !data.paused && ["downloading", "verifying", "indexing"].includes(data.state)) {
+        if (state.activeTab === "settings" && !data.paused && ["downloading", "verifying", "indexing", "retrying"].includes(data.state)) {
           semanticTimer = window.setTimeout(loadSemanticStatus, 2000);
         }
       } catch (err) {
-        if (version === semanticVersion) document.getElementById("semanticStatus").textContent = `Could not read semantic search status. ${settingError(err)}`;
+        if (version === semanticVersion) {
+          document.getElementById("semanticStatus").textContent = `Could not read semantic search status. ${settingError(err)}`;
+          if (state.activeTab === "settings") {
+            semanticTimer = window.setTimeout(loadSemanticStatus, semanticRetryMs);
+            semanticRetryMs = Math.min(30000, semanticRetryMs * 2);
+          }
+        }
       }
     }
 

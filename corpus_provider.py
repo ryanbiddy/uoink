@@ -63,7 +63,7 @@ class UoinkCorpusProvider:
         del name
         return str(value or "").replace("_", " ").replace("-", " ").title()
 
-    def _item_ref(self, row: dict) -> dict:
+    def _item_ref(self, row: dict, *, search_details=False) -> dict:
         metadata = _json_object(row.get("metadata_json"))
         author = (
             row.get("author")
@@ -92,7 +92,7 @@ class UoinkCorpusProvider:
         )
         return {
             "id": str(row.get("video_id") or ""),
-            **{key: row[key] for key in ("passage", "source_id", "passage_id", "span", "timestamp_seconds", "passage_verified", "citation_reason") if key in row},
+            **({key: row[key] for key in ("passage", "source_id", "passage_id", "span", "timestamp_seconds", "passage_verified", "citation_reason") if key in row} if search_details else {}),
             "title": str(row.get("title") or ""),
             "author": str(author) if author else None,
             "source_type": source_type,
@@ -144,10 +144,10 @@ class UoinkCorpusProvider:
             state = "empty_corpus"
         return {
             "items": [
-                self._item_ref(dict(row))
+                self._item_ref(dict(row), search_details=request.search_details and bool(request.q))
                 for row in result.get("results") or []
             ],
-            **{key: result[key] for key in ("search_mode", "requested_mode", "fallback_reason") if key in result},
+            **({key: result[key] for key in ("search_mode", "requested_mode", "fallback_reason") if key in result} if request.search_details else {}),
             "page": {
                 "state": state,
                 "total": total,

@@ -641,6 +641,21 @@ def _check_memory_search_rate_limit() -> bool:
     return True
 
 
+# Status polling has its own budget and cannot consume search requests.
+_search_status_request_times: list[float] = []
+_search_status_rate_lock = threading.Lock()
+
+
+def _check_search_status_rate_limit() -> bool:
+    now = time.monotonic()
+    with _search_status_rate_lock:
+        _search_status_request_times[:] = [t for t in _search_status_request_times if t > now - 60.0]
+        if len(_search_status_request_times) >= 180:
+            return False
+        _search_status_request_times.append(now)
+    return True
+
+
 # ---- Strict JSON decoding (Living Library Phase 2, 2026-09-04) -------------
 # Python's json module accepts NaN, Infinity and duplicate object keys (the
 # last duplicate silently wins). The Phase 2 contract requires all three to be
@@ -2467,7 +2482,7 @@ def _resume_local_search():
     if LocalSearch.enabled_at(DATA_ROOT):
         try:
             engine = _get_local_search()
-            if engine.manager.acceptance():
+            if engine.manager.acceptance() and not engine.status()["paused"]:
                 engine.start()
         except Exception:
             log.warning("Semantic search could not resume; keyword search is available")
@@ -12621,28 +12636,29 @@ _LIBRARY_SORTS = ("newest", "oldest", "title", "relevance")
 
 
 def _library_search(idx, *, q: str | None, filters: dict, kind: str | None,
-                    sort: str, limit: int, offset: int, match: str = "forgiving", mode="auto") -> dict:
+                    sort: str, limit: int, offset: int, match: str = "forgiving", mode="auto", passages=True) -> dict:
     """``{total, results}`` like Index.search_yoinks_for_memory, plus a
     source-type group (``kind``) and an order over every match: newest,
     oldest, title (A to Z), or relevance (FTS rank; newest without q)."""
     from uoink_core.search_service import citation_fields, select_mode
     actual, reason = select_mode(idx, mode)
-    if actual != "keyword":
-        result = idx.search_mode(q, 200, mode=mode, match=match, filters=filters,
+    if actual != "keyword" and q:
+        result = idx.search_mode(q, max(200, offset + limit), mode=mode, match=match, filters=filters, passages=False,
                                 source_types=_LIBRARY_KINDS.get(kind or ""),
                                 keyword=lambda count, start, override: _library_search(
                                     idx, q=q, filters=filters, kind=kind,
                                     sort="relevance" if override else sort,
-                                    limit=count, offset=start, match=override or match, mode="keyword"))
-        if result["search_mode"] == "keyword":
-            reason = result["fallback_reason"]
-        else:
-            rows = result["results"]
+                                    limit=count, offset=start, match=override or match, mode="keyword", passages=False))
+        rows = result["results"]
+        if result["search_mode"] != "keyword":
             if sort == "title":
                 rows.sort(key=lambda row: (row.get("title") or "").casefold())
             elif sort in ("newest", "oldest"):
                 rows.sort(key=lambda row: (row.get("yoinked_at") or "", row["video_id"]), reverse=sort == "newest")
-            return {**result, "results": rows[offset:offset + limit]}
+        rows = rows[offset:offset + limit]
+        if passages:
+            rows = idx._search_passages(rows, q, "forgiving" if result["search_mode"] == "hybrid" else match)
+        return {**result, "results": rows}
     mode_info = {"search_mode": "keyword", "requested_mode": mode, "fallback_reason": reason}
     clauses = ["y.deleted_at IS NULL"]
     params: list = []
@@ -12688,12 +12704,14 @@ def _library_search(idx, *, q: str | None, filters: dict, kind: str | None,
         args = params
     with idx._lock:
         try:
-            cnt = idx._conn.execute(prefix + "SELECT COUNT(*) AS n " + tail, args).fetchone()
-            if expression and match == "forgiving":
-                rows = idx._conn.execute(index._fts_page(prefix, tail, order, offset=True),
-                                         args + [limit, offset, expression]).fetchall()
+            count_prefix, count_args = (index._fts_hits("yoinks_fts", q, match, ranked=False)
+                                        if expression else ("", []))
+            cnt = idx._conn.execute(count_prefix + "SELECT COUNT(*) AS n " + tail, count_args + params).fetchone()
+            if expression:
+                rows = idx._conn.execute(index._fts_page(prefix, tail, order, offset=True, snippets=passages),
+                                         args + [limit, offset] + ([expression] if passages else [])).fetchall()
             else:
-                selection = "y.*, h._snippet, h._score, f.content AS _content" if expression else "y.*"
+                selection = "y.*"
                 rows = idx._conn.execute(
                     prefix + "SELECT " + selection + " " + tail + " ORDER BY " + order + " LIMIT ? OFFSET ?",
                     args + [limit, offset]).fetchall()
@@ -12701,8 +12719,9 @@ def _library_search(idx, *, q: str | None, filters: dict, kind: str | None,
             # A MATCH expression FTS5 still rejects reads as no matches.
             log.warning("library search rejected query %r", q)
             return {"total": 0, "results": [], **mode_info}
+    rows = [dict(r) for r in rows]
     return {"total": int(cnt["n"]) if cnt else 0,
-            "results": [citation_fields(idx._search_passage(dict(r), q, match)) if q else dict(r) for r in rows],
+            "results": idx._search_passages(rows, q, match) if q and passages else rows,
             **mode_info}
 
 
@@ -13858,7 +13877,8 @@ class Handler(BaseHTTPRequestHandler):
     def _handle_search_control(self, action, body=None):
         if not self._is_dashboard_origin():
             return self._send_json(403, {"ok": False, "error": "dashboard origin required"})
-        if not _check_memory_search_rate_limit():
+        rate_limit = _check_search_status_rate_limit if action == "status" else _check_memory_search_rate_limit
+        if not rate_limit():
             return self._send_json(429, {"ok": False, "error": "too many requests"})
         from uoink_core.local_search import TermsRequired
         try:
@@ -14113,10 +14133,10 @@ class Handler(BaseHTTPRequestHandler):
             corpus_contract.failure(operation, error),
         )
 
-    def _corpus_v1_call(self, operation: str, callback):
+    def _corpus_v1_call(self, operation: str, callback, *, search_details=False):
         try:
             data = callback()
-            payload = corpus_contract.success(operation, data)
+            payload = corpus_contract.success(operation, data, search_details=search_details)
         except corpus_contract.ContractError as error:
             return self._send_corpus_v1_error(operation, error)
         except Exception:
@@ -14139,6 +14159,7 @@ class Handler(BaseHTTPRequestHandler):
         return self._corpus_v1_call(
             "search",
             lambda: self._corpus_v1_provider().search(request),
+            search_details=request.search_details,
         )
 
     def _handle_corpus_v1_get(self, bare: str):

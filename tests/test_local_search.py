@@ -16,6 +16,7 @@ from types import SimpleNamespace
 import pytest
 
 from uoink_core import local_search as ls
+from index import Index
 
 
 class TinyIndex:
@@ -26,16 +27,23 @@ class TinyIndex:
         self.db = sqlite3.connect(self._path, check_same_thread=False)
         self.db.row_factory = sqlite3.Row
         self.lock = threading.RLock()
+        self._lock, self._conn = self.lock, self.db
         self.db.executescript("""
             CREATE TABLE yoinks(video_id TEXT PRIMARY KEY, title TEXT, deleted_at TEXT,
               channel TEXT, topic TEXT, hook_type TEXT, platform TEXT, source_type TEXT,
               author TEXT, yoinked_at TEXT);
-            CREATE TABLE yoinks_fts(video_id TEXT PRIMARY KEY, content TEXT);
+            CREATE VIRTUAL TABLE yoinks_fts USING fts5(video_id UNINDEXED, slug,
+              channel, title, topic, hook_type, content, tokenize='unicode61');
             CREATE TABLE clips(clip_id INTEGER PRIMARY KEY, video_id TEXT, seq INTEGER,
               start REAL, end REAL, text TEXT, media_revision TEXT);
+            CREATE INDEX clips_video_id ON clips(video_id);
             CREATE TABLE citations(video_id TEXT, kind TEXT, seq INTEGER, text TEXT,
               timestamp_start REAL, timestamp_end REAL);
         """)
+        self.db.execute("PRAGMA journal_mode=WAL")
+
+    detached_snapshot = Index.detached_snapshot
+    source_stamp = Index.source_stamp
 
     @contextmanager
     def read_snapshot(self):
@@ -50,7 +58,8 @@ class TinyIndex:
                              fields.get("hook_type", "question"), fields.get("platform", "web"),
                              fields.get("source_type", "article"), fields.get("author", "Ada"),
                              fields.get("yoinked_at", "2026-10-21T12:00:00")))
-            self.db.execute("INSERT OR REPLACE INTO yoinks_fts VALUES (?, ?)", (identity, content))
+            self.db.execute("DELETE FROM yoinks_fts WHERE video_id=?", (identity,))
+            self.db.execute("INSERT INTO yoinks_fts(video_id, content) VALUES (?, ?)", (identity, content))
 
 
 @pytest.fixture
@@ -443,7 +452,7 @@ def test_runtime_failure_does_not_echo_document_or_local_path(engine, index):
     engine._model.embed = fail
     with pytest.raises(ls.SearchUnavailable):
         engine.embedding_search("rust")
-    assert engine.status()["state"] == "error"
+    assert engine.status()["state"] == "retrying"
     assert "private" not in engine.status()["message"]
 
 

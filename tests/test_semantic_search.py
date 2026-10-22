@@ -268,7 +268,7 @@ def test_stdio_search_uses_helper_and_falls_back_without_loading_model(db, monke
     idx, engine = ready(db)
     calls = []
     remote = {"ok": True, "search_mode": "hybrid", "results": []}
-    monkeypatch.setattr(server, "_call_http_registry_tool", lambda *args, **kwargs: calls.append(args) or remote)
+    monkeypatch.setattr(server, "_call_http_registry_tool", lambda *args, **kwargs: calls.append(args) or {"ok": True, "result": remote})
     local = lambda: {"ok": True, "results": [], "search_mode": "keyword"}
     for tool in ("search_library", "search_uoinks", "search_clips"):
         assert runtime.dispatch_search(tool, {"query": "rust"}, server, local, running=lambda: True) is remote
@@ -290,9 +290,9 @@ def test_http_modes_and_corpus_additive_shape(db, mode):
     assert response.status == 200, response.payload
     expected = "hybrid" if mode == "auto" else mode
     assert response.payload["search_mode"] == expected
-    request_data = corpus_contract.SearchRequest.from_query({"q": "rusty", "mode": mode})
+    request_data = corpus_contract.SearchRequest.from_query({"q": "rusty", "mode": mode, "search_details": "true"})
     data = corpus_provider.UoinkCorpusProvider(idx, idx._path.parent).search(request_data)
-    corpus_contract.validate_data("search", data)
+    corpus_contract.validate_data("search", data, search_details=True)
     assert data["search_mode"] == expected and data["items"][0]["passage"]
 
 

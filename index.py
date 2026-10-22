@@ -690,7 +690,8 @@ def _plain_snippet(text: str) -> str:
     return (text or "").replace(_MATCH_START, "").replace(_MATCH_END, "")
 
 
-def _fts_hits(table: str, query: str, match: str, weights: str = "") -> tuple[str, list]:
+def _fts_hits(table: str, query: str, match: str, weights: str = "", *,
+              video_ids=None, ranked=True) -> tuple[str, list]:
     """Rank before pagination, using only FTS-tokenized words for coverage.
 
     BM25 alone can put short partial hits above long complete hits. Scale it
@@ -702,47 +703,80 @@ def _fts_hits(table: str, query: str, match: str, weights: str = "") -> tuple[st
     """
     assert table in ("yoinks_fts", "clips_fts")
     expression = _fts_query(query, match)
-    rank = f"bm25({table}{', ' + weights if weights else ''})"
-    column = 6 if table == "yoinks_fts" else 0
-    snippet_words = 12 if table == "yoinks_fts" else 16
-    snippet = f"snippet({table}, {column}, '{_MATCH_START}', '{_MATCH_END}', '…', {snippet_words})"
-    # Forgiving ranking can consider hundreds of rows. Generate their excerpts
-    # only when the caller materializes results, not in the candidate/count CTE.
-    base = (f"SELECT rowid, {rank} AS _score, "
-            f"{snippet if match == 'strict' else 'NULL'} AS _snippet "
-            f"FROM {table} WHERE {table} MATCH ?")
+    rank = f"bm25({table}{', ' + weights if weights else ''})" if ranked else "0.0"
+    # Never extract snippets in the candidate set, including strict searches.
+    # Collect page clip IDs with the ordinary video_id index. A single bounded
+    # FTS cursor joins those IDs. Reopening MATCH for each clip repeats prefix
+    # expansion and BM25 corpus statistics even with an FTS rowid constraint.
+    params = []
+    scoped = ""
+    source = table
+    restriction = ""
+    if video_ids is not None:
+        assert table == "clips_fts" and video_ids
+        scoped = ("scoped_clips AS MATERIALIZED (SELECT clip_id FROM clips WHERE video_id IN ("
+                  + ",".join("?" for _ in video_ids) + ")), ")
+        source = "clips_fts CROSS JOIN scoped_clips s ON s.clip_id=clips_fts.rowid"
+        restriction = ("clips_fts.rowid >= (SELECT MIN(clip_id) FROM scoped_clips) AND "
+                       "clips_fts.rowid <= (SELECT MAX(clip_id) FROM scoped_clips) AND ")
+        params.extend(video_ids)
+    identity = f", {table}.video_id" if table == "yoinks_fts" else ""
+    base = (f"SELECT {table}.rowid{identity}, {rank} AS _score FROM {source} "
+            f"WHERE {restriction}{table} MATCH ?")
+    params.append(expression)
     if match == "strict":
-        return f"WITH search_hits AS MATERIALIZED ({base}) ", [expression]
-    joins = ("JOIN yoinks y ON y.video_id=f.video_id" if table == "yoinks_fts" else
-             "JOIN clips c ON c.clip_id=f.rowid JOIN yoinks y ON y.video_id=c.video_id")
+        return f"WITH {scoped}search_hits AS MATERIALIZED ({base}) ", params
     all_terms = _fts_query(" ".join(_search_terms(query)), "strict")
+    if table == "clips_fts":
+        # Exact-title priority is constant within each source, so it cannot
+        # affect which of that source's clips supplies its passage.
+        complete = "1" if expression == all_terms else "rowid IN (SELECT rowid FROM all_hits)"
+        all_hits = ("" if expression == all_terms else
+                    f"all_hits AS MATERIALIZED (SELECT {table}.rowid FROM {source} "
+                    f"WHERE {restriction}{table} MATCH ?), ")
+        title_sources = ("title_sources AS MATERIALIZED (SELECT video_id FROM yoinks "
+                         "WHERE search_title_key(title)=? AND deleted_at IS NULL), " if video_ids is None else "")
+        return (f"WITH {scoped}word_hits AS MATERIALIZED ({base}), {title_sources}{all_hits}"
+                "search_hits AS (SELECT rowid, .001 * _score / (1.0 - _score) "
+                f"- .001 * ({complete}) AS _score FROM word_hits) ",
+                params + ([_search_title_key(query)] if video_ids is None else [])
+                + ([] if expression == all_terms else [all_terms]))
+    titles = ("SELECT f.rowid, f.video_id FROM (SELECT 1 FROM title_sources LIMIT 1) t "
+              "CROSS JOIN yoinks_fts f WHERE f.video_id IN (SELECT video_id FROM title_sources)")
     sql = (
-        f"WITH word_hits AS MATERIALIZED ({base}), "
-        f"title_hits AS MATERIALIZED (SELECT f.rowid FROM {table} f {joins} "
-        "WHERE search_title_key(y.title)=? AND y.deleted_at IS NULL "
-        + ("AND f.rowid IN (SELECT rowid FROM word_hits) " if table == "clips_fts" else "") + "), "
-        f"all_hits AS MATERIALIZED (SELECT rowid FROM {table} WHERE {table} MATCH ?), "
+        f"WITH {scoped}word_hits AS MATERIALIZED ({base}), "
+        "title_sources AS MATERIALIZED (SELECT video_id FROM yoinks "
+        "WHERE search_title_key(title)=? AND deleted_at IS NULL), "
+        f"title_hits AS MATERIALIZED ({titles}), "
+        + ("all_hits AS (SELECT rowid FROM word_hits), " if all_terms == expression else
+           f"all_hits AS MATERIALIZED (SELECT {table}.rowid FROM {source} WHERE {restriction}{table} MATCH ?), ") +
         "candidates AS (SELECT * FROM word_hits UNION ALL "
-        "SELECT rowid, 0.0, '' FROM title_hits WHERE rowid NOT IN (SELECT rowid FROM word_hits)), "
-        f"search_hits AS (SELECT candidates.rowid, COALESCE((SELECT {snippet} FROM {table} "
-        f"WHERE {table}.rowid=candidates.rowid AND {table} MATCH ?), '') AS _snippet, "
+        "SELECT rowid, video_id, 0.0 FROM title_hits WHERE rowid NOT IN (SELECT rowid FROM word_hits)), "
+        "search_hits AS (SELECT candidates.rowid, candidates.video_id, "
         ".001 * _score / (1.0 - _score) "
-        "- .001 * (rowid IN (SELECT rowid FROM all_hits)) "
+        + ("- .001 " if expression == all_terms else "- .001 * (rowid IN (SELECT rowid FROM all_hits)) ") +
         "- .002 * (rowid IN (SELECT rowid FROM title_hits)) AS _score FROM candidates) "
     )
-    return sql, [expression, _search_title_key(query), all_terms, expression]
+    return sql, params + [_search_title_key(query)] + ([] if all_terms == expression else [all_terms])
 
 
-def _fts_page(prefix: str, tail: str, order: str, *, offset=False) -> str:
+def _fts_page(prefix: str, tail: str, order: str, *, offset=False, total=False, snippets=True) -> str:
     """Materialize the filtered page before asking FTS to extract snippets."""
     page = " LIMIT ? OFFSET ?" if offset else " LIMIT ?"
     outer_order = order.replace("h.", "p.").replace("y.", "p.")
-    return (prefix.rstrip() + ", page_hits AS MATERIALIZED ("
-            "SELECT y.*, h._score, f.content AS _content, h.rowid AS _fts_rowid "
-            + tail + " ORDER BY " + order + page + ") "
-            f"SELECT p.*, COALESCE((SELECT snippet(yoinks_fts, 6, '{_MATCH_START}', '{_MATCH_END}', '…', 12) "
-            "FROM yoinks_fts WHERE yoinks_fts.rowid=p._fts_rowid AND yoinks_fts MATCH ?), '') AS _snippet "
-            "FROM page_hits p ORDER BY " + outer_order)
+    page_sql = (prefix.rstrip() + ", page_hits AS MATERIALIZED ("
+            "SELECT y.*, h._score, h.rowid AS _fts_rowid "
+            + (", COUNT(*) OVER () AS _total " if total else "")
+            + tail + " ORDER BY " + order + page + ") ")
+    if not snippets:
+        return (page_sql + "SELECT p.*, f.content AS _content, '' AS _snippet, 1 AS _snippet_pending "
+                "FROM page_hits p JOIN yoinks_fts f ON f.rowid=p._fts_rowid ORDER BY " + outer_order)
+    return (page_sql.rstrip() + ", page_snippets AS MATERIALIZED ("
+            f"SELECT p._fts_rowid, snippet(yoinks_fts, 6, '{_MATCH_START}', '{_MATCH_END}', '…', 12) AS _snippet "
+            "FROM yoinks_fts CROSS JOIN page_hits p ON p._fts_rowid=yoinks_fts.rowid WHERE yoinks_fts MATCH ?) "
+            "SELECT p.*, f.content AS _content, COALESCE(s._snippet, '') AS _snippet "
+            "FROM page_hits p JOIN yoinks_fts f ON f.rowid=p._fts_rowid "
+            "LEFT JOIN page_snippets s ON s._fts_rowid=p._fts_rowid ORDER BY " + outer_order)
 
 
 # --------------------------------------------------------------------------
@@ -762,19 +796,23 @@ def normalize_entity_name(name: str) -> str:
 
 
 def _entity_deep_link(video_id: str, seconds, *, platform: str | None = None,
-                      metadata_json: str | None = None) -> str | None:
+                      metadata_json: str | None = None, source_url=None) -> str | None:
     """Return a source-aware timestamp link for an entity mention."""
     vid = (video_id or "").strip()
+    if source_url is None and metadata_json:
+        try:
+            metadata = json.loads(metadata_json)
+            source_url = metadata.get("url") if isinstance(metadata, dict) else None
+        except (TypeError, json.JSONDecodeError):
+            pass
+    if seconds is None:
+        if isinstance(source_url, str) and source_url.startswith(("http://", "https://")):
+            return source_url.split("#", 1)[0]
+        return f"https://youtube.com/watch?v={vid}" if not platform or platform == "youtube" else None
     try:
         t = max(0, int(float(seconds)))
     except (TypeError, ValueError):
         t = 0
-    metadata = {}
-    try:
-        metadata = json.loads(metadata_json or "{}")
-    except (TypeError, json.JSONDecodeError):
-        pass
-    source_url = metadata.get("url") if isinstance(metadata, dict) else None
     if platform and platform != "youtube":
         if isinstance(source_url, str) and source_url.startswith(("http://", "https://")):
             return f"{source_url.split('#', 1)[0]}#t={t}"
@@ -795,14 +833,22 @@ class Index:
     instance is usable as a context manager."""
 
     def __init__(self, conn: sqlite3.Connection, path: Path):
+        from functools import lru_cache
         self._conn = conn
-        conn.create_function("search_title_key", 1, _search_title_key, deterministic=True)
-        conn.create_function("entity_keyword_score", 2, _entity_keyword_score, deterministic=True)
+        conn.create_function("search_title_key", 1, lru_cache(maxsize=16384)(_search_title_key), deterministic=True)
+        conn.create_function("entity_keyword_score", 2, lru_cache(maxsize=16384)(_entity_keyword_score), deterministic=True)
         self._path = path
         self._lock = threading.RLock()
         self._insert_count = 0
         self._local_search = None
         self._source_change_callback = None
+        # Existing-only readers also support databases from before this index.
+        try:
+            self._clip_metadata_index = bool(conn.execute(
+                "SELECT 1 FROM sqlite_master WHERE name='idx_clips_search_metadata' AND type='index'"
+            ).fetchone())
+        except sqlite3.Error:
+            self._clip_metadata_index = False  # surface storage errors at the read boundary
         # Explicit write-transaction owner: (id(connection), thread ident).
         # Bound only by write_transaction(); BriefStore uses this instead of
         # guessing native sqlite3* pointers.
@@ -834,20 +880,22 @@ class Index:
         Readers share this Index lock, so no read can observe the connection
         swap. Keep the original connection usable if initialization fails.
         """
+        from functools import lru_cache
         with self._lock:
             if not self._existing_read_only:
                 return
             previous = self._conn
             conn = sqlite3.connect(str(self._path), check_same_thread=False)
             try:
-                conn.create_function("search_title_key", 1, _search_title_key, deterministic=True)
-                conn.create_function("entity_keyword_score", 2, _entity_keyword_score, deterministic=True)
+                conn.create_function("search_title_key", 1, lru_cache(maxsize=16384)(_search_title_key), deterministic=True)
+                conn.create_function("entity_keyword_score", 2, lru_cache(maxsize=16384)(_entity_keyword_score), deterministic=True)
                 conn.row_factory = sqlite3.Row
                 conn.execute("PRAGMA journal_mode=WAL")
                 conn.execute("PRAGMA foreign_keys=ON")
                 version = _run_migrations(conn)
                 _backfill_clips_if_needed(conn, version)
                 self._conn = conn
+                self._clip_metadata_index = True
                 try:
                     from provenance import backfill_source_types
                     backfill_source_types(self)
@@ -1033,6 +1081,21 @@ class Index:
     snapshot = read_snapshot
     read_transaction = read_snapshot
 
+    @contextmanager
+    def detached_snapshot(self):
+        """Read committed WAL data without holding the capture connection lock."""
+        conn = sqlite3.connect(self._path.resolve().as_uri() + "?mode=ro", uri=True)
+        conn.row_factory = sqlite3.Row
+        try:
+            conn.execute("BEGIN DEFERRED")
+            yield conn
+        finally:
+            conn.close()
+
+    def source_stamp(self):
+        with self._lock:
+            return (self._conn.total_changes, self._conn.execute("PRAGMA data_version").fetchone()[0])
+
     def library_service(self):
         """One service seam, shared by transports and corpus lifecycle hooks."""
         service = getattr(self, "_library_work_service", None)
@@ -1085,7 +1148,7 @@ class Index:
 
     def search_mode(self, query: str, limit: int = 50, *, mode="auto", offset=0,
                     match="forgiving", filters=None, clips_only=False, video_id=None,
-                    source_types=None, keyword=None) -> dict:
+                    source_types=None, keyword=None, passages=True) -> dict:
         from uoink_core.search_service import search
         filters = dict(filters or {})
         if keyword is None:
@@ -1095,10 +1158,10 @@ class Index:
                                              match=override or match, **filters)
                     return {"total": len(rows), "results": rows[start:start + count]}
                 return self.search_yoinks_for_memory(q=query, limit=count, offset=start,
-                                                     match=override or match, **filters)
+                                                     match=override or match, passages=False, **filters)
         return search(self, query, mode=mode, limit=limit, offset=offset, filters=filters,
                       source_types=source_types, source_id=video_id,
-                      clips_only=clips_only, keyword=keyword)
+                      clips_only=clips_only, keyword=keyword, passages=passages, match=match)
 
     def search_embedding(self, query: str, limit: int = 10, **filters) -> dict:
         return self.search_mode(query, limit, mode="semantic", filters=filters)
@@ -1227,7 +1290,7 @@ class Index:
     def search(self, query: str, limit: int = 10, *,
                channel: str | None = None,
                hook_type: str | None = None,
-               match: str = "forgiving") -> list[dict]:
+               match: str = "forgiving", passages: bool = True) -> list[dict]:
         """Full-text search across indexed corpora. Returns yoink rows ranked
         by weighted FTS5 bm25 (best first; see _YOINKS_BM25_WEIGHTS),
         optionally filtered by channel/hook_type."""
@@ -1238,8 +1301,7 @@ class Index:
         # Each result row carries `_snippet` (a match excerpt) and `_score`
         # (bm25; lower is a better match) alongside the yoinks columns.
         prefix, params = _fts_hits("yoinks_fts", query, match, self._YOINKS_BM25_WEIGHTS)
-        tail = ("FROM search_hits h CROSS JOIN yoinks_fts f ON f.rowid=h.rowid "
-               "CROSS JOIN yoinks y ON y.video_id = f.video_id "
+        tail = ("FROM search_hits h CROSS JOIN yoinks y ON y.video_id = h.video_id "
                "WHERE y.deleted_at IS NULL ")
         if channel:
             tail += "AND y.channel = ? "
@@ -1248,12 +1310,9 @@ class Index:
             tail += "AND y.hook_type = ? "
             params.append(hook_type)
         params.append(max(1, int(limit)))
-        if match == "forgiving":
-            sql = _fts_page(prefix, tail, "h._score, y.video_id")
+        sql = _fts_page(prefix, tail, "h._score, y.video_id", snippets=passages)
+        if passages:
             params.append(_fts_query(query, match))
-        else:
-            sql = (prefix + "SELECT y.*, h._snippet, h._score, f.content AS _content "
-                   + tail + " ORDER BY h._score, y.video_id LIMIT ?")
         with self._lock:
             try:
                 rows = self._conn.execute(sql, params).fetchall()
@@ -1261,7 +1320,65 @@ class Index:
                 # Defensive: a MATCH expression FTS5 still rejects.
                 log.warning("FTS search rejected query %r", query)
                 return []
-        return [self._search_passage(dict(r), query, match) for r in rows]
+        rows = [dict(r) for r in rows]
+        return self._search_passages(rows, query, match) if passages else rows
+
+    def source_score_lower_bound(self, query: str) -> float:
+        """A conservative best possible forgiving source score.
+
+        FTS5 BM25 caps each phrase contribution at (k1 + 1) * IDF, with
+        k1=1.2. Column weights change frequency, not that cap. A globally
+        absent term contributes zero. Include coverage and exact-title guards
+        so callers can skip a source scan only when every returned clip wins.
+        """
+        from math import log
+        terms = _search_terms(query)
+        if not terms:
+            return float("inf")
+        expressions = [f'"{term}"' + ("*" if i == len(terms) - 1 else "")
+                       for i, term in enumerate(terms)]
+        counts = ", ".join("(SELECT COUNT(*) FROM yoinks_fts WHERE yoinks_fts MATCH ?)" for _ in terms)
+        with self._lock:
+            values = self._conn.execute(
+                "SELECT EXISTS(SELECT 1 FROM yoinks WHERE deleted_at IS NULL AND search_title_key(title)=?), "
+                # FTS5's normal docsize table has one row per document. Counting
+                # its keys avoids loading the large inline FTS content records.
+                "(SELECT COUNT(*) FROM yoinks_fts_docsize), "
+                "EXISTS(SELECT 1 FROM yoinks_fts WHERE yoinks_fts MATCH ? LIMIT 1), " + counts,
+                [_search_title_key(query), _fts_query(" ".join(terms), "strict"), *expressions]).fetchone()
+        if values[0]:
+            return float("-inf")  # exact titles must enter the candidate pool
+        total = values[1]
+        magnitude = 2.2 * sum(max(1e-6, log((total - n + .5) / (n + .5))) for n in values[3:] if n)
+        return -.001 * magnitude / (1 + magnitude) - .001 * bool(values[2]) - 1e-12
+
+    def _search_passages(self, rows: list[dict], query: str, match: str) -> list[dict]:
+        """One indexed clip query for the returned page, never one per row."""
+        if not rows:
+            return []
+        pending = [row for row in rows if "_content" in row]
+        identities = list(dict.fromkeys(row["video_id"] for row in pending))
+        if not identities:
+            return rows
+        deferred = [row for row in pending if row.get("_snippet_pending")]
+        if deferred:
+            ids = [row["_fts_rowid"] for row in deferred]
+            with self._lock:
+                snippets = self._conn.execute(
+                    "WITH page_ids(id) AS (VALUES " + ",".join("(?)" for _ in ids) + ") "
+                    f"SELECT yoinks_fts.rowid, snippet(yoinks_fts, 6, '{_MATCH_START}', '{_MATCH_END}', '…', 12) "
+                    "FROM yoinks_fts CROSS JOIN page_ids p ON p.id=yoinks_fts.rowid "
+                    "WHERE yoinks_fts MATCH ? AND yoinks_fts.rowid>=? AND yoinks_fts.rowid<=?",
+                    [*ids, _fts_query(query, match), min(ids), max(ids)]).fetchall()
+            by_rowid = {row[0]: row[1] for row in snippets}
+            for row in deferred:
+                row["_snippet"] = by_rowid.get(row["_fts_rowid"], "")
+                row.pop("_snippet_pending", None)
+        clips = self.search_clips(query, len(identities), match=match,
+                                  group_sources=True, _video_ids=identities, _snippets=False)
+        by_source = {clip["video_id"]: clip for clip in clips}
+        return [self._search_passage({**row, "_matched_clip": by_source.get(row["video_id"])},
+                                     query, match) if "_content" in row else row for row in rows]
 
     def _search_passage(self, row: dict, query: str, match: str) -> dict:
         """Attach a stored clip, or exact character span in indexed content.
@@ -1275,11 +1392,8 @@ class Index:
         row["_snippet"] = _plain_snippet(marked_snippet)
         # A source can match metadata or text outside its stored clips.
         # Never substitute the first clip or the opening of the content.
-        clips = self.get_clips(row["video_id"])
-        if clips:
-            clips = self.search_clips(query, 1, video_id=row["video_id"], match=match)
-        if clips:
-            clip = clips[0]
+        clip = row.pop("_matched_clip", None)
+        if clip:
             row["passage"] = {key: clip.get(key) for key in
                               ("video_id", "clip_id", "text", "start", "end", "timing")}
         elif content:
@@ -1299,36 +1413,96 @@ class Index:
         return citation_fields(row)
 
     # ---- clips (living library phase 1; see clips.py) --------------------
+    def _partial_clip_page(self, query, limit):
+        """Stream FTS rank when a missing term rules out every coverage boost.
+
+        FTS can sort its own rank without joining every match to a source.
+        Consume the final score's ties before choosing deterministic sources.
+        Caller holds the connection lock. None means use the full rank rules.
+        """
+        terms = _search_terms(query)
+        if len(terms) < 2:
+            return None
+        expressions = [f'"{term}"' + ("*" if i == len(terms) - 1 else "")
+                       for i, term in enumerate(terms)]
+        checks = ", ".join("EXISTS (SELECT 1 FROM clips_fts WHERE clips_fts MATCH ? LIMIT 1)" for _ in terms)
+        probe = self._conn.execute(
+            "SELECT EXISTS (SELECT 1 FROM yoinks WHERE deleted_at IS NULL AND search_title_key(title)=?) AS title, "
+            + checks, [_search_title_key(query), *expressions]).fetchone()
+        if probe[0] or all(probe[1:]):
+            return None
+        # Globally absent phrases contribute zero to BM25. Keep the original
+        # exact/prefix form of each remaining phrase while avoiding that work.
+        expression = " OR ".join(term for term, present in zip(expressions, probe[1:]) if present)
+        if not expression:
+            return []
+        hint = " INDEXED BY idx_clips_search_metadata" if self._clip_metadata_index else ""
+        cursor = self._conn.execute(
+            "SELECT c.clip_id, c.video_id, c.seq, clips_fts.rank AS raw_score FROM clips_fts "
+            "CROSS JOIN clips c" + hint + " ON c.clip_id=clips_fts.rowid "
+            "CROSS JOIN yoinks y ON y.video_id=c.video_id "
+            "WHERE clips_fts MATCH ? AND y.deleted_at IS NULL ORDER BY clips_fts.rank",
+            (expression,))
+        cursor.row_factory = None
+        best, boundary, cutoff = {}, None, None
+        try:
+            for clip_id, vid, seq, raw in cursor:
+                if boundary is not None and raw > boundary:
+                    break
+                if cutoff is not None and (raw, vid) > cutoff:
+                    continue
+                previous = best.get(vid)
+                if previous is None or (raw, seq, clip_id) < (previous[3], previous[2], previous[0]):
+                    best[vid] = (clip_id, vid, seq, raw)
+                if len(best) > limit:
+                    del best[max(best, key=lambda identity: (best[identity][3], identity))]
+                if boundary is None and len(best) >= limit:
+                    boundary = raw
+                if len(best) == limit:
+                    cutoff = max((row[3], row[1]) for row in best.values())
+        finally:
+            cursor.close()
+        return [{"clip_id": clip_id, "video_id": vid, "_score": .001 * raw / (1 - raw)}
+                for clip_id, vid, seq, raw in sorted(best.values(), key=lambda row: (row[3], row[1]))]
+
     def search_clips(self, query: str, limit: int = 20, *,
                      video_id: str | None = None,
                      channel: str | None = None,
-                     match: str = "forgiving", group_sources: bool = False) -> list[dict]:
+                     match: str = "forgiving", group_sources: bool = False,
+                     _video_ids=None, _snippets=True) -> list[dict]:
         """Full-text search over clips (merged transcript windows). Returns
         one row per clip -- ``{clip_id, video_id, slug, title, channel,
         start, end, text, source_deep_link, _score, _snippet}`` -- ranked by
         bm25(clips_fts), best first, restricted to live items."""
         if not _fts_query(query, match):
             return []
-        prefix, params = _fts_hits("clips_fts", query, match)
+        identities = [video_id] if video_id else _video_ids
+        prefix, params = _fts_hits("clips_fts", query, match, video_ids=identities)
         score = "h._score"
-        grouped = group_sources and match == "forgiving"
-        if grouped:
+        if match == "forgiving" and identities is None:
+            score += " - .002 * (c.video_id IN (SELECT video_id FROM title_sources))"
+        grouped = group_sources
+        if grouped and match == "forgiving" and identities is None and len(_search_terms(query)) > 1:
             # FTS checks each term across all clips belonging to a source.
             # Keep the single-clip score for choosing that source's passage.
             terms = _search_terms(query)
+            expressions = [f'"{term}"' + ("*" if i == len(terms) - 1 else "")
+                           for i, term in enumerate(terms)]
+            possible = " AND ".join("EXISTS (SELECT 1 FROM clips_fts WHERE clips_fts MATCH ? LIMIT 1)" for _ in terms)
             coverage = " INTERSECT ".join(
-                "SELECT c.video_id FROM clips_fts JOIN clips c ON c.clip_id=clips_fts.rowid "
+                "SELECT c.video_id FROM coverage_possible p CROSS JOIN clips_fts "
+                "JOIN clips c ON c.clip_id=clips_fts.rowid "
                 "WHERE clips_fts MATCH ?" for _ in terms)
-            params.extend(f'"{term}"' + ("*" if i == len(terms) - 1 else "")
-                          for i, term in enumerate(terms))
-            prefix = prefix.rstrip() + ", covered_sources AS (" + coverage + ") "
+            params.extend(expressions + expressions)
+            prefix = (prefix.rstrip() + ", coverage_possible AS MATERIALIZED (SELECT 1 WHERE " + possible
+                      + "), covered_sources AS (" + coverage + ") ")
             score += " - .001 * (c.video_id IN (SELECT video_id FROM covered_sources) AND h.rowid NOT IN (SELECT rowid FROM all_hits))"
-        sql = (prefix + "SELECT c.clip_id, c.video_id, y.slug, y.title, y.channel, "
-               "c.start, c.\"end\", c.text, c.source_deep_link, "
-               + score + " AS _score, h._snippet "
-               + (", ROW_NUMBER() OVER (PARTITION BY c.video_id ORDER BY h._score, c.seq) AS _source_rank " if grouped else "") +
+        metadata_hint = " INDEXED BY idx_clips_search_metadata" if self._clip_metadata_index else ""
+        sql = (prefix + "SELECT c.clip_id, c.video_id, c.seq, "
+               + score + " AS _score "
+               + (", h._score AS _raw_score " if grouped else "") +
                "FROM search_hits h "
-               "JOIN clips c ON c.clip_id = h.rowid "
+               "JOIN clips c" + metadata_hint + " ON c.clip_id = h.rowid "
                "JOIN yoinks y ON y.video_id = c.video_id "
                "WHERE y.deleted_at IS NULL ")
         if video_id:
@@ -1338,14 +1512,69 @@ class Index:
             sql += "AND y.channel = ? "
             params.append(channel)
         # Tie-break on (video_id, seq) so equal scores order deterministically.
+        fallback_sql = None
         if grouped:
-            sql = "SELECT * FROM (" + sql + ") WHERE _source_rank=1 ORDER BY _score, video_id LIMIT ?"
+            # SQLite's single MIN aggregate takes its bare _score from the
+            # row supplying that minimum. Tied raw scores have the same source
+            # priority; resolve their seq tie only for the final source page.
+            def group_page(candidates):
+                return ("WITH scored_clips AS MATERIALIZED (" + candidates + "), "
+                        "source_page AS MATERIALIZED (SELECT video_id, MIN(_raw_score) AS best, _score "
+                        "FROM scored_clips GROUP BY video_id ORDER BY _score, video_id LIMIT ?), "
+                        "best_clips AS MATERIALIZED (SELECT s.video_id, MIN(s.seq) AS seq, p._score "
+                        "FROM scored_clips s CROSS JOIN source_page p ON s.video_id=p.video_id AND s._raw_score=p.best "
+                        "GROUP BY s.video_id) "
+                        "SELECT b.video_id, b._score, c.clip_id FROM best_clips b "
+                        "JOIN clips c ON c.video_id=b.video_id AND c.seq=b.seq")
+            # With constant within-source priority, the best global clips
+            # contain the best sources. Group a small prefix first. If it has
+            # too few distinct sources, fall back to the exhaustive grouping.
+            if identities is None:
+                fallback_sql = group_page(sql)
+                prefix_limit = str(max(32, int(limit) * 2))
+                if match == "forgiving" and len(_search_terms(query)) > 1:
+                    # Cross-clip coverage can change which passage supplies a
+                    # source's rank. Only use the prefix when none qualifies.
+                    prefix_limit = "CASE WHEN EXISTS (SELECT 1 FROM covered_sources) THEN -1 ELSE " + prefix_limit + " END"
+                sql += "ORDER BY _score, c.video_id, c.seq LIMIT " + prefix_limit
+            sql = group_page(sql)
         else:
-            sql += "ORDER BY h._score, c.video_id, c.seq LIMIT ?"
+            sql += "ORDER BY _score, c.video_id, c.seq LIMIT ?"
         params.append(max(1, int(limit)))
+        # Materialize after grouping and LIMIT before invoking snippet().
+        def materialize_page(page_sql):
+            return ("WITH clip_page AS MATERIALIZED (" + page_sql + ") "
+                    "SELECT p.clip_id, p.video_id, p._score, y.slug, y.title, y.channel, "
+                    "c.start, c.\"end\", c.text, c.source_deep_link, '' AS _snippet "
+                    "FROM clip_page p JOIN clips c ON c.clip_id=p.clip_id JOIN yoinks y ON y.video_id=p.video_id "
+                    "ORDER BY p._score, p.video_id, c.seq")
+        sql = materialize_page(sql)
         with self._lock:
             try:
-                rows = self._conn.execute(sql, params).fetchall()
+                partial = (self._partial_clip_page(query, max(1, int(limit)))
+                           if grouped and identities is None and not channel and match == "forgiving" else None)
+                if partial is not None:
+                    page_sql = " UNION ALL ".join("SELECT ? AS clip_id, ? AS video_id, ? AS _score" for _ in partial)
+                    page_args = [value for row in partial for value in (row["clip_id"], row["video_id"], row["_score"])]
+                    rows = self._conn.execute(materialize_page(page_sql), page_args).fetchall() if partial else []
+                else:
+                    rows = self._conn.execute(sql, params).fetchall()
+                    if fallback_sql is not None and 0 < len(rows) < max(1, int(limit)):
+                        rows = self._conn.execute(materialize_page(fallback_sql), params).fetchall()
+                rows = [dict(row) for row in rows]
+                if _snippets and rows:
+                    # One FTS cursor extracts only the chosen page, including
+                    # when a short candidate prefix required the full grouping.
+                    ids = [row["clip_id"] for row in rows]
+                    snippets = self._conn.execute(
+                        "WITH page_ids(id) AS (VALUES " + ",".join("(?)" for _ in ids) + ") "
+                        f"SELECT clips_fts.rowid, snippet(clips_fts, 0, '{_MATCH_START}', '{_MATCH_END}', '…', 16) "
+                        "FROM clips_fts CROSS JOIN page_ids p ON p.id=clips_fts.rowid "
+                        "WHERE clips_fts MATCH ? AND clips_fts.rowid>=? AND clips_fts.rowid<=?",
+                        [*ids, _fts_query(query, match), min(ids), max(ids)]).fetchall()
+                    by_id = {row[0]: row[1] for row in snippets}
+                    for row in rows:
+                        row["_snippet"] = by_id.get(row["clip_id"], "")
             except sqlite3.OperationalError:
                 log.warning("clips FTS search rejected query %r", query)
                 return []
@@ -1369,7 +1598,10 @@ class Index:
         import clips as _clips  # noqa: WPS433 -- keeps index importable alone
         with self._lock:
             result = _clips.rebuild_all_clips(self._conn)
-        self._invalidate_library_sources(self.all_video_ids())
+        identities = self.all_video_ids()
+        self._invalidate_library_sources(identities)
+        for identity in identities:
+            self._notify_source_changed(identity)
         return result
 
     def clip_coverage(self) -> dict:
@@ -2066,7 +2298,7 @@ class Index:
                                  date_to: str | None = None,
                                  limit: int = 50,
                                  offset: int = 0,
-                                 match: str = "forgiving") -> dict:
+                                 match: str = "forgiving", passages: bool = True) -> dict:
         """Filtered query backing the memory page. All filters are optional
         and combinable. Returns ``{total, results}`` where ``total`` is the
         match count before limit/offset (for pagination). Soft-deleted rows
@@ -2122,22 +2354,19 @@ class Index:
                         "yoinks_fts", q, match, self._YOINKS_BM25_WEIGHTS if match == "forgiving" else "")
                     # Keep FTS candidates first. Driving this join from the
                     # deleted_at index repeats every hit for every live row.
-                    tail = ("FROM search_hits h CROSS JOIN yoinks_fts f ON f.rowid=h.rowid "
-                            "CROSS JOIN yoinks y ON y.video_id = f.video_id "
+                    tail = ("FROM search_hits h CROSS JOIN yoinks y ON y.video_id = h.video_id "
                             "WHERE " + where)
-                    cnt = self._conn.execute(
-                        prefix + "SELECT COUNT(*) AS n " + tail, search_params + params
-                    ).fetchone()
-                    total = int(cnt["n"]) if cnt else 0
-                    if match == "forgiving":
-                        rows = self._conn.execute(
-                            _fts_page(prefix, tail, "h._score, y.video_id", offset=True),
-                            search_params + params + [limit, offset, expression]).fetchall()
-                    else:
-                        rows = self._conn.execute(
-                            prefix + "SELECT y.*, h._snippet, h._score, f.content AS _content " + tail
-                            + " ORDER BY h._score, y.video_id LIMIT ? OFFSET ?",
-                            search_params + params + [limit, offset]).fetchall()
+                    rows = self._conn.execute(
+                        _fts_page(prefix, tail, "h._score, y.video_id", offset=True, total=True, snippets=passages),
+                        search_params + params + [limit, offset] + ([expression] if passages else [])).fetchall()
+                    total = int(rows[0]["_total"]) if rows else 0
+                    if not rows and offset:
+                        # An out-of-range page still needs the filtered count.
+                        count_prefix, count_params = _fts_hits("yoinks_fts", q, match, ranked=False)
+                        cnt = self._conn.execute(
+                            count_prefix + "SELECT COUNT(*) AS n " + tail, count_params + params
+                        ).fetchone()
+                        total = int(cnt["n"]) if cnt else 0
                 elif q:
                     # q was given but yielded no usable FTS terms.
                     return {"total": 0, "results": []}
@@ -2156,8 +2385,8 @@ class Index:
                 # Defensive: a MATCH expression FTS5 still rejects.
                 log.warning("memory search rejected query %r", q)
                 return {"total": 0, "results": []}
-        return {"total": total, "results": [self._search_passage(dict(r), q, match) if q else dict(r)
-                                             for r in rows]}
+        rows = [{key: r[key] for key in r.keys() if key != "_total"} for r in rows]
+        return {"total": total, "results": self._search_passages(rows, q, match) if q and passages else rows}
 
     def soft_delete_yoink(self, video_id: str) -> dict | None:
         """Mark a yoink soft-deleted (deleted_at = now). Returns the updated
@@ -3094,12 +3323,13 @@ class Index:
         sql = (
             "SELECT y.video_id AS video_id, y.slug AS slug, y.title AS title, "
             "       y.channel AS channel, y.platform AS platform, "
-            "       y.metadata_json AS metadata_json, em.source AS source, "
-            "       em.mention_id AS mention_id, em.timestamp AS timestamp, em.context AS context, "
-            "       (SELECT content FROM yoinks_fts WHERE video_id=y.video_id LIMIT 1) AS _content "
-            "FROM entity_mentions em "
-            "JOIN entities e ON e.entity_id = em.entity_id "
-            "JOIN yoinks   y ON y.video_id  = em.video_id "
+            "       CASE WHEN json_valid(y.metadata_json) THEN json_extract(y.metadata_json, '$.url') END AS _source_url, "
+            "       em.source AS source, "
+            "       em.mention_id AS mention_id, em.context AS context, "
+            "       e.name AS _entity_name "
+            "FROM entities e "
+            "CROSS JOIN entity_mentions em ON em.entity_id = e.entity_id "
+            "CROSS JOIN yoinks y ON y.video_id = em.video_id "
         )
         if match == "strict":
             sql += ("WHERE e.name_normalized = ? AND y.deleted_at IS NULL "
@@ -3108,38 +3338,77 @@ class Index:
         else:
             # This is an entity-name lookup, not transcript FTS. Preserve
             # exact normalized names, then admit any useful name word.
-            sql += ("WHERE (e.name_normalized = ? OR entity_keyword_score(e.name, ?) > 0) "
-                    "AND y.deleted_at IS NULL ORDER BY (search_title_key(y.title)=?) DESC, "
-                    "(e.name_normalized=?) DESC, entity_keyword_score(e.name, ?) DESC, "
+            # Compute each entity's rank once before expanding its mentions.
+            sql = ("WITH matched_entities AS MATERIALIZED (SELECT entity_id, name, "
+                   "(name_normalized=?) AS exact, entity_keyword_score(name, ?) AS word_score "
+                   "FROM entities WHERE name_normalized=? OR entity_keyword_score(name, ?)>0) "
+                   + sql.replace("FROM entities e ", "FROM matched_entities e "))
+            sql += ("WHERE y.deleted_at IS NULL ORDER BY (search_title_key(y.title)=?) DESC, "
+                    "e.exact DESC, e.word_score DESC, "
                     "em.mention_id DESC LIMIT ?")
-            params = [norm, name, _search_title_key(name), norm, name, max(1, int(limit))]
+            params = [norm, name, norm, name, _search_title_key(name), max(1, int(limit))]
         with self._lock:
-            rows = self._conn.execute(sql, params).fetchall()
+            cursor = self._conn.execute(sql, params)
+            keys = [column[0] for column in cursor.description]
+            cursor.row_factory = None
+            rows = [dict(zip(keys, values)) for values in cursor]
+            identities = list(dict.fromkeys(r["video_id"] for r in rows))
+            if not identities:
+                return []
+            placeholders = ",".join("?" for _ in identities)
+            patterns = {entity: re.compile(
+                r"(?<!\w)" + r"[\W_]*".join(re.escape(t) for t in _fts_terms(entity)) + r"(?!\w)",
+                re.IGNORECASE) for entity in {r["_entity_name"] for r in rows}}
+            content_ids = list({r["video_id"] for r in rows
+                                if patterns[r["_entity_name"]].search(r["context"] or "")})
+            # An unindexed FTS identity column is scanned once for the page,
+            # never once for each mention. Clips use their ordinary index.
+            contents = ({r["video_id"]: r["content"] for r in self._conn.execute(
+                "SELECT video_id, content FROM yoinks_fts WHERE video_id IN (" + ",".join("?" for _ in content_ids) + ")",
+                content_ids)} if content_ids else {})
+            clips = {}
+            expression = " OR ".join("(" + _fts_query(entity, "strict") + ")" for entity in patterns)
+            hint = " INDEXED BY idx_clips_search_metadata" if self._clip_metadata_index else ""
+            for clip in self._conn.execute(
+                    "SELECT c.* FROM clips_fts CROSS JOIN clips m" + hint + " ON m.clip_id=clips_fts.rowid "
+                    "CROSS JOIN clips c ON c.clip_id=m.clip_id WHERE clips_fts MATCH ? "
+                    "AND m.video_id IN (" + placeholders + ") ORDER BY c.video_id, c.seq",
+                    [expression, *identities]):
+                clips.setdefault(clip["video_id"], []).append(dict(clip))
+        from clips import timing_kind
+        from uoink_core.search_service import citation_fields
         out = []
         for r in rows:
-            d = dict(r)
-            d["deep_link"] = _entity_deep_link(
-                d.get("video_id"), d.get("timestamp"),
-                platform=d.get("platform"),
-                metadata_json=d.get("metadata_json"))
-            d.pop("metadata_json", None)
-            content = d.pop("_content", "") or ""
+            d = r  # this method owns the dictionaries materialized above
+            source_url = d.pop("_source_url", None)
+            video_id = d["video_id"]
+            entity = d.pop("_entity_name")
             # Context is an entity annotation. When it quotes a stored clip,
             # carry that clip's identity and actual timing for exact quoting.
-            context = d.get("context") or ""
+            context = d["context"]
             if context:
-                clip = next((c for c in self.get_clips(d["video_id"])
-                             if context in c["text"]), None)
+                candidates = clips.get(video_id)
+                clip = next((c for c in candidates
+                             if context in c["text"] and patterns[entity].search(c["text"])), None) if candidates else None
                 if clip:
-                    d["passage"] = {"video_id": d["video_id"], **{
+                    clip["timing"] = timing_kind(clip)
+                    d["passage"] = {"video_id": video_id, **{
                         key: clip.get(key) for key in ("clip_id", "text", "start", "end", "timing")}}
-                elif context in content:
-                    start = content.index(context)
-                    d["passage"] = {"video_id": d["video_id"], "text": context,
-                                    "char_start": start, "char_end": start + len(context),
-                                    "field": "content"}
-                    if d.get("timestamp") is not None:
-                        d["passage"]["timestamp"] = d["timestamp"]
+                elif video_id in contents and patterns[entity].search(context):
+                    start = (contents[video_id] or "").find(context)
+                    if start >= 0:
+                        d["passage"] = {"video_id": video_id, "text": context,
+                                        "char_start": start, "char_end": start + len(context),
+                                        "field": "content"}
+                if "passage" in d:
+                    d["passage_verified"] = True
+            d = citation_fields(d, copy_row=False)
+            # Annotation timestamps are not proof of a timed passage.
+            seconds = d.get("timestamp_seconds")
+            if seconds is not None:
+                d["timestamp"] = seconds
+            d["deep_link"] = _entity_deep_link(
+                video_id, seconds, platform=d["platform"], source_url=source_url)
             out.append(d)
         return out
 

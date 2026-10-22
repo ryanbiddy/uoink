@@ -30,6 +30,7 @@ SEARCH_QUERY_KEYS = {
     "q",
     "match",
     "mode",
+    "search_details",
     "channel",
     "topic",
     "hook_type",
@@ -129,6 +130,7 @@ class SearchRequest:
     offset: int = 0
     match: str = "forgiving"
     mode: str = "auto"
+    search_details: bool = False
 
     @classmethod
     def from_query(cls, query: Mapping[str, Any]) -> "SearchRequest":
@@ -199,7 +201,11 @@ class SearchRequest:
         mode = one("mode") or "auto"
         if mode not in ("auto", "keyword", "semantic", "hybrid"):
             raise ContractError("invalid_request", "mode must be auto, keyword, semantic or hybrid")
-        return cls(limit=limit, offset=offset, match=match, mode=mode, **values)
+        search_details = one("search_details") or "false"
+        if search_details not in ("true", "false"):
+            raise ContractError("invalid_request", "search_details must be true or false")
+        return cls(limit=limit, offset=offset, match=match, mode=mode,
+                   search_details=search_details == "true", **values)
 
 
 @dataclass(frozen=True)
@@ -273,7 +279,7 @@ class CorpusReadProvider(Protocol):
         ...
 
 
-def _exact_keys(value: Any, expected: set[str], label: str, optional=()) -> dict:
+def _exact_keys(value: Any, expected: set[str], label: str) -> dict:
     if not isinstance(value, dict):
         raise ContractError(
             "provider_nonconformant",
@@ -281,9 +287,9 @@ def _exact_keys(value: Any, expected: set[str], label: str, optional=()) -> dict
             status=500,
         )
     actual = set(value)
-    if expected - actual or actual - expected - set(optional):
+    if actual != expected:
         missing = sorted(expected - actual)
-        unknown = sorted(actual - expected - set(optional))
+        unknown = sorted(actual - expected)
         detail = []
         if missing:
             detail.append("missing " + ", ".join(missing))
@@ -341,8 +347,11 @@ def validate_source_url(value: Any, label: str) -> None:
         )
 
 
-def validate_item_ref(item: Any) -> None:
-    item = _exact_keys(item, _ITEM_KEYS, "item", optional={"passage", "source_id", "passage_id", "span", "timestamp_seconds", "passage_verified", "citation_reason"})
+def validate_item_ref(item: Any, *, search_details=False) -> None:
+    if search_details and isinstance(item, dict):
+        from uoink_core.search_service import CITATION_FIELDS
+        item = {key: value for key, value in item.items() if key not in CITATION_FIELDS}
+    item = _exact_keys(item, _ITEM_KEYS, "item")
     if not isinstance(item["id"], str) or not item["id"]:
         raise ContractError(
             "provider_nonconformant",
@@ -472,7 +481,7 @@ def validate_assembly(data: Any) -> None:
         )
 
 
-def validate_data(operation: str, data: Any) -> None:
+def validate_data(operation: str, data: Any, *, search_details=False) -> None:
     if operation not in OPERATIONS:
         raise ContractError(
             "provider_nonconformant",
@@ -480,8 +489,10 @@ def validate_data(operation: str, data: Any) -> None:
             status=500,
         )
     if operation == "search":
-        data = _exact_keys(data, {"items", "page"}, "search data",
-                           optional={"search_mode", "requested_mode", "fallback_reason"})
+        if search_details and isinstance(data, dict):
+            from uoink_core.search_service import META_FIELDS
+            data = {key: value for key, value in data.items() if key not in META_FIELDS}
+        data = _exact_keys(data, {"items", "page"}, "search data")
         if not isinstance(data["items"], list):
             raise ContractError(
                 "provider_nonconformant",
@@ -489,7 +500,7 @@ def validate_data(operation: str, data: Any) -> None:
                 status=500,
             )
         for item in data["items"]:
-            validate_item_ref(item)
+            validate_item_ref(item, search_details=search_details)
         page = _exact_keys(
             data["page"],
             {"state", "total", "corpus_total", "limit", "offset"},
@@ -633,8 +644,8 @@ def validate_data(operation: str, data: Any) -> None:
         )
 
 
-def success(operation: str, data: dict) -> dict:
-    validate_data(operation, data)
+def success(operation: str, data: dict, *, search_details=False) -> dict:
+    validate_data(operation, data, search_details=search_details)
     return {
         "ok": True,
         "contract": CONTRACT_NAME,

@@ -15,8 +15,9 @@ import shutil
 import sqlite3
 import struct
 import threading
+import time
 from contextlib import closing
-from dataclasses import asdict, dataclass
+from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from functools import cached_property
 from itertools import islice
@@ -265,7 +266,11 @@ class Source:
     @cached_property
     def fingerprint(self):
         # Includes all content and citation coordinates, even if a clip is reused.
-        payload = json.dumps([_CACHE_VERSION, asdict(self)], sort_keys=True, ensure_ascii=False)
+        # Preserve the cache format without recursively copying every span.
+        value = {"source_id": self.source_id, "title": self.title, "content": self.content,
+                 "passages": [{"passage_id": p.passage_id, "text": p.text, "span": p.span,
+                               "timestamp_seconds": p.timestamp_seconds} for p in self.passages]}
+        payload = json.dumps([_CACHE_VERSION, value], sort_keys=True, ensure_ascii=False)
         return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 
@@ -291,8 +296,19 @@ class IndexSources:
         self.index = index
         self._cache_stamp = None
         self._cache_sources = ()
+        self._cache_lock = threading.RLock()
 
-    def snapshot(self, *, source_id=None, filters=None, source_types=None, _db=None):
+    def snapshot(self, *, source_id=None, source_ids=None, filters=None, source_types=None, _db=None):
+        stamp = self.index.source_stamp()
+        with self._cache_lock:
+            if _db is not None:
+                return self._snapshot(source_id=source_id, source_ids=source_ids, filters=filters, source_types=source_types,
+                                      _db=_db, stamp=stamp, cache=False)
+            with self.index.detached_snapshot() as db:
+                return self._snapshot(source_id=source_id, source_ids=source_ids, filters=filters, source_types=source_types,
+                                      _db=db, stamp=stamp)
+
+    def _snapshot(self, *, source_id=None, source_ids=None, filters=None, source_types=None, _db, stamp, cache=True):
         from contextlib import nullcontext
         filters = dict(filters or {})
         if filters.keys() - FILTERS:
@@ -301,6 +317,9 @@ class IndexSources:
         if source_id is not None:
             clauses.append("y.video_id = ?")
             params.append(source_id)
+        if source_ids is not None:
+            clauses.append("y.video_id IN (" + ",".join("?" for _ in source_ids) + ")")
+            params.extend(source_ids)
         if source_types:
             clauses.append("COALESCE(NULLIF(y.source_type, ''), 'video') IN ("
                            + ",".join("?" for _ in source_types) + ")")
@@ -322,19 +341,23 @@ class IndexSources:
             # Every source write uses this connection; data_version also detects
             # commits from another process. Reuse immutable passages only while
             # both stamps match. No source text is copied to another database.
-            stamp = (db.total_changes, db.execute("PRAGMA data_version").fetchone()[0])
-            full = not source_id and not any(filters.values()) and not source_types
-            if stamp == self._cache_stamp:
+            full = not source_id and source_ids is None and not any(filters.values()) and not source_types
+            if cache and stamp == self._cache_stamp:
                 if full:
                     return list(self._cache_sources)
                 eligible = {row[0] for row in db.execute(
                     "SELECT y.video_id FROM yoinks y WHERE " + " AND ".join(clauses), params)}
                 return [source for source in self._cache_sources if source.source_id in eligible]
-            rows = db.execute("SELECT y.video_id, y.title, COALESCE(f.content, '') AS content "
-                              "FROM yoinks y LEFT JOIN yoinks_fts f ON f.video_id=y.video_id "
+            rows = db.execute("SELECT y.video_id, y.title "
+                              "FROM yoinks y "
                               "WHERE " + " AND ".join(clauses) + " ORDER BY y.video_id", params).fetchall()
+            # video_id is UNINDEXED in FTS5. Read it once, then join in memory.
+            eligible = {row["video_id"] for row in rows}
+            contents = {row["video_id"]: row["content"] or "" for row in db.execute(
+                "SELECT video_id, content FROM yoinks_fts") if row["video_id"] in eligible}
             for row in rows:
-                identity, title, content = row["video_id"], row["title"] or "", row["content"]
+                identity, title = row["video_id"], row["title"] or ""
+                content = contents.get(identity, "")
                 clips = db.execute("SELECT clip_id, seq, start, end, text, media_revision "
                                    "FROM clips WHERE video_id=? ORDER BY seq, clip_id", (identity,)).fetchall()
                 passages = tuple(Passage(f"clip:{clip['clip_id']}", clip["text"],
@@ -352,7 +375,7 @@ class IndexSources:
                                              c["timestamp_start"])
                                      for c in citations if (c["text"] or "").strip())
                 sources.append(Source(identity, title, content, passages or word_passages(content or title)))
-            if full:
+            if full and cache:
                 self._cache_stamp, self._cache_sources = stamp, tuple(sources)
         return sources
 
@@ -531,24 +554,31 @@ class LocalSearch:
         self._worker = None
         self._pending = set()
         self._full = self._download = False
-        self._paused = False
+        self._paused = self.settings_at(self.root).get("paused") is True
         self._state = "not_installed"
         self._error = ""
         self._done = self._total = self._received = 0
+        self._retry_at = 0.0
+        self._retry_delay = 1.0
+
+    @classmethod
+    def enabled_at(cls, root):
+        return cls.settings_at(root).get("enabled") is True
 
     @staticmethod
-    def enabled_at(root):
+    def settings_at(root):
         path = Path(root) / "search-settings.json"
         try:
-            return not path.is_symlink() and json.loads(path.read_text(encoding="utf-8")).get("enabled") is True
+            value = json.loads(path.read_text(encoding="utf-8")) if not path.is_symlink() else {}
+            return value if isinstance(value, dict) else {}
         except (OSError, ValueError, AttributeError):
-            return False
+            return {}
 
     def _enable(self, enabled):
         path = self.root / "search-settings.json"
         if path.is_symlink() or path.with_name(path.name + ".part").is_symlink():
             raise ValueError("Search settings must not be a symlink")
-        _atomic_json(path, {"enabled": enabled})
+        _atomic_json(path, {"enabled": enabled, "paused": self._paused if enabled else False})
         self.enabled = enabled
 
     def _set(self, phase, **values):
@@ -579,6 +609,10 @@ class LocalSearch:
                     "model_bytes": model_bytes, "vector_bytes": vector_bytes,
                     "disk_bytes": model_bytes + vector_bytes}
 
+    def retry_ready(self):
+        with self._state_lock:
+            return self._state == "retrying" and time.monotonic() >= self._retry_at
+
     progress = status
 
     def accept_terms(self, *, accepted, terms_version):
@@ -604,6 +638,7 @@ class LocalSearch:
     def start(self, *, download=False):
         with self._control:
             self._require_terms()
+            self._paused = False
             self._enable(True)
             if not download and not self.manager.present():
                 self._set("not_installed")
@@ -614,6 +649,8 @@ class LocalSearch:
                 self._full = True
                 self._download = self._download or download
                 self._error = ""
+                self._retry_at = 0.0
+                self._retry_delay = 1.0
                 self._state = "downloading" if download else "verifying"
                 self._launch()
             return True
@@ -622,14 +659,15 @@ class LocalSearch:
         return self.start(download=True)
 
     def update_source(self, source_id):
-        with self._control:
-            if not self.enabled or not self.manager.acceptance() or not self.manager.present():
+        # Capture callbacks must not wait for pause/remove to join an inference
+        # worker. They only enqueue; the worker verifies model and consent.
+        with self._state_lock:
+            if not self.enabled:
                 return False
-            with self._state_lock:
-                self._pending.add(str(source_id))
-                if not self._paused:
-                    self._state = "indexing"
-                    self._launch()
+            self._pending.add(str(source_id))
+            if not self._paused and not self._stop.is_set() and self.manager.present():
+                self._state = "indexing"
+                self._launch()
             return True
 
     def wait(self, timeout=None):
@@ -645,6 +683,7 @@ class LocalSearch:
             with self._state_lock:
                 self._paused = True
                 self._stop.set()
+            self._enable(self.enabled)
             return self.wait(timeout)
 
     def rebuild(self):
@@ -677,8 +716,7 @@ class LocalSearch:
         self._set(phase, received=received)
 
     def _sync(self, identities):
-        documents = self.sources.snapshot() if identities is None else [
-            doc for identity in sorted(identities) for doc in self.sources.snapshot(source_id=identity)]
+        documents = self.sources.snapshot() if identities is None else self.sources.snapshot(source_ids=sorted(identities))
         live = {doc.source_id: doc.fingerprint for doc in documents}
         if identities is None:
             self.store.invalidate(live)
@@ -686,7 +724,10 @@ class LocalSearch:
             for identity in identities:
                 self.store.invalidate(live, only=identity)
         existing = self.store.fingerprints()
-        self._set("indexing", done=0, total=len(documents))
+        with self.sources.index.detached_snapshot() as db:
+            total = db.execute("SELECT COUNT(*) FROM yoinks WHERE deleted_at IS NULL").fetchone()[0]
+        completed = len(existing) if identities is not None else 0
+        self._set("indexing", done=min(completed, total), total=total)
         for done, doc in enumerate(documents, 1):
             self._checkpoint()
             if existing.get(doc.source_id) != doc.fingerprint:
@@ -703,10 +744,12 @@ class LocalSearch:
                 current = self.sources.snapshot(source_id=doc.source_id)
                 if current and current[0].fingerprint == doc.fingerprint:
                     self.store.replace(doc, vectors)
+                    if identities is not None and doc.source_id not in existing:
+                        completed += 1
                 else:
                     with self._state_lock:
                         self._pending.add(doc.source_id)
-            self._set("indexing", done=done)
+            self._set("indexing", done=min(done if identities is None else completed, total))
 
     def _run(self):
         try:
@@ -773,12 +816,23 @@ class LocalSearch:
             # Recheck after inference so edits/deletes during the query cannot
             # escape through a vector read from the earlier snapshot.
             current = {doc.source_id: doc.fingerprint for doc in self.sources.snapshot(filters=filters)}
+            with self._state_lock:
+                self._retry_at = 0.0
+                self._retry_delay = 1.0
+                if self._state == "retrying":
+                    self._set("ready", error="")
             return [hit for hit in hits if current.get(hit.source_id) == eligible.get(hit.source_id)]
         except SearchUnavailable:
             raise
-        except Exception:
-            message = "Local search failed. Retry setup or rebuild the derived index."
-            self._set("error", error=message)
+        except Exception as exc:
+            corrupt = (isinstance(exc, sqlite3.DatabaseError) and
+                       (getattr(exc, "sqlite_errorcode", 0) & 0xff) in (sqlite3.SQLITE_CORRUPT, sqlite3.SQLITE_NOTADB))
+            message = ("Rebuild the derived search index in Settings." if corrupt else
+                       "Local search is temporarily unavailable. Retrying automatically; keyword search still works.")
+            with self._state_lock:
+                self._retry_at = time.monotonic() + self._retry_delay
+                self._retry_delay = min(60.0, self._retry_delay * 2)
+                self._set("error" if corrupt else "retrying", error=message)
             raise SearchUnavailable(message) from None
         finally:
             self._activity.release()

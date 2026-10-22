@@ -387,7 +387,7 @@ def search_uoinks(args: dict[str, Any]) -> dict[str, Any]:
     page = idx.search_mode(query, limit, mode=mode, match=match,
                            filters={"channel": channel, "hook_type": hook_type},
                            keyword=lambda count, offset, override: {"results": idx.search(
-                               query, count, channel=channel, hook_type=hook_type, match=override or match)})
+                               query, count, channel=channel, hook_type=hook_type, match=override or match, passages=False)})
     rows = page["results"]
     results = []
     for r in rows:
