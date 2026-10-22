@@ -1,10 +1,18 @@
-"""Explicit SDK 1 baseline regeneration, never run automatically by pytest.
+"""Explicit wire baseline regeneration, never run automatically by pytest.
 
 Run with the repository on PYTHONPATH and an isolated parent environment:
     python -B tests/update_mcp_wire_goldens.py
+The full baseline still requires SDK 1.28.1. On SDK 2, search-only refresh is:
+    python -B tests/update_mcp_wire_goldens.py --search-only
+This uses the real stdio server with a disposable seeded library. It updates
+only the four search tools' schemas/descriptions and the embedded search data
+in prompt/success. Protocol envelopes and every other baseline entry are kept.
+The modern fixture contains requests only and shares these expected results.
 Review the fixture diff. Only VERSION and the platform capability notice are
 substituted by the tests; schemas and all other text are exact comparisons.
 """
+import argparse
+import copy
 import importlib.metadata
 import json
 from pathlib import Path
@@ -14,7 +22,81 @@ from tests.mcp_wire import ROOT, HttpClient, StdioClient, initialize_request, re
 from tests.mcp_wire_fixtures import seed_library
 
 
+SEARCH_TOOLS = {"search_uoinks", "search_clips", "search_library", "find_mentions"}
+
+
+def refresh_search(golden, tools, prompt, success):
+    """Return a narrow update; refuse changes outside search-owned fields."""
+    updated = copy.deepcopy(golden)
+    assert [t["name"] for t in tools] == [t["name"] for t in golden["tools"]]
+    for old, live, target in zip(golden["tools"], tools, updated["tools"]):
+        if old["name"] in SEARCH_TOOLS:
+            for field in ("inputSchema", "description"):
+                if target[field] != live[field]:
+                    target[field] = live[field]
+        assert target == live, f"Non-search tool change: {old['name']}"
+
+    # Only the second prompt message's search data may change. Keep the
+    # instructions, wrapper, contract versions, topic and message envelope exact.
+    old_text = golden["prompt"]["messages"][1]["content"]["text"]
+    new_text = prompt["messages"][1]["content"]["text"]
+    opening = "<untrusted_uoink_library_context>\n"
+    closing = "\n</untrusted_uoink_library_context>"
+    old_prefix, old_body = old_text.split(opening)
+    new_prefix, new_body = new_text.split(opening)
+    old_body, old_suffix = old_body.split(closing)
+    new_body, new_suffix = new_body.split(closing)
+    assert (old_prefix, old_suffix) == (new_prefix, new_suffix)
+    old_data, new_data = json.loads(old_body), json.loads(new_body)
+    for field in ("hits", "hit_count", "next_step", "note", "omitted", "dropped_for_budget"):
+        old_data.pop(field, None)
+        new_data.pop(field, None)
+    assert old_data == new_data, "Non-search prompt data changed"
+    updated["prompt"]["messages"][1]["content"]["text"] = new_text
+    assert updated["prompt"] == prompt, "Prompt envelope or instructions changed"
+
+    old_data = json.loads(golden["success"]["content"][0]["text"])
+    new_text = success["content"][0]["text"]
+    new_data = json.loads(new_text)
+    for field in ("results", "search_mode", "requested_mode", "fallback_reason"):
+        old_data.pop(field, None)
+        new_data.pop(field, None)
+    assert old_data == new_data, "Non-search tool result data changed"
+    updated["success"]["content"][0]["text"] = new_text
+    assert updated["success"] == success, "Tool result envelope changed"
+    return updated
+
+
+def update_search_only():
+    target = Path(__file__).parent / "fixtures/mcp_wire/sdk1.json"
+    golden = json.loads(target.read_text(encoding="utf-8"))
+    scratch = ROOT / "_scratch/sdk2/m2"
+    scratch.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(dir=scratch) as directory:
+        seed_library(directory)
+        with StdioClient.launch(directory) as client:
+            client.initialize()
+            tools = client.request(2, "tools/list")["result"]["tools"]
+            assert tools == registry_golden(), "Wire registry differs from product schemas"
+            prompt = client.request(3, "prompts/get", {
+                "name": "consult-library", "arguments": {"topic": "absent-m2-topic"}})["result"]
+            success = client.request(4, "tools/call", {
+                "name": "search_clips", "arguments": {"query": "absent-m2-topic"}})["result"]
+            client.save(scratch / "search-golden-generation-stdio.jsonl")
+    updated = refresh_search(golden, tools, prompt, success)
+    target.write_text(json.dumps(updated, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    changed = [key for key in golden if updated[key] != golden[key]]
+    print(f"Search-only refresh: {', '.join(changed) or 'no changes'}")
+
+
 def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--search-only", action="store_true",
+                        help="Refresh only search data, allowed on SDK 2")
+    args = parser.parse_args()
+    if args.search_only:
+        update_search_only()
+        return
     assert importlib.metadata.version("mcp") == "1.28.1", "Regenerate the baseline on pinned SDK 1"
     import _platform
     from library_resources import TEMPLATES

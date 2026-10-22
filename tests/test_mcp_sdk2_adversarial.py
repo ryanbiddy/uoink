@@ -536,19 +536,23 @@ def test_cancelled_unadmitted_request_cannot_release_another_slot(modern, guard)
                 def admit(ident):
                     return u._begin_inbound_transport_scope(types.JSONRPCRequest(
                         jsonrpc="2.0", id=ident, method="tools/call", params={"name": "get_library_item"}))
-                first, second, third = admit(2), admit(3), admit(4)
-                assert third.scope.refusal.code == "rate_limited"
-                assert guard._active == 2
+                # Lane S raised the reader limit. Fill the configured capacity
+                # before testing cancellation of a request that owns no slot.
+                admitted = [admit(ident) for ident in range(2, 2 + guard.max_active)]
+                refused_id = 2 + guard.max_active
+                refused = admit(refused_id)
+                assert refused.scope.refusal.code == "rate_limited"
+                assert guard._active == len(admitted)
                 u._begin_inbound_transport_scope(types.JSONRPCNotification(
-                    jsonrpc="2.0", method="notifications/cancelled", params={"requestId": 4}))
+                    jsonrpc="2.0", method="notifications/cancelled", params={"requestId": refused_id}))
                 await u._deliver_bounded_outbound(SessionMessage(types.JSONRPCResponse(
-                    jsonrpc="2.0", id=4, result={})), client)
+                    jsonrpc="2.0", id=refused_id, result={})), client)
                 await client.quiet()
-                third.settle()
-                assert guard._active == 2 and guard.releases == 0
-                first.settle()
-                second.settle()
-                assert guard.releases == 2
+                refused.settle()
+                assert guard._active == len(admitted) and guard.releases == 0
+                for state in admitted:
+                    state.settle()
+                assert guard.releases == len(admitted)
             finally:
                 u._release_stdio_requests()
                 u._stdio_requests.reset(token)
