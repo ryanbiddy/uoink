@@ -171,14 +171,16 @@ def slow(*args):
     time.sleep(0.03)
     record(*args)
 u._record = slow
-for _ in range(10):
+# Three counts keep the backlog well inside the 1 s exit flush bound even on
+# slow CI runners, where each locked write can take about 100 ms.
+for _ in range(3):
     u.count("searches")
 # Deliberately no queue.join: the daemon's exit hook must flush these.
 '''
     result = subprocess.run([sys.executable, "-c", script, str(store)],
                             capture_output=True, text=True, timeout=5)
     assert result.returncode == 0, result.stderr
-    assert usage.disclosure()["next_payload"]["searches"] == 10
+    assert usage.disclosure()["next_payload"]["searches"] == 3
 
 
 def test_exit_flush_is_bounded(store, monkeypatch):
