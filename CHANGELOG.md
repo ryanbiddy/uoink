@@ -137,7 +137,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   profile: Claude Code 2.1.307 listed 91 tools (35 in core mode) and called a
   tool, also with `MCP_PROTOCOL_NEGOTIATION=auto`; Codex 0.153.4 called a tool
   with its default settings and with `CODEX_MCP_PROTOCOL_VERSION=2026-07-28`.
-  {{PACKAGED_CLIENT_CHECK}} Characterization recordings from SDK 1 cover all
+  The installed 3.11.0 build, in an isolated profile: Claude Code 2.1.308
+  listed 91 tools and called one; Codex 0.153.4 called two tools.
+  Characterization recordings from SDK 1 cover all
   four legacy protocol versions, and 66 adversarial cases pass in both eras.
 - Client recipes: 45 of 48 are checked against official docs. The connect
   docs still mark client acceptance as "not yet tested" for every recipe.
