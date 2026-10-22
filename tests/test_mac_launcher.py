@@ -46,6 +46,8 @@ def startup(monkeypatch, tmp_path):
     monkeypatch.setattr(server, "HOST", "127.0.0.1")
     monkeypatch.setattr(server, "PORT", 0)
     monkeypatch.setattr(server, "DATA_ROOT", tmp_path)
+    # This loop outlives main() and would sync consent into later tests' stores.
+    monkeypatch.setattr(server.uoink_usage, "start_sender", lambda *_: None)
     for name in ("_existing_server_responds", "_is_installed_layout", "_apply_output_root_fallback",
                  "_migrate_plaintext_anthropic_key", "_migrate_jobs_json_to_index",
                  "_migrate_taxonomy_json_to_index", "_seed_default_style_anchors",
@@ -148,3 +150,16 @@ def test_main_thread_handler_and_subinterpreter_refusal(startup, monkeypatch, pl
     assert len(calls) == expected and served == [True]
     if calls:
         assert calls[0][0] == signal.SIGTERM
+
+
+def test_startup_fixture_does_not_start_usage_sender(startup, monkeypatch):
+    started = []
+
+    def thread(*args, **kwargs):
+        return SimpleNamespace(start=lambda: started.append(kwargs.get("name")))
+
+    monkeypatch.setattr(startup.uoink_usage.threading, "Thread", thread)
+    # Exercise the real main() call site, including the fixture's sender stub.
+    test_main_thread_handler_and_subinterpreter_refusal(
+        startup, monkeypatch, "win32", False, 0)
+    assert started == [], "Launcher tests must not leave a usage sender running"

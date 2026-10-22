@@ -49,6 +49,91 @@ def ready(db):
     return idx, engine
 
 
+@pytest.mark.parametrize("mode", ["keyword", "semantic", "hybrid", "auto"])
+@pytest.mark.parametrize("surface", ["index", "sources", "clips", "library", "memory", "sorted", "corpus"])
+@pytest.mark.parametrize("available", [True, False], ids=["ready", "fallback"])
+def test_one_search_request_counts_once_across_modes(db, monkeypatch, mode, surface, available):
+    import uoink_usage as usage
+
+    idx, engine, _ = db
+    usage.set_enabled(True)
+    seed(idx, "mars", "Mars has rusty soil", timed=True)
+    ready(db)
+    # Index creation, model indexing and status polling are not user searches.
+    engine.status()
+    idx.search_yoinks_for_memory()
+    idx.search_mode(None, mode=mode)
+    assert usage.flush()
+    assert usage.disclosure()["next_payload"]["searches"] == 0
+    if not available:
+        def unavailable(*args, **kwargs):
+            raise ls.SearchUnavailable("offline fixture unavailable")
+        monkeypatch.setattr(engine, "embedding_search", unavailable)
+
+    def search():
+        if surface == "index":
+            return idx.search_mode("rusty", mode=mode)
+        if surface == "sources":
+            return tools.search_uoinks({"query": "rusty", "mode": mode})
+        if surface == "clips":
+            return tools.search_clips({"query": "rusty", "mode": mode})
+        if surface == "library":
+            reader = library_resources.LibraryReader(idx, data_root=idx._path.parent)
+            return reader.search("rusty", mode=mode)
+        if surface == "corpus":
+            return corpus_provider.UoinkCorpusProvider(idx, data_root=idx._path.parent).search(
+                corpus_contract.SearchRequest(q="rusty", mode=mode, search_details=True))
+        handler = object.__new__(server.Handler)
+        handler.path = f"/memory/search?q=rusty&mode={mode}" + ("&sort=title&kind=videos" if surface == "sorted" else "")
+        replies = []
+        handler._send_json = lambda status, body: replies.append((status, body))
+        server.Handler._handle_memory_search(handler)
+        assert replies[-1][0] == 200
+        return replies[-1][1]
+
+    baseline = search()
+    expected_mode = ("hybrid" if mode == "auto" else mode) if available else "keyword"
+    assert baseline["search_mode"] == expected_mode
+    assert baseline.get("hits") or baseline.get("results") or baseline.get("items")
+    assert usage.flush()
+    assert usage.disclosure()["next_payload"]["searches"] == 1
+    # A counter failure cannot change a successful response, including the
+    # library's worker thread and the sorted route's recursive hybrid callback.
+    def failed_count(*args, **kwargs):
+        raise OSError("usage unavailable")
+    monkeypatch.setattr(usage, "count", failed_count)
+    assert search() == baseline
+
+
+def test_timed_out_semantic_worker_does_not_recount_request(db, monkeypatch):
+    import threading
+    import uoink_usage as usage
+
+    idx, engine, _ = db
+    seed(idx, "mars", "Mars rusty soil", timed=True)
+    ready(db)
+    usage.set_enabled(True)
+    release = threading.Event()
+    original = idx.search_mode
+
+    def delayed(*args, **kwargs):
+        assert release.wait(5)
+        return original(*args, **kwargs)
+
+    monkeypatch.setattr(idx, "search_mode", delayed)
+    try:
+        reader = library_resources.LibraryReader(idx, data_root=engine.root, deadline_s=0.8)
+        page = reader.search("rusty", mode="hybrid")
+        assert page["search_mode"] == "keyword" and "time" in page["fallback_reason"]
+        assert page["hits"][0]["item_id"] == "mars"
+    finally:
+        release.set()
+        assert engine._query_lock.acquire(timeout=5)
+        engine._query_lock.release()
+    assert usage.flush()
+    assert usage.disclosure()["next_payload"]["searches"] == 1
+
+
 def request(method, path, body=None, **headers):
     probe = Probe(method, path, body, headers={"Host": "127.0.0.1:15180", **headers})
     probe.server = SimpleNamespace(server_address=("127.0.0.1", 15180))

@@ -648,7 +648,14 @@ popup (`POST /migration/move-desktop-corpus`), never automatically.
 
 ## What Uoink does not collect
 
-Uoink has no Uoink cloud service, account system, telemetry endpoint, or hosted analytics. Extraction and files stay on the user's machine.
+Uoink has no cloud library or account system. Extraction and files stay on the user's machine.
+
+Uoink sends no usage data by default. If you turn on "Share anonymous usage counts", it sends daily counts to usage.uoink.app: calls by tool name, known MCP clients, stdio or HTTP calls, captures by source and result, and library searches. Reports include a random install ID, app version, operating system and major version, processor type, install type and hours counted. They never include content, URLs, titles, paths, search text, usernames, IP addresses or account details.
+
+Counts use a separate local SQLite file, not the library index. Only the helper
+sends HTTPS reports, at most once every 24 hours, with a five-second timeout.
+Isolated installs never send. Tests require an explicit non-production endpoint
+override. No tokens or API keys are used for usage sharing.
 
 The dashboard and extension use bundled Inter, Bungee and JetBrains Mono
 fonts. They make no Google Fonts requests to `fonts.googleapis.com` or

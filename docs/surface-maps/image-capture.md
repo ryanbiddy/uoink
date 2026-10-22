@@ -11,7 +11,9 @@ content + topic + timestamp. No new corpus shape, no new query path. It reads
 back through `/recent`, `/memory/search`, `/library/facets`, and every MCP tool
 with no special-casing.
 
-## Local-first, zero telemetry (design constraint)
+## Local image storage and optional usage counts
+
+Uoink sends no usage data by default. If you turn on "Share anonymous usage counts", it sends daily counts to usage.uoink.app: calls by tool name, known MCP clients, stdio or HTTP calls, captures by source and result, and library searches. Reports include a random install ID, app version, operating system and major version, processor type, install type and hours counted. They never include content, URLs, titles, paths, search text, usernames, IP addresses or account details.
 
 Uoink makes no outbound cloud AI calls, so nothing here calls a cloud vision or
 OCR service. The model for "queryable images" is:

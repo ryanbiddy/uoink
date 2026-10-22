@@ -14,6 +14,7 @@ from types import SimpleNamespace
 
 import pytest
 import _platform
+import uoink_usage
 
 from test_phase3_support import (
     ROOT, cursor_row, item_rows, ledger, migration_dir, observation, ok,
@@ -45,6 +46,7 @@ def server_parts(rig):
 
     namespace = dict(
         _platform=_platform,
+        uoink_usage=uoink_usage,
         source_subscriptions=rig.module, json=json, log=logging.getLogger('astra'),
         threading=SimpleNamespace(Thread=DormantThread),
         socket=SimpleNamespace(gethostname=lambda: 'fixture-host'), DATA_ROOT=rig.root,

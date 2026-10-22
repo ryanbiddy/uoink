@@ -25,6 +25,8 @@ applies any pending ``NNNN_*.sql`` file in numeric order and is idempotent.
 
 from __future__ import annotations
 
+import uoink_usage
+
 import errno
 import hashlib
 import json
@@ -1231,6 +1233,7 @@ class Index:
             except Exception:
                 log.warning("Semantic search update failed; saved source is intact")
 
+    @uoink_usage.search(query_arg="query")
     def search_mode(self, query: str, limit: int = 50, *, mode="auto", offset=0,
                     match="forgiving", filters=None, clips_only=False, video_id=None,
                     source_types=None, keyword=None, passages=True) -> dict:
@@ -1426,6 +1429,7 @@ class Index:
             "JOIN yoinks_fts f ON f.rowid=p._fts_rowid ORDER BY p._score, p.video_id",
             [value for row in page for value in row]).fetchall()
 
+    @uoink_usage.search
     def search(self, query: str, limit: int = 10, *,
                channel: str | None = None,
                hook_type: str | None = None,
@@ -1740,6 +1744,7 @@ class Index:
                 break
         return covered
 
+    @uoink_usage.search
     def search_clips(self, query: str, limit: int = 20, *,
                      video_id: str | None = None,
                      channel: str | None = None,
@@ -2508,6 +2513,7 @@ class Index:
         return [{"text": r["text"], "last_used": r["last_used"]} for r in rows]
 
     # ---- memory / soft delete (Sprint 18) -------------------------------
+    @uoink_usage.search(query_arg="q")
     def search_yoinks_for_memory(self, *, q: str | None = None,
                                  channel: str | None = None,
                                  topic: str | None = None,

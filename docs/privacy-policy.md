@@ -1,6 +1,6 @@
 # Uoink Privacy Policy
 
-**Repository draft — not yet effective. Last reviewed 2026-10-16.**
+**Repository draft, not yet effective. Last reviewed 2026-10-21.**
 
 This policy explains exactly what Uoink does and does not do with your
 data. It is written to be read, not to be skimmed past. If anything here
@@ -11,9 +11,9 @@ is unclear, email us (see *Contact* below).
 
 ## The short version
 
-Uoink does not collect anything about you. There is no Uoink account, no
-Uoink server in the cloud, no analytics, and no telemetry. Uoink runs on
-your own machine. It contacts a source service when you ask it to capture
+Uoink sends no usage data by default. If you turn on "Share anonymous usage counts", it sends daily counts to usage.uoink.app: calls by tool name, known MCP clients, stdio or HTTP calls, captures by source and result, and library searches. Reports include a random install ID, app version, operating system and major version, processor type, install type and hours counted. They never include content, URLs, titles, paths, search text, usernames, IP addresses or account details.
+
+Uoink has no account or cloud library. It runs on your own machine. It contacts a source service when you ask it to capture
 that source, the GitHub release API only when you click **Check now**, and
 Anthropic only with your own API key: for automatic AI analysis you turn on,
 a key test, or an AI action that you or a connected agent start on demand.
@@ -24,10 +24,13 @@ and the local data they create.
 
 ## 1. What Uoink collects about you
 
-Nothing.
+Sharing is off by default. If enabled, reports contain only the counts and
+app details listed above. The random UUID4 is made only when sharing is enabled.
+It is not derived from hardware, an account, a path or a token. Turning sharing
+off deletes it, the local counts and the local sent history. Turning sharing
+on again creates a new ID.
 
-Uoink has no user accounts, no sign-in, and no usage tracking. It does
-not phone home. The local helper writes a diagnostic log to
+The local helper writes a diagnostic log to
 `%LOCALAPPDATA%\Uoink\server.log` on your own computer to help you
 troubleshoot; that log never leaves your machine and is never sent
 anywhere.
@@ -35,6 +38,15 @@ anywhere.
 ## 2. What leaves your computer, and when
 
 Uoink makes these outbound requests:
+
+- **Anonymous usage counts, only if you turn sharing on.** At most once every
+  24 hours, the helper posts the report described above to
+  `https://usage.uoink.app/v1/ping`. No report includes an IP address. As with
+  any HTTPS request, the receiving service can see the connection IP address;
+  this client does not control that service's access logs. The repository
+  implementation makes no promise about server log retention. An offline
+  attempt is silent and can be retried once in the next daily window.
+  Isolated installs never send. `UOINK_USAGE_SHARING=0` forces sharing off.
 
 - **Source capture — when you ask for it.** A YouTube capture downloads
   public video data, thumbnails, transcripts, comments, and metadata from
@@ -137,9 +149,15 @@ origin, without a query or fragment. Open YouTube uses the fixed product
 link through the same check, with no helper-side open or focus request.
 Allowed visits send the destination site ordinary browser request metadata.
 
-Uoink sends no analytics, telemetry, usage tracking, or crash reports. The
-extracted corpus, screenshots, and files are written only to folders on your
-own computer.
+Uoink sends nothing to its usage service by default. Optional usage reports
+contain only the fields listed above. Uoink sends no crash reports. The
+extracted corpus, screenshots, and files stay on your computer.
+
+Dashboard > Settings > App > Usage sharing includes "See what is sent".
+It shows the next report with current counts and the exact last ten reports
+sent successfully, each with its UTC date. The first dashboard visit offers
+a one-time choice with "No thanks" as the default. Dismissing it keeps sharing
+off; it does not appear on the splash screen.
 
 ### Local data persistence
 
@@ -171,6 +189,12 @@ Uoink stores the following on your Windows machine:
   retry saving without another provider request. Deleted and unavailable
   captures are shown separately from failed capture attempts.
 - **Soft-deleted uoinks** — when you delete a uoink from the Memory page, the folder moves to `%USERPROFILE%\Desktop\Uoink\_yoink-trash\<topic>\<slug>__deleted-<timestamp>\`. The content remains readable on disk for 30 days, then is automatically purged by the helper on startup or every 24 hours thereafter. To delete immediately, manually remove the folder from `_yoink-trash`.
+- **Optional usage counts**: `usage-counts.sqlite3` in the local data folder.
+  The helper and stdio process use SQLite transactions to record counts safely.
+  The database holds the active random ID, bounded counts, the daily send gate,
+  any pending retry and the last ten successful reports. Disabling sharing
+  erases the ID, counts, pending report and sent history; the send gate remains
+  so toggling cannot cause more than one attempt in 24 hours.
 - **Helper state** — `server.log`, `token.txt`, `server.pid`, the v2.1 migration markers (`.migration-complete`, `.migrated-from-yoink`), and migrated legacy files (`jobs.json.migrated`, `taxonomy.json.migrated`) live alongside `index.db` under `%LOCALAPPDATA%\Uoink\`.
 
 Library text leaves your machine through Uoink's Anthropic integration only
@@ -193,6 +217,8 @@ authorized discovery call or balance test. There is no Uoink cloud server
 that receives either key.
 
 ## 4. Your control over your data
+
+- **Turn usage sharing off at any time** in Settings > App > Usage sharing.
 
 - **Clear your API key at any time** from dashboard Settings > AI features. If
   Anthropic rejects the key (for example, an expired key), Uoink also

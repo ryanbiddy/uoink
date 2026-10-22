@@ -29,6 +29,7 @@ import urllib.request
 
 import pytest
 import _platform
+import uoink_usage
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -37,6 +38,7 @@ URL_B = "https://www.youtube.com/watch?v=bbbbbbbbbbb"
 
 
 def _load(path, names, scope, *, constants=(), class_name=None):
+    scope.setdefault("uoink_usage", uoink_usage)
     tree = ast.parse(path.read_text(encoding="utf-8-sig"))
     body = tree.body
     if class_name:

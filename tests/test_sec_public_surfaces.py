@@ -23,6 +23,7 @@ from unittest.mock import Mock
 from urllib.parse import urlparse
 
 import pytest
+import uoink_usage
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -86,6 +87,7 @@ def helper(surface_code):
         {"corpus_path": str(PRIVATE_ROOT / "missing.md")},
     ]
     namespace = {
+        "uoink_usage": uoink_usage,
         "__name__": "offline_public_surfaces",
         "BaseHTTPRequestHandler": BaseHTTPRequestHandler,
         "HOST": "127.0.0.1", "PORT": PORT, "VERSION": "test",
