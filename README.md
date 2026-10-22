@@ -8,7 +8,7 @@
 
 **Uoink keeps the videos, podcasts, and articles creators and AI developers study on their own disk, then hands them to Claude, ChatGPT, Cursor, or a local MCP agent as a cited corpus.**
 
-Free, open source (MIT), and local-first: no account, no Uoink cloud, no required telemetry. Uoink saves supported sources as structured Markdown on *your* machine, then makes the corpus available to your AI through the clipboard, a local MCP server, and an OpenAPI bridge. YouTube capture includes the transcript, timestamped screenshots, comments, and metadata; other source types keep the material their publishers expose.
+Free, open source (MIT), and local-first: no account, no Uoink cloud, and anonymous usage counts stay off unless you turn them on. Uoink saves supported sources as structured Markdown on *your* machine, then makes the corpus available to your AI through the clipboard, a local MCP server, and an OpenAPI bridge. YouTube capture includes the transcript, timestamped screenshots, comments, and metadata; other source types keep the material their publishers expose.
 
 - **Website:** https://uoink.app · **Install:** https://uoink.app/install · **Developers:** https://uoink.app/developers
 - **Status:** Windows 10/11 only. There is no Mac build. The extension sideloads from the release — it is not on the Chrome Web Store. The installer is unsigned, so Windows SmartScreen will warn on first run.
