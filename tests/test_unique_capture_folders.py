@@ -21,6 +21,7 @@ import sys
 import tempfile
 import threading
 import time
+import unicodedata
 from types import SimpleNamespace
 from unittest.mock import Mock
 from urllib.parse import parse_qs, urlparse
@@ -86,10 +87,10 @@ def capture(tmp_path, monkeypatch):
     for column, kind in (("schema_version", "INTEGER"), ("source_type", "TEXT"),
                          ("platform", "TEXT"), ("author", "TEXT"), ("deleted_at", "TEXT")):
         conn.execute(f"ALTER TABLE yoinks ADD COLUMN {column} {kind}")
-    index_scope = {"threading": threading}
-    _load(ROOT / "index.py", set(), index_scope,
-          constants={"_YOINK_COLUMNS", "CURRENT_YOINK_SCHEMA"})
-    _load(ROOT / "index.py", {"__init__", "upsert_yoink", "get_yoink", "get_by_slug"},
+    index_scope = {"threading": threading, "unicodedata": unicodedata}
+    _load(ROOT / "index.py", {"_search_title_key", "_entity_keyword_score", "_search_terms", "_fts_terms"},
+          index_scope, constants={"_YOINK_COLUMNS", "CURRENT_YOINK_SCHEMA", "SEARCH_STOPWORDS"})
+    _load(ROOT / "index.py", {"__init__", "upsert_yoink", "get_yoink", "get_by_slug", "_notify_source_changed"},
           index_scope, class_name="Index")
     index_class = type("Index", (), {name: value for name, value in index_scope.items()
                                     if callable(value)})

@@ -241,6 +241,7 @@ def test_bridge_repairs_a_crash_between_index_and_episode_link(
 
     monkeypatch.setattr(server, "_get_index", lambda: idx)
     monkeypatch.setattr(server, "DATA_ROOT", tmp_path)
+    monkeypatch.setattr(server, "INDEX_PATH", idx._path)
     monkeypatch.setattr(server, "_diagnose_payload", lambda: {"ok": True})
     monkeypatch.setattr(
         server.migrate_install, "migration_status", lambda: {"ok": True})

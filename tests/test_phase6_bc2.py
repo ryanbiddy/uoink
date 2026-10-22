@@ -869,13 +869,13 @@ def test_bc2_export_adapter_admits_once_binds_existing_storage_and_bounds_the_lo
     assert error["details"]["reason"] == "lock_wait"
     held.release()
     env.clock.advance()
-    env.guard.admit()
-    env.guard.admit()
+    for _ in range(env.guard.max_active):
+        env.guard.admit()
     try:
         _refusal(media.export_cited_range_tool(good_args, backend, clock=env.clock), "rate_limited")
     finally:
-        env.guard.release()
-        env.guard.release()
+        for _ in range(env.guard.max_active):
+            env.guard.release()
     assert env.guard._active == 0
 
     # Registry adapter: the tool is in TOOL_REGISTRY with read-only hints

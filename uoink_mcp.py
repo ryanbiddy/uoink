@@ -237,8 +237,8 @@ def list_recent_uoinks(limit: int = 20) -> dict:
     return uoink_mcp_tools.call_tool("list_recent_uoinks", {"limit": limit})
 
 
-def search_uoinks(query: str, limit: int = 10) -> dict:
-    return uoink_mcp_tools.call_tool("search_uoinks", {"query": query, "limit": limit})
+def search_uoinks(query: str, limit: int = 10, match: str = "forgiving", mode: str = "auto") -> dict:
+    return uoink_mcp_tools.call_tool("search_uoinks", {"query": query, "limit": limit, "match": match, "mode": mode})
 
 
 def search_clips(
@@ -246,8 +246,10 @@ def search_clips(
     limit: int = 20,
     video_id: str | None = None,
     channel: str | None = None,
+    match: str = "forgiving",
+    mode: str = "auto",
 ) -> dict:
-    args: dict = {"query": query, "limit": limit}
+    args: dict = {"query": query, "limit": limit, "match": match, "mode": mode}
     if video_id:
         args["video_id"] = video_id
     if channel:
@@ -302,9 +304,9 @@ def get_uoink_health(slug: str) -> dict:
     return uoink_mcp_tools.call_tool("get_uoink_health", {"slug": slug})
 
 
-def find_mentions(entity: str, limit: int = 50) -> dict:
+def find_mentions(entity: str, limit: int = 50, match: str = "forgiving") -> dict:
     return uoink_mcp_tools.call_tool(
-        "find_mentions", {"entity": entity, "limit": limit}
+        "find_mentions", {"entity": entity, "limit": limit, "match": match}
     )
 
 
@@ -429,8 +431,8 @@ def get_library_activity(
 # reject duplicate JSON keys before handlers receive parsed objects. Every reader is request-scoped on the process-wide guard (2 active,
 # 60 admissions per minute, 2 s deadline). Nothing here writes to stdout.
 # --------------------------------------------------------------------------
-def search_library(query: str, limit: int = 5):
-    return uoink_mcp_tools.call_tool("search_library", {"query": query, "limit": limit})
+def search_library(query: str, limit: int = 5, match: str = "forgiving", mode: str = "auto"):
+    return uoink_mcp_tools.call_tool("search_library", {"query": query, "limit": limit, "match": match, "mode": mode})
 
 
 def get_library_item(video_id: str | None = None, slug: str | None = None):
@@ -639,8 +641,9 @@ def _register_phase4_stdio() -> None:
 
     def tool_result(name, arguments):
         active = reader()
-        envelope = library_resources.call_tool(name, arguments if arguments is not None else {}, active,
-                                               client_identity="stdio")
+        from uoink_agent_runtime import dispatch_search
+        envelope = dispatch_search(name, arguments, server, lambda: library_resources.call_tool(
+            name, arguments if arguments is not None else {}, active, client_identity="stdio"), running=_helper_running)
         if name == "publish_library_brief" and not server._platform.library_mirror_capability()["available"]:
             envelope["capabilities"] = server._platform.platform_capabilities()
         text = library_resources.render_tool_text(envelope)

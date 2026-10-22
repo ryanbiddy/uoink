@@ -1,6 +1,6 @@
 ﻿from pathlib import Path
 import tempfile
-from index import Index
+from index import Index, latest_schema_version
 from library_work import LibraryWorkService, RequestContext
 
 def fixture():
@@ -40,7 +40,7 @@ def test_stage_a():
     assert idx._conn.execute('SELECT COUNT(*) FROM item_shelves').fetchone()[0]==0
     assert idx._conn.execute('PRAGMA integrity_check').fetchone()[0]=='ok'
     assert idx._conn.execute('PRAGMA foreign_key_check').fetchall()==[]
-    assert idx.schema_version()==30  # 0027 substrate + 0028 source subscriptions (Phase 3) + 0030 media depth (Phase 6, BD-0 amendment)
+    assert idx.schema_version()==latest_schema_version()
     idx.close()
 
 if __name__=='__main__':

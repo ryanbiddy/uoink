@@ -276,6 +276,7 @@ def test_login_wall_fails_honestly_and_persists_nothing(monkeypatch):
     root = Path(tmp.name) / "corpus"
     root.mkdir(parents=True)
     monkeypatch.setattr(server, "DESKTOP_ROOT", root)
+    monkeypatch.setattr(server, "DATA_ROOT", Path(tmp.name))
     monkeypatch.setattr(server, "_get_index", lambda: idx)
 
     def _boom(url, **kwargs):
