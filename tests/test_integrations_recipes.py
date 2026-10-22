@@ -1,4 +1,5 @@
 """Official-doc recipe contracts, with no installed clients or network access."""
+import io
 import json
 from pathlib import Path
 import shlex
@@ -20,7 +21,8 @@ CHANGES = json.loads((FIXTURES / "changes.json").read_text())
 def fake_install(base, platform):
     app = base / "O'Brien & 雪 with spaces" / "Uoink.app"
     resources = app / "Contents/Resources" if platform == "darwin" else app
-    python = resources / ("Python/bin/python3" if platform == "darwin" else "python/python.exe")
+    python = resources / ({"darwin": "Python/bin/python3", "linux": "python/bin/python3"}
+                          .get(platform, "python/python.exe"))
     python.parent.mkdir(parents=True, exist_ok=True)
     python.touch()
     (resources / "uoink_mcp.py").touch()
@@ -42,7 +44,7 @@ def normalize_output(output, app, resources, python, profile):
     return output
 
 
-@pytest.mark.parametrize("platform", ["win32", "darwin"])
+@pytest.mark.parametrize("platform", ["win32", "darwin", "linux"])
 @pytest.mark.parametrize("client", connect.CLIENTS)
 def test_platform_output_and_print_only_contract(tmp_path, monkeypatch, capsys, platform, client):
     app, resources, python = fake_install(tmp_path, platform)
@@ -76,7 +78,7 @@ def test_platform_output_and_print_only_contract(tmp_path, monkeypatch, capsys, 
     assert spec.checked in out.err and all(url in out.err for url in spec.sources)
     assert "not yet tested" in out.err
     assert "Official docs verified:" not in out.out
-    if platform == "darwin":
+    if platform in {"darwin", "linux"}:
         assert "%APPDATA%" not in connect.client_spec(client).location
         assert "%USERPROFILE%" not in connect.client_spec(client).location
     if spec.format in {"json", "jsonc", "yaml", "toml"}:
@@ -113,7 +115,7 @@ def test_platform_output_and_print_only_contract(tmp_path, monkeypatch, capsys, 
             actual = tokens[3:]
         assert actual == expected
     snapshot_clients = set(CHANGES["added"]) | set(CHANGES["stdout_changed"])
-    if client in snapshot_clients:
+    if client in snapshot_clients and platform in {"win32", "darwin"}:
         snapshots = json.loads((FIXTURES / "recipes.json").read_text(encoding="utf-8"))
         actual = normalize_output(out.out.rstrip("\n"), app, resources, python, profile)
         assert actual == snapshots[platform][client]
@@ -121,8 +123,14 @@ def test_platform_output_and_print_only_contract(tmp_path, monkeypatch, capsys, 
 
 @pytest.mark.parametrize("platform", ["win32", "darwin"])
 @pytest.mark.parametrize("client", ["claude-desktop", "cursor", "cline"])
-def test_file_writers_preserve_unrelated_config(tmp_path, monkeypatch, platform, client):
+@pytest.mark.parametrize("default_encoding", ["utf-8", "cp1252"])
+def test_file_writers_preserve_unrelated_config(tmp_path, monkeypatch, platform, client,
+                                               default_encoding):
     import server
+    # pathlib resolves omitted encodings here. Patching locale.getpreferredencoding
+    # alone does not affect its C-backed file I/O, or override Python's UTF-8 mode.
+    monkeypatch.setattr(io, "text_encoding", lambda encoding, stacklevel=2:
+                        default_encoding if encoding in (None, "locale") else encoding)
     home = tmp_path / "O'Brien & 雪 temporary home"
     for key, value in {"HOME": home, "USERPROFILE": home, "APPDATA": home / "AppData/Roaming",
                        "LOCALAPPDATA": home / "AppData/Local"}.items():
@@ -130,25 +138,31 @@ def test_file_writers_preserve_unrelated_config(tmp_path, monkeypatch, platform,
     monkeypatch.setattr(sys, "platform", platform)
     app, resources, python = fake_install(tmp_path, platform)
     monkeypatch.setattr(server, "HERE", resources)
-    monkeypatch.setattr(server, "_mcp_stdio_command", lambda: (str(python), [str(resources / "uoink_mcp.py")]))
+    monkeypatch.setattr(server._install_isolation, "child_argv", lambda: [])
     spec = server._agent_client_spec(client)
     cfg = spec["config_path"]
     assert cfg.is_relative_to(home)
     cfg.parent.mkdir(parents=True)
-    original = b'{"theme":"dark","mcpServers":{"other":{"command":"untouched","env":{"NOTE":"keep"}}}}\n'
+    original = ('{"theme":"雪 dark","mcpServers":{"other":{"command":"untouched",'
+                '"env":{"NOTE":"café 雪"}}}}\n').encode("utf-8")
     cfg.write_bytes(original)
+    with cfg.open() as stream:
+        assert stream.encoding == default_encoding
+    expected_args = (["-B", "-s"] if platform == "darwin" else []) + [str(resources / "uoink_mcp.py")]
     for action in ("added", "updated"):
         before = cfg.read_bytes()
         result = server._connect_ai_client(client)
         assert result["action"] == action
         assert Path(result["backup_path"]).read_bytes() == before
         data = json.loads(cfg.read_text(encoding="utf-8"))
-        assert data["theme"] == "dark"
+        assert data["theme"] == "雪 dark"
         assert data["mcpServers"]["other"] == json.loads(original)["mcpServers"]["other"]
         assert data["mcpServers"]["uoink"]["command"] == str(python)
+        assert data["mcpServers"]["uoink"]["args"] == expected_args
+        assert server._client_is_connected(cfg)
 
 
-@pytest.mark.parametrize("platform", ["win32", "darwin"])
+@pytest.mark.parametrize("platform", ["win32", "darwin", "linux"])
 def test_continue_dashboard_refuses_obsolete_write(tmp_path, monkeypatch, platform):
     import server
     monkeypatch.setenv("HOME", str(tmp_path))
@@ -174,6 +188,26 @@ def test_generated_tables_have_all_sources_and_dates():
         assert connect.client_table() in document
     assert all(connect.CLIENTS[name].platforms == tuple(platforms)
                for name, platforms in CHANGES["restricted_platforms"].items())
+
+
+def test_generated_platforms_match_available_routes():
+    rows = connect.client_table().splitlines()[2:]
+    labels = {"win32": "Windows", "darwin": "macOS", "linux": "Linux"}
+    for (name, spec), row in zip(connect.CLIENTS.items(), rows):
+        cells = [cell.strip() for cell in row.split("|")[1:-1]]
+        assert cells[1] == ", ".join(labels[p] for p in spec.platforms), name
+        assert ("linux" in spec.platforms) == bool(spec.linux_location), name
+        assert cells[4] == (spec.linux_location or "No recipe"), name
+        if spec.linux_location:
+            assert not any(part in spec.linux_location for part in
+                           ("%APPDATA%", "%USERPROFILE%", "~/Library/", "macOS")), name
+    assert connect.CLIENTS["auggie"].platforms == ("darwin", "linux")
+    assert connect.CLIENTS["auggie"].linux_location == "~/.augment/settings.json"
+    for name in ("claude-desktop", "anythingllm", "raycast", "obsidian",
+                 "boltai", "alfred", "perplexity", "autohotkey", "powertoys", "windows-odr"):
+        assert "linux" not in connect.CLIENTS[name].platforms, name
+    for name in ("cursor", "continue", "goose", "hermes", "zed", "n8n", "vscode"):
+        assert "linux" in connect.CLIENTS[name].platforms, name
 
 
 def test_list_has_every_recipe_once(capsys):

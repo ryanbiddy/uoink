@@ -301,6 +301,9 @@ def test_unchanged_connect_stdout_is_byte_identical_to_v3100(tmp_path, monkeypat
     old_connect = load_release_module("uoink_connect")
     old_cli = load_release_module("uoink_cli")
     monkeypatch.setattr(sys, "platform", platform)
+    home = tmp_path / "temporary home"
+    monkeypatch.setenv("HOME", str(home))
+    monkeypatch.setenv("USERPROFILE", str(home))
     # Exercise the POSIX quoting branch even on the Windows test host.
     if platform == "linux":
         for module in (old_connect, connect):
@@ -318,6 +321,7 @@ def test_unchanged_connect_stdout_is_byte_identical_to_v3100(tmp_path, monkeypat
     assert set(old_connect.CLIENTS) <= set(connect.CLIENTS)
     commands = [["connect", c] for c in old_connect.CLIENTS]
     commands += [["connect", c, "--deeplink"] for c in ("cursor", "vscode")]
+    changed_locations = set()
     for args in commands:
         outputs = []
         for module, recipes in ((old_cli, old_connect), (cli, connect)):
@@ -329,6 +333,7 @@ def test_unchanged_connect_stdout_is_byte_identical_to_v3100(tmp_path, monkeypat
         name = args[1]
         if platform not in connect.CLIENTS[name].platforms:
             assert name in changes["restricted_platforms"]
+            assert platform not in changes["restricted_platforms"][name]
             assert outputs[1][0] == 2 and outputs[1][1] == b""
         else:
             assert outputs[0][0] == outputs[1][0] == 0
@@ -339,6 +344,17 @@ def test_unchanged_connect_stdout_is_byte_identical_to_v3100(tmp_path, monkeypat
                 assert outputs[0][1] == outputs[1][1], args
             assert b"Official docs verified:" in outputs[1][2]
             assert b"Checked: 2026-10-21" in outputs[1][2]
+            if platform == "linux":
+                old_location, new_location = (output[2].splitlines()[0] for output in outputs)
+                if old_location != new_location:
+                    # Location changes are on stderr, never a stdout exemption.
+                    changed_locations.add(name)
+                    location = changes["linux_locations_changed"][name]
+                    if location.startswith("~/"):
+                        location = str(home / location[2:])
+                    assert new_location == f"File: {location}".encode("utf-8"), args
+    if platform == "linux":
+        assert changed_locations == set(changes["linux_locations_changed"])
 
 
 def test_darwin_mcpb_payload_and_validation(tmp_path):
