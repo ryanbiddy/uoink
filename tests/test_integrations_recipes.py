@@ -20,7 +20,8 @@ CHANGES = json.loads((FIXTURES / "changes.json").read_text())
 def fake_install(base, platform):
     app = base / "O'Brien & 雪 with spaces" / "Uoink.app"
     resources = app / "Contents/Resources" if platform == "darwin" else app
-    python = resources / ("Python/bin/python3" if platform == "darwin" else "python/python.exe")
+    python = resources / ({"darwin": "Python/bin/python3", "linux": "python/bin/python3"}
+                          .get(platform, "python/python.exe"))
     python.parent.mkdir(parents=True, exist_ok=True)
     python.touch()
     (resources / "uoink_mcp.py").touch()
@@ -42,7 +43,7 @@ def normalize_output(output, app, resources, python, profile):
     return output
 
 
-@pytest.mark.parametrize("platform", ["win32", "darwin"])
+@pytest.mark.parametrize("platform", ["win32", "darwin", "linux"])
 @pytest.mark.parametrize("client", connect.CLIENTS)
 def test_platform_output_and_print_only_contract(tmp_path, monkeypatch, capsys, platform, client):
     app, resources, python = fake_install(tmp_path, platform)
@@ -76,7 +77,7 @@ def test_platform_output_and_print_only_contract(tmp_path, monkeypatch, capsys, 
     assert spec.checked in out.err and all(url in out.err for url in spec.sources)
     assert "not yet tested" in out.err
     assert "Official docs verified:" not in out.out
-    if platform == "darwin":
+    if platform in {"darwin", "linux"}:
         assert "%APPDATA%" not in connect.client_spec(client).location
         assert "%USERPROFILE%" not in connect.client_spec(client).location
     if spec.format in {"json", "jsonc", "yaml", "toml"}:
@@ -113,7 +114,7 @@ def test_platform_output_and_print_only_contract(tmp_path, monkeypatch, capsys, 
             actual = tokens[3:]
         assert actual == expected
     snapshot_clients = set(CHANGES["added"]) | set(CHANGES["stdout_changed"])
-    if client in snapshot_clients:
+    if client in snapshot_clients and platform in {"win32", "darwin"}:
         snapshots = json.loads((FIXTURES / "recipes.json").read_text(encoding="utf-8"))
         actual = normalize_output(out.out.rstrip("\n"), app, resources, python, profile)
         assert actual == snapshots[platform][client]
@@ -148,7 +149,7 @@ def test_file_writers_preserve_unrelated_config(tmp_path, monkeypatch, platform,
         assert data["mcpServers"]["uoink"]["command"] == str(python)
 
 
-@pytest.mark.parametrize("platform", ["win32", "darwin"])
+@pytest.mark.parametrize("platform", ["win32", "darwin", "linux"])
 def test_continue_dashboard_refuses_obsolete_write(tmp_path, monkeypatch, platform):
     import server
     monkeypatch.setenv("HOME", str(tmp_path))
@@ -174,6 +175,26 @@ def test_generated_tables_have_all_sources_and_dates():
         assert connect.client_table() in document
     assert all(connect.CLIENTS[name].platforms == tuple(platforms)
                for name, platforms in CHANGES["restricted_platforms"].items())
+
+
+def test_generated_platforms_match_available_routes():
+    rows = connect.client_table().splitlines()[2:]
+    labels = {"win32": "Windows", "darwin": "macOS", "linux": "Linux"}
+    for (name, spec), row in zip(connect.CLIENTS.items(), rows):
+        cells = [cell.strip() for cell in row.split("|")[1:-1]]
+        assert cells[1] == ", ".join(labels[p] for p in spec.platforms), name
+        assert ("linux" in spec.platforms) == bool(spec.linux_location), name
+        assert cells[4] == (spec.linux_location or "No recipe"), name
+        if spec.linux_location:
+            assert not any(part in spec.linux_location for part in
+                           ("%APPDATA%", "%USERPROFILE%", "~/Library/", "macOS")), name
+    assert connect.CLIENTS["auggie"].platforms == ("darwin", "linux")
+    assert connect.CLIENTS["auggie"].linux_location == "~/.augment/settings.json"
+    for name in ("claude-desktop", "anythingllm", "raycast", "obsidian",
+                 "boltai", "alfred", "perplexity", "autohotkey", "powertoys", "windows-odr"):
+        assert "linux" not in connect.CLIENTS[name].platforms, name
+    for name in ("cursor", "continue", "goose", "hermes", "zed", "n8n", "vscode"):
+        assert "linux" in connect.CLIENTS[name].platforms, name
 
 
 def test_list_has_every_recipe_once(capsys):

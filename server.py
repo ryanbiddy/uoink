@@ -11415,6 +11415,7 @@ def _agent_client_specs() -> list[dict]:
             # Official schema checked 2026-10-21:
             # https://docs.continue.dev/customize/deep-dives/mcp
             "config_path": home / ".continue" / "config.yaml",
+            "legacy_config_path": home / ".continue" / "config.json",
             "manual_only": True,
             "markers": [home / ".continue"],
         },
@@ -11435,17 +11436,84 @@ def _uoink_mcp_entry() -> dict:
     return {"command": command, "args": args}
 
 
+def _entry_launches_uoink(entry) -> bool:
+    """Match this install's stdio launch, regardless of the user's entry name."""
+    if not isinstance(entry, dict) or entry.get("disabled") is True or entry.get("enabled") is False:
+        return False
+    command, args = _mcp_stdio_command()
+    actual_args = entry.get("args")
+    if not isinstance(entry.get("command"), str) or not isinstance(actual_args, list):
+        return False
+    if len(actual_args) != len(args) or not all(isinstance(arg, str) for arg in actual_args):
+        return False
+    import ntpath
+    import posixpath
+    paths = ntpath if sys.platform == "win32" else posixpath
+    normalize = lambda value: paths.normcase(paths.normpath(value))
+    return (entry.get("type", "stdio") == "stdio"
+            and normalize(entry["command"]) == normalize(command)
+            and all(normalize(actual) == normalize(expected) if paths.isabs(expected)
+                    else actual == expected for actual, expected in zip(actual_args, args)))
+
+
 def _client_is_connected(config_path: Path) -> bool:
-    """True when the client's config already lists a `uoink` mcpServers entry.
-    Best-effort: an unreadable / non-JSON file reads as not-connected."""
+    """True when a JSON client's MCP entry launches this Uoink install."""
     try:
         if not config_path.exists():
             return False
         data = json.loads(config_path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError):
+    except (OSError, UnicodeError, ValueError, RecursionError):
         return False
     servers = data.get("mcpServers") if isinstance(data, dict) else None
-    return isinstance(servers, dict) and "uoink" in servers
+    return isinstance(servers, dict) and any(_entry_launches_uoink(entry) for entry in servers.values())
+
+
+def _continue_connection(spec: dict) -> tuple[Path, bool, str]:
+    """Read global Continue settings only. YAML takes precedence over legacy JSON.
+
+    Current: ~/.continue/config.yaml, mcpServers list.
+    Legacy: ~/.continue/config.json, experimental.modelContextProtocolServers
+    with a nested transport object. Both locations use the user home on each OS.
+    """
+    cfg = spec["config_path"]
+    legacy = spec["legacy_config_path"]
+    if not cfg.exists() and legacy.exists():
+        cfg = legacy
+    if not cfg.exists():
+        return cfg, False, "Continue config was not found."
+    try:
+        raw = cfg.read_text(encoding="utf-8-sig")
+        if cfg.suffix == ".yaml":
+            try:
+                import yaml  # PyYAML is already in requirements-installer-lock.txt.
+            except ImportError:
+                return cfg, False, "Continue YAML detection needs the bundled PyYAML parser."
+            try:
+                data = yaml.safe_load(raw)
+            except yaml.YAMLError:
+                return cfg, False, "Continue config.yaml is not valid YAML."
+        else:
+            data = json.loads(raw)
+    except (OSError, UnicodeError):
+        return cfg, False, "Continue config could not be read as UTF-8."
+    except (ValueError, RecursionError):
+        return cfg, False, "Continue config is malformed."
+    if not isinstance(data, dict):
+        return cfg, False, "Continue config must contain an object."
+    if cfg.suffix == ".yaml":
+        entries = data.get("mcpServers", [])
+    else:
+        experimental = data.get("experimental", {})
+        if not isinstance(experimental, dict):
+            return cfg, False, "Continue experimental settings must contain an object."
+        entries = experimental.get("modelContextProtocolServers", [])
+    if not isinstance(entries, list) or any(not isinstance(entry, dict) for entry in entries):
+        return cfg, False, "Continue MCP servers must contain a list of objects."
+    for entry in entries:
+        launch = entry if cfg.suffix == ".yaml" else entry.get("transport")
+        if _entry_launches_uoink(launch):
+            return cfg, True, "An MCP server entry launches this Uoink install."
+    return cfg, False, "No MCP server entry launches this Uoink install."
 
 
 def _detect_ai_clients() -> list[dict]:
@@ -11454,13 +11522,20 @@ def _detect_ai_clients() -> list[dict]:
     for spec in _agent_client_specs():
         installed = any(p.exists() for p in spec["markers"])
         cfg = spec["config_path"]
+        details = {}
+        if spec["name"] == "continue":
+            cfg, connected, reason = _continue_connection(spec)
+            details["connected_reason"] = reason
+        else:
+            connected = _client_is_connected(cfg)
         out.append({
             "name": spec["name"],
             "label": spec["label"],
             "installed": installed,
             "config_path": str(cfg),
             "config_exists": cfg.exists(),
-            "connected": False if spec.get("manual_only") else _client_is_connected(cfg),
+            "connected": connected,
+            **details,
         })
     return out
 
