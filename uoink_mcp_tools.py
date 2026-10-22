@@ -365,6 +365,10 @@ def list_recent_uoinks(args: dict[str, Any]) -> dict[str, Any]:
 
 
 def search_uoinks(args: dict[str, Any]) -> dict[str, Any]:
+    from uoink_core.search_service import MODES, metadata
+    mode = args.get("mode", "auto")
+    if mode not in MODES:
+        return _err("mode must be auto, keyword, semantic or hybrid")
     # Sprint 15: FTS5 keyword search via the library index instead of
     # read_text()-ing every corpus file. Return shape unchanged
     # ({slug, title, snippet, score}); optional channel / hook_type filters.
@@ -379,7 +383,12 @@ def search_uoinks(args: dict[str, Any]) -> dict[str, Any]:
     channel = channel.strip() if isinstance(channel, str) and channel.strip() else None
     hook_type = args.get("hook_type")
     hook_type = hook_type.strip() if isinstance(hook_type, str) and hook_type.strip() else None
-    rows = _b()._get_index().search(query, limit, channel=channel, hook_type=hook_type, match=match)
+    idx = _b()._get_index()
+    page = idx.search_mode(query, limit, mode=mode, match=match,
+                           filters={"channel": channel, "hook_type": hook_type},
+                           keyword=lambda count, offset, override: {"results": idx.search(
+                               query, count, channel=channel, hook_type=hook_type, match=override or match)})
+    rows = page["results"]
     results = []
     for r in rows:
         score = r.get("_score")
@@ -392,8 +401,9 @@ def search_uoinks(args: dict[str, Any]) -> dict[str, Any]:
             # better match, matching the old term-count score's direction.
             "score": round(-score, 4) if isinstance(score, (int, float)) else 0.0,
             **({"passage": r["passage"]} if "passage" in r else {}),
+            **{key: r[key] for key in ("source_id", "passage_id", "span", "timestamp_seconds") if key in r},
         })
-    return _ok(results=results)
+    return _ok(results=results, **metadata(page))
 
 
 def get_uoink_corpus(args: dict[str, Any]) -> dict[str, Any]:
@@ -518,6 +528,10 @@ def _clean_text(value: Any) -> str | None:
 
 def search_clips(args: dict[str, Any]) -> dict[str, Any]:
     """Full-text search over transcript windows with source timing and links."""
+    from uoink_core.search_service import MODES, metadata
+    mode = args.get("mode", "auto")
+    if mode not in MODES:
+        return _err("mode must be auto, keyword, semantic or hybrid")
     query = args.get("query")
     if not isinstance(query, str) or not query.strip():
         return _err("query required")
@@ -527,8 +541,9 @@ def search_clips(args: dict[str, Any]) -> dict[str, Any]:
     limit = _limit_int(args.get("limit"), default=20, low=1, high=50)
     video_id = _clean_text(args.get("video_id"))
     channel = _clean_text(args.get("channel"))
-    rows = _b()._get_index().search_clips(
-        query, limit, video_id=video_id, channel=channel, match=match)
+    page = _b()._get_index().search_mode(query, limit, mode=mode, clips_only=True,
+                                        video_id=video_id, filters={"channel": channel}, match=match)
+    rows = page["results"]
     results = []
     for r in rows:
         score = r.get("_score")
@@ -543,11 +558,12 @@ def search_clips(args: dict[str, Any]) -> dict[str, Any]:
             "text": r.get("text"),
             "deep_link": r.get("source_deep_link"),
             "timing": r.get("timing", "unknown"),
+            **{key: r[key] for key in ("passage", "source_id", "passage_id", "span", "timestamp_seconds") if key in r},
             # bm25 is lower-is-better; negate so higher means better, the
             # same direction search_uoinks reports.
             "score": round(-score, 4) if isinstance(score, (int, float)) else 0.0,
         })
-    return _ok(results=results)
+    return _ok(results=results, **metadata(page))
 
 
 def get_evidence_card(args: dict[str, Any]) -> dict[str, Any]:
@@ -3895,6 +3911,9 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
         },
         description="Full-text search across saved Uoink corpora.",
         input_schema=_schema({
+            "mode": {"type": "string", "enum": ["auto", "keyword", "semantic", "hybrid"],
+                      "default": "auto",
+                      "description": "Auto uses hybrid when the local semantic index is ready, otherwise keyword."},
             "match": {"type": "string", "enum": ["forgiving", "strict"],
                       "default": "forgiving",
                       "description": "Forgiving matches useful words; strict requires every word."},
@@ -3928,6 +3947,9 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "search_uoinks to find whole items."
         ),
         input_schema=_schema({
+            "mode": {"type": "string", "enum": ["auto", "keyword", "semantic", "hybrid"],
+                      "default": "auto",
+                      "description": "Auto uses hybrid when the local semantic index is ready, otherwise keyword."},
             "match": {"type": "string", "enum": ["forgiving", "strict"],
                       "default": "forgiving",
                       "description": "Forgiving matches useful words; strict requires every word."},
@@ -5601,6 +5623,9 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "retrieval is needed."
         ),
         input_schema=_schema({
+            "mode": {"type": "string", "enum": ["auto", "keyword", "semantic", "hybrid"],
+                      "default": "auto",
+                      "description": "Auto uses hybrid when the local semantic index is ready, otherwise keyword."},
             "match": {"type": "string", "enum": ["forgiving", "strict"],
                       "default": "forgiving",
                       "description": "Forgiving matches useful words; strict requires every word."},

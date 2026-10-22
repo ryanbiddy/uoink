@@ -27,6 +27,7 @@ import os
 from pathlib import Path
 import platform
 import re
+import shutil
 import statistics
 import sys
 import textwrap
@@ -97,6 +98,7 @@ class OfflineGuard:
     def __init__(self, workdir, out):
         self.roots = [safe_path(workdir), safe_path(out)]
         self.database = self.roots[0] / "benchmark.sqlite3"
+        self.vectors = self.roots[0] / "search-vectors.db"
 
     def writable(self, path):
         resolved = safe_path(path)
@@ -116,7 +118,7 @@ class OfflineGuard:
             ):
                 self.writable(args[0])
         elif event == "sqlite3.connect":
-            if args[0] != ":memory:" and safe_path(args[0]) != self.database:
+            if args[0] != ":memory:" and safe_path(args[0]) not in (self.database, self.vectors):
                 raise ValueError("refusing SQLite database outside disposable index")
         elif event in {"os.listdir", "os.scandir"}:
             if args[0] is not None and not isinstance(args[0], int):
@@ -210,7 +212,14 @@ def mode_search(index, mode):
     """Only call declared modes; **kwargs alone is not evidence of support."""
     explicit = getattr(index, "search_" + mode, None)
     if callable(explicit):
-        return lambda query: explicit(query, limit=30)
+        def run(query):
+            result = explicit(query, limit=30)
+            if mode in ("embedding", "hybrid") and isinstance(result, dict):
+                expected = "semantic" if mode == "embedding" else mode
+                if result.get("search_mode", expected) != expected:
+                    raise RuntimeError("benchmark refuses semantic fallback: " + str(result.get("fallback_reason")))
+            return result
+        return run
     search = getattr(index, "search", None)
     if not callable(search):
         return None
@@ -260,6 +269,48 @@ def ingest(index, docs, workdir):
             "yoinked_at": doc.get("captured_at") or "",
             "metadata_json": json.dumps({"url": doc["url"]}),
         }, content=doc["text"])
+
+
+def prepare_model(index, model_dir, workdir):
+    """Verified local files and consent belong only to this disposable benchmark."""
+    from uoink_core.local_search import LocalSearch, MODEL_FILES, TERMS_VERSION, verified
+    model_dir = safe_path(model_dir)
+    for name, size, checksum in MODEL_FILES:
+        source = model_dir / name
+        safe_path(source)
+        if not verified(source, size, checksum):
+            raise ValueError("--model-dir must contain verified regular files: " + name)
+    engine = LocalSearch(workdir, index)
+    for name, _, _ in MODEL_FILES:
+        target = engine.manager.directory / name
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(model_dir / name, target)
+    # Explicit test-only acceptance requested by --model-dir. Never uses a user profile.
+    engine.accept_terms(accepted=True, terms_version=TERMS_VERSION)
+    index.set_local_search(engine)
+    start = time.perf_counter()
+    engine.start()
+    while not engine.wait(30):
+        status = engine.status()
+        print(f"Building vector index: {status['state']} {status['done']}/{status['total']}", flush=True)
+        if time.perf_counter() - start > 7200:
+            engine.pause()
+            raise RuntimeError("vector index build timed out")
+    elapsed = time.perf_counter() - start
+    if engine.status()["state"] != "ready":
+        raise RuntimeError("vector index build failed: " + engine.status()["message"])
+    return engine, elapsed
+
+
+def validate_resume(index, docs, workdir):
+    """Resume only an exact frozen benchmark corpus, never a normal library."""
+    with index.read_snapshot() as db:
+        rows = db.execute("SELECT y.video_id, y.title, y.corpus_path, f.content FROM yoinks y "
+                          "JOIN yoinks_fts f ON f.video_id=y.video_id WHERE y.deleted_at IS NULL").fetchall()
+    actual = {row["video_id"]: (row["title"], row["content"], row["corpus_path"]) for row in rows}
+    expected = {doc["id"]: (doc["title"], doc["text"], str(workdir / "sources" / (doc["id"] + ".md"))) for doc in docs}
+    if actual != expected or len(rows) != len(docs):
+        raise ValueError("--resume requires an unchanged disposable benchmark corpus")
 
 
 def map_results(results, docs):
@@ -330,13 +381,18 @@ def evaluate(search, docs, queries, mode, repeats):
              "query": q["query"], "targets": q["targets"], "ranking": ranking,
              "seconds": seconds, **rank_metrics(ranking, q["targets"])}
             for q, ranking, seconds in zip(queries, rankings, timings)]
+    all_metrics = aggregate(rows)
+    if rows:
+        print(f"{mode}: top 5 {all_metrics['hit5']}/{all_metrics['n']}; "
+              f"warm p95 {all_metrics['p95_seconds'] * 1000:.3f} ms. "
+              f"Checking {len(docs)} exact titles.", flush=True)
     titles = []
     for doc in docs:
         ranking = map_results(search(doc["title"]), docs)
         titles.append({"kind": "exact_title", "mode": mode, "source_id": doc["id"],
                        "query": doc["title"], "first_id": ranking[0] if ranking else None,
                        "passed": bool(ranking and ranking[0] == doc["id"])})
-    metrics = {"status": "ok", "all": aggregate(rows),
+    metrics = {"status": "ok", "all": all_metrics,
                "groups": {g: aggregate([r for r in rows if r["group"] == g]) for g in GROUPS},
                "exact_title": {"passed": sum(row["passed"] for row in titles), "n": len(titles)}}
     return metrics, rows + titles
@@ -359,6 +415,10 @@ def summary(metrics):
                          f"{row['hit10']}/{row['n']} | {row['zero_results']} | {row['mrr30']:.4f} | "
                          f"{row['p50_seconds'] * 1000:.3f} / {row['p95_seconds'] * 1000:.3f} |")
     lines.append("")
+    if metrics.get("index_build_seconds") is not None:
+        lines.append(f"Vector index build: {metrics['index_build_seconds']:.3f} seconds (excluded from query latency).")
+        if metrics.get("resumed_sources"):
+            lines.append(f"Resumed with {metrics['resumed_sources']} previously indexed sources; build time covers this invocation.")
     for mode, data in metrics["modes"].items():
         if data["status"] == "skipped":
             lines.append(f"{mode}: {data['reason']}.")
@@ -381,6 +441,8 @@ def main(argv=None):
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--workdir", type=Path, required=True)
     parser.add_argument("--repeats", type=int, default=5)
+    parser.add_argument("--model-dir", type=Path, help="Verified local EmbeddingGemma folder. Never downloads.")
+    parser.add_argument("--resume", action="store_true", help="Reuse only an unchanged disposable benchmark corpus and derived vectors; --out must still be empty.")
     args = parser.parse_args(argv)
     modes = list(dict.fromkeys(part.strip() for part in args.modes.split(",")))
     if not modes or any(mode not in MODES for mode in modes) or args.repeats < 1:
@@ -395,7 +457,11 @@ def main(argv=None):
     if out.is_relative_to(workdir) or workdir.is_relative_to(out):
         raise ValueError("--out and --workdir must be separate directories")
     fresh_directory(out)
-    fresh_directory(workdir)
+    if args.resume:
+        if not (workdir / "benchmark.sqlite3").is_file():
+            raise ValueError("--resume requires a disposable benchmark.sqlite3")
+    else:
+        fresh_directory(workdir)
     # platform.processor() can invoke a local uname subprocess on Linux. Gather
     # runtime metadata before the audit hook forbids checkout child processes.
     runtime = {"python": platform.python_version(), "python_executable": sys.executable,
@@ -413,9 +479,18 @@ def main(argv=None):
     records = []
     with checkout_index(repo) as module:
         with module.Index.open(workdir / "benchmark.sqlite3") as index:
-            ingest(index, docs, workdir)
+            if args.resume:
+                validate_resume(index, docs, workdir)
+            else:
+                ingest(index, docs, workdir)
+            engine = None
+            if args.model_dir and any(mode in modes for mode in ("embedding", "hybrid")):
+                if args.resume:
+                    from uoink_core.local_search import VectorStore
+                    metrics["resumed_sources"] = len(VectorStore(workdir / "search-vectors.db").fingerprints())
+                engine, metrics["index_build_seconds"] = prepare_model(index, args.model_dir, workdir)
             for mode in modes:
-                search = mode_search(index, mode)
+                search = (None if mode in ("embedding", "hybrid") and engine is None else mode_search(index, mode))
                 if search is None:
                     reason = "not available in this checkout"
                     print(f"{mode}: {reason}", flush=True)
@@ -424,6 +499,8 @@ def main(argv=None):
                 print(f"Measuring {mode}: {len(queries)} queries, {args.repeats} repeats", flush=True)
                 metrics["modes"][mode], rows = evaluate(search, docs, queries, mode, args.repeats)
                 records.extend(rows)
+            if engine is not None:
+                engine.pause()
     (out / "metrics.json").write_text(json.dumps(metrics, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     (out / "per-query.jsonl").write_text("".join(json.dumps(row, ensure_ascii=False) + "\n" for row in records), encoding="utf-8")
     report = summary(metrics)

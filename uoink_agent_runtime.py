@@ -1,6 +1,6 @@
-"""Shared in-process agent dispatch and resident-helper identity check.
+"""Shared agent dispatch and resident-helper identity check.
 
-No HTTP probes, SDK dependency, or alternate consent path.
+Semantic search uses the resident helper after its process identity is checked.
 """
 from __future__ import annotations
 
@@ -54,9 +54,33 @@ def helper_running(backend) -> bool:
         return False
 
 
+def dispatch_search(name, arguments, backend, local, *, running=None):
+    """Keep the model in the resident helper, including for stdio clients."""
+    if name not in ("search_library", "search_uoinks", "search_clips"):
+        return local()
+    args = arguments if isinstance(arguments, dict) else {}
+    if args.get("mode", "auto") not in ("auto", "semantic", "hybrid"):
+        return local()
+    from uoink_core.local_search import LocalSearch
+    if not LocalSearch.enabled_at(backend.DATA_ROOT):
+        return local()
+    try:
+        if running() if running is not None else helper_running(backend):
+            result = backend._call_http_registry_tool(name, args, timeout=1.5)
+            if result.get("ok") is True and result.get("search_mode") in ("keyword", "semantic", "hybrid"):
+                return result
+    except Exception:
+        pass
+    result = local()
+    if result.get("ok") is True:
+        result.update(search_mode="keyword", requested_mode=args.get("mode", "auto"),
+                      fallback_reason="The semantic search helper is unavailable. Open Uoink and retry. Keyword search still works.")
+    return result
+
+
 def call_tool(name, arguments, backend, *, running=None):
     if name == "poll_monitored_playlist" and not (
             running() if running is not None else helper_running(backend)):
         return {"ok": False, "error": "Open Uoink first, then retry polling the monitored playlist. "
                 "Its scheduled captures need the running Uoink helper."}
-    return registry.call_tool(name, arguments)
+    return dispatch_search(name, arguments, backend, lambda: registry.call_tool(name, arguments), running=running)

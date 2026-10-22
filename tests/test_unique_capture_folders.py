@@ -90,7 +90,7 @@ def capture(tmp_path, monkeypatch):
     index_scope = {"threading": threading, "unicodedata": unicodedata}
     _load(ROOT / "index.py", {"_search_title_key", "_entity_keyword_score", "_search_terms", "_fts_terms"},
           index_scope, constants={"_YOINK_COLUMNS", "CURRENT_YOINK_SCHEMA", "SEARCH_STOPWORDS"})
-    _load(ROOT / "index.py", {"__init__", "upsert_yoink", "get_yoink", "get_by_slug"},
+    _load(ROOT / "index.py", {"__init__", "upsert_yoink", "get_yoink", "get_by_slug", "_notify_source_changed"},
           index_scope, class_name="Index")
     index_class = type("Index", (), {name: value for name, value in index_scope.items()
                                     if callable(value)})

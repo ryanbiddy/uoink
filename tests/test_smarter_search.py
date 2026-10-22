@@ -249,7 +249,7 @@ def test_schemas_add_only_optional_match():
     for name, fields in old_fields.items():
         spec = tools.TOOL_REGISTRY[name]
         schema = spec.input_schema
-        assert set(schema["properties"]) == fields | {"match"}
+        assert set(schema["properties"]) == fields | {"match"} | ({"mode"} if name != "find_mentions" else set())
         assert schema["required"] == (["entity"] if name == "find_mentions" else ["query"])
         assert schema["additionalProperties"] is False
         assert schema["properties"]["match"]["enum"] == ["forgiving", "strict"]
@@ -261,7 +261,7 @@ def test_schemas_add_only_optional_match():
         if name == "search_library":
             expected["query"] = {"type": "string", "description": "Search text, at most 512 characters."}
             expected["limit"]["description"] = "Maximum hits, 1-20 (default 5)."
-        assert {k: v for k, v in schema["properties"].items() if k != "match"} == expected
+        assert {k: v for k, v in schema["properties"].items() if k not in ("match", "mode")} == expected
     assert tools.TOOL_REGISTRY["search_library"].input_schema == library_resources.TOOL_SCHEMAS["search_library"]
     assert corpus_contract.SearchRequest.from_query({}).match == "forgiving"
 

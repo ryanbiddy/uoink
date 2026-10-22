@@ -695,8 +695,11 @@ def _fts_hits(table: str, query: str, match: str, weights: str = "") -> tuple[st
     rank = f"bm25({table}{', ' + weights if weights else ''})"
     column = 6 if table == "yoinks_fts" else 0
     snippet_words = 12 if table == "yoinks_fts" else 16
+    snippet = f"snippet({table}, {column}, '', '', '…', {snippet_words})"
+    # Forgiving ranking can consider hundreds of rows. Generate their excerpts
+    # only when the caller materializes results, not in the candidate/count CTE.
     base = (f"SELECT rowid, {rank} AS _score, "
-            f"snippet({table}, {column}, '', '', '…', {snippet_words}) AS _snippet "
+            f"{snippet if match == 'strict' else 'NULL'} AS _snippet "
             f"FROM {table} WHERE {table} MATCH ?")
     if match == "strict":
         return f"WITH search_hits AS MATERIALIZED ({base}) ", [expression]
@@ -710,12 +713,25 @@ def _fts_hits(table: str, query: str, match: str, weights: str = "") -> tuple[st
         f"all_hits AS MATERIALIZED (SELECT rowid FROM {table} WHERE {table} MATCH ?), "
         "candidates AS (SELECT * FROM word_hits UNION ALL "
         "SELECT rowid, 0.0, '' FROM title_hits WHERE rowid NOT IN (SELECT rowid FROM word_hits)), "
-        "search_hits AS (SELECT rowid, _snippet, "
+        f"search_hits AS (SELECT candidates.rowid, COALESCE((SELECT {snippet} FROM {table} "
+        f"WHERE {table}.rowid=candidates.rowid AND {table} MATCH ?), '') AS _snippet, "
         ".001 * _score / (1.0 - _score) "
         "- .001 * (rowid IN (SELECT rowid FROM all_hits)) "
         "- .002 * (rowid IN (SELECT rowid FROM title_hits)) AS _score FROM candidates) "
     )
-    return sql, [expression, _search_title_key(query), all_terms]
+    return sql, [expression, _search_title_key(query), all_terms, expression]
+
+
+def _fts_page(prefix: str, tail: str, order: str, *, offset=False) -> str:
+    """Materialize the filtered page before asking FTS to extract snippets."""
+    page = " LIMIT ? OFFSET ?" if offset else " LIMIT ?"
+    outer_order = order.replace("h.", "p.").replace("y.", "p.")
+    return (prefix.rstrip() + ", page_hits AS MATERIALIZED ("
+            "SELECT y.*, h._score, f.content AS _content, h.rowid AS _fts_rowid "
+            + tail + " ORDER BY " + order + page + ") "
+            "SELECT p.*, COALESCE((SELECT snippet(yoinks_fts, 6, '', '', '…', 12) "
+            "FROM yoinks_fts WHERE yoinks_fts.rowid=p._fts_rowid AND yoinks_fts MATCH ?), '') AS _snippet "
+            "FROM page_hits p ORDER BY " + outer_order)
 
 
 # --------------------------------------------------------------------------
@@ -774,6 +790,8 @@ class Index:
         self._path = path
         self._lock = threading.RLock()
         self._insert_count = 0
+        self._local_search = None
+        self._source_change_callback = None
         # Explicit write-transaction owner: (id(connection), thread ident).
         # Bound only by write_transaction(); BriefStore uses this instead of
         # guessing native sqlite3* pointers.
@@ -1043,6 +1061,40 @@ class Index:
             log.error("library source invalidation failed: %s", result["error"]["code"])
 
     # ---- yoinks ----------------------------------------------------------
+    def set_local_search(self, engine) -> None:
+        self._local_search = engine
+        self._source_change_callback = engine.update_source
+
+    def _notify_source_changed(self, video_id: str) -> None:
+        if self._source_change_callback is not None:
+            try:
+                self._source_change_callback(video_id)
+            except Exception:
+                log.warning("Semantic search update failed; saved source is intact")
+
+    def search_mode(self, query: str, limit: int = 50, *, mode="auto", offset=0,
+                    match="forgiving", filters=None, clips_only=False, video_id=None,
+                    source_types=None, keyword=None) -> dict:
+        from uoink_core.search_service import search
+        filters = dict(filters or {})
+        if keyword is None:
+            def keyword(count, start, override):
+                if clips_only:
+                    rows = self.search_clips(query, count + start, video_id=video_id,
+                                             match=override or match, **filters)
+                    return {"total": len(rows), "results": rows[start:start + count]}
+                return self.search_yoinks_for_memory(q=query, limit=count, offset=start,
+                                                     match=override or match, **filters)
+        return search(self, query, mode=mode, limit=limit, offset=offset, filters=filters,
+                      source_types=source_types, source_id=video_id,
+                      clips_only=clips_only, keyword=keyword)
+
+    def search_embedding(self, query: str, limit: int = 10, **filters) -> dict:
+        return self.search_mode(query, limit, mode="semantic", filters=filters)
+
+    def search_hybrid(self, query: str, limit: int = 10, **filters) -> dict:
+        return self.search_mode(query, limit, mode="hybrid", filters=filters)
+
     def upsert_yoink(self, record: dict, *, content: str = "") -> None:
         """Insert or update one yoink row, and refresh its FTS5 entry.
 
@@ -1102,6 +1154,7 @@ class Index:
                     "self-channel recognition skipped: %s", e)
             self._conn.commit()
         self._invalidate_library_sources([video_id])
+        self._notify_source_changed(video_id)
 
     def delete_yoink(self, video_id: str) -> None:
         """Delete a yoink and its citations (FK cascade) and FTS row."""
@@ -1110,6 +1163,7 @@ class Index:
             self._conn.execute("DELETE FROM yoinks_fts WHERE video_id=?", (video_id,))
             self._conn.commit()
         self._invalidate_library_sources([video_id])
+        self._notify_source_changed(video_id)
 
     def get_yoink(self, video_id: str) -> dict | None:
         with self._lock:
@@ -1173,18 +1227,22 @@ class Index:
         # Each result row carries `_snippet` (a match excerpt) and `_score`
         # (bm25; lower is a better match) alongside the yoinks columns.
         prefix, params = _fts_hits("yoinks_fts", query, match, self._YOINKS_BM25_WEIGHTS)
-        sql = (prefix + "SELECT y.*, h._snippet, h._score, f.content AS _content "
-               "FROM search_hits h CROSS JOIN yoinks_fts f ON f.rowid=h.rowid "
+        tail = ("FROM search_hits h CROSS JOIN yoinks_fts f ON f.rowid=h.rowid "
                "CROSS JOIN yoinks y ON y.video_id = f.video_id "
                "WHERE y.deleted_at IS NULL ")
         if channel:
-            sql += "AND y.channel = ? "
+            tail += "AND y.channel = ? "
             params.append(channel)
         if hook_type:
-            sql += "AND y.hook_type = ? "
+            tail += "AND y.hook_type = ? "
             params.append(hook_type)
-        sql += "ORDER BY h._score, y.video_id LIMIT ?"
         params.append(max(1, int(limit)))
+        if match == "forgiving":
+            sql = _fts_page(prefix, tail, "h._score, y.video_id")
+            params.append(_fts_query(query, match))
+        else:
+            sql = (prefix + "SELECT y.*, h._snippet, h._score, f.content AS _content "
+                   + tail + " ORDER BY h._score, y.video_id LIMIT ?")
         with self._lock:
             try:
                 rows = self._conn.execute(sql, params).fetchall()
@@ -1200,6 +1258,7 @@ class Index:
         FTS snippets may contain ellipses, so they are discovery text. The
         optional passage is the verbatim text an agent can quote instead.
         """
+        row.pop("_fts_rowid", None)
         content = row.pop("_content", "") or ""
         clips = self.get_clips(row["video_id"])
         if clips:
@@ -2032,11 +2091,15 @@ class Index:
                         prefix + "SELECT COUNT(*) AS n " + tail, search_params + params
                     ).fetchone()
                     total = int(cnt["n"]) if cnt else 0
-                    rows = self._conn.execute(
-                        prefix + "SELECT y.* " + tail
-                        + " ORDER BY h._score, y.video_id LIMIT ? OFFSET ?",
-                        search_params + params + [limit, offset],
-                    ).fetchall()
+                    if match == "forgiving":
+                        rows = self._conn.execute(
+                            _fts_page(prefix, tail, "h._score, y.video_id", offset=True),
+                            search_params + params + [limit, offset, expression]).fetchall()
+                    else:
+                        rows = self._conn.execute(
+                            prefix + "SELECT y.*, h._snippet, h._score, f.content AS _content " + tail
+                            + " ORDER BY h._score, y.video_id LIMIT ? OFFSET ?",
+                            search_params + params + [limit, offset]).fetchall()
                 elif q:
                     # q was given but yielded no usable FTS terms.
                     return {"total": 0, "results": []}
@@ -2055,7 +2118,8 @@ class Index:
                 # Defensive: a MATCH expression FTS5 still rejects.
                 log.warning("memory search rejected query %r", q)
                 return {"total": 0, "results": []}
-        return {"total": total, "results": [dict(r) for r in rows]}
+        return {"total": total, "results": [self._search_passage(dict(r), q, match) if q else dict(r)
+                                             for r in rows]}
 
     def soft_delete_yoink(self, video_id: str) -> dict | None:
         """Mark a yoink soft-deleted (deleted_at = now). Returns the updated
@@ -2070,6 +2134,7 @@ class Index:
                 "SELECT * FROM yoinks WHERE video_id=?", (video_id,)
             ).fetchone()
         self._invalidate_library_sources([video_id])
+        self._notify_source_changed(video_id)
         return dict(row) if row else None
 
     def restore_yoink(self, video_id: str) -> dict | None:
@@ -2083,6 +2148,7 @@ class Index:
             row = self._conn.execute(
                 "SELECT * FROM yoinks WHERE video_id=?", (video_id,)
             ).fetchone()
+        self._notify_source_changed(video_id)
         return dict(row) if row else None
 
     def prune_trash(self, now: datetime) -> list[str]:
@@ -2486,6 +2552,7 @@ class Index:
                     raise
                 self._conn.commit()
             self._invalidate_library_sources([video_id])
+            self._notify_source_changed(video_id)
             return 0
         max_seq_by_kind: dict = {}
         for r in rows:
@@ -2537,6 +2604,7 @@ class Index:
                 raise
             self._conn.commit()
         self._invalidate_library_sources([video_id])
+        self._notify_source_changed(video_id)
         return len(rows)
 
     # ---- Phase 6 media publication (phase6-v1, BC-2) ----------------------
@@ -2544,6 +2612,7 @@ class Index:
         """Phase 2 invalidation as part of the publication operation: the
         committed snapshot is durable and replayable, so a failure here is a
         retryable ``library_unavailable`` rather than a silent log line."""
+        self._notify_source_changed(video_id)
         import library_media as _media  # noqa: WPS433 -- keeps index importable alone
         with self._lock:
             exists = self._conn.execute(

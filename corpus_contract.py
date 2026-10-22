@@ -29,6 +29,7 @@ FACET_NAMES = (
 SEARCH_QUERY_KEYS = {
     "q",
     "match",
+    "mode",
     "channel",
     "topic",
     "hook_type",
@@ -127,6 +128,7 @@ class SearchRequest:
     limit: int = 50
     offset: int = 0
     match: str = "forgiving"
+    mode: str = "auto"
 
     @classmethod
     def from_query(cls, query: Mapping[str, Any]) -> "SearchRequest":
@@ -194,7 +196,10 @@ class SearchRequest:
         match = one("match") or "forgiving"
         if match not in ("forgiving", "strict"):
             raise ContractError("invalid_request", "match must be forgiving or strict")
-        return cls(limit=limit, offset=offset, match=match, **values)
+        mode = one("mode") or "auto"
+        if mode not in ("auto", "keyword", "semantic", "hybrid"):
+            raise ContractError("invalid_request", "mode must be auto, keyword, semantic or hybrid")
+        return cls(limit=limit, offset=offset, match=match, mode=mode, **values)
 
 
 @dataclass(frozen=True)
@@ -268,7 +273,7 @@ class CorpusReadProvider(Protocol):
         ...
 
 
-def _exact_keys(value: Any, expected: set[str], label: str) -> dict:
+def _exact_keys(value: Any, expected: set[str], label: str, optional=()) -> dict:
     if not isinstance(value, dict):
         raise ContractError(
             "provider_nonconformant",
@@ -276,9 +281,9 @@ def _exact_keys(value: Any, expected: set[str], label: str) -> dict:
             status=500,
         )
     actual = set(value)
-    if actual != expected:
+    if expected - actual or actual - expected - set(optional):
         missing = sorted(expected - actual)
-        unknown = sorted(actual - expected)
+        unknown = sorted(actual - expected - set(optional))
         detail = []
         if missing:
             detail.append("missing " + ", ".join(missing))
@@ -337,7 +342,7 @@ def validate_source_url(value: Any, label: str) -> None:
 
 
 def validate_item_ref(item: Any) -> None:
-    item = _exact_keys(item, _ITEM_KEYS, "item")
+    item = _exact_keys(item, _ITEM_KEYS, "item", optional={"passage", "source_id", "passage_id", "span", "timestamp_seconds"})
     if not isinstance(item["id"], str) or not item["id"]:
         raise ContractError(
             "provider_nonconformant",
@@ -475,7 +480,8 @@ def validate_data(operation: str, data: Any) -> None:
             status=500,
         )
     if operation == "search":
-        data = _exact_keys(data, {"items", "page"}, "search data")
+        data = _exact_keys(data, {"items", "page"}, "search data",
+                           optional={"search_mode", "requested_mode", "fallback_reason"})
         if not isinstance(data["items"], list):
             raise ContractError(
                 "provider_nonconformant",

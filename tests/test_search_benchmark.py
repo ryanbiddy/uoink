@@ -93,6 +93,44 @@ def test_nonempty_workdir_is_preserved(tmp_path):
     assert marker.read_text(encoding="utf-8") == "preserve"
 
 
+def test_model_dir_prepares_real_indexer_in_disposable_root(tmp_path, monkeypatch):
+    import index
+    from uoink_core import local_search as ls
+    from tests.test_local_search import FakeModel
+    data = b"verified fixture"
+    files = (("onnx/model_quantized.onnx", len(data), bench.digest(data)),)
+    monkeypatch.setattr(ls, "MODEL_FILES", files)
+    original = ls.LocalSearch
+    monkeypatch.setattr(ls, "LocalSearch", lambda root, idx: original(root, idx, model_factory=FakeModel))
+    model_dir = tmp_path / "verified"
+    (model_dir / "onnx").mkdir(parents=True)
+    (model_dir / files[0][0]).write_bytes(data)
+    work = tmp_path / "work"
+    work.mkdir()
+    with index.Index.open(work / "benchmark.sqlite3") as idx:
+        doc = document()
+        bench.ingest(idx, [doc], work)
+        bench.validate_resume(idx, [doc], work)
+        with pytest.raises(ValueError, match="unchanged disposable"):
+            bench.validate_resume(idx, [{**doc, "text": "changed"}], work)
+        engine, seconds = bench.prepare_model(idx, model_dir, work)
+        try:
+            assert seconds > 0 and engine.status()["state"] == "ready"
+            assert engine.manager.acceptance()["accepted"] is True
+            assert engine.manager.directory.is_relative_to(work)
+            assert set(engine.store.fingerprints()) == {doc["id"]}
+            assert bench.mode_search(idx, "embedding")("moon")["search_mode"] == "semantic"
+            engine.pause()
+            with pytest.raises(RuntimeError, match="refuses semantic fallback"):
+                bench.mode_search(idx, "hybrid")("moon")
+        finally:
+            engine.pause()
+    assert not (model_dir / "embeddinggemma-terms.json").exists()
+    (model_dir / files[0][0]).write_bytes(b"bad")
+    with pytest.raises(ValueError, match="verified regular files"):
+        bench.prepare_model(None, model_dir, work)
+
+
 def test_audit_guard_blocks_network_live_sqlite_and_external_writes(tmp_path):
     guard = bench.OfflineGuard(tmp_path / "work", tmp_path / "out")
     for event, args in (
@@ -109,6 +147,7 @@ def test_audit_guard_blocks_network_live_sqlite_and_external_writes(tmp_path):
         with pytest.raises(RuntimeError, match="offline benchmark"):
             guard(event, ())
     guard("sqlite3.connect", (str(tmp_path / "work/benchmark.sqlite3"),))
+    guard("sqlite3.connect", (str(tmp_path / "work/search-vectors.db"),))
     guard("sqlite3.connect", (":memory:",))
     guard("open", (str(tmp_path / "out/metrics.json"), "w", os.O_WRONLY))
 

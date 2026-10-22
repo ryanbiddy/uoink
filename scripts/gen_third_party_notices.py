@@ -77,6 +77,17 @@ and [adapted file list](third-party-notices/README.md).
 """
 
 
+EMBEDDINGGEMMA_BLOCK = """\
+## Optional EmbeddingGemma search
+
+The search code ships in Uoink. Model weights are downloaded separately after
+explicit acceptance and are never bundled. See the bundled
+[model notice](third-party-notices/EmbeddingGemma-NOTICE.md),
+[Gemma Terms of Use](third-party-notices/Gemma-Terms-of-Use.txt) and
+[Prohibited Use Policy](third-party-notices/Gemma-Prohibited-Use-Policy.txt).
+"""
+
+
 SUPPLEMENTAL_NOTICE_BLOCK = """\
 ## Supplemental upstream notices
 
@@ -250,7 +261,7 @@ def main() -> int:
                   "source and build provenance are in vendor/nltk-pathsec in the source "
                   "repository. This modification does not qualify model loading or "
                   "clear unrelated dependency advisories."]
-    lines += ["", supplemental, "", ADAPTED_TEXT_BLOCK, "", FFMPEG_BLOCK,
+    lines += ["", supplemental, "", EMBEDDINGGEMMA_BLOCK, "", ADAPTED_TEXT_BLOCK, "", FFMPEG_BLOCK,
               "", BUNDLED_FONTS_BLOCK, ""]
     output.write_text("\n".join(lines), encoding="utf-8")
     print(f"wrote {output} ({len(rows)} python packages, source: {source})")

@@ -53,8 +53,8 @@ def test_stdio_wrappers_delegate_to_the_shared_handlers(monkeypatch):
     assert uoink_mcp.get_evidence_card(slug="s") == {"ok": True}
     assert uoink_mcp.get_evidence_card(video_id="v1", profile="librarian", n_clips=3) == {"ok": True}
     assert calls == [
-        ("search_clips", {"query": "harbor signal", "limit": 20, "match": "forgiving"}),
-        ("search_clips", {"query": "harbor signal", "limit": 5, "video_id": "v1", "channel": "c", "match": "forgiving"}),
+        ("search_clips", {"query": "harbor signal", "limit": 20, "match": "forgiving", "mode": "auto"}),
+        ("search_clips", {"query": "harbor signal", "limit": 5, "video_id": "v1", "channel": "c", "match": "forgiving", "mode": "auto"}),
         ("get_evidence_card", {"profile": "full", "slug": "s"}),
         ("get_evidence_card", {"profile": "librarian", "video_id": "v1", "n_clips": 3}),
     ]

@@ -1,8 +1,8 @@
 """Opt-in CPU retrieval, with no work or optional dependency imports at import time.
 
 Construct LocalSearch with the helper's resolved DATA_ROOT and its existing Index.
-Only the derived database is written here. See _scratch/embed/INTEGRATION.md for
-the transport hooks deferred to the next pass.
+Only the derived database and opt-in model state are written here. The helper
+owns its lifecycle; search_service supplies shared mode selection and ranking.
 """
 from __future__ import annotations
 
@@ -18,6 +18,7 @@ import threading
 from contextlib import closing
 from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta, timezone
+from functools import cached_property
 from itertools import islice
 from pathlib import Path
 from typing import NamedTuple
@@ -60,7 +61,7 @@ class _Paused(Exception):
 
 def verified(path: Path, size: int, checksum: str) -> bool:
     try:
-        if not path.is_file() or path.stat().st_size != size:
+        if path.is_symlink() or not path.is_file() or path.stat().st_size != size:
             return False
         with path.open("rb") as stream:
             return hashlib.file_digest(stream, "sha256").hexdigest() == checksum
@@ -103,6 +104,9 @@ class ModelManager:
 
     def acceptance(self):
         try:
+            self._check_paths()
+            if self.terms_path.is_symlink():
+                return None
             record = json.loads(self.terms_path.read_text(encoding="utf-8"))
             stamp = datetime.fromisoformat(record["accepted_at"])
             if (record.get("terms_version") == TERMS_VERSION
@@ -258,7 +262,7 @@ class Source:
     content: str
     passages: tuple[Passage, ...]
 
-    @property
+    @cached_property
     def fingerprint(self):
         # Includes all content and citation coordinates, even if a clip is reused.
         payload = json.dumps([_CACHE_VERSION, asdict(self)], sort_keys=True, ensure_ascii=False)
@@ -285,8 +289,10 @@ class IndexSources:
 
     def __init__(self, index):
         self.index = index
+        self._cache_stamp = None
+        self._cache_sources = ()
 
-    def snapshot(self, *, source_id=None, filters=None):
+    def snapshot(self, *, source_id=None, filters=None, source_types=None):
         filters = dict(filters or {})
         if filters.keys() - FILTERS:
             raise ValueError("Unknown embedding search filter")
@@ -294,6 +300,10 @@ class IndexSources:
         if source_id is not None:
             clauses.append("y.video_id = ?")
             params.append(source_id)
+        if source_types:
+            clauses.append("COALESCE(NULLIF(y.source_type, ''), 'video') IN ("
+                           + ",".join("?" for _ in source_types) + ")")
+            params.extend(source_types)
         for key in sorted(FILTERS - {"date_from", "date_to"}):
             if filters.get(key):
                 clauses.append(f"y.{key} = ?")
@@ -308,6 +318,17 @@ class IndexSources:
             params.append(end.strftime("%Y-%m-%d"))
         sources = []
         with self.index.read_snapshot() as db:
+            # Every source write uses this connection; data_version also detects
+            # commits from another process. Reuse immutable passages only while
+            # both stamps match. No source text is copied to another database.
+            stamp = (db.total_changes, db.execute("PRAGMA data_version").fetchone()[0])
+            full = not source_id and not any(filters.values()) and not source_types
+            if stamp == self._cache_stamp:
+                if full:
+                    return list(self._cache_sources)
+                eligible = {row[0] for row in db.execute(
+                    "SELECT y.video_id FROM yoinks y WHERE " + " AND ".join(clauses), params)}
+                return [source for source in self._cache_sources if source.source_id in eligible]
             rows = db.execute("SELECT y.video_id, y.title, COALESCE(f.content, '') AS content "
                               "FROM yoinks y LEFT JOIN yoinks_fts f ON f.video_id=y.video_id "
                               "WHERE " + " AND ".join(clauses) + " ORDER BY y.video_id", params).fetchall()
@@ -330,6 +351,8 @@ class IndexSources:
                                              c["timestamp_start"])
                                      for c in citations if (c["text"] or "").strip())
                 sources.append(Source(identity, title, content, passages or word_passages(content or title)))
+            if full:
+                self._cache_stamp, self._cache_sources = stamp, tuple(sources)
         return sources
 
 
@@ -356,6 +379,7 @@ class VectorStore:
 
     def __init__(self, path):
         self.path = Path(path)
+        self._cache = None
 
     def _connect(self):
         self.path.parent.mkdir(parents=True, exist_ok=True)
@@ -397,25 +421,56 @@ class VectorStore:
             db.execute("INSERT INTO sources VALUES (?, ?)", (source.source_id, fingerprint))
             db.executemany("INSERT INTO vectors VALUES (?, ?, ?, ?, ?, ?)", rows)
 
-    def search(self, vector, live, limit):
+    def search(self, vector, live, limit, *, clips_only=False):
         if not self.path.exists():
             return []
         query = _unit_vector(vector)
         best = {}
+        # Inference already depends on numpy. Fake/stdlib-only callers retain
+        # the scalar path. einsum avoids an unbounded BLAS thread pool.
+        try:
+            import numpy as np
+        except ImportError:
+            np = None
+        stamp = tuple((p.stat().st_mtime_ns, p.stat().st_size) if p.exists() else None
+                      for p in (self.path, self.path.with_name(self.path.name + "-wal")))
+        if np is not None:
+            if self._cache is None or self._cache[0] != stamp:
+                with closing(self._connect()) as db:
+                    stored = db.execute("SELECT * FROM vectors ORDER BY source_id, passage_id").fetchall()
+                matrix = (np.vstack([np.frombuffer(row[5], dtype="<f4") for row in stored])
+                          if stored else np.empty((0, DIMENSIONS), dtype="float32"))
+                if matrix.shape != (len(stored), DIMENSIONS) or not np.isfinite(matrix).all():
+                    raise ValueError("Invalid stored embedding")
+                self._cache = stamp, [row[:5] for row in stored], matrix
+            _, rows, matrix = self._cache
+            scores = np.einsum("ij,j->i", matrix, np.asarray(query), dtype="float64", optimize=False)
+            for row, score in zip(rows, scores):
+                identity, passage, fingerprint, span, timestamp = row
+                if live.get(identity) != fingerprint or (clips_only and not passage.startswith("clip:")):
+                    continue
+                key = (identity, passage) if clips_only else identity
+                if key not in best or score > best[key].score:
+                    best[key] = SearchHit(identity, passage, json.loads(span), timestamp, float(score))
+            return sorted(best.values(), key=lambda hit: (-hit.score, hit.source_id, hit.passage_id))[:limit]
         with closing(self._connect()) as db:
             for identity, passage, fingerprint, span, timestamp, blob in db.execute(
                     "SELECT * FROM vectors ORDER BY source_id, passage_id"):
                 if live.get(identity) != fingerprint:
                     continue
+                if clips_only and not passage.startswith("clip:"):
+                    continue
                 values = struct.unpack("<768f", blob)
                 if not all(math.isfinite(value) for value in values):
                     raise ValueError("Invalid stored embedding")
                 score = math.fsum(a * b for a, b in zip(query, values))
-                if identity not in best or score > best[identity].score:
-                    best[identity] = SearchHit(identity, passage, json.loads(span), timestamp, score)
-        return sorted(best.values(), key=lambda hit: (-hit.score, hit.source_id))[:limit]
+                key = (identity, passage) if clips_only else identity
+                if key not in best or score > best[key].score:
+                    best[key] = SearchHit(identity, passage, json.loads(span), timestamp, score)
+        return sorted(best.values(), key=lambda hit: (-hit.score, hit.source_id, hit.passage_id))[:limit]
 
     def remove(self):
+        self._cache = None
         for suffix in ("", "-wal", "-shm", "-journal"):
             self.path.with_name(self.path.name + suffix).unlink(missing_ok=True)
 
@@ -458,6 +513,7 @@ class LocalSearch:
         if main_path.parent != self.root:
             raise ValueError("Pass the active index's data root")
         self.manager = ModelManager(self.root)
+        self.enabled = self.enabled_at(self.root)
         self.sources = IndexSources(index)
         self.store = VectorStore(self.root / "search-vectors.db")
         if (self.store.path.resolve() != self.store.path or self.store.path == main_path
@@ -477,6 +533,21 @@ class LocalSearch:
         self._state = "not_installed"
         self._error = ""
         self._done = self._total = self._received = 0
+
+    @staticmethod
+    def enabled_at(root):
+        path = Path(root) / "search-settings.json"
+        try:
+            return not path.is_symlink() and json.loads(path.read_text(encoding="utf-8")).get("enabled") is True
+        except (OSError, ValueError, AttributeError):
+            return False
+
+    def _enable(self, enabled):
+        path = self.root / "search-settings.json"
+        if path.is_symlink() or path.with_name(path.name + ".part").is_symlink():
+            raise ValueError("Search settings must not be a symlink")
+        _atomic_json(path, {"enabled": enabled})
+        self.enabled = enabled
 
     def _set(self, phase, **values):
         with self._state_lock:
@@ -498,7 +569,8 @@ class LocalSearch:
 
             model_bytes = disk_bytes(self.manager.directory.rglob("*"))
             vector_bytes = disk_bytes(self.root.glob("search-vectors.db*"))
-            return {"state": self._state, "message": self._error, "paused": self._paused,
+            return {"state": self._state, "enabled": self.enabled,
+                    "message": self._error, "paused": self._paused,
                     "done": self._done, "total": self._total, "bytes": self._received,
                     "download_bytes": DOWNLOAD_BYTES, "terms_version": TERMS_VERSION,
                     "acceptance": self.manager.acceptance(), "model": MODEL_ID,
@@ -530,6 +602,7 @@ class LocalSearch:
     def start(self, *, download=False):
         with self._control:
             self._require_terms()
+            self._enable(True)
             if not download and not self.manager.present():
                 self._set("not_installed")
                 return False
@@ -539,6 +612,7 @@ class LocalSearch:
                 self._full = True
                 self._download = self._download or download
                 self._error = ""
+                self._state = "downloading" if download else "verifying"
                 self._launch()
             return True
 
@@ -547,11 +621,12 @@ class LocalSearch:
 
     def update_source(self, source_id):
         with self._control:
-            if not self.manager.acceptance() or not self.manager.present():
+            if not self.enabled or not self.manager.acceptance() or not self.manager.present():
                 return False
             with self._state_lock:
                 self._pending.add(str(source_id))
                 if not self._paused:
+                    self._state = "indexing"
                     self._launch()
             return True
 
@@ -580,6 +655,7 @@ class LocalSearch:
 
     def remove(self):
         with self._control:
+            self._enable(False)
             if not self.pause():
                 raise SearchUnavailable("Wait for the model operation to stop, then remove again")
             with self._activity:
@@ -665,7 +741,8 @@ class LocalSearch:
                 if self._worker is threading.current_thread():
                     self._worker = None
 
-    def embedding_search(self, query, limit=100, filters=None):
+    def embedding_search(self, query, limit=100, filters=None, *, source_id=None,
+                         source_types=None, clips_only=False):
         if not isinstance(query, str):
             raise TypeError("query must be text")
         filters = dict(filters or {})
@@ -686,10 +763,11 @@ class LocalSearch:
             # Full snapshot for invalidation, filtered snapshot for eligibility.
             live = {doc.source_id: doc.fingerprint for doc in self.sources.snapshot()}
             self.store.invalidate(live)
-            eligible = ({doc.source_id: doc.fingerprint for doc in self.sources.snapshot(filters=filters)}
-                        if filters else live)
+            eligible = ({doc.source_id: doc.fingerprint for doc in self.sources.snapshot(
+                filters=filters, source_id=source_id, source_types=source_types)}
+                if any(filters.values()) or source_id or source_types else live)
             vector = self._model.embed([QUERY_PREFIX + query], wait=False)[0]
-            hits = self.store.search(vector, eligible, limit)
+            hits = self.store.search(vector, eligible, limit, clips_only=clips_only)
             # Recheck after inference so edits/deletes during the query cannot
             # escape through a vector read from the earlier snapshot.
             current = {doc.source_id: doc.fingerprint for doc in self.sources.snapshot(filters=filters)}

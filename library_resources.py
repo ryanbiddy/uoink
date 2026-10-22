@@ -1156,12 +1156,14 @@ class LibraryReader:
         with self._operation() as op:
             return self._read(op, parsed, uri)
 
-    def search(self, query: str, limit: int = 5, *, match: str = "forgiving") -> dict:
+    def search(self, query: str, limit: int = 5, *, match: str = "forgiving", mode="auto") -> dict:
         query, limit = _validate_search(query, limit)
+        if mode not in ("auto", "keyword", "semantic", "hybrid"):
+            raise _invalid("invalid_mode", field="mode")
         if match not in ("forgiving", "strict"):
             raise _invalid("invalid_match", field="match")
         with self._operation() as op:
-            return self._search(op, query, limit, match=match)
+            return self._search(op, query, limit, match=match, mode=mode)
 
     def get_item(self, *, video_id: str | None = None, slug: str | None = None) -> dict:
         selector = _validate_selector(video_id, slug)
@@ -2046,7 +2048,17 @@ class LibraryReader:
         }
         return hit
 
-    def _search(self, op: _Operation, query: str, limit: int, *, match: str = "forgiving") -> dict:
+    def _search(self, op: _Operation, query: str, limit: int, *, match: str = "forgiving", mode="auto") -> dict:
+        from uoink_core.search_service import select_mode, metadata
+        actual, reason = select_mode(self.index, mode)
+        mode_info = {"search_mode": "keyword", "requested_mode": mode, "fallback_reason": reason}
+        semantic_rows = None
+        if actual != "keyword":
+            page = self._index_call(op, lambda: self.index.search_mode(query, limit, mode=mode, match=match))
+            mode_info = metadata(page)
+            if page["search_mode"] != "keyword":
+                semantic_rows = page["results"]
+                match = "forgiving"  # merge timed and prose hits in the returned source order
         hits: list[dict] = []
         seen: set[str] = set()
         omitted = {"invalid_source_data": 0, "deleted_or_missing": 0, "other": 0}
@@ -2070,7 +2082,9 @@ class LibraryReader:
             if not self._has_tables((table,), op):
                 raise ResourceError("library_unavailable", details={"storage": "missing_table"})
         op.check()
-        rows = self._index_call(op, lambda: self.index.search_clips(query, limit, match=match))
+        rows = ([{**row, "clip_id": row["passage"]["clip_id"]} for row in semantic_rows
+                 if row.get("passage", {}).get("clip_id") is not None] if semantic_rows is not None
+                else self._index_call(op, lambda: self.index.search_clips(query, limit, match=match)))
         op.check()
         for row in rows:
             vid = row.get("video_id")
@@ -2092,10 +2106,12 @@ class LibraryReader:
                                   excerpt_id=eid, timing=evidence["timing"], start=evidence["start"],
                                   end=evidence["end"], deep_link=evidence["deep_link"]))
             hits[-1]["clip_id"] = clip["clip_id"]
-            hits[-1]["_score"] = row.get("_score", 0)
+            hits[-1]["_score"] = row.get("_search_order", row.get("_score", 0))
+            hits[-1].update({key: row[key] for key in ("source_id", "passage_id", "span", "timestamp_seconds", "passage") if key in row})
             seen.add(vid)
         if match == "forgiving" or len(hits) < limit:
-            rows = self._index_call(op, lambda: self.index.search(query, limit, match=match))
+            rows = (semantic_rows if semantic_rows is not None else
+                    self._index_call(op, lambda: self.index.search(query, limit, match=match)))
             op.check()
             for row in rows:
                 if match == "strict" and len(hits) >= limit:
@@ -2113,7 +2129,7 @@ class LibraryReader:
                 seen.add(vid)
                 if bundle.prose_id is not None:
                     hits.append(self._hit(vid, bundle, evidence_kind="text_only",
-                                          preview=self._preview(bundle.prose), excerpt_id=bundle.prose_id,
+                                          preview=self._preview(row.get("passage", {}).get("text") or bundle.prose), excerpt_id=bundle.prose_id,
                                           timing="not_timed", start=None, end=None,
                                           deep_link=bundle.card.get("url")))
                 else:
@@ -2121,7 +2137,8 @@ class LibraryReader:
                     hits.append(self._hit(vid, bundle, evidence_kind="discovery_hint",
                                           preview=self._preview(snippet or label(bundle.card.get("title"))),
                                           excerpt_id=None, timing=None, start=None, end=None, deep_link=None))
-                hits[-1]["_score"] = row.get("_score", 0)
+                hits[-1]["_score"] = row.get("_search_order", row.get("_score", 0))
+                hits[-1].update({key: row[key] for key in ("source_id", "passage_id", "span", "timestamp_seconds", "passage") if key in row})
         if match == "forgiving":
             hits.sort(key=lambda hit: hit["_score"])
             hits = hits[:limit]
@@ -2129,6 +2146,7 @@ class LibraryReader:
             hit.pop("_score", None)
         exhausted = len(hits) < limit
         result = _success(
+            **mode_info,
             query=query, limit=limit, hits=hits, hit_count=len(hits),
             library_items=library_items, storage="ok",
             exhaustive=False, omitted=omitted,
@@ -2212,11 +2230,13 @@ class RequestScope:
     def read(self, uri: str) -> dict:
         return self.reader._read(self.op, parse_uri(uri), uri)
 
-    def search(self, query: str, limit: int = 5, *, match: str = "forgiving") -> dict:
+    def search(self, query: str, limit: int = 5, *, match: str = "forgiving", mode="auto") -> dict:
         query, limit = _validate_search(query, limit)
+        if mode not in ("auto", "keyword", "semantic", "hybrid"):
+            raise _invalid("invalid_mode", field="mode")
         if match not in ("forgiving", "strict"):
             raise _invalid("invalid_match", field="match")
-        return self.reader._search(self.op, query, limit, match=match)
+        return self.reader._search(self.op, query, limit, match=match, mode=mode)
 
     def get_item(self, *, video_id: str | None = None, slug: str | None = None) -> dict:
         return self.reader._get_item(self.op, _validate_selector(video_id, slug))
@@ -2306,6 +2326,9 @@ TOOL_SCHEMAS: dict[str, dict] = {
     "search_library": {
         "type": "object",
         "properties": {
+            "mode": {"type": "string", "enum": ["auto", "keyword", "semantic", "hybrid"],
+                      "default": "auto",
+                      "description": "Auto uses hybrid when the local semantic index is ready, otherwise keyword."},
             "match": {"type": "string", "enum": ["forgiving", "strict"],
                       "default": "forgiving",
                       "description": "Forgiving matches useful words; strict requires every word."},
@@ -2437,11 +2460,11 @@ def call_tool(name: str, args, reader: LibraryReader, *, client_identity: str = 
             store = library_briefs.BriefStore.for_reader(reader)
             return library_briefs.call_tool(name, args, store, client_identity=client_identity)
         if name == "search_library":
-            args = _strict_arguments(args, ("query", "limit", "match"), ("query",))
+            args = _strict_arguments(args, ("query", "limit", "match", "mode"), ("query",))
             if "limit" in args and args["limit"] is None:
                 raise _invalid("null_field", field="limit")
             return reader.search(args["query"], args.get("limit", LIMITS["default_search_hits"]),
-                                 match=args.get("match", "forgiving"))
+                                 match=args.get("match", "forgiving"), mode=args.get("mode", "auto"))
         if name == "get_library_item":
             args = _strict_arguments(args, ("video_id", "slug"), ())
             if "video_id" in args and args["video_id"] is None:
