@@ -122,6 +122,7 @@ finally:
     sys.stdout = _stdout
 
 import uoink_mcp_tools  # noqa: E402
+import uoink_usage  # noqa: E402
 
 
 uoink_mcp_tools.bind_backend(server)
@@ -184,6 +185,7 @@ class RegistryMCP(Server):
         """Own the public streams, including the alternate SDK stdio writer."""
         bounded = _bounded_stdio_writer_depth.get() > 0
         token = _stdio_requests.set({}) if not bounded else None
+        usage_token = _stdio_usage_connection.set({}) if not bounded else None
         try:
             await super().run(
                 # The bounded reader already prepares messages before queueing.
@@ -194,6 +196,7 @@ class RegistryMCP(Server):
             if token is not None:
                 _release_stdio_requests()
                 _stdio_requests.reset(token)
+                _stdio_usage_connection.reset(usage_token)
 
 
 
@@ -800,6 +803,31 @@ def _stdio_param(params, key: str):
 _bounded_stdio_writer_depth = contextvars.ContextVar("uoink_bounded_stdio_writer_depth", default=0)
 _stdio_requests = contextvars.ContextVar("uoink_stdio_requests", default=None)
 _active_stdio_request = contextvars.ContextVar("uoink_active_stdio_request", default=None)
+_stdio_usage_connection = contextvars.ContextVar("uoink_stdio_usage_connection", default=None)
+
+
+def _count_inbound_usage(message):
+    """Count inbound attempts before admission, as in SDK 1, without affecting RPCs."""
+    try:
+        connection = _stdio_usage_connection.get()
+        if connection is not None and not connection.get("client_counted"):
+            meta = _stdio_param(message.params, "_meta")
+            legacy = message.method == "initialize"
+            modern = _stdio_param(meta, mcp_types.PROTOCOL_VERSION_META_KEY) == LATEST_MODERN_VERSION
+            if legacy or modern:
+                client = (_stdio_param(message.params, "clientInfo") if legacy else
+                          _stdio_param(meta, mcp_types.CLIENT_INFO_META_KEY))
+                connection["client_counted"] = True
+                uoink_usage.count("mcp_clients", _stdio_param(client, "name"))
+    except Exception:
+        pass  # Usage failures must never change a protocol response.
+    try:
+        if message.method == "tools/call":
+            name = _stdio_param(message.params, "name")
+            if name:
+                uoink_usage.mcp_call(name, "stdio")
+    except Exception:
+        pass
 
 
 class _StdioRequest:
@@ -860,6 +888,7 @@ def _begin_inbound_transport_scope(message):
     previous = requests.get(key)
     if previous is not None:
         return previous
+    _count_inbound_usage(message)
     name = _stdio_param(message.params, "name") if message.method == "tools/call" else None
     if not isinstance(name, str):
         name = None  # Let SDK parameter validation refuse malformed names.
@@ -1314,6 +1343,7 @@ def bounded_stdio_server(stdin=None, stdout=None):
         input_file, output_file = streams.__enter__()
         depth = _bounded_stdio_writer_depth.set(_bounded_stdio_writer_depth.get() + 1)
         requests = _stdio_requests.set({})
+        usage_token = _stdio_usage_connection.set({})
         reads_send, reads = anyio.create_memory_object_stream(0)
         writes, writes_receive = anyio.create_memory_object_stream(0)
 
@@ -1358,6 +1388,7 @@ def bounded_stdio_server(stdin=None, stdout=None):
         finally:
             _release_stdio_requests()
             _stdio_requests.reset(requests)
+            _stdio_usage_connection.reset(usage_token)
             _bounded_stdio_writer_depth.reset(depth)
             streams.__exit__(None, None, None)
 

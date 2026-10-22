@@ -62,6 +62,7 @@ sys.path.insert(0, str(HERE))
 
 # Isolation must be validated before any later import can open default data.
 import uoink_install_isolation as _install_isolation  # noqa: E402
+import uoink_usage
 _install_isolation.apply_from_process()
 
 
@@ -505,6 +506,10 @@ def _settings_path() -> Path:
     if binding is not None:
         return binding.profile / "settings.json"
     return SETTINGS_PATH
+uoink_usage.configure(lambda: _settings_path().parent, VERSION,
+                      "mcpb" if (HERE / "manifest.json").is_file() else
+                      "installer" if (HERE / "python").is_dir() or _platform.mac_bundle_contents() else "source")
+
 ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages"
 ANTHROPIC_MODEL = "claude-haiku-4-5-20251001"
 ANTHROPIC_VERSION = "2023-06-01"
@@ -965,6 +970,8 @@ def _default_settings() -> dict:
         # feed work must be able to stay invisible. Suppressed notifications
         # remain available in the dashboard Activity stream.
         "notifications_enabled": True,
+        "usage_sharing": False,
+        "usage_sharing_prompt_seen": False,
         "anthropic_key_invalid": False,
         "scrapecreators_enabled": False,
         "scrapecreators_agent_calls_enabled": False,
@@ -1138,6 +1145,8 @@ def _normalize_settings(data: dict) -> dict:
         clean.get("writing_default_attach_all_screenshots", False)
     )
     clean["auto_uoink_enabled"] = bool(clean.get("auto_uoink_enabled"))
+    clean["usage_sharing"] = clean.get("usage_sharing") is True and not uoink_usage.forced_off()
+    clean["usage_sharing_prompt_seen"] = clean.get("usage_sharing_prompt_seen") is True
     clean["notifications_enabled"] = bool(
         clean.get("notifications_enabled", True)
     )
@@ -1168,7 +1177,8 @@ def _normalize_settings(data: dict) -> dict:
     return clean
 
 
-def _read_settings() -> dict:
+def _read_stored_settings() -> dict:
+    """Read saved values without defaults or process environment overrides."""
     with _settings_lock:
         data: dict = {}
         settings_file = _settings_path()
@@ -1179,21 +1189,76 @@ def _read_settings() -> dict:
                     data = raw
             except (OSError, json.JSONDecodeError) as e:
                 log.warning("settings read failed: %s", e)
-        return _normalize_settings(data)
+        return data
 
 
-def _write_settings(data: dict) -> None:
-    with _settings_lock:
+def _read_settings() -> dict:
+    """Return settings for this process, including its usage-sharing override."""
+    return _normalize_settings(_read_stored_settings())
+
+
+@contextlib.contextmanager
+def _settings_file_lock():
+    """Serialize settings writers and consent sync across helper/stdio processes."""
+    path = _settings_path().with_suffix(".json.lock")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("a+b") as lock:
+        if os.name == "nt":
+            import msvcrt
+            if lock.tell() == 0:
+                lock.write(b"\0")
+                lock.flush()
+            lock.seek(0)
+            msvcrt.locking(lock.fileno(), msvcrt.LK_LOCK, 1)
+        else:
+            import fcntl
+            fcntl.flock(lock.fileno(), fcntl.LOCK_EX)
+        try:
+            yield
+        finally:
+            if os.name == "nt":
+                lock.seek(0)
+                msvcrt.locking(lock.fileno(), msvcrt.LK_UNLCK, 1)
+            else:
+                fcntl.flock(lock.fileno(), fcntl.LOCK_UN)
+
+
+def _write_settings(data: dict, *, usage_choice: bool | None = None) -> None:
+    with _settings_lock, _settings_file_lock():
         settings_file = _settings_path()
         settings_file.parent.mkdir(parents=True, exist_ok=True)
         clean = _normalize_settings(data)
+        previous = _read_stored_settings()
+        # Only an explicit /settings choice can change consent. All other
+        # writers preserve the value read here, including stale stdio snapshots.
+        if usage_choice is not None:
+            clean["usage_sharing"] = usage_choice is True
+        elif "usage_sharing" in previous:
+            clean["usage_sharing"] = previous["usage_sharing"]
+        else:
+            clean.pop("usage_sharing", None)
+        if previous.get("usage_sharing_prompt_seen") is True:
+            clean["usage_sharing_prompt_seen"] = True
         tmp = settings_file.with_suffix(".json.tmp")
         tmp.write_text(json.dumps(clean, indent=2), encoding="utf-8")
         tmp.replace(settings_file)
+        if (previous.get("usage_sharing") is True) != (clean.get("usage_sharing") is True):
+            try:
+                uoink_usage.set_enabled(clean["usage_sharing"])
+            except Exception:
+                log.debug("Usage sharing state could not be updated")
+                raise OSError("Could not update usage sharing") from None
         try:
             os.chmod(settings_file, 0o600)
         except OSError:
             pass
+        # Replies describe this process; storage above keeps the saved choice.
+        data["usage_sharing"] = clean.get("usage_sharing") is True and not uoink_usage.forced_off()
+
+
+def _sync_usage_sharing():
+    with _settings_lock, _settings_file_lock():
+        uoink_usage.set_enabled(_read_stored_settings().get("usage_sharing") is True)
 
 
 def _validate_output_dir_value(value: object) -> tuple[Path | None, str | None]:
@@ -1450,6 +1515,10 @@ def _public_settings(data: dict | None = None) -> dict:
         Path(data.get("output_dir") or DESKTOP_ROOT).expanduser()
     )
     return {
+        "usage_sharing": data.get("usage_sharing") is True and not uoink_usage.forced_off(),
+        "usage_sharing_forced_off": uoink_usage.forced_off(),
+        "usage_sharing_prompt_seen": data.get("usage_sharing_prompt_seen") is True,
+        "usage_sharing_disclosure": uoink_usage.disclosure(),
         "comment_intelligence_enabled": bool(data.get("comment_intelligence_enabled")),
         "hook_type_enabled": bool(data.get("hook_type_enabled")),
         "entity_extraction_enabled": bool(
@@ -5984,6 +6053,7 @@ def _retry_publication_one() -> bool:
     return True
 
 
+@uoink_usage.capture(lambda url, *args, **kwargs: {"youtube": "youtube", "twitter": "x"}.get(_detect_platform_from_url(url), "other"))
 def _run_extraction(url: str, interval: int, output_folder: Path,
                     *, notify: bool = True,
                     metadata: dict | None = None,
@@ -9141,6 +9211,7 @@ def _podcast_transcription_worker() -> None:
     while True:
         job_id = _podcast_transcription_queue.get()
         manual_lock = None
+        usage_publish_attempted = False
         try:
             with _jobs_lock:
                 job = dict(_jobs.get(job_id) or {})
@@ -9244,6 +9315,7 @@ def _podcast_transcription_worker() -> None:
                                  "owner_token": fence.get("owner_token")}):
                             raise source_subscriptions.CaptureOwnershipUnavailable(
                                 "standing start no longer executed by this process")
+                    usage_publish_attempted = True
                     corpus_result = podcasts.episode_to_corpus(
                         _get_index(), episode_id, data_root=DATA_ROOT)
                     _heartbeat_note_ingest()
@@ -9292,6 +9364,11 @@ def _podcast_transcription_worker() -> None:
                 failure_code=None if corpus_result else (
                     "publish_failed" if corpus_error else "publish_not_requested"))
         except BaseException as exc:  # keep the one long-lived worker alive
+            if not usage_publish_attempted and isinstance(job, dict) and job.get("publish_to_corpus"):
+                try:
+                    uoink_usage.count("captures", "podcast", "failed")
+                except Exception:
+                    pass
             # Tracebacks and raw tool text go only to server.log. The console,
             # the episode row and the job (shown by the dashboard) get the
             # sanitized forms used for every other machine error detail.
@@ -10113,6 +10190,10 @@ class _ServerCaptureBackend(source_subscriptions.CaptureBackend):
                 downloaded = podcasts.download_episode_audio(
                     _get_index(), episode_id, data_root=DATA_ROOT)
             if not downloaded.get("ok"):
+                try:
+                    uoink_usage.count("captures", "podcast", "failed")
+                except Exception:
+                    pass
                 # The downloader validates the enclosure before testing media.
                 if _platform.sys.platform == "darwin" and downloaded.get("code") == "media_requires_ffmpeg":
                     return source_subscriptions.CaptureOutcome(
@@ -10129,9 +10210,17 @@ class _ServerCaptureBackend(source_subscriptions.CaptureBackend):
                 consent_given=False, publish_to_corpus=True,
                 source_start_id=start_id, source_owner_token=start["owner_token"])
             if status == 412:
+                try:
+                    uoink_usage.count("captures", "podcast", "failed")
+                except Exception:
+                    pass
                 return source_subscriptions.CaptureOutcome(
                     "failed", code="missing_transcription_setup")
             if not queued.get("ok"):
+                try:
+                    uoink_usage.count("captures", "podcast", "failed")
+                except Exception:
+                    pass
                 return source_subscriptions.CaptureOutcome("failed", code="transcription_unavailable")
             # The queued job now owns the capture-identity lock (released by
             # _settle_source_capture when the job ends).
@@ -12714,6 +12803,7 @@ _LIBRARY_KINDS = {
 _LIBRARY_SORTS = ("newest", "oldest", "title", "relevance")
 
 
+@uoink_usage.search(query_arg="q")
 def _library_search(idx, *, q: str | None, filters: dict, kind: str | None,
                     sort: str, limit: int, offset: int, match: str = "forgiving", mode="auto", passages=True) -> dict:
     """``{total, results}`` like Index.search_yoinks_for_memory, plus a
@@ -13460,6 +13550,7 @@ class Handler(BaseHTTPRequestHandler):
         return False
 
     def _send_json(self, status: int, payload: dict):
+        uoink_usage.capture_result(payload)
         if status >= 400:
             self._drain_early_error_body()
         body = json.dumps(payload).encode("utf-8")
@@ -13989,6 +14080,16 @@ class Handler(BaseHTTPRequestHandler):
 
     def _handle_settings_get(self):
         self._send_json(200, {"ok": True, "settings": _public_settings()})
+
+    def _handle_usage_prompt(self):
+        # Claim once under the settings lock, including concurrent dashboard tabs.
+        with _settings_lock:
+            data = _read_settings()
+            show = not data["usage_sharing_prompt_seen"] and not uoink_usage.forced_off()
+            if not data["usage_sharing_prompt_seen"]:
+                data["usage_sharing_prompt_seen"] = True
+                _write_settings(data)
+        self._send_json(200, {"ok": True, "show": show})
 
     def _handle_settings_output_folder_pick(self, body: dict):
         settings = _read_settings()
@@ -16144,6 +16245,7 @@ class Handler(BaseHTTPRequestHandler):
             log.exception("/extract/page/allowlist POST failed")
             return self._send_json(500, {"ok": False, "error": str(e)})
 
+    @uoink_usage.capture("page", response=True)
     def _handle_extract_page(self, body):
         """POST /extract/page {url, render_mode?, include_screenshot?,
         follow_links_depth?}. Allowlist-gated by default; result lands
@@ -16363,6 +16465,8 @@ class Handler(BaseHTTPRequestHandler):
             "writing_default_attach_all_screenshots",  # v3.3 D-20
             "auto_uoink_enabled",           # V-3 taste-aware auto-uoink
             "notifications_enabled",        # Desktop balloons; default ON
+            "usage_sharing",
+            "usage_sharing_prompt_seen",
             "keep_media",                   # E-1 Zing enabler -- keep
                                             # short-video media after
                                             # extraction (default OFF)
@@ -16439,6 +16543,12 @@ class Handler(BaseHTTPRequestHandler):
         for field in boolean_fields:
             if field in body:
                 data[field] = body[field]
+        # Any choice is final for the one-time card, including changing Settings.
+        # A stale tab cannot reset the seen marker and make the card nag again.
+        if "usage_sharing" in body or data.get("usage_sharing_prompt_seen") is True:
+            data["usage_sharing_prompt_seen"] = True
+        if _read_settings().get("usage_sharing_prompt_seen") is True:
+            data["usage_sharing_prompt_seen"] = True
         if "clipboard_screenshot_cap" in body:
             data["clipboard_screenshot_cap"] = int(body["clipboard_screenshot_cap"])
         if "anthropic_key" in body:
@@ -16609,7 +16719,10 @@ class Handler(BaseHTTPRequestHandler):
                     "ok": False, "error": "topics write failed"})
         data["updated_at"] = _now_iso()
         try:
-            _write_settings(data)
+            if "usage_sharing" in body:
+                _write_settings(data, usage_choice=body["usage_sharing"])
+            else:
+                _write_settings(data)
         except OSError as e:
             log.warning("settings write failed: %s", e)
             return self._send_json(200, {"ok": False, "error": "settings write failed"})
@@ -16706,6 +16819,12 @@ class Handler(BaseHTTPRequestHandler):
         # explicit helper paths (/mcp/v1/tools/call) because different HTTP
         # MCP clients are still converging on transport details.
         if bare == "/mcp/v1/initialize" or (bare == "/mcp/v1" and method == "initialize"):
+            params = body.get("params") or {}
+            client = params.get("clientInfo") if isinstance(params, dict) else None
+            try:
+                uoink_usage.count("mcp_clients", client.get("name") if isinstance(client, dict) else None)
+            except Exception:
+                pass
             return self._send_mcp_result(request_id, _mcp_initialize_result(body))
         if method == "notifications/initialized":
             # JSON-RPC notifications have no response id/body. Return an
@@ -16727,6 +16846,10 @@ class Handler(BaseHTTPRequestHandler):
             if not isinstance(name, str) or not isinstance(args, dict):
                 return self._send_mcp_error(request_id, -32602, "invalid tool call")
             tools = _mcp_tools_module()
+            try:
+                uoink_usage.mcp_call(name, "http")
+            except Exception:
+                pass
             if name in getattr(tools, "DISCOVERY_TOOL_NAMES", ()):
                 payload = tools.call_tool(name, args, **self._discovery_context())
             else:
@@ -16998,6 +17121,7 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
+    @uoink_usage.capture("x", response=True)
     def _handle_extract_x(self, body: dict):
         """POST /extract/x {url} -- capture an X post's text plus the
         author's own earlier chain via the public syndication endpoint, as
@@ -17048,6 +17172,7 @@ class Handler(BaseHTTPRequestHandler):
             "metadata": result.get("metadata", {}),
         })
 
+    @uoink_usage.capture("x", response=True)
     def _handle_extract_x_article(self, body: dict):
         """POST /extract/x-article {url, title, author, markdown, images} --
         persist an X ARTICLE that the extension already parsed out of the
@@ -17089,6 +17214,7 @@ class Handler(BaseHTTPRequestHandler):
             "metadata": result.get("metadata", {}),
         })
 
+    @uoink_usage.capture("note", response=True)
     def _handle_create_note(self, body: dict):
         """POST /notes {text, title?, author?} -- persist a quick note / musing
         the user jotted as a first-class uoink (source_type='note', platform=
@@ -17131,6 +17257,7 @@ class Handler(BaseHTTPRequestHandler):
             "platform": notes.PLATFORM,
         })
 
+    @uoink_usage.capture("image", response=True)
     def _handle_create_image(self):
         """POST /images -- persist an image / meme the user dropped, pasted, or
         picked as a first-class uoink (source_type='image', platform='image').
@@ -17209,6 +17336,7 @@ class Handler(BaseHTTPRequestHandler):
             "platform": images.PLATFORM,
         })
 
+    @uoink_usage.capture("reddit", response=True)
     def _handle_extract_reddit(self, body: dict):
         """POST /extract/reddit {url, depth_limit?, score_threshold?} --
         capture a Reddit thread via its public .json as a yoink with
@@ -18465,6 +18593,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_sources_service_route("archive_source", body)
         if bare == "/settings":
             return self._handle_settings_post(body)
+        if bare == "/settings/usage-prompt":
+            return self._handle_usage_prompt()
         if bare == "/settings/output-folder/pick":
             return self._handle_settings_output_folder_pick(body)
         if bare == "/settings/test-key":
@@ -19199,6 +19329,8 @@ class Handler(BaseHTTPRequestHandler):
         log.info("queue retry-now: pending_id=%d", pending_id)
         self._send_json(200, {"ok": True})
 
+    @uoink_usage.capture(lambda self, body: {"youtube": "youtube", "twitter": "x"}.get(
+        _detect_platform_from_url(body.get("url", "")), "other"), response=True)
     def _handle_extract_any(self, body: dict):
         """v3.1 universal extractor entry point.
 
@@ -19508,6 +19640,8 @@ class Handler(BaseHTTPRequestHandler):
         })
 
     @_reports_live_extract
+    @uoink_usage.capture(lambda self, body: {"youtube": "youtube", "twitter": "x"}.get(
+        _detect_platform_from_url(body.get("url", "")), "other"), response=True)
     def _handle_extract(self, body: dict):
         url, interval, err = self._validate_url_interval(body)
         if err:
@@ -20293,6 +20427,7 @@ def main(*, show_dashboard: bool = False):
             )
 
     atexit.register(_remove_suite_lease)
+    uoink_usage.start_sender(_sync_usage_sharing)
 
     # Tier 1 (v2.1.1): ambient system-tray presence on installed Windows
     # builds. Guarded by the installed-layout check (bundled pythonw next to

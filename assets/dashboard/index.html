@@ -411,6 +411,40 @@
       padding: 28px 28px 34px;
     }
 
+    /* One-time usage opt-in card: its own row above the content, styled as a card. */
+    .main:has(> #usageOptInCard:not(.hidden)) {
+      grid-template-rows: auto minmax(0, 1fr);
+    }
+
+    .main > #usageOptInCard {
+      gap: 10px;
+      margin: 24px 28px 0;
+      padding: 18px 20px;
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--rust);
+      border-radius: var(--card-radius);
+      background: color-mix(in srgb, var(--surface) 82%, transparent);
+    }
+
+    .main > #usageOptInCard h2 {
+      margin: 0;
+      font-size: 17px;
+    }
+
+    .main > #usageOptInCard .setting-copy {
+      margin: 0;
+      max-width: 80ch;
+    }
+
+    .main > #usageOptInCard .inline-row {
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .main > #usageOptInCard #usageChoiceStatus:empty {
+      display: none;
+    }
+
     .tab-panel {
       display: none;
       max-width: 1180px;
@@ -3759,6 +3793,9 @@
       .content {
         padding: 26px 18px 34px;
       }
+      .main > #usageOptInCard {
+        margin: 18px 18px 0;
+      }
       .page-head {
         display: grid;
       }
@@ -4354,6 +4391,17 @@
     </aside>
 
     <main class="main">
+      <form class="setting-block hidden" id="usageOptInCard" aria-labelledby="usageOptInTitle">
+        <h2 id="usageOptInTitle">Help improve Uoink with usage counts</h2>
+        <p class="setting-copy">Sharing is off by default. If you turn it on, Uoink sends daily counts of tools, known MCP clients, connections, captures and searches to usage.uoink.app, along with a random ID and app and system versions. It never sends content, URLs, titles, paths, search text or account details.</p>
+        <p class="setting-copy">You can see the exact data and change your choice in Settings. This card appears only once.</p>
+        <div class="inline-row">
+          <button class="button" type="submit" id="usageNoThanks">No thanks</button>
+          <button class="button ghost" type="button" id="usageYes">Share anonymous usage counts</button>
+          <button class="button ghost" type="button" id="usageDismiss" aria-label="Dismiss usage sharing card">Dismiss</button>
+        </div>
+        <p id="usageChoiceStatus" role="status" aria-live="polite"></p>
+      </form>
       <div class="content">
         <section class="tab-panel" id="tab-for-you" data-tab-panel="for-you">
           <div class="page-head">
@@ -5754,12 +5802,29 @@
               <p class="setting-copy">When off, updates stay in Activity without opening a balloon. Fullscreen apps also receive this courtesy automatically.</p>
             </div>
 
+            <div class="setting-block" id="settings-usage">
+              <h2>Usage sharing</h2>
+              <label class="inline-row"><input id="usageSharing" type="checkbox" aria-describedby="usageSharingCopy usageSharingSaveStatus"> Share anonymous usage counts</label>
+              <div class="setting-feedback"><span class="setting-status" id="usageSharingSaveStatus" role="status" aria-live="polite" aria-atomic="true"></span><button class="button ghost setting-retry hidden" id="usageSharingSaveRetry" type="button" data-setting-retry="usageSharing">Retry save</button></div>
+              <p class="setting-copy" id="usageSharingCopy">Off by default. If enabled, Uoink sends counts to usage.uoink.app at most once every 24 hours: calls by tool name, known MCP client names, calls over stdio or HTTP, captures by source and result, and library searches. Each report includes a random install ID, a random report ID to prevent repeat counting, Uoink version, operating system and major version, processor type, install type and hours counted. No content, URLs, titles, paths, search text, account details, usernames or IP addresses are included in the report.</p>
+              <p class="setting-copy" id="usageSharingOverride" role="status"></p>
+              <p class="setting-copy">Turning this off deletes the random ID, local counts and sent history. Turning it on again creates a new ID.</p>
+              <details id="usageDisclosure">
+                <summary>See what is sent</summary>
+                <p class="setting-copy" id="usagePayloadLabel">Sample payload. Sharing is off. Counts are zero and IDs are placeholders.</p>
+                <pre id="usageNextPayload" style="white-space:pre-wrap;overflow-wrap:anywhere">null</pre>
+                <p class="setting-copy">Last 10 sent payloads and their dates, kept on this computer.</p>
+                <pre id="usageSentPayloads" style="white-space:pre-wrap;overflow-wrap:anywhere">[]</pre>
+                <p id="usageDisclosureStatus" role="status" aria-live="polite"></p>
+              </details>
+            </div>
+
             <div class="setting-block" id="settings-updates">
               <h2>Updates</h2>
               <p class="setting-copy" id="versionLine">Loading version...</p>
               <p class="setting-copy" id="updateLine">Last checked: not yet</p>
               <button class="button ghost" type="button" id="checkUpdates">Check now</button>
-              <p class="setting-copy-dim" style="font-size:12px;color:var(--dim);margin-top:8px">Checking for updates queries <code>api.github.com</code> to fetch the latest release tag. No telemetry is collected.</p>
+              <p class="setting-copy-dim" style="font-size:12px;color:var(--dim);margin-top:8px">Checking for updates queries <code>api.github.com</code> to fetch the latest release tag. This check sends no usage counts or library data.</p>
             </div>
 
             <div class="setting-block" id="settings-about">
@@ -15405,6 +15470,7 @@
       scrapecreatorsCap: ["scrapecreators_daily_credit_cap", 25],
       autostartToggle: ["autostart", false],
       notificationsEnabled: ["notifications_enabled", true],
+      usageSharing: ["usage_sharing", false],
       screenshotCount: ["clipboard_screenshot_cap", 4],
       claimVerificationToggle: ["claim_verification_enabled", false],
       entityExtractionToggle: ["entity_extraction_enabled", false],
@@ -15438,6 +15504,52 @@
     let aiPricingError = "";
     const settingsResourceVersions = new Map();
     const DASHBOARD_INTERVAL_KEY = "uoink.dashboard.screenshotInterval";
+
+    function renderUsageSettings(settings) {
+      const forced = settings.usage_sharing_forced_off === true;
+      document.getElementById("usageSharing").disabled = forced;
+      if (forced) document.getElementById("usageSharing").checked = false;
+      document.getElementById("usageSharingOverride").textContent = forced
+        ? "Sharing is forced off by UOINK_USAGE_SHARING=0." : "";
+      const disclosure = settings.usage_sharing_disclosure || {};
+      document.getElementById("usagePayloadLabel").textContent = disclosure.sample === true
+        ? "Sample payload. Sharing is off. Counts are zero and IDs are placeholders."
+        : "Next payload with the current counts. New activity can change it before the daily send.";
+      document.getElementById("usageNextPayload").textContent = JSON.stringify(disclosure.next_payload ?? null, null, 2);
+      document.getElementById("usageSentPayloads").textContent = JSON.stringify(disclosure.sent || [], null, 2);
+      document.getElementById("usageDisclosureStatus").textContent = disclosure.error || "";
+    }
+
+    async function refreshUsageDisclosure() {
+      try {
+        const data = await settingsRequest("/settings");
+        renderUsageSettings(data.settings || {});
+      } catch (_) {
+        document.getElementById("usageDisclosureStatus").textContent = "Could not load usage counts. Close and reopen this section to try again.";
+      }
+    }
+
+    async function chooseUsageSharing(enabled) {
+      const card = document.getElementById("usageOptInCard");
+      const buttons = ["usageYes", "usageNoThanks", "usageDismiss"].map(id => document.getElementById(id));
+      buttons.forEach(button => { button.disabled = true; });
+      try {
+        await settingsWriteQueue;
+        const data = await settingsRequest("/settings", { method: "POST", body: JSON.stringify({ usage_sharing: enabled }) });
+        renderUsageSettings(data.settings || {});
+        document.getElementById("usageSharing").checked = data.settings.usage_sharing === true;
+        card.classList.toggle("hidden", true);
+      } catch (_) {
+        document.getElementById("usageChoiceStatus").textContent = "Could not save this choice. You can change sharing in Settings.";
+      } finally { buttons.forEach(button => { button.disabled = false; }); }
+    }
+
+    async function showUsagePrompt() {
+      try {
+        const data = await settingsRequest("/settings/usage-prompt", { method: "POST", body: "{}" });
+        document.getElementById("usageOptInCard").classList.toggle("hidden", data.show !== true);
+      } catch (_) { /* Optional card stays hidden if the helper is unavailable. */ }
+    }
 
     function settingEdit(id) {
       if (!settingEdits.has(id)) settingEdits.set(id, { version: 0, dirty: false, retry: null });
@@ -15571,6 +15683,10 @@
         }
         // Only adopt the acknowledged field, not stale siblings in the response.
         state.settings = { ...(state.settings || {}), [confirmedField]: stored[confirmedField] };
+        if (field === "usage_sharing") {
+          renderUsageSettings(stored);
+          document.getElementById("usageOptInCard").classList.toggle("hidden", true);
+        }
         if (field === "scrapecreators_key") state.settings.scrapecreators_key_invalid = stored.scrapecreators_key_invalid === true;
         if (field === "output_dir") state.settings.output_dir_pending_restart = stored.output_dir_pending_restart;
         renderAICostEstimate();
@@ -15684,6 +15800,7 @@
 
     function hydrateSettings(data, versions) {
       const settings = data.settings || {};
+      renderUsageSettings(settings);
       // The full response is useful to Generate, but must not overwrite a
       // newer confirmed write or an edit still waiting for its change event.
       const previous = state.settings || {};
@@ -16534,6 +16651,11 @@
     }
 
     function wireEvents() {
+      document.getElementById("usageOptInCard").addEventListener("submit", event => { event.preventDefault(); chooseUsageSharing(false); });
+      document.getElementById("usageNoThanks").addEventListener("click", event => { event.preventDefault(); chooseUsageSharing(false); });
+      document.getElementById("usageDismiss").addEventListener("click", () => chooseUsageSharing(false));
+      document.getElementById("usageYes").addEventListener("click", () => chooseUsageSharing(true));
+      document.getElementById("usageDisclosure").addEventListener("toggle", event => { if (event.target.open) refreshUsageDisclosure(); });
       document.querySelectorAll("[data-tab-button]").forEach((btn) => {
         btn.addEventListener("click", () => switchTab(btn.dataset.tabButton));
       });
@@ -17281,6 +17403,7 @@
       wireEvents();
       wireLibraryActivityEvents();
       wireRoutes();
+      showUsagePrompt();
       applyHashRoute();
       await refreshHealth();
       await loadLibraryFacets();

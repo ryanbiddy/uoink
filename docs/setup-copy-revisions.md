@@ -110,11 +110,11 @@ Rationale: "Local helper" reinforces why a desktop installer exists.
 
 Original:
 
-> Uoink runs a tiny program on your computer that does the heavy lifting locally - that's why your data stays private. Nothing leaves your machine except the YouTube transcript request.
+> Uoink runs a helper on your computer and stores your library locally. Captures fetch data from the source site. Optional AI features contact their providers, and usage counts are sent only if you enable sharing.
 
 Proposed:
 
-> Uoink runs a small helper on your computer. It downloads public YouTube data, builds the corpus locally, and saves everything to your Uoink folder. No Uoink cloud. No account.
+> Uoink runs a small helper on your computer. It fetches source data and saves your library in your Uoink folder. Optional AI features use external providers. Usage sharing is off by default, and no Uoink account is required.
 
 Rationale: More explicit about local-first and less hand-wavy about privacy.
 

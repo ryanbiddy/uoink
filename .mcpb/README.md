@@ -268,6 +268,12 @@ Comment Intelligence, Hook Type classification and entity extraction are off by
 default. Agent-requested analysis also requires your key. Content returned to
 Claude is handled under Claude's policy.
 
+Usage sharing is off by default. If you turn on "Share anonymous usage counts"
+in the dashboard, Uoink sends daily tool, known-client, transport, capture and
+search counts to usage.uoink.app, with a random install ID and app and system
+versions. Reports never contain content, URLs, titles, paths, search text or
+account details. Settings shows the next payload and the last ten sent payloads.
+
 Read the [Uoink privacy policy](https://uoink.app/privacy).
 
 ## Rebuilding

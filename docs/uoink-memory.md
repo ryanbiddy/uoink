@@ -15,7 +15,7 @@ Uoink Memory is local-first:
 - Search is served by the local helper on `127.0.0.1`.
 - The index lives at `%LOCALAPPDATA%\Uoink\index.db`.
 - Your corpora, screenshots, thumbnails, and sidecars stay on disk.
-- There is no Uoink cloud service and no telemetry upload.
+- Uoink sends no usage data by default. If you turn on "Share anonymous usage counts", it sends daily counts to usage.uoink.app: calls by tool name, known MCP clients, stdio or HTTP calls, captures by source and result, and library searches. Reports include a random install ID, app version, operating system and major version, processor type, install type and hours counted. They never include content, URLs, titles, paths, search text, usernames, IP addresses or account details.
 
 ## How To Open It
 

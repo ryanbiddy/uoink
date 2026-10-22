@@ -17,7 +17,8 @@ Transport (the POST /images route + token gate + raw-body read) is owned by
 server.py. Topic classification is injected by the caller
 (server._classify_topic) so this module stays standalone and unit-testable.
 
-Local-first, zero telemetry: nothing here calls a cloud vision or OCR service.
+Image processing stays local; this module calls no cloud vision or OCR service.
+Optional usage sharing counts image captures without sending image content.
 We store the image + the user's caption + where it came from. The AI that
 QUERIES the corpus (Claude over MCP) already has vision, so the image file is
 made reachable to it at query time (get_uoink_corpus returns the absolute path

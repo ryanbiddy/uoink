@@ -129,6 +129,8 @@ and every other refusal to ``-32603``, with :meth:`ResourceError.envelope` in
 """
 from __future__ import annotations
 
+import uoink_usage
+
 import base64
 import binascii
 import contextlib
@@ -2065,6 +2067,7 @@ class LibraryReader:
         }
         return hit
 
+    @uoink_usage.search
     def _search(self, op: _Operation, query: str, limit: int, *, match: str = "forgiving", mode="auto") -> dict:
         from uoink_core.search_service import select_mode, metadata, CITATION_FIELDS
         from uoink_core.local_search import SearchUnavailable
@@ -2096,9 +2099,12 @@ class LibraryReader:
             def prepared_keyword(count, offset, override):
                 return {"total": lexical["total"], "results": lexical["results"][offset:offset + count]}
 
+            # Keep one usage scope across the semantic worker and any fallback.
+            from contextvars import copy_context
+            search_context = copy_context()
             try:
                 page = self._storage(lambda: self.index._local_search.query_with_timeout(
-                    lambda: self.index.search_mode(query, limit, mode=mode, match=match, keyword=prepared_keyword),
+                    lambda: search_context.run(self.index.search_mode, query, limit, mode=mode, match=match, keyword=prepared_keyword),
                     op.remaining() - semantic_reserve))
             except SearchUnavailable as exc:
                 page = None

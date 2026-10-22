@@ -8,7 +8,7 @@
 
 **Uoink keeps the videos, podcasts, and articles creators and AI developers study on their own disk, then hands them to Claude, ChatGPT, Cursor, or a local MCP agent as a cited corpus.**
 
-Free, open source (MIT), and local-first: no account, no Uoink cloud, no required telemetry. Uoink saves supported sources as structured Markdown on *your* machine, then makes the corpus available to your AI through the clipboard, a local MCP server, and an OpenAPI bridge. YouTube capture includes the transcript, timestamped screenshots, comments, and metadata; other source types keep the material their publishers expose.
+Free, open source (MIT), and local-first: no account, no Uoink cloud, and anonymous usage counts stay off unless you turn them on. Uoink saves supported sources as structured Markdown on *your* machine, then makes the corpus available to your AI through the clipboard, a local MCP server, and an OpenAPI bridge. YouTube capture includes the transcript, timestamped screenshots, comments, and metadata; other source types keep the material their publishers expose.
 
 - **Website:** https://uoink.app · **Install:** https://uoink.app/install · **Developers:** https://uoink.app/developers
 - **Status:** Windows 10/11 only. There is no Mac build. The extension sideloads from the release — it is not on the Chrome Web Store. The installer is unsigned, so Windows SmartScreen will warn on first run.
@@ -127,8 +127,16 @@ pending; see the [discovery tool contract](docs/v2-mcp.md#discover_candidates).
 ## Privacy
 
 Your saved corpora, screenshots, podcast audio, transcripts, library index and
-diagnostic logs stay on your computer. Uoink has no account, cloud library or
-telemetry.
+diagnostic logs stay on your computer. Uoink has no account or cloud library.
+
+Uoink sends no usage data by default. If you turn on "Share anonymous usage counts", it sends daily counts to usage.uoink.app: calls by tool name, known MCP clients, stdio or HTTP calls, captures by source and result, and library searches. Reports include a random install ID, app version, operating system and major version, processor type, install type and hours counted. They never include content, URLs, titles, paths, search text, usernames, IP addresses or account details.
+
+Sharing is off by default. In Dashboard > Settings > App > Usage sharing,
+"See what is sent" shows the next report and the last ten sent reports with
+their dates. Turning sharing off deletes the random ID, local counts and
+sent history. UOINK_USAGE_SHARING=0 forces it off.
+
+See the [usage payload and counting design](docs/usage-sharing.md).
 
 Capture fetches the source you ask for. Podcast watches poll feeds you enable;
 Auto-ingest can also download new episodes. Truncated X posts may use the
