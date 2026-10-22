@@ -302,7 +302,7 @@ def test_stdio_wire_path_records_to_shared_file(store, monkeypatch):
         client.send({"jsonrpc": "2.0", "id": 2, "method": "tools/call", "params": {
             "name": "search_uoinks", "arguments": {"query": ""}}})
         assert "result" in client.wait_for(2)
-        deadline = time.monotonic() + 3
+        deadline = time.monotonic() + 10  # the stdio child flushes counts asynchronously; slow runners need headroom
         while time.monotonic() < deadline:
             p = usage.disclosure()["next_payload"]
             if p["tools"].get("search_uoinks") and p["mcp_clients"].get("other"):
