@@ -148,12 +148,11 @@ def _classifier_license(meta) -> str:
 
 
 def _fill_license_expressions(rows: list[dict]) -> list[dict]:
-    """Recover PEP 639 ``License-Expression`` where a row has no licence.
+    """Prefer the installed distribution's PEP 639 ``License-Expression``.
 
-    Newer wheels (anyio, click, cryptography, ...) declare their licence only
-    as an SPDX ``License-Expression``; pip-licenses 5.0 and the legacy
-    ``License`` field both report UNKNOWN for them. Read the exact installed
-    metadata for those rows only; declared values are never overridden.
+    Classifiers can be less precise, such as ``BSD License`` instead of
+    ``BSD-3-Clause``. Use the declared SPDX expression when present; otherwise
+    retain the collector's existing licence value, including UNKNOWN.
     """
     import importlib.metadata as md
     normalize = lambda name: re.sub(r"[-_.]+", "-", name).lower()
@@ -165,9 +164,6 @@ def _fill_license_expressions(rows: list[dict]) -> list[dict]:
         if name and expression:
             expressions.setdefault(normalize(name), expression)
     for row in rows:
-        current = (row.get("License") or "").strip()
-        if current and current.upper() != "UNKNOWN":
-            continue
         expression = expressions.get(normalize(row.get("Name") or ""))
         if expression:
             row["License"] = expression

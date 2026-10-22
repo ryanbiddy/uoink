@@ -30,7 +30,7 @@ This file is generated from the installed dependency tree (source: pip-licenses)
 | defusedxml | 0.7.1 | Python Software Foundation License | https://github.com/tiran/defusedxml |
 | einops | 0.8.2 | MIT License | https://github.com/arogozhnikov/einops |
 | faster-whisper | 1.2.1 | MIT License | https://github.com/SYSTRAN/faster-whisper |
-| filelock | 3.32.0 | MIT License | https://github.com/tox-dev/py-filelock |
+| filelock | 3.32.0 | MIT | https://github.com/tox-dev/py-filelock |
 | flatbuffers | 25.12.19 | Apache Software License | https://google.github.io/flatbuffers/ |
 | fonttools | 4.63.0 | MIT | http://github.com/fonttools/fonttools |
 | frozenlist | 1.8.0 | Apache-2.0 | https://github.com/aio-libs/frozenlist |
@@ -39,8 +39,8 @@ This file is generated from the installed dependency tree (source: pip-licenses)
 | greenlet | 3.5.4 | MIT AND PSF-2.0 | https://greenlet.readthedocs.io |
 | grpcio | 1.82.1 | Apache-2.0 | https://grpc.io |
 | h11 | 0.16.0 | MIT License | https://github.com/python-hyper/h11 |
-| httpcore2 | 2.16.0 | BSD License | https://github.com/pydantic/httpx2 |
-| httpx2 | 2.16.0 | BSD License | https://github.com/pydantic/httpx2 |
+| httpcore2 | 2.16.0 | BSD-3-Clause | https://github.com/pydantic/httpx2 |
+| httpx2 | 2.16.0 | BSD-3-Clause | https://github.com/pydantic/httpx2 |
 | huggingface_hub | 0.36.2 | Apache Software License | https://github.com/huggingface/huggingface_hub |
 | idna | 3.18 | BSD-3-Clause | https://github.com/kjd/idna |
 | jaraco.classes | 3.4.0 | MIT License | https://github.com/jaraco/jaraco.classes |
@@ -101,7 +101,7 @@ This file is generated from the installed dependency tree (source: pip-licenses)
 | pyparsing | 3.3.2 | MIT | https://github.com/pyparsing/pyparsing/ |
 | pystray | 0.19.5 | GNU Lesser General Public License v3 (LGPLv3) | https://github.com/moses-palmer/pystray |
 | python-dateutil | 2.9.0.post0 | Apache Software License; BSD License | https://github.com/dateutil/dateutil |
-| python-multipart | 0.0.32 | Apache Software License | https://github.com/Kludex/python-multipart |
+| python-multipart | 0.0.32 | Apache-2.0 | https://github.com/Kludex/python-multipart |
 | pythonnet | 3.0.5 | MIT License | https://pythonnet.github.io/ |
 | pytorch-lightning | 2.6.6 | Apache Software License | https://github.com/Lightning-AI/lightning |
 | pytorch-metric-learning | 2.9.0 | MIT License | https://github.com/KevinMusgrave/pytorch-metric-learning |
