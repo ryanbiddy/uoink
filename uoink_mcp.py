@@ -65,6 +65,7 @@ try:
     import anyio.lowlevel
     from mcp.server import Server
     from mcp.server.caching import CACHEABLE_METHODS, CacheHint
+    from mcp.shared.dispatcher import coerce_request_id
     from mcp import types as mcp_types
 except ImportError:
     print(
@@ -149,7 +150,14 @@ class RegistryMCP(Server):
             # Paid discovery has its own 8 s/page timeout, not the 2 s
             # library-read deadline. Keep stdio responsive to other calls
             # and cancellation while the bounded worker finishes (as in v3.9.1).
-            envelope = await asyncio.to_thread(uoink_mcp_tools.call_tool, name, arguments)
+            state = _active_stdio_request.get()
+            if state is not None:
+                # Peer cancellation cannot stop a paid worker thread. AnyIO
+                # waits for that worker before the unanswered callback settles
+                # the request, keeping its ID reserved throughout the work.
+                envelope = await anyio.to_thread.run_sync(uoink_mcp_tools.call_tool, name, arguments)
+            else:
+                envelope = await asyncio.to_thread(uoink_mcp_tools.call_tool, name, arguments)
         else:
             # Registry handlers share one Index connection with the Library
             # read, prompt and resource handlers, and several read idx._conn
@@ -736,7 +744,10 @@ def _register_phase4_stdio() -> None:
             if state is not None:
                 state.protocol_version = ctx.protocol_version
             token = library_resources.bind_transport_scope(ctx.request_id)
+            request_token = _active_stdio_request.set(state)
             try:
+                if state is not None and state.cancelled:
+                    raise MCPError(code=-32600, message="Request cancelled")
                 scope = library_resources.current_transport_scope()
                 if scope is not None and scope.refusal is not None:
                     response = _stdio_refusal_server_result(ctx, scope.refusal)
@@ -745,6 +756,7 @@ def _register_phase4_stdio() -> None:
                     return response
                 return await handler(ctx, params)
             finally:
+                _active_stdio_request.reset(request_token)
                 library_resources.reset_bound_transport_scope(token)
         return handle
 
@@ -772,6 +784,7 @@ def _stdio_param(params, key: str):
 # public SDK writer can settle only at its concrete model_dump_json boundary.
 _bounded_stdio_writer_depth = contextvars.ContextVar("uoink_bounded_stdio_writer_depth", default=0)
 _stdio_requests = contextvars.ContextVar("uoink_stdio_requests", default=None)
+_active_stdio_request = contextvars.ContextVar("uoink_active_stdio_request", default=None)
 
 
 class _StdioRequest:
@@ -782,6 +795,7 @@ class _StdioRequest:
         self.protocol_version = None
         self.cancelled = False
         self.settled = False
+        self.output_started = False
 
     def settle(self):
         import library_resources
@@ -794,12 +808,13 @@ class _StdioRequest:
             else:
                 self.scope.release()
         requests = _stdio_requests.get()
-        if requests is not None and requests.get(self.message.id) is self:
-            requests.pop(self.message.id)
+        key = coerce_request_id(self.message.id)
+        if requests is not None and requests.get(key) is self:
+            requests.pop(key)
 
 
 def _request_state(request_id):
-    return (_stdio_requests.get() or {}).get(request_id)
+    return (_stdio_requests.get() or {}).get(coerce_request_id(request_id))
 
 
 def _release_stdio_requests():
@@ -813,10 +828,12 @@ def _begin_inbound_transport_scope(message):
     if isinstance(message, mcp_types.JSONRPCNotification):
         if message.method == "notifications/cancelled":
             request_id = _stdio_param(message.params, "requestId")
+            if type(request_id) not in (int, str):
+                return None
             state = _request_state(request_id)
-            if state is not None:
+            if state is not None and not state.output_started:
                 state.cancelled = True
-            library_resources.mark_transport_cancelled(request_id)
+                library_resources.mark_transport_cancelled(state.message.id)
         return None
     if not isinstance(message, mcp_types.JSONRPCRequest):
         return None
@@ -824,15 +841,18 @@ def _begin_inbound_transport_scope(message):
     if requests is None:
         requests = {}
         _stdio_requests.set(requests)
-    previous = requests.get(message.id)
+    key = coerce_request_id(message.id)
+    previous = requests.get(key)
     if previous is not None:
         return previous
     name = _stdio_param(message.params, "name") if message.method == "tools/call" else None
+    if not isinstance(name, str):
+        name = None  # Let SDK parameter validation refuse malformed names.
     scope = None
     if library_resources.is_budgeted_stdio_request(message.method, name):
         scope = library_resources.begin_transport_request(message.id, message.method, name)
     state = _StdioRequest(message, scope)
-    requests[message.id] = state
+    requests[key] = state
     return state
 
 
@@ -1121,6 +1141,13 @@ async def _deliver_bounded_outbound(session_message, stdout) -> None:
             return
         text = message.model_dump_json(by_alias=True, exclude_none=True)
         text = _check_serialized_frame(message, text, scope, state)
+        # Let input already waiting on the event loop cancel prepared output.
+        # Once write starts bytes may have escaped, so cancellation is too late.
+        await anyio.lowlevel.checkpoint()
+        if (state is not None and state.cancelled) or (scope is not None and scope.cancel_requested):
+            return
+        if state is not None:
+            state.output_started = True
         await stdout.write(text + "\n")
         await stdout.flush()
     finally:
@@ -1130,16 +1157,146 @@ async def _deliver_bounded_outbound(session_message, stdout) -> None:
             library_resources.finish_transport_request(request_id)
 
 
+def _stdio_wire_streams(stdin, stdout):
+    """Keep protocol descriptors private from Python, native code and children."""
+    from contextlib import contextmanager
+    from io import TextIOWrapper
+    import queue
+    import threading
+
+    def rebind(fd):
+        if sys.platform == "win32":
+            import ctypes
+            import msvcrt
+            from ctypes import wintypes
+            set_handle = ctypes.WinDLL("kernel32", use_last_error=True).SetStdHandle
+            set_handle.argtypes = (wintypes.DWORD, wintypes.HANDLE)
+            set_handle.restype = wintypes.BOOL
+            if not set_handle(-10 if fd == 0 else -11, msvcrt.get_osfhandle(fd)):
+                raise ctypes.WinError(ctypes.get_last_error())
+
+    class Input:
+        def __init__(self, file):
+            self.file = file
+            self.lock = threading.Lock()
+            self.reading = False
+            self.closed = False
+            self.pending = queue.Queue()
+            self.worker = threading.Thread(target=self.run, name="uoink-stdio-input", daemon=True)
+            self.worker.start()
+
+        def run(self):
+            while (item := self.pending.get()) is not None:
+                loop, future = item
+                try:
+                    value, error = self.readline(), None
+                except Exception as exc:
+                    value, error = None, exc
+
+                def complete(value=value, error=error, future=future):
+                    if not future.done():
+                        if error is not None:
+                            future.set_exception(error)
+                        else:
+                            future.set_result(value)
+                try:
+                    loop.call_soon_threadsafe(complete)
+                except RuntimeError:  # The writer failed and the loop closed.
+                    return
+
+        def readline(self):
+            with self.lock:
+                if self.closed:
+                    return ""
+                self.reading = True
+            try:
+                return self.file.readline()
+            finally:
+                with self.lock:
+                    self.reading = False
+                    if self.closed:
+                        self.file.close()
+
+        def close(self):
+            # A failed writer must not wait for a peer that keeps stdin open.
+            # An abandoned reader owns its descriptor until readline returns.
+            with self.lock:
+                self.closed = True
+                if not self.reading:
+                    self.file.close()
+            self.pending.put(None)
+
+        def __aiter__(self):
+            return self
+
+        async def __anext__(self):
+            # AnyIO's worker threads are non-daemon. An abandoned pipe read
+            # would still hold interpreter shutdown when the output peer dies.
+            loop = asyncio.get_running_loop()
+            future = loop.create_future()
+            self.pending.put((loop, future))
+            line = await future
+            if not line:
+                raise StopAsyncIteration
+            return line
+
+    @contextmanager
+    def streams():
+        saved = []
+        owned_input = owned_output = None
+        try:
+            for fd, explicit in ((0, stdin), (1, stdout)):
+                if explicit is not None:
+                    continue
+                if fd == 1:
+                    sys.stdout.flush()
+                private = os.dup(fd)
+                os.set_inheritable(private, False)
+                saved.append((fd, private))
+                diversion = os.open(os.devnull, os.O_RDONLY) if fd == 0 else os.dup(2)
+                try:
+                    os.dup2(diversion, fd)
+                    rebind(fd)
+                finally:
+                    os.close(diversion)
+                if fd == 0:
+                    owned_input = Input(TextIOWrapper(os.fdopen(os.dup(private), "rb"),
+                                                     encoding="utf-8", errors="replace"))
+                else:
+                    owned_output = TextIOWrapper(os.fdopen(os.dup(private), "wb"), encoding="utf-8")
+            yield stdin if stdin is not None else owned_input, (
+                stdout if stdout is not None else anyio.wrap_file(owned_output))
+        finally:
+            # Flush stray buffered print output while stdout still points at stderr.
+            if any(fd == 1 for fd, _ in saved):
+                sys.stdout.flush()
+            for fd, private in reversed(saved):
+                try:
+                    os.dup2(private, fd)
+                    rebind(fd)
+                finally:
+                    os.close(private)
+            if owned_input is not None:
+                owned_input.close()
+            if owned_output is not None:
+                try:
+                    owned_output.close()
+                except OSError:
+                    # The original write/flush failure already owns shutdown.
+                    pass
+
+    return streams()
+
+
 def bounded_stdio_server(stdin=None, stdout=None):
     """Application stdio transport: SDK messages, product-owned write lifetime."""
     from contextlib import asynccontextmanager
-    from io import TextIOWrapper
     from mcp.shared.message import SessionMessage
 
     @asynccontextmanager
     async def transport():
-        input_file = stdin or anyio.wrap_file(TextIOWrapper(sys.stdin.buffer, encoding="utf-8", errors="replace"))
-        output_file = stdout or anyio.wrap_file(TextIOWrapper(sys.stdout.buffer, encoding="utf-8"))
+        streams = _stdio_wire_streams(stdin, stdout)
+        input_file, output_file = streams.__enter__()
         depth = _bounded_stdio_writer_depth.set(_bounded_stdio_writer_depth.get() + 1)
         requests = _stdio_requests.set({})
         reads_send, reads = anyio.create_memory_object_stream(0)
@@ -1189,6 +1346,7 @@ def bounded_stdio_server(stdin=None, stdout=None):
             _release_stdio_requests()
             _stdio_requests.reset(requests)
             _bounded_stdio_writer_depth.reset(depth)
+            streams.__exit__(None, None, None)
 
     return transport()
 

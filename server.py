@@ -20197,13 +20197,14 @@ def _print_json(payload: dict) -> None:
     print(json.dumps(payload, indent=2, default=str))
 
 
-def _mcp_stdio_selfcheck(timeout: float = 60.0) -> dict:
+def _mcp_stdio_selfcheck(timeout: float = 60.0, *, modern: bool = False, env=None) -> dict:
     """C-01 (CRIT-1): prove the stdio MCP entry point actually boots from
     THIS interpreter and answers the protocol, the way an MCP client would
     drive it. Runs `python -P uoink_mcp.py` (-P withholds the script dir
     from sys.path, recreating the bundled embeddable Python's ._pth
-    behavior even on a dev interpreter) and walks
-    initialize -> initialized -> tools/list. Returns {ok, tools|error}.
+    behavior even on a dev interpreter). Legacy mode walks initialize ->
+    initialized -> tools/list; modern mode uses discover -> tools/list.
+    Records the observed protocol version and concrete serializer.
 
     This is the check that was missing while every install shipped a dead
     agentic path: the import crash only reproduced under the embeddable
@@ -20215,14 +20216,15 @@ def _mcp_stdio_selfcheck(timeout: float = 60.0) -> dict:
         proc = subprocess.Popen(
             [sys.executable, "-P", str(script)],
             cwd=str(HERE), stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE, text=True, encoding="utf-8")
+            stderr=subprocess.PIPE, text=True, encoding="utf-8", env=env)
     except OSError as e:
         return {"ok": False, "error": f"couldn't launch the MCP process: {e}"}
 
     lines: queue.Queue = queue.Queue()
-    threading.Thread(
+    stdout_thread = threading.Thread(
         target=lambda: [lines.put(line) for line in proc.stdout],
-        daemon=True).start()
+        daemon=True)
+    stdout_thread.start()
     stderr_tail: list[str] = []
 
     def _drain_stderr() -> None:
@@ -20230,15 +20232,16 @@ def _mcp_stdio_selfcheck(timeout: float = 60.0) -> dict:
             stderr_tail.append(line.rstrip())
             del stderr_tail[:-5]
 
-    threading.Thread(target=_drain_stderr, daemon=True).start()
-    deadline = time.time() + timeout
+    stderr_thread = threading.Thread(target=_drain_stderr, daemon=True)
+    stderr_thread.start()
+    deadline = time.monotonic() + timeout
 
     def _send(message: dict) -> None:
         proc.stdin.write(json.dumps(message) + "\n")
         proc.stdin.flush()
 
     def _wait_for(request_id: int) -> dict | None:
-        while time.time() < deadline:
+        while time.monotonic() < deadline:
             try:
                 line = lines.get(timeout=0.5)
             except queue.Empty:
@@ -20247,14 +20250,22 @@ def _mcp_stdio_selfcheck(timeout: float = 60.0) -> dict:
                 continue
             try:
                 message = json.loads(line)
-            except (json.JSONDecodeError, TypeError):
-                continue
+            except (json.JSONDecodeError, TypeError) as exc:
+                raise ValueError("Non-JSON output on MCP stdout") from exc
+            if not isinstance(message, dict) or message.get("jsonrpc") != "2.0":
+                raise ValueError("Invalid JSON-RPC output on MCP stdout")
             if message.get("id") == request_id:
                 return message
         return None
 
     try:
-        _send({"jsonrpc": "2.0", "id": 1, "method": "initialize",
+        modern_params = {"_meta": {
+            "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+            "io.modelcontextprotocol/clientCapabilities": {}}}
+        opening = "server/discover" if modern else "initialize"
+        _send({"jsonrpc": "2.0", "id": 1, "method": opening,
+               "params": modern_params} if modern else {
+               "jsonrpc": "2.0", "id": 1, "method": "initialize",
                "params": {"protocolVersion": "2024-11-05", "capabilities": {},
                           "clientInfo": {"name": "uoink-doctor",
                                          "version": VERSION}}})
@@ -20262,18 +20273,35 @@ def _mcp_stdio_selfcheck(timeout: float = 60.0) -> dict:
         if not init or "result" not in init:
             tail = "; ".join(stderr_tail)
             return {"ok": False,
-                    "error": "initialize got no response"
+                    "error": f"{opening} got no response"
                              + (f" (stderr: {tail})" if tail else "")}
-        _send({"jsonrpc": "2.0", "method": "notifications/initialized"})
-        _send({"jsonrpc": "2.0", "id": 2, "method": "tools/list"})
+        if modern:
+            if "2026-07-28" not in init["result"].get("supportedVersions", []):
+                return {"ok": False, "error": "discover did not confirm modern protocol"}
+            version = "2026-07-28"
+        else:
+            version = init["result"].get("protocolVersion")
+            if version not in ("2024-11-05", "2025-03-26", "2025-06-18", "2025-11-25"):
+                return {"ok": False, "error": "initialize returned an invalid protocol version"}
+            _send({"jsonrpc": "2.0", "method": "notifications/initialized"})
+        listing = {"jsonrpc": "2.0", "id": 2, "method": "tools/list"}
+        if modern:
+            listing["params"] = modern_params
+        _send(listing)
         tools = _wait_for(2)
         if not tools or "result" not in tools:
             return {"ok": False, "error": "tools/list got no response"}
+        if modern and (tools["result"].get("resultType") != "complete" or
+                       "io.modelcontextprotocol/serverInfo" not in tools["result"].get("_meta", {})):
+            return {"ok": False, "error": "tools/list lacks the modern result envelope"}
         count = len((tools.get("result") or {}).get("tools") or [])
         if count < 14:
             return {"ok": False,
                     "error": f"tools/list returned only {count} tools"}
-        return {"ok": True, "tools": count}
+        return {"ok": True, "tools": count, "protocol_era": "modern" if modern else "legacy",
+                "protocol_version": version, "opening_method": opening,
+                "serializer": "JSONRPCResponse.model_dump_json",
+                "transport": "bounded_stdio_server", "evidence": "JSON-RPC self-check"}
     except Exception as e:
         return {"ok": False, "error": f"stdio handshake failed: {e}"}
     finally:
@@ -20285,6 +20313,31 @@ def _mcp_stdio_selfcheck(timeout: float = 60.0) -> dict:
             proc.wait(timeout=10)
         except Exception:
             proc.kill()
+            proc.wait(timeout=5)
+        stdout_thread.join(timeout=2)
+        stderr_thread.join(timeout=2)
+        proc.stdout.close()
+        proc.stderr.close()
+
+
+def _mcp_modern_stdio_selfcheck(timeout: float = 60.0) -> dict:
+    """Probe modern stdio in a separate disposable profile and app directory."""
+    import tempfile
+    with tempfile.TemporaryDirectory(prefix="uoink-modern-selfcheck-") as directory:
+        root = Path(directory)
+        for name in ("profile", "app", "temp"):
+            (root / name).mkdir()
+        with socket.socket() as probe:
+            probe.bind(("127.0.0.1", 0))
+            port = probe.getsockname()[1]
+        if port == 5179:
+            return {"ok": False, "error": "isolated port allocation selected the production port"}
+        env = dict(os.environ, UOINK_ISOLATED_PROFILE=str(root / "profile"),
+                   UOINK_ISOLATED_APP_DIR=str(root / "app"), UOINK_ISOLATED_PORT=str(port),
+                   LOCALAPPDATA=str(root / "appdata"), XDG_DATA_HOME=str(root / "xdg"),
+                   UOINK_OUTPUT_DIR=str(root / "out"), TMP=str(root / "temp"), TEMP=str(root / "temp"),
+                   PYTHONDONTWRITEBYTECODE="1", PYTHONUTF8="1")
+        return _mcp_stdio_selfcheck(timeout, modern=True, env=env)
 
 
 # ---- C-05 (CRIT-5): stale-path integrity + heal ---------------------------
@@ -20634,6 +20687,7 @@ def doctor_payload() -> dict:
         "diagnose": _diagnose_payload(),
         "migration": migrate_install.migration_status(),
         "mcp_stdio": _mcp_stdio_selfcheck(),
+        "mcp_stdio_modern": _mcp_modern_stdio_selfcheck(),
         "path_integrity": _path_integrity_status(force=True),
         "podcast_corpus": _podcast_corpus_reconciliation_status(),
     }

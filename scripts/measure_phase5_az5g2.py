@@ -242,6 +242,7 @@ def run_shipped_stdio(
     replace_reader=None,
     shift_after_admit: float = 0.0,
     label: str,
+    modern: bool = False,
 ) -> dict[str, Any]:
     """Drive bounded_stdio_server and retain exact stdout frames."""
     frames: list[str] = []
@@ -262,6 +263,11 @@ def run_shipped_stdio(
         "method": "tools/call",
         "params": {"name": "get_library_activity", "arguments": arguments},
     }
+    if modern:
+        meta = {"io.modelcontextprotocol/protocolVersion": "2026-07-28",
+                "io.modelcontextprotocol/clientCapabilities": {}}
+        initialize = {"jsonrpc": "2.0", "id": 1, "method": "server/discover", "params": {"_meta": meta}}
+        call["params"]["_meta"] = meta
     init_line = json.dumps(initialize, ensure_ascii=False, separators=(",", ":")) + "\n"
     note_line = json.dumps(initialized, ensure_ascii=False, separators=(",", ":")) + "\n"
     call_line = json.dumps(call, ensure_ascii=False, separators=(",", ":")) + "\n"
@@ -300,7 +306,8 @@ def run_shipped_stdio(
                 group.start_soon(serve)
                 await incoming.send(init_line)
                 await outgoing.receive()
-                await incoming.send(note_line)
+                if not modern:
+                    await incoming.send(note_line)
                 await incoming.send(call_line)
                 await outgoing.receive()
                 group.cancel_scope.cancel()
@@ -314,6 +321,7 @@ def run_shipped_stdio(
     t1 = time.perf_counter()
 
     activity = None
+    observed_version = None
     parsed_frames = []
     for raw in frames:
         rec = {
@@ -331,7 +339,12 @@ def run_shipped_stdio(
                 activity = obj
                 rec["role"] = "tools_call_response"
             elif obj.get("id") == 1:
-                rec["role"] = "initialize_response"
+                rec["role"] = "discover_response" if modern else "initialize_response"
+                opened = obj.get("result") or {}
+                if modern and "2026-07-28" in opened.get("supportedVersions", []):
+                    observed_version = "2026-07-28"
+                elif not modern:
+                    observed_version = opened.get("protocolVersion")
             else:
                 rec["role"] = "other"
         except json.JSONDecodeError:
@@ -342,6 +355,8 @@ def run_shipped_stdio(
         "scope": "actual_shipped_stdio_entry",
         "entry": "uoink_mcp.bounded_stdio_server / run_bounded_stdio_async writer",
         "label": label,
+        "protocol_version": observed_version,
+        "protocol_era": ("modern" if observed_version == "2026-07-28" else "legacy") if observed_version else None,
         "includes_reader_invocation": replace_reader is None,
         "serializer": "JSONRPCResponse.model_dump_json(by_alias=True, exclude_none=True) then completed-frame cap then trailing newline",
         "elapsed_ms": (t1 - t0) * 1000.0,
@@ -551,8 +566,9 @@ def collect_metadata() -> dict[str, Any]:
         "mcp_installed": pkg_version("mcp"),
         "mcp_pin": next(line for line in (ROOT / "requirements.txt").read_text().splitlines()
                         if line.startswith("mcp==")),
-        "protocol_era": "legacy",
-        "protocol_version": "2025-06-18",
+        "protocol_era": None,
+        "protocol_version": None,
+        "requested_protocol_version": "2025-06-18",
         "anyio": pkg_version("anyio"),
         "pydantic": pkg_version("pydantic"),
         "pytest": pkg_version("pytest"),
@@ -684,6 +700,7 @@ def generate_markdown(obs: dict[str, Any]) -> str:
 - **Source tree:** `{obs['metadata']['git_tree']}`
 - **Worktree dirty:** `{obs['metadata']['worktree_dirty']}`; adapter SHA-256 `{obs['metadata']['adapter_sha256']}`
 - **SDK:** `{obs['metadata']['mcp_installed']}`; protocol `{obs['metadata']['protocol_era']}` / `{obs['metadata']['protocol_version']}`
+- **Separate modern probe:** `{obs['metadata']['modern_protocol_version']}`, verified by discover and the call frame.
 - **Harness:** `scripts/measure_phase5_az5g2.py`
 - **Proof:** `{PROOF.relative_to(ROOT).as_posix()}/`
 
@@ -737,6 +754,8 @@ The extended test suite in `tests/test_library_analysis_fixtures.py::test_activi
 | **Deadline Expiry Refusal** | 548 items, expired monotonic clock | {fmt_ms(extra['untraced_deadline']['construction_ms'])} ms reader refusal, {fmt_int(deadline['raw_bytes'])} bytes raw JSON | `ok: False`, `error.code = "{deadline_err.get('code')}"`, `retryable: {deadline_err.get('retryable')}`. Message: `{deadline_err.get('message')}`. Diagnostic traced heap {heap_deadline['heap_peak_kib']:.1f} KiB. A separately labelled shipped-entry inbound-expiry refusal is retained in the proof (`shipped_expired_inbound`). |
 | **Transport Serialization** | 548-item report packet in hand-built envelope | {fmt_ms(hand['elapsed_ms'])} ms, {fmt_int(hand['jsonrpc_utf8_bytes'])} bytes | Hand-built JSON-RPC synthetic envelope with preface and document fences; isolates serialization timing and does not invoke the stdio handler. |
 | **Actual shipped stdio entry** | 548-item live reader through `bounded_stdio_server` | {fmt_ms(shipped548['elapsed_ms'])} ms session (includes initialize + reader + writer), {fmt_int(shipped_bytes(shipped548))} bytes JSON-RPC | Actual shipped transport: SDK `JSONRPCResponse.model_dump_json`, completed-frame cap, trailing newline retained in proof. `isError`={shipped548.get('isError')}. This is a harness transcript, not a real-client log. |
+| **Modern shipped stdio entry** | 548-item live reader, protocol {extra['shipped_modern_548']['protocol_version']} | {fmt_ms(extra['shipped_modern_548']['elapsed_ms'])} ms session, {fmt_int(shipped_bytes(extra['shipped_modern_548']))} bytes JSON-RPC | Includes discover, reader, concrete serialization and modern metadata. Harness evidence only. |
+| **Modern 10,000-item entry** | 10,000-item live reader, protocol {extra['shipped_modern_10k']['protocol_version']} | {fmt_ms(extra['shipped_modern_10k']['elapsed_ms'])} ms session, {fmt_int(shipped_bytes(extra['shipped_modern_10k']))} bytes JSON-RPC | Separate SDK 2 measurement using the same response cap. Harness evidence only. |
 | **Three Memberships / Item** | {dense['dims']['items']} items, {dense['dims']['memberships']} memberships | {fmt_ms(extra['untraced_dense']['construction_ms'])} ms untraced, {fmt_int(dense['raw_bytes'])} bytes raw JSON | `ok: True`. {rows_phrase(dense['counts'])}. Journal {fmt_int(dense['dims']['journal_bytes'])} bytes. Shipped JSON-RPC {fmt_int(shipped_bytes(extra['shipped_live_dense']))} bytes. |
 | **Multi-Operation Journal** | {multi['dims']['items']} items, {multi['dims']['applies']} consecutive applied operations | {fmt_ms(extra['untraced_multi']['construction_ms'])} ms untraced, {fmt_int(multi['raw_bytes'])} bytes raw JSON | Proved: `coverage_status = "{multi['counts']['coverage_shelf']['coverage_status']}"`, `reasons = {multi['counts']['coverage_shelf']['reasons']}`. {rows_phrase(multi['counts'])}. Journal {fmt_int(multi['dims']['journal_bytes'])} bytes. Shipped JSON-RPC {fmt_int(shipped_bytes(extra['shipped_live_multi']))} bytes. |
 | **100k-Observation Scale** | {obs100k['dims']['items']} item, {fmt_int(obs100k['dims']['observations'])} source item observations | {fmt_ms(extra['untraced_100k']['construction_ms'])} ms untraced, {fmt_int(obs100k['raw_bytes'])} bytes raw JSON | `ok: True`. Coverage `{obs100k['counts']['coverage_shelf']['coverage_status']}`. {rows_phrase(obs100k['counts'])}. No journal. Shipped JSON-RPC {fmt_int(shipped_bytes(extra['shipped_live_100k']))} bytes. |
@@ -1052,6 +1071,15 @@ def main() -> int:
         extra["shipped_live_10k"] = shipped(
             conn_10k, PRIMARY_ARGS, "10000 primary live reader through bounded_stdio_server", "10000_primary"
         )
+        extra["shipped_modern_548"] = shipped(
+            conn_548, PRIMARY_ARGS, "548 primary modern live reader", "548_primary_modern", modern=True
+        )
+        extra["shipped_modern_10k"] = shipped(
+            conn_10k, PRIMARY_ARGS, "10000 primary modern live reader", "10000_primary_modern", modern=True
+        )
+        metadata["protocol_era"] = extra["shipped_live_548"]["protocol_era"]
+        metadata["protocol_version"] = extra["shipped_live_548"]["protocol_version"]
+        metadata["modern_protocol_version"] = extra["shipped_modern_548"]["protocol_version"]
         extra["shipped_live_replay"] = shipped(
             conn_replay_db, REPLAY_ARGS, "548 proved replay live reader through bounded_stdio_server", "548_replay"
         )
