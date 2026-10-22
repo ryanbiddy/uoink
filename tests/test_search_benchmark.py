@@ -267,12 +267,16 @@ def test_cli_real_ingestion_and_skip_with_synthetic_corpus(tmp_path):
     assert strict["all"]["hit1"] == 30 and strict["all"]["latency_samples"] == 60
     assert strict["exact_title"] == {"passed": 2, "n": 2}
     assert metrics["index_sha256"] == bench.digest((REPO / "index.py").read_bytes())
+    # Later checkouts gain modes (3.11 adds forgiving); each is either measured or cleanly skipped.
     for mode in ("forgiving", "embedding", "hybrid"):
-        assert f"{mode}: not available in this checkout" in result.stdout
-        assert metrics["modes"][mode]["status"] == "skipped"
+        skipped = metrics["modes"][mode].get("status") == "skipped"
+        assert (f"{mode}: not available in this checkout" in result.stdout) == skipped
+        if not skipped:
+            assert metrics["modes"][mode]["all"]["latency_samples"] == 60
     assert (tmp_path / "work/benchmark.sqlite3").is_file()
     assert (tmp_path / "work/sources" / (docs[0]["id"] + ".md")).read_text(encoding="utf-8") == docs[0]["text"]
-    assert len((tmp_path / "out/per-query.jsonl").read_text(encoding="utf-8").splitlines()) == 32
+    measured = 1 + sum(metrics["modes"][m].get("status") != "skipped" for m in ("forgiving", "embedding", "hybrid"))
+    assert len((tmp_path / "out/per-query.jsonl").read_text(encoding="utf-8").splitlines()) == 32 * measured
     assert "strict / constraints" in (tmp_path / "out/summary.md").read_text(encoding="utf-8")
     # A second invocation cannot reuse or replace a prior index/output.
     again = run_cli(tmp_path)

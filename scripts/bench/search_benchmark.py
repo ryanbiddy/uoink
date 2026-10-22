@@ -215,6 +215,9 @@ def mode_search(index, mode):
     if not callable(search):
         return None
     params = inspect.signature(search).parameters
+    # 3.11 keyword search takes match="forgiving" | "strict" and defaults to forgiving.
+    if "match" in params and mode in ("strict", "forgiving"):
+        return lambda query: search(query, limit=30, match=mode)
     if "mode" not in params:
         return (lambda query: search(query, limit=30)) if mode == "strict" else None
     declared = set(getattr(index, "SEARCH_MODES", ()))
