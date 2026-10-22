@@ -411,6 +411,40 @@
       padding: 28px 28px 34px;
     }
 
+    /* One-time usage opt-in card: its own row above the content, styled as a card. */
+    .main:has(> #usageOptInCard:not(.hidden)) {
+      grid-template-rows: auto minmax(0, 1fr);
+    }
+
+    .main > #usageOptInCard {
+      gap: 10px;
+      margin: 24px 28px 0;
+      padding: 18px 20px;
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--rust);
+      border-radius: var(--card-radius);
+      background: color-mix(in srgb, var(--surface) 82%, transparent);
+    }
+
+    .main > #usageOptInCard h2 {
+      margin: 0;
+      font-size: 17px;
+    }
+
+    .main > #usageOptInCard .setting-copy {
+      margin: 0;
+      max-width: 80ch;
+    }
+
+    .main > #usageOptInCard .inline-row {
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .main > #usageOptInCard #usageChoiceStatus:empty {
+      display: none;
+    }
+
     .tab-panel {
       display: none;
       max-width: 1180px;
@@ -3758,6 +3792,9 @@
       }
       .content {
         padding: 26px 18px 34px;
+      }
+      .main > #usageOptInCard {
+        margin: 18px 18px 0;
       }
       .page-head {
         display: grid;
