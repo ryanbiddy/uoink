@@ -40,6 +40,25 @@ The plugin includes the skill and launches the installed Python and
 For a custom installation, use `uoink connect claude-code` and install the
 standalone skill into `~/.claude/skills` instead of enabling the plugin.
 
+## Zing (video studio, optional)
+
+[Zing](https://github.com/ryanbiddy/zing) studies reference videos, matches a
+style from your Uoink library, renders local cuts with captions, color and
+transitions, and makes memes. It is a separate tool. This marketplace also
+carries its plugin:
+
+```powershell
+claude plugin install zing@uoink
+```
+
+The plugin launches `zing serve-mcp`, so install Zing first (it is not on
+PyPI; see Zing's [CONNECT.md](https://github.com/ryanbiddy/zing/blob/main/docs/CONNECT.md))
+and make sure `zing` is on PATH. Run `zing doctor` once. The plugin includes
+the `zing` skill and the `uoink-zing` suite skill, which teaches the flow from
+finding a reference in Uoink to rendering with Zing and saving the breakdown
+back to Uoink. Both skills are also in `skills/` for other agents. The Zing
+plugin is **not yet tested** in Claude Code beyond `claude plugin validate`.
+
 ## Codex, pi, Hermes Agent, and OpenClaw
 
 Use the same skill folder in each agent. These PowerShell commands copy the
@@ -143,7 +162,13 @@ generated from `uoink_connect.py`; do not edit it by hand.
 plugins/uoink/.claude-plugin/plugin.json
 plugins/uoink/.mcp.json
 plugins/uoink/skills/uoink/
+plugins/zing/.claude-plugin/plugin.json
+plugins/zing/.mcp.json
+plugins/zing/skills/zing/
+plugins/zing/skills/uoink-zing/
 skills/uoink/
+skills/zing/
+skills/uoink-zing/
 ```
 
 The two skill folders are generated copies. In the main Uoink repository, edit
@@ -151,6 +176,10 @@ The two skill folders are generated copies. In the main Uoink repository, edit
 `python scripts/build_agent_kit.py --check`. The test suite fails on drift.
 The same script sets the plugin version from `VERSION` and regenerates the client
 tables here and in `docs/connect-your-agent.md`; `--check` fails if either drifts.
+
+The Zing skill folders are copies of `skills/zing` and `skills/uoink-zing` in
+the [Zing repository](https://github.com/ryanbiddy/zing); `plugins/zing/SOURCE.md`
+records the commit they were copied from.
 
 Before publication, run locally:
 
