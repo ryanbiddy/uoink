@@ -17,8 +17,8 @@ def test_local_response_copy_does_not_settle_the_outgoing_request(db, monkeypatc
 
     def read_with_diagnostic(args):
         before = library_resources.process_guard()._active
-        copy = types.JSONRPCMessage(types.JSONRPCResponse(
-            jsonrpc='2.0', id=2, result={'diagnostic': 'local copy only'}))
+        copy = types.JSONRPCResponse(
+            jsonrpc='2.0', id=2, result={'diagnostic': 'local copy only'})
         assert json.loads(copy.model_dump_json())['id'] == 2
         observations.append((before, library_resources.process_guard()._active,
                              library_resources.transport_scope(2) is not None))

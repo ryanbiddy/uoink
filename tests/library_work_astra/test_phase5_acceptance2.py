@@ -5,6 +5,8 @@ No model, resident helper, network listener, or live index.
 """
 from __future__ import annotations
 
+from tests.mcp_sdk import handler_for
+
 import asyncio
 import hashlib
 import json
@@ -382,7 +384,6 @@ def test_phase5_ba2_unknown_interval_field_rejected_before_storage(monkeypatch):
 def test_phase5_ba2_raw_stdio_duplicate_keys_rejected_before_read(db, monkeypatch):
     import anyio
     import io
-    from mcp.server.stdio import stdio_server
 
     monkeypatch.setattr(analysis, "_analysis_db_override", db)
     raw = ('{"jsonrpc":"2.0","id":1,"method":"tools/call","params":'
@@ -393,17 +394,15 @@ def test_phase5_ba2_raw_stdio_duplicate_keys_rejected_before_read(db, monkeypatc
     monkeypatch.setattr(analysis, "_get_connection", lambda: (reads.append(True), real_connect())[1])
 
     async def invoke():
-        async with stdio_server(stdin=anyio.wrap_file(io.StringIO(raw)), stdout=anyio.wrap_file(io.StringIO())) as (incoming, outgoing):
-            try:
-                message = await incoming.receive()
-                if isinstance(message, Exception):
-                    return
-                request = mcp_types.CallToolRequest.model_validate(message.message.root.model_dump())
-                await uoink_mcp.mcp._mcp_server.request_handlers[mcp_types.CallToolRequest](request)
-            finally:
-                await outgoing.aclose()
+        output = io.StringIO()
+        async with uoink_mcp.bounded_stdio_server(
+                stdin=anyio.wrap_file(io.StringIO(raw)), stdout=anyio.wrap_file(output)) as (incoming, outgoing):
+            await uoink_mcp.mcp.run(incoming, outgoing, uoink_mcp.mcp.create_initialization_options())
+        assert json.loads(output.getvalue()) == {
+            "jsonrpc": "2.0", "id": None,
+            "error": {"code": -32700, "message": "Invalid JSON-RPC message"}}
     anyio.run(invoke)
-    assert not reads, "Actual SDK raw stdio decoder admitted duplicate date_basis keys"
+    assert not reads, "Shipped raw stdio decoder admitted duplicate date_basis keys"
 
 
 def test_phase5_ba2_transaction_refusal_uses_frozen_error_code(db):
@@ -415,8 +414,8 @@ def test_phase5_ba2_transaction_refusal_uses_frozen_error_code(db):
 
 
 def test_phase5_ba2_stdio_schema_matches_registry():
-    result = asyncio.run(uoink_mcp.mcp._mcp_server.request_handlers[mcp_types.ListToolsRequest](mcp_types.ListToolsRequest(method="tools/list"))).root
-    actual = next(t.inputSchema for t in result.tools if t.name == "get_library_activity")
+    result = asyncio.run(handler_for(uoink_mcp.mcp, "tools/list")(mcp_types.ListToolsRequest(method="tools/list")))
+    actual = next(t.input_schema for t in result.tools if t.name == "get_library_activity")
     expected = uoink_mcp_tools.TOOL_REGISTRY["get_library_activity"].input_schema
     assert actual == expected
 
@@ -429,8 +428,8 @@ def test_phase5_ba2_small_normal_stdio_summary_succeeds(db, monkeypatch):
     direct = report(db)
     assert direct["ok"]
     result = stdio_result({"interval": INTERVAL})
-    assert not result.isError, result.content[0].text
-    assert len(json.dumps({"jsonrpc": "2.0", "id": 1, "result": result.model_dump(mode="json", exclude_none=True)}, ensure_ascii=False).encode()) <= 65536
+    assert not result.is_error, result.content[0].text
+    assert len(json.dumps({"jsonrpc": "2.0", "id": 1, "result": result.model_dump(by_alias=True, mode="json", exclude_none=True)}, ensure_ascii=False).encode()) <= 65536
 
 
 def test_phase5_ba2_long_label_evidence_remains_accessible(db):
@@ -508,7 +507,7 @@ def test_phase5_ba2_stdio_serialization_is_inside_deadline(db, monkeypatch):
         return real_render(packet)
     monkeypatch.setattr(library_resources, "render_tool_text", slow_render)
     result = stdio_result({"interval": INTERVAL})
-    assert result.isError and "deadline_exceeded" in result.content[0].text, result.content[0].text[:300]
+    assert result.is_error and "deadline_exceeded" in result.content[0].text, result.content[0].text[:300]
 
 
 @pytest.mark.parametrize("damage", ["appended_claim", "wrong_interval", "missing_revisions", "wrong_clock"])

@@ -15,7 +15,8 @@ Contract rules this module does not implement exactly, and why
    actual SDK JSON-RPC serialization are all charged to that admission.
    Direct handler calls still use ``LibraryReader.assert_within_deadline``;
    the shipped stdio entry checks completed UTF-8 bytes and remaining time
-   after ``JSONRPCMessage.model_dump_json``, then releases. ``request()``
+   after the concrete ``JSONRPCResponse.model_dump_json(by_alias=True)``
+   (or ``JSONRPCError``) and releases after write and flush. ``request()``
    keeps one admission and one deadline for a prompt's fan-out. The one
    deadline is carried into backend acquisition:
    ``_bind_index`` passes the remaining time to the index factory, and

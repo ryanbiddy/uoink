@@ -67,7 +67,7 @@ def read_pins(path: Path) -> list[tuple[str, str]]:
         line = raw.split("#", 1)[0].strip()
         if not line:
             continue
-        match = re.fullmatch(r"([A-Za-z0-9][A-Za-z0-9_.-]*)==([A-Za-z0-9][A-Za-z0-9_.+!-]*)", line)
+        match = re.fullmatch(r"([A-Za-z0-9][A-Za-z0-9_.-]*)==([A-Za-z0-9][A-Za-z0-9_.+!-]*)(?: --hash=sha256:[0-9a-f]{64})?", line)
         if not match or canonical(match[1]) in seen:
             raise ValueError(f"{path}:{number}: expected a unique exact package==version pin")
         seen.add(canonical(match[1]))

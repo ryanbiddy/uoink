@@ -118,7 +118,8 @@ def _event(event_id: str, item_id: str = "short-123") -> dict:
     }
 
 
-def test_uoink_suite_provider_matches_conformance_fixture():
+def test_uoink_suite_provider_matches_conformance_fixture(monkeypatch):
+    monkeypatch.setattr(server._install_isolation, "current_binding", lambda: None)
     expected = json.loads(regenerate.FIXTURE_PATH.read_text(encoding="utf-8"))
     actual = regenerate.generate_fixture()
     assert actual == expected

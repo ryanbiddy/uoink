@@ -94,6 +94,7 @@ def test_extension_updates_keep_user_prompts(monkeypatch, tmp_path):
 
 def test_darwin_bind_does_not_resolve_dns(monkeypatch):
     monkeypatch.setattr(server, "sys", SimpleNamespace(platform="darwin"))
+    monkeypatch.setattr(server._install_isolation, "current_binding", lambda: None)
     def forbidden(*args):
         raise AssertionError("binding a loopback service must not wait for DNS")
     monkeypatch.setattr(socket, "getfqdn", forbidden)
@@ -105,6 +106,7 @@ def test_darwin_bind_does_not_resolve_dns(monkeypatch):
 @pytest.mark.parametrize("platform", ["darwin", "win32"])
 def test_splash_fallback_keeps_darwin_sentinels_outside_app(monkeypatch, tmp_path, platform):
     import uoink_splash
+    monkeypatch.setattr(uoink_splash._install_isolation, "current_binding", lambda: None)
     monkeypatch.setattr(uoink_splash, "sys", SimpleNamespace(platform=platform))
     monkeypatch.setattr(Path, "home", classmethod(lambda cls: tmp_path))
     monkeypatch.setitem(sys.modules, "_platform", None)

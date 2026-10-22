@@ -369,35 +369,205 @@ def test_queue_join_waits_for_sqlite_lock_and_committed_count(store, monkeypatch
     assert usage.disclosure()["next_payload"]["searches"] == 1
 
 
-def test_stdio_wire_path_records_to_shared_file(store, monkeypatch):
-    from tests.test_c01_mcp_stdio import _StdioClient, _isolated_env, ROOT
-    env = _isolated_env(str(store))
+@pytest.mark.parametrize("modern", [False, True], ids=["legacy", "modern"])
+@pytest.mark.parametrize("client_name,bucket", [("private client name", "other"), ("claude-code", "claude-code")])
+def test_stdio_wire_path_records_to_shared_file(store, monkeypatch, modern, client_name, bucket):
+    from mcp import types
+    from tests.mcp_wire import StdioClient, isolated_env, ROOT
+    from tests.test_mcp_wire import modern_params
+    env = isolated_env(store)
     profile = Path(env["UOINK_ISOLATED_PROFILE"])
     monkeypatch.setattr(usage, "_root", lambda: profile)
     enabled()
-    client = _StdioClient([sys.executable, str(ROOT / "uoink_mcp.py")], ROOT, env)
+    client = StdioClient([sys.executable, str(ROOT / "uoink_mcp.py")], ROOT, env)
     try:
-        client.send({"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {
-            "protocolVersion": "2024-11-05", "capabilities": {},
-            "clientInfo": {"name": "private client name", "version": "private"}}})
-        assert "result" in client.wait_for(1)
-        client.send({"jsonrpc": "2.0", "method": "notifications/initialized"})
-        client.send({"jsonrpc": "2.0", "id": 2, "method": "tools/call", "params": {
-            "name": "search_uoinks", "arguments": {"query": ""}}})
-        assert "result" in client.wait_for(2)
+        info = {"name": client_name, "version": "private"}
+        if modern:
+            params = modern_params()
+            params["_meta"][types.CLIENT_INFO_META_KEY] = info
+            # The 2026-07-28 era opens with server/discover; ping is a legacy-only method.
+            assert "result" in client.request(1, "server/discover", params)
+        else:
+            assert "result" in client.request(1, "initialize", {
+                "protocolVersion": "2024-11-05", "capabilities": {}, "clientInfo": info})
+            client.send({"jsonrpc": "2.0", "method": "notifications/initialized"})
+        for ident in (2, 3):
+            params = {"name": "search_uoinks", "arguments": {"query": ""}}
+            if modern:
+                params = modern_params(params)
+                # Later per-request identity must not count a second client.
+                params["_meta"][types.CLIENT_INFO_META_KEY] = {"name": "cursor", "version": "1"}
+            assert "result" in client.request(ident, "tools/call", params)
         deadline = time.monotonic() + 10  # the stdio child flushes counts asynchronously; slow runners need headroom
         while time.monotonic() < deadline:
             p = usage.disclosure()["next_payload"]
             # Tool and transport counts are separate queue entries.
-            if (p and p["tools"].get("search_uoinks") and p["mcp_clients"].get("other")
-                    and p["transports"].get("stdio")):
+            if (p and p["tools"].get("search_uoinks") == 2 and p["mcp_clients"].get(bucket)
+                    and p["transports"].get("stdio") == 2):
                 break
             time.sleep(0.02)
-        assert p["tools"] == {"search_uoinks": 1}
-        assert p["mcp_clients"] == {"other": 1}
-        assert p["transports"] == {"stdio": 1}
+        assert p["tools"] == {"search_uoinks": 2}
+        assert p["mcp_clients"] == {bucket: 1}
+        assert p["transports"] == {"stdio": 2}
     finally:
         client.close()
+
+
+@pytest.mark.parametrize("modern", [False, True])
+@pytest.mark.parametrize("bounded", [False, True], ids=["sdk-stream", "bounded-stream"])
+def test_stdio_usage_failures_preserve_responses_and_connection_counts(monkeypatch, modern, bounded):
+    import anyio
+    from mcp.shared.message import SessionMessage
+    import uoink_mcp as u
+    from tests.mcp_wire import initialize_request, rpc
+    from tests.test_mcp_wire import modern_params
+    from tests.test_phase5_az5h import _Input
+
+    clients, calls = [], []
+    broken = False
+
+    def count(group, name="count", outcome="ok"):
+        if group != "mcp_clients":
+            return
+        clients.append((group, name))
+        if broken:
+            raise OSError("synthetic usage failure")
+
+    def call(name, transport):
+        calls.append((name, transport))
+        if broken:
+            raise OSError("synthetic usage failure")
+
+    monkeypatch.setattr(usage, "count", count)
+    monkeypatch.setattr(usage, "mcp_call", call)
+
+    async def connection():
+        incoming, reads = anyio.create_memory_object_stream(0)
+        writes, outgoing = anyio.create_memory_object_stream(0)
+
+        class Output:
+            async def write(self, text):
+                await writes.send(text)
+
+            async def flush(self):
+                pass
+
+        async def serve():
+            if bounded:
+                async with u.bounded_stdio_server(_Input(reads), Output()) as (reader, writer):
+                    await u.mcp.run(reader, writer, u.mcp.create_initialization_options())
+            else:
+                await u.mcp.run(reads, writes, u.mcp.create_initialization_options())
+
+        async def send(message):
+            text = json.dumps(message)
+            await incoming.send(text + "\n" if bounded else SessionMessage(u.parse_stdio_message(text)))
+
+        async def reply():
+            frame = await outgoing.receive()
+            return json.loads(frame if bounded else frame.message.model_dump_json(by_alias=True, exclude_none=True))
+
+        responses = []
+        with anyio.fail_after(8):
+            async with anyio.create_task_group() as group:
+                group.start_soon(serve)
+                opening = (rpc(1, "ping", modern_params()) if modern else
+                           initialize_request("2025-11-25"))
+                await send(opening)
+                responses.append(await reply())
+                if not modern:
+                    await send({"jsonrpc": "2.0", "method": "notifications/initialized"})
+                    # SDK 1 counted every initialize. U2 intentionally counts
+                    # the client only once for this connection.
+                    await send(dict(opening, id=4))
+                    responses.append(await reply())
+                for ident in (2, 3):
+                    params = {"name": "search_uoinks", "arguments": {"query": ""}}
+                    await send(rpc(ident, "tools/call", modern_params(params) if modern else params))
+                    responses.append(await reply())
+                await incoming.aclose()
+        return responses
+
+    baseline = anyio.run(connection)
+    broken = True
+    assert anyio.run(connection) == baseline
+    assert clients == [("mcp_clients", None if modern else "uoink-wire-characterization")] * 2
+    assert calls == [("search_uoinks", "stdio")] * 4
+
+
+@pytest.mark.parametrize("modern", [False, True])
+def test_stdio_usage_counts_attempts_before_validation_admission_and_cancellation(monkeypatch, modern):
+    import anyio
+    import library_resources as lr
+    from tests.test_mcp_sdk2_adversarial import session
+    calls = Mock()
+    monkeypatch.setattr(usage, "mcp_call", calls)
+    monkeypatch.setattr(usage, "count", Mock())
+    guard = lr.ReadGuard(admissions_per_minute=1)
+    guard.admit()
+    guard.release()
+    monkeypatch.setattr(lr, "_PROCESS_GUARD", guard)
+
+    async def check():
+        async with session(modern) as client:
+            # A cancellation with no request is not a tool call.
+            await client.cancel(99)
+            await client.quiet()
+            calls.assert_not_called()
+            # A valid JSON-RPC request still counts when typed parameters fail.
+            await client.request(2, params={"name": "search_uoinks", "arguments": []})
+            assert json.loads(await client.receive())["error"]["code"] == -32602
+            # The old hook ran before budget admission, so refusals also count.
+            await client.request(3, name="get_library_item")
+            result = json.loads(await client.receive())["result"]
+            assert result["isError"] is True
+            assert json.loads(result["content"][0]["text"])["error"]["code"] == "rate_limited"
+            assert [entry.args for entry in calls.call_args_list] == [
+                ("search_uoinks", "stdio"), ("get_library_item", "stdio")]
+    anyio.run(check)
+
+
+@pytest.mark.parametrize("modern", [False, True])
+def test_stdio_usage_excludes_bad_frames_duplicates_and_notifications(monkeypatch, modern):
+    import anyio
+    from tests.mcp_sdk import replace_handler
+    from tests.test_mcp_sdk2_adversarial import session
+    import uoink_mcp as u
+    calls = Mock()
+    monkeypatch.setattr(usage, "mcp_call", calls)
+    monkeypatch.setattr(usage, "count", Mock())
+
+    async def check():
+        entered = anyio.Event()
+
+        async def pending(ctx, params):
+            entered.set()
+            await anyio.sleep_forever()
+
+        with replace_handler(u.mcp, "tools/call", pending):
+            async with session(modern) as client:
+                for frame in (
+                    '{"jsonrpc":',
+                    '{"jsonrpc":"2.0","id":[],"method":"tools/call","params":{"name":"search_uoinks"}}',
+                    '{"jsonrpc":"2.0","id":2,"id":3,"method":"tools/call","params":{"name":"search_uoinks"}}',
+                ):
+                    await client.input.send(frame + "\n")
+                    assert "error" in json.loads(await client.receive())
+                await client.send({"jsonrpc": "2.0", "method": "tools/call", "params": {"name": "search_uoinks"}})
+                await client.send({"jsonrpc": "2.0", "id": 80, "result": {}})
+                await client.quiet()
+                calls.assert_not_called()
+                await client.request(2, name="search_uoinks")
+                await entered.wait()
+                await client.request(2, name="search_uoinks")
+                assert json.loads(await client.receive())["error"]["code"] == -32600
+                calls.assert_called_once_with("search_uoinks", "stdio")
+                await client.cancel(2)
+                await client.until(lambda: not client.states)
+                await client.quiet()
+                # Cancellation after input does not undo the original count.
+                calls.assert_called_once_with("search_uoinks", "stdio")
+    anyio.run(check)
 
 
 def test_concurrent_processes_do_not_lose_counts(store):

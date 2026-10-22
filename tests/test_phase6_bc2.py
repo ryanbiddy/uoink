@@ -15,6 +15,8 @@ validation/coherence/adapters, 6 production capture paths, 7 virtual view,
 """
 from __future__ import annotations
 
+from tests.mcp_sdk import handler_for
+
 import copy
 import hashlib
 import json
@@ -927,14 +929,14 @@ def test_bc2_export_is_on_stdio_with_the_registry_schema_and_wrapped_response_ch
     tools = {t.name: t for t in _complete_local_call(uoink_mcp.mcp.list_tools())}
     assert "export_cited_range" in tools and len(tools) == 91
     spec = uoink_mcp_tools.TOOL_REGISTRY["export_cited_range"]
-    handlers = uoink_mcp.mcp._mcp_server.request_handlers
-    listed = _complete_local_call(handlers[mcp_types.ListToolsRequest](
-        mcp_types.ListToolsRequest(method="tools/list"))).root.tools
+    handlers = uoink_mcp.mcp
+    listed = _complete_local_call(handler_for(handlers, "tools/list")(
+        mcp_types.ListToolsRequest(method="tools/list"))).tools
     wire = {t.name: t for t in listed}
     assert len(wire) == 91
-    assert wire["export_cited_range"].inputSchema == spec.input_schema
+    assert wire["export_cited_range"].input_schema == spec.input_schema
     assert wire["export_cited_range"].description == spec.description
-    assert wire["export_cited_range"].annotations.readOnlyHint is True
+    assert wire["export_cited_range"].annotations.read_only_hint is True
     manifest = json.loads((ROOT / ".mcpb" / "manifest.json").read_text(encoding="utf-8"))
     assert "export_cited_range" in {t["name"] for t in manifest["tools"]}
     assert len(manifest["tools"]) == 91
@@ -942,15 +944,15 @@ def test_bc2_export_is_on_stdio_with_the_registry_schema_and_wrapped_response_ch
     assert "### export_cited_range" in doc and "**35 tools**" in doc and "**91 tools**" in doc
     assert "91 tools" in (ROOT / "docs" / "v2-api.md").read_text(encoding="utf-8")
 
-    handler = handlers[mcp_types.CallToolRequest]
+    handler = handler_for(handlers, "tools/call")
     previous = uoink_mcp_tools._backend
     uoink_mcp_tools.bind_backend(_Backend(fail=AssertionError("malformed request touched storage")))
     try:
         request = mcp_types.CallToolRequest(
             method="tools/call",
             params=mcp_types.CallToolRequestParams(name="export_cited_range", arguments={"video_id": "x", "start": 1}))
-        result = _complete_local_call(handler(request)).root
-        assert result.isError is True
+        result = _complete_local_call(handler(request))
+        assert result.is_error is True
         envelope = json.loads(result.content[0].text)
         assert envelope["ok"] is False and envelope["error"]["code"] == "invalid_request"
         assert envelope["contract_version"] == "phase6-v1"
@@ -962,8 +964,8 @@ def test_bc2_export_is_on_stdio_with_the_registry_schema_and_wrapped_response_ch
             method="tools/call",
             params=mcp_types.CallToolRequestParams(name="export_cited_range",
                                                    arguments={"video_id": "x", "start": 1, "end": 2}))
-        result = _complete_local_call(handler(request)).root
-        assert result.isError is True and unavailable.bound == 1
+        result = _complete_local_call(handler(request))
+        assert result.is_error is True and unavailable.bound == 1
         envelope = json.loads(result.content[0].text)
         assert envelope["error"]["code"] == "library_unavailable"
         payload = {"content": [{"type": "text", "text": result.content[0].text}], "isError": True}

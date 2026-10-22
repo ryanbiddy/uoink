@@ -1,6 +1,8 @@
 """T6 acceptance: mocked provider, socket-free transports, tmp_path runs only."""
 from __future__ import annotations
 
+from tests.mcp_sdk import handler_for
+
 import asyncio
 import datetime as dt
 import contextlib
@@ -95,11 +97,11 @@ def call(transport, name, args, *, headers=None):
     if transport == "registry":
         return tools.call_tool(name, args)
     if transport == "stdio":
-        handler = uoink_mcp.mcp._mcp_server.request_handlers[types.CallToolRequest]
+        handler = handler_for(uoink_mcp.mcp, "tools/call")
         result = _run_stdio(handler(types.CallToolRequest(
-            method="tools/call", params=types.CallToolRequestParams(name=name, arguments=args)))).root
+            method="tools/call", params=types.CallToolRequestParams(name=name, arguments=args))))
         envelope = json.loads(result.content[0].text)
-        assert result.isError is (envelope.get("ok") is not True)
+        assert result.is_error is (envelope.get("ok") is not True)
         return envelope
     if transport == "http":
         probe = Probe("/mcp/v1/tools/call", {"id": 1, "params": {"name": name, "arguments": args}}, headers)
@@ -162,7 +164,7 @@ def test_discovery_plan_agent_gate_and_queue_on_every_transport(adapter, transpo
 @pytest.mark.parametrize("name", ["discover_candidates", "queue_discovered"])
 @pytest.mark.parametrize("cancel", [False, True])
 def test_stdio_discovery_serves_other_requests_and_cancellation(adapter, monkeypatch, name, cancel):
-    handlers = uoink_mcp.mcp._mcp_server.request_handlers
+    handlers = uoink_mcp.mcp
     release = threading.Event()
     expected = {"ok": True, "fixture": name}
 
@@ -177,15 +179,15 @@ def test_stdio_discovery_serves_other_requests_and_cancellation(adapter, monkeyp
 
         monkeypatch.setattr(adapter.service, name, blocked)
         args = ARGS if name == "discover_candidates" else {"run_id": "fixture", "keys": ["a"]}
-        pending = asyncio.create_task(handlers[types.CallToolRequest](types.CallToolRequest(
+        pending = asyncio.create_task(handler_for(handlers, "tools/call")(types.CallToolRequest(
             method="tools/call", params=types.CallToolRequestParams(name=name, arguments=args))))
         try:
             await asyncio.wait_for(started.wait(), 1)
             assert not pending.done(), "discovery blocked the stdio event loop"
-            result = await asyncio.wait_for(handlers[types.ListToolsRequest](
+            result = await asyncio.wait_for(handler_for(handlers, "tools/list")(
                 types.ListToolsRequest(method="tools/list")), 1)
-            assert len(result.root.tools) == 91
-            assert tools.DISCOVERY_TOOL_NAMES <= {tool.name for tool in result.root.tools}
+            assert len(result.tools) == 91
+            assert tools.DISCOVERY_TOOL_NAMES <= {tool.name for tool in result.tools}
             assert not pending.done()
             if cancel:
                 pending.cancel()
@@ -193,8 +195,8 @@ def test_stdio_discovery_serves_other_requests_and_cancellation(adapter, monkeyp
                     await asyncio.wait_for(pending, 1)
             else:
                 release.set()
-                response = (await asyncio.wait_for(pending, 1)).root
-                assert response.isError is False
+                response = (await asyncio.wait_for(pending, 1))
+                assert response.is_error is False
                 assert json.loads(response.content[0].text) == expected
         finally:
             release.set()

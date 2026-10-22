@@ -1,6 +1,8 @@
 """Darwin refusals happen before settings, index, ledger or destination I/O."""
 from __future__ import annotations
 
+from tests.mcp_sdk import handler_for
+
 import json
 from types import SimpleNamespace
 
@@ -101,7 +103,7 @@ def test_stdio_budgeted_handlers_disclose_capability(darwin, monkeypatch, name):
     monkeypatch.setattr(library_resources, "call_tool", lambda *args, **kwargs: {"ok": True})
     monkeypatch.setattr(server, "_get_index", lambda: SimpleNamespace(_conn=None))
     monkeypatch.setattr(library_resources.LibraryReader, "assert_within_deadline", lambda *args: None)
-    handler = uoink_mcp.mcp._mcp_server.request_handlers[types.CallToolRequest]
+    handler = handler_for(uoink_mcp.mcp, "tools/call")
     request = types.CallToolRequest(method="tools/call", params=types.CallToolRequestParams(name=name, arguments={}))
     # These local handlers complete synchronously. Avoid asyncio's Windows
     # socketpair so this regression can run with all networking forbidden.
@@ -109,7 +111,7 @@ def test_stdio_budgeted_handlers_disclose_capability(darwin, monkeypatch, name):
     try:
         coroutine.send(None)
     except StopIteration as done:
-        result = done.value.root
+        result = done.value
     else:
         pytest.fail("Local handler unexpectedly suspended")
     finally:

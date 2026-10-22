@@ -14,10 +14,11 @@ spec.loader.exec_module(notices)
 
 def test_bundled_fonts_match_committed_notices_and_have_licences(tmp_path, monkeypatch):
     rows = [
-        {"Name": line.split("==")[0], "Version": line.split("==")[1], "License": "fixture"}
+        {"Name": line.split("==")[0], "Version": line.split("==", 1)[1].split()[0], "License": "fixture"}
         for line in (ROOT / "requirements-installer-lock.txt").read_text().splitlines()
         if line and not line.startswith("#")
     ]
+    assert all(not any(char.isspace() for char in row["Version"]) for row in rows)
     monkeypatch.setattr(notices, "_from_pip_licenses", lambda: rows)
     monkeypatch.setattr(importlib.metadata, "distributions", lambda: ())
     target = tmp_path / "notices.md"
