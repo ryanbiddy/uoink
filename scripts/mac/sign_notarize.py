@@ -19,6 +19,16 @@ from build_bundle import create_dmg, sha256, signing_order, tree_inventory
 from qualify_deps import write_json
 from sign_archives import sign_archives
 
+DEVELOPER_ID_G2 = Path(__file__).parent / "certs/DeveloperIDG2CA.cer"
+# https://www.apple.com/certificateauthority/DeveloperIDG2CA.cer
+DEVELOPER_ID_G2_SHA256 = "f16cd3c54c7f83cea4bf1a3e6a0819c8aaa8e4a1528fd144715f350643d2df3a"
+
+
+def verified_intermediate() -> Path:
+    if sha256(DEVELOPER_ID_G2) != DEVELOPER_ID_G2_SHA256:
+        raise ValueError("Developer ID G2 intermediate SHA256 mismatch")
+    return DEVELOPER_ID_G2
+
 
 def public_output(text: str) -> str:
     for name in ("MACOS_CERT_P12_BASE64", "MACOS_CERT_PASSWORD", "NOTARY_API_KEY_P8_BASE64",
@@ -53,10 +63,15 @@ def private_path() -> Path:
 
 
 def prepare_identity(private: Path, team: str) -> tuple[str, Path]:
+    intermediate = verified_intermediate()
     private.mkdir(mode=0o700)
     os.chmod(private, 0o700)
     original = checked(["security", "list-keychains", "-d", "user"]).stdout
     write_json(private / "search-list.json", shlex.split(original))
+    default = shlex.split(checked(["security", "default-keychain", "-d", "user"]).stdout)
+    if len(default) != 1:
+        raise ValueError("Expected one original default keychain")
+    write_json(private / "default-keychain.json", default)
     for variable, name in (("MACOS_CERT_P12_BASE64", "identity.p12"),
                            ("NOTARY_API_KEY_P8_BASE64", "notary.p8")):
         encoded = "".join(os.environ[variable].split())
@@ -66,6 +81,7 @@ def prepare_identity(private: Path, team: str) -> tuple[str, Path]:
     print(f"::add-mask::{password}", flush=True)
     keychain = private / "signing.keychain-db"
     checked(["security", "create-keychain", "-p", password, keychain])
+    checked(["security", "import", intermediate, "-k", keychain])
     checked(["security", "set-keychain-settings", "-lut", "7200", keychain])
     checked(["security", "unlock-keychain", "-p", password, keychain])
     checked(["security", "import", private / "identity.p12", "-k", keychain,
@@ -73,6 +89,7 @@ def prepare_identity(private: Path, team: str) -> tuple[str, Path]:
     checked(["security", "set-key-partition-list", "-S", "apple-tool:,apple:,codesign:",
              "-s", "-k", password, keychain])
     checked(["security", "list-keychains", "-d", "user", "-s", keychain])
+    checked(["security", "default-keychain", "-d", "user", "-s", keychain])
     identities = checked(["security", "find-identity", "-v", "-p", "codesigning", keychain]).stdout
     identity = identity_from_output(identities, team)
     return identity, keychain
@@ -93,18 +110,21 @@ def cleanup(private: Path) -> None:
     if private.is_symlink():
         raise ValueError("Private signing directory must not be a symlink")
     errors = []
-    try:
-        saved = private / "search-list.json"
-        if saved.exists():
-            checked(["security", "list-keychains", "-d", "user", "-s", *json.loads(saved.read_text())])
-    except Exception as exc:
-        errors.append(str(exc))
+    # Attempt both restorations even if one fails, before deleting the keychain.
+    for filename, operation in (("search-list.json", "list-keychains"),
+                                ("default-keychain.json", "default-keychain")):
+        try:
+            saved = private / filename
+            if saved.exists():
+                checked(["security", operation, "-d", "user", "-s", *json.loads(saved.read_text())])
+        except Exception:
+            errors.append(f"security {operation} restore failed")
     try:
         keychain = private / "signing.keychain-db"
         if keychain.exists():
             checked(["security", "delete-keychain", keychain])
-    except Exception as exc:
-        errors.append(str(exc))
+    except Exception:
+        errors.append("security delete-keychain failed")
     finally:
         shutil.rmtree(private)
     if errors:
@@ -118,12 +138,38 @@ def codesign_command(path: Path, identity: str, keychain: Path) -> list:
             "--sign", identity, "--keychain", keychain, path]
 
 
+def signing_diagnostics(keychain: Path, evidence: Path) -> None:
+    # Public certificate metadata only. Never dump a keychain, environment or
+    # commands used to import private keys. Keep collecting if a query fails.
+    commands = [["security", "find-identity", "-v", "-p", "codesigning", keychain]]
+    for source in (keychain, "/Library/Keychains/System.keychain",
+                   "/System/Library/Keychains/SystemRootCertificates.keychain"):
+        commands.append(["security", "find-certificate", "-a", "-Z", "-c",
+                         "Developer ID Certification Authority", source])
+    commands.extend([["security", "list-keychains", "-d", "user"],
+                     ["security", "default-keychain", "-d", "user"]])
+    with (evidence / "codesign-keychain-diagnostics.txt").open("a", encoding="utf-8") as log:
+        for command in commands:
+            try:
+                result = tool(command)
+                detail = f"exit {result.returncode}\n{result.stdout}{result.stderr}"
+            except Exception as exc:
+                # Exception strings may contain argv or private tool output.
+                detail = f"query unavailable ({type(exc).__name__})"
+            log.write(public_output(shlex.join([str(a) for a in command]) + "\n" + detail + "\n"))
+
+
 def sign(path: Path, identity: str, keychain: Path, evidence: Path) -> None:
-    result = tool(codesign_command(path, identity, keychain), timeout=300)
+    try:
+        result = tool(codesign_command(path, identity, keychain), timeout=300)
+    except OSError:
+        signing_diagnostics(keychain, evidence)
+        raise RuntimeError("codesign could not start; see codesign-keychain-diagnostics.txt") from None
     with (evidence / "codesign-sign.txt").open("a", encoding="utf-8") as log:
         log.write(public_output(f"{path}\n{result.stdout}{result.stderr}\n"))
     if result.returncode:
-        raise RuntimeError(f"codesign failed on {path}; see codesign-sign.txt")
+        signing_diagnostics(keychain, evidence)
+        raise RuntimeError(public_output(f"codesign failed on {path}; see codesign-sign.txt"))
 
 
 def notarize(path: Path, label: str, private: Path, evidence: Path) -> None:
@@ -216,7 +262,10 @@ def main():
     elif args.phase == "prepare":
         prepare(args.download, args.output)
     else:
-        sign_release(args.output, args.evidence, private_path(), os.environ["MACOS_TEAM_ID"])
+        try:
+            sign_release(args.output, args.evidence, private_path(), os.environ["MACOS_TEAM_ID"])
+        finally:
+            cleanup(private_path())
 
 
 if __name__ == "__main__":

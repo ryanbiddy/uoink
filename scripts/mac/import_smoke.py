@@ -10,8 +10,19 @@ import subprocess
 import tempfile
 
 from qualify_deps import ROOT, run_logged, sha256, verify_ui_wheels, wheel_details, write_json
+from build_bundle import prune_development_payload
 
-COCOA_IMPORT = "import AppKit, Quartz, WebKit, Security, webview; import webview.platforms.cocoa as cocoa; assert cocoa.renderer == 'wkwebview', cocoa.renderer; print('pywebview backend: cocoa (WKWebView, import only)')"
+COCOA_IMPORT = "import importlib.util; assert importlib.util.find_spec('PyObjCTest') is None, 'PyObjCTest must not ship'; import AppKit, Quartz, WebKit, Security, webview; import webview.platforms.cocoa as cocoa; assert cocoa.renderer == 'wkwebview', cocoa.renderer; print('pywebview backend: cocoa (WKWebView, import only)')"
+
+
+def prune_smoke_venv(python: Path, report: Path) -> list[dict]:
+    result = subprocess.run([str(python), "-B", "-c",
+                             "import json, sys; print(json.dumps([sys.prefix, sys.base_prefix]))"],
+                            check=True, capture_output=True, text=True, timeout=30)
+    prefix, base = [Path(value).resolve() for value in json.loads(result.stdout)]
+    if prefix == base or prefix != python.absolute().parent.parent.resolve():
+        raise ValueError("Import smoke pruning requires its disposable venv")
+    return prune_development_payload(prefix, report)
 
 
 def local_source(root: Path, name: str) -> Path | None:
@@ -197,6 +208,7 @@ def main() -> int:
             base + [str(path)], output / f"install-{i}.txt")} for i, path in enumerate(wheels)]
     report["pip_check_exit_code"] = run_logged(
         [str(args.python), "-m", "pip", "check"], output / "pip-check.txt")
+    report["development_pruned"] = prune_smoke_venv(args.python, output / "development-pruned.json")
     report["cocoa_import_exit_code"] = run_logged(
         [str(args.python), "-B", "-c", COCOA_IMPORT], output / "cocoa-import.txt")
     support = runpy.run_path(str(ROOT / "tests/test_c01_mcp_stdio.py"), run_name="mac_smoke_support")

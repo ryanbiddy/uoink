@@ -131,13 +131,28 @@ def prune_python(app: Path, report: Path) -> list[dict]:
     if not bundle_path(python, root) or python.resolve().parent != (root / "bin").resolve():
         raise ValueError("Bundled Python interpreter must stay inside Python/bin")
     targets.extend(path for path in (root / "bin").iterdir() if path not in keep)
+    return prune_paths(root, targets, report)
+
+
+def development_payload(root: Path) -> list[Path]:
+    """Find debug symbol bundles and PyObjC's own test package."""
+    return [path for path in root.rglob("*")
+            if (path.suffix == ".dSYM" or path.name == "PyObjCTest")
+            and (path.is_dir() or path.is_symlink())]
+
+
+def prune_development_payload(root: Path, report: Path) -> list[dict]:
+    return prune_paths(root, development_payload(root), report)
+
+
+def prune_paths(root: Path, targets: list[Path], report: Path) -> list[dict]:
     removed = []
     write_json(report, removed)
     for target in sorted(set(targets)):
         if not target.exists() and not target.is_symlink():
             continue
         if not bundle_path(target, root):
-            raise ValueError(f"Refusing to prune outside bundled Python: {target}")
+            raise ValueError(f"Refusing to prune outside payload root: {target}")
         entries = [target] if target.is_symlink() else [target, *sorted(target.rglob("*"))]
         rows = [{"path": entry.relative_to(root).as_posix(),
                  "type": "symlink" if entry.is_symlink() else "directory" if entry.is_dir() else "file"}
@@ -455,6 +470,8 @@ def build(wheels: Path, output: Path, ffmpeg_output: Path | None = None) -> Path
     shutil.copyfile(ROOT / "installer/mac/cli.sh", cli)
     cli.chmod(0o755)
     (resources / "scripts/mac/uninstall.sh").chmod(0o755)
+    prune_development_payload(app, output / "development-pruned.json")
+    shutil.copyfile(output / "development-pruned.json", notices / "development-pruned.json")
     rewrite_rpaths(app, output / "native-rpath-removals.json")
     write_json(notices / "build.json", {"version": version, "python": pin, "python_url": url,
                                        "platform": platform.platform(), "ffmpeg": ffmpeg,

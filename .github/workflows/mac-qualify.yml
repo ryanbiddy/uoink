@@ -254,6 +254,7 @@ jobs:
           --download "$RUNNER_TEMP/mac-sign-input" --output "$RUNNER_TEMP/mac-signed"
       - name: Sign, notarize and staple app then DMG
         env:
+          HOME: ${{ env.UOINK_RUNNER_HOME }}
           MACOS_CERT_P12_BASE64: ${{ secrets.MACOS_CERT_P12_BASE64 }}
           MACOS_CERT_PASSWORD: ${{ secrets.MACOS_CERT_PASSWORD }}
           NOTARY_API_KEY_P8_BASE64: ${{ secrets.NOTARY_API_KEY_P8_BASE64 }}
@@ -264,6 +265,8 @@ jobs:
           --output "$RUNNER_TEMP/mac-signed" --evidence "$RUNNER_TEMP/mac-signed-evidence"
       - name: Delete signing keychain and decoded keys before any payload execution
         if: always()
+        env:
+          HOME: ${{ env.UOINK_RUNNER_HOME }}
         run: python -B scripts/mac/sign_notarize.py cleanup
       - name: Assess and launch a quarantined installed copy
         run: |

@@ -84,7 +84,7 @@ def test_private_import_and_cleanup_never_print_password_or_read_key_files(tmp_p
 
     def tool(argv, **kw):
         calls.append(argv)
-        out = '"original.keychain-db"' if argv[1:3] == ["list-keychains", "-d"] else ""
+        out = '"original.keychain-db"' if argv[1] in {"list-keychains", "default-keychain"} else ""
         if "create-keychain" in argv:
             Path(argv[-1]).touch()
         if "find-identity" in argv:
@@ -96,28 +96,146 @@ def test_private_import_and_cleanup_never_print_password_or_read_key_files(tmp_p
     identity, keychain = signing.prepare_identity(private, TEAM)
     assert identity == IDENTITY
     assert (private / "identity.p12").exists() and (private / "notary.p8").exists()
-    imported = next(c for c in calls if "import" in c)
+    imported = next(c for c in calls if private / "identity.p12" in c)
     assert imported[-2:] == ["-T", "/usr/bin/codesign"] and "-A" not in imported
+    created = next(i for i, c in enumerate(calls) if "create-keychain" in c)
+    assert calls[created + 1] == ["security", "import", signing.DEVELOPER_ID_G2, "-k", keychain]
+    assert ["security", "default-keychain", "-d", "user", "-s", keychain] in calls
     assert any("set-key-partition-list" in c for c in calls)
     assert capsys.readouterr().out == "::add-mask::random-fixture-password\n"
     signing.cleanup(private)
     assert not private.exists()
     assert ["security", "delete-keychain", keychain] in calls
     assert ["security", "list-keychains", "-d", "user", "-s", "original.keychain-db"] in calls
+    assert ["security", "default-keychain", "-d", "user", "-s", "original.keychain-db"] in calls
 
 
-@pytest.mark.parametrize("operation", ["list-keychains", "delete-keychain"])
+@pytest.mark.parametrize("operation", ["list-keychains", "default-keychain", "delete-keychain"])
 def test_cleanup_removes_decoded_files_even_when_security_fails(tmp_path, monkeypatch, operation):
     private = tmp_path / "private"
     private.mkdir()
     (private / "search-list.json").write_text('["original"]')
+    (private / "default-keychain.json").write_text('["original"]')
     (private / "signing.keychain-db").touch()
     (private / "notary.p8").touch()
-    monkeypatch.setattr(signing, "tool", lambda argv, **kw: SimpleNamespace(
+    calls = []
+    monkeypatch.setattr(signing, "tool", lambda argv, **kw: calls.append(argv) or SimpleNamespace(
         returncode=1 if operation in argv else 0, stdout="", stderr="private error"))
     with pytest.raises(RuntimeError, match="cleanup failed"):
         signing.cleanup(private)
     assert not private.exists()
+    assert [c[1] for c in calls] == ["list-keychains", "default-keychain", "delete-keychain"]
+
+
+def test_intermediate_is_pinned_and_wrong_file_is_refused_before_private_import(tmp_path, monkeypatch):
+    assert signing.verified_intermediate() == signing.DEVELOPER_ID_G2
+    wrong = tmp_path / "wrong.cer"
+    wrong.write_bytes(b"not the pinned public Apple G2 intermediate")
+    monkeypatch.setattr(signing, "DEVELOPER_ID_G2", wrong)
+    monkeypatch.setattr(signing, "tool", lambda *a, **kw: pytest.fail("No keychain changes before hash check"))
+    with pytest.raises(ValueError, match="SHA256 mismatch"):
+        signing.prepare_identity(tmp_path / "private", TEAM)
+    assert not (tmp_path / "private").exists()
+
+
+@pytest.mark.parametrize("failure", ["intermediate-import", "second-codesign"])
+def test_sign_phase_restores_keychain_state_after_failure(tmp_path, monkeypatch, failure):
+    app = make_app(tmp_path)
+    (app / "Contents/Resources/VERSION").write_text("3.10.0")
+    notices = app / "Contents/Resources/notices"
+    notices.mkdir()
+    (notices / "build.json").write_text('{}')
+    for name in ("MACOS_CERT_P12_BASE64", "NOTARY_API_KEY_P8_BASE64"):
+        monkeypatch.setenv(name, "Zml4dHVyZQ==")
+    monkeypatch.setenv("MACOS_CERT_PASSWORD", "fixture-password")
+    monkeypatch.setenv("MACOS_TEAM_ID", TEAM)
+    monkeypatch.setenv("RUNNER_TEMP", str(tmp_path))
+    monkeypatch.setattr(signing.sys, "platform", "darwin")
+    monkeypatch.setattr(signing.platform, "machine", lambda: "arm64")
+    evidence = tmp_path / "evidence"
+    monkeypatch.setattr(signing.sys, "argv", ["sign_notarize.py", "sign", "--output", str(tmp_path),
+                                           "--evidence", str(evidence)])
+    monkeypatch.setattr(signing, "sign_archives", lambda *a: None)
+    original = ["/Users/runner/Library/Keychains/login with spaces.keychain-db",
+                "/Library/Keychains/System.keychain"]
+    state = {"list-keychains": list(original), "default-keychain": original[:1]}
+    calls = []
+    signed = 0
+
+    def tool(argv, **kw):
+        nonlocal signed
+        calls.append(argv)
+        out, code = "", 0
+        if argv[0] == "codesign":
+            signed += 1
+            keychain = str(signing.private_path() / "signing.keychain-db")
+            assert state == {"list-keychains": [keychain], "default-keychain": [keychain]}
+            assert any(c[:3] == ["security", "import", signing.DEVELOPER_ID_G2] for c in calls[:-1])
+            code = int(signed == 2)
+        elif argv[1] in state:
+            if "-s" in argv:
+                state[argv[1]] = [str(p) for p in argv[5:]]
+            else:
+                out = "\n".join(f'"{p}"' for p in state[argv[1]])
+        elif argv[1] == "create-keychain":
+            Path(argv[-1]).touch()
+        elif argv[1] == "import" and argv[2] == signing.DEVELOPER_ID_G2:
+            code = int(failure == "intermediate-import")
+        elif argv[1] == "find-identity":
+            out = f'1) ABC "{IDENTITY}"'
+        return SimpleNamespace(returncode=code, stdout=out, stderr="fixture tool failure" if code else "")
+
+    monkeypatch.setattr(signing, "tool", tool)
+    with pytest.raises(RuntimeError, match="failed"):
+        signing.main()
+    assert signed == (2 if failure == "second-codesign" else 0)
+    assert state == {"list-keychains": original, "default-keychain": original[:1]}
+    assert not signing.private_path().exists()
+    assert calls[-1][1] == "delete-keychain"
+    assert (evidence / "codesign-keychain-diagnostics.txt").exists() == (signed == 2)
+    # The workflow's always() cleanup is safe after the sign phase's finally.
+    signing.cleanup(signing.private_path())
+
+
+@pytest.mark.parametrize("failure", ["exit", "timeout", "start"])
+def test_codesign_failure_diagnostics_are_public_and_complete(tmp_path, monkeypatch, capsys, failure):
+    values = {name: "secret-fixture-" + name.lower() for name in (
+        "MACOS_CERT_P12_BASE64", "MACOS_CERT_PASSWORD", "NOTARY_API_KEY_P8_BASE64",
+        "NOTARY_API_KEY_ID", "NOTARY_API_ISSUER_ID")}
+    for name, value in values.items():
+        monkeypatch.setenv(name, value)
+    private_output = " ".join(values.values())
+    calls = []
+    keychain = tmp_path / "private/signing.keychain-db"
+
+    def run(argv, **kw):
+        calls.append(argv)
+        if argv[0] == "codesign":
+            if failure == "timeout":
+                raise subprocess.TimeoutExpired(argv, 300, output=private_output.encode())
+            if failure == "start":
+                raise OSError(private_output)
+        # Missing certificates must not stop the remaining diagnostic queries.
+        if "System.keychain" in argv[-1]:
+            raise OSError(private_output)
+        return SimpleNamespace(returncode=1, stdout=private_output, stderr=private_output)
+
+    monkeypatch.setattr(signing.subprocess, "run", run)
+    with pytest.raises(RuntimeError, match="codesign") as error:
+        signing.sign(tmp_path / "native.so", IDENTITY, keychain, tmp_path)
+    assert calls[1:] == [
+        ["security", "find-identity", "-v", "-p", "codesigning", str(keychain)],
+        *[["security", "find-certificate", "-a", "-Z", "-c", "Developer ID Certification Authority", source]
+          for source in (str(keychain), "/Library/Keychains/System.keychain",
+                         "/System/Library/Keychains/SystemRootCertificates.keychain")],
+        ["security", "list-keychains", "-d", "user"],
+        ["security", "default-keychain", "-d", "user"],
+    ]
+    diagnostic = (tmp_path / "codesign-keychain-diagnostics.txt").read_text()
+    assert "[redacted]" in diagnostic and "query unavailable (OSError)" in diagnostic
+    captured = capsys.readouterr()
+    public = "".join(p.read_text() for p in tmp_path.glob("*.txt")) + str(error.value) + captured.out + captured.err
+    assert all(value not in public for value in values.values())
 
 
 @pytest.mark.parametrize("status,code", [("Accepted", 0), ("Invalid", 0), ("Rejected", 1), ("In Progress", 1)])
@@ -460,6 +578,10 @@ def test_workflow_limits_secrets_and_orders_cleanup_before_every_runtime_step():
     assert sum("secrets." in s for s in steps) == 1
     cleanup = next(i for i, step in enumerate(steps) if "sign_notarize.py cleanup" in step)
     assert "        if: always()\n" in steps[cleanup] and key_step < cleanup
+    assert [i for i, step in enumerate(steps) if "HOME: ${{ env.UOINK_RUNNER_HOME }}" in step] == [key_step, cleanup]
+    runner_env = (ROOT / "scripts/mac/runner-env.sh").read_text()
+    assert 'echo "UOINK_RUNNER_HOME=${UOINK_RUNNER_HOME:-$HOME}"' in runner_env
+    assert 'echo "HOME=$root/home"' in runner_env
     for i, step in enumerate(steps):
         assert not re.search(r"set\s+[^\n]*-\w*x|set\s+-o\s+xtrace", step)
         if any(script in step for script in ("quarantine_smoke.py", "dmg_smoke.py", "receipt.py")):
