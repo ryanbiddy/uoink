@@ -332,7 +332,7 @@ def test_doctor_carries_the_selfcheck():
     server_src = (ROOT / "server.py").read_text(encoding="utf-8")
     _assert("def _mcp_stdio_selfcheck" in server_src,
             "doctor self-check function missing")
-    _assert('"mcp_stdio": _mcp_stdio_selfcheck()' in server_src,
+    _assert('"mcp_stdio": _mcp_stdio_selfcheck(timeout=' in server_src,
             "doctor_payload must include the mcp_stdio check")
     _assert('"-P"' in server_src.split("def _mcp_stdio_selfcheck", 1)[1][:2000],
             "self-check must recreate the embeddable condition with -P")

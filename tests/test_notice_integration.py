@@ -21,9 +21,11 @@ def isolated_distribution_metadata(monkeypatch):
 
 
 def rows():
-    return [{"Name": line.split("==")[0], "Version": line.split("==")[1], "License": "fixture-metadata"}
+    data = [{"Name": line.split("==")[0], "Version": line.split("==", 1)[1].split()[0], "License": "fixture-metadata"}
             for line in (ROOT / "requirements-installer-lock.txt").read_text().splitlines()
             if line and not line.startswith("#")]
+    assert all(not any(char.isspace() for char in row["Version"]) for row in data)
+    return data
 
 
 def output_for(tmp_path, monkeypatch, data):

@@ -24,18 +24,19 @@ def open_era(client, modern):
 def test_parser_recovers_and_eof_settles_without_polluted_stdout(tmp_path, modern):
     with StdioClient.launch(tmp_path) as client:
         open_era(client, modern)
-        bad = [('', -32700), ('{', -32700),
-               ('{"jsonrpc":"2.0","id":2,"id":3,"method":"ping"}', -32700),
-               ('{"jsonrpc":"2.0","id":null,"method":"ping"}', -32600),
-               ('{"jsonrpc":"2.0","id":true,"method":"ping"}', -32600),
-               ('{"jsonrpc":"2.0","id":1.5,"method":"ping"}', -32600),
-               ('{"jsonrpc":"2.0","id":[],"method":"ping"}', -32600),
-               ('{"jsonrpc":"2.0","id":{},"method":"ping"}', -32600),
-               ('[]', -32600), ('{"a":NaN}', -32700)]
-        for line, code in bad:
+        bad = [('', -32700, "Invalid JSON-RPC message"), ('{', -32700, "Invalid JSON-RPC message"),
+               ('{"jsonrpc":"2.0","id":2,"id":3,"method":"ping"}', -32700, "Invalid JSON-RPC message"),
+               *[(json.dumps({"jsonrpc": "2.0", "id": ident, "method": "ping"}),
+                  -32600, "Invalid request ID") for ident in (None, True, 1.5, [], {})],
+               ('[]', -32600, "Empty JSON-RPC batch"),
+               ('[1]', -32600, "Expected a JSON-RPC object"),
+               ('{"jsonrpc":"1.0","id":2,"method":"ping"}', -32600, "Invalid JSON-RPC envelope"),
+               ('{"a":NaN}', -32700, "Invalid JSON-RPC message")]
+        for line, code, message in bad:
             client.send_raw(line)
             reply = client.receive()
             assert reply.get("id") is None and reply["error"]["code"] == code
+            assert reply["error"]["message"] == message
             assert len(client.transcript[-1]["line"].encode()) < 65536
         for ident in (None, True, [], {}, 1.5):
             client.send({"jsonrpc": "2.0", "method": "notifications/cancelled", "params": {"requestId": ident}})
@@ -46,6 +47,40 @@ def test_parser_recovers_and_eof_settles_without_polluted_stdout(tmp_path, moder
         assert "result" in client.request(99, "tools/list", modern_params() if modern else {})
         client.assert_quiet()
         save_evidence(client, f"m4-parser-{'modern' if modern else 'legacy'}")
+    assert client.proc.returncode == 0
+
+
+@pytest.mark.parametrize("modern", [False, True])
+def test_client_responses_are_silent_before_and_after_opening(tmp_path, modern):
+    with StdioClient.launch(tmp_path) as client:
+        for opened in (False, True):
+            if opened:
+                open_era(client, modern)
+            for ident in (None, 1, "client-response"):
+                for body in ({"result": {}}, {"error": {"code": -32600, "message": "client error"}},
+                             {"result": {"padding": "x" * 65536}},
+                             {"error": {"code": -32600, "message": "x" * 65536}}):
+                    client.send({"jsonrpc": "2.0", "id": ident, **body})
+        reply = client.request(99, "tools/list", modern_params() if modern else {})
+        assert "result" in reply
+        client.assert_quiet()
+    assert client.proc.returncode == 0
+
+
+def test_initialize_with_modern_metadata_selects_legacy(tmp_path):
+    with StdioClient.launch(tmp_path) as client:
+        request = initialize_request("2025-11-25")
+        request["params"] = modern_params(request["params"])
+        client.send(request)
+        result = client.receive()["result"]
+        assert result["protocolVersion"] == "2025-11-25"
+        assert "resultType" not in result
+        client.send({"jsonrpc": "2.0", "method": "notifications/initialized"})
+        listing = client.request(2, "tools/list")["result"]
+        assert len(listing["tools"]) == 91 and "resultType" not in listing
+        assert client.request(3, "tools/list", modern_params())["error"]["code"] == -32600
+        assert client.request(4, "ping")["result"] == {}
+        client.assert_quiet()
     assert client.proc.returncode == 0
 
 
@@ -150,7 +185,9 @@ def test_installed_selfcheck_reports_actual_protocol(tmp_path, modern):
     assert evidence["protocol_era"] == ("modern" if modern else "legacy")
     assert evidence["protocol_version"] == ("2026-07-28" if modern else "2024-11-05")
     assert evidence["opening_method"] == ("server/discover" if modern else "initialize")
-    assert evidence["serializer"] == "JSONRPCResponse.model_dump_json"
+    assert evidence["expected_serializer"] == "JSONRPCResponse.model_dump_json"
+    assert evidence["expected_transport"] == "bounded_stdio_server"
+    assert "serializer" not in evidence and "transport" not in evidence
     assert evidence["evidence"] == "JSON-RPC self-check"
     destination = os.environ.get("M2_WIRE_EVIDENCE")
     if destination:

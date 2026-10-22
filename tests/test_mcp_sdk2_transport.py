@@ -13,6 +13,14 @@ from tests.mcp_wire import ROOT, StdioClient, isolated_env
 from tests.test_mcp_wire import GOLDEN, modern_domain, modern_params
 
 
+@pytest.mark.parametrize("body", [{"result": {}}, {"error": {"code": -32600, "message": "client error"}}])
+@pytest.mark.parametrize("ident", [None, 1, "client-response"])
+def test_response_frames_are_ignored_at_debug_level(body, ident, caplog):
+    with caplog.at_level("DEBUG", logger="uoink_mcp"):
+        assert uoink_mcp.parse_stdio_message(json.dumps({"jsonrpc": "2.0", "id": ident, **body})) is None
+    assert caplog.messages == ["Ignoring inbound JSON-RPC response"]
+
+
 def test_server_uses_public_api_and_explicit_cache_and_telemetry_policy():
     assert isinstance(uoink_mcp.mcp, Server)
     assert uoink_mcp.mcp.middleware == []

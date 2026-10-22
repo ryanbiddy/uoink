@@ -35,7 +35,8 @@ def test_doctor_exit_tracks_health(monkeypatch, healthy, expected):
 def test_doctor_fails_for_unhealthy_helper_or_pending_migration(monkeypatch):
     monkeypatch.setattr(server, "_diagnose_payload", lambda: {"ok": True})
     monkeypatch.setattr(server.migrate_install, "migration_status", lambda: {})
-    monkeypatch.setattr(server, "_mcp_stdio_selfcheck", lambda: {"ok": True})
+    monkeypatch.setattr(server, "_mcp_stdio_selfcheck", lambda **_kwargs: {"ok": True})
+    monkeypatch.setattr(server, "_mcp_modern_stdio_selfcheck", lambda **_kwargs: {"ok": True})
     monkeypatch.setattr(
         server, "_path_integrity_status", lambda force=False: {"ok": True}
     )

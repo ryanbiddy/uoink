@@ -127,6 +127,7 @@ def helper(surface_code):
         "_helper_health_status": Mock(return_value={"ok": True}),
         "_doctor_heartbeat": Mock(return_value={"stale": False}),
         "_mcp_stdio_selfcheck": Mock(return_value={"ok": True}),
+        "_mcp_modern_stdio_selfcheck": Mock(return_value={"ok": True}),
         "_podcast_corpus_reconciliation_status": Mock(return_value={"ok": True}),
         "whisper_runner": SimpleNamespace(
             normalize_model=lambda value: "base",

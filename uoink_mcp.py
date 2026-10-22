@@ -33,6 +33,7 @@ from __future__ import annotations
 import asyncio
 import contextvars
 import json
+import logging
 import os
 import sys
 import time
@@ -67,6 +68,7 @@ try:
     from mcp.server.caching import CACHEABLE_METHODS, CacheHint
     from mcp.shared.dispatcher import coerce_request_id
     from mcp import types as mcp_types
+    from mcp.types.version import LATEST_MODERN_VERSION
 except ImportError:
     print(
         "Uoink MCP requires the official MCP Python SDK. "
@@ -80,7 +82,7 @@ class _InvalidStdioRequest(ValueError):
 
 
 def parse_stdio_message(line):
-    """Reject ambiguous JSON before the public SDK wire validator runs."""
+    """Drop responses; reject ambiguous or oversized requests before SDK validation."""
     def reject_pairs(pairs):
         result = {}
         for key, value in pairs:
@@ -91,7 +93,16 @@ def parse_stdio_message(line):
 
     raw = json.loads(line, object_pairs_hook=reject_pairs,
                      parse_constant=lambda value: (_ for _ in ()).throw(ValueError("Invalid number")))
+    if (isinstance(raw, dict) and raw.get("jsonrpc") == "2.0" and
+            "method" not in raw and ("result" in raw or "error" in raw)):
+        # Responses, including null-ID errors, never call for another reply.
+        logging.getLogger(__name__).debug("Ignoring inbound JSON-RPC response")
+        return None
+    if _stdio_inbound_line_rejection(line) is not None:
+        raise _InvalidStdioRequest(_STDIO_PROTOCOL_REJECTION_MESSAGE)
     if not isinstance(raw, dict):
+        if raw == []:
+            raise _InvalidStdioRequest("Empty JSON-RPC batch")
         raise _InvalidStdioRequest("Expected a JSON-RPC object")
     if "id" in raw and (type(raw["id"]) not in (int, str)):
         raise _InvalidStdioRequest("Invalid request ID")
@@ -175,7 +186,8 @@ class RegistryMCP(Server):
         token = _stdio_requests.set({}) if not bounded else None
         try:
             await super().run(
-                _InboundScopeStream(read_stream),
+                # The bounded reader already prepares messages before queueing.
+                read_stream if bounded else _InboundScopeStream(read_stream),
                 write_stream if bounded else _SdkSettlementStream(write_stream),
                 initialization_options, raise_exceptions=raise_exceptions)
         finally:
@@ -557,8 +569,8 @@ def _register_phase4_stdio() -> None:
         if exc.code == "invalid_request":
             code = -32602
         elif exc.code in ("resource_not_found", "resource_deleted"):
-            code = -32602 if ctx.protocol_version == "2026-07-28" else -32002
-            if ctx.protocol_version == "2026-07-28":
+            code = -32602 if ctx.protocol_version == LATEST_MODERN_VERSION else -32002
+            if ctx.protocol_version == LATEST_MODERN_VERSION:
                 data["uri"] = _stdio_param(ctx.params, "uri")
         else:
             code = -32603
@@ -1007,7 +1019,7 @@ def _stdio_domain_tool_message(request_id, envelope, *, state=None):
     dumped = result.model_dump(by_alias=True, mode="json", exclude_none=True)
     if state is None:
         state = _request_state(request_id)
-    if state is not None and state.protocol_version == "2026-07-28":
+    if state is not None and state.protocol_version == LATEST_MODERN_VERSION:
         dumped["resultType"] = "complete"
         dumped["_meta"] = {mcp_types.SERVER_INFO_META_KEY: mcp.server_info_stamp}
     else:
@@ -1060,11 +1072,11 @@ def _stdio_completed_frame_cap() -> int:
     return int(library_resources.LIMITS["max_response_bytes"])
 
 
-def _stdio_protocol_rejection_frame(request_id=None) -> str:
+def _stdio_protocol_rejection_frame(request_id=None, *, message=_STDIO_PROTOCOL_REJECTION_MESSAGE) -> str:
     return mcp_types.JSONRPCError(
         jsonrpc="2.0", id=request_id,
         error=mcp_types.ErrorData(code=_STDIO_PROTOCOL_REJECTION_CODE,
-                                 message=_STDIO_PROTOCOL_REJECTION_MESSAGE),
+                                 message=message),
     ).model_dump_json(by_alias=True, exclude_none=False, exclude={"error": {"data"}})
 
 
@@ -1305,23 +1317,21 @@ def bounded_stdio_server(stdin=None, stdout=None):
         async def stdin_reader():
             async with reads_send:
                 async for line in input_file:
-                    refusal = _stdio_inbound_line_rejection(line)
-                    if refusal is not None:
-                        await writes.send(refusal)
-                        continue
                     try:
                         message = parse_stdio_message(line)
-                    except _InvalidStdioRequest:
-                        await writes.send(_stdio_protocol_rejection_frame(None))
+                    except _InvalidStdioRequest as exc:
+                        await writes.send(_stdio_protocol_rejection_frame(None, message=str(exc)))
                         continue
                     except (ValueError, TypeError, RecursionError):
                         # SDK 2 logs/drops exception objects. Refuse here so the
                         # peer receives an explicit bounded error and can recover.
-                        await writes.send(_stdio_parse_rejection_frame())
+                        await writes.send(_stdio_inbound_line_rejection(line) or _stdio_parse_rejection_frame())
+                        continue
+                    if message is None:
                         continue
                     refusal = _stdio_request_id_rejection(message)
                     if isinstance(message, mcp_types.JSONRPCRequest) and _request_state(message.id) is not None:
-                        refusal = _stdio_protocol_rejection_frame(None)
+                        refusal = _stdio_protocol_rejection_frame(None, message="Duplicate in-flight request ID")
                     if refusal is not None:
                         await writes.send(refusal)
                         continue

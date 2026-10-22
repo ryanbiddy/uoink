@@ -113,6 +113,33 @@ def handler_returning(factory):
 
 
 @pytest.mark.parametrize("modern", [False, True])
+def test_shipped_path_prepares_each_message_once(modern, monkeypatch, guard):
+    prepared = []
+    original = u._prepare_inbound
+
+    def prepare(message):
+        prepared.append((message.message.method, getattr(message.message, "id", None)))
+        return original(message)
+
+    monkeypatch.setattr(u, "_prepare_inbound", prepare)
+
+    async def check():
+        with replace_handler(u.mcp, "tools/call", handler_returning(lambda *_: result())):
+            async with session(modern) as client:
+                await client.request()
+                assert json.loads(await client.receive())["id"] == 2
+                await client.cancel(999)
+                await client.request(3, method="tools/list")
+                assert json.loads(await client.receive())["id"] == 3
+
+    anyio.run(check)
+    expected = [("server/discover", 1)] if modern else [
+        ("initialize", 1), ("notifications/initialized", None)]
+    assert prepared == expected + [("tools/call", 2), ("notifications/cancelled", None), ("tools/list", 3)]
+    assert guard.releases == 1
+
+
+@pytest.mark.parametrize("modern", [False, True])
 @pytest.mark.parametrize("error", [False, True, "rpc"])
 def test_exact_final_utf8_boundary_and_oversized_errors(modern, error, guard):
     from mcp.shared.exceptions import MCPError
@@ -488,7 +515,8 @@ def test_id_stays_reserved_until_flush_and_late_cancel_is_ignored(modern, guard,
                 await anyio.sleep(0.02)
                 assert client.states[2] is state and not state.cancelled
                 release.set()
-                assert json.loads(await client.receive())["error"]["code"] == -32600
+                assert json.loads(await client.receive())["error"] == {
+                    "code": -32600, "message": "Duplicate in-flight request ID"}
                 await client.until(lambda: state.settled)
                 assert guard.releases == 1
                 await client.request()

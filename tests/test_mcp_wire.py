@@ -137,7 +137,10 @@ def test_stdio_invalid_line_refusal_and_connection_survives(tmp_path, version, c
                     "code": -32700, "message": "Invalid JSON-RPC message"}}
             else:
                 refusal = client.receive()
-                assert refusal == GOLDEN["oversized"]
+                message = ("Inbound request exceeds protocol limits" if case == "oversized" else
+                           "Empty JSON-RPC batch" if case == "batch" else "Invalid request ID")
+                assert refusal == {"jsonrpc": "2.0", "id": None, "error": {
+                    "code": -32600, "message": message}}
                 assert len(json.dumps(refusal).encode()) <= 65536
             client.send(rpc(99, "ping"))
             # receive(), rather than wait_for(), also catches an extra response
