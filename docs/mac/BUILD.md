@@ -102,7 +102,8 @@ The launcher is compiled for arm64 with `-mmacosx-version-min=15.0`, and
 `mac-sign` runs on `macos-15` arm64 after `mac-build`. It downloads that job's
 tar archive and Darwin MCPB without rebuilding. Tar preserves modes and links;
 the signing pass replaces ad-hoc signatures, including the CLI script's xattrs.
-Only this job uses the `mac-release` environment. Its signing step receives:
+This job and the status-only `notary-check` job use the `mac-release`
+environment. The signing step receives:
 
 - `MACOS_CERT_P12_BASE64`
 - `MACOS_CERT_PASSWORD`
@@ -146,23 +147,30 @@ and a command to check it later.
 
 Set `NOTARY_APP_TIMEOUT_MINUTES` and `NOTARY_DMG_TIMEOUT_MINUTES` to positive
 whole minutes to override the defaults. CI reads the matching GitHub Actions
-variables from the repository or `mac-release` environment. The job limit is
-350 minutes, leaving 110 minutes beyond the default budgets for signing,
-packaging, smoke tests and cleanup. Keep that headroom when changing budgets.
+variables from the repository or `mac-release` environment. The dispatch input
+`notary_app_minutes` overrides the app variable, for example `210` with the
+default 90-minute DMG budget. The combined budgets must be at most 300 minutes;
+larger values fail before key import. The job limit stays at 350 minutes,
+leaving at least 50 minutes for signing, packaging, smoke tests and cleanup.
 The temporary keychain stays unlocked for up to six hours so the DMG can be
 signed after a long app wait. The sign phase's `finally` cleanup and the
 workflow's `always()` cleanup still delete it before any payload runs.
 
-To try an existing app submission, set `NOTARY_REUSE_SUBMISSION_ID` to its ID
-in the signing step's environment or the matching Actions variable. It is
-empty by default. For the timed-out run above, the value is
-`a85b5ddc-eff7-496a-af76-df93e91632ab`. CI checks its status and, only when it
-is `Accepted`, tries stapling and validating the freshly signed app before
-creating or uploading a ZIP. Successful stapling skips the app submission.
-If that ticket does not match the fresh cdhashes, or stapling or validation
-otherwise fails, CI submits a new app ZIP. An unconfirmed or pending submission
-also takes the normal submission path. Clear the variable after the attempt;
-it is a retry aid, not a way to skip ticket validation.
+To check a slow submission, dispatch `mac-qualify.yml` with `notary_check_ids`
+set to one to five comma-separated UUIDs. For the pending runs, use
+`968ac10a-dc40-435f-89a5-85ddfb941ab9,a85b5ddc-eff7-496a-af76-df93e91632ab`.
+Only the ten-minute `notary-check` job runs. It uses the p8 key, checks each
+ID once, fetches logs for Accepted, Invalid or Rejected results, and deletes
+the key even on failure. Read the status and created date in the job summary
+and download `mac-notary-check` for JSON. It cannot cancel a signing run.
+
+Once an app submission is Accepted, leave `notary_check_ids` empty and set
+the dispatch input `notary_reuse_submission_id` to that UUID. This overrides
+`NOTARY_REUSE_SUBMISSION_ID` from Actions variables for that run. CI tries
+stapling and validating the freshly signed app before uploading a ZIP.
+Success skips app submission; a pending status or a ticket that does not fit
+falls back to a new submission. The full build still runs, and the DMG still
+needs its own notarization. Reuse does not guarantee a short signing run.
 
 CI builds the DMG from the stapled app, signs and submits the DMG separately,
 then staples and validates its ticket. `dmg.json` is rewritten after DMG

@@ -24,6 +24,7 @@ DEVELOPER_ID_G2 = Path(__file__).parent / "certs/DeveloperIDG2CA.cer"
 # https://www.apple.com/certificateauthority/DeveloperIDG2CA.cer
 DEVELOPER_ID_G2_SHA256 = "f16cd3c54c7f83cea4bf1a3e6a0819c8aaa8e4a1528fd144715f350643d2df3a"
 NOTARY_BUDGET_MINUTES = {"app": 150, "dmg": 90}
+NOTARY_MAX_TOTAL_MINUTES = 300  # Reserve 50 minutes in the 350-minute signing job.
 NOTARY_POLL_SECONDS = 60
 
 
@@ -34,13 +35,23 @@ def verified_intermediate() -> Path:
 
 
 def public_output(text: str) -> str:
+    values = []
     for name in ("MACOS_CERT_P12_BASE64", "MACOS_CERT_PASSWORD", "NOTARY_API_KEY_P8_BASE64",
                  "NOTARY_API_KEY_ID", "NOTARY_API_ISSUER_ID"):
         value = os.environ.get(name)
         if value:
-            # Tool JSON escapes quotes and newlines in values.
-            text = text.replace(json.dumps(value)[1:-1], "[redacted]")
-            text = text.replace(value, "[redacted]")
+            values.append(value)
+            if name == "NOTARY_API_KEY_P8_BASE64":
+                try:
+                    decoded = base64.b64decode("".join(value.split()), validate=True).decode("utf-8").strip()
+                    if decoded:
+                        values.append(decoded)
+                except ValueError:
+                    pass
+    for value in values:
+        # Tool JSON escapes quotes and newlines in values.
+        text = text.replace(json.dumps(value)[1:-1], "[redacted]")
+        text = text.replace(value, "[redacted]")
     return text
 
 
@@ -179,14 +190,26 @@ def sign(path: Path, identity: str, keychain: Path, evidence: Path) -> None:
 
 
 def notary_budget_seconds(label: str) -> int:
-    name = f"NOTARY_{label.upper()}_TIMEOUT_MINUTES"
-    try:
-        minutes = int(os.environ.get(name, str(NOTARY_BUDGET_MINUTES[label])))
-        if minutes <= 0:
-            raise ValueError
-    except ValueError:
-        raise ValueError(f"{name} must be a positive whole number of minutes") from None
-    return minutes * 60
+    budgets = {}
+    for kind, default in NOTARY_BUDGET_MINUTES.items():
+        name = f"NOTARY_{kind.upper()}_TIMEOUT_MINUTES"
+        try:
+            minutes = int(os.environ.get(name, str(default)))
+            if minutes <= 0:
+                raise ValueError
+        except ValueError:
+            raise ValueError(f"{name} must be a positive whole number of minutes") from None
+        budgets[kind] = minutes
+    if sum(budgets.values()) > NOTARY_MAX_TOTAL_MINUTES:
+        raise ValueError(f"Combined app and DMG notary budgets must be at most {NOTARY_MAX_TOTAL_MINUTES} minutes")
+    return budgets[label] * 60
+
+
+def submission_id(value: str) -> str:
+    value = value.strip()
+    if not re.fullmatch(r"[0-9a-fA-F]{8}(?:-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}", value):
+        raise ValueError("Notary submission ID must be a UUID")
+    return value.lower()
 
 
 def public_json(path: Path, value) -> None:
@@ -260,6 +283,7 @@ def reuse_notarization(app: Path, private: Path, evidence: Path) -> bool:
     submission = os.environ.get("NOTARY_REUSE_SUBMISSION_ID", "").strip()
     if not submission:
         return False
+    submission = submission_id(submission)
     result, response = notary_request("info", submission, private, evidence, "notary-app-reuse-info")
     record = {"id": submission, "status": response.get("status", "Unknown"), "reused": False}
     if result.returncode == 0 and response.get("id") == submission and response.get("status") == "Accepted":
@@ -302,6 +326,8 @@ def prepare(download: Path, output: Path) -> None:
 def sign_release(output: Path, evidence: Path, private: Path, team: str) -> None:
     for label in NOTARY_BUDGET_MINUTES:
         notary_budget_seconds(label)
+    if os.environ.get("NOTARY_REUSE_SUBMISSION_ID", "").strip():
+        submission_id(os.environ["NOTARY_REUSE_SUBMISSION_ID"])
     evidence.mkdir(parents=True, exist_ok=True)
     app = output / "Uoink.app"
     version = (app / "Contents/Resources/VERSION").read_text().strip()

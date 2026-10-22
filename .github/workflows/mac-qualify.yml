@@ -2,6 +2,22 @@ name: macOS qualification
 
 on:
   workflow_dispatch:
+    inputs:
+      notary_check_ids:
+        description: 'Check only: 1 to 5 comma-separated submission UUIDs'
+        type: string
+        required: false
+        default: ''
+      notary_app_minutes:
+        description: 'App wait minutes; app plus DMG must be at most 300 (default DMG 90)'
+        type: string
+        required: false
+        default: ''
+      notary_reuse_submission_id:
+        description: 'Accepted app submission UUID to try stapling before a new upload'
+        type: string
+        required: false
+        default: ''
   push:
     branches:
       - 'mac/**'
@@ -10,7 +26,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: mac-qualify-${{ github.ref }}
+  group: mac-qualify-${{ github.ref }}-${{ inputs.notary_check_ids != '' && 'notary-check' || 'qualify' }}
   cancel-in-progress: true
 
 defaults:
@@ -27,7 +43,41 @@ env:
   PIP_NO_INPUT: '1'
 
 jobs:
+  notary-check:
+    name: check existing notarization submissions
+    if: ${{ inputs.notary_check_ids != '' }}
+    environment: mac-release
+    runs-on: macos-15
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+          architecture: arm64
+      - name: Check status once and fetch terminal logs
+        env:
+          NOTARY_CHECK_IDS: ${{ inputs.notary_check_ids }}
+          NOTARY_API_KEY_P8_BASE64: ${{ secrets.NOTARY_API_KEY_P8_BASE64 }}
+          NOTARY_API_KEY_ID: ${{ secrets.NOTARY_API_KEY_ID }}
+          NOTARY_API_ISSUER_ID: ${{ secrets.NOTARY_API_ISSUER_ID }}
+        run: python -B scripts/mac/check_notary.py check --evidence "$RUNNER_TEMP/mac-notary-check"
+      - name: Delete decoded notary key
+        if: always()
+        run: python -B scripts/mac/check_notary.py cleanup
+      - name: Upload public notary JSON
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mac-notary-check
+          path: ${{ runner.temp }}/mac-notary-check/*.json
+          if-no-files-found: error
+          retention-days: 14
+
   portable-tests:
+    if: ${{ inputs.notary_check_ids == '' }}
     name: portable tests (Python ${{ matrix.python }})
     runs-on: macos-15
     timeout-minutes: 45
@@ -69,6 +119,7 @@ jobs:
           retention-days: 14
 
   dependency-graph:
+    if: ${{ inputs.notary_check_ids == '' }}
     name: dependency graph
     runs-on: macos-15
     timeout-minutes: 90
@@ -129,6 +180,7 @@ jobs:
         run: exit 1
 
   mac-build:
+    if: ${{ inputs.notary_check_ids == '' }}
     name: ad-hoc arm64 app and DMG
     needs: dependency-graph
     runs-on: macos-15
@@ -225,17 +277,18 @@ jobs:
           retention-days: 14
 
   mac-sign:
+    if: ${{ inputs.notary_check_ids == '' }}
     name: Developer ID arm64 app and DMG
     needs: mac-build
     environment: mac-release
     runs-on: macos-15
-    # 240 minutes for notarization, 110 for signing, packaging, smoke and cleanup.
+    # At most 300 minutes for notarization, 50 for other work and cleanup.
     timeout-minutes: 350
     env:
       MACOS_TEAM_ID: WTGFF582VY
-      NOTARY_APP_TIMEOUT_MINUTES: ${{ vars.NOTARY_APP_TIMEOUT_MINUTES || '150' }}
+      NOTARY_APP_TIMEOUT_MINUTES: ${{ inputs.notary_app_minutes || vars.NOTARY_APP_TIMEOUT_MINUTES || '150' }}
       NOTARY_DMG_TIMEOUT_MINUTES: ${{ vars.NOTARY_DMG_TIMEOUT_MINUTES || '90' }}
-      NOTARY_REUSE_SUBMISSION_ID: ${{ vars.NOTARY_REUSE_SUBMISSION_ID || '' }}
+      NOTARY_REUSE_SUBMISSION_ID: ${{ inputs.notary_reuse_submission_id || vars.NOTARY_REUSE_SUBMISSION_ID || '' }}
     steps:
       - uses: actions/checkout@v5
         with:
@@ -319,7 +372,7 @@ jobs:
   import-smoke:
     name: import smoke
     needs: dependency-graph
-    if: ${{ always() && !cancelled() }}
+    if: ${{ always() && !cancelled() && inputs.notary_check_ids == '' }}
     runs-on: macos-15
     timeout-minutes: 20
     continue-on-error: true

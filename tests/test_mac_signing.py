@@ -412,7 +412,7 @@ def test_release_sequence_staples_app_before_dmg_and_hashes_final_bytes(tmp_path
     monkeypatch.setenv("NOTARY_API_ISSUER_ID", "fixture-issuer")
     monkeypatch.delenv("NOTARY_REUSE_SUBMISSION_ID", raising=False)
     if reuse != "off":
-        monkeypatch.setenv("NOTARY_REUSE_SUBMISSION_ID", "previous-submission")
+        monkeypatch.setenv("NOTARY_REUSE_SUBMISSION_ID", "968ac10a-dc40-435f-89a5-85ddfb941ab9")
     app = make_app(tmp_path)
     (app / "Contents/Resources/VERSION").write_text("3.10.0")
     notices = app / "Contents/Resources/notices"
@@ -425,9 +425,9 @@ def test_release_sequence_staples_app_before_dmg_and_hashes_final_bytes(tmp_path
     monkeypatch.setattr(signing, "notarize", lambda path, label, *a: events.append("notarize " + label))
 
     def tool(argv, **kw):
-        assert argv[:4] == ["xcrun", "notarytool", "info", "previous-submission"]
+        assert argv[:4] == ["xcrun", "notarytool", "info", "968ac10a-dc40-435f-89a5-85ddfb941ab9"]
         events.append("reuse info")
-        return SimpleNamespace(returncode=0, stdout=json.dumps({"id": "previous-submission", "status": "Accepted"}),
+        return SimpleNamespace(returncode=0, stdout=json.dumps({"id": "968ac10a-dc40-435f-89a5-85ddfb941ab9", "status": "Accepted"}),
                                stderr="")
 
     monkeypatch.setattr(signing, "tool", tool)
@@ -472,9 +472,9 @@ def test_release_sequence_staples_app_before_dmg_and_hashes_final_bytes(tmp_path
                                           ("staple-fails", False), ("validate-fails", False)])
 def test_reuse_requires_accepted_and_matching_validated_ticket(notary_rig, monkeypatch, case, expected):
     rig = notary_rig
-    monkeypatch.setenv("NOTARY_REUSE_SUBMISSION_ID", "previous-submission")
+    monkeypatch.setenv("NOTARY_REUSE_SUBMISSION_ID", "968ac10a-dc40-435f-89a5-85ddfb941ab9")
     status = "In Progress" if case == "pending" else "Accepted"
-    rig.replies = [("info", {"id": "previous-submission", "status": status},
+    rig.replies = [("info", {"id": "968ac10a-dc40-435f-89a5-85ddfb941ab9", "status": status},
                     1 if case == "info-fails" else 0, "stderr")]
     if case not in ("pending", "info-fails"):
         rig.replies.append(("staple", "ticket output", 1 if case == "staple-fails" else 0, "stdout"))
@@ -482,7 +482,7 @@ def test_reuse_requires_accepted_and_matching_validated_ticket(notary_rig, monke
             rig.replies.append(("validate", "ticket output", 1 if case == "validate-fails" else 0, "stdout"))
     assert signing.reuse_notarization(Path("Uoink.app"), rig.private, rig.evidence) is expected
     assert json.loads((rig.evidence / "notary-app-reuse.json").read_text())["reused"] is expected
-    assert rig.calls[0][0][:4] == ["xcrun", "notarytool", "info", "previous-submission"]
+    assert rig.calls[0][0][:4] == ["xcrun", "notarytool", "info", "968ac10a-dc40-435f-89a5-85ddfb941ab9"]
     assert all(call[0][2] != "submit" for call in rig.calls)
 
 
@@ -729,7 +729,7 @@ def test_workflow_limits_secrets_and_orders_cleanup_before_every_runtime_step():
         assert f"    {field}\n" in job
     assert f"      MACOS_TEAM_ID: {TEAM}\n" in job
     for name, other in jobs.items():
-        if name != "mac-sign":
+        if name not in ("mac-sign", "notary-check"):
             assert "secrets." not in other and "mac-release" not in other
     header, body = job.split("    steps:\n", 1)
     assert "secrets." not in header
