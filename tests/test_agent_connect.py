@@ -54,8 +54,13 @@ def test_all_requested_recipes_are_in_the_single_table():
             "librechat", "msty", "boltai", "continue", "raycast", "smithery-local", "windows-odr",
             "obsidian", "open-webui", "anythingllm", "lm-studio", "ollama", "n8n", "make", "zapier",
             "autohotkey", "powertoys", "alfred"} <= connect.CLIENTS.keys()
-    for name in ("jan", "msty", "boltai", "continue", "open-webui", "anythingllm", "ollama"):
-        assert "unverified" in connect.CLIENTS[name].note.lower()
+    assert {"kiro", "copilot-cli", "auggie", "factory-droid", "qwen-code", "crush",
+            "antigravity", "chatbox", "dive", "perplexity"} <= connect.CLIENTS.keys()
+    for name, spec in connect.CLIENTS.items():
+        assert spec.sources and all(url.startswith("https://") for url in spec.sources), name
+        assert spec.checked == "2026-10-21", name
+        assert spec.verified or spec.reason, name
+        assert spec.location and spec.mac_location, name
 
 
 @pytest.mark.parametrize("kind", ["file", "directory", "dangling", "root", "parent", "junction"])

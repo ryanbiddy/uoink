@@ -11405,10 +11405,8 @@ def _env_dir(var: str) -> Path | None:
 
 def _agent_client_specs() -> list[dict]:
     """Per-client detection spec: the config file we'd edit, plus the marker
-    paths whose existence means "this client is installed". Windows-first
-    (the only shipped build today); falls back to ~/.<client> paths that are
-    correct on macOS/Linux too so the logic is portable when the Mac build
-    lands."""
+    paths whose existence means "this client is installed". Continue's current
+    YAML config needs manual merging; the JSON writer must not modify it."""
     home = Path.home()
     appdata = _env_dir("APPDATA") or (home / "AppData" / "Roaming")
     local = _env_dir("LOCALAPPDATA") or (home / "AppData" / "Local")
@@ -11449,7 +11447,10 @@ def _agent_client_specs() -> list[dict]:
         {
             "name": "continue",
             "label": "Continue",
-            "config_path": home / ".continue" / "config.json",
+            # Official schema checked 2026-10-21:
+            # https://docs.continue.dev/customize/deep-dives/mcp
+            "config_path": home / ".continue" / "config.yaml",
+            "manual_only": True,
             "markers": [home / ".continue"],
         },
     ]
@@ -11494,7 +11495,7 @@ def _detect_ai_clients() -> list[dict]:
             "installed": installed,
             "config_path": str(cfg),
             "config_exists": cfg.exists(),
-            "connected": _client_is_connected(cfg),
+            "connected": False if spec.get("manual_only") else _client_is_connected(cfg),
         })
     return out
 
@@ -11511,6 +11512,11 @@ def _connect_ai_client(name: str) -> dict:
     if spec is None:
         e = ValueError("That AI client is not supported.")
         e.http_status = 404
+        raise e
+    if spec.get("manual_only"):
+        e = ValueError("Continue uses YAML configuration. Run 'uoink connect continue' "
+                       "and follow its merge instructions. Nothing was changed.")
+        e.http_status = 409
         raise e
     cfg: Path = spec["config_path"]
     installed = any(p.exists() for p in spec["markers"])

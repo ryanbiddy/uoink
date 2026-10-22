@@ -15,182 +15,299 @@ for a default install. For a custom install, use its `cli\uoink.cmd` instead.
 Local library reads need neither a provider API key nor a running Uoink window.
 Capture and paid tools keep their own requirements.
 
-## MCP clients
+## Client recipes and documentation checks
 
-Run the command in your row. It prints config with absolute paths for the copy
-of Uoink being invoked. The file location and notes go to stderr; stdout holds
-only the config or shell command. Merge the printed server entry into the
-existing file, then restart the client's MCP connection. `connect` never edits
-another app's files. For Claude Code, run the printed command in PowerShell.
+`uoink connect <client>` prints a recipe with this installation's absolute paths.
+It does not read or edit client config files, launch clients, or contact the
+running helper. Location, documentation status, sources and check date go to
+stderr. Stdout contains the config, command or setup steps. Merge entries into
+an existing config without replacing unrelated settings or servers.
 
-Every recipe here is **not yet tested** in its client. Parsing config and
-validating a plugin do not prove that a client accepts it. The supplied
-October 18/19 research used search snippets, not full primary-page review.
-**Unverified** below means the research marked the detail unverified or did
-not cover it. UI-only clients have no established file path in that research;
-use their import form or enter the printed command, arguments and environment.
+**Verified docs: Yes** means the linked official documentation establishes the
+printed format or UI route. For Ollama, Obsidian, Make and Zapier it describes
+the documented route or limit, not an MCP config file. Every client connection
+is still **not yet tested** in the actual client. A source check and a config
+parse do not establish end-to-end acceptance. **No** rows state the missing
+evidence. These checks cover Windows and macOS, dated **2026-10-21**.
 
-| Client | Generate config | Location and format | Status |
-|---|---|---|---|
-| Claude Code | `uoink connect claude-code` | Run the printed `claude mcp add --scope user --transport stdio uoink ...` command; Claude manages `~/.claude.json`. | not yet tested |
-| Claude Desktop | `uoink connect claude-desktop` | `%APPDATA%\Claude\claude_desktop_config.json`, under `mcpServers`. | not yet tested |
-| Cursor | `uoink connect cursor` | `~/.cursor/mcp.json`, under `mcpServers`. Output sets `UOINK_MCP_TOOLSET=core` for its tool cap. | not yet tested |
-| Codex | `uoink connect codex` | `~/.codex/config.toml`, the `[mcp_servers.uoink]` and environment tables. | not yet tested |
-| Gemini CLI | `uoink connect gemini` | `~/.gemini/settings.json`, under `mcpServers`. | not yet tested |
-| VS Code | `uoink connect vscode` | Project `.vscode/mcp.json`, under `servers`, with `type: stdio`. | not yet tested |
-| Windsurf | `uoink connect windsurf` | `~/.codeium/windsurf/mcp_config.json`, under `mcpServers`. | not yet tested |
-| Cline | `uoink connect cline` | Open **MCP Servers > Configure MCP Servers** and merge into `cline_mcp_settings.json`. The disk location varies by editor/profile. | not yet tested |
-| Zed | `uoink connect zed` | `%APPDATA%\Zed\settings.json` on Windows; `~/.config/zed/settings.json` elsewhere, under `context_servers`. See uncertainty below. | not yet tested |
-| Goose | `uoink connect goose` | `~/.config/goose/config.yaml`, under `extensions`. See uncertainty below. | not yet tested |
-| OpenCode | `uoink connect opencode` | `~/.config/opencode/opencode.json` or project `opencode.json`, under `mcp`, with `type: local`. | not yet tested |
-| LM Studio | `uoink connect lm-studio` | `~/.lmstudio/mcp.json`, under `mcpServers`. Confirm the path in MCP settings. | not yet tested |
-| Hermes Agent | `uoink connect hermes` | `~/.hermes/config.yaml`, under `mcp_servers`. See uncertainty below. | not yet tested |
-| Warp | `uoink connect warp` | `~/.warp/.mcp.json` or project `.warp/.mcp.json`; JSON `mcpServers`. | not yet tested |
-| JetBrains Junie | `uoink connect junie` | `~/.junie/mcp/mcp.json` or project `.junie/mcp/mcp.json`; JSON `mcpServers`. AI Assistant's Settings > Tools > AI Assistant > MCP JSON import is a separate, unverified route. | not yet tested |
-| Amp | `uoink connect amp` | Windows `%APPDATA%/amp/settings.json`, elsewhere `~/.config/amp/settings.json`; JSON `amp.mcpServers`. Project `.amp/settings.json` needs client approval. Paths come from secondary research. | not yet tested |
-| Roo Code | `uoink connect roo` | Project `.roo/mcp.json` or global `mcp_settings.json` opened from Roo's MCP settings; JSON `mcpServers`. | not yet tested |
-| Kilo Code, newer | `uoink connect kilo` | `~/.config/kilo/kilo.jsonc` or project `kilo.jsonc`; `mcp.uoink`, `type: local`, command array and `environment`. | not yet tested; conflicting doc generations |
-| Kilo Code, older | `uoink connect kilo-legacy` | Project `.kilocode/mcp.json` or global `mcp_settings.json` opened from Kilo's MCP settings; JSON `mcpServers`. Choose one format for your installed version. | not yet tested; conflicting doc generations |
-| Cherry Studio | `uoink connect cherry-studio` | Settings > MCP Server > Add > STDIO or Import from JSON; `mcpServers`. No file path established. | not yet tested |
-| Jan | `uoink connect jan` | Settings > MCP Servers > Add; candidate JSON `mcpServers` or enter the fields. No file path established. | not yet tested; unverified |
-| LibreChat | `uoink connect librechat` | App's `librechat.yaml`; `mcpServers.uoink` with `type: stdio`. Run on this PC with access to the printed paths. | not yet tested; secondary research |
-| Msty | `uoink connect msty` | Toolbox > MCP Tools > JSON; candidate `mcpServers`. No file path established. | not yet tested; unverified |
-| BoltAI | `uoink connect boltai` | macOS app's MCP JSON import; candidate `mcpServers`. No file path established. Mac-later for Uoink. | not yet tested; unverified |
-| Continue | `uoink connect continue` | `~/.continue/config.yaml` or `.continue/mcpServers/uoink.yaml`; YAML `mcpServers` list with `name`, `command`, `args`, `env`. Use agent mode; check the installed schema. | not yet tested; unverified |
-| Raycast MCP | `uoink connect raycast` | Raycast AI MCP settings; command, args and env, or candidate JSON `mcpServers` import. No file path established. Research supports local stdio; import format and Windows availability remain unverified. | not yet tested |
-| Open WebUI | `uoink connect open-webui` | Candidate local mcpo JSON config passed with `--config <chosen-config.json>`, then Open WebUI tool-server settings. See below. | not yet tested; unverified |
-| AnythingLLM | `uoink connect anythingllm` | Desktop MCP settings; candidate `storage/plugins/anythingllm_mcp_servers.json` under its storage root, JSON `mcpServers`. Confirm the path in the installed app. | not yet tested; unverified |
-| Ollama-based clients | `uoink connect ollama` | The MCP-capable client's own file or JSON import, candidate `mcpServers`; Ollama itself has no MCP client config. | not yet tested; client-specific, unverified |
-| Smithery local | `uoink connect smithery-local` | Text guidance for a future `agent-kit/smithery.yaml`. Research supplies `target: local` but no complete stdio schema, so no manifest is shipped. | not yet tested; schema unverified |
-| Windows On-Device Agent Registry | `uoink connect windows-odr` | Text guidance for `odr.exe mcp add` from a local MCPB `manifest.json`; see preview limits below. | not yet tested; local argument syntax unverified |
-| Obsidian | `uoink connect obsidian` | Text guidance for Settings > Library > Library Mirror; writes Markdown into `<vault>/Uoink/`. | not yet tested in Obsidian |
-| n8n self-hosted | `uoink connect n8n` | HTTP Request node on this PC; local HTTP API with `X-Uoink-Token`. | not yet tested |
-| Make / Zapier | `uoink connect make` / `uoink connect zapier` | Text explanation only. Cloud runners cannot reach this PC's loopback API. | not yet tested; cloud route skipped |
-| AutoHotkey v2 | `uoink connect autohotkey` | A user-created `.ahk` script calling the absolute `cli/uoink.cmd` path. | not yet tested |
-| PowerToys Command Palette | `uoink connect powertoys` | Command/shortcut settings, where supported, calling `cli/uoink.cmd`; no extension or inline results. | not yet tested; UI route unverified |
-| Alfred | `uoink connect alfred` | macOS workflow Run Script action calling the CLI; Mac-later. | not yet tested |
+The table is generated from `CLIENTS` in `uoink_connect.py`. Windows home paths
+use `%USERPROFILE%`; `%APPDATA%` is the roaming application-data directory.
+On macOS, `~` is your home directory. Project paths are relative to the workspace
+opened in the client. An explicit UI route means there is no file to locate or
+JSON import to assume. Platform-specific recipes refuse unsupported platforms.
 
-Goose, Hermes, Continue and LibreChat output uses JSON-form YAML, valid YAML 1.2. When
-merging into an existing block-style YAML file, translate the same keys into
-that style or use a YAML-aware editor. Do not append a separate JSON document.
+<!-- BEGIN GENERATED CLIENTS -->
+| Client | Platforms | Windows location or route | macOS location or route | Verified docs | Official source | Checked |
+|---|---|---|---|---|---|---|
+| `uoink connect claude-code` | Windows, macOS | %USERPROFILE%/.claude.json (managed by claude mcp add) | ~/.claude.json (managed by claude mcp add) | Yes | [docs 1](https://code.claude.com/docs/en/mcp) | 2026-10-21 |
+| `uoink connect claude-desktop` | Windows, macOS | %APPDATA%/Claude/claude_desktop_config.json | ~/Library/Application Support/Claude/claude_desktop_config.json | Yes | [docs 1](https://modelcontextprotocol.io/docs/develop/connect-local-servers) | 2026-10-21 |
+| `uoink connect cursor` | Windows, macOS | %USERPROFILE%/.cursor/mcp.json | ~/.cursor/mcp.json | Yes | [docs 1](https://cursor.com/docs/mcp) | 2026-10-21 |
+| `uoink connect codex` | Windows, macOS | %USERPROFILE%/.codex/config.toml | ~/.codex/config.toml | Yes | [docs 1](https://developers.openai.com/codex/mcp) | 2026-10-21 |
+| `uoink connect gemini` | Windows, macOS | %USERPROFILE%/.gemini/settings.json | ~/.gemini/settings.json | Yes | [docs 1](https://geminicli.com/docs/tools/mcp-server/) | 2026-10-21 |
+| `uoink connect vscode` | Windows, macOS | Project .vscode/mcp.json | Project .vscode/mcp.json | Yes | [docs 1](https://code.visualstudio.com/docs/agents/reference/mcp-configuration) | 2026-10-21 |
+| `uoink connect windsurf` | Windows, macOS | %APPDATA%/devin/mcp_config.json | ~/.config/devin/mcp_config.json | Yes | [docs 1](https://docs.devin.ai/desktop/cascade/mcp) | 2026-10-21 |
+| `uoink connect cline` | Windows, macOS | Cline > MCP Servers > Configure > Configure MCP Servers (cline_mcp_settings.json) | Cline > MCP Servers > Configure > Configure MCP Servers (cline_mcp_settings.json) | Yes | [docs 1](https://docs.cline.bot/mcp/mcp-overview) | 2026-10-21 |
+| `uoink connect zed` | Windows, macOS | %APPDATA%/Zed/settings.json | Zed command palette > Open Settings File | No: The MCP shape is documented, but current official pages disagree on the macOS settings directory. Use Open Settings File. | [docs 1](https://zed.dev/docs/ai/mcp), [docs 2](https://github.com/zed-industries/zed/blob/main/docs/.doc-examples/configuration.md), [docs 3](https://zed.dev/docs/debugger) | 2026-10-21 |
+| `uoink connect goose` | Windows, macOS | %APPDATA%/Block/goose/config/config.yaml | ~/.config/goose/config.yaml | Yes | [docs 1](https://github.com/aaif-goose/goose/blob/main/documentation/docs/guides/config-files.md) | 2026-10-21 |
+| `uoink connect opencode` | Windows, macOS | %USERPROFILE%/.config/opencode/opencode.json | ~/.config/opencode/opencode.json | Yes | [docs 1](https://opencode.ai/docs/mcp-servers/), [docs 2](https://opencode.ai/docs/config/) | 2026-10-21 |
+| `uoink connect lm-studio` | Windows, macOS | %USERPROFILE%/.lmstudio/mcp.json | ~/.lmstudio/mcp.json | Yes | [docs 1](https://lmstudio.ai/blog/lmstudio-v0.3.17), [docs 2](https://lmstudio.ai/docs/app/mcp) | 2026-10-21 |
+| `uoink connect hermes` | Windows, macOS | %LOCALAPPDATA%/hermes/config.yaml | ~/.hermes/config.yaml | Yes | [docs 1](https://hermes-agent.nousresearch.com/docs/user-guide/features/mcp), [docs 2](https://hermes-agent.nousresearch.com/docs/getting-started/installation/) | 2026-10-21 |
+| `uoink connect warp` | Windows, macOS | %USERPROFILE%/.warp/.mcp.json | ~/.warp/.mcp.json | Yes | [docs 1](https://docs.warp.dev/agents/capabilities/mcp/) | 2026-10-21 |
+| `uoink connect junie` | Windows, macOS | %USERPROFILE%/.junie/mcp/mcp.json | ~/.junie/mcp/mcp.json | Yes | [docs 1](https://junie.jetbrains.com/docs/junie-cli-mcp-configuration.html) | 2026-10-21 |
+| `uoink connect amp` | Windows, macOS | %USERPROFILE%/.config/amp/settings.json | ~/.config/amp/settings.json | Yes | [docs 1](https://ampcode.com/docs/customize/mcp), [docs 2](https://ampcode.com/docs/cli/settings) | 2026-10-21 |
+| `uoink connect roo` | Windows, macOS | Project .roo/mcp.json | Project .roo/mcp.json | Yes | [docs 1](https://roocodeinc.github.io/Roo-Code/features/mcp/using-mcp-in-roo/) | 2026-10-21 |
+| `uoink connect kilo` | Windows, macOS | %USERPROFILE%/.config/kilo/kilo.jsonc | ~/.config/kilo/kilo.jsonc | Yes | [docs 1](https://kilo.ai/docs/automate/mcp/using-in-kilo-code) | 2026-10-21 |
+| `uoink connect kilo-legacy` | Windows, macOS | Legacy Kilo extension config; no current path confirmed | Legacy Kilo extension config; no current path confirmed | No: Current docs describe kilo.jsonc, not the old .kilocode/mcp.json format. | [docs 1](https://kilo.ai/docs/automate/mcp/using-in-kilo-code) | 2026-10-21 |
+| `uoink connect cherry-studio` | Windows, macOS | Settings > MCP > MCP Servers > Add (manual stdio fields) | Settings > MCP > MCP Servers > Add (manual stdio fields) | Yes | [docs 1](https://docs.cherryai.com.cn/advanced-basic/extensions/mcp) | 2026-10-21 |
+| `uoink connect jan` | Windows, macOS | Settings > MCP Servers > + | Settings > MCP Servers > + | Yes | [docs 1](https://docs.jan.ai/desktop/mcp) | 2026-10-21 |
+| `uoink connect librechat` | Windows, macOS | librechat.yaml in the LibreChat app directory | librechat.yaml in the LibreChat app directory | Yes | [docs 1](https://www.librechat.ai/docs/configuration/librechat_yaml/object_structure/mcp_servers) | 2026-10-21 |
+| `uoink connect msty` | Windows, macOS | Toolbox > Tools > Add New Tool > STDIO / JSON > Tool Configuration | Toolbox > Tools > Add New Tool > STDIO / JSON > Tool Configuration | Yes | [docs 1](https://docs.msty.ai/studio/toolbox/tools) | 2026-10-21 |
+| `uoink connect boltai` | macOS | Not available on Windows | ~/.boltai/mcp.json | Yes | [docs 1](https://docs.boltai.com/docs/plugins/mcp-servers) | 2026-10-21 |
+| `uoink connect continue` | Windows, macOS | Project .continue/mcpServers/uoink.yaml | Project .continue/mcpServers/uoink.yaml | Yes | [docs 1](https://docs.continue.dev/customize/deep-dives/mcp) | 2026-10-21 |
+| `uoink connect raycast` | Windows, macOS | Install MCP Server command, or Manage MCP Servers > Install New Server | Install MCP Server command, or Manage MCP Servers > Install New Server | Yes | [docs 1](https://manual.raycast.com/ai/model-context-protocol), [docs 2](https://www.raycast.com/changelog/windows) | 2026-10-21 |
+| `uoink connect open-webui` | Windows, macOS | A chosen mcpo JSON file passed with --config | A chosen mcpo JSON file passed with --config | Yes | [docs 1](https://github.com/open-webui/mcpo), [docs 2](https://docs.openwebui.com/features/extensibility/mcp/) | 2026-10-21 |
+| `uoink connect anythingllm` | Windows, macOS | %APPDATA%/anythingllm-desktop/storage/plugins/anythingllm_mcp_servers.json | ~/Library/Application Support/anythingllm-desktop/storage/plugins/anythingllm_mcp_servers.json | Yes | [docs 1](https://docs.anythingllm.com/mcp-compatibility/desktop), [docs 2](https://docs.anythingllm.com/mcp-compatibility/overview), [docs 3](https://docs.anythingllm.com/installation-desktop/storage) | 2026-10-21 |
+| `uoink connect ollama` | Windows, macOS | No MCP config in Ollama; configure its client instead | No MCP config in Ollama; configure its client instead | Yes | [docs 1](https://docs.ollama.com/capabilities/tool-calling), [docs 2](https://docs.openwebui.com/features/extensibility/mcp/), [docs 3](https://docs.continue.dev/guides/ollama-guide) | 2026-10-21 |
+| `uoink connect smithery-local` | Windows, macOS | MCPB publishing docs; no smithery.yaml recipe | MCPB publishing docs; no smithery.yaml recipe | No: The current docs describe MCPB publishing, but a local smithery.yaml command/args schema was not established. | [docs 1](https://smithery.ai/docs/build/publish) | 2026-10-21 |
+| `uoink connect windows-odr` | Windows | An unpacked MCPB bundle's manifest.json | Not available on macOS | Yes | [docs 1](https://learn.microsoft.com/en-us/windows/ai/mcp/servers/mcp-manual) | 2026-10-21 |
+| `uoink connect obsidian` | Windows, macOS | Uoink Settings > Library > Library Mirror; choose the vault root | Library Mirror is unavailable on macOS; use read-only CLI/MCP | Yes | [docs 1](https://help.obsidian.md/uri) | 2026-10-21 |
+| `uoink connect n8n` | Windows, macOS | Self-hosted n8n workflow UI on the Uoink host | Self-hosted n8n workflow UI on the Uoink host | Yes | [docs 1](https://docs.n8n.io/integrations/builtin/credentials/httprequest/), [docs 2](https://docs.n8n.io/integrations/builtin/cluster-nodes/sub-nodes/n8n-nodes-langchain.toolmcp/), [docs 3](https://github.com/n8n-io/n8n/releases/tag/n8n%401.114.0) | 2026-10-21 |
+| `uoink connect make` | Windows, macOS | No direct localhost route from Make cloud runners | No direct localhost route from Make cloud runners | Yes | [docs 1](https://help.make.com/on-premise-agent) | 2026-10-21 |
+| `uoink connect zapier` | Windows, macOS | No direct localhost route from Zapier cloud runners | No direct localhost route from Zapier cloud runners | Yes | [docs 1](https://help.zapier.com/hc/en-us/articles/44391646192397-Ways-to-make-API-requests-in-Zapier) | 2026-10-21 |
+| `uoink connect autohotkey` | Windows | A user-created .ahk file (AutoHotkey v2) | Not available on macOS | Yes | [docs 1](https://github.com/AutoHotkey/AutoHotkeyDocs/blob/v2/docs/lib/Run.htm) | 2026-10-21 |
+| `uoink connect powertoys` | Windows | PowerToys Command Palette > Run commands | Not available on macOS | Yes | [docs 1](https://learn.microsoft.com/en-us/windows/powertoys/command-palette/overview) | 2026-10-21 |
+| `uoink connect alfred` | macOS | Not available on Windows | Workflow > Run Script (/bin/zsh) | Yes | [docs 1](https://www.alfredapp.com/help/workflows/actions/run-script/) | 2026-10-21 |
+| `uoink connect kiro` | Windows, macOS | %USERPROFILE%/.kiro/settings/mcp.json | ~/.kiro/settings/mcp.json | Yes | [docs 1](https://kiro.dev/docs/mcp/configuration/) | 2026-10-21 |
+| `uoink connect copilot-cli` | Windows, macOS | %USERPROFILE%/.copilot/mcp-config.json | ~/.copilot/mcp-config.json | Yes | [docs 1](https://docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/add-mcp-servers) | 2026-10-21 |
+| `uoink connect auggie` | macOS | Not native; WSL uses $HOME/.augment/settings.json inside WSL | ~/.augment/settings.json | Yes | [docs 1](https://docs.augmentcode.com/cli/integrations), [docs 2](https://docs.augmentcode.com/cli/setup-auggie/install-auggie-cli) | 2026-10-21 |
+| `uoink connect factory-droid` | Windows, macOS | %USERPROFILE%/.factory/mcp.json | ~/.factory/mcp.json | Yes | [docs 1](https://docs.factory.com/harness/mcp) | 2026-10-21 |
+| `uoink connect qwen-code` | Windows, macOS | %USERPROFILE%/.qwen/settings.json | ~/.qwen/settings.json | Yes | [docs 1](https://qwenlm.github.io/qwen-code-docs/en/users/features/mcp/) | 2026-10-21 |
+| `uoink connect crush` | Windows, macOS | %USERPROFILE%/.config/crush/crushrc | ~/.config/crush/crushrc | Yes | [docs 1](https://github.com/charmbracelet/crush/blob/main/README.md) | 2026-10-21 |
+| `uoink connect antigravity` | Windows, macOS | %USERPROFILE%/.gemini/config/mcp_config.json | ~/.gemini/config/mcp_config.json | Yes | [docs 1](https://www.antigravity.google/docs/mcp) | 2026-10-21 |
+| `uoink connect chatbox` | Windows, macOS | Settings > MCP > Add Server > Local (stdio) | Settings > MCP > Add Server > Local (stdio) | Yes | [docs 1](https://api.chatboxai.app/en/guide/work-mode/configuration) | 2026-10-21 |
+| `uoink connect dive` | Windows, macOS | MCP server settings JSON editor | MCP server settings JSON editor | Yes | [docs 1](https://github.com/OpenAgentPlatform/Dive/blob/main/MCP_SETUP.md) | 2026-10-21 |
+| `uoink connect perplexity` | macOS | Local MCP is not supported on Windows | Mac app > Plugins > Add custom > Simple (local MCP) | Yes | [docs 1](https://www.perplexity.ai/help-center/en/articles/11502712-local-and-remote-mcps-for-perplexity) | 2026-10-21 |
+<!-- END GENERATED CLIENTS -->
 
-Current formats could not be checked online in this pass. Specific uncertainty:
-Zed's `command`/`args` shape versus its older nested command shape; Goose's
-extension fields and config location; LM Studio's config location; and Hermes's
-stdio `mcp_servers` fields. Cline's file location also varies. Each affected
-recipe prints a note. Verify these against the installed client's settings.
-All recipe choices live together in `uoink_connect.py` for easy correction.
+On macOS, follow [the Mac install guide](mac/INSTALL.md). Run the installed
+`Uoink.app/Contents/Helpers/uoink` shim, or its PATH symlink. Generated MCP
+commands use the app's bundled `Contents/Resources/Python/bin/python3 -B -s`
+and `Contents/Resources/uoink_mcp.py`, including custom app locations. BoltAI,
+Alfred and Perplexity local MCP are Mac-only. Auggie documents Windows through
+WSL; Uoink does not print a native Windows recipe or guess WSL path translation.
+
+Claude Code prints a PowerShell command on Windows and a shell command on Mac.
+Crush prints a line for its current **crushrc** file, interpreted by Crush's
+built-in Bash on both platforms. Do not run that line in PowerShell. Current
+Antigravity uses `~/.gemini/config/mcp_config.json`, shared by its App, IDE and
+CLI. Current Kilo uses `mcp` with a command array in `kilo.jsonc`; the retained
+`kilo-legacy` entry explains why it no longer prints the old unverified format.
+
+Goose, Hermes, Continue and LibreChat output JSON-form YAML, valid YAML 1.2.
+Translate the keys into the existing file's YAML style or use a YAML-aware
+editor. Do not append a second JSON document. Continue's standalone workspace
+file includes `name`, `version`, `schema: v1` and a `mcpServers` list. In an
+existing global `~/.continue/config.yaml`, merge only the list and retain the
+agent's metadata and models. MCP needs Continue's Agent mode. The dashboard's
+old Continue JSON writer now refuses the edit and points to this manual route.
+It does not migrate or overwrite an existing Continue configuration.
+
+## Local-model apps
+
+The MCP client starts Uoink. The model must also support tool calls. Ollama is
+the model runtime and has no Uoink MCP config. Pair it with Open WebUI or Continue
+and configure the Ollama provider separately. `uoink connect ollama` prints
+those client choices.
+
+For **LM Studio**, open the Program tab, then **Install > Edit mcp.json**.
+Merge the printed `mcpServers.uoink` entry and save. Its documented locations
+are `%USERPROFILE%/.lmstudio/mcp.json` on Windows and `~/.lmstudio/mcp.json`
+on Mac. [LM Studio's setup and path documentation](https://lmstudio.ai/blog/lmstudio-v0.3.17).
+
+For **AnythingLLM Desktop**, click the version number and choose **Open storage**
+to confirm the storage root shown in the table. Merge into
+`plugins/anythingllm_mcp_servers.json`, then choose **Agent Skills > Refresh**.
+Use `@agent` in chat. The server may be configured correctly even when the model
+cannot call it. [Desktop MCP setup](https://docs.anythingllm.com/mcp-compatibility/desktop).
+
+**Jan**, **Cherry Studio** and **Chatbox** have documented command, argument and
+environment fields. Their recipes print a field reference, not a claimed JSON
+import. **Msty** instead accepts a bare `command`/`args`/`env` object in
+**Toolbox > Tools > Add New Tool > STDIO / JSON > Tool Configuration**; name it
+`uoink`. **BoltAI** uses its MCP JSON editor on Mac.
+
+**Open WebUI** has two documented routes:
+
+1. Native MCP: on version 0.6.31 or later, open **Settings > Admin > Integrations >
+   External Tool Servers**, add an **MCP (Streamable HTTP)** connection, and use
+   `http://127.0.0.1:5179/mcp/v1`. Set the `X-Uoink-Token` custom header through
+   the connection's authentication/header settings. Use the configured Uoink
+   port if different. This route requires Open WebUI's server process to run on
+   the same host and reach that loopback interface.
+2. mcpo bridge: `uoink connect open-webui` prints the official `mcpServers`
+   config for a chosen JSON file. Pass that file with mcpo's `--config` option.
+   Run the bridge locally with authentication. In Open WebUI, add its OpenAPI
+   tool-server URL for the named `/uoink` route. The bridge must be able to
+   execute the printed Python and script paths.
+
+See [native MCP](https://docs.openwebui.com/features/extensibility/mcp/) and
+[mcpo's README](https://github.com/open-webui/mcpo). Neither route was connected
+during verification. A container's `127.0.0.1` and filesystem are its own;
+these host paths and URLs are not a Docker recipe.
+
+## Raycast and Mac launchers
+
+Run **Install MCP Server**, or **Manage MCP Servers > Install New Server**.
+Choose **Stdio**, name it `uoink`, and copy the command and environment fields
+from `uoink connect raycast`. Paste the `args` JSON array intact into Arguments
+so spaces remain part of each path. Raycast Pro is required. This form is
+documented; a `mcpServers` JSON import is not claimed. The Windows changelog
+also confirms MCP support. [Raycast MCP](https://manual.raycast.com/ai/model-context-protocol),
+[Windows changelog](https://www.raycast.com/changelog/windows).
+
+On Mac, Perplexity's **Plugins > Add custom > Simple** local setup requires its
+PerplexityXPC helper. Paste the full command from `uoink connect perplexity`,
+save, wait for **Running**, then enable it under Sources. The website's remote
+connectors cannot run that local command.
+[Perplexity local MCP](https://www.perplexity.ai/help-center/en/articles/11502712-local-and-remote-mcps-for-perplexity).
+
+`uoink connect alfred` prints a fixed Run Script action using the installed
+Mac CLI shim. AutoHotkey v2 and PowerToys Command Palette recipes are
+Windows-only. PowerToys uses **Run commands** (`>`). These launch the CLI;
+they do not add inline library search results. Keep arbitrary clipboard or
+query text out of shell command strings.
+
+## Obsidian on Windows and macOS
+
+On **Windows**, open the vault in Obsidian once, then open Uoink's
+**Settings > Library > Library Mirror**. Set the destination to the vault root,
+for example `C:\Users\you\Documents\Research Vault`, not its `.obsidian` folder.
+Choose **All current and future items** or **Allowlist only** with item IDs.
+Choose **Preview**, review the scope and counts, then **Enable**. The mirror is
+off by default; the dashboard's preview and consent flow enables it.
+
+The mirror writes Markdown under `<vault>/Uoink/`: `Library.md` is the index,
+`Library/` contains evidence cards, `Shelves/` contains shelf pages, and `Briefs/`
+contains accepted briefs. It exports one way. It does not copy the whole media
+library, import vault edits, or synchronize Obsidian settings. Resync processes
+bounded work, so pending items can remain. Disable stops future writes and
+leaves existing exported notes in place. Conflicting edits and unmanaged files
+can block writes. Mirror behavior is unchanged by these integration recipes.
+
+Open the generated index with this link after replacing the vault name:
+
+```text
+obsidian://open?vault=Research%20Vault&file=Uoink%2FLibrary
+```
+
+For an evidence card, use its actual vault-relative path from the exported
+index as the `file` value, with percent encoding. Do not derive the hashed
+filename from its title. Obsidian opens these Markdown files normally; no
+plugin is needed. The URI also works on Mac for notes that already exist.
+[Obsidian URI parameters](https://help.obsidian.md/uri), checked 2026-10-21.
+
+On **macOS**, Library Mirror is gated off in `_platform.library_mirror_capability`.
+There is no automatic vault export in the current Mac build. The read-only
+alternative is the local CLI or an MCP client on the Mac:
+
+```sh
+uoink search "working memory" --limit 5
+uoink recent --limit 10
+uoink get "ITEM_ID_FROM_SEARCH"
+```
+
+Read the returned evidence and copy selected results into an Obsidian note
+manually if needed. These commands do not write vault notes. The older
+`obsidian_vault_path` setting for `TASTE.md` and `USER.md` is separate from
+Library Mirror and does not enable a Mac corpus mirror. No Obsidian MCP plugin
+is claimed or installed.
+
+## n8n, Zapier and Make
+
+Run **self-hosted n8n on the same host as Uoink**, with access to its loopback
+interface. This applies to both Windows and Mac. A cloud worker, remote worker
+or ordinary container cannot use its own `127.0.0.1` to reach the Uoink host.
+These are setup recipes; no request was sent during verification.
+
+For the **HTTP Request node**:
+
+1. Create a **Header Auth** credential. Set Name to `X-Uoink-Token` and enter
+   your local Uoink token in its credential value field.
+2. Add an HTTP Request node with method **GET** and URL
+   `http://127.0.0.1:5179/memory/search`.
+3. Set query parameters `q` to `working memory` and `limit` to `5`.
+4. Set Authentication to **Generic Credential Type**, select **Header Auth**,
+   and select the saved credential. Execute the node when ready.
+
+Keep the token in n8n credentials, not node JSON, a URL, a workflow export,
+chat or logs. See [n8n HTTP credentials](https://docs.n8n.io/integrations/builtin/credentials/httprequest/)
+and [Uoink's search endpoint](v2-api.md#get-memorysearch).
+
+For the **MCP Client Tool node**, attach it to an AI Agent's tool connection.
+Choose **HTTP Streamable**, use `http://127.0.0.1:5179/mcp/v1` as the endpoint,
+and select **Header Auth** with the saved `X-Uoink-Token` credential. Choose
+only the tools needed by that workflow, then check tool discovery. Use the
+configured Uoink port if different. This node has no documented stdio launch
+route. Its current reference still describes an SSE field; n8n's official
+1.114.0 release notes explicitly establish HTTP Streamable as the default.
+If your node only offers SSE, update it before trying this recipe. Client
+acceptance with Uoink's `/mcp/v1` endpoint remains not yet tested.
+[n8n MCP Client Tool reference](https://docs.n8n.io/integrations/builtin/cluster-nodes/sub-nodes/n8n-nodes-langchain.toolmcp/),
+[official transport release note](https://github.com/n8n-io/n8n/releases/tag/n8n%401.114.0).
+
+Zapier and Make cloud runners cannot reach this PC's `127.0.0.1`. Make documents
+a separate Enterprise on-prem agent, but this guide does not claim a tested
+Uoink integration with it. No tunnel or public API exposure is configured.
+[Make on-prem agent](https://help.make.com/on-premise-agent),
+[Zapier HTTP actions](https://help.zapier.com/hc/en-us/articles/44391646192397-Ways-to-make-API-requests-in-Zapier).
+
+## Preview registries and clients not added
+
+On Windows build **26220.7262 or later**, the preview ODR command accepts a
+local unpacked MCPB manifest as a positional argument:
+
+```powershell
+odr.exe mcp add "C:\path with spaces\uoink-bundle\manifest.json"
+odr.exe list
+```
+
+Keep the bundle files beside that manifest. The source tree's `.mcpb/manifest.json`
+has bundle-relative paths and is not a standalone installed package. Registration
+and client acceptance are not yet tested. Uoink's installer does not run ODR.
+[Microsoft's manual registration guide](https://learn.microsoft.com/en-us/windows/ai/mcp/servers/mcp-manual).
+
+Smithery now documents local MCPB publishing, but no current local `smithery.yaml`
+command/args schema was established. The existing entry remains unverified and
+prints guidance only. It does not publish the user's private installation.
+
+These requested clients were checked on **2026-10-21** and skipped. MCP support
+alone is not enough to infer a config format or path.
+
+| Client | Official source checked | Why no recipe was added |
+|---|---|---|
+| Trae | [MCP docs](https://docs.trae.ai/ide/model-context-protocol) | The official page repeatedly failed to load. The current schema and paths could not be verified. |
+| Witsy | [Official README](https://github.com/Kochava-Studios/witsy/blob/main/README.md) | It confirms MCP support, but the documentation reviewed did not establish a local config/import schema. |
+| 5ire | [Docs](https://5ire.app/docs), [official README](https://github.com/nanbingxyz/5ire) | The reviewed docs describe tools and remote setup but do not establish a complete local config/import schema. |
+| DeepChat | [Official repository docs](https://github.com/ThinkInAIXYZ/deepchat/tree/main/docs) | The reviewed README and architecture docs confirm MCP support but do not establish a user-facing local config/import schema. A CLI guide fetch also failed. |
+
+ChatGPT web, claude.ai web and remote-only connectors are outside these local
+recipes. A local skill or file does not give a cloud runner access to this host.
 
 ## Cursor and VS Code install links
 
-In **Settings > Agents (MCP) > Agent connection**, choose **Add to Cursor** or
-**Add to VS Code**. Each button opens the installed client's review flow using
-this Uoink install's absolute Python and stdio script paths. Cursor receives
-the `core` toolset. The links contain only paths, isolation arguments when
-active, and the UTF-8/toolset environment settings. They contain no API token.
-
-The same links are available without opening a client:
+The dashboard's **Settings > Agents (MCP) > Agent connection** section offers
+**Add to Cursor** and **Add to VS Code**. They open each client's review flow
+with the current installation's absolute paths. Cursor receives the `core`
+toolset. The links contain paths, isolation arguments when active, and UTF-8
+settings, with no API token. These commands only print the same links:
 
 ```powershell
 uoink connect cursor --deeplink
 uoink connect vscode --deeplink
 ```
 
-Both commands only print. The dashboard builds the links locally through its
-existing authenticated config endpoint. Clicking makes no HTTP request and
-does not write client config. The client decides whether to install the server;
-Uoink cannot detect completion or whether a URL handler is installed. Buttons
-stay disabled if config loading fails. Client acceptance is not yet tested.
-
-## Local-model apps and preview registries
-
-LM Studio, Jan, Cherry Studio, Msty and MCP-capable Ollama clients can use the
-same local stdio process where their client supports it. The model also needs
-tool-calling support. Ollama supplies a model runtime, not the client connection.
-The handoff did not verify Open WebUI or AnythingLLM. Open WebUI's printed
-recipe is a candidate **mcpo** bridge config; native MCP support was not verified.
-Check the installed bridge before using it, bind it only to loopback and use
-its authentication. A bridge running in Docker or on another PC cannot use
-these Windows paths or treat its own `127.0.0.1` as the Uoink PC.
-
-Windows On-Device Agent Registry is a **preview** needing Windows build 26220
-or later; the research cites **26220.7262+**. Its local route consumes the
-MCPB manifest from the bundle (`.mcpb/manifest.json` in the source tree). On a
-supported build, inspect `odr.exe mcp add --help`, then use `odr.exe mcp add`
-with the local manifest option shown there. The handoff did not establish that
-option's spelling; `--uri` was documented only for remote servers. Do not treat
-the source manifest's bundle-relative paths as a standalone executable package.
-Registration and bundle acceptance are not yet tested. The installer never
-runs `odr.exe`.
-
-Smithery's secondary research mentions `target: local` but gives no complete
-local stdio schema. `connect smithery-local` prints the local command details
-and this limit. A `smithery.yaml` is deferred until that format is confirmed.
-Uoink does not configure remote hosting, publish a listing, or expose a tunnel.
-The research lists ChatGPT developer mode, claude.ai web connectors and Notion
-AI as remote routes (the Notion detail is unverified). They are skipped for
-this local-only integration.
-
-## Obsidian vault mirror
-
-Open **Settings > Library > Library Mirror**, enter the vault's root folder,
-and choose **All current and future items** or **Allowlist only** with item IDs.
-Select **Preview**, review the counts, then select **Enable** as confirmation.
-The mirror is off by default. The backend stores `library_mirror_enabled` and
-`library_mirror_consent` with destination, scope and allowlist. Enabling or
-broadening scope requires the dashboard's preview and intent flow; changing
-settings directly is not a substitute.
-
-`library_mirror.py` writes a one-way generated view under `<vault>/Uoink/`:
-evidence cards, shelf pages and accepted briefs. It does not copy the full media
-library, read vault edits back, or sync Obsidian settings. **Resync** processes
-bounded work; pending or stale counts can remain. The default batch is 20 files
-with a two-second work budget, and individual files are capped at 64 KiB.
-Conflicting user edits, unmanaged files and redirected paths can block writes
-or deletions. **Disable** stops the mirror; it does not erase previously
-exported files. Third-party indexes and synced copies remain outside Uoink's
-deletion control.
-
-The older `obsidian_vault_path` setting mirrors only `TASTE.md` and `USER.md`.
-It is separate from Library Mirror and does not enable corpus export. No
-Obsidian client connection was tested here. The research names no existing
-MCP-capable Obsidian plugin, so there is no claimed plugin recipe. If you choose
-one separately, verify that it can launch local stdio and use the printed
-command/args/env; installing the mirror does not install an MCP plugin.
-
-## Local automation and launchers
-
-Only **self-hosted n8n on the same PC**, with access to the host loopback
-interface, fits this recipe. In an HTTP Request node, use this existing read
-endpoint from [the API reference](v2-api.md#get-memorysearch):
-
-```http
-GET http://127.0.0.1:5179/memory/search?q=memory&limit=5
-X-Uoink-Token: <your local token>
-```
-
-Use your configured port if different. Store the token in n8n's credentials,
-not in a URL, copied workflow JSON, chat or logs. Treat it as access to your
-local library. This example was not sent during verification. Cloud n8n, Make,
-Zapier and Pipedream cannot reach the PC's `127.0.0.1`; remote HTTPS bridges and
-tunnels are skipped. Containers have their own loopback interface too.
-
-For AutoHotkey v2, `uoink connect autohotkey` prints a `.ahk` hotkey with this
-install's absolute launcher path. Its fixed action is:
-
-```autohotkey
-#Requires AutoHotkey v2.0
-^!u::Run('uoink search "working memory" --text')
-```
-
-In PowerToys Command Palette, where your release supports a command or shortcut,
-set its executable to the installed `cli/uoink.cmd` and arguments to
-`search "working memory" --text`. This starts a CLI process; it does not provide
-inline search results. That UI route is unverified. Alfred is Mac-later: a
-future local Mac install could use a workflow Run Script action with
-`uoink search "working memory" --text`. All three recipes are not yet tested.
-Keep user-supplied queries out of shell command strings unless correctly quoted.
-
+The client decides whether to install the server. Uoink cannot detect completion
+or a missing URL handler. Client acceptance is not yet tested.
 ## Agent Skills clients
 
 The same skill works with MCP tools or the CLI. `uoink skill path` prints the

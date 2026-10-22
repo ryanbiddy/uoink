@@ -297,7 +297,7 @@ def load_release_module(name):
 
 
 @pytest.mark.parametrize("platform", ["win32", "linux"])
-def test_connect_output_is_byte_identical_to_v3100(tmp_path, monkeypatch, platform):
+def test_unchanged_connect_stdout_is_byte_identical_to_v3100(tmp_path, monkeypatch, platform):
     old_connect = load_release_module("uoink_connect")
     old_cli = load_release_module("uoink_cli")
     monkeypatch.setattr(sys, "platform", platform)
@@ -313,7 +313,10 @@ def test_connect_output_is_byte_identical_to_v3100(tmp_path, monkeypatch, platfo
         monkeypatch.setattr(module, "APP_DIR", app)
     monkeypatch.setattr(cli.isolation, "apply_from_process", lambda _: None)
     monkeypatch.setattr(cli.isolation, "child_argv", lambda: [])
-    commands = [["connect", "--list"]] + [["connect", c] for c in connect.CLIENTS]
+    changes = json.loads((ROOT / "tests/fixtures/connect_20261021/changes.json").read_text())
+    assert set(connect.CLIENTS) - set(old_connect.CLIENTS) == set(changes["added"])
+    assert set(old_connect.CLIENTS) <= set(connect.CLIENTS)
+    commands = [["connect", c] for c in old_connect.CLIENTS]
     commands += [["connect", c, "--deeplink"] for c in ("cursor", "vscode")]
     for args in commands:
         outputs = []
@@ -323,7 +326,19 @@ def test_connect_output_is_byte_identical_to_v3100(tmp_path, monkeypatch, platfo
             with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
                 code = module.main(args)
             outputs.append((code, out.getvalue().encode("utf-8"), err.getvalue().encode("utf-8")))
-        assert outputs[0] == outputs[1], args
+        name = args[1]
+        if platform not in connect.CLIENTS[name].platforms:
+            assert name in changes["restricted_platforms"]
+            assert outputs[1][0] == 2 and outputs[1][1] == b""
+        else:
+            assert outputs[0][0] == outputs[1][0] == 0
+            if name in changes["stdout_changed"] and "--deeplink" not in args:
+                # Deliberate recipe changes have reviewed replacement snapshots.
+                assert outputs[0][1] != outputs[1][1], args
+            else:
+                assert outputs[0][1] == outputs[1][1], args
+            assert b"Official docs verified:" in outputs[1][2]
+            assert b"Checked: 2026-10-21" in outputs[1][2]
 
 
 def test_darwin_mcpb_payload_and_validation(tmp_path):
