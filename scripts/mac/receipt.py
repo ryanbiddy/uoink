@@ -8,6 +8,7 @@ import os
 from pathlib import Path
 import plistlib
 import re
+import shutil
 import socket
 import stat
 import subprocess
@@ -213,7 +214,8 @@ def verify_runtime(checks: dict):
         require(menu.get(name) is True, f"Menu lifecycle proof missing: {name}")
 
 
-def collect(dmg: Path, output: Path, expected_sha256: str | None = None) -> dict:
+def collect(dmg: Path, output: Path, expected_sha256: str | None = None, *,
+            require_notarized: bool = False, expected_team_id: str | None = None) -> dict:
     report = {"schema_version": 1, "started_utc": datetime.now(timezone.utc).isoformat(),
               "artifact": {}, "interpreter": {}, "install": {}, "runtime": {},
               "isolation": {}, "cleanup": {}, "verdict": "fail", "reasons": []}
@@ -234,6 +236,9 @@ def collect(dmg: Path, output: Path, expected_sha256: str | None = None) -> dict
         require(expected_sha256 is not None, "No --expected-sha256: pass the hash the build recorded")
         require(bool(re.fullmatch(r"[0-9a-fA-F]{64}", expected_sha256)), "Invalid expected SHA-256")
         require(digest == expected_sha256.lower(), "DMG SHA-256 differs from --expected-sha256")
+        if require_notarized:
+            require(bool(re.fullmatch(r"[A-Z0-9]{10}", expected_team_id or "")),
+                    "Strict receipt requires --expected-team-id")
         require(sys.platform == "darwin", "Installed receipt requires macOS")
         home = real_home()
         report["isolation"]["before"] = protected_snapshot(home)
@@ -259,6 +264,10 @@ def collect(dmg: Path, output: Path, expected_sha256: str | None = None) -> dict
             require(copied_signing["exit"] == 0 and mounted_hash and copied_hash
                     and mounted_hash.group(1) == copied_hash.group(1), "Copied app signature differs from the DMG")
             report["install"]["cdhash_matches_dmg"] = True
+            if require_notarized:
+                from verify_signing import verify_notarized
+                report["notarization"] = {}
+                verify_notarized(app, dmg, expected_team_id, report["notarization"], execute=command)
             report["interpreter"] = attest_interpreter(app, mounted, scratch, env)
 
             def observer(event, proc, menu):
@@ -287,10 +296,23 @@ def collect(dmg: Path, output: Path, expected_sha256: str | None = None) -> dict
             verify = command(["/usr/bin/codesign", "--verify", "--strict", "--deep", app])
             report["install"]["signature_after_runtime"] = verify
             require(verify["exit"] == 0, "Installed signature changed during runtime")
+            if require_notarized:
+                report["notarization_after_runtime"] = {}
+                verify_notarized(app, dmg, expected_team_id, report["notarization_after_runtime"], execute=command)
     except Exception as exc:
         failed(exc)
     finally:
         # Cleanup failures cannot hide an earlier failure or prevent isolation's after snapshot.
+        if (require_notarized and app is not None and scratch is not None and
+                not report.get("notarization", {}).get("ok")):
+            try:
+                require(app.is_relative_to(scratch) and app.name == "Uoink.app",
+                        "Refusing cleanup outside the disposable install")
+                shutil.rmtree(app)
+                report["cleanup"].update(app_gone=True, refused_before_execution=True)
+                app = None
+            except Exception as exc:
+                failed(exc)
         if app is not None and env is not None:
             try:
                 before = no_survivors(app, identities, port)
@@ -341,6 +363,8 @@ def main(argv=None) -> int:
     parser.add_argument("--dmg", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--expected-sha256")
+    parser.add_argument("--require-notarized", action="store_true")
+    parser.add_argument("--expected-team-id")
     args = parser.parse_args(argv)
     output = args.output.expanduser().resolve()
     if sys.platform == "darwin":
@@ -352,7 +376,8 @@ def main(argv=None) -> int:
     # No existing receipt is overwritten, and no partial run leaves a stale pass.
     output.mkdir(parents=True, exist_ok=True)
     with (output / "receipt.json").open("x", encoding="utf-8") as stream:
-        report = collect(args.dmg.expanduser().absolute(), output, args.expected_sha256)
+        report = collect(args.dmg.expanduser().absolute(), output, args.expected_sha256,
+                         require_notarized=args.require_notarized, expected_team_id=args.expected_team_id)
         json.dump(report, stream, indent=2, sort_keys=True)
         stream.write("\n")
     print(f"{report['verdict']}: {output / 'receipt.json'}")

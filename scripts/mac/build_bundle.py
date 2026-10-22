@@ -237,6 +237,11 @@ def macho_files(app: Path):
             raise ValueError(f"File escapes app: {path}")
         with path.open("rb") as stream:
             magic = stream.read(4)
+            # Java class headers share FAT_MAGIC. Their next word is the
+            # minor/major class version, not a Mach-O architecture count.
+            java_version = stream.read(4) if magic == b"\xca\xfe\xba\xbe" else b""
+        if path.suffix == ".class" and len(java_version) == 4 and 45 <= int.from_bytes(java_version[2:], "big") <= 100:
+            continue
         if magic in MACHO:
             yield path
 
@@ -278,18 +283,20 @@ def binary_inventory(app: Path) -> list[dict]:
     return rows
 
 
-def signing_order(app: Path) -> list[Path]:
-    with (app / "Contents/Info.plist").open("rb") as stream:
-        if plistlib.load(stream).get("CFBundleExecutable") != "Uoink":
-            raise ValueError("CFBundleExecutable must match Contents/MacOS/Uoink")
+def signing_order(app: Path, *, require_main: bool = True) -> list[Path]:
+    if require_main:
+        with (app / "Contents/Info.plist").open("rb") as stream:
+            if plistlib.load(stream).get("CFBundleExecutable") != "Uoink":
+                raise ValueError("CFBundleExecutable must match Contents/MacOS/Uoink")
     targets = set(macho_files(app))
     main = app / "Contents/MacOS/Uoink"
-    if main not in targets:
+    if require_main and main not in targets:
         raise ValueError("Contents/MacOS/Uoink must be a native executable")
     # Executable scripts in code locations (the uoink CLI shim in Helpers) are
     # code to codesign; sign them like Mach-O files (signature in xattrs).
-    for folder in ("Contents/Helpers", "Contents/MacOS"):
-        root = app / folder
+    roots = [app, *(p for p in app.rglob("*") if p.suffix in {".app", ".bundle", ".xpc", ".framework"}
+                   and p.is_dir() and not p.is_symlink())]
+    for root in (base / folder for base in roots for folder in ("Contents/Helpers", "Contents/MacOS")):
         if not root.is_dir():
             continue
         for path in root.rglob("*"):
@@ -308,7 +315,7 @@ def signing_order(app: Path) -> list[Path]:
                     if plistlib.load(stream).get("CFBundleExecutable"):
                         targets.add(path)
                 break
-    return sorted(targets, key=lambda p: (-len(p.parts), str(p))) + [app]
+    return sorted(targets, key=lambda p: (-len(p.parts), str(p))) + ([app] if require_main else [])
 
 
 def sign_app(app: Path, report: Path) -> None:
@@ -324,7 +331,7 @@ def sign_app(app: Path, report: Path) -> None:
                                   "stderr": assessment.stderr, "expected": "rejection until Developer ID and notarization"}})
 
 
-def create_dmg(app: Path, output: Path, version: str) -> Path:
+def create_dmg(app: Path, output: Path, version: str, *, signed: bool = False) -> Path:
     dmg = output / f"Uoink-{version}-macos-arm64.dmg"
     if dmg.exists():
         raise ValueError("DMG already exists")
@@ -335,7 +342,8 @@ def create_dmg(app: Path, output: Path, version: str) -> Path:
         (stage / "Read Me.txt").write_text(
             f"Uoink {version} for Apple Silicon requires macOS {MINIMUM_MACOS} or later.\n"
             "Drag Uoink to Applications. Eject this disk, then open Uoink from Applications.\n"
-            "This private test build is ad-hoc signed. Developer ID and notarization are pending.\n",
+            + ("This build uses Developer ID signing and notarization.\n" if signed else
+               "This private test build is ad-hoc signed. Developer ID and notarization are pending.\n"),
             encoding="utf-8")
         command = ["hdiutil", "create", "-format", "UDZO", "-volname", f"Uoink {version}",
                    "-srcfolder", stage, dmg]

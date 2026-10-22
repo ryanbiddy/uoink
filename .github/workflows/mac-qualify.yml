@@ -224,6 +224,91 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
+  mac-sign:
+    name: Developer ID arm64 app and DMG
+    needs: mac-build
+    environment: mac-release
+    runs-on: macos-15
+    timeout-minutes: 120
+    env:
+      MACOS_TEAM_ID: WTGFF582VY
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+          architecture: arm64
+      - name: Establish disposable profile before imports
+        run: bash scripts/mac/runner-env.sh
+      - name: Record signing runner and assert arm64
+        run: bash scripts/mac/runner-info.sh "$RUNNER_TEMP/mac-signed-evidence/environment.txt"
+      - uses: actions/download-artifact@v4
+        with:
+          name: uoink-macos-arm64-adhoc
+          path: ${{ runner.temp }}/mac-sign-input
+      - name: Extract the existing app with modes and symlinks
+        run: >-
+          python -B scripts/mac/sign_notarize.py prepare
+          --download "$RUNNER_TEMP/mac-sign-input" --output "$RUNNER_TEMP/mac-signed"
+      - name: Sign, notarize and staple app then DMG
+        env:
+          MACOS_CERT_P12_BASE64: ${{ secrets.MACOS_CERT_P12_BASE64 }}
+          MACOS_CERT_PASSWORD: ${{ secrets.MACOS_CERT_PASSWORD }}
+          NOTARY_API_KEY_P8_BASE64: ${{ secrets.NOTARY_API_KEY_P8_BASE64 }}
+          NOTARY_API_KEY_ID: ${{ secrets.NOTARY_API_KEY_ID }}
+          NOTARY_API_ISSUER_ID: ${{ secrets.NOTARY_API_ISSUER_ID }}
+        run: >-
+          python -B scripts/mac/sign_notarize.py sign
+          --output "$RUNNER_TEMP/mac-signed" --evidence "$RUNNER_TEMP/mac-signed-evidence"
+      - name: Delete signing keychain and decoded keys before any payload execution
+        if: always()
+        run: python -B scripts/mac/sign_notarize.py cleanup
+      - name: Assess and launch a quarantined installed copy
+        run: |
+          test ! -e "$RUNNER_TEMP/uoink-signing-private"
+          version="$(cat VERSION)"
+          python -B scripts/mac/quarantine_smoke.py \
+            --dmg "$RUNNER_TEMP/mac-signed/Uoink-$version-macos-arm64.dmg" \
+            --expected-team-id "$MACOS_TEAM_ID" --output "$RUNNER_TEMP/mac-signed-evidence/quarantine"
+      - name: Smoke the signed DMG and Darwin connector
+        run: |
+          test ! -e "$RUNNER_TEMP/uoink-signing-private"
+          version="$(cat VERSION)"
+          python -B scripts/mac/dmg_smoke.py \
+            --dmg "$RUNNER_TEMP/mac-signed/Uoink-$version-macos-arm64.dmg" \
+            --mcpb "$RUNNER_TEMP/mac-signed/uoink-$version-macos.mcpb" \
+            --output "$RUNNER_TEMP/mac-signed-evidence/dmg-smoke"
+      - name: Collect strict installed receipt from final signed bytes
+        run: |
+          test ! -e "$RUNNER_TEMP/uoink-signing-private"
+          version="$(cat VERSION)"
+          digest="$(python -c 'import json,sys; print(json.load(open(sys.argv[1]))["sha256"])' "$RUNNER_TEMP/mac-signed/dmg.json")"
+          python -B scripts/mac/receipt.py \
+            --dmg "$RUNNER_TEMP/mac-signed/Uoink-$version-macos-arm64.dmg" \
+            --expected-sha256 "$digest" --require-notarized --expected-team-id "$MACOS_TEAM_ID" \
+            --output "$RUNNER_TEMP/mac-signed-evidence/receipt"
+      - name: Upload signed DMG and Darwin connector
+        uses: actions/upload-artifact@v4
+        with:
+          name: uoink-macos-arm64-signed
+          path: |
+            ${{ runner.temp }}/mac-signed/*.dmg
+            ${{ runner.temp }}/mac-signed/*.mcpb
+            ${{ runner.temp }}/mac-signed/dmg.json
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 7
+      - name: Upload public signing and runtime evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mac-signed-evidence
+          path: ${{ runner.temp }}/mac-signed-evidence/
+          if-no-files-found: error
+          retention-days: 14
+
   import-smoke:
     name: import smoke
     needs: dependency-graph

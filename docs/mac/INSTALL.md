@@ -1,21 +1,20 @@
 # Install the macOS test build
 
-These are draft steps for the private Apple Silicon build. Use the DMG from
-the matching successful `mac-build` job, named `Uoink-<VERSION>-macos-arm64.dmg`.
-The artifact also contains `dmg.json` with its SHA-256 and size. This build has
-an ad-hoc signature. Developer ID signing, notarization and interactive Mac
-acceptance are still pending. Apple Silicon and macOS 15 or later are required.
+Use `uoink-macos-arm64-signed` from a successful `mac-sign` job. It contains
+`Uoink-<VERSION>-macos-arm64.dmg` and `dmg.json` with the final SHA-256 and size.
+The job requires Developer ID signing, notarization and stapled tickets for
+the app and DMG. Apple Silicon and macOS 15 or later are required.
+The first signed hosted run and interactive acceptance are still pending.
 
 ## Install and open
 
-1. Download and open the DMG. Drag Uoink to the Applications shortcut.
-2. Eject the mounted disk, then open Uoink from Applications once.
-3. If macOS blocks an unidentified developer, dismiss the alert. Open Apple
-   menu > System Settings > Privacy & Security. Find the blocked Uoink entry
-   in Security and choose **Open Anyway**. Authenticate if asked, then confirm
-   **Open**. Exact wording needs confirmation on the supported Mac releases.
-4. Do not use that flow for a damaged-signature or malware alert. A managed
-   Mac may prohibit overrides. A later update can require another override.
+1. Download the signed artifact in Safari, unzip it and open the DMG.
+   Drag Uoink to the Applications shortcut.
+2. Eject the mounted disk, then double-click Uoink in Applications.
+3. Confirm the standard "downloaded from the internet" prompt if it appears.
+   No security override should be needed. An unidentified-developer,
+   damaged-signature or malware alert is a failed acceptance check; record it
+   with the workflow run and follow [ACCEPTANCE.md](ACCEPTANCE.md).
 
 The installed app starts a menu-bar process and shows the welcome window once
 per version. Open dashboard, Open folder, Settings, Recent items and Quit Uoink

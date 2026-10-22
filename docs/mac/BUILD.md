@@ -8,14 +8,13 @@ branch or with `workflow_dispatch`. Its `mac-build` job now produces:
 - `uoink-<VERSION>-macos.mcpb`, the Darwin-only thin Claude Desktop connector.
 - `uoink-<VERSION>-macos-arm64.tar.gz`, retained for bundle inspection.
 
-The preceding hosted run built Python 3.13.16, the hashed wheel graph and LGPL
-FFmpeg, then passed helper health, media/alignment, mirror gating, MCP 91/35
-and immutable-bundle smoke. The DMG, whole-app ad-hoc signature, login startup
-and client setup added in passes 7, 9 and 10 still need a hosted run.
+Pass 11 hosted arm64 run `39552211211` passed the ad-hoc build, DMG smoke and
+installed receipt. Pass 12 adds `mac-sign` after `mac-build` for Developer ID
+signing and notarization. Its first hosted result is still pending.
 
-Artifacts are private test builds. Ad-hoc signing establishes no developer
-trust. Developer ID, notarization and interactive Mac acceptance remain
-pending. Pass 8 adds the native UI and its hosted process checks.
+Artifacts are private test builds. Use `uoink-macos-arm64-signed` for signed
+installation testing. The ad-hoc artifact establishes no developer trust.
+Interactive Mac acceptance remains pending.
 `LSMinimumSystemVersion` is `15.0`, matching the hosted runtime coverage. See [INSTALL.md](INSTALL.md) for draft user steps.
 
 ## Build locally on a disposable macOS arm64 machine
@@ -95,15 +94,65 @@ verifies the completed app. Failures print the exit code and codesign stderr.
 The launcher is compiled for arm64 with `-mmacosx-version-min=15.0`, and
 `CFBundleExecutable` must be `Uoink`.
 
-Developer ID signing will enable hardened runtime with `--options runtime`.
-Start with no entitlements. Qualify bundled Python, native extensions and media
-processing under that policy before release. Add `com.apple.security.cs.allow-jit`
-only if a required JIT fails that qualification; consider
-`com.apple.security.cs.allow-unsigned-executable-memory` only if a required
-dependency demonstrably needs it. No entitlement is currently established as
-necessary. Keep library validation enabled by signing nested code with the same
-Developer ID; do not grant `com.apple.security.cs.disable-library-validation` or
-`com.apple.security.cs.allow-dyld-environment-variables` by default.
+## Developer ID signing and notarization
+
+`mac-sign` runs on `macos-15` arm64 after `mac-build`. It downloads that job's
+tar archive and Darwin MCPB without rebuilding. Tar preserves modes and links;
+the signing pass replaces ad-hoc signatures, including the CLI script's xattrs.
+Only this job uses the `mac-release` environment. Its signing step receives:
+
+- `MACOS_CERT_P12_BASE64`
+- `MACOS_CERT_PASSWORD`
+- `NOTARY_API_KEY_P8_BASE64`
+- `NOTARY_API_KEY_ID`
+- `NOTARY_API_ISSUER_ID`
+
+Decoded files stay in a mode 0700 directory under `RUNNER_TEMP`. The job imports
+the certificate into a temporary keychain with a random, masked password and
+codesign access. It reads the imported identity name and requires team
+`WTGFF582VY`, a public workflow value. Cleanup runs even after failure, restores
+the previous keychain search list and deletes the temporary keychain and files.
+No bundled code runs until cleanup succeeds.
+
+Signing uses `--force --options runtime --timestamp`, the imported identity and
+the temporary keychain. It signs every Mach-O file, scripts in Helpers/MacOS,
+enclosing code bundles and finally Uoink.app. It never signs with `--deep`.
+There are **no entitlement exceptions**: none has been proved necessary for
+this payload. Library validation stays enabled; nested native code uses the
+same identity. JIT, unsigned executable memory, disabled library validation
+and `get-task-allow` are not granted. A hosted runtime failure must establish
+the need for any later exception, which belongs only on its executable.
+
+The archive scan opens ZIP, wheel, JAR, egg and tar payloads recursively, including
+ZIP files detected by content. `nested-archives.json` lists each archive, native
+members, action and before/after hashes. Native members and enclosing bundles
+are signed with the same ordering before their archive is repacked; child
+archives finish first. Archives without native code stay byte-identical.
+Traversal, escaping links, excessive nesting or more than 8 GiB of expanded
+archive data fail the job. The first hosted scan must establish the real
+payload findings; offline tests use nested archive fixtures.
+
+CI submits a ditto ZIP of the signed app with a 30-minute notary timeout, staples
+the accepted app, then builds the DMG from that app. It signs and submits the
+DMG separately, staples it and validates both tickets. `dmg.json` is rewritten
+after DMG stapling so its SHA-256 names the final bytes.
+
+After key deletion, CI verifies strict signatures, team, runtime flags, secure
+timestamps and both tickets. It quarantines a DMG copy as a Safari download,
+installs with ditto into a path with spaces, requires the app's quarantine
+attribute, and assesses both app and DMG with spctl. It records
+`syspolicy_check distribution` when available, launches through LaunchServices
+with disposable paths and requires `/health` within 120 seconds. DMG smoke
+and the strict installed receipt then run against the signed artifact.
+
+Read `mac-signed-evidence` after a failure. `notary-app.json` and
+`notary-dmg.json` give submission IDs and status. Any status other than
+`Accepted` fails; CI fetches the submission's `notary-*-log.json`, whose issues
+name rejected paths and reasons. `codesign-sign.txt` records signing failures;
+`quarantine/quarantine.json` records codesign, spctl and policy output.
+Launch stderr and smoke output help locate hardened-runtime crashes.
+`receipt/receipt.json` records the strict verdict and all existing runtime,
+cleanup and isolation checks. Credentials and keychains are never uploaded.
 
 ## Inputs and reproducibility
 
@@ -299,7 +348,7 @@ executable together. `--deep` is used only for the final
 `spctl --assess` output;
 Gatekeeper rejection is expected until Developer ID signing and notarization.
 The main app entry is compiled from `installer/mac/launcher.c`; it execs only
-the bundled Python with `-B -s`. No credentials or signing certificates are used.
+the bundled Python with `-B -s`. The ad-hoc build job uses no signing credentials.
 
 The build must fail on an incomplete graph, a changed hash, a missing source,
 a Mach-O file without arm64, or any remaining absolute load dependency or rpath
@@ -376,12 +425,11 @@ contents, uninstall refusal/planning, signing order, DMG command construction,
 MCPB manifests and ZIP contents, shell/YAML syntax, payload closure and the
 static jobs in `ci.yml`. These checks do not execute Apple tools.
 
-The next hosted run must prove compilation of the native entry, all strict
-signature checks, DMG creation/mount/copy/detach, the relocated immutable-bundle
-smoke, CLI output and the generated plist. The owner must provide Developer ID
-certificates for the later signing pass and an interactive Apple Silicon Mac
-for Gatekeeper, Finder, login/logout, Quit, Chrome, clients, Keychain and UI
-acceptance. macOS 15 is the minimum for this test build; macOS 14 is not supported.
+The next hosted run must prove Developer ID signing, archive handling, both
+notary acceptances and tickets, quarantine propagation and launch, signed DMG
+smoke and the strict installed receipt. An interactive Apple Silicon Mac is
+still required for Safari, Finder, login/logout, Quit, Chrome, clients, Keychain
+and UI acceptance. macOS 15 is the minimum; macOS 14 is not supported.
 
 ## Offline check record for passes 7, 9 and 10
 

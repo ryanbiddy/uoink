@@ -5,11 +5,19 @@ and version from the same successful hosted build. Record the macOS version,
 app version and result beside each step. A fresh macOS test account makes the
 first-run check repeatable without changing your existing Uoink data.
 
-## Run the receipt on your Mac
+## Download and open the signed app
 
-Download `uoink-macos-arm64-adhoc` from the workflow run being tested and
-unzip it into `~/Downloads/uoink-mac`. It holds the DMG and `dmg.json`, the
-hash the hosted build recorded. Make a fresh clone of
+In Safari, download `uoink-macos-arm64-signed` from the successful workflow
+run being tested. Unzip it into `~/Downloads/uoink-mac`. Open its DMG, drag
+Uoink to Applications, eject the disk, then double-click Uoink in Applications.
+Confirm that it opens with no security prompt beyond the standard
+"downloaded from the internet" confirmation. Do not bypass a security block.
+Record the exact alert if this fails. Then run the strict receipt below.
+
+## Run the strict receipt on your Mac
+
+The signed artifact holds the DMG and `dmg.json`, the hash the hosted job
+recorded after stapling. Make a fresh clone of
 `https://github.com/ryanbiddy/uoink.git` and check out that run's exact commit.
 From the clone's root, run this in Terminal:
 
@@ -18,11 +26,16 @@ version="$(cat VERSION)"
 dmg="$HOME/Downloads/uoink-mac/Uoink-$version-macos-arm64.dmg"
 expected="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["sha256"])' "$HOME/Downloads/uoink-mac/dmg.json")"
 python3 -B scripts/mac/receipt.py --dmg "$dmg" --expected-sha256 "$expected" \
+  --require-notarized --expected-team-id WTGFF582VY \
   --output "$HOME/Desktop/uoink-receipt"
 ```
 
 The expected hash comes from the build, not from the downloaded file, so a
 changed or corrupted download fails the receipt.
+Strict mode also requires team `WTGFF582VY`, hardened runtime, secure timestamps,
+valid app and DMG tickets, and spctl acceptance with app source
+`Notarized Developer ID`. All existing runtime, cleanup and isolation checks
+must still pass. Omitting the strict flag retains the ad-hoc receipt behavior.
 
 Use Python 3.10 or later. System `python3` runs only the collector. You can
 replace `python3` with the full quoted path to an app's
@@ -45,11 +58,10 @@ overwrite it. A passing receipt does not replace the visible UI checks below.
 
 ## Check the visible app
 
-1. Open the DMG. Read the minimum version, drag Uoink to Applications, eject
-   the disk and open the installed app. Expected: it starts from Applications,
-   shows one menu-bar U and opens the welcome window. This private build is
-   ad-hoc signed. Follow [INSTALL.md](INSTALL.md) if macOS blocks an unidentified
-   developer. A damaged-signature alert is a failed check.
+1. Complete the Safari download and double-click check above. Expected: Uoink
+   starts from Applications, shows one menu-bar U and opens the welcome window.
+   Any security block beyond the normal internet-download confirmation fails
+   this check. No manual security override is part of acceptance.
 
 2. Switch System Settings > Appearance between Light and Dark. Expected: the
    monochrome U remains visible in both modes, with clean edges on the Retina
