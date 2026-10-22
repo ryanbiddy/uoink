@@ -302,7 +302,11 @@ def reuse_notarization(app: Path, private: Path, evidence: Path) -> bool:
 
 def staple(path: Path, label: str, evidence: Path) -> None:
     for operation in ("staple", "validate"):
-        result = tool(["xcrun", "stapler", operation, path], timeout=300)
+        # stapler fetches the ticket from Apple's CDN; retry only a dropped connection.
+        for _ in range(3):
+            result = tool(["xcrun", "stapler", operation, path], timeout=300)
+            if not result.returncode or "NSURLErrorDomain" not in result.stdout + result.stderr:
+                break
         (evidence / f"stapler-{label}-{operation}.txt").write_text(
             public_output(result.stdout + result.stderr), encoding="utf-8")
         if result.returncode:
