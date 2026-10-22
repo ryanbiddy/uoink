@@ -23,7 +23,8 @@ class Client:
     note: str = ""
     guide: str = ""
     mac_location: str = ""
-    platforms: tuple[str, ...] = ("win32", "darwin", "linux")
+    linux_location: str = ""
+    platforms: tuple[str, ...] = ("win32", "darwin")
     sources: tuple[str, ...] = ()
     checked: str = "2026-10-21"
     verified: bool = True
@@ -33,9 +34,18 @@ class Client:
 def recipe(format: str, location: str, source: str, shape="mcpServers", **kwargs) -> Client:
     """Use explicit Windows homes while retaining the documented POSIX spelling."""
     mac = kwargs.pop("mac_location", location)
+    # Share POSIX paths and platform-neutral routes, never macOS-only paths.
+    linux = kwargs.pop("linux_location", None)
+    if linux is None:
+        linux = mac if not any(part in mac for part in
+                               ("~/Library/", "macOS", "Not available", "%")) else ""
+    platforms = kwargs.pop("platforms", ("win32", "darwin", *(["linux"] if linux else [])))
+    if "linux" not in platforms:
+        linux = ""
     extra_sources = kwargs.pop("sources", ())
     return Client(format, location.replace("~/", "%USERPROFILE%/"), shape,
-                  mac_location=mac, sources=(source, *extra_sources), **kwargs)
+                  mac_location=mac, linux_location=linux, platforms=platforms,
+                  sources=(source, *extra_sources), **kwargs)
 
 
 UI_FIELDS = ("Name: uoink. Transport: stdio. Enter these command, args and env values\n"
@@ -77,6 +87,7 @@ CLIENTS = {
                     note="Use the IDE's config button; the directory depends on editor and profile. Cline CLI uses ~/.cline/data/settings/cline_mcp_settings.json."),
     "zed": recipe("json", "%APPDATA%/Zed/settings.json", "https://zed.dev/docs/ai/mcp", "context_servers",
                   mac_location="Zed command palette > Open Settings File",
+                  linux_location="~/.config/zed/settings.json",
                   sources=("https://github.com/zed-industries/zed/blob/main/docs/.doc-examples/configuration.md",
                            "https://zed.dev/docs/debugger"),
                   verified=False,
@@ -128,6 +139,7 @@ CLIENTS = {
                        note="IDE Agent mode. For global config.yaml, merge only the mcpServers list into your existing config; keep its metadata and models."),
     "raycast": recipe("text", "Install MCP Server command, or Manage MCP Servers > Install New Server",
                       "https://manual.raycast.com/ai/model-context-protocol", guide=UI_FIELDS,
+                      platforms=("win32", "darwin"),
                       sources=("https://www.raycast.com/changelog/windows",),
                       note="Requires Raycast Pro. Choose Stdio; Arguments accepts a JSON array, so paste the args array intact. No JSON config import is claimed."),
     "open-webui": recipe("json", "A chosen mcpo JSON file passed with --config",
@@ -205,8 +217,8 @@ CLIENTS = {
 
 def client_spec(client: str) -> Client:
     spec = CLIENTS[client]
-    if sys.platform == "darwin":
-        location = spec.mac_location
+    if sys.platform in {"darwin", "linux"}:
+        location = spec.mac_location if sys.platform == "darwin" else spec.linux_location
         if location.startswith("~/") and " (" not in location:
             location = str(Path(location).expanduser())
         return replace(spec, location=location)
@@ -224,13 +236,13 @@ def require_platform(client: str) -> None:
 
 def client_table() -> str:
     """Generated into the guide and the distributable kit, including audit gaps."""
-    rows = ["| Client | Platforms | Windows location or route | macOS location or route | Verified docs | Official source | Checked |",
-            "|---|---|---|---|---|---|---|"]
+    rows = ["| Client | Platforms | Windows location or route | macOS location or route | Linux location or route | Verified docs | Official source | Checked |",
+            "|---|---|---|---|---|---|---|---|"]
     for name, spec in CLIENTS.items():
-        platforms = ", ".join(label for key, label in (("win32", "Windows"), ("darwin", "macOS")) if key in spec.platforms)
+        platforms = ", ".join(label for key, label in (("win32", "Windows"), ("darwin", "macOS"), ("linux", "Linux")) if key in spec.platforms)
         status = "Yes" if spec.verified else "No: " + spec.reason
         links = ", ".join(f"[docs {i + 1}]({url})" for i, url in enumerate(spec.sources))
-        rows.append(f"| `uoink connect {name}` | {platforms} | {spec.location} | {spec.mac_location} | {status} | {links} | {spec.checked} |")
+        rows.append(f"| `uoink connect {name}` | {platforms} | {spec.location} | {spec.mac_location} | {spec.linux_location or 'No recipe'} | {status} | {links} | {spec.checked} |")
     return "\n".join(rows) + "\n"
 
 def bundle_resources(app_dir: Path) -> Path | None:

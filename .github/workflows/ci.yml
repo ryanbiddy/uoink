@@ -160,7 +160,8 @@ jobs:
         # mcp 2.0.0 (2026-08) removed the mcp.server.fastmcp import path
         # uoink_mcp.py is written against; migrating to the 2.x API is a
         # separate ticket.
-        run: pip install pytest Pillow "mcp<2"
+        # PyYAML (the installer lock's pin) so the Continue detection tests run instead of skipping.
+        run: pip install pytest Pillow "mcp<2" "PyYAML==6.0.3"
       - name: Run tests
         # The Living Library tests import top-level modules (index, server,
         # library_*) directly, so the checkout root must be on PYTHONPATH.
