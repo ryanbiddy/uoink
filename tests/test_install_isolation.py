@@ -28,6 +28,28 @@ ROOT = Path(__file__).resolve().parent.parent
 PRODUCTION_PORT = 5179
 
 
+@pytest.fixture(autouse=True)
+def fresh_process_binding(monkeypatch):
+    """Keep default-state assertions independent of the isolated test runner.
+
+    Backend children still receive their explicit disposable profile and port.
+    Restore the runner's binding and environment when each test finishes.
+    """
+    previous = iso.current_binding()
+    with monkeypatch.context() as env:
+        for name in (iso.ENV_PROFILE, iso.ENV_PORT, iso.ENV_APP_DIR):
+            env.delenv(name, raising=False)
+        iso.apply_from_process(argv=[], environ={})
+        try:
+            yield
+        finally:
+            if previous is not None:
+                iso.apply_explicit(profile=previous.profile, port=previous.port,
+                                   app_dir=previous.app_dir)
+            else:
+                iso.apply_from_process(argv=[], environ={})
+
+
 def _free_loopback_port() -> int:
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.bind(("127.0.0.1", 0))
@@ -51,10 +73,13 @@ def _child_env(canary: Path) -> dict[str, str]:
     env["XDG_DATA_HOME"] = str(canary / "xdg")
     inherited = [part for part in env.get("PYTHONPATH", "").split(os.pathsep) if part]
     extra = []
-    try:
-        extra.append(site.getusersitepackages())
-    except Exception:
-        pass
+    # A disposable venv must use its own reviewed SDK graph. Prepending the
+    # user's packages would silently replace it with the shared SDK 1 install.
+    if sys.prefix == sys.base_prefix:
+        try:
+            extra.append(site.getusersitepackages())
+        except Exception:
+            pass
     env["PYTHONPATH"] = os.pathsep.join([str(ROOT), *extra, *inherited])
     env["librarian_apply_enabled"] = "false"
     return env
@@ -595,7 +620,7 @@ def test_upgrade_check_refuses_a_live_owned_helper(tmp_path):
 def test_stdio_inherits_isolated_profile(tmp_path):
     try:
         import anyio  # noqa: F401
-        from mcp.server.fastmcp import FastMCP  # noqa: F401
+        from mcp.server import Server  # noqa: F401
     except ImportError:
         pytest.skip("mcp SDK not installed")
     canary = tmp_path / "user"

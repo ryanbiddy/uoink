@@ -12,7 +12,7 @@ import pytest
 import server
 import uoink_mcp
 import uoink_mcp_tools
-from tests.test_phase4_stdio import _complete_local_call
+from tests.mcp_wire import StdioClient
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -25,8 +25,10 @@ def _documented_count(label: str) -> int:
     return int(match.group(1))
 
 
-def test_documented_transport_counts_match_both_live_registries() -> None:
-    stdio_tools = _complete_local_call(uoink_mcp.mcp.list_tools())
+def test_documented_transport_counts_match_both_live_registries(tmp_path) -> None:
+    with StdioClient.launch(tmp_path) as client:
+        client.initialize()
+        stdio_tools = client.request(2, "tools/list")["result"]["tools"]
 
     assert _documented_count("Supported stdio registry") == len(stdio_tools)
     assert _documented_count("Local HTTP/OpenAPI registry") == len(
@@ -39,7 +41,7 @@ def test_documented_transport_counts_match_both_live_registries() -> None:
     assert len(uoink_mcp_tools.TOOL_REGISTRY) == 91
 
 
-def test_discovery_manifest_privacy_security_and_transport_contracts() -> None:
+def test_discovery_manifest_privacy_security_and_transport_contracts(tmp_path) -> None:
     import source_manifest
 
     row = next(r for r in source_manifest.build_sources()["sources"]
@@ -72,11 +74,10 @@ def test_discovery_manifest_privacy_security_and_transport_contracts() -> None:
                  "all redirects are refused", "8-second", "8 MB", "five-minute", "single-use",
                  "25 by default", "24 run files", "GET /discovery/runs/<run_id>"):
         assert text in security
-    from mcp import types
-    # Exercise tools/list on the wire: the low-level adapter installs the
-    # registry's strict schemas over FastMCP's signature-generated defaults.
-    handler = uoink_mcp.mcp._mcp_server.request_handlers[types.ListToolsRequest]
-    stdio = _complete_local_call(handler(types.ListToolsRequest(method="tools/list"))).root.tools
+    # Exercise the real subprocess serializer and registry schemas.
+    with StdioClient.launch(tmp_path) as client:
+        client.initialize()
+        stdio = client.request(2, "tools/list")["result"]["tools"]
     assert len(stdio) == 91
     audit = (ROOT / "docs/mcp-tool-annotations.md").read_text(encoding="utf-8")
     manifest = json.loads((ROOT / ".mcpb/manifest.json").read_text(encoding="utf-8"))
@@ -85,9 +86,9 @@ def test_discovery_manifest_privacy_security_and_transport_contracts() -> None:
         spec = uoink_mcp_tools.TOOL_REGISTRY[name]
         assert spec.annotations == {"readOnlyHint": False, "destructiveHint": False,
                                     "idempotentHint": idempotent, "openWorldHint": True}
-        wire = next(t for t in stdio if t.name == name)
-        assert wire.inputSchema == spec.input_schema and wire.description == spec.description
-        assert all(getattr(wire.annotations, k) == v for k, v in spec.annotations.items())
+        wire = next(t for t in stdio if t["name"] == name)
+        assert wire["inputSchema"] == spec.input_schema and wire["description"] == spec.description
+        assert all(wire["annotations"][k] == v for k, v in spec.annotations.items())
         assert f"| `{name}` |" in audit
         bundled = next(t for t in manifest["tools"] if t["name"] == name)
         assert set(bundled) == {"name", "description"}

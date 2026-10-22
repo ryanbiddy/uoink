@@ -3,6 +3,8 @@
 This module runs the expensive supplied benchmark once, and reuses only its
 test-session observations. It does not introduce an application report cache.
 """
+
+from tests.mcp_sdk import handler_for
 import asyncio
 import json
 import re
@@ -39,11 +41,11 @@ def benchmark_capture(tmp_path_factory):
             # Feed the captured reader packet through the actual shipped adapter.
             # This isolates serialization and avoids a second benchmark read.
             with patch.object(library_analysis, "get_library_activity", lambda arguments: packet):
-                actual = asyncio.run(uoink_mcp.mcp._mcp_server.request_handlers[mcp_types.CallToolRequest](request)).root
-            wire = mcp_types.JSONRPCResponse(jsonrpc="2.0", id=1, result=actual.model_dump(mode="json", exclude_none=True))
+                actual = asyncio.run(handler_for(uoink_mcp.mcp, "tools/call")(request))
+            wire = mcp_types.JSONRPCResponse(jsonrpc="2.0", id=1, result=actual.model_dump(by_alias=True, mode="json", exclude_none=True))
             record["actual_stdio_bytes"] = len(wire.model_dump_json(by_alias=True, exclude_none=True).encode())
-            record["actual_stdio_is_error"] = actual.isError
-            if actual.isError:
+            record["actual_stdio_is_error"] = actual.is_error
+            if actual.is_error:
                 record["actual_stdio_error"] = json.loads(actual.content[0].text)
         else:
             record["error"] = packet["error"]
