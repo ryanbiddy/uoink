@@ -86,10 +86,10 @@ def _transaction(create=False):
             # Windows sharing violations surface as SQLITE_CANTOPEN, outside
             # SQLite's busy timeout. Retry only opening, before any state change
             # or sender call can run, so a retry cannot duplicate either one.
-            # A missing file while sharing is off is final, not a sharing violation.
-            if (attempt == 3 or (not create and not path.exists())
-                    or (not isinstance(exc, PermissionError)
-                        and getattr(exc, "sqlite_errorcode", 0) & 0xff != sqlite3.SQLITE_CANTOPEN)):
+            # _record already skips a missing file, so every retry here is a real
+            # open of an existing file; a stat during a sharing violation can lie.
+            if (attempt == 3 or (not isinstance(exc, PermissionError)
+                    and getattr(exc, "sqlite_errorcode", 0) & 0xff != sqlite3.SQLITE_CANTOPEN)):
                 raise
             time.sleep(0.05 * 2 ** attempt)
     try:
