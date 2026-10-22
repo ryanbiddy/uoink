@@ -229,11 +229,11 @@ def test_security_api_original_url_and_cf_ownership(tmp_path, monkeypatch, mode)
 def test_normal_install_only_clears_quarantine_on_disposable_copy(tmp_path, monkeypatch, quarantined):
     app = make_app(tmp_path / "Applications With Spaces/Uoink.app")
     calls = []
-    attrs = iter(["com.apple.quarantine: fixture" if quarantined else "", ""])
+    attrs = iter(["Uoink.app: com.apple.quarantine" if quarantined else "", ""])
 
     def run(argv, **kw):
         calls.append(argv)
-        return SimpleNamespace(stdout=next(attrs) if "-lr" in argv else "")
+        return SimpleNamespace(stdout=next(attrs) if argv[:2] == ["/usr/bin/xattr", "-r"] else "")
     monkeypatch.setattr(dmg_smoke, "run", run)
     proof = {}
     dmg_smoke.prepare_normal_install(app, proof)

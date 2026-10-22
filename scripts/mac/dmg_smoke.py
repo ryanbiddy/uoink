@@ -42,10 +42,11 @@ def prepare_normal_install(app: Path, report: dict) -> None:
     """Only a disposable runtime copy loses quarantine, after the Gatekeeper gate."""
     if app.name != "Uoink.app" or app.is_symlink() or not app.is_dir():
         raise ValueError("Expected a disposable installed Uoink.app")
-    before = run(["/usr/bin/xattr", "-lr", app], capture_output=True).stdout
+    # Attribute names only: -l would print binary values (code signatures) that are not UTF-8.
+    before = run(["/usr/bin/xattr", "-r", app], capture_output=True, errors="replace").stdout
     if "com.apple.quarantine" in before:
         run(["/usr/bin/xattr", "-dr", "com.apple.quarantine", app], capture_output=True)
-    after = run(["/usr/bin/xattr", "-lr", app], capture_output=True).stdout
+    after = run(["/usr/bin/xattr", "-r", app], capture_output=True, errors="replace").stdout
     if "com.apple.quarantine" in after:
         raise ValueError("Normal runtime copy still has quarantine")
     run(["codesign", "--verify", "--strict", "--deep", app], capture_output=True)
