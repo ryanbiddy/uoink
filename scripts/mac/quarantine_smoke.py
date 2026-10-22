@@ -91,6 +91,14 @@ def smoke(dmg: Path, output: Path, team: str) -> None:
                 report["syspolicy_check"] = command([policy, "distribution", app]) if policy else {"available": False}
                 if policy:
                     require(report["syspolicy_check"]["exit"] == 0, "syspolicy_check distribution failed")
+                # A first open of a downloaded app shows macOS's one-time "downloaded from
+                # the internet" confirmation, which nobody can click on a headless runner.
+                # Mark the copy user-approved the way that click does (quarantine flag 0x40),
+                # keeping the quarantine so Gatekeeper still evaluates signature and ticket.
+                fields = report["app_quarantine"]["stdout"].strip().split(";")
+                fields[0] = f"{int(fields[0], 16) | 0x40:04x}"
+                report["user_approval"] = command(["xattr", "-w", "com.apple.quarantine", ";".join(fields), app])
+                require(report["user_approval"]["exit"] == 0, "Cannot record the simulated first-open approval")
                 launch(app, scratch, output, report["launch"])
                 # Confirm execution did not break either final signature/ticket.
                 report["after_launch"] = {}

@@ -678,8 +678,14 @@ def test_quarantine_copy_assessment_and_launch_sequence(tmp_path, monkeypatch, q
             quarantine_smoke.smoke(dmg, output, TEAM)
         assert events == ["install"]
     writes = [c for c in calls if c[:2] == ["xattr", "-w"]]
-    assert len(writes) == 1 and Path(writes[0][-1]).suffix == ".dmg"
-    assert ";Safari;" in writes[0][3]
+    assert Path(writes[0][-1]).suffix == ".dmg" and ";Safari;" in writes[0][3]
+    if quarantine_present:
+        # The copied app keeps its quarantine and gains only the user-approved flag (0x40),
+        # the state macOS records when a person clicks Open on first launch.
+        assert len(writes) == 2 and Path(writes[1][-1]).suffix == ".app"
+        assert writes[1][3] == "00c3;fixture;Safari;id"
+    else:
+        assert len(writes) == 1
     result = json.loads((output / "quarantine.json").read_text())
     assert result["ok"] == quarantine_present and result["install"]["detached"]
 
