@@ -153,7 +153,11 @@ def test_az5h_actual_stdio_entry_deadline_during_sdk_serialization(db, monkeypat
     assert library_resources.process_guard()._active == 0
 
 
-def test_az5h_actual_stdio_entry_releases_on_cancellation(db, monkeypatch):
+def test_sdk1_stdio_cancel_sends_error_response_then_releases_admission(db, monkeypatch):
+    # M2 baseline: SDK 1 sends code 0, "Request cancelled", and the bounded
+    # writer releases admission when that error frame settles. M3/M4 must
+    # deliberately replace this with no response after cancellation and
+    # release admission without relying on an outgoing cancellation frame.
     seed.insert_yoink(db, "az5h", yoinked_at="2026-09-05T12:00:00.000Z")
     db.commit()
     monkeypatch.setattr(analysis, "_analysis_db_override", db)
@@ -175,16 +179,14 @@ def test_az5h_actual_stdio_entry_releases_on_cancellation(db, monkeypatch):
         await incoming.send(json.dumps(_activity_call()) + "\n")
         with anyio.fail_after(5):
             await started.wait()
+        assert library_resources.process_guard()._active == 1
         await incoming.send(json.dumps({
             "jsonrpc": "2.0", "method": "notifications/cancelled",
             "params": {"requestId": 2}}) + "\n")
 
     response = _run_stdio([], after_init=after_init)[0]
-    assert response["id"] == 2
-    assert "error" in response or (isinstance(response.get("result"), dict) and response["result"].get("isError"))
-    if "result" in response and response["result"].get("isError"):
-        envelope = json.loads(response["result"]["content"][0]["text"])
-        assert envelope["error"]["code"] in {"deadline_exceeded", "rate_limited"} or envelope["ok"] is False
+    assert response == {"jsonrpc": "2.0", "id": 2,
+                        "error": {"code": 0, "message": "Request cancelled"}}
     assert library_resources.process_guard()._active == 0
 
 

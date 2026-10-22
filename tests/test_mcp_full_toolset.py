@@ -18,6 +18,7 @@ import server
 import uoink_mcp
 import uoink_mcp_tools as tools
 from tests.test_c01_mcp_stdio import CORE_STDIO_TOOLS, ROOT, _StdioClient, _isolated_env
+from tests.mcp_wire import StdioClient
 from tests.test_discovery_queue import _run_stdio
 from tests.test_library_adapters import mcp_call, post, valid_pin_operation
 
@@ -237,16 +238,18 @@ FLATTENED = {"claim_library_work", "apply_reshelving", "set_source_consent"}
 
 
 @pytest.mark.parametrize("path", ["/mcp/v1", "/mcp/v1/tools/list"])
-def test_http_and_stdio_list_identical_client_schemas(local_backend, monkeypatch, path):
+def test_http_and_stdio_list_identical_client_schemas(local_backend, monkeypatch, path, tmp_path):
     monkeypatch.setenv("UOINK_MCP_TOOLSET", "full")
     frozen = json.dumps(tools.list_tools(), sort_keys=True)
     http = post(path, {"jsonrpc": "2.0", "id": 1, "method": "tools/list"})
     assert http.status == 200
     listed = http.payload["result"]["tools"]
-    stdio = _run_stdio(uoink_mcp.mcp.list_tools())
+    with StdioClient.launch(tmp_path) as client:
+        client.initialize()
+        stdio = client.request(2, "tools/list")["result"]["tools"]
     fields = ("name", "description", "inputSchema")
     assert [{k: t[k] for k in fields} for t in listed] == [
-        {k: getattr(t, k) for k in fields} for t in stdio]
+        {k: t[k] for k in fields} for t in stdio]
     assert len(listed) == len(tools.TOOL_REGISTRY) == 91
     changed = set()
     for tool in listed:
@@ -286,17 +289,19 @@ def test_http_flattening_preserves_frozen_schema_refusals(local_backend, name, a
     assert result["structuredContent"] == json.loads(result["content"][0]["text"]) == expected
 
 
-def test_listed_schemas_have_no_top_level_combinators():
+def test_listed_schemas_have_no_top_level_combinators(tmp_path):
     # The Anthropic API rejects top-level oneOf/anyOf/allOf, and Claude Code
     # then shows none of the server's tools (seen with the 3.9.2 build).
-    listed = _run_stdio(uoink_mcp.mcp.list_tools())
+    with StdioClient.launch(tmp_path) as client:
+        client.initialize()
+        listed = client.request(2, "tools/list")["result"]["tools"]
     changed = set()
     for tool in listed:
-        schema = tool.inputSchema
-        assert schema.get("type") == "object", tool.name
-        assert not {"oneOf", "anyOf", "allOf", "not"} & set(schema), tool.name
-        if schema != tools.TOOL_REGISTRY[tool.name].input_schema:
-            changed.add(tool.name)
+        schema = tool["inputSchema"]
+        assert schema.get("type") == "object", tool["name"]
+        assert not {"oneOf", "anyOf", "allOf", "not"} & set(schema), tool["name"]
+        if schema != tools.TOOL_REGISTRY[tool["name"]].input_schema:
+            changed.add(tool["name"])
     assert changed == FLATTENED
 
 

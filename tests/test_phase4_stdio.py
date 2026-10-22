@@ -15,11 +15,8 @@ from __future__ import annotations
 import hashlib
 import json
 import os
-import queue
-import subprocess
 import sys
 import tempfile
-import threading
 import time
 from pathlib import Path
 from typing import Any
@@ -101,83 +98,11 @@ TOTAL_BC2_TOOLS = TOTAL_AV2_TOOLS | NEW_PHASE6_EXPORT_TOOLS
 TOTAL_PLAYBOOK_TOOLS = TOTAL_BC2_TOOLS | {"get_playbook_input", "discover_candidates", "queue_discovered"}
 
 
-class _StdioTestClient:
-    """Stdio client managing a child MCP process with honest deadline waiting."""
-
-    def __init__(self, cmd: list[str], cwd: Path | str, env: dict[str, str], timeout: float = 30.0):
-        self.proc = subprocess.Popen(
-            cmd,
-            cwd=str(cwd),
-            env=env,
-            stdin=subprocess.PIPE,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True,
-            encoding="utf-8",
-        )
-        self.deadline = time.time() + timeout
-        self.lines: queue.Queue = queue.Queue()
-        self.raw_stdout_lines: list[str] = []
-        self.stderr_lines: list[str] = []
-
-        threading.Thread(target=self._drain_stdout, daemon=True).start()
-        threading.Thread(target=self._drain_stderr, daemon=True).start()
-
-    def _drain_stdout(self):
-        for line in self.proc.stdout:
-            self.raw_stdout_lines.append(line)
-            self.lines.put(line)
-
-    def _drain_stderr(self):
-        for line in self.proc.stderr:
-            self.stderr_lines.append(line.rstrip())
-
-    def send(self, message: dict[str, Any]) -> None:
-        self.proc.stdin.write(json.dumps(message) + "\n")
-        self.proc.stdin.flush()
-
-    def wait_for(self, request_id: int, timeout: float = 10.0) -> dict[str, Any]:
-        end_time = time.time() + timeout
-        while time.time() < end_time:
-            try:
-                line = self.lines.get(timeout=0.2)
-            except queue.Empty:
-                if self.proc.poll() is not None:
-                    tail = "\n".join(self.stderr_lines[-6:])
-                    raise AssertionError(
-                        f"MCP process exited {self.proc.returncode} before answering id={request_id}. stderr tail:\n{tail}"
-                    )
-                continue
-            try:
-                msg = json.loads(line)
-            except json.JSONDecodeError:
-                continue
-            if msg.get("id") == request_id:
-                return msg
-        raise AssertionError(f"Timed out waiting for response id={request_id}")
-
-    def close(self):
-        try:
-            self.proc.stdin.close()
-        except Exception:
-            pass
-        try:
-            self.proc.wait(timeout=5)
-        except Exception:
-            self.proc.kill()
+from tests.mcp_wire import StdioClient as _StdioTestClient, isolated_env
 
 
 def _make_isolated_env(tmp_path: Path) -> dict[str, str]:
-    env = dict(os.environ)
-    profile = tmp_path / "profile"
-    profile.mkdir(exist_ok=True)
-    env["UOINK_ISOLATED_PROFILE"] = str(profile)
-    env["UOINK_ISOLATED_PORT"] = "5187"
-    env.pop("UOINK_ISOLATED_APP_DIR", None)
-    env["LOCALAPPDATA"] = str(tmp_path / "appdata")
-    env["XDG_DATA_HOME"] = str(tmp_path / "xdg")
-    env["UOINK_OUTPUT_DIR"] = str(tmp_path / "out")
-    return env
+    return isolated_env(tmp_path)
 
 
 class TestP406CapabilitiesAndDiscovery:
@@ -609,33 +534,32 @@ def test_playbook_prompts_and_tools_match_on_all_transports(playbook_adapter, na
     assert len(tool.model_dump_json().encode()) + 256 <= LIMITS["max_response_bytes"]
 
 
-def test_playbook_wire_schema_hints_and_prompt_arguments(playbook_adapter):
+def test_playbook_wire_schema_hints_and_prompt_arguments(tmp_path):
     import uoink_mcp_tools
     from tests.test_c01_mcp_stdio import _assert_tool_metadata
 
-    _, _, _, handlers, types = playbook_adapter
-    listed = _complete_local_call(handlers[types.ListToolsRequest](
-        types.ListToolsRequest(method="tools/list"))).root.tools
+    with _StdioTestClient.launch(tmp_path) as client:
+        client.initialize()
+        listed = client.request(2, "tools/list")["result"]["tools"]
+        prompts = client.request(3, "prompts/list")["result"]["prompts"]
     assert len(listed) == 91
     assert len(uoink_mcp_tools.TOOL_REGISTRY) == 91
-    _assert_tool_metadata([t.model_dump(by_alias=True, exclude_none=True) for t in listed])
-    tool = next(t for t in listed if t.name == "get_playbook_input")
-    spec = uoink_mcp_tools.TOOL_REGISTRY[tool.name]
-    assert tool.inputSchema == spec.input_schema
-    assert tool.description == spec.description
-    assert tool.inputSchema["required"] == ["playbook", "arguments"]
-    assert tool.inputSchema["additionalProperties"] is False
-    assert set(tool.inputSchema["properties"]["playbook"]["enum"]) == {p[0] for p in PLAYBOOK_CASES}
-    assert tool.inputSchema["properties"]["arguments"]["type"] == "object"
+    _assert_tool_metadata(listed)
+    tool = next(t for t in listed if t["name"] == "get_playbook_input")
+    spec = uoink_mcp_tools.TOOL_REGISTRY[tool["name"]]
+    assert tool["inputSchema"] == spec.input_schema
+    assert tool["description"] == spec.description
+    assert tool["inputSchema"]["required"] == ["playbook", "arguments"]
+    assert tool["inputSchema"]["additionalProperties"] is False
+    assert set(tool["inputSchema"]["properties"]["playbook"]["enum"]) == {p[0] for p in PLAYBOOK_CASES}
+    assert tool["inputSchema"]["properties"]["arguments"]["type"] == "object"
     assert spec.annotations == {"readOnlyHint": True, "destructiveHint": False,
                                 "idempotentHint": True, "openWorldHint": False}
     assert spec.rate_limiter is None
-    prompts = _complete_local_call(handlers[types.ListPromptsRequest](
-        types.ListPromptsRequest(method="prompts/list"))).root.prompts
     assert len(PROMPTS) == 4
     assert len(prompts) == 9
     expected = [*PROMPTS, *research_playbooks.PLAYBOOKS]
-    assert [p.model_dump(exclude_none=True) for p in prompts] == expected
+    assert prompts == expected
 
 
 @pytest.mark.parametrize("args", [
