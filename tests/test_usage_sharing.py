@@ -56,7 +56,8 @@ def test_default_off_creates_no_file(store):
     usage.count("searches")
     usage._queue.join()
     assert not usage._path().exists()
-    assert usage.disclosure() == {"next_payload": None, "sent": []}
+    assert usage.disclosure()["sample"] is True
+    assert usage.disclosure()["next_payload"]["transports"] == {"stdio": 0, "http": 0}
     assert not usage.send_due()
     usage._post.assert_not_called()
 
@@ -67,7 +68,8 @@ def test_id_only_on_opt_in_and_deleted_on_opt_out(store):
     usage.count("searches")
     usage._queue.join()
     usage.set_enabled(False)
-    assert usage.disclosure() == {"next_payload": None, "sent": []}
+    assert usage.disclosure()["sample"] is True
+    assert usage.disclosure()["sent"] == []
     assert first.encode() not in usage._path().read_bytes()
     assert enabled()["install_id"] != first
 
@@ -78,7 +80,7 @@ def test_env_zero_forces_off_even_with_saved_true(store, monkeypatch):
     assert server._normalize_settings({"usage_sharing": True})["usage_sharing"] is False
     usage.set_enabled(True)
     usage.count("searches")
-    assert usage.disclosure()["next_payload"] is None
+    assert usage.disclosure()["sample"] is True
     assert identity.encode() not in usage._path().read_bytes()
     assert not usage.send_due()
     usage._post.assert_not_called()
@@ -100,12 +102,12 @@ def test_schema_and_fuzzed_content_never_enter_counts(store):
     usage.count("searches")
     usage._queue.join()
     p = usage.disclosure()["next_payload"]
-    assert set(p) == {"schema", "install_id", "version", "os", "os_major", "arch",
+    assert set(p) == {"schema", "install_id", "report_id", "version", "os", "os_major", "arch",
                       "install_kind", "period_hours", "mcp_clients", "transports", "tools", "captures", "searches"}
     assert p["schema"] == 1 and p["os"] in ("windows", "macos", "linux")
     assert p["captures"] == {"page": {"ok": 30, "failed": 30}}
     assert p["mcp_clients"] == {"other": 60, "claude-code": 1}
-    assert p["tools"] == {"search_library": 1} and p["transports"] == {"stdio": 1}
+    assert p["tools"] == {"search_library": 1} and p["transports"] == {"stdio": 1, "http": 0}
     assert p["searches"] == 1
     encoded = usage._encode(p)
     for word in ("PRIVATE", "secret", "https:", "C:/", "alice", "192.0.2.42", "query"):
@@ -135,13 +137,13 @@ def test_tests_cannot_call_sender_without_explicit_safe_override(store, monkeypa
     usage._post.assert_not_called()
 
 
-def test_daily_gate_retry_once_reset_and_history(store, monkeypatch):
+def test_daily_gate_stable_retry_and_history(store, monkeypatch):
     enabled()
     usage.count("searches")
     usage._queue.join()
     now = age()
     monkeypatch.setenv("UOINK_USAGE_ENDPOINT", "https://usage-test.invalid/v1/ping")
-    sender = Mock(side_effect=[False, False, True] + [True] * 11)
+    sender = Mock(side_effect=[None, None, 204] + [204] * 11)
     monkeypatch.setattr(usage, "_post", sender)
     assert not usage.send_due(now)
     first = sender.call_args.args[1]
@@ -153,8 +155,9 @@ def test_daily_gate_retry_once_reset_and_history(store, monkeypatch):
     assert not usage.send_due(now + usage.DAY)
     assert sender.call_args.args[1] == first
     assert usage.send_due(now + 2 * usage.DAY)
-    assert sender.call_args.args[1]["searches"] == 2
-    assert usage.disclosure()["next_payload"]["searches"] == 0
+    assert sender.call_args.args[1] == first
+    assert usage.disclosure()["next_payload"]["searches"] == 1
+    assert usage.disclosure()["next_payload"]["report_id"] != first["report_id"]
     assert usage.disclosure()["sent"][0]["payload"] == sender.call_args.args[1]
     for day in range(3, 14):
         assert usage.send_due(now + day * usage.DAY)
@@ -167,7 +170,7 @@ def test_opt_out_and_restart_do_not_bypass_daily_gate(store, monkeypatch):
     enabled()
     now = age()
     monkeypatch.setenv("UOINK_USAGE_ENDPOINT", "https://usage-test.invalid/v1/ping")
-    monkeypatch.setattr(usage, "_post", Mock(return_value=True))
+    monkeypatch.setattr(usage, "_post", Mock(return_value=204))
     assert usage.send_due(now)
     usage.set_enabled(False)
     enabled()
@@ -180,13 +183,13 @@ def test_first_send_waits_24_hours_after_consent(store, monkeypatch):
     with usage._transaction() as state:
         since = state["since"]
     monkeypatch.setenv("UOINK_USAGE_ENDPOINT", "https://usage-test.invalid/v1/ping")
-    monkeypatch.setattr(usage, "_post", Mock(return_value=True))
+    monkeypatch.setattr(usage, "_post", Mock(return_value=204))
     assert not usage.send_due(since + usage.DAY - 1)
     usage._post.assert_not_called()
     assert usage.send_due(since + usage.DAY)
 
 
-def test_post_has_five_second_timeout_and_no_redirects(store, monkeypatch):
+def test_post_has_socket_timeout_and_no_redirects(store, monkeypatch):
     payload = enabled()
     response = Mock(status=204)
     response.__enter__ = Mock(return_value=response)
@@ -195,9 +198,9 @@ def test_post_has_five_second_timeout_and_no_redirects(store, monkeypatch):
     opener.open.return_value = response
     build = Mock(return_value=opener)
     monkeypatch.setattr(usage.urllib.request, "build_opener", build)
-    assert _REAL_POST("https://usage-test.invalid/v1/ping", payload)
+    assert _REAL_POST("https://usage-test.invalid/v1/ping", payload) == 204
     request = opener.open.call_args.args[0]
-    assert opener.open.call_args.kwargs == {"timeout": 5}
+    assert opener.open.call_args.kwargs == {"timeout": usage.SEND_DEADLINE}
     assert request.method == "POST" and request.data == usage._encode(payload)
     assert isinstance(build.call_args.args[0], usage._NoRedirect)
     assert build.call_args.args[0].redirect_request(None, None, 302, None, None, "https://other.invalid") is None
@@ -408,7 +411,7 @@ def test_stdio_wire_path_records_to_shared_file(store, monkeypatch, modern, clie
             time.sleep(0.02)
         assert p["tools"] == {"search_uoinks": 2}
         assert p["mcp_clients"] == {bucket: 1}
-        assert p["transports"] == {"stdio": 2}
+        assert p["transports"] == {"stdio": 2, "http": 0}
     finally:
         client.close()
 
@@ -606,7 +609,7 @@ def test_settings_toggle_and_one_time_card(store, monkeypatch):
     assert usage.disclosure()["next_payload"] is not None
     handler._handle_settings_post({"usage_sharing": False, "usage_sharing_prompt_seen": False})
     assert server._read_settings()["usage_sharing_prompt_seen"] is True
-    assert usage.disclosure()["next_payload"] is None
+    assert usage.disclosure()["sample"] is True
     monkeypatch.setenv("UOINK_USAGE_SHARING", "0")
     handler._handle_settings_post({"usage_sharing": True})
     assert replies[-1][1]["settings"]["usage_sharing"] is False
@@ -645,7 +648,7 @@ def test_http_mcp_counts_only_registered_names(store):
     usage._queue.join()
     p = usage.disclosure()["next_payload"]
     assert p["tools"] == {"search_uoinks": 1}
-    assert p["transports"] == {"http": 1}
+    assert p["transports"] == {"http": 1, "stdio": 0}
     assert p["mcp_clients"] == {"cursor": 1}
 
 
@@ -704,7 +707,7 @@ def test_queued_events_survive_successful_send(store, monkeypatch):
     occurred = time.time()
     now = age()
     monkeypatch.setenv("UOINK_USAGE_ENDPOINT", "https://usage-test.invalid/v1/ping")
-    monkeypatch.setattr(usage, "_post", Mock(return_value=True))
+    monkeypatch.setattr(usage, "_post", Mock(return_value=204))
     assert usage.send_due(now)
     usage._record(usage._path(), "searches", "count", "ok", occurred)
     assert usage.disclosure()["next_payload"]["searches"] == 1
@@ -718,7 +721,7 @@ def test_success_clears_zero_keys_for_the_next_period(store, monkeypatch):
     usage._queue.join()
     now = age()
     monkeypatch.setenv("UOINK_USAGE_ENDPOINT", "https://usage-test.invalid/v1/ping")
-    monkeypatch.setattr(usage, "_post", Mock(return_value=True))
+    monkeypatch.setattr(usage, "_post", Mock(return_value=204))
     assert usage.send_due(now)
     with usage._transaction() as state:
         assert state["counts"] == {}
@@ -732,3 +735,101 @@ def test_unrelated_settings_save_does_not_wait_on_usage_store(store, monkeypatch
     monkeypatch.setattr(usage, "set_enabled", Mock(side_effect=AssertionError("Unrelated write touched usage DB")))
     server._write_settings({"notifications_enabled": False})
     usage.set_enabled.assert_not_called()
+
+
+@pytest.mark.parametrize("alias,label", sorted(usage.CLIENTS.items()))
+def test_real_client_aliases_are_exact_and_case_insensitive(store, alias, label):
+    assert usage._label("mcp_clients", " " + alias.upper() + " ") == label
+    assert usage._label("mcp_clients", alias + " private suffix") == "other"
+
+
+@pytest.mark.parametrize("machine,arch", [("AMD64", "x86_64"), ("aarch64", "arm64"),
+                                        ("i386", "other"), ("PRIVATE computer", "other")])
+def test_arch_is_a_fixed_enum(store, monkeypatch, machine, arch):
+    monkeypatch.setattr(usage.platform, "machine", lambda: machine)
+    assert usage._metadata()["arch"] == arch
+
+
+def test_readers_never_write_or_create_usage_state(store, monkeypatch):
+    monkeypatch.setattr(server, "SETTINGS_PATH", store / "settings.json")
+    monkeypatch.setattr(server, "_get_saved_anthropic_key", lambda: "")
+    monkeypatch.setattr(server, "_get_saved_scrapecreators_key", lambda: "")
+    monkeypatch.setattr(server, "_load_topics", lambda: {})
+    monkeypatch.setattr(server, "_autostart_enabled", lambda: False)
+    monkeypatch.setattr(server, "_reliability_model_status", lambda *args: {})
+    monkeypatch.setattr(server.whisper_runner, "is_whisperx_available", lambda: False)
+    assert usage.disclosure()["sample"]
+    assert not usage._path().exists()
+    enabled()
+    before = usage._path().read_bytes()
+    monkeypatch.setattr(usage, "_transaction", Mock(side_effect=AssertionError("read acquired write lock")))
+    assert server._public_settings()["usage_sharing_disclosure"]["sample"] is False
+    monkeypatch.setenv("UOINK_USAGE_SHARING", "0")
+    sample = server._public_settings()["usage_sharing_disclosure"]
+    assert sample["sample"] and sample["next_payload"]["install_id"] == usage.SAMPLE_ID
+    assert usage._path().read_bytes() == before
+
+
+def test_pending_payload_is_revalidated_before_send(store, monkeypatch):
+    enabled()
+    now = age()
+    with usage._transaction() as state:
+        payload = usage._payload(state, now)
+        payload.update(private="secret", arch="PRIVATE path", os_major="PRIVATE user", install_kind="PRIVATE")
+        payload["tools"] = {"search_library": 1, "private_tool": 9}
+        payload["mcp_clients"] = {"codex": 2, "private-client": 9}
+        payload["transports"] = {"stdio": 1, "private": 9}
+        payload["captures"] = {"page": {"ok": 1, "failed": 0, "private": 8}, "private-site": {"ok": 9}}
+        state.update(pending=payload, pending_created=now, pending_until=now)
+    monkeypatch.setenv("UOINK_USAGE_ENDPOINT", "https://usage-test.invalid/v1/ping")
+    monkeypatch.setattr(usage, "_post", Mock(return_value=204))
+    assert usage.send_due(now)
+    sent = usage._post.call_args.args[1]
+    assert sent["tools"] == {"search_library": 1}
+    assert sent["mcp_clients"] == {"codex": 2}
+    assert sent["transports"] == {"stdio": 1, "http": 0}
+    assert sent["captures"] == {"page": {"ok": 1, "failed": 0}}
+    assert b"private" not in usage._encode(sent).lower()
+
+
+@pytest.mark.parametrize("status", [200, 202, 400, 503, 208])
+def test_only_recorded_or_report_duplicate_acknowledges_snapshot(store, monkeypatch, status):
+    enabled()
+    usage.count("searches")
+    usage._queue.join()
+    now = age()
+    monkeypatch.setenv("UOINK_USAGE_ENDPOINT", "https://usage-test.invalid/v1/ping")
+    sender = Mock(side_effect=[503, status])
+    monkeypatch.setattr(usage, "_post", sender)
+    assert not usage.send_due(now)  # receiver may have recorded it before a lost reply
+    usage.count("searches")
+    usage._queue.join()
+    assert usage.send_due(now + usage.DAY) is (status == 208)
+    assert sender.call_args_list[0].args[1] == sender.call_args_list[1].args[1]
+    state = usage._read_state()
+    assert state["counts"]["searches"]["count"] == (1 if status == 208 else 2)
+    assert len(state["history"]) == (1 if status == 208 else 0)
+
+
+@pytest.mark.parametrize("legacy", [False, True])
+def test_expired_or_legacy_snapshot_is_not_recounted_under_new_id(store, monkeypatch, legacy):
+    enabled()
+    usage.count("searches")
+    usage._queue.join()
+    now = age()
+    monkeypatch.setenv("UOINK_USAGE_ENDPOINT", "https://usage-test.invalid/v1/ping")
+    sender = Mock(side_effect=[503, 204])
+    monkeypatch.setattr(usage, "_post", sender)
+    assert not usage.send_due(now)
+    first = sender.call_args.args[1]
+    if legacy:
+        with usage._transaction() as state:
+            state["pending"].pop("report_id")
+    for _ in range(2):
+        usage.count("searches")
+    usage._queue.join()
+    assert usage.send_due(now + (1 if legacy else 7) * usage.DAY)
+    sent = sender.call_args.args[1]
+    assert sent["report_id"] != first["report_id"]
+    assert sent["searches"] == 2  # first snapshot's uncertain count is not sent twice
+    assert usage.disclosure()["next_payload"]["searches"] == 0

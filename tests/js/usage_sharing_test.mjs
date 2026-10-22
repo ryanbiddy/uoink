@@ -11,6 +11,10 @@ assert.equal(p.nodes.get('usageSharing').disabled, true);
 assert.match(p.nodes.get('usageSharingOverride').textContent, /UOINK_USAGE_SHARING=0/);
 assert.deepEqual(JSON.parse(p.nodes.get('usageNextPayload').textContent), payload);
 assert.deepEqual(JSON.parse(p.nodes.get('usageSentPayloads').textContent), sent);
+assert.match(p.nodes.get('usagePayloadLabel').textContent, /Next payload/);
+p.c.renderUsageSettings({ usage_sharing: false,
+  usage_sharing_disclosure: { next_payload: payload, sample: true, sent: [] } });
+assert.match(p.nodes.get('usagePayloadLabel').textContent, /Sample payload.*Sharing is off.*placeholders/);
 
 p.setHandler(async (path, options) => ({ ok: true, settings: {
   usage_sharing: JSON.parse(options.body).usage_sharing, usage_sharing_forced_off: false,

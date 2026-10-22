@@ -1176,12 +1176,42 @@ def _read_settings() -> dict:
         return _normalize_settings(data)
 
 
-def _write_settings(data: dict) -> None:
-    with _settings_lock:
+@contextlib.contextmanager
+def _settings_file_lock():
+    """Serialize settings writers and consent sync across helper/stdio processes."""
+    path = _settings_path().with_suffix(".json.lock")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("a+b") as lock:
+        if os.name == "nt":
+            import msvcrt
+            if lock.tell() == 0:
+                lock.write(b"\0")
+                lock.flush()
+            lock.seek(0)
+            msvcrt.locking(lock.fileno(), msvcrt.LK_LOCK, 1)
+        else:
+            import fcntl
+            fcntl.flock(lock.fileno(), fcntl.LOCK_EX)
+        try:
+            yield
+        finally:
+            if os.name == "nt":
+                lock.seek(0)
+                msvcrt.locking(lock.fileno(), msvcrt.LK_UNLCK, 1)
+            else:
+                fcntl.flock(lock.fileno(), fcntl.LOCK_UN)
+
+
+def _write_settings(data: dict, *, usage_choice: bool | None = None) -> None:
+    with _settings_lock, _settings_file_lock():
         settings_file = _settings_path()
         settings_file.parent.mkdir(parents=True, exist_ok=True)
         clean = _normalize_settings(data)
         previous = _read_settings()
+        # Only an explicit /settings choice can change consent. All other
+        # writers preserve the value read here, including stale stdio snapshots.
+        clean["usage_sharing"] = (previous["usage_sharing"] if usage_choice is None
+                                  else usage_choice is True and not uoink_usage.forced_off())
         if previous.get("usage_sharing_prompt_seen"):
             clean["usage_sharing_prompt_seen"] = True
         tmp = settings_file.with_suffix(".json.tmp")
@@ -1197,10 +1227,12 @@ def _write_settings(data: dict) -> None:
             os.chmod(settings_file, 0o600)
         except OSError:
             pass
+        # The caller's settings reply must show the consent preserved at commit.
+        data["usage_sharing"] = clean["usage_sharing"]
 
 
 def _sync_usage_sharing():
-    with _settings_lock:
+    with _settings_lock, _settings_file_lock():
         uoink_usage.set_enabled(_read_settings()["usage_sharing"])
 
 
@@ -16542,7 +16574,10 @@ class Handler(BaseHTTPRequestHandler):
                     "ok": False, "error": "topics write failed"})
         data["updated_at"] = _now_iso()
         try:
-            _write_settings(data)
+            if "usage_sharing" in body:
+                _write_settings(data, usage_choice=body["usage_sharing"])
+            else:
+                _write_settings(data)
         except OSError as e:
             log.warning("settings write failed: %s", e)
             return self._send_json(200, {"ok": False, "error": "settings write failed"})

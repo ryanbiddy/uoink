@@ -5739,12 +5739,12 @@
               <h2>Usage sharing</h2>
               <label class="inline-row"><input id="usageSharing" type="checkbox" aria-describedby="usageSharingCopy usageSharingSaveStatus"> Share anonymous usage counts</label>
               <div class="setting-feedback"><span class="setting-status" id="usageSharingSaveStatus" role="status" aria-live="polite" aria-atomic="true"></span><button class="button ghost setting-retry hidden" id="usageSharingSaveRetry" type="button" data-setting-retry="usageSharing">Retry save</button></div>
-              <p class="setting-copy" id="usageSharingCopy">Off by default. If enabled, Uoink sends counts to usage.uoink.app at most once every 24 hours: calls by tool name, known MCP client names, calls over stdio or HTTP, captures by source and result, and library searches. Each report includes a random install ID, Uoink version, operating system and major version, processor type, install type and hours counted. No content, URLs, titles, paths, search text, account details, usernames or IP addresses are included in the report.</p>
+              <p class="setting-copy" id="usageSharingCopy">Off by default. If enabled, Uoink sends counts to usage.uoink.app at most once every 24 hours: calls by tool name, known MCP client names, calls over stdio or HTTP, captures by source and result, and library searches. Each report includes a random install ID, a random report ID to prevent repeat counting, Uoink version, operating system and major version, processor type, install type and hours counted. No content, URLs, titles, paths, search text, account details, usernames or IP addresses are included in the report.</p>
               <p class="setting-copy" id="usageSharingOverride" role="status"></p>
               <p class="setting-copy">Turning this off deletes the random ID, local counts and sent history. Turning it on again creates a new ID.</p>
               <details id="usageDisclosure">
                 <summary>See what is sent</summary>
-                <p class="setting-copy">Next payload with the current counts. New activity can change it before the daily send. Null means nothing is scheduled.</p>
+                <p class="setting-copy" id="usagePayloadLabel">Sample payload. Sharing is off. Counts are zero and IDs are placeholders.</p>
                 <pre id="usageNextPayload" style="white-space:pre-wrap;overflow-wrap:anywhere">null</pre>
                 <p class="setting-copy">Last 10 sent payloads and their dates, kept on this computer.</p>
                 <pre id="usageSentPayloads" style="white-space:pre-wrap;overflow-wrap:anywhere">[]</pre>
@@ -15430,6 +15430,9 @@
       document.getElementById("usageSharingOverride").textContent = forced
         ? "Sharing is forced off by UOINK_USAGE_SHARING=0." : "";
       const disclosure = settings.usage_sharing_disclosure || {};
+      document.getElementById("usagePayloadLabel").textContent = disclosure.sample === true
+        ? "Sample payload. Sharing is off. Counts are zero and IDs are placeholders."
+        : "Next payload with the current counts. New activity can change it before the daily send.";
       document.getElementById("usageNextPayload").textContent = JSON.stringify(disclosure.next_payload ?? null, null, 2);
       document.getElementById("usageSentPayloads").textContent = JSON.stringify(disclosure.sent || [], null, 2);
       document.getElementById("usageDisclosureStatus").textContent = disclosure.error || "";

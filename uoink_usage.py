@@ -1,7 +1,7 @@
 """Opt-in, bounded counts. No event bodies, credentials or network on callers.
 
-The helper and stdio processes share a separate SQLite file. BEGIN IMMEDIATE
-serializes consent, counter updates and sending across processes. Callers only
+The helper and stdio processes share a separate SQLite file. Short transactions
+serialize consent and counter updates across processes, never network I/O. Callers only
 put fixed labels on a bounded queue; one daemon does local I/O. Only the helper
 starts the daily sender. SQLite is from the standard library on all platforms.
 """
@@ -10,8 +10,10 @@ from __future__ import annotations
 from contextlib import contextmanager
 from contextvars import ContextVar
 from functools import wraps
+import atexit
 import json
 import logging
+import math
 import os
 from pathlib import Path
 import platform
@@ -23,26 +25,41 @@ import threading
 import time
 import uuid
 import urllib.request
+import urllib.error
 
 USAGE_ENDPOINT = "https://usage.uoink.app/v1/ping"
 DAY = 24 * 60 * 60
 MAX_COUNT = 100000  # The usage receiver rejects any count above this.
-MAX_TOOL_KEYS = 64
+MAX_TOOL_KEYS = 128
+SEND_DEADLINE = 4.0
+# Stop before the receiver's seven-day report marker expires, including the
+# time a final network attempt could take. Uncertain old counts are discarded.
+REPORT_RETENTION = 7 * DAY - SEND_DEADLINE
+FLUSH_DEADLINE = 1.0
+SAMPLE_ID = "00000000-0000-4000-8000-000000000000"
+SEMVER = re.compile(r"(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)"
+                    r"(?:-((?:0|[1-9][0-9]*|[0-9]*[a-zA-Z-][0-9a-zA-Z-]*)"
+                    r"(?:\.(?:0|[1-9][0-9]*|[0-9]*[a-zA-Z-][0-9a-zA-Z-]*))*))?"
+                    r"(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?")
 SOURCES = ("youtube", "x", "reddit", "page", "podcast", "image", "note", "other")
 CLIENTS = {
     "claude desktop": "claude-desktop", "claude-desktop": "claude-desktop",
-    "claude": "claude-desktop", "claude-code": "claude-code",
-    "claude code": "claude-code", "cursor": "cursor", "cline": "cline",
+    "claude": "claude-desktop", "claude-ai": "claude-desktop", "claude-code": "claude-code",
+    "claude code": "claude-code", "cursor": "cursor", "cursor-vscode": "cursor", "cline": "cline",
     "continue": "continue", "codex": "codex", "openai-codex": "codex",
-    "chatgpt": "chatgpt", "vscode": "vscode", "visual studio code": "vscode",
+    "codex-mcp-client": "codex", "chatgpt": "chatgpt",
+    "vscode": "vscode", "vs code": "vscode", "visual studio code": "vscode",
+    "vscode-insiders": "vscode", "vscode - insiders": "vscode",
+    "visual studio code - insiders": "vscode", "code - insiders": "vscode",
 }
 log = logging.getLogger(__name__)
 _root = None
-_version = "0"
+_version = "0.0.0"
 _kind = "source"
 _queue = queue.Queue(maxsize=1024)
 _worker_lock = threading.Lock()
 _worker = None
+_network_lock = threading.Lock()
 _capture = ContextVar("usage_capture", default=None)
 _search = ContextVar("usage_search", default=False)
 
@@ -51,7 +68,7 @@ def configure(root, version, install_kind="source"):
     """Configure paths without opening any file or starting a sender."""
     global _root, _version, _kind
     _root = root
-    _version = version if re.fullmatch(r"\d+(?:\.\d+){0,3}", version) else "0"
+    _version = version if isinstance(version, str) and SEMVER.fullmatch(version) else "0.0.0"
     _kind = install_kind if install_kind in ("installer", "mcpb", "source") else "source"
 
 
@@ -71,17 +88,11 @@ def _path():
     return Path(_root()) / "usage-counts.sqlite3"
 
 
-@contextmanager
-def _transaction(create=False):
-    path = _path()
-    if create:
-        path.parent.mkdir(parents=True, exist_ok=True)
-    # mode=rw prevents a late queued event from creating state while off.
-    uri = path.as_uri() + ("?mode=rwc" if create else "?mode=rw")
+def _connect(path, mode):
+    uri = path.as_uri() + "?mode=" + mode
     for attempt in range(4):
         try:
-            conn = sqlite3.connect(uri, uri=True, timeout=6)
-            break
+            return sqlite3.connect(uri, uri=True, timeout=6)
         except (PermissionError, sqlite3.OperationalError) as exc:
             # Windows sharing violations surface as SQLITE_CANTOPEN, outside
             # SQLite's busy timeout. Retry only opening, before any state change
@@ -92,6 +103,15 @@ def _transaction(create=False):
                     and getattr(exc, "sqlite_errorcode", 0) & 0xff != sqlite3.SQLITE_CANTOPEN)):
                 raise
             time.sleep(0.05 * 2 ** attempt)
+
+
+@contextmanager
+def _transaction(create=False, *, path=None):
+    path = _path() if path is None else path
+    if create:
+        path.parent.mkdir(parents=True, exist_ok=True)
+    # mode=rw prevents a late queued event from creating state while off.
+    conn = _connect(path, "rwc" if create else "rw")
     try:
         conn.execute("PRAGMA secure_delete=ON")
         conn.execute("BEGIN IMMEDIATE")
@@ -106,6 +126,19 @@ def _transaction(create=False):
         conn.close()
 
 
+def _read_state(path=None):
+    """Disclosure and send preflight never create a file or acquire a write lock."""
+    path = _path() if path is None else path
+    if not path.exists():
+        return {}
+    conn = _connect(path, "ro")
+    try:
+        row = conn.execute("SELECT value FROM state WHERE id=1").fetchone()
+        return json.loads(row[0]) if row else {}
+    finally:
+        conn.close()
+
+
 def set_enabled(enabled):
     """Consent is authoritative across processes; off erases ID and history."""
     enabled = enabled is True and not forced_off()
@@ -116,7 +149,7 @@ def set_enabled(enabled):
             last_attempt = state.get("last_attempt", 0)
             state.clear()
             now = time.time()
-            state.update(install_id=str(uuid.uuid4()), since=now, enabled_at=now,
+            state.update(install_id=str(uuid.uuid4()), report_id=str(uuid.uuid4()), since=now, enabled_at=now,
                          last_attempt=last_attempt, counts={}, history=[])
         elif not enabled:
             last_attempt = state.get("last_attempt", 0)
@@ -131,7 +164,8 @@ def _tool_names():
 
 def _label(group, label):
     if group == "tools":
-        return label if isinstance(label, str) and label in _tool_names() else None
+        return label if (isinstance(label, str) and label in _tool_names()
+                         and re.fullmatch(r"[a-z0-9_]{3,64}", label)) else None
     if group == "mcp_clients":
         return CLIENTS.get(label.strip().lower(), "other") if isinstance(label, str) else "other"
     if group == "transports":
@@ -145,7 +179,7 @@ def _record(path, group, label, outcome, occurred):
     # Path is captured at enqueue time, so reconfiguration cannot redirect work.
     if forced_off() or _root is None or path != _path() or not path.exists():
         return
-    with _transaction() as state:
+    with _transaction(path=path) as state:
         if not state.get("install_id") or occurred < state.get("enabled_at", state["since"]):
             return
         counts = state.setdefault("counts", {})
@@ -153,7 +187,10 @@ def _record(path, group, label, outcome, occurred):
         key = label + ":" + outcome if group == "captures" else label
         if group == "tools" and key not in bucket and len(bucket) >= MAX_TOOL_KEYS:
             return
-        bucket[key] = min(MAX_COUNT, bucket.get(key, 0) + 1)
+        # Reserve room for new activity even when the outstanding report is at
+        # the wire limit. Its acknowledged counts are subtracted separately.
+        pending = _report_counts(state.get("pending") or {}).get(group, {}).get(key, 0)
+        bucket[key] = min(MAX_COUNT + _counter(pending), bucket.get(key, 0) + 1)
 
 
 def _drain():
@@ -186,6 +223,21 @@ def count(group, label="count", outcome="ok"):
         _queue.put_nowait((_path(), group, label, "ok" if outcome == "ok" else "failed", time.time()))
     except Exception:
         log.debug("Usage count skipped")
+
+
+def flush(timeout=FLUSH_DEADLINE):
+    """Bounded best effort at process exit. This only waits for local counts."""
+    deadline = time.monotonic() + timeout
+    with _queue.all_tasks_done:
+        while _queue.unfinished_tasks:
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                return False
+            _queue.all_tasks_done.wait(remaining)
+    return True
+
+
+atexit.register(flush)
 
 
 def mcp_call(name, transport):
@@ -258,39 +310,82 @@ def _metadata():
     release = (platform.mac_ver()[0] if os_name == "macos" else
                ("11" if sys.getwindowsversion().build >= 22000 else str(sys.getwindowsversion().major))
                if os_name == "windows" else platform.release())
-    major = re.match(r"\d{1,3}", release)
+    major = re.match(r"[0-9]{1,3}", release)
     machine = platform.machine().lower()
     arch = {"amd64": "x86_64", "x86_64": "x86_64", "aarch64": "arm64",
-            "arm64": "arm64", "i386": "x86", "i686": "x86", "x86": "x86"}.get(machine, "other")
-    return dict(version=_version, os=os_name, os_major=major[0] if major else "0",
+            "arm64": "arm64"}.get(machine, "other")
+    return dict(version=_version, os=os_name, os_major=major[0] if major else "unknown",
                 arch=arch, install_kind=_kind)
+
+
+def _counter(value):
+    return min(MAX_COUNT, max(0, value)) if type(value) is int else 0
+
+
+def _uuid4(value):
+    try:
+        parsed = uuid.UUID(value)
+        return str(parsed) if parsed.version == 4 else None
+    except (ValueError, TypeError, AttributeError):
+        return None
+
+
+def _sanitize_payload(payload):
+    """Rebuild persisted snapshots from today's closed labels and field rules."""
+    def bucket(group, allowed, cap):
+        values = payload.get(group)
+        if not isinstance(values, dict):
+            return {}
+        return dict(sorted((k, _counter(v)) for k, v in values.items()
+                           if k in allowed and _counter(v))[:cap])
+
+    metadata = _metadata()
+    for key, allowed in (("os", ("windows", "macos", "linux")),
+                         ("arch", ("x86_64", "arm64", "other")),
+                         ("install_kind", ("installer", "mcpb", "source"))):
+        if payload.get(key) in allowed:
+            metadata[key] = payload[key]
+    version = payload.get("version")
+    if isinstance(version, str) and SEMVER.fullmatch(version):
+        metadata["version"] = version
+    major = payload.get("os_major")
+    metadata["os_major"] = major if isinstance(major, str) and re.fullmatch(r"[0-9]{1,3}|unknown", major) else "unknown"
+    hours = payload.get("period_hours", 0)
+    hours = min(MAX_COUNT, max(0, hours)) if type(hours) in (int, float) and math.isfinite(hours) else 0
+    clean = dict(schema=1, install_id=_uuid4(payload.get("install_id")),
+                 report_id=_uuid4(payload.get("report_id")), **metadata, period_hours=hours,
+                 mcp_clients=bucket("mcp_clients", set(CLIENTS.values()) | {"other"}, 9),
+                 transports={"stdio": 0, "http": 0},
+                 tools=bucket("tools", {n for n in _tool_names() if re.fullmatch(r"[a-z0-9_]{3,64}", n)}, MAX_TOOL_KEYS),
+                 captures={}, searches=_counter(payload.get("searches")))
+    clean["transports"].update(bucket("transports", {"stdio", "http"}, 2))
+    captures = payload.get("captures")
+    if isinstance(captures, dict):
+        for source in SOURCES:
+            if isinstance(captures.get(source), dict):
+                clean["captures"][source] = {o: _counter(captures[source].get(o)) for o in ("ok", "failed")}
+    # Keep the actual compact UTF-8 body within the receiver's byte budget.
+    while len(_encode(clean)) > 4096 and clean["tools"]:
+        clean["tools"].pop(next(reversed(clean["tools"])))
+    if len(_encode(clean)) > 4096 or not clean["install_id"] or not clean["report_id"]:
+        raise ValueError("invalid usage payload")
+    return clean
 
 
 def _payload(state, now):
     if not state.get("install_id"):
         return None
     counts = state.get("counts", {})
-    def bucket(group, allowed, cap):
-        return {k: min(MAX_COUNT, max(0, int(v))) for k, v in
-                sorted(counts.get(group, {}).items()) if k in allowed and v > 0} if cap is None else dict(
-                    list(bucket(group, allowed, None).items())[:cap])
-    payload = dict(schema=1, install_id=str(uuid.UUID(state["install_id"])), **_metadata(),
+    payload = dict(schema=1, install_id=state["install_id"], report_id=state.get("report_id", SAMPLE_ID), **_metadata(),
                    period_hours=round(max(0, now - state["since"]) / 3600, 2),
-                   mcp_clients=bucket("mcp_clients", set(CLIENTS.values()) | {"other"}, 9),
-                   transports=bucket("transports", {"stdio", "http"}, 2),
-                   tools=bucket("tools", _tool_names(), MAX_TOOL_KEYS), captures={},
-                   searches=min(MAX_COUNT, max(0, counts.get("searches", {}).get("count", 0))))
+                   mcp_clients=counts.get("mcp_clients", {}), transports=counts.get("transports", {}),
+                   tools=counts.get("tools", {}), captures={}, searches=counts.get("searches", {}).get("count", 0))
     for source in SOURCES:
         values = counts.get("captures", {})
         if any(values.get(source + ":" + outcome, 0) for outcome in ("ok", "failed")):
-            payload["captures"][source] = {outcome: min(MAX_COUNT, max(0, values.get(source + ":" + outcome, 0)))
+            payload["captures"][source] = {outcome: values.get(source + ":" + outcome, 0)
                                           for outcome in ("ok", "failed")}
-    # The limit applies to actual compact UTF-8 bytes, even if registry names grow.
-    while len(_encode(payload)) >= 4096 and payload["tools"]:
-        payload["tools"].pop(next(reversed(payload["tools"])))
-    if len(_encode(payload)) >= 4096:
-        raise ValueError("usage payload exceeds limit")
-    return payload
+    return _sanitize_payload(payload)
 
 
 def _encode(payload):
@@ -298,15 +393,16 @@ def _encode(payload):
 
 
 def disclosure():
-    empty = {"next_payload": None, "sent": []}
+    sample = _payload({"install_id": SAMPLE_ID, "report_id": SAMPLE_ID, "since": 0}, 0)
+    empty = {"next_payload": sample, "sample": True, "sent": []}
     try:
-        if forced_off():
-            set_enabled(False)
-        if _root is None or not _path().exists():
+        if forced_off() or _root is None:
             return empty
-        with _transaction() as state:
-            return {"next_payload": state.get("pending") or _payload(state, time.time()),
-                    "sent": state.get("history", [])[-10:]}
+        state = _read_state()
+        if not state.get("install_id"):
+            return empty
+        payload = _sanitize_payload(state["pending"]) if state.get("pending") else _payload(state, time.time())
+        return {"next_payload": payload, "sample": False, "sent": state.get("history", [])[-10:]}
     except Exception:
         log.debug("Usage disclosure unavailable")
         return {**empty, "error": "Usage counts could not be read."}
@@ -334,12 +430,82 @@ class _NoRedirect(urllib.request.HTTPRedirectHandler):
 def _post(endpoint, payload):
     request = urllib.request.Request(endpoint, data=_encode(payload), method="POST",
                                      headers={"Content-Type": "application/json"})
-    with urllib.request.build_opener(_NoRedirect()).open(request, timeout=5) as response:
-        return 200 <= response.status < 300
+    try:
+        with urllib.request.build_opener(_NoRedirect()).open(request, timeout=SEND_DEADLINE) as response:
+            return response.status
+    except urllib.error.HTTPError as exc:
+        return exc.code
+
+
+def _send_snapshot(endpoint, payload, path, generation):
+    """Bound the sender's wait, including DNS. At most one network worker lives."""
+    if not _network_lock.acquire(blocking=False):
+        return None
+    result = []
+    expired = threading.Event()
+
+    def run():
+        try:
+            state = _read_state(path)
+            if (not expired.is_set() and not forced_off() and not isolated() and _root is not None and path == _path()
+                    and state.get("send_generation") == generation
+                    and state.get("install_id") == payload["install_id"]):
+                result.append(_post(endpoint, payload))
+        except Exception:
+            log.debug("Usage send unavailable")
+        finally:
+            _network_lock.release()
+
+    worker = threading.Thread(target=run, name="usage-post", daemon=True)
+    deadline = time.monotonic() + SEND_DEADLINE
+    try:
+        worker.start()
+    except Exception:
+        _network_lock.release()
+        raise
+    worker.join(max(0, deadline - time.monotonic()))
+    expired.set()
+    return result[0] if not worker.is_alive() and result else None
+
+
+def _report_counts(payload):
+    def bucket(group):
+        value = payload.get(group)
+        return value if isinstance(value, dict) else {}
+
+    values = {g: {k: _counter(n) for k, n in bucket(g).items()}
+              for g in ("tools", "transports", "mcp_clients")}
+    values["captures"] = {s + ":" + o: _counter(n) for s, outcomes in bucket("captures").items()
+                          if isinstance(outcomes, dict) for o, n in outcomes.items()}
+    values["searches"] = {"count": _counter(payload.get("searches", 0))}
+    return values
+
+
+def _subtract_counts(state, payload):
+    counts = state.get("counts", {})
+    for group, values in _report_counts(payload).items():
+        for key, n in values.items():
+            if key in counts.get(group, {}):
+                remaining = max(0, counts[group][key] - n)
+                if remaining:
+                    counts[group][key] = remaining
+                else:
+                    counts[group].pop(key)
+        if not counts.get(group):
+            counts.pop(group, None)
+
+
+def _finish_report(state, now, payload):
+    _subtract_counts(state, payload)
+    state["since"] = state.pop("pending_until", now)
+    state.pop("pending", None)
+    state.pop("pending_created", None)
+    state.pop("send_generation", None)
+    state["report_id"] = str(uuid.uuid4())
 
 
 def send_due(now=None):
-    """One attempt per day across restarts. Retry a failed snapshot only once."""
+    """One attempt per day. Keep the report ID within the receiver's retry window."""
     try:
         if forced_off():
             set_enabled(False)
@@ -348,50 +514,46 @@ def send_due(now=None):
         if isolated() or not endpoint or _root is None or not _path().exists():
             return False
         now = time.time() if now is None else now
+        path = _path()
         # Commit the attempt before network I/O so a crash cannot bypass the gate.
-        with _transaction() as state:
+        with _transaction(path=path) as state:
             if (not state.get("install_id") or now - state.get("last_attempt", state["since"]) < DAY
                     or now - state["since"] < DAY):
                 return False
-            payload = state.get("pending") or _payload(state, now)
-            retry = bool(state.get("pending"))
+            pending = state.get("pending")
+            if pending and (not _uuid4(pending.get("report_id"))
+                            or now - state.get("pending_created", 0) >= REPORT_RETENTION):
+                # Legacy reports cannot safely gain an ID on retry, and expired
+                # report markers cannot prevent double counting. Retire only
+                # that snapshot, without claiming it was sent successfully.
+                # Retire every old count, even keys a new wire payload would
+                # omit to fit its byte limit. None of this legacy JSON is sent.
+                _finish_report(state, now, pending)
+            state["report_id"] = (_uuid4((state.get("pending") or {}).get("report_id"))
+                                  or _uuid4(state.get("report_id")) or str(uuid.uuid4()))
+            if state.get("pending"):
+                payload = _sanitize_payload({**state["pending"], "install_id": state["install_id"],
+                                             "report_id": state["report_id"]})
+            else:
+                payload = _payload(state, now)
+                state["pending_until"] = now
+                state["pending_created"] = now
+            generation = str(uuid.uuid4())
+            state["send_generation"] = generation
             state["last_attempt"] = now
             state["pending"] = payload
-            if not retry:
-                state["pending_until"] = now
-        # Recheck consent under the interprocess lock. Turning off waits only for
-        # an already running request; after it returns no request can start.
-        with _transaction() as state:
-            if state.get("install_id") != payload["install_id"] or forced_off() or isolated():
+        status = _send_snapshot(endpoint, payload, path, generation)
+        # A timed-out worker never touches storage. Off/on and a later send both
+        # invalidate this generation, so late responses cannot affect new counts.
+        if _root is None or path != _path():
+            return False
+        with _transaction(path=path) as state:
+            if (state.get("install_id") != payload["install_id"]
+                    or state.get("send_generation") != generation or forced_off() or isolated()):
                 return False
-            try:
-                sent = _post(endpoint, payload)
-            except Exception:
-                log.debug("Usage send unavailable")
-                sent = False
-            if not sent:
-                if retry:
-                    state.pop("pending", None)
-                    state.pop("pending_until", None)
+            if status not in (204, 208):
                 return False
-            counts = state.get("counts", {})
-            for group in ("tools", "transports", "mcp_clients", "captures", "searches"):
-                values = payload[group]
-                if group == "captures":
-                    values = {s + ":" + o: n for s, outcomes in values.items() for o, n in outcomes.items()}
-                elif group == "searches":
-                    values = {"count": values}
-                for key, n in values.items():
-                    if key in counts.get(group, {}):
-                        remaining = max(0, counts[group][key] - n)
-                        if remaining:
-                            counts[group][key] = remaining
-                        else:
-                            counts[group].pop(key)
-                if not counts.get(group):
-                    counts.pop(group, None)
-            state["since"] = state.pop("pending_until", now)
-            state.pop("pending", None)
+            _finish_report(state, now, payload)
             state["history"] = (state.get("history", []) + [{
                 "date": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(now)), "payload": payload}])[-10:]
             return True
