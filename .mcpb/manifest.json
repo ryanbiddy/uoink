@@ -161,7 +161,7 @@
     },
     {
       "name": "search_library",
-      "description": "Bounded clip-first search of the saved library (default 5, at most 20 hits) with an item-text fallback for items without clips. Each hit carries the item id, source revision, safe title and link, evidence kind and timing, a 240-character preview and revision-bound card and excerpt URIs for read_library_resource. Results are bounded, not exhaustive; follow next_step when more retrieval is needed."
+      "description": "Bounded clip-first search of the saved library (default 5, at most 20 hits) with verified clip or item-text passages when available. Check passage_verified before quoting; citation_reason explains missing passages. Each hit carries the item id, source revision, safe title and link, evidence kind and timing, a 240-character preview and revision-bound card and excerpt URIs for read_library_resource. Results are bounded, not exhaustive; follow next_step when more retrieval is needed."
     },
     {
       "name": "get_library_item",

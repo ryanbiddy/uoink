@@ -332,12 +332,25 @@ Both treat punctuation and FTS operators as text and prefix-match the last
 word. If all words are stopwords, forgiving search keeps them. Forgiving
 results put an exact title first, ignoring case and punctuation, then hits
 with every useful word, then partial hits. BM25 orders hits within each group.
+Forgiving `score` values are scaled relevance scores: higher is better. They
+include coverage and title bonuses and are not raw BM25 magnitudes. Do not
+compare their magnitudes with strict, semantic, or hybrid scores.
 
 Results also carry `video_id` and, when source text is available, an optional
 `passage`. Quote `passage.text`: `snippet` may contain ellipses. A passage has
 either a stored `clip_id` with `start` and `end` in seconds, or `char_start`
 and `char_end` (exclusive) in the indexed `content` field. These are Unicode
 character offsets, not byte offsets. `timing` describes the stored timing.
+Search results include `passage_verified`. When it is `false`, `citation_reason`
+explains why no passage, span, or timestamp was returned. A title or metadata
+match can still be useful for discovery without supplying a quotable passage.
+Keyword passages contain matched text. Semantic passages are the stored chunks
+that produced the matches, checked against the current source. Hybrid results
+use either verified form. These rules apply to MCP and HTTP search responses.
+When a semantic chunk comes from a source with no body text, its offsets refer
+to the title and `passage.field` is `"title"`.
+`search_library` counts terms across a source's clips for ranking while citing
+the best single matching clip; that clip may contain only some of the terms.
 
 Parameters:
 
@@ -930,7 +943,7 @@ The operation returns pure aggregation over saved items, shelf movements, and so
 ### search_library
 
 Bounded clip-first search of the saved library (default 5, at most 20 hits)
-with an item-text fallback for items without clips (Phase 4, contract
+with verified clip or item-text passages when available (Phase 4, contract
 `phase4-v1-2026-09-08`, run AV-1).
 
 Optional `match: "forgiving" | "strict"` defaults to forgiving search.
@@ -938,6 +951,9 @@ Forgiving results put exact titles and complete word matches before partial
 matches across clips and item text. Strict mode keeps clip-first retrieval.
 Timed hits also include `clip_id`; existing `item_id`, `excerpt_id`, source
 revision, excerpt URI, and `start`/`end` fields identify the exact evidence.
+When no passage can be verified, the result has `passage_verified: false`
+and a `citation_reason`, with no passage or excerpt link. A source match
+outside its clips can carry an exact character span without a timestamp.
 
 The dashboard, `/memory/search`, and `/api/corpus/v1/search` accept the same
 optional `match` parameter and default to forgiving. The dashboard selects

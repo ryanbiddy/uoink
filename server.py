@@ -12847,7 +12847,7 @@ def _enrich_yoink_rows(idx, rows: list[dict]) -> list[dict]:
             "transcript_source": transcript_source if isinstance(transcript_source, str) else None,
             "asr_fallback_status": asr_status if isinstance(asr_status, str) else None,
             "has_transcript": bool(transcript),
-            **{key: r[key] for key in ("passage", "source_id", "passage_id", "span", "timestamp_seconds") if key in r},
+            **{key: r[key] for key in ("passage", "source_id", "passage_id", "span", "timestamp_seconds", "passage_verified", "citation_reason") if key in r},
         })
     return out
 

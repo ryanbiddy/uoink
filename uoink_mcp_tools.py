@@ -401,7 +401,7 @@ def search_uoinks(args: dict[str, Any]) -> dict[str, Any]:
             # better match, matching the old term-count score's direction.
             "score": round(-score, 4) if isinstance(score, (int, float)) else 0.0,
             **({"passage": r["passage"]} if "passage" in r else {}),
-            **{key: r[key] for key in ("source_id", "passage_id", "span", "timestamp_seconds") if key in r},
+            **{key: r[key] for key in ("source_id", "passage_id", "span", "timestamp_seconds", "passage_verified", "citation_reason") if key in r},
         })
     return _ok(results=results, **metadata(page))
 
@@ -558,7 +558,7 @@ def search_clips(args: dict[str, Any]) -> dict[str, Any]:
             "text": r.get("text"),
             "deep_link": r.get("source_deep_link"),
             "timing": r.get("timing", "unknown"),
-            **{key: r[key] for key in ("passage", "source_id", "passage_id", "span", "timestamp_seconds") if key in r},
+            **{key: r[key] for key in ("passage", "source_id", "passage_id", "span", "timestamp_seconds", "passage_verified", "citation_reason") if key in r},
             # bm25 is lower-is-better; negate so higher means better, the
             # same direction search_uoinks reports.
             "score": round(-score, 4) if isinstance(score, (int, float)) else 0.0,
@@ -5615,8 +5615,9 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
         },
         description=(
             "Bounded clip-first search of the saved library (default 5, at "
-            "most 20 hits) with an item-text fallback for items without "
-            "clips. Each hit carries the item id, source revision, safe title "
+            "most 20 hits) with verified clip or item-text passages when available. "
+            "Check passage_verified before quoting; citation_reason explains missing passages. "
+            "Each hit carries the item id, source revision, safe title "
             "and link, evidence kind and timing, a 240-character preview and "
             "revision-bound card and excerpt URIs for read_library_resource. "
             "Results are bounded, not exhaustive; follow next_step when more "

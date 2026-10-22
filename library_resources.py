@@ -2049,12 +2049,23 @@ class LibraryReader:
         return hit
 
     def _search(self, op: _Operation, query: str, limit: int, *, match: str = "forgiving", mode="auto") -> dict:
-        from uoink_core.search_service import select_mode, metadata
+        from uoink_core.search_service import select_mode, metadata, CITATION_FIELDS
         actual, reason = select_mode(self.index, mode)
         mode_info = {"search_mode": "keyword", "requested_mode": mode, "fallback_reason": reason}
         semantic_rows = None
         if actual != "keyword":
-            page = self._index_call(op, lambda: self.index.search_mode(query, limit, mode=mode, match=match))
+            def keyword_candidates(count, offset, override):
+                keyword_match = override or match
+                candidates = {row["video_id"]: row for row in self.index.search(query, count, match=keyword_match)}
+                for row in self.index.search_clips(query, count, match=keyword_match, group_sources=True):
+                    existing = candidates.get(row["video_id"], {})
+                    candidates[row["video_id"]] = {
+                        **existing, **row, "_score": min(existing.get("_score", 0), row["_score"])}
+                ranked = sorted(candidates.values(), key=lambda row: (row["_score"], row["video_id"]))
+                return {"total": len(ranked), "results": ranked[offset:offset + count]}
+
+            page = self._index_call(op, lambda: self.index.search_mode(
+                query, limit, mode=mode, match=match, keyword=keyword_candidates))
             mode_info = metadata(page)
             if page["search_mode"] != "keyword":
                 semantic_rows = page["results"]
@@ -2084,11 +2095,11 @@ class LibraryReader:
         op.check()
         rows = ([{**row, "clip_id": row["passage"]["clip_id"]} for row in semantic_rows
                  if row.get("passage", {}).get("clip_id") is not None] if semantic_rows is not None
-                else self._index_call(op, lambda: self.index.search_clips(query, limit, match=match)))
+                else self._index_call(op, lambda: self.index.search_clips(query, limit, match=match, group_sources=True)))
         op.check()
         for row in rows:
             vid = row.get("video_id")
-            if not isinstance(vid, str):
+            if not isinstance(vid, str) or vid in seen:
                 continue
             bundle = self._bundle(op, vid)
             op.check()
@@ -2107,7 +2118,7 @@ class LibraryReader:
                                   end=evidence["end"], deep_link=evidence["deep_link"]))
             hits[-1]["clip_id"] = clip["clip_id"]
             hits[-1]["_score"] = row.get("_search_order", row.get("_score", 0))
-            hits[-1].update({key: row[key] for key in ("source_id", "passage_id", "span", "timestamp_seconds", "passage") if key in row})
+            hits[-1].update({key: row[key] for key in CITATION_FIELDS if key in row})
             seen.add(vid)
         if match == "forgiving" or len(hits) < limit:
             rows = (semantic_rows if semantic_rows is not None else
@@ -2117,17 +2128,23 @@ class LibraryReader:
                 if match == "strict" and len(hits) >= limit:
                     break
                 vid = row.get("video_id")
-                if not isinstance(vid, str) or vid in seen:
+                if not isinstance(vid, str):
+                    continue
+                if vid in seen:
+                    if match == "forgiving":
+                        hit = next(hit for hit in hits if hit["item_id"] == vid)
+                        hit["_score"] = min(hit["_score"], row.get("_search_order", row.get("_score", 0)))
                     continue
                 bundle = self._bundle(op, vid)
                 op.check()
                 if bundle.error is not None:
                     note_omission(bundle)
                     continue
-                if bundle.clips:
-                    continue  # clip-first covered items with clips
                 seen.add(vid)
-                if bundle.prose_id is not None:
+                passage = row.get("passage", {})
+                # Excerpt links must contain the same verified passage.
+                if (row.get("passage_verified") and bundle.prose_id is not None
+                        and passage.get("text") and passage["text"] in bundle.prose):
                     hits.append(self._hit(vid, bundle, evidence_kind="text_only",
                                           preview=self._preview(row.get("passage", {}).get("text") or bundle.prose), excerpt_id=bundle.prose_id,
                                           timing="not_timed", start=None, end=None,
@@ -2138,7 +2155,7 @@ class LibraryReader:
                                           preview=self._preview(snippet or label(bundle.card.get("title"))),
                                           excerpt_id=None, timing=None, start=None, end=None, deep_link=None))
                 hits[-1]["_score"] = row.get("_search_order", row.get("_score", 0))
-                hits[-1].update({key: row[key] for key in ("source_id", "passage_id", "span", "timestamp_seconds", "passage") if key in row})
+                hits[-1].update({key: row[key] for key in CITATION_FIELDS if key in row})
         if match == "forgiving":
             hits.sort(key=lambda hit: hit["_score"])
             hits = hits[:limit]

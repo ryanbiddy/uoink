@@ -92,7 +92,7 @@ class UoinkCorpusProvider:
         )
         return {
             "id": str(row.get("video_id") or ""),
-            **{key: row[key] for key in ("passage", "source_id", "passage_id", "span", "timestamp_seconds") if key in row},
+            **{key: row[key] for key in ("passage", "source_id", "passage_id", "span", "timestamp_seconds", "passage_verified", "citation_reason") if key in row},
             "title": str(row.get("title") or ""),
             "author": str(author) if author else None,
             "source_type": source_type,

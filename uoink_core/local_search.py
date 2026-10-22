@@ -292,7 +292,8 @@ class IndexSources:
         self._cache_stamp = None
         self._cache_sources = ()
 
-    def snapshot(self, *, source_id=None, filters=None, source_types=None):
+    def snapshot(self, *, source_id=None, filters=None, source_types=None, _db=None):
+        from contextlib import nullcontext
         filters = dict(filters or {})
         if filters.keys() - FILTERS:
             raise ValueError("Unknown embedding search filter")
@@ -317,7 +318,7 @@ class IndexSources:
             clauses.append("y.yoinked_at < ?")
             params.append(end.strftime("%Y-%m-%d"))
         sources = []
-        with self.index.read_snapshot() as db:
+        with (nullcontext(_db) if _db is not None else self.index.read_snapshot()) as db:
             # Every source write uses this connection; data_version also detects
             # commits from another process. Reuse immutable passages only while
             # both stamps match. No source text is copied to another database.
@@ -362,6 +363,7 @@ class SearchHit(NamedTuple):
     span: dict
     timestamp_seconds: float | None
     score: float
+    fingerprint: str | None = None
 
 
 def _unit_vector(vector):
@@ -451,7 +453,7 @@ class VectorStore:
                     continue
                 key = (identity, passage) if clips_only else identity
                 if key not in best or score > best[key].score:
-                    best[key] = SearchHit(identity, passage, json.loads(span), timestamp, float(score))
+                    best[key] = SearchHit(identity, passage, json.loads(span), timestamp, float(score), fingerprint)
             return sorted(best.values(), key=lambda hit: (-hit.score, hit.source_id, hit.passage_id))[:limit]
         with closing(self._connect()) as db:
             for identity, passage, fingerprint, span, timestamp, blob in db.execute(
@@ -466,7 +468,7 @@ class VectorStore:
                 score = math.fsum(a * b for a, b in zip(query, values))
                 key = (identity, passage) if clips_only else identity
                 if key not in best or score > best[key].score:
-                    best[key] = SearchHit(identity, passage, json.loads(span), timestamp, score)
+                    best[key] = SearchHit(identity, passage, json.loads(span), timestamp, score, fingerprint)
         return sorted(best.values(), key=lambda hit: (-hit.score, hit.source_id, hit.passage_id))[:limit]
 
     def remove(self):

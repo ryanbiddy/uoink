@@ -5,6 +5,17 @@ MODES = ("auto", "keyword", "semantic", "hybrid")
 MODE_SCHEMA = {"type": "string", "enum": list(MODES), "default": "auto",
                "description": "Auto uses hybrid when the local semantic index is ready, otherwise keyword."}
 META_FIELDS = ("search_mode", "requested_mode", "fallback_reason")
+CITATION_FIELDS = ("passage", "source_id", "passage_id", "span", "timestamp_seconds",
+                   "passage_verified", "citation_reason")
+
+
+def unverified(row, reason="No matched passage could be verified in stored source text."):
+    row = dict(row)
+    for key in ("passage", "passage_id", "span", "timestamp_seconds", "start", "end", "timing",
+                "source_deep_link"):
+        row.pop(key, None)
+    row.update(source_id=row["video_id"], passage_verified=False, citation_reason=reason)
+    return row
 
 
 def metadata(result):
@@ -13,6 +24,8 @@ def metadata(result):
 
 def citation_fields(row):
     row = dict(row)
+    if row.get("passage_verified") is not True:
+        return unverified(row, row.get("citation_reason") or "No matched passage could be verified in stored source text.")
     passage = row.get("passage")
     if not passage and row.get("clip_id") is not None:
         passage = {key: row.get(key) for key in ("video_id", "clip_id", "text", "start", "end", "timing")}
@@ -27,7 +40,9 @@ def citation_fields(row):
                  "timestamp_seconds": passage.get("timestamp_seconds", passage.get("start"))}
         passage.update(extra)
         row.update(extra, passage=passage)
-    return row
+        row.pop("citation_reason", None)
+        return row
+    return unverified(row)
 
 
 def select_mode(index, mode):
@@ -62,20 +77,27 @@ def _hydrate(index, hits, *, clips_only=False):
         return []
     result = []
     with index.read_snapshot() as db:
+        from uoink_core.local_search import IndexSources
+        sources_reader = getattr(getattr(index, "_local_search", None), "sources", None) or IndexSources(index)
+        current = {source.source_id: source for source in sources_reader.snapshot(_db=db)}
         identities = list(dict.fromkeys(hit.source_id for hit in hits))
         placeholders = ",".join("?" for _ in identities)
         sources = {row["video_id"]: dict(row) for row in db.execute(
             "SELECT * FROM yoinks WHERE video_id IN (" + placeholders + ") AND deleted_at IS NULL", identities)}
-        # video_id is unindexed in FTS. Read the candidate texts in one scan,
-        # rather than scanning the entire FTS table separately for each hit.
-        contents = dict(db.execute("SELECT video_id, content FROM yoinks_fts WHERE video_id IN ("
-                                   + placeholders + ")", identities))
         for hit in hits:
             row = sources.get(hit.source_id)
             if row is None:
                 continue
             row = dict(row)
-            content = contents.get(hit.source_id) or row.get("title") or ""
+            source = current.get(hit.source_id)
+            stored = next((p for p in source.passages if p.passage_id == hit.passage_id), None) if source else None
+            row.update(_score=-hit.score, _snippet="")
+            if (source is None or not hit.fingerprint or source.fingerprint != hit.fingerprint
+                    or stored is None or stored.span != hit.span or stored.timestamp_seconds != hit.timestamp_seconds):
+                if clips_only:
+                    row["clip_id"] = hit.span.get("clip_id")
+                result.append(unverified(row, "The matched semantic chunk changed or could not be verified."))
+                continue
             span = dict(hit.span)
             passage = {"video_id": hit.source_id, "source_id": hit.source_id,
                        "passage_id": hit.passage_id, "span": span,
@@ -101,11 +123,11 @@ def _hydrate(index, hits, *, clips_only=False):
                 passage["text"] = citation["text"]
                 passage["timing"] = "coarse" if hit.timestamp_seconds is not None else "not_timed"
             else:
-                passage.update(text=content[span["char_start"]:span["char_end"]],
-                               field="content", timing="not_timed")
+                passage.update(text=stored.text,
+                               field="content" if source.content else "title", timing="not_timed")
             row.update(source_id=hit.source_id, passage_id=hit.passage_id, span=span,
                        timestamp_seconds=hit.timestamp_seconds, passage=passage,
-                       _snippet=passage["text"], _score=-hit.score)
+                       passage_verified=True, _snippet=passage["text"], _score=-hit.score)
             result.append(row)
     return result
 
@@ -135,7 +157,8 @@ def search(index, query, *, mode="auto", limit=50, offset=0, filters=None,
             if actual == "hybrid":
                 lexical = [citation_fields(row) for row in keyword(100, 0, "forgiving")["results"]]
                 for row in lexical:
-                    rows.setdefault(row[key], row)
+                    if row[key] not in rows or (not rows[row[key]].get("passage_verified") and row.get("passage_verified")):
+                        rows[row[key]] = row
                 ranking = rrf_merge([row[key] for row in lexical], [row[key] for row in semantic], k=60)
             title_key = _search_title_key(query)
             ranking.sort(key=lambda pair: _search_title_key(rows[pair[0]].get("title") or "") != title_key)

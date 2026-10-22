@@ -342,7 +342,7 @@ def validate_source_url(value: Any, label: str) -> None:
 
 
 def validate_item_ref(item: Any) -> None:
-    item = _exact_keys(item, _ITEM_KEYS, "item", optional={"passage", "source_id", "passage_id", "span", "timestamp_seconds"})
+    item = _exact_keys(item, _ITEM_KEYS, "item", optional={"passage", "source_id", "passage_id", "span", "timestamp_seconds", "passage_verified", "citation_reason"})
     if not isinstance(item["id"], str) or not item["id"]:
         raise ContractError(
             "provider_nonconformant",

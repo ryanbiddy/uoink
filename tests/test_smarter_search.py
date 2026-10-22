@@ -111,7 +111,8 @@ def test_clip_ranking_default_strict_and_passage_identity(db):
     seed(db, "partial", "lunar " * 40, timed=True)
     seed(db, "exact", "unrelated text", title="LUNAR, LANDER!", timed=True)
     rows = db.search_clips("lunar lander")
-    assert ids(rows)[:3] == ["exact", "complete", "partial"]
+    # Exact titles do not turn unrelated clip text into a citation.
+    assert ids(rows) == ["complete", "partial"]
     assert ids(db.search_clips("lunar lander", match="strict")) == ["complete"]
     result = tools.search_clips({"query": "lunar lander"})["results"][0]
     stored = db.get_clips(result["video_id"])[0]
@@ -180,10 +181,14 @@ def test_library_default_strict_mixed_ranking_and_citations(db):
     strict = library_resources.call_tool("search_library", {"query": "lunar lander", "match": "strict"}, reader)
     assert [r["item_id"] for r in strict["hits"]] == ["full", "exact"]
     for hit in result["hits"]:
-        assert hit["excerpt_id"] and hit["source_revision"]
-        assert reader.read(hit["uris"]["excerpt"])["contents"]
+        assert hit["source_revision"]
         if hit["item_id"] != "exact":
+            assert hit["excerpt_id"]
+            assert reader.read(hit["uris"]["excerpt"])["contents"]
             assert hit["clip_id"] and hit["start"] == 12.5
+        else:
+            assert hit["passage_verified"] is False
+            assert hit["excerpt_id"] is None
 
 
 @pytest.mark.parametrize("route", ["memory", "memory_kind", "corpus"])

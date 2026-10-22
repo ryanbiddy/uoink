@@ -36,6 +36,7 @@ import tempfile
 import threading
 import time
 import unicodedata
+import uuid
 from contextlib import contextmanager
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -680,6 +681,15 @@ def _entity_keyword_score(name: str, query: str) -> int:
                for i, term in enumerate(terms))
 
 
+# Private FTS markers distinguish matched body text from title-only snippets.
+_MATCH_START = "\x01" + uuid.uuid4().hex + "\x01"
+_MATCH_END = "\x02" + uuid.uuid4().hex + "\x02"
+
+
+def _plain_snippet(text: str) -> str:
+    return (text or "").replace(_MATCH_START, "").replace(_MATCH_END, "")
+
+
 def _fts_hits(table: str, query: str, match: str, weights: str = "") -> tuple[str, list]:
     """Rank before pagination, using only FTS-tokenized words for coverage.
 
@@ -695,7 +705,7 @@ def _fts_hits(table: str, query: str, match: str, weights: str = "") -> tuple[st
     rank = f"bm25({table}{', ' + weights if weights else ''})"
     column = 6 if table == "yoinks_fts" else 0
     snippet_words = 12 if table == "yoinks_fts" else 16
-    snippet = f"snippet({table}, {column}, '', '', '…', {snippet_words})"
+    snippet = f"snippet({table}, {column}, '{_MATCH_START}', '{_MATCH_END}', '…', {snippet_words})"
     # Forgiving ranking can consider hundreds of rows. Generate their excerpts
     # only when the caller materializes results, not in the candidate/count CTE.
     base = (f"SELECT rowid, {rank} AS _score, "
@@ -709,7 +719,8 @@ def _fts_hits(table: str, query: str, match: str, weights: str = "") -> tuple[st
     sql = (
         f"WITH word_hits AS MATERIALIZED ({base}), "
         f"title_hits AS MATERIALIZED (SELECT f.rowid FROM {table} f {joins} "
-        "WHERE search_title_key(y.title)=? AND y.deleted_at IS NULL), "
+        "WHERE search_title_key(y.title)=? AND y.deleted_at IS NULL "
+        + ("AND f.rowid IN (SELECT rowid FROM word_hits) " if table == "clips_fts" else "") + "), "
         f"all_hits AS MATERIALIZED (SELECT rowid FROM {table} WHERE {table} MATCH ?), "
         "candidates AS (SELECT * FROM word_hits UNION ALL "
         "SELECT rowid, 0.0, '' FROM title_hits WHERE rowid NOT IN (SELECT rowid FROM word_hits)), "
@@ -729,7 +740,7 @@ def _fts_page(prefix: str, tail: str, order: str, *, offset=False) -> str:
     return (prefix.rstrip() + ", page_hits AS MATERIALIZED ("
             "SELECT y.*, h._score, f.content AS _content, h.rowid AS _fts_rowid "
             + tail + " ORDER BY " + order + page + ") "
-            "SELECT p.*, COALESCE((SELECT snippet(yoinks_fts, 6, '', '', '…', 12) "
+            f"SELECT p.*, COALESCE((SELECT snippet(yoinks_fts, 6, '{_MATCH_START}', '{_MATCH_END}', '…', 12) "
             "FROM yoinks_fts WHERE yoinks_fts.rowid=p._fts_rowid AND yoinks_fts MATCH ?), '') AS _snippet "
             "FROM page_hits p ORDER BY " + outer_order)
 
@@ -1260,30 +1271,38 @@ class Index:
         """
         row.pop("_fts_rowid", None)
         content = row.pop("_content", "") or ""
+        marked_snippet = row.get("_snippet") or ""
+        row["_snippet"] = _plain_snippet(marked_snippet)
+        # A source can match metadata or text outside its stored clips.
+        # Never substitute the first clip or the opening of the content.
         clips = self.get_clips(row["video_id"])
         if clips:
-            clips = self.search_clips(query, 1, video_id=row["video_id"], match=match) or clips[:1]
+            clips = self.search_clips(query, 1, video_id=row["video_id"], match=match)
         if clips:
             clip = clips[0]
             row["passage"] = {key: clip.get(key) for key in
                               ("video_id", "clip_id", "text", "start", "end", "timing")}
         elif content:
-            # Locate the contiguous part of SQLite's snippet in the original
-            # indexed string. Fall back to the opening span for title-only hits.
-            excerpt = max((row.get("_snippet") or "").split("…"), key=len).strip()
-            start = content.find(excerpt) if excerpt else 0
-            start = max(0, start)
-            end = min(len(content), start + (len(excerpt) if excerpt else 240))
-            row["passage"] = {"video_id": row["video_id"], "text": content[start:end],
-                              "char_start": start, "char_end": end,
-                              "field": "content", "timing": "not_timed"}
-        return row
+            for chunk in sorted(marked_snippet.split("…"), key=len, reverse=True):
+                if _MATCH_START not in chunk or _MATCH_END not in chunk:
+                    continue
+                excerpt = _plain_snippet(chunk).strip()
+                start = content.find(excerpt) if excerpt else -1
+                if start < 0:
+                    continue
+                row["passage"] = {"video_id": row["video_id"], "text": excerpt,
+                                  "char_start": start, "char_end": start + len(excerpt),
+                                  "field": "content", "timing": "not_timed"}
+                break
+        row["passage_verified"] = bool(row.get("passage"))
+        from uoink_core.search_service import citation_fields
+        return citation_fields(row)
 
     # ---- clips (living library phase 1; see clips.py) --------------------
     def search_clips(self, query: str, limit: int = 20, *,
                      video_id: str | None = None,
                      channel: str | None = None,
-                     match: str = "forgiving") -> list[dict]:
+                     match: str = "forgiving", group_sources: bool = False) -> list[dict]:
         """Full-text search over clips (merged transcript windows). Returns
         one row per clip -- ``{clip_id, video_id, slug, title, channel,
         start, end, text, source_deep_link, _score, _snippet}`` -- ranked by
@@ -1291,9 +1310,23 @@ class Index:
         if not _fts_query(query, match):
             return []
         prefix, params = _fts_hits("clips_fts", query, match)
+        score = "h._score"
+        grouped = group_sources and match == "forgiving"
+        if grouped:
+            # FTS checks each term across all clips belonging to a source.
+            # Keep the single-clip score for choosing that source's passage.
+            terms = _search_terms(query)
+            coverage = " INTERSECT ".join(
+                "SELECT c.video_id FROM clips_fts JOIN clips c ON c.clip_id=clips_fts.rowid "
+                "WHERE clips_fts MATCH ?" for _ in terms)
+            params.extend(f'"{term}"' + ("*" if i == len(terms) - 1 else "")
+                          for i, term in enumerate(terms))
+            prefix = prefix.rstrip() + ", covered_sources AS (" + coverage + ") "
+            score += " - .001 * (c.video_id IN (SELECT video_id FROM covered_sources) AND h.rowid NOT IN (SELECT rowid FROM all_hits))"
         sql = (prefix + "SELECT c.clip_id, c.video_id, y.slug, y.title, y.channel, "
                "c.start, c.\"end\", c.text, c.source_deep_link, "
-               "h._score, h._snippet "
+               + score + " AS _score, h._snippet "
+               + (", ROW_NUMBER() OVER (PARTITION BY c.video_id ORDER BY h._score, c.seq) AS _source_rank " if grouped else "") +
                "FROM search_hits h "
                "JOIN clips c ON c.clip_id = h.rowid "
                "JOIN yoinks y ON y.video_id = c.video_id "
@@ -1305,7 +1338,10 @@ class Index:
             sql += "AND y.channel = ? "
             params.append(channel)
         # Tie-break on (video_id, seq) so equal scores order deterministically.
-        sql += "ORDER BY h._score, c.video_id, c.seq LIMIT ?"
+        if grouped:
+            sql = "SELECT * FROM (" + sql + ") WHERE _source_rank=1 ORDER BY _score, video_id LIMIT ?"
+        else:
+            sql += "ORDER BY h._score, c.video_id, c.seq LIMIT ?"
         params.append(max(1, int(limit)))
         with self._lock:
             try:
@@ -1314,7 +1350,9 @@ class Index:
                 log.warning("clips FTS search rejected query %r", query)
                 return []
         from clips import timing_kind
-        return [{**dict(r), "timing": timing_kind(dict(r))} for r in rows]
+        from uoink_core.search_service import citation_fields
+        return [citation_fields({**dict(r), "_snippet": _plain_snippet(r["_snippet"]),
+                                 "passage_verified": True, "timing": timing_kind(dict(r))}) for r in rows]
 
     def get_clips(self, video_id: str) -> list[dict]:
         """Every clip for one item, in timeline order."""

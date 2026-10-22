@@ -17,6 +17,9 @@
         "items": [
           {
             "id": "video-contract",
+            "source_id": "video-contract",
+            "passage_verified": false,
+            "citation_reason": "No matched passage could be verified in stored source text.",
             "title": "The saved hour",
             "author": "Fixture Creator",
             "source_type": "youtube",
@@ -48,6 +51,9 @@
           },
           {
             "id": "note-contract",
+            "source_id": "note-contract",
+            "passage_verified": false,
+            "citation_reason": "No matched passage could be verified in stored source text.",
             "title": "Local note",
             "author": "You",
             "source_type": "note",
@@ -115,6 +121,7 @@
               "char_end": 39
             },
             "timestamp_seconds": null,
+            "passage_verified": true,
             "title": "The saved hour",
             "author": "Fixture Creator",
             "source_type": "youtube",
