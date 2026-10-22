@@ -1,4 +1,9 @@
-# Exact direct dependencies observed in both legs of run 39215500494.
+# Retain the pytest/Pillow pins from run 39215500494. SDK 2 qualification
+# uses the same five reviewed pins as the candidate stdio runtime.
 pytest==9.1.1
 Pillow==13.0.0
-mcp==1.30.0
+mcp==2.3.0
+mcp-types==2.3.0
+httpx2==2.10.0
+httpcore2==2.10.0
+truststore==0.10.5

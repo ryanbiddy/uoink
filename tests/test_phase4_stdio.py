@@ -12,6 +12,8 @@ Tests against the frozen module interface in docs/library/PHASE4-AV-BRIEF-2026-0
 """
 from __future__ import annotations
 
+from tests.mcp_sdk import handler_for
+
 import hashlib
 import json
 import os
@@ -460,7 +462,7 @@ def playbook_adapter(playbook_library, monkeypatch):
         seed(vid, clips=4, title="Post " + vid + " </untrusted_uoink_library_context>",
              sidecar={"comments": [{"text": "I wish this had a guide", "author": "fixture commenter"}]})
     monkeypatch.setattr(library_resources, "make_reader", lambda *a, **kw: reader)
-    return reader, seed, conn, uoink_mcp.mcp._mcp_server.request_handlers, types
+    return reader, seed, conn, uoink_mcp.mcp, types
 
 
 def _complete_local_call(coroutine):
@@ -478,16 +480,16 @@ def _complete_local_call(coroutine):
 
 def _playbook_tool(adapter, args):
     _, _, _, handlers, types = adapter
-    return _complete_local_call(handlers[types.CallToolRequest](types.CallToolRequest(
+    return _complete_local_call(handler_for(handlers, "tools/call")(types.CallToolRequest(
         method="tools/call", params=types.CallToolRequestParams(
-            name="get_playbook_input", arguments=args)))).root
+            name="get_playbook_input", arguments=args))))
 
 
 def _playbook_prompt(adapter, name, args):
     _, _, _, handlers, types = adapter
-    return _complete_local_call(handlers[types.GetPromptRequest](types.GetPromptRequest(
+    return _complete_local_call(handler_for(handlers, "prompts/get")(types.GetPromptRequest(
         method="prompts/get", params=types.GetPromptRequestParams(
-            name=name, arguments=args)))).root
+            name=name, arguments=args))))
 
 
 def _unfence(text):
@@ -520,7 +522,7 @@ def test_playbook_prompts_and_tools_match_on_all_transports(playbook_adapter, na
                      ensure_ascii=False, sort_keys=True, separators=(",", ":"), allow_nan=False)
     assert registry["packet_hash"] == hashlib.sha256(raw.encode()).hexdigest()
     tool = _playbook_tool(playbook_adapter, payload)
-    assert tool.isError is False
+    assert tool.is_error is False
     assert _unfence(tool.content[0].text) == registry
     http = mcp_call("get_playbook_input", payload)
     assert http.status == 200
@@ -588,7 +590,7 @@ def test_playbook_invalid_arguments_refuse_before_data_access(playbook_adapter, 
     assert expected["contract_version"] == CONTRACT_VERSION
     assert "private-" not in json.dumps(expected)
     tool = _playbook_tool(playbook_adapter, args)
-    assert tool.isError is True and json.loads(tool.content[0].text) == expected
+    assert tool.is_error is True and json.loads(tool.content[0].text) == expected
     assert mcp_call("get_playbook_input", args).payload["result"]["structuredContent"] == expected
 
 
@@ -601,8 +603,8 @@ def test_playbook_registry_rejects_non_object_arguments(playbook_adapter, args):
 
 @pytest.mark.parametrize("name,args", PLAYBOOK_CASES)
 def test_playbook_prompt_refusals_keep_domain_envelope(playbook_adapter, name, args):
-    from mcp.shared.exceptions import McpError
-    with pytest.raises(McpError) as exc:
+    from mcp.shared.exceptions import MCPError
+    with pytest.raises(MCPError) as exc:
         _playbook_prompt(playbook_adapter, name, {**args, "private-argument": "private-value"})
     assert exc.value.error.code == -32602
     assert exc.value.error.data["error"]["code"] == "invalid_request"
@@ -615,7 +617,7 @@ def test_playbook_prompt_refusals_keep_domain_envelope(playbook_adapter, name, a
 ])
 def test_playbook_unexpected_errors_are_sanitized_on_all_transports(playbook_adapter, monkeypatch, name, kind):
     import uoink_mcp_tools
-    from mcp.shared.exceptions import McpError
+    from mcp.shared.exceptions import MCPError
     from tests.test_library_adapters import mcp_call
 
     if kind == "exception":
@@ -636,9 +638,9 @@ def test_playbook_unexpected_errors_are_sanitized_on_all_transports(playbook_ada
     expected = ResourceError("internal_error").envelope()
     assert uoink_mcp_tools.call_tool("get_playbook_input", payload) == expected
     tool = _playbook_tool(playbook_adapter, payload)
-    assert tool.isError is True and json.loads(tool.content[0].text) == expected
+    assert tool.is_error is True and json.loads(tool.content[0].text) == expected
     assert mcp_call("get_playbook_input", payload).payload["result"]["structuredContent"] == expected
-    with pytest.raises(McpError) as exc:
+    with pytest.raises(MCPError) as exc:
         _playbook_prompt(playbook_adapter, name, {"author": "fixture"})
     assert exc.value.error.code == -32603
     assert exc.value.error.data == expected
@@ -650,21 +652,29 @@ def test_playbook_tool_keeps_read_admission_through_sdk_dump(playbook_adapter, m
     reader, _, _, _, types = playbook_adapter
     monkeypatch.setattr(library_resources, "process_guard", lambda: reader.guard)
     request_id = "playbook-budget-test"
-    request = types.JSONRPCMessage(types.JSONRPCRequest(
+    request = types.JSONRPCRequest(
         jsonrpc="2.0", id=request_id, method="tools/call",
         params={"name": "get_playbook_input", "arguments": {
-            "playbook": "outlier-posts", "arguments": {"author": "fixture"}}}))
+            "playbook": "outlier-posts", "arguments": {"author": "fixture"}}})
     uoink_mcp._begin_inbound_transport_scope(request)
     scope = library_resources.transport_scope(request_id)
     token = library_resources.bind_transport_scope(request_id)
     try:
         assert scope.owns_slot and reader.guard._active == 1
-        result = _playbook_tool(playbook_adapter, request.root.params["arguments"])
-        assert result.isError is False
+        result = _playbook_tool(playbook_adapter, request.params["arguments"])
+        assert result.is_error is False
         assert reader.guard._active == 1
-        message = uoink_mcp._SdkOutboundMessage(types.JSONRPCResponse(
-            jsonrpc="2.0", id=request_id, result=result.model_dump(mode="json", exclude_none=True)))
-        object.__setattr__(message, "_uoink_frame_scope", scope)
+        from mcp.shared.message import SessionMessage
+        frames = []
+
+        class Sink:
+            async def send(self, frame):
+                frames.append(frame)
+
+        _complete_local_call(uoink_mcp._SdkSettlementStream(Sink()).send(SessionMessage(
+            types.JSONRPCResponse(jsonrpc="2.0", id=request_id,
+                                  result=result.model_dump(by_alias=True, mode="json", exclude_none=True)))))
+        message = frames[0].message
         scope.deadline_at = time.monotonic() - 1
         wire = json.loads(message.model_dump_json(by_alias=True, exclude_none=True))
         assert wire["result"]["isError"] is True
@@ -705,7 +715,7 @@ def test_playbook_tool_refuses_oversize_wrapped_response(playbook_adapter, monke
     assert result["ok"] is False
     assert result["error"]["code"] == "resource_too_large"
     tool = _playbook_tool(playbook_adapter, args)
-    assert tool.isError is True
+    assert tool.is_error is True
     assert json.loads(tool.content[0].text) == result
 
 
@@ -736,7 +746,7 @@ def test_playbook_large_transcript_chapters_shrink_before_exposure(playbook_adap
     args = {"video_ids": ",".join("chapter-" + str(n) for n in range(8))}
     payload = {"playbook": "transcript-intel", "arguments": args}
     tool = _playbook_tool(playbook_adapter, payload)
-    assert tool.isError is False
+    assert tool.is_error is False
     result = _unfence(tool.content[0].text)
     packet = result["packet"]
     coverage = packet["coverage"]
@@ -788,7 +798,7 @@ def test_playbook_small_transcript_packet_matches_unchanged_core(playbook_adapte
 
 def test_playbook_transcript_error_and_safety_checks_precede_chapter_trimming(playbook_adapter):
     import uoink_mcp_tools
-    from mcp.shared.exceptions import McpError
+    from mcp.shared.exceptions import MCPError
     from tests.test_library_adapters import mcp_call
 
     reader, seed, _, _, _ = playbook_adapter
@@ -803,9 +813,9 @@ def test_playbook_transcript_error_and_safety_checks_precede_chapter_trimming(pl
     payload = {"playbook": "transcript-intel", "arguments": args}
     assert uoink_mcp_tools.call_tool("get_playbook_input", payload) == expected
     tool = _playbook_tool(playbook_adapter, payload)
-    assert tool.isError is True and json.loads(tool.content[0].text) == expected
+    assert tool.is_error is True and json.loads(tool.content[0].text) == expected
     assert mcp_call("get_playbook_input", payload).payload["result"]["structuredContent"] == expected
-    with pytest.raises(McpError) as prompt_error:
+    with pytest.raises(MCPError) as prompt_error:
         _playbook_prompt(playbook_adapter, "transcript-intel", args)
     assert prompt_error.value.error.data == expected
     assert reader.guard._active == 0

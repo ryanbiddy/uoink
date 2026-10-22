@@ -1,8 +1,6 @@
 [
   {
     "name": "server-discover-then-tools-list",
-    "status": "xfail",
-    "reason": "SDK 1 has no dual-era runner; enabled by M3",
     "exchanges": [
       {
         "request": {
@@ -10,8 +8,10 @@
           "id": 1,
           "method": "server/discover",
           "params": {
-            "_meta": {"protocolVersion": "2026-07-28"},
-            "clientCapabilities": {}
+            "_meta": {
+              "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+              "io.modelcontextprotocol/clientCapabilities": {}
+            }
           }
         }
       },
@@ -20,22 +20,99 @@
           "jsonrpc": "2.0",
           "id": 2,
           "method": "tools/list",
-          "params": {"_meta": {"protocolVersion": "2026-07-28"}}
+          "params": {
+            "_meta": {
+              "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+              "io.modelcontextprotocol/clientCapabilities": {}
+            }
+          }
+        }
+      },
+      {
+        "request": {
+          "jsonrpc": "2.0",
+          "id": 3,
+          "method": "tools/call",
+          "params": {
+            "_meta": {
+              "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+              "io.modelcontextprotocol/clientCapabilities": {}
+            },
+            "name": "search_clips",
+            "arguments": {
+              "query": "absent-m2-topic"
+            }
+          }
         }
       }
     ]
   },
   {
     "name": "inline-first-tools-list",
-    "status": "xfail",
-    "reason": "SDK 1 has no dual-era runner; enabled by M3",
     "exchanges": [
       {
         "request": {
           "jsonrpc": "2.0",
           "id": 1,
           "method": "tools/list",
-          "params": {"_meta": {"protocolVersion": "2026-07-28"}}
+          "params": {
+            "_meta": {
+              "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+              "io.modelcontextprotocol/clientCapabilities": {}
+            }
+          }
+        }
+      },
+      {
+        "request": {
+          "jsonrpc": "2.0",
+          "id": 3,
+          "method": "tools/call",
+          "params": {
+            "_meta": {
+              "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+              "io.modelcontextprotocol/clientCapabilities": {}
+            },
+            "name": "search_clips",
+            "arguments": {
+              "query": "absent-m2-topic"
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "name": "inline-first-tools-call",
+    "exchanges": [
+      {
+        "request": {
+          "jsonrpc": "2.0",
+          "id": 1,
+          "method": "tools/call",
+          "params": {
+            "_meta": {
+              "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+              "io.modelcontextprotocol/clientCapabilities": {}
+            },
+            "name": "search_clips",
+            "arguments": {
+              "query": "absent-m2-topic"
+            }
+          }
+        }
+      },
+      {
+        "request": {
+          "jsonrpc": "2.0",
+          "id": 2,
+          "method": "tools/list",
+          "params": {
+            "_meta": {
+              "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+              "io.modelcontextprotocol/clientCapabilities": {}
+            }
+          }
         }
       }
     ]

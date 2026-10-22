@@ -21,7 +21,7 @@ standalone download failed with HTTP 403, `rate limit exceeded`.
 | Inconsistent executable and lease checks | Mirror and subscriptions now request executable-bound observations through the shared adapter. Subscription children persist their own executable, including ffmpeg. Missing child executable evidence remains unknown. Mirror passes its lease tolerance through in milliseconds; ownership defaults to zero. |
 | Standalone download failure | The unauthenticated moving release endpoint hit GitHub's rate limit. `standalone-python.json` pins release `20261013`, both Python 3.13.16 arm64 asset names, sizes and SHA-256 values from the successful run-1 report. CI supplies its token through the environment for API metadata only. HTTP failures print their status and persist it in the report; pinned hashes are mandatory even if GitHub omits a digest. |
 | Linux qualification unit failure | Wheel-set validation imported pip's private vendored parser. It now uses `packaging.version`, with a regression that makes pip unavailable. |
-| Moving qualification tooling | `build-tooling.txt` hashes pip 26.1.2, setuptools 83.0.0, wheel 0.47.0 and packaging 26.2. Workflow and source builds use that file. Portable tests pin pytest 9.1.1, Pillow 13.0.0 and mcp 1.30.0, the versions observed in both hosted legs. |
+| Moving qualification tooling | `build-tooling.txt` hashes pip 26.1.2, setuptools 83.0.0, wheel 0.47.0 and packaging 26.2. Workflow and source builds use that file. Portable tests retain the hosted pytest 9.1.1 and Pillow 13.0.0 pins. The SDK candidate now pins mcp/mcp-types 2.3.0, httpx2/httpcore2 2.10.0 and truststore 0.10.5; hosted and native SDK 2 qualification is pending. The earlier hosted legs used mcp 1.30.0. |
 
 The local repair checks use the requested Windows interpreter, BelowNormal
 priority, `IG_FORBIDDEN_LIVE`, and a guarded source copy under `%TEMP%`.
@@ -171,7 +171,7 @@ minimum to macOS 15, the OS used for hosted runtime checks.
 
 | Job | Evidence |
 | --- | --- |
-| A, portable tests | `tests/` and `pytest Pillow "mcp<2"` on Python 3.11/3.13. Disposable HOME and OS data/cache directories, without a global isolation binding. Individual tests retain explicit isolation. Each run uploads JUnit XML and environment details. |
+| A, portable tests | `tests/` with `scripts/mac/portable-tests.txt` on Python 3.11/3.13. Disposable HOME and OS data/cache directories, without a global isolation binding. Individual tests retain explicit isolation. Each run uploads JUnit XML and environment details. |
 | B, dependency graph | Builds the three reviewed local wheels, then probes included pins for CPython 3.13 at both `macosx_14_0_arm64` and `macosx_15_0_arm64`. Combined resolvers use `--find-links` for built wheels. Missing packages and failed builds remain failures. |
 | C, import smoke | Rejects missing pins or changed wheel hashes before installation. A fresh venv installs the complete selected set with `--no-index --no-deps`, runs `pip check`, imports, and actual `initialize`/`tools/list` exchanges for 91 full and 35 core tools. |
 

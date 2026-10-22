@@ -53,6 +53,7 @@ $StagingDir   = Join-Path $InstallerDir 'staging'
 $TemplatesDir = Join-Path $InstallerDir 'templates'
 $IconSrc      = Join-Path $InstallerDir 'uoink.ico'
 $InstallerLock = Join-Path $RepoRoot 'requirements-installer-lock.txt'
+$InstallerConstraints = Join-Path $CacheDir 'installer-version-constraints.txt'
 $verifyInstallerLock = Join-Path $RepoRoot 'scripts\verify_installer_lock.py'
 $NltkPathsecWheel = Join-Path $RepoRoot 'vendor\nltk-pathsec\dist\nltk-3.10.3+uoink.pathsec1-py3-none-any.whl'
 $NLTK_PATHSEC_SHA256 = '969f623541344ade83ea267130e016d6cb8a223ecaaf28fb3d7a663c7e3c60d8'
@@ -145,7 +146,7 @@ $YTDLP_VERSION  = '2026.08.19'
 $PILLOW_VERSION = '12.3.0'
 # Official Model Context Protocol Python SDK for the stdio MCP server.
 # Also pinned in requirements.txt for dev installs and docs.
-$MCP_VERSION    = '1.28.1'
+$MCP_VERSION    = '2.3.0'
 # Windows Credential Manager wrapper for Anthropic API key storage.
 # Also pinned in requirements.txt for dev installs and docs.
 $KEYRING_VERSION = '25.7.0'
@@ -428,15 +429,18 @@ if ($LASTEXITCODE -ne 0) { throw 'pip bootstrap failed' }
 
 # 2d. Install the direct runtime dependencies while constraining the complete
 #     transitive graph to the reviewed Windows/CPython 3.13 lock. Artifact
-#     hashes remain a separate release control. Pillow drives the multimodal
+#     hashes for the SDK delta are recorded in the lock. Whole-graph artifact
+#     qualification remains a separate release control. Pillow drives the multimodal
 #     paste-corpus generator
 #     (resize / re-encode / base64 screenshots for clipboard embedding).
 #     MCP powers uoink_mcp.py for stdio agent integrations. keyring stores
 #     the user's Anthropic API key in Windows Credential Manager.
+& $embedPython $verifyInstallerLock $InstallerLock --write-constraints $InstallerConstraints
+if ($LASTEXITCODE -ne 0) { throw 'Installer constraint export failed' }
 Write-Host "    installing yt-dlp==$YTDLP_VERSION + Pillow==$PILLOW_VERSION + mcp==$MCP_VERSION + keyring==$KEYRING_VERSION + pystray==$PYSTRAY_VERSION + pywebview==$PYWEBVIEW_VERSION + pythonnet==$PYTHONNET_VERSION + faster-whisper==$FASTER_WHISPER_VERSION + whisperx==$WHISPERX_VERSION..."
 & $embedPython -m pip install --no-warn-script-location --no-compile --no-cache-dir `
     --no-build-isolation `
-    --constraint $InstallerLock `
+    --constraint $InstallerConstraints `
     $NltkPathsecWheel `
     "yt-dlp==$YTDLP_VERSION" "Pillow==$PILLOW_VERSION" "mcp==$MCP_VERSION" "keyring==$KEYRING_VERSION" "pystray==$PYSTRAY_VERSION" "pywebview==$PYWEBVIEW_VERSION" "pythonnet==$PYTHONNET_VERSION" "faster-whisper==$FASTER_WHISPER_VERSION" "whisperx==$WHISPERX_VERSION"
 if ($LASTEXITCODE -ne 0) { throw 'pip install (yt-dlp + Pillow + MCP + keyring + pystray + faster-whisper + whisperx) failed' }
@@ -458,7 +462,7 @@ try {
     $ErrorActionPreference = 'Continue'
     & $embedPython -m pip install --no-warn-script-location --no-compile --no-cache-dir `
         --no-build-isolation `
-        --constraint $InstallerLock "pip-licenses==5.0.0" 2>$null
+        --constraint $InstallerConstraints "pip-licenses==5.0.0" 2>$null
     $noticeToolInstallExit = $global:LASTEXITCODE
     $ErrorActionPreference = $noticePriorErrorPreference
     if ($noticeToolInstallExit -ne 0) {

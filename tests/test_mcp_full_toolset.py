@@ -1,6 +1,8 @@
 """MCP inventory, consent parity, scheduling and offline startup (current release)."""
 from __future__ import annotations
 
+from tests.mcp_sdk import handler_for
+
 import asyncio
 from dataclasses import replace
 import json
@@ -24,11 +26,11 @@ from tests.test_library_adapters import mcp_call, post, valid_pin_operation
 
 
 def call(name, args):
-    handler = uoink_mcp.mcp._mcp_server.request_handlers[types.CallToolRequest]
+    handler = handler_for(uoink_mcp.mcp, "tools/call")
     result = _run_stdio(handler(types.CallToolRequest(
-        method="tools/call", params=types.CallToolRequestParams(name=name, arguments=args)))).root
+        method="tools/call", params=types.CallToolRequestParams(name=name, arguments=args))))
     body = json.loads(result.content[0].text)
-    assert result.isError is (body.get("ok") is not True)
+    assert result.is_error is (body.get("ok") is not True)
     return body
 
 
@@ -149,13 +151,13 @@ def test_registry_handlers_run_on_the_event_loop_like_v391(monkeypatch):
 
     monkeypatch.setitem(tools.TOOL_REGISTRY, "uoink_page",
                         replace(tools.TOOL_REGISTRY["uoink_page"], handler=page, rate_limiter=None))
-    handler = uoink_mcp.mcp._mcp_server.request_handlers[types.CallToolRequest]
+    handler = handler_for(uoink_mcp.mcp, "tools/call")
 
     async def exercise():
         seen["loop"] = threading.get_ident()
         response = await handler(types.CallToolRequest(
             method="tools/call", params=types.CallToolRequestParams(name="uoink_page", arguments={})))
-        assert not response.root.isError
+        assert not response.is_error
     _run_stdio(exercise())
     assert seen["page"] == seen["loop"]
 

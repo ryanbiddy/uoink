@@ -1,7 +1,7 @@
 # Third-Party Notices
 
 Uoink is MIT-licensed. It bundles the third-party components below.
-This file is generated from the installed dependency tree (source: pip-licenses) on 2026-10-18; regenerate with `python scripts/gen_third_party_notices.py`.
+This file is generated from the installed dependency tree (source: pip-licenses) on 2026-10-18. The SDK 2 candidate delta was updated from the five installed wheel metadata records on 2026-10-21; native full-graph regeneration is pending M5. Regenerate with `python scripts/gen_third_party_notices.py`.
 
 | Package | Version | License | Project |
 |---|---|---|---|
@@ -39,9 +39,8 @@ This file is generated from the installed dependency tree (source: pip-licenses)
 | greenlet | 3.5.4 | MIT AND PSF-2.0 | https://greenlet.readthedocs.io |
 | grpcio | 1.82.1 | Apache-2.0 | https://grpc.io |
 | h11 | 0.16.0 | MIT License | https://github.com/python-hyper/h11 |
-| httpcore | 1.0.9 | BSD License | https://www.encode.io/httpcore/ |
-| httpx | 0.28.1 | BSD License | https://github.com/encode/httpx |
-| httpx-sse | 0.4.3 | MIT | https://github.com/florimondmanca/httpx-sse |
+| httpcore2 | 2.10.0 | BSD-3-Clause | https://github.com/pydantic/httpx2 |
+| httpx2 | 2.10.0 | BSD-3-Clause | https://github.com/pydantic/httpx2 |
 | huggingface_hub | 0.36.2 | Apache Software License | https://github.com/huggingface/huggingface_hub |
 | idna | 3.18 | BSD-3-Clause | https://github.com/kjd/idna |
 | jaraco.classes | 3.4.0 | MIT License | https://github.com/jaraco/jaraco.classes |
@@ -60,7 +59,8 @@ This file is generated from the installed dependency tree (source: pip-licenses)
 | markdown-it-py | 4.2.0 | MIT License | https://github.com/executablebooks/markdown-it-py |
 | MarkupSafe | 3.0.3 | BSD-3-Clause | https://github.com/pallets/markupsafe/ |
 | matplotlib | 3.11.1 | Python Software Foundation License | https://matplotlib.org |
-| mcp | 1.28.1 | MIT License | https://modelcontextprotocol.io |
+| mcp | 2.3.0 | MIT | https://modelcontextprotocol.io |
+| mcp-types | 2.3.0 | MIT | https://modelcontextprotocol.io |
 | mdurl | 0.1.2 | MIT License | https://github.com/executablebooks/mdurl |
 | more-itertools | 11.1.0 | MIT | https://github.com/more-itertools/more-itertools |
 | mpmath | 1.3.0 | BSD License | http://mpmath.org/ |
@@ -95,14 +95,12 @@ This file is generated from the installed dependency tree (source: pip-licenses)
 | pyannoteai-sdk | 0.4.0 | UNKNOWN | UNKNOWN |
 | pycparser | 3.0 | BSD-3-Clause | https://github.com/eliben/pycparser |
 | pydantic | 2.13.4 | MIT | https://github.com/pydantic/pydantic |
-| pydantic-settings | 2.14.2 | MIT License | https://github.com/pydantic/pydantic-settings |
 | pydantic_core | 2.46.4 | MIT | https://github.com/pydantic/pydantic |
 | Pygments | 2.20.0 | BSD-2-Clause | https://pygments.org |
 | PyJWT | 2.13.0 | MIT | https://github.com/jpadilla/pyjwt |
 | pyparsing | 3.3.2 | MIT | https://github.com/pyparsing/pyparsing/ |
 | pystray | 0.19.5 | GNU Lesser General Public License v3 (LGPLv3) | https://github.com/moses-palmer/pystray |
 | python-dateutil | 2.9.0.post0 | Apache Software License; BSD License | https://github.com/dateutil/dateutil |
-| python-dotenv | 1.2.2 | BSD-3-Clause | https://github.com/theskumar/python-dotenv |
 | python-multipart | 0.0.32 | Apache Software License | https://github.com/Kludex/python-multipart |
 | pythonnet | 3.0.5 | MIT License | https://pythonnet.github.io/ |
 | pytorch-lightning | 2.6.6 | Apache Software License | https://github.com/Lightning-AI/lightning |
@@ -137,8 +135,9 @@ This file is generated from the installed dependency tree (source: pip-licenses)
 | torchvision | 0.23.0 | BSD | https://github.com/pytorch/vision |
 | tqdm | 4.69.0 | MPL-2.0 AND MIT | https://tqdm.github.io |
 | transformers | 4.57.6 | Apache Software License | https://github.com/huggingface/transformers |
-| typing-inspection | 0.4.2 | MIT | https://github.com/pydantic/typing-inspection |
+| truststore | 0.10.5 | MIT | https://github.com/sethmlarson/truststore |
 | typing_extensions | 4.16.0 | PSF-2.0 | https://github.com/python/typing_extensions |
+| typing-inspection | 0.4.2 | MIT | https://github.com/pydantic/typing-inspection |
 | tzdata | 2026.3 | Apache-2.0 | https://github.com/python/tzdata |
 | urllib3 | 2.7.0 | MIT | https://github.com/urllib3/urllib3/blob/main/CHANGES.rst |
 | uvicorn | 0.51.0 | BSD-3-Clause | https://uvicorn.dev/ |

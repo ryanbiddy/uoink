@@ -5,6 +5,8 @@ clock wrapper case remains a separate reported failure.
 """
 from __future__ import annotations
 
+from tests.mcp_sdk import handler_for
+
 import asyncio
 import json
 import time
@@ -45,8 +47,8 @@ def _call_stdio_handler(args: dict):
         params=mcp_types.CallToolRequestParams(name="get_library_activity", arguments=args),
     )
     return asyncio.run(
-        uoink_mcp.mcp._mcp_server.request_handlers[mcp_types.CallToolRequest](request)
-    ).root
+        handler_for(uoink_mcp.mcp, "tools/call")(request)
+    )
 
 
 def test_az5d2_actual_handler_deadline_during_final_wire_serialization(db, monkeypatch):
@@ -80,7 +82,7 @@ def test_az5d2_actual_handler_deadline_during_final_wire_serialization(db, monke
 
     result = _call_stdio_handler({"interval": INTERVAL})
     envelope = json.loads(result.content[0].text)
-    assert result.isError
+    assert result.is_error
     assert envelope["error"]["code"] == "deadline_exceeded"
     assert envelope["error"]["retryable"] is True
     assert held_during_wire and all(n > 0 for n in held_during_wire), held_during_wire

@@ -32,6 +32,7 @@ sys.path.insert(0, str(ROOT))
 import library_analysis
 import library_resources
 import uoink_mcp
+from tests.mcp_sdk import handler_for
 from tests import test_library_analysis_fixtures as az
 
 PROOF = ROOT / "docs" / "library" / "proof" / "az5g2-2026-09-08"
@@ -48,8 +49,9 @@ DASHBOARD_TARGET = 24576
 WIRE_CAP = 65536
 JOURNAL_CAP = 67_108_864
 FIXTURE_ORDER = [
-    "548_primary_traced",
+    "548_primary_untraced",
     "10000_primary_untraced",
+    "548_primary_traced",
     "10000_primary_traced_diagnostic",
     "548_proved_replay",
     "70mib_journal_refusal",
@@ -291,7 +293,7 @@ def run_shipped_stdio(
 
             async def serve():
                 async with uoink_mcp.bounded_stdio_server(_Stdin(input_stream), sink) as (reads, writes):
-                    low = uoink_mcp.mcp._mcp_server
+                    low = uoink_mcp.mcp
                     await low.run(reads, writes, low.create_initialization_options())
 
             async with anyio.create_task_group() as group:
@@ -341,7 +343,7 @@ def run_shipped_stdio(
         "entry": "uoink_mcp.bounded_stdio_server / run_bounded_stdio_async writer",
         "label": label,
         "includes_reader_invocation": replace_reader is None,
-        "serializer": "JSONRPCMessage.model_dump_json(by_alias=True, exclude_none=True) then completed-frame cap then trailing newline",
+        "serializer": "JSONRPCResponse.model_dump_json(by_alias=True, exclude_none=True) then completed-frame cap then trailing newline",
         "elapsed_ms": (t1 - t0) * 1000.0,
         "shift_after_admit_sec": shift_after_admit,
         "request": {
@@ -386,11 +388,11 @@ def handler_only_serialize(packet: dict[str, Any], arguments: dict[str, Any]) ->
     library_analysis.reset_rate_limiter()
     t0 = time.perf_counter()
     with patch.object(library_analysis, "get_library_activity", lambda arguments: packet):
-        actual = asyncio.run(uoink_mcp.mcp._mcp_server.request_handlers[mcp_types.CallToolRequest](request)).root
+        actual = asyncio.run(handler_for(uoink_mcp.mcp, "tools/call")(request))
     wire = mcp_types.JSONRPCResponse(
         jsonrpc="2.0",
         id=1,
-        result=actual.model_dump(mode="json", exclude_none=True),
+        result=actual.model_dump(by_alias=True, mode="json", exclude_none=True),
     )
     text = wire.model_dump_json(by_alias=True, exclude_none=True)
     t1 = time.perf_counter()
@@ -403,7 +405,7 @@ def handler_only_serialize(packet: dict[str, Any], arguments: dict[str, Any]) ->
         "serializer": "JSONRPCResponse.model_dump_json(by_alias=True, exclude_none=True)",
         "elapsed_ms": (t1 - t0) * 1000.0,
         "jsonrpc_utf8_bytes": len(encoded),
-        "isError": actual.isError,
+        "isError": actual.is_error,
         "sha256": sha256_bytes(encoded),
         "text": text,
     }
@@ -537,20 +539,25 @@ def untraced_construction(conn, arguments: dict[str, Any], label: str) -> dict[s
 def collect_metadata() -> dict[str, Any]:
     return {
         "run": "AZ-5g2",
-        "date": "2026-09-08",
+        "date": datetime.now(timezone.utc).date().isoformat(),
         "python_version": sys.version,
         "python_executable": sys.executable,
         "platform": platform.platform(),
         "git_commit": git_output("rev-parse", "HEAD"),
         "git_tree": git_output("rev-parse", "HEAD^{tree}"),
         "git_head_subject": git_output("log", "-1", "--format=%s"),
+        "worktree_dirty": bool(git_output("status", "--porcelain")),
+        "adapter_sha256": sha256_bytes((ROOT / "uoink_mcp.py").read_bytes()),
         "mcp_installed": pkg_version("mcp"),
-        "mcp_pin": "mcp==1.27.1",
+        "mcp_pin": next(line for line in (ROOT / "requirements.txt").read_text().splitlines()
+                        if line.startswith("mcp==")),
+        "protocol_era": "legacy",
+        "protocol_version": "2025-06-18",
         "anyio": pkg_version("anyio"),
         "pydantic": pkg_version("pydantic"),
         "pytest": pkg_version("pytest"),
-        "shipped_stdio_entry": "uoink_mcp.mcp.run_stdio_async is uoink_mcp.run_bounded_stdio_async",
-        "run_stdio_is_bounded": uoink_mcp.mcp.run_stdio_async is uoink_mcp.run_bounded_stdio_async,
+        "shipped_stdio_entry": "uoink_mcp.main -> run_bounded_stdio_async -> public Server.run",
+        "run_stdio_is_bounded": "anyio.run(run_bounded_stdio_async)" in (ROOT / "uoink_mcp.py").read_text(encoding="utf-8"),
         "apply_remains_false": True,
         "service_deadline_sec_default": library_analysis.SERVICE_DEADLINE_SEC,
         "max_response_bytes": library_analysis.MAX_RESPONSE_BYTES,
@@ -670,13 +677,15 @@ def generate_markdown(obs: dict[str, Any]) -> str:
 
     return f"""# Phase 5 AZ Synthetic Fixture Measurements
 
-- **Date:** 2026-09-08
+- **Date:** {obs['metadata']['date']}
 - **Status:** Measured on synthetic test fixtures (`tests/test_library_analysis_fixtures.py`) after AZ-5h2
 - **Scope:** Read tool `get_library_activity`, report construction, serialization, query plans, resource limits, and the actual shipped stdio entry (`bounded_stdio_server` / `run_bounded_stdio_async`).
 - **Source commit:** `{obs['metadata']['git_commit']}`
 - **Source tree:** `{obs['metadata']['git_tree']}`
+- **Worktree dirty:** `{obs['metadata']['worktree_dirty']}`; adapter SHA-256 `{obs['metadata']['adapter_sha256']}`
+- **SDK:** `{obs['metadata']['mcp_installed']}`; protocol `{obs['metadata']['protocol_era']}` / `{obs['metadata']['protocol_version']}`
 - **Harness:** `scripts/measure_phase5_az5g2.py`
-- **Proof:** `docs/library/proof/az5g2-2026-09-08/`
+- **Proof:** `{PROOF.relative_to(ROOT).as_posix()}/`
 
 All figures below are benchmarked against isolated SQLite databases populated with synthetic data fixtures. No live user index or production database was queried. Tracing passes are labelled separately and are not compared with untraced times as equivalent. Returned display-array lengths are samples, not population totals.
 
@@ -695,7 +704,7 @@ The benchmark fixture evaluates two corpus scales:
 | **Combined Query Execution** | Plans measured on this 548 fixture | Plans measured on this 10k fixture | Q1: `{q1_detail}`; Q3: `{q3_detail}`; individual query times are not isolated from total construction time |
 | **Peak Heap Memory (tracemalloc)** | {heap548['heap_peak_kib']:.1f} KiB | {heap10k['heap_peak_kib']:.1f} KiB | Traced Python heap peak under tracemalloc in separately labelled diagnostic passes; not process RSS. 10k heap used a relaxed 30.0 s diagnostic deadline. |
 | **Wire Response Payload** | {fmt_int(p548['raw_bytes'])} bytes | {fmt_int(p10k['raw_bytes'])} bytes | 65,536 bytes (64 KiB envelope); raw reader JSON payload bytes (legacy table label 'Wire Response Payload' verified by test; distinguished from actual transport wire bytes below) |
-| **Actual Transport Wire Payload (stdio adapter)** | {fmt_int(shipped_bytes(shipped548))} bytes | {fmt_int(shipped_bytes(shipped10k))} bytes | 65,536 bytes completed JSON-RPC UTF-8 before newline, measured through the actual shipped `bounded_stdio_server` writer (`JSONRPCMessage.model_dump_json`); trailing newline is retained in the proof frames and is not counted in this row |
+| **Actual Transport Wire Payload (stdio adapter)** | {fmt_int(shipped_bytes(shipped548))} bytes | {fmt_int(shipped_bytes(shipped10k))} bytes | 65,536 bytes completed JSON-RPC UTF-8 before newline, measured through the actual shipped `bounded_stdio_server` writer (`JSONRPCResponse.model_dump_json`); trailing newline is retained in the proof frames and is not counted in this row |
 | **Combined Journal Deltas** | {journal_548_kib:.1f} KiB ({fmt_int(journal_548)} bytes) | {fmt_int(journal_10k)} bytes (~{journal_10k/1024/1024:.2f} MiB) | 67,108,864 bytes (64 MiB) fixed journal gate; sizes from `SUM(LENGTH(CAST(forward_json AS BLOB))+LENGTH(CAST(inverse_json AS BLOB)))` on the live fixture databases |
 | **Status** | Measured | Measured | Within the 64 KiB completed-frame cap; raw JSON and shipped JSON-RPC both fit 65,536 bytes; exceeds the 24,576-byte dashboard target (a target, not an acceptance-blocking hard limit) |
 
@@ -705,7 +714,7 @@ Handler-only serialization of the same captured packets (not the shipped entry; 
 - At 548 items, row shedding occurred to satisfy the 64 KiB wire budget: {rows_phrase(c548)}. Raw JSON is {fmt_int(p548['raw_bytes'])} bytes; shipped stdio JSON-RPC is {fmt_int(shipped_bytes(shipped548))} bytes (`isError`={shipped548.get('isError')}).
 - At 10,000 items, row shedding occurred: {rows_phrase(c10k)}. Raw JSON is {fmt_int(p10k['raw_bytes'])} bytes; shipped stdio JSON-RPC is {fmt_int(shipped_bytes(shipped10k))} bytes (`isError`={shipped10k.get('isError')}).
 - {replay_claim}
-- Untraced 548 construction completed in {fmt_ms(u548['construction_ms'])} ms. The cost fixture's first 548 call is a traced pass ({fmt_ms(heap548['elapsed_ms'])} ms diagnostic heap including tracemalloc). Untraced 10,000-item construction completed in {fmt_ms(extra['untraced_10k']['construction_ms'])} ms. A separate 10k tracing pass with a 30.0 s diagnostic deadline recorded {heap10k['heap_peak_kib']:.1f} KiB peak Python heap. Tracemalloc measures Python heap allocations, not total process memory / RSS.
+- Untraced 548 construction completed in {fmt_ms(u548['construction_ms'])} ms. A separate traced pass took {fmt_ms(heap548['elapsed_ms'])} ms including tracemalloc. Untraced 10,000-item construction completed in {fmt_ms(extra['untraced_10k']['construction_ms'])} ms. A separate 10k tracing pass with a 30.0 s diagnostic deadline recorded {heap10k['heap_peak_kib']:.1f} KiB peak Python heap. Tracemalloc measures Python heap allocations, not total process memory / RSS.
 - The 24,576-byte dashboard target is missed by the primary packets ({fmt_int(p548['raw_bytes'])} / {fmt_int(p10k['raw_bytes'])} bytes raw JSON; {fmt_int(shipped_bytes(shipped548))} / {fmt_int(shipped_bytes(shipped10k))} bytes shipped JSON-RPC). That target is aspirational, not a fixed acceptance-blocking limit. The fixed enforced envelope is 65,536 completed UTF-8 bytes.
 
 Population dimensions (not display-array lengths):
@@ -727,7 +736,7 @@ The extended test suite in `tests/test_library_analysis_fixtures.py::test_activi
 | **70 MiB Journal Refusal** | {huge['dims']['items']} item, {fmt_int(huge['dims']['journal_bytes'])} bytes forward/inverse deltas | {fmt_ms(extra['untraced_70mib']['construction_ms'])} ms untraced refusal, {fmt_int(huge['raw_bytes'])} bytes raw JSON | `ok: False`, `error.code = "{huge_err.get('code')}"`, `retryable: {huge_err.get('retryable')}`. Bounded refusal before JSON materialization. Shipped entry frame {fmt_int(extra['shipped_live_70mib'].get('activity_jsonrpc_utf8_bytes') or 0)} bytes, `isError`={extra['shipped_live_70mib'].get('isError')}. Diagnostic traced heap {heap_refuse['heap_peak_kib']:.1f} KiB (not a normal timing result). |
 | **Deadline Expiry Refusal** | 548 items, expired monotonic clock | {fmt_ms(extra['untraced_deadline']['construction_ms'])} ms reader refusal, {fmt_int(deadline['raw_bytes'])} bytes raw JSON | `ok: False`, `error.code = "{deadline_err.get('code')}"`, `retryable: {deadline_err.get('retryable')}`. Message: `{deadline_err.get('message')}`. Diagnostic traced heap {heap_deadline['heap_peak_kib']:.1f} KiB. A separately labelled shipped-entry inbound-expiry refusal is retained in the proof (`shipped_expired_inbound`). |
 | **Transport Serialization** | 548-item report packet in hand-built envelope | {fmt_ms(hand['elapsed_ms'])} ms, {fmt_int(hand['jsonrpc_utf8_bytes'])} bytes | Hand-built JSON-RPC synthetic envelope with preface and document fences; isolates serialization timing and does not invoke the stdio handler. |
-| **Actual shipped stdio entry** | 548-item live reader through `bounded_stdio_server` | {fmt_ms(shipped548['elapsed_ms'])} ms session (includes initialize + reader + writer), {fmt_int(shipped_bytes(shipped548))} bytes JSON-RPC | Actual shipped transport: SDK `JSONRPCMessage.model_dump_json`, completed-frame cap, trailing newline retained in proof. `isError`={shipped548.get('isError')}. This is a harness transcript, not a real-client log. |
+| **Actual shipped stdio entry** | 548-item live reader through `bounded_stdio_server` | {fmt_ms(shipped548['elapsed_ms'])} ms session (includes initialize + reader + writer), {fmt_int(shipped_bytes(shipped548))} bytes JSON-RPC | Actual shipped transport: SDK `JSONRPCResponse.model_dump_json`, completed-frame cap, trailing newline retained in proof. `isError`={shipped548.get('isError')}. This is a harness transcript, not a real-client log. |
 | **Three Memberships / Item** | {dense['dims']['items']} items, {dense['dims']['memberships']} memberships | {fmt_ms(extra['untraced_dense']['construction_ms'])} ms untraced, {fmt_int(dense['raw_bytes'])} bytes raw JSON | `ok: True`. {rows_phrase(dense['counts'])}. Journal {fmt_int(dense['dims']['journal_bytes'])} bytes. Shipped JSON-RPC {fmt_int(shipped_bytes(extra['shipped_live_dense']))} bytes. |
 | **Multi-Operation Journal** | {multi['dims']['items']} items, {multi['dims']['applies']} consecutive applied operations | {fmt_ms(extra['untraced_multi']['construction_ms'])} ms untraced, {fmt_int(multi['raw_bytes'])} bytes raw JSON | Proved: `coverage_status = "{multi['counts']['coverage_shelf']['coverage_status']}"`, `reasons = {multi['counts']['coverage_shelf']['reasons']}`. {rows_phrase(multi['counts'])}. Journal {fmt_int(multi['dims']['journal_bytes'])} bytes. Shipped JSON-RPC {fmt_int(shipped_bytes(extra['shipped_live_multi']))} bytes. |
 | **100k-Observation Scale** | {obs100k['dims']['items']} item, {fmt_int(obs100k['dims']['observations'])} source item observations | {fmt_ms(extra['untraced_100k']['construction_ms'])} ms untraced, {fmt_int(obs100k['raw_bytes'])} bytes raw JSON | `ok: True`. Coverage `{obs100k['counts']['coverage_shelf']['coverage_status']}`. {rows_phrase(obs100k['counts'])}. No journal. Shipped JSON-RPC {fmt_int(shipped_bytes(extra['shipped_live_100k']))} bytes. |
@@ -772,7 +781,7 @@ Fixed implemented limits (not the same thing as a measured guarantee that every 
    - Measured here with a {fmt_int(huge['dims']['journal_bytes'])}-byte synthetic payload; refusal envelope {fmt_int(huge['raw_bytes'])} raw bytes.
 
 2. **2.0-Second Service Deadline (fixed):**
-   - Checked at entry and through the shipped writer's final `JSONRPCMessage.model_dump_json`.
+   - Checked at entry and through the shipped writer's final `JSONRPCResponse.model_dump_json`.
    - AZ-5h2 uses the original inbound `admitted_at` when a transport scope is bound.
    - Injected expired-clock reader refusal measured at {fmt_ms(extra['untraced_deadline']['construction_ms'])} ms, {fmt_int(deadline['raw_bytes'])} raw bytes, `retryable: {deadline_err.get('retryable')}`.
    - This is not a blocked-lock measurement; remaining-budget SQLite waits are covered by AZ-5h2 tests, not by this timing row.
@@ -797,10 +806,10 @@ Fixed implemented limits (not the same thing as a measured guarantee that every 
 
 - Git commit `{obs['metadata']['git_commit']}`, tree `{obs['metadata']['git_tree']}`.
 - Interpreter `{obs['metadata']['python_version'].splitlines()[0]}`; installed mcp `{obs['metadata']['mcp_installed']}`; pin `{obs['metadata']['mcp_pin']}`.
-- `uoink_mcp.mcp.run_stdio_async is uoink_mcp.run_bounded_stdio_async` = `{obs['metadata']['run_stdio_is_bounded']}`.
+- Explicit bounded stdio entry verified in source: `{obs['metadata']['run_stdio_is_bounded']}`. Measured protocol: `{obs['metadata']['protocol_era']}` / `{obs['metadata']['protocol_version']}`.
 - Pre-refresh document archive SHA-256 `{obs['archive']['working_tree_sha256']}` (git blob `{obs['archive']['source_git_blob']}`).
 - Rejected AZ-5g Gemini partial is not this record: `{obs['archive']['rejected_az5g_patch']}` SHA-256 `{obs['archive']['rejected_az5g_patch_sha256']}`.
-- Complete packets and frames live under `docs/library/proof/az5g2-2026-09-08/packets/`.
+- Complete packets and frames live under `{PROOF.relative_to(ROOT).as_posix()}/packets/`.
 - Handler-only dumps, hand-built envelopes, and shipped frames are separate files with distinct scope labels.
 - Normal construction times are untraced. Heap figures are diagnostic tracing only.
 - A handler transcript is not a real MCP client log. No model, live index, or port 5179 was used.
@@ -873,14 +882,14 @@ def main() -> int:
         print("[az5g2] running unedited cost fixture", flush=True)
         captured = capture_cost_fixture(tmp_dir)
         if len(captured) != len(FIXTURE_ORDER):
-            observations["errors"].append(
+            raise ValueError(
                 f"expected {len(FIXTURE_ORDER)} fixture reads, got {len(captured)}"
             )
         named: dict[str, Any] = {}
         for rec, fallback_name in zip(captured, FIXTURE_ORDER):
             name = classify_record(rec)
-            if name == "unclassified":
-                name = fallback_name
+            if name != fallback_name:
+                raise ValueError(f"expected fixture {fallback_name}, got {name}")
             rec["name"] = name
             rec["counts"] = extract_counts(rec["packet"])
             named[name] = rec
@@ -1093,12 +1102,11 @@ def main() -> int:
         for extra_path in (harness, runner, report):
             if extra_path.exists():
                 tracked.append(extra_path)
-        manifest = write_manifest(tracked)
-        observations["manifest"] = write_bytes(manifest, manifest.read_bytes())
-        # Manifest includes itself after hashing; rewrite with the file list excluding the
-        # changing self-hash by hashing all other artifacts, then the sums file separately
-        # is fine for external files. Keep as written.
+        # Store only the manifest path before hashing observations. Recording
+        # its digest here would create a circular hash and invalidate the file.
+        observations["manifest"] = {"path": (PROOF / "SHA256SUMS").relative_to(ROOT).as_posix()}
         checkpoint()
+        write_manifest(tracked)
         print("[az5g2] wrote", summary_path, flush=True)
         print("[az5g2] 548 raw", named["548_primary_traced"]["raw_bytes"], "shipped", extra["shipped_live_548"].get("activity_jsonrpc_utf8_bytes"), flush=True)
         print("[az5g2] 10k raw", named["10000_primary_untraced"]["raw_bytes"], "shipped", extra["shipped_live_10k"].get("activity_jsonrpc_utf8_bytes"), flush=True)

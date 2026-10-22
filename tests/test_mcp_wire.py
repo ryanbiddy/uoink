@@ -101,9 +101,10 @@ def test_legacy_stdio_wire_golden(tmp_path, version, toolset, inventory):
                 assert "structuredContent" not in result
                 assert result["isError"] is not ok
                 assert json.loads(result["content"][0]["text"])["ok"] is ok
-            # SDK 1 reports unknown typed methods as invalid params on stdio.
+            # Deliberate SDK 2 change: proper JSON-RPC method-not-found.
             assert client.request(9, "m2/unknown") == {
-                "jsonrpc": "2.0", "id": 9, "error": GOLDEN["unknown_stdio"]}
+                "jsonrpc": "2.0", "id": 9, "error": {
+                    "code": -32601, "message": "Method not found", "data": "m2/unknown"}}
             assert client.request(10, "ping") == {"jsonrpc": "2.0", "id": 10, "result": {}}
             client.assert_quiet()
         finally:
@@ -115,23 +116,26 @@ BAD_LINES = {
     "malformed": "{",
     "duplicate_keys": '{"jsonrpc":"2.0","id":2,"method":"ping","method":"tools/list"}',
     "null_id": '{"jsonrpc":"2.0","id":null,"method":"ping"}',
+    "bool_id": '{"jsonrpc":"2.0","id":true,"method":"ping"}',
+    "float_id": '{"jsonrpc":"2.0","id":1.5,"method":"ping"}',
+    "batch": '[]',
     "oversized": '{"jsonrpc":"2.0","id":2,"method":"ping","params":{"padding":"' + "x" * 65536 + '"}}',
 }
 
 
 @pytest.mark.parametrize("version", LEGACY_VERSIONS)
 @pytest.mark.parametrize("case", BAD_LINES)
-def test_sdk1_stdio_invalid_line_golden_and_connection_survives(tmp_path, version, case):
-    # These are observations, not desired SDK 2 error semantics. In SDK 1,
-    # malformed/duplicate JSON produces a log notification, while null id is
-    # parsed as a notification and ignored. M3 must review any change here.
+def test_stdio_invalid_line_refusal_and_connection_survives(tmp_path, version, case):
+    # Deliberate SDK 2 boundary change: explicit bounded parse/invalid-request
+    # refusals replace logging and silent dropping at the product boundary.
     with StdioClient.launch(tmp_path) as client:
         try:
             assert "result" in client.initialize(version)
             client.send_raw(BAD_LINES[case])
             if case in ("malformed", "duplicate_keys"):
-                assert client.receive() == GOLDEN["parser_notification"]
-            elif case == "oversized":
+                assert client.receive() == {"jsonrpc": "2.0", "id": None, "error": {
+                    "code": -32700, "message": "Invalid JSON-RPC message"}}
+            else:
                 refusal = client.receive()
                 assert refusal == GOLDEN["oversized"]
                 assert len(json.dumps(refusal).encode()) <= 65536
@@ -173,17 +177,108 @@ def test_legacy_http_wire_golden(tmp_path, version, aliases, inventory):
     assert client.child.proc.returncode == 0
 
 
-@pytest.mark.xfail(run=False, strict=True, reason="SDK 1 has no dual-era runner; enabled by M3")
+@pytest.mark.parametrize("toolset", ["full", "core"])
 @pytest.mark.parametrize("transcript", MODERN, ids=lambda row: row["name"])
-def test_modern_2026_07_28_wire_transcript(tmp_path, transcript, inventory):
-    # Pending test data only. Not executed or counted as acceptance in M2.
+def test_modern_2026_07_28_wire_transcript(tmp_path, transcript, inventory, toolset):
+    uri = seed_library(tmp_path)
+    with StdioClient.launch(tmp_path, toolset=toolset) as client:
+        try:
+            for exchange in transcript["exchanges"]:
+                request = exchange["request"]
+                client.send(request)
+                result = client.wait_for(request["id"])["result"]
+                method = request["method"]
+                domain = modern_domain(result, cacheable=method in ("tools/list", "server/discover"))
+                if method == "tools/list":
+                    assert domain == {"tools": inventory[toolset]}
+                elif method == "tools/call":
+                    assert domain == GOLDEN["success"]
+                else:
+                    init = expected_initialize("stdio", "2025-11-25")
+                    caps = dict(init["capabilities"])
+                    caps.pop("experimental")
+                    assert domain == {"supportedVersions": ["2026-07-28"],
+                                      "capabilities": caps, "instructions": init["instructions"]}
+            cases = [
+                ("templates", "resources/templates/list", {}),
+                ("prompts", "prompts/list", {}),
+                ("resource", "resources/read", {"uri": uri}),
+                ("prompt", "prompts/get", {"name": "consult-library", "arguments": {"topic": "absent-m2-topic"}}),
+                ("invalid", "tools/call", {"name": "get_playbook_input", "arguments": {}}),
+            ]
+            for request_id, (label, method, params) in enumerate(cases, 10):
+                result = client.request(request_id, method, modern_params(params))["result"]
+                assert modern_domain(result, cacheable=method in (
+                    "resources/templates/list", "resources/read", "prompts/list")) == GOLDEN[label]
+            client.assert_quiet()
+        finally:
+            save_evidence(client, f"modern-{transcript['name']}-{toolset}")
+    assert client.proc.returncode == 0
+
+
+def modern_params(params=None, *, version="2026-07-28"):
+    return dict(params or {}, _meta={
+        "io.modelcontextprotocol/protocolVersion": version,
+        "io.modelcontextprotocol/clientCapabilities": {}})
+
+
+def modern_domain(result, *, cacheable=False):
+    domain = dict(result)
+    assert domain.pop("resultType") == "complete"
+    assert domain.pop("_meta") == {"io.modelcontextprotocol/serverInfo": {
+        "name": "uoink", "version": (ROOT / "VERSION").read_text().strip()}}
+    if cacheable:
+        assert domain.pop("ttlMs") == 0
+        assert domain.pop("cacheScope") == "private"
+    else:
+        assert "ttlMs" not in domain and "cacheScope" not in domain
+    return domain
+
+
+@pytest.mark.parametrize("modern", [False, True])
+def test_protocol_errors_preserve_connection(tmp_path, modern):
+    uri = seed_library(tmp_path).replace("/bTItd2lyZQ/", "/bWlzc2luZw/")
     with StdioClient.launch(tmp_path) as client:
-        for exchange in transcript["exchanges"]:
-            client.send(exchange["request"])
-            reply = client.wait_for(exchange["request"]["id"])
-            assert "result" in reply
-            result = reply["result"]
-            assert result["resultType"] == "complete"
-            assert result["ttlMs"] == 0 and result["cacheScope"] == "private"
-            if exchange["request"]["method"] == "tools/list":
-                assert result["tools"] == inventory["full"]
+        if modern:
+            # An unsupported opening version still selects the modern era.
+            unsupported = client.request(1, "tools/list", modern_params(version="2099-01-01"))
+            assert unsupported["error"]["code"] == -32022
+            assert unsupported["error"]["data"] == {"requested": "2099-01-01", "supported": ["2026-07-28"]}
+        else:
+            assert client.initialize("2099-01-01")["result"] == expected_initialize("stdio", "2025-11-25")
+        wrap = modern_params if modern else lambda params: params
+        cases = [
+            ("m3/unknown", {}, -32601),
+            ("tools/call", {"name": "search_clips", "arguments": []}, -32602),
+            ("tools/call", {"arguments": {}}, -32602),
+            ("resources/read", {}, -32602),
+        ]
+        for request_id, (method, params, code) in enumerate(cases, 10):
+            assert client.request(request_id, method, wrap(params))["error"]["code"] == code
+            if modern:
+                healthy = client.request(request_id + 100, "tools/list", wrap({}))["result"]
+                assert modern_domain(healthy, cacheable=True)["tools"] == GOLDEN["tools"]
+            else:
+                assert client.request(request_id + 100, "ping")["result"] == {}
+        missing = client.request(30, "resources/read", wrap({"uri": uri}))["error"]
+        assert missing["code"] == (-32602 if modern else -32002)
+        assert missing["data"]["error"]["code"] == "resource_not_found"
+        if modern:
+            assert missing["data"]["uri"] == uri
+            malformed = [None, {}, {"_meta": {}}, {"_meta": []},
+                         {"_meta": {"io.modelcontextprotocol/protocolVersion": "2026-07-28"}},
+                         {"_meta": {"io.modelcontextprotocol/protocolVersion": 1,
+                                    "io.modelcontextprotocol/clientCapabilities": {}}},
+                         {"_meta": {"io.modelcontextprotocol/protocolVersion": "2026-07-28",
+                                    "io.modelcontextprotocol/clientCapabilities": []}}]
+            for request_id, params in enumerate(malformed, 40):
+                assert client.request(request_id, "tools/list", params)["error"]["code"] == -32602
+            switched = client.request(50, "initialize", initialize_request("2025-11-25")["params"])
+            assert switched["error"]["code"] == -32022
+        else:
+            assert client.request(50, "tools/list", modern_params())["error"]["code"] == -32600
+        result = client.request(60, "tools/call", wrap({"name": "search_clips", "arguments": {"query": "absent-m2-topic"}}))["result"]
+        assert (modern_domain(result) if modern else result) == GOLDEN["success"]
+        client.assert_quiet()
+        save_evidence(client, f"errors-{'modern' if modern else 'legacy'}")
+    assert client.proc.returncode == 0
