@@ -1,4 +1,5 @@
 """Official-doc recipe contracts, with no installed clients or network access."""
+import io
 import json
 from pathlib import Path
 import shlex
@@ -122,8 +123,14 @@ def test_platform_output_and_print_only_contract(tmp_path, monkeypatch, capsys, 
 
 @pytest.mark.parametrize("platform", ["win32", "darwin"])
 @pytest.mark.parametrize("client", ["claude-desktop", "cursor", "cline"])
-def test_file_writers_preserve_unrelated_config(tmp_path, monkeypatch, platform, client):
+@pytest.mark.parametrize("default_encoding", ["utf-8", "cp1252"])
+def test_file_writers_preserve_unrelated_config(tmp_path, monkeypatch, platform, client,
+                                               default_encoding):
     import server
+    # pathlib resolves omitted encodings here. Patching locale.getpreferredencoding
+    # alone does not affect its C-backed file I/O, or override Python's UTF-8 mode.
+    monkeypatch.setattr(io, "text_encoding", lambda encoding, stacklevel=2:
+                        default_encoding if encoding in (None, "locale") else encoding)
     home = tmp_path / "O'Brien & 雪 temporary home"
     for key, value in {"HOME": home, "USERPROFILE": home, "APPDATA": home / "AppData/Roaming",
                        "LOCALAPPDATA": home / "AppData/Local"}.items():
@@ -131,22 +138,28 @@ def test_file_writers_preserve_unrelated_config(tmp_path, monkeypatch, platform,
     monkeypatch.setattr(sys, "platform", platform)
     app, resources, python = fake_install(tmp_path, platform)
     monkeypatch.setattr(server, "HERE", resources)
-    monkeypatch.setattr(server, "_mcp_stdio_command", lambda: (str(python), [str(resources / "uoink_mcp.py")]))
+    monkeypatch.setattr(server._install_isolation, "child_argv", lambda: [])
     spec = server._agent_client_spec(client)
     cfg = spec["config_path"]
     assert cfg.is_relative_to(home)
     cfg.parent.mkdir(parents=True)
-    original = b'{"theme":"dark","mcpServers":{"other":{"command":"untouched","env":{"NOTE":"keep"}}}}\n'
+    original = ('{"theme":"雪 dark","mcpServers":{"other":{"command":"untouched",'
+                '"env":{"NOTE":"café 雪"}}}}\n').encode("utf-8")
     cfg.write_bytes(original)
+    with cfg.open() as stream:
+        assert stream.encoding == default_encoding
+    expected_args = (["-B", "-s"] if platform == "darwin" else []) + [str(resources / "uoink_mcp.py")]
     for action in ("added", "updated"):
         before = cfg.read_bytes()
         result = server._connect_ai_client(client)
         assert result["action"] == action
         assert Path(result["backup_path"]).read_bytes() == before
-        data = json.loads(cfg.read_text())
-        assert data["theme"] == "dark"
+        data = json.loads(cfg.read_text(encoding="utf-8"))
+        assert data["theme"] == "雪 dark"
         assert data["mcpServers"]["other"] == json.loads(original)["mcpServers"]["other"]
         assert data["mcpServers"]["uoink"]["command"] == str(python)
+        assert data["mcpServers"]["uoink"]["args"] == expected_args
+        assert server._client_is_connected(cfg)
 
 
 @pytest.mark.parametrize("platform", ["win32", "darwin", "linux"])
