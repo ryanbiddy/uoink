@@ -27,6 +27,9 @@ import uuid
 import urllib.request
 import urllib.error
 
+# Bound at import so a test that patches time.monotonic cannot break flush or send deadlines.
+_monotonic = time.monotonic
+
 USAGE_ENDPOINT = "https://usage.uoink.app/v1/ping"
 DAY = 24 * 60 * 60
 MAX_COUNT = 100000  # The usage receiver rejects any count above this.
@@ -228,10 +231,10 @@ def count(group, label="count", outcome="ok"):
 
 def flush(timeout=FLUSH_DEADLINE):
     """Bounded best effort at process exit. This only waits for local counts."""
-    deadline = time.monotonic() + timeout
+    deadline = _monotonic() + timeout
     with _queue.all_tasks_done:
         while _queue.unfinished_tasks:
-            remaining = deadline - time.monotonic()
+            remaining = deadline - _monotonic()
             if remaining <= 0:
                 return False
             _queue.all_tasks_done.wait(remaining)
@@ -458,13 +461,13 @@ def _send_snapshot(endpoint, payload, path, generation):
             _network_lock.release()
 
     worker = threading.Thread(target=run, name="usage-post", daemon=True)
-    deadline = time.monotonic() + SEND_DEADLINE
+    deadline = _monotonic() + SEND_DEADLINE
     try:
         worker.start()
     except Exception:
         _network_lock.release()
         raise
-    worker.join(max(0, deadline - time.monotonic()))
+    worker.join(max(0, deadline - _monotonic()))
     expired.set()
     return result[0] if not worker.is_alive() and result else None
 
