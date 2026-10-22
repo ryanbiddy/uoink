@@ -165,6 +165,15 @@ texts, source bindings and recorded metadata conflict are listed in
   This notice does not resolve that conflict or grant legal clearance.
 
 
+## Optional EmbeddingGemma search
+
+The search code ships in Uoink. Model weights are downloaded separately after
+explicit acceptance and are never bundled. See the bundled
+[model notice](third-party-notices/EmbeddingGemma-NOTICE.md),
+[Gemma Terms of Use](third-party-notices/Gemma-Terms-of-Use.txt) and
+[Prohibited Use Policy](third-party-notices/Gemma-Prohibited-Use-Policy.txt).
+
+
 ## Adapted documentation text
 
 The five local research-playbook instructions adapt workflow steps, output
