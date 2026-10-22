@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import logging
 import os
@@ -16,6 +17,92 @@ from helper import mac_ui
 from uoink_tray import UoinkTray
 
 log = logging.getLogger("uoink.menubar")
+TEMPLATES = ("menubar-template.png", "menubar-template@2x.png")
+
+
+def resource_bundles(NSBundle):
+    """Python's main bundle may be Python/bin. Find its enclosing app too."""
+    candidates = []
+    try:
+        candidates.append(NSBundle.mainBundle())
+    except Exception as exc:
+        log.warning("menu bar main bundle unavailable: %s", exc)
+    for parent in Path(sys.executable).parents:
+        if parent.suffix == ".app":
+            candidates.append(NSBundle.bundleWithPath_(str(parent)))
+    seen = set()
+    for bundle in candidates:
+        if bundle is None:
+            continue
+        path = str(bundle.bundlePath())
+        log.info("menu bar resource bundle: %s (id %s)", path, bundle.bundleIdentifier())
+        if bundle.bundleIdentifier() == "com.ryanbiddy.uoink" and path not in seen:
+            seen.add(path)
+            yield bundle
+
+
+def install_status_icon(button, A, NSBundle, NSData) -> dict:
+    """Use bundle resources and byte decoding, with a usable text fallback."""
+    proof = {"pid": os.getpid(), "mode": "text", "module_path": __file__,
+             "executable": sys.executable, "templates": [], "attempts": []}
+    try:
+        image = A.NSImage.alloc().initWithSize_((18, 18))
+        bundles = list(resource_bundles(NSBundle))
+        for name in TEMPLATES:
+            loaded = False
+            for bundle in bundles:
+                try:
+                    located = bundle.pathForResource_ofType_inDirectory_(Path(name).stem, "png", "assets/brand")
+                except Exception as exc:
+                    located = None
+                    log.warning("menu bar resource index failed for %s in %s: %s", name, bundle.bundlePath(), exc)
+                # NSBundle can omit an indexed resource; its resource directory
+                # still belongs to the running (possibly translocated) bundle.
+                paths = [Path(located)] if located else []
+                if bundle.resourcePath():
+                    paths.append(Path(bundle.resourcePath()) / "assets/brand" / name)
+                for path in dict.fromkeys(paths):
+                    attempt = {"name": name, "path": str(path)}
+                    proof["attempts"].append(attempt)
+                    log.info("menu bar template path: %s", path)
+                    try:
+                        raw = path.read_bytes()
+                        attempt.update(bytes=len(raw), sha256=hashlib.sha256(raw).hexdigest())
+                        # Diagnose the previous loader without depending on it.
+                        # This separates native filename/type refusal from bad bytes.
+                        try:
+                            old_rep = A.NSBitmapImageRep.imageRepWithContentsOfFile_(str(path))
+                            attempt["filename_decode"] = "decoded" if old_rep is not None else "nil"
+                        except Exception as exc:
+                            attempt["filename_decode"] = f"{type(exc).__name__}: {exc}"
+                        # Decode bytes without asking AppKit to reopen a filename.
+                        data = NSData.dataWithBytes_length_(raw, len(raw))
+                        representation = A.NSBitmapImageRep.imageRepWithData_(data)
+                        if representation is None:
+                            raise ValueError("AppKit could not decode PNG bytes")
+                        representation.setSize_((18, 18))
+                        image.addRepresentation_(representation)
+                        proof["templates"].append(dict(attempt))
+                        loaded = True
+                        break
+                    except Exception as exc:
+                        attempt["error"] = f"{type(exc).__name__}: {exc}"
+                        log.warning("menu bar template failed at %s: %s", path, exc)
+                if loaded:
+                    break
+        if proof["templates"]:
+            image.setTemplate_(True)
+            button.setImage_(image)
+            proof["mode"] = "image"
+        else:
+            button.setTitle_("Uoink")
+    except Exception as exc:
+        proof["error"] = f"{type(exc).__name__}: {exc}"
+        button.setTitle_("Uoink")
+        log.warning("menu bar resource lookup failed: %s", exc)
+    # CI binds this evidence to the live menu PID after its event loop connects.
+    log.info("menu bar icon: %s", json.dumps(proof, sort_keys=True))
+    return proof
 
 
 def single_instance(data_root: Path):
@@ -59,7 +146,7 @@ def run_menu(client: MenuClient) -> None:
     if threading.current_thread() is not threading.main_thread():
         raise RuntimeError("AppKit must run on the process main thread")
     import AppKit as A
-    from Foundation import NSObject, NSTimer, NSRunLoop, NSRunLoopCommonModes
+    from Foundation import NSObject, NSTimer, NSRunLoop, NSRunLoopCommonModes, NSBundle, NSData
 
     app = A.NSApplication.sharedApplication()
     app.setActivationPolicy_(A.NSApplicationActivationPolicyAccessory)
@@ -118,16 +205,7 @@ def run_menu(client: MenuClient) -> None:
         return item
 
     status_item = A.NSStatusBar.systemStatusBar().statusItemWithLength_(A.NSVariableStatusItemLength)
-    image = A.NSImage.alloc().initWithSize_((18, 18))
-    assets = Path(__file__).resolve().parents[1] / "assets/brand"
-    for name in ("menubar-template.png", "menubar-template@2x.png"):
-        representation = A.NSBitmapImageRep.imageRepWithContentsOfFile_(str(assets / name))
-        if representation is None:
-            raise RuntimeError("Missing menu-bar template: " + name)
-        representation.setSize_((18, 18))
-        image.addRepresentation_(representation)
-    image.setTemplate_(True)
-    status_item.button().setImage_(image)
+    install_status_icon(status_item.button(), A, NSBundle, NSData)
     status_item.button().setToolTip_("Uoink " + client.version)
     menu = A.NSMenu.alloc().init()
     menu.setAutoenablesItems_(False)

@@ -2,13 +2,16 @@
 from __future__ import annotations
 
 import argparse
+import ctypes
 from datetime import datetime, timezone
+from functools import lru_cache
 import json
 import os
 from pathlib import Path
 import plistlib
 import re
 import shutil
+import signal
 import socket
 import stat
 import subprocess
@@ -112,12 +115,94 @@ def observe(pid: int) -> dict:
             "started_us": observation.started_us, "executable": observation.executable}
 
 
+@lru_cache(maxsize=1)
+def translocation_api():
+    """Load lazily so receipt tests do not require Apple frameworks."""
+    cf = ctypes.CDLL("/System/Library/Frameworks/CoreFoundation.framework/CoreFoundation")
+    security = ctypes.CDLL("/System/Library/Frameworks/Security.framework/Security")
+    pointer = ctypes.c_void_p
+    cf.CFURLCreateFromFileSystemRepresentation.argtypes = [pointer, ctypes.c_char_p, ctypes.c_long, ctypes.c_bool]
+    cf.CFURLCreateFromFileSystemRepresentation.restype = pointer
+    cf.CFURLGetFileSystemRepresentation.argtypes = [pointer, ctypes.c_bool, pointer, ctypes.c_long]
+    cf.CFURLGetFileSystemRepresentation.restype = ctypes.c_bool
+    cf.CFRelease.argtypes = [pointer]
+    cf.CFRelease.restype = None
+    security.SecTranslocateIsTranslocatedURL.argtypes = [pointer, ctypes.POINTER(ctypes.c_bool), ctypes.POINTER(pointer)]
+    security.SecTranslocateIsTranslocatedURL.restype = ctypes.c_bool
+    security.SecTranslocateCreateOriginalPathForURL.argtypes = [pointer, ctypes.POINTER(pointer)]
+    security.SecTranslocateCreateOriginalPathForURL.restype = pointer
+    return cf, security
+
+
+def translocated_original(bundle: Path) -> Path | None:
+    """Ask Security for the original URL. Bundle ID or matching bytes cannot identify a copy."""
+    cf, security = translocation_api()
+    encoded = os.fsencode(bundle)
+    url = cf.CFURLCreateFromFileSystemRepresentation(None, encoded, len(encoded), True)
+    require(url, "Cannot create translocation URL")
+    error, original = ctypes.c_void_p(), None
+    try:
+        translocated = ctypes.c_bool()
+        require(security.SecTranslocateIsTranslocatedURL(url, ctypes.byref(translocated), ctypes.byref(error)),
+                "Cannot determine translocation status")
+        if not translocated.value:
+            return None
+        original = security.SecTranslocateCreateOriginalPathForURL(url, ctypes.byref(error))
+        require(original, "Cannot resolve translocated original path")
+        buffer = ctypes.create_string_buffer(4096)
+        require(cf.CFURLGetFileSystemRepresentation(original, True, buffer, len(buffer)),
+                "Cannot read translocated original path")
+        return Path(os.fsdecode(buffer.value))
+    finally:
+        for value in (original, error.value, url):
+            if value:
+                cf.CFRelease(value)
+
+
+def executable_origin(app: Path, executable: str) -> dict | None:
+    """Match only this install or a Security-verified translocation of it."""
+    app = app.resolve()
+    path = Path(executable)
+    if not path.is_absolute():
+        return None
+    path = path.resolve()
+    if path.is_relative_to(app):
+        return {"bundle": str(app), "original": str(app), "translocated": False}
+    for bundle in path.parents:
+        if bundle.name != app.name or bundle.suffix != ".app":
+            continue
+        # Do not query arbitrary other app bundles or treat a matching ID as ownership.
+        if bundle.parent.name != "d" or bundle.parent.parent.parent.name != "AppTranslocation":
+            continue
+        original = translocated_original(bundle)
+        if original is None or original.resolve() != app:
+            return None
+        with (bundle / "Contents/Info.plist").open("rb") as stream:
+            candidate_id = plistlib.load(stream).get("CFBundleIdentifier")
+        with (app / "Contents/Info.plist").open("rb") as stream:
+            expected_id = plistlib.load(stream).get("CFBundleIdentifier")
+        if candidate_id != "com.ryanbiddy.uoink" or candidate_id != expected_id:
+            return None
+        return {"bundle": str(bundle), "original": str(original.resolve()),
+                "translocated": True, "bundle_id": candidate_id, "method": "SecTranslocate"}
+    return None
+
+
+def interpreter_origin(app: Path, executable: str) -> dict:
+    python = bundle_python(app)
+    origin = executable_origin(app, executable)
+    require(origin is not None, "Health process uses a non-bundle interpreter")
+    running = Path(origin["bundle"])
+    require(Path(executable).resolve() == bundle_python(running),
+            "Health process uses a non-bundle interpreter")
+    require(sha256(Path(executable)) == sha256(python), "Running interpreter differs from installed copy")
+    return origin
+
+
 def bind_health(proc, app: Path, port: int) -> dict:
     require(type(port) is int and 0 < port < 65536 and port != 5179, "Health must use a disposable port")
-    python = bundle_python(app)
     before = observe(proc.pid)
-    require(Path(before["executable"]).resolve() == python,
-            "Health process uses a non-bundle interpreter")
+    origin = interpreter_origin(app, before["executable"])
     require(listeners(port) == [proc.pid], "Health listener is not the launched helper")
     # Disable ambient proxies, and refuse redirects to any other endpoint.
     class NoRedirect(urllib.request.HTTPRedirectHandler):
@@ -129,7 +214,7 @@ def bind_health(proc, app: Path, port: int) -> dict:
     require(health.get("ok") is True, "Installed helper health failed")
     require(listeners(port) == [proc.pid] and observe(proc.pid) == before and proc.poll() is None,
             "Health process identity changed during the request")
-    return {"identity": before, "listener_pid": proc.pid, "port": port, "health": health}
+    return {"identity": before, "origin": origin, "listener_pid": proc.pid, "port": port, "health": health}
 
 
 def scoped_processes(app: Path) -> list[dict]:
@@ -140,7 +225,7 @@ def scoped_processes(app: Path) -> list[dict]:
     for text in result["stdout"].split():
         pid = int(text)
         observation = darwin_observe(pid, with_executable=True)
-        if observation.executable and Path(observation.executable).is_relative_to(app):
+        if observation.executable and executable_origin(app, observation.executable):
             require(observation.status == "alive" and observation.started_us, "Owned process identity unknown")
             found.append({"pid": pid, "created_ms": observation.created_ms,
                           "started_us": observation.started_us, "executable": observation.executable})
@@ -158,20 +243,51 @@ def describe(pid: int) -> dict:
 
 
 def no_survivors(app: Path, identities: list[dict], port: int, settle: float = 5.0) -> dict:
-    rows = [{**item, "state": darwin_liveness(item["pid"], item["created_ms"])} for item in identities]
+    def states():
+        return [{**item, "state": darwin_liveness(item["pid"], item["created_ms"])} for item in identities]
     # Birth identity is sufficient after uninstall, when samefile cannot work.
     first = [{**row, **describe(row["pid"])} for row in scoped_processes(app)]
     survivors, waited = first, 0.0
+    rows, owners = states(), listeners(port)
     # Lifeline children exit on their parent's death asynchronously; allow a
     # short bounded settle, and record what was alive at the first look.
-    while survivors and waited < settle:
+    while (survivors or owners or any(row["state"] != "dead" for row in rows)) and waited < settle:
         time.sleep(.25)
         waited += .25
         survivors = scoped_processes(app)
-    owners = listeners(port)
+        rows, owners = states(), listeners(port)
     return {"identities": rows, "first_look": first, "settled_after_s": waited,
             "survivors": [{**row, **describe(row["pid"])} for row in survivors], "listeners": owners,
             "ok": all(row["state"] == "dead" for row in rows) and not survivors and not owners}
+
+
+def stop_owned(app: Path, identities: list[dict], port: int) -> dict:
+    """Never signal a listener just because it owns our port, or a PID after reuse."""
+    tracked = {(item["pid"], item["started_us"]): item for item in identities}
+    signals = []
+    # SIGKILL is 9 on Darwin; its name is absent on Windows mocked-test hosts.
+    for sig, settle in ((signal.SIGTERM, 15), (getattr(signal, "SIGKILL", 9), 5)):
+        for item in scoped_processes(app):
+            tracked[(item["pid"], item["started_us"])] = item
+        for item in list(tracked.values()):
+            if (darwin_liveness(item["pid"], item["created_ms"], item["executable"]) == "alive"
+                    and executable_origin(app, item["executable"])):
+                # Recheck the complete incarnation immediately before signaling.
+                try:
+                    current = observe(item["pid"])
+                except ValueError:
+                    continue  # It exited, or identity became unknown. Never guess.
+                if current != item:
+                    continue
+                try:
+                    os.kill(item["pid"], sig)
+                    signals.append({"pid": item["pid"], "started_us": item["started_us"], "signal": int(sig)})
+                except ProcessLookupError:
+                    pass
+        proof = no_survivors(app, list(tracked.values()), port, settle=settle)
+        if proof["ok"]:
+            break
+    return {**proof, "signals": signals}
 
 
 def attest_interpreter(app: Path, mounted: Path, scratch: Path, env: dict) -> dict:
@@ -268,11 +384,15 @@ def collect(dmg: Path, output: Path, expected_sha256: str | None = None, *,
                 from verify_signing import verify_notarized
                 report["notarization"] = {}
                 verify_notarized(app, dmg, expected_team_id, report["notarization"], execute=command)
+            report["install"]["normal_install"] = {}
+            dmg_smoke.prepare_normal_install(app, report["install"]["normal_install"])
             report["interpreter"] = attest_interpreter(app, mounted, scratch, env)
 
             def observer(event, proc, menu):
                 if event in ("connected", "relaunch"):
                     bound = bind_health(proc, app, port)
+                    require(bound["origin"]["translocated"] is False,
+                            "Normal installed receipt ran under translocation")
                     require(sha256(Path(bound["identity"]["executable"])) == report["interpreter"]["sha256"],
                             "Health interpreter hash changed")
                     menu_identity = observe(menu["pid"])

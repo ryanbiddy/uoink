@@ -325,14 +325,14 @@ jobs:
         env:
           HOME: ${{ env.UOINK_RUNNER_HOME }}
         run: python -B scripts/mac/sign_notarize.py cleanup
-      - name: Assess and launch a quarantined installed copy
+      - name: Gate quarantined launch, then prove the menu in a normal signed copy
         run: |
           test ! -e "$RUNNER_TEMP/uoink-signing-private"
           version="$(cat VERSION)"
           python -B scripts/mac/quarantine_smoke.py \
             --dmg "$RUNNER_TEMP/mac-signed/Uoink-$version-macos-arm64.dmg" \
             --expected-team-id "$MACOS_TEAM_ID" --output "$RUNNER_TEMP/mac-signed-evidence/quarantine"
-      - name: Smoke the signed DMG and Darwin connector
+      - name: Smoke the signed DMG from a normal install and check the Darwin connector
         run: |
           test ! -e "$RUNNER_TEMP/uoink-signing-private"
           version="$(cat VERSION)"

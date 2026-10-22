@@ -6,12 +6,12 @@ import json
 import os
 from pathlib import Path
 import shutil
-import signal
 import socket
 import subprocess
 import tempfile
 import time
 from types import SimpleNamespace
+import urllib.request
 import uuid
 
 import bundle_smoke
@@ -21,7 +21,49 @@ from qualify_deps import write_json
 from verify_signing import command, require, verify_notarized
 
 
-def launch(app: Path, scratch: Path, output: Path, report: dict) -> None:
+def bind_menu(app: Path, bound: dict, log_file: Path) -> dict:
+    """Credit the AppKit event loop and icon, bound to the verified helper."""
+    port, helper = bound["port"], bound["identity"]
+    require(port != 5179, "Menu must use a disposable port")
+
+    def same_helper():
+        require(receipt.listeners(port) == [helper["pid"]] and receipt.observe(helper["pid"]) == helper,
+                "Menu helper identity changed")
+
+    class NoRedirect(urllib.request.HTTPRedirectHandler):
+        def redirect_request(self, *args, **kwargs):
+            raise ValueError("Menu endpoint redirected")
+
+    opener = urllib.request.build_opener(urllib.request.ProxyHandler({}), NoRedirect())
+
+    def get(path, headers):
+        same_helper()
+        request = urllib.request.Request(f"http://127.0.0.1:{port}" + path, headers=headers)
+        with opener.open(request, timeout=5) as response:
+            result = json.load(response)
+        same_helper()
+        return result
+
+    # Same local UI handshake as bundle_smoke. Never persist the token.
+    token = get("/token", {"X-Uoink-Client": "uoink-extension", "Sec-Fetch-Site": "same-origin",
+                           "Sec-Fetch-Mode": "cors", "Sec-Fetch-Dest": "empty"})["token"]
+    deadline = time.monotonic() + 45
+    while time.monotonic() < deadline:
+        menu = get("/helper/ui", {"X-Uoink-Token": token})
+        require(menu.get("helper_pid") == helper["pid"], "Menu belongs to another helper")
+        if menu.get("alive") and menu.get("connected"):
+            identity = receipt.observe(menu["pid"])
+            origin = receipt.interpreter_origin(app, identity["executable"])
+            require(origin == bound["origin"], "Menu belongs to another app copy")
+            icon = bundle_smoke.menu_icon_evidence(log_file, menu["pid"], Path(origin["bundle"]))
+            require(receipt.observe(menu["pid"]) == identity, "Menu identity changed")
+            return {**menu, "identity": identity, "origin": origin, "icon": icon}
+        time.sleep(.25)
+    raise RuntimeError("AppKit menu did not connect within 45s; see launch stderr")
+
+
+def launch(app: Path, scratch: Path, output: Path, report: dict, *, translocated: bool = True) -> None:
+    output.mkdir(parents=True, exist_ok=True)
     with socket.socket() as sock:
         sock.bind(("127.0.0.1", 0))
         port = sock.getsockname()[1]
@@ -39,6 +81,8 @@ def launch(app: Path, scratch: Path, output: Path, report: dict) -> None:
     for key in keys:
         argv += ["--env", f"{key}={env[key]}"]
     argv += ["--args", "--helper"]
+    identities = []
+    failed = False
     try:
         opened = subprocess.run(argv, cwd=scratch, env=env, capture_output=True, text=True, timeout=30)
         report["open"] = {"exit": opened.returncode, "stdout": opened.stdout, "stderr": opened.stderr}
@@ -51,21 +95,28 @@ def launch(app: Path, scratch: Path, output: Path, report: dict) -> None:
                 proc = SimpleNamespace(pid=owners[0], poll=lambda: None)
                 try:
                     report["health"] = receipt.bind_health(proc, app, port)
+                    identities.append(report["health"]["identity"])
+                    require(report["health"]["origin"]["translocated"] is translocated,
+                            f"Expected translocated={translocated} launch")
+                    report["menubar"] = bind_menu(app, report["health"], output / "launch-stderr.txt")
+                    identities.append(report["menubar"]["identity"])
                     return
                 except OSError:
                     pass
             time.sleep(.25)
         raise RuntimeError("Quarantined launch did not serve /health within 120s; see launch stderr")
+    except Exception as exc:
+        failed = True
+        report["error"] = f"{type(exc).__name__}: {exc}"
+        raise
     finally:
-        # open does not return the app PID. Only signal identities from this copy.
-        for item in receipt.scoped_processes(app):
-            if receipt.darwin_liveness(item["pid"], item["created_ms"], item["executable"]) == "alive":
-                try:
-                    os.kill(item["pid"], signal.SIGTERM)
-                except ProcessLookupError:
-                    pass
-        report["cleanup"] = receipt.no_survivors(app, [], port, settle=15)
-        require(report["cleanup"]["ok"], "Quarantined launch left surviving processes")
+        try:
+            report["cleanup"] = receipt.stop_owned(app, identities, port)
+            require(report["cleanup"]["ok"], "Launch left surviving processes")
+        except Exception as exc:
+            report["cleanup_error"] = f"{type(exc).__name__}: {exc}"
+            if not failed:
+                raise
 
 
 def smoke(dmg: Path, output: Path, team: str) -> None:
@@ -103,6 +154,20 @@ def smoke(dmg: Path, output: Path, team: str) -> None:
                 # Confirm execution did not break either final signature/ticket.
                 report["after_launch"] = {}
                 verify_notarized(app, download, team, report["after_launch"])
+                # Exercise the same signed bytes in a second, unquarantined
+                # Applications-style copy. The downloaded copy stays quarantined.
+                normal_root = scratch / "normal"
+                normal = normal_root / "Applications With Spaces/Uoink.app"
+                normal.parent.mkdir(parents=True)
+                dmg_smoke.run(["ditto", app, normal], timeout=300)
+                normal_report = report["normal_install"] = {}
+                dmg_smoke.prepare_normal_install(normal, normal_report)
+                normal_report["notarization"] = {}
+                verify_notarized(normal, download, team, normal_report["notarization"])
+                normal_report["launch"] = {}
+                launch(normal, normal_root, output / "normal", normal_report["launch"], translocated=False)
+                normal_report["after_launch"] = {}
+                verify_notarized(normal, download, team, normal_report["after_launch"])
         report["ok"] = True
     except Exception as exc:
         report["error"] = f"{type(exc).__name__}: {exc}"

@@ -339,6 +339,7 @@ def test_rpath_rewrite_reports_edits_and_inventory_rechecks(monkeypatch, tmp_pat
 def test_smoke_success_requires_completed_checks_and_immutable_bundle(monkeypatch, tmp_path, mutate, fail):
     from types import SimpleNamespace
     import bundle_smoke
+    monkeypatch.setattr(bundle_smoke, "menu_icon_evidence", lambda *a: {"mode": "image"})
     app = tmp_path / "Original.app"
     app.mkdir()
     (app / "payload").write_text("original")

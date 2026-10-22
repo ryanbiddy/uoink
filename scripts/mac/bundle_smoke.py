@@ -20,7 +20,7 @@ import time
 import urllib.request
 import wave
 
-from build_bundle import ROOT, PYTHON_EXECUTABLE, development_payload, tree_inventory
+from build_bundle import ROOT, PYTHON_EXECUTABLE, development_payload, tree_inventory, sha256
 from qualify_deps import write_json
 from ffmpeg_bundle import probe_torchcodec
 from import_smoke import COCOA_IMPORT
@@ -66,6 +66,24 @@ def stop(proc):
     except subprocess.TimeoutExpired:
         os.killpg(proc.pid, signal.SIGKILL)
         proc.wait(timeout=10)
+
+
+def menu_icon_evidence(log_file: Path, pid: int, app: Path) -> dict:
+    """Require both signed template resources, not just the user-facing fallback."""
+    marker = "menu bar icon: "
+    rows = [json.loads(line.split(marker, 1)[1]) for line in log_file.read_text().splitlines() if marker in line]
+    matches = [row for row in rows if row.get("pid") == pid]
+    if len(matches) != 1:
+        raise ValueError(f"Missing or ambiguous menu icon evidence for PID {pid}")
+    proof = matches[0]
+    names = {"menubar-template.png", "menubar-template@2x.png"}
+    if proof.get("mode") != "image" or {row["name"] for row in proof["templates"]} != names:
+        raise ValueError("Both menu templates must decode in AppKit")
+    for row in proof["templates"]:
+        expected = app / "Contents/Resources/assets/brand" / row["name"]
+        if Path(row["path"]).resolve() != expected.resolve() or row["sha256"] != sha256(expected):
+            raise ValueError("Menu template differs from running bundle resource")
+    return proof
 
 
 def expected_tools() -> dict:
@@ -310,6 +328,7 @@ def smoke(app: Path, output: Path, *, scratch: Path | None = None,
                 assert "-m helper.mac_menubar" in command, command
                 assert str(python) in command or str(python.resolve()) in command, command
                 report["menubar"] = {**menu, "bundled_command": command.strip()}
+                report["menubar"]["icon"] = menu_icon_evidence(output / "helper.txt", menu_pid, relocated)
 
                 def menu_pids():
                     listing = subprocess.run(["/bin/ps", "-axo", "pid=,command="],
@@ -381,6 +400,7 @@ def smoke(app: Path, output: Path, *, scratch: Path | None = None,
                 else:
                     raise AssertionError("Menu did not reconnect after relaunch")
                 assert restarted["pid"] != menu_pid
+                report["menubar"]["relaunch_icon"] = menu_icon_evidence(output / "helper.txt", restarted["pid"], relocated)
                 if observer:
                     observer("relaunch", helper, restarted)
                 report["menubar"]["relaunch_connected"] = True

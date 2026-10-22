@@ -92,6 +92,19 @@ def tree_inventory(root: Path) -> list[dict]:
     return rows
 
 
+def verify_menu_resources(app: Path) -> list[dict]:
+    """Record exactly which template bytes reach the app before signing."""
+    rows = []
+    for name in ("menubar-template.png", "menubar-template@2x.png"):
+        relative = Path("assets/brand") / name
+        target = app / "Contents/Resources" / relative
+        digest = sha256(ROOT / relative)
+        if not target.is_file() or target.is_symlink() or sha256(target) != digest:
+            raise ValueError(f"Missing or changed menu resource: {target}")
+        rows.append({"path": target.relative_to(app).as_posix(), "size": target.stat().st_size, "sha256": digest})
+    return rows
+
+
 def relocate_python_script(content: str) -> str:
     """Replace pip's build-path shebang with a relative interpreter shim."""
     lines = content.splitlines(keepends=True)
@@ -478,6 +491,7 @@ def build(wheels: Path, output: Path, ffmpeg_output: Path | None = None) -> Path
                                        "signing": "whole app ad-hoc; no Developer ID or notarization",
                                        "minimum_os": MINIMUM_MACOS,
                                        "source_files": [p.as_posix() for p in files]})
+    write_json(output / "menu-resources.json", verify_menu_resources(app))
     sign_app(app, output / "signing.json")
     write_json(output / "native-inventory.json", binary_inventory(app))
     inventory = tree_inventory(app)

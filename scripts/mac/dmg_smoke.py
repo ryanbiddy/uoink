@@ -38,6 +38,21 @@ def installed_dmg(dmg: Path, scratch: Path, report: dict):
             report["detached"] = True
 
 
+def prepare_normal_install(app: Path, report: dict) -> None:
+    """Only a disposable runtime copy loses quarantine, after the Gatekeeper gate."""
+    if app.name != "Uoink.app" or app.is_symlink() or not app.is_dir():
+        raise ValueError("Expected a disposable installed Uoink.app")
+    before = run(["/usr/bin/xattr", "-lr", app], capture_output=True).stdout
+    if "com.apple.quarantine" in before:
+        run(["/usr/bin/xattr", "-dr", "com.apple.quarantine", app], capture_output=True)
+    after = run(["/usr/bin/xattr", "-lr", app], capture_output=True).stdout
+    if "com.apple.quarantine" in after:
+        raise ValueError("Normal runtime copy still has quarantine")
+    run(["codesign", "--verify", "--strict", "--deep", app], capture_output=True)
+    report.update(app=str(app), quarantine_removed="com.apple.quarantine" in before,
+                  quarantine_absent=True, signature_verified=True)
+
+
 def smoke_dmg(dmg: Path, mcpb: Path, output: Path) -> None:
     output.mkdir(parents=True, exist_ok=False)
     report = {"ok": False, "sha256": sha256(dmg), "detached": False}
@@ -45,6 +60,8 @@ def smoke_dmg(dmg: Path, mcpb: Path, output: Path) -> None:
         scratch = Path(temporary)
         try:
             with installed_dmg(dmg, scratch, report) as (_, installed):
+                report["normal_install"] = {}
+                prepare_normal_install(installed, report["normal_install"])
                 report["mcpb"] = {"version": check(mcpb)["version"], "platform": "darwin", "ok": True}
                 smoke(installed, output / "installed-copy")
                 run(["codesign", "--verify", "--strict", "--deep", installed], capture_output=True)

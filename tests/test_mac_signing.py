@@ -665,11 +665,15 @@ def test_quarantine_copy_assessment_and_launch_sequence(tmp_path, monkeypatch, q
     monkeypatch.setattr(quarantine_smoke, "command", command)
     monkeypatch.setattr(quarantine_smoke, "verify_notarized", verify)
     monkeypatch.setattr(quarantine_smoke.shutil, "which", lambda tool: "/usr/bin/syspolicy_check")
-    monkeypatch.setattr(quarantine_smoke, "launch", lambda *a: events.append("launch"))
+    monkeypatch.setattr(quarantine_smoke.dmg_smoke, "run", lambda args, **kw: shutil.copytree(args[1], args[2]))
+    monkeypatch.setattr(quarantine_smoke.dmg_smoke, "prepare_normal_install",
+                        lambda app, report: events.append("normal_copy"))
+    monkeypatch.setattr(quarantine_smoke, "launch", lambda *a, **kw:
+                        events.append("normal_launch" if kw.get("translocated") is False else "launch"))
     output = tmp_path / "output"
     if quarantine_present:
         quarantine_smoke.smoke(dmg, output, TEAM)
-        assert events == ["install", "assess", "launch", "assess"]
+        assert events == ["install", "assess", "launch", "assess", "normal_copy", "assess", "normal_launch", "assess"]
         assert any(c[:2] == ["/usr/bin/syspolicy_check", "distribution"] for c in calls)
         assert any("context:primary-signature" in c for c in calls)
         assert any("--verbose=2" in c and "--strict" in c and "--deep" in c for c in calls)
