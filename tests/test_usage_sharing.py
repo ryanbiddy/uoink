@@ -76,14 +76,20 @@ def test_id_only_on_opt_in_and_deleted_on_opt_out(store):
 
 def test_env_zero_forces_off_even_with_saved_true(store, monkeypatch):
     identity = enabled()["install_id"]
+    usage.count("searches")
+    usage._queue.join()
+    before = usage._read_state()
     monkeypatch.setenv("UOINK_USAGE_SHARING", "0")
     assert server._normalize_settings({"usage_sharing": True})["usage_sharing"] is False
     usage.set_enabled(True)
     usage.count("searches")
     assert usage.disclosure()["sample"] is True
-    assert identity.encode() not in usage._path().read_bytes()
     assert not usage.send_due()
+    assert usage._read_state() == before
     usage._post.assert_not_called()
+    monkeypatch.delenv("UOINK_USAGE_SHARING")
+    assert usage.disclosure()["next_payload"]["install_id"] == identity
+    assert usage.disclosure()["next_payload"]["searches"] == 1
 
 
 def test_schema_and_fuzzed_content_never_enter_counts(store):

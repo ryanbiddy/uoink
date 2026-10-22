@@ -141,7 +141,8 @@ def _read_state(path=None):
 
 def set_enabled(enabled):
     """Consent is authoritative across processes; off erases ID and history."""
-    enabled = enabled is True and not forced_off()
+    # The environment stops this process's activity, not the shared consent.
+    enabled = enabled is True
     if _root is None or (not enabled and not _path().exists()):
         return
     with _transaction(create=enabled) as state:
@@ -508,7 +509,6 @@ def send_due(now=None):
     """One attempt per day. Keep the report ID within the receiver's retry window."""
     try:
         if forced_off():
-            set_enabled(False)
             return False
         endpoint = _endpoint()
         if isolated() or not endpoint or _root is None or not _path().exists():

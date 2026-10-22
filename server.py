@@ -1162,7 +1162,8 @@ def _normalize_settings(data: dict) -> dict:
     return clean
 
 
-def _read_settings() -> dict:
+def _read_stored_settings() -> dict:
+    """Read saved values without defaults or process environment overrides."""
     with _settings_lock:
         data: dict = {}
         settings_file = _settings_path()
@@ -1173,7 +1174,12 @@ def _read_settings() -> dict:
                     data = raw
             except (OSError, json.JSONDecodeError) as e:
                 log.warning("settings read failed: %s", e)
-        return _normalize_settings(data)
+        return data
+
+
+def _read_settings() -> dict:
+    """Return settings for this process, including its usage-sharing override."""
+    return _normalize_settings(_read_stored_settings())
 
 
 @contextlib.contextmanager
@@ -1207,17 +1213,21 @@ def _write_settings(data: dict, *, usage_choice: bool | None = None) -> None:
         settings_file = _settings_path()
         settings_file.parent.mkdir(parents=True, exist_ok=True)
         clean = _normalize_settings(data)
-        previous = _read_settings()
+        previous = _read_stored_settings()
         # Only an explicit /settings choice can change consent. All other
         # writers preserve the value read here, including stale stdio snapshots.
-        clean["usage_sharing"] = (previous["usage_sharing"] if usage_choice is None
-                                  else usage_choice is True and not uoink_usage.forced_off())
-        if previous.get("usage_sharing_prompt_seen"):
+        if usage_choice is not None:
+            clean["usage_sharing"] = usage_choice is True
+        elif "usage_sharing" in previous:
+            clean["usage_sharing"] = previous["usage_sharing"]
+        else:
+            clean.pop("usage_sharing", None)
+        if previous.get("usage_sharing_prompt_seen") is True:
             clean["usage_sharing_prompt_seen"] = True
         tmp = settings_file.with_suffix(".json.tmp")
         tmp.write_text(json.dumps(clean, indent=2), encoding="utf-8")
         tmp.replace(settings_file)
-        if (previous.get("usage_sharing") is True) != clean["usage_sharing"]:
+        if (previous.get("usage_sharing") is True) != (clean.get("usage_sharing") is True):
             try:
                 uoink_usage.set_enabled(clean["usage_sharing"])
             except Exception:
@@ -1227,13 +1237,13 @@ def _write_settings(data: dict, *, usage_choice: bool | None = None) -> None:
             os.chmod(settings_file, 0o600)
         except OSError:
             pass
-        # The caller's settings reply must show the consent preserved at commit.
-        data["usage_sharing"] = clean["usage_sharing"]
+        # Replies describe this process; storage above keeps the saved choice.
+        data["usage_sharing"] = clean.get("usage_sharing") is True and not uoink_usage.forced_off()
 
 
 def _sync_usage_sharing():
     with _settings_lock, _settings_file_lock():
-        uoink_usage.set_enabled(_read_settings()["usage_sharing"])
+        uoink_usage.set_enabled(_read_stored_settings().get("usage_sharing") is True)
 
 
 def _validate_output_dir_value(value: object) -> tuple[Path | None, str | None]:

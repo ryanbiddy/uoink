@@ -43,6 +43,8 @@ Set it for the helper to stop sending, because only the helper runs the sender.
 Setting it only for a stdio client stops that process from counting; it does
 not disable a helper already running in another environment. The Settings
 switch turns off sharing across processes.
+The environment override leaves the saved choice, install ID and counts intact.
+An explicit Settings change still saves your choice while the override is set.
 
 Reports never include content, URLs, titles, file paths, search text, usernames,
 IP addresses or account details. HTTPS still exposes the connection IP to
@@ -113,7 +115,8 @@ while the request is in flight.
 
 The network worker is a daemon. Python cannot forcibly cancel a DNS or socket
 call already running in that thread. It may finish after the deadline or
-after opt-out; its late result cannot change local state. At most one such
+after opt-out. A send started before opting out can still be delivered once;
+its late result cannot change local state. At most one such
 worker can be outstanding in a sender process.
 
 Each pending report has its own UUID4 `report_id`, kept across restarts and
