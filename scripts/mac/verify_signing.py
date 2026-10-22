@@ -17,6 +17,15 @@ def require(condition, message):
         raise ValueError(message)
 
 
+def validate_ticket(path, *, execute=command, attempts=3) -> dict:
+    """stapler validate contacts Apple's CDN; retry only a dropped connection."""
+    for attempt in range(attempts):
+        result = execute(["xcrun", "stapler", "validate", path])
+        if result["exit"] == 0 or "NSURLErrorDomain" not in result["stdout"] + result["stderr"]:
+            break
+    return {**result, "attempts": attempt + 1}
+
+
 def verify_notarized(app: Path, dmg: Path, team: str, report: dict, *, execute=command) -> None:
     require(bool(re.fullmatch(r"[A-Z0-9]{10}", team or "")), "Strict receipt requires an expected team ID")
     report.update(expected_team_id=team, ok=False)
@@ -26,7 +35,7 @@ def verify_notarized(app: Path, dmg: Path, team: str, report: dict, *, execute=c
         report[label] = {
             "verify": execute(["/usr/bin/codesign", "--verify", "--strict", "--deep", "--verbose=2", path]),
             "details": execute(["/usr/bin/codesign", "-dv", "--verbose=4", path]),
-            "ticket": execute(["xcrun", "stapler", "validate", path]),
+            "ticket": validate_ticket(path, execute=execute),
             "spctl": execute(["/usr/sbin/spctl", "--assess", *assessment, "-vvv", path]),
         }
     for label in ("app", "dmg"):

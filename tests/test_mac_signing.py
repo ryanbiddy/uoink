@@ -756,3 +756,25 @@ def test_workflow_limits_secrets_and_orders_cleanup_before_every_runtime_step():
     uploads = [s for s in steps if "upload-artifact" in s]
     assert not any("private" in p or "keychain" in p or "mac-sign-input" in p for p in uploads)
     assert "--require-notarized" in json.dumps(steps)
+
+
+def test_ticket_validation_retries_only_a_dropped_network_connection():
+    import verify_signing
+
+    def fake(outputs):
+        calls = []
+
+        def execute(argv):
+            calls.append(argv)
+            return outputs[min(len(calls), len(outputs)) - 1]
+        return execute, calls
+
+    lost = {"exit": 68, "stdout": "", "stderr": 'Error Domain=NSURLErrorDomain Code=-1005 "The network connection was lost."'}
+    ok = {"exit": 0, "stdout": "The validate action worked!", "stderr": ""}
+    execute, calls = fake([lost, ok])
+    assert verify_signing.validate_ticket("x.dmg", execute=execute)["exit"] == 0 and len(calls) == 2
+    missing = {"exit": 65, "stdout": "", "stderr": "does not have a ticket stapled to it"}
+    execute, calls = fake([missing, ok])
+    assert verify_signing.validate_ticket("x.dmg", execute=execute)["exit"] == 65 and len(calls) == 1
+    execute, calls = fake([lost])
+    assert verify_signing.validate_ticket("x.dmg", execute=execute)["exit"] == 68 and len(calls) == 3
