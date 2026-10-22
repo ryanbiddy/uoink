@@ -42,6 +42,7 @@ from contextlib import contextmanager
 from http.server import ThreadingHTTPServer
 from pathlib import Path
 import sys
+from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import images  # noqa: E402
@@ -265,7 +266,7 @@ def test_route_persists_and_surfaces_everywhere():
         server.DESKTOP_ROOT = out_root
         uoink_mcp_tools.bind_backend(server)
         try:
-            with _server():
+            with patch.object(server, "_allowed_roots", return_value={out_root}), _server():
                 status, res = _post_image(
                     _synthetic_png(),
                     query="caption=Zettelkasten+meme+about+fleeting+ideas"

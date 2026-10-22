@@ -18,6 +18,66 @@ import time
 
 ROOT = Path(__file__).resolve().parents[1]
 LEGACY_VERSIONS = ("2024-11-05", "2025-03-26", "2025-06-18", "2025-11-25")
+_USER_HOME = Path.home()
+_USER_DATA_ROOTS = (
+    _USER_HOME / "AppData/Local/Uoink",
+    _USER_HOME / "Library/Application Support/Uoink",
+    _USER_HOME / ".local/share/Uoink",
+    Path(os.environ.get("LOCALAPPDATA", _USER_HOME / "AppData/Local")) / "Uoink",
+    Path(os.environ.get("XDG_DATA_HOME", _USER_HOME / ".local/share")) / "Uoink",
+)
+
+
+def _assert_disposable_env(env):
+    """Accept explicit profiles and redirected user roots, never live state.
+
+    A temporary HOME is intentional in the read-only app and restart tests:
+    keep that normal platform layout rather than changing the child's profile.
+    Those stdio-only reads need no helper port. If a port is supplied, validate
+    it even in a temporary-home environment.
+    """
+    forbidden = list(_USER_DATA_ROOTS)
+    for source in (os.environ, env):
+        live_index = source.get("IG_FORBIDDEN_LIVE")
+        if live_index:
+            forbidden.append(Path(live_index.replace("\\", "/")).parent)
+
+    def disposable(value):
+        assert value and Path(value).is_absolute(), "test root must be absolute"
+        path = Path(value).resolve()
+        assert path != _USER_HOME.resolve(), "refusing the real user home"
+        for live in forbidden:
+            assert not path.is_relative_to(live.resolve()), "refusing the live data root"
+        return path
+
+    profile = env.get("UOINK_ISOLATED_PROFILE")
+    port = env.get("UOINK_ISOLATED_PORT")
+    if port is not None:
+        try:
+            number = int(port)
+        except (TypeError, ValueError):
+            raise AssertionError("test port must be an integer") from None
+        assert 0 < number <= 65535 and number != 5179, "refusing unsafe test port"
+    if profile:
+        disposable(profile)
+        assert port is not None, "isolated profile requires a test port"
+    else:
+        assert port is None, "isolated port requires a profile"
+        # Match the platform's effective root, including environment precedence.
+        # A safe HOME alone cannot rescue a live LOCALAPPDATA or XDG_DATA_HOME.
+        home = env.get("USERPROFILE" if sys.platform == "win32" else "HOME")
+        if sys.platform == "win32":
+            base = env.get("LOCALAPPDATA")
+            root = (disposable(base) if base else disposable(home) / "AppData/Local") / "Uoink"
+        elif sys.platform == "darwin":
+            root = disposable(home) / "Library/Application Support/Uoink"
+        else:
+            base = env.get("XDG_DATA_HOME")
+            root = (disposable(base) if base else disposable(home) / ".local/share") / "Uoink"
+        disposable(root)
+    # APP_DIR is optional in supported isolated installs, but cannot name live state.
+    if env.get("UOINK_ISOLATED_APP_DIR"):
+        disposable(env["UOINK_ISOLATED_APP_DIR"])
 
 
 def unused_port():
@@ -61,9 +121,7 @@ class StdioClient:
     """Strict JSON lines, retained out-of-order replies, finite per-read waits."""
 
     def __init__(self, cmd, cwd, env, timeout=30):
-        assert env.get("UOINK_ISOLATED_PROFILE")
-        assert env.get("UOINK_ISOLATED_APP_DIR")
-        assert env.get("UOINK_ISOLATED_PORT") not in (None, "5179")
+        _assert_disposable_env(env)
         self.timeout = timeout
         self.proc = subprocess.Popen(
             cmd, cwd=cwd, env=env, stdin=subprocess.PIPE, stdout=subprocess.PIPE,

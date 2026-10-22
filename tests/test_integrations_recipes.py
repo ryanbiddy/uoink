@@ -142,7 +142,7 @@ def test_file_writers_preserve_unrelated_config(tmp_path, monkeypatch, platform,
         result = server._connect_ai_client(client)
         assert result["action"] == action
         assert Path(result["backup_path"]).read_bytes() == before
-        data = json.loads(cfg.read_text())
+        data = json.loads(cfg.read_text(encoding="utf-8"))
         assert data["theme"] == "dark"
         assert data["mcpServers"]["other"] == json.loads(original)["mcpServers"]["other"]
         assert data["mcpServers"]["uoink"]["command"] == str(python)
