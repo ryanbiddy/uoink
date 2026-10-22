@@ -11440,7 +11440,11 @@ def _entry_launches_uoink(entry) -> bool:
     """Match this install's stdio launch, regardless of the user's entry name."""
     if not isinstance(entry, dict) or entry.get("disabled") is True or entry.get("enabled") is False:
         return False
-    command, args = _mcp_stdio_command()
+    try:
+        command, args = _mcp_stdio_command()
+    except OSError:
+        # An incomplete app bundle has no launcher to match; detection must not fail the scan.
+        return False
     actual_args = entry.get("args")
     if not isinstance(entry.get("command"), str) or not isinstance(actual_args, list):
         return False

@@ -30,7 +30,9 @@ is still **not yet tested** in the actual client. A source check and a config
 parse do not establish end-to-end acceptance. **No** rows state the missing
 evidence. The documentation review is dated **2026-10-21**. Linux is listed
 where the recipe has a Linux path or a platform-neutral route. A missing Linux
-recipe does not establish whether the client itself supports Linux.
+recipe does not establish whether the client itself supports Linux. Unless a
+row's sources name a Linux path, its Linux location reuses the documented POSIX
+spelling and was not separately checked against Linux documentation.
 
 The table is generated from `CLIENTS` in `uoink_connect.py`. Windows home paths
 use `%USERPROFILE%`; `%APPDATA%` is the roaming application-data directory.

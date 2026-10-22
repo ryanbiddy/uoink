@@ -192,3 +192,17 @@ def test_legacy_json_does_not_need_yaml_parser(client_home, monkeypatch):
         {"transport": {"type": "stdio", "command": command, "args": args}}]}}), "json")
     monkeypatch.setitem(sys.modules, "yaml", None)
     assert detected()["connected"]
+
+
+def test_detection_survives_a_bundle_without_its_launcher(tmp_path, monkeypatch):
+    import server
+
+    def missing_launcher():
+        raise FileNotFoundError("bundled Python is missing")
+
+    monkeypatch.setattr(server, "_mcp_stdio_command", missing_launcher)
+    config = tmp_path / "mcp.json"
+    config.write_text(json.dumps({"mcpServers": {"uoink": {"command": "python3", "args": ["uoink_mcp.py"]}}}),
+                      encoding="utf-8")
+    assert server._entry_launches_uoink({"command": "python3", "args": ["uoink_mcp.py"]}) is False
+    assert server._client_is_connected(config) is False
