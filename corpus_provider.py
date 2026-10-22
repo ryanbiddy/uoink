@@ -126,6 +126,7 @@ class UoinkCorpusProvider:
                     "channel", "topic", "hook_type", "platform", "source_type", "author", "date_from", "date_to")},
                 limit=request.limit,
                 offset=request.offset,
+                passages=request.search_details,
             )
             corpus_total = self.idx.count_corpus()
         except Exception as error:

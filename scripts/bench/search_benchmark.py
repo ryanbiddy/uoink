@@ -33,6 +33,7 @@ import sys
 import textwrap
 import time
 from urllib.parse import urlparse
+from urllib.request import url2pathname
 
 
 DEFAULT_CORPUS = Path("E:/AI/projects/uoink/experiments/search-jev-gemma-2026-09-23")
@@ -118,7 +119,13 @@ class OfflineGuard:
             ):
                 self.writable(args[0])
         elif event == "sqlite3.connect":
-            if args[0] != ":memory:" and safe_path(args[0]) not in (self.database, self.vectors):
+            path = os.fsdecode(args[0])
+            if path.startswith("file:"):
+                uri = urlparse(path)
+                if uri.netloc not in ("", "localhost") or uri.query != "mode=ro":
+                    raise ValueError("refusing SQLite URI outside disposable read connection")
+                path = url2pathname(uri.path)
+            if path != ":memory:" and safe_path(path) not in (self.database, self.vectors):
                 raise ValueError("refusing SQLite database outside disposable index")
         elif event in {"os.listdir", "os.scandir"}:
             if args[0] is not None and not isinstance(args[0], int):

@@ -78,11 +78,12 @@ def test_dense_search_work_does_not_grow_quadratically(db):
             steps += 1
             return 0
 
-        db._conn.set_progress_handler(progress, 100)
-        try:
-            result = db.search_yoinks_for_memory(q="lunar lander", limit=10)
-        finally:
-            db._conn.set_progress_handler(None, 0)
+        with db.search_read() as conn:
+            conn.set_progress_handler(progress, 100)
+            try:
+                result = db.search_yoinks_for_memory(q="lunar lander", limit=10)
+            finally:
+                conn.set_progress_handler(None, 0)
         return steps, result["total"]
 
     for n in range(80):

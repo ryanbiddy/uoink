@@ -70,9 +70,16 @@ def dispatch_search(name, arguments, backend, local, *, running=None):
             # two-second deadline plus a small local transport margin.
             envelope = backend._call_http_registry_tool(name, args, timeout=2.5)
             result = envelope.get("result") if envelope.get("ok") is True else None
+            for response in (result, envelope):
+                if (isinstance(response, dict) and isinstance(response.get("error"), dict)
+                        and response["error"].get("code") == "deadline_exceeded"):
+                    return response
             if (isinstance(result, dict) and result.get("ok") is True
                     and result.get("search_mode") in ("keyword", "semantic", "hybrid")):
                 return result
+    except TimeoutError:
+        from library_resources import ResourceError
+        return ResourceError("deadline_exceeded").envelope()
     except Exception:
         pass
     result = local()

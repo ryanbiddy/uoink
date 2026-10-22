@@ -675,6 +675,8 @@ def inventory_installed(installed_app: Path) -> dict[str, Any]:
                 "uoink_mcp.py", "uoink_install_isolation.py",
                 "migrations/0028_source_subscriptions.sql",
                 "migrations/0030_media_depth.sql",
+                "migrations/0031_search_metadata.sql",
+                "migrations/0032_search_prefixes.sql",
                 "VERSION", MARKER_FILENAME):
         path = installed_app / rel
         files[rel.replace("\\", "/")] = {

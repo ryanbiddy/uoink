@@ -66,7 +66,9 @@ Contract rules this module does not implement exactly, and why
    validation.
 4. Concurrency overflow has no separate frozen code; it refuses
    ``rate_limited`` with ``retry_after_ms`` and ``details.reason``
-   ``"concurrency"`` and never queues.
+   ``"concurrency"`` and never queues. Lane S allows four simultaneous
+   readers now that ranking uses independent read connections. The two-second
+   deadline and 60-admission rolling minute remain unchanged.
 5. Excerpt resolution covers every clip of an item, not only the six in the
    Librarian card: search hits address clips outside the card. Identities use
    the card builder's own evidence construction and hash (``library_cards``
@@ -179,7 +181,7 @@ LIMITS: dict[str, Any] = {
     "max_search_hits": 20,
     "max_search_preview_codepoints": 240,
     "service_deadline_s": 2.0,
-    "max_active_readers": 2,
+    "max_active_readers": 4,
     "admissions_per_minute": 60,
     "max_retry_after_ms": 60000,
     "max_curated_resources": 41,
@@ -693,7 +695,7 @@ class ReadGuard:
     ``admissions_per_minute`` admissions per rolling minute, shared by every
     reader constructed with it. Excess is refused, never queued."""
 
-    def __init__(self, *, clock: Callable[[], float] | None = None, max_active: int = 2,
+    def __init__(self, *, clock: Callable[[], float] | None = None, max_active: int = 4,
                  admissions_per_minute: int = 60, window_s: float = 60.0):
         self.clock = clock or time.monotonic
         self.max_active = max(1, int(max_active))
@@ -994,7 +996,7 @@ class LibraryReader:
 
     def __init__(self, index, *, data_root, clock: Callable[[], float] | None = None,
                  wall_clock: Callable[[], float] | None = None, deadline_s: float = 2.0,
-                 max_active: int = 2, admissions_per_minute: int = 60,
+                 max_active: int = 4, admissions_per_minute: int = 60,
                  guard: ReadGuard | None = None,
                  index_factory: Callable[..., Any] | None = None):
         # ``index`` may be None when ``index_factory`` binds storage lazily:
@@ -1282,6 +1284,18 @@ class LibraryReader:
         def run():
             with self._lock(op):
                 return fn()
+        return self._storage(run)
+
+    def _search_call(self, op: _Operation, fn: Callable[[], Any]):
+        """Run ranking on a separate reader with this operation's deadline."""
+        if not callable(getattr(self.index, "search_read", None)):
+            return self._index_call(op, fn)
+        def run():
+            op.check()
+            with self.index.search_read(deadline_at=op.deadline_at, clock=self._clock):
+                result = fn()
+            op.check()
+            return result
         return self._storage(run)
 
     def _sql(self, sql: str, params: tuple = (), op: _Operation | None = None) -> list[dict]:
@@ -2058,9 +2072,9 @@ class LibraryReader:
         if actual != "keyword":
             def keyword_candidates(count, offset, override):
                 keyword_match = override or match
-                candidates = {row["video_id"]: row for row in self._index_call(op, lambda:
+                candidates = {row["video_id"]: row for row in self._search_call(op, lambda:
                     self.index.search(query, count, match=keyword_match, passages=False))}
-                clip_rows = self._index_call(op, lambda: self.index.search_clips(
+                clip_rows = self._search_call(op, lambda: self.index.search_clips(
                     query, count, match=keyword_match, group_sources=True, _snippets=False))
                 for row in clip_rows:
                     existing = candidates.get(row["video_id"], {})
@@ -2101,18 +2115,25 @@ class LibraryReader:
             if not self._has_tables((table,), op):
                 raise ResourceError("library_unavailable", details={"storage": "missing_table"})
         op.check()
-        rows = ([{**row, "clip_id": row["passage"]["clip_id"]} for row in semantic_rows
-                 if row.get("passage", {}).get("clip_id") is not None] if semantic_rows is not None
-                else self._index_call(op, lambda: self.index.search_clips(query, limit, match=match, group_sources=True, _snippets=False)))
         source_rows = None
+        combined = getattr(self.index, "library_search_candidates", None)
+        candidates = (self._search_call(op, lambda: combined(query, limit))
+                      if match == "forgiving" and semantic_rows is None and callable(combined) else None)
+        if candidates is not None:
+            rows, source_rows = candidates
+        else:
+            rows = ([{**row, "clip_id": row["passage"]["clip_id"]} for row in semantic_rows
+                     if row.get("passage", {}).get("clip_id") is not None] if semantic_rows is not None
+                    else self._search_call(op, lambda: self.index.search_clips(query, limit, match=match, group_sources=True, _snippets=False)))
         if match == "forgiving" and semantic_rows is None:
-            bound = getattr(self.index, "source_score_lower_bound", None)
-            clips_win = (len(rows) >= limit and bound is not None and
-                         self._index_call(op, lambda: bound(query)) > max(row["_score"] for row in rows))
-            # Do not skip possible replacements for an invalid clip source.
-            clips_win = clips_win and all(self._bundle(op, row["video_id"]).error is None for row in rows)
-            source_rows = ([] if clips_win else self._index_call(op, lambda:
-                self.index.search(query, limit, match=match, passages=False)))
+            if source_rows is None:
+                bound = getattr(self.index, "source_score_lower_bound", None)
+                clips_win = (len(rows) >= limit and bound is not None and
+                             self._search_call(op, lambda: bound(query)) > max(row["_score"] for row in rows))
+                # Do not skip possible replacements for an invalid clip source.
+                clips_win = clips_win and all(self._bundle(op, row["video_id"]).error is None for row in rows)
+                source_rows = ([] if clips_win else self._search_call(op, lambda:
+                    self.index.search(query, limit, match=match, passages=False)))
             scores = {}
             for row in [*rows, *source_rows]:
                 vid = row["video_id"]
@@ -2156,9 +2177,9 @@ class LibraryReader:
             seen.add(vid)
         if match == "forgiving" or len(hits) < limit:
             rows = (semantic_rows if semantic_rows is not None else source_rows if source_rows is not None else
-                    self._index_call(op, lambda: self.index.search(query, limit, match=match, passages=False)))
+                    self._search_call(op, lambda: self.index.search(query, limit, match=match, passages=False)))
             if semantic_rows is None:
-                pending = self._index_call(op, lambda: self.index._search_passages(
+                pending = self._search_call(op, lambda: self.index._search_passages(
                     [row for row in rows if row["video_id"] not in seen], query, match))
                 hydrated = {row["video_id"]: row for row in pending}
                 rows = [hydrated.get(row["video_id"], row) for row in rows]

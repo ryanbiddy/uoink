@@ -1,4 +1,4 @@
-"""Shared search mode selection. Search never starts workers or downloads."""
+"""Shared search mode selection. Search never starts model work or downloads."""
 from __future__ import annotations
 
 MODES = ("auto", "keyword", "semantic", "hybrid")

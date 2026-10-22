@@ -31,8 +31,11 @@ All routes require `X-Uoink-Token`. Search accepts `q`, `channel`, `topic`,
 Unknown parameters return `invalid_request`.
 
 Search also accepts `match=forgiving|strict` and
-`mode=auto|keyword|semantic|hybrid`. These change retrieval, while the default
-response keeps the exact v1 keys used by Writer.
+`mode=auto|keyword|semantic|hybrid`. An omitted mode uses forgiving keyword
+search, so `page.total` counts all matches and offsets can reach every page.
+Explicit `auto`, `semantic`, or `hybrid` can use the semantic candidate pool;
+its total describes that pool. The default response keeps the exact v1 keys
+used by Writer. Without `search_details=true`, search skips passage extraction.
 
 Callers that need citation and mode details must send `search_details=true`.
 That opt-in adds `search_mode`, `requested_mode`, and `fallback_reason` to search

@@ -20,16 +20,34 @@ from uoink_core import local_search as ls
 def count_snippets(idx):
     """Wrap real FTS snippets, whose xFindFunction overrides scalar mocks."""
     calls = []
-    conn = idx._conn
-    conn.create_function("observe_snippet", 1, lambda text: calls.append(text) or text)
     class ObservedConnection:
+        def __init__(self, conn):
+            self.conn = conn
         def execute(self, sql, *args):
             sql = re.sub(r"snippet\([^)]*\)", r"observe_snippet(\g<0>)", sql)
-            return conn.execute(sql, *args)
+            return self.conn.execute(sql, *args)
         def __getattr__(self, name):
-            return getattr(conn, name)
-    idx._conn = ObservedConnection()
+            return getattr(self.conn, name)
+    original = idx.search_read
+    @contextmanager
+    def observed(**kwargs):
+        with original(**kwargs) as conn:
+            conn.create_function("observe_snippet", 1, lambda text: calls.append(text) or text)
+            yield ObservedConnection(conn)
+    idx.search_read = observed
     return calls
+
+
+def trace_search(idx, statements):
+    callback = lambda sql: statements.append(sql) if not sql.startswith("--") else None
+    idx._conn.set_trace_callback(callback)
+    original = idx.search_read
+    @contextmanager
+    def observed(**kwargs):
+        with original(**kwargs) as conn:
+            conn.set_trace_callback(callback)
+            yield conn
+    idx.search_read = observed
 
 
 @pytest.fixture
@@ -51,7 +69,7 @@ def library(tmp_path):
 @pytest.mark.parametrize("surface", ["search", "memory", "dashboard"])
 def test_passage_queries_and_snippets_are_bounded_by_page(library, match, surface):
     statements = []
-    library._conn.set_trace_callback(lambda sql: statements.append(sql) if not sql.startswith("--") else None)
+    trace_search(library, statements)
     # Count actual snippet invocations, not occurrences in SQL text. The old
     # materialized CTE invoked this for every candidate, including strict mode.
     snippets = count_snippets(library)
@@ -102,8 +120,7 @@ def test_partial_rank_stream_preserves_exhaustive_results_and_score_ties(library
             [(f"source{n:03}", seq, seq * 30, seq * 30 + 20, "Retention viewer")
              for n in reversed(range(80)) for seq in (9, 1)])
     streamed = library.search_clips(query, 7, group_sources=True)
-    monkeypatch.setattr(library, "_partial_clip_page", lambda *args: None)
-    exhaustive = library.search_clips(query, 7, group_sources=True)
+    exhaustive = library.search_clips(query, 7, group_sources=True, _video_ids=sorted(library.all_video_ids()))
     assert [(row["clip_id"], row["_score"]) for row in streamed] == [
         (row["clip_id"], row["_score"]) for row in exhaustive]
     assert [row["video_id"] for row in streamed] == [f"source{n:03}" for n in range(7)]
@@ -111,7 +128,7 @@ def test_partial_rank_stream_preserves_exhaustive_results_and_score_ties(library
 
 def test_memory_page_counts_once_and_keeps_total_past_last_page(library):
     statements = []
-    library._conn.set_trace_callback(statements.append)
+    trace_search(library, statements)
     page = library.search_yoinks_for_memory(q="retention", limit=7, offset=10)
     assert page["total"] == 80 and len(page["results"]) == 7
     assert all("_total" not in row for row in page["results"])
@@ -121,10 +138,10 @@ def test_memory_page_counts_once_and_keeps_total_past_last_page(library):
 
 def test_global_clip_rank_uses_covering_metadata_index(library):
     statements = []
-    library._conn.set_trace_callback(statements.append)
+    trace_search(library, statements)
     library.search_clips("retention", 5)
     library._conn.set_trace_callback(None)
-    sql = next(sql for sql in statements if sql.startswith("WITH clip_page"))
+    sql = next(sql for sql in statements if "idx_clips_search_metadata" in sql)
     plan = [row[3] for row in library._conn.execute("EXPLAIN QUERY PLAN " + sql)]
     assert any("COVERING INDEX idx_clips_search_metadata" in line for line in plan), plan
 
@@ -179,7 +196,7 @@ def test_dashboard_hybrid_pool_and_fallback_materialize_only_final_page(library,
     pages, statements = [], []
     original = library._search_passages
     monkeypatch.setattr(library, "_search_passages", lambda rows, *args: pages.append(len(rows)) or original(rows, *args))
-    library._conn.set_trace_callback(lambda sql: statements.append(sql) if not sql.startswith("--") else None)
+    trace_search(library, statements)
     result = server._library_search(library, q="retention", filters={}, kind=None,
                                      sort="relevance", limit=5, offset=10, mode="hybrid")
     assert pages == [5]
@@ -187,7 +204,7 @@ def test_dashboard_hybrid_pool_and_fallback_materialize_only_final_page(library,
     assert len(result["results"]) == 5
     assert result["search_mode"] == ("keyword" if fails else "hybrid")
     assert sum(sql.startswith("WITH clip_page") for sql in statements) == 1
-    assert sum("SELECT COUNT(*) AS n FROM search_hits" in sql for sql in statements) == 1
+    assert sum("SELECT COUNT(*) AS n FROM" in sql for sql in statements) == 1
 
 
 def test_snapshot_scans_fts_once_and_does_not_hold_capture_lock(library, monkeypatch):
@@ -280,6 +297,16 @@ def test_library_semantic_fallback_uses_keyword_candidates_once(db, monkeypatch)
     assert calls == [True]
 
 
+def test_long_library_query_ranks_sources_and_fetches_clips_once(library):
+    statements = []
+    trace_search(library, statements)
+    query = "retention viewer pacing editing thumbnails narrative audience hook"
+    result = library_resources.LibraryReader(library, data_root=library._path.parent).search(query, 5, mode="keyword")
+    assert len(result["hits"]) == 5
+    assert sum("ORDER BY yoinks_fts.rank" in sql and " OR " in sql for sql in statements) == 1
+    assert sum(sql.startswith("WITH clip_page") for sql in statements) == 1
+
+
 def test_find_mentions_batches_content_and_requires_entity_in_the_passage(db):
     idx, _, _ = db
     for vid, content, timed in [("wrong", "A shared context without the entity.", True),
@@ -289,16 +316,18 @@ def test_find_mentions_batches_content_and_requires_entity_in_the_passage(db):
         idx.record_entities(vid, [{"name": "Lunar Lander", "type": "topic",
                                    "mentions": [{"timestamp": 999, "context": content}]}])
     statements = []
-    idx._conn.set_trace_callback(lambda sql: statements.append(sql) if not sql.startswith("--") else None)
+    trace_search(idx, statements)
     rows = {row["video_id"]: row for row in idx.find_mentions("Lunar Lander", 200)}
     assert rows["wrong"]["passage_verified"] is False and rows["wrong"]["citation_reason"]
-    assert "timestamp" not in rows["wrong"] and "timestamp_seconds" not in rows["wrong"]
-    assert "#t=" not in (rows["wrong"].get("deep_link") or "")
-    assert rows["text"]["passage_verified"] is True and "timestamp" not in rows["text"]
+    assert rows["wrong"]["timestamp"] == 999 and "timestamp_seconds" not in rows["wrong"]
+    assert rows["wrong"]["deep_link"].endswith("&t=999s")
+    assert rows["text"]["passage_verified"] is True and rows["text"]["timestamp"] == 999
     assert rows["text"]["timestamp_seconds"] is None
     assert rows["clip"]["passage_verified"] is True and rows["clip"]["timestamp_seconds"] == 12.5
     assert sum(sql.startswith("SELECT video_id, content FROM yoinks_fts") for sql in statements) == 1
-    assert sum(sql.startswith("SELECT c.* FROM clips_fts") for sql in statements) == 1
+    # Quotes naming the entity can stop at their first matching clip. Other
+    # annotations use a second batch to find a clip containing the entity.
+    assert 1 <= sum(sql.startswith("WITH page_contexts") for sql in statements) <= 2
 
 
 def test_mention_name_is_ranked_once_before_expanding_rows(library):
@@ -306,9 +335,10 @@ def test_mention_name_is_ranked_once_before_expanding_rows(library):
         library.record_entities(vid, [{"name": "Lunar Lander", "type": "topic",
                                       "mentions": [{"context": "Not quoted"}]}])
     calls = []
-    library._conn.create_function("entity_keyword_score", 2,
-        lambda name, query: calls.append(name) or index._entity_keyword_score(name, query))
-    assert len(library.find_mentions("Lunar Lander", 80)) == 80
+    with library.search_read() as conn:
+        conn.create_function("entity_keyword_score", 2,
+            lambda name, query: calls.append(name) or index._entity_keyword_score(name, query))
+        assert len(library.find_mentions("Lunar Lander", 80)) == 80
     assert len(calls) <= 2
 
 
@@ -377,7 +407,7 @@ def test_corpus_details_require_explicit_opt_in_and_browse_has_no_citations(db):
     seed(idx, "mars", "Mars rusty soil")
     ready(db)
     detail = request("GET", "/api/corpus/v1/search?q=rusty&search_details=true").payload["data"]
-    assert detail["search_mode"] == "hybrid" and detail["items"][0]["passage_verified"]
+    assert detail["search_mode"] == "keyword" and detail["items"][0]["passage_verified"]
     corpus_contract.validate_data("search", detail, search_details=True)
     browse = request("GET", "/api/corpus/v1/search?search_details=true").payload["data"]
     assert key_bytes(browse["items"][0]) == ITEM_KEYS

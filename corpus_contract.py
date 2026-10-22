@@ -129,7 +129,7 @@ class SearchRequest:
     limit: int = 50
     offset: int = 0
     match: str = "forgiving"
-    mode: str = "auto"
+    mode: str = "keyword"
     search_details: bool = False
 
     @classmethod
@@ -198,7 +198,7 @@ class SearchRequest:
         match = one("match") or "forgiving"
         if match not in ("forgiving", "strict"):
             raise ContractError("invalid_request", "match must be forgiving or strict")
-        mode = one("mode") or "auto"
+        mode = one("mode") or "keyword"
         if mode not in ("auto", "keyword", "semantic", "hybrid"):
             raise ContractError("invalid_request", "mode must be auto, keyword, semantic or hybrid")
         search_details = one("search_details") or "false"

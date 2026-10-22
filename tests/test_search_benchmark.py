@@ -138,6 +138,8 @@ def test_audit_guard_blocks_network_live_sqlite_and_external_writes(tmp_path):
         ("os.scandir", ("E:/Uoink",)),
         ("os.listdir", ("E:/AI/_keys",)),
         ("sqlite3.connect", (str(tmp_path / "other.sqlite3"),)),
+        ("sqlite3.connect", ((tmp_path / "other.sqlite3").as_uri() + "?mode=ro",)),
+        ("sqlite3.connect", ((tmp_path / "work/benchmark.sqlite3").as_uri() + "?mode=rw",)),
         ("open", (str(tmp_path / "other.txt"), "w", os.O_WRONLY)),
         ("os.rename", (str(tmp_path / "work/a"), str(tmp_path / "outside"))),
     ):
@@ -147,6 +149,7 @@ def test_audit_guard_blocks_network_live_sqlite_and_external_writes(tmp_path):
         with pytest.raises(RuntimeError, match="offline benchmark"):
             guard(event, ())
     guard("sqlite3.connect", (str(tmp_path / "work/benchmark.sqlite3"),))
+    guard("sqlite3.connect", ((tmp_path / "work/benchmark.sqlite3").as_uri() + "?mode=ro",))
     guard("sqlite3.connect", (str(tmp_path / "work/search-vectors.db"),))
     guard("sqlite3.connect", (":memory:",))
     guard("open", (str(tmp_path / "out/metrics.json"), "w", os.O_WRONLY))

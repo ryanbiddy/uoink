@@ -335,6 +335,10 @@ with every useful word, then partial hits. BM25 orders hits within each group.
 Forgiving `score` values are scaled relevance scores: higher is better. They
 include coverage and title bonuses and are not raw BM25 magnitudes. Do not
 compare their magnitudes with strict, semantic, or hybrid scores.
+Scores retain full floating-point precision. With `b = -BM25`, the lexical
+component is `0.001 * b / (1 + b)`, plus `0.001` for complete term coverage
+and `0.002` for an exact title. Small differences still determine ordering;
+rounding to four decimal places would erase many of them.
 
 Results also carry `video_id` and, when source text is available, an optional
 `passage`. Quote `passage.text`: `snippet` may contain ellipses. A passage has
@@ -349,8 +353,12 @@ that produced the matches, checked against the current source. Hybrid results
 use either verified form. These rules apply to MCP and HTTP search responses.
 When a semantic chunk comes from a source with no body text, its offsets refer
 to the title and `passage.field` is `"title"`.
-`search_library` counts terms across a source's clips for ranking while citing
-the best single matching clip; that clip may contain only some of the terms.
+Large forgiving clip searches first rank a bounded source candidate pool
+(`max(32, limit)` sources), then rank those sources' matching clips.
+Small or sparse source pools also search clips whose text is absent from the
+source body. `search_library` counts terms across candidate sources' clips
+while citing one matching clip, which may contain only some of the terms.
+These clip results are a ranked selection, not an exhaustive source listing.
 
 Parameters:
 
@@ -728,6 +736,8 @@ Each row includes `mention_id`, `video_id`, and the stored `timestamp` in
 seconds. `context` is an entity annotation. When it matches a stored clip,
 the optional `passage` supplies that clip's ID, verbatim text, and timing.
 When it matches indexed prose, `passage` supplies character offsets instead.
+`timestamp` and `deep_link` retain the annotation's stored time even when it
+is unverified. Verified timing is separate in `timestamp_seconds` and `passage`.
 
 Return shape:
 
@@ -1215,7 +1225,7 @@ source and media revisions and evidence refs. Every referenced original
 artifact is validated by bytes before anything is quoted; a missing input is
 `library_unavailable`, corrupt bytes or bindings `invalid_source_data`. The
 read is one coherent SQLite transaction with a final source/media recheck,
-admitted on the shared Phase 4 guard (2 s deadline, 2 active, 60/minute) with
+admitted on the shared Phase 4 guard (2 s deadline, 4 active, 60/minute) with
 the same wire budgets (24,576 rendered bytes, 65,536 wrapped bytes). Nothing
 is fetched, transcribed or saved; text-only items refuse `not_timed` with
 `next_step: get_library_item`, and coarse (paragraph) timing refuses

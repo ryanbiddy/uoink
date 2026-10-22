@@ -297,9 +297,24 @@ class IndexSources:
         self._cache_stamp = None
         self._cache_sources = ()
         self._cache_lock = threading.RLock()
+        self._refresh_worker = None
 
-    def snapshot(self, *, source_id=None, source_ids=None, filters=None, source_types=None, _db=None):
+    def snapshot(self, *, source_id=None, source_ids=None, filters=None, source_types=None, _db=None, wait=True):
         stamp = self.index.source_stamp()
+        if not wait:
+            if not self._cache_lock.acquire(blocking=False):
+                raise SearchUnavailable("Source snapshot is refreshing; use keyword search")
+            try:
+                if stamp != self._cache_stamp:
+                    if self._refresh_worker is None or not self._refresh_worker.is_alive():
+                        self._refresh_worker = threading.Thread(target=self._refresh, name="search-source-snapshot", daemon=True)
+                        self._refresh_worker.start()
+                    raise SearchUnavailable("Source snapshot is refreshing; use keyword search")
+                with self.index.detached_snapshot() as db:
+                    return self._snapshot(source_id=source_id, source_ids=source_ids, filters=filters,
+                                          source_types=source_types, _db=db, stamp=stamp)
+            finally:
+                self._cache_lock.release()
         with self._cache_lock:
             if _db is not None:
                 return self._snapshot(source_id=source_id, source_ids=source_ids, filters=filters, source_types=source_types,
@@ -307,6 +322,17 @@ class IndexSources:
             with self.index.detached_snapshot() as db:
                 return self._snapshot(source_id=source_id, source_ids=source_ids, filters=filters, source_types=source_types,
                                       _db=db, stamp=stamp)
+
+    def _refresh(self):
+        try:
+            documents = self.snapshot()
+            # Fingerprints are lazy. Populate them on this worker too.
+            for document in documents:
+                document.fingerprint
+        except Exception:
+            # Keep the previous stamp. The next request retries and continues
+            # to use keyword results if storage remains unavailable.
+            pass
 
     def _snapshot(self, *, source_id=None, source_ids=None, filters=None, source_types=None, _db, stamp, cache=True):
         from contextlib import nullcontext
@@ -376,6 +402,8 @@ class IndexSources:
                                      for c in citations if (c["text"] or "").strip())
                 sources.append(Source(identity, title, content, passages or word_passages(content or title)))
             if full and cache:
+                for source in sources:
+                    source.fingerprint
                 self._cache_stamp, self._cache_sources = stamp, tuple(sources)
         return sources
 
@@ -750,6 +778,10 @@ class LocalSearch:
                     with self._state_lock:
                         self._pending.add(doc.source_id)
             self._set("indexing", done=min(done if identities is None else completed, total))
+        # Refresh and fingerprint on this worker after a write. Queries use
+        # keyword fallback until a current immutable snapshot is available.
+        if identities is not None:
+            self.sources.snapshot()
 
     def _run(self):
         try:
@@ -806,16 +838,16 @@ class LocalSearch:
             if self._model is None:
                 raise SearchUnavailable("Start local search before querying")
             # Full snapshot for invalidation, filtered snapshot for eligibility.
-            live = {doc.source_id: doc.fingerprint for doc in self.sources.snapshot()}
+            live = {doc.source_id: doc.fingerprint for doc in self.sources.snapshot(wait=False)}
             self.store.invalidate(live)
             eligible = ({doc.source_id: doc.fingerprint for doc in self.sources.snapshot(
-                filters=filters, source_id=source_id, source_types=source_types)}
+                filters=filters, source_id=source_id, source_types=source_types, wait=False)}
                 if any(filters.values()) or source_id or source_types else live)
             vector = self._model.embed([QUERY_PREFIX + query], wait=False)[0]
             hits = self.store.search(vector, eligible, limit, clips_only=clips_only)
             # Recheck after inference so edits/deletes during the query cannot
             # escape through a vector read from the earlier snapshot.
-            current = {doc.source_id: doc.fingerprint for doc in self.sources.snapshot(filters=filters)}
+            current = {doc.source_id: doc.fingerprint for doc in self.sources.snapshot(filters=filters, wait=False)}
             with self._state_lock:
                 self._retry_at = 0.0
                 self._retry_delay = 1.0

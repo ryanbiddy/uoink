@@ -399,7 +399,7 @@ def search_uoinks(args: dict[str, Any]) -> dict[str, Any]:
             "snippet": (r.get("_snippet") or "").strip(),
             # FTS5 bm25 is lower-is-better; negate so a higher score means a
             # better match, matching the old term-count score's direction.
-            "score": round(-score, 4) if isinstance(score, (int, float)) else 0.0,
+            "score": -score if isinstance(score, (int, float)) else 0.0,
             **({"passage": r["passage"]} if "passage" in r else {}),
             **{key: r[key] for key in ("source_id", "passage_id", "span", "timestamp_seconds", "passage_verified", "citation_reason") if key in r},
         })
@@ -561,7 +561,7 @@ def search_clips(args: dict[str, Any]) -> dict[str, Any]:
             **{key: r[key] for key in ("passage", "source_id", "passage_id", "span", "timestamp_seconds", "passage_verified", "citation_reason") if key in r},
             # bm25 is lower-is-better; negate so higher means better, the
             # same direction search_uoinks reports.
-            "score": round(-score, 4) if isinstance(score, (int, float)) else 0.0,
+            "score": -score if isinstance(score, (int, float)) else 0.0,
         })
     return _ok(results=results, **metadata(page))
 

@@ -207,12 +207,18 @@ def test_edit_soft_delete_hard_delete_restore_and_restart(engine, index):
     before = engine.store.fingerprints()
     index.seed(content="Changed Mars content")
     # No hook required to suppress obsolete vectors.
+    with pytest.raises(ls.SearchUnavailable):
+        engine.embedding_search("rust")
+    engine.sources._refresh_worker.join(5)
     assert "mars" not in [hit.source_id for hit in engine.embedding_search("rust")]
     assert "mars" not in engine.store.fingerprints()
     assert engine.update_source("mars")
     assert engine.wait(5)
     assert engine.store.fingerprints()["mars"] != before["mars"]
     index.seed(deleted_at="2026-10-21")
+    with pytest.raises(ls.SearchUnavailable):
+        engine.embedding_search("rust")
+    engine.sources._refresh_worker.join(5)
     assert "mars" not in [hit.source_id for hit in engine.embedding_search("rust")]
     index.seed()
     engine.update_source("mars")
@@ -244,6 +250,9 @@ def test_clip_spans_timestamps_max_per_source_and_metadata_changes(engine, index
     assert hit.timestamp_seconds == 50
     with index.db:
         index.db.execute("UPDATE clips SET start=51 WHERE clip_id=15")
+    with pytest.raises(ls.SearchUnavailable):
+        engine.embedding_search("rust")
+    engine.sources._refresh_worker.join(5)
     assert engine.embedding_search("rust") == []
 
 
@@ -287,7 +296,9 @@ def test_edit_during_inference_cannot_publish_or_return(engine, index):
         return result
 
     engine._model.embed = edit_during_query
-    assert engine.embedding_search("rust") == []
+    with pytest.raises(ls.SearchUnavailable):
+        engine.embedding_search("rust")
+    engine.sources._refresh_worker.join(5)
     engine._model.embed = original
     first = True
 

@@ -12773,30 +12773,36 @@ def _library_search(idx, *, q: str | None, filters: dict, kind: str | None,
     if expression:
         prefix, search_params = index._fts_hits(
             "yoinks_fts", q, match, idx._YOINKS_BM25_WEIGHTS if match == "forgiving" else "")
-        tail = ("FROM search_hits h CROSS JOIN yoinks_fts f ON f.rowid=h.rowid "
-                "CROSS JOIN yoinks y ON y.video_id = f.video_id WHERE " + where)
+        tail = ("FROM search_hits h CROSS JOIN yoinks y ON y.video_id = h.video_id WHERE " + where)
         args = search_params + params
         if sort == "relevance":
             order = "h._score, y.video_id"
     else:
         tail = "FROM yoinks y WHERE " + where
         args = params
-    with idx._lock:
+    with idx.search_read() as db:
         try:
-            count_prefix, count_args = (index._fts_hits("yoinks_fts", q, match, ranked=False)
-                                        if expression else ("", []))
-            cnt = idx._conn.execute(count_prefix + "SELECT COUNT(*) AS n " + tail, count_args + params).fetchone()
-            if expression:
-                rows = idx._conn.execute(index._fts_page(prefix, tail, order, offset=True, snippets=passages),
-                                         args + [limit, offset] + ([expression] if passages else [])).fetchall()
+            rows = (idx._ranked_source_page(db, q, limit, offset, where, params)
+                    if expression and match == "forgiving" and sort == "relevance" else None)
+            if rows is not None:
+                cnt = db.execute(
+                    "SELECT COUNT(*) AS n FROM yoinks_fts CROSS JOIN yoinks y "
+                    "ON y.video_id=yoinks_fts.video_id WHERE yoinks_fts MATCH ? AND " + where,
+                    [expression, *params]).fetchone()
             else:
-                selection = "y.*"
-                rows = idx._conn.execute(
-                    prefix + "SELECT " + selection + " " + tail + " ORDER BY " + order + " LIMIT ? OFFSET ?",
-                    args + [limit, offset]).fetchall()
-        except sqlite3.OperationalError:
+                count_prefix, count_args = (index._fts_hits("yoinks_fts", q, match, ranked=False)
+                                            if expression else ("", []))
+                cnt = db.execute(count_prefix + "SELECT COUNT(*) AS n " + tail, count_args + params).fetchone()
+                if expression:
+                    rows = db.execute(index._fts_page(prefix, tail, order, offset=True, snippets=passages),
+                                      args + [limit, offset] + ([expression] if passages else [])).fetchall()
+                else:
+                    rows = db.execute(
+                        prefix + "SELECT y.* " + tail + " ORDER BY " + order + " LIMIT ? OFFSET ?",
+                        args + [limit, offset]).fetchall()
+        except sqlite3.OperationalError as error:
             # A MATCH expression FTS5 still rejects reads as no matches.
-            log.warning("library search rejected query %r", q)
+            idx._search_error(error, q, "library search")
             return {"total": 0, "results": [], **mode_info}
     rows = [dict(r) for r in rows]
     return {"total": int(cnt["n"]) if cnt else 0,
@@ -20779,6 +20785,10 @@ def _call_http_registry_tool(name: str, arguments: dict,
             "error": f"helper returned HTTP {status}",
         }
     except (urllib.error.URLError, TimeoutError, OSError) as exc:
+        if (name in ("search_library", "search_uoinks", "search_clips")
+                and isinstance(getattr(exc, "reason", exc), TimeoutError)):
+            from library_resources import ResourceError
+            return ResourceError("deadline_exceeded").envelope()
         return {
             "ok": False,
             "error": f"could not reach the Uoink helper at {url}: {exc}",
