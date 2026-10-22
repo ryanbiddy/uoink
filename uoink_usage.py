@@ -77,8 +77,21 @@ def _transaction(create=False):
     if create:
         path.parent.mkdir(parents=True, exist_ok=True)
     # mode=rw prevents a late queued event from creating state while off.
-    conn = sqlite3.connect(path.as_uri() + ("?mode=rwc" if create else "?mode=rw"),
-                           uri=True, timeout=6)
+    uri = path.as_uri() + ("?mode=rwc" if create else "?mode=rw")
+    for attempt in range(4):
+        try:
+            conn = sqlite3.connect(uri, uri=True, timeout=6)
+            break
+        except (PermissionError, sqlite3.OperationalError) as exc:
+            # Windows sharing violations surface as SQLITE_CANTOPEN, outside
+            # SQLite's busy timeout. Retry only opening, before any state change
+            # or sender call can run, so a retry cannot duplicate either one.
+            # A missing file while sharing is off is final, not a sharing violation.
+            if (attempt == 3 or (not create and not path.exists())
+                    or (not isinstance(exc, PermissionError)
+                        and getattr(exc, "sqlite_errorcode", 0) & 0xff != sqlite3.SQLITE_CANTOPEN)):
+                raise
+            time.sleep(0.05 * 2 ** attempt)
     try:
         conn.execute("PRAGMA secure_delete=ON")
         conn.execute("BEGIN IMMEDIATE")

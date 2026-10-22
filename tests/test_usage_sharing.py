@@ -6,6 +6,7 @@ import subprocess
 import sys
 import threading
 import time
+from types import SimpleNamespace
 import uuid
 from unittest.mock import Mock
 
@@ -286,6 +287,88 @@ def test_stale_queued_event_does_not_cross_consent_periods(store):
     assert usage.disclosure()["next_payload"]["searches"] == 0
 
 
+def open_failure(kind):
+    if kind == "permission":
+        return PermissionError("sharing violation")
+    error = usage.sqlite3.OperationalError("unable to open database file")
+    error.sqlite_errorcode = usage.sqlite3.SQLITE_CANTOPEN
+    return error
+
+
+@pytest.mark.parametrize("kind", ["permission", "sqlite"])
+@pytest.mark.parametrize("operation", ["record", "disclosure"])
+def test_transient_database_open_failure_preserves_counts(store, monkeypatch, kind, operation):
+    enabled()
+    usage.count("searches")
+    usage._queue.join()
+    connect = usage.sqlite3.connect
+    attempts = []
+
+    def open_once_denied(*args, **kwargs):
+        attempts.append(True)
+        if len(attempts) == 1:
+            raise open_failure(kind)
+        return connect(*args, **kwargs)
+
+    with monkeypatch.context() as patch:
+        patch.setattr(usage.sqlite3, "connect", open_once_denied)
+        if operation == "record":
+            for _ in range(20):
+                usage.count("searches")
+            usage._queue.join()
+        else:
+            assert usage.disclosure()["next_payload"]["searches"] == 1
+    assert usage.disclosure()["next_payload"]["searches"] == (21 if operation == "record" else 1)
+    assert len(attempts) == (21 if operation == "record" else 2)
+    usage._post.assert_not_called()
+
+
+@pytest.mark.parametrize("kind", ["permission", "sqlite"])
+def test_persistent_open_failure_is_bounded_and_does_not_escape_count(store, monkeypatch, kind):
+    enabled()
+    sleep = Mock()
+    connect = Mock(side_effect=open_failure(kind))
+    with monkeypatch.context() as patch:
+        patch.setattr(usage.sqlite3, "connect", connect)
+        patch.setattr(usage, "time", SimpleNamespace(time=time.time, sleep=sleep))
+        usage.count("searches")
+        usage._queue.join()
+    assert 1 < connect.call_count <= 4
+    assert sum(call.args[0] for call in sleep.call_args_list) <= 0.35 + 1e-9
+    usage.count("searches")
+    usage._queue.join()
+    assert usage.disclosure()["next_payload"]["searches"] == 1
+    usage._post.assert_not_called()
+
+
+def test_queue_join_waits_for_sqlite_lock_and_committed_count(store, monkeypatch):
+    enabled()
+    entered, joined = threading.Event(), threading.Event()
+    connect = usage.sqlite3.connect
+
+    def observed_connect(*args, **kwargs):
+        conn = connect(*args, **kwargs)
+        conn.set_trace_callback(lambda sql: entered.set() if sql == "BEGIN IMMEDIATE" else None)
+        return conn
+
+    blocker = connect(usage._path())
+    blocker.execute("BEGIN IMMEDIATE")
+    waiter = threading.Thread(target=lambda: (usage._queue.join(), joined.set()), daemon=True)
+    try:
+        monkeypatch.setattr(usage.sqlite3, "connect", observed_connect)
+        usage.count("searches")
+        assert entered.wait(2)
+        waiter.start()
+        assert not joined.wait(0.05)
+    finally:
+        blocker.rollback()
+        blocker.close()
+        if waiter.ident is not None:
+            waiter.join(10)
+    assert joined.is_set()
+    assert usage.disclosure()["next_payload"]["searches"] == 1
+
+
 def test_stdio_wire_path_records_to_shared_file(store, monkeypatch):
     from tests.test_c01_mcp_stdio import _StdioClient, _isolated_env, ROOT
     env = _isolated_env(str(store))
@@ -305,7 +388,9 @@ def test_stdio_wire_path_records_to_shared_file(store, monkeypatch):
         deadline = time.monotonic() + 10  # the stdio child flushes counts asynchronously; slow runners need headroom
         while time.monotonic() < deadline:
             p = usage.disclosure()["next_payload"]
-            if p["tools"].get("search_uoinks") and p["mcp_clients"].get("other"):
+            # Tool and transport counts are separate queue entries.
+            if (p and p["tools"].get("search_uoinks") and p["mcp_clients"].get("other")
+                    and p["transports"].get("stdio")):
                 break
             time.sleep(0.02)
         assert p["tools"] == {"search_uoinks": 1}
@@ -323,7 +408,9 @@ def test_concurrent_processes_do_not_lose_counts(store):
     procs = [subprocess.Popen([sys.executable, "-c", script, str(store)]) for _ in range(2)]
     for proc in procs:
         assert proc.wait(timeout=15) == 0
-    assert usage.disclosure()["next_payload"]["searches"] == 200
+    disclosure = usage.disclosure()
+    assert disclosure["next_payload"] is not None, disclosure
+    assert disclosure["next_payload"]["searches"] == 200
 
 
 def test_settings_toggle_and_one_time_card(store, monkeypatch):
