@@ -708,6 +708,35 @@ def test_memory_browsing_does_not_count_as_a_search(store):
         idx.close()
 
 
+def test_usage_failure_preserves_search_and_capture_results(store, monkeypatch):
+    monkeypatch.setattr(usage, "count", Mock(side_effect=OSError("counter unavailable")))
+    result = {"ok": True}
+    error = ValueError("original failure")
+    for decorate in (usage.search, usage.capture("page")):
+        assert decorate(lambda: result)() is result
+
+        @decorate
+        def failed():
+            raise error
+
+        with pytest.raises(ValueError) as caught:
+            failed()
+        assert caught.value is error
+    assert usage._search.get() is False and usage._capture.get() is None
+
+
+def test_http_mcp_usage_failure_preserves_responses(store, monkeypatch):
+    handler = object.__new__(server.Handler)
+    handler._send_mcp_result = lambda ident, payload: payload
+    requests = [{"id": 1, "method": "initialize", "params": {}},
+                {"id": 2, "method": "tools/call", "params": {
+                    "name": "search_uoinks", "arguments": {"query": ""}}}]
+    expected = [handler._handle_mcp_post("/mcp/v1", body) for body in requests]
+    for name in ("count", "mcp_call"):
+        monkeypatch.setattr(usage, name, Mock(side_effect=OSError("usage unavailable")))
+    assert [handler._handle_mcp_post("/mcp/v1", body) for body in requests] == expected
+
+
 def test_queued_events_survive_successful_send(store, monkeypatch):
     enabled()
     occurred = time.time()

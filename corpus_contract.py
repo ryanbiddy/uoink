@@ -28,6 +28,9 @@ FACET_NAMES = (
 )
 SEARCH_QUERY_KEYS = {
     "q",
+    "match",
+    "mode",
+    "search_details",
     "channel",
     "topic",
     "hook_type",
@@ -125,6 +128,9 @@ class SearchRequest:
     date_to: str | None = None
     limit: int = 50
     offset: int = 0
+    match: str = "forgiving"
+    mode: str = "keyword"
+    search_details: bool = False
 
     @classmethod
     def from_query(cls, query: Mapping[str, Any]) -> "SearchRequest":
@@ -189,7 +195,17 @@ class SearchRequest:
                 and values["date_from"] > values["date_to"]):
             raise ContractError(
                 "invalid_request", "date_from is after date_to")
-        return cls(limit=limit, offset=offset, **values)
+        match = one("match") or "forgiving"
+        if match not in ("forgiving", "strict"):
+            raise ContractError("invalid_request", "match must be forgiving or strict")
+        mode = one("mode") or "keyword"
+        if mode not in ("auto", "keyword", "semantic", "hybrid"):
+            raise ContractError("invalid_request", "mode must be auto, keyword, semantic or hybrid")
+        search_details = one("search_details") or "false"
+        if search_details not in ("true", "false"):
+            raise ContractError("invalid_request", "search_details must be true or false")
+        return cls(limit=limit, offset=offset, match=match, mode=mode,
+                   search_details=search_details == "true", **values)
 
 
 @dataclass(frozen=True)
@@ -331,7 +347,10 @@ def validate_source_url(value: Any, label: str) -> None:
         )
 
 
-def validate_item_ref(item: Any) -> None:
+def validate_item_ref(item: Any, *, search_details=False) -> None:
+    if search_details and isinstance(item, dict):
+        from uoink_core.search_service import CITATION_FIELDS
+        item = {key: value for key, value in item.items() if key not in CITATION_FIELDS}
     item = _exact_keys(item, _ITEM_KEYS, "item")
     if not isinstance(item["id"], str) or not item["id"]:
         raise ContractError(
@@ -462,7 +481,7 @@ def validate_assembly(data: Any) -> None:
         )
 
 
-def validate_data(operation: str, data: Any) -> None:
+def validate_data(operation: str, data: Any, *, search_details=False) -> None:
     if operation not in OPERATIONS:
         raise ContractError(
             "provider_nonconformant",
@@ -470,6 +489,9 @@ def validate_data(operation: str, data: Any) -> None:
             status=500,
         )
     if operation == "search":
+        if search_details and isinstance(data, dict):
+            from uoink_core.search_service import META_FIELDS
+            data = {key: value for key, value in data.items() if key not in META_FIELDS}
         data = _exact_keys(data, {"items", "page"}, "search data")
         if not isinstance(data["items"], list):
             raise ContractError(
@@ -478,7 +500,7 @@ def validate_data(operation: str, data: Any) -> None:
                 status=500,
             )
         for item in data["items"]:
-            validate_item_ref(item)
+            validate_item_ref(item, search_details=search_details)
         page = _exact_keys(
             data["page"],
             {"state", "total", "corpus_total", "limit", "offset"},
@@ -622,8 +644,8 @@ def validate_data(operation: str, data: Any) -> None:
         )
 
 
-def success(operation: str, data: dict) -> dict:
-    validate_data(operation, data)
+def success(operation: str, data: dict, *, search_details=False) -> dict:
+    validate_data(operation, data, search_details=search_details)
     return {
         "ok": True,
         "contract": CONTRACT_NAME,

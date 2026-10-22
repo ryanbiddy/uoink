@@ -265,14 +265,24 @@ def capture_result(result):
                        and ("video_id" not in result or bool(result["video_id"])))
 
 
-def search(fn):
+def search(fn=None, *, query_arg=None):
+    """Count the outer search once, excluding queryless browsing when requested."""
+    if fn is None:
+        return lambda fn: search(fn, query_arg=query_arg)
+    if query_arg is not None:
+        from inspect import signature
+        parameters = signature(fn)
     @wraps(fn)
     def wrapped(*args, **kwargs):
         nested = _search.get()
         token = _search.set(True)
         try:
-            if not nested:
-                count("searches")
+            try:
+                has_query = query_arg is None or bool(parameters.bind(*args, **kwargs).arguments.get(query_arg))
+                if not nested and has_query:
+                    count("searches")
+            except Exception:
+                pass  # Usage must not change the result or the original exception.
             return fn(*args, **kwargs)
         finally:
             _search.reset(token)
@@ -303,7 +313,10 @@ def capture(source, *, response=False):
             finally:
                 _capture.reset(token)
                 if not scope.get("skip"):
-                    count("captures", label, "ok" if scope["ok"] else "failed")
+                    try:
+                        count("captures", label, "ok" if scope["ok"] else "failed")
+                    except Exception:
+                        pass  # Preserve the capture result or its original exception.
         return wrapped
     return decorate
 

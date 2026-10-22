@@ -24,6 +24,14 @@ These two cached Python wheels contain no license-text member. The files beside 
 
 These notices do not establish legal clearance, authenticate every package member, or qualify package installation, script execution or model behavior.
 
+## Optional EmbeddingGemma search
+
+The model is downloaded only after acceptance. Its weights, search vectors and
+acceptance record are stored in the active installation's data folder and never
+ship in an installer or MCP bundle. The bundled [model notice](EmbeddingGemma-NOTICE.md)
+links to the [Gemma Terms of Use](Gemma-Terms-of-Use.txt) and
+[Prohibited Use Policy](Gemma-Prohibited-Use-Policy.txt).
+
 ## Adapted documentation text
 
 **ScrapeCreators social media research skills.** Uoink's five local research

@@ -646,6 +646,21 @@ def _check_memory_search_rate_limit() -> bool:
     return True
 
 
+# Status polling has its own budget and cannot consume search requests.
+_search_status_request_times: list[float] = []
+_search_status_rate_lock = threading.Lock()
+
+
+def _check_search_status_rate_limit() -> bool:
+    now = time.monotonic()
+    with _search_status_rate_lock:
+        _search_status_request_times[:] = [t for t in _search_status_request_times if t > now - 60.0]
+        if len(_search_status_request_times) >= 180:
+            return False
+        _search_status_request_times.append(now)
+    return True
+
+
 # ---- Strict JSON decoding (Living Library Phase 2, 2026-09-04) -------------
 # Python's json module accepts NaN, Infinity and duplicate object keys (the
 # last duplicate silently wins). The Phase 2 contract requires all three to be
@@ -2450,6 +2465,8 @@ _taxonomy_lock = threading.Lock()
 INDEX_PATH = DATA_ROOT / "index.db"
 _index_singleton: "index.Index | None" = None
 _index_open_lock = threading.Lock()
+_local_search_singleton = None
+_local_search_lock = threading.Lock()
 # True from an index.db corruption-recovery (open_or_recover) until the
 # rebuilding backfill scan finishes. Surfaced in /health as index_recovering.
 _index_recovering = False
@@ -2515,6 +2532,29 @@ def _get_index() -> "index.Index":
         elif getattr(_index_singleton, "_existing_read_only", False):
             _index_singleton.initialize_for_write()
         return _index_singleton
+
+
+def _get_local_search():
+    """One engine bound to this helper's resolved installation, created on demand."""
+    global _local_search_singleton
+    with _local_search_lock:
+        if _local_search_singleton is None:
+            from uoink_core.local_search import LocalSearch
+            idx = _get_index()
+            _local_search_singleton = LocalSearch(DATA_ROOT, idx)
+            idx.set_local_search(_local_search_singleton)
+        return _local_search_singleton
+
+
+def _resume_local_search():
+    from uoink_core.local_search import LocalSearch
+    if LocalSearch.enabled_at(DATA_ROOT):
+        try:
+            engine = _get_local_search()
+            if engine.manager.acceptance() and not engine.status()["paused"]:
+                engine.start()
+        except Exception:
+            log.warning("Semantic search could not resume; keyword search is available")
 
 
 def _get_existing_index(timeout_s: float | None = None) -> "index.Index":
@@ -3338,6 +3378,10 @@ def _index_yoink(folder: Path, sidecar: dict, corpus_path: Path | None,
             # (screenshots) the fenced transcript write does not own.
             idx.insert_citations(video_id, [])
     _mirror_event("capture", video_id=video_id)  # seam: capture_commit
+    try:
+        idx._notify_source_changed(video_id)
+    except Exception:
+        log.warning("Semantic search update failed; saved capture is intact")
     return True
 
 
@@ -9321,7 +9365,10 @@ def _podcast_transcription_worker() -> None:
                     "publish_failed" if corpus_error else "publish_not_requested"))
         except BaseException as exc:  # keep the one long-lived worker alive
             if not usage_publish_attempted and isinstance(job, dict) and job.get("publish_to_corpus"):
-                uoink_usage.count("captures", "podcast", "failed")
+                try:
+                    uoink_usage.count("captures", "podcast", "failed")
+                except Exception:
+                    pass
             # Tracebacks and raw tool text go only to server.log. The console,
             # the episode row and the job (shown by the dashboard) get the
             # sanitized forms used for every other machine error detail.
@@ -10143,7 +10190,10 @@ class _ServerCaptureBackend(source_subscriptions.CaptureBackend):
                 downloaded = podcasts.download_episode_audio(
                     _get_index(), episode_id, data_root=DATA_ROOT)
             if not downloaded.get("ok"):
-                uoink_usage.count("captures", "podcast", "failed")
+                try:
+                    uoink_usage.count("captures", "podcast", "failed")
+                except Exception:
+                    pass
                 # The downloader validates the enclosure before testing media.
                 if _platform.sys.platform == "darwin" and downloaded.get("code") == "media_requires_ffmpeg":
                     return source_subscriptions.CaptureOutcome(
@@ -10160,11 +10210,17 @@ class _ServerCaptureBackend(source_subscriptions.CaptureBackend):
                 consent_given=False, publish_to_corpus=True,
                 source_start_id=start_id, source_owner_token=start["owner_token"])
             if status == 412:
-                uoink_usage.count("captures", "podcast", "failed")
+                try:
+                    uoink_usage.count("captures", "podcast", "failed")
+                except Exception:
+                    pass
                 return source_subscriptions.CaptureOutcome(
                     "failed", code="missing_transcription_setup")
             if not queued.get("ok"):
-                uoink_usage.count("captures", "podcast", "failed")
+                try:
+                    uoink_usage.count("captures", "podcast", "failed")
+                except Exception:
+                    pass
                 return source_subscriptions.CaptureOutcome("failed", code="transcription_unavailable")
             # The queued job now owns the capture-identity lock (released by
             # _settle_source_capture when the job ends).
@@ -12747,11 +12803,32 @@ _LIBRARY_KINDS = {
 _LIBRARY_SORTS = ("newest", "oldest", "title", "relevance")
 
 
+@uoink_usage.search(query_arg="q")
 def _library_search(idx, *, q: str | None, filters: dict, kind: str | None,
-                    sort: str, limit: int, offset: int) -> dict:
+                    sort: str, limit: int, offset: int, match: str = "forgiving", mode="auto", passages=True) -> dict:
     """``{total, results}`` like Index.search_yoinks_for_memory, plus a
     source-type group (``kind``) and an order over every match: newest,
     oldest, title (A to Z), or relevance (FTS rank; newest without q)."""
+    from uoink_core.search_service import citation_fields, select_mode
+    actual, reason = select_mode(idx, mode)
+    if actual != "keyword" and q:
+        result = idx.search_mode(q, max(200, offset + limit), mode=mode, match=match, filters=filters, passages=False,
+                                source_types=_LIBRARY_KINDS.get(kind or ""),
+                                keyword=lambda count, start, override: _library_search(
+                                    idx, q=q, filters=filters, kind=kind,
+                                    sort="relevance" if override else sort,
+                                    limit=count, offset=start, match=override or match, mode="keyword", passages=False))
+        rows = result["results"]
+        if result["search_mode"] != "keyword":
+            if sort == "title":
+                rows.sort(key=lambda row: (row.get("title") or "").casefold())
+            elif sort in ("newest", "oldest"):
+                rows.sort(key=lambda row: (row.get("yoinked_at") or "", row["video_id"]), reverse=sort == "newest")
+        rows = rows[offset:offset + limit]
+        if passages:
+            rows = idx._search_passages(rows, q, "forgiving" if result["search_mode"] == "hybrid" else match)
+        return {**result, "results": rows}
+    mode_info = {"search_mode": "keyword", "requested_mode": mode, "fallback_reason": reason}
     clauses = ["y.deleted_at IS NULL"]
     params: list = []
     for column in ("channel", "platform", "source_type", "author", "topic", "hook_type"):
@@ -12779,31 +12856,48 @@ def _library_search(idx, *, q: str | None, filters: dict, kind: str | None,
         "oldest": "y.yoinked_at ASC, y.video_id ASC",
         "title": "y.title COLLATE NOCASE ASC, y.yoinked_at DESC",
     }.get(sort, "y.yoinked_at DESC, y.video_id DESC")
-    if q:
-        uoink_usage.count("searches")
-    match = index._fts_query(q) if q else ""
-    if q and not match:
-        return {"total": 0, "results": []}
-    if match:
-        tail = ("FROM yoinks_fts f JOIN yoinks y ON y.video_id = f.video_id "
-                "WHERE yoinks_fts MATCH ? AND " + where)
-        args = [match] + params
+    expression = index._fts_query(q, match)
+    prefix = ""
+    if q and not expression:
+        return {"total": 0, "results": [], **mode_info}
+    if expression:
+        prefix, search_params = index._fts_hits(
+            "yoinks_fts", q, match, idx._YOINKS_BM25_WEIGHTS if match == "forgiving" else "")
+        tail = ("FROM search_hits h CROSS JOIN yoinks y ON y.video_id = h.video_id WHERE " + where)
+        args = search_params + params
         if sort == "relevance":
-            order = "bm25(yoinks_fts)"
+            order = "h._score, y.video_id"
     else:
         tail = "FROM yoinks y WHERE " + where
         args = params
-    with idx._lock:
+    with idx.search_read() as db:
         try:
-            cnt = idx._conn.execute("SELECT COUNT(*) AS n " + tail, args).fetchone()
-            rows = idx._conn.execute(
-                "SELECT y.* " + tail + " ORDER BY " + order + " LIMIT ? OFFSET ?",
-                args + [limit, offset]).fetchall()
-        except sqlite3.OperationalError:
+            rows = (idx._ranked_source_page(db, q, limit, offset, where, params)
+                    if expression and match == "forgiving" and sort == "relevance" else None)
+            if rows is not None:
+                cnt = db.execute(
+                    "SELECT COUNT(*) AS n FROM yoinks_fts CROSS JOIN yoinks y "
+                    "ON y.video_id=yoinks_fts.video_id WHERE yoinks_fts MATCH ? AND " + where,
+                    [expression, *params]).fetchone()
+            else:
+                count_prefix, count_args = (index._fts_hits("yoinks_fts", q, match, ranked=False)
+                                            if expression else ("", []))
+                cnt = db.execute(count_prefix + "SELECT COUNT(*) AS n " + tail, count_args + params).fetchone()
+                if expression:
+                    rows = db.execute(index._fts_page(prefix, tail, order, offset=True, snippets=passages),
+                                      args + [limit, offset] + ([expression] if passages else [])).fetchall()
+                else:
+                    rows = db.execute(
+                        prefix + "SELECT y.* " + tail + " ORDER BY " + order + " LIMIT ? OFFSET ?",
+                        args + [limit, offset]).fetchall()
+        except sqlite3.OperationalError as error:
             # A MATCH expression FTS5 still rejects reads as no matches.
-            log.warning("library search rejected query %r", q)
-            return {"total": 0, "results": []}
-    return {"total": int(cnt["n"]) if cnt else 0, "results": [dict(r) for r in rows]}
+            idx._search_error(error, q, "library search")
+            return {"total": 0, "results": [], **mode_info}
+    rows = [dict(r) for r in rows]
+    return {"total": int(cnt["n"]) if cnt else 0,
+            "results": idx._search_passages(rows, q, match) if q and passages else rows,
+            **mode_info}
 
 
 def _enrich_yoink_rows(idx, rows: list[dict]) -> list[dict]:
@@ -12947,6 +13041,7 @@ def _enrich_yoink_rows(idx, rows: list[dict]) -> list[dict]:
             "transcript_source": transcript_source if isinstance(transcript_source, str) else None,
             "asr_fallback_status": asr_status if isinstance(asr_status, str) else None,
             "has_transcript": bool(transcript),
+            **{key: r[key] for key in ("passage", "source_id", "passage_id", "span", "timestamp_seconds", "passage_verified", "citation_reason") if key in r},
         })
     return out
 
@@ -13720,6 +13815,10 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_session_active()
         if bare == "/settings":
             return self._handle_settings_get()
+        if bare == "/search/status":
+            return self._handle_search_control("status")
+        if bare.startswith("/search/notices/"):
+            return self._handle_search_notice(bare.rsplit("/", 1)[-1])
         if sys.platform == "darwin" and bare == "/helper/ui":
             from helper.mac_ui import menu_state
             return self._send_json(200, {"ok": True, **menu_state()})
@@ -13944,6 +14043,41 @@ class Handler(BaseHTTPRequestHandler):
         )
 
     # ---- /settings ----
+    def _handle_search_notice(self, name):
+        allowed = {"EmbeddingGemma-NOTICE.md", "Gemma-Terms-of-Use.txt",
+                   "Gemma-Prohibited-Use-Policy.txt"}
+        if name not in allowed:
+            return self._send_json(404, {"ok": False, "error": "notice not found"})
+        return self._send_file(HERE / "third-party-notices" / name, "text/plain; charset=utf-8")
+
+    def _handle_search_control(self, action, body=None):
+        if not self._is_dashboard_origin():
+            return self._send_json(403, {"ok": False, "error": "dashboard origin required"})
+        rate_limit = _check_search_status_rate_limit if action == "status" else _check_memory_search_rate_limit
+        if not rate_limit():
+            return self._send_json(429, {"ok": False, "error": "too many requests"})
+        from uoink_core.local_search import TermsRequired
+        try:
+            engine = _get_local_search()
+            if action == "terms":
+                if not isinstance(body, dict):
+                    raise TermsRequired("Accept the current Gemma terms first")
+                engine.accept_terms(accepted=body.get("accepted"), terms_version=body.get("terms_version"))
+            elif action == "download":
+                engine.download()
+            elif action == "start":
+                engine.start(download=not engine.manager.present())
+            elif action == "pause":
+                if not engine.pause():
+                    return self._send_json(409, {"ok": False, "error": "Pausing. Try again after the current batch stops."})
+            elif action == "remove":
+                engine.remove()
+            return self._send_json(200, {"ok": True, **engine.status()})
+        except (TermsRequired, ValueError):
+            return self._send_json(400, {"ok": False, "error": "Accept the current Gemma terms with accepted: true first."})
+        except Exception:
+            return self._send_json(503, {"ok": False, "error": "Semantic search is unavailable. Keyword search still works. Try again in Settings."})
+
     def _handle_settings_get(self):
         self._send_json(200, {"ok": True, "settings": _public_settings()})
 
@@ -14185,10 +14319,10 @@ class Handler(BaseHTTPRequestHandler):
             corpus_contract.failure(operation, error),
         )
 
-    def _corpus_v1_call(self, operation: str, callback):
+    def _corpus_v1_call(self, operation: str, callback, *, search_details=False):
         try:
             data = callback()
-            payload = corpus_contract.success(operation, data)
+            payload = corpus_contract.success(operation, data, search_details=search_details)
         except corpus_contract.ContractError as error:
             return self._send_corpus_v1_error(operation, error)
         except Exception:
@@ -14211,6 +14345,7 @@ class Handler(BaseHTTPRequestHandler):
         return self._corpus_v1_call(
             "search",
             lambda: self._corpus_v1_provider().search(request),
+            search_details=request.search_details,
         )
 
     def _handle_corpus_v1_get(self, bare: str):
@@ -16686,7 +16821,10 @@ class Handler(BaseHTTPRequestHandler):
         if bare == "/mcp/v1/initialize" or (bare == "/mcp/v1" and method == "initialize"):
             params = body.get("params") or {}
             client = params.get("clientInfo") if isinstance(params, dict) else None
-            uoink_usage.count("mcp_clients", client.get("name") if isinstance(client, dict) else None)
+            try:
+                uoink_usage.count("mcp_clients", client.get("name") if isinstance(client, dict) else None)
+            except Exception:
+                pass
             return self._send_mcp_result(request_id, _mcp_initialize_result(body))
         if method == "notifications/initialized":
             # JSON-RPC notifications have no response id/body. Return an
@@ -16708,7 +16846,10 @@ class Handler(BaseHTTPRequestHandler):
             if not isinstance(name, str) or not isinstance(args, dict):
                 return self._send_mcp_error(request_id, -32602, "invalid tool call")
             tools = _mcp_tools_module()
-            uoink_usage.mcp_call(name, "http")
+            try:
+                uoink_usage.mcp_call(name, "http")
+            except Exception:
+                pass
             if name in getattr(tools, "DISCOVERY_TOOL_NAMES", ()):
                 payload = tools.call_tool(name, args, **self._discovery_context())
             else:
@@ -16787,6 +16928,12 @@ class Handler(BaseHTTPRequestHandler):
             sort = None
 
         q = _one("q")
+        mode = _one("mode") or "auto"
+        if mode not in ("auto", "keyword", "semantic", "hybrid"):
+            return self._send_json(400, {"ok": False, "error": "mode must be auto, keyword, semantic or hybrid"})
+        match = _one("match") or "forgiving"
+        if match not in ("forgiving", "strict"):
+            return self._send_json(400, {"ok": False, "error": "match must be forgiving or strict"})
         # The index's own order already answers newest-first without a
         # query and best match with one; only a type group or another
         # order needs _library_search.
@@ -16796,7 +16943,7 @@ class Handler(BaseHTTPRequestHandler):
         try:
             if kind or not own_order:
                 res = _library_search(
-                    idx, q=q, kind=kind, sort=sort or "newest",
+                    idx, q=q, kind=kind, sort=sort or ("relevance" if q else "newest"), match=match, mode=mode,
                     filters={
                         "channel": _one("channel"), "topic": _one("topic"),
                         "hook_type": hook_type, "platform": _one("platform"),
@@ -16806,13 +16953,12 @@ class Handler(BaseHTTPRequestHandler):
                     limit=limit, offset=offset,
                 )
             else:
-                res = idx.search_yoinks_for_memory(
-                    q=q, channel=_one("channel"), topic=_one("topic"),
-                    hook_type=hook_type,
-                    platform=_one("platform"), source_type=_one("source_type"),
-                    author=_one("author"),
-                    date_from=date_from, date_to=date_to,
-                    limit=limit, offset=offset,
+                res = idx.search_mode(
+                    q, mode=mode, match=match, limit=limit, offset=offset,
+                    filters={"channel": _one("channel"), "topic": _one("topic"),
+                             "hook_type": hook_type, "platform": _one("platform"),
+                             "source_type": _one("source_type"), "author": _one("author"),
+                             "date_from": date_from, "date_to": date_to},
                 )
             corpus_total = idx.count_corpus()
         except Exception as e:
@@ -16846,6 +16992,7 @@ class Handler(BaseHTTPRequestHandler):
             "limit": limit,
             "offset": offset,
             "results": results,
+            **{key: res[key] for key in ("search_mode", "requested_mode", "fallback_reason") if key in res},
         })
 
     # ---- /open-folder?path=... ----
@@ -18384,6 +18531,8 @@ class Handler(BaseHTTPRequestHandler):
             return
         from urllib.parse import unquote
         bare = self.path.split("?", 1)[0]
+        if bare == "/search/model":
+            return self._handle_search_control("remove")
         m = re.fullmatch(r"/taste/anchors/([^/]+)", bare)
         if m:
             return self._handle_taste_anchor_delete(unquote(m.group(1)))
@@ -18417,6 +18566,9 @@ class Handler(BaseHTTPRequestHandler):
         except Handler._BodyError as e:
             return self._send_json(e.status, {"ok": False, "error": e.message})
 
+        if bare in ("/search/terms", "/search/model", "/search/start", "/search/pause"):
+            return self._handle_search_control({"/search/terms": "terms", "/search/model": "download",
+                                                "/search/start": "start", "/search/pause": "pause"}[bare], body)
         if bare == LIBRARY_INTENT_ROUTE:
             return self._handle_library_intent(body)
         if bare == DISCOVERY_INTENT_ROUTE:
@@ -20378,6 +20530,7 @@ def main(*, show_dashboard: bool = False):
             # A subinterpreter also has a main_thread(), but CPython permits
             # signal handlers only in the main interpreter. Leave it unchanged.
             pass
+    _resume_local_search()
     try:
         server.serve_forever()
     except KeyboardInterrupt:
@@ -20387,6 +20540,8 @@ def main(*, show_dashboard: bool = False):
             from helper.mac_ui import close_children
             close_children()
         _remove_suite_lease()
+        if _local_search_singleton is not None:
+            _local_search_singleton.pause()
         server.server_close()
 
 
@@ -20856,6 +21011,10 @@ def _call_http_registry_tool(name: str, arguments: dict,
             "error": f"helper returned HTTP {status}",
         }
     except (urllib.error.URLError, TimeoutError, OSError) as exc:
+        if (name in ("search_library", "search_uoinks", "search_clips")
+                and isinstance(getattr(exc, "reason", exc), TimeoutError)):
+            from library_resources import ResourceError
+            return ResourceError("deadline_exceeded").envelope()
         return {
             "ok": False,
             "error": f"could not reach the Uoink helper at {url}: {exc}",

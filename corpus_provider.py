@@ -63,7 +63,7 @@ class UoinkCorpusProvider:
         del name
         return str(value or "").replace("_", " ").replace("-", " ").title()
 
-    def _item_ref(self, row: dict) -> dict:
+    def _item_ref(self, row: dict, *, search_details=False) -> dict:
         metadata = _json_object(row.get("metadata_json"))
         author = (
             row.get("author")
@@ -92,6 +92,7 @@ class UoinkCorpusProvider:
         )
         return {
             "id": str(row.get("video_id") or ""),
+            **({key: row[key] for key in ("passage", "source_id", "passage_id", "span", "timestamp_seconds", "passage_verified", "citation_reason") if key in row} if search_details else {}),
             "title": str(row.get("title") or ""),
             "author": str(author) if author else None,
             "source_type": source_type,
@@ -119,18 +120,13 @@ class UoinkCorpusProvider:
 
     def search(self, request: corpus_contract.SearchRequest) -> dict:
         try:
-            result = self.idx.search_yoinks_for_memory(
-                q=request.q,
-                channel=request.channel,
-                topic=request.topic,
-                hook_type=request.hook_type,
-                platform=request.platform,
-                source_type=request.source_type,
-                author=request.author,
-                date_from=request.date_from,
-                date_to=request.date_to,
+            result = self.idx.search_mode(
+                request.q, mode=request.mode, match=request.match,
+                filters={key: getattr(request, key) for key in (
+                    "channel", "topic", "hook_type", "platform", "source_type", "author", "date_from", "date_to")},
                 limit=request.limit,
                 offset=request.offset,
+                passages=request.search_details,
             )
             corpus_total = self.idx.count_corpus()
         except Exception as error:
@@ -149,9 +145,10 @@ class UoinkCorpusProvider:
             state = "empty_corpus"
         return {
             "items": [
-                self._item_ref(dict(row))
+                self._item_ref(dict(row), search_details=request.search_details and bool(request.q))
                 for row in result.get("results") or []
             ],
+            **({key: result[key] for key in ("search_mode", "requested_mode", "fallback_reason") if key in result} if request.search_details else {}),
             "page": {
                 "state": state,
                 "total": total,

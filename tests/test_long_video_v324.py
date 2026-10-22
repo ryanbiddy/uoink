@@ -226,7 +226,7 @@ def test_phase_error_and_activity_record():
 def test_extract_route_carries_chunked_mode(tmp: Path):
     captured = {}
     saved = {name: getattr(server, name) for name in (
-        "DESKTOP_ROOT", "_fetch_metadata", "_classify_topic",
+        "DESKTOP_ROOT", "DATA_ROOT", "_get_index", "_fetch_metadata", "_classify_topic",
         "_run_extraction", "_record_single_extract_job",
     )}
 
@@ -252,8 +252,11 @@ def test_extract_route_carries_chunked_mode(tmp: Path):
             "source_duration_seconds": 7200,
         }
 
+    isolated_index = index_module.Index.open(tmp / "index.db")
     try:
         server.DESKTOP_ROOT = tmp
+        server.DATA_ROOT = tmp
+        server._get_index = lambda: isolated_index
         server._fetch_metadata = lambda *_a, **_k: {
             "id": "abcdef", "title": "Long source", "duration": 7200}
         server._classify_topic = lambda *_a, **_k: "Test"
@@ -275,6 +278,7 @@ def test_extract_route_carries_chunked_mode(tmp: Path):
     finally:
         for name, value in saved.items():
             setattr(server, name, value)
+        isolated_index.close()
 
     _assert(status == 200 and payload["long_video_mode"] == "chunked",
             f"/extract exposes selected mode: {status}, {payload}")

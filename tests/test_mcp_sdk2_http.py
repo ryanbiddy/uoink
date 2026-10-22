@@ -43,7 +43,7 @@ def test_sdk2_http_client_completes_list_and_call(tmp_path, mode):
                     assert [t.model_dump(by_alias=True, exclude_none=True) for t in listing.tools] == registry_golden()
                     called = await client.call_tool("search_clips", {"query": "absent-m2-topic"})
                     assert called.is_error is False
-                    assert called.structured_content == {"ok": True, "results": []}
+                    assert called.structured_content == json.loads(GOLDEN["success"]["content"][0]["text"])
                     assert json.loads(called.content[0].text) == called.structured_content
                     evidence.update(tools=len(listing.tools), call=called.model_dump(by_alias=True, exclude_none=True))
 
