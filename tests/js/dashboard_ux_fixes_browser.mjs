@@ -85,7 +85,7 @@ try {
     const settings = await bounds("#tab-settings");
     assert.equal(settings.x, library.x, "Settings shares the Library left edge");
     assert.equal(settings.width, library.width, "Settings shares the Library width");
-    assert.equal(await page.locator(".settings-index a").count(), 6, "all section chips remain");
+    assert.equal(await page.locator(".settings-index a").count(), 7, "all section chips remain");
     const copy = await page.locator("#tab-settings .setting-copy").first().evaluate((el) => {
       const s = getComputedStyle(el);
       return { width: el.getBoundingClientRect().width, max: parseFloat(s.maxWidth) };

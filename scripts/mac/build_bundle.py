@@ -42,6 +42,15 @@ def run(command, **kwargs):
         raise
 
 
+def assert_search_payload(paths):
+    for path in paths:
+        path = Path(path)
+        if ({part.lower() for part in path.parts} & {"_scratch", "embeddinggemma-300m-onnx-q8-v1"}
+                or re.match(r"^(embeddinggemma-terms\.json|search-settings\.json|search-vectors\.db|model_quantized\.onnx)([.\-_].*)?$",
+                            path.name, re.IGNORECASE)):
+            raise ValueError(f"Search model or private search state in package: {path}")
+
+
 def payload_files(root: Path = ROOT) -> list[Path]:
     manifest = json.loads((root / "scripts/mac/payload.json").read_text(encoding="utf-8"))
     if manifest["schema_version"] != 1:
@@ -70,6 +79,12 @@ def payload_files(root: Path = ROOT) -> list[Path]:
     for name in paths:
         if not any(p == Path(name) or Path(name) in p.parents for p in files):
             raise ValueError(f"Payload not tracked: {name}")
+    assert_search_payload(files)
+    required = {Path("uoink_core/local_search.py"), Path("uoink_core/search_service.py"),
+                *(Path("third-party-notices") / name for name in (
+                    "EmbeddingGemma-NOTICE.md", "Gemma-Terms-of-Use.txt", "Gemma-Prohibited-Use-Policy.txt"))}
+    if required - set(files):
+        raise ValueError("Missing semantic search source or notices")
     return sorted(files)
 
 
@@ -453,6 +468,7 @@ def build(wheels: Path, output: Path, ffmpeg_output: Path | None = None) -> Path
                                        "signing": "whole app ad-hoc; no Developer ID or notarization",
                                        "minimum_os": MINIMUM_MACOS,
                                        "source_files": [p.as_posix() for p in files]})
+    assert_search_payload(path.relative_to(app) for path in app.rglob("*"))
     sign_app(app, output / "signing.json")
     write_json(output / "native-inventory.json", binary_inventory(app))
     inventory = tree_inventory(app)

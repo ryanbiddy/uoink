@@ -44,8 +44,10 @@ def test_boolean_keywords_remain_literal_words_in_mixed_language_search(tmp_path
         seed(db, "wanted", "日本語 OR canción")
         seed(db, "japanese-only", "日本語")
         seed(db, "spanish-only", "canción")
-        assert [row["video_id"] for row in db.search('日本語 OR "canción"')] == ["wanted"]
-        assert index._fts_query('title:日本語 NOT canción*') == '"title" "日本語" "NOT" "canción"*'
+        assert [row["video_id"] for row in db.search('日本語 OR "canción"')][0] == "wanted"
+        assert len(db.search('日本語 OR "canción"')) == 3
+        assert [row["video_id"] for row in db.search('日本語 OR "canción"', match="strict")] == ["wanted"]
+        assert index._fts_query('title:日本語 NOT canción*', "strict") == '"title" "日本語" "NOT" "canción"*'
 
 
 @pytest.mark.parametrize("query", ["", '"*():{}[]', "\u0301\u0308", "\x00\n\t", "🙂"])
@@ -54,4 +56,5 @@ def test_separator_only_queries_stay_empty(query):
 
 
 def test_existing_ascii_and_numeric_query_behavior_is_preserved():
-    assert index._fts_query('foo_bar 123 hooks') == '"foo_bar" "123" "hooks"*'
+    assert index._fts_query('foo_bar 123 hooks') == '"foo_bar" OR "123" OR "hooks"*'
+    assert index._fts_query('foo_bar 123 hooks', "strict") == '"foo_bar" "123" "hooks"*'

@@ -30,6 +30,22 @@ All routes require `X-Uoink-Token`. Search accepts `q`, `channel`, `topic`,
 `limit`, and `offset`. `limit` is 1 through 200; dates are `YYYY-MM-DD`.
 Unknown parameters return `invalid_request`.
 
+Search also accepts `match=forgiving|strict` and
+`mode=auto|keyword|semantic|hybrid`. An omitted mode uses forgiving keyword
+search, so `page.total` counts all matches and offsets can reach every page.
+Explicit `auto`, `semantic`, or `hybrid` can use the semantic candidate pool;
+its total describes that pool. The default response keeps the exact v1 keys
+used by Writer. Without `search_details=true`, search skips passage extraction.
+
+Callers that need citation and mode details must send `search_details=true`.
+That opt-in adds `search_mode`, `requested_mode`, and `fallback_reason` to search
+data. Query results may also carry `source_id`, `passage_verified`,
+`citation_reason`, `passage`, `passage_id`, `span`, and `timestamp_seconds`.
+Browse requests without `q` omit citation fields, including with the opt-in.
+`search_details=false` or an omitted parameter returns the original v1 shape.
+The default validator rejects all of these extra fields. An opted-in consumer
+must validate with `search_details=True`.
+
 Assembly accepts a JSON object with optional `format`, `topic`, `hook_target`,
 `your_channel`, and `n_examples` fields. `n_examples` is an integer from 1
 through 100. Unknown fields are rejected, including `workspace_id`: assembly

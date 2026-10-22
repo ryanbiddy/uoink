@@ -165,7 +165,8 @@ def test_legacy_http_wire_golden(tmp_path, version, aliases, inventory):
             assert client.post(rpc(2, "tools/list"), path=path("tools/list")) == (200, {
                 "jsonrpc": "2.0", "id": 2, "result": {"tools": inventory["full"]}})
             call = rpc(3, "tools/call", {"name": "search_clips", "arguments": {"query": "absent-m2-topic"}})
-            expected = dict(GOLDEN["success"], structuredContent={"ok": True, "results": []})
+            expected = dict(GOLDEN["success"], structuredContent=json.loads(
+                GOLDEN["success"]["content"][0]["text"]))
             assert client.post(call, path=path("tools/call")) == (200, {
                 "jsonrpc": "2.0", "id": 3, "result": expected})
             assert json.loads(expected["content"][0]["text"]) == expected["structuredContent"]

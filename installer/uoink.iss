@@ -100,6 +100,9 @@ Name: "agentpath"; Description: "Add the uoink command to PATH for AI agents"; G
 ; Attribution index and exact supplemental notices (staged with hash checks).
 Source: "staging\THIRD-PARTY-NOTICES.md"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\third-party-notices\README.md"; DestDir: "{app}\third-party-notices"; Flags: ignoreversion
+Source: "staging\third-party-notices\EmbeddingGemma-NOTICE.md"; DestDir: "{app}\third-party-notices"; Flags: ignoreversion
+Source: "staging\third-party-notices\Gemma-Terms-of-Use.txt"; DestDir: "{app}\third-party-notices"; Flags: ignoreversion
+Source: "staging\third-party-notices\Gemma-Prohibited-Use-Policy.txt"; DestDir: "{app}\third-party-notices"; Flags: ignoreversion
 Source: "staging\third-party-notices\antlr4-python3-runtime-4.9.3-LICENSE.txt"; DestDir: "{app}\third-party-notices"; Flags: ignoreversion
 Source: "staging\third-party-notices\proxy-tools-0.1.0-UPSTREAM-LICENSE.txt"; DestDir: "{app}\third-party-notices"; Flags: ignoreversion
 Source: "staging\third-party-notices\scrapecreators-social-media-research-skills-MIT-LICENSE.txt"; DestDir: "{app}\third-party-notices"; Flags: ignoreversion

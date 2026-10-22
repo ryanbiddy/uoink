@@ -264,6 +264,8 @@ def test_route_captures_and_persists():
         idx = index_mod.Index.open(Path(d) / "index.db")
         original_get_index = server._get_index
         original_extract = server.x_extractor.extract_x_thread
+        original_root = server.DESKTOP_ROOT
+        server.DESKTOP_ROOT = Path(d) / "output"
         server._get_index = lambda: idx
         fetch = _fetcher({"7": _payload("7", "Persist me.")})
         # server.x_extractor is this same module object, so route through
@@ -293,6 +295,7 @@ def test_route_captures_and_persists():
                         f"failure relay: {res}")
         finally:
             server._get_index = original_get_index
+            server.DESKTOP_ROOT = original_root
             server.x_extractor.extract_x_thread = original_extract
             idx.close()
     print("ok  route persists an x_thread yoink and relays honest errors")

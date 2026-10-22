@@ -16,6 +16,7 @@ function fixture() {
   const p=setup(), requests=[], copies=[];
   let transport=async path=>{
     if(path==='/settings/pricing') return {ok:true,pricing};
+    if(path==='/search/status') return {ok:true,state:'not_installed',enabled:false,accepted:false};
     if(path==='/taxonomy/corrections?limit=20') return {ok:true,total:4,corrections};
     if(path==='/skill/system-prompt') return prompt;
     if(path.startsWith('/open-folder?path=')) return {ok:true};
@@ -157,7 +158,7 @@ const groups={
     const p=fixture();
     for(const fn of ['loadSettingsMcp','loadTasteSettings','loadPlaylistSettings','loadPodcastFeedSettings','loadChannels','loadAllowedSites','loadAgentSetup']) p.c[fn]=async()=>{};
     await p.c.refreshSettings();
-    assert.deepEqual(new Set(p.requests.map(r=>r.path)),new Set(['/settings','/settings/pricing','/taxonomy/corrections?limit=20','/skill/system-prompt']));
+    assert.deepEqual(new Set(p.requests.map(r=>r.path)),new Set(['/settings','/settings/pricing','/taxonomy/corrections?limit=20','/skill/system-prompt','/search/status']));
     assert.equal(p.el('aiCostEstimate').classList.contains('hidden'),false);
     assert.equal(p.el('hookCorrectionsList').children.length,4);
     assert.equal(p.el('skillSystemPrompt').value,prompt);

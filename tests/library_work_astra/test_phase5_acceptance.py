@@ -372,15 +372,15 @@ def test_phase5_missing_episode_table_is_feature_unavailable(db):
 def test_phase5_reuses_phase4_active_read_limit(db, monkeypatch):
     guard = library_resources.ReadGuard()
     monkeypatch.setattr(library_resources, "_PROCESS_GUARD", guard)
-    guard.admit()
-    guard.admit()
+    for _ in range(guard.max_active):
+        guard.admit()
     try:
         result = report(db)
         assert result["ok"] is False
         assert result["error"]["code"] == "rate_limited"
     finally:
-        guard.release()
-        guard.release()
+        for _ in range(guard.max_active):
+            guard.release()
 
 
 def test_phase5_expired_query_stops_before_subsequent_queries(db, monkeypatch):

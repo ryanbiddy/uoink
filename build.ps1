@@ -611,7 +611,10 @@ New-Item -ItemType Directory -Force -Path (Join-Path $StagingDir 'third-party-no
 foreach ($noticeRelative in @('THIRD-PARTY-NOTICES.md', 'third-party-notices\README.md',
         'third-party-notices\antlr4-python3-runtime-4.9.3-LICENSE.txt',
         'third-party-notices\proxy-tools-0.1.0-UPSTREAM-LICENSE.txt',
-        'third-party-notices\scrapecreators-social-media-research-skills-MIT-LICENSE.txt')) {
+        'third-party-notices\scrapecreators-social-media-research-skills-MIT-LICENSE.txt',
+        'third-party-notices\EmbeddingGemma-NOTICE.md',
+        'third-party-notices\Gemma-Terms-of-Use.txt',
+        'third-party-notices\Gemma-Prohibited-Use-Policy.txt')) {
     $noticeSource = Join-Path $RepoRoot $noticeRelative
     $noticeTarget = Join-Path $StagingDir $noticeRelative
     $noticeHash = (Get-FileHash -LiteralPath $noticeSource -Algorithm SHA256).Hash
@@ -860,6 +863,13 @@ if ($remainingBytecode) {
 }
 if (Test-Path $stagedToken) {
     throw 'Final staging cleanup left token.txt'
+}
+
+& (Join-Path $RepoRoot 'scripts\assert-search-payload.ps1') -Root $StagingDir
+foreach ($searchModule in @('local_search.py', 'search_service.py')) {
+    if (-not (Test-Path -LiteralPath (Join-Path $StagingDir "uoink_core\$searchModule"))) {
+        throw "Missing search module: $searchModule"
+    }
 }
 
 # Inno records source mtimes in setup data. Worktree checkout times made two
