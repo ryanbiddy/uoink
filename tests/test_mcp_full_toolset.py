@@ -46,7 +46,7 @@ def test_real_stdio_toolsets_and_helper_down(tmp_path, mode, count):
         client.send({"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {
             "protocolVersion": "2024-11-05", "capabilities": {},
             "clientInfo": {"name": "release-smoke", "version": "1"}}})
-        assert client.wait_for(1)["result"]["serverInfo"]["version"] == "3.10.0"
+        assert client.wait_for(1)["result"]["serverInfo"]["version"] == (ROOT / "VERSION").read_text(encoding="utf-8").strip()
         client.send({"jsonrpc": "2.0", "method": "notifications/initialized"})
         client.send({"jsonrpc": "2.0", "id": 2, "method": "tools/list"})
         listed = client.wait_for(2)["result"]["tools"]
