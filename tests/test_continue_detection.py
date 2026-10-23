@@ -171,7 +171,11 @@ def test_printed_continue_recipe_is_detected(client_home):
 
 def test_windows_path_spelling_and_renamed_entry(client_home, monkeypatch):
     monkeypatch.setattr(sys, "platform", "win32")
-    command, args = server._mcp_stdio_command()
+    # Use real Windows paths: on a POSIX host the install paths have no drive, and
+    # Python 3.13's ntpath.isabs treats "/Users/..." as relative.
+    command = r"C:\Users\Me\AppData\Local\Uoink\python\python.exe"
+    args = [r"C:\Users\Me\AppData\Local\Uoink\uoink_mcp.py"]
+    monkeypatch.setattr(server, "_mcp_stdio_command", lambda: (command, args))
     entry = {"command": command.upper().replace("\\", "/"),
              "args": [a.upper().replace("\\", "/") for a in args]}
     path = client_home / "renamed.json"
