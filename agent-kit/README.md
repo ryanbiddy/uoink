@@ -10,7 +10,7 @@ terminal and run `uoink status`. This kit contains instructions and MCP config;
 it does not include Python, the app, or your library. The CLI requires the
 3.10.0 release of Uoink or later.
 
-For the private macOS build, follow [the draft Mac install guide](../docs/mac/INSTALL.md).
+For the private macOS build, follow [the draft Mac install guide](https://github.com/ryanbiddy/uoink/blob/main/docs/mac/INSTALL.md).
 The CLI is `<installed Uoink.app>/Contents/Helpers/uoink`. Use a PATH symlink
 to that shim, then run `uoink connect <client>` to print the actual app paths.
 The command uses `Contents/Resources/Python/bin/python3 -B -s` and
