@@ -25,6 +25,7 @@ over nested JSON in native-command arguments.
 | `zing render` | EDL → MP4 using FFmpeg/libass; optional voiceover is separate. |
 | `zing layout` | Explicit model fetching or standalone caption geometry plan. |
 | `zing color` | Match SDR distribution → recipe/LUT/preview; apply LUT → derived video. |
+| `zing music check` | Rate supplied local music for a brief or plan. No downloads; requires the audio extra. |
 | `zing audio` | Analyze local audio/video → observations; does not change the mix. |
 | `zing thumbs` | Thumbnail candidates for a studied slug. |
 | `zing inspect` | Timeline PNG with aligned frames/waveform/available timed text. |
@@ -165,6 +166,12 @@ zing still pick ./stills --id CONCEPT_ID --workspace /absolute/workspace
 
 Use an ID returned by the first command. Both forms accept `--json`; workspace
 selection controls cached models and assets, while `--out` names the output folder.
+`--aspect` is 1:1, 4:5, 9:16 or 16:9. `--fit auto` (default) crops to fill the
+frame only when the face detector ran and detected faces (or, with none, a
+measured subject in a crop keeping 75% of the photo) fit with margin; else it
+blur-fills and warns why. Without `zing layout fetch-model` it never crops; `fill`, `blur`, `contain`
+(letterbox) and `cover` (centered crop) force one framing. `meme render` takes
+the same `--fit` values; `meme render-video` takes `cover`, `contain` or `blur`.
 
 For individual memes:
 
