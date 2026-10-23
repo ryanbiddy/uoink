@@ -15,7 +15,7 @@
     {
       "name": "zing",
       "source": "./plugins/zing",
-      "description": "Study, match, render and inspect short videos and memes locally with Zing; uses your Uoink library for references."
+      "description": "Pre-alpha. Study a reference video, match that look on your clips and make memes, on your machine. Needs Python and FFmpeg."
     }
   ]
 }
