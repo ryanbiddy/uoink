@@ -54,6 +54,7 @@ HARNESS = ROOT / "tests" / "js" / "rehaul_shell_test.mjs"
 SECTIONS = [
     ("capture", "Capture"),
     ("ai", "AI features"),
+    ("search", "Semantic search"),
     ("library", "Library and export"),
     ("agents", "Agents (MCP)"),
     ("app", "App"),
@@ -188,7 +189,7 @@ def test_about_star_and_stop_live_in_settings_app():
     assert "⭐" not in DASHBOARD
 
 
-def test_settings_has_the_five_spec_sections_in_order():
+def test_settings_has_the_spec_sections_and_optional_search_in_order():
     settings = _panel("settings")
     index = _between(settings, '<nav class="settings-index" aria-label="Settings sections">', "</nav>")
     assert re.findall(r'<a href="#settings/([a-z]+)">([^<]+)</a>', index) == SECTIONS
@@ -198,7 +199,7 @@ def test_settings_has_the_five_spec_sections_in_order():
         heading = re.search(
             rf'<section class="settings-section" id="settings-{key}" aria-labelledby="([^"]+)">\s*'
             r'<h2 class="settings-section-title" id="\1" tabindex="-1">([^<]+)</h2>', settings)
-        assert heading and heading.group(2) == title, key
+        assert heading and heading.group(2) == (title + " (optional)" if key == "search" else title), key
     blocks = {
         "capture": ("Auto-uoink playlists", "Taste-aware auto-uoink", "Podcast feeds", "Sites Uoink works on",
                     "Clipboard screenshots", "Transcript checker"),

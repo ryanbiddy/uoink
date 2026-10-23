@@ -475,7 +475,7 @@ async function groupPaste() {
     await sleep(DEBOUNCE_WAIT_MS);
     await settle();
     const last = p.searches().at(-1);
-    check(Boolean(last) && last.get("q") === "agent loops" && last.get("sort") === "newest", "the search asks the helper with the query and the sort", last && last.toString());
+    check(Boolean(last) && last.get("q") === "agent loops" && last.get("sort") === "relevance" && last.get("match") === "forgiving", "the search asks the helper for forgiving Best match results", last && last.toString());
     check(!p.paths().some((path) => path.startsWith("/detect")) && p.state.libraryRuns.length === 0, "text asks /detect nothing and starts no capture", p.paths());
     edit(p.els.searchInput, "youtu.be/abc123");
     check(p.state.filters.q === "", "the link drops the search it replaced", p.state.filters.q);

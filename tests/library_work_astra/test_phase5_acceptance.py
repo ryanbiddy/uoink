@@ -5,6 +5,8 @@ These are deliberately failing regression tests on the AZ candidate, not xfails.
 """
 from __future__ import annotations
 
+from tests.mcp_sdk import handler_for
+
 import asyncio
 import json
 import sqlite3
@@ -370,15 +372,15 @@ def test_phase5_missing_episode_table_is_feature_unavailable(db):
 def test_phase5_reuses_phase4_active_read_limit(db, monkeypatch):
     guard = library_resources.ReadGuard()
     monkeypatch.setattr(library_resources, "_PROCESS_GUARD", guard)
-    guard.admit()
-    guard.admit()
+    for _ in range(guard.max_active):
+        guard.admit()
     try:
         result = report(db)
         assert result["ok"] is False
         assert result["error"]["code"] == "rate_limited"
     finally:
-        guard.release()
-        guard.release()
+        for _ in range(guard.max_active):
+            guard.release()
 
 
 def test_phase5_expired_query_stops_before_subsequent_queries(db, monkeypatch):
@@ -428,7 +430,7 @@ def stdio_result(args):
     request = mcp_types.CallToolRequest(method="tools/call", params=mcp_types.CallToolRequestParams(name="get_library_activity", arguments=args))
     real_read = analysis.get_library_activity
     with patch.object(analysis, "get_library_activity", lambda arguments: real_read(arguments, clock=NOW)):
-        return asyncio.run(uoink_mcp.mcp._mcp_server.request_handlers[mcp_types.CallToolRequest](request)).root
+        return asyncio.run(handler_for(uoink_mcp.mcp, "tools/call")(request))
 
 
 def test_phase5_actual_stdio_envelope_stays_within_wire_cap(db, monkeypatch):
@@ -437,21 +439,21 @@ def test_phase5_actual_stdio_envelope_stays_within_wire_cap(db, monkeypatch):
     db.commit()
     monkeypatch.setattr(analysis, "_analysis_db_override", db)
     result = stdio_result({"interval": INTERVAL})
-    wire = json.dumps({"jsonrpc": "2.0", "id": 1, "result": result.model_dump(mode="json", exclude_none=True)}, ensure_ascii=False).encode()
+    wire = json.dumps({"jsonrpc": "2.0", "id": 1, "result": result.model_dump(by_alias=True, mode="json", exclude_none=True)}, ensure_ascii=False).encode()
     assert len(wire) <= 65536, len(wire)
 
 
 def test_phase5_stdio_errors_set_is_error(db, monkeypatch):
     monkeypatch.setattr(analysis, "_analysis_db_override", db)
     result = stdio_result({"interval": {"start": "bad", "end": "bad"}})
-    assert result.isError is True
+    assert result.is_error is True
 
 
 def test_phase5_stdio_advertises_read_only_idempotent_annotations():
     tool = next(t for t in asyncio.run(uoink_mcp.mcp.list_tools()) if t.name == "get_library_activity")
     assert tool.annotations is not None
-    assert tool.annotations.readOnlyHint is True
-    assert tool.annotations.idempotentHint is True
+    assert tool.annotations.read_only_hint is True
+    assert tool.annotations.idempotent_hint is True
 
 
 def test_phase5_stdio_model_text_has_phase4_untrusted_fence(db, monkeypatch):
@@ -536,7 +538,7 @@ def test_phase5_stdio_unknown_arguments_are_rejected_before_read(db, monkeypatch
         result = stdio_result({"interval": INTERVAL, "invented": "value"})
     finally:
         db.set_trace_callback(None)
-    assert result.isError is True
+    assert result.is_error is True
     assert reads == []
 
 

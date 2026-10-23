@@ -168,7 +168,9 @@ def test_stable_profile_identity_different_ports(tmp_path, fake_kr):
         assert_no_ordinary_service_calls(fake_kr)
 
 
-def test_ordinary_legacy_compatibility(fake_kr):
+def test_ordinary_legacy_compatibility(fake_kr, monkeypatch):
+    monkeypatch.setattr(iso, "current_binding", lambda: None)
+    monkeypatch.setattr(server, "_ISOLATION", None)
     assert iso.current_binding() is None
 
     # Fallback to Yoink when Uoink key absent

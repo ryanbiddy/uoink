@@ -32,6 +32,7 @@ import pytest
 import _platform
 
 import index
+import uoink_usage
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -96,6 +97,7 @@ def helper(source_tree, tmp_path, monkeypatch):
     idx = Mock()
     idx.import_payload.return_value = {"style_anchors": {"imported": 1}}
     namespace = {
+        "uoink_usage": uoink_usage,
         "_platform": _platform, "sys": sys,
         "__name__": "offline_import_errors", "Path": Path,
         "BaseHTTPRequestHandler": BaseHTTPRequestHandler,

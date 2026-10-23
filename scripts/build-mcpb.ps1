@@ -107,6 +107,7 @@ if (Test-Path $icon) { Copy-Item $icon (Join-Path $BuildDir "icon.png") -Force }
 else { Write-Warning "icon assets\logo-mark-256.png not found; bundle will ship without icon.png" }
 
 # --- Pack ------------------------------------------------------------------
+& (Join-Path $RepoRoot 'scripts\assert-search-payload.ps1') -Root $BuildDir
 if (-not $OutDir) { $OutDir = Join-Path $RepoRoot "dist" }
 New-Item -ItemType Directory -Path $OutDir -Force | Out-Null
 $OutFile = Join-Path $OutDir "uoink-$version.mcpb"

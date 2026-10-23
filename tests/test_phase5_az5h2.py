@@ -147,18 +147,18 @@ def test_az5h2_deadline_and_rate_refusal_frames_stay_within_wire_cap(db, monkeyp
     seed.insert_yoink(db, "az5h2-ref", yoinked_at="2026-09-05T12:00:00.000Z")
     db.commit()
     _bind_clocked_reader(monkeypatch, db)
-    original_dump = mcp_types.JSONRPCMessage.model_dump_json
+    original_dump = mcp_types.JSONRPCResponse.model_dump_json
     original_clock = time.monotonic
     clock_shift = [0.0]
 
     def expensive_actual_serialization(message, *args, **kwargs):
         text = original_dump(message, *args, **kwargs)
-        root = message.root
+        root = message
         if isinstance(root, mcp_types.JSONRPCResponse) and root.id == 2:
             clock_shift[0] += 3.0
         return text
 
-    monkeypatch.setattr(mcp_types.JSONRPCMessage, "model_dump_json", expensive_actual_serialization)
+    monkeypatch.setattr(mcp_types.JSONRPCResponse, "model_dump_json", expensive_actual_serialization)
     monkeypatch.setattr(time, "monotonic", lambda: original_clock() + clock_shift[0])
     deadline_response = _run_stdio([_activity_call()])[0]
     envelope = json.loads(deadline_response["result"]["content"][0]["text"])
@@ -169,8 +169,8 @@ def test_az5h2_deadline_and_rate_refusal_frames_stay_within_wire_cap(db, monkeyp
 
     analysis.reset_rate_limiter()
     guard = library_resources.process_guard()
-    guard.admit()
-    guard.admit()
+    for _ in range(guard.max_active):
+        guard.admit()
     try:
         rate_response = _run_stdio([_activity_call(3)])[0]
         assert rate_response["id"] == 3
@@ -181,10 +181,10 @@ def test_az5h2_deadline_and_rate_refusal_frames_stay_within_wire_cap(db, monkeyp
         else:
             assert rate_response["error"]["data"]["error"]["code"] == "rate_limited"
         assert _frame_bytes(rate_response) <= WIRE_CAP
-        assert guard._active == 2
+        assert guard._active == guard.max_active
     finally:
-        guard.release()
-        guard.release()
+        for _ in range(guard.max_active):
+            guard.release()
         analysis.reset_rate_limiter()
     assert library_resources.process_guard()._active == 0
 
@@ -213,12 +213,12 @@ def test_az5h2_typed_error_frame_is_capped(db, monkeypatch):
     seed.insert_yoink(db, "az5h2-typed", yoinked_at="2026-09-05T12:00:00.000Z")
     db.commit()
     _bind_clocked_reader(monkeypatch, db)
-    original_dump = mcp_types.JSONRPCMessage.model_dump_json
+    original_dump = mcp_types.JSONRPCResponse.model_dump_json
     padded = [False]
 
     def padded_typed_error(message, *args, **kwargs):
         text = original_dump(message, *args, **kwargs)
-        root = message.root
+        root = message
         if (
             not padded[0]
             and isinstance(root, mcp_types.JSONRPCResponse)
@@ -230,7 +230,7 @@ def test_az5h2_typed_error_frame_is_capped(db, monkeypatch):
             return text + ("x" * 70000)
         return text
 
-    monkeypatch.setattr(mcp_types.JSONRPCMessage, "model_dump_json", padded_typed_error)
+    monkeypatch.setattr(mcp_types.JSONRPCResponse, "model_dump_json", padded_typed_error)
     response = _run_stdio([{
         "jsonrpc": "2.0", "id": 2, "method": "tools/call", "params": {
             "name": "get_library_activity", "arguments": {"interval": "bad"},

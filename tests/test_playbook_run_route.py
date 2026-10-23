@@ -95,7 +95,7 @@ def mcp_adapter(route, monkeypatch):
     from mcp import types
 
     monkeypatch.setattr(uoink_mcp_tools, "_backend", server)
-    return (*route[:3], uoink_mcp.mcp._mcp_server.request_handlers, types)
+    return (*route[:3], uoink_mcp.mcp, types)
 
 
 @pytest.mark.parametrize("name,arguments", CASES)
@@ -233,7 +233,7 @@ def test_empty_provider_response_is_metered_but_returns_no_draft(route):
 def test_serialization_failure_is_sanitized_on_all_transports(
         route, mcp_adapter, monkeypatch, caplog, name, arguments):
     import uoink_mcp_tools
-    from mcp.shared.exceptions import McpError
+    from mcp.shared.exceptions import MCPError
     from tests.test_library_adapters import mcp_call, post as tool_post
     from tests.test_phase4_stdio import _playbook_prompt, _playbook_tool
 
@@ -257,8 +257,8 @@ def test_serialization_failure_is_sanitized_on_all_transports(
     assert http.status == 200 and http.payload["result"]["isError"] is True
     assert http.payload["result"]["structuredContent"] == expected
     tool = _playbook_tool(mcp_adapter, payload)
-    assert tool.isError is True and json.loads(tool.content[0].text) == expected
-    with pytest.raises(McpError) as exc:
+    assert tool.is_error is True and json.loads(tool.content[0].text) == expected
+    with pytest.raises(MCPError) as exc:
         _playbook_prompt(mcp_adapter, name, arguments)
     assert exc.value.error.code == -32603 and exc.value.error.data == expected
     assert "unexpected_private_field" not in caplog.text
@@ -327,7 +327,7 @@ def test_extreme_metric_packet_succeeds_on_all_transports(route, mcp_adapter, na
     assert http.status == 200 and http.payload["result"]["isError"] is False
     assert http.payload["result"]["structuredContent"] == result
     tool = _playbook_tool(mcp_adapter, payload)
-    assert tool.isError is False and _unfence(tool.content[0].text) == result
+    assert tool.is_error is False and _unfence(tool.content[0].text) == result
     prompt = _playbook_prompt(mcp_adapter, name, args)
     assert _unfence(prompt.messages[1].content.text) == result["packet"]
     route[3].assert_not_called()

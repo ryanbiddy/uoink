@@ -2,7 +2,7 @@
 
 Status: Sprint 4 backend implemented  
 Schema version: 2.1.0  
-SDK: official Model Context Protocol Python SDK, `mcp==1.27.1`  
+SDK: official Model Context Protocol Python SDK, `mcp==2.3.0` and `mcp-types==2.3.0`\
 Transports: stdio, plus an experimental authenticated local HTTP JSON-RPC helper
 
 ## Overview
@@ -11,6 +11,38 @@ Uoink serves the same tool registry over both MCP transports:
 
 - Supported stdio registry: **91 tools**.
 - Local HTTP/OpenAPI registry: **91 tools**.
+
+Stdio uses the SDK's native dual-era runner. Existing clients can initialize
+with `2024-11-05`, `2025-03-26`, `2025-06-18` or `2025-11-25`, then send
+`notifications/initialized`. Unsupported handshake versions negotiate
+`2025-11-25`. Modern clients can start with `server/discover` or a normal
+request such as `tools/list`; every modern request carries this envelope:
+
+```json
+{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{"_meta":{"io.modelcontextprotocol/protocolVersion":"2026-07-28","io.modelcontextprotocol/clientCapabilities":{}}}}
+```
+
+The first request selects the era for that connection. `initialize` selects
+legacy even when it carries modern metadata. Changing eras requires a new
+connection. Modern results include `resultType` and server identity in `_meta`.
+Cacheable results use `ttlMs: 0` and `cacheScope: "private"`. Legacy responses
+retain their earlier shapes. `/mcp/v1` retains its legacy HTTP contract and
+does not advertise 2026-07-28 HTTP support.
+
+| Stdio refusal | Code or result |
+|---|---|
+| Malformed JSON or duplicate keys | Bounded null-ID error, `-32700` |
+| Invalid envelope or ID, oversized input, modern request on a legacy connection | `-32600` |
+| Unknown method | `-32601`, with the method name in error data |
+| Malformed arguments or missing/malformed modern metadata | `-32602` |
+| Unsupported modern version or initialize on a modern connection | `-32022` |
+| Missing/deleted resource | Legacy `-32002`; modern `-32602` with the URI and domain error data |
+| Tool domain refusal | `CallToolResult` with `isError: true` and the existing text envelope |
+
+These refusals leave the connection usable. Accepted cancellation sends no
+response and releases admission when the operation settles. Ordinary completed
+frames have a 65,536-byte limit before the newline; genuine `tools/list`
+responses have 262,144 bytes. The incoming method selects that allowance.
 
 Claude Desktop (.mcpb), Claude Code and Cursor use `uoink_mcp.py` over stdio.
 It advertises every registry tool with the same name, description, input schema,
@@ -326,6 +358,40 @@ opaque response keys; product copy and human-readable messages use Uoink.
 
 Keyword search across saved Uoink markdown corpora.
 
+`match` is optional: `"forgiving"` (default) drops common English words and
+matches any remaining word; `"strict"` requires every word, as before.
+Both treat punctuation and FTS operators as text and prefix-match the last
+word. If all words are stopwords, forgiving search keeps them. Forgiving
+results put an exact title first, ignoring case and punctuation, then hits
+with every useful word, then partial hits. BM25 orders hits within each group.
+Forgiving `score` values are scaled relevance scores: higher is better. They
+include coverage and title bonuses and are not raw BM25 magnitudes. Do not
+compare their magnitudes with strict, semantic, or hybrid scores.
+Scores retain full floating-point precision. With `b = -BM25`, the lexical
+component is `0.001 * b / (1 + b)`, plus `0.001` for complete term coverage
+and `0.002` for an exact title. Small differences still determine ordering;
+rounding to four decimal places would erase many of them.
+
+Results also carry `video_id` and, when source text is available, an optional
+`passage`. Quote `passage.text`: `snippet` may contain ellipses. A passage has
+either a stored `clip_id` with `start` and `end` in seconds, or `char_start`
+and `char_end` (exclusive) in the indexed `content` field. These are Unicode
+character offsets, not byte offsets. `timing` describes the stored timing.
+Search results include `passage_verified`. When it is `false`, `citation_reason`
+explains why no passage, span, or timestamp was returned. A title or metadata
+match can still be useful for discovery without supplying a quotable passage.
+Keyword passages contain matched text. Semantic passages are the stored chunks
+that produced the matches, checked against the current source. Hybrid results
+use either verified form. These rules apply to MCP and HTTP search responses.
+When a semantic chunk comes from a source with no body text, its offsets refer
+to the title and `passage.field` is `"title"`.
+Large forgiving clip searches first rank a bounded source candidate pool
+(`max(32, limit)` sources), then rank those sources' matching clips.
+Small or sparse source pools also search clips whose text is absent from the
+source body. `search_library` counts terms across candidate sources' clips
+while citing one matching clip, which may contain only some of the terms.
+These clip results are a ranked selection, not an exhaustive source listing.
+
 Parameters:
 
 ```json
@@ -359,6 +425,10 @@ coarse timing and is marked `timing: coarse`) and return a deep link to each
 matching moment. Optional `video_id` and `channel` fields narrow the search.
 Available on stdio and HTTP/OpenAPI since 2026-09-04 (run E); both call the
 same handler.
+
+Optional `match: "forgiving" | "strict"` uses the same defaults and ranking
+as `search_uoinks`. Each result includes its stored `clip_id`, `video_id`,
+verbatim `text`, and `start`/`end` in seconds where timing exists.
 
 Parameters:
 
@@ -689,6 +759,18 @@ Parameters:
 
 `entity` is required. `name` is accepted as an alias by the backend. `limit` is optional, defaults to 50, and is clamped to 1-200.
 
+Optional `match` defaults to `"forgiving"`: it matches useful words in recorded
+entity names, with exact normalized names and complete names ahead of partial
+names. An exact source title ranks first; ties use newest mentions first.
+`"strict"` keeps the original exact, case and punctuation insensitive entity
+lookup. This tool searches recorded entity names, not transcript text.
+Each row includes `mention_id`, `video_id`, and the stored `timestamp` in
+seconds. `context` is an entity annotation. When it matches a stored clip,
+the optional `passage` supplies that clip's ID, verbatim text, and timing.
+When it matches indexed prose, `passage` supplies character offsets instead.
+`timestamp` and `deep_link` retain the annotation's stored time even when it
+is unverified. Verified timing is separate in `timestamp_seconds` and `passage`.
+
 Return shape:
 
 ```json
@@ -903,8 +985,22 @@ The operation returns pure aggregation over saved items, shelf movements, and so
 ### search_library
 
 Bounded clip-first search of the saved library (default 5, at most 20 hits)
-with an item-text fallback for items without clips (Phase 4, contract
+with verified clip or item-text passages when available (Phase 4, contract
 `phase4-v1-2026-09-08`, run AV-1).
+
+Optional `match: "forgiving" | "strict"` defaults to forgiving search.
+Forgiving results put exact titles and complete word matches before partial
+matches across clips and item text. Strict mode keeps clip-first retrieval.
+Timed hits also include `clip_id`; existing `item_id`, `excerpt_id`, source
+revision, excerpt URI, and `start`/`end` fields identify the exact evidence.
+When no passage can be verified, the result has `passage_verified: false`
+and a `citation_reason`, with no passage or excerpt link. A source match
+outside its clips can carry an exact character span without a timestamp.
+
+The dashboard, `/memory/search`, and `/api/corpus/v1/search` accept the same
+optional `match` parameter and default to forgiving. The dashboard selects
+Best match when a query starts. Date sorting stays available, and Exact words
+selects strict mode. Clearing the query returns to newest-first browsing.
 
 ```json
 { "query": "agent harness", "limit": 5 }
@@ -1161,7 +1257,7 @@ source and media revisions and evidence refs. Every referenced original
 artifact is validated by bytes before anything is quoted; a missing input is
 `library_unavailable`, corrupt bytes or bindings `invalid_source_data`. The
 read is one coherent SQLite transaction with a final source/media recheck,
-admitted on the shared Phase 4 guard (2 s deadline, 2 active, 60/minute) with
+admitted on the shared Phase 4 guard (2 s deadline, 4 active, 60/minute) with
 the same wire budgets (24,576 rendered bytes, 65,536 wrapped bytes). Nothing
 is fetched, transcribed or saved; text-only items refuse `not_timed` with
 `next_step: get_library_item`, and coarse (paragraph) timing refuses

@@ -19,6 +19,8 @@ transports live in server.py and uoink_mcp_tools.py."""
 
 from __future__ import annotations
 
+import uoink_usage
+
 import hashlib
 import json
 import logging
@@ -1117,6 +1119,7 @@ def _link_episode_to_yoink(idx, episode_id: int, video_id: str) -> None:
             raise LookupError(f"episode not found: {episode_id}")
 
 
+@uoink_usage.capture("podcast")
 def episode_to_corpus(idx, episode_id: int, *, data_root: Path) -> dict:
     """Publish a completed episode transcript into the shared corpus.
 

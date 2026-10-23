@@ -62,6 +62,7 @@ sys.path.insert(0, str(HERE))
 
 # Isolation must be validated before any later import can open default data.
 import uoink_install_isolation as _install_isolation  # noqa: E402
+import uoink_usage
 _install_isolation.apply_from_process()
 
 
@@ -505,6 +506,10 @@ def _settings_path() -> Path:
     if binding is not None:
         return binding.profile / "settings.json"
     return SETTINGS_PATH
+uoink_usage.configure(lambda: _settings_path().parent, VERSION,
+                      "mcpb" if (HERE / "manifest.json").is_file() else
+                      "installer" if (HERE / "python").is_dir() or _platform.mac_bundle_contents() else "source")
+
 ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages"
 ANTHROPIC_MODEL = "claude-haiku-4-5-20251001"
 ANTHROPIC_VERSION = "2023-06-01"
@@ -638,6 +643,21 @@ def _check_memory_search_rate_limit() -> bool:
             return False
         kept.append(now)
         _memory_search_request_times[:] = kept
+    return True
+
+
+# Status polling has its own budget and cannot consume search requests.
+_search_status_request_times: list[float] = []
+_search_status_rate_lock = threading.Lock()
+
+
+def _check_search_status_rate_limit() -> bool:
+    now = time.monotonic()
+    with _search_status_rate_lock:
+        _search_status_request_times[:] = [t for t in _search_status_request_times if t > now - 60.0]
+        if len(_search_status_request_times) >= 180:
+            return False
+        _search_status_request_times.append(now)
     return True
 
 
@@ -950,6 +970,8 @@ def _default_settings() -> dict:
         # feed work must be able to stay invisible. Suppressed notifications
         # remain available in the dashboard Activity stream.
         "notifications_enabled": True,
+        "usage_sharing": False,
+        "usage_sharing_prompt_seen": False,
         "anthropic_key_invalid": False,
         "scrapecreators_enabled": False,
         "scrapecreators_agent_calls_enabled": False,
@@ -1123,6 +1145,8 @@ def _normalize_settings(data: dict) -> dict:
         clean.get("writing_default_attach_all_screenshots", False)
     )
     clean["auto_uoink_enabled"] = bool(clean.get("auto_uoink_enabled"))
+    clean["usage_sharing"] = clean.get("usage_sharing") is True and not uoink_usage.forced_off()
+    clean["usage_sharing_prompt_seen"] = clean.get("usage_sharing_prompt_seen") is True
     clean["notifications_enabled"] = bool(
         clean.get("notifications_enabled", True)
     )
@@ -1153,7 +1177,8 @@ def _normalize_settings(data: dict) -> dict:
     return clean
 
 
-def _read_settings() -> dict:
+def _read_stored_settings() -> dict:
+    """Read saved values without defaults or process environment overrides."""
     with _settings_lock:
         data: dict = {}
         settings_file = _settings_path()
@@ -1164,21 +1189,76 @@ def _read_settings() -> dict:
                     data = raw
             except (OSError, json.JSONDecodeError) as e:
                 log.warning("settings read failed: %s", e)
-        return _normalize_settings(data)
+        return data
 
 
-def _write_settings(data: dict) -> None:
-    with _settings_lock:
+def _read_settings() -> dict:
+    """Return settings for this process, including its usage-sharing override."""
+    return _normalize_settings(_read_stored_settings())
+
+
+@contextlib.contextmanager
+def _settings_file_lock():
+    """Serialize settings writers and consent sync across helper/stdio processes."""
+    path = _settings_path().with_suffix(".json.lock")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("a+b") as lock:
+        if os.name == "nt":
+            import msvcrt
+            if lock.tell() == 0:
+                lock.write(b"\0")
+                lock.flush()
+            lock.seek(0)
+            msvcrt.locking(lock.fileno(), msvcrt.LK_LOCK, 1)
+        else:
+            import fcntl
+            fcntl.flock(lock.fileno(), fcntl.LOCK_EX)
+        try:
+            yield
+        finally:
+            if os.name == "nt":
+                lock.seek(0)
+                msvcrt.locking(lock.fileno(), msvcrt.LK_UNLCK, 1)
+            else:
+                fcntl.flock(lock.fileno(), fcntl.LOCK_UN)
+
+
+def _write_settings(data: dict, *, usage_choice: bool | None = None) -> None:
+    with _settings_lock, _settings_file_lock():
         settings_file = _settings_path()
         settings_file.parent.mkdir(parents=True, exist_ok=True)
         clean = _normalize_settings(data)
+        previous = _read_stored_settings()
+        # Only an explicit /settings choice can change consent. All other
+        # writers preserve the value read here, including stale stdio snapshots.
+        if usage_choice is not None:
+            clean["usage_sharing"] = usage_choice is True
+        elif "usage_sharing" in previous:
+            clean["usage_sharing"] = previous["usage_sharing"]
+        else:
+            clean.pop("usage_sharing", None)
+        if previous.get("usage_sharing_prompt_seen") is True:
+            clean["usage_sharing_prompt_seen"] = True
         tmp = settings_file.with_suffix(".json.tmp")
         tmp.write_text(json.dumps(clean, indent=2), encoding="utf-8")
         tmp.replace(settings_file)
+        if (previous.get("usage_sharing") is True) != (clean.get("usage_sharing") is True):
+            try:
+                uoink_usage.set_enabled(clean["usage_sharing"])
+            except Exception:
+                log.debug("Usage sharing state could not be updated")
+                raise OSError("Could not update usage sharing") from None
         try:
             os.chmod(settings_file, 0o600)
         except OSError:
             pass
+        # Replies describe this process; storage above keeps the saved choice.
+        data["usage_sharing"] = clean.get("usage_sharing") is True and not uoink_usage.forced_off()
+
+
+def _sync_usage_sharing():
+    with _settings_lock, _settings_file_lock():
+        uoink_usage.set_enabled(_read_stored_settings().get("usage_sharing") is True)
 
 
 def _validate_output_dir_value(value: object) -> tuple[Path | None, str | None]:
@@ -1435,6 +1515,10 @@ def _public_settings(data: dict | None = None) -> dict:
         Path(data.get("output_dir") or DESKTOP_ROOT).expanduser()
     )
     return {
+        "usage_sharing": data.get("usage_sharing") is True and not uoink_usage.forced_off(),
+        "usage_sharing_forced_off": uoink_usage.forced_off(),
+        "usage_sharing_prompt_seen": data.get("usage_sharing_prompt_seen") is True,
+        "usage_sharing_disclosure": uoink_usage.disclosure(),
         "comment_intelligence_enabled": bool(data.get("comment_intelligence_enabled")),
         "hook_type_enabled": bool(data.get("hook_type_enabled")),
         "entity_extraction_enabled": bool(
@@ -2381,6 +2465,8 @@ _taxonomy_lock = threading.Lock()
 INDEX_PATH = DATA_ROOT / "index.db"
 _index_singleton: "index.Index | None" = None
 _index_open_lock = threading.Lock()
+_local_search_singleton = None
+_local_search_lock = threading.Lock()
 # True from an index.db corruption-recovery (open_or_recover) until the
 # rebuilding backfill scan finishes. Surfaced in /health as index_recovering.
 _index_recovering = False
@@ -2446,6 +2532,29 @@ def _get_index() -> "index.Index":
         elif getattr(_index_singleton, "_existing_read_only", False):
             _index_singleton.initialize_for_write()
         return _index_singleton
+
+
+def _get_local_search():
+    """One engine bound to this helper's resolved installation, created on demand."""
+    global _local_search_singleton
+    with _local_search_lock:
+        if _local_search_singleton is None:
+            from uoink_core.local_search import LocalSearch
+            idx = _get_index()
+            _local_search_singleton = LocalSearch(DATA_ROOT, idx)
+            idx.set_local_search(_local_search_singleton)
+        return _local_search_singleton
+
+
+def _resume_local_search():
+    from uoink_core.local_search import LocalSearch
+    if LocalSearch.enabled_at(DATA_ROOT):
+        try:
+            engine = _get_local_search()
+            if engine.manager.acceptance() and not engine.status()["paused"]:
+                engine.start()
+        except Exception:
+            log.warning("Semantic search could not resume; keyword search is available")
 
 
 def _get_existing_index(timeout_s: float | None = None) -> "index.Index":
@@ -3269,6 +3378,10 @@ def _index_yoink(folder: Path, sidecar: dict, corpus_path: Path | None,
             # (screenshots) the fenced transcript write does not own.
             idx.insert_citations(video_id, [])
     _mirror_event("capture", video_id=video_id)  # seam: capture_commit
+    try:
+        idx._notify_source_changed(video_id)
+    except Exception:
+        log.warning("Semantic search update failed; saved capture is intact")
     return True
 
 
@@ -5940,6 +6053,7 @@ def _retry_publication_one() -> bool:
     return True
 
 
+@uoink_usage.capture(lambda url, *args, **kwargs: {"youtube": "youtube", "twitter": "x"}.get(_detect_platform_from_url(url), "other"))
 def _run_extraction(url: str, interval: int, output_folder: Path,
                     *, notify: bool = True,
                     metadata: dict | None = None,
@@ -9097,6 +9211,7 @@ def _podcast_transcription_worker() -> None:
     while True:
         job_id = _podcast_transcription_queue.get()
         manual_lock = None
+        usage_publish_attempted = False
         try:
             with _jobs_lock:
                 job = dict(_jobs.get(job_id) or {})
@@ -9200,6 +9315,7 @@ def _podcast_transcription_worker() -> None:
                                  "owner_token": fence.get("owner_token")}):
                             raise source_subscriptions.CaptureOwnershipUnavailable(
                                 "standing start no longer executed by this process")
+                    usage_publish_attempted = True
                     corpus_result = podcasts.episode_to_corpus(
                         _get_index(), episode_id, data_root=DATA_ROOT)
                     _heartbeat_note_ingest()
@@ -9248,6 +9364,11 @@ def _podcast_transcription_worker() -> None:
                 failure_code=None if corpus_result else (
                     "publish_failed" if corpus_error else "publish_not_requested"))
         except BaseException as exc:  # keep the one long-lived worker alive
+            if not usage_publish_attempted and isinstance(job, dict) and job.get("publish_to_corpus"):
+                try:
+                    uoink_usage.count("captures", "podcast", "failed")
+                except Exception:
+                    pass
             # Tracebacks and raw tool text go only to server.log. The console,
             # the episode row and the job (shown by the dashboard) get the
             # sanitized forms used for every other machine error detail.
@@ -10069,6 +10190,10 @@ class _ServerCaptureBackend(source_subscriptions.CaptureBackend):
                 downloaded = podcasts.download_episode_audio(
                     _get_index(), episode_id, data_root=DATA_ROOT)
             if not downloaded.get("ok"):
+                try:
+                    uoink_usage.count("captures", "podcast", "failed")
+                except Exception:
+                    pass
                 # The downloader validates the enclosure before testing media.
                 if _platform.sys.platform == "darwin" and downloaded.get("code") == "media_requires_ffmpeg":
                     return source_subscriptions.CaptureOutcome(
@@ -10085,9 +10210,17 @@ class _ServerCaptureBackend(source_subscriptions.CaptureBackend):
                 consent_given=False, publish_to_corpus=True,
                 source_start_id=start_id, source_owner_token=start["owner_token"])
             if status == 412:
+                try:
+                    uoink_usage.count("captures", "podcast", "failed")
+                except Exception:
+                    pass
                 return source_subscriptions.CaptureOutcome(
                     "failed", code="missing_transcription_setup")
             if not queued.get("ok"):
+                try:
+                    uoink_usage.count("captures", "podcast", "failed")
+                except Exception:
+                    pass
                 return source_subscriptions.CaptureOutcome("failed", code="transcription_unavailable")
             # The queued job now owns the capture-identity lock (released by
             # _settle_source_capture when the job ends).
@@ -11415,6 +11548,7 @@ def _agent_client_specs() -> list[dict]:
             # Official schema checked 2026-10-21:
             # https://docs.continue.dev/customize/deep-dives/mcp
             "config_path": home / ".continue" / "config.yaml",
+            "legacy_config_path": home / ".continue" / "config.json",
             "manual_only": True,
             "markers": [home / ".continue"],
         },
@@ -11435,17 +11569,88 @@ def _uoink_mcp_entry() -> dict:
     return {"command": command, "args": args}
 
 
+def _entry_launches_uoink(entry) -> bool:
+    """Match this install's stdio launch, regardless of the user's entry name."""
+    if not isinstance(entry, dict) or entry.get("disabled") is True or entry.get("enabled") is False:
+        return False
+    try:
+        command, args = _mcp_stdio_command()
+    except OSError:
+        # An incomplete app bundle has no launcher to match; detection must not fail the scan.
+        return False
+    actual_args = entry.get("args")
+    if not isinstance(entry.get("command"), str) or not isinstance(actual_args, list):
+        return False
+    if len(actual_args) != len(args) or not all(isinstance(arg, str) for arg in actual_args):
+        return False
+    import ntpath
+    import posixpath
+    paths = ntpath if sys.platform == "win32" else posixpath
+    normalize = lambda value: paths.normcase(paths.normpath(value))
+    return (entry.get("type", "stdio") == "stdio"
+            and normalize(entry["command"]) == normalize(command)
+            and all(normalize(actual) == normalize(expected) if paths.isabs(expected)
+                    else actual == expected for actual, expected in zip(actual_args, args)))
+
+
 def _client_is_connected(config_path: Path) -> bool:
-    """True when the client's config already lists a `uoink` mcpServers entry.
-    Best-effort: an unreadable / non-JSON file reads as not-connected."""
+    """True when a JSON client's MCP entry launches this Uoink install."""
     try:
         if not config_path.exists():
             return False
         data = json.loads(config_path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError):
+    except (OSError, UnicodeError, ValueError, RecursionError):
         return False
     servers = data.get("mcpServers") if isinstance(data, dict) else None
-    return isinstance(servers, dict) and "uoink" in servers
+    return isinstance(servers, dict) and any(_entry_launches_uoink(entry) for entry in servers.values())
+
+
+def _continue_connection(spec: dict) -> tuple[Path, bool, str]:
+    """Read global Continue settings only. YAML takes precedence over legacy JSON.
+
+    Current: ~/.continue/config.yaml, mcpServers list.
+    Legacy: ~/.continue/config.json, experimental.modelContextProtocolServers
+    with a nested transport object. Both locations use the user home on each OS.
+    """
+    cfg = spec["config_path"]
+    legacy = spec["legacy_config_path"]
+    if not cfg.exists() and legacy.exists():
+        cfg = legacy
+    if not cfg.exists():
+        return cfg, False, "Continue config was not found."
+    try:
+        raw = cfg.read_text(encoding="utf-8-sig")
+        if cfg.suffix == ".yaml":
+            try:
+                import yaml  # PyYAML is already in requirements-installer-lock.txt.
+            except ImportError:
+                return cfg, False, "Continue YAML detection needs the bundled PyYAML parser."
+            try:
+                data = yaml.safe_load(raw)
+            except yaml.YAMLError:
+                return cfg, False, "Continue config.yaml is not valid YAML."
+        else:
+            data = json.loads(raw)
+    except (OSError, UnicodeError):
+        return cfg, False, "Continue config could not be read as UTF-8."
+    except (ValueError, RecursionError):
+        return cfg, False, "Continue config is malformed."
+    if not isinstance(data, dict):
+        return cfg, False, "Continue config must contain an object."
+    if cfg.suffix == ".yaml":
+        entries = data.get("mcpServers", [])
+    else:
+        experimental = data.get("experimental", {})
+        if not isinstance(experimental, dict):
+            return cfg, False, "Continue experimental settings must contain an object."
+        entries = experimental.get("modelContextProtocolServers", [])
+    if not isinstance(entries, list) or any(not isinstance(entry, dict) for entry in entries):
+        return cfg, False, "Continue MCP servers must contain a list of objects."
+    for entry in entries:
+        launch = entry if cfg.suffix == ".yaml" else entry.get("transport")
+        if _entry_launches_uoink(launch):
+            return cfg, True, "An MCP server entry launches this Uoink install."
+    return cfg, False, "No MCP server entry launches this Uoink install."
 
 
 def _detect_ai_clients() -> list[dict]:
@@ -11454,13 +11659,20 @@ def _detect_ai_clients() -> list[dict]:
     for spec in _agent_client_specs():
         installed = any(p.exists() for p in spec["markers"])
         cfg = spec["config_path"]
+        details = {}
+        if spec["name"] == "continue":
+            cfg, connected, reason = _continue_connection(spec)
+            details["connected_reason"] = reason
+        else:
+            connected = _client_is_connected(cfg)
         out.append({
             "name": spec["name"],
             "label": spec["label"],
             "installed": installed,
             "config_path": str(cfg),
             "config_exists": cfg.exists(),
-            "connected": False if spec.get("manual_only") else _client_is_connected(cfg),
+            "connected": connected,
+            **details,
         })
     return out
 
@@ -12591,11 +12803,32 @@ _LIBRARY_KINDS = {
 _LIBRARY_SORTS = ("newest", "oldest", "title", "relevance")
 
 
+@uoink_usage.search(query_arg="q")
 def _library_search(idx, *, q: str | None, filters: dict, kind: str | None,
-                    sort: str, limit: int, offset: int) -> dict:
+                    sort: str, limit: int, offset: int, match: str = "forgiving", mode="auto", passages=True) -> dict:
     """``{total, results}`` like Index.search_yoinks_for_memory, plus a
     source-type group (``kind``) and an order over every match: newest,
     oldest, title (A to Z), or relevance (FTS rank; newest without q)."""
+    from uoink_core.search_service import citation_fields, select_mode
+    actual, reason = select_mode(idx, mode)
+    if actual != "keyword" and q:
+        result = idx.search_mode(q, max(200, offset + limit), mode=mode, match=match, filters=filters, passages=False,
+                                source_types=_LIBRARY_KINDS.get(kind or ""),
+                                keyword=lambda count, start, override: _library_search(
+                                    idx, q=q, filters=filters, kind=kind,
+                                    sort="relevance" if override else sort,
+                                    limit=count, offset=start, match=override or match, mode="keyword", passages=False))
+        rows = result["results"]
+        if result["search_mode"] != "keyword":
+            if sort == "title":
+                rows.sort(key=lambda row: (row.get("title") or "").casefold())
+            elif sort in ("newest", "oldest"):
+                rows.sort(key=lambda row: (row.get("yoinked_at") or "", row["video_id"]), reverse=sort == "newest")
+        rows = rows[offset:offset + limit]
+        if passages:
+            rows = idx._search_passages(rows, q, "forgiving" if result["search_mode"] == "hybrid" else match)
+        return {**result, "results": rows}
+    mode_info = {"search_mode": "keyword", "requested_mode": mode, "fallback_reason": reason}
     clauses = ["y.deleted_at IS NULL"]
     params: list = []
     for column in ("channel", "platform", "source_type", "author", "topic", "hook_type"):
@@ -12623,29 +12856,48 @@ def _library_search(idx, *, q: str | None, filters: dict, kind: str | None,
         "oldest": "y.yoinked_at ASC, y.video_id ASC",
         "title": "y.title COLLATE NOCASE ASC, y.yoinked_at DESC",
     }.get(sort, "y.yoinked_at DESC, y.video_id DESC")
-    match = index._fts_query(q) if q else ""
-    if q and not match:
-        return {"total": 0, "results": []}
-    if match:
-        tail = ("FROM yoinks_fts f JOIN yoinks y ON y.video_id = f.video_id "
-                "WHERE yoinks_fts MATCH ? AND " + where)
-        args = [match] + params
+    expression = index._fts_query(q, match)
+    prefix = ""
+    if q and not expression:
+        return {"total": 0, "results": [], **mode_info}
+    if expression:
+        prefix, search_params = index._fts_hits(
+            "yoinks_fts", q, match, idx._YOINKS_BM25_WEIGHTS if match == "forgiving" else "")
+        tail = ("FROM search_hits h CROSS JOIN yoinks y ON y.video_id = h.video_id WHERE " + where)
+        args = search_params + params
         if sort == "relevance":
-            order = "bm25(yoinks_fts)"
+            order = "h._score, y.video_id"
     else:
         tail = "FROM yoinks y WHERE " + where
         args = params
-    with idx._lock:
+    with idx.search_read() as db:
         try:
-            cnt = idx._conn.execute("SELECT COUNT(*) AS n " + tail, args).fetchone()
-            rows = idx._conn.execute(
-                "SELECT y.* " + tail + " ORDER BY " + order + " LIMIT ? OFFSET ?",
-                args + [limit, offset]).fetchall()
-        except sqlite3.OperationalError:
+            rows = (idx._ranked_source_page(db, q, limit, offset, where, params)
+                    if expression and match == "forgiving" and sort == "relevance" else None)
+            if rows is not None:
+                cnt = db.execute(
+                    "SELECT COUNT(*) AS n FROM yoinks_fts CROSS JOIN yoinks y "
+                    "ON y.video_id=yoinks_fts.video_id WHERE yoinks_fts MATCH ? AND " + where,
+                    [expression, *params]).fetchone()
+            else:
+                count_prefix, count_args = (index._fts_hits("yoinks_fts", q, match, ranked=False)
+                                            if expression else ("", []))
+                cnt = db.execute(count_prefix + "SELECT COUNT(*) AS n " + tail, count_args + params).fetchone()
+                if expression:
+                    rows = db.execute(index._fts_page(prefix, tail, order, offset=True, snippets=passages),
+                                      args + [limit, offset] + ([expression] if passages else [])).fetchall()
+                else:
+                    rows = db.execute(
+                        prefix + "SELECT y.* " + tail + " ORDER BY " + order + " LIMIT ? OFFSET ?",
+                        args + [limit, offset]).fetchall()
+        except sqlite3.OperationalError as error:
             # A MATCH expression FTS5 still rejects reads as no matches.
-            log.warning("library search rejected query %r", q)
-            return {"total": 0, "results": []}
-    return {"total": int(cnt["n"]) if cnt else 0, "results": [dict(r) for r in rows]}
+            idx._search_error(error, q, "library search")
+            return {"total": 0, "results": [], **mode_info}
+    rows = [dict(r) for r in rows]
+    return {"total": int(cnt["n"]) if cnt else 0,
+            "results": idx._search_passages(rows, q, match) if q and passages else rows,
+            **mode_info}
 
 
 def _enrich_yoink_rows(idx, rows: list[dict]) -> list[dict]:
@@ -12789,6 +13041,7 @@ def _enrich_yoink_rows(idx, rows: list[dict]) -> list[dict]:
             "transcript_source": transcript_source if isinstance(transcript_source, str) else None,
             "asr_fallback_status": asr_status if isinstance(asr_status, str) else None,
             "has_transcript": bool(transcript),
+            **{key: r[key] for key in ("passage", "source_id", "passage_id", "span", "timestamp_seconds", "passage_verified", "citation_reason") if key in r},
         })
     return out
 
@@ -13297,6 +13550,7 @@ class Handler(BaseHTTPRequestHandler):
         return False
 
     def _send_json(self, status: int, payload: dict):
+        uoink_usage.capture_result(payload)
         if status >= 400:
             self._drain_early_error_body()
         body = json.dumps(payload).encode("utf-8")
@@ -13561,6 +13815,10 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_session_active()
         if bare == "/settings":
             return self._handle_settings_get()
+        if bare == "/search/status":
+            return self._handle_search_control("status")
+        if bare.startswith("/search/notices/"):
+            return self._handle_search_notice(bare.rsplit("/", 1)[-1])
         if sys.platform == "darwin" and bare == "/helper/ui":
             from helper.mac_ui import menu_state
             return self._send_json(200, {"ok": True, **menu_state()})
@@ -13785,8 +14043,53 @@ class Handler(BaseHTTPRequestHandler):
         )
 
     # ---- /settings ----
+    def _handle_search_notice(self, name):
+        allowed = {"EmbeddingGemma-NOTICE.md", "Gemma-Terms-of-Use.txt",
+                   "Gemma-Prohibited-Use-Policy.txt"}
+        if name not in allowed:
+            return self._send_json(404, {"ok": False, "error": "notice not found"})
+        return self._send_file(HERE / "third-party-notices" / name, "text/plain; charset=utf-8")
+
+    def _handle_search_control(self, action, body=None):
+        if not self._is_dashboard_origin():
+            return self._send_json(403, {"ok": False, "error": "dashboard origin required"})
+        rate_limit = _check_search_status_rate_limit if action == "status" else _check_memory_search_rate_limit
+        if not rate_limit():
+            return self._send_json(429, {"ok": False, "error": "too many requests"})
+        from uoink_core.local_search import TermsRequired
+        try:
+            engine = _get_local_search()
+            if action == "terms":
+                if not isinstance(body, dict):
+                    raise TermsRequired("Accept the current Gemma terms first")
+                engine.accept_terms(accepted=body.get("accepted"), terms_version=body.get("terms_version"))
+            elif action == "download":
+                engine.download()
+            elif action == "start":
+                engine.start(download=not engine.manager.present())
+            elif action == "pause":
+                if not engine.pause():
+                    return self._send_json(409, {"ok": False, "error": "Pausing. Try again after the current batch stops."})
+            elif action == "remove":
+                engine.remove()
+            return self._send_json(200, {"ok": True, **engine.status()})
+        except (TermsRequired, ValueError):
+            return self._send_json(400, {"ok": False, "error": "Accept the current Gemma terms with accepted: true first."})
+        except Exception:
+            return self._send_json(503, {"ok": False, "error": "Semantic search is unavailable. Keyword search still works. Try again in Settings."})
+
     def _handle_settings_get(self):
         self._send_json(200, {"ok": True, "settings": _public_settings()})
+
+    def _handle_usage_prompt(self):
+        # Claim once under the settings lock, including concurrent dashboard tabs.
+        with _settings_lock:
+            data = _read_settings()
+            show = not data["usage_sharing_prompt_seen"] and not uoink_usage.forced_off()
+            if not data["usage_sharing_prompt_seen"]:
+                data["usage_sharing_prompt_seen"] = True
+                _write_settings(data)
+        self._send_json(200, {"ok": True, "show": show})
 
     def _handle_settings_output_folder_pick(self, body: dict):
         settings = _read_settings()
@@ -14016,10 +14319,10 @@ class Handler(BaseHTTPRequestHandler):
             corpus_contract.failure(operation, error),
         )
 
-    def _corpus_v1_call(self, operation: str, callback):
+    def _corpus_v1_call(self, operation: str, callback, *, search_details=False):
         try:
             data = callback()
-            payload = corpus_contract.success(operation, data)
+            payload = corpus_contract.success(operation, data, search_details=search_details)
         except corpus_contract.ContractError as error:
             return self._send_corpus_v1_error(operation, error)
         except Exception:
@@ -14042,6 +14345,7 @@ class Handler(BaseHTTPRequestHandler):
         return self._corpus_v1_call(
             "search",
             lambda: self._corpus_v1_provider().search(request),
+            search_details=request.search_details,
         )
 
     def _handle_corpus_v1_get(self, bare: str):
@@ -15941,6 +16245,7 @@ class Handler(BaseHTTPRequestHandler):
             log.exception("/extract/page/allowlist POST failed")
             return self._send_json(500, {"ok": False, "error": str(e)})
 
+    @uoink_usage.capture("page", response=True)
     def _handle_extract_page(self, body):
         """POST /extract/page {url, render_mode?, include_screenshot?,
         follow_links_depth?}. Allowlist-gated by default; result lands
@@ -16160,6 +16465,8 @@ class Handler(BaseHTTPRequestHandler):
             "writing_default_attach_all_screenshots",  # v3.3 D-20
             "auto_uoink_enabled",           # V-3 taste-aware auto-uoink
             "notifications_enabled",        # Desktop balloons; default ON
+            "usage_sharing",
+            "usage_sharing_prompt_seen",
             "keep_media",                   # E-1 Zing enabler -- keep
                                             # short-video media after
                                             # extraction (default OFF)
@@ -16236,6 +16543,12 @@ class Handler(BaseHTTPRequestHandler):
         for field in boolean_fields:
             if field in body:
                 data[field] = body[field]
+        # Any choice is final for the one-time card, including changing Settings.
+        # A stale tab cannot reset the seen marker and make the card nag again.
+        if "usage_sharing" in body or data.get("usage_sharing_prompt_seen") is True:
+            data["usage_sharing_prompt_seen"] = True
+        if _read_settings().get("usage_sharing_prompt_seen") is True:
+            data["usage_sharing_prompt_seen"] = True
         if "clipboard_screenshot_cap" in body:
             data["clipboard_screenshot_cap"] = int(body["clipboard_screenshot_cap"])
         if "anthropic_key" in body:
@@ -16406,7 +16719,10 @@ class Handler(BaseHTTPRequestHandler):
                     "ok": False, "error": "topics write failed"})
         data["updated_at"] = _now_iso()
         try:
-            _write_settings(data)
+            if "usage_sharing" in body:
+                _write_settings(data, usage_choice=body["usage_sharing"])
+            else:
+                _write_settings(data)
         except OSError as e:
             log.warning("settings write failed: %s", e)
             return self._send_json(200, {"ok": False, "error": "settings write failed"})
@@ -16503,6 +16819,12 @@ class Handler(BaseHTTPRequestHandler):
         # explicit helper paths (/mcp/v1/tools/call) because different HTTP
         # MCP clients are still converging on transport details.
         if bare == "/mcp/v1/initialize" or (bare == "/mcp/v1" and method == "initialize"):
+            params = body.get("params") or {}
+            client = params.get("clientInfo") if isinstance(params, dict) else None
+            try:
+                uoink_usage.count("mcp_clients", client.get("name") if isinstance(client, dict) else None)
+            except Exception:
+                pass
             return self._send_mcp_result(request_id, _mcp_initialize_result(body))
         if method == "notifications/initialized":
             # JSON-RPC notifications have no response id/body. Return an
@@ -16524,6 +16846,10 @@ class Handler(BaseHTTPRequestHandler):
             if not isinstance(name, str) or not isinstance(args, dict):
                 return self._send_mcp_error(request_id, -32602, "invalid tool call")
             tools = _mcp_tools_module()
+            try:
+                uoink_usage.mcp_call(name, "http")
+            except Exception:
+                pass
             if name in getattr(tools, "DISCOVERY_TOOL_NAMES", ()):
                 payload = tools.call_tool(name, args, **self._discovery_context())
             else:
@@ -16602,6 +16928,12 @@ class Handler(BaseHTTPRequestHandler):
             sort = None
 
         q = _one("q")
+        mode = _one("mode") or "auto"
+        if mode not in ("auto", "keyword", "semantic", "hybrid"):
+            return self._send_json(400, {"ok": False, "error": "mode must be auto, keyword, semantic or hybrid"})
+        match = _one("match") or "forgiving"
+        if match not in ("forgiving", "strict"):
+            return self._send_json(400, {"ok": False, "error": "match must be forgiving or strict"})
         # The index's own order already answers newest-first without a
         # query and best match with one; only a type group or another
         # order needs _library_search.
@@ -16611,7 +16943,7 @@ class Handler(BaseHTTPRequestHandler):
         try:
             if kind or not own_order:
                 res = _library_search(
-                    idx, q=q, kind=kind, sort=sort or "newest",
+                    idx, q=q, kind=kind, sort=sort or ("relevance" if q else "newest"), match=match, mode=mode,
                     filters={
                         "channel": _one("channel"), "topic": _one("topic"),
                         "hook_type": hook_type, "platform": _one("platform"),
@@ -16621,13 +16953,12 @@ class Handler(BaseHTTPRequestHandler):
                     limit=limit, offset=offset,
                 )
             else:
-                res = idx.search_yoinks_for_memory(
-                    q=q, channel=_one("channel"), topic=_one("topic"),
-                    hook_type=hook_type,
-                    platform=_one("platform"), source_type=_one("source_type"),
-                    author=_one("author"),
-                    date_from=date_from, date_to=date_to,
-                    limit=limit, offset=offset,
+                res = idx.search_mode(
+                    q, mode=mode, match=match, limit=limit, offset=offset,
+                    filters={"channel": _one("channel"), "topic": _one("topic"),
+                             "hook_type": hook_type, "platform": _one("platform"),
+                             "source_type": _one("source_type"), "author": _one("author"),
+                             "date_from": date_from, "date_to": date_to},
                 )
             corpus_total = idx.count_corpus()
         except Exception as e:
@@ -16661,6 +16992,7 @@ class Handler(BaseHTTPRequestHandler):
             "limit": limit,
             "offset": offset,
             "results": results,
+            **{key: res[key] for key in ("search_mode", "requested_mode", "fallback_reason") if key in res},
         })
 
     # ---- /open-folder?path=... ----
@@ -16789,6 +17121,7 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
+    @uoink_usage.capture("x", response=True)
     def _handle_extract_x(self, body: dict):
         """POST /extract/x {url} -- capture an X post's text plus the
         author's own earlier chain via the public syndication endpoint, as
@@ -16839,6 +17172,7 @@ class Handler(BaseHTTPRequestHandler):
             "metadata": result.get("metadata", {}),
         })
 
+    @uoink_usage.capture("x", response=True)
     def _handle_extract_x_article(self, body: dict):
         """POST /extract/x-article {url, title, author, markdown, images} --
         persist an X ARTICLE that the extension already parsed out of the
@@ -16880,6 +17214,7 @@ class Handler(BaseHTTPRequestHandler):
             "metadata": result.get("metadata", {}),
         })
 
+    @uoink_usage.capture("note", response=True)
     def _handle_create_note(self, body: dict):
         """POST /notes {text, title?, author?} -- persist a quick note / musing
         the user jotted as a first-class uoink (source_type='note', platform=
@@ -16922,6 +17257,7 @@ class Handler(BaseHTTPRequestHandler):
             "platform": notes.PLATFORM,
         })
 
+    @uoink_usage.capture("image", response=True)
     def _handle_create_image(self):
         """POST /images -- persist an image / meme the user dropped, pasted, or
         picked as a first-class uoink (source_type='image', platform='image').
@@ -17000,6 +17336,7 @@ class Handler(BaseHTTPRequestHandler):
             "platform": images.PLATFORM,
         })
 
+    @uoink_usage.capture("reddit", response=True)
     def _handle_extract_reddit(self, body: dict):
         """POST /extract/reddit {url, depth_limit?, score_threshold?} --
         capture a Reddit thread via its public .json as a yoink with
@@ -18194,6 +18531,8 @@ class Handler(BaseHTTPRequestHandler):
             return
         from urllib.parse import unquote
         bare = self.path.split("?", 1)[0]
+        if bare == "/search/model":
+            return self._handle_search_control("remove")
         m = re.fullmatch(r"/taste/anchors/([^/]+)", bare)
         if m:
             return self._handle_taste_anchor_delete(unquote(m.group(1)))
@@ -18227,6 +18566,9 @@ class Handler(BaseHTTPRequestHandler):
         except Handler._BodyError as e:
             return self._send_json(e.status, {"ok": False, "error": e.message})
 
+        if bare in ("/search/terms", "/search/model", "/search/start", "/search/pause"):
+            return self._handle_search_control({"/search/terms": "terms", "/search/model": "download",
+                                                "/search/start": "start", "/search/pause": "pause"}[bare], body)
         if bare == LIBRARY_INTENT_ROUTE:
             return self._handle_library_intent(body)
         if bare == DISCOVERY_INTENT_ROUTE:
@@ -18251,6 +18593,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_sources_service_route("archive_source", body)
         if bare == "/settings":
             return self._handle_settings_post(body)
+        if bare == "/settings/usage-prompt":
+            return self._handle_usage_prompt()
         if bare == "/settings/output-folder/pick":
             return self._handle_settings_output_folder_pick(body)
         if bare == "/settings/test-key":
@@ -18985,6 +19329,8 @@ class Handler(BaseHTTPRequestHandler):
         log.info("queue retry-now: pending_id=%d", pending_id)
         self._send_json(200, {"ok": True})
 
+    @uoink_usage.capture(lambda self, body: {"youtube": "youtube", "twitter": "x"}.get(
+        _detect_platform_from_url(body.get("url", "")), "other"), response=True)
     def _handle_extract_any(self, body: dict):
         """v3.1 universal extractor entry point.
 
@@ -19294,6 +19640,8 @@ class Handler(BaseHTTPRequestHandler):
         })
 
     @_reports_live_extract
+    @uoink_usage.capture(lambda self, body: {"youtube": "youtube", "twitter": "x"}.get(
+        _detect_platform_from_url(body.get("url", "")), "other"), response=True)
     def _handle_extract(self, body: dict):
         url, interval, err = self._validate_url_interval(body)
         if err:
@@ -20079,6 +20427,7 @@ def main(*, show_dashboard: bool = False):
             )
 
     atexit.register(_remove_suite_lease)
+    uoink_usage.start_sender(_sync_usage_sharing)
 
     # Tier 1 (v2.1.1): ambient system-tray presence on installed Windows
     # builds. Guarded by the installed-layout check (bundled pythonw next to
@@ -20181,6 +20530,7 @@ def main(*, show_dashboard: bool = False):
             # A subinterpreter also has a main_thread(), but CPython permits
             # signal handlers only in the main interpreter. Leave it unchanged.
             pass
+    _resume_local_search()
     try:
         server.serve_forever()
     except KeyboardInterrupt:
@@ -20190,6 +20540,8 @@ def main(*, show_dashboard: bool = False):
             from helper.mac_ui import close_children
             close_children()
         _remove_suite_lease()
+        if _local_search_singleton is not None:
+            _local_search_singleton.pause()
         server.server_close()
 
 
@@ -20197,94 +20549,185 @@ def _print_json(payload: dict) -> None:
     print(json.dumps(payload, indent=2, default=str))
 
 
-def _mcp_stdio_selfcheck(timeout: float = 60.0) -> dict:
+def _mcp_stdio_selfcheck(timeout: float = 60.0, *, modern: bool = False, env=None) -> dict:
     """C-01 (CRIT-1): prove the stdio MCP entry point actually boots from
     THIS interpreter and answers the protocol, the way an MCP client would
     drive it. Runs `python -P uoink_mcp.py` (-P withholds the script dir
     from sys.path, recreating the bundled embeddable Python's ._pth
-    behavior even on a dev interpreter) and walks
-    initialize -> initialized -> tools/list. Returns {ok, tools|error}.
+    behavior even on a dev interpreter). Legacy mode walks initialize ->
+    initialized -> tools/list; modern mode uses discover -> tools/list.
+    Records the observed protocol version. expected_serializer and
+    expected_transport name the implementation we expect, not wire evidence.
 
     This is the check that was missing while every install shipped a dead
     agentic path: the import crash only reproduced under the embeddable
     interpreter, so nothing in dev or CI ever saw it."""
-    script = HERE / "uoink_mcp.py"
-    if not script.exists():
-        return {"ok": False, "error": f"uoink_mcp.py not found at {script}"}
-    try:
+    deadline = time.monotonic() + max(0.0, timeout)
+    # Keep part of the same budget for process and pipe cleanup.
+    handshake_deadline = deadline - min(2.0, max(0.0, timeout) / 5)
+    proc = None
+    threads = []
+    result = {}
+
+    def probe():
+        nonlocal proc
+        if time.monotonic() >= handshake_deadline:
+            return {"ok": False, "error": "stdio self-check deadline exhausted"}
+        script = HERE / "uoink_mcp.py"
+        if not script.exists():
+            return {"ok": False, "error": f"uoink_mcp.py not found at {script}"}
         proc = subprocess.Popen(
             [sys.executable, "-P", str(script)],
             cwd=str(HERE), stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE, text=True, encoding="utf-8")
-    except OSError as e:
-        return {"ok": False, "error": f"couldn't launch the MCP process: {e}"}
+            stderr=subprocess.PIPE, text=True, encoding="utf-8", env=env)
+        lines: queue.Queue = queue.Queue()
+        stderr_tail: list[str] = []
 
-    lines: queue.Queue = queue.Queue()
-    threading.Thread(
-        target=lambda: [lines.put(line) for line in proc.stdout],
-        daemon=True).start()
-    stderr_tail: list[str] = []
+        def drain_stdout():
+            for line in proc.stdout:
+                lines.put(line)
 
-    def _drain_stderr() -> None:
-        for line in proc.stderr:
-            stderr_tail.append(line.rstrip())
-            del stderr_tail[:-5]
+        def drain_stderr():
+            for line in proc.stderr:
+                stderr_tail.append(line.rstrip())
+                del stderr_tail[:-5]
 
-    threading.Thread(target=_drain_stderr, daemon=True).start()
-    deadline = time.time() + timeout
+        for drain in (drain_stdout, drain_stderr):
+            thread = threading.Thread(target=drain, daemon=True)
+            threads.append(thread)
+            thread.start()
 
-    def _send(message: dict) -> None:
-        proc.stdin.write(json.dumps(message) + "\n")
-        proc.stdin.flush()
+        def send(message: dict) -> None:
+            proc.stdin.write(json.dumps(message) + "\n")
+            proc.stdin.flush()
 
-    def _wait_for(request_id: int) -> dict | None:
-        while time.time() < deadline:
-            try:
-                line = lines.get(timeout=0.5)
-            except queue.Empty:
-                if proc.poll() is not None:
-                    return None
-                continue
-            try:
-                message = json.loads(line)
-            except (json.JSONDecodeError, TypeError):
-                continue
-            if message.get("id") == request_id:
-                return message
-        return None
+        def wait_for(request_id: int) -> dict | None:
+            while (remaining := handshake_deadline - time.monotonic()) > 0:
+                try:
+                    line = lines.get(timeout=min(0.5, remaining))
+                except queue.Empty:
+                    if proc.poll() is not None:
+                        return None
+                    continue
+                try:
+                    message = json.loads(line)
+                except (json.JSONDecodeError, TypeError) as exc:
+                    raise ValueError("Non-JSON output on MCP stdout") from exc
+                if not isinstance(message, dict) or message.get("jsonrpc") != "2.0":
+                    raise ValueError("Invalid JSON-RPC output on MCP stdout")
+                if message.get("id") == request_id:
+                    return message
+            return None
 
-    try:
-        _send({"jsonrpc": "2.0", "id": 1, "method": "initialize",
+        from mcp.types.version import LATEST_MODERN_VERSION
+        modern_params = {"_meta": {
+            "io.modelcontextprotocol/protocolVersion": LATEST_MODERN_VERSION,
+            "io.modelcontextprotocol/clientCapabilities": {}}}
+        opening = "server/discover" if modern else "initialize"
+        send({"jsonrpc": "2.0", "id": 1, "method": opening,
+               "params": modern_params} if modern else {
+               "jsonrpc": "2.0", "id": 1, "method": "initialize",
                "params": {"protocolVersion": "2024-11-05", "capabilities": {},
                           "clientInfo": {"name": "uoink-doctor",
                                          "version": VERSION}}})
-        init = _wait_for(1)
+        init = wait_for(1)
         if not init or "result" not in init:
             tail = "; ".join(stderr_tail)
             return {"ok": False,
-                    "error": "initialize got no response"
+                    "error": f"{opening} got no response"
                              + (f" (stderr: {tail})" if tail else "")}
-        _send({"jsonrpc": "2.0", "method": "notifications/initialized"})
-        _send({"jsonrpc": "2.0", "id": 2, "method": "tools/list"})
-        tools = _wait_for(2)
+        if modern:
+            if LATEST_MODERN_VERSION not in init["result"].get("supportedVersions", []):
+                return {"ok": False, "error": "discover did not confirm modern protocol"}
+            version = LATEST_MODERN_VERSION
+        else:
+            version = init["result"].get("protocolVersion")
+            if version not in ("2024-11-05", "2025-03-26", "2025-06-18", "2025-11-25"):
+                return {"ok": False, "error": "initialize returned an invalid protocol version"}
+            send({"jsonrpc": "2.0", "method": "notifications/initialized"})
+        listing = {"jsonrpc": "2.0", "id": 2, "method": "tools/list"}
+        if modern:
+            listing["params"] = modern_params
+        send(listing)
+        tools = wait_for(2)
         if not tools or "result" not in tools:
             return {"ok": False, "error": "tools/list got no response"}
+        if modern and (tools["result"].get("resultType") != "complete" or
+                       "io.modelcontextprotocol/serverInfo" not in tools["result"].get("_meta", {})):
+            return {"ok": False, "error": "tools/list lacks the modern result envelope"}
         count = len((tools.get("result") or {}).get("tools") or [])
         if count < 14:
             return {"ok": False,
                     "error": f"tools/list returned only {count} tools"}
-        return {"ok": True, "tools": count}
-    except Exception as e:
-        return {"ok": False, "error": f"stdio handshake failed: {e}"}
-    finally:
+        return {"ok": True, "tools": count, "protocol_era": "modern" if modern else "legacy",
+                "protocol_version": version, "opening_method": opening,
+                "expected_serializer": "JSONRPCResponse.model_dump_json",
+                "expected_transport": "bounded_stdio_server", "evidence": "JSON-RPC self-check"}
+
+    def cleanup_step(label, action):
         try:
-            proc.stdin.close()
-        except Exception:
-            pass
+            action()
+        except Exception as exc:
+            prior = result.get("error")
+            result.update(ok=False, error=(f"{prior}; " if prior else "") + f"{label}: {exc}")
+
+    def remaining(cap):
+        return min(cap, max(0.0, deadline - time.monotonic()))
+
+    def reap():
         try:
-            proc.wait(timeout=10)
-        except Exception:
+            proc.wait(timeout=remaining(1.0))
+        except subprocess.TimeoutExpired:
             proc.kill()
+            proc.wait(timeout=remaining(1.0))
+
+    try:
+        result.update(probe())
+    except Exception as e:
+        result.update(ok=False, error=f"stdio self-check failed: {e}")
+    finally:
+        if proc is not None:
+            cleanup_step("stdin cleanup failed", proc.stdin.close)
+            cleanup_step("process cleanup failed", reap)
+            for thread in threads:
+                cleanup_step("reader cleanup failed", lambda: thread.join(timeout=remaining(0.5)))
+            for position, pipe in enumerate((proc.stdout, proc.stderr)):
+                # Closing a buffered reader while its thread is blocked can
+                # itself block doctor. Leave it to the daemon if reaping failed.
+                def close_reader():
+                    if position < len(threads) and threads[position].is_alive():
+                        raise RuntimeError("reader did not stop before the deadline")
+                    pipe.close()
+                cleanup_step("pipe cleanup failed", close_reader)
+    return result
+
+
+def _mcp_modern_stdio_selfcheck(timeout: float = 60.0) -> dict:
+    """Probe a disposable profile; report setup and cleanup failures as data."""
+    try:
+        import tempfile
+        deadline = time.monotonic() + max(0.0, timeout)
+        if timeout <= 0:
+            return {"ok": False, "error": "modern stdio self-check deadline exhausted"}
+        # Keep cleanup strict so a locked file produces ok=False. The outer
+        # catch covers __enter__, every setup step, and __exit__ as well.
+        with tempfile.TemporaryDirectory(prefix="uoink-modern-selfcheck-") as directory:
+            root = Path(directory)
+            for name in ("profile", "app", "temp"):
+                (root / name).mkdir()
+            with socket.socket() as probe:
+                probe.bind(("127.0.0.1", 0))
+                port = probe.getsockname()[1]
+            if port == 5179:
+                return {"ok": False, "error": "isolated port allocation selected the production port"}
+            env = dict(os.environ, UOINK_ISOLATED_PROFILE=str(root / "profile"),
+                       UOINK_ISOLATED_APP_DIR=str(root / "app"), UOINK_ISOLATED_PORT=str(port),
+                       LOCALAPPDATA=str(root / "appdata"), XDG_DATA_HOME=str(root / "xdg"),
+                       UOINK_OUTPUT_DIR=str(root / "out"), TMP=str(root / "temp"), TEMP=str(root / "temp"),
+                       PYTHONDONTWRITEBYTECODE="1", PYTHONUTF8="1")
+            return _mcp_stdio_selfcheck(max(0.0, deadline - time.monotonic()), modern=True, env=env)
+    except Exception as exc:
+        return {"ok": False, "error": f"modern stdio self-check failed: {exc}"}
 
 
 # ---- C-05 (CRIT-5): stale-path integrity + heal ---------------------------
@@ -20568,6 +21011,10 @@ def _call_http_registry_tool(name: str, arguments: dict,
             "error": f"helper returned HTTP {status}",
         }
     except (urllib.error.URLError, TimeoutError, OSError) as exc:
+        if (name in ("search_library", "search_uoinks", "search_clips")
+                and isinstance(getattr(exc, "reason", exc), TimeoutError)):
+            from library_resources import ResourceError
+            return ResourceError("deadline_exceeded").envelope()
         return {
             "ok": False,
             "error": f"could not reach the Uoink helper at {url}: {exc}",
@@ -20621,6 +21068,7 @@ def doctor_payload() -> dict:
     # not completed a pass within the freshness bound is not healthy even
     # though its HTTP listener still answers.
     heartbeat = _doctor_heartbeat(helper_health)
+    mcp_deadline = time.monotonic() + 30.0
     payload = {
         "ok": bool(
             helper_health.get("ok")
@@ -20633,7 +21081,8 @@ def doctor_payload() -> dict:
         "schema_migration": schema_migration,
         "diagnose": _diagnose_payload(),
         "migration": migrate_install.migration_status(),
-        "mcp_stdio": _mcp_stdio_selfcheck(),
+        "mcp_stdio": _mcp_stdio_selfcheck(timeout=max(0.0, mcp_deadline - time.monotonic())),
+        "mcp_stdio_modern": _mcp_modern_stdio_selfcheck(timeout=max(0.0, mcp_deadline - time.monotonic())),
         "path_integrity": _path_integrity_status(force=True),
         "podcast_corpus": _podcast_corpus_reconciliation_status(),
     }

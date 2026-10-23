@@ -23,6 +23,7 @@ from unittest.mock import Mock
 from urllib.parse import urlparse
 
 import pytest
+import uoink_usage
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -86,6 +87,7 @@ def helper(surface_code):
         {"corpus_path": str(PRIVATE_ROOT / "missing.md")},
     ]
     namespace = {
+        "uoink_usage": uoink_usage,
         "__name__": "offline_public_surfaces",
         "BaseHTTPRequestHandler": BaseHTTPRequestHandler,
         "HOST": "127.0.0.1", "PORT": PORT, "VERSION": "test",
@@ -127,6 +129,7 @@ def helper(surface_code):
         "_helper_health_status": Mock(return_value={"ok": True}),
         "_doctor_heartbeat": Mock(return_value={"stale": False}),
         "_mcp_stdio_selfcheck": Mock(return_value={"ok": True}),
+        "_mcp_modern_stdio_selfcheck": Mock(return_value={"ok": True}),
         "_podcast_corpus_reconciliation_status": Mock(return_value={"ok": True}),
         "whisper_runner": SimpleNamespace(
             normalize_model=lambda value: "base",

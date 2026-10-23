@@ -90,7 +90,7 @@ jobs:
         run: |
           # v2.1 rename: canonical MCP modules are uoink_mcp*.py; yoink_mcp.py
           # is a back-compat shim that re-exports from uoink_mcp.
-          files=(server.py uoink_mcp.py uoink_mcp_tools.py uoink_agent_runtime.py uoink_cli.py uoink_connect.py yoink_mcp.py)
+          files=(server.py uoink_usage.py uoink_mcp.py uoink_mcp_tools.py uoink_agent_runtime.py uoink_cli.py uoink_connect.py yoink_mcp.py)
           if [ -f index.py ]; then files+=(index.py); fi
           python -m py_compile "${files[@]}"
 
@@ -155,12 +155,9 @@ jobs:
         with:
           python-version: "3.11"
       - name: Install dependencies
-        # mcp: the stdio entry point's SDK, required so the C-01 regression
-        # test actually drives uoink_mcp.py instead of skipping. Pinned <2:
-        # mcp 2.0.0 (2026-08) removed the mcp.server.fastmcp import path
-        # uoink_mcp.py is written against; migrating to the 2.x API is a
-        # separate ticket.
-        run: pip install pytest Pillow "mcp<2"
+        # Match the dual-era stdio runtime and its reviewed transport dependencies,
+        # plus PyYAML (the installer lock's pin) so the Continue detection tests run.
+        run: pip install pytest Pillow "mcp==2.3.0" "mcp-types==2.3.0" "httpx2==2.16.0" "httpcore2==2.16.0" "truststore==0.10.5" "PyYAML==6.0.3"
       - name: Run tests
         # The Living Library tests import top-level modules (index, server,
         # library_*) directly, so the checkout root must be on PYTHONPATH.

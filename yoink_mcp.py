@@ -5,8 +5,8 @@ import it) keep working through the v2.x alias window; update them to
 """
 
 from uoink_mcp import *  # noqa: F401,F403
-from uoink_mcp import mcp  # explicit re-export for the stdio entry point below
+from uoink_mcp import main, mcp  # explicit public entry and compatibility export
 
 
 if __name__ == "__main__":
-    mcp.run(transport="stdio")
+    main()

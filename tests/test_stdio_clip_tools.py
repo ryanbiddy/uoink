@@ -15,33 +15,36 @@ import index
 import uoink_mcp
 import uoink_mcp_tools as tools
 from tests.test_c01_mcp_stdio import CANONICAL_STDIO_TOOLS
-from tests.test_phase4_stdio import _complete_local_call
+from tests.mcp_wire import StdioClient
 
 ROOT = Path(__file__).resolve().parents[1]
 CLIP_TOOLS = {"search_clips", "get_evidence_card"}
 
 
-def _stdio_tools() -> dict[str, object]:
-    return {t.name: t for t in _complete_local_call(uoink_mcp.mcp.list_tools())}
+def _stdio_tools(tmp_path) -> dict[str, dict]:
+    with StdioClient.launch(tmp_path) as client:
+        client.initialize()
+        listed = client.request(2, "tools/list")["result"]["tools"]
+    return {t["name"]: t for t in listed}
 
 
-def test_clip_tools_are_on_stdio_and_the_count_is_91():
-    stdio = _stdio_tools()
+def test_clip_tools_are_on_stdio_and_the_count_is_91(tmp_path):
+    stdio = _stdio_tools(tmp_path)
     assert CLIP_TOOLS.issubset(stdio)
     # Full mode includes the clip tools and every other shared registry tool.
     assert len(stdio) == 91
     assert set(stdio) == CANONICAL_STDIO_TOOLS
 
 
-def test_stdio_and_http_agree_on_parameter_names():
-    stdio = _stdio_tools()
+def test_stdio_and_http_agree_on_parameter_names(tmp_path):
+    stdio = _stdio_tools(tmp_path)
     for name in CLIP_TOOLS:
         http_props = set(tools.TOOL_REGISTRY[name].input_schema["properties"])
-        stdio_props = set(stdio[name].inputSchema["properties"])
+        stdio_props = set(stdio[name]["inputSchema"]["properties"])
         assert stdio_props == http_props, name
-    assert stdio["search_clips"].inputSchema["required"] == ["query"]
-    assert "required" not in stdio["get_evidence_card"].inputSchema or \
-        stdio["get_evidence_card"].inputSchema["required"] == []
+    assert stdio["search_clips"]["inputSchema"]["required"] == ["query"]
+    assert "required" not in stdio["get_evidence_card"]["inputSchema"] or \
+        stdio["get_evidence_card"]["inputSchema"]["required"] == []
 
 
 def test_stdio_wrappers_delegate_to_the_shared_handlers(monkeypatch):
@@ -53,8 +56,8 @@ def test_stdio_wrappers_delegate_to_the_shared_handlers(monkeypatch):
     assert uoink_mcp.get_evidence_card(slug="s") == {"ok": True}
     assert uoink_mcp.get_evidence_card(video_id="v1", profile="librarian", n_clips=3) == {"ok": True}
     assert calls == [
-        ("search_clips", {"query": "harbor signal", "limit": 20}),
-        ("search_clips", {"query": "harbor signal", "limit": 5, "video_id": "v1", "channel": "c"}),
+        ("search_clips", {"query": "harbor signal", "limit": 20, "match": "forgiving", "mode": "auto"}),
+        ("search_clips", {"query": "harbor signal", "limit": 5, "video_id": "v1", "channel": "c", "match": "forgiving", "mode": "auto"}),
         ("get_evidence_card", {"profile": "full", "slug": "s"}),
         ("get_evidence_card", {"profile": "librarian", "video_id": "v1", "n_clips": 3}),
     ]

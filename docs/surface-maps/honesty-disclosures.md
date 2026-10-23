@@ -17,8 +17,11 @@ To protect user trust and clarify the limits of local privacy guarantees, we pla
 - **Content**: Added the **Disclaimer & Terms of Use** statement prior to the requirements.
 
 ### 3. Website Privacy Policy
+The orchestrator updates the website separately. The following describes the
+new repository policy, not a verified change to the live website.
+
 - **File**: [pages.ts](file:///E:/AI/projects/uoink/site/app/content/pages.ts) (under `privacy` section)
-- **Content**: Clarifies that the local Uoink desktop application and extension collect **zero telemetry**, while the marketing website (<code>uoink.video</code>) uses basic Vercel Analytics to count page visits. Explicitly states that local database/settings are isolated from website analytics.
+- **Content**: Uoink sends no usage data by default. If you turn on "Share anonymous usage counts", it sends daily counts to usage.uoink.app: calls by tool name, known MCP clients, stdio or HTTP calls, captures by source and result, and library searches. Reports include a random install ID, app version, operating system and major version, processor type, install type and hours counted. They never include content, URLs, titles, paths, search text, usernames, IP addresses or account details. Website analytics are separate from the local library and settings.
 - **Update Check Disclosure**: Plainly details that the manual "Check now" updates button queries the `api.github.com` endpoints to compare tags, sending no telemetry or library data.
 
 ### 4. Website Terms of Use

@@ -56,6 +56,15 @@ done
 [ -f "$REPO_ROOT/assets/logo-mark-256.png" ] && cp "$REPO_ROOT/assets/logo-mark-256.png" "$BUILD_DIR/icon.png" || echo "WARN: icon not found"
 
 # --- Pack ------------------------------------------------------------------
+"$PY" - "$BUILD_DIR" <<'PYEOF'
+import pathlib, re, sys
+source = pathlib.Path(sys.argv[1])
+for full in source.rglob("*"):
+    path = full.relative_to(source)
+    if ({part.lower() for part in path.parts} & {"_scratch", "embeddinggemma-300m-onnx-q8-v1"}
+            or re.match(r"^(embeddinggemma-terms\.json|search-settings\.json|search-vectors\.db|model_quantized\.onnx)([._-].*)?$", path.name, re.I)):
+        raise SystemExit(f"Search model or private search state in package: {path}")
+PYEOF
 mkdir -p "$OUT_DIR"
 OUT_FILE="$OUT_DIR/uoink-$VERSION.mcpb"
 rm -f "$OUT_FILE"

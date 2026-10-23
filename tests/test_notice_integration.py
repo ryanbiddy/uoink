@@ -2,8 +2,10 @@
 import hashlib
 import importlib.util
 import json
+from email.message import Message
 from pathlib import Path
 import subprocess
+from types import SimpleNamespace
 
 import pytest
 
@@ -13,10 +15,17 @@ notices = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(notices)
 
 
+@pytest.fixture(autouse=True)
+def isolated_distribution_metadata(monkeypatch):
+    monkeypatch.setattr("importlib.metadata.distributions", lambda: [])
+
+
 def rows():
-    return [{"Name": line.split("==")[0], "Version": line.split("==")[1], "License": "fixture-metadata"}
+    data = [{"Name": line.split("==")[0], "Version": line.split("==", 1)[1].split()[0], "License": "fixture-metadata"}
             for line in (ROOT / "requirements-installer-lock.txt").read_text().splitlines()
             if line and not line.startswith("#")]
+    assert all(not any(char.isspace() for char in row["Version"]) for row in data)
+    return data
 
 
 def output_for(tmp_path, monkeypatch, data):
@@ -60,6 +69,51 @@ def test_failed_pip_collectors_reach_injected_importlib_fallback(tmp_path, monke
     assert "source: importlib.metadata (pip-licenses unavailable)" in text
     assert notices.SUPPLEMENTAL_NOTICE_BLOCK in text
     assert text.count(notices.ADAPTED_TEXT_BLOCK) == 1
+
+
+@pytest.mark.parametrize("collector", ["pip-licenses", "importlib"])
+def test_license_expression_preferred_with_legacy_fallback(tmp_path, monkeypatch, collector):
+    data = rows()
+    cases = {
+        # The expression overrides a known classifier or legacy License field.
+        "httpx2": ("BSD License", "BSD-3-Clause", "BSD-3-Clause"),
+        "mcp-types": ("MIT License", " MIT ", "MIT"),
+        # Keep compound SPDX expressions intact, and still fill UNKNOWN rows.
+        "greenlet": ("UNKNOWN", "MIT AND PSF-2.0", "MIT AND PSF-2.0"),
+        # Missing/blank expressions retain the existing SPDX/classifier value.
+        "truststore": ("MIT", None, "MIT"),
+        "h11": ("MIT License", "", "MIT License"),
+        "mpmath": ("BSD License", " \t ", "BSD License"),
+        "mdurl": ("UNKNOWN", None, "UNKNOWN"),
+    }
+    distributions = []
+    for row in data:
+        meta = Message()
+        name = row["Name"]
+        meta["Name"] = "MCP_TYPES" if name == "mcp-types" else name
+        meta["Version"] = row["Version"]
+        if name in cases:
+            current, expression, _ = cases[name]
+            row["License"] = current
+            if name == "h11":
+                meta["Classifier"] = "License :: OSI Approved :: MIT License"
+            elif current != "UNKNOWN":
+                meta["License"] = current
+            if expression is not None:
+                meta["License-Expression"] = expression
+        else:
+            meta["License"] = row["License"]
+        distributions.append(SimpleNamespace(metadata=meta))
+    monkeypatch.setattr("importlib.metadata.distributions", lambda: distributions)
+    target = output_for(tmp_path, monkeypatch, data)
+    if collector == "importlib":
+        monkeypatch.setattr(notices, "_from_pip_licenses", lambda: None)
+    assert notices.main() == 0
+    text = target.read_text(encoding="utf8")
+    for name, (_, _, expected) in cases.items():
+        row = next(row for row in data if row["Name"] == name)
+        output_name = "MCP_TYPES" if name == "mcp-types" and collector == "importlib" else name
+        assert f"| {output_name} | {row['Version']} | {expected} |" in text
 
 
 @pytest.mark.parametrize("name", ["proxy_tools", "antlr4-python3-runtime"])

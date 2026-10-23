@@ -15,6 +15,8 @@ only.
 
 from __future__ import annotations
 
+import uoink_usage
+
 import base64
 import json
 import logging
@@ -227,6 +229,8 @@ def _hook_context_for_folder(folder: Path) -> dict[str, Any]:
     }
 
 
+@uoink_usage.capture(lambda args: {"youtube": "youtube", "twitter": "x"}.get(
+    _b()._detect_platform_from_url(args.get("url", "")), "other"))
 def uoink_video(args: dict[str, Any]) -> dict[str, Any]:
     import _platform
     b = _b()
@@ -365,30 +369,45 @@ def list_recent_uoinks(args: dict[str, Any]) -> dict[str, Any]:
 
 
 def search_uoinks(args: dict[str, Any]) -> dict[str, Any]:
+    from uoink_core.search_service import MODES, metadata
+    mode = args.get("mode", "auto")
+    if mode not in MODES:
+        return _err("mode must be auto, keyword, semantic or hybrid")
     # Sprint 15: FTS5 keyword search via the library index instead of
     # read_text()-ing every corpus file. Return shape unchanged
     # ({slug, title, snippet, score}); optional channel / hook_type filters.
     query = args.get("query")
     if not isinstance(query, str) or not query.strip():
         return _err("query required")
+    match = args.get("match", "forgiving")
+    if match not in ("forgiving", "strict"):
+        return _err("match must be forgiving or strict")
     limit = _limit_int(args.get("limit"), default=10, low=1, high=50)
     channel = args.get("channel")
     channel = channel.strip() if isinstance(channel, str) and channel.strip() else None
     hook_type = args.get("hook_type")
     hook_type = hook_type.strip() if isinstance(hook_type, str) and hook_type.strip() else None
-    rows = _b()._get_index().search(query, limit, channel=channel, hook_type=hook_type)
+    idx = _b()._get_index()
+    page = idx.search_mode(query, limit, mode=mode, match=match,
+                           filters={"channel": channel, "hook_type": hook_type},
+                           keyword=lambda count, offset, override: {"results": idx.search(
+                               query, count, channel=channel, hook_type=hook_type, match=override or match, passages=False)})
+    rows = page["results"]
     results = []
     for r in rows:
         score = r.get("_score")
         results.append({
+            "video_id": r.get("video_id"),
             "slug": r.get("slug"),
             "title": r.get("title"),
             "snippet": (r.get("_snippet") or "").strip(),
             # FTS5 bm25 is lower-is-better; negate so a higher score means a
             # better match, matching the old term-count score's direction.
-            "score": round(-score, 4) if isinstance(score, (int, float)) else 0.0,
+            "score": -score if isinstance(score, (int, float)) else 0.0,
+            **({"passage": r["passage"]} if "passage" in r else {}),
+            **{key: r[key] for key in ("source_id", "passage_id", "span", "timestamp_seconds", "passage_verified", "citation_reason") if key in r},
         })
-    return _ok(results=results)
+    return _ok(results=results, **metadata(page))
 
 
 def get_uoink_corpus(args: dict[str, Any]) -> dict[str, Any]:
@@ -513,18 +532,27 @@ def _clean_text(value: Any) -> str | None:
 
 def search_clips(args: dict[str, Any]) -> dict[str, Any]:
     """Full-text search over transcript windows with source timing and links."""
+    from uoink_core.search_service import MODES, metadata
+    mode = args.get("mode", "auto")
+    if mode not in MODES:
+        return _err("mode must be auto, keyword, semantic or hybrid")
     query = args.get("query")
     if not isinstance(query, str) or not query.strip():
         return _err("query required")
+    match = args.get("match", "forgiving")
+    if match not in ("forgiving", "strict"):
+        return _err("match must be forgiving or strict")
     limit = _limit_int(args.get("limit"), default=20, low=1, high=50)
     video_id = _clean_text(args.get("video_id"))
     channel = _clean_text(args.get("channel"))
-    rows = _b()._get_index().search_clips(
-        query, limit, video_id=video_id, channel=channel)
+    page = _b()._get_index().search_mode(query, limit, mode=mode, clips_only=True,
+                                        video_id=video_id, filters={"channel": channel}, match=match)
+    rows = page["results"]
     results = []
     for r in rows:
         score = r.get("_score")
         results.append({
+            "clip_id": r.get("clip_id"),
             "video_id": r.get("video_id"),
             "slug": r.get("slug"),
             "title": r.get("title"),
@@ -534,11 +562,12 @@ def search_clips(args: dict[str, Any]) -> dict[str, Any]:
             "text": r.get("text"),
             "deep_link": r.get("source_deep_link"),
             "timing": r.get("timing", "unknown"),
+            **{key: r[key] for key in ("passage", "source_id", "passage_id", "span", "timestamp_seconds", "passage_verified", "citation_reason") if key in r},
             # bm25 is lower-is-better; negate so higher means better, the
             # same direction search_uoinks reports.
-            "score": round(-score, 4) if isinstance(score, (int, float)) else 0.0,
+            "score": -score if isinstance(score, (int, float)) else 0.0,
         })
-    return _ok(results=results)
+    return _ok(results=results, **metadata(page))
 
 
 def get_evidence_card(args: dict[str, Any]) -> dict[str, Any]:
@@ -1644,6 +1673,7 @@ def uoink_url(args: dict[str, Any]) -> dict[str, Any]:
             self.payload = None
 
         def _send_json(self, status: int, payload: dict) -> dict:
+            uoink_usage.capture_result(payload)
             self.status = status
             self.payload = payload
             return payload
@@ -1658,6 +1688,7 @@ def uoink_url(args: dict[str, Any]) -> dict[str, Any]:
     return _err("uoink_url returned no result")
 
 
+@uoink_usage.capture("note")
 def uoink_note(args: dict[str, Any]) -> dict[str, Any]:
     """Persist a text note through the same builders as POST /notes."""
     server = _b()
@@ -1689,6 +1720,7 @@ def uoink_note(args: dict[str, Any]) -> dict[str, Any]:
     )
 
 
+@uoink_usage.capture("image")
 def uoink_image(args: dict[str, Any]) -> dict[str, Any]:
     """Persist a base64 PNG, JPEG, or WebP through POST /images logic."""
     server = _b()
@@ -1736,6 +1768,7 @@ def uoink_image(args: dict[str, Any]) -> dict[str, Any]:
     )
 
 
+@uoink_usage.capture("x")
 def uoink_x(args: dict[str, Any]) -> dict[str, Any]:
     """Capture an X post through the same extractor as POST /extract/x."""
     server = _b()
@@ -1780,6 +1813,7 @@ def uoink_x(args: dict[str, Any]) -> dict[str, Any]:
 
 
 # ---- v3.2 Universal Site Uoinking ------------------------------------
+@uoink_usage.capture("page")
 def uoink_page(args: dict[str, Any]) -> dict[str, Any]:
     """v3.2 Universal Site Uoinking: capture an allowed page as a yoink.
 
@@ -1824,6 +1858,7 @@ def uoink_page(args: dict[str, Any]) -> dict[str, Any]:
     return result
 
 
+@uoink_usage.capture("reddit")
 def uoink_reddit_thread(args: dict[str, Any]) -> dict[str, Any]:
     """v3.3 Reddit capture: fetch a thread via its public .json (no API key),
     flatten the comment tree (depth + score limited), and persist it as a
@@ -2269,15 +2304,17 @@ def get_script(args: dict[str, Any]) -> dict[str, Any]:
 
 
 def find_mentions(args: dict[str, Any]) -> dict[str, Any]:
-    """Return every recorded mention of an entity across the library,
-    newest first, each with a timestamped YouTube deep link (Sprint 16)."""
+    """Find recorded entity names, carrying source spans and stored timing."""
     name = args.get("entity") or args.get("name")
     if not isinstance(name, str) or not name.strip():
         return _err("entity name (string) is required")
+    match = args.get("match", "forgiving")
+    if match not in ("forgiving", "strict"):
+        return _err("match must be forgiving or strict")
     limit = _limit_int(args.get("limit"), default=50, low=1, high=200)
     # Index.find_mentions normalises the name itself, so the raw entity
     # string is passed straight through.
-    rows = _b()._get_index().find_mentions(name.strip(), limit)
+    rows = _b()._get_index().find_mentions(name.strip(), limit, match=match)
     return _ok(mentions=rows)
 
 
@@ -3884,6 +3921,12 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
         },
         description="Full-text search across saved Uoink corpora.",
         input_schema=_schema({
+            "mode": {"type": "string", "enum": ["auto", "keyword", "semantic", "hybrid"],
+                      "default": "auto",
+                      "description": "Auto uses hybrid when the local semantic index is ready, otherwise keyword."},
+            "match": {"type": "string", "enum": ["forgiving", "strict"],
+                      "default": "forgiving",
+                      "description": "Forgiving matches useful words; strict requires every word."},
             "query": {"type": "string"},
             "limit": {"type": "integer", "minimum": 1, "maximum": 50, "default": 10},
             "channel": {
@@ -3914,6 +3957,12 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "search_uoinks to find whole items."
         ),
         input_schema=_schema({
+            "mode": {"type": "string", "enum": ["auto", "keyword", "semantic", "hybrid"],
+                      "default": "auto",
+                      "description": "Auto uses hybrid when the local semantic index is ready, otherwise keyword."},
+            "match": {"type": "string", "enum": ["forgiving", "strict"],
+                      "default": "forgiving",
+                      "description": "Forgiving matches useful words; strict requires every word."},
             "query": {"type": "string"},
             "limit": {"type": "integer", "minimum": 1, "maximum": 50, "default": 20},
             "video_id": {
@@ -4245,10 +4294,13 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
         },
         description=(
             "Find every place an entity (person, tool, product, company, "
-            "or topic) is mentioned across saved uoinks, newest first, each "
-            "with a timestamped YouTube deep link."
+            "or topic) is mentioned across saved uoinks. Rank by name match, "
+            "with newest first for ties. Results include stored timestamps and source links."
         ),
         input_schema=_schema({
+            "match": {"type": "string", "enum": ["forgiving", "strict"],
+                      "default": "forgiving",
+                      "description": "Forgiving matches entity name words; strict requires the exact normalized name."},
             "entity": {
                 "type": "string",
                 "description": "Entity name to look up (case-insensitive).",
@@ -5573,14 +5625,21 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
         },
         description=(
             "Bounded clip-first search of the saved library (default 5, at "
-            "most 20 hits) with an item-text fallback for items without "
-            "clips. Each hit carries the item id, source revision, safe title "
+            "most 20 hits) with verified clip or item-text passages when available. "
+            "Check passage_verified before quoting; citation_reason explains missing passages. "
+            "Each hit carries the item id, source revision, safe title "
             "and link, evidence kind and timing, a 240-character preview and "
             "revision-bound card and excerpt URIs for read_library_resource. "
             "Results are bounded, not exhaustive; follow next_step when more "
             "retrieval is needed."
         ),
         input_schema=_schema({
+            "mode": {"type": "string", "enum": ["auto", "keyword", "semantic", "hybrid"],
+                      "default": "auto",
+                      "description": "Auto uses hybrid when the local semantic index is ready, otherwise keyword."},
+            "match": {"type": "string", "enum": ["forgiving", "strict"],
+                      "default": "forgiving",
+                      "description": "Forgiving matches useful words; strict requires every word."},
             "query": {"type": "string", "description": "Search text, at most 512 characters."},
             "limit": {"type": "integer", "minimum": 1, "maximum": 20, "default": 5,
                       "description": "Maximum hits, 1-20 (default 5)."},

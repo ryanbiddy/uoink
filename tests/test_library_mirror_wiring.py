@@ -119,6 +119,7 @@ def _isolate_mirror_state(monkeypatch, tmp_path):
     server._mirror_intents.clear()
     server._mirror_previews.clear()
     monkeypatch.setattr(server, "SETTINGS_PATH", tmp_path / "settings.json")
+    monkeypatch.setattr(server, "_settings_path", lambda: tmp_path / "settings.json")
     monkeypatch.setattr(server, "_get_saved_anthropic_key", lambda: None)
     monkeypatch.setattr(server, "_autostart_enabled", lambda: False)
     monkeypatch.setattr(server, "_load_topics", lambda: {"topics": []})

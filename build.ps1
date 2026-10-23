@@ -53,6 +53,7 @@ $StagingDir   = Join-Path $InstallerDir 'staging'
 $TemplatesDir = Join-Path $InstallerDir 'templates'
 $IconSrc      = Join-Path $InstallerDir 'uoink.ico'
 $InstallerLock = Join-Path $RepoRoot 'requirements-installer-lock.txt'
+$InstallerConstraints = Join-Path $CacheDir 'installer-version-constraints.txt'
 $verifyInstallerLock = Join-Path $RepoRoot 'scripts\verify_installer_lock.py'
 $NltkPathsecWheel = Join-Path $RepoRoot 'vendor\nltk-pathsec\dist\nltk-3.10.3+uoink.pathsec1-py3-none-any.whl'
 $NLTK_PATHSEC_SHA256 = '969f623541344ade83ea267130e016d6cb8a223ecaaf28fb3d7a663c7e3c60d8'
@@ -145,7 +146,7 @@ $YTDLP_VERSION  = '2026.08.19'
 $PILLOW_VERSION = '12.3.0'
 # Official Model Context Protocol Python SDK for the stdio MCP server.
 # Also pinned in requirements.txt for dev installs and docs.
-$MCP_VERSION    = '1.28.1'
+$MCP_VERSION    = '2.3.0'
 # Windows Credential Manager wrapper for Anthropic API key storage.
 # Also pinned in requirements.txt for dev installs and docs.
 $KEYRING_VERSION = '25.7.0'
@@ -309,6 +310,7 @@ foreach ($f in @(
     '_platform.py',
     'uoink_processes.py',
     'uoink_install_isolation.py',
+    'uoink_usage.py',
     'migrate_install.py',
     'channels.py',
     'workspaces.py',
@@ -428,15 +430,18 @@ if ($LASTEXITCODE -ne 0) { throw 'pip bootstrap failed' }
 
 # 2d. Install the direct runtime dependencies while constraining the complete
 #     transitive graph to the reviewed Windows/CPython 3.13 lock. Artifact
-#     hashes remain a separate release control. Pillow drives the multimodal
+#     hashes for the SDK delta are recorded in the lock. Whole-graph artifact
+#     qualification remains a separate release control. Pillow drives the multimodal
 #     paste-corpus generator
 #     (resize / re-encode / base64 screenshots for clipboard embedding).
 #     MCP powers uoink_mcp.py for stdio agent integrations. keyring stores
 #     the user's Anthropic API key in Windows Credential Manager.
+& $embedPython $verifyInstallerLock $InstallerLock --write-constraints $InstallerConstraints
+if ($LASTEXITCODE -ne 0) { throw 'Installer constraint export failed' }
 Write-Host "    installing yt-dlp==$YTDLP_VERSION + Pillow==$PILLOW_VERSION + mcp==$MCP_VERSION + keyring==$KEYRING_VERSION + pystray==$PYSTRAY_VERSION + pywebview==$PYWEBVIEW_VERSION + pythonnet==$PYTHONNET_VERSION + faster-whisper==$FASTER_WHISPER_VERSION + whisperx==$WHISPERX_VERSION..."
 & $embedPython -m pip install --no-warn-script-location --no-compile --no-cache-dir `
     --no-build-isolation `
-    --constraint $InstallerLock `
+    --constraint $InstallerConstraints `
     $NltkPathsecWheel `
     "yt-dlp==$YTDLP_VERSION" "Pillow==$PILLOW_VERSION" "mcp==$MCP_VERSION" "keyring==$KEYRING_VERSION" "pystray==$PYSTRAY_VERSION" "pywebview==$PYWEBVIEW_VERSION" "pythonnet==$PYTHONNET_VERSION" "faster-whisper==$FASTER_WHISPER_VERSION" "whisperx==$WHISPERX_VERSION"
 if ($LASTEXITCODE -ne 0) { throw 'pip install (yt-dlp + Pillow + MCP + keyring + pystray + faster-whisper + whisperx) failed' }
@@ -458,7 +463,7 @@ try {
     $ErrorActionPreference = 'Continue'
     & $embedPython -m pip install --no-warn-script-location --no-compile --no-cache-dir `
         --no-build-isolation `
-        --constraint $InstallerLock "pip-licenses==5.0.0" 2>$null
+        --constraint $InstallerConstraints "pip-licenses==5.0.0" 2>$null
     $noticeToolInstallExit = $global:LASTEXITCODE
     $ErrorActionPreference = $noticePriorErrorPreference
     if ($noticeToolInstallExit -ne 0) {
@@ -607,7 +612,10 @@ New-Item -ItemType Directory -Force -Path (Join-Path $StagingDir 'third-party-no
 foreach ($noticeRelative in @('THIRD-PARTY-NOTICES.md', 'third-party-notices\README.md',
         'third-party-notices\antlr4-python3-runtime-4.9.3-LICENSE.txt',
         'third-party-notices\proxy-tools-0.1.0-UPSTREAM-LICENSE.txt',
-        'third-party-notices\scrapecreators-social-media-research-skills-MIT-LICENSE.txt')) {
+        'third-party-notices\scrapecreators-social-media-research-skills-MIT-LICENSE.txt',
+        'third-party-notices\EmbeddingGemma-NOTICE.md',
+        'third-party-notices\Gemma-Terms-of-Use.txt',
+        'third-party-notices\Gemma-Prohibited-Use-Policy.txt')) {
     $noticeSource = Join-Path $RepoRoot $noticeRelative
     $noticeTarget = Join-Path $StagingDir $noticeRelative
     $noticeHash = (Get-FileHash -LiteralPath $noticeSource -Algorithm SHA256).Hash
@@ -665,6 +673,7 @@ Copy-Item (Join-Path $RepoRoot 'scripts\recall_hook.py') (Join-Path $StagingDir 
 Copy-Item (Join-Path $RepoRoot '_platform.py')   $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'uoink_processes.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'uoink_install_isolation.py') $StagingDir -Force
+Copy-Item (Join-Path $RepoRoot 'uoink_usage.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'migrate_install.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'channels.py')    $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'workspaces.py')  $StagingDir -Force
@@ -764,7 +773,7 @@ Write-Step 'Staged smoke'
 Push-Location $StagingDir
 try {
     & '.\python\python.exe' -m py_compile `
-        server.py index.py clips.py provenance.py library_cards.py usage_meter.py migrate_install.py uoink_install_isolation.py channels.py workspaces.py claims.py scripts.py voice_dna.py writing_studio.py corpus_contract.py corpus_provider.py corpus_intelligence.py page_extractor.py writer_peer.py engagement_contract.py media_handoff.py suite_service.py source_manifest.py openapi_bridge.py reddit_extractor.py x_extractor.py x_article_extractor.py notes.py images.py taste_scoring.py memory_layer.py podcasts.py mobile_playlists.py whisper_runner.py uoink_mcp.py uoink_mcp_tools.py uoink_agent_runtime.py uoink_cli.py uoink_connect.py uoink_reliability.py yoink_mcp.py yt_extract.py helper\_version.py
+        server.py index.py clips.py provenance.py library_cards.py usage_meter.py migrate_install.py uoink_install_isolation.py uoink_usage.py channels.py workspaces.py claims.py scripts.py voice_dna.py writing_studio.py corpus_contract.py corpus_provider.py corpus_intelligence.py page_extractor.py writer_peer.py engagement_contract.py media_handoff.py suite_service.py source_manifest.py openapi_bridge.py reddit_extractor.py x_extractor.py x_article_extractor.py notes.py images.py taste_scoring.py memory_layer.py podcasts.py mobile_playlists.py whisper_runner.py uoink_mcp.py uoink_mcp_tools.py uoink_agent_runtime.py uoink_cli.py uoink_connect.py uoink_reliability.py yoink_mcp.py yt_extract.py helper\_version.py
     if ($LASTEXITCODE -ne 0) {
         throw 'staged smoke: py_compile of staged Python files failed'
     }
@@ -856,6 +865,13 @@ if ($remainingBytecode) {
 }
 if (Test-Path $stagedToken) {
     throw 'Final staging cleanup left token.txt'
+}
+
+& (Join-Path $RepoRoot 'scripts\assert-search-payload.ps1') -Root $StagingDir
+foreach ($searchModule in @('local_search.py', 'search_service.py')) {
+    if (-not (Test-Path -LiteralPath (Join-Path $StagingDir "uoink_core\$searchModule"))) {
+        throw "Missing search module: $searchModule"
+    }
 }
 
 # Inno records source mtimes in setup data. Worktree checkout times made two

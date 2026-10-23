@@ -43,6 +43,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 HARNESS = REPO_ROOT / "tests" / "js" / "dash_search_sequencing_test.mjs"
 
 GROUPS = [
+    "search_modes",
     "typing",
     "stale_error",
     "load_more",

@@ -77,6 +77,17 @@ and [adapted file list](third-party-notices/README.md).
 """
 
 
+EMBEDDINGGEMMA_BLOCK = """\
+## Optional EmbeddingGemma search
+
+The search code ships in Uoink. Model weights are downloaded separately after
+explicit acceptance and are never bundled. See the bundled
+[model notice](third-party-notices/EmbeddingGemma-NOTICE.md),
+[Gemma Terms of Use](third-party-notices/Gemma-Terms-of-Use.txt) and
+[Prohibited Use Policy](third-party-notices/Gemma-Prohibited-Use-Policy.txt).
+"""
+
+
 SUPPLEMENTAL_NOTICE_BLOCK = """\
 ## Supplemental upstream notices
 
@@ -148,12 +159,11 @@ def _classifier_license(meta) -> str:
 
 
 def _fill_license_expressions(rows: list[dict]) -> list[dict]:
-    """Recover PEP 639 ``License-Expression`` where a row has no licence.
+    """Prefer the installed distribution's PEP 639 ``License-Expression``.
 
-    Newer wheels (anyio, click, cryptography, ...) declare their licence only
-    as an SPDX ``License-Expression``; pip-licenses 5.0 and the legacy
-    ``License`` field both report UNKNOWN for them. Read the exact installed
-    metadata for those rows only; declared values are never overridden.
+    Classifiers can be less precise, such as ``BSD License`` instead of
+    ``BSD-3-Clause``. Use the declared SPDX expression when present; otherwise
+    retain the collector's existing licence value, including UNKNOWN.
     """
     import importlib.metadata as md
     normalize = lambda name: re.sub(r"[-_.]+", "-", name).lower()
@@ -165,9 +175,6 @@ def _fill_license_expressions(rows: list[dict]) -> list[dict]:
         if name and expression:
             expressions.setdefault(normalize(name), expression)
     for row in rows:
-        current = (row.get("License") or "").strip()
-        if current and current.upper() != "UNKNOWN":
-            continue
         expression = expressions.get(normalize(row.get("Name") or ""))
         if expression:
             row["License"] = expression
@@ -250,7 +257,7 @@ def main() -> int:
                   "source and build provenance are in vendor/nltk-pathsec in the source "
                   "repository. This modification does not qualify model loading or "
                   "clear unrelated dependency advisories."]
-    lines += ["", supplemental, "", ADAPTED_TEXT_BLOCK, "", FFMPEG_BLOCK,
+    lines += ["", supplemental, "", EMBEDDINGGEMMA_BLOCK, "", ADAPTED_TEXT_BLOCK, "", FFMPEG_BLOCK,
               "", BUNDLED_FONTS_BLOCK, ""]
     output.write_text("\n".join(lines), encoding="utf-8")
     print(f"wrote {output} ({len(rows)} python packages, source: {source})")

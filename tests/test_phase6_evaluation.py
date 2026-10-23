@@ -1102,13 +1102,13 @@ def test_phase6_export_alignment_limits_and_errors(sandbox):
     finally:
         bad_conn.close()
     env.clock.advance()
-    env.guard.admit()
-    env.guard.admit()
+    for _ in range(env.guard.max_active):
+        env.guard.admit()
     try:
         _refusal(media.export_cited_range(conn, base, clock=env.clock), "rate_limited")
     finally:
-        env.guard.release()
-        env.guard.release()
+        for _ in range(env.guard.max_active):
+            env.guard.release()
     env.clock.advance()
     for _ in range(60):
         env.guard.admit()

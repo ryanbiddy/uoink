@@ -384,7 +384,7 @@ def test_phase5_ba3_stdio_holds_admission_through_final_render(db, monkeypatch):
         return real_render(packet)
     monkeypatch.setattr(library_resources, "render_tool_text", render)
     result = stdio_result({"interval": INTERVAL})
-    assert not result.isError
+    assert not result.is_error
     assert active and all(n > 0 for n in active), active
 
 
@@ -409,7 +409,7 @@ def test_phase5_ba3_final_wire_serialization_is_inside_deadline(db, monkeypatch)
     monkeypatch.setattr(library_resources, "wire_bytes", wire)
     monkeypatch.setattr(time, "monotonic", lambda: monotonic() + elapsed[0])
     result = stdio_result({"interval": INTERVAL})
-    assert result.isError and "deadline_exceeded" in result.content[0].text, result.content[0].text[:180]
+    assert result.is_error and "deadline_exceeded" in result.content[0].text, result.content[0].text[:180]
 
 
 NARRATION = "Between 00:00 and 18:00 UTC on September 6, two shelf operations were recorded for 1 item. Net shelf membership remained unchanged."

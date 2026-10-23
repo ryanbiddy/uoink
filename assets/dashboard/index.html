@@ -411,6 +411,40 @@
       padding: 28px 28px 34px;
     }
 
+    /* One-time usage opt-in card: its own row above the content, styled as a card. */
+    .main:has(> #usageOptInCard:not(.hidden)) {
+      grid-template-rows: auto minmax(0, 1fr);
+    }
+
+    .main > #usageOptInCard {
+      gap: 10px;
+      margin: 24px 28px 0;
+      padding: 18px 20px;
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--rust);
+      border-radius: var(--card-radius);
+      background: color-mix(in srgb, var(--surface) 82%, transparent);
+    }
+
+    .main > #usageOptInCard h2 {
+      margin: 0;
+      font-size: 17px;
+    }
+
+    .main > #usageOptInCard .setting-copy {
+      margin: 0;
+      max-width: 80ch;
+    }
+
+    .main > #usageOptInCard .inline-row {
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .main > #usageOptInCard #usageChoiceStatus:empty {
+      display: none;
+    }
+
     .tab-panel {
       display: none;
       max-width: 1180px;
@@ -3284,6 +3318,7 @@
     }
 
     #tab-library .library-more-filters .library-filter-summary,
+    #matchFilter,
     #sortFilter {
       min-height: var(--target-chip);
     }
@@ -3757,6 +3792,9 @@
       }
       .content {
         padding: 26px 18px 34px;
+      }
+      .main > #usageOptInCard {
+        margin: 18px 18px 0;
       }
       .page-head {
         display: grid;
@@ -4353,6 +4391,17 @@
     </aside>
 
     <main class="main">
+      <form class="setting-block hidden" id="usageOptInCard" aria-labelledby="usageOptInTitle">
+        <h2 id="usageOptInTitle">Help improve Uoink with usage counts</h2>
+        <p class="setting-copy">Sharing is off by default. If you turn it on, Uoink sends daily counts of tools, known MCP clients, connections, captures and searches to usage.uoink.app, along with a random ID and app and system versions. It never sends content, URLs, titles, paths, search text or account details.</p>
+        <p class="setting-copy">You can see the exact data and change your choice in Settings. This card appears only once.</p>
+        <div class="inline-row">
+          <button class="button" type="submit" id="usageNoThanks">No thanks</button>
+          <button class="button ghost" type="button" id="usageYes">Share anonymous usage counts</button>
+          <button class="button ghost" type="button" id="usageDismiss" aria-label="Dismiss usage sharing card">Dismiss</button>
+        </div>
+        <p id="usageChoiceStatus" role="status" aria-live="polite"></p>
+      </form>
       <div class="content">
         <section class="tab-panel" id="tab-for-you" data-tab-panel="for-you">
           <div class="page-head">
@@ -4804,6 +4853,10 @@
                 <input class="control" id="dateTo" type="date" aria-label="Date to">
               </div>
             </details>
+            <select class="control" id="matchFilter" aria-label="Search matching">
+              <option value="forgiving">Any useful words</option>
+              <option value="strict">Exact words</option>
+            </select>
             <select class="control" id="sortFilter" aria-label="Sort Library">
               <option value="newest">Newest first</option>
               <option value="oldest">Oldest first</option>
@@ -4815,6 +4868,7 @@
 
           <div class="summary-line">
             <span id="resultSummary" aria-live="polite">Loading library...</span>
+            <span class="library-count hidden" id="searchModeLabel" role="status"></span>
             <div class="library-filter-chips hidden" id="activeFilters" aria-live="polite"></div>
             <span><span id="facetStatus" class="facet-status hidden" title="">?</span> <button class="hook-help-link" type="button" data-hook-explain="">What's a hook?</button></span>
             <span class="health-legend" title="A row names its state in words; the dot only repeats it.">
@@ -5347,6 +5401,7 @@
           <nav class="settings-index" aria-label="Settings sections">
             <a href="#settings/capture">Capture</a>
             <a href="#settings/ai">AI features</a>
+            <a href="#settings/search">Semantic search</a>
             <a href="#settings/connected-services">Connected services</a>
             <a href="#settings/library">Library and export</a>
             <a href="#settings/agents">Agents (MCP)</a>
@@ -5537,6 +5592,29 @@
           </div>
           </section>
 
+          <section class="settings-section" id="settings-search" aria-labelledby="settingsSearchTitle">
+            <h2 class="settings-section-title" id="settingsSearchTitle" tabindex="-1">Semantic search (optional)</h2>
+            <div class="setting-block">
+              <p class="setting-copy">Find saved passages with similar meaning, even when the words differ. Download about 330 MB from Hugging Face once. Search runs on this computer and works offline after that. Your searches and saved text stay on this computer. Only the model download uses the internet.</p>
+              <p class="setting-copy">This uses the Gemma model under Google's Gemma Terms of Use. Read the bundled <a href="/search/notices/EmbeddingGemma-NOTICE.md" data-search-notice>model notice</a>, <a href="/search/notices/Gemma-Terms-of-Use.txt" data-search-notice>Gemma Terms of Use</a> and <a href="/search/notices/Gemma-Prohibited-Use-Policy.txt" data-search-notice>Prohibited Use Policy</a>. You must accept them before downloading.</p>
+              <label class="inline-row"><input id="semanticAccept" type="checkbox"> I accept the Gemma Terms of Use and Prohibited Use Policy.</label>
+              <p class="setting-copy" id="semanticStatus" role="status" aria-live="polite">Semantic search is off. Keyword search is available.</p>
+              <progress id="semanticProgress" class="hidden" aria-label="Semantic search progress" max="1" value="0"></progress>
+              <div class="inline-row">
+                <button class="button primary" id="semanticDownload" type="button" disabled>Accept and download</button>
+                <button class="button ghost" id="semanticPause" type="button" disabled>Pause</button>
+                <button class="button ghost" id="semanticResume" type="button" disabled>Resume</button>
+                <button class="button ghost" id="semanticRemove" type="button" disabled>Remove semantic search</button>
+              </div>
+              <p class="setting-copy">Removing semantic search deletes the model, its search index and your acceptance record. Keyword search keeps working.</p>
+            </div>
+          </section>
+          <dialog id="semanticNoticeDialog" aria-labelledby="semanticNoticeTitle">
+            <h2 id="semanticNoticeTitle">Gemma notice</h2>
+            <pre id="semanticNoticeText" style="white-space:pre-wrap;max-width:70ch;max-height:65vh;overflow:auto"></pre>
+            <form method="dialog"><button class="button ghost" type="submit">Close</button></form>
+          </dialog>
+
           <section class="settings-section" id="settings-connected-services" aria-labelledby="settingsConnectedServicesTitle">
             <h2 class="settings-section-title" id="settingsConnectedServicesTitle" tabindex="-1">Connected services</h2>
             <div class="settings-grid">
@@ -5724,12 +5802,29 @@
               <p class="setting-copy">When off, updates stay in Activity without opening a balloon. Fullscreen apps also receive this courtesy automatically.</p>
             </div>
 
+            <div class="setting-block" id="settings-usage">
+              <h2>Usage sharing</h2>
+              <label class="inline-row"><input id="usageSharing" type="checkbox" aria-describedby="usageSharingCopy usageSharingSaveStatus"> Share anonymous usage counts</label>
+              <div class="setting-feedback"><span class="setting-status" id="usageSharingSaveStatus" role="status" aria-live="polite" aria-atomic="true"></span><button class="button ghost setting-retry hidden" id="usageSharingSaveRetry" type="button" data-setting-retry="usageSharing">Retry save</button></div>
+              <p class="setting-copy" id="usageSharingCopy">Off by default. If enabled, Uoink sends counts to usage.uoink.app at most once every 24 hours: calls by tool name, known MCP client names, calls over stdio or HTTP, captures by source and result, and library searches. Each report includes a random install ID, a random report ID to prevent repeat counting, Uoink version, operating system and major version, processor type, install type and hours counted. No content, URLs, titles, paths, search text, account details, usernames or IP addresses are included in the report.</p>
+              <p class="setting-copy" id="usageSharingOverride" role="status"></p>
+              <p class="setting-copy">Turning this off deletes the random ID, local counts and sent history. Turning it on again creates a new ID.</p>
+              <details id="usageDisclosure">
+                <summary>See what is sent</summary>
+                <p class="setting-copy" id="usagePayloadLabel">Sample payload. Sharing is off. Counts are zero and IDs are placeholders.</p>
+                <pre id="usageNextPayload" style="white-space:pre-wrap;overflow-wrap:anywhere">null</pre>
+                <p class="setting-copy">Last 10 sent payloads and their dates, kept on this computer.</p>
+                <pre id="usageSentPayloads" style="white-space:pre-wrap;overflow-wrap:anywhere">[]</pre>
+                <p id="usageDisclosureStatus" role="status" aria-live="polite"></p>
+              </details>
+            </div>
+
             <div class="setting-block" id="settings-updates">
               <h2>Updates</h2>
               <p class="setting-copy" id="versionLine">Loading version...</p>
               <p class="setting-copy" id="updateLine">Last checked: not yet</p>
               <button class="button ghost" type="button" id="checkUpdates">Check now</button>
-              <p class="setting-copy-dim" style="font-size:12px;color:var(--dim);margin-top:8px">Checking for updates queries <code>api.github.com</code> to fetch the latest release tag. No telemetry is collected.</p>
+              <p class="setting-copy-dim" style="font-size:12px;color:var(--dim);margin-top:8px">Checking for updates queries <code>api.github.com</code> to fetch the latest release tag. This check sends no usage counts or library data.</p>
             </div>
 
             <div class="setting-block" id="settings-about">
@@ -5889,6 +5984,7 @@
         date_from: "",
         date_to: "",
         sort: "newest",
+        match: "forgiving",
         // Re-haul type chips: "" (All), videos, posts, notes, podcasts.
         kind: "",
       },
@@ -6213,6 +6309,7 @@
       dateTo: document.getElementById("dateTo"),
       dateRangeError: document.getElementById("dateRangeError"),
       sortFilter: document.getElementById("sortFilter"),
+      matchFilter: document.getElementById("matchFilter"),
       facetStatus: document.getElementById("facetStatus"),
       queueRows: document.getElementById("queueRows"),
       attentionRows: document.getElementById("attentionRows"),
@@ -10861,13 +10958,14 @@
       // helper over every match, not re-sorted on the loaded page (D26).
       if (state.filters.kind) params.set("kind", state.filters.kind);
       params.set("sort", state.filters.sort || "newest");
+      params.set("match", state.filters.match || "forgiving");
       params.set("limit", String(extra.limit ?? state.limit));
       params.set("offset", String(extra.offset ?? state.offset));
       return params;
     }
 
     function hasLibraryFilters() {
-      return Object.entries(state.filters).some(([key, value]) => key !== "sort" && String(value || "").trim());
+      return Object.entries(state.filters).some(([key, value]) => key !== "sort" && key !== "match" && String(value || "").trim());
     }
 
     function libraryFilterLabel(key) {
@@ -10902,7 +11000,7 @@
     // The type chips show their own state, so the kind is no removable chip.
     function activeLibraryFilterEntries() {
       return Object.entries(state.filters)
-        .filter(([key, value]) => key !== "sort" && key !== "kind" && String(value || "").trim())
+        .filter(([key, value]) => key !== "sort" && key !== "kind" && key !== "match" && String(value || "").trim())
         .map(([key, value]) => ({
           key,
           label: libraryFilterLabel(key),
@@ -11055,7 +11153,8 @@
     function resetLibraryFilters() {
       [els.searchInput, els.platformFilter, els.sourceTypeFilter, els.channelFilter, els.topicFilter, els.hookFilter, els.formatFilter, els.performanceFilter, els.lengthFilter, els.dateFrom, els.dateTo].forEach((el) => { el.value = ""; });
       els.sortFilter.value = "newest";
-      state.filters = { q: "", platform: "", source_type: "", author: "", topic: "", hook_type: "", format: "", performance: "", length: "", date_from: "", date_to: "", sort: "newest", kind: "" };
+      els.matchFilter.value = "forgiving";
+      state.filters = { q: "", platform: "", source_type: "", author: "", topic: "", hook_type: "", format: "", performance: "", length: "", date_from: "", date_to: "", sort: "newest", match: "forgiving", kind: "" };
       setLibraryDateError("");
       els.libraryMoreFilters.removeAttribute("open");
       resetLibraryCapture();
@@ -11151,8 +11250,19 @@
         }
         if (request !== state.libraryRequest) return;
         const params = paramsFromFilters();
+        params.set("mode", reset ? "auto" : (state.searchMode || "auto"));
         const data = await authFetch(`/memory/search?${params.toString()}`);
         if (request !== state.libraryRequest) return;
+        const actualMode = data.search_mode || "keyword";
+        if (!reset && state.searchMode && actualMode !== state.searchMode) {
+          state.loading = false;
+          return loadLibrary({ reset: true, jobs: false });
+        }
+        state.searchMode = actualMode;
+        const modeLabel = document.getElementById("searchModeLabel");
+        modeLabel.textContent = ({ keyword: "Keyword", semantic: "Semantic", hybrid: "Hybrid" })[state.searchMode];
+        modeLabel.title = data.fallback_reason || "Search mode used for these results";
+        modeLabel.classList.toggle("hidden", !params.get("q"));
         const rows = Array.isArray(data.results) ? data.results : [];
         state.total = Number(data.total) || 0;
         state.corpusTotal = Number.isFinite(Number(data.corpus_total)) ? Number(data.corpus_total) : (hasLibraryFilters() ? state.corpusTotal : state.total);
@@ -13140,7 +13250,7 @@
         if (request !== settingsReadVersion) return;
         status.textContent = `Could not load settings: ${settingError(err)} Use Reload to try again.`;
       }
-      await Promise.all([loadSettingsMcp(), loadTasteSettings(), loadPlaylistSettings(), loadPodcastFeedSettings(), loadChannels(), loadAllowedSites(), loadAgentSetup(), loadAIPricing(), loadHookCorrections(), loadSkillSystemPrompt()]);
+      await Promise.all([loadSettingsMcp(), loadTasteSettings(), loadPlaylistSettings(), loadPodcastFeedSettings(), loadChannels(), loadAllowedSites(), loadAgentSetup(), loadAIPricing(), loadHookCorrections(), loadSkillSystemPrompt(), loadSemanticStatus()]);
       els.helperStatus.textContent = els.helperStatusText ? els.helperStatusText.textContent : "See the helper status in the sidebar.";
     }
 
@@ -15360,6 +15470,7 @@
       scrapecreatorsCap: ["scrapecreators_daily_credit_cap", 25],
       autostartToggle: ["autostart", false],
       notificationsEnabled: ["notifications_enabled", true],
+      usageSharing: ["usage_sharing", false],
       screenshotCount: ["clipboard_screenshot_cap", 4],
       claimVerificationToggle: ["claim_verification_enabled", false],
       entityExtractionToggle: ["entity_extraction_enabled", false],
@@ -15393,6 +15504,52 @@
     let aiPricingError = "";
     const settingsResourceVersions = new Map();
     const DASHBOARD_INTERVAL_KEY = "uoink.dashboard.screenshotInterval";
+
+    function renderUsageSettings(settings) {
+      const forced = settings.usage_sharing_forced_off === true;
+      document.getElementById("usageSharing").disabled = forced;
+      if (forced) document.getElementById("usageSharing").checked = false;
+      document.getElementById("usageSharingOverride").textContent = forced
+        ? "Sharing is forced off by UOINK_USAGE_SHARING=0." : "";
+      const disclosure = settings.usage_sharing_disclosure || {};
+      document.getElementById("usagePayloadLabel").textContent = disclosure.sample === true
+        ? "Sample payload. Sharing is off. Counts are zero and IDs are placeholders."
+        : "Next payload with the current counts. New activity can change it before the daily send.";
+      document.getElementById("usageNextPayload").textContent = JSON.stringify(disclosure.next_payload ?? null, null, 2);
+      document.getElementById("usageSentPayloads").textContent = JSON.stringify(disclosure.sent || [], null, 2);
+      document.getElementById("usageDisclosureStatus").textContent = disclosure.error || "";
+    }
+
+    async function refreshUsageDisclosure() {
+      try {
+        const data = await settingsRequest("/settings");
+        renderUsageSettings(data.settings || {});
+      } catch (_) {
+        document.getElementById("usageDisclosureStatus").textContent = "Could not load usage counts. Close and reopen this section to try again.";
+      }
+    }
+
+    async function chooseUsageSharing(enabled) {
+      const card = document.getElementById("usageOptInCard");
+      const buttons = ["usageYes", "usageNoThanks", "usageDismiss"].map(id => document.getElementById(id));
+      buttons.forEach(button => { button.disabled = true; });
+      try {
+        await settingsWriteQueue;
+        const data = await settingsRequest("/settings", { method: "POST", body: JSON.stringify({ usage_sharing: enabled }) });
+        renderUsageSettings(data.settings || {});
+        document.getElementById("usageSharing").checked = data.settings.usage_sharing === true;
+        card.classList.toggle("hidden", true);
+      } catch (_) {
+        document.getElementById("usageChoiceStatus").textContent = "Could not save this choice. You can change sharing in Settings.";
+      } finally { buttons.forEach(button => { button.disabled = false; }); }
+    }
+
+    async function showUsagePrompt() {
+      try {
+        const data = await settingsRequest("/settings/usage-prompt", { method: "POST", body: "{}" });
+        document.getElementById("usageOptInCard").classList.toggle("hidden", data.show !== true);
+      } catch (_) { /* Optional card stays hidden if the helper is unavailable. */ }
+    }
 
     function settingEdit(id) {
       if (!settingEdits.has(id)) settingEdits.set(id, { version: 0, dirty: false, retry: null });
@@ -15460,7 +15617,7 @@
 
     async function settingsRequest(path, options = {}) {
       const controller = new AbortController();
-      const timer = window.setTimeout(() => controller.abort(), 15000);
+      const timer = window.setTimeout(() => controller.abort(), options.timeoutMs || 15000);
       try {
         const data = await authFetch(path, { ...options, signal: controller.signal });
         if (!data || data.ok === false) throw new Error(data && data.error || "Empty response from helper");
@@ -15526,6 +15683,10 @@
         }
         // Only adopt the acknowledged field, not stale siblings in the response.
         state.settings = { ...(state.settings || {}), [confirmedField]: stored[confirmedField] };
+        if (field === "usage_sharing") {
+          renderUsageSettings(stored);
+          document.getElementById("usageOptInCard").classList.toggle("hidden", true);
+        }
         if (field === "scrapecreators_key") state.settings.scrapecreators_key_invalid = stored.scrapecreators_key_invalid === true;
         if (field === "output_dir") state.settings.output_dir_pending_restart = stored.output_dir_pending_restart;
         renderAICostEstimate();
@@ -15639,6 +15800,7 @@
 
     function hydrateSettings(data, versions) {
       const settings = data.settings || {};
+      renderUsageSettings(settings);
       // The full response is useful to Generate, but must not overwrite a
       // newer confirmed write or an edit still waiting for its change event.
       const previous = state.settings || {};
@@ -15952,7 +16114,111 @@
       }
     }
 
+    let semanticState = null;
+    let semanticBusy = false;
+    let semanticVersion = 0;
+    let semanticTimer = null;
+    let semanticRetryMs = 2000;
+
+    function renderSemanticStatus() {
+      const data = semanticState || {};
+      const accepted = Boolean(data.acceptance);
+      const checkbox = document.getElementById("semanticAccept");
+      if (accepted) checkbox.checked = true;
+      checkbox.disabled = semanticBusy || accepted;
+      const active = ["downloading", "verifying", "indexing"].includes(data.state) && !data.paused;
+      const messages = {
+        not_installed: "Semantic search is off. Keyword search is available.",
+        terms_needed: "Accept the current Gemma terms first.",
+        downloading: `Downloading ${Math.round((data.bytes || 0) / 1000000)} of 330 MB.`,
+        verifying: "Verifying the model files.",
+        indexing: `Indexing saved sources: ${data.done || 0} of ${data.total || 0}. Keyword search is available.`,
+        ready: `Ready. ${data.done || 0} of ${data.total || 0} sources indexed.`,
+        retrying: data.message || "Semantic search is retrying. Keyword search is available.",
+        error: data.message || "Semantic search is unavailable. Retry setup. Keyword search still works."
+      };
+      document.getElementById("semanticStatus").textContent = data.paused ? "Paused. Select Resume to continue. Keyword search is available." : (messages[data.state] || messages.not_installed);
+      const progress = document.getElementById("semanticProgress");
+      progress.classList.toggle("hidden", !active);
+      if (data.state === "verifying") progress.removeAttribute("value");
+      else {
+        progress.max = Math.max(1, Number(data.state === "downloading" ? data.download_bytes : data.total) || 0);
+        progress.value = Number(data.state === "downloading" ? data.bytes : data.done) || 0;
+      }
+      const download = document.getElementById("semanticDownload");
+      download.textContent = accepted ? "Download model" : "Accept and download";
+      download.disabled = semanticBusy || !semanticState || (!accepted && !checkbox.checked) || active || data.state === "ready";
+      document.getElementById("semanticPause").disabled = semanticBusy || !data.enabled || data.paused;
+      document.getElementById("semanticResume").disabled = semanticBusy || !accepted || (!data.paused && data.state !== "error");
+      document.getElementById("semanticRemove").disabled = semanticBusy || !(accepted || data.model_bytes || data.vector_bytes);
+    }
+
+    async function loadSemanticStatus() {
+      const version = ++semanticVersion;
+      window.clearTimeout(semanticTimer);
+      try {
+        const data = await readSettingsResource("/search/status");
+        if (version !== semanticVersion) return;
+        semanticState = data;
+        semanticRetryMs = 2000;
+        renderSemanticStatus();
+        if (state.activeTab === "settings" && !data.paused && ["downloading", "verifying", "indexing", "retrying"].includes(data.state)) {
+          semanticTimer = window.setTimeout(loadSemanticStatus, 2000);
+        }
+      } catch (err) {
+        if (version === semanticVersion) {
+          document.getElementById("semanticStatus").textContent = `Could not read semantic search status. ${settingError(err)}`;
+          if (state.activeTab === "settings") {
+            semanticTimer = window.setTimeout(loadSemanticStatus, semanticRetryMs);
+            semanticRetryMs = Math.min(30000, semanticRetryMs * 2);
+          }
+        }
+      }
+    }
+
+    async function semanticAction(action) {
+      if (semanticBusy) return;
+      if (action === "remove" && !confirm("Remove the semantic model, search index and acceptance record? Keyword search will keep working.")) return;
+      semanticBusy = true;
+      ++semanticVersion;
+      window.clearTimeout(semanticTimer);
+      renderSemanticStatus();
+      try {
+        if (action === "download" && !semanticState?.acceptance) {
+          if (!document.getElementById("semanticAccept").checked) throw new Error("Accept the Gemma terms first.");
+          await settingsRequest("/search/terms", { method: "POST", body: JSON.stringify({ accepted: true, terms_version: semanticState.terms_version }) });
+        }
+        const path = action === "download" || action === "remove" ? "/search/model" : `/search/${action}`;
+        semanticState = await settingsRequest(path, { method: action === "remove" ? "DELETE" : "POST", body: action === "remove" ? undefined : "{}", timeoutMs: 35000 });
+        if (action === "remove") document.getElementById("semanticAccept").checked = false;
+        semanticBusy = false;
+        renderSemanticStatus();
+        await loadSemanticStatus();
+      } catch (err) {
+        semanticBusy = false;
+        renderSemanticStatus();
+        document.getElementById("semanticStatus").textContent = settingError(err);
+      }
+    }
+
+    function bindSemanticSearch() {
+      document.getElementById("semanticAccept").addEventListener("change", renderSemanticStatus);
+      for (const [id, action] of [["semanticDownload", "download"], ["semanticPause", "pause"], ["semanticResume", "start"], ["semanticRemove", "remove"]]) {
+        document.getElementById(id).addEventListener("click", () => semanticAction(action));
+      }
+      document.querySelectorAll("[data-search-notice]").forEach(link => link.addEventListener("click", async event => {
+        event.preventDefault();
+        try {
+          const text = await readSettingsResource(link.getAttribute("href"), "text");
+          document.getElementById("semanticNoticeTitle").textContent = link.textContent;
+          document.getElementById("semanticNoticeText").textContent = text;
+          document.getElementById("semanticNoticeDialog").showModal();
+        } catch (err) { document.getElementById("semanticStatus").textContent = settingError(err); }
+      }));
+    }
+
     function wireSettingsAutosave() {
+      bindSemanticSearch();
       document.getElementById("reloadHookCorrections").addEventListener("click", loadHookCorrections);
       document.getElementById("reloadSkillPrompt").addEventListener("click", loadSkillSystemPrompt);
       document.getElementById("copySkillPrompt").addEventListener("click", copySkillSystemPrompt);
@@ -16385,6 +16651,11 @@
     }
 
     function wireEvents() {
+      document.getElementById("usageOptInCard").addEventListener("submit", event => { event.preventDefault(); chooseUsageSharing(false); });
+      document.getElementById("usageNoThanks").addEventListener("click", event => { event.preventDefault(); chooseUsageSharing(false); });
+      document.getElementById("usageDismiss").addEventListener("click", () => chooseUsageSharing(false));
+      document.getElementById("usageYes").addEventListener("click", () => chooseUsageSharing(true));
+      document.getElementById("usageDisclosure").addEventListener("toggle", event => { if (event.target.open) refreshUsageDisclosure(); });
       document.querySelectorAll("[data-tab-button]").forEach((btn) => {
         btn.addEventListener("click", () => switchTab(btn.dataset.tabButton));
       });
@@ -16398,7 +16669,10 @@
       // so nothing from the old search shows under the new search box.
       const invalidateAndReload = () => {
         // A link in the box is a capture, never a search.
+        const hadQuery = Boolean(state.filters.q.trim());
         state.filters.q = looksLikeLink(els.searchInput.value) ? "" : els.searchInput.value;
+        const hasQuery = Boolean(state.filters.q.trim());
+        if (hasQuery !== hadQuery) els.sortFilter.value = hasQuery ? "relevance" : "newest";
         state.filters.platform = els.platformFilter.value;
         state.filters.source_type = els.sourceTypeFilter.value;
         state.filters.author = els.channelFilter.value;
@@ -16410,12 +16684,13 @@
         state.filters.date_from = els.dateFrom.value;
         state.filters.date_to = els.dateTo.value;
         state.filters.sort = els.sortFilter.value;
+        state.filters.match = els.matchFilter.value || "forgiving";
         updateVideoFacetVisibility();
         state.libraryRequest++;
         state.libraryResetPending = true;
         reload();
       };
-      [els.platformFilter, els.sourceTypeFilter, els.channelFilter, els.topicFilter, els.hookFilter, els.formatFilter, els.performanceFilter, els.lengthFilter, els.dateFrom, els.dateTo, els.sortFilter].forEach((el) => {
+      [els.platformFilter, els.sourceTypeFilter, els.channelFilter, els.topicFilter, els.hookFilter, els.formatFilter, els.performanceFilter, els.lengthFilter, els.dateFrom, els.dateTo, els.sortFilter, els.matchFilter].forEach((el) => {
         el.addEventListener(el.tagName === "INPUT" ? "input" : "change", invalidateAndReload);
       });
       // Re-haul: the one box searches or, holding a link, offers to capture
@@ -17128,6 +17403,7 @@
       wireEvents();
       wireLibraryActivityEvents();
       wireRoutes();
+      showUsagePrompt();
       applyHashRoute();
       await refreshHealth();
       await loadLibraryFacets();

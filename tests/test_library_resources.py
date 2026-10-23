@@ -471,7 +471,7 @@ class TestP403BytesAndLimits:
         assert LIMITS["max_search_hits"] == 20
         assert LIMITS["max_search_preview_codepoints"] == 240
         assert LIMITS["service_deadline_s"] == 2.0
-        assert LIMITS["max_active_readers"] == 2
+        assert LIMITS["max_active_readers"] == 4
         assert LIMITS["admissions_per_minute"] == 60
         assert LIMITS["max_curated_resources"] == 41
 

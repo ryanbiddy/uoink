@@ -34,6 +34,7 @@ import _platform
 
 import podcasts
 import source_subscriptions as ss
+import uoink_usage
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -213,7 +214,8 @@ def dialer(network, monkeypatch):
 
 @pytest.fixture
 def consumers(network, monkeypatch, tmp_path):
-    namespace = dict(_platform=_platform, source_subscriptions=ss, urllib=urllib, log=logging.getLogger(__name__),
+    namespace = dict(_platform=_platform, source_subscriptions=ss, uoink_usage=uoink_usage,
+                     urllib=urllib, log=logging.getLogger(__name__),
                      subprocess=subprocess, json=json, Path=Path, urlparse=urlparse,
                      parse_qs=parse_qs, re=re,
                      YTDLP_CMD=["synthetic-yt-dlp"], COMMENTS_TIMEOUT_SEC=10,

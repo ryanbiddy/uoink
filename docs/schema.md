@@ -6,7 +6,7 @@ Scope: SQLite library index, FTS5 search, job/taxonomy migration, citations, hea
 
 ## Overview
 
-Sprint 15 adds a local SQLite library index at `%LOCALAPPDATA%\Uoink\index.db`. The index is a local-only database: it is never uploaded, synced to a Uoink cloud service, or used for telemetry. It accelerates library operations that previously depended on scanning the Uoink output tree or reading separate JSON files. In practice, it becomes the durable home for searchable yoink metadata, FTS5 content, job records, Hook Type taxonomy rows, citation maps, and extraction health snapshots.
+Sprint 15 adds a local SQLite library index at `%LOCALAPPDATA%\Uoink\index.db`. The index is a local-only database: it is never uploaded, synced to a Uoink cloud service, or used to store usage counts. Optional usage counts live in a separate `usage-counts.sqlite3` file. The index accelerates library operations that previously depended on scanning the Uoink output tree or reading separate JSON files. In practice, it becomes the durable home for searchable yoink metadata, FTS5 content, job records, Hook Type taxonomy rows, citation maps, and extraction health snapshots.
 
 The index replaces or absorbs these older persistence patterns:
 
