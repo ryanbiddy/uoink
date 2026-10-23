@@ -22,8 +22,8 @@ import library_mirror as mirror
 import library_prompts
 import library_resources as resources
 from tests.phase4_fixtures import (
-    MockClock, build_test_card, make_disposable_index, parse_fenced_document,
-    seed_shelf, seed_yoink_item,
+    MockClock, arm_mirror_timeout_at_boundary, build_test_card, make_disposable_index,
+    parse_fenced_document, seed_shelf, seed_yoink_item,
 )
 
 
@@ -59,10 +59,10 @@ def item_file(env, vid="a"):
     return env.vault / mirror.MIRROR_ROOT / mirror.item_relpath(vid)
 
 
-def export(env, *ids):
+def export(env, *ids, budget_s=mirror.DEFAULT_BUDGET_S):
     for vid in ids or ("a",):
         env.mirror.on_committed_event("capture", video_id=vid)
-    result = env.mirror.resync()
+    result = env.mirror.resync(budget_s=budget_s)
     assert result["ok"], result
     for vid in ids or ("a",):
         assert item_file(env, vid).is_file(), result
@@ -415,10 +415,12 @@ def test_mirror_rechecks_authoritative_deletion_before_replace(env, monkeypatch)
 
 @pytest.mark.skipif(sys.platform == "darwin", reason="library_mirror_unavailable_macos: gate covered in test_mac_capabilities.py")
 def test_timed_out_vault_worker_cannot_publish_after_return(env, monkeypatch):
-    env.mirror._clock = time.monotonic
+    # Keep the fixture clock frozen during setup. Start the real timeout only
+    # after the worker reaches the write whose cancellation we are testing.
     env.mirror.on_committed_event("capture", video_id="a")
     original = env.mirror._atomic_vault
     entered, release, finished = threading.Event(), threading.Event(), threading.Event()
+    armed = arm_mirror_timeout_at_boundary(monkeypatch, entered, budget=0.05, watchdog_s=30)
     original_work = env.mirror._vault_work
 
     def complete_work(plan):
@@ -431,7 +433,7 @@ def test_timed_out_vault_worker_cannot_publish_after_return(env, monkeypatch):
         if dest != item_file(env):
             return original(dest, data, root, recheck=recheck)
         entered.set()
-        assert release.wait(3)
+        assert release.wait(30)
         return original(dest, data, root, recheck=recheck)
 
     monkeypatch.setattr(env.mirror, "_atomic_vault", blocked)
@@ -440,9 +442,11 @@ def test_timed_out_vault_worker_cannot_publish_after_return(env, monkeypatch):
         result = env.mirror.resync(budget_s=0.05)
         assert entered.is_set()
         assert result["ok"] is False
+        assert armed == pytest.approx([0.05])
+        assert result["error"]["details"]["reason"] == "timeout"
     finally:
         release.set()
-        assert finished.wait(3)
+        assert finished.wait(30)
     assert not item_file(env).exists(), "abandoned daemon wrote after timeout and lock release"
 
 
@@ -503,7 +507,8 @@ def test_generated_index_escapes_raw_identity_markup(env):
 @pytest.mark.skipif(sys.platform != "win32",
                     reason="Mirror publication/deletion requires Windows handle sharing exclusion")
 def test_mirror_preserves_user_edit_between_hash_and_replace(env, monkeypatch):
-    export(env)
+    # Allow successful writes to reach the ownership recheck on a loaded runner.
+    export(env, budget_s=30)
     mutate_clip(env)
     env.mirror.on_committed_event("source_refresh", video_id="a")
     original = env.mirror._atomic_vault
@@ -515,7 +520,7 @@ def test_mirror_preserves_user_edit_between_hash_and_replace(env, monkeypatch):
         return original(dest, data, root, recheck=recheck)
 
     monkeypatch.setattr(env.mirror, "_atomic_vault", user_edit)
-    env.mirror.resync()
+    env.mirror.resync(budget_s=30)
     assert item_file(env).read_bytes() == personal
 
 
