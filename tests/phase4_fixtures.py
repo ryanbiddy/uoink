@@ -56,7 +56,7 @@ class MockClock:
         self._wall += seconds
 
 
-def arm_mirror_timeout_at_boundary(monkeypatch, entered, budget=0.1):
+def arm_mirror_timeout_at_boundary(monkeypatch, entered, budget=0.1, *, watchdog_s=5):
     """Start the real cancellable wait once the test holds its I/O boundary.
 
     Keep the fixture's MockClock so setup cannot consume the operation budget.
@@ -70,7 +70,7 @@ def arm_mirror_timeout_at_boundary(monkeypatch, entered, budget=0.1):
     class BoundaryEvent(threading.Event):
         def wait(self, timeout=None):
             if timeout is not None and abs(timeout - budget) < 1e-9:
-                assert entered.wait(5), "The held I/O boundary was not reached"
+                assert entered.wait(watchdog_s), "The held I/O boundary was not reached"
                 armed.append(timeout)
             return super().wait(timeout)
 

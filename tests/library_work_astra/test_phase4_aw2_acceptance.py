@@ -22,7 +22,9 @@ import library_resources as resources
 from tests.library_work_astra.test_phase4_aw_acceptance import (
     env, delete_item, export, item_file, mutate_clip, publication_args, publish,
 )
-from tests.phase4_fixtures import parse_fenced_document, seed_shelf
+from tests.phase4_fixtures import (
+    arm_mirror_timeout_at_boundary, parse_fenced_document, seed_shelf,
+)
 
 
 def test_d01_backend_open_lock_obeys_deadline(env, monkeypatch):
@@ -353,15 +355,16 @@ def test_d12_unowned_temps_are_never_inferred_from_name_or_text(env, suffix, con
 
 @pytest.mark.skipif(sys.platform == "darwin", reason="library_mirror_unavailable_macos: gate covered in test_mac_capabilities.py")
 def test_d13_replace_syscall_cannot_complete_after_timeout(env, monkeypatch):
-    env.mirror._clock = time.monotonic
+    # Let setup reach the held replace before starting the real timeout.
     target = item_file(env)
     entered, release, finished = threading.Event(), threading.Event(), threading.Event()
+    armed = arm_mirror_timeout_at_boundary(monkeypatch, entered, watchdog_s=30)
     original_replace, original_work = env.mirror._io_replace, env.mirror._vault_work
 
     def blocked_replace(src, dst):
         if Path(dst) == target:
             entered.set()
-            assert release.wait(3)
+            assert release.wait(30)
         return original_replace(src, dst)
 
     def complete_work(plan):
@@ -375,10 +378,12 @@ def test_d13_replace_syscall_cannot_complete_after_timeout(env, monkeypatch):
     try:
         result = env.mirror.resync(budget_s=0.1)
         assert entered.is_set() and result["ok"] is False
+        assert armed == pytest.approx([0.1])
+        assert result["error"]["details"]["reason"] == "timeout"
         assert not target.exists()
     finally:
         release.set()
-        assert finished.wait(3)
+        assert finished.wait(30)
     assert not target.exists(), "timed-out worker published after return"
 
 
@@ -442,6 +447,8 @@ def test_d16_shelf_title_cannot_introduce_markdown_image(env):
                      ("![AW2](https://example.invalid/image)",))
     seed_shelf(env.idx, member_video_ids=["a"])
     env.mirror.on_committed_event("apply", shelf_id="shelf-test-01")
-    env.mirror.resync()
+    # Allow the export to finish before checking the rendered title.
+    result = env.mirror.resync(budget_s=30)
+    assert result["ok"], result
     shelf = env.vault / "Uoink" / mirror.shelf_relpath("shelf-test-01")
     assert "![AW2](https://example.invalid/image)" not in shelf.read_text(encoding="utf-8")

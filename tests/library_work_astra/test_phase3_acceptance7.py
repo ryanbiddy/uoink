@@ -125,8 +125,10 @@ Promise.resolve(vm.runInNewContext(code, context, {timeout: 5000}))
   .then(value => process.stdout.write(JSON.stringify(value)))
   .catch(error => { process.stderr.write(String(error)); process.exitCode = 1; });
 """
+    # Allow slow Windows process startup; the VM still bounds the dashboard
+    # code itself to five seconds.
     result = subprocess.run([node, '-'], input=program, text=True, encoding='utf-8',
-                            capture_output=True, cwd=ROOT, timeout=10, check=False)
+                            capture_output=True, cwd=ROOT, timeout=60, check=False)
     assert result.returncode == 0, result.stderr
     return json.loads(result.stdout)
 
