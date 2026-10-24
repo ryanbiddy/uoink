@@ -510,6 +510,9 @@ def _fetch_page_html(url: str, http_open=None):
                                         "error": f"upstream returned HTTP {resp.status}"}
             raw = resp.read(_PAGE_MAX_BYTES + 1)
             final_url = resp.geturl() if hasattr(resp, "geturl") else url
+        if len(raw) > _PAGE_MAX_BYTES:
+            return None, {"fetched_at": _now_iso(), "fetched_url": final_url}, {
+                "code": "page_fetch_too_large", "error": "page exceeds the fetch byte limit"}
         return raw, {"fetched_at": _now_iso(), "fetched_url": final_url}, None
     except Exception as exc:
         return None, {"fetched_at": _now_iso(), "fetched_url": url}, {
@@ -555,12 +558,13 @@ def _extract_article_page(url, *, render_mode, include_screenshot,
                    "error": diagnostic, "code": "article_extractor_failed"}
         log.warning("%s", diagnostic)
     label(primary, ENGINE_READABILITY)
-    if primary.get("ok") or primary.get("code") == "article_extraction_limit":
+    if primary.get("ok"):
         return primary
 
     # A clear wall is terminal. A browser cannot acquire the user's sign-in.
     if "login or paywall" in primary.get("diagnostic", ""):
         return primary
+    script_backed = bool(re.search(br"<script\b", raw, re.I))
     if _CRAWL4AI_AVAILABLE:
         try:
             (check_url or source_subscriptions.check_public_http_url)(url)
@@ -571,32 +575,40 @@ def _extract_article_page(url, *, render_mode, include_screenshot,
             result = _extract_crawl4ai(url, render_mode=render_mode,
                                       include_screenshot=include_screenshot,
                                       follow_links_depth=follow_links_depth)
-            diagnostic = article_extractor.text_diagnostic(result.get("markdown"))
+            result["metadata"] = {**primary.get("metadata", {}), **(result.get("metadata") or {})}
+            result["title"] = result.get("title") or result["metadata"].get("title") or primary.get("title")
+            diagnostic = article_extractor.text_diagnostic(result.get("markdown"), script_backed=script_backed,
+                                                            allow_short=bool(result["title"]))
             if diagnostic:
                 result.update(ok=False, code="article_body_not_found", diagnostic=diagnostic,
                               error=diagnostic, markdown="", article_status="not_found")
             result["markdown"] = (result.get("markdown") or "")[:article_extractor.MAX_MARKDOWN]
-            result["metadata"] = {**primary.get("metadata", {}), **(result.get("metadata") or {})}
-            label(result, ENGINE_CRAWL4AI)
-            if "login or paywall" in (diagnostic or ""):
-                return result
             if result.get("ok"):
-                result["article_status"] = "found"
+                short = len(result["markdown"]) < article_extractor.MIN_TEXT
+                result["article_status"] = "short_article" if short else "found"
+                if short:
+                    result["diagnostic"] = "short article"
+            label(result, ENGINE_CRAWL4AI)
+            if result.get("ok") or "login or paywall" in (diagnostic or ""):
                 return result
         except Exception as exc:
             label({"ok": False, "diagnostic": f"browser extractor failed: {type(exc).__name__}"}, ENGINE_CRAWL4AI)
 
     result = _extract_stdlib(url, include_screenshot=include_screenshot, html=raw)
-    diagnostic = (primary.get("diagnostic") if primary.get("code") == "article_body_not_found"
-                  else article_extractor.text_diagnostic(result.get("markdown")))
     result["metadata"] = {**(result.get("metadata") or {}), **primary.get("metadata", {})}
     result["title"] = primary.get("title") or result.get("title")
+    diagnostic = (primary.get("diagnostic") if primary.get("code") == "article_body_not_found"
+                  else article_extractor.text_diagnostic(result.get("markdown"), script_backed=script_backed,
+                                                          allow_short=bool(result["title"])))
     result["markdown"] = (result.get("markdown") or "")[:article_extractor.MAX_MARKDOWN]
     if diagnostic:
         result.update(ok=False, code="article_body_not_found", diagnostic=diagnostic[:240],
                       error=diagnostic[:240], markdown="", article_status="not_found")
     else:
-        result["article_status"] = "found"
+        short = len(result["markdown"]) < article_extractor.MIN_TEXT
+        result["article_status"] = "short_article" if short else "found"
+        if short:
+            result["diagnostic"] = "short article"
     return label(result, ENGINE_STDLIB)
 
 

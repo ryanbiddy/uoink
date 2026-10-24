@@ -110,6 +110,159 @@ def test_nav_login_link_does_not_make_an_article_a_wall():
     assert article.extract(document, URL)["ok"]
 
 
+def prose(length):
+    """Synthetic reporting with an exact length for the reviewed regressions."""
+    text = ("The council opened the river path after workers repaired the bridge. "
+            "Residents can reach the station again, and the eastern gate stays open. "
+            "Inspectors checked the railings and recorded the repairs in the public log. "
+            "The next inspection will cover the footbridge beside the school. ")
+    return (text * (length // len(text) + 1))[:length - 1] + "."
+
+
+@pytest.mark.parametrize("chrome", [
+    '<header><a href="/login">Sign in to continue</a></header>',
+    '<noscript>Please enable JavaScript</noscript>',
+])
+def test_short_article_survives_header_login_and_noscript(chrome):
+    body = prose(364)
+    result = article.extract(f"<title>River path opens</title>{chrome}<article><p>{body}</p></article>", URL)
+    assert result["ok"] and result["extraction_engine"] == article.ENGINE
+    assert body in result["markdown"]
+    assert "Sign in to continue" not in result["markdown"]
+    assert "enable JavaScript" not in result["markdown"]
+
+
+def test_short_article_can_discuss_subscriptions():
+    body = "The library lets residents subscribe to read its weekly reports. "
+    body += prose(283 - len(body))
+    assert len(body) == 283
+    result = article.extract(f"<title>Library reports</title><article><p>{body}</p></article>", URL)
+    assert result["ok"] and body in result["markdown"]
+
+
+@pytest.mark.parametrize("sentence,length", [
+    ("Please enable JavaScript to continue.", 1519),
+    ("Loading the reader.", 399),
+    ("Please enable JavaScript to continue.", 3039),
+    ("Please enable JavaScript to continue", 1519),
+    ("The reader will appear in a moment.", 399),
+])
+def test_repeated_javascript_shell_is_not_an_article(sentence, length):
+    body = ((sentence + " ") * (length // (len(sentence) + 1) + 1))[:length]
+    document = f'<title>Reading app</title><body><div id="root">{body}</div><script src="/app.js"></script></body>'
+    result = pages.extract_page(None, URL, enforce_allowlist=False,
+                                http_open=lambda *a, **k: response(document.encode()))
+    assert not result["ok"] and "empty JavaScript page" in result["diagnostic"]
+    assert result["markdown"] == ""
+
+
+def test_single_loader_and_javascript_prompt_without_script():
+    loader = article.extract('<body><div>Loading the reader.</div><script src="app.js"></script></body>', URL)
+    assert not loader["ok"] and "empty JavaScript page" in loader["diagnostic"]
+    prompt = "Please enable JavaScript to continue. " * 80
+    result = article.extract(f"<body><div>{prompt}</div></body>", URL)
+    assert not result["ok"] and "empty JavaScript page" in result["diagnostic"]
+
+
+@pytest.mark.parametrize("base,expected", [
+    ("https://cdn.example.org/blog/post/", "https://cdn.example.org/blog/post/photo.html"),
+    ("/images/", "https://news.example.org/images/photo.html"),
+    ("javascript:alert(1)", "https://news.example.org/notes/photo.html"),
+    ("data:text/html,x", "https://news.example.org/notes/photo.html"),
+    ("https://user:pass@cdn.example.org/", "https://news.example.org/notes/photo.html"),
+    ("https://@cdn.example.org/", "https://news.example.org/notes/photo.html"),
+])
+def test_document_base_controls_safe_relative_links(base, expected):
+    document = (f'<head><base href="{base}"></head><article><p>{prose(364)} '
+                '<a href="photo.html">Photo</a><a href="javascript:alert(1)">Script</a>'
+                '<a href="data:text/html,x">Data</a></p></article>')
+    result = article.extract(document, URL)
+    assert result["ok"] and f"[Photo]({expected})" in result["markdown"]
+    assert result["links"] == [{"href": expected}]
+
+
+@pytest.mark.parametrize("container,byline", [
+    ('<body class="author-jane">', '<span class="byline">Jane Doe</span>'),
+    ('<body><div class="authority">City Desk</div>', '<span class="author">Jane Doe</span>'),
+    ('<body><div class="author-box">Report by Jane Doe</div>', '<span id="article-author">Jane Doe</span>'),
+])
+def test_visible_byline_uses_shortest_matching_token(container, byline):
+    document = f"{container}<article>{byline}<p>{prose(364)}</p></article></body>"
+    assert article.extract(document, URL)["metadata"]["author"] == "Jane Doe"
+
+
+@pytest.mark.parametrize("tag", ["header", "nav"])
+def test_header_login_form_does_not_veto_div_article(tag):
+    body = prose(2404)
+    document = (f'<{tag}><form class="login-wall"><input type="password">'
+                f'<h2>Sign in to continue</h2></form></{tag}>'
+                f'<div class="content"><h1>River path opens</h1><p>{body}</p></div>')
+    result = article.extract(document, URL)
+    assert result["ok"] and body in result["markdown"]
+    assert "Sign in" not in result["markdown"]
+
+
+@pytest.mark.parametrize("length", [93, 125, 199])
+def test_one_paragraph_brief_is_labeled_short_article(length):
+    body = prose(length)
+    document = f'<title>River path opens</title><article><p>{body}</p></article><script src="analytics.js"></script>'
+    result = pages.extract_page(None, URL, enforce_allowlist=False,
+                                http_open=lambda *a, **k: response(document.encode()))
+    assert result["ok"] and body in result["markdown"]
+    assert result["extraction_engine"] == article.ENGINE
+    assert result["article_status"] == "short_article" and result["diagnostic"] == "short article"
+
+
+def test_short_heading_or_untitled_snippet_is_not_a_brief():
+    for document in (f"<article><p>{prose(125)}</p></article>",
+                     f"<title>Menu</title><article><h1>{prose(125)}</h1></article>"):
+        assert not article.extract(document, URL)["ok"]
+
+
+@pytest.mark.parametrize("browser", [False, True])
+@pytest.mark.parametrize("limit", ["depth", "size"])
+def test_extractor_limits_try_fallbacks(monkeypatch, browser, limit):
+    body = prose(364)
+    document = f"<title>River path opens</title><p>{body}</p>"
+    if limit == "depth":
+        document = "<div>" * 90 + document + "</div>" * 90
+    else:
+        monkeypatch.setattr(article, "MAX_INPUT", 100)
+    monkeypatch.setattr(pages, "_CRAWL4AI_AVAILABLE", browser)
+    crawler = Mock(return_value={"ok": True, "markdown": body})
+    monkeypatch.setattr(pages, "_extract_crawl4ai", crawler)
+    result = pages.extract_page(None, URL, enforce_allowlist=False, check_url=lambda u: u,
+                                http_open=lambda *a, **k: response(document.encode()))
+    assert result["ok"] and body in result["markdown"]
+    assert result["extraction_engine"] == ("crawl4ai" if browser else "stdlib")
+    assert "limit" in result["extraction_attempts"][0]["diagnostic"]
+    assert len(result["extraction_attempts"]) == 2
+
+
+@pytest.mark.parametrize("browser", [False, True])
+def test_deep_brief_is_recovered_and_labeled(monkeypatch, browser):
+    body = prose(125)
+    document = "<div>" * 90 + f"<title>River path opens</title><p>{body}</p>" + "</div>" * 90
+    monkeypatch.setattr(pages, "_CRAWL4AI_AVAILABLE", browser)
+    monkeypatch.setattr(pages, "_extract_crawl4ai", Mock(return_value={"ok": True, "title": "River path opens", "markdown": body}))
+    result = pages.extract_page(None, URL, enforce_allowlist=False, check_url=lambda u: u,
+                                http_open=lambda *a, **k: response(document.encode()))
+    assert result["ok"] and result["article_status"] == "short_article"
+    assert result["diagnostic"] == result["extraction_attempts"][-1]["diagnostic"] == "short article"
+
+
+def test_fetch_byte_cap_is_terminal(monkeypatch):
+    primary, crawler = Mock(), Mock()
+    monkeypatch.setattr(article, "extract", primary)
+    monkeypatch.setattr(pages, "_extract_crawl4ai", crawler)
+    monkeypatch.setattr(pages, "_CRAWL4AI_AVAILABLE", True)
+    result = pages.extract_page(None, URL, enforce_allowlist=False,
+                                http_open=lambda *a, **k: response(b"x" * (pages._PAGE_MAX_BYTES + 1)))
+    assert not result["ok"] and result["code"] == "page_fetch_too_large"
+    primary.assert_not_called()
+    crawler.assert_not_called()
+
+
 @pytest.mark.parametrize("name", ["login", "paywall"])
 def test_long_account_boilerplate_does_not_make_a_wall_an_article(name):
     boilerplate = b"<p>Members can manage their account preferences and billing details here. </p>" * 80
@@ -168,7 +321,7 @@ def test_fallback_order_and_single_static_fetch(monkeypatch):
 
 def test_crawl4ai_can_recover_js_body_but_not_a_shell(monkeypatch):
     monkeypatch.setattr(pages, "_CRAWL4AI_AVAILABLE", True)
-    crawler = Mock(return_value={"ok": True, "url": URL, "markdown": "Rendered article has useful facts, examples and explanations. " * 8})
+    crawler = Mock(return_value={"ok": True, "url": URL, "markdown": prose(364)})
     monkeypatch.setattr(pages, "_extract_crawl4ai", crawler)
     def run():
         return pages.extract_page(None, URL, enforce_allowlist=False, check_url=lambda u: u,
@@ -176,6 +329,8 @@ def test_crawl4ai_can_recover_js_body_but_not_a_shell(monkeypatch):
     result = run()
     assert result["ok"] and result["extraction_engine"] == "crawl4ai"
     crawler.return_value = {"ok": True, "markdown": "Sign in to continue"}
+    assert not run()["ok"]
+    crawler.return_value = {"ok": True, "markdown": "Loading the reader. " * 21}
     assert not run()["ok"]
 
 

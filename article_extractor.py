@@ -6,8 +6,8 @@
 """Extract an article from already-fetched HTML. This module never uses the network.
 
 This is a limited Python adaptation, not a complete browser DOM or a claim of
-Mozilla Readability compatibility. Limits fail closed rather than publishing a
-partial parse as a complete article.
+Mozilla Readability compatibility. A limit returns a failed attempt so the caller
+can try another extractor without publishing a partial parse.
 """
 from __future__ import annotations
 
@@ -27,17 +27,22 @@ MAX_DEPTH = 80
 MAX_SECONDS = 2.0
 MAX_MARKDOWN = 100000
 MIN_TEXT = 200
+MIN_BRIEF = 80
 _SPACE = re.compile(r"\s+")
 _COMMAS = re.compile(r"[,\u060c\ufe50\ufe10\ufe11\u2e41\u2e34\u2e32\uff0c]")
 _POSITIVE = re.compile(r"article|body|content|entry|main|post|text|blog|story", re.I)
 _NEGATIVE = re.compile(r"banner|comment|footer|masthead|promo|related|share|sidebar|sponsor|widget|advert|(?:^|[-_ ])ads?(?:$|[-_ ])", re.I)
-_UNLIKELY = re.compile(r"breadcrumb|combx|comment|disqus|footer|menu|related|replies|sidebar|social|share|sponsor|advert|popup|cookie|paywall|login-wall|subscription-wall|(?:^|[-_ ])ads?(?:$|[-_ ])", re.I)
+# Keep wall prompts until the chosen content is checked. A wall class elsewhere
+# in the document must not decide whether the selected prose is an article.
+_UNLIKELY = re.compile(r"breadcrumb|combx|comment|disqus|footer|menu|related|replies|sidebar|social|share|sponsor|advert|popup|cookie|(?:^|[-_ ])ads?(?:$|[-_ ])", re.I)
 _VOID = set("area base br col embed hr img input link meta param source track wbr".split())
 _HIDDEN = set("script style template noscript svg canvas iframe object".split())
-_NOISE = set("nav footer aside form button input select textarea".split())
+_NOISE = set("header nav footer aside form button input select textarea".split())
 _BLOCK = set("article section div p pre blockquote table ul ol li dl h1 h2 h3 h4 h5 h6".split())
 _WALL = re.compile(r"(?:sign\s*in|log\s*in|subscribe|subscription|register|create an account)\s+(?:is required|required|to (?:read|continue|view|access|unlock))|(?:subscriber|members?)[- ]only|already a subscriber|unlock (?:this|the|full) article|purchase (?:a )?subscription", re.I)
 _JS = re.compile(r"enable javascript|javascript is (?:not available|disabled|required)|requires javascript|please turn on javascript", re.I)
+_BYLINE = re.compile(r"(?:^|[\s_-])(?:byline|author|writtenby)(?:$|[\s_-])", re.I)
+_LOADER = re.compile(r"^(?:loading(?:\s+(?:the\s+)?(?:reader|article|page|content|app|application|data))?|please wait)(?:[.!\u2026 ]|\bplease wait)*$", re.I)
 
 
 class ExtractionLimit(ValueError):
@@ -108,7 +113,7 @@ class Document(HTMLParser):
         self.stack[-1].children.append(data)
 
 
-def _text(node, *, raw=False, limit=MAX_INPUT):
+def _text(node, *, raw=False, limit=MAX_INPUT, blocks=False):
     parts, size, stack = [], 0, [node]
     while stack and size < limit:
         item = stack.pop()
@@ -116,7 +121,11 @@ def _text(node, *, raw=False, limit=MAX_INPUT):
             parts.append(item[:limit - size])
             size += len(parts[-1])
         elif not item.excluded:
+            if blocks and item.tag in _BLOCK:
+                stack.append("\n")
             stack.extend(reversed(item.children))
+            if blocks and item.tag in _BLOCK:
+                stack.append("\n")
     text = "".join(parts)
     return text if raw else _SPACE.sub(" ", text).strip()
 
@@ -174,11 +183,17 @@ def _metadata(doc):
         "published_date": ld.get("published_date") or first("article:published_time", "datepublished", "date", "pubdate", "dc.date", "dcterms.created"),
         "site_name": ld.get("site_name") or first("og:site_name", "application-name"),
     }
+    bylines = []
     for node in doc.nodes:
-        if not result["author"] and re.search(r"byline|author|writtenby", node.hint, re.I):
-            result["author"] = _text(node, limit=200) or None
+        if (not result["author"] and node.tag not in {"html", "body", "main", "article"}
+                and node.tag not in _HIDDEN and _BYLINE.search(node.hint)):
+            text = _text(node, limit=201)
+            if text and len(text) <= 200:
+                bylines.append(text)
         if not result["title"] and node.tag == "h1":
             result["title"] = _text(node, limit=500) or None
+    if bylines:
+        result["author"] = min(bylines, key=len)
     return {k: v for k, v in result.items() if v}
 
 
@@ -261,7 +276,8 @@ def safe_link(href, url):
     try:
         target = urljoin(url, href.strip())
         parsed = urlsplit(target)
-        if parsed.scheme.lower() not in {"http", "https"} or not parsed.hostname or parsed.username or parsed.password:
+        if (parsed.scheme.lower() not in {"http", "https"} or not parsed.hostname
+                or parsed.username is not None or parsed.password is not None):
             return None
         return quote(target, safe=":/?#@!$&'*+,;=%")
     except ValueError:
@@ -362,14 +378,42 @@ class Markdown:
         return inner
 
 
-def text_diagnostic(text):
-    """Shared conservative gate for fallback text; never echo page data."""
+def _solid_prose(text):
+    return (len(text) >= MIN_BRIEF and len(text.split()) >= 12
+            and sum(c.isalpha() for c in text) >= len(text) * .6
+            and bool(re.search(r"[.!?]", text)))
+
+
+def text_diagnostic(text, *, script_backed=False, allow_short=False):
+    """Judge chosen prose, not page chrome. Never echo page data in diagnostics."""
+    # Count distinct sentences/blocks so repeated account copy cannot drown out
+    # a wall prompt. Keep block boundaries for headings and Markdown fallbacks.
+    units = {}
+    for part in re.split(r"(?<=[.!?])\s+|[\r\n]+", text or ""):
+        part = _SPACE.sub(" ", part).strip(" \t#>*-_").casefold()
+        if part:
+            units[part] = units.get(part, 0) + 1
+
+    def substance(pattern):
+        # A mention inside a report is not a prompt. Measure phrase coverage,
+        # with no length ceiling, including prompts repeated without punctuation.
+        prompts = {u for u in units if sum(len(m[0]) for m in pattern.finditer(u)) >= len(u) * .35}
+        other = sum(len(u) for u in units if u not in prompts)
+        return prompts and other < MIN_TEXT and (len(prompts) >= 2 or sum(map(len, prompts)) >= other * .5)
+
     text = _SPACE.sub(" ", text or "").strip()
-    if _WALL.search(text) and len(text) < 2000:
+    if substance(_WALL):
         return "article body not found: login or paywall page"
-    if _JS.search(text) and len(text) < 1000:
+    if substance(_JS):
         return "article body not found: empty JavaScript page"
-    if len(text) < MIN_TEXT:
+    if script_backed:
+        total = sum(len(u) * count for u, count in units.items())
+        repeated = any(count >= 3 and len(u) <= 160 and len(u) * count >= total * .8
+                       for u, count in units.items())
+        loader = bool(units) and all(_LOADER.fullmatch(u) for u in units)
+        if len(text) < 40 or repeated or loader:
+            return "article body not found: empty JavaScript page"
+    if len(text) < MIN_TEXT and not (allow_short and _solid_prose(text)):
         return "article body not found: too little main text"
     return None
 
@@ -397,39 +441,34 @@ def extract(html: bytes | str, url: str) -> dict:
         doc.close()
         result["metadata"] = _metadata(doc)
         result["title"] = result["metadata"].get("title")
-        # Inspect visible wall prompts before pruning forms and unlikely nodes.
-        for node in doc.nodes:
-            node.excluded = bool((node.parent and node.parent.excluded) or
-                                 node.tag in {"script", "style", "head", "template", "nav", "footer", "aside"} or
-                                 node.attrs.get("role") == "navigation" or "hidden" in node.attrs or
-                                 node.attrs.get("aria-hidden") == "true")
-        visible = _text(doc.root, limit=4000)
-        wall = text_diagnostic(visible)
-        prominent_wall = any(
-            not n.excluded and (
-                (n.tag in {"h1", "h2"} and _WALL.search(_text(n, limit=300))) or
-                (n.tag == "input" and n.attrs.get("type", "").lower() == "password") or
-                re.search(r"paywall|login-wall|subscription-wall", n.hint, re.I))
-            for n in doc.nodes)
         _prepare(doc)
         chosen = _choose(doc)
         length = sum(n.length for n in chosen)
         result["article_text_length"] = length
-        diagnostic = wall if wall and ("login" in wall or "JavaScript" in wall) else None
-        if prominent_wall and not any(n.tag == "article" and not n.excluded and n.length >= 1000 for n in doc.nodes):
-            diagnostic = "article body not found: login or paywall page"
-        if not diagnostic and length < MIN_TEXT:
-            script_count = sum(n.tag == "script" for n in doc.nodes)
-            diagnostic = ("article body not found: empty JavaScript page" if script_count and length < 40
-                          else "article body not found: too little main text")
+        text = "\n".join(_text(n, raw=True, blocks=True) for n in chosen)
+        # A titled brief needs a prose paragraph, not just a heading or menu.
+        brief = False
+        if length < MIN_TEXT and result["title"]:
+            chosen_set = set(chosen)
+            in_content = set()
+            for node in doc.nodes:
+                if not node.excluded and (node in chosen_set or node.parent in in_content):
+                    in_content.add(node)
+            brief = any(n.tag == "p" and n.density < .25 and _solid_prose(_text(n)) for n in in_content)
+        diagnostic = text_diagnostic(text, script_backed=any(n.tag == "script" for n in doc.nodes),
+                                     allow_short=brief)
         if diagnostic:
             result.update(code="article_body_not_found", diagnostic=diagnostic, error=diagnostic)
             return result
-        renderer = Markdown(url, doc.check)
+        base = next((n.attrs["href"] for n in doc.nodes if n.tag == "base" and "href" in n.attrs), None)
+        renderer = Markdown(safe_link(base, url) or url, doc.check)
         markdown = renderer.cap("".join(renderer.render(n) for n in chosen)).strip()
         doc.check()
-        result.update(ok=True, markdown=markdown, links=renderer.links, article_status="found",
+        result.update(ok=True, markdown=markdown, links=renderer.links,
+                      article_status="short_article" if length < MIN_TEXT else "found",
                       output_truncated=renderer.truncated)
+        if length < MIN_TEXT:
+            result["diagnostic"] = "short article"
         return result
     except ExtractionLimit as exc:
         diagnostic = "article body not found: " + str(exc)

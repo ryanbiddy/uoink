@@ -1,6 +1,6 @@
 # Article extraction UX2 verification
 
-Implemented on `feat/article-extract` at base `90349a3f6b3431f52908968674319bc60f67634f`, with zero new runtime dependencies. All changes are uncommitted. Product versions and Git refs are unchanged.
+The initial implementation below was committed as `50bd21a`, on `feat/article-extract` from base `90349a3f6b3431f52908968674319bc60f67634f`, with zero new runtime dependencies. This initial verification record is retained. The [repair results](#repair-of-50bd21a) at the end describe the current uncommitted changes.
 
 Installed Windows users previously received the regex `stdlib` path. The `.mcpb` inherits its installed runtime, and the Mac build recipe also omits Crawl4AI. The [original audit](article-extraction-ux2-audit.md) retains the packaging evidence and the rejected Trafilatura measurements, with the approved decision added above it.
 
@@ -69,3 +69,43 @@ Files changed or added:
 - The original audit report with its decision line, and this verification report. Disposable verification tools and output remain under ignored `_scratch`.
 
 Remaining limits: this is a heuristic adaptation, not Mozilla's complete browser DOM implementation. Very short articles, unusual markup, non-English wall prompts and complex tables may need future fixtures; tables are limited to 20 columns and disclose truncation. Static success does not render JavaScript or capture a screenshot. Crawl4AI is absent from packaged builds and its fallback was tested with injected results, not a live browser. Its existing browser/network behavior was not expanded in this pass. The full WSL suite and installer/Mac builds remain for the orchestrator.
+
+## Repair of 50bd21a
+
+The repair runs wall and JavaScript checks on selected content after removing header, navigation, footer, aside, form and noscript chrome. Prompt coverage and distinct sentences distinguish a wall from a passing mention; repeated boilerplate cannot hide a wall. JavaScript prompt detection has no page-length ceiling. Script-backed loaders and repeated short sentences are rejected, including through fallback extraction.
+
+The first safe document `base href` resolves relative links. Invalid schemes and credentials, including an empty username, fall back to the fetched URL. Byline hints match class/id token boundaries, skip html/body/main/article containers, and choose the shortest matching text. JSON-LD handling is unchanged.
+
+Titled prose briefs of at least 80 characters can publish with `article_status=short_article` and the diagnostic `short article`. Extraction limits now try optional Crawl4AI and then regex. The fetch boundary still refuses responses over 8 MiB before any extractor runs. Source identity, publication, corpus.read/1 keys, product versions, packaging and dependency files are unchanged. No packages were installed; added runtime dependency size is zero. The original audit and its Trafilatura decision remain unchanged.
+
+| Regression | Before repair | After repair |
+|---|---|---|
+| 364-character article with header sign-in link | Rejected as login/paywall | Article retained; header removed |
+| 283-character article mentioning `subscribe to read` | Rejected as login/paywall | Article retained |
+| Real article with standard noscript warning | Rejected as empty JavaScript page | Article retained; warning removed |
+| 1,519-character repeated JavaScript prompt | Published as an article | Refused as empty JavaScript page |
+| 399-character repeated loader | Published as an article | Refused as empty JavaScript page |
+| CDN `base href` and relative `photo.html` | Link used the fetch directory | Link uses the CDN base; unsafe links remain dropped |
+| `body.author-jane` before a byline | Article text became author | `Jane Doe` |
+| `div.authority` before `span.author` | `City Desk` became author | `Jane Doe` |
+| 2,404-character div article with header password form | Rejected as login/paywall | Article retained; form removed |
+| 125-character titled paragraph | Rejected as too short | Published and labeled `short article` |
+| 90 nested divs | Extraction limit ended capture | Crawl4AI or regex recovers the article; failed attempt recorded |
+
+Tests also cover 93- and 199-character briefs, a deep brief, long login/paywall boilerplate, JavaScript prompts without punctuation, a 3,039-character shell, fallback loaders, invalid bases, and the terminal fetch cap. All seven original saved HTML fixtures still pass.
+
+Verification used the same ig-native interpreter, isolated scratch profile, forbidden-live guard and offline test overlay described above. Every Python run used BelowNormal priority, `UOINK_URL=http://127.0.0.1:1`, `IG_FORBIDDEN_LIVE`, this worktree's `PYTHONPATH`, and `PYTHONDONTWRITEBYTECODE=1`. The pytest launcher adds `-p no:cacheprovider`. No live pages or external network were used.
+
+| Command | Result |
+|---|---|
+| `python -B _scratch/run_article_checks.py -q -s` with the broad file set listed above | 1,083 passed, 4 skipped in 79.25 seconds |
+| `python -B _scratch/run_article_checks.py -q tests/test_dashboard_capture_outcomes.py` | 12 passed in 1.11 seconds |
+| `python -B _scratch/static_article_checks.py` | All ci.yml static checks passed, including MCP inventory, agent kit, Python compile, extension syntax/lint, JSON/version checks and Bash syntax |
+| Notice generation/integration and Windows/Mac lock tests in the broad run | Passed |
+| `git diff --check` | Passed |
+
+The 2 MiB synthetic page took **0.315 seconds** and returned 99,998 Markdown characters with truncation recorded. The four skips are Windows-inapplicable POSIX lock tests. Warnings are existing `datetime.utcnow` deprecations. Logs are `_scratch/article-repair-verification.log`, `_scratch/article-repair-dashboard.log` and `_scratch/article-repair-static.log`.
+
+Changed files: `article_extractor.py`, `page_extractor.py`, `tests/test_page_extractor_articles.py`, and this report. HEAD remains `50bd21a`; all repair changes are uncommitted.
+
+Open risks: shell detection remains a language-sensitive heuristic. The regex fallback has weaker content selection when the main extractor reaches a limit. Crawl4AI recovery was tested with injected results; no live browser was run. The full WSL suite and builds remain for the orchestrator.
