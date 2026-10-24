@@ -1,6 +1,6 @@
 # Article extraction UX2 verification
 
-The initial implementation below was committed as `50bd21a`, on `feat/article-extract` from base `90349a3f6b3431f52908968674319bc60f67634f`, with zero new runtime dependencies. This initial verification record is retained. The [repair results](#repair-of-50bd21a) at the end describe the current uncommitted changes.
+The initial implementation below was committed as `50bd21a`, on `feat/article-extract` from base `90349a3f6b3431f52908968674319bc60f67634f`, with zero new runtime dependencies. This initial verification record is retained. The [repair results](#repair-of-50bd21a) at the end describe the review fixes committed as `333cec9`.
 
 Installed Windows users previously received the regex `stdlib` path. The `.mcpb` inherits its installed runtime, and the Mac build recipe also omits Crawl4AI. The [original audit](article-extraction-ux2-audit.md) retains the packaging evidence and the rejected Trafilatura measurements, with the approved decision added above it.
 
@@ -106,6 +106,6 @@ Verification used the same ig-native interpreter, isolated scratch profile, forb
 
 The 2 MiB synthetic page took **0.315 seconds** and returned 99,998 Markdown characters with truncation recorded. The four skips are Windows-inapplicable POSIX lock tests. Warnings are existing `datetime.utcnow` deprecations. Logs are `_scratch/article-repair-verification.log`, `_scratch/article-repair-dashboard.log` and `_scratch/article-repair-static.log`.
 
-Changed files: `article_extractor.py`, `page_extractor.py`, `tests/test_page_extractor_articles.py`, and this report. HEAD remains `50bd21a`; all repair changes are uncommitted.
+Changed files: `article_extractor.py`, `page_extractor.py`, `tests/test_page_extractor_articles.py`, and this report. The repair was committed as `333cec9`. Known gap: a script-backed page that repeats an unpunctuated loader phrase (for example "Loading the reader") can still publish.
 
 Open risks: shell detection remains a language-sensitive heuristic. The regex fallback has weaker content selection when the main extractor reaches a limit. Crawl4AI recovery was tested with injected results; no live browser was run. The full WSL suite and builds remain for the orchestrator.
