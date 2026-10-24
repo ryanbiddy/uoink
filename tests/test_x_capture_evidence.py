@@ -14,6 +14,20 @@ import x_extractor
 
 
 FIXTURES = json.loads((Path(__file__).parent / "fixtures/x_capture_evidence.json").read_text(encoding="utf-8"))
+PROBES = json.loads((Path(__file__).parent / "fixtures/x_capture_review_probes.json").read_text(encoding="utf-8"))
+UNKNOWN_METRICS = {key: None for key in ("likes", "reposts", "quotes", "replies", "views", "bookmarks")}
+PHOTO_METRICS = dict(UNKNOWN_METRICS, likes=0, reposts=4, quotes=0, replies=0)
+EXPECTED = {
+    "long_post": ("complete", "FxTwitter", UNKNOWN_METRICS),
+    "quote_post": ("complete", "FxTwitter", UNKNOWN_METRICS),
+    "photos": ("complete", "FxTwitter", PHOTO_METRICS),
+    "video": ("complete", "FxTwitter", UNKNOWN_METRICS),
+    "missing_ancestor": ("complete", "FxTwitter", UNKNOWN_METRICS),
+    "provider_failure": ("truncated", "syndication", UNKNOWN_METRICS),
+    "shorter_response": ("unknown", "syndication", PHOTO_METRICS),
+    "embedded_parent": ("complete", "FxTwitter", UNKNOWN_METRICS),
+    "quote_tombstone": ("complete", "FxTwitter", UNKNOWN_METRICS),
+}
 
 
 @pytest.fixture(autouse=True)
@@ -46,9 +60,10 @@ def post(result):
 def test_every_capture_discloses_completeness_provider_scope_and_missing_metrics(name):
     result = extract(name)
     evidence = post(result)
-    assert evidence["text_completeness"] in {"complete", "truncated", "unknown"}
-    assert evidence["capture_provider"] in {"syndication", "FxTwitter"}
-    assert set(evidence["engagement"]) == set(x_evidence.METRICS)
+    completeness, provider, metrics = EXPECTED[name]
+    assert evidence["text_completeness"] == completeness
+    assert evidence["capture_provider"] == provider
+    assert evidence["engagement"] == metrics
     assert f"Text: {evidence['text_completeness']}" in result["markdown"]
     assert "Replies below the shared post" in result["markdown"]
     assert result["metadata"]["capture_scope"] == x_evidence.SCOPE
@@ -276,8 +291,11 @@ def test_ancestor_boundaries_are_marked(boundary, monkeypatch):
     result = x_extractor.extract_x_thread(f"https://x.com/example/status/{fixture['tweet_id']}",
                                           _fetch=lambda *a, **k: payload)
     assert result["ok"] and result["tweets_captured"] == 1
-    assert post(result)["missing_parent"]
-    assert "not captured" in result["markdown"]
+    reasons = {"cycle": "cycle detected", "cap": "ancestor limit reached",
+               "different_author": "outside same-author scope", "unknown_author": "author unknown"}
+    parent_id = payload["in_reply_to_status_id_str"]
+    assert post(result)["missing_parent"] == {"id": parent_id, "reason": reasons[boundary]}
+    assert f"Parent {parent_id} not captured: {reasons[boundary]}." in result["markdown"]
 
 
 def test_wrong_id_and_malformed_supplements_preserve_available_capture():
@@ -289,3 +307,160 @@ def test_wrong_id_and_malformed_supplements_preserve_available_capture():
     assert len(merged["_uoink_x_evidence"]["media"]) == 1
     invalid = x_extractor._merge_fxtwitter_full_text(merged, {"code": 200, "status": []})
     assert invalid["_uoink_x_evidence"]["media"] == merged["_uoink_x_evidence"]["media"]
+
+
+@pytest.mark.parametrize("reverse", [False, True])
+def test_expansion_keeps_longest_http_url_regardless_of_order(reverse):
+    payload = copy.deepcopy(PROBES["expansions"])
+    if reverse:
+        payload["entities"]["urls"].reverse()
+    evidence = x_evidence.shape(payload, "FxTwitter")
+    expected = "Read https://example.invalid/full/report-with-details"
+    assert x_evidence.expanded_text(evidence) == expected
+    # Rendering older evidence must apply the same checks, without relying on shaping.
+    evidence["expanded_links"] = payload["entities"]["urls"]
+    assert x_evidence.expanded_text(evidence) == expected
+    rendered = "\n".join(x_evidence.render_post(evidence))
+    assert expected in rendered
+    assert "javascript:" not in rendered and "data:" not in rendered
+
+
+def test_media_facets_supply_expansions_and_markdown_links():
+    evidence = x_evidence.shape(PROBES["media_facet"], "FxTwitter")
+    assert [(link["url"], link["expanded_url"]) for link in evidence["expanded_links"]] == [
+        ("https://t.co/clip", "https://x.com/example/status/1/video/1"),
+        ("https://t.co/originalonly", None),
+        (None, "https://example.invalid/video"),
+    ]
+    rendered = "\n".join(x_evidence.render_post(evidence))
+    assert "Watch https://x.com/example/status/1/video/1" in rendered
+    for url in ("https://x.com/example/status/1/video/1", "https://t.co/originalonly", "https://example.invalid/video"):
+        assert f"Link: {url}" in rendered
+    assert "javascript:" not in rendered and "data:" not in rendered
+
+
+def test_expansion_length_is_compared_before_markdown_encoding():
+    payload = copy.deepcopy(PROBES["expansions"])
+    payload["entities"]["urls"][1]["expanded_url"] = "https://x.invalid/[][][][][][][]"
+    evidence = x_evidence.shape(payload, "FxTwitter")
+    assert x_evidence.render_post(evidence)[0] == "Read https://example.invalid/full/report-with-details"
+
+
+def test_engagement_merge_keeps_larger_counts_and_distinguishes_null():
+    probe = PROBES["engagement"]
+    first = x_extractor._merge_fxtwitter_full_text(probe["syndication"], probe["fxtwitter"])
+    expected = {"likes": 12, "replies": 4, "reposts": 9, "views": 25, "quotes": None, "bookmarks": 0}
+    assert first["_uoink_x_evidence"]["engagement"] == expected
+    syndication = x_evidence.shape(probe["syndication"])
+    fx = x_evidence.shape(probe["fxtwitter"]["status"], "FxTwitter")
+    assert x_evidence.merge(fx, syndication)["engagement"] == expected
+    later = x_extractor._merge_fxtwitter_full_text(first, {"code": 200, "status": {"id": "1", "text": "Short"}})
+    assert later["_uoink_x_evidence"]["engagement"] == expected
+    assert "likes: 12" in "\n".join(x_evidence.render_post(later["_uoink_x_evidence"]))
+
+
+@pytest.mark.parametrize("kind", ["poll", "card", "article", "community_note"])
+@pytest.mark.parametrize("embedded", [False, True])
+def test_attachment_only_parent_is_captured_and_walk_continues(kind, embedded):
+    chain = copy.deepcopy(PROBES["attachment_chain"])
+    attachment = chain["2"].pop("poll")
+    chain["2"][kind] = attachment
+    if embedded:
+        chain["3"]["parent"] = chain["2"]
+    result = x_extractor.extract_x_thread("https://x.com/example/status/3", _fetch=lambda post_id, **kw: chain[post_id])
+    assert result["ok"]
+    posts = result["metadata"]["x_capture"]["posts"]
+    assert [p["id"] for p in posts] == ["1", "2", "3"]
+    assert all(p["missing_parent"] is None for p in posts)
+    assert posts[1]["attachments"] == {kind: attachment}
+    assert posts[1]["text_completeness"] == "unknown"
+    assert "Option one" in result["markdown"] and "Earlier post still reached" in result["markdown"]
+    # The same acceptance rule applies when the shared post only has an attachment.
+    chain["2"].pop("in_reply_to_status_id_str")
+    single = x_extractor.extract_x_thread("https://x.com/example/status/2", _fetch=lambda *a, **kw: chain["2"])
+    assert single["ok"] and single["tweets_captured"] == 1
+
+
+def test_longer_raw_text_becomes_rendered_body_with_its_completeness():
+    evidence = x_evidence.shape(PROBES["raw_text"], "FxTwitter")
+    assert evidence["text"] == PROBES["raw_text"]["raw_text"]["text"]
+    assert evidence["text_completeness"] == "complete"
+    assert "FULL-TAIL" in "\n".join(x_evidence.render_post(evidence))
+    marked = dict(PROBES["raw_text"], truncated=True)
+    assert x_evidence.shape(marked, "FxTwitter")["text_completeness"] == "truncated"
+    shorter_raw = dict(PROBES["raw_text"], raw_text={"text": "Short"})
+    assert x_evidence.shape(shorter_raw, "FxTwitter")["text"] == PROBES["raw_text"]["text"]
+
+
+def test_unsafe_urls_cannot_reach_saved_descriptors_or_markdown(tmp_path):
+    import index
+    fixture = PROBES["unsafe_urls"]
+    merged = x_extractor._merge_fxtwitter_full_text({"id_str": "1", "text": "Captured text"},
+                                                   {"code": 200, "status": fixture})
+    result = x_extractor.extract_x_thread("https://x.com/example/status/1", _fetch=lambda *a, **kw: merged)
+    assert result["ok"]
+    evidence = post(result)
+    assert evidence["quote"]["url"] == "https://x.com/example/status/2"
+    assert evidence["quote"]["text"] == "Quoted text survives"
+    assert evidence["media"][0]["url"] is None
+    assert evidence["media"][0]["alt_text"] == "Unsafe photo"
+    assert result["images"] == [{"src": "https://example.invalid/safe.jpg", "alt": "Safe photo"}]
+    assert result["links"][0]["href"] == "https://t.co/unsafe"
+    assert evidence["url_warnings"]
+    assert "URLs were omitted" in result["markdown"]
+    assert "Card text survives" in result["markdown"] and "Note text survives" in result["markdown"]
+    idx = index.Index.open(tmp_path / "index.db")
+    try:
+        item_id = page_extractor.persist_page_yoink(idx, result, data_root=tmp_path, source_type="x_thread")
+        row = idx.get_yoink(item_id)
+        saved = Path(row["sidecar_path"]).read_text(encoding="utf-8")
+        card = library_cards.build_card(row, [], corpus_text=result["markdown"])
+        for output in (saved, json.dumps(card), result["markdown"], json.dumps(result)):
+            assert "javascript:" not in output and "data:" not in output
+            assert "[Injected]" not in output and "https://example.invalid/attack" not in output
+    finally:
+        idx.close()
+    # Old or manually supplied evidence also passes through the Markdown fence.
+    evidence["quote"]["url"] = fixture["quote"]["url"]
+    evidence["media"][0]["url"] = "javascript:alert(1)"
+    rendered = "\n".join(x_evidence.render_post(evidence))
+    assert "[Injected]" not in rendered and "javascript:" not in rendered
+
+
+@pytest.mark.parametrize("url", ["javascript:alert(1)", "data:image/png,bad", "ftp://example.invalid/image",
+                                  "https://example.invalid/a\n[Injected](https://example.invalid/b)"])
+@pytest.mark.parametrize("nested", ["url", "media", "quote", "facets", "attachments"])
+def test_card_trust_fence_rejects_nested_x_urls(tmp_path, url, nested):
+    from library_resources import LibraryReader, ResourceError
+    structures = {
+        "url": {"url": url}, "media": {"media": [{"variants": [{"url": url}]}]},
+        "quote": {"quote": {"url": url}},
+        "facets": {"raw_text": {"facets": [{"type": "media", "original": "https://t.co/a", "replacement": url}]}},
+        "attachments": {"attachments": {"article": {"thumbnail_url": url}}},
+    }
+    card = {"x_capture": {"posts": [structures[nested]]}}
+    reader = LibraryReader(None, data_root=tmp_path)
+    with pytest.raises(ResourceError) as error:
+        reader._assert_card_safe(card, None)
+    assert error.value.code == "invalid_source_data"
+    assert error.value.details["reason"] == "unsafe_link"
+
+
+def test_dom_images_filter_schemes_and_disclose_omissions():
+    payload = copy.deepcopy(FIXTURES["extension_dom"])
+    payload["images"] += ["javascript:alert(1)", {"src": "data:image/png,bad"},
+                          {"src": "https://example.invalid/a\n[Injected](https://example.invalid/b)"}]
+    result = x_article_extractor.build_extract_result(payload)
+    assert result["images"] == FIXTURES["extension_dom"]["images"]
+    assert "Some supplied images were omitted" in result["markdown"]
+    assert "javascript:" not in json.dumps(result) and "data:" not in json.dumps(result)
+
+
+def test_http_url_punctuation_cannot_create_a_markdown_link():
+    fixture = copy.deepcopy(PROBES["unsafe_urls"])
+    fixture["quote"]["url"] = "https://example.invalid/[Injected](https://example.invalid/attack)"
+    evidence = x_evidence.shape(fixture, "FxTwitter")
+    assert evidence["quote"]["url"] == fixture["quote"]["url"]
+    rendered = "\n".join(x_evidence.render_post(evidence))
+    assert "[Injected](https://example.invalid/attack)" not in rendered
+    assert "%5BInjected%5D%28https://example.invalid/attack%29" in rendered

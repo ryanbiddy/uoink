@@ -26,7 +26,6 @@ import re
 import urllib.error
 import urllib.parse
 import urllib.request
-from copy import deepcopy
 from datetime import datetime, timezone
 
 import x_article_extractor
@@ -197,7 +196,7 @@ def _merge_fxtwitter_full_text(syndication: dict,
     if valid:
         evidence = x_evidence.merge(evidence, x_evidence.shape(status, "FxTwitter"))
     else:
-        evidence = deepcopy(evidence)
+        evidence = x_evidence.sanitize_urls(evidence)
         evidence["provider_status"]["FxTwitter"] = "unavailable or invalid response"
     enriched = dict(syndication)
     enriched["text"] = evidence["text"]
@@ -210,7 +209,7 @@ def _merge_fxtwitter_full_text(syndication: dict,
 def _shape_tweet(payload: dict) -> dict:
     if not isinstance(payload, dict):
         raise ValueError("Unexpected X response shape.")
-    evidence = deepcopy(payload.get("_uoink_x_evidence")) or x_evidence.shape(payload)
+    evidence = x_evidence.sanitize_urls(payload.get("_uoink_x_evidence")) or x_evidence.shape(payload)
     return {
         "id": evidence["id"],
         "author_name": evidence["author"]["name"] or "Unknown",
@@ -271,8 +270,7 @@ def collect_thread(tweet_id: str, *, timeout: int = 20, _fetch=None, _supplement
         except (ValueError, OSError):
             missing("unavailable or request failed")
             break  # ancestor gone; keep what we have
-        if parent["id"] != parent_id or (not parent["text"] and not parent["evidence"]["media"]
-                                         and not parent["evidence"]["quote"]):
+        if parent["id"] != parent_id or not x_evidence.has_content(parent["evidence"]):
             missing("unavailable or invalid response")
             break
         if parent["author_handle"].lower() != start["author_handle"].lower():
@@ -336,7 +334,7 @@ def extract_x_thread(url: str, *, timeout: int = 20, _fetch=None, _supplement=No
     if not tweets:
         return {"ok": False, "code": "parse_failed",
                 "error": "X answered but no post came back."}
-    if len(tweets) == 1 and not tweets[0]["text"] and not tweets[0]["evidence"]["media"] and not tweets[0]["evidence"]["quote"]:
+    if len(tweets) == 1 and not x_evidence.has_content(tweets[0]["evidence"]):
         return {"ok": False, "code": "empty",
                 "error": "That post has no text to capture. For a video "
                          "post, use the regular Uoink button."}
@@ -368,12 +366,13 @@ def extract_x_thread(url: str, *, timeout: int = 20, _fetch=None, _supplement=No
             else "x-syndication"
         ),
         "extracted_at": _now_iso(),
-        "links": [dict(link, href=link.get("expanded_url") or link.get("url"))
-                  for t in tweets for link in t["evidence"]["expanded_links"]],
+        "links": [dict(link, href=x_evidence.safe_url(link.get("expanded_url")) or x_evidence.safe_url(link.get("url")))
+                  for t in tweets for link in t["evidence"]["expanded_links"]
+                  if x_evidence.safe_url(link.get("expanded_url")) or x_evidence.safe_url(link.get("url"))],
         # This route persists descriptors; it has never downloaded post photos.
         "images": [{"src": m["url"], "alt": m["alt_text"]}
                    for t in tweets for m in t["evidence"]["media"]
-                   if m["type"] == "photo" and m["url"]],
+                   if m["type"] == "photo" and x_evidence.safe_url(m["url"])],
         "screenshot_path": None,
         "tweets_captured": len(tweets),
     }

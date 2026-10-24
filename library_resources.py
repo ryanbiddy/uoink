@@ -1413,6 +1413,9 @@ class LibraryReader:
 
         scan(card)
         links = [card.get("url")] + [e.get("deep_link") for e in card.get("excerpts") or []]
+        if card.get("x_capture"):
+            from uoink_core import x_evidence
+            links.extend(x_evidence.url_fields(card["x_capture"]))
         for link in links:
             if link is not None and safe_url(link) != link:
                 raise ResourceError("invalid_source_data", details={"reason": "unsafe_link"})

@@ -70,10 +70,10 @@ def _clean_images(images) -> list[dict]:
     if not isinstance(images, list):
         return out
     for item in images:
-        if isinstance(item, str) and item.strip():
-            out.append({"src": item.strip(), "alt": ""})
+        if isinstance(item, str) and x_evidence.safe_url(item):
+            out.append({"src": item, "alt": ""})
         elif isinstance(item, dict):
-            src = str(item.get("src") or "").strip()
+            src = x_evidence.safe_url(item.get("src"))
             if src:
                 out.append({"src": src, "alt": str(item.get("alt") or "")})
         if len(out) >= 100:
@@ -122,6 +122,8 @@ def build_extract_result(payload: dict) -> dict:
         "author": {"name": author_name or author, "screen_name": author_handle},
         "photos": [{"url": image["src"], "alt": image["alt"] or None} for image in images],
     }, "extension DOM")
+    if isinstance(payload.get("images"), list) and len(images) < len(payload["images"]):
+        evidence["url_warnings"] = ["Some supplied images were omitted because their URLs were invalid or the image limit was reached."]
     # The DOM parser cannot prove that all collapsed or unloaded text was seen.
     evidence["text_completeness"] = "unknown"
 
@@ -131,7 +133,7 @@ def build_extract_result(payload: dict) -> dict:
         "title": title,
         "markdown": markdown + "\n\nCapture limits: Text completeness is unknown. "
                     "Only the rendered X Article DOM was captured. Quotes, links, "
-                    "media and engagement may be missing.\n",
+                    "media and engagement may be missing.\n" + "".join(note + "\n" for note in evidence.get("url_warnings", [])),
         "metadata": {
             "author": author,
             "author_name": author_name,

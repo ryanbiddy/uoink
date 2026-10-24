@@ -15,9 +15,14 @@ Each entry in `x_capture.posts` includes:
 | `media` | Photo URL and nullable alt text; video and GIF URLs, variants, and poster; supplied dimensions and format fields |
 | `media_extra`, `attachments` | Other supplied media objects, polls, link cards, Articles, and community notes |
 | `missing_parent` | Parent ID and the reason the walk stopped, or `null` |
-| `engagement` | Likes, reposts, quotes, replies, views, and bookmarks. `null` means unavailable; `0` remains zero |
+| `engagement` | Likes, reposts, quotes, replies, views, and bookmarks. `null` means unavailable; the larger supplied count wins when providers disagree |
+| `url_warnings` | Present when unsafe or malformed URL fields were omitted, or DOM images exceeded the capture limit |
 
 The markdown includes quote text, links, media descriptors, and missing-data disclosures. Links expand only from response entities or facets. There are no redirect lookups. The post route has no photo download step; `images` contains descriptors for sidecar persistence. This change adds no automatic media downloads.
+
+For each shortened link, the longest supplied HTTP or HTTPS expansion wins. Media facets also contribute links. URL destinations are checked before saving and before Markdown rendering; other schemes, credentials, whitespace and controls are rejected. Rejected destinations leave a warning while the remaining text and media details are kept. Library reads check nested X evidence URLs too.
+
+Longer `raw_text.text` can supply the post body. Polls, cards, Articles and community notes count as captured content even without a body, photo or quote, and their supplied text appears in Markdown. These ancestors do not stop the upward walk.
 
 The walker still visits only the shared post and earlier posts by that author, with the existing 25-ancestor cap. It does not capture descendants or a full conversation. Embedded parents receive the same FxTwitter supplement as separately fetched ancestors. Missing parents, unknown authors, other-author boundaries, cycles, and the cap all leave a marker. A failed supplement retains the evidence already received.
 
