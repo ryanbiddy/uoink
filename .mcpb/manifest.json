@@ -3,8 +3,8 @@
   "name": "uoink",
   "display_name": "Uoink",
   "version": "3.11.0",
-  "description": "Connect Claude Desktop to all 91 Uoink tools for local capture, research, writing and library work.",
-  "long_description": "Uoink keeps the videos, podcasts, and articles you study on your own disk, then hands them to Claude as a cited corpus. This bundle connects Claude Desktop to your already-installed Uoink helper's local MCP server (stdio). Install the Uoink helper from https://uoink.app/install first, then install this bundle. Core capture is local and needs no API key; optional AI features use your own Anthropic key. Version 3.11.0 exposes all 91 tools over the standard connection, with the same consent gates. Set UOINK_MCP_TOOLSET=core for the previous 35 tools on clients that cap tool counts.",
+  "description": "Search and cite your saved YouTube and podcast transcripts in Claude, from your local Uoink library on Windows.",
+  "long_description": "Use Uoink when you want Claude to find what a saved video or podcast said, cite the timestamp, capture a new link or save a research note. This bundle connects Claude Desktop to the local MCP server in your installed Uoink app for Windows 10/11, which reads your Markdown and JSON library, including YouTube transcripts, frames and comments. Install Uoink from https://uoink.app/install first. Core capture is local and needs no API key; optional AI features use your own Anthropic key. Clients that cap tool counts can set UOINK_MCP_TOOLSET=core.",
   "author": {
     "name": "Ryan Biddy",
     "url": "https://uoink.app"
@@ -21,15 +21,17 @@
   },
   "license": "MIT",
   "keywords": [
-    "youtube",
+    "youtube-transcript",
+    "podcast-transcript",
+    "knowledge-base",
+    "research",
+    "citations",
     "transcription",
     "mcp",
     "local-first",
+    "windows",
     "claude",
-    "rag",
-    "creator-tools",
-    "podcast",
-    "corpus"
+    "rag"
   ],
   "icon": "icon.png",
   "server": {

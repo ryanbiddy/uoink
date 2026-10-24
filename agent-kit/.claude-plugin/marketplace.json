@@ -4,18 +4,18 @@
     "name": "Ryan Biddy"
   },
   "metadata": {
-    "description": "Local Uoink library and Zing video tools and skills for AI agents."
+    "description": "Uoink research library (Windows) and Zing video tools (pre-alpha), as skills and MCP plugins for agents."
   },
   "plugins": [
     {
       "name": "uoink",
       "source": "./plugins/uoink",
-      "description": "Search, cite, and capture with your local Uoink library."
+      "description": "Search and cite saved YouTube and podcast transcripts, capture links and save notes with the Uoink Windows app."
     },
     {
       "name": "zing",
       "source": "./plugins/zing",
-      "description": "Study, match, render and inspect short videos and memes locally with Zing; uses your Uoink library for references."
+      "description": "Pre-alpha. Study a reference video, match that look on your clips and make memes, on your machine. Needs Python and FFmpeg."
     }
   ]
 }
