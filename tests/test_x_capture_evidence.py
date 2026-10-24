@@ -464,3 +464,19 @@ def test_http_url_punctuation_cannot_create_a_markdown_link():
     rendered = "\n".join(x_evidence.render_post(evidence))
     assert "[Injected](https://example.invalid/attack)" not in rendered
     assert "%5BInjected%5D%28https://example.invalid/attack%29" in rendered
+
+
+def test_quote_header_and_alt_text_cannot_start_a_markdown_line():
+    evidence = x_evidence.shape(PROBES["media_facet"], "FxTwitter")
+    quote = copy.deepcopy(evidence)
+    quote["id"] = "7\n[spoof](https://evil.example/a)"
+    quote["author"] = {**quote.get("author", {}), "handle": "someone\r\n[spoof](https://evil.example/b)"}
+    quote["url"] = None
+    evidence["quote"] = quote
+    evidence["media"] = [{"type": "photo", "url": "https://pbs.twimg.com/media/a.jpg",
+                          "alt_text": "a cat\n[spoof](https://evil.example/c)", "variants": []}]
+    lines = x_evidence.render_post(evidence)
+    assert not any(line.lstrip().startswith("[spoof]") for line in lines)
+    header = next(line for line in lines if line.startswith("Quoted post ") and " by @" in line)
+    assert header == "Quoted post 7 [spoof](https://evil.example/a) by @someone [spoof](https://evil.example/b): URL unavailable"
+    assert "Alt text: a cat [spoof](https://evil.example/c)" in lines

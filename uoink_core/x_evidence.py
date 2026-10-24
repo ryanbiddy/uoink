@@ -34,6 +34,12 @@ def _text(value):
     return value.strip() if isinstance(value, str) else ""
 
 
+def _one_line(value):
+    """Collapse line breaks and control characters so a field cannot start a new markdown line."""
+    text = str(value) if value is not None else ""
+    return " ".join("".join(" " if unicodedata.category(ch) in ("Cc", "Cf", "Zl", "Zp") else ch for ch in text).split())
+
+
 def safe_url(value):
     """Accept only intact HTTP(S) destinations, before trimming or parsing."""
     if not isinstance(value, str) or not value or len(value) > 2048 or "\\" in value:
@@ -325,17 +331,17 @@ def disclosures(post):
             notes.append(f"{provider} supplement: {status}. Saved available evidence.")
     if post.get("missing_parent"):
         parent = post["missing_parent"]
-        notes.append(f"Parent {parent['id']} not captured: {parent['reason']}.")
+        notes.append(f"Parent {_one_line(parent['id'])} not captured: {_one_line(parent['reason'])}.")
     if post.get("unavailable_reason"):
         notes.append(f"Post unavailable: {post['unavailable_reason']}.")
     if not post.get("quote"):
         notes.append("Quoted-post availability is unknown.")
     else:
         quote = post["quote"]
-        notes.append(f"Quoted post {quote['id']}: text {quote['text_completeness']}. "
+        notes.append(f"Quoted post {_one_line(quote['id'])}: text {quote['text_completeness']}. "
                      f"Provider: {quote['capture_provider']}.")
         if quote.get("unavailable_reason"):
-            notes.append(f"Quoted post {quote['id']} unavailable: {quote['unavailable_reason']}.")
+            notes.append(f"Quoted post {_one_line(quote['id'])} unavailable: {_one_line(quote['unavailable_reason'])}.")
     if not post["media"]:
         notes.append("Media availability is unknown.")
     else:
@@ -363,9 +369,9 @@ def summary_lines(evidence):
         notes = post.get("disclosures") or disclosures(post)
         lines.extend(prefix + note for note in notes)
         if post.get("quote"):
-            visit(post["quote"], f"Quoted post {post['quote']['id']}: ")
+            visit(post["quote"], f"Quoted post {_one_line(post['quote']['id'])}: ")
     for post in evidence.get("posts", []):
-        visit(post, f"Post {post['id']}: ")
+        visit(post, f"Post {_one_line(post['id'])}: ")
     if evidence.get("summary"):
         for key, value in evidence["summary"].items():
             lines.append(f"{key.replace('_', ' ').capitalize()}: {value}")
@@ -423,7 +429,7 @@ def render_post(post):
     for media in post["media"]:
         lines.append(f"{media['type'].capitalize()}: {media.get('url') or 'URL unavailable'}")
         if media.get("alt_text") is not None:
-            lines.append(f"Alt text: {media['alt_text']}")
+            lines.append(f"Alt text: {_one_line(media['alt_text'])}")
         if media.get("poster"):
             lines.append(f"Poster: {media['poster']}")
         for variant in media.get("variants", []):
@@ -441,6 +447,6 @@ def render_post(post):
         lines.extend(_attachment_lines(value, kind.replace("_", " ").capitalize()))
     if post.get("quote"):
         quote = post["quote"]
-        lines += ["", f"Quoted post {quote['id']} by @{quote['author'].get('handle') or 'unknown'}: {quote['url'] or 'URL unavailable'}",
+        lines += ["", f"Quoted post {_one_line(quote['id'])} by @{_one_line(quote['author'].get('handle')) or 'unknown'}: {quote['url'] or 'URL unavailable'}",
                   *render_post(original_quote)]
     return lines
