@@ -43,6 +43,7 @@
     "notes.py",
     "openapi_bridge.py",
     "page_extractor.py",
+    "article_extractor.py",
     "podcasts.py",
     "provenance.py",
     "reddit_extractor.py",

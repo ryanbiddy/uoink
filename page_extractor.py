@@ -2,9 +2,8 @@
 
 Per PROMPT-V3.2-CC-BACKEND.md Deliverable 2 + Ryan's locked answer #1:
 opt-in allowlist (defaults pre-seeded: YouTube + X/Twitter; user adds
-others) + Crawl4AI as the canonical engine (lazy import) + stdlib
-fallback that ALWAYS works so the helper boots fine even when the
-Crawl4AI bundle is broken.
+others) + a stdlib Readability adaptation, then optional Crawl4AI + regex
+fallback. Empty bodies and access walls fail without publishing an article.
 
 Compute policy (locked, LOCAL-FIRST):
 - Crawl4AI runs ON-DEVICE. No third-party API.
@@ -12,10 +11,10 @@ Compute policy (locked, LOCAL-FIRST):
   top, cache result in _CRAWL4AI_AVAILABLE. BaseException catch so a
   broken bundle (playwright DLL miss, browser binary missing) leaves
   the helper booting cleanly.
-- Stdlib fallback uses urllib + a simple regex/heuristic markdown
-  synthesis. No JS rendering, no screenshot, but produces useful
-  output for static pages. The extraction_engine field on the
-  response tells the dashboard which path was used.
+- The primary extractor accepts HTML fetched by public_http_open, keeps
+  article structure and attribution, and has no network access of its own.
+  extraction_engine, extraction_version and fetched_at record provenance.
+  Static extraction has no screenshot or JavaScript rendering.
 
 Allowlist behaviour:
 - Patterns are bare hostnames or hostname-with-wildcard
@@ -50,6 +49,7 @@ from typing import Any
 from urllib.parse import urlparse
 
 import source_subscriptions
+import article_extractor
 
 log = logging.getLogger("uoink.page_extractor")
 
@@ -76,6 +76,7 @@ def is_crawl4ai_available() -> bool:
 # ---- enums + constants -------------------------------------------------
 ENGINE_CRAWL4AI = "crawl4ai"
 ENGINE_STDLIB = "stdlib"
+ENGINE_READABILITY = article_extractor.ENGINE
 
 RENDER_MODE_JS = "js"
 RENDER_MODE_STATIC = "static"
@@ -215,7 +216,9 @@ def author_for(source_type: str | None, metadata: dict | None,
         if author and author not in ("[unknown]", "[deleted]", ""):
             return f"u/{author}"
         return None
-    # Generic web page: the host is the site, which is the honest "who".
+    # Article metadata is a better attribution than the site's hostname.
+    if isinstance(md.get("author"), str) and md["author"].strip():
+        return md["author"].strip()
     host = ""
     try:
         host = (urlparse(url).hostname or "").lower()
@@ -440,19 +443,20 @@ def extract_page(idx, url: str, *,
                   include_screenshot: bool = True,
                   follow_links_depth: int = 0,
                   enforce_allowlist: bool = True,
-                  check_url=None) -> dict:
+                  check_url=None, http_open=None) -> dict:
     """Extract a single page. Returns the structured response shape per
     PROMPT-V3.2-CC-BACKEND.md Deliverable 2.
 
-    Engine selection: Crawl4AI when available (handles JS render +
-    screenshot), stdlib fallback otherwise (static HTML + heuristic
-    markdown + no screenshot).
+    Engine selection: bounded stdlib article extraction, optional Crawl4AI,
+    then the legacy regex fallback. Failed body checks never become articles
+    just because the last fallback returns text.
 
     The allowlist gate runs by default. Callers that need to bypass
     (e.g., the Writing Studio URL anchor ingestion that wraps this
     function) pass enforce_allowlist=False. Both paths still require a public
-    network target. check_url injects Crawl4AI's initial URL check for tests;
-    the stdlib path separately checks each request and redirect."""
+    network target. http_open injects an offline response for tests; production
+    checks every static request and redirect. check_url injects the separate
+    initial URL admission check for the optional browser fallback."""
     canonical = normalize_page_url(url)
     if not canonical:
         return {"ok": False,
@@ -469,30 +473,18 @@ def extract_page(idx, url: str, *,
     depth = max(0, min(int(follow_links_depth or 0),
                           _MAX_FOLLOW_LINKS_DEPTH))
 
-    result = None
-    if _CRAWL4AI_AVAILABLE:
-        try:
-            (check_url or source_subscriptions.check_public_http_url)(canonical)
-        except source_subscriptions.ServiceError as exc:
-            return {"ok": False, "code": exc.code, "error": str(exc),
-                    "url": canonical}
-        try:
-            result = _extract_crawl4ai(
-                canonical, render_mode=render_mode,
-                include_screenshot=include_screenshot,
-                follow_links_depth=depth)
-        except Exception as e:
-            log.warning("crawl4ai extract failed (%s); falling back to "
-                          "stdlib: %s", canonical, e)
-    if result is None:
-        result = _extract_stdlib(canonical,
-                                   include_screenshot=include_screenshot)
+    result = _extract_article_page(
+        canonical, render_mode=render_mode, include_screenshot=include_screenshot,
+        follow_links_depth=depth, check_url=check_url, http_open=http_open)
     # Honest handling of X's login/nojs wall: a plain fetch of an x.com
     # Article or page comes back as "JavaScript is not available", not the
     # content. Fail cleanly with actionable copy instead of persisting the
     # wall as a junk uoink (the v3.3.2 behaviour Ryan hit).
-    if result.get("ok") and _is_x_login_wall(canonical, result):
+    if ((result.get("ok") and _is_x_login_wall(canonical, result)) or
+            (urlparse(canonical).hostname in _X_HOSTS and
+             "JavaScript page" in result.get("diagnostic", ""))):
         return {
+            **result,
             "ok": False,
             "code": "x_login_wall",
             "url": canonical,
@@ -505,6 +497,107 @@ def extract_page(idx, url: str, *,
                       "a /status/ link."),
         }
     return result
+
+
+def _fetch_page_html(url: str, http_open=None):
+    """The sole static fetch boundary; admission and redirects stay in policy."""
+    try:
+        with (http_open or source_subscriptions.public_http_open)(
+                url, headers={"User-Agent": _USER_AGENT},
+                timeout=_PAGE_FETCH_TIMEOUT_SEC) as resp:
+            if resp.status != 200:
+                return None, {"fetched_at": _now_iso(), "fetched_url": url}, {"code": "upstream_http_error",
+                                        "error": f"upstream returned HTTP {resp.status}"}
+            raw = resp.read(_PAGE_MAX_BYTES + 1)
+            final_url = resp.geturl() if hasattr(resp, "geturl") else url
+        return raw, {"fetched_at": _now_iso(), "fetched_url": final_url}, None
+    except Exception as exc:
+        return None, {"fetched_at": _now_iso(), "fetched_url": url}, {
+            "code": getattr(exc, "code", None) or "page_fetch_failed",
+            "error": (f"fetch failed: {exc}")[:240]}
+
+
+def _engine_version(engine):
+    if engine == ENGINE_READABILITY:
+        return article_extractor.VERSION
+    if engine == ENGINE_STDLIB:
+        return "1"
+    from importlib.metadata import PackageNotFoundError, version
+    try:
+        return version("crawl4ai")
+    except PackageNotFoundError:
+        return "unknown"
+
+
+def _extract_article_page(url, *, render_mode, include_screenshot,
+                          follow_links_depth, check_url=None, http_open=None):
+    raw, fetch_info, failure = _fetch_page_html(url, http_open)
+    attempts = []
+
+    def label(result, engine):
+        result.update(extraction_engine=engine, extraction_version=_engine_version(engine),
+                      fetched_at=result.get("fetched_at") or fetch_info["fetched_at"],
+                      fetched_url=result.get("fetched_url") or fetch_info["fetched_url"],
+                      url=url, extracted_at=_now_iso())
+        attempts.append({"engine": engine, "version": result["extraction_version"],
+                         "status": "ok" if result.get("ok") else "failed",
+                         "diagnostic": (result.get("diagnostic") or result.get("error") or "")[:240]})
+        result["extraction_attempts"] = list(attempts)
+        return result
+
+    if failure:
+        return label({"ok": False, "url": url, **failure}, ENGINE_READABILITY)
+    try:
+        primary = article_extractor.extract(raw, fetch_info["fetched_url"])
+    except Exception as exc:
+        diagnostic = f"article extractor failed: {type(exc).__name__}"[:240]
+        primary = {"ok": False, "url": url, "diagnostic": diagnostic,
+                   "error": diagnostic, "code": "article_extractor_failed"}
+        log.warning("%s", diagnostic)
+    label(primary, ENGINE_READABILITY)
+    if primary.get("ok") or primary.get("code") == "article_extraction_limit":
+        return primary
+
+    # A clear wall is terminal. A browser cannot acquire the user's sign-in.
+    if "login or paywall" in primary.get("diagnostic", ""):
+        return primary
+    if _CRAWL4AI_AVAILABLE:
+        try:
+            (check_url or source_subscriptions.check_public_http_url)(url)
+        except source_subscriptions.ServiceError as exc:
+            return label({"ok": False, "url": url, "code": exc.code,
+                          "error": str(exc)[:240]}, ENGINE_CRAWL4AI)
+        try:
+            result = _extract_crawl4ai(url, render_mode=render_mode,
+                                      include_screenshot=include_screenshot,
+                                      follow_links_depth=follow_links_depth)
+            diagnostic = article_extractor.text_diagnostic(result.get("markdown"))
+            if diagnostic:
+                result.update(ok=False, code="article_body_not_found", diagnostic=diagnostic,
+                              error=diagnostic, markdown="", article_status="not_found")
+            result["markdown"] = (result.get("markdown") or "")[:article_extractor.MAX_MARKDOWN]
+            result["metadata"] = {**primary.get("metadata", {}), **(result.get("metadata") or {})}
+            label(result, ENGINE_CRAWL4AI)
+            if "login or paywall" in (diagnostic or ""):
+                return result
+            if result.get("ok"):
+                result["article_status"] = "found"
+                return result
+        except Exception as exc:
+            label({"ok": False, "diagnostic": f"browser extractor failed: {type(exc).__name__}"}, ENGINE_CRAWL4AI)
+
+    result = _extract_stdlib(url, include_screenshot=include_screenshot, html=raw)
+    diagnostic = (primary.get("diagnostic") if primary.get("code") == "article_body_not_found"
+                  else article_extractor.text_diagnostic(result.get("markdown")))
+    result["metadata"] = {**(result.get("metadata") or {}), **primary.get("metadata", {})}
+    result["title"] = primary.get("title") or result.get("title")
+    result["markdown"] = (result.get("markdown") or "")[:article_extractor.MAX_MARKDOWN]
+    if diagnostic:
+        result.update(ok=False, code="article_body_not_found", diagnostic=diagnostic[:240],
+                      error=diagnostic[:240], markdown="", article_status="not_found")
+    else:
+        result["article_status"] = "found"
+    return label(result, ENGINE_STDLIB)
 
 
 def _extract_crawl4ai(url: str, *, render_mode: str,
@@ -542,7 +635,7 @@ def _extract_crawl4ai(url: str, *, render_mode: str,
     if screenshot_b64:
         screenshot_path = f"<inline-base64:{len(screenshot_b64)}b>"
     return {
-        "ok": True,
+        "ok": bool(getattr(result, "success", True)),
         "extraction_engine": ENGINE_CRAWL4AI,
         "url": url,
         "title": title,
@@ -553,6 +646,7 @@ def _extract_crawl4ai(url: str, *, render_mode: str,
         "links": [{"href": l} if isinstance(l, str) else l for l in links[:50]],
         "images": [{"src": i} if isinstance(i, str) else i for i in images[:50]],
         "extracted_at": _now_iso(),
+        "fetched_at": _now_iso(),
     }
 
 
@@ -605,29 +699,17 @@ def _html_to_markdown(html: str) -> str:
     return s.strip()
 
 
-def _extract_stdlib(url: str, *, include_screenshot: bool, http_open=None) -> dict:
+def _extract_stdlib(url: str, *, include_screenshot: bool, http_open=None, html=None) -> dict:
     """Stdlib-only fallback. urllib GET + regex-based HTML-to-markdown.
     Always returns a usable result for static pages; returns
     screenshot_path=None because we can't render. http_open is an explicit
     test injection; production checks the public network on every hop."""
-    try:
-        with (http_open or source_subscriptions.public_http_open)(
-                url, headers={"User-Agent": _USER_AGENT},
-                timeout=_PAGE_FETCH_TIMEOUT_SEC) as resp:
-            if resp.status != 200:
-                return {"ok": False,
-                        "error": f"upstream returned HTTP {resp.status}",
-                        "extraction_engine": ENGINE_STDLIB,
-                        "url": url}
-            raw = resp.read(_PAGE_MAX_BYTES)
-    except urllib.error.URLError as e:
-        return {"ok": False, "error": f"fetch failed: {e}",
-                "extraction_engine": ENGINE_STDLIB, "url": url}
-    except Exception as e:
-        return {"ok": False, "error": f"fetch failed: {e}",
-                "extraction_engine": ENGINE_STDLIB, "url": url}
-
-    html = raw.decode("utf-8", errors="replace")
+    if html is None:
+        html, _, failure = _fetch_page_html(url, http_open)
+        if failure:
+            return {"ok": False, **failure, "extraction_engine": ENGINE_STDLIB, "url": url}
+    if isinstance(html, bytes):
+        html = html.decode("utf-8", errors="replace")
     title_match = _TITLE_RE.search(html)
     title = title_match.group(1).strip() if title_match else None
     metadata: dict[str, str] = {}
@@ -636,9 +718,9 @@ def _extract_stdlib(url: str, *, include_screenshot: bool, http_open=None) -> di
         val = m.group("val").strip()
         if key:
             metadata[key] = val
-    links = [{"href": m.group("href").strip()}
+    links = [{"href": href}
               for m in _LINK_RE.finditer(html)
-              if m.group("href").strip()][:50]
+              if (href := article_extractor.safe_link(m.group("href").strip(), url))][:50]
     images = [{"src": m.group("src").strip()}
                 for m in _IMG_RE.finditer(html)
                 if m.group("src").strip()][:50]
@@ -682,6 +764,10 @@ def persist_page_yoink(idx, extract_result: dict, *,
     title = extract_result.get("title") or url
     md = extract_result.get("markdown") or ""
     metadata = extract_result.get("metadata") or {}
+    provenance = {key: extract_result[key] for key in (
+        "extraction_engine", "extraction_version", "fetched_at", "fetched_url", "extraction_attempts",
+        "article_status", "article_text_length", "output_truncated", "diagnostic")
+        if key in extract_result}
     digest = hashlib.sha1(url.encode("utf-8")).hexdigest()
     video_id = f"{slug_prefix}_{digest[:11]}"
 
@@ -723,8 +809,18 @@ def persist_page_yoink(idx, extract_result: dict, *,
         folder.mkdir(parents=True, exist_ok=True)
         corpus_path = folder / f"{slug_prefix}.md"
         sidecar_path = folder / f"{slug_prefix}.json"
+        attribution = ""
+        if source_type == SOURCE_TYPE_PAGE:
+            for label, key in (("Author", "author"), ("Published", "published_date"), ("Site", "site_name")):
+                if metadata.get(key):
+                    attribution += f"**{label}:** {article_extractor._escape(str(metadata[key]))}\n\n"
+        body_md = md or ""
+        if source_type == SOURCE_TYPE_PAGE:
+            first, _, rest = body_md.partition("\n")
+            if first.strip() == "# " + article_extractor._escape(title):
+                body_md = rest.lstrip()
         corpus_path.write_text(
-            f"# {title}\n\n**Source:** {url}\n\n" + (md or ""),
+            f"# {title}\n\n**Source:** {url}\n\n" + attribution + body_md,
             encoding="utf-8")
         import json as _json
         sidecar_path.write_text(_json.dumps({
@@ -734,6 +830,7 @@ def persist_page_yoink(idx, extract_result: dict, *,
             "author": author,
             "url": url, "title": title,
             "extraction_engine": extract_result.get("extraction_engine"),
+            **provenance,
             "metadata": metadata,
             "links": extract_result.get("links") or [],
             "images": extract_result.get("images") or [],
@@ -744,6 +841,7 @@ def persist_page_yoink(idx, extract_result: dict, *,
     import json as _json
     metadata_json = _json.dumps({
         **metadata,
+        **provenance,
         "url": url,
         "platform": platform,
         "author": author,
