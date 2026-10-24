@@ -26,9 +26,11 @@ import re
 import urllib.error
 import urllib.parse
 import urllib.request
+from copy import deepcopy
 from datetime import datetime, timezone
 
 import x_article_extractor
+from uoink_core import x_evidence
 
 SOURCE_TYPE = "x_thread"
 SYNDICATION_URL = "https://cdn.syndication.twimg.com/tweet-result"
@@ -185,70 +187,99 @@ def fetch_fxtwitter_status_json(tweet_id: str, *, timeout: int = 20) -> dict | N
 
 def _merge_fxtwitter_full_text(syndication: dict,
                                fxtwitter: dict | None) -> dict:
-    """Prefer a longer, matching v2 status text over syndication text."""
-    if not isinstance(fxtwitter, dict) or fxtwitter.get("code") != 200:
-        return syndication
-    status = fxtwitter.get("status")
-    if not isinstance(status, dict):
-        return syndication
+    """Retain all available evidence, including on a failed supplement."""
+    evidence = syndication.get("_uoink_x_evidence") or x_evidence.shape(syndication)
+    status = fxtwitter.get("status") if isinstance(fxtwitter, dict) else None
     expected_id = str(syndication.get("id_str") or syndication.get("id") or "")
-    received_id = str(status.get("id") or "")
-    if expected_id and received_id != expected_id:
-        return syndication
-    current = str(syndication.get("text") or "").strip()
-    full = str(status.get("text") or "").strip()
-    if len(full) <= len(current):
-        return syndication
+    valid = (isinstance(status, dict) and fxtwitter.get("code") == 200
+             and str(status.get("id") or "") == expected_id
+             and status.get("type") != "tombstone")
+    if valid:
+        evidence = x_evidence.merge(evidence, x_evidence.shape(status, "FxTwitter"))
+    else:
+        evidence = deepcopy(evidence)
+        evidence["provider_status"]["FxTwitter"] = "unavailable or invalid response"
     enriched = dict(syndication)
-    enriched["text"] = full
-    enriched["_uoink_full_text_source"] = "fxtwitter-v2"
+    enriched["text"] = evidence["text"]
+    enriched["_uoink_x_evidence"] = evidence
+    if evidence["capture_provider"] == "FxTwitter":
+        enriched["_uoink_full_text_source"] = "fxtwitter-v2"
     return enriched
 
 
 def _shape_tweet(payload: dict) -> dict:
-    user = payload.get("user") or {}
-    photos = payload.get("photos") or []
+    if not isinstance(payload, dict):
+        raise ValueError("Unexpected X response shape.")
+    evidence = deepcopy(payload.get("_uoink_x_evidence")) or x_evidence.shape(payload)
     return {
-        "id": str(payload.get("id_str") or ""),
-        "author_name": (user.get("name") or "").strip() or "Unknown",
-        "author_handle": (user.get("screen_name") or "").strip(),
-        "text": (payload.get("text") or "").strip(),
+        "id": evidence["id"],
+        "author_name": evidence["author"]["name"] or "Unknown",
+        "author_handle": evidence["author"]["handle"] or "",
+        "text": evidence["text"],
         "created_at": payload.get("created_at") or "",
-        "in_reply_to_id": str(payload.get("in_reply_to_status_id_str") or ""),
-        "in_reply_to_handle": (payload.get("in_reply_to_screen_name") or "").strip(),
-        "photo_count": len(photos) if isinstance(photos, list) else 0,
-        "has_video": bool(payload.get("video")),
+        "in_reply_to_id": evidence["in_reply_to_id"],
+        "in_reply_to_handle": evidence["in_reply_to_handle"].strip(),
+        "photo_count": sum(m["type"] == "photo" for m in evidence["media"]),
+        "has_video": any(m["type"] in {"video", "gif"} for m in evidence["media"]),
+        "evidence": evidence,
         "full_text_source": payload.get("_uoink_full_text_source"),
         "parent_payload": payload.get("parent") if isinstance(payload.get("parent"), dict) else None,
     }
 
 
-def collect_thread(tweet_id: str, *, timeout: int = 20, _fetch=None) -> list[dict]:
+def collect_thread(tweet_id: str, *, timeout: int = 20, _fetch=None, _supplement=None) -> list[dict]:
     """Fetch the shared post, then walk the author's own reply chain upward
     to the root (or MAX_THREAD_HOPS). Returns tweets in reading order,
     root first. Uses the embedded `parent` payload when the endpoint
     includes it, refetching by id otherwise. A missing ancestor stops the
     walk without failing the capture: you still get everything below it."""
     fetcher = _fetch or fetch_tweet_json
+    # An injected fetcher never unexpectedly opens a live supplement request.
+    supplement = _supplement or (fetch_fxtwitter_status_json if _fetch is None else None)
     start = _shape_tweet(fetcher(tweet_id, timeout=timeout))
     chain = [start]
     hops = 0
     current = start
-    while (current["in_reply_to_id"]
-           and current["in_reply_to_handle"]
-           and current["in_reply_to_handle"].lower() == start["author_handle"].lower()
-           and hops < MAX_THREAD_HOPS):
+    seen = {start["id"]}
+    while current["in_reply_to_id"]:
+        parent_id = current["in_reply_to_id"]
+        def missing(reason):
+            current["evidence"]["missing_parent"] = {"id": parent_id, "reason": reason}
+        if not current["in_reply_to_handle"]:
+            missing("author unknown")
+            break
+        if current["in_reply_to_handle"].lower() != start["author_handle"].lower():
+            missing("outside same-author scope")
+            break
+        if hops >= MAX_THREAD_HOPS or parent_id in seen:
+            missing("ancestor limit reached" if hops >= MAX_THREAD_HOPS else "cycle detected")
+            break
         hops += 1
         parent_payload = current["parent_payload"]
         try:
             if parent_payload and str(parent_payload.get("id_str") or "") == current["in_reply_to_id"]:
+                if supplement and not parent_payload.get("_uoink_x_evidence"):
+                    try:
+                        extra = supplement(parent_id, timeout=timeout)
+                    except (ValueError, OSError):
+                        extra = None
+                    parent_payload = _merge_fxtwitter_full_text(parent_payload, extra)
                 parent = _shape_tweet(parent_payload)
             else:
                 parent = _shape_tweet(fetcher(current["in_reply_to_id"],
                                               timeout=timeout))
-        except ValueError:
+        except (ValueError, OSError):
+            missing("unavailable or request failed")
             break  # ancestor gone; keep what we have
+        if parent["id"] != parent_id or (not parent["text"] and not parent["evidence"]["media"]
+                                         and not parent["evidence"]["quote"]):
+            missing("unavailable or invalid response")
+            break
+        if parent["author_handle"].lower() != start["author_handle"].lower():
+            missing("outside same-author scope")
+            break
         chain.append(parent)
+        seen.add(parent["id"])
         current = parent
     chain.reverse()
     return chain
@@ -273,7 +304,7 @@ def render_markdown(tweets: list[dict], source_url: str) -> str:
     lines += [f"*{scope}*", ""]
     for index, tweet in enumerate(tweets, start=1):
         lines.append(f"## {index}/{count}")
-        lines.append(tweet["text"] or "(no text)")
+        lines.extend(x_evidence.render_post(tweet["evidence"]))
         extras = []
         if tweet["photo_count"]:
             extras.append(f"{tweet['photo_count']} photo{'s' if tweet['photo_count'] != 1 else ''}")
@@ -287,7 +318,7 @@ def render_markdown(tweets: list[dict], source_url: str) -> str:
     return "\n".join(lines).strip() + "\n"
 
 
-def extract_x_thread(url: str, *, timeout: int = 20, _fetch=None) -> dict:
+def extract_x_thread(url: str, *, timeout: int = 20, _fetch=None, _supplement=None) -> dict:
     """Fetch + walk + render an X post chain into an extract_result dict
     shaped for page_extractor.persist_page_yoink. `_fetch` is the test
     injection point. Returns {ok: False, code, error} on any failure."""
@@ -296,7 +327,7 @@ def extract_x_thread(url: str, *, timeout: int = 20, _fetch=None) -> dict:
         return {"ok": False, "code": "bad_url",
                 "error": "Not an X post URL (expected x.com/<user>/status/<id>)."}
     try:
-        tweets = collect_thread(tweet_id, timeout=timeout, _fetch=_fetch)
+        tweets = collect_thread(tweet_id, timeout=timeout, _fetch=_fetch, _supplement=_supplement)
     except ValueError as e:
         return {"ok": False, "code": "fetch_failed", "error": str(e)}
     except Exception as e:  # defensive: malformed payloads
@@ -305,7 +336,7 @@ def extract_x_thread(url: str, *, timeout: int = 20, _fetch=None) -> dict:
     if not tweets:
         return {"ok": False, "code": "parse_failed",
                 "error": "X answered but no post came back."}
-    if len(tweets) == 1 and not tweets[0]["text"] and not tweets[0]["photo_count"]:
+    if len(tweets) == 1 and not tweets[0]["text"] and not tweets[0]["evidence"]["media"] and not tweets[0]["evidence"]["quote"]:
         return {"ok": False, "code": "empty",
                 "error": "That post has no text to capture. For a video "
                          "post, use the regular Uoink button."}
@@ -330,14 +361,19 @@ def extract_x_thread(url: str, *, timeout: int = 20, _fetch=None) -> dict:
             "photo_count": sum(t["photo_count"] for t in tweets),
             "has_video": any(t["has_video"] for t in tweets),
             "full_text_posts": full_text_posts,
+            "x_capture": x_evidence.capture([t["evidence"] for t in tweets]),
         },
         "extraction_engine": (
             "x-syndication+fxtwitter-v2" if full_text_posts
             else "x-syndication"
         ),
         "extracted_at": _now_iso(),
-        "links": [],
-        "images": [],
+        "links": [dict(link, href=link.get("expanded_url") or link.get("url"))
+                  for t in tweets for link in t["evidence"]["expanded_links"]],
+        # This route persists descriptors; it has never downloaded post photos.
+        "images": [{"src": m["url"], "alt": m["alt_text"]}
+                   for t in tweets for m in t["evidence"]["media"]
+                   if m["type"] == "photo" and m["url"]],
         "screenshot_path": None,
         "tweets_captured": len(tweets),
     }

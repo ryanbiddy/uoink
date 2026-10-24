@@ -21,6 +21,8 @@ from __future__ import annotations
 import re
 from datetime import datetime, timezone
 
+from uoink_core import x_evidence
+
 SOURCE_TYPE = "x_article"
 EXTRACTION_ENGINE = "x-article-dom"
 
@@ -115,17 +117,33 @@ def build_extract_result(payload: dict) -> dict:
     if not title:
         title = f"{author} on X" if author else "X Article"
 
+    evidence = x_evidence.shape({
+        "id": canonical.rsplit("/", 1)[-1], "url": canonical, "text": markdown,
+        "author": {"name": author_name or author, "screen_name": author_handle},
+        "photos": [{"url": image["src"], "alt": image["alt"] or None} for image in images],
+    }, "extension DOM")
+    # The DOM parser cannot prove that all collapsed or unloaded text was seen.
+    evidence["text_completeness"] = "unknown"
+
     return {
         "ok": True,
         "url": canonical,
         "title": title,
-        "markdown": markdown,
+        "markdown": markdown + "\n\nCapture limits: Text completeness is unknown. "
+                    "Only the rendered X Article DOM was captured. Quotes, links, "
+                    "media and engagement may be missing.\n",
         "metadata": {
             "author": author,
             "author_name": author_name,
             "author_handle": author_handle,
             "image_count": len(images),
             "capture_scope": "rendered X Article DOM (authenticated session)",
+            "x_capture": {
+                "schema_version": 1, "scope": "rendered X Article DOM (authenticated session)",
+                "posts": [evidence],
+                "limits": ["Text completeness is unknown. Only the rendered Article DOM was captured.",
+                           "Quotes, links, media and engagement may be missing."],
+            },
         },
         "extraction_engine": EXTRACTION_ENGINE,
         "extracted_at": _now_iso(),

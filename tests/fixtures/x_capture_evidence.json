@@ -1,0 +1,650 @@
+{
+  "synthetic": true,
+  "schema_sources": {
+    "fxembed": "https://github.com/FxEmbed/FxEmbed/blob/d0c0f6923752bba00c19a81686e0efab867bb47a/packages/atmosphere/src/types/api-schemas.ts",
+    "react_tweet": "https://github.com/vercel/react-tweet/blob/cb5070e392fe707f43cdcfcddbd9e3972142eb43/packages/react-tweet/src/api/types/tweet.ts"
+  },
+  "cases": {
+    "long_post": {
+      "tweet_id": "1234567890123456789",
+      "syndication": {
+        "id_str": "1234567890123456789",
+        "text": "This is the beginning of a long post whose public syndication copy stops before the author reaches the useful conclusion. The captured version should keep going through the concrete details, examples, and final recommendation, but this fixture's syndication payload ends here…",
+        "created_at": "Thu Sep 03 12:00:00 +0000 2026",
+        "user": {
+          "name": "Example Author",
+          "screen_name": "example"
+        },
+        "photos": []
+      },
+      "fxtwitter": {
+        "code": 200,
+        "status": {
+          "type": "status",
+          "id": "1234567890123456789",
+          "url": "https://x.com/example/status/1234567890123456789",
+          "text": "This is the beginning of a long post whose public syndication copy stops before the author reaches the useful conclusion. The captured version should keep going through the concrete details, examples, and final recommendation. The final paragraph survives because FxTwitter API v2 returns the complete long-post text. FULL-TEXT-END",
+          "created_at": "Thu Sep 03 12:00:00 +0000 2026",
+          "author": {
+            "name": "Example Author",
+            "screen_name": "example"
+          },
+          "media": {
+            "photos": [],
+            "videos": []
+          }
+        }
+      }
+    },
+    "quote_post": {
+      "tweet_id": "1234567890123456789",
+      "syndication": {
+        "id_str": "1234567890123456789",
+        "text": "Comment on the quoted evidence. https://t.co/quote",
+        "created_at": "Thu Sep 03 12:00:00 +0000 2026",
+        "user": {
+          "name": "Example Author",
+          "screen_name": "example"
+        },
+        "photos": [],
+        "quoted_tweet": {
+          "id_str": "200",
+          "text": "Quoted opening...",
+          "note_tweet": {
+            "id": "note200"
+          },
+          "user": {
+            "name": "Quoted Author",
+            "screen_name": "quoted"
+          },
+          "favorite_count": 0,
+          "entities": {
+            "hashtags": [
+              {
+                "text": "evidence",
+                "indices": [
+                  0,
+                  9
+                ]
+              }
+            ]
+          }
+        },
+        "entities": {
+          "urls": [
+            {
+              "url": "https://t.co/quote",
+              "expanded_url": "https://x.com/quoted/status/200",
+              "display_url": "x.com/quoted/status/200",
+              "indices": [
+                32,
+                50
+              ]
+            }
+          ]
+        }
+      },
+      "fxtwitter": {
+        "code": 200,
+        "status": {
+          "type": "status",
+          "id": "1234567890123456789",
+          "url": "https://x.com/example/status/1234567890123456789",
+          "text": "Comment on the quoted evidence. https://t.co/quote",
+          "created_at": "Thu Sep 03 12:00:00 +0000 2026",
+          "author": {
+            "name": "Example Author",
+            "screen_name": "example"
+          },
+          "media": {
+            "photos": [],
+            "videos": []
+          },
+          "quote": {
+            "type": "status",
+            "id": "200",
+            "url": "https://x.com/quoted/status/200",
+            "text": "Quoted opening and the final detail. QUOTE-END",
+            "author": {
+              "name": "Quoted Author",
+              "screen_name": "quoted"
+            },
+            "likes": 0,
+            "replies": 3,
+            "media": {
+              "photos": [
+                {
+                  "type": "photo",
+                  "url": "https://example.invalid/quoted.jpg",
+                  "altText": "Quoted chart",
+                  "width": 600,
+                  "height": 400
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    "photos": {
+      "tweet_id": "1234567890123456789",
+      "syndication": {
+        "id_str": "1234567890123456789",
+        "text": "Photo evidence https://t.co/report",
+        "created_at": "Thu Sep 03 12:00:00 +0000 2026",
+        "user": {
+          "name": "Example Author",
+          "screen_name": "example"
+        },
+        "photos": [
+          {
+            "url": "https://example.invalid/photo.jpg",
+            "width": 800,
+            "height": 600
+          }
+        ],
+        "mediaDetails": [
+          {
+            "type": "photo",
+            "media_url_https": "https://example.invalid/photo.jpg",
+            "ext_alt_text": "A blue square beside a red circle."
+          }
+        ],
+        "favorite_count": 0,
+        "entities": {
+          "urls": [
+            {
+              "url": "https://t.co/report",
+              "expanded_url": "https://example.invalid/report",
+              "display_url": "example.invalid/report",
+              "indices": [
+                15,
+                34
+              ]
+            }
+          ],
+          "user_mentions": [
+            {
+              "id_str": "201",
+              "name": "Mention",
+              "screen_name": "mention",
+              "indices": [
+                0,
+                8
+              ]
+            }
+          ]
+        }
+      },
+      "fxtwitter": {
+        "code": 200,
+        "status": {
+          "type": "status",
+          "id": "1234567890123456789",
+          "url": "https://x.com/example/status/1234567890123456789",
+          "text": "Photo evidence https://t.co/report",
+          "created_at": "Thu Sep 03 12:00:00 +0000 2026",
+          "author": {
+            "name": "Example Author",
+            "screen_name": "example"
+          },
+          "media": {
+            "photos": [
+              {
+                "type": "photo",
+                "url": "https://example.invalid/photo.jpg",
+                "altText": "A blue square beside a red circle.",
+                "width": 800,
+                "height": 600
+              },
+              {
+                "type": "photo",
+                "url": "https://example.invalid/photo2.jpg",
+                "width": 500,
+                "height": 500
+              }
+            ]
+          },
+          "likes": 0,
+          "reposts": 4,
+          "replies": 0,
+          "quotes": 0,
+          "views": null,
+          "bookmarks": null,
+          "raw_text": {
+            "text": "Photo evidence https://t.co/report",
+            "display_text_range": [
+              0,
+              34
+            ],
+            "facets": [
+              {
+                "type": "url",
+                "original": "https://t.co/report",
+                "replacement": "https://example.invalid/report",
+                "display": "example.invalid/report",
+                "indices": [
+                  15,
+                  34
+                ]
+              },
+              {
+                "type": "bold",
+                "indices": [
+                  0,
+                  5
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    "video": {
+      "tweet_id": "1234567890123456789",
+      "syndication": {
+        "id_str": "1234567890123456789",
+        "text": "A video and a GIF.",
+        "created_at": "Thu Sep 03 12:00:00 +0000 2026",
+        "user": {
+          "name": "Example Author",
+          "screen_name": "example"
+        },
+        "photos": [],
+        "mediaDetails": [
+          {
+            "type": "video",
+            "media_url_https": "https://example.invalid/poster.jpg",
+            "video_info": {
+              "variants": [
+                {
+                  "url": "https://example.invalid/video-low.mp4",
+                  "content_type": "video/mp4",
+                  "bitrate": 256000
+                }
+              ]
+            }
+          },
+          {
+            "type": "animated_gif",
+            "media_url_https": "https://example.invalid/gif.jpg",
+            "video_info": {
+              "variants": [
+                {
+                  "url": "https://example.invalid/loop.mp4",
+                  "content_type": "video/mp4",
+                  "bitrate": 0
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "fxtwitter": {
+        "code": 200,
+        "status": {
+          "type": "status",
+          "id": "1234567890123456789",
+          "url": "https://x.com/example/status/1234567890123456789",
+          "text": "A video and a GIF.",
+          "created_at": "Thu Sep 03 12:00:00 +0000 2026",
+          "author": {
+            "name": "Example Author",
+            "screen_name": "example"
+          },
+          "media": {
+            "videos": [
+              {
+                "type": "video",
+                "url": "https://example.invalid/video.mp4",
+                "thumbnail_url": "https://example.invalid/poster.jpg",
+                "duration": 8,
+                "width": 1280,
+                "height": 720,
+                "formats": [
+                  {
+                    "url": "https://example.invalid/video.mp4",
+                    "container": "mp4",
+                    "bitrate": 1000000
+                  },
+                  {
+                    "url": "https://example.invalid/video.m3u8",
+                    "container": "m3u8"
+                  }
+                ]
+              },
+              {
+                "type": "gif",
+                "url": "https://example.invalid/loop.mp4",
+                "thumbnail_url": "https://example.invalid/gif.jpg",
+                "duration": 2,
+                "width": 400,
+                "height": 400,
+                "formats": [
+                  {
+                    "url": "https://example.invalid/loop.mp4",
+                    "container": "mp4"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    "missing_ancestor": {
+      "tweet_id": "1234567890123456789",
+      "syndication": {
+        "id_str": "1234567890123456789",
+        "text": "The last surviving post.",
+        "created_at": "Thu Sep 03 12:00:00 +0000 2026",
+        "user": {
+          "name": "Example Author",
+          "screen_name": "example"
+        },
+        "photos": [],
+        "in_reply_to_status_id_str": "404",
+        "in_reply_to_screen_name": "example"
+      },
+      "fxtwitter": {
+        "code": 200,
+        "status": {
+          "type": "status",
+          "id": "1234567890123456789",
+          "url": "https://x.com/example/status/1234567890123456789",
+          "text": "The last surviving post.",
+          "created_at": "Thu Sep 03 12:00:00 +0000 2026",
+          "author": {
+            "name": "Example Author",
+            "screen_name": "example"
+          },
+          "media": {
+            "photos": [],
+            "videos": []
+          },
+          "replying_to": {
+            "status": "404",
+            "screen_name": "example"
+          }
+        }
+      },
+      "ancestor_error": "unavailable"
+    },
+    "provider_failure": {
+      "tweet_id": "1234567890123456789",
+      "syndication": {
+        "id_str": "1234567890123456789",
+        "text": "This is the beginning of a long post whose public syndication copy stops before the author reaches the useful conclusion. The captured version should keep going through the concrete details, examples, and final recommendation, but this fixture's syndication payload ends here…",
+        "created_at": "Thu Sep 03 12:00:00 +0000 2026",
+        "user": {
+          "name": "Example Author",
+          "screen_name": "example"
+        },
+        "photos": []
+      },
+      "fxtwitter": null,
+      "transport_error": "timeout"
+    },
+    "shorter_response": {
+      "tweet_id": "1234567890123456789",
+      "syndication": {
+        "id_str": "1234567890123456789",
+        "text": "This longer original contains information that the later shorter response must never remove. ORIGINAL-END",
+        "created_at": "Thu Sep 03 12:00:00 +0000 2026",
+        "user": {
+          "name": "Example Author",
+          "screen_name": "example"
+        },
+        "photos": [
+          {
+            "url": "https://example.invalid/photo.jpg",
+            "width": 800,
+            "height": 600
+          }
+        ],
+        "mediaDetails": [
+          {
+            "type": "photo",
+            "media_url_https": "https://example.invalid/photo.jpg",
+            "ext_alt_text": "A blue square beside a red circle."
+          }
+        ],
+        "favorite_count": 0,
+        "entities": {
+          "urls": [
+            {
+              "url": "https://t.co/report",
+              "expanded_url": "https://example.invalid/report",
+              "display_url": "example.invalid/report",
+              "indices": [
+                15,
+                34
+              ]
+            }
+          ],
+          "user_mentions": [
+            {
+              "id_str": "201",
+              "name": "Mention",
+              "screen_name": "mention",
+              "indices": [
+                0,
+                8
+              ]
+            }
+          ]
+        }
+      },
+      "fxtwitter": {
+        "code": 200,
+        "status": {
+          "type": "status",
+          "id": "1234567890123456789",
+          "url": "https://x.com/example/status/1234567890123456789",
+          "text": "Short.",
+          "created_at": "Thu Sep 03 12:00:00 +0000 2026",
+          "author": {
+            "name": "Example Author",
+            "screen_name": "example"
+          },
+          "media": {
+            "photos": [
+              {
+                "type": "photo",
+                "url": "https://example.invalid/photo.jpg",
+                "altText": "A blue square beside a red circle.",
+                "width": 800,
+                "height": 600
+              },
+              {
+                "type": "photo",
+                "url": "https://example.invalid/photo2.jpg",
+                "width": 500,
+                "height": 500
+              }
+            ]
+          },
+          "likes": 0,
+          "reposts": 4,
+          "replies": 0,
+          "quotes": 0,
+          "views": null,
+          "bookmarks": null,
+          "raw_text": {
+            "text": "Photo evidence https://t.co/report",
+            "display_text_range": [
+              0,
+              34
+            ],
+            "facets": [
+              {
+                "type": "url",
+                "original": "https://t.co/report",
+                "replacement": "https://example.invalid/report",
+                "display": "example.invalid/report",
+                "indices": [
+                  15,
+                  34
+                ]
+              },
+              {
+                "type": "bold",
+                "indices": [
+                  0,
+                  5
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    "embedded_parent": {
+      "tweet_id": "300",
+      "syndication": {
+        "id_str": "300",
+        "text": "The shared child.",
+        "created_at": "Thu Sep 03 12:00:00 +0000 2026",
+        "user": {
+          "name": "Example Author",
+          "screen_name": "example"
+        },
+        "photos": [],
+        "in_reply_to_status_id_str": "1234567890123456789",
+        "in_reply_to_screen_name": "example",
+        "parent": {
+          "id_str": "1234567890123456789",
+          "text": "This is the beginning of a long post whose public syndication copy stops before the author reaches the useful conclusion. The captured version should keep going through the concrete details, examples, and final recommendation, but this fixture's syndication payload ends here…",
+          "created_at": "Thu Sep 03 12:00:00 +0000 2026",
+          "user": {
+            "name": "Example Author",
+            "screen_name": "example"
+          },
+          "photos": []
+        }
+      },
+      "fxtwitter": {
+        "code": 200,
+        "status": {
+          "type": "status",
+          "id": "300",
+          "url": "https://x.com/example/status/300",
+          "text": "The shared child.",
+          "created_at": "Thu Sep 03 12:00:00 +0000 2026",
+          "author": {
+            "name": "Example Author",
+            "screen_name": "example"
+          },
+          "media": {
+            "photos": [],
+            "videos": []
+          }
+        }
+      },
+      "parent_fxtwitter": {
+        "code": 200,
+        "status": {
+          "type": "status",
+          "id": "1234567890123456789",
+          "url": "https://x.com/example/status/1234567890123456789",
+          "text": "This is the beginning of a long post whose public syndication copy stops before the author reaches the useful conclusion. The captured version should keep going through the concrete details, examples, and final recommendation. The final paragraph survives because FxTwitter API v2 returns the complete long-post text. FULL-TEXT-END",
+          "created_at": "Thu Sep 03 12:00:00 +0000 2026",
+          "author": {
+            "name": "Example Author",
+            "screen_name": "example"
+          },
+          "media": {
+            "photos": [],
+            "videos": []
+          }
+        }
+      }
+    },
+    "quote_tombstone": {
+      "tweet_id": "1234567890123456789",
+      "syndication": {
+        "id_str": "1234567890123456789",
+        "text": "Comment on the quoted evidence. https://t.co/quote",
+        "created_at": "Thu Sep 03 12:00:00 +0000 2026",
+        "user": {
+          "name": "Example Author",
+          "screen_name": "example"
+        },
+        "photos": [],
+        "quoted_tweet": {
+          "id_str": "200",
+          "text": "Quoted opening...",
+          "note_tweet": {
+            "id": "note200"
+          },
+          "user": {
+            "name": "Quoted Author",
+            "screen_name": "quoted"
+          },
+          "favorite_count": 0,
+          "entities": {
+            "hashtags": [
+              {
+                "text": "evidence",
+                "indices": [
+                  0,
+                  9
+                ]
+              }
+            ]
+          }
+        },
+        "entities": {
+          "urls": [
+            {
+              "url": "https://t.co/quote",
+              "expanded_url": "https://x.com/quoted/status/200",
+              "display_url": "x.com/quoted/status/200",
+              "indices": [
+                32,
+                50
+              ]
+            }
+          ]
+        }
+      },
+      "fxtwitter": {
+        "code": 200,
+        "status": {
+          "type": "status",
+          "id": "1234567890123456789",
+          "url": "https://x.com/example/status/1234567890123456789",
+          "text": "Comment on the quoted evidence. https://t.co/quote",
+          "created_at": "Thu Sep 03 12:00:00 +0000 2026",
+          "author": {
+            "name": "Example Author",
+            "screen_name": "example"
+          },
+          "media": {
+            "photos": [],
+            "videos": []
+          },
+          "quote": {
+            "type": "tombstone",
+            "id": "200",
+            "reason": "unavailable",
+            "message": "Post unavailable"
+          }
+        }
+      }
+    }
+  },
+  "extension_dom": {
+    "url": "https://x.com/example/article/123456",
+    "title": "Saved article",
+    "author": "Example Author",
+    "author_handle": "example",
+    "markdown": "The article body is visible, but the DOM cannot prove that nothing was collapsed.",
+    "images": [
+      {
+        "src": "https://example.invalid/article.jpg",
+        "alt": "Article chart"
+      }
+    ]
+  }
+}
