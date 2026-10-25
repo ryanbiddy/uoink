@@ -32,7 +32,7 @@ def test_native_launcher_cleanup_and_build_contract():
     for name in ("PYTHONHOME", "PYTHONPATH", "PYTHONSTARTUP", "PYTHONUSERBASE", "PYTHONEXECUTABLE"):
         assert f'"{name}"' in source
     assert source.index("if (clear_environment())") < source.index("execv(python, args)")
-    assert 'strcmp(argv[1], "--helper")' in source
+    assert 'strcmp(user[0], "--helper")' in source
     builder = (ROOT / "scripts/mac/build_bundle.py").read_text(encoding="utf-8")
     assert '"clang", "-arch", "arm64", f"-mmacosx-version-min={MINIMUM_MACOS}"' in builder
     assert '"CFBundleExecutable": "Uoink"' in builder
@@ -46,6 +46,8 @@ def startup(monkeypatch, tmp_path):
     monkeypatch.setattr(server, "HOST", "127.0.0.1")
     monkeypatch.setattr(server, "PORT", 0)
     monkeypatch.setattr(server, "DATA_ROOT", tmp_path)
+    monkeypatch.setattr(server, "TOKEN_PATH", tmp_path / "token.txt")
+    monkeypatch.setattr(server, "_TOKEN_OWNED", False)  # main() claims it; restore after.
     # This loop outlives main() and would sync consent into later tests' stores.
     monkeypatch.setattr(server.uoink_usage, "start_sender", lambda *_: None)
     for name in ("_existing_server_responds", "_is_installed_layout", "_apply_output_root_fallback",
@@ -163,3 +165,543 @@ def test_startup_fixture_does_not_start_usage_sender(startup, monkeypatch):
     test_main_thread_handler_and_subinterpreter_refusal(
         startup, monkeypatch, "win32", False, 0)
     assert started == [], "Launcher tests must not leave a usage sender running"
+
+
+def _clang():
+    import shutil
+    import subprocess
+    if sys.platform != "darwin":
+        return None
+    try:
+        clang = subprocess.run(["xcrun", "--find", "clang"], capture_output=True, text=True, timeout=30, check=True).stdout.strip()
+        sdk = subprocess.run(["xcrun", "--show-sdk-path"], capture_output=True, text=True, timeout=30, check=True).stdout.strip()
+        return clang, sdk
+    except (OSError, subprocess.SubprocessError):
+        tools = Path("/Library/Developer/CommandLineTools")
+        clang, sdk = tools / "usr/bin/clang", tools / "SDKs/MacOSX.sdk"
+        return (str(clang), str(sdk)) if clang.is_file() and sdk.is_dir() and shutil.which(str(clang)) else None
+
+
+@pytest.fixture(scope="module")
+def launcher_app(tmp_path_factory):
+    """The real launcher.c in a fake bundle whose python3 records its argv."""
+    import subprocess
+    tools = _clang()
+    if tools is None:
+        pytest.skip("needs macOS clang")
+    app = tmp_path_factory.mktemp("launcher") / "Uoink.app/Contents"
+    (app / "MacOS").mkdir(parents=True)
+    (app / "Resources/Python/bin").mkdir(parents=True)
+    for script in ("uoink_supervisor.py", "server.py"):
+        (app / "Resources" / script).write_text("", encoding="utf-8")
+    python = app / "Resources/Python/bin/python3"
+    python.write_text('#!/bin/sh\nfor arg in "$@"; do printf \'%s\\n\' "$arg"; done\n', encoding="utf-8")
+    python.chmod(0o755)
+    subprocess.run([tools[0], "-isysroot", tools[1], "-arch", "arm64", "-mmacosx-version-min=15.0",
+                    "-Wall", "-Wextra", "-Werror", str(ROOT / "installer/mac/launcher.c"),
+                    "-o", str(app / "MacOS/Uoink")], check=True, capture_output=True, timeout=120)
+    return app
+
+
+@pytest.mark.parametrize("argv,script,forwarded", [
+    ([], "uoink_supervisor.py", ["--show-dashboard"]),
+    (["-psn_0_1234567"], "uoink_supervisor.py", ["--show-dashboard"]),
+    (["-NSDocumentRevisionsDebugMode", "YES"], "uoink_supervisor.py", ["--show-dashboard"]),
+    (["-NSQuitAlwaysKeepsWindows", "NO", "-psn_0_9"], "uoink_supervisor.py", ["--show-dashboard"]),
+    (["--helper", "--startup"], "uoink_supervisor.py", ["--startup"]),
+    (["-psn_0_1", "--helper", "--startup"], "uoink_supervisor.py", ["--startup"]),
+    (["--helper"], "uoink_supervisor.py", []),
+    (["status"], "server.py", ["status"]),
+    (["--show-dashboard"], "server.py", ["--show-dashboard"]),
+    (["mcp", "-psn_0_1"], "server.py", ["mcp"]),
+])
+def test_compiled_launcher_classifies_after_dropping_framework_args(launcher_app, argv, script, forwarded):
+    import subprocess
+    result = subprocess.run([str(launcher_app / "MacOS/Uoink"), *argv], capture_output=True, text=True, timeout=30)
+    assert result.returncode == 0, result.stderr
+    args = result.stdout.splitlines()
+    assert args[:2] == ["-B", "-s"] and Path(args[2]).name == script
+    assert args[3:] == forwarded
+
+
+@pytest.fixture
+def supervisor(monkeypatch, tmp_path):
+    import uoink_supervisor
+    monkeypatch.setattr(uoink_supervisor.sys, "platform", "darwin")
+    return uoink_supervisor
+
+
+def _next_tick(supervisor):
+    """Wait out the monotonic clock's tick (about 15.6 ms on Windows) so a new
+    open is strictly later than the window that was just shown."""
+    start = supervisor.time.monotonic()
+    while supervisor.time.monotonic() <= start:
+        supervisor.time.sleep(0.001)
+
+
+def _dashboard_helper(monkeypatch, ok=True):
+    """A loopback stand-in for the resident helper's /helper/dashboard route."""
+    import json
+    import uoink_install_isolation
+    seen = []
+
+    class Handler(BaseHTTPRequestHandler):
+        def do_POST(self):
+            seen.append((self.path, self.headers.get("X-Uoink-Token"),
+                         json.loads(self.rfile.read(int(self.headers["Content-Length"])))))
+            body = json.dumps({"ok": ok}).encode()
+            self.send_response(200)
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+
+        def log_message(self, *args):
+            pass
+
+    httpd = HTTPServer(("127.0.0.1", 0), Handler)
+    threading.Thread(target=httpd.serve_forever, kwargs={"poll_interval": 0.01}, daemon=True).start()
+    monkeypatch.setattr(uoink_install_isolation, "helper_url",
+                        lambda path: f"http://127.0.0.1:{httpd.server_port}{path}")
+    return httpd, seen
+
+
+def test_duplicate_darwin_launch_asks_resident_helper(supervisor, monkeypatch, tmp_path):
+    httpd, seen = _dashboard_helper(monkeypatch)
+    spawned = []
+    monkeypatch.setattr(supervisor.subprocess, "Popen", lambda *a, **k: spawned.append(a))
+    (tmp_path / "token.txt").write_text("resident-token\n", encoding="utf-8")
+    try:
+        assert supervisor.show_running_dashboard(tmp_path) is True
+    finally:
+        httpd.shutdown()
+        httpd.server_close()
+    assert seen == [("/helper/dashboard", "resident-token", {"settings": False})]
+    assert spawned == []  # No untracked uoink_dashboard.py on Darwin.
+
+
+@pytest.mark.parametrize("token", [None, b"", b"\xff\xfe"])
+def test_duplicate_darwin_launch_never_mints_a_token(supervisor, monkeypatch, tmp_path, token):
+    httpd, seen = _dashboard_helper(monkeypatch)
+    opened = []
+    import webbrowser
+    monkeypatch.setattr(webbrowser, "open", lambda url: opened.append(url) or False)
+    monkeypatch.setattr(supervisor.subprocess, "Popen", lambda *a, **k: pytest.fail("spawned a dashboard"))
+    if token is not None:
+        (tmp_path / "token.txt").write_bytes(token)
+    try:
+        # The real webbrowser.open result is reported, not an assumed success.
+        assert supervisor.show_running_dashboard(tmp_path) is False
+    finally:
+        httpd.shutdown()
+        httpd.server_close()
+    assert seen == [] and len(opened) == 1 and opened[0].endswith("/dashboard")
+    assert (tmp_path / "token.txt").read_bytes() == token if token is not None else not (tmp_path / "token.txt").exists()
+
+
+def test_duplicate_darwin_launch_falls_back_when_helper_refuses(supervisor, monkeypatch, tmp_path):
+    httpd, seen = _dashboard_helper(monkeypatch, ok=False)
+    import webbrowser
+    monkeypatch.setattr(webbrowser, "open", lambda url: True)
+    (tmp_path / "token.txt").write_text("stale-token", encoding="utf-8")
+    try:
+        assert supervisor.show_running_dashboard(tmp_path) is True
+    finally:
+        httpd.shutdown()
+        httpd.server_close()
+    assert len(seen) == 1
+
+
+@pytest.mark.parametrize("platform", ["win32", "linux"])
+def test_duplicate_launch_off_darwin_still_spawns_dashboard_script(monkeypatch, tmp_path, platform):
+    import uoink_supervisor
+    monkeypatch.setattr(uoink_supervisor.sys, "platform", platform)
+    spawned = []
+    monkeypatch.setattr(uoink_supervisor.subprocess, "Popen", lambda args, **k: spawned.append(args))
+    assert uoink_supervisor.show_running_dashboard(tmp_path) is True
+    assert len(spawned) == 1 and spawned[0][1].endswith("uoink_dashboard.py")
+
+
+@pytest.mark.parametrize("platform,command_flag,first_args", [
+    ("darwin", False, ["--show-dashboard"]),
+    ("win32", True, []),
+])
+def test_show_dashboard_reaches_only_the_first_darwin_helper(monkeypatch, tmp_path, platform, command_flag, first_args):
+    import uoink_supervisor
+    captured = {}
+
+    class Fake:
+        owned = True
+
+        def __init__(self, root, command, url, **kw):
+            captured.update(command=command, **kw)
+
+        def run(self):
+            return 0
+
+    monkeypatch.setattr(uoink_supervisor.sys, "platform", platform)
+    monkeypatch.setattr(uoink_supervisor, "Supervisor", Fake)
+    monkeypatch.setattr(uoink_supervisor, "data_root", lambda: tmp_path)
+    monkeypatch.setattr(uoink_supervisor, "login_session", lambda: "session")
+    resident = ["--resident"] if platform == "darwin" else []
+    assert uoink_supervisor.main([*resident, "--show-dashboard"]) == 0
+    assert ("--show-dashboard" in captured["command"]) is command_flag
+    assert captured["first_args"] == first_args
+
+
+def test_crash_restarts_do_not_repeat_first_only_args(monkeypatch, tmp_path):
+    import io
+    import uoink_supervisor
+    commands = []
+
+    class Child:
+        pid = 4242
+
+        def __init__(self):
+            self.stdout = io.BytesIO(b"")
+
+        def poll(self):
+            return 1
+
+        def wait(self, timeout=None):
+            return 1
+
+    monkeypatch.setattr(uoink_supervisor.subprocess, "Popen", lambda command, **k: commands.append(command) or Child())
+    supervisor = uoink_supervisor.Supervisor(
+        tmp_path, ["python", "server.py"], "http://127.0.0.1:1/health", session="s",
+        first_args=["--show-dashboard"], backoff=(0, 0), poll=0, notify=lambda state: None,
+        sleep=lambda seconds: None)
+    assert supervisor.loop() == 0
+    assert commands == [["python", "server.py", "--show-dashboard"],
+                        ["python", "server.py"], ["python", "server.py"]]
+
+
+@pytest.mark.parametrize("splash,expected", [(True, []), (False, ["launch-flag"])])
+def test_first_run_splash_replaces_launch_dashboard_on_darwin(startup, monkeypatch, splash, expected):
+    server = startup
+    from helper import mac_ui
+    reasons = []
+    monkeypatch.setattr(server, "_is_installed_layout", lambda: True)
+    monkeypatch.setattr(mac_ui, "start_menu", lambda **k: SimpleNamespace(pid=1))
+    monkeypatch.setattr(mac_ui, "spawn", lambda *a: None)
+    monkeypatch.setattr(server, "_splash_should_spawn", lambda _: splash)
+    monkeypatch.setattr(server, "_spawn_dashboard_window", lambda **k: reasons.append(k["reason"]) or True)
+
+    class Immediate(HTTPServer):
+        def serve_forever(self, poll_interval=0.5):
+            pass
+
+    monkeypatch.setattr(server, "_YoinkHTTPServer", lambda address, _h: Immediate(address, BaseHTTPRequestHandler))
+    errors = []
+    worker = threading.Thread(target=lambda: _run(server, errors), daemon=True)
+    worker.start()
+    worker.join(10)
+    assert not worker.is_alive() and not errors
+    assert reasons == expected
+    assert (server.TOKEN_PATH).read_text(encoding="utf-8") == server.TOKEN
+
+
+def _run(server, errors):
+    try:
+        server.main(show_dashboard=True)
+    except BaseException as exc:
+        errors.append(exc)
+
+
+def test_menu_bar_process_handles_the_reopen_event():
+    source = (ROOT / "helper/mac_menubar.py").read_text(encoding="utf-8")
+    assert "def applicationShouldHandleReopen_hasVisibleWindows_(self, app, visible):" in source
+    assert source.index("app.setDelegate_(reopen)") < source.index("app.run()")
+    try:
+        import AppKit
+    except ImportError:
+        return  # Portable runners lack PyObjC; the bundled interpreter has it.
+    from helper import mac_menubar
+    done = threading.Event()
+    delegate = mac_menubar.reopen_delegate(SimpleNamespace(dashboard=done.set))
+    assert delegate.applicationShouldHandleReopen_hasVisibleWindows_(AppKit.NSApp, False) is False
+    assert done.wait(2)
+
+
+
+def test_darwin_open_hands_off_to_a_detached_resident(supervisor, monkeypatch, tmp_path):
+    """LaunchServices must never be left holding a long-lived process to reopen."""
+    spawned = []
+    monkeypatch.setattr(supervisor, "data_root", lambda: tmp_path)
+    monkeypatch.setattr(supervisor, "Supervisor", lambda *a, **k: pytest.fail("stayed resident"))
+    monkeypatch.setattr(supervisor.subprocess, "Popen", lambda args, **kw: spawned.append((args, kw)))
+    assert supervisor.main(["--show-dashboard"]) == 0
+    (args, kw), = spawned
+    assert Path(args[3]).name == "uoink_supervisor.py" and args[4:7] == ["--resident", "--show-dashboard", "--opened-at"]
+    assert abs(float(args[7]) - supervisor.time.monotonic()) < 5
+    assert kw["start_new_session"] is True and kw["stdin"] is supervisor.subprocess.DEVNULL
+
+
+@pytest.mark.parametrize("state", ["running", "starting", "backoff", "crash_loop"])
+def test_darwin_open_while_resident_asks_or_queues(supervisor, monkeypatch, tmp_path, state):
+    shown = []
+    monkeypatch.setattr(supervisor, "data_root", lambda: tmp_path)
+    monkeypatch.setattr(supervisor, "show_running_dashboard", lambda root: shown.append(root) or True)
+    monkeypatch.setattr(supervisor.subprocess, "Popen", lambda *a, **k: pytest.fail("started a second resident"))
+    supervisor.write_json(tmp_path / supervisor.STATE_FILE, {"status": state})
+    with supervisor.admission(tmp_path) as owned:  # The resident holds the lock.
+        assert owned
+        assert supervisor.main(["--show-dashboard"]) == 0
+    # Only the resident consumes opens, now or once its helper is ready.
+    assert shown == []
+    assert supervisor.take_dashboard_request(tmp_path) is not None
+
+
+def test_darwin_open_with_helper_but_no_supervisor_asks_that_helper(supervisor, monkeypatch, tmp_path):
+    asked = []
+    monkeypatch.setattr(supervisor, "data_root", lambda: tmp_path)
+    monkeypatch.setattr(supervisor, "request_dashboard", lambda root: asked.append(root) or True)
+    monkeypatch.setattr(supervisor.subprocess, "Popen", lambda *a, **k: pytest.fail("duplicated a live helper"))
+    assert supervisor.main(["--show-dashboard"]) == 0
+    assert asked == [tmp_path]
+
+
+def test_dashboard_request_is_taken_once_and_expires(supervisor, monkeypatch, tmp_path):
+    assert supervisor.take_dashboard_request(tmp_path) is None
+    supervisor.request_dashboard_later(tmp_path)
+    assert supervisor.take_dashboard_request(tmp_path) is not None
+    assert supervisor.take_dashboard_request(tmp_path) is None
+    supervisor.write_json(tmp_path / supervisor.DASHBOARD_REQUEST,
+                          {"requested_at": supervisor.time.monotonic() - supervisor.REQUEST_WINDOW - 1})
+    assert supervisor.take_dashboard_request(tmp_path) is None
+    (tmp_path / supervisor.DASHBOARD_REQUEST).write_text("not json", encoding="utf-8")
+    assert supervisor.take_dashboard_request(tmp_path) is None
+    assert not (tmp_path / supervisor.DASHBOARD_REQUEST).exists()
+
+
+@pytest.mark.parametrize("first_args,launch_flag", [([], False), (["--show-dashboard"], True)])
+def test_ready_callback_runs_on_every_helper_start(monkeypatch, tmp_path, first_args, launch_flag):
+    import io
+    import uoink_supervisor
+    ready = []
+
+    class Child:
+        pid = 4242
+
+        def __init__(self):
+            self.stdout, self.polls = io.BytesIO(b""), 0
+
+        def poll(self):
+            self.polls += 1
+            return None if self.polls < 6 else 1
+
+        def wait(self, timeout=None):
+            return 1
+
+    starts = []
+    monkeypatch.setattr(uoink_supervisor.subprocess, "Popen", lambda command, **k: starts.append(len(ready)) or Child())
+    supervisor = uoink_supervisor.Supervisor(
+        tmp_path, ["python", "server.py"], "http://127.0.0.1:1/health", session="s",
+        first_args=first_args, on_ready=ready.append, backoff=(0,), poll=0,
+        probe=lambda *a: True, notify=lambda state: None, sleep=lambda seconds: None)
+    assert supervisor.loop() == 0
+    # Polled every tick while ready, through crash restarts; only the first ready
+    # tick of the launch flag's start says the window is already open.
+    assert len(starts) == 2 and all(ready[at:] for at in starts)
+    assert ready.count(True) == int(launch_flag) and ready[0] is launch_flag
+
+
+def test_darwin_ready_callback_honors_a_waiting_open(supervisor, monkeypatch, tmp_path):
+    captured, shown = {}, []
+
+    class Fake:
+        def __init__(self, root, command, url, **kw):
+            captured.update(kw)
+            self.owned = True
+
+        def run(self):
+            return 0
+
+    monkeypatch.setattr(supervisor, "Supervisor", Fake)
+    monkeypatch.setattr(supervisor, "data_root", lambda: tmp_path)
+    monkeypatch.setattr(supervisor, "login_session", lambda: "session")
+    monkeypatch.setattr(supervisor, "show_running_dashboard", lambda root: shown.append(root))
+    assert supervisor.main(["--startup"]) == 0
+    on_ready = captured["on_ready"]
+    supervisor.request_dashboard_later(tmp_path)
+    on_ready(True)  # The launch flag already opened a window.
+    _next_tick(supervisor)
+    supervisor.request_dashboard_later(tmp_path)
+    on_ready(False)
+    for _ in range(50):
+        if shown:
+            break
+        supervisor.time.sleep(0.02)
+    assert shown == [tmp_path] and not (tmp_path / supervisor.DASHBOARD_REQUEST).exists()
+
+
+def test_resident_that_loses_admission_leaves_its_open_queued(supervisor, monkeypatch, tmp_path):
+    class Lost:
+        owned = False
+
+        def __init__(self, *a, **k):
+            pass
+
+        def run(self):
+            return 0
+
+    monkeypatch.setattr(supervisor, "Supervisor", Lost)
+    monkeypatch.setattr(supervisor, "data_root", lambda: tmp_path)
+    monkeypatch.setattr(supervisor, "login_session", lambda: "session")
+    monkeypatch.setattr(supervisor.time, "sleep", lambda seconds: None)
+    supervisor.write_json(tmp_path / supervisor.STATE_FILE, {"status": "starting"})
+    opened = supervisor.time.monotonic() - 2
+    assert supervisor.main(["--resident", "--show-dashboard", "--opened-at", repr(opened)]) == 0
+    # Queued with the user's open time, so a winner's launch window absorbs it.
+    assert supervisor.take_dashboard_request(tmp_path) == opened
+
+
+def test_late_queued_open_from_before_the_launch_window_is_absorbed(supervisor, monkeypatch, tmp_path):
+    captured, shown = {}, []
+
+    class Fake:
+        owned = True
+
+        def __init__(self, root, command, url, **kw):
+            captured.update(kw)
+
+        def run(self):
+            return 0
+
+    monkeypatch.setattr(supervisor, "Supervisor", Fake)
+    monkeypatch.setattr(supervisor, "data_root", lambda: tmp_path)
+    monkeypatch.setattr(supervisor, "login_session", lambda: "session")
+    monkeypatch.setattr(supervisor, "show_running_dashboard", lambda root: shown.append(root))
+    before = supervisor.time.monotonic() - 1
+    assert supervisor.main(["--resident", "--show-dashboard", "--opened-at", repr(before)]) == 0
+    on_ready = captured["on_ready"]
+    on_ready(True)  # The launch flag's window is up.
+    supervisor.request_dashboard_later(tmp_path, before)  # A losing resident, late.
+    on_ready(False)
+    assert shown == []
+    _next_tick(supervisor)
+    supervisor.request_dashboard_later(tmp_path)  # A new open after the window.
+    on_ready(False)
+    for _ in range(50):
+        if shown:
+            break
+        supervisor.time.sleep(0.02)
+    assert shown == [tmp_path]
+
+
+def test_orphan_helper_is_asked_while_admission_is_held(supervisor, monkeypatch, tmp_path):
+    held = []
+
+    def ask(root):
+        with supervisor.admission(root) as owned:
+            held.append(not owned)
+        return True
+
+    monkeypatch.setattr(supervisor, "data_root", lambda: tmp_path)
+    monkeypatch.setattr(supervisor, "request_dashboard", ask)
+    monkeypatch.setattr(supervisor.subprocess, "Popen", lambda *a, **k: pytest.fail("spawned a resident"))
+    assert supervisor.main(["--show-dashboard"]) == 0
+    assert held == [True]
+
+
+def test_darwin_supervisor_retries_admission_held_by_an_opener(supervisor, monkeypatch, tmp_path):
+    runs = []
+
+    class Briefly:
+        def __init__(self, *a, **k):
+            self.owned = False
+
+        def run(self):
+            runs.append(1)
+            self.owned = len(runs) == 3
+            return 0
+
+    monkeypatch.setattr(supervisor, "Supervisor", Briefly)
+    monkeypatch.setattr(supervisor, "data_root", lambda: tmp_path)
+    monkeypatch.setattr(supervisor, "login_session", lambda: "session")
+    monkeypatch.setattr(supervisor.time, "sleep", lambda seconds: None)
+    assert supervisor.main(["--startup"]) == 0
+    assert len(runs) == 3
+
+
+def test_resident_and_login_launches_still_supervise(supervisor, monkeypatch, tmp_path):
+    runs = []
+
+    class Fake:
+        owned = True
+
+        def __init__(self, root, command, url, **kw):
+            runs.append(kw)
+
+        def run(self):
+            return 0
+
+    monkeypatch.setattr(supervisor, "Supervisor", Fake)
+    monkeypatch.setattr(supervisor, "data_root", lambda: tmp_path)
+    monkeypatch.setattr(supervisor, "login_session", lambda: "session")
+    monkeypatch.setattr(supervisor.subprocess, "Popen", lambda *a, **k: pytest.fail("detached again"))
+    assert supervisor.main(["--resident", "--show-dashboard"]) == 0
+    assert supervisor.main(["--startup"]) == 0
+    assert [run["first_args"] for run in runs] == [["--show-dashboard"], []]
+    assert [run["startup"] for run in runs] == [False, True]
+
+
+def test_one_queued_open_is_claimed_exactly_once(supervisor, tmp_path):
+    supervisor.request_dashboard_later(tmp_path)
+    barrier, results = threading.Barrier(8), []
+
+    def claim():
+        barrier.wait()
+        results.append(supervisor.take_dashboard_request(tmp_path))
+
+    workers = [threading.Thread(target=claim) for _ in range(8)]
+    for worker in workers:
+        worker.start()
+    for worker in workers:
+        worker.join(5)
+    assert sum(result is not None for result in results) == 1
+    assert list(tmp_path.iterdir()) == []
+
+
+def test_resident_never_retries_admission_after_losing(supervisor, monkeypatch, tmp_path):
+    runs = []
+
+    class Lost:
+        owned = False
+
+        def __init__(self, *a, **k):
+            pass
+
+        def run(self):
+            runs.append(1)
+            return 0
+
+    monkeypatch.setattr(supervisor, "Supervisor", Lost)
+    monkeypatch.setattr(supervisor, "data_root", lambda: tmp_path)
+    monkeypatch.setattr(supervisor, "login_session", lambda: "session")
+    monkeypatch.setattr(supervisor.time, "sleep", lambda seconds: pytest.fail("a resident waited to take over"))
+    assert supervisor.main(["--resident", "--show-dashboard"]) == 0
+    assert runs == [1]  # Taking over later could undo the winner's Quit.
+
+
+def test_wall_clock_corrections_do_not_reorder_opens(supervisor, monkeypatch, tmp_path):
+    monkeypatch.setattr(supervisor.time, "time", lambda: 0.0)  # A large backward jump.
+    supervisor.request_dashboard_later(tmp_path)
+    assert supervisor.take_dashboard_request(tmp_path) is not None
+
+
+def test_late_handoff_never_replaces_a_newer_open(supervisor, tmp_path):
+    supervisor.request_dashboard_later(tmp_path)
+    newer = supervisor.read_json(tmp_path / supervisor.DASHBOARD_REQUEST)["requested_at"]
+    supervisor.request_dashboard_later(tmp_path, newer - 10)
+    assert supervisor.take_dashboard_request(tmp_path) == newer
+
+
+def test_a_new_login_drops_opens_from_an_earlier_session(monkeypatch, tmp_path):
+    import uoink_supervisor
+    uoink_supervisor.write_json(tmp_path / uoink_supervisor.STATE_FILE, {"session": "old-boot", "status": "stopped"})
+    uoink_supervisor.request_dashboard_later(tmp_path)
+    supervisor = uoink_supervisor.Supervisor(tmp_path, ["python"], "http://127.0.0.1:1/health", session="new-boot")
+    monkeypatch.setattr(supervisor, "loop", lambda: 0)
+    monkeypatch.setattr(uoink_supervisor.sys, "platform", "linux")
+    assert supervisor.run() == 0
+    assert not (tmp_path / uoink_supervisor.DASHBOARD_REQUEST).exists()
