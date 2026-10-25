@@ -258,6 +258,7 @@ def test_scheduler_advances_capture_only_through_the_ledger_for_a_consented_sour
     monkeypatch.setattr(server, "_get_index", lambda: idx)
     monkeypatch.setattr(server, "_source_service", lambda: service)
     toasts = []
+    monkeypatch.setattr(server, "_desktop_alerts_for_results_only", lambda: False)  # Windows and Linux
     monkeypatch.setattr(server, "maybe_toast",
                         lambda title, body, **_kw: toasts.append((title, body)))
     ingests_before = server._heartbeat_payload()["counts"]["ingests"]

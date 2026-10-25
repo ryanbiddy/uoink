@@ -10716,8 +10716,12 @@ def _poll_source_for_watch(claim: dict) -> dict:
     result = service.run_claimed_poll(claim)
     inserted = int(result.get("inserted") or 0)
     if result.get("ok") and inserted and result.get("enrollment"):
-        maybe_toast("New source items",
-                    f"{inserted} new item(s) discovered from a watched source.")
+        title, body = "New source items", f"{inserted} new item(s) discovered from a watched source."
+        if _desktop_alerts_for_results_only():
+            # Informational, not a capture result: Activity only.
+            _queue_dashboard_notification(title, body, reason="macOS desktop alerts are kept for results")
+        else:
+            maybe_toast(title, body)
     return result
 
 
@@ -20166,6 +20170,15 @@ def _bundled_icon_path() -> str | None:
     return str(candidate) if candidate.is_file() else None
 
 
+def _desktop_alerts_for_results_only() -> bool:
+    """macOS desktop alerts are kept for capture results and helper failures.
+
+    Until Uoink has its own notifier, osascript alerts are credited to Script
+    Editor, and a Mac launch already opens the dashboard or splash.
+    """
+    return sys.platform == "darwin"
+
+
 def maybe_toast(title: str, body: str, icon_path: str | None = None) -> bool:
     """Show a courteous desktop notification or queue it in Activity.
 
@@ -20628,6 +20641,8 @@ def main(*, show_dashboard: bool = False):
     # a settings flag so it never repeats.
     if splash_spawned:
         log.info("toast: skipped regular ready toast while first-run splash is visible")
+    elif _desktop_alerts_for_results_only():
+        log.info("toast: skipped ready toast on macOS")
     elif not _maybe_post_migration_toast():
         maybe_toast(
             "Uoink is Active & Ready ✓",
