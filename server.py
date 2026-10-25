@@ -8303,13 +8303,16 @@ def _mask_anthropic_key(key: str) -> str | None:
     return (key[:6] + "…" + key[-4:]) if len(key) >= 12 else "set"
 
 
-# Autostart Run key reuses the same HKCU value the installer writes.
-_AUTOSTART_SUBKEY = r"Software\Microsoft\Windows\CurrentVersion\Run"
-_AUTOSTART_VALUE = "Uoink"
+# Windows login startup has one owner: the per-user supervisor task.
 
 
-def _autostart_command() -> str:
-    return f'"{HERE / "python" / "pythonw.exe"}" "{HERE / "server.py"}"'
+def _watchdog_setting(mode: str):
+    if _install_isolation.current_binding() is not None:
+        return None
+    return subprocess.run(
+        ["powershell.exe", "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass",
+         "-File", str(HERE / "scripts" / "install-watchdog.ps1"), "-InstallDir", str(HERE), "-Mode", mode],
+        capture_output=True, text=True, timeout=30, creationflags=0x08000000)
 
 
 def _autostart_enabled() -> bool | None:
@@ -8323,23 +8326,14 @@ def _autostart_enabled() -> bool | None:
     if sys.platform != "win32":
         return None
     try:
-        import winreg
-    except Exception:
-        return None
-    try:
-        with winreg.OpenKey(winreg.HKEY_CURRENT_USER, _AUTOSTART_SUBKEY, 0,
-                            winreg.KEY_READ) as k:
-            try:
-                winreg.QueryValueEx(k, _AUTOSTART_VALUE)
-                return True
-            except FileNotFoundError:
-                return False
-    except OSError:
+        result = _watchdog_setting("Status")
+        return result.stdout.strip() == "enabled" if result and result.returncode == 0 else None
+    except (OSError, subprocess.SubprocessError):
         return None
 
 
 def _set_autostart(enabled: bool) -> bool | None:
-    """Set the Windows Run value or Mac LaunchAgent. None means unsupported."""
+    """Set the Windows task or Mac LaunchAgent. None means unsupported."""
     if sys.platform == "darwin":
         from helper import mac_lifecycle
         try:
@@ -8351,23 +8345,9 @@ def _set_autostart(enabled: bool) -> bool | None:
     if sys.platform != "win32":
         return None
     try:
-        import winreg
-    except Exception:
-        return None
-    try:
-        with winreg.OpenKey(winreg.HKEY_CURRENT_USER, _AUTOSTART_SUBKEY, 0,
-                            winreg.KEY_READ | winreg.KEY_SET_VALUE) as k:
-            if enabled:
-                winreg.SetValueEx(k, _AUTOSTART_VALUE, 0, winreg.REG_SZ,
-                                  _autostart_command())
-            else:
-                try:
-                    winreg.DeleteValue(k, _AUTOSTART_VALUE)
-                except FileNotFoundError:
-                    pass
-        log.info("autostart %s", "enabled" if enabled else "disabled")
-        return True
-    except OSError as e:
+        result = _watchdog_setting("Register" if enabled else "Disable")
+        return result.returncode == 0 if result else None
+    except (OSError, subprocess.SubprocessError) as e:
         log.warning("autostart toggle failed: %s", e)
         return False
 
@@ -13696,6 +13676,7 @@ class Handler(BaseHTTPRequestHandler):
         # paths return the same payload so existing clients keep working.
         bare = self.path.split("?", 1)[0]
         if bare == "/ping" or bare == "/health":
+            import uoink_supervisor
             # Public liveness probe -- intentionally unauthenticated.
             log.debug("GET %s from %s -> ok", bare, self.client_address[0])
             settings = _read_settings() or {}
@@ -13705,6 +13686,9 @@ class Handler(BaseHTTPRequestHandler):
             return self._send_json(200, {
                 "ok": True,
                 "version": VERSION,
+                "pid": os.getpid(),
+                "supervisor_run_id": os.environ.get("UOINK_SUPERVISOR_RUN_ID"),
+                "helper_recovery": uoink_supervisor.status(DATA_ROOT),
                 "migration_version": _active_migration_version,
                 "migration_pending": (
                     _active_migration_version < latest_migration
@@ -16410,6 +16394,11 @@ class Handler(BaseHTTPRequestHandler):
         expect the connection to drop right after this response."""
         if not self._require_token():
             return
+        import uoink_supervisor
+        try:
+            uoink_supervisor.request_stop(DATA_ROOT)
+        except OSError:
+            return self._send_json(500, {"ok": False, "error": "Could not save the stop request. Try Quit again."})
         self._send_json(200, {"ok": True, "stopping": True})
         threading.Thread(target=self.server.shutdown, daemon=True).start()
 
@@ -20441,6 +20430,8 @@ def main(*, show_dashboard: bool = False):
             import uoink_tray
 
             def _tray_stop():
+                import uoink_supervisor
+                uoink_supervisor.request_stop(DATA_ROOT)
                 # Called from the tray's daemon thread; shut the server down on
                 # a separate thread so serve_forever() unblocks and main()
                 # returns (atexit then clears the PID file).
@@ -21061,6 +21052,8 @@ def doctor_payload() -> dict:
     months while every other check reported green) and C-05 added
     path_integrity (a green doctor while every content action 404s was the
     exact failure mode on the machine that motivated the fix)."""
+    import uoink_supervisor
+    recovery = uoink_supervisor.status(DATA_ROOT)
     helper_health = _helper_health_status()
     schema_migration = index.schema_migration_status(INDEX_PATH)
     # Heartbeat semantics (2026-09-04): the doctor reads the same
@@ -21075,8 +21068,10 @@ def doctor_payload() -> dict:
             and not schema_migration.get("pending")
             and not schema_migration.get("error")
             and not heartbeat.get("stale")
+            and recovery.get("status") not in {"crash_loop", "supervisor_error", "unreadable"}
         ),
         "helper_health": helper_health,
+        "helper_recovery": recovery,
         "heartbeat": heartbeat,
         "schema_migration": schema_migration,
         "diagnose": _diagnose_payload(),
@@ -21204,6 +21199,15 @@ def run_cli(argv: list[str]) -> int:
                              "error": f"{explicit} is not a folder"})
                 return 1
         _print_json(rebuild_index_from_disk(root=explicit))
+        return 0
+    if (_is_installed_layout() and not os.environ.get("UOINK_SUPERVISOR_RUN_ID")
+            and _install_isolation.current_binding() is None):
+        # Old Run values and shortcuts may still invoke server.py during an
+        # upgrade. They join the same supervisor lock before starting a helper.
+        # Replace this process so its imported server logger cannot hold the
+        # child's rotating log open on Windows.
+        os.execv(sys.executable, [sys.executable, "-B", "-s", str(HERE / "uoink_supervisor.py"),
+                                 *(["--show-dashboard"] if "--show-dashboard" in argv else [])])
         return 0
     main(show_dashboard="--show-dashboard" in argv)
     return 0

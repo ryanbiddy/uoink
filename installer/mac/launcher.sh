@@ -3,7 +3,11 @@
 set -euo pipefail
 for variable in "${!DYLD_@}"; do unset "$variable"; done
 unset PYTHONHOME PYTHONPATH PYTHONSTARTUP PYTHONUSERBASE PYTHONEXECUTABLE
-if [[ "${1:-}" == --helper ]]; then shift; fi
+entry=server.py
+if [[ $# == 0 || "${1:-}" == --helper ]]; then
+  entry=uoink_supervisor.py
+  if [[ "${1:-}" == --helper ]]; then shift; fi
+fi
 contents="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 python="$contents/Resources/Python/bin/python3"
 if [[ ! -x "$python" ]]; then
@@ -12,4 +16,4 @@ if [[ ! -x "$python" ]]; then
 fi
 export PYTHONDONTWRITEBYTECODE=1 PYTHONNOUSERSITE=1
 cd "$contents/Resources"
-exec "$python" -B -s "$contents/Resources/server.py" "$@"
+exec "$python" -B -s "$contents/Resources/$entry" "$@"

@@ -10,17 +10,20 @@
     <array>
         <string>__APP_PATH__/Contents/MacOS/Uoink</string>
         <string>--helper</string>
+        <string>--startup</string>
     </array>
     <!-- Start at login. -->
     <key>RunAtLoad</key>
     <true/>
     <key>KeepAlive</key>
-    <false/>
+    <dict><key>SuccessfulExit</key><false/></dict>
+    <key>ThrottleInterval</key>
+    <integer>30</integer>
     <key>ProcessType</key>
     <string>Background</string>
     <key>StandardOutPath</key>
-    <string>__HOME__/Library/Logs/Uoink/launchd.out.log</string>
+    <string>/dev/null</string>
     <key>StandardErrorPath</key>
-    <string>__HOME__/Library/Logs/Uoink/launchd.err.log</string>
+    <string>/dev/null</string>
 </dict>
 </plist>

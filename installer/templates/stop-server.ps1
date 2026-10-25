@@ -12,6 +12,13 @@
 # visible confirmation they got on start.
 
 $installDir = $PSScriptRoot
+# Save intent before a forced stop, including a helper that cannot answer HTTP.
+$recoveryPython = Join-Path $installDir 'python\python.exe'
+$recoveryScript = Join-Path $installDir 'uoink_supervisor.py'
+if (Test-Path -LiteralPath $recoveryScript) {
+    & $recoveryPython $recoveryScript --stop
+    if ($LASTEXITCODE -ne 0) { throw 'Could not save the stop request. No helper was stopped.' }
+}
 $pidFile = Join-Path $installDir 'server.pid'
 $stoppedAny = $false
 $notificationsEnabled = $true

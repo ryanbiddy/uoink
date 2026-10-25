@@ -329,14 +329,16 @@ def uoink_playlist(args: dict[str, Any]) -> dict[str, Any]:
 
 
 def get_job_status(args: dict[str, Any]) -> dict[str, Any]:
+    import uoink_supervisor
+    recovery = uoink_supervisor.status()
     b = _b()
     job_id = args.get("job_id")
     if not isinstance(job_id, str) or not b._is_valid_job_id(job_id):
-        return _err("job id invalid")
+        return {**_err("job id invalid"), "helper_recovery": recovery}
     job = b._get_public_job(job_id)
     if not job:
-        return _err("job not found")
-    return _ok(job=job)
+        return {**_err("job not found"), "helper_recovery": recovery}
+    return _ok(job=job, helper_recovery=recovery)
 
 
 def cancel_job(args: dict[str, Any]) -> dict[str, Any]:

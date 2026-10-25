@@ -61,6 +61,10 @@ class JsApi:
     dashboard HTML doesn't call into native; expose open_url for future
     external-link clicks so Codex's feature-detection has something to find."""
 
+    def helper_recovery(self):
+        import uoink_supervisor
+        return uoink_supervisor.status()
+
     def open_url(self, url):
         try:
             webbrowser.open(url)

@@ -20,6 +20,8 @@
 # are logged to %TEMP%\uoink-upgrade-prep.log for post-mortem if a user
 # reports the new helper still not starting.
 
+param([string]$InstallDir = (Join-Path $env:LOCALAPPDATA 'Uoink'))
+
 $ErrorActionPreference = 'Continue'
 $logPath = Join-Path $env:TEMP 'uoink-upgrade-prep.log'
 
@@ -56,6 +58,13 @@ function Wait-PortFree($timeoutSeconds) {
     return -not (Test-Port5179Bound)
 }
 
+# Stop retrying before probing the old helper or replacing installed files.
+# Older installs have no supervisor and continue through the existing flow.
+$recoveryScript = Join-Path $InstallDir 'uoink_supervisor.py'
+if (Test-Path -LiteralPath $recoveryScript) {
+    & (Join-Path $InstallDir 'python\python.exe') $recoveryScript --stop
+    if ($LASTEXITCODE -ne 0) { throw 'Could not pause helper recovery before upgrade.' }
+}
 Write-PrepLog '==== upgrade prep start ===='
 Write-PrepLog ("LOCALAPPDATA={0}" -f $env:LOCALAPPDATA)
 $portStart = Test-Port5179Bound

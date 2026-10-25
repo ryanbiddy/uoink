@@ -123,6 +123,7 @@ Source: "staging\server.py"; DestDir: "{app}"; Flags: ignoreversion
 ; System-tray module (Tier 1 v2.1.1) -- imported by server.py at boot on
 ; installed builds. Optional at runtime (degrades if pystray is unavailable).
 Source: "staging\uoink_tray.py"; DestDir: "{app}"; Flags: ignoreversion
+Source: "staging\uoink_supervisor.py"; DestDir: "{app}"; Flags: ignoreversion
 ; Tier 2 GUI: pywebview splash + dashboard window subprocess entrypoints. The
 ; tray's left-click spawns uoink_dashboard.py; server.py spawns uoink_splash.py
 ; on the first boot. Optional at runtime (graceful degradation if pywebview
@@ -259,7 +260,7 @@ Source: "staging\upgrade_prep.ps1"; Flags: dontcopy
 ; think in servers, and this matches the README + finish-page wording.
 Name: "{group}\Uoink"; \
   Filename: "{app}\python\pythonw.exe"; \
-  Parameters: """{app}\server.py"" --show-dashboard"; \
+  Parameters: """{app}\uoink_supervisor.py"" --show-dashboard"; \
   WorkingDir: "{app}"; \
   IconFilename: "{app}\uoink.ico"; \
   Comment: "Start Uoink"; \
@@ -313,7 +314,7 @@ Name: "{group}\Uninstall Uoink Isolated"; \
 ; shortcut but never created one.
 Name: "{autodesktop}\Uoink"; \
   Filename: "{app}\python\pythonw.exe"; \
-  Parameters: """{app}\server.py"" --show-dashboard"; \
+  Parameters: """{app}\uoink_supervisor.py"" --show-dashboard"; \
   WorkingDir: "{app}"; \
   IconFilename: "{app}\uoink.ico"; \
   Comment: "Start Uoink"; \
@@ -329,26 +330,22 @@ Name: "{autodesktop}\Uoink Isolated"; \
   Tasks: desktopicon; \
   Check: IsolatedInstall
 
-[Registry]
-; Auto-start the helper on every Windows login. uninsdeletevalue removes the
-; entry on uninstall so we don't leave dead Run keys behind. The first-run
-; helper (migrate_install.py) drops any legacy "Yoink" Run value.
-Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; \
-  ValueType: string; ValueName: "Uoink"; \
-  ValueData: """{app}\python\pythonw.exe"" ""{app}\server.py"""; \
-  Flags: uninsdeletevalue; \
-  Check: not IsolatedInstall
-
 [Run]
 ; "Set up the browser button now" checkbox on the finish page (default checked).
 Filename: "{app}\python\pythonw.exe"; \
-  Parameters: """{app}\server.py"""; \
+  Parameters: """{app}\uoink_supervisor.py"""; \
   WorkingDir: "{app}"; \
   Description: "Set up the browser button now"; \
   Flags: postinstall nowait skipifsilent; \
   Check: not IsolatedInstall
 
 [UninstallRun]
+Filename: "powershell.exe"; \
+  Parameters: "-NoProfile -NonInteractive -ExecutionPolicy Bypass -File ""{app}\scripts\install-watchdog.ps1"" -InstallDir ""{app}"" -Mode Unregister"; \
+  WorkingDir: "{app}"; \
+  Flags: runhidden waituntilterminated; \
+  RunOnceId: "UnregisterUoinkRecovery"; \
+  Check: not IsolatedInstall
 ; Stop a running server before file removal so unins doesn't fail on locked
 ; site-packages files. waituntilterminated gives the process time to exit.
 Filename: "{app}\stop-server.bat"; \
@@ -1567,6 +1564,21 @@ begin
   Result := True;
 end;
 
+function UnregisterHelperRecovery(): Boolean;
+var
+  ResultCode: Integer;
+begin
+  Result := Exec('powershell.exe',
+    '-NoProfile -NonInteractive -ExecutionPolicy Bypass -File "' +
+    ExpandConstant('{app}\scripts\install-watchdog.ps1') + '" -InstallDir "' +
+    ExpandConstant('{app}') + '" -Mode Unregister', ExpandConstant('{app}'),
+    SW_HIDE, ewWaitUntilTerminated, ResultCode);
+  Result := Result and (ResultCode = 0);
+  if not Result then
+    SuppressibleMsgBox('Uoink could not remove login startup. Close Task Scheduler and try uninstalling again.',
+      mbInformation, MB_OK, IDOK);
+end;
+
 function InitializeUninstall(): Boolean;
 var
   AppDir, IsolatedFlag, PersistedProfile, PersistedPort, PersistedAppDir: String;
@@ -1582,7 +1594,7 @@ begin
 
   if (CompareText(Trim(IsolatedFlag), '1') <> 0) and (not MarkerExists) then
   begin
-    Result := True;
+    Result := UnregisterHelperRecovery();
     Exit;
   end;
 
@@ -1728,7 +1740,7 @@ begin
   begin
     Executed := Exec(
       'powershell.exe',
-      '-NoProfile -NonInteractive -ExecutionPolicy Bypass -File "' + ScriptPath + '"',
+      '-NoProfile -NonInteractive -ExecutionPolicy Bypass -File "' + ScriptPath + '" -InstallDir "' + ExpandConstant('{app}') + '"',
       ExpandConstant('{tmp}'),
       SW_HIDE,
       ewWaitUntilTerminated,
@@ -1984,6 +1996,22 @@ begin
     Log('Post-install: isolated-install.json persistence verification failed');
 end;
 
+procedure RegisterHelperRecovery();
+var
+  ResultCode: Integer;
+begin
+  if IsolatedInstall() then Exit;
+  if not Exec('powershell.exe',
+    '-NoProfile -NonInteractive -ExecutionPolicy Bypass -File "' +
+    ExpandConstant('{app}\scripts\install-watchdog.ps1') + '" -InstallDir "' +
+    ExpandConstant('{app}') + '"', ExpandConstant('{app}'), SW_HIDE,
+    ewWaitUntilTerminated, ResultCode) then
+    ResultCode := -1;
+  if ResultCode <> 0 then
+    SuppressibleMsgBox('Uoink could not register crash recovery. Your previous login startup was retained. ' +
+      'Run setup again to enable recovery.', mbInformation, MB_OK, IDOK);
+end;
+
 procedure CurStepChanged(CurStep: TSetupStep);
 begin
   if CurStep = ssPostInstall then
@@ -1994,6 +2022,7 @@ begin
         RaiseException('isolated-install-marker-write-failed: could not write isolated-install.json');
     end;
     VerifyInstalledHelper();
+    RegisterHelperRecovery();
     AddAgentPath();
   end;
 end;
