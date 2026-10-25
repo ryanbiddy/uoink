@@ -257,13 +257,14 @@ def add_style_anchor(idx, *, name: str, source_type: str,
     else:
         raw_text = source_value
 
-    with idx._lock:
-        cur = idx._conn.execute(
+    with idx.write_transaction() as conn:
+        cur = conn.execute(
             "INSERT INTO style_anchors "
             "(name, source_type, source_url, raw_text, active, added_at) "
             "VALUES (?, ?, ?, ?, 1, ?)",
             (name, source_type, source_url, raw_text, _now_iso()))
-    return get_style_anchor(idx, cur.lastrowid or 0) or {}
+        anchor_id = cur.lastrowid or 0
+    return get_style_anchor(idx, anchor_id) or {}
 
 
 def update_style_anchor(idx, anchor_id: int, *,
@@ -293,16 +294,16 @@ def update_style_anchor(idx, anchor_id: int, *,
                 "deactivate one before activating another")
             err.http_status = 422
             raise err
-    with idx._lock:
-        idx._conn.execute(
+    with idx.write_transaction() as conn:
+        conn.execute(
             "UPDATE style_anchors SET name=?, active=? WHERE id=?",
             (new_name, new_active, anchor_id))
     return get_style_anchor(idx, anchor_id)
 
 
 def remove_style_anchor(idx, anchor_id: int) -> bool:
-    with idx._lock:
-        cur = idx._conn.execute(
+    with idx.write_transaction() as conn:
+        cur = conn.execute(
             "DELETE FROM style_anchors WHERE id=?", (anchor_id,))
         return cur.rowcount > 0
 
@@ -492,8 +493,8 @@ def persist_piece(idx, *, yoink_id: str | None,
     else:
         warnings = []
 
-    with idx._lock:
-        cur = idx._conn.execute(
+    with idx.write_transaction() as conn:
+        cur = conn.execute(
             "INSERT INTO writing_pieces "
             "(yoink_id, kind, version, parent_id, title, dek, body, "
             " tags, source_credit_line, voice_warnings, "

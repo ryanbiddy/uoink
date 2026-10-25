@@ -55,8 +55,8 @@ def create_workspace(idx, *, format: str | None = None,
     until the caller invokes assemble_workspace()."""
     wid = _gen_workspace_id()
     now = _now_iso()
-    with idx._lock:
-        idx._conn.execute(
+    with idx.write_transaction() as conn:
+        conn.execute(
             "INSERT INTO workspaces (id, created_at, updated_at, format, "
             "topic, hook_target, your_channel, n_examples, "
             "assembled_yoinks, notes) "
@@ -91,15 +91,15 @@ def list_workspaces(idx, *, limit: int = 50) -> list[dict]:
 
 
 def delete_workspace(idx, workspace_id: str) -> bool:
-    with idx._lock:
-        cur = idx._conn.execute(
+    with idx.write_transaction() as conn:
+        cur = conn.execute(
             "DELETE FROM workspaces WHERE id=?", (workspace_id,))
         return cur.rowcount > 0
 
 
 def _save_assembled(idx, workspace_id: str, video_ids: list[str]) -> None:
-    with idx._lock:
-        idx._conn.execute(
+    with idx.write_transaction() as conn:
+        conn.execute(
             "UPDATE workspaces SET assembled_yoinks=?, updated_at=? "
             "WHERE id=?",
             (json.dumps(video_ids), _now_iso(), workspace_id))
@@ -169,14 +169,14 @@ def log_critique(idx, workspace_id: str, *, draft_text: str,
     if not get_workspace(idx, workspace_id):
         raise ValueError(f"workspace not found: {workspace_id}")
     findings_blob = json.dumps(findings or {})
-    with idx._lock:
-        cur = idx._conn.execute(
+    with idx.write_transaction() as conn:
+        cur = conn.execute(
             "INSERT INTO workspace_critique_log "
             "(workspace_id, ts_utc, mode, draft_text, findings) "
             "VALUES (?, ?, ?, ?, ?)",
             (workspace_id, _now_iso(), mode, draft_text, findings_blob))
         # Bump updated_at on the parent
-        idx._conn.execute(
+        conn.execute(
             "UPDATE workspaces SET updated_at=? WHERE id=?",
             (_now_iso(), workspace_id))
         return cur.lastrowid or 0

@@ -377,25 +377,26 @@ def add_allowed(idx, url_pattern: str) -> dict:
         raise ValueError("url_pattern too long (max 253)")
     if any(c in pattern for c in (" ", "\t", "\n", "\r")):
         raise ValueError("url_pattern cannot contain whitespace")
-    with idx._lock:
-        cur = idx._conn.execute(
+    with idx.write_transaction() as conn:
+        cur = conn.execute(
             "INSERT OR IGNORE INTO allowed_sites "
             "(url_pattern, added_at) VALUES (?, ?)",
             (pattern, _now_iso()))
         if cur.rowcount == 0:
-            row = idx._conn.execute(
+            row = conn.execute(
                 "SELECT * FROM allowed_sites WHERE url_pattern=?",
                 (pattern,)).fetchone()
             return dict(row) if row else {}
-    return _get_allowed(idx, cur.lastrowid or 0) or {}
+        allowed_id = cur.lastrowid or 0
+    return _get_allowed(idx, allowed_id) or {}
 
 
 def remove_allowed(idx, url_pattern: str) -> bool:
     pattern = (url_pattern or "").strip().lower()
     if not pattern:
         return False
-    with idx._lock:
-        cur = idx._conn.execute(
+    with idx.write_transaction() as conn:
+        cur = conn.execute(
             "DELETE FROM allowed_sites WHERE url_pattern=?", (pattern,))
         return cur.rowcount > 0
 
