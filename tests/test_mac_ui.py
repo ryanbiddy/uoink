@@ -369,6 +369,17 @@ def test_windows_open_on_the_screen_under_the_pointer(monkeypatch):
     assert ui.cursor_screen() is None
 
 
+class _Event:
+    """pywebview's event: `window.events.loaded += handler`."""
+
+    def __init__(self):
+        self.handlers = []
+
+    def __iadd__(self, handler):
+        self.handlers.append(handler)
+        return self
+
+
 @pytest.mark.parametrize("module_name", ["uoink_dashboard", "uoink_splash"])
 def test_mac_dashboard_and_splash_pass_the_pointer_screen(monkeypatch, tmp_path, module_name):
     import importlib
@@ -378,14 +389,20 @@ def test_mac_dashboard_and_splash_pass_the_pointer_screen(monkeypatch, tmp_path,
     chosen = object()
     monkeypatch.setattr(ui, "cursor_screen", lambda: chosen)
     webview = ModuleType("webview")
-    webview.create_window = Mock(return_value=SimpleNamespace(events=SimpleNamespace(loaded=Mock())))
+    webview.create_window = Mock(return_value=SimpleNamespace(events=SimpleNamespace(loaded=_Event())))
     webview.start = Mock()
     platforms = ModuleType("webview.platforms")
     cocoa = ModuleType("webview.platforms.cocoa")
     for name, value in [("webview", webview), ("webview.platforms", platforms), ("webview.platforms.cocoa", cocoa)]:
         monkeypatch.setitem(sys.modules, name, value)
+    opened = Mock()
+    monkeypatch.setattr(module.webbrowser, "open", opened)  # Never a real browser.
     if module_name == "uoink_splash":
-        monkeypatch.setattr(module, "_sentinel_current", lambda _: False)
+        # Never touch the real first-run sentinel in the user's data folder.
+        monkeypatch.setattr(module, "_sentinel_path", lambda: tmp_path / ".first-run-done")
         monkeypatch.setattr(module, "_helper_health_ok", lambda: True)
     module.main()
     assert webview.create_window.call_args.kwargs["screen"] is chosen
+    webview.start.assert_called_once_with(gui="cocoa")
+    opened.assert_not_called()
+    assert not (tmp_path / ".first-run-done").exists()  # Written only once WebKit loads.
