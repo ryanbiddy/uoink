@@ -3511,14 +3511,50 @@ def _iter_corpus_folders(root: Path | None = None):
             yield folder, corpus
 
 
+def _backfill_slug_conflict(idx, folder: Path, video_id: str) -> dict | None:
+    owner = idx.get_by_slug(folder.name)
+    if owner is None:
+        return None
+    other_path = owner.get("corpus_path") or owner.get("sidecar_path")
+    other_folder = Path(other_path).parent if other_path else None
+    if owner["video_id"] == video_id and other_folder == folder:
+        return None
+    return {"path": str(folder), "other_path": str(other_folder) if other_folder else "unknown",
+            "video_id": owner["video_id"]}
+
+
+def _duplicate_folder_names_status() -> dict:
+    """Read-only doctor report, including paths kept out of public health."""
+    duplicates = []
+    try:
+        idx = _get_existing_index()
+        for folder, _corpus in _iter_corpus_folders():
+            sidecar_path = folder / f"{folder.name}.json"
+            try:
+                sidecar = json.loads(sidecar_path.read_text(encoding="utf-8"))
+            except (OSError, ValueError):
+                continue
+            if not isinstance(sidecar, dict) or not sidecar.get("video_id"):
+                continue
+            conflict = _backfill_slug_conflict(idx, folder, sidecar["video_id"])
+            if conflict:
+                duplicates.append(conflict)
+    except (OSError, index.sqlite3.Error) as exc:
+        return {"count": len(duplicates), "folders": duplicates, "error": str(exc)}
+    return {"count": len(duplicates), "folders": duplicates}
+
+
 def _run_backfill(root: Path | None = None) -> None:
     """Index every on-disk yoink folder not already in index.db. Incremental
-    (skips rows already present) and cancellable via _backfill_cancel.
+    (skips rows already present) and cancellable via _backfill_cancel. A new
+    folder whose name is already another row's slug is skipped with one
+    warning; the doctor lists those duplicates.
     ``root`` overrides the scan root for --rebuild-index (C-03): the corpus
     may live somewhere the configured output root can't see."""
     global _index_recovering
     try:
-        known = _get_index().all_video_ids()
+        idx = _get_index()
+        known = idx.all_video_ids()
     except Exception:
         log.exception("backfill: could not read the index")
         with _backfill_lock:
@@ -3542,12 +3578,18 @@ def _run_backfill(root: Path | None = None) -> None:
                        if sidecar_path.exists() else {})
         except (OSError, json.JSONDecodeError):
             sidecar = {}
-        video_id = (sidecar.get("video_id") or "").strip()
+        video_id = (sidecar.get("video_id") or "").strip() if isinstance(sidecar, dict) else ""
         if not video_id or video_id in known:
             continue  # unindexable, or already indexed (incremental skip)
         try:
+            conflict = _backfill_slug_conflict(idx, folder, video_id)
+            if conflict:
+                log.warning("backfill: skipped %s: folder name already used by %s (video %s)",
+                            conflict["path"], conflict["other_path"], conflict["video_id"])
+                continue
             if _index_yoink(folder, sidecar, corpus, sidecar_path):
                 indexed += 1
+                known.add(video_id)
         except Exception:
             log.exception("backfill: failed to index %s", folder)
     with _backfill_lock:
@@ -5798,7 +5840,50 @@ def _video_capture_folder(parent: Path, url: str, metadata: dict) -> Path:
     return parent / f"{title_slug[:63]}_{suffix}"
 
 
-def _verify_video_capture_folder(folder: Path, url: str, metadata: dict) -> None:
+def _indexed_video_capture(url: str, metadata: dict) -> dict | None:
+    """Find one live, verified destination without guessing from its title."""
+    try:
+        idx = _get_index()
+        source = _video_capture_source(url)
+        row = idx.get_yoink(_video_capture_id(url, metadata))
+        matches = {row["video_id"]: row} if row and row.get("deleted_at") is None else {}
+        # Only a miss needs the recorded-URL scan (older captures stored a
+        # different ID). It parses every live row's metadata, so skip it on
+        # the common path.
+        for candidate in ([] if matches else idx.list_capture_sources()):
+            try:
+                saved = json.loads(candidate.get("metadata_json") or "{}")
+            except (ValueError, TypeError):
+                continue
+            if not isinstance(saved, dict):
+                continue
+            urls = [saved.get(key) for key in ("url", "source_url", "webpage_url", "original_url")]
+            if any(isinstance(value, str) and value.strip()
+                   and _video_capture_source(value) == source for value in urls):
+                matches[candidate["video_id"]] = candidate
+        if not matches:
+            return None
+        if len(matches) != 1:
+            log.warning("capture: using new folder for %s: multiple live source rows", source)
+            return None
+        row, = matches.values()
+        corpus = Path(row["corpus_path"])
+        folder = corpus.parent
+        if (not corpus.is_absolute() or corpus.suffix.lower() != ".md"
+                or folder.name != row["slug"] or not folder.is_dir()
+                or (row.get("sidecar_path")
+                    and Path(row["sidecar_path"]).parent != folder)):
+            log.warning("capture: using new folder for %s: indexed paths unavailable or inconsistent", source)
+            return None
+        _verify_video_capture_folder(folder, url, metadata, video_id=row["video_id"])
+        return row
+    except (OSError, ValueError, TypeError, index.sqlite3.Error) as exc:
+        log.warning("capture: using new folder for %s: %s", url, exc)
+        return None
+
+
+def _verify_video_capture_folder(folder: Path, url: str, metadata: dict,
+                                 *, video_id: str | None = None) -> None:
     """Refuse ambiguous ownership; never infer it from a folder's title."""
     if folder.is_symlink() or getattr(folder, "is_junction", lambda: False)():
         raise FileExistsError(f"capture folder is a link: {folder}")
@@ -5806,7 +5891,7 @@ def _verify_video_capture_folder(folder: Path, url: str, metadata: dict) -> None
     if not entries:
         return
     source = _video_capture_source(url)
-    video_id = _video_capture_id(url, metadata)
+    video_id = video_id or _video_capture_id(url, metadata)
     verified = False
     for name in (".capture-source.json", f"{folder.name}.json", "yoink.json", "metadata.json"):
         path = folder / name
@@ -5858,14 +5943,18 @@ def _create_video_entry_folder(folder: Path, url: str, metadata: dict) -> Path:
             return target
 
 
-def _prepare_video_capture_folder(folder: Path, url: str, metadata: dict) -> None:
-    """Claim the directory before any capture artifact can be overwritten."""
-    video_id = _video_capture_id(url, metadata)
+def _prepare_video_capture_folder(folder: Path, url: str, metadata: dict,
+                                  *, refresh_existing: bool = True) -> tuple[Path, dict | None]:
+    """Select and claim the directory before any artifact can be overwritten."""
+    existing = _indexed_video_capture(url, metadata) if refresh_existing else None
+    if existing is not None:
+        folder = Path(existing["corpus_path"]).parent
+    video_id = existing["video_id"] if existing else _video_capture_id(url, metadata)
     folder.parent.mkdir(parents=True, exist_ok=True)
     try:
         folder.mkdir()
     except FileExistsError:
-        _verify_video_capture_folder(folder, url, metadata)
+        _verify_video_capture_folder(folder, url, metadata, video_id=video_id)
     # Exclusive creation also protects an empty directory from two different
     # sources claiming it concurrently. Keep a failed/partial claim for review.
     claim = folder / ".capture-source.json"
@@ -5873,7 +5962,8 @@ def _prepare_video_capture_folder(folder: Path, url: str, metadata: dict) -> Non
         with claim.open("x", encoding="utf-8") as stream:
             json.dump({"url": _video_capture_source(url), "video_id": video_id}, stream)
     except FileExistsError:
-        _verify_video_capture_folder(folder, url, metadata)
+        _verify_video_capture_folder(folder, url, metadata, video_id=video_id)
+    return folder, existing
 
 
 def _schedule_publication_retry(folder: Path, sidecar: dict, corpus_path: Path, metadata: dict,
@@ -6052,7 +6142,8 @@ def _retry_publication_one() -> bool:
             if ownership.conflict:
                 refuse_obsolete(ownership.conflict)
             try:
-                _verify_video_capture_folder(folder, url, {"id": record["metadata_id"]})
+                _verify_video_capture_folder(folder, url, {"id": record["metadata_id"]},
+                                             video_id=sidecar["video_id"])
             except FileExistsError:
                 # Another source, unverifiable ownership or a link.
                 obsolete = True
@@ -6173,7 +6264,8 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
                     long_video_mode: str = LONG_VIDEO_MODE_FULL,
                     cancel_event: threading.Event | None = None,
                     phase_callback=None,
-                    pending_id: int | None = None) -> dict:
+                    pending_id: int | None = None,
+                    refresh_existing: bool = True) -> dict:
     """Yoink a single video into output_folder.
 
     Steps:
@@ -6201,12 +6293,13 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
         topic = _classify_topic(metadata)
 
     title = metadata.get("title") or "Untitled"
-    _prepare_video_capture_folder(output_folder, url, metadata)
+    output_folder, existing = _prepare_video_capture_folder(
+        output_folder, url, metadata, refresh_existing=refresh_existing)
     # A new capture has only its ownership claim. Refreshes keep previous
     # artifacts until generation and the file swap have succeeded.
     refreshing = any(p.name != ".capture-source.json" for p in output_folder.iterdir())
     video_slug = output_folder.name
-    video_id = _video_capture_id(url, metadata)
+    video_id = existing["video_id"] if existing else _video_capture_id(url, metadata)
     log.info("Uoinking '%s' -> %s (topic=%s)", title, output_folder, topic)
 
     # P1-4: bound screenshot count so a 4-hour video at 5s interval doesn't
@@ -6295,7 +6388,8 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
     asset_folder = stage_root / "n" if refreshing else output_folder
     backup_folder = stage_root / "p" if refreshing else None
     media_backup_folder = stage_root / "m" if refreshing else None
-    corpus_name = _corpus_path(output_folder).name
+    corpus_name = (Path(existing["corpus_path"]).name if existing
+                   else _corpus_path(output_folder).name)
     sidecar_name = f"{video_slug}.json"
     staged_names = {Path(corpus_name): Path("c.md"), Path(sidecar_name): Path("c.json")}
     markdown_index_attempted = False
@@ -6872,7 +6966,7 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
                     raise FileExistsError(f"capture artifact appeared during publication: {target}")
                 installed.append(relative)
                 rename_artifact(asset_folder / stage_name(relative), target)
-            yoink_path = _corpus_path(output_folder)
+            yoink_path = output_folder / corpus_name
             sidecar_path = output_folder / f"{video_slug}.json"
             if keep_media:
                 video_files = [output_folder / p.name for p in video_files]
@@ -12018,7 +12112,7 @@ def _playlist_worker(job_id: str):
                                       video_slug=target.name, folder=str(target))
                     else:
                         target = _create_video_entry_folder(target, v["url"], metadata)
-                        _prepare_video_capture_folder(target, v["url"], metadata)
+                        _prepare_video_capture_folder(target, v["url"], metadata, refresh_existing=False)
                         target_claimed = True
                         result = _run_extraction(
                             v["url"],
@@ -12030,6 +12124,7 @@ def _playlist_worker(job_id: str):
                             generate_paste=False,
                             cancel_event=cancel_event,
                             phase_callback=phase_cb,
+                            refresh_existing=False,
                         )
 
                 target = Path(result["folder"])
@@ -19520,7 +19615,7 @@ class Handler(BaseHTTPRequestHandler):
         folder = _video_capture_folder(
             DESKTOP_ROOT / _topic_folder_name(topic), canonical, metadata)
         try:
-            _prepare_video_capture_folder(folder, canonical, metadata)
+            folder, existing = _prepare_video_capture_folder(folder, canonical, metadata)
         except Exception as e:
             log.exception("/extract/any (generic) destination unavailable")
             return self._send_json(500, {"ok": False, "error": str(e)})
@@ -19547,7 +19642,7 @@ class Handler(BaseHTTPRequestHandler):
             "upload_date": metadata.get("upload_date"),
             "view_count": metadata.get("view_count"),
             "like_count": metadata.get("like_count"),
-            "video_id": _video_capture_id(canonical, metadata),
+            "video_id": existing["video_id"] if existing else _video_capture_id(canonical, metadata),
             "transcript": transcript_entries,
             # Comments/screenshots/hook are explicit nulls so the
             # dashboard knows they're unavailable rather than missing.
@@ -19591,7 +19686,7 @@ class Handler(BaseHTTPRequestHandler):
                               "_No transcript available (site did not "
                               "expose subtitles / yt-dlp could not parse)._",
                               ""]
-        corpus_path = folder / "corpus.md"
+        corpus_path = Path(existing["corpus_path"]) if existing else folder / "corpus.md"
         _atomic_write_text(corpus_path, "\n".join(corpus_lines))
 
         # Persist as a yoink row so it appears in Library + MCP search.
@@ -19995,7 +20090,8 @@ class Handler(BaseHTTPRequestHandler):
                     result = _run_extraction(url, interval, target,
                                               notify=False,
                                               metadata=metadata, topic=topic,
-                                              generate_paste=False)
+                                              generate_paste=False,
+                                              refresh_existing=False)
             except BaseException as e:
                 msg = friendly_error(e)
                 detail = machine_error_detail(e)
@@ -21202,6 +21298,7 @@ def doctor_payload() -> dict:
         "mcp_stdio": _mcp_stdio_selfcheck(timeout=max(0.0, mcp_deadline - time.monotonic())),
         "mcp_stdio_modern": _mcp_modern_stdio_selfcheck(timeout=max(0.0, mcp_deadline - time.monotonic())),
         "path_integrity": _path_integrity_status(force=True),
+        "duplicate_folder_names": _duplicate_folder_names_status(),
         "podcast_corpus": _podcast_corpus_reconciliation_status(),
     }
     return payload

@@ -908,6 +908,7 @@ def _backfill_after_failed_save(state, monkeypatch, backfill):
         "_backfill_cancel": threading.Event(), "_index_recovering": True,
     })
     _load(ROOT / "server.py", {"_run_backfill", "_iter_corpus_folders"}, state.scope)
+    _load(ROOT / "server.py", {"_backfill_slug_conflict"}, state.scope)
     monkeypatch.setitem(state.scope, "_citations_from_sidecar",
                         lambda sidecar, folder: [dict(SCREENSHOT_CITATION)])
     with monkeypatch.context() as patch:

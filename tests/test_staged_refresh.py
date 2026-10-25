@@ -40,6 +40,7 @@ def refresh(capture):
     state = SimpleNamespace(
         generation="old", failure=None, cancel_at=None, keep_media=True,
         event=threading.Event(), destinations=[], before=None, media_ext="mp4",
+        refresh_existing=True,
     )
     scope["_read_settings"] = lambda: {"keep_media": state.keep_media}
     scope["_long_video_chunks"] = lambda d: [
@@ -96,6 +97,7 @@ def refresh(capture):
             URL_A, 30, state.folder, metadata=_metadata(URL_A), topic="Test",
             source_type="short_video", notify=False, generate_paste=False,
             cancel_event=state.event, long_video_mode=mode,
+            refresh_existing=state.refresh_existing,
         )
 
     state.folder = scope["_video_capture_folder"](
@@ -354,6 +356,7 @@ def test_cancel_during_index_finishes_committed_capture(refresh, monkeypatch, fi
     if first_capture:
         state.before = None
         state.folder = state.folder.with_name("first-capture")
+        state.refresh_existing = False  # Explicitly exercise a new entry, not recapture selection.
     index_yoink = state.scope["_index_yoink"]
 
     def cancel_after_index(*args):
@@ -842,6 +845,7 @@ def test_persistent_rename_locks_have_bounded_retries(refresh, monkeypatch, phas
 def test_first_capture_identity_conflict_still_removes_downloaded_media(refresh, monkeypatch, mode):
     refresh.before = None
     refresh.folder = refresh.folder.with_name("first-conflict")
+    refresh.refresh_existing = False
     refresh.keep_media = False
     order = []
 

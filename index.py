@@ -1878,6 +1878,15 @@ class Index:
             ).fetchall()
         return [dict(r) for r in rows]
 
+    def list_capture_sources(self) -> list[dict]:
+        """Live capture identities for matching recorded URL aliases offline."""
+        with self._lock:
+            rows = self._conn.execute(
+                "SELECT video_id, slug, corpus_path, sidecar_path, metadata_json "
+                "FROM yoinks WHERE deleted_at IS NULL"
+            ).fetchall()
+        return [dict(row) for row in rows]
+
     def update_content_paths(self, video_id: str, *, corpus_path: str,
                              sidecar_path: str) -> None:
         """Re-point one row's on-disk paths (C-05 stale-path heal)."""
