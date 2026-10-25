@@ -41,6 +41,9 @@
     <!-- Background/menu-bar helper: no Dock icon (mirrors the Windows tray). -->
     <key>LSUIElement</key>
     <true/>
+    <!-- Captures default to ~/Desktop/Uoink, which macOS gates behind a prompt. -->
+    <key>NSDesktopFolderUsageDescription</key>
+    <string>Uoink saves your captures in the Uoink folder on your Desktop.</string>
     <key>NSHighResolutionCapable</key>
     <true/>
     <key>NSHumanReadableCopyright</key>
