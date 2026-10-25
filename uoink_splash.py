@@ -683,9 +683,10 @@ def _main_mac() -> int:
         import webview
         import webview.platforms.cocoa  # noqa: F401
         api = JsApi()
+        from helper.mac_ui import cursor_screen
         window = webview.create_window("Welcome to Uoink", _splash_url(),
                                       width=WIDTH, height=HEIGHT, resizable=False,
-                                      js_api=api)
+                                      js_api=api, screen=cursor_screen())
         api.attach(window)
 
         def loaded():
