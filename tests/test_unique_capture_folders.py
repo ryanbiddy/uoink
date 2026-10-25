@@ -6,7 +6,7 @@ the real index upsert against an in-memory copy of the schema.
 from __future__ import annotations
 
 import ast
-from contextlib import nullcontext
+from contextlib import contextmanager, nullcontext
 from datetime import datetime
 import hashlib
 import json
@@ -89,10 +89,12 @@ def capture(tmp_path, monkeypatch):
     for column, kind in (("schema_version", "INTEGER"), ("source_type", "TEXT"),
                          ("platform", "TEXT"), ("author", "TEXT"), ("deleted_at", "TEXT")):
         conn.execute(f"ALTER TABLE yoinks ADD COLUMN {column} {kind}")
-    index_scope = {"threading": threading, "unicodedata": unicodedata}
+    index_scope = {"threading": threading, "unicodedata": unicodedata,
+                   "contextmanager": contextmanager}
     _load(ROOT / "index.py", {"_search_title_key", "_entity_keyword_score", "_search_terms", "_fts_terms"},
           index_scope, constants={"_YOINK_COLUMNS", "CURRENT_YOINK_SCHEMA", "SEARCH_STOPWORDS"})
-    _load(ROOT / "index.py", {"__init__", "upsert_yoink", "get_yoink", "get_by_slug", "_notify_source_changed"},
+    _load(ROOT / "index.py", {"__init__", "upsert_yoink", "_rollback_on_error", "get_yoink", "get_by_slug",
+                              "_notify_source_changed"},
           index_scope, class_name="Index")
     index_class = type("Index", (), {name: value for name, value in index_scope.items()
                                     if callable(value)})
