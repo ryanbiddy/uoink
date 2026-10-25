@@ -87,7 +87,9 @@ def extraction(monkeypatch, tmp_path):
 
     state.asr = Mock(side_effect=fake_asr)
     state.comments = Mock()
-    state.index = Mock(spec=["enqueue_pending", "set_pending_error"])
+    state.index = Mock(spec=["enqueue_pending", "set_pending_error", "get_yoink", "list_capture_sources"])
+    state.index.get_yoink.return_value = None
+    state.index.list_capture_sources.return_value = []
     monkeypatch.setattr(server, "DESKTOP_ROOT", tmp_path)
     monkeypatch.setattr(server, "_run_subprocess", fake_run)
     monkeypatch.setattr(server, "_fetch_metadata", Mock(return_value=metadata))
