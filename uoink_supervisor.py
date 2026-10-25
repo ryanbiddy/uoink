@@ -199,24 +199,30 @@ def show_running_dashboard(root: Path) -> bool:
     return True
 
 
-def request_dashboard_later(root: Path) -> None:
-    write_json(root / DASHBOARD_REQUEST, {"requested_at": time.time()})
+def request_dashboard_later(root: Path, opened_at: float | None = None) -> None:
+    # Keep the time of the user's open, not of a late handoff, so it coalesces.
+    write_json(root / DASHBOARD_REQUEST, {"requested_at": opened_at or time.time()})
 
 
-def take_dashboard_request(root: Path) -> bool:
-    """Claim a pending open atomically. Stale requests never pop a window later."""
+def take_dashboard_request(root: Path) -> float | None:
+    """Claim a pending open atomically and return when it was made.
+
+    Stale requests never pop a window later.
+    """
     claimed = root / f".{DASHBOARD_REQUEST}.{os.getpid()}.{uuid.uuid4().hex}"
     try:
         os.replace(root / DASHBOARD_REQUEST, claimed)
     except OSError:
-        return False
+        return None
     try:
         requested = read_json(claimed).get("requested_at")
     except (OSError, ValueError):
         requested = None
     finally:
         claimed.unlink(missing_ok=True)
-    return isinstance(requested, (int, float)) and 0 <= time.time() - requested < REQUEST_WINDOW
+    if isinstance(requested, (int, float)) and 0 <= time.time() - requested < REQUEST_WINDOW:
+        return float(requested)
+    return None
 
 
 def open_app(root: Path) -> int:
@@ -228,16 +234,19 @@ def open_app(root: Path) -> int:
     a detached resident supervisor, then exit. Every later open is a new launch.
     """
     import uoink_install_isolation as isolation
+    opened_at = time.time()
     with admission(root) as free:
-        pass
+        # A helper that outlived its supervisor still owns the window. Ask it
+        # under admission so no resident can open a launch window meanwhile.
+        if free and request_dashboard(root):
+            return 0
     if not free:
         # The resident shows it now, or as soon as its helper is ready.
-        request_dashboard_later(root)
+        request_dashboard_later(root, opened_at)
         return 0
-    if request_dashboard(root):
-        return 0  # A helper outlived its supervisor; it still owns the window.
     subprocess.Popen([sys.executable, "-B", "-s", str(Path(__file__).resolve()),
-                      "--resident", "--show-dashboard", *isolation.child_argv()],
+                      "--resident", "--show-dashboard", "--opened-at", repr(opened_at),
+                      *isolation.child_argv()],
                      cwd=HERE, stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
                      stderr=subprocess.DEVNULL, start_new_session=True)
     return 0
@@ -426,6 +435,7 @@ def main(argv=None) -> int:
     parser.add_argument("--stop", action="store_true")
     parser.add_argument("--show-dashboard", action="store_true")
     parser.add_argument("--resident", action="store_true", help=argparse.SUPPRESS)
+    parser.add_argument("--opened-at", type=float, help=argparse.SUPPRESS)
     args = parser.parse_args(isolation.strip_cli(sys.argv[1:] if argv is None else argv))
     if args.stop:
         request_stop()
@@ -441,16 +451,27 @@ def main(argv=None) -> int:
         if args.show_dashboard and not args.resident:
             return open_app(root)
 
+        shown_at = [0.0]
+
         def on_ready(shown):
-            # Runs every poll while the helper is ready. On the start that the
-            # launch flag already opened, drop opens queued before it was ready.
-            if take_dashboard_request(root) and not shown:
+            # Runs every poll while the helper is ready. Opens made before the
+            # launch flag's window appeared are already answered by it.
+            if shown:
+                shown_at[0] = time.time()
+            requested = take_dashboard_request(root)
+            if requested is not None and requested > shown_at[0]:
                 threading.Thread(target=show_running_dashboard, args=(root,), daemon=True).start()
     try:
         supervisor = Supervisor(root, command, isolation.helper_url("/health"),
                                 session=login_session(), startup=args.startup,
                                 first_args=first_args, on_ready=on_ready)
         result = supervisor.run()
+        # A user open holds admission briefly while it asks an orphaned helper.
+        for _ in range(25 if sys.platform == "darwin" else 0):
+            if supervisor.owned:
+                break
+            time.sleep(0.2)
+            result = supervisor.run()
     except (OSError, ValueError, subprocess.SubprocessError):
         failure = {"status": "supervisor_error", "reason": "Helper recovery could not start. Check access to the Uoink data folder.",
                    "action": ACTION}
@@ -462,7 +483,7 @@ def main(argv=None) -> int:
     if sys.platform == "darwin":
         if args.show_dashboard and not supervisor.owned:
             # Another supervisor won admission; it consumes the request.
-            request_dashboard_later(root)
+            request_dashboard_later(root, args.opened_at)
     elif args.show_dashboard and status(root).get("status") == "running":
         show_running_dashboard(root)
     return result

@@ -422,7 +422,8 @@ def test_darwin_open_hands_off_to_a_detached_resident(supervisor, monkeypatch, t
     monkeypatch.setattr(supervisor.subprocess, "Popen", lambda args, **kw: spawned.append((args, kw)))
     assert supervisor.main(["--show-dashboard"]) == 0
     (args, kw), = spawned
-    assert Path(args[3]).name == "uoink_supervisor.py" and args[4:6] == ["--resident", "--show-dashboard"]
+    assert Path(args[3]).name == "uoink_supervisor.py" and args[4:7] == ["--resident", "--show-dashboard", "--opened-at"]
+    assert abs(float(args[7]) - supervisor.time.time()) < 5
     assert kw["start_new_session"] is True and kw["stdin"] is supervisor.subprocess.DEVNULL
 
 
@@ -438,7 +439,7 @@ def test_darwin_open_while_resident_asks_or_queues(supervisor, monkeypatch, tmp_
         assert supervisor.main(["--show-dashboard"]) == 0
     # Only the resident consumes opens, now or once its helper is ready.
     assert shown == []
-    assert supervisor.take_dashboard_request(tmp_path) is True
+    assert supervisor.take_dashboard_request(tmp_path) is not None
 
 
 def test_darwin_open_with_helper_but_no_supervisor_asks_that_helper(supervisor, monkeypatch, tmp_path):
@@ -451,15 +452,15 @@ def test_darwin_open_with_helper_but_no_supervisor_asks_that_helper(supervisor, 
 
 
 def test_dashboard_request_is_taken_once_and_expires(supervisor, monkeypatch, tmp_path):
-    assert supervisor.take_dashboard_request(tmp_path) is False
+    assert supervisor.take_dashboard_request(tmp_path) is None
     supervisor.request_dashboard_later(tmp_path)
-    assert supervisor.take_dashboard_request(tmp_path) is True
-    assert supervisor.take_dashboard_request(tmp_path) is False
+    assert supervisor.take_dashboard_request(tmp_path) is not None
+    assert supervisor.take_dashboard_request(tmp_path) is None
     supervisor.write_json(tmp_path / supervisor.DASHBOARD_REQUEST,
                           {"requested_at": supervisor.time.time() - supervisor.REQUEST_WINDOW - 1})
-    assert supervisor.take_dashboard_request(tmp_path) is False
+    assert supervisor.take_dashboard_request(tmp_path) is None
     (tmp_path / supervisor.DASHBOARD_REQUEST).write_text("not json", encoding="utf-8")
-    assert supervisor.take_dashboard_request(tmp_path) is False
+    assert supervisor.take_dashboard_request(tmp_path) is None
     assert not (tmp_path / supervisor.DASHBOARD_REQUEST).exists()
 
 
@@ -536,9 +537,79 @@ def test_resident_that_loses_admission_leaves_its_open_queued(supervisor, monkey
     monkeypatch.setattr(supervisor, "Supervisor", Lost)
     monkeypatch.setattr(supervisor, "data_root", lambda: tmp_path)
     monkeypatch.setattr(supervisor, "login_session", lambda: "session")
+    monkeypatch.setattr(supervisor.time, "sleep", lambda seconds: None)
     supervisor.write_json(tmp_path / supervisor.STATE_FILE, {"status": "starting"})
-    assert supervisor.main(["--resident", "--show-dashboard"]) == 0
-    assert supervisor.take_dashboard_request(tmp_path) is True
+    opened = supervisor.time.time() - 2
+    assert supervisor.main(["--resident", "--show-dashboard", "--opened-at", repr(opened)]) == 0
+    # Queued with the user's open time, so a winner's launch window absorbs it.
+    assert supervisor.take_dashboard_request(tmp_path) == opened
+
+
+def test_late_queued_open_from_before_the_launch_window_is_absorbed(supervisor, monkeypatch, tmp_path):
+    captured, shown = {}, []
+
+    class Fake:
+        owned = True
+
+        def __init__(self, root, command, url, **kw):
+            captured.update(kw)
+
+        def run(self):
+            return 0
+
+    monkeypatch.setattr(supervisor, "Supervisor", Fake)
+    monkeypatch.setattr(supervisor, "data_root", lambda: tmp_path)
+    monkeypatch.setattr(supervisor, "login_session", lambda: "session")
+    monkeypatch.setattr(supervisor, "show_running_dashboard", lambda root: shown.append(root))
+    before = supervisor.time.time() - 1
+    assert supervisor.main(["--resident", "--show-dashboard", "--opened-at", repr(before)]) == 0
+    on_ready = captured["on_ready"]
+    on_ready(True)  # The launch flag's window is up.
+    supervisor.request_dashboard_later(tmp_path, before)  # A losing resident, late.
+    on_ready(False)
+    assert shown == []
+    supervisor.request_dashboard_later(tmp_path)  # A new open after the window.
+    on_ready(False)
+    for _ in range(50):
+        if shown:
+            break
+        supervisor.time.sleep(0.02)
+    assert shown == [tmp_path]
+
+
+def test_orphan_helper_is_asked_while_admission_is_held(supervisor, monkeypatch, tmp_path):
+    held = []
+
+    def ask(root):
+        with supervisor.admission(root) as owned:
+            held.append(not owned)
+        return True
+
+    monkeypatch.setattr(supervisor, "data_root", lambda: tmp_path)
+    monkeypatch.setattr(supervisor, "request_dashboard", ask)
+    monkeypatch.setattr(supervisor.subprocess, "Popen", lambda *a, **k: pytest.fail("spawned a resident"))
+    assert supervisor.main(["--show-dashboard"]) == 0
+    assert held == [True]
+
+
+def test_darwin_supervisor_retries_admission_held_by_an_opener(supervisor, monkeypatch, tmp_path):
+    runs = []
+
+    class Briefly:
+        def __init__(self, *a, **k):
+            self.owned = False
+
+        def run(self):
+            runs.append(1)
+            self.owned = len(runs) == 3
+            return 0
+
+    monkeypatch.setattr(supervisor, "Supervisor", Briefly)
+    monkeypatch.setattr(supervisor, "data_root", lambda: tmp_path)
+    monkeypatch.setattr(supervisor, "login_session", lambda: "session")
+    monkeypatch.setattr(supervisor.time, "sleep", lambda seconds: None)
+    assert supervisor.main(["--startup"]) == 0
+    assert len(runs) == 3
 
 
 def test_resident_and_login_launches_still_supervise(supervisor, monkeypatch, tmp_path):
@@ -576,5 +647,5 @@ def test_one_queued_open_is_claimed_exactly_once(supervisor, tmp_path):
         worker.start()
     for worker in workers:
         worker.join(5)
-    assert sorted(results) == [False] * 7 + [True]
+    assert sum(result is not None for result in results) == 1
     assert list(tmp_path.iterdir()) == []
