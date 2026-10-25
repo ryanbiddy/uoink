@@ -10,6 +10,49 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [3.11.1] - 2026-10-25
+
+### Added
+
+- Web articles are extracted by a built-in port of Mozilla Readability's
+  main-content algorithm (Apache-2.0). Saved Markdown keeps headings, lists,
+  quotes, code, simple tables and links, and reads the title, author, date and
+  site from JSON-LD, OpenGraph and meta tags. Crawl4AI, where installed, and
+  the old regex path remain fallbacks, and the engine used is recorded.
+- Saved X posts keep quote posts, media descriptors (photo alt text, video and
+  GIF variants, posters), expanded links and real counts. Every capture says
+  whether its text is complete, truncated or unknown, and which provider
+  supplied it. Missing thread parents and tombstoned quotes are disclosed.
+- A per-user supervisor restarts the helper after a crash (3 restarts per 10
+  minutes, with backoff), honors Quit until the next login or a manual start,
+  and reports crash loops. On Windows it is a per-user Scheduled Task that
+  replaces the Run entry. A port conflict stops after one launch.
+
+### Changed
+
+- Tool, server, `.mcpb`, extension and agent-kit descriptions were rewritten
+  for search and for agents. All 91 tool definitions were rewritten against
+  Glama's tool-definition rubric, and a Linux container build was added for
+  directory listings.
+
+### Fixed
+
+- Caption-less X videos now get a local Whisper transcript. The fallback was
+  handed the screenshot download, which on X is a video-only stream, so every
+  attempt failed with "tuple index out of range" and the note said "No
+  captions available." Uoink now checks the captured media for audio and,
+  when there is none, downloads the source audio once (cut to the same ranges
+  for long videos). When no audio exists, the note says so and the library
+  labels it "no audio". Model loading stays cache-only.
+- Paywalls, login walls and empty JavaScript pages are labeled failed
+  captures instead of saved as successful articles.
+
+### Compatibility and testing
+
+- The MCP server still exposes 91 tools by default and 35 with
+  `UOINK_MCP_TOOLSET=core`. This is a Windows release; the Mac preview is
+  not part of 3.11.1.
+
 ## [3.11.0] - 2026-10-22
 
 ### Added
