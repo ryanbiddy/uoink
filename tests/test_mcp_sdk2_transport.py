@@ -54,6 +54,30 @@ def test_both_script_entries_and_install_marker(tmp_path, entry, from_install, m
     assert client.proc.returncode == 0
 
 
+def _oversized(ident):
+    return json.dumps({"jsonrpc": "2.0", "id": ident, "method": "ping", "params": {"padding": "x" * 65536}})
+
+
+def test_oversized_request_refusal_echoes_only_a_safe_id():
+    def reply_id(line):
+        with pytest.raises(uoink_mcp._InvalidStdioRequest) as caught:
+            uoink_mcp.parse_stdio_message(line)
+        assert str(caught.value) == "Inbound request exceeds protocol limits"
+        return caught.value.request_id
+
+    token = uoink_mcp._stdio_requests.set({})
+    try:
+        assert reply_id(_oversized(5)) == 5
+        assert reply_id(_oversized("call-5")) == "call-5"
+        # An ID too large to echo inside the refusal cap stays null.
+        assert reply_id(json.dumps({"jsonrpc": "2.0", "id": "i" * 70000, "method": "ping"})) is None
+        # Never settle a different call that already owns this ID.
+        uoink_mcp._stdio_requests.get()[uoink_mcp.coerce_request_id(5)] = object()
+        assert reply_id(_oversized(5)) is None
+    finally:
+        uoink_mcp._stdio_requests.reset(token)
+
+
 def test_only_trusted_tools_list_method_gets_inventory_allowance():
     async def check():
         token = uoink_mcp._stdio_requests.set({})
