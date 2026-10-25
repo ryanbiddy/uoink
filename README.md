@@ -13,7 +13,7 @@ Free, open source and local on Windows: transcripts, frames and comments land on
 Free, open source (MIT), and local-first: no account, no Uoink cloud, and anonymous usage counts stay off unless you turn them on. Uoink saves supported sources as structured Markdown on *your* machine, then makes the corpus available to your AI through the clipboard, a local MCP server, and an OpenAPI bridge. YouTube capture includes the transcript, timestamped screenshots, comments, and metadata; other source types keep the material their publishers expose.
 
 - **Website:** https://uoink.app · **Install:** https://uoink.app/install · **Developers:** https://uoink.app/developers
-- **Status:** Windows 10/11 today. Mac (Apple Silicon, macOS 15 or later): preview coming soon. The extension sideloads from the release; it is not on the Chrome Web Store. The installer is unsigned, so Windows SmartScreen will warn on first run.
+- **Status:** Windows 10/11, plus a Mac preview (Apple Silicon, macOS 15 or later) that Apple has notarized. The extension sideloads from the release; it is not on the Chrome Web Store yet. The Windows installer is unsigned, so SmartScreen will warn on first run.
 
 ## Why Uoink
 
@@ -89,11 +89,13 @@ Uoink ships a portable Skill at `skills/uoink/SKILL.md` (installed to `%LOCALAPP
 
 ## Install
 
-1. **Download the installer.** Download `Uoink-Setup-3.11.1.exe` from the [v3.11.1 release](https://github.com/ryanbiddy/uoink/releases/tag/v3.11.1). Windows 10/11 only for now; a Mac preview (Apple Silicon, macOS 15 or later) is coming soon. The installer is unsigned: if SmartScreen shows "Windows protected your PC", choose **More info -> Run anyway**, and check the file against the SHA-256 listed on the release page.
+1. **Download the installer.** Download `Uoink-Setup-3.11.2.exe` from the [v3.11.2 release](https://github.com/ryanbiddy/uoink/releases/tag/v3.11.2). For Windows 10/11; Mac steps are below. The installer is unsigned: if SmartScreen shows "Windows protected your PC", choose **More info -> Run anyway**, and check the file against the SHA-256 listed on the release page.
 2. **Run it.** Defaults install to `%LOCALAPPDATA%\Uoink\` (no admin required). The finish page can launch the helper immediately, and an autostart entry runs it on each login.
 <!-- store-install:start -->
 3. **Load the bundled extension.** On first launch, Uoink shows a one-time setup splash. Use it to open your browser's extensions page and copy the installed extension path; then enable Developer mode, click **Load unpacked**, and select that folder.
 <!-- store-install:end -->
+
+**On a Mac** (Apple Silicon, macOS 15 or later; preview): download `Uoink-3.11.2-macos-arm64.dmg` from the same release, drag Uoink to Applications, eject the disk and open Uoink from Applications. The app is signed and notarized, so macOS only asks its usual question about apps downloaded from the internet. Then load the extension from the setup splash as above. See [docs/mac/INSTALL.md](docs/mac/INSTALL.md).
 
 The store install link is controlled by [store-config.json](extension/store-config.json). When the listing is live, the setup splash and these steps offer **Add to Chrome**, with sideloading under **Advanced**. Release maintainers: follow [SUBMIT-NOW.md](docs/store/SUBMIT-NOW.md).
 

@@ -10,6 +10,87 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [3.11.2] - 2026-10-25
+
+### Added
+
+- A Mac build for Apple Silicon (macOS 15 or later), released as a preview.
+  `Uoink-3.11.2-macos-arm64.dmg` is signed with a Developer ID, and Apple has
+  notarized both the app and the DMG, with tickets stapled. It opens after
+  macOS's standard "downloaded from the internet" prompt, with no security
+  override. The setup page offers **Download for Mac** and the steps to drag
+  Uoink to Applications.
+- macOS: opening Uoink.app while Uoink is running shows the dashboard.
+  Before, a second open did nothing, and the menu-bar icon (which the
+  MacBook notch can hide) was the only way back in.
+- macOS: the dashboard and the setup splash open on the display under the
+  pointer instead of the main display.
+- macOS: the Desktop access prompt says why Uoink asks ("Uoink saves your
+  captures in the Uoink folder on your Desktop.").
+- Chrome Web Store build. `scripts/build_cws.py` writes an allowlisted store
+  zip with no manifest key, mock API or source maps. The helper trusts the
+  store item ID from `extension/store-config.json` (exact origin match) next
+  to the pinned developer ID. Setup keeps the unpacked-extension flow until
+  the listing is approved; `scripts/sync_store_links.py` then switches the
+  splash, setup page and README to "Add to Chrome".
+
+### Changed
+
+- Extension onboarding knows which OS it's on. On a Mac, the dashboard's
+  "Get the extension" card shows `~/Library/Application Support/Uoink/extension`
+  (then the real path once the helper answers), and **Open extension folder**
+  reveals it in Finder and copies the path. Chrome's **Load unpacked** picker
+  hides `~/Library`, so the card explains pressing ⌘⇧G and pasting. The setup
+  page and dashboard no longer say Windows-only things on a Mac.
+- The extension no longer requests the unused youtu.be, mobile.twitter.com
+  and localhost:5179 host permissions.
+- macOS: desktop alerts are kept for capture results and helper failures
+  only. The "Uoink is ready" banner is gone, because a launch already opens a
+  window. A notifier app of Uoink's own is planned for 3.12; until then macOS
+  credits these alerts to Script Editor.
+- macOS: dashboard copy says "this Mac" instead of "this PC".
+- Setup splash: Chrome is listed first and Comet is detected. When a browser
+  won't open its extensions page from the splash (Comet ignores it), Uoink
+  copies the address and the steps say to paste it in the address bar.
+
+### Fixed
+
+- A failed index write no longer wedges the helper. A write that raised
+  (for example a duplicate folder name during the startup backfill) left its
+  SQLite transaction open, and every later save on that helper failed until a
+  restart. Upserts, deletes and the other 22 older write paths now roll back
+  their own failures. `write_transaction()` and `read_snapshot()` still refuse
+  to start over an open transaction instead of committing or discarding it.
+- Re-capturing an item saved by an older version refreshes it in place
+  instead of creating a second folder. Duplicate folder names no longer fail
+  the startup backfill; each is skipped with one warning and `uoink doctor`
+  lists them. The backfill stays incremental: known items are not re-indexed
+  on each start.
+- An MCP stdio request over 64 KiB (for example a long `uoink_note`) is
+  refused with its own request ID instead of `id: null`, so the client no
+  longer waits forever.
+- Captions longer than the video are cut at the video's end, and YouTube's
+  `\h` hard spaces and `[\h__\h]` censor markers are cleaned out of
+  transcripts.
+- The supervisor writes the helper's output to `helper-output.log` as it
+  arrives. Before, short output sat in the pipe until 4 KiB had built up or
+  the helper exited.
+- Setup splash: no white corners, the bottom button is no longer clipped,
+  and the footnote no longer overlaps a button.
+- macOS: if the menu-bar icon can't be loaded, the menu bar shows "Uoink" as
+  text instead of failing to start.
+
+### Compatibility and testing
+
+- The MCP server still exposes 91 tools by default and 35 with
+  `UOINK_MCP_TOOLSET=core`.
+- macOS qualification signs with Developer ID, notarizes and staples the app
+  and DMG in CI, then launches the quarantined DMG without an override and
+  collects an installed receipt from the final signed bytes. It also checks
+  the real LaunchAgent contract (`--helper --startup`,
+  `KeepAlive.SuccessfulExit=false`, `ThrottleInterval` 30) and no longer
+  depends on reverse DNS on CI runners.
+
 ## [3.11.1] - 2026-10-25
 
 ### Added

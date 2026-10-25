@@ -75,10 +75,12 @@ const groups = {
     assert.equal(env.scroll.behavior,'auto');assert.equal(env.document.activeElement.id,'verify-btn');
   },
   async platforms() {
-    const setupSource = readFileSync(join(EXT, 'setup.js'), 'utf8');
+    // Without a published DMG, Mac users get the manual instructions.
+    const setupSource = readFileSync(join(EXT, 'setup.js'), 'utf8')
+      .replace(/const PUBLISHED_MAC_DMG = "[^"]*";/,'const PUBLISHED_MAC_DMG = "";');
     const version = setupSource.match(/const PUBLISHED_INSTALLER_VERSION = "([^"]+)";/)[1];
     for (const [os,word] of [['win','Start Menu'],['mac','Applications'],['linux','Terminal']]) {
-      const env=await setup({os,fetch:()=>jsonResponse({ok:false},503)});
+      const env=await setup({os,setupSource,fetch:()=>jsonResponse({ok:false},503)});
       assert.match(env.el('status-instructions').textContent,new RegExp(word));
       assert.equal(env.el('download-btn').hidden,os!=='win');
       assert.equal(env.el('manual-install').hidden,os==='win');
@@ -92,10 +94,9 @@ const groups = {
     }
   },
   async mac_download() {
-    // Until a Mac DMG is published, Mac users get the manual instructions.
-    const setupSource = readFileSync(join(EXT, 'setup.js'), 'utf8');
-    assert.match(setupSource,/const PUBLISHED_MAC_DMG = "";/);
-    const published = setupSource.replace('const PUBLISHED_MAC_DMG = "";','const PUBLISHED_MAC_DMG = "3.11.2";');
+    // The release publishes the Mac DMG next to the Windows installer.
+    const published = readFileSync(join(EXT, 'setup.js'), 'utf8');
+    assert.match(published,/const PUBLISHED_MAC_DMG = "3\.11\.2";/);
     const mac=await setup({os:'mac',setupSource:published,fetch:()=>jsonResponse({ok:false},503)});
     assert.equal(mac.el('download-btn').hidden,false);
     assert.equal(mac.el('manual-install').hidden,true);
