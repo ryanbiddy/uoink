@@ -1,0 +1,192 @@
+{
+  "synthetic": true,
+  "description": "Saved synthetic FxEmbed v2 and syndication responses for UX1 review probes.",
+  "expansions": {
+    "id": "1",
+    "text": "Read https://t.co/probe",
+    "entities": {
+      "urls": [
+        {
+          "url": "https://t.co/probe",
+          "expanded_url": "https://example.invalid/full/report-with-details"
+        },
+        {
+          "url": "https://t.co/probe",
+          "expanded_url": "https://example.invalid/short"
+        },
+        {
+          "url": "https://t.co/probe",
+          "expanded_url": "javascript:alert(1)"
+        },
+        {
+          "url": "https://t.co/probe",
+          "expanded_url": "data:text/plain,bad"
+        }
+      ]
+    }
+  },
+  "media_facet": {
+    "id": "1",
+    "text": "Watch https://t.co/clip",
+    "raw_text": {
+      "text": "Watch https://t.co/clip",
+      "facets": [
+        {
+          "type": "media",
+          "original": "https://t.co/clip",
+          "replacement": "https://x.com/example/status/1/video/1",
+          "display": "x.com/example/video"
+        },
+        {
+          "type": "media",
+          "original": "https://t.co/originalonly",
+          "replacement": "javascript:alert(1)"
+        },
+        {
+          "type": "media",
+          "original": "data:text/plain,bad",
+          "replacement": "https://example.invalid/video"
+        },
+        {
+          "type": "url",
+          "original": "javascript:alert(1)",
+          "replacement": "data:text/plain,bad"
+        }
+      ]
+    }
+  },
+  "engagement": {
+    "syndication": {
+      "id_str": "1",
+      "text": "Saved counts",
+      "favorite_count": 0,
+      "conversation_count": 0,
+      "retweet_count": 9,
+      "view_count": null
+    },
+    "fxtwitter": {
+      "code": 200,
+      "status": {
+        "id": "1",
+        "text": "Saved counts",
+        "likes": 12,
+        "replies": 4,
+        "reposts": 3,
+        "views": 25,
+        "quotes": null,
+        "bookmarks": 0
+      }
+    }
+  },
+  "attachment_chain": {
+    "1": {
+      "id_str": "1",
+      "text": "Earlier post still reached",
+      "user": {
+        "screen_name": "example"
+      }
+    },
+    "2": {
+      "id_str": "2",
+      "text": "",
+      "user": {
+        "screen_name": "example"
+      },
+      "in_reply_to_status_id_str": "1",
+      "in_reply_to_screen_name": "example",
+      "poll": {
+        "choices": [
+          {
+            "label": "Option one",
+            "count": 2
+          },
+          {
+            "label": "Option two",
+            "count": 0
+          }
+        ],
+        "total_votes": 2
+      }
+    },
+    "3": {
+      "id_str": "3",
+      "text": "Shared post",
+      "user": {
+        "screen_name": "example"
+      },
+      "in_reply_to_status_id_str": "2",
+      "in_reply_to_screen_name": "example"
+    }
+  },
+  "raw_text": {
+    "id": "1",
+    "text": "A truncated display field that fills one hundred characters before the useful ending is omitted here...",
+    "raw_text": {
+      "text": "A truncated display field that fills one hundred characters before the useful ending is omitted here, followed by the actual conclusion. FULL-TAIL",
+      "facets": []
+    }
+  },
+  "unsafe_urls": {
+    "id": "1",
+    "text": "Captured text https://t.co/unsafe",
+    "author": {
+      "screen_name": "example"
+    },
+    "entities": {
+      "urls": [
+        {
+          "url": "https://t.co/unsafe",
+          "expanded_url": "javascript:alert(1)"
+        }
+      ]
+    },
+    "media": {
+      "photos": [
+        {
+          "type": "photo",
+          "url": "javascript:alert(1)",
+          "altText": "Unsafe photo"
+        },
+        {
+          "type": "photo",
+          "url": "https://example.invalid/safe.jpg",
+          "altText": "Safe photo"
+        }
+      ],
+      "videos": [
+        {
+          "type": "video",
+          "url": "data:video/mp4,bad",
+          "thumbnail_url": "javascript:alert(1)",
+          "variants": [
+            {
+              "url": "javascript:alert(1)"
+            },
+            {
+              "url": "data:video/mp4,bad"
+            },
+            {
+              "url": "https://example.invalid/safe.mp4"
+            }
+          ]
+        }
+      ]
+    },
+    "quote": {
+      "id": "2",
+      "text": "Quoted text survives",
+      "url": "https://x.com/example/status/2\n[Injected](https://example.invalid/attack)",
+      "author": {
+        "screen_name": "example"
+      }
+    },
+    "card": {
+      "title": "Card text survives",
+      "url": "data:text/plain,bad"
+    },
+    "community_note": {
+      "text": "Note text survives",
+      "source_url": "javascript:alert(1)"
+    }
+  }
+}
