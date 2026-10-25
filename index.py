@@ -1088,6 +1088,22 @@ class Index:
                     self._write_txn_owner = None
 
     @contextmanager
+    def _rollback_on_error(self):
+        """Roll back the implicit transaction if a legacy write raises.
+
+        Legacy writers commit on success but used to leave a failed DML's
+        implicit BEGIN open, which wedged every later write_transaction and
+        read_snapshot on this shared connection (for example a backfill
+        hitting UNIQUE(yoinks.slug)). Callers hold self._lock.
+        """
+        try:
+            yield
+        except BaseException:
+            if self._conn.in_transaction:
+                self._conn.rollback()
+            raise
+
+    @contextmanager
     def read_snapshot(self):
         """Hold Index lock and an explicit read transaction across reading."""
         with self._lock:
@@ -1286,7 +1302,7 @@ class Index:
         update_set = ", ".join(
             f"{col}=excluded.{col}" for col in _YOINK_COLUMNS if col != "video_id"
         )
-        with self._lock:
+        with self._lock, self._rollback_on_error():
             self._conn.execute(
                 f"INSERT INTO yoinks ({', '.join(_YOINK_COLUMNS)}) "
                 f"VALUES ({placeholders}) "
@@ -1322,7 +1338,7 @@ class Index:
 
     def delete_yoink(self, video_id: str) -> None:
         """Delete a yoink and its citations (FK cascade) and FTS row."""
-        with self._lock:
+        with self._lock, self._rollback_on_error():
             self._conn.execute("DELETE FROM yoinks WHERE video_id=?", (video_id,))
             self._conn.execute("DELETE FROM yoinks_fts WHERE video_id=?", (video_id,))
             self._conn.commit()
