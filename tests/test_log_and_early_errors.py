@@ -47,6 +47,7 @@ def http(tmp_path):
         "_platform": _platform, "sys": sys,
         "BaseHTTPRequestHandler": BaseHTTPRequestHandler, "Path": Path,
         "json": json, "secrets": secrets, "time": time,
+        "os": SimpleNamespace(getpid=lambda: 12345, environ={}),
         "VERSION": "0.0.0", "HOST": "127.0.0.1", "PORT": 12345,
         "TOKEN": "synthetic-test-token", "ALLOWED_ORIGINS": set(),
         "log": logging.getLogger(__name__), "DATA_ROOT": tmp_path,

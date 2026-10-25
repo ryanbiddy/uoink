@@ -92,7 +92,7 @@ def helper(surface_code):
         "BaseHTTPRequestHandler": BaseHTTPRequestHandler,
         "HOST": "127.0.0.1", "PORT": PORT, "VERSION": "test",
         "TOKEN": "synthetic-public-surfaces-token",
-        "os": SimpleNamespace(environ={}), "sys": SimpleNamespace(platform="win32"),
+        "os": SimpleNamespace(environ={}, getpid=lambda: 12345), "sys": SimpleNamespace(platform="win32"),
         "json": json, "re": re,
         "secrets": secrets, "urlparse": urlparse, "time": time,
         "datetime": datetime, "log": Mock(),

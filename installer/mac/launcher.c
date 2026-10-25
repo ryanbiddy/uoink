@@ -41,7 +41,8 @@ int main(int argc, char **argv) {
     if (!part) return 1;
     *part = 0; /* Contents */
     if (snprintf(python, sizeof(python), "%s/Resources/Python/bin/python3", resolved) >= (int)sizeof(python) ||
-        snprintf(script, sizeof(script), "%s/Resources/server.py", resolved) >= (int)sizeof(script)) return 1;
+        snprintf(script, sizeof(script), "%s/Resources/%s", resolved,
+                 (argc == 1 || strcmp(argv[1], "--helper") == 0) ? "uoink_supervisor.py" : "server.py") >= (int)sizeof(script)) return 1;
     if (access(python, X_OK) || access(script, R_OK)) {
         fputs("Uoink installation is incomplete. Reinstall Uoink.app from the DMG.\n", stderr); return 1;
     }

@@ -40,14 +40,14 @@ def agent_path(home: Path) -> Path:
 
 def plist(app: Path, home: Path) -> dict:
     contents = app_path(app) / "Contents"
-    logs = home.resolve() / "Library/Logs/Uoink"
     return {"Label": LABEL,
-            "ProgramArguments": [str(contents / "MacOS/Uoink"), "--helper"],
+            "ProgramArguments": [str(contents / "MacOS/Uoink"), "--helper", "--startup"],
             "WorkingDirectory": str(contents / "Resources"),
-            "RunAtLoad": True, "KeepAlive": False, "ProcessType": "Background",
+            "RunAtLoad": True, "KeepAlive": {"SuccessfulExit": False},
+            "ThrottleInterval": 30, "ProcessType": "Background",
             "EnvironmentVariables": {"PYTHONDONTWRITEBYTECODE": "1", "PYTHONNOUSERSITE": "1"},
-            "StandardOutPath": str(logs / "launchd.out.log"),
-            "StandardErrorPath": str(logs / "launchd.err.log")}
+            # Helper stdout/stderr are captured and rotated by the supervisor.
+            "StandardOutPath": "/dev/null", "StandardErrorPath": "/dev/null"}
 
 
 def launchctl(*args):
@@ -126,7 +126,7 @@ def check_disable(app: Path, home: Path | None = None) -> bool:
         pid = re.search(r"(?m)^\s*pid = (\d+)\s*$", service.stdout)
         if pid:
             import _platform
-            identity = read_identity(app, home)
+            identity = read_identity(app, home, supervisor="--startup" in payload["ProgramArguments"])
             if (identity is None or identity.get("pid") != int(pid.group(1)) or
                     _platform.darwin_liveness(identity.get("pid"), identity.get("created_ms"), identity.get("executable")) != "alive"):
                 raise ValueError("Loaded LaunchAgent process ownership is unknown; refusing bootout")
@@ -207,8 +207,9 @@ def uninstall_plan(app: Path, home: Path) -> dict:
             "process_policy": "Only the recorded helper with matching script, executable and creation identity"}
 
 
-def read_identity(app: Path, home: Path) -> dict | None:
-    path = home / "Library/Application Support/Uoink/runtime-identity.json"
+def read_identity(app: Path, home: Path, *, supervisor: bool = False) -> dict | None:
+    filename = "supervisor-identity.json" if supervisor else "runtime-identity.json"
+    path = home / "Library/Application Support/Uoink" / filename
     if not path.exists():
         return None
     if path.is_symlink():
@@ -216,7 +217,7 @@ def read_identity(app: Path, home: Path) -> dict | None:
     identity = json.loads(path.read_text(encoding="utf-8"))
     contents = app / "Contents"
     if (not isinstance(identity, dict) or
-            Path(identity.get("script", "")).resolve() != (contents / "Resources/server.py").resolve() or
+            Path(identity.get("script", "")).resolve() != (contents / "Resources" / ("uoink_supervisor.py" if supervisor else "server.py")).resolve() or
             Path(identity.get("executable", "")).resolve() != (contents / MAC_BUNDLE_PYTHON).resolve()):
         raise ValueError("Runtime identity belongs to another install; no process stopped or app removed")
     return identity
@@ -239,6 +240,12 @@ def uninstall(app: Path, home: Path) -> dict:
     plan = uninstall_plan(app, home)
     app = Path(plan["app"])
     set_enabled(app, False, home)
+    # A manually opened app can own a supervisor outside launchd. Validate
+    # recorded ownership before preventing its helper from restarting.
+    read_identity(app, home)
+    read_identity(app, home, supervisor=True)
+    from uoink_supervisor import request_stop
+    request_stop(home / "Library/Application Support/Uoink", reason="uninstall")
     stop_verified(app, home)
     # Validate again after stopping. Never remove a link or an unrelated bundle.
     if app_path(app) != app:
