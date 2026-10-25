@@ -69,6 +69,13 @@
     </header>
     <h1 id="page-title">Set up your first capture</h1>
     <p class="lede">Install the helper, check the connection, then save a source to your library.</p>
+    <div id="store-install" class="notice" hidden>
+      <p>Use the store version for automatic extension updates. The Windows helper is still required.</p>
+      <a id="store-install-link" target="_blank" rel="noopener">Add to Chrome</a>
+      <details><summary>Advanced: load the bundled extension</summary>
+        <p>Open <code>chrome://extensions</code>, turn on Developer mode, click <strong>Load unpacked</strong>, and select the helper's <code>extension</code> folder. Use one copy of Uoink at a time.</p>
+      </details>
+    </div>
     <p id="settings-moved" class="notice" hidden>Settings now live in the dashboard. <a id="settings-destination" href="http://127.0.0.1:5179/dashboard#settings/capture" target="_blank" rel="noopener">Open dashboard Settings</a>.</p>
     <nav aria-label="Setup steps">
       <ol class="setup-progress">
@@ -123,6 +130,7 @@
     <footer class="secondary">Connect Claude Desktop, Claude Code or Cursor to all 91 Uoink tools. Capture options, AI features, library and agent connections are in <a href="http://127.0.0.1:5179/dashboard#settings/capture" target="_blank" rel="noopener">dashboard Settings</a>.</footer>
   </main>
   <script src="lib/extract.js"></script>
+  <script src="lib/store-links.js"></script>
   <script src="setup.js"></script>
 </body>
 </html>

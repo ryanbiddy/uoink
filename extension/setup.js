@@ -27,6 +27,13 @@ function scrollBehavior() {
   return preferred === "smooth" ? "auto" : preferred;
 }
 
+async function showStoreInstall() {
+  const url = await globalThis.UoinkStore?.load();
+  if (!url) return;
+  $("store-install-link").href = url;
+  $("store-install").hidden = false;
+}
+
 function setPlatform(os) {
   const value = String(os || "").toLowerCase();
   platformOs = /^(mac|darwin)/.test(value) ? "mac" : /^(linux|cros|openbsd)/.test(value) ? "linux" : "win";
@@ -256,4 +263,5 @@ window.addEventListener("hashchange", applySource);
 setPlatform("win");
 chrome.runtime.getPlatformInfo(info => setPlatform(info && info.os));
 applySource();
+showStoreInstall();
 checkConnection();

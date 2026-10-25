@@ -311,6 +311,8 @@ foreach ($f in @(
     'uoink_processes.py',
     'uoink_install_isolation.py',
     'uoink_usage.py',
+    'uoink_store.py',
+    'extension\store-config.json',
     'migrate_install.py',
     'channels.py',
     'workspaces.py',
@@ -634,6 +636,7 @@ Copy-Item (Join-Path $RepoRoot 'uoink_tray.py')  $StagingDir -Force
 # entrypoints (not at server import time), but must ship or the tray's
 # left-click + the first-run splash crash silently.
 Copy-Item (Join-Path $RepoRoot 'uoink_splash.py')    $StagingDir -Force
+Copy-Item (Join-Path $RepoRoot 'uoink_store.py')     $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'uoink_dashboard.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'index.py')       $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'clips.py')       $StagingDir -Force

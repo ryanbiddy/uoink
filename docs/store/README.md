@@ -1,13 +1,21 @@
-# docs/store — Chrome Web Store submission package (Uoink v3.2.8)
+# Uoink 3.11 store submission
 
-Ready-to-submit CWS listing package. **Submission is a manual Ryan step.**
+Start with [SUBMIT-NOW.md](SUBMIT-NOW.md). Ryan creates the developer account,
+pays the fee, uploads the zip and submits it.
 
-Start with **[`SUBMISSION-CHECKLIST.md`](./SUBMISSION-CHECKLIST.md)**.
+The package and form answers are prepared. Submission still needs the draft
+item ID in the released helper, current screenshots, and a published Limited
+Use statement. See [SUBMISSION-CHECKLIST.md](SUBMISSION-CHECKLIST.md).
 
-- [`listing.md`](./listing.md) — all listing copy (name, descriptions, single purpose, category, support email, privacy URL, website).
-- [`permissions-justification.md`](./permissions-justification.md) — reviewer justifications + data-use affirmations.
-- `screenshots/` — 5 store screenshots, exactly 1280×800, upload in filename order.
-- `tiles/` — promo tiles (440×280, 1400×560, plus a spare 920×680).
+- [Listing fields](listing.md)
+- [Permission justifications](permissions-justification.md)
+- [Privacy form answers](privacy-practices.md)
+- [Reviewer test instructions](reviewer-test-instructions.md)
+- [Policy audit and review risks](POLICY-AUDIT.md)
+- [Screenshot recapture list](SCREENSHOTS.md)
+- [Website copy handoff](website-copy-notes.md)
+- [Build and verification receipt](VERIFICATION.md)
 
-Facts current as of v3.2.8; domains updated to uoink.app. Screenshots sourced
-from `marketing/assets/2026-07-06-final` and `2026-07-06`.
+The July images remain for reference. Do not upload them as 3.11 screenshots.
+The older `docs/store-listing.md`, prelaunch audit and external CWS handoff
+files are historical drafts. This folder is the current submission source.

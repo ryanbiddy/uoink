@@ -444,6 +444,8 @@ class JsApi:
         return True
 
     def extension_status(self):
+        from uoink_store import load_store_config
+
         extension_dir = _extension_dir()
         manifest_exists = (extension_dir / "manifest.json").is_file()
         sentinel_exists = self._extension_sentinel.is_file()
@@ -452,6 +454,7 @@ class JsApi:
         if should_show:
             self._hold_open = True
         return {
+            "store_url": load_store_config()["chrome_web_store_url"],
             "path": str(extension_dir),
             "manifest_exists": manifest_exists,
             "sentinel_exists": sentinel_exists,

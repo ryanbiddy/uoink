@@ -354,7 +354,12 @@ PINNED_EXTENSION_ID = "bkcapfidedhfcjpmjabeopfbcjcbmdmi"
 
 
 def _allowed_extension_ids() -> set[str]:
+    from uoink_store import load_store_config
+
     ids = {PINNED_EXTENSION_ID}
+    store_id = load_store_config()["chrome_web_store_id"]
+    if store_id:
+        ids.add(store_id)
     extra = (os.environ.get("UOINK_EXTENSION_IDS") or "").split(",")
     try:
         settings = _read_settings() or {}

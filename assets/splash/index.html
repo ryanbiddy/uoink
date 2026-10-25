@@ -339,6 +339,7 @@
     let tertiaryAction = "";
     let extensionPath = "";
     let extensionBrowser = null;
+    let extensionStatus = null;
 
     function nativeApi() {
       return window.pywebview && window.pywebview.api ? window.pywebview.api : null;
@@ -472,11 +473,25 @@
       });
     }
 
-    function setExtensionHint(status) {
+    function setExtensionHint(status, advanced = false) {
+      extensionStatus = status;
       extensionPath = status?.path || "";
       extensionBrowser = status?.browser || { name: "your Chromium browser", url: "chrome://extensions/" };
       const browserName = extensionBrowser.name || "your Chromium browser";
       const extensionUrl = extensionBrowser.url || "chrome://extensions/";
+      if (status?.store_url && !advanced) {
+        callNative("set_window_title", "Last step - add Uoink to Chrome");
+        setMode({
+          mode: "extension", eyebrow: "One-time setup", pill: "Helper ready",
+          headline: "Add the Uoink button to Chrome",
+          copy: "Open the store page and click Add to Chrome. Chrome will keep the extension up to date.",
+          primary: { text: "Add to Chrome", action: "extension-store" },
+          secondary: { text: "Advanced: load unpacked", action: "extension-advanced" },
+          tertiary: { text: "I've added it - done", action: "extension-done" },
+        });
+        hideExtensionExtras();
+        return;
+      }
       callNative("set_window_title", `Last step - load the extension in ${browserName}`);
       setMode({
         mode: "extension",
@@ -618,6 +633,8 @@
       else if (action === "settings") openSettings();
       else if (action === "youtube") openLastYoutube();
       else if (action === "dismiss") dismiss();
+      else if (action === "extension-store") openExternal(extensionStatus.store_url);
+      else if (action === "extension-advanced") setExtensionHint(extensionStatus, true);
       else if (action === "extension-open") {
         try {
           const opened = await callNative("open_extensions_page", extensionBrowser?.id || "");
