@@ -12,7 +12,7 @@ Install the Uoink helper app, then load its bundled extension. On first launch, 
 <!-- store-install:end -->
 
 Apply that copy to the homepage extension button, `/install`, and any
-"Load unpacked" onboarding instructions. Keep the Windows helper requirement
+"Load unpacked" onboarding instructions. Keep the Uoink helper app requirement
 beside the install button. A store install removes the Developer mode step;
 it does not replace the helper. Show sideloading in an Advanced disclosure
 once the store link is live. Remove any `uoink.video` link in these surfaces.
