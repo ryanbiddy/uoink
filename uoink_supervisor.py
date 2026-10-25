@@ -270,8 +270,10 @@ def capture_output(pipe, root: Path, tail: list) -> None:
     handler = RotatingFileHandler(root / "helper-output.log", maxBytes=1024 * 1024,
                                   backupCount=3, encoding="utf-8")
     try:
-        # Fixed chunks bound memory even if a child prints no newlines.
-        while chunk := pipe.read(4096):
+        # Fixed chunks bound memory even if a child prints no newlines. read1
+        # returns what has arrived; read(4096) would hold short output until
+        # 4 KiB accumulated or the helper exited.
+        while chunk := pipe.read1(4096):
             tail[0] = (tail[0] + chunk)[-8192:]
             handler.emit(logging.LogRecord("helper", logging.INFO, "", 0,
                                           chunk.decode("utf-8", errors="replace"), (), None))
