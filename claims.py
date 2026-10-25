@@ -98,7 +98,7 @@ def extract_claims(idx, video_id: str, *, claims: list[dict],
     now = _now_iso()
     inserted: list[int] = []
     errors: list[str] = []
-    with idx._lock:
+    with idx.write_transaction() as conn:
         for c in claims:
             if not isinstance(c, dict):
                 errors.append("non-dict claim skipped")
@@ -111,7 +111,7 @@ def extract_claims(idx, video_id: str, *, claims: list[dict],
                 continue
             ctx = c.get("context")
             ctx_blob = json.dumps(ctx) if isinstance(ctx, dict) else None
-            cur = idx._conn.execute(
+            cur = conn.execute(
                 "INSERT INTO claims "
                 "(video_id, claim_text, check_worthiness, status, "
                 "evidence, extracted_at, context_json) "
@@ -163,8 +163,8 @@ def verify_claim(idx, claim_id: int, *, evidence: list[dict],
             "source_url": src, "quote": quote[:1024],
             "alignment_signal": align,
         })
-    with idx._lock:
-        idx._conn.execute(
+    with idx.write_transaction() as conn:
+        conn.execute(
             "UPDATE claims SET evidence=?, status=?, verified_at=? WHERE id=?",
             (json.dumps(clean), STATUS_VERIFIED, _now_iso(), claim_id))
     return {"ok": True, "claim_id": claim_id, "evidence_count": len(clean),
@@ -229,8 +229,8 @@ def list_claims(idx, *, video_id: str | None = None,
 
 def mark_not_attempted(idx, claim_id: int) -> bool:
     """User-initiated 'skip verification' (per ROADMAP A2 status enum)."""
-    with idx._lock:
-        cur = idx._conn.execute(
+    with idx.write_transaction() as conn:
+        cur = conn.execute(
             "UPDATE claims SET status=?, verified_at=? WHERE id=?",
             (STATUS_NOT_ATTEMPTED, _now_iso(), claim_id))
         return cur.rowcount > 0
