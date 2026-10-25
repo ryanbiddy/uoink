@@ -13877,6 +13877,14 @@ class Handler(BaseHTTPRequestHandler):
                     corpus_paths_ok=bool(integrity.get("ok")),
                 ),
             )
+        if bare == "/":
+            # People type the bare helper address into a browser. Send them to
+            # the public dashboard shell instead of a token-mismatch 403.
+            self.send_response(302)
+            self.send_header("Location", "/dashboard")
+            self.send_header("Content-Length", "0")
+            self.end_headers()
+            return
         if bare == "/dashboard" or bare == "/dashboard/":
             # Public local UI shell. The page itself performs the same token
             # handshake as the extension before reading recent yoinks or
