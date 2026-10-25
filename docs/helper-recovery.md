@@ -17,8 +17,10 @@ not cause a restart. Only process exit triggers recovery.
 A nonzero exit, failed process launch or startup timeout allows up to three
 restarts in a rolling ten minute window. Delays are 5, 15 and 45 seconds.
 The next failure stops recovery, saves the cause and shows an OS notification
-from the supervisor. A bind failure tells the user to close the conflicting
-helper or app. Other failures direct the user to doctor and the logs.
+from the supervisor. A bind failure or an already running helper stops after
+one launch, without retries or a crash-loop notification. The state explains
+the port conflict and how to use or close the other helper or app. Other
+failures direct the user to doctor and the logs.
 
 Exit zero stops recovery. Tray Quit, dashboard Quit and the installed Stop
 shortcut also save `helper-stop.json` before stopping the helper. That marker
@@ -43,13 +45,17 @@ task. If setup dies between those operations, startup remains available.
 Legacy `server.py` launches in this build also enter the supervisor lock,
 so overlapping startup entries cannot start two helpers. An owned task from
 the older watchdog script is disabled and removed after registration.
-Foreign startup definitions are retained.
+Foreign startup definitions are retained. First-run data migration uses the
+registrar's read-only ownership check and does not recreate a Run value when
+an owned task exists, including a disabled task.
 
 The installer registers on install and upgrade after the existing files-only
 verification. Upgrade prep writes a stop request before the existing graceful
-stop and file replacement. Uninstall unregisters before deleting files and
-stops if unregistering fails. Disabling login startup in settings disables
-the task without interrupting a capture. Isolated installs do not register
+stop and file replacement. Setup stops if preparation fails or the helper's
+port remains occupied. Uninstall checks startup ownership without changes
+before confirmation, then unregisters at the confirmed uninstall step. It
+aborts before deleting files if unregistering fails. Disabling login startup
+in settings disables the task without interrupting a capture. Isolated installs do not register
 tasks or change ordinary startup.
 
 ## State and logs

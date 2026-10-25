@@ -2,7 +2,7 @@
 param(
     [string]$InstallDir = (Split-Path -Parent $PSScriptRoot),
     [string]$PythonPath,
-    [ValidateSet('Register', 'Unregister', 'Status', 'Disable')]
+    [ValidateSet('Register', 'Unregister', 'Status', 'Disable', 'Ownership')]
     [string]$Mode = 'Register'
 )
 
@@ -30,6 +30,11 @@ $ownedOldTask = $oldTask -and $oldTask.Principal.UserId -in @($identity.Name, $i
     @($oldTask.Actions | Where-Object { $_.Arguments -eq $oldArgument }).Count -eq 1
 if ($Mode -eq 'Status') {
     if ($existing -and $existing.State -ne 'Disabled') { Write-Output 'enabled' } else { Write-Output 'disabled' }
+    return
+}
+if ($Mode -eq 'Ownership') {
+    # Migration must also respect an owned task whose login trigger is disabled.
+    if ($existing) { Write-Output 'owned' } else { Write-Output 'absent' }
     return
 }
 if ($Mode -in @('Unregister', 'Disable')) {

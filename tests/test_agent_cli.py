@@ -364,7 +364,18 @@ def test_installer_path_ownership_isolation_and_exact_removal():
     assert "AgentSameEntry(AgentExpandedEntry(Target), ExpandConstant('{app}\\bin'))) then Exit;" in remove
     assert "AgentFilterPath(Value, Target, True, Found)" in remove
     assert "AgentWritePath(Updated, ValueType)" in remove
-    assert "if CurUninstallStep = usUninstall then RemoveAgentPath();" in source
+    from inno_recovery_harness import PascalBody
+    callback = PascalBody(block(
+        "procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);",
+        "procedure VerifyInstalledHelper();"))
+    removals = []
+    scope = dict(usuninstall='confirmed', false=False, isolatedinstall=lambda: False,
+                 unregisterhelperrecovery=lambda _: True,
+                 removeagentpath=lambda: removals.append('path'))
+    for step in ('before-confirmation', 'confirmed', 'post-uninstall', 'done'):
+        scope['curuninstallstep'] = step
+        callback.execute(callback.tree, scope)
+        assert removals == ([] if step == 'before-confirmation' else ['path'])
     filtering = block("function AgentFilterPath(", "procedure AddAgentPath();")
     assert "Copy(Value, Start, I - Start)" in filtering
     assert "(not Found) and AgentSameEntry(Entry, Target)" in filtering

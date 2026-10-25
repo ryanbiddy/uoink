@@ -7,14 +7,15 @@ $expectedName = 'Uoink Helper-' + $identity.User.Value
 $expectedArgument = '"{0}" --startup' -f (Join-Path $InstallDir 'uoink_supervisor.py')
 $runValue = '"{0}" "{1}"' -f (Join-Path $InstallDir 'python\pythonw.exe'), (Join-Path $InstallDir 'server.py')
 $global:recoveryFixtureTask = $null
-if ($Scenario -in @('update', 'unregister', 'disable', 'status', 'foreign')) {
+if ($Scenario -in @('update', 'unregister', 'disable', 'status', 'foreign', 'unregister-preview', 'ownership', 'ownership-disabled', 'ownership-foreign')) {
     $global:recoveryFixtureTask = [pscustomobject]@{
         Actions = @([pscustomobject]@{Arguments=$expectedArgument})
         Principal = [pscustomobject]@{UserId=$identity.Name}
         State = 'Ready'
     }
 }
-if ($Scenario -eq 'foreign') { $global:recoveryFixtureTask.Actions[0].Arguments = 'foreign' }
+if ($Scenario -in @('foreign', 'ownership-foreign')) { $global:recoveryFixtureTask.Actions[0].Arguments = 'foreign' }
+if ($Scenario -eq 'ownership-disabled') { $global:recoveryFixtureTask.State = 'Disabled' }
 function Assert-Equal($Actual, $Expected) {
     if ($Actual -cne $Expected) { throw "Expected [$Expected], got [$Actual]" }
 }
@@ -123,12 +124,14 @@ $mode = switch ($Scenario) {
     'absent' { 'Unregister' }
     'disable' { 'Disable' }
     'status' { 'Status' }
+    'unregister-preview' { 'Unregister' }
+    { $_ -like 'ownership*' } { 'Ownership' }
     default { 'Register' }
 }
 $failed = $false
 $result = $null
 try {
-    $result = & $Script -InstallDir $InstallDir -Mode $mode -WhatIf:($Scenario -eq 'whatif')
+    $result = & $Script -InstallDir $InstallDir -Mode $mode -WhatIf:($Scenario -in @('whatif', 'unregister-preview'))
 } catch {
     if ($_.Exception.Message -notmatch 'injected|belongs to another install') { throw }
     $failed = $true

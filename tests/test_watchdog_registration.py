@@ -21,6 +21,9 @@ ROOT = Path(__file__).resolve().parents[1]
     ('unregister', ['unregister', 'remove-run'], False), ('absent', [], False),
     ('disable', ['disable', 'remove-run'], False), ('status', [], False),
     ('foreign', [], True), ('whatif', [], False),
+    ('unregister-preview', [], False),
+    ('ownership', [], False), ('ownership-disabled', [], False),
+    ('ownership-absent', [], False), ('ownership-foreign', [], True),
 ])
 def test_registration_arguments_and_migration_order(tmp_path, scenario, events, failed):
     app = tmp_path / 'Install with spaces'
@@ -36,6 +39,10 @@ def test_registration_arguments_and_migration_order(tmp_path, scenario, events, 
     payload = json.loads(result.stdout.strip().splitlines()[-1])
     assert payload['events'] == events
     assert payload['failed'] is failed
+    if scenario in {'ownership', 'ownership-disabled'}:
+        assert payload['result'] == 'owned'
+    if scenario == 'ownership-absent':
+        assert payload['result'] == 'absent'
 
 
 def test_powershell_sources_parse_without_execution():
@@ -43,7 +50,8 @@ def test_powershell_sources_parse_without_execution():
     if not powershell:
         pytest.skip('PowerShell parser unavailable')
     files = ['scripts/install-watchdog.ps1', 'installer/upgrade_prep.ps1',
-             'installer/verify_install.ps1', 'installer/templates/stop-server.ps1', 'tests/watchdog_fixture.ps1']
+             'installer/verify_install.ps1', 'installer/templates/stop-server.ps1', 'tests/watchdog_fixture.ps1',
+             'tests/upgrade_prep_fixture.ps1']
     for name in files:
         # Paths are repository-owned, never user-provided shell fragments.
         command = "$tokens=$null; $errors=$null; [void][System.Management.Automation.Language.Parser]::ParseFile('" + str(ROOT / name).replace("'", "''") + "', [ref]$tokens, [ref]$errors); if ($errors) { $errors | Out-String | Write-Error; exit 1 }"

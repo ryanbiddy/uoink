@@ -1564,14 +1564,18 @@ begin
   Result := True;
 end;
 
-function UnregisterHelperRecovery(): Boolean;
+function UnregisterHelperRecovery(Preview: Boolean): Boolean;
 var
   ResultCode: Integer;
+  Params: String;
 begin
-  Result := Exec('powershell.exe',
+  Params :=
     '-NoProfile -NonInteractive -ExecutionPolicy Bypass -File "' +
     ExpandConstant('{app}\scripts\install-watchdog.ps1') + '" -InstallDir "' +
-    ExpandConstant('{app}') + '" -Mode Unregister', ExpandConstant('{app}'),
+    ExpandConstant('{app}') + '" -Mode Unregister';
+  if Preview then Params := Params + ' -WhatIf';
+  ResultCode := -1;
+  Result := Exec('powershell.exe', Params, ExpandConstant('{app}'),
     SW_HIDE, ewWaitUntilTerminated, ResultCode);
   Result := Result and (ResultCode = 0);
   if not Result then
@@ -1594,7 +1598,8 @@ begin
 
   if (CompareText(Trim(IsolatedFlag), '1') <> 0) and (not MarkerExists) then
   begin
-    Result := UnregisterHelperRecovery();
+    (* Read-only preflight. Declining confirmation must leave startup intact. *)
+    Result := UnregisterHelperRecovery(True);
     Exit;
   end;
 
@@ -1667,11 +1672,8 @@ end;
    with the stored token, fallback Stop-Process under Yoink/Uoink roots,
    wait-for-port-free, sentinel delete, full logging to
    %TEMP%\uoink-upgrade-prep.log). Pascal also calls DeleteFile() on the
-   sentinel directly as belt-and-suspenders -- if PowerShell itself
-   failed to launch (locked down policy, missing pwsh, etc.) the upgrader
-   still gets their splash. The script is non-fatal on any failure -- the
-   worst case is the previously-shipping behaviour, which is what we have
-   today, so a prep failure should never abort the install.
+   sentinel directly after successful preparation. Setup must stop if the
+   script cannot run or cannot release the helper's port.
 
    Note: this block + the ones below use Pascal's other comment delimiter
    instead of the house brace style because Inno's Pascal Script does NOT
@@ -1730,14 +1732,15 @@ begin
   try
     ExtractTemporaryFile('upgrade_prep.ps1');
   except
-    (* ExtractTemporaryFile raised. Skip the PS script + fall through to
-       the direct sentinel delete below. *)
     Log('PrepareToInstall: ExtractTemporaryFile(upgrade_prep.ps1) failed');
+    Result := 'Uoink setup could not prepare the upgrade. Close Uoink and run setup again.';
+    Exit;
   end;
 
   ScriptPath := ExpandConstant('{tmp}\upgrade_prep.ps1');
   if FileExists(ScriptPath) then
   begin
+    ResultCode := -1;
     Executed := Exec(
       'powershell.exe',
       '-NoProfile -NonInteractive -ExecutionPolicy Bypass -File "' + ScriptPath + '" -InstallDir "' + ExpandConstant('{app}') + '"',
@@ -1745,18 +1748,19 @@ begin
       SW_HIDE,
       ewWaitUntilTerminated,
       ResultCode);
-    if Executed then
-      Log('PrepareToInstall: upgrade_prep.ps1 exited with code ' + IntToStr(ResultCode))
-    else
-      Log('PrepareToInstall: powershell.exe Exec() failed; falling through');
+    Log('PrepareToInstall: upgrade_prep.ps1 exited with code ' + IntToStr(ResultCode));
+    if (not Executed) or (ResultCode <> 0) then
+    begin
+      Result := 'Uoink setup could not stop the previous helper. Close Uoink or restart Windows, then run setup again. Details are in your Temp folder as uoink-upgrade-prep.log.';
+      Exit;
+    end;
   end else
-    Log('PrepareToInstall: upgrade_prep.ps1 missing under tmp; falling through');
+  begin
+    Result := 'Uoink setup is missing its upgrade preparation script. Download setup again.';
+    Exit;
+  end;
 
-  (* Belt-and-suspenders: directly remove the splash sentinel so even if
-     the PS script never ran (PowerShell missing, ExecutionPolicy locked
-     by a domain policy, ExtractTemporaryFile raised), the upgrader still
-     sees the splash on first launch. DeleteFile is a no-op if the file
-     is absent (clean install). *)
+  (* Repeat sentinel cleanup only after preparation succeeded. *)
   if FileExists(SentinelPath) then
   begin
     if DeleteFile(SentinelPath) then
@@ -1922,7 +1926,14 @@ end;
 
 procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
 begin
-  if CurUninstallStep = usUninstall then RemoveAgentPath();
+  if CurUninstallStep = usUninstall then
+  begin
+    (* Confirmation has completed. Abort before deleting files if startup
+       cannot be removed; UninstallRun exit codes alone cannot enforce this. *)
+    if not IsolatedInstall() then
+      if not UnregisterHelperRecovery(False) then Abort;
+    RemoveAgentPath();
+  end;
 end;
 
 procedure VerifyInstalledHelper();

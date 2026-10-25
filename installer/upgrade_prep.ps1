@@ -15,8 +15,8 @@
 #   %LOCALAPPDATA%\Uoink\.first-run-done. The new helper sees it and skips
 #   the splash, so upgraders never get the "Uoink is running" confirmation.
 #
-# This script handles both. Non-fatal on any failure (the worst case is the
-# previously-shipping behaviour, which is what we have today). All actions
+# This script handles both. Failure to stop recovery or release the port
+# returns a nonzero exit so setup stops before replacing files. All actions
 # are logged to %TEMP%\uoink-upgrade-prep.log for post-mortem if a user
 # reports the new helper still not starting.
 
@@ -62,8 +62,16 @@ function Wait-PortFree($timeoutSeconds) {
 # Older installs have no supervisor and continue through the existing flow.
 $recoveryScript = Join-Path $InstallDir 'uoink_supervisor.py'
 if (Test-Path -LiteralPath $recoveryScript) {
-    & (Join-Path $InstallDir 'python\python.exe') $recoveryScript --stop
-    if ($LASTEXITCODE -ne 0) { throw 'Could not pause helper recovery before upgrade.' }
+    try {
+        $ErrorActionPreference = 'Stop'
+        & (Join-Path $InstallDir 'python\python.exe') $recoveryScript --stop
+        if ($LASTEXITCODE -ne 0) { throw 'Could not pause helper recovery before upgrade.' }
+    } catch {
+        Write-PrepLog ('Upgrade stopped: could not pause helper recovery. ' + $_.Exception.Message)
+        exit 1
+    } finally {
+        $ErrorActionPreference = 'Continue'
+    }
 }
 Write-PrepLog '==== upgrade prep start ===='
 Write-PrepLog ("LOCALAPPDATA={0}" -f $env:LOCALAPPDATA)
@@ -118,6 +126,7 @@ Write-PrepLog ("port 5179 free after graceful wait? {0}" -f $freed)
 # uoink_splash.py can hold pywebview DLLs open without binding 5179, causing
 # Inno to abort while replacing site-packages files.
 $roots = @(
+    $InstallDir,
     (Join-Path $env:LOCALAPPDATA 'Uoink'),
     (Join-Path $env:LOCALAPPDATA 'Yoink')
 )
@@ -137,7 +146,7 @@ foreach ($p in $procs) {
     if (-not $exe) { continue }
     $matched = $false
     foreach ($r in $roots) {
-        if ($exe.StartsWith($r, [StringComparison]::OrdinalIgnoreCase)) { $matched = $true; break }
+        if ($exe.StartsWith($r.TrimEnd('\') + '\', [StringComparison]::OrdinalIgnoreCase)) { $matched = $true; break }
     }
     if (-not $matched) { continue }
     try {
@@ -147,12 +156,11 @@ foreach ($p in $procs) {
         Write-PrepLog ("Stop-Process pid={0} failed: {1}" -f $p.ProcessId, $_.Exception.Message)
     }
 }
-if (-not $freed) {
-    $freedAfterKill = Wait-PortFree 2
-    Write-PrepLog ("port 5179 free after Stop-Process wait? {0}" -f $freedAfterKill)
-    if (-not $freedAfterKill) {
-        Write-PrepLog 'WARNING: port 5179 STILL bound -- install will proceed; new helper may need a reboot to bind'
-    }
+$freedAfterKill = Wait-PortFree 2
+Write-PrepLog ("port 5179 free after Stop-Process wait? {0}" -f $freedAfterKill)
+if (-not $freedAfterKill) {
+    Write-PrepLog 'Upgrade stopped: port 5179 is still in use. Close Uoink or restart Windows, then run setup again.'
+    exit 1
 }
 
 # ---- Step 4: clear the splash sentinel ------------------------------------

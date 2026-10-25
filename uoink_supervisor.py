@@ -292,10 +292,17 @@ class Supervisor:
                     code = child.wait(timeout=10)
                 if reader is not None:
                     reader.join(timeout=2)
-            if not self.stopped() and code != 0 and re.search(
-                    rb"failed to bind|address already in use|WinError 10048", tail[0], re.IGNORECASE):
-                reason = "Helper could not bind its local port. Close the conflicting helper or app, then open Uoink again."
+            bind_failure = code != 0 and re.search(
+                rb"failed[- ]to[- ]bind|address already in use|WinError 10048", tail[0], re.IGNORECASE)
+            already_running = code == 0 and re.search(
+                rb"Uoink server already running", tail[0], re.IGNORECASE)
             self.save(last_exit_code=code, last_stop_at=stamp(), helper_pid=None, reason=reason)
+            if not self.stopped() and (bind_failure or already_running):
+                reason = ("Another Uoink helper is already running on the local port."
+                          if already_running else "Helper could not bind its local port. Another helper or app is using it.")
+                self.save(status="stopped", reason=reason,
+                          action="Use the running Uoink helper, or close the app holding the port and open Uoink again.")
+                return 0
             if self.stopped() or code == 0:
                 self.save(status="stopped", reason="Helper was stopped. Open Uoink to start it again.", action="")
                 return 0

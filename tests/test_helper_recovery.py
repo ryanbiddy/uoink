@@ -24,6 +24,9 @@ with (root / 'starts').open('a') as f: f.write('start\n')
 if mode == 'exit0': sys.exit(0)
 if mode == 'exit1': sys.exit(1)
 if mode == 'crash': os._exit(7)
+if mode == 'already_running':
+    print('Uoink server already running on http://127.0.0.1:1 -- exiting', flush=True)
+    sys.exit(0)
 if mode == 'quit':
     (root / 'helper-stop.json').write_text('{"reason": "quit"}')
     sys.exit(1)
@@ -89,15 +92,33 @@ def test_real_disposable_child_policy(tmp_path, mode, code):
 
 
 def test_bind_failure_is_disclosed(tmp_path):
+    notifications = []
     with socket.socket() as held:
         held.bind(('127.0.0.1', 0))
         held.listen()
         assert held.getsockname()[1] != 5179
-        runner = supervisor(tmp_path, 'bind')
+        runner = supervisor(tmp_path, 'bind', notify=notifications.append)
         runner.command.append(str(held.getsockname()[1]))
         assert runner.run() == 0
     assert 'could not bind' in recovery.status(tmp_path)['reason']
     assert recovery.status(tmp_path)['last_exit_code'] == 1
+    assert (tmp_path / 'starts').read_text().splitlines() == ['start']
+    assert recovery.status(tmp_path)['restart_count'] == 0
+    assert recovery.status(tmp_path)['status'] == 'stopped'
+    assert runner.state['restart_times'] == []
+    assert notifications == []
+
+
+def test_healthy_other_helper_is_disclosed_without_retry(tmp_path):
+    notifications = []
+    runner = supervisor(tmp_path, 'already_running', notify=notifications.append)
+    assert runner.run() == 0
+    state = recovery.status(tmp_path)
+    assert state['status'] == 'stopped' and state['last_exit_code'] == 0
+    assert 'already running' in state['reason'] and state['action']
+    assert (tmp_path / 'starts').read_text().splitlines() == ['start']
+    assert state['restart_count'] == 0 and runner.state['restart_times'] == []
+    assert notifications == []
 
 
 def test_stop_intent_wins_over_nonzero_exit(tmp_path):
@@ -212,10 +233,18 @@ def test_profile_and_public_projection(tmp_path, monkeypatch):
     recovery.request_stop()
     assert (tmp_path / recovery.STOP_FILE).exists()
     recovery.write_json(tmp_path / recovery.STATE_FILE, {'status': 'crash_loop', 'session': 'private',
-                                                       'supervisor_pid': 98, 'command': 'private'})
+                                                       'supervisor_pid': 98, 'command': 'private',
+                                                       'data_root': str(tmp_path),
+                                                       'token': 'secret-test-token',
+                                                       'exception': 'private raw exception'})
     result = recovery.status()
     assert result['status'] == 'crash_loop'
-    assert 'session' not in result and 'supervisor_pid' not in result and 'command' not in result
+    assert set(result) == {'available', 'schema_version', 'status', 'last_exit_code',
+                          'restart_count', 'last_start_at', 'last_stop_at', 'ready_at',
+                          'reason', 'action'}
+    serialized = json.dumps(result)
+    assert all(value not in serialized for value in
+               ('private', 'secret-test-token', str(tmp_path), json.dumps(str(tmp_path))[1:-1]))
     (tmp_path / recovery.STATE_FILE).write_text('broken')
     assert recovery.status()['status'] == 'unreadable'
 
@@ -252,17 +281,6 @@ def test_readiness_requires_this_child_and_launch(monkeypatch, payload, expected
     opener = SimpleNamespace(open=lambda *a, **kw: nullcontext(reply))
     monkeypatch.setattr(recovery.urllib.request, 'build_opener', lambda *a: opener)
     assert recovery.ready('http://127.0.0.1:1/health', 'current', 123) is expected
-
-
-def test_installer_and_launchers_route_through_supervisor():
-    text = (ROOT / 'installer/uoink.iss').read_text(encoding='utf-8')
-    assert 'ValueName: "Uoink"' not in text
-    assert 'RegisterHelperRecovery();' in text
-    assert '-Mode Unregister' in text
-    assert 'VerifyInstalledHelper();\n    RegisterHelperRecovery();' in text
-    assert 'uoink_supervisor.py"" --show-dashboard' in text
-    assert '--stop' in (ROOT / 'installer/upgrade_prep.ps1').read_text()
-    assert '--stop' in (ROOT / 'installer/templates/stop-server.ps1').read_text()
 
 
 def test_quit_writes_intent_before_response_and_shutdown(tmp_path, monkeypatch):

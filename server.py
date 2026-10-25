@@ -20291,8 +20291,8 @@ def main(*, show_dashboard: bool = False):
         server = _YoinkHTTPServer((HOST, PORT), Handler)
     except OSError as e:
         # Port held by something we couldn't probe via /health (different
-        # app, half-open socket, etc). A non-zero exit lets Task Scheduler's
-        # restart-on-failure policy recover or surface the outage.
+        # app, half-open socket, etc). The supervisor reports this conflict
+        # without retrying or treating it as a helper crash loop.
         # Isolated mode never falls back to production port 5179.
         if _install_isolation.current_binding() is not None:
             log.error("isolated-port-occupied: failed to bind %s:%d -- %s", HOST, PORT, e)
