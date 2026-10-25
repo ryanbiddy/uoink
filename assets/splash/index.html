@@ -513,7 +513,7 @@
         tertiary: { text: "I've loaded it - done", action: "extension-done" },
       });
       els.steps.innerHTML = `
-        <li>Open ${escapeHtml(extensionUrl)} in ${escapeHtml(browserName)}</li>
+        <li>Open ${escapeHtml(browserName)} extensions (or paste ${escapeHtml(extensionUrl)} in its address bar)</li>
         <li>Turn ON "Developer mode" (top-right toggle)</li>
         <li>Click "Load unpacked" -> select this folder:</li>
       `;
@@ -622,6 +622,21 @@
       }
     }
 
+    // Browsers may open a blank tab instead of their internal extensions
+    // page when another app asks, so always hand over the address as well.
+    async function copyExtensionsUrl() {
+      const name = extensionBrowser?.name || "your browser";
+      let url = extensionBrowser?.url || "chrome://extensions/";
+      try {
+        const result = await callNative("copy_extensions_url", extensionBrowser?.id || "");
+        if (!result || result.ok === false) throw new Error("copy failed");
+        url = result.url || url;
+        els.copyStatus.textContent = `Copied ${url}. If ${name} didn't show its extensions page, click its address bar, paste and press Enter.`;
+      } catch (_) {
+        els.copyStatus.textContent = `If ${name} didn't show its extensions page, type ${url} in its address bar and press Enter.`;
+      }
+    }
+
     async function copyPath() {
       try {
         const result = await callNative("copy_extension_path");
@@ -651,6 +666,7 @@
         } catch (_) {
           openExternal(extensionBrowser?.url || "chrome://extensions/");
         }
+        await copyExtensionsUrl();
       } else if (action === "copy-path") {
         await copyPath();
       } else if (action === "extension-done") {
