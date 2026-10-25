@@ -136,6 +136,13 @@ def test_store_id_adds_exact_origin_without_unpinning_dev(helper, tmp_path, monk
     assert request(helper, headers=token_headers(f"chrome-extension://{OTHER_ID}"))[0] == 403
 
 
+def test_missing_store_module_keeps_pinned_token_access(helper, monkeypatch):
+    # An install without uoink_store.py must not take down /token for the pinned extension.
+    import sys
+    monkeypatch.setitem(sys.modules, "uoink_store", None)
+    assert helper["_allowed_extension_ids"]() == {PINNED_ID}
+    assert request(helper, headers=token_headers())[0] == 200
+
 @pytest.mark.parametrize("configured", [OTHER_ID, [OTHER_ID, EDGE_ID], (OTHER_ID, EDGE_ID)])
 @pytest.mark.parametrize("method", ["GET", "POST"])
 def test_configured_ids_add_to_pin_and_to_each_other(helper, configured, method):

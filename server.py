@@ -354,10 +354,15 @@ PINNED_EXTENSION_ID = "bkcapfidedhfcjpmjabeopfbcjcbmdmi"
 
 
 def _allowed_extension_ids() -> set[str]:
-    from uoink_store import load_store_config
-
     ids = {PINNED_EXTENSION_ID}
-    store_id = load_store_config()["chrome_web_store_id"]
+    try:
+        from uoink_store import load_store_config
+
+        store_id = load_store_config()["chrome_web_store_id"]
+    except Exception:
+        # A missing or unreadable store config must never take down /token;
+        # the pinned developer ID keeps working.
+        store_id = ""
     if store_id:
         ids.add(store_id)
     extra = (os.environ.get("UOINK_EXTENSION_IDS") or "").split(",")
