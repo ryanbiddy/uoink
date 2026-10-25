@@ -87,7 +87,8 @@ def test_discovery_manifest_privacy_security_and_transport_contracts(tmp_path) -
         assert spec.annotations == {"readOnlyHint": False, "destructiveHint": False,
                                     "idempotentHint": idempotent, "openWorldHint": True}
         wire = next(t for t in stdio if t["name"] == name)
-        assert wire["inputSchema"] == spec.input_schema and wire["description"] == spec.description
+        assert wire["inputSchema"] == uoink_mcp_tools.client_input_schema(spec.input_schema, spec.name)
+        assert wire["description"] == spec.description
         assert all(wire["annotations"][k] == v for k, v in spec.annotations.items())
         assert f"| `{name}` |" in audit
         bundled = next(t for t in manifest["tools"] if t["name"] == name)

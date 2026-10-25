@@ -268,9 +268,9 @@ class HttpClient:
         self.child.close()
 
 
-def registry_golden(toolset="full"):
+def registry_golden(toolset="full", *, structured_results=False):
     """Derive the complete expected inventory afresh, without SDK conversion."""
     import uoink_mcp_tools as tools
-    registry = {tool["name"]: tool for tool in tools.list_tools()}
-    return [dict(registry[name], inputSchema=tools.client_input_schema(registry[name]["inputSchema"]))
+    registry = {tool["name"]: tool for tool in tools.list_tools(structured_results=structured_results)}
+    return [dict(registry[name], inputSchema=tools.client_input_schema(registry[name]["inputSchema"], name))
             for name in tools.stdio_tool_names(toolset)]

@@ -392,9 +392,10 @@ def test_inno_isolated_mode_skips_5179_prep_and_ordinary_launch():
     run_section = iss.split("[Run]", 1)[1].split("[UninstallRun]", 1)[0]
     assert "--show-dashboard" not in run_section
     assert 'Check: not IsolatedInstall' in run_section
-    registry = iss.split("[Registry]", 1)[1].split("[Run]", 1)[0]
-    assert "CurrentVersion\\Run" in registry
-    assert "Check: not IsolatedInstall" in registry
+    assert 'ValueName: "Uoink"' not in iss
+    registration = iss.split("procedure RegisterHelperRecovery();", 1)[1].split("procedure CurStepChanged", 1)[0]
+    assert "if IsolatedInstall() then Exit;" in registration
+    assert "install-watchdog.ps1" in registration
     assert "staging\\uoink_install_isolation.py" in iss
     assert "WriteIsolatedMarker" in iss
 

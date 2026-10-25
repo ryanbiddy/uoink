@@ -549,7 +549,7 @@ def test_playbook_wire_schema_hints_and_prompt_arguments(tmp_path):
     _assert_tool_metadata(listed)
     tool = next(t for t in listed if t["name"] == "get_playbook_input")
     spec = uoink_mcp_tools.TOOL_REGISTRY[tool["name"]]
-    assert tool["inputSchema"] == spec.input_schema
+    assert tool["inputSchema"] == uoink_mcp_tools.client_input_schema(spec.input_schema, spec.name)
     assert tool["description"] == spec.description
     assert tool["inputSchema"]["required"] == ["playbook", "arguments"]
     assert tool["inputSchema"]["additionalProperties"] is False

@@ -12,6 +12,7 @@ import os
 from pathlib import Path
 
 import pytest
+from uoink_mcp_tools import without_descriptions
 
 from tests.mcp_wire import (
     ROOT, LEGACY_VERSIONS, HttpClient, StdioClient, initialize_request, registry_golden, rpc,
@@ -61,10 +62,12 @@ def inventory():
         assert not {"oneOf", "anyOf", "allOf", "not"} & schema.keys()
         assert all(type(tool["annotations"][hint]) is bool for hint in (
             "readOnlyHint", "destructiveHint", "idempotentHint", "openWorldHint"))
-        if schema != tools.TOOL_REGISTRY[tool["name"]].input_schema:
+        if without_descriptions(schema) != without_descriptions(tools.TOOL_REGISTRY[tool["name"]].input_schema):
             changed.add(tool["name"])
     assert changed == {"claim_library_work", "apply_reshelving", "set_source_consent"}
-    return {"full": full, "core": core}
+    http = registry_golden(structured_results=True)
+    assert [{k: v for k, v in t.items() if k != "outputSchema"} for t in http] == full
+    return {"full": full, "core": core, "http": http}
 
 
 @pytest.mark.parametrize("version", LEGACY_VERSIONS)
@@ -163,7 +166,7 @@ def test_legacy_http_wire_golden(tmp_path, version, aliases, inventory):
                 "jsonrpc": "2.0", "id": 1, "result": expected_initialize("http", version)})
             assert client.post({"jsonrpc": "2.0", "method": "notifications/initialized"}) == (202, None)
             assert client.post(rpc(2, "tools/list"), path=path("tools/list")) == (200, {
-                "jsonrpc": "2.0", "id": 2, "result": {"tools": inventory["full"]}})
+                "jsonrpc": "2.0", "id": 2, "result": {"tools": inventory["http"]}})
             call = rpc(3, "tools/call", {"name": "search_clips", "arguments": {"query": "absent-m2-topic"}})
             expected = dict(GOLDEN["success"], structuredContent=json.loads(
                 GOLDEN["success"]["content"][0]["text"]))

@@ -630,6 +630,7 @@ foreach ($noticeRelative in @('THIRD-PARTY-NOTICES.md', 'third-party-notices\REA
 }
 
 Copy-Item (Join-Path $RepoRoot 'server.py')      $StagingDir -Force
+Copy-Item (Join-Path $RepoRoot 'uoink_supervisor.py') $StagingDir -Force
 # System-tray module (Tier 1 v2.1.1). Imported by server.py at boot on
 # installed builds; optional at runtime (degrades if pystray is unavailable).
 Copy-Item (Join-Path $RepoRoot 'uoink_tray.py')  $StagingDir -Force

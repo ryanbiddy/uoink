@@ -12616,20 +12616,26 @@
       return "win";
     }
 
-    function renderHelperStatus(online) {
+    function renderHelperStatus(online, recovery) {
       const ok = Boolean(online);
       const copy = HELPER_STATUS_COPY[helperPlatform()];
       const pill = els.runningPill;
       if (!pill) return;
       pill.classList.toggle("online", ok);
       pill.classList.toggle("offline", !ok);
-      const text = ok ? copy.running : "Uoink is offline";
+      const failed = recovery && ["crash_loop", "supervisor_error"].includes(recovery.status);
+      const text = failed ? "Uoink stopped after repeated failures" : ok ? copy.running : "Uoink is offline";
       // Same words, no rewrite: the 10 s poll must not re-announce the status.
       if (els.helperStatusText && els.helperStatusText.textContent !== text) els.helperStatusText.textContent = text;
       if (els.helperOfflineFix) {
-        const fix = ok ? "" : copy.fix;
+        const details = recovery && recovery.available
+          ? [recovery.reason, recovery.action,
+             `Last exit: ${recovery.last_exit_code == null ? "unknown" : recovery.last_exit_code}. Restarts: ${recovery.restart_count || 0}.`,
+             recovery.last_start_at ? `Last start: ${recovery.last_start_at}.` : "",
+             recovery.last_stop_at ? `Last stop: ${recovery.last_stop_at}.` : ""].filter(Boolean).join(" ") : "";
+        const fix = details || (ok ? "" : copy.fix);
         if (els.helperOfflineFix.textContent !== fix) els.helperOfflineFix.textContent = fix;
-        els.helperOfflineFix.classList.toggle("hidden", ok);
+        els.helperOfflineFix.classList.toggle("hidden", !fix);
       }
     }
 
@@ -12639,13 +12645,18 @@
         const data = await res.json();
         state.health = data;
         const ok = data && data.ok !== false;
-        renderHelperStatus(ok);
+        renderHelperStatus(ok, data.helper_recovery);
         els.versionLine.textContent = `v${data.version || "unknown"} | current`;
         els.aboutVersion.textContent = `Version: ${data.version || "unknown"}`;
         els.aboutPort.textContent = `http://127.0.0.1:${data.port || 5179}`;
         renderLibrarianStatus(data.library);
       } catch (_) {
-        renderHelperStatus(false);
+        let recovery = null;
+        try {
+          if (window.pywebview && window.pywebview.api && window.pywebview.api.helper_recovery)
+            recovery = await window.pywebview.api.helper_recovery();
+        } catch (_) {}
+        renderHelperStatus(false, recovery);
         renderLibrarianStatus(null);
       }
     }

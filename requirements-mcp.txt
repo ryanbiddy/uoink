@@ -1,0 +1,6 @@
+# Stdio runtime only. Keep the reviewed SDK/transport pins aligned with CI.
+mcp==2.3.0
+mcp-types==2.3.0
+httpx2==2.16.0
+httpcore2==2.16.0
+truststore==0.10.5

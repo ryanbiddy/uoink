@@ -89,6 +89,20 @@ models, output-root recovery, and corpus state. The response shape is:
 {
   "ok": true,
   "version": "<current version>",
+  "pid": 1234,
+  "supervisor_run_id": null,
+  "helper_recovery": {
+    "available": false,
+    "schema_version": null,
+    "status": null,
+    "last_exit_code": null,
+    "restart_count": null,
+    "last_start_at": null,
+    "last_stop_at": null,
+    "ready_at": null,
+    "reason": null,
+    "action": null
+  },
   "migration_version": 25,
   "migration_pending": false,
   "last_successful_tick_at": "2026-09-04T16:30:00Z",
@@ -127,6 +141,20 @@ models, output-root recovery, and corpus state. The response shape is:
   }
 }
 ```
+
+`pid` identifies the responding helper process. `supervisor_run_id` is a fresh
+identifier for each supervised child, or `null` for a direct start. The
+supervisor checks both on `/health` before declaring its child ready. The
+identifier is public readiness metadata and grants no access.
+
+`helper_recovery` reports the last recorded recovery state on all platforms.
+The example shows missing state. With state present, `available` is `true`;
+the block includes schema version 1, status, exit code, restart count, UTC
+start/stop/readiness timestamps, and a short reason and action. An unreadable
+state returns only `available: false`, `status: "unreadable"`, `reason`, and
+`action`. The block excludes paths, tokens, command lines, raw exceptions,
+login identity, process IDs, and retry timestamps. See
+[helper recovery](docs/helper-recovery.md) for the restart policy and states.
 
 `path_integrity` always contains `ok`, `checked`, and `missing`. When indexed
 files are missing it also contains a human-readable `hint`; if the index scan

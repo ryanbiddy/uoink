@@ -17,6 +17,21 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  mcp-linux-container:
+    name: offline Linux MCP introspection
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - name: Build stdio image
+        run: docker build --tag uoink-mcp:ci .
+      - name: Initialize and list the complete default registry offline
+        run: >-
+          docker run --rm --network none --read-only
+          --tmpfs /tmp:rw,nosuid,nodev,size=64m
+          --entrypoint python uoink-mcp:ci
+          -B /app/scripts/smoke_mcp_container.py
+
   extension-static:
     name: extension static checks
     runs-on: ubuntu-latest

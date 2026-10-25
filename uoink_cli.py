@@ -336,7 +336,7 @@ def main(argv=None):
                 spec = registry.TOOL_REGISTRY[name]
                 item = {"name": name, "description": " ".join(spec.description.split())}
                 if ns.json:
-                    item["inputSchema"] = registry.client_input_schema(spec.input_schema)
+                    item["inputSchema"] = registry.client_input_schema(spec.input_schema, name)
                 items.append(item)
             return emit({"ok": True, "tools": items}, text_mode)
         # Parse generic inputs before importing the backend or touching storage.

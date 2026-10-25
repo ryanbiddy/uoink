@@ -11,8 +11,8 @@ What it moves (Windows; macOS/Linux paths handled the same way via _platform):
 1. App-data dir:    %LOCALAPPDATA%\Yoink\  -> \Uoink\  (index.db, settings.json,
    server.log, token.txt, jobs/taxonomy, skills, the output\ fallback dir).
 2. Credential Manager: the saved Anthropic key under service "Yoink" -> "Uoink".
-3. HKCU\...\Run autostart: drop the legacy "Yoink" value (the v2.1 installer
-   writes the new "Uoink" one); ensure "Uoink" points at this install.
+3. Login startup: use the supervisor task when owned by this install. Older
+   installs migrate the legacy "Yoink" Run value to "Uoink".
 4. Desktop corpus (Desktop\Yoink\ -> Desktop\Uoink\): NOT automatic. Exposed via
    migrate_desktop_corpus(), triggered by an opt-in prompt in the extension
    popup, because users may have linked those paths from other tools.
@@ -35,6 +35,7 @@ from __future__ import annotations
 import logging
 import os
 import shutil
+import subprocess
 import sys
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -242,9 +243,34 @@ def _remove_legacy_run_key(dry_run: bool) -> str:
         return f"failed (non-fatal): {e}"
 
 
+def _supervisor_owns_startup(app_dir: Path) -> bool | None:
+    """Use the registrar's ownership check, including disabled tasks.
+
+    None means startup could not be inspected. Preserve existing entries then.
+    """
+    registrar = app_dir / "scripts" / "install-watchdog.ps1"
+    if not registrar.is_file():
+        return False  # Older installs still migrate the legacy Run value.
+    try:
+        result = subprocess.run(
+            ["powershell.exe", "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass",
+             "-File", str(registrar), "-InstallDir", str(app_dir), "-Mode", "Ownership"],
+            capture_output=True, text=True, timeout=30, creationflags=0x08000000)
+    except (OSError, subprocess.SubprocessError):
+        return None
+    if result.returncode == 0 and result.stdout.strip() in {"owned", "absent"}:
+        return result.stdout.strip() == "owned"
+    return None
+
+
 def _migrate_run_key(app_dir: Path, dry_run: bool) -> str:
     if sys.platform != "win32":
         return "skipped: not Windows"
+    owned = _supervisor_owns_startup(app_dir)
+    if owned is None:
+        return "skipped: could not verify supervisor ownership; startup retained"
+    if owned:
+        return f"supervisor owns startup; {_remove_legacy_run_key(dry_run)}"
     try:
         import winreg
     except Exception as e:  # pragma: no cover
