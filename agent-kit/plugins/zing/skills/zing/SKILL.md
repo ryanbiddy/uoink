@@ -1,6 +1,6 @@
 ---
 name: zing
-description: Study reference videos, plan and render local cuts, match SDR color, plan captions around faces, inspect timelines, and make memes with Zing through CLI or MCP. Use for Zing editing and creative-studio tasks with local media.
+description: A free, local creative studio for short videos and memes that runs in your terminal and that AI agents can drive. Use Zing through CLI or MCP to study references, plan and render local cuts, match video styles, inspect timelines, and make memes.
 ---
 
 # Zing
@@ -9,6 +9,19 @@ Zing measures media and renders explicit plans. You supply editorial judgment:
 which moment opens the cut, which evidence supports a style choice, and what
 footage is missing. Keep measured facts, chosen approximations and unknowns
 separate. Never claim to recover an original font, LUT, preset or editor project.
+
+## Start with the creator's goal
+
+Use `zing_studio` to ask the user the right questions. Pass the path choice and
+answers so far; relay the returned question, recommended answer, reason and
+evidence. Keep unknowns visible. Show the returned plan and get confirmation
+before executing its tool calls. Reuse match, still and music tools when listed;
+`zing_studio_run` covers b/d/f and returns a project to poll. Read
+[studio.md](references/studio.md) for the flow and boundaries.
+
+With shell access, `zing studio` provides the same interview. Use
+`--answers <file> --json` to review a plan and add `--yes` only after confirmation.
+That flag never grants reference-download consent.
 
 ## Start with the available tools
 
@@ -23,7 +36,7 @@ not mean every optional extra or model is installed.
 
 Read [commands.md](references/commands.md) for CLI recipes, direction JSON,
 installation needs, and still/animated meme handling. Read
-[mcp.md](references/mcp.md) for the 32-tool surface and asynchronous job rules.
+[mcp.md](references/mcp.md) for the 36-tool surface and asynchronous job rules.
 The CLI also has project, layout, color, audio and assembly operations that do
 not have equivalent MCP tools. Switch to shell access for them; do not invent
 tools or imply that a connected MCP server grants shell access.
@@ -42,7 +55,8 @@ tools or imply that a connected MCP server grants shell access.
   use a local viewer. That tool returns image content, unlike the path-only
   inspectors.
 - Ask before downloads unless the user already authorized that exact acquisition.
-  Package installs, uncached Whisper/OCR models, layout model fetching, video URLs,
+  Package installs, Whisper setup (`zing doctor --speech-model`; study never fetches
+  one), uncached OCR models, layout model fetching, video URLs,
   preset setup and uncached meme templates can require network access. A local
   video does not make a first study offline. Use local assets/caches when possible;
   `--offline` on meme rendering forbids template fetching, not all Zing networking.
@@ -179,3 +193,10 @@ Match reports use rendered observations. Sparse OCR, sampled face detection and
 unpaired color statistics leave limits that must remain visible. Current director
 plans use cuts; uncertain reference effects are warnings. Missing footage returns
 the director's named shortage, and a failed draft prevents “three ready.”
+
+## Explain a reference
+
+For "how was this made?", use `zing explain VIDEO --out DIR` or `zing_explain`.
+Read the card's facts, confidence and unknowns separately. Add `--against DRAFT`
+for a measured comparison. See [Explain](references/explain.md). Do not call a
+substitute font or fitted LUT the original.
