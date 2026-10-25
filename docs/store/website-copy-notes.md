@@ -8,7 +8,7 @@ The helper splash and extension setup read the same bundled JSON directly.
 <!-- store-install:start -->
 Keep the current download and sideload instructions until the store link is live.
 
-Install the Windows helper, then load its bundled extension. On first launch, Uoink shows a one-time setup splash. Use it to open your browser's extensions page and copy the installed extension path; then enable Developer mode, click **Load unpacked**, and select that folder.
+Install the Uoink helper app, then load its bundled extension. On first launch, Uoink shows a one-time setup splash. Use it to open your browser's extensions page and copy the installed extension path; then enable Developer mode, click **Load unpacked**, and select that folder.
 <!-- store-install:end -->
 
 Apply that copy to the homepage extension button, `/install`, and any

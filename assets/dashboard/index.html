@@ -5303,7 +5303,7 @@
               <div>
                 <div class="eyebrow">Browser button</div>
                 <h2>Get the extension</h2>
-                <p>The Uoink button lives in a browser extension you load once. It's already on this machine at <code>%LOCALAPPDATA%\Uoink\extension</code>.</p>
+                <p>The Uoink button lives in a browser extension you load once. It's already on this machine at <code id="extensionPathText">%LOCALAPPDATA%\Uoink\extension</code>.</p>
               </div>
               <button class="button primary" type="button" data-open-extension>Open extension folder</button>
             </div>
@@ -5311,6 +5311,7 @@
               <li>Open <code>chrome://extensions</code> in Chrome.</li>
               <li>Turn on <strong>Developer mode</strong> in the top right.</li>
               <li>Click <strong>Load unpacked</strong> and pick the <code>extension</code> folder that just opened.</li>
+              <li id="extensionMacPickerHint" hidden>On a Mac that folder is inside the hidden Library. In the <strong>Load unpacked</strong> window press <kbd>⌘</kbd><kbd>⇧</kbd><kbd>G</kbd>, paste the path the button copied, press Return, then click <strong>Select</strong>.</li>
               <li>Click the puzzle-piece Extensions icon in the toolbar and pin <strong>Uoink</strong>, so the Uoink button stays visible.</li>
             </ol>
             <p class="get-extension-note">Uoink is built and tested for Chrome. Edge and Brave are Chromium-based and may work, but are not tested.</p>
@@ -6272,6 +6273,8 @@
       yoinkWriteFrom: document.getElementById("yoinkWriteFrom"),
       yoinkBack: document.getElementById("yoinkBack"),
       runningPill: document.getElementById("runningPill"),
+      extensionPathText: document.getElementById("extensionPathText"),
+      extensionMacPickerHint: document.getElementById("extensionMacPickerHint"),
       helperStatusText: document.getElementById("helperStatusText"),
       helperOfflineFix: document.getElementById("helperOfflineFix"),
       librarySplit: document.getElementById("librarySplit"),
@@ -12597,7 +12600,12 @@
     // the helper's. Only Windows has an installed launcher (the installer's
     // Start menu entry); no Mac or Linux build ships (docs/mac-install.md),
     // so there the helper can only have been a source checkout's server.py.
-    const HELPER_SOURCE_FIX = "Uoink ships for Windows only. If you ran it from source, start python server.py again. This page reconnects by itself.";
+    const HELPER_SOURCE_FIX = "If you ran Uoink from source, start python server.py again. This page reconnects by itself.";
+    const EXTENSION_PATH_COPY = {
+      win: "%LOCALAPPDATA%\\Uoink\\extension",
+      mac: "~/Library/Application Support/Uoink/extension",
+      linux: "the Uoink data folder's extension folder",
+    };
     const HELPER_STATUS_COPY = {
       win: {
         running: "Running on this PC",
@@ -12605,7 +12613,7 @@
       },
       mac: {
         running: "Running on this Mac",
-        fix: HELPER_SOURCE_FIX,
+        fix: "Open Uoink from Applications or Spotlight. This page reconnects by itself.",
       },
       linux: {
         running: "Running on this computer",
@@ -17034,6 +17042,9 @@
       }
       if (els.imageSaveButton) els.imageSaveButton.addEventListener("click", saveImage);
       if (els.imageClearButton) els.imageClearButton.addEventListener("click", clearImageSelection);
+      const extensionPlatform = helperPlatform();
+      if (els.extensionPathText) els.extensionPathText.textContent = EXTENSION_PATH_COPY[extensionPlatform];
+      if (els.extensionMacPickerHint) els.extensionMacPickerHint.hidden = extensionPlatform !== "mac";
       const emptyPasteUrl = document.getElementById("emptyPasteUrl");
       if (emptyPasteUrl) emptyPasteUrl.addEventListener("click", focusLibraryBox);
       // Delegate once so links rendered after startup use the same boundary.
@@ -17049,9 +17060,26 @@
         }
         const openExtensionButton = event.target.closest("[data-open-extension]");
         if (openExtensionButton) {
+          const platform = helperPlatform();
           authFetch("/open-extension").then(
-            () => showToast("Opened the extension folder. Load it unpacked from there."),
-            () => showToast("Couldn't open it. The extension lives at %LOCALAPPDATA%\\Uoink\\extension.")
+            async (res) => {
+              const path = res && res.path;
+              if (path && els.extensionPathText) els.extensionPathText.textContent = path;
+              if (platform !== "mac" || !path) {
+                showToast("Opened the extension folder. Load it unpacked from there.");
+                return;
+              }
+              // Chrome's folder picker hides ~/Library; the path goes to Go to Folder.
+              // A clipboard write can stay pending (no focus or permission), so cap it.
+              const copied = await Promise.race([
+                navigator.clipboard.writeText(path).then(() => true, () => false),
+                new Promise((resolve) => setTimeout(() => resolve(false), 1500)),
+              ]);
+              showToast(copied
+                ? "Opened it in Finder and copied its path. In Load unpacked, press ⌘⇧G and paste."
+                : "Opened it in Finder. In Load unpacked, press ⌘⇧G and enter " + path + ".");
+            },
+            () => showToast("Couldn't open it. The extension lives at " + EXTENSION_PATH_COPY[platform] + ".")
           );
           return;
         }

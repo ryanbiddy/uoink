@@ -21,7 +21,7 @@ def readme_step(url: str) -> str:
     if not url:
         return f"3. **Load the bundled extension.** {SIDELOAD}"
     return (f"3. **[Add to Chrome]({url}).** Open the store page and click **Add to Chrome**, then pin **Uoink** "
-            "from Chrome's Extensions menu. Keep the Windows helper running.\n\n"
+            "from Chrome's Extensions menu. Keep the Uoink helper app running.\n\n"
             f"<details>\n<summary>Advanced: load the bundled extension</summary>\n\n{SIDELOAD} "
             "Use one copy of Uoink at a time.\n\n</details>")
 
@@ -29,11 +29,11 @@ def readme_step(url: str) -> str:
 def website_copy(url: str) -> str:
     if url:
         return (f"Primary extension button: [Add to Chrome]({url}).\n\n"
-                "Install the Windows helper, add Uoink to Chrome, then pin Uoink from the Extensions menu. "
+                "Install the Uoink helper app, add Uoink to Chrome, then pin Uoink from the Extensions menu. "
                 "Keep the helper running to save sources.\n\n"
                 f"Advanced fallback: {SIDELOAD}")
     return ("Keep the current download and sideload instructions until the store link is live.\n\n"
-            f"Install the Windows helper, then load its bundled extension. {SIDELOAD}")
+            f"Install the Uoink helper app, then load its bundled extension. {SIDELOAD}")
 
 
 def sync(root: Path = ROOT, *, check: bool = False) -> None:

@@ -58,6 +58,12 @@ def test_setup_page_points_to_the_verified_published_installer() -> None:
         f'v{PUBLISHED_VERSION}/{PUBLISHED_ASSET}"'
     ) in html
     assert "data-win-only" in html
+    # Empty until the Mac DMG is published; the release bumps it with the version.
+    assert 'const PUBLISHED_MAC_DMG = "";' in script
+    assert (
+        "`https://github.com/ryanbiddy/uoink/releases/download/"
+        "v${PUBLISHED_MAC_DMG}/Uoink-${PUBLISHED_MAC_DMG}-macos-arm64.dmg`"
+    ) in script
     assert "Uoink-Setup-3.2.2.exe" not in script + html
 
 

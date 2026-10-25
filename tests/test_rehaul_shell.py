@@ -143,15 +143,17 @@ def test_helper_status_sits_at_the_bottom_with_os_copy():
         "Start Uoink from the Start menu.",
     ):
         assert phrase in copy, phrase
-    # Only Windows ships a launcher (docs/mac-install.md: no Mac build, no
-    # Uoink.app), so Mac and Linux offline copy names the source run and
-    # never sends people to an app or command that does not exist.
+    # Windows and (from 3.11.2) macOS ship an app, so their offline copy opens
+    # it. Linux has no build: its copy names the source run and never sends
+    # people to an app or command that does not exist.
     source_fix = _between(SCRIPT, "const HELPER_SOURCE_FIX = ", ";\n")
-    assert "Uoink ships for Windows only." in source_fix
+    assert "Windows only" not in source_fix
     assert "start python server.py again." in source_fix
-    assert copy.count("fix: HELPER_SOURCE_FIX,") == 2
+    assert copy.count("fix: HELPER_SOURCE_FIX,") == 1
+    assert '"Open Uoink from Applications or Spotlight. This page reconnects by itself."' in copy
     for wrong in ("Applications", "uoink-helper"):
-        assert wrong not in copy and wrong not in source_fix, wrong
+        assert wrong not in source_fix, wrong
+    assert "uoink-helper" not in copy
     # About, Star on GitHub and Stop Uoink left the sidebar for Settings.
     for gone in ("Stop Uoink", "Star on GitHub", "About", "More controls", "Private local app"):
         assert gone not in sidebar, gone

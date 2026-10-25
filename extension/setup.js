@@ -6,6 +6,10 @@ const POLL_MS = 2000;
 const HEARTBEAT_MS = 10000;
 // Release download target; 3.11.1, its GitHub release and uoink.app go live together.
 const PUBLISHED_INSTALLER_VERSION = "3.11.1";
+// Version of the published Mac DMG (Uoink-<version>-macos-arm64.dmg). Empty
+// until that release asset exists; bump it with PUBLISHED_INSTALLER_VERSION.
+const PUBLISHED_MAC_DMG = "";
+const RUNNING_COPY = { win: "Running on this PC", mac: "Running on this Mac", linux: "Running on this computer" };
 const SUGGESTED_VIDEO = {
   url: "https://www.youtube.com/watch?v=8rABwKRsec4",
   title: "Andrej Karpathy on AGI, hiring, and the future of programming",
@@ -39,13 +43,20 @@ function setPlatform(os) {
   platformOs = /^(mac|darwin)/.test(value) ? "mac" : /^(linux|cros|openbsd)/.test(value) ? "linux" : "win";
   document.body.dataset.platform = platformOs;
   const windows = platformOs === "win";
-  $("download-btn").hidden = !windows;
-  $("manual-install").hidden = windows;
+  const macDownload = platformOs === "mac" && PUBLISHED_MAC_DMG !== "";
+  $("download-btn").hidden = !windows && !macDownload;
+  $("manual-install").hidden = windows || macDownload;
   const installerName = `Uoink-Setup-${PUBLISHED_INSTALLER_VERSION}.exe`;
   $("download-btn").href = `https://github.com/ryanbiddy/uoink/releases/download/v${PUBLISHED_INSTALLER_VERSION}/${installerName}`;
+  if (macDownload) {
+    $("download-btn").href = `https://github.com/ryanbiddy/uoink/releases/download/v${PUBLISHED_MAC_DMG}/Uoink-${PUBLISHED_MAC_DMG}-macos-arm64.dmg`;
+    $("download-btn").textContent = "Download for Mac";
+  }
   $("install-instructions").textContent = windows
     ? "Download the Windows installer, open it, and follow the installation steps. Agent connections include all 91 Uoink tools."
-    : `The published installer is for Windows. On ${platformOs === "mac" ? "macOS" : "Linux"}, use the manual install instructions.`;
+    : macDownload
+      ? "Download Uoink for Mac (Apple silicon), open it, and drag Uoink to Applications. Then open Uoink from Applications."
+      : `No ${platformOs === "mac" ? "Mac" : "Linux"} download is published yet. Use the manual install instructions.`;
   if (!helperUp && $("status-block").dataset.state === "down") $("status-instructions").textContent = helperOfflineDetail();
 }
 
@@ -91,7 +102,7 @@ function renderAvailability() {
 function showConnection(up) {
   helperUp = up;
   $("status-block").dataset.state = up ? "running" : "down";
-  $("status-text").textContent = up ? "Running on this PC" : "Uoink is offline";
+  $("status-text").textContent = up ? RUNNING_COPY[platformOs] : "Uoink is offline";
   $("status-instructions").textContent = up ? "Connected. You can start your first capture." : helperOfflineDetail();
   if (!up) $("diagnose").hidden = true;
   markCurrent(up ? "capture" : "verify");
