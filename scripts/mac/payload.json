@@ -67,6 +67,7 @@
     "uoink_dashboard.py",
     "uoink_install_isolation.py",
     "uoink_usage.py",
+    "uoink_store.py",
     "uoink_mcp.py",
     "uoink_mcp_tools.py",
     "uoink_processes.py",
