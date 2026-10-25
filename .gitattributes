@@ -6,6 +6,7 @@
 # and the macOS bundle launcher (installer/mac/launcher.sh).
 *.sh text eol=lf
 tests/fixtures/connect_v3100/* text eol=lf
+tests/fixtures/articles/*.html text eol=lf
 
 # Cross-repository contract fixtures are hashed byte-for-byte. Keep their
 # materialized bytes identical on Windows, macOS, and Linux.

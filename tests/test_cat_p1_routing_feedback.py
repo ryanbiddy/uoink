@@ -130,10 +130,10 @@ def _x_wall_result(url):
 
 def test_walled_capture_honest_and_persists_nothing():
     url = "https://x.com/jack/article/1900000000001"
-    saved_stdlib = page_extractor._extract_stdlib
+    saved_extract = page_extractor._extract_article_page
     saved_crawl = page_extractor._CRAWL4AI_AVAILABLE
     page_extractor._CRAWL4AI_AVAILABLE = False
-    page_extractor._extract_stdlib = lambda u, **k: _x_wall_result(u)
+    page_extractor._extract_article_page = lambda u, **k: _x_wall_result(u)
     try:
         class _Idx:
             def upsert_yoink(self, *a, **k):
@@ -149,7 +149,7 @@ def test_walled_capture_honest_and_persists_nothing():
         _assert(page_extractor.persist_page_yoink(_Idx(), result) is None,
                 "persist on a failed result must return None (no junk uoink)")
     finally:
-        page_extractor._extract_stdlib = saved_stdlib
+        page_extractor._extract_article_page = saved_extract
         page_extractor._CRAWL4AI_AVAILABLE = saved_crawl
     print("ok  X login wall fails honestly and persists nothing")
 

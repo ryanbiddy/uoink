@@ -183,6 +183,15 @@ Copyright (c) 2026 ScrapeCreators. No upstream script or code is shipped.
 See the [complete MIT license](third-party-notices/scrapecreators-social-media-research-skills-MIT-LICENSE.txt)
 and [adapted file list](third-party-notices/README.md).
 
+`article_extractor.py` adapts the scoring, class/id hints, ancestor score
+propagation and sibling selection from
+[Mozilla Readability 0.6.0](https://github.com/mozilla/readability/blob/0.6.0/Readability.js)
+(Apache-2.0). Copyright (c) 2010 Arc90 Inc. Uoink replaces the browser DOM
+with Python's html.parser and adds resource limits, shell detection,
+metadata handling and Markdown output. This is a limited adaptation, not
+the upstream JavaScript implementation. See the
+[Apache-2.0 license](third-party-notices/mozilla-readability-APACHE-2.0.txt).
+
 
 ## ffmpeg (bundled binary, not a Python package)
 

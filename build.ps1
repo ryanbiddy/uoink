@@ -613,6 +613,7 @@ foreach ($noticeRelative in @('THIRD-PARTY-NOTICES.md', 'third-party-notices\REA
         'third-party-notices\antlr4-python3-runtime-4.9.3-LICENSE.txt',
         'third-party-notices\proxy-tools-0.1.0-UPSTREAM-LICENSE.txt',
         'third-party-notices\scrapecreators-social-media-research-skills-MIT-LICENSE.txt',
+        'third-party-notices\mozilla-readability-APACHE-2.0.txt',
         'third-party-notices\EmbeddingGemma-NOTICE.md',
         'third-party-notices\Gemma-Terms-of-Use.txt',
         'third-party-notices\Gemma-Prohibited-Use-Policy.txt')) {
@@ -689,6 +690,7 @@ Copy-Item (Join-Path $RepoRoot 'engagement_contract.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'media_handoff.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'suite_service.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'page_extractor.py') $StagingDir -Force
+Copy-Item (Join-Path $RepoRoot 'article_extractor.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'source_manifest.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'openapi_bridge.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'reddit_extractor.py') $StagingDir -Force
@@ -773,7 +775,7 @@ Write-Step 'Staged smoke'
 Push-Location $StagingDir
 try {
     & '.\python\python.exe' -m py_compile `
-        server.py index.py clips.py provenance.py library_cards.py usage_meter.py migrate_install.py uoink_install_isolation.py uoink_usage.py channels.py workspaces.py claims.py scripts.py voice_dna.py writing_studio.py corpus_contract.py corpus_provider.py corpus_intelligence.py page_extractor.py writer_peer.py engagement_contract.py media_handoff.py suite_service.py source_manifest.py openapi_bridge.py reddit_extractor.py x_extractor.py x_article_extractor.py notes.py images.py taste_scoring.py memory_layer.py podcasts.py mobile_playlists.py whisper_runner.py uoink_mcp.py uoink_mcp_tools.py uoink_agent_runtime.py uoink_cli.py uoink_connect.py uoink_reliability.py yoink_mcp.py yt_extract.py helper\_version.py
+        server.py index.py clips.py provenance.py library_cards.py usage_meter.py migrate_install.py uoink_install_isolation.py uoink_usage.py channels.py workspaces.py claims.py scripts.py voice_dna.py writing_studio.py corpus_contract.py corpus_provider.py corpus_intelligence.py page_extractor.py article_extractor.py writer_peer.py engagement_contract.py media_handoff.py suite_service.py source_manifest.py openapi_bridge.py reddit_extractor.py x_extractor.py x_article_extractor.py notes.py images.py taste_scoring.py memory_layer.py podcasts.py mobile_playlists.py whisper_runner.py uoink_mcp.py uoink_mcp_tools.py uoink_agent_runtime.py uoink_cli.py uoink_connect.py uoink_reliability.py yoink_mcp.py yt_extract.py helper\_version.py
     if ($LASTEXITCODE -ne 0) {
         throw 'staged smoke: py_compile of staged Python files failed'
     }
