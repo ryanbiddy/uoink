@@ -82,6 +82,32 @@ def test_login_opt_in_idempotence_disable_and_quit_policy(install, monkeypatch):
     assert life.status(app, home)["enabled"] is False
 
 
+@pytest.mark.parametrize("invalid", [None, "args", "program", "keepalive", "successful_exit",
+                                    "throttle", "run_at_load", "stdout", "stderr"])
+def test_generated_launchagent_meets_smoke_contract(install, invalid):
+    from bundle_smoke import verify_launchagent
+    app, home = install
+    payload = life.plist(app, home)
+    if invalid == "args":
+        payload["ProgramArguments"].pop()
+    elif invalid == "program":
+        payload["ProgramArguments"][0] = str(home / "foreign")
+    else:
+        changes = {"keepalive": ("KeepAlive", False),
+                   "successful_exit": ("KeepAlive", {"SuccessfulExit": True}),
+                   "throttle": ("ThrottleInterval", 0), "run_at_load": ("RunAtLoad", False),
+                   "stdout": ("StandardOutPath", str(home / "unbounded.log")),
+                   "stderr": ("StandardErrorPath", str(home / "unbounded.log"))}
+        if invalid:
+            key, value = changes[invalid]
+            payload[key] = value
+    if invalid:
+        with pytest.raises(AssertionError):
+            verify_launchagent(payload, app / "Contents/MacOS/Uoink")
+    else:
+        verify_launchagent(payload, app / "Contents/MacOS/Uoink")
+
+
 @pytest.mark.parametrize("failure", ["print", "bootstrap", "bootout"])
 def test_launchctl_failures_are_not_reported_as_success(install, monkeypatch, failure):
     app, home = install
