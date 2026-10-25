@@ -809,8 +809,9 @@ const captureStream = PopupCaptures.stream({
 
 function popupOfflineHint() {
   const os = String(navigator.userAgentData?.platform || navigator.platform || navigator.userAgent || "").toLowerCase();
-  if (/mac|darwin|linux|cros|chrome os/.test(os)) {
-    return "Uoink ships for Windows only. If you ran it from source, start python server.py again in Terminal.";
+  if (/mac|darwin/.test(os)) return "Open Uoink from Applications or Spotlight, then try again.";
+  if (/linux|cros|chrome os/.test(os)) {
+    return "If you ran Uoink from source, start python server.py again in Terminal.";
   }
   return "Start Uoink from the Start menu, then try again.";
 }

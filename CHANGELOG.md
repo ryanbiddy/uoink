@@ -41,7 +41,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   (then the real path once the helper answers), and **Open extension folder**
   reveals it in Finder and copies the path. Chrome's **Load unpacked** picker
   hides `~/Library`, so the card explains pressing ⌘⇧G and pasting. The setup
-  page and dashboard no longer say Windows-only things on a Mac.
+  page, dashboard and extension popup no longer say Windows-only things on a
+  Mac; when Uoink isn't running, the popup says to open it from Applications
+  or Spotlight.
 - The extension no longer requests the unused youtu.be, mobile.twitter.com
   and localhost:5179 host permissions.
 - macOS: desktop alerts are kept for capture results and helper failures

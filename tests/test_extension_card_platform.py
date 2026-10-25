@@ -25,6 +25,14 @@ def test_card_path_and_mac_picker_hint_follow_the_platform():
     assert 'els.extensionMacPickerHint.hidden = extensionPlatform !== "mac"' in init
 
 
+def test_popup_offline_hint_sends_mac_users_to_the_app():
+    popup = (ROOT / "extension/popup.js").read_text(encoding="utf-8")
+    hint = _between(popup, "function popupOfflineHint() {", "\n}\n")
+    assert 'if (/mac|darwin/.test(os)) return "Open Uoink from Applications or Spotlight, then try again.";' in hint
+    assert "Windows only" not in hint
+    assert "Start Uoink from the Start menu, then try again." in hint
+
+
 def test_mac_open_copies_the_real_path_and_failures_name_this_os():
     handler = _between(HTML, 'authFetch("/open-extension").then(', "return;\n        }")
     # The helper's answer is the real (possibly isolated) path, not the default.

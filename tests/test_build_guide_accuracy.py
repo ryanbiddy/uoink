@@ -68,10 +68,12 @@ def test_public_docs_do_not_claim_an_unshipped_macos_app() -> None:
         "Nothing else leaves your machine",
         "exactly one third party",
         "2026-XX-XX",
+        "There is no current macOS build",
     ):
         assert stale_claim not in privacy
     for required_claim in (
-        "There is no current macOS build",
+        "~/Library/Application Support/Uoink/",
+        "macOS Keychain",
         "cdn.syndication.twimg.com",
         "api.github.com",
         "user-supplied web page or podcast feed",
