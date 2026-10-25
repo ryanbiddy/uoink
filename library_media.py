@@ -113,6 +113,7 @@ import sqlite3
 import tempfile
 import time
 import unicodedata
+from contextlib import suppress
 from pathlib import Path
 from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
@@ -1556,18 +1557,24 @@ def store_snapshot(conn: sqlite3.Connection, item: dict, cues: list[dict], block
     """Write the media rows and annotated clips for an already published
     file-side snapshot (citations are written by the caller). Returns the
     clip count."""
-    block = validate_media_block(block)
-    if block["video_id"] != item["video_id"]:
-        raise _invalid("cross_item_annotations")
-    if not _has_column(conn, "clips", "speaker_spans_json"):
-        raise MediaError("library_unavailable", details={"reason": "schema_not_migrated"})
-    _bind_cues(block, cues, stale_code="invalid_source_data")
-    projected = project_clips(cues, item, annotations=block)
-    _write_media_rows(conn, block)
-    _write_clips(conn, item["video_id"], projected)
-    if commit:
-        conn.commit()
-    return len(projected)
+    try:
+        block = validate_media_block(block)
+        if block["video_id"] != item["video_id"]:
+            raise _invalid("cross_item_annotations")
+        if not _has_column(conn, "clips", "speaker_spans_json"):
+            raise MediaError("library_unavailable", details={"reason": "schema_not_migrated"})
+        _bind_cues(block, cues, stale_code="invalid_source_data")
+        projected = project_clips(cues, item, annotations=block)
+        _write_media_rows(conn, block)
+        _write_clips(conn, item["video_id"], projected)
+        if commit:
+            conn.commit()
+        return len(projected)
+    except BaseException:
+        if commit:
+            with suppress(BaseException):
+                conn.rollback()
+        raise
 
 
 def rebuild_item(conn, video_id: str, *, sidecar: dict | None) -> dict:
@@ -1644,18 +1651,12 @@ def rebuild_item(conn, video_id: str, *, sidecar: dict | None) -> dict:
         conn.commit()
         return {"ok": True, "video_id": video_id, "mode": "reconstruct", "clips": len(projected),
                 "cues": len(cues), "media_revision": block["media_revision"] if block else None}
-    except MediaError:
-        try:
+    except BaseException as exc:
+        with suppress(BaseException):
             conn.rollback()
-        except sqlite3.Error:
-            pass
+        if isinstance(exc, sqlite3.Error):
+            raise MediaError("library_unavailable") from None
         raise
-    except sqlite3.Error:
-        try:
-            conn.rollback()
-        except sqlite3.Error:
-            pass
-        raise MediaError("library_unavailable") from None
 
 
 # --------------------------------------------------------------------------
@@ -2342,18 +2343,12 @@ def publish_transcript(conn, video_id: str, *, cues, media_block, artifacts, tic
                 "media_revision": block["media_revision"], "clips": len(projected), "cues": len(cues),
                 "generation": next_generation, "pruned_artifacts": retention["pruned"],
                 "cleanup_pending": retention["cleanup_pending"]}
-    except MediaError:
-        try:
+    except BaseException as exc:
+        with suppress(BaseException):
             conn.rollback()
-        except sqlite3.Error:
-            pass
+        if isinstance(exc, sqlite3.Error):
+            raise MediaError("library_unavailable") from None
         raise
-    except sqlite3.Error:
-        try:
-            conn.rollback()
-        except sqlite3.Error:
-            pass
-        raise MediaError("library_unavailable") from None
 
 
 # --------------------------------------------------------------------------
