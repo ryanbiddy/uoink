@@ -53,3 +53,11 @@ Adapted files:
 No upstream script or code is shipped. Uoink computes metrics locally and gives
 the calling agent bounded, cited library evidence. The lineage pin is
 `vendor/scrapecreators-research-skills/VENDOR.md` in the source repository.
+
+**Mozilla Readability.** `article_extractor.py` adapts main-content scoring
+and sibling joining from [Readability 0.6.0](https://github.com/mozilla/readability/blob/0.6.0/Readability.js).
+Copyright (c) 2010 Arc90 Inc. The [Apache-2.0 license](mozilla-readability-APACHE-2.0.txt)
+covers this adaptation. Uoink uses a bounded stdlib Python parser and its own
+Markdown renderer, with shell detection and metadata extraction. No JavaScript
+or new runtime package is bundled. This is not a complete port of Mozilla's DOM
+implementation.
