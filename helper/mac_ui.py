@@ -95,6 +95,24 @@ def watch_parent() -> None:
     threading.Thread(target=watch, name="uoink-ui-lifeline", daemon=True).start()
 
 
+def cursor_screen():
+    """The pywebview screen under the mouse pointer, or None.
+
+    Without one, pywebview centers on NSScreen.mainScreen(), which for a
+    menu-bar app is the arrangement's first display, often another monitor.
+    """
+    try:
+        import AppKit
+        import webview
+        point = AppKit.NSEvent.mouseLocation()
+        for screen in webview.screens:
+            if screen.frame is not None and AppKit.NSPointInRect(point, screen.frame):
+                return screen
+    except Exception:
+        pass
+    return None
+
+
 def start_menu(*, host, port, version, token_path, output_dir, data_root):
     global _menu, _connected_at
     # One launch attempt per helper, never a restart loop after UI failure.

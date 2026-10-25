@@ -70,7 +70,7 @@ def add_playlist(idx, playlist_url: str, *,
     # on trees without the source tables.
     floor = 15 if managed else 1
     interval = max(floor, min(int(poll_interval_min or (60 if managed else 5)), 1440))
-    with idx._lock:
+    with idx._lock, idx._rollback_on_error():
         cur = idx._conn.execute(
             "INSERT OR IGNORE INTO monitored_playlists "
             "(playlist_url, name, poll_interval_min, added_at) "
@@ -314,7 +314,7 @@ def poll_playlist(idx, playlist_id: int, *,
     # never past declined videos (see the cursor update below).
     captured_ids: list[str] = []
     now = _now_iso()
-    with idx._lock:
+    with idx._lock, idx._rollback_on_error():
         for e in new_entries:
             # V-3: when a taste filter is wired, let it decide. A declined
             # candidate is recorded in skipped[] only (no queue, no event).

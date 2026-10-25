@@ -241,6 +241,7 @@ def test_next_due_source_tick_queues_without_a_desktop_toast(
         "is_foreground_fullscreen",
         lambda: False,
     )
+    monkeypatch.setattr(server, "_desktop_alerts_for_results_only", lambda: False)  # Windows and Linux
     queued = []
     monkeypatch.setattr(
         server,

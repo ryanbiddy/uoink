@@ -18,6 +18,7 @@ Requirements:
 """
 
 import argparse
+import logging
 import re
 import subprocess
 import sys
@@ -125,8 +126,19 @@ def _dedupe_srt_entries(entries: list[tuple[float, float, str]]):
     return out
 
 
-def parse_srt(srt_path: Path):
-    """Yield (start_sec, end_sec, text) from an SRT file."""
+def _clean_caption_text(text: str) -> str:
+    # YouTube writes the ASS hard space (\h), and censors a word as [\h__\h].
+    text = re.sub(r"<[^>]+>", "", text).replace("\\h", " ")
+    text = re.sub(r"\[\s*__\s*\]", "[__]", text)
+    return re.sub(r"[ \t]{2,}", " ", text).strip()
+
+
+def parse_srt(srt_path: Path, duration: float | None = None):
+    """Yield (start_sec, end_sec, text) from an SRT file.
+
+    With a known ``duration``, cues that start at or after it are dropped and
+    end times are clamped: uploaders sometimes attach captions for a longer cut.
+    """
     content = srt_path.read_text(encoding="utf-8", errors="ignore")
     pattern = re.compile(
         r"(\d+):(\d+):(\d+)[,.](\d+)\s+-->\s+(\d+):(\d+):(\d+)[,.](\d+)"
@@ -149,11 +161,16 @@ def parse_srt(srt_path: Path):
         start = h1 * 3600 + m1 * 60 + s1 + ms1 / 1000
         end = h2 * 3600 + m2 * 60 + s2 + ms2 / 1000
         text_lines = [ln for ln in lines if not pattern.search(ln) and not ln.isdigit()]
-        text = " ".join(text_lines)
-        text = re.sub(r"<[^>]+>", "", text).strip()
+        text = _clean_caption_text(" ".join(text_lines))
         if text:
             entries.append((start, end, text))
 
+    if duration and duration > 0:
+        kept = [(start, min(end, duration), text) for start, end, text in entries if start < duration]
+        if len(kept) < len(entries):
+            logging.getLogger(__name__).info(
+                "dropped %d caption cue(s) past the %.0fs video", len(entries) - len(kept), duration)
+        entries = kept
     yield from _dedupe_srt_entries(entries)
 
 

@@ -1,7 +1,7 @@
 """Offline concurrency and cancellation regressions for YouTube pacing."""
 from __future__ import annotations
 
-from contextlib import contextmanager
+from contextlib import contextmanager, nullcontext
 
 import json
 import subprocess
@@ -722,7 +722,7 @@ def test_external_identity_owner_still_has_bounded_wait(network, monkeypatch, wa
 def test_playlist_endpoints_wait_through_shared_limiter(network, monkeypatch, endpoint):
     playlist = {"id": 1, "playlist_url": "https://youtube.com/playlist?list=PLfixture",
                 "enabled": True, "last_seen_video_ids": []}
-    idx = SimpleNamespace(_lock=threading.Lock(), _conn=Mock())
+    idx = SimpleNamespace(_lock=threading.Lock(), _conn=Mock(), _rollback_on_error=nullcontext)
     monkeypatch.setattr(server, "_get_index", lambda: idx)
     monkeypatch.setattr(server, "_read_settings", lambda: {"auto_uoink_enabled": True})
     monkeypatch.setattr(server.mobile_playlists, "get_playlist", lambda *_a: playlist)

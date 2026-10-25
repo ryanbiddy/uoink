@@ -163,8 +163,9 @@ def main() -> int:
             import webview
             # Fail before making a window if the Cocoa backend cannot import.
             import webview.platforms.cocoa  # noqa: F401
+            from helper.mac_ui import cursor_screen
             webview.create_window("Uoink", target_url, width=WIDTH, height=HEIGHT,
-                                  resizable=True, js_api=MacJsApi())
+                                  resizable=True, js_api=MacJsApi(), screen=cursor_screen())
             webview.start(gui="cocoa")
         except Exception as exc:
             log.warning("Cocoa dashboard unavailable; opening browser: %s", exc)
