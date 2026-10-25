@@ -519,7 +519,15 @@ def test_local_html_cannot_be_framed(helper, path, origin):
     assert headers["Content-Length"] == str(len(HTML))
 
 
-@pytest.mark.parametrize("path", ["/health", "/ping", "/diagnose", "/dashboard", "/splash"])
+@pytest.mark.parametrize("origin", [None, "https://www.youtube.com"])
+def test_bare_root_redirects_to_dashboard(helper, origin):
+    status, headers, body = request(helper, "/", headers={"Origin": origin} if origin else {})
+    assert status == 302
+    assert headers["Location"] == "/dashboard"
+    assert body == b""
+
+
+@pytest.mark.parametrize("path", ["/health", "/ping", "/diagnose", "/dashboard", "/splash", "/"])
 @pytest.mark.parametrize("method", ["GET", "OPTIONS"])
 def test_public_surfaces_still_reject_rebinding_hosts(helper, path, method):
     status, _, payload = request(helper, path, method=method, headers={"Host": "attacker.test"})
