@@ -1,0 +1,10 @@
+<!doctype html><html><head><title>Checking a queue</title></head><body><nav>NAV NOISE</nav>
+<article class="entry"><h1>Checking a queue</h1><p>A queue can preserve work across a restart, but the reader must distinguish pending records from completed records. This example checks the oldest entry, records a result and advances the cursor only after the result has been written successfully.</p>
+<h2>Example</h2><pre><code>def next_item(queue):
+    if queue:
+        return queue[0] &lt; 10
+    return False
+</code></pre><p>Use <code>next_item(queue)</code> to inspect the value. Read the <a href="../guide">queue guide</a>, then compare the states below. A failed write should leave the original entry available for another attempt.</p>
+<table><thead><tr><th>State</th><th>Action</th></tr></thead><tbody><tr><td>Pending</td><td>Read | retry</td></tr><tr><td>Complete</td><td>Advance</td></tr></tbody></table>
+<blockquote><p>Keep the pending record until the result is durable.</p></blockquote>
+<p>Unsafe destinations still have readable labels: <a href="javascript:alert(1)">script label</a>, <a href="data:text/html,hello">data label</a>. The <a href="https://docs.example.org/api">API reference</a> is a normal link.</p></article></body></html>

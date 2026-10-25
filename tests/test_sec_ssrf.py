@@ -262,9 +262,13 @@ def consumers(network, monkeypatch, tmp_path):
                 _MAX_FOLLOW_LINKS_DEPTH=1, _CRAWL4AI_AVAILABLE=True,
                 host_is_allowed=Mock(return_value=True),
                 _is_x_login_wall=lambda *args: False,
-                _extract_crawl4ai=Mock(return_value={"ok": True}))
+                _extract_crawl4ai=Mock(return_value={"ok": True, "markdown": "Synthetic article body with enough text to read. " * 10}))
+    import article_extractor
+    page.update(article_extractor=article_extractor, ENGINE_READABILITY=article_extractor.ENGINE,
+                ENGINE_CRAWL4AI="crawl4ai", _X_HOSTS={"x.com"}, _engine_version=lambda engine: "test")
     load_functions("page_extractor.py", ("_extract_stdlib", "extract_page",
-                                         "normalize_page_url"), page)
+                                         "normalize_page_url", "_fetch_page_html",
+                                         "_extract_article_page"), page)
     # The relaxed /extract/any and /live/status validator's generic step.
     namespace["page_extractor"].normalize_page_url = page["normalize_page_url"]
     episode ={"feed_id": 1, "audio_url": PUBLIC, "status": "new"}
@@ -595,17 +599,22 @@ def test_crawl4ai_checks_public_target_before_rendering(network, consumers):
 
     def render(url, **kwargs):
         at_render.append((url, list(network.lookups), list(network.requests)))
-        return {"ok": True}
+        return {"ok": True, "markdown": "Synthetic article body with enough text to read. " * 10}
 
     consumers.page["_extract_crawl4ai"].side_effect = render
     assert consumers.page["extract_page"](None, PUBLIC)["ok"]
-    assert at_render == [(PUBLIC, ["public.example"], [])]
+    assert len(at_render) == 1 and at_render[0][0] == PUBLIC
+    assert at_render[0][1] and all(host == "public.example" for host in at_render[0][1])
+    assert [request.full_url for request in at_render[0][2]] == [PUBLIC]
 
 
 def test_crawl4ai_local_fixture_requires_explicit_injection(network, consumers):
     local = "http://localhost:8765/fixture"
     check = Mock(side_effect=lambda url: url)
-    assert consumers.page["extract_page"](None, local, check_url=check)["ok"]
+    body = io.BytesIO(b"<html><body>Short fixture</body></html>")
+    body.status = 200
+    assert consumers.page["extract_page"](None, local, check_url=check,
+                                         http_open=lambda *a, **k: body)["ok"]
     check.assert_called_once_with(local)
     assert consumers.page["_extract_crawl4ai"].call_args.args == (local,)
     assert network.requests == network.lookups == []

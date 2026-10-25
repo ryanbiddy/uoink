@@ -106,6 +106,7 @@ Source: "staging\third-party-notices\Gemma-Prohibited-Use-Policy.txt"; DestDir: 
 Source: "staging\third-party-notices\antlr4-python3-runtime-4.9.3-LICENSE.txt"; DestDir: "{app}\third-party-notices"; Flags: ignoreversion
 Source: "staging\third-party-notices\proxy-tools-0.1.0-UPSTREAM-LICENSE.txt"; DestDir: "{app}\third-party-notices"; Flags: ignoreversion
 Source: "staging\third-party-notices\scrapecreators-social-media-research-skills-MIT-LICENSE.txt"; DestDir: "{app}\third-party-notices"; Flags: ignoreversion
+Source: "staging\third-party-notices\mozilla-readability-APACHE-2.0.txt"; DestDir: "{app}\third-party-notices"; Flags: ignoreversion
 
 ; Python embeddable distribution (already includes pythonw.exe + python.exe
 ; + the stdlib zip). After staging, Lib\site-packages contains yt_dlp,
@@ -180,6 +181,7 @@ Source: "staging\engagement_contract.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\media_handoff.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\suite_service.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\page_extractor.py"; DestDir: "{app}"; Flags: ignoreversion
+Source: "staging\article_extractor.py"; DestDir: "{app}"; Flags: ignoreversion
 ; v3.2.1/v3.3 modules imported by server.py at boot. These must be in both
 ; build.ps1 staging and Inno's installed file list; staging-only coverage is
 ; not enough because the real helper imports from {app}.
