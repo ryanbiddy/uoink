@@ -16,6 +16,7 @@ only.
 from __future__ import annotations
 
 import uoink_usage
+from copy import deepcopy
 
 import base64
 import json
@@ -3824,17 +3825,455 @@ CORE_STDIO_TOOLS = (
 )
 
 
+DESCRIPTIONS = {
+    "uoink_video": "Capture one YouTube video into a saved Markdown corpus with screenshots. Use for a single video; use uoink_playlist for a batch or uoink_url for other supported video platforms and long-video modes. Runs synchronously and needs the local media runtime. Returns the saved corpus and file paths; failures can leave partial capture files. Recapturing a source can replace its saved corpus and metadata.",
+    "uoink_playlist": "Start a background capture job for the videos in a YouTube playlist. Use for a one-time batch; use add_monitored_playlist for ongoing metadata monitoring or uoink_video for one video. Returns a job_id for get_job_status and cancel_job. Requires the local media runtime; the job can produce partial outputs before completion or cancellation. Recapturing a source can replace its saved corpus and metadata.",
+    "get_job_status": "Read progress, per-item outcomes and errors for a saved capture or transcription job. Use after uoink_playlist or transcribe_podcast_episode returns a job_id; use cancel_job to request cancellation. Returns the current job object, or an error for an invalid or unknown identifier.",
+    "cancel_job": "Request cancellation of a capture or transcription job while keeping partial outputs on disk. Use when the user wants work stopped; use get_job_status to inspect progress without cancelling. Returns the updated job object or an error for an unknown identifier. Cancellation does not delete captures already saved.",
+    "list_recent_uoinks": "List the newest saved captures from the local index, with their slugs, titles, folders and capture times. Use to browse recent additions without a query; use search_uoinks for matching text or search_library for bounded citation-ready retrieval. Returns up to the requested number of items under the legacy yoinks key.",
+    "search_uoinks": "Find whole saved items by text, with optional channel and hook filters. Use to select corpora; use search_clips for timed transcript windows, search_library for bounded revision-bound retrieval, or query_by_facets for exact stored labels. Returns ranked item snippets and search-mode metadata. Semantic modes depend on the local index and helper; unavailable semantic search falls back to keyword with a reason.",
+    "search_clips": "Find transcript windows in saved items, with timing, source links and ranked snippets. Use to locate quotable passages; use search_uoinks for whole items or search_library for bounded clip-first results with resource URIs. Long source cues keep coarse timing and link to the cue start. Semantic modes can fall back to keyword; inspect the returned search-mode metadata and passage verification before quoting.",
+    "get_evidence_card": "Build a saved item's evidence card with identity, summary hints and clips spread across its timeline. Use when you need a selectable card profile or clip count; use get_library_item for a bounded default Librarian card with revision-bound resource URIs. Supply at least one selector: a matching slug takes precedence, then video_id is tried. Missing items return an error; cards expose no local file paths.",
+    "get_uoink_corpus": "Read a saved item's complete Markdown corpus, citation rows and available source or image pointers by slug. Use when you need the full local document; use get_library_item then read_library_resource for bounded chunks, or get_citation_map for citations alone. Returns an error if the corpus is missing or unreadable. Image pointers refer to saved pixels; this call performs no image interpretation.",
+    "analyze_comments": "Analyze a saved capture's comments with Anthropic and replace its stored comment-intelligence section. Use to refresh themes, mentioned products and disagreements; use get_playbook_input with comment-mining for local evidence that your own agent analyzes. Requires a saved Anthropic key and at least five saved comments. Sends comment content to the provider and returns the resulting analysis lists.",
+    "classify_hook": "Classify a saved capture's opening with Anthropic and replace its stored hook analysis. Use to run the classifier; use get_taxonomy to inspect saved classifications or classify_facets to store your own labels. Requires a saved Anthropic key and sends saved title, transcript and comment context to the provider. Returns the hook, explanation, confidence and correction count, and appends a taxonomy entry.",
+    "get_taxonomy": "Read saved hook-classification rows, optionally restricted to a channel or hook. Use to inspect prior classifier results; use get_facet_taxonomy for allowed labels, classify_hook to run the classifier, or analyze_self_channel for own-channel trends. Returns a bounded taxonomy list without rerunning analysis.",
+    "get_citation_map": "Read all stored transcript and screenshot citations for one saved capture. Use for citation timing and source links without the full corpus; use get_uoink_corpus for Markdown or export_cited_range for a bounded cue-aligned export. Returns separate transcript and screenshot lists with source-aware deep links where available. Requires a saved video_id in the item's sidecar; missing captures return an error.",
+    "get_uoink_health": "Read the stored per-section extraction health of a saved capture. Use to diagnose missing or failed capture sections; use get_transcript_reliability for questionable transcript spans. Reads the index snapshot, falling back to the sidecar, and returns an error when no health data exists. It does not retry extraction or recompute health.",
+    "find_mentions": "Find recorded entity-name mentions across saved items, with stored spans, timing and source links. Use for people, products, tools or topics already indexed as entities; use search_clips for arbitrary transcript text or search_uoinks for whole-item search. Ranks by name match with newest first on ties. Results are limited and do not extract new entities.",
+    "get_transcript_reliability": "Read stored transcript-reliability spans for a saved item. Use to inspect suspect wording before quoting; use get_uoink_health for extraction-section health or export_cited_range for stored cue text. Returns status not_computed with empty spans when no reliability snapshot exists. Computation requires the helper endpoint or the user's auto-check setting; this read never downloads a model.",
+    "add_podcast_feed": "Register a podcast RSS feed for ongoing metadata monitoring. Use for the podcast feed and episode workflow; use register_source for the general standing-source interface or list_podcast_feeds to find an existing feed. Returns the existing row for a duplicate URL. Audio auto-ingest is a separate explicit opt-in, off by default; standing capture still requires source consent through the dashboard.",
+    "list_podcast_feeds": "List registered podcast feeds newest first, including their saved polling settings. Use to obtain a feed_id before polling or removal; use list_podcast_episodes to inspect episodes and list_sources for standing-source consent. Returns feeds and their count. This call reads saved registrations without fetching RSS.",
+    "remove_podcast_feed": "Stop monitoring a registered podcast feed. Use after list_podcast_feeds identifies the feed; use set_source_consent to disable capture while retaining detection. A source-linked feed is archived and disabled; a legacy unlinked feed is deleted with its tracked episode rows. Returns whether a row was affected; already published corpora are not removed.",
+    "poll_podcast_feed": "Refresh metadata for one registered podcast feed through the source-aware polling path. Use after add_podcast_feed when new episode observations are needed; use list_podcast_episodes to read cached episodes without a fetch. Managed sources honor detection due times and leases. Polling records observations; capture remains subject to separate source consent and scheduling. Returns the poll outcome or a feed error.",
+    "list_podcast_episodes": "List tracked podcast episodes newest published first, optionally scoped to a feed or lifecycle state. Use to obtain episode IDs and check download or transcription state; use list_podcast_feeds for feed settings or poll_podcast_feed to refresh observations. Returns episodes and count from local storage without fetching audio.",
+    "download_podcast_episode": "Download a tracked podcast episode's audio to its canonical local MP3. Use after list_podcast_episodes, before transcribe_podcast_episode; use episode_to_corpus only after a transcript exists. Requires yt-dlp and ffmpeg, and blocks until download finishes or fails. Reuses an existing nonempty canonical file and records its path on the episode.",
+    "get_whisperx_status": "Inspect local WhisperX availability, the selected model and the diarization default. Use before transcribe_podcast_episode to identify missing runtime prerequisites; use get_job_status to monitor an already queued transcription. Returns availability and supported model settings without downloading a model or starting transcription.",
+    "transcribe_podcast_episode": "Queue local WhisperX transcription for a downloaded podcast episode. Use after download_podcast_episode and get_whisperx_status; monitor the returned job with get_job_status, then publish with episode_to_corpus. A single worker writes or replaces the JSON transcript beside the audio. First-time model downloads require user consent: only reissue with consent_given after the dashboard records the opt-in. Missing runtime returns an error.",
+    "episode_to_corpus": "Publish a completed podcast transcript as a searchable local corpus with source-aware citations. Use after transcribe_podcast_episode completes; use download_podcast_episode for audio acquisition. Writes deterministic Markdown and sidecar files, replaces the prior corpus/index snapshot and repairs partial previous attempts. Missing audio or transcript prerequisites return an error; success identifies the published item.",
+    "get_library_activity": "Report saved-library capture activity, shelf churn and standing-source observations for a time interval. Use for counts and revision-bound drill-down; use get_library_brief_input for a daily writing packet or source_status for one source's observations. Start with a summary, then reuse its report_revision for detail pages. Returns deterministic metrics and evidence; stale detail revisions require a fresh summary.",
+    "search_library": "Retrieve a bounded, clip-first selection of saved-library matches with revision-bound card and excerpt URIs. Use for citation-ready research; use search_uoinks for whole-item filters or search_clips for more transcript windows. Check passage_verified before quoting; citation_reason explains missing passages. Follow resource URIs with read_library_resource and next_step for more retrieval. Results are not exhaustive; search-mode metadata explains keyword fallback.",
+    "get_library_item": "Resolve one saved item to its bounded default Librarian card and canonical card, excerpt and initial corpus-chunk URIs. Use before quoting or paging through evidence; use get_evidence_card for selectable profiles and clip counts, or get_uoink_corpus for the full local Markdown. Supply exactly one selector. Follow returned URIs with read_library_resource; missing or stale evidence produces a structured refusal.",
+    "read_library_resource": "Read a bounded saved-library card, excerpt, corpus chunk, shelf page or brief from its uoink URI. Use as the tools-only equivalent of resources/read, after search_library or get_library_item supplies a URI. Use get_uoink_corpus for a full document instead of chunk paging. Validation, rendered contents and refusals match native resource reads; follow next_step on stale revisions or unavailable evidence.",
+    "get_playbook_input": "Prepare cited local evidence and instructions for a client-written research report. Use for creator comparisons, transcript analysis, comment mining or repurposing; use analyze_self_channel for computed own-channel performance, search_library for ad hoc retrieval and get_library_brief_input for a dated operational brief. Returns instruction, packet and packet_hash within the library read budget. The client does the analysis; no model is called. Argument selectors depend on the selected playbook.",
+    "discover_candidates": "Plan or run a ScrapeCreators search and save uncaptured candidates. Use to find new material; use search_library for saved evidence and queue_discovered to capture selected candidates. Off by default; requires a saved key, discovery enabled and daily credit room. Omit confirm_credits for a free plan, then confirm its exact cost. Spending requires agent discovery consent or a dashboard intent; stdio needs agent consent because dashboard intents are process-bound. No candidate is captured by this call.",
+    "queue_discovered": "Enqueue selected saved discovery candidates for normal capture. Use after discover_candidates returns a run and candidate keys; use that tool again to search for new candidates. Requires agent discovery consent or a dashboard intent; stdio needs agent consent because dashboard intents are process-bound. Returns queued and skipped picks, skipping unknown, unsupported, captured or queued URLs. No ScrapeCreators credits are spent; the resident retry worker performs capture later.",
+    "get_library_brief_input": "Prepare a dated library-status packet for a brief that the client writes. Use for a requested daily brief; use get_library_activity for direct metrics or get_playbook_input for topical research. Returns job_key, input_hash, bound revisions, counts, coverage, up to 20 work rows and five Librarian cards within 24,576 bytes. No work lease is acquired. Pass the unchanged packet to publish_library_brief after writing.",
+    "publish_library_brief": "Save a client-written daily brief as an immutable local artifact. Use only for the user's requested brief job after get_library_brief_input; use read_library_resource to read a published brief. Validates the exact packet against current data and binds quotes to supplied evidence. An identical submission_key retry returns the saved result; stale_brief requires fresh input. Writes under reach/briefs without applying labels or changing the assignment queue.",
+    "export_cited_range": "Export verbatim stored transcript cues with speaker provenance, overlapping chapters, safe links and evidence references. Use after search_clips identifies a passage; use get_citation_map for all citation rows or read_library_resource for an existing resource URI. Select exact cue-aligned bounds or a current excerpt, at most 120 seconds and 200 cues. Returns source/media revisions; refusals include next_step. It does not fetch media or recompute transcription.",
+    "list_library_work": "List Librarian assignment counts and one cursor page of work for a run. Use to inspect readiness before claim_library_work; use get_library_activity for aggregate library metrics. Listing expires stale leases and can update work state. Returns run revision, work states, manifest dispositions and waiting-client status. The server does not perform the Librarian's model work.",
+    "claim_library_work": "Lease Librarian evidence packets, or renew, release or cancel your current attempts. Use after list_library_work to acquire work; use submit_library_result to store an assignment. Claim returns up to twelve packets with attempt tokens. Renew/release/cancel require the work_id and attempt_token from that claim. Leases last 60-900 seconds, never beyond one hour from first claim; three attempts exhaust a row.",
+    "submit_library_result": "Store a client's shelf-assignment result for one currently leased Librarian item. Use after claim_library_work; use apply_reshelving to preview accepted assignments as label changes. Copy the packet's identifiers and revision hashes unchanged, and quote its evidence. Submission stages results without changing current labels; an identical submission_key retry replays the recorded response. Report unavailable usage honestly instead of inventing zero usage.",
+    "apply_reshelving": "Create a reshelving preview or apply an approved preview to current labels. Use after submit_library_result stages assignments; use pin_shelf for a user's individual shelf decision or undo_library_apply to reverse the latest apply. Preview needs a run and current projection revision; apply needs its preview_id, delta_hash and operation_key. Apply is disabled by default and stops at 15 percent churn without trusted human approval; expired or stale previews must be rebuilt.",
+    "pin_shelf": "Record a user's pin, unpin or move decision for one item's shelf membership. Use for an explicit individual decision; use apply_reshelving for run-wide proposed changes. Requires a dashboard-minted user_intent_token tied to the exact operation and current projection revision; no actor string grants authority. The Librarian cannot override the resulting user decision. Retry the same operation_key only with identical arguments.",
+    "undo_library_apply": "Reverse the latest applicable library apply by replaying its stored inverse as a new journal operation. Use to undo the apply that produced the current projection revision; use apply_reshelving for a new proposal or pin_shelf for one item's shelf choice. Requires a dashboard user_intent_token. The inverse is itself reversible; identical operation_key retries replay the receipt, and stale revisions are refused.",
+    "list_sources": "List standing RSS, YouTube channel and playlist sources with consent, enrollment, daily allowance and detection health. Use to find source_id values and compare source states; use source_status for one source's observations or list_podcast_feeds/list_monitored_playlists for legacy feed and playlist IDs. Returns a keyset page from local storage. Pass its cursor unchanged to continue; no poll or capture starts.",
+    "register_source": "Register a standing source for future metadata detection with capture consent off. Use for the general source workflow; use add_podcast_feed or add_monitored_playlist when you need their feed or playlist IDs. Creates a due detection cursor without an immediate network call; the resident scheduler polls later. Duplicates return the existing source unchanged with created=false. Enable capture separately through set_source_consent after dashboard confirmation.",
+    "source_status": "Read one standing source's summary, observed-item page and all in-flight reservations. Use after list_sources for detailed capture and classification state; use set_source_consent to change capture permission. Returns saved observations without enrolling, polling or starting work. Continue item pages with the returned cursor; revisions in the summary are needed for consent changes.",
+    "set_source_consent": "Enable or disable standing capture for a registered source after local confirmation. Use after register_source and source_status; use remove_podcast_feed or remove_monitored_playlist to stop their monitoring entirely. Requires current revisions and a dashboard-minted intent. Enabling permits at most 25 initial back-catalog items and 10 starts per UTC day; disabling releases unstarted reservations. Identical operation-key retries return the stored receipt; active captures are not cancelled by disabling.",
+    "analyze_self_channel": "Summarize the user's saved own-channel videos into hook and format history, monthly performance trends and top performers. Use for own-channel planning; use get_playbook_input with creator-teardown for a chosen creator's research packet or get_engagement_signal for one item's local usage. Scope by a registered handle or omit it for all recognized own channels. Results reflect saved data, not live channel analytics.",
+    "get_schema_version": "Report the local SQL migration, item and sidecar schema versions and supported read ranges. Use before interpreting older saved records in an integration; use get_uoink_health to diagnose a capture's contents. Returns null for the SQL version if it cannot be read. This is a storage compatibility check, not a migration request.",
+    "get_user_role": "Read the saved user role and its resolved dashboard sort and filter emphasis. Use to inspect the current dashboard preference; use set_user_role to change it or get_user_taste for writing and content preferences. Returns the normalized role, emphasis and supported roles without changing settings.",
+    "set_user_role": "Replace the saved user role that controls dashboard sort and filter emphasis. Use for the user's chosen working role; use get_user_role to inspect it or update_user_taste for content preferences. Returns the normalized role and computed emphasis. Other saved settings are retained.",
+    "check_live_status": "Fetch video metadata to determine whether a broadcast is live, upcoming or finished. Use before deciding to capture now or wait; use uoink_video or uoink_url to capture, and get_job_status for an existing job. Requires the metadata-fetch runtime and network access. Returns the canonical URL, title and detected live state without starting extraction.",
+    "add_monitored_playlist": "Register a YouTube playlist for ongoing metadata monitoring. Use for repeated observation; use uoink_playlist for a one-time capture batch or register_source for the general source interface. Returns the existing row for a duplicate URL. Managed playlists start with capture consent off and clamp polling to at least 15 minutes; capture requires separate source consent and the resident helper.",
+    "list_monitored_playlists": "List registered playlist monitors newest first with saved monitoring settings. Use to obtain playlist_id before polling or removal; use list_monitored_playlist_events for discoveries and list_sources for standing-source consent. Returns playlists and count from local storage without fetching YouTube.",
+    "remove_monitored_playlist": "Stop monitoring a registered playlist. Use after list_monitored_playlists identifies it; use set_source_consent to stop capture while keeping metadata detection. Source-linked playlists are archived and disabled; legacy unlinked playlists and their discovery events are deleted. Returns whether a row was affected. Saved captures remain available.",
+    "poll_monitored_playlist": "Refresh observations for a registered playlist through its source-aware polling path. Use after list_monitored_playlists when fresh observations are needed; use list_monitored_playlist_events for cached discoveries. Stdio requires the resident Uoink helper. Managed sources honor due-time and lease gates, and detection does not enqueue captures; captures require separate source consent and reservations. Returns the poll outcome and observation summary.",
+    "list_monitored_playlist_events": "List recorded playlist-discovery events newest first, optionally filtered by playlist or lifecycle state. Use to inspect what monitoring found; use poll_monitored_playlist to refresh observations or list_monitored_playlists for monitor settings. Returns saved events and count. Reading events does not enqueue or retry captures.",
+    "get_user_taste": "Read consolidated TASTE.md preferences and performance anchors. Use for writing or example-selection context; use get_user_memory for hand-edited personal notes or update_user_taste to replace a preference section. If missing, regenerates the file from local engagement and anchors, including a configured vault mirror. Returns content and path without calling a model.",
+    "get_user_memory": "Read the user's hand-edited USER.md notes about channels, topics and workflow. Use for personal context; use get_user_taste for consolidated content preferences. Creates a local skeleton on first read when absent, then returns content and path. Existing hand-edited text is preserved; the taste consolidator does not overwrite it.",
+    "update_user_taste": "Replace one persisted taste-preference section and regenerate TASTE.md. Use for a user-requested preference change; use get_user_taste to inspect current preferences or get_user_memory for separate personal notes. The supplied Markdown replaces that section verbatim. Regeneration updates the local file and configured vault mirror; other preference sections remain intact.",
+    "get_engagement_signal": "Read one saved item's time-decayed local engagement score, event counts and last-event time. Use to assess how the user has used an item; use analyze_self_channel for captured channel-performance trends or query_by_facets for stored performance labels. The score uses local interaction events with a 30-day half-life, not live social-network engagement.",
+    "classify_facets": "Store your agent's facet classifications and tags on a saved item. Use after analyzing its evidence; use query_by_facets to retrieve labeled items or classify_hook for provider-run hook classification. Validates supplied labels, replaces those facet values and adds deduplicated tags. Missing performance tier and length bucket can be derived from saved metadata. Returns applied facets and tag counts; no model call runs here.",
+    "query_by_facets": "List saved items matching all supplied facet and tag filters, newest first. Use for exact stored-label selection; use search_uoinks for text relevance, classify_facets to write labels, or get_facet_taxonomy to discover supported axes. Returns yoinks and count from local storage. Filters are AND-combined; omitted filters leave that axis unrestricted.",
+    "get_facet_taxonomy": "Return supported format, performance-tier, length-bucket and hook label lists. Use before classify_facets or query_by_facets; use get_taxonomy for saved per-item hook-classification rows. These are the server's allowed label constants, not counts of labels present in the library.",
+    "assemble_workspace": "Select and rank saved examples for planning a video, with audience questions and available taste or own-channel context. Use to assemble a corpus slice; use get_workspace to read a saved workspace or critique_against_corpus to review a draft. Ranking uses format, performance tier and local engagement. Supplying workspace_id replaces that workspace's selected-item list; omitting it only returns the slice. Your agent performs any subsequent model analysis.",
+    "critique_against_corpus": "Prepare workspace grounding for a draft critique, or append your agent's findings to its critique log. Use after assemble_workspace; use get_workspace to read earlier critiques or revise_script to save a script revision. Omit findings to retrieve context, then submit your analysis with findings. Repeated submissions append log entries. Server-side BYO generation is not implemented; the agent performs the analysis.",
+    "list_workspaces": "List saved video-planning workspaces newest first. Use to obtain a workspace ID for get_workspace, assemble_workspace or generate_script; use list_scripts for script-version history. Returns workspace rows and count. This tool does not create workspaces or assemble new examples.",
+    "get_workspace": "Read one saved video-planning workspace and its full critique log. Use after list_workspaces; use assemble_workspace to select new examples or critique_against_corpus to append findings. Supply id or its workspace_id alias; id takes precedence. Returns workspace and critique_log, or an error if the workspace is missing.",
+    "extract_claims": "Store checkable claims that your agent extracted from a saved item. Use after reading its evidence; use verify_claim to record supporting or conflicting evidence and list_claims to inspect existing claims. Appends claim rows in extracted state and returns their IDs. The agent performs decomposition; this tool does not determine truth. BYO model execution is not implemented.",
+    "verify_claim": "Record your agent's evidence and alignment signals for an existing claim. Use after extract_claims; use get_claim to inspect evidence without changing it. Replaces the stored evidence and updates review status. Signals describe support, contradiction, mixed evidence or inconclusiveness, never a truth verdict; the user judges the claim. The agent performs research, and BYO model execution is not implemented.",
+    "list_claims": "List saved checkable claims, optionally filtered by source item or review status. Use to select claim IDs for get_claim or verify_claim; use extract_claims to add claims. Returns claim rows and count. A verified status records that evidence was submitted, not that the claim is true.",
+    "get_claim": "Read one saved claim with its recorded evidence and alignment signals. Use after list_claims; use verify_claim to replace its evidence. Supply id or its claim_id alias; id takes precedence. Returns the claim or a not-found error. Review status and alignment signals are evidence records, not automatic truth verdicts.",
+    "generate_script": "Prepare workspace grounding for a video script, or save an agent-written script as a new version. Use for a new draft; use revise_script to revise an existing script or write_blog/write_tweet for prose pieces. Omit script to retrieve context, then submit your structured draft. The agent writes it; server-side BYO generation is not implemented. Returns grounding or the saved script ID and version.",
+    "revise_script": "Prepare revision context for an existing video script, or save its replacement as a linked new version. Use after get_script or critique_against_corpus; use generate_script for a new draft. Without revised_script, returns the previous script and grounding; with it, persists a new row whose parent is the prior script. The agent performs rewriting; server-side BYO generation is not implemented.",
+    "get_shot_list": "Derive and save a default shot list from a script's beats and its workspace format. Use when you want heuristic camera cues; use get_script to read the existing shot list without replacing it, or supply a custom shot_list through generate_script. This call overwrites the prior shot list and returns the generated rows. It does not run a model.",
+    "list_scripts": "List saved video-script versions newest first, optionally within one workspace. Use to find a script ID for get_script or revise_script; use list_writing_pieces for tweet, thread and blog drafts. Returns script rows and count without generating or changing a draft.",
+    "get_script": "Read a saved video-script version, including beats, shot list and source-item citations. Use after list_scripts; use revise_script for a new version or get_shot_list to regenerate camera cues. Supply id or its script_id alias; id takes precedence. Returns the script object or a not-found error.",
+    "write_tweet": "Prepare grounding for a tweet or thread, or save a credited draft in the local Writing Studio. Use for short social drafts; use write_blog for articles or generate_script for video scripts. Without body, returns grounding unless direct generation is requested with the saved Anthropic key. With body, saves the agent's draft and returns soft Voice DNA warnings. Creator credit cannot be suppressed. Direct generation sends context to Anthropic and retries fatal phrase violations once before refusing to save; nothing is posted to a social account.",
+    "write_blog": "Prepare grounding for a blog article, or save a credited Markdown draft in the local Writing Studio. Use for long prose; use write_tweet for tweets and threads or generate_script for video scripts. Without body, returns grounding unless direct generation is requested with the saved Anthropic key. With body, saves the agent's draft and returns soft Voice DNA warnings. Keep the required Source credit. Direct generation sends context to Anthropic and retries fatal phrase violations once before refusing to save; nothing is published to a website.",
+    "list_writing_pieces": "List saved tweet, thread and blog drafts newest first, optionally filtered by kind or source item. Use to find a piece ID for get_writing_piece; use list_scripts for video-script versions. Returns pieces and count. The list contains local drafts, not posts fetched from social or publishing accounts.",
+    "get_writing_piece": "Read one saved Writing Studio tweet, thread or blog draft. Use after list_writing_pieces; use write_tweet or write_blog to save another draft, or get_script for video scripts. Supply id or its piece_id alias; id takes precedence. Returns the piece object or a not-found error.",
+    "add_style_anchor": "Save a named writing-style reference from pasted text or a URL. Use to guide later write_tweet/write_blog drafts; use list_style_anchors to select existing references. URL references fetch prose through the page extractor and can retain null raw_text if extraction fails. Returns the anchor; more than ten anchors is refused. Style references do not authorize copying source facts or suppressing creator credit.",
+    "list_style_anchors": "List saved writing-style references with active flags and the configured ten-anchor cap. Use to select style_anchor_ids for write_tweet or write_blog; use add_style_anchor to save a reference or remove_style_anchor to delete one. Returns anchors and count without refetching URL contents.",
+    "remove_style_anchor": "Delete a saved writing-style reference. Use after list_style_anchors identifies the reference; use add_style_anchor to save a replacement. Supply anchor_id or its id alias; anchor_id takes precedence. Returns the selected ID and whether it was removed. Previously saved writing pieces remain.",
+    "uoink_url": "Capture a supported video URL through platform routing, with metadata/transcript fallback for other yt-dlp sites. Use for non-YouTube videos or long-video modes; use uoink_video for a single standard YouTube capture, uoink_page for webpage prose, uoink_x for X text chains, or uoink_reddit_thread for discussion comments. Requires the local media runtime. Saves a local corpus; generic fallback has no screenshots, comment fetch or hook classification. Recapturing a source can replace its saved corpus and metadata.",
+    "uoink_note": "Save user-provided text as a local searchable note with title and attribution. Use for pasted ideas or prose without fetching a source; use uoink_page for a web article or uoink_image for pixels. Returns the saved item ID, slug and metadata. Empty or invalid notes are refused; title can be derived from the text.",
+    "uoink_image": "Save supplied PNG, JPEG or WebP bytes as a local image corpus item with optional caption and attribution. Use for screenshots, diagrams or images; use uoink_note for text or uoink_page to fetch a webpage. Accepts strict base64 or a data URL and returns the saved item ID, slug and metadata. Invalid images are refused. No cloud OCR or vision service runs.",
+    "uoink_x": "Capture an X post and its author's earlier chain as a local text corpus item. Use for post text; use uoink_url for an X video capture or uoink_page for general webpage prose. Requires x_text_capture_enabled and public source access. Returns the saved item ID, title, captured-tweet count and metadata; disabled capture or extraction failure returns an error. Recapturing a source can replace its saved corpus and metadata.",
+    "uoink_page": "Fetch an allowed webpage as Markdown and save it as a local corpus item. Use for articles and documentation; use uoink_url for videos, uoink_x for post chains or uoink_reddit_thread for comments. Add an unlisted host with add_allowed_site only with user authorization. Crawl4AI renders locally when available; static fallback has no screenshot. Returns extracted content and metadata; video_id is null if extraction succeeded but persistence failed. Recapturing a source can replace its saved corpus and metadata.",
+    "uoink_reddit_thread": "Capture a Reddit post and filtered comment tree as a local discussion corpus. Use when replies matter; use uoink_page for general webpage prose or uoink_url for video extraction. Fetches Reddit's public JSON without API credentials or the page allowlist, then saves nested replies with source_type reddit_thread. Returns captured content, comment counts and the saved item ID; fetch or save failures return an error. Recapturing a source can replace its saved corpus and metadata.",
+    "list_allowed_sites": "List saved webpage-capture hostname patterns and their active state. Use before uoink_page to check access; use add_allowed_site or remove_allowed_site to change the allowlist. Returns sites, count and default seeds. Seeds can be removed like other entries; this call does not test reachability or fetch pages.",
+    "add_allowed_site": "Add a hostname pattern to the webpage-capture allowlist. Use for a user-authorized uoink_page destination; use list_allowed_sites to inspect rules or remove_allowed_site to revoke one. Plain hosts include subdomains; wildcard patterns match their specified subdomains. Returns the saved rule and reuses an existing pattern unchanged. This grants future page access but does not capture a page.",
+    "remove_allowed_site": "Remove a hostname pattern from the webpage-capture allowlist. Use to revoke a rule found by list_allowed_sites; use add_allowed_site to restore it. Returns the normalized pattern and whether a rule was removed. Saved captures remain, and overlapping rules can still allow the same host.",
+}
+
+# Existing constraints, enums and defaults remain authoritative. These strings
+# document the client view without modifying the frozen validator schemas.
+PARAMETERS = {
+    "active_only": "Only return rows whose active flag is set; omit to include inactive rows.",
+    "enabled_only": "Only return registrations with monitoring enabled; this does not imply capture consent.",
+    "limit": "Maximum rows to return in this response; does not change stored data.",
+    "video_id": "Stable saved-item identifier from a search or capture result; not necessarily a YouTube ID.",
+    "yoink_id": "Stable source-item identifier from a capture or search result.",
+    "source_yoink_id": "Saved item to ground the draft and creator credit; omit for a draft without a source item.",
+    "slug": "Saved item's folder slug from list_recent_uoinks or search_uoinks.",
+    "feed_id": "Integer feed ID returned by add_podcast_feed or list_podcast_feeds.",
+    "episode_id": "Integer episode ID from list_podcast_episodes, not the feed ID.",
+    "playlist_id": "Integer monitor ID from add_monitored_playlist or list_monitored_playlists.",
+    "feed_url": "Public HTTP(S) RSS or Atom feed URL, not the podcast's homepage.",
+    "playlist_url": "YouTube playlist URL containing its list identifier.",
+    "poll_interval_min": "Requested interval between metadata checks, in minutes; not a capture deadline.",
+    "auto_ingest": "Explicit podcast audio-ingest preference; false unless the user opted in. Standing-source capture consent is separate.",
+    "query": "Nonempty search text to match against saved content.",
+    "channel": "Saved channel name to restrict the results; omit for all channels.",
+    "hook_type": "Stored opening-hook classification to write or match; see get_facet_taxonomy for hook labels.",
+    "format": "Content format label, such as tutorial or talking_head; see get_facet_taxonomy.",
+    "performance_tier": "Channel-relative performance label: over, average or under.",
+    "length_bucket": "Duration bucket: short, medium, long or deep; see get_facet_taxonomy.",
+    "production_style": "Free-form description of how the item was produced.",
+    "topic": "Stored topic label used to classify or select examples.",
+    "tag": "One saved tag that each returned item must have.",
+    "tags": "Free-form labels to attach to the saved item or draft.",
+    "job_id": "Job identifier returned by a capture or transcription queue operation.",
+    "workspace_id": "Saved workspace identifier from list_workspaces or get_workspace.",
+    "script_id": "Integer script-version ID from list_scripts, generate_script or revise_script.",
+    "claim_id": "Integer claim ID from extract_claims or list_claims.",
+    "piece_id": "Alias for id; use a saved writing-piece ID from list_writing_pieces.",
+    "anchor_id": "Integer style-reference ID from list_style_anchors.",
+    "name": "User-facing name for this saved registration or reference.",
+    "title": "Display title for the saved content; omit to use the handler's derived/default title.",
+    "author": "Attribution name supplied by the user; not an account to authenticate.",
+    "text": "Nonempty note text to save, including any Markdown formatting.",
+    "image_base64": "Base64-encoded PNG, JPEG or WebP bytes; a data URL prefix is also accepted.",
+    "mime": "Image media type, such as image/png, image/jpeg or image/webp; omit for detection.",
+    "filename": "Original image filename used as a naming hint, not a destination path.",
+    "caption": "User-supplied image description stored with the item; no image analysis is performed.",
+    "source_url": "Original source URL to store for attribution; this field does not fetch it.",
+    "url_pattern": "Hostname or wildcard hostname pattern, without whitespace; for example example.com or *.docs.example.com.",
+    "render_mode": "js requests local browser rendering when available; static requests HTML extraction.",
+    "include_screenshot": "Request a page screenshot when the renderer supports it; static fallback has none.",
+    "follow_links_depth": "Requested linked-page depth passed to the extractor; current capture does not recursively persist linked pages.",
+    "depth_limit": "Maximum nested comment depth to retain; zero excludes deeper reply levels.",
+    "score_threshold": "Minimum Reddit comment score to retain; lower values include less-upvoted comments.",
+    "long_video_mode": "full runs normal extraction; lite requests the helper's reduced long-video capture path.",
+    "role": "User's dashboard emphasis preference; changes sorting and filter-chip priority.",
+    "section": "Taste-preference section whose saved Markdown body will be replaced.",
+    "content": "Replacement Markdown for the selected taste section; existing text in that section is replaced.",
+    "your_channel": "Registered own-channel handle used to add a self-analysis snapshot.",
+    "hook_target": "Desired hook classification used to guide the workspace's example selection.",
+    "n_examples": "Maximum saved examples to assemble for this planning context.",
+    "draft_text": "Draft to critique against the workspace's saved examples.",
+    "findings": "Agent-written critique object, for example hook_strength, structural_deviation, pacing_issues and missing_audience_hooks; omit to get grounding only.",
+    "claims": "Agent-extracted objects with claim_text, optional check_worthiness from 0 to 1 and optional context object. Invalid entries are skipped and reported in errors.",
+    "evidence": "Evidence objects with source_url, quote and alignment_signal (supports, contradicts, mixed or inconclusive). Existing evidence is replaced; quotes are stored up to 1024 characters.",
+    "script": "Agent-written object with hook, beats, body, cta and source_yoinks citations; optional shot_list. Omit to retrieve grounding only.",
+    "revised_script": "Replacement script object with the same fields as generate_script.script; omit for revision context only.",
+    "parent_script_id": "Prior script-version ID to link as this version's parent; omit for an initial draft.",
+    "critique_findings": "Agent-supplied findings to include in revision context; the server does not analyze them.",
+    "revision_target": "Requested revision focus supplied to the agent alongside the previous script.",
+    "mode": "Compute provenance label: agent or byo_key. The caller still supplies the analysis; this field alone does not run a provider model.",
+    "angle": "Requested editorial focus for the draft's grounding or direct-generation prompt.",
+    "target_length_chars": "Desired character length for the writing prompt; not a hard persistence limit.",
+    "target_length_words": "Desired word length for the writing prompt; not a hard persistence limit.",
+    "style_anchor_ids": "Saved style-reference IDs from list_style_anchors to include in writing context.",
+    "body": "Agent-written draft text, including mandatory source credit; omit for grounding or explicitly requested direct generation.",
+    "source_credit_line": "Exact creator-credit line to retain in the body; use the line supplied by grounding.",
+    "skip_voice_dna_this_time": "Skip the Voice DNA check for this save; does not waive mandatory source credit.",
+    "suppress_credit": "Must not be true: suppressing creator credit is rejected.",
+    "parent_id": "Earlier writing-piece ID to link as this draft's parent version.",
+    "dek": "Optional short subtitle beneath a blog title.",
+    "source_type": "url fetches a style reference from the web; text stores the supplied prose directly.",
+    "source_value": "HTTP(S) URL when source_type is url, or the pasted reference text when it is text.",
+    "profile": "full includes the normal evidence card; librarian selects the smaller assignment-oriented card.",
+    "n_clips": "Requested number of timeline-spread evidence clips; omit for the selected profile's default.",
+    "model": "Local WhisperX model size; omit to use the saved model setting.",
+    "language": "Whisper language code, such as en; omit for automatic language detection.",
+    "diarize": "Request speaker diarization; omit to use the saved default and its runtime prerequisites.",
+    "consent_given": "True only after the user opted in through the dashboard to the required first-time model download.",
+    "run_id": "Librarian run identifier from list_library_work; omission selects the service's default run where allowed.",
+    "cursor": "Opaque cursor from the previous response; pass unchanged to continue the same listing.",
+    "state": "Work-state filter; all includes every state rather than only ready assignments.",
+    "client_id": "Stable identifier for your Librarian client; use the same value through claim, renew and submit.",
+    "max_items": "Maximum single-item packets to lease in this claim.",
+    "lease_seconds": "Requested lease duration in seconds; renewal cannot extend past the attempt's absolute lifetime.",
+    "work_id": "Work-row identifier returned by claim_library_work, distinct from the source item ID.",
+    "attempt_token": "Opaque token for your current leased attempt; copy from claim_library_work and do not invent it.",
+    "reason": "Human-readable explanation for the requested action or non-assignment outcome.",
+    "submission_key": "Client-generated retry key; reuse only for an identical submission.",
+    "schema_version": "Result contract version required by the claimed packet.",
+    "source_revision": "Revision of the saved source evidence; copy from the packet or retrieval result to detect stale input.",
+    "taxonomy_revision": "Taxonomy hash from the leased packet; copy unchanged into the submission.",
+    "packet_hash": "Hash of the exact leased input packet; copy unchanged from claim_library_work.",
+    "result": "Assignment outcome with evidenced shelf memberships, or unmapped/unsupported/error with a reason; conforms to the referenced result schema.",
+    "usage": "Actual client model usage, or an explicit unavailable report when measurements are missing; never invent zero usage.",
+    "expected_projection_revision": "Current label-projection revision from the library response; stale writes are refused.",
+    "activate_version": "Whether the preview should activate this run's taxonomy version when applied.",
+    "preview_id": "Unexpired preview identifier returned by apply_reshelving in preview mode.",
+    "delta_hash": "Exact proposed-change hash returned with the preview; prevents applying a different delta.",
+    "operation_key": "Client-generated key for an identical-operation retry; do not reuse it for different arguments.",
+    "shelf_id": "Stable target shelf identifier from the library taxonomy or evidence packet.",
+    "user_intent_token": "Operation-bound capability minted after local dashboard confirmation; agents cannot mint it or substitute an actor field.",
+    "apply_id": "Journal apply identifier whose resulting projection revision is still current.",
+    "source_id": "Standing-source identifier returned by register_source or list_sources.",
+    "consent_state": "on enables consent-controlled standing captures; off releases unstarted reservations while retaining detection.",
+    "include_archived": "Include archived registrations as well as current sources.",
+    "display_name": "Human-readable source label; omit to use the source's default display name.",
+    "item_limit": "Maximum observed items in this source-status page; reservations are returned separately.",
+    "item_cursor": "Opaque observed-item cursor from the previous source_status response.",
+    "expected_revision": "Current source revision from source_status; a changed source requires refreshing it.",
+    "expected_cursor_revision": "Detection-cursor revision from source_status, required when enabling consent and forbidden when disabling it.",
+    "playbook": "Research packet to prepare; its name selects the allowed arguments and required selectors.",
+    "arguments": "String-valued playbook arguments: outlier-posts/creator-teardown require author (optional platform); outlier-posts also accepts since. transcript-intel needs exactly one of video_ids/topic/author (optional since). comment-mining needs video_ids or author and optional lens=voc/demand. repurpose-pack requires video_ids and optional kinds. IDs/kinds are comma-separated strings; ID caps are 8, 10 and 5 respectively. since is a UTC YYYY-MM-DD capture date, not future.",
+    "platform": "Remote platform for the discovery search; the mode/platform pair must be supported.",
+    "channel_id": "YouTube channel ID beginning UC, as an alternative to handle in creator mode only.",
+    "pages": "Maximum discovery pages to request; each planned page consumes one confirmed credit.",
+    "confirm_credits": "Exact credits_planned from the free plan; omit to request the plan without spending.",
+    "keys": "Candidate keys from the selected discovery run; only these saved candidates are considered for capture.",
+    "date": "UTC day for the operational brief, YYYY-MM-DD, not in the future.",
+    "job_key": "Brief job_key returned by get_library_brief_input; copy unchanged.",
+    "input_hash": "Brief input_hash returned by get_library_brief_input; copy unchanged.",
+    "input_packet": "Exact unmodified packet returned by get_library_brief_input.",
+    "document": "Client-written brief Markdown within the 8192-byte UTF-8 limit, with evidence-bound citations.",
+    "citations": "Evidence citations carrying item_id, source_revision, card_hash, excerpt_id, quote, evidence_kind, start and end; copy identifiers from the input packet.",
+    "uri": "Canonical uoink://library/v1/ resource URI returned by library retrieval; preserve its revision and paging components.",
+    "media_revision": "Optional expected media snapshot revision; mismatches return revision_unavailable.",
+    "excerpt_id": "Current excerpt identifier instead of explicit cue-aligned start and end bounds.",
+    "offset": "Zero-based offset into the chosen detail collection, under the same report revision.",
+    "metric_id": "Stable metric identifier from the summary; required when requesting evidence detail.",
+    "detail": "Detail collection to page; omit for the summary and its report_revision.",
+    "date_basis": "Use capture timestamps or original publication timestamps for the item report.",
+}
+
+OVERRIDES = {
+    "search_uoinks": {"mode": "auto prefers hybrid when the local semantic index is ready, otherwise keyword; explicit semantic/hybrid can also fall back with a reason."},
+    "search_clips": {"mode": "auto prefers hybrid when the local semantic index is ready, otherwise keyword; explicit semantic/hybrid can also fall back with a reason."},
+    "search_library": {"mode": "auto prefers hybrid when the local semantic index is ready, otherwise keyword; explicit semantic/hybrid can also fall back with a reason."},
+    "uoink_video": {"url": "YouTube watch or youtu.be video URL; playlists use uoink_playlist."},
+    "uoink_playlist": {"url": "YouTube playlist URL with a list identifier; individual videos use uoink_video."},
+    "uoink_url": {"url": "HTTP(S) video/source URL accepted by yt-dlp's supported extractors.", "interval": "Seconds between screenshots in the full media pipeline; ignored by metadata-only fallback."},
+    "check_live_status": {"url": "Public HTTP(S) video URL whose metadata should be probed."},
+    "uoink_page": {"url": "HTTP(S) webpage URL whose hostname matches an active page allowlist rule."},
+    "uoink_x": {"url": "Public x.com or twitter.com status URL for the terminal post in the desired author chain."},
+    "uoink_reddit_thread": {"url": "reddit.com/r/<sub>/comments/... thread URL."},
+    "get_workspace": {"id": "Preferred workspace ID from list_workspaces; takes precedence over workspace_id."},
+    "get_claim": {"id": "Preferred claim ID from list_claims; takes precedence over claim_id."},
+    "get_script": {"id": "Preferred script-version ID from list_scripts; takes precedence over script_id."},
+    "get_writing_piece": {"id": "Preferred writing-piece ID from list_writing_pieces; takes precedence over piece_id."},
+    "remove_style_anchor": {"id": "Alias for anchor_id, used only when anchor_id is absent."},
+    "discover_candidates": {
+        "mode": "creator requires exactly one of handle/channel_id; keyword requires query and excludes both creator selectors.",
+        "handle": "Creator handle, optionally prefixed @; use instead of channel_id in creator mode.",
+        "query": "Remote keyword-search phrase; required only in keyword mode.",
+        "user_intent_token": "Optional dashboard discovery intent bound to this process and operation. Stdio must use the enabled agent-discovery consent setting instead.",
+    },
+    "queue_discovered": {
+        "run_id": "Saved discovery run_id returned by discover_candidates, not a Librarian run ID.",
+        "user_intent_token": "Optional dashboard queue intent bound to this process and operation. Stdio must use the enabled agent-discovery consent setting instead.",
+    },
+    "analyze_self_channel": {"handle": "Registered own-channel handle, with or without @; omit for all recognized own channels."},
+    "claim_library_work": {"action": "claim acquires packets; renew extends your lease; release returns your attempt; cancel cancels it. Non-claim actions require work_id and attempt_token."},
+    "apply_reshelving": {"mode": "preview creates a proposal and requires run_id; apply requires preview_id, delta_hash and operation_key and must pass the local apply gate."},
+    "pin_shelf": {"action": "pin protects this membership; unpin removes its pin; move records a user-directed placement on the target shelf."},
+    "list_podcast_episodes": {"status": "Episode lifecycle filter: new, queued, downloaded, transcribed or ignored."},
+    "list_monitored_playlist_events": {"status": "Discovery lifecycle filter: discovered, queued, extracted or failed."},
+    "list_claims": {"status": "Review lifecycle filter; verified means evidence recorded, not proven true."},
+    "list_writing_pieces": {"kind": "Saved draft format to include; omit to include tweet, thread and blog pieces."},
+    "register_source": {"kind": "Source adapter: podcast RSS feed, YouTube channel or YouTube playlist.", "url": "Public HTTP(S) feed, channel or playlist URL matching kind; normalized into a stable source identity."},
+    "list_sources": {"kind": "Only list sources using this feed, channel or playlist adapter."},
+    "get_library_activity": {"expected_revision": "Summary report_revision required for detail pages; refresh the summary after a mismatch."},
+    "get_library_brief_input": {"run_id": "Librarian assignment run ID whose work status belongs in the brief."},
+    "publish_library_brief": {"usage": "Actual client-reported usage object, or null if unavailable; never invent zero measurements."},
+}
+
+
+def document_input_schema(schema, tool_name):
+    """Add descriptions only to a fresh client schema; never alter constraints."""
+    result = deepcopy(schema)
+    overrides = OVERRIDES.get(tool_name, {})
+    for name, prop in result.get("properties", {}).items():
+        description = overrides.get(name) or PARAMETERS.get(name)
+        if description:
+            prop["description"] = description
+    return result
+
+
+def without_descriptions(value):
+    """Compare validation contracts while ignoring documentation strings."""
+    if isinstance(value, dict):
+        result = {}
+        for key, child in value.items():
+            if key == "description":
+                continue
+            if key in {"const", "enum", "default", "examples"}:
+                # Literal data can contain a key named description. It is not
+                # schema documentation and must remain part of the contract.
+                result[key] = deepcopy(child)
+            elif key in {"properties", "patternProperties", "$defs", "definitions",
+                         "dependentSchemas", "dependencies"} and isinstance(child, dict):
+                result[key] = {name: without_descriptions(schema) for name, schema in child.items()}
+            else:
+                result[key] = without_descriptions(child)
+        return result
+    if isinstance(value, list):
+        return [without_descriptions(v) for v in value]
+    return value
+
+
+def _output(fields):
+    """Document the existing JSON result envelope, including failure results."""
+    return {
+        "type": "object",
+        "description": "JSON result envelope; ok distinguishes success from failure. HTTP returns it as structuredContent and JSON text.",
+        "properties": {
+            "ok": {"type": "boolean", "description": "True for a successful operation; false for a refusal or failure."},
+            "error": {"type": ["string", "object"], "description": "Failure message or structured refusal with code and recovery details; present on failure."},
+            **fields,
+        },
+        "required": ["ok"],
+        "allOf": [{"if": {"properties": {"ok": {"const": True}}},
+                   "then": {"required": list(fields)},
+                   "else": {"required": ["error"]}}],
+    }
+
+
+def _field(kind, description, **extra):
+    return {"type": kind, "description": description, **extra}
+
+
+OUTPUT_SCHEMAS = {
+    "uoink_video": _output({
+        "slug": _field("string", "Saved capture's folder slug for later corpus reads."),
+        "folder": _field("string", "Absolute local capture folder."),
+        "corpus_md": _field("string", "Captured Markdown corpus."),
+        "screenshots": _field("array", "Saved screenshot file paths.", items={"type": "string"}),
+    }),
+    "uoink_playlist": _output({"job_id": _field("string", "Asynchronous capture identifier for get_job_status or cancel_job.")}),
+    "get_uoink_corpus": _output({
+        "corpus_md": _field("string", "Complete saved Markdown document."),
+        "folder": _field("string", "Absolute local folder holding the corpus."),
+        "video_id": _field(["string", "null"], "Saved source-item identifier when available."),
+        "video_url": _field(["string", "null"], "YouTube watch URL when the source is a YouTube item."),
+        "source_url": _field(["string", "null"], "Original source URL from the sidecar."),
+        "citations": _field("array", "Stored citation rows for this source; empty if unavailable.", items={"type": "object"}),
+    }),
+    "get_citation_map": _output({
+        "video_id": _field("string", "Saved source identifier."),
+        "transcript_citations": _field("array", "Transcript cue rows with seq, timestamp_start/end, text, source_url and deep_link.", items={"type": "object"}),
+        "screenshot_citations": _field("array", "Screenshot rows with seq, timestamp, file_path, source_url and deep_link.", items={"type": "object"}),
+    }),
+    "get_uoink_health": _output({
+        "video_id": _field(["string", "null"], "Saved source identifier if present."),
+        "health": _field("object", "Stored extraction-health snapshot, including per-section outcomes."),
+    }),
+    "get_transcript_reliability": _output({
+        "video_id": _field("string", "Requested saved item identifier."),
+        "reliability": _field("object", "Stored status and suspect spans; absent computation returns not_computed with an empty spans list."),
+    }),
+    "get_schema_version": _output({
+        "sql_migration": _field(["integer", "null"], "Highest applied SQL migration, or null if unreadable."),
+        "yoink_schema": _field("integer", "Item-row schema version currently written."),
+        "sidecar_schema": _field("integer", "Sidecar schema version currently written."),
+        "yoink_schema_supported": _field("array", "Inclusive minimum and maximum supported item-row versions.", items={"type": "integer"}),
+        "sidecar_schema_supported": _field("array", "Inclusive minimum and maximum supported sidecar versions.", items={"type": "integer"}),
+    }),
+    "get_user_role": _output({
+        "role": _field("string", "Normalized persisted dashboard role."),
+        "emphasis": _field("object", "Resolved dashboard filter-chip order and sort preference."),
+        "supported_roles": _field("array", "Allowed dashboard role values.", items={"type": "string"}),
+    }),
+    "set_user_role": _output({
+        "role": _field("string", "Normalized saved dashboard role."),
+        "emphasis": _field("object", "Dashboard emphasis resolved from the new role."),
+    }),
+    "get_workspace": _output({
+        "workspace": _field("object", "Saved workspace settings and selected source items."),
+        "critique_log": _field("array", "Stored draft-and-findings history; empty when unavailable.", items={"type": "object"}),
+    }),
+    "extract_claims": _output({
+        "video_id": _field("string", "Source item to which inserted claims belong."),
+        "inserted_ids": _field("array", "IDs of successfully saved claims.", items={"type": "integer"}),
+        "errors": _field("array", "Reasons individual invalid claims were skipped; success can include partial errors.", items={"type": "string"}),
+        "mode": _field("string", "Caller-declared compute provenance."),
+    }),
+    "verify_claim": _output({
+        "claim_id": _field("integer", "Claim whose evidence was replaced."),
+        "evidence_count": _field("integer", "Number of stored evidence entries."),
+        "mode": _field("string", "Caller-declared compute provenance; not a truth verdict."),
+    }),
+    "get_shot_list": _output({
+        "script_id": _field("integer", "Script updated with the derived shot list."),
+        "shot_list": _field("array", "One row per beat with scene number, label, suggested cues and notes.", items={"type": "object"}),
+        "format": _field(["string", "null"], "Workspace format used for cue suggestions, if available."),
+    }),
+    "remove_style_anchor": _output({
+        "removed": _field("boolean", "Whether the selected style reference was removed."),
+        "id": _field("integer", "Selected style-reference identifier."),
+    }),
+    "remove_allowed_site": _output({
+        "removed": _field("boolean", "Whether the specified allowlist row was deleted."),
+        "url_pattern": _field("string", "Normalized lowercase pattern that was selected."),
+    }),
+}
+
+# These handlers return a stable named collection and, where applicable, count.
+for _name, _collection, _meaning, _count in (
+    ("list_recent_uoinks", "yoinks", "Recent saved items with slug, title, folder and yoinked_at.", False),
+    ("find_mentions", "mentions", "Indexed entity matches with stored spans, timing and source links.", False),
+    ("get_taxonomy", "taxonomy", "Saved hook-classification rows matching the filters.", False),
+    ("list_podcast_feeds", "feeds", "Registered podcast feed rows, newest first.", True),
+    ("list_podcast_episodes", "episodes", "Tracked episode rows, newest published first.", True),
+    ("list_monitored_playlists", "playlists", "Playlist monitor rows, newest first.", True),
+    ("list_monitored_playlist_events", "events", "Saved playlist-discovery rows, newest first.", True),
+    ("query_by_facets", "yoinks", "Saved item rows matching every supplied facet.", True),
+    ("list_workspaces", "workspaces", "Saved planning workspace rows, newest first.", True),
+    ("list_claims", "claims", "Stored claim rows, with evidence review state.", True),
+    ("list_scripts", "scripts", "Saved script-version rows, newest first.", True),
+    ("list_writing_pieces", "pieces", "Saved tweet, thread and blog draft rows, newest first.", True),
+):
+    _fields = {_collection: _field("array", _meaning, items={"type": "object"})}
+    if _count:
+        _fields["count"] = _field("integer", "Number of rows returned in this response, not a total across pages.")
+    OUTPUT_SCHEMAS[_name] = _output(_fields)
+
+for _name, _key, _meaning in (
+    ("get_job_status", "job", "Current public job state, progress and per-item outcomes."),
+    ("cancel_job", "job", "Public job state after cancellation was requested."),
+    ("get_claim", "claim", "Saved claim with its recorded evidence and alignment signals."),
+    ("get_script", "script", "Saved script version with beats, shot list and source citations."),
+    ("get_writing_piece", "piece", "Saved Writing Studio draft and associated metadata."),
+    ("add_style_anchor", "anchor", "Saved style reference; URL extraction can leave raw_text null."),
+    ("add_podcast_feed", "feed", "New or existing podcast feed registration."),
+    ("add_monitored_playlist", "playlist", "New or existing playlist monitor registration."),
+    ("add_allowed_site", "site", "New or existing allowlist rule, unchanged on a duplicate."),
+):
+    OUTPUT_SCHEMAS[_name] = _output({_key: _field("object", _meaning)})
+
+for _name in ("remove_podcast_feed", "remove_monitored_playlist"):
+    OUTPUT_SCHEMAS[_name] = _output({"removed": _field("boolean", "Whether the registration was archived/disabled or deleted.")})
+
+
 TOOL_REGISTRY: dict[str, ToolSpec] = {
     "uoink_video": ToolSpec(
         name="uoink_video",
         title="Capture video",
         annotations={
-            "readOnlyHint": False, "destructiveHint": False,
+            "readOnlyHint": False, "destructiveHint": True,
             "idempotentHint": False, "openWorldHint": True,
         },
         description=(
-            "Extract a single YouTube video into a Uoink corpus. Returns the "
-            "saved folder, markdown corpus, and screenshot paths."
+            DESCRIPTIONS["uoink_video"]
         ),
         input_schema=_schema({
             "url": {"type": "string", "description": "YouTube video URL."},
@@ -3853,10 +4292,10 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
         name="uoink_playlist",
         title="Capture playlist",
         annotations={
-            "readOnlyHint": False, "destructiveHint": False,
+            "readOnlyHint": False, "destructiveHint": True,
             "idempotentHint": False, "openWorldHint": True,
         },
-        description="Start asynchronous extraction for a YouTube playlist.",
+        description=DESCRIPTIONS["uoink_playlist"],
         input_schema=_schema({
             "url": {"type": "string", "description": "YouTube playlist URL."},
             "interval": {
@@ -3877,7 +4316,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "readOnlyHint": True, "destructiveHint": False,
             "idempotentHint": True, "openWorldHint": False,
         },
-        description="Return the full status object for an async Uoink job.",
+        description=DESCRIPTIONS["get_job_status"],
         input_schema=_schema({
             "job_id": {"type": "string", "description": "Job ID from uoink_playlist."},
         }, ["job_id"]),
@@ -3890,7 +4329,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "readOnlyHint": False, "destructiveHint": True,
             "idempotentHint": True, "openWorldHint": False,
         },
-        description="Cancel an async Uoink job and leave partial outputs on disk.",
+        description=DESCRIPTIONS["cancel_job"],
         input_schema=_schema({
             "job_id": {"type": "string", "description": "Job ID to cancel."},
         }, ["job_id"]),
@@ -3903,7 +4342,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "readOnlyHint": True, "destructiveHint": False,
             "idempotentHint": True, "openWorldHint": False,
         },
-        description="List recent saved Uoink corpora.",
+        description=DESCRIPTIONS["list_recent_uoinks"],
         input_schema=_schema({
             "limit": {"type": "integer", "minimum": 1, "maximum": 100, "default": 20},
         }),
@@ -3919,7 +4358,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "readOnlyHint": True, "destructiveHint": False,
             "idempotentHint": True, "openWorldHint": False,
         },
-        description="Full-text search across saved Uoink corpora.",
+        description=DESCRIPTIONS["search_uoinks"],
         input_schema=_schema({
             "mode": {"type": "string", "enum": ["auto", "keyword", "semantic", "hybrid"],
                       "default": "auto",
@@ -3951,10 +4390,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "idempotentHint": True, "openWorldHint": False,
         },
         description=(
-            "Full-text search over transcript windows from saved uoinks. "
-            "Long source cues retain coarse timing and link to the cue start "
-            "in the source. Use this to find the exact quotable passage; use "
-            "search_uoinks to find whole items."
+            DESCRIPTIONS["search_clips"]
         ),
         input_schema=_schema({
             "mode": {"type": "string", "enum": ["auto", "keyword", "semantic", "hybrid"],
@@ -3985,10 +4421,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "idempotentHint": True, "openWorldHint": False,
         },
         description=(
-            "Return an evidence card for one saved uoink: title, channel, "
-            "platform, topic, source URL, a short summary hint, and its most "
-            "quotable clips spread across the timeline, each with a deep "
-            "link. Resolve by slug or video_id."
+            DESCRIPTIONS["get_evidence_card"]
         ),
         input_schema=_schema({
             "slug": {"type": "string", "description": "Folder slug of the saved uoink."},
@@ -4010,10 +4443,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "idempotentHint": False, "openWorldHint": False,
         },
         description=(
-            "List Librarian assignment work for a run: counts by work state "
-            "and manifest disposition, the run revision, one cursor page of "
-            "items, and whether staged work is waiting for a subscribed "
-            "client. Expires stale leases while listing; the server never runs the Librarian itself."
+            DESCRIPTIONS["list_library_work"]
         ),
         input_schema=LIBRARY_TOOL_SCHEMAS["list_library_work"],
         handler=list_library_work,
@@ -4026,11 +4456,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "idempotentHint": False, "openWorldHint": False,
         },
         description=(
-            "Lease Librarian work for a client (action=claim returns up to "
-            "twelve single-item packets, each with one evidence card and an "
-            "attempt token), or renew, release or cancel the client's own "
-            "current attempt. Leases run 60-900 seconds and never past one "
-            "hour after the first claim; a row is exhausted after three."
+            DESCRIPTIONS["claim_library_work"]
         ),
         input_schema=LIBRARY_TOOL_SCHEMAS["claim_library_work"],
         handler=claim_library_work,
@@ -4043,12 +4469,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "idempotentHint": True, "openWorldHint": False,
         },
         description=(
-            "Submit one Librarian result for one leased work row: an "
-            "assignment of one to three shelf memberships with quoted "
-            "evidence, or an explicit unmapped, unsupported or error outcome. "
-            "Validated and stored; nothing is applied to current labels. An "
-            "identical retry under the same submission_key returns the "
-            "recorded response."
+            DESCRIPTIONS["submit_library_result"]
         ),
         input_schema=LIBRARY_TOOL_SCHEMAS["submit_library_result"],
         handler=submit_library_result,
@@ -4061,12 +4482,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "idempotentHint": False, "openWorldHint": False,
         },
         description=(
-            "Preview the exact reshelving delta for a run (mode=preview, the "
-            "default), or apply a locally approved, unexpired preview by its "
-            "delta hash and operation key (mode=apply). Apply is refused "
-            "while librarian_apply_enabled is off, which is the shipping "
-            "default, and stops at 15 percent churn without a trusted human "
-            "approval."
+            DESCRIPTIONS["apply_reshelving"]
         ),
         input_schema=LIBRARY_TOOL_SCHEMAS["apply_reshelving"],
         handler=apply_reshelving,
@@ -4079,10 +4495,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "idempotentHint": True, "openWorldHint": False,
         },
         description=(
-            "Pin, unpin or move one item on a shelf as a user decision that "
-            "the Librarian may not override. Requires a user_intent_token "
-            "minted by the dashboard confirmation route; no client actor "
-            "string grants that authority."
+            DESCRIPTIONS["pin_shelf"]
         ),
         input_schema=LIBRARY_TOOL_SCHEMAS["pin_shelf"],
         handler=pin_shelf,
@@ -4095,10 +4508,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "idempotentHint": True, "openWorldHint": False,
         },
         description=(
-            "Undo one recorded library apply by replaying its stored inverse "
-            "as a new, itself reversible, journal operation. Only the apply "
-            "that produced the current projection revision can be undone, "
-            "and a user_intent_token from the dashboard is required."
+            DESCRIPTIONS["undo_library_apply"]
         ),
         input_schema=LIBRARY_TOOL_SCHEMAS["undo_library_apply"],
         handler=undo_library_apply,
@@ -4114,9 +4524,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "idempotentHint": True, "openWorldHint": False,
         },
         description=(
-            "List standing sources (podcast RSS feeds, YouTube channels and "
-            "playlists) with consent state, enrollment, today's UTC start "
-            "allowance and detection health. Read-only; keyset pagination."
+            DESCRIPTIONS["list_sources"]
         ),
         input_schema=_sources_tool_schema("list_sources"),
         handler=list_sources,
@@ -4129,10 +4537,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "idempotentHint": True, "openWorldHint": True,
         },
         description=(
-            "Register a standing source for metadata detection only. Creates "
-            "the source with capture off and a due detection cursor; no "
-            "network call, no capture. A duplicate returns the existing source "
-            "unchanged (created=false)."
+            DESCRIPTIONS["register_source"]
         ),
         input_schema=_sources_tool_schema("register_source"),
         handler=register_source,
@@ -4145,9 +4550,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "idempotentHint": True, "openWorldHint": False,
         },
         description=(
-            "One source's current summary, one page of observed items with "
-            "capture and classification state, and every in-flight "
-            "reservation. Read-only: never enrolls, polls or starts work."
+            DESCRIPTIONS["source_status"]
         ),
         input_schema=_sources_tool_schema("source_status"),
         handler=source_status,
@@ -4160,12 +4563,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "idempotentHint": True, "openWorldHint": True,
         },
         description=(
-            "Turn standing capture on or off for one source. Requires the "
-            "expected source revision (and cursor revision when enabling), an "
-            "operation key and a user_intent_token minted by the local "
-            "dashboard confirmation; the stored receipt is returned on an "
-            "identical retry. On: at most 25 back-catalog items once, then new "
-            "items, 10 starts per UTC day. Off: releases unstarted reservations."
+            DESCRIPTIONS["set_source_consent"]
         ),
         input_schema=_sources_tool_schema("set_source_consent"),
         handler=set_source_consent,
@@ -4177,7 +4575,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "readOnlyHint": True, "destructiveHint": False,
             "idempotentHint": True, "openWorldHint": False,
         },
-        description="Return the full markdown corpus for a saved uoink by slug.",
+        description=DESCRIPTIONS["get_uoink_corpus"],
         input_schema=_schema({
             "slug": {"type": "string", "description": "Folder slug of the saved uoink."},
         }, ["slug"]),
@@ -4191,8 +4589,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "idempotentHint": False, "openWorldHint": True,
         },
         description=(
-            "Run Comment Intelligence on an existing uoink and return themes, "
-            "mentioned products/tools, and disagreements."
+            DESCRIPTIONS["analyze_comments"]
         ),
         input_schema=_schema({
             "slug": {"type": "string", "description": "Folder slug of the saved uoink."},
@@ -4207,7 +4604,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "readOnlyHint": False, "destructiveHint": True,
             "idempotentHint": False, "openWorldHint": True,
         },
-        description="Classify the hook type for an existing uoink.",
+        description=DESCRIPTIONS["classify_hook"],
         input_schema=_schema({
             "slug": {"type": "string", "description": "Folder slug of the saved uoink."},
         }, ["slug"]),
@@ -4222,8 +4619,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "idempotentHint": True, "openWorldHint": False,
         },
         description=(
-            "Return captured Hook Type taxonomy rows, optionally filtered by "
-            "channel and hook_type."
+            DESCRIPTIONS["get_taxonomy"]
         ),
         input_schema=_schema({
             "channel": {
@@ -4262,8 +4658,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "idempotentHint": True, "openWorldHint": False,
         },
         description=(
-            "Return the transcript + screenshot citation map for a saved "
-            "uoink, each entry with a timestamped YouTube deep link."
+            DESCRIPTIONS["get_citation_map"]
         ),
         input_schema=_schema({
             "slug": {"type": "string", "description": "Folder slug of the saved uoink."},
@@ -4278,7 +4673,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "readOnlyHint": True, "destructiveHint": False,
             "idempotentHint": True, "openWorldHint": False,
         },
-        description="Return the per-section extraction health score for a saved uoink.",
+        description=DESCRIPTIONS["get_uoink_health"],
         input_schema=_schema({
             "slug": {"type": "string", "description": "Folder slug of the saved uoink."},
         }, ["slug"]),
@@ -4293,9 +4688,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "idempotentHint": True, "openWorldHint": False,
         },
         description=(
-            "Find every place an entity (person, tool, product, company, "
-            "or topic) is mentioned across saved uoinks. Rank by name match, "
-            "with newest first for ties. Results include stored timestamps and source links."
+            DESCRIPTIONS["find_mentions"]
         ),
         input_schema=_schema({
             "match": {"type": "string", "enum": ["forgiving", "strict"],
@@ -4325,13 +4718,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "idempotentHint": True, "openWorldHint": False,
         },
         description=(
-            "Aggregate the user's own saved "
-            "videos (those tagged is_self via channel-name recognition) "
-            "into hook evolution, format evolution, performance trend by "
-            "month, and a top-performers list. Pass `handle` to scope to "
-            "one of the user's registered channels; omit for the union "
-            "across every registered channel. `limit` caps the "
-            "top_performers list (default 10, max 100). Pure local read."
+            DESCRIPTIONS["analyze_self_channel"]
         ),
         input_schema=_schema({
             "handle": {
@@ -4356,10 +4743,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "idempotentHint": True, "openWorldHint": False,
         },
         description=(
-            "Report the data-shape versions Uoink writes + the supported "
-            "read-range. v2.5 substrate: cross-version aggregators (Channel "
-            "Decoder, Niche Corpus) check this before assuming v2 fields are "
-            "present in older rows/sidecars. Read-only, no arguments."
+            DESCRIPTIONS["get_schema_version"]
         ),
         input_schema=_schema({}, []),
         handler=get_schema_version,
@@ -4373,10 +4757,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "idempotentHint": True, "openWorldHint": False,
         },
         description=(
-            "Report the user's persisted role (creator | "
-            "researcher | marketer | mixed) + the dashboard emphasis "
-            "(primary/secondary chip order + default sort) the helper "
-            "computes from it. Read-only."
+            DESCRIPTIONS["get_user_role"]
         ),
         input_schema=_schema({}, []),
         handler=get_user_role,
@@ -4390,10 +4771,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "idempotentHint": True, "openWorldHint": False,
         },
         description=(
-            "Persist the user's role choice. Drives Library "
-            "default sort + filter-chip emphasis on the dashboard. "
-            "Bounded enum -- one of creator | researcher | marketer | "
-            "mixed."
+            DESCRIPTIONS["set_user_role"]
         ),
         input_schema=_schema({
             "role": {
@@ -4412,13 +4790,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "idempotentHint": True, "openWorldHint": True,
         },
         description=(
-            "Probe a URL to find out if it is a live broadcast "
-            "without extracting. Returns one of: not_live | live | "
-            "upcoming | post_live | was_live. The agent uses this to "
-            "decide between immediate extraction and 'wait until the "
-            "broadcast ends' (the helper's live_stream_behavior "
-            "setting handles the latter for /extract; this tool is "
-            "the read-only probe path)."
+            DESCRIPTIONS["check_live_status"]
         ),
         input_schema=_schema({
             "url": {"type": "string"},
@@ -4434,10 +4806,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "idempotentHint": True, "openWorldHint": True,
         },
         description=(
-            "Register an RSS feed URL. Idempotent -- "
-            "existing URL returns the same row. poll_interval_min "
-            "default 60, range 15-1440. Metadata is watched automatically; "
-            "auto_ingest is an explicit per-feed opt-in and defaults false."
+            DESCRIPTIONS["add_podcast_feed"]
         ),
         input_schema=_schema({
             "feed_url": {"type": "string"},
@@ -4456,7 +4825,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "readOnlyHint": True, "destructiveHint": False,
             "idempotentHint": True, "openWorldHint": False,
         },
-        description="List registered RSS feeds newest-first.",
+        description=DESCRIPTIONS["list_podcast_feeds"],
         input_schema=_schema({
             "enabled_only": {"type": "boolean", "default": False},
         }, []),
@@ -4471,7 +4840,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "idempotentHint": True, "openWorldHint": False,
         },
         description=(
-            "Delete a feed + cascade its episodes."
+            DESCRIPTIONS["remove_podcast_feed"]
         ),
         input_schema=_schema({
             "feed_id": {"type": "integer"},
@@ -4487,10 +4856,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "idempotentHint": False, "openWorldHint": True,
         },
         description=(
-            "Trigger one feed poll (HTTP GET + RSS/Atom "
-            "parse + upsert episodes). Conditional GET via ETag/"
-            "If-Modified-Since on subsequent polls so daily-news "
-            "podcasts don't re-download an unchanged feed body."
+            DESCRIPTIONS["poll_podcast_feed"]
         ),
         input_schema=_schema({
             "feed_id": {"type": "integer"},
@@ -4506,9 +4872,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "idempotentHint": True, "openWorldHint": False,
         },
         description=(
-            "List episodes. Optional feed_id + status "
-            "filters (new | queued | downloaded | transcribed | "
-            "ignored). Newest published first."
+            DESCRIPTIONS["list_podcast_episodes"]
         ),
         input_schema=_schema({
             "feed_id": {"type": "integer"},
@@ -4529,11 +4893,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "idempotentHint": True, "openWorldHint": True,
         },
         description=(
-            "Download an episode's MP3 via yt-dlp + "
-            "ffmpeg. Synchronous. Returns when the file lands at "
-            "<data_root>/Podcasts/<feed-slug>/<episode-slug>.mp3 or "
-            "yt-dlp errors. Idempotent -- skips re-download when the "
-            "canonical path already has a non-zero file."
+            DESCRIPTIONS["download_podcast_episode"]
         ),
         input_schema=_schema({
             "episode_id": {"type": "integer"},
@@ -4549,10 +4909,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "idempotentHint": True, "openWorldHint": False,
         },
         description=(
-            "Report whether the WhisperX runtime is importable + "
-            "the currently-selected model size + the diarization "
-            "default. Agents call this before transcribe to decide "
-            "whether to surface an install prompt to the user."
+            DESCRIPTIONS["get_whisperx_status"]
         ),
         input_schema=_schema({}, []),
         handler=get_whisperx_status,
@@ -4566,14 +4923,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "idempotentHint": False, "openWorldHint": True,
         },
         description=(
-            "Queue WhisperX for a downloaded episode. A single "
-            "below-normal-priority worker writes the JSON transcript next "
-            "to the MP3; get_job_status reports durable progress. Returns "
-            "consent_required=True when the "
-            "first-time model download (200 MB - 2 GB) needs the user "
-            "to opt in (re-issue with consent_given=True after the "
-            "dashboard prompt records the opt-in), OR a runtime-not-"
-            "installed error when whisperx isn't importable."
+            DESCRIPTIONS["transcribe_podcast_episode"]
         ),
         input_schema=_schema({
             "episode_id": {"type": "integer"},
@@ -4595,10 +4945,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "idempotentHint": True, "openWorldHint": False,
         },
         description=(
-            "Publish a completed podcast transcript into the local Uoink "
-            "corpus. Writes deterministic Markdown and sidecar files, "
-            "indexes full text and source-aware citations, and safely "
-            "repairs partial prior attempts."
+            DESCRIPTIONS["episode_to_corpus"]
         ),
         input_schema=_schema({
             "episode_id": {"type": "integer"},
@@ -4614,9 +4961,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "idempotentHint": True, "openWorldHint": True,
         },
         description=(
-            "Register a YouTube playlist URL to "
-            "monitor for auto-uoinks. Idempotent on UNIQUE "
-            "playlist_url. poll_interval_min default 5, range 1-1440."
+            DESCRIPTIONS["add_monitored_playlist"]
         ),
         input_schema=_schema({
             "playlist_url": {"type": "string"},
@@ -4634,8 +4979,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "readOnlyHint": True, "destructiveHint": False,
             "idempotentHint": True, "openWorldHint": False,
         },
-        description=("List registered playlists "
-                      "newest-first."),
+        description=(DESCRIPTIONS["list_monitored_playlists"]),
         input_schema=_schema({
             "enabled_only": {"type": "boolean", "default": False},
         }, []),
@@ -4649,8 +4993,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "readOnlyHint": False, "destructiveHint": True,
             "idempotentHint": True, "openWorldHint": False,
         },
-        description=("Delete a playlist + cascade "
-                      "its discovery events."),
+        description=(DESCRIPTIONS["remove_monitored_playlist"]),
         input_schema=_schema({
             "playlist_id": {"type": "integer"},
         }, ["playlist_id"]),
@@ -4665,12 +5008,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "idempotentHint": False, "openWorldHint": True,
         },
         description=(
-            "Poll one playlist (yt-dlp "
-            "--flat-playlist) + diff against last_seen_video_ids + "
-            "auto-queue new videos via the existing pending_yoinks "
-            "retry worker. Returns the new[] discovery list so the "
-            "dashboard can show it under a 'from mobile playlist' "
-            "label distinct from rate-limit retries."
+            DESCRIPTIONS["poll_monitored_playlist"]
         ),
         input_schema=_schema({
             "playlist_id": {"type": "integer"},
@@ -4686,9 +5024,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "idempotentHint": True, "openWorldHint": False,
         },
         description=(
-            "List per-discovery events. Optional "
-            "filters: playlist_id, status (discovered | queued | "
-            "extracted | failed). Newest first."
+            DESCRIPTIONS["list_monitored_playlist_events"]
         ),
         input_schema=_schema({
             "playlist_id": {"type": "integer"},
@@ -4709,10 +5045,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "idempotentHint": True, "openWorldHint": False,
         },
         description=(
-            "Return the consolidated TASTE.md "
-            "(preferred hooks/formats, avoid list, top performance "
-            "anchors). Generated from engagement events + persisted "
-            "taste anchors. Read-only, no arguments."
+            DESCRIPTIONS["get_user_taste"]
         ),
         input_schema=_schema({}, []),
         handler=get_user_taste,
@@ -4726,10 +5059,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "idempotentHint": True, "openWorldHint": False,
         },
         description=(
-            "Return the user's free-form USER.md "
-            "notes (Channels I admire, My channel(s), Topics, Workflow "
-            "notes). Hand-edited markdown -- the consolidator never "
-            "overwrites this file. No arguments."
+            DESCRIPTIONS["get_user_memory"]
         ),
         input_schema=_schema({}, []),
         handler=get_user_memory,
@@ -4743,10 +5073,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "idempotentHint": True, "openWorldHint": False,
         },
         description=(
-            "Set one taste anchor section "
-            "(preferred_hooks | preferred_formats | avoid) and "
-            "re-consolidate TASTE.md. `content` is markdown that "
-            "replaces the section body verbatim -- bullets recommended."
+            DESCRIPTIONS["update_user_taste"]
         ),
         input_schema=_schema({
             "section": {
@@ -4766,11 +5093,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "idempotentHint": True, "openWorldHint": False,
         },
         description=(
-            "Return the time-decayed value_score "
-            "for one video plus per-event-type counts and last event "
-            "timestamp. Events live entirely on the local SQLite index "
-            "(zero outbound). Weights are documented in index.py "
-            "(_ENGAGEMENT_WEIGHTS); decay half-life is 30 days."
+            DESCRIPTIONS["get_engagement_signal"]
         ),
         input_schema=_schema({
             "video_id": {
@@ -4789,11 +5112,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "idempotentHint": True, "openWorldHint": False,
         },
         description=(
-            "Persist agent-classified facets + free-form tags for a video. "
-            "Model-agnostic: the calling agent does the LLM work using its "
-            "own model; this tool validates against bounded enums and writes "
-            "to the row. The server fills performance_tier (channel-relative) "
-            "and length_bucket (from duration) if you don't pass them."
+            DESCRIPTIONS["classify_facets"]
         ),
         input_schema=_schema({
             "video_id": {"type": "string"},
@@ -4821,9 +5140,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "idempotentHint": True, "openWorldHint": False,
         },
         description=(
-            "Filter saved yoinks by facet values (format / performance_tier / "
-            "hook_type / topic / length_bucket / tag). All filters "
-            "AND-combined; newest first."
+            DESCRIPTIONS["query_by_facets"]
         ),
         input_schema=_schema({
             "format": {"type": "string"},
@@ -4844,7 +5161,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "readOnlyHint": True, "destructiveHint": False,
             "idempotentHint": True, "openWorldHint": False,
         },
-        description="Enum lists for the v2.5 facet axes (used for filter chips).",
+        description=DESCRIPTIONS["get_facet_taxonomy"],
         input_schema=_schema({}, []),
         handler=get_facet_taxonomy,
         rate_limiter=_RateLimiter(60),
@@ -4857,9 +5174,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "idempotentHint": True, "openWorldHint": False,
         },
         description=(
-            "Return stored transcript reliability spans for a saved uoink by "
-            "YouTube video_id. Read-only; computation is triggered by the "
-            "helper endpoint or the user's auto-check setting."
+            DESCRIPTIONS["get_transcript_reliability"]
         ),
         input_schema=_schema({
             "video_id": {
@@ -4878,15 +5193,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "idempotentHint": True, "openWorldHint": False,
         },
         description=(
-            "v3 P4 build workspace: pull a corpus slice for planning a "
-            "video. Ranks yoinks by S1 facets (format match), performance "
-            "tier (over > average > under), and S2 engagement value_score. "
-            "Returns the slice + audience questions from comments + "
-            "optional self-channel snapshot (if your_channel is set) + "
-            "optional taste anchors (if S4 memory layer is available). "
-            "Pure local read; the calling agent does any LLM analysis "
-            "downstream. If `workspace_id` is provided the slice is "
-            "persisted onto that row."
+            DESCRIPTIONS["assemble_workspace"]
         ),
         input_schema=_schema({
             "format": {"type": "string"},
@@ -4908,15 +5215,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "idempotentHint": False, "openWorldHint": False,
         },
         description=(
-            "v3 P4 critique tool. Two-phase: call WITHOUT `findings` to "
-            "retrieve the assembled context (corpus slice + audience "
-            "questions + taste anchors) -- the agent does the LLM "
-            "analysis on that context. Call WITH `findings` (structured "
-            "JSON object with hook_strength, structural_deviation, "
-            "pacing_issues, missing_audience_hooks per ROADMAP P4) to "
-            "persist the analysis to the workspace's critique log. "
-            "Model-agnostic default; BYO-key mode accepted but not yet "
-            "implemented on-server."
+            DESCRIPTIONS["critique_against_corpus"]
         ),
         input_schema=_schema({
             "workspace_id": {"type": "string"},
@@ -4935,7 +5234,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "idempotentHint": True, "openWorldHint": False,
         },
         description=(
-            "v3 P4: list build workspaces newest-first. Read-only."
+            DESCRIPTIONS["list_workspaces"]
         ),
         input_schema=_schema({
             "limit": {"type": "integer", "minimum": 1, "maximum": 500,
@@ -4952,8 +5251,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "idempotentHint": True, "openWorldHint": False,
         },
         description=(
-            "v3 P4: fetch one workspace + its full critique log (every "
-            "draft + findings combination the agent has persisted)."
+            DESCRIPTIONS["get_workspace"]
         ),
         input_schema=_schema({
             "id": {"type": "string"},
@@ -4970,12 +5268,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "idempotentHint": False, "openWorldHint": False,
         },
         description=(
-            "v3 A2 (Loki-inspired): persist agent-extracted claims for "
-            "a video. LOCKED FRAMING -- the calling agent does the LLM "
-            "decomposition; this tool validates + writes. Each claim is "
-            "{claim_text, check_worthiness? (0.0-1.0), context?}. NEVER "
-            "auto-asserts truth verdicts -- surfaces checkable claims "
-            "so the user can decide which to verify."
+            DESCRIPTIONS["extract_claims"]
         ),
         input_schema=_schema({
             "video_id": {"type": "string"},
@@ -4993,10 +5286,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "idempotentHint": False, "openWorldHint": False,
         },
         description=(
-            "v3 A2: record evidence for one extracted claim. "
-            "alignment_signal MUST be one of supports / contradicts / "
-            "mixed / inconclusive. NEVER 'true' / 'false' / 'lie'. The "
-            "user judges the verdict from the surfaced evidence."
+            DESCRIPTIONS["verify_claim"]
         ),
         input_schema=_schema({
             "claim_id": {"type": "integer"},
@@ -5021,8 +5311,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "idempotentHint": True, "openWorldHint": False,
         },
         description=(
-            "v3 A2: list extracted claims. Filter by video_id and/or "
-            "status (extracted | verified | not-attempted)."
+            DESCRIPTIONS["list_claims"]
         ),
         input_schema=_schema({
             "video_id": {"type": "string"},
@@ -5043,7 +5332,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "readOnlyHint": True, "destructiveHint": False,
             "idempotentHint": True, "openWorldHint": False,
         },
-        description="v3 A2: fetch one claim by id, with stored evidence.",
+        description=DESCRIPTIONS["get_claim"],
         input_schema=_schema({
             "id": {"type": "integer"},
             "claim_id": {"type": "integer"},
@@ -5059,16 +5348,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "idempotentHint": False, "openWorldHint": False,
         },
         description=(
-            "v3 P5 script studio: two-phase generator. Call WITHOUT "
-            "`script` payload to retrieve grounding context (workspace "
-            "metadata + assembled corpus slice + audience questions + "
-            "optional taste anchors + optional self-channel snapshot). "
-            "The calling agent does the writing using its own model. "
-            "Call WITH `script` (a structured object with hook + beats "
-            "+ body + cta + source_yoinks citations) to persist as a "
-            "new versioned row. parent_script_id chains revisions. An "
-            "optional hook_type_lens biases the opening toward one of the "
-            "9 hook styles."
+            DESCRIPTIONS["generate_script"]
         ),
         input_schema=_schema({
             "workspace_id": {"type": "string"},
@@ -5095,11 +5375,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "idempotentHint": False, "openWorldHint": False,
         },
         description=(
-            "v3 P5: revise an existing script grounded in critique "
-            "findings. Two-phase like generate_script -- without "
-            "`revised_script` returns previous + grounding for the "
-            "agent to act on; with `revised_script` persists as a new "
-            "version (parent_script_id auto-set to the prior id)."
+            DESCRIPTIONS["revise_script"]
         ),
         input_schema=_schema({
             "script_id": {"type": "integer"},
@@ -5113,17 +5389,13 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "get_shot_list": ToolSpec(
         name="get_shot_list",
-        title="Generate shot list",
+        title="Generate and save shot list",
         annotations={
             "readOnlyHint": False, "destructiveHint": True,
             "idempotentHint": True, "openWorldHint": False,
         },
         description=(
-            "v3 P5: derive (and persist) a default shot list from a "
-            "script's beats + the parent workspace's S1 format facet. "
-            "Per-beat row with format-specific cue suggestions. The "
-            "calling agent can override by supplying shot_list directly "
-            "in generate_script."
+            DESCRIPTIONS["get_shot_list"]
         ),
         input_schema=_schema({
             "script_id": {"type": "integer"},
@@ -5139,8 +5411,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "idempotentHint": True, "openWorldHint": False,
         },
         description=(
-            "v3 P5: list scripts newest-first. Optional workspace_id "
-            "filter scopes to one workspace's history."
+            DESCRIPTIONS["list_scripts"]
         ),
         input_schema=_schema({
             "workspace_id": {"type": "string"},
@@ -5157,7 +5428,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "readOnlyHint": True, "destructiveHint": False,
             "idempotentHint": True, "openWorldHint": False,
         },
-        description="v3 P5: fetch one script by id.",
+        description=DESCRIPTIONS["get_script"],
         input_schema=_schema({
             "id": {"type": "integer"},
             "script_id": {"type": "integer"},
@@ -5174,12 +5445,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "idempotentHint": False, "openWorldHint": True,
         },
         description=(
-            "Two-phase tweet/thread generator. "
-            "Phase 1 (no `body`) returns grounding (source yoink + "
-            "creator credit + style anchors + Voice DNA prompt). "
-            "Phase 2 (`body` present) persists + scans for canned phrases "
-            "+ returns structured warnings (soft warn -- "
-            "NEVER auto-blocks). Creator credit is required in the body."
+            DESCRIPTIONS["write_tweet"]
         ),
         input_schema=_schema({
             "source_yoink_id": {"type": "string"},
@@ -5233,10 +5499,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "idempotentHint": False, "openWorldHint": True,
         },
         description=(
-            "Two-phase blog generator. Same shape "
-            "as write_tweet but Phase 2 accepts title, dek, tags, and "
-            "expects markdown body with a Source section. Soft-warn "
-            "canned-phrase scan; creator credit non-suppressible."
+            DESCRIPTIONS["write_blog"]
         ),
         input_schema=_schema({
             "source_yoink_id": {"type": "string"},
@@ -5284,8 +5547,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "idempotentHint": True, "openWorldHint": False,
         },
         description=(
-            "List generated pieces newest-first. "
-            "Optional `kind` (tweet|thread|blog) + `yoink_id` filters."
+            DESCRIPTIONS["list_writing_pieces"]
         ),
         input_schema=_schema({
             "kind": {"type": "string",
@@ -5304,7 +5566,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "readOnlyHint": True, "destructiveHint": False,
             "idempotentHint": True, "openWorldHint": False,
         },
-        description="Fetch one piece by id.",
+        description=DESCRIPTIONS["get_writing_piece"],
         input_schema=_schema({
             "id": {"type": "integer"},
             "piece_id": {"type": "integer"},
@@ -5320,12 +5582,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "idempotentHint": False, "openWorldHint": True,
         },
         description=(
-            "Add a Substack-style voice anchor "
-            "(URL or raw pasted text). User names each. Cap at 10 -- "
-            "returns 422-shaped error when exceeded. URL ingestion "
-            "extracts prose via the helper's page extractor (Universal "
-            "Site PR); falls back to NULL raw_text when the extractor "
-            "isn't bound yet."
+            DESCRIPTIONS["add_style_anchor"]
         ),
         input_schema=_schema({
             "name": {"type": "string"},
@@ -5343,8 +5600,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "readOnlyHint": True, "destructiveHint": False,
             "idempotentHint": True, "openWorldHint": False,
         },
-        description=("List style anchors + their "
-                      "active flag + the helper's 10-anchor cap."),
+        description=(DESCRIPTIONS["list_style_anchors"]),
         input_schema=_schema({
             "active_only": {"type": "boolean", "default": False},
         }, []),
@@ -5358,7 +5614,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "readOnlyHint": False, "destructiveHint": True,
             "idempotentHint": True, "openWorldHint": False,
         },
-        description="Delete a style anchor.",
+        description=DESCRIPTIONS["remove_style_anchor"],
         input_schema=_schema({
             "anchor_id": {"type": "integer"},
             "id": {"type": "integer"},
@@ -5371,13 +5627,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
         name="uoink_url",
         title="Capture URL",
         annotations={
-            "readOnlyHint": False, "destructiveHint": False,
+            "readOnlyHint": False, "destructiveHint": True,
             "idempotentHint": False, "openWorldHint": True,
         },
         description=(
-            "Capture any http(s) URL through the helper's universal extractor. "
-            "Known video platforms use the full media pipeline; other sites "
-            "use the metadata and transcript fallback."
+            DESCRIPTIONS["uoink_url"]
         ),
         input_schema=_schema({
             "url": {"type": "string"},
@@ -5395,7 +5649,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "readOnlyHint": False, "destructiveHint": False,
             "idempotentHint": False, "openWorldHint": False,
         },
-        description="Save a text note as a first-class local corpus item.",
+        description=DESCRIPTIONS["uoink_note"],
         input_schema=_schema({
             "text": {"type": "string"},
             "title": {"type": "string"},
@@ -5412,8 +5666,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "idempotentHint": False, "openWorldHint": False,
         },
         description=(
-            "Save a base64 PNG, JPEG, or WebP as a local image corpus item. "
-            "No cloud OCR or vision service runs."
+            DESCRIPTIONS["uoink_image"]
         ),
         input_schema=_schema({
             "image_base64": {"type": "string"},
@@ -5430,12 +5683,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
         name="uoink_x",
         title="Capture X post",
         annotations={
-            "readOnlyHint": False, "destructiveHint": False,
+            "readOnlyHint": False, "destructiveHint": True,
             "idempotentHint": False, "openWorldHint": True,
         },
         description=(
-            "Capture an X post and the author's earlier chain as a local corpus "
-            "item. Requires x_text_capture_enabled, which defaults on."
+            DESCRIPTIONS["uoink_x"]
         ),
         input_schema=_schema({
             "url": {"type": "string"},
@@ -5448,18 +5700,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
         name="uoink_page",
         title="Capture web page",
         annotations={
-            "readOnlyHint": False, "destructiveHint": False,
+            "readOnlyHint": False, "destructiveHint": True,
             "idempotentHint": False, "openWorldHint": True,
         },
         description=(
-            "Capture an allowed page as "
-            "a yoink. Crawl4AI runs ON-DEVICE when available "
-            "(JS render + screenshot); stdlib fallback otherwise "
-            "(static HTML + markdown synthesis, no screenshot). "
-            "Allowlist-gated -- add the host via add_allowed_site "
-            "first if it's not in the defaults (youtube.com, "
-            "youtu.be, x.com, twitter.com). Result auto-persists as a "
-            "yoink with source_type='page'."
+            DESCRIPTIONS["uoink_page"]
         ),
         input_schema=_schema({
             "url": {"type": "string"},
@@ -5477,16 +5722,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
         name="uoink_reddit_thread",
         title="Capture Reddit thread",
         annotations={
-            "readOnlyHint": False, "destructiveHint": False,
+            "readOnlyHint": False, "destructiveHint": True,
             "idempotentHint": False, "openWorldHint": True,
         },
         description=(
-            "Fetch a thread via its public .json "
-            "(no API key, no OAuth), flatten the comment tree with a depth "
-            "limit and a score threshold, and persist it as a yoink with "
-            "source_type='reddit_thread'. Renders as Post -> Top comments -> "
-            "nested replies so search and facets work on the conversation. "
-            "Runs on-device; no allowlist gate."
+            DESCRIPTIONS["uoink_reddit_thread"]
         ),
         input_schema=_schema({
             "url": {"type": "string",
@@ -5508,10 +5748,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "idempotentHint": True, "openWorldHint": False,
         },
         description=(
-            "List the user's allowed hostnames. "
-            "Default seeds (youtube.com, youtu.be, x.com, "
-            "twitter.com) are pre-added by migration 0015 and "
-            "removable like any other entry."
+            DESCRIPTIONS["list_allowed_sites"]
         ),
         input_schema=_schema({
             "active_only": {"type": "boolean", "default": False},
@@ -5527,11 +5764,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "idempotentHint": True, "openWorldHint": True,
         },
         description=(
-            "Add a hostname or wildcard pattern "
-            "(`*.docs.example.com` matches all sub.docs.example.com "
-            "subdomains). Idempotent on UNIQUE url_pattern. Plain "
-            "hostnames also match their subdomains (so 'example.com' "
-            "matches 'www.example.com')."
+            DESCRIPTIONS["add_allowed_site"]
         ),
         input_schema=_schema({
             "url_pattern": {"type": "string"},
@@ -5547,8 +5780,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "idempotentHint": True, "openWorldHint": False,
         },
         description=(
-            "Remove a hostname or wildcard "
-            "pattern from the allowlist."
+            DESCRIPTIONS["remove_allowed_site"]
         ),
         input_schema=_schema({
             "url_pattern": {"type": "string"},
@@ -5563,7 +5795,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "readOnlyHint": True, "destructiveHint": False,
             "idempotentHint": True, "openWorldHint": False,
         },
-        description="Report deterministic library activity, shelf churn, and source observations.",
+        description=DESCRIPTIONS["get_library_activity"],
         input_schema=_schema({
             "interval": {
                 "type": "object",
@@ -5624,14 +5856,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "idempotentHint": True, "openWorldHint": False,
         },
         description=(
-            "Bounded clip-first search of the saved library (default 5, at "
-            "most 20 hits) with verified clip or item-text passages when available. "
-            "Check passage_verified before quoting; citation_reason explains missing passages. "
-            "Each hit carries the item id, source revision, safe title "
-            "and link, evidence kind and timing, a 240-character preview and "
-            "revision-bound card and excerpt URIs for read_library_resource. "
-            "Results are bounded, not exhaustive; follow next_step when more "
-            "retrieval is needed."
+            DESCRIPTIONS["search_library"]
         ),
         input_schema=_schema({
             "mode": {"type": "string", "enum": ["auto", "keyword", "semantic", "hybrid"],
@@ -5654,10 +5879,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "idempotentHint": True, "openWorldHint": False,
         },
         description=(
-            "Resolve one saved item by video_id or slug (exactly one) and "
-            "return its default Librarian evidence card unchanged plus "
-            "canonical card, excerpt and initial corpus-chunk URIs. Bounded; "
-            "use before quoting."
+            DESCRIPTIONS["get_library_item"]
         ),
         input_schema=_schema({
             "video_id": {"type": "string", "description": "Stable item id (exactly one selector)."},
@@ -5673,10 +5895,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "idempotentHint": True, "openWorldHint": False,
         },
         description=(
-            "Read one uoink://library/v1/ resource URI (card, excerpt, corpus "
-            "chunk, shelf page or brief) with the same validation, contents "
-            "and refusals as resources/read. Fallback for clients without "
-            "native resource reads; identical text, one renderer."
+            DESCRIPTIONS["read_library_resource"]
         ),
         input_schema=_schema({
             "uri": {"type": "string", "description": "A uoink://library/v1/... resource URI."},
@@ -5690,7 +5909,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "readOnlyHint": True, "destructiveHint": False,
             "idempotentHint": True, "openWorldHint": False,
         },
-        description=PLAYBOOK_INPUT_DESCRIPTION,
+        description=DESCRIPTIONS["get_playbook_input"],
         input_schema=PLAYBOOK_INPUT_SCHEMA,
         handler=_research_playbooks_call,
     ),
@@ -5698,7 +5917,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
         name="discover_candidates", title="Discover capture candidates",
         annotations={"readOnlyHint": False, "destructiveHint": False,
                      "idempotentHint": False, "openWorldHint": True},
-        description=DISCOVER_CANDIDATES_DESCRIPTION,
+        description=DESCRIPTIONS["discover_candidates"],
         input_schema=DISCOVER_CANDIDATES_SCHEMA,
         handler=lambda args: _discovery_call("discover_candidates", args),
         rate_limiter=_RateLimiter(6),
@@ -5707,7 +5926,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
         name="queue_discovered", title="Queue discovered posts",
         annotations={"readOnlyHint": False, "destructiveHint": False,
                      "idempotentHint": True, "openWorldHint": True},
-        description=QUEUE_DISCOVERED_DESCRIPTION,
+        description=DESCRIPTIONS["queue_discovered"],
         input_schema=QUEUE_DISCOVERED_SCHEMA,
         handler=lambda args: _discovery_call("queue_discovered", args),
         rate_limiter=_RateLimiter(30),
@@ -5725,12 +5944,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "idempotentHint": True, "openWorldHint": False,
         },
         description=(
-            "Prepare bounded input for a client-run daily brief: for a UTC "
-            "date and a Phase 2 run id, return job_key, input_hash, bound "
-            "queue/run/projection revisions, capture and event counts, "
-            "coverage, up to 20 work-status rows and up to 5 default "
-            "Librarian cards (at most 24,576 bytes). Read only: no lease, no "
-            "mutation. The client tracks its own report job."
+            DESCRIPTIONS["get_library_brief_input"]
         ),
         input_schema=_schema({
             "date": {"type": "string", "description": "UTC day, YYYY-MM-DD; not in the future."},
@@ -5746,14 +5960,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "idempotentHint": True, "openWorldHint": False,
         },
         description=(
-            "Local write: persist one client-produced brief for a job "
-            "prepared by get_library_brief_input. Validates the packet "
-            "against current library data (stale_brief on change), binds "
-            "every citation to supplied evidence, is idempotent on "
-            "submission_key, and stores an immutable artifact under the "
-            "local reach/briefs directory. Cannot apply labels or alter the "
-            "assignment queue. Invoke only as part of the user's requested "
-            "brief job."
+            DESCRIPTIONS["publish_library_brief"]
         ),
         input_schema=_schema({
             "job_key": {"type": "string", "description": "job_key returned by get_library_brief_input."},
@@ -5785,14 +5992,14 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "readOnlyHint": True, "destructiveHint": False,
             "idempotentHint": True, "openWorldHint": False,
         },
-        description=EXPORT_CITED_RANGE_DESCRIPTION,
+        description=DESCRIPTIONS["export_cited_range"],
         input_schema=EXPORT_CITED_RANGE_SCHEMA,
         handler=_library_media_export,
     ),
 }
 
 
-def list_tools() -> list[dict[str, Any]]:
+def list_tools(*, structured_results: bool = True) -> list[dict[str, Any]]:
     tools = []
     for spec in TOOL_REGISTRY.values():
         item: dict[str, Any] = {
@@ -5804,6 +6011,8 @@ def list_tools() -> list[dict[str, Any]]:
             item["annotations"] = spec.annotations
         if spec.title is not None:
             item["title"] = spec.title
+        if structured_results and spec.name in OUTPUT_SCHEMAS:
+            item["outputSchema"] = OUTPUT_SCHEMAS[spec.name]
         tools.append(item)
     return tools
 
@@ -5850,7 +6059,7 @@ def stdio_tool_names(toolset: str = "full") -> tuple[str, ...]:
 _SCHEMA_COMBINATORS = ("oneOf", "anyOf", "allOf")
 
 
-def client_input_schema(schema: dict) -> dict:
+def client_input_schema(schema: dict, tool_name: str | None = None) -> dict:
     """The input schema both stdio and HTTP advertise to MCP clients.
 
     The Anthropic API rejects tool input schemas with oneOf/anyOf/allOf at the
@@ -5860,6 +6069,10 @@ def client_input_schema(schema: dict) -> dict:
     whose properties merge the variants. The handlers still validate every
     call against the exact registry schema, so nothing looser is accepted.
     """
+    # Documentation is a copy of the client view. Frozen registry schemas
+    # remain byte-for-byte inputs to the validators and contract snapshots.
+    if tool_name is not None:
+        return document_input_schema(client_input_schema(schema), tool_name)
     if schema.get("type") == "object" and not any(k in schema for k in _SCHEMA_COMBINATORS):
         return schema
     flat = {k: v for k, v in schema.items() if k not in _SCHEMA_COMBINATORS + ("not",)}

@@ -8,6 +8,11 @@ This uses the real stdio server with a disposable seeded library. It updates
 only the four search tools' schemas/descriptions and the embedded search data
 in prompt/success. Protocol envelopes and every other baseline entry are kept.
 The modern fixture contains requests only and shares these expected results.
+For documentation changes on either supported SDK, use:
+    python -B tests/update_mcp_wire_goldens.py --metadata-only
+This refreshes all tool metadata after rejecting any input contract or inventory
+change and synchronizes the bundle's tool descriptions. All non-tool protocol
+fixtures remain unchanged. See docs/GLAMA-BUILD.md.
 Review the fixture diff. Only VERSION and the platform capability notice are
 substituted by the tests; schemas and all other text are exact comparisons.
 """
@@ -18,11 +23,48 @@ import json
 from pathlib import Path
 import tempfile
 
+from uoink_mcp_tools import without_descriptions
+
 from tests.mcp_wire import ROOT, HttpClient, StdioClient, initialize_request, registry_golden, rpc
 from tests.mcp_wire_fixtures import seed_library
 
 
 SEARCH_TOOLS = {"search_uoinks", "search_clips", "search_library", "find_mentions"}
+
+
+def refresh_metadata(golden, tools):
+    """Refresh documentation only; reject any input-contract or inventory drift."""
+    updated = copy.deepcopy(golden)
+    assert [t["name"] for t in tools] == [t["name"] for t in golden["tools"]]
+    for old, live in zip(golden["tools"], tools):
+        assert without_descriptions(old["inputSchema"]) == without_descriptions(live["inputSchema"]), old["name"]
+        allowed = {"description", "title", "annotations", "inputSchema", "outputSchema"}
+        assert {k: v for k, v in old.items() if k not in allowed} == {
+            k: v for k, v in live.items() if k not in allowed}, old["name"]
+    updated["tools"] = copy.deepcopy(tools)
+    return updated
+
+
+def update_metadata_only():
+    target = Path(__file__).parent / "fixtures/mcp_wire/sdk1.json"
+    golden = json.loads(target.read_text(encoding="utf-8"))
+    scratch = ROOT / "_scratch/tdqs-wire"
+    scratch.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(dir=scratch) as directory:
+        with StdioClient.launch(directory) as client:
+            client.initialize()
+            tools = client.request(2, "tools/list")["result"]["tools"]
+            assert tools == registry_golden(), "Wire registry differs from product schemas"
+            client.save(scratch / "metadata-generation-stdio.jsonl")
+    updated = refresh_metadata(golden, tools)
+    manifest_path = ROOT / ".mcpb/manifest.json"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    assert [t["name"] for t in manifest["tools"]] == [t["name"] for t in tools]
+    for bundled, live in zip(manifest["tools"], tools):
+        bundled["description"] = live["description"]
+    target.write_text(json.dumps(updated, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    print(f"Metadata-only refresh: {len(tools)} tools; input contracts and other wire fixtures unchanged")
 
 
 def refresh_search(golden, tools, prompt, success):
@@ -93,7 +135,13 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--search-only", action="store_true",
                         help="Refresh only search data, allowed on SDK 2")
+    parser.add_argument("--metadata-only", action="store_true",
+                        help="Refresh tool documentation with structural input-contract checks")
     args = parser.parse_args()
+    if args.metadata_only:
+        assert not args.search_only, "Choose only one refresh mode"
+        update_metadata_only()
+        return
     if args.search_only:
         update_search_only()
         return

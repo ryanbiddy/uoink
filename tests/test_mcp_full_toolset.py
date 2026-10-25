@@ -12,6 +12,7 @@ import sys
 import threading
 
 import pytest
+from uoink_mcp_tools import without_descriptions
 from mcp import types
 
 import index
@@ -55,8 +56,9 @@ def test_real_stdio_toolsets_and_helper_down(tmp_path, mode, count):
         assert tuple(names) == tools.stdio_tool_names("core" if mode == "core" else "full")
         for tool in listed:
             spec = tools.TOOL_REGISTRY[tool["name"]]
-            assert tool["inputSchema"] == tools.client_input_schema(spec.input_schema)
+            assert tool["inputSchema"] == tools.client_input_schema(spec.input_schema, tool["name"])
             assert tool["description"] == spec.description
+            assert "outputSchema" not in tool, "Stdio preserves its text-only result contract"
         client.send({"jsonrpc": "2.0", "id": 3, "method": "tools/call", "params": {
             "name": "poll_monitored_playlist", "arguments": {"playlist_id": 1}}})
         result = client.wait_for(3)["result"]
@@ -92,6 +94,9 @@ def test_real_stdio_toolsets_and_helper_down(tmp_path, mode, count):
                 assert "result" in response, (name, response)
                 body = json.loads(response["result"]["content"][0]["text"])
                 assert type(body.get("ok")) is bool, (name, body)
+                if name in tools.OUTPUT_SCHEMAS:
+                    import jsonschema
+                    jsonschema.validate(body, tools.OUTPUT_SCHEMAS[name])
                 if name in local_successes:
                     assert body["ok"] is True, (name, body)
                 if body["ok"] is False:
@@ -259,8 +264,8 @@ def test_http_and_stdio_list_identical_client_schemas(local_backend, monkeypatch
         assert schema.get("type") == "object", tool["name"]
         assert not {"oneOf", "anyOf", "allOf", "not"} & set(schema), tool["name"]
         spec = tools.TOOL_REGISTRY[tool["name"]]
-        assert schema == tools.client_input_schema(spec.input_schema)
-        if schema != spec.input_schema:
+        assert schema == tools.client_input_schema(spec.input_schema, tool["name"])
+        if without_descriptions(schema) != without_descriptions(spec.input_schema):
             changed.add(tool["name"])
     assert changed == FLATTENED
     assert json.dumps(tools.list_tools(), sort_keys=True) == frozen
@@ -302,7 +307,7 @@ def test_listed_schemas_have_no_top_level_combinators(tmp_path):
         schema = tool["inputSchema"]
         assert schema.get("type") == "object", tool["name"]
         assert not {"oneOf", "anyOf", "allOf", "not"} & set(schema), tool["name"]
-        if schema != tools.TOOL_REGISTRY[tool["name"]].input_schema:
+        if without_descriptions(schema) != without_descriptions(tools.TOOL_REGISTRY[tool["name"]].input_schema):
             changed.add(tool["name"])
     assert changed == FLATTENED
 

@@ -934,7 +934,7 @@ def test_bc2_export_is_on_stdio_with_the_registry_schema_and_wrapped_response_ch
         mcp_types.ListToolsRequest(method="tools/list"))).tools
     wire = {t.name: t for t in listed}
     assert len(wire) == 91
-    assert wire["export_cited_range"].input_schema == spec.input_schema
+    assert wire["export_cited_range"].input_schema == uoink_mcp_tools.client_input_schema(spec.input_schema, spec.name)
     assert wire["export_cited_range"].description == spec.description
     assert wire["export_cited_range"].annotations.read_only_hint is True
     manifest = json.loads((ROOT / ".mcpb" / "manifest.json").read_text(encoding="utf-8"))
