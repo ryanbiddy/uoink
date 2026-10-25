@@ -180,6 +180,12 @@ def human(payload):
     def label(value):
         # Keep control characters escaped even in the human display.
         return json.dumps(str(value), ensure_ascii=False)[1:-1][:240]
+    def capture_limits(value):
+        evidence = value.get("x_capture") if isinstance(value, dict) else None
+        if not isinstance(evidence, dict):
+            return ""
+        from uoink_core.x_evidence import summary_lines
+        return "\n" + "\n".join(label(line) for line in summary_lines(evidence))
     if "clients" in payload:
         return "\n".join(payload["clients"])
     if "hits" in payload or "yoinks" in payload:
@@ -196,9 +202,11 @@ def human(payload):
     if "card" in payload:
         card = payload["card"]
         return (f"{label(card.get('title') or payload.get('item_id', 'Item'))}\n"
-                f"ID: {label(payload.get('item_id', ''))}\nUse JSON output for excerpts and source revisions.")
+                f"ID: {label(payload.get('item_id', ''))}\nUse JSON output for excerpts and source revisions."
+                + capture_limits(card))
     if "video_id" in payload and "title" in payload:
-        return f"Saved: {label(payload['title'])} [{label(payload['video_id'])}]"
+        return (f"Saved: {label(payload['title'])} [{label(payload['video_id'])}]"
+                + capture_limits(payload.get("metadata") or payload))
     if "path" in payload:
         return label(payload["path"])
     if "job_id" in payload:

@@ -6,12 +6,14 @@
 [![MCP server](https://img.shields.io/badge/MCP-server-FF3D00.svg)](https://uoink.app/mcp)
 [![Website: uoink.app](https://img.shields.io/badge/web-uoink.app-C2410C.svg)](https://uoink.app)
 
-**Uoink keeps the videos, podcasts, and articles creators and AI developers study on their own disk, then hands them to Claude, ChatGPT, Cursor, or a local MCP agent as a cited corpus.**
+**Save the YouTube videos, podcasts and articles you study. Your AI searches them and cites the timestamp.**
+
+Free, open source and local on Windows: transcripts, frames and comments land on your disk as Markdown and JSON, ready for Claude, Cursor, Codex or any MCP client.
 
 Free, open source (MIT), and local-first: no account, no Uoink cloud, and anonymous usage counts stay off unless you turn them on. Uoink saves supported sources as structured Markdown on *your* machine, then makes the corpus available to your AI through the clipboard, a local MCP server, and an OpenAPI bridge. YouTube capture includes the transcript, timestamped screenshots, comments, and metadata; other source types keep the material their publishers expose.
 
 - **Website:** https://uoink.app · **Install:** https://uoink.app/install · **Developers:** https://uoink.app/developers
-- **Status:** Windows 10/11 only. There is no Mac build. The extension sideloads from the release — it is not on the Chrome Web Store. The installer is unsigned, so Windows SmartScreen will warn on first run.
+- **Status:** Windows 10/11 today. Mac (Apple Silicon, macOS 15 or later): preview coming soon. The extension sideloads from the release; it is not on the Chrome Web Store. The installer is unsigned, so Windows SmartScreen will warn on first run.
 
 ## Why Uoink
 
@@ -87,7 +89,7 @@ Uoink ships a portable Skill at `skills/uoink/SKILL.md` (installed to `%LOCALAPP
 
 ## Install
 
-1. **Download the installer.** Download `Uoink-Setup-3.11.0.exe` from the [v3.11.0 release](https://github.com/ryanbiddy/uoink/releases/tag/v3.11.0). Windows 10/11 only. There is no Mac build today. The installer is unsigned: if SmartScreen shows "Windows protected your PC", choose **More info -> Run anyway**, and check the file against the SHA-256 listed on the release page.
+1. **Download the installer.** Download `Uoink-Setup-3.11.0.exe` from the [v3.11.0 release](https://github.com/ryanbiddy/uoink/releases/tag/v3.11.0). Windows 10/11 only for now; a Mac preview (Apple Silicon, macOS 15 or later) is coming soon. The installer is unsigned: if SmartScreen shows "Windows protected your PC", choose **More info -> Run anyway**, and check the file against the SHA-256 listed on the release page.
 2. **Run it.** Defaults install to `%LOCALAPPDATA%\Uoink\` (no admin required). The finish page can launch the helper immediately, and an autostart entry runs it on each login.
 3. **Load the bundled extension.** On first launch, Uoink shows a one-time setup splash. Use it to open your browser's extensions page and copy the installed extension path; then enable Developer mode, click **Load unpacked**, and select that folder. (The Chrome Web Store listing is pending; sideload is the current path.)
 
