@@ -6673,7 +6673,7 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
         if not shot_times:
             shot_times = [i * interval for i in range(len(shots))]
 
-        entries = list(parse_srt(srt_files[0])) if srt_files else []
+        entries = list(parse_srt(srt_files[0], duration=duration)) if srt_files else []
         platform_caption_count = len(entries)
         if not entries and phase_callback:
             phase_callback("transcript")
