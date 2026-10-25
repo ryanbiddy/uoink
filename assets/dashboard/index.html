@@ -5253,7 +5253,7 @@
             <p class="discovery-note" id="discoveryCreditPlan" role="status" aria-live="polite">Review the credit plan before running discovery.</p>
             <p class="discovery-note" id="discoveryStatus" role="status" aria-live="polite"></p>
             <div id="discoveryRecovery" class="hidden">
-              <p class="discovery-note" role="status">Results were fetched, but could not be saved on this PC. Keep Uoink open and save them again before queueing. This uses no more provider credits.</p>
+              <p class="discovery-note" role="status">Results were fetched, but could not be saved on <span data-this-device>this PC</span>. Keep Uoink open and save them again before queueing. This uses no more provider credits.</p>
               <button class="button" id="discoverySaveAgain" type="button">Save results locally again</button>
             </div>
             <div class="inline-row"><button class="button primary" id="discoveryQueue" type="button" disabled>Uoink selected (0)</button><button class="button ghost" id="discoveryRefresh" type="button" disabled>Refresh capture states</button></div>
@@ -5625,7 +5625,7 @@
                 <p class="setting-copy" id="scrapecreatorsKeyStatus" role="status">No key saved.</p>
                 <div class="inline-row"><button class="button" id="saveScrapecreatorsKey" type="button">Save key</button><button class="button ghost" id="removeScrapecreatorsKey" type="button">Remove key</button></div>
                 <div class="setting-feedback"><span class="setting-status" id="scrapecreatorsKeySaveStatus" role="status" aria-live="polite"></span><button class="button ghost setting-retry hidden" id="scrapecreatorsKeySaveRetry" type="button" data-setting-retry="scrapecreatorsKey">Retry save</button></div>
-                <label class="disclosure" for="scrapecreatorsDisclosure"><input id="scrapecreatorsDisclosure" type="checkbox"><span>Discovery sends the creator handle or search words you type, with your key, to api.scrapecreators.com. Each request uses ScrapeCreators credits (most endpoints: 1 credit per request, per their docs). Nothing from your library is sent. Results are saved on this PC.</span></label>
+                <label class="disclosure" for="scrapecreatorsDisclosure"><input id="scrapecreatorsDisclosure" type="checkbox"><span>Discovery sends the creator handle or search words you type, with your key, to api.scrapecreators.com. Each request uses ScrapeCreators credits (most endpoints: 1 credit per request, per their docs). Nothing from your library is sent. Results are saved on <span data-this-device>this PC</span>.</span></label>
                 <label class="inline-row" for="scrapecreatorsEnabled"><input id="scrapecreatorsEnabled" type="checkbox" disabled aria-describedby="scrapecreatorsEnabledSaveStatus"> Enable discovery</label>
                 <div class="setting-feedback"><span class="setting-status" id="scrapecreatorsEnabledSaveStatus" role="status" aria-live="polite"></span><button class="button ghost setting-retry hidden" id="scrapecreatorsEnabledSaveRetry" type="button" data-setting-retry="scrapecreatorsEnabled">Retry save</button></div>
                 <p class="setting-copy">Save a key and tick the disclosure to enable discovery. Discovery and agent spending start off.</p>
@@ -7579,19 +7579,19 @@
       const noCaptions = `${platformChipLabel(platformOf(row, sidecar))} didn't provide captions for this ${podcast ? "episode" : "video"}`;
       if (source === "asr") {
         return podcast
-          ? `Uoink transcribed this episode's audio on this PC with Whisper${model}.`
-          : `${noCaptions}, so Uoink transcribed the audio on this PC with Whisper${model}.`;
+          ? `Uoink transcribed this episode's audio on ${thisDevice()} with Whisper${model}.`
+          : `${noCaptions}, so Uoink transcribed the audio on ${thisDevice()} with Whisper${model}.`;
       }
       if (source) return "";
       if (status === "disabled") {
-        return `${noCaptions}, and transcribing on this PC is turned off, so there is no transcript. Turn it on in Settings, Capture, then Re-transcribe.`;
+        return `${noCaptions}, and transcribing on ${thisDevice()} is turned off, so there is no transcript. Turn it on in Settings, Capture, then Re-transcribe.`;
       }
       if (status === "model_not_downloaded") {
-        return `${noCaptions}, and the local transcriber${modelName ? ` (${modelName})` : ""} isn't on this PC yet, so there is no transcript. Download it in Settings, Capture, then Re-transcribe.`;
+        return `${noCaptions}, and the local transcriber${modelName ? ` (${modelName})` : ""} isn't on ${thisDevice()} yet, so there is no transcript. Download it in Settings, Capture, then Re-transcribe.`;
       }
       if (status === "failed") {
         const reason = String(fallback.error || "").trim();
-        return `${noCaptions}, and transcribing it on this PC failed${reason ? ` (${reason})` : ""}. Re-transcribe to try again.`;
+        return `${noCaptions}, and transcribing it on ${thisDevice()} failed${reason ? ` (${reason})` : ""}. Re-transcribe to try again.`;
       }
       if (status === "no_audio") {
         const reason = typeof fallback.reason === "string" ? fallback.reason.trim().slice(0, 300) : "";
@@ -7611,7 +7611,7 @@
       const prose = readerMarkdownHtml(state.selectedYoinkMarkdown);
       if (prose) return `${prose}${shots}`;
       if (state.selectedYoinkMarkdownState === "loading" || (!state.selectedYoinkSidecar && !state.selectedYoinkSidecarError && isTimedMedia(row, sidecar))) {
-        return `${emptyPanelRow("Opening the transcript...", "Reading the saved files on this PC.")}${shots}`;
+        return `${emptyPanelRow("Opening the transcript...", `Reading the saved files on ${thisDevice()}.`)}${shots}`;
       }
       if (state.selectedYoinkMarkdownState === "no_markdown") {
         return `${emptyPanelRow(
@@ -8582,7 +8582,7 @@
         const result = await callMcpTool("discover_candidates", { ...plan.args, confirm_credits: plan.credits_planned, user_intent_token: token });
         d.run = result;
         d.selected.clear();
-        discoveryElement("discoveryStatus").textContent = `${result.candidates.length} results · ${result.credits_used} credits used. ${result.save_failed ? "Local save failed." : "Saved on this PC."}`;
+        discoveryElement("discoveryStatus").textContent = `${result.candidates.length} results · ${result.credits_used} credits used. ${result.save_failed ? "Local save failed." : `Saved on ${thisDevice()}.`}`;
       } catch (error) {
         // A partial provider failure can still carry paid candidates and a save failure.
         if (error.data && error.data.run_id && Array.isArray(error.data.candidates)) { d.run = error.data; d.selected.clear(); }
@@ -8599,7 +8599,7 @@
         const data = await authFetch("/discovery/runs/save", { method: "POST", body: JSON.stringify({ run_id: d.run.run_id }) });
         if (!data.run || data.run.run_id !== d.run.run_id || !Array.isArray(data.run.candidates)) throw new Error("Invalid saved receipt");
         d.run = data.run;
-        discoveryElement("discoveryStatus").textContent = d.run.save_failed ? "Local save still failed. Results remain in memory; keep Uoink open and try saving again." : "Results saved on this PC. No provider credits used.";
+        discoveryElement("discoveryStatus").textContent = d.run.save_failed ? "Local save still failed. Results remain in memory; keep Uoink open and try saving again." : `Results saved on ${thisDevice()}. No provider credits used.`;
       } catch (error) { discoveryElement("discoveryStatus").textContent = discoveryMessage(error); }
       finally { d.busy = false; renderDiscoveryResults(); }
     }
@@ -12612,6 +12612,11 @@
         fix: HELPER_SOURCE_FIX,
       },
     };
+
+    // "this PC", "this Mac" or "this computer", for copy about local work.
+    function thisDevice() {
+      return { win: "this PC", mac: "this Mac", linux: "this computer" }[helperPlatform()];
+    }
 
     function helperPlatform() {
       const nav = typeof navigator === "undefined" ? {} : (navigator || {});
@@ -17036,6 +17041,7 @@
       if (els.imageClearButton) els.imageClearButton.addEventListener("click", clearImageSelection);
       const emptyPasteUrl = document.getElementById("emptyPasteUrl");
       if (emptyPasteUrl) emptyPasteUrl.addEventListener("click", focusLibraryBox);
+      for (const node of document.querySelectorAll("[data-this-device]")) node.textContent = thisDevice();
       // Delegate once so links rendered after startup use the same boundary.
       document.addEventListener("click", openExternalLink);
       document.addEventListener("auxclick", (event) => {
