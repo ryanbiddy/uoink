@@ -23,6 +23,9 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 STATE_FILE = "helper-recovery.json"
 STOP_FILE = "helper-stop.json"
+# A Darwin open that arrives before the helper is ready waits here for it.
+DASHBOARD_REQUEST = "dashboard-request.json"
+REQUEST_WINDOW = 300
 WINDOW = 600
 BACKOFF = (5, 15, 45)
 ACTION = "Run uoink doctor, check helper-output.log and server.log, then open Uoink to try again."
@@ -196,6 +199,24 @@ def show_running_dashboard(root: Path) -> bool:
     return True
 
 
+def request_dashboard_later(root: Path) -> None:
+    write_json(root / DASHBOARD_REQUEST, {"requested_at": time.time()})
+
+
+def take_dashboard_request(root: Path) -> bool:
+    """Consume a pending open. Stale requests never pop a window much later."""
+    path = root / DASHBOARD_REQUEST
+    try:
+        requested = read_json(path).get("requested_at")
+    except (OSError, ValueError):
+        requested = None
+    try:
+        path.unlink(missing_ok=True)
+    except OSError:
+        return False
+    return isinstance(requested, (int, float)) and 0 <= time.time() - requested < REQUEST_WINDOW
+
+
 def open_app(root: Path) -> int:
     """A Finder, Dock or Spotlight open of Uoink.app on Darwin.
 
@@ -208,9 +229,15 @@ def open_app(root: Path) -> int:
     with admission(root) as free:
         pass
     if not free:
-        if status(root).get("status") == "running":
-            show_running_dashboard(root)
+        if status(root).get("status") != "running":
+            # The resident shows it once its helper is ready.
+            request_dashboard_later(root)
+            if status(root).get("status") != "running" or not take_dashboard_request(root):
+                return 0
+        show_running_dashboard(root)
         return 0
+    if request_dashboard(root):
+        return 0  # A helper outlived its supervisor; it still owns the window.
     subprocess.Popen([sys.executable, "-B", "-s", str(Path(__file__).resolve()),
                       "--resident", "--show-dashboard", *isolation.child_argv()],
                      cwd=HERE, stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
@@ -240,13 +267,14 @@ def capture_output(pipe, root: Path, tail: list) -> None:
 
 class Supervisor:
     def __init__(self, root: Path, command: list[str], url: str, *, session: str,
-                 startup: bool = False, first_args=(), readiness_timeout: float = 120,
+                 startup: bool = False, first_args=(), on_ready=None, readiness_timeout: float = 120,
                  poll: float = 0.5, backoff=BACKOFF, window: float = WINDOW,
                  probe=ready, notify=notify_failure, clock=time.time, sleep=time.sleep):
         self.root, self.command, self.url = root, command, url
         self.session, self.startup = session, startup
         # Extra arguments for the first helper start only, never for restarts.
         self.first_args = list(first_args)
+        self.on_ready, self.owned = on_ready, False
         self.readiness_timeout, self.poll = readiness_timeout, poll
         self.backoff, self.window = backoff, window
         self.probe, self.notify, self.clock, self.sleep = probe, notify, clock, sleep
@@ -271,6 +299,7 @@ class Supervisor:
         with admission(self.root) as owned:
             if not owned:
                 return 0
+            self.owned = True
             try:
                 old = read_json(self.root / STATE_FILE)
             except ValueError:
@@ -306,6 +335,7 @@ class Supervisor:
         while not self.stopped():
             run_id = uuid.uuid4().hex
             command = self.command + self.first_args if first else self.command
+            shown = first and "--show-dashboard" in self.first_args
             first = False
             self.save(status="starting", last_start_at=stamp(), ready_at=None,
                       reason="Waiting for helper readiness.", action="")
@@ -339,6 +369,8 @@ class Supervisor:
                         if successes >= 2:
                             is_ready = True
                             self.save(status="running", ready_at=stamp(), reason="Helper is ready.")
+                            if self.on_ready is not None:
+                                self.on_ready(shown)
                         elif time.monotonic() >= deadline:
                             reason = "Helper did not become ready before the startup deadline. Check for a port conflict or startup error."
                             child.terminate()
@@ -404,12 +436,20 @@ def main(argv=None) -> int:
         # A Darwin restart after a crash must not pop the dashboard again.
         (first_args if sys.platform == "darwin" else command).append("--show-dashboard")
     root = data_root()
-    if sys.platform == "darwin" and args.show_dashboard and not args.resident:
-        return open_app(root)
+    on_ready = None
+    if sys.platform == "darwin":
+        if args.show_dashboard and not args.resident:
+            return open_app(root)
+
+        def on_ready(shown):
+            # The launch flag already opened one; otherwise honor a waiting open.
+            if take_dashboard_request(root) and not shown:
+                threading.Thread(target=show_running_dashboard, args=(root,), daemon=True).start()
     try:
-        result = Supervisor(root, command, isolation.helper_url("/health"),
-                            session=login_session(), startup=args.startup,
-                            first_args=first_args).run()
+        supervisor = Supervisor(root, command, isolation.helper_url("/health"),
+                                session=login_session(), startup=args.startup,
+                                first_args=first_args, on_ready=on_ready)
+        result = supervisor.run()
     except (OSError, ValueError, subprocess.SubprocessError):
         failure = {"status": "supervisor_error", "reason": "Helper recovery could not start. Check access to the Uoink data folder.",
                    "action": ACTION}
@@ -420,6 +460,9 @@ def main(argv=None) -> int:
         return 0
     if args.show_dashboard and status(root).get("status") == "running":
         show_running_dashboard(root)
+    elif sys.platform == "darwin" and args.show_dashboard and not supervisor.owned:
+        # Another supervisor won admission while it was starting up.
+        request_dashboard_later(root)
     return result
 
 

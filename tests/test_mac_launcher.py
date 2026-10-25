@@ -321,6 +321,8 @@ def test_show_dashboard_reaches_only_the_first_darwin_helper(monkeypatch, tmp_pa
     captured = {}
 
     class Fake:
+        owned = True
+
         def __init__(self, root, command, url, **kw):
             captured.update(command=command, **kw)
 
@@ -424,8 +426,8 @@ def test_darwin_open_hands_off_to_a_detached_resident(supervisor, monkeypatch, t
     assert kw["start_new_session"] is True and kw["stdin"] is supervisor.subprocess.DEVNULL
 
 
-@pytest.mark.parametrize("state,asked", [("running", True), ("starting", False), ("crash_loop", False)])
-def test_darwin_open_while_resident_asks_its_helper(supervisor, monkeypatch, tmp_path, state, asked):
+@pytest.mark.parametrize("state", ["running", "starting", "backoff", "crash_loop"])
+def test_darwin_open_while_resident_asks_or_queues(supervisor, monkeypatch, tmp_path, state):
     shown = []
     monkeypatch.setattr(supervisor, "data_root", lambda: tmp_path)
     monkeypatch.setattr(supervisor, "show_running_dashboard", lambda root: shown.append(root) or True)
@@ -434,13 +436,114 @@ def test_darwin_open_while_resident_asks_its_helper(supervisor, monkeypatch, tmp
     with supervisor.admission(tmp_path) as owned:  # The resident holds the lock.
         assert owned
         assert supervisor.main(["--show-dashboard"]) == 0
-    assert shown == ([tmp_path] if asked else [])
+    assert shown == ([tmp_path] if state == "running" else [])
+    # Not ready yet: the open waits for the resident's helper instead of vanishing.
+    assert (tmp_path / supervisor.DASHBOARD_REQUEST).exists() is (state != "running")
+
+
+def test_darwin_open_with_helper_but_no_supervisor_asks_that_helper(supervisor, monkeypatch, tmp_path):
+    asked = []
+    monkeypatch.setattr(supervisor, "data_root", lambda: tmp_path)
+    monkeypatch.setattr(supervisor, "request_dashboard", lambda root: asked.append(root) or True)
+    monkeypatch.setattr(supervisor.subprocess, "Popen", lambda *a, **k: pytest.fail("duplicated a live helper"))
+    assert supervisor.main(["--show-dashboard"]) == 0
+    assert asked == [tmp_path]
+
+
+def test_dashboard_request_is_taken_once_and_expires(supervisor, monkeypatch, tmp_path):
+    assert supervisor.take_dashboard_request(tmp_path) is False
+    supervisor.request_dashboard_later(tmp_path)
+    assert supervisor.take_dashboard_request(tmp_path) is True
+    assert supervisor.take_dashboard_request(tmp_path) is False
+    supervisor.write_json(tmp_path / supervisor.DASHBOARD_REQUEST,
+                          {"requested_at": supervisor.time.time() - supervisor.REQUEST_WINDOW - 1})
+    assert supervisor.take_dashboard_request(tmp_path) is False
+    (tmp_path / supervisor.DASHBOARD_REQUEST).write_text("not json", encoding="utf-8")
+    assert supervisor.take_dashboard_request(tmp_path) is False
+    assert not (tmp_path / supervisor.DASHBOARD_REQUEST).exists()
+
+
+@pytest.mark.parametrize("first_args,shown", [([], [False, False]), (["--show-dashboard"], [True, False])])
+def test_ready_callback_runs_on_every_helper_start(monkeypatch, tmp_path, first_args, shown):
+    import io
+    import uoink_supervisor
+    ready = []
+
+    class Child:
+        pid = 4242
+
+        def __init__(self):
+            self.stdout, self.polls = io.BytesIO(b""), 0
+
+        def poll(self):
+            self.polls += 1
+            return None if self.polls < 4 else 1
+
+        def wait(self, timeout=None):
+            return 1
+
+    monkeypatch.setattr(uoink_supervisor.subprocess, "Popen", lambda command, **k: Child())
+    supervisor = uoink_supervisor.Supervisor(
+        tmp_path, ["python", "server.py"], "http://127.0.0.1:1/health", session="s",
+        first_args=first_args, on_ready=ready.append, backoff=(0,), poll=0,
+        probe=lambda *a: True, notify=lambda state: None, sleep=lambda seconds: None)
+    assert supervisor.loop() == 0
+    # Crash restarts honor a waiting open too; only the launch flag's start says shown.
+    assert ready == shown
+
+
+def test_darwin_ready_callback_honors_a_waiting_open(supervisor, monkeypatch, tmp_path):
+    captured, shown = {}, []
+
+    class Fake:
+        def __init__(self, root, command, url, **kw):
+            captured.update(kw)
+            self.owned = True
+
+        def run(self):
+            return 0
+
+    monkeypatch.setattr(supervisor, "Supervisor", Fake)
+    monkeypatch.setattr(supervisor, "data_root", lambda: tmp_path)
+    monkeypatch.setattr(supervisor, "login_session", lambda: "session")
+    monkeypatch.setattr(supervisor, "show_running_dashboard", lambda root: shown.append(root))
+    assert supervisor.main(["--startup"]) == 0
+    on_ready = captured["on_ready"]
+    supervisor.request_dashboard_later(tmp_path)
+    on_ready(True)  # The launch flag already opened a window.
+    supervisor.request_dashboard_later(tmp_path)
+    on_ready(False)
+    for _ in range(50):
+        if shown:
+            break
+        supervisor.time.sleep(0.02)
+    assert shown == [tmp_path] and not (tmp_path / supervisor.DASHBOARD_REQUEST).exists()
+
+
+def test_resident_that_loses_admission_leaves_its_open_queued(supervisor, monkeypatch, tmp_path):
+    class Lost:
+        owned = False
+
+        def __init__(self, *a, **k):
+            pass
+
+        def run(self):
+            return 0
+
+    monkeypatch.setattr(supervisor, "Supervisor", Lost)
+    monkeypatch.setattr(supervisor, "data_root", lambda: tmp_path)
+    monkeypatch.setattr(supervisor, "login_session", lambda: "session")
+    supervisor.write_json(tmp_path / supervisor.STATE_FILE, {"status": "starting"})
+    assert supervisor.main(["--resident", "--show-dashboard"]) == 0
+    assert supervisor.take_dashboard_request(tmp_path) is True
 
 
 def test_resident_and_login_launches_still_supervise(supervisor, monkeypatch, tmp_path):
     runs = []
 
     class Fake:
+        owned = True
+
         def __init__(self, root, command, url, **kw):
             runs.append(kw)
 
