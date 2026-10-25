@@ -87,7 +87,7 @@ class UoinkTray:
     def _token(self) -> str:
         try:
             return self.token_path.read_text(encoding="utf-8").strip()
-        except OSError:
+        except (OSError, UnicodeError):
             return ""
 
     def _get(self, path: str, *, auth: bool, timeout: float = 2.0):

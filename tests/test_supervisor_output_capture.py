@@ -42,4 +42,5 @@ def test_tail_is_bounded_and_output_is_kept_in_order(tmp_path):
     child.wait()
     text = "".join((tmp_path / "helper-output.log").read_text(encoding="utf-8").split("\n"))
     assert text.endswith(f"line {lines - 1}") and len(tail[0]) <= 8192
-    assert tail[0].endswith(f"line {lines - 1}\n".encode())
+    # Windows children write CRLF line endings.
+    assert tail[0].rstrip(b"\r\n").endswith(f"line {lines - 1}".encode())

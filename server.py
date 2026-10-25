@@ -555,15 +555,31 @@ ANTHROPIC_HOOK_EST_INPUT_TOKENS = 1_200
 ANTHROPIC_HOOK_EST_OUTPUT_TOKENS = 80
 
 
+def _read_token_file() -> str:
+    try:
+        return TOKEN_PATH.read_text(encoding="utf-8").strip()
+    except (OSError, UnicodeError):
+        return ""
+
+
+_TOKEN_GUESS = None
+
+
 def _load_or_create_token() -> str:
-    if TOKEN_PATH.exists():
-        try:
-            existing = TOKEN_PATH.read_text(encoding="utf-8").strip()
-            if existing:
-                return existing
-        except OSError:
-            pass
-    fresh = secrets.token_urlsafe(32)
+    # Import never writes the token. A duplicate launch, CLI or MCP process
+    # must not replace the token a running helper holds in memory; main()
+    # persists a fresh token only after this process owns the port.
+    global _TOKEN_GUESS
+    existing = _read_token_file()
+    if existing:
+        return existing
+    _TOKEN_GUESS = secrets.token_urlsafe(32)
+    return _TOKEN_GUESS
+
+
+def _persist_token(fresh: str) -> None:
+    if _read_token_file() == fresh:
+        return
     try:
         TOKEN_PATH.write_text(fresh, encoding="utf-8")
         # Best-effort: tighten file perms on POSIX. On Windows, ACLs default
@@ -577,10 +593,21 @@ def _load_or_create_token() -> str:
         # Non-fatal: keep an in-memory token for the session. Persistence is
         # nice-to-have; auth still works within this server's lifetime.
         pass
-    return fresh
 
 
 TOKEN = _load_or_create_token()
+_TOKEN_OWNED = False
+
+
+def _current_token() -> str:
+    """The token the running helper accepts, for code that may run outside it.
+
+    A stdio MCP or CLI process may have imported before the helper's first bind
+    persisted a token; it must follow the file, not its own unpersisted guess.
+    """
+    if _TOKEN_OWNED or TOKEN != _TOKEN_GUESS:
+        return TOKEN
+    return _read_token_file() or TOKEN
 
 # /token rate limit -- defends the relaxed Origin gate. The legitimate
 # caller (the extension) fetches /token once per install plus the rare 403
@@ -749,7 +776,7 @@ def _library_session_hash() -> str:
     has no session of its own beyond holding the per-install token, so the
     session is that token: rotating it (a reinstall, a token reset) orphans
     every unconsumed intent. Only a hash ever leaves this process."""
-    return hashlib.sha256(("uoink-dashboard-intent:" + TOKEN).encode("utf-8")).hexdigest()
+    return hashlib.sha256(("uoink-dashboard-intent:" + _current_token()).encode("utf-8")).hexdigest()
 
 
 # /queue/* rate limits (Sprint 19 / C4). /queue/status is poll-friendly
@@ -20427,9 +20454,9 @@ def _spawn_dashboard_window(*, reason: str, settings: bool = False) -> bool:
         url = _install_isolation.helper_url("/dashboard")
         if sys.platform == "darwin" and settings:
             url += "#settings"
-        webbrowser.open(url)
-        log.info("dashboard: opened browser fallback (%s)", reason)
-        return True
+        opened = bool(webbrowser.open(url))
+        log.info("dashboard: browser fallback %s (%s)", "opened" if opened else "unavailable", reason)
+        return opened
     except Exception as e:
         log.warning("dashboard: browser fallback failed (%s): %s", reason, e)
         return False
@@ -20474,7 +20501,7 @@ class _YoinkHTTPServer(ThreadingHTTPServer):
 
 
 def main(*, show_dashboard: bool = False):
-    global _active_migration_version
+    global _active_migration_version, _TOKEN_OWNED
     # Output directories are created lazily by the write paths themselves
     # (_run_extraction, _atomic_write_text, and the jobs/taxonomy/settings
     # writers all mkdir(parents=True, exist_ok=True) their own parents).
@@ -20531,6 +20558,9 @@ def main(*, show_dashboard: bool = False):
         else:
             log.error("Failed to bind %s:%d -- %s", HOST, PORT, e)
         sys.exit(1)
+    # This process owns the port, so its token is the one clients must read.
+    _persist_token(TOKEN)
+    _TOKEN_OWNED = True
 
     _migrate_plaintext_anthropic_key()
     # Sprint 15: open the library index (quarantining + rebuilding a corrupt
@@ -20723,7 +20753,8 @@ def main(*, show_dashboard: bool = False):
         except Exception as exc:
             log.warning("splash: failed to spawn (non-fatal): %s", exc)
 
-    if show_dashboard:
+    # A plain Mac launch asks for the dashboard; the first-run splash wins.
+    if show_dashboard and not (sys.platform == "darwin" and splash_spawned):
         _spawn_dashboard_window(reason="launch-flag")
 
     log.info("Uoink server v%s running on http://%s:%d", VERSION, HOST, PORT)
@@ -21212,7 +21243,7 @@ def _call_http_registry_tool(name: str, arguments: dict,
         data=json.dumps(arguments).encode("utf-8"),
         headers={
             "Content-Type": "application/json",
-            "X-Uoink-Token": TOKEN,
+            "X-Uoink-Token": _current_token(),
         },
         method="POST",
     )

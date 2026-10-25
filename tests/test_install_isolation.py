@@ -693,7 +693,9 @@ def test_stdio_inherits_isolated_profile(tmp_path):
                 answered = message
                 break
         assert answered is not None and "result" in answered
-        assert (profile / "index.db").exists() or (profile / "token.txt").exists()
+        assert (profile / "server.log").exists()
+        # Only a helper that owns the port writes the token, never stdio.
+        assert not (profile / "token.txt").exists()
         assert not _canary_index(canary).exists()
     finally:
         try:

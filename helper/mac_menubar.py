@@ -142,6 +142,27 @@ class MenuClient(UoinkTray):
         self._open_path(Path(path))
 
 
+_reopen_class = None
+
+
+def reopen_delegate(client: MenuClient):
+    """LaunchServices checks this process in as Uoink.app, so opening the app
+    again from Finder, the Dock or Spotlight arrives here as a reopen event."""
+    global _reopen_class
+    from Foundation import NSObject
+
+    if _reopen_class is None:
+        class UoinkReopenDelegate(NSObject):
+            def applicationShouldHandleReopen_hasVisibleWindows_(self, app, visible):
+                threading.Thread(target=self.client.dashboard, daemon=True).start()
+                return False  # Handled: AppKit has no window of its own to restore.
+
+        _reopen_class = UoinkReopenDelegate
+    delegate = _reopen_class.alloc().init()
+    delegate.client = client
+    return delegate
+
+
 def run_menu(client: MenuClient) -> None:
     if threading.current_thread() is not threading.main_thread():
         raise RuntimeError("AppKit must run on the process main thread")
@@ -150,6 +171,8 @@ def run_menu(client: MenuClient) -> None:
 
     app = A.NSApplication.sharedApplication()
     app.setActivationPolicy_(A.NSApplicationActivationPolicyAccessory)
+    reopen = reopen_delegate(client)
+    app.setDelegate_(reopen)
     updates = queue.Queue()
     running = threading.Event()
     stopping = threading.Event()

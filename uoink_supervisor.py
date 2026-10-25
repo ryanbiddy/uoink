@@ -23,6 +23,9 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 STATE_FILE = "helper-recovery.json"
 STOP_FILE = "helper-stop.json"
+# A Darwin open asks the resident supervisor, the only consumer, through this file.
+DASHBOARD_REQUEST = "dashboard-request.json"
+REQUEST_WINDOW = 300
 WINDOW = 600
 BACKOFF = (5, 15, 45)
 ACTION = "Run uoink doctor, check helper-output.log and server.log, then open Uoink to try again."
@@ -160,6 +163,103 @@ def ready(url: str, run_id: str, pid: int) -> bool:
         return False
 
 
+def request_dashboard(root: Path) -> bool:
+    """Ask the resident Darwin helper to open its own dashboard window.
+
+    Reads the token the running helper persisted; never creates or rotates it.
+    """
+    import uoink_install_isolation as isolation
+    try:
+        token = (root / "token.txt").read_text(encoding="utf-8").strip()
+    except (OSError, UnicodeError):
+        token = ""
+    if not token:
+        return False
+    request = urllib.request.Request(
+        isolation.helper_url("/helper/dashboard"),
+        data=b'{"settings": false}', method="POST",
+        headers={"X-Uoink-Token": token, "Content-Type": "application/json"})
+    try:
+        with urllib.request.build_opener(urllib.request.ProxyHandler({})).open(request, timeout=3) as reply:
+            return reply.status == 200 and json.loads(reply.read(32768)).get("ok") is True
+    except (OSError, ValueError, AttributeError):
+        return False
+
+
+def show_running_dashboard(root: Path) -> bool:
+    if sys.platform == "darwin":
+        # The helper owns the window; a duplicate launch spawns nothing itself.
+        if request_dashboard(root):
+            return True
+        import webbrowser
+        import uoink_install_isolation as isolation
+        return bool(webbrowser.open(isolation.helper_url("/dashboard")))
+    subprocess.Popen([sys.executable, str(HERE / "uoink_dashboard.py")],
+                     creationflags=0x08000000 if os.name == "nt" else 0)
+    return True
+
+
+def request_dashboard_later(root: Path, opened_at: float | None = None) -> None:
+    # Keep the time of the user's open, not of a late handoff, so it coalesces.
+    # time.monotonic is system-wide on Darwin and immune to clock corrections.
+    requested = opened_at or time.monotonic()
+    try:
+        pending = read_json(root / DASHBOARD_REQUEST).get("requested_at")
+    except (OSError, ValueError):
+        pending = None
+    if isinstance(pending, (int, float)) and pending > requested:
+        return  # A newer open is already waiting.
+    write_json(root / DASHBOARD_REQUEST, {"requested_at": requested})
+
+
+def take_dashboard_request(root: Path) -> float | None:
+    """Claim a pending open atomically and return when it was made.
+
+    Stale requests never pop a window later.
+    """
+    claimed = root / f".{DASHBOARD_REQUEST}.{os.getpid()}.{uuid.uuid4().hex}"
+    try:
+        os.replace(root / DASHBOARD_REQUEST, claimed)
+    except OSError:
+        return None
+    try:
+        requested = read_json(claimed).get("requested_at")
+    except (OSError, ValueError):
+        requested = None
+    finally:
+        claimed.unlink(missing_ok=True)
+    if isinstance(requested, (int, float)) and 0 <= time.monotonic() - requested < REQUEST_WINDOW:
+        return float(requested)
+    return None
+
+
+def open_app(root: Path) -> int:
+    """A Finder, Dock or Spotlight open of Uoink.app on Darwin.
+
+    LaunchServices records this launched process as the app and turns a later open
+    into a reopen Apple Event for it, which a process without AppKit never gets.
+    So never stay resident here: ask a running helper for its dashboard, or start
+    a detached resident supervisor, then exit. Every later open is a new launch.
+    """
+    import uoink_install_isolation as isolation
+    opened_at = time.monotonic()
+    with admission(root) as free:
+        # A helper that outlived its supervisor still owns the window. Ask it
+        # under admission so no resident can open a launch window meanwhile.
+        if free and request_dashboard(root):
+            return 0
+    if not free:
+        # The resident shows it now, or as soon as its helper is ready.
+        request_dashboard_later(root, opened_at)
+        return 0
+    subprocess.Popen([sys.executable, "-B", "-s", str(Path(__file__).resolve()),
+                      "--resident", "--show-dashboard", "--opened-at", repr(opened_at),
+                      *isolation.child_argv()],
+                     cwd=HERE, stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+                     stderr=subprocess.DEVNULL, start_new_session=True)
+    return 0
+
+
 def notify_failure(state: dict) -> None:
     import _platform
     # This runs in the surviving supervisor, never in the dead helper/tray.
@@ -184,11 +284,14 @@ def capture_output(pipe, root: Path, tail: list) -> None:
 
 class Supervisor:
     def __init__(self, root: Path, command: list[str], url: str, *, session: str,
-                 startup: bool = False, readiness_timeout: float = 120,
+                 startup: bool = False, first_args=(), on_ready=None, readiness_timeout: float = 120,
                  poll: float = 0.5, backoff=BACKOFF, window: float = WINDOW,
                  probe=ready, notify=notify_failure, clock=time.time, sleep=time.sleep):
         self.root, self.command, self.url = root, command, url
         self.session, self.startup = session, startup
+        # Extra arguments for the first helper start only, never for restarts.
+        self.first_args = list(first_args)
+        self.on_ready, self.owned = on_ready, False
         self.readiness_timeout, self.poll = readiness_timeout, poll
         self.backoff, self.window = backoff, window
         self.probe, self.notify, self.clock, self.sleep = probe, notify, clock, sleep
@@ -213,6 +316,7 @@ class Supervisor:
         with admission(self.root) as owned:
             if not owned:
                 return 0
+            self.owned = True
             try:
                 old = read_json(self.root / STATE_FILE)
             except ValueError:
@@ -220,6 +324,9 @@ class Supervisor:
             fresh = not self.startup or old.get("session") != self.session
             if fresh:
                 (self.root / STOP_FILE).unlink(missing_ok=True)
+            if old.get("session") != self.session:
+                # Open times are per boot; a new login never honors older ones.
+                (self.root / DASHBOARD_REQUEST).unlink(missing_ok=True)
             self.state = {"schema_version": 1, "status": "starting", "last_exit_code": None,
                           "restart_count": 0, "last_start_at": None, "last_stop_at": None,
                           "ready_at": None, "reason": "Starting helper.", "action": "",
@@ -244,8 +351,12 @@ class Supervisor:
                 return 0  # No unbounded outer OS retry loop.
 
     def loop(self) -> int:
+        first = True
         while not self.stopped():
             run_id = uuid.uuid4().hex
+            command = self.command + self.first_args if first else self.command
+            shown = first and "--show-dashboard" in self.first_args
+            first = False
             self.save(status="starting", last_start_at=stamp(), ready_at=None,
                       reason="Waiting for helper readiness.", action="")
             env = dict(os.environ, UOINK_SUPERVISOR_RUN_ID=run_id, PYTHONUNBUFFERED="1")
@@ -255,7 +366,7 @@ class Supervisor:
             code = None
             tail = [b""]
             try:
-                child = subprocess.Popen(self.command, cwd=HERE, env=env, stdin=subprocess.DEVNULL,
+                child = subprocess.Popen(command, cwd=HERE, env=env, stdin=subprocess.DEVNULL,
                                          stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                                          creationflags=0x08000000 if os.name == "nt" else 0)
                 reader = threading.Thread(target=capture_output, args=(child.stdout, self.root, tail), daemon=True)
@@ -278,10 +389,14 @@ class Supervisor:
                         if successes >= 2:
                             is_ready = True
                             self.save(status="running", ready_at=stamp(), reason="Helper is ready.")
+                            if self.on_ready is not None:
+                                self.on_ready(shown)
                         elif time.monotonic() >= deadline:
                             reason = "Helper did not become ready before the startup deadline. Check for a port conflict or startup error."
                             child.terminate()
                             break
+                    elif self.on_ready is not None:
+                        self.on_ready(False)
                     self.sleep(self.poll)
                 code = child.wait(timeout=10)
                 if not reason.startswith("Helper did not"):
@@ -332,17 +447,45 @@ def main(argv=None) -> int:
     parser.add_argument("--startup", action="store_true")
     parser.add_argument("--stop", action="store_true")
     parser.add_argument("--show-dashboard", action="store_true")
+    parser.add_argument("--resident", action="store_true", help=argparse.SUPPRESS)
+    parser.add_argument("--opened-at", type=float, help=argparse.SUPPRESS)
     args = parser.parse_args(isolation.strip_cli(sys.argv[1:] if argv is None else argv))
     if args.stop:
         request_stop()
         return 0
     command = [sys.executable, "-B", "-s", str(HERE / "server.py")]
+    first_args = []
     if args.show_dashboard:
-        command.append("--show-dashboard")
+        # A Darwin restart after a crash must not pop the dashboard again.
+        (first_args if sys.platform == "darwin" else command).append("--show-dashboard")
     root = data_root()
+    on_ready = None
+    if sys.platform == "darwin":
+        if args.show_dashboard and not args.resident:
+            return open_app(root)
+
+        shown_at = [0.0]
+
+        def on_ready(shown):
+            # Runs every poll while the helper is ready. Opens made before the
+            # launch flag's window appeared are already answered by it.
+            if shown:
+                shown_at[0] = time.monotonic()
+            requested = take_dashboard_request(root)
+            if requested is not None and requested > shown_at[0]:
+                threading.Thread(target=show_running_dashboard, args=(root,), daemon=True).start()
     try:
-        result = Supervisor(root, command, isolation.helper_url("/health"),
-                            session=login_session(), startup=args.startup).run()
+        supervisor = Supervisor(root, command, isolation.helper_url("/health"),
+                                session=login_session(), startup=args.startup,
+                                first_args=first_args, on_ready=on_ready)
+        result = supervisor.run()
+        # A user open holds admission briefly while it asks an orphaned helper.
+        # Only login startup retries: a resident must never outlast a Quit.
+        for _ in range(25 if sys.platform == "darwin" and args.startup else 0):
+            if supervisor.owned:
+                break
+            time.sleep(0.2)
+            result = supervisor.run()
     except (OSError, ValueError, subprocess.SubprocessError):
         failure = {"status": "supervisor_error", "reason": "Helper recovery could not start. Check access to the Uoink data folder.",
                    "action": ACTION}
@@ -351,9 +494,12 @@ def main(argv=None) -> int:
         finally:
             notify_failure(failure)
         return 0
-    if args.show_dashboard and status(root).get("status") == "running":
-        subprocess.Popen([sys.executable, str(HERE / "uoink_dashboard.py")],
-                         creationflags=0x08000000 if os.name == "nt" else 0)
+    if sys.platform == "darwin":
+        if args.show_dashboard and not supervisor.owned:
+            # Another supervisor won admission; it consumes the request.
+            request_dashboard_later(root, args.opened_at)
+    elif args.show_dashboard and status(root).get("status") == "running":
+        show_running_dashboard(root)
     return result
 
 
