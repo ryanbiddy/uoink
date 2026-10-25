@@ -39,7 +39,7 @@ def test_disclosure_keyboard_theme_and_no_remote_resources():
         "Discovery sends the creator handle or search words you type, with your key, "
         "to api.scrapecreators.com. Each request uses ScrapeCreators credits "
         "(most endpoints: 1 credit per request, per their docs). Nothing from your "
-        "library is sent. Results are saved on this PC."
+        "library is sent. Results are saved on <span data-this-device>this PC</span>."
     )
     assert disclosure in markup
     for control in ("scrapecreatorsKey", "scrapecreatorsDisclosure", "scrapecreatorsEnabled",
