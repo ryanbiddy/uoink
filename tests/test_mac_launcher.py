@@ -47,6 +47,7 @@ def startup(monkeypatch, tmp_path):
     monkeypatch.setattr(server, "PORT", 0)
     monkeypatch.setattr(server, "DATA_ROOT", tmp_path)
     monkeypatch.setattr(server, "TOKEN_PATH", tmp_path / "token.txt")
+    monkeypatch.setattr(server, "_TOKEN_OWNED", False)  # main() claims it; restore after.
     # This loop outlives main() and would sync consent into later tests' stores.
     monkeypatch.setattr(server.uoink_usage, "start_sender", lambda *_: None)
     for name in ("_existing_server_responds", "_is_installed_layout", "_apply_output_root_fallback",

@@ -88,3 +88,57 @@ def test_duplicate_launch_leaves_running_helper_token_intact(tmp_path, content):
         assert _authorized(port, token)
     finally:
         _stop_isolated_helper(profile, port, canary, proc)
+
+
+def test_importer_follows_the_token_a_later_helper_persists(monkeypatch, tmp_path):
+    """A stdio MCP or CLI process that imported before the helper's first bind."""
+    import json
+
+    path = tmp_path / "token.txt"
+    monkeypatch.setattr(server, "TOKEN_PATH", path)
+    monkeypatch.setattr(server, "_TOKEN_OWNED", False)
+    monkeypatch.setattr(server, "_TOKEN_GUESS", None)
+    monkeypatch.setattr(server, "TOKEN", server._load_or_create_token())  # No file at import.
+    assert server.TOKEN == server._TOKEN_GUESS
+    guessed_hash = server._library_session_hash()
+    path.write_text("helper-token\n", encoding="utf-8")  # The helper binds and persists.
+    sent = []
+
+    class Reply:
+        status = 200
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *exc):
+            return False
+
+        def read(self, *a):
+            return json.dumps({"ok": True}).encode()
+
+    monkeypatch.setattr(server.urllib.request, "urlopen",
+                        lambda request, timeout=None: sent.append(request.get_header("X-uoink-token")) or Reply())
+    server._call_http_registry_tool("list_sources", {})
+    assert sent == ["helper-token"]
+    helper_hash = server.hashlib.sha256(b"uoink-dashboard-intent:helper-token").hexdigest()
+    assert server._library_session_hash() == helper_hash != guessed_hash
+
+
+def test_the_port_owner_keeps_its_own_token(monkeypatch, tmp_path):
+    path = tmp_path / "token.txt"
+    path.write_text("someone-else", encoding="utf-8")
+    monkeypatch.setattr(server, "TOKEN_PATH", path)
+    monkeypatch.setattr(server, "TOKEN", "owner-token")
+    monkeypatch.setattr(server, "_TOKEN_OWNED", True)
+    assert server._current_token() == "owner-token"
+
+
+def test_a_token_read_at_import_is_used_as_is(monkeypatch, tmp_path):
+    path = tmp_path / "token.txt"
+    path.write_text("imported-token", encoding="utf-8")
+    monkeypatch.setattr(server, "TOKEN_PATH", path)
+    monkeypatch.setattr(server, "_TOKEN_OWNED", False)
+    monkeypatch.setattr(server, "_TOKEN_GUESS", None)
+    monkeypatch.setattr(server, "TOKEN", server._load_or_create_token())
+    path.write_text("rotated-on-disk", encoding="utf-8")
+    assert server._current_token() == "imported-token"  # Unchanged from before this fix.
