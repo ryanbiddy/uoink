@@ -435,6 +435,8 @@ def extract(html: bytes | str, url: str) -> dict:
                 html = html.decode(encoding, errors="replace")
             except (LookupError, UnicodeError):
                 html = html.decode("utf-8", errors="replace")
+        # HTML input preprocessing normalizes newlines, including inside pre/code.
+        html = html.replace("\r\n", "\n").replace("\r", "\n")
         for offset in range(0, len(html), 16384):
             doc.check()
             doc.feed(html[offset:offset + 16384])

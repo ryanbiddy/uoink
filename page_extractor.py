@@ -515,7 +515,7 @@ def _fetch_page_html(url: str, http_open=None):
                 "code": "page_fetch_too_large", "error": "page exceeds the fetch byte limit"}
         return raw, {"fetched_at": _now_iso(), "fetched_url": final_url}, None
     except Exception as exc:
-        return None, {"fetched_at": _now_iso(), "fetched_url": url}, {
+        return None, {}, {
             "code": getattr(exc, "code", None) or "page_fetch_failed",
             "error": (f"fetch failed: {exc}")[:240]}
 
@@ -549,7 +549,9 @@ def _extract_article_page(url, *, render_mode, include_screenshot,
         return result
 
     if failure:
-        return label({"ok": False, "url": url, **failure}, ENGINE_READABILITY)
+        # Admission/fetch failure is not an extraction attempt. Preserve the
+        # deterministic error shape shared by the CLI, MCP and HTTP callers.
+        return {"ok": False, "url": url, **failure}
     try:
         primary = article_extractor.extract(raw, fetch_info["fetched_url"])
     except Exception as exc:
@@ -719,7 +721,7 @@ def _extract_stdlib(url: str, *, include_screenshot: bool, http_open=None, html=
     if html is None:
         html, _, failure = _fetch_page_html(url, http_open)
         if failure:
-            return {"ok": False, **failure, "extraction_engine": ENGINE_STDLIB, "url": url}
+            return {"ok": False, **failure, "url": url}
     if isinstance(html, bytes):
         html = html.decode("utf-8", errors="replace")
     title_match = _TITLE_RE.search(html)

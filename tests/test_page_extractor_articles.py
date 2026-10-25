@@ -90,6 +90,18 @@ def test_markdown_retains_code_table_quote_and_safe_links():
     assert "javascript:" not in md and "data:" not in md
 
 
+@pytest.mark.parametrize("newline", ["\r\n", "\r"])
+@pytest.mark.parametrize("as_bytes", [False, True])
+def test_html_input_newlines_are_normalized(newline, as_bytes):
+    document = html("technical").decode("utf-8").replace("\r\n", "\n").replace("\r", "\n")
+    expected = article.extract(document, URL)
+    document = document.replace("\n", newline)
+    result = article.extract(document.encode("utf-8") if as_bytes else document, URL)
+    assert result["ok"] and result == expected
+    assert "\r" not in result["markdown"]
+    assert "```\ndef next_item(queue):\n    if queue:\n" in result["markdown"]
+
+
 def test_lists_and_nested_items():
     md = article.extract(html("lists"), URL)["markdown"]
     assert "1. Write the station" in md and "1. Record the instrument" in md
@@ -346,6 +358,21 @@ def test_fetch_refusal_never_runs_extractors(monkeypatch):
     assert not result["ok"]
     primary.assert_not_called()
     crawler.assert_not_called()
+
+
+@pytest.mark.parametrize("browser", [False, True])
+def test_private_target_refusal_has_no_fetch_or_extraction_provenance(monkeypatch, browser):
+    url = "http://192.168.1.2/private-page"
+    clock = Mock(return_value="2026-10-24T01:00:00Z")
+    monkeypatch.setattr(pages, "_now_iso", clock)
+    monkeypatch.setattr(pages, "_CRAWL4AI_AVAILABLE", browser)
+    expected = {"ok": False, "url": url, "code": "unsupported_source",
+                "error": "fetch failed: Loopback, link-local and private targets are refused"}
+    assert pages.extract_page(None, url, enforce_allowlist=False) == expected
+    clock.return_value = "2026-10-24T02:00:00Z"
+    assert pages.extract_page(None, url, enforce_allowlist=False) == expected
+    assert pages._extract_stdlib(url, include_screenshot=False) == expected
+    clock.assert_not_called()
 
 
 def test_publication_preserves_identity_and_adds_provenance(tmp_path):
