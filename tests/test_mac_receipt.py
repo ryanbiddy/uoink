@@ -83,7 +83,8 @@ def rig(tmp_path, monkeypatch):
                 "executable": str(app / receipt.PYTHON_EXECUTABLE)}
     monkeypatch.setattr(receipt, "observe", identity)
     monkeypatch.setattr(receipt, "bind_health", lambda proc, app, port: {
-        "identity": identity(proc.pid), "listener_pid": proc.pid, "port": port, "health": {"ok": True}})
+        "identity": identity(proc.pid + 2), "supervisor_identity": identity(proc.pid),
+        "listener_pid": proc.pid + 2, "port": port, "health": {"ok": True}})
     monkeypatch.setattr(receipt, "scoped_processes", lambda app: [identity(99)] if state.failure == "survivor" else [])
     monkeypatch.setattr(receipt, "listeners", lambda port: [])
     monkeypatch.setattr(receipt, "darwin_liveness", lambda *a: "unknown" if state.failure == "unknown" else "dead")
@@ -179,21 +180,49 @@ def test_incomplete_or_failed_evidence_never_earns_installed_pass(rig, tmp_path,
 
 def test_health_binds_listener_and_exact_incarnation(tmp_path, monkeypatch):
     app = make_app(tmp_path / "Uoink.app")
-    identity = {"pid": 10, "created_ms": 123.456, "started_us": 123456,
+    identity = {"pid": 11, "created_ms": 123.456, "started_us": 123456,
                 "executable": str(app / receipt.PYTHON_EXECUTABLE)}
-    monkeypatch.setattr(receipt, "observe", lambda pid: identity)
-    monkeypatch.setattr(receipt, "listeners", lambda port: [10])
+    supervisor = {**identity, "pid": 10}
+    monkeypatch.setattr(receipt, "observe", lambda pid: supervisor if pid == 10 else identity)
+    monkeypatch.setattr(receipt, "describe", lambda pid: {"ppid": 10})
+    monkeypatch.setattr(receipt, "listeners", lambda port: [11])
     monkeypatch.setattr(receipt.urllib.request, "build_opener", lambda *a: SimpleNamespace(
-        open=lambda *a, **kw: io.BytesIO(b'{"ok": true}')))
+        open=lambda *a, **kw: io.BytesIO(b'{"ok": true, "pid": 11, "supervisor_run_id": "fixture"}')))
     proc = SimpleNamespace(pid=10, poll=lambda: None)
-    assert receipt.bind_health(proc, app, 18081)["identity"] == identity
-    monkeypatch.setattr(receipt, "listeners", lambda port: [99])
+    bound = receipt.bind_health(proc, app, 18081)
+    assert bound["identity"] == identity and bound["supervisor_identity"] == supervisor
+    assert bound["listener_pid"] == 11
+    monkeypatch.setattr(receipt, "listeners", lambda port: [10])
     with pytest.raises(ValueError, match="listener"):
         receipt.bind_health(proc, app, 18081)
-    monkeypatch.setattr(receipt, "listeners", lambda port: [10])
-    observations = iter([identity, {**identity, "started_us": 123457}])
+    monkeypatch.setattr(receipt, "listeners", lambda port: [11])
+    observations = iter([supervisor, identity, {**identity, "started_us": 123457}])
     monkeypatch.setattr(receipt, "observe", lambda pid: next(observations))
     with pytest.raises(ValueError, match="identity changed"):
+        receipt.bind_health(proc, app, 18081)
+
+
+@pytest.mark.parametrize("invalid", ["parent", "helper_executable", "health_pid", "run_id",
+                                    "supervisor_reused", "supervisor_exited", "reparented"])
+def test_health_rejects_unowned_or_changed_supervision(tmp_path, monkeypatch, invalid):
+    app = make_app(tmp_path / "Uoink.app")
+    observations = []
+    def observe(pid):
+        observations.append(pid)
+        return {"pid": pid, "created_ms": 1,
+                "started_us": 2000 if invalid == "supervisor_reused" and len(observations) == 4 else 1000,
+                "executable": str(tmp_path / "foreign") if invalid == "helper_executable" and pid == 11
+                else str(app / receipt.PYTHON_EXECUTABLE)}
+    parents = iter([99, 99] if invalid == "parent" else [10, 99] if invalid == "reparented" else [10, 10])
+    monkeypatch.setattr(receipt, "observe", observe)
+    monkeypatch.setattr(receipt, "describe", lambda pid: {"ppid": next(parents)})
+    monkeypatch.setattr(receipt, "listeners", lambda port: [11])
+    health = {"ok": True, "pid": 99 if invalid == "health_pid" else 11,
+              "supervisor_run_id": "" if invalid == "run_id" else "fixture"}
+    monkeypatch.setattr(receipt.urllib.request, "build_opener", lambda *a: SimpleNamespace(
+        open=lambda *a, **kw: io.BytesIO(json.dumps(health).encode())))
+    proc = SimpleNamespace(pid=10, poll=lambda: 0 if invalid == "supervisor_exited" else None)
+    with pytest.raises(ValueError):
         receipt.bind_health(proc, app, 18081)
 
 

@@ -381,9 +381,13 @@ def test_smoke_success_requires_completed_checks_and_immutable_bundle(monkeypatc
             import plistlib
             contents = Path(command[-1]) / "Contents"
             return SimpleNamespace(returncode=0, stdout=plistlib.dumps({
-                "ProgramArguments": [str(contents / "MacOS/Uoink"), "--helper"],
-                "KeepAlive": False, "RunAtLoad": True,
-                "StandardOutPath": str(Path(kwargs["env"]["HOME"]) / "Library/Logs/Uoink/launchd.out.log")}))
+                "ProgramArguments": [str(contents / "MacOS/Uoink"), "--helper", "--startup"],
+                "KeepAlive": {"SuccessfulExit": False}, "RunAtLoad": True, "ThrottleInterval": 30,
+                "StandardOutPath": "/dev/null", "StandardErrorPath": "/dev/null"}))
+        if bundle_smoke.KILL_HELPER in command:
+            assert command[-1] == str(current[0].pid)
+            current[0].dead = True
+            return SimpleNamespace(returncode=0)
         if command[-1] == "status":
             mirror = "mirror" in command
             return SimpleNamespace(returncode=1 if mirror else 0, stderr="",
@@ -399,10 +403,10 @@ def test_smoke_success_requires_completed_checks_and_immutable_bundle(monkeypatc
     current = [None]
     def popen(command, **kwargs):
         pid = 100 if current[0] is None else 200
-        current[0] = SimpleNamespace(pid=pid, poll=lambda: None, wait=lambda **kw: 0, kill=lambda: None,
+        current[0] = SimpleNamespace(pid=pid, poll=lambda: None, wait=lambda **kw: 0, returncode=0,
+                                     kill=lambda: pytest.fail("The launcher PID is the supervisor, not the helper"),
                                      python=Path(command[0]).parents[1] / "Resources/Python/bin/python3",
                                      profile=Path(kwargs["env"]["UOINK_ISOLATED_PROFILE"]).resolve(), dead=False)
-        current[0].kill = lambda: setattr(current[0], "dead", True)
         return current[0]
 
     def request(req, **kwargs):
@@ -414,7 +418,7 @@ def test_smoke_success_requires_completed_checks_and_immutable_bundle(monkeypatc
         else:
             if url.endswith("/helper/quit"):
                 current[0].dead = True
-            data = {"ok": True, "capabilities": capabilities}
+            data = {"ok": True, "capabilities": capabilities, "helper_recovery": {"status": "running"}}
         return io.StringIO(json.dumps(data))
 
     monkeypatch.setattr(bundle_smoke.socket, "socket", Socket)
@@ -435,6 +439,50 @@ def test_smoke_success_requires_completed_checks_and_immutable_bundle(monkeypatc
     assert report["ok"] is (not mutate and not fail)
     assert report["bundle_unchanged"] is (not mutate)
     assert app.is_dir()
+
+
+@pytest.mark.parametrize("invalid", [None, "supervisor", "helper", "script", "executable", "identity", "status"])
+def test_smoke_abrupt_death_targets_verified_helper_after_stop_intent(tmp_path, monkeypatch, invalid):
+    import os
+    import signal
+    from types import SimpleNamespace
+    import bundle_smoke
+
+    resources = tmp_path / "Uoink.app/Contents/Resources"
+    state = {"supervisor_pid": 100, "helper_pid": 101, "status": "running"}
+    identity = {"pid": 101, "created_ms": 123.456, "executable": sys.executable,
+                "script": str(resources / "server.py")}
+    if invalid == "supervisor":
+        state["supervisor_pid"] = 999
+    elif invalid == "helper":
+        identity["pid"] = 999
+    elif invalid in {"script", "executable"}:
+        identity[invalid] = str(tmp_path / "foreign")
+    elif invalid == "status":
+        state["status"] = "backoff"
+    effects = []
+    def read(path):
+        assert path.parent == tmp_path
+        return state if path.name == "helper-recovery.json" else identity
+    def live(pid, created, executable):
+        assert (pid, created, executable) == (101, 123.456, sys.executable)
+        return "unknown" if invalid == "identity" else "alive"
+    monkeypatch.setitem(sys.modules, "_platform", SimpleNamespace(darwin_liveness=live))
+    monkeypatch.setitem(sys.modules, "uoink_supervisor", SimpleNamespace(
+        STATE_FILE="helper-recovery.json", read_json=read,
+        request_stop=lambda root, **kw: effects.append(("stop", root))))
+    monkeypatch.setenv("UOINK_ISOLATED_PROFILE", str(tmp_path))
+    monkeypatch.setattr(sys, "argv", ["-c", str(resources), "100"])
+    monkeypatch.setattr(sys, "path", list(sys.path))
+    monkeypatch.setattr(signal, "SIGKILL", 9, raising=False)
+    monkeypatch.setattr(os, "kill", lambda pid, sig: effects.append(("kill", pid, sig)))
+    if invalid:
+        with pytest.raises(AssertionError):
+            exec(bundle_smoke.KILL_HELPER, {})
+        assert effects == []
+    else:
+        exec(bundle_smoke.KILL_HELPER, {})
+        assert effects == [("stop", tmp_path), ("kill", 101, 9)]
 
 
 def test_python_pruning_records_removals_and_preserves_runtime(tmp_path):
