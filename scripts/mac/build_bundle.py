@@ -117,6 +117,19 @@ def tree_inventory(root: Path) -> list[dict]:
     return rows
 
 
+def verify_menu_resources(app: Path) -> list[dict]:
+    """Record exactly which template bytes reach the app before signing."""
+    rows = []
+    for name in ("menubar-template.png", "menubar-template@2x.png"):
+        relative = Path("assets/brand") / name
+        target = app / "Contents/Resources" / relative
+        digest = sha256(ROOT / relative)
+        if not target.is_file() or target.is_symlink() or sha256(target) != digest:
+            raise ValueError(f"Missing or changed menu resource: {target}")
+        rows.append({"path": target.relative_to(app).as_posix(), "size": target.stat().st_size, "sha256": digest})
+    return rows
+
+
 def relocate_python_script(content: str) -> str:
     """Replace pip's build-path shebang with a relative interpreter shim."""
     lines = content.splitlines(keepends=True)
@@ -156,13 +169,28 @@ def prune_python(app: Path, report: Path) -> list[dict]:
     if not bundle_path(python, root) or python.resolve().parent != (root / "bin").resolve():
         raise ValueError("Bundled Python interpreter must stay inside Python/bin")
     targets.extend(path for path in (root / "bin").iterdir() if path not in keep)
+    return prune_paths(root, targets, report)
+
+
+def development_payload(root: Path) -> list[Path]:
+    """Find debug symbol bundles and PyObjC's own test package."""
+    return [path for path in root.rglob("*")
+            if (path.suffix == ".dSYM" or path.name == "PyObjCTest")
+            and (path.is_dir() or path.is_symlink())]
+
+
+def prune_development_payload(root: Path, report: Path) -> list[dict]:
+    return prune_paths(root, development_payload(root), report)
+
+
+def prune_paths(root: Path, targets: list[Path], report: Path) -> list[dict]:
     removed = []
     write_json(report, removed)
     for target in sorted(set(targets)):
         if not target.exists() and not target.is_symlink():
             continue
         if not bundle_path(target, root):
-            raise ValueError(f"Refusing to prune outside bundled Python: {target}")
+            raise ValueError(f"Refusing to prune outside payload root: {target}")
         entries = [target] if target.is_symlink() else [target, *sorted(target.rglob("*"))]
         rows = [{"path": entry.relative_to(root).as_posix(),
                  "type": "symlink" if entry.is_symlink() else "directory" if entry.is_dir() else "file"}
@@ -262,6 +290,11 @@ def macho_files(app: Path):
             raise ValueError(f"File escapes app: {path}")
         with path.open("rb") as stream:
             magic = stream.read(4)
+            # Java class headers share FAT_MAGIC. Their next word is the
+            # minor/major class version, not a Mach-O architecture count.
+            java_version = stream.read(4) if magic == b"\xca\xfe\xba\xbe" else b""
+        if path.suffix == ".class" and len(java_version) == 4 and 45 <= int.from_bytes(java_version[2:], "big") <= 100:
+            continue
         if magic in MACHO:
             yield path
 
@@ -303,18 +336,20 @@ def binary_inventory(app: Path) -> list[dict]:
     return rows
 
 
-def signing_order(app: Path) -> list[Path]:
-    with (app / "Contents/Info.plist").open("rb") as stream:
-        if plistlib.load(stream).get("CFBundleExecutable") != "Uoink":
-            raise ValueError("CFBundleExecutable must match Contents/MacOS/Uoink")
+def signing_order(app: Path, *, require_main: bool = True) -> list[Path]:
+    if require_main:
+        with (app / "Contents/Info.plist").open("rb") as stream:
+            if plistlib.load(stream).get("CFBundleExecutable") != "Uoink":
+                raise ValueError("CFBundleExecutable must match Contents/MacOS/Uoink")
     targets = set(macho_files(app))
     main = app / "Contents/MacOS/Uoink"
-    if main not in targets:
+    if require_main and main not in targets:
         raise ValueError("Contents/MacOS/Uoink must be a native executable")
     # Executable scripts in code locations (the uoink CLI shim in Helpers) are
     # code to codesign; sign them like Mach-O files (signature in xattrs).
-    for folder in ("Contents/Helpers", "Contents/MacOS"):
-        root = app / folder
+    roots = [app, *(p for p in app.rglob("*") if p.suffix in {".app", ".bundle", ".xpc", ".framework"}
+                   and p.is_dir() and not p.is_symlink())]
+    for root in (base / folder for base in roots for folder in ("Contents/Helpers", "Contents/MacOS")):
         if not root.is_dir():
             continue
         for path in root.rglob("*"):
@@ -333,7 +368,7 @@ def signing_order(app: Path) -> list[Path]:
                     if plistlib.load(stream).get("CFBundleExecutable"):
                         targets.add(path)
                 break
-    return sorted(targets, key=lambda p: (-len(p.parts), str(p))) + [app]
+    return sorted(targets, key=lambda p: (-len(p.parts), str(p))) + ([app] if require_main else [])
 
 
 def sign_app(app: Path, report: Path) -> None:
@@ -349,7 +384,7 @@ def sign_app(app: Path, report: Path) -> None:
                                   "stderr": assessment.stderr, "expected": "rejection until Developer ID and notarization"}})
 
 
-def create_dmg(app: Path, output: Path, version: str) -> Path:
+def create_dmg(app: Path, output: Path, version: str, *, signed: bool = False) -> Path:
     dmg = output / f"Uoink-{version}-macos-arm64.dmg"
     if dmg.exists():
         raise ValueError("DMG already exists")
@@ -360,7 +395,8 @@ def create_dmg(app: Path, output: Path, version: str) -> Path:
         (stage / "Read Me.txt").write_text(
             f"Uoink {version} for Apple Silicon requires macOS {MINIMUM_MACOS} or later.\n"
             "Drag Uoink to Applications. Eject this disk, then open Uoink from Applications.\n"
-            "This private test build is ad-hoc signed. Developer ID and notarization are pending.\n",
+            + ("This build uses Developer ID signing and notarization.\n" if signed else
+               "This private test build is ad-hoc signed. Developer ID and notarization are pending.\n"),
             encoding="utf-8")
         command = ["hdiutil", "create", "-format", "UDZO", "-volname", f"Uoink {version}",
                    "-srcfolder", stage, dmg]
@@ -468,12 +504,15 @@ def build(wheels: Path, output: Path, ffmpeg_output: Path | None = None) -> Path
     shutil.copyfile(ROOT / "installer/mac/cli.sh", cli)
     cli.chmod(0o755)
     (resources / "scripts/mac/uninstall.sh").chmod(0o755)
+    prune_development_payload(app, output / "development-pruned.json")
+    shutil.copyfile(output / "development-pruned.json", notices / "development-pruned.json")
     rewrite_rpaths(app, output / "native-rpath-removals.json")
     write_json(notices / "build.json", {"version": version, "python": pin, "python_url": url,
                                        "platform": platform.platform(), "ffmpeg": ffmpeg,
                                        "signing": "whole app ad-hoc; no Developer ID or notarization",
                                        "minimum_os": MINIMUM_MACOS,
                                        "source_files": [p.as_posix() for p in files]})
+    write_json(output / "menu-resources.json", verify_menu_resources(app))
     assert_search_payload(path.relative_to(app) for path in app.rglob("*"))
     sign_app(app, output / "signing.json")
     write_json(output / "native-inventory.json", binary_inventory(app))

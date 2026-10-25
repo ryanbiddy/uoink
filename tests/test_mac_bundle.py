@@ -339,11 +339,18 @@ def test_rpath_rewrite_reports_edits_and_inventory_rechecks(monkeypatch, tmp_pat
 def test_smoke_success_requires_completed_checks_and_immutable_bundle(monkeypatch, tmp_path, mutate, fail):
     from types import SimpleNamespace
     import bundle_smoke
+    monkeypatch.setattr(bundle_smoke, "menu_icon_evidence", lambda *a: {"mode": "image"})
     app = tmp_path / "Original.app"
     app.mkdir()
     (app / "payload").write_text("original")
     (app / "Contents/Resources").mkdir(parents=True)
     (app / "Contents/Resources/VERSION").write_text("3.10.0")
+    for relative in ("Contents/Resources/Python/lib/python3.13/site-packages/PyObjCTest/__init__.py",
+                     "Contents/Frameworks/example.dSYM/Contents/Resources/DWARF/example"):
+        target = app / relative
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes(b"debug/test fixture")
+    bundle.prune_development_payload(app, tmp_path / "development-pruned.json")
     output = tmp_path / "evidence"
     capabilities = {"library_mirror": {"code": "library_mirror_unavailable_macos"},
                     "media": {"available": True, "code": None}}
@@ -438,6 +445,12 @@ def test_smoke_success_requires_completed_checks_and_immutable_bundle(monkeypatc
     report = json.loads((output / "smoke.json").read_text())
     assert report["ok"] is (not mutate and not fail)
     assert report["bundle_unchanged"] is (not mutate)
+    assert report["development_payload"] == []
+    if not mutate and not fail:
+        assert report["cocoa"]["import_only"]
+        assert report["menubar"]["connected"]
+        assert report["menubar"]["duplicate_launch_same_pid"]
+        assert report["menubar"]["quit_no_survivor"]
     assert app.is_dir()
 
 
@@ -529,3 +542,65 @@ def test_python_pruning_keeps_only_internal_interpreter_target(tmp_path, externa
         assert bundle.prune_python(app, report) == []
     assert target.read_bytes() == b"interpreter"
     assert (root / "bin/python3").is_symlink()
+
+
+def test_development_pruning_records_nested_debug_and_pyobjc_tests_only(tmp_path):
+    app = tmp_path / "Uoink.app"
+    site = "Contents/Resources/Python/lib/python3.13/site-packages/"
+    discarded = [site + "PyObjCTest/__init__.py", site + "PyObjCTest/NULL.so",
+                 site + "PyObjCTest/NULL.so.dSYM/Contents/Resources/DWARF/NULL.so",
+                 site + "objc/_objc.so.dSYM/Contents/Resources/DWARF/_objc.so",
+                 "Contents/Frameworks/native.dSYM/Contents/Resources/DWARF/native"]
+    retained = [site + name for name in ("objc/_objc.so", "AppKit/__init__.py", "Quartz/__init__.py",
+                "WebKit/__init__.py", "Security/__init__.py", "webview/platforms/cocoa.py",
+                "other/tests/runtime_data.json", "PyObjCTestExtra/__init__.py")]
+    for relative in discarded + retained:
+        path = app / relative
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(b"\xcf\xfa\xed\xfe" + b"fixture")
+    report = tmp_path / "development-pruned.json"
+    rows = bundle.prune_development_payload(app, report)
+    assert rows == json.loads(report.read_text())
+    assert {r["path"] for r in rows if r["type"] == "file"} == set(discarded)
+    assert len({r["path"] for r in rows}) == len(rows)
+    assert bundle.development_payload(app) == []
+    assert all(not (app / name).exists() for name in discarded)
+    assert all((app / name).read_bytes().endswith(b"fixture") for name in retained)
+    assert {p.relative_to(app).as_posix() for p in bundle.signing_order(app, require_main=False)} == set(retained)
+    assert bundle.prune_development_payload(app, tmp_path / "second-pass.json") == []
+
+
+def test_development_pruning_refuses_an_escaping_target(tmp_path):
+    app = tmp_path / "Uoink.app"
+    app.mkdir()
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    (outside / "keep").write_text("keep")
+    try:
+        (app / "native.dSYM").symlink_to(outside, target_is_directory=True)
+    except OSError as error:
+        pytest.skip(f"Symlink creation unavailable: {error}")
+    with pytest.raises(ValueError, match="outside payload root"):
+        bundle.prune_development_payload(app, tmp_path / "report.json")
+    assert (outside / "keep").read_text() == "keep"
+
+
+@pytest.mark.parametrize("relative", ["PyObjCTest/__init__.py", "native.dSYM/Contents/Resources/DWARF/native"])
+def test_bundle_smoke_rejects_unpruned_payload_before_execution(tmp_path, monkeypatch, relative):
+    import bundle_smoke
+    app = tmp_path / "Uoink.app"
+    target = app / "Contents/Resources" / relative
+    target.parent.mkdir(parents=True)
+    target.write_text("unwanted payload")
+    monkeypatch.setattr(bundle_smoke.subprocess, "run", lambda *a, **kw: pytest.fail("Payload must not execute"))
+    output = tmp_path / "evidence"
+    with pytest.raises(AssertionError):
+        bundle_smoke.smoke(app, output)
+    report = json.loads((output / "smoke.json").read_text())
+    assert not report["ok"] and report["bundle_unchanged"] and report["development_payload"]
+
+
+def test_runtime_source_does_not_reference_pyobjc_test_package():
+    for relative in bundle.payload_files():
+        if relative.suffix == ".py":
+            assert "PyObjCTest" not in (ROOT / relative).read_text(encoding="utf-8-sig"), relative

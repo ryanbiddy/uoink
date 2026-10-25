@@ -6,6 +6,8 @@ mkdir -p "$root/home/Desktop" "$root/profile" "$root/output" \
   "$root/local" "$root/roaming" "$root/data" "$root/config" "$root/cache" \
   "$RUNNER_TEMP/mac-evidence"
 {
+  # Signing restores this HOME for security and codesign in that step only.
+  echo "UOINK_RUNNER_HOME=${UOINK_RUNNER_HOME:-$HOME}"
   echo "HOME=$root/home"
   echo "USERPROFILE=$root/home"
   echo "LOCALAPPDATA=$root/local"

@@ -57,6 +57,8 @@ def rig(tmp_path, monkeypatch):
                 raise OSError("detach failed")
             report["detached"] = True
     monkeypatch.setattr(receipt.dmg_smoke, "installed_dmg", installed)
+    monkeypatch.setattr(receipt.dmg_smoke, "prepare_normal_install",
+                        lambda app, report: report.update(quarantine_absent=True))
 
     def command(argv, **kw):
         state.calls.append([str(x) for x in argv])
@@ -84,7 +86,7 @@ def rig(tmp_path, monkeypatch):
     monkeypatch.setattr(receipt, "observe", identity)
     monkeypatch.setattr(receipt, "bind_health", lambda proc, app, port: {
         "identity": identity(proc.pid + 2), "supervisor_identity": identity(proc.pid),
-        "listener_pid": proc.pid + 2, "port": port, "health": {"ok": True}})
+        "origin": {"translocated": False}, "listener_pid": proc.pid + 2, "port": port, "health": {"ok": True}})
     monkeypatch.setattr(receipt, "scoped_processes", lambda app: [identity(99)] if state.failure == "survivor" else [])
     monkeypatch.setattr(receipt, "listeners", lambda port: [])
     monkeypatch.setattr(receipt, "darwin_liveness", lambda *a: "unknown" if state.failure == "unknown" else "dead")
