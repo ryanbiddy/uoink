@@ -423,7 +423,7 @@ def test_darwin_open_hands_off_to_a_detached_resident(supervisor, monkeypatch, t
     assert supervisor.main(["--show-dashboard"]) == 0
     (args, kw), = spawned
     assert Path(args[3]).name == "uoink_supervisor.py" and args[4:7] == ["--resident", "--show-dashboard", "--opened-at"]
-    assert abs(float(args[7]) - supervisor.time.time()) < 5
+    assert abs(float(args[7]) - supervisor.time.monotonic()) < 5
     assert kw["start_new_session"] is True and kw["stdin"] is supervisor.subprocess.DEVNULL
 
 
@@ -457,7 +457,7 @@ def test_dashboard_request_is_taken_once_and_expires(supervisor, monkeypatch, tm
     assert supervisor.take_dashboard_request(tmp_path) is not None
     assert supervisor.take_dashboard_request(tmp_path) is None
     supervisor.write_json(tmp_path / supervisor.DASHBOARD_REQUEST,
-                          {"requested_at": supervisor.time.time() - supervisor.REQUEST_WINDOW - 1})
+                          {"requested_at": supervisor.time.monotonic() - supervisor.REQUEST_WINDOW - 1})
     assert supervisor.take_dashboard_request(tmp_path) is None
     (tmp_path / supervisor.DASHBOARD_REQUEST).write_text("not json", encoding="utf-8")
     assert supervisor.take_dashboard_request(tmp_path) is None
@@ -539,7 +539,7 @@ def test_resident_that_loses_admission_leaves_its_open_queued(supervisor, monkey
     monkeypatch.setattr(supervisor, "login_session", lambda: "session")
     monkeypatch.setattr(supervisor.time, "sleep", lambda seconds: None)
     supervisor.write_json(tmp_path / supervisor.STATE_FILE, {"status": "starting"})
-    opened = supervisor.time.time() - 2
+    opened = supervisor.time.monotonic() - 2
     assert supervisor.main(["--resident", "--show-dashboard", "--opened-at", repr(opened)]) == 0
     # Queued with the user's open time, so a winner's launch window absorbs it.
     assert supervisor.take_dashboard_request(tmp_path) == opened
@@ -561,7 +561,7 @@ def test_late_queued_open_from_before_the_launch_window_is_absorbed(supervisor, 
     monkeypatch.setattr(supervisor, "data_root", lambda: tmp_path)
     monkeypatch.setattr(supervisor, "login_session", lambda: "session")
     monkeypatch.setattr(supervisor, "show_running_dashboard", lambda root: shown.append(root))
-    before = supervisor.time.time() - 1
+    before = supervisor.time.monotonic() - 1
     assert supervisor.main(["--resident", "--show-dashboard", "--opened-at", repr(before)]) == 0
     on_ready = captured["on_ready"]
     on_ready(True)  # The launch flag's window is up.
@@ -649,3 +649,48 @@ def test_one_queued_open_is_claimed_exactly_once(supervisor, tmp_path):
         worker.join(5)
     assert sum(result is not None for result in results) == 1
     assert list(tmp_path.iterdir()) == []
+
+
+def test_resident_never_retries_admission_after_losing(supervisor, monkeypatch, tmp_path):
+    runs = []
+
+    class Lost:
+        owned = False
+
+        def __init__(self, *a, **k):
+            pass
+
+        def run(self):
+            runs.append(1)
+            return 0
+
+    monkeypatch.setattr(supervisor, "Supervisor", Lost)
+    monkeypatch.setattr(supervisor, "data_root", lambda: tmp_path)
+    monkeypatch.setattr(supervisor, "login_session", lambda: "session")
+    monkeypatch.setattr(supervisor.time, "sleep", lambda seconds: pytest.fail("a resident waited to take over"))
+    assert supervisor.main(["--resident", "--show-dashboard"]) == 0
+    assert runs == [1]  # Taking over later could undo the winner's Quit.
+
+
+def test_wall_clock_corrections_do_not_reorder_opens(supervisor, monkeypatch, tmp_path):
+    monkeypatch.setattr(supervisor.time, "time", lambda: 0.0)  # A large backward jump.
+    supervisor.request_dashboard_later(tmp_path)
+    assert supervisor.take_dashboard_request(tmp_path) is not None
+
+
+def test_late_handoff_never_replaces_a_newer_open(supervisor, tmp_path):
+    supervisor.request_dashboard_later(tmp_path)
+    newer = supervisor.read_json(tmp_path / supervisor.DASHBOARD_REQUEST)["requested_at"]
+    supervisor.request_dashboard_later(tmp_path, newer - 10)
+    assert supervisor.take_dashboard_request(tmp_path) == newer
+
+
+def test_a_new_login_drops_opens_from_an_earlier_session(monkeypatch, tmp_path):
+    import uoink_supervisor
+    uoink_supervisor.write_json(tmp_path / uoink_supervisor.STATE_FILE, {"session": "old-boot", "status": "stopped"})
+    uoink_supervisor.request_dashboard_later(tmp_path)
+    supervisor = uoink_supervisor.Supervisor(tmp_path, ["python"], "http://127.0.0.1:1/health", session="new-boot")
+    monkeypatch.setattr(supervisor, "loop", lambda: 0)
+    monkeypatch.setattr(uoink_supervisor.sys, "platform", "linux")
+    assert supervisor.run() == 0
+    assert not (tmp_path / uoink_supervisor.DASHBOARD_REQUEST).exists()

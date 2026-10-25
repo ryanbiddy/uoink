@@ -201,7 +201,15 @@ def show_running_dashboard(root: Path) -> bool:
 
 def request_dashboard_later(root: Path, opened_at: float | None = None) -> None:
     # Keep the time of the user's open, not of a late handoff, so it coalesces.
-    write_json(root / DASHBOARD_REQUEST, {"requested_at": opened_at or time.time()})
+    # time.monotonic is system-wide on Darwin and immune to clock corrections.
+    requested = opened_at or time.monotonic()
+    try:
+        pending = read_json(root / DASHBOARD_REQUEST).get("requested_at")
+    except (OSError, ValueError):
+        pending = None
+    if isinstance(pending, (int, float)) and pending > requested:
+        return  # A newer open is already waiting.
+    write_json(root / DASHBOARD_REQUEST, {"requested_at": requested})
 
 
 def take_dashboard_request(root: Path) -> float | None:
@@ -220,7 +228,7 @@ def take_dashboard_request(root: Path) -> float | None:
         requested = None
     finally:
         claimed.unlink(missing_ok=True)
-    if isinstance(requested, (int, float)) and 0 <= time.time() - requested < REQUEST_WINDOW:
+    if isinstance(requested, (int, float)) and 0 <= time.monotonic() - requested < REQUEST_WINDOW:
         return float(requested)
     return None
 
@@ -234,7 +242,7 @@ def open_app(root: Path) -> int:
     a detached resident supervisor, then exit. Every later open is a new launch.
     """
     import uoink_install_isolation as isolation
-    opened_at = time.time()
+    opened_at = time.monotonic()
     with admission(root) as free:
         # A helper that outlived its supervisor still owns the window. Ask it
         # under admission so no resident can open a launch window meanwhile.
@@ -314,6 +322,9 @@ class Supervisor:
             fresh = not self.startup or old.get("session") != self.session
             if fresh:
                 (self.root / STOP_FILE).unlink(missing_ok=True)
+            if old.get("session") != self.session:
+                # Open times are per boot; a new login never honors older ones.
+                (self.root / DASHBOARD_REQUEST).unlink(missing_ok=True)
             self.state = {"schema_version": 1, "status": "starting", "last_exit_code": None,
                           "restart_count": 0, "last_start_at": None, "last_stop_at": None,
                           "ready_at": None, "reason": "Starting helper.", "action": "",
@@ -457,7 +468,7 @@ def main(argv=None) -> int:
             # Runs every poll while the helper is ready. Opens made before the
             # launch flag's window appeared are already answered by it.
             if shown:
-                shown_at[0] = time.time()
+                shown_at[0] = time.monotonic()
             requested = take_dashboard_request(root)
             if requested is not None and requested > shown_at[0]:
                 threading.Thread(target=show_running_dashboard, args=(root,), daemon=True).start()
@@ -467,7 +478,8 @@ def main(argv=None) -> int:
                                 first_args=first_args, on_ready=on_ready)
         result = supervisor.run()
         # A user open holds admission briefly while it asks an orphaned helper.
-        for _ in range(25 if sys.platform == "darwin" else 0):
+        # Only login startup retries: a resident must never outlast a Quit.
+        for _ in range(25 if sys.platform == "darwin" and args.startup else 0):
             if supervisor.owned:
                 break
             time.sleep(0.2)
