@@ -17,6 +17,7 @@ Red before CM-11:
 from __future__ import annotations
 
 import json
+import subprocess
 import tempfile
 import types
 from pathlib import Path
@@ -42,6 +43,12 @@ def offline_capture(monkeypatch):
     monkeypatch.setattr(server, "_get_saved_scrapecreators_key", lambda: "")
     monkeypatch.setattr(server, "_anthropic_key_for_feature", lambda *_args: None)
     monkeypatch.setattr(server, "_autostart_enabled", lambda: False)
+
+    def probe_only(cmd, **_kwargs):
+        assert Path(cmd[0]).stem == "ffprobe", f"unexpected command: {cmd}"
+        return subprocess.CompletedProcess(cmd, 0, b'{"streams": [{"index": 1}]}', b"")
+
+    monkeypatch.setattr(server, "_run_subprocess", probe_only)
     yield
     unexpected_io.assert_not_called()
 
@@ -249,6 +256,8 @@ def test_failed_model_download_never_writes_readiness_marker(
 def _fake_no_caption_subprocess(cmd, **_kwargs):
     """Mock yt-dlp + ffmpeg. It emits media and a screenshot, never an SRT."""
     parts = [str(part) for part in cmd]
+    if Path(parts[0]).stem == "ffprobe":
+        return subprocess.CompletedProcess(cmd, 0, b'{"streams": [{"index": 1}]}', b"")
     is_ffmpeg = parts and parts[0].endswith("ffmpeg")
     out = None
     if "-o" in parts:
@@ -266,17 +275,36 @@ def _fake_no_caption_subprocess(cmd, **_kwargs):
     return types.SimpleNamespace(returncode=0, stdout="", stderr=b"")
 
 
+@pytest.mark.parametrize("audio_case", ["embedded", "video_only", "download_failed", "silent_source"])
 def test_captionless_x_capture_persists_asr_and_provenance(
-        monkeypatch, tmp_path):
+        monkeypatch, tmp_path, audio_case):
     root = tmp_path / "corpus"
     root.mkdir()
     idx = index_mod.Index.open(tmp_path / "index.db")
     calls = []
+    downloads = []
+
+    def fake_run(cmd, **kwargs):
+        if Path(cmd[0]).stem == "ffprobe":
+            assert cmd[cmd.index("-select_streams") + 1] == "a"
+            assert kwargs["check"] is True
+            has_audio = (audio_case == "embedded" or
+                         (Path(cmd[-1]).name == "audio.m4a" and audio_case == "video_only"))
+            return subprocess.CompletedProcess(
+                cmd, 0, json.dumps({"streams": [{"index": 1}] if has_audio else []}), b"")
+        if "bestaudio/best" in cmd:
+            downloads.append((cmd, kwargs))
+            if audio_case == "download_failed":
+                raise subprocess.CalledProcessError(1, cmd, stderr=b"audio unavailable")
+            path = Path(cmd[cmd.index("-o") + 1].replace("%(ext)s", "m4a"))
+            path.write_bytes(b"audio")
+            return subprocess.CompletedProcess(cmd, 0, b"", b"")
+        return _fake_no_caption_subprocess(cmd, **kwargs)
+
     try:
         monkeypatch.setattr(server, "DESKTOP_ROOT", root)
         monkeypatch.setattr(server, "_get_index", lambda: idx)
-        monkeypatch.setattr(server, "_run_subprocess",
-                            _fake_no_caption_subprocess)
+        monkeypatch.setattr(server, "_run_subprocess", fake_run)
         monkeypatch.setattr(server, "_download_thumbnail",
                             lambda *_args, **_kwargs: None)
         monkeypatch.setattr(server, "_fetch_channel_context",
@@ -325,6 +353,30 @@ def test_captionless_x_capture_persists_asr_and_provenance(
 
         sidecar = json.loads(
             (folder / f"{folder.name}.json").read_text(encoding="utf-8"))
+        assert result["ok"] is True
+        assert len(downloads) == (0 if audio_case == "embedded" else 1)
+        assert not list(folder.glob(".asr-*")), "temporary audio must be removed"
+        if downloads:
+            assert downloads[0][0][-1] == url
+            assert Path(downloads[0][0][downloads[0][0].index("-o") + 1]).parent.parent == folder
+        if audio_case in {"download_failed", "silent_source"}:
+            assert not calls
+            assert result["transcript_source"] is None
+            assert sidecar["transcript_source"] is None
+            assert sidecar["transcript"] == []
+            assert sidecar["asr_fallback"]["status"] == "no_audio"
+            assert "audio stream" in sidecar["asr_fallback"]["reason"]
+            assert sidecar["asr_fallback"]["caption_reason"] == "captions_unavailable"
+            assert not (folder / "transcript.txt").exists()
+            for markdown in (result["yoink_md"], (folder / f"{folder.name}.md").read_text(encoding="utf-8")):
+                transcript_section = markdown.split("## Transcript\n", 1)[1].split("\n## ", 1)[0]
+                assert sidecar["transcript_note"] in transcript_section
+                assert "No transcript:" in transcript_section
+                assert "No captions available for this video." not in transcript_section
+            return
+        assert len(calls) == 1
+        assert calls[0][0].name == ("video.mp4" if audio_case == "embedded" else "audio.m4a")
+        assert sidecar["media_depth"]["provenance"]["transcript_source"]["kind"] == "local_asr"
         _assert(result["ok"] is True and calls,
                 f"X fallback did not run: result={result}, calls={calls}")
         _assert(sidecar.get("transcript_source") == "asr",
