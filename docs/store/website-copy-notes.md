@@ -8,11 +8,11 @@ The helper splash and extension setup read the same bundled JSON directly.
 <!-- store-install:start -->
 Keep the current download and sideload instructions until the store link is live.
 
-Install the Windows helper, then load its bundled extension. On first launch, Uoink shows a one-time setup splash. Use it to open your browser's extensions page and copy the installed extension path; then enable Developer mode, click **Load unpacked**, and select that folder.
+Install the Uoink helper app, then load its bundled extension. On first launch, Uoink shows a one-time setup splash. Use it to open your browser's extensions page and copy the installed extension path; then enable Developer mode, click **Load unpacked**, and select that folder.
 <!-- store-install:end -->
 
 Apply that copy to the homepage extension button, `/install`, and any
-"Load unpacked" onboarding instructions. Keep the Windows helper requirement
+"Load unpacked" onboarding instructions. Keep the Uoink helper app requirement
 beside the install button. A store install removes the Developer mode step;
 it does not replace the helper. Show sideloading in an Advanced disclosure
 once the store link is live. Remove any `uoink.video` link in these surfaces.

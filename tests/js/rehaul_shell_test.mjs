@@ -1112,19 +1112,20 @@ async function groupStatus() {
     check(p.els.helperStatusText.textContent === "Running on this PC" && p.els.helperOfflineFix.classList.contains("hidden"), "coming back reads running again", p.els.helperStatusText.textContent);
   });
 
-  // No Mac or Linux build ships (docs/mac-install.md), so there is no app to
-  // open: offline says so and names the source run's restart instead.
-  const SOURCE_FIX = "Uoink ships for Windows only. If you ran it from source, start python server.py again. This page reconnects by itself.";
+  // 3.11.2 ships the Mac app, so Mac offline copy opens it. No Linux build
+  // ships, so Linux offline copy names the source run's restart instead.
+  const SOURCE_FIX = "If you ran Uoink from source, start python server.py again. This page reconnects by itself.";
+  const MAC_FIX = "Open Uoink from Applications or Spotlight. This page reconnects by itself.";
 
-  await scenario("macOS: running on this Mac, offline names the source run", async () => {
+  await scenario("macOS: running on this Mac, offline opens the app", async () => {
     const p = makePage({ platform: "MacIntel", uaPlatform: "macOS" });
     await p.page.refreshHealth();
     check(p.els.helperStatusText.textContent === "Running on this Mac", "running reads Running on this Mac", p.els.helperStatusText.textContent);
     p.helper.down = true;
     await p.page.refreshHealth();
     check(p.els.helperStatusText.textContent === "Uoink is offline" && !p.els.helperOfflineFix.classList.contains("hidden"), "offline reads Uoink is offline with a fix line", [p.els.helperStatusText.textContent, [...p.els.helperOfflineFix.classList._set]]);
-    check(p.els.helperOfflineFix.textContent === SOURCE_FIX, "offline on macOS says Uoink is Windows-only and how a source run restarts", p.els.helperOfflineFix.textContent);
-    check(!p.els.helperOfflineFix.textContent.includes("Start menu") && !p.els.helperOfflineFix.textContent.includes("Applications"), "no Windows launcher and no Mac app that does not exist", p.els.helperOfflineFix.textContent);
+    check(p.els.helperOfflineFix.textContent === MAC_FIX, "offline on macOS says to open Uoink from Applications", p.els.helperOfflineFix.textContent);
+    check(!p.els.helperOfflineFix.textContent.includes("Start menu") && !p.els.helperOfflineFix.textContent.includes("Windows"), "no Windows launcher or Windows-only claim on a Mac", p.els.helperOfflineFix.textContent);
   });
 
   await scenario("Linux: running on this computer, offline names the source run", async () => {
@@ -1133,7 +1134,7 @@ async function groupStatus() {
     check(p.els.helperStatusText.textContent === "Running on this computer", "running reads Running on this computer", p.els.helperStatusText.textContent);
     p.helper.down = true;
     await p.page.refreshHealth();
-    check(p.els.helperOfflineFix.textContent === SOURCE_FIX, "offline on Linux says Uoink is Windows-only and how a source run restarts", p.els.helperOfflineFix.textContent);
+    check(p.els.helperOfflineFix.textContent === SOURCE_FIX, "offline on Linux says how a source run restarts", p.els.helperOfflineFix.textContent);
     check(!p.els.helperOfflineFix.textContent.includes("Start menu"), "no Windows launcher on Linux", p.els.helperOfflineFix.textContent);
   });
 }

@@ -102,7 +102,7 @@ def test_removed_setup_capabilities_have_dashboard_consumers(endpoint, capabilit
     )
 
 
-@pytest.mark.parametrize("group", ["offline", "platforms", "navigation_motion", "heartbeat", "visibility", "diagnostics", "routes", "capture", "capture_failure", "capture_races", "worker", "notifications"])
+@pytest.mark.parametrize("group", ["offline", "platforms", "mac_download", "navigation_motion", "heartbeat", "visibility", "diagnostics", "routes", "capture", "capture_failure", "capture_races", "worker", "notifications"])
 def test_setup_behaviour(group):
     result = subprocess.run(
         ["node", str(ROOT / "tests/js/rehaul_setup_test.mjs"), group],
