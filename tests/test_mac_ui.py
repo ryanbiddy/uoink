@@ -224,6 +224,16 @@ def test_reviewed_ui_pins_and_minimum_are_consistent():
     assert plist["LSMinimumSystemVersion"] == payload["ffmpeg"]["minimum_macos"] == bundle.MINIMUM_MACOS == "15.0"
 
 
+def test_installed_plist_explains_desktop_access():
+    # Captures default to ~/Desktop/Uoink; without this key the macOS prompt has no reason text.
+    sys.path.insert(0, str(ROOT / "scripts/mac"))
+    import build_bundle as bundle
+    reference = plistlib.loads((ROOT / "installer/mac/Info.plist").read_bytes())
+    installed = plistlib.loads(plistlib.dumps(bundle.info_plist("3.11.1")))
+    assert installed["NSDesktopFolderUsageDescription"] == reference["NSDesktopFolderUsageDescription"] == bundle.DESKTOP_USAGE
+    assert installed["LSUIElement"] is True and installed["CFBundleVersion"] == "3.11.1"
+
+
 def test_ui_routes_are_authenticated_before_state_or_actions(monkeypatch):
     import server
     monkeypatch.setattr(server.sys, "platform", "darwin")
