@@ -342,3 +342,50 @@ def test_native_ui_lifeline_and_single_instance(tmp_path):
         if proc is not None and proc.poll() is None:
             proc.kill()
             proc.wait(timeout=5)
+
+
+def _screens(monkeypatch, mouse, frames):
+    """Fake AppKit and pywebview screens in Cocoa's bottom-left coordinates."""
+    appkit = ModuleType("AppKit")
+    appkit.NSEvent = SimpleNamespace(mouseLocation=lambda: mouse)
+    appkit.NSPointInRect = lambda p, r: r[0] <= p[0] < r[0] + r[2] and r[1] <= p[1] < r[1] + r[3]
+    webview = ModuleType("webview")
+    webview.screens = [SimpleNamespace(frame=frame, name=str(frame)) for frame in frames]
+    monkeypatch.setitem(sys.modules, "AppKit", appkit)
+    monkeypatch.setitem(sys.modules, "webview", webview)
+    return webview.screens
+
+
+def test_windows_open_on_the_screen_under_the_pointer(monkeypatch):
+    # This Mac: the laptop is the primary display; two monitors sit above it.
+    laptop, right, left = (0, 0, 1728, 1117), (1181, 1117, 1920, 1080), (-739, 1117, 1920, 1080)
+    screens = _screens(monkeypatch, (100, 200), [laptop, right, left])
+    assert ui.cursor_screen() is screens[0]
+    screens = _screens(monkeypatch, (1625, 1772), [laptop, right, left])
+    assert ui.cursor_screen() is screens[1]
+    _screens(monkeypatch, (9999, 9999), [laptop])
+    assert ui.cursor_screen() is None  # pywebview's own default then applies.
+    monkeypatch.setitem(sys.modules, "AppKit", None)  # import fails off the bundle
+    assert ui.cursor_screen() is None
+
+
+@pytest.mark.parametrize("module_name", ["uoink_dashboard", "uoink_splash"])
+def test_mac_dashboard_and_splash_pass_the_pointer_screen(monkeypatch, tmp_path, module_name):
+    import importlib
+    module = importlib.import_module(module_name)
+    monkeypatch.setattr(module.sys, "platform", "darwin")
+    monkeypatch.setattr(ui, "watch_parent", Mock())
+    chosen = object()
+    monkeypatch.setattr(ui, "cursor_screen", lambda: chosen)
+    webview = ModuleType("webview")
+    webview.create_window = Mock(return_value=SimpleNamespace(events=SimpleNamespace(loaded=Mock())))
+    webview.start = Mock()
+    platforms = ModuleType("webview.platforms")
+    cocoa = ModuleType("webview.platforms.cocoa")
+    for name, value in [("webview", webview), ("webview.platforms", platforms), ("webview.platforms.cocoa", cocoa)]:
+        monkeypatch.setitem(sys.modules, name, value)
+    if module_name == "uoink_splash":
+        monkeypatch.setattr(module, "_sentinel_current", lambda _: False)
+        monkeypatch.setattr(module, "_helper_health_ok", lambda: True)
+    module.main()
+    assert webview.create_window.call_args.kwargs["screen"] is chosen
