@@ -555,15 +555,23 @@ ANTHROPIC_HOOK_EST_INPUT_TOKENS = 1_200
 ANTHROPIC_HOOK_EST_OUTPUT_TOKENS = 80
 
 
+def _read_token_file() -> str:
+    try:
+        return TOKEN_PATH.read_text(encoding="utf-8").strip()
+    except (OSError, UnicodeError):
+        return ""
+
+
 def _load_or_create_token() -> str:
-    if TOKEN_PATH.exists():
-        try:
-            existing = TOKEN_PATH.read_text(encoding="utf-8").strip()
-            if existing:
-                return existing
-        except OSError:
-            pass
-    fresh = secrets.token_urlsafe(32)
+    # Import never writes the token. A duplicate launch, CLI or MCP process
+    # must not replace the token a running helper holds in memory; main()
+    # persists a fresh token only after this process owns the port.
+    return _read_token_file() or secrets.token_urlsafe(32)
+
+
+def _persist_token(fresh: str) -> None:
+    if _read_token_file() == fresh:
+        return
     try:
         TOKEN_PATH.write_text(fresh, encoding="utf-8")
         # Best-effort: tighten file perms on POSIX. On Windows, ACLs default
@@ -577,7 +585,6 @@ def _load_or_create_token() -> str:
         # Non-fatal: keep an in-memory token for the session. Persistence is
         # nice-to-have; auth still works within this server's lifetime.
         pass
-    return fresh
 
 
 TOKEN = _load_or_create_token()
@@ -20318,9 +20325,9 @@ def _spawn_dashboard_window(*, reason: str, settings: bool = False) -> bool:
         url = _install_isolation.helper_url("/dashboard")
         if sys.platform == "darwin" and settings:
             url += "#settings"
-        webbrowser.open(url)
-        log.info("dashboard: opened browser fallback (%s)", reason)
-        return True
+        opened = bool(webbrowser.open(url))
+        log.info("dashboard: browser fallback %s (%s)", "opened" if opened else "unavailable", reason)
+        return opened
     except Exception as e:
         log.warning("dashboard: browser fallback failed (%s): %s", reason, e)
         return False
@@ -20422,6 +20429,8 @@ def main(*, show_dashboard: bool = False):
         else:
             log.error("Failed to bind %s:%d -- %s", HOST, PORT, e)
         sys.exit(1)
+    # This process owns the port, so its token is the one clients must read.
+    _persist_token(TOKEN)
 
     _migrate_plaintext_anthropic_key()
     # Sprint 15: open the library index (quarantining + rebuilding a corrupt
@@ -20614,7 +20623,8 @@ def main(*, show_dashboard: bool = False):
         except Exception as exc:
             log.warning("splash: failed to spawn (non-fatal): %s", exc)
 
-    if show_dashboard:
+    # A plain Mac launch asks for the dashboard; the first-run splash wins.
+    if show_dashboard and not (sys.platform == "darwin" and splash_spawned):
         _spawn_dashboard_window(reason="launch-flag")
 
     log.info("Uoink server v%s running on http://%s:%d", VERSION, HOST, PORT)
