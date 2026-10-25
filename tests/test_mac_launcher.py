@@ -231,6 +231,14 @@ def supervisor(monkeypatch, tmp_path):
     return uoink_supervisor
 
 
+def _next_tick(supervisor):
+    """Wait out the monotonic clock's tick (about 15.6 ms on Windows) so a new
+    open is strictly later than the window that was just shown."""
+    start = supervisor.time.monotonic()
+    while supervisor.time.monotonic() <= start:
+        supervisor.time.sleep(0.001)
+
+
 def _dashboard_helper(monkeypatch, ok=True):
     """A loopback stand-in for the resident helper's /helper/dashboard route."""
     import json
@@ -516,6 +524,7 @@ def test_darwin_ready_callback_honors_a_waiting_open(supervisor, monkeypatch, tm
     on_ready = captured["on_ready"]
     supervisor.request_dashboard_later(tmp_path)
     on_ready(True)  # The launch flag already opened a window.
+    _next_tick(supervisor)
     supervisor.request_dashboard_later(tmp_path)
     on_ready(False)
     for _ in range(50):
@@ -569,6 +578,7 @@ def test_late_queued_open_from_before_the_launch_window_is_absorbed(supervisor, 
     supervisor.request_dashboard_later(tmp_path, before)  # A losing resident, late.
     on_ready(False)
     assert shown == []
+    _next_tick(supervisor)
     supervisor.request_dashboard_later(tmp_path)  # A new open after the window.
     on_ready(False)
     for _ in range(50):
