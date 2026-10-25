@@ -65,7 +65,9 @@ def handler_code():
 
 
 @pytest.fixture
-def helper(handler_code):
+def helper(handler_code, tmp_path, monkeypatch):
+    import uoink_store
+    monkeypatch.setattr(uoink_store, "CONFIG_PATH", tmp_path / "store-config.json")
     namespace = {
         "uoink_usage": uoink_usage,
         "__name__": "offline_token_handler", "BaseHTTPRequestHandler": BaseHTTPRequestHandler,
@@ -114,6 +116,32 @@ def test_manifest_public_key_derives_pinned_id():
 def test_default_allowlist_is_pinned(helper):
     assert helper["_allowed_extension_ids"]() == {PINNED_ID}
 
+
+def test_store_id_adds_exact_origin_without_unpinning_dev(helper, tmp_path, monkeypatch):
+    import uoink_store
+    config = tmp_path / "store-config.json"
+    config.write_text(json.dumps({"chrome_web_store_id": OTHER_ID, "chrome_web_store_url": ""}), encoding="utf-8")
+    monkeypatch.setattr(uoink_store, "CONFIG_PATH", config)
+    assert helper["_allowed_extension_ids"]() == {PINNED_ID, OTHER_ID}
+    for extension_id in (PINNED_ID, OTHER_ID):
+        origin = f"chrome-extension://{extension_id}"
+        for method in ("GET", "POST"):
+            assert request(helper, method=method, headers=token_headers(origin))[0] == 200
+        for suffix in ("/", ":80", ".attacker.test", "?x=1", "#fragment", "@attacker.test"):
+            status, headers, _ = request(helper, headers=token_headers(origin + suffix))
+            assert status == 403
+            assert headers["Access-Control-Allow-Origin"] is None
+    config.write_text('{"chrome_web_store_id":"*","chrome_web_store_url":""}', encoding="utf-8")
+    assert helper["_allowed_extension_ids"]() == {PINNED_ID}
+    assert request(helper, headers=token_headers(f"chrome-extension://{OTHER_ID}"))[0] == 403
+
+
+def test_missing_store_module_keeps_pinned_token_access(helper, monkeypatch):
+    # An install without uoink_store.py must not take down /token for the pinned extension.
+    import sys
+    monkeypatch.setitem(sys.modules, "uoink_store", None)
+    assert helper["_allowed_extension_ids"]() == {PINNED_ID}
+    assert request(helper, headers=token_headers())[0] == 200
 
 @pytest.mark.parametrize("configured", [OTHER_ID, [OTHER_ID, EDGE_ID], (OTHER_ID, EDGE_ID)])
 @pytest.mark.parametrize("method", ["GET", "POST"])

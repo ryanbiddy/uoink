@@ -34,6 +34,7 @@ const LAST_YOINK_CLIPBOARD_KEY = "yoink_last_clipboard_at";
 const LAST_CLIPBOARD_BUDGET_KEY = "yoink_last_clipboard_budget";
 const _clipboardRetryPayloads = new Map();
 const _queueViewNotificationIds = new Set();
+let _ensureOffscreenInflight = null;
 
 const LINK_PATTERNS = [
   "https://www.youtube.com/watch*",
@@ -63,7 +64,7 @@ chrome.runtime.onInstalled.addListener(async (details) => {
   await refreshActiveSession();
   syncThemeIcon().catch((e) => console.warn("[stc] theme sync failed", e));
   restoreQueue().catch((e) => console.warn("[stc] restore failed", e));
-  chrome.alarms.create("health-check", { periodInMinutes: 0.25 });
+  chrome.alarms.create("health-check", { periodInMinutes: 0.5 });
   checkHealthAndUpdateBadge().catch((e) => console.warn("[stc] checkHealthAndUpdateBadge failed", e));
 
   // Eager auth-token prefetch. Without this, the user's first authed
@@ -102,14 +103,14 @@ chrome.runtime.onStartup.addListener(async () => {
   await refreshActiveSession();
   syncThemeIcon().catch((e) => console.warn("[stc] theme sync failed", e));
   restoreQueue().catch((e) => console.warn("[stc] restore failed", e));
-  chrome.alarms.create("health-check", { periodInMinutes: 0.25 });
+  chrome.alarms.create("health-check", { periodInMinutes: 0.5 });
   checkHealthAndUpdateBadge().catch((e) => console.warn("[stc] checkHealthAndUpdateBadge failed", e));
 });
 
 // SW spins up on demand (notification click, message, alarm, etc) and the OS
 // theme may have flipped while it was idle. Re-sync on every wake.
 syncThemeIcon().catch((e) => console.warn("[stc] theme sync failed", e));
-chrome.alarms.create("health-check", { periodInMinutes: 0.25 });
+chrome.alarms.create("health-check", { periodInMinutes: 0.5 });
 checkHealthAndUpdateBadge().catch((e) => console.warn("[stc] checkHealthAndUpdateBadge failed", e));
 
 // ---- Alarms and Commands --------------------------------------------------
@@ -675,19 +676,20 @@ try {
 // createDocument(), then both try to create -- the second throws "Only a
 // single offscreen document may be created". Cache the in-flight create
 // promise so concurrent callers wait on the same operation.
-let _ensureOffscreenInflight = null;
 async function ensureOffscreen() {
-  if (chrome.offscreen && chrome.offscreen.hasDocument) {
-    if (await chrome.offscreen.hasDocument()) return;
-  } else {
-    const contexts = await chrome.runtime.getContexts({
-      contextTypes: ["OFFSCREEN_DOCUMENT"],
-    });
-    if (contexts && contexts.length) return;
-  }
   if (_ensureOffscreenInflight) return _ensureOffscreenInflight;
   _ensureOffscreenInflight = (async () => {
     try {
+      // Share the lookup as well as creation. hasDocument can become true
+      // before createDocument resolves and the message listener is ready.
+      if (chrome.offscreen && chrome.offscreen.hasDocument) {
+        if (await chrome.offscreen.hasDocument()) return;
+      } else {
+        const contexts = await chrome.runtime.getContexts({
+          contextTypes: ["OFFSCREEN_DOCUMENT"],
+        });
+        if (contexts && contexts.length) return;
+      }
       await chrome.offscreen.createDocument({
         url: OFFSCREEN_URL,
         reasons: OFFSCREEN_REASONS,

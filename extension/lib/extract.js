@@ -8,6 +8,8 @@
   "use strict";
 
   const SERVER = "http://127.0.0.1:5179";
+  // Production is always real-helper mode. The store builder checks this flag.
+  const USE_MOCK_API = false;
   const DEFAULT_INTERVAL = 30;
   const REQUEST_TIMEOUT_MS = 10 * 60 * 1000; // 10 minutes
 
@@ -443,12 +445,9 @@
   }
 
   // ---- Playlist / job API (v2) ----------------------------------------
-  // These four endpoints belong to the v2 playlist flow. Popup sets
-  // globalThis.YOINK_USE_MOCK_API = true while the real backend is being
-  // built on `codex/v2-backend-playlist`; flip it off (in popup.js) once the
-  // server lands and reconcile the wire shapes here against docs/v2-api.md.
+  // The mock module is excluded from the store package.
   function _useMock() {
-    return !!(global.YOINK_USE_MOCK_API && global.MOCK_API);
+    return !!(USE_MOCK_API && global.YOINK_USE_MOCK_API && global.MOCK_API);
   }
   function playlistPreview(url) {
     if (_useMock()) return global.MOCK_API.playlistPreview(url);

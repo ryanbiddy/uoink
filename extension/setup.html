@@ -69,6 +69,13 @@
     </header>
     <h1 id="page-title">Set up your first capture</h1>
     <p class="lede">Install the helper, check the connection, then save a source to your library.</p>
+    <div id="store-install" class="notice" hidden>
+      <p>Use the store version for automatic extension updates. The Windows helper is still required.</p>
+      <a id="store-install-link" target="_blank" rel="noopener">Add to Chrome</a>
+      <details><summary>Advanced: load the bundled extension</summary>
+        <p>Open <code>chrome://extensions</code>, turn on Developer mode, click <strong>Load unpacked</strong>, and select the helper's <code>extension</code> folder. Use one copy of Uoink at a time.</p>
+      </details>
+    </div>
     <p id="settings-moved" class="notice" hidden>Settings now live in the dashboard. <a id="settings-destination" href="http://127.0.0.1:5179/dashboard#settings/capture" target="_blank" rel="noopener">Open dashboard Settings</a>.</p>
     <nav aria-label="Setup steps">
       <ol class="setup-progress">
@@ -83,7 +90,7 @@
         <p>The helper runs on your computer and saves captures to your local library.</p>
         <p id="install-instructions" class="secondary">Download the Windows installer, open it, and follow the installation steps.</p>
         <div class="actions">
-          <a id="download-btn" class="button" data-win-only href="https://github.com/ryanbiddy/uoink/releases/download/v3.11.0/Uoink-Setup-3.11.0.exe" target="_blank" rel="noopener">Download for Windows</a>
+          <a id="download-btn" class="button" data-win-only href="https://github.com/ryanbiddy/uoink/releases/download/v3.11.1/Uoink-Setup-3.11.1.exe" target="_blank" rel="noopener">Download for Windows</a>
           <a id="manual-install" class="button secondary" href="https://github.com/ryanbiddy/uoink/blob/main/REQUIREMENTS.md" target="_blank" rel="noopener" hidden>Manual install instructions</a>
           <a id="skip-install" href="#verify">Already installed? Verify</a>
         </div>
@@ -123,6 +130,7 @@
     <footer class="secondary">Connect Claude Desktop, Claude Code or Cursor to all 91 Uoink tools. Capture options, AI features, library and agent connections are in <a href="http://127.0.0.1:5179/dashboard#settings/capture" target="_blank" rel="noopener">dashboard Settings</a>.</footer>
   </main>
   <script src="lib/extract.js"></script>
+  <script src="lib/store-links.js"></script>
   <script src="setup.js"></script>
 </body>
 </html>
