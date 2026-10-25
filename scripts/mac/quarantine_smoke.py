@@ -21,7 +21,7 @@ from qualify_deps import write_json
 from verify_signing import command, require, verify_notarized
 
 
-def bind_menu(app: Path, bound: dict, log_file: Path) -> dict:
+def bind_menu(app: Path, bound: dict, log_files: list[Path]) -> dict:
     """Credit the AppKit event loop and icon, bound to the verified helper."""
     port, helper = bound["port"], bound["identity"]
     require(port != 5179, "Menu must use a disposable port")
@@ -55,7 +55,7 @@ def bind_menu(app: Path, bound: dict, log_file: Path) -> dict:
             identity = receipt.observe(menu["pid"])
             origin = receipt.interpreter_origin(app, identity["executable"])
             require(origin == bound["origin"], "Menu belongs to another app copy")
-            icon = bundle_smoke.menu_icon_evidence(log_file, menu["pid"], Path(origin["bundle"]))
+            icon = bundle_smoke.menu_icon_evidence(log_files, menu["pid"], Path(origin["bundle"]))
             require(receipt.observe(menu["pid"]) == identity, "Menu identity changed")
             return {**menu, "identity": identity, "origin": origin, "icon": icon}
         time.sleep(.25)
@@ -103,7 +103,7 @@ def launch(app: Path, scratch: Path, output: Path, report: dict, *, translocated
                     identities.extend([report["health"]["supervisor_identity"], report["health"]["identity"]])
                     require(report["health"]["origin"]["translocated"] is translocated,
                             f"Expected translocated={translocated} launch")
-                    report["menubar"] = bind_menu(app, report["health"], output / "launch-stderr.txt")
+                    report["menubar"] = bind_menu(app, report["health"], bundle_smoke.helper_logs(output / "launch-stderr.txt", env))
                     identities.append(report["menubar"]["identity"])
                     return
                 except OSError:

@@ -253,6 +253,23 @@ def test_ci_does_not_credit_text_fallback_as_icon_proof(tmp_path):
         bundle_smoke.menu_icon_evidence(path, 10, tmp_path)
 
 
+def test_icon_proof_is_read_from_the_supervisor_capture_and_tolerates_split_lines(tmp_path):
+    """Since #291 the menu's stderr reaches the profile's helper-output.log, not the launch log."""
+    profile = tmp_path / "profile"
+    profile.mkdir()
+    launch = tmp_path / "launch.txt"
+    launch.write_text("launcher only\n")
+    capture = profile / "helper-output.log"
+    capture.write_text('INFO:uoink.menubar:menu bar icon: {"pid":10,"mode":"te\n'
+                       'INFO:uoink.menubar:menu bar icon: {"pid":10,"mode":"text","templates":[]}\n')
+    logs = bundle_smoke.helper_logs(launch, {"UOINK_ISOLATED_PROFILE": str(profile)})
+    assert logs == [launch, capture]
+    with pytest.raises(ValueError, match="Both menu templates"):
+        bundle_smoke.menu_icon_evidence(logs, 10, tmp_path)
+    with pytest.raises(ValueError, match="Missing or ambiguous"):
+        bundle_smoke.menu_icon_evidence([launch, tmp_path / "absent.log"], 10, tmp_path)
+
+
 @pytest.mark.parametrize("foreign_menu", [False, True])
 def test_menu_proof_requires_live_event_loop_in_same_bundle(copies, tmp_path, monkeypatch, foreign_menu):
     app, other, trans, foreign = copies
