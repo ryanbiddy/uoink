@@ -1088,6 +1088,22 @@ class Index:
                     self._write_txn_owner = None
 
     @contextmanager
+    def _rollback_on_error(self):
+        """Roll back the implicit transaction if a legacy write raises.
+
+        Legacy writers commit on success but used to leave a failed DML's
+        implicit BEGIN open, which wedged every later write_transaction and
+        read_snapshot on this shared connection (for example a backfill
+        hitting UNIQUE(yoinks.slug)). Callers hold self._lock.
+        """
+        try:
+            yield
+        except BaseException:
+            if self._conn.in_transaction:
+                self._conn.rollback()
+            raise
+
+    @contextmanager
     def read_snapshot(self):
         """Hold Index lock and an explicit read transaction across reading."""
         with self._lock:
@@ -1286,7 +1302,7 @@ class Index:
         update_set = ", ".join(
             f"{col}=excluded.{col}" for col in _YOINK_COLUMNS if col != "video_id"
         )
-        with self._lock:
+        with self._lock, self._rollback_on_error():
             self._conn.execute(
                 f"INSERT INTO yoinks ({', '.join(_YOINK_COLUMNS)}) "
                 f"VALUES ({placeholders}) "
@@ -1308,7 +1324,9 @@ class Index:
             # P3 (e.g., the backfill smoke tools).
             try:
                 from channels import tag_if_self  # noqa: WPS433
-                tag_if_self(self, video_id, record.get("channel"))
+                # Join this yoink write. A nested write_transaction would
+                # raise, and the handler below would drop the tag.
+                tag_if_self(self, video_id, record.get("channel"), self._conn)
             except Exception as e:  # pragma: no cover -- defensive
                 # Recognition failure must not block a yoink write.
                 import logging
@@ -1320,7 +1338,7 @@ class Index:
 
     def delete_yoink(self, video_id: str) -> None:
         """Delete a yoink and its citations (FK cascade) and FTS row."""
-        with self._lock:
+        with self._lock, self._rollback_on_error():
             self._conn.execute("DELETE FROM yoinks WHERE video_id=?", (video_id,))
             self._conn.execute("DELETE FROM yoinks_fts WHERE video_id=?", (video_id,))
             self._conn.commit()
@@ -1860,6 +1878,15 @@ class Index:
             ).fetchall()
         return [dict(r) for r in rows]
 
+    def list_capture_sources(self) -> list[dict]:
+        """Live capture identities for matching recorded URL aliases offline."""
+        with self._lock:
+            rows = self._conn.execute(
+                "SELECT video_id, slug, corpus_path, sidecar_path, metadata_json "
+                "FROM yoinks WHERE deleted_at IS NULL"
+            ).fetchall()
+        return [dict(row) for row in rows]
+
     def update_content_paths(self, video_id: str, *, corpus_path: str,
                              sidecar_path: str) -> None:
         """Re-point one row's on-disk paths (C-05 stale-path heal)."""
@@ -2354,20 +2381,18 @@ class Index:
             tags = [tags]
         now = _now_iso()
         added = 0
-        with self._lock:
+        with self.write_transaction() as conn:
             for raw in tags or []:
                 t = (raw or "").strip().lower()
                 if not t:
                     continue
                 try:
-                    self._conn.execute(
+                    conn.execute(
                         "INSERT INTO yoink_tags (video_id, tag, source, added_at) "
                         "VALUES (?, ?, ?, ?)", (video_id, t, source, now))
                     added += 1
                 except sqlite3.IntegrityError:
                     pass
-            if added:
-                self._conn.commit()  # C-03: tags must survive a kill
         return added
 
     def get_tags(self, video_id: str) -> list[str]:
@@ -3700,9 +3725,9 @@ class Index:
         if not body.strip():
             raise ValueError("draft body required")
         now = _now_iso()
-        with self._lock:
+        with self.write_transaction() as conn:
             if draft_id is None:
-                cur = self._conn.execute(
+                cur = conn.execute(
                     "INSERT INTO writing_drafts "
                     "(yoink_id, kind, title, body, source_credit_line, "
                     " created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
@@ -3715,7 +3740,7 @@ class Index:
                 # not a 500 from the failed bind (G-90).
                 raise ValueError(f"draft {draft_id} not found")
             else:
-                cur = self._conn.execute(
+                cur = conn.execute(
                     "UPDATE writing_drafts SET yoink_id=?, kind=?, title=?, "
                     "body=?, source_credit_line=?, updated_at=? WHERE id=?",
                     (yoink_id, str(kind or "tweet"), title, body,
@@ -3723,7 +3748,6 @@ class Index:
                 )
                 if cur.rowcount == 0:
                     raise ValueError(f"draft {draft_id} not found")
-            self._conn.commit()
         draft = self.get_writing_draft(int(draft_id))
         if draft is None:  # pragma: no cover -- row written above
             raise ValueError(f"draft {draft_id} not found")

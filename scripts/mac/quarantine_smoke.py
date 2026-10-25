@@ -91,11 +91,16 @@ def launch(app: Path, scratch: Path, output: Path, report: dict, *, translocated
         while time.monotonic() < deadline:
             owners = receipt.listeners(port)
             if len(owners) == 1:
-                # bind_health rechecks interpreter identity and listener ownership.
-                proc = SimpleNamespace(pid=owners[0], poll=lambda: None)
+                # The listener is the supervisor's helper child; bind_health rechecks
+                # both interpreters, the parent link and listener ownership.
+                parent = receipt.describe(owners[0]).get("ppid")
+                if parent is None:  # The listener exited between the two reads.
+                    time.sleep(.25)
+                    continue
                 try:
+                    proc = SimpleNamespace(pid=parent, poll=lambda: None)
                     report["health"] = receipt.bind_health(proc, app, port)
-                    identities.append(report["health"]["identity"])
+                    identities.extend([report["health"]["supervisor_identity"], report["health"]["identity"]])
                     require(report["health"]["origin"]["translocated"] is translocated,
                             f"Expected translocated={translocated} launch")
                     report["menubar"] = bind_menu(app, report["health"], output / "launch-stderr.txt")

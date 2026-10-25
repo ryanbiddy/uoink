@@ -92,7 +92,7 @@ def helper(surface_code):
         "BaseHTTPRequestHandler": BaseHTTPRequestHandler,
         "HOST": "127.0.0.1", "PORT": PORT, "VERSION": "test",
         "TOKEN": "synthetic-public-surfaces-token",
-        "os": SimpleNamespace(environ={}), "sys": SimpleNamespace(platform="win32"),
+        "os": SimpleNamespace(environ={}, getpid=lambda: 12345), "sys": SimpleNamespace(platform="win32"),
         "json": json, "re": re,
         "secrets": secrets, "urlparse": urlparse, "time": time,
         "datetime": datetime, "log": Mock(),
@@ -131,6 +131,7 @@ def helper(surface_code):
         "_mcp_stdio_selfcheck": Mock(return_value={"ok": True}),
         "_mcp_modern_stdio_selfcheck": Mock(return_value={"ok": True}),
         "_podcast_corpus_reconciliation_status": Mock(return_value={"ok": True}),
+        "_duplicate_folder_names_status": Mock(return_value={"count": 0, "folders": []}),
         "whisper_runner": SimpleNamespace(
             normalize_model=lambda value: "base",
             is_whisperx_available=lambda: True,
@@ -519,7 +520,15 @@ def test_local_html_cannot_be_framed(helper, path, origin):
     assert headers["Content-Length"] == str(len(HTML))
 
 
-@pytest.mark.parametrize("path", ["/health", "/ping", "/diagnose", "/dashboard", "/splash"])
+@pytest.mark.parametrize("origin", [None, "https://www.youtube.com"])
+def test_bare_root_redirects_to_dashboard(helper, origin):
+    status, headers, body = request(helper, "/", headers={"Origin": origin} if origin else {})
+    assert status == 302
+    assert headers["Location"] == "/dashboard"
+    assert body == b""
+
+
+@pytest.mark.parametrize("path", ["/health", "/ping", "/diagnose", "/dashboard", "/splash", "/"])
 @pytest.mark.parametrize("method", ["GET", "OPTIONS"])
 def test_public_surfaces_still_reject_rebinding_hosts(helper, path, method):
     status, _, payload = request(helper, path, method=method, headers={"Host": "attacker.test"})

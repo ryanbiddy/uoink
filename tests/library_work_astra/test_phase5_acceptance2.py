@@ -416,7 +416,8 @@ def test_phase5_ba2_transaction_refusal_uses_frozen_error_code(db):
 def test_phase5_ba2_stdio_schema_matches_registry():
     result = asyncio.run(handler_for(uoink_mcp.mcp, "tools/list")(mcp_types.ListToolsRequest(method="tools/list")))
     actual = next(t.input_schema for t in result.tools if t.name == "get_library_activity")
-    expected = uoink_mcp_tools.TOOL_REGISTRY["get_library_activity"].input_schema
+    expected = uoink_mcp_tools.client_input_schema(
+        uoink_mcp_tools.TOOL_REGISTRY["get_library_activity"].input_schema, "get_library_activity")
     assert actual == expected
 
 

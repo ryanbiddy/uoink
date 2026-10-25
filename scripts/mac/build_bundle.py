@@ -27,6 +27,16 @@ MAC = Path(__file__).parent
 PYTHON_ROOT = Path("Contents/Resources/Python")
 PYTHON_EXECUTABLE = PYTHON_ROOT / "bin/python3"
 MINIMUM_MACOS = "15.0"
+# Shown in the macOS prompt when Uoink first saves to ~/Desktop/Uoink.
+DESKTOP_USAGE = "Uoink saves your captures in the Uoink folder on your Desktop."
+
+
+def info_plist(version: str) -> dict:
+    return {"CFBundleName": "Uoink", "CFBundleDisplayName": "Uoink",
+            "CFBundleIdentifier": "com.ryanbiddy.uoink", "CFBundleExecutable": "Uoink",
+            "CFBundlePackageType": "APPL", "CFBundleShortVersionString": version,
+            "CFBundleVersion": version, "LSMinimumSystemVersion": MINIMUM_MACOS,
+            "LSUIElement": True, "NSDesktopFolderUsageDescription": DESKTOP_USAGE}
 
 
 def run(command, **kwargs):
@@ -478,11 +488,7 @@ def build(wheels: Path, output: Path, ffmpeg_output: Path | None = None) -> Path
     if not re.fullmatch(r"\d+\.\d+\.\d+", version):
         raise ValueError("Invalid product VERSION")
     with (contents / "Info.plist").open("wb") as stream:
-        plistlib.dump({"CFBundleName": "Uoink", "CFBundleDisplayName": "Uoink",
-                       "CFBundleIdentifier": "com.ryanbiddy.uoink", "CFBundleExecutable": "Uoink",
-                       "CFBundlePackageType": "APPL", "CFBundleShortVersionString": version,
-                       "CFBundleVersion": version, "LSMinimumSystemVersion": MINIMUM_MACOS,
-                       "LSUIElement": True}, stream)
+        plistlib.dump(info_plist(version), stream)
     notices = resources / "notices"
     notices.mkdir()
     shutil.copyfile(output / "python-pruned.json", notices / "python-pruned.json")

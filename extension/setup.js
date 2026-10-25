@@ -4,8 +4,8 @@
 const SERVER = "http://127.0.0.1:5179";
 const POLL_MS = 2000;
 const HEARTBEAT_MS = 10000;
-// Release download target; 3.11.0, its GitHub release and uoink.app go live together.
-const PUBLISHED_INSTALLER_VERSION = "3.11.0";
+// Release download target; 3.11.1, its GitHub release and uoink.app go live together.
+const PUBLISHED_INSTALLER_VERSION = "3.11.1";
 const SUGGESTED_VIDEO = {
   url: "https://www.youtube.com/watch?v=8rABwKRsec4",
   title: "Andrej Karpathy on AGI, hiring, and the future of programming",
@@ -25,6 +25,13 @@ function scrollBehavior() {
   // Setup has no animated scroll surface. Keep navigation instant even when
   // the system permits motion; only readers, toasts and capture strips move.
   return preferred === "smooth" ? "auto" : preferred;
+}
+
+async function showStoreInstall() {
+  const url = await globalThis.UoinkStore?.load();
+  if (!url) return;
+  $("store-install-link").href = url;
+  $("store-install").hidden = false;
 }
 
 function setPlatform(os) {
@@ -256,4 +263,5 @@ window.addEventListener("hashchange", applySource);
 setPlatform("win");
 chrome.runtime.getPlatformInfo(info => setPlatform(info && info.os));
 applySource();
+showStoreInstall();
 checkConnection();

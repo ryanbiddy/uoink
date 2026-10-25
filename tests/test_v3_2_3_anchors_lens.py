@@ -13,13 +13,18 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import writing_studio as ws  # noqa: E402
+from index import Index  # noqa: E402
 
 
 class FakeIndex:
+    # Writers commit through the real Index boundary, not a test copy.
+    write_transaction = Index.write_transaction
+
     def __init__(self):
         self._conn = sqlite3.connect(":memory:")
         self._conn.row_factory = sqlite3.Row
-        self._lock = threading.Lock()
+        self._lock = threading.RLock()
+        self._write_txn_owner = None
         # style_anchors after 0014 + the 0016 is_default add.
         self._conn.executescript("""
             CREATE TABLE style_anchors (

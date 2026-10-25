@@ -112,16 +112,16 @@ def _x_login_wall_result(url):
 
 def test_page_extractor_flags_x_login_wall_and_does_not_persist():
     url = "https://x.com/i/article/1789012345678901234"
-    saved_stdlib = page_extractor._extract_stdlib
+    saved_extract = page_extractor._extract_article_page
     saved_crawl = page_extractor._CRAWL4AI_AVAILABLE
     try:
         page_extractor._CRAWL4AI_AVAILABLE = False
-        page_extractor._extract_stdlib = (
+        page_extractor._extract_article_page = (
             lambda u, **k: _x_login_wall_result(u))
         r = page_extractor.extract_page(
             None, url, enforce_allowlist=False, include_screenshot=False)
     finally:
-        page_extractor._extract_stdlib = saved_stdlib
+        page_extractor._extract_article_page = saved_extract
         page_extractor._CRAWL4AI_AVAILABLE = saved_crawl
     _assert(r.get("ok") is False,
             f"the X login wall must fail honestly, not save junk: {r}")
@@ -134,11 +134,11 @@ def test_page_extractor_flags_x_login_wall_and_does_not_persist():
     _assert(page_extractor.persist_page_yoink(None, r) is None,
             "an ok:false wall result must never persist a uoink")
     # A genuine article page (no wall signature) is untouched.
-    saved_stdlib = page_extractor._extract_stdlib
+    saved_extract = page_extractor._extract_article_page
     saved_crawl = page_extractor._CRAWL4AI_AVAILABLE
     try:
         page_extractor._CRAWL4AI_AVAILABLE = False
-        page_extractor._extract_stdlib = lambda u, **k: {
+        page_extractor._extract_article_page = lambda u, **k: {
             "ok": True, "extraction_engine": "stdlib", "url": u,
             "title": "Real Article", "markdown": "# Real Article\n\nBody.",
             "metadata": {}, "links": [], "images": []}
@@ -146,7 +146,7 @@ def test_page_extractor_flags_x_login_wall_and_does_not_persist():
             None, "https://x.com/i/article/1", enforce_allowlist=False,
             include_screenshot=False)
     finally:
-        page_extractor._extract_stdlib = saved_stdlib
+        page_extractor._extract_article_page = saved_extract
         page_extractor._CRAWL4AI_AVAILABLE = saved_crawl
     _assert(ok.get("ok") is True,
             f"a real x.com page that renders must still succeed: {ok}")

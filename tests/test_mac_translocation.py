@@ -151,14 +151,17 @@ def test_scoped_processes_include_only_owned_normal_and_translocated_copies(copi
 
 def test_health_binds_translocated_interpreter_and_rejects_other_copy(copies, monkeypatch):
     app, other, trans, foreign = copies
-    identity = {"pid": 10, "created_ms": 1, "started_us": 1000, "executable": str(trans / receipt.PYTHON_EXECUTABLE)}
-    monkeypatch.setattr(receipt, "observe", lambda pid: dict(identity))
-    monkeypatch.setattr(receipt, "listeners", lambda port: [10])
+    # Since #291 the launched supervisor (10) owns the helper child (12) that listens.
+    identity = {"created_ms": 1, "started_us": 1000, "executable": str(trans / receipt.PYTHON_EXECUTABLE)}
+    monkeypatch.setattr(receipt, "observe", lambda pid: {**identity, "pid": pid})
+    monkeypatch.setattr(receipt, "listeners", lambda port: [12])
+    monkeypatch.setattr(receipt, "describe", lambda pid: {"ppid": 10})
     monkeypatch.setattr(receipt.urllib.request, "build_opener", lambda *a: SimpleNamespace(
-        open=lambda *a, **kw: io.BytesIO(b'{"ok": true}')))
+        open=lambda *a, **kw: io.BytesIO(b'{"ok": true, "pid": 12, "supervisor_run_id": "run"}')))
     proc = SimpleNamespace(pid=10, poll=lambda: None)
     proof = receipt.bind_health(proc, app, 18081)
     assert proof["origin"]["bundle"] == str(trans) and proof["origin"]["translocated"]
+    assert proof["listener_pid"] == 12 and proof["supervisor_identity"]["pid"] == 10
     identity["executable"] = str(foreign / receipt.PYTHON_EXECUTABLE)
     with pytest.raises(ValueError, match="non-bundle interpreter"):
         receipt.bind_health(proc, app, 18081)
@@ -289,11 +292,14 @@ def test_launch_requires_menu_and_cleans_on_success_or_crash(copies, tmp_path, m
     helper = {"pid": 10, "created_ms": 1, "started_us": 1000,
               "executable": str((trans if translocated else app) / receipt.PYTHON_EXECUTABLE)}
     menu = {**helper, "pid": 11}
-    bound = {"identity": helper, "origin": {"translocated": translocated}, "port": 18081}
+    supervisor = {**helper, "pid": 9}  # Since #291 the listener is the supervisor's child.
+    bound = {"identity": helper, "supervisor_identity": supervisor,
+             "origin": {"translocated": translocated}, "port": 18081}
     monkeypatch.setattr(quarantine_smoke.subprocess, "run",
                         lambda *a, **kw: SimpleNamespace(returncode=0, stdout="", stderr=""))
     monkeypatch.setattr(receipt, "listeners", lambda _: [10])
-    monkeypatch.setattr(receipt, "bind_health", lambda *a: bound)
+    monkeypatch.setattr(receipt, "describe", lambda pid: {"ppid": 9})
+    monkeypatch.setattr(receipt, "bind_health", lambda proc, *a: bound if proc.pid == 9 else None)
     monkeypatch.setattr(quarantine_smoke, "bind_menu",
                         Mock(side_effect=RuntimeError("menu crashed")) if menu_fails else lambda *a: {"identity": menu})
     cleanup = Mock(return_value={"ok": True})
@@ -305,5 +311,5 @@ def test_launch_requires_menu_and_cleans_on_success_or_crash(copies, tmp_path, m
     else:
         quarantine_smoke.launch(app, tmp_path, tmp_path / "out", report, translocated=translocated)
         assert report["menubar"]["identity"] == menu
-    assert cleanup.call_args.args[1] == ([helper] if menu_fails else [helper, menu])
+    assert cleanup.call_args.args[1] == ([supervisor, helper] if menu_fails else [supervisor, helper, menu])
     assert report["cleanup"]["ok"]

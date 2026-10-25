@@ -35,7 +35,7 @@ HARNESS = REPO_ROOT / "tests" / "js" / "ext_spa_navigation_test.mjs"
 YOUTUBE_JS = ["lib/extract.js", "lib/ui.js", "content.js"]
 X_ARTICLE_JS = ["lib/x-article.js", "content-x-article.js"]
 
-# What the manifest granted before E2; widening the matches must not add to it.
+# Audited store permissions; SPA navigation must not add to these grants.
 PERMISSIONS = [
     "alarms", "clipboardWrite", "notifications", "storage", "contextMenus",
     "activeTab", "scripting", "offscreen",
@@ -43,13 +43,10 @@ PERMISSIONS = [
 HOST_PERMISSIONS = [
     "https://www.youtube.com/*",
     "https://m.youtube.com/*",
-    "https://youtu.be/*",
     "https://x.com/*",
     "https://twitter.com/*",
-    "https://mobile.twitter.com/*",
     "https://*.reddit.com/*",
     "http://127.0.0.1:5179/*",
-    "http://localhost:5179/*",
 ]
 YOUTUBE_HOSTS = {"www.youtube.com", "m.youtube.com"}
 X_HOSTS = {"x.com", "www.x.com", "twitter.com", "www.twitter.com"}

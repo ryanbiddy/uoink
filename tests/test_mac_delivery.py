@@ -69,9 +69,10 @@ def test_login_opt_in_idempotence_disable_and_quit_policy(install, monkeypatch):
     assert not life.agent_path(home).exists()
     life.set_enabled(app, True, home)
     payload = plistlib.loads(life.agent_path(home).read_bytes())
-    assert payload["ProgramArguments"] == [str(app / "Contents/MacOS/Uoink"), "--helper"]
-    assert payload["RunAtLoad"] is True and payload["KeepAlive"] is False
-    assert Path(payload["StandardOutPath"]).parent == home / "Library/Logs/Uoink"
+    assert payload["ProgramArguments"] == [str(app / "Contents/MacOS/Uoink"), "--helper", "--startup"]
+    assert payload["RunAtLoad"] is True and payload["KeepAlive"] == {"SuccessfulExit": False}
+    assert payload["ThrottleInterval"] == 30
+    assert payload["StandardOutPath"] == payload["StandardErrorPath"] == "/dev/null"
     assert life.status(app, home)["enabled"] is True
     life.set_enabled(app, True, home)
     assert [c[0] for c in fake.calls].count("bootstrap") == 1
@@ -79,6 +80,32 @@ def test_login_opt_in_idempotence_disable_and_quit_policy(install, monkeypatch):
     assert ("bootout", "gui/501/" + life.LABEL) in fake.calls
     assert not life.agent_path(home).exists()
     assert life.status(app, home)["enabled"] is False
+
+
+@pytest.mark.parametrize("invalid", [None, "args", "program", "keepalive", "successful_exit",
+                                    "throttle", "run_at_load", "stdout", "stderr"])
+def test_generated_launchagent_meets_smoke_contract(install, invalid):
+    from bundle_smoke import verify_launchagent
+    app, home = install
+    payload = life.plist(app, home)
+    if invalid == "args":
+        payload["ProgramArguments"].pop()
+    elif invalid == "program":
+        payload["ProgramArguments"][0] = str(home / "foreign")
+    else:
+        changes = {"keepalive": ("KeepAlive", False),
+                   "successful_exit": ("KeepAlive", {"SuccessfulExit": True}),
+                   "throttle": ("ThrottleInterval", 0), "run_at_load": ("RunAtLoad", False),
+                   "stdout": ("StandardOutPath", str(home / "unbounded.log")),
+                   "stderr": ("StandardErrorPath", str(home / "unbounded.log"))}
+        if invalid:
+            key, value = changes[invalid]
+            payload[key] = value
+    if invalid:
+        with pytest.raises(AssertionError):
+            verify_launchagent(payload, app / "Contents/MacOS/Uoink")
+    else:
+        verify_launchagent(payload, app / "Contents/MacOS/Uoink")
 
 
 @pytest.mark.parametrize("failure", ["print", "bootstrap", "bootout"])
@@ -238,7 +265,12 @@ def test_uninstall_uses_shared_identity_and_fails_closed(install, monkeypatch, s
     path.write_text(json.dumps(identity))
     calls = []
     monkeypatch.setattr(_platform, "darwin_liveness", lambda *a: state)
-    monkeypatch.setattr(uoink_install_isolation, "_terminate_owned", lambda i: calls.append(i) or terminate)
+    def terminate_owned(identity):
+        stop = json.loads((path.parent / "helper-stop.json").read_text())
+        assert stop["reason"] == "uninstall" and stop["requested_at"]
+        calls.append(identity)
+        return terminate
+    monkeypatch.setattr(uoink_install_isolation, "_terminate_owned", terminate_owned)
     monkeypatch.setattr(life, "launchctl", Launchctl())
     if success:
         life.uninstall(app, home)
@@ -466,7 +498,7 @@ def test_dmg_format_volume_link_and_digest(tmp_path, monkeypatch):
     assert receipt["sha256"] == build_bundle.sha256(dmg) and receipt["size_bytes"] == len(b"fake UDZO")
 
 
-@pytest.mark.parametrize("foreign", ["program", "pid", "unknown"])
+@pytest.mark.parametrize("foreign", ["program", "pid", "unknown", None])
 def test_bootout_never_stops_an_unverified_service(install, monkeypatch, foreign):
     import _platform
     app, home = install
@@ -476,10 +508,10 @@ def test_bootout_never_stops_an_unverified_service(install, monkeypatch, foreign
     text = f"program = {app / 'Contents/MacOS/Uoink'}\npid = 123\n"
     if foreign == "program":
         text = "program = /foreign/python3\npid = 123\n"
-    identity = home / "Library/Application Support/Uoink/runtime-identity.json"
+    identity = home / "Library/Application Support/Uoink/supervisor-identity.json"
     identity.parent.mkdir(parents=True)
     identity.write_text(json.dumps({"pid": 124 if foreign == "pid" else 123, "created_ms": 12345,
-        "script": str(app / "Contents/Resources/server.py"),
+        "script": str(app / "Contents/Resources/uoink_supervisor.py"),
         "executable": str(app / "Contents/Resources/Python/bin/python3")}))
     calls = []
     def fake(*args):
@@ -487,9 +519,15 @@ def test_bootout_never_stops_an_unverified_service(install, monkeypatch, foreign
         return SimpleNamespace(returncode=0, stderr="", stdout=text)
     monkeypatch.setattr(life, "launchctl", fake)
     monkeypatch.setattr(_platform, "darwin_liveness", lambda *a: "unknown" if foreign == "unknown" else "alive")
-    with pytest.raises(ValueError, match="refusing bootout"):
+    if foreign:
+        with pytest.raises(ValueError, match="refusing bootout"):
+            life.bootout(app, home)
+        assert all(c[0] == "print" for c in calls)
+    else:
         life.bootout(app, home)
-    assert all(c[0] == "print" for c in calls)
+        assert calls == [("print", "gui/501/" + life.LABEL),
+                         ("print", "gui/501/" + life.LABEL),
+                         ("bootout", "gui/501/" + life.LABEL)]
 
 
 def test_dashboard_and_stdio_use_the_same_darwin_entry(install, monkeypatch):

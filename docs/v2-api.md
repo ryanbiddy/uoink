@@ -90,6 +90,20 @@ Success response: HTTP 200
 {
   "ok": true,
   "version": "<current version>",
+  "pid": 1234,
+  "supervisor_run_id": null,
+  "helper_recovery": {
+    "available": false,
+    "schema_version": null,
+    "status": null,
+    "last_exit_code": null,
+    "restart_count": null,
+    "last_start_at": null,
+    "last_stop_at": null,
+    "ready_at": null,
+    "reason": null,
+    "action": null
+  },
   "migration_version": 25,
   "migration_pending": false,
   "last_successful_tick_at": "2026-09-04T16:30:00Z",
@@ -135,6 +149,9 @@ Fields:
 |---|---:|---|
 | `ok` | boolean | Always `true` for a healthy helper. |
 | `version` | string | Helper version from the top-level `VERSION` file. |
+| `pid` | integer | Process ID of the helper answering this request. |
+| `supervisor_run_id` | string or null | Fresh identifier for each supervised child; `null` for a direct start. The supervisor checks this and `pid` on `/health` before declaring its child ready. This public identifier grants no access. |
+| `helper_recovery` | object | Last recorded recovery state on all platforms. Includes `available`, `schema_version`, `status`, `last_exit_code`, `restart_count`, UTC `last_start_at`, `last_stop_at`, and `ready_at` timestamps, plus a short `reason` and `action`. Missing state has `available: false` and null values, as shown above. Unreadable state returns only `available: false`, `status: "unreadable"`, `reason`, and `action`. Excludes paths, tokens, command lines, raw exceptions, login identity, process IDs, and retry timestamps. See [helper recovery](helper-recovery.md) for the restart policy and states. |
 | `migration_version` | integer | Newest SQLite schema migration opened by this helper process. |
 | `migration_pending` | boolean | `true` if the checkout contains a newer migration than the running helper opened. |
 | `last_successful_tick_at` | string or null | RFC 3339 UTC time of the last source-scheduler pass in which no feed poll failed; `null` before the first such pass. |
@@ -1592,7 +1609,7 @@ stdio-only; HTTP clients use this tool. The existing token gate still applies.
 consent checks, rate limits and standard error envelopes as stdio. See
 [discovery arguments and results](v2-mcp.md#discover_candidates).
 
-All 91 registry tools are also available over stdio by default in 3.11.0, with
+All 91 registry tools are also available over stdio by default in 3.11.1, with
 the same handlers and client schemas. Both MCP transports flatten the three
 top-level `oneOf` schemas for client compatibility; the server still validates
 the exact frozen schemas. `UOINK_MCP_TOOLSET=core` keeps the earlier 35.

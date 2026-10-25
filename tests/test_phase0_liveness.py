@@ -106,7 +106,10 @@ def test_watchdog_has_bounded_restart_policy():
     script = (server.HERE / "scripts" / "install-watchdog.ps1").read_text(
         encoding="utf-8"
     )
-    assert "-RestartCount 3" in script
-    assert "-RestartInterval (New-TimeSpan -Minutes 1)" in script
+    import uoink_supervisor
+    assert uoink_supervisor.BACKOFF == (5, 15, 45)
+    assert uoink_supervisor.WINDOW == 600
+    assert "uoink_supervisor.py" in script and "--startup" in script
+    assert "-RestartCount" not in script  # One retry budget, owned by Python.
     assert "Register-ScheduledTask" in script
     assert "-Force" in script

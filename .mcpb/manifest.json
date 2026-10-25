@@ -2,9 +2,9 @@
   "manifest_version": "0.4",
   "name": "uoink",
   "display_name": "Uoink",
-  "version": "3.11.0",
-  "description": "Connect Claude Desktop to all 91 Uoink tools for local capture, research, writing and library work.",
-  "long_description": "Uoink keeps the videos, podcasts, and articles you study on your own disk, then hands them to Claude as a cited corpus. This bundle connects Claude Desktop to your already-installed Uoink helper's local MCP server (stdio). Install the Uoink helper from https://uoink.app/install first, then install this bundle. Core capture is local and needs no API key; optional AI features use your own Anthropic key. Version 3.11.0 exposes all 91 tools over the standard connection, with the same consent gates. Set UOINK_MCP_TOOLSET=core for the previous 35 tools on clients that cap tool counts.",
+  "version": "3.11.1",
+  "description": "Search and cite your saved YouTube and podcast transcripts in Claude, from your local Uoink library on Windows.",
+  "long_description": "Use Uoink when you want Claude to find what a saved video or podcast said, cite the timestamp, capture a new link or save a research note. This bundle connects Claude Desktop to the local MCP server in your installed Uoink app for Windows 10/11, which reads your Markdown and JSON library, including YouTube transcripts, frames and comments. Install Uoink from https://uoink.app/install first. Core capture is local and needs no API key; optional AI features use your own Anthropic key. Clients that cap tool counts can set UOINK_MCP_TOOLSET=core.",
   "author": {
     "name": "Ryan Biddy",
     "url": "https://uoink.app"
@@ -21,15 +21,17 @@
   },
   "license": "MIT",
   "keywords": [
-    "youtube",
+    "youtube-transcript",
+    "podcast-transcript",
+    "knowledge-base",
+    "research",
+    "citations",
     "transcription",
     "mcp",
     "local-first",
+    "windows",
     "claude",
-    "rag",
-    "creator-tools",
-    "podcast",
-    "corpus"
+    "rag"
   ],
   "icon": "icon.png",
   "server": {
@@ -57,367 +59,367 @@
   "tools": [
     {
       "name": "uoink_video",
-      "description": "Extract a single YouTube video into a Uoink corpus. Returns the saved folder, markdown corpus, and screenshot paths."
+      "description": "Capture one YouTube video into a saved Markdown corpus with screenshots. Use for a single video; use uoink_playlist for a batch or uoink_url for other supported video platforms and long-video modes. Runs synchronously and needs the local media runtime. Returns the saved corpus and file paths; failures can leave partial capture files. Recapturing a source can replace its saved corpus and metadata."
     },
     {
       "name": "uoink_playlist",
-      "description": "Start asynchronous extraction for a YouTube playlist."
+      "description": "Start a background capture job for the videos in a YouTube playlist. Use for a one-time batch; use add_monitored_playlist for ongoing metadata monitoring or uoink_video for one video. Returns a job_id for get_job_status and cancel_job. Requires the local media runtime; the job can produce partial outputs before completion or cancellation. Recapturing a source can replace its saved corpus and metadata."
     },
     {
       "name": "get_job_status",
-      "description": "Return the full status object for an async Uoink job."
+      "description": "Read progress, per-item outcomes and errors for a saved capture or transcription job. Use after uoink_playlist or transcribe_podcast_episode returns a job_id; use cancel_job to request cancellation. Returns the current job object, or an error for an invalid or unknown identifier."
     },
     {
       "name": "cancel_job",
-      "description": "Cancel an async Uoink job and leave partial outputs on disk."
+      "description": "Request cancellation of a capture or transcription job while keeping partial outputs on disk. Use when the user wants work stopped; use get_job_status to inspect progress without cancelling. Returns the updated job object or an error for an unknown identifier. Cancellation does not delete captures already saved."
     },
     {
       "name": "list_recent_uoinks",
-      "description": "List recent saved Uoink corpora."
+      "description": "List the newest saved captures from the local index, with their slugs, titles, folders and capture times. Use to browse recent additions without a query; use search_uoinks for matching text or search_library for bounded citation-ready retrieval. Returns up to the requested number of items under the legacy yoinks key."
     },
     {
       "name": "search_uoinks",
-      "description": "Full-text search across saved Uoink corpora."
+      "description": "Find whole saved items by text, with optional channel and hook filters. Use to select corpora; use search_clips for timed transcript windows, search_library for bounded revision-bound retrieval, or query_by_facets for exact stored labels. Returns ranked item snippets and search-mode metadata. Semantic modes depend on the local index and helper; unavailable semantic search falls back to keyword with a reason."
     },
     {
       "name": "search_clips",
-      "description": "Full-text search over transcript windows from saved uoinks. Long source cues retain coarse timing and link to the cue start in the source. Use this to find the exact quotable passage; use search_uoinks to find whole items."
+      "description": "Find transcript windows in saved items, with timing, source links and ranked snippets. Use to locate quotable passages; use search_uoinks for whole items or search_library for bounded clip-first results with resource URIs. Long source cues keep coarse timing and link to the cue start. Semantic modes can fall back to keyword; inspect the returned search-mode metadata and passage verification before quoting."
     },
     {
       "name": "get_evidence_card",
-      "description": "Return an evidence card for one saved uoink: title, channel, platform, topic, source URL, a short summary hint, and its most quotable clips spread across the timeline, each with a deep link. Resolve by slug or video_id."
+      "description": "Build a saved item's evidence card with identity, summary hints and clips spread across its timeline. Use when you need a selectable card profile or clip count; use get_library_item for a bounded default Librarian card with revision-bound resource URIs. Supply at least one selector: a matching slug takes precedence, then video_id is tried. Missing items return an error; cards expose no local file paths."
     },
     {
       "name": "get_uoink_corpus",
-      "description": "Return the full markdown corpus for a saved uoink by slug."
+      "description": "Read a saved item's complete Markdown corpus, citation rows and available source or image pointers by slug. Use when you need the full local document; use get_library_item then read_library_resource for bounded chunks, or get_citation_map for citations alone. Returns an error if the corpus is missing or unreadable. Image pointers refer to saved pixels; this call performs no image interpretation."
     },
     {
       "name": "analyze_comments",
-      "description": "Run Comment Intelligence on an existing uoink and return themes, mentioned products/tools, and disagreements."
+      "description": "Analyze a saved capture's comments with Anthropic and replace its stored comment-intelligence section. Use to refresh themes, mentioned products and disagreements; use get_playbook_input with comment-mining for local evidence that your own agent analyzes. Requires a saved Anthropic key and at least five saved comments. Sends comment content to the provider and returns the resulting analysis lists."
     },
     {
       "name": "classify_hook",
-      "description": "Classify the hook type for an existing uoink."
+      "description": "Classify a saved capture's opening with Anthropic and replace its stored hook analysis. Use to run the classifier; use get_taxonomy to inspect saved classifications or classify_facets to store your own labels. Requires a saved Anthropic key and sends saved title, transcript and comment context to the provider. Returns the hook, explanation, confidence and correction count, and appends a taxonomy entry."
     },
     {
       "name": "get_taxonomy",
-      "description": "Return captured Hook Type taxonomy rows, optionally filtered by channel and hook_type."
+      "description": "Read saved hook-classification rows, optionally restricted to a channel or hook. Use to inspect prior classifier results; use get_facet_taxonomy for allowed labels, classify_hook to run the classifier, or analyze_self_channel for own-channel trends. Returns a bounded taxonomy list without rerunning analysis."
     },
     {
       "name": "get_citation_map",
-      "description": "Return the transcript + screenshot citation map for a saved uoink, each entry with a timestamped YouTube deep link."
+      "description": "Read all stored transcript and screenshot citations for one saved capture. Use for citation timing and source links without the full corpus; use get_uoink_corpus for Markdown or export_cited_range for a bounded cue-aligned export. Returns separate transcript and screenshot lists with source-aware deep links where available. Requires a saved video_id in the item's sidecar; missing captures return an error."
     },
     {
       "name": "get_uoink_health",
-      "description": "Return the per-section extraction health score for a saved uoink."
+      "description": "Read the stored per-section extraction health of a saved capture. Use to diagnose missing or failed capture sections; use get_transcript_reliability for questionable transcript spans. Reads the index snapshot, falling back to the sidecar, and returns an error when no health data exists. It does not retry extraction or recompute health."
     },
     {
       "name": "find_mentions",
-      "description": "Find every place an entity (person, tool, product, company, or topic) is mentioned across saved uoinks. Rank by name match, with newest first for ties. Results include stored timestamps and source links."
+      "description": "Find recorded entity-name mentions across saved items, with stored spans, timing and source links. Use for people, products, tools or topics already indexed as entities; use search_clips for arbitrary transcript text or search_uoinks for whole-item search. Ranks by name match with newest first on ties. Results are limited and do not extract new entities."
     },
     {
       "name": "get_transcript_reliability",
-      "description": "Return stored transcript reliability spans for a saved uoink by YouTube video_id. Read-only; computation is triggered by the helper endpoint or the user's auto-check setting."
+      "description": "Read stored transcript-reliability spans for a saved item. Use to inspect suspect wording before quoting; use get_uoink_health for extraction-section health or export_cited_range for stored cue text. Returns status not_computed with empty spans when no reliability snapshot exists. Computation requires the helper endpoint or the user's auto-check setting; this read never downloads a model."
     },
     {
       "name": "add_podcast_feed",
-      "description": "Register an RSS feed URL. Idempotent -- existing URL returns the same row. poll_interval_min default 60, range 15-1440. Metadata is watched automatically; auto_ingest is an explicit per-feed opt-in and defaults false."
+      "description": "Register a podcast RSS feed for ongoing metadata monitoring. Use for the podcast feed and episode workflow; use register_source for the general standing-source interface or list_podcast_feeds to find an existing feed. Returns the existing row for a duplicate URL. Audio auto-ingest is a separate explicit opt-in, off by default; standing capture still requires source consent through the dashboard."
     },
     {
       "name": "list_podcast_feeds",
-      "description": "List registered RSS feeds newest-first."
+      "description": "List registered podcast feeds newest first, including their saved polling settings. Use to obtain a feed_id before polling or removal; use list_podcast_episodes to inspect episodes and list_sources for standing-source consent. Returns feeds and their count. This call reads saved registrations without fetching RSS."
     },
     {
       "name": "remove_podcast_feed",
-      "description": "Delete a feed + cascade its episodes."
+      "description": "Stop monitoring a registered podcast feed. Use after list_podcast_feeds identifies the feed; use set_source_consent to disable capture while retaining detection. A source-linked feed is archived and disabled; a legacy unlinked feed is deleted with its tracked episode rows. Returns whether a row was affected; already published corpora are not removed."
     },
     {
       "name": "poll_podcast_feed",
-      "description": "Trigger one feed poll (HTTP GET + RSS/Atom parse + upsert episodes). Conditional GET via ETag/If-Modified-Since on subsequent polls so daily-news podcasts don't re-download an unchanged feed body."
+      "description": "Refresh metadata for one registered podcast feed through the source-aware polling path. Use after add_podcast_feed when new episode observations are needed; use list_podcast_episodes to read cached episodes without a fetch. Managed sources honor detection due times and leases. Polling records observations; capture remains subject to separate source consent and scheduling. Returns the poll outcome or a feed error."
     },
     {
       "name": "list_podcast_episodes",
-      "description": "List episodes. Optional feed_id + status filters (new | queued | downloaded | transcribed | ignored). Newest published first."
+      "description": "List tracked podcast episodes newest published first, optionally scoped to a feed or lifecycle state. Use to obtain episode IDs and check download or transcription state; use list_podcast_feeds for feed settings or poll_podcast_feed to refresh observations. Returns episodes and count from local storage without fetching audio."
     },
     {
       "name": "download_podcast_episode",
-      "description": "Download an episode's MP3 via yt-dlp + ffmpeg. Synchronous. Returns when the file lands at <data_root>/Podcasts/<feed-slug>/<episode-slug>.mp3 or yt-dlp errors. Idempotent -- skips re-download when the canonical path already has a non-zero file."
+      "description": "Download a tracked podcast episode's audio to its canonical local MP3. Use after list_podcast_episodes, before transcribe_podcast_episode; use episode_to_corpus only after a transcript exists. Requires yt-dlp and ffmpeg, and blocks until download finishes or fails. Reuses an existing nonempty canonical file and records its path on the episode."
     },
     {
       "name": "get_whisperx_status",
-      "description": "Report whether the WhisperX runtime is importable + the currently-selected model size + the diarization default. Agents call this before transcribe to decide whether to surface an install prompt to the user."
+      "description": "Inspect local WhisperX availability, the selected model and the diarization default. Use before transcribe_podcast_episode to identify missing runtime prerequisites; use get_job_status to monitor an already queued transcription. Returns availability and supported model settings without downloading a model or starting transcription."
     },
     {
       "name": "transcribe_podcast_episode",
-      "description": "Queue WhisperX for a downloaded episode. A single below-normal-priority worker writes the JSON transcript next to the MP3; get_job_status reports durable progress. Returns consent_required=True when the first-time model download (200 MB - 2 GB) needs the user to opt in (re-issue with consent_given=True after the dashboard prompt records the opt-in), OR a runtime-not-installed error when whisperx isn't importable."
+      "description": "Queue local WhisperX transcription for a downloaded podcast episode. Use after download_podcast_episode and get_whisperx_status; monitor the returned job with get_job_status, then publish with episode_to_corpus. A single worker writes or replaces the JSON transcript beside the audio. First-time model downloads require user consent: only reissue with consent_given after the dashboard records the opt-in. Missing runtime returns an error."
     },
     {
       "name": "episode_to_corpus",
-      "description": "Publish a completed podcast transcript into the local Uoink corpus. Writes deterministic Markdown and sidecar files, indexes full text and source-aware citations, and safely repairs partial prior attempts."
+      "description": "Publish a completed podcast transcript as a searchable local corpus with source-aware citations. Use after transcribe_podcast_episode completes; use download_podcast_episode for audio acquisition. Writes deterministic Markdown and sidecar files, replaces the prior corpus/index snapshot and repairs partial previous attempts. Missing audio or transcript prerequisites return an error; success identifies the published item."
     },
     {
       "name": "get_library_activity",
-      "description": "Report deterministic library activity, shelf churn, and source observations."
+      "description": "Report saved-library capture activity, shelf churn and standing-source observations for a time interval. Use for counts and revision-bound drill-down; use get_library_brief_input for a daily writing packet or source_status for one source's observations. Start with a summary, then reuse its report_revision for detail pages. Returns deterministic metrics and evidence; stale detail revisions require a fresh summary."
     },
     {
       "name": "search_library",
-      "description": "Bounded clip-first search of the saved library (default 5, at most 20 hits) with verified clip or item-text passages when available. Check passage_verified before quoting; citation_reason explains missing passages. Each hit carries the item id, source revision, safe title and link, evidence kind and timing, a 240-character preview and revision-bound card and excerpt URIs for read_library_resource. Results are bounded, not exhaustive; follow next_step when more retrieval is needed."
+      "description": "Retrieve a bounded, clip-first selection of saved-library matches with revision-bound card and excerpt URIs. Use for citation-ready research; use search_uoinks for whole-item filters or search_clips for more transcript windows. Check passage_verified before quoting; citation_reason explains missing passages. Follow resource URIs with read_library_resource and next_step for more retrieval. Results are not exhaustive; search-mode metadata explains keyword fallback."
     },
     {
       "name": "get_library_item",
-      "description": "Resolve one saved item by video_id or slug (exactly one) and return its default Librarian evidence card unchanged plus canonical card, excerpt and initial corpus-chunk URIs. Bounded; use before quoting."
+      "description": "Resolve one saved item to its bounded default Librarian card and canonical card, excerpt and initial corpus-chunk URIs. Use before quoting or paging through evidence; use get_evidence_card for selectable profiles and clip counts, or get_uoink_corpus for the full local Markdown. Supply exactly one selector. Follow returned URIs with read_library_resource; missing or stale evidence produces a structured refusal."
     },
     {
       "name": "read_library_resource",
-      "description": "Read one uoink://library/v1/ resource URI (card, excerpt, corpus chunk, shelf page or brief) with the same validation, contents and refusals as resources/read. Fallback for clients without native resource reads; identical text, one renderer."
+      "description": "Read a bounded saved-library card, excerpt, corpus chunk, shelf page or brief from its uoink URI. Use as the tools-only equivalent of resources/read, after search_library or get_library_item supplies a URI. Use get_uoink_corpus for a full document instead of chunk paging. Validation, rendered contents and refusals match native resource reads; follow next_step on stale revisions or unavailable evidence."
     },
     {
       "name": "get_playbook_input",
-      "description": "Prepare a bounded, cited research packet from the local library for outlier-posts, transcript-intel, comment-mining, creator-teardown or repurpose-pack. Returns instruction, packet and packet_hash; the client writes the report. No model, network, capture or settings changes."
+      "description": "Prepare cited local evidence and instructions for a client-written research report. Use for creator comparisons, transcript analysis, comment mining or repurposing; use analyze_self_channel for computed own-channel performance, search_library for ad hoc retrieval and get_library_brief_input for a dated operational brief. Returns instruction, packet and packet_hash within the library read budget. The client does the analysis; no model is called. Argument selectors depend on the selected playbook."
     },
     {
       "name": "discover_candidates",
-      "description": "Plan or run one ScrapeCreators discovery search with your saved key. Off by default. Omit confirm_credits for a free plan; set it to the planned credits to spend. Requires discovery enabled, room under the daily cap, and agent discovery enabled or a dashboard intent. Saves normalized candidates locally; does not capture them or fetch thumbnails."
+      "description": "Plan or run a ScrapeCreators search and save uncaptured candidates. Use to find new material; use search_library for saved evidence and queue_discovered to capture selected candidates. Off by default; requires a saved key, discovery enabled and daily credit room. Omit confirm_credits for a free plan, then confirm its exact cost. Spending requires agent discovery consent or a dashboard intent; stdio needs agent consent because dashboard intents are process-bound. No candidate is captured by this call."
     },
     {
       "name": "queue_discovered",
-      "description": "Queue 1-10 saved discovery candidates for normal Uoink capture. Requires agent discovery enabled or a dashboard intent. Skips captured, queued, unsupported and unknown picks. No ScrapeCreators call or credits; the normal retry worker captures the selected URLs."
+      "description": "Enqueue selected saved discovery candidates for normal capture. Use after discover_candidates returns a run and candidate keys; use that tool again to search for new candidates. Requires agent discovery consent or a dashboard intent; stdio needs agent consent because dashboard intents are process-bound. Returns queued and skipped picks, skipping unknown, unsupported, captured or queued URLs. No ScrapeCreators credits are spent; the resident retry worker performs capture later."
     },
     {
       "name": "get_library_brief_input",
-      "description": "Prepare bounded input for a client-run daily brief: for a UTC date and a Phase 2 run id, return job_key, input_hash, bound queue/run/projection revisions, capture and event counts, coverage, up to 20 work-status rows and up to 5 default Librarian cards (at most 24,576 bytes). Read only: no lease, no mutation. The client tracks its own report job."
+      "description": "Prepare a dated library-status packet for a brief that the client writes. Use for a requested daily brief; use get_library_activity for direct metrics or get_playbook_input for topical research. Returns job_key, input_hash, bound revisions, counts, coverage, up to 20 work rows and five Librarian cards within 24,576 bytes. No work lease is acquired. Pass the unchanged packet to publish_library_brief after writing."
     },
     {
       "name": "publish_library_brief",
-      "description": "Local write: persist one client-produced brief for a job prepared by get_library_brief_input. Validates the packet against current library data (stale_brief on change), binds every citation to supplied evidence, is idempotent on submission_key, and stores an immutable artifact under the local reach/briefs directory. Cannot apply labels or alter the assignment queue. Invoke only as part of the user's requested brief job."
+      "description": "Save a client-written daily brief as an immutable local artifact. Use only for the user's requested brief job after get_library_brief_input; use read_library_resource to read a published brief. Validates the exact packet against current data and binds quotes to supplied evidence. An identical submission_key retry returns the saved result; stale_brief requires fresh input. Writes under reach/briefs without applying labels or changing the assignment queue."
     },
     {
       "name": "export_cited_range",
-      "description": "Read-only cited export of one stored transcript range (exact cue-aligned start/end, at most 120 s and 200 cues) or one current excerpt id from a saved item: verbatim stored text, per-cue speaker labels with provenance, overlapping chapters, safe source and seek links, source/media revisions and evidence refs. Nothing is fetched, transcribed or saved; refusals carry a next_step."
+      "description": "Export verbatim stored transcript cues with speaker provenance, overlapping chapters, safe links and evidence references. Use after search_clips identifies a passage; use get_citation_map for all citation rows or read_library_resource for an existing resource URI. Select exact cue-aligned bounds or a current excerpt, at most 120 seconds and 200 cues. Returns source/media revisions; refusals include next_step. It does not fetch media or recompute transcription."
     },
     {
       "name": "list_library_work",
-      "description": "List Librarian assignment work for a run: counts by work state and manifest disposition, the run revision, one cursor page of items, and whether staged work is waiting for a subscribed client. Expires stale leases while listing; the server never runs the Librarian itself."
+      "description": "List Librarian assignment counts and one cursor page of work for a run. Use to inspect readiness before claim_library_work; use get_library_activity for aggregate library metrics. Listing expires stale leases and can update work state. Returns run revision, work states, manifest dispositions and waiting-client status. The server does not perform the Librarian's model work."
     },
     {
       "name": "claim_library_work",
-      "description": "Lease Librarian work for a client (action=claim returns up to twelve single-item packets, each with one evidence card and an attempt token), or renew, release or cancel the client's own current attempt. Leases run 60-900 seconds and never past one hour after the first claim; a row is exhausted after three."
+      "description": "Lease Librarian evidence packets, or renew, release or cancel your current attempts. Use after list_library_work to acquire work; use submit_library_result to store an assignment. Claim returns up to twelve packets with attempt tokens. Renew/release/cancel require the work_id and attempt_token from that claim. Leases last 60-900 seconds, never beyond one hour from first claim; three attempts exhaust a row."
     },
     {
       "name": "submit_library_result",
-      "description": "Submit one Librarian result for one leased work row: an assignment of one to three shelf memberships with quoted evidence, or an explicit unmapped, unsupported or error outcome. Validated and stored; nothing is applied to current labels. An identical retry under the same submission_key returns the recorded response."
+      "description": "Store a client's shelf-assignment result for one currently leased Librarian item. Use after claim_library_work; use apply_reshelving to preview accepted assignments as label changes. Copy the packet's identifiers and revision hashes unchanged, and quote its evidence. Submission stages results without changing current labels; an identical submission_key retry replays the recorded response. Report unavailable usage honestly instead of inventing zero usage."
     },
     {
       "name": "apply_reshelving",
-      "description": "Preview the exact reshelving delta for a run (mode=preview, the default), or apply a locally approved, unexpired preview by its delta hash and operation key (mode=apply). Apply is refused while librarian_apply_enabled is off, which is the shipping default, and stops at 15 percent churn without a trusted human approval."
+      "description": "Create a reshelving preview or apply an approved preview to current labels. Use after submit_library_result stages assignments; use pin_shelf for a user's individual shelf decision or undo_library_apply to reverse the latest apply. Preview needs a run and current projection revision; apply needs its preview_id, delta_hash and operation_key. Apply is disabled by default and stops at 15 percent churn without trusted human approval; expired or stale previews must be rebuilt."
     },
     {
       "name": "pin_shelf",
-      "description": "Pin, unpin or move one item on a shelf as a user decision that the Librarian may not override. Requires a user_intent_token minted by the dashboard confirmation route; no client actor string grants that authority."
+      "description": "Record a user's pin, unpin or move decision for one item's shelf membership. Use for an explicit individual decision; use apply_reshelving for run-wide proposed changes. Requires a dashboard-minted user_intent_token tied to the exact operation and current projection revision; no actor string grants authority. The Librarian cannot override the resulting user decision. Retry the same operation_key only with identical arguments."
     },
     {
       "name": "undo_library_apply",
-      "description": "Undo one recorded library apply by replaying its stored inverse as a new, itself reversible, journal operation. Only the apply that produced the current projection revision can be undone, and a user_intent_token from the dashboard is required."
+      "description": "Reverse the latest applicable library apply by replaying its stored inverse as a new journal operation. Use to undo the apply that produced the current projection revision; use apply_reshelving for a new proposal or pin_shelf for one item's shelf choice. Requires a dashboard user_intent_token. The inverse is itself reversible; identical operation_key retries replay the receipt, and stale revisions are refused."
     },
     {
       "name": "list_sources",
-      "description": "List standing sources (podcast RSS feeds, YouTube channels and playlists) with consent state, enrollment, today's UTC start allowance and detection health. Read-only; keyset pagination."
+      "description": "List standing RSS, YouTube channel and playlist sources with consent, enrollment, daily allowance and detection health. Use to find source_id values and compare source states; use source_status for one source's observations or list_podcast_feeds/list_monitored_playlists for legacy feed and playlist IDs. Returns a keyset page from local storage. Pass its cursor unchanged to continue; no poll or capture starts."
     },
     {
       "name": "register_source",
-      "description": "Register a standing source for metadata detection only. Creates the source with capture off and a due detection cursor; no network call, no capture. A duplicate returns the existing source unchanged (created=false)."
+      "description": "Register a standing source for future metadata detection with capture consent off. Use for the general source workflow; use add_podcast_feed or add_monitored_playlist when you need their feed or playlist IDs. Creates a due detection cursor without an immediate network call; the resident scheduler polls later. Duplicates return the existing source unchanged with created=false. Enable capture separately through set_source_consent after dashboard confirmation."
     },
     {
       "name": "source_status",
-      "description": "One source's current summary, one page of observed items with capture and classification state, and every in-flight reservation. Read-only: never enrolls, polls or starts work."
+      "description": "Read one standing source's summary, observed-item page and all in-flight reservations. Use after list_sources for detailed capture and classification state; use set_source_consent to change capture permission. Returns saved observations without enrolling, polling or starting work. Continue item pages with the returned cursor; revisions in the summary are needed for consent changes."
     },
     {
       "name": "set_source_consent",
-      "description": "Turn standing capture on or off for one source. Requires the expected source revision (and cursor revision when enabling), an operation key and a user_intent_token minted by the local dashboard confirmation; the stored receipt is returned on an identical retry. On: at most 25 back-catalog items once, then new items, 10 starts per UTC day. Off: releases unstarted reservations."
+      "description": "Enable or disable standing capture for a registered source after local confirmation. Use after register_source and source_status; use remove_podcast_feed or remove_monitored_playlist to stop their monitoring entirely. Requires current revisions and a dashboard-minted intent. Enabling permits at most 25 initial back-catalog items and 10 starts per UTC day; disabling releases unstarted reservations. Identical operation-key retries return the stored receipt; active captures are not cancelled by disabling."
     },
     {
       "name": "analyze_self_channel",
-      "description": "Aggregate the user's own saved videos (those tagged is_self via channel-name recognition) into hook evolution, format evolution, performance trend by month, and a top-performers list. Pass `handle` to scope to one of the user's registered channels; omit for the union across every registered channel. `limit` caps the top_performers list (default 10, max 100). Pure local read."
+      "description": "Summarize the user's saved own-channel videos into hook and format history, monthly performance trends and top performers. Use for own-channel planning; use get_playbook_input with creator-teardown for a chosen creator's research packet or get_engagement_signal for one item's local usage. Scope by a registered handle or omit it for all recognized own channels. Results reflect saved data, not live channel analytics."
     },
     {
       "name": "get_schema_version",
-      "description": "Report the data-shape versions Uoink writes + the supported read-range. v2.5 substrate: cross-version aggregators (Channel Decoder, Niche Corpus) check this before assuming v2 fields are present in older rows/sidecars. Read-only, no arguments."
+      "description": "Report the local SQL migration, item and sidecar schema versions and supported read ranges. Use before interpreting older saved records in an integration; use get_uoink_health to diagnose a capture's contents. Returns null for the SQL version if it cannot be read. This is a storage compatibility check, not a migration request."
     },
     {
       "name": "get_user_role",
-      "description": "Report the user's persisted role (creator | researcher | marketer | mixed) + the dashboard emphasis (primary/secondary chip order + default sort) the helper computes from it. Read-only."
+      "description": "Read the saved user role and its resolved dashboard sort and filter emphasis. Use to inspect the current dashboard preference; use set_user_role to change it or get_user_taste for writing and content preferences. Returns the normalized role, emphasis and supported roles without changing settings."
     },
     {
       "name": "set_user_role",
-      "description": "Persist the user's role choice. Drives Library default sort + filter-chip emphasis on the dashboard. Bounded enum -- one of creator | researcher | marketer | mixed."
+      "description": "Replace the saved user role that controls dashboard sort and filter emphasis. Use for the user's chosen working role; use get_user_role to inspect it or update_user_taste for content preferences. Returns the normalized role and computed emphasis. Other saved settings are retained."
     },
     {
       "name": "check_live_status",
-      "description": "Probe a URL to find out if it is a live broadcast without extracting. Returns one of: not_live | live | upcoming | post_live | was_live. The agent uses this to decide between immediate extraction and 'wait until the broadcast ends' (the helper's live_stream_behavior setting handles the latter for /extract; this tool is the read-only probe path)."
+      "description": "Fetch video metadata to determine whether a broadcast is live, upcoming or finished. Use before deciding to capture now or wait; use uoink_video or uoink_url to capture, and get_job_status for an existing job. Requires the metadata-fetch runtime and network access. Returns the canonical URL, title and detected live state without starting extraction."
     },
     {
       "name": "add_monitored_playlist",
-      "description": "Register a YouTube playlist URL to monitor for auto-uoinks. Idempotent on UNIQUE playlist_url. poll_interval_min default 5, range 1-1440."
+      "description": "Register a YouTube playlist for ongoing metadata monitoring. Use for repeated observation; use uoink_playlist for a one-time capture batch or register_source for the general source interface. Returns the existing row for a duplicate URL. Managed playlists start with capture consent off and clamp polling to at least 15 minutes; capture requires separate source consent and the resident helper."
     },
     {
       "name": "list_monitored_playlists",
-      "description": "List registered playlists newest-first."
+      "description": "List registered playlist monitors newest first with saved monitoring settings. Use to obtain playlist_id before polling or removal; use list_monitored_playlist_events for discoveries and list_sources for standing-source consent. Returns playlists and count from local storage without fetching YouTube."
     },
     {
       "name": "remove_monitored_playlist",
-      "description": "Delete a playlist + cascade its discovery events."
+      "description": "Stop monitoring a registered playlist. Use after list_monitored_playlists identifies it; use set_source_consent to stop capture while keeping metadata detection. Source-linked playlists are archived and disabled; legacy unlinked playlists and their discovery events are deleted. Returns whether a row was affected. Saved captures remain available."
     },
     {
       "name": "poll_monitored_playlist",
-      "description": "Poll one playlist (yt-dlp --flat-playlist) + diff against last_seen_video_ids + auto-queue new videos via the existing pending_yoinks retry worker. Returns the new[] discovery list so the dashboard can show it under a 'from mobile playlist' label distinct from rate-limit retries."
+      "description": "Refresh observations for a registered playlist through its source-aware polling path. Use after list_monitored_playlists when fresh observations are needed; use list_monitored_playlist_events for cached discoveries. Stdio requires the resident Uoink helper. Managed sources honor due-time and lease gates, and detection does not enqueue captures; captures require separate source consent and reservations. Returns the poll outcome and observation summary."
     },
     {
       "name": "list_monitored_playlist_events",
-      "description": "List per-discovery events. Optional filters: playlist_id, status (discovered | queued | extracted | failed). Newest first."
+      "description": "List recorded playlist-discovery events newest first, optionally filtered by playlist or lifecycle state. Use to inspect what monitoring found; use poll_monitored_playlist to refresh observations or list_monitored_playlists for monitor settings. Returns saved events and count. Reading events does not enqueue or retry captures."
     },
     {
       "name": "get_user_taste",
-      "description": "Return the consolidated TASTE.md (preferred hooks/formats, avoid list, top performance anchors). Generated from engagement events + persisted taste anchors. Read-only, no arguments."
+      "description": "Read consolidated TASTE.md preferences and performance anchors. Use for writing or example-selection context; use get_user_memory for hand-edited personal notes or update_user_taste to replace a preference section. If missing, regenerates the file from local engagement and anchors, including a configured vault mirror. Returns content and path without calling a model."
     },
     {
       "name": "get_user_memory",
-      "description": "Return the user's free-form USER.md notes (Channels I admire, My channel(s), Topics, Workflow notes). Hand-edited markdown -- the consolidator never overwrites this file. No arguments."
+      "description": "Read the user's hand-edited USER.md notes about channels, topics and workflow. Use for personal context; use get_user_taste for consolidated content preferences. Creates a local skeleton on first read when absent, then returns content and path. Existing hand-edited text is preserved; the taste consolidator does not overwrite it."
     },
     {
       "name": "update_user_taste",
-      "description": "Set one taste anchor section (preferred_hooks | preferred_formats | avoid) and re-consolidate TASTE.md. `content` is markdown that replaces the section body verbatim -- bullets recommended."
+      "description": "Replace one persisted taste-preference section and regenerate TASTE.md. Use for a user-requested preference change; use get_user_taste to inspect current preferences or get_user_memory for separate personal notes. The supplied Markdown replaces that section verbatim. Regeneration updates the local file and configured vault mirror; other preference sections remain intact."
     },
     {
       "name": "get_engagement_signal",
-      "description": "Return the time-decayed value_score for one video plus per-event-type counts and last event timestamp. Events live entirely on the local SQLite index (zero outbound). Weights are documented in index.py (_ENGAGEMENT_WEIGHTS); decay half-life is 30 days."
+      "description": "Read one saved item's time-decayed local engagement score, event counts and last-event time. Use to assess how the user has used an item; use analyze_self_channel for captured channel-performance trends or query_by_facets for stored performance labels. The score uses local interaction events with a 30-day half-life, not live social-network engagement."
     },
     {
       "name": "classify_facets",
-      "description": "Persist agent-classified facets + free-form tags for a video. Model-agnostic: the calling agent does the LLM work using its own model; this tool validates against bounded enums and writes to the row. The server fills performance_tier (channel-relative) and length_bucket (from duration) if you don't pass them."
+      "description": "Store your agent's facet classifications and tags on a saved item. Use after analyzing its evidence; use query_by_facets to retrieve labeled items or classify_hook for provider-run hook classification. Validates supplied labels, replaces those facet values and adds deduplicated tags. Missing performance tier and length bucket can be derived from saved metadata. Returns applied facets and tag counts; no model call runs here."
     },
     {
       "name": "query_by_facets",
-      "description": "Filter saved yoinks by facet values (format / performance_tier / hook_type / topic / length_bucket / tag). All filters AND-combined; newest first."
+      "description": "List saved items matching all supplied facet and tag filters, newest first. Use for exact stored-label selection; use search_uoinks for text relevance, classify_facets to write labels, or get_facet_taxonomy to discover supported axes. Returns yoinks and count from local storage. Filters are AND-combined; omitted filters leave that axis unrestricted."
     },
     {
       "name": "get_facet_taxonomy",
-      "description": "Enum lists for the v2.5 facet axes (used for filter chips)."
+      "description": "Return supported format, performance-tier, length-bucket and hook label lists. Use before classify_facets or query_by_facets; use get_taxonomy for saved per-item hook-classification rows. These are the server's allowed label constants, not counts of labels present in the library."
     },
     {
       "name": "assemble_workspace",
-      "description": "v3 P4 build workspace: pull a corpus slice for planning a video. Ranks yoinks by S1 facets (format match), performance tier (over > average > under), and S2 engagement value_score. Returns the slice + audience questions from comments + optional self-channel snapshot (if your_channel is set) + optional taste anchors (if S4 memory layer is available). Pure local read; the calling agent does any LLM analysis downstream. If `workspace_id` is provided the slice is persisted onto that row."
+      "description": "Select and rank saved examples for planning a video, with audience questions and available taste or own-channel context. Use to assemble a corpus slice; use get_workspace to read a saved workspace or critique_against_corpus to review a draft. Ranking uses format, performance tier and local engagement. Supplying workspace_id replaces that workspace's selected-item list; omitting it only returns the slice. Your agent performs any subsequent model analysis."
     },
     {
       "name": "critique_against_corpus",
-      "description": "v3 P4 critique tool. Two-phase: call WITHOUT `findings` to retrieve the assembled context (corpus slice + audience questions + taste anchors) -- the agent does the LLM analysis on that context. Call WITH `findings` (structured JSON object with hook_strength, structural_deviation, pacing_issues, missing_audience_hooks per ROADMAP P4) to persist the analysis to the workspace's critique log. Model-agnostic default; BYO-key mode accepted but not yet implemented on-server."
+      "description": "Prepare workspace grounding for a draft critique, or append your agent's findings to its critique log. Use after assemble_workspace; use get_workspace to read earlier critiques or revise_script to save a script revision. Omit findings to retrieve context, then submit your analysis with findings. Repeated submissions append log entries. Server-side BYO generation is not implemented; the agent performs the analysis."
     },
     {
       "name": "list_workspaces",
-      "description": "v3 P4: list build workspaces newest-first. Read-only."
+      "description": "List saved video-planning workspaces newest first. Use to obtain a workspace ID for get_workspace, assemble_workspace or generate_script; use list_scripts for script-version history. Returns workspace rows and count. This tool does not create workspaces or assemble new examples."
     },
     {
       "name": "get_workspace",
-      "description": "v3 P4: fetch one workspace + its full critique log (every draft + findings combination the agent has persisted)."
+      "description": "Read one saved video-planning workspace and its full critique log. Use after list_workspaces; use assemble_workspace to select new examples or critique_against_corpus to append findings. Supply id or its workspace_id alias; id takes precedence. Returns workspace and critique_log, or an error if the workspace is missing."
     },
     {
       "name": "extract_claims",
-      "description": "v3 A2 (Loki-inspired): persist agent-extracted claims for a video. LOCKED FRAMING -- the calling agent does the LLM decomposition; this tool validates + writes. Each claim is {claim_text, check_worthiness? (0.0-1.0), context?}. NEVER auto-asserts truth verdicts -- surfaces checkable claims so the user can decide which to verify."
+      "description": "Store checkable claims that your agent extracted from a saved item. Use after reading its evidence; use verify_claim to record supporting or conflicting evidence and list_claims to inspect existing claims. Appends claim rows in extracted state and returns their IDs. The agent performs decomposition; this tool does not determine truth. BYO model execution is not implemented."
     },
     {
       "name": "verify_claim",
-      "description": "v3 A2: record evidence for one extracted claim. alignment_signal MUST be one of supports / contradicts / mixed / inconclusive. NEVER 'true' / 'false' / 'lie'. The user judges the verdict from the surfaced evidence."
+      "description": "Record your agent's evidence and alignment signals for an existing claim. Use after extract_claims; use get_claim to inspect evidence without changing it. Replaces the stored evidence and updates review status. Signals describe support, contradiction, mixed evidence or inconclusiveness, never a truth verdict; the user judges the claim. The agent performs research, and BYO model execution is not implemented."
     },
     {
       "name": "list_claims",
-      "description": "v3 A2: list extracted claims. Filter by video_id and/or status (extracted | verified | not-attempted)."
+      "description": "List saved checkable claims, optionally filtered by source item or review status. Use to select claim IDs for get_claim or verify_claim; use extract_claims to add claims. Returns claim rows and count. A verified status records that evidence was submitted, not that the claim is true."
     },
     {
       "name": "get_claim",
-      "description": "v3 A2: fetch one claim by id, with stored evidence."
+      "description": "Read one saved claim with its recorded evidence and alignment signals. Use after list_claims; use verify_claim to replace its evidence. Supply id or its claim_id alias; id takes precedence. Returns the claim or a not-found error. Review status and alignment signals are evidence records, not automatic truth verdicts."
     },
     {
       "name": "generate_script",
-      "description": "v3 P5 script studio: two-phase generator. Call WITHOUT `script` payload to retrieve grounding context (workspace metadata + assembled corpus slice + audience questions + optional taste anchors + optional self-channel snapshot). The calling agent does the writing using its own model. Call WITH `script` (a structured object with hook + beats + body + cta + source_yoinks citations) to persist as a new versioned row. parent_script_id chains revisions. An optional hook_type_lens biases the opening toward one of the 9 hook styles."
+      "description": "Prepare workspace grounding for a video script, or save an agent-written script as a new version. Use for a new draft; use revise_script to revise an existing script or write_blog/write_tweet for prose pieces. Omit script to retrieve context, then submit your structured draft. The agent writes it; server-side BYO generation is not implemented. Returns grounding or the saved script ID and version."
     },
     {
       "name": "revise_script",
-      "description": "v3 P5: revise an existing script grounded in critique findings. Two-phase like generate_script -- without `revised_script` returns previous + grounding for the agent to act on; with `revised_script` persists as a new version (parent_script_id auto-set to the prior id)."
+      "description": "Prepare revision context for an existing video script, or save its replacement as a linked new version. Use after get_script or critique_against_corpus; use generate_script for a new draft. Without revised_script, returns the previous script and grounding; with it, persists a new row whose parent is the prior script. The agent performs rewriting; server-side BYO generation is not implemented."
     },
     {
       "name": "get_shot_list",
-      "description": "v3 P5: derive (and persist) a default shot list from a script's beats + the parent workspace's S1 format facet. Per-beat row with format-specific cue suggestions. The calling agent can override by supplying shot_list directly in generate_script."
+      "description": "Derive and save a default shot list from a script's beats and its workspace format. Use when you want heuristic camera cues; use get_script to read the existing shot list without replacing it, or supply a custom shot_list through generate_script. This call overwrites the prior shot list and returns the generated rows. It does not run a model."
     },
     {
       "name": "list_scripts",
-      "description": "v3 P5: list scripts newest-first. Optional workspace_id filter scopes to one workspace's history."
+      "description": "List saved video-script versions newest first, optionally within one workspace. Use to find a script ID for get_script or revise_script; use list_writing_pieces for tweet, thread and blog drafts. Returns script rows and count without generating or changing a draft."
     },
     {
       "name": "get_script",
-      "description": "v3 P5: fetch one script by id."
+      "description": "Read a saved video-script version, including beats, shot list and source-item citations. Use after list_scripts; use revise_script for a new version or get_shot_list to regenerate camera cues. Supply id or its script_id alias; id takes precedence. Returns the script object or a not-found error."
     },
     {
       "name": "write_tweet",
-      "description": "Two-phase tweet/thread generator. Phase 1 (no `body`) returns grounding (source yoink + creator credit + style anchors + Voice DNA prompt). Phase 2 (`body` present) persists + scans for canned phrases + returns structured warnings (soft warn -- NEVER auto-blocks). Creator credit is required in the body."
+      "description": "Prepare grounding for a tweet or thread, or save a credited draft in the local Writing Studio. Use for short social drafts; use write_blog for articles or generate_script for video scripts. Without body, returns grounding unless direct generation is requested with the saved Anthropic key. With body, saves the agent's draft and returns soft Voice DNA warnings. Creator credit cannot be suppressed. Direct generation sends context to Anthropic and retries fatal phrase violations once before refusing to save; nothing is posted to a social account."
     },
     {
       "name": "write_blog",
-      "description": "Two-phase blog generator. Same shape as write_tweet but Phase 2 accepts title, dek, tags, and expects markdown body with a Source section. Soft-warn canned-phrase scan; creator credit non-suppressible."
+      "description": "Prepare grounding for a blog article, or save a credited Markdown draft in the local Writing Studio. Use for long prose; use write_tweet for tweets and threads or generate_script for video scripts. Without body, returns grounding unless direct generation is requested with the saved Anthropic key. With body, saves the agent's draft and returns soft Voice DNA warnings. Keep the required Source credit. Direct generation sends context to Anthropic and retries fatal phrase violations once before refusing to save; nothing is published to a website."
     },
     {
       "name": "list_writing_pieces",
-      "description": "List generated pieces newest-first. Optional `kind` (tweet|thread|blog) + `yoink_id` filters."
+      "description": "List saved tweet, thread and blog drafts newest first, optionally filtered by kind or source item. Use to find a piece ID for get_writing_piece; use list_scripts for video-script versions. Returns pieces and count. The list contains local drafts, not posts fetched from social or publishing accounts."
     },
     {
       "name": "get_writing_piece",
-      "description": "Fetch one piece by id."
+      "description": "Read one saved Writing Studio tweet, thread or blog draft. Use after list_writing_pieces; use write_tweet or write_blog to save another draft, or get_script for video scripts. Supply id or its piece_id alias; id takes precedence. Returns the piece object or a not-found error."
     },
     {
       "name": "add_style_anchor",
-      "description": "Add a Substack-style voice anchor (URL or raw pasted text). User names each. Cap at 10 -- returns 422-shaped error when exceeded. URL ingestion extracts prose via the helper's page extractor (Universal Site PR); falls back to NULL raw_text when the extractor isn't bound yet."
+      "description": "Save a named writing-style reference from pasted text or a URL. Use to guide later write_tweet/write_blog drafts; use list_style_anchors to select existing references. URL references fetch prose through the page extractor and can retain null raw_text if extraction fails. Returns the anchor; more than ten anchors is refused. Style references do not authorize copying source facts or suppressing creator credit."
     },
     {
       "name": "list_style_anchors",
-      "description": "List style anchors + their active flag + the helper's 10-anchor cap."
+      "description": "List saved writing-style references with active flags and the configured ten-anchor cap. Use to select style_anchor_ids for write_tweet or write_blog; use add_style_anchor to save a reference or remove_style_anchor to delete one. Returns anchors and count without refetching URL contents."
     },
     {
       "name": "remove_style_anchor",
-      "description": "Delete a style anchor."
+      "description": "Delete a saved writing-style reference. Use after list_style_anchors identifies the reference; use add_style_anchor to save a replacement. Supply anchor_id or its id alias; anchor_id takes precedence. Returns the selected ID and whether it was removed. Previously saved writing pieces remain."
     },
     {
       "name": "uoink_url",
-      "description": "Capture any http(s) URL through the helper's universal extractor. Known video platforms use the full media pipeline; other sites use the metadata and transcript fallback."
+      "description": "Capture a supported video URL through platform routing, with metadata/transcript fallback for other yt-dlp sites. Use for non-YouTube videos or long-video modes; use uoink_video for a single standard YouTube capture, uoink_page for webpage prose, uoink_x for X text chains, or uoink_reddit_thread for discussion comments. Requires the local media runtime. Saves a local corpus; generic fallback has no screenshots, comment fetch or hook classification. Recapturing a source can replace its saved corpus and metadata."
     },
     {
       "name": "uoink_note",
-      "description": "Save a text note as a first-class local corpus item."
+      "description": "Save user-provided text as a local searchable note with title and attribution. Use for pasted ideas or prose without fetching a source; use uoink_page for a web article or uoink_image for pixels. Returns the saved item ID, slug and metadata. Empty or invalid notes are refused; title can be derived from the text."
     },
     {
       "name": "uoink_image",
-      "description": "Save a base64 PNG, JPEG, or WebP as a local image corpus item. No cloud OCR or vision service runs."
+      "description": "Save supplied PNG, JPEG or WebP bytes as a local image corpus item with optional caption and attribution. Use for screenshots, diagrams or images; use uoink_note for text or uoink_page to fetch a webpage. Accepts strict base64 or a data URL and returns the saved item ID, slug and metadata. Invalid images are refused. No cloud OCR or vision service runs."
     },
     {
       "name": "uoink_x",
-      "description": "Capture an X post and the author's earlier chain as a local corpus item. Requires x_text_capture_enabled, which defaults on."
+      "description": "Capture an X post and its author's earlier chain as a local text corpus item. Use for post text; use uoink_url for an X video capture or uoink_page for general webpage prose. Requires x_text_capture_enabled and public source access. Returns the saved item ID, title, captured-tweet count and metadata; disabled capture or extraction failure returns an error. Recapturing a source can replace its saved corpus and metadata."
     },
     {
       "name": "uoink_page",
-      "description": "Capture an allowed page as a yoink. Crawl4AI runs ON-DEVICE when available (JS render + screenshot); stdlib fallback otherwise (static HTML + markdown synthesis, no screenshot). Allowlist-gated -- add the host via add_allowed_site first if it's not in the defaults (youtube.com, youtu.be, x.com, twitter.com). Result auto-persists as a yoink with source_type='page'."
+      "description": "Fetch an allowed webpage as Markdown and save it as a local corpus item. Use for articles and documentation; use uoink_url for videos, uoink_x for post chains or uoink_reddit_thread for comments. Add an unlisted host with add_allowed_site only with user authorization. Crawl4AI renders locally when available; static fallback has no screenshot. Returns extracted content and metadata; video_id is null if extraction succeeded but persistence failed. Recapturing a source can replace its saved corpus and metadata."
     },
     {
       "name": "uoink_reddit_thread",
-      "description": "Fetch a thread via its public .json (no API key, no OAuth), flatten the comment tree with a depth limit and a score threshold, and persist it as a yoink with source_type='reddit_thread'. Renders as Post -> Top comments -> nested replies so search and facets work on the conversation. Runs on-device; no allowlist gate."
+      "description": "Capture a Reddit post and filtered comment tree as a local discussion corpus. Use when replies matter; use uoink_page for general webpage prose or uoink_url for video extraction. Fetches Reddit's public JSON without API credentials or the page allowlist, then saves nested replies with source_type reddit_thread. Returns captured content, comment counts and the saved item ID; fetch or save failures return an error. Recapturing a source can replace its saved corpus and metadata."
     },
     {
       "name": "list_allowed_sites",
-      "description": "List the user's allowed hostnames. Default seeds (youtube.com, youtu.be, x.com, twitter.com) are pre-added by migration 0015 and removable like any other entry."
+      "description": "List saved webpage-capture hostname patterns and their active state. Use before uoink_page to check access; use add_allowed_site or remove_allowed_site to change the allowlist. Returns sites, count and default seeds. Seeds can be removed like other entries; this call does not test reachability or fetch pages."
     },
     {
       "name": "add_allowed_site",
-      "description": "Add a hostname or wildcard pattern (`*.docs.example.com` matches all sub.docs.example.com subdomains). Idempotent on UNIQUE url_pattern. Plain hostnames also match their subdomains (so 'example.com' matches 'www.example.com')."
+      "description": "Add a hostname pattern to the webpage-capture allowlist. Use for a user-authorized uoink_page destination; use list_allowed_sites to inspect rules or remove_allowed_site to revoke one. Plain hosts include subdomains; wildcard patterns match their specified subdomains. Returns the saved rule and reuses an existing pattern unchanged. This grants future page access but does not capture a page."
     },
     {
       "name": "remove_allowed_site",
-      "description": "Remove a hostname or wildcard pattern from the allowlist."
+      "description": "Remove a hostname pattern from the webpage-capture allowlist. Use to revoke a rule found by list_allowed_sites; use add_allowed_site to restore it. Returns the normalized pattern and whether a rule was removed. Saved captures remain, and overlapping rules can still allow the same host."
     }
   ],
   "compatibility": {

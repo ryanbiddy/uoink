@@ -355,6 +355,16 @@ PINNED_EXTENSION_ID = "bkcapfidedhfcjpmjabeopfbcjcbmdmi"
 
 def _allowed_extension_ids() -> set[str]:
     ids = {PINNED_EXTENSION_ID}
+    try:
+        from uoink_store import load_store_config
+
+        store_id = load_store_config()["chrome_web_store_id"]
+    except Exception:
+        # A missing or unreadable store config must never take down /token;
+        # the pinned developer ID keeps working.
+        store_id = ""
+    if store_id:
+        ids.add(store_id)
     extra = (os.environ.get("UOINK_EXTENSION_IDS") or "").split(",")
     try:
         settings = _read_settings() or {}
@@ -2740,11 +2750,34 @@ def _asr_duration_expectation(duration_seconds: object) -> dict:
     }
 
 
+def _media_has_audio(media_path: Path,
+                     cancel_event: threading.Event | None = None) -> bool | None:
+    """Return whether audio exists, or None when the probe is inconclusive."""
+    try:
+        result = _run_subprocess(
+            [_platform.media_binary("ffprobe"), "-v", "error", "-select_streams", "a",
+             "-show_entries", "stream=index", "-of", "json", str(media_path)],
+            cancel_event=cancel_event,
+            check=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            timeout=30,
+        )
+        data = json.loads(result.stdout)
+    except (FileNotFoundError, subprocess.CalledProcessError,
+            subprocess.TimeoutExpired, json.JSONDecodeError):
+        return None
+    if not isinstance(data, dict) or not isinstance(data.get("streams"), list):
+        return None
+    return bool(data["streams"])
+
+
 def _resolve_video_transcript(
         caption_entries: list[tuple[float, float, str]],
         media_path: Path,
         duration_seconds: object,
         *,
+        url: str | None = None,
         settings: dict | None = None,
         captions_refused: bool = False,
         media_chunks: list[tuple[Path, float, float]] | None = None,
@@ -2756,7 +2789,7 @@ def _resolve_video_transcript(
     exist. Fallback skips and failures are structured separately so a
     caption-less capture still succeeds without pretending it has words.
     Chunk inputs carry source offsets and durations; ASR covers only those
-    downloaded sections.
+    downloaded sections, including when separate source audio is needed.
     """
     _raise_if_cancelled(cancel_event)
     if caption_entries:
@@ -2780,25 +2813,87 @@ def _resolve_video_transcript(
         }
 
     try:
-        entries = []
-        for path, offset, length in (media_chunks or [(media_path, 0.0, None)]):
-            _raise_if_cancelled(cancel_event)
-            local_entries = uoink_reliability.transcribe_media(
-                path,
-                model_name=model_name,
-                model_root=RELIABILITY_MODEL_ROOT,
-            )
-            _raise_if_cancelled(cancel_event)
-            if media_chunks:
-                # ASR timestamps are local to each sampled section. Bound
-                # them to that section before linking to the source video.
-                entries.extend(
-                    (offset + max(0.0, start), offset + min(end, length), text)
-                    for start, end, text in local_entries
-                    if min(end, length) > max(0.0, start)
-                )
-            else:
-                entries.extend(local_entries)
+        with contextlib.ExitStack() as cleanup:
+            entries = []
+            audio_path = None
+            for number, (path, offset, length) in enumerate(
+                    media_chunks or [(media_path, 0.0, None)]):
+                _raise_if_cancelled(cancel_event)
+                has_audio = _media_has_audio(path, cancel_event)
+                _raise_if_cancelled(cancel_event)
+                needs_source_audio = has_audio is False
+                if not needs_source_audio:
+                    try:
+                        local_entries = uoink_reliability.transcribe_media(
+                            path,
+                            model_name=model_name,
+                            model_root=RELIABILITY_MODEL_ROOT,
+                        )
+                    except IndexError:
+                        if has_audio is True:
+                            raise
+                        needs_source_audio = True
+                    _raise_if_cancelled(cancel_event)
+                if needs_source_audio:
+                    if audio_path is None:
+                        no_audio = {
+                            "status": "no_audio", "caption_reason": reason,
+                            "model": model_name, **expectation,
+                            "reason": "Captured media has no audio stream, and no source URL is available.",
+                        }
+                        if not url:
+                            return [], None, no_audio
+                        # Keep fallback files within this capture and remove them
+                        # on success, failure, or cancellation.
+                        tmp_dir = Path(cleanup.enter_context(tempfile.TemporaryDirectory(
+                            prefix=".asr-", dir=media_path.parent,
+                            ignore_cleanup_errors=True)))
+                        try:
+                            audio_path = _download_reliability_audio(url, tmp_dir, cancel_event)
+                            _raise_if_cancelled(cancel_event)
+                            has_audio = _media_has_audio(audio_path, cancel_event)
+                        except PlaylistJobCancelled:
+                            raise
+                        except Exception as e:
+                            no_audio.update(
+                                reason="Captured media has no audio stream, and source audio could not be obtained.",
+                                error=_sanitize_error(str(e)),
+                            )
+                            return [], None, no_audio
+                        if has_audio is False:
+                            no_audio["reason"] = "Neither the captured media nor the source download contains an audio stream."
+                            return [], None, no_audio
+                    path = audio_path
+                    if media_chunks:
+                        # Download once, then decode only the same sampled ranges.
+                        # Each WAV starts at zero; the mapping below adds offset once.
+                        path = audio_path.parent / f"chunk-{number:03d}.wav"
+                        _run_subprocess(
+                            [_platform.media_binary("ffmpeg"), "-v", "error", "-nostdin", "-y",
+                             "-ss", str(offset), "-i", str(audio_path), "-t", str(length),
+                             "-map", "0:a:0", "-vn", "-ac", "1", "-ar", "16000",
+                             "-c:a", "pcm_s16le", str(path)],
+                            cancel_event=cancel_event, check=True,
+                            stdout=subprocess.DEVNULL, stderr=subprocess.PIPE,
+                            timeout=_ffmpeg_timeout_for(length),
+                        )
+                    _raise_if_cancelled(cancel_event)
+                    local_entries = uoink_reliability.transcribe_media(
+                        path,
+                        model_name=model_name,
+                        model_root=RELIABILITY_MODEL_ROOT,
+                    )
+                _raise_if_cancelled(cancel_event)
+                if media_chunks:
+                    # ASR timestamps are local to each sampled section. Bound
+                    # them to that section before linking to the source video.
+                    entries.extend(
+                        (offset + max(0.0, start), offset + min(end, length), text)
+                        for start, end, text in local_entries
+                        if min(end, length) > max(0.0, start)
+                    )
+                else:
+                    entries.extend(local_entries)
     except PlaylistJobCancelled:
         raise
     except Exception as e:
@@ -2810,6 +2905,18 @@ def _resolve_video_transcript(
             "error": _sanitize_error(str(e)),
             **expectation,
         }
+    finally:
+        # Retry cleanup after the context exits; a Windows media lock must not
+        # discard a completed transcript or change the fallback status.
+        try:
+            for tmp_dir in media_path.parent.glob(".asr-*"):
+                if tmp_dir.is_dir() and not tmp_dir.is_symlink():
+                    try:
+                        shutil.rmtree(tmp_dir)
+                    except OSError:
+                        pass
+        except OSError:
+            pass
 
     completed = {
         "status": "completed",
@@ -3404,14 +3511,50 @@ def _iter_corpus_folders(root: Path | None = None):
             yield folder, corpus
 
 
+def _backfill_slug_conflict(idx, folder: Path, video_id: str) -> dict | None:
+    owner = idx.get_by_slug(folder.name)
+    if owner is None:
+        return None
+    other_path = owner.get("corpus_path") or owner.get("sidecar_path")
+    other_folder = Path(other_path).parent if other_path else None
+    if owner["video_id"] == video_id and other_folder == folder:
+        return None
+    return {"path": str(folder), "other_path": str(other_folder) if other_folder else "unknown",
+            "video_id": owner["video_id"]}
+
+
+def _duplicate_folder_names_status() -> dict:
+    """Read-only doctor report, including paths kept out of public health."""
+    duplicates = []
+    try:
+        idx = _get_existing_index()
+        for folder, _corpus in _iter_corpus_folders():
+            sidecar_path = folder / f"{folder.name}.json"
+            try:
+                sidecar = json.loads(sidecar_path.read_text(encoding="utf-8"))
+            except (OSError, ValueError):
+                continue
+            if not isinstance(sidecar, dict) or not sidecar.get("video_id"):
+                continue
+            conflict = _backfill_slug_conflict(idx, folder, sidecar["video_id"])
+            if conflict:
+                duplicates.append(conflict)
+    except (OSError, index.sqlite3.Error) as exc:
+        return {"count": len(duplicates), "folders": duplicates, "error": str(exc)}
+    return {"count": len(duplicates), "folders": duplicates}
+
+
 def _run_backfill(root: Path | None = None) -> None:
     """Index every on-disk yoink folder not already in index.db. Incremental
-    (skips rows already present) and cancellable via _backfill_cancel.
+    (skips rows already present) and cancellable via _backfill_cancel. A new
+    folder whose name is already another row's slug is skipped with one
+    warning; the doctor lists those duplicates.
     ``root`` overrides the scan root for --rebuild-index (C-03): the corpus
     may live somewhere the configured output root can't see."""
     global _index_recovering
     try:
-        known = _get_index().all_video_ids()
+        idx = _get_index()
+        known = idx.all_video_ids()
     except Exception:
         log.exception("backfill: could not read the index")
         with _backfill_lock:
@@ -3435,12 +3578,18 @@ def _run_backfill(root: Path | None = None) -> None:
                        if sidecar_path.exists() else {})
         except (OSError, json.JSONDecodeError):
             sidecar = {}
-        video_id = (sidecar.get("video_id") or "").strip()
+        video_id = (sidecar.get("video_id") or "").strip() if isinstance(sidecar, dict) else ""
         if not video_id or video_id in known:
             continue  # unindexable, or already indexed (incremental skip)
         try:
+            conflict = _backfill_slug_conflict(idx, folder, video_id)
+            if conflict:
+                log.warning("backfill: skipped %s: folder name already used by %s (video %s)",
+                            conflict["path"], conflict["other_path"], conflict["video_id"])
+                continue
             if _index_yoink(folder, sidecar, corpus, sidecar_path):
                 indexed += 1
+                known.add(video_id)
         except Exception:
             log.exception("backfill: failed to index %s", folder)
     with _backfill_lock:
@@ -5514,7 +5663,7 @@ def _build_yoink_md(metadata: dict, url: str, entries: list, shots: list,
     parts.append(f"**Topic:** {topic}")
     if cap_warning:
         parts.append(f"**Note:** {cap_warning}")
-    if transcript_note:
+    if transcript_note and (entries or (media_sections and "## Transcript\n" not in media_sections)):
         parts.append(f"**Transcript:** {transcript_note}")
     parts.append("")
     parts.append("---")
@@ -5542,6 +5691,9 @@ def _build_yoink_md(metadata: dict, url: str, entries: list, shots: list,
 
     # Transcript
     if media_sections:
+        if not entries and transcript_note:
+            media_sections = media_sections.replace(
+                "## Transcript\n", f"## Transcript\n\n*{transcript_note}*\n", 1)
         parts.append(media_sections.rstrip("\n"))
         parts.append("")
     elif not entries:
@@ -5688,7 +5840,50 @@ def _video_capture_folder(parent: Path, url: str, metadata: dict) -> Path:
     return parent / f"{title_slug[:63]}_{suffix}"
 
 
-def _verify_video_capture_folder(folder: Path, url: str, metadata: dict) -> None:
+def _indexed_video_capture(url: str, metadata: dict) -> dict | None:
+    """Find one live, verified destination without guessing from its title."""
+    try:
+        idx = _get_index()
+        source = _video_capture_source(url)
+        row = idx.get_yoink(_video_capture_id(url, metadata))
+        matches = {row["video_id"]: row} if row and row.get("deleted_at") is None else {}
+        # Only a miss needs the recorded-URL scan (older captures stored a
+        # different ID). It parses every live row's metadata, so skip it on
+        # the common path.
+        for candidate in ([] if matches else idx.list_capture_sources()):
+            try:
+                saved = json.loads(candidate.get("metadata_json") or "{}")
+            except (ValueError, TypeError):
+                continue
+            if not isinstance(saved, dict):
+                continue
+            urls = [saved.get(key) for key in ("url", "source_url", "webpage_url", "original_url")]
+            if any(isinstance(value, str) and value.strip()
+                   and _video_capture_source(value) == source for value in urls):
+                matches[candidate["video_id"]] = candidate
+        if not matches:
+            return None
+        if len(matches) != 1:
+            log.warning("capture: using new folder for %s: multiple live source rows", source)
+            return None
+        row, = matches.values()
+        corpus = Path(row["corpus_path"])
+        folder = corpus.parent
+        if (not corpus.is_absolute() or corpus.suffix.lower() != ".md"
+                or folder.name != row["slug"] or not folder.is_dir()
+                or (row.get("sidecar_path")
+                    and Path(row["sidecar_path"]).parent != folder)):
+            log.warning("capture: using new folder for %s: indexed paths unavailable or inconsistent", source)
+            return None
+        _verify_video_capture_folder(folder, url, metadata, video_id=row["video_id"])
+        return row
+    except (OSError, ValueError, TypeError, index.sqlite3.Error) as exc:
+        log.warning("capture: using new folder for %s: %s", url, exc)
+        return None
+
+
+def _verify_video_capture_folder(folder: Path, url: str, metadata: dict,
+                                 *, video_id: str | None = None) -> None:
     """Refuse ambiguous ownership; never infer it from a folder's title."""
     if folder.is_symlink() or getattr(folder, "is_junction", lambda: False)():
         raise FileExistsError(f"capture folder is a link: {folder}")
@@ -5696,7 +5891,7 @@ def _verify_video_capture_folder(folder: Path, url: str, metadata: dict) -> None
     if not entries:
         return
     source = _video_capture_source(url)
-    video_id = _video_capture_id(url, metadata)
+    video_id = video_id or _video_capture_id(url, metadata)
     verified = False
     for name in (".capture-source.json", f"{folder.name}.json", "yoink.json", "metadata.json"):
         path = folder / name
@@ -5748,14 +5943,18 @@ def _create_video_entry_folder(folder: Path, url: str, metadata: dict) -> Path:
             return target
 
 
-def _prepare_video_capture_folder(folder: Path, url: str, metadata: dict) -> None:
-    """Claim the directory before any capture artifact can be overwritten."""
-    video_id = _video_capture_id(url, metadata)
+def _prepare_video_capture_folder(folder: Path, url: str, metadata: dict,
+                                  *, refresh_existing: bool = True) -> tuple[Path, dict | None]:
+    """Select and claim the directory before any artifact can be overwritten."""
+    existing = _indexed_video_capture(url, metadata) if refresh_existing else None
+    if existing is not None:
+        folder = Path(existing["corpus_path"]).parent
+    video_id = existing["video_id"] if existing else _video_capture_id(url, metadata)
     folder.parent.mkdir(parents=True, exist_ok=True)
     try:
         folder.mkdir()
     except FileExistsError:
-        _verify_video_capture_folder(folder, url, metadata)
+        _verify_video_capture_folder(folder, url, metadata, video_id=video_id)
     # Exclusive creation also protects an empty directory from two different
     # sources claiming it concurrently. Keep a failed/partial claim for review.
     claim = folder / ".capture-source.json"
@@ -5763,7 +5962,8 @@ def _prepare_video_capture_folder(folder: Path, url: str, metadata: dict) -> Non
         with claim.open("x", encoding="utf-8") as stream:
             json.dump({"url": _video_capture_source(url), "video_id": video_id}, stream)
     except FileExistsError:
-        _verify_video_capture_folder(folder, url, metadata)
+        _verify_video_capture_folder(folder, url, metadata, video_id=video_id)
+    return folder, existing
 
 
 def _schedule_publication_retry(folder: Path, sidecar: dict, corpus_path: Path, metadata: dict,
@@ -5942,7 +6142,8 @@ def _retry_publication_one() -> bool:
             if ownership.conflict:
                 refuse_obsolete(ownership.conflict)
             try:
-                _verify_video_capture_folder(folder, url, {"id": record["metadata_id"]})
+                _verify_video_capture_folder(folder, url, {"id": record["metadata_id"]},
+                                             video_id=sidecar["video_id"])
             except FileExistsError:
                 # Another source, unverifiable ownership or a link.
                 obsolete = True
@@ -6063,7 +6264,8 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
                     long_video_mode: str = LONG_VIDEO_MODE_FULL,
                     cancel_event: threading.Event | None = None,
                     phase_callback=None,
-                    pending_id: int | None = None) -> dict:
+                    pending_id: int | None = None,
+                    refresh_existing: bool = True) -> dict:
     """Yoink a single video into output_folder.
 
     Steps:
@@ -6091,12 +6293,13 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
         topic = _classify_topic(metadata)
 
     title = metadata.get("title") or "Untitled"
-    _prepare_video_capture_folder(output_folder, url, metadata)
+    output_folder, existing = _prepare_video_capture_folder(
+        output_folder, url, metadata, refresh_existing=refresh_existing)
     # A new capture has only its ownership claim. Refreshes keep previous
     # artifacts until generation and the file swap have succeeded.
     refreshing = any(p.name != ".capture-source.json" for p in output_folder.iterdir())
     video_slug = output_folder.name
-    video_id = _video_capture_id(url, metadata)
+    video_id = existing["video_id"] if existing else _video_capture_id(url, metadata)
     log.info("Uoinking '%s' -> %s (topic=%s)", title, output_folder, topic)
 
     # P1-4: bound screenshot count so a 4-hour video at 5s interval doesn't
@@ -6185,7 +6388,8 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
     asset_folder = stage_root / "n" if refreshing else output_folder
     backup_folder = stage_root / "p" if refreshing else None
     media_backup_folder = stage_root / "m" if refreshing else None
-    corpus_name = _corpus_path(output_folder).name
+    corpus_name = (Path(existing["corpus_path"]).name if existing
+                   else _corpus_path(output_folder).name)
     sidecar_name = f"{video_slug}.json"
     staged_names = {Path(corpus_name): Path("c.md"), Path(sidecar_name): Path("c.json")}
     markdown_index_attempted = False
@@ -6477,6 +6681,7 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
             entries,
             video_files[0],
             duration,
+            url=url,
             captions_refused=captions_refused,
             media_chunks=[
                 (path, chunk["start_seconds"], chunk["duration_seconds"])
@@ -6507,6 +6712,8 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
                 coverage = (" of sampled sections"
                             if effective_long_video_mode == LONG_VIDEO_MODE_CHUNKED else "")
                 transcript_note = f"Local Whisper transcript{coverage}: {caption_note}"
+            elif asr_fallback and asr_fallback.get("status") == "no_audio":
+                transcript_note = f"No transcript: {asr_fallback['reason']}"
             else:
                 transcript_note = f"No transcript: {caption_note}"
 
@@ -6707,7 +6914,9 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
             # (including extra files in screenshots/) where they are.
             published_names = {staged: final for final, staged in staged_names.items()}
             staged_files = [p.relative_to(asset_folder) for p in asset_folder.rglob("*")
-                            if p.is_file() and (keep_media or p not in video_files)]
+                            if p.is_file() and (keep_media or p not in video_files)
+                            and not any(part.startswith(".asr-")
+                                        for part in p.relative_to(asset_folder).parts)]
             replacements = [published_names.get(relative, relative) for relative in staged_files]
             previous = set(replacements)
             for pattern in ("video.*", "video-chunk-*.*", "screenshots/shot_*.jpg",
@@ -6757,7 +6966,7 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
                     raise FileExistsError(f"capture artifact appeared during publication: {target}")
                 installed.append(relative)
                 rename_artifact(asset_folder / stage_name(relative), target)
-            yoink_path = _corpus_path(output_folder)
+            yoink_path = output_folder / corpus_name
             sidecar_path = output_folder / f"{video_slug}.json"
             if keep_media:
                 video_files = [output_folder / p.name for p in video_files]
@@ -8303,13 +8512,16 @@ def _mask_anthropic_key(key: str) -> str | None:
     return (key[:6] + "…" + key[-4:]) if len(key) >= 12 else "set"
 
 
-# Autostart Run key reuses the same HKCU value the installer writes.
-_AUTOSTART_SUBKEY = r"Software\Microsoft\Windows\CurrentVersion\Run"
-_AUTOSTART_VALUE = "Uoink"
+# Windows login startup has one owner: the per-user supervisor task.
 
 
-def _autostart_command() -> str:
-    return f'"{HERE / "python" / "pythonw.exe"}" "{HERE / "server.py"}"'
+def _watchdog_setting(mode: str):
+    if _install_isolation.current_binding() is not None:
+        return None
+    return subprocess.run(
+        ["powershell.exe", "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass",
+         "-File", str(HERE / "scripts" / "install-watchdog.ps1"), "-InstallDir", str(HERE), "-Mode", mode],
+        capture_output=True, text=True, timeout=30, creationflags=0x08000000)
 
 
 def _autostart_enabled() -> bool | None:
@@ -8323,23 +8535,14 @@ def _autostart_enabled() -> bool | None:
     if sys.platform != "win32":
         return None
     try:
-        import winreg
-    except Exception:
-        return None
-    try:
-        with winreg.OpenKey(winreg.HKEY_CURRENT_USER, _AUTOSTART_SUBKEY, 0,
-                            winreg.KEY_READ) as k:
-            try:
-                winreg.QueryValueEx(k, _AUTOSTART_VALUE)
-                return True
-            except FileNotFoundError:
-                return False
-    except OSError:
+        result = _watchdog_setting("Status")
+        return result.stdout.strip() == "enabled" if result and result.returncode == 0 else None
+    except (OSError, subprocess.SubprocessError):
         return None
 
 
 def _set_autostart(enabled: bool) -> bool | None:
-    """Set the Windows Run value or Mac LaunchAgent. None means unsupported."""
+    """Set the Windows task or Mac LaunchAgent. None means unsupported."""
     if sys.platform == "darwin":
         from helper import mac_lifecycle
         try:
@@ -8351,23 +8554,9 @@ def _set_autostart(enabled: bool) -> bool | None:
     if sys.platform != "win32":
         return None
     try:
-        import winreg
-    except Exception:
-        return None
-    try:
-        with winreg.OpenKey(winreg.HKEY_CURRENT_USER, _AUTOSTART_SUBKEY, 0,
-                            winreg.KEY_READ | winreg.KEY_SET_VALUE) as k:
-            if enabled:
-                winreg.SetValueEx(k, _AUTOSTART_VALUE, 0, winreg.REG_SZ,
-                                  _autostart_command())
-            else:
-                try:
-                    winreg.DeleteValue(k, _AUTOSTART_VALUE)
-                except FileNotFoundError:
-                    pass
-        log.info("autostart %s", "enabled" if enabled else "disabled")
-        return True
-    except OSError as e:
+        result = _watchdog_setting("Register" if enabled else "Disable")
+        return result.returncode == 0 if result else None
+    except (OSError, subprocess.SubprocessError) as e:
         log.warning("autostart toggle failed: %s", e)
         return False
 
@@ -11923,7 +12112,7 @@ def _playlist_worker(job_id: str):
                                       video_slug=target.name, folder=str(target))
                     else:
                         target = _create_video_entry_folder(target, v["url"], metadata)
-                        _prepare_video_capture_folder(target, v["url"], metadata)
+                        _prepare_video_capture_folder(target, v["url"], metadata, refresh_existing=False)
                         target_claimed = True
                         result = _run_extraction(
                             v["url"],
@@ -11935,6 +12124,7 @@ def _playlist_worker(job_id: str):
                             generate_paste=False,
                             cancel_event=cancel_event,
                             phase_callback=phase_cb,
+                            refresh_existing=False,
                         )
 
                 target = Path(result["folder"])
@@ -13696,6 +13886,7 @@ class Handler(BaseHTTPRequestHandler):
         # paths return the same payload so existing clients keep working.
         bare = self.path.split("?", 1)[0]
         if bare == "/ping" or bare == "/health":
+            import uoink_supervisor
             # Public liveness probe -- intentionally unauthenticated.
             log.debug("GET %s from %s -> ok", bare, self.client_address[0])
             settings = _read_settings() or {}
@@ -13705,6 +13896,9 @@ class Handler(BaseHTTPRequestHandler):
             return self._send_json(200, {
                 "ok": True,
                 "version": VERSION,
+                "pid": os.getpid(),
+                "supervisor_run_id": os.environ.get("UOINK_SUPERVISOR_RUN_ID"),
+                "helper_recovery": uoink_supervisor.status(DATA_ROOT),
                 "migration_version": _active_migration_version,
                 "migration_pending": (
                     _active_migration_version < latest_migration
@@ -13788,6 +13982,14 @@ class Handler(BaseHTTPRequestHandler):
                     corpus_paths_ok=bool(integrity.get("ok")),
                 ),
             )
+        if bare == "/":
+            # People type the bare helper address into a browser. Send them to
+            # the public dashboard shell instead of a token-mismatch 403.
+            self.send_response(302)
+            self.send_header("Location", "/dashboard")
+            self.send_header("Content-Length", "0")
+            self.end_headers()
+            return
         if bare == "/dashboard" or bare == "/dashboard/":
             # Public local UI shell. The page itself performs the same token
             # handshake as the extension before reading recent yoinks or
@@ -16410,6 +16612,11 @@ class Handler(BaseHTTPRequestHandler):
         expect the connection to drop right after this response."""
         if not self._require_token():
             return
+        import uoink_supervisor
+        try:
+            uoink_supervisor.request_stop(DATA_ROOT)
+        except OSError:
+            return self._send_json(500, {"ok": False, "error": "Could not save the stop request. Try Quit again."})
         self._send_json(200, {"ok": True, "stopping": True})
         threading.Thread(target=self.server.shutdown, daemon=True).start()
 
@@ -16837,7 +17044,7 @@ class Handler(BaseHTTPRequestHandler):
             registry = {tool["name"]: tool for tool in tools.list_tools()}
             return self._send_mcp_result(request_id, {
                 "tools": [dict(registry[name], inputSchema=tools.client_input_schema(
-                    registry[name]["inputSchema"])) for name in tools.stdio_tool_names("full")],
+                    registry[name]["inputSchema"], name)) for name in tools.stdio_tool_names("full")],
             })
         if bare == "/mcp/v1/tools/call" or (bare == "/mcp/v1" and method == "tools/call"):
             params = body.get("params") if isinstance(body.get("params"), dict) else body
@@ -18373,12 +18580,12 @@ class Handler(BaseHTTPRequestHandler):
                     filtered[key] = val
 
         # CM-11: why local ASR ran or did not (disabled, model not downloaded,
-        # failed, chunked media). Short strings only, so a long error never
+        # failed, no audio, chunked media). Short strings only, so a long error never
         # reaches the page.
         raw_asr = data.get("asr_fallback")
         if isinstance(raw_asr, dict):
             filtered["asr_fallback"] = {
-                key: raw_asr[key].strip()[:300] for key in ("status", "model", "error")
+                key: raw_asr[key].strip()[:300] for key in ("status", "model", "error", "reason")
                 if isinstance(raw_asr.get(key), str) and raw_asr[key].strip()
             }
 
@@ -19408,7 +19615,7 @@ class Handler(BaseHTTPRequestHandler):
         folder = _video_capture_folder(
             DESKTOP_ROOT / _topic_folder_name(topic), canonical, metadata)
         try:
-            _prepare_video_capture_folder(folder, canonical, metadata)
+            folder, existing = _prepare_video_capture_folder(folder, canonical, metadata)
         except Exception as e:
             log.exception("/extract/any (generic) destination unavailable")
             return self._send_json(500, {"ok": False, "error": str(e)})
@@ -19435,7 +19642,7 @@ class Handler(BaseHTTPRequestHandler):
             "upload_date": metadata.get("upload_date"),
             "view_count": metadata.get("view_count"),
             "like_count": metadata.get("like_count"),
-            "video_id": _video_capture_id(canonical, metadata),
+            "video_id": existing["video_id"] if existing else _video_capture_id(canonical, metadata),
             "transcript": transcript_entries,
             # Comments/screenshots/hook are explicit nulls so the
             # dashboard knows they're unavailable rather than missing.
@@ -19479,7 +19686,7 @@ class Handler(BaseHTTPRequestHandler):
                               "_No transcript available (site did not "
                               "expose subtitles / yt-dlp could not parse)._",
                               ""]
-        corpus_path = folder / "corpus.md"
+        corpus_path = Path(existing["corpus_path"]) if existing else folder / "corpus.md"
         _atomic_write_text(corpus_path, "\n".join(corpus_lines))
 
         # Persist as a yoink row so it appears in Library + MCP search.
@@ -19883,7 +20090,8 @@ class Handler(BaseHTTPRequestHandler):
                     result = _run_extraction(url, interval, target,
                                               notify=False,
                                               metadata=metadata, topic=topic,
-                                              generate_paste=False)
+                                              generate_paste=False,
+                                              refresh_existing=False)
             except BaseException as e:
                 msg = friendly_error(e)
                 detail = machine_error_detail(e)
@@ -20302,8 +20510,8 @@ def main(*, show_dashboard: bool = False):
         server = _YoinkHTTPServer((HOST, PORT), Handler)
     except OSError as e:
         # Port held by something we couldn't probe via /health (different
-        # app, half-open socket, etc). A non-zero exit lets Task Scheduler's
-        # restart-on-failure policy recover or surface the outage.
+        # app, half-open socket, etc). The supervisor reports this conflict
+        # without retrying or treating it as a helper crash loop.
         # Isolated mode never falls back to production port 5179.
         if _install_isolation.current_binding() is not None:
             log.error("isolated-port-occupied: failed to bind %s:%d -- %s", HOST, PORT, e)
@@ -20441,6 +20649,8 @@ def main(*, show_dashboard: bool = False):
             import uoink_tray
 
             def _tray_stop():
+                import uoink_supervisor
+                uoink_supervisor.request_stop(DATA_ROOT)
                 # Called from the tray's daemon thread; shut the server down on
                 # a separate thread so serve_forever() unblocks and main()
                 # returns (atexit then clears the PID file).
@@ -21061,6 +21271,8 @@ def doctor_payload() -> dict:
     months while every other check reported green) and C-05 added
     path_integrity (a green doctor while every content action 404s was the
     exact failure mode on the machine that motivated the fix)."""
+    import uoink_supervisor
+    recovery = uoink_supervisor.status(DATA_ROOT)
     helper_health = _helper_health_status()
     schema_migration = index.schema_migration_status(INDEX_PATH)
     # Heartbeat semantics (2026-09-04): the doctor reads the same
@@ -21075,8 +21287,10 @@ def doctor_payload() -> dict:
             and not schema_migration.get("pending")
             and not schema_migration.get("error")
             and not heartbeat.get("stale")
+            and recovery.get("status") not in {"crash_loop", "supervisor_error", "unreadable"}
         ),
         "helper_health": helper_health,
+        "helper_recovery": recovery,
         "heartbeat": heartbeat,
         "schema_migration": schema_migration,
         "diagnose": _diagnose_payload(),
@@ -21084,6 +21298,7 @@ def doctor_payload() -> dict:
         "mcp_stdio": _mcp_stdio_selfcheck(timeout=max(0.0, mcp_deadline - time.monotonic())),
         "mcp_stdio_modern": _mcp_modern_stdio_selfcheck(timeout=max(0.0, mcp_deadline - time.monotonic())),
         "path_integrity": _path_integrity_status(force=True),
+        "duplicate_folder_names": _duplicate_folder_names_status(),
         "podcast_corpus": _podcast_corpus_reconciliation_status(),
     }
     return payload
@@ -21204,6 +21419,15 @@ def run_cli(argv: list[str]) -> int:
                              "error": f"{explicit} is not a folder"})
                 return 1
         _print_json(rebuild_index_from_disk(root=explicit))
+        return 0
+    if (_is_installed_layout() and not os.environ.get("UOINK_SUPERVISOR_RUN_ID")
+            and _install_isolation.current_binding() is None):
+        # Old Run values and shortcuts may still invoke server.py during an
+        # upgrade. They join the same supervisor lock before starting a helper.
+        # Replace this process so its imported server logger cannot hold the
+        # child's rotating log open on Windows.
+        os.execv(sys.executable, [sys.executable, "-B", "-s", str(HERE / "uoink_supervisor.py"),
+                                 *(["--show-dashboard"] if "--show-dashboard" in argv else [])])
         return 0
     main(show_dashboard="--show-dashboard" in argv)
     return 0

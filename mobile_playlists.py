@@ -428,8 +428,8 @@ def poll_playlist(idx, playlist_id: int, *,
 
 
 def _record_poll_failure(idx, playlist_id: int, error: str) -> None:
-    with idx._lock:
-        idx._conn.execute(
+    with idx.write_transaction() as conn:
+        conn.execute(
             "UPDATE monitored_playlists SET "
             "  last_polled_at = ?, "
             "  error_count = error_count + 1, "

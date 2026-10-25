@@ -284,6 +284,11 @@ class UoinkTray:
 
     def _on_stop(self, *_):
         self._touch()
+        try:
+            self._stop_callback()
+        except Exception as e:
+            log.warning("tray: stop callback failed: %s", e)
+            return
         self._stopping.set()
         try:
             if self._icon is not None:
@@ -291,10 +296,6 @@ class UoinkTray:
                 self._icon.stop()
         except Exception:
             pass
-        try:
-            self._stop_callback()
-        except Exception as e:
-            log.warning("tray: stop callback failed: %s", e)
 
     # ---- poll loop ---------------------------------------------------------
     def _poll_loop(self) -> None:

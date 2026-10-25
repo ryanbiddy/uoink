@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "mac_files": ["uoink_usage.py", "helper/mac_lifecycle.py", "helper/mac_ui.py", "helper/mac_menubar.py", "scripts/mac/uninstall.sh", "assets/brand/menubar-template.png", "assets/brand/menubar-template@2x.png", "uoink_core/search_service.py"],
+  "mac_files": ["uoink_usage.py", "uoink_supervisor.py", "uoink_store.py", "extension/store-config.json", "extension/lib/store-links.js", "helper/mac_lifecycle.py", "helper/mac_ui.py", "helper/mac_menubar.py", "scripts/mac/uninstall.sh", "assets/brand/menubar-template.png", "assets/brand/menubar-template@2x.png", "uoink_core/search_service.py"],
   "ui_wheels": "ui-wheels.json",
   "basis": "Reviewed build.ps1 source payload; Windows launch/watchdog scripts excluded. VERSION and license notices added.",
   "paths": [
@@ -43,6 +43,7 @@
     "notes.py",
     "openapi_bridge.py",
     "page_extractor.py",
+    "article_extractor.py",
     "podcasts.py",
     "provenance.py",
     "reddit_extractor.py",
@@ -51,6 +52,7 @@
     "scripts.py",
     "scripts/recall_hook.py",
     "server.py",
+    "uoink_supervisor.py",
     "skills",
     "source_manifest.py",
     "source_subscriptions.py",
@@ -66,6 +68,7 @@
     "uoink_dashboard.py",
     "uoink_install_isolation.py",
     "uoink_usage.py",
+    "uoink_store.py",
     "uoink_mcp.py",
     "uoink_mcp_tools.py",
     "uoink_processes.py",

@@ -104,7 +104,7 @@ def test_tools_schemas_and_text(capsys):
     tools = json.loads(capsys.readouterr().out)["tools"]
     assert tuple(t["name"] for t in tools) == registry.stdio_tool_names("core")
     for tool in tools:
-        assert tool["inputSchema"] == registry.client_input_schema(registry.TOOL_REGISTRY[tool["name"]].input_schema)
+        assert tool["inputSchema"] == registry.client_input_schema(registry.TOOL_REGISTRY[tool["name"]].input_schema, tool["name"])
     assert cli.main(["tools", "--text"]) == 0
     assert "search_library:" in capsys.readouterr().out
 
@@ -364,7 +364,18 @@ def test_installer_path_ownership_isolation_and_exact_removal():
     assert "AgentSameEntry(AgentExpandedEntry(Target), ExpandConstant('{app}\\bin'))) then Exit;" in remove
     assert "AgentFilterPath(Value, Target, True, Found)" in remove
     assert "AgentWritePath(Updated, ValueType)" in remove
-    assert "if CurUninstallStep = usUninstall then RemoveAgentPath();" in source
+    from inno_recovery_harness import PascalBody
+    callback = PascalBody(block(
+        "procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);",
+        "procedure VerifyInstalledHelper();"))
+    removals = []
+    scope = dict(usuninstall='confirmed', false=False, isolatedinstall=lambda: False,
+                 unregisterhelperrecovery=lambda _: True,
+                 removeagentpath=lambda: removals.append('path'))
+    for step in ('before-confirmation', 'confirmed', 'post-uninstall', 'done'):
+        scope['curuninstallstep'] = step
+        callback.execute(callback.tree, scope)
+        assert removals == ([] if step == 'before-confirmation' else ['path'])
     filtering = block("function AgentFilterPath(", "procedure AddAgentPath();")
     assert "Copy(Value, Start, I - Start)" in filtering
     assert "(not Found) and AgentSameEntry(Entry, Target)" in filtering

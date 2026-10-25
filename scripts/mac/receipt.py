@@ -201,9 +201,15 @@ def interpreter_origin(app: Path, executable: str) -> dict:
 
 def bind_health(proc, app: Path, port: int) -> dict:
     require(type(port) is int and 0 < port < 65536 and port != 5179, "Health must use a disposable port")
-    before = observe(proc.pid)
-    origin = interpreter_origin(app, before["executable"])
-    require(listeners(port) == [proc.pid], "Health listener is not the launched helper")
+    supervisor = observe(proc.pid)
+    origin = interpreter_origin(app, supervisor["executable"])
+    owners = listeners(port)
+    require(len(owners) == 1 and owners[0] != proc.pid, "Health listener is not a supervised helper")
+    helper_pid = owners[0]
+    before = observe(helper_pid)
+    require(interpreter_origin(app, before["executable"]) == origin,
+            "Health process uses a non-bundle interpreter")
+    require(describe(helper_pid).get("ppid") == proc.pid, "Health listener is not the launched supervisor's child")
     # Disable ambient proxies, and refuse redirects to any other endpoint.
     class NoRedirect(urllib.request.HTTPRedirectHandler):
         def redirect_request(self, *args, **kwargs):
@@ -212,9 +218,14 @@ def bind_health(proc, app: Path, port: int) -> dict:
     with opener.open(f"http://127.0.0.1:{port}/health", timeout=5) as response:
         health = json.load(response)
     require(health.get("ok") is True, "Installed helper health failed")
-    require(listeners(port) == [proc.pid] and observe(proc.pid) == before and proc.poll() is None,
+    require(health.get("pid") == helper_pid and bool(health.get("supervisor_run_id")),
+            "Health does not identify the supervised helper")
+    require(listeners(port) == [helper_pid] and observe(helper_pid) == before
+            and observe(proc.pid) == supervisor and proc.poll() is None
+            and describe(helper_pid).get("ppid") == proc.pid,
             "Health process identity changed during the request")
-    return {"identity": before, "origin": origin, "listener_pid": proc.pid, "port": port, "health": health}
+    return {"identity": before, "supervisor_identity": supervisor, "origin": origin,
+            "listener_pid": helper_pid, "port": port, "health": health}
 
 
 def scoped_processes(app: Path) -> list[dict]:
@@ -398,7 +409,7 @@ def collect(dmg: Path, output: Path, expected_sha256: str | None = None, *,
                     menu_identity = observe(menu["pid"])
                     require(Path(menu_identity["executable"]).resolve() == bundle_python(app),
                             "Menu uses a non-bundle interpreter")
-                    identities.extend([bound["identity"], menu_identity])
+                    identities.extend([bound["supervisor_identity"], bound["identity"], menu_identity])
                     report["interpreter"]["health_bindings"].append({"event": event, **bound, "menu_identity": menu_identity})
                 else:
                     proof = no_survivors(app, identities, port)

@@ -534,6 +534,11 @@ async function groupRows() {
     check(whisper.includes("transcript by Whisper"), "local ASR: Done · transcript by Whisper", whisper);
     const none = p.page.cardHtml({ ...base, transcript_source: null, has_transcript: false, asr_fallback_status: "failed" });
     check(none.includes("no captions, transcription failed"), "no words: the row says so", none);
+    const noAudio = p.page.cardHtml({ ...base, transcript_source: null, has_transcript: false, asr_fallback_status: "no_audio" });
+    check(noAudio.includes(">Done<") && noAudio.includes("no audio for transcription"), "no audio: the capture is Done with a distinct reason", noAudio);
+    check(!noAudio.includes("no captions") && !noAudio.includes("transcription failed"), "no audio is distinct from missing captions and a failed transcription", noAudio);
+    const noCaptions = p.page.cardHtml({ ...base, transcript_source: null, has_transcript: false });
+    check(noCaptions.includes("no captions") && !noCaptions.includes("no audio"), "a caption miss keeps its existing label", noCaptions);
     const note = p.page.cardHtml({ video_id: "n1", source_type: "note", platform: "note", title: "Idea", author: "You" });
     check(note.includes("your note") && note.includes('source-type-chip">note<'), "a note row names itself", note);
     check(captions.includes('data-thumb-for="v1"') && captions.includes("row-thumb"), "the row holds a slot for the real thumbnail", captions);
@@ -653,6 +658,27 @@ async function groupReader() {
     await failed.page.openYoinkDetail(READER_ROW);
     await settle();
     check(failed.els.yoinkTranscriptNote.textContent.includes("failed (out of memory)"), "a failed transcription gives its reason", failed.els.yoinkTranscriptNote.textContent);
+  });
+
+  await scenario("no audio explains the missing transcript with a bounded reason or fixed sentence", async () => {
+    const audioReason = "Captured media has no audio stream, and source audio could not be obtained.";
+    for (const [reason, expected] of [
+      [`  ${audioReason}  `, audioReason],
+      [undefined, "Audio was unavailable for transcription."],
+      ["  ", "Audio was unavailable for transcription."],
+      [{ invalid: true }, "Audio was unavailable for transcription."],
+      ["x".repeat(900), "x".repeat(300)],
+      ["<b>Audio unavailable</b>", "<b>Audio unavailable</b>"],
+    ]) {
+      const p = makePage({ files: readerFiles({
+        transcript_source: null, transcript: [], asr_fallback: { status: "no_audio", reason },
+      }, "") });
+      await p.page.openYoinkDetail({ ...READER_ROW, has_transcript: false, asr_fallback_status: "no_audio" });
+      await settle();
+      check(p.els.yoinkTranscriptNote.textContent === `No transcript. ${expected}`, "no audio uses the bounded reason or fixed sentence", p.els.yoinkTranscriptNote.textContent);
+      check(!p.els.yoinkTranscriptNote.classList.contains("hidden"), "the no-audio note is visible");
+      check(p.els.yoinkDetail.innerHTML.includes("No transcript saved."), "no audio keeps the empty transcript state", p.els.yoinkDetail.innerHTML);
+    }
   });
 
   await scenario("an untimed transcript never invents a time", async () => {

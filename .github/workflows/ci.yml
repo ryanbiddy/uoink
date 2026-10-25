@@ -17,6 +17,21 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  mcp-linux-container:
+    name: offline Linux MCP introspection
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - name: Build stdio image
+        run: docker build --tag uoink-mcp:ci .
+      - name: Initialize and list the complete default registry offline
+        run: >-
+          docker run --rm --network none --read-only
+          --tmpfs /tmp:rw,nosuid,nodev,size=64m
+          --entrypoint python uoink-mcp:ci
+          -B /app/scripts/smoke_mcp_container.py
+
   extension-static:
     name: extension static checks
     runs-on: ubuntu-latest
@@ -77,6 +92,9 @@ jobs:
             exit 1
           fi
 
+      - name: Build allowlisted Chrome Web Store package
+        run: python scripts/build_cws.py
+
   backend-static:
     name: backend Python static checks
     runs-on: ubuntu-latest
@@ -90,7 +108,7 @@ jobs:
         run: |
           # v2.1 rename: canonical MCP modules are uoink_mcp*.py; yoink_mcp.py
           # is a back-compat shim that re-exports from uoink_mcp.
-          files=(server.py uoink_usage.py uoink_mcp.py uoink_mcp_tools.py uoink_agent_runtime.py uoink_cli.py uoink_connect.py yoink_mcp.py)
+          files=(server.py uoink_store.py uoink_usage.py uoink_mcp.py uoink_mcp_tools.py uoink_agent_runtime.py uoink_cli.py uoink_connect.py yoink_mcp.py)
           if [ -f index.py ]; then files+=(index.py); fi
           python -m py_compile "${files[@]}"
 
@@ -127,6 +145,9 @@ jobs:
 
       - name: Compare MCP inventory across registry, docs, bundle and receipt
         run: python scripts/check_mcp_inventory.py
+
+      - name: Check store install copy against shared config
+        run: python scripts/sync_store_links.py --check
 
   bash-lint:
     name: bash script lint

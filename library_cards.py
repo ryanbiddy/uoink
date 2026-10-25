@@ -131,6 +131,9 @@ def build_card(item: dict, clips: list[dict], *, corpus_text: str = "",
     card = {key: item.get(key) for key in (
         "video_id", "slug", "title", "channel", "platform", "source_type",
         "topic", "yoinked_at")}
+    # X evidence is additive. corpus.read/1 builds its own fixed-key objects.
+    if card["source_type"] in {"x_thread", "x_article"} and isinstance(meta.get("x_capture"), dict):
+        card["x_capture"] = copy.deepcopy(meta["x_capture"])
     if not _string(card["video_id"]):
         raise ValueError("item requires video_id")
     evidence = [{"start": c.get("start"), "end": c.get("end"),
@@ -246,7 +249,23 @@ def build_card(item: dict, clips: list[dict], *, corpus_text: str = "",
         while len(card_text(card).encode("utf-8")) > byte_budget:
             card["truncation"]["byte_budget"] = True
             # Remove optional context before sacrificing supplied quotations.
-            if card["hint"]:
+            capture = card.get("x_capture")
+            if capture and not capture.get("details_omitted"):
+                from uoink_core import x_evidence
+                card["x_capture"] = {
+                    "scope": capture.get("scope"), "limits": capture.get("limits"),
+                    "details_omitted": True,
+                    "detail_location": "Saved X sidecar metadata.x_capture",
+                    "posts": [{"id": post["id"], "text_completeness": post["text_completeness"],
+                               "capture_provider": post["capture_provider"],
+                               "disclosures": x_evidence.disclosures(post)}
+                              for post in capture.get("posts", [])],
+                }
+                card["truncation"]["fields"].append("x_capture")
+            elif capture and capture.get("posts"):
+                from uoink_core import x_evidence
+                card["x_capture"] = x_evidence.compact_summary(capture)
+            elif card["hint"]:
                 card["hint"] = None
                 card["summary_hint"] = None
                 card["truncation"]["fields"].append("hint")
