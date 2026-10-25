@@ -195,8 +195,8 @@ def persist_script(idx, workspace_id: str, *, script: dict,
     except (TypeError, ValueError):
         raise ValueError("target_length_sec must be an integer")
 
-    with idx._lock:
-        cur = idx._conn.execute(
+    with idx.write_transaction() as conn:
+        cur = conn.execute(
             "INSERT INTO scripts (workspace_id, version, generated_at, format, "
             "target_length_sec, hook, beats, body, cta, shot_list, "
             "source_yoinks, mode, parent_script_id) "
@@ -316,8 +316,8 @@ def derive_shot_list(idx, script_id: int) -> dict:
             "notes": None,
         })
     blob = json.dumps(rows)
-    with idx._lock:
-        idx._conn.execute(
+    with idx.write_transaction() as conn:
+        conn.execute(
             "UPDATE scripts SET shot_list=? WHERE id=?",
             (blob, script_id))
     return {"ok": True, "script_id": script_id, "shot_list": rows,

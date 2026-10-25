@@ -1308,7 +1308,9 @@ class Index:
             # P3 (e.g., the backfill smoke tools).
             try:
                 from channels import tag_if_self  # noqa: WPS433
-                tag_if_self(self, video_id, record.get("channel"))
+                # Join this yoink write. A nested write_transaction would
+                # raise, and the handler below would drop the tag.
+                tag_if_self(self, video_id, record.get("channel"), self._conn)
             except Exception as e:  # pragma: no cover -- defensive
                 # Recognition failure must not block a yoink write.
                 import logging
@@ -2354,20 +2356,18 @@ class Index:
             tags = [tags]
         now = _now_iso()
         added = 0
-        with self._lock:
+        with self.write_transaction() as conn:
             for raw in tags or []:
                 t = (raw or "").strip().lower()
                 if not t:
                     continue
                 try:
-                    self._conn.execute(
+                    conn.execute(
                         "INSERT INTO yoink_tags (video_id, tag, source, added_at) "
                         "VALUES (?, ?, ?, ?)", (video_id, t, source, now))
                     added += 1
                 except sqlite3.IntegrityError:
                     pass
-            if added:
-                self._conn.commit()  # C-03: tags must survive a kill
         return added
 
     def get_tags(self, video_id: str) -> list[str]:
@@ -3700,9 +3700,9 @@ class Index:
         if not body.strip():
             raise ValueError("draft body required")
         now = _now_iso()
-        with self._lock:
+        with self.write_transaction() as conn:
             if draft_id is None:
-                cur = self._conn.execute(
+                cur = conn.execute(
                     "INSERT INTO writing_drafts "
                     "(yoink_id, kind, title, body, source_credit_line, "
                     " created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
@@ -3715,7 +3715,7 @@ class Index:
                 # not a 500 from the failed bind (G-90).
                 raise ValueError(f"draft {draft_id} not found")
             else:
-                cur = self._conn.execute(
+                cur = conn.execute(
                     "UPDATE writing_drafts SET yoink_id=?, kind=?, title=?, "
                     "body=?, source_credit_line=?, updated_at=? WHERE id=?",
                     (yoink_id, str(kind or "tweet"), title, body,
@@ -3723,7 +3723,6 @@ class Index:
                 )
                 if cur.rowcount == 0:
                     raise ValueError(f"draft {draft_id} not found")
-            self._conn.commit()
         draft = self.get_writing_draft(int(draft_id))
         if draft is None:  # pragma: no cover -- row written above
             raise ValueError(f"draft {draft_id} not found")

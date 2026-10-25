@@ -25,6 +25,7 @@ import server  # noqa: E402
 import uoink_mcp_tools as tools  # noqa: E402
 import writing_studio as ws  # noqa: E402
 import voice_dna  # noqa: E402
+from index import Index  # noqa: E402
 
 
 def _assert(cond, msg):
@@ -44,8 +45,12 @@ YOINK = {
 
 
 class MemIndex:
+    # Writers commit through the real Index boundary, not a test copy.
+    write_transaction = Index.write_transaction
+
     def __init__(self):
-        self._lock = threading.Lock()
+        self._lock = threading.RLock()
+        self._write_txn_owner = None
         self._conn = sqlite3.connect(":memory:", check_same_thread=False)
         self._conn.row_factory = sqlite3.Row
         self._conn.executescript(

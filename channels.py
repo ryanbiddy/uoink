@@ -78,8 +78,8 @@ def add_channel(idx, handle: str, *, name: str | None = None,
     handle = _normalise_handle(handle)
     if not handle:
         raise ValueError("handle required")
-    with idx._lock:
-        idx._conn.execute(
+    with idx.write_transaction() as conn:
+        conn.execute(
             "INSERT INTO user_channels (handle, channel_id, name, added_at) "
             "VALUES (?,?,?,?) "
             "ON CONFLICT(handle) DO UPDATE SET "
@@ -91,8 +91,8 @@ def add_channel(idx, handle: str, *, name: str | None = None,
 
 def remove_channel(idx, handle: str) -> bool:
     handle = _normalise_handle(handle)
-    with idx._lock:
-        cur = idx._conn.execute(
+    with idx.write_transaction() as conn:
+        cur = conn.execute(
             "DELETE FROM user_channels WHERE lower(handle) = lower(?)",
             (handle,))
         return cur.rowcount > 0
@@ -113,8 +113,8 @@ def get_channel(idx, handle: str) -> dict | None:
 def set_verified(idx, handle: str, *, channel_id: str | None,
                   name: str | None) -> None:
     handle = _normalise_handle(handle)
-    with idx._lock:
-        idx._conn.execute(
+    with idx.write_transaction() as conn:
+        conn.execute(
             "UPDATE user_channels "
             "SET channel_id = COALESCE(?, channel_id), "
             "    name       = COALESCE(?, name), "
@@ -208,18 +208,28 @@ def is_self_channel(idx, channel_name: str | None) -> bool:
     return row is not None
 
 
-def tag_if_self(idx, video_id: str, channel_name: str | None) -> bool:
+def _tag_if_self(conn, video_id: str) -> bool:
+    """Insert the is_self tag. The caller owns the transaction."""
+    cur = conn.execute(
+        "INSERT OR IGNORE INTO yoink_tags (video_id, tag, source, added_at) "
+        "VALUES (?, 'is_self', 'auto', ?)",
+        (video_id, _now_iso()))
+    return cur.rowcount > 0
+
+
+def tag_if_self(idx, video_id: str, channel_name: str | None, conn=None) -> bool:
     """Insert ('is_self', source='auto') into yoink_tags if the video's
     channel matches a user_channels entry. Returns True iff a NEW row was
-    inserted (so callers can count fresh tags vs no-ops on backfills)."""
+    inserted (so callers can count fresh tags vs no-ops on backfills).
+
+    Pass ``conn`` to join a caller's open transaction (Index.upsert_yoink).
+    The default commits this write on its own (recognize_now)."""
     if not is_self_channel(idx, channel_name):
         return False
-    with idx._lock:
-        cur = idx._conn.execute(
-            "INSERT OR IGNORE INTO yoink_tags (video_id, tag, source, added_at) "
-            "VALUES (?, 'is_self', 'auto', ?)",
-            (video_id, _now_iso()))
-        return cur.rowcount > 0
+    if conn is None:
+        with idx.write_transaction() as conn:
+            return _tag_if_self(conn, video_id)
+    return _tag_if_self(conn, video_id)
 
 
 def recognize_now(idx) -> dict:
