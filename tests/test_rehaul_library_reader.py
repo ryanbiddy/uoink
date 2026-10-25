@@ -228,7 +228,7 @@ def test_reader_transcript_never_invents_times_and_links_only_real_ones():
     link = _between(SCRIPT, "function sourceTimeUrl(url, seconds)", "const READER_PARAGRAPH_SEGMENTS")
     assert "youtube\\.com|youtu\\.be" in link, "only YouTube takes a time in its link"
     note = _between(SCRIPT, "function transcriptNoteText(row, sidecar = {})", "function readerDocumentHtml(row, sidecar = {})")
-    for status in ('"disabled"', '"model_not_downloaded"', '"failed"', '"skipped_chunked_mode"'):
+    for status in ('"disabled"', '"model_not_downloaded"', '"failed"', '"no_audio"', '"skipped_chunked_mode"'):
         assert status in note
     assert 'source === "asr"' in note
     # Reader screenshots load lazily, not through the page-wide loader.
@@ -381,7 +381,8 @@ def test_requests_the_index_already_orders_keep_the_index_path(library, monkeypa
     assert len(calls) == 4, "a group or another order is answered by _library_search"
 
 
-def test_rows_carry_where_the_transcript_came_from(tmp_path):
+@pytest.mark.parametrize("has_audio", [True, False], ids=["transcribed", "no-audio"])
+def test_rows_carry_where_the_transcript_came_from(tmp_path, has_audio):
     idx = index_mod.Index.open(tmp_path / "isolated.db")
     try:
         folder = tmp_path / "output" / "v9"
@@ -389,16 +390,17 @@ def test_rows_carry_where_the_transcript_came_from(tmp_path):
         sidecar = folder / "v9.json"
         sidecar.write_text(json.dumps({
             "url": "https://www.youtube.com/watch?v=v9", "platform": "youtube", "title": "Nine",
-            "transcript": [{"start": 0, "end": 2, "text": "hello"}],
-            "transcript_source": "asr", "asr_fallback": {"status": "completed", "model": "base"},
+            "transcript": [{"start": 0, "end": 2, "text": "hello"}] if has_audio else [],
+            "transcript_source": "asr" if has_audio else None,
+            "asr_fallback": {"status": "completed" if has_audio else "no_audio", "model": "base"},
         }), encoding="utf-8")
         idx.upsert_yoink({"video_id": "v9", "slug": "v9", "yoinked_at": "2026-10-01T10:00:00", "title": "Nine",
                           "source_type": "video", "platform": "youtube",
                           "corpus_path": str(folder / "v9.md"), "sidecar_path": str(sidecar)})
         row = server._enrich_yoink_rows(idx, [idx.get_yoink("v9")])[0]
-        assert row["transcript_source"] == "asr"
-        assert row["asr_fallback_status"] == "completed"
-        assert row["has_transcript"] is True
+        assert row["transcript_source"] == ("asr" if has_audio else None)
+        assert row["asr_fallback_status"] == ("completed" if has_audio else "no_audio")
+        assert row["has_transcript"] is has_audio
     finally:
         idx.close()
 
@@ -443,6 +445,28 @@ def test_details_carry_the_transcript_source_and_why_whisper_ran(item):
     assert len(details["asr_fallback"]["error"]) == 300
     assert set(details["asr_fallback"]) == {"status", "model", "error"}
     assert details["yoinked_at"] == "2026-09-12T00:00:00Z" and details["upload_date"] == "20260901"
+    assert "DO_NOT_RETURN" not in json.dumps(data)
+
+
+@pytest.mark.parametrize("reason, expected", [
+    ("  Captured media has no audio stream, and source audio could not be obtained. \n",
+     "Captured media has no audio stream, and source audio could not be obtained."),
+    ("  " + "x" * 900 + "  ", "x" * 300),
+    ("  \n", None),
+    (None, None),
+    ({"private": "DO_NOT_RETURN"}, None),
+])
+def test_details_carry_only_a_bounded_nonempty_audio_reason(item, reason, expected):
+    status, data = item({
+        "transcript_source": None, "transcript": [],
+        "asr_fallback": {"status": "no_audio", "model": "base", "reason": reason,
+                         "caption_reason": "captions_unavailable", "private": "DO_NOT_RETURN"},
+    })
+
+    assert status == 200
+    fallback = data["details"]["asr_fallback"]
+    assert fallback == {"status": "no_audio", "model": "base", **(
+        {"reason": expected} if expected is not None else {})}
     assert "DO_NOT_RETURN" not in json.dumps(data)
 
 
