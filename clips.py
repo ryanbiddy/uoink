@@ -25,6 +25,7 @@ import math
 import re
 import sqlite3
 import time
+from contextlib import suppress
 
 log = logging.getLogger("uoink.clips")
 
@@ -349,59 +350,70 @@ def build_clips_for_video(conn: sqlite3.Connection, video_id: str, *,
     Returns the number of clips written. ``conn`` needs ``row_factory =
     sqlite3.Row`` (Index's connection has it). Pass ``commit=False`` when the
     caller owns the transaction."""
-    cues = [dict(r) for r in conn.execute(
-        "SELECT seq, timestamp_start, timestamp_end, text, source_deep_link "
-        "FROM citations WHERE video_id=? AND kind='transcript_chunk' "
-        "ORDER BY seq", (video_id,))]
-    # Phase 6 (phase6-v1): once a coherent media snapshot exists for this
-    # item's current cues, the annotated projection replaces the clips so
-    # labels, spans and chapter overlaps stay bound to the same rows. The
-    # legacy path below is unchanged for every other item.
-    if cues and _media_snapshot_current(conn, video_id):
-        import library_media  # noqa: WPS433 -- lazy: library_media imports clips
-        # BC-2: an unusable snapshot is a refusal, not a silent downgrade.
-        # The MediaError propagates so the caller keeps the existing
-        # materialized snapshot and clips instead of replacing them with
-        # unannotated rows bound to the same cues.
-        written = library_media.project_clips_for_video(conn, video_id)
+    try:
+        cues = [dict(r) for r in conn.execute(
+            "SELECT seq, timestamp_start, timestamp_end, text, source_deep_link "
+            "FROM citations WHERE video_id=? AND kind='transcript_chunk' "
+            "ORDER BY seq", (video_id,))]
+        # Phase 6 (phase6-v1): once a coherent media snapshot exists for this
+        # item's current cues, the annotated projection replaces the clips so
+        # labels, spans and chapter overlaps stay bound to the same rows. The
+        # legacy path below is unchanged for every other item.
+        if cues and _media_snapshot_current(conn, video_id):
+            import library_media  # noqa: WPS433 -- lazy: library_media imports clips
+            # BC-2: an unusable snapshot is a refusal, not a silent downgrade.
+            # The MediaError propagates so the caller keeps the existing
+            # materialized snapshot and clips instead of replacing them with
+            # unannotated rows bound to the same cues.
+            written = library_media.project_clips_for_video(conn, video_id)
+            if commit:
+                conn.commit()
+            return written
+        conn.execute("DELETE FROM clips WHERE video_id=?", (video_id,))
+        clips = merge_cues(cues, _item_for(conn, video_id)) if cues else []
+        if clips:
+            conn.executemany(
+                "INSERT INTO clips (video_id, seq, start, end, text, speaker, "
+                "source_deep_link, cue_count) VALUES (?, ?, ?, ?, ?, NULL, ?, ?)",
+                [(video_id, c["seq"], c["start"], c["end"], c["text"],
+                  c["source_deep_link"], c["cue_count"]) for c in clips])
         if commit:
             conn.commit()
-        return written
-    conn.execute("DELETE FROM clips WHERE video_id=?", (video_id,))
-    clips = merge_cues(cues, _item_for(conn, video_id)) if cues else []
-    if clips:
-        conn.executemany(
-            "INSERT INTO clips (video_id, seq, start, end, text, speaker, "
-            "source_deep_link, cue_count) VALUES (?, ?, ?, ?, ?, NULL, ?, ?)",
-            [(video_id, c["seq"], c["start"], c["end"], c["text"],
-              c["source_deep_link"], c["cue_count"]) for c in clips])
-    if commit:
-        conn.commit()
-    return len(clips)
+        return len(clips)
+    except BaseException:
+        if commit:
+            with suppress(BaseException):
+                conn.rollback()
+        raise
 
 
 def rebuild_all_clips(conn: sqlite3.Connection) -> dict:
     """Rebuild clips for every indexed item, in one transaction. Items with
     no transcript citations end up with zero clips (any stale rows go)."""
-    started = time.monotonic()
-    video_ids = [r[0] for r in conn.execute(
-        "SELECT video_id FROM yoinks ORDER BY video_id")]
-    conn.execute("DELETE FROM clips")
-    items_with_clips = 0
-    clip_count = 0
-    for video_id in video_ids:
-        n = build_clips_for_video(conn, video_id, commit=False)
-        if n:
-            items_with_clips += 1
-            clip_count += n
-    conn.commit()
-    return {
-        "items": len(video_ids),
-        "items_with_clips": items_with_clips,
-        "items_without_clips": len(video_ids) - items_with_clips,
-        "clip_count": clip_count,
-        "seconds": round(time.monotonic() - started, 3),
-    }
+    try:
+        started = time.monotonic()
+        video_ids = [r[0] for r in conn.execute(
+            "SELECT video_id FROM yoinks ORDER BY video_id")]
+        conn.execute("DELETE FROM clips")
+        items_with_clips = 0
+        clip_count = 0
+        for video_id in video_ids:
+            n = build_clips_for_video(conn, video_id, commit=False)
+            if n:
+                items_with_clips += 1
+                clip_count += n
+        conn.commit()
+        return {
+            "items": len(video_ids),
+            "items_with_clips": items_with_clips,
+            "items_without_clips": len(video_ids) - items_with_clips,
+            "clip_count": clip_count,
+            "seconds": round(time.monotonic() - started, 3),
+        }
+    except BaseException:
+        with suppress(BaseException):
+            conn.rollback()
+        raise
 
 
 def clip_coverage(conn: sqlite3.Connection) -> dict:
