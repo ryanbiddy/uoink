@@ -1609,7 +1609,7 @@ stdio-only; HTTP clients use this tool. The existing token gate still applies.
 consent checks, rate limits and standard error envelopes as stdio. See
 [discovery arguments and results](v2-mcp.md#discover_candidates).
 
-All 91 registry tools are also available over stdio by default in 3.11.0, with
+All 91 registry tools are also available over stdio by default in 3.11.1, with
 the same handlers and client schemas. Both MCP transports flatten the three
 top-level `oneOf` schemas for client compatibility; the server still validates
 the exact frozen schemas. `UOINK_MCP_TOOLSET=core` keeps the earlier 35.
