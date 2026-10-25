@@ -39,7 +39,7 @@ import threading
 import time
 import unicodedata
 import uuid
-from contextlib import contextmanager
+from contextlib import contextmanager, suppress
 from datetime import datetime, timedelta
 from pathlib import Path
 
@@ -1065,7 +1065,10 @@ class Index:
         Helper modules share this connection. Refuse to enter while another
         caller has left a transaction open instead of accidentally committing
         that caller's work. The re-entrant Index lock keeps the boundary
-        exclusive across worker threads.
+        exclusive across worker threads. An open transaction here cannot be
+        told apart from a caller up the stack that still owns it, so it is
+        never rolled back on that caller's behalf; legacy writers roll back
+        their own failures through _rollback_on_error().
         """
         with self._lock:
             if self._conn.in_transaction:
@@ -1080,8 +1083,9 @@ class Index:
                 yield self._conn
                 self._conn.commit()
             except BaseException:
-                if self._conn.in_transaction:
-                    self._conn.rollback()
+                with suppress(BaseException):
+                    if self._conn.in_transaction:
+                        self._conn.rollback()
                 raise
             finally:
                 if self._write_txn_owner == owner:
@@ -1094,13 +1098,15 @@ class Index:
         Legacy writers commit on success but used to leave a failed DML's
         implicit BEGIN open, which wedged every later write_transaction and
         read_snapshot on this shared connection (for example a backfill
-        hitting UNIQUE(yoinks.slug)). Callers hold self._lock.
+        hitting UNIQUE(yoinks.slug)). Callers hold self._lock. Rollback is
+        best effort so its own failure never hides the original exception.
         """
         try:
             yield
         except BaseException:
-            if self._conn.in_transaction:
-                self._conn.rollback()
+            with suppress(BaseException):
+                if self._conn.in_transaction:
+                    self._conn.rollback()
             raise
 
     @contextmanager
@@ -1116,8 +1122,9 @@ class Index:
                 self._conn.execute("BEGIN DEFERRED")
                 yield self._conn
             finally:
-                if self._conn.in_transaction:
-                    self._conn.rollback()
+                with suppress(BaseException):
+                    if self._conn.in_transaction:
+                        self._conn.rollback()
 
     snapshot = read_snapshot
     read_transaction = read_snapshot
@@ -1878,10 +1885,19 @@ class Index:
             ).fetchall()
         return [dict(r) for r in rows]
 
+    def list_capture_sources(self) -> list[dict]:
+        """Live capture identities for matching recorded URL aliases offline."""
+        with self._lock:
+            rows = self._conn.execute(
+                "SELECT video_id, slug, corpus_path, sidecar_path, metadata_json "
+                "FROM yoinks WHERE deleted_at IS NULL"
+            ).fetchall()
+        return [dict(row) for row in rows]
+
     def update_content_paths(self, video_id: str, *, corpus_path: str,
                              sidecar_path: str) -> None:
         """Re-point one row's on-disk paths (C-05 stale-path heal)."""
-        with self._lock:
+        with self._lock, self._rollback_on_error():
             self._conn.execute(
                 "UPDATE yoinks SET corpus_path=?, sidecar_path=? "
                 "WHERE video_id=?",
@@ -1950,7 +1966,7 @@ class Index:
         """Set platform / author / channel on one row and refresh the FTS
         `channel` term so a corrected author is searchable. Used only by the
         Phase 2 backfill; new writes go through upsert_yoink."""
-        with self._lock:
+        with self._lock, self._rollback_on_error():
             self._conn.execute(
                 "UPDATE yoinks SET platform=?, author=?, channel=? "
                 "WHERE video_id=?",
@@ -2016,7 +2032,7 @@ class Index:
             raise ValueError(
                 "this export was written by a newer Uoink; update first")
         report: dict[str, dict] = {}
-        with self._lock:
+        with self._lock, self._rollback_on_error():
             for table in self.EXPORT_TABLES:
                 rows = (payload.get("tables") or {}).get(table) or []
                 table_cols = {r[1] for r in self._conn.execute(
@@ -2190,7 +2206,7 @@ class Index:
         if source not in self._ENGAGEMENT_SOURCES:
             raise ValueError(f"source must be one of {self._ENGAGEMENT_SOURCES}")
         ts = ts_utc or _now_iso()
-        with self._lock:
+        with self._lock, self._rollback_on_error():
             cur = self._conn.execute(
                 "INSERT INTO engagement_events (video_id, event_type, ts_utc, source) "
                 "VALUES (?, ?, ?, ?)",
@@ -2358,7 +2374,7 @@ class Index:
             return 0
         set_sql = ", ".join(f"{k}=?" for k, _ in pairs)
         params = [v for _, v in pairs] + [video_id]
-        with self._lock:
+        with self._lock, self._rollback_on_error():
             self._conn.execute(
                 f"UPDATE yoinks SET {set_sql} WHERE video_id=?", params)
             self._conn.commit()  # C-03: facets must survive a kill
@@ -2645,7 +2661,7 @@ class Index:
     def soft_delete_yoink(self, video_id: str) -> dict | None:
         """Mark a yoink soft-deleted (deleted_at = now). Returns the updated
         row, or None if there is no such yoink."""
-        with self._lock:
+        with self._lock, self._rollback_on_error():
             self._conn.execute(
                 "UPDATE yoinks SET deleted_at=? WHERE video_id=?",
                 (_now_iso(), video_id),
@@ -2660,7 +2676,7 @@ class Index:
 
     def restore_yoink(self, video_id: str) -> dict | None:
         """Clear a yoink's deleted_at. Returns the updated row, or None."""
-        with self._lock:
+        with self._lock, self._rollback_on_error():
             self._conn.execute(
                 "UPDATE yoinks SET deleted_at=NULL WHERE video_id=?",
                 (video_id,),
@@ -2723,7 +2739,7 @@ class Index:
         a time, so the cap (1000) only kicks in for noisy clients or a
         rough YouTube rate-limit day."""
         terminal_placeholders = ", ".join("?" * len(_PENDING_TERMINAL_STATES))
-        with self._lock:
+        with self._lock, self._rollback_on_error():
             total = self._conn.execute(
                 "SELECT COUNT(*) FROM pending_yoinks"
             ).fetchone()[0]
@@ -2767,7 +2783,7 @@ class Index:
 
     def set_pending_error(self, pending_id: int, error: str) -> None:
         """Store the initial refusal without counting it as a retry."""
-        with self._lock:
+        with self._lock, self._rollback_on_error():
             self._conn.execute(
                 "UPDATE pending_yoinks SET last_error=? "
                 "WHERE pending_id=? AND status='pending' AND attempt_count=0",
@@ -2962,7 +2978,7 @@ class Index:
         for a 'failed' row, flips it back to 'pending'. No-op for
         'succeeded' / 'cancelled' / 'running' / 'publishing' rows.
         Returns True when a row changed."""
-        with self._lock:
+        with self._lock, self._rollback_on_error():
             cur = self._conn.execute(
                 "UPDATE pending_yoinks "
                 "SET status='pending', retry_after=? "
@@ -3061,16 +3077,13 @@ class Index:
         ]
         if not rows:
             import clips as _clips  # noqa: WPS433 -- keeps index importable alone
-            with self._lock:
+            with self._lock, self._rollback_on_error():
                 self._conn.execute(
                     "DELETE FROM citations WHERE video_id=?", (video_id,))
                 try:
                     _clips.build_clips_for_video(self._conn, video_id, commit=False)
                 except sqlite3.Error:
                     log.exception("clip build failed for %s", video_id)
-                except Exception:
-                    self._conn.rollback()
-                    raise
                 self._conn.commit()
             self._invalidate_library_sources([video_id])
             self._notify_source_changed(video_id)
@@ -3081,7 +3094,7 @@ class Index:
             if isinstance(seq, int) and kind is not None:
                 max_seq_by_kind[kind] = max(max_seq_by_kind.get(kind, -1), seq)
         import clips as _clips  # noqa: WPS433 -- keeps index importable alone
-        with self._lock:
+        with self._lock, self._rollback_on_error():
             # Phase 6 (phase6-v1): once migration 0030 exists, each cue's local
             # label and its provenance object travel in the same write. A
             # label without provenance is never stored as attributed evidence.
@@ -3116,13 +3129,8 @@ class Index:
                 # Clips are derived data; never let them block a citation
                 # write. --build-clips re-derives everything.
                 log.exception("clip build failed for %s", video_id)
-            except Exception:
-                # Phase 6 (BC-2): a current but unusable media snapshot is a
-                # refusal (library_media.MediaError), not a silent downgrade
-                # to unannotated clips. Nothing is committed, so the existing
-                # citations, snapshot and clips are preserved.
-                self._conn.rollback()
-                raise
+            # MediaError and other escaping failures reach the rollback
+            # guard, preserving the existing citations, snapshot and clips.
             self._conn.commit()
         self._invalidate_library_sources([video_id])
         self._notify_source_changed(video_id)
@@ -3246,7 +3254,7 @@ class Index:
         update_set = ", ".join(
             f"{col}=excluded.{col}" for col in _JOB_COLUMNS if col != "job_id"
         )
-        with self._lock:
+        with self._lock, self._rollback_on_error():
             self._conn.execute(
                 f"INSERT INTO jobs ({', '.join(_JOB_COLUMNS)}) "
                 f"VALUES ({placeholders}) "
@@ -3286,7 +3294,7 @@ class Index:
         fresh attempt for the same source replaces it (G-14)."""
         if not job_id:
             return 0
-        with self._lock:
+        with self._lock, self._rollback_on_error():
             cur = self._conn.execute(
                 "DELETE FROM jobs WHERE job_id=?", (job_id,))
             self._conn.commit()
@@ -3297,7 +3305,7 @@ class Index:
         terminal jobs (pending/running) are always retained. Returns the
         number of rows deleted."""
         placeholders = ", ".join("?" * len(_TERMINAL_JOB_STATES))
-        with self._lock:
+        with self._lock, self._rollback_on_error():
             cur = self._conn.execute(
                 f"DELETE FROM jobs WHERE status IN ({placeholders}) "
                 f"AND job_id NOT IN ("
@@ -3318,7 +3326,7 @@ class Index:
         video_id = record.get("video_id")
         if not video_id:
             raise ValueError("upsert_taxonomy: record requires a video_id")
-        with self._lock:
+        with self._lock, self._rollback_on_error():
             self._conn.execute(
                 "INSERT OR REPLACE INTO taxonomy "
                 "(video_id, hook_type, hook_explanation, channel, title, "

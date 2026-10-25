@@ -106,7 +106,7 @@ def set_anchor(idx, section: str, content: str) -> None:
             f"section must be one of {ANCHOR_SECTIONS}, got {section!r}")
     key = f"taste.{section}"
     body = (content or "").replace("\r\n", "\n").rstrip() + "\n"
-    with idx._lock:
+    with idx._lock, idx._rollback_on_error():
         idx._conn.execute(
             "INSERT INTO memory_layer (key, value, updated_at) VALUES (?,?,?) "
             "ON CONFLICT(key) DO UPDATE SET value=excluded.value, "
@@ -154,7 +154,7 @@ def get_taste_anchors(idx) -> dict:
 
 
 def _write_taste_anchors(idx, anchors: dict) -> None:
-    with idx._lock:
+    with idx._lock, idx._rollback_on_error():
         idx._conn.execute(
             "INSERT INTO memory_layer (key, value, updated_at) VALUES (?,?,?) "
             "ON CONFLICT(key) DO UPDATE SET value=excluded.value, "

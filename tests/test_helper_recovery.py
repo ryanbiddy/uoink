@@ -19,6 +19,7 @@ FAKE = r'''
 import json, os, socket, sys, threading, time
 from pathlib import Path
 from http.server import BaseHTTPRequestHandler, HTTPServer
+from socketserver import TCPServer
 mode, root = sys.argv[1], Path(sys.argv[2])
 with (root / 'starts').open('a') as f: f.write('start\n')
 if mode == 'exit0': sys.exit(0)
@@ -43,7 +44,16 @@ class Handler(BaseHTTPRequestHandler):
                           'supervisor_run_id': os.environ['UOINK_SUPERVISOR_RUN_ID']}).encode()
         self.send_response(200); self.end_headers(); self.wfile.write(body)
     def log_message(self, *args): pass
-http = HTTPServer(('127.0.0.1', 0), Handler)
+class LoopbackServer(HTTPServer):
+    def server_bind(self):
+        # Match the real Darwin helper: loopback startup needs no reverse DNS.
+        TCPServer.server_bind(self)
+        self.server_name = 'localhost'
+        self.server_port = self.server_address[1]
+def no_dns(*args):
+    raise AssertionError('The disposable helper must not resolve a hostname')
+socket.getfqdn = no_dns
+http = LoopbackServer(('127.0.0.1', 0), Handler)
 assert http.server_port != 5179
 (root / 'port').write_text(str(http.server_port))
 threading.Thread(target=http.serve_forever, daemon=True).start()
@@ -140,7 +150,9 @@ def test_ready_slow_job_is_not_restarted(tmp_path):
     runner = supervisor(tmp_path, 'slow')
     assert runner.run() == 0
     state = recovery.status(tmp_path)
-    assert state['ready_at'] and state['restart_count'] == 0
+    assert state['ready_at'] and state['restart_count'] == 0, state
+    assert state['last_exit_code'] == 0, state
+    assert (tmp_path / 'starts').read_text().splitlines() == ['start']
     assert (tmp_path / 'slow-job-finished').exists()
 
 
