@@ -2740,11 +2740,34 @@ def _asr_duration_expectation(duration_seconds: object) -> dict:
     }
 
 
+def _media_has_audio(media_path: Path,
+                     cancel_event: threading.Event | None = None) -> bool | None:
+    """Return whether audio exists, or None when the probe is inconclusive."""
+    try:
+        result = _run_subprocess(
+            [_platform.media_binary("ffprobe"), "-v", "error", "-select_streams", "a",
+             "-show_entries", "stream=index", "-of", "json", str(media_path)],
+            cancel_event=cancel_event,
+            check=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            timeout=30,
+        )
+        data = json.loads(result.stdout)
+    except (FileNotFoundError, subprocess.CalledProcessError,
+            subprocess.TimeoutExpired, json.JSONDecodeError):
+        return None
+    if not isinstance(data, dict) or not isinstance(data.get("streams"), list):
+        return None
+    return bool(data["streams"])
+
+
 def _resolve_video_transcript(
         caption_entries: list[tuple[float, float, str]],
         media_path: Path,
         duration_seconds: object,
         *,
+        url: str | None = None,
         settings: dict | None = None,
         captions_refused: bool = False,
         media_chunks: list[tuple[Path, float, float]] | None = None,
@@ -2756,7 +2779,7 @@ def _resolve_video_transcript(
     exist. Fallback skips and failures are structured separately so a
     caption-less capture still succeeds without pretending it has words.
     Chunk inputs carry source offsets and durations; ASR covers only those
-    downloaded sections.
+    downloaded sections, including when separate source audio is needed.
     """
     _raise_if_cancelled(cancel_event)
     if caption_entries:
@@ -2780,25 +2803,87 @@ def _resolve_video_transcript(
         }
 
     try:
-        entries = []
-        for path, offset, length in (media_chunks or [(media_path, 0.0, None)]):
-            _raise_if_cancelled(cancel_event)
-            local_entries = uoink_reliability.transcribe_media(
-                path,
-                model_name=model_name,
-                model_root=RELIABILITY_MODEL_ROOT,
-            )
-            _raise_if_cancelled(cancel_event)
-            if media_chunks:
-                # ASR timestamps are local to each sampled section. Bound
-                # them to that section before linking to the source video.
-                entries.extend(
-                    (offset + max(0.0, start), offset + min(end, length), text)
-                    for start, end, text in local_entries
-                    if min(end, length) > max(0.0, start)
-                )
-            else:
-                entries.extend(local_entries)
+        with contextlib.ExitStack() as cleanup:
+            entries = []
+            audio_path = None
+            for number, (path, offset, length) in enumerate(
+                    media_chunks or [(media_path, 0.0, None)]):
+                _raise_if_cancelled(cancel_event)
+                has_audio = _media_has_audio(path, cancel_event)
+                _raise_if_cancelled(cancel_event)
+                needs_source_audio = has_audio is False
+                if not needs_source_audio:
+                    try:
+                        local_entries = uoink_reliability.transcribe_media(
+                            path,
+                            model_name=model_name,
+                            model_root=RELIABILITY_MODEL_ROOT,
+                        )
+                    except IndexError:
+                        if has_audio is True:
+                            raise
+                        needs_source_audio = True
+                    _raise_if_cancelled(cancel_event)
+                if needs_source_audio:
+                    if audio_path is None:
+                        no_audio = {
+                            "status": "no_audio", "caption_reason": reason,
+                            "model": model_name, **expectation,
+                            "reason": "Captured media has no audio stream, and no source URL is available.",
+                        }
+                        if not url:
+                            return [], None, no_audio
+                        # Keep fallback files within this capture and remove them
+                        # on success, failure, or cancellation.
+                        tmp_dir = Path(cleanup.enter_context(tempfile.TemporaryDirectory(
+                            prefix=".asr-", dir=media_path.parent,
+                            ignore_cleanup_errors=True)))
+                        try:
+                            audio_path = _download_reliability_audio(url, tmp_dir, cancel_event)
+                            _raise_if_cancelled(cancel_event)
+                            has_audio = _media_has_audio(audio_path, cancel_event)
+                        except PlaylistJobCancelled:
+                            raise
+                        except Exception as e:
+                            no_audio.update(
+                                reason="Captured media has no audio stream, and source audio could not be obtained.",
+                                error=_sanitize_error(str(e)),
+                            )
+                            return [], None, no_audio
+                        if has_audio is False:
+                            no_audio["reason"] = "Neither the captured media nor the source download contains an audio stream."
+                            return [], None, no_audio
+                    path = audio_path
+                    if media_chunks:
+                        # Download once, then decode only the same sampled ranges.
+                        # Each WAV starts at zero; the mapping below adds offset once.
+                        path = audio_path.parent / f"chunk-{number:03d}.wav"
+                        _run_subprocess(
+                            [_platform.media_binary("ffmpeg"), "-v", "error", "-nostdin", "-y",
+                             "-ss", str(offset), "-i", str(audio_path), "-t", str(length),
+                             "-map", "0:a:0", "-vn", "-ac", "1", "-ar", "16000",
+                             "-c:a", "pcm_s16le", str(path)],
+                            cancel_event=cancel_event, check=True,
+                            stdout=subprocess.DEVNULL, stderr=subprocess.PIPE,
+                            timeout=_ffmpeg_timeout_for(length),
+                        )
+                    _raise_if_cancelled(cancel_event)
+                    local_entries = uoink_reliability.transcribe_media(
+                        path,
+                        model_name=model_name,
+                        model_root=RELIABILITY_MODEL_ROOT,
+                    )
+                _raise_if_cancelled(cancel_event)
+                if media_chunks:
+                    # ASR timestamps are local to each sampled section. Bound
+                    # them to that section before linking to the source video.
+                    entries.extend(
+                        (offset + max(0.0, start), offset + min(end, length), text)
+                        for start, end, text in local_entries
+                        if min(end, length) > max(0.0, start)
+                    )
+                else:
+                    entries.extend(local_entries)
     except PlaylistJobCancelled:
         raise
     except Exception as e:
@@ -2810,6 +2895,18 @@ def _resolve_video_transcript(
             "error": _sanitize_error(str(e)),
             **expectation,
         }
+    finally:
+        # Retry cleanup after the context exits; a Windows media lock must not
+        # discard a completed transcript or change the fallback status.
+        try:
+            for tmp_dir in media_path.parent.glob(".asr-*"):
+                if tmp_dir.is_dir() and not tmp_dir.is_symlink():
+                    try:
+                        shutil.rmtree(tmp_dir)
+                    except OSError:
+                        pass
+        except OSError:
+            pass
 
     completed = {
         "status": "completed",
@@ -5514,7 +5611,7 @@ def _build_yoink_md(metadata: dict, url: str, entries: list, shots: list,
     parts.append(f"**Topic:** {topic}")
     if cap_warning:
         parts.append(f"**Note:** {cap_warning}")
-    if transcript_note:
+    if transcript_note and (entries or (media_sections and "## Transcript\n" not in media_sections)):
         parts.append(f"**Transcript:** {transcript_note}")
     parts.append("")
     parts.append("---")
@@ -5542,6 +5639,9 @@ def _build_yoink_md(metadata: dict, url: str, entries: list, shots: list,
 
     # Transcript
     if media_sections:
+        if not entries and transcript_note:
+            media_sections = media_sections.replace(
+                "## Transcript\n", f"## Transcript\n\n*{transcript_note}*\n", 1)
         parts.append(media_sections.rstrip("\n"))
         parts.append("")
     elif not entries:
@@ -6477,6 +6577,7 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
             entries,
             video_files[0],
             duration,
+            url=url,
             captions_refused=captions_refused,
             media_chunks=[
                 (path, chunk["start_seconds"], chunk["duration_seconds"])
@@ -6507,6 +6608,8 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
                 coverage = (" of sampled sections"
                             if effective_long_video_mode == LONG_VIDEO_MODE_CHUNKED else "")
                 transcript_note = f"Local Whisper transcript{coverage}: {caption_note}"
+            elif asr_fallback and asr_fallback.get("status") == "no_audio":
+                transcript_note = f"No transcript: {asr_fallback['reason']}"
             else:
                 transcript_note = f"No transcript: {caption_note}"
 
@@ -6707,7 +6810,9 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
             # (including extra files in screenshots/) where they are.
             published_names = {staged: final for final, staged in staged_names.items()}
             staged_files = [p.relative_to(asset_folder) for p in asset_folder.rglob("*")
-                            if p.is_file() and (keep_media or p not in video_files)]
+                            if p.is_file() and (keep_media or p not in video_files)
+                            and not any(part.startswith(".asr-")
+                                        for part in p.relative_to(asset_folder).parts)]
             replacements = [published_names.get(relative, relative) for relative in staged_files]
             previous = set(replacements)
             for pattern in ("video.*", "video-chunk-*.*", "screenshots/shot_*.jpg",
@@ -18362,12 +18467,12 @@ class Handler(BaseHTTPRequestHandler):
                     filtered[key] = val
 
         # CM-11: why local ASR ran or did not (disabled, model not downloaded,
-        # failed, chunked media). Short strings only, so a long error never
+        # failed, no audio, chunked media). Short strings only, so a long error never
         # reaches the page.
         raw_asr = data.get("asr_fallback")
         if isinstance(raw_asr, dict):
             filtered["asr_fallback"] = {
-                key: raw_asr[key].strip()[:300] for key in ("status", "model", "error")
+                key: raw_asr[key].strip()[:300] for key in ("status", "model", "error", "reason")
                 if isinstance(raw_asr.get(key), str) and raw_asr[key].strip()
             }
 

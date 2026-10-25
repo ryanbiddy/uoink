@@ -33,6 +33,8 @@ def extraction(monkeypatch, tmp_path):
     state = SimpleNamespace(
         caption_error=None, media_error=None, captions_available=True,
         settings=server._default_settings(), model_cached=True, calls=[],
+        media_has_audio=True, audio_error=None, source_has_audio=True,
+        probe_error=None, cut_error=None,
     )
     metadata = {
         "id": "abcdef12345", "title": "Caption test", "duration": 60,
@@ -43,8 +45,18 @@ def extraction(monkeypatch, tmp_path):
 
     def fake_run(cmd, **kwargs):
         state.calls.append((list(cmd), kwargs))
+        if Path(cmd[0]).stem == "ffprobe":
+            assert Path(cmd[-1]).is_file(), "probe must inspect a captured or downloaded file"
+            if state.probe_error is not None:
+                raise state.probe_error
+            has_audio = state.source_has_audio if Path(cmd[-1]).name.startswith("audio.") else state.media_has_audio
+            return subprocess.CompletedProcess(
+                cmd, 0, json.dumps({"streams": [{"index": 1}] if has_audio else []}), b"")
         if cmd[0] == "ffmpeg":
-            Path(cmd[-1].replace("%04d", "0001")).write_bytes(b"jpeg")
+            if Path(cmd[-1]).suffix == ".wav" and state.cut_error is not None:
+                raise state.cut_error
+            data = b"media" if Path(cmd[-1]).suffix == ".wav" else b"jpeg"
+            Path(cmd[-1].replace("%04d", "0001")).write_bytes(data)
         elif "--skip-download" in cmd:
             if state.caption_error is not None:
                 raise state.caption_error
@@ -56,6 +68,8 @@ def extraction(monkeypatch, tmp_path):
                     encoding="utf-8",
                 )
         else:
+            if "bestaudio/best" in cmd and state.audio_error is not None:
+                raise state.audio_error
             if state.media_error is not None:
                 raise state.media_error
             if SUBTITLE_FLAGS.intersection(cmd) and state.caption_error is not None:
@@ -271,6 +285,269 @@ def test_absent_captions_reach_asr(extraction, mode):
     assert result["asr_fallback"]["reason"] == "captions_unavailable"
     assert "YouTube captions unavailable" in result["yoink_md"]
     extraction.asr.assert_called_once()
+    assert not any("bestaudio/best" in cmd for cmd, _kwargs in extraction.calls)
+
+
+@pytest.mark.parametrize("mode", ["full", "chunked"])
+@pytest.mark.parametrize("probe_error", [
+    None,
+    FileNotFoundError("ffprobe missing"),
+    subprocess.CalledProcessError(1, ["ffprobe"]),
+    subprocess.TimeoutExpired(["ffprobe"], 30),
+], ids=["positive", "missing", "exit-1", "timeout"])
+def test_embedded_audio_transcribes_despite_probe_errors(extraction, mode, probe_error):
+    extraction.captions_available = False
+    extraction.metadata["duration"] = 7200
+    extraction.probe_error = probe_error
+
+    result = extraction.run(mode)
+
+    assert result["ok"] is True
+    assert result["asr_fallback"]["status"] == "completed"
+    probes = [Path(cmd[-1]) for cmd, _kwargs in extraction.calls if Path(cmd[0]).stem == "ffprobe"]
+    expected_count = len(result["long_video_chunks"]) if mode == "chunked" else 1
+    assert expected_count > 1 if mode == "chunked" else expected_count == 1
+    assert len(probes) == extraction.asr.call_count == expected_count
+    assert probes == [call.args[0] for call in extraction.asr.call_args_list]
+    assert all(path.name.startswith("video") for path in probes)
+    assert not any("bestaudio/best" in cmd for cmd, _kwargs in extraction.calls)
+
+
+@pytest.mark.parametrize("mode", ["full", "chunked"])
+@pytest.mark.parametrize("probe_error", [
+    FileNotFoundError("ffprobe missing"),
+    subprocess.CalledProcessError(1, ["ffprobe"]),
+    subprocess.TimeoutExpired(["ffprobe"], 30),
+], ids=["missing", "exit-1", "timeout"])
+def test_video_only_inconclusive_probe_downloads_once(extraction, mode, probe_error):
+    extraction.captions_available = False
+    extraction.metadata["duration"] = 7200
+    extraction.media_has_audio = False
+    extraction.probe_error = probe_error
+
+    def asr(path, **_kwargs):
+        assert path.is_file()
+        if path.name.startswith("video"):
+            raise IndexError("no audio stream")
+        return [(0.0, 2.0, "Recovered transcript.")]
+
+    extraction.asr.side_effect = asr
+    result = extraction.run(mode)
+
+    assert result["ok"] is True
+    assert result["transcript_source"] == "asr"
+    assert result["asr_fallback"]["status"] == "completed"
+    assert len([cmd for cmd, _kwargs in extraction.calls if "bestaudio/best" in cmd]) == 1
+    section_count = len(result["long_video_chunks"]) if mode == "chunked" else 1
+    assert extraction.asr.call_count == 2 * section_count
+    assert (extraction.folder / "transcript.txt").read_text(encoding="utf-8").count(
+        "Recovered transcript.") == section_count
+    assert not list(extraction.folder.glob(".asr-*"))
+
+
+@pytest.mark.parametrize("mode", ["full", "chunked"])
+def test_positive_probe_index_error_stays_failed(extraction, mode):
+    extraction.captions_available = False
+    extraction.asr.side_effect = IndexError("decoder index error")
+
+    result = extraction.run(mode)
+
+    assert result["ok"] is True
+    assert result["asr_fallback"]["status"] == "failed"
+    extraction.asr.assert_called_once()
+    assert not any("bestaudio/best" in cmd for cmd, _kwargs in extraction.calls)
+    assert not (extraction.folder / "transcript.txt").exists()
+
+
+@pytest.mark.parametrize("mode", ["full", "chunked"])
+def test_audio_download_timeout_keeps_capture_without_transcript(extraction, mode):
+    extraction.captions_available = False
+    extraction.media_has_audio = False
+    extraction.audio_error = subprocess.TimeoutExpired(["yt-dlp"], 60)
+
+    result = extraction.run(mode)
+
+    assert result["ok"] is True
+    assert result["asr_fallback"]["status"] == "no_audio"
+    assert result["asr_fallback"]["caption_reason"] == "captions_unavailable"
+    assert not (extraction.folder / "transcript.txt").exists()
+    assert not list(extraction.folder.glob(".asr-*"))
+    extraction.asr.assert_not_called()
+
+
+@pytest.mark.parametrize("source_has_audio", [True, False], ids=["transcript", "no-audio"])
+def test_asr_cleanup_lock_retries_without_discarding_result(extraction, monkeypatch, source_has_audio):
+    extraction.captions_available = False
+    extraction.media_has_audio = False
+    extraction.source_has_audio = source_has_audio
+    unlink = server.os.unlink
+    locked = []
+
+    def locked_unlink(path, *args, **kwargs):
+        if (Path(path).name.startswith("audio.") and len(locked) < 2):
+            locked.append(path)
+            raise PermissionError("media temporarily locked")
+        return unlink(path, *args, **kwargs)
+
+    monkeypatch.setattr(server.os, "unlink", locked_unlink)
+    result = extraction.run()
+
+    assert len(locked) == 2, "exercise the initial cleanup and its permission retry"
+    assert result["ok"] is True
+    assert result["asr_fallback"]["status"] == ("completed" if source_has_audio else "no_audio")
+    assert result["transcript_source"] == ("asr" if source_has_audio else None)
+    assert (extraction.folder / "transcript.txt").exists() is source_has_audio
+    assert not any(part.startswith(".asr-") for path in extraction.folder.rglob("*")
+                   for part in path.relative_to(extraction.folder).parts)
+
+
+@pytest.mark.parametrize("nested", [False, True], ids=["capture-root", "nested"])
+def test_refresh_does_not_publish_asr_files_when_cleanup_stays_locked(extraction, monkeypatch, nested):
+    extraction.run()
+    extraction.captions_available = False
+    extraction.media_has_audio = False
+    rmtree = server.shutil.rmtree
+    temporary_rmtree = server.tempfile.TemporaryDirectory._rmtree
+    rename = Path.rename
+    cleanup_attempts = []
+    published = []
+
+    def locked_temporary_rmtree(path, ignore_errors=False, **kwargs):
+        if Path(path).name.startswith(".asr-"):
+            assert ignore_errors is True
+            return  # A locked file remains after best-effort temporary cleanup.
+        return temporary_rmtree(path, ignore_errors=ignore_errors, **kwargs)
+
+    def locked_rmtree(path, *args, **kwargs):
+        if Path(path).name.startswith(".asr-"):
+            cleanup_attempts.append(Path(path))
+            raise OSError("media still locked")
+        return rmtree(path, *args, **kwargs)
+
+    def record_rename(path, target):
+        published.append(Path(target).relative_to(extraction.folder))
+        return rename(path, target)
+
+    original_asr = extraction.asr.side_effect
+
+    def asr(path, **kwargs):
+        if nested:
+            nested_dir = path.parent.parent / "screenshots" / ".asr-leftover"
+            nested_dir.mkdir()
+            (nested_dir / "audio.m4a").write_bytes(b"leftover")
+        return original_asr(path, **kwargs)
+
+    extraction.asr.side_effect = asr
+    monkeypatch.setattr(server.tempfile.TemporaryDirectory, "_rmtree", staticmethod(locked_temporary_rmtree))
+    monkeypatch.setattr(server.shutil, "rmtree", locked_rmtree)
+    monkeypatch.setattr(Path, "rename", record_rename)
+
+    result = extraction.run()
+
+    assert result["ok"] is True and result["transcript_source"] == "asr"
+    assert cleanup_attempts
+    assert all(not part.startswith(".asr-") for path in published for part in path.parts)
+    assert not any(part.startswith(".asr-") for path in extraction.folder.rglob("*")
+                   for part in path.relative_to(extraction.folder).parts)
+    assert (extraction.folder / "transcript.txt").read_text(encoding="utf-8") == "Local transcript."
+
+
+@pytest.mark.parametrize("mode", ["full", "chunked"])
+@pytest.mark.parametrize("outcome", ["recovered", "download_failed", "silent_source"])
+def test_caption_refusal_recovers_audio_or_reports_no_audio(extraction, mode, outcome):
+    extraction.caption_error = subprocess.CalledProcessError(1, ["yt-dlp"], stderr=CAPTION_429)
+    extraction.media_has_audio = False
+    if outcome == "download_failed":
+        extraction.audio_error = subprocess.CalledProcessError(1, ["yt-dlp"], stderr=MEDIA_429)
+    extraction.source_has_audio = outcome != "silent_source"
+
+    result = extraction.run(mode)
+
+    assert result["ok"] is True
+    assert not result.get("queued")
+    extraction.index.enqueue_pending.assert_not_called()
+    assert len([cmd for cmd, _kwargs in extraction.calls if "bestaudio/best" in cmd]) == 1
+    if outcome == "recovered":
+        assert result["transcript_source"] == "asr"
+        assert result["asr_fallback"]["reason"] == "captions_refused"
+        extraction.asr.assert_called_once()
+    else:
+        assert result["transcript_source"] is None
+        assert result["asr_fallback"]["status"] == "no_audio"
+        assert result["asr_fallback"]["caption_reason"] == "captions_refused"
+        assert "audio stream" in result["transcript_note"]
+        extraction.asr.assert_not_called()
+    assert not list(extraction.folder.glob(".asr-*"))
+
+
+def test_video_only_chunks_download_audio_once_and_preserve_offsets(extraction):
+    extraction.captions_available = False
+    extraction.media_has_audio = False
+    extraction.metadata["duration"] = 7200
+    extraction.asr.side_effect = None
+    extraction.asr.return_value = [(-1.0, 2.0, "opening"), (119.0, 121.0, "ending")]
+
+    result = extraction.run("chunked")
+
+    chunks = result["long_video_chunks"]
+    assert len(chunks) > 1
+    downloads = [cmd for cmd, _kwargs in extraction.calls if "bestaudio/best" in cmd]
+    cuts = [cmd for cmd, _kwargs in extraction.calls if cmd[0] == "ffmpeg" and "-ss" in cmd]
+    assert len(downloads) == 1
+    assert len(cuts) == len(chunks) == extraction.asr.call_count
+    assert [float(cmd[cmd.index("-ss") + 1]) for cmd in cuts] == [c["start_seconds"] for c in chunks]
+    assert [float(cmd[cmd.index("-t") + 1]) for cmd in cuts] == [c["duration_seconds"] for c in chunks]
+    assert all(call.args[0].suffix == ".wav" for call in extraction.asr.call_args_list)
+    assert result["asr_fallback"]["coverage"] == "sampled_sections"
+    assert result["asr_fallback"]["duration_seconds"] == result["processed_media_seconds"]
+    folder = extraction.folder
+    sidecar = json.loads((folder / f"{folder.name}.json").read_text(encoding="utf-8"))
+    expected = []
+    for chunk in chunks:
+        offset, length = chunk["start_seconds"], chunk["duration_seconds"]
+        expected.extend((offset + max(0, start), offset + min(end, length))
+                        for start, end, _text in extraction.asr.return_value
+                        if min(end, length) > max(0, start))
+    assert [(row["start"], row["end"]) for row in sidecar["transcript"]] == expected
+    assert not list(folder.glob(".asr-*"))
+
+
+def test_audio_download_cancellation_prevents_publication(extraction):
+    extraction.captions_available = False
+    extraction.media_has_audio = False
+    extraction.audio_error = server.PlaylistJobCancelled("playlist job cancelled")
+    cancel_event = threading.Event()
+
+    with pytest.raises(server.PlaylistJobCancelled):
+        extraction.run(cancel_event=cancel_event)
+
+    download = next((cmd, kwargs) for cmd, kwargs in extraction.calls if "bestaudio/best" in cmd)
+    assert download[1]["cancel_event"] is cancel_event
+    extraction.asr.assert_not_called()
+    extraction.comments.assert_not_called()
+    assert not list(extraction.folder.glob(".asr-*"))
+    assert not (extraction.folder / f"{extraction.folder.name}.json").exists()
+
+
+@pytest.mark.parametrize("phase", ["probe", "cut", "whisper"])
+def test_audio_fallback_cancellation_prevents_publication(extraction, phase):
+    extraction.captions_available = False
+    extraction.media_has_audio = False
+    error = server.PlaylistJobCancelled("playlist job cancelled")
+    if phase == "probe":
+        extraction.probe_error = error
+    elif phase == "cut":
+        extraction.cut_error = error
+    else:
+        extraction.asr.side_effect = error
+
+    with pytest.raises(server.PlaylistJobCancelled):
+        extraction.run("chunked", cancel_event=threading.Event())
+
+    extraction.comments.assert_not_called()
+    assert not list(extraction.folder.glob(".asr-*"))
+    assert not (extraction.folder / "transcript.txt").exists()
+    assert not (extraction.folder / f"{extraction.folder.name}.json").exists()
 
 
 def test_chunked_asr_uses_source_timestamps_and_discloses_sampled_coverage(extraction):

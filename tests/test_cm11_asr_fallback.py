@@ -17,7 +17,9 @@ Red before CM-11:
 from __future__ import annotations
 
 import json
+import subprocess
 import tempfile
+import threading
 import types
 from pathlib import Path
 import sys
@@ -42,6 +44,12 @@ def offline_capture(monkeypatch):
     monkeypatch.setattr(server, "_get_saved_scrapecreators_key", lambda: "")
     monkeypatch.setattr(server, "_anthropic_key_for_feature", lambda *_args: None)
     monkeypatch.setattr(server, "_autostart_enabled", lambda: False)
+
+    def probe_only(cmd, **_kwargs):
+        assert Path(cmd[0]).stem == "ffprobe", f"unexpected command: {cmd}"
+        return subprocess.CompletedProcess(cmd, 0, b'{"streams": [{"index": 1}]}', b"")
+
+    monkeypatch.setattr(server, "_run_subprocess", probe_only)
     yield
     unexpected_io.assert_not_called()
 
@@ -152,6 +160,113 @@ def test_asr_failure_is_nonfatal_and_sanitized(monkeypatch, tmp_path):
             f"sidecar error leaked a local path: {fallback}")
 
 
+@pytest.mark.parametrize("payload, expected", [
+    ('{"streams": [{"index": 1}]}', True),
+    ('{"streams": []}', False),
+    ('{"streams": null}', None),
+    ('{"streams": {}}', None),
+    ('{"streams": "audio"}', None),
+    ('{}', None),
+    ('[]', None),
+    ('null', None),
+    ('invalid json', None),
+])
+def test_audio_probe_requires_an_object_with_a_streams_list(monkeypatch, tmp_path, payload, expected):
+    probe = Mock(return_value=subprocess.CompletedProcess(["ffprobe"], 0, payload, b""))
+    monkeypatch.setattr(server, "_run_subprocess", probe)
+
+    assert server._media_has_audio(tmp_path / "video.mp4") is expected
+    probe.assert_called_once()
+
+
+@pytest.mark.parametrize("error", [
+    FileNotFoundError("ffprobe missing"),
+    subprocess.CalledProcessError(1, ["ffprobe"]),
+    subprocess.TimeoutExpired(["ffprobe"], 30),
+], ids=["missing", "exit-1", "timeout"])
+def test_audio_probe_errors_are_inconclusive(monkeypatch, tmp_path, error):
+    monkeypatch.setattr(server, "_run_subprocess", Mock(side_effect=error))
+    assert server._media_has_audio(tmp_path / "video.mp4") is None
+
+
+def test_audio_probe_cancellation_propagates(monkeypatch, tmp_path):
+    monkeypatch.setattr(server, "_run_subprocess", Mock(side_effect=server.PlaylistJobCancelled()))
+    with pytest.raises(server.PlaylistJobCancelled):
+        server._media_has_audio(tmp_path / "video.mp4")
+
+
+def test_cancellation_after_probe_stops_before_whisper(monkeypatch, tmp_path):
+    cancel_event = threading.Event()
+    monkeypatch.setattr(server, "_reliability_model_status", lambda _model: {"cached": True})
+
+    def probe(*_args):
+        cancel_event.set()
+        return True
+
+    monkeypatch.setattr(server, "_media_has_audio", probe)
+    asr = Mock()
+    monkeypatch.setattr(reliability, "transcribe_media", asr)
+    with pytest.raises(server.PlaylistJobCancelled):
+        server._resolve_video_transcript(
+            [], tmp_path / "video.mp4", 60, settings={"whisper_model": "base"},
+            cancel_event=cancel_event)
+    asr.assert_not_called()
+
+
+@pytest.mark.parametrize("has_audio", [True, None], ids=["positive", "inconclusive"])
+@pytest.mark.parametrize("error_type", [IndexError, RuntimeError])
+def test_only_inconclusive_probe_index_error_downloads_audio(
+        monkeypatch, tmp_path, has_audio, error_type):
+    media = tmp_path / "video.mp4"
+    media.write_bytes(b"media")
+    monkeypatch.setattr(server, "_reliability_model_status", lambda _model: {"cached": True})
+    probe = Mock(return_value=has_audio)
+    monkeypatch.setattr(server, "_media_has_audio", probe)
+    words = [(0.0, 2.0, "recovered words")]
+    asr = Mock(side_effect=[error_type("decoder error"), words])
+    monkeypatch.setattr(reliability, "transcribe_media", asr)
+
+    def download(_url, folder, _cancel_event):
+        path = folder / "audio.m4a"
+        path.write_bytes(b"audio")
+        return path
+
+    download = Mock(side_effect=download)
+    monkeypatch.setattr(server, "_download_reliability_audio", download)
+    entries, source, fallback = server._resolve_video_transcript(
+        [], media, 60, url="https://example.com/video", settings={"whisper_model": "base"})
+
+    assert asr.call_args_list[0].args[0] == media
+    if has_audio is None and error_type is IndexError:
+        download.assert_called_once()
+        assert probe.call_count == asr.call_count == 2
+        assert asr.call_args_list[1].args[0].name == "audio.m4a"
+        assert entries == words and source == "asr"
+        assert fallback["status"] == "completed"
+    else:
+        download.assert_not_called()
+        asr.assert_called_once()
+        assert entries == [] and source is None
+        assert fallback["status"] == "failed"
+    assert not list(tmp_path.glob(".asr-*"))
+
+
+@pytest.mark.parametrize("media_sections", [None, "## Transcript\n\n", "## Chapters\n\nNone.\n"])
+@pytest.mark.parametrize("with_entries", [False, True], ids=["empty", "provenance"])
+def test_markdown_transcript_note_occurs_once(media_sections, with_entries):
+    note = "Local Whisper transcript: captions unavailable" if with_entries else "No transcript: no audio available."
+    entries = [(0.0, 2.0, "words")] if with_entries else []
+    markdown = server._build_yoink_md(
+        {"title": "Example"}, "https://example.com/video", entries, [], 30, {},
+        "2026-10-24", "Test", media_sections=media_sections, transcript_note=note)
+
+    assert markdown.count(note) == 1
+    in_header = with_entries or (media_sections and "## Transcript\n" not in media_sections)
+    assert (f"**Transcript:** {note}" in markdown) == bool(in_header)
+    if not in_header:
+        assert note in markdown.split("## Transcript\n", 1)[1]
+
+
 @pytest.mark.parametrize("outcome", ["completed", "empty", "failed"])
 def test_caption_refusal_reason_survives_asr_outcome(monkeypatch, tmp_path, outcome):
     monkeypatch.setattr(server, "_reliability_model_status", lambda _model: {"cached": True})
@@ -249,6 +364,8 @@ def test_failed_model_download_never_writes_readiness_marker(
 def _fake_no_caption_subprocess(cmd, **_kwargs):
     """Mock yt-dlp + ffmpeg. It emits media and a screenshot, never an SRT."""
     parts = [str(part) for part in cmd]
+    if Path(parts[0]).stem == "ffprobe":
+        return subprocess.CompletedProcess(cmd, 0, b'{"streams": [{"index": 1}]}', b"")
     is_ffmpeg = parts and parts[0].endswith("ffmpeg")
     out = None
     if "-o" in parts:
@@ -266,17 +383,39 @@ def _fake_no_caption_subprocess(cmd, **_kwargs):
     return types.SimpleNamespace(returncode=0, stdout="", stderr=b"")
 
 
+@pytest.mark.parametrize("audio_case", ["embedded", "video_only", "download_failed", "silent_source"])
 def test_captionless_x_capture_persists_asr_and_provenance(
-        monkeypatch, tmp_path):
+        monkeypatch, tmp_path, audio_case):
     root = tmp_path / "corpus"
     root.mkdir()
     idx = index_mod.Index.open(tmp_path / "index.db")
     calls = []
+    downloads = []
+    probes = []
+
+    def fake_run(cmd, **kwargs):
+        if Path(cmd[0]).stem == "ffprobe":
+            probes.append(Path(cmd[-1]))
+            assert probes[-1].is_file()
+            assert cmd[cmd.index("-select_streams") + 1] == "a"
+            assert kwargs["check"] is True
+            has_audio = (audio_case == "embedded" or
+                         (Path(cmd[-1]).name == "audio.m4a" and audio_case == "video_only"))
+            return subprocess.CompletedProcess(
+                cmd, 0, json.dumps({"streams": [{"index": 1}] if has_audio else []}), b"")
+        if "bestaudio/best" in cmd:
+            downloads.append((cmd, kwargs))
+            if audio_case == "download_failed":
+                raise subprocess.CalledProcessError(1, cmd, stderr=b"audio unavailable")
+            path = Path(cmd[cmd.index("-o") + 1].replace("%(ext)s", "m4a"))
+            path.write_bytes(b"audio")
+            return subprocess.CompletedProcess(cmd, 0, b"", b"")
+        return _fake_no_caption_subprocess(cmd, **kwargs)
+
     try:
         monkeypatch.setattr(server, "DESKTOP_ROOT", root)
         monkeypatch.setattr(server, "_get_index", lambda: idx)
-        monkeypatch.setattr(server, "_run_subprocess",
-                            _fake_no_caption_subprocess)
+        monkeypatch.setattr(server, "_run_subprocess", fake_run)
         monkeypatch.setattr(server, "_download_thumbnail",
                             lambda *_args, **_kwargs: None)
         monkeypatch.setattr(server, "_fetch_channel_context",
@@ -325,6 +464,32 @@ def test_captionless_x_capture_persists_asr_and_provenance(
 
         sidecar = json.loads(
             (folder / f"{folder.name}.json").read_text(encoding="utf-8"))
+        assert result["ok"] is True
+        assert len(downloads) == (0 if audio_case == "embedded" else 1)
+        assert len(probes) == (1 if audio_case in {"embedded", "download_failed"} else 2)
+        assert not list(folder.glob(".asr-*")), "temporary audio must be removed"
+        if downloads:
+            assert downloads[0][0][-1] == url
+            assert Path(downloads[0][0][downloads[0][0].index("-o") + 1]).parent.parent == folder
+        if audio_case in {"download_failed", "silent_source"}:
+            assert not calls
+            assert result["transcript_source"] is None
+            assert sidecar["transcript_source"] is None
+            assert sidecar["transcript"] == []
+            assert sidecar["asr_fallback"]["status"] == "no_audio"
+            assert "audio stream" in sidecar["asr_fallback"]["reason"]
+            assert sidecar["asr_fallback"]["caption_reason"] == "captions_unavailable"
+            assert not (folder / "transcript.txt").exists()
+            for markdown in (result["yoink_md"], (folder / f"{folder.name}.md").read_text(encoding="utf-8")):
+                assert markdown.count(sidecar["transcript_note"]) == 1
+                transcript_section = markdown.split("## Transcript\n", 1)[1].split("\n## ", 1)[0]
+                assert sidecar["transcript_note"] in transcript_section
+                assert "No transcript:" in transcript_section
+                assert "No captions available for this video." not in transcript_section
+            return
+        assert len(calls) == 1
+        assert calls[0][0].name == ("video.mp4" if audio_case == "embedded" else "audio.m4a")
+        assert sidecar["media_depth"]["provenance"]["transcript_source"]["kind"] == "local_asr"
         _assert(result["ok"] is True and calls,
                 f"X fallback did not run: result={result}, calls={calls}")
         _assert(sidecar.get("transcript_source") == "asr",
