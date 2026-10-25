@@ -43,7 +43,7 @@ def test_browser_catalog_maps_common_chromium_extension_pages() -> None:
     expected = {
         "edge": "edge://extensions/",
         "chrome": "chrome://extensions/",
-        "comet": "chrome://extensions/",
+        "comet": "comet://extensions/",
         "brave": "brave://extensions/",
         "vivaldi": "vivaldi://extensions/",
         "opera-gx": "opera://extensions/",

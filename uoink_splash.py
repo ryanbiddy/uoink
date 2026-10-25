@@ -128,7 +128,7 @@ BROWSER_CATALOG = [
     {
         "id": "comet",
         "name": "Comet",
-        "url": "chrome://extensions/",
+        "url": "comet://extensions/",
         "commands": ["comet", "comet.exe"],
         "progids": ["comethtm", "comet"],
         "paths": [
@@ -488,6 +488,17 @@ class JsApi:
 
     def open_extensions_page(self, browser_id=None):
         return _open_extensions_page(str(browser_id or "") or None)
+
+    def copy_extensions_url(self, browser_id=None):
+        """Copy the browser's extensions address for pasting.
+
+        Browsers refuse to open their internal pages from another app (Comet
+        opens a blank tab), so the splash always offers the address too.
+        """
+        selected = _browser_by_id(str(browser_id or "") or None)
+        browser = _browser_descriptor(selected) if selected else _preferred_browser()
+        url = str(browser["url"])
+        return {"ok": _copy_to_clipboard(url), "url": url}
 
     def copy_extension_path(self):
         path = str(_extension_dir())
