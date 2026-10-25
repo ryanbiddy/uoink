@@ -644,6 +644,7 @@ def test_dmg_smoke_detaches_on_success_and_failure(tmp_path, monkeypatch, fail):
         calls.append(args)
         if args[0] == "ditto":
             args[-1].mkdir(parents=True)
+        return SimpleNamespace(stdout="")
     def smoke(*args):
         if fail:
             raise ValueError("smoke failed")
@@ -662,7 +663,7 @@ def test_dmg_smoke_detaches_on_success_and_failure(tmp_path, monkeypatch, fail):
     assert calls[-1][:2] == ["hdiutil", "detach"]
     installed = next(c[-1] for c in calls if c[0] == "ditto")
     assert [c for c in calls if c[0] == "codesign"] == [
-        ["codesign", "--verify", "--strict", "--deep", installed]] * (1 if fail else 2)
+        ["codesign", "--verify", "--strict", "--deep", installed]] * (2 if fail else 3)
     report = json.loads((output / "dmg-smoke.json").read_text())
     assert report["detached"] is True and report["ok"] is not fail
 

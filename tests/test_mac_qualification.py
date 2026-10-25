@@ -337,5 +337,72 @@ class QualificationTests(unittest.TestCase):
         self.assertIn("hash mismatch", str(smoke.verify_complete_set(self.root, [wheel])))
 
 
+    def test_import_smoke_prunes_before_cocoa_startup_and_stdio_probes(self):
+        venv = self.root / "venv"
+        python = venv / "bin/python3"
+        site = venv / "lib/python3.13/site-packages"
+        unwanted = [site / "PyObjCTest/__init__.py", site / "objc/_objc.so.dSYM/Contents/Resources/DWARF/_objc.so"]
+        runtime = site / "objc/_objc.so"
+        for path in [*unwanted, runtime]:
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes(b"fixture")
+        wheel = self.root / "fixture.whl"
+        wheel.write_bytes(b"wheel")
+        events = []
+
+        def check_pruned(event):
+            self.assertTrue(all(not path.exists() for path in unwanted))
+            self.assertEqual(runtime.read_bytes(), b"fixture")
+            events.append(event)
+
+        def run(command, *a, **kw):
+            if command[-1] == smoke.COCOA_IMPORT:
+                check_pruned("cocoa")
+            return 0
+
+        def import_one(*a):
+            check_pruned("startup")
+            return {"ok": True}
+
+        def protocol(*a):
+            check_pruned("stdio")
+            return {"ok": True}
+
+        output = self.root / "evidence"
+        with patch.object(sys, "argv", ["import_smoke.py", "--python", str(python), "--wheels", str(self.root),
+                                       "--output", str(output)]), \
+                patch.object(smoke, "select_wheels", return_value=[wheel]), \
+                patch.object(smoke, "verify_complete_set", return_value=[]), \
+                patch.object(smoke, "verify_ui_wheels"), \
+                patch.object(smoke, "run_logged", side_effect=run), \
+                patch.object(smoke.subprocess, "run", return_value=SimpleNamespace(
+                    stdout=json.dumps([str(venv), str(self.root / "base-python")]))), \
+                patch.object(smoke.runpy, "run_path", return_value={}), \
+                patch.object(smoke, "startup_modules", return_value=["helper.mac_menubar"]), \
+                patch.object(smoke, "import_one", side_effect=import_one), \
+                patch.object(smoke, "protocol_smoke", side_effect=protocol):
+            self.assertEqual(smoke.main(), 0)
+        self.assertEqual(events, ["cocoa", "startup", "stdio", "stdio"])
+        report = json.loads((output / "smoke.json").read_text())
+        self.assertEqual(report["development_pruned"], json.loads((output / "development-pruned.json").read_text()))
+        self.assertEqual({r["path"] for r in report["development_pruned"] if r["type"] == "file"},
+                         {p.relative_to(venv).as_posix() for p in unwanted})
+
+    def test_import_smoke_never_prunes_a_system_or_unrelated_python(self):
+        python = self.root / "venv/bin/python3"
+        for prefix, base in ((self.root, self.root), (self.root / "unrelated", self.root)):
+            with self.subTest(prefix=prefix), \
+                    patch.object(smoke.subprocess, "run", return_value=SimpleNamespace(
+                        stdout=json.dumps([str(prefix), str(base)]))), \
+                    patch.object(smoke, "prune_development_payload", side_effect=AssertionError("must not prune")):
+                with self.assertRaisesRegex(ValueError, "disposable venv"):
+                    smoke.prune_smoke_venv(python, self.root / "report.json")
+
+    def test_cocoa_probe_refuses_an_importable_pyobjc_test_package(self):
+        with patch("importlib.util.find_spec", return_value=object()):
+            with self.assertRaisesRegex(AssertionError, "PyObjCTest must not ship"):
+                exec(smoke.COCOA_IMPORT, {})
+
+
 if __name__ == "__main__":
     unittest.main()
