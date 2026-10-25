@@ -80,6 +80,25 @@ except ImportError:
 class _InvalidStdioRequest(ValueError):
     """Valid JSON whose JSON-RPC envelope cannot be accepted."""
 
+    def __init__(self, message, request_id=None):
+        super().__init__(message)
+        self.request_id = request_id
+
+
+def _stdio_oversized_reply_id(raw):
+    """Echo a usable request ID so the client can settle its pending call."""
+    if not isinstance(raw, dict) or "method" not in raw:
+        return None
+    request_id = raw.get("id")
+    if type(request_id) not in (int, str):
+        return None
+    if not _stdio_request_id_fits(request_id, _stdio_completed_frame_cap()):
+        return None
+    if _request_state(request_id) is not None:
+        # Never answer for a different in-flight call with the same ID.
+        return None
+    return request_id
+
 
 def parse_stdio_message(line):
     """Drop responses; reject ambiguous or oversized requests before SDK validation."""
@@ -99,7 +118,8 @@ def parse_stdio_message(line):
         logging.getLogger(__name__).debug("Ignoring inbound JSON-RPC response")
         return None
     if _stdio_inbound_line_rejection(line) is not None:
-        raise _InvalidStdioRequest(_STDIO_PROTOCOL_REJECTION_MESSAGE)
+        raise _InvalidStdioRequest(_STDIO_PROTOCOL_REJECTION_MESSAGE,
+                                   request_id=_stdio_oversized_reply_id(raw))
     if not isinstance(raw, dict):
         if raw == []:
             raise _InvalidStdioRequest("Empty JSON-RPC batch")
@@ -1355,7 +1375,7 @@ def bounded_stdio_server(stdin=None, stdout=None):
                     try:
                         message = parse_stdio_message(line)
                     except _InvalidStdioRequest as exc:
-                        await writes.send(_stdio_protocol_rejection_frame(None, message=str(exc)))
+                        await writes.send(_stdio_protocol_rejection_frame(exc.request_id, message=str(exc)))
                         continue
                     except (ValueError, TypeError, RecursionError):
                         # SDK 2 logs/drops exception objects. Refuse here so the
