@@ -9,7 +9,7 @@ Loads Codex's HTML at http://127.0.0.1:5179/splash. The splash JS itself
 fetches /diagnose to choose the success vs. failure variant, so this wrapper
 doesn't need to inject state -- it just hosts the window.
 
-Window: 640x450 frameless, on top, positioned bottom-right of primary monitor.
+Window: 640x490 frameless, on top, positioned bottom-right of primary monitor.
 Slide-up over ~400ms via window.move() in a background thread (pywebview
 windows don't natively animate). After an 8s linger the splash dismisses,
 closes its own webview process, and writes the current version to the
@@ -49,7 +49,9 @@ _install_isolation.apply_from_process()
 
 SPLASH_URL = "http://127.0.0.1:5179/splash"
 DASHBOARD_SETTINGS_URL = "http://127.0.0.1:5179/dashboard#settings/byo-key"
-WIDTH, HEIGHT = 640, 450
+# Windows gives a frameless pywebview window ~40 px less client height than
+# requested, so 490 leaves the setup state's steps and buttons room.
+WIDTH, HEIGHT = 640, 490
 MARGIN = 32           # bottom-right offset
 LINGER_SEC = 8.0      # mock 2.2.1: 8s linger before minimize
 ANIM_MS = 400         # slide-up duration
@@ -109,18 +111,8 @@ def _extension_dir() -> Path:
 
 
 BROWSER_CATALOG = [
-    {
-        "id": "edge",
-        "name": "Microsoft Edge",
-        "url": "edge://extensions/",
-        "commands": ["msedge", "msedge.exe"],
-        "progids": ["msedge", "microsoftedge"],
-        "paths": [
-            ("PROGRAMFILES(X86)", "Microsoft/Edge/Application/msedge.exe"),
-            ("PROGRAMFILES", "Microsoft/Edge/Application/msedge.exe"),
-            ("LOCALAPPDATA", "Microsoft/Edge/Application/msedge.exe"),
-        ],
-    },
+    # Chrome first: it is the tested browser, and the first installed entry
+    # is the fallback when the default browser is not in this list.
     {
         "id": "chrome",
         "name": "Chrome",
@@ -131,6 +123,28 @@ BROWSER_CATALOG = [
             ("PROGRAMFILES", "Google/Chrome/Application/chrome.exe"),
             ("PROGRAMFILES(X86)", "Google/Chrome/Application/chrome.exe"),
             ("LOCALAPPDATA", "Google/Chrome/Application/chrome.exe"),
+        ],
+    },
+    {
+        "id": "comet",
+        "name": "Comet",
+        "url": "chrome://extensions/",
+        "commands": ["comet", "comet.exe"],
+        "progids": ["comethtm", "comet"],
+        "paths": [
+            ("LOCALAPPDATA", "Perplexity/Comet/Application/comet.exe"),
+        ],
+    },
+    {
+        "id": "edge",
+        "name": "Microsoft Edge",
+        "url": "edge://extensions/",
+        "commands": ["msedge", "msedge.exe"],
+        "progids": ["msedge", "microsoftedge"],
+        "paths": [
+            ("PROGRAMFILES(X86)", "Microsoft/Edge/Application/msedge.exe"),
+            ("PROGRAMFILES", "Microsoft/Edge/Application/msedge.exe"),
+            ("LOCALAPPDATA", "Microsoft/Edge/Application/msedge.exe"),
         ],
     },
     {
@@ -254,7 +268,7 @@ def _browser_from_prog_id(prog_id: str):
 
 def _browser_executable(browser) -> str:
     if sys.platform == "darwin":
-        names = {"chrome": "Google Chrome", "edge": "Microsoft Edge", "brave": "Brave Browser",
+        names = {"chrome": "Google Chrome", "comet": "Comet", "edge": "Microsoft Edge", "brave": "Brave Browser",
                  "vivaldi": "Vivaldi", "opera-gx": "Opera GX", "arc": "Arc", "chromium": "Chromium"}
         name = names.get(browser["id"])
         if name:
@@ -539,6 +553,31 @@ class JsApi:
             target=_close, name="uoink-splash-close", daemon=True).start()
 
 
+def _round_corners(window) -> None:
+    """Ask Windows 11 for native rounded corners on the frameless window.
+
+    Earlier Windows versions reject the attribute and keep square corners.
+    """
+    if sys.platform != "win32":
+        return
+    try:
+        import ctypes
+        hwnd = 0
+        native = getattr(window, "native", None)
+        handle = getattr(native, "Handle", None)
+        if handle is not None:
+            hwnd = int(handle.ToInt64())
+        if not hwnd:
+            hwnd = ctypes.windll.user32.FindWindowW(None, window.title)
+        if hwnd:
+            preference = ctypes.c_int(2)  # DWMWCP_ROUND
+            ctypes.windll.dwmapi.DwmSetWindowAttribute(
+                ctypes.c_void_p(hwnd), 33,  # DWMWA_WINDOW_CORNER_PREFERENCE
+                ctypes.byref(preference), ctypes.sizeof(preference))
+    except Exception as e:
+        log.debug("rounded corners unavailable: %s", e)
+
+
 def _slide_up(window, final_x: int, sh: int) -> None:
     """Animate the window from below-screen up to its final y over ANIM_MS."""
     final_y = sh - HEIGHT - MARGIN
@@ -597,11 +636,13 @@ def main() -> int:
         x=final_x,
         y=sh,            # start off-screen so frame-1 doesn't flash at final position
         js_api=api,
+        background_color="#0A0A0A",
         **window_kwargs,
     )
     api.attach(window)
 
     def _after_loaded():
+        _round_corners(window)
         _slide_up(window, final_x, sh)
         time.sleep(LINGER_SEC)
         if not api.should_hold_open():

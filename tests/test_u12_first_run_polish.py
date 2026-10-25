@@ -43,6 +43,7 @@ def test_browser_catalog_maps_common_chromium_extension_pages() -> None:
     expected = {
         "edge": "edge://extensions/",
         "chrome": "chrome://extensions/",
+        "comet": "chrome://extensions/",
         "brave": "brave://extensions/",
         "vivaldi": "vivaldi://extensions/",
         "opera-gx": "opera://extensions/",
@@ -55,6 +56,10 @@ def test_browser_catalog_maps_common_chromium_extension_pages() -> None:
             "default-browser ProgId detection misses Edge")
     require(uoink_splash._browser_from_prog_id("BraveHTML")["id"] == "brave",
             "default-browser ProgId detection misses Brave")
+    require(uoink_splash._browser_from_prog_id("CometHTM.QEXRYSQSWUQVDRYKI35FBQZYXY")["id"] == "comet",
+            "default-browser ProgId detection misses Comet")
+    require(uoink_splash.BROWSER_CATALOG[0]["id"] == "chrome",
+            "Chrome (the tested browser) must be the installed-browser fallback")
 
 
 def test_extension_status_returns_browser_metadata() -> None:
