@@ -23,7 +23,7 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 STATE_FILE = "helper-recovery.json"
 STOP_FILE = "helper-stop.json"
-# A Darwin open that arrives before the helper is ready waits here for it.
+# A Darwin open asks the resident supervisor, the only consumer, through this file.
 DASHBOARD_REQUEST = "dashboard-request.json"
 REQUEST_WINDOW = 300
 WINDOW = 600
@@ -204,16 +204,18 @@ def request_dashboard_later(root: Path) -> None:
 
 
 def take_dashboard_request(root: Path) -> bool:
-    """Consume a pending open. Stale requests never pop a window much later."""
-    path = root / DASHBOARD_REQUEST
+    """Claim a pending open atomically. Stale requests never pop a window later."""
+    claimed = root / f".{DASHBOARD_REQUEST}.{os.getpid()}.{uuid.uuid4().hex}"
     try:
-        requested = read_json(path).get("requested_at")
-    except (OSError, ValueError):
-        requested = None
-    try:
-        path.unlink(missing_ok=True)
+        os.replace(root / DASHBOARD_REQUEST, claimed)
     except OSError:
         return False
+    try:
+        requested = read_json(claimed).get("requested_at")
+    except (OSError, ValueError):
+        requested = None
+    finally:
+        claimed.unlink(missing_ok=True)
     return isinstance(requested, (int, float)) and 0 <= time.time() - requested < REQUEST_WINDOW
 
 
@@ -229,12 +231,8 @@ def open_app(root: Path) -> int:
     with admission(root) as free:
         pass
     if not free:
-        if status(root).get("status") != "running":
-            # The resident shows it once its helper is ready.
-            request_dashboard_later(root)
-            if status(root).get("status") != "running" or not take_dashboard_request(root):
-                return 0
-        show_running_dashboard(root)
+        # The resident shows it now, or as soon as its helper is ready.
+        request_dashboard_later(root)
         return 0
     if request_dashboard(root):
         return 0  # A helper outlived its supervisor; it still owns the window.
@@ -375,6 +373,8 @@ class Supervisor:
                             reason = "Helper did not become ready before the startup deadline. Check for a port conflict or startup error."
                             child.terminate()
                             break
+                    elif self.on_ready is not None:
+                        self.on_ready(False)
                     self.sleep(self.poll)
                 code = child.wait(timeout=10)
                 if not reason.startswith("Helper did not"):
@@ -442,7 +442,8 @@ def main(argv=None) -> int:
             return open_app(root)
 
         def on_ready(shown):
-            # The launch flag already opened one; otherwise honor a waiting open.
+            # Runs every poll while the helper is ready. On the start that the
+            # launch flag already opened, drop opens queued before it was ready.
             if take_dashboard_request(root) and not shown:
                 threading.Thread(target=show_running_dashboard, args=(root,), daemon=True).start()
     try:
@@ -458,11 +459,12 @@ def main(argv=None) -> int:
         finally:
             notify_failure(failure)
         return 0
-    if args.show_dashboard and status(root).get("status") == "running":
+    if sys.platform == "darwin":
+        if args.show_dashboard and not supervisor.owned:
+            # Another supervisor won admission; it consumes the request.
+            request_dashboard_later(root)
+    elif args.show_dashboard and status(root).get("status") == "running":
         show_running_dashboard(root)
-    elif sys.platform == "darwin" and args.show_dashboard and not supervisor.owned:
-        # Another supervisor won admission while it was starting up.
-        request_dashboard_later(root)
     return result
 
 

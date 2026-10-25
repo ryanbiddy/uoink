@@ -436,9 +436,9 @@ def test_darwin_open_while_resident_asks_or_queues(supervisor, monkeypatch, tmp_
     with supervisor.admission(tmp_path) as owned:  # The resident holds the lock.
         assert owned
         assert supervisor.main(["--show-dashboard"]) == 0
-    assert shown == ([tmp_path] if state == "running" else [])
-    # Not ready yet: the open waits for the resident's helper instead of vanishing.
-    assert (tmp_path / supervisor.DASHBOARD_REQUEST).exists() is (state != "running")
+    # Only the resident consumes opens, now or once its helper is ready.
+    assert shown == []
+    assert supervisor.take_dashboard_request(tmp_path) is True
 
 
 def test_darwin_open_with_helper_but_no_supervisor_asks_that_helper(supervisor, monkeypatch, tmp_path):
@@ -463,8 +463,8 @@ def test_dashboard_request_is_taken_once_and_expires(supervisor, monkeypatch, tm
     assert not (tmp_path / supervisor.DASHBOARD_REQUEST).exists()
 
 
-@pytest.mark.parametrize("first_args,shown", [([], [False, False]), (["--show-dashboard"], [True, False])])
-def test_ready_callback_runs_on_every_helper_start(monkeypatch, tmp_path, first_args, shown):
+@pytest.mark.parametrize("first_args,launch_flag", [([], False), (["--show-dashboard"], True)])
+def test_ready_callback_runs_on_every_helper_start(monkeypatch, tmp_path, first_args, launch_flag):
     import io
     import uoink_supervisor
     ready = []
@@ -477,19 +477,22 @@ def test_ready_callback_runs_on_every_helper_start(monkeypatch, tmp_path, first_
 
         def poll(self):
             self.polls += 1
-            return None if self.polls < 4 else 1
+            return None if self.polls < 6 else 1
 
         def wait(self, timeout=None):
             return 1
 
-    monkeypatch.setattr(uoink_supervisor.subprocess, "Popen", lambda command, **k: Child())
+    starts = []
+    monkeypatch.setattr(uoink_supervisor.subprocess, "Popen", lambda command, **k: starts.append(len(ready)) or Child())
     supervisor = uoink_supervisor.Supervisor(
         tmp_path, ["python", "server.py"], "http://127.0.0.1:1/health", session="s",
         first_args=first_args, on_ready=ready.append, backoff=(0,), poll=0,
         probe=lambda *a: True, notify=lambda state: None, sleep=lambda seconds: None)
     assert supervisor.loop() == 0
-    # Crash restarts honor a waiting open too; only the launch flag's start says shown.
-    assert ready == shown
+    # Polled every tick while ready, through crash restarts; only the first ready
+    # tick of the launch flag's start says the window is already open.
+    assert len(starts) == 2 and all(ready[at:] for at in starts)
+    assert ready.count(True) == int(launch_flag) and ready[0] is launch_flag
 
 
 def test_darwin_ready_callback_honors_a_waiting_open(supervisor, monkeypatch, tmp_path):
@@ -558,3 +561,20 @@ def test_resident_and_login_launches_still_supervise(supervisor, monkeypatch, tm
     assert supervisor.main(["--startup"]) == 0
     assert [run["first_args"] for run in runs] == [["--show-dashboard"], []]
     assert [run["startup"] for run in runs] == [False, True]
+
+
+def test_one_queued_open_is_claimed_exactly_once(supervisor, tmp_path):
+    supervisor.request_dashboard_later(tmp_path)
+    barrier, results = threading.Barrier(8), []
+
+    def claim():
+        barrier.wait()
+        results.append(supervisor.take_dashboard_request(tmp_path))
+
+    workers = [threading.Thread(target=claim) for _ in range(8)]
+    for worker in workers:
+        worker.start()
+    for worker in workers:
+        worker.join(5)
+    assert sorted(results) == [False] * 7 + [True]
+    assert list(tmp_path.iterdir()) == []
