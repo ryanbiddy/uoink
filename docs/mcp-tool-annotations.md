@@ -5,14 +5,15 @@ names carry identical titles and hints in `uoink_mcp_tools.TOOL_REGISTRY`.
 
 Hints describe successful calls and their possible effects, including queued
 work. Idempotent reads can return different results after the library changes.
-Capture and feed-fetch operations use `destructiveHint=false` as required by the
-3.8.1 brief. Operations that cancel, delete or replace saved analysis,
-transcripts or published corpora use `destructiveHint=true`.
+Source recapture can replace an existing corpus and metadata, so those capture
+tools use `destructiveHint=true`, including queued playlist captures. New notes
+and images create separate items. Operations that cancel, delete or replace
+saved analysis, transcripts or published corpora also use `destructiveHint=true`.
 
 | Tool | Title | readOnlyHint | destructiveHint | idempotentHint | openWorldHint | Reason |
 |---|---|---|---|---|---|---|
-| `uoink_video` | Capture video | false | false | false | true | Fetches the requested video and saves a corpus; another capture can fetch new source data. |
-| `uoink_playlist` | Capture playlist | false | false | false | true | Fetches a playlist and starts a new capture job. |
+| `uoink_video` | Capture video | false | true | false | true | Fetches the requested video and saves a corpus; another capture can fetch new source data. Recapture can replace the existing source snapshot. |
+| `uoink_playlist` | Capture playlist | false | true | false | true | Fetches a playlist and starts a new capture job. Recapture can replace the existing source snapshot. |
 | `get_job_status` | Get job status | true | false | true | false | Reads local job state. |
 | `cancel_job` | Cancel job | false | true | true | false | Cancels work; repeating cancellation does not restart it. |
 | `list_recent_uoinks` | List recent captures | true | false | true | false | Reads saved corpus metadata. |
@@ -29,7 +30,7 @@ transcripts or published corpora use `destructiveHint=true`.
 | `get_transcript_reliability` | Get transcript reliability | true | false | true | false | Reads stored reliability spans. |
 | `add_podcast_feed` | Add podcast feed | false | false | true | true | Registers a unique feed URL and enables future network polling; repeated registration reuses it. |
 | `list_podcast_feeds` | List podcast feeds | true | false | true | false | Reads registered feed rows. |
-| `remove_podcast_feed` | Remove podcast feed | false | true | true | false | Deletes the feed and tracked episodes; repeating leaves them absent. |
+| `remove_podcast_feed` | Remove podcast feed | false | true | true | false | Archives and disables a source-linked feed; deletes a legacy unlinked feed and its tracked episodes. Published corpora remain. |
 | `poll_podcast_feed` | Poll podcast feed | false | false | false | true | Fetches the feed and records discoveries; repeated polls can find new episodes. |
 | `list_podcast_episodes` | List podcast episodes | true | false | true | false | Reads tracked episode rows. |
 | `download_podcast_episode` | Download podcast audio | false | false | true | true | Downloads episode audio; reuses an existing nonempty canonical file. |
@@ -83,7 +84,7 @@ transcripts or published corpora use `destructiveHint=true`.
 | `get_claim` | Get claim | true | false | true | false | Reads one claim with its evidence. |
 | `generate_script` | Generate script | false | false | false | false | Returns grounding or stores an agent-supplied script as a new row. |
 | `revise_script` | Revise script | false | false | false | false | Returns revision grounding or saves a new script version. |
-| `get_shot_list` | Generate shot list | false | true | true | false | Derives a deterministic shot list and replaces the script's prior shot list. |
+| `get_shot_list` | Generate and save shot list | false | true | true | false | Derives a deterministic shot list and replaces the script's prior shot list. |
 | `list_scripts` | List scripts | true | false | true | false | Reads stored scripts. |
 | `get_script` | Get script | true | false | true | false | Reads one script and its saved shots and citations. |
 | `write_tweet` | Write tweet or thread | false | false | false | true | Returns grounding or saves a draft; explicit direct generation can call Anthropic with the saved key. |
@@ -93,12 +94,12 @@ transcripts or published corpora use `destructiveHint=true`.
 | `add_style_anchor` | Add style anchor | false | false | false | true | Saves a style anchor and can fetch its URL with private-network checks. |
 | `list_style_anchors` | List style anchors | true | false | true | false | Reads saved style anchors. |
 | `remove_style_anchor` | Remove style anchor | false | true | true | false | Deletes a style anchor; repeating leaves it absent. |
-| `uoink_url` | Capture URL | false | false | false | true | Fetches the requested URL through the universal extractor and saves its corpus. |
+| `uoink_url` | Capture URL | false | true | false | true | Fetches the requested URL through the universal extractor and saves its corpus. Recapture can replace the existing source snapshot. |
 | `uoink_note` | Save note | false | false | false | false | Saves a local text note; repeated calls can create additional notes. |
 | `uoink_image` | Save image | false | false | false | false | Decodes supplied image bytes and saves a local image capture. |
-| `uoink_x` | Capture X post | false | false | false | true | Fetches and saves X text when X text capture is enabled. |
-| `uoink_page` | Capture web page | false | false | false | true | Fetches an allowed public page and saves it; private-network checks remain enforced. |
-| `uoink_reddit_thread` | Capture Reddit thread | false | false | false | true | Fetches a public Reddit thread and saves filtered comments. |
+| `uoink_x` | Capture X post | false | true | false | true | Fetches and saves X text when X text capture is enabled. Recapture can replace the existing source snapshot. |
+| `uoink_page` | Capture web page | false | true | false | true | Fetches an allowed public page and saves it; private-network checks remain enforced. Recapture can replace the existing source snapshot. |
+| `uoink_reddit_thread` | Capture Reddit thread | false | true | false | true | Fetches a public Reddit thread and saves filtered comments. Recapture can replace the existing source snapshot. |
 | `list_allowed_sites` | List allowed sites | true | false | true | false | Reads the saved site allowlist. |
 | `add_allowed_site` | Add allowed site | false | false | true | true | Adds a unique host pattern, authorizing later page fetches; repeats reuse it. |
 | `remove_allowed_site` | Remove allowed site | false | true | true | false | Removes a site pattern; repeating leaves it absent. |

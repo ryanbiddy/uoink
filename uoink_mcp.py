@@ -151,9 +151,11 @@ class RegistryMCP(Server):
 
     async def list_tools(self):
         names = uoink_mcp_tools.stdio_tool_names(STDIO_TOOLSET)
-        registry = {tool["name"]: tool for tool in uoink_mcp_tools.list_tools()}
+        # Stdio keeps the frozen JSON-text result envelope. MCP outputSchema
+        # requires structuredContent, which this transport does not emit.
+        registry = {tool["name"]: tool for tool in uoink_mcp_tools.list_tools(structured_results=False)}
         return [mcp_types.Tool(**dict(registry[name], inputSchema=uoink_mcp_tools.client_input_schema(
-            registry[name]["inputSchema"]))) for name in names]
+            registry[name]["inputSchema"], name))) for name in names]
 
     async def call_tool(self, name, arguments):
         if name not in uoink_mcp_tools.stdio_tool_names(STDIO_TOOLSET):

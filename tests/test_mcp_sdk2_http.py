@@ -40,7 +40,7 @@ def test_sdk2_http_client_completes_list_and_call(tmp_path, mode):
                 async with Client(transport(), mode=mode, read_timeout_seconds=5) as client:
                     evidence["protocol_version"] = client.protocol_version
                     listing = await client.list_tools()
-                    assert [t.model_dump(by_alias=True, exclude_none=True) for t in listing.tools] == registry_golden()
+                    assert [t.model_dump(by_alias=True, exclude_none=True) for t in listing.tools] == registry_golden(structured_results=True)
                     called = await client.call_tool("search_clips", {"query": "absent-m2-topic"})
                     assert called.is_error is False
                     assert called.structured_content == json.loads(GOLDEN["success"]["content"][0]["text"])

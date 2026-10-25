@@ -104,7 +104,7 @@ def test_tools_schemas_and_text(capsys):
     tools = json.loads(capsys.readouterr().out)["tools"]
     assert tuple(t["name"] for t in tools) == registry.stdio_tool_names("core")
     for tool in tools:
-        assert tool["inputSchema"] == registry.client_input_schema(registry.TOOL_REGISTRY[tool["name"]].input_schema)
+        assert tool["inputSchema"] == registry.client_input_schema(registry.TOOL_REGISTRY[tool["name"]].input_schema, tool["name"])
     assert cli.main(["tools", "--text"]) == 0
     assert "search_library:" in capsys.readouterr().out
 

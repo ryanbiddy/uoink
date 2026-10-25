@@ -1,0 +1,16 @@
+# Only explicitly copied server sources enter the build context.
+**
+!*.py
+!VERSION
+!topics.json
+!requirements-mcp.txt
+!helper/
+!helper/__init__.py
+!helper/_version.py
+!uoink_core/
+!uoink_core/*.py
+!migrations/
+!migrations/*.sql
+!scripts/
+!scripts/run_mcp_container.py
+!scripts/smoke_mcp_container.py
