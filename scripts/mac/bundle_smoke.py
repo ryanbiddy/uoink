@@ -26,6 +26,40 @@ from ffmpeg_bundle import probe_torchcodec
 from import_smoke import COCOA_IMPORT
 
 
+def verify_launchagent(config: dict, launcher: Path) -> None:
+    program = config["ProgramArguments"]
+    assert len(program) == 3 and program[1:] == ["--helper", "--startup"], ("launchagent args", program)
+    assert Path(program[0]).resolve() == launcher.resolve(), ("launchagent program", program, str(launcher))
+    assert config["RunAtLoad"] is True
+    assert config["KeepAlive"] == {"SuccessfulExit": False}
+    assert config["KeepAlive"]["SuccessfulExit"] is False
+    assert type(config["ThrottleInterval"]) is int and config["ThrottleInterval"] == 30
+    # The supervisor captures and rotates helper output. launchd must not
+    # create a second, unbounded copy in the user's Logs directory.
+    assert config["StandardOutPath"] == config["StandardErrorPath"] == "/dev/null"
+
+
+# Run in the bundled interpreter, using only the disposable profile's recorded
+# identities. Stop intent suppresses recovery for this abrupt menu EOF test.
+KILL_HELPER = r'''
+import os, signal, sys
+from pathlib import Path
+sys.path.insert(0, sys.argv[1])
+import _platform
+import uoink_supervisor as recovery
+root = Path(os.environ['UOINK_ISOLATED_PROFILE'])
+state = recovery.read_json(root / recovery.STATE_FILE)
+identity = recovery.read_json(root / 'runtime-identity.json')
+assert state['supervisor_pid'] == int(sys.argv[2]) and state['status'] == 'running'
+assert identity['pid'] == state['helper_pid']
+assert Path(identity['script']).resolve() == Path(sys.argv[1], 'server.py').resolve()
+assert Path(identity['executable']).resolve() == Path(sys.executable).resolve()
+assert _platform.darwin_liveness(identity['pid'], identity['created_ms'], identity['executable']) == 'alive'
+recovery.request_stop(root, reason='smoke-helper-death')
+os.kill(identity['pid'], signal.SIGKILL)
+'''
+
+
 def environment(scratch: Path, port: int) -> dict:
     env = os.environ.copy()
     for key in list(env):
@@ -233,16 +267,8 @@ def smoke(app: Path, output: Path, *, scratch: Path | None = None,
             agent_path.parent.mkdir(parents=True)
             agent_path.write_bytes(agent.stdout)
             config = plistlib.loads(agent.stdout)
-            program = config["ProgramArguments"]
-            assert len(program) == 2 and program[1] == "--helper", ("launchagent args", program)
-            assert same_file(program[0], launcher), ("launchagent program", program, str(launcher))
-            assert config["KeepAlive"] is False and config["RunAtLoad"] is True
-            logs = (Path(env["HOME"]) / "Library/Logs/Uoink").resolve()
-            for key in ("StandardOutPath", "StandardErrorPath"):
-                if key == "StandardErrorPath" and key not in config:
-                    continue
-                assert Path(config[key]).resolve().is_relative_to(logs), ("launchagent log path", key, config[key])
-            report["launchagent"] = {"generated": True, "bootstrapped": False}
+            verify_launchagent(config, launcher)
+            report["launchagent"] = {"generated": True, "bootstrapped": False, "config": config}
             report["media"] = media_smoke(contents, scratch, env)
             cocoa = subprocess.run([str(python), "-B", "-s", "-c", COCOA_IMPORT],
                                    cwd=scratch, env=env, capture_output=True, text=True,
@@ -267,6 +293,9 @@ def smoke(app: Path, output: Path, *, scratch: Path | None = None,
                         assert health["capabilities"]["library_mirror"]["code"] == "library_mirror_unavailable_macos"
                         assert health["capabilities"]["media"]["available"] is True
                         assert health["capabilities"]["media"]["code"] is None
+                        if health["helper_recovery"]["status"] != "running":
+                            time.sleep(0.2)
+                            continue
                         report["health"] = health
                         break
                     except OSError:
@@ -362,14 +391,17 @@ def smoke(app: Path, output: Path, *, scratch: Path | None = None,
                 report["menubar"]["quit_no_survivor"] = True
                 if observer:
                     observer("quit", helper, menu)
-                # A second helper must acquire the released lock. Kill only
-                # this test's direct child to exercise kernel-close of its pipe.
+                # A second supervisor must acquire the released lock. Its
+                # helper owns the menu lifeline; the launcher PID no longer does.
                 helper = subprocess.Popen([str(launcher), "--helper"], cwd=scratch, env=env,
                                           stdout=log, stderr=subprocess.STDOUT, start_new_session=True)
                 deadline = time.monotonic() + 120
                 while time.monotonic() < deadline:
                     try:
                         restarted = wait_menu()
+                        if ui_request("/health")["helper_recovery"]["status"] != "running":
+                            time.sleep(.2)
+                            continue
                         break
                     except OSError:
                         if helper.poll() is not None:
@@ -381,11 +413,14 @@ def smoke(app: Path, output: Path, *, scratch: Path | None = None,
                 if observer:
                     observer("relaunch", helper, restarted)
                 report["menubar"]["relaunch_connected"] = True
-                helper.kill()
+                subprocess.run([str(python), "-B", "-s", "-c", KILL_HELPER, str(resources), str(helper.pid)],
+                               cwd=scratch, env=env, check=True, timeout=10)
                 helper.wait(timeout=10)
+                assert helper.returncode == 0
                 assert_menu_gone(restarted["pid"])
                 assert menu_pids() == []
                 report["menubar"]["helper_death_no_survivor"] = True
+                report["menubar"]["helper_death_stop_intent"] = True
                 if observer:
                     observer("helper_death", helper, restarted)
                 checks_passed = True

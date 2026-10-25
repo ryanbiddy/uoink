@@ -79,7 +79,8 @@ def capture(tmp_path, monkeypatch):
     monkeypatch.setattr(socket.socket, "connect", blocked)
     monkeypatch.setattr(urllib.request, "urlopen", blocked)
     monkeypatch.setitem(sys.modules, "channels", SimpleNamespace(tag_if_self=lambda *a: None))
-    monkeypatch.setitem(sys.modules, "provenance", SimpleNamespace(derive_source_type=lambda **k: "video"))
+    monkeypatch.setitem(sys.modules, "provenance", SimpleNamespace(
+        derive_source_type=lambda **k: "video", backfill_source_types=lambda idx: None))
     monkeypatch.setitem(sys.modules, "library_media", SimpleNamespace(schema_ready=lambda c: False))
     monkeypatch.setitem(sys.modules, "yt_extract", SimpleNamespace(chapters_from_metadata=lambda m: []))
 
@@ -96,6 +97,8 @@ def capture(tmp_path, monkeypatch):
     _load(ROOT / "index.py", {"__init__", "upsert_yoink", "_rollback_on_error", "get_yoink", "get_by_slug",
                               "_notify_source_changed"},
           index_scope, class_name="Index")
+    if "def list_capture_sources(" in (ROOT / "index.py").read_text(encoding="utf-8"):
+        _load(ROOT / "index.py", {"list_capture_sources"}, index_scope, class_name="Index")
     index_class = type("Index", (), {name: value for name, value in index_scope.items()
                                     if callable(value)})
     idx = index_class(conn, tmp_path / "unused-index.db")
@@ -173,6 +176,10 @@ def capture(tmp_path, monkeypatch):
     })
     _load(ROOT / "server.py", {"_handle_session_add", "_handle_session_close",
                                "_handle_extract_any"}, scope, class_name="Handler")
+    # Optional on the base revision so recapture tests can prove behavioral
+    # failures there, rather than failing to compile a newly added helper.
+    if "def _indexed_video_capture(" in (ROOT / "server.py").read_text(encoding="utf-8"):
+        _load(ROOT / "server.py", {"_indexed_video_capture"}, scope)
 
     def run(url, *, parent=None, metadata=None, folder=None):
         metadata = metadata if metadata is not None else _metadata(url)

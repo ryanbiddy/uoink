@@ -131,6 +131,7 @@ def helper(surface_code):
         "_mcp_stdio_selfcheck": Mock(return_value={"ok": True}),
         "_mcp_modern_stdio_selfcheck": Mock(return_value={"ok": True}),
         "_podcast_corpus_reconciliation_status": Mock(return_value={"ok": True}),
+        "_duplicate_folder_names_status": Mock(return_value={"count": 0, "folders": []}),
         "whisper_runner": SimpleNamespace(
             normalize_model=lambda value: "base",
             is_whisperx_available=lambda: True,
