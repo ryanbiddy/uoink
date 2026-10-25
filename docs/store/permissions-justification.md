@@ -1,30 +1,57 @@
-# Permissions justification — Uoink (CWS reviewer notes)
+# Permission justifications for 3.11
 
-Paste each justification into the matching field in the CWS Developer Console
-under **Privacy practices → Permission justifications**.
+Paste each paragraph into the matching Privacy practices field. All eight
+API permissions remain because they have live callers. Three unused host
+entries were removed: `https://youtu.be/*`, `https://mobile.twitter.com/*`
+and `http://localhost:5179/*`.
 
-## Extension permissions
+## alarms
 
-- **`alarms`** — Runs a periodic health check to see whether the local helper is responsive, and updates the toolbar badge color accordingly.
-- **`clipboardWrite`** — Copies the extracted Markdown corpus and base64-encoded screenshots to the user's clipboard so they can paste it into Claude, ChatGPT, or a notes app.
-- **`notifications`** — Shows capture success messages and local-helper-offline warnings.
-- **`storage`** — Persists local extension settings: screenshot count, active research session name, mobile queue sync state, and setup state. No browsing data.
-- **`contextMenus`** — Adds right-click actions to trigger extraction on supported video links and thumbnails.
-- **`activeTab`** — Reads the current tab's URL and injects the extraction content script only when the user clicks the extension action on a supported video tab.
-- **`scripting`** — Injects the in-page Uoink button and the extraction content script on supported pages via the MV3 scripting API, only in response to a user action.
-- **`offscreen`** — Manifest V3 service workers cannot reach the clipboard API directly; an offscreen document is the only supported path for clipboard writes.
+Checks whether the local Uoink helper is available and updates the toolbar badge. The service worker uses a 30-second alarm so it can refresh status after waking. It does not collect browsing history.
+
+## clipboardWrite
+
+Writes the capture the user requested to the clipboard, including its text and supported image representation. Users can then paste it into an app of their choice. The extension does not read the existing clipboard.
+
+## notifications
+
+Shows the result of a user-requested capture or copy, including failures and an unavailable helper. Notifications do not contain advertising. Queued jobs do not trigger desktop notifications.
+
+## storage
+
+Stores the helper authentication token, setup state, active session, pending capture results and recent failures in extension-local or session storage. These records can contain selected source URLs and titles. The screenshot interval preference uses browser sync storage. No general browsing-history log is collected.
+
+## contextMenus
+
+Adds capture actions to the right-click menu for supported links and pages, plus a page-capture action. The chosen URL is sent to the local helper only when the user selects the action.
+
+## activeTab
+
+Reads the active tab's URL after the user opens the extension or invokes a capture action. It also supplies temporary access for reading feed links and preview metadata on a page the user chooses, without asking for persistent access to all websites.
+
+## scripting
+
+Runs bundled code to read a selected page's feed links or preview metadata, and to inject the bundled X Article parser into an already-open tab after installation or update. No script is downloaded or evaluated from a server.
+
+## offscreen
+
+Creates a packaged offscreen document so capture work in the Manifest V3 service worker can write to the clipboard. The same document checks the browser's color-scheme preference. It does not load a remote document.
 
 ## Host permissions
 
-- **`https://www.youtube.com/*`, `https://m.youtube.com/*`, `https://youtu.be/*`** — Runs the in-page Uoink button and reads public transcripts, comments, and chapter metadata on YouTube.
-- **`https://x.com/*`, `https://twitter.com/*`, `https://mobile.twitter.com/*`** — Validates video links and triggers context-menu extraction on X / Twitter pages.
-- **`https://*.reddit.com/*`** — Reads a public Reddit thread and its top comments when the user runs a capture on a Reddit page.
-- **`http://127.0.0.1:5179/*`, `http://localhost:5179/*`** — Talks to the local Uoink helper process listening on port 5179. All heavy processing and storage happen there, on the user's machine.
+| Manifest entry | Text for the reviewer |
+|---|---|
+| `https://www.youtube.com/*`, `https://m.youtube.com/*` | Supports the in-page capture button and access to supported YouTube tabs. The content script starts on the site's other pages so navigation to a video works without reloading. Capture is user-triggered; the helper retrieves the selected source. |
+| `https://x.com/*`, `https://twitter.com/*` | Supports the X Article button and the bundled parser on articles the user can already read, including script injection into already-open tabs. The rendered article is sent to the local helper when requested. |
+| `https://*.reddit.com/*` | Supports Reddit thread tabs and the in-page capture control across Reddit's site variants. The selected thread URL is passed to the local helper for extraction. |
+| `http://127.0.0.1:5179/*` | Connects to the required Windows helper on the user's own PC for health checks, authentication, capture requests and local results. The helper binds to loopback and checks exact extension origins and a per-install token. This is not an internet server. |
 
-## Data use affirmations (CWS "Data usage" section)
+The declared content scripts also cover `www.x.com`, `www.twitter.com` and
+Reddit thread pages. They are visible site access in the manifest, even though
+these are not all repeated in `host_permissions`. Generic page capture and
+short links do not need persistent host grants; they use user-selected URLs
+and the helper. No `<all_urls>`, cookies, history, downloads or tabs permission
+is requested.
 
-- **Website content — collected, "selected" only.** The extension reads the transcript, comments, and metadata of videos the user explicitly chooses to process. It is processed locally.
-- **Not sold to third parties.**
-- **Not used or transferred for any purpose unrelated to the single purpose** (video/podcast/page extraction).
-- **Not used for creditworthiness or lending.**
-- **Complies with the Chrome Web Store Limited Use policy and User Data policy.**
+See [POLICY-AUDIT.md](POLICY-AUDIT.md) for file and line evidence and
+[privacy-practices.md](privacy-practices.md) for the data declarations.

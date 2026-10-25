@@ -1,46 +1,45 @@
-# Chrome Web Store submission checklist — Uoink
+# 3.11 submission checklist
 
-**This submission is a manual Ryan step.** This folder is the ready-to-submit
-package. Nothing here submits anything; it's copy, images, and a checklist.
+The account, fee, upload and submission are Ryan's actions. Start with
+[SUBMIT-NOW.md](SUBMIT-NOW.md) for the click sequence.
 
-## What's in this folder
+## Prepared in this worktree
 
-| File | Use |
-|---|---|
-| `listing.md` | Item name, summary, detailed description, single purpose, category, support email, privacy URL, website — all copy-paste ready. |
-| `permissions-justification.md` | Per-permission justifications + data-use affirmations for the reviewer. |
-| `screenshots/01…05-*.png` | The 5 store screenshots, exactly 1280×800. Upload in filename order. |
-| `tiles/promo-small-440x280.png` | Small promo tile. |
-| `tiles/promo-marquee-1400x560.png` | Marquee promo tile. |
-| `tiles/promo-large-920x680.png` | Spare large promo / social. |
+- [x] MV3 upload zip from `extension/` only, with a strict file allowlist.
+- [x] Development key omitted from the zip and retained in the source manifest.
+- [x] Mock API excluded; production mock switch is false; no source maps.
+- [x] Version checked against VERSION without editing version fields.
+- [x] Shared store ID/URL config, developer ID retained, exact origin tests.
+- [x] Unused host grants removed and remaining permissions explained.
+- [x] Listing, privacy form, reviewer instructions and website copy prepared.
+- [x] Offline Chrome smoke and requested static/security/setup checks recorded.
+- [x] Existing screenshot and tile inventory inspected.
 
-## Pre-submission (verify before uploading)
+## Ryan's gates before Submit for review
 
-- [ ] `hi@uoink.app` mailbox receives mail.
-- [ ] `https://uoink.app/privacy` resolves and is current.
-- [ ] `https://uoink.app` resolves.
-- [ ] `extension/manifest.json` version matches the explicitly approved submission tag.
-- [ ] `USE_MOCK_API = false` in `extension/popup.js`.
-- [ ] `PUBLISHED_INSTALLER_VERSION` in `extension/setup.js` matches a
-  non-draft GitHub release whose `Uoink-Setup-<version>.exe` asset resolves.
-- [ ] License compliance clean (CRIT-2): confirm the shipped build no longer bundles AGPL/GPL deps and `THIRD-PARTY-NOTICES.md` is current — CWS rejects license-mismatched extensions.
-- [ ] Final extension `.zip` produced from a clean checkout (`build.ps1` zips `extension/`).
-- [ ] Tested in a clean Chrome profile with the helper running: in-page button, `Alt+U`, and right-click all work on a real YouTube video.
+- [ ] Register/pay the one-time developer fee and enable 2-Step Verification.
+- [ ] Create the draft item by uploading `dist/uoink-extension-3.11.0-cws.zip`.
+- [ ] **Paste the store ID here:** `extension/store-config.json`, value of
+  `chrome_web_store_id`. Keep `chrome_web_store_url` empty until the link is live.
+- [ ] Release a helper containing that config and `uoink_store.py`.
+  Public users must get a helper that recognizes the store ID without manual edits.
+- [ ] Confirm the helper download used by setup includes the store ID. The public
+  v3.11.0 installer exists, but it predates this pass; this pass did not replace it.
+- [ ] Verify a real capture and clipboard copy with the store identity in a
+  disposable profile, using permitted source material.
+- [ ] Publish the Limited Use statement from `privacy-practices.md` on `/privacy`.
+- [ ] Recapture the images in `SCREENSHOTS.md`. Upload at least one current shot.
+- [ ] Verify `hi@uoink.app` receives mail and the support URL works.
+- [ ] Fill out all fields and choose Public or Unlisted distribution.
+- [ ] Paste the reviewer test instructions. Leave usage sharing off for testing.
+- [ ] Submit for review with deferred publication until the helper is ready.
 
-## Submission steps
+## After approval
 
-1. Log in at https://chrome.google.com/webstore/devconsole/.
-2. Select the existing Uoink listing (or create a new item) and upload the
-   clean `extension-uoink-<approved-version>.zip`.
-3. Confirm the store title is `Uoink — Local corpus for AI` (or `Uoink` if the long title is rejected).
-4. Paste from `listing.md`: summary, detailed description, single purpose statement, category (Productivity), language (English US), support email, privacy URL, website.
-5. Paste from `permissions-justification.md`: each permission justification + the data-use affirmations.
-6. Upload the 5 screenshots from `screenshots/` (in order) and the promo tiles from `tiles/`.
-7. Complete the Privacy practices form (Website content — selected only; no sale; limited use).
-8. Click **Submit for review**.
-
-## Notes / open items
-
-- **Domains were migrated uoink.video → uoink.app.** All copy in this folder uses uoink.app. If any older asset still shows uoink.video, do not use it.
-- Screenshots are dashboard + extension shots resized from `marketing/assets/2026-07-06-final` and `2026-07-06`. If a fresher extension-on-YouTube capture exists at submission time, swap screenshot #1 for it (it's the search-results thumbnail).
-- The 6th "podcast diarization / evidence panel" screenshots from the older CWS draft are optional; the 5 here tell the core story (capture → own → write → search → organize).
+- [ ] Publish the item and verify the public install link.
+- [ ] Paste that link into `chrome_web_store_url` in the same JSON file.
+- [ ] Run `python scripts/sync_store_links.py`, then its `--check` mode.
+- [ ] Ship the updated helper/bundled extension and apply `website-copy-notes.md`.
+  The shipped setup and splash now offer Add to Chrome, with Advanced sideloading.
+- [ ] A store extension update is optional for this link-only change; if uploading
+  another package, follow the normal release process and increase its version.

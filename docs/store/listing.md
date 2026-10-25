@@ -1,135 +1,66 @@
-# Chrome Web Store listing — Uoink (copy-paste ready)
+# Uoink 3.11 listing fields
 
-Everything below is ready to paste into the CWS Developer Console. Facts current
-as of v3.2.8. Domains/emails updated to **uoink.app**. Submission is a manual
-Ryan step — see `SUBMISSION-CHECKLIST.md`.
+Use the manifest name and summary below. They are already in the upload zip.
+The dashboard may populate them from the manifest instead of offering editable
+fields. Paste the detailed description into Store listing.
 
----
+## Name
 
-## Item name (45 chars max)
-```
-Uoink — Local corpus for AI
-```
-<!-- 27 chars -->
+Uoink
 
-## Summary / short description (132 chars max)
-```
-Save videos, podcasts, and articles to your own disk, then hand your AI a cited corpus to write from.
-```
-<!-- 101 chars -->
+## Summary
 
-## Category
-Productivity
+Save YouTube transcripts, frames and comments to a local library your AI can search and cite. Needs the Uoink Windows app.
 
-## Language
-English (United States)
+## Category and language
 
----
+Productivity. Choose the Research & Education subcategory if offered.
+English (United States).
 
 ## Detailed description
 
-Uoink keeps the videos, podcasts, and articles you study on your own disk, then hands them to your AI as a cited corpus you can write from in your voice.
+Save a source while you browse, then find it again in your own library.
 
-Paste a bare YouTube link into Claude and it will happily invent what the video says. Give it a Uoink corpus and it quotes the transcript, cites timestamps, and reads the comments.
+Uoink captures YouTube transcripts, frames, comments and source details on your Windows PC. It also supports X posts and articles, Reddit threads, and supported web pages and podcast links. What gets saved depends on the source.
 
-This extension is the fastest capture path. Click the Uoink button under a video, press Alt+U, or right-click a video link. Uoink saves the source as a structured corpus on your computer, puts a paste-ready version on your clipboard for Claude, ChatGPT, or your agent, and keeps the full files on disk.
+The free Uoink Windows helper is required. Install it from https://uoink.app/install and keep it running. Without the helper, the extension shows Offline and explains how to connect it. Capture controls stay disabled until it connects.
 
-Uoink captures more than YouTube:
+To save a source:
 
-- **YouTube** — timestamped transcript, timestamped screenshots (a paste-safe subset in the clipboard), top comments with authors and like counts, title, channel, description, tags, views, upload date, thumbnail, and a JSON sidecar for agents and scripts.
-- **X / Twitter** — video transcripts and post text with author credit.
-- **Podcasts** — automatic RSS/Atom metadata watching, with optional per-feed Auto-ingest for local audio download, WhisperX transcription, and corpus publishing. Audio work is off by default. Speaker labels appear only when optional diarization succeeds.
-- **Web pages and articles** — readable text into the same corpus format.
-- **Reddit** — threads and top comments as clean Markdown.
+1. Click Uoink on a supported page, open the toolbar popup, press Alt+U, or use the right-click menu.
+2. Choose what to save. You can also paste a supported link into the popup.
+3. Open the local Library to search the saved text and read it with its source details. Copy a capture when you want to use it in another app.
 
-Use it when a source is worth studying, quoting, remixing, or writing from later.
+YouTube captures can include a timestamped transcript, selected frames, comments and metadata. X Articles can be captured from the article you can already read in your browser. Uoink does not unlock paywalls or grant access to private content. Save only material you have permission to use.
 
-### Three ways to use Uoink
+Your library stays on your computer. Uoink has no account or hosted library. The extension talks to the helper at 127.0.0.1:5179, which means this PC. It stores capture state locally; the screenshot interval preference can sync through your browser account.
 
-**Chrome extension.** One click on a video page (or Alt+U, or right-click). Uoink saves the source, loads your clipboard, and keeps the full corpus on your machine.
+Some previews load source thumbnails. After a capture is copied, the extension can open Claude in a new tab. It does not paste or submit the capture for you. You choose what to share with Claude, ChatGPT or a connected AI app.
 
-**Local dashboard.** Search your Library, filter by topic or channel, inspect Evidence, and turn saved videos, podcasts, and articles into credited tweets, threads, blog drafts, or scripts — in your own voice.
+Optional helper features can send selected material to Anthropic using your own API key. Authorized discovery requests can contact ScrapeCreators. Transcription runs locally, but model downloads and model-library telemetry can make outside connections. These details and controls are explained in the privacy policy.
 
-**MCP and agent tools.** Connect Claude Desktop, Cursor, Cline, or another MCP-capable client to the local Uoink helper. Tools include `uoink_video`, `uoink_playlist`, `list_recent_uoinks`, `search_uoinks`, `get_uoink_corpus`, `analyze_comments`, `classify_hook`, `get_citation_map`, `get_uoink_health`, and `find_mentions`. The broader HTTP/OpenAPI catalog also includes `search_clips` and `get_evidence_card` for timestamped passages.
+Usage sharing is off by default. If you turn it on in the helper, it sends daily usage counts and app details to usage.uoink.app. Reports include random install and report IDs, but no captured content, URLs, titles, file paths, search text, prompts, API keys or account details. Settings shows the report and lets you turn sharing off.
 
-### Why creators use it
+Uoink is free and open source. Requires Windows 10 or Windows 11, Chrome, and the Uoink helper. Optional third-party services can charge for use.
 
-- **One click, full source.** Skip transcript copying and screenshot juggling on supported videos.
-- **Context travels with the transcript.** Comments, metadata, and frames stay close to the words.
-- **Local-first by default.** Files, screenshots, and the search index stay on your computer.
-- **Agent-friendly.** Your AI can call Uoink tools directly through the local helper.
-- **Writing-aware.** Uoink can draft from saved sources while keeping creator credit visible.
+Install the helper: https://uoink.app/install
+Privacy and network calls: https://uoink.app/privacy
+Source code and support: https://github.com/ryanbiddy/uoink
 
-### Optional AI features
+## Single purpose
 
-Core capture works without an API key. Optional features use your own Anthropic API key:
+Save sources the user chooses while browsing into a local research library, with source details and text they can search, read and copy for use with their AI tools. The extension supplies capture buttons, a popup, a shortcut and context-menu actions. The required Windows helper processes and stores the selected material on the user's computer.
 
-- Comment Intelligence groups comment themes and notable disagreements.
-- Hook Type classification labels the opening style.
-- Entity Extraction finds people, tools, products, companies, and topics across your library.
+## Other fields
 
-These features are off by default. Your key lives in the operating system credential store and goes only to Anthropic, only for the calls you choose.
+| Field | Value |
+|---|---|
+| Website | https://uoink.app |
+| Privacy policy | https://uoink.app/privacy |
+| Support URL | https://github.com/ryanbiddy/uoink/issues |
+| Support email | hi@uoink.app |
+| Price | Free |
+| Mature content | No; the listing has no mature content |
 
-### Privacy summary
-
-- Uoink runs without accounts or a Uoink cloud.
-- The helper runs on 127.0.0.1.
-- Saved corpora live under your chosen local folder, usually `Desktop\Uoink`.
-- Optional AI features send source text to Anthropic only when you enable them.
-- Smart Screenshot Picker stays local.
-
-Full policy: https://uoink.app/privacy
-
-### Requirements
-
-- Windows 10 or Windows 11
-- Chrome or a Chromium-based browser
-- The free Uoink local helper, installed from the GitHub release (https://uoink.app/install)
-
-Uoink is completely free and open source (MIT). Users are responsible for ensuring their use of captured media complies with the Terms of Service and copyright policies of YouTube, Reddit, X (Twitter), and any other source platforms.
-
----
-
-## Single purpose statement (1,000 chars max)
-```
-Uoink saves supported sources — starting with YouTube videos, plus X posts, podcasts, and web pages — into a structured local corpus and makes it available through the clipboard, a local dashboard, and local MCP tools for AI agents. The saved material follows the source: YouTube includes transcripts, screenshots, comments, and metadata; podcast feeds update metadata automatically, while local episode transcription and publishing remain an explicit per-feed choice.
-```
-
-## Support email
-```
-hi@uoink.app
-```
-> Confirm this mailbox receives mail before submission.
-
-## Privacy policy URL
-```
-https://uoink.app/privacy
-```
-> Confirm this URL resolves before submission.
-
-## Website / homepage
-```
-https://uoink.app
-```
-
----
-
-## Screenshots (docs/store/screenshots/, all 1280×800)
-
-The Web Store accepts up to 5. The first appears in search results — lead with the button on YouTube.
-
-| # | File | Suggested caption |
-|---|---|---|
-| 1 | `01-uoink-button-on-youtube.png` | One click under any YouTube video saves the full source to your disk. |
-| 2 | `02-your-local-library.png` | Your captured videos, podcasts, and articles — one local library you own. |
-| 3 | `03-write-from-your-corpus.png` | Turn saved sources into credited drafts in your own voice. |
-| 4 | `04-search-your-corpus.png` | Search and filter everything you've saved by topic and channel. |
-| 5 | `05-auto-organized-by-topic.png` | Captures auto-sort into topic folders as you go. |
-
-## Promo tiles (docs/store/tiles/)
-
-| Asset | File | CWS field |
-|---|---|---|
-| Small promo tile | `promo-small-440x280.png` | Small promo tile (440×280) |
-| Marquee promo tile | `promo-marquee-1400x560.png` | Marquee promo tile (1400×560) |
-| Large promo (spare) | `promo-large-920x680.png` | Optional / social |
+Verify that the support mailbox receives mail. This pass did not send mail.
+Use the recapture plan in [SCREENSHOTS.md](SCREENSHOTS.md), not the July files.

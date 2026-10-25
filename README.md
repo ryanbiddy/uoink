@@ -91,7 +91,11 @@ Uoink ships a portable Skill at `skills/uoink/SKILL.md` (installed to `%LOCALAPP
 
 1. **Download the installer.** Download `Uoink-Setup-3.11.1.exe` from the [v3.11.1 release](https://github.com/ryanbiddy/uoink/releases/tag/v3.11.1). Windows 10/11 only for now; a Mac preview (Apple Silicon, macOS 15 or later) is coming soon. The installer is unsigned: if SmartScreen shows "Windows protected your PC", choose **More info -> Run anyway**, and check the file against the SHA-256 listed on the release page.
 2. **Run it.** Defaults install to `%LOCALAPPDATA%\Uoink\` (no admin required). The finish page can launch the helper immediately, and an autostart entry runs it on each login.
-3. **Load the bundled extension.** On first launch, Uoink shows a one-time setup splash. Use it to open your browser's extensions page and copy the installed extension path; then enable Developer mode, click **Load unpacked**, and select that folder. (The Chrome Web Store listing is pending; sideload is the current path.)
+<!-- store-install:start -->
+3. **Load the bundled extension.** On first launch, Uoink shows a one-time setup splash. Use it to open your browser's extensions page and copy the installed extension path; then enable Developer mode, click **Load unpacked**, and select that folder.
+<!-- store-install:end -->
+
+The store install link is controlled by [store-config.json](extension/store-config.json). When the listing is live, the setup splash and these steps offer **Add to Chrome**, with sideloading under **Advanced**. Release maintainers: follow [SUBMIT-NOW.md](docs/store/SUBMIT-NOW.md).
 
 For developers running from source, see [REQUIREMENTS.md](./REQUIREMENTS.md). Build the installer locally with `./build.ps1` (see [docs/build-installer.md](./docs/build-installer.md)).
 

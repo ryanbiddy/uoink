@@ -166,6 +166,7 @@ Source: "staging\uoink_processes.py"; DestDir: "{app}"; Flags: ignoreversion
 ; opening default data. Must ship or isolated mode cannot start.
 Source: "staging\uoink_install_isolation.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\uoink_usage.py"; DestDir: "{app}"; Flags: ignoreversion
+Source: "staging\uoink_store.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\migrate_install.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\channels.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\workspaces.py"; DestDir: "{app}"; Flags: ignoreversion
