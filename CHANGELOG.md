@@ -46,6 +46,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   labels it "no audio". Model loading stays cache-only.
 - Paywalls, login walls and empty JavaScript pages are labeled failed
   captures instead of saved as successful articles.
+- 22 helper write paths never committed. Saving claims, style anchors,
+  writing pieces and drafts, workspaces, channels, allowed sites, scripts,
+  tags and playlist poll failures returned success, kept the SQLite write
+  lock, and lost the row when the process exited. Meanwhile other processes
+  got "database is locked", and later transactions on the helper failed.
+  Every one now goes through `Index.write_transaction()`, which commits, or
+  rolls back on error. Return values and errors are unchanged.
+- Opening the bare helper address (`http://127.0.0.1:5179/`) in a browser
+  redirects to `/dashboard` instead of returning "missing or invalid token".
+  The Host check still runs first.
 
 ### Compatibility and testing
 
