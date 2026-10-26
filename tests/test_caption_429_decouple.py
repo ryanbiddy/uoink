@@ -34,7 +34,7 @@ def extraction(monkeypatch, tmp_path):
         caption_error=None, media_error=None, captions_available=True,
         settings=server._default_settings(), model_cached=True, calls=[],
         media_has_audio=True, audio_error=None, source_has_audio=True,
-        probe_error=None, cut_error=None,
+        probe_error=None, cut_error=None, extra_srt={},
     )
     metadata = {
         "id": "abcdef12345", "title": "Caption test", "duration": 60,
@@ -67,6 +67,9 @@ def extraction(monkeypatch, tmp_path):
                     "1\n00:00:00,000 --> 00:00:02,000\nPlatform captions.\n",
                     encoding="utf-8",
                 )
+                for name, text in state.extra_srt.items():
+                    (folder / name).write_text(
+                        f"1\n00:00:00,000 --> 00:00:02,000\n{text}\n", encoding="utf-8")
         else:
             if "bestaudio/best" in cmd and state.audio_error is not None:
                 raise state.audio_error
@@ -240,7 +243,9 @@ def test_full_mode_media_command_has_no_subtitle_flags(extraction):
     assert caption_cmd == [
         *server.YTDLP_CMD,
         "--skip-download", "--write-auto-subs", "--write-subs",
-        "--sub-lang", "en.*,en", "--convert-subs", "srt",
+        # Named English tracks. A pattern would also select YouTube's
+        # auto-translated tracks, and a 429 on one of those saved nothing.
+        "--sub-lang", "en,en-US,en-GB,en-orig", "--convert-subs", "srt",
         "-o", media_cmd[media_cmd.index("-o") + 1], URL,
     ]
     assert Path(caption_cmd[caption_cmd.index("-o") + 1]).name == "video.%(ext)s"
@@ -644,6 +649,20 @@ def test_cancellation_during_caption_fetch_propagates(extraction, caplog, mode):
     assert caption_kwargs["cancel_event"] is cancel_event
     assert "subtitle fetch unavailable" not in caplog.text
     extraction.asr.assert_not_called()
+
+
+@pytest.mark.parametrize("mode", ["full", "chunked"])
+def test_uploaded_english_captions_win_over_auto_captions(extraction, extract_handler, mode):
+    # "video.en-orig.srt" sorts before "video.en.srt", so plain glob order
+    # would pick the auto-captions on some filesystems.
+    extraction.extra_srt = {"video.en-orig.srt": "Auto captions.", "video.en-en.srt": "Other track."}
+    status, result = extract_handler(mode)
+
+    assert status == 200
+    assert result["caption_count"] == 1
+    assert "Platform captions." in result["yoink_md"]
+    assert "Auto captions." not in result["yoink_md"]
+    assert "Other track." not in result["yoink_md"]
 
 
 def test_media_failure_still_propagates(extraction):
