@@ -54,6 +54,9 @@ uoink clips <query>
 diagnostics as JSON. `rebuild-index` runs the existing on-disk rebuild and
 accepts an optional corpus root. `search` and `clips` send the query to the
 running helper's authenticated HTTP tool registry and print its JSON response.
+With no arguments the wrapper starts the helper. Agent subcommands such as
+`uoink status`, `uoink tools` and `uoink call` run the agent CLI
+(`uoink_cli.py`) instead; see [Connect your agent](docs/connect-your-agent.md).
 
 ## Install the Windows watchdog
 

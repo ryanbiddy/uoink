@@ -309,6 +309,49 @@ def test_legacy_launcher_unchanged_and_serve_forwards(monkeypatch):
     assert 'exec "$uoink_python" "$uoink_root/uoink_cli.py" "$@"' in shell
 
 
+@pytest.mark.parametrize("args, script", [
+    ([], "server.py"), (["--doctor"], "server.py"), (["doctor"], "server.py"),
+    (["rebuild-index"], "server.py"), (["search", "working memory"], "server.py"),
+    (["clips", "hook"], "server.py"), (["mirror", "status"], "server.py"),
+    (["--isolated-stop"], "server.py"), (["--show-dashboard"], "server.py"),
+    (["--isolated-profile", "p q", "--isolated-port", "18090"], "server.py"),
+    (["status"], "uoink_cli.py"), (["tools", "--toolset", "core"], "uoink_cli.py"),
+    (["call", "search_library", "query=a & b"], "uoink_cli.py"),
+    (["capture", "https://example.com/a"], "uoink_cli.py"), (["serve", "--doctor"], "uoink_cli.py"),
+    (["--help"], "uoink_cli.py"), (["--text", "status"], "uoink_cli.py"),
+    (["--isolated-profile", "p q", "--isolated-port", "18090", "status"], "uoink_cli.py"),
+    (["--isolated-from-install-dir", "app", "recent"], "uoink_cli.py"),
+])
+def test_root_launcher_sends_agent_subcommands_to_cli(tmp_path, args, script):
+    # Stubs report which script the real root launcher ran, with argv and exit code intact.
+    checkout = tmp_path / "checkout"
+    checkout.mkdir()
+    stub = ("import json, os, sys\n"
+            "print(json.dumps([os.path.basename(__file__), sys.argv[1:], os.environ.get('PYTHONUTF8')]))\n"
+            "raise SystemExit(7)\n")
+    for name in ("server.py", "uoink_cli.py"):
+        (checkout / name).write_text(stub, encoding="utf-8")
+    env = {key: value for key, value in os.environ.items() if key != "PYTHONUTF8"}
+    if os.name == "nt":
+        launcher = checkout / "uoink.cmd"
+        launcher.write_bytes((ROOT / "uoink.cmd").read_bytes())
+        env["PATH"] = str(Path(sys.executable).parent) + os.pathsep + env.get("PATH", "")
+        command = f'cmd.exe /d /s /c "{subprocess.list2cmdline([str(launcher), *args])}"'
+    else:
+        launcher = checkout / "uoink"
+        launcher.write_bytes((ROOT / "uoink").read_bytes())
+        launcher.chmod(0o755)
+        python3 = tmp_path / "bin" / "python3"
+        python3.parent.mkdir()
+        python3.write_text(f'#!/bin/sh\nexec {shlex.quote(sys.executable)} "$@"\n', encoding="utf-8")
+        python3.chmod(0o755)
+        env["PATH"] = str(python3.parent) + os.pathsep + env.get("PATH", "")
+        command = [str(launcher), *args]
+    result = subprocess.run(command, env=env, capture_output=True, text=True, timeout=60)
+    assert result.returncode == 7, result.stdout + result.stderr
+    assert json.loads(result.stdout) == [script, args, "1" if script == "uoink_cli.py" else None]
+
+
 def test_agent_kit_copies_cannot_drift():
     import runpy
     build = runpy.run_path(str(ROOT / "scripts/build_agent_kit.py"))["build"]

@@ -504,6 +504,22 @@ def darwin_liveness(
     return "alive"
 
 
+def procfs_exited(pid: int) -> bool:
+    """True when Linux procfs shows an exited, unreaped pid (state Z or X).
+
+    kill(pid, 0) still succeeds for a zombie until its parent reaps it, so a
+    signal probe alone counts an exited process as running. An unreadable
+    stat file proves nothing; other platforms keep their native checks.
+    """
+    if not sys.platform.startswith("linux"):
+        return False
+    try:
+        with open(f"/proc/{int(pid)}/stat", "r", encoding="ascii", errors="replace") as handle:
+            return handle.read().rsplit(")", 1)[1].split()[0] in {"Z", "X"}
+    except (OSError, ValueError, IndexError):
+        return False
+
+
 def desktop_dir() -> Path:
     """User's Desktop folder.
 

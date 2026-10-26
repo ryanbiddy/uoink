@@ -2,6 +2,7 @@
 import json
 import os
 from pathlib import Path
+import socket
 import subprocess
 import sys
 
@@ -57,8 +58,34 @@ print('class-compatible')
     assert not any(e["event"] == "subprocess_attempt" for e in events)
 
 
+def _ipv6_loopback_unavailable():
+    """Why this machine cannot bind [::1], or None when it can."""
+    if not socket.has_ipv6:
+        return "IPv6 unavailable: this Python was built without IPv6 support"
+    try:
+        with socket.socket(socket.AF_INET6) as sock:
+            sock.bind(("::1", 0))
+    except OSError as exc:
+        return f"IPv6 unavailable: this machine cannot bind [::1] ({exc})"
+    return None
+
+
+def test_ipv6_skip_reason_names_the_failed_bind(monkeypatch):
+    def no_ipv6(*args, **kwargs):
+        raise OSError(97, "Address family not supported by protocol")
+    monkeypatch.setattr(socket, "has_ipv6", True)
+    monkeypatch.setattr(socket, "socket", no_ipv6)
+    reason = _ipv6_loopback_unavailable()
+    assert reason.startswith("IPv6 unavailable: this machine cannot bind [::1]")
+    assert "Address family not supported" in reason
+
+
 @pytest.mark.parametrize("declared", [True, False])
 def test_ipv6_query_is_still_refused_and_callsite_is_accounted(tmp_path, declared):
+    # The probe creates a real AF_INET6 socket before the guard refuses its bind.
+    reason = _ipv6_loopback_unavailable()
+    if reason:
+        pytest.skip(reason)
     query = """import socket
 def _has_ipv6(host):
     sock = socket.socket(socket.AF_INET6)

@@ -415,8 +415,11 @@ inspect its final result, including failures. MCP sessions retain their usual
 asynchronous behavior.
 
 The original root `uoink.cmd` and POSIX `uoink` still run `server.py`, including
-their existing HTTP search and maintenance commands. The new PATH command is
-`{app}\cli\uoink.cmd`. Its no-argument behavior starts the helper;
+their existing HTTP search and maintenance commands. They hand the agent
+subcommands (`tools`, `call`, `capture`, `recent`, `get`, `note`, `status`,
+`connect`, `skill`, `serve`) to this CLI, so a source checkout can run
+`./uoink status`; `search` stays the helper's HTTP search. The new PATH
+command is `{app}\cli\uoink.cmd`. Its no-argument behavior starts the helper;
 `uoink serve` does the same, and `uoink serve --doctor` forwards the old CLI.
 Use the new command's `search` for in-process library reads. An extensionless
 `{app}\cli\uoink` shell launcher also serves Bash-based agents on Windows.

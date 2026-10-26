@@ -87,6 +87,8 @@ def liveness(pid: int, created_ms: int | float | None) -> str:
             return "dead"
         except PermissionError:
             pass
+        if _posix_exited(int(pid)):
+            return "dead"
         if created_ms is not None:
             actual = _posix_created_ms(int(pid))
             if (actual is not None
@@ -265,3 +267,15 @@ def _posix_created_ms(pid: int) -> int | float | None:
         return boot * 1000 + (ticks * 1000) // hertz
     except (OSError, ValueError, IndexError, StopIteration, AttributeError):
         return None
+
+
+def _posix_exited(pid: int) -> bool:
+    """Linux procfs state Z or X: exited but still answering kill(pid, 0)."""
+    if not sys.platform.startswith("linux"):
+        return False
+    try:
+        with open(f"/proc/{pid}/stat", "r", encoding="ascii",
+                  errors="replace") as handle:
+            return handle.read().rsplit(")", 1)[1].split()[0] in {"Z", "X"}
+    except (OSError, IndexError):
+        return False

@@ -5,6 +5,10 @@
 # CRLF shebang ("bad interpreter: /usr/bin/env bash^M"). Covers build-mac.sh
 # and the macOS bundle launcher (installer/mac/launcher.sh).
 *.sh text eol=lf
+# The extensionless root launcher is a shell script too (WSL's sh rejects a
+# CR). The root cmd launcher has labels, which cmd finds reliably only in CRLF.
+/uoink text eol=lf
+/uoink.cmd text eol=crlf
 tests/fixtures/connect_v3100/* text eol=lf
 tests/fixtures/articles/*.html text eol=lf
 
