@@ -142,7 +142,7 @@ def test_saved_rows_hold_a_thumbnail_title_source_line_and_one_state_line():
     card = _between(SCRIPT, "function cardHtml(row)", "async function loadThumbnail")
     for marker in ('<div class="row-thumb" aria-hidden="true">', '<img alt="" data-thumb-for="${id}" class="hidden">',
                    '<div class="card-title">${title}</div>', '<div class="card-source">${author} &middot; ${platformLabel}',
-                   '<div class="row-state">${savedStateLine(row)}${healthException(row.health)}</div>'):
+                   '<div class="row-state">${savedStateLine(row)}${healthException(row.health, row)}</div>'):
         assert marker in card
     detail = _between(SCRIPT, "function savedRowDetail(row)", "function savedStateLine(row)")
     assert "captions`" in detail and '"transcript by Whisper"' in detail
