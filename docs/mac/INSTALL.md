@@ -1,20 +1,22 @@
-# Install the macOS test build
+# Install Uoink on a Mac (preview)
 
-Use `uoink-macos-arm64-signed` from a successful `mac-sign` job. It contains
-`Uoink-<VERSION>-macos-arm64.dmg` and `dmg.json` with the final SHA-256 and size.
-The job requires Developer ID signing, notarization and stapled tickets for
-the app and DMG. Apple Silicon and macOS 15 or later are required.
-The first signed hosted run and interactive acceptance are still pending.
+Uoink for Mac needs Apple Silicon and macOS 15 or later. Download
+`Uoink-<VERSION>-macos-arm64.dmg` from the
+[latest release](https://github.com/ryanbiddy/uoink/releases/latest) and check
+it against the SHA-256 listed there. The app and the DMG are signed with a
+Developer ID and notarized by Apple, with their tickets stapled.
 
 ## Install and open
 
-1. Download the signed artifact in Safari, unzip it and open the DMG.
-   Drag Uoink to the Applications shortcut.
+1. Open the DMG and drag Uoink to the Applications shortcut.
 2. Eject the mounted disk, then double-click Uoink in Applications.
-3. Confirm the standard "downloaded from the internet" prompt if it appears.
-   No security override should be needed. An unidentified-developer,
-   damaged-signature or malware alert is a failed acceptance check; record it
-   with the workflow run and follow [ACCEPTANCE.md](ACCEPTANCE.md).
+3. Confirm the standard "downloaded from the internet" prompt. No security
+   override is needed. If macOS instead reports an unidentified developer, a
+   damaged app or malware, don't open it; report it with the DMG's SHA-256.
+
+Release maintainers: the `mac-sign` job builds the same DMG as the
+`uoink-macos-arm64-signed` artifact. Follow [ACCEPTANCE.md](ACCEPTANCE.md) on a
+real Mac before publishing it.
 
 The installed app starts a menu-bar process and shows the welcome window once
 per version. Open dashboard, Open folder, Settings, Recent items and Quit Uoink
@@ -53,10 +55,11 @@ Start Uoink once so it creates the user-owned extension copy at:
 ~/Library/Application Support/Uoink/extension
 ```
 
-In Chrome, open `chrome://extensions`, turn on Developer mode, choose **Load
-unpacked**, and select that folder. Finder's Go to Folder command can open
-the path. Use the copy under Application Support so updates and edited prompts
-stay outside the app's signature. Chrome onboarding still needs a real-Mac test.
+In Chrome, open `chrome://extensions`, turn on Developer mode and choose
+**Load unpacked**. The picker hides `~/Library`, so press ⌘⇧G, paste the path
+and press Return. The dashboard's **Get the extension** card copies the path
+for you. Use the copy under Application Support so updates and edited prompts
+stay outside the app's signature.
 
 ## Connect your AI
 
@@ -88,7 +91,7 @@ resolver. Its Claude Desktop connect action preserves other entries and writes
 a backup. Client acceptance remains untested until someone tries these on a Mac.
 
 For Claude Desktop's extension flow, open `uoink-<VERSION>-macos.mcpb` from the
-same build. Select the installed **Uoink.app** in its Uoink app setting. The
+same release. Select the installed **Uoink.app** in its Uoink app setting. The
 default is `/Applications/Uoink.app`; change it if you moved the app. The
 connector reports a missing install on stderr. It contains no Python runtime.
 Use the Darwin connector, not the Windows `.mcpb`.
@@ -107,11 +110,11 @@ disabling uses `bootout` and removes the plist. Disabling can stop the helper
 for the current session. Open Uoink again to run it manually.
 
 Quit from the menu bar or dashboard stops the helper and its native UI
-processes without restarting them. The LaunchAgent
-uses `KeepAlive: false`. If login startup is still enabled, Uoink starts again
+processes without restarting them. The LaunchAgent restarts the helper only
+after a crash (`KeepAlive` with `SuccessfulExit: false`). If login startup is still enabled, Uoink starts again
 at the next login. After moving or replacing the app, disable and re-enable
 login startup so its absolute paths match. Quit Uoink and close MCP clients
-before replacing the app; automated upgrades are not part of this pass.
+before replacing the app; Uoink does not update itself yet.
 
 ## Remove the app
 

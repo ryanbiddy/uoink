@@ -624,12 +624,14 @@ Windows SmartScreen warnings are expected for unsigned builds.
 
 ## macOS status
 
-There is no current macOS build, `.dmg`, or `Uoink.app`, so Uoink has no
-deployed macOS signing, notarization, Keychain, LaunchAgent, or file-sandbox
-posture to claim. The repository contains planning and scaffolding for those
-surfaces, but none has been compiled, signed, notarized, or run on a Mac.
-`docs/mac-install.md` records the current user-facing status, and
-`docs/MAC-BUILD-PLAN.md` records the unverified implementation plan.
+Uoink 3.11.2 ships a Mac preview for Apple Silicon. The app and DMG are signed
+with a Developer ID under the hardened runtime, with no entitlements, then
+notarized by Apple and stapled. Uoink does not use the App Sandbox. API keys
+are stored in the macOS Keychain via `keyring`. Login startup is a per-user
+LaunchAgent (`~/Library/LaunchAgents/com.ryanbiddy.uoink.plist`) that stays
+off until you enable it in settings. `docs/mac-install.md` records the current
+user-facing status, and `docs/mac/BUILD.md` the build, signing and
+qualification pipeline.
 
 ## Install migration (v2.1)
 

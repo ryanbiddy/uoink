@@ -350,7 +350,8 @@ def test_security_docs_do_not_claim_unbuilt_macos_or_removed_asr() -> None:
 
     assert "`whisper-timestamped`" not in security
     assert "`faster-whisper`" in security
-    assert "There is no current macOS build" in security
+    assert "There is no current macOS build" not in security
+    assert "notarized by Apple and stapled" in security
     assert "The `.dmg` packaging pipeline codesigns" not in security
     assert "macOS product ships" not in mac_map
     assert "describes the intended shipped experience" not in mac_plan

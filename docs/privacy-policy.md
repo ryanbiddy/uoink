@@ -161,9 +161,17 @@ off; it does not appear on the splash screen.
 
 ### Local data persistence
 
-Uoink currently ships only for Windows. There is no current macOS build,
-`.dmg`, or `Uoink.app`; macOS paths and Keychain support described in planning
-documents are not deployed storage.
+On a Mac (the Apple Silicon preview, from 3.11.2), Uoink keeps the same items
+in macOS locations:
+
+- captures, including `_yoink-trash`, in `~/Desktop/Uoink/`;
+- the library index, settings, helper state, discovery runs, optional usage
+  counts and the extension copy in `~/Library/Application Support/Uoink/`;
+- the Anthropic and ScrapeCreators keys in the macOS Keychain, via `keyring`,
+  under the same service and usernames as on Windows;
+- login-startup logs in `~/Library/Logs/Uoink/`.
+
+The paths below are the Windows locations.
 
 Uoink stores the following on your Windows machine:
 
@@ -242,6 +250,12 @@ that receives either key.
      including the index, trash, and uoinked corpora. (A pre-rename install
      may also leave `Yoink` copies for up to 7 days before the helper removes
      them.)
+
+  On a Mac, close AI clients that use Uoink, then run
+  `bash /Applications/Uoink.app/Contents/Resources/scripts/mac/uninstall.sh /Applications/Uoink.app --remove`.
+  It removes the app and its login item and keeps your data. Then optionally
+  delete `~/Library/Application Support/Uoink/` and `~/Desktop/Uoink/`, and the
+  `Uoink` entries in Keychain Access.
 
 ## 5. Third parties
 

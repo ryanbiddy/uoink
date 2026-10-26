@@ -53,7 +53,7 @@ Claude Desktop uses `~/Library/Application Support/Claude/claude_desktop_config.
 Cursor uses `~/.cursor/mcp.json`, and Codex uses `~/.codex/config.toml`.
 The agent kit's static Claude Code plugin MCP entry is Windows-only. On Mac,
 use `uoink connect claude-code` and the standalone skill. Client acceptance
-and notarization are pending. Library mirroring is unavailable on Mac.
+is pending. Library mirroring is unavailable on Mac.
 
 ## Find and cite saved evidence
 

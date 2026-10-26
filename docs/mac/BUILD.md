@@ -13,12 +13,13 @@ installed receipt. Pass 12 adds `mac-sign` after `mac-build` for Developer ID
 signing and notarization. Run `39707190093` signed all 1,436 targets after the
 G2 intermediate import fix, then hit the app's 30-minute notary wait timeout.
 Submission `a85b5ddc-eff7-496a-af76-df93e91632ab` was still processing at that
-timeout. A complete signed hosted result is still pending.
+timeout. Run `40237282753` then signed, notarized and stapled the app and DMG,
+and that DMG passed interactive acceptance on a real Mac, including a
+quarantined first open with no override.
 
-Artifacts are private test builds. Use `uoink-macos-arm64-signed` for signed
-installation testing. The ad-hoc artifact establishes no developer trust.
-Interactive Mac acceptance remains pending.
-`LSMinimumSystemVersion` is `15.0`, matching the hosted runtime coverage. See [INSTALL.md](INSTALL.md) for draft user steps.
+Releases attach the DMG from `uoink-macos-arm64-signed`, built from the release
+commit. The ad-hoc artifact establishes no developer trust.
+`LSMinimumSystemVersion` is `15.0`, matching the hosted runtime coverage. See [INSTALL.md](INSTALL.md) for user steps.
 
 ## Build locally on a disposable macOS arm64 machine
 
@@ -450,8 +451,9 @@ Artifact upload happens only after these checks pass. The evidence artifact
 keeps signing, DMG hash/size, native/file inventories and both smoke reports.
 
 LaunchAgent behavior lives in `helper/mac_lifecycle.py`. Tests simulate
-`launchctl` and use temporary home directories. `RunAtLoad: true` and
-`KeepAlive: false` start once at login without a Quit or duplicate-launch restart
+`launchctl` and use temporary home directories. `RunAtLoad: true` with
+`KeepAlive: {SuccessfulExit: false}` and `ThrottleInterval: 30` start once at
+login and restart only after a crash, so a Quit or duplicate launch does not
 loop. Disable and uninstall parse the plist and require its first program
 argument to resolve inside the verified app before any bootout or unlink.
 A foreign or unverifiable definition is retained with an error. Bootout must

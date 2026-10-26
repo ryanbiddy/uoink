@@ -51,7 +51,9 @@ async function setup(options = {}) {
     assert.ok(timer,`timer ${ms} exists`);
     env.timeouts.delete(timer[0]);timer[1]();await settle();
   };
-  env.load('lib/extract.js');env.load('setup.js');await settle();
+  env.load('lib/extract.js');
+  if (options.setupSource) env.runSource(options.setupSource,'setup.js'); else env.load('setup.js');
+  await settle();
   return env;
 }
 async function result(env,row) {
@@ -73,16 +75,38 @@ const groups = {
     assert.equal(env.scroll.behavior,'auto');assert.equal(env.document.activeElement.id,'verify-btn');
   },
   async platforms() {
-    const setupSource = readFileSync(join(EXT, 'setup.js'), 'utf8');
+    // Without a published DMG, Mac users get the manual instructions.
+    const setupSource = readFileSync(join(EXT, 'setup.js'), 'utf8')
+      .replace(/const PUBLISHED_MAC_DMG = "[^"]*";/,'const PUBLISHED_MAC_DMG = "";');
     const version = setupSource.match(/const PUBLISHED_INSTALLER_VERSION = "([^"]+)";/)[1];
     for (const [os,word] of [['win','Start Menu'],['mac','Applications'],['linux','Terminal']]) {
-      const env=await setup({os,fetch:()=>jsonResponse({ok:false},503)});
+      const env=await setup({os,setupSource,fetch:()=>jsonResponse({ok:false},503)});
       assert.match(env.el('status-instructions').textContent,new RegExp(word));
       assert.equal(env.el('download-btn').hidden,os!=='win');
       assert.equal(env.el('manual-install').hidden,os==='win');
       assert.equal(env.el('download-btn').href,`https://github.com/ryanbiddy/uoink/releases/download/v${version}/Uoink-Setup-${version}.exe`);
       if(os!=='win') assert.doesNotMatch(env.el('status-instructions').textContent,/Windows/);
+      if(os!=='win') assert.doesNotMatch(env.el('install-instructions').textContent,/Windows/);
     }
+    for (const [os,word] of [['win','PC'],['mac','Mac'],['linux','computer']]) {
+      const env=await setup({os});
+      assert.equal(env.el('status-text').textContent,`Running on this ${word}`);
+    }
+  },
+  async mac_download() {
+    // The release publishes the Mac DMG next to the Windows installer.
+    const published = readFileSync(join(EXT, 'setup.js'), 'utf8');
+    assert.match(published,/const PUBLISHED_MAC_DMG = "3\.11\.2";/);
+    const mac=await setup({os:'mac',setupSource:published,fetch:()=>jsonResponse({ok:false},503)});
+    assert.equal(mac.el('download-btn').hidden,false);
+    assert.equal(mac.el('manual-install').hidden,true);
+    assert.equal(mac.el('download-btn').href,'https://github.com/ryanbiddy/uoink/releases/download/v3.11.2/Uoink-3.11.2-macos-arm64.dmg');
+    assert.equal(mac.el('download-btn').textContent,'Download for Mac');
+    assert.match(mac.el('install-instructions').textContent,/drag Uoink to Applications/);
+    const win=await setup({os:'win',setupSource:published,fetch:()=>jsonResponse({ok:false},503)});
+    assert.match(win.el('download-btn').href,/Uoink-Setup-[0-9.]+\.exe$/);
+    const linux=await setup({os:'linux',setupSource:published,fetch:()=>jsonResponse({ok:false},503)});
+    assert.equal(linux.el('download-btn').hidden,true);
   },
   async navigation_motion() {
     for (const reducedMotion of [true, false]) {

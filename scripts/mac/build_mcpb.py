@@ -24,7 +24,7 @@ def manifest() -> dict:
     result["long_description"] = ("Connect to the Uoink.app installed from the macOS DMG. "
         "Choose its actual location in the Uoink app setting. The connector checks the install, "
         "then runs Contents/Resources/Python/bin/python3 -B -s with Contents/Resources/uoink_mcp.py. "
-        "Library mirroring is unavailable on macOS. This private test build is not notarized.")
+        "Library mirroring is unavailable on macOS.")
     validate(result, "darwin")
     return result
 
