@@ -2,7 +2,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-C2410C.svg)](./LICENSE)
 [![Release](https://img.shields.io/github/v/release/ryanbiddy/uoink?color=C2410C&label=release)](https://github.com/ryanbiddy/uoink/releases/latest)
-[![Platform: Windows](https://img.shields.io/badge/platform-Windows%2010%2F11-0A0A0A.svg)](https://uoink.app/install)
+[![Platform: Windows and Mac](https://img.shields.io/badge/platform-Windows%2010%2F11%20%7C%20macOS%2015%2B-0A0A0A.svg)](https://uoink.app/install)
 [![MCP server](https://img.shields.io/badge/MCP-server-FF3D00.svg)](https://uoink.app/mcp)
 [![Website: uoink.app](https://img.shields.io/badge/web-uoink.app-C2410C.svg)](https://uoink.app)
 
