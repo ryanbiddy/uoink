@@ -13898,7 +13898,9 @@ class Handler(BaseHTTPRequestHandler):
         self.send_response(200)
         self.send_header("Content-Type", mime)
         self.send_header("Content-Length", str(len(body)))
-        self.send_header("Cache-Control", "private, max-age=300")
+        # Revalidate every load: an upgrade replaces these files, and a cached
+        # copy kept an open tab on the old dashboard for up to five minutes.
+        self.send_header("Cache-Control", "private, no-cache")
         if mime.split(";", 1)[0].strip().lower() == "text/html":
             self.send_header("Content-Security-Policy", "frame-ancestors 'none'")
             self.send_header("X-Frame-Options", "DENY")
