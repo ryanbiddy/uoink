@@ -228,7 +228,7 @@ def test_reader_transcript_never_invents_times_and_links_only_real_ones():
     link = _between(SCRIPT, "function sourceTimeUrl(url, seconds)", "const READER_PARAGRAPH_SEGMENTS")
     assert "youtube\\.com|youtu\\.be" in link, "only YouTube takes a time in its link"
     note = _between(SCRIPT, "function transcriptNoteText(row, sidecar = {})", "function readerDocumentHtml(row, sidecar = {})")
-    for status in ('"disabled"', '"model_not_downloaded"', '"failed"', '"no_audio"', '"skipped_chunked_mode"'):
+    for status in ('"disabled"', '"model_not_downloaded"', '"failed"', '"no_audio"', '"no_speech"', '"skipped_chunked_mode"'):
         assert status in note
     assert 'source === "asr"' in note
     # Reader screenshots load lazily, not through the page-wide loader.

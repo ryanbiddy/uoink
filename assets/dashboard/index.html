@@ -464,14 +464,15 @@
       padding: 28px 28px 34px;
     }
 
-    /* One-time usage opt-in card: its own row above the content, styled as a card. */
+    /* One-time usage opt-in card: its own row above the content, styled as a card.
+       The bottom margin keeps scrolled content from looking like it runs under it. */
     .main:has(> #usageOptInCard:not(.hidden)) {
       grid-template-rows: auto minmax(0, 1fr);
     }
 
     .main > #usageOptInCard {
       gap: 10px;
-      margin: 24px 28px 0;
+      margin: 24px 28px 12px;
       padding: 18px 20px;
       border: 1px solid var(--border);
       border-left: 3px solid var(--rust);
@@ -7846,6 +7847,9 @@
         const reason = typeof fallback.reason === "string" ? fallback.reason.trim().slice(0, 300) : "";
         return `No transcript. ${reason || "Audio was unavailable for transcription."}`;
       }
+      if (status === "no_speech") {
+        return `${noCaptions}. Uoink ran Whisper${model} on ${thisDevice()} and it found no speech, so there is no transcript.`;
+      }
       if (status === "skipped_chunked_mode") {
         return `${noCaptions}. Uoink saved this long ${podcast ? "episode" : "video"} in sections, so it did not transcribe partial audio.`;
       }
@@ -11623,6 +11627,7 @@
       if (kind === "asr") return "transcript by Whisper";
       if (row && row.has_transcript === false) {
         if (row.asr_fallback_status === "no_audio") return "no audio for transcription";
+        if (row.asr_fallback_status === "no_speech") return "no speech found";
         return row.asr_fallback_status === "failed" ? "no captions, transcription failed" : "no captions";
       }
       return "transcript saved";

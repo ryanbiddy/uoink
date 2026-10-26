@@ -282,7 +282,7 @@ def test_caption_refusal_reason_survives_asr_outcome(monkeypatch, tmp_path, outc
     asr.assert_called_once_with(
         tmp_path / "video.mp4", model_name="base", model_root=server.RELIABILITY_MODEL_ROOT)
     assert fallback["reason"] == "captions_refused"
-    assert fallback["status"] == ("failed" if outcome == "failed" else "completed")
+    assert fallback["status"] == {"failed": "failed", "empty": "no_speech"}.get(outcome, "completed")
     assert source == ("asr" if outcome == "completed" else None)
     assert entries == ([(0.0, 2.0, "words")] if outcome == "completed" else [])
 

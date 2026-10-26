@@ -126,11 +126,33 @@ def test_video_without_audio_is_not_a_missing_transcript():
     health = server.compute_health({"source_type": "video", "transcript": [], "screenshots": [1],
                                     "asr_fallback": {"status": "no_audio"}})
     assert health["transcript"] == "no audio"
+    # Whisper ran and heard nothing to transcribe: music or silence.
+    health = server.compute_health({"source_type": "video", "transcript": [], "screenshots": [1],
+                                    "asr_fallback": {"status": "no_speech"}})
+    assert health["transcript"] == "no speech"
     # Captions that are merely absent still flag: Re-uoink or local
     # transcription can fix those.
     health = server.compute_health({"source_type": "video", "transcript": [], "screenshots": [1],
                                     "asr_fallback": {"status": "disabled"}})
     assert health["transcript"] == "missing"
+
+
+def test_music_only_video_reads_done_with_no_speech():
+    shown = run_js("""
+      const row = {video_id: "m1", source_type: "video", platform: "x", has_transcript: false,
+                   transcript_source: null, asr_fallback_status: "no_speech",
+                   health: {transcript: "no speech", screenshots: "ok", comments: "skipped"}};
+      ({line: savedStateLine(row), badge: healthException(row.health, row),
+        note: transcriptNoteText(row, {asr_fallback: {status: "no_speech", model: "base"}})})
+    """)
+    assert ">Done</span>" in shown["line"] and "no speech found" in shown["line"]
+    assert shown["badge"] == ""
+    assert "found no speech, so there is no transcript." in shown["note"]
+
+
+def test_usage_card_leaves_a_gap_above_the_scrolling_content():
+    rule = _between(DASHBOARD, ".main > #usageOptInCard {", "}")
+    assert "margin: 24px 28px 12px;" in rule
 
 
 def test_generic_capture_has_no_screenshots_to_miss():
@@ -170,6 +192,7 @@ def test_badge_names_the_problem():
       note: healthException({transcript: "missing"}, {video_id: "n1", source_type: "note"}),
       clean: healthException({transcript: "ok", screenshots: "skipped", comments: "disabled", hook: "skipped", comment_intelligence: "not_run"}, {video_id: "v6"}),
       noAudio: healthException({transcript: "no audio", screenshots: "ok", comments: "ok"}, {video_id: "v7"}),
+      noSpeech: healthException({transcript: "no speech", screenshots: "ok", comments: "ok"}, {video_id: "v8"}),
     })""")
     one = badges["one"]
     assert one.startswith('<button class="health-exception fail" type="button" data-health-open="v1" aria-haspopup="dialog"')
@@ -181,7 +204,7 @@ def test_badge_names_the_problem():
     # A failure outranks a step still running; the drawer lists both.
     assert ">No transcript</button>" in badges["mixed"] and "health-exception fail" in badges["mixed"]
     assert ">No text</button>" in badges["note"]
-    assert badges["clean"] == "" and badges["noAudio"] == ""
+    assert badges["clean"] == "" and badges["noAudio"] == "" and badges["noSpeech"] == ""
 
 
 def test_done_never_sits_beside_a_problem():
