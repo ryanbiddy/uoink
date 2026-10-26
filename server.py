@@ -899,6 +899,8 @@ _LIVE_STATES = (
 LIVE_BEHAVIOR_WAIT = "wait_for_end"
 LIVE_BEHAVIOR_NOW = "extract_when_recorded"
 _LIVE_BEHAVIORS = (LIVE_BEHAVIOR_WAIT, LIVE_BEHAVIOR_NOW)
+# Dashboard appearance: follow the OS theme, or force light or dark.
+_DASHBOARD_THEMES = ("system", "light", "dark")
 _WHISPER_MODELS = (
     "tiny", "base", "small", "medium", "large", "large-v3-turbo",
 )
@@ -1032,6 +1034,10 @@ def _default_settings() -> dict:
         # source_type='short_video' ONLY; long-form captures always delete
         # their media regardless of this flag.
         "keep_media": False,
+        # Dashboard appearance: "system" follows the OS (prefers-color-scheme);
+        # "light" or "dark" forces it. Stored here, not per browser, so the
+        # Uoink window and a browser tab show the same theme.
+        "dashboard_theme": "system",
         # Living Library Phase 2 (2026-09-04, brief reservation 10): whether
         # apply_reshelving(mode=apply) may write labels. Shipping default OFF
         # and deliberately absent from the /settings POST field list: turning
@@ -1206,6 +1212,8 @@ def _normalize_settings(data: dict) -> dict:
         clean.get("x_text_capture_enabled", True)
     )
     clean["keep_media"] = bool(clean.get("keep_media"))
+    theme = str(clean.get("dashboard_theme") or "system").strip().lower()
+    clean["dashboard_theme"] = theme if theme in _DASHBOARD_THEMES else "system"
     model = str(clean.get("whisper_model") or "base").strip().lower()
     clean["whisper_model"] = model if model in _WHISPER_MODELS else "base"
     # Strict JSON true only; "true"/1 stay off, matching librarian_apply.
@@ -1639,6 +1647,9 @@ def _public_settings(data: dict | None = None) -> dict:
         # E-1 (Zing enabler): opt-in short-video media retention, default
         # OFF. Backend setting only for now -- no dashboard control yet.
         "keep_media": bool(data.get("keep_media")),
+        # Settings > App > Appearance: system, light or dark.
+        "dashboard_theme": (data.get("dashboard_theme")
+                            if data.get("dashboard_theme") in _DASHBOARD_THEMES else "system"),
         # Living Library Phase 2: read-only here; see _default_settings.
         "librarian_apply_enabled": data.get("librarian_apply_enabled") is True,
         # Phase 4 opt-in corpus mirror (separate from obsidian_vault_path).
@@ -13890,7 +13901,9 @@ class Handler(BaseHTTPRequestHandler):
         self.send_response(200)
         self.send_header("Content-Type", mime)
         self.send_header("Content-Length", str(len(body)))
-        self.send_header("Cache-Control", "private, max-age=300")
+        # Revalidate every load: an upgrade replaces these files, and a cached
+        # copy kept an open tab on the old dashboard for up to five minutes.
+        self.send_header("Cache-Control", "private, no-cache")
         if mime.split(";", 1)[0].strip().lower() == "text/html":
             self.send_header("Content-Security-Policy", "frame-ancestors 'none'")
             self.send_header("X-Frame-Options", "DENY")
@@ -16767,6 +16780,7 @@ class Handler(BaseHTTPRequestHandler):
                          "role",                  # v3.1 P2
                          "live_stream_behavior",  # v3.1 live
                          "whisper_model",         # v3.1 A1/podcast
+                         "dashboard_theme",       # Settings > App > Appearance
                          "library_mirror_enabled",
                          "library_mirror_consent")
         if (
@@ -16997,6 +17011,13 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send_json(400, {
                     "ok": False,
                     "error": "whisper_model must be a string"})
+        if "dashboard_theme" in body:
+            raw_theme = body.get("dashboard_theme")
+            if not isinstance(raw_theme, str) or raw_theme.strip().lower() not in _DASHBOARD_THEMES:
+                return self._send_json(400, {
+                    "ok": False,
+                    "error": f"dashboard_theme must be one of {list(_DASHBOARD_THEMES)}"})
+            data["dashboard_theme"] = raw_theme.strip().lower()
         if "topics" in body:
             err = _validate_topics(body.get("topics"))
             if err:

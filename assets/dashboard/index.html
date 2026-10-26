@@ -4,6 +4,15 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Uoink Dashboard</title>
+  <!-- Appearance: apply the saved theme before the first paint, so a forced
+       Light or Dark never flashes the system theme. The helper's settings
+       hold the choice (applyDashboardTheme); this copy is a per-browser cache. -->
+  <script id="themeBoot">
+    try {
+      const theme = localStorage.getItem("uoink.dashboard.theme");
+      if (theme === "light" || theme === "dark") document.documentElement.dataset.theme = theme;
+    } catch (_) {}
+  </script>
   <style>
     /* Brand tokens: mirror of assets/brand/tokens.css (this page is served
        on its own, so the block is inline). Fonts are the bundled files in
@@ -121,7 +130,7 @@
     }
 
     @media (prefers-color-scheme: dark) {
-      :root {
+      :root:not([data-theme="light"]) {
         --bg: #0A0A0A;
         --surface: #141110;
         --surface-sel: #1E1815;
@@ -150,6 +159,45 @@
         --scrim: rgba(0, 0, 0, 0.72);
         --on-scrim: #FFFFFF;
       }
+    }
+
+    /* A page with a theme choice sets data-theme on <html>: "dark" forces the
+       dark values above on any system, "light" keeps the defaults. Keep this
+       block equal to the dark block above. */
+    :root[data-theme="dark"] {
+      color-scheme: dark;
+
+      --bg: #0A0A0A;
+      --surface: #141110;
+      --surface-sel: #1E1815;
+      --text: #F5EDE6;
+      --text-2: #A8968A;
+      --line: #2A211C;
+      --line-strong: #3A2E27;
+      --action: #FF3D00;
+      --on-action: #0A0A0A;
+      --ok: #22C55E;
+      --fail: #FF8A5C;
+      --step-done: #F5EDE6;
+      --step-now: #C2410C;
+      --step-fail: #FF3D00;
+      --step-todo: #3A2E27;
+      --focus-ring: #C2410C;
+
+      --acid: #FFD23F;
+      --warn: #FFE3A3;
+      --danger-bg: #3A1F1F;
+      --danger-border: #6A3A3A;
+      --shadow-soft: 0 22px 70px rgba(0, 0, 0, 0.38);
+      --rust-bright: #FF8A5C;
+      --vermillion: #FF8A5C;
+      --ok-bright: #22C55E;
+      --scrim: rgba(0, 0, 0, 0.72);
+      --on-scrim: #FFFFFF;
+    }
+
+    :root[data-theme="light"] {
+      color-scheme: light;
     }
 
     /* Focus ring: 2px rust, offset 2px. Important so the per-control
@@ -193,9 +241,14 @@
     }
 
     @media (prefers-color-scheme: dark) {
-      :root {
+      :root:not([data-theme="light"]) {
         --info: #38BDF8;
       }
+    }
+
+    /* Settings > App > Appearance can force a theme (data-theme on <html>). */
+    :root[data-theme="dark"] {
+      --info: #38BDF8;
     }
 
     * { box-sizing: border-box; }
@@ -3403,18 +3456,63 @@
       margin-bottom: var(--space-6);
     }
 
+    /* Back stays in reach for the whole read: the breadcrumb row sticks to
+       the top of the scrolling area as one compact row on the page ground,
+       and scroll-padding keeps focused or linked content out from under it. */
     .reader-crumbs {
+      position: sticky;
+      top: 0;
+      z-index: 5;
       display: flex;
-      flex-wrap: wrap;
+      flex-wrap: nowrap;
       align-items: center;
-      gap: var(--space-2) var(--space-3);
+      gap: var(--space-3);
       min-width: 0;
+      margin: 0 0 var(--space-4);
+      border-bottom: 1px solid transparent;
+      padding: var(--space-2) 0;
+      background: var(--bg);
+    }
+
+    .reader-crumbs.stuck {
+      border-bottom-color: var(--line);
+    }
+
+    .reader-crumbs .crumb-list {
+      flex-wrap: nowrap;
+      overflow: hidden;
+    }
+
+    .reader-crumbs .crumb-list li:last-child {
+      flex: 1 1 auto;
+    }
+
+    .reader-crumbs .crumb-list li:not(:last-child) {
+      flex: 0 0 auto;
+    }
+
+    .content:has(#tab-yoink.active),
+    html:has(#tab-yoink.active) {
+      scroll-padding-top: 64px;
+    }
+
+    /* While reading, the scroll area's top padding moves into the panels,
+       so the Back row sticks flush to the top edge with no strip of text
+       showing above it. */
+    .content:has(> .library-split.reading) {
+      padding-top: 0;
+    }
+
+    .library-split.reading > .tab-panel {
+      padding-top: 28px;
     }
 
     .reader-crumbs #yoinkBack {
+      flex: 0 0 auto;
       min-height: var(--target-chip);
       margin: 0;
       border-radius: var(--radius-pill);
+      white-space: nowrap;
     }
 
     .crumb-list {
@@ -3773,7 +3871,10 @@
         display: none;
       }
 
-      body { overflow: auto; }
+      /* The page itself scrolls here. clip, not hidden: hidden would make
+         each of these a scroll container that never scrolls, and the
+         reader's sticky Back row would stick to it instead of the page. */
+      body { overflow: visible; }
       html,
       body,
       .app,
@@ -3781,7 +3882,13 @@
       .content,
       .tab-panel {
         max-width: 100%;
-        overflow-x: hidden;
+        overflow-x: clip;
+      }
+      .content {
+        overflow-y: visible;
+      }
+      .library-split.reading > .tab-panel {
+        padding-top: 26px;
       }
       .app {
         min-width: 0;
@@ -5154,15 +5261,17 @@
              where they were taken; comments, analysis and file details fold
              away below it. -->
         <section class="tab-panel reader" id="tab-yoink" data-tab-panel="yoink" aria-labelledby="yoinkHeading">
+          <!-- The Back row is the panel's own child so it can stick to the
+               top for the whole read, not just while the head is in view. -->
+          <nav class="reader-crumbs" aria-label="Breadcrumb">
+            <button class="button ghost" type="button" id="yoinkBack">&larr; Back</button>
+            <ol class="crumb-list">
+              <li><a href="#library">Library</a></li>
+              <li class="hidden" id="yoinkCrumbTopicItem"><button class="crumb-button" type="button" id="yoinkCrumbTopic" data-reader-topic="">Topic</button></li>
+              <li><span class="crumb-current" id="yoinkTitle" aria-current="page">No uoink selected</span></li>
+            </ol>
+          </nav>
           <div class="page-head reader-head">
-            <nav class="reader-crumbs" aria-label="Breadcrumb">
-              <button class="button ghost" type="button" id="yoinkBack">&larr; Back</button>
-              <ol class="crumb-list">
-                <li><a href="#library">Library</a></li>
-                <li class="hidden" id="yoinkCrumbTopicItem"><button class="crumb-button" type="button" id="yoinkCrumbTopic" data-reader-topic="">Topic</button></li>
-                <li><span class="crumb-current" id="yoinkTitle" aria-current="page">No uoink selected</span></li>
-              </ol>
-            </nav>
             <div class="reader-title-block">
               <div class="reader-kind" id="yoinkKind"></div>
               <h1 id="yoinkHeading" tabindex="-1">Pick something to read</h1>
@@ -5825,6 +5934,19 @@
           <section class="settings-section" id="settings-app" aria-labelledby="settingsAppTitle">
           <h2 class="settings-section-title" id="settingsAppTitle" tabindex="-1">App</h2>
           <div class="settings-grid">
+            <div class="setting-block" id="settings-appearance">
+              <h2>Appearance</h2>
+              <div class="inline-row">
+                <select class="field" id="dashboardTheme" style="max-width:280px" aria-label="Appearance" aria-describedby="dashboardThemeCopy dashboardThemeSaveStatus">
+                  <option value="system" data-theme-system>Match Windows</option>
+                  <option value="light">Light</option>
+                  <option value="dark">Dark</option>
+                </select>
+              <div class="setting-feedback"><span class="setting-status" id="dashboardThemeSaveStatus" role="status" aria-live="polite" aria-atomic="true"></span><button class="button ghost setting-retry hidden" id="dashboardThemeSaveRetry" type="button" data-setting-retry="dashboardTheme">Retry save</button></div>
+              </div>
+              <p class="setting-copy" id="dashboardThemeCopy">Applies to this dashboard in the Uoink window and in your browser.</p>
+            </div>
+
             <div class="setting-block" id="settings-helper">
               <h2>Local app</h2>
               <p class="setting-copy" id="helperStatus">Checking app status...</p>
@@ -6391,6 +6513,7 @@
       undoTopicRemove: document.getElementById("undoTopicRemove"),
       autostartToggle: document.getElementById("autostartToggle"),
       notificationsEnabled: document.getElementById("notificationsEnabled"),
+      dashboardTheme: document.getElementById("dashboardTheme"),
       screenshotCount: document.getElementById("screenshotCount"),
       rolePicker: document.getElementById("rolePicker"),
       channelsStatus: document.getElementById("channelsStatus"),
@@ -15782,6 +15905,7 @@
       styleAnchorsSource: ["style_anchors_source", "taste"],
       obsidianVaultPath: ["obsidian_vault_path", ""],
       mirrorScriptsToggle: ["mirror_scripts_to_obsidian", false],
+      dashboardTheme: ["dashboard_theme", "system"],
     };
     const TASTE_FIELDS = { tasteHooks: "preferred_hooks", tasteFormats: "preferred_formats", tasteAvoid: "avoid" };
     const settingEdits = new Map();
@@ -15832,6 +15956,45 @@
       } catch (_) {
         document.getElementById("usageChoiceStatus").textContent = "Could not save this choice. You can change sharing in Settings.";
       } finally { buttons.forEach(button => { button.disabled = false; }); }
+    }
+
+    // ---- Appearance: Match Windows (or system) / Light / Dark ------------
+    // The helper's settings hold the choice, so the Uoink window and a
+    // browser tab agree. localStorage caches it for the boot script in
+    // <head>, which applies it before the first paint. "system" removes
+    // data-theme and the prefers-color-scheme tokens decide.
+    const DASHBOARD_THEME_KEY = "uoink.dashboard.theme";
+
+    function dashboardThemeValue(value) {
+      return value === "light" || value === "dark" ? value : "system";
+    }
+
+    function applyDashboardTheme(value) {
+      const theme = dashboardThemeValue(value);
+      const root = document.documentElement;
+      if (theme === "system") delete root.dataset.theme;
+      else root.dataset.theme = theme;
+      try { localStorage.setItem(DASHBOARD_THEME_KEY, theme); } catch (_) {}
+      return theme;
+    }
+
+    function renderDashboardThemeLabels() {
+      // "Match Windows" on Windows, "Match system" on a Mac or Linux.
+      const label = helperPlatform() === "win" ? "Match Windows" : "Match system";
+      for (const option of document.querySelectorAll("[data-theme-system]")) option.textContent = label;
+    }
+
+    // The saved choice from the helper, applied at startup. A change still
+    // waiting to save wins over what the helper last stored.
+    async function syncDashboardTheme() {
+      try {
+        const data = await settingsRequest("/settings");
+        const settings = data.settings || {};
+        if (!Object.prototype.hasOwnProperty.call(settings, "dashboard_theme")) return;
+        if (settingEdit("dashboardTheme").dirty || settingEdit("dashboardTheme").version) return;
+        const theme = applyDashboardTheme(settings.dashboard_theme);
+        if (els.dashboardTheme) els.dashboardTheme.value = theme;
+      } catch (_) { /* The cached theme stays until the helper answers. */ }
     }
 
     async function showUsagePrompt() {
@@ -16110,6 +16273,8 @@
         if (control.type === "checkbox") control.checked = Boolean(value);
         else control.value = Array.isArray(value) ? value.join("\n") : String(value);
       }
+      // Appearance follows the control: the helper's value, or an edit still saving.
+      if (Object.prototype.hasOwnProperty.call(settings, "dashboard_theme") && els.dashboardTheme) applyDashboardTheme(els.dashboardTheme.value);
       if (settingEdit("anthropicKey").version !== (versions.anthropicKey || 0)) state.settings.anthropic_key_set = previous.anthropic_key_set;
       if (settingEdit("scrapecreatorsKey").version !== (versions.scrapecreatorsKey || 0)) {
         state.settings.scrapecreators_key_set = previous.scrapecreators_key_set;
@@ -16831,6 +16996,10 @@
     }
 
     function switchTab(tab, options = {}) {
+      const previousTab = state.activeTab;
+      // Leaving the Library remembers where its list was, so coming back
+      // from the reader (Back, Esc or the browser's Back) lands there.
+      if (previousTab === "library" && tab !== "library") state.libraryScroll = pageScrollPosition();
       if (tab !== "activity" && state.activityFailureKey) closeCaptureFailure();
       if (tab === "build" || tab === "script") tab = "writing";
       if (tab === "about") {
@@ -16863,8 +17032,9 @@
       if (tab === "sources") renderSources();
       if (tab === "activity") refreshActivity();
       if (tab === "settings") refreshSettings();
-      const content = document.querySelector(".content");
-      if (content) content.scrollTop = 0;
+      const back = tab === "library" && previousTab === "yoink" ? state.libraryScroll : null;
+      setPageScrollPosition(back || { content: 0, page: 0 });
+      syncReaderCrumbs();
       if (!options.fromRoute) pushRoute(routeForTab(tab, options));
       if (tab === "settings" && options.section) revealSettingsSection(options.section);
       if (tab === "sources" && options.section === "discover") revealSourcesDiscover();
@@ -16928,6 +17098,47 @@
       navigateTo("#library");
     }
 
+    // The dashboard scrolls in .content on a wide window and as a page under
+    // 1080px; a saved position records both.
+    function pageScrollPosition() {
+      const content = document.querySelector(".content");
+      return { content: content ? content.scrollTop : 0, page: Number(window.scrollY) || 0 };
+    }
+
+    function setPageScrollPosition(position) {
+      const content = document.querySelector(".content");
+      if (content) content.scrollTop = position.content || 0;
+      if (typeof window.scrollTo === "function") window.scrollTo(0, position.page || 0);
+    }
+
+    // The reader's Back row is sticky; once it is holding on while the read
+    // scrolls under it, a hairline separates it from the text.
+    function syncReaderCrumbs() {
+      const crumbs = document.querySelector("#tab-yoink > .reader-crumbs");
+      const panel = document.getElementById("tab-yoink");
+      if (!crumbs || !panel || typeof crumbs.getBoundingClientRect !== "function") return;
+      // Unstuck, the row sits right under the panel's top padding.
+      const resting = panel.getBoundingClientRect().top + (parseFloat(getComputedStyle(panel).paddingTop) || 0);
+      const stuck = state.activeTab === "yoink" && crumbs.getBoundingClientRect().top - resting > 1;
+      crumbs.classList.toggle("stuck", stuck);
+    }
+
+    // Esc closes the reader like its Back button, unless a dialog, an open
+    // menu or a text field is using the key.
+    function closeReaderOnEscape(event) {
+      if (event.key !== "Escape" || event.defaultPrevented || state.activeTab !== "yoink") return;
+      if (document.querySelector("dialog[open], .modal-backdrop:not(.hidden)")) return;
+      const menu = document.querySelector("#tab-yoink details.action-menu[open]");
+      if (menu) {
+        menu.removeAttribute("open");
+        return;
+      }
+      const target = event.target;
+      if (target && typeof target.closest === "function" && target.closest("input, textarea, select, [contenteditable]")) return;
+      event.preventDefault();
+      goBack();
+    }
+
     function wireRoutes() {
       window.addEventListener("hashchange", applyHashRoute);
       window.addEventListener("popstate", applyHashRoute);
@@ -16941,6 +17152,14 @@
         if (href && href !== "#" && navigateTo(href)) event.preventDefault();
       });
       if (els.yoinkBack) els.yoinkBack.addEventListener("click", goBack);
+      document.addEventListener("keydown", closeReaderOnEscape);
+      // switchTab places the scroll for every route (the Library's saved
+      // place, else the top); the browser's own restore would undo it.
+      const hist = window.history;
+      if (hist && "scrollRestoration" in hist) hist.scrollRestoration = "manual";
+      const content = document.querySelector(".content");
+      if (content) content.addEventListener("scroll", syncReaderCrumbs, { passive: true });
+      window.addEventListener("scroll", syncReaderCrumbs, { passive: true });
     }
 
     function wireEvents() {
@@ -17173,6 +17392,10 @@
       // About, Star on GitHub and Stop Uoink live in Settings > App.
       wireProductButtons((url) => openExternal(url, "product"));
       wireSettingsAutosave();
+      // Appearance changes at once; the autosave above makes it stick everywhere.
+      renderDashboardThemeLabels();
+      els.dashboardTheme.value = dashboardThemeValue(document.documentElement.dataset.theme);
+      els.dashboardTheme.addEventListener("change", () => applyDashboardTheme(els.dashboardTheme.value));
       document.getElementById("testKey").addEventListener("click", testKey);
       document.getElementById("copyMcp").addEventListener("click", async () => {
         try {
@@ -17753,6 +17976,9 @@
       applyHashRoute();
       await refreshHealth();
       await loadLibraryFacets();
+      // After the first token-gated call, so it reuses that token: the
+      // helper rate-limits /token.
+      syncDashboardTheme();
       await refreshJobs();
       await loadLibrary({ reset: true });
       await loadLibraryActivity(false);
