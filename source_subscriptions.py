@@ -1632,6 +1632,9 @@ def _process_alive(pid: int, created_ms: int | float | None, executable: str | N
             return "dead"
         except PermissionError:
             pass
+        from _platform import procfs_exited
+        if procfs_exited(int(pid)):
+            return "dead"  # an unreaped zombie still answers kill(pid, 0)
         if created_ms is not None:
             actual = _posix_process_created_ms(int(pid))
             if actual is not None and abs(actual - int(created_ms)) > _PROCESS_START_TOLERANCE_MS:

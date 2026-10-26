@@ -851,6 +851,8 @@ def _process_liveness(
         return "dead"
     except (OSError, PermissionError, ValueError):
         return "unknown"
+    if _platform.procfs_exited(int(pid)):
+        return "dead"  # an unreaped zombie still answers kill(pid, 0)
     if created_ms is not None:
         actual = _posix_process_created_ms(int(pid))
         if actual is None:

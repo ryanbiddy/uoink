@@ -1,7 +1,8 @@
 """Agent CLI: one registry envelope per call, with no HTTP proxy.
 
-The root uoink launchers still run server.py. The installed cli launcher runs
-this module with bundled Python; pin sys.path for Python's embedded ._pth mode.
+The root uoink launchers send agent subcommands here and everything else to
+server.py. The installed cli launcher runs this module with bundled Python;
+pin sys.path for Python's embedded ._pth mode.
 """
 from __future__ import annotations
 

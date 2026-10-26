@@ -12,4 +12,25 @@ else
     uoink_python=python
 fi
 
+# Agent subcommands run the agent CLI, as cli/uoink does. No arguments, helper
+# flags and the helper's own commands (doctor, rebuild-index, search, clips)
+# still run server.py. Isolation flags may come before the subcommand.
+uoink_command=
+uoink_skip=
+for uoink_arg do
+    if [ -n "$uoink_skip" ]; then
+        uoink_skip=
+        continue
+    fi
+    case $uoink_arg in
+        --isolated-profile|--isolated-port|--isolated-from-install-dir) uoink_skip=1 ;;
+        *) uoink_command=$uoink_arg; break ;;
+    esac
+done
+case $uoink_command in
+    tools|call|capture|recent|get|note|status|connect|skill|serve|--text|-h|--help)
+        export PYTHONIOENCODING=utf-8 PYTHONUTF8=1
+        exec "$uoink_python" "$uoink_root/uoink_cli.py" "$@" ;;
+esac
+
 exec "$uoink_python" "$uoink_root/server.py" "$@"

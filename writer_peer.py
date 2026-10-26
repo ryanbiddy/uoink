@@ -225,10 +225,11 @@ def process_is_live(pid: int) -> bool:
     except ProcessLookupError:
         return False
     except PermissionError:
-        return True
+        pass
     except OSError:
         return False
-    return True
+    from _platform import procfs_exited
+    return not procfs_exited(pid)  # an unreaped zombie still answers kill(pid, 0)
 
 
 def validate_runtime_lease(
