@@ -17,6 +17,9 @@
 #        reddit_extractor.py, uoink_mcp.py, uoink_mcp_tools.py, yoink_mcp.py
 #        (shim), yt_extract.py, topics.json, skills\,
 #        assets\dashboard\, stop-server.{bat,ps1}, uoink.ico
+#        models\whisper-bundled\<size>\  the pinned faster-whisper model
+#                  (scripts\whisper_model_pin.json; cached in
+#                  build\cache\whisper-model, hash-checked every build)
 #   3. Run ISCC.exe against installer\uoink.iss to produce
 #      build\Uoink-Setup-<version>.exe
 #
@@ -162,7 +165,8 @@ $PYWEBVIEW_VERSION = '5.4'
 $PYTHONNET_VERSION = '3.0.5'
 # Transcript reliability detection (C-02: was whisper-timestamped, now
 # faster-whisper for license compliance -- MIT, no dtw-python/openai-whisper).
-# Library ships; the tiny Whisper model downloads lazily to
+# Library ships, and since 3.12 so does the default (base) model: see the
+# bundled Whisper model step below. Other sizes download on request to
 # %LOCALAPPDATA%\Uoink\models\whisper.
 $FASTER_WHISPER_VERSION = '1.2.1'
 # v3.1.2 podcast/A1 transcription runtime. This bundles WhisperX and its
@@ -618,7 +622,8 @@ foreach ($noticeRelative in @('THIRD-PARTY-NOTICES.md', 'third-party-notices\REA
         'third-party-notices\mozilla-readability-APACHE-2.0.txt',
         'third-party-notices\EmbeddingGemma-NOTICE.md',
         'third-party-notices\Gemma-Terms-of-Use.txt',
-        'third-party-notices\Gemma-Prohibited-Use-Policy.txt')) {
+        'third-party-notices\Gemma-Prohibited-Use-Policy.txt',
+        'third-party-notices\faster-whisper-base-NOTICE.md')) {
     $noticeSource = Join-Path $RepoRoot $noticeRelative
     $noticeTarget = Join-Path $StagingDir $noticeRelative
     $noticeHash = (Get-FileHash -LiteralPath $noticeSource -Algorithm SHA256).Hash
@@ -771,6 +776,19 @@ if ($StageSourceOnly) {
     return
 }
 
+# ---- 2g-bis. Bundled Whisper model (3.12) -------------------------------
+# Every download ships the default transcription model, so a fresh install
+# transcribes caption-less videos with no download step. The pin fixes the
+# Hugging Face revision and each file's size and SHA-256. The stager reuses
+# build\cache\whisper-model, fails closed on any mismatch (deleting the bad
+# cache file so a re-run fetches fresh), and never touches a Hugging Face
+# cache on this machine. It lands in {app}\models\whisper-bundled\<size>\.
+Write-Step 'Staging bundled Whisper model'
+& $embedPython (Join-Path $RepoRoot 'scripts\stage_whisper_model.py') `
+    --cache (Join-Path $CacheDir 'whisper-model') `
+    --dest (Join-Path $StagingDir 'models\whisper-bundled')
+if ($LASTEXITCODE -ne 0) { throw 'Bundled Whisper model staging failed; see the hash or download error above' }
+
 # ---- 2h. Staged smoke (Sprint 19.6 / Fix 1) -----------------------------
 # Verifies the staged tree is actually runnable BEFORE ISCC packages it,
 # so the works-in-repo-breaks-in-installer drift class is caught here
@@ -826,6 +844,21 @@ import uoink_splash, uoink_dashboard
 print("smoke: import uoink_splash + uoink_dashboard OK")
 import whisperx
 print("smoke: import whisperx OK")
+import uoink_reliability
+bundled_root = pathlib.Path(__file__).resolve().parent / "models" / "whisper-bundled"
+info = uoink_reliability.bundled_model_info()
+if not info or pathlib.Path(info["path"]).parent != bundled_root:
+    raise SystemExit("smoke: bundled Whisper model missing under %s (got %r)" % (bundled_root, info))
+user_cache = pathlib.Path(tempfile.mkdtemp()) / "models" / "whisper"
+status = uoink_reliability.reliability_model_status(info["model"], user_cache)
+if status["cached"] is not True or status["source"] != "bundled":
+    raise SystemExit("smoke: an empty profile does not select the bundled model: %r" % status)
+before = sorted((p.name, p.stat().st_size) for p in pathlib.Path(info["path"]).iterdir())
+uoink_reliability._load_model(info["model"], user_cache)
+after = sorted((p.name, p.stat().st_size) for p in pathlib.Path(info["path"]).iterdir())
+if before != after or user_cache.exists():
+    raise SystemExit("smoke: loading the bundled model wrote files: %r -> %r" % (before, after))
+print("smoke: bundled Whisper %s @ %s loads read-only" % (info["model"], info["revision"][:12]))
 '@
     try {
         & '.\python\python.exe' $smokePy

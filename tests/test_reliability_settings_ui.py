@@ -40,7 +40,11 @@ const toasts = [];
 let refreshed = 0;
 const els = {
   whisperModel: { value: input.model || 'tiny' },
-  downloadReliabilityModel: { disabled: false },
+  downloadReliabilityModel: {
+    disabled: false,
+    hidden: false,
+    classList: { toggle(name, on) { if (name === 'hidden') els.downloadReliabilityModel.hidden = Boolean(on); } },
+  },
   reliabilityStatus: { textContent: '' },
 };
 const context = {
@@ -76,6 +80,9 @@ if (action === 'label') {
   result = context.transcriptModelConfirmMessage(input.model);
 } else if (action === 'status') {
   result = context.reliabilityStatusText(input.selected, input.relModel || {});
+} else if (action === 'render') {
+  context.renderReliabilityStatus(input.selected, input.relModel || {});
+  result = { status: els.reliabilityStatus.textContent, hidden: els.downloadReliabilityModel.hidden };
 } else if (action === 'download') {
   Promise.resolve(context.downloadSelectedReliabilityModel()).then(() => {
     process.stdout.write(JSON.stringify({
@@ -239,11 +246,36 @@ def test_download_confirms_then_posts_selected_model():
     print("ok  confirm precedes POST of the exact selected model")
 
 
+BUNDLED_STATUS = {"model": "base", "cached": True, "source": "bundled",
+                  "bundled_model": "base", "estimated_download_mb": 150}
+
+
+def test_bundled_model_reads_ready_and_hides_the_download_button():
+    saved = _run({"action": "render", "selected": "base", "relModel": BUNDLED_STATUS})["result"]
+    _assert(saved["status"] == "Balanced model comes with Uoink and is ready on this device.", saved)
+    _assert(saved["hidden"] is True, f"no download offer for a bundled model: {saved}")
+    # An unsaved pick of the bundled size is ready too, with no download.
+    unsaved = _run({"action": "render", "selected": "base", "relModel": {
+        "model": "small", "cached": False, "bundled_model": "base", "estimated_download_mb": 490}})["result"]
+    _assert("comes with Uoink" in unsaved["status"] and unsaved["hidden"] is True, unsaved)
+    # A size the install does not ship still offers its download and size.
+    other = _run({"action": "render", "selected": "small", "relModel": BUNDLED_STATUS})["result"]
+    _assert(other["status"] == "Careful checker model is not downloaded yet (~490 MB).", other)
+    _assert(other["hidden"] is False, other)
+    # A downloaded copy (the user's own) keeps the existing wording.
+    downloaded = _run({"action": "render", "selected": "base", "relModel": {
+        **BUNDLED_STATUS, "source": "downloaded"}})["result"]
+    _assert(downloaded["status"] == "Balanced checker model is ready on this device.", downloaded)
+    _assert(downloaded["hidden"] is True, downloaded)
+    print("ok  bundled model reads ready; download only offered when missing")
+
+
 def main() -> int:
     test_one_label_function_covers_all_six_choices()
     test_per_choice_sizes_and_unknown_metadata()
     test_unsaved_selection_uses_its_own_size()
     test_download_confirms_then_posts_selected_model()
+    test_bundled_model_reads_ready_and_hides_the_download_button()
     print("\nall green")
     return 0
 

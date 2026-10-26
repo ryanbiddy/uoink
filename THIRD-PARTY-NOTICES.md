@@ -211,6 +211,25 @@ the upstream JavaScript implementation. See the
 - LGPL text: https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
 
 
+## Bundled Whisper model (not a Python package)
+
+- **Component:** OpenAI Whisper `base` weights, converted to the
+  CTranslate2 format by SYSTRAN for faster-whisper:
+  https://huggingface.co/Systran/faster-whisper-base at pinned revision
+  `ebe41f70d5b6dfa9166e2c581c45c9c0cfc57b66`. Installed read-only at
+  `models/whisper-bundled/base/` (macOS: `Contents/Resources/models/whisper-bundled/base/`).
+- **License:** MIT. OpenAI releases Whisper's code and model weights under
+  the MIT License (Copyright (c) 2022 OpenAI); the SYSTRAN model card
+  declares `license: mit` for the conversion.
+- **Files** (the build refuses any size or hash mismatch):
+  - `config.json`: 2,309 bytes, SHA-256 `56a6d8110d311f19c8f0471e562832c7527f146b567275bfca59fcf7c184da9a`
+  - `model.bin`: 145,217,532 bytes, SHA-256 `d01c3014881c9c6f3133c182f3d2887eb6ca1c789a7538c5c007196857a0a6a9`
+  - `tokenizer.json`: 2,203,239 bytes, SHA-256 `fb7b63191e9bb045082c79fd742a3106a12c99513ab30df4a0d47fa6cb6fd0ab`
+  - `vocabulary.txt`: 459,861 bytes, SHA-256 `34ce3fe1c5041027b3f8d42912270993f986dbc4bb34cf27f951e34a1e453913`
+- Provenance and the full license text:
+  [model notice](third-party-notices/faster-whisper-base-NOTICE.md).
+
+
 ## Bundled fonts (not Python packages)
 
 The dashboard and the Chrome extension ship their own copies of three

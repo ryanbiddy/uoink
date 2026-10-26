@@ -9,7 +9,8 @@ what ships:
 Uses pip-licenses' JSON output when available (build path); falls back to
 importlib.metadata so a dev run without pip-licenses still produces an
 honest, if terser, file. ffmpeg is not a pip package, so its LGPL notice is
-appended from a fixed block (the BtbN win64-lgpl build, per build.ps1).
+appended from a fixed block (the BtbN win64-lgpl build, per build.ps1). The
+bundled Whisper model's entry is rendered from scripts/whisper_model_pin.json.
 """
 from __future__ import annotations
 
@@ -83,6 +84,37 @@ with Python's html.parser and adds resource limits, shell detection,
 metadata handling and Markdown output. This is a limited adaptation, not
 the upstream JavaScript implementation. See the
 [Apache-2.0 license](third-party-notices/mozilla-readability-APACHE-2.0.txt).
+"""
+
+
+WHISPER_PIN = Path(__file__).resolve().with_name("whisper_model_pin.json")
+
+
+def whisper_model_block(pin_path: Path = WHISPER_PIN) -> str:
+    """The bundled Whisper model's entry, rendered from the build pin.
+
+    build.ps1 and the macOS bundle stage exactly the files the pin names, so
+    the notice cannot drift from what ships.
+    """
+    pin = json.loads(Path(pin_path).read_text(encoding="utf-8"))
+    model, repo, revision = pin["model"], pin["repo"], pin["revision"]
+    files = "\n".join(f"  - `{name}`: {meta['size']:,} bytes, SHA-256 `{meta['sha256']}`"
+                      for name, meta in sorted(pin["files"].items()))
+    return f"""\
+## Bundled Whisper model (not a Python package)
+
+- **Component:** OpenAI Whisper `{model}` weights, converted to the
+  CTranslate2 format by SYSTRAN for faster-whisper:
+  https://huggingface.co/{repo} at pinned revision
+  `{revision}`. Installed read-only at
+  `models/whisper-bundled/{model}/` (macOS: `Contents/Resources/models/whisper-bundled/{model}/`).
+- **License:** MIT. OpenAI releases Whisper's code and model weights under
+  the MIT License (Copyright (c) 2022 OpenAI); the SYSTRAN model card
+  declares `license: mit` for the conversion.
+- **Files** (the build refuses any size or hash mismatch):
+{files}
+- Provenance and the full license text:
+  [model notice](third-party-notices/faster-whisper-{model}-NOTICE.md).
 """
 
 
@@ -267,7 +299,7 @@ def main() -> int:
                   "repository. This modification does not qualify model loading or "
                   "clear unrelated dependency advisories."]
     lines += ["", supplemental, "", EMBEDDINGGEMMA_BLOCK, "", ADAPTED_TEXT_BLOCK, "", FFMPEG_BLOCK,
-              "", BUNDLED_FONTS_BLOCK, ""]
+              "", whisper_model_block(), "", BUNDLED_FONTS_BLOCK, ""]
     output.write_text("\n".join(lines), encoding="utf-8")
     print(f"wrote {output} ({len(rows)} python packages, source: {source})")
     return 0

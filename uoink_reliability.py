@@ -12,17 +12,23 @@ AGPL word-confidence library (which pulled openai-whisper + dtw-python and
 made the shipped product's "MIT" claim false). The public interface
 (detect_unreliable_spans / ensure_model / Span) is unchanged, so nothing
 downstream moves.
+
+3.12: every installer ships one model (see ``bundled_model_dir``), so a
+fresh install transcribes without a download step. A model the user
+downloaded still wins over the bundled copy.
 """
 
 from __future__ import annotations
 
+import json
 import re
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any
 
 
-DEFAULT_MODEL = "tiny"
+# The settings default (server._normalize_settings) and the bundled model.
+DEFAULT_MODEL = "base"
 DEFAULT_THRESHOLD = 0.5
 
 
@@ -91,9 +97,8 @@ def _import_faster_whisper():
     return WhisperModel
 
 
-# faster-whisper's compute_type: int8 keeps the tiny model tiny on CPU and
-# needs no CUDA. The reliability model is deliberately the smallest one --
-# it's a confidence probe, not the primary transcript.
+# faster-whisper's compute_type: int8 keeps the model small on CPU and needs
+# no CUDA.
 _COMPUTE_TYPE = "int8"
 
 
@@ -102,7 +107,8 @@ def _load_model(model_name: str, model_root: str | Path | None, *,
     """Construct WhisperModel. Ordinary callers stay local-only.
 
     ``ensure_model`` is the only acquisition path and must pass
-    ``local_files_only=False``.
+    ``local_files_only=False``. A local load uses the user's downloaded
+    cache when it is ready, else the bundled copy of the same size.
     """
     WhisperModel = _import_faster_whisper()
     kwargs: dict[str, Any] = {
@@ -110,6 +116,12 @@ def _load_model(model_name: str, model_root: str | Path | None, *,
         "compute_type": _COMPUTE_TYPE,
         "local_files_only": bool(local_files_only),
     }
+    if local_files_only:
+        source, bundled = resolve_model(model_name, model_root)
+        if source == SOURCE_BUNDLED:
+            # Read-only app data: load the snapshot directory by path and
+            # pass no download_root, so nothing is created or written there.
+            return WhisperModel(str(bundled), **kwargs)
     if model_root:
         root = Path(model_root)
         if not local_files_only:
@@ -246,15 +258,144 @@ def is_model_ready(model_name: object,
         return False
 
 
+# ---- Bundled model (3.12) ---------------------------------------------------
+# Installers stage one pinned faster-whisper snapshot
+# (scripts/whisper_model_pin.json, scripts/stage_whisper_model.py) at
+# <app>/models/whisper-bundled/<size>/: {app} on Windows and
+# Contents/Resources in the macOS bundle, the folder this module ships in.
+# It is read-only app data. Lookup for the selected size:
+#   1. the user's downloaded cache (ensure_model + ready marker) wins;
+#   2. otherwise the bundled copy, when the selected size is the bundled one;
+#   3. otherwise unavailable, as before (capture records model_not_downloaded).
+BUNDLED_MODEL_DIRNAME = "whisper-bundled"
+BUNDLED_MANIFEST = "uoink-model.json"
+SOURCE_DOWNLOADED = "downloaded"
+SOURCE_BUNDLED = "bundled"
+
+
+def bundled_model_root() -> Path:
+    """This install's bundled-model folder. It may not exist (source checkout).
+
+    An isolated install names its app folder (UOINK_ISOLATED_APP_DIR, through
+    uoink_install_isolation); otherwise the app folder is this module's own.
+    """
+    app_dir: Path | None = None
+    try:
+        import uoink_install_isolation
+        binding = uoink_install_isolation.current_binding()
+        if binding is not None and binding.app_dir is not None:
+            app_dir = Path(binding.app_dir)
+    except Exception:  # pragma: no cover - the isolation module always ships
+        app_dir = None
+    if app_dir is None:
+        app_dir = Path(__file__).resolve().parent
+    elif app_dir.suffix == ".app":
+        # A macOS bundle path: its app files live in Contents/Resources.
+        app_dir = app_dir / "Contents" / "Resources"
+    return app_dir / "models" / BUNDLED_MODEL_DIRNAME
+
+
+def _bundled_manifest(directory: Path) -> dict | None:
+    try:
+        with (directory / BUNDLED_MANIFEST).open("rb") as stream:
+            raw = stream.read(65536)
+        manifest = json.loads(raw.decode("utf-8"))
+    except (OSError, ValueError):
+        return None
+    return manifest if isinstance(manifest, dict) else None
+
+
+def bundled_model_dir(model_name: object,
+                      bundled_root: str | Path | None = None) -> Path | None:
+    """The bundled snapshot directory for this size, or None.
+
+    A structural check, cheap enough for every status call: the manifest
+    names this size, its repository and a full revision; each listed file is
+    a regular file of the pinned size; the files faster-whisper needs are
+    there. The build verified every SHA-256 before packaging. Never writes.
+    """
+    name = _supported_model_name(model_name)
+    if name is None:
+        return None
+    root = Path(bundled_root) if bundled_root is not None else bundled_model_root()
+    directory = root.absolute() / name
+    try:
+        if directory.is_symlink() or not directory.is_dir():
+            return None
+        manifest = _bundled_manifest(directory)
+        if (manifest is None or manifest.get("model") != name
+                or manifest.get("repo") != _MODEL_REPOSITORIES[name]
+                or re.fullmatch(r"[0-9a-f]{40}", str(manifest.get("revision") or "")) is None):
+            return None
+        files = manifest.get("files")
+        if not isinstance(files, dict) or not set(_RELIABILITY_CACHE_FILES) <= set(files):
+            return None
+        for file_name, meta in files.items():
+            if (not isinstance(file_name, str) or file_name in {".", ".."}
+                    or re.fullmatch(r"[\w.-]+", file_name) is None
+                    or not isinstance(meta, dict)):
+                return None
+            path = directory / file_name
+            if path.is_symlink() or not path.is_file():
+                return None
+            size = path.stat().st_size
+            if size == 0 or size != meta.get("size"):
+                return None
+        return directory
+    except (OSError, ValueError, TypeError):
+        return None
+
+
+def bundled_model_info(bundled_root: str | Path | None = None) -> dict[str, Any] | None:
+    """{model, revision, path} for the size this install ships, or None."""
+    root = Path(bundled_root) if bundled_root is not None else bundled_model_root()
+    for name in _MODEL_REPOSITORIES:
+        directory = bundled_model_dir(name, root)
+        if directory is not None:
+            manifest = _bundled_manifest(directory) or {}
+            return {"model": name, "revision": manifest.get("revision"),
+                    "path": str(directory)}
+    return None
+
+
+def resolve_model(model_name: object, model_root: str | Path | None, *,
+                  bundled_root: str | Path | None = None) -> tuple[str | None, Path | None]:
+    """Choose the local copy of a selected size: (source, bundled_dir).
+
+    ("downloaded", None) when the user's ready cache exists, which wins;
+    ("bundled", <dir>) when this install ships that size; else (None, None).
+    """
+    if is_model_ready(model_name, model_root):
+        return SOURCE_DOWNLOADED, None
+    directory = bundled_model_dir(model_name, bundled_root)
+    if directory is not None:
+        return SOURCE_BUNDLED, directory
+    return None, None
+
+
 def reliability_model_status(model_name: object,
-                             model_root: str | Path) -> dict[str, Any]:
-    """Selected-model status used by the helper settings payload."""
+                             model_root: str | Path, *,
+                             bundled_root: str | Path | None = None) -> dict[str, Any]:
+    """Selected-model status used by the helper settings payload.
+
+    ``cached`` means the selected size can run now; ``source`` says which
+    copy ("downloaded" or "bundled"). ``bundled_model`` names the size this
+    install ships whatever is selected, so the dashboard can say an unsaved
+    choice is already on the device.
+    """
     selected = str(model_name or "").strip().lower()
     root = Path(model_root)
+    source, _bundled = resolve_model(selected, root, bundled_root=bundled_root)
+    shipped = bundled_model_info(bundled_root)
     return {
         "model": selected,
         "model_root": str(root),
-        "cached": is_model_ready(selected, root),
+        "cached": source is not None,
+        "source": source,
+        "downloaded": source == SOURCE_DOWNLOADED,
+        "bundled_model": shipped["model"] if shipped else None,
+        "bundled_revision": shipped["revision"] if shipped else None,
+        "bundled_path": shipped["path"] if shipped else None,
         "estimated_download_mb": estimated_download_mb(selected),
     }
 
@@ -288,12 +429,13 @@ def transcribe_media(media_path: str | Path, *,
                      model_name: str = DEFAULT_MODEL,
                      model_root: str | Path | None = None,
                      _transcribe=None) -> list[tuple[float, float, str]]:
-    """Transcribe local media with an already-cached faster-whisper model.
+    """Transcribe local media with a local faster-whisper model.
 
     This path is used only as a fallback when a video source exposes no
-    captions. ``local_files_only=True`` is intentional: capture must not
-    become an implicit model download. ``ensure_model`` remains the explicit
-    user-triggered download path.
+    captions. The model is the user's downloaded copy or the bundled one
+    (``resolve_model``). ``local_files_only=True`` is intentional: capture
+    must not become an implicit model download. ``ensure_model`` remains the
+    explicit user-triggered download path.
     """
     media = Path(media_path)
     if not media.is_file():

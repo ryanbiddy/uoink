@@ -13,6 +13,8 @@ Locked compute policy (LOCAL-FIRST):
   <data_root>/whisper_models/<model_size>/. Consent dialog lives in
   the dashboard; this module just respects an explicit
   `consent_given=True` flag and refuses without it on first download.
+  The size the installer bundles (3.12+: base) needs no download: a
+  downloaded copy of that size still wins, else the bundled one runs.
 
 Output shape (transcript JSON written to
 <data_root>/Podcasts/<feed>/<episode>.transcript.json):
@@ -223,13 +225,31 @@ def _cached_model_snapshot(data_root: Path, model_size: str) -> Path | None:
         return None
 
 
-def is_model_downloaded(data_root: Path, model_size: str = MODEL_BASE) -> bool:
-    """Report minimum ASR files cached, without importing a runtime or writing.
+def _bundled_snapshot(model_size: str) -> Path | None:
+    """The installer-bundled snapshot of this size, or None.
 
-    This is structural readiness for consent/preflight, not artifact validation
-    or a claim that the model has loaded. Execution rechecks the snapshot.
+    3.12 installers ship one model under the app folder; capture ASR and
+    podcast jobs share it (see uoink_reliability.bundled_model_dir). It is
+    read-only app data, loaded by path, so it needs no download consent.
     """
-    return _cached_model_snapshot(data_root, normalize_model(model_size)) is not None
+    try:
+        import uoink_reliability
+    except Exception:  # pragma: no cover - the module always ships
+        return None
+    return uoink_reliability.bundled_model_dir(normalize_model(model_size))
+
+
+def is_model_downloaded(data_root: Path, model_size: str = MODEL_BASE) -> bool:
+    """Report the model available locally, without importing a runtime or writing.
+
+    True for minimum ASR files in the user's cache, or for the installer's
+    bundled copy of the same size. This is structural readiness for
+    consent/preflight, not artifact validation or a claim that the model has
+    loaded. Execution rechecks the snapshot.
+    """
+    model_size = normalize_model(model_size)
+    return (_cached_model_snapshot(data_root, model_size) is not None
+            or _bundled_snapshot(model_size) is not None)
 
 
 def _model_dir(data_root: Path, model_size: str) -> Path:
@@ -251,6 +271,9 @@ def _prepare_model_snapshot(data_root: Path, model_size: str, *,
     snapshot = _cached_model_snapshot(data_root, model_size)
     if snapshot is not None:
         return snapshot
+    bundled = _bundled_snapshot(model_size)
+    if bundled is not None:
+        return bundled
     if not consent_given:
         raise PermissionError(
             f"Whisper model '{model_size}' is not fully cached; "
@@ -439,7 +462,8 @@ def transcribe_audio(audio_path: Path, *,
     # rebuild reuses it; a genuinely new execution gets a new one.
     diarization_run: dict[str, Any] | None = None
     try:
-        if _checked_model_snapshot(data_root, model_size, model_path) is None:
+        if (model_path != _bundled_snapshot(model_size)
+                and _checked_model_snapshot(data_root, model_size, model_path) is None):
             raise RuntimeError('Local ASR snapshot changed before model construction')
         model = whisperx.load_model(str(model_path), device=device,
                                       compute_type=_compute_type(device),

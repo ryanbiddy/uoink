@@ -18,7 +18,10 @@
 ;   topics.json       Topic-folder routing rules.
 ;   skills\           Operator Skill + copyable system prompt.
 ;   assets\dashboard\ Helper-served local dashboard HTML.
-;   stop-server.bat   Stops the server via the PID file written at startup.
+;   models\whisper-bundled\<size>\  Pinned faster-whisper model (3.12+),
+;                     read-only. Capture ASR and podcast jobs load it when no
+;                     downloaded copy of the selected size exists.
+;   stop-server.bat  Stops the server via the PID file written at startup.
 ;   uoink.ico         Used for shortcuts and the uninstaller.
 
 #define AppName       "Uoink"
@@ -107,6 +110,7 @@ Source: "staging\third-party-notices\antlr4-python3-runtime-4.9.3-LICENSE.txt"; 
 Source: "staging\third-party-notices\proxy-tools-0.1.0-UPSTREAM-LICENSE.txt"; DestDir: "{app}\third-party-notices"; Flags: ignoreversion
 Source: "staging\third-party-notices\scrapecreators-social-media-research-skills-MIT-LICENSE.txt"; DestDir: "{app}\third-party-notices"; Flags: ignoreversion
 Source: "staging\third-party-notices\mozilla-readability-APACHE-2.0.txt"; DestDir: "{app}\third-party-notices"; Flags: ignoreversion
+Source: "staging\third-party-notices\faster-whisper-base-NOTICE.md"; DestDir: "{app}\third-party-notices"; Flags: ignoreversion
 
 ; Python embeddable distribution (already includes pythonw.exe + python.exe
 ; + the stdlib zip). After staging, Lib\site-packages contains yt_dlp,
@@ -248,6 +252,11 @@ Source: "staging\migrations\*"; DestDir: "{app}\migrations"; Flags: recursesubdi
 ; module fix -- staging coverage alone is not enough; the file must land in
 ; {app}\defaults or the seed silently no-ops. verify_install.ps1 asserts it.
 Source: "staging\defaults\*"; DestDir: "{app}\defaults"; Flags: recursesubdirs ignoreversion createallsubdirs
+; 3.12: the default transcription model ships with the app, so a fresh install
+; transcribes caption-less videos with no download step. build.ps1 stages it
+; from scripts\whisper_model_pin.json (pinned revision, SHA-256 per file).
+; [InstallDelete] below clears the previous version's copy first.
+Source: "staging\models\whisper-bundled\*"; DestDir: "{app}\models\whisper-bundled"; Flags: recursesubdirs ignoreversion createallsubdirs
 Source: "staging\stop-server.bat"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\stop-server.ps1"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\verify_install.ps1"; DestDir: "{app}"; Flags: ignoreversion
@@ -363,6 +372,11 @@ Filename: "{app}\python\python.exe"; \
   Flags: runhidden waituntilterminated; \
   RunOnceId: "StopIsolatedUoink"; \
   Check: IsolatedInstall
+
+[InstallDelete]
+; Replace, never merge, the bundled model: a release that pins another
+; revision or size must not leave the old files beside the new ones.
+Type: filesandordirs; Name: "{app}\models\whisper-bundled"
 
 [UninstallDelete]
 ; Pip and the running Python create files we didn't ship (.pyc caches, the

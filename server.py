@@ -444,7 +444,9 @@ FFMPEG_TIMEOUT_PER_VIDEO_SEC = 0.25
 SCREENSHOT_SAMPLE_TARGET = 8
 CLIPBOARD_SCREENSHOT_CAP_DEFAULT = 4
 CLIPBOARD_SCREENSHOT_CAP_MAX = 12
-RELIABILITY_MODEL_NAME = "tiny"
+# Fallback for an unrecognized model name: the settings default and the
+# model every installer bundles (uoink_reliability.bundled_model_dir).
+RELIABILITY_MODEL_NAME = "base"
 RELIABILITY_DEFAULT_THRESHOLD = 0.5
 
 
@@ -956,8 +958,9 @@ def _default_settings() -> dict:
         "smart_screenshot_picker_enabled": False,
         "clipboard_screenshot_cap": CLIPBOARD_SCREENSHOT_CAP_DEFAULT,
         "transcript_reliability_auto_check": False,
-        # CM-11: when a downloaded video exposes no subtitle track, use an
-        # already-downloaded local faster-whisper model. Default ON because
+        # CM-11: when a downloaded video exposes no subtitle track, use a
+        # local faster-whisper model (the user's download, else the copy the
+        # installer bundles). Default ON because
         # caption-less X clips otherwise become unqueryable; users can opt
         # out in Settings. This flag never authorizes a model download.
         "asr_fallback_enabled": True,
