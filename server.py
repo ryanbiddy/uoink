@@ -2761,10 +2761,11 @@ def compute_health(sidecar: dict) -> dict:
         comments_health = "missing"
     transcript_health = "ok" if sidecar.get("transcript") else "missing"
     asr_fallback = sidecar.get("asr_fallback")
-    if (transcript_health == "missing" and isinstance(asr_fallback, dict)
-            and asr_fallback.get("status") == "no_audio"):
-        # Nothing to transcribe: the media has no audio stream.
-        transcript_health = "no audio"
+    if transcript_health == "missing" and isinstance(asr_fallback, dict):
+        # Nothing to transcribe: the media has no audio stream, or Whisper
+        # heard no speech in it (music, silence). Re-uoink can't fix either.
+        transcript_health = {"no_audio": "no audio", "no_speech": "no speech"}.get(
+            asr_fallback.get("status"), transcript_health)
     health = {
         "transcript": transcript_health,
         "screenshots": "ok" if sidecar.get("screenshots") else "missing",
@@ -3003,6 +3004,9 @@ def _resolve_video_transcript(
     }
     if media_chunks:
         completed["coverage"] = "sampled_sections"
+    if not entries:
+        # Whisper ran, and its voice filter kept nothing: music or silence.
+        completed["status"] = "no_speech"
     return entries, ("asr" if entries else None), completed
 
 
@@ -6801,6 +6805,8 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
                 transcript_note = f"Local Whisper transcript{coverage}: {caption_note}"
             elif asr_fallback and asr_fallback.get("status") == "no_audio":
                 transcript_note = f"No transcript: {asr_fallback['reason']}"
+            elif asr_fallback and asr_fallback.get("status") == "no_speech":
+                transcript_note = f"No transcript: {caption_note}, and Whisper found no speech"
             else:
                 transcript_note = f"No transcript: {caption_note}"
 
