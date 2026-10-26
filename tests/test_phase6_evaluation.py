@@ -1599,7 +1599,7 @@ def test_phase6_adapter_fetch_boundaries(sandbox):
     downloads = [cmd for cmd in commands if tool(cmd) == "yt-dlp" and "--write-subs" in cmd]
     assert len(downloads) == 1
     command = downloads[0]
-    assert command[command.index("--sub-lang") + 1] == "en.*,en"
+    assert command[command.index("--sub-lang") + 1] == "en,en-US,en-GB,en-orig"
     assert not any(flag in command for flag in ("--all-subs", "--cookies", "--cookies-from-browser", "--username", "--password"))
     assert [tool(cmd) for cmd in commands] == ["yt-dlp", "yt-dlp", "ffmpeg"]
     # X's existing same-author bounded parent traversal is the only supplied
