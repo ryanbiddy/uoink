@@ -156,7 +156,12 @@ def ensure_model(model_name: str = DEFAULT_MODEL,
 
 def _supported_model_name(model_name: object) -> str | None:
     name = str(model_name or "").strip().lower()
-    return name if name in _MODEL_REPOSITORIES else None
+    # Return our own key, not the caller's string: model folders are built
+    # from this name, so only the fixed repository names can reach a path.
+    for known in _MODEL_REPOSITORIES:
+        if known == name:
+            return known
+    return None
 
 
 def estimated_download_mb(model_name: object) -> int | None:
