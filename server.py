@@ -2703,12 +2703,34 @@ def _source_deep_link(source_url: str, seconds) -> str:
     return f"{source_url.split('#', 1)[0]}#t={t}"
 
 
+# Sections a capture kind never produces. They report "skipped", as a note's
+# do: "missing" flagged every saved article as needing attention, though an
+# article has no transcript, screenshots or comments to fetch.
+_HEALTH_NOT_APPLICABLE = {
+    "page": ("transcript", "screenshots", "comments"),
+    "x_article": ("transcript", "screenshots", "comments"),
+    "x_thread": ("transcript", "screenshots", "comments"),
+    "reddit_thread": ("transcript", "screenshots", "comments"),
+    "image": ("transcript", "screenshots", "comments"),
+    "episode": ("screenshots", "comments"),
+}
+
+# Comments the source withholds (turned off by the uploader) or a capture
+# mode never fetches. A re-capture can't fix these, so they aren't "missing".
+_HEALTH_COMMENTS_NOT_FETCHED = {
+    "disabled": "disabled",
+    "skipped": "skipped",
+    "skipped_generic": "skipped",
+}
+
+
 def compute_health(sidecar: dict) -> dict:
     """A per-source extraction health snapshot (A5), computed at extraction
     time. Stored on the sidecar under `health` and in the index. The
     comments / hook / comment-intelligence background workers finish *after*
     this snapshot, so those fields report in-progress status, not the final
-    result."""
+    result. Only a value containing missing / failed / error / unavailable
+    is a problem; sections the source never has report "skipped"."""
     source_type = str(sidecar.get("source_type") or "").strip().lower()
     platform = str(sidecar.get("platform") or "").strip().lower()
     if source_type == "note" or platform == "note":
@@ -2722,15 +2744,30 @@ def compute_health(sidecar: dict) -> dict:
         comments_health = "ok -- fewer than 5 comments"
     elif comments_status == "pending":
         comments_health = "pending"
+    elif comments_status in _HEALTH_COMMENTS_NOT_FETCHED:
+        comments_health = _HEALTH_COMMENTS_NOT_FETCHED[comments_status]
     else:
         comments_health = "missing"
-    return {
-        "transcript": "ok" if sidecar.get("transcript") else "missing",
+    transcript_health = "ok" if sidecar.get("transcript") else "missing"
+    asr_fallback = sidecar.get("asr_fallback")
+    if (transcript_health == "missing" and isinstance(asr_fallback, dict)
+            and asr_fallback.get("status") == "no_audio"):
+        # Nothing to transcribe: the media has no audio stream.
+        transcript_health = "no audio"
+    health = {
+        "transcript": transcript_health,
         "screenshots": "ok" if sidecar.get("screenshots") else "missing",
         "comments": comments_health,
         "hook": sidecar.get("hook_type_status") or "skipped",
         "comment_intelligence": sidecar.get("comment_intelligence_status") or "skipped",
     }
+    skipped = set(_HEALTH_NOT_APPLICABLE.get(source_type, ()))
+    if sidecar.get("extraction_mode") == "generic":
+        # /extract/any saves a transcript only; no screenshots by design.
+        skipped.add("screenshots")
+    for key in skipped:
+        health[key] = "skipped"
+    return health
 
 
 def _normalize_reliability_model(model_name: object) -> str:

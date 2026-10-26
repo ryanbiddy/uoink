@@ -13,7 +13,7 @@ DASHBOARD = (ROOT / "assets" / "dashboard" / "index.html").read_text(
 
 def test_library_card_health_is_exception_only() -> None:
     function = DASHBOARD[
-        DASHBOARD.index("function healthException(health)")
+        DASHBOARD.index("function healthException(health, row = {})")
         : DASHBOARD.index("function videoIdOf(row)")
     ]
     card = DASHBOARD[
@@ -24,7 +24,7 @@ def test_library_card_health_is_exception_only() -> None:
     assert 'if (!issues.length) return "";' in function
     assert '"Needs attention"' in function
     assert '"Still working"' in function
-    assert "${healthException(row.health)}" in card
+    assert "${healthException(row.health, row)}" in card
     assert "healthDots(row.health)" not in card
 
 

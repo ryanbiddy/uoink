@@ -1020,6 +1020,41 @@
     .health-exception.warn { color: var(--acid); }
     .health-exception.fail { color: var(--vermillion); }
 
+    /* The badge is a button: it opens the drawer that says why. */
+    button.health-exception {
+      border: 0;
+      cursor: pointer;
+    }
+
+    button.health-exception:hover {
+      background: color-mix(in srgb, currentColor 14%, transparent);
+    }
+
+    button.health-exception:focus-visible {
+      outline: 2px solid currentColor;
+      outline-offset: 2px;
+    }
+
+    .health-issue-list {
+      display: grid;
+      gap: 0;
+      margin: 20px 0 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .health-issue-list li {
+      display: grid;
+      gap: 4px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--line);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .health-issue-list strong { color: var(--text); }
+    .health-issue-list span { color: var(--text-2); }
+
     .health-legend {
       display: flex;
       flex-wrap: wrap;
@@ -4371,8 +4406,8 @@
       <nav class="nav" aria-label="Sections">
         <button class="nav-button active" type="button" data-tab-button="library" data-nav-label="Library" aria-current="page">Library <span class="nav-count" id="libraryNavCount" title="0 saved sources" aria-label="0 saved sources">0</span></button>
         <button class="nav-button" type="button" data-tab-button="activity" data-nav-label="Activity">Activity <span class="nav-badges"><span class="nav-failed hidden" id="activityFailedBadge"></span><span class="nav-count" id="activityNavCount" title="0 active jobs" aria-label="0 active jobs">0</span></span></button>
-        <button class="nav-button" type="button" data-tab-button="writing" data-nav-label="Generate">Generate <span class="nav-count" id="writingNavCount" title="0 Generate items" aria-label="0 Generate items">0</span></button>
-        <button class="nav-button" type="button" data-tab-button="sources" data-nav-label="Sources">Sources <span class="nav-count" id="sourcesNavCount" title="0 source types" aria-label="0 source types">0</span></button>
+        <button class="nav-button" type="button" data-tab-button="writing" data-nav-label="Generate">Generate <span class="nav-count hidden" id="writingNavCount" title="0 saved drafts" aria-label="0 saved drafts"></span></button>
+        <button class="nav-button" type="button" data-tab-button="sources" data-nav-label="Sources">Sources <span class="nav-count hidden" id="sourcesNavCount" title="0 subscribed sources" aria-label="0 subscribed sources"></span></button>
         <button class="nav-button" type="button" data-tab-button="settings" data-nav-label="Settings">Settings</button>
       </nav>
       <!-- Re-haul Library: every topic you've uoinked, with counts (U-05).
@@ -4808,7 +4843,7 @@
             <h1 id="libraryHeadline"><span id="libraryHeadlineText">Library</span> <span class="library-count" id="libraryCount">0</span></h1>
             <div class="inline-row library-head-actions">
               <a class="route-link" href="#for-you" data-nav-label="For You">For You <span class="nav-count" id="forYouNavCount" title="0 suggestions" aria-label="0 suggestions">0</span></a>
-              <button class="button ghost" type="button" id="clearFilters">Clear filters</button>
+              <button class="button ghost hidden" type="button" id="clearFilters">Clear filters</button>
               <button class="button ghost" type="button" id="newYoink">Open YouTube</button>
             </div>
           </div>
@@ -5913,6 +5948,19 @@
       </div>
     </div>
   </div>
+  <!-- A saved row's health badge opens this: what needs attention, why,
+       and Re-uoink, which captures the same link again in place. -->
+  <dialog class="activity-drawer" id="itemHealthDrawer" aria-labelledby="itemHealthTitle" aria-describedby="itemHealthLabel">
+    <div class="activity-drawer-head">
+      <div><p class="activity-failed-label" id="itemHealthLabel"></p><h2 id="itemHealthTitle" tabindex="-1"></h2></div>
+      <button class="button ghost" type="button" id="closeItemHealth">Close</button>
+    </div>
+    <ul class="health-issue-list" id="itemHealthIssues" aria-label="What needs attention"></ul>
+    <div class="activity-drawer-actions">
+      <button class="button primary" type="button" id="reuoinkItemHealth">Re-uoink</button>
+    </div>
+    <p class="activity-meta" id="itemHealthNote"></p>
+  </dialog>
   <div class="handoff-popup hidden" id="writingHandoffPopup" role="dialog" aria-modal="false" aria-label="Screenshot drag targets">
     <div class="handoff-popup-head">
       <div>
@@ -6292,6 +6340,7 @@
       resultSummary: document.getElementById("resultSummary"),
       pageSummary: document.getElementById("pageSummary"),
       activeFilters: document.getElementById("activeFilters"),
+      clearFilters: document.getElementById("clearFilters"),
       libraryMoreFilters: document.getElementById("libraryMoreFilters"),
       advancedFilterCount: document.getElementById("advancedFilterCount"),
       loadMore: document.getElementById("loadMore"),
@@ -6318,6 +6367,7 @@
       attentionRows: document.getElementById("attentionRows"),
       earlierRows: document.getElementById("earlierRows"),
       captureFailureDrawer: document.getElementById("captureFailureDrawer"),
+      itemHealthDrawer: document.getElementById("itemHealthDrawer"),
       queueMeta: document.getElementById("queueMeta"),
       activityHeadline: document.getElementById("activityHeadline"),
       activityNavCount: document.getElementById("activityNavCount"),
@@ -6978,19 +7028,63 @@
       `;
     }
 
-    function healthException(health) {
-      const keys = ["transcript", "screenshots", "comments", "hook", "comment_intelligence"];
-      const issues = keys.map((key) => {
+    // A saved row's health, in words. The helper reports a section the
+    // source never has (comments on an article or note, a skipped hook) as
+    // "skipped", so only something a Re-uoink or a setting can fix, or a
+    // step still running, shows up here.
+    const HEALTH_ISSUE_LABELS = {
+      transcript: { failed: "No transcript", working: "Transcript pending" },
+      screenshots: { failed: "No screenshots", working: "Screenshots pending" },
+      comments: { failed: "Comments failed", working: "Comments pending" },
+      hook: { failed: "Hook failed", working: "Hook pending" },
+      comment_intelligence: { failed: "Comment analysis failed", working: "Comment analysis pending" },
+    };
+
+    function healthIssues(health) {
+      return Object.keys(HEALTH_ISSUE_LABELS).map((key) => {
         const value = health && health[key] ? String(health[key]) : "skipped";
         const failed = /missing|failed|error|unavailable/i.test(value);
         const working = /pending|processing|queued/i.test(value);
         return failed || working ? { key, value, failed } : null;
       }).filter(Boolean);
+    }
+
+    function healthIssueLabel(issue, row = {}) {
+      // A note keeps its text under "transcript".
+      if (issue.key === "transcript" && issue.failed && isNoteContent(row)) return "No text";
+      return HEALTH_ISSUE_LABELS[issue.key][issue.failed ? "failed" : "working"];
+    }
+
+    // Why a section needs attention and what fixes it, for the health drawer.
+    function healthIssueReason(issue, row = {}) {
+      if (!issue.failed) return "Uoink is still working on this. It finishes on its own.";
+      if (issue.key === "transcript") {
+        if (isNoteContent(row)) return "This note has no saved text.";
+        const asr = String(row.asr_fallback_status || "");
+        if (asr === "disabled") return "The source had no captions, and local transcription is turned off. Turn on \"Transcribe videos locally when captions are missing\" in Settings, then Re-uoink.";
+        if (asr === "model_not_downloaded") return "The source had no captions, and the local transcription model isn't downloaded yet. Download it in Settings, then Re-uoink.";
+        if (asr === "failed") return "The source had no captions, and local transcription failed. Re-uoink to try again.";
+        return "No transcript was saved for this capture. Re-uoink to try again.";
+      }
+      if (issue.key === "screenshots") return "No screenshots were saved for this capture. Re-uoink to take them again.";
+      if (issue.key === "comments") return "Uoink couldn't fetch the comments. Re-uoink to try again.";
+      if (issue.key === "hook") return "The hook analysis didn't finish. Re-uoink to run it again.";
+      return "The comment analysis didn't finish. Re-uoink to run it again.";
+    }
+
+    // The badge names the problem ("No transcript", or "2 issues") and opens
+    // the health drawer, which says why and offers Re-uoink.
+    function healthException(health, row = {}) {
+      const issues = healthIssues(health);
       if (!issues.length) return "";
-      const failed = issues.some((issue) => issue.failed);
-      const label = failed ? "Needs attention" : "Still working";
+      const problems = issues.filter((issue) => issue.failed);
+      const kind = problems.length ? "Needs attention" : "Still working";
+      const shown = problems.length ? problems : issues;
+      const label = shown.length === 1
+        ? healthIssueLabel(shown[0], row)
+        : (problems.length ? `${shown.length} issues` : `${shown.length} steps pending`);
       const detail = issues.map((issue) => `${humanLabel(issue.key)}: ${issue.value}`).join(". ");
-      return `<div class="health-exception ${failed ? "fail" : "warn"}" title="${htmlEscape(detail)}" aria-label="${htmlEscape(`${label}. ${detail}`)}">${label}</div>`;
+      return `<button class="health-exception ${problems.length ? "fail" : "warn"}" type="button" data-health-open="${htmlEscape(videoIdOf(row))}" aria-haspopup="dialog" title="${htmlEscape(`${kind}. ${detail}`)}" aria-label="${htmlEscape(`${kind}: ${label}. Show why`)}">${htmlEscape(label)}</button>`;
     }
 
     function videoIdOf(row) {
@@ -8695,7 +8789,8 @@
       if (!els.sourceMap) return;
       const ready = SOURCE_CAPABILITIES.filter((source) => source.status !== "planned");
       const planned = SOURCE_CAPABILITIES.filter((source) => source.status === "planned");
-      setSidebarBadge(els.sourcesNavCount, ready.length, "capture-ready source types");
+      // The Sources badge counts subscribed sources (loadStandingSubscriptions),
+      // not this fixed list of capture-ready source types.
       els.sourceMap.innerHTML = ready.map((source, index) => `
         <article class="source-card" role="listitem" aria-labelledby="source-card-title-${index}">
           <div class="source-card-head">
@@ -9788,6 +9883,8 @@
         state.standingSources = [];
       } finally {
         state.standingSourcesLoading = false;
+        // The Sources badge counts subscribed sources and hides at zero.
+        setSidebarBadge(els.sourcesNavCount, state.standingSources.length, "subscribed sources", { hideWhenZero: true });
         renderStandingSubscriptions();
       }
     }
@@ -11025,6 +11122,8 @@
       els.activeFilters.classList.toggle("hidden", !entries.length);
       const advancedCount = entries.filter((entry) => ADVANCED_LIBRARY_FILTER_KEYS.has(entry.key)).length;
       els.advancedFilterCount.textContent = String(advancedCount);
+      // Clear filters only shows while a filter, search or type chip is on.
+      if (els.clearFilters) els.clearFilters.classList.toggle("hidden", !hasLibraryFilters());
     }
 
     function libraryFilterControl(key) {
@@ -11378,8 +11477,12 @@
     }
 
     // One state line per saved row: the word carries the state, the dot
-    // only repeats it.
+    // only repeats it. A row with a health badge says "Saved" in a neutral
+    // tone, so a green "Done" never sits beside "No transcript".
     function savedStateLine(row) {
+      if (healthIssues(row && row.health).length) {
+        return `<span class="state-word saved"><i class="state-dot" aria-hidden="true"></i>Saved</span><span class="state-detail"> &middot; ${htmlEscape(savedRowDetail(row))}</span>`;
+      }
       return `<span class="state-word done"><i class="state-dot" aria-hidden="true"></i>Done</span><span class="state-detail"> &middot; ${htmlEscape(savedRowDetail(row))}</span>`;
     }
 
@@ -11415,7 +11518,7 @@
           <div class="row-body">
             <div class="card-title">${title}</div>
             <div class="card-source">${author} &middot; ${platformLabel}${age ? ` &middot; ${htmlEscape(age)}` : ""}</div>
-            <div class="row-state">${savedStateLine(row)}${healthException(row.health)}</div>
+            <div class="row-state">${savedStateLine(row)}${healthException(row.health, row)}</div>
           </div>
           <div class="row-actions">
             ${hookChip}
@@ -11626,7 +11729,12 @@
       run.jobId = typeof data.job_id === "string" ? data.job_id : "";
       run.errorDetail = failure.detail;
       if (data.code === "host_not_allowed") {
-        run.reason = "That site isn't on your allowed pages list yet. Add it in Settings, then try again.";
+        // The row offers "Allow <host>" (allowLibraryRunSite), so the wall
+        // is one click from here instead of a trip to Settings.
+        run.allowHost = urlHostname(run.url);
+        run.reason = run.allowHost
+          ? "That site isn't on your allowed pages list yet. Allow it to capture this page."
+          : "That site isn't on your allowed pages list yet. Add it in Settings, then try again.";
       } else if (data.code === "x_login_wall") {
         run.reason = failure.detail ? failure.reason : "X login-walls this one. Paste a /status/ link to capture X posts and threads.";
       } else {
@@ -11668,6 +11776,86 @@
       els.searchInput.value = url;
       syncLibraryBox();
       startLibraryCapture();
+    }
+
+    function urlHostname(value) {
+      try { return new URL(value).hostname; } catch (_) { return ""; }
+    }
+
+    // A page that hit the allowlist wall: add its host the way Settings'
+    // Add does (the extension's "Allow this site and retry" adds the same
+    // exact host), then capture it again in place of the failed row.
+    async function allowLibraryRunSite(key, button) {
+      const run = (state.libraryRuns || []).find((item) => item.id === key);
+      if (!run || !run.allowHost) return;
+      if (button) { button.disabled = true; button.textContent = "Allowing..."; }
+      try {
+        await saveAllowedSite(run.allowHost);
+      } catch (err) {
+        if (button) { button.disabled = false; button.textContent = `Allow ${run.allowHost}`; }
+        setLibraryCaptureNote(`Couldn't allow ${run.allowHost}: ${settingError(err)}`);
+        return;
+      }
+      retryLibraryCapture(run.url, key);
+    }
+
+    // ---- Saved rows: the health drawer ----------------------------------
+    // Opened from a row's health badge: what needs attention, why, and
+    // Re-uoink, which sends the same link back through the Library box.
+    // Re-capturing a link refreshes its saved item in place.
+    const itemHealth = { id: "", trigger: null };
+
+    function itemHealthRow() {
+      return (state.library || []).find((row) => videoIdOf(row) === itemHealth.id) || null;
+    }
+
+    function renderItemHealth() {
+      const row = itemHealthRow();
+      if (!row) return;
+      const issues = healthIssues(row.health);
+      const problems = issues.filter((issue) => issue.failed);
+      const url = sourceUrlOf(row);
+      document.getElementById("itemHealthLabel").textContent = problems.length ? "Needs attention" : "Still working";
+      document.getElementById("itemHealthTitle").textContent = firstValue(row.episode_title, row.title, "Untitled uoink");
+      document.getElementById("itemHealthIssues").innerHTML = issues.map((issue) => `
+        <li><strong>${htmlEscape(healthIssueLabel(issue, row))}</strong><span>${htmlEscape(healthIssueReason(issue, row))}</span></li>
+      `).join("");
+      const reuoink = document.getElementById("reuoinkItemHealth");
+      const canReuoink = Boolean(problems.length && url && !isNoteContent(row));
+      reuoink.classList.toggle("hidden", !canReuoink);
+      document.getElementById("itemHealthNote").textContent = canReuoink
+        ? "Re-uoink captures the same link again and refreshes this item in place. Progress shows under the Library box."
+        : (problems.length ? "This item has no source link to capture again." : "The badge clears once these steps finish.");
+    }
+
+    function openItemHealth(id, trigger) {
+      itemHealth.id = id;
+      if (!itemHealthRow()) { itemHealth.id = ""; return; }
+      itemHealth.trigger = trigger || document.activeElement;
+      renderItemHealth();
+      if (!els.itemHealthDrawer.open) els.itemHealthDrawer.showModal();
+      document.getElementById("itemHealthTitle").focus();
+    }
+
+    function closeItemHealth() {
+      const id = itemHealth.id;
+      const trigger = itemHealth.trigger;
+      itemHealth.id = "";
+      itemHealth.trigger = null;
+      if (els.itemHealthDrawer.open) els.itemHealthDrawer.close();
+      // A Library reload replaces rows: find the current copy of the badge.
+      const replacement = Array.from(document.querySelectorAll("[data-health-open]"))
+        .find((button) => button.dataset.healthOpen === id);
+      const target = replacement || (trigger && trigger.isConnected ? trigger : null) || els.searchInput;
+      if (target && typeof target.focus === "function") target.focus();
+    }
+
+    function reuoinkFromItemHealth() {
+      const row = itemHealthRow();
+      const url = row && sourceUrlOf(row);
+      if (!url) return;
+      closeItemHealth();
+      retryLibraryCapture(url);
     }
 
     // ---- Re-haul Library: type chips ------------------------------------
@@ -11881,7 +12069,9 @@
           errorDetail: failed ? run.errorDetail : "",
           strip: failed ? captureStripHtml(index, { failed }) : captureStripHtml(index, { advanced: captureAdvanced(run.id, index) }),
           actions: failed
-            ? `<button class="button ghost" type="button" data-library-retry="${htmlEscape(run.url)}" data-library-run="${htmlEscape(run.id)}">Retry now</button><button class="button ghost" type="button" data-library-dismiss="${htmlEscape(run.id)}">Dismiss</button>`
+            ? `${run.allowHost
+              ? `<button class="button" type="button" data-library-allow-site="${htmlEscape(run.id)}">Allow ${htmlEscape(run.allowHost)}</button>`
+              : `<button class="button ghost" type="button" data-library-retry="${htmlEscape(run.url)}" data-library-run="${htmlEscape(run.id)}">Retry now</button>`}<button class="button ghost" type="button" data-library-dismiss="${htmlEscape(run.id)}">Dismiss</button>`
             : "",
         });
       });
@@ -14286,9 +14476,9 @@
       }
       await loadStyleAnchors();
       await loadGenerateSmartInputs();
-      const generateBadgeCount = state.writingPieces.length || state.styleAnchors.length;
-      const generateBadgeLabel = state.writingPieces.length ? "saved drafts" : "style anchors";
-      setSidebarBadge(els.writingNavCount, generateBadgeCount, generateBadgeLabel);
+      // Counts the user's saved drafts only. The old fallback to style
+      // anchors showed "Generate 5" on a fresh install: the seeded defaults.
+      setSidebarBadge(els.writingNavCount, state.writingPieces.length, "saved drafts", { hideWhenZero: true });
       renderSuggestionDatalists();
       renderThreadBuilder();
       updateWritingAttribution();
@@ -15090,18 +15280,34 @@
         : emptyPanelRow("No extra sites yet.", "Defaults are already listed above. Add a domain when page capture is ready.");
     }
 
+    // The pattern to save from what was typed or pasted. The allowlist
+    // matches hosts, so a pasted link saves its host: the whole URL would
+    // save but never match a page.
+    function allowedSitePatternFrom(value) {
+      const text = String(value || "").trim();
+      if (/^[a-z][a-z0-9+.-]*:\/\//i.test(text)) {
+        try { return new URL(text).hostname; } catch (_) { return text; }
+      }
+      return text.split(/[/?#]/)[0];
+    }
+
+    // Settings' Add and a capture row's "Allow <host>" both save here.
+    async function saveAllowedSite(urlPattern) {
+      await authFetch("/extract/page/allowlist", {
+        method: "POST",
+        body: JSON.stringify({ action: "add", url_pattern: urlPattern }),
+      });
+      await loadAllowedSites();
+    }
+
     async function addAllowedSite() {
-      const urlPattern = els.allowedSitePattern.value.trim();
+      const urlPattern = allowedSitePatternFrom(els.allowedSitePattern.value);
       if (!urlPattern) return setSettingFeedback("allowedSitePattern", "Enter a site pattern first.", "error");
       setSettingFeedback("allowedSitePattern", "Saving…", "saving");
       try {
-        await authFetch("/extract/page/allowlist", {
-          method: "POST",
-          body: JSON.stringify({ action: "add", url_pattern: urlPattern }),
-        });
+        await saveAllowedSite(urlPattern);
         els.allowedSitePattern.value = "";
         setSettingFeedback("allowedSitePattern", "Saved");
-        await loadAllowedSites();
       } catch (err) {
         setSettingFeedback("allowedSitePattern", `Not saved: ${settingError(err)}`, "error");
       }
@@ -16872,6 +17078,15 @@
       els.captureFailureDrawer.addEventListener("keydown", (event) => {
         trapModalFocus(event, els.captureFailureDrawer, closeCaptureFailure);
       });
+      document.getElementById("closeItemHealth").addEventListener("click", closeItemHealth);
+      document.getElementById("reuoinkItemHealth").addEventListener("click", reuoinkFromItemHealth);
+      els.itemHealthDrawer.addEventListener("cancel", (event) => {
+        event.preventDefault();
+        closeItemHealth();
+      });
+      els.itemHealthDrawer.addEventListener("keydown", (event) => {
+        trapModalFocus(event, els.itemHealthDrawer, closeItemHealth);
+      });
       document.getElementById("retryCaptureFailure").addEventListener("click", () => actOnActivityFailure("retry"));
       document.getElementById("removeCaptureFailure").addEventListener("click", () => actOnActivityFailure("remove"));
       document.getElementById("captureFailureAlternateActions").addEventListener("click", (event) => {
@@ -16951,6 +17166,11 @@
       document.getElementById("addChannel").addEventListener("click", addChannel);
       document.getElementById("recognizeChannels").addEventListener("click", recognizeChannels);
       document.getElementById("addAllowedSite").addEventListener("click", addAllowedSite);
+      els.allowedSitePattern.addEventListener("keydown", (event) => {
+        if (event.key !== "Enter" || event.isComposing) return;
+        event.preventDefault();
+        addAllowedSite();
+      });
       els.writingShowWarnings.addEventListener("change", () => {
         if (!els.writingShowWarnings.checked) els.voiceWarningCopy.textContent = "Warnings are hidden for this session.";
       });
@@ -17109,6 +17329,11 @@
           focusLibraryBox();
           return;
         }
+        const libraryAllow = event.target.closest("[data-library-allow-site]");
+        if (libraryAllow) {
+          allowLibraryRunSite(libraryAllow.dataset.libraryAllowSite || "", libraryAllow);
+          return;
+        }
         const libraryRetry = event.target.closest("[data-library-retry]");
         if (libraryRetry) {
           retryLibraryCapture(libraryRetry.dataset.libraryRetry, libraryRetry.dataset.libraryRun || "");
@@ -17224,6 +17449,12 @@
           // Before the card branch: hook badges live inside cards and must
           // open the explainer, not the detail view.
           openHookExplainer(hookExplain.dataset.hookExplain || "");
+          return;
+        }
+        const healthOpen = event.target.closest("[data-health-open]");
+        if (healthOpen) {
+          // Before the card branch too: the badge sits inside the row.
+          openItemHealth(healthOpen.dataset.healthOpen || "", healthOpen);
           return;
         }
         const resumeDraftButton = event.target.closest("[data-resume-draft]");

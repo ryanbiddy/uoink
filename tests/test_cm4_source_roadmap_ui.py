@@ -21,7 +21,12 @@ def test_sources_separate_ready_and_planned_entries() -> None:
     assert 'source.status === "planned"' in render
     assert "ready.map((source, index)" in render
     assert "planned.map((source, index)" in render
-    assert '"capture-ready source types"' in render
+    # Dashboard run-through U4: the Sources badge counts subscribed sources,
+    # not the fixed catalog of capture-ready types ("Sources 4" on a fresh
+    # install meant nothing).
+    assert "setSidebarBadge(els.sourcesNavCount, ready.length" not in render
+    assert ('setSidebarBadge(els.sourcesNavCount, state.standingSources.length, '
+            '"subscribed sources", { hideWhenZero: true })') in render
 
 
 def test_planned_sources_are_collapsed_and_visually_secondary() -> None:
