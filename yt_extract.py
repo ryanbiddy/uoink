@@ -253,7 +253,7 @@ def main():
             _platform.media_binary("ffmpeg") if sys.platform == "darwin" else "ffmpeg",
             "-loglevel", "error", "-y",
             "-i", str(video_file),
-            "-vf", f"fps=1/{args.interval}",
+            "-vf", f"fps=1/{args.interval}:round=up",
             "-q:v", "2",
             str(shots_dir / "shot_%04d.jpg"),
         ],

@@ -33,7 +33,7 @@ def test_screenshot_command_forces_full_range_jpeg(tmp_path: Path) -> None:
     )
 
     assert command[:4] == ["ffmpeg", "-loglevel", "error", "-y"]
-    assert command[command.index("-vf") + 1] == "fps=1/2"
+    assert command[command.index("-vf") + 1] == "fps=1/2:round=up"
     assert command[command.index("-pix_fmt") + 1] == "yuvj420p"
     assert command[-1] == str(tmp_path / "shot_%04d.jpg")
 
@@ -68,3 +68,59 @@ def test_limited_range_15_second_fixture_produces_eight_jpegs(
 
     assert extracted.returncode == 0, extracted.stderr[-1000:]
     assert len(list(tmp_path.glob("shot_*.jpg"))) == 8
+
+
+def _frame_md5s(command: list[str]) -> list[str]:
+    """Run a screenshot command with framemd5 output instead of JPEG files."""
+    framemd5 = command[:-1] + ["-f", "framemd5", "-"]
+    framemd5.remove("-q:v")
+    framemd5.remove("2")
+    out = subprocess.run(framemd5, capture_output=True, text=True, check=True).stdout
+    return [line.rsplit(",", 1)[1].strip() for line in out.splitlines()
+            if line and not line.startswith("#")]
+
+
+def _source_frame_md5(video: Path, frame: int) -> str:
+    out = subprocess.run(
+        ["ffmpeg", "-loglevel", "error", "-i", str(video),
+         "-vf", f"select=eq(n\,{frame})", "-frames:v", "1",
+         "-pix_fmt", "yuvj420p", "-f", "framemd5", "-"],
+        capture_output=True, text=True, check=True).stdout
+    return [line.rsplit(",", 1)[1].strip() for line in out.splitlines()
+            if line and not line.startswith("#")][0]
+
+
+@pytest.mark.skipif(shutil.which("ffmpeg") is None, reason="ffmpeg not on PATH")
+def test_shots_are_taken_at_their_labeled_times(tmp_path: Path) -> None:
+    video = tmp_path / "timed.mkv"
+    subprocess.run(
+        ["ffmpeg", "-loglevel", "error", "-y", "-f", "lavfi",
+         "-i", "testsrc2=size=160x90:rate=10:duration=65",
+         "-c:v", "ffv1", str(video)],
+        check=True, capture_output=True)
+
+    shots = _frame_md5s(server._screenshot_ffmpeg_command(
+        video, 30, tmp_path / "shot_%04d.jpg"))
+
+    # Labels are 0, 30 and 60 seconds; at 10 fps those are frames 0, 300, 600.
+    assert shots == [_source_frame_md5(video, n) for n in (0, 300, 600)]
+
+
+@pytest.mark.skipif(shutil.which("ffmpeg") is None, reason="ffmpeg not on PATH")
+def test_clip_shorter_than_half_the_interval_still_gets_a_shot(
+        tmp_path: Path) -> None:
+    # X syndication metadata can omit the duration, so the interval stays at
+    # 30 s for an 8 s clip. A re-capture then failed with "Screenshot
+    # generation produced no images."
+    video = tmp_path / "short.mkv"
+    subprocess.run(
+        ["ffmpeg", "-loglevel", "error", "-y", "-f", "lavfi",
+         "-i", "testsrc2=size=160x90:rate=25:duration=8.6",
+         "-c:v", "ffv1", str(video)],
+        check=True, capture_output=True)
+
+    command = server._screenshot_ffmpeg_command(
+        video, 30, tmp_path / "shot_%04d.jpg")
+    subprocess.run(command, check=True, capture_output=True)
+
+    assert len(list(tmp_path.glob("shot_*.jpg"))) == 1
