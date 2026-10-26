@@ -155,6 +155,38 @@ def test_usage_card_leaves_a_gap_above_the_scrolling_content():
     assert "margin: 24px 28px 12px;" in rule
 
 
+@pytest.mark.parametrize("source_type", ["x_thread", "reddit_thread"])
+def test_video_post_keeps_its_transcript_and_screenshot_checks(source_type):
+    # The library fills in the index's source type, which names an X or Reddit
+    # post with a video by its URL. The video path's sidecar still reports.
+    video = {"source_type": source_type, "transcript": [], "transcript_source": None,
+             "interval_seconds": 2, "screenshots": [], "comments_status": "disabled",
+             "asr_fallback": {"status": "model_not_downloaded"}}
+    health = server.compute_health(video)
+    assert health["transcript"] == "missing" and health["screenshots"] == "missing"
+    assert health["comments"] == "disabled"
+    video["asr_fallback"] = {"status": "no_speech"}
+    assert server.compute_health(video)["transcript"] == "no speech"
+    # A text post saved by the page path still skips both.
+    text = server.compute_health({"source_type": source_type, "title": "Saved",
+                                  "screenshot_path": None})
+    assert text["transcript"] == text["screenshots"] == "skipped"
+
+
+def test_video_post_row_says_how_its_transcript_came_out():
+    shown = run_js("""({
+      noSpeech: savedRowDetail({source_type: "x_thread", platform: "x", has_transcript: false,
+                                transcript_source: null, asr_fallback_status: "no_speech"}),
+      whisper: savedRowDetail({source_type: "x_thread", platform: "x", has_transcript: true,
+                               transcript_source: "asr", asr_fallback_status: "completed"}),
+      text: savedRowDetail({source_type: "x_thread", platform: "x", has_transcript: false,
+                            transcript_source: null, asr_fallback_status: null}),
+      reddit: savedRowDetail({source_type: "reddit_thread", platform: "reddit", has_transcript: false}),
+    })""")
+    assert shown == {"noSpeech": "no speech found", "whisper": "transcript by Whisper",
+                     "text": "post and thread", "reddit": "thread and comments"}
+
+
 def test_generic_capture_has_no_screenshots_to_miss():
     health = server.compute_health({"extraction_mode": "generic", "transcript": [1], "screenshots": [],
                                     "comments_status": "skipped_generic"})
