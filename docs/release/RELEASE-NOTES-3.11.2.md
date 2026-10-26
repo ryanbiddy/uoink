@@ -47,7 +47,7 @@ See [docs/mac/INSTALL.md](https://github.com/ryanbiddy/uoink/blob/v3.11.2/docs/m
 
 | File | SHA-256 |
 | --- | --- |
-| `Uoink-Setup-3.11.2.exe` | `81f7d385f300fc3964c7dd7239566fe7241718e18ef9858b9a84cc6cb841828d` |
-| `uoink-3.11.2.mcpb` | `0a8973ad50348b8a9e7d17f58436edf5d0a4e9fcd0a46030aeef8e2f8673fb1b` |
-| `Uoink-3.11.2-macos-arm64.dmg` | `e0645c3380f8877bed9f84b1ec1392a96664536010201ba39019b61f9a7d49ab` |
-| `uoink-3.11.2-macos.mcpb` | `9476ac551bf0b6e3286aced4bda9ed97d91744c2789ad0ad864074623be5ae6f` |
+| `Uoink-Setup-3.11.2.exe` | `2819092030d1bfe0c8dba7706f11fba88445aa72fe252b9db9dd17a4973c41f8` |
+| `uoink-3.11.2.mcpb` | `e31bbb96e033723ab70d8e3fa44fcee5dbdf5207fae5e44190d6f9a984e6847a` |
+| `Uoink-3.11.2-macos-arm64.dmg` | `4cd40562cbaf01002bf2ecca0509888c1e09698a7f79da26f8387327d0d2635d` |
+| `uoink-3.11.2-macos.mcpb` | `820b27a60fcffaa579553489a99096de90bd313e15321106b842645471f0feb8` |
