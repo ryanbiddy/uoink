@@ -3,7 +3,9 @@
 The re-haul SPEC (handoff/ui-rehaul-2026-10-15/SPEC.md, "Tokens") puts its
 token table in assets/brand/tokens.css and extension/brand/tokens.css: light
 is the default, dark applies under prefers-color-scheme: dark, and the old
-token names keep working. Inter, Bungee and JetBrains Mono ship as local
+token names keep working. A page that offers a theme choice (the dashboard's
+Settings > App > Appearance) sets data-theme on <html>: "dark" forces the
+same dark values, "light" keeps the defaults even on a dark system. Inter, Bungee and JetBrains Mono ship as local
 font files with their SIL OFL texts, and no page loads fonts from the
 network (the dashboard must work offline; the popup must not call Google on
 every open). The files are the uoink.app site's own copies (site/app/fonts),
@@ -126,7 +128,12 @@ MOTION = {
 
 ROOT_RE = re.compile(r":root\s*\{([^{}]*)\}")
 DARK_RE = re.compile(
-    r"@media\s*\(\s*prefers-color-scheme\s*:\s*dark\s*\)\s*\{\s*:root\s*\{([^{}]*)\}\s*\}")
+    r"@media\s*\(\s*prefers-color-scheme\s*:\s*dark\s*\)\s*\{\s*"
+    r':root:not\(\s*\[\s*data-theme\s*=\s*"light"\s*\]\s*\)\s*\{([^{}]*)\}\s*\}')
+# data-theme on <html> overrides the system: "dark" forces the dark values,
+# "light" keeps the defaults; each sets the matching color-scheme.
+FORCED_DARK_RE = re.compile(r':root\[\s*data-theme\s*=\s*"dark"\s*\]\s*\{([^{}]*)\}')
+FORCED_LIGHT_RE = re.compile(r':root\[\s*data-theme\s*=\s*"light"\s*\]\s*\{([^{}]*)\}')
 DECL_RE = re.compile(r"(--[A-Za-z0-9-]+)\s*:\s*([^;]+);")
 FONT_FACE_RE = re.compile(r"@font-face\s*\{([^{}]*)\}")
 FOCUS_RE = re.compile(r"(?:^|[\s}]):focus-visible\s*\{([^{}]*)\}", re.M)
@@ -173,7 +180,7 @@ def _decls(body: str) -> dict[str, str]:
 
 def _themes(css: str) -> tuple[dict[str, str], dict[str, str]]:
     dark = DARK_RE.search(css)
-    assert dark, "no :root block under @media (prefers-color-scheme: dark)"
+    assert dark, 'no :root:not([data-theme="light"]) block under @media (prefers-color-scheme: dark)'
     light = ROOT_RE.search(css)
     assert light and light.start() < dark.start(), "the light :root must come first, outside any @media"
     return _decls(light.group(1)), _decls(dark.group(1))
@@ -320,6 +327,24 @@ def test_token_files_match_and_both_themes_define_every_token():
     reference = themes["assets/brand/tokens.css"]
     assert themes["assets/dashboard/index.html"] == reference, \
         "the dashboard's inline token block drifted from assets/brand/tokens.css"
+
+
+def test_data_theme_forces_either_theme_on_any_system():
+    # data-theme="dark" repaints with exactly the dark values whatever the
+    # system says; data-theme="light" keeps the defaults (the media block is
+    # guarded off). Each sets the matching color-scheme for native controls.
+    for label, css in _sources().items():
+        _light, dark = _themes(css)
+        forced = FORCED_DARK_RE.search(css)
+        assert forced, f'{label}: no :root[data-theme="dark"] block'
+        assert _decls(forced.group(1)) == dark, f"{label}: forced dark drifted from the dark block"
+        assert "color-scheme: dark;" in _norm(forced.group(1)), label
+        light = FORCED_LIGHT_RE.search(css)
+        assert light and _norm(light.group(1)) == "color-scheme: light;", label
+    # The dashboard's own dark-only value follows the forced theme too.
+    css = _dashboard_css()
+    assert re.search(r':root\[data-theme="dark"\]\s*\{\s*--info:\s*#38BDF8;\s*\}', css)
+    assert re.search(r'@media \(prefers-color-scheme: dark\) \{\s*:root:not\(\[data-theme="light"\]\) \{\s*--info:', css)
 
 
 def test_old_token_names_follow_the_theme():
@@ -545,7 +570,7 @@ def test_no_page_keeps_a_fixed_surface_or_text_colour():
 def _resolver(rel: str):
     light, dark = _themes(_sources()["assets/brand/tokens.css"])
     page = _strip_comments((ROOT / rel).read_text(encoding="utf-8"))
-    for block in re.finditer(r"(@media\s*\(\s*prefers-color-scheme\s*:\s*dark\s*\)\s*\{\s*)?:root\s*\{([^{}]*)\}", page):
+    for block in re.finditer(r'(@media\s*\(\s*prefers-color-scheme\s*:\s*dark\s*\)\s*\{\s*)?:root(?::not\(\[data-theme="light"\]\))?\s*\{([^{}]*)\}', page):
         (dark if block.group(1) else light).update(_decls(block.group(2)))
     return {"light": light, "dark": {**light, **dark}}
 
