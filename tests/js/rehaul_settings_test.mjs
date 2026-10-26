@@ -44,7 +44,7 @@ function setup() {
     authFetch:async (path,opts={})=>{writes.push({path,body:opts.body?JSON.parse(opts.body):null});return handler(path,opts);},
     renderRolePicker:role=>{nodes.get('rolePicker').value=role;},
     renderTopics:topics=>{nodes.get('topicList').value=JSON.stringify(topics);},
-    syncWhisperModelOptions:()=>{},reliabilityStatusText:()=>'',renderWritingScreenshots:()=>{},renderAgentSetup:()=>{},renderAutoUoinkStatus:()=>{},renderLibraryMirrorFromSettings:()=>{},
+    syncWhisperModelOptions:()=>{},reliabilityStatusText:()=>'',renderReliabilityStatus:()=>{},renderWritingScreenshots:()=>{},renderAgentSetup:()=>{},renderAutoUoinkStatus:()=>{},renderLibraryMirrorFromSettings:()=>{},
     readTopicEditor:()=>[{name:'Research',keywords:['source']}],
     outputFolderPathFromSettings:()=>state.settings.output_dir_configured,
     renderOutputFolder:path=>{nodes.get('outputFolder').value=path;},

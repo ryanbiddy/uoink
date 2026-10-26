@@ -32,6 +32,15 @@ ship in an installer or MCP bundle. The bundled [model notice](EmbeddingGemma-NO
 links to the [Gemma Terms of Use](Gemma-Terms-of-Use.txt) and
 [Prohibited Use Policy](Gemma-Prohibited-Use-Policy.txt).
 
+## Bundled Whisper base model
+
+Since 3.12 the Windows installer and the macOS app ship the default
+transcription model, read-only: OpenAI Whisper `base` (MIT) in SYSTRAN's
+CTranslate2 conversion (model card: MIT), pinned to revision
+`ebe41f70d5b6dfa9166e2c581c45c9c0cfc57b66`. The bundled
+[model notice](faster-whisper-base-NOTICE.md) lists each file's size and
+SHA-256 and carries the full MIT license text.
+
 ## Adapted documentation text
 
 **ScrapeCreators social media research skills.** Uoink's five local research

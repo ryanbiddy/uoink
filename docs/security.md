@@ -481,7 +481,7 @@ Installed Windows builds store helper state under `%LOCALAPPDATA%\Uoink\` (migra
 - `token.txt` - random helper token generated with `secrets.token_urlsafe(32)`.
 - `server.pid` - best-effort helper process id for Stop Uoink.
 - `server.log` - local diagnostic log.
-- `models\whisper\` - optional local Whisper model cache for transcript reliability detection. The model is not bundled in the installer; users download it explicitly from the dashboard before reliability checks run.
+- `models\whisper\` - optional local Whisper model cache for other model sizes, downloaded only when the user asks from the dashboard. Since 3.12 the default `base` model ships read-only in the install folder (`{app}\models\whisper-bundled\base\`; on macOS `Uoink.app/Contents/Resources/models/whisper-bundled/base/`), pinned to a Hugging Face revision and SHA-256 checked at build time. A downloaded copy of the same size takes precedence.
 - `.migration-complete` / `.migrated-from-yoink` - markers written by the v2.1 install migration (see below).
 
 Corpus, sidecar, settings, and migration writes use temp-file-and-replace patterns where practical. Corrupt `index.db` is quarantined as `index.db.corrupt-<timestamp>` and rebuilt from on-disk corpora through a local backfill scan. Legacy corrupt `jobs.json` or `taxonomy.json` migration input is logged and left in place rather than crashing the helper.
@@ -596,10 +596,13 @@ are normalized before Inno Setup runs. Full pip distribution hash locking
 remains a future hardening item.
 
 Transcript reliability detection is local-only and uses `faster-whisper` word
-probabilities. Model weights are not bundled. The automatic capture-time check
-uses cached files only and never authorizes a download; `ensure_model` is the
-explicit user-triggered download path. On Windows the selected model is cached
-under `%LOCALAPPDATA%\Uoink\models\whisper` and is never uploaded.
+probabilities. Since 3.12 the default `base` weights ship with the app, read-only
+and loaded by directory path (`scripts/whisper_model_pin.json` pins the revision
+and every file's SHA-256; the build refuses a mismatch). The automatic
+capture-time check uses local files only and never authorizes a download;
+`ensure_model` is the explicit user-triggered download path for other sizes. On
+Windows a downloaded model is cached under `%LOCALAPPDATA%\Uoink\models\whisper`
+and is never uploaded.
 
 Speaker labeling is a separate WhisperX/pyannote path in `whisper_runner.py`.
 When diarization is requested, it loads alignment and speaker models, then

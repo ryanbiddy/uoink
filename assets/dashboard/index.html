@@ -5624,7 +5624,7 @@
               </div>
             </div>
 
-            <div class="setting-block">
+            <div class="setting-block" id="transcription-model">
               <h2>Transcript checker</h2>
               <p class="setting-copy" id="reliabilityStatus">Checking transcript checker...</p>
               <label class="inline-row"><input id="reliabilityAutoCheck" type="checkbox" aria-describedby="reliabilityAutoCheckSaveStatus"> Auto-check transcript quality</label>
@@ -5632,13 +5632,13 @@
               <label class="inline-row"><input id="asrFallbackEnabled" type="checkbox" checked aria-describedby="asrFallbackEnabledSaveStatus"> Transcribe videos locally when captions are missing</label>
               <div class="setting-feedback"><span class="setting-status" id="asrFallbackEnabledSaveStatus" role="status" aria-live="polite" aria-atomic="true"></span><button class="button ghost setting-retry hidden" id="asrFallbackEnabledSaveRetry" type="button" data-setting-retry="asrFallbackEnabled">Retry save</button></div>
               <div class="inline-row">
-                <select class="field" id="whisperModel" aria-label="Transcript checker model" aria-describedby="whisperModelSaveStatus"></select>
+                <select class="field" id="whisperModel" aria-label="Transcript checker model" aria-describedby="whisperModelSaveStatus" data-reveal-focus></select>
               <div class="setting-feedback"><span class="setting-status" id="whisperModelSaveStatus" role="status" aria-live="polite" aria-atomic="true"></span><button class="button ghost setting-retry hidden" id="whisperModelSaveRetry" type="button" data-setting-retry="whisperModel">Retry save</button></div>
               </div>
               <div class="inline-row">
                 <button class="button" type="button" id="downloadReliabilityModel">Download selected model</button>
               </div>
-              <p class="setting-copy">Runs locally. When captions are missing, the selected model can take about 10–15 minutes per hour of video on a typical laptop; larger models may take longer. Downloads only after you ask and stays in your Uoink data folder.</p>
+              <p class="setting-copy">Runs locally. When captions are missing, the selected model can take about 10–15 minutes per hour of video on a typical laptop; larger models may take longer. Uoink comes with one model ready to use; any other downloads only after you ask and stays in your Uoink data folder.</p>
             </div>
           </div>
           </section>
@@ -7178,6 +7178,18 @@
       return HEALTH_ISSUE_LABELS[issue.key][issue.failed ? "failed" : "working"];
     }
 
+    // Settings, Capture, Transcript checker: where a missing model is fixed.
+    const TRANSCRIPTION_MODEL_ROUTE = "#settings/transcription-model";
+    const TRANSCRIPTION_MODEL_LINK_TEXT = "Download it in Settings";
+
+    // The selected transcription model is on this device now (downloaded,
+    // or bundled with Uoink since 3.12). A capture saved before it was there
+    // only needs a Re-uoink, never a download.
+    function transcriptionModelReady() {
+      const info = state.settings && state.settings.transcript_reliability_model;
+      return Boolean(info && typeof info === "object" && info.cached);
+    }
+
     // Why a section needs attention and what fixes it, for the health drawer.
     function healthIssueReason(issue, row = {}) {
       if (!issue.failed) return "Uoink is still working on this. It finishes on its own.";
@@ -7185,7 +7197,11 @@
         if (isNoteContent(row)) return "This note has no saved text.";
         const asr = String(row.asr_fallback_status || "");
         if (asr === "disabled") return "The source had no captions, and local transcription is turned off. Turn on \"Transcribe videos locally when captions are missing\" in Settings, then Re-uoink.";
-        if (asr === "model_not_downloaded") return "The source had no captions, and the local transcription model isn't downloaded yet. Download it in Settings, then Re-uoink.";
+        if (asr === "model_not_downloaded") {
+          return transcriptionModelReady()
+            ? "The source had no captions, and the local transcription model wasn't on this device when this was saved. It's ready now, so Re-uoink to transcribe it."
+            : `The source had no captions, and the local transcription model isn't downloaded yet. ${TRANSCRIPTION_MODEL_LINK_TEXT}, then Re-uoink.`;
+        }
         if (asr === "failed") return "The source had no captions, and local transcription failed. Re-uoink to try again.";
         return "No transcript was saved for this capture. Re-uoink to try again.";
       }
@@ -7193,6 +7209,16 @@
       if (issue.key === "comments") return "Uoink couldn't fetch the comments. Re-uoink to try again.";
       if (issue.key === "hook") return "The hook analysis didn't finish. Re-uoink to run it again.";
       return "The comment analysis didn't finish. Re-uoink to run it again.";
+    }
+
+    // The drawer's reason as HTML. The Settings step becomes a link that
+    // opens Settings at the transcription-model control; the drawer closes
+    // on that click (wireEvents) and the in-app route handler navigates.
+    function healthIssueReasonHtml(issue, row = {}) {
+      const text = htmlEscape(healthIssueReason(issue, row));
+      const phrase = htmlEscape(TRANSCRIPTION_MODEL_LINK_TEXT);
+      if (issue.key !== "transcript" || !text.includes(phrase)) return text;
+      return text.replace(phrase, `<a href="${TRANSCRIPTION_MODEL_ROUTE}" data-health-settings>${phrase}</a>`);
     }
 
     // The badge names the problem ("No transcript", or "2 issues") and opens
@@ -7807,6 +7833,9 @@
         return `${noCaptions}, and transcribing on ${thisDevice()} is turned off, so there is no transcript. Turn it on in Settings, Capture, then Re-transcribe.`;
       }
       if (status === "model_not_downloaded") {
+        if (transcriptionModelReady()) {
+          return `${noCaptions}, and the local transcriber wasn't on ${thisDevice()} when this was saved, so there is no transcript. It's ready now: Re-transcribe to add one.`;
+        }
         return `${noCaptions}, and the local transcriber${modelName ? ` (${modelName})` : ""} isn't on ${thisDevice()} yet, so there is no transcript. Download it in Settings, Capture, then Re-transcribe.`;
       }
       if (status === "failed") {
@@ -11941,7 +11970,7 @@
       document.getElementById("itemHealthLabel").textContent = problems.length ? "Needs attention" : "Still working";
       document.getElementById("itemHealthTitle").textContent = firstValue(row.episode_title, row.title, "Untitled uoink");
       document.getElementById("itemHealthIssues").innerHTML = issues.map((issue) => `
-        <li><strong>${htmlEscape(healthIssueLabel(issue, row))}</strong><span>${htmlEscape(healthIssueReason(issue, row))}</span></li>
+        <li><strong>${htmlEscape(healthIssueLabel(issue, row))}</strong><span>${healthIssueReasonHtml(issue, row)}</span></li>
       `).join("");
       const reuoink = document.getElementById("reuoinkItemHealth");
       const canReuoink = Boolean(problems.length && url && !isNoteContent(row));
@@ -13538,18 +13567,44 @@
       return `Download the ${modelLabel} transcript checker now? ${sizeBit}`;
     }
 
+    // Where a model on this device came from: "downloaded", "bundled" (it
+    // ships with Uoink), or "" when that size isn't here. relModel is the
+    // helper's status for the saved choice; bundled_model names the size
+    // this install ships, so an unsaved pick of it is ready too.
+    function transcriptModelSource(model, relModel) {
+      const key = String(model || "").toLowerCase();
+      const info = relModel && typeof relModel === "object" ? relModel : {};
+      if (!key) return "";
+      if (key === String(info.model || "").toLowerCase() && info.cached) {
+        return info.source === "bundled" ? "bundled" : "downloaded";
+      }
+      return key === String(info.bundled_model || "").toLowerCase() ? "bundled" : "";
+    }
+
     function reliabilityStatusText(selectedModel, relModel) {
       const selected = String(selectedModel || "").toLowerCase();
       const info = relModel && typeof relModel === "object" ? relModel : {};
       const saved = String(info.model || "").toLowerCase();
       const modelLabel = transcriptModelLabel(selected || saved);
       const selectedIsSaved = Boolean(selected) && selected === saved;
-      const cached = selectedIsSaved && Boolean(info.cached);
-      if (cached) {
+      const source = transcriptModelSource(selected || saved, info);
+      if (source === "bundled") {
+        return `${modelLabel} model comes with Uoink and is ready on this device.`;
+      }
+      if (source) {
         return `${modelLabel} checker model is ready on this device.`;
       }
       const sizeCopy = transcriptModelSizeCopy(selected || saved, selectedIsSaved ? info.estimated_download_mb : null);
       return `${modelLabel} checker model is not downloaded yet (${sizeCopy}).`;
+    }
+
+    // Status line plus the download button, which only shows for a model
+    // this device doesn't have yet.
+    function renderReliabilityStatus(selectedModel, relModel) {
+      const info = relModel && typeof relModel === "object" ? relModel : {};
+      els.reliabilityStatus.textContent = reliabilityStatusText(selectedModel, info);
+      const ready = Boolean(transcriptModelSource(selectedModel || info.model, info));
+      els.downloadReliabilityModel.classList.toggle("hidden", ready);
     }
 
     async function downloadSelectedReliabilityModel() {
@@ -16129,7 +16184,7 @@
         }
       }
       if (field === "default_evidence_sources") value = value.split(/\r?\n/).map(line => line.trim()).filter(Boolean);
-      if (field === "whisper_model") els.reliabilityStatus.textContent = reliabilityStatusText(value, (state.settings || {}).transcript_reliability_model || {});
+      if (field === "whisper_model") renderReliabilityStatus(value, (state.settings || {}).transcript_reliability_model || {});
       if (field === "output_dir" && !value) {
         setSettingFeedback(id, "Not saved: enter a folder path.", "error");
         return Promise.resolve(false);
@@ -16237,7 +16292,7 @@
       const modelValue = els.whisperModel.value;
       syncWhisperModelOptions();
       if (modelValue) els.whisperModel.value = modelValue;
-      els.reliabilityStatus.textContent = reliabilityStatusText(els.whisperModel.value, settings.transcript_reliability_model || {});
+      renderReliabilityStatus(els.whisperModel.value, settings.transcript_reliability_model || {});
       els.writingShowWarnings.checked = els.voiceWarningsEnabled.checked;
       renderWritingScreenshots();
       renderAgentSetup();
@@ -16918,14 +16973,17 @@
     }
 
     // #settings/<section>: scroll the section (or a block such as byo-key)
-    // into view and put focus on its heading, as an in-page link would.
+    // into view and put focus on its heading, as an in-page link would. A
+    // block that names a control with data-reveal-focus (the transcription
+    // model picker) focuses that control instead.
     function revealSettingsSection(section) {
       const target = settingsSectionTarget(section);
       if (!target) return;
       window.setTimeout(() => {
         target.scrollIntoView({ block: "start", behavior: scrollBehavior() });
-        const heading = target.querySelector(".settings-section-title, h2") || target;
-        if (!heading.hasAttribute("tabindex")) heading.setAttribute("tabindex", "-1");
+        const control = target.querySelector("[data-reveal-focus]");
+        const heading = control || target.querySelector(".settings-section-title, h2") || target;
+        if (!control && !heading.hasAttribute("tabindex")) heading.setAttribute("tabindex", "-1");
         heading.focus({ preventScroll: true });
       }, 0);
     }
@@ -17299,6 +17357,13 @@
       });
       document.getElementById("closeItemHealth").addEventListener("click", closeItemHealth);
       document.getElementById("reuoinkItemHealth").addEventListener("click", reuoinkFromItemHealth);
+      // "Download it in Settings": close the modal drawer first; the click
+      // then reaches wireRoutes' in-app link handler, which opens Settings.
+      els.itemHealthDrawer.addEventListener("click", (event) => {
+        const link = event.target && typeof event.target.closest === "function"
+          ? event.target.closest("[data-health-settings]") : null;
+        if (link) closeItemHealth();
+      });
       els.itemHealthDrawer.addEventListener("cancel", (event) => {
         event.preventDefault();
         closeItemHealth();

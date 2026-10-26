@@ -248,6 +248,48 @@ def media_smoke(contents: Path, scratch: Path, env: dict) -> dict:
     return report
 
 
+WHISPER_SMOKE = r'''
+import json, sys
+from pathlib import Path
+resources = Path(sys.argv[1])
+sys.path.insert(0, str(resources))
+import uoink_reliability as rel
+info = rel.bundled_model_info()
+assert info and Path(info["path"]).resolve().is_relative_to(resources.resolve()), info
+user_cache = Path(sys.argv[3])
+status = rel.reliability_model_status(info["model"], user_cache)
+assert status["cached"] is True and status["source"] == "bundled", status
+model = rel._load_model(info["model"], user_cache)
+segments, _info = model.transcribe(sys.argv[2], beam_size=1, vad_filter=False)
+decoded = list(segments)
+entries = rel.transcribe_media(sys.argv[2], model_name=info["model"], model_root=user_cache)
+assert not user_cache.exists(), "a bundled load must not create the user cache"
+print(json.dumps({"model": info["model"], "revision": info["revision"], "path": info["path"],
+                  "decoded_segments": len(decoded), "entries": len(entries)}))
+'''
+
+
+def whisper_smoke(contents: Path, scratch: Path, env: dict) -> dict:
+    """The bundled model loads by path, offline, and runs the decoder.
+
+    The tone carries no words; the point is that the CTranslate2 weights load
+    from Resources with HF_HUB_OFFLINE and nothing is written there (the
+    caller's before/after tree inventory proves the bundle is unchanged).
+    """
+    audio = scratch / "whisper-tone.wav"
+    with wave.open(str(audio), "wb") as stream:
+        stream.setparams((1, 2, 16000, 0, "NONE", "not compressed"))
+        stream.writeframes(b"\x00\x10\x00\xf0" * 16000)
+    python = contents.parent / PYTHON_EXECUTABLE
+    result = subprocess.run([str(python), "-B", "-s", "-c", WHISPER_SMOKE, str(contents / "Resources"),
+                             str(audio), str(scratch / "user-whisper-cache")],
+                            cwd=scratch, env=env, capture_output=True, text=True, timeout=300)
+    if result.returncode != 0:
+        print(f"whisper smoke failed:\n{result.stderr}", file=sys.stderr, flush=True)
+        raise AssertionError("Bundled Whisper model did not load and run")
+    return json.loads(result.stdout.strip().splitlines()[-1])
+
+
 def smoke(app: Path, output: Path, *, scratch: Path | None = None,
           env: dict | None = None, observer=None) -> dict:
     """Receipt callers keep the installed path/profile and observe live processes."""
@@ -305,6 +347,7 @@ def smoke(app: Path, output: Path, *, scratch: Path | None = None,
             verify_launchagent(config, launcher)
             report["launchagent"] = {"generated": True, "bootstrapped": False, "config": config}
             report["media"] = media_smoke(contents, scratch, env)
+            report["whisper"] = whisper_smoke(contents, scratch, env)
             cocoa = subprocess.run([str(python), "-B", "-s", "-c", COCOA_IMPORT],
                                    cwd=scratch, env=env, capture_output=True, text=True,
                                    check=True, timeout=60)
@@ -395,6 +438,13 @@ def smoke(app: Path, output: Path, *, scratch: Path | None = None,
                 assert report["status"]["ok"] is True
                 assert report["status"]["helper_running"] is True
                 assert report["status"]["capabilities"]["media"]["available"] is True
+                # A fresh profile has no downloaded model: the helper must
+                # report the bundled one as ready for caption-less capture.
+                model_status = ui_request("/reliability/model/status")["model"]
+                assert model_status["cached"] is True, model_status
+                assert model_status["source"] == "bundled", model_status
+                assert model_status["model"] == model_status["bundled_model"], model_status
+                report["whisper_status"] = model_status
                 mirror = subprocess.run([str(launcher), "mirror", "status"], cwd=scratch, env=env,
                                         capture_output=True, text=True, timeout=90)
                 assert mirror.returncode == 1, mirror.stderr

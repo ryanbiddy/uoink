@@ -85,6 +85,7 @@ python\           Python 3.13 embeddable + the pinned runtime packages listed be
 bin\              ffmpeg.exe, ffprobe.exe (PATH-prepended by server.py)
 cli\              uoink.cmd, uoink (only this folder goes on User PATH)
 bin\torchcodec\   seven LGPL FFmpeg 7.1.5 shared libraries for TorchCodec 0.7
+models\whisper-bundled\base\  pinned faster-whisper base model (3.12+), read-only
 server.py         The local HTTP helper
 uoink_mcp.py      MCP stdio entry point for agent clients
 uoink_mcp_tools.py Shared MCP tool registry
@@ -119,9 +120,17 @@ The helper runs under `pythonw.exe`, so there's no console window. `server.py` w
   `bootstrap.pypa.io/get-pip.py` alias. Used once during the build to
   bootstrap pip into the embeddable.
 
-These three direct downloads are cached under `build\cache\`. Delete the cache
-or pass `-Clean` to force a refresh. The remaining runtime packages are
-installed into the embeddable Python with the exact pip versions below.
+- **Whisper model** — `Systran/faster-whisper-base` on Hugging Face at the
+  revision in `scripts\whisper_model_pin.json`, which also records each
+  file's size and SHA-256. `scripts\stage_whisper_model.py` downloads from
+  that revision (never `main`), refuses any mismatch, and stages
+  `installer\staging\models\whisper-bundled\base\`. The macOS bundle build
+  stages the same pin into `Contents/Resources/models/whisper-bundled/`.
+
+These direct downloads are cached under `build\cache\` (the model under
+`build\cache\whisper-model\`). Delete the cache or pass `-Clean` to force a
+refresh. The remaining runtime packages are installed into the embeddable
+Python with the exact pip versions below.
 
 ## Current pin snapshot
 
@@ -139,6 +148,7 @@ installed into the embeddable Python with the exact pip versions below.
 | pythonnet | 3.0.5 | (pip) | Runtime bridge used by the Windows desktop shell. |
 | faster-whisper | 1.2.1 | (pip) | Local transcript reliability backend. |
 | whisperx | 3.8.6 | (pip) | Optional local transcription and diarization runtime. |
+| Whisper base model | `Systran/faster-whisper-base` @ `ebe41f70d5b6` | Locked in `scripts/whisper_model_pin.json` | Ships so caption-less videos transcribe with no download (about 129 MB of installer growth). Notice: `third-party-notices/faster-whisper-base-NOTICE.md`. |
 
 ### SHA256 hashes
 
@@ -187,6 +197,7 @@ so checkout times do not change the installer wrapper.
 | Pillow, pystray, pywebview, pythonnet | Update `$PILLOW_VERSION`, `$PYSTRAY_VERSION`, `$PYWEBVIEW_VERSION`, or `$PYTHONNET_VERSION` in `build.ps1` and the matching `requirements.txt` pin. |
 | faster-whisper, whisperx | Update `$FASTER_WHISPER_VERSION` or `$WHISPERX_VERSION` in `build.ps1` and the matching `requirements.txt` pin; verify their shared dependency resolution together. |
 | ffmpeg | Update `$FFMPEG_VERSION`, `$FFMPEG_URL`, and `$FFMPEG_SHA256` together after verifying the replacement is still a BtbN win64 LGPL build. |
+| Whisper model | Update `revision` and every file's `size` and `sha256` in `scripts/whisper_model_pin.json` together, after checking the model card's license. Changing `model` also needs the settings default (`whisper_model` in `server.py`), `installer\verify_install.ps1`, and the matching notice in `third-party-notices/`. Re-run `build.ps1` so `THIRD-PARTY-NOTICES.md` regenerates from the pin. |
 | Uoink itself | Update `helper\_version.py`, then mirror the same value into the repo-root `VERSION` file and `extension\manifest.json`. `build.ps1` rewrites `installer\uoink.generated.iss`, stages `VERSION` from the helper constant, and fails if any version value drifts. |
 
 ## How `server.py` finds bundled binaries

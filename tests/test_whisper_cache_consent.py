@@ -43,6 +43,9 @@ def runner_functions(source):
     scope = {
         "Path": Path, "re": re, "sys": sys, "_WHISPERX_AVAILABLE": True,
         "_download_model_snapshot": blocked, "_runtime_device": lambda: "cpu",
+        # These contracts cover the user's cache. The installer-bundled copy
+        # has its own tests (test_bundled_whisper_model.py); none here.
+        "_bundled_snapshot": lambda model_size: None,
         "_compute_type": lambda device: "int8", "_now_iso": lambda: "synthetic-time",
     }
     future = ast.ImportFrom(module="__future__", names=[ast.alias(name="annotations")], level=0)

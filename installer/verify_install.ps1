@@ -53,7 +53,10 @@ $requiredFiles = @(
     'taste_scoring.py',
     'uoink_store.py',
     'extension\store-config.json',
-    'defaults\style_anchors.json'
+    'defaults\style_anchors.json',
+    # 3.12: the bundled transcription model (scripts\whisper_model_pin.json).
+    'models\whisper-bundled\base\model.bin',
+    'models\whisper-bundled\base\uoink-model.json'
 )
 foreach ($rf in $requiredFiles) {
     $rfPath = Join-Path $appDir $rf
