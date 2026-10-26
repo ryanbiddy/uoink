@@ -57,6 +57,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Fixed
 
+- YouTube captures save their transcript again. Uoink asked for every
+  caption track starting with "en", which includes YouTube's
+  auto-translated tracks (en-de, en-ja...). YouTube rate-limits those
+  separately, and one refusal there stopped the whole caption download, so
+  captures said "YouTube refused captions". Uoink now asks for en, en-US,
+  en-GB and en-orig by name, and prefers uploaded English captions over
+  auto-captions.
 - A failed index write no longer wedges the helper. A write that raised
   (for example a duplicate folder name during the startup backfill) left its
   SQLite transaction open, and every later save on that helper failed until a

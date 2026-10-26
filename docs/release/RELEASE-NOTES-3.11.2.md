@@ -2,6 +2,7 @@
 
 ## What's new
 
+- **YouTube transcripts are back.** YouTube captures in 3.11.0 and 3.11.1 often saved no transcript and said "YouTube refused captions". Uoink was also asking for YouTube's auto-translated caption tracks, which YouTube rate-limits, and one refusal stopped the whole download. Uoink now asks only for the English tracks. Videos captured without a transcript can be captured again; they refresh in place.
 - **Uoink for Mac (preview).** Apple Silicon Macs on macOS 15 or later can now run Uoink. The app and the DMG are signed with a Developer ID and notarized by Apple, so macOS only asks its usual question about apps downloaded from the internet. On a Mac, the dashboard and setup steps say Mac things: Finder, Applications, and the ⌘⇧G trick for Chrome's **Load unpacked** picker, which hides `~/Library`.
 - **A failed save no longer breaks later saves.** A write that failed (for example on a duplicate folder name during startup) left the library's transaction open, and every save after it failed until the helper restarted. Each write now rolls back its own failure.
 - **Re-capturing an older item updates it.** Capturing something saved by an older version refreshes that item instead of making a second folder. Duplicate folder names are skipped with one warning, and `uoink doctor` lists them.
