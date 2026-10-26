@@ -518,6 +518,8 @@ def test_local_html_cannot_be_framed(helper, path, origin):
     assert headers["Content-Security-Policy"] == "frame-ancestors 'none'"
     assert headers["X-Frame-Options"] == "DENY"
     assert headers["Content-Length"] == str(len(HTML))
+    # An upgrade must reach an open tab on its next load, not after a cache expiry.
+    assert headers["Cache-Control"] == "private, no-cache"
 
 
 @pytest.mark.parametrize("origin", [None, "https://www.youtube.com"])
