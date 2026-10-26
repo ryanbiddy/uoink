@@ -443,7 +443,7 @@ def test_dashboard_init_does_not_request_remote_features():
         "loadLibrary", "loadLibraryActivity", "startLibraryActivityTimer",
         "loadResume", "loadForYou", "loadWriting", "renderSources",
         "refreshActivity", "connectJobsStream",
-        "showUsagePrompt",
+        "showUsagePrompt", "syncDashboardTheme",
     ]
     _run_js(f"""
 const calls = [], requests = [];

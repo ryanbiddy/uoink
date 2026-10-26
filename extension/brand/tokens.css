@@ -1,6 +1,8 @@
 /* Uoink brand tokens: Direction A "Reader" (UI re-haul SPEC, 2026-10-15).
  *
  * Light is the default theme; dark applies under prefers-color-scheme: dark.
+ * A page that offers a theme choice sets data-theme="light" or "dark" on
+ * <html> to override the system; without it, the system decides.
  * The names pages used before the re-haul (--ink, --cream, --rust, ...) are
  * aliases of the theme tokens, so every page that still uses them follows
  * the theme: --ink is the page ground, --cream the body text, --rust the
@@ -129,7 +131,7 @@
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
     --bg: #0A0A0A;
     --surface: #141110;
     --surface-sel: #1E1815;
@@ -158,6 +160,45 @@
     --scrim: rgba(0, 0, 0, 0.72);
     --on-scrim: #FFFFFF;
   }
+}
+
+/* A page with a theme choice sets data-theme on <html>: "dark" forces the
+   dark values above on any system, "light" keeps the defaults. Keep this
+   block equal to the dark block above. */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --bg: #0A0A0A;
+  --surface: #141110;
+  --surface-sel: #1E1815;
+  --text: #F5EDE6;
+  --text-2: #A8968A;
+  --line: #2A211C;
+  --line-strong: #3A2E27;
+  --action: #FF3D00;
+  --on-action: #0A0A0A;
+  --ok: #22C55E;
+  --fail: #FF8A5C;
+  --step-done: #F5EDE6;
+  --step-now: #C2410C;
+  --step-fail: #FF3D00;
+  --step-todo: #3A2E27;
+  --focus-ring: #C2410C;
+
+  --acid: #FFD23F;
+  --warn: #FFE3A3;
+  --danger-bg: #3A1F1F;
+  --danger-border: #6A3A3A;
+  --shadow-soft: 0 22px 70px rgba(0, 0, 0, 0.38);
+  --rust-bright: #FF8A5C;
+  --vermillion: #FF8A5C;
+  --ok-bright: #22C55E;
+  --scrim: rgba(0, 0, 0, 0.72);
+  --on-scrim: #FFFFFF;
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
 }
 
 /* Focus ring: 2px rust, offset 2px. Important so older per-control
