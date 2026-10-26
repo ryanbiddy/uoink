@@ -11620,8 +11620,11 @@
       if (isNoteContent(row) || st === "note") return "your note";
       if (st === "image" || platformOf(row) === "image") return "your image";
       if (st === "page" || st === "x_article") return "article text";
-      if (st === "x_thread") return "post and thread";
-      if (st === "reddit_thread") return "thread and comments";
+      // A post with a video went through the video path, which records how
+      // its transcript came out; a text post records neither.
+      const videoPost = Boolean(row && (row.transcript_source || row.asr_fallback_status));
+      if (st === "x_thread" && !videoPost) return "post and thread";
+      if (st === "reddit_thread" && !videoPost) return "thread and comments";
       const kind = transcriptKind(row && row.transcript_source);
       if (kind === "captions") return `${platformChipLabel(platformOf(row))} captions`;
       if (kind === "asr") return "transcript by Whisper";

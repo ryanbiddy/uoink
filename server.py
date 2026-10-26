@@ -2777,6 +2777,11 @@ def compute_health(sidecar: dict) -> dict:
         "comment_intelligence": sidecar.get("comment_intelligence_status") or "skipped",
     }
     skipped = set(_HEALTH_NOT_APPLICABLE.get(source_type, ()))
+    if "transcript" in skipped and ("transcript_source" in sidecar
+                                    or "interval_seconds" in sidecar):
+        # The video path saved this: an X or Reddit post with a video, which
+        # the index names by its URL. It has a transcript and screenshots.
+        skipped.clear()
     if sidecar.get("extraction_mode") == "generic":
         # /extract/any saves a transcript only; no screenshots by design.
         skipped.add("screenshots")
