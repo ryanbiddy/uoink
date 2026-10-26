@@ -4063,7 +4063,11 @@ def _screenshot_ffmpeg_command(video_file: Path, interval: int,
         _platform.media_binary("ffmpeg") if _platform.sys.platform == "darwin" else "ffmpeg",
         "-loglevel", "error", "-y",
         "-i", str(video_file),
-        "-vf", f"fps=1/{max(1, int(interval))}",
+        # round=up takes the frame at 0, interval, 2*interval..., which is what
+        # the shot labels say. The default (near) took the frame half an
+        # interval later, and none at all from a clip shorter than half the
+        # interval (an X video whose duration the metadata left out).
+        "-vf", f"fps=1/{max(1, int(interval))}:round=up",
         # MJPEG requires full-range YUV. Without this, limited-range yuv420p(tv)
         # inputs can fail with "Non full-range YUV is non-standard".
         "-pix_fmt", "yuvj420p",

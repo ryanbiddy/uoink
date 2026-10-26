@@ -127,8 +127,8 @@ def test_lite_extraction_path(tmp: Path):
     _assert(ffmpeg_calls[0][ffmpeg_calls[0].index("-pix_fmt") + 1]
             == "yuvj420p", "screenshot output must be full-range JPEG YUV")
     vf = ffmpeg_calls[0][ffmpeg_calls[0].index("-vf") + 1]
-    # fps=1/<interval>
-    used_interval = int(vf.split("/")[1])
+    # fps=1/<interval>:round=up
+    used_interval = int(vf.split("/")[1].split(":")[0])
     _assert(used_interval >= server.LITE_SHOT_INTERVAL_SEC,
             f"lite forces sparse interval >= {server.LITE_SHOT_INTERVAL_SEC}, "
             f"got {used_interval}")

@@ -119,7 +119,7 @@ def extract(url: str, interval: int, status_q: queue.Queue, result_q: queue.Queu
             [
                 "ffmpeg", "-loglevel", "error", "-y",
                 "-i", str(video_file),
-                "-vf", f"fps=1/{interval}",
+                "-vf", f"fps=1/{interval}:round=up",
                 "-q:v", "2",
                 str(shots_dir / "shot_%04d.jpg"),
             ],
