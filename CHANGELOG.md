@@ -10,6 +10,25 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- Every download ships the Whisper transcription model, so a fresh install
+  transcribes videos that have no captions with no download step. The
+  Windows installer and the Mac app carry the default **base** model (OpenAI
+  Whisper, MIT, in SYSTRAN's faster-whisper conversion), pinned to one
+  Hugging Face revision and SHA-256 checked when the installer is built.
+  The Windows installer grows by about 129 MB. A model you downloaded
+  yourself still takes precedence, and other sizes still download only when
+  you ask. Podcast transcription uses the same copy.
+
+### Changed
+
+- Settings no longer offers to download a model that is already on the
+  device. Items saved before the model was there say to Re-uoink instead
+  of to download it, and when a model really is missing, the
+  needs-attention drawer's "Download it in Settings" opens Settings at the
+  transcription-model control.
+
 ## [3.11.2] - 2026-10-25
 
 ### Added

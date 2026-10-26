@@ -422,6 +422,9 @@ def test_smoke_success_requires_completed_checks_and_immutable_bundle(monkeypatc
             data = {"token": "fixture-only"}
         elif url.endswith("/helper/ui"):
             data = {"ok": True, "alive": True, "connected": True, "pid": current[0].pid + 1}
+        elif url.endswith("/reliability/model/status"):
+            data = {"ok": True, "model": {"model": "base", "cached": True, "source": "bundled",
+                                          "bundled_model": "base"}}
         else:
             if url.endswith("/helper/quit"):
                 current[0].dead = True
@@ -436,6 +439,7 @@ def test_smoke_success_requires_completed_checks_and_immutable_bundle(monkeypatc
     monkeypatch.setattr(bundle_smoke.subprocess, "run", run)
     monkeypatch.setattr(bundle_smoke, "stdio", lambda *args: {"ok": True})
     monkeypatch.setattr(bundle_smoke, "media_smoke", lambda *args: {"ok": True})
+    monkeypatch.setattr(bundle_smoke, "whisper_smoke", lambda *args: {"model": "base"})
     monkeypatch.setattr(bundle_smoke, "stop", lambda proc: None)
     if mutate or fail:
         with pytest.raises(AssertionError if mutate else RuntimeError):
@@ -451,6 +455,8 @@ def test_smoke_success_requires_completed_checks_and_immutable_bundle(monkeypatc
         assert report["menubar"]["connected"]
         assert report["menubar"]["duplicate_launch_same_pid"]
         assert report["menubar"]["quit_no_survivor"]
+        assert report["whisper"] == {"model": "base"}
+        assert report["whisper_status"]["source"] == "bundled"
     assert app.is_dir()
 
 

@@ -310,7 +310,8 @@ The meter hides nothing (run F acceptance, case 3, 2026-09-04):
 
 ### GET /reliability/model/status
 
-Return the local Whisper model cache status for transcript reliability detection.
+Return the local Whisper model status for the selected size, used by local
+transcription of caption-less videos and by transcript reliability detection.
 
 Auth: `X-Uoink-Token` required.
 
@@ -320,17 +321,29 @@ Success response: HTTP 200
 {
   "ok": true,
   "model": {
-    "model": "tiny",
+    "model": "base",
     "model_root": "C:\\Users\\<you>\\AppData\\Local\\Uoink\\models\\whisper",
-    "cached": false,
+    "cached": true,
+    "source": "bundled",
+    "downloaded": false,
+    "bundled_model": "base",
+    "bundled_revision": "ebe41f70d5b6dfa9166e2c581c45c9c0cfc57b66",
+    "bundled_path": "C:\\Users\\<you>\\AppData\\Local\\Uoink\\models\\whisper-bundled\\base",
     "estimated_download_mb": 150
   }
 }
 ```
 
+`cached` is true when the selected size can run now. `source` says which copy
+runs: `downloaded` (the user's cache under `model_root`, which wins) or
+`bundled` (the read-only copy the installer or macOS app ships, 3.12+; on macOS
+under `Uoink.app/Contents/Resources/models/whisper-bundled`). It is `null` when
+the selected size is not on the device. `bundled_model` names the size this
+install ships regardless of the selection, or `null` for a source checkout.
+
 ### POST /reliability/model/download
 
-Download/cache the selected local model used by `faster-whisper`. This is user-triggered from the dashboard; the installer does not bundle model weights.
+Download/cache the selected local model used by `faster-whisper`. This is user-triggered from the dashboard. Since 3.12 the installer and the macOS app ship the default `base` model, so this is only needed for another size; a downloaded copy of a size takes precedence over the bundled one.
 
 Auth: `X-Uoink-Token` required.
 

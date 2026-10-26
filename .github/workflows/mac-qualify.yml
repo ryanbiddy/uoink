@@ -218,8 +218,14 @@ jobs:
           key: ffmpeg-macos15-arm64-floor15-${{ steps.ffmpeg-key.outputs.recipe }}-${{ steps.ffmpeg-key.outputs.toolchain }}
       - name: Build pinned LGPL FFmpeg or verify cached output
         run: python -B scripts/mac/build_ffmpeg.py --output "$RUNNER_TEMP/mac-ffmpeg"
+      # The bundled Whisper model download. The stager re-verifies every
+      # cached file's size and SHA-256 against the pin before it ships.
+      - uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/whisper-model
+          key: whisper-model-${{ hashFiles('scripts/whisper_model_pin.json') }}
       - name: Assemble pinned payload and inventory native loaders
-        run: bash build-mac.sh --wheels "$RUNNER_TEMP/mac-wheels" --output "$RUNNER_TEMP/mac-app" --ffmpeg-output "$RUNNER_TEMP/mac-ffmpeg"
+        run: bash build-mac.sh --wheels "$RUNNER_TEMP/mac-wheels" --output "$RUNNER_TEMP/mac-app" --ffmpeg-output "$RUNNER_TEMP/mac-ffmpeg" --whisper-cache "$RUNNER_TEMP/whisper-model"
       - name: Smoke relocated bundle and verify immutable tree
         run: python -B scripts/mac/bundle_smoke.py --app "$RUNNER_TEMP/mac-app/Uoink.app" --output "$RUNNER_TEMP/mac-evidence/bundle-smoke"
       - name: Build and validate the Darwin MCPB
