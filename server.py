@@ -5816,7 +5816,11 @@ def _fetch_video_subtitles(url: str, output_folder: Path, *,
                 "--skip-download",
                 "--write-auto-subs",
                 "--write-subs",
-                "--sub-lang", "en.*,en",
+                # Named tracks only. "en.*" also matched YouTube's
+                # auto-translated tracks (en-de, en-de-DE...), which are
+                # rate-limited separately; one 429 there made yt-dlp exit
+                # before --convert-subs, so no transcript was saved.
+                "--sub-lang", "en,en-US,en-GB,en-orig",
                 "--convert-subs", "srt",
                 "-o", str(output_folder / "video.%(ext)s"),
                 url,
@@ -6607,7 +6611,11 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
 
         video_files = [f for f in sorted(asset_folder.glob(media_glob))
                        if f.suffix in (".mp4", ".webm", ".mkv")]
-        srt_files = list(asset_folder.glob("video*.srt"))
+        # Uploaded English captions first, then auto-captions. glob order
+        # differs between filesystems.
+        srt_order = ["video.en.srt", "video.en-US.srt", "video.en-GB.srt", "video.en-orig.srt"]
+        srt_files = sorted(asset_folder.glob("video*.srt"), key=lambda p: (
+            srt_order.index(p.name) if p.name in srt_order else len(srt_order), p.name))
         if not video_files:
             if effective_long_video_mode == LONG_VIDEO_MODE_CHUNKED:
                 raise ExtractionPhaseError(

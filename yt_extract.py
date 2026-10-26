@@ -229,7 +229,7 @@ def main():
             *ytdlp,
             "--write-auto-subs",
             "--write-subs",
-            "--sub-lang", "en.*,en",
+            "--sub-lang", "en,en-US,en-GB,en-orig",  # named tracks, not auto-translations
             "--convert-subs", "srt",
             "-f", (_platform.video_format("worst[height>=360]/worst")
                    if sys.platform == "darwin" else "worst[height>=360]/worst"),
