@@ -12,6 +12,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- A Raycast extension in `integrations/raycast` for macOS and Windows. Search
+  the library as you type, open a result at its timestamp, copy or paste a
+  Markdown citation, uoink a typed, selected, copied or open-tab link, and
+  save notes. Raycast AI gets `@uoink` tools for search, item excerpts, recent
+  captures and confirmed saves, and AI Chat can mention a saved item. The
+  extension runs the installed `uoink` CLI with argument arrays and no shell;
+  on Windows it starts the bundled Python directly instead of `uoink.cmd`.
+  It is not in the Raycast Store yet.
 - Every download ships the Whisper transcription model, so a fresh install
   transcribes videos that have no captions with no download step. The
   Windows installer and the Mac app carry the default **base** model (OpenAI

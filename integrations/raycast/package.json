@@ -1,0 +1,212 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "uoink",
+  "title": "Uoink",
+  "description": "Search your local Uoink library of saved videos, podcasts and articles, cite the exact timestamp, and uoink new links.",
+  "icon": "icon.png",
+  "author": "ryanbiddy",
+  "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Productivity",
+    "Media"
+  ],
+  "keywords": [
+    "youtube",
+    "transcript",
+    "podcast",
+    "research",
+    "citation",
+    "mcp",
+    "notes"
+  ],
+  "commands": [
+    {
+      "name": "search-library",
+      "title": "Search Library",
+      "subtitle": "Uoink",
+      "description": "Search the transcripts, articles and notes you saved with Uoink, then open or cite the exact moment.",
+      "mode": "view"
+    },
+    {
+      "name": "uoink-link",
+      "title": "Uoink Link",
+      "description": "Save a YouTube video, podcast feed, article, X post or Reddit thread. Uses the typed link, the selected text or the clipboard.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "url",
+          "type": "text",
+          "placeholder": "Link (optional)",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "uoink-current-tab",
+      "title": "Uoink Current Tab",
+      "description": "Save the page in your browser's active tab. Needs the Raycast browser extension.",
+      "mode": "no-view"
+    },
+    {
+      "name": "save-note",
+      "title": "Save Note",
+      "subtitle": "Uoink",
+      "description": "Save an idea or quote as a searchable note in your Uoink library.",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "search-library",
+      "title": "Search Library",
+      "description": "Search the user's saved videos, podcasts, articles, threads and notes. Returns passages with timestamps and links to the exact moment."
+    },
+    {
+      "name": "get-library-item",
+      "title": "Get Library Item",
+      "description": "Open one saved item by its ID or slug and return its source and timestamped excerpts."
+    },
+    {
+      "name": "list-recent-uoinks",
+      "title": "List Recent Uoinks",
+      "description": "List the newest items saved to the library."
+    },
+    {
+      "name": "uoink-link",
+      "title": "Uoink Link",
+      "description": "Save a link (YouTube, X, Reddit, podcast feed or web article) into the user's library. Asks for confirmation first."
+    },
+    {
+      "name": "save-note",
+      "title": "Save Note",
+      "description": "Save text as a searchable note in the user's library. Asks for confirmation first."
+    },
+    {
+      "name": "mention-library",
+      "title": "Library Items",
+      "description": "Mention a saved item in AI Chat to give the AI its timestamped excerpts.",
+      "functionalities": [
+        "AI mention search"
+      ]
+    }
+  ],
+  "resourceProvider": "read-item",
+  "ai": {
+    "instructions": "Uoink is the user's local library of saved YouTube videos, podcasts, web articles, X posts, Reddit threads and notes. It runs on the user's computer; nothing is fetched from a Uoink cloud. Answer questions about saved material from search-library or get-library-item results only, and never invent quotes, titles or timestamps. When a result has a timestamp and link, cite it as a Markdown link such as [Video title @ 12:34](link). Quote a passage word for word only when passageVerified is true; otherwise paraphrase and say the match is approximate. If search returns nothing, say so and suggest other key words. Only call uoink-link or save-note when the user explicitly asks to save, capture or uoink something.",
+    "evals": [
+      {
+        "input": "@uoink what have I saved about working memory?",
+        "mocks": {
+          "search-library": {
+            "libraryItems": 42,
+            "results": [
+              {
+                "itemId": "dQw4w9WgXcQ",
+                "title": "How memory actually works",
+                "from": "Learning Lab",
+                "timestamp": "4:12",
+                "link": "https://www.youtube.com/watch?v=dQw4w9WgXcQ&t=252s",
+                "passage": "Working memory holds about four chunks at once, which is why cramming fails.",
+                "passageVerified": true,
+                "match": "timed_clip"
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "search-library"
+          },
+          {
+            "includes": "4:12"
+          }
+        ]
+      },
+      {
+        "input": "@uoink what did I save most recently?",
+        "mocks": {
+          "list-recent-uoinks": [
+            {
+              "slug": "hook-teardown-3f9a2c1b",
+              "title": "Hook teardown: the first five seconds",
+              "saved": "2026-10-29T18:04:00Z"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": "list-recent-uoinks"
+          },
+          {
+            "includes": "Hook teardown"
+          }
+        ]
+      },
+      {
+        "input": "@uoink save this video https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+        "mocks": {
+          "uoink-link": {
+            "saved": "how-memory-actually-works-dQw4w9Wg",
+            "slug": "how-memory-actually-works-dQw4w9Wg",
+            "queued": false,
+            "markdownTruncated": false
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "uoink-link",
+              "arguments": {
+                "url": {
+                  "includes": "dQw4w9WgXcQ"
+                }
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "preferences": [
+    {
+      "name": "cliPath",
+      "title": "Uoink CLI",
+      "description": "Leave empty for a default install (/Applications/Uoink.app on macOS, %LOCALAPPDATA%\\Uoink on Windows). Otherwise choose Uoink.app, its Contents/Helpers/uoink command, or cli\\uoink.cmd in your Uoink folder.",
+      "type": "file",
+      "required": false
+    },
+    {
+      "name": "copyAfterCapture",
+      "title": "After a Capture",
+      "label": "Copy the Markdown to the clipboard",
+      "description": "Like the Uoink browser button: a video capture's transcript Markdown lands on your clipboard, ready to paste into an AI.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.10.1",
+    "@raycast/utils": "^2.2.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.18.0",
+    "@types/react": "^19.3.0",
+    "eslint": "^10.14.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
