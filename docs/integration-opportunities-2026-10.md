@@ -5,6 +5,13 @@ directories and package stores. It skips what already ships: the ~50
 `uoink connect` MCP recipes, the Chrome extension, the Obsidian mirror, and the
 new [Raycast extension](../integrations/raycast/README.md).
 
+**Update, same day:** built in this branch, not yet submitted. Native
+integrations for Flow Launcher, Alfred and Obsidian are in
+[`integrations/`](../integrations/README.md). winget and Homebrew manifests are
+in [`packaging/`](../packaging/README.md). The agent-kit plugin's README and
+LICENSE blockers are fixed. Paste-ready submissions are in
+[`docs/submissions/`](submissions/README.md).
+
 Effort is an estimate: **S** = days, **M** = 1–2 weeks, **L** = new toolchain,
 signing or packaging work. Rows marked *search-only* were not confirmed against
 official docs, because this session's network blocked many doc sites. Re-check

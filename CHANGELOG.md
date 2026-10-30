@@ -20,6 +20,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   extension runs the installed `uoink` CLI with argument arrays and no shell;
   on Windows it starts the bundled Python directly instead of `uoink.cmd`.
   It is not in the Raycast Store yet.
+- A Flow Launcher plugin (`integrations/flow-launcher`, Windows), an Alfred
+  workflow (`integrations/alfred`, macOS) and an Obsidian plugin
+  (`integrations/obsidian`, desktop) with the same no-shell CLI approach.
+  Flow and Alfred search the library with `uk`, open results at their
+  timestamp, copy citations and uoink pasted links; Obsidian inserts
+  timestamped citations into notes. None is in its store yet.
+- winget manifests and a Homebrew cask for 3.11.2 in `packaging/`, and a
+  submission kit with paste-ready text for each directory and store in
+  `docs/submissions/`.
+- The agent-kit plugin folder has the README and license that the Claude
+  plugin directory requires.
 - Every download ships the Whisper transcription model, so a fresh install
   transcribes videos that have no captions with no download step. The
   Windows installer and the Mac app carry the default **base** model (OpenAI

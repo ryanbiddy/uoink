@@ -16,6 +16,7 @@ hands-on part.
 | 8 | [Flow Launcher store](#8-flow-launcher-store) | 20 min | Ready after a test run on Windows |
 | 9 | [Edge Add-ons](#9-edge-add-ons) | 30 min | Ready; needs a helper release for the new ID |
 | 10 | [Alfred Gallery](#10-alfred-gallery) | later | Use the workflow for a while first |
+| 10b | [Obsidian community directory](#10b-obsidian-community-directory) | 20 min | Ready after a test run in a vault |
 | 11 | [Claude directory](#11-claude-directory-and-goose) | — | **Blocked** on one decision |
 | 12 | [Goose extensions directory](#11-claude-directory-and-goose) | — | **Blocked** on the same decision |
 
@@ -153,6 +154,17 @@ The Gallery is curated. Use the workflow yourself for a few weeks, then follow
 [alfredapp/gallery-edits](https://github.com/alfredapp/gallery-edits). Until then,
 attach `Uoink.alfredworkflow` (from `integrations/alfred/build_workflow.py`) to a
 GitHub release.
+
+## 10b. Obsidian community directory
+
+1. Test it: `cd integrations/obsidian && npm install && npm run build`, then copy
+   `main.js` and `manifest.json` into `<vault>/.obsidian/plugins/uoink/` and
+   enable **Uoink** under Community plugins.
+2. Create `ryanbiddy/obsidian-uoink` and copy that folder's contents to its root.
+3. Push a tag `1.0.0`. The release workflow drafts a release with `main.js` and
+   `manifest.json`; publish it.
+4. Submit the repository at [community.obsidian.md](https://community.obsidian.md)
+   (sign in with GitHub). Review is automated.
 
 ## 11. Claude directory and Goose
 
