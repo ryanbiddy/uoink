@@ -1,0 +1,38 @@
+# Active only at the root of the dedicated plugin repository. Flow's store
+# updater reads that repository's latest release, so the plugin can't share
+# releases with the Uoink app.
+name: Publish Release
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: [plugin.json]
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build the plugin zip
+        id: build
+        run: |
+          version=$(python3 -c "import json; print(json.load(open('plugin.json'))['Version'])")
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          python3 - <<'PY'
+          import zipfile
+          files = ["plugin.json", "main.py", "SettingsTemplate.yaml", "Images/icon.png", "README.md", "LICENSE"]
+          with zipfile.ZipFile("Flow.Launcher.Plugin.Uoink.zip", "w", zipfile.ZIP_DEFLATED) as zf:
+              for name in files:
+                  zf.write(name)
+          PY
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag="v${{ steps.build.outputs.version }}"
+          gh release view "$tag" >/dev/null 2>&1 && { echo "$tag already released"; exit 0; }
+          gh release create "$tag" Flow.Launcher.Plugin.Uoink.zip --title "$tag" --notes "Uoink for Flow Launcher $tag"

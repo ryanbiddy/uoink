@@ -1,0 +1,70 @@
+"""Flow Launcher plugin: JSON-RPC results from canned CLI payloads."""
+from pathlib import Path
+import importlib.util
+import json
+
+import pytest
+
+MAIN = Path(__file__).resolve().parents[1] / "integrations" / "flow-launcher" / "main.py"
+
+
+@pytest.fixture()
+def plugin(monkeypatch, tmp_path):
+    spec = importlib.util.spec_from_file_location("uoink_flow_main", MAIN)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    monkeypatch.setattr(module, "STATUS_FILE", tmp_path / "last-capture.json")
+    return module
+
+
+HIT = {"item_id": "abc123", "title": "How memory works", "channel": "Learning Lab", "start": 252.4,
+       "deep_link": "https://www.youtube.com/watch?v=abc123&t=252s", "source_link": "https://www.youtube.com/watch?v=abc123",
+       "preview": {"text": "Working memory holds about four chunks.", "truncated": False}}
+
+
+def test_search_results_open_the_moment_and_copy_a_citation(plugin, monkeypatch):
+    calls = []
+    def fake(settings, *args, timeout=60):
+        calls.append(args)
+        return {"ok": True, "hits": [HIT], "library_items": 3}
+    monkeypatch.setattr(plugin, "run_uoink", fake)
+    [row] = plugin.query("working memory")
+    assert calls == [("search", "working memory", "--limit", "15")]
+    assert row["title"] == "How memory works"
+    assert row["subTitle"].startswith("4:12 · Learning Lab · Working memory")
+    assert row["jsonRPCAction"] == {"method": "open_url", "parameters": [HIT["deep_link"]]}
+    assert row["copyText"].endswith("[How memory works @ 4:12](https://www.youtube.com/watch?v=abc123&t=252s)")
+    menu = plugin.context_menu(row["contextData"])
+    assert [item["title"] for item in menu] == ["Copy citation", "Copy link", "Open source", "Copy item ID"]
+    assert menu[0]["jsonRPCAction"]["method"] == "Flow.Launcher.CopyToClipboard"
+    assert menu[0]["jsonRPCAction"]["parameters"][1:] == [False, True]
+
+
+def test_links_are_offered_for_capture_and_text_is_searched(plugin, monkeypatch):
+    monkeypatch.setattr(plugin, "run_uoink", lambda *a, **k: {"ok": True, "hits": [], "library_items": 0})
+    [row] = plugin.query("https://youtu.be/abc123")
+    assert row["jsonRPCAction"] == {"method": "capture", "parameters": ["https://youtu.be/abc123"]}
+    assert plugin.query("javascript:alert(1)")[0]["title"] == "Your library is empty"
+
+
+def test_missing_install_points_to_the_install_page(plugin, tmp_path):
+    [row] = plugin.query("anything", {"uoinkFolder": str(tmp_path / "nowhere")})
+    assert row["title"] == "Uoink isn't installed here"
+    assert row["jsonRPCAction"]["parameters"] == [plugin.INSTALL_URL]
+
+
+def test_capture_worker_records_the_outcome(plugin, monkeypatch):
+    def fail(*args, **kwargs):
+        raise plugin.UoinkError("host is not in the allowlist")
+    monkeypatch.setattr(plugin, "run_uoink", fail)
+    assert plugin.capture_worker("https://example.com/a", {}) == 1
+    status = json.loads(plugin.STATUS_FILE.read_text(encoding="utf-8"))
+    assert status["state"] == "failed" and "allowlist" in status["error"]
+    monkeypatch.setattr(plugin, "run_uoink", lambda *a, **k: {"ok": True, "slug": "how-memory-works"})
+    assert plugin.capture_worker("https://example.com/a", {}) == 0
+    assert plugin.last_capture_row()[0]["title"] == "Uoinked how-memory-works"
+
+
+def test_uoink_runs_without_flows_pythonpath(plugin, monkeypatch):
+    monkeypatch.setenv("PYTHONPATH", r"C:\Flow\JsonRPC")
+    assert "PYTHONPATH" not in plugin.uoink_env()
