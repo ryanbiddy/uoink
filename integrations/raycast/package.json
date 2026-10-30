@@ -28,28 +28,21 @@
       "name": "search-library",
       "title": "Search Library",
       "subtitle": "Uoink",
-      "description": "Search the transcripts, articles and notes you saved with Uoink, then open or cite the exact moment.",
+      "description": "Search the transcripts, articles and notes you saved with Uoink. Enter copies a citation that links to the exact timestamp.",
       "mode": "view"
     },
     {
-      "name": "uoink-link",
-      "title": "Uoink Link",
-      "description": "Save a YouTube video, podcast feed, article, X post or Reddit thread. Uses the typed link, the selected text or the clipboard.",
-      "mode": "no-view",
-      "arguments": [
-        {
-          "name": "url",
-          "type": "text",
-          "placeholder": "Link (optional)",
-          "required": false
-        }
-      ]
+      "name": "uoink-this-url",
+      "title": "Uoink This URL",
+      "description": "Save the link on your clipboard, or else the page in your browser's active tab (macOS, with the Raycast browser extension), to your Uoink library.",
+      "mode": "no-view"
     },
     {
-      "name": "uoink-current-tab",
-      "title": "Uoink Current Tab",
-      "description": "Save the page in your browser's active tab. Needs the Raycast browser extension.",
-      "mode": "no-view"
+      "name": "recent-saves",
+      "title": "Recent Saves",
+      "subtitle": "Uoink",
+      "description": "Show the last 20 items you saved with Uoink.",
+      "mode": "view"
     },
     {
       "name": "save-note",

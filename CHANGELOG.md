@@ -12,10 +12,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
-- A Raycast extension in `integrations/raycast` for macOS and Windows. Search
-  the library as you type, open a result at its timestamp, copy or paste a
-  Markdown citation, uoink a typed, selected, copied or open-tab link, and
-  save notes. Raycast AI gets `@uoink` tools for search, item excerpts, recent
+- A Raycast extension in `integrations/raycast` for macOS and Windows that
+  works on the free Raycast plan. Search Library copies a Markdown citation
+  that links to the timestamp, Uoink This URL saves the copied link (or the
+  active browser tab on macOS), Recent Saves lists the last 20 items, and
+  Save Note saves text. Raycast AI gets `@uoink` tools for search, item excerpts, recent
   captures and confirmed saves, and AI Chat can mention a saved item. The
   extension runs the installed `uoink` CLI with argument arrays and no shell;
   on Windows it starts the bundled Python directly instead of `uoink.cmd`.

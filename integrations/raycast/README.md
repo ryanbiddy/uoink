@@ -16,12 +16,16 @@ The Uoink window does not need to be open. Library search reads your local index
 
 | Command | What it does |
 |---|---|
-| **Search Library** | Search transcripts, articles and notes as you type. With no query, shows what you saved most recently. Open a result at its timestamp, copy or paste a Markdown citation, or open the full item. |
-| **Uoink Link** | Save a YouTube video or playlist, X post, Reddit thread, podcast feed or web article. Uses the link you type, else the selected text, else the clipboard. A video's transcript Markdown is copied to your clipboard when it's done (you can turn this off). |
-| **Uoink Current Tab** | Save the page in your browser's active tab. Needs the [Raycast browser extension](https://www.raycast.com/browser-extension). |
+| **Search Library** | Search transcripts, articles and notes as you type; results show their timestamps. **Enter copies a Markdown citation** that links to the exact moment. ⌘O opens the source at that timestamp, ⌘⇧V pastes the citation, and ⌘I shows the full item. |
+| **Uoink This URL** | Save the link on your clipboard. If the clipboard has no link, it saves the page in your browser's active tab instead (macOS, with the [Raycast browser extension](https://www.raycast.com/browser-extension)). A video's transcript Markdown is copied to your clipboard when it's done; you can turn this off. |
+| **Recent Saves** | Your last 20 saves. Enter shows the item; you can also show it in Finder or File Explorer. |
 | **Save Note** | Save an idea or quote as a searchable note. |
 
+On Windows, Uoink This URL uses the clipboard only, because Raycast's browser-tab API isn't available on Windows yet.
+
 Long videos can take a few minutes, because Uoink transcribes and takes screenshots before it reports back. Web pages follow Uoink's site allowlist; allow a new site from the Uoink dashboard first.
+
+Every command works on the free Raycast plan. Only the Raycast AI features below need a plan that includes AI.
 
 ## Raycast AI
 
@@ -42,5 +46,5 @@ Uoink also ships a full MCP server with 91 tools. To use it from Raycast AI inst
 ## Troubleshooting
 
 - **"Uoink isn't set up"**: Uoink isn't at its default location. Install it, or set **Uoink CLI** in the preferences.
-- **"Can't read the browser tab"**: install the Raycast browser extension and keep the browser open, or use **Uoink Link**.
+- **"No link to uoink"**: copy the link first. On macOS, Uoink This URL can also read the active tab once the Raycast browser extension is installed and the browser is open.
 - **A web page won't save**: allow the site in the Uoink dashboard, then try again.
