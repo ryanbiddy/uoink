@@ -1,0 +1,10 @@
+{
+	"id": "uoink",
+	"name": "Uoink",
+	"version": "1.0.0",
+	"minAppVersion": "1.4.0",
+	"description": "Search the videos, podcasts and articles you saved with Uoink, insert timestamped citations, and save new links to your library.",
+	"author": "Ryan Biddy",
+	"authorUrl": "https://uoink.app",
+	"isDesktopOnly": true
+}
