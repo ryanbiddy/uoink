@@ -1,4 +1,4 @@
-# Permission justifications for 3.11
+# Permission justifications for 3.12
 
 Paste each paragraph into the matching Privacy practices field. All eight
 API permissions remain because they have live callers. Three unused host
@@ -44,7 +44,7 @@ Creates a packaged offscreen document so capture work in the Manifest V3 service
 | `https://www.youtube.com/*`, `https://m.youtube.com/*` | Supports the in-page capture button and access to supported YouTube tabs. The content script starts on the site's other pages so navigation to a video works without reloading. Capture is user-triggered; the helper retrieves the selected source. |
 | `https://x.com/*`, `https://twitter.com/*` | Supports the X Article button and the bundled parser on articles the user can already read, including script injection into already-open tabs. The rendered article is sent to the local helper when requested. |
 | `https://*.reddit.com/*` | Supports Reddit thread tabs and the in-page capture control across Reddit's site variants. The selected thread URL is passed to the local helper for extraction. |
-| `http://127.0.0.1:5179/*` | Connects to the required Windows helper on the user's own PC for health checks, authentication, capture requests and local results. The helper binds to loopback and checks exact extension origins and a per-install token. This is not an internet server. |
+| `http://127.0.0.1:5179/*` | Connects to the required Uoink helper app on the user's own computer for health checks, authentication, capture requests and local results. The helper binds to loopback and checks exact extension origins and a per-install token. This is not an internet server. |
 
 The declared content scripts also cover `www.x.com`, `www.twitter.com` and
 Reddit thread pages. They are visible site access in the manifest, even though

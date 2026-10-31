@@ -1,12 +1,14 @@
 # Reviewer test instructions
 
-Paste the following into the dashboard's **Test instructions** tab.
+Paste everything from here down to **Notes for Ryan** into the dashboard's
+**Test instructions** tab.
+
 No Uoink account, login credentials, paid API key or usage-sharing opt-in is needed.
 
-## Without installing the Windows helper
+## Without installing the helper
 
 1. Install the extension. The setup tab opens once on first installation.
-2. It shows "Set up your first capture", a Windows helper download link, a
+2. It shows "Set up your first capture", a helper download link, a
    connection check and a first-capture button.
 3. With the helper absent, the status becomes **Uoink is offline**. It tells
    Windows users to open the Start Menu and start Uoink Server. The download
@@ -22,11 +24,13 @@ This checks installation and the missing-helper flow. It does not demonstrate
 successful extraction. The store zip contains no mock API. The local helper
 is a disclosed requirement, not a hidden login or paywall.
 
-## Full capture on Windows 10 or 11
+## Full capture on Windows 10/11 or macOS 15+
 
 1. Download the helper using the setup tab or https://uoink.app/install.
-   The 3.11 release is https://github.com/ryanbiddy/uoink/releases/tag/v3.11.0.
-   Use the release's checksum instructions before running the installer.
+   The current release is https://github.com/ryanbiddy/uoink/releases/tag/v3.12.0
+   (a Windows installer, and a DMG for Apple Silicon Macs). Use the release's
+   checksum instructions before running it. On a Mac, open Uoink from
+   Applications instead of the Start menu; the other steps are the same.
 2. Start Uoink Server. Keep it running. Use the extension installed from this
    review item; do not also load the bundled developer extension.
 3. Return to setup and click **Check again**. Expect **Running on this PC**.
@@ -49,10 +53,10 @@ to loopback; optional outside service calls use HTTPS. The helper rejects
 unknown extension origins, checks the local Host header and uses a per-install
 token for protected operations. There are no wildcard origin grants.
 
-Ryan must include this draft item's exact ID in the helper release before
-review. A helper with only the developer ID may answer the public health check
-but refuse capture authentication. If that happens, it is a helper identity
-configuration issue, not a request for reviewer credentials.
+The helper trusts this store item's ID from version 3.11.2 on, so capture
+authentication works with the extension installed from this listing.
+
+## Notes for Ryan (don't paste)
 
 The offline smoke was tested in Chrome for Testing 153 with a disposable
 profile. No helper was started or contacted. Failed localhost network requests
