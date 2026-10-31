@@ -971,8 +971,12 @@ def test_keyring_namespace_write_only_settings_clear_and_invalid_keep(settings_r
     probe = Probe("/settings")
     probe._handle_settings_get()
     assert KEY not in json.dumps(probe.payload)
-    assert all(service == server._isolated_keyring_service(folder) and username == "scrapecreators_key"
+    # Public settings also read the phone inbox's presence flag; every call
+    # stays in this profile's isolated namespace.
+    assert all(service == server._isolated_keyring_service(folder)
+               and username in ("scrapecreators_key", "relay_pull_token")
                for _, service, username in fake.calls)
+    assert not any(op != "get" for op, _, username in fake.calls if username == "relay_pull_token")
     probe = Probe("/settings", {"scrapecreators_key": None})
     probe.do_POST()
     assert probe.payload["ok"] and server._get_saved_scrapecreators_key() == ""
