@@ -132,18 +132,6 @@ def backend():
     return server
 
 
-CAPTURE_TOOLS = {
-    "youtube_video": ("uoink_video", "url"),
-    "youtube_playlist": ("uoink_playlist", "url"),
-    "short_video": ("uoink_url", "url"),
-    "x_video": ("uoink_url", "url"),
-    "x_article": ("uoink_page", "url"),
-    "reddit_thread": ("uoink_reddit_thread", "url"),
-    "podcast_feed": ("add_podcast_feed", "feed_url"),
-    "web_page": ("uoink_page", "url"),
-}
-
-
 def friendly_call(ns, server):
     if ns.command == "call":
         return ns.tool, arguments(ns)
@@ -155,10 +143,13 @@ def friendly_call(ns, server):
         return "get_library_item", {"slug" if ns.slug else "video_id": ns.id}
     if ns.command == "note":
         return "uoink_note", {"text": ns.text, **({"title": ns.title} if ns.title is not None else {})}
+    # server.CAPTURE_TOOLS is the one source-to-tool map, shared with the
+    # Uoink Relay poller. Read it from the backend passed in, so this module
+    # still imports nothing from server at load.
     route = server._classify_capture_url(ns.url)
-    if not route.get("ok") or route["source"] not in CAPTURE_TOOLS:
+    if not route.get("ok") or route["source"] not in server.CAPTURE_TOOLS:
         raise UsageError(route.get("note") or "unsupported capture URL")
-    name, key = CAPTURE_TOOLS[route["source"]]
+    name, key = server.CAPTURE_TOOLS[route["source"]]
     return name, {key: route["canonical"]}
 
 
