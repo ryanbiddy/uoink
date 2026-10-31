@@ -4,6 +4,7 @@ from __future__ import annotations
 import ast
 import json
 import logging
+import re
 from pathlib import Path
 
 import pytest
@@ -24,7 +25,7 @@ def classify_topic():
              if isinstance(node, ast.FunctionDef) and node.name in names]
     assert {node.name for node in nodes} == names
     scope = {
-        "json": json, "log": logging.getLogger(__name__),
+        "json": json, "re": re, "log": logging.getLogger(__name__),
         "TOPICS_PATH": ROOT / "topics.json",
         "HERE": ROOT, "_platform": _platform,
     }

@@ -118,6 +118,36 @@ def _now_iso() -> str:
     return time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime())
 
 
+# Capture paths disagree on yoinked_at: videos write local time with no zone
+# ("2026-10-31T10:34:16"), while pages, posts, notes and podcasts write UTC
+# with a Z ("2026-10-31T17:33:43Z"). Compared as text, a same-day UTC stamp
+# outranks a newer local one west of Greenwich. Stored values stay as
+# written; ordering and date bounds compare them as local time instead.
+_ZONED_STAMP = re.compile(r"(?:Z|[+-][0-9][0-9]:[0-9][0-9])$")
+
+
+def capture_sort_key(value) -> str:
+    """``value`` as local time (``YYYY-MM-DDTHH:MM:SS``) for ordering and
+    date bounds. A zoned stamp is converted; a zone-less one is already
+    local, as it was written. Anything unparseable passes through."""
+    text = str(value or "")
+    if not _ZONED_STAMP.search(text):
+        return text
+    try:
+        moment = datetime.fromisoformat(text[:-1] + "+00:00" if text.endswith("Z") else text)
+        return moment.astimezone().strftime("%Y-%m-%dT%H:%M:%S")
+    except (ValueError, OverflowError, OSError):
+        return text
+
+
+def capture_time_sql(column: str = "yoinked_at") -> str:
+    """The SQL twin of capture_sort_key, for ORDER BY and date filters. Only
+    zoned stamps pay for the conversion."""
+    return (f"(CASE WHEN {column} GLOB '*Z' OR {column} GLOB '*[+-][0-9][0-9]:[0-9][0-9]' "
+            f"THEN COALESCE(strftime('%Y-%m-%dT%H:%M:%S', {column}, 'localtime'), {column}) "
+            f"ELSE {column} END)")
+
+
 class PublicationRetryQueue:
     """File-backed publication receipts, independent of a failing SQLite DB.
 
@@ -1985,7 +2015,7 @@ class Index:
         with self._lock:
             rows = self._conn.execute(
                 "SELECT * FROM yoinks WHERE deleted_at IS NULL "
-                "ORDER BY yoinked_at DESC LIMIT ?",
+                f"ORDER BY {capture_time_sql()} DESC LIMIT ?",
                 (max(1, int(limit)),),
             ).fetchall()
         return [dict(r) for r in rows]
@@ -2439,7 +2469,7 @@ class Index:
         with self._lock:
             rows = self._conn.execute(
                 f"SELECT {', '.join(cols)} FROM yoinks y{where_sql} "
-                f"ORDER BY yoinked_at DESC LIMIT ?", params).fetchall()
+                f"ORDER BY {capture_time_sql('y.yoinked_at')} DESC LIMIT ?", params).fetchall()
         return [dict(zip(cols, r)) for r in rows]
 
     def corpus_facets(self) -> dict:
@@ -2470,9 +2500,13 @@ class Index:
                 ).fetchall()
                 out[col] = [{"value": r["v"], "count": int(r["n"])}
                             for r in rows]
+            # The bounds are stored values, picked by real capture time.
+            captured = capture_time_sql()
             bounds = self._conn.execute(
-                "SELECT MIN(yoinked_at) AS lo, MAX(yoinked_at) AS hi "
-                "FROM yoinks WHERE deleted_at IS NULL"
+                "SELECT (SELECT yoinked_at FROM yoinks WHERE deleted_at IS NULL "
+                f"ORDER BY {captured} ASC LIMIT 1) AS lo, "
+                "(SELECT yoinked_at FROM yoinks WHERE deleted_at IS NULL "
+                f"ORDER BY {captured} DESC LIMIT 1) AS hi"
             ).fetchone()
         out["date_bounds"] = {
             "min": bounds["lo"] if bounds else None,
@@ -2523,7 +2557,7 @@ class Index:
                 "SELECT channel, COUNT(*) AS n, MAX(yoinked_at) AS recent, "
                 "(SELECT corpus_path FROM yoinks y2 "
                 " WHERE y2.channel = y.channel AND y2.deleted_at IS NULL "
-                " ORDER BY yoinked_at DESC LIMIT 1) AS corpus_path "
+                f" ORDER BY {capture_time_sql('y2.yoinked_at')} DESC LIMIT 1) AS corpus_path "
                 f"FROM yoinks y WHERE {where} "
                 "GROUP BY channel ORDER BY n DESC, channel ASC LIMIT ?",
                 params,
@@ -2589,8 +2623,10 @@ class Index:
         if hook_type:
             clauses.append("y.hook_type = ?")
             params.append(hook_type)
+        # Dates are local calendar days, so the bounds compare local time.
+        captured = capture_time_sql("y.yoinked_at")
         if date_from:
-            clauses.append("y.yoinked_at >= ?")
+            clauses.append(f"{captured} >= ?")
             params.append(date_from)
         if date_to:
             # Inclusive upper bound on a YYYY-MM-DD date: yoinked_at carries
@@ -2599,7 +2635,7 @@ class Index:
             try:
                 nxt = (datetime.strptime(date_to, "%Y-%m-%d")
                        + timedelta(days=1)).strftime("%Y-%m-%d")
-                clauses.append("y.yoinked_at < ?")
+                clauses.append(f"{captured} < ?")
                 params.append(nxt)
             except ValueError:
                 log.warning("memory search: bad date_to %r ignored", date_to)
@@ -2648,7 +2684,7 @@ class Index:
                     total = int(cnt["n"]) if cnt else 0
                     rows = db.execute(
                         "SELECT y.* FROM yoinks y WHERE " + where
-                        + " ORDER BY y.yoinked_at DESC LIMIT ? OFFSET ?",
+                        + f" ORDER BY {captured} DESC LIMIT ? OFFSET ?",
                         params + [limit, offset],
                     ).fetchall()
             except sqlite3.OperationalError as error:

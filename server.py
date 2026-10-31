@@ -3937,17 +3937,34 @@ def _load_topics() -> dict:
 
 def _classify_topic(metadata: dict) -> str:
     """Pick the best topic name for this video by counting keyword
-    substring matches across the title, description, tags, channel, and
-    uploader. Topic with the most matches wins; ties go to the topic
-    defined first in topics.json. Falls back when nothing matches.
+    matches across the title, description, tags, channel, and uploader.
+    Topic with the most matches wins; ties go to the topic defined first
+    in topics.json. Falls back when nothing matches.
+
+    A keyword matches whole words, plus a plural "s": "RAG" doesn't fire
+    inside "average" or "AI" inside "said", while "creator" still finds
+    "creators" and "AI" finds "#AI" and "AI-powered". Links don't count,
+    and neither do description lines that are just a short label and a
+    link ("Facebook - https://..."): a link list says where a creator
+    posts, not what the video is about.
     """
-    haystack = " ".join([
+    link = re.compile(r"(?:https?://|www\.)\S+", re.IGNORECASE)
+    description = "\n".join(
+        line for line in (metadata.get("description") or "").splitlines()
+        if not link.search(line) or len(link.sub(" ", line).split()) > 3)
+    haystack = link.sub(" ", " ".join([
         metadata.get("title") or "",
-        metadata.get("description") or "",
+        description,
         " ".join(metadata.get("tags") or []),
         metadata.get("channel") or "",
         metadata.get("uploader") or "",
-    ]).lower()
+    ])).lower()
+
+    def matches(keyword) -> bool:
+        words = str(keyword).lower().split()
+        # (?<![^\W_]) / (?![^\W_]): no letter or digit on either side.
+        pattern = r"(?<![^\W_])" + r"\s+".join(map(re.escape, words)) + r"s?(?![^\W_])"
+        return bool(words) and re.search(pattern, haystack) is not None
 
     cfg = _load_topics()
     fallback = (cfg.get("fallback") or "Uncategorized").strip() or "Uncategorized"
@@ -3959,7 +3976,7 @@ def _classify_topic(metadata: dict) -> str:
         kws = t.get("keywords") or []
         if not name or not kws:
             continue
-        score = sum(1 for kw in kws if kw and str(kw).lower() in haystack)
+        score = sum(1 for kw in kws if kw and matches(kw))
         if score > best_score:
             best_score = score
             best_name = name
@@ -13192,7 +13209,8 @@ def _library_search(idx, *, q: str | None, filters: dict, kind: str | None,
             if sort == "title":
                 rows.sort(key=lambda row: (row.get("title") or "").casefold())
             elif sort in ("newest", "oldest"):
-                rows.sort(key=lambda row: (row.get("yoinked_at") or "", row["video_id"]), reverse=sort == "newest")
+                rows.sort(key=lambda row: (index.capture_sort_key(row.get("yoinked_at")), row["video_id"]),
+                          reverse=sort == "newest")
         rows = rows[offset:offset + limit]
         if passages:
             rows = idx._search_passages(rows, q, "forgiving" if result["search_mode"] == "hybrid" else match)
@@ -13211,20 +13229,22 @@ def _library_search(idx, *, q: str | None, filters: dict, kind: str | None,
         clauses.append("COALESCE(NULLIF(y.source_type, ''), 'video') IN ("
                        + ", ".join("?" for _ in types) + ")")
         params.extend(types)
+    # Capture stamps mix local and UTC forms; compare them as local time.
+    captured = index.capture_time_sql("y.yoinked_at")
     date_from, date_to = filters.get("date_from"), filters.get("date_to")
     if date_from:
-        clauses.append("y.yoinked_at >= ?")
+        clauses.append(f"{captured} >= ?")
         params.append(date_from)
     if date_to:
         # Inclusive upper bound, as the index reads it.
         nxt = (datetime.strptime(date_to, "%Y-%m-%d") + timedelta(days=1)).strftime("%Y-%m-%d")
-        clauses.append("y.yoinked_at < ?")
+        clauses.append(f"{captured} < ?")
         params.append(nxt)
     where = " AND ".join(clauses)
     order = {
-        "oldest": "y.yoinked_at ASC, y.video_id ASC",
-        "title": "y.title COLLATE NOCASE ASC, y.yoinked_at DESC",
-    }.get(sort, "y.yoinked_at DESC, y.video_id DESC")
+        "oldest": f"{captured} ASC, y.video_id ASC",
+        "title": f"y.title COLLATE NOCASE ASC, {captured} DESC",
+    }.get(sort, f"{captured} DESC, y.video_id DESC")
     expression = index._fts_query(q, match)
     prefix = ""
     if q and not expression:
@@ -13445,7 +13465,8 @@ def _resurface_days_since(value) -> float:
     except ValueError:
         return 9999.0
     if ts.tzinfo is not None:
-        ts = ts.replace(tzinfo=None)
+        # Compare in local time, which is how naive stamps are written.
+        ts = ts.astimezone().replace(tzinfo=None)
     return max(0.0, (datetime.now() - ts).total_seconds() / 86400.0)
 
 
@@ -13497,7 +13518,7 @@ def _resurface_payload(idx) -> dict:
     for topic, group in by_topic.items():
         if len(group) < 2:
             continue
-        pair = sorted(group, key=lambda r: str(r.get("yoinked_at") or ""),
+        pair = sorted(group, key=lambda r: index.capture_sort_key(r.get("yoinked_at")),
                       reverse=True)[:2]
         connections.append({
             "topic": topic,
@@ -15552,7 +15573,7 @@ class Handler(BaseHTTPRequestHandler):
         except ValueError:
             return 9999.0
         if ts.tzinfo is not None:
-            ts = ts.replace(tzinfo=None)
+            ts = ts.astimezone().replace(tzinfo=None)
         return max(0.0, (datetime.now() - ts).total_seconds() / 86400.0)
 
     def _handle_resurface_today(self):
