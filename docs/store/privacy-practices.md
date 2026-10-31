@@ -1,4 +1,4 @@
-# Privacy practices form for 3.11
+# Privacy practices form for 3.12
 
 Use these answers with the public [privacy policy](https://uoink.app/privacy),
 retrieved successfully on 2026-10-24. It covers opt-in usage counts, browser
@@ -65,11 +65,10 @@ is separate from Uoink usage sharing.
 
 ## Required public Limited Use statement
 
-The live policy did not contain an affirmative Chrome Web Store Limited Use
-statement when checked. Add this text on `/privacy` before submitting:
+The policy needs an affirmative Chrome Web Store Limited Use statement. This
+text is on https://uoink.app/privacy from uoink-site#63 (Oct 31, 2026):
 
 > Uoink's use and transfer of user data complies with the Chrome Web Store User Data Policy, including its Limited Use requirements.
 
 Link "Chrome Web Store User Data Policy" to
 https://developer.chrome.com/docs/webstore/program-policies/policies#protecting_user_privacy.
-This worktree includes the copy; it does not publish the website.

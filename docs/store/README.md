@@ -12,10 +12,11 @@ Use statement. See [SUBMISSION-CHECKLIST.md](SUBMISSION-CHECKLIST.md).
 - [Privacy form answers](privacy-practices.md)
 - [Reviewer test instructions](reviewer-test-instructions.md)
 - [Policy audit and review risks](POLICY-AUDIT.md)
-- [Screenshot recapture list](SCREENSHOTS.md)
+- [Screenshots and their sources](SCREENSHOTS.md)
 - [Website copy handoff](website-copy-notes.md)
 - [Build and verification receipt](VERIFICATION.md)
 
-The July images remain for reference. Do not upload them as 3.11 screenshots.
+The five images in `screenshots/` are 3.12.0 captures from 2026-10-31. Their
+sources and licenses are in `screenshots/SOURCES.md`.
 The older `docs/store-listing.md`, prelaunch audit and external CWS handoff
 files are historical drafts. This folder is the current submission source.

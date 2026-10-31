@@ -386,7 +386,8 @@ def reliability_model_status(model_name: object,
     ``cached`` means the selected size can run now; ``source`` says which
     copy ("downloaded" or "bundled"). ``bundled_model`` names the size this
     install ships whatever is selected, so the dashboard can say an unsaved
-    choice is already on the device.
+    choice is already on the device. ``estimated_download_mb`` is None for
+    the bundled copy, which is never downloaded.
     """
     selected = str(model_name or "").strip().lower()
     root = Path(model_root)
@@ -401,7 +402,8 @@ def reliability_model_status(model_name: object,
         "bundled_model": shipped["model"] if shipped else None,
         "bundled_revision": shipped["revision"] if shipped else None,
         "bundled_path": shipped["path"] if shipped else None,
-        "estimated_download_mb": estimated_download_mb(selected),
+        "estimated_download_mb": (None if source == SOURCE_BUNDLED
+                                  else estimated_download_mb(selected)),
     }
 
 

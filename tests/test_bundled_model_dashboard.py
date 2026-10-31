@@ -58,7 +58,7 @@ def test_link_route_reaches_the_model_control_and_closes_the_drawer():
     picker = _between(settings, '<select class="field" id="whisperModel"', "</select>")
     assert "data-reveal-focus" in picker
     assert settings.index('id="transcription-model"') < settings.index('id="whisperModel"')
-    reveal = _between(DASHBOARD, "function revealSettingsSection(section) {", "function revealSourcesDiscover")
+    reveal = _between(DASHBOARD, "function revealSettingsSection(section, loaded = null) {", "function revealSourcesDiscover")
     assert 'target.querySelector("[data-reveal-focus]")' in reveal
     wiring = _between(DASHBOARD, 'document.getElementById("reuoinkItemHealth").addEventListener',
                       'els.itemHealthDrawer.addEventListener("cancel"')

@@ -28,7 +28,8 @@ The account, fee, upload and submission are Ryan's actions. Start with
 - [ ] Verify a real capture and clipboard copy with the store identity in a
   disposable profile, using permitted source material.
 - [ ] Publish the Limited Use statement from `privacy-practices.md` on `/privacy`.
-- [ ] Recapture the images in `SCREENSHOTS.md`. Upload at least one current shot.
+- [x] Recapture the images in `SCREENSHOTS.md` (3.12.0, 2026-10-31).
+- [ ] Upload at least one current shot, in the order `SCREENSHOTS.md` lists.
 - [ ] Verify `hi@uoink.app` receives mail and the support URL works.
 - [ ] Fill out all fields and choose Public or Unlisted distribution.
 - [ ] Paste the reviewer test instructions. Leave usage sharing off for testing.

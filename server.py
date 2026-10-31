@@ -4513,6 +4513,48 @@ def _download_thumbnail(metadata: dict, output_folder: Path, *,
     return jpg_path if jpg_path.exists() else None
 
 
+def _x_video_poster_url(extract_result: dict) -> str | None:
+    """The poster of an X capture's video or GIF, the shared post's before
+    its earlier posts', or None for a text or photo post. x_extractor keeps
+    it in metadata.x_capture (URLs already checked) but never fetches it."""
+    capture = ((extract_result or {}).get("metadata") or {}).get("x_capture")
+    posts = capture.get("posts") if isinstance(capture, dict) else None
+    if not isinstance(posts, list):
+        return None
+    # The chain is root first, so the shared post is the last one.
+    for post in reversed(posts):
+        media = post.get("media") if isinstance(post, dict) else None
+        for item in media if isinstance(media, list) else ():
+            if not isinstance(item, dict) or item.get("type") not in ("video", "gif"):
+                continue
+            poster = item.get("poster")
+            if isinstance(poster, str) and poster:
+                return poster
+    return None
+
+
+def _save_x_video_poster(video_id: str, extract_result: dict) -> Path | None:
+    """Save an X post's video poster as the capture's thumbnail.jpg, the
+    file its Library row shows, through the video path's thumbnail download.
+    Best effort: the post is already saved, so a failure only logs."""
+    poster = _x_video_poster_url(extract_result)
+    if not poster:
+        return None
+    folder = None
+    try:
+        row = _get_index().get_yoink(video_id) or {}
+        if not row.get("corpus_path"):
+            return None
+        folder = Path(row["corpus_path"]).parent
+        return _download_thumbnail({"thumbnail": poster}, folder)
+    except Exception as e:  # no ffmpeg, a full disk: never fail the capture
+        log.warning("X video poster not saved for %s: %s", video_id, e)
+        return None
+    finally:
+        if folder is not None:
+            (folder / "thumbnail.raw").unlink(missing_ok=True)
+
+
 def _fetch_channel_context(channel_url: str, *,
                            cancel_event: threading.Event | None = None) -> dict:
     """Best-effort fetch of channel description + last 5 video stubs.
@@ -17484,6 +17526,7 @@ class Handler(BaseHTTPRequestHandler):
         if not video_id:
             return self._send_json(500, {
                 "ok": False, "error": "Couldn't save the X posts."})
+        _save_x_video_poster(video_id, result)
         log.info("POST /extract/x -> ok (%s, %d posts)",
                  video_id, result.get("tweets_captured", 0))
         return self._send_json(200, {

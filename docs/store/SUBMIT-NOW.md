@@ -12,8 +12,8 @@ Have these ready:
 - `dist/uoink-extension-3.11.0-cws.zip`, built with `python scripts/build_cws.py`.
 - `listing.md`, `permissions-justification.md`, `privacy-practices.md` and
   `reviewer-test-instructions.md` from this folder.
-- At least one fresh 1280x800 screenshot from `SCREENSHOTS.md`, preferably the
-  YouTube capture and helper setup shots. Do not use the July images unchanged.
+- The 1280x800 screenshots in `screenshots/`, listed in `SCREENSHOTS.md`. They
+  are 3.12.0 captures from 2026-10-31. Upload at least one.
 - `extension/icons/icon128.png`; optional small and marquee tiles in `tiles/`.
 - A monitored support email. Verify that `hi@uoink.app` receives mail.
 - The Limited Use statement from `privacy-practices.md`, published on
@@ -100,7 +100,8 @@ describes these tabs. Dashboard labels can change; keep the field values above.
 ## 4. Submit, about 2 minutes
 
 14. Resolve any incomplete-field messages. Check the helper requirement is
-    prominent, the privacy URL opens without sign-in, and the images show 3.11.
+    prominent, the privacy URL opens without sign-in, and the screenshots are
+    the 3.12.0 set from `SCREENSHOTS.md`.
 15. Click **Submit for review**. In the confirmation dialog, turn off automatic
     publication so you can coordinate the helper and website. Confirm submission.
 16. Enable review/staged notifications on **Account** and monitor that inbox.
