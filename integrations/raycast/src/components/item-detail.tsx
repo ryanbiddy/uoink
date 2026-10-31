@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Detail, Icon, Keyboard } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { citation, getItem, itemMarkdown, formatTimestamp } from "../lib/uoink";
+import { getItem, itemMarkdown, formatTimestamp, quoteCitation } from "../lib/uoink";
 import { SetupActions } from "../lib/feedback";
 
 type Selector = { itemId: string } | { slug: string };
@@ -60,7 +60,13 @@ export function ItemDetail({ selector, title }: { selector: Selector; title?: st
                   <Action.CopyToClipboard
                     key={excerpt.excerpt_id}
                     title={formatTimestamp(excerpt.start) ?? excerpt.text.slice(0, 40)}
-                    content={citation(excerpt.text, name, excerpt.deep_link ?? data.source_link, excerpt.start)}
+                    content={quoteCitation(
+                      excerpt.text,
+                      name,
+                      excerpt.deep_link ?? data.source_link,
+                      excerpt.start,
+                      excerpt.truncated,
+                    )}
                   />
                 ))}
               </ActionPanel.Submenu>

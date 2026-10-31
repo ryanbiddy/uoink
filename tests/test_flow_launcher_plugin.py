@@ -19,6 +19,7 @@ def plugin(monkeypatch, tmp_path):
 
 HIT = {"item_id": "abc123", "title": "How memory works", "channel": "Learning Lab", "start": 252.4,
        "deep_link": "https://www.youtube.com/watch?v=abc123&t=252s", "source_link": "https://www.youtube.com/watch?v=abc123",
+       "evidence_kind": "timed_clip", "passage_verified": True,
        "preview": {"text": "Working memory holds about four chunks.", "truncated": False}}
 
 
@@ -33,11 +34,26 @@ def test_search_results_open_the_moment_and_copy_a_citation(plugin, monkeypatch)
     assert row["title"] == "How memory works"
     assert row["subTitle"].startswith("4:12 · Learning Lab · Working memory")
     assert row["jsonRPCAction"] == {"method": "open_url", "parameters": [HIT["deep_link"]]}
-    assert row["copyText"].endswith("[How memory works @ 4:12](https://www.youtube.com/watch?v=abc123&t=252s)")
+    assert row["copyText"] == ("> Working memory holds about four chunks.\n>\n"
+                               "> — [How memory works @ 4:12](https://www.youtube.com/watch?v=abc123&t=252s)")
     menu = plugin.context_menu(row["contextData"])
     assert [item["title"] for item in menu] == ["Copy citation", "Copy link", "Open source", "Copy item ID"]
     assert menu[0]["jsonRPCAction"]["method"] == "Flow.Launcher.CopyToClipboard"
     assert menu[0]["jsonRPCAction"]["parameters"][1:] == [False, True]
+
+
+def test_only_verified_passages_are_quoted(plugin, monkeypatch):
+    cut = {**HIT, "preview": {"text": "Working memory holds about four chunks at on", "truncated": True}}
+    hint = {**HIT, "start": None, "deep_link": None, "evidence_kind": "discovery_hint", "passage_verified": False,
+            "preview": {"text": "…memory holds about…", "truncated": False}}
+    monkeypatch.setattr(plugin, "run_uoink", lambda *a, **k: {"ok": True, "hits": [cut, hint], "library_items": 2})
+    timed, metadata = plugin.query("memory")
+    assert timed["copyText"] == ("> Working memory holds about four chunks at on…\n>\n"
+                                 "> — [How memory works @ 4:12](https://www.youtube.com/watch?v=abc123&t=252s)")
+    assert metadata["copyText"] == "[How memory works](https://www.youtube.com/watch?v=abc123)"
+    assert metadata["contextData"]["citation"] == metadata["copyText"]
+    assert plugin.hit_citation({**cut, "passage_verified": False}) == (
+        "[How memory works @ 4:12](https://www.youtube.com/watch?v=abc123&t=252s)")
 
 
 def test_links_are_offered_for_capture_and_text_is_searched(plugin, monkeypatch):

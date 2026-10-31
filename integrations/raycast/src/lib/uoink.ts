@@ -3,6 +3,9 @@ import { execFile } from "node:child_process";
 import { existsSync, statSync } from "node:fs";
 import { homedir } from "node:os";
 import path from "node:path";
+import { formatTimestamp } from "./citation";
+
+export { formatTimestamp, hitCitation, isVerifiedPassage, linkCitation, quoteCitation } from "./citation";
 
 // The uoink CLI prints one JSON envelope on stdout. Failures exit 1 with
 // {"ok": false, "error": ...}; usage errors exit 2 with "uoink: ..." on stderr.
@@ -309,36 +312,6 @@ export function asHttpUrl(text: string | undefined): string | undefined {
   }
 }
 
-export function formatTimestamp(seconds: number | null | undefined): string | undefined {
-  if (seconds === null || seconds === undefined || !Number.isFinite(seconds)) {
-    return undefined;
-  }
-  const total = Math.max(0, Math.floor(seconds));
-  const h = Math.floor(total / 3600);
-  const m = Math.floor((total % 3600) / 60);
-  const s = String(total % 60).padStart(2, "0");
-  return h > 0 ? `${h}:${String(m).padStart(2, "0")}:${s}` : `${m}:${s}`;
-}
-
-function quote(text: string): string {
-  return text
-    .trim()
-    .split(/\r?\n/)
-    .map((line) => `> ${line}`)
-    .join("\n");
-}
-
-/** A Markdown quote that links back to the moment, or to the source when untimed. */
-export function citation(text: string, title: string, link: string | null, start: number | null): string {
-  const stamp = formatTimestamp(start);
-  const label = stamp ? `${title} @ ${stamp}` : title;
-  return `${quote(text)}\n>\n> — ${link ? `[${label}](${link})` : label}`;
-}
-
-export function hitCitation(hit: SearchHit): string {
-  return citation(hit.preview.text, hit.title, hit.deep_link ?? hit.source_link, hit.start);
-}
-
 /** The whole card as Markdown, for the detail view, AI mentions and copying. */
 export function itemMarkdown(item: LibraryItem): string {
   const { card } = item;
@@ -352,7 +325,7 @@ export function itemMarkdown(item: LibraryItem): string {
   const excerpts = (card.excerpts ?? []).map((excerpt) => {
     const stamp = formatTimestamp(excerpt.start);
     const heading = stamp ? (excerpt.deep_link ? `[${stamp}](${excerpt.deep_link})` : stamp) : "Excerpt";
-    return `### ${heading}\n\n${excerpt.text.trim()}${excerpt.truncated ? " …" : ""}`;
+    return `### ${heading}\n\n${excerpt.text.trim()}${excerpt.truncated ? "…" : ""}`;
   });
   return [
     `# ${title}`,

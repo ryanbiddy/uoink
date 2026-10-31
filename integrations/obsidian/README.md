@@ -8,7 +8,7 @@ insert a quote that links to the exact timestamp, and save new links.
 
 | Command | What it does |
 |---|---|
-| **Insert citation from library** | Search as you type. Pick a result to insert a Markdown quote that links to the matched moment. With an empty search, pick a recent capture to insert its title, source and timestamped excerpts. |
+| **Insert citation from library** | Search as you type. Pick a result to insert a citation that links to the matched moment. With an empty search, pick a recent capture to insert its title, source and timestamped excerpts. |
 | **Search library and open the moment** | Same search; picking a result opens the source at that timestamp in your browser. |
 | **Save a link to the library** | Uoink a YouTube video or playlist, X post, Reddit thread, podcast feed or web page. Uses the selected text if it's a link, otherwise asks (prefilled from the clipboard). |
 
@@ -19,6 +19,11 @@ A citation looks like this:
 >
 > — [How memory works @ 4:12](https://www.youtube.com/watch?v=abc123&t=252s)
 ```
+
+Only a passage Uoink verified in the saved source is quoted, and "…" marks a
+quote that was cut short. A result that matched only the title or metadata is
+inserted as a link, such as `[How memory works](https://www.youtube.com/watch?v=abc123)`.
+The Raycast, Alfred and Flow Launcher integrations copy the same formats.
 
 ## Requirements
 

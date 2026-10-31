@@ -2,6 +2,9 @@ import { execFile } from "child_process";
 import { existsSync, statSync } from "fs";
 import { homedir } from "os";
 import * as path from "path";
+import { quoteCitation } from "./citation";
+
+export { formatTimestamp, hitCitation, isVerifiedPassage, linkCitation, quoteCitation } from "./citation";
 
 // The uoink CLI prints one JSON envelope on stdout. Failures exit 1 with
 // {"ok": false, "error": ...}; usage errors exit 2 with "uoink: ..." on stderr.
@@ -11,6 +14,8 @@ export interface SearchHit {
 	title: string;
 	channel: string;
 	source_link: string | null;
+	evidence_kind: "timed_clip" | "text_only" | "discovery_hint";
+	passage_verified?: boolean;
 	start: number | null;
 	deep_link: string | null;
 	preview: { text: string; truncated: boolean };
@@ -200,39 +205,13 @@ export function asHttpUrl(text: string | undefined | null): string | undefined {
 	}
 }
 
-export function formatTimestamp(seconds: number | null | undefined): string | undefined {
-	if (seconds === null || seconds === undefined || !Number.isFinite(seconds)) {
-		return undefined;
-	}
-	const total = Math.max(0, Math.floor(seconds));
-	const h = Math.floor(total / 3600);
-	const m = Math.floor((total % 3600) / 60);
-	const s = String(total % 60).padStart(2, "0");
-	return h > 0 ? `${h}:${String(m).padStart(2, "0")}:${s}` : `${m}:${s}`;
-}
-
-/** A Markdown quote that links back to the moment, or to the source when untimed. */
-export function citation(text: string, title: string, link: string | null, start: number | null): string {
-	const stamp = formatTimestamp(start);
-	const label = stamp ? `${title} @ ${stamp}` : title;
-	const quote = text
-		.trim()
-		.split(/\r?\n/)
-		.map((line) => `> ${line}`)
-		.join("\n");
-	return `${quote}\n>\n> — ${link ? `[${label}](${link})` : label}`;
-}
-
-export function hitCitation(hit: SearchHit): string {
-	return citation(hit.preview.text || hit.title, hit.title, hit.deep_link ?? hit.source_link, hit.start);
-}
-
 /** An item's card as Markdown: title, source and timestamped excerpts. */
 export function itemMarkdown(item: LibraryItem): string {
 	const title = item.card.title || item.card.slug || item.item_id;
 	const heading = item.source_link ? `## [${title}](${item.source_link})` : `## ${title}`;
+	// Card excerpts are stored text from the item itself, so they are quoted.
 	const excerpts = (item.card.excerpts ?? []).map((excerpt) =>
-		citation(excerpt.text + (excerpt.truncated ? " …" : ""), title, excerpt.deep_link ?? item.source_link, excerpt.start),
+		quoteCitation(excerpt.text, title, excerpt.deep_link ?? item.source_link, excerpt.start, excerpt.truncated),
 	);
 	return [heading, ...(excerpts.length ? excerpts : [item.card.summary_hint ?? ""])].filter(Boolean).join("\n\n");
 }

@@ -12,6 +12,7 @@ from __future__ import annotations
 import json
 import os
 from pathlib import Path
+import re
 import subprocess
 import sys
 from urllib.parse import urlparse
@@ -82,11 +83,38 @@ def timestamp(seconds) -> str:
     return f"{hours}:{minutes:02d}:{secs:02d}" if hours else f"{minutes}:{secs:02d}"
 
 
-def citation(text: str, title: str, link: str | None, start) -> str:
+# Citation formats shared by every Uoink integration (Raycast, Obsidian, Alfred,
+# Flow Launcher). A verified passage is quoted with an attribution line;
+# anything else is a link to the item and moment with no quote.
+def link_citation(title: str, link: str | None, start) -> str:
     stamp = timestamp(start)
     label = f"{title} @ {stamp}" if stamp else title
-    quote = "\n".join(f"> {line}" for line in (text or "").strip().splitlines())
-    return f"{quote}\n>\n> — {f'[{label}]({link})' if link else label}"
+    return f"[{label}]({link})" if link else label
+
+
+def quote_citation(text: str, title: str, link: str | None, start, truncated: bool = False) -> str:
+    """A Markdown quote with an attribution line. "…" marks text that was cut short."""
+    body = (text or "").strip()
+    if not body:
+        return link_citation(title, link, start)
+    lines = re.split(r"\r?\n", body + ("…" if truncated else ""))
+    quote = "\n".join(f"> {line}" for line in lines)
+    return f"{quote}\n>\n> — {link_citation(title, link, start)}"
+
+
+def is_verified(hit: dict) -> bool:
+    """Uoink found this exact text in the saved source. Title and metadata matches never are."""
+    return hit.get("passage_verified") is True and hit.get("evidence_kind") != "discovery_hint"
+
+
+def hit_citation(hit: dict) -> str:
+    title = hit.get("title") or hit.get("item_id") or "Untitled"
+    preview = hit.get("preview") or {}
+    link = hit.get("deep_link") or hit.get("source_link")
+    if is_verified(hit):
+        return quote_citation(preview.get("text") or "", title, link, hit.get("start"),
+                              preview.get("truncated") is True)
+    return link_citation(title, link, hit.get("start"))
 
 
 def one_line(text: str, limit: int = 120) -> str:
@@ -109,7 +137,7 @@ def hit_item(hit: dict) -> dict:
     title = hit.get("title") or hit.get("item_id") or "Untitled"
     preview = (hit.get("preview") or {}).get("text") or ""
     link = hit.get("deep_link") or hit.get("source_link")
-    quote = citation(preview or title, title, link, hit.get("start"))
+    quote = hit_citation(hit)
     stamp = timestamp(hit.get("start"))
     subtitle = " · ".join(part for part in (stamp, hit.get("channel") or "", one_line(preview)) if part)
     mods = {"cmd": {"arg": quote, "subtitle": "Copy a Markdown citation", "variables": {"action": "copy"}},

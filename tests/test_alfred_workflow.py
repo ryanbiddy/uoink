@@ -38,14 +38,32 @@ def workflow():
 def test_search_rows_open_moments_and_copy_citations(workflow, monkeypatch):
     hit = {"item_id": "abc123", "title": "How memory works", "channel": "Learning Lab", "start": 3725,
            "deep_link": "https://youtu.be/abc123?t=3725", "source_link": "https://youtu.be/abc123",
-           "preview": {"text": "Working memory holds about four chunks."}}
+           "evidence_kind": "timed_clip", "passage_verified": True,
+           "preview": {"text": "Working memory holds about four chunks.", "truncated": False}}
     monkeypatch.setattr(workflow, "run_uoink", lambda *a, **k: {"ok": True, "hits": [hit], "library_items": 1})
     [row] = workflow.filter_items("memory")
     assert row["arg"] == hit["deep_link"] and row["variables"] == {"action": "open"}
     assert row["subtitle"].startswith("1:02:05 · Learning Lab")
-    assert row["mods"]["cmd"]["arg"].endswith("[How memory works @ 1:02:05](https://youtu.be/abc123?t=3725)")
+    assert row["mods"]["cmd"]["arg"] == ("> Working memory holds about four chunks.\n>\n"
+                                         "> — [How memory works @ 1:02:05](https://youtu.be/abc123?t=3725)")
     assert row["mods"]["ctrl"]["arg"] == hit["source_link"]
     assert row["text"]["copy"] == row["mods"]["cmd"]["arg"]
+
+
+def test_only_verified_passages_are_quoted(workflow):
+    base = {"item_id": "abc123", "title": "How memory works", "start": 252.9,
+            "deep_link": "https://youtu.be/abc123?t=252", "source_link": "https://youtu.be/abc123"}
+    cut = {**base, "evidence_kind": "timed_clip", "passage_verified": True,
+           "preview": {"text": "Working memory holds about\nfour chunks at on", "truncated": True}}
+    assert workflow.hit_citation(cut) == ("> Working memory holds about\n> four chunks at on…\n>\n"
+                                          "> — [How memory works @ 4:12](https://youtu.be/abc123?t=252)")
+    unverified = {**cut, "passage_verified": False}
+    assert workflow.hit_citation(unverified) == "[How memory works @ 4:12](https://youtu.be/abc123?t=252)"
+    # A title or metadata match has no moment and is never quoted, even if flagged.
+    hint = {**base, "start": None, "deep_link": None, "evidence_kind": "discovery_hint",
+            "passage_verified": True, "preview": {"text": "…memory holds about…", "truncated": False}}
+    assert workflow.hit_citation(hint) == "[How memory works](https://youtu.be/abc123)"
+    assert workflow.hit_citation({**hint, "source_link": None}) == "How memory works"
 
 
 def test_links_capture_and_missing_app_offers_install(workflow, monkeypatch, tmp_path):

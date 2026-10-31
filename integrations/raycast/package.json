@@ -89,7 +89,7 @@
   ],
   "resourceProvider": "read-item",
   "ai": {
-    "instructions": "Uoink is the user's local library of saved YouTube videos, podcasts, web articles, X posts, Reddit threads and notes. It runs on the user's computer; nothing is fetched from a Uoink cloud. Answer questions about saved material from search-library or get-library-item results only, and never invent quotes, titles or timestamps. When a result has a timestamp and link, cite it as a Markdown link such as [Video title @ 12:34](link). Quote a passage word for word only when passageVerified is true; otherwise paraphrase and say the match is approximate. If search returns nothing, say so and suggest other key words. Only call uoink-link or save-note when the user explicitly asks to save, capture or uoink something.",
+    "instructions": "Uoink is the user's local library of saved YouTube videos, podcasts, web articles, X posts, Reddit threads and notes. It runs on the user's computer; nothing is fetched from a Uoink cloud. Answer questions about saved material from search-library or get-library-item results only, and never invent quotes, titles or timestamps. When a result has a timestamp and link, cite it as a Markdown link such as [Video title @ 12:34](link). Quote a passage word for word only when passageVerified is true, and end the quote with … when passageTruncated is true; otherwise paraphrase and say the match is approximate. If search returns nothing, say so and suggest other key words. Only call uoink-link or save-note when the user explicitly asks to save, capture or uoink something.",
     "evals": [
       {
         "input": "@uoink what have I saved about working memory?",
