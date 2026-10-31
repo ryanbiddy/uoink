@@ -44,6 +44,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Fixed
 
+- Wikipedia articles capture instead of failing as an "empty JavaScript
+  page". The wiki skin puts feature flags such as `main-menu-pinned-disabled`
+  on the `<html>` element, the menu filter matched them, and the whole page
+  was dropped before the text was measured. Class names on `<html>` and
+  `<body>` no longer hide the page; empty JavaScript pages still fail.
+- Wikipedia captures are titled with the article name instead of its short
+  description. When a page's structured data gives a different `name` and
+  `headline`, Uoink now uses the headline only if it matches the page title
+  and the name does not, as Readability does. Before, the headline always
+  won, and Wikipedia's headline is the short description.
+- Captured web pages show a thumbnail in the Library. Uoink saves the page's
+  `og:image` (else `twitter:image`, else `image_src`) as `thumbnail.jpg`,
+  where video captures keep theirs, through the same public-network checks,
+  10 MB cap and image type check as saved images. A missing or broken image
+  leaves the page saved without a thumbnail.
 - An X post with a video shows the video's poster on its Library row instead
   of a grey "post" block. Capturing the post saves the poster as its
   thumbnail; a poster that can't be fetched never fails the capture. Text

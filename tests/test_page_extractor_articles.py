@@ -176,6 +176,52 @@ def test_single_loader_and_javascript_prompt_without_script():
     assert not result["ok"] and "empty JavaScript page" in result["diagnostic"]
 
 
+def test_root_skin_flags_do_not_hide_a_server_rendered_article():
+    # Wiki skins put feature flags such as "main-menu-pinned-disabled" on <html>.
+    result = pages.extract_page(None, URL, enforce_allowlist=False,
+                                http_open=lambda *a, **k: response(html("wiki-skin")))
+    assert result["ok"] and result["extraction_engine"] == article.ENGINE
+    assert result["article_status"] == "found"
+    # The JSON-LD headline is the wiki's short description; the name is the title.
+    assert result["title"] == result["metadata"]["title"] == "Harbor lanterns"
+    assert "dissolves in salt water" in result["markdown"] and "## History" in result["markdown"]
+    for unwanted in ("NAV NOISE", "MENU NOISE", "FOOTER NOISE"):
+        assert unwanted not in result["markdown"]
+
+
+@pytest.mark.parametrize("title,ld,expected", [
+    ("Harbor lanterns - Example Wiki", {"name": "Harbor lanterns", "headline": "paper lights floated on the tide"},
+     "Harbor lanterns"),
+    ("River path opens after repairs | Example Daily", {"name": "Example Daily", "headline": "River path opens after repairs"},
+     "River path opens after repairs"),
+    ("Example Daily | River path opens after repairs", {"name": "Example Daily", "headline": "River path opens after repairs"},
+     "River path opens after repairs"),
+    ("River path opens after repairs", {"name": "River path opens after repairs today", "headline": "River path opens after repairs"},
+     "River path opens after repairs today"),
+    ("Example Daily", {"name": "River path opens", "headline": "Repairs finished on the bridge"}, "River path opens"),
+    ("Example Daily", {"headline": "River path opens"}, "River path opens"),
+    ("Example Daily", {"name": "River path opens"}, "River path opens"),
+])
+def test_jsonld_headline_wins_only_when_it_matches_the_page_title(title, ld, expected):
+    data = json.dumps({"@context": "https://schema.org", "@type": "NewsArticle", **ld})
+    # JSON-LD ahead of <title>: the choice waits for the whole document.
+    document = (f'<head><script type="application/ld+json">{data}</script><title>{title}</title></head>'
+                f"<article><p>{prose(364)}</p></article>")
+    assert article.extract(document, URL)["metadata"]["title"] == expected
+
+
+@pytest.mark.parametrize("root", ['<html class="client-nojs main-menu-pinned">',
+                                  '<html><body class="has-sidebar comments-open">'])
+def test_root_class_hints_keep_articles_and_shells_apart(root):
+    body = prose(364)
+    result = article.extract(f'{root}<div class="menu">MENU NOISE</div>'
+                             f'<article><p>{body}</p></article><script src="/app.js"></script>', URL)
+    assert result["ok"] and body in result["markdown"] and "MENU NOISE" not in result["markdown"]
+    shell = article.extract(f'{root}<div id="root"></div><noscript>Please enable JavaScript.</noscript>'
+                            '<script src="/app.js"></script>', URL)
+    assert not shell["ok"] and "empty JavaScript page" in shell["diagnostic"]
+
+
 @pytest.mark.parametrize("base,expected", [
     ("https://cdn.example.org/blog/post/", "https://cdn.example.org/blog/post/photo.html"),
     ("/images/", "https://news.example.org/images/photo.html"),
@@ -396,6 +442,111 @@ def test_publication_preserves_identity_and_adds_provenance(tmp_path):
         assert pages.persist_page_yoink(idx, result, data_root=tmp_path / "corpus") == identifier
     finally:
         idx.close()
+
+
+def png():
+    from PIL import Image
+    buffer = io.BytesIO()
+    Image.new("RGB", (64, 48), (40, 90, 160)).save(buffer, format="PNG")
+    return buffer.getvalue()
+
+
+@pytest.mark.parametrize("head,expected", [
+    ('<meta property="og:image" content="/media/lead.png"><meta name="twitter:image" content="https://cdn.example.org/t.png">',
+     "https://news.example.org/media/lead.png"),
+    ('<meta property="og:image" content="data:image/png;base64,AAAA"><meta name="twitter:image" content="t.png">',
+     "https://news.example.org/notes/t.png"),
+    ('<link rel="image_src" href="//cdn.example.org/src.png">', "https://cdn.example.org/src.png"),
+    ('<base href="https://cdn.example.org/a/"><meta property="og:image" content="lead.png">',
+     "https://cdn.example.org/a/lead.png"),
+    ('<meta property="og:image" content="  ">', None),
+])
+def test_lead_image_prefers_og_then_twitter_then_image_src(head, expected):
+    result = article.extract(f"<head><title>River path opens</title>{head}</head>"
+                             f"<article><p>{prose(364)}</p></article>", URL)
+    assert result["ok"] and result["metadata"].get("image") == expected
+
+
+def capture(tmp_path, http_open, document=None):
+    import index
+    idx = index.Index.open(tmp_path / "index.db")
+    try:
+        result = pages.extract_page(None, URL, enforce_allowlist=False,
+                                    http_open=lambda *a, **k: response(document or html("wiki-skin")))
+        identifier = pages.persist_page_yoink(idx, result, data_root=tmp_path / "corpus", http_open=http_open)
+        return idx.get_yoink(identifier)
+    finally:
+        idx.close()
+
+
+def test_page_lead_image_becomes_the_library_thumbnail(tmp_path):
+    opened = []
+    def http_open(url, **kwargs):
+        opened.append((url, kwargs))
+        return response(png())
+    row = capture(tmp_path, http_open)
+    # The Library row and reader look for thumbnail.jpg beside the corpus file.
+    folder = Path(row["corpus_path"]).parent
+    assert (folder / "thumbnail.jpg").read_bytes().startswith(b"\xff\xd8\xff")
+    assert [url for url, _ in opened] == ["https://news.example.org/media/thumb/harbor-lanterns-960.jpg"]
+    assert opened[0][1]["timeout"] == pages._PAGE_FETCH_TIMEOUT_SEC
+    assert json.loads(row["metadata_json"])["image"] == opened[0][0]
+    assert sorted(p.name for p in folder.iterdir()) == ["page.json", "page.md", "thumbnail.jpg"]
+
+
+def failing_image(kind):
+    def http_open(url, **kwargs):
+        if kind == "error":
+            raise OSError("image host unavailable")
+        if kind == "status":
+            body = response(png())
+            body.status = 404
+            return body
+        if kind == "html":
+            return response(b"<!doctype html><title>Not an image</title>")
+        if kind == "large":
+            import images
+            return response(png() + b"\0" * images.MAX_IMAGE_BYTES)
+        return response(b"\x89PNG\r\n\x1a\n" + b"\0" * 64)  # right magic, no image
+    return http_open
+
+
+@pytest.mark.parametrize("kind", ["error", "status", "html", "large", "corrupt"])
+def test_failed_lead_image_never_fails_the_capture(tmp_path, kind):
+    row = capture(tmp_path, failing_image(kind))
+    assert row and Path(row["corpus_path"]).is_file()
+    assert sorted(p.name for p in Path(row["corpus_path"]).parent.iterdir()) == ["page.json", "page.md"]
+
+
+def test_lead_image_uses_the_public_network_policy(tmp_path, monkeypatch):
+    refused = []
+    public_open = pages.source_subscriptions.public_http_open
+    def spy(url, **kwargs):
+        try:
+            return public_open(url, **kwargs)
+        except pages.source_subscriptions.ServiceError as exc:
+            refused.append(exc.code)
+            raise
+    monkeypatch.setattr(pages.source_subscriptions, "public_http_open", spy)
+    document = html("wiki-skin").replace(b"/media/thumb/harbor-lanterns-960.jpg", b"http://192.168.1.2/lead.jpg")
+    row = capture(tmp_path, None, document)
+    assert refused == ["unsupported_source"]
+    assert not (Path(row["corpus_path"]).parent / "thumbnail.jpg").exists()
+
+
+def test_page_without_lead_image_or_other_sources_fetch_nothing(tmp_path):
+    http_open = Mock(side_effect=AssertionError("no image fetch expected"))
+    assert capture(tmp_path, http_open, html("meta"))
+    result = {"ok": True, "url": "https://www.reddit.com/r/example/comments/1", "title": "Thread",
+              "markdown": prose(364), "metadata": {"image": "https://cdn.example.org/t.png"}}
+    import index
+    idx = index.Index.open(tmp_path / "reddit.db")
+    try:
+        assert pages.persist_page_yoink(idx, result, data_root=tmp_path / "corpus", source_type="reddit_thread",
+                                        subfolder="Reddit", slug_prefix="reddit", http_open=http_open)
+    finally:
+        idx.close()
+    http_open.assert_not_called()
 
 
 def test_bounds_and_malformed_html(monkeypatch):

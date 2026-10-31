@@ -53,7 +53,9 @@ Uoink makes these outbound requests:
   YouTube and its delivery hosts. A pasted Reddit thread uses Reddit's public
   JSON endpoint. A pasted X post uses X's public syndication endpoint at
   `cdn.syndication.twimg.com`. A web-page or podcast capture requests the
-  user-supplied web page or podcast feed. Those services receive the ordinary
+  user-supplied web page or podcast feed; a web-page capture also requests
+  the preview image the page names for its thumbnail, which can be on another
+  host. Those services receive the ordinary
   request metadata needed to answer, such as your IP address and Uoink's user
   agent, and may redirect the request to their own CDN.
 - **Anthropic API requests — only with your own key.** Uoink has no
