@@ -35,6 +35,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - The agent-kit plugin folder has the README and license that the Claude
   plugin directory requires.
 
+### Fixed
+
+- Newest first is newest first in a library that mixes videos with pages,
+  posts or notes. Videos store their save time as local time and the rest
+  as UTC, and the two were compared as text, so west of UTC a page saved in
+  the morning outranked a video saved that afternoon. The Library list and
+  sort control, date filters, `uoink recent` and the MCP recent and facet
+  tools now compare both as local time. Stored times are unchanged.
+- Topic keywords match whole words. A page that says "average" or "storage"
+  no longer files under AI and ML for containing "RAG", and a keyword like
+  "AI" no longer matches inside "said". Links, and description lines that
+  are only a short label and a link ("Facebook - https://..."), no longer
+  count, so a lecture's social link list doesn't file it under Social Media
+  Research. A plural "s" still matches ("creators", "LLMs").
+
 ## [3.12.0] - 2026-10-30
 
 ### Added

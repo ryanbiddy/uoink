@@ -354,13 +354,15 @@ class IndexSources:
             if filters.get(key):
                 clauses.append(f"y.{key} = ?")
                 params.append(filters[key])
+        # Same local-day bounds as the keyword search.
+        from index import capture_time_sql
         if filters.get("date_from"):
             datetime.strptime(filters["date_from"], "%Y-%m-%d")
-            clauses.append("y.yoinked_at >= ?")
+            clauses.append(f"{capture_time_sql('y.yoinked_at')} >= ?")
             params.append(filters["date_from"])
         if filters.get("date_to"):
             end = datetime.strptime(filters["date_to"], "%Y-%m-%d") + timedelta(days=1)
-            clauses.append("y.yoinked_at < ?")
+            clauses.append(f"{capture_time_sql('y.yoinked_at')} < ?")
             params.append(end.strftime("%Y-%m-%d"))
         sources = []
         with (nullcontext(_db) if _db is not None else self.index.read_snapshot()) as db:
