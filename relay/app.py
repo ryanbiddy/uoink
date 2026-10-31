@@ -555,9 +555,12 @@ class RelayHandler(BaseHTTPRequestHandler):
         self._json(status, {"ok": False, "error": message}, extra)
 
     def _client_ip(self) -> str:
+        """The address Render's proxy saw: the LAST X-Forwarded-For entry,
+        which the proxy appends. Earlier entries come from the client and
+        can be forged, so they never change the key."""
         forwarded = self.headers.get("X-Forwarded-For") or ""
-        first = forwarded.split(",", 1)[0].strip()
-        return first or self.client_address[0]
+        last = forwarded.rsplit(",", 1)[-1].strip()
+        return last or self.client_address[0]
 
     def _token_role(self) -> str | None:
         header = self.headers.get("Authorization") or ""
@@ -576,13 +579,17 @@ class RelayHandler(BaseHTTPRequestHandler):
         return None
 
     def _authorize(self, role: str) -> bool:
-        ip = self._client_ip()
-        if self.relay.auth_failures.exceeded(ip):
-            self._error(429, "too many failed attempts; try again later",
-                        {"Retry-After": str(AUTH_FAIL_WINDOW_SEC)})
-            return False
+        # The token decides first: a valid push or pull token is never
+        # refused, so nobody can lock the phone out by failing from (or
+        # claiming) its address. Only missing or wrong tokens are counted
+        # and throttled.
         actual = self._token_role()
         if actual is None:
+            ip = self._client_ip()
+            if self.relay.auth_failures.exceeded(ip):
+                self._error(429, "too many failed attempts; try again later",
+                            {"Retry-After": str(AUTH_FAIL_WINDOW_SEC)})
+                return False
             self.relay.auth_failures.hit(ip)
             self._error(401, "missing or invalid token", {"WWW-Authenticate": "Bearer"})
             return False

@@ -150,8 +150,10 @@ The relay has no page that shows your links. `GET /healthz` answers whether
 the store is reachable, with no counts. Every response is marked
 `Cache-Control: no-store`.
 
-Abuse limits: after 30 requests with a wrong token from one address in 10
-minutes, that address gets `429` until the window passes. The relay accepts 60
+Abuse limits: after 30 requests with a missing or wrong token from one address
+in 10 minutes, further wrong-token requests from that address get `429` until
+the window passes. A valid token is never refused, so nobody can lock your
+phone out. The address is the one Render's proxy records. The relay accepts 60
 new links a minute, links of up to 2048 characters, notes of up to 500
 characters and requests of up to 16 KiB. It holds at most 500 waiting links
 and answers `429 inbox full` past that.

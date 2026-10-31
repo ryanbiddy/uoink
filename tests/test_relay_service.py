@@ -326,18 +326,38 @@ def test_unknown_routes_and_methods(relay):
 
 # ---- abuse limits -----------------------------------------------------------------
 
-def test_failed_auth_limit_per_client_ip(relay):
-    attacker = {"X-Forwarded-For": "203.0.113.9, 10.0.0.1"}
+def test_failed_auth_limit_throttles_only_invalid_tokens(relay):
+    proxy_seen = {"X-Forwarded-For": "203.0.113.9"}
     for _ in range(30):
-        assert relay.request("GET", "/v1/links", token="w" * 40, headers=attacker)[0] == 401
-    status, payload, headers, _ = relay.request("GET", "/v1/links", token="w" * 40, headers=attacker)
+        assert relay.request("GET", "/v1/links", token="w" * 40, headers=proxy_seen)[0] == 401
+    status, payload, headers, _ = relay.request("GET", "/v1/links", token="w" * 40, headers=proxy_seen)
     assert status == 429 and headers["retry-after"] == "600"
-    # The limited address is blocked even with the right token...
-    assert relay.request("GET", "/v1/links", token=PULL, headers=attacker)[0] == 429
-    # ...another address is not, and the window passes.
-    assert relay.request("GET", "/v1/links", token=PULL, headers={"X-Forwarded-For": "198.51.100.4"})[0] == 200
+    assert relay.request("POST", "/v1/links", {"url": "https://example.com/x"}, headers=proxy_seen)[0] == 429
+    # A valid token always proceeds from the tripped address, and the role
+    # check still applies.
+    assert relay.request("GET", "/v1/links", token=PULL, headers=proxy_seen)[0] == 200
+    assert relay.push("https://example.com/kept", headers=proxy_seen)[0] == 201
+    assert relay.request("GET", "/v1/links", token=PUSH, headers=proxy_seen)[0] == 403
+    # Another address is not throttled, and the window passes.
+    assert relay.request("GET", "/v1/links", token="w" * 40, headers={"X-Forwarded-For": "198.51.100.4"})[0] == 401
     relay.clock.advance(600)
-    assert relay.request("GET", "/v1/links", token=PULL, headers=attacker)[0] == 200
+    assert relay.request("GET", "/v1/links", token="w" * 40, headers=proxy_seen)[0] == 401
+
+
+def test_limiter_keys_on_the_proxy_appended_address(relay):
+    # Render appends the address it saw; forged earlier hops never change the key.
+    for n in range(30):
+        forged = {"X-Forwarded-For": f"10.0.0.{n}, 192.0.2.{n}, 203.0.113.50"}
+        assert relay.request("GET", "/v1/links", token="w" * 40, headers=forged)[0] == 401
+    assert relay.request("GET", "/v1/links", token="w" * 40,
+                         headers={"X-Forwarded-For": "198.51.100.200, 203.0.113.50"})[0] == 429
+    assert relay.request("GET", "/v1/links", token="w" * 40,
+                         headers={"X-Forwarded-For": "203.0.113.50, 198.51.100.7"})[0] == 401
+    # With no header the socket address is the key.
+    for _ in range(30):
+        relay.request("GET", "/v1/links", token="w" * 40)
+    assert relay.request("GET", "/v1/links", token="w" * 40)[0] == 429
+    assert relay.request("GET", "/v1/links", token=PULL)[0] == 200
 
 
 def test_push_rate_limit_is_sixty_a_minute(relay):
