@@ -1,4 +1,4 @@
-# Uoink 3.11 listing fields
+# Uoink 3.12 listing fields
 
 Use the manifest name and summary below. They are already in the upload zip.
 The dashboard may populate them from the manifest instead of offering editable
@@ -21,9 +21,9 @@ English (United States).
 
 Save a source while you browse, then find it again in your own library.
 
-Uoink captures YouTube transcripts, frames, comments and source details on your Windows PC. It also supports X posts and articles, Reddit threads, and supported web pages and podcast links. What gets saved depends on the source.
+Uoink captures YouTube transcripts, frames, comments and source details on your computer. It also supports X posts and articles, Reddit threads, and supported web pages and podcast links. What gets saved depends on the source.
 
-The free Uoink Windows helper is required. Install it from https://uoink.app/install and keep it running. Without the helper, the extension shows Offline and explains how to connect it. Capture controls stay disabled until it connects.
+The free Uoink helper app for Windows or Mac is required. Install it from https://uoink.app/install and keep it running. Without the helper, the extension shows Offline and explains how to connect it. Capture controls stay disabled until it connects.
 
 To save a source:
 
@@ -33,15 +33,15 @@ To save a source:
 
 YouTube captures can include a timestamped transcript, selected frames, comments and metadata. X Articles can be captured from the article you can already read in your browser. Uoink does not unlock paywalls or grant access to private content. Save only material you have permission to use.
 
-Your library stays on your computer. Uoink has no account or hosted library. The extension talks to the helper at 127.0.0.1:5179, which means this PC. It stores capture state locally; the screenshot interval preference can sync through your browser account.
+Your library stays on your computer. Uoink has no account or hosted library. The extension talks to the helper at 127.0.0.1:5179, which means your own computer. It stores capture state locally; the screenshot interval preference can sync through your browser account.
 
 Some previews load source thumbnails. After a capture is copied, the extension can open Claude in a new tab. It does not paste or submit the capture for you. You choose what to share with Claude, ChatGPT or a connected AI app.
 
-Optional helper features can send selected material to Anthropic using your own API key. Authorized discovery requests can contact ScrapeCreators. Transcription runs locally, but model downloads and model-library telemetry can make outside connections. These details and controls are explained in the privacy policy.
+Optional helper features can send selected material to Anthropic using your own API key. Authorized discovery requests can contact ScrapeCreators. Transcription runs locally with a model that ships with the helper; optional extra models download on request, and model-library telemetry can make outside connections. These details and controls are explained in the privacy policy.
 
 Usage sharing is off by default. If you turn it on in the helper, it sends daily usage counts and app details to usage.uoink.app. Reports include random install and report IDs, but no captured content, URLs, titles, file paths, search text, prompts, API keys or account details. Settings shows the report and lets you turn sharing off.
 
-Uoink is free and open source. Requires Windows 10 or Windows 11, Chrome, and the Uoink helper. Optional third-party services can charge for use.
+Uoink is free and open source. Requires Chrome and the Uoink helper on Windows 10 or 11, or on macOS 15 or later with Apple Silicon. Optional third-party services can charge for use.
 
 Install the helper: https://uoink.app/install
 Privacy and network calls: https://uoink.app/privacy
@@ -49,7 +49,7 @@ Source code and support: https://github.com/ryanbiddy/uoink
 
 ## Single purpose
 
-Save sources the user chooses while browsing into a local research library, with source details and text they can search, read and copy for use with their AI tools. The extension supplies capture buttons, a popup, a shortcut and context-menu actions. The required Windows helper processes and stores the selected material on the user's computer.
+Save sources the user chooses while browsing into a local research library, with source details and text they can search, read and copy for use with their AI tools. The extension supplies capture buttons, a popup, a shortcut and context-menu actions. The required Uoink helper app processes and stores the selected material on the user's computer.
 
 ## Other fields
 
