@@ -157,3 +157,27 @@ Unsupported URL (also `200`, not an error): `ok: false`, `source:
 "unsupported"` or `"empty"`, `endpoint: null`, and a plain-language `note`.
 An X post routes to `/extract/x` (text + thread, shipped v3.3.0) with an
 honest `note`; a video in the post is queued via the extension's Uoink button.
+
+---
+
+## GET /relay/status and POST /relay/check (token-gated)
+
+**What they do.** Report and trigger the phone inbox poller (Uoink Relay,
+`docs/relay.md`). `GET /relay/status` returns
+`{ok, enabled, configured, last_poll_at, last_ok_at, last_error,
+last_capture_error, picked_up_total, last_pending_count, polling}`.
+`POST /relay/check` wakes the `relay-inbox` thread, waits up to 8 s for the
+check and returns the same shape. Both always answer HTTP 200.
+
+**Auth posture.** Token-gated like `/settings`: the status reveals whether the
+user set up a relay. Neither route returns or logs the pull token;
+`last_error` is fixed plain-language text.
+
+**State it touches.** In-memory poller state only. The settings live in
+`settings.json` (`relay_enabled`, `relay_url`, `relay_poll_minutes`) and the
+pull token in the keyring (`relay_pull_token`, isolation-aware service).
+
+**Outbound requests.** Only to the saved `relay_url`, only while
+`relay_enabled` is true: `GET /v1/links` and `DELETE /v1/links/<id>`.
+
+**Consumers.** Dashboard Settings > Capture > Phone inbox.

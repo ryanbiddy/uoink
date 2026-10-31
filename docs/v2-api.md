@@ -2052,6 +2052,59 @@ Fields:
 | `status` | string | Reset status to `"pending"`. |
 | `message` | string | Confirmation message. |
 
+### GET /relay/status and POST /relay/check
+
+The phone inbox ([docs/relay.md](relay.md)). Both require `X-Uoink-Token`.
+`GET /relay/status` reads the poller's state. `POST /relay/check` (body `{}`)
+wakes the poller to check the relay now, waits up to 8 seconds for that check
+and returns the same status. A sleeping free relay can take longer; `polling`
+stays `true` until the check ends. When the phone inbox is off or missing its
+address or pull token, the check contacts nothing and returns the status.
+
+```json
+{
+  "ok": true,
+  "enabled": true,
+  "configured": true,
+  "last_poll_at": "2026-10-30T09:15:02",
+  "last_ok_at": "2026-10-30T09:15:03",
+  "last_error": null,
+  "last_capture_error": null,
+  "picked_up_total": 4,
+  "last_pending_count": 1,
+  "polling": false
+}
+```
+
+| Field | Notes |
+|---|---|
+| `enabled` | `relay_enabled` in settings. |
+| `configured` | A relay address and a pull token are both saved. |
+| `last_poll_at`, `last_ok_at` | Local time of the last check and the last successful one, or `null`. |
+| `last_error` | Why the last check failed, in plain words, or `null`. Never contains the token. |
+| `last_capture_error` | The last capture that returned an error, or `null` after a clean check. |
+| `picked_up_total` | Links handed to a capture tool since the helper started. |
+| `last_pending_count` | Links the relay listed at the last successful check. |
+
+`POST /settings` accepts `relay_enabled` (boolean, default false),
+`relay_url` (`https://`, or `http://` only for `127.0.0.1` and `localhost`; a
+trailing slash is removed; `""` or null clears), `relay_poll_minutes` (1-60,
+default 5) and the write-only `relay_token` (the relay's pull token, 32-4096
+characters without spaces; `""` or null clears). The token goes to the
+system credential store as `relay_pull_token`; `GET /settings` returns only
+`relay_token_set`. A credential store that can't keep the token answers
+`{"ok": false, "error": "credential store unavailable"}`.
+
+The poller wakes every 30 seconds and checks when the phone inbox is on and
+due. It sends `GET <relay_url>/v1/links` with the pull token as a Bearer token
+(90-second timeout, redirects refused), then handles links one at a time,
+oldest first: classify with the `/detect` rules, call the same registry tool
+as `uoink capture`, and `DELETE <relay_url>/v1/links/<id>` once the tool
+returns. Unsupported links are deleted unrouted. A tool that raises keeps its
+link for the next check and drops it after the second raise. A registry rate
+limit leaves the link for the next check. A note on a captured link is also
+saved with `uoink_note`, titled "From my phone".
+
 ## Job state machine
 
 All async jobs use the same state machine:

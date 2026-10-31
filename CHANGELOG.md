@@ -10,6 +10,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- **Phone inbox (Uoink Relay)**, off by default. Deploy a small relay to your
+  own Render account with the Deploy to Render button in
+  [docs/relay.md](docs/relay.md), share links to it from an iOS Shortcut or an
+  Android share target, and Uoink captures each one with the same tool
+  `uoink capture` uses, then deletes it from the relay. The relay stores only
+  the link and an optional note, with a 7-day expiry, and separates the
+  phone's push token from the desktop's pull token. Set it up in
+  Settings > Capture > **Phone inbox**; the pull token stays in the system
+  credential store. New helper routes: `GET /relay/status` and
+  `POST /relay/check`.
+
 ## [3.12.0] - 2026-10-30
 
 ### Added

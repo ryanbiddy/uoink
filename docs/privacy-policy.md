@@ -18,7 +18,9 @@ that source, the GitHub release API only when you click **Check now**, and
 Anthropic only with your own API key: for automatic AI analysis you turn on,
 a key test, or an AI action that you or a connected agent start on demand.
 Optional ScrapeCreators discovery sends your search terms or creator identifier
-with your key only after you enable it and authorize the call. The rest of
+with your key only after you enable it and authorize the call. The optional
+phone inbox contacts only the relay address you set, on your own Render
+account, after you turn it on. The rest of
 this document names those requests, browser visits from dashboard links,
 and the local data they create.
 
@@ -104,6 +106,15 @@ Uoink makes these outbound requests:
   supports it. These model-loading requests
   are separate from Anthropic analysis and the cached-only transcription-model
   check; Uoink passes the local audio path to the speaker-labeling pipeline.
+- **Phone inbox (Uoink Relay): only if you turn it on.** It is off by
+  default. When on, the helper contacts only the relay address you set,
+  sending your pull token in the `Authorization` header, to list waiting links
+  and delete each one after it captures it. Uoink sends nothing else to the
+  relay: no library content, transcripts or settings. The relay runs on your
+  own Render account, not a Uoink server. It holds a shared link and an
+  optional note until Uoink picks it up, or for 7 days at most, and its logs
+  record only method, route, status and duration. Capturing a picked-up link
+  then contacts its source service as above. See [docs/relay.md](relay.md).
 - **GitHub release check — only when you click `Check now`.** The dashboard
   requests the latest Uoink release record from `api.github.com`. It sends no
   corpus content or usage event. GitHub receives the normal request metadata.
@@ -125,7 +136,7 @@ of external link before opening a browser:
    use this same restriction.
 2. **Fixed product links** must match an exact origin and path: the repository
    at `https://github.com/ryanbiddy/uoink`, its `/blob/main/CHANGELOG.md`,
-   `/releases`, and `/issues` pages; `https://claude.ai/new`;
+   `/blob/main/docs/relay.md`, `/releases`, and `/issues` pages; `https://claude.ai/new`;
    `https://claude.ai/download`; `https://twitter.com/intent/tweet`; or
    `https://youtube.com`. Queries and fragments are blocked, except the
    tweet intent's dashboard-built `text` and/or `url` parameters, each at
@@ -181,6 +192,10 @@ Uoink stores the following on your Windows machine:
 - **ScrapeCreators API key** — Windows Credential Manager, via `keyring`,
   username `scrapecreators_key` in the same service. Isolated profiles use
   `Uoink-isolated-<hash>` for both keys, with no fallback to the normal profile.
+- **Phone inbox pull token** — when you save one, Windows Credential Manager
+  via `keyring`, username `relay_pull_token` in the same service (the isolated
+  service for an isolated profile). `settings.json` keeps only the relay
+  address, the on/off choice and the check interval.
 - **Discovery runs** — `discovery\runs\<YYYY-MM>\<run_id>.json` beneath the
   local data folder. These store the submitted query, handle or channel_id;
   run identity, provider, endpoint, mode, platform and fetch time; credit counts,
@@ -264,7 +279,8 @@ third-party trackers. The third parties it can contact are the source service
 you ask it to capture (for example YouTube, Reddit, X, or a supplied web/feed
 host), Anthropic for enabled automatic analysis, key tests or AI actions that
 you or a connected agent start with your key, ScrapeCreators for authorized
-discovery or balance checks after you enable it, Hugging Face for model
+discovery or balance checks after you enable it, the relay you deploy to your
+own Render account if you turn on the phone inbox, Hugging Face for model
 loading during requested speaker labeling, and GitHub when you request an
 update check. Their handling of request data is governed by their own
 policies and, where applicable, the terms of your account.
