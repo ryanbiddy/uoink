@@ -2100,9 +2100,13 @@ due. It sends `GET <relay_url>/v1/links` with the pull token as a Bearer token
 (90-second timeout, redirects refused), then handles links one at a time,
 oldest first: classify with the `/detect` rules, call the same registry tool
 as `uoink capture`, and `DELETE <relay_url>/v1/links/<id>` once the tool
-returns. Unsupported links are deleted unrouted. A tool that raises keeps its
-link for the next check and drops it after the second raise. A registry rate
-limit leaves the link for the next check. A note on a captured link is also
+returns. A registry rate limit leaves the link for the next check. A tool
+that raises keeps its link for the next check. A link that can't be captured
+(unsupported, a capture that returns `ok: false`, or a second raise) is saved
+with `uoink_note` as "From my phone (not captured)": the shared note, the URL
+and a sanitized "Uoink couldn't capture this link: <reason>" line. The link
+is deleted only after that note saves; otherwise it stays, and the next check
+retries the note without capturing again. A note on a captured link is also
 saved with `uoink_note`, titled "From my phone".
 
 ## Job state machine

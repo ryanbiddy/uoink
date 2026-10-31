@@ -16,7 +16,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   own Render account with the Deploy to Render button in
   [docs/relay.md](docs/relay.md), share links to it from an iOS Shortcut or an
   Android share target, and Uoink captures each one with the same tool
-  `uoink capture` uses, then deletes it from the relay. The relay stores only
+  `uoink capture` uses, then deletes it from the relay. A link Uoink can't
+  capture is saved as a note instead, so nothing shared is lost. The relay
+  checks the token before any rate limit, so a valid token is never refused,
+  and keys its failed-auth limit on the address Render's proxy records. It stores only
   the link and an optional note, with a 7-day expiry, and separates the
   phone's push token from the desktop's pull token. Set it up in
   Settings > Capture > **Phone inbox**; the pull token stays in the system

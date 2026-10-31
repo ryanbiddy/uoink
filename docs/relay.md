@@ -101,13 +101,17 @@ Open **Dashboard > Settings > Capture > Phone inbox**:
 and how many links it picked up, or what went wrong.
 
 Each link is captured with the same tool `uoink capture` uses: YouTube videos
-and playlists, X posts, Reddit threads, podcast feeds and web pages. A link
-Uoink can't capture is removed from the relay. Once a capture finishes, the
-link is removed whether it worked or not; a failed capture shows in Activity
-like any other. A web page on a site that isn't in **Sites Uoink works on** is
-refused, so add the site there first. If the share had a note and the capture
-worked, Uoink also saves a note titled "From my phone" with the note and the
-link.
+and playlists, X posts, Reddit threads, podcast feeds and web pages. If the
+share had a note and the capture worked, Uoink also saves a note titled "From
+my phone" with the note and the link.
+
+A link Uoink can't capture becomes a note, so nothing you share is lost. That
+covers a kind of link Uoink doesn't support, a capture that fails, and a web
+page on a site that isn't in **Sites Uoink works on**. The note is titled
+"From my phone (not captured)" and holds your note, the link and why it
+wasn't captured. For a blocked site, allow it in Settings, then Re-uoink. Uoink
+removes the link from the relay only after the note is saved; if the note
+can't be saved, the link waits for the next check.
 
 ## Free plan notes
 

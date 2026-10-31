@@ -11256,6 +11256,7 @@ RELAY_HTTP_TIMEOUT_SEC = 90
 RELAY_MAX_RAISES = 2
 RELAY_CHECK_WAIT_SEC = 8.0
 RELAY_NOTE_TITLE = "From my phone"
+RELAY_FALLBACK_TITLE = "From my phone (not captured)"
 RELAY_DONE_TTL_SEC = 8 * 24 * 60 * 60   # past the relay's own 7-day expiry
 _RELAY_ID_RE = re.compile(r"\A[0-9]{13}-[0-9a-f]{12}\Z")
 _RELAY_RATE_LIMITED_PREFIX = "rate limit exceeded"
@@ -11279,6 +11280,9 @@ _relay_state = {
 # DELETE has not succeeded yet (never captured twice).
 _relay_raises: dict[str, int] = {}
 _relay_done: dict[str, float] = {}
+# Links Uoink couldn't capture whose fallback note hasn't saved yet: the
+# reason to write, retried on the next check before the link is deleted.
+_relay_fallback: dict[str, str] = {}
 
 
 class _RelayError(Exception):
@@ -11397,24 +11401,78 @@ def _relay_delete(base: str, token: str, link_id: str) -> bool:
     return False
 
 
+def _relay_capture_failure_reason(result: dict, url: str) -> str:
+    """Plain words for a capture that returned ok false. A page whose site
+    isn't allowed says how to fix it."""
+    if result.get("code") == "host_not_allowed":
+        host = re.sub(r"[^A-Za-z0-9.-]", "", urlparse(url).hostname or "")[:253]
+        return (f"{host or 'this site'} isn't in Sites Uoink works on. Allow the site in "
+                "Settings > Capture > Sites Uoink works on, then Re-uoink.")
+    error = result.get("error")
+    message = error.get("message") if isinstance(error, dict) else error
+    return _sanitize_error(str(message or "the capture failed")) or "the capture failed"
+
+
+def _relay_save_fallback_note(tools, url: str, note, reason: str) -> bool:
+    """Keep a link Uoink couldn't capture as a Uoink note: the shared note,
+    the URL, and one line saying why."""
+    parts = [note.strip()] if isinstance(note, str) and note.strip() else []
+    if url:
+        parts.append(url)
+    parts.append(f"Uoink couldn't capture this link: {reason}")
+    try:
+        saved = tools.call_tool("uoink_note", {
+            "title": RELAY_FALLBACK_TITLE, "text": "\n\n".join(parts)})
+    except Exception as exc:
+        log.warning("relay: the fallback note was not saved (%s)", type(exc).__name__)
+        return False
+    if isinstance(saved, dict) and saved.get("ok") is True:
+        return True
+    log.warning("relay: the fallback note was not saved")
+    return False
+
+
+def _relay_settle_uncaptured(link_id: str, base: str, token: str, tools,
+                             url: str, note, reason: str) -> str:
+    """Nothing shared is lost: save the link as a note, then delete it from
+    the relay. If the note can't be saved, keep the link for the next check."""
+    if not _relay_save_fallback_note(tools, url, note, reason):
+        _relay_fallback[link_id] = reason
+        _relay_update(last_capture_error=_sanitize_error(
+            "A shared link couldn't be captured or saved as a note. Uoink will "
+            f"try again at the next check. {reason}"))
+        return "kept"
+    _relay_fallback.pop(link_id, None)
+    _relay_done[link_id] = time.time()
+    _relay_update(last_capture_error=_sanitize_error(
+        f"A shared link couldn't be captured, so it was saved as a note: {reason}"))
+    _relay_delete(base, token, link_id)
+    return "noted"
+
+
 def _relay_handle_link(link: dict, base: str, token: str, tools) -> str:
-    """Capture one pending link. Returns kept, deferred, dropped, captured,
-    failed or skipped."""
+    """Capture one pending link. Returns captured, noted (kept as a note
+    because it couldn't be captured), kept, deferred or skipped."""
     link_id = link.get("id")
     if not isinstance(link_id, str) or not _RELAY_ID_RE.match(link_id):
         return "skipped"
     if link_id in _relay_done:
-        # Captured on an earlier check; only the DELETE is still owed.
+        # Handled on an earlier check; only the DELETE is still owed.
         _relay_delete(base, token, link_id)
         return "skipped"
     url = link.get("url") if isinstance(link.get("url"), str) else ""
+    note = link.get("note")
+    if link_id in _relay_fallback:
+        # The capture already failed; only its fallback note is still owed.
+        return _relay_settle_uncaptured(link_id, base, token, tools, url, note,
+                                        _relay_fallback[link_id])
     route = _classify_capture_url(url)
     capture_tools = _capture_tools()
     if not route.get("ok") or route.get("source") not in capture_tools:
-        _relay_delete(base, token, link_id)
-        log.info("relay: dropped a shared link Uoink can't capture (%s)",
+        log.info("relay: a shared link Uoink can't capture becomes a note (%s)",
                  route.get("source") or "unsupported")
-        return "dropped"
+        return _relay_settle_uncaptured(link_id, base, token, tools, url, note,
+                                        "Uoink doesn't support this kind of link yet.")
     name, key = capture_tools[route["source"]]
     try:
         result = tools.call_tool(name, {key: route["canonical"]})
@@ -11422,10 +11480,11 @@ def _relay_handle_link(link: dict, base: str, token: str, tools) -> str:
         attempts = _relay_raises.get(link_id, 0) + 1
         if attempts >= RELAY_MAX_RAISES:
             _relay_raises.pop(link_id, None)
-            _relay_delete(base, token, link_id)
-            log.warning("relay: dropped a shared link after %d failed attempts (%s)",
+            log.warning("relay: capture failed %d times (%s); the link becomes a note",
                         attempts, type(exc).__name__)
-            return "dropped"
+            return _relay_settle_uncaptured(
+                link_id, base, token, tools, url, note,
+                f"the capture failed {attempts} times ({type(exc).__name__}).")
         _relay_raises[link_id] = attempts
         log.warning("relay: capture raised %s; the link stays for the next check",
                     type(exc).__name__)
@@ -11437,10 +11496,13 @@ def _relay_handle_link(link: dict, base: str, token: str, tools) -> str:
     if result.get("ok") is False and isinstance(error, str) and error.startswith(_RELAY_RATE_LIMITED_PREFIX):
         # The registry refused before trying. Not picked up: try next check.
         return "deferred"
+    with _relay_cond:
+        _relay_state["picked_up_total"] += 1
+    if result.get("ok") is not True:
+        return _relay_settle_uncaptured(link_id, base, token, tools, url, note,
+                                        _relay_capture_failure_reason(result, url))
     _relay_done[link_id] = time.time()
-    ok = result.get("ok") is True
-    note = link.get("note")
-    if ok and isinstance(note, str) and note.strip():
+    if isinstance(note, str) and note.strip():
         try:
             saved = tools.call_tool("uoink_note", {
                 "title": RELAY_NOTE_TITLE, "text": f"{note.strip()}\n\n{url}"})
@@ -11448,14 +11510,8 @@ def _relay_handle_link(link: dict, base: str, token: str, tools) -> str:
                 log.warning("relay: the shared note was not saved")
         except Exception as exc:
             log.warning("relay: the shared note was not saved (%s)", type(exc).__name__)
-    if not ok:
-        message = error.get("message") if isinstance(error, dict) else error
-        _relay_update(last_capture_error=_sanitize_error(
-            f"Couldn't capture a shared link: {message or 'capture failed'}"))
     _relay_delete(base, token, link_id)
-    with _relay_cond:
-        _relay_state["picked_up_total"] += 1
-    return "captured" if ok else "failed"
+    return "captured"
 
 
 def _relay_poll_once() -> dict:
@@ -11489,7 +11545,7 @@ def _relay_poll_once() -> dict:
                 outcomes.append(outcome)
                 if outcome == "deferred":
                     break
-            if outcomes and "failed" not in outcomes:
+            if outcomes and not {"noted", "kept"} & set(outcomes):
                 _relay_update(last_capture_error=None)
             _relay_update(last_ok_at=_now_iso())
             if outcomes:

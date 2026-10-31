@@ -80,6 +80,7 @@ def relay_state(monkeypatch):
         "next_due": 0.0})
     monkeypatch.setattr(server, "_relay_raises", {})
     monkeypatch.setattr(server, "_relay_done", {})
+    monkeypatch.setattr(server, "_relay_fallback", {})
     monkeypatch.setattr(server, "_relay_wake", threading.Event())
     monkeypatch.setattr(server, "_relay_stop", threading.Event())
     monkeypatch.setattr(server, "_relay_cond", threading.Condition())
@@ -284,13 +285,21 @@ class Tools:
         self.calls = []
         self.raises: set[str] = set()
         self.results: dict[str, dict] = {}
+        self.note_result: dict | Exception = {"ok": True}
 
     def call_tool(self, name, args):
         self.calls.append((name, args))
+        if name == "uoink_note":
+            if isinstance(self.note_result, Exception):
+                raise self.note_result
+            return self.note_result
         url = args.get("url") or args.get("feed_url")
         if url in self.raises:
             raise RuntimeError("tool exploded")
         return self.results.get(url, {"ok": True})
+
+    def notes(self):
+        return [args for name, args in self.calls if name == "uoink_note"]
 
 
 @pytest.fixture
@@ -334,34 +343,77 @@ def test_uses_the_shared_capture_map(poll_rig):
     assert poll_rig.tools.calls == [("add_podcast_feed", {"feed_url": "https://example.com/feed.xml"})]
 
 
-def test_a_failed_capture_is_still_picked_up(poll_rig):
-    poll_rig.relay.add(PAGE, note="should not be saved")
-    poll_rig.tools.results[PAGE] = {"ok": False, "error": "Site not on the allowed list: example.com"}
+def test_a_failed_capture_becomes_a_note_then_leaves_the_relay(poll_rig):
+    poll_rig.relay.add(PAGE, note="Read later")
+    poll_rig.tools.results[PAGE] = {"ok": False, "error": "fetch failed for C:\\Users\\x\\file.txt"}
     status = server._relay_poll_once()
     assert poll_rig.relay.links == [] and status["picked_up_total"] == 1
-    assert [name for name, _ in poll_rig.tools.calls] == ["uoink_page"]
-    assert "Couldn't capture a shared link" in status["last_capture_error"]
+    assert [name for name, _ in poll_rig.tools.calls] == ["uoink_page", "uoink_note"]
+    note = poll_rig.tools.notes()[0]
+    assert note["title"] == "From my phone (not captured)"
+    lines = note["text"].split("\n\n")
+    assert lines[:2] == ["Read later", PAGE]
+    assert lines[2].startswith("Uoink couldn't capture this link: fetch failed")
+    assert "C:\\Users" not in note["text"]   # the reason is sanitized
+    assert "saved as a note" in status["last_capture_error"]
 
 
-def test_a_raising_tool_keeps_the_link_once_then_drops_it(poll_rig, caplog):
-    link_id = poll_rig.relay.add(YOUTUBE)
+def test_a_page_blocked_by_the_allowlist_says_how_to_fix_it(poll_rig):
+    blocked = "https://example.org/some-article"
+    poll_rig.relay.add(blocked)
+    poll_rig.tools.results[blocked] = {
+        "ok": False, "code": "host_not_allowed",
+        "error": "host 'example.org' is not in the allowlist. Add it via /extract/page/allowlist."}
+    server._relay_poll_once()
+    note = poll_rig.tools.notes()[0]
+    assert note["text"] == (
+        f"{blocked}\n\nUoink couldn't capture this link: example.org isn't in Sites Uoink works on. "
+        "Allow the site in Settings > Capture > Sites Uoink works on, then Re-uoink.")
+    assert poll_rig.relay.links == []
+
+
+def test_a_raising_tool_keeps_the_link_once_then_saves_it_as_a_note(poll_rig, caplog):
+    link_id = poll_rig.relay.add(YOUTUBE, note="the zoo one")
     poll_rig.tools.raises.add(YOUTUBE)
     server._relay_poll_once()
     assert [link["id"] for link in poll_rig.relay.links] == [link_id]
-    assert server._relay_raises == {link_id: 1}
+    assert server._relay_raises == {link_id: 1} and poll_rig.tools.notes() == []
     server._relay_poll_once()
     assert poll_rig.relay.links == [] and server._relay_raises == {}
-    assert len(poll_rig.tools.calls) == 2
+    assert [name for name, _ in poll_rig.tools.calls] == ["uoink_video", "uoink_video", "uoink_note"]
+    note = poll_rig.tools.notes()[0]
+    assert note["text"] == (f"the zoo one\n\n{YOUTUBE}\n\nUoink couldn't capture this link: "
+                            "the capture failed 2 times (RuntimeError).")
     assert server._relay_state["picked_up_total"] == 0
-    assert "after 2 failed attempts" in caplog.text and YOUTUBE not in caplog.text
+    assert "failed 2 times" in caplog.text and YOUTUBE not in caplog.text
 
 
-def test_unsupported_links_are_dropped_without_a_capture(poll_rig, monkeypatch):
+def test_unsupported_links_become_notes_without_a_capture(poll_rig, monkeypatch):
     poll_rig.relay.add("https://example.com/odd")
     monkeypatch.setattr(server, "_classify_capture_url", lambda url: {"ok": False, "source": "unsupported"})
     status = server._relay_poll_once()
-    assert poll_rig.tools.calls == [] and poll_rig.relay.links == []
-    assert status["picked_up_total"] == 0
+    assert [name for name, _ in poll_rig.tools.calls] == ["uoink_note"]
+    assert poll_rig.tools.notes()[0]["text"] == (
+        "https://example.com/odd\n\nUoink couldn't capture this link: "
+        "Uoink doesn't support this kind of link yet.")
+    assert poll_rig.relay.links == [] and status["picked_up_total"] == 0
+
+
+@pytest.mark.parametrize("failure", [{"ok": False, "error": "disk full"}, OSError("disk full"), None])
+def test_a_fallback_note_that_fails_keeps_the_link_and_retries_only_the_note(poll_rig, failure):
+    link_id = poll_rig.relay.add(PAGE)
+    poll_rig.tools.results[PAGE] = {"ok": False, "code": "host_not_allowed", "error": "not allowed"}
+    poll_rig.tools.note_result = failure
+    status = server._relay_poll_once()
+    assert [link["id"] for link in poll_rig.relay.links] == [link_id]
+    assert link_id in server._relay_fallback
+    assert "Uoink will try again" in status["last_capture_error"]
+    poll_rig.tools.note_result = {"ok": True}
+    server._relay_poll_once()
+    assert poll_rig.relay.links == [] and server._relay_fallback == {}
+    # The capture ran once; the second check only saved the owed note.
+    assert [name for name, _ in poll_rig.tools.calls] == ["uoink_page", "uoink_note", "uoink_note"]
+    assert "isn't in Sites Uoink works on" in poll_rig.tools.notes()[-1]["text"]
 
 
 def test_a_note_is_saved_after_a_successful_capture(poll_rig):
