@@ -22,6 +22,7 @@ const DEFAULT_SETTINGS: UoinkSettings = { cliPath: "" };
 type Suggestion = { kind: "hit"; hit: SearchHit } | { kind: "recent"; item: RecentItem };
 
 const TYPING_PAUSE_MS = 200;
+const NO_MATCHES = "No matches in your Uoink library.";
 
 function errorText(error: unknown): string {
 	if (error instanceof UoinkError && error.code === "cli_missing") {
@@ -42,7 +43,7 @@ class LibraryModal extends SuggestModal<Suggestion> {
 	) {
 		super(app);
 		this.setPlaceholder(placeholder);
-		this.emptyStateText = "No matches in your Uoink library.";
+		this.emptyStateText = NO_MATCHES;
 	}
 
 	async getSuggestions(query: string): Promise<Suggestion[]> {
@@ -51,6 +52,7 @@ class LibraryModal extends SuggestModal<Suggestion> {
 		try {
 			if (!trimmed) {
 				const recent = await this.uoink.recent();
+				this.emptyStateText = NO_MATCHES;
 				return recent.map((item) => ({ kind: "recent" as const, item }));
 			}
 			// Each search starts the CLI, so wait for a pause in typing.
@@ -59,10 +61,15 @@ class LibraryModal extends SuggestModal<Suggestion> {
 				return this.lastResults;
 			}
 			const hits = await this.uoink.search(trimmed);
+			// A search that works again clears an earlier error message.
+			this.emptyStateText = NO_MATCHES;
 			this.lastResults = hits.map((hit) => ({ kind: "hit" as const, hit }));
 			return this.lastResults;
 		} catch (error) {
-			this.emptyStateText = errorText(error);
+			// Only the current query's failure replaces the empty-state text.
+			if (trimmed === this.latestQuery) {
+				this.emptyStateText = errorText(error);
+			}
 			return [];
 		}
 	}

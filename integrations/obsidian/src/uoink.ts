@@ -70,12 +70,21 @@ interface Launcher {
 	prefix: string[];
 }
 
-export function defaultCliPath(): string {
+function defaultCliCandidates(): [string, ...string[]] {
 	if (process.platform === "win32") {
 		const local = process.env.LOCALAPPDATA ?? path.join(homedir(), "AppData", "Local");
-		return path.join(local, "Uoink", "cli", "uoink.cmd");
+		return [path.join(local, "Uoink", "cli", "uoink.cmd")];
 	}
-	return "/Applications/Uoink.app/Contents/Helpers/uoink";
+	return [
+		"/Applications/Uoink.app/Contents/Helpers/uoink",
+		path.join(homedir(), "Applications", "Uoink.app", "Contents", "Helpers", "uoink"),
+	];
+}
+
+/** The first default location that exists, else the standard one (named in errors). */
+export function defaultCliPath(): string {
+	const candidates = defaultCliCandidates();
+	return candidates.find(isFile) ?? candidates[0];
 }
 
 function isFile(candidate: string): boolean {
