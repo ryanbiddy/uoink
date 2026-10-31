@@ -12,21 +12,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
-- A Raycast extension in `integrations/raycast` for macOS and Windows that
-  works on the free Raycast plan. Search Library copies a Markdown citation
-  that links to the timestamp, Uoink This URL saves the copied link (or the
-  active browser tab on macOS), Recent Saves lists the last 20 items, and
-  Save Note saves text. Raycast AI gets `@uoink` tools for search, item excerpts, recent
-  captures and confirmed saves, and AI Chat can mention a saved item. The
-  extension runs the installed `uoink` CLI with argument arrays and no shell;
-  on Windows it starts the bundled Python directly instead of `uoink.cmd`.
-  It is not in the Raycast Store yet.
+- A Raycast extension in `integrations/raycast` for macOS and Windows.
+  Search Library copies a Markdown citation that links to the timestamp,
+  Uoink This URL saves the copied link (or the active browser tab on macOS),
+  Recent Saves lists the last 20 items, and Save Note saves text. With a
+  Raycast plan that includes AI, Raycast AI gets `@uoink` tools for search,
+  item excerpts, recent captures and confirmed saves, and AI Chat can mention
+  a saved item. The extension runs the installed `uoink` CLI with argument
+  arrays and no shell; on Windows it starts the bundled Python directly
+  instead of `uoink.cmd`. It is not in the Raycast Store yet.
 - A Flow Launcher plugin (`integrations/flow-launcher`, Windows), an Alfred
   workflow (`integrations/alfred`, macOS) and an Obsidian plugin
   (`integrations/obsidian`, desktop) with the same no-shell CLI approach.
   Flow and Alfred search the library with `uk`, open results at their
   timestamp, copy citations and uoink pasted links; Obsidian inserts
-  timestamped citations into notes. None is in its store yet.
+  timestamped citations into notes. None is in its store yet. All four quote
+  only a passage Uoink verified, mark a cut-short quote with "…", and cite
+  title or metadata matches as a plain link.
 - winget manifests and a Homebrew cask for 3.11.2 in `packaging/`, and a
   submission kit with paste-ready text for each directory and store in
   `docs/submissions/`.

@@ -28,8 +28,10 @@ The Raycast, Alfred and Flow Launcher integrations copy the same formats.
 ## Requirements
 
 - Obsidian on desktop (Windows or macOS). The plugin is desktop-only.
-- [Uoink](https://uoink.app/install) 3.10 or later. A default install is found
-  automatically. Otherwise set **Uoink command** in the plugin's options to
+- [Uoink](https://uoink.app/install) 3.10 or later on Windows, or 3.11.2 or
+  later for the macOS preview. A default install (`%LOCALAPPDATA%\Uoink`, or
+  `Uoink.app` in `/Applications` or `~/Applications`) is found automatically.
+  Otherwise set **Uoink command** in the plugin's options to
   `Uoink.app`, its `Contents/Helpers/uoink` command, or `cli\uoink.cmd` in your Uoink folder.
 
 The Uoink window doesn't need to be open.

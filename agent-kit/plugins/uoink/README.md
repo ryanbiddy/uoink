@@ -15,7 +15,8 @@ save notes, and write in your voice from your own saved evidence.
 
 ## Requirements
 
-Install Uoink 3.10 or later from [uoink.app/install](https://uoink.app/install).
+Install Uoink from [uoink.app/install](https://uoink.app/install): 3.10 or later
+on Windows, or 3.11.2 or later for the macOS preview.
 The MCP server entry uses the default Windows install path. On a Mac, or on a
 custom install, run `uoink connect claude-code` and use the command it prints;
 the skill also works through the `uoink` command alone.

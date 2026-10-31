@@ -1,16 +1,16 @@
 # Submission kit
 
-Everything below is ready except where a row says **Blocked**. Each step needs
-your accounts, so none of it has been submitted. Times are estimates for the
-hands-on part.
+A row is ready unless it says **Blocked** or **Needs**, which name what has to
+happen first. Each step needs your accounts, so none of it has been submitted.
+Times are estimates for the hands-on part.
 
 | # | Where | Time | Status |
 |---|---|---|---|
 | 1 | [Cline MCP Marketplace](#1-cline-mcp-marketplace) | 5 min | Ready |
 | 2 | [GitHub MCP Registry](#2-github-mcp-registry) | 5 min | Ready |
 | 3 | [mcp.so and PulseMCP](#3-mcpso-and-pulsemcp) | 10 min | Ready |
-| 4 | [Glama score, then awesome-mcp-servers](#4-glama-then-awesome-mcp-servers) | 15 min | Ready |
-| 5 | [Raycast Store](#5-raycast-store) | 30 min | Ready after a test run on your Mac |
+| 4 | [Glama score, then awesome-mcp-servers](#4-glama-then-awesome-mcp-servers) | 15 min | **Blocked** on Ryan running the Glama build |
+| 5 | [Raycast Store](#5-raycast-store) | 30 min | **Needs** Ryan's Raycast handle (author 404), then a test run on a Mac |
 | 6 | [Homebrew tap](#6-homebrew-tap) | 10 min | Ready |
 | 7 | [winget](#7-winget) | 20 min | Ready |
 | 8 | [Flow Launcher store](#8-flow-launcher-store) | 20 min | Ready after a test run on Windows |
@@ -36,8 +36,8 @@ and attach [`logo-400.png`](logo-400.png). Before you submit, give Cline the rep
 > Cline 91 tools to search that library and cite the exact timestamp, capture
 > new links, and save notes, so answers come from sources the user actually
 > saved instead of guesses. It's free, MIT licensed, and local-first: no account,
-> no cloud, and library reads need no API key. Windows 10/11 and macOS 15+
-> (Apple Silicon). `llms-install.md` covers setup.
+> no cloud, and library reads need no API key. Windows 10/11, plus a macOS 15+
+> preview for Apple Silicon. `llms-install.md` covers setup.
 
 ## 2. GitHub MCP Registry
 
@@ -63,7 +63,8 @@ Both use web forms. Paste the same values:
 - **Description:** Local-first MCP server with 91 tools over a Markdown library
   on your own disk: search transcripts and articles with timestamped citations,
   capture YouTube, X, Reddit, podcast and web links, save notes, and write from
-  your own sources. Free, MIT, no account. Windows and macOS (Apple Silicon).
+  your own sources. Free, MIT, no account. Windows, plus a macOS preview
+  (Apple Silicon).
 - **Transport:** stdio (also HTTP at `127.0.0.1:5179/mcp/v1` with a local token)
 - **Tags:** youtube, transcripts, podcasts, research, knowledge-base, local-first
 
@@ -92,7 +93,9 @@ npm run dev        # try every command, plus @uoink in AI Chat
 npm run lint       # also checks your author handle against raycast.com
 ```
 
-1. If your Raycast handle isn't `ryanbiddy`, change `author` in `package.json`.
+1. `ryanbiddy` isn't a Raycast handle yet: `npm run lint` gets a 404 for it.
+   Sign in at [raycast.com](https://www.raycast.com), then set `author` in
+   `package.json` to your handle.
 2. Take three screenshots with Raycast's **Capture Window** command, ticking
    **Save to Metadata**: Search Library with results, an item's detail, and a
    capture toast. Use a library with no private material.

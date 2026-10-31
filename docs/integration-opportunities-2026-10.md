@@ -14,8 +14,7 @@ LICENSE blockers are fixed. Paste-ready submissions are in
 
 Effort is an estimate: **S** = days, **M** = 1–2 weeks, **L** = new toolchain,
 signing or packaging work. Rows marked *search-only* were not confirmed against
-official docs, because this session's network blocked many doc sites. Re-check
-them before you build.
+official docs. Re-check them before you build.
 
 Two facts shape most rows:
 - Uoink listens only on `127.0.0.1`. A cloud service can't call it. Uoink can
@@ -28,14 +27,14 @@ Two facts shape most rows:
 
 | # | Do this | Effort | Why |
 |---|---|---|---|
-| 1 | **Turn the agent-kit plugin into a Claude directory submission** | S–M | Anthropic's directory [no longer accepts `.mcpb`](https://claude.com/docs/directory/publish); a local MCP server must ship inside a plugin bundle. `agent-kit/plugins/uoink` has no README or LICENSE, and its `.mcp.json` runs `${LOCALAPPDATA}\Uoink\python\python.exe`, which is Windows-only. Both block validation ([checklist](https://claude.com/docs/plugins/pre-submission-checklist.md)). Fix: README of at least 40 words, LICENSE, and a launch command on PATH, for example a new `uoink mcp` subcommand. |
+| 1 | **Turn the agent-kit plugin into a Claude directory submission** | S–M | Anthropic's directory [no longer accepts `.mcpb`](https://claude.com/docs/directory/publish); a local MCP server must ship inside a plugin bundle. `agent-kit/plugins/uoink` now has the README and LICENSE that the [checklist](https://claude.com/docs/plugins/pre-submission-checklist.md) requires. Its `.mcp.json` still runs `${LOCALAPPDATA}\Uoink\python\python.exe`, which is Windows-only and blocks validation. Fix: a launch command on PATH, for example a new `uoink mcp` subcommand, or submit a skills-only plugin first ([options](submissions/README.md#11-claude-directory-and-goose)). |
 | 2 | **Get Uoink's Glama score** | S | The awesome-mcp-servers [PR #16963](https://github.com/punkpeye/awesome-mcp-servers/pull/16963) is waiting on it. Re-run the build per `docs/GLAMA-BUILD.md`. |
 | 3 | **Submit the extension to Edge Add-ons** (and the prepared Chrome Web Store package) | S | The same MV3 package works; Edge supports `offscreen`. Free, certified in up to 7 business days. Ends sideloading on Windows' default browser. |
 | 4 | **Quick directory round** | S each | Goose: PR an entry to [`servers.json`](https://raw.githubusercontent.com/aaif-goose/goose/main/documentation/static/servers.json); it already lists local apps that must be running. Cline: open an issue with a 400×400 logo ([rules](https://raw.githubusercontent.com/cline/mcp-marketplace/main/README.md)). GitHub MCP registry: ask for onboarding in [discussion #1257](https://github.com/github/github-mcp-server/discussions/1257). mcp.so and PulseMCP: submit forms (*search-only*). |
 | 5 | **winget manifest** | S–M | No popularity or signing bar in the [validation docs](https://raw.githubusercontent.com/microsoft/winget-pkgs/master/doc/Validation.md). Inno Setup installers are supported. Risks: the silent install must not prompt, and the unsigned installer could trip antivirus or unwanted-software checks. |
 | 6 | **Flow Launcher plugin** (Windows' Raycast) | S | Python over JSON-RPC, the same language as Uoink. Gives inline search results, open-at-timestamp and capture. Listed by PR to `Flow.Launcher.PluginsManifest`; about 272 plugins. |
 | 7 | **PowerToys Command Palette extension** | M | Biggest Windows launcher audience. Search page with an excerpt detail pane, a capture form and recent items. C#/.NET. Distribution via WinGet (an Inno Setup EXE is the documented path) plus a Gallery PR (94 entries). |
-| 8 | **Obsidian community plugin** | M | Search and "insert timestamped quote" inside the editor, on **Mac and Windows** (the mirror is Windows-only). `requestUrl()` can reach `127.0.0.1:5179`. Automated review; the README must disclose network use ([policies](https://raw.githubusercontent.com/obsidianmd/obsidian-developer-docs/main/en/Community%20directory/Developer%20policies.md)). Decide how the plugin gets the token first. |
+| 8 | **Obsidian community plugin** | M | Built in [`integrations/obsidian`](../integrations/obsidian/README.md): search and "insert timestamped citation" inside the editor, on **Mac and Windows** (the mirror is Windows-only). It runs the `uoink` CLI, so it needs no token and makes no network requests; its README carries the disclosures that the automated review checks ([policies](https://raw.githubusercontent.com/obsidianmd/obsidian-developer-docs/main/en/Community%20directory/Developer%20policies.md)). Next: its own repository, then submit. |
 | 9 | **"Send to Zotero"** from Uoink | S–M | Zotero 10's local API (`localhost:23119`) creates a citable item with a child note of timestamped quotes after the user clicks Allow ([source](https://raw.githubusercontent.com/zotero/zotero/main/chrome/content/zotero/xpcom/server/server_localAPI.js)). No store, best researcher fit. The Zotero 10.0 date is *search-only*. |
 | 10 | **Apple Shortcuts pack** | S | `.shortcut` files that call the CLI: the Share sheet, Services menu, Finder Quick Actions and Spotlight on Mac. No native code. |
 
@@ -88,8 +87,6 @@ Two smaller enablers help every launcher and hardware integration:
   notarized Mac build isn't represented.
 - `docs/release/BRIEF-3.8.1-DIRECTORY-READY.md` targets the deprecated
   `.mcpb` directory route.
-- The GitHub repo shows 0 stars. Cline, Homebrew and Scoop use popularity as a
-  gate.
 
 ## Not verified
 
@@ -103,5 +100,5 @@ These came from search snippets only:
 - Stream Deck review times.
 - Whether Shortcuts can reach `http://127.0.0.1`.
 
-Before you build the Obsidian or bookmarklet token handoff, read `server.py`'s
-`/token` setup route.
+Before you build the bookmarklet token handoff, read `server.py`'s `/token`
+setup route.
