@@ -42,6 +42,7 @@ _BLOCK = set("article section div p pre blockquote table ul ol li dl h1 h2 h3 h4
 _WALL = re.compile(r"(?:sign\s*in|log\s*in|subscribe|subscription|register|create an account)\s+(?:is required|required|to (?:read|continue|view|access|unlock))|(?:subscriber|members?)[- ]only|already a subscriber|unlock (?:this|the|full) article|purchase (?:a )?subscription", re.I)
 _JS = re.compile(r"enable javascript|javascript is (?:not available|disabled|required)|requires javascript|please turn on javascript", re.I)
 _BYLINE = re.compile(r"(?:^|[\s_-])(?:byline|author|writtenby)(?:$|[\s_-])", re.I)
+_TITLE_SEPARATOR = re.compile(r" [|\-–—\\/>»] ")
 # Lead image sources in preference order. Relative URLs resolve like links.
 _IMAGE_KEYS = ("og:image", "og:image:url", "twitter:image", "twitter:image:src", "image_src")
 _LOADER = re.compile(r"^(?:loading(?:\s+(?:the\s+)?(?:reader|article|page|content|app|application|data))?|please wait)(?:[.!\u2026 ]|\bplease wait)*$", re.I)
@@ -142,6 +143,36 @@ def _value(value):
     return ""
 
 
+def _similarity(text, title):
+    """Readability's _textSimilarity: the share of title words found in text."""
+    words = set(filter(None, re.split(r"\W+", text.lower())))
+    title_words = list(filter(None, re.split(r"\W+", title.lower())))
+    if not words or not title_words:
+        return 0
+    missing = " ".join(w for w in title_words if w not in words)
+    return 1 - len(missing) / len(" ".join(title_words))
+
+
+def _matches_title(text, title):
+    # Readability compares with the <title> minus its site part: the text before
+    # the last separator, or after the first when that leaves under three words.
+    forms = [title]
+    separators = list(_TITLE_SEPARATOR.finditer(title))
+    if separators:
+        main = title[:separators[-1].start()]
+        forms.append(main if len(main.split()) >= 3 else title[separators[0].end():])
+    return any(_similarity(text, form) > .75 for form in forms)
+
+
+def _ld_title(headline, name, title):
+    # Some sites put a description or their own name in one of the two. As in
+    # Readability, the headline wins only when it matches the page <title> and
+    # the name does not; Wikipedia's headline is the article's short description.
+    if headline and name and headline != name:
+        return headline if _matches_title(headline, title) and not _matches_title(name, title) else name
+    return name or headline
+
+
 def _metadata(doc, base):
     meta, ld, images = {}, {}, {}
     budget = 128000
@@ -176,7 +207,7 @@ def _metadata(doc, base):
                         types = value.get("@type", [])
                         types = [types] if isinstance(types, str) else types
                         if isinstance(types, list) and any(str(t).endswith(("Article", "Posting", "Report")) for t in types):
-                            ld.setdefault("title", _value(value.get("headline") or value.get("name")))
+                            ld.setdefault("names", (_value(value.get("headline")), _value(value.get("name"))))
                             ld.setdefault("author", _value(value.get("author")))
                             ld.setdefault("published_date", _value(value.get("datePublished")))
                             ld.setdefault("site_name", _value(value.get("publisher")))
@@ -187,7 +218,8 @@ def _metadata(doc, base):
     def first(*keys):
         return next((meta[k] for k in keys if meta.get(k)), None)
     result = {
-        "title": ld.get("title") or first("og:title", "twitter:title", "title", "html_title"),
+        "title": (_ld_title(*ld.get("names", ("", "")), meta.get("html_title", ""))
+                  or first("og:title", "twitter:title", "title", "html_title")),
         "author": ld.get("author") or first("author", "article:author", "byl", "byline", "dc.creator"),
         "published_date": ld.get("published_date") or first("article:published_time", "datepublished", "date", "pubdate", "dc.date", "dcterms.created"),
         "site_name": ld.get("site_name") or first("og:site_name", "application-name"),

@@ -42,6 +42,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   on the `<html>` element, the menu filter matched them, and the whole page
   was dropped before the text was measured. Class names on `<html>` and
   `<body>` no longer hide the page; empty JavaScript pages still fail.
+- Wikipedia captures are titled with the article name instead of its short
+  description. When a page's structured data gives a different `name` and
+  `headline`, Uoink now uses the headline only if it matches the page title
+  and the name does not, as Readability does. Before, the headline always
+  won, and Wikipedia's headline is the short description.
 - Captured web pages show a thumbnail in the Library. Uoink saves the page's
   `og:image` (else `twitter:image`, else `image_src`) as `thumbnail.jpg`,
   where video captures keep theirs, through the same public-network checks,

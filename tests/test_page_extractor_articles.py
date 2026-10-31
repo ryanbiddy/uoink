@@ -182,9 +182,32 @@ def test_root_skin_flags_do_not_hide_a_server_rendered_article():
                                 http_open=lambda *a, **k: response(html("wiki-skin")))
     assert result["ok"] and result["extraction_engine"] == article.ENGINE
     assert result["article_status"] == "found"
+    # The JSON-LD headline is the wiki's short description; the name is the title.
+    assert result["title"] == result["metadata"]["title"] == "Harbor lanterns"
     assert "dissolves in salt water" in result["markdown"] and "## History" in result["markdown"]
     for unwanted in ("NAV NOISE", "MENU NOISE", "FOOTER NOISE"):
         assert unwanted not in result["markdown"]
+
+
+@pytest.mark.parametrize("title,ld,expected", [
+    ("Harbor lanterns - Example Wiki", {"name": "Harbor lanterns", "headline": "paper lights floated on the tide"},
+     "Harbor lanterns"),
+    ("River path opens after repairs | Example Daily", {"name": "Example Daily", "headline": "River path opens after repairs"},
+     "River path opens after repairs"),
+    ("Example Daily | River path opens after repairs", {"name": "Example Daily", "headline": "River path opens after repairs"},
+     "River path opens after repairs"),
+    ("River path opens after repairs", {"name": "River path opens after repairs today", "headline": "River path opens after repairs"},
+     "River path opens after repairs today"),
+    ("Example Daily", {"name": "River path opens", "headline": "Repairs finished on the bridge"}, "River path opens"),
+    ("Example Daily", {"headline": "River path opens"}, "River path opens"),
+    ("Example Daily", {"name": "River path opens"}, "River path opens"),
+])
+def test_jsonld_headline_wins_only_when_it_matches_the_page_title(title, ld, expected):
+    data = json.dumps({"@context": "https://schema.org", "@type": "NewsArticle", **ld})
+    # JSON-LD ahead of <title>: the choice waits for the whole document.
+    document = (f'<head><script type="application/ld+json">{data}</script><title>{title}</title></head>'
+                f"<article><p>{prose(364)}</p></article>")
+    assert article.extract(document, URL)["metadata"]["title"] == expected
 
 
 @pytest.mark.parametrize("root", ['<html class="client-nojs main-menu-pinned">',
