@@ -1,32 +1,49 @@
-# Screenshot recapture list for 3.11
+# Store screenshots, 3.12.0
 
-All five existing files are 1280x800 and were inspected on 2026-10-24.
-They are July references, not approved 3.11 listing images. No replacement
-screenshots were fabricated or added in this pass.
+The five files in `screenshots/` are Uoink 3.12.0 captures from 2026-10-31
+(`main` at `d5c2b8b`). Each is a 1280x800 PNG, edge to edge, light theme, with
+square corners and no padding. They replace the July references. Upload them
+in this order.
 
-| Existing file | What is outdated | Exact 1280x800 recapture |
-|---|---|---|
-| `screenshots/01-uoink-button-on-youtube.png` | Old button styling, black padding and an unrelated ad in the player. | On a YouTube watch page for a video you own or may save, show the current Uoink button and source title. Wait until any ad has ended. Capture the page edge to edge without black bars. Keep this filename. |
-| `screenshots/02-your-local-library.png` | July sidebar and card grid, including the old Generate navigation. | In the 3.11 helper, open `/dashboard#library` with a small library of permitted sources. Show the current navigation and readable saved items. Keep this filename. |
-| `screenshots/03-write-from-your-corpus.png` | July Generate/X composer, old controls and generated claims that are unnecessary for a capture listing. | Replace with `03-read-a-saved-source.png`: open a real saved item from Library at `/dashboard#item/<saved-id>` and show its reader, source attribution and timestamped text. |
-| `screenshots/04-search-your-corpus.png` | July search layout and old card styling. | In `/dashboard#library`, search for a term that occurs in a permitted saved source. Show the query and real matching results in the current layout. Keep this filename. |
-| `screenshots/05-auto-organized-by-topic.png` | Near-duplicate of #2; it does not demonstrate automatic topic organization. | Replace with `05-helper-setup.png`: open `chrome-extension://<actual-extension-id>/setup.html?source=offline` with the helper stopped in a test environment. Show the helper requirement, Offline state and disabled capture button. |
+Every saved source in frame is Creative Commons or public domain. Titles,
+URLs, licenses and the shots each appears in are in
+[screenshots/SOURCES.md](screenshots/SOURCES.md).
 
-These route paths identify the screens; this pass did not open the installed
-helper or use Ryan's library. Use a separate review profile/library for new
-captures. Keep private paths, keys, account menus and unrelated personal tabs
-out of frame. Use actual UI and actual source results, with no invented counts.
+| File | What it shows |
+|---|---|
+| `screenshots/01-uoink-button-on-youtube.png` | A CC BY lecture on a YouTube watch page in theater mode, with no ad showing. The current Uoink button sits beside Like, Share and Save with its green connected dot. |
+| `screenshots/02-your-local-library.png` | `/dashboard#library` with the 8-item review library sorted Title A to Z: current navigation, topics and readable saved items. |
+| `screenshots/03-read-a-saved-source.png` | The reader at `/dashboard#item/V9w3Fhh9BkM`: source title and channel, timestamped transcript and a captured frame. |
+| `screenshots/04-search-your-corpus.png` | A Library search for `orbit` with its 5 real matches across videos and pages. |
+| `screenshots/05-helper-setup.png` | `setup.html?source=offline` with no helper running: the helper requirement, Download for Windows and the "Uoink is offline" state. |
 
-No visible `uoink.video` text was found in these five images. #3 visibly uses
-`uoink.app`. The old domain remains in the historical handoff drafts; if a
-recapture or a different asset shows it, replace that asset before upload.
+## How they were made
+
+- The dashboard shots come from an isolated 3.12.0 helper with an empty review
+  profile, never Ryan's library. Each source was saved through the helper's
+  own capture routes. Counts, times and results are what the app showed.
+- Shots 01 and 05 use a disposable browser profile with a temporary copy of
+  `extension/`. The copy points at the isolated helper (01) or at a port with
+  nothing listening (05). The repository's extension is unchanged.
+- No account was signed in. No bookmarks, other tabs, notifications, local
+  paths or keys are in frame. No `uoink.video` text is visible.
+
+## Known limits
+
+- **01:** The narrow black bands beside the video are YouTube's own theater
+  mode player at a 16:10 window size. They are not padding. Theater mode keeps
+  YouTube's unrelated recommendations out of frame.
+- **05:** The disabled "Uoink this video" button is below the frame. Step 3
+  of the setup page suggests a named podcast episode, and that block sits
+  directly above the button. To show the button, recapture after that
+  suggestion changes to a Creative Commons source.
+
+## Other images
 
 The three promo tiles were also inspected. They contain brand copy, no old
 domain or UI screenshot. The 440x280 small tile and 1400x560 marquee are usable
 as optional brand artwork. The 920x680 large tile is a spare, not a current CWS
 upload field. Use `extension/icons/icon128.png` for the store icon.
 
-Google requires at least one screenshot and permits up to five. For a shorter
-submission, use fresh #1 plus #5, then add the other recaptures when ready.
-Use full-bleed PNGs at 1280x800, square corners, with no padding. See Google's
+Google requires at least one screenshot and permits up to five. See Google's
 [image requirements](https://developer.chrome.com/docs/webstore/images).

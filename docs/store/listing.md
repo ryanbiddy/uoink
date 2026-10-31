@@ -63,4 +63,4 @@ Save sources the user chooses while browsing into a local research library, with
 | Mature content | No; the listing has no mature content |
 
 Verify that the support mailbox receives mail. This pass did not send mail.
-Use the recapture plan in [SCREENSHOTS.md](SCREENSHOTS.md), not the July files.
+Upload the 3.12.0 screenshots listed in [SCREENSHOTS.md](SCREENSHOTS.md).
