@@ -4,7 +4,7 @@
   "name": "Uoink",
   "short_name": "Uoink",
   "version": "3.12.0",
-  "description": "Save YouTube transcripts, frames and comments to a local library your AI can search and cite. Needs the Uoink Windows app.",
+  "description": "Save YouTube transcripts, frames and comments to a local library your AI can search and cite. Needs the Uoink app on Windows or Mac.",
   "homepage_url": "https://uoink.app",
   "permissions": [
     "alarms",
