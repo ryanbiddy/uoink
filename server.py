@@ -8184,18 +8184,12 @@ def _classify_capture_url(raw: str) -> dict:
         "YouTube, X, Reddit threads, podcasts, and most web pages work."}
 
 
-# Registry tool and argument for each _classify_capture_url source. The agent
-# CLI (`uoink capture`) and the Uoink Relay poller route through this one map.
-CAPTURE_TOOLS = {
-    "youtube_video": ("uoink_video", "url"),
-    "youtube_playlist": ("uoink_playlist", "url"),
-    "short_video": ("uoink_url", "url"),
-    "x_video": ("uoink_url", "url"),
-    "x_article": ("uoink_page", "url"),
-    "reddit_thread": ("uoink_reddit_thread", "url"),
-    "podcast_feed": ("add_podcast_feed", "feed_url"),
-    "web_page": ("uoink_page", "url"),
-}
+def _capture_tools() -> dict:
+    """The agent CLI's source-to-tool map (uoink_cli.CAPTURE_TOOLS), so the
+    Uoink Relay poller routes a link exactly as `uoink capture` does.
+    Imported on use; uoink_cli loads nothing from this module at import."""
+    import uoink_cli
+    return uoink_cli.CAPTURE_TOOLS
 
 
 def _is_valid_job_id(s: str) -> bool:
@@ -11415,12 +11409,13 @@ def _relay_handle_link(link: dict, base: str, token: str, tools) -> str:
         return "skipped"
     url = link.get("url") if isinstance(link.get("url"), str) else ""
     route = _classify_capture_url(url)
-    if not route.get("ok") or route.get("source") not in CAPTURE_TOOLS:
+    capture_tools = _capture_tools()
+    if not route.get("ok") or route.get("source") not in capture_tools:
         _relay_delete(base, token, link_id)
         log.info("relay: dropped a shared link Uoink can't capture (%s)",
                  route.get("source") or "unsupported")
         return "dropped"
-    name, key = CAPTURE_TOOLS[route["source"]]
+    name, key = capture_tools[route["source"]]
     try:
         result = tools.call_tool(name, {key: route["canonical"]})
     except Exception as exc:

@@ -326,8 +326,9 @@ def test_routes_each_link_to_the_cli_tool_oldest_first_and_deletes_it(poll_rig):
 
 
 def test_uses_the_shared_capture_map(poll_rig):
-    assert server.CAPTURE_TOOLS["youtube_video"] == ("uoink_video", "url")
-    assert server.CAPTURE_TOOLS["podcast_feed"] == ("add_podcast_feed", "feed_url")
+    import uoink_cli
+    assert server._capture_tools() is uoink_cli.CAPTURE_TOOLS
+    assert uoink_cli.CAPTURE_TOOLS["podcast_feed"] == ("add_podcast_feed", "feed_url")
     poll_rig.relay.add("https://example.com/feed.xml")
     server._relay_poll_once()
     assert poll_rig.tools.calls == [("add_podcast_feed", {"feed_url": "https://example.com/feed.xml"})]
