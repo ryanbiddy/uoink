@@ -59,17 +59,20 @@ def seed(idx, rows):
                  stamp, f"/library/{video_id}.md"))
 
 
-@pytest.fixture
-def library(tmp_path):
+def mixed_rows():
     # Alternating kinds, an hour apart: newest first is page2, video2, page1, video1.
-    rows = [
+    return [
         ("video1", local_stamp(BASE), "video"),
         ("page1", utc_stamp(BASE + timedelta(hours=1)), "page"),
         ("video2", local_stamp(BASE + timedelta(hours=2)), "video"),
         ("page2", utc_stamp(BASE + timedelta(hours=3)), "page"),
     ]
+
+
+@pytest.fixture
+def library(tmp_path):
     with index.Index.open(tmp_path / "index.db") as idx:
-        seed(idx, rows)
+        seed(idx, mixed_rows())
         yield idx
 
 
@@ -117,6 +120,21 @@ def test_library_sort_control_orders_by_real_time(library):
     assert ids(page["results"]) == NEWEST
     page = server._library_search(library, q=None, filters={}, kind=None, sort="oldest", limit=10, offset=0)
     assert ids(page["results"]) == NEWEST[::-1]
+
+
+@pytest.mark.parametrize("passages", [True, False])
+def test_keyword_query_with_sort_orders_by_real_time(tmp_path, passages):
+    # With a query the page is built by _fts_page, which re-aliases the order.
+    with index.Index.open(tmp_path / "index.db") as idx:
+        for video_id, stamp, source_type in mixed_rows():
+            idx.upsert_yoink({"video_id": video_id, "slug": video_id, "channel": "Shared Channel",
+                              "title": f"Moon {video_id}", "topic": "Space", "source_type": source_type,
+                              "yoinked_at": stamp, "corpus_path": "", "sidecar_path": ""},
+                             content="The moon and its phases.")
+        for sort, expected in (("newest", NEWEST), ("oldest", NEWEST[::-1])):
+            page = server._library_search(idx, q="moon", filters={}, kind=None, sort=sort, limit=10,
+                                          offset=0, mode="keyword", passages=passages)
+            assert ids(page["results"]) == expected
 
 
 def test_semantic_results_resort_by_real_time(library, monkeypatch):
