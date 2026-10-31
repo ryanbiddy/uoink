@@ -12,6 +12,12 @@
 tests/fixtures/connect_v3100/* text eol=lf
 tests/fixtures/articles/*.html text eol=lf
 
+# Integrations are copied into their own repositories and stores, and their
+# checks compare bytes (the Alfred info.plist test, Prettier in ray lint).
+# Keep them LF on every platform; images stay binary.
+integrations/** text eol=lf
+integrations/**/*.png binary
+
 # Cross-repository contract fixtures are hashed byte-for-byte. Keep their
 # materialized bytes identical on Windows, macOS, and Linux.
 tests/fixtures/suite_integration_v1/*.json text eol=lf

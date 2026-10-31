@@ -10,7 +10,7 @@ Uoink
 
 ## Summary
 
-Save YouTube transcripts, frames and comments to a local library your AI can search and cite. Needs the Uoink Windows app.
+Save YouTube transcripts, frames and comments to a local library your AI can search and cite. Needs the Uoink app on Windows or Mac.
 
 ## Category and language
 

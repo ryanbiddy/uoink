@@ -1,0 +1,311 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>bundleid</key>
+	<string>app.uoink.alfred</string>
+	<key>category</key>
+	<string>Productivity</string>
+	<key>connections</key>
+	<dict>
+		<key>8E2D7B0C-5B1E-4F43-9C3A-0D6A1F2B7C01</key>
+		<array>
+			<dict>
+				<key>destinationuid</key>
+				<string>8E2D7B0C-5B1E-4F43-9C3A-0D6A1F2B7C02</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+		</array>
+		<key>8E2D7B0C-5B1E-4F43-9C3A-0D6A1F2B7C03</key>
+		<array>
+			<dict>
+				<key>destinationuid</key>
+				<string>8E2D7B0C-5B1E-4F43-9C3A-0D6A1F2B7C04</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+		</array>
+	</dict>
+	<key>createdby</key>
+	<string>Ryan Biddy</string>
+	<key>description</key>
+	<string>Search your Uoink library and cite the exact moment</string>
+	<key>disabled</key>
+	<false/>
+	<key>name</key>
+	<string>Uoink</string>
+	<key>objects</key>
+	<array>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>alfredfiltersresults</key>
+				<false/>
+				<key>alfredfiltersresultsmatchmode</key>
+				<integer>0</integer>
+				<key>argumenttreatemptyqueryasnil</key>
+				<false/>
+				<key>argumenttrimmode</key>
+				<integer>0</integer>
+				<key>argumenttype</key>
+				<integer>1</integer>
+				<key>escaping</key>
+				<integer>0</integer>
+				<key>keyword</key>
+				<string>{var:keyword}</string>
+				<key>queuedelaycustom</key>
+				<integer>3</integer>
+				<key>queuedelayimmediatelyinitially</key>
+				<true/>
+				<key>queuedelaymode</key>
+				<integer>0</integer>
+				<key>queuemode</key>
+				<integer>1</integer>
+				<key>runningsubtext</key>
+				<string>Searching your library…</string>
+				<key>script</key>
+				<string>app="${uoink_app:-/Applications/Uoink.app}"
+py="$app/Contents/Resources/Python/bin/python3"
+if [[ ! -x "$py" ]]; then
+  printf '%s' '{"items":[{"title":"Uoink isn’t installed here","subtitle":"↩ opens the install page. Installed elsewhere? Set the Uoink app path in the workflow configuration.","arg":"https://uoink.app/install","variables":{"action":"open"}}]}'
+  exit 0
+fi
+exec "$py" -I -B ./uoink_alfred.py filter "$1"</string>
+				<key>scriptargtype</key>
+				<integer>1</integer>
+				<key>scriptfile</key>
+				<string></string>
+				<key>skipuniversalaction</key>
+				<true/>
+				<key>subtext</key>
+				<string>Search your library, or paste a link to uoink it</string>
+				<key>title</key>
+				<string>Uoink</string>
+				<key>type</key>
+				<integer>11</integer>
+				<key>withspace</key>
+				<true/>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.input.scriptfilter</string>
+			<key>uid</key>
+			<string>8E2D7B0C-5B1E-4F43-9C3A-0D6A1F2B7C01</string>
+			<key>version</key>
+			<integer>3</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>concurrently</key>
+				<true/>
+				<key>escaping</key>
+				<integer>0</integer>
+				<key>script</key>
+				<string>app="${uoink_app:-/Applications/Uoink.app}"
+py="$app/Contents/Resources/Python/bin/python3"
+if [[ ! -x "$py" ]]; then
+  [[ "$action" == open &amp;&amp; "$1" == https://* ]] &amp;&amp; /usr/bin/open "$1"
+  exit 0
+fi
+exec "$py" -I -B ./uoink_alfred.py act "${action:-open}" "$1"</string>
+				<key>scriptargtype</key>
+				<integer>1</integer>
+				<key>scriptfile</key>
+				<string></string>
+				<key>type</key>
+				<integer>11</integer>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.action.script</string>
+			<key>uid</key>
+			<string>8E2D7B0C-5B1E-4F43-9C3A-0D6A1F2B7C02</string>
+			<key>version</key>
+			<integer>2</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>acceptsfiles</key>
+				<false/>
+				<key>acceptsmulti</key>
+				<integer>0</integer>
+				<key>acceptstext</key>
+				<false/>
+				<key>acceptsurls</key>
+				<true/>
+				<key>name</key>
+				<string>Uoink</string>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.trigger.universalaction</string>
+			<key>uid</key>
+			<string>8E2D7B0C-5B1E-4F43-9C3A-0D6A1F2B7C03</string>
+			<key>version</key>
+			<integer>1</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>concurrently</key>
+				<true/>
+				<key>escaping</key>
+				<integer>0</integer>
+				<key>script</key>
+				<string>app="${uoink_app:-/Applications/Uoink.app}"
+py="$app/Contents/Resources/Python/bin/python3"
+[[ -x "$py" ]] || { /usr/bin/open "https://uoink.app/install"; exit 0; }
+exec "$py" -I -B ./uoink_alfred.py act capture "$1"</string>
+				<key>scriptargtype</key>
+				<integer>1</integer>
+				<key>scriptfile</key>
+				<string></string>
+				<key>type</key>
+				<integer>11</integer>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.action.script</string>
+			<key>uid</key>
+			<string>8E2D7B0C-5B1E-4F43-9C3A-0D6A1F2B7C04</string>
+			<key>version</key>
+			<integer>2</integer>
+		</dict>
+	</array>
+	<key>readme</key>
+	<string>## Usage
+
+Search the videos, podcasts, articles and notes you saved with [Uoink](https://uoink.app) via the `uk` keyword.
+
+* &lt;kbd&gt;↩&lt;/kbd&gt; Open the source at the matched timestamp.
+* &lt;kbd&gt;⌘&lt;/kbd&gt;&lt;kbd&gt;↩&lt;/kbd&gt; Copy a Markdown citation with a timestamped link (&lt;kbd&gt;⌘&lt;/kbd&gt;&lt;kbd&gt;C&lt;/kbd&gt; also copies it).
+* &lt;kbd&gt;⌥&lt;/kbd&gt;&lt;kbd&gt;↩&lt;/kbd&gt; Copy the item ID.
+* &lt;kbd&gt;⌃&lt;/kbd&gt;&lt;kbd&gt;↩&lt;/kbd&gt; Open the source page.
+* &lt;kbd&gt;⌘&lt;/kbd&gt;&lt;kbd&gt;Y&lt;/kbd&gt; Quick Look the source.
+
+With no query, `uk` lists recent captures; &lt;kbd&gt;↩&lt;/kbd&gt; reveals one in Finder. Paste a link after `uk` to uoink it, or use the **Uoink** Universal Action on a URL. A notification reports when the capture is saved, and a video's Markdown is copied to the clipboard.
+
+## Setup
+
+Install [Uoink](https://uoink.app/install) for Mac. If Uoink.app isn't in /Applications, set its path in the workflow configuration.
+
+Everything stays on your Mac: the workflow runs the uoink command inside Uoink.app. Searching makes no network calls; a capture fetches only the link you give it.
+</string>
+	<key>uidata</key>
+	<dict>
+		<key>8E2D7B0C-5B1E-4F43-9C3A-0D6A1F2B7C01</key>
+		<dict>
+			<key>note</key>
+			<string>Search the library, or offer a pasted link for capture</string>
+			<key>xpos</key>
+			<real>40.0</real>
+			<key>ypos</key>
+			<real>40.0</real>
+		</dict>
+		<key>8E2D7B0C-5B1E-4F43-9C3A-0D6A1F2B7C02</key>
+		<dict>
+			<key>note</key>
+			<string>Open, reveal, copy or capture, per the action variable</string>
+			<key>xpos</key>
+			<real>260.0</real>
+			<key>ypos</key>
+			<real>40.0</real>
+		</dict>
+		<key>8E2D7B0C-5B1E-4F43-9C3A-0D6A1F2B7C03</key>
+		<dict>
+			<key>note</key>
+			<string>Uoink a URL from anywhere</string>
+			<key>xpos</key>
+			<real>40.0</real>
+			<key>ypos</key>
+			<real>200.0</real>
+		</dict>
+		<key>8E2D7B0C-5B1E-4F43-9C3A-0D6A1F2B7C04</key>
+		<dict>
+			<key>note</key>
+			<string>Capture the URL</string>
+			<key>xpos</key>
+			<real>260.0</real>
+			<key>ypos</key>
+			<real>200.0</real>
+		</dict>
+	</dict>
+	<key>userconfigurationconfig</key>
+	<array>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>default</key>
+				<string>uk</string>
+				<key>placeholder</key>
+				<string>uk</string>
+				<key>required</key>
+				<true/>
+				<key>trim</key>
+				<true/>
+			</dict>
+			<key>description</key>
+			<string>Keyword for searching and uoinking.</string>
+			<key>label</key>
+			<string>Keyword</string>
+			<key>type</key>
+			<string>textfield</string>
+			<key>variable</key>
+			<string>keyword</string>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>default</key>
+				<string>/Applications/Uoink.app</string>
+				<key>placeholder</key>
+				<string>/Applications/Uoink.app</string>
+				<key>required</key>
+				<false/>
+				<key>trim</key>
+				<true/>
+			</dict>
+			<key>description</key>
+			<string>Where Uoink.app is installed.</string>
+			<key>label</key>
+			<string>Uoink app</string>
+			<key>type</key>
+			<string>textfield</string>
+			<key>variable</key>
+			<string>uoink_app</string>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>default</key>
+				<true/>
+				<key>required</key>
+				<false/>
+				<key>text</key>
+				<string>Copy a video's Markdown after a capture</string>
+			</dict>
+			<key>description</key>
+			<string>Like the Uoink browser button: the transcript lands on your clipboard.</string>
+			<key>label</key>
+			<string>After a capture</string>
+			<key>type</key>
+			<string>checkbox</string>
+			<key>variable</key>
+			<string>copy_after_capture</string>
+		</dict>
+	</array>
+	<key>variablesdontexport</key>
+	<array/>
+	<key>version</key>
+	<string>1.0.0</string>
+	<key>webaddress</key>
+	<string>https://uoink.app</string>
+</dict>
+</plist>

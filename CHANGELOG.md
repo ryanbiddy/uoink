@@ -17,14 +17,34 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   [docs/relay.md](docs/relay.md), share links to it from an iOS Shortcut or an
   Android share target, and Uoink captures each one with the same tool
   `uoink capture` uses, then deletes it from the relay. A link Uoink can't
-  capture is saved as a note instead, so nothing shared is lost. The relay
-  checks the token before any rate limit, so a valid token is never refused,
-  and keys its failed-auth limit on the address Render's proxy records. It stores only
+  capture is saved as a note instead, so nothing shared is lost. It stores only
   the link and an optional note, with a 7-day expiry, and separates the
   phone's push token from the desktop's pull token. Set it up in
   Settings > Capture > **Phone inbox**; the pull token stays in the system
   credential store. New helper routes: `GET /relay/status` and
   `POST /relay/check`.
+- A Raycast extension in `integrations/raycast` for macOS and Windows.
+  Search Library copies a Markdown citation that links to the timestamp,
+  Uoink This URL saves the copied link (or the active browser tab on macOS),
+  Recent Saves lists the last 20 items, and Save Note saves text. With a
+  Raycast plan that includes AI, Raycast AI gets `@uoink` tools for search,
+  item excerpts, recent captures and confirmed saves, and AI Chat can mention
+  a saved item. The extension runs the installed `uoink` CLI with argument
+  arrays and no shell; on Windows it starts the bundled Python directly
+  instead of `uoink.cmd`. It is not in the Raycast Store yet.
+- A Flow Launcher plugin (`integrations/flow-launcher`, Windows), an Alfred
+  workflow (`integrations/alfred`, macOS) and an Obsidian plugin
+  (`integrations/obsidian`, desktop) with the same no-shell CLI approach.
+  Flow and Alfred search the library with `uk`, open results at their
+  timestamp, copy citations and uoink pasted links; Obsidian inserts
+  timestamped citations into notes. None is in its store yet. All four quote
+  saved transcript and article text, mark a cut-short quote with "…", and
+  cite title or metadata matches as a plain link.
+- winget manifests and a Homebrew cask for 3.12.0 in `packaging/`, and a
+  submission kit with paste-ready text for each directory and store in
+  `docs/submissions/`.
+- The agent-kit plugin folder has the README and license that the Claude
+  plugin directory requires.
 
 ## [3.12.0] - 2026-10-30
 

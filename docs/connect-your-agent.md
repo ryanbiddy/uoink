@@ -169,7 +169,13 @@ these host paths and URLs are not a Docker recipe.
 
 ## Raycast and Mac launchers
 
-Run **Install MCP Server**, or **Manage MCP Servers > Install New Server**.
+A native Raycast extension lives in [integrations/raycast](../integrations/raycast/README.md).
+It searches the library, opens results at their timestamp, copies citations,
+saves links and notes, and gives Raycast AI `@uoink` tools. It runs the
+installed `uoink` CLI without a shell and needs no MCP setup. Until it is in the
+Raycast Store, load it with `npm install && npm run dev` in that folder.
+
+For Uoink's full MCP tool set in Raycast AI, run **Install MCP Server**, or **Manage MCP Servers > Install New Server**.
 Choose **Stdio**, name it `uoink`, and copy the command and environment fields
 from `uoink connect raycast`. Paste the `args` JSON array intact into Arguments
 so spaces remain part of each path. Raycast Pro is required. This form is

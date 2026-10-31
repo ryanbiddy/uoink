@@ -1,0 +1,11 @@
+#$schema: https://www.flowlauncher.com/schemas/settings-template.schema.json
+body:
+  - type: textBlock
+    attributes:
+      description: Uoink for Flow Launcher runs the Uoink app installed on this PC. Leave the folder empty for a default install.
+  - type: inputWithFolderBtn
+    attributes:
+      name: uoinkFolder
+      label: Uoink folder
+      description: The folder that holds uoink_cli.py and the python folder. Default is %LOCALAPPDATA%\Uoink.
+      defaultValue: ""
