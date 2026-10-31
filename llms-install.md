@@ -61,6 +61,13 @@ Run these steps on the person's PC. See [README](README.md#install) for details.
    by `connect` and listed in [Connect your agent](docs/connect-your-agent.md).
    Restart the client's MCP connection and confirm it lists Uoink's tools.
 
+   For a client with no recipe, or one that takes a single launch command,
+   releases after 3.12.0 also accept `"command": "uoink"` with `"args": ["mcp"]`.
+   If the client cannot start `.cmd` files, use `"command": "cmd"` with
+   `"args": ["/c", "uoink", "mcp"]`. Check first with `uoink mcp --help`: on
+   3.12.0 and earlier it is a usage error, so use the absolute command and
+   args that `uoink connect` prints instead.
+
 6. Ask the person to start **Uoink** from the Start menu. Silent install does not
    launch the helper; local CLI reads and MCP work without it. For browser capture,
    use the setup splash to copy the installed extension path, open

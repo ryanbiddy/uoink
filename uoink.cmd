@@ -7,7 +7,7 @@ rem Agent subcommands run the agent CLI, as cli\uoink.cmd does. No arguments,
 rem helper flags and the helper's own commands (doctor, rebuild-index, search,
 rem clips) still run server.py. Isolation flags may come before the subcommand.
 call :first_command %*
-for %%C in (tools call capture recent get note status connect skill serve --text -h --help) do (
+for %%C in (tools call capture recent get note status connect skill serve mcp --text -h --help) do (
     if "%UOINK_COMMAND%"=="%%C" goto agent_cli
 )
 "%UOINK_PYTHON%" "%UOINK_ROOT%server.py" %*
