@@ -12,6 +12,8 @@ installer/staging/
 video.*
 Yoink/
 Uoink/
+# winget's manifest path requires a Uoink/ folder.
+!packaging/winget/manifests/r/ReplayRyan/Uoink/
 !skills/
 !skills/yoink/
 !skills/yoink/**

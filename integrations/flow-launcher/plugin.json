@@ -1,0 +1,13 @@
+{
+  "$schema": "https://www.flowlauncher.com/schemas/plugin.schema.json",
+  "ID": "ecf47e06-d970-405f-9f97-462583fdb44c",
+  "ActionKeyword": "uk",
+  "Name": "Uoink",
+  "Description": "Search your local Uoink library of saved videos, podcasts and articles, open the exact moment, copy citations and uoink new links.",
+  "Author": "ryanbiddy",
+  "Version": "1.0.0",
+  "Language": "python",
+  "Website": "https://uoink.app",
+  "IcoPath": "Images/icon.png",
+  "ExecuteFileName": "main.py"
+}
