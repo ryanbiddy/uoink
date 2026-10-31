@@ -29,7 +29,7 @@ def test_search_results_open_the_moment_and_copy_a_citation(plugin, monkeypatch)
         return {"ok": True, "hits": [HIT], "library_items": 3}
     monkeypatch.setattr(plugin, "run_uoink", fake)
     [row] = plugin.query("working memory")
-    assert calls == [("search", "working memory", "--limit", "15")]
+    assert calls == [("search", "--limit", "15", "--", "working memory")]
     assert row["title"] == "How memory works"
     assert row["subTitle"].startswith("4:12 · Learning Lab · Working memory")
     assert row["jsonRPCAction"] == {"method": "open_url", "parameters": [HIT["deep_link"]]}
@@ -45,6 +45,18 @@ def test_links_are_offered_for_capture_and_text_is_searched(plugin, monkeypatch)
     [row] = plugin.query("https://youtu.be/abc123")
     assert row["jsonRPCAction"] == {"method": "capture", "parameters": ["https://youtu.be/abc123"]}
     assert plugin.query("javascript:alert(1)")[0]["title"] == "Your library is empty"
+
+
+def test_text_that_starts_with_a_dash_stays_positional(plugin, monkeypatch):
+    calls = []
+    def fake(settings, *args, timeout=60):
+        calls.append(args)
+        return {"ok": True, "hits": [], "library_items": 1}
+    monkeypatch.setattr(plugin, "run_uoink", fake)
+    plugin.query("-v")
+    plugin.capture_worker("https://example.com/a", {})
+    assert calls[0] == ("search", "--limit", "15", "--", "-v")
+    assert calls[1] == ("capture", "--", "https://example.com/a")
 
 
 def test_missing_install_points_to_the_install_page(plugin, tmp_path):

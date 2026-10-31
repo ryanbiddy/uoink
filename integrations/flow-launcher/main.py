@@ -194,7 +194,8 @@ def hit_context(hit: dict) -> dict:
 
 
 def search(text: str, settings: dict) -> list[dict]:
-    payload = run_uoink(settings, "search", text, "--limit", str(SEARCH_LIMIT))
+    # Options first; "--" keeps a query that starts with "-" positional.
+    payload = run_uoink(settings, "search", "--limit", str(SEARCH_LIMIT), "--", text)
     hits = payload.get("hits", [])
     if not hits:
         empty = payload.get("library_items") == 0
@@ -278,7 +279,7 @@ def capture(url: str, settings: dict | None = None) -> dict:
 
 def capture_worker(url: str, settings: dict) -> int:
     try:
-        payload = run_uoink(settings, "capture", url, timeout=CAPTURE_TIMEOUT)
+        payload = run_uoink(settings, "capture", "--", url, timeout=CAPTURE_TIMEOUT)
     except UoinkError as exc:
         write_status(state="failed", url=url, error=str(exc))
         return 1

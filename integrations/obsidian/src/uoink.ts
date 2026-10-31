@@ -159,8 +159,10 @@ export class Uoink {
 		});
 	}
 
+	// Options go first and "--" ends option parsing, so text that starts with
+	// "-" stays a positional argument.
 	async search(query: string, limit = 15): Promise<SearchHit[]> {
-		const result = await this.run<{ hits: SearchHit[] }>(["search", query, "--limit", String(limit)]);
+		const result = await this.run<{ hits: SearchHit[] }>(["search", "--limit", String(limit), "--", query]);
 		return result.hits;
 	}
 
@@ -170,12 +172,14 @@ export class Uoink {
 	}
 
 	item(selector: { itemId: string } | { slug: string }): Promise<LibraryItem> {
-		return this.run<LibraryItem>("slug" in selector ? ["get", selector.slug, "--slug"] : ["get", selector.itemId]);
+		return this.run<LibraryItem>(
+			"slug" in selector ? ["get", "--slug", "--", selector.slug] : ["get", "--", selector.itemId],
+		);
 	}
 
 	capture(url: string): Promise<CaptureResult> {
 		// Long videos transcribe and take screenshots before the CLI returns.
-		return this.run<CaptureResult>(["capture", url], 30 * 60_000);
+		return this.run<CaptureResult>(["capture", "--", url], 30 * 60_000);
 	}
 }
 

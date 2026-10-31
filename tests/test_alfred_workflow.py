@@ -54,3 +54,16 @@ def test_links_capture_and_missing_app_offers_install(workflow, monkeypatch, tmp
     monkeypatch.setenv("uoink_app", str(tmp_path / "Uoink.app"))
     [row] = workflow.filter_items("memory")
     assert row["arg"] == workflow.INSTALL_URL
+
+
+def test_text_that_starts_with_a_dash_stays_positional(workflow, monkeypatch):
+    calls = []
+    def fake(*args, **kwargs):
+        calls.append(args)
+        return {"ok": True, "hits": [], "library_items": 1}
+    monkeypatch.setattr(workflow, "run_uoink", fake)
+    monkeypatch.setattr(workflow, "notify", lambda *a: None)
+    workflow.filter_items("-v")
+    workflow.act("capture", "https://example.com/a")
+    assert calls[0] == ("search", "--limit", "20", "--", "-v")
+    assert calls[1] == ("capture", "--", "https://example.com/a")

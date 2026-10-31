@@ -139,7 +139,8 @@ def filter_items(query: str) -> list[dict]:
         url = as_http_url(query)
         if url:
             return [item("Uoink this link", url, arg=url, action="capture")]
-        payload = run_uoink("search", query, "--limit", str(SEARCH_LIMIT))
+        # Options first; "--" keeps a query that starts with "-" positional.
+        payload = run_uoink("search", "--limit", str(SEARCH_LIMIT), "--", query)
         hits = payload.get("hits", [])
         if not hits:
             empty = payload.get("library_items") == 0
@@ -172,7 +173,7 @@ def act(action: str, value: str) -> int:
     elif action == "capture" and as_http_url(value):
         notify("Uoinking…", value)
         try:
-            payload = run_uoink("capture", value, timeout=CAPTURE_TIMEOUT)
+            payload = run_uoink("capture", "--", value, timeout=CAPTURE_TIMEOUT)
         except UoinkError as exc:
             notify("Couldn't uoink that link", one_line(str(exc), 200))
             return 1

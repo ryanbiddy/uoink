@@ -246,8 +246,10 @@ export async function runUoink<T>(args: string[], options: RunOptions = {}): Pro
   });
 }
 
+// Options go first and "--" ends option parsing, so text that starts with "-"
+// (a query like "-v", a note like "-idea") stays a positional argument.
 export function searchLibrary(query: string, limit = 10, options?: RunOptions) {
-  return runUoink<SearchResult>(["search", query, "--limit", String(limit)], options);
+  return runUoink<SearchResult>(["search", "--limit", String(limit), "--", query], options);
 }
 
 export async function listRecent(limit = 20, options?: RunOptions): Promise<RecentItem[]> {
@@ -256,7 +258,7 @@ export async function listRecent(limit = 20, options?: RunOptions): Promise<Rece
 }
 
 export function getItem(selector: { itemId: string } | { slug: string }, options?: RunOptions) {
-  const args = "slug" in selector ? ["get", selector.slug, "--slug"] : ["get", selector.itemId];
+  const args = "slug" in selector ? ["get", "--slug", "--", selector.slug] : ["get", "--", selector.itemId];
   return runUoink<LibraryItem>(args, options);
 }
 
@@ -276,11 +278,12 @@ export async function getItemByIdOrSlug(id: string, options?: RunOptions): Promi
 const CAPTURE_TIMEOUT_MS = 30 * 60_000;
 
 export function captureUrl(url: string) {
-  return runUoink<CaptureResult>(["capture", url], { timeoutMs: CAPTURE_TIMEOUT_MS });
+  return runUoink<CaptureResult>(["capture", "--", url], { timeoutMs: CAPTURE_TIMEOUT_MS });
 }
 
 export function saveNote(text: string, title?: string) {
-  return runUoink<NoteResult>(["note", text, ...(title ? ["--title", title] : [])]);
+  // --title=value keeps a title that starts with "-" attached to its flag.
+  return runUoink<NoteResult>(["note", ...(title ? [`--title=${title}`] : []), "--", text]);
 }
 
 export function getStatus() {
