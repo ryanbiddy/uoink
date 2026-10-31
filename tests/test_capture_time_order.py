@@ -182,9 +182,11 @@ def test_date_filters_use_the_local_calendar_day(tmp_path):
 
 
 def test_resurface_age_reads_utc_stamps_as_utc():
+    # Ages are local wall-clock differences, so allow an hour for a DST change
+    # in the last day. Reading the UTC stamp as local is 7-8 hours off in US Pacific.
     a_day_ago = datetime.now(timezone.utc) - timedelta(days=1)
     stamp = a_day_ago.strftime("%Y-%m-%dT%H:%M:%SZ")
-    assert server._resurface_days_since(stamp) == pytest.approx(1.0, abs=0.01)
-    assert server.Handler._days_since_iso(stamp) == pytest.approx(1.0, abs=0.01)
+    assert server._resurface_days_since(stamp) == pytest.approx(1.0, abs=0.05)
+    assert server.Handler._days_since_iso(stamp) == pytest.approx(1.0, abs=0.05)
     assert server._resurface_days_since(local_stamp(datetime.now() - timedelta(days=2))) \
         == pytest.approx(2.0, abs=0.01)
