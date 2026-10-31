@@ -3,8 +3,8 @@
 Native integrations that call the installed `uoink` CLI. Each one passes text
 as arguments, never through a shell, and needs no token. On Windows they start
 Uoink's bundled Python with `uoink_cli.py` instead of `uoink.cmd`. All four copy
-the same citation formats: a quote with a timestamped link when Uoink verified
-the passage, otherwise just the link.
+the same citation formats: a quote with a timestamped link when the match is
+saved transcript or article text, otherwise just the link.
 
 | Folder | App | Platforms | What you get | Status |
 |---|---|---|---|---|

@@ -1,17 +1,16 @@
 // Citation formats shared by every Uoink integration (Raycast, Obsidian, Alfred,
 // Flow Launcher). No imports, so the helpers stay easy to check on their own.
 //
-//   verified passage   > Working memory holds about four chunks…
-//                      >
-//                      > — [How memory works @ 4:12](https://youtu.be/abc?t=252)
-//   anything else      [How memory works @ 4:12](https://youtu.be/abc?t=252)
+//   saved source text   > Working memory holds about four chunks…
+//   (timed_clip,        >
+//    text_only)         > — [How memory works @ 4:12](https://youtu.be/abc?t=252)
+//   anything else       [How memory works @ 4:12](https://youtu.be/abc?t=252)
 
 /** The search-hit fields a citation needs. */
 export interface CitableHit {
 	item_id?: string;
 	title: string;
 	evidence_kind?: string;
-	passage_verified?: boolean;
 	start: number | null;
 	deep_link: string | null;
 	source_link: string | null;
@@ -55,16 +54,20 @@ export function quoteCitation(
 	return `${quote}\n>\n> — ${linkCitation(title, link, start)}`;
 }
 
-/** Uoink found this exact text in the saved source. Title and metadata matches never are. */
-export function isVerifiedPassage(hit: CitableHit): boolean {
-	return hit.passage_verified === true && hit.evidence_kind !== "discovery_hint";
+/**
+ * The preview is saved source text: a timed transcript clip or a passage from
+ * the saved prose. A discovery_hint is a search snippet or the title, and a
+ * missing or unknown kind is never quoted.
+ */
+export function isQuotable(hit: CitableHit): boolean {
+	return hit.evidence_kind === "timed_clip" || hit.evidence_kind === "text_only";
 }
 
-/** Quote a verified passage; otherwise cite the item and moment without quoting. */
+/** Quote saved source text; otherwise cite the item and moment without quoting. */
 export function hitCitation(hit: CitableHit): string {
 	const title = hit.title || hit.item_id || "Untitled";
 	const link = hit.deep_link ?? hit.source_link;
-	return isVerifiedPassage(hit)
+	return isQuotable(hit)
 		? quoteCitation(hit.preview.text, title, link, hit.start, hit.preview.truncated)
 		: linkCitation(title, link, hit.start);
 }

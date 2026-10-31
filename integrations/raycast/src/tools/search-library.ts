@@ -1,4 +1,4 @@
-import { formatTimestamp, isVerifiedPassage, searchLibrary } from "../lib/uoink";
+import { formatTimestamp, isQuotable, searchLibrary } from "../lib/uoink";
 
 type Input = {
   /**
@@ -28,7 +28,7 @@ export default async function tool(input: Input) {
       timestamp: formatTimestamp(hit.start),
       link: hit.deep_link ?? hit.source_link ?? undefined,
       passage: hit.preview.text,
-      passageVerified: isVerifiedPassage(hit),
+      passageVerified: isQuotable(hit),
       passageTruncated: hit.preview.truncated,
       match: hit.evidence_kind,
     })),

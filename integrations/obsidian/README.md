@@ -20,8 +20,8 @@ A citation looks like this:
 > — [How memory works @ 4:12](https://www.youtube.com/watch?v=abc123&t=252s)
 ```
 
-Only a passage Uoink verified in the saved source is quoted, and "…" marks a
-quote that was cut short. A result that matched only the title or metadata is
+Only saved source text (a transcript clip or an article passage) is quoted,
+and "…" marks a quote that was cut short. A result that matched only the title or metadata is
 inserted as a link, such as `[How memory works](https://www.youtube.com/watch?v=abc123)`.
 The Raycast, Alfred and Flow Launcher integrations copy the same formats.
 

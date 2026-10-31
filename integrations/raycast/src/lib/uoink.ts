@@ -5,7 +5,7 @@ import { homedir } from "node:os";
 import path from "node:path";
 import { formatTimestamp } from "./citation";
 
-export { formatTimestamp, hitCitation, isVerifiedPassage, linkCitation, quoteCitation } from "./citation";
+export { formatTimestamp, hitCitation, isQuotable, linkCitation, quoteCitation } from "./citation";
 
 // The uoink CLI prints one JSON envelope on stdout. Failures exit 1 with
 // {"ok": false, "error": ...}; usage errors exit 2 with "uoink: ..." on stderr.

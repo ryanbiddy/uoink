@@ -27,8 +27,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   Flow and Alfred search the library with `uk`, open results at their
   timestamp, copy citations and uoink pasted links; Obsidian inserts
   timestamped citations into notes. None is in its store yet. All four quote
-  only a passage Uoink verified, mark a cut-short quote with "…", and cite
-  title or metadata matches as a plain link.
+  saved transcript and article text, mark a cut-short quote with "…", and
+  cite title or metadata matches as a plain link.
 - winget manifests and a Homebrew cask for 3.12.0 in `packaging/`, and a
   submission kit with paste-ready text for each directory and store in
   `docs/submissions/`.

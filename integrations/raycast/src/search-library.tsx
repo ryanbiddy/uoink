@@ -3,7 +3,7 @@ import { useCachedPromise } from "@raycast/utils";
 import { useRef, useState } from "react";
 import { ItemDetail } from "./components/item-detail";
 import { ErrorView } from "./lib/feedback";
-import { formatTimestamp, hitCitation, isVerifiedPassage, SearchHit, searchLibrary } from "./lib/uoink";
+import { formatTimestamp, hitCitation, isQuotable, SearchHit, searchLibrary } from "./lib/uoink";
 
 const MATCH_LABELS: Record<SearchHit["evidence_kind"], string> = {
   timed_clip: "Timed transcript passage",
@@ -67,8 +67,8 @@ export default function SearchLibrary() {
 
 function hitMarkdown(hit: SearchHit): string {
   const text = `${hit.preview.text.trim() || hit.title}${hit.preview.truncated ? "…" : ""}`;
-  // Only a verified passage is shown as a quote; a metadata match is context.
-  const body = isVerifiedPassage(hit) ? `> ${text.replace(/\r?\n/g, "\n> ")}` : text;
+  // Only saved source text is shown as a quote; a metadata match is context.
+  const body = isQuotable(hit) ? `> ${text.replace(/\r?\n/g, "\n> ")}` : text;
   return `## ${hit.title}\n\n${body}`;
 }
 

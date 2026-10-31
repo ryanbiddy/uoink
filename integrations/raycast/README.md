@@ -16,7 +16,7 @@ The Uoink window does not need to be open. Library search reads your local index
 
 | Command | What it does |
 |---|---|
-| **Search Library** | Search transcripts, articles and notes as you type; results show their timestamps. **Enter copies a Markdown citation** that links to the exact moment: a quote when Uoink verified the passage, otherwise just the link. ⌘O opens the source at that timestamp, ⌘⇧V pastes the citation, and ⌘I shows the full item. |
+| **Search Library** | Search transcripts, articles and notes as you type; results show their timestamps. **Enter copies a Markdown citation** that links to the exact moment: a quote when the match is saved transcript or article text, otherwise just the link. ⌘O opens the source at that timestamp, ⌘⇧V pastes the citation, and ⌘I shows the full item. |
 | **Uoink This URL** | Save the link on your clipboard. If the clipboard has no link, it saves the page in your browser's active tab instead (macOS, with the [Raycast browser extension](https://www.raycast.com/browser-extension)). A video's transcript Markdown is copied to your clipboard when it's done; you can turn this off. |
 | **Recent Saves** | Your last 20 saves. Enter shows the item; you can also show it in Finder or File Explorer. |
 | **Save Note** | Save an idea or quote as a searchable note. |

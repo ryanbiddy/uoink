@@ -123,8 +123,8 @@ def timestamp(seconds) -> str:
 
 
 # Citation formats shared by every Uoink integration (Raycast, Obsidian, Alfred,
-# Flow Launcher). A verified passage is quoted with an attribution line;
-# anything else is a link to the item and moment with no quote.
+# Flow Launcher). Saved source text (a timed_clip or text_only hit) is quoted
+# with an attribution line; anything else is a link to the item and moment.
 def link_citation(title: str, link: str | None, start) -> str:
     stamp = timestamp(start)
     label = f"{title} @ {stamp}" if stamp else title
@@ -141,16 +141,21 @@ def quote_citation(text: str, title: str, link: str | None, start, truncated: bo
     return f"{quote}\n>\n> — {link_citation(title, link, start)}"
 
 
-def is_verified(hit: dict) -> bool:
-    """Uoink found this exact text in the saved source. Title and metadata matches never are."""
-    return hit.get("passage_verified") is True and hit.get("evidence_kind") != "discovery_hint"
+QUOTABLE_KINDS = ("timed_clip", "text_only")
+
+
+def is_quotable(hit: dict) -> bool:
+    """The preview is saved source text: a timed transcript clip or a passage from
+    the saved prose. A discovery_hint is a search snippet or the title, and a
+    missing or unknown kind is never quoted."""
+    return hit.get("evidence_kind") in QUOTABLE_KINDS
 
 
 def hit_citation(hit: dict) -> str:
     title = hit.get("title") or hit.get("item_id") or "Untitled"
     preview = hit.get("preview") or {}
     link = hit.get("deep_link") or hit.get("source_link")
-    if is_verified(hit):
+    if is_quotable(hit):
         return quote_citation(preview.get("text") or "", title, link, hit.get("start"),
                               preview.get("truncated") is True)
     return link_citation(title, link, hit.get("start"))

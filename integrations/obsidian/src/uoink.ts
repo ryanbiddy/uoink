@@ -4,7 +4,7 @@ import { homedir } from "os";
 import * as path from "path";
 import { quoteCitation } from "./citation";
 
-export { formatTimestamp, hitCitation, isVerifiedPassage, linkCitation, quoteCitation } from "./citation";
+export { formatTimestamp, hitCitation, isQuotable, linkCitation, quoteCitation } from "./citation";
 
 // The uoink CLI prints one JSON envelope on stdout. Failures exit 1 with
 // {"ok": false, "error": ...}; usage errors exit 2 with "uoink: ..." on stderr.
@@ -15,7 +15,6 @@ export interface SearchHit {
 	channel: string;
 	source_link: string | null;
 	evidence_kind: "timed_clip" | "text_only" | "discovery_hint";
-	passage_verified?: boolean;
 	start: number | null;
 	deep_link: string | null;
 	preview: { text: string; truncated: boolean };
