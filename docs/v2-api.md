@@ -329,7 +329,7 @@ Success response: HTTP 200
     "bundled_model": "base",
     "bundled_revision": "ebe41f70d5b6dfa9166e2c581c45c9c0cfc57b66",
     "bundled_path": "C:\\Users\\<you>\\AppData\\Local\\Uoink\\models\\whisper-bundled\\base",
-    "estimated_download_mb": 150
+    "estimated_download_mb": null
   }
 }
 ```
@@ -340,6 +340,8 @@ runs: `downloaded` (the user's cache under `model_root`, which wins) or
 under `Uoink.app/Contents/Resources/models/whisper-bundled`). It is `null` when
 the selected size is not on the device. `bundled_model` names the size this
 install ships regardless of the selection, or `null` for a source checkout.
+`estimated_download_mb` is the selected size's approximate download, or `null`
+when the bundled copy runs, since that copy is never downloaded.
 
 ### POST /reliability/model/download
 
