@@ -42,6 +42,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   load, with no re-capture.
 - A row reads **Done** only when nothing is outstanding. A row with a badge
   reads **Saved**.
+- The sidebar's Generate and Sources counts now count saved drafts and
+  subscribed sources, and hide at zero. **Clear filters** shows only while a
+  filter, search or type is on.
 - Videos with nothing to transcribe are not problems. A video with no audio
   reads "no audio", and one where Whisper heard no speech (music, silence)
   reads **Done · no speech found**. The note says "No transcript: captions
@@ -86,7 +89,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - The MCP server still exposes 91 tools by default and 35 with
   `UOINK_MCP_TOOLSET=core`.
 - The Windows installer is about 519 MB (390 MB in 3.11.2) and the Mac DMG
-  about 711 MB (580 MB), because both now carry the Whisper base model.
+  about 709 MB (580 MB), because both now carry the Whisper base model.
 - The IPv6 refusal test skips on machines that cannot bind `[::1]`, and says
   why.
 
