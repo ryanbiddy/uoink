@@ -2954,6 +2954,7 @@
     #tab-settings .soft-note,
     #tab-settings .job-sub,
     #tab-settings .topic-field span { font-family: var(--font-ui); }
+    .phone-inbox select.field { justify-self: start; width: auto; min-width: 200px; }
     .setting-feedback { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
     .setting-status { color: var(--text-2); font-size: 13px; overflow-wrap: anywhere; }
     .setting-status[data-state="error"] { color: var(--vermillion); }
@@ -5602,6 +5603,26 @@
               <p class="setting-copy">Feed watching saves metadata only by default. Auto-ingest uses the selected local transcription model; a first-time model download still needs approval.</p>
             </div>
 
+            <div class="setting-block phone-inbox" id="phone-inbox">
+              <h2>Phone inbox</h2>
+              <p class="setting-copy">Share a link from your phone and Uoink captures it here. Links travel through a small relay that runs on your own Render account. It holds each link only until Uoink picks it up, and never longer than 7 days.</p>
+              <p class="setting-copy"><a href="https://github.com/ryanbiddy/uoink/blob/main/docs/relay.md" data-product-link target="_blank" rel="noreferrer">Set up a relay</a></p>
+              <label for="relayUrl">Relay address</label>
+              <input class="field" id="relayUrl" type="url" inputmode="url" maxlength="2048" placeholder="https://your-relay.onrender.com" autocomplete="off" spellcheck="false" aria-describedby="relayUrlSaveStatus">
+              <label for="relayToken">Pull token</label>
+              <input class="field" id="relayToken" type="password" maxlength="4096" autocomplete="new-password" spellcheck="false" aria-describedby="relayTokenHint relayUrlSaveStatus">
+              <p class="setting-copy" id="relayTokenHint">RELAY_PULL_TOKEN from the relay's Environment page on Render. Uoink keeps it in the system credential store.</p>
+              <label class="inline-row" for="relayEnabled"><input id="relayEnabled" type="checkbox"> Pick up links shared from my phone</label>
+              <label for="relayPollMinutes">Check every</label>
+              <select class="field" id="relayPollMinutes"><option value="2">2 minutes</option><option value="5" selected>5 minutes</option><option value="15">15 minutes</option><option value="30">30 minutes</option></select>
+              <div class="inline-row">
+                <button class="button" type="button" id="relaySave">Save</button>
+                <button class="button ghost" type="button" id="relayCheck" disabled>Check now</button>
+              </div>
+              <div class="setting-feedback"><span class="setting-status" id="relayUrlSaveStatus" role="status" aria-live="polite" aria-atomic="true"></span><button class="button ghost setting-retry hidden" id="relayUrlSaveRetry" type="button" data-setting-retry="relayUrl">Retry save</button></div>
+              <p class="setting-copy" id="relayStatus" role="status" aria-live="polite">Off.</p>
+            </div>
+
             <div class="setting-block">
               <h2>Sites Uoink works on</h2>
               <p class="setting-copy" id="allowedSitesStatus">Checking site permissions...</p>
@@ -6620,6 +6641,7 @@
         "https://github.com/ryanbiddy/uoink/blob/main/CHANGELOG.md",
         "https://github.com/ryanbiddy/uoink/releases",
         "https://github.com/ryanbiddy/uoink/issues",
+        "https://github.com/ryanbiddy/uoink/blob/main/docs/relay.md",
         "https://claude.ai/new",
         "https://claude.ai/download",
         "https://youtube.com/",
@@ -13655,7 +13677,7 @@
         if (request !== settingsReadVersion) return;
         status.textContent = `Could not load settings: ${settingError(err)} Use Reload to try again.`;
       }
-      await Promise.all([loadSettingsMcp(), loadTasteSettings(), loadPlaylistSettings(), loadPodcastFeedSettings(), loadChannels(), loadAllowedSites(), loadAgentSetup(), loadAIPricing(), loadHookCorrections(), loadSkillSystemPrompt(), loadSemanticStatus()]);
+      await Promise.all([loadSettingsMcp(), loadTasteSettings(), loadPlaylistSettings(), loadPodcastFeedSettings(), loadChannels(), loadAllowedSites(), loadAgentSetup(), loadAIPricing(), loadHookCorrections(), loadSkillSystemPrompt(), loadSemanticStatus(), loadRelayStatus()]);
       els.helperStatus.textContent = els.helperStatusText ? els.helperStatusText.textContent : "See the helper status in the sidebar.";
     }
 
@@ -16061,6 +16083,7 @@
       edit.dirty = true;
       setSettingFeedback(id, id === "tasteAnchorId"
         ? "Not saved yet. Choose a rating, then select Add anchor."
+        : id === "relayUrl" ? "Not saved yet. Select Save."
         : "Not saved yet. Leave the field to save.");
       return edit.version;
     }
@@ -16289,6 +16312,7 @@
         state.settings.scrapecreators_key_invalid = previous.scrapecreators_key_invalid;
       }
       renderConnectedServices();
+      renderRelaySettings(versions, previous);
       for (const [id, field] of [["rolePicker", "role"], ["topicList", "topics"]]) {
         if (settingEdit(id).dirty || settingEdit(id).version !== (versions[id] || 0)) state.settings[field] = previous[field];
       }
@@ -16680,7 +16704,166 @@
       }));
     }
 
+    // ---- Phone inbox (Uoink Relay) ---------------------------------------
+    // One Save sends the whole card. The pull token is write-only: the
+    // field is never filled in, and "Saved" only says one is stored.
+    const RELAY_POLL_CHOICES = [2, 5, 15, 30];
+    let relayStatusData = null;
+    let relayStatusTimer = null;
+    let relayStatusRefreshes = 0;
+    let relayStatusRequest = 0;
+
+    function relayElement(id) { return document.getElementById(id); }
+
+    function relayReady(settings = state.settings || {}) {
+      return settings.relay_enabled === true && Boolean(settings.relay_url) && settings.relay_token_set === true;
+    }
+
+    function relayAgo(value) {
+      const t = new Date(value).getTime();
+      if (!value || Number.isNaN(t)) return "";
+      const mins = Math.max(0, Math.round((Date.now() - t) / 60000));
+      if (mins < 1) return "just now";
+      if (mins < 60) return `${mins} min ago`;
+      const hours = Math.round(mins / 60);
+      if (hours < 48) return `${hours} ${hours === 1 ? "hour" : "hours"} ago`;
+      return `${Math.round(hours / 24)} days ago`;
+    }
+
+    function renderRelayStatus() {
+      const settings = state.settings || {};
+      const status = relayStatusData || {};
+      const minutes = Number(settings.relay_poll_minutes) || 5;
+      let text;
+      if (settings.relay_enabled !== true) text = "Off.";
+      else if (!settings.relay_url || settings.relay_token_set !== true) text = "Add the relay address and pull token, then select Save.";
+      else if (status.polling) text = "Checking the relay… A relay that was asleep can take about a minute to answer.";
+      else if (status.last_error) text = status.last_error;
+      else if (status.last_poll_at) {
+        const count = Number(status.picked_up_total) || 0;
+        text = `Last checked ${relayAgo(status.last_ok_at || status.last_poll_at)} · ${count} ${count === 1 ? "link" : "links"} picked up`;
+        if (status.last_capture_error) text += `. ${status.last_capture_error}`;
+      } else text = `On. Uoink checks every ${minutes} minutes.`;
+      relayElement("relayStatus").textContent = text;
+      relayElement("relayCheck").disabled = !relayReady(settings) || Boolean(status.polling);
+    }
+
+    function renderRelaySettings(versions = {}, previous = null) {
+      const edit = settingEdit("relayUrl");
+      const editing = edit.dirty || edit.version !== (versions.relayUrl || 0);
+      if (editing && previous) {
+        // A Save in flight or unsaved typing wins over a late settings read.
+        for (const field of ["relay_url", "relay_enabled", "relay_poll_minutes", "relay_token_set"]) {
+          if (Object.prototype.hasOwnProperty.call(previous, field)) state.settings[field] = previous[field];
+        }
+      }
+      const settings = state.settings || {};
+      if (!editing) {
+        const minutes = Number(settings.relay_poll_minutes) || 5;
+        const choices = RELAY_POLL_CHOICES.includes(minutes) ? RELAY_POLL_CHOICES
+          : [...RELAY_POLL_CHOICES, minutes].sort((a, b) => a - b);
+        relayElement("relayPollMinutes").innerHTML = choices
+          .map(n => `<option value="${n}">${n} ${n === 1 ? "minute" : "minutes"}</option>`).join("");
+        relayElement("relayPollMinutes").value = String(minutes);
+        relayElement("relayUrl").value = settings.relay_url || "";
+        relayElement("relayEnabled").checked = settings.relay_enabled === true;
+        relayElement("relayToken").value = "";
+      }
+      relayElement("relayToken").placeholder = settings.relay_token_set === true ? "Saved" : "Paste the pull token";
+      renderRelayStatus();
+    }
+
+    function noteRelayEdit() { noteSettingEdit("relayUrl"); }
+
+    function scheduleRelayStatus() {
+      window.clearTimeout(relayStatusTimer);
+      if (!relayStatusData || !relayStatusData.polling || relayStatusRefreshes >= 24) return;
+      relayStatusRefreshes += 1;
+      relayStatusTimer = window.setTimeout(loadRelayStatus, 5000);
+    }
+
+    async function loadRelayStatus() {
+      if (!relayReady()) { relayStatusData = null; renderRelayStatus(); return; }
+      const request = ++relayStatusRequest;
+      try {
+        const data = await settingsRequest("/relay/status");
+        if (request !== relayStatusRequest) return;
+        relayStatusData = data;
+      } catch (err) {
+        if (request !== relayStatusRequest) return;
+        relayStatusData = { last_error: `Couldn't read the phone inbox status: ${settingError(err)}` };
+      }
+      renderRelayStatus();
+      scheduleRelayStatus();
+    }
+
+    async function checkRelayNow() {
+      const button = relayElement("relayCheck");
+      if (button.disabled) return;
+      button.disabled = true;
+      relayElement("relayStatus").textContent = "Checking the relay…";
+      const request = ++relayStatusRequest;
+      relayStatusRefreshes = 0;
+      try {
+        await settingsWriteQueue;
+        const data = await settingsRequest("/relay/check", { method: "POST", body: "{}", timeoutMs: 20000 });
+        if (request === relayStatusRequest) relayStatusData = data;
+      } catch (err) {
+        if (request === relayStatusRequest) relayStatusData = { last_error: `Check failed: ${settingError(err)}` };
+      }
+      renderRelayStatus();
+      scheduleRelayStatus();
+    }
+
+    function saveRelaySettings() {
+      const settings = state.settings || {};
+      const patch = {
+        relay_url: relayElement("relayUrl").value.trim(),
+        relay_enabled: relayElement("relayEnabled").checked,
+        relay_poll_minutes: Number(relayElement("relayPollMinutes").value) || 5,
+      };
+      const token = relayElement("relayToken").value.trim();
+      if (token) patch.relay_token = token;
+      if (patch.relay_enabled && !patch.relay_url) {
+        noteRelayEdit();
+        setSettingFeedback("relayUrl", "Not saved: enter the relay address first.", "error");
+        return Promise.resolve(false);
+      }
+      if (patch.relay_enabled && !token && settings.relay_token_set !== true) {
+        noteRelayEdit();
+        setSettingFeedback("relayUrl", "Not saved: paste the pull token first.", "error");
+        return Promise.resolve(false);
+      }
+      return queueSettingSave("relayUrl", async () => {
+        const data = await settingsRequest("/settings", { method: "POST", body: JSON.stringify(patch) });
+        const stored = data.settings;
+        if (!stored || !Object.prototype.hasOwnProperty.call(stored, "relay_token_set")) throw unsupportedSettingError();
+        if (stored.relay_url !== patch.relay_url.replace(/\/+$/, "") || stored.relay_enabled !== patch.relay_enabled
+            || stored.relay_poll_minutes !== patch.relay_poll_minutes || (token && stored.relay_token_set !== true)) {
+          throw new Error("The helper did not keep this value. Reload to check it, or retry.");
+        }
+        state.settings = { ...(state.settings || {}), relay_url: stored.relay_url, relay_enabled: stored.relay_enabled,
+          relay_poll_minutes: stored.relay_poll_minutes, relay_token_set: stored.relay_token_set };
+        return data;
+      }, () => {
+        relayElement("relayToken").value = "";
+        relayElement("relayUrl").value = state.settings.relay_url || "";
+        relayElement("relayToken").placeholder = state.settings.relay_token_set === true ? "Saved" : "Paste the pull token";
+        relayStatusData = null;
+        renderRelayStatus();
+        if (relayReady()) window.setTimeout(loadRelayStatus, 3000);
+      });
+    }
+
+    function wireRelaySettings() {
+      for (const id of ["relayUrl", "relayToken"]) relayElement(id).addEventListener("input", noteRelayEdit);
+      for (const id of ["relayEnabled", "relayPollMinutes"]) relayElement(id).addEventListener("change", noteRelayEdit);
+      relayElement("relaySave").addEventListener("click", saveRelaySettings);
+      relayElement("relayCheck").addEventListener("click", checkRelayNow);
+    }
+
     function wireSettingsAutosave() {
+      wireRelaySettings();
       bindSemanticSearch();
       document.getElementById("reloadHookCorrections").addEventListener("click", loadHookCorrections);
       document.getElementById("reloadSkillPrompt").addEventListener("click", loadSkillSystemPrompt);
