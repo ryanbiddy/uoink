@@ -173,6 +173,13 @@ def test_json_url_field_can_hold_shared_text_and_a_typed_note_wins(relay):
         ("https://example.com/x", "Title"), ("https://example.com/y", "Mine")]
 
 
+def test_json_url_list_from_a_multi_item_share(relay):
+    status, *_ = relay.request("POST", "/v1/links", {"url": ["A talk", "https://example.com/talk"]}, token=PUSH)
+    assert status == 201
+    assert relay.pull()[1]["links"][0]["url"] == "https://example.com/talk"
+    assert relay.pull()[1]["links"][0]["note"] == "A talk"
+
+
 def test_extract_url_skips_an_invalid_candidate():
     url, remaining, reason = app.extract_url("bad https://user:pw@example.com/ then https://ok.example/p")
     assert url == "https://ok.example/p" and reason is None and "then" in remaining

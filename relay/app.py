@@ -706,7 +706,11 @@ class RelayHandler(BaseHTTPRequestHandler):
                 raise ShareError("body is not valid JSON") from None
             if not isinstance(data, dict):
                 raise ShareError("JSON body must be an object")
-            return resolve_share(data.get("url"), [data.get("text"), data.get("title")], data.get("note"))
+            url = data.get("url")
+            if isinstance(url, list) and url and all(isinstance(item, str) for item in url):
+                # A share sheet can hand a Shortcut several items (text and URL).
+                url = " ".join(url)
+            return resolve_share(url, [data.get("text"), data.get("title")], data.get("note"))
         if content_type == "application/x-www-form-urlencoded":
             try:
                 fields = parse_qs(text, keep_blank_values=False, max_num_fields=20, strict_parsing=False)

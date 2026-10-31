@@ -1686,7 +1686,7 @@ def _public_settings(data: dict | None = None) -> dict:
         "anthropic_key_set": bool(key and not data.get("anthropic_key_invalid")),
         "scrapecreators_enabled": data.get("scrapecreators_enabled") is True,
         "scrapecreators_agent_calls_enabled": data.get("scrapecreators_agent_calls_enabled") is True,
-        "scrapecreators_daily_credit_cap": _normalize_settings(data)["scrapecreators_daily_credit_cap"],
+        "scrapecreators_daily_credit_cap": normalized["scrapecreators_daily_credit_cap"],
         "scrapecreators_key_set": bool(_get_saved_scrapecreators_key()),
         "scrapecreators_key_invalid": data.get("scrapecreators_key_invalid") is True,
         # Tier 2 dashboard Settings tab additions:
